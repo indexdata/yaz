@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.13  1995-06-07 14:36:47  quinn
+ * Revision 1.14  1995-06-07 14:42:34  quinn
+ * Fixed CLOSE
+ *
+ * Revision 1.13  1995/06/07  14:36:47  quinn
  * Added CLOSE
  *
  * Revision 1.12  1995/06/05  10:53:13  quinn
@@ -848,7 +851,7 @@ Z_ScanResponse *zget_ScanResponse(ODR o);
 Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
 Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
 Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
-Z_Close *zet_Close(ODR o);
+Z_Close *zget_Close(ODR o);
 Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 
 #include <prt-rsc.h>

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.4  1995-06-07 14:36:25  quinn
+ * Revision 1.5  1995-06-07 14:42:30  quinn
+ * Fixed CLOSE
+ *
+ * Revision 1.4  1995/06/07  14:36:25  quinn
  * Added CLOSE
  *
  * Revision 1.3  1995/06/05  10:52:06  quinn
@@ -255,7 +258,7 @@ Z_AccessControlResponse *zget_AccessControlResponse(ODR o)
     return r;
 }
 
-Z_Close *zet_Close(ODR o)
+Z_Close *zget_Close(ODR o)
 {
     Z_Close *r = odr_malloc(o, sizeof(*r));
 
@@ -303,6 +306,9 @@ Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which)
 	    break;
 	case Z_APDU_resourceControlResponse:
 	    r->u.resourceControlResponse = zget_ResourceControlResponse(o);
+	    break;
+	case Z_APDU_close:
+	    r->u.close = zget_Close(o);
 	    break;
 	default:
 	    fprintf(stderr, "Bad APDU-type to zget_APDU");
