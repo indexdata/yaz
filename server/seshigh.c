@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.26  1995-05-18 13:02:12  quinn
+ * Revision 1.27  1995-05-29 08:12:06  quinn
+ * Moved oid to util
+ *
+ * Revision 1.26  1995/05/18  13:02:12  quinn
  * Smallish.
  *
  * Revision 1.25  1995/05/17  08:42:26  quinn
@@ -211,10 +214,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
     new->rejected = 0;
     request_initq(&new->incoming);
     request_initq(&new->outgoing);
-    if (cs_getproto(link) == CS_Z3950)
-	new->proto = PROTO_Z3950;
-    else
-	new->proto = PROTO_SR;
+    new->proto = cs_getproto(link);
     return new;
 }
 

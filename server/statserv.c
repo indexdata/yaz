@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.19  1995-05-16 09:37:27  quinn
+ * Revision 1.20  1995-05-29 08:12:09  quinn
+ * Moved oid to util
+ *
+ * Revision 1.19  1995/05/16  09:37:27  quinn
  * Fixed bug
  *
  * Revision 1.18  1995/05/16  08:51:09  quinn
@@ -329,8 +332,8 @@ int statserv_main(int argc, char **argv)
 		add_listener(arg, protocol);
 		listeners++;
 		break;
-	    case 'z': protocol = CS_Z3950; break;
-	    case 's': protocol = CS_SR; break;
+	    case 'z': protocol = PROTO_Z3950; break;
+	    case 's': protocol = PROTO_SR; break;
 	    case 'S': control_block.dynamic = 0; break;
 	    case 'l':
 	    	strcpy(control_block.logfile, arg ? arg : "");
