@@ -3,11 +3,11 @@ Copyright (C) 1995-2000, Index Data ApS.
 See the file LICENSE for details.
 
 Compilation and installation instructions for YAZ 
-  $Id: README,v 1.31 2000-04-05 07:39:54 adam Exp $
+  $Id: README,v 1.32 2000-11-23 10:58:32 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
-role of Z39.50/SR.
+role of Z39.50.
 
 Windows programmers: refer to the file windows.txt which describes how
 to build the software using Microsoft Visual C++.

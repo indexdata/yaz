@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.34  2000-09-04 08:58:15  adam
+ * Revision 1.35  2000-11-23 10:58:33  adam
+ * SSL comstack support. Separate POSIX thread support library.
+ *
+ * Revision 1.34  2000/09/04 08:58:15  adam
  * Added prefix yaz_ for most logging utility functions.
  *
  * Revision 1.33  2000/08/10 08:41:26  adam
@@ -478,12 +481,21 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     r->output_format = r->request_format;  
     if (r->request_format == VAL_SUTRS)
     {
+#if 0
+/* this section returns a huge record (for testing non-blocking write, etc) */
+	r->len = 980000;
+	r->record = odr_malloc (r->stream, r->len);
+	memset (r->record, 'x', r->len);
+#else
+/* this section returns a small record */
     	char buf[100];
 
 	sprintf(buf, "This is dummy SUTRS record number %d\n", r->number);
+
 	r->len = strlen(buf);
 	r->record = (char *) odr_malloc (r->stream, r->len+1);
 	strcpy(r->record, buf);
+#endif
     }
     else if (r->request_format == VAL_GRS1)
     {

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
+ * Revision 1.3  2000-11-23 10:58:32  adam
+ * SSL comstack support. Separate POSIX thread support library.
+ *
+ * Revision 1.2  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -94,7 +97,8 @@ YAZ_BEGIN_CDECL
 
 YAZ_EXPORT int completeWAIS(const unsigned char *buf, int len);
 YAZ_EXPORT struct sockaddr_in *tcpip_strtoaddr(const char *str);
-YAZ_EXPORT COMSTACK tcpip_type(int s, int blocking, int protocol);
+YAZ_EXPORT COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp);
+YAZ_EXPORT COMSTACK ssl_type(int s, int blocking, int protocol, void *vp);
 
 YAZ_END_CDECL
 

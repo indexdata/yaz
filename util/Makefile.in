@@ -67,6 +67,7 @@ DLLTOOL = @DLLTOOL@
 ILLLIB = @ILLLIB@
 ILLMODULE = @ILLMODULE@
 LD = @LD@
+LIBTHREAD = @LIBTHREAD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
@@ -81,6 +82,8 @@ YAZ_SRC_ROOT = @YAZ_SRC_ROOT@
 
 noinst_LTLIBRARIES = libutil.la
 
+#lib_LTLIBRARIES = libyazthread.la
+
 bin_SCRIPTS = yaz-comp
 
 EXTRA_DIST = yaz-comp
@@ -88,6 +91,8 @@ EXTRA_DIST = yaz-comp
 LIBS = 
 
 INCLUDES = -I$(srcdir)/../include
+
+libyazthread_la_INCLUDES = -I$(srcdir)/../include
 
 noinst_PROGRAMS = marcdump
 
@@ -386,6 +391,8 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
+
+#libyazthread_la_SOURCES=nmemthread.c xmalloc.c log.c
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

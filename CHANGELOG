@@ -1,13 +1,23 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+On UNIX when POSIX threads are available, a separate library libyazthread
+is created. Programmers should link with that library and the yaz library
+when using threads. The reason for the split was that some applications
+on Linux, such as Apache, doesn't work well when using shared objects that
+relies on threads.
+
+Added SSL support for the COMSTACK. You start yaz-client and yaz-ztest
+(or any frontend server) in SSL mode by specifying ssl: followed by
+address.
+
 Added feature for CCL module. Virtual structure s=al or s=ol generates
 and-list and or-list respectively instead of phrase search.
 
 Added some OID's.
 
 * Added prefix "yaz_" for the functions log_init.., log_file..  and
-log_mask_str. This was done to avoid name conflicts with other
-libraries (say other PHP extensions).
+log_mask_str. This was done to avoid name conflicts with other libraries
+(such as other PHP extensions).
 
 Added raw OID member for preferred record syntax (request_format_raw)
 and returned record syntax (output_format_raw) for backend fetch method.

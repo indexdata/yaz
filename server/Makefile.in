@@ -67,6 +67,7 @@ DLLTOOL = @DLLTOOL@
 ILLLIB = @ILLLIB@
 ILLMODULE = @ILLMODULE@
 LD = @LD@
+LIBTHREAD = @LIBTHREAD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
@@ -88,7 +89,7 @@ EXTRA_DIST = service.c
 
 LIBS = 
 
-INCLUDES = -I$(srcdir)/../include
+INCLUDES = -I$(srcdir)/../include 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
 LTLIBRARIES =  $(noinst_LTLIBRARIES)

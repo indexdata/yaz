@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.66  2000-10-06 12:00:28  adam
+ * Revision 1.67  2000-11-23 10:58:32  adam
+ * SSL comstack support. Separate POSIX thread support library.
+ *
+ * Revision 1.66  2000/10/06 12:00:28  adam
  * Fixed Handle leak for WIN32.
  *
  * Revision 1.65  2000/09/04 08:58:15  adam
@@ -387,6 +390,7 @@ void statserv_remove(IOCHAN pIOChannel)
     }
 }
 
+/* WIN32 statserv_closedown */
 void statserv_closedown()
 {
     /* Shouldn't do anything if we are not initialized */
@@ -460,7 +464,8 @@ void event_loop_thread (IOCHAN iochan)
     event_loop (&iochan);
 }
 
-static void listener(IOCHAN h, int event)
+/* WIN32 listener */
+static void listener(IOCHAN h, int event)   
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
     association *newas;
@@ -482,14 +487,14 @@ static void listener(IOCHAN h, int event)
     }
     else if (event == EVENT_OUTPUT)
     {
-    	COMSTACK new_line;
+    	COMSTACK new_line = cs_accept(line);
     	IOCHAN new_chan;
 	char *a = NULL;
 
-	if (!(new_line = cs_accept(line)))
+	if (!new_line)
 	{
 	    yaz_log(LOG_FATAL, "Accept failed.");
-	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT);
 	    return;
 	}
 	yaz_log(LOG_DEBUG, "Accept ok");
@@ -509,6 +514,10 @@ static void listener(IOCHAN h, int event)
             iochan_destroy(h);
             return;
 	}
+	newas->cs_get_mask = EVENT_INPUT;
+	newas->cs_put_mask = 0;
+	newas->cs_accept_mask = 0;
+
 	yaz_log(LOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
@@ -563,6 +572,7 @@ void sigterm(int sig)
 
 static void *new_session (void *vp);
 
+/* UNIX listener */
 static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
@@ -644,9 +654,9 @@ static void listener(IOCHAN h, int event)
     /* in dynamic mode, only the child ever comes down here */
     else if (event == EVENT_OUTPUT)
     {
-    	COMSTACK new_line;
+    	COMSTACK new_line = cs_accept(line);
 
-	if (!(new_line = cs_accept(line)))
+	if (!new_line)
 	{
 	    yaz_log(LOG_FATAL, "Accept failed.");
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
@@ -697,8 +707,25 @@ static void *new_session (void *vp)
     association *newas;
     IOCHAN new_chan;
     COMSTACK new_line = (COMSTACK) vp;
-    if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
-				   EVENT_INPUT)))
+
+    unsigned cs_get_mask, cs_accept_mask, mask =  
+	((new_line->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
+	((new_line->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
+
+    if (mask)    
+    {
+	yaz_log (LOG_LOG, "new_session , accept incomplete");
+	cs_accept_mask = mask;  /* accept didn't complete */
+	cs_get_mask = 0;
+    }
+    else
+    {
+	yaz_log (LOG_LOG, "new_session , accept complete");
+	cs_accept_mask = 0;     /* accept completed.  */
+	cs_get_mask = mask = EVENT_INPUT;
+    }
+
+    if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, mask)))
     {
 	yaz_log(LOG_FATAL, "Failed to create iochan");
 	return 0;
@@ -708,10 +735,14 @@ static void *new_session (void *vp)
 	yaz_log(LOG_FATAL, "Failed to create new assoc.");
 	return 0;
     }
+    newas->cs_accept_mask = cs_accept_mask;
+    newas->cs_get_mask = cs_get_mask;
+
     iochan_setdata(new_chan, newas);
     iochan_settimeout(new_chan, control_block.idle_timeout * 60);
     a = cs_addrstr(new_line);
     yaz_log(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+    
     if (control_block.threads)
     {
 	event_loop(&new_chan);
@@ -775,23 +806,24 @@ static void add_listener(char *where, int what)
 
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
     {
-	yaz_log (LOG_WARN, "%s: Address format: ('tcp'|'osi')':'<address>", me);
+	yaz_log (LOG_WARN, "%s: Address format: ('tcp'|'ssl')':'<address>",
+		 me);
 	return;
     }
     if (!strcmp(mode, "tcp"))
 	type = tcpip_type;
-    else if (!strcmp(mode, "osi"))
+    else if (!strcmp(mode, "ssl"))
     {
-#ifdef USE_XTIMOSI
-	type = mosi_type;
+#if HAVE_OPENSSL_SSL_H
+	type = ssl_type;
 #else
-	yaz_log (LOG_WARN, "OSI Transport not allowed by configuration.");
+	yaz_log (LOG_WARN, "SSL Transport not allowed by configuration.");
 	return;
 #endif
     }
     else
     {
-    	yaz_log (LOG_WARN, "You must specify either 'osi:' or 'tcp:'");
+    	yaz_log (LOG_WARN, "You must specify either 'ssl:' or 'tcp:'");
 	return;
     }
     yaz_log(LOG_LOG, "Adding %s %s listener on %s",
@@ -862,7 +894,7 @@ int statserv_start(int argc, char **argv)
     /* We need to initialize the thread list */
     ThreadList_Initialize();
 #endif /* WIN32 */
-
+    
 #ifdef WIN32
     if ((me = strrchr (argv[0], '\\')))
 	me++;
@@ -873,7 +905,7 @@ int statserv_start(int argc, char **argv)
 #endif
     if (control_block.options_func(argc, argv))
         return(1);
-
+    
     if (control_block.bend_start)
         (*control_block.bend_start)(&control_block);
 #ifdef WIN32
@@ -886,18 +918,16 @@ int statserv_start(int argc, char **argv)
 	logf (LOG_LOG, "Starting server %s pid=%d", me, getpid());
 #if 0
 	sigset_t sigs_to_block;
-
+	
 	sigemptyset(&sigs_to_block);
 	sigaddset (&sigs_to_block, SIGTERM);
 	pthread_sigmask (SIG_BLOCK, &sigs_to_block, 0);
-	pthread_create (&
-
-
+	/* missing... */
 #endif
 	if (control_block.dynamic)
 	    signal(SIGCHLD, catchchld);
     }
-    
+    signal (SIGPIPE, SIG_IGN);
     signal (SIGTERM, sigterm);
     if (*control_block.setuid)
     {

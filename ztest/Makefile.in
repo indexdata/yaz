@@ -67,6 +67,7 @@ DLLTOOL = @DLLTOOL@
 ILLLIB = @ILLLIB@
 ILLMODULE = @ILLMODULE@
 LD = @LD@
+LIBTHREAD = @LIBTHREAD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
@@ -85,7 +86,8 @@ yaz_ztest_SOURCES = ztest.c read-grs.c
 
 EXTRA_DIST = dummy-records dummy-words dummy-grs
 
-yaz_ztest_LDADD = ../lib/libyaz.la
+@ISTHR_TRUE@extra = ../lib/libyazthread.la
+yaz_ztest_LDADD = $(extra) ../lib/libyaz.la $(LIBTHREAD)
 
 INCLUDES = -I$(srcdir)/../include
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -98,7 +100,9 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 yaz_ztest_OBJECTS =  ztest.o read-grs.o
-yaz_ztest_DEPENDENCIES =  ../lib/libyaz.la
+@ISTHR_TRUE@yaz_ztest_DEPENDENCIES =  ../lib/libyazthread.la \
+@ISTHR_TRUE@../lib/libyaz.la
+@ISTHR_FALSE@yaz_ztest_DEPENDENCIES =  ../lib/libyaz.la
 yaz_ztest_LDFLAGS = 
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)

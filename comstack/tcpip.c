@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.33  2000-09-04 08:27:11  adam
+ * Revision 1.34  2000-11-23 10:58:32  adam
+ * SSL comstack support. Separate POSIX thread support library.
+ *
+ * Revision 1.33  2000/09/04 08:27:11  adam
  * Work on error handling for tcpip_accept.
  *
  * Revision 1.32  1999/11/30 13:47:11  adam
@@ -183,6 +186,10 @@
 #endif
 #include <errno.h>
 #include <fcntl.h>
+#if HAVE_OPENSSL_SSL_H
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#endif
 
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
@@ -202,17 +209,22 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 		 int (*check_ip)(void *cd, const char *a, int len, int type),
 		 void *cd);
 
+#if HAVE_OPENSSL_SSL_H
+int ssl_get(COMSTACK h, char **buf, int *bufsize);
+int ssl_put(COMSTACK h, char *buf, int size);
+#endif
+
 COMSTACK tcpip_accept(COMSTACK h);
 char *tcpip_addrstr(COMSTACK h);
 void *tcpip_straddr(COMSTACK h, const char *str);
 
-#undef TRACE_TCPIP
-#ifdef TRACE_TCPIP
+#if 0
 #define TRC(x) x
 #else
 #define TRC(X)
 #endif
 
+/* this state is used for both SSL and straight TCP/IP */
 typedef struct tcpip_state
 {
     char *altbuf; /* alternate buffer for surplus data */
@@ -224,6 +236,11 @@ typedef struct tcpip_state
     int (*complete)(const unsigned char *buf, int len); /* length/comple. */
     struct sockaddr_in addr;  /* returned by cs_straddr */
     char buf[128]; /* returned by cs_addrstr */
+#if HAVE_OPENSSL_SSL_H
+    SSL_CTX *ctx;
+    SSL_CTX *ctx_alloc;
+    SSL *ssl;
+#endif
 } tcpip_state;
 
 #ifdef WIN32
@@ -243,7 +260,6 @@ static int tcpip_init (void)
     return 1;
 }
 #else
-
 static int proto_number = 0;
 
 static int tcpip_init (void)
@@ -256,11 +272,12 @@ static int tcpip_init (void)
     return 1;
 }
 #endif
+
 /*
  * This function is always called through the cs_create() macro.
  * s >= 0: socket has already been established for us.
  */
-COMSTACK tcpip_type(int s, int blocking, int protocol)
+COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
 {
     COMSTACK p;
     tcpip_state *state;
@@ -297,6 +314,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
 #endif
 	return 0;
 
+    p->io_pending = 0;
     p->iofile = s;
     p->type = tcpip_type;
     p->protocol = (enum oid_proto) protocol;
@@ -318,6 +336,11 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     p->cerrno = 0;
     p->stackerr = 0;
 
+#if HAVE_OPENSSL_SSL_H
+    state->ctx = state->ctx_alloc = 0;
+    state->ssl = 0;
+#endif
+
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
@@ -331,6 +354,41 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
 
     return p;
 }
+
+#if HAVE_OPENSSL_SSL_H
+
+COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
+{
+    tcpip_state *state;
+    COMSTACK p;
+    yaz_log(LOG_LOG, "ssl_type begin");
+
+    p = tcpip_type (s, blocking, protocol, 0);
+    if (!p)
+	return 0;
+    p->f_get = ssl_get;
+    p->f_put = ssl_put;
+    p->type = ssl_type;
+    state = (tcpip_state *) p->cprivate;
+    if (vp)
+	state->ctx = vp;
+    else
+    {
+	SSL_load_error_strings();
+	OpenSSL_add_all_algorithms();
+
+	state->ctx = state->ctx_alloc = SSL_CTX_new (SSLv23_method());
+	if (!state->ctx)
+	{
+	    tcpip_close(p);
+	    return 0;
+	}
+    }
+    /* note: we don't handle already opened socket in SSL mode - yet */
+    yaz_log(LOG_LOG, "ssl_type end");
+    return p;
+}
+#endif
 
 int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add)
 {
@@ -399,18 +457,72 @@ int tcpip_more(COMSTACK h)
 int tcpip_connect(COMSTACK h, void *address)
 {
     struct sockaddr_in *add = (struct sockaddr_in *)address;
+#if HAVE_OPENSSL_SSL_H
+	tcpip_state *sp = (tcpip_state *)h->cprivate;
+#endif
+    int r;
 
     TRC(fprintf(stderr, "tcpip_connect\n"));
-    if (connect(h->iofile, (struct sockaddr *) add, sizeof(*add)) < 0)
+    h->io_pending = 0;
+    if (h->state == CS_UNBND)
     {
+	r = connect(h->iofile, (struct sockaddr *) add, sizeof(*add));
+	if (r < 0)
+	{
 #ifdef WIN32
-        if (WSAGetLastError() == WSAEWOULDBLOCK)
+	    if (WSAGetLastError() == WSAEWOULDBLOCK)
+	    {
+		h->state = CS_CONNECTING;
+		h->io_pending = CS_WANT_WRITE;
+		return 1;
+	    }
 #else
-        if (errno == EINPROGRESS)
+	    if (errno == EINPROGRESS)
+	    {
+		h->state = CS_CONNECTING;
+		h->io_pending = CS_WANT_WRITE|CS_WANT_READ;
+		return 1;
+	    }
 #endif
-            return 1;
-        return -1;
+	    return -1;
+	}
+	h->state = CS_CONNECTING;
     }
+    if (h->state != CS_CONNECTING)
+    {
+        h->cerrno = CSOUTSTATE;
+	return -1;
+    }
+#if HAVE_OPENSSL_SSL_H
+    if (sp->ctx)
+    {
+	int res;
+
+	if (!sp->ssl)
+	{
+	    sp->ssl = SSL_new (sp->ctx);
+	    SSL_set_fd (sp->ssl, h->iofile);
+	}
+	res = SSL_connect (sp->ssl);
+	if (res <= 0)
+	{
+	    int err = SSL_get_error(sp->ssl, res);
+	    if (err == SSL_ERROR_WANT_READ)
+	    {
+		yaz_log (LOG_LOG, "SSL_connect. want_read");
+		h->io_pending = CS_WANT_READ;
+		return 1;
+	    }
+	    if (err == SSL_ERROR_WANT_WRITE)
+	    {
+		yaz_log (LOG_LOG, "SSL_connect. want_write");
+		h->io_pending = CS_WANT_WRITE;
+		return 1;
+	    }
+	    return -1;
+	}
+    }
+#endif
     h->state = CS_DATAXFER;
     return 0;
 }
@@ -424,6 +536,9 @@ int tcpip_rcvconnect(COMSTACK h)
     return 0;
 }
 
+#define CERTF "ztest.pem"
+#define KEYF "ztest.pem"
+
 int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     struct sockaddr *addr = (struct sockaddr *)address;
@@ -433,7 +548,43 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
     unsigned long one = 1;
 #endif
 
-    TRC(fprintf(stderr, "tcpip_bind\n"));
+#if HAVE_OPENSSL_SSL_H
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
+    if (sp->ctx)
+    {
+	if (sp->ctx_alloc)
+	{
+	    int res;
+	    res = SSL_CTX_use_certificate_file (sp->ctx, CERTF,
+						SSL_FILETYPE_PEM);
+	    if (res <= 0)
+	    {
+		ERR_print_errors_fp(stderr);
+		exit (2);
+	    }
+	    res = SSL_CTX_use_PrivateKey_file (sp->ctx, KEYF,
+					       SSL_FILETYPE_PEM);
+	    if (res <= 0)
+	    {
+		ERR_print_errors_fp(stderr);
+		exit (3);
+	    }
+	    res = SSL_CTX_check_private_key (sp->ctx);
+	    if (res <= 0)
+	    {
+		ERR_print_errors_fp(stderr);
+		exit(5);
+	    }
+	}
+	TRC (fprintf (stderr, "ssl_bind\n"));
+    }
+    else
+    {
+	TRC (fprintf (stderr, "tcpip_bind\n"));
+    }
+#else
+    TRC (fprintf (stderr, "tcpip_bind\n"));
+#endif
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*) 
 	&one, sizeof(one)) < 0)
     {
@@ -511,67 +662,116 @@ COMSTACK tcpip_accept(COMSTACK h)
 #endif
 
     TRC(fprintf(stderr, "tcpip_accept\n"));
-    if (h->state != CS_INCON)
+    if (h->state == CS_INCON)
+    {
+	if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
+	{
+	    h->cerrno = CSYSERR;
+#ifdef WIN32
+	    closesocket(h->newfd);
+#else
+	    close(h->newfd);
+#endif
+	    h->newfd = -1;
+	    return 0;
+	}
+	memcpy(cnew, h, sizeof(*h));
+	cnew->iofile = h->newfd;
+	cnew->io_pending = 0;
+	if (!(state = (tcpip_state *)
+	      (cnew->cprivate = xmalloc(sizeof(tcpip_state)))))
+	{
+	    h->cerrno = CSYSERR;
+	    if (h->newfd != -1)
+	    {
+#ifdef WIN32
+		closesocket(h->newfd);
+#else
+		close(h->newfd);
+#endif
+		h->newfd = -1;
+	    }
+	    return 0;
+	}
+	if (!cnew->blocking && 
+#ifdef WIN32
+	    (ioctlsocket(cnew->iofile, FIONBIO, &tru) < 0)
+#else
+	    (!cnew->blocking && fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
+#endif
+	    )
+	{
+	    h->cerrno = CSYSERR;
+	    if (h->newfd != -1)
+	    {
+#ifdef WIN32
+		closesocket(h->newfd);
+#else
+		close(h->newfd);
+#endif
+		h->newfd = -1;
+	    }
+	    xfree (cnew);
+	    xfree (state);
+	    return 0;
+	}
+	h->newfd = -1;
+	state->altbuf = 0;
+	state->altsize = state->altlen = 0;
+	state->towrite = state->written = -1;
+	state->complete = st->complete;
+	cnew->state = CS_ACCEPT;
+	h->state = CS_IDLE;
+	
+#if HAVE_OPENSSL_SSL_H
+	state->ctx = st->ctx;
+	state->ctx_alloc = 0;
+	state->ssl = st->ssl;
+	if (state->ctx)
+	{
+	    state->ssl = SSL_new (state->ctx);
+	    SSL_set_fd (state->ssl, cnew->iofile);
+	}
+#endif
+	h = cnew;
+    }
+    if (h->state == CS_ACCEPT)
+    {
+#if HAVE_OPENSSL_SSL_H
+	tcpip_state *state = (tcpip_state *)h->cprivate;
+	if (state->ctx)
+	{
+	    int res = SSL_accept (state->ssl);
+	    TRC(fprintf(stderr, "SSL_accept\n"));
+	    if (res <= 0)
+	    {
+		int err = SSL_get_error(state->ssl, res);
+		if (err == SSL_ERROR_WANT_READ)
+		{
+		    h->io_pending = CS_WANT_READ;
+		    yaz_log (LOG_LOG, "SSL_accept. want_read");
+		    return h;
+		}
+		if (err == SSL_ERROR_WANT_WRITE)
+		{
+		    h->io_pending = CS_WANT_WRITE;
+		    yaz_log (LOG_LOG, "SSL_accept. want_write");
+		    return h;
+		}
+		cs_close (h);
+		return 0;
+	    }
+	}
+#endif
+    }
+    else
     {
         h->cerrno = CSOUTSTATE;
         return 0;
     }
-    if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
-    {
-        h->cerrno = CSYSERR;
-#ifdef WIN32
-        closesocket(h->newfd);
-#else
-        close(h->newfd);
-#endif
-	h->newfd = -1;
-        return 0;
-    }
-    memcpy(cnew, h, sizeof(*h));
-    cnew->iofile = h->newfd;
-    if (!(state = (tcpip_state *)
-	  (cnew->cprivate = xmalloc(sizeof(tcpip_state)))))
-    {
-        h->cerrno = CSYSERR;
-	if (h->newfd != -1)
-	{
-#ifdef WIN32
-	    closesocket(h->newfd);
-#else
-	    close(h->newfd);
-#endif
-	    h->newfd = -1;
-	}
-        return 0;
-    }
-#ifdef WIN32
-    if (!cnew->blocking && ioctlsocket(cnew->iofile, FIONBIO, &tru) < 0)
-#else
-    if (!cnew->blocking && fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
-#endif
-    {
-	h->cerrno = CSYSERR;
-	if (h->newfd != -1)
-	{
-#ifdef WIN32
-	    closesocket(h->newfd);
-#else
-	    close(h->newfd);
-#endif
-	    h->newfd = -1;
-	}
-	xfree (cnew);
-	xfree (state);
-        return 0;
-    }
-    h->newfd = -1;
-    state->altbuf = 0;
-    state->altsize = state->altlen = 0;
-    state->towrite = state->written = -1;
-    state->complete = st->complete;
-    cnew->state = CS_DATAXFER;
-    h->state = CS_IDLE;
-    return cnew;
+    h->io_pending = 0;
+    h->state = CS_DATAXFER;
+    return h;
 }
 
 #define CS_TCPIP_BUFCHUNK 4096
@@ -601,6 +801,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         sp->altbuf = tmpc;
         sp->altsize = tmpi;
     }
+    h->io_pending = 0;
     while (!(berlen = (*sp->complete)((unsigned char *)*buf, hasread)))
     {
         if (!*bufsize)
@@ -611,11 +812,16 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
             if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
                 return -1;
-        if ((res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0)) < 0)
+	res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0);
+	TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
+	if (res < 0)
 	{
 #ifdef WIN32
-            if (WSAGetLastError() == WSAEWOULDBLOCK)
+	    if (WSAGetLastError() == WSAEWOULDBLOCK)
+	    {
+		h->io_pending = CS_WANT_READ;
 		break;
+	    }
 	    else
 		return -1;
 #else
@@ -624,20 +830,22 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 		|| errno == EINPROGRESS
 #endif
 		)
+	    {
+		h->io_pending = CS_WANT_READ;
 		break;
-            else if (errno == 0)
+	    }
+	    else if (errno == 0)
 		continue;
 	    else
-                return -1;
+		return -1;
 #endif
 	}
-        if (!res)
-            return 0;
+	else if (!res)
+	    return 0;
         hasread += res;
-        TRC(fprintf(stderr, "  res=%d, hasread=%d\n", res, hasread));
     }
-    TRC(fprintf(stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
-        hasread, berlen));
+    TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
+		  hasread, berlen));
     /* move surplus buffer (or everything if we didn't get a BER rec.) */
     if (hasread > berlen)
     {
@@ -661,6 +869,93 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     return berlen ? berlen : 1;
 }
 
+
+#if HAVE_OPENSSL_SSL_H
+/*
+ * Return: -1 error, >1 good, len of buffer, ==1 incomplete buffer,
+ * 0=connection closed.
+ */
+int ssl_get(COMSTACK h, char **buf, int *bufsize)
+{
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
+    char *tmpc;
+    int tmpi, berlen, rest, req, tomove;
+    int hasread = 0, res;
+
+    TRC(fprintf(stderr, "ssl_get: bufsize=%d\n", *bufsize));
+    if (sp->altlen) /* switch buffers */
+    {
+        TRC(fprintf(stderr, "  %d bytes in altbuf (0x%x)\n", sp->altlen,
+            (unsigned) sp->altbuf));
+        tmpc = *buf;
+        tmpi = *bufsize;
+        *buf = sp->altbuf;
+        *bufsize = sp->altsize;
+        hasread = sp->altlen;
+        sp->altlen = 0;
+        sp->altbuf = tmpc;
+        sp->altsize = tmpi;
+    }
+    h->io_pending = 0;
+    while (!(berlen = (*sp->complete)((unsigned char *)*buf, hasread)))
+    {
+        if (!*bufsize)
+        {
+            if (!(*buf = (char *)xmalloc(*bufsize = CS_TCPIP_BUFCHUNK)))
+                return -1;
+        }
+        else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
+            if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
+                return -1;
+	res = SSL_read (sp->ssl, *buf + hasread, CS_TCPIP_BUFCHUNK);
+	TRC(fprintf(stderr, "  SSL_read res=%d, hasread=%d\n", res, hasread));
+	if (res <= 0)
+	{
+	    int ssl_err = SSL_get_error(sp->ssl, res);
+	    if (ssl_err == SSL_ERROR_WANT_READ)
+	    {
+		h->io_pending = CS_WANT_READ;
+		yaz_log (LOG_LOG, "SSL_read. want_read");
+		break;
+	    }
+	    if (ssl_err == SSL_ERROR_WANT_WRITE)
+	    {
+		h->io_pending = CS_WANT_WRITE;
+		yaz_log (LOG_LOG, "SSL_read. want_write");
+		break;
+	    }
+	    if (res == 0)
+		return 0;
+	    return -1;
+	}
+	hasread += res;
+    }
+    TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
+        hasread, berlen));
+    /* move surplus buffer (or everything if we didn't get a BER rec.) */
+    if (hasread > berlen)
+    {
+        tomove = req = hasread - berlen;
+        rest = tomove % CS_TCPIP_BUFCHUNK;
+        if (rest)
+            req += CS_TCPIP_BUFCHUNK - rest;
+        if (!sp->altbuf)
+        {
+            if (!(sp->altbuf = (char *)xmalloc(sp->altsize = req)))
+                return -1;
+        } else if (sp->altsize < req)
+            if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
+                return -1;
+        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
+            (unsigned) sp->altbuf));
+        memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
+    }
+    if (berlen < CS_TCPIP_BUFCHUNK - 1)
+        *(*buf + berlen) = '\0';
+    return berlen ? berlen : 1;
+}
+#endif
+
 /*
  * Returns 1, 0 or -1
  * In nonblocking mode, you must call again with same buffer while
@@ -672,6 +967,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
 
     TRC(fprintf(stderr, "tcpip_put: size=%d\n", size));
+    h->io_pending = 0;
     if (state->towrite < 0)
     {
         state->towrite = size;
@@ -684,29 +980,87 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     }
     while (state->towrite > state->written)
     {
-        if ((res = send(h->iofile, buf + state->written, size -
-            state->written, 0)) < 0)
-        {
+	if ((res = send(h->iofile, buf + state->written, size -
+			state->written, 0)) < 0)
+	{
+	    if (
 #ifdef WIN32
-            if (WSAGetLastError() == WSAEWOULDBLOCK)
+		WSAGetLastError() == WSAEWOULDBLOCK
 #else
-            if (errno == EAGAIN)
+		errno == EAGAIN
 #endif
-            {
-                TRC(fprintf(stderr, "  Flow control stop\n"));
-                return 1;
-            }
-            h->cerrno = CSYSERR;
-            return -1;
-        }
-        state->written += res;
-        TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
-            res, state->written, size));
+		)
+	    {
+		TRC(fprintf(stderr, "  Flow control stop\n"));
+		h->io_pending = CS_WANT_WRITE;
+		return 1;
+	    }
+	    h->cerrno = CSYSERR;
+	    return -1;
+	}
+	state->written += res;
+	TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
+		    res, state->written, size));
     }
     state->towrite = state->written = -1;
     TRC(fprintf(stderr, "  Ok\n"));
     return 0;
 }
+
+
+#if HAVE_OPENSSL_SSL_H
+/*
+ * Returns 1, 0 or -1
+ * In nonblocking mode, you must call again with same buffer while
+ * return value is 1.
+ */
+int ssl_put(COMSTACK h, char *buf, int size)
+{
+    int res;
+    struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
+
+    TRC(fprintf(stderr, "ssl_put: size=%d\n", size));
+    h->io_pending = 0;
+    if (state->towrite < 0)
+    {
+        state->towrite = size;
+        state->written = 0;
+    }
+    else if (state->towrite != size)
+    {
+        h->cerrno = CSWRONGBUF;
+        return -1;
+    }
+    while (state->towrite > state->written)
+    {
+	res = SSL_write (state->ssl, buf + state->written,
+			 size - state->written);
+	if (res <= 0)
+	{
+	    int ssl_err = SSL_get_error(state->ssl, res);
+	    if (ssl_err == SSL_ERROR_WANT_READ)
+	    {
+		h->io_pending = CS_WANT_READ;
+		yaz_log (LOG_LOG, "SSL_write. want_read");
+		return 1;
+	    }
+	    if (ssl_err == SSL_ERROR_WANT_WRITE)
+	    {
+		h->io_pending = CS_WANT_WRITE;
+		yaz_log (LOG_LOG, "SSL_write. want_write");
+		return 1;
+	    }
+	    return -1;
+	}
+	state->written += res;
+	TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
+		    res, state->written, size));
+    }
+    state->towrite = state->written = -1;
+    TRC(fprintf(stderr, "  Ok\n"));
+    return 0;
+}
+#endif
 
 int tcpip_close(COMSTACK h)
 {
@@ -714,13 +1068,31 @@ int tcpip_close(COMSTACK h)
 
     TRC(fprintf(stderr, "tcpip_close\n"));
     if (h->iofile != -1)
+    {
+#if HAVE_OPENSSL_SSL_H
+	if (sp->ssl)
+	{
+	    SSL_shutdown (sp->ssl);
+	}
+#endif
 #ifdef WIN32
         closesocket(h->iofile);
 #else
         close(h->iofile);
 #endif
+    }
     if (sp->altbuf)
         xfree(sp->altbuf);
+#if HAVE_OPENSSL_SSL_H
+    if (sp->ssl)
+    {
+	TRC (fprintf(stderr, "SSL_free\n"));
+	SSL_free (sp->ssl);
+    }
+    sp->ssl = 0;
+    if (sp->ctx_alloc)
+	SSL_CTX_free (sp->ctx_alloc);
+#endif
     xfree(sp);
     xfree(h);
     return 0;
@@ -746,5 +1118,9 @@ char *tcpip_addrstr(COMSTACK h)
     else
 	r = inet_ntoa(addr.sin_addr);
     sprintf(buf, "tcp:%s", r);
+#if HAVE_OPENSSL_SSL_H
+    if (sp->ctx)
+	sprintf(buf, "ssl:%s", r);
+#endif
     return buf;
 }

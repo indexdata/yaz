@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.3 2000-04-05 07:39:55 adam Exp $
+## $Id: Makefile.am,v 1.4 2000-11-23 10:58:32 adam Exp $
 
 noinst_LTLIBRARIES=libserver.la
 
@@ -9,4 +9,4 @@ EXTRA_DIST=service.c
 
 LIBS =
 
-INCLUDES=-I$(srcdir)/../include
+INCLUDES=-I$(srcdir)/../include 

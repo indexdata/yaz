@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.110  2000-10-02 13:05:32  adam
+ * Revision 1.111  2000-11-23 10:58:32  adam
+ * SSL comstack support. Separate POSIX thread support library.
+ *
+ * Revision 1.110  2000/10/02 13:05:32  adam
  * Fixed bug introduced by previous commit.
  *
  * Revision 1.109  2000/10/02 11:07:44  adam
@@ -435,6 +438,9 @@ association *create_association(IOCHAN channel, COMSTACK link)
     anew->init = 0;
     anew->client_chan = channel;
     anew->client_link = link;
+    anew->cs_get_mask = 0;
+    anew->cs_put_mask = 0;
+    anew->cs_accept_mask = 0;
     if (!(anew->decode = odr_createmem(ODR_DECODE)) ||
     	!(anew->encode = odr_createmem(ODR_ENCODE)))
 	return 0;
@@ -578,12 +584,37 @@ void ir_session(IOCHAN h, int event)
 	}
 	return;
     }
-    if (event & EVENT_INPUT || event & EVENT_WORK) /* input */
+    if (event & assoc->cs_accept_mask)
     {
-    	if (event & EVENT_INPUT)
+	yaz_log (LOG_DEBUG, "ir_session (accept)");
+	if (!cs_accept (conn))
+	{
+	    yaz_log (LOG_LOG, "accept failed");
+	    destroy_association(assoc);
+	    iochan_destroy(h);
+	}
+	iochan_clearflag (h, EVENT_OUTPUT|EVENT_OUTPUT);
+	if (conn->io_pending) 
+	{   /* cs_accept didn't complete */
+	    assoc->cs_accept_mask = 
+		((conn->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
+		((conn->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
+
+	    iochan_setflag (h, assoc->cs_accept_mask);
+	}
+	else
+	{   /* cs_accept completed. Prepare for reading (cs_get) */
+	    assoc->cs_accept_mask = 0;
+	    assoc->cs_get_mask = EVENT_INPUT;
+	    iochan_setflag (h, assoc->cs_get_mask);
+	}
+	return;
+    }
+    if ((event & assoc->cs_get_mask) || (event & EVENT_WORK)) /* input */
+    {
+    	if ((assoc->cs_put_mask & EVENT_INPUT) == 0 && (event & assoc->cs_get_mask))
 	{
 	    yaz_log(LOG_DEBUG, "ir_session (input)");
-	    assert(assoc && conn);
 	    /* We aren't speaking to this fellow */
 	    if (assoc->state == ASSOC_DEAD)
 	    {
@@ -593,6 +624,7 @@ void ir_session(IOCHAN h, int event)
 		iochan_destroy(h);
 		return;
 	    }
+	    assoc->cs_get_mask = EVENT_INPUT;
 	    if ((res = cs_get(conn, &assoc->input_buffer,
 		&assoc->input_buffer_len)) <= 0)
 	    {
@@ -603,7 +635,12 @@ void ir_session(IOCHAN h, int event)
 		return;
 	    }
 	    else if (res == 1) /* incomplete read - wait for more  */
+	    {
+		if (conn->io_pending & CS_WANT_WRITE)
+		    assoc->cs_get_mask |= EVENT_OUTPUT;
+		iochan_setflag(h, assoc->cs_get_mask);
 		return;
+	    }
 	    if (cs_more(conn)) /* more stuff - call us again later, please */
 		iochan_setevent(h, EVENT_INPUT);
 	    	
@@ -642,34 +679,43 @@ void ir_session(IOCHAN h, int event)
 		do_close_req(assoc, Z_Close_systemProblem, msg, req);
 	}
     }
-    if (event & EVENT_OUTPUT)
+    if (event & assoc->cs_put_mask)
     {
     	request *req = request_head(&assoc->outgoing);
 
+	assoc->cs_put_mask = 0;
 	yaz_log(LOG_DEBUG, "ir_session (output)");
 	req->state = REQUEST_PENDING;
     	switch (res = cs_put(conn, req->response, req->len_response))
 	{
-	    case -1:
-	    	yaz_log(LOG_LOG, "Connection closed by client");
-		cs_close(conn);
-		destroy_association(assoc);
-		iochan_destroy(h);
-		break;
-	    case 0: /* all sent - release the request structure */
-	    	yaz_log(LOG_DEBUG, "Wrote PDU, %d bytes", req->len_response);
-		nmem_destroy(req->request_mem);
-		request_deq(&assoc->outgoing);
-		request_release(req);
-		if (!request_head(&assoc->outgoing))
-		    iochan_clearflag(h, EVENT_OUTPUT);
-		break;
-	    /* value of 1 -- partial send -- is simply ignored */
+	case -1:
+	    yaz_log(LOG_LOG, "Connection closed by client");
+	    cs_close(conn);
+	    destroy_association(assoc);
+	    iochan_destroy(h);
+	    break;
+	case 0: /* all sent - release the request structure */
+	    yaz_log(LOG_DEBUG, "Wrote PDU, %d bytes", req->len_response);
+	    nmem_destroy(req->request_mem);
+	    request_deq(&assoc->outgoing);
+	    request_release(req);
+	    if (!request_head(&assoc->outgoing))
+	    {   /* restore mask for cs_get operation ... */
+		iochan_clearflag(h, EVENT_OUTPUT|EVENT_INPUT);
+		iochan_setflag(h, assoc->cs_get_mask);
+	    }
+	    break;
+	default:
+	    if (conn->io_pending & CS_WANT_WRITE)
+		assoc->cs_put_mask |= EVENT_OUTPUT;
+	    if (conn->io_pending & CS_WANT_READ)
+		assoc->cs_put_mask |= EVENT_INPUT;
+	    iochan_setflag(h, assoc->cs_put_mask);
 	}
     }
     if (event & EVENT_EXCEPT)
     {
-	yaz_log(LOG_DEBUG, "ir_session (exception)");
+	yaz_log(LOG_LOG, "ir_session (exception)");
 	cs_close(conn);
 	destroy_association(assoc);
 	iochan_destroy(h);
@@ -848,6 +894,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     request_enq(&assoc->outgoing, req);
     /* turn the work over to the ir_session handler */
     iochan_setflag(assoc->client_chan, EVENT_OUTPUT);
+    assoc->cs_put_mask = EVENT_OUTPUT;
     /* Is there more work to be done? give that to the input handler too */
 #if 1
     if (request_head(&assoc->incoming))
@@ -992,6 +1039,12 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     assoc->preferredMessageSize = *req->preferredMessageSize;
     if (assoc->preferredMessageSize > assoc->maximumRecordSize)
     	assoc->preferredMessageSize = assoc->maximumRecordSize;
+
+#if 0
+    assoc->maximumRecordSize = 3000000;
+    assoc->preferredMessageSize = 3000000;
+#endif
+
     resp->preferredMessageSize = &assoc->preferredMessageSize;
     resp->maximumRecordSize = &assoc->maximumRecordSize;
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.3 2000-10-11 12:24:58 adam Exp $
+# $Id: yaz-config.in,v 1.4 2000-11-23 10:58:32 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -9,7 +9,7 @@ yaz_echo_source=yes
 yaz_echo_lalibs=no
 yaz_src_root=@YAZ_SRC_ROOT@
 
-yazlibs="@LIBS@"
+yazextralibs="@LIBS@"
 YAZVERSION=@VERSION@
 
 usage()
@@ -23,6 +23,8 @@ Options:
 	[--lalibs]
 	[--cflags]
 	[--tabs]
+Libraries:
+	threads
 EOF
 	exit $1
 }
@@ -61,6 +63,9 @@ while test $# -gt 0; do
     --lalibs)
       yaz_echo_lalibs=yes
       ;;
+    threads)
+      lib_thread=yes
+      ;;
     -*)
       yaz_echo_help=yes
       ;;
@@ -68,20 +73,30 @@ while test $# -gt 0; do
   shift
 done
 
+if test "$lib_thread" = "yes"; then
+    yazextralibs="@LIBTHREAD@ $yazextralibs"
+    lyaz="-lyazthread -lyaz"
+else
+    lyaz="-lyaz"
+fi 
 if test "$yaz_echo_source" = "yes"; then
     YAZTAB=${yaz_src_root}/tab
     YAZBIN=${yaz_src_root}/bin
-    YAZLIB="-L${yaz_src_root}/lib/.libs -lyaz $yazlibs"
-    YAZLALIB="${yaz_src_root}/lib/libyaz.la $yazlibs"
+    YAZLIB="-L${yaz_src_root}/lib/.libs $lyaz $yazextralibs"
+    if test "$lib_thread" = "yes"; then
+        YAZLALIB="${yaz_src_root}/lib/libyazthread.la ${yaz_src_root}/lib/libyaz.la $yazextralibs"
+    else
+        YAZLALIB="${yaz_src_root}/lib/libyazthread.la $yazextralibs"
+    fi
     YAZINC="-I${yaz_src_root}/include"
 else
     YAZTAB=$yazprefix/share/yaz/tab
     YAZBIN=$yazprefix/bin
 
     if test "$yazprefix" = "/usr"; then
-	YAZLIB="-lyaz $yazlibs"
+	YAZLIB="$lyaz $yazextralibs"
     else
-	YAZLIB="-L$yazprefix/lib -lyaz $yazlibs"
+	YAZLIB="-L$yazprefix/lib $lyaz $yazextralibs"
     fi
     YAZLALIB=$YAZLIB
     if test "$yazprefix" = "/usr"; then
@@ -89,6 +104,10 @@ else
     else
 	YAZINC=-I$yazprefix/include
     fi
+fi
+
+if test "$lib_thread" = "yes"; then
+    YAZINC="$YAZINC -D_REENTRANT"
 fi
 
 if test "$yaz_echo_help" = "yes"; then

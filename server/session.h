@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.23  2000-04-05 07:39:55  adam
+ * Revision 1.24  2000-11-23 10:58:32  adam
+ * SSL comstack support. Separate POSIX thread support library.
+ *
+ * Revision 1.23  2000/04/05 07:39:55  adam
  * Added shared library support (libtool).
  *
  * Revision 1.22  2000/03/20 19:06:25  adam
@@ -155,6 +158,10 @@ typedef struct association
     int preferredMessageSize;
     int maximumRecordSize;
     int version;                  /* highest version-bit set (2 or 3) */
+
+    unsigned cs_get_mask;
+    unsigned cs_put_mask;
+    unsigned cs_accept_mask;
 
     struct bend_initrequest *init;
 #if 0

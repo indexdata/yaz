@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.2 2000-02-28 11:20:06 adam Exp $
+ * $Id: comstack.h,v 1.3 2000-11-23 10:58:32 adam Exp $
  */
 
 #ifndef COMSTACK_H
@@ -67,7 +67,7 @@ YAZ_BEGIN_CDECL
 
 struct comstack;
 typedef struct comstack *COMSTACK;
-typedef COMSTACK (*CS_TYPE)(int s, int blocking, int protocol);
+typedef COMSTACK (*CS_TYPE)(int s, int blocking, int protocol, void *vp);
 
 struct comstack
 {
@@ -84,11 +84,14 @@ struct comstack
 #define CS_INCON      2
 #define CS_OUTCON     3
 #define CS_DATAXFER   4
+#define CS_ACCEPT     5
+#define CS_CONNECT    6
     int newfd;     /* storing new descriptor between listen and accept */
     int blocking;  /* is this link (supposed to be) blocking? */
+    unsigned io_pending; /* flag to signal read / write op is incomplete */
     int event;     /* current event */
 #define CS_NONE       0
-#define CS_CONNECT    1
+#define CS_CONNECTING 1
 #define CS_DISCON     2
 #define CS_LISTEN     3
 #define CS_DATA       4
@@ -120,9 +123,9 @@ struct comstack
 #define cs_listen_check(handle, ap, al, cf, cd) ((*(handle)->f_listen)(handle, ap, al, cf, cd))
 #define cs_accept(handle) ((*(handle)->f_accept)(handle))
 #define cs_close(handle) ((*(handle)->f_close)(handle))
-#define cs_create(type, blocking, proto) ((*type)(-1, blocking, proto))
+#define cs_create(type, blocking, proto) ((*type)(-1, blocking, proto, 0))
 #define cs_createbysocket(sock, type, blocking, proto) \
-	((*type)(sock, blocking, proto))
+	((*type)(sock, blocking, proto, 0))
 #define cs_type(handle) ((handle)->type)
 #define cs_fileno(handle) ((handle)->iofile)
 #define cs_stackerr(handle) ((handle)->stackerr)
@@ -131,7 +134,11 @@ struct comstack
 #define cs_getproto(handle) ((handle)->protocol)
 #define cs_addrstr(handle) ((*(handle)->f_addrstr)(handle))
 #define cs_straddr(handle, str) ((*(handle)->f_straddr)(handle, str))
+#define cs_want_read(handle) ((handle)->io_pending & CS_WANT_READ)
+#define cs_want_write(handle) ((handle)->io_pending & CS_WANT_WRITE)
 
+#define CS_WANT_READ 1
+#define CS_WANT_WRITE 2
 YAZ_EXPORT const char *cs_strerror(COMSTACK h);
 YAZ_EXPORT const char *cs_errmsg(int n);
 

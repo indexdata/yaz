@@ -67,6 +67,7 @@ DLLTOOL = @DLLTOOL@
 ILLLIB = @ILLLIB@
 ILLMODULE = @ILLMODULE@
 LD = @LD@
+LIBTHREAD = @LIBTHREAD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
@@ -79,7 +80,9 @@ SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
 YAZ_SRC_ROOT = @YAZ_SRC_ROOT@
 
-lib_LTLIBRARIES = libyaz.la
+@ISTHR_TRUE@extra = libyazthread.la
+
+lib_LTLIBRARIES = libyaz.la $(extra)
 
 # If the line below is omitted the LINK variable is
 # not set in Makefile.in and it will NOT work ..
@@ -88,7 +91,11 @@ EXTRA_libyaz_la_SOURCES = x.c
 # No real sources
 libyaz_la_SOURCES = 
 
+libyazthread_la_SOURCES = nmem.c statserv.c
+
 LDFLAGS = -version-info 1:0:0
+
+INCLUDES = -I$(srcdir)/../include -I$(srcdir)/../server  -D_REENTRANT=1 -DHAVE_PTHREAD_H=1
 
 bin_SCRIPTS = yaz-config
 
@@ -107,6 +114,9 @@ libyaz_la_DEPENDENCIES =  ../odr/libodr.la ../$(ASNMODULE)/libasn.la \
 ../comstack/libcomstack.la ../server/libserver.la ../zutil/libzutil.la \
 ../util/libutil.la ../ccl/libccl.la ../retrieval/libret.la
 libyaz_la_OBJECTS = 
+libyazthread_la_LDFLAGS = 
+libyazthread_la_LIBADD = 
+libyazthread_la_OBJECTS =  nmem.lo statserv.lo
 SCRIPTS =  $(bin_SCRIPTS)
 
 CFLAGS = @CFLAGS@
@@ -121,9 +131,9 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DEP_FILES =  .deps/x.P
-SOURCES = $(libyaz_la_SOURCES) $(EXTRA_libyaz_la_SOURCES)
-OBJECTS = $(libyaz_la_OBJECTS)
+DEP_FILES =  .deps/nmem.P .deps/statserv.P .deps/x.P
+SOURCES = $(libyaz_la_SOURCES) $(EXTRA_libyaz_la_SOURCES) $(libyazthread_la_SOURCES)
+OBJECTS = $(libyaz_la_OBJECTS) $(libyazthread_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -197,6 +207,9 @@ maintainer-clean-libtool:
 
 libyaz.la: $(libyaz_la_OBJECTS) $(libyaz_la_DEPENDENCIES)
 	$(LINK) -rpath $(libdir) $(libyaz_la_LDFLAGS) $(libyaz_la_OBJECTS) $(libyaz_la_LIBADD) $(LIBS)
+
+libyazthread.la: $(libyazthread_la_OBJECTS) $(libyazthread_la_DEPENDENCIES)
+	$(LINK) -rpath $(libdir) $(libyazthread_la_LDFLAGS) $(libyazthread_la_OBJECTS) $(libyazthread_la_LIBADD) $(LIBS)
 
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
@@ -376,6 +389,12 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
+
+nmem.c:
+	ln -s $(srcdir)/../util/nmem.c
+
+statserv.c:
+	ln -s $(srcdir)/../server/statserv.c
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

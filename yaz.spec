@@ -40,6 +40,10 @@ cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 /usr/lib/libyaz.so
 /usr/lib/libyaz.so.1
 /usr/lib/libyaz.so.1.0.0
+/usr/lib/libyazthread.a
+/usr/lib/libyazthread.so
+/usr/lib/libyazthread.so.1
+/usr/lib/libyazthread.so.1.0.0
 /usr/include/yaz
 /usr/share/yaz/doc
 /usr/share/aclocal/yaz.m4

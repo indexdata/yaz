@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.107  2000-11-16 13:11:07  adam
+ * Revision 1.108  2000-11-23 10:58:32  adam
+ * SSL comstack support. Separate POSIX thread support library.
+ *
+ * Revision 1.107  2000/11/16 13:11:07  adam
  * Changed because ccl_rpn_query sets attribute set.
  *
  * Revision 1.106  2000/11/13 09:44:59  adam
@@ -588,16 +591,25 @@ int cmd_open(char *arg)
             session_mem = NULL;
         }
     }
+    t = tcpip_type;
     base[0] = '\0';
     if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
         return 0;
     if (strncmp (type_and_host, "tcp:", 4) == 0)
         host = type_and_host + 4;
+    else if (strncmp (type_and_host, "ssl:", 4) == 0)
+    {
+#if HAVE_OPENSSL_SSL_H
+	t = ssl_type;
+#else
+	printf ("SSL not supported\n");
+#endif
+        host = type_and_host + 4;
+    }
     else
         host = type_and_host;
     if (*base)
         cmd_base (base);
-    t = tcpip_type;
     protocol = PROTO_Z3950;
 
     if (!(conn = cs_create(t, 1, protocol)))
