@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.91  1999-06-01 14:29:12  adam
+ * Revision 1.92  1999-06-17 10:54:45  adam
+ * Added facility to specify implementation version - and name
+ * for server.
+ *
+ * Revision 1.91  1999/06/01 14:29:12  adam
  * Work on Extended Services.
  *
  * Revision 1.90  1999/05/27 13:02:20  adam
@@ -799,6 +803,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     binitreq.configname = "default-config";
     binitreq.auth = req->idAuthentication;
     binitreq.referenceId = req->referenceId;
+    binitreq.implementation_version = 0;
+    binitreq.implementation_name = 0;
     binitreq.bend_sort = NULL;
     binitreq.bend_search = NULL;
     binitreq.bend_present = NULL;
@@ -890,7 +896,30 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	assoc->preferredMessageSize = assoc->maximumRecordSize;
     resp->preferredMessageSize = &assoc->preferredMessageSize;
     resp->maximumRecordSize = &assoc->maximumRecordSize;
+
     resp->implementationName = "Index Data/YAZ Generic Frontend Server";
+
+    if (binitreq.implementation_name)
+    {
+	char *nv = (char *)
+	    odr_malloc (assoc->encode,
+			strlen(binitreq.implementation_name) + 3 + 
+			       strlen(resp->implementationName));
+	sprintf (nv, "%s %s",
+		 resp->implementationName, binitreq.implementation_name);
+        resp->implementationName = nv;
+    }
+    if (binitreq.implementation_version)
+    {
+	char *nv = (char *)
+	    odr_malloc (assoc->encode,
+			strlen(binitreq.implementation_version) + 3 + 
+			       strlen(resp->implementationVersion));
+	sprintf (nv, "%s %s",
+		 resp->implementationVersion, binitreq.implementation_version);
+        resp->implementationVersion = nv;
+    }
+
     if (binitres->errcode)
     {
     	logf(LOG_LOG, "Connection rejected by backend.");

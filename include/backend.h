@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.25  1999-06-01 14:29:12  adam
+ * Revision 1.26  1999-06-17 10:54:44  adam
+ * Added facility to specify implementation version - and name
+ * for server.
+ *
+ * Revision 1.25  1999/06/01 14:29:12  adam
  * Work on Extended Services.
  *
  * Revision 1.24  1999/03/31 11:18:24  adam
@@ -245,6 +249,8 @@ typedef struct bend_initrequest
     ODR stream;                /* encoding stream */
     Z_ReferenceId *referenceId;/* reference ID */
     
+    char *implementation_name;
+    char *implementation_version;
     int (*bend_sort) (void *handle, bend_sort_rr *rr);
     int (*bend_search) (void *handle, bend_search_rr *rr);
     int (*bend_present) (void *handle, bend_present_rr *rr);
