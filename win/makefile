@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.17 2000-10-06 12:01:12 adam Exp $
+# $Id: makefile,v 1.18 2000-11-01 14:47:00 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=1   # 0 for release, 1 for debug
+DEBUG=0   # 0 for release, 1 for debug
 
 NEW_Z3950=1  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
@@ -58,6 +58,7 @@ ZUTILDIR=$(SRCDIR)\ZUTIL
 RETDIR=$(SRCDIR)\RETRIEVAL
 Z3950DIR=$(SRCDIR)\Z39.50
 ILLDIR=$(SRCDIR)\ill
+CCLDIR=$(SRCDIR)\ccl
 
 CLIENTDIR=$(SRCDIR)\CLIENT
 SERVERDIR=$(SRCDIR)\SERVER
@@ -96,6 +97,7 @@ proto_h: $(PROTOH)
 COMMON_C_OPTIONS=          \
   /nologo /W3 /GX /FD /c   \
   /D "WIN32" /D "_WINDOWS" \
+  /D "CCL2RPN=1"           \
   /FR"$(OBJDIR)\\"         \
   /Fo"$(OBJDIR)\\"         \
   /Fd"$(OBJDIR)\\" 
@@ -197,6 +199,15 @@ YAZ_SERVER_OBJS= \
 ZTEST_OBJS= \
 	"$(OBJDIR)\read-grs.obj" \
 	"$(OBJDIR)\ztest.obj" 
+
+YAZ_CCL_OBJS= \
+   $(OBJDIR)\cclerrms.obj \
+   $(OBJDIR)\cclfind.obj \
+   $(OBJDIR)\cclptree.obj \
+   $(OBJDIR)\cclqfile.obj \
+   $(OBJDIR)\cclqual.obj \
+   $(OBJDIR)\cclstr.obj \
+   $(OBJDIR)\ccltoken.obj
 
 YAZ_ASN_OBJS= \
    $(OBJDIR)\proto.obj \
@@ -326,8 +337,9 @@ COMMON_YAZ_OBJS= \
    $(YAZ_ODR_OBJS) \
    $(YAZ_COMSTACK_OBJS) \
    $(YAZ_ZUTIL_OBJS) \
+   $(YAZ_CCL_OBJS) \
    $(YAZ_RET_OBJS) \
-   $(YAZ_SERVER_OBJS)
+   $(YAZ_SERVER_OBJS) 
 
 !if $(NEW_Z3950)
 YAZ_OBJS= \
@@ -508,6 +520,9 @@ generated_files: \
 {$(ILL_C_DIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) $(COPT) $< 
 
+{$(CCLDIR)}.c{$(OBJDIR)}.obj:
+	@$(CPP) $(COPT) $< 
+
 ############### ASN-generated files
 
 !if $(HAVE_TCL)
@@ -660,7 +675,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.17  2000-10-06 12:01:12  adam
+# Revision 1.18  2000-11-01 14:47:00  adam
+# Added CCL support for WIN32.
+#
+# Revision 1.17  2000/10/06 12:01:12  adam
 # Updates regarding ASN-code generation (mostly).
 #
 # Revision 1.16  2000/05/05 13:48:15  adam
