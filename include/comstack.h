@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.20  1998-05-18 13:06:55  adam
+ * Revision 1.21  1998-05-20 09:52:39  adam
+ * Removed 'dead' definition.
+ *
+ * Revision 1.20  1998/05/18 13:06:55  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -168,7 +171,6 @@ struct comstack
 #define CS_LISTEN     3
 #define CS_DATA       4
     enum oid_proto protocol;  /* what application protocol are we talking? */
-    int (*f_look)(COMSTACK handle);
     int (*f_put)(COMSTACK handle, char *buf, int size);
     int (*f_get)(COMSTACK handle, char **buf, int *bufsize);
     int (*f_more)(COMSTACK handle);
