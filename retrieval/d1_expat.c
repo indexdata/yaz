@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: d1_expat.c,v 1.6 2002-07-25 12:52:53 adam Exp $
+ * $Id: d1_expat.c,v 1.7 2002-08-23 14:24:05 adam Exp $
  */
 
 #if HAVE_EXPAT_H
@@ -22,11 +22,14 @@
 
 #include <expat.h>
 
+#define XML_CHUNK 1024
+
 struct user_info {
     data1_node *d1_stack[256];
     int level;
     data1_handle dh;
     NMEM nmem;
+    int loglevel;
 };
 
 static void cb_start (void *user, const char *el, const char **attr)
@@ -37,7 +40,7 @@ static void cb_start (void *user, const char *el, const char **attr)
     ui->d1_stack[ui->level] = data1_mk_tag (ui->dh, ui->nmem, el, attr,
                                                 ui->d1_stack[ui->level-1]);
     ui->level++;
-    yaz_log (LOG_DEBUG, "cb_start %s", el);
+    yaz_log (ui->loglevel, "cb_start %s", el);
 }
 
 static void cb_end (void *user, const char *el)
@@ -45,28 +48,17 @@ static void cb_end (void *user, const char *el)
     struct user_info *ui = (struct user_info*) user;
 
     ui->level--;
-    yaz_log (LOG_DEBUG, "cb_end %s", el);
+    yaz_log (ui->loglevel, "cb_end %s", el);
 }
 
 static void cb_chardata (void *user, const char *s, int len)
 {
     struct user_info *ui = (struct user_info*) user;
-#if 1
-    yaz_log (LOG_DEBUG, "cb_chardata %.*s", len, s);
+#if 0
+    yaz_log (ui->loglevel, "cb_chardata %.*s", len, s);
+#endif
     ui->d1_stack[ui->level] = data1_mk_text_n (ui->dh, ui->nmem, s, len,
                                                    ui->d1_stack[ui->level -1]);
-#else
-    int i;
-
-    for (i = 0; i<len; i++)
-        if (!strchr ("\n\n ", s[i]))
-            break;
-    if (i != len)
-    {
-        ui->d1_stack[ui->level] = data1_mk_text_n (ui->dh, ui->nmem, s, len,
-                                                   ui->d1_stack[ui->level -1]);
-    }
-#endif
 }
 
 static void cb_decl (void *user, const char *version, const char*encoding,
@@ -88,7 +80,7 @@ static void cb_decl (void *user, const char *version, const char*encoding,
     
     data1_mk_preprocess (ui->dh, ui->nmem, "xml", attr_list,
                              ui->d1_stack[ui->level-1]);
-    yaz_log (LOG_DEBUG, "decl version=%s encoding=%s",
+    yaz_log (ui->loglevel, "decl version=%s encoding=%s",
              version ? version : "null",
              encoding ? encoding : "null");
 }
@@ -102,7 +94,7 @@ static void cb_processing (void *user, const char *target,
                              ui->d1_stack[ui->level-1]);
     data1_mk_text_nf (ui->dh, ui->nmem, data, strlen(data), res);
     
-    yaz_log (LOG_DEBUG, "decl processing target=%s data=%s",
+    yaz_log (ui->loglevel, "decl processing target=%s data=%s",
              target ? target : "null",
              data ? data : "null");
     
@@ -112,7 +104,7 @@ static void cb_processing (void *user, const char *target,
 static void cb_comment (void *user, const char *data)
 {
     struct user_info *ui = (struct user_info*) user;
-    yaz_log (LOG_DEBUG, "decl comment data=%s", data ? data : "null");
+    yaz_log (ui->loglevel, "decl comment data=%s", data ? data : "null");
     data1_mk_comment (ui->dh, ui->nmem, data, ui->d1_stack[ui->level-1]);
 }
 
@@ -120,13 +112,15 @@ static void cb_doctype_start (void *userData, const char *doctypeName,
                               const char *sysid, const char *pubid,
                               int has_internal_subset)
 {
-    yaz_log (LOG_DEBUG, "doctype start doctype=%s sysid=%s pubid=%s",
+    struct user_info *ui = (struct user_info*) userData;
+    yaz_log (ui->loglevel, "doctype start doctype=%s sysid=%s pubid=%s",
              doctypeName, sysid, pubid);
 }
 
 static void cb_doctype_end (void *userData)
 {
-    yaz_log (LOG_DEBUG, "doctype end");
+    struct user_info *ui = (struct user_info*) userData;
+    yaz_log (ui->loglevel, "doctype end");
 }
 
 
@@ -136,13 +130,69 @@ static void cb_entity_decl (void *userData, const char *entityName,
                             const char *base, const char *systemId,
                             const char *publicId, const char *notationName)
 {
-    yaz_log (LOG_DEBUG,
-             "entity %s is_para_entry=%d value=%.*s base=%s systemId=%s"
+    struct user_info *ui = (struct user_info*) userData;
+    yaz_log (ui->loglevel,
+             "entity decl %s is_para_entry=%d value=%.*s base=%s systemId=%s"
              " publicId=%s notationName=%s",
              entityName, is_parameter_entity, value_length, value,
              base, systemId, publicId, notationName);
     
 }
+
+static int cb_external_entity (XML_Parser pparser,
+                               const char *context,
+                               const char *base,
+                               const char *systemId,
+                               const char *publicId)
+{
+    struct user_info *ui = (struct user_info*) XML_GetUserData(pparser);
+    FILE *inf;
+    int done = 0;
+    XML_Parser parser;
+
+    yaz_log (ui->loglevel,
+             "external entity context=%s base=%s systemid=%s publicid=%s",
+             context, base, systemId, publicId);
+    if (!systemId)
+        return 1;
+
+    if (!(inf = fopen (systemId, "rb")))
+    {
+        yaz_log (LOG_WARN|LOG_ERRNO, "fopen %s", systemId);
+        return 0;
+    }
+
+    parser = XML_ExternalEntityParserCreate (pparser, "", 0);
+    while (!done)
+    {
+        int r;
+        void *buf = XML_GetBuffer (parser, XML_CHUNK);
+        if (!buf)
+        {
+            yaz_log (LOG_WARN, "XML_GetBuffer fail");
+            break;
+        }
+        r = fread (buf, 1, XML_CHUNK, inf);
+        if (r == 0)
+        {
+            if (ferror(inf))
+            {
+                yaz_log (LOG_WARN|LOG_ERRNO, "fread %s", systemId);
+                break;
+            }
+            done = 1;
+        }
+        if (!XML_ParseBuffer (parser, r, done))
+        {
+            yaz_log (LOG_WARN, "XML_ParseBuffer failed %s",
+		     XML_ErrorString(XML_GetErrorCode(parser)));
+	}
+    }
+    fclose (inf);
+    XML_ParserFree (parser);
+    return done;
+}
+
 
 #if HAVE_ICONV_H
 static int cb_encoding_convert (void *data, const char *s)
@@ -178,13 +228,14 @@ static int cb_encoding_handler (void *userData, const char *name,
 {
     int i = 0;
     int no_ok = 0;
+    struct user_info *ui = (struct user_info*) userData;
 
     iconv_t t = iconv_open ("UNICODE", name);
     if (t == (iconv_t) (-1))
         return 0;
    
     info->data = 0;  /* signal that multibyte is not in use */
-    yaz_log (LOG_DEBUG, "Encoding handler of %s", name);
+    yaz_log (ui->loglevel, "Encoding handler of %s", name);
     for (i = 0; i<256; i++)
     {
         size_t ret;
@@ -203,7 +254,7 @@ static int cb_encoding_handler (void *userData, const char *name,
         {
             if (errno == EILSEQ)
             {
-                yaz_log (LOG_DEBUG, "Encoding %d: invalid sequence", i);
+                yaz_log (ui->loglevel, "Encoding %d: invalid sequence", i);
                 info->map[i] = -1;  /* invalid sequence */
             }
             if (errno == EINVAL)
@@ -258,10 +309,10 @@ static int cb_encoding_handler (void *userData, const char *name,
                     }
                 }
                 if (info->map[i] < -1)
-                    yaz_log (LOG_DEBUG, "Encoding %d: multibyte input %d",
+                    yaz_log (ui->loglevel, "Encoding %d: multibyte input %d",
                              i, -info->map[i]);
                 else
-                    yaz_log (LOG_DEBUG, "Encoding %d: multibyte input failed",
+                    yaz_log (ui->loglevel, "Encoding %d: multibyte input failed",
                              i);
             }
             if (errno == E2BIG)
@@ -300,10 +351,9 @@ static int cb_encoding_handler (void *userData, const char *name,
         return 0;
     return 1;
 }
-
+/* HAVE_ICONV_H */
 #endif
 
-#define XML_CHUNK 1024
 
 data1_node *data1_read_xml (data1_handle dh,
                             int (*rf)(void *, char *, size_t), void *fh,
@@ -313,6 +363,7 @@ data1_node *data1_read_xml (data1_handle dh,
     struct user_info uinfo;
     int done = 0;
 
+    uinfo.loglevel = LOG_LOG;
     uinfo.level = 1;
     uinfo.dh = dh;
     uinfo.nmem = m;
@@ -329,10 +380,10 @@ data1_node *data1_read_xml (data1_handle dh,
     XML_SetCommentHandler (parser, cb_comment);
     XML_SetDoctypeDeclHandler (parser, cb_doctype_start, cb_doctype_end);
     XML_SetEntityDeclHandler (parser, cb_entity_decl);
+    XML_SetExternalEntityRefHandler (parser, cb_external_entity);
 #if HAVE_ICONV_H
-    XML_SetUnknownEncodingHandler (parser, cb_encoding_handler, 0);
+    XML_SetUnknownEncodingHandler (parser, cb_encoding_handler, &uinfo);
 #endif
-
     while (!done)
     {
         int r;
@@ -340,28 +391,29 @@ data1_node *data1_read_xml (data1_handle dh,
         if (!buf)
         {
             /* error */
-            yaz_log (LOG_FATAL, "XML_GetBuffer fail");
-            return 0;
+            yaz_log (LOG_WARN, "XML_GetBuffer fail");
+            break;
         }
         r = (*rf)(fh, buf, XML_CHUNK);
         if (r < 0)
         {
             /* error */
-            yaz_log (LOG_FATAL, "XML read fail");
-            return 0;
+            yaz_log (LOG_WARN, "XML read fail");
+            break;
         }
         else if (r == 0)
             done = 1;
         if (!XML_ParseBuffer (parser, r, done))
         {
-            yaz_log (LOG_FATAL, "XML_ParseBuffer failed %s",
+            yaz_log (LOG_WARN, "XML_ParseBuffer (1) failed %s",
 		     XML_ErrorString(XML_GetErrorCode(parser)));
 	}
     }
     XML_ParserFree (parser);
-    if (!uinfo.d1_stack[1])
+    if (!uinfo.d1_stack[1] || !done)
         return 0;
     return uinfo.d1_stack[0];
 }
 
+/* HAVE_EXPAT_H */
 #endif
