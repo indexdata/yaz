@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.7 2003/12/16
+
 MARC conversion can now generate ISO2709 output in another
 character set. yaz-marcdump uses this facility if you invoke it
 with option -O.
