@@ -1,3 +1,9 @@
+yaz (1.9.2-1) unstable; urgency=low
+
+  * Upstream release.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 26 Nov 2002 14:44:52 +0100
+
 yaz (1.9.1-5) unstable; urgency=low
 
   * GRS-1 render for ZOOM. data1 moved to zebra.
