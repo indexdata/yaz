@@ -1,4 +1,4 @@
-/* $Id: lexer.c,v 1.3 2003-04-14 15:40:03 adam Exp $
+/* $Id: lexer.c,v 1.4 2003-04-14 16:52:10 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -9,7 +9,7 @@ See the file LICENSE.
 
 static void putb(YYSTYPE *lval, CQL_parser cp, int c)
 {
-    if (lval->len >= lval->size)
+    if (lval->len+1 >= lval->size)
     {
         char *nb = nmem_malloc(cp->nmem, (lval->size = lval->len * 2 + 20));
         memcpy (nb, lval->buf, lval->len);
@@ -29,7 +29,6 @@ int yylex(YYSTYPE *lval, void *vp)
     CQL_parser cp = (CQL_parser) vp;
     int c;
     lval->cql = 0;
-    lval->rel = 0;
     lval->rel = 0;
     lval->len = 0;
     lval->size = 10;
