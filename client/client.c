@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.43  1996-11-08 11:03:26  adam
+ * Revision 1.44  1997-05-05 11:20:35  adam
+ * Client uses "options" utility and marc dump filename may be specified
+ * as an option (-m <file>).
+ *
+ * Revision 1.43  1996/11/08 11:03:26  adam
  * Client accepts multiple database names.
  *
  * Revision 1.42  1996/10/08 10:44:57  quinn
@@ -157,6 +161,7 @@
 #include <proto.h>
 #include <marcdisp.h>
 #include <diagbib1.h>
+#include <options.h>
 
 #include <pquery.h>
 
@@ -185,7 +190,6 @@ static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan[512] = "0";
 static char last_cmd[100] = "?";
 static FILE *marcdump = 0;
-static char marcdump_file[512] = "marc.out";
 
 typedef enum {
     QueryType_Prefix,
@@ -498,7 +502,12 @@ static void display_record(Z_DatabaseRecord *p)
     if (ent->value == VAL_SOIF)
         printf("%.*s", r->u.octet_aligned->len, r->u.octet_aligned->buf);
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
-        marc_display ((char*)p->u.octet_aligned->buf, stdout);
+    {
+        const char *marc_buf = (char*)p->u.octet_aligned->buf;
+        marc_display (marc_buf, stdout);
+        if (marcdump)
+            fwrite (marc_buf, strlen (marc_buf), 1, marcdump);
+    }
     else if (ent->value == VAL_SUTRS)
     {
         if (r->which != Z_External_sutrs)
@@ -824,15 +833,6 @@ static int send_presentRequest(char *arg)
 	static Z_Range *rangep = &range;
     req->num_ranges = 1;
 #endif
-
-
-
-
-
-
-
-
-
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
     prefsyn.proto = protocol;
@@ -1320,16 +1320,36 @@ static int client(int wait)
 
 int main(int argc, char **argv)
 {
+    char *prog = *argv;
+    char *arg;
+    int ret;
+    int opened = 0;
+
     initialize();
     cmd_base("Default");
-    if (argc > 1)
-        cmd_open(argv[1]);
-    else
-        printf(C_PROMPT);
-    if (*marcdump_file && !(marcdump = fopen(marcdump_file, "a")))
+
+    while ((ret = options("m:", argv, argc, &arg)) != -2)
     {
-	perror(marcdump_file);
-	exit(1);
+        switch (ret)
+        {
+        case 0:
+            cmd_open (arg);
+            opened = 1;
+            break;
+        case 'm':
+            if (!(marcdump = fopen (arg, "a")))
+            {
+                perror (arg);
+                exit (1);
+            }
+            break;
+        default:
+            fprintf (stderr, "Usage: %s [-m <marclog>] [<server-addr>]\n",
+                     prog);
+            exit (1);
+        }
     }
-    return client((argc > 1));
+    if (!opened)
+        printf (C_PROMPT);
+    return client (opened);
 }
