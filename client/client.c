@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.3  1995-05-22 15:06:53  quinn
+ * Revision 1.4  1995-05-22 15:30:13  adam
+ * Client uses prefix query notation.
+ *
+ * Revision 1.3  1995/05/22  15:06:53  quinn
  * *** empty log message ***
  *
  * Revision 1.2  1995/05/22  14:56:40  quinn
@@ -36,7 +39,15 @@
 #include <oid.h>
 
 #include <marcdisp.h>
+
+#ifdef RPN_QUERY
+#ifdef PREFIX_QUERY
+#include <pquery.h>
+#else
 #include <yaz-ccl.h>
+#endif
+#endif
+
 #include "../version.h"
 
 #define C_PROMPT "Z> "
@@ -51,7 +62,11 @@ static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
 static int setno = 1;                   /* current set offset */
 static int protocol = PROTO_Z3950;      /* current app protocol */
+#ifdef RPN_QUERY
+#ifndef PREFIX_QUERY
 static CCL_bibset bibset;               /* CCL bibset handle */
+#endif
+#endif
 
 static void send_apdu(Z_APDU *a)
 {
@@ -289,22 +304,29 @@ static int send_searchRequest(char *arg)
     Z_SearchRequest *req = apdu->u.searchRequest;
     char *databaseNames = database;
     Z_Query query;
+#ifdef RPN_QUERY
+#ifndef PREFIX_QUERY
+    struct ccl_rpn_node *rpn;
     int error, pos;
+#endif
+#endif
     char setstring[100];
+#ifdef RPN_QUERY
     Z_RPNQuery *RPNquery;
     oident bib1;
-    struct ccl_rpn_node *rpn;
-#ifndef RPN_QUERY
+#else
     Odr_oct ccl_query;
 #endif
 
 #ifdef RPN_QUERY
+#ifndef PREFIX_QUERY
     rpn = ccl_find_str(bibset, arg, &error, &pos);
     if (error)
     {
     	printf("CCL ERROR: %s\n", ccl_err_msg(error));
     	return 0;
     }
+#endif
 #endif
 
     if (!strcmp(arg, "@big")) /* strictly for troublemaking */
@@ -334,7 +356,17 @@ static int send_searchRequest(char *arg)
 
 #ifdef RPN_QUERY
     query.which = Z_Query_type_1;
+
+#ifndef PREFIX_QUERY
     assert((RPNquery = ccl_rpn_query(rpn)));
+#else
+    RPNquery = p_query_rpn (out, arg);
+    if (!RPNquery)
+    {
+        printf("Prefix query error\n");
+        return 0;
+    }
+#endif
     bib1.proto = protocol;
     bib1.class = CLASS_ATTSET;
     bib1.value = VAL_BIB1;
@@ -497,6 +529,8 @@ static void initialize(void)
     }
     setvbuf(stdout, 0, _IONBF, 0);
 
+#ifdef RPN_QUERY
+#ifndef PREFIX_QUERY
     bibset = ccl_qual_mk (); 
     inf = fopen ("default.bib", "r");
     if (inf)
@@ -504,6 +538,8 @@ static void initialize(void)
     	ccl_qual_file (bibset, inf);
     	fclose (inf);
     }
+#endif
+#endif
 }
 
 static int client(void)
