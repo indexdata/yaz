@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.3 2003-05-19 20:45:07 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.4 2003-05-23 00:24:04 mike Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -246,11 +246,15 @@
   </term>
   <listitem>
    <para>Sets the query type as used by command <literal>find</literal>.
-    The following is supported: <literal>prefix</literal> for 
-    <link linkend="PQF">Prefix Query Notation</link> (Type-1 Query);
-    <literal>ccl</literal> for CCL search (Type-2
-    Query), <literal>cql</literal> for CQL or <literal>ccl2rpn</literal> for
-    <link linkend="CCL">CCL</link> to RPN conversion (Type-1 Query).
+    The following is supported:
+    <literal>prefix</literal> for
+	<link linkend="PQF">Prefix Query Notation</link> (Type-1 Query);
+    <literal>ccl</literal> for CCL search (Type-2 Query),
+    <literal>cql</literal> for CQL (Type-104 search with CQL OID),
+    <literal>ccl2rpn</literal> for
+	<link linkend="CCL">CCL</link> to RPN conversion (Type-1 Query).
+    <literal>cql2rpn</literal> for
+	CQL to RPN conversion (Type-1 Query).
    </para>
   </listitem>
  </varlistentry>
@@ -433,6 +437,18 @@
    <para>Specifies that CCL fields should be read from file
     file <replaceable>filename</replaceable>. This command does the
     thing as option <literal>-c</literal>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>set_cqlfields</literal>
+   <replaceable>filename</replaceable>
+  </term>
+  <listitem>
+   <para>Specifies that CQL fields should be read from file
+    file <replaceable>filename</replaceable>. This command does the
+    thing as option <literal>-q</literal>.
    </para>
   </listitem>
  </varlistentry>

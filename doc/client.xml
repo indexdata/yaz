@@ -1,4 +1,4 @@
-<!-- $Id: client.xml,v 1.15 2003-05-19 20:45:07 adam Exp $ -->
+<!-- $Id: client.xml,v 1.16 2003-05-23 00:24:04 mike Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
@@ -21,6 +21,7 @@
     <arg>-m <replaceable>fname</replaceable></arg>
     <arg>-a <replaceable>fname</replaceable></arg>
     <arg>-c <replaceable>fname</replaceable></arg>
+    <arg>-q <replaceable>fname</replaceable></arg>
     <arg>-v <replaceable>level</replaceable></arg>
     <arg>-p <replaceable>target</replaceable></arg>
     <arg>-u <replaceable>auth</replaceable></arg>
@@ -65,6 +66,15 @@
       <simpara>Sets the filename for CCL fields to
        <replaceable>fname</replaceable>. If this option is not given the
        YAZ client reads CCL fields from file <literal>default.bib</literal>.
+      </simpara></listitem>
+    </varlistentry>
+    <varlistentry><term>
+      <literal>-q</literal> <replaceable>fname</replaceable>
+     </term><listitem>
+      <simpara>Sets the filename for CQL fields to
+       <replaceable>fname</replaceable>. If this option is not given the
+       YAZ client reads CQL fields from file
+       <literal>/usr/local/share/yaz/etc/pqf.properties</literal>.
       </simpara></listitem>
     </varlistentry>
     <varlistentry><term>

@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
 ]>
-<!-- $Id: yaz-client.sgml,v 1.5 2003-05-19 20:45:07 adam Exp $ -->
+<!-- $Id: yaz-client.sgml,v 1.6 2003-05-23 00:24:04 mike Exp $ -->
 <refentry id="yaz-client">
  
  <refmeta>
@@ -20,6 +20,7 @@
    <arg choice="opt"><option>-m <replaceable>filename</replaceable></option></arg>
    <arg choice="opt"><option>-a <replaceable>filename</replaceable></option></arg>
    <arg choice="opt"><option>-c <replaceable>filename</replaceable></option></arg>
+   <arg choice="opt"><option>-q <replaceable>filename</replaceable></option></arg>
    <arg choice="opt"><option>-p <replaceable>addr</replaceable></option></arg>
    <arg choice="opt"><option>-u <replaceable>auth</replaceable></option></arg>
    <arg choice="opt"><option>-k <replaceable>size</replaceable></option></arg>
@@ -82,6 +83,13 @@
       </para></listitem>
     </varlistentry>
     <varlistentry>
+     <term>-q <replaceable>filename</replaceable></term>
+     <listitem><para>
+       If specified, CQL configuration will be read from
+       the file given.
+      </para></listitem>
+    </varlistentry>
+    <varlistentry>
      <term>-p <replaceable>addr</replaceable></term>
      <listitem><para>
        If specified, the client will use the proxy at the address
@@ -117,6 +125,9 @@
    </para>
    <para id="CCL">
     Section "Common Command Language" in the YAZ manual.
+   </para>
+   <para id="CQL">
+    Section "Common QUery Language" in the YAZ manual.
    </para>
   </refsect1>
 </refentry>
