@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed bug that made the frontend server crash when no attribute
+set was specified for scan.
+
 Front-end server automatically switches to original working directory
 when installed as an NT service. Previously -w had to be specified to
 make it work.

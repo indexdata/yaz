@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.111  2000-11-23 10:58:32  adam
+ * Revision 1.112  2001-01-29 09:38:22  adam
+ * Fixed bug that made the frontend server crash when no attribute set
+ * was specified for scan.
+ *
+ * Revision 1.111  2000/11/23 10:58:32  adam
  * SSL comstack support. Separate POSIX thread support library.
  *
  * Revision 1.110  2000/10/02 13:05:32  adam
@@ -1705,7 +1709,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	    bsrr->attributeset = VAL_NONE;
 	else
 	    bsrr->attributeset = attset->value;
-	log_scan_term (req->termListAndStartPoint, attset->value);
+	log_scan_term (req->termListAndStartPoint, bsrr->attributeset);
 	bsrr->term_position = req->preferredPositionInResponse ?
 	    *req->preferredPositionInResponse : 1;
 	((int (*)(void *, bend_scan_rr *))
