@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.29 2002-09-25 12:37:07 adam Exp $
+ * $Id: log.c,v 1.30 2002-10-22 10:04:51 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -180,6 +180,7 @@ void yaz_log(int level, const char *fmt, ...)
         sprintf(buf + strlen(buf), " [%s]", strerror(yaz_errno()));
 #endif
     }
+    va_end (ap);
     if (start_hook_func)
         (*start_hook_func)(o_level, buf, start_hook_info);
     ti = time(0);
