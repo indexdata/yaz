@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.4  1995-11-13 09:27:36  quinn
+ * Revision 1.5  1995-12-11 15:22:37  quinn
+ * Added last_child field to the node.
+ * Rewrote schema-mapping.
+ *
+ * Revision 1.4  1995/11/13  09:27:36  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.3  1995/11/01  16:34:57  quinn
@@ -97,7 +101,7 @@ data1_node *data1_mk_node(void)
     else
 	if (!(r = xmalloc(sizeof(*r))))
 	    abort();
-    r->next = r->child = r->parent = 0;
+    r->next = r->child = r->last_child = r->parent = 0;
     r->num_children = 0;
     return r;
 }
@@ -343,6 +347,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	 */
 	while ((*pp = data1_read_node(buf, res, line, absyn)))
 	{
+	    res->last_child = *pp;
 	    res->num_children++;
 	    pp = &(*pp)->next;
 	}

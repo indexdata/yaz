@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.3  1995-11-01 16:34:56  quinn
+ * Revision 1.4  1995-12-11 15:22:37  quinn
+ * Added last_child field to the node.
+ * Rewrote schema-mapping.
+ *
+ * Revision 1.3  1995/11/01  16:34:56  quinn
  * Making data1 look for tables in data1_tabpath
  *
  * Revision 1.2  1995/11/01  13:54:46  quinn
@@ -113,7 +117,6 @@ data1_maptab *data1_read_maptab(char *file)
 	    {
 		int type, np;
 		char valstr[512], parm[512];
-		int numval;
 
 		if (ep)
 		    ep++;
@@ -157,6 +160,8 @@ data1_maptab *data1_read_maptab(char *file)
     fclose(f);
     return res;
 }
+
+#if 0
 
 /*
  * Locate node with givel elementname.
@@ -294,6 +299,113 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res)
     return 0;
 }
 
+
+#else
+
+/*
+ * See if the node n is equivalent to the tag t.
+ */
+static int tagmatch(data1_node *n, data1_maptag *t)
+{
+    if (n->which != DATA1N_tag)
+	return 0;
+    if (n->u.tag.element)
+    {
+	if (n->u.tag.element->tag->tagset->type != t->type)
+	    return 0;
+	if (n->u.tag.element->tag->which == DATA1T_numeric)
+	{
+	    if (t->which != D1_MAPTAG_numeric)
+		return 0;
+	    if (n->u.tag.element->tag->value.numeric != t->value.numeric)
+		return 0;
+	}
+	else
+	{
+	    if (t->which != D1_MAPTAG_string)
+		return 0;
+	    if (data1_matchstr(n->u.tag.element->tag->value.string,
+		t->value.string))
+		return 0;
+	}
+    }
+    else /* local tag */
+    {
+	char str[10];
+
+	if (t->type != 3)
+	    return 0;
+	if (t->which == D1_MAPTAG_numeric)
+	    sprintf(str, "%d", t->value.numeric);
+	else
+	    strcpy(str, t->value.string);
+	if (data1_matchstr(n->u.tag.tag, str))
+	    return 0;
+    }
+    return 1;
+}
+
+static int map_elements(data1_node *res, data1_node *n, data1_mapunit *m)
+{
+    data1_node *c;
+
+    for (c = n->child; c; c = c->next)
+    {
+	if (c->which == DATA1N_tag)
+	{
+	    if (c->u.tag.element && !data1_matchstr(c->u.tag.element->name,
+		m->source_element_name))
+	    {
+		/* Process target path specification */
+		data1_maptag *mt;
+		data1_node *pn = res, *cur = pn->last_child;
+
+		for (mt = m->target_path; mt; mt = mt->next)
+		{
+		    if (!cur || !tagmatch(cur, mt))
+		    {
+			cur = data1_mk_node();
+			cur->which = DATA1N_tag;
+			cur->u.tag.element = 0;
+			cur->u.tag.tag = mt->value.string;
+			cur->u.tag.node_selected = 0;
+			cur->parent = pn;
+			cur->root = pn->root;
+			if (!pn->child)
+			    pn->child = cur;
+			if (pn->last_child)
+			    pn->last_child->next = cur;
+			pn->last_child = cur;
+			pn->num_children++;
+		    }
+		    if (mt->next)
+			pn = cur;
+		    else if (!m->no_data)
+		    {
+			cur->child = c->child;
+			cur->num_children = c->num_children;
+			c->child = 0;
+			c->num_children = 0;
+		    }
+		}
+	    }
+	    else if (map_elements(res, c, m) < 0)
+		return -1;
+	}
+    }
+    return 0;
+}
+
+static int map_record(data1_node *res, data1_node *n, data1_maptab *map)
+{
+    data1_mapunit *m;
+
+    for (m = map->map; m; m = m->next)
+	if (map_elements(res, n, m) < 0)
+	    return -1;
+    return 0;
+}
+
 /*
  * Create a (possibly lossy) copy of the given record based on the
  * table. The new copy will refer back to the data of the original record,
@@ -313,10 +425,12 @@ data1_node *data1_map_record(data1_node *n, data1_maptab *map)
     res->parent = 0;
     res->root = res;
 
-    if (map_children(n, map, res) < 0)
+    if (map_record(res, n, map) < 0)
     {
 	data1_free_tree(res);
 	return 0;
     }
     return res;
 }
+
+#endif
