@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.6 2002-02-11 23:25:27 adam Exp $
+# $Id: z.tcl,v 1.7 2002-02-12 21:11:49 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -334,7 +334,8 @@ set map($m,TargetPart) ESAdminTargetPart
 # ----
 set m NegotiationRecordDefinition-charSetandLanguageNegotiation-3
 set filename($m) z-charneg
-
+set membermap($m,OriginProposal_0,private) {OriginProposal_0_private zprivate}
+set membermap($m,TargetResponse,private) {TargetResponse_private zprivate}
 # ----------------------------------------------------------
 # "Constructed" types defined by means of C-types are declared here.
 # Each function returns the C-handler and the C-type.

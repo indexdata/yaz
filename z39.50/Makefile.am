@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.8 2002-02-11 23:25:27 adam Exp $
+## $Id: Makefile.am,v 1.9 2002-02-12 21:11:49 adam Exp $
 
 INCLUDES=-I$(top_srcdir)/include
 
@@ -73,5 +73,5 @@ $(srcdir)/z.tcl $(srcdir)/esadmin.asn $(YAZCOMP)
 	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esadmin.asn
 
 # Charset negotiation
-$(srcdir)/z-charneg.c : $(srcdir)/charneg-3.asn
+$(srcdir)/z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn
 	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) charneg-3.asn
