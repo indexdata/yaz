@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Updated TagSet-G and -M definitions (tagsetm.tag and tagsetg.tag).
+
 Implemented the new structured date and time definition as approved
 by the ZIG. Added schemaId element to the specificTag in Espec-1
 (also approved at the last ZIG). Thanks to RVDM.
