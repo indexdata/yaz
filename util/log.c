@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.25  2001-08-23 09:02:46  adam
+ * Revision 1.26  2002-01-03 10:23:33  adam
+ * Using _vsnprintf on WIN32.
+ *
+ * Revision 1.25  2001/08/23 09:02:46  adam
  * WIN32 fixes: Socket not re-used for bind. yaz_log logs WIN32 error
  * message.
  *
@@ -243,11 +246,17 @@ void yaz_log(int level, const char *fmt, ...)
 	    level -= mask_names[i].mask;
 	}
     va_start(ap, fmt);
+#ifdef WIN32
+    _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
+#else
+/* !WIN32 */
 #if HAVE_VSNPRINTF
     vsnprintf(buf, sizeof(buf), fmt, ap);
 #else
     vsprintf(buf, fmt, ap);
 #endif
+#endif
+/* WIN32 */
     if (o_level & LOG_ERRNO)
     {
 #ifdef WIN32
