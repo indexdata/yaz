@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.6  2001-03-25 21:55:13  adam
+ * Revision 1.7  2001-05-16 07:22:56  adam
+ * YAZ CVS Date part of implementationVersion in init{request,Response}.
+ *
+ * Revision 1.6  2001/03/25 21:55:13  adam
  * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
  *
  * Revision 1.5  2001/03/13 18:11:38  adam
@@ -93,9 +96,13 @@ Z_InitRequest *zget_InitRequest(ODR o)
     r->preferredMessageSize = odr_intdup(o, 30*1024);
     r->maximumRecordSize = odr_intdup(o, 30*1024);
     r->idAuthentication = 0;
-    r->implementationId = "YAZ (id=81)";
+    r->implementationId = "81";
     r->implementationName = "Index Data/YAZ";
-    r->implementationVersion = YAZ_VERSION;
+    r->implementationVersion = YAZ_VERSION
+#ifdef YAZ_DATE
+    " (" YAZ_DATE ")"
+#endif
+	;
     r->userInformationField = 0;
     r->otherInfo = 0;
     return r;
@@ -113,9 +120,13 @@ Z_InitResponse *zget_InitResponse(ODR o)
     r->preferredMessageSize = odr_intdup(o, 30*1024);
     r->maximumRecordSize = odr_intdup(o, 30*1024);
     r->result = odr_intdup(o, 1);
-    r->implementationId = "YAZ (id=81)";
+    r->implementationId = "81";
     r->implementationName = "Index Data/YAZ";
-    r->implementationVersion = YAZ_VERSION;
+    r->implementationVersion = YAZ_VERSION
+#ifdef YAZ_DATE
+    " (" YAZ_DATE ")"
+#endif
+	;
     r->userInformationField = 0;
     r->otherInfo = 0;
     return r;
