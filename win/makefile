@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.29 2001-10-25 12:46:07 adam Exp $
+# $Id: makefile,v 1.30 2001-10-28 23:28:26 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -106,8 +106,9 @@ yaz_date_h: $(YAZ_DATE_H)
 COMMON_C_OPTIONS=          \
   /nologo /W3 /GX /FD /c   \
   /D "YAZ_MODULE_ill=1"    \
-  /D "WIN32" /D "_WINDOWS" \
-  /D "CCL2RPN=1"           \
+  /D "YAZ_MODULE_ccl=1"    \
+  /D "_WINDOWS"            \
+  /D "WIN32"               \
   /FR"$(OBJDIR)\\"         \
   /Fo"$(OBJDIR)\\"         \
   /Fd"$(OBJDIR)\\" 
@@ -801,7 +802,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.29  2001-10-25 12:46:07  adam
+# Revision 1.30  2001-10-28 23:28:26  adam
+# Enable CCL-to-RPN for YAZ client on WIN32.
+#
+# Revision 1.29  2001/10/25 12:46:07  adam
 # codecs not built as they should.
 #
 # Revision 1.28  2001/10/25 10:45:08  adam
