@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.50 2005-03-05 09:17:27 adam Exp $
+ * $Id: seshigh.c,v 1.51 2005-03-05 12:14:12 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -927,15 +927,16 @@ static char *srw_bend_explain_default(void *handle, bend_explain_rr *rr)
 	if (!strcmp((const char *) ptr->name, "explain"))
 	{
 	    int len;
-	    ptr = xmlCopyNode(ptr, 1);
+	    xmlDocPtr doc = xmlNewDoc("1.0");
+	    xmlChar *buf_out;
+	    char *content;
 
-	    xmlDocPtr doc = xmlNewDoc((const xmlChar *) "1.0");
+	    ptr = xmlCopyNode(ptr, 1);
         
 	    xmlDocSetRootElement(doc, ptr);
 	    
-	    xmlChar *buf_out;
 	    xmlDocDumpMemory(doc, &buf_out, &len);
-	    char *content = (char*) odr_malloc(rr->stream, 1+len);
+	    content = (char*) odr_malloc(rr->stream, 1+len);
 	    memcpy(content, buf_out, len);
 	    content[len] = '\0';
 	    
@@ -1063,10 +1064,11 @@ static void srw_bend_scan(association *assoc, request *req,
 	{
 	    if (assoc->cql_transform)
 	    {
+		int srw_error;
 		bsrr->scanClause = 0;
 		bsrr->attributeset = VAL_NONE;
 		bsrr->term = odr_malloc(assoc->decode, sizeof(*bsrr->term));
-		int srw_error = cql2pqf_scan(assoc->encode,
+		srw_error = cql2pqf_scan(assoc->encode,
 					     srw_req->scanClause.cql,
 					     assoc->cql_transform,
 					     bsrr->term);
@@ -1758,7 +1760,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.50 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.51 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

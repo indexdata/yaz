@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.24 2005-03-03 23:16:20 adam Exp $
+ * $Id: statserv.c,v 1.25 2005-03-05 12:14:12 adam Exp $
  */
 
 /**
@@ -69,7 +69,10 @@ static NMEM gfs_nmem = 0;
 
 static char *me = "statserver"; /* log prefix */
 static char *programname="statserver"; /* full program name */
-#if YAZ_POSIX_THREADS
+#ifdef WIN32
+DWORD current_control_tls;
+static int init_control_tls = 0;
+#elif YAZ_POSIX_THREADS
 static pthread_key_t current_control_tls;
 static int init_control_tls = 0;
 #else
@@ -269,6 +272,7 @@ int control_association(association *assoc, const char *host, int force_open)
 		assoc->server_node_ptr = gfs->server_node_ptr;
 		assoc->last_control = &gfs->cb;
 		statserv_setcontrol(&gfs->cb);
+		yaz_log(YLOG_DEBUG, "server select: %s", gfs->cb.configname);
 		return 1;
 	    }
 	}
@@ -276,6 +280,7 @@ int control_association(association *assoc, const char *host, int force_open)
 	assoc->last_control = 0;
 	assoc->cql_transform = 0;
 	assoc->server_node_ptr = 0;
+	yaz_log(YLOG_DEBUG, "server select: no match");
 	return 0;
     }
     else
@@ -284,6 +289,7 @@ int control_association(association *assoc, const char *host, int force_open)
 	assoc->last_control = &control_block;
 	assoc->cql_transform = 0;
 	assoc->server_node_ptr = 0;
+	yaz_log(YLOG_DEBUG, "server select: config=%s", control_block.configname);
 	return 1;
     }
 }
@@ -299,9 +305,10 @@ static void xml_config_read()
 	return;
     for (ptr = ptr->children; ptr; ptr = ptr->next)
     {
+	struct _xmlAttr *attr;
 	if (ptr->type != XML_ELEMENT_NODE)
 	    continue;
-	struct _xmlAttr *attr = ptr->properties;
+	attr = ptr->properties;
 	if (!strcmp((const char *) ptr->name, "listen"))
 	{
 	    /*
@@ -377,6 +384,14 @@ static void xml_config_read()
 
 static void xml_config_open()
 {
+#ifdef WIN32
+    init_control_tls = 1;
+    current_control_tls = TlsAlloc();
+#elif YAZ_POSIX_THREADS
+    init_control_tls = 1;
+    pthread_key_create(&current_control_tls, 0);
+#endif
+    
     gfs_nmem = nmem_create();
 #if HAVE_XML2
     if (control_block.xml_config[0] == '\0')
@@ -392,7 +407,6 @@ static void xml_config_open()
 	}
     }
     xml_config_read();
-
 #endif
 }
 
@@ -407,6 +421,13 @@ static void xml_config_close()
 #endif
     gfs_server_list = 0;
     nmem_destroy(gfs_nmem);
+#ifdef WIN32
+    if (init_control_tls)
+	TlsFree(current_control_tls);
+#elif YAZ_POSIX_THREADS
+    if (init_control_tls)
+        pthread_key_delete(current_control_tls);
+#endif
 }
 
 static void xml_config_add_listeners()
@@ -674,7 +695,7 @@ static void listener(IOCHAN h, int event)
 	yaz_log(YLOG_DEBUG, "Accept ok");
 
 	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
-				       EVENT_INPUT, parent_chan->port)))
+				       EVENT_INPUT, parent_chan->chan_id)))
 	{
 	    yaz_log(YLOG_FATAL, "Failed to create iochan");
             iochan_destroy(h);
@@ -751,9 +772,6 @@ void statserv_closedown()
         iochan_destroy(p);
     }
     xml_config_close();
-#if YAZ_POSIX_THREADS
-    pthread_key_delete(current_control_tls);
-#endif
 }
 
 void sigterm(int sig)
@@ -1031,7 +1049,12 @@ static void catchchld(int num)
 
 statserv_options_block *statserv_getcontrol(void)
 {
-#if YAZ_POSIX_THREADS
+#ifdef WIN32
+    if (init_control_tls)
+	return (statserv_options_block *) TlsGetValue(current_control_tls);
+    else
+	return &control_block;
+#elif YAZ_POSIX_THREADS
     if (init_control_tls)
 	return pthread_getspecific(current_control_tls);
     else
@@ -1045,7 +1068,10 @@ statserv_options_block *statserv_getcontrol(void)
 
 void statserv_setcontrol(statserv_options_block *block)
 {
-#if YAZ_POSIX_THREADS
+#ifdef WIN32
+    if (init_control_tls)
+	TlsSetValue(current_control_tls, block);
+#elif YAZ_POSIX_THREADS
     if (init_control_tls)
 	pthread_setspecific(current_control_tls, block);
 #else
@@ -1081,11 +1107,6 @@ int statserv_start(int argc, char **argv)
     if (control_block.options_func(argc, argv))
         return 1;
 
-#if YAZ_POSIX_THREADS
-    init_control_tls = 1;
-    pthread_key_create(&current_control_tls, 0);
-#endif
-    
     xml_config_open();
     
     xml_config_bend_start();
