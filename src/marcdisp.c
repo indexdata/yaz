@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.6 2004-08-07 08:07:00 adam Exp $
+ * $Id: marcdisp.c,v 1.7 2004-10-01 11:45:48 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -271,19 +271,25 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             wrbuf_puts (wr, " ");
             break;
         case YAZ_MARC_SIMPLEXML:
-            wrbuf_printf (wr, "<field tag=\"%s\"", tag);
+            wrbuf_printf (wr, "<field tag=\"");
+	    marc_cdata(mt, tag, strlen(tag), wr);
+	    wrbuf_printf(wr, "\"");
             break;
         case YAZ_MARC_OAIMARC:
             if (identifier_flag)
-                wrbuf_printf (wr, "  <varfield id=\"%s\"", tag);
+                wrbuf_printf (wr, "  <varfield id=\"");
             else
-                wrbuf_printf (wr, "  <fixfield id=\"%s\"", tag);
+                wrbuf_printf (wr, "  <fixfield id=\"");
+	    marc_cdata(mt, tag, strlen(tag), wr);
+	    wrbuf_printf(wr, "\"");
             break;
         case YAZ_MARC_MARCXML:
             if (identifier_flag)
-                wrbuf_printf (wr, "  <datafield tag=\"%s\"", tag);
+                wrbuf_printf (wr, "  <datafield tag=\"");
             else
-                wrbuf_printf (wr, "  <controlfield tag=\"%s\"", tag);
+                wrbuf_printf (wr, "  <controlfield tag=\"");
+	    marc_cdata(mt, tag, strlen(tag), wr);
+	    wrbuf_printf(wr, "\"");
         }
         
         if (identifier_flag)
@@ -301,13 +307,19 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                     wrbuf_putc(wr, buf[i]);
                     break;
                 case YAZ_MARC_SIMPLEXML:
-                    wrbuf_printf(wr, " Indicator%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf(wr, " Indicator%d=\"", j+1);
+		    marc_cdata(mt, buf+i, 1, wr);
+                    wrbuf_printf(wr, "\"");
                     break;
                 case YAZ_MARC_OAIMARC:
-                    wrbuf_printf(wr, " i%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf(wr, " i%d=\"", j+1);
+		    marc_cdata(mt, buf+i, 1, wr);
+                    wrbuf_printf(wr, "\"");
                     break;
                 case YAZ_MARC_MARCXML:
-                    wrbuf_printf(wr, " ind%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf(wr, " ind%d=\"", j+1);
+		    marc_cdata(mt, buf+i, 1, wr);
+                    wrbuf_printf(wr, "\"");
                 }
             }
 	}
@@ -339,26 +351,26 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 		    break;
                 case YAZ_MARC_LINE: 
                     wrbuf_puts (wr, " $"); 
-                    for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (wr, buf[i]);
+		    marc_cdata(mt, buf+i, identifier_length-1, wr);
+		    i = i+identifier_length-1;
                     wrbuf_putc (wr, ' ');
                     break;
                 case YAZ_MARC_SIMPLEXML:
                     wrbuf_puts (wr, "  <subfield code=\"");
-                    for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (wr, buf[i]);
+		    marc_cdata(mt, buf+i, identifier_length-1, wr);
+		    i = i+identifier_length-1;
                     wrbuf_puts (wr, "\">");
                     break;
                 case YAZ_MARC_OAIMARC:
                     wrbuf_puts (wr, "    <subfield label=\"");
-                    for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (wr, buf[i]);
+		    marc_cdata(mt, buf+i, identifier_length-1, wr);
+		    i = i+identifier_length-1;
                     wrbuf_puts (wr, "\">");
                     break;
                 case YAZ_MARC_MARCXML:
                     wrbuf_puts (wr, "    <subfield code=\"");
-                    for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (wr, buf[i]);
+		    marc_cdata(mt, buf+i, identifier_length-1, wr);
+		    i = i+identifier_length-1;
                     wrbuf_puts (wr, "\">");
                     break;
                 }
