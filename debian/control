@@ -8,7 +8,7 @@ Package: yaz-runtime
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
-Conflicts: idzebra (<= 1.3.4-2), php4-yaz (<= 4.1.2-6)
+Conflicts: idzebra (<= 1.3.4-2), php4-yaz (<= 4.1.2-5)
 Description: The YAZ Z39.50 toolkit (runtime files)
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
