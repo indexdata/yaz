@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.7 2000-10-11 10:40:56 adam Exp $
+## $Id: Makefile.am,v 1.8 2000-10-11 11:36:15 adam Exp $
 
 lib_LTLIBRARIES = libyaz.la
 
@@ -9,7 +9,7 @@ EXTRA_libyaz_la_SOURCES=x.c
 # No real sources
 libyaz_la_SOURCES=
 
-LDFLAGS=-version-info 0:0:0
+LDFLAGS=-version-info 1:0:0
 
 bin_SCRIPTS = yaz-config
 
