@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.11 2001-10-23 21:00:19 adam Exp $
+## $Id: Makefile.am,v 1.12 2001-11-20 09:25:45 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -18,6 +18,8 @@ dist-hook:
 	cd doc; make
 	mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
+	mkdir $(distdir)/debian
+	-cp $(srcdir)/debian/* $(distdir)/debian
 
 rpm: $(PACKAGE)-$(VERSION).tar.gz
 	cp $(PACKAGE)-$(VERSION).tar.gz /usr/src/redhat/SOURCES
