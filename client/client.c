@@ -4,8 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.33  1996-05-09 07:25:22  quinn
- * Sm
+ * Revision 1.34  1996-05-09 07:26:49  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.33  1996/05/09  07:25:22  quinn
+ * Small
  *
  * Revision 1.32  1996/03/15  11:05:33  adam
  * The user can set the preferred query type (prefix, ccl, ..) with the
