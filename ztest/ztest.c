@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.20  1998-12-14 14:48:05  adam
+ * Revision 1.21  1998-12-15 12:45:42  adam
+ * Minor change.
+ *
+ * Revision 1.20  1998/12/14 14:48:05  adam
  * Fixed memory leak - happened when fetching MARC records.
  *
  * Revision 1.19  1998/10/20 15:16:22  adam
@@ -312,8 +315,7 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *fd)
     else if ((cp = dummy_database_record(q->number, q->stream)))
     {
 	r->len = strlen(cp);
-	r->record = (char *) odr_malloc (q->stream, 1+r->len);
-	strcpy (r->record, cp);
+	r->record = cp;
 	r->format = VAL_USMARC;
     }
     else
