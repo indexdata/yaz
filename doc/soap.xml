@@ -1,4 +1,4 @@
-<!-- $Id: soap.xml,v 1.1 2003-02-21 12:06:05 adam Exp $ -->
+<!-- $Id: soap.xml,v 1.2 2003-02-21 12:20:22 adam Exp $ -->
 <chapter id="soap"><title>SOAP and SRW</title>
   <sect1 id="soap.introduction"><title>Introduction</title>
     <para>
@@ -104,7 +104,7 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
     <para>
       The <literal>handlers</literal> is a list of SOAP services codec
       handlers - one handler for each service namespace. For SRW, the
-      namespace is http://www.loc.gov/zing/srw/v1.0/.
+      namespace is <literal>http://www.loc.gov/zing/srw/v1.0/</literal>.
     </para>
     <para>
       Each handler is define as follows:
@@ -127,7 +127,7 @@ int handler(ODR o, void * ptr, void **handler_data,
       </synopsis>
     </para>
   </sect1>
-  <sect1><title>SRW</title>
+  <sect1 id="soap.srw"><title>SRW</title>
     <para>
       SRW is just one kind of SOAP handler as described in the previous
       section.

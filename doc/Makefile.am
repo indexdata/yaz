@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.39 2003-02-21 12:06:05 adam Exp $
+## $Id: Makefile.am,v 1.40 2003-02-21 12:20:22 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -18,7 +18,7 @@ HTMLFILES = \
  license.html license.other.html odr.debugging.html odr.html \
  odr.programming.html odr.use.html server.backendfunctions.html \
  server.backend.html server.frontend.html server.html server.invocation.html \
- server.main.html soap.html soap.http.html soap.xml.html \
+ server.main.html soap.html soap.http.html soap.xml.html soap.srw.html \
  tools.html tools.nmem.html tools.oid.html yaz.html \
  zoom.events.html zoom.html zoom.options.html zoom.query.html \
  zoom.records.html zoom.resultsets.html zoom.scan.html
