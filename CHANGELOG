@@ -1,6 +1,11 @@
---- 1.4pl1 1998/1/29
-
 Possible compatibility problems with earlier versions marked with '*'.
+
+--- 1.4pl2 1998/1/30
+
+Fixed bug in server library regarding inetd mode (-i). This bug
+was introduced by release 1.4.
+
+--- 1.4pl1 1998/1/29
 
 Added sort facility in client and backend server interface.
 

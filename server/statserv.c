@@ -7,7 +7,11 @@
  *   Chas Woodfield, Fretwell Downing Datasystem.
  *
  * $Log: statserv.c,v $
- * Revision 1.45  1998-01-29 13:30:23  adam
+ * Revision 1.46  1998-01-30 15:24:57  adam
+ * Fixed bug in inetd code. The server listened on tcp:@:9999 even
+ * though it was started in inetd mode.
+ *
+ * Revision 1.45  1998/01/29 13:30:23  adam
  * Better event handle system for NT/Unix.
  *
  * Revision 1.44  1997/11/07 13:31:52  adam
@@ -628,6 +632,8 @@ static void inetd_connection(int what)
             {
 	        logf(LOG_FATAL, "Failed to create association structure");
             }
+            chan->next = pListener;
+            pListener = chan;
         }
         else
         {
@@ -806,10 +812,6 @@ int statserv_start(int argc, char **argv)
 	    	return(1);
             }
     }
-
-    if ((pListener == NULL) && *control_block.default_listen)
-	add_listener(control_block.default_listen, protocol);
-
 #ifndef WINDOWS
     if (inetd)
 	inetd_connection(protocol);
@@ -836,6 +838,9 @@ int statserv_start(int argc, char **argv)
 	}
     }
 #endif /* WINDOWS */
+
+    if ((pListener == NULL) && *control_block.default_listen)
+	add_listener(control_block.default_listen, protocol);
 
     logf(LOG_LOG, "Entering event loop.");
 	
