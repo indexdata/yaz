@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.21  1996-07-26 13:38:19  quinn
+ * Revision 1.22  1996-10-08 12:58:17  adam
+ * New ODR function, odr_choice_enable_bias, to control behaviour of
+ * odr_choice_bias.
+ *
+ * Revision 1.21  1996/07/26  13:38:19  quinn
  * Various smaller things. Gathered header-files.
  *
  * Revision 1.20  1995/11/08  17:41:32  quinn
@@ -129,6 +133,7 @@ ODR odr_createmem(int direction)
     r->ecb.can_grow = 1;
     r->buflen = 0;
     r->mem = nmem_create();
+    r->enable_bias = 1;
     odr_reset(r);
     return r;
 }

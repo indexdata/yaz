@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.11  1995-09-29 17:12:23  quinn
+ * Revision 1.12  1996-10-08 12:58:17  adam
+ * New ODR function, odr_choice_enable_bias, to control behaviour of
+ * odr_choice_bias.
+ *
+ * Revision 1.11  1995/09/29  17:12:23  quinn
  * Smallish
  *
  * Revision 1.10  1995/09/27  15:02:58  quinn
@@ -102,5 +106,11 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 
 void odr_choice_bias(ODR o, int what)
 {
-    o->choice_bias = what;
+    if (o->enable_bias)
+        o->choice_bias = what;
+}
+
+void odr_choice_enable_bias (ODR o, int mode)
+{
+    o->enable_bias = mode;
 }

@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.18  1996-07-26 13:38:14  quinn
+ * Revision 1.19  1996-10-08 12:58:08  adam
+ * New ODR function, odr_choice_enable_bias, to control behaviour of
+ * odr_choice_bias.
+ *
+ * Revision 1.18  1996/07/26  13:38:14  quinn
  * Various smaller things. Gathered header-files.
  *
  * Revision 1.17  1995/11/08  17:41:27  quinn
@@ -247,6 +251,7 @@ typedef struct odr
     int t_class;         /* implicit tagging (-1==default tag) */
     int t_tag;
 
+    int enable_bias;     /* force choice enable flag */
     int choice_bias;     /* force choice */
     int lenlen;          /* force length-of-lenght (odr_setlen()) */
 
