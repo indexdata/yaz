@@ -2,7 +2,7 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.6 2002/MM/DD
 
-Added PQF feature: '@attr use=value' may be written as '@use=value'.
+Added PQF feature: '@attr type=value' may be written as '@type=value'.
 
 Client displays USR.1:SearchResult-1 (hits per term).
 
