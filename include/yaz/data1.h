@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.2  1999-12-21 14:16:19  ian
+ * Revision 1.3  2000-01-04 17:46:17  ian
+ * Added function to count occurences of a tag spec in a data1 tree.
+ *
+ * Revision 1.2  1999/12/21 14:16:19  ian
  * Changed retrieval module to allow data1 trees with no associated absyn.
  * Also added a simple interface for extracting values from data1 trees using
  * a string based tagpath.
@@ -568,8 +571,8 @@ YAZ_EXPORT data1_node
                              int first_flag, int local_allowed);
 
 YAZ_EXPORT char *data1_getNodeValue(data1_node* node, char* pTagPath);
-
 YAZ_EXPORT data1_node *data1_LookupNode(data1_node* node, char* pTagPath);
+YAZ_EXPORT int data1_CountOccurences(data1_node* node, char* pTagPath);
 
 #ifdef __cplusplus
 }

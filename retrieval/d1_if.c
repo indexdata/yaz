@@ -6,7 +6,10 @@
  * d1_if.c : A simple interface for extracting strings from data1_node tree structures
  *
  * $Log: d1_if.c,v $
- * Revision 1.1  1999-12-21 14:16:19  ian
+ * Revision 1.2  2000-01-04 17:46:17  ian
+ * Added function to count occurences of a tag spec in a data1 tree.
+ *
+ * Revision 1.1  1999/12/21 14:16:19  ian
  * Changed retrieval module to allow data1 trees with no associated absyn.
  * Also added a simple interface for extracting values from data1 trees using
  * a string based tagpath.
@@ -236,4 +239,57 @@ data1_node *data1_LookupNode(data1_node* node, char* pTagPath)
     {
         return matched_node;
     }
+}
+
+/**
+
+data1_CountOccurences
+
+Count the number of occurences of the last instance on a tagpath.
+
+@param data1_node* node : The root of the tree we wish to look for occurences in
+@param const char* pTagPath : The tagpath we want to count the occurences of... 
+
+*/
+int data1_CountOccurences(data1_node* node, char* pTagPath)
+{
+    int iRetVal = 0;
+    data1_node* n = NULL;
+    data1_node* pParent = NULL;
+
+    n = data1_LookupNode(node, pTagPath );
+
+
+    if ( ( n ) &&
+         ( n->which == DATA1N_tag ) &&
+         ( n->parent ) )
+    {
+        data1_node* current_child;
+        pParent = n->parent;
+
+        for ( current_child = pParent->child;
+              current_child;
+              current_child = current_child->next )
+        {
+            if ( current_child->which == DATA1N_tag )
+            {
+                if ( current_child->u.tag.element == NULL )
+                {
+                    if ( ( n->u.tag.tag ) &&
+                         ( current_child->u.tag.tag ) &&
+                         ( strcmp(current_child->u.tag.tag, n->u.tag.tag) == 0 ) )
+                    {
+                        iRetVal++;
+                    }
+                }
+                else if ( current_child->u.tag.element == n->u.tag.element )
+                {
+                    /* Hmmm... Is the above right for non string tags???? */
+                    iRetVal++;
+                }
+            }
+        }
+    }
+
+    return iRetVal;
 }
