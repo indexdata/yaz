@@ -44,7 +44,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.17 2002-06-06 12:54:24 adam Exp $
+ * $Id: cclqual.c,v 1.18 2003-06-19 19:51:40 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -305,14 +305,21 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
                                       int seq)
 {
     struct ccl_qualifier *q;
+    const char *aliases;
+    int case_sensitive = cclp->ccl_case_sensitive;
 
     ccl_assert (cclp);
     if (!cclp->bibset)
 	return NULL;
+
+    aliases = ccl_qual_search_special(cclp->bibset, "case");
+    if (aliases)
+	case_sensitive = atoi(aliases);
+
     for (q = cclp->bibset->list; q; q = q->next)
         if (strlen(q->name) == len)
         {
-            if (cclp->ccl_case_sensitive)
+            if (case_sensitive)
             {
                 if (!memcmp (name, q->name, len))
                     break;
