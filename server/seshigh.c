@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.38  1995-06-19 12:39:11  quinn
+ * Revision 1.39  1995-06-27 13:21:00  quinn
+ * SUTRS support
+ *
+ * Revision 1.38  1995/06/19  12:39:11  quinn
  * Fixed bug in timeout code. Added BER dumper.
  *
  * Revision 1.37  1995/06/16  13:16:14  quinn
@@ -712,14 +715,13 @@ static Z_DiagRecs *diagrecs(oid_proto proto, int error, char *addinfo)
 
 static Z_Records *pack_records(association *a, char *setname, int start,
 				int *num, Z_ElementSetNames *esn,
-				int *next, int *pres)
+				int *next, int *pres, oid_value format)
 {
     int recno, total_length = 0, toget = *num;
     static Z_Records records;
     static Z_NamePlusRecordList reclist;
     static Z_NamePlusRecord *list[MAX_RECORDS];
     oident recform;
-    Odr_oid *oid;
 
     records.which = Z_Records_DBOSD;
     records.u.databaseOrSurDiagnostics = &reclist;
@@ -728,12 +730,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     *pres = Z_PRES_SUCCESS;
     *num = 0;
     *next = 0;
-
-    recform.proto = a->proto;
-    recform.class = CLASS_RECSYN;
-    recform.value = VAL_USMARC;
-    if (!(oid = odr_oiddup(a->encode, oid_getoidbyent(&recform))))
-    	return 0;
 
     logf(LOG_DEBUG, "Request to pack %d+%d", start, toget);
     logf(LOG_DEBUG, "pms=%d, mrs=%d", a->preferredMessageSize,
@@ -752,6 +748,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	}
 	freq.setname = setname;
 	freq.number = recno;
+	freq.format = format;
 	if (!(fres = bend_fetch(a->backend, &freq, 0)))
 	{
 	    *pres = Z_PRES_FAILURE;
@@ -809,18 +806,60 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	if (!(thisrec->u.databaseRecord = thisext = odr_malloc(a->encode,
 	    sizeof(Z_DatabaseRecord))))
 	    return 0;
-	thisext->direct_reference = oid; /* should be OID for current MARC */
+	recform.proto = a->proto;
+	recform.class = CLASS_RECSYN;
+	recform.value = fres->format;
+	thisext->direct_reference = odr_oiddup(a->encode,
+	    oid_getoidbyent(&recform));
 	thisext->indirect_reference = 0;
 	thisext->descriptor = 0;
-	thisext->which = ODR_EXTERNAL_octet;
-	if (!(thisext->u.octet_aligned = odr_malloc(a->encode,
-	    sizeof(Odr_oct))))
-	    return 0;
-	if (!(thisext->u.octet_aligned->buf = odr_malloc(a->encode, fres->len)))
-	    return 0;
-	memcpy(thisext->u.octet_aligned->buf, fres->record, fres->len);
-	thisext->u.octet_aligned->len = thisext->u.octet_aligned->size =
-	    fres->len;
+	if (fres->format == VAL_SUTRS) /* SUTRS ios a single-ASN.1-type */
+	{
+	    Odr_oct sutrs_asn;
+	    Odr_oct *sp = &sutrs_asn;
+	    Odr_any *single = odr_malloc(a->encode, sizeof(*single));
+	    char *buf, *remember;
+	    int len, s_remember;
+
+	    sutrs_asn.buf = (unsigned char*) fres->record;
+	    sutrs_asn.len = sutrs_asn.size = fres->len;
+	    /*
+	     * we borrow the encoding stream for preparing the buffer. This
+	     * is not the most elegant solution - a better way might have been
+	     * to reserve a different stream, or to devise a better system
+	     * for handling externals in general.
+	     */
+	    remember = odr_getbuf(a->encode, &len, &s_remember);
+	    buf = odr_malloc(a->encode, fres->len + 10); /* buf for encoding */
+	    odr_setbuf(a->encode, buf, fres->len + 10, 0); /* can_grow==0 */
+	    if (!z_SUTRS(a->encode, &sp, 0))
+	    {
+		logf(LOG_LOG, "ODR error encoding SUTRS: %s",
+		    odr_errlist[odr_geterror(a->encode)]);
+		return 0;
+	    }
+	    thisext->which = ODR_EXTERNAL_single;
+	    thisext->u.single_ASN1_type = single;
+	    single->buf = (unsigned char*)odr_getbuf(a->encode, &single->len,
+		&single->size);
+	    /* Now restore the encoding stream */
+	    odr_setbuf(a->encode, remember, s_remember, 1);
+	    logf(LOG_DEBUG, "   Format is SUTRS. len %d, encoded len %d",
+	    	fres->len, single->len);
+	}
+	else /* octet-aligned record. Easy as pie */
+	{
+	    thisext->which = ODR_EXTERNAL_octet;
+	    if (!(thisext->u.octet_aligned = odr_malloc(a->encode,
+		sizeof(Odr_oct))))
+		return 0;
+	    if (!(thisext->u.octet_aligned->buf = odr_malloc(a->encode,
+		fres->len)))
+		return 0;
+	    memcpy(thisext->u.octet_aligned->buf, fres->record, fres->len);
+	    thisext->u.octet_aligned->len = thisext->u.octet_aligned->size =
+		fres->len;
+	}
 	reclist.records[reclist.num_records] = thisrec;
 	reclist.num_records++;
 	total_length += fres->len;
@@ -921,8 +960,16 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
 	if (toget && !resp.records)
 	{
+	    oident *prefformat;
+	    oid_value form;
+
+	    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)) ||
+	    	prefformat->class != CLASS_RECSYN)
+		form = VAL_NONE;
+	    else
+	    	form = prefformat->value;
 	    resp.records = pack_records(assoc, req->resultSetName, 1,
-		&toget, setnames, &next, &presst);
+		&toget, setnames, &next, &presst, form);
 	    if (!resp.records)
 		return 0;
 	    resp.numberOfRecordsReturned = &toget;
@@ -965,6 +1012,9 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     static Z_APDU apdu;
     static Z_PresentResponse resp;
     static int presst, next, num;
+    oident *prefformat;
+    oid_value form;
+
 
     logf(LOG_LOG, "Got PresentRequest.");
     apdu.which = Z_APDU_presentResponse;
@@ -974,9 +1024,14 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     resp.otherInfo = 0;
 #endif
 
+    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)) ||
+	prefformat->class != CLASS_RECSYN)
+	form = VAL_NONE;
+    else
+	form = prefformat->value;
     num = *req->numberOfRecordsRequested;
     resp.records = pack_records(assoc, req->resultSetId,
-	*req->resultSetStartPoint, &num, 0, &next, &presst);
+	*req->resultSetStartPoint, &num, 0, &next, &presst, form);
     if (!resp.records)
     	return 0;
     resp.numberOfRecordsReturned = &num;

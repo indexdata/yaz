@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.26 1995-06-25 10:53:57 quinn Exp $
+# $Id: Makefile,v 1.27 1995-06-27 13:20:59 quinn Exp $
 
 LIBDIR=../lib
 
@@ -14,7 +14,7 @@ LIBINCLUDE=-L$(LIBDIR)
 DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libserver.a 
 LIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
-$(LIBDIR)/libcomstack.a $(LIBMOSI) $(LIBDIR)/libutil.a
+$(LIBDIR)/libcomstack.a $(LIBMOSI) $(LIBDIR)/libutil.a $(ELIBS)
 PO = eventl.o seshigh.o statserv.o requestq.o
 CPP=$(CC) -E
 PROG=ztest
