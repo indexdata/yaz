@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.19 2003-09-02 12:12:13 adam Exp $
+ * $Id: oid.h,v 1.20 2003-09-16 19:38:53 adam Exp $
  */
 
 #ifndef OID_H
@@ -42,7 +42,7 @@ typedef enum oid_proto
     PROTO_SR,
     PROTO_GENERAL,
     PROTO_WAIS,
-    PROTO_HTTP,
+    PROTO_HTTP
 } oid_proto;
 
 typedef enum oid_class
