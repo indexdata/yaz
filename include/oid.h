@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.12  1996-02-20 12:52:37  quinn
+ * Revision 1.13  1996-02-20 17:57:53  adam
+ * Added const to oid_getvalbyname.
+ *
+ * Revision 1.12  1996/02/20  12:52:37  quinn
  * Various
  *
  * Revision 1.11  1996/01/02  08:57:30  quinn
@@ -169,6 +172,6 @@ void oid_oidcpy(int *t, int *s);
 void oid_oidcat(int *t, int *s);
 int oid_oidcmp(int *o1, int *o2);
 int oid_oidlen(int *o);
-oid_value oid_getvalbyname(char *name);
+oid_value oid_getvalbyname(const char *name);
 
 #endif

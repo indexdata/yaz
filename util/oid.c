@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.13  1996-02-20 16:37:33  quinn
+ * Revision 1.14  1996-02-20 17:58:28  adam
+ * Added const to oid_getvalbyname.
+ *
+ * Revision 1.13  1996/02/20  16:37:33  quinn
  * Using yaz_matchstr in oid_getvalbyname
  *
  * Revision 1.12  1996/01/02  08:57:53  quinn
@@ -300,7 +303,7 @@ int *oid_getoidbyent(struct oident *ent)
     return 0;
 }
 
-oid_value oid_getvalbyname(char *name)
+oid_value oid_getvalbyname(const char *name)
 {
     struct oident *p;
 
