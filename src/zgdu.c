@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: zgdu.c,v 1.2 2003-12-21 11:33:29 adam Exp $
  */
 
 #include <yaz/odr.h>
@@ -96,7 +96,7 @@ void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
 const char *z_HTTP_header_lookup(Z_HTTP_Header *hp, const char *n)
 {
     for (; hp; hp = hp->next)
-        if (!strcmp(hp->name, n))
+        if (!yaz_matchstr(hp->name, n))
             return hp->value;
     return 0;
 }
