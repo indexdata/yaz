@@ -44,7 +44,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.2 2004-08-18 10:03:01 adam Exp $
+ * $Id: cclqfile.c,v 1.3 2004-09-22 11:21:51 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -212,6 +212,31 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
 	ccl_qual_add_special(bibset, qual_name+1, cp);
     else
 	ccl_qual_field(bibset, cp, qual_name);
+}
+
+void ccl_qual_buf(CCL_bibset bibset, const char *buf)
+{
+    const char *cp1 = buf;
+    char line[256];
+    while (1)
+    {
+	const char *cp2 = cp1;
+	int len;
+	while (*cp2 && !strchr("\r\n", *cp2))
+	    cp2++;
+	len = cp2 - cp1;
+	if (len > 0)
+	{
+	    if (len >= (sizeof(line)-1))
+		len = sizeof(line)-1;
+	    memcpy(line, cp1, len);
+	    line[len] = '\0';
+	    ccl_qual_line(bibset, line);
+	}
+	if (!*cp2)
+	    break;
+	cp1 = cp2+1;
+    }
 }
 
 void ccl_qual_line(CCL_bibset bibset, char *line)

@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 Macro YAZ_INIT in yaz.m4: option --with-yazconfig renamed to --with-yaz.
 
+Added CCL utility ccl_qual_buf which parses one or more CCL 
+spec lines in a buffer.
+
 Added CCL utility ccl_qual_line which adds CCL qualifier line consisting
 of name and value - ignoring empty lines and comments.
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.2 2004-08-11 12:01:22 adam Exp $
+ * $Id: tstccl.c,v 1.3 2004-09-22 11:21:51 adam Exp $
  */
 
 /* CCL test */
@@ -26,15 +26,39 @@ static struct ccl_tst query_str[] = {
     {0, 0}
 };
 
-void tst1(void)
+void tst1(int pass)
 {
     CCL_parser parser = ccl_parser_create ();
     CCL_bibset bibset = ccl_qual_mk();
     int i;
+    char tstline[128];
 
-    ccl_qual_fitem(bibset, "u=4    s=pw t=l,r", "ti");
-    ccl_qual_fitem(bibset, "1=1016 s=al,pw",    "term");
-    ccl_qual_fitem(bibset, "1=/my/title",         "dc.title");
+    switch(pass)
+    {
+    case 0:
+        ccl_qual_fitem(bibset, "u=4    s=pw t=l,r", "ti");
+        ccl_qual_fitem(bibset, "1=1016 s=al,pw",    "term");
+        ccl_qual_fitem(bibset, "1=/my/title",         "dc.title");
+	break;
+    case 1:
+	strcpy(tstline, "ti u=4    s=pw t=l,r");
+        ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "term 1=1016 s=al,pw   # default term");
+        ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "dc.title 1=/my/title");
+        ccl_qual_line(bibset, tstline);
+	break;
+    case 2:
+        ccl_qual_buf(bibset, "ti u=4    s=pw t=l,r\n"
+		     "term 1=1016 s=al,pw\r\n"
+		     "\n"
+		     "dc.title 1=/my/title\n");
+	break;
+    default:
+	exit(23);
+    }
 
     parser->bibset = bibset;
 
@@ -80,6 +104,8 @@ void tst1(void)
 
 int main(int argc, char **argv)
 {
-    tst1();
+    tst1(0);
+    tst1(1);
+    tst1(2);
     exit(0);
 }
