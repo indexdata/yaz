@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.67  1997-09-17 12:10:40  adam
+ * Revision 1.68  1997-09-29 13:18:59  adam
+ * Added function, oid_ent_to_oid, to replace the function
+ * oid_getoidbyent, which is not thread safe.
+ *
+ * Revision 1.67  1997/09/17 12:10:40  adam
  * YAZ version 1.4.
  *
  * Revision 1.66  1997/09/05 15:26:44  adam
@@ -764,6 +768,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
  */
 static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 {
+    int oid[OID_SIZE];
     Z_Records *rec = odr_malloc (assoc->encode, sizeof(*rec));
     oident bib1;
     int *err = odr_malloc (assoc->encode, sizeof(*err));
@@ -785,7 +790,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 #else
     rec->u.nonSurrogateDiagnostic = dr;
 #endif
-    dr->diagnosticSetId = oid_getoidbyent(&bib1);
+    dr->diagnosticSetId = oid_ent_to_oid(&bib1, oid);
     dr->condition = err;
     dr->which = Z_DiagForm_v2AddInfo;
     dr->addinfo = addinfo ? addinfo : "";
@@ -798,6 +803,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
 					    int error, char *addinfo)
 {
+    int oid[OID_SIZE];
     Z_NamePlusRecord *rec = odr_malloc (assoc->encode, sizeof(*rec));
     int *err = odr_malloc (assoc->encode, sizeof(*err));
     oident bib1;
@@ -815,7 +821,7 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
     rec->u.surrogateDiagnostic = drec;
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = dr;
-    dr->diagnosticSetId = oid_getoidbyent(&bib1);
+    dr->diagnosticSetId = oid_ent_to_oid(&bib1, oid);
     dr->condition = err;
     dr->which = Z_DiagForm_v2AddInfo;
     dr->addinfo = addinfo ? addinfo : "";
@@ -827,6 +833,7 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
  */
 static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 {
+    int oid[OID_SIZE];
     Z_DiagRecs *recs = odr_malloc (assoc->encode, sizeof(*recs));
     int *err = odr_malloc (assoc->encode, sizeof(*err));
     oident bib1;
@@ -846,7 +853,7 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = rec;
 
-    rec->diagnosticSetId = oid_getoidbyent(&bib1);
+    rec->diagnosticSetId = oid_ent_to_oid(&bib1, oid);
     rec->condition = err;
     rec->which = Z_DiagForm_v2AddInfo;
     rec->addinfo = addinfo ? addinfo : "";
@@ -857,6 +864,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 				int *num, Z_RecordComposition *comp,
 				int *next, int *pres, oid_value format)
 {
+    int oid[OID_SIZE];
     int recno, total_length = 0, toget = *num, dumped_records = 0;
     Z_Records *records = odr_malloc (a->encode, sizeof(*records));
     Z_NamePlusRecordList *reclist = odr_malloc (a->encode, sizeof(*reclist));
@@ -960,7 +968,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	recform.oclass = CLASS_RECSYN;
 	recform.value = fres->format;
 	thisext->direct_reference = odr_oiddup(a->encode,
-	    oid_getoidbyent(&recform));
+	    oid_ent_to_oid(&recform, oid));
 	thisext->indirect_reference = 0;
 	thisext->descriptor = 0;
 	if (fres->len < 0) /* Structured data */

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.10  1997-09-29 07:21:10  adam
+ * Revision 1.11  1997-09-29 13:18:59  adam
+ * Added function, oid_ent_to_oid, to replace the function
+ * oid_getoidbyent, which is not thread safe.
+ *
+ * Revision 1.10  1997/09/29 07:21:10  adam
  * Added typecast to avoid warnings on MSVC.
  *
  * Revision 1.9  1997/09/17 12:10:35  adam
@@ -55,11 +59,12 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
     Z_Variant *r = odr_malloc(o, sizeof(*r));
     oident var1;
     int i;
+    int oid[OID_SIZE];
 
     var1.proto = PROTO_Z3950;
     var1.oclass = CLASS_VARSET;
     var1.value = VAL_VAR1;
-    r->globalVariantSetId = odr_oiddup(o, oid_getoidbyent(&var1));
+    r->globalVariantSetId = odr_oiddup(o, oid_ent_to_oid(&var1, oid));
 
     if (argc)
 	r->triples = odr_malloc(o, sizeof(Z_Triple*) * argc);

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.15  1997-09-29 07:13:43  adam
+ * Revision 1.16  1997-09-29 13:19:00  adam
+ * Added function, oid_ent_to_oid, to replace the function
+ * oid_getoidbyent, which is not thread safe.
+ *
+ * Revision 1.15  1997/09/29 07:13:43  adam
  * Changed type of a few variables to avoid warnings.
  *
  * Revision 1.14  1997/09/22 12:33:41  adam
@@ -195,13 +199,14 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
             else
             {
                 oident attrid;
+                int oid[OID_SIZE];
 
                 attrid.proto = PROTO_Z3950;
                 attrid.oclass = CLASS_ATTSET;
                 attrid.value = attr_set[i];
                    
                 zapt->attributeList[i]->attributeSet = 
-                    odr_oiddup (o, oid_getoidbyent (&attrid));
+                    odr_oiddup (o, oid_ent_to_oid (&attrid, oid));
             }
 	    zapt->attributeList[i]->which = Z_AttributeValue_numeric;
 	    zapt->attributeList[i]->value.numeric = &attr_tmp[2*i+1];
@@ -441,6 +446,7 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
     oid_value attr_set[512];
     oid_value topSet = VAL_NONE;
     oident oset;
+    int oid[OID_SIZE];
 
     zq = odr_malloc (o, sizeof(*zq));
     lex (li);
@@ -461,7 +467,7 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
     oset.oclass = CLASS_ATTSET;
     oset.value = topSet;
 
-    zq->attributeSetId = odr_oiddup (o, oid_getoidbyent (&oset));
+    zq->attributeSetId = odr_oiddup (o, oid_ent_to_oid (&oset, oid));
 
     if (!(zq->RPNStructure = rpn_structure (li, o, proto, 0, 512,
                                             attr_array, attr_set)))
@@ -494,6 +500,7 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
     const char *cp;
     oid_value topSet = VAL_NONE;
     oident oset;
+    int oid[OID_SIZE];
 
     lex (li);
     if (li->query_look == 'r')
@@ -511,7 +518,7 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
     oset.oclass = CLASS_ATTSET;
     oset.value = topSet;
 
-    *attributeSetP = odr_oiddup (o, oid_getoidbyent (&oset));
+    *attributeSetP = odr_oiddup (o, oid_ent_to_oid (&oset, oid));
 
     while (li->query_look == 'l')
     {

@@ -2,6 +2,11 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX
 
+Revised the CCL parser utility to be thread safe.
+
+Added function, oid_ent_to_oid, to replace the function 
+oid_getoidbyent, which is not thread safe.
+
 * Added nmem_init and nmem_exit to initialize and release
 NMEM resources. Function nmem_init should be called once in the
 initial thread before NMEM/ODR is used. statserv.c and client.c

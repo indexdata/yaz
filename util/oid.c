@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.23  1997-09-09 10:10:19  adam
+ * Revision 1.24  1997-09-29 13:19:00  adam
+ * Added function, oid_ent_to_oid, to replace the function
+ * oid_getoidbyent, which is not thread safe.
+ *
+ * Revision 1.23  1997/09/09 10:10:19  adam
  * Another MSV5.0 port. Changed projects to include proper
  * library/include paths.
  * Server starts server in test-mode when no options are given.
@@ -359,13 +363,13 @@ struct oident *oid_getentbyoid(int *o)
     return 0;
 }
 
+
 /*
  * To query, fill out proto, class, and value of the ent parameter.
  */
-int *oid_getoidbyent(struct oident *ent)
+int *oid_ent_to_oid(struct oident *ent, int *ret)
 {
     struct oident *p;
-    static int ret[OID_SIZE];
 
     for (p = oids; *p->oidsuffix >= 0; p++)
         if (ent->proto == p->proto &&
@@ -397,6 +401,15 @@ int *oid_getoidbyent(struct oident *ent)
                 return ret;
             }
     return 0;
+}
+/*
+ * To query, fill out proto, class, and value of the ent parameter.
+ */
+int *oid_getoidbyent(struct oident *ent)
+{
+    static int ret[OID_SIZE];
+
+    return oid_ent_to_oid (ent, ret);
 }
 
 oid_value oid_getvalbyname(const char *name)

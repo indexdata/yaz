@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.52  1997-09-29 07:20:31  adam
+ * Revision 1.53  1997-09-29 13:18:59  adam
+ * Added function, oid_ent_to_oid, to replace the function
+ * oid_getoidbyent, which is not thread safe.
+ *
+ * Revision 1.52  1997/09/29 07:20:31  adam
  * Client code uses nmem_init.
  *
  * Revision 1.51  1997/09/26 09:41:55  adam
@@ -620,6 +624,7 @@ static int send_searchRequest(char *arg)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
     Z_Query query;
+    int oid[OID_SIZE];
 #if CCL2RPN
     struct ccl_rpn_node *rpn;
     int error, pos;
@@ -665,12 +670,13 @@ static int send_searchRequest(char *arg)
         mediumSetPresentNumber > 0))
     {
         oident prefsyn;
+        int oid[OID_SIZE];
 
         prefsyn.proto = protocol;
         prefsyn.oclass = CLASS_RECSYN;
         prefsyn.value = recordsyntax;
         req->preferredRecordSyntax =
-            odr_oiddup(out, oid_getoidbyent(&prefsyn));
+            odr_oiddup(out, oid_ent_to_oid(&prefsyn, oid));
         req->smallSetElementSetNames =
             req->mediumSetElementSetNames = elementSetNames;
     }
@@ -704,7 +710,7 @@ static int send_searchRequest(char *arg)
         bib1.proto = protocol;
         bib1.oclass = CLASS_ATTSET;
         bib1.value = VAL_BIB1;
-        RPNquery->attributeSetId = oid_getoidbyent(&bib1);
+        RPNquery->attributeSetId = oid_ent_to_oid(&bib1, oid);
         query.u.type_1 = RPNquery;
         ccl_rpn_delete (rpn);
         break;
@@ -834,6 +840,7 @@ static int send_presentRequest(char *arg)
     Z_RecordComposition compo;
     oident prefsyn;
     int nos = 1;
+    int oid[OID_SIZE];
     char *p;
     char setstring[100];
 
@@ -864,7 +871,8 @@ static int send_presentRequest(char *arg)
     prefsyn.proto = protocol;
     prefsyn.oclass = CLASS_RECSYN;
     prefsyn.value = recordsyntax;
-    req->preferredRecordSyntax = oid_getoidbyent(&prefsyn);
+    req->preferredRecordSyntax = oid_ent_to_oid(&prefsyn, oid);
+
     if (elementSetNames)
     {
         req->recordComposition = &compo;
@@ -1033,65 +1041,13 @@ int cmd_format(char *arg)
         printf("Usage: format <recordsyntax>\n");
         return 0;
     }
-    if (!strcmp(arg, "sutrs"))
+    recordsyntax = oid_getvalbyname (arg);
+    if (recordsyntax == VAL_NONE)
     {
-        printf("Preferred format is SUTRS.\n");
-        recordsyntax = VAL_SUTRS;
-        return 1;
-    }
-    else if (!strcmp(arg, "usmarc"))
-    {
-        printf("Preferred format is USMARC\n");
-        recordsyntax = VAL_USMARC;
-        return 1;
-    }
-    else if (!strcmp(arg, "danmarc"))
-    {
-        printf("Preferred format is DANMARC\n");
-        recordsyntax = VAL_DANMARC;
-        return 1;
-    }
-    else if (!strcmp(arg, "ukmarc"))
-    {
-        printf("Preferred format is UKMARC\n");
-        recordsyntax = VAL_UKMARC;
-        return 1;
-    }
-    else if (!strcmp(arg, "unimarc"))
-    {
-        printf("Preferred format is UNIMARC\n");
-        recordsyntax = VAL_UNIMARC;
-        return 1;
-    }
-    else if (!strcmp(arg, "grs1"))
-    {
-        printf("Preferred format is GRS1\n");
-        recordsyntax = VAL_GRS1;
-        return 1;
-    }
-    else if (!strcmp(arg, "soif"))
-    {
-        printf("Preferred format is SOIF\n");
-        recordsyntax = VAL_SOIF;
-        return 1;
-    }
-    else if (!strcmp(arg, "summary"))
-    {
-        printf("Preferred format is Summary\n");
-        recordsyntax = VAL_SUMMARY;
-        return 1;
-    }
-    else if (!strcmp(arg, "explain"))
-    {
-        printf("Preferred format is Explain\n");
-        recordsyntax = VAL_EXPLAIN;
-        return 1;
-    }
-    else
-    {
-        printf("Specify one of {sutrs,usmarc,danmarc,ukmarc,unimarc,grs1,summary,explain}.\n");
+        printf ("unknown record syntax\n");
         return 0;
     }
+    return 1;
 }
 
 int cmd_elements(char *arg)

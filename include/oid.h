@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.23  1997-09-01 08:49:50  adam
+ * Revision 1.24  1997-09-29 13:18:59  adam
+ * Added function, oid_ent_to_oid, to replace the function
+ * oid_getoidbyent, which is not thread safe.
+ *
+ * Revision 1.23  1997/09/01 08:49:50  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -106,7 +110,7 @@
 extern "C" {
 #endif
 
-#define OID_SIZE 100
+#define OID_SIZE 20
     
 typedef enum oid_proto
 {
@@ -208,6 +212,7 @@ typedef struct oident
 } oident;
 
 YAZ_EXPORT int *oid_getoidbyent(struct oident *ent);
+YAZ_EXPORT int *oid_ent_to_oid(struct oident *ent, int *dst);
 YAZ_EXPORT struct oident *oid_getentbyoid(int *o);
 YAZ_EXPORT void oid_oidcpy(int *t, int *s);
 YAZ_EXPORT void oid_oidcat(int *t, int *s);
