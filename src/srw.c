@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.27 2004-10-15 00:19:00 adam Exp $
+ * $Id: srw.c,v 1.28 2004-10-31 19:23:22 adam Exp $
  */
 /**
  * \file srw.c
@@ -578,6 +578,10 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 		odr_malloc(o, sizeof(*res));
             res->diagnostics = 0;
             res->num_diagnostics = 0;
+	    res->record.recordSchema = 0;
+	    res->record.recordData_buf = 0;
+	    res->record.recordData_len = 0;
+	    res->record.recordPosition = 0;
 
 	    for (; ptr; ptr = ptr->next)
 	    {
