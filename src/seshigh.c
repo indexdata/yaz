@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.38 2004-12-13 14:21:55 heikki Exp $
+ * $Id: seshigh.c,v 1.39 2004-12-20 23:38:03 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -68,7 +68,8 @@ void backend_response(IOCHAN i, int event);
 static int process_gdu_response(association *assoc, request *req, Z_GDU *res);
 static int process_z_response(association *assoc, request *req, Z_APDU *res);
 static Z_APDU *process_initRequest(association *assoc, request *reqb);
-static Z_External *init_diagnostics(ODR odr, int errcode, char *errstring);
+static Z_External *init_diagnostics(ODR odr, int errcode,
+				    const char *errstring);
 static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *response_searchRequest(association *assoc, request *reqb,
@@ -105,6 +106,14 @@ static void get_logbits()
         log_requestdetail=yaz_log_module_level("requestdetail"); 
     }
 }
+
+static void wr_diag(WRBUF w, int error, const char *addinfo)
+{
+    wrbuf_printf(w, "ERROR [%d] %s%s%s",
+		 error, diagbib1_str(error),
+		 addinfo ? "--" : "", addinfo ? addinfo : "");
+}
+
 
 /*
  * Create and initialize a new association-handle.
@@ -287,7 +296,6 @@ void ir_session(IOCHAN h, int event)
     }
     if (event & assoc->cs_accept_mask)
     {
-        yaz_log (log_session, "ir_session (accept)");
         if (!cs_accept (conn))
         {
             yaz_log (YLOG_WARN, "accept failed");
@@ -618,7 +626,8 @@ static void srw_bend_search(association *assoc, request *req,
     int srw_error = 0;
     bend_search_rr rr;
     Z_External *ext;
-    char *querystr="";
+    const char *querystr = 0;
+    const char *querytype = 0;
     
     *http_code = 200;
     yaz_log(log_requestdetail, "Got SRW SearchRetrieveRequest");
@@ -654,7 +663,8 @@ static void srw_bend_search(association *assoc, request *req,
         ext->descriptor = 0;
         ext->which = Z_External_CQL;
         ext->u.cql = srw_req->query.cql;
-        querystr=srw_req->query.cql;
+        querystr = srw_req->query.cql;
+	querytype = "CQL";
 
         rr.query->which = Z_Query_type_104;
         rr.query->u.type_104 =  ext;
@@ -666,7 +676,8 @@ static void srw_bend_search(association *assoc, request *req,
 
         pqf_parser = yaz_pqf_create ();
 
-        querystr=srw_req->query.pqf;
+        querystr = srw_req->query.pqf;
+	querytype = "PQF";
         RPNquery = yaz_pqf_parse (pqf_parser, assoc->decode,
                                   srw_req->query.pqf);
         if (!RPNquery)
@@ -697,8 +708,8 @@ static void srw_bend_search(association *assoc, request *req,
     {
         if (log_request)
         {
-            WRBUF wr=wrbuf_alloc();
-            wrbuf_printf(wr, "Search: SRW: %s ",querystr);
+            WRBUF wr = wrbuf_alloc();
+            wrbuf_printf(wr, "Search: %s: %s ", querytype, querystr);
             wrbuf_printf(wr," ERROR %d ", srw_error);
             yaz_log(log_request, "Search %s", wrbuf_buf(wr) );
             wrbuf_free(wr,1);
@@ -809,12 +820,12 @@ static void srw_bend_search(association *assoc, request *req,
     if (log_request)
     {
         WRBUF wr=wrbuf_alloc();
-        wrbuf_printf(wr,"SRW: %s",querystr );
+        wrbuf_printf(wr,"SRW: %s", querystr);
         if (srw_error)
             wrbuf_printf(wr," ERROR %d ", srw_error);
         else
         {
-            wrbuf_printf(wr," OK:%d hits ",rr.hits);
+            wrbuf_printf(wr," OK:%d hits ", rr.hits);
             if (srw_res->num_records)
                 wrbuf_printf(wr," Returned %d records", srw_res->num_records);
         }
@@ -1419,7 +1430,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.38 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.39 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1429,50 +1440,30 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     if (binitres->errcode)
     {
-        yaz_log(YLOG_DEBUG, "Connection rejected by backend.");
+	WRBUF wr = wrbuf_alloc();
         *resp->result = 0;
         assoc->state = ASSOC_DEAD;
-        resp->userInformationField = init_diagnostics(assoc->encode,
-                                                      binitres->errcode,
-                                                      binitres->errstring);
-        yaz_log(log_request,"Init from '%s' (%s) (ver %s) Error %d %s",
-            req->implementationName ? req->implementationName :"??",
-            req->implementationId ? req->implementationId :"?", 
-            req->implementationVersion ? req->implementationVersion: "?",
-            binitres->errcode,binitres->errstring );
+        resp->userInformationField =
+	    init_diagnostics(assoc->encode, binitres->errcode,
+			     binitres->errstring);
+	wr_diag(wr, binitres->errcode, binitres->errstring);
+        yaz_log(log_request, "Init from '%s' (%s) (ver %s) %s",
+		req->implementationName ? req->implementationName :"??",
+		req->implementationId ? req->implementationId :"?", 
+		req->implementationVersion ? req->implementationVersion: "?",
+		wrbuf_buf(wr));
+	wrbuf_free(wr, 1);
     }
     else
     {
         assoc->state = ASSOC_UP;
-        yaz_log(log_request,"Init from '%s' (%s) (ver %s) OK",
-            req->implementationName ? req->implementationName :"??",
-            req->implementationId ? req->implementationId :"?", 
-            req->implementationVersion ? req->implementationVersion: "?");
+        yaz_log(log_request, "Init from '%s' (%s) (ver %s) OK",
+		req->implementationName ? req->implementationName :"??",
+		req->implementationId ? req->implementationId :"?", 
+		req->implementationVersion ? req->implementationVersion: "?");
     }
 
     return apdu;
-}
-
-/*
- * Diagnostic in default format, to be returned as either a surrogate
- * or non-surrogate diagnostic in the context of an open session, or
- * as User-information when an Init is refused.
- */
-static Z_DefaultDiagFormat *justdiag(ODR odr, int error, char *addinfo)
-{
-    int *err = odr_intdup(odr, error);
-    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
-        odr_malloc (odr, sizeof(*dr));
-
-    yaz_log(log_requestdetail, "[%d] %s%s%s", error, diagbib1_str(error),
-        addinfo ? " -- " : "", addinfo ? addinfo : "");
-
-    dr->diagnosticSetId =
-        yaz_oidval_to_z3950oid (odr, CLASS_DIAGSET, VAL_BIB1);
-    dr->condition = err;
-    dr->which = Z_DefaultDiagFormat_v2Addinfo;
-    dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
-    return dr;
 }
 
 /*
@@ -1481,53 +1472,11 @@ static Z_DefaultDiagFormat *justdiag(ODR odr, int error, char *addinfo)
  * Implementor Agreement 5 (Returning diagnostics in an InitResponse):
  *      http://lcweb.loc.gov/z3950/agency/agree/initdiag.html
  */
-static Z_External *init_diagnostics(ODR odr, int error, char *addinfo)
+static Z_External *init_diagnostics(ODR odr, int error, const char *addinfo)
 {
-    Z_External *x, *x2;
-    oident oid;
-    Z_OtherInformation *u;
-    Z_OtherInformationUnit *l;
-    Z_DiagnosticFormat *d;
-    Z_DiagnosticFormat_s *e;
-
-    x = (Z_External*) odr_malloc(odr, sizeof *x);
-    x->descriptor = 0;
-    x->indirect_reference = 0;  
-    oid.proto = PROTO_Z3950;
-    oid.oclass = CLASS_USERINFO;
-    oid.value = VAL_USERINFO1;
-    x->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
-    x->which = Z_External_userInfo1;
-
-    u = odr_malloc(odr, sizeof *u);
-    x->u.userInfo1 = u;
-    u->num_elements = 1;
-    u->list = (Z_OtherInformationUnit**) odr_malloc(odr, sizeof *u->list);
-    u->list[0] = (Z_OtherInformationUnit*) odr_malloc(odr, sizeof *u->list[0]);
-    l = u->list[0];
-    l->category = 0;
-    l->which = Z_OtherInfo_externallyDefinedInfo;
-
-    x2 = (Z_External*) odr_malloc(odr, sizeof *x);
-    l->information.externallyDefinedInfo = x2;
-    x2->descriptor = 0;
-    x2->indirect_reference = 0;
-    oid.oclass = CLASS_DIAGSET;
-    oid.value = VAL_DIAG1;
-    x2->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
-    x2->which = Z_External_diag1;
-
-    d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
-    x2->u.diag1 = d;
-    d->num = 1;
-    d->elements = (Z_DiagnosticFormat_s**) odr_malloc (odr, sizeof *d->elements);
-    d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc (odr, sizeof *d->elements[0]);
-    e = d->elements[0];
-
-    e->which = Z_DiagnosticFormat_s_defaultDiagRec;
-    e->u.defaultDiagRec = justdiag(odr, error, addinfo);
-    e->message = 0;
-    return x;
+    yaz_log(log_requestdetail, "[%d] %s%s%s", error, diagbib1_str(error),
+        addinfo ? " -- " : "", addinfo ? addinfo : "");
+    return zget_init_diagnostics(odr, error, addinfo);
 }
 
 /*
@@ -1535,60 +1484,27 @@ static Z_External *init_diagnostics(ODR odr, int error, char *addinfo)
  */
 static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 {
-    Z_Records *rec = (Z_Records *)
-        odr_malloc (assoc->encode, sizeof(*rec));
+    Z_Records *rec = (Z_Records *) odr_malloc (assoc->encode, sizeof(*rec));
+
+    yaz_log(log_requestdetail, "[%d] %s%s%s", error, diagbib1_str(error),
+	    addinfo ? " -- " : "", addinfo ? addinfo : "");
+
     rec->which = Z_Records_NSD;
-    rec->u.nonSurrogateDiagnostic = justdiag(assoc->encode, error, addinfo);
+    rec->u.nonSurrogateDiagnostic = zget_DefaultDiagFormat(assoc->encode,
+							   error, addinfo);
     return rec;
 }
 
 /*
  * surrogate diagnostic.
  */
-static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
-                                          int error, char *addinfo)
+static Z_NamePlusRecord *surrogatediagrec(association *assoc, 
+					  const char *dbname,
+                                          int error, const char *addinfo)
 {
-    Z_NamePlusRecord *rec = (Z_NamePlusRecord *)
-        odr_malloc (assoc->encode, sizeof(*rec));
-    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
-    
-    yaz_log(YLOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
-    rec->databaseName = dbname;
-    rec->which = Z_NamePlusRecord_surrogateDiagnostic;
-    rec->u.surrogateDiagnostic = drec;
-    drec->which = Z_DiagRec_defaultFormat;
-    drec->u.defaultFormat = justdiag(assoc->encode, error, addinfo);
-
-    return rec;
-}
-
-/*
- * multiple nonsurrogate diagnostics.
- */
-static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
-{
-    Z_DiagRecs *recs = (Z_DiagRecs *)odr_malloc (assoc->encode, sizeof(*recs));
-    int *err = odr_intdup(assoc->encode, error);
-    Z_DiagRec **recp = (Z_DiagRec **)odr_malloc (assoc->encode, sizeof(*recp));
-    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *rec = (Z_DefaultDiagFormat *)
-        odr_malloc (assoc->encode, sizeof(*rec));
-
-    yaz_log(YLOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo ? addinfo : "");
-
-    recs->num_diagRecs = 1;
-    recs->diagRecs = recp;
-    recp[0] = drec;
-    drec->which = Z_DiagRec_defaultFormat;
-    drec->u.defaultFormat = rec;
-
-    rec->diagnosticSetId =
-        yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
-    rec->condition = err;
-
-    rec->which = Z_DefaultDiagFormat_v2Addinfo;
-    rec->u.v2Addinfo = odr_strdup (assoc->encode, addinfo ? addinfo : "");
-    return recs;
+    yaz_log(log_requestdetail, "[%d] %s%s%s", error, diagbib1_str(error),
+	    addinfo ? " -- " : "", addinfo ? addinfo : "");
+    return zget_surrogateDiagRec(assoc->encode, dbname, error, addinfo);
 }
 
 static Z_Records *pack_records(association *a, char *setname, int start,
@@ -1605,7 +1521,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     Z_NamePlusRecord **list =
         (Z_NamePlusRecord **) odr_malloc (a->encode, sizeof(*list) * toget);
 
-    *errcode=0;
     records->which = Z_Records_DBOSD;
     records->u.databaseOrSurDiagnostics = reclist;
     reclist->num_records = 0;
@@ -1663,7 +1578,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
                     freq.errstring = s;
                 }
                 if (errcode)
-                    *errcode=freq.errcode;
+                    *errcode = freq.errcode;
                 return diagrec(a, freq.errcode, freq.errstring);
             }
             reclist->records[reclist->num_records] =
@@ -1877,12 +1792,12 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
             else
                 form = prefformat->value;
             resp->records = pack_records(assoc, req->resultSetName, 1,
-                toget, compp, next, presst, form, req->referenceId,
-                               req->preferredRecordSyntax, NULL);
+					 toget, compp, next, presst, form, req->referenceId,
+					 req->preferredRecordSyntax, NULL);
             if (!resp->records)
                 return 0;
             resp->numberOfRecordsReturned = toget;
-            returnedrecs=*toget;
+            returnedrecs = *toget;
             resp->nextResultSetPosition = next;
             resp->searchStatus = sr;
             resp->resultSetStatus = 0;
@@ -1906,14 +1821,15 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
         WRBUF wr=wrbuf_alloc();
         wrbuf_put_zquery(wr, req->query);
         if (bsrt->errcode)
-            wrbuf_printf(wr," ERROR %d %s", bsrt->errcode, bsrt->errstring);
+	    wr_diag(wr, bsrt->errcode, bsrt->errstring);
         else
         {
-            wrbuf_printf(wr," OK:%d hits ",bsrt->hits);
+            wrbuf_printf(wr," OK:%d hits ", bsrt->hits);
             if (returnedrecs)
-                wrbuf_printf(wr," Returned %d records", returnedrecs);
+                wrbuf_printf(wr," %d records returned", returnedrecs);
         }
-        yaz_log(log_request, "Search %s", wrbuf_buf(wr) );
+        yaz_log(log_request, "Search %s %s", req->resultSetName,
+		wrbuf_buf(wr));
         wrbuf_free(wr,1);
     }
     return apdu;
@@ -1944,7 +1860,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     Z_PresentResponse *resp;
     int *next;
     int *num;
-    int errcode=0;
+    int errcode = 0;
+    const char *errstring = 0;
 
     yaz_log(log_requestdetail, "Got PresentRequest.");
 
@@ -1979,7 +1896,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
         {
             resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
             *resp->presentStatus = Z_PresentStatus_failure;
-            errcode=bprr->errcode;
+            errcode = bprr->errcode;
+	    errstring = bprr->errstring;
         }
     }
     apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
@@ -1996,32 +1914,31 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
         *num = *req->numberOfRecordsRequested;
         resp->records =
             pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
-                     num, req->recordComposition, next, resp->presentStatus,
+			 num, req->recordComposition, next,
+			 resp->presentStatus,
                          form, req->referenceId, req->preferredRecordSyntax, 
                          &errcode);
     }
-    if (!resp->records)
-        return 0;
-    resp->numberOfRecordsReturned = num;
-    resp->nextResultSetPosition = next;
     if (log_request)
     {
-        WRBUF wr=wrbuf_alloc();
-        wrbuf_printf(wr, "Present: [%s] %d+%d ",
+        WRBUF wr = wrbuf_alloc();
+        wrbuf_printf(wr, "Present %s %d+%d ",
                 req->resultSetId, *req->resultSetStartPoint,
                 *req->numberOfRecordsRequested);
         if (*resp->presentStatus == Z_PresentStatus_failure)
-        {
-            wrbuf_printf(wr," ERROR %d ", errcode);
-        }
+	    wr_diag(wr, errcode, errstring);
         else if (*resp->presentStatus == Z_PresentStatus_success)
             wrbuf_printf(wr," OK %d records returned ", *num);
         else
             wrbuf_printf(wr," Partial (%d) OK %d records returned ", 
                     *resp->presentStatus, *num);
         yaz_log(log_request, "%s", wrbuf_buf(wr) );
-        wrbuf_free(wr,1);
+        wrbuf_free(wr, 1);
     }
+    if (!resp->records)
+        return 0;
+    resp->numberOfRecordsReturned = num;
+    resp->nextResultSetPosition = next;
     
     return apdu;
 }
@@ -2122,7 +2039,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
      (*assoc->init->bend_scan))(assoc->backend, bsrr);
 
     if (bsrr->errcode)
-        diagrecs_p = diagrecs(assoc, bsrr->errcode, bsrr->errstring);
+        diagrecs_p = zget_DiagRecs(assoc->encode,
+				   bsrr->errcode, bsrr->errstring);
     else
     {
         int i;
@@ -2179,9 +2097,9 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
             }
             else
             {
-                Z_DiagRecs *drecs = diagrecs (assoc,
-                                              bsrr->entries[i].errcode,
-                                              bsrr->entries[i].errstring);
+                Z_DiagRecs *drecs = zget_DiagRecs(assoc->encode,
+						  bsrr->entries[i].errcode,
+						  bsrr->entries[i].errstring);
                 assert (drecs->num_diagRecs == 1);
                 e->which = Z_Entry_surrogateDiagnostic;
                 assert (drecs->diagRecs[0]);
@@ -2256,7 +2174,8 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     res->resultSetStatus = 0;
     if (bsrr->errcode)
     {
-        Z_DiagRecs *dr = diagrecs (assoc, bsrr->errcode, bsrr->errstring);
+        Z_DiagRecs *dr = zget_DiagRecs(assoc->encode,
+				       bsrr->errcode, bsrr->errstring);
         res->diagnostics = dr->diagRecs;
         res->num_diagnostics = dr->num_diagRecs;
     }
@@ -2309,7 +2228,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
 
     bdrr->num_setnames = req->num_resultSetList;
     bdrr->setnames = req->resultSetList;
-    for (i=0;i<req->num_resultSetList;i++)
+    for (i = 0; i<req->num_resultSetList; i++)
         yaz_log(log_requestdetail, "resultset: '%s'",
                 req->resultSetList[i]);
     bdrr->stream = assoc->encode;
@@ -2352,7 +2271,6 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
             res->deleteListStatuses->elements[i]->status = bdrr->statuses+i;
             res->deleteListStatuses->elements[i]->id =
                 odr_strdup (assoc->encode, bdrr->setnames[i]);
-            
         }
     }
     res->numberNotDeleted = 0;
@@ -2366,7 +2284,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     {
         WRBUF wr=wrbuf_alloc();
         wrbuf_printf(wr, "Delete ");
-        for (i=0;i<req->num_resultSetList;i++)
+        for (i = 0; i<req->num_resultSetList; i++)
             wrbuf_printf(wr, " '%s' ", req->resultSetList[i]);
         if (bdrr->delete_status)
             wrbuf_printf(wr," ERROR %d", bdrr->delete_status);
@@ -2531,9 +2449,9 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     }
     else
     {
-        Z_DiagRecs *diagRecs = diagrecs (assoc, esrequest.errcode,
-                                         esrequest.errstring);
-
+        Z_DiagRecs *diagRecs =
+	    zget_DiagRecs(assoc->encode, esrequest.errcode,
+			  esrequest.errstring);
         /* Backend indicates error, request will not be processed */
         yaz_log(YLOG_DEBUG,"Request could not be processed...failure !");
         *resp->operationStatus = Z_ExtendedServicesResponse_failure;
