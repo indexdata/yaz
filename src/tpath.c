@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: tpath.c,v 1.2 2004-10-15 00:19:01 adam Exp $
+ * $Id: tpath.c,v 1.3 2004-11-18 15:18:14 heikki Exp $
  */
 /**
  * \file tpath.c
@@ -18,7 +18,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <yaz/tpath.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 
 FILE *yaz_path_fopen(const char *path, const char *name, const char *mode)
 {

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_oct.c,v 1.6 2004-10-15 00:19:00 adam Exp $
+ * $Id: odr_oct.c,v 1.7 2004-11-18 15:18:13 heikki Exp $
  */
 /**
  * \file odr_oct.c
@@ -12,7 +12,6 @@
 #include <config.h>
 #endif
 
-#include <yaz/log.h>
 #include "odr-priv.h"
 
 /*

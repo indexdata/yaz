@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.66 2004-11-16 17:08:11 heikki Exp $
+ * $Id: ztest.c,v 1.67 2004-11-18 15:18:14 heikki Exp $
  */
 
 /*
@@ -41,7 +41,7 @@ int ztest_search (void *handle, bend_search_rr *rr)
     /* if database is stop, stop this process.. For debugging only. */
     if (!yaz_matchstr (rr->basenames[0], "stop"))
     {
-	nmem_print_list_l(LOG_LOG);
+	nmem_print_list_l(YLOG_LOG);
         exit(0);
     }
 #endif
@@ -404,7 +404,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     }
     else
     {
-        yaz_log (LOG_WARN, "Unknown Extended Service(%d)",
+        yaz_log (YLOG_WARN, "Unknown Extended Service(%d)",
 		 rr->esr->taskSpecificParameters->which);
 	
     }

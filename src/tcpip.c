@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.11 2004-10-15 00:19:01 adam Exp $
+ * $Id: tcpip.c,v 1.12 2004-11-18 15:18:14 heikki Exp $
  */
 /**
  * \file tcpip.c
@@ -28,7 +28,6 @@
 
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
-#include <yaz/log.h>
 #include <yaz/nmem.h>
 
 #ifdef WIN32

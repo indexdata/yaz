@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.8 2004-10-15 00:19:00 adam Exp $
+ * $Id: odr.c,v 1.9 2004-11-18 15:18:13 heikki Exp $
  *
  */
 
@@ -20,7 +20,11 @@
 #include <stdarg.h>
 
 #include <yaz/xmalloc.h>
+#include <yaz/ylog.h>
 #include "odr-priv.h"
+
+static int log_level=0;
+static int log_level_initialized=0;
 
 Odr_null *ODR_NULLVAL = (Odr_null *) "NULL";  /* the presence of a null value */
 
@@ -170,11 +174,15 @@ int odr_set_charset(ODR o, const char *to, const char *from)
     return 0;
 }
 
-#include <yaz/log.h>
 
 ODR odr_createmem(int direction)
 {
     ODR o;
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("odr");
+        log_level_initialized=1;
+    }
 
     if (!(o = (ODR)xmalloc(sizeof(*o))))
         return 0;
@@ -189,12 +197,18 @@ ODR odr_createmem(int direction)
     o->op->iconv_handle = 0;
     odr_setprint(o, stderr);
     odr_reset(o);
-    yaz_log (LOG_DEBUG, "odr_createmem dir=%d o=%p", direction, o);
+    yaz_log (log_level, "odr_createmem dir=%d o=%p", direction, o);
     return o;
 }
 
 void odr_reset(ODR o)
 {
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("odr");
+        log_level_initialized=1;
+    }
+
     odr_seterror(o, ONONE, 0);
     o->bp = o->buf;
     odr_seek(o, ODR_S_SET, 0);
@@ -208,7 +222,7 @@ void odr_reset(ODR o)
     o->lenlen = 1;
     if (o->op->iconv_handle != 0)
         yaz_iconv(o->op->iconv_handle, 0, 0, 0, 0);
-    yaz_log (LOG_DEBUG, "odr_reset o=%p", o);
+    yaz_log (log_level, "odr_reset o=%p", o);
 }
     
 void odr_destroy(ODR o)
@@ -222,7 +236,7 @@ void odr_destroy(ODR o)
         yaz_iconv_close (o->op->iconv_handle);
     xfree(o->op);
     xfree(o);
-    yaz_log (LOG_DEBUG, "odr_destroy o=%p", o);
+    yaz_log (log_level, "odr_destroy o=%p", o);
 }
 
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)

@@ -2,7 +2,7 @@
  * Copyright (C) 1994-2004, Index Data
  * All rights reserved.
  *
- * $Id: readconf.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ * $Id: readconf.c,v 1.3 2004-11-18 15:18:13 heikki Exp $
  */
 
 /**
@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/readconf.h>
 
 #define l_isspace(c) ((c) == '\t' || (c) == ' ' || (c) == '\n' || (c) == '\r')
@@ -69,7 +69,7 @@ int readconf(char *name, void *rprivate,
     
     if (!(f = fopen(name, "r")))
     {
-	yaz_log(LOG_WARN|LOG_ERRNO, "readconf: %s", name);
+	yaz_log(YLOG_WARN|YLOG_ERRNO, "readconf: %s", name);
 	return -1;
     }
     for (;;)

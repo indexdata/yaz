@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: read-grs.c,v 1.8 2003-01-06 08:20:29 adam Exp $
+ * $Id: read-grs.c,v 1.9 2004-11-18 15:18:14 heikki Exp $
  */
 
 /*
@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 #include <yaz/proto.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 
 #define GRS_MAX_FIELDS 50
 
@@ -42,7 +42,7 @@ static Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	    return r;
 	if (sscanf(buf, "(%d,%[^)])", &type, value) != 2)
 	{
-	    yaz_log(LOG_WARN, "Bad data in '%s'", buf);
+	    yaz_log(YLOG_WARN, "Bad data in '%s'", buf);
 	    return 0;
 	}
 	if (!type && *value == '0')

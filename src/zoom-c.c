@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.31 2004-10-15 00:19:01 adam Exp $
+ * $Id: zoom-c.c,v 1.32 2004-11-18 15:18:14 heikki Exp $
  */
 /**
  * \file zoom-c.c
@@ -16,7 +16,7 @@
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
 #include <yaz/otherinfo.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/pquery.h>
 #include <yaz/marcdisp.h>
 #include <yaz/diagbib1.h>
@@ -27,6 +27,9 @@
 #if HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
+
+static int log_level=0;
+static int log_level_initialized=0;
 
 typedef enum {
     zoom_pending,
@@ -94,6 +97,12 @@ static void set_dset_error (ZOOM_connection c, int error,
                             const char *addinfo, const char *addinfo2)
 {
     char *cp;
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("zoom");
+        log_level_initialized=1;
+    }
+
     xfree (c->addinfo);
     c->addinfo = 0;
     c->error = error;
@@ -114,7 +123,7 @@ static void set_dset_error (ZOOM_connection c, int error,
     else if (addinfo)
         c->addinfo = xstrdup(addinfo);
     if (error)
-        yaz_log(LOG_DEBUG, "Error %s %s:%d %s %s",
+        yaz_log(log_level, "Error %s %s:%d %s %s",
                 c->host_port ? c->host_port : "<>", dset, error,
                 addinfo ? addinfo : "",
                 addinfo2 ? addinfo2 : "");
@@ -226,6 +235,12 @@ ZOOM_API(ZOOM_connection)
 ZOOM_connection_create (ZOOM_options options)
 {
     ZOOM_connection c = (ZOOM_connection) xmalloc (sizeof(*c));
+
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("zoom");
+        log_level_initialized=1;
+    }
 
     c->proto = PROTO_Z3950;
     c->cs = 0;
@@ -339,13 +354,19 @@ ZOOM_connection_connect(ZOOM_connection c,
     const char *val;
     ZOOM_task task;
 
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("zoom");
+        log_level_initialized=1;
+    }
+
     if (c->cs)
     {
-        yaz_log (LOG_DEBUG, "reconnect");
+        yaz_log (log_level, "reconnect");
         c->reconnect_ok = 1;
         return;
     }
-    yaz_log(LOG_DEBUG, "connect");
+    yaz_log(log_level, "connect");
     xfree (c->proxy);
     val = ZOOM_options_get (c->options, "proxy");
     if (val && *val)
@@ -421,7 +442,7 @@ ZOOM_query_destroy(ZOOM_query s)
 	return;
 
     (s->refcount)--;
-    yaz_log (LOG_DEBUG, "ZOOM_query_destroy count=%d", s->refcount);
+    yaz_log (log_level, "ZOOM_query_destroy count=%d", s->refcount);
     if (s->refcount == 0)
     {
 	odr_destroy (s->odr);
@@ -510,7 +531,7 @@ void ZOOM_resultset_addref (ZOOM_resultset r)
     if (r)
     {
 	(r->refcount)++;
-        yaz_log (LOG_DEBUG, "ZOOM_resultset_addref r=%p count=%d",
+        yaz_log (log_level, "ZOOM_resultset_addref r=%p count=%d",
                  r, r->refcount);
     }
 }
@@ -519,7 +540,13 @@ ZOOM_resultset ZOOM_resultset_create ()
 {
     ZOOM_resultset r = (ZOOM_resultset) xmalloc (sizeof(*r));
 
-    yaz_log (LOG_DEBUG, "ZOOM_resultset_create r = %p", r);
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("zoom");
+        log_level_initialized=1;
+    }
+
+    yaz_log (log_level, "ZOOM_resultset_create r = %p", r);
     r->refcount = 1;
     r->size = 0;
     r->odr = odr_createmem (ODR_ENCODE);
@@ -587,12 +614,12 @@ ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     {
         if (!c->cs)
         {
-            yaz_log(LOG_DEBUG, "NO COMSTACK");
+            yaz_log(log_level, "NO COMSTACK");
             ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
         }
         else
         {
-            yaz_log(LOG_DEBUG, "PREPARE FOR RECONNECT");
+            yaz_log(log_level, "PREPARE FOR RECONNECT");
             c->reconnect_ok = 1;
         }
     }
@@ -625,12 +652,12 @@ ZOOM_API(void)
     {
         if (!c->cs)
         {
-            yaz_log(LOG_DEBUG, "NO COMSTACK");
+            yaz_log(log_level, "NO COMSTACK");
             ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
         }
         else
         {
-            yaz_log(LOG_DEBUG, "PREPARE FOR RECONNECT");
+            yaz_log(log_level, "PREPARE FOR RECONNECT");
             c->reconnect_ok = 1;
         }
     }
@@ -673,7 +700,7 @@ ZOOM_resultset_destroy(ZOOM_resultset r)
     if (!r)
         return;
     (r->refcount)--;
-    yaz_log (LOG_DEBUG, "ZOOM_resultset_destroy r = %p count=%d",
+    yaz_log (log_level, "ZOOM_resultset_destroy r = %p count=%d",
              r, r->refcount);
     if (r->refcount == 0)
     {
@@ -735,12 +762,12 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
     {
         if (!c->cs)
         {
-            yaz_log(LOG_DEBUG, "NO COMSTACK");
+            yaz_log(log_level, "NO COMSTACK");
             ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
         }
         else
         {
-            yaz_log(LOG_DEBUG, "PREPARE FOR RECONNECT");
+            yaz_log(log_level, "PREPARE FOR RECONNECT");
             c->reconnect_ok = 1;
         }
     }
@@ -802,13 +829,19 @@ static zoom_ret do_connect (ZOOM_connection c)
 {
     void *add;
     const char *effective_host;
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("zoom");
+        log_level_initialized=1;
+    }
+
 
     if (c->proxy)
 	effective_host = c->proxy;
     else
 	effective_host = c->host_port;
 
-    yaz_log (LOG_DEBUG, "do_connect host=%s", effective_host);
+    yaz_log (log_level, "do_connect host=%s", effective_host);
 
     if (c->cs)
 	cs_close(c->cs);
@@ -942,7 +975,7 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 	    z_APDU(odr_pr, &a, 0, 0);
 	    odr_destroy(odr_pr);
 	}
-        yaz_log (LOG_DEBUG, "encoding failed");
+        yaz_log (log_level, "encoding failed");
         set_ZOOM_error(c, ZOOM_ERROR_ENCODE, 0);
 	odr_reset(out);
 	return -1;
@@ -957,7 +990,7 @@ static zoom_ret send_APDU (ZOOM_connection c, Z_APDU *a)
     assert (a);
     if (encode_APDU(c, a, c->odr_out))
 	return zoom_complete;
-    yaz_log(LOG_DEBUG, "send APDU type=%d", a->which);
+    yaz_log(log_level, "send APDU type=%d", a->which);
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
     event = ZOOM_Event_create (ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event (c, event);
@@ -1004,7 +1037,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.31 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.32 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1352,7 +1385,7 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
                     break;
             }
             r->setname = xstrdup (setname);
-            yaz_log (LOG_DEBUG, "allocating set %s", r->setname);
+            yaz_log (log_level, "allocating set %s", r->setname);
         }
         else
             r->setname = xstrdup ("default");
@@ -1975,7 +2008,7 @@ static void handle_search_response (ZOOM_connection c, Z_SearchResponse *sr)
     ZOOM_resultset resultset;
     ZOOM_Event event;
     
-    yaz_log (LOG_DEBUG, "got search response");
+    yaz_log (log_level, "got search response");
     
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
 	return ;
@@ -2766,20 +2799,20 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
 
     if (!task)
     {
-        yaz_log (LOG_DEBUG, "ZOOM_connection_exec_task task=<null>");
+        yaz_log (log_level, "ZOOM_connection_exec_task task=<null>");
 	return 0;
     }
-    yaz_log (LOG_DEBUG, "ZOOM_connection_exec_task type=%d run=%d",
+    yaz_log (log_level, "ZOOM_connection_exec_task type=%d run=%d",
              task->which, task->running);
     if (c->error != ZOOM_ERROR_NONE)
     {
-        yaz_log (LOG_DEBUG, "remove tasks because of error = %d", c->error);
+        yaz_log (log_level, "remove tasks because of error = %d", c->error);
         ZOOM_connection_remove_tasks (c);
         return 0;
     }
     if (task->running)
     {
-        yaz_log (LOG_DEBUG, "task already running");
+        yaz_log (log_level, "task already running");
 	return 0;
     }
     task->running = 1;
@@ -2818,16 +2851,16 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
     }
     else
     {
-        yaz_log (LOG_DEBUG, "remove tasks because no connection exist");
+        yaz_log (log_level, "remove tasks because no connection exist");
         ZOOM_connection_remove_tasks (c);
     }
     if (ret == zoom_complete)
     {
-        yaz_log (LOG_DEBUG, "task removed (complete)");
+        yaz_log (log_level, "task removed (complete)");
         ZOOM_connection_remove_task (c);
         return 0;
     }
-    yaz_log (LOG_DEBUG, "task pending");
+    yaz_log (log_level, "task pending");
     return 1;
 }
 
@@ -2868,7 +2901,7 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
     Z_InitResponse *initrs;
     
     c->mask = 0;
-    yaz_log (LOG_DEBUG, "recv APDU type=%d", apdu->which);
+    yaz_log (log_level, "recv APDU type=%d", apdu->which);
     switch(apdu->which)
     {
     case Z_APDU_initResponse:
@@ -2927,7 +2960,7 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
                 int sel;
                 
                 yaz_get_response_charneg(tmpmem, p, &charset, &lang, &sel);
-                yaz_log(LOG_DEBUG, "Target accepted: charset %s, "
+                yaz_log(log_level, "Target accepted: charset %s, "
                         "language %s, select %d",
                         charset ? charset : "none", lang ? lang : "none", sel);
                 if (charset)
@@ -3006,7 +3039,7 @@ static void handle_srw_response(ZOOM_connection c,
 
     resultset->size = 0;
 
-    yaz_log(LOG_DEBUG, "got SRW response OK");
+    yaz_log(log_level, "got SRW response OK");
     
     if (res->numberOfRecords)
         resultset->size = *res->numberOfRecords;
@@ -3069,7 +3102,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
     c->mask = 0;
-    yaz_log (LOG_DEBUG, "handle_http");
+    yaz_log (log_level, "handle_http");
 
     if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
     {
@@ -3136,7 +3169,7 @@ static int do_read (ZOOM_connection c)
     
     r = cs_get (c->cs, &c->buf_in, &c->len_in);
     more = cs_more(c->cs);
-    yaz_log (LOG_DEBUG, "do_read len=%d more=%d", r, more);
+    yaz_log (log_level, "do_read len=%d more=%d", r, more);
     if (r == 1)
 	return 0;
     if (r <= 0)
@@ -3145,7 +3178,7 @@ static int do_read (ZOOM_connection c)
         {
             do_close (c);
             c->reconnect_ok = 0;
-            yaz_log (LOG_DEBUG, "reconnect read");
+            yaz_log (log_level, "reconnect read");
             c->tasks->running = 0;
             ZOOM_connection_insert_task (c, ZOOM_TASK_CONNECT);
         }
@@ -3200,14 +3233,14 @@ static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
     event = ZOOM_Event_create(ZOOM_EVENT_SEND_DATA);
     ZOOM_connection_put_event (c, event);
 
-    yaz_log (LOG_DEBUG, "do_write_ex len=%d", len_out);
+    yaz_log (log_level, "do_write_ex len=%d", len_out);
     if ((r=cs_put (c->cs, buf_out, len_out)) < 0)
     {
         if (c->reconnect_ok)
         {
             do_close (c);
             c->reconnect_ok = 0;
-            yaz_log (LOG_DEBUG, "reconnect write");
+            yaz_log (log_level, "reconnect write");
             c->tasks->running = 0;
             ZOOM_connection_insert_task (c, ZOOM_TASK_CONNECT);
             return zoom_pending;
@@ -3226,12 +3259,12 @@ static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
             c->mask += ZOOM_SELECT_WRITE;
         if (c->cs->io_pending & CS_WANT_READ)
             c->mask += ZOOM_SELECT_READ;
-        yaz_log (LOG_DEBUG, "do_write_ex 1 mask=%d", c->mask);
+        yaz_log (log_level, "do_write_ex 1 mask=%d", c->mask);
     }
     else
     {
         c->mask = ZOOM_SELECT_READ|ZOOM_SELECT_EXCEPT;
-        yaz_log (LOG_DEBUG, "do_write_ex 2 mask=%d", c->mask);
+        yaz_log (log_level, "do_write_ex 2 mask=%d", c->mask);
     }
     return zoom_pending;
 }
@@ -3368,7 +3401,7 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
 {
     ZOOM_Event event = 0;
     int r = cs_look(c->cs);
-    yaz_log (LOG_DEBUG, "ZOOM_connection_do_io c=%p mask=%d cs_look=%d",
+    yaz_log (log_level, "ZOOM_connection_do_io c=%p mask=%d cs_look=%d",
 	     c, mask, r);
     
     if (r == CS_NONE)
@@ -3384,7 +3417,7 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
         event = ZOOM_Event_create (ZOOM_EVENT_CONNECT);
 
         ret = cs_rcvconnect (c->cs);
-        yaz_log (LOG_DEBUG, "cs_rcvconnect returned %d", ret);
+        yaz_log (log_level, "cs_rcvconnect returned %d", ret);
         if (ret == 1)
         {
             c->mask = ZOOM_SELECT_EXCEPT;
@@ -3569,9 +3602,9 @@ ZOOM_event (int no, ZOOM_connection *cs)
 #else
     tv.tv_sec = timeout;
     tv.tv_usec = 0;
-    yaz_log (LOG_DEBUG, "select start");
+    yaz_log (log_level, "select start");
     r = select (max_fd+1, &input, &output, &except, &tv);
-    yaz_log (LOG_DEBUG, "select stop, returned r=%d", r);
+    yaz_log (log_level, "select stop, returned r=%d", r);
     for (i = 0; i<no; i++)
     {
 	ZOOM_connection c = cs[i];
@@ -3599,7 +3632,7 @@ ZOOM_event (int no, ZOOM_connection *cs)
 	    /* timeout and this connection was waiting */
 	    set_ZOOM_error(c, ZOOM_ERROR_TIMEOUT, 0);
             do_close (c);
-            yaz_log (LOG_DEBUG, "timeout");
+            yaz_log (log_level, "timeout");
             ZOOM_connection_put_event(c, event);
 	}
     }

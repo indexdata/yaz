@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.15 2004-11-17 13:03:07 heikki Exp $
+ * $Id: log.c,v 1.16 2004-11-18 15:18:13 heikki Exp $
  */
 
 /**
@@ -34,7 +34,7 @@
 #include <errno.h>
 #include <time.h>
 #include <yaz/nmem.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 
 static NMEM_MUTEX log_mutex = 0;
 static int mutex_init_flag = 0; /* not yet initialized */
@@ -54,7 +54,7 @@ char *strerror(int n)
 
 
 
-static int l_level = LOG_DEFAULT_LEVEL;
+static int l_level = YLOG_DEFAULT_LEVEL;
 static FILE *l_file = NULL;
 static char l_prefix[512] = "";
 static char l_prefix2[512] = "";
@@ -76,24 +76,24 @@ static struct {
     char *name;
 }  mask_names[MAX_MASK_NAMES] =
 {
-    { LOG_FATAL,  "fatal"},
-    { LOG_DEBUG,  "debug"},
-    { LOG_WARN,   "warn" },
-    { LOG_LOG,    "log"  },
-    { LOG_ERRNO,  ""},
-    { LOG_MALLOC, "malloc"},
-    { LOG_APP,    "app"  },
-    { LOG_NOTIME, "" },
-    { LOG_APP2,   "app2" },
-    { LOG_APP3,   "app3" },
-    { LOG_ALL,    "all"  },
-    { LOG_FLUSH,  "flush" },
-    { LOG_LOGLVL, "loglevel" }, 
+    { YLOG_FATAL,  "fatal"},
+    { YLOG_DEBUG,  "debug"},
+    { YLOG_WARN,   "warn" },
+    { YLOG_LOG,    "log"  },
+    { YLOG_ERRNO,  ""},
+    { YLOG_MALLOC, "malloc"},
+ /*   { YLOG_APP,    "app"  }, */
+    { YLOG_NOTIME, "" },
+ /*   { YLOG_APP2,   "app2" }, */
+ /*   { YLOG_APP3,   "app3" }, */
+    { YLOG_ALL,    "all"  },
+    { YLOG_FLUSH,  "flush" },
+    { YLOG_LOGLVL, "loglevel" }, 
     { 0,          "none" },
     { 0, NULL }
     /* the rest will be filled in if the user defines dynamic modules*/
 };  
-static unsigned int next_log_bit = LOG_LAST_BIT<<1; /* first dynamic bit */
+static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
 static void init_mutex()
 {
@@ -140,7 +140,7 @@ void yaz_log_reopen(void)
     {
         fclose (l_file);
     }
-    if (l_level & LOG_FLUSH)
+    if (l_level & YLOG_FLUSH)
         setvbuf(new_file, 0, _IONBF, 0);
     l_file = new_file;
 }
@@ -167,25 +167,25 @@ static void rotate_log()
 
 void yaz_log_init_level (int level)
 {
-    if ( (l_level & LOG_FLUSH) != (level & LOG_FLUSH) )
+    if ( (l_level & YLOG_FLUSH) != (level & YLOG_FLUSH) )
     {
         l_level = level;
         yaz_log_reopen(); /* make sure we set buffering right */
     } else
         l_level = level;
-    if (l_level  & LOG_LOGLVL)
+    if (l_level  & YLOG_LOGLVL)
     {  /* dump the log level bits */
         char *bittype="Static ";
         int i;
-        yaz_log(LOG_LOGLVL,"Setting log level to %d = 0x%08x",l_level,l_level);
+        yaz_log(YLOG_LOGLVL,"Setting log level to %d = 0x%08x",l_level,l_level);
         for (i = 0; mask_names[i].name; i++)
             if (mask_names[i].mask && *mask_names[i].name)
                 if (strcmp(mask_names[i].name,"all")!=0)
                 {
-                    yaz_log(LOG_LOGLVL,"%s log bit %08x '%s' is %s",
+                    yaz_log(YLOG_LOGLVL,"%s log bit %08x '%s' is %s",
                         bittype, mask_names[i].mask, mask_names[i].name,
                         (level & mask_names[i].mask)?  "ON": "off");
-                if (mask_names[i].mask>LOG_LAST_BIT)
+                if (mask_names[i].mask>YLOG_LAST_BIT)
                     bittype="Dynamic";
                 }
     }
@@ -274,7 +274,7 @@ void yaz_log(int level, const char *fmt, ...)
     	if ( mask_names[i].mask & level)
     	{
 	    if (*mask_names[i].name && mask_names[i].mask && 
-                 mask_names[i].mask != LOG_ALL)
+                 mask_names[i].mask != YLOG_ALL)
             {
 		sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
 	        level &= ~mask_names[i].mask;
@@ -292,7 +292,7 @@ void yaz_log(int level, const char *fmt, ...)
 #endif
 #endif
 /* WIN32 */
-    if (o_level & LOG_ERRNO)
+    if (o_level & YLOG_ERRNO)
     {
         strcat(buf, " [");
         yaz_strerror(buf+strlen(buf), 2048);
@@ -303,14 +303,14 @@ void yaz_log(int level, const char *fmt, ...)
         (*start_hook_func)(o_level, buf, start_hook_info);
     ti = time(0);
     tim = localtime(&ti);
-    if (l_level & LOG_NOTIME)
+    if (l_level & YLOG_NOTIME)
 	tbuf[0] = '\0';
     else
 	strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tim);
     tbuf[TIMEFORMAT_LEN-1] = '\0';
     fprintf(l_file, "%s %s%s %s%s\n", tbuf, l_prefix, flags,
             l_prefix2, buf);
-    if (l_level & (LOG_FLUSH|LOG_DEBUG) )
+    if (l_level & (YLOG_FLUSH|YLOG_DEBUG) )
         fflush(l_file);
     if (end_hook_func)
 	(*end_hook_func)(o_level, buf, end_hook_info);
@@ -358,7 +358,7 @@ static int define_module_bit(const char *name)
         ;
     if ( (i>=MAX_MASK_NAMES) || (next_log_bit >= 1<<31 ))
     {
-        yaz_log(LOG_WARN,"No more log bits left, not logging '%s'", name);
+        yaz_log(YLOG_WARN,"No more log bits left, not logging '%s'", name);
         return 0;
     }
     mask_names[i].mask = next_log_bit;
@@ -377,19 +377,19 @@ int yaz_log_module_level(const char *name)
     for (i = 0; mask_names[i].name; i++)
         if (0==strcmp(n,mask_names[i].name))
         {
-            yaz_log(LOG_LOGLVL,"returning log bit 0x%x for '%s' %s",
+            yaz_log(YLOG_LOGLVL,"returning log bit 0x%x for '%s' %s",
                     mask_names[i].mask, n, 
                     strcmp(n,name)?name:"" );
             return mask_names[i].mask;
         }
-    yaz_log(LOG_LOGLVL,"returning NO log bit for '%s' %s", n, 
+    yaz_log(YLOG_LOGLVL,"returning NO log bit for '%s' %s", n, 
                     strcmp(n,name)?name:"" );
     return 0;
 }
 
 int yaz_log_mask_str (const char *str)
 {
-    return yaz_log_mask_str_x (str, LOG_DEFAULT_LEVEL);
+    return yaz_log_mask_str_x (str, YLOG_DEFAULT_LEVEL);
 }
 
 int yaz_log_mask_str_x (const char *str, int level)

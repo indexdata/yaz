@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2004, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.6 2004-11-17 00:18:54 adam Exp $
+ * $Id: logrpn.c,v 1.7 2004-11-18 15:18:13 heikki Exp $
  */
 
 /**
@@ -13,8 +13,9 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/logrpn.h>
+
 
 static const char *relToStr(int v)
 {
@@ -437,7 +438,6 @@ static void wrbuf_apt(WRBUF b, Z_AttributesPlusTerm *zapt)
     
 static void wrbuf_structure (WRBUF b, Z_RPNStructure *zs, enum oid_value ast)
 {
-    int i;
     if (zs->which == Z_RPNStructure_complex)
     {
         Z_Operator *op = zs->u.complex->roperator;
@@ -532,7 +532,7 @@ static void wrbuf_rpn_query(WRBUF b, Z_RPNQuery *rpn)
 
 void log_rpn_query (Z_RPNQuery *rpn)
 {
-    log_rpn_query_level(LOG_LOG, rpn);
+    log_rpn_query_level(YLOG_LOG, rpn);
 }
 
 void log_scan_term_level (int loglevel, 
@@ -553,7 +553,7 @@ void log_scan_term_level (int loglevel,
 
 void log_scan_term (Z_AttributesPlusTerm *zapt, oid_value ast)
 {
-    log_scan_term_level (LOG_LOG, zapt, ast);
+    log_scan_term_level (YLOG_LOG, zapt, ast);
 }
 
 void wrbuf_scan_term(WRBUF b, Z_AttributesPlusTerm *zapt, oid_value ast)
@@ -585,7 +585,7 @@ void yaz_log_zquery_level (int loglevel, Z_Query *q)
 
 void yaz_log_zquery (Z_Query *q)
 {
-    yaz_log_zquery_level(LOG_LOG,q);
+    yaz_log_zquery_level(YLOG_LOG,q);
 }
 
 void wrbuf_put_zquery(WRBUF b, Z_Query *q)

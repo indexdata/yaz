@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.29 2004-04-29 08:54:56 adam Exp $
+ * $Id: zoomsh.c,v 1.30 2004-11-18 15:18:14 heikki Exp $
  */
 
 /* ZOOM-C Shell */
@@ -23,7 +23,7 @@
 
 #include <yaz/xmalloc.h>
 
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/nmem.h>
 #include <yaz/zoom.h>
 #include <yaz/oid.h>
@@ -269,7 +269,7 @@ static void cmd_debug (ZOOM_connection *c, ZOOM_resultset *r,
                        ZOOM_options options,
                        const char **args)
 {
-    yaz_log_init_level(LOG_ALL);
+    yaz_log_init_level(YLOG_ALL);
 }
 
 static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ * $Id: eventl.c,v 1.3 2004-11-18 15:18:13 heikki Exp $
  */
 
 /**
@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include <yaz/yconfig.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/comstack.h>
 #include <yaz/xmalloc.h>
 #include "eventl.h"
@@ -41,9 +41,18 @@
 #define YAZ_EV_SELECT select
 #endif
 
+static int log_level=0;
+static int log_level_initialized=0;
+
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
 {
     IOCHAN new_iochan;
+
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("eventl");
+        log_level_initialized=1;
+    }
 
     if (!(new_iochan = (IOCHAN)xmalloc(sizeof(*new_iochan))))
     	return 0;
@@ -81,7 +90,7 @@ int event_loop(IOCHAN *iochans)
     	for (p = *iochans; p; p = p->next)
     	{
             time_t w, ftime;
-            yaz_log(LOG_DEBUG, "fd=%d flags=%d force_event=%d",
+            yaz_log(log_level, "fd=%d flags=%d force_event=%d",
                     p->fd, p->flags, p->force_event);
 	    if (p->force_event)
                 to.tv_sec = 0;          /* polling select */
@@ -104,9 +113,9 @@ int event_loop(IOCHAN *iochans)
                     to.tv_sec = w;
             }
 	}
-        yaz_log(LOG_DEBUG, "select start %ld", (long) to.tv_sec);
+        yaz_log(log_level, "select start %ld", (long) to.tv_sec);
 	res = YAZ_EV_SELECT(max + 1, &in, &out, &except, &to);
-        yaz_log(LOG_DEBUG, "select end");
+        yaz_log(log_level, "select end");
 	if (res < 0)
 	{
 	    if (yaz_errno() == EINTR)
@@ -127,7 +136,7 @@ int event_loop(IOCHAN *iochans)
                 cs_close(conn);
 	        destroy_association(assoc);
 	        iochan_destroy(*iochans);
-                yaz_log(LOG_DEBUG, "error select, destroying iochan %p",
+                yaz_log(log_level, "error select, destroying iochan %p",
 			*iochans);
             }
 	}

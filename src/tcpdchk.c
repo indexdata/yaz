@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpdchk.c,v 1.2 2004-10-15 00:19:01 adam Exp $
+ * $Id: tcpdchk.c,v 1.3 2004-11-18 15:18:13 heikki Exp $
  */
 /**
  * \file tcpdchk.c
@@ -14,13 +14,16 @@
 
 #include <yaz/yconfig.h>
 #include <yaz/comstack.h>
+#include <yaz/statserv.h>
+#include <yaz/ylog.h>
+
 
 #if HAVE_TCPD_H
 #include <syslog.h>
 #include <tcpd.h>
 
 
-int allow_severity = LOG_INFO;
+int allow_severity = LOG_INFO;  /* not YLOG !! */
 int deny_severity = LOG_WARNING;
 
 #ifdef LOG_DEBUG
@@ -31,9 +34,6 @@ int deny_severity = LOG_WARNING;
 #endif
 
 #endif
-
-#include <yaz/statserv.h>
-#include <yaz/log.h>
 
 int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 {
@@ -70,11 +70,11 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 	    i = hosts_access(&request_info);
 	    if (!i)
 	    {
-		yaz_log (LOG_DEBUG, "access denied from %s",
+		yaz_log (YLOG_DEBUG, "access denied from %s",
 			 host_name ? host_name : host_addr);
 		return 1;
 	    }
-	    yaz_log (LOG_DEBUG, "access granted from %s",
+	    yaz_log (YLOG_DEBUG, "access granted from %s",
 		     host_name ? host_name : host_addr);
 #endif
 	}

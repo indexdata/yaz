@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.5 2004-11-03 22:33:17 adam Exp $
+ * $Id: nmem.c,v 1.6 2004-11-18 15:18:13 heikki Exp $
  */
 
 /**
@@ -11,6 +11,9 @@
  *
  * This is a simple and fairly wasteful little module for nibble memory
  * allocation. Evemtually we'll put in something better.
+ *
+ * FIXME - it also has some semaphore stuff, and stuff to handle errno.
+ *         These should be moved to some other place!
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -21,7 +24,7 @@
 #include <errno.h>
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 #include <yaz/oid.h>
 
 #ifdef WIN32
@@ -37,6 +40,9 @@
 #endif
 
 #define NMEM_CHUNK (4*1024)
+
+static int log_level=0;
+static int log_level_initialized=0;
 
 #ifdef WIN32
 static CRITICAL_SECTION critical_section;
@@ -69,6 +75,12 @@ struct nmem_mutex {
 
 YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
 {
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("nmem");
+        log_level_initialized=1;
+    }
+
     NMEM_ENTER;
     if (!*p)
     {
@@ -143,15 +155,15 @@ static void free_block(nmem_block *p)
     memset(p->buf, 'Y', p->size);
     p->next = freelist;
     freelist = p;
-#if NMEM_DEBUG
-    yaz_log (LOG_DEBUG, "nmem free_block p=%p", p);
-#endif
+    if (log_level)
+        yaz_log (log_level, "nmem free_block p=%p", p);
 }
 
 #if NMEM_DEBUG
 void nmem_print_list (void)
 {
-    nmem_print_list_l(LOG_DEBUG);
+    if(log_level)
+        nmem_print_list_l(log_level);
 }
 
 void nmem_print_list_l (int level)
@@ -173,17 +185,16 @@ static nmem_block *get_block(int size)
 {
     nmem_block *r, *l;
 
-#if NMEM_DEBUG
-    yaz_log (LOG_DEBUG, "nmem get_block size=%d", size);
-#endif
+    if (log_level)
+        yaz_log (log_level, "nmem get_block size=%d", size);
+
     for (r = freelist, l = 0; r; l = r, r = r->next)
     	if (r->size >= size)
 	    break;
     if (r)
     {
-#if NMEM_DEBUG
-	yaz_log (LOG_DEBUG, "nmem get_block found free block p=%p", r);
-#endif
+        if (log_level)
+	    yaz_log (log_level, "nmem get_block found free block p=%p", r);
     	if (l)
 	    l->next = r->next;
 	else
@@ -195,9 +206,9 @@ static nmem_block *get_block(int size)
 
 	if (get < size)
 	    get = size;
-#if NMEM_DEBUG
-	yaz_log (LOG_DEBUG, "nmem get_block alloc new block size=%d", get);
-#endif
+        if(log_level)
+	    yaz_log (log_level, "nmem get_block alloc new block size=%d", get);
+
 	r = (nmem_block *)xmalloc(sizeof(*r));
 	r->buf = (char *)xmalloc(r->size = get);
     }
@@ -208,10 +219,8 @@ static nmem_block *get_block(int size)
 void nmem_reset(NMEM n)
 {
     nmem_block *t;
-
-#if NMEM_DEBUG
-    yaz_log (LOG_DEBUG, "nmem_reset p=%p", n);
-#endif
+    
+    yaz_log (log_level, "nmem_reset p=%p", n);
     if (!n)
 	return;
     NMEM_ENTER;
@@ -235,12 +244,13 @@ void *nmem_malloc(NMEM n, int size)
     char *r;
 
 #if NMEM_DEBUG
-    yaz_log (LOG_DEBUG, "%s:%d: nmem_malloc p=%p size=%d", file, line,
-                     n, size);
+    if (log_level)
+        yaz_log (log_level, "%s:%d: nmem_malloc p=%p size=%d", 
+                file, line, n, size);
 #endif
     if (!n)
     {
-        yaz_log (LOG_FATAL, "calling nmem_malloc with an null pointer");
+        yaz_log (YLOG_FATAL, "calling nmem_malloc with an null pointer");
         abort ();
     }
 #ifdef WIN32
@@ -277,6 +287,11 @@ NMEM nmem_create(void)
 #if NMEM_DEBUG
     struct nmem_debug_info *debug_p;
 #endif
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("nmem");
+        log_level_initialized=1;
+    }
     
     NMEM_ENTER;
     nmem_active_no++;
@@ -288,7 +303,7 @@ NMEM nmem_create(void)
     NMEM_LEAVE;
 
 #if NMEM_DEBUG
-    yaz_log (LOG_DEBUG, "%s:%d: nmem_create %d p=%p", file, line,
+    yaz_log (YLOG_DEBUG, "%s:%d: nmem_create %d p=%p", file, line,
                      nmem_active_no, r);
 #endif
     r->blocks = 0;
@@ -299,7 +314,7 @@ NMEM nmem_create(void)
     for (debug_p = nmem_debug_list; debug_p; debug_p = debug_p->next)
 	if (debug_p->p == r)
 	{
-	    yaz_log (LOG_FATAL, "multi used block in nmem");
+	    yaz_log (YLOG_FATAL, "multi used block in nmem");
 	    abort ();
 	}
     debug_p = xmalloc (sizeof(*debug_p));
@@ -329,7 +344,7 @@ void nmem_destroy(NMEM n)
 	return;
     
 #if NMEM_DEBUG
-    yaz_log (LOG_DEBUG, "%s:%d: nmem_destroy %d p=%p", file, line,
+    yaz_log (log_level, "%s:%d: nmem_destroy %d p=%p", file, line,
                      nmem_active_no-1, n);
     NMEM_ENTER;
     for (debug_p = &nmem_debug_list; *debug_p; debug_p = &(*debug_p)->next)
@@ -345,7 +360,7 @@ void nmem_destroy(NMEM n)
     nmem_print_list();
     if (!ok)
     {
-	yaz_log (LOG_WARN, "%s:%d destroying unallocated nmem block p=%p",
+	yaz_log (YLOG_WARN, "%s:%d destroying unallocated nmem block p=%p",
 		 file, line, n);
 	return;
     }
@@ -383,12 +398,18 @@ void nmem_critical_leave (void)
 
 void nmem_init (void)
 {
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("nmem");
+        log_level_initialized=1;
+    }
+    
     if (++nmem_init_flag == 1)
     {
 #ifdef WIN32
 	InitializeCriticalSection(&critical_section);
 #elif YAZ_GNU_THREADS
-	yaz_log (LOG_LOG, "pth_init");
+	yaz_log (log_level, "pth_init"); /* ??? */
         pth_init ();
 #endif
 	nmem_active_no = 0;
@@ -452,6 +473,12 @@ void yaz_set_errno(int v)
 void yaz_strerror(char *buf, int max)
 {
     char *cp;
+    if (!log_level_initialized)
+    {
+        log_level=yaz_log_module_level("nmem");
+        log_level_initialized=1;
+    }
+    
 #ifdef WIN32
     DWORD err = GetLastError();
     if (err)

@@ -2,19 +2,19 @@
  * Copyright (c) 2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.1 2004-11-03 22:30:52 adam Exp $
+ * $Id: tstlog.c,v 1.2 2004-11-18 15:18:14 heikki Exp $
  *
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <yaz/options.h>
-#include <yaz/log.h>
+#include <yaz/ylog.h>
 
 int main(int argc, char **argv)
 {
     char *arg;
     int ret;
-    int level = LOG_LOG;
+    int level = YLOG_LOG;
 
     while ((ret = options("f:v:l:m:", argv, argc, &arg)) != -2)
     {
