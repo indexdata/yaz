@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.4 2003-05-23 00:24:04 mike Exp $
+   $Id: yaz-client-commands.xml,v 1.5 2004-09-22 19:22:08 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -89,6 +89,26 @@
    <screen>
     scan @attr 1=4 water
    </screen>
+  </listitem>
+ </varlistentry>
+ <varlistentry><term>
+   <literal>scanpos</literal> <replaceable>pos</replaceable>
+  </term>
+  <listitem>
+   <simpara>
+    Sets preferred position for scan. This value
+    is used in next scan. By default position is 1.
+   </simpara>
+  </listitem>
+ </varlistentry>
+ <varlistentry><term>
+   <literal>scanstep</literal> <replaceable>step</replaceable>
+  </term>
+  <listitem>
+   <simpara>
+    Set step-size for scan. This value is used in next scan
+    sent to the target. By default step-size is 0.
+   </simpara>
   </listitem>
  </varlistentry>
  <varlistentry id="sortspec"><term>
