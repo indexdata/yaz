@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.12 2003-05-14 13:49:02 adam Exp $
+ * $Id: unix.c,v 1.13 2003-09-16 20:48:28 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -308,7 +308,7 @@ static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
 		    void *cd)
 {
     struct sockaddr_un addr;
-    YAZ_SOCKLEN_T len = SUN_LEN(&addr);
+    YAZ_SOCKLEN_T len = sizeof(addr);
 
     TRC(fprintf(stderr, "unix_listen pid=%d\n", getpid()));
     if (h->state != CS_ST_IDLE)
@@ -388,6 +388,7 @@ static COMSTACK unix_accept(COMSTACK h)
 	state->altsize = state->altlen = 0;
 	state->towrite = state->written = -1;
 	state->complete = st->complete;
+	memcpy(&state->addr, &st->addr, sizeof(state->addr));
 	cnew->state = CS_ST_ACCEPT;
 	cnew->event = CS_NONE;
 	h->state = CS_ST_IDLE;
