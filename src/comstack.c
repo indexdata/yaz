@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.11 2004-09-21 14:59:01 adam Exp $
+ * $Id: comstack.c,v 1.12 2004-09-30 10:00:17 adam Exp $
  */
 
 #include <string.h>
@@ -147,7 +147,12 @@ int cs_complete_auto(const unsigned char *buf, int len)
 		&& buf[2] >= 0x20 && buf[2] < 0x7f)
     {
         /* deal with HTTP request/response */
-	int i = 2, content_len = -1, chunked = 0;
+	int i = 2, content_len = 0, chunked = 0;
+	
+	/* if dealing with HTTP responses - then default
+	   content length is unlimited (socket close) */
+	if (!memcmp(buf, "HTTP/", 5))
+	    content_len = -1; 
 
         while (i <= len-4)
         {
