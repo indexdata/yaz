@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.149 2002-04-13 18:09:01 adam Exp $
+ * $Id: client.c,v 1.150 2002-04-15 11:19:32 adam Exp $
  */
 
 #include <stdio.h>
@@ -89,10 +89,11 @@ static QueryType queryType = QueryType_Prefix;
 static CCL_bibset bibset;               /* CCL bibset handle */
 #endif
 
-#if HAVE_READLINE_READLINE_H
-#ifndef RL_READLINE_VERSION
+#if HAVE_READLINE_COMPLETION_OVER
+
+#else
+/* readline doesn't have this var. Define it ourselves. */
 int rl_attempted_completion_over = 0;
-#endif
 #endif
 
 /* set this one to 1, to avoid decode of unknown MARCs  */
