@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.4  1995-12-11 15:22:37  quinn
+ * Revision 1.5  1995-12-12 14:11:31  quinn
+ * More work on the large-record problem.
+ *
+ * Revision 1.4  1995/12/11  15:22:37  quinn
  * Added last_child field to the node.
  * Rewrote schema-mapping.
  *
@@ -161,7 +164,7 @@ data1_maptab *data1_read_maptab(char *file)
     return res;
 }
 
-#if 0
+#if 1
 
 /*
  * Locate node with givel elementname.
@@ -239,25 +242,15 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res)
 		    c->u.tag.element->name))
 		{
 		    data1_node *pn = res;
+		    data1_node *cur = pn->last_child;
 		    data1_maptag *mt;
-		    data1_node *l;
 
 		    /*
 		     * process the target path specification.
 		     */
 		    for (mt = m->target_path; mt; mt = mt->next)
 		    {
-			int match = 0;
-			data1_node *cur;
-			data1_node *last;
-
-			for (l = pn->child, last = 0; l; last = l, l = l->next)
-			    if (!match)
-				match = tagmatch(l, mt);
-			    else
-				if (!tagmatch(l, mt))
-				    break;
-			if (!match || !mt->next || mt->new_field)
+			if (!cur || !tagmatch(cur, mt))
 			{
 			    cur = data1_mk_node();
 			    cur->which = DATA1N_tag;
@@ -266,31 +259,27 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res)
 			    cur->u.tag.node_selected = 0;
 			    cur->parent = pn;
 			    cur->root = pn->root;
-			    if (!last)
-			    {
-				cur->next = pn->child;
+			    if (!pn->child)
 				pn->child = cur;
-			    }
-			    else
-			    {
-				cur->next = last->next;
-				last->next = cur;
-			    }
+			    if (pn->last_child)
+				pn->last_child->next = cur;
+			    pn->last_child = cur;
 			    pn->num_children++;
 			}
-			else
-			    cur = last ? last : pn->child;
 			
-			if (mt ->next)
+			if (mt->next)
 			    pn = cur;
 			else if (!m->no_data)
 			{
 			    cur->child = c->child;
+			    cur->last_child = c->last_child;
 			    cur->num_children = c->num_children;
 			    c->child = 0;
+			    c->last_child = 0;
 			    c->num_children = 0;
 			}
 		    }
+		    break;
 		}
 	    }
 	    if (map_children(c, map, res) < 0)
@@ -406,6 +395,8 @@ static int map_record(data1_node *res, data1_node *n, data1_maptab *map)
     return 0;
 }
 
+#endif
+
 /*
  * Create a (possibly lossy) copy of the given record based on the
  * table. The new copy will refer back to the data of the original record,
@@ -425,7 +416,7 @@ data1_node *data1_map_record(data1_node *n, data1_maptab *map)
     res->parent = 0;
     res->root = res;
 
-    if (map_record(res, n, map) < 0)
+    if (map_children(n, map, res) < 0)
     {
 	data1_free_tree(res);
 	return 0;
@@ -433,4 +424,3 @@ data1_node *data1_map_record(data1_node *n, data1_maptab *map)
     return res;
 }
 
-#endif
