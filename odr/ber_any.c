@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.7  1995-03-17 10:17:39  quinn
+ * Revision 1.8  1995-04-17 09:37:42  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.7  1995/03/17  10:17:39  quinn
  * Added memory management.
  *
  * Revision 1.6  1995/03/08  12:12:02  quinn
@@ -99,5 +102,7 @@ int completeBER(unsigned char *buf, int len)
 	b += res;
 	len -= res;
     }
+    if (len < 2)
+    	return 0;
     return (b - buf) + 2;
 }
