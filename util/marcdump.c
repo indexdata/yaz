@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.20 2003-01-06 08:20:28 adam Exp $
+ * $Id: marcdump.c,v 1.21 2003-02-12 22:02:33 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -144,7 +144,6 @@ int main (int argc, char **argv)
                         
                         while (inbytesleft)
                         {
-                            int i;
                             size_t outbytesleft = sizeof(outbuf);
                             char *outp = outbuf;
                             size_t r = yaz_iconv (cd, (char**) &inp,
