@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.3 2003-02-18 21:27:53 adam Exp $
+/* $Id: cql.h,v 1.4 2003-05-27 09:46:26 mike Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -184,44 +184,8 @@ int cql_transform_buf(cql_transform_t ct,
 YAZ_EXPORT
 int cql_transform_error(cql_transform_t ct, const char **addinfo);
 
-/*
-10 Illegal query
-11 Unsupported query type (XCQL vs CQL)
-12 Too many characters in query
-13 Unbalanced or illegal use of parentheses
-14 Unbalanced or illegal use of quotes
-15 Illegal or unsupported index set
-16 Illegal or unsupported index
-17 Illegal or unsupported combination of index and index set
-18 Illegal or unsupported combination of indexes
-19 Illegal or unsupported relation
-20 Illegal or unsupported relation modifier
-21 Illegal or unsupported combination of relation modifers
-22 Illegal or unsupported combination of relation and index
-23 Too many characters in term
-24 Illegal combination of relation and term
-25 Special characters not quoted in term
-26 Non special character escaped in term
-27 Empty term unsupported
-28 Masking character not supported
-29 Masked words too short
-30 Too many masking characters in term
-31 Anchoring character not supported
-32 Anchoring character in illegal or unsupported position
-33 Combination of proximity/adjacency and masking characters not supported
-34 Combination of proximity/adjacency and anchoring characters not supported
-35 Terms only exclusion (stop) words
-36 Term in invalid format for index or relation
-37 Illegal or unsupported boolean operator
-38 Too many boolean operators in query
-39 Proximity not supported
-40 Illegal or unsupported proximity relation
-41 Illegal or unsupported proximity distance
-42 Illegal or unsupported proximity unit
-43 Illegal or unsupported proximity ordering
-44 Illegal or unsupported combination of proximity modifiers
-45 Index set name (prefix) assigned to multiple identifiers
-*/
+YAZ_EXPORT
+const char *cql_strerror(int code);
 
 #endif
 /* CQL_H_INCLUDED */
