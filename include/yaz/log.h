@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.22 2004-11-19 10:07:08 heikki Exp $
+ * $Id: log.h,v 1.23 2004-11-26 10:58:38 heikki Exp $
  */
 
 /**
@@ -52,14 +52,15 @@ YAZ_BEGIN_CDECL
 #define LOG_WARN   YLOG_WARN
 #define LOG_LOG    YLOG_LOG /* Deprecated, use the modern dynamic log levels*/
 #define LOG_ERRNO  YLOG_ERRNO 
- /*     LOG_FILE   discontinued */
-#define LOG_APP    YLOG_APP   /* Deprecated */
- /*     LOG_MALLOC discontinued */
+#define LOG_FILE   0x00000020 /* Deprecated - not in ylog.h at all*/
+#define LOG_APP    0x00000040 /* Deprecated - not in ylog.h at all*/
+#define LOG_MALLOC YLOG_MALLOC /* deprecated */
 #define LOG_NOTIME YLOG_NOTIME /* do not output date and time */
-#define LOG_APP2   YLOG_APP2 /* deprecated */
-#define LOG_APP3   YLOG_APP3 /* deprecated */
+#define LOG_APP2   0x00000200 /* Deprecated - not in ylog.h at all*/
+#define LOG_APP3   0x00000400 /* Deprecated - not in ylog.h at all*/
 #define LOG_FLUSH  YLOG_FLUSH 
- /*     LOG_LOGLVL so new that nobody should be using it.  */
+ /*     LOG_LOGLVL is a new one in ylog.h. So new that no log.h users should
+  *     use it */
 
 #define LOG_ALL    YLOG_ALL
 
