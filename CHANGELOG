@@ -1,33 +1,23 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-<<<<<<< 1.45
-<<<<<<< 1.43
-=======
-=======
->>>>>>> /tmp/T4a02877
 --- XXXXXXXXXXXXX
 
-<<<<<<< CHANGELOG
 Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
 
-<<<<<<< CHANGELOG
 Smallish bug-fixes in the new encoders/decoders (explain).
 
-Bug (stupid) fixed in DeleteRequest.
-||||||| 1.46
-Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
-=======
+Bug fixed in DeleteRequest.
+
 Fixed tagging bug of type 101 query in SearchRequest-Query PDU encoder/decoder.
 
 Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
->>>>>>> /tmp/T4a18297
 
-||||||| 1.45
->>>>>>> /tmp/T4a00109
-=======
 Added SOIF syntax (using private OID for now) to retrieval module and client.
 
->>>>>>> /tmp/T4a02877
+Added Update extended service.
+
+Added SearchResult-1 additional info structure.
+
 --- 1.2 1996/6/10 (1st anniversary release)
 
 Added Summary record syntax. Lightly tested.
