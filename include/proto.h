@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.23  1995-08-21 09:10:36  quinn
+ * Revision 1.24  1995-08-29 11:17:43  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.23  1995/08/21  09:10:36  quinn
  * Smallish fixes to suppport new formats.
  *
  * Revision 1.22  1995/08/17  12:45:14  quinn
@@ -1148,6 +1151,8 @@ int z_Term(ODR o, Z_Term **p, int opt);
 int z_Specification(ODR o, Z_Specification **p, int opt);
 int z_Permissions(ODR o, Z_Permissions **p, int opt);
 int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
+int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
+int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
 Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 
 #include <prt-rsc.h>
@@ -1155,6 +1160,7 @@ Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 #include <prt-exp.h>
 #include <prt-grs.h>
 #include <prt-exd.h>
+#include <prt-dia.h>
 
 #include <prt-ext.h>
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.3  1995-08-21 09:10:18  quinn
+ * Revision 1.4  1995-08-29 11:17:16  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.3  1995/08/21  09:10:18  quinn
  * Smallish fixes to suppport new formats.
  *
  * Revision 1.2  1995/08/17  12:45:00  quinn
@@ -41,6 +44,7 @@ int z_External(ODR o, Z_External **p, int opt)
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_extendedService,
 	    z_TaskPackage},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, z_ItemOrder},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1, z_DiagnosticFormat},
 	{-1, -1, -1, -1, 0}
     };
     /*
@@ -60,6 +64,9 @@ int z_External(ODR o, Z_External **p, int opt)
 	{VAL_RESOURCE2, Z_External_resourceReport2},
 	{VAL_PROMPT1, Z_External_promptObject1},
 	{VAL_GRS1, Z_External_grs1},
+	{VAL_EXTENDED, Z_External_extendedService},
+	{VAL_ITEMORDER, Z_External_itemOrder},
+	{VAL_DIAG1, Z_External_diag1},
 	{VAL_NONE, 0}
     };
 

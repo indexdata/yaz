@@ -49,7 +49,8 @@ struct Z_External
 	Z_External_promptObject1,
 	Z_External_grs1,
 	Z_External_extendedService,
-	Z_External_itemOrder
+	Z_External_itemOrder,
+	Z_External_diag1
     } which;
     union
     {
@@ -67,6 +68,7 @@ struct Z_External
 	Z_GenericRecord *grs1;
 	Z_TaskPackage *extendedService;
 	Z_ItemOrder *itemOrder;
+	Z_DiagnosticFormat *diag1;
     } u;
 };
 
