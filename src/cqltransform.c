@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.2 2003-12-18 16:42:52 mike Exp $
+/* $Id: cqltransform.c,v 1.3 2003-12-18 16:50:18 mike Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -315,7 +315,7 @@ static const char *cql_get_ns(cql_transform_t ct,
         }
         return 0;
     }
-    /* 4. lookup qualifier.prefix. */
+    /* 4. lookup index.prefix. */
     
     cp = cn->u.st.index;
     cp_dot = strchr(cp, '.');
