@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.61 2003-07-15 08:26:26 adam Exp $
+# $Id: makefile,v 1.62 2003-07-19 13:48:49 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -10,7 +10,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=1   # 0 for release, 1 for debug
+DEBUG=0   # 0 for release, 1 for debug
 
 # TCL
 TCL="C:\Tcl\bin\tclsh84.exe"
@@ -395,7 +395,8 @@ Z3950_OBJS= \
    $(OBJDIR)\zes-update0.obj \
    $(OBJDIR)\prt-ext.obj \
    $(OBJDIR)\z-charneg.obj \
-   $(OBJDIR)\z-mterm2.obj
+   $(OBJDIR)\z-mterm2.obj \
+   $(OBJDIR)\z-oclcui.obj
 
 ILL_OBJS= \
    $(OBJDIR)\ill-get.obj\
@@ -470,6 +471,10 @@ CHARNEG_C_FILES = $(Z3950_C_DIR)\z-charneg.c
 MTERM2_H_FILES = $(INCLDIR)\yaz\z-mterm2.h
 MTERM2_C_FILES = $(Z3950_C_DIR)\z-mterm2.c
 
+# Files generated from mterm2.asn
+OCLCUI_H_FILES = $(INCLDIR)\yaz\z-oclcui.h
+OCLCUI_C_FILES = $(Z3950_C_DIR)\z-oclcui.c
+
 # Files created from z3950v3.asn
 Z3950V3_H_FILES= \
    $(INCLDIR)\yaz\z-accdes1.h \
@@ -523,6 +528,7 @@ ILL_CORE_FILES= $(ILL_CORE_C_FILES) $(ILL_CORE_H_FILES)
 ITEM_REQ_FILES= $(ITEM_REQ_C_FILES) $(ITEM_REQ_H_FILES)
 CHARNEG_FILES = $(CHARNEG_C_FILES) $(CHARNEG_H_FILES)
 MTERM2_FILES = $(MTERM2_C_FILES) $(MTERM2_H_FILES)
+OCLCUI_FILES = $(OCLCUI_C_FILES) $(OCLCUI_H_FILES)
 
 GENERATED_C_FILES= \
    $(Z3950V3_C_FILES)  \
@@ -531,7 +537,8 @@ GENERATED_C_FILES= \
    $(DATETIME_C_FILES) \
    $(ESADMIN_C_FILES) \
    $(CHARNEG_C_FILES) \
-   $(MTERM2_C_FILES)
+   $(MTERM2_C_FILES) \
+   $(OCLCUI_C_FILES)
 
 GENERATED_H_FILES= \
    $(Z3950V3_H_FILES)  \
@@ -540,7 +547,8 @@ GENERATED_H_FILES= \
    $(DATETIME_H_FILES) \
    $(ESADMIN_H_FILES) \
    $(CHARNEG_H_FILES) \
-   $(MTERM2_H_FILES)
+   $(MTERM2_H_FILES) \
+   $(OCLCUI_H_FILES)
 
 generated_files: \
 	$(GENERATED_H_FILES) \
@@ -640,6 +648,11 @@ $(CHARNEG_FILES): $(Z3950DIR)\charneg-3.asn
 $(MTERM2_FILES): $(Z3950DIR)\mterm2.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) -d z.tcl mterm2.asn
+	@cd $(WINDIR)
+
+$(OCLCUI_FILES): $(Z3950DIR)\oclcui.asn
+	@cd $(Z3950DIR)
+	$(TCL) $(TCLOPT) -d z.tcl oclcui.asn
 	@cd $(WINDIR)
 
 $(ILL_CORE_FILES): $(ILLDIR)\ill9702.asn
@@ -931,7 +944,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.61  2003-07-15 08:26:26  adam
+# Revision 1.62  2003-07-19 13:48:49  adam
+# makefile updated for oclcui.asn
+#
+# Revision 1.61  2003/07/15 08:26:26  adam
 # opacdisp.obj
 #
 # Revision 1.60  2003/06/11 18:37:10  adam
