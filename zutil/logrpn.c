@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2001, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.6 2002-01-22 10:54:46 adam Exp $
+ * $Id: logrpn.c,v 1.7 2002-07-25 12:48:54 adam Exp $
  */
 #include <stdio.h>
 
@@ -266,14 +266,25 @@ static void zlog_structure (Z_RPNStructure *zs, int level, enum oid_value ast)
         {
             Z_AttributesPlusTerm *zapt = zs->u.simple->u.attributesPlusTerm;
 
-            if (zapt->term->which == Z_Term_general) 
+            switch (zapt->term->which)
             {
+            case Z_Term_general:
                 yaz_log (LOG_LOG, "%*.0s term '%.*s' (general)", level, "",
 			 zapt->term->u.general->len,
 			 zapt->term->u.general->buf);
-            }
-            else
-            {
+                break;
+            case Z_Term_characterString:
+                yaz_log (LOG_LOG, "%*.0s term '%s' (string)", level, "",
+			 zapt->term->u.characterString);
+                break;
+            case Z_Term_numeric:
+                yaz_log (LOG_LOG, "%*.0s term '%d' (numeric)", level, "",
+			 *zapt->term->u.numeric);
+                break;
+            case Z_Term_null:
+                yaz_log (LOG_LOG, "%*.0s term (null)", level, "");
+                break;
+            default:
                 yaz_log (LOG_LOG, "%*.0s term (not general)", level, "");
             }
             zlog_attributes (zapt, level+2, ast);
