@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.162 2002-07-25 12:52:53 adam Exp $
+ * $Id: client.c,v 1.163 2002-08-26 12:15:35 adam Exp $
  */
 
 #include <stdio.h>
@@ -333,13 +333,20 @@ static int cmd_base(char *arg)
     num_databaseNames = 0;
     while (1)
     {
+        char *cp1;
         if (!(cp = strchr(arg, ' ')))
             cp = arg + strlen(arg);
         if (cp - arg < 1)
             break;
         databaseNames[num_databaseNames] = (char *)xmalloc (1 + cp - arg);
         memcpy (databaseNames[num_databaseNames], arg, cp - arg);
-        databaseNames[num_databaseNames++][cp - arg] = '\0';
+        databaseNames[num_databaseNames][cp - arg] = '\0';
+
+        for (cp1 = databaseNames[num_databaseNames]; *cp1 ; cp1++)
+            if (*cp1 == '+')
+                *cp1 = ' ';
+        num_databaseNames++;
+
         if (!*cp)
             break;
         arg = cp+1;
