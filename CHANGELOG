@@ -1,5 +1,15 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* CHANGED DEFINITION OF ES: UPDATE (INCLUDING THE OID) to reflect the
+new definition from the ZIG. NOTE THIS IF YOU HAVE AN UPDATE
+IMPLEMENTATION! This change was made to the development version before
+the ZIG decided to retract the amendment. If any users MUST be
+compatible with the original Update definition, PLEASE CONTACT US, and
+we will include a separate definition corresponding to the old Update
+ES. Note that because of the change to the ASN.1 of the
+TaskPackageRecordStructure we cannot define a single structure that
+will support both versions.
+
 * Added const modifier to buffer parameter for some ODR/BER encoding
 routines: ber_dectag, ber_declen, odp_more_chunks, completeBER,
 completeWAIS, odr_dumpBER.
