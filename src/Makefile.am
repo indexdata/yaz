@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.5 2004-01-12 12:11:57 adam Exp $
+## $Id: Makefile.am,v 1.6 2004-02-09 09:54:58 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -159,9 +159,9 @@ thr-eventl.lo: eventl.c
 
 # SSL versions of objects.
 ssl-comstack.lo: comstack.c
-	$(LTCOMPILE) $(SSL_FLAGS) -c $(srcdir)/comstack.c -o ssl-comstack.lo
+	$(LTCOMPILE) $(SSL_CFLAGS) $(SSL_DEFS) -c $(srcdir)/comstack.c -o ssl-comstack.lo
 
 ssl-tcpip.lo: tcpip.c
-	$(LTCOMPILE) $(SSL_FLAGS) -c $(srcdir)/tcpip.c -o ssl-tcpip.lo
+	$(LTCOMPILE) $(SSL_CFLAGS) $(SSL_DEFS) -c $(srcdir)/tcpip.c -o ssl-tcpip.lo
 
 

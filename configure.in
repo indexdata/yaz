@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.124 2004-02-05 11:55:56 adam Exp $
+dnl $Id: configure.in,v 1.125 2004-02-09 09:54:58 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.10)
 AM_MAINTAINER_MODE
@@ -115,9 +115,9 @@ if test "$openssl" != "no"; then
 	xCFLAGS="$CFLAGS";
 	if test "$openssl" != "yes"; then
 		if $openssl/bin/pkg-config --exists openssl; then
-			SSL_CFLAGS=`$openssl/bin/pkgconfig --cflags openssl`
-			SSL_LIBS=`$openssl/bin/pkgconfig --libs openssl`
-			sslver=`$openssl/bin/pkgconfig --modversion openssl`
+			SSL_CFLAGS=`$openssl/bin/pkg-config --cflags openssl`
+			SSL_LIBS=`$openssl/bin/pkg-config --libs openssl`
+			sslver=`$openssl/bin/pkg-config --modversion openssl`
 		else
                 	SSL_CFLAGS="-I$openssl/include -I$openssl/include/openssl"
                 	SSL_LIBS="-L$openssl/lib"
@@ -143,7 +143,7 @@ if test "$openssl" != "no"; then
 		fi
 	fi
 	if test "$sslver" != "no"; then
-		SSL_DEFS="-DHAVE_OPENSSL_H=1"
+		SSL_DEFS="-DHAVE_OPENSSL_SSL_H=1"
 		USE_SSL=1
 	fi
 	AC_MSG_CHECKING([for SSL])

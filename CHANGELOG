@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed compilation for SSL which wasn't properly enabled for all platforms.
+
 --- 2.0.10 2004/02/05 
 
 For yaz.m4, allow second argument for YAZ_INIT to hold minimal version of
