@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2003, Index Data.
+ * Copyright (c) 2003-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: opacdisp.c,v 1.1 2003-10-27 12:21:34 adam Exp $
+ * $Id: opacdisp.c,v 1.2 2004-03-10 21:09:01 adam Exp $
  */
 
 #include <stdio.h>
@@ -77,6 +77,8 @@ void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags)
 	    opac_element_str (wrbuf, 2, "localLocation", d->localLocation);
 	    opac_element_str (wrbuf, 2, "shelvingLocation", d->shelvingLocation);
 	    opac_element_str (wrbuf, 2, "callNumber", d->callNumber);
+	    opac_element_str (wrbuf, 2, "shelvingData", d->shelvingData);
+	    
 	    opac_element_str (wrbuf, 2, "copyNumber", d->copyNumber);
 	    opac_element_str (wrbuf, 2, "publicNote", d->publicNote);
 	    opac_element_str (wrbuf, 2, "reproductionNote", d->reproductionNote);
