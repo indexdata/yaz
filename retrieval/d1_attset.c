@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.10  1998-10-13 16:09:48  adam
+ * Revision 1.11  1998-10-14 13:31:56  adam
+ * Bug fix. Bug introduced by previous commit.
+ *
+ * Revision 1.10  1998/10/13 16:09:48  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -131,7 +134,7 @@ data1_attset *data1_read_attset(data1_handle dh, const char *file)
 	    }
 	    else /* parse the string "local{,local}" */
 	    {
-		char *p = argv[4];
+		char *p = argv[3];
 		data1_local_attribute **ap = &locals;
 		do
 		{
