@@ -1,13 +1,13 @@
 #
 # This table maps records in the GILS abstract syntax to the USMARC one
-#
+# $Id: gils-usmarc.map,v 1.6 2002-05-28 21:11:08 adam Exp $
 
 targetname usmarc
 targetref USmarc
 
 map rank			/(3,999)/(3,r)
-map localControlNumber		/(3,001)/(3,@)
-map dateLastModified		/(3,005)/(3,@)
+map localControlNumber		/(3,001)
+map dateLastModified		/(3,005)
 map ControlIdentifier		/(3,035)/(3,a)
 
 map title			/(3,245)/(3,a)

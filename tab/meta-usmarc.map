@@ -1,8 +1,10 @@
+# Meta to USMARC conversion
+# $Id: meta-usmarc.map,v 1.2 2002-05-28 21:11:08 adam Exp $
 targetname usmarc
 targetref USmarc
 
-map localControlNumber  /(3,001)/(3,@)
-map dateLastModified    /(3,005)/(3,@)
+map localControlNumber  /(3,001)
+map dateLastModified    /(3,005)
 
 map subject		/(3,653)/(3,a)
 map title		/(3,245)/(3,a)
