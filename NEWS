@@ -1,5 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed a few AC_TRY_LINK configure tests that did not operate properly
+due to new GCC removing "redundant" code.
+
+Added yaz-client commands scanpos and scanstep that sets preferred
+position and step-size for scan.
+
 Macro YAZ_INIT in yaz.m4: option --with-yazconfig renamed to --with-yaz.
 
 Added CCL utility ccl_qual_buf which parses one or more CCL 
