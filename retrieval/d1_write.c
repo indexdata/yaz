@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_write.c,v $
- * Revision 1.4  1998-05-18 13:07:08  adam
+ * Revision 1.5  1998-06-05 08:57:43  adam
+ * Fixed problem with function wordlen.
+ *
+ * Revision 1.4  1998/05/18 13:07:08  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -29,11 +32,11 @@
 
 #define IDSGML_MARGIN 75
 
-static int wordlen(char *b)
+static int wordlen(char *b, int max)
 {
     int l = 0;
 
-    while (*b && !isspace(*b))
+    while (l < max && !isspace(*b))
 	l++, b++;
     return l;
 }
@@ -84,7 +87,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 		    if (!l)
 			break;
 		    /* break if we'll cross margin and word is not too long */
-		    if (col + (wlen = wordlen(p)) > IDSGML_MARGIN && wlen <
+		    if (col + (wlen = wordlen(p, l)) > IDSGML_MARGIN && wlen <
 			IDSGML_MARGIN)
 		    {
 			sprintf(line, "\n");
