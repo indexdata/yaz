@@ -1,3 +1,7 @@
+yaz (1.8.7-1) unstable; urgency=low
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 22 May 2002 13:33:37 +0100
+
 yaz (1.8.6-1) unstable; urgency=low
 
   * Package yaz-ssl instead of yaz-runtime-ssl.
