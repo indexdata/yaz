@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.29 2002-03-18 18:14:34 adam Exp $
+ * $Id: cclfind.c,v 1.30 2002-05-17 08:46:01 adam Exp $
  *
  * Old Europagate log:
  *
@@ -627,22 +627,24 @@ static struct ccl_rpn_node *qualifiers2 (CCL_parser cclp,
 }
 
 /*
- * qualifiers: Parse CCL qualifiers and search terms. 
+ * qualifiers1: Parse CCL qualifiers and search terms. 
  * cclp:   CCL Parser
  * la:     Token pointer to RELATION token.
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
-                                        struct ccl_rpn_attr **qa)
+static struct ccl_rpn_node *qualifiers1 (CCL_parser cclp, struct ccl_token *la,
+                                         struct ccl_rpn_attr **qa)
 {
     struct ccl_token *lookahead = cclp->look_token;
     struct ccl_token *look_start = cclp->look_token;
     struct ccl_rpn_attr **ap;
     struct ccl_rpn_node *node = 0;
+    const char *field_str;
     int no = 0;
     int seq = 0;
     int i;
+    int mode_merge = 1;
 #if 0
     if (qa)
     {
@@ -656,24 +658,50 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
     if (qa)
         for (i=0; qa[i]; i++)
             no++;
-    ap = (struct ccl_rpn_attr **)malloc ((no+1) * sizeof(*ap));
+    ap = (struct ccl_rpn_attr **)malloc ((no ? (no+1) : 2) * sizeof(*ap));
     ccl_assert (ap);
 
-    while (1)
+    field_str = ccl_qual_search_special(cclp->bibset, "field");
+    if (field_str)
     {
-        struct ccl_rpn_node *node_sub;
-        int found = 0;
+        if (!strcmp (field_str, "or"))
+            mode_merge = 0;
+        else if (!strcmp (field_str, "merge"))
+            mode_merge = 1;
+    }
+    if (!mode_merge)
+    {
+        /* consider each field separately and OR */
         lookahead = look_start;
-        for (i = 0; lookahead != la; i++)
+        while (lookahead != la)
         {
-            ap[i] = ccl_qual_search (cclp, lookahead->name,
-                                     lookahead->len, seq);
-            if (ap[i])
-                found++;
-            if (!ap[i] && seq > 0)
-                ap[i] = ccl_qual_search (cclp, lookahead->name,
-                                         lookahead->len, 0);
-            if (!ap[i])
+            ap[1] = 0;
+            seq = 0;
+            while ((ap[0] = ccl_qual_search (cclp, lookahead->name,
+                                             lookahead->len, seq)) != 0)
+            {
+                struct ccl_rpn_node *node_sub;
+                cclp->look_token = la;
+                
+                node_sub = qualifiers2(cclp, ap);
+                if (!node_sub)
+                {
+                    ccl_rpn_delete (node);
+                    free (ap);
+                    return 0;
+                }
+                if (node)
+                {
+                    struct ccl_rpn_node *node_this = mk_node(CCL_RPN_OR);
+                    node_this->u.p[0] = node;
+                    node_this->u.p[1] = node_sub;
+                    node = node_this;
+                }
+                else
+                    node = node_sub;
+                seq++;
+            }
+            if (seq == 0)
             {
                 cclp->look_token = lookahead;
                 cclp->error_code = CCL_ERR_UNKNOWN_QUAL;
@@ -684,32 +712,66 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
             if (lookahead->kind == CCL_TOK_COMMA)
                 lookahead = lookahead->next;
         }
-        if (qa)
-            while (*qa)
-                ap[i++] = *qa++;
-        ap[i] = NULL;
-
-        if (!found)
-            break;
-
-        cclp->look_token = lookahead;
-
-        node_sub = qualifiers2(cclp, ap);
-        if (!node_sub)
+    }
+    else
+    {
+        /* merge attributes from ALL fields - including inherited ones */
+        while (1)
         {
-            ccl_rpn_delete (node);
-            break;
+            struct ccl_rpn_node *node_sub;
+            int found = 0;
+            lookahead = look_start;
+            for (i = 0; lookahead != la; i++)
+            {
+                ap[i] = ccl_qual_search (cclp, lookahead->name,
+                                         lookahead->len, seq);
+                if (ap[i])
+                    found++;
+                if (!ap[i] && seq > 0)
+                    ap[i] = ccl_qual_search (cclp, lookahead->name,
+                                             lookahead->len, 0);
+                if (!ap[i])
+                {
+                    cclp->look_token = lookahead;
+                    cclp->error_code = CCL_ERR_UNKNOWN_QUAL;
+                    free (ap);
+                    return NULL;
+                }
+                lookahead = lookahead->next;
+                if (lookahead->kind == CCL_TOK_COMMA)
+                    lookahead = lookahead->next;
+            }
+            if (qa)
+            {
+                struct ccl_rpn_attr **qa0 = qa;
+                
+                while (*qa0)
+                    ap[i++] = *qa0++;
+            }
+            ap[i] = NULL;
+            
+            if (!found)
+                break;
+            
+            cclp->look_token = lookahead;
+            
+            node_sub = qualifiers2(cclp, ap);
+            if (!node_sub)
+            {
+                ccl_rpn_delete (node);
+                break;
+            }
+            if (node)
+            {
+                struct ccl_rpn_node *node_this = mk_node(CCL_RPN_OR);
+                node_this->u.p[0] = node;
+                node_this->u.p[1] = node_sub;
+                node = node_this;
+            }
+            else
+                node = node_sub;
+            seq++;
         }
-        if (node)
-        {
-            struct ccl_rpn_node *node_this = mk_node(CCL_RPN_OR);
-            node_this->u.p[0] = node;
-            node_this->u.p[1] = node_sub;
-            node = node_this;
-        }
-        else
-            node = node_sub;
-        seq++;
     }
     free (ap);
     return node;
@@ -813,7 +875,7 @@ static struct ccl_rpn_node *search_elements (CCL_parser cclp,
     {
         lookahead = lookahead->next;
         if (lookahead->kind == CCL_TOK_REL || lookahead->kind == CCL_TOK_EQ)
-            return qualifiers (cclp, lookahead, qa);
+            return qualifiers1 (cclp, lookahead, qa);
         if (lookahead->kind != CCL_TOK_COMMA)
             break;
         lookahead = lookahead->next;
