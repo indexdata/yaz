@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.34  1996-05-09 07:26:49  quinn
+ * Revision 1.35  1996-06-03 09:45:50  quinn
+ * Added display of OIDs in the GRS routine.
+ *
+ * Revision 1.34  1996/05/09  07:26:49  quinn
  * *** empty log message ***
  *
  * Revision 1.33  1996/05/09  07:25:22  quinn
@@ -384,6 +387,21 @@ static void display_grs1(Z_GenericRecord *r, int level)
             printf("%s\n", t->content->u.string);
         else if (t->content->which == Z_ElementData_numeric)
 	    printf("%d\n", *t->content->u.numeric);
+	else if (t->content->which == Z_ElementData_oid)
+	{
+	    int *ip = t->content->u.oid;
+	    oident *oent;
+
+	    if ((oent = oid_getentbyoid(t->content->u.oid)))
+		printf("OID: %s\n", oent->desc);
+	    else
+	    {
+		printf("{");
+		while (ip && *ip >= 0)
+		    printf(" %d", *(ip++));
+		printf(" }\n");
+	    }
+	}
 	else if (t->content->which == Z_ElementData_noDataRequested)
 	    printf("[No data requested]\n");
 	else if (t->content->which == Z_ElementData_elementEmpty)
