@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Modified bib1.att; local attributes for ANY didn't include
+ANY itself (only affects use of the retrieval module).
+
 Fixed bug in plain SGML reader in function data1_read_node:
 tags with prefix "var" was incorrectly interpreted as variants.
 
