@@ -2,7 +2,7 @@
  * Copyright (c) 2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: opacdisp.c,v 1.2 2003-07-14 12:59:23 adam Exp $
+ * $Id: opacdisp.c,v 1.3 2003-07-30 08:57:35 adam Exp $
  */
 
 #include <stdio.h>
@@ -31,12 +31,16 @@ static void opac_element_str(WRBUF wrbuf, int l, const char *elem,
 
 static void opac_element_bool(WRBUF wrbuf, int l, const char *elem, int *data)
 {
-    if (data && *data)
+    if (data)
     {
 	while (--l >= 0)
 	    wrbuf_puts(wrbuf, " ");
 	wrbuf_puts(wrbuf, "<");
 	wrbuf_puts(wrbuf, elem);
+	if (*data)
+            wrbuf_puts(wrbuf, " value=\"1\"");
+	else
+            wrbuf_puts(wrbuf, " value=\"0\"");
 	wrbuf_puts(wrbuf, "/>\n");
     }
 }
@@ -110,9 +114,9 @@ void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags)
 				      d->circulationData[j]->restrictions);
 		    opac_element_str (wrbuf, 4, "itemId",
 				      d->circulationData[j]->itemId);
-		    opac_element_bool (wrbuf, 4, "renewable: %d\n",
+		    opac_element_bool (wrbuf, 4, "renewable",
 				       d->circulationData[j]->renewable);
-		    opac_element_bool (wrbuf, 4, "onHold: %d\n",
+		    opac_element_bool (wrbuf, 4, "onHold",
 				       d->circulationData[j]->onHold);
 		    opac_element_str (wrbuf, 4, "enumAndChron",
 				      d->circulationData[j]->enumAndChron);
