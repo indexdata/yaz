@@ -62,7 +62,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
-    $(OutDir)\$(TargetName).dll $(ProjDir)\lib
+     $(OutDir)\$(TargetName).dll $(ProjDir)\lib
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
@@ -99,7 +99,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
-    $(OutDir)\$(TargetName).dll $(ProjDir)\lib
+     $(OutDir)\$(TargetName).dll $(ProjDir)\lib
 # End Special Build Tool
 
 !ENDIF 
@@ -119,8 +119,6 @@ SOURCE=.\Util\atoin.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -131,8 +129,6 @@ SOURCE=.\odr\ber_any.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -145,8 +141,6 @@ SOURCE=.\odr\ber_bit.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -157,8 +151,6 @@ SOURCE=.\odr\ber_bool.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -171,8 +163,6 @@ SOURCE=.\odr\ber_int.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -183,8 +173,6 @@ SOURCE=.\odr\ber_len.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -197,8 +185,6 @@ SOURCE=.\odr\ber_null.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -209,8 +195,6 @@ SOURCE=.\odr\ber_oct.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -223,8 +207,6 @@ SOURCE=.\odr\ber_oid.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -235,8 +217,6 @@ SOURCE=.\odr\ber_tag.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -249,8 +229,6 @@ SOURCE=.\ccl\cclerrms.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -261,8 +239,6 @@ SOURCE=.\ccl\cclfind.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -275,8 +251,6 @@ SOURCE=.\ccl\cclptree.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -287,8 +261,6 @@ SOURCE=.\ccl\cclqfile.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -301,8 +273,6 @@ SOURCE=.\ccl\cclqual.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -313,8 +283,6 @@ SOURCE=.\ccl\cclstr.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -327,8 +295,6 @@ SOURCE=.\ccl\ccltoken.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -339,8 +305,6 @@ SOURCE=.\comstack\comstack.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -353,8 +317,6 @@ SOURCE=.\retrieval\d1_absyn.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -365,8 +327,6 @@ SOURCE=.\retrieval\d1_attset.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -379,8 +339,6 @@ SOURCE=.\retrieval\d1_doespec.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -391,8 +349,6 @@ SOURCE=.\retrieval\d1_espec.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -405,8 +361,6 @@ SOURCE=.\retrieval\d1_expout.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -417,8 +371,6 @@ SOURCE=.\retrieval\d1_grs.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -435,8 +387,6 @@ SOURCE=.\retrieval\d1_map.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -447,8 +397,6 @@ SOURCE=.\retrieval\d1_marc.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -461,8 +409,6 @@ SOURCE=.\retrieval\d1_read.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -473,8 +419,6 @@ SOURCE=.\retrieval\d1_soif.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -487,8 +431,6 @@ SOURCE=.\retrieval\d1_sumout.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -499,8 +441,6 @@ SOURCE=.\retrieval\d1_sutrs.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -513,8 +453,6 @@ SOURCE=.\retrieval\d1_tagset.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -525,8 +463,6 @@ SOURCE=.\retrieval\d1_varset.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -539,8 +475,6 @@ SOURCE=.\retrieval\d1_write.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -551,8 +485,6 @@ SOURCE=.\asn\diagbib1.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -565,8 +497,6 @@ SOURCE=.\util\dmalloc.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -577,8 +507,6 @@ SOURCE=.\odr\dumpber.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -591,8 +519,6 @@ SOURCE=.\util\log.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -604,8 +530,6 @@ SOURCE=.\util\marcdisp.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -616,8 +540,6 @@ SOURCE=.\util\nmem.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -634,8 +556,6 @@ SOURCE=.\odr\odr.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -646,8 +566,6 @@ SOURCE=.\odr\odr_any.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -660,8 +578,6 @@ SOURCE=.\odr\odr_bit.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -672,8 +588,6 @@ SOURCE=.\odr\odr_bool.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -686,8 +600,6 @@ SOURCE=.\odr\odr_choice.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -698,8 +610,6 @@ SOURCE=.\odr\odr_cons.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -712,8 +622,6 @@ SOURCE=.\odr\odr_int.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -724,8 +632,6 @@ SOURCE=.\odr\odr_mem.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -738,8 +644,6 @@ SOURCE=.\odr\odr_null.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -750,8 +654,6 @@ SOURCE=.\odr\odr_oct.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -764,8 +666,6 @@ SOURCE=.\odr\odr_oid.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -776,8 +676,6 @@ SOURCE=.\odr\odr_priv.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -790,8 +688,6 @@ SOURCE=.\odr\odr_seq.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -802,8 +698,6 @@ SOURCE=.\odr\odr_tag.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -816,8 +710,6 @@ SOURCE=.\odr\odr_use.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -828,8 +720,6 @@ SOURCE=.\odr\odr_util.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -842,8 +732,6 @@ SOURCE=.\util\oid.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -854,8 +742,6 @@ SOURCE=.\util\options.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -868,8 +754,6 @@ SOURCE=.\util\pquery.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -880,8 +764,6 @@ SOURCE=.\asn\proto.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -894,8 +776,6 @@ SOURCE=".\asn\prt-acc.c"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -906,8 +786,6 @@ SOURCE=".\asn\prt-add.c"
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -920,8 +798,6 @@ SOURCE=".\asn\prt-arc.c"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -932,8 +808,6 @@ SOURCE=".\asn\prt-dia.c"
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -946,8 +820,6 @@ SOURCE=".\asn\prt-esp.c"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -958,8 +830,6 @@ SOURCE=".\asn\prt-exd.c"
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -972,8 +842,6 @@ SOURCE=".\asn\prt-exp.c"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -984,8 +852,6 @@ SOURCE=".\asn\prt-ext.c"
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -998,8 +864,6 @@ SOURCE=".\asn\prt-grs.c"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -1010,8 +874,6 @@ SOURCE=".\asn\prt-rsc.c"
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -1024,8 +886,6 @@ SOURCE=.\util\query.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -1036,8 +896,6 @@ SOURCE=.\util\readconf.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -1050,8 +908,6 @@ SOURCE=.\comstack\tcpip.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -1062,8 +918,6 @@ SOURCE=.\util\tpath.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -1076,8 +930,6 @@ SOURCE=.\comstack\waislen.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -1088,8 +940,6 @@ SOURCE=.\util\wrbuf.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -1102,8 +952,6 @@ SOURCE=.\util\xmalloc.c
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -1114,8 +962,6 @@ SOURCE=".\util\yaz-ccl.c"
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
@@ -1128,8 +974,6 @@ SOURCE=".\util\yaz-util.c"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
 
-# ADD CPP /I "include"
-
 !ENDIF 
 
 # End Source File
@@ -1140,8 +984,6 @@ SOURCE=.\asn\zget.c
 !IF  "$(CFG)" == "yaz - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-# ADD CPP /I "include"
 
 !ENDIF 
 
