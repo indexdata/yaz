@@ -10,8 +10,8 @@ Demo client can request simple element set names.
 
 Added Diagnostic Format.
 
-Added simple Close to frontend server (no hooks for resource reporting yet),
-and demonstration client.
+Added simple Close handling to frontend server (no hooks for resource
+reporting yet), and demonstration client.
 
 --- 1.0b3 1995/08/24
 
