@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.13  1997-09-17 12:10:42  adam
+ * Revision 1.14  1997-09-22 12:33:41  adam
+ * Fixed bug introduced by previous commit.
+ *
+ * Revision 1.13  1997/09/17 12:10:42  adam
  * YAZ version 1.4.
  *
  * Revision 1.12  1997/09/01 08:54:13  adam
@@ -89,7 +92,7 @@ static int compare_term (struct lex_info *li, const char *src, int off)
 {
     size_t len=strlen(src);
 
-    if (li->lex_len == len && !memcmp (li->lex_buf+off, src, len-off))
+    if (li->lex_len == len+off && !memcmp (li->lex_buf+off, src, len-off))
 	return 1;
     return 0;
 }

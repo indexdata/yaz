@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1997, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.2 1997-09-17 12:10:43 adam Exp $
+# $Id: Makefile,v 1.3 1997-09-22 12:33:41 adam Exp $
 
 LIBDIR=../lib
 
@@ -21,7 +21,7 @@ RANLIB=ranlib
 
 all: $(PROG)
 
-$(PROG): $(LIB) $(PROGO) 
+$(PROG): $(LIB) $(PROGO) $(LIBS)
 	$(CC) $(CFLAGS) $(LIBINCLUDE) -o $(PROG) $(PROGO) $(LIBS)
 
 alll:
