@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: pquery.c,v $
- * Revision 1.9  2001-09-24 21:51:56  adam
+ * Revision 1.10  2001-10-28 23:10:03  adam
+ * Fix local attribute setting for pquery.
+ *
+ * Revision 1.9  2001/09/24 21:51:56  adam
  * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
  * and yaz_z3950oid_to_str.
  *
@@ -353,7 +356,7 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
                 (Z_AttributeElement*)odr_malloc (o,sizeof(**elements));
             elements[k]->attributeType = &attr_tmp[2*i];
 	    elements[k]->attributeSet =
-		yaz_oidval_to_z3950oid(o, attr_set[i], CLASS_ATTSET);
+		yaz_oidval_to_z3950oid(o, CLASS_ATTSET, attr_set[i]);
 	    if (attr_clist[i])
 	    {
 		elements[k]->which = Z_AttributeValue_complex;

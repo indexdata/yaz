@@ -1,5 +1,5 @@
 # CCL field mappings
-# $Id: default.bib,v 1.7 2001-02-12 15:35:19 adam Exp $
+# $Id: default.bib,v 1.8 2001-10-28 23:10:03 adam Exp $
 # 
 # The rule below is used when no fields are specified
 term t=l,r  s=al
@@ -23,12 +23,12 @@ note u=63   s=pw
 af   u=1006 s=pw
 #
 # Rules for a few GILS fields
-north  gils,u=2040 r=o
-south  gils,u=2041 r=o
-east  gils,u=2038 r=o
-west  gils,u=2039 r=o
-distributor gils,u=2000 s=pw
-distributorname gils,u=2001 s=pw
+north  gils-attset,u=2040 r=o
+south  gils-attset,u=2041 r=o
+east  gils-attset,u=2038 r=o
+west  gils-attest,u=2039 r=o
+distributor gils-attset,u=2000 s=pw
+distributorname gils-attset,u=2001 s=pw
 
 # Explain fields
 ExplainCategory      exp1,1=1

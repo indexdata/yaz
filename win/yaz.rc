@@ -54,8 +54,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,8,0,0
- PRODUCTVERSION 1,8,0,0
+ FILEVERSION 1,8,1,0
+ PRODUCTVERSION 1,8,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -73,14 +73,14 @@ BEGIN
             VALUE "Comments", "Z39.50 C Library\0"
             VALUE "CompanyName", "Index Data\0"
             VALUE "FileDescription", "YAZ Toolkit\0"
-            VALUE "FileVersion", "1, 8, 0, 0\0"
+            VALUE "FileVersion", "1, 8, 1, 0\0"
             VALUE "InternalName", "YAZ\0"
             VALUE "LegalCopyright", "Copyright © 1996-2001 Index Data\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "yaz.rc\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Index Data YAZ Toolkit\0"
-            VALUE "ProductVersion", "1, 8, 0, 0\0"
+            VALUE "ProductVersion", "1, 8, 1, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
