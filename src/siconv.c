@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.3 2004-03-15 21:39:06 adam Exp $
+ * $Id: siconv.c,v 1.4 2004-03-15 22:51:10 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -226,26 +226,10 @@ static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
 	size_t inbytesleft0 = inbytesleft;
 	inp++;
 	inbytesleft--;
-	if (inbytesleft <= 1)
-	{
-	    *no_read = 0;
-	    cd->my_errno = YAZ_ICONV_EINVAL;
-	    return 0;
-	}
-	if (*inp == '(' || *inp == ',') /* GO, one bytes */
+	while(inbytesleft > 0 && strchr("(,$", *inp))
 	{
 	    inbytesleft--;
 	    inp++;
-	}
-	else if (*inp == '$') /* G0, multi byte */
-	{
-	    inbytesleft--;
-	    inp++;
-	    if (inp[0] == ',')
-	    {
-		inbytesleft--;
-		inp++;
-	    }
 	}
 	if (inbytesleft <= 0)
 	{
