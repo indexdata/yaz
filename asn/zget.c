@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.11  1997-05-02 08:39:10  quinn
+ * Revision 1.12  1997-10-29 12:00:37  adam
+ * Routine zget_SearchRequest fills resultSetName member with "default"
+ * instead of "Default".
+ *
+ * Revision 1.11  1997/05/02 08:39:10  quinn
  * New PDUs added, thanks to Ronald van der Meer
  *
  * Revision 1.10  1996/01/02 08:57:23  quinn
@@ -104,7 +108,7 @@ Z_SearchRequest *zget_SearchRequest(ODR o)
     *r->mediumSetPresentNumber = 0;
     r->replaceIndicator = odr_malloc(o, sizeof(bool_t));
     *r->replaceIndicator = 1;
-    r->resultSetName = "Default";
+    r->resultSetName = "default";
     r->num_databaseNames = 0;
     r->databaseNames = 0;
     r->smallSetElementSetNames = 0;

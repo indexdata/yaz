@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Routine zget_SearchRequest fills resultSetName member with "default"
+instead of "Default".
+
 Fixed memory leak in server. Request queue member wasn't freed.
 
 Fixed nmem_exit so that memory is freed.
