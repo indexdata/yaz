@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.29 2003-06-02 12:53:27 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.30 2003-06-04 09:15:40 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -551,30 +551,51 @@
     <function>ZOOM_record_get</function> is provided. The
     function returns a pointer to certain record information. The
     nature (type) of the pointer depends on the parameter,
-    <function>type</function>.
+    <parameter>type</parameter>.
+   </para>
+   <para>
+    The <parameter>type</parameter> is a string of the format:
+   </para>
+   <para>
+    <replaceable>form</replaceable>[; charset=<replaceable>from</replaceable>[,<replaceable>to</replaceable>]]
+   </para>
+   <para>
+    where <replaceable>form</replaceable> specifies the format of the
+    returned record, <replaceable>from</replaceable>
+    specifies the character set of the record in its original form
+    (as returned by the server), <replaceable>to</replaceable> specifies
+    the output (returned)
+    character set encoding.
+    If charset is not given, then no character set conversion takes place.
+    If <replaceable>to</replaceable> is omitted UTF-8 is assumed.
+   </para>
+   <para>
     In addition, for certain types, the length
     <literal>len</literal> passed will be set to the size in bytes of
-    the returned information.
+    the returned information. 
+    </para>
+   <para>
+    The following are the supported values for <replaceable>form</replaceable>.
     <variablelist>
      <varlistentry><term><literal>database</literal></term>
       <listitem><para>Database of record is returned
         as a C null-terminated string. Return type
         <literal>const char *</literal>. 
        </para></listitem>
-      </varlistentry>
+     </varlistentry>
      <varlistentry><term><literal>syntax</literal></term>
       <listitem><para>The transfer syntax (OID) of the record is returned
         as a C null-terminated string. Return type is
         <literal>const char *</literal>. 
        </para></listitem>
-      </varlistentry>
+     </varlistentry>
      <varlistentry><term><literal>render</literal></term>
       <listitem><para>The record is returned in a display friendly
         format. Upon completion buffer is returned
         (type <literal>const char *</literal>) and length is stored in
         <literal>*len</literal>.
        </para></listitem>
-      </varlistentry>
+     </varlistentry>
      <varlistentry><term><literal>raw</literal></term>
       <listitem><para>The record is returned in the internal
         YAZ specific format. For GRS-1, Explain, and others, the
@@ -585,8 +606,37 @@
         For SUTRS and octet aligned record (including all MARCs) the
         octet buffer is returned and the length of the buffer.
        </para></listitem>
-      </varlistentry>
+     </varlistentry>
+     <varlistentry><term><literal>xml</literal></term>
+      <listitem><para>The record is returned in XML if possible.
+	SRW/SRU and Z39.50 records with transfer syntax XML are
+	returned verbatim. MARC records are returned in
+	<ulink url="http://www.loc.gov/standards/marcxml/">
+	 MARCXML
+	 </ulink> 
+	(converted from ISO2709 to MARCXML by YAZ).
+	GRS-1 and OPAC records are not supported for this form.
+        Upon completion, the XML buffer is returned
+	(type <literal>const char *</literal>) and length is stored in
+        <literal>*len</literal>.
+       </para></listitem>
+     </varlistentry>
     </variablelist>
+   </para>
+   <para>
+    Most
+    <ulink url="http://www.loc.gov/marc/">
+     MARC21
+    </ulink>
+    records uses the 
+    <ulink url="http://www.loc.gov/marc/specifications/speccharmarc8.html">
+     MARC-8
+    </ulink>
+    character set encoding.
+    An application that wishes to display in Latin-1 would use
+    <screen>
+     render; charset=marc8,iso-8859-1
+    </screen>
    </para>
    <sect2><title>Z39.50 Protocol behavior</title>
     <para>
@@ -601,7 +651,7 @@
     <para>
      There is a trick, however, in the usage of function
      <function>ZOOM_resultset_records</function> that allows for
-     delayed retrieval (and makes it non-blocking). By passing
+     delayed retrieval (and makes it non-blocking). By using
      a null pointer for <parameter>recs</parameter> you're indicating
      you're not interested in getting records objects
      <emphasis>now</emphasis>.
