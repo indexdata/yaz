@@ -7,7 +7,7 @@ Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex
 Package: yaz
 Section: utils
 Architecture: any
-Depends: libyaz, ${shlibs:Depends}
+Depends: libyaz
 Conflicts: yaz-runtime, yaz-ssl
 Description: The YAZ Z39.50 toolkit (utilities)
  YAZ is a toolkit that allows you to develop software using the
