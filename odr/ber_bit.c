@@ -3,21 +3,19 @@
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: ber_oct.c,v $
- * Revision 1.2  1995-02-02 20:38:50  quinn
+ * $Log: ber_bit.c,v $
+ * Revision 1.1  1995-02-02 20:38:49  quinn
  * Updates.
  *
- * Revision 1.1  1995/02/02  16:21:52  quinn
- * First kick.
  *
  */
 
 #include <odr.h>
 
-int ber_octetstring(ODR o, ODR_OCT *p, int cons)
+int ber_bitstring(ODR o, ODR_BITMASK *p, int cons)
 {
     int res, len;
-    unsigned char *base, *c;
+    unsigned char *base;
 
     switch (o->direction)
     {
@@ -30,39 +28,39 @@ int ber_octetstring(ODR o, ODR_OCT *p, int cons)
 	    {
 	    	base = o->bp;
 	    	while (odp_more_chunks(o, base, len))
-		    if (!odr_octetstring(o, &p, 0))
+		    if (!odr_bitstring(o, &p, 0))
 		    	return 0;
 		return 1;
 	    }
-	    /* primitive octetstring */
+	    /* primitive bitstring */
 	    if (len < 0)
 	    	return 0;
 	    if (len == 0)
 	    	return 1;
-	    if (len > p->size - p->len)
-	    {
-	    	c = nalloc(o, p->size += len + 1);
-	    	if (p->len)
-		    memcpy(c, p->buf, p->len);
-		p->buf = c;
-	    }
-	    memcpy(p->buf + p->len, o->bp, len);
-	    p->len += len;
+	    if (len - 1 > ODR_BITMASK_SIZE)
+	    	return 0;
+	    o->bp++;      /* silently ignore the unused-bits field */
+	    o->left--;
+	    len--;
+	    memcpy(p->bits + p->top + 1, o->bp, len);
+	    p->top += len;
 	    o->bp += len;
 	    o->left -= len;
 	    return 1;
     	case ODR_ENCODE:
-	    if ((res = ber_enclen(o->bp, p->len, 5, 0)) < 0)
+	    if ((res = ber_enclen(o->bp, p->top + 2, 5, 0)) < 0)
 	    	return 0;
 	    o->bp += res;
 	    o->left -= res;
-	    if (p->len == 0)
-	    	return 1;
-	    if (p->len > o->left)
+	    if (p->top + 2 > o->left)
 	    	return 0;
-	    memcpy(o->bp, p->buf, p->len);
-	    o->bp += p->len;
-	    o->left -= p->len;
+	    *(o->bp++) = 0;    /* no unused bits here */
+	    o->left--;
+	    if (p->top < 0)
+	    	return 1;
+	    memcpy(o->bp, p->bits, p->top + 1);
+	    o->bp += p->top + 1;
+	    o->left -= p->top +1;
 	    return 1;
     	case ODR_PRINT: return 1;
     	default: return 0;

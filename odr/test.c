@@ -1,41 +1,83 @@
 #include <stdio.h>
-
 #include <odr.h>
 
-int odr_dummy(ODR o, int **p, int opt)
+typedef ODR_BITMASK Z_ReferenceId;
+
+typedef struct Z_InitRequest
 {
-    return odr_implicit(o, odr_integer, p, ODR_PRIVATE, 10, opt);
+    Z_ReferenceId *referenceId;    /* OPTIONAL */
+    ODR_BITMASK *options;
+    ODR_BITMASK *protocolVersion;
+    int *preferredMessageSize;
+    int *maximumRecordSize;
+    char *idAuthentication;      /* OPTIONAL */
+    char *implementationId;      /* OPTIONAL */
+    char *implementationName;    /* OPTIONAL */
+    char *implementationVersion; /* OPTIONAL */
+} Z_InitRequest;
+
+int z_ReferenceId(ODR o, Z_ReferenceId **p, int opt)
+{
+    return odr_implicit(o, odr_octetstring, (ODR_OCT**) p, ODR_CONTEXT, 2, opt);
 }
 
-struct dummy
+int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 {
-    int *alfa;
-    int *beta;
-};
+    Z_InitRequest *pp;
 
-int odr_dummy2(ODR o, struct dummy **p, int opt)
-{
-    struct dummy *pp;
-
-    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    if (!odr_sequence_begin(o, p, sizeof(Z_InitRequest)))
     	return opt;
     pp = *p;
     return
-    	odr_implicit(o, odr_integer, &pp->alfa, ODR_CONTEXT, 1, 1) &&
-    	odr_implicit(o, odr_integer, &pp->beta, ODR_CONTEXT, 2, 1) &&
-    	odr_sequence_end(o);
+    	z_ReferenceId(o, &pp->referenceId, 1) &&
+    	odr_implicit(o, odr_bitstring, &pp->protocolVersion, ODR_CONTEXT, 
+	    3, 0) &&
+	odr_implicit(o, odr_bitstring, &pp->options, ODR_CONTEXT, 4, 0) &&
+	odr_implicit(o, odr_integer, &pp->preferredMessageSize, ODR_CONTEXT,
+	    5, 0) &&
+	odr_implicit(o, odr_integer, &pp->maximumRecordSize, ODR_CONTEXT,
+	    6, 0) &&
+	odr_implicit(o, odr_visiblestring, &pp->idAuthentication, ODR_CONTEXT,
+	    7, 1) &&
+	odr_implicit(o, odr_visiblestring, &pp->implementationId, ODR_CONTEXT,
+	    110, 1) &&
+	odr_implicit(o, odr_visiblestring, &pp->implementationName, ODR_CONTEXT,
+	    111, 1) &&
+	odr_implicit(o, odr_visiblestring, &pp->implementationVersion,
+	    ODR_CONTEXT, 112, 1) &&
+	odr_sequence_end(o);
 }
 
 int main()
 {
     int i;
-    unsigned char buf[1024];
+    unsigned char buf[4048];
     struct odr o;
-    int test=-99999;
-    int *tp = &test, *tp2;
-    ODR_OCT bbb, *bbb1, *bbb2;
-    ODR_OCT ccc, *ccc1;
-    char *str1 = "FOO", *str2 = "BAR";
+    Z_InitRequest ireq, *ireqp, *ireq2p;
+    ODR_BITMASK options, protocolVersion;
+    char *iId = "YAZ", *iName = "Yet Another Z39.50 Implementation",
+    	*iVersion = "0.1";
+    int maximumRS = 4096, preferredMS = 2048;
+
+    ODR_MASK_ZERO(&protocolVersion);
+    ODR_MASK_SET(&protocolVersion, 0);
+    ODR_MASK_SET(&protocolVersion, 1);
+
+    ODR_MASK_ZERO(&options);
+    ODR_MASK_SET(&options, 0);
+    ODR_MASK_SET(&options, 1);
+    ODR_MASK_SET(&options, 2);
+
+    ireq.referenceId = 0;
+    ireq.protocolVersion = &protocolVersion;
+    ireq.options = &options;
+    ireq.preferredMessageSize = &preferredMS;
+    ireq.maximumRecordSize = &maximumRS;
+    ireq.idAuthentication = 0;
+    ireq.implementationId = iId;
+    ireq.implementationName = iName;
+    ireq.implementationVersion = iVersion;
+    ireqp = &ireq;
 
     o.buf = buf;
     o.bp=o.buf;
@@ -43,21 +85,10 @@ int main()
     o.direction = ODR_ENCODE;
     o.t_class = -1;
 
-    bbb.buf = (unsigned char *) str1;
-    bbb.len = bbb.size = strlen(str1);
-    bbb1 = &bbb;
-
-    ccc.buf = (unsigned char*) str2;
-    ccc.len = ccc.size = strlen(str2);
-    ccc1 = &ccc;
-
-    odr_constructed_begin(&o, &bbb1, ODR_UNIVERSAL, ODR_OCTETSTRING, 0);
-    odr_octetstring(&o, &bbb1, 0);
-    odr_octetstring(&o, &ccc1, 0);
-    odr_constructed_end(&o);
+    z_InitRequest(&o, &ireqp, 0);
 
     o.direction = ODR_DECODE;
     o.bp = o.buf;
 
-    odr_octetstring(&o, &bbb2, 0);
+    z_InitRequest(&o, &ireq2p, 0);
 }    
