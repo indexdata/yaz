@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.49  1995-10-16 13:51:53  quinn
+ * Revision 1.50  1995-10-25 16:58:32  quinn
+ * Simple.
+ *
+ * Revision 1.49  1995/10/16  13:51:53  quinn
  * Changes to provide Especs to the backend.
  *
  * Revision 1.48  1995/10/06  08:51:20  quinn
@@ -399,8 +402,9 @@ void ir_session(IOCHAN h, int event)
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
 	    if (!z_APDU(assoc->decode, &req->request, 0))
 	    {
-		logf(LOG_LOG, "ODR error on incoming PDU: %s",
-		    odr_errlist[odr_geterror(assoc->decode)]);
+		logf(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
+		    odr_errlist[odr_geterror(assoc->decode)],
+		    odr_offset(assoc->decode));
 		logf(LOG_LOG, "PDU dump:");
 		odr_dumpBER(log_file(), assoc->input_buffer, res);
 		do_close(assoc, Z_Close_protocolError, "Malformed package");
