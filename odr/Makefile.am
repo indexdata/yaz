@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.10 2003-05-27 21:12:22 adam Exp $
+## $Id: Makefile.am,v 1.11 2003-05-27 21:42:45 adam Exp $
 
 noinst_LTLIBRARIES = libodr.la
 
@@ -11,7 +11,7 @@ EXTRA_PROGRAMS = tstodr
 EXTRA_DIST = tstodrcodec.c tstodrcodec.h tstodr.asn
 
 tstodr_LDADD = libodr.la ../util/libutil.la
-tstodr_SOURCES = tstodr.c tstodrcodec.c tstodrcodec.h 
+tstodr_SOURCES = tstodrcodec.c tstodrcodec.h tstodr.c
 
 # Rule for generating codecs for our small ASN.1 spec
 tstodrcodec.c tstodrcodec.h: $(srcdir)/tstodr.asn $(top_srcdir)/util/yaz-asncomp
