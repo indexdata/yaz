@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.26 2005-03-08 11:07:50 adam Exp $
+ * $Id: statserv.c,v 1.27 2005-03-08 11:48:09 adam Exp $
  */
 
 /**
@@ -63,6 +63,7 @@
 
 static IOCHAN pListener = NULL;
 
+static char gfs_root_dir[FILENAME_MAX+1];
 static struct gfs_server *gfs_server_list = 0;
 static struct gfs_listen *gfs_listen_list = 0;
 static NMEM gfs_nmem = 0;
@@ -233,6 +234,21 @@ static struct gfs_listen * gfs_listen_new(const char *id,
     return n;
 }
 
+static void gfs_server_chdir(struct gfs_server *gfs)
+{
+    if (gfs_root_dir[0])
+    {
+	if (chdir(gfs_root_dir))
+	    yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s", gfs_root_dir);
+    }
+    if (gfs->directory)
+    {
+	if (chdir(gfs->directory))
+	    yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s",
+		    gfs->directory);
+    }
+}
+
 int control_association(association *assoc, const char *host, int force_open)
 {
     char vhost[128], *cp;
@@ -264,21 +280,19 @@ int control_association(association *assoc, const char *host, int force_open)
 		{
 		    statserv_setcontrol(assoc->last_control);
 		    if (assoc->backend && assoc->init)
+		    {
+			gfs_server_chdir(gfs);
 			(assoc->last_control->bend_close)(assoc->backend);
+		    }
 		    assoc->backend = 0;
 		    xfree(assoc->init);
 		    assoc->init = 0;
-		    if (gfs->directory)
-		    {
-			if (chdir(gfs->directory))
-			    yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s",
-				    gfs->directory);
-		    }
 		}
 		assoc->cql_transform = gfs->cql_transform;
 		assoc->server_node_ptr = gfs->server_node_ptr;
 		assoc->last_control = &gfs->cb;
 		statserv_setcontrol(&gfs->cb);
+		gfs_server_chdir(gfs);
 		yaz_log(YLOG_DEBUG, "server select: %s", gfs->cb.configname);
 		return 1;
 	    }
@@ -403,6 +417,11 @@ static void xml_config_read()
 
 static void xml_config_open()
 {
+    if (!getcwd(gfs_root_dir, FILENAME_MAX))
+    {
+	yaz_log(YLOG_WARN|YLOG_ERRNO, "getcwd failed");
+	gfs_root_dir[0] = '\0';
+    }
 #ifdef WIN32
     init_control_tls = 1;
     current_control_tls = TlsAlloc();
@@ -472,7 +491,10 @@ static void xml_config_bend_start()
 		    gfs->cb.configname);
 	    statserv_setcontrol(&gfs->cb);
 	    if (control_block.bend_start)
+	    {
+		gfs_server_chdir(gfs);
 		(control_block.bend_start)(&gfs->cb);
+	    }
 	}
     }
     else
@@ -482,7 +504,6 @@ static void xml_config_bend_start()
 	if (control_block.bend_start)
 	    (*control_block.bend_start)(&control_block);
     }
-
 }
 
 static void xml_config_bend_stop()
@@ -1087,6 +1108,7 @@ statserv_options_block *statserv_getcontrol(void)
 
 void statserv_setcontrol(statserv_options_block *block)
 {
+    chdir(gfs_root_dir);
 #ifdef WIN32
     if (init_control_tls)
 	TlsSetValue(current_control_tls, block);
