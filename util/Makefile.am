@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.21 2003-06-03 09:17:12 adam Exp $
+## $Id: Makefile.am,v 1.22 2003-06-11 11:09:22 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 
@@ -40,7 +40,7 @@ tstwrbuf_SOURCES = tstwrbuf.c
 
 # MARC8 conversion is generated from charconv.sgm
 marc8.c: charconv.sgm charconv.tcl
-	cd $(srcdir); ./charconv.tcl -p marc8 -s 50 charconv.sgm charconv_cjk.xml -o marc8.c
+	cd $(srcdir); ./charconv.tcl -p marc8 -s 50 charconv.sgm -o marc8.c
 
 libutil_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
    nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
