@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2005, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.31 2005-01-11 10:48:47 adam Exp $
+ * $Id: srw.c,v 1.32 2005-01-11 12:05:32 adam Exp $
  */
 /**
  * \file srw.c
@@ -95,7 +95,10 @@ static int match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
 #endif
     ptr = ptr->children;
     if (!ptr || ptr->type != XML_TEXT_NODE)
-        return 0;
+    {
+	*val = "";
+        return 1;
+    }
     *val = odr_strdup(o, ptr->content);
     if (len)
         *len = strlen(ptr->content);
@@ -626,7 +629,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 				     &req->scanClause.cql))
 		    ;
 		else if (match_xsd_string(ptr, "pScanClause", o,
-					  &req->scanClause.cql))
+					  &req->scanClause.pqf))
 		{
 		    req->query_type = Z_SRW_query_type_pqf;
 		}
