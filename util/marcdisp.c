@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdisp.c,v $
- * Revision 1.8  1999-11-30 13:47:12  adam
+ * Revision 1.9  1999-12-21 16:24:48  adam
+ * More robust ISO2709 handling (in case of real bad formats).
+ *
+ * Revision 1.8  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.7  1997/09/24 13:29:40  adam
@@ -73,7 +76,11 @@ int marc_display_ex (const char *buf, FILE *outf, int debug)
 	fprintf (outf, "Length implementation %5d\n", length_implementation);
     }
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
+    {
         entry_p += 3+length_data_entry+length_starting;
+        if (entry_p >= record_length)
+            return -1;
+    }
     base_address = entry_p+1;
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
     {

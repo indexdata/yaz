@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.91  1999-12-16 23:36:19  adam
+ * Revision 1.92  1999-12-21 16:24:48  adam
+ * More robust ISO2709 handling (in case of real bad formats).
+ *
+ * Revision 1.91  1999/12/16 23:36:19  adam
  * Implemented ILL protocol. Minor updates ASN.1 compiler.
  *
  * Revision 1.90  1999/11/30 13:47:11  adam
@@ -753,7 +756,13 @@ static void display_record(Z_DatabaseRecord *p)
             ent->value == VAL_HTML)
             print_record(octet_buf, p->u.octet_aligned->len);
 	else
-            marc_display (octet_buf, NULL);
+        {
+            if (marc_display (octet_buf, NULL) <= 0)
+            {
+                printf ("ISO2709 decoding failed, dumping record as is:\n");
+                print_record(octet_buf, p->u.octet_aligned->len);
+            }
+        }
         if (marcdump)
             fwrite (octet_buf, 1, p->u.octet_aligned->len, marcdump);
     }
