@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.5  2000-01-31 13:15:22  adam
+ * Revision 1.6  2000-02-02 15:13:23  adam
+ * Minor change.
+ *
+ * Revision 1.5  2000/01/31 13:15:22  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -282,6 +285,5 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
 	wrbuf_puts (w, p->u.t.term);
 	wrbuf_puts (w, "} ");
 	break;
-    default:
     }
 }
