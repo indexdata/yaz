@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.16  1998-10-15 08:26:23  adam
+ * Revision 1.17  1998-10-18 22:33:35  quinn
+ * Added diagnostic dump of Item Order Eservice.
+ *
+ * Revision 1.16  1998/10/15 08:26:23  adam
  * Added type cast to make C++ happy.
  *
  * Revision 1.15  1998/10/13 20:05:57  adam
@@ -109,6 +112,46 @@ int ztest_present (void *handle, bend_present_rr *rr)
 
 int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 {
+    logf(LOG_LOG, "function: %d", *rr->esr->function);
+    if (rr->esr->packageName)
+    	logf(LOG_LOG, "packagename: %s", rr->esr->packageName);
+    logf(LOG_LOG, "Waitaction: %d", *rr->esr->waitAction);
+
+    if (rr->esr->taskSpecificParameters &&
+   	 rr->esr->taskSpecificParameters->which == Z_External_itemOrder)
+    {
+    	Z_ItemOrder *it = rr->esr->taskSpecificParameters->u.itemOrder;
+	if (it->which != Z_ItemOrder_esRequest)
+	    logf(LOG_WARN, "Expected EsRequest");
+	else
+	{
+	    Z_IORequest *ir = it->u.esRequest;
+	    Z_IOOriginPartToKeep *k = ir->toKeep;
+	    Z_IOOriginPartNotToKeep *n = ir->notToKeep;
+
+	    if (k && k->contact)
+	    {
+	        if (k->contact->name)
+		    logf(LOG_LOG, "contact name %s", k->contact->name);
+		if (k->contact->phone)
+		    logf(LOG_LOG, "contact phone %s", k->contact->phone);
+		if (k->contact->email)
+		    logf(LOG_LOG, "contact email %s", k->contact->email);
+	    }
+	    if (k->addlBilling)
+	    {
+	        logf(LOG_LOG, "Billing info (not shown)");
+	    }
+
+	    if (n->resultSetItem)
+	    {
+	        logf(LOG_LOG, "resultsetItem");
+		logf(LOG_LOG, "setId: %s", n->resultSetItem->resultSetId);
+		logf(LOG_LOG, "item: %d", *n->resultSetItem->item);
+	    }
+
+	}
+    }
     rr->errcode = 0;
     return 0;
 }
