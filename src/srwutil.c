@@ -2,13 +2,14 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.23 2005-01-15 19:47:14 adam Exp $
+ * $Id: srwutil.c,v 1.24 2005-01-16 21:56:24 adam Exp $
  */
 /**
  * \file srwutil.c
  * \brief Implements SRW/SRU utilities.
  */
 
+#include <stdlib.h>
 #include <yaz/srw.h>
 #include <yaz/yaz-iconv.h>
 
