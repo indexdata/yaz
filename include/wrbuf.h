@@ -28,6 +28,8 @@
 #ifndef WRBUF_H
 #define WRBUF_H
 
+#include <yconfig.h>
+
 typedef struct wrbuf
 {
     char *buf;
@@ -40,6 +42,9 @@ void wrbuf_free(WRBUF b, int free_buf);
 void wrbuf_rewind(WRBUF b);
 int wrbuf_grow(WRBUF b, int minsize);
 int wrbuf_write(WRBUF b, char *buf, int size);
+
+#define wrbuf_len(b) ((b)->pos)
+#define wrbuf_buf(b) ((b)->buf)
 
 #define wrbuf_putc(b, c) \
     (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
