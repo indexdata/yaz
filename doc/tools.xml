@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.22 2003-03-18 13:30:21 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.23 2003-05-22 16:57:28 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -182,16 +182,120 @@
 
     <para>
      Version 3 of the Z39.50 specification defines various encoding of terms.
-     Use the <literal>@term </literal> <replaceable>type</replaceable>,
+     Use <literal>@term </literal> <replaceable>type</replaceable>
+     <replaceable>string</replaceable>,
      where type is one of: <literal>general</literal>,
-     <literal>numeric</literal>, <literal>string</literal>
-     (for InternationalString), ..
+     <literal>numeric</literal> or <literal>string</literal>
+     (for InternationalString).
      If no term type has been given, the <literal>general</literal> form
-     is used which is the only encoding allowed in both version 2 - and 3
+     is used.  This is the only encoding allowed in both versions 2 and 3
      of the Z39.50 standard.
     </para>
     
-    <example><title>PQF queries</title>
+    <sect3 id="PQF-prox">
+      <title>Using Proximity Operators with PQF</title>
+      <note>
+        <para>
+	  This is an advanced topic, describing how to construct
+	  queries that make very specific requirements on the
+	  relative location of their operands.
+	  You may wish to skip this section and go straight to
+	  <link linkend="pqf-examples">the example PQF queries</link>.
+	</para>
+	<para>
+	  <warning>
+	    <para>
+	      Most Z39.50 servers do not support proximity searching, or
+	      support only a small subset of the full functionality that
+	      can be expressed using the PQF proximity operator.  Be
+	      aware that the ability to <emphasis>express</emphasis> a
+	      query in PQF is no guarantee that any given server will
+	      be able to <emphasis>execute</emphasis> it.
+	    </para>
+          </warning>
+	</para>
+      </note>
+      <para>
+        The proximity operator <literal>@prox</literal> is a special
+        and more restrictive version of the conjunction operator
+        <literal>@and</literal>.  Its semantics are described in 
+	section 3.7.2 (Proximity) of Z39.50 the standard itself, which
+        can be read on-line at
+	<ulink url="http://lcweb.loc.gov/z3950/agency/markup/09.html"/>
+      </para>
+      <para>
+	In PQF, the proximity operation is represented by a sequence
+	of the form
+	<screen>
+@prox <replaceable>exclusion</replaceable> <replaceable>distance</replaceable> <replaceable>ordered</replaceable> <replaceable>relation</replaceable> <replaceable>which-code</replaceable> <replaceable>unit-code</replaceable>
+	</screen>
+	in which the meanings of the parameters are as described in in
+	the standard, and they can take the following values:
+	<itemizedlist>
+	  <listitem><formalpara><title>exclusion</title><para>
+	    0 = false (i.e. the proximity condition specified by the
+	    remaining parameters must be satisfied) or
+	    1 = true (the proximity condition specified by the
+	    remaining parameters must <emphasis>not</emphasis> be
+	    satisifed).
+	  </para></formalpara></listitem>
+	  <listitem><formalpara><title>distance</title><para>
+	    An integer specifying the difference between the locations
+	    of the operands: e.g. two adjacent words would have
+	    distance=1 since their locations differ by one unit.
+	  </para></formalpara></listitem>
+	  <listitem><formalpara><title>ordered</title><para>
+	    1 = ordered (the operands must occur in the order the
+	    query specifies them) or
+	    0 = unordered (they may appear in either order).
+	  </para></formalpara></listitem>
+	  <listitem><formalpara><title>relation</title><para>
+	    Recognised values are
+	    1 (lessThan),
+	    2 (lessThanOrEqual),
+	    3 (equal),
+	    4 (greaterThanOrEqual),
+	    5 (greaterThan) and
+	    6 (notEqual).
+	  </para></formalpara></listitem>
+	  <listitem><formalpara><title>which-code</title><para>
+	    <literal>known</literal>
+	    or
+	    <literal>k</literal>
+	    (the unit-code parameter is taken from the well-known list
+	    of alternatives described in below) or
+	    <literal>private</literal>
+	    or
+	    <literal>p</literal>
+	    (the unit-code paramater has semantics specific to an
+	    out-of-band agreement such as a profile).
+	  </para></formalpara></listitem>
+	  <listitem><formalpara><title>unit-code</title><para>
+	    If the which-code parameter is <literal>known</literal>
+	    then the recognised values are
+	    1 (character),
+	    2 (word),
+	    3 (sentence),
+	    4 (paragraph),
+	    5 (section),
+	    6 (chapter),
+	    7 (document),
+	    8 (element),
+	    9 (subelement),
+	    10 (elementType) and
+	    11 (byte).
+	    If which-code is <literal>private</literal> then the
+	    acceptable values are determined by the profile.
+	  </para></formalpara></listitem>
+	</itemizedlist>
+	(The numeric values of the relation and well-known unit-code
+	parameters are taken straight from
+	<ulink url="http://lcweb.loc.gov/z3950/agency/asn1.html#ProximityOperator"
+	>the ASN.1</ulink> of the proximity structure in the standard.)
+      </para>
+    </sect3>
+
+    <sect3 id="pqf-examples"><title>PQF queries</title>
 
      <para>Queries using simple terms.
       <screen>
@@ -227,8 +331,40 @@
       Proximity.
       <screen>
        @prox 0 3 1 2 k 2 dylan zimmerman
-       </screen>
-      </para>
+      </screen>
+      <note><para>
+      Here the parameters 0, 3, 1, 2, k and 2 represent exclusion,
+      distance, ordered, relation, which-code and unit-code, in that
+      order.  So:
+      <itemizedlist>
+        <listitem><para>
+	  exclusion = 0: the proximity condition must hold
+        </para></listitem>
+        <listitem><para>
+	  distance = 3: the terms must be three units apart
+        </para></listitem>
+        <listitem><para>
+	  ordered = 1: they must occur in the order they are specified
+        </para></listitem>
+        <listitem><para>
+	  relation = 2: lessThanOrEqual (to the distance of 3 units)
+        </para></listitem>
+        <listitem><para>
+	  which-code is ``known'', so the standard unit-codes are used
+        </para></listitem>
+        <listitem><para>
+	  unit-code = 2: word.
+        </para></listitem>
+      </itemizedlist>
+      So the whole proximity query means that the words
+      <literal>dylan</literal> and <literal>zimmerman</literal> must
+      both occur in the record, in that order, differing in position
+      by three or fewer words (i.e. with two or fewer words between
+      them.)  The query would find ``Bob Dylan, aka. Robert
+      Zimmerman'', but not ``Bob Dylan, born as Robert Zimmerman''
+      since the distance in this case is four.
+      </para></note>
+     </para>
      <para>
       Specifying term type.
       <screen>
@@ -243,8 +379,20 @@
        
        @and @attr 2=4 @attr gils 1=2038 -114 @attr 2=2 @attr gils 1=2039 -109
       </screen>
+      <note>
+	<para>
+	  The last of these examples is a spatial search: in
+	  <ulink url="http://www.gils.net/prof_v2.html#sec_7_4"
+	  >the GILS attribute set</ulink>,
+	  access point
+	  2038 indicates West Bounding Coordinate and
+	  2030 indicates East Bounding Coordinate,
+	  so the query is for areas extending from -114 degrees
+	  to no more than -109 degrees.
+	</para>
+      </note>
      </para>
-    </example>
+    </sect3>
    </sect2>
    <sect2 id="CCL"><title>Common Command Language</title>
 
@@ -771,8 +919,23 @@ int cql_transform_buf(cql_transform_t ct,
      </para>
      <para>
       If conversion failed, <function>cql_transform_buf</function>
-      returns a non-zero error code; otherwise zero is returned
-      (conversion successful).
+      returns a non-zero SRW error code; otherwise zero is returned
+      (conversion successful).  The meanings of the numeric error
+      codes are listed in the SRW specifications at
+      <ulink url="http://www.loc.gov/srw/diagnostic-list.html"/>
+     </para>
+     <para>
+      If conversion fails, more information can be obtained by calling
+      <synopsis>
+int cql_transform_error(cql_transform_t ct, char **addinfop);
+      </synopsis>
+      This function returns the most recently returned numeric
+      error-code and sets the string-pointer at
+      <literal>*addinfop</literal> to point to a string containing
+      additional information about the error that occurred: for
+      example, if the error code is 15 (``Illegal or unsupported index
+      set''), the additional information is the name of the requested
+      index set that was not recognised.
      </para>
      <para>
       If you wish to be able to produce a PQF result in a different
