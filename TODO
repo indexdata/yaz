@@ -1,6 +1,6 @@
-YAZ TODO $Id: TODO,v 1.2 1997-09-29 07:24:21 adam Exp $
+YAZ TODO $Id: TODO,v 1.3 1997-10-02 12:16:51 quinn Exp $
 
-Unicode support.
+Complete Unicode support.
 
 Complete EXPLAIN support in retrieval module.
 
