@@ -1,14 +1,14 @@
-<!-- $Id: client.xml,v 1.1 2001-08-08 19:33:21 adam Exp $ -->
+<!-- $Id: client.xml,v 1.2 2001-08-13 09:42:54 adam Exp $ -->
  <chapter><title>The YAZ client</title>
   <sect1><title>Introduction</title>
    <para>
-    yaz-client is a linemode Z39.50 client. It supports a fair amount
+    yaz-client is a line-mode Z39.50 client. It supports a fair amount
     of the functionality of the Z39.50-1995 standard, but some things you
-    need to enable or disable by recompilation.
+    need to enable or disable by re-compilation.
     Its primary purpose is to exercise the
     package, and verify that the protocol works OK.
     For the same reason some commands offers more functionality than others.
-    Commands that exercies common Z39.50 services such as search and present
+    Commands that exercises common Z39.50 services such as search and present
     have more features than less common supported services, such as Extended
     Services (ItemOrder, ItemUpdate,..).
    </para>
@@ -61,7 +61,7 @@
       <literal>-v</literal> <replaceable>level</replaceable>
      </term><listitem>
       <simpara>Sets the LOG level to <replaceable>level</replaceable>.
-       Level is a sequence of tokens separated by comman. Each token
+       Level is a sequence of tokens separated by comma. Each token
        is a integer or a named LOG item - one of 
        <literal>fatal</literal>,
        <literal>debug</literal>,
@@ -373,7 +373,7 @@
      </term>
      <listitem>
       <para>Sends an Item Order Request using the ILL External. 
-       <replaceable>type</replaceable> is either 1 or 2 which correponds to
+       <replaceable>type</replaceable> is either 1 or 2 which corresponds to
        ILL-Profile 1 and 2 respectively. The <replaceable>no</replaceable>
        is the Result Set position of the record to be ordered.
       </para>
@@ -422,7 +422,7 @@
     <screen>
      f @attrset Bib-1 @and @attr GILS 1=2008 Washington @attr 1=21 weather
     </screen>
-    For the full specifiction of the Prefix Query see the section
+    For the full specification of the Prefix Query see the section
      <link linkend="PQF">Prefix Query Format</link>.
    </para>
   </sect1>

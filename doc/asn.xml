@@ -1,4 +1,4 @@
-<!-- $Id: asn.xml,v 1.6 2001-08-08 19:33:21 adam Exp $ -->
+<!-- $Id: asn.xml,v 1.7 2001-08-13 09:42:54 adam Exp $ -->
  <chapter><title>The ASN Module</title>
   <sect1><title>Introduction</title>
    <para>
@@ -110,7 +110,7 @@
    <para>
    As well as the individual PDU functions, a function
     <function>zget_APDU()</function> is provided, which allocates
-    a toplevel Z-APDU of the type requested:
+    a top-level Z-APDU of the type requested:
    </para>
    
    <synopsis>

@@ -1,10 +1,10 @@
-<!-- $Id: frontend.xml,v 1.4 2001-07-20 21:34:36 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.5 2001-08-13 09:42:54 adam Exp $ -->
  <chapter><title id="server">Making an IR Server for Your Database</title>
   <sect1><title>Introduction</title>
 
    <para>
     If you aren't into documentation, a good way to learn how the
-    backend interface works is to look at the <filename>backend.h</filename>
+    back end interface works is to look at the <filename>backend.h</filename>
     file. Then, look at the small dummy-server in
     <filename>ztest/ztest.c</filename>. Finally, you can have a look at
     the <filename>seshigh.c</filename> file, which is where most of the
@@ -34,11 +34,11 @@
     <para>
      The backend interface was designed in anticipation of a specific
      integration task, while still attempting to achieve some degree of
-     generality. We realise fully that there are points where the
+     generality. We realize fully that there are points where the
      interface can be improved significantly. If you have specific
      functions or parameters that you think could be useful, send us a
      mail (or better, sign on to the mailing list referred to in the
-     toplevel README file). We will try to fit good suggestions into future
+     top-level README file). We will try to fit good suggestions into future
      releases, to the extent that it can be done without requiring
      too many structural changes in existing applications.
     </para>
@@ -111,7 +111,7 @@
     will include other files from the <filename>include/yaz</filename>
     directory, so you'll probably want to use the -I option of your
     compiler to tell it where to find the files. When you run
-    <literal>make</literal> in the toplevel &yaz; directory,
+    <literal>make</literal> in the top-level &yaz; directory,
     everything you need to create your server is put the
     <filename>lib/libyaz.a</filename> library.
    </para>
@@ -269,7 +269,7 @@ statserv_options_block *statserv_getcontrol(void);
      <varlistentry><term>
        <literal>void (*bend_stop)(struct statserv_options_block *p)</literal>
       </term>
-      <listitem><para>Pointer to function which is called whenver the server
+      <listitem><para>Pointer to function which is called whenever the server
 	has stopped listening for incoming connections. This function pointer
 	has a default value of NULL in which case it isn't called.
 	When the server operates as an NT service this handler is called
@@ -412,7 +412,7 @@ typedef struct bend_initresult
    <sect2><title>Search and retrieve</title>
 
     <para>We now describe the handlers that are required to support search -
-     and retrieve. You must support two functions - one for seearch - and one
+     and retrieve. You must support two functions - one for search - and one
      for fetch (retrieval of one record). If desirable you can provide a
      third handler which is called when a present request is received which
      allows you to optimize retrieval of multiple-records.
@@ -604,7 +604,7 @@ typedef struct {
    <sect2><title>Delete</title>
 
     <para>
-     For backends that supports delete of a result set only one handler
+     For back-ends that supports delete of a result set only one handler
      must be defined.
     </para>
 

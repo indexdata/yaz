@@ -1,11 +1,11 @@
-<!-- $Id: future.xml,v 1.2 2001-07-19 23:29:40 adam Exp $ -->
+<!-- $Id: future.xml,v 1.3 2001-08-13 09:42:54 adam Exp $ -->
  <chapter><title>Future Directions</title>
 
   <para>
-   We have a new and better version of the frontend server on the drawing
+   We have a new and better version of the front-end server on the drawing
    board. Resources and external commitments will govern when we'll be
-   able to do something real with it. Fetures should include greater
-   flexibility, greter support for access/resource control, and easy
+   able to do something real with it. Features should include greater
+   flexibility, greater support for access/resource control, and easy
    support for Explain (possibly with Zebra as an extra database engine).
   </para>
 

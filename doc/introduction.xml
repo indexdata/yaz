@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.2 2001-07-19 23:29:40 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.3 2001-08-13 09:42:54 adam Exp $ -->
  <chapter><title>Introduction</title>
   
   <para>
@@ -69,7 +69,7 @@
    and for exchanging BER-encoded PDUs over that connection. When you
    create a connection endpoint, you need to specify what transport to
    use (OSI or TCP/IP), and which protocol you want to use (SR or
-   Z39.50). For the remainer of the connection's lifetime, you don't have
+   Z39.50). For the remainder of the connection's lifetime, you don't have
    to worry about the underlying transport protocol at all - the &comstack;
    will ensure that the correct mechanism is used.
   </para>
@@ -86,7 +86,7 @@
    if you don't like the protocol API provided by &odr;/&asn;, you
    can use SNACC or BERUtils instead, and still have the benefits of the
    transparent transport approach of the &comstack; module. Secondly,
-   we realise that you may have to fit the toolkit into an existing
+   we realize that you may have to fit the toolkit into an existing
    event-processing structure, in a way that
    is incompatible with the &comstack; interface or some other part of &yaz;.
   </para>

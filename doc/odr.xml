@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.3 2001-07-20 21:34:36 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.4 2001-08-13 09:42:54 adam Exp $ -->
  <chapter><title id="odr">The ODR Module</title>
   
   <sect1><title>Introduction</title>
@@ -135,7 +135,7 @@
      small bits of space, the system maintains a freelist of larger chunks
      of memory, which are handed out in small bits. This scheme is
      generally known as a <emphasis>nibble memory</emphasis> system.
-     It is very useful for maintaing short-lived constructions such
+     It is very useful for maintaining short-lived constructions such
      as protocol PDUs.
     </para>
 
@@ -184,7 +184,7 @@
      The integer pointed to by len is set to the length of the encoded
      data, and a pointer to that data is returned. <literal>*size</literal>
      is set to the size of the buffer (unless <literal>size</literal> is null,
-     signalling that you are not interested in the size). The next call to
+     signaling that you are not interested in the size). The next call to
      a primitive function using the same &odr; stream will overwrite the
      data, unless a different buffer has been supplied using the call
     </para>
@@ -235,7 +235,7 @@
     </para>
 
     <para>
-     It is important to realise that the ODR stream will not release this
+     It is important to realize that the ODR stream will not release this
      memory when you call <function>odr_reset()</function>: It will
      merely update its internal pointers to prepare for the encoding of a
      new data value.
@@ -244,7 +244,7 @@
      be released <emphasis>only</emphasis> if the <literal>can_grow</literal>
      parameter to <function>odr_setbuf()</function> was nonzero. The
      <literal>can_grow</literal> parameter, in other words, is a way of
-     signalling who is to own the buffer, you or the ODR stream. If you never call
+     signaling who is to own the buffer, you or the ODR stream. If you never call
      <function>odr_setbuf()</function> on your encoding stream, which is
      typically the case, the buffer allocated by the stream will belong to
      the stream by default.
@@ -494,7 +494,7 @@ void do_nothing_useful(int value)
     type has a dual function. Depending on the settings of the ODR
     stream which is supplied as a parameter, the function may be used
     either to encode or decode data. The functions that can be built
-    using these primitive functions, to represent more complex datatypes, share
+    using these primitive functions, to represent more complex data types, share
     this quality. The result is that you only have to enter the definition
     for a type once - and you have the functionality of encoding, decoding
     (and pretty-printing) all in one unit. The resulting C source code is
@@ -510,7 +510,7 @@ void do_nothing_useful(int value)
     In many cases, the model of the XDR functions works quite well in this
     role.
     In others, it is less elegant. Most of the hassle comes from the optional
-    SEQUENCE memebers which don't exist in XDR.
+    SEQUENCE members which don't exist in XDR.
    </para>
 
    <sect2><title>The Primitive ASN.1 Types</title>
@@ -697,7 +697,7 @@ int odr_oid(ODR o, Odr_oid **p, int optional, const char *name);
      </synopsis>
 
      <para>
-      The C OID represenation is simply an array of integers, terminated by
+      The C OID representation is simply an array of integers, terminated by
       the value -1 (the <literal>Odr_oid</literal> type is synonymous with
       the <literal>int</literal> type).
       We suggest that you use the OID database module (see section
@@ -839,7 +839,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
      You could, of course, name your structures, types, and functions any way
      you please - as long as you're consistent, and your code is easily readable.
      <literal>odr_ok</literal> is just that - a predicate that returns the
-     state of the stream. It is used to ensure that the behaviour of the new
+     state of the stream. It is used to ensure that the behavior of the new
      type is compatible with the interface of the primitive types.
     </para>
 
@@ -963,7 +963,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
       Notice that the interface here gets kind of nasty. The reason is
       simple: Explicitly tagged, constructed types are fairly rare in
       the protocols that we care about, so the
-      aesthetic annoyance (not to mention the dangers of a cluttered
+      esthetic annoyance (not to mention the dangers of a cluttered
       interface) is less than the time that would be required to develop a
       better interface. Nevertheless, it is far from satisfying, and it's a
       point that will be worked on in the future. One option for you would
@@ -980,7 +980,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
    <sect2><title>SEQUENCE OF</title>
 
     <para>
-     To handle sequences (arrays) of a apecific type, the function
+     To handle sequences (arrays) of a specific type, the function
     </para>
 
     <synopsis>
@@ -1185,7 +1185,7 @@ int myChoice(ODR o, MyChoice **p, int optional, const char *name)
     </para>
 
     <para>
-     The ASN.1 specifictions naturally requires that each member of a
+     The ASN.1 specifications naturally requires that each member of a
      CHOICE have a distinct tag, so they can be told apart on decoding.
      Sometimes it can be useful to define a CHOICE that has multiple types
      that share the same tag. You'll need some other mechanism, perhaps

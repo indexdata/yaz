@@ -1,9 +1,9 @@
-<!-- $Id: tools.xml,v 1.4 2001-08-08 19:33:21 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.5 2001-08-13 09:42:54 adam Exp $ -->
  <chapter><title>Supporting Tools</title>
   
   <para>
    In support of the service API - primarily the ASN module, which
-   provides the programmatic interface to the Z39.50 APDUs, &yaz; contains
+   provides the pro-grammatic interface to the Z39.50 APDUs, &yaz; contains
    a collection of tools that support the development of applications.
   </para>
 
@@ -253,7 +253,7 @@ int p_query_attset (const char *arg);
       index, such as title (ti) and author indexes (au). The CCL standard
       itself doesn't specify a particular set of qualifiers, but it does
       suggest a few short-hand notations. You can customize the CCL parser
-      to support a particular set of qualifiers to relect the current target
+      to support a particular set of qualifiers to reflect the current target
       profile. Traditionally, a qualifier would map to a particular
       use-attribute within the BIB-1 attribute set. However, you could also
       define qualifiers that would set, for example, the
@@ -348,14 +348,14 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
      <para>
       which takes the CCL profile (<literal>bibset</literal>) and query
       (<literal>str</literal>) as input. Upon successful completion the RPN
-      tree is returned. If an error eccur, such as a syntax error, the integer
+      tree is returned. If an error occur, such as a syntax error, the integer
       pointed to by <literal>error</literal> holds the error code and
       <literal>pos</literal> holds the offset inside query string in which
       the parsing failed.
      </para>
 
      <para>
-      An english representation of the error may be obtained by calling
+      An English representation of the error may be obtained by calling
       the <literal>ccl_err_msg</literal> function. The error codes are
       listed in <filename>ccl.h</filename>.
      </para>
@@ -677,10 +677,10 @@ typedef struct oident
 
    <note>
     <para>
-     The nibble memory pool is shared amonst threads. POSIX
+     The nibble memory pool is shared amongst threads. POSIX
      mutex'es and WIN32 Critical sections are introduced to keep the
      module thread safe. On WIN32 function <function>nmem_init()</function>
-     initialises the Critical Section handle and should be called once
+     initializes the Critical Section handle and should be called once
      before any other nmem function is used.
     </para>
    </note>
