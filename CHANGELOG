@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.9.2 2002/11/26
 
+yaz_marc_decode uses OAI MARC as XML format for ISO2709 records.
+
 Fix bad race conditions on SIGTERM and terminate gracefully in
 frontend server.
 
