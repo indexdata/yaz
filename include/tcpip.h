@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.6  1996-02-10 12:23:42  quinn
+ * Revision 1.7  1996-07-06 19:58:32  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.6  1996/02/10  12:23:42  quinn
  * Enable inetd operations fro TCP/IP stack
  *
  * Revision 1.5  1995/09/29  17:12:13  quinn
@@ -57,16 +60,8 @@
 #ifndef TCPIP_H
 #define TCPIP_H
 
+#define YNETINCLUDE
 #include <yconfig.h>
-#include <sys/types.h>
-#ifdef WINDOWS
-#include <winsock.h>
-#else
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#endif
 
 struct sockaddr_in *tcpip_strtoaddr(const char *str);
 

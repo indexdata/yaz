@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.5  1996-01-02 08:57:44  quinn
+ * Revision 1.6  1996-07-06 19:58:34  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.5  1996/01/02  08:57:44  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.4  1995/12/05  11:16:10  quinn
@@ -77,6 +80,12 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
 	{
 	    t->which = Z_Triple_null;
 	    t->value.null = ODR_NULLVAL;
+	}
+	else if (isdigit(*value))
+	{
+	    t->which = Z_Triple_integer;
+	    t->value.integer = odr_malloc(o, sizeof(*t->value.integer));
+	    *t->value.integer = atoi(value);
 	}
 	else
 	{

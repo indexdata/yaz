@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.5  1996-06-03 09:46:42  quinn
+ * Revision 1.6  1996-07-06 19:58:34  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.5  1996/06/03  09:46:42  quinn
  * Added OID data type.
  *
  * Revision 1.4  1996/05/01  12:45:30  quinn
@@ -137,6 +140,10 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
     ODR o)
 {
     Z_ElementData *res = odr_malloc(o, sizeof(*res));
+    data1_node *p;
+
+    for (p = n->parent; p && p->which != DATA1N_tag; p = p->parent)
+	;
 
     if (!n)
     {
@@ -146,6 +153,7 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
     else if (n->which == DATA1N_data && (leaf || n->parent->num_children == 1))
     {
 	char str[512];
+	int toget;
 
 	switch (n->u.data.what)
 	{
@@ -155,10 +163,13 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
 		*res->u.numeric = atoi(n->u.data.data);
 		break;
 	    case DATA1I_text:
+	        toget = n->u.data.len;
+		if (p->u.tag.get_bytes > 0 && p->u.tag.get_bytes < toget)
+		    toget = p->u.tag.get_bytes;
 	    	res->which = Z_ElementData_string;
-		res->u.string = odr_malloc(o, n->u.data.len+1);
-		memcpy(res->u.string, n->u.data.data, n->u.data.len);
-		res->u.string[n->u.data.len] = '\0';
+		res->u.string = odr_malloc(o, toget+1);
+		memcpy(res->u.string, n->u.data.data, toget);
+		res->u.string[toget] = '\0';
 		break;
 	    case DATA1I_oid:
 	        res->which = Z_ElementData_oid;

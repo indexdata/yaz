@@ -18,7 +18,7 @@ esetname VARIANT gils-variant.est  # for WAIS-compliance
 esetname B gils-b.est
 esetname G gils-g.est
 esetname W gils-b.est   # We don't really do bodyOfDisplay yet.
-esetname F @
+esetname F gils-f.est
 
 elm (1,1)		    schemaIdentifier              -
 elm (1,10)                  rank                          -
@@ -94,11 +94,3 @@ elm (4,98)/(4,17)           crossReferenceLinkage         !
 elm (4,98)/(4,18)           crossReferenceType            !
 elm (4,23)                  originalControlIdentifier     !
 elm (4,59)                  supplementalInformation       !
-
-elm (2,9)                   bodyOfDisplay		  Any
-
-#
-# Local tags - testing only
-#
-
-elm sampleText              bodyOfText			!

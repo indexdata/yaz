@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.4  1996-06-07 11:04:32  quinn
+ * Revision 1.5  1996-07-06 19:58:34  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.4  1996/06/07  11:04:32  quinn
  * Fixed tag->tagset dependency
  *
  * Revision 1.3  1995/11/13  09:27:33  quinn
@@ -61,7 +64,7 @@ static Z_Triple *find_triple(Z_Variant *var, oid_value universalset,
 }
 
 static void mark_subtree(data1_node *n, int make_variantlist, int no_data,
-    Z_Variant *vreq)
+    int get_bytes, Z_Variant *vreq)
 {
     data1_node *c;
 
@@ -70,6 +73,7 @@ static void mark_subtree(data1_node *n, int make_variantlist, int no_data,
 	n->u.tag.node_selected = 1;
 	n->u.tag.make_variantlist = make_variantlist;
 	n->u.tag.no_data_requested = no_data;
+	n->u.tag.get_bytes = get_bytes;
     }
 
     for (c = n->child; c; c = c->next)
@@ -80,8 +84,9 @@ static void mark_subtree(data1_node *n, int make_variantlist, int no_data,
 	    c->u.tag.node_selected = 1;
 	    c->u.tag.make_variantlist = make_variantlist;
 	    c->u.tag.no_data_requested = no_data;
+	    c->u.tag.get_bytes = get_bytes;
 	}
-	mark_subtree(c, make_variantlist, no_data, vreq);
+	mark_subtree(c, make_variantlist, no_data, get_bytes, vreq);
     }
 }
 
@@ -153,6 +158,8 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
 		{
 		    int show_variantlist = 0;
 		    int no_data = 0;
+		    int get_bytes = -1;
+
 		    Z_Variant *vreq =
 			e->elements[i]->u.simpleElement->variantRequest;
 		    oident *defset = oid_getentbyoid(e->defaultVariantSetId);
@@ -164,6 +171,8 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
 
 		    if (vreq)
 		    {
+			Z_Triple *r;
+
 			/*
 			 * 6,5: meta-data requested, variant list.
 			 */
@@ -174,8 +183,13 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
 			 */
 			if (find_triple(vreq, defsetval, var1, 9, 1))
 			    no_data = 1;
+
+			/* howmuch */
+			if ((r = find_triple(vreq, defsetval, var1, 5, 5)))
+			    if (r->which == Z_Triple_integer)
+				get_bytes = *r->value.integer;
 		    }
-		    mark_subtree(c, show_variantlist, no_data, vreq);
+		    mark_subtree(c, show_variantlist, no_data, get_bytes, vreq);
 		}
 		hits++;
 		/*

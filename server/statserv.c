@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.35  1996-05-29 10:03:28  quinn
+ * Revision 1.36  1996-07-06 19:58:36  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.35  1996/05/29  10:03:28  quinn
  * Options work
  *
  * Revision 1.34  1996/02/21  13:12:07  quinn
@@ -118,15 +121,13 @@
  * really have to, but it's great for debugging memory management.  :)
  */
 
+#include <yconfig.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/wait.h>
 #include <signal.h>
 #include <errno.h>
-#include <sys/types.h>
 #include <pwd.h>
-#include <sys/time.h>
 
 #include <options.h>
 #include <eventl.h>

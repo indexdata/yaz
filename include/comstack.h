@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.14  1996-02-10 12:23:41  quinn
+ * Revision 1.15  1996-07-06 19:58:32  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.14  1996/02/10  12:23:41  quinn
  * Enable inetd operations fro TCP/IP stack
  *
  * Revision 1.13  1995/11/01  13:54:33  quinn
@@ -108,6 +111,7 @@
 #ifndef COMSTACK_H
 #define COMSTACK_H
 
+#define YNETINCLUDE
 #include <yconfig.h>
 #include <oid.h>
 #include <xmalloc.h>

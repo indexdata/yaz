@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.16  1996-06-10 08:55:34  quinn
+ * Revision 1.17  1996-07-06 19:58:32  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.16  1996/06/10  08:55:34  quinn
  * Added Summary. Unfinished work
  *
  * Revision 1.15  1996/06/03  09:46:03  quinn
@@ -312,6 +315,7 @@ typedef struct data1_node
 	    int node_selected;
 	    int make_variantlist;
 	    int no_data_requested;
+	    int get_bytes;
 	} tag;
 
 	struct

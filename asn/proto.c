@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.48  1996-06-10 08:53:33  quinn
+ * Revision 1.49  1996-07-06 19:58:28  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.48  1996/06/10  08:53:33  quinn
  * Added Summary,OPAC,ResourceReport
  *
  * Revision 1.47  1996/05/29  15:47:50  quinn
@@ -1759,7 +1762,7 @@ int z_ResourceReportResponse(ODR o, Z_ResourceReportResponse **p, int opt)
         z_ReferenceId(o, &(*p)->referenceId, 1) &&
 	odr_implicit(o, odr_integer, &(*p)->resourceReportStatus,
 	    ODR_CONTEXT, 50, 0) &&
-	odr_implicit(o, z_External, &(*p)->resourceReport, ODR_CONTEXT,
+	odr_explicit(o, z_External, &(*p)->resourceReport, ODR_CONTEXT,
 	    51, 1) &&
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
 	odr_sequence_end(o);

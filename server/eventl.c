@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.21  1996-02-21 12:55:51  quinn
+ * Revision 1.22  1996-07-06 19:58:35  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.21  1996/02/21  12:55:51  quinn
  * small
  *
  * Revision 1.20  1996/02/21  12:52:55  quinn
@@ -70,17 +73,13 @@
  *
  */
 
+#include <yconfig.h>
 #include <stdio.h>
 #include <assert.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#ifdef _AIX
-#include <sys/select.h>
-#endif
 
 #include <eventl.h>
 

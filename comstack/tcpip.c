@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.11  1996-02-23 10:00:39  quinn
+ * Revision 1.12  1996-07-06 19:58:30  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.11  1996/02/23  10:00:39  quinn
  * WAIS Work
  *
  * Revision 1.10  1996/02/20  12:52:11  quinn
@@ -112,10 +115,6 @@
 
 #include <comstack.h>
 #include <tcpip.h>
-
-#ifndef WINDOWS
-#include <sys/time.h>
-#endif
 
 int tcpip_close(COMSTACK h);
 int tcpip_put(COMSTACK h, char *buf, int size);

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.36  1996-06-10 08:53:47  quinn
+ * Revision 1.37  1996-07-06 19:58:29  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.36  1996/06/10  08:53:47  quinn
  * Added Summary
  *
  * Revision 1.35  1996/06/03  09:45:50  quinn
@@ -121,17 +124,11 @@
  * to illustrate the use of the YAZ service-level API.
  */
 
+#include <yconfig.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef WINDOWS
 #include <time.h>
-#else
-#include <sys/time.h>
-#endif
 #include <assert.h>
-#ifdef _AIX
-#include <sys/select.h>
-#endif
 
 #include <comstack.h>
 #include <tcpip.h>
@@ -653,7 +650,7 @@ static int send_searchRequest(char *arg)
         assert((RPNquery = ccl_rpn_query(rpn)));
         bib1.proto = protocol;
         bib1.oclass = CLASS_ATTSET;
-        bib1.value = VAL_BIB1;
+        bib1.value = attributeset;
         RPNquery->attributeSetId = oid_getoidbyent(&bib1);
         query.u.type_1 = RPNquery;
         break;
@@ -781,6 +778,24 @@ static int send_presentRequest(char *arg)
         sprintf(setstring, "%d", setnumber);
         req->resultSetId = setstring;
     }
+
+
+#if 0
+    if (1)
+    {
+	static Z_Range range;
+	static Z_Range *rangep = &range;
+    req->num_ranges = 1;
+#endif
+
+
+
+
+
+
+
+
+
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
     prefsyn.proto = protocol;

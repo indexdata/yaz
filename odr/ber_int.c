@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.11  1995-09-29 17:12:16  quinn
+ * Revision 1.12  1996-07-06 19:58:33  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.11  1995/09/29  17:12:16  quinn
  * Smallish
  *
  * Revision 1.10  1995/09/29  17:01:50  quinn
@@ -41,13 +44,8 @@
  */
 
 
-#include <sys/types.h>
-
-#ifdef WINDOWS
-#include <winsock.h>
-#else
-#include <netinet/in.h>  /* for htons... */
-#endif
+#define YNETINCLUDE
+#include <yconfig.h>
 
 #include <string.h>
 

@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- XXXXXXXXXXXXX
+
+Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
+
 --- 1.2 1996/6/10 (1st anniversary release)
 
 Added Summary record syntax. Lightly tested.

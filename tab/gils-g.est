@@ -7,10 +7,3 @@ simpleelement (1,16)
 simpleelement (4,1)
 simpleelement (4,52)
 simpleelement (4,98)
-
-#
-# These are not formally required by GILS
-#
-simpleelement (4,59)
-simpleelement (4,70)
-simpleelement (4,97)

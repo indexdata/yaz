@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.61  1996-06-10 08:56:16  quinn
+ * Revision 1.62  1996-07-06 19:58:35  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.61  1996/06/10  08:56:16  quinn
  * Work on Summary.
  *
  * Revision 1.60  1996/05/30  11:03:10  quinn
@@ -217,11 +220,11 @@
  *
  */
 
+#include <yconfig.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
-#include <sys/time.h>
 
 #include <xmalloc.h>
 #include <comstack.h>

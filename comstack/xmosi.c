@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.12  1996-05-22 08:34:44  adam
+ * Revision 1.13  1996-07-06 19:58:30  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.12  1996/05/22  08:34:44  adam
  * Added ifdef USE_XTIMOSI; so that 'make depend' works.
  *
  * Revision 1.11  1996/02/23 10:00:41  quinn
@@ -102,11 +105,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#define YNETINCLUDE
+#include <yconfig.h>
 
 #include <comstack.h>
 #include <xmosi.h>

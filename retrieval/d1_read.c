@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.10  1996-01-19 15:41:47  quinn
+ * Revision 1.11  1996-07-06 19:58:35  quinn
+ * System headerfiles gathered in yconfig
+ *
+ * Revision 1.10  1996/01/19  15:41:47  quinn
  * Fixed uninitialized boolean.
  *
  * Revision 1.9  1996/01/17  14:52:47  adam
@@ -170,6 +173,7 @@ data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
     tagn->u.tag.node_selected = 0;
     tagn->u.tag.make_variantlist = 0;
     tagn->u.tag.no_data_requested = 0;
+    tagn->u.tag.get_bytes = -1;
     if (!(tagn->u.tag.element = data1_getelementbytagname(root->u.root.absyn,
 	0, tagname)))
 	return 0;
@@ -360,6 +364,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	    res->u.tag.node_selected = 0;
 	    res->u.tag.make_variantlist = 0;
 	    res->u.tag.no_data_requested = 0;
+	    res->u.tag.get_bytes = -1;
 	    res->root = parent->root;
 	    *buf = t + 1;
 	}
