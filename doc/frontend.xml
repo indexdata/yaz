@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.17 2003-04-28 21:02:16 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.18 2003-11-03 10:46:52 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -13,7 +13,7 @@
 
    <para>
     If you have a database system that you would like to make available by
-    means of Z39.50 or SRW, &yaz; basically offers your two options. You
+    means of Z39.50, SRW o SRU, &yaz; basically offers your two options. You
     can use the APIs provided by the &asn;, &odr;, and &comstack;
     modules to
     create and decode PDUs, and exchange them with a client.
@@ -774,22 +774,59 @@ typedef struct bend_scan_rr {
    </para>
 
    <para>
-    For TCP/IP and SSL, the special hostname &quot;@&quot; is mapped to
-    the address <literal>INADDR_ANY</literal>, which causes the
-    server to listen on any local interface. 
-   </para>
-   
-   <para>
-    Examples:
-   <screen>
-    tcp:@:210
-
-    ssl:@:3000
-
-    unix:/tmp/yaz
-   </screen>
+    For TCP/IP and SSL, the special hostname <literal>@</literal> 
+    (at sign) is mapped to the address <literal>INADDR_ANY</literal>,
+    which causes the server to listen on any local interface. 
    </para>
 
+   <example><title>Running the GFS on Unix</title>
+    <para>
+     Assuming the server application <replaceable>appname</replaceable> is
+     started as root, the following will make it listen on port 210.
+     The server will change identity to <literal>nobody</literal>
+     and write its log to <filename>/var/log/app.log</filename>.
+     <screen>
+      <replaceable>appname</replaceable> -l /var/log/app.log -u nobody tcp:@:210
+     </screen>
+    </para>
+    <para>
+     The server will accept Z39.50 requests and offer SRW/SRU service
+     on port 210.
+    </para>
+   </example>
+   <example><title>Setting up Apache as SRW/SRU Frontend</title>
+    <para>
+     If you use <ulink url="http://httpd.apache.org/">Apache</ulink>
+     as your public web server and want to offer HTTP port 80
+     access to the YAZ server on 210, you can use the
+     <ulink url="http://httpd.apache.org/docs/mod/mod_proxy.html#proxypass">
+      <literal>ProxyPass</literal></ulink> 
+     directive.
+     If you have virtual host
+     <literal>srw.mydomain</literal> you can use the following directives
+     in Apache's httpd.conf:
+     <screen>
+      &lt;VirtualHost *>
+       ErrorLog /home/srw/logs/error_log
+       TransferLog /home/srw/logs/access_log
+       ProxyPass / http://srw.mydomain:210/
+      &lt;/VirualHost>
+     </screen>
+    </para>
+    <para>
+     The above for the Apache 1.3 series.
+    </para>
+   </example>
+   <example><title>Running a aerver with local access only</title>
+    <para>
+     Servers that is only being accessed from the local host should listen
+     on UNIX file socket rather than a Internet socket. To listen on
+     <filename>/tmp/mysocket</filename> start the server as follows:
+     <screen>
+      <replaceable>appname</replaceable> tcp:/tmp/mysocket
+     </screen>
+    </para>
+   </example>
   </sect1>
  </chapter>
  
