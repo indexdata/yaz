@@ -3,3 +3,10 @@ Makefile
 Makefile.in
 tstodrcodec.c
 tstodrcodec.h
+.libs
+tstccl
+tsticonv
+tstmatchstr
+tstnmem
+tstodr
+tstwrbuf
