@@ -100,5 +100,9 @@ SOURCE=.\session.h
 
 SOURCE=.\statserv.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\tcpdchk.c
+# End Source File
 # End Target
 # End Project
