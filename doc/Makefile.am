@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.24 2001-10-29 14:50:40 adam Exp $
+## $Id: Makefile.am,v 1.25 2001-10-29 14:51:14 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -34,10 +34,8 @@ $(HTMLFILES): $(XMLFILES) $(srcdir)/yazhtml.dsl
 $(srcdir)/yaz.php: $(XMLFILES) $(srcdir)/yazphp.dsl
 	cd $(srcdir); jade -E14 -d yazphp.dsl -t sgml xml.dcl yaz.xml
 
-$(srcdir)/yaz.pdf: $(srcdir)/yaz.tex
-	pdfjadetex yaz.tex
-	pdfjadetex yaz.tex
-	pdfjadetex yaz.tex
-
-$(srcdir)/yaz.tex: $(XMLFILES) $(srcdir)/yazprint.dsl
+$(srcdir)/yaz.pdf: $(XMLFILES) $(srcdir)/yazprint.dsl
 	cd $(srcdir); jade -d yazprint.dsl -t tex xml.dcl yaz.xml
+	pdfjadetex yaz.tex
+	pdfjadetex yaz.tex
+	pdfjadetex yaz.tex
