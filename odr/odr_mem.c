@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.9  1995-10-13 16:08:08  quinn
+ * Revision 1.10  1995-10-25 16:58:19  quinn
+ * Stupid bug in odr_malloc
+ *
+ * Revision 1.9  1995/10/13  16:08:08  quinn
  * Added OID utility
  *
  * Revision 1.8  1995/09/29  17:12:24  quinn
@@ -119,7 +122,7 @@ ODR_MEM odr_extract_mem(ODR o)
 
 void *odr_malloc(ODR o, int size)
 {
-    struct odr_memblock *p = o->mem;
+    struct odr_memblock *p;
     char *r;
 
     if (!o)
@@ -128,6 +131,7 @@ void *odr_malloc(ODR o, int size)
 	    abort();
 	return r;
     }
+    p = o->mem;
     if (!p || p->size - p->top < size)
     	if (!(p = get_block(size)))
 	    abort();
