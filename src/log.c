@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.17 2004-11-23 14:10:47 heikki Exp $
+ * $Id: log.c,v 1.18 2004-12-13 14:21:55 heikki Exp $
  */
 
 /**
@@ -34,7 +34,8 @@
 #include <errno.h>
 #include <time.h>
 #include <yaz/nmem.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
+#include <yaz/xmalloc.h>
 
 static NMEM_MUTEX log_mutex = 0;
 static int mutex_init_flag = 0; /* not yet initialized */

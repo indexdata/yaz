@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.6 2004-11-18 15:18:13 heikki Exp $
+ * $Id: nmem.c,v 1.7 2004-12-13 14:21:55 heikki Exp $
  */
 
 /**
@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/oid.h>
 
 #ifdef WIN32

@@ -2,7 +2,7 @@
  * Copyright (C) 1994-2004, Index Data
  * All rights reserved.
  *
- * $Id: readconf.c,v 1.3 2004-11-18 15:18:13 heikki Exp $
+ * $Id: readconf.c,v 1.4 2004-12-13 14:21:55 heikki Exp $
  */
 
 /**
@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/readconf.h>
 
 #define l_isspace(c) ((c) == '\t' || (c) == ' ' || (c) == '\n' || (c) == '\r')

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.37 2004-12-02 19:12:52 adam Exp $
+ * $Id: seshigh.c,v 1.38 2004-12-13 14:21:55 heikki Exp $
  */
 /**
  * \file seshigh.c
@@ -50,7 +50,7 @@
 #include "session.h"
 #include <yaz/proto.h>
 #include <yaz/oid.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/logrpn.h>
 #include <yaz/statserv.h>
 #include <yaz/diagbib1.h>
@@ -1419,7 +1419,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.37 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.38 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.30 2004-11-18 15:18:14 heikki Exp $
+ * $Id: zoomsh.c,v 1.31 2004-12-13 14:21:58 heikki Exp $
  */
 
 /* ZOOM-C Shell */
@@ -23,7 +23,7 @@
 
 #include <yaz/xmalloc.h>
 
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/nmem.h>
 #include <yaz/zoom.h>
 #include <yaz/oid.h>

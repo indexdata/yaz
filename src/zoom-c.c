@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.32 2004-11-18 15:18:14 heikki Exp $
+ * $Id: zoom-c.c,v 1.33 2004-12-13 14:21:56 heikki Exp $
  */
 /**
  * \file zoom-c.c
@@ -16,7 +16,7 @@
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
 #include <yaz/otherinfo.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/pquery.h>
 #include <yaz/marcdisp.h>
 #include <yaz/diagbib1.h>
@@ -1037,7 +1037,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.32 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.33 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,

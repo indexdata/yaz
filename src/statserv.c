@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.12 2004-11-18 15:18:13 heikki Exp $
+ * $Id: statserv.c,v 1.13 2004-12-13 14:21:55 heikki Exp $
  */
 
 /**
@@ -41,7 +41,7 @@
 #ifdef USE_XTIMOSI
 #include <yaz/xmosi.h>
 #endif
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include "eventl.h"
 #include "session.h"
 #include <yaz/statserv.h>

@@ -2,13 +2,13 @@
  * Copyright (c) 2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.2 2004-11-18 15:18:14 heikki Exp $
+ * $Id: tstlog.c,v 1.3 2004-12-13 14:21:58 heikki Exp $
  *
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <yaz/options.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 
 int main(int argc, char **argv)
 {

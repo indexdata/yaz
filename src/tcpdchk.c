@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpdchk.c,v 1.3 2004-11-18 15:18:13 heikki Exp $
+ * $Id: tcpdchk.c,v 1.4 2004-12-13 14:21:56 heikki Exp $
  */
 /**
  * \file tcpdchk.c
@@ -15,7 +15,7 @@
 #include <yaz/yconfig.h>
 #include <yaz/comstack.h>
 #include <yaz/statserv.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 
 
 #if HAVE_TCPD_H

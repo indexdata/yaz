@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.9 2004-11-18 15:18:13 heikki Exp $
+ * $Id: odr.c,v 1.10 2004-12-13 14:21:55 heikki Exp $
  *
  */
 
@@ -20,7 +20,7 @@
 #include <stdarg.h>
 
 #include <yaz/xmalloc.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include "odr-priv.h"
 
 static int log_level=0;

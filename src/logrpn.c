@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2004, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.7 2004-11-18 15:18:13 heikki Exp $
+ * $Id: logrpn.c,v 1.8 2004-12-13 14:21:55 heikki Exp $
  */
 
 /**
@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/logrpn.h>
 
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1994-2004, Index Data
  * All rights reserved.
  *
- * $Id: xmalloc.c,v 1.3 2004-11-18 15:18:14 heikki Exp $
+ * $Id: xmalloc.c,v 1.4 2004-12-13 14:21:56 heikki Exp $
  */
 /**
  * \file xmalloc.c
@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/xmalloc.h>
 
 #ifndef TRACE_XMALLOC

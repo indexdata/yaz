@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.3 2004-11-18 15:18:13 heikki Exp $
+ * $Id: eventl.c,v 1.4 2004-12-13 14:21:55 heikki Exp $
  */
 
 /**
@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include <yaz/yconfig.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 #include <yaz/comstack.h>
 #include <yaz/xmalloc.h>
 #include "eventl.h"

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-util.h,v 1.13 2004-12-10 10:42:33 heikki Exp $
+ * $Id: yaz-util.h,v 1.14 2004-12-13 14:21:55 heikki Exp $
  */
 /**
  * \file yaz-util.h
@@ -37,22 +37,7 @@
 #include <yaz/yaz-version.h>
 #include <yaz/xmalloc.h>
 
-/* [y]log.h trickery */
-/* if [y]log.h has been included, do not worry about it */
-/* else warn here, and make sure log.h does not warn */
-
-#ifndef YLOG_H 
-
-#ifndef YAZ_USE_OLD_LOG
-#warning "yaz-util.h is deprecated - include the files directly, and use ylog.h"
-/* If you get tired of this message, configure your program like this */
-/* CFLAGS="-Wall -g -D YAZ_USE_OLD_LOG" ./configure   */
-#define YAZ_USE_OLD_LOG
-/* do not complain of the old log.h */
-#endif
-
 #include <yaz/log.h>  
-#endif
 
 #include <yaz/tpath.h>
 #include <yaz/options.h>

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: read-grs.c,v 1.9 2004-11-18 15:18:14 heikki Exp $
+ * $Id: read-grs.c,v 1.10 2004-12-13 14:21:59 heikki Exp $
  */
 
 /*
@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 #include <yaz/proto.h>
-#include <yaz/ylog.h>
+#include <yaz/log.h>
 
 #define GRS_MAX_FIELDS 50
 
