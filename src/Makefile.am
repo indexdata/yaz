@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.14 2004-08-07 08:06:57 adam Exp $
+## $Id: Makefile.am,v 1.15 2004-08-07 08:18:19 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -20,7 +20,7 @@ illdatadir=$(pkgdatadir)/ill
 illdata_DATA=ill9702.asn item-req.asn ill.tcl
 
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
- charconv.tcl codetables.xml charconv.sgm
+ charconv.tcl codetables.xml
 
 YAZCOMP = $(top_srcdir)/util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
@@ -29,8 +29,8 @@ AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
 AM_YFLAGS=-p cql_
 THREADED_FLAGS = @CFLAGSTHREADS@
 
-# MARC8 conversion is generated from charconv.sgm + codetables.xml
-marc8.c: charconv.tcl charconv.sgm codetables.xml
+# MARC8 conversion is generated from codetables.xml
+marc8.c: charconv.tcl codetables.xml
 	cd $(srcdir); ./charconv.tcl -p marc8 codetables.xml -o marc8.c
 
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \

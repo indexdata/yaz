@@ -2,17 +2,27 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.24 2004-08-04 09:30:30 adam Exp $
+ * $Id: marcdump.c,v 1.25 2004-08-07 08:18:20 adam Exp $
  */
 
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
+#if HAVE_XML2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
 #if HAVE_LOCALE_H
 #include <locale.h>
@@ -39,9 +49,60 @@ static void usage(const char *prog)
              prog);
 } 
 
+#if HAVE_XML2
+void print_xpath_nodes(xmlNodeSetPtr nodes, FILE* output) {
+    xmlNodePtr cur;
+    int size;
+    int i;
+    
+    assert(output);
+    size = (nodes) ? nodes->nodeNr : 0;
+    
+    fprintf(output, "Result (%d nodes):\n", size);
+    for(i = 0; i < size; ++i) {
+	assert(nodes->nodeTab[i]);
+	
+	if(nodes->nodeTab[i]->type == XML_NAMESPACE_DECL)
+	{
+	    xmlNsPtr ns;
+	    
+	    ns = (xmlNsPtr)nodes->nodeTab[i];
+	    cur = (xmlNodePtr)ns->next;
+	    if(cur->ns) { 
+	        fprintf(output, "= namespace \"%s\"=\"%s\" for node %s:%s\n", 
+		    ns->prefix, ns->href, cur->ns->href, cur->name);
+	    } else {
+	        fprintf(output, "= namespace \"%s\"=\"%s\" for node %s\n", 
+		    ns->prefix, ns->href, cur->name);
+	    }
+	} 
+	else if(nodes->nodeTab[i]->type == XML_ELEMENT_NODE)
+	{
+	    cur = nodes->nodeTab[i];   	    
+	    if(cur->ns) { 
+    	        fprintf(output, "= element node \"%s:%s\"\n", 
+		    cur->ns->href, cur->name);
+	    } 
+	    else
+	    {
+    	        fprintf(output, "= element node \"%s\"\n", 
+		    cur->name);
+	    }
+	}
+	else
+	{
+	    cur = nodes->nodeTab[i];    
+	    fprintf(output, "= node \"%s\": type %d\n", cur->name, cur->type);
+	}
+    }
+}
+#endif
+
 int main (int argc, char **argv)
 {
     int r;
+    int libxml_dom_test = 0;
+    int print_offset = 0;
     char *arg;
     int verbose = 0;
     FILE *inf;
@@ -51,7 +112,7 @@ int main (int argc, char **argv)
     int xml = 0;
     FILE *cfile = 0;
     char *from = 0, *to = 0;
-
+    int num = 1;
     
 #if HAVE_LOCALE_H
     setlocale(LC_CTYPE, "");
@@ -62,7 +123,7 @@ int main (int argc, char **argv)
 #endif
 #endif
 
-    while ((r = options("vc:xOXIf:t:", argv, argc, &arg)) != -2)
+    while ((r = options("pvc:xOXIf:t:2", argv, argc, &arg)) != -2)
     {
 	int count;
 	no++;
@@ -90,6 +151,12 @@ int main (int argc, char **argv)
             break;
 	case 'I':
 	    xml = YAZ_MARC_ISO2709;
+	    break;
+	case 'p':
+	    print_offset = 1;
+	    break;
+	case '2':
+	    libxml_dom_test = 1;
 	    break;
         case 0:
 	    inf = fopen (arg, "rb");
@@ -128,7 +195,16 @@ int main (int argc, char **argv)
                     
                     r = fread (buf, 1, 5, inf);
                     if (r < 5)
+		    {
+			if (r && print_offset)
+			    printf ("Extra %d bytes", r);
                         break;
+		    }
+		    if (print_offset)
+		    {
+			long off = ftell(inf);
+			printf ("Record %d offset %ld\n", num, (long) off);
+		    }
                     len = atoi_n(buf, 5);
                     if (len < 25 || len > 100000)
                         break;
@@ -140,6 +216,43 @@ int main (int argc, char **argv)
                     if (r <= 0)
                         break;
 		    fwrite (result, rlen, 1, stdout);
+#if HAVE_XML2
+		    if (libxml_dom_test)
+		    {
+			xmlDocPtr doc = xmlParseMemory(result, rlen);
+			if (!doc)
+			    fprintf(stderr, "xmLParseMemory failed\n");
+			else
+			{
+			    int i;
+			    xmlXPathContextPtr xpathCtx; 
+			    xmlXPathObjectPtr xpathObj; 
+			    static const char *xpathExpr[] = {
+				"/record/datafield[@tag='245']/subfield[@code='a']",
+				"/record/datafield[@tag='100']/subfield",
+				"/record/datafield[@tag='245']/subfield[@code='a']",
+				"/record/datafield[@tag='650']/subfield",
+				"/record/datafield[@tag='650']",
+				0};
+			    
+			    xpathCtx = xmlXPathNewContext(doc);
+
+			    for (i = 0; xpathExpr[i]; i++) {
+				xpathObj = xmlXPathEvalExpression(xpathExpr[i], xpathCtx);
+				if(xpathObj == NULL) {
+				    fprintf(stderr,"Error: unable to evaluate xpath expression \"%s\"\n", xpathExpr[i]);
+				}
+				else
+				{
+				    print_xpath_nodes(xpathObj->nodesetval, stdout);
+				    xmlXPathFreeObject(xpathObj);
+				}
+			    }
+			    xmlXPathFreeContext(xpathCtx); 
+			    xmlFreeDoc(doc);
+			}
+		    }
+#endif
                     if (cfile)
                     {
                         char *p = buf;
@@ -159,6 +272,7 @@ int main (int argc, char **argv)
 			}
                         fprintf (cfile, "\"\n");
                     }
+		    num++;
                 }
                 count++;
                 if (cd)

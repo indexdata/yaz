@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.2 2004-03-15 21:39:06 adam Exp $
+ * $Id: tsticonv.c,v 1.3 2004-08-07 08:18:19 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -20,9 +20,6 @@ static const char *iso_8859_1_a[] = {
     "ax" ,
     "\330",
     "eneb\346r",
-    "\xfc",
-    "\xfb",
-    "\xfbr",
     0 };
 
 /* same test strings in MARC-8 format */
@@ -30,9 +27,6 @@ static const char *marc8_a[] = {
     "ax",   
     "\xa2",          /* latin capital letter o with stroke */
     "eneb\xb5r",     /* latin small letter ae */
-    "\xe8\x75",      /* latin small letter u with umlaut */
-    "\xe3\x75",      /* latin small letter u with circumflex */
-    "\xe3\x75r",     /* latin small letter u with circumflex */
     0
 };
 
@@ -79,16 +73,25 @@ static void marc8_tst_a()
 static void marc8_tst_b()
 {
     static const char *marc8_b[] = {
+	/* 0 */	
 	"\033$1" "\x21\x2B\x3B" /* FF1F */ "\033(B" "o",
+	/* 1 */ 
 	"\033$1" "\x6F\x77\x29" /* AE0E */ "\x6F\x52\x7C" /* c0F4 */ "\033(B",
+	/* 2 */ 
 	"\033$1"
-	"\x21\x50\x6E"  /* 7CFB */
-	"\x21\x51\x31"  /* 7D71 */
-	"\x21\x3A\x67"  /* 5B89 */
-	"\x21\x33\x22"  /* 5168 */
-	"\x21\x33\x53"  /* 5206 */
-	"\x21\x44\x2B"  /* 6790 */
+	"\x21\x50\x6E"  /* UCS 7CFB */
+	"\x21\x51\x31"  /* UCS 7D71 */
+	"\x21\x3A\x67"  /* UCS 5B89 */
+	"\x21\x33\x22"  /* UCS 5168 */
+	"\x21\x33\x53"  /* UCS 5206 */
+	"\x21\x44\x2B"  /* UCS 6790 */
 	"\033(B",
+	/* 3 */
+	"\xB0\xB2",     /* AYN and oSLASH */
+	/* 4 */
+	"\xF6\x61",     /* a underscore */
+	/* 5 */
+	"\x61\xC2",     /* a, phonorecord mark */
 	0
     };
     static const char *ucs4_b[] = {
@@ -100,6 +103,9 @@ static void marc8_tst_b()
 	"\x00\x00\x51\x68"
 	"\x00\x00\x52\x06"
 	"\x00\x00\x67\x90",
+	"\x00\x00\x02\xBB"  "\x00\x00\x00\xF8",
+	"\x00\x00\x00\x61"  "\x00\x00\x03\x32",
+	"\x00\x00\x00\x61"  "\x00\x00\x21\x17",
 	0
     };
     int i;
@@ -115,7 +121,7 @@ static void marc8_tst_b()
     {
         size_t r;
 	size_t len;
-	size_t expect_len = (i == 2 ? 24 : 8);
+	size_t expect_len = i == 2 ? 24 : 8;
         char *inbuf= (char*) marc8_b[i];
         size_t inbytesleft = strlen(inbuf);
         char outbuf0[24];
@@ -257,6 +263,7 @@ static void dconvert(int mandatory, const char *tmpcode)
 	
 int main (int argc, char **argv)
 {
+    yaz_log_init_file("tsticonv.log");
     dconvert(1, "UTF-8");
     dconvert(1, "ISO-8859-1");
     dconvert(1, "UCS4");

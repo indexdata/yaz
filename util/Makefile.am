@@ -1,8 +1,6 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.27 2004-05-01 23:32:20 adam Exp $
-
-TESTS = $(check_PROGRAMS)
+## $Id: Makefile.am,v 1.28 2004-08-07 08:18:20 adam Exp $
 
 bin_SCRIPTS = yaz-asncomp yaz-config
 
@@ -10,7 +8,7 @@ EXTRA_DIST = yaz-asncomp
 
 DISTCLEANFILES = yaz-config
 
-AM_CPPFLAGS=-I$(top_srcdir)/include
+AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
 
 bin_PROGRAMS = yaz-marcdump yaz-iconv
 noinst_PROGRAMS = cclsh cql2pqf cql2xcql srwtst yaz-benchmark

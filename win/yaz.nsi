@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.49 2004-08-06 08:31:03 adam Exp $
+; $Id: yaz.nsi,v 1.50 2004-08-07 08:18:20 adam Exp $
 
 !define VERSION "2.0.22"
 
@@ -132,7 +132,6 @@ Section "YAZ Source" YAZ_Source
 	File ..\src\*.y
 	File ..\src\*.tcl
 	File ..\src\*.asn
-	File ..\src\charconv.sgm
 	File ..\src\codetables.xml
 	SetOutPath $INSTDIR\zoom
 	File ..\zoom\*.c

@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixes for MARC-8 in yaz_iconv character set utilies. The MARC-8
+to UTF-8/UCS conversion is now only based on codetables.xml.
+
+yaz_marc_decode_buf sets leader pos 9 to "a" for MARCXML output.
+
 --- 2.0.22 2004/08/06
 
 Add support for more "commit changes" in ZOOM (uses Extended Services).
