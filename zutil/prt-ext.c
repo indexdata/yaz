@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.3  2000-03-14 13:52:32  ian
+ * Revision 1.4  2000-03-14 15:22:04  ian
+ * Added Admin external to choice table.
+ *
+ * Revision 1.3  2000/03/14 13:52:32  ian
  * Added Admin Extended Service to External Choice
  *
  * Revision 1.2  1999/11/30 13:47:12  adam
@@ -114,6 +117,9 @@ static Z_ext_typeent type_table[] =
     {VAL_DBUPDATE, Z_External_update, (Odr_fun)z_IUUpdate},
     {VAL_DATETIME, Z_External_dateTime, (Odr_fun)z_DateTime},
     {VAL_UNIVERSE_REPORT, Z_External_universeReport, (Odr_fun)z_UniverseReport},
+#ifdef ASN_COMPILED
+    {VAL_ADMINSERVICE, Z_External_ESAdmin, (Odr_fun)z_Admin},
+#endif
     {VAL_NONE, 0, 0}
 };
 
