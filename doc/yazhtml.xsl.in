@@ -3,9 +3,15 @@
 
 <xsl:import href="@XSL_DIR@/htmlhelp/htmlhelp.xsl"/>
 
-<xsl:param name="suppress.navigation" select="0"/>
-<xsl:param name="use.id.as.filename" select="1"/>
-
+<xsl:template name="body.attributes">
+   <link rel="stylesheet" type="text/css" href="yaz.css"/>
+</xsl:template>
+<xsl:variable name="suppress.navigation">0</xsl:variable>
+<xsl:variable name="use.id.as.filename">1</xsl:variable>
+<xsl:variable name="generate.book.toc">1</xsl:variable>
+<xsl:variable name="toc.section.depth">3</xsl:variable>
+<xsl:variable name="generate.toc.section.depth">3</xsl:variable>
+<xsl:variable name="section.autolabel">1</xsl:variable>
 
 </xsl:stylesheet>
 

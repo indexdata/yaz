@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.49 2003-10-27 12:21:24 adam Exp $
+## $Id: Makefile.am,v 1.50 2003-11-16 22:56:53 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -31,9 +31,9 @@ REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-marcdump-man.xml
 
 SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
-	apilayer.obj
+	apilayer.obj yaz.css
 
-doc_DATA = $(HTMLFILES) yaz.pdf id.png apilayer.png
+doc_DATA = $(HTMLFILES) yaz.pdf id.png apilayer.png yaz.css
 man_MANS = $(MANFILES)
 
 EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
