@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.29 2003-02-12 22:02:47 adam Exp $
+ * $Id: marcdisp.c,v 1.30 2003-07-14 12:59:23 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -56,6 +56,12 @@ static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
             case '&':
                 wrbuf_puts(wr, "&amp;");
                 break;
+	    case '"':
+		wrbuf_puts(wr, "&quot;");
+		break;
+	    case '\'':
+		wrbuf_puts(wr, "&apos;");
+		break;
             default:
                 wrbuf_putc(wr, buf[i]);
             }

@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+OPAC support ZOOM. ZOOM_record_get returns OPAC info (as XML) if
+type is "opac".
+
 Add three new utility functions for translating OIDs between various
 formats -- symbolic name such as "Usmarc", minus-1-terminated int
 arrays and dotted strings such as "1.2.840.10003.9.5.1":

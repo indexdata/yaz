@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.31 2003-07-09 22:38:12 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.32 2003-07-14 12:59:23 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -621,6 +621,10 @@
         Upon completion, the XML buffer is returned
 	(type <literal>const char *</literal>) and length is stored in
         <literal>*len</literal>.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry><term><literal>opac</literal></term>
+      <listitem><para>OPAC for record is returned in XML.
        </para></listitem>
      </varlistentry>
     </variablelist>

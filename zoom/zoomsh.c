@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.22 2003-07-10 11:50:32 mike Exp $
+ * $Id: zoomsh.c,v 1.23 2003-07-14 12:59:23 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -153,8 +153,9 @@ static void display_records (ZOOM_connection c,
 	int pos = i + start;
         ZOOM_record rec = ZOOM_resultset_record (r, pos);
 	const char *db = ZOOM_record_get (rec, "database", 0);
-	int len;
+	int len, opac_len;
 	const char *render = ZOOM_record_get (rec, "render", &len);
+	const char *opac_render = ZOOM_record_get (rec, "opac", &opac_len);
 	const char *syntax = ZOOM_record_get (rec, "syntax", 0);
 	/* if rec is non-null, we got a record for display */
 	if (rec)
@@ -166,7 +167,10 @@ static void display_records (ZOOM_connection c,
 	    if (render)
 		fwrite (render, 1, len, stdout);
 	    printf ("\n");
+	    if (opac_render)
+		fwrite (opac_render, 1, opac_len, stdout);
 	}
+	    
     }
 }
 

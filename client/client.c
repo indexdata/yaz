@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.201 2003-06-19 21:10:03 adam Exp $
+ * $Id: client.c,v 1.202 2003-07-14 12:59:23 adam Exp $
  */
 
 #include <stdio.h>
@@ -807,6 +807,107 @@ static void display_record(Z_External *r)
         yaz_display_grs1(w, r->u.grs1, 0);
         puts (wrbuf_buf(w));
         wrbuf_free(w, 1);
+    }
+    else if ( /* OPAC display not complete yet .. */
+	     ent && ent->value == VAL_OPAC)
+    {
+	int i;
+	if (r->u.opac->bibliographicRecord)
+	    display_record(r->u.opac->bibliographicRecord);
+	for (i = 0; i<r->u.opac->num_holdingsData; i++)
+	{
+	    Z_HoldingsRecord *h = r->u.opac->holdingsData[i];
+	    if (h->which == Z_HoldingsRecord_marcHoldingsRecord)
+	    {
+		printf ("MARC holdings %d\n", i);
+		display_record(h->u.marcHoldingsRecord);
+	    }
+	    else if (h->which == Z_HoldingsRecord_holdingsAndCirc)
+	    {
+		int j;
+
+		Z_HoldingsAndCircData *data = h->u.holdingsAndCirc;
+
+		printf ("Data holdings %d\n", i);
+		if (data->typeOfRecord)
+		    printf ("typeOfRecord: %s\n", data->typeOfRecord);
+		if (data->encodingLevel)
+		    printf ("encodingLevel: %s\n", data->encodingLevel);
+		if (data->receiptAcqStatus)
+		    printf ("receiptAcqStatus: %s\n", data->receiptAcqStatus);
+		if (data->generalRetention)
+		    printf ("generalRetention: %s\n", data->generalRetention);
+		if (data->completeness)
+		    printf ("completeness: %s\n", data->completeness);
+		if (data->dateOfReport)
+		    printf ("dateOfReport: %s\n", data->dateOfReport);
+		if (data->nucCode)
+		    printf ("nucCode: %s\n", data->nucCode);
+		if (data->localLocation)
+		    printf ("localLocation: %s\n", data->localLocation);
+		if (data->shelvingLocation)
+		    printf ("shelvingLocation: %s\n", data->shelvingLocation);
+		if (data->callNumber)
+		    printf ("callNumber: %s\n", data->callNumber);
+		if (data->copyNumber)
+		    printf ("copyNumber: %s\n", data->copyNumber);
+		if (data->publicNote)
+		    printf ("publicNote: %s\n", data->publicNote);
+		if (data->reproductionNote)
+		    printf ("reproductionNote: %s\n", data->reproductionNote);
+		if (data->termsUseRepro)
+		    printf ("termsUseRepro: %s\n", data->termsUseRepro);
+		if (data->enumAndChron)
+		    printf ("enumAndChron: %s\n", data->enumAndChron);
+		for (j = 0; j<data->num_volumes; j++)
+		{
+		    printf ("volume %d\n", j);
+		    if (data->volumes[j]->enumeration)
+			printf (" enumeration: %s\n",
+				data->volumes[j]->enumeration);
+		    if (data->volumes[j]->chronology)
+			printf (" chronology: %s\n",
+				data->volumes[j]->chronology);
+		    if (data->volumes[j]->enumAndChron)
+			printf (" enumAndChron: %s\n",
+				data->volumes[j]->enumAndChron);
+		}
+		for (j = 0; j<data->num_circulationData; j++)
+		{
+		    printf ("circulation %d\n", j);
+		    if (data->circulationData[j]->availableNow)
+			printf (" availableNow: %d\n",
+				*data->circulationData[j]->availableNow);
+		    if (data->circulationData[j]->availablityDate)
+			printf (" availabiltyDate: %s\n",
+				data->circulationData[j]->availablityDate);
+		    if (data->circulationData[j]->availableThru)
+			printf (" availableThru: %s\n",
+				data->circulationData[j]->availableThru);
+		    if (data->circulationData[j]->restrictions)
+			printf (" restrictions: %s\n",
+				data->circulationData[j]->restrictions);
+		    if (data->circulationData[j]->itemId)
+			printf (" itemId: %s\n",
+				data->circulationData[j]->itemId);
+		    if (data->circulationData[j]->renewable)
+			printf (" renewable: %d\n",
+				*data->circulationData[j]->renewable);
+		    if (data->circulationData[j]->onHold)
+			printf (" onHold: %d\n",
+				*data->circulationData[j]->onHold);
+		    if (data->circulationData[j]->enumAndChron)
+			printf (" enumAndChron: %s\n",
+				data->circulationData[j]->enumAndChron);
+		    if (data->circulationData[j]->midspine)
+			printf (" midspine: %s\n",
+				data->circulationData[j]->midspine);
+		    if (data->circulationData[j]->temporaryLocation)
+			printf (" temporaryLocation: %s\n",
+				data->circulationData[j]->temporaryLocation);
+		}
+	    }
+	}
     }
     else 
     {

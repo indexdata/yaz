@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: proto.h,v 1.9 2003-02-21 12:08:58 adam Exp $
+ * $Id: proto.h,v 1.10 2003-07-14 12:59:23 adam Exp $
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H
@@ -111,6 +111,7 @@ YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
 
 YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);
 
+YAZ_EXPORT void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags);
 
 YAZ_END_CDECL
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.38 2003-06-03 13:59:28 adam Exp $
+ * $Id: zoom-c.c,v 1.39 2003-07-14 12:59:23 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -604,6 +604,8 @@ ZOOM_resultset_destroy(ZOOM_resultset r)
                 wrbuf_free (rc->rec.wrbuf_marc, 1);
             if (rc->rec.wrbuf_iconv)
                 wrbuf_free (rc->rec.wrbuf_iconv, 1);
+            if (rc->rec.wrbuf_opac)
+                wrbuf_free (rc->rec.wrbuf_opac, 1);
 	}
 	if (r->connection)
 	{
@@ -1304,6 +1306,7 @@ ZOOM_record_clone (ZOOM_record srec)
     nrec->odr = odr_createmem(ODR_DECODE);
     nrec->wrbuf_marc = 0;
     nrec->wrbuf_iconv = 0;
+    nrec->wrbuf_opac = 0;
     odr_setbuf (nrec->odr, buf, size, 0);
     z_NamePlusRecord (nrec->odr, &nrec->npr, 0, 0);
     
@@ -1337,6 +1340,10 @@ ZOOM_record_destroy (ZOOM_record rec)
 	return;
     if (rec->wrbuf_marc)
 	wrbuf_free (rec->wrbuf_marc, 1);
+    if (rec->wrbuf_iconv)
+	wrbuf_free (rec->wrbuf_iconv, 1);
+    if (rec->wrbuf_opac)
+	wrbuf_free (rec->wrbuf_opac, 1);
     odr_destroy (rec->odr);
     xfree (rec);
 }
@@ -1478,7 +1485,15 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
         oident *ent = oid_getentbyoid(r->direct_reference);
-        
+
+	/* render bibliographic record .. */
+	if (r->which == Z_External_OPAC)
+	{
+	    r = r->u.opac->bibliographicRecord;
+	    if (!r)
+		return 0;
+	    ent = oid_getentbyoid(r->direct_reference);
+	}
         if (r->which == Z_External_sutrs)
 	    return record_iconv_return(rec, len,
 				       r->u.sutrs->buf, r->u.sutrs->len,
@@ -1537,6 +1552,15 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
         oident *ent = oid_getentbyoid(r->direct_reference);
+
+	/* render bibliographic record .. */
+	if (r->which == Z_External_OPAC)
+	{
+	    r = r->u.opac->bibliographicRecord;
+	    if (!r)
+		return 0;
+	    ent = oid_getentbyoid(r->direct_reference);
+	}
         
         if (r->which == Z_External_sutrs)
 	    return record_iconv_return(rec, len,
@@ -1589,11 +1613,6 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
             if (len) *len = 5;
             return "GRS-1";
         }
-	else if (r->which == Z_External_OPAC)
-        {
-            if (len) *len = 4;
-            return "OPAC";
-        }
 	return 0;
     }
     else if (!strcmp (type, "raw"))
@@ -1612,7 +1631,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
 		if (len) *len = r->u.octet_aligned->len;
 		return (const char *) r->u.octet_aligned->buf;
 	    }
-	    else /* grs-1, explain, ... */
+	    else /* grs-1, explain, OPAC, ... */
 	    {
 		if (len) *len = -1;
                 return (const char *) npr->u.databaseRecord;
@@ -1625,6 +1644,23 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
 	if (npr->which == Z_NamePlusRecord_databaseRecord)
             return (const char *) npr->u.databaseRecord;
 	return 0;
+    }
+    else if (npr->which == Z_NamePlusRecord_databaseRecord &&
+             !strcmp (type, "opac"))
+	     
+    {
+	Z_External *r = (Z_External *) npr->u.databaseRecord;
+	if (r->which == Z_External_OPAC)
+	{
+	    if (!rec->wrbuf_opac)
+		rec->wrbuf_opac = wrbuf_alloc();
+	    wrbuf_rewind (rec->wrbuf_opac);
+	    yaz_display_OPAC(rec->wrbuf_opac, r->u.opac, 0);
+	    return record_iconv_return(rec, len,
+				       wrbuf_buf(rec->wrbuf_opac),
+				       wrbuf_len(rec->wrbuf_opac),
+				       charset);
+	}
     }
     return 0;
 }
@@ -1671,6 +1707,7 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr,
     rc->rec.odr = 0;
     rc->rec.wrbuf_marc = 0;
     rc->rec.wrbuf_iconv = 0;
+    rc->rec.wrbuf_opac = 0;
     if (elementSetName)
 	rc->elementSetName = odr_strdup (r->odr, elementSetName);
     else
