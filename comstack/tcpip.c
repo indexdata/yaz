@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.12  1996-07-06 19:58:30  quinn
+ * Revision 1.13  1996-11-01 08:45:18  adam
+ * Bug fix: used close on MS-Windows. Fixed to closesocket.
+ *
+ * Revision 1.12  1996/07/06 19:58:30  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.11  1996/02/23  10:00:39  quinn
@@ -535,7 +538,11 @@ int tcpip_close(COMSTACK h)
     tcpip_state *sp = h->private;
 
     TRC(fprintf(stderr, "tcpip_close\n"));
+#ifdef WINDOWS
+    closesocket(h->iofile);
+#else
     close(h->iofile);
+#endif
     if (sp->altbuf)
         xfree(sp->altbuf);
     xfree(sp);
