@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added Extended Services to server (backend.h). Thanks to Charles Woodfield.
+
 Added EXTERNAL: UNIverse Resource Report.
 
 Implemened odr_enum and odr_set_of functions to handle ASN.1 types

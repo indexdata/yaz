@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.18  1998-02-10 11:03:56  adam
+ * Revision 1.19  1998-03-31 11:07:45  adam
+ * Furhter work on UNIverse resource report.
+ * Added Extended Services handling in frontend server.
+ *
+ * Revision 1.18  1998/02/10 11:03:56  adam
  * Added support for extended handlers in backend server interface.
  *
  * Revision 1.17  1998/01/29 13:15:35  adam
@@ -195,6 +199,18 @@ typedef struct bend_sort_rr
     char *errstring;
 } bend_sort_rr;
 
+/* extended services handler. Added in from DALI */
+typedef struct bend_esrequest_rr
+{
+    int ItemNo;
+    Z_ExtendedServicesRequest *esr;
+    ODR stream;                /* encoding stream */
+    bend_request request;
+    bend_association association;
+    int errcode;               /* 0==success */
+    char *errstring;           /* system error string or NULL */
+} bend_esrequest_rr;
+
 typedef struct bend_initrequest
 {
     char *configname;
@@ -204,6 +220,7 @@ typedef struct bend_initrequest
     int (*bend_sort) (void *handle, bend_sort_rr *rr);
     int (*bend_search) (void *handle, bend_search_rr *rr);
     int (*bend_present) (void *handle, bend_present_rr *rr);
+    int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult
@@ -226,6 +243,7 @@ YAZ_EXPORT Z_ReferenceId *bend_request_getid (ODR odr, bend_request req);
 YAZ_EXPORT int bend_backend_respond (bend_association a, bend_request req);
 YAZ_EXPORT void bend_request_setdata(bend_request r, void *p);
 YAZ_EXPORT void *bend_request_getdata(bend_request r);
+
 
 #ifdef __cplusplus
 }

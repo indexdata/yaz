@@ -33,7 +33,6 @@
 #define PRT_EXT_H
 
 #include <yconfig.h>
-#include <prt-dat.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,6 +99,7 @@ struct Z_External
 	Z_SearchInfoReport *searchResult1;
 	Z_IUUpdate *update;
 	Z_DateTime *dateTime;
+    Z_UniverseReport *universeReport;
     } u;
 };
 

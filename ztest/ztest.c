@@ -7,7 +7,11 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.8  1998-02-11 11:53:36  adam
+ * Revision 1.9  1998-03-31 11:07:45  adam
+ * Furhter work on UNIverse resource report.
+ * Added Extended Services handling in frontend server.
+ *
+ * Revision 1.8  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.7  1998/02/10 11:03:57  adam
@@ -52,6 +56,7 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o);
 int ztest_search (void *handle, bend_search_rr *rr);
 int ztest_sort (void *handle, bend_sort_rr *rr);
 int ztest_present (void *handle, bend_present_rr *rr);
+int ztest_esrequest (void *handle, bend_esrequest_rr *rr);
 
 bend_initresult *bend_init(bend_initrequest *q)
 {
@@ -64,6 +69,7 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_sort = ztest_sort;       /* register sort handler */
     q->bend_search = ztest_search;   /* register search handler */
     q->bend_present = ztest_present; /* register present handle */
+    q->bend_esrequest = ztest_esrequest;
     return r;
 }
 
@@ -75,6 +81,12 @@ int ztest_search (void *handle, bend_search_rr *rr)
 
 int ztest_present (void *handle, bend_present_rr *rr)
 {
+    return 0;
+}
+
+int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
+{
+    rr->errcode = 0;
     return 0;
 }
 
@@ -226,28 +238,6 @@ bend_deleteresult *bend_delete(void *handle, bend_deleterequest *q, int *num)
     return 0;
 }
 
-#if 0
-bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
-{
-    static struct scan_entry list[200];
-    static char buf[200][200];
-    static bend_scanresult r;
-    int i;
-
-    r.term_position = q->term_position;
-    r.num_entries = q->num_entries;
-    r.entries = list;
-    for (i = 0; i < r.num_entries; i++)
-    {
-    	list[i].term = buf[i];
-	sprintf(list[i].term, "term-%d", i+1);
-	list[i].occurrences = rand() % 100000;
-    }
-    r.errcode = 0;
-    r.errstring = 0;
-    return &r;
-}
-#else
 /*
  * silly dummy-scan what reads words from a file.
  */
@@ -327,8 +317,6 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
     	r->status = BEND_SCAN_PARTIAL;
     return r;
 }
-
-#endif
 
 void bend_close(void *handle)
 {

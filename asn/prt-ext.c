@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.17  1998-03-20 14:46:06  adam
+ * Revision 1.18  1998-03-31 11:07:44  adam
+ * Furhter work on UNIverse resource report.
+ * Added Extended Services handling in frontend server.
+ *
+ * Revision 1.17  1998/03/20 14:46:06  adam
  * Added UNIverse Resource Reports.
  *
  * Revision 1.16  1998/02/11 11:53:32  adam
@@ -83,6 +87,7 @@ static Z_ext_typeent type_table[] =
     {VAL_SEARCHRES1, Z_External_searchResult1, (Odr_fun)z_SearchInfoReport},
     {VAL_DBUPDATE, Z_External_update, (Odr_fun)z_IUUpdate},
     {VAL_DATETIME, Z_External_dateTime, (Odr_fun)z_DateTime},
+    {VAL_UNIVERSE_REPORT, Z_External_universeReport, (Odr_fun)z_UniverseReport},
     {VAL_NONE, 0, 0}
 };
 

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.63  1998-03-05 08:05:10  adam
+ * Revision 1.64  1998-03-31 11:07:44  adam
+ * Furhter work on UNIverse resource report.
+ * Added Extended Services handling in frontend server.
+ *
+ * Revision 1.63  1998/03/05 08:05:10  adam
  * Added a few casts to make C++ happy.
  *
  * Revision 1.62  1998/02/11 11:53:33  adam
@@ -319,6 +323,7 @@ static void send_initRequest()
     ODR_MASK_SET(req->options, Z_Options_triggerResourceCtrl);
     ODR_MASK_SET(req->options, Z_Options_scan);
     ODR_MASK_SET(req->options, Z_Options_sort);
+    ODR_MASK_SET(req->options, Z_Options_extendedServices);
 
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
@@ -796,11 +801,258 @@ static int process_searchResponse(Z_SearchResponse *res)
     return 0;
 }
 
+static void print_level(int iLevel)
+{
+    int i;
+    for (i = 0; i < iLevel * 4; i++)
+        printf(" ");
+}
+
+static void print_int(int iLevel, const char *pTag, int *pInt)
+{
+    if (pInt != NULL)
+    {
+        print_level(iLevel);
+        printf("%s: %d\n", pTag, *pInt);
+    }
+}
+
+static void print_string(int iLevel, const char *pTag, const char *pString)
+{
+    if (pString != NULL)
+    {
+        print_level(iLevel);
+        printf("%s: %s\n", pTag, pString);
+    }
+}
+
+static void print_oid(int iLevel, const char *pTag, Odr_oid *pOid)
+{
+    if (pOid != NULL)
+    {
+        int *pInt = pOid;
+
+        print_level(iLevel);
+        printf("%s:", pTag);
+        for (; *pInt != -1; pInt++)
+            printf(" %d", *pInt);
+        printf("\n");
+    }
+}
+
+static void print_referenceId(int iLevel, Z_ReferenceId *referenceId)
+{
+    if (referenceId != NULL)
+    {
+        int i;
+
+        print_level(iLevel);
+        printf("Ref Id (%d, %d): ", referenceId->len, referenceId->size);
+        for (i = 0; i < referenceId->len; i++)
+            printf("%c", referenceId->buf[i]);
+        printf("\n");
+    }
+}
+
+static void print_string_or_numeric(int iLevel, const char *pTag, Z_StringOrNumeric *pStringNumeric)
+{
+    if (pStringNumeric != NULL)
+    {
+        switch (pStringNumeric->which)
+        {
+            case Z_StringOrNumeric_string:
+                print_string(iLevel, pTag, pStringNumeric->u.string);
+                break;
+
+            case Z_StringOrNumeric_numeric:
+                print_int(iLevel, pTag, pStringNumeric->u.numeric);
+                break;
+
+            default:
+                print_level(iLevel);
+                printf("%s: valid type for Z_StringOrNumeric\n", pTag);
+                break;
+        }
+    }
+}
+
+static void print_universe_report_duplicate(int iLevel, Z_UniverseReportDuplicate *pUniverseReportDuplicate)
+{
+    if (pUniverseReportDuplicate != NULL)
+    {
+        print_level(iLevel);
+        printf("Universe Report Duplicate: \n");
+        iLevel++;
+        print_string_or_numeric(iLevel, "Hit No", pUniverseReportDuplicate->hitno);
+    }
+}
+
+static void print_universe_report_hits(int iLevel, Z_UniverseReportHits *pUniverseReportHits)
+{
+    if (pUniverseReportHits != NULL)
+    {
+        print_level(iLevel);
+        printf("Universe Report Hits: \n");
+        iLevel++;
+        print_string_or_numeric(iLevel, "Database", pUniverseReportHits->database);
+        print_string_or_numeric(iLevel, "Hits", pUniverseReportHits->hits);
+    }
+}
+
+static void print_universe_report(int iLevel, Z_UniverseReport *pUniverseReport)
+{
+    if (pUniverseReport != NULL)
+    {
+        print_level(iLevel);
+        printf("Universe Report: \n");
+        iLevel++;
+        print_int(iLevel, "Total Hits", pUniverseReport->totalHits);
+        switch (pUniverseReport->which)
+        {
+            case Z_UniverseReport_databaseHits:
+                print_universe_report_hits(iLevel, pUniverseReport->u.databaseHits);
+                break;
+
+            case Z_UniverseReport_duplicate:
+                print_universe_report_duplicate(iLevel, pUniverseReport->u.duplicate);
+                break;
+
+            default:
+                print_level(iLevel);
+                printf("Type: %d\n", pUniverseReport->which);
+                break;
+        }
+    }
+}
+
+static void print_external(int iLevel, Z_External *pExternal)
+{
+    if (pExternal != NULL)
+    {
+        print_level(iLevel);
+        printf("External: \n");
+        iLevel++;
+        print_oid(iLevel, "Direct Reference", pExternal->direct_reference);
+        print_int(iLevel, "InDirect Reference", pExternal->indirect_reference);
+        print_string(iLevel, "Descriptor", pExternal->descriptor);
+        switch (pExternal->which)
+        {
+            case Z_External_universeReport:
+                print_universe_report(iLevel, pExternal->u.universeReport);
+                break;
+
+            default:
+                print_level(iLevel);
+                printf("Type: %d\n", pExternal->which);
+                break;
+        }
+    }
+}
+
 static int process_resourceControlRequest (Z_ResourceControlRequest *req)
 {
     printf ("Received ResourceControlRequest.\n");
-    print_refid (req->referenceId);
+    print_referenceId(1, req->referenceId);
+    print_int(1, "Suspended Flag", req->suspendedFlag);
+    print_int(1, "Partial Results Available", req->partialResultsAvailable);
+    print_int(1, "Response Required", req->responseRequired);
+    print_int(1, "Triggered Request Flag", req->triggeredRequestFlag);
+    print_external(1, req->resourceReport);
     return 0;
+}
+
+void process_ESResponse(Z_ExtendedServicesResponse *res)
+{
+    printf("process_ESResponse\n");
+}
+
+static Z_External *CreateItemOrderExternal(int itemno)
+{
+    Z_External *r = odr_malloc(out, sizeof(Z_External));
+    oident ItemOrderRequest;
+  
+    ItemOrderRequest.proto = PROTO_Z3950;
+    ItemOrderRequest.oclass = CLASS_EXTSERV;
+    ItemOrderRequest.value = VAL_ITEMORDER;
+ 
+    r->direct_reference = odr_oiddup(out,oid_getoidbyent(&ItemOrderRequest)); 
+    r->indirect_reference = odr_malloc(out,sizeof(int));
+    *r->indirect_reference = 0;
+
+    r->descriptor = "Extended services item order";
+
+    r->which = Z_External_itemOrder;
+
+    r->u.itemOrder = odr_malloc(out,sizeof(Z_ItemOrder));
+    memset(r->u.itemOrder, 0, sizeof(Z_ItemOrder));
+    r->u.itemOrder->which=Z_ItemOrder_esRequest;
+
+    r->u.itemOrder->u.esRequest = odr_malloc(out,sizeof(Z_IORequest));
+    memset(r->u.itemOrder->u.esRequest, 0, sizeof(Z_IORequest));
+
+    r->u.itemOrder->u.esRequest->toKeep = odr_malloc(out,sizeof(Z_IOOriginPartToKeep));
+    memset(r->u.itemOrder->u.esRequest->toKeep, 0, sizeof(Z_IOOriginPartToKeep));
+    r->u.itemOrder->u.esRequest->notToKeep = odr_malloc(out,sizeof(Z_IOOriginPartNotToKeep));
+    memset(r->u.itemOrder->u.esRequest->notToKeep, 0, sizeof(Z_IOOriginPartNotToKeep));
+
+    r->u.itemOrder->u.esRequest->toKeep->supplDescription = NULL;
+    r->u.itemOrder->u.esRequest->toKeep->contact = NULL;
+    r->u.itemOrder->u.esRequest->toKeep->addlBilling = NULL;
+
+    r->u.itemOrder->u.esRequest->notToKeep->resultSetItem = odr_malloc(out, sizeof(Z_IOResultSetItem));
+    memset(r->u.itemOrder->u.esRequest->notToKeep->resultSetItem, 0, sizeof(Z_IOResultSetItem));
+    r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->resultSetId = "1";
+
+    r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = odr_malloc(out, sizeof(int));
+    *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
+
+    r->u.itemOrder->u.esRequest->notToKeep->itemRequest = NULL;
+    return r;
+}
+
+/* II : Added to do DALI Item Order Extended services request */
+static int send_itemorder(char *arg)
+{
+    int itemno = -1;
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
+    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+    oident ItemOrderRequest;
+
+    if (*arg)
+        itemno = atoi(arg);
+
+    /* Set up item order request */
+
+    /* Function being performed by this extended services request */
+    req->function = odr_malloc(out, sizeof(int));
+    *req->function = Z_ExtendedServicesRequest_create;
+
+    /* Package type, Using protocol ILL ( But that's not in the oid.h file yet */
+    /* create an object of class Extended Service, value Item Order            */
+    ItemOrderRequest.proto = PROTO_Z3950;
+    ItemOrderRequest.oclass = CLASS_EXTSERV;
+    ItemOrderRequest.value = VAL_ITEMORDER;
+    req->packageType = odr_oiddup(out,oid_getoidbyent(&ItemOrderRequest));
+    req->packageName = "1.Extendedserveq";
+
+    /* ** taskSpecificParameters ** */
+    req->taskSpecificParameters = CreateItemOrderExternal(itemno);
+
+    /* waitAction - Create the ILL request and that's it */
+    *req->waitAction = Z_ExtendedServicesRequest_wait;
+
+    send_apdu(apdu);
+    return 0;
+}
+
+/* II : Added to do DALI Item Order Extended services request */
+static int cmd_itemorder(char *arg)
+{
+    printf("Item order request\n");
+    fflush(stdout);
+
+    send_itemorder(arg);
+    return(1);
 }
 
 static int cmd_find(char *arg)
@@ -1430,6 +1682,7 @@ static int client(int wait)
 	{"attributeset", cmd_attributeset, "<attrset>"},
         {"querytype", cmd_querytype, "<type>"},
 	{"refid", cmd_refid, "<id>"},
+	{"itemorder", cmd_itemorder, "<item>"},
         {0,0}
     };
     char *netbuffer= 0;
@@ -1555,6 +1808,10 @@ static int client(int wait)
 		case Z_APDU_sortResponse:
 		    process_sortResponse(apdu->u.sortResponse);
 		    break;
+                case Z_APDU_extendedServicesResponse:
+                    printf("Got extended services response\n");
+                    process_ESResponse(apdu->u.extendedServicesResponse);
+                    break;
 		case Z_APDU_close:
 		    printf("Target has closed the association.\n");
 		    process_close(apdu->u.close);
@@ -1612,3 +1869,5 @@ int main(int argc, char **argv)
         printf (C_PROMPT);
     return client (opened);
 }
+
+

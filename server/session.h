@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.15  1998-02-11 11:53:36  adam
+ * Revision 1.16  1998-03-31 11:07:45  adam
+ * Furhter work on UNIverse resource report.
+ * Added Extended Services handling in frontend server.
+ *
+ * Revision 1.15  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.14  1998/02/10 11:03:57  adam
@@ -133,6 +137,7 @@ typedef struct association
     int (*bend_sort) ();
     int (*bend_search) ();
     int (*bend_present) ();
+    int (*bend_esrequest) ();
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);

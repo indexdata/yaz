@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.72  1998-02-11 11:53:35  adam
+ * Revision 1.73  1998-03-31 11:07:45  adam
+ * Furhter work on UNIverse resource report.
+ * Added Extended Services handling in frontend server.
+ *
+ * Revision 1.72  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.71  1998/02/10 11:03:57  adam
@@ -293,6 +297,10 @@ void save_referenceId (request *reqb, Z_ReferenceId *refid);
 static FILE *apduf = 0; /* for use in static mode */
 static statserv_options_block *control_block = 0;
 
+/* Chas: Added in from DALI */
+static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd);
+/* Chas: End of addition from DALI */
+
 /*
  * Create and initialize a new association-handle.
  *  channel  : iochannel for the current line.
@@ -559,7 +567,18 @@ static int process_request(association *assoc, request *req)
 	    res = process_presentRequest(assoc, req, &fd); break;
 	case Z_APDU_scanRequest:
 	    res = process_scanRequest(assoc, req, &fd); break;
-	case Z_APDU_sortRequest:
+/* Chas: Added in from DALI */
+        case Z_APDU_extendedServicesRequest:
+	    if (assoc->bend_esrequest)
+		res = process_ESRequest(assoc, req, &fd);
+	    else
+	    {
+		logf(LOG_WARN, "Cannot handle EXTENDED SERVICES APDU");
+		return -1;
+	    }
+/* Chas: End of addition from DALI */
+	    break;
+        case Z_APDU_sortRequest:
 	    if (assoc->bend_sort)
 		res = process_sortRequest(assoc, req, &fd);
 	    else
@@ -709,6 +728,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     binitreq.bend_sort = NULL;
     binitreq.bend_search = NULL;
     binitreq.bend_present = NULL;
+    binitreq.bend_esrequest = NULL;
     if (!(binitres = bend_init(&binitreq)))
     {
     	logf(LOG_WARN, "Bad response from backend.");
@@ -722,6 +742,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 	logf (LOG_DEBUG, "Search handler installed");
     if ((assoc->bend_present = (int (*)())binitreq.bend_present))
 	logf (LOG_DEBUG, "Present handler installed");   
+    if ((assoc->bend_esrequest = (int (*)())binitreq.bend_esrequest))
+	logf (LOG_DEBUG, "ESRequest handler installed");   
+    
     resp->referenceId = req->referenceId;
     *options = '\0';
     /* let's tell the client what we can do */
@@ -735,13 +758,17 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->options, Z_Options_present);
 	strcat(options, " prst");
     }
-#if 0
     if (ODR_MASK_GET(req->options, Z_Options_delSet))
     {
-    	ODR_MASK_SET(&options, Z_Options_delSet);
+    	ODR_MASK_SET(resp->options, Z_Options_delSet);
 	strcat(options, " del");
     }
-#endif
+    if (ODR_MASK_GET(req->options, Z_Options_extendedServices) &&
+	binitreq.bend_esrequest)
+    {
+	ODR_MASK_SET(resp->options, Z_Options_extendedServices);
+	strcat (options, " extendedServices");
+    }
     if (ODR_MASK_GET(req->options, Z_Options_namedResultSets))
     {
     	ODR_MASK_SET(resp->options, Z_Options_namedResultSets);
@@ -1536,3 +1563,51 @@ void *bend_request_getdata(bend_request r)
 {
     return r->clientData;
 }
+
+/* Chas: Added in from DALI */
+static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
+{
+    bend_esrequest_rr esrequest;
+
+    Z_ExtendedServicesRequest *req = reqb->request->u.extendedServicesRequest;
+    Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_extendedServicesResponse);
+
+    Z_ExtendedServicesResponse *resp = apdu->u.extendedServicesResponse;
+
+    logf(LOG_DEBUG,"inside Process esRequest");
+
+    esrequest.esr = reqb->request->u.extendedServicesRequest;
+    esrequest.stream = assoc->encode;
+    esrequest.errcode = 0;
+    esrequest.errstring = NULL;
+	esrequest.request = reqb;
+	esrequest.association = assoc;
+
+    (*assoc->bend_esrequest)(assoc->backend, &esrequest, fd);
+
+    /* If the response is being delayed, return NULL */
+    if (esrequest.request == NULL)
+        return(NULL);
+
+    resp->referenceId = req->referenceId;
+
+    if ( esrequest.errcode == 0 )
+    {
+        /* Backend service indicates request will be processed */
+        logf(LOG_DEBUG,"Request will be processed...Good !");
+        *resp->operationStatus = Z_ExtendedServicesResponse_done;
+    }
+    else
+    {
+        /* Backend indicates error, request will not be processed */
+        logf(LOG_DEBUG,"Request will not be processed...BAD !");
+        *resp->operationStatus = Z_ExtendedServicesResponse_failure;
+    }
+    /* Do something with the members of bend_extendedservice */
+
+    logf(LOG_DEBUG,"Send the result apdu");
+
+    return apdu;
+}
+
+/* Chas: End of addition from DALI */
