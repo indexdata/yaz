@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.31  1995-06-16 13:15:56  quinn
+ * Revision 1.32  1995-06-19 12:37:28  quinn
+ * Fixed a bug in the compspec.
+ *
+ * Revision 1.31  1995/06/16  13:15:56  quinn
  * Fixed Defaultdiagformat.
  *
  * Revision 1.30  1995/06/15  15:42:01  quinn
@@ -104,6 +107,16 @@
 #include <proto.h>
 
 /* ---------------------- GLOBAL DEFS ------------------- */
+
+/*
+ * We'll use a general octetstring here, since string operations are
+ * clumsy on long strings.
+ */
+int z_SUTRS(ODR o, Odr_oct **p, int opt)
+{
+    return odr_implicit(o, odr_octetstring, p, ODR_UNIVERSAL,
+	ODR_GENERALSTRING, opt);
+}
 
 int z_ReferenceId(ODR o, Z_ReferenceId **p, int opt)
 {
@@ -443,14 +456,12 @@ int z_ElementSetNames(ODR o, Z_ElementSetNames **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (!odr_constructed_begin(o, p, ODR_CONTEXT, 19))
-    	return opt && odr_ok(o);
-
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
+    else
+    	return opt && odr_ok(o);
 
-    if (odr_choice(o, arm, &(*p)->u, &(*p)->which) &&
-    	odr_constructed_end(o))
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
     return 0;
@@ -1212,7 +1223,7 @@ int z_RecordComposition(ODR o, Z_RecordComposition **p, int opt)
 {
     static Odr_arm arm[] =
     {
-    	{ODR_EXPLICIT, ODR_CONTEXT, 1, Z_RecordComp_simple,
+    	{ODR_EXPLICIT, ODR_CONTEXT, 19, Z_RecordComp_simple,
 	    z_ElementSetNames},
 	{ODR_IMPLICIT, ODR_CONTEXT, 209, Z_RecordComp_complex,
 	    z_CompSpec},
@@ -1262,7 +1273,8 @@ int z_PresentRequest(ODR o, Z_PresentRequest **p, int opt)
 	    &(*p)->num_ranges) || odr_ok(o)) &&
 	z_RecordComposition(o, &(*p)->recordComposition, 1) &&
 #else
-	z_ElementSetNames(o, &pp->elementSetNames, 1) &&
+	odr_explicit(o, z_ElementSetNames, &pp->elementSetNames, ODR_CONTEXT,
+	    19, 1) &&
 #endif
 	odr_implicit(o, odr_oid, &(*p)->preferredRecordSyntax, ODR_CONTEXT,
 	    104, 1) &&
