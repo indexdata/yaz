@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.50 2002-01-23 20:22:49 adam Exp $
+ * $Id: oid.c,v 1.51 2002-01-26 20:50:59 adam Exp $
  */
 
 /*
@@ -447,8 +447,6 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
     struct oident *oident = 0;
 
     nmem_mutex_enter (oid_mutex);
-    if (desc)
-        oident = oid_getentbyoid_x (oid);
     if (!oident)
     {
 	char desc_str[200];
@@ -514,7 +512,9 @@ static oid_value oid_getval_raw(const char *name)
     }
     oid[i] = val;
     oid[i+1] = -1;
-    oident = oid_addent (oid, PROTO_GENERAL, CLASS_GENERAL, NULL,
+    oident = oid_getentbyoid_x (oid);
+    if (!oident)
+        oident = oid_addent (oid, PROTO_GENERAL, CLASS_GENERAL, NULL,
 			 VAL_DYNAMIC);
     return oident->value;
 }
