@@ -1,11 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 1.9 2002/09/DD
+--- 1.9 2002/09/08
 
 PQF parser rejects bad queries - including those with extra
 characters in them. PQF parser used to silently ignore that.
 Cleaner API for PQF added, which allows you to get detailed
 error information for bad queries (see yaz/pquery.h).
+
+Fixed bug in ZOOM_record_get for type "database".
 
 Implemented mini iconv library supporting conversions between
 UTF-8, UCS4, UCS4LE and ISO-8859-1. Implemented in util/siconv.c.
