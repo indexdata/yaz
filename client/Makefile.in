@@ -84,7 +84,7 @@ yaz_client_SOURCES = client.c admin.c admin.h
 
 yaz_client_LDADD = ../lib/libyaz.la $(READLINE_LIBS)
 
-INCLUDES = -I$(srcdir)/../include -DCCLRPN=1
+INCLUDES = -I$(srcdir)/../include -DCCL2RPN=1
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
 PROGRAMS =  $(bin_PROGRAMS)
