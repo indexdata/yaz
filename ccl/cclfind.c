@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.27 2001-11-27 22:38:50 adam Exp $
+ * $Id: cclfind.c,v 1.28 2002-03-13 11:47:23 adam Exp $
  *
  * Old Europagate log:
  *
@@ -592,7 +592,7 @@ static struct ccl_rpn_node *qualifiers2 (CCL_parser cclp,
             }
         }
         else if (cclp->look_token->len == 1 &&
-                 cclp->look_token->name[0] == '"')   /* = - term  ? */
+                 cclp->look_token->name[0] == '-')   /* = - term  ? */
         {
             ADVANCE;
             if (!(p = search_term (cclp, ap)))

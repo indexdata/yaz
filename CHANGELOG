@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.6 2002/MM/DD
 
+Fix bug in CCL parser when form "field = - <number>" was used.
+
 Added function yaz_marc_decode that decodes MARC for line mode
 display or XML.
 
