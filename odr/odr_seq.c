@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.18  1997-05-14 06:53:58  adam
+ * Revision 1.19  1997-06-23 10:31:11  adam
+ * Added RVDM's SEQUENCE OF patch again!
+ *
+ * Revision 1.18  1997/05/14 06:53:58  adam
  * C++ support.
  *
  * Revision 1.17  1997/05/05 11:21:09  adam
@@ -105,8 +108,11 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
     char **tmp = 0;
     int size = 0, i;
 
-    if (!odr_sequence_begin(o, p, 0))
+    if (!odr_sequence_begin(o, p, 0)) {
+	if (o->direction == ODR_DECODE)
+	    *num = 0;
     	return 0;
+    }
 
     switch (o->direction)
     {
