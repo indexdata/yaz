@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.8  1995-09-29 17:12:24  quinn
+ * Revision 1.9  1995-10-13 16:08:08  quinn
+ * Added OID utility
+ *
+ * Revision 1.8  1995/09/29  17:12:24  quinn
  * Smallish
  *
  * Revision 1.7  1995/09/27  15:02:59  quinn
@@ -119,6 +122,12 @@ void *odr_malloc(ODR o, int size)
     struct odr_memblock *p = o->mem;
     char *r;
 
+    if (!o)
+    {
+	if (!(r = malloc(size)))
+	    abort();
+	return r;
+    }
     if (!p || p->size - p->top < size)
     	if (!(p = get_block(size)))
 	    abort();

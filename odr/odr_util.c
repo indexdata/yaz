@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include <odr.h>
 #include <oid.h>
 
@@ -43,4 +45,22 @@ Odr_oid *odr_oiddup(ODR odr, Odr_oid *o)
     	return 0;
     oid_oidcpy(r, o);
     return r;
+}
+
+Odr_oid *odr_getoidbystr(ODR o, char *str)
+{
+    int num = 1, i = 0;
+    char *p = str;
+    Odr_oid *ret;
+
+    if (!isdigit(*str))
+	return 0;
+    while ((p = strchr(p, '.')))
+	num++, p++;
+    ret = odr_malloc(o, sizeof(*ret)*num);
+    p = str;
+    do
+	ret[i++] = atoi(p);
+    while ((p = strchr(p, '.')));
+    return ret;
 }

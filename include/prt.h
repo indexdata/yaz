@@ -50,5 +50,6 @@ int odr_dumpBER(FILE *f, char *buf, int len);
 void odr_choice_bias(ODR o, int what);
 int odr_total(ODR o);
 char *odr_errmsg(int n);
+Odr_oid *odr_getoidbystr(ODR o, char *str);
 
 #endif
