@@ -1,6 +1,9 @@
 /*
  * $Log: admin.c,v $
- * Revision 1.8  2000-04-17 14:21:38  adam
+ * Revision 1.9  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.8  2000/04/17 14:21:38  adam
  * WIN32 update.
  *
  * Revision 1.7  2000/04/05 07:39:54  adam
@@ -251,7 +254,7 @@ int cmd_adm_import(char *arg)
 	    {
 		Z_Segment *segment;
 		Z_NamePlusRecord *rec;
-		Odr_oct *oct = odr_malloc (out, sizeof(*oct));
+		Odr_oct *oct = (Odr_oct *) odr_malloc (out, sizeof(*oct));
 
 		if (!apdu)
 		{
@@ -270,7 +273,7 @@ int cmd_adm_import(char *arg)
 		rec->u.intermediateFragment->u.notExternallyTagged = oct;
 		
 		oct->len = oct->size = status.st_size;
-		oct->buf = odr_malloc (out, oct->size);
+		oct->buf = (unsigned char *) odr_malloc (out, oct->size);
 		fread (oct->buf, 1, oct->size, inf);
 		fclose (inf);
 		

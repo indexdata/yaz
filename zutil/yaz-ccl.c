@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.10  2001-02-20 11:23:50  adam
+ * Revision 1.11  2001-02-21 13:46:54  adam
+ * C++ fixes.
+ *
+ * Revision 1.10  2001/02/20 11:23:50  adam
  * Updated ccl_pquery to consider local attribute set too.
  *
  * Revision 1.9  2000/11/27 14:16:55  adam
@@ -108,7 +111,7 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
 
 		    ident.oclass = CLASS_ATTSET;
 		    ident.proto = PROTO_Z3950;
-		    ident.value = value;
+		    ident.value = (oid_value) value;
 		    elements[i]->attributeSet =
 			odr_oiddup (o, oid_ent_to_oid (&ident, oid));
 		}
@@ -172,15 +175,15 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
     {
     case CCL_RPN_AND:
         zo->which = Z_Operator_and;
-        zo->u.and = odr_nullval();
+        zo->u.op_and = odr_nullval();
         break;
     case CCL_RPN_OR:
         zo->which = Z_Operator_or;
-        zo->u.and = odr_nullval();
+        zo->u.op_or = odr_nullval();
         break;
     case CCL_RPN_NOT:
         zo->which = Z_Operator_and_not;
-        zo->u.and = odr_nullval();
+        zo->u.op_and_not = odr_nullval();
         break;
     case CCL_RPN_PROX:
 	zo->which = Z_Operator_prox;
@@ -202,7 +205,7 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
 	*zo->u.prox->relationType = Z_ProximityOperator_Prox_lessThan;
 	zo->u.prox->which = Z_ProximityOperator_known;
 	zo->u.prox->u.known = 
-	    odr_malloc (o, sizeof(*zo->u.prox->u.known));
+	    (Z_ProxUnit *) odr_malloc (o, sizeof(*zo->u.prox->u.known));
 	*zo->u.prox->u.known = Z_ProxUnit_word;
 #else
 	*zo->u.prox->relationType = Z_Prox_lessThan;

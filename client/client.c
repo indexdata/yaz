@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.113  2001-02-21 09:41:15  adam
+ * Revision 1.114  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.113  2001/02/21 09:41:15  adam
  * Fixed problem with old codecs.
  *
  * Revision 1.112  2001/02/20 11:25:32  adam
@@ -1369,7 +1372,8 @@ static Z_External *create_external_itemRequest()
         
         r->u.single_ASN1_type = (Odr_oct *)
             odr_malloc (out, sizeof(*r->u.single_ASN1_type));
-        r->u.single_ASN1_type->buf = odr_malloc (out, item_request_size);
+        r->u.single_ASN1_type->buf = (unsigned char *)
+	    odr_malloc (out, item_request_size);
         r->u.single_ASN1_type->len = item_request_size;
         r->u.single_ASN1_type->size = item_request_size;
         memcpy (r->u.single_ASN1_type->buf, item_request_buf,
@@ -1432,7 +1436,8 @@ static Z_External *create_external_ILL_APDU(int which)
         
         r->u.single_ASN1_type = (Odr_oct *)
             odr_malloc (out, sizeof(*r->u.single_ASN1_type));
-        r->u.single_ASN1_type->buf = odr_malloc (out, ill_request_size);
+        r->u.single_ASN1_type->buf = (unsigned char *)
+	    odr_malloc (out, ill_request_size);
         r->u.single_ASN1_type->len = ill_request_size;
         r->u.single_ASN1_type->size = ill_request_size;
         memcpy (r->u.single_ASN1_type->buf, ill_request_buf, ill_request_size);
@@ -1911,7 +1916,7 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
             req->termListAndStartPoint->term->u.general)
         {
             req->termListAndStartPoint->term->u.general->buf =
-                odr_strdup(out, term);
+                (unsigned char *) odr_strdup(out, term);
             req->termListAndStartPoint->term->u.general->len =
                 req->termListAndStartPoint->term->u.general->size =
                 strlen(term);

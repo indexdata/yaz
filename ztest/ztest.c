@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.37  2001-02-20 11:25:32  adam
+ * Revision 1.38  2001-02-21 13:46:54  adam
+ * C++ fixes.
+ *
+ * Revision 1.37  2001/02/20 11:25:32  adam
  * Added ill_get_APDU and ill_get_Cancel.
  *
  * Revision 1.36  2001/01/30 21:34:18  adam
@@ -220,7 +223,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 			if (r->which == ODR_EXTERNAL_single)
 			{
 			    odr_setbuf(rr->decode,
-				       r->u.single_ASN1_type->buf,
+				       (char *) r->u.single_ASN1_type->buf,
 				       r->u.single_ASN1_type->len, 0);
 			    
 			    if (!ill_ItemRequest (rr->decode, &item_req, 0, 0))
@@ -249,7 +252,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 			{
 			    yaz_log (LOG_LOG, "Decode ILL APDU begin");
 			    odr_setbuf(rr->decode,
-				       r->u.single_ASN1_type->buf,
+				       (char*) r->u.single_ASN1_type->buf,
 				       r->u.single_ASN1_type->len, 0);
 			    
 			    if (!ill_APDU (rr->decode, &ill_apdu, 0, 0))
@@ -260,7 +263,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                        odr_offset(rr->decode));
                                 yaz_log(LOG_LOG, "PDU dump:");
                                 odr_dumpBER(yaz_log_file(),
-                                     r->u.single_ASN1_type->buf,
+                                     (char *) r->u.single_ASN1_type->buf,
                                      r->u.single_ASN1_type->len);
                             }
 			    else

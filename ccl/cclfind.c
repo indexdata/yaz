@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.20  2000-11-16 13:03:12  adam
+ * Revision 1.21  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.20  2000/11/16 13:03:12  adam
  * Function ccl_rpn_query sets attributeSet to Bib-1.
  *
  * Revision 1.19  2000/11/16 09:58:02  adam
@@ -300,7 +303,7 @@ static void add_attr (struct ccl_rpn_node *p, const char *set,
     ccl_assert (n);
     if (set)
     {
-        n->set = malloc (strlen(set)+1);
+        n->set = (char*) malloc (strlen(set)+1);
         strcpy (n->set, set);
     }
     else

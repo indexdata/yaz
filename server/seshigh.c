@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.113  2001-01-30 21:34:17  adam
+ * Revision 1.114  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.113  2001/01/30 21:34:17  adam
  * Added step-size for Scan backend interface.
  *
  * Revision 1.112  2001/01/29 09:38:22  adam
@@ -930,7 +933,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     char options[100];
 
     xfree (assoc->init);
-    assoc->init = xmalloc (sizeof(*assoc->init));
+    assoc->init = (bend_initrequest *) xmalloc (sizeof(*assoc->init));
 
     yaz_log(LOG_LOG, "Got initRequest");
     if (req->implementationId)
@@ -1094,14 +1097,14 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
  * These functions should be merged.
  */
 
-static void set_addinfo (Z_DefaultDiagFormat *dr, char *addinfo)
+static void set_addinfo (Z_DefaultDiagFormat *dr, char *addinfo, ODR odr)
 {
 #if ASN_COMPILED
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
-    dr->u.v2Addinfo = addinfo ? addinfo : "";
+    dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
 #else
     dr->which = Z_DiagForm_v2AddInfo;
-    dr->addinfo = addinfo ? addinfo : "";
+    dr->addinfo = odr_strdup (odr, addinfo ? addinfo : "");
 #endif
 }
 
@@ -1139,7 +1142,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
     dr->diagnosticSetId =
 	odr_oiddup (assoc->encode, oid_ent_to_oid(&bib1, oid));
     dr->condition = err;
-    set_addinfo (dr, addinfo);
+    set_addinfo (dr, addinfo, assoc->encode);
     return rec;
 }
 
@@ -1172,7 +1175,7 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
     dr->diagnosticSetId = odr_oiddup (assoc->encode,
                                       oid_ent_to_oid(&bib1, oid));
     dr->condition = err;
-    set_addinfo (dr, addinfo);
+    set_addinfo (dr, addinfo, assoc->encode);
 
     return rec;
 }
@@ -1208,10 +1211,10 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 
 #ifdef ASN_COMPILED
     rec->which = Z_DefaultDiagFormat_v2Addinfo;
-    rec->u.v2Addinfo = addinfo ? addinfo : "";
+    rec->u.v2Addinfo = odr_strdup (assoc->encode, addinfo ? addinfo : "");
 #else
     rec->which = Z_DiagForm_v2AddInfo;
-    rec->addinfo = addinfo ? addinfo : "";
+    rec->addinfo = odr_strdup (assoc->encode, addinfo ? addinfo : "");
 #endif
     return recs;
 }
@@ -1843,8 +1846,9 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     if (bdrr->num_setnames > 0)
     {
 	int i;
-	bdrr->statuses = odr_malloc(assoc->encode, sizeof(*bdrr->statuses) *
-				    bdrr->num_setnames);
+	bdrr->statuses = (int*) 
+	    odr_malloc(assoc->encode, sizeof(*bdrr->statuses) *
+		       bdrr->num_setnames);
 	for (i = 0; i < bdrr->num_setnames; i++)
 	    bdrr->statuses[i] = 0;
     }
@@ -1860,16 +1864,18 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     if (bdrr->num_setnames > 0)
     {
 	int i;
-	res->deleteListStatuses = odr_malloc(assoc->encode,
-					     sizeof(*res->deleteListStatuses));
+	res->deleteListStatuses = (Z_ListStatuses *)
+	    odr_malloc(assoc->encode, sizeof(*res->deleteListStatuses));
 	res->deleteListStatuses->num = bdrr->num_setnames;
 	res->deleteListStatuses->elements =
-	    odr_malloc (assoc->encode,
+	    (Z_ListStatus **)
+	    odr_malloc (assoc->encode, 
 			sizeof(*res->deleteListStatuses->elements) *
 			bdrr->num_setnames);
 	for (i = 0; i<bdrr->num_setnames; i++)
 	{
 	    res->deleteListStatuses->elements[i] =
+		(Z_ListStatus *)
 		odr_malloc (assoc->encode,
 			    sizeof(**res->deleteListStatuses->elements));
 	    res->deleteListStatuses->elements[i]->status = bdrr->statuses+i;

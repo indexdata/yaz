@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
  * $Log: odr.c,v $
- * Revision 1.33  2000-02-29 13:44:55  adam
+ * Revision 1.34  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.33  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.32  2000/01/31 13:15:21  adam
@@ -123,7 +126,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/odr.h>
 
-Odr_null *ODR_NULLVAL = "NULL";  /* the presence of a null value */
+Odr_null *ODR_NULLVAL = (Odr_null *) "NULL";  /* the presence of a null value */
 
 Odr_null *odr_nullval (void)
 {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.4  1999-12-21 16:25:20  adam
+ * Revision 1.5  2001-02-21 13:46:54  adam
+ * C++ fixes.
+ *
+ * Revision 1.4  1999/12/21 16:25:20  adam
  * Fixed handling of default/inherited attributes.
  *
  * Revision 1.3  1999/12/20 15:20:13  adam
@@ -375,15 +378,15 @@ static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
     {
     case 'a':
         zo->which = Z_Operator_and;
-        zo->u.and = odr_nullval();
+        zo->u.op_and = odr_nullval();
         break;
     case 'o':
         zo->which = Z_Operator_or;
-        zo->u.and = odr_nullval();
+        zo->u.op_or = odr_nullval();
         break;
     case 'n':
         zo->which = Z_Operator_and_not;
-        zo->u.and = odr_nullval();
+        zo->u.op_and_not = odr_nullval();
         break;
     case 'p':
         zo->which = Z_Operator_prox;

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: ill-get.c,v $
- * Revision 1.7  2001-02-20 11:25:32  adam
+ * Revision 1.8  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.7  2001/02/20 11:25:32  adam
  * Added ill_get_APDU and ill_get_Cancel.
  *
  * Revision 1.6  2000/08/10 08:41:26  adam
@@ -36,7 +39,7 @@ bool_t *ill_get_bool (struct ill_get_ctl *gc, const char *name,
     ODR o = gc->odr;
     char element[128];
     const char *v;
-    bool_t *r = odr_malloc (o, sizeof(*r));
+    bool_t *r = (bool_t *) odr_malloc (o, sizeof(*r));
     
     strcpy(element, name);
     if (sub)
@@ -60,7 +63,7 @@ int *ill_get_int (struct ill_get_ctl *gc, const char *name,
     ODR o = gc->odr;
     char element[128];
     const char *v;
-    int *r = odr_malloc (o, sizeof(*r));
+    int *r = (int *) odr_malloc (o, sizeof(*r));
     
     strcpy(element, name);
     if (sub)
@@ -155,7 +158,8 @@ ILL_Person_Or_Institution_Symbol *ill_get_Person_Or_Insitution_Symbol (
 {
     char element[128];
     ODR o = gc->odr;
-    ILL_Person_Or_Institution_Symbol *p = odr_malloc (o, sizeof(*p));
+    ILL_Person_Or_Institution_Symbol *p =
+	(ILL_Person_Or_Institution_Symbol *) odr_malloc (o, sizeof(*p));
     
     strcpy(element, name);
     if (sub)
@@ -179,7 +183,8 @@ static ILL_Name_Of_Person_Or_Institution *ill_get_Name_Of_Person_Or_Institution(
 {
     char element[128];
     ODR o = gc->odr;
-    ILL_Name_Of_Person_Or_Institution *p = odr_malloc (o, sizeof(*p));
+    ILL_Name_Of_Person_Or_Institution *p =
+	(ILL_Name_Of_Person_Or_Institution *) odr_malloc (o, sizeof(*p));
     
     strcpy(element, name);
     if (sub)
@@ -671,7 +676,7 @@ ILL_APDU *ill_get_APDU (
     if (!strcmp (v, "request"))
     {
 	r->which = ILL_APDU_ILL_Request;
-	r->u.ILL_Request = ill_get_ILLRequest(gc, name, sub);
+	r->u.illRequest = ill_get_ILLRequest(gc, name, sub);
     }
     else if (!strcmp (v, "cancel"))
     {

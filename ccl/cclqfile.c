@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqfile.c,v $
- * Revision 1.7  2001-01-24 11:55:31  adam
+ * Revision 1.8  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.7  2001/01/24 11:55:31  adam
  * Fixed nasty bug introduced by previous commit (attribute sets not
  * properly allocated).
  *
@@ -175,7 +178,7 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
             pair[pair_no*2+1] = value;
 	    if (setp)
 	    {
-	        attsets[pair_no] = malloc (strlen(qual_spec)+1);
+	        attsets[pair_no] = (char*) malloc (strlen(qual_spec)+1);
 	        strcpy (attsets[pair_no], qual_spec);
 	    }
 	    else

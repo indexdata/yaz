@@ -7,7 +7,10 @@ exec tclsh "$0" "$@"
 # See the file LICENSE for details.
 #
 # $Log: yaz-comp,v $
-# Revision 1.1  2000-03-02 08:48:20  adam
+# Revision 1.2  2001-02-21 13:46:54  adam
+# C++ fixes.
+#
+# Revision 1.1  2000/03/02 08:48:20  adam
 # Renamed ASN.1 compiler to yaz-comp (used to be yc.tcl).
 #
 # Revision 1.6  2000/02/10 13:44:02  adam
@@ -256,7 +259,9 @@ proc asnName {name} {
 	if {$inf(verbose)} {
 	    puts " mapping member $name,$val to $nval"
 	}
-	lex
+	if {![string match {[A-Z]*} $val]} {
+	    lex
+	}
     } else {
 	set nval $val
 	if {![string match {[A-Z]*} $val]} {
@@ -563,7 +568,7 @@ proc asnSequence {name tag implicit tagtype} {
         lappend l "\tif (!odr_constructed_begin (o, p, $tagtype, $tag, name))"
         lappend l "\t\treturn opt && odr_ok(o);"
         lappend l "\tif (o->direction == ODR_DECODE)"
-        lappend l "\t\t*p = odr_malloc (o, sizeof(**p));"
+        lappend l "\t\t*p = ($inf(vprefix)$name *) odr_malloc (o, sizeof(**p));"
 
         lappend l "\tif (!odr_sequence_begin (o, p, sizeof(**p), 0))"
         lappend l "\t\{"

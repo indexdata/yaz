@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.35  2000-12-05 14:44:25  adam
+ * Revision 1.36  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.35  2000/12/05 14:44:25  adam
  * Readers skips <! ...> sections.
  *
  * Revision 1.34  2000/12/05 10:06:23  adam
@@ -348,7 +351,7 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	    c = (*get_byte)(fh);
 	if (!c  || c == '>' || c == '/')
 	    break;
-	*pp = p = nmem_malloc (m, sizeof(*p));
+	*pp = p = (data1_xattr *) nmem_malloc (m, sizeof(*p));
 	p->next = 0;
 	pp = &p->next;
 	p->value = 0;
@@ -361,7 +364,7 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	}
 	wrbuf_putc (wrbuf, '\0');
 	len = wrbuf_len(wrbuf);
-	p->name = nmem_malloc (m, len);
+	p->name = (char*) nmem_malloc (m, len);
 	strcpy (p->name, wrbuf_buf(wrbuf));
 	if (c == '=')
 	{
@@ -376,7 +379,7 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	    }
 	    wrbuf_putc (wrbuf, '\0');
 	    len = wrbuf_len(wrbuf);
-	    p->value = nmem_malloc (m, len);
+	    p->value = (char*) nmem_malloc (m, len);
 	    strcpy (p->value, wrbuf_buf(wrbuf));
 	    if (c == '"')
 		c = (*get_byte)(fh);	

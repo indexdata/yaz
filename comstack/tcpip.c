@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.35  2000-11-27 15:17:40  adam
+ * Revision 1.36  2001-02-21 13:46:53  adam
+ * C++ fixes.
+ *
+ * Revision 1.35  2000/11/27 15:17:40  adam
  * Using SSLeay_add_all_algorithms instead of OpenSSL_add_all_algorithms.
  *
  * Revision 1.34  2000/11/23 10:58:32  adam
@@ -613,7 +616,11 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 		 void *cd)
 {
     struct sockaddr_in addr;
+#ifdef __cplusplus
+    socklen_t len = sizeof(addr);
+#else
     int len = sizeof(addr);
+#endif
 
     TRC(fprintf(stderr, "tcpip_listen pid=%d\n", getpid()));
     if (h->state != CS_IDLE)

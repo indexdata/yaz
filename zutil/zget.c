@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.3  2000-03-20 19:06:25  adam
+ * Revision 1.4  2001-02-21 13:46:54  adam
+ * C++ fixes.
+ *
+ * Revision 1.3  2000/03/20 19:06:25  adam
  * Added Segment request for fronend server. Work on admin for client.
  *
  * Revision 1.2  1999/11/30 13:47:12  adam
@@ -340,7 +343,7 @@ Z_Segment *zget_Segment(ODR o)
     r->numberOfRecordsReturned = (int *)odr_malloc(o, sizeof(int));
     *r->numberOfRecordsReturned = 0;
     r->num_segmentRecords = 0;
-    r->segmentRecords = odr_nullval();
+    r->segmentRecords = (Z_NamePlusRecord **) odr_nullval();
     r->otherInfo = 0;
     return r;
 }

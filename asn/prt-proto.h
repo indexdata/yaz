@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: prt-proto.h,v 1.1 2000-10-03 12:55:50 adam Exp $
+ * $Id: prt-proto.h,v 1.2 2001-02-21 13:46:53 adam Exp $
  */
 
 #ifndef PRT_PROTO_H
@@ -322,9 +322,9 @@ typedef struct Z_Operator
 #define Z_Operator_prox 3
     union
     {
-    	Odr_null *and;          /* these guys are nulls. */
-    	Odr_null *or;
-    	Odr_null *and_not;
+    	Odr_null *op_and;          /* these guys are nulls. */
+    	Odr_null *op_or;
+    	Odr_null *op_and_not;
 	Z_ProximityOperator *prox;
     } u;
 } Z_Operator;
