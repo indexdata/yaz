@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.1  1995-05-22 15:31:49  adam
+ * Revision 1.2  1995-05-26 08:56:11  adam
+ * New function: p_query_scan.
+ *
+ * Revision 1.1  1995/05/22  15:31:49  adam
  * New function, p_query_rpn, to convert from prefix (ascii) to rpn (asn).
  *
  */
@@ -77,9 +80,10 @@ static int query_token (const char **qptr, const char **lex_buf, int *lex_len)
     return 't';
 }
 
-static void lex (void)
+static int lex (void)
 {
-    query_look = query_token (&query_buf, &query_lex_buf, &query_lex_len);
+    return query_look = 
+        query_token (&query_buf, &query_lex_buf, &query_lex_len);
 }
 
 static Z_AttributesPlusTerm *rpn_term (ODR o, int num_attr, int *attr_list)
@@ -233,5 +237,31 @@ Z_RPNQuery *p_query_rpn (ODR o, const char *qbuf)
     if (!(zq->RPNStructure = rpn_structure (o, 0, 512, attr_array)))
         return NULL;
     return zq;
+}
+
+Z_AttributesPlusTerm *p_query_scan (ODR o, const char *qbuf)
+{
+    int attr_list[1024];
+    int num_attr = 0;
+    int max_attr = 512;
+    const char *cp;
+
+    query_buf = qbuf;
+    while (lex() == 'l')
+    {
+        lex ();
+        if (!query_look)
+            return NULL;
+        if (!(cp = strchr (query_lex_buf, '=')))
+            return NULL;
+        if (num_attr >= max_attr)
+            return NULL;
+        attr_list[2*num_attr] = atoi (query_lex_buf);
+        attr_list[2*num_attr+1] = atoi (cp+1);
+        num_attr++;
+    }
+    if (!query_look)
+        return NULL;
+    return rpn_term (o, num_attr, attr_list);
 }
 
