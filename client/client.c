@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.32  1996-03-15 11:05:33  adam
+ * Revision 1.33  1996-05-09 07:25:22  quinn
+ * Sm
+ *
+ * Revision 1.32  1996/03/15  11:05:33  adam
  * The user can set the preferred query type (prefix, ccl, ..) with the
  * querytype command.
  *
@@ -508,7 +511,7 @@ static void display_diagrec(Z_DiagRec *p)
         printf("Missing or unknown diagset\n");
     printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
     if (r->addinfo && *r->addinfo)
-        printf(" -- %s\n", r->addinfo);
+        printf(" -- '%s'\n", r->addinfo);
     else
         printf("\n");
 }
