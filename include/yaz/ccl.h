@@ -45,60 +45,9 @@
 /*
  * CCL - header file
  *
- * $Log: ccl.h,v $
- * Revision 1.10  2001-06-28 12:42:01  adam
- * Added prototype for ccl_qual_add_special.
+ * $Id: ccl.h,v 1.11 2001-11-27 22:38:50 adam Exp $
  *
- * Revision 1.9  2001/03/07 13:24:40  adam
- * Member and_not in Z_Operator is kept for backwards compatibility.
- * Added support for definition of CCL operators in field spec file.
- *
- * Revision 1.8  2000/11/16 09:58:02  adam
- * Implemented local AttributeSet setting for CCL field maps.
- *
- * Revision 1.7  2000/11/01 14:47:00  adam
- * Added CCL support for WIN32.
- *
- * Revision 1.6  2000/10/17 19:50:28  adam
- * Implemented and-list and or-list for CCL module.
- *
- * Revision 1.5  2000/05/02 17:19:58  adam
- * Removed MINUS token.
- *
- * Revision 1.4  2000/03/14 09:06:11  adam
- * Added POSIX threads support for frontend server.
- *
- * Revision 1.3  2000/02/08 10:39:53  adam
- * Added a few functions to set name of operands, etc.
- *
- * Revision 1.2  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.9  1998/02/11 11:53:33  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.8  1997/09/29 09:01:19  adam
- * Changed CCL parser to be thread safe. New type, CCL-parser, declared
- * and a create/destructor ccl_parser_create/ccl_parser_destroy has been
- * added.
- *
- * Revision 1.7  1997/09/01 08:49:47  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.6  1997/05/14 06:53:37  adam
- * C++ support.
- *
- * Revision 1.5  1997/04/30 08:52:08  quinn
- * Null
- *
- * Revision 1.4  1996/10/11  15:02:26  adam
- * CCL parser from Europagate Email gateway 1.0.
+ * Old Europagate Log:
  *
  * Revision 1.10  1996/01/08  08:41:22  adam
  * Minor changes.
@@ -256,6 +205,8 @@ struct ccl_token {
 /* CCL Qualifier */
 struct ccl_qualifier {
     char *name;
+    int no_sub;
+    struct ccl_qualifier **sub;
     struct ccl_rpn_attr *attr_list;
     struct ccl_qualifier *next;
 };
@@ -327,7 +278,11 @@ YAZ_EXPORT void ccl_qual_add (CCL_bibset b, const char *name, int no,
 YAZ_EXPORT void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
 				  int *attr, char **attsets);
 
-YAZ_EXPORT void ccl_qual_add_special (CCL_bibset bibset, const char *n, const char *v);
+YAZ_EXPORT void ccl_qual_add_special (CCL_bibset bibset,
+                                      const char *n, const char *v);
+
+YAZ_EXPORT void ccl_qual_add_combi (CCL_bibset b, const char *n,
+                                    const char *names);
 
 /* Read CCL qualifier list spec from file inf */
 YAZ_EXPORT void ccl_qual_file (CCL_bibset bibset, FILE *inf);
@@ -336,7 +291,8 @@ YAZ_EXPORT void ccl_qual_file (CCL_bibset bibset, FILE *inf);
 YAZ_EXPORT int ccl_qual_fname (CCL_bibset bibset, const char *fname);
 
 /* Add CCL qualifier by using single-line spec */
-YAZ_EXPORT void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name);
+YAZ_EXPORT void ccl_qual_fitem (CCL_bibset bibset, const char *cp,
+                                const char *qual_name);
 
 /* Make CCL qualifier set */
 YAZ_EXPORT CCL_bibset ccl_qual_mk (void);
@@ -352,8 +308,10 @@ YAZ_EXPORT int ccl_stricmp (const char *s1, const char *s2);
 YAZ_EXPORT int ccl_memicmp (const char *s1, const char *s2, size_t n);
 
 /* Search for qualifier 'name' in set 'b'. */
-YAZ_EXPORT struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp, const char *name,
-                                      size_t len);
+YAZ_EXPORT struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
+                                                 const char *name,
+                                                 size_t len,
+                                                 int seq);
 
 /* Create CCL parser */
 YAZ_EXPORT CCL_parser ccl_parser_create (void);

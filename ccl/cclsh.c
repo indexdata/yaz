@@ -44,35 +44,9 @@
 /* CCL shell.
  * Europagate 1995
  *
- * $Log: cclsh.c,v $
- * Revision 1.10  2001-10-03 23:54:41  adam
- * Fixes for numeric ranges (date=1980-1990).
+ * $Id: cclsh.c,v 1.11 2001-11-27 22:38:50 adam Exp $
  *
- * Revision 1.9  2001/05/16 07:30:16  adam
- * Minor cosmetic changes that makes checker gcc happier.
- *
- * Revision 1.8  2001/03/18 20:45:39  ja7
- * Added readline and history support to cclsh
- *
- * Revision 1.7  2000/10/17 19:50:28  adam
- * Implemented and-list and or-list for CCL module.
- *
- * Revision 1.6  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.5  1999/12/16 23:36:19  adam
- * Implemented ILL protocol. Minor updates ASN.1 compiler.
- *
- * Revision 1.4  1999/03/31 11:15:37  adam
- * Fixed memory leaks in ccl_find_str and ccl_qual_rm.
- *
- * Revision 1.3  1997/04/30 08:52:07  quinn
- * Null
- *
- * Revision 1.2  1996/10/11  15:00:25  adam
- * CCL parser from Europagate Email gateway 1.0.
+ * Old Europagate Log:
  *
  * Revision 1.11  1995/05/16  09:39:27  adam
  * LICENSE.
@@ -108,7 +82,6 @@
  *
  * Revision 1.1  1995/02/13  12:35:21  adam
  * First version of CCL. Qualifiers aren't handled yet.
- *
  */
 
 #include <stdio.h>
@@ -199,10 +172,10 @@ int main (int argc, char **argv)
             if (*line_in)
                 add_history(line_in);
 #endif
-	    if(strlen(line_in) > 999) {
-	      fprintf(stderr,"Input line to long\n");
-	      break;
-	    };
+	    if (strlen(line_in) > 999) {
+                fprintf(stderr,"Input line to long\n");
+                break;
+	    }
             strcpy(buf,line_in);
             free (line_in);
 #else    
@@ -215,7 +188,6 @@ int main (int argc, char **argv)
         {
 	    CCL_parser cclp = ccl_parser_create ();
 	    struct ccl_token *list;
-	    struct ccl_rpn_node *p;
 	    
 	    cclp->bibset = bibset;
 	    
@@ -243,7 +215,7 @@ int main (int argc, char **argv)
 	    {
 		struct ccl_token *lp;
 		for (lp = list; lp; lp = lp->next)
-		    printf ("%d %.*s\n", lp->kind, lp->len, lp->name);
+		    printf ("%d %.*s\n", lp->kind, (int) (lp->len), lp->name);
 	    }
 	    ccl_token_del (list);
 	    ccl_parser_destroy (cclp);

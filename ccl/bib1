@@ -1,4 +1,4 @@
-# $Id: bib1,v 1.8 2001-03-22 21:23:30 adam Exp $
+# $Id: bib1,v 1.9 2001-11-27 22:38:50 adam Exp $
 # CCL qualifiers and their mappings
 #
 # Each line takes the form:
@@ -104,3 +104,10 @@ exp:category exp1,1=1
 @set s set
 @case 0		      # case insenstive (1 for case sensitive)
 @truncation * ?
+
+# Aliases 
+#
+# forfatter=x is equivalent to au=x
+forfatter au
+# tiau=x is equivalent to ti=x or ti=x
+tiau ti au

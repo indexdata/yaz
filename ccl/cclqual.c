@@ -44,45 +44,9 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Log: cclqual.c,v $
- * Revision 1.15  2001-03-07 13:24:40  adam
- * Member and_not in Z_Operator is kept for backwards compatibility.
- * Added support for definition of CCL operators in field spec file.
+ * $Id: cclqual.c,v 1.16 2001-11-27 22:38:50 adam Exp $
  *
- * Revision 1.14  2000/11/16 09:58:02  adam
- * Implemented local AttributeSet setting for CCL field maps.
- *
- * Revision 1.13  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.12  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.11  1999/03/31 11:15:37  adam
- * Fixed memory leaks in ccl_find_str and ccl_qual_rm.
- *
- * Revision 1.10  1998/07/07 15:49:40  adam
- * Added braces to avoid warning.
- *
- * Revision 1.9  1998/02/11 11:53:33  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.8  1997/09/29 08:56:38  adam
- * Changed CCL parser to be thread safe. New type, CCL_parser, declared
- * and a create/destructers ccl_parser_create/ccl_parser/destory has
- * been added.
- *
- * Revision 1.7  1997/09/01 08:48:12  adam
- * New windows NT/95 port using MSV5.0. Only a few changes made
- * to avoid warnings.
- *
- * Revision 1.6  1997/04/30 08:52:07  quinn
- * Null
- *
- * Revision 1.5  1996/10/11  15:00:25  adam
- * CCL parser from Europagate Email gateway 1.0.
+ * Old Europagate Log:
  *
  * Revision 1.9  1995/05/16  09:39:27  adam
  * LICENSE.
@@ -134,6 +98,18 @@ struct ccl_qualifier_special {
     struct ccl_qualifier_special *next;
 };
 
+
+static struct ccl_qualifier *ccl_qual_lookup (CCL_bibset b,
+                                              const char *n, size_t len)
+{
+    struct ccl_qualifier *q;
+    for (q = b->list; q; q = q->next)
+        if (len == strlen(q->name) && !memcmp (q->name, n, len))
+            break;
+    return q;
+}
+
+
 void ccl_qual_add_special (CCL_bibset bibset, const char *n, const char *v)
 {
     struct ccl_qualifier_special *p;
@@ -162,6 +138,51 @@ void ccl_qual_add_special (CCL_bibset bibset, const char *n, const char *v)
     p->value[pe - v] = '\0';
 }
 
+static int next_token(const char **cpp, const char **dst)
+{
+    int len = 0;
+    const char *cp = *cpp;
+    while (*cp && strchr(" \r\n\t\f", *cp))
+        cp++;
+    if (dst)
+        *dst = cp;
+    len = 0;
+    while (*cp && !strchr(" \r\n\t\f", *cp))
+    {
+        cp++;
+        len++;
+    }
+    *cpp = cp;
+    return len;
+}
+
+void ccl_qual_add_combi (CCL_bibset b, const char *n, const char *names)
+{
+    const char *cp, *cp1;
+    int i, len;
+    struct ccl_qualifier *q;
+    for (q = b->list; q && strcmp(q->name, n); q = q->next)
+	;
+    if (q)
+        return ;
+    q = (struct ccl_qualifier *) malloc (sizeof(*q));
+    q->name = ccl_strdup (n);
+    q->attr_list = 0;
+    q->next = b->list;
+    b->list = q;
+    
+    cp = names;
+    for (i = 0; next_token(&cp, 0); i++)
+        ;
+    q->no_sub = i;
+    q->sub = (struct ccl_qualifier **) malloc (sizeof(*q->sub) *
+                                               (1+q->no_sub));
+    cp = names;
+    for (i = 0; (len = next_token(&cp, &cp1)); i++)
+    {
+        q->sub[i] = ccl_qual_lookup (b, cp1, len);
+    }
+}
 
 /*
  * ccl_qual_add: Add qualifier to Bibset. If qualifier already
@@ -191,13 +212,16 @@ void ccl_qual_add_set (CCL_bibset b, const char *name, int no, int *pairs,
         new_qual->next = b->list;
         b->list = new_qual;
         
-        new_qual->name = (char *)malloc (strlen(name)+1);
-        ccl_assert (new_qual->name);
-        strcpy (new_qual->name, name);
+        new_qual->name = ccl_strdup (name);
         attrp = &new_qual->attr_list;
+
+        new_qual->no_sub = 0;
+        new_qual->sub = 0;
     }
     else
     {
+        if (q->sub)
+            free (q->sub);
         attrp = &q->attr_list;
         while (*attrp)
             attrp = &(*attrp)->next;
@@ -254,6 +278,8 @@ void ccl_qual_rm (CCL_bibset *b)
 	}
         q1 = q->next;
 	free (q->name);
+        if (q->sub)
+            free (q->sub);
 	free (q);
     }
     for (sp = (*b)->special; sp; sp = sp1)
@@ -275,7 +301,8 @@ void ccl_qual_rm (CCL_bibset *b)
  * return: Attribute info. NULL if not found.
  */
 struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
-				      const char *name, size_t len)
+				      const char *name, size_t len,
+                                      int seq)
 {
     struct ccl_qualifier *q;
 
@@ -288,15 +315,24 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
             if (cclp->ccl_case_sensitive)
             {
                 if (!memcmp (name, q->name, len))
-                    return q->attr_list;
+                    break;
             }
             else
             {
                 if (!ccl_memicmp (name, q->name, len))
-                    return q->attr_list;
+                    break;
             }
         }
-    return NULL;
+    if (q)
+    {
+        if (q->attr_list && seq == 0)
+            return q->attr_list;
+        if (seq < q->no_sub && q->sub[seq])
+        {
+            return q->sub[seq]->attr_list;
+        }
+    }
+    return 0;
 }
 
 const char *ccl_qual_search_special (CCL_bibset b,

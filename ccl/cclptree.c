@@ -44,23 +44,9 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Log: cclptree.c,v $
- * Revision 1.8  2000-11-16 09:58:02  adam
- * Implemented local AttributeSet setting for CCL field maps.
+ * $Id: cclptree.c,v 1.9 2001-11-27 22:38:50 adam Exp $
  *
- * Revision 1.7  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.6  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.5  1997/04/30 08:52:06  quinn
- * Null
- *
- * Revision 1.4  1996/10/11  15:00:25  adam
- * CCL parser from Europagate Email gateway 1.0.
+ * Old Europagate Log:
  *
  * Revision 1.6  1995/05/16  09:39:26  adam
  * LICENSE.

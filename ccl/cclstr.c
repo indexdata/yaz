@@ -44,15 +44,9 @@
 /* CCL string compare utilities
  * Europagate, 1995
  *
- * $Log: cclstr.c,v $
- * Revision 1.3  1999-11-30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
+ * $Id: cclstr.c,v 1.4 2001-11-27 22:38:50 adam Exp $
  *
- * Revision 1.2  1997/04/30 08:52:07  quinn
- * Null
- *
- * Revision 1.1  1996/10/11  15:00:26  adam
- * CCL parser from Europagate Email gateway 1.0.
+ * Old Europagate Log:
  *
  * Revision 1.3  1996/01/24  10:11:19  adam
  * Added include of stdlib.h.

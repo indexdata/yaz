@@ -44,52 +44,9 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Log: ccltoken.c,v $
- * Revision 1.17  2001-10-03 23:54:41  adam
- * Fixes for numeric ranges (date=1980-1990).
+ * $Id: ccltoken.c,v 1.18 2001-11-27 22:38:50 adam Exp $
  *
- * Revision 1.16  2001/03/07 13:24:40  adam
- * Member and_not in Z_Operator is kept for backwards compatibility.
- * Added support for definition of CCL operators in field spec file.
- *
- * Revision 1.15  2000/05/01 09:36:50  adam
- * Range operator only treated in ordered ranges so that minus (-) can be
- * used for, say, the and-not operator.
- *
- * Revision 1.14  2000/03/14 09:06:11  adam
- * Added POSIX threads support for frontend server.
- *
- * Revision 1.13  2000/02/08 10:39:53  adam
- * Added a few functions to set name of operands, etc.
- *
- * Revision 1.12  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.11  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.10  1998/07/07 15:49:41  adam
- * Added braces to avoid warning.
- *
- * Revision 1.9  1998/02/11 11:53:33  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.8  1997/09/29 08:56:38  adam
- * Changed CCL parser to be thread safe. New type, CCL_parser, declared
- * and a create/destructers ccl_parser_create/ccl_parser/destory has
- * been added.
- *
- * Revision 1.7  1997/09/01 08:48:12  adam
- * New windows NT/95 port using MSV5.0. Only a few changes made
- * to avoid warnings.
- *
- * Revision 1.6  1997/04/30 08:52:07  quinn
- * Null
- *
- * Revision 1.5  1996/10/11  15:00:26  adam
- * CCL parser from Europagate Email gateway 1.0.
+ * Old Europagate Log:
  *
  * Revision 1.10  1995/07/11  12:28:31  adam
  * New function: ccl_token_simple (split into simple tokens) and

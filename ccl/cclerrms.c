@@ -44,26 +44,9 @@
 /*
  * Europagate, 1995
  *
- * $Log: cclerrms.c,v $
- * Revision 1.9  2000-03-14 09:06:11  adam
- * Added POSIX threads support for frontend server.
+ * $Id: cclerrms.c,v 1.10 2001-11-27 22:38:50 adam Exp $
  *
- * Revision 1.8  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.7  1998/02/11 11:53:33  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.6  1997/09/29 08:56:37  adam
- * Changed CCL parser to be thread safe. New type, CCL_parser, declared
- * and a create/destructers ccl_parser_create/ccl_parser/destory has
- * been added.
- *
- * Revision 1.5  1997/04/30 08:52:06  quinn
- * Null
- *
- * Revision 1.4  1996/10/11  15:00:24  adam
- * CCL parser from Europagate Email gateway 1.0.
+ * Old Europagate Log:
  *
  * Revision 1.8  1995/05/16  09:39:25  adam
  * LICENSE.

@@ -44,43 +44,9 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Log: cclqfile.c,v $
- * Revision 1.11  2001-09-14 10:49:51  adam
- * Bug fix: file wasn't closed in ccl_qual_fname.
+ * $Id: cclqfile.c,v 1.12 2001-11-27 22:38:50 adam Exp $
  *
- * Revision 1.10  2001/05/16 07:30:16  adam
- * Minor cosmetic changes that makes checker gcc happier.
- *
- * Revision 1.9  2001/03/07 13:24:40  adam
- * Member and_not in Z_Operator is kept for backwards compatibility.
- * Added support for definition of CCL operators in field spec file.
- *
- * Revision 1.8  2001/02/21 13:46:53  adam
- * C++ fixes.
- *
- * Revision 1.7  2001/01/24 11:55:31  adam
- * Fixed nasty bug introduced by previous commit (attribute sets not
- * properly allocated).
- *
- * Revision 1.6  2000/11/16 09:58:02  adam
- * Implemented local AttributeSet setting for CCL field maps.
- *
- * Revision 1.5  2000/10/17 19:50:28  adam
- * Implemented and-list and or-list for CCL module.
- *
- * Revision 1.4  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.3  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.2  1997/04/30 08:52:06  quinn
- * Null
- *
- * Revision 1.1  1996/10/11  15:00:25  adam
- * CCL parser from Europagate Email gateway 1.0.
+ * Old Europagate Log:
  *
  * Revision 1.3  1995/05/16  09:39:26  adam
  * LICENSE.
@@ -118,7 +84,14 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 	    break;
 
         if (!(split = strchr (qual_spec, '=')))
+        {
+            if (pair_no == 0)
+            {
+                ccl_qual_add_combi (bibset, qual_name, cp);
+                return;
+            }
             break;
+        }
         cp += no_scan;
         
         *split++ = '\0';
