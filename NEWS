@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.23 2004/08/11
+
+Fix buffer overrun in CQL parser when dealing with proximity (%).
+
 Fixes for MARC-8 in yaz_iconv character set utilies. The MARC-8
 to UTF-8/UCS conversion is now only based on codetables.xml.
 
