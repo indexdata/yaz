@@ -1,6 +1,6 @@
-## Copyright (C) 1994-2003, Index Data
+## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.25 2004-03-10 16:34:29 adam Exp $
+## $Id: Makefile.am,v 1.26 2004-03-29 15:09:14 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 

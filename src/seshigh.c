@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.22 2004-03-16 13:12:43 adam Exp $
+ * $Id: seshigh.c,v 1.23 2004-03-29 15:09:14 adam Exp $
  */
 
 /*
@@ -471,6 +471,7 @@ static int srw_bend_init(association *assoc)
     ce = yaz_set_proposal_charneg(assoc->decode, &encoding, 1, 0, 0, 1);
     assoc->init->charneg_request = ce->u.charNeg3;
 #endif
+    assoc->backend = 0;
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
     	yaz_log(LOG_WARN, "Bad response from backend.");
@@ -1197,6 +1198,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
             assoc->init->charneg_request = negotiation;
     }
     
+    assoc->backend = 0;
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
     	yaz_log(LOG_WARN, "Bad response from backend.");
@@ -1319,7 +1321,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.22 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.23 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1414,6 +1416,7 @@ static Z_External *init_diagnostics(ODR odr, int error, char *addinfo)
 
     e->which = Z_DiagnosticFormat_s_defaultDiagRec;
     e->u.defaultDiagRec = justdiag(odr, error, addinfo);
+    e->message = 0;
     return x;
 }
 
