@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.245 2004-07-30 08:37:52 adam Exp $
+ * $Id: client.c,v 1.246 2004-08-11 11:44:30 adam Exp $
  */
 
 #include <stdio.h>
@@ -3972,7 +3972,7 @@ void process_cmd_line(char* line)
     
     /* removed tailing spaces from the arg command */
     { 
-        char* p = arg;
+        unsigned char* p = arg;
         char* lastnonspace=NULL;
         
         for(;*p; ++p) {
