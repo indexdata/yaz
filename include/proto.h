@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.32  1996-02-20 12:52:39  quinn
+ * Revision 1.33  1996-02-23 10:00:51  quinn
+ * SCAN Work
+ *
+ * Revision 1.32  1996/02/20  12:52:39  quinn
  * Various
  *
  * Revision 1.31  1996/01/22  09:46:45  quinn
@@ -866,11 +869,17 @@ typedef struct Z_ScanOccurrences
 
 } Z_ScanOccurrences;
 
-typedef struct Z_OccurrenceByAttributes
+typedef struct Z_OccurrenceByAttributesElem
 {
     Z_AttributeList *attributes;
     Z_ScanOccurrences *occurrences;         /* OPTIONAL */
     Z_OtherInformation *otherOccurInfo;      /* OPTIONAL */
+} Z_OccurrenceByAttributesElem;
+
+typedef struct Z_OccurrenceByAttributes
+{
+    int num_elements;
+    Z_OccurrenceByAttributesElem **elements;
 } Z_OccurrenceByAttributes;
 
 #else
