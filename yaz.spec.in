@@ -62,6 +62,7 @@ rm -fr ${RPM_BUILD_ROOT}
 /usr/share/man/man1/zoomsh.*
 /usr/share/man/man1/yaz-marcdump.*
 /usr/share/man/man1/yaz-iconv.*
+/usr/share/man/man7/yaz-log.*
 
 %files -n lib%{name}
 /usr/lib/*.so.*

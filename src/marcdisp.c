@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.9 2004-11-25 09:43:10 adam Exp $
+ * $Id: marcdisp.c,v 1.10 2004-11-26 11:01:05 adam Exp $
  */
 
 /**
@@ -95,7 +95,17 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     base_address = atoi_n (buf+12, 5);
 
     length_data_entry = atoi_n (buf+20, 1);
+    if (buf[20] <= '0' || buf[20] >= '9')
+    {
+        wrbuf_printf(wr, "<!-- Length data entry should hold a digit. Assuming 4 -->\n");
+	length_data_entry = 4;
+    }
     length_starting = atoi_n (buf+21, 1);
+    if (buf[21] <= '0' || buf[21] >= '9')
+    {
+        wrbuf_printf(wr, "<!-- Length starting should hold a digit. Assuming 5 -->\n");
+	length_starting = 5;
+    }
     length_implementation = atoi_n (buf+22, 1);
 
     if (mt->xml != YAZ_MARC_LINE)
@@ -248,9 +258,11 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	int i, j;
 	char tag[4];
         int identifier_flag = 0;
+	int entry_p0;
 
         memcpy (tag, buf+entry_p, 3);
 	entry_p += 3;
+	entry_p0 = entry_p;
         tag[3] = '\0';
 	data_length = atoi_n (buf+entry_p, length_data_entry);
 	entry_p += length_data_entry;
@@ -258,6 +270,12 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	entry_p += length_starting;
 	i = data_offset + base_address;
 	end_offset = i+data_length-1;
+        
+	if (mt->debug)
+	{
+	    wrbuf_printf(wr, "<!-- offset=%d data dlength=%d doffset=%d -->\n",
+		    entry_p0, data_length, data_offset);
+	}
         
         if (indicator_length < 4 && indicator_length > 0)
         {
@@ -409,9 +427,9 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         if (mt->xml == YAZ_MARC_LINE)
             wrbuf_putc (wr, '\n');
 	if (i < end_offset)
-	    wrbuf_puts (wr, "  <!-- separator but not at end of field -->\n");
+	    wrbuf_printf(wr, "  <!-- separator but not at end of field length=%d-->\n", data_length);
 	if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
-	    wrbuf_puts (wr, "  <!-- no separator at end of field -->\n");
+	    wrbuf_printf(wr, "  <!-- no separator at end of field length=%d-->\n", data_length);
         switch(mt->xml)
         {
         case YAZ_MARC_SIMPLEXML:
