@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.23  1995-05-22 11:30:18  quinn
+ * Revision 1.24  1995-05-22 13:58:18  quinn
+ * Fixed an ODR_NULLVAL.
+ *
+ * Revision 1.23  1995/05/22  11:30:18  quinn
  * Adding Z39.50-1992 stuff to proto.c. Adding zget.c
  *
  * Revision 1.22  1995/05/17  08:40:56  quinn
@@ -425,7 +428,6 @@ int z_Operator(ODR o, Z_Operator **p, int opt)
     	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Operator_prox, z_ProximityOperator},
     	{-1, -1, -1, -1, 0}
     };
-    int dummy = 999;
 
     if (!*p && o->direction != ODR_DECODE)
     	return opt;
@@ -434,7 +436,7 @@ int z_Operator(ODR o, Z_Operator **p, int opt)
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
     else
-    	(*p)->u.and = &dummy;
+    	(*p)->u.and = ODR_NULLVAL;
 
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which) &&
     	odr_constructed_end(o))
