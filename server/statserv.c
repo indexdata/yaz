@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.1  1995-03-10 18:22:45  quinn
+ * Revision 1.2  1995-03-14 10:28:03  quinn
+ * More work on demo server.
+ *
+ * Revision 1.1  1995/03/10  18:22:45  quinn
  * The rudiments of an asynchronous server.
  *
  */
@@ -16,7 +19,13 @@
 
 #include <stdio.h>
 
+#include <options.h>
 #include <eventl.h>
+#include <session.h>
+#include <eventl.h>
+#include <comstack.h>
+#include <tcpip.h>
+#include <xmosi.h>
 
 static char *me = "";
 
@@ -26,6 +35,7 @@ static char *me = "";
 void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
+    association *newas;
 
     if (event == EVENT_INPUT)
     {
@@ -36,7 +46,7 @@ void listener(IOCHAN h, int event)
 	    fprintf(stderr, "cs_listen failed.\n");
 	    exit(1);
 	}
-	iochan_setflags(h, EVENT_OUTPUT) /* set us up for accepting */
+	iochan_setflags(h, EVENT_OUTPUT); /* set us up for accepting */
     }
     else if (event == EVENT_OUTPUT)
     {
@@ -48,12 +58,18 @@ void listener(IOCHAN h, int event)
 	    fprintf(stderr, "Accept failed.\n");
 	    exit(1);
 	}
-	if (!(new_chan = iochan_create(cs_fileno(initializer, init_fun,
-	    EVENT_INPUT))))
+	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
+	    EVENT_INPUT)))
 	{
 	    fprintf(stderr, "Failed to create iochan\n");
 	    exit(1);
 	}
+	if (!(newas = create_association(new_chan, new_line)))
+	{
+	    fprintf(stderr, "Failed to create new assoc.\n");
+	    exit(1);
+	}
+	iochan_setdata(h, newas);
     	iochan_setflags(h, EVENT_INPUT); /* reset for listening */
     }
     else
@@ -70,7 +86,7 @@ void add_listener(char *where)
 {
     COMSTACK l;
     CS_TYPE type;
-    char mode[100], addr[100]
+    char mode[100], addr[100];
     void *ap;
     IOCHAN lst;
 
@@ -82,22 +98,24 @@ void add_listener(char *where)
     }
     if (!strcmp(mode, "tcp"))
     {
-    	if (!(ap = tcpip_strtoaddr(where)))
+    	if (!(ap = tcpip_strtoaddr(addr)))
     	{
 	    fprintf(stderr, "Address resolution failed for TCP.\n");
 	    exit(1);
 	}
 	type = tcpip_type;
     }
+#if 0
     else if (!strcmp(mode, "osi"))
     {
-    	if (!(ap = mosi_strtoaddr(where)))
+    	if (!(ap = mosi_strtoaddr(addr)))
     	{
 	    fprintf(stderr, "Address resolution failed for TCP.\n");
 	    exit(1);
 	}
 	type = mosi_type;
     }
+#endif
     else
     {
     	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");
@@ -131,7 +149,7 @@ int main(int argc, char **argv)
     	switch (ret)
     	{
 	    case 0: me = arg; break;
-	    case 'l': add_listener(arg); l++; break;
+	    case 'l': add_listener(arg); listeners++; break;
 	    default:
 	    	fprintf(stderr, "Usage: %s [-l <listener-addr>]\n", me);
 	    	exit(1);
