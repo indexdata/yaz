@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.197 2003-05-22 23:55:19 mike Exp $
+ * $Id: client.c,v 1.198 2003-05-23 08:52:35 adam Exp $
  */
 
 #include <stdio.h>
@@ -61,10 +61,10 @@
 static char *codeset = 0;               /* character set for output */
 
 static ODR out, in, print;              /* encoding and decoding streams */
-#ifdef THESE_ARE_NOT_USED
+#if HAVE_XML2
 static ODR srw_sr_odr_out = 0;
 static Z_SRW_PDU *srw_sr = 0;
-#endif /*THESE_ARE_NOT_USED*/
+#endif
 static FILE *apdu_file = 0;
 static FILE *ber_file = 0;
 static COMSTACK conn = 0;               /* our z-association */
