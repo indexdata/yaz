@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.35 2002-09-25 20:32:22 adam Exp $
+## $Id: Makefile.am,v 1.36 2002-11-08 12:27:00 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -26,7 +26,7 @@ MANFILES=yaz-client.1 yaz-client-ssl.1 yaz-ztest.8 \
 REFFILES=yaz-client.sgml yaz-ztest.sgml yaz-config.sgml \
 	yaz-man.sgml zoomsh.sgml
 
-SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl xml.dcl id.eps id.png
+SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps
 
 doc_DATA = $(HTMLFILES) yaz.pdf id.png
 
@@ -69,4 +69,7 @@ yaz.pdf: $(XMLFILES) $(srcdir)/id.png
 	pdfjadetex yaz.tex
 	pdfjadetex yaz.tex
 	pdfjadetex yaz.tex
+
+index.tkl: $(XMLFILES) tkl.xsl
+	xsltproc tkl.xsl yaz.xml
 

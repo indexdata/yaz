@@ -10,6 +10,8 @@ yaz.aux
 yaz.log
 yaz.out
 yaz.pdf
+*.php
+*.tkl
 manpage.links
 manpage.refs
 *.[178]
