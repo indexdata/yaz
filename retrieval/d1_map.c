@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.8  1996-05-01 12:45:31  quinn
+ * Revision 1.9  1996-06-10 08:56:02  quinn
+ * Work on Summary.
+ *
+ * Revision 1.8  1996/05/01  12:45:31  quinn
  * Support use of local tag names in abs file.
  *
  * Revision 1.7  1995/12/13  13:44:31  quinn
@@ -35,6 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <oid.h>
 #include <xmalloc.h>
@@ -43,7 +47,7 @@
 
 #include <tpath.h>
 #include <data1.h>
-#include "d1_map.h"
+#include <d1_map.h>
 
 data1_maptab *data1_read_maptab(char *file)
 {
@@ -52,6 +56,7 @@ data1_maptab *data1_read_maptab(char *file)
     int argc;
     char *argv[50], line[512];
     data1_mapunit **mapp;
+    int local_numeric = 0;
 
     if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
     {
@@ -91,6 +96,8 @@ data1_maptab *data1_read_maptab(char *file)
 	    res->target_absyn_name = xmalloc(strlen(argv[1])+1);
 	    strcpy(res->target_absyn_name, argv[1]);
 	}
+	else if (!yaz_matchstr(argv[0], "localnumeric"))
+	    local_numeric = 1;
 	else if (!strcmp(argv[0], "name"))
 	{
 	    if (argc != 2)
@@ -147,21 +154,17 @@ data1_maptab *data1_read_maptab(char *file)
 		    (*mtp)->new_field = 1;
 		else
 		    (*mtp)->new_field = 0;
-#if 0
-		if ((numval = atoi(valstr)))
-		{
+		if ((type != 3 || local_numeric) && isdigit(*valstr))
+                {
 		    (*mtp)->which = D1_MAPTAG_numeric;
-		    (*mtp)->value.numeric = numval;
+		    (*mtp)->value.numeric = atoi(valstr);
 		}
 		else
 		{
-#endif
 		    (*mtp)->which = D1_MAPTAG_string;
 		    (*mtp)->value.string = xmalloc(strlen(valstr)+1);
 		    strcpy((*mtp)->value.string, valstr);
-#if 0
 		}
-#endif 
 		mtp = &(*mtp)->next;
 	    }
 	    mapp = &(*mapp)->next;
@@ -173,10 +176,8 @@ data1_maptab *data1_read_maptab(char *file)
     return res;
 }
 
-#if 1
-
 /*
- * Locate node with givel elementname.
+ * Locate node with given elementname.
  * NOTE: This is stupid - we don't find repeats this way.
  */
 static data1_node *find_node(data1_node *p, char *elementname)
@@ -302,115 +303,6 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res,
 	}
     return 0;
 }
-
-
-#else
-
-/*
- * See if the node n is equivalent to the tag t.
- */
-static int tagmatch(data1_node *n, data1_maptag *t)
-{
-    if (n->which != DATA1N_tag)
-	return 0;
-    if (n->u.tag.element)
-    {
-	if (n->u.tag.element->tag->tagset->type != t->type)
-	    return 0;
-	if (n->u.tag.element->tag->which == DATA1T_numeric)
-	{
-	    if (t->which != D1_MAPTAG_numeric)
-		return 0;
-	    if (n->u.tag.element->tag->value.numeric != t->value.numeric)
-		return 0;
-	}
-	else
-	{
-	    if (t->which != D1_MAPTAG_string)
-		return 0;
-	    if (data1_matchstr(n->u.tag.element->tag->value.string,
-		t->value.string))
-		return 0;
-	}
-    }
-    else /* local tag */
-    {
-	char str[10];
-
-	if (t->type != 3)
-	    return 0;
-	if (t->which == D1_MAPTAG_numeric)
-	    sprintf(str, "%d", t->value.numeric);
-	else
-	    strcpy(str, t->value.string);
-	if (data1_matchstr(n->u.tag.tag, str))
-	    return 0;
-    }
-    return 1;
-}
-
-static int map_elements(data1_node *res, data1_node *n, data1_mapunit *m)
-{
-    data1_node *c;
-
-    for (c = n->child; c; c = c->next)
-    {
-	if (c->which == DATA1N_tag)
-	{
-	    if (c->u.tag.element && !data1_matchstr(c->u.tag.element->name,
-		m->source_element_name))
-	    {
-		/* Process target path specification */
-		data1_maptag *mt;
-		data1_node *pn = res, *cur = pn->last_child;
-
-		for (mt = m->target_path; mt; mt = mt->next)
-		{
-		    if (!cur || !tagmatch(cur, mt))
-		    {
-			cur = data1_mk_node();
-			cur->which = DATA1N_tag;
-			cur->u.tag.element = 0;
-			cur->u.tag.tag = mt->value.string;
-			cur->u.tag.node_selected = 0;
-			cur->parent = pn;
-			cur->root = pn->root;
-			if (!pn->child)
-			    pn->child = cur;
-			if (pn->last_child)
-			    pn->last_child->next = cur;
-			pn->last_child = cur;
-			pn->num_children++;
-		    }
-		    if (mt->next)
-			pn = cur;
-		    else if (!m->no_data)
-		    {
-			cur->child = c->child;
-			cur->num_children = c->num_children;
-			c->child = 0;
-			c->num_children = 0;
-		    }
-		}
-	    }
-	    else if (map_elements(res, c, m) < 0)
-		return -1;
-	}
-    }
-    return 0;
-}
-
-static int map_record(data1_node *res, data1_node *n, data1_maptab *map)
-{
-    data1_mapunit *m;
-
-    for (m = map->map; m; m = m->next)
-	if (map_elements(res, n, m) < 0)
-	    return -1;
-    return 0;
-}
-
-#endif
 
 /*
  * Create a (possibly lossy) copy of the given record based on the

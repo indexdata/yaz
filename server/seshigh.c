@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.60  1996-05-30 11:03:10  quinn
+ * Revision 1.61  1996-06-10 08:56:16  quinn
+ * Work on Summary.
+ *
+ * Revision 1.60  1996/05/30  11:03:10  quinn
  * Fixed NextresultSetPosition bug fixed.
  *
  * Revision 1.59  1996/05/14  09:26:46  quinn
@@ -963,6 +966,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		case VAL_GRS1: thisext->which = Z_External_grs1; break;
 		case VAL_EXPLAIN: thisext->which = Z_External_explainRecord;
 		    break;
+		case VAL_SUMMARY: thisext->which = Z_External_summary; break;
+		case VAL_OPAC: thisext->which = Z_External_OPAC; break;
 
 		default:
 		    logf(LOG_FATAL, "Unknown structured format from backend.");

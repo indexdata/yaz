@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.6  1996-05-31 13:52:21  quinn
+ * Revision 1.7  1996-06-10 08:56:01  quinn
+ * Work on Summary.
+ *
+ * Revision 1.6  1996/05/31  13:52:21  quinn
  * Fixed uninitialized variable for local tags in abstract syntax.
  *
  * Revision 1.5  1996/05/09  07:27:43  quinn
@@ -116,7 +119,7 @@ data1_absyn *data1_read_absyn(char *file)
     char line[512], *r, cmd[512], args[512];
     data1_absyn *res = 0;
     FILE *f;
-    data1_element **ppl[D1_MAX_NESTING];
+    data1_element **ppl[D1_MAX_NESTING], *cur[D1_MAX_NESTING];
     data1_esetname **esetpp;
     data1_maptab **maptabp;
     data1_marctab **marcp;
@@ -142,6 +145,7 @@ data1_absyn *data1_read_absyn(char *file)
     marcp = &res->marc;
     res->elements = 0;
     ppl[0] = &res->elements;
+    cur[0] = 0;
     esetpp = &res->esetnames;
 
     for (;;)
@@ -187,16 +191,17 @@ data1_absyn *data1_read_absyn(char *file)
 	    }
 	    if (i > level + 1)
 	    {
-		logf(LOG_WARN, "Bad level inc in %s in '%'", file, args);
+		logf(LOG_WARN, "Bad level inc in %s in '%s'", file, args);
 		fclose(f);
 		return 0;
 	    }
 	    level = i;
-	    if (!(new = *ppl[level] = xmalloc(sizeof(*new))))
+	    if (!(new = cur[level] = *ppl[level] = xmalloc(sizeof(*new))))
 		abort;
 	    new->next = new->children = 0;
 	    new->tag = 0;
 	    new->termlists = 0;
+	    new->parent = level ? cur[level - 1] : 0;
 	    tp = &new->termlists;
 	    ppl[level] = &new->next;
 	    ppl[level+1] = &new->children;
