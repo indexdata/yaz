@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.41  1995-08-02 10:23:06  quinn
+ * Revision 1.42  1995-08-15 11:16:50  quinn
+ * CV:e ----------------------------------------------------------------------
+ * CV:e ----------------------------------------------------------------------
+ *
+ * Revision 1.41  1995/08/02  10:23:06  quinn
  * Smallish
  *
  * Revision 1.40  1995/07/31  14:34:26  quinn
@@ -337,7 +341,6 @@ void ir_session(IOCHAN h, int event)
 	    req = request_get(); /* get a new request structure */
 	    odr_reset(assoc->decode);
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
-odr_dumpBER(log_file(), assoc->input_buffer, res);
 	    if (!z_APDU(assoc->decode, &req->request, 0))
 	    {
 		logf(LOG_LOG, "ODR error on incoming PDU: %s",
