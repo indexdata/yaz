@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.56  1997-11-05 09:18:31  adam
+ * Revision 1.57  1998-01-07 12:58:22  adam
+ * Using fgets instead of gets.
+ *
+ * Revision 1.56  1997/11/05 09:18:31  adam
  * The client handles records with no associated syntax.
  *
  * Revision 1.55  1997/10/31 12:20:08  adam
@@ -1213,7 +1216,7 @@ static int client(int wait)
 #endif
         {
             /* quick & dirty way to get a command line. */
-            if (!gets(line))
+            if (!fgets(line, 1023, stdin))
                 break;
             if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
             {
