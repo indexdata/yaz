@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.33  1996-02-23 10:00:51  quinn
+ * Revision 1.34  1996-06-10 08:55:36  quinn
+ * Added Summary. Unfinished work
+ *
+ * Revision 1.33  1996/02/23  10:00:51  quinn
  * SCAN Work
  *
  * Revision 1.32  1996/02/20  12:52:39  quinn
@@ -1223,6 +1226,32 @@ typedef struct Z_SortRequest
     Z_OtherInformation *otherInfo;          /* OPTIONAL */
 } Z_SortRequest;
 
+/* ----------------------- Resource Report ------------------ */
+
+typedef struct Z_ResourceReportRequest
+{
+    Z_ReferenceId *referenceId;             /* OPTIONAL */
+    Z_ReferenceId *opId;                    /* OPTIONAL */
+    Odr_oid *prefResourceReportFormat;      /* OPTIONAL */
+    Z_OtherInformation *otherInfo;          /* OPTIONAL */
+} Z_ResourceReportRequest;
+
+typedef struct Z_ResourceReportResponse
+{
+    Z_ReferenceId *referenceId;             /* OPTIONAL */
+    int *resourceReportStatus;
+#define Z_ResourceReportStatus_success   0
+#define Z_ResourceReportStatus_partial   1
+#define Z_ResourceReportStatus_failure_1 2
+#define Z_ResourceReportStatus_failure_2 3
+#define Z_ResourceReportStatus_failure_3 4
+#define Z_ResourceReportStatus_failure_4 5
+#define Z_ResourceReportStatus_failure_5 6
+#define Z_ResourceReportStatus_failure_6 7
+    Z_External *resourceReport;             /* OPTIONAL */
+    Z_OtherInformation *otherInfo;          /* OPTIONAL */
+} Z_ResourceReportResponse;
+
 /* ------------------------ APDU ---------------------------- */
 
 typedef struct Z_APDU
@@ -1249,6 +1278,8 @@ typedef struct Z_APDU
 #define Z_APDU_accessControlResponse 18
 #define Z_APDU_sortRequest 20
 #define Z_APDU_sortResponse 21
+#define Z_APDU_resourceReportRequest 22
+#define Z_APDU_resourceReportResponse 23
     union
     {
 	Z_InitRequest  *initRequest;
@@ -1264,6 +1295,8 @@ typedef struct Z_APDU
 	Z_ResourceControlRequest *resourceControlRequest;
 	Z_ResourceControlResponse *resourceControlResponse;
 	Z_TriggerResourceControlRequest *triggerResourceControlRequest;
+	Z_ResourceReportRequest *resourceReportRequest;
+	Z_ResourceReportResponse *resourceReportResponse;
 	Z_ScanRequest *scanRequest;
 	Z_ScanResponse *scanResponse;
 	Z_SortRequest *sortRequest;
@@ -1313,6 +1346,7 @@ Z_APDU *zget_APDU(ODR o, int which);
 #include <prt-acc.h>
 #include <prt-exp.h>
 #include <prt-grs.h>
+#include <prt-arc.h>
 #include <prt-exd.h>
 #include <prt-dia.h>
 #include <prt-esp.h>

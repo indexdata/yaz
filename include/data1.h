@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.15  1996-06-03 09:46:03  quinn
+ * Revision 1.16  1996-06-10 08:55:34  quinn
+ * Added Summary. Unfinished work
+ *
+ * Revision 1.15  1996/06/03  09:46:03  quinn
  * Added OID type.
  *
  * Revision 1.14  1996/05/09  07:27:11  quinn
@@ -261,6 +264,7 @@ typedef struct data1_element
     char *name;
     data1_tag *tag;
     data1_termlist *termlists;
+    struct data1_element *parent;
     struct data1_element *children;
     struct data1_element *next;
 } data1_element;
@@ -382,5 +386,6 @@ data1_marctab *data1_read_marctab(char *file);
 char *data1_nodetomarc(data1_marctab *p, data1_node *n, int selected, int *len);
 char *data1_nodetoidsgml(data1_node *n, int select, int *len);
 Z_ExplainRecord *data1_nodetoexplain(data1_node *n, int select, ODR o);
+Z_BriefBib *data1_nodetosummary(data1_node *n, int select, ODR o);
 
 #endif

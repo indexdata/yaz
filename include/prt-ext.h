@@ -67,6 +67,8 @@ struct Z_External
 #define Z_External_itemOrder 10
 #define Z_External_diag1 11
 #define Z_External_espec1 12
+#define Z_External_summary 13
+#define Z_External_OPAC 14
     union
     {
 	/* Generic types */
@@ -85,6 +87,7 @@ struct Z_External
 	Z_ItemOrder *itemOrder;
 	Z_DiagnosticFormat *diag1;
 	Z_Espec1 *espec1;
+	Z_BriefBib *summary;
     } u;
 };
 
