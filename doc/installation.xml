@@ -1,66 +1,66 @@
-<!-- $Id: installation.xml,v 1.6 2001-10-24 21:30:47 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.7 2001-10-26 20:13:44 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
- <sect1><title>Introduction</title>
-  <para>
-   The latest version of the software will generally be found at:
-  </para>
-  <para>
-   <ulink url="http://ftp.indexdata.dk/pub/yaz/">
-    http://ftp.indexdata.dk/pub/yaz/</ulink>
-  </para>
-  <para>
-   We have tried our best to keep the software portable, and on many
-   platforms, you should be able to compile everything with little or
-   no changes.
-   So far, the software has been ported to the following platforms with
-   little or no difficulties.
+  <sect1><title>Introduction</title>
+   <para>
+    The latest version of the software will generally be found at:
+   </para>
+   <para>
+    <ulink url="http://ftp.indexdata.dk/pub/yaz/">
+     http://ftp.indexdata.dk/pub/yaz/</ulink>
+   </para>
+   <para>
+    We have tried our best to keep the software portable, and on many
+    platforms, you should be able to compile everything with little or
+    no changes.
+    So far, the software has been ported to the following platforms with
+    little or no difficulties.
+    
+    <itemizedlist>
+     <listitem><para>Unix systems</para>
+      <itemizedlist>
+       <listitem><para>HP/UX</para></listitem>
+       <listitem><para>SunOS/Solaris</para></listitem>
+       <listitem><para>DEC Unix</para></listitem>
+       <listitem><para>OpenBSD/FreeBSD</para></listitem>
+       <listitem><para>Linux</para></listitem>
+       <listitem><para>IBM AIX</para></listitem>
+       <listitem><para>Data General DG/UX (with some CFLAGS tinkering)
+        </para></listitem>
+       <listitem><para>SGI/IRIX</para></listitem>
+       <listitem><para>DDE Supermax</para></listitem>
+      </itemizedlist></listitem>
+     <listitem><para>Non-unix systems</para>
+      <itemizedlist>
+       <listitem><para>Apple Macintosh (using the Codewarrior programming
+         environment and the GUSI socket libraries)</para></listitem>
+       <listitem><para>MS Windows 95/98/NT/W2K (Win32)</para></listitem>
+       <listitem><para>IBM AS/400</para></listitem>
+      </itemizedlist></listitem>
+    </itemizedlist>
+    
+   </para>
+   <para>
+    If you move the software to other platforms, we'd be grateful if you'd
+    let us know about it. If you run into difficulties, we will try to help
+    if we can, and if you solve the problems, we would be happy to include
+    your fixes in the next release. So far, we have mostly avoided
+    &num;ifdefs for individual platforms, and we'd like to keep it that
+    way as far as it makes sense.
+   </para>
    
-   <itemizedlist>
-    <listitem><para>Unix systems</para>
-     <itemizedlist>
-      <listitem><para>HP/UX</para></listitem>
-      <listitem><para>SunOS/Solaris</para></listitem>
-      <listitem><para>DEC Unix</para></listitem>
-      <listitem><para>OpenBSD/FreeBSD</para></listitem>
-      <listitem><para>Linux</para></listitem>
-      <listitem><para>IBM AIX</para></listitem>
-      <listitem><para>Data General DG/UX (with some CFLAGS tinkering)
-       </para></listitem>
-      <listitem><para>SGI/IRIX</para></listitem>
-      <listitem><para>DDE Supermax</para></listitem>
-     </itemizedlist></listitem>
-    <listitem><para>Non-unix systems</para>
-     <itemizedlist>
-      <listitem><para>Apple Macintosh (using the Codewarrior programming
-	environment and the GUSI socket libraries)</para></listitem>
-      <listitem><para>MS Windows 95/98/NT/W2K (Win32)</para></listitem>
-      <listitem><para>IBM AS/400</para></listitem>
-     </itemizedlist></listitem>
-   </itemizedlist>
+   <para>
+    We maintain a mailing-list for the purpose of announcing new releases and
+    bug-fixes, as well as general discussion. Subscribe by sending mail to
+    <ulink url="mailto:yaz-request@indexdata.dk">
+     yaz-request@indexdata.dk
+    </ulink>.
+    General questions and problems can be directed at 
+    <ulink url="mailto:yaz-help@indexdata.dk">
+     yaz-help@indexdata.dk
+    </ulink>, or the address given at the top of this document.
+   </para>
    
-  </para>
-  <para>
-   If you move the software to other platforms, we'd be grateful if you'd
-   let us know about it. If you run into difficulties, we will try to help
-   if we can, and if you solve the problems, we would be happy to include
-   your fixes in the next release. So far, we have mostly avoided
-   &num;ifdefs for individual platforms, and we'd like to keep it that
-   way as far as it makes sense.
-  </para>
-  
-  <para>
-   We maintain a mailing-list for the purpose of announcing new releases and
-   bug-fixes, as well as general discussion. Subscribe by sending mail to
-   <ulink url="mailto:yaz-request@indexdata.dk">
-    yaz-request@indexdata.dk
-   </ulink>.
-   General questions and problems can be directed at 
-   <ulink url="mailto:yaz-help@indexdata.dk">
-    yaz-help@indexdata.dk
-   </ulink>, or the address given at the top of this document.
-  </para>
-  
   </sect1>
   <sect1 id="installation.unix"><title>UNIX</title>
    
@@ -113,7 +113,7 @@
      <varlistentry><term><literal>--enable-tcpd</literal></term>
       <listitem><para>The front end server will be built using Wietse's
         <ulink url="ftp://ftp.porcupine.org/pub/security/index.html">
-        TCP wrapper library</ulink>. It allows you to allow/deny
+         TCP wrapper library</ulink>. It allows you to allow/deny
         clients depending on IP number. The TCP wrapper library is
         commonly used in Linux/BSD distributions.
        </para></listitem>
@@ -159,8 +159,8 @@
      
      <varlistentry><term><filename>client/yaz-client</filename></term>
       <listitem><para>Z39.50 client for testing the protocol.
-       See chapter <link linkend="client">
-       YAZ client</link> for more information.
+        See chapter <link linkend="client">
+         YAZ client</link> for more information.
        </para></listitem></varlistentry>
      
      <varlistentry><term><filename>yaz-config</filename></term>
@@ -178,13 +178,13 @@
      <varlistentry><term><filename>zoom/zoomsh</filename></term>
       <listitem><para>
         A simple shell implemented on top of the 
-       <link linkend="zoom">ZOOM</link> functions.
+        <link linkend="zoom">ZOOM</link> functions.
         The shell is a command line application that allows you to enter
         simple commands perform to perform ZOOM operations.
        </para></listitem></varlistentry>
 
      <varlistentry><term><filename>zoom/zoomtst1</filename>, 
-      <filename>zoom/zoomtst2</filename>, ..</term>
+       <filename>zoom/zoomtst2</filename>, ..</term>
       <listitem><para>
         Several small applications that demonstrates the use of ZOOM.
        </para></listitem></varlistentry>
@@ -243,18 +243,18 @@
     <variablelist>
      <varlistentry><term><literal>DEBUG</literal></term>
       <listitem><para>
-	 If set to 1, the software is
-	 compiled with debugging libraries (code generation is
-         multi-threaded debug DLL).
-         If set to 0, the software is compiled with release libraries
-         (code generation is multi-threaded DLL).
+        If set to 1, the software is
+        compiled with debugging libraries (code generation is
+        multi-threaded debug DLL).
+        If set to 0, the software is compiled with release libraries
+        (code generation is multi-threaded DLL).
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>TCL</literal></term>
       <listitem><para>
-	 Specifies the name of the Tcl shell (EXE-file).
-	 You do not need setting this or installing Tcl unless you wish
-	 to change or add ASN.1 for &yaz;.
+        Specifies the name of the Tcl shell (EXE-file).
+        You do not need setting this or installing Tcl unless you wish
+        to change or add ASN.1 for &yaz;.
        </para></listitem>
      </varlistentry>
     </variablelist>
@@ -267,7 +267,7 @@
     If command <filename>nmake</filename> is not found on your system
     you probably haven't defined the environment variables required to
     use that tool. To fix that, find and run the batch file
-   <filename>vcvars32.bat</filename>. You need to run it from within
+    <filename>vcvars32.bat</filename>. You need to run it from within
     the command prompt or set the environment variables "globally";
     otherwise it doesn't work.
    </para>
@@ -315,7 +315,7 @@
        </para></listitem></varlistentry>
 
      <varlistentry><term><filename>bin/zoomtst1.exe</filename>, 
-      <filename>bin/zoomtst2.exe</filename>, ..</term>
+       <filename>bin/zoomtst2.exe</filename>, ..</term>
       <listitem><para>
         Several small applications that demonstrates the use of ZOOM.
        </para></listitem></varlistentry>
@@ -336,7 +336,7 @@
  sgml-indent-step:1
  sgml-indent-data:t
  sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
  -->

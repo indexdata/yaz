@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.7 2001-10-24 20:12:36 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.8 2001-10-26 20:13:44 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
 
@@ -847,7 +847,7 @@ typedef struct bend_scan_rr {
  sgml-indent-step:1
  sgml-indent-data:t
  sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
  -->

@@ -1,8 +1,8 @@
-<!-- $Id: zoom.xml,v 1.4 2001-10-24 21:24:38 quinn Exp $ -->
+<!-- $Id: zoom.xml,v 1.5 2001-10-26 20:13:44 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
-   &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
+    &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
    an initiative started by Mike Taylor (Mike is from the UK, which
    explains the peculiar name of the model). The goal of &zoom; is to
    provide a common Z39.50 client API not bound to a particular
@@ -41,14 +41,14 @@
    <literal>NULL</literal> pointer.
   </para>
   <sect1 id="zoom.connections"><title>Connections</title>
- 
+   
    <para>The Connection object is a session with a target.
    </para>
    <synopsis>
    #include &lt;yaz/zoom.h>
-
+    
    Z3950_connection Z3950_connection_new (const char *host, int portnum);
-
+    
    Z3950_connection Z3950_connection_create (Z3950_options options);
 
    void Z3950_connection_connect(Z3950_connection c, const char *host,
@@ -96,68 +96,68 @@
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
      <colspec colwidth="3*" colname="default"></colspec>
-    <thead>
-     <row>
-      <entry>Option</entry>
-      <entry>Description</entry>
-      <entry>Default</entry>
-     </row>
-    </thead>
-    <tbody>
-     <row><entry>
-       implementationName</entry><entry>Name of Your client
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Description</entry>
+       <entry>Default</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row><entry>
+        implementationName</entry><entry>Name of Your client
+       </entry><entry>none</entry></row>
+      <row><entry>
+        user</entry><entry>Authentication user name
+       </entry><entry>none</entry></row>
+      <row><entry>
+        group</entry><entry>Authentication group name
+       </entry><entry>none</entry></row>
+      <row><entry>
+        pass</entry><entry>Authentication password
       </entry><entry>none</entry></row>
-     <row><entry>
-       user</entry><entry>Authentication user name
-      </entry><entry>none</entry></row>
-     <row><entry>
-       group</entry><entry>Authentication group name
-      </entry><entry>none</entry></row>
-     <row><entry>
-       pass</entry><entry>Authentication password
-      </entry><entry>none</entry></row>
-     <row><entry>
-       proxy</entry><entry>Proxy host
-      </entry><entry>none</entry></row>
-     <row><entry>
-       async</entry><entry>If true (1) the connection operates in 
-       asynchronous operation which means that all calls are non-blocking
-       except <function>Z3950_event</function>.
-      </entry><entry>0</entry></row>
-     <row><entry>
-       maximumRecordSize</entry><entry> Maximum size of single record.
-      </entry><entry>1 MB</entry></row>
-     <row><entry>
-       preferredMessageSize</entry><entry> Maximum size of multiple records.
-      </entry><entry>1 MB</entry></row>
-    </tbody>
-   </tgroup>
+      <row><entry>
+        proxy</entry><entry>Proxy host
+       </entry><entry>none</entry></row>
+      <row><entry>
+        async</entry><entry>If true (1) the connection operates in 
+        asynchronous operation which means that all calls are non-blocking
+        except <function>Z3950_event</function>.
+       </entry><entry>0</entry></row>
+      <row><entry>
+        maximumRecordSize</entry><entry> Maximum size of single record.
+       </entry><entry>1 MB</entry></row>
+      <row><entry>
+        preferredMessageSize</entry><entry> Maximum size of multiple records.
+       </entry><entry>1 MB</entry></row>
+     </tbody>
+    </tgroup>
    </table>
    <para>
-     Function <function>Z3950_connection_host</function> returns
+    Function <function>Z3950_connection_host</function> returns
      the host for the connection as specified in a call to
-     <function>Z3950_connection_new</function> or 
-     <function>Z3950_connection_connect</function>.
-     This function returns <literal>NULL</literal> if host isn't
-     set for the connection.
+    <function>Z3950_connection_new</function> or 
+    <function>Z3950_connection_connect</function>.
+    This function returns <literal>NULL</literal> if host isn't
+    set for the connection.
    </para>
    <synopsis>
      int Z3950_connection_error (Z3950_connection c, const char **cp,
                                  const char **addinfo);
    </synopsis>
    <para>
-     Use <function>Z3950_connection_error</function> to check for
-     errors for the last operation(s) performed. The function returns
-     zero if no errors occurred; non-zero otherwise indicating the error.
-     Pointers <parameter>cp</parameter> and <parameter>addinfo</parameter>
-     holds messages for the error and additional-info if passed as
-     non-<literal>NULL</literal>.
+    Use <function>Z3950_connection_error</function> to check for
+    errors for the last operation(s) performed. The function returns
+    zero if no errors occurred; non-zero otherwise indicating the error.
+    Pointers <parameter>cp</parameter> and <parameter>addinfo</parameter>
+    holds messages for the error and additional-info if passed as
+    non-<literal>NULL</literal>.
    </para>
   </sect1>
   <sect1 id="zoom.search"><title>Search objects</title>
    <para>
-     Search objects defines how result sets are obtained. They
-     act like queries.
+    Search objects defines how result sets are obtained. They
+    act like queries.
    </para>
    <synopsis>
      Z3950_search Z3950_search_create(void);
@@ -169,24 +169,23 @@
      int Z3950_search_sortby(Z3950_search s, const char *criteria);
    </synopsis>
    <para>
-     Create search objects using <function>Z3950_search_create</function>
-     and destroy them by calling <function>Z3950_search_destroy</function>.
-     RPN-queries can be specified in <link linkend="PQF">PQF</link>
-     notation by using the
-     function <function>Z3950_search_prefix</function>. More
-     query types will be added later, such as
-     <link linkend="CCL">CCL</link> to RPN-mapping, native CCL query,
-     etc. In addition to a search, a sort criteria may be set. Function
-     <function>Z3950_search_sortby</function> specifies a 
-     sort criteria using the same string notation for sort as offered by
-     the <link linkend="sortspec">YAZ client</link>.
+    Create search objects using <function>Z3950_search_create</function>
+    and destroy them by calling <function>Z3950_search_destroy</function>.
+    RPN-queries can be specified in <link linkend="PQF">PQF</link>
+    notation by using the
+    function <function>Z3950_search_prefix</function>. More
+    query types will be added later, such as
+    <link linkend="CCL">CCL</link> to RPN-mapping, native CCL query,
+    etc. In addition to a search, a sort criteria may be set. Function
+    <function>Z3950_search_sortby</function> specifies a 
+    sort criteria using the same string notation for sort as offered by
+    the <link linkend="sortspec">YAZ client</link>.
    </para>
   </sect1>
   <sect1 id="zoom.resultsets"><title>Result sets</title>
    <para>
-     The result set object is a container for records returned from
-     a target.
-     search.
+    The result set object is a container for records returned from
+    a target.
    </para>
    <synopsis>
      Z3950_resultset Z3950_connection_search(Z3950_connection,
@@ -198,12 +197,12 @@
      void Z3950_resultset_destroy(Z3950_resultset r);
    </synopsis>
    <para>
-     Function <function>Z3950_connection_search</function> creates
+    Function <function>Z3950_connection_search</function> creates
      a result set given a connection - and search object.
-     Destroy a result set by calling
-     <function>Z3950_resultset_destroy</function>.
-     Simple clients using PQF only may use function
-     <function>Z3950_connection_search_pqf</function> instead.
+    Destroy a result set by calling
+    <function>Z3950_resultset_destroy</function>.
+    Simple clients using PQF only may use function
+    <function>Z3950_connection_search_pqf</function> instead.
    </para>
    <synopsis>
      const char *Z3950_resultset_option (Z3950_resultset r,
@@ -216,68 +215,68 @@
                                 const char *type, int *len);
    </synopsis>
    <para>
-     Function <function>Z3950_resultset_options</function> sets or
-     modifies an option for a result set similar to 
+    Function <function>Z3950_resultset_options</function> sets or
+    modifies an option for a result set similar to 
     <function>Z3950_connection_option</function>.
    </para>
    <para>
-     The number of hits also called result-count is returned by
-     function <function>Z3950_resultset_size</function>.
+    The number of hits also called result-count is returned by
+    function <function>Z3950_resultset_size</function>.
    </para>
    <para>
-     Function <function>Z3950_resultset_get</function> is similar to
-     <link linkend="zoom.record.get">
+    Function <function>Z3950_resultset_get</function> is similar to
+    <link linkend="zoom.record.get">
      <function>Z3950_record_get</function></link> but
-     instead of operating on a record object, it operates on a record on
-     a given offset within a result set.
+    instead of operating on a record object, it operates on a record on
+    a given offset within a result set.
    </para>
    <table frame="top"><title>ZOOM Result set Options</title>
     <tgroup cols="3">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
      <colspec colwidth="2*" colname="default"></colspec>
-    <thead>
-     <row>
-      <entry>Option</entry>
-      <entry>Description</entry>
-      <entry>Default</entry>
-     </row>
-    </thead>
-    <tbody>
-     <row><entry>
-       piggyback</entry><entry>True (1) if piggyback should be
-       used in searches; false (0) if not.
-      </entry><entry>1</entry></row>
-     <row><entry>
-       start</entry><entry>Offset of first record we wish to
-       retrieve from the target. Note first record has offset 0
-      unlike the protocol specifications where first record has position
-       1.
-      </entry><entry>0</entry></row>
-     <row><entry>
-       count</entry><entry>Number of records to be retrieved.
-      </entry><entry>0</entry></row>
-     <row><entry>
-       elementSetName</entry><entry>Element-Set name of records. 
-       Most targets should honor element set name <literal>B</literal>
-       and <literal>F</literal> for brief and full respectively.
-      </entry><entry>none</entry></row>
-     <row><entry>
-       preferredRecordSyntax</entry><entry>Preferred Syntax, such as
-       <literal>USMARC</literal>, <literal>SUTRS</literal>, etc.
-      </entry><entry>none</entry></row>
-     <row><entry>
-       databaseName</entry><entry>One or more database names
-       separated by character plus (<literal>+</literal>).
-      </entry><entry>Default</entry></row>
-    </tbody>
-   </tgroup>
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Description</entry>
+       <entry>Default</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row><entry>
+        piggyback</entry><entry>True (1) if piggyback should be
+        used in searches; false (0) if not.
+       </entry><entry>1</entry></row>
+      <row><entry>
+        start</entry><entry>Offset of first record we wish to
+        retrieve from the target. Note first record has offset 0
+        unlike the protocol specifications where first record has position
+        1.
+       </entry><entry>0</entry></row>
+      <row><entry>
+        count</entry><entry>Number of records to be retrieved.
+       </entry><entry>0</entry></row>
+      <row><entry>
+        elementSetName</entry><entry>Element-Set name of records. 
+        Most targets should honor element set name <literal>B</literal>
+        and <literal>F</literal> for brief and full respectively.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        preferredRecordSyntax</entry><entry>Preferred Syntax, such as
+        <literal>USMARC</literal>, <literal>SUTRS</literal>, etc.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        databaseName</entry><entry>One or more database names
+        separated by character plus (<literal>+</literal>).
+       </entry><entry>Default</entry></row>
+     </tbody>
+    </tgroup>
    </table>
   </sect1>
   <sect1 id="zoom.records"><title>Records</title>
    <para>
-     A record object is a retrival record on the client side -
-     created from result sets.
+    A record object is a retrival record on the client side -
+    created from result sets.
    </para>
    <synopsis>
      void Z3950_resultset_records (Z3950_resultset r,
@@ -291,45 +290,45 @@
      void Z3950_record_destroy (Z3950_record rec);
    </synopsis>
    <para>
-     Records are created by functions 
-     <function>Z3950_resultset_records</function> or
-     <function>Z3950_resultset_record</function>
-     and destroyed by <function>Z3950_record_destroy</function>.
+    Records are created by functions 
+    <function>Z3950_resultset_records</function> or
+    <function>Z3950_resultset_record</function>
+    and destroyed by <function>Z3950_record_destroy</function>.
    </para>
    <para>
-     A single record is created and returned by function
-     <function>Z3950_resultset_record</function> that takes a 
-     position as argument. First record has position zero.
-     If no record could be obtained <literal>NULL</literal> is returned.
+    A single record is created and returned by function
+    <function>Z3950_resultset_record</function> that takes a 
+    position as argument. First record has position zero.
+    If no record could be obtained <literal>NULL</literal> is returned.
    </para>
    <para>
-     Function <function>Z3950_resultset_records</function> retrieves
-     a number of records from a result set. Options <literal>start</literal>
-     and <literal>count</literal> specifies the range of records to
-     be returned. Upon completion <literal>recs[0], ..recs[*cnt]</literal>
-     holds record objects for the records. These array of records
+    Function <function>Z3950_resultset_records</function> retrieves
+    a number of records from a result set. Options <literal>start</literal>
+    and <literal>count</literal> specifies the range of records to
+    be returned. Upon completion <literal>recs[0], ..recs[*cnt]</literal>
+    holds record objects for the records. These array of records
      <literal>recs</literal> should be allocate prior to calling 
-     <function>Z3950_resultset_records</function>. Note that for
-     records that couldn't be retrieved from the target
-     <literal>recs[ ..]</literal> is <literal>NULL</literal>.
+    <function>Z3950_resultset_records</function>. Note that for
+    records that couldn't be retrieved from the target
+    <literal>recs[ ..]</literal> is <literal>NULL</literal>.
    </para>
    <para id="zoom.record.get">
-     In order to extract information about a single record,
-     <function>Z3950_record_get</function> is provided. The
-     function returns a pointer to certain record information. The
-     nature (type) of the pointer depends on the <function>type</function>
-     given. In addition for certain types, the length
-     <literal>len</literal> passed will be set to the size in bytes of
-     the returned information. The types <literal>database</literal>,
-     <literal>syntax</literal> and <literal>render</literal> are
-     supported. More will be added later.
+    In order to extract information about a single record,
+    <function>Z3950_record_get</function> is provided. The
+    function returns a pointer to certain record information. The
+    nature (type) of the pointer depends on the <function>type</function>
+    given. In addition for certain types, the length
+    <literal>len</literal> passed will be set to the size in bytes of
+    the returned information. The types <literal>database</literal>,
+    <literal>syntax</literal> and <literal>render</literal> are
+    supported. More will be added later.
    </para>
   </sect1>
   <sect1 id="zoom.options"><title>Options</title>
    <para>
-     Most objects in &zoom; allow you to specify options to change
-     default behaviour. From an implementation point of view a set of options
-     is just like an associate array / hash array, etc.
+    Most objects in &zoom; allow you to specify options to change
+    default behaviour. From an implementation point of view a set of options
+    is just like an associate array / hash array, etc.
    </para>
    <synopsis>
      Z3950_options Z3950_options_create (void);
@@ -356,26 +355,26 @@
   </sect1>
   <sect1 id="zoom.events"><title>Events</title>
    <para>
-     If you're developing non-blocking applications, you have to deal 
-     with events.
+    If you're developing non-blocking applications, you have to deal 
+    with events.
    </para>
    <synopsis>
-     int Z3950_event (int no, Z3950_connection *cs);
+    int Z3950_event (int no, Z3950_connection *cs);
    </synopsis>
    <para>
-     The <function>Z3950_event</function> executes pending events for
-     a number of connections. Supply the number of connections in
-     <literal>no</literal> and an array of connections in
-     <literal>cs</literal> (<literal>cs[0] ... cs[no-1]</literal>).
-     A pending event could be a sending a search, receiving a response,
-     etc.
-     When an event has a occured for one of the connections, this function
-     returns a positive integer <literal>n</literal> denoting that an event
-     occurred for connection <literal>cs[n-1]</literal>.
-     When no events are pending for the connections, a value of zero is
-     returned.
-     To make sure all outstanding requests are performed call this function
-     repeatedly until zero is returned.
+    The <function>Z3950_event</function> executes pending events for
+    a number of connections. Supply the number of connections in
+    <literal>no</literal> and an array of connections in
+    <literal>cs</literal> (<literal>cs[0] ... cs[no-1]</literal>).
+    A pending event could be a sending a search, receiving a response,
+    etc.
+    When an event has a occured for one of the connections, this function
+    returns a positive integer <literal>n</literal> denoting that an event
+    occurred for connection <literal>cs[n-1]</literal>.
+    When no events are pending for the connections, a value of zero is
+    returned.
+    To make sure all outstanding requests are performed call this function
+    repeatedly until zero is returned.
    </para>
   </sect1>
  </chapter>
@@ -390,7 +389,7 @@
  sgml-indent-step:1
  sgml-indent-data:t
  sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
  -->

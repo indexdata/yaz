@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.6 2001-10-24 20:12:36 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.7 2001-10-26 20:13:44 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -1241,7 +1241,7 @@ void odr_choice_bias(ODR o, int what);
  sgml-indent-step:1
  sgml-indent-data:t
  sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
  -->

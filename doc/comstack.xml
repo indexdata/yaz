@@ -1,4 +1,4 @@
-<!-- $Id: comstack.xml,v 1.4 2001-10-24 09:27:59 adam Exp $ -->
+<!-- $Id: comstack.xml,v 1.5 2001-10-26 20:13:44 adam Exp $ -->
  <chapter id="comstack"><title>The COMSTACK Module</title>
 
   <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>
@@ -569,7 +569,7 @@ if (buf)
  sgml-indent-step:1
  sgml-indent-data:t
  sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
  -->

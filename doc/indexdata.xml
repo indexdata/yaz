@@ -1,4 +1,4 @@
-<!-- $Id: indexdata.xml,v 1.5 2001-10-24 09:27:59 adam Exp $ -->
+<!-- $Id: indexdata.xml,v 1.6 2001-10-26 20:13:44 adam Exp $ -->
  <appendix id="indexdata"><title>About Index Data</title>
 
   <para>
@@ -56,7 +56,7 @@
  sgml-indent-step:1
  sgml-indent-data:t
  sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
  -->

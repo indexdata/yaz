@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.6 2001-10-24 21:24:38 quinn Exp $ -->
+<!-- $Id: introduction.xml,v 1.7 2001-10-26 20:13:44 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   
   <para>
@@ -24,8 +24,8 @@
    level APIs of &yaz;.
   </para>
   <para>
-   The basic low level modules, which are independent of the role (client or server),
-   consist of three primary interfaces:
+   The basic low level modules, which are independent of the role
+   (client or server), consist of three primary interfaces:
    
    <itemizedlist>
     <listitem><para>&asn;, which provides a C representation of the Z39.50
@@ -48,7 +48,7 @@
    provided by the &odr; (Open Data Representation) subsystem.
   </para>
   <para>
-   &odr; is a basic mechanism for representing an
+    &odr; is a basic mechanism for representing an
    ASN.1 type in the C programming language, and for implementing BER
    encoders and decoders for values of that type. The types defined in
    the &asn; module generally have the prefix <literal>Z_</literal>, and
@@ -119,7 +119,7 @@
  sgml-indent-step:1
  sgml-indent-data:t
  sgml-parent-document:"yaz.xml"
- sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
  -->

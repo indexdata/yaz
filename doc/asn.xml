@@ -1,4 +1,4 @@
-<!-- $Id: asn.xml,v 1.11 2001-10-25 11:55:56 adam Exp $ -->
+<!-- $Id: asn.xml,v 1.12 2001-10-26 20:13:44 adam Exp $ -->
  <chapter id="asn"><title>The Z39.50 ASN.1 Module</title>
   <sect1 id="asn.introduction"><title>Introduction</title>
    <para>
@@ -1067,7 +1067,7 @@ typedef struct Z_ext_typeent
  sgml-indent-step:1
  sgml-indent-data:t
  sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-local-catalogs: nil
  sgml-namecase-general:t
  End:
  -->
