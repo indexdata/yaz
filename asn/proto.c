@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.39  1995-09-29 17:11:53  quinn
+ * Revision 1.40  1996-01-02 11:46:40  quinn
+ * Changed 'operator' to 'roperator' to avoid C++ conflict.
+ *
+ * Revision 1.39  1995/09/29  17:11:53  quinn
  * Smallish
  *
  * Revision 1.38  1995/09/27  15:02:40  quinn
@@ -661,7 +664,7 @@ int z_Complex(ODR o, Z_Complex **p, int opt)
     return
     	z_RPNStructure(o, &(*p)->s1, 0) &&
     	z_RPNStructure(o, &(*p)->s2, 0) &&
-    	z_Operator(o, &(*p)->operator, 0) &&
+    	z_Operator(o, &(*p)->roperator, 0) &&
     	odr_sequence_end(o);
 }
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.7  1995-09-29 17:12:36  quinn
+ * Revision 1.8  1996-01-02 11:46:56  quinn
+ * Changed 'operator' to 'roperator' to avoid C++ conflict.
+ *
+ * Revision 1.7  1995/09/29  17:12:36  quinn
  * Smallish
  *
  * Revision 1.6  1995/09/27  15:03:03  quinn
@@ -184,7 +187,7 @@ static Z_Complex *rpn_complex (ODR o, int num_attr, int max_attr,
 
     zc = odr_malloc (o, sizeof(*zc));
     zo = odr_malloc (o, sizeof(*zo));
-    zc->operator = zo;
+    zc->roperator = zo;
     switch (query_look)
     {
     case 'a':

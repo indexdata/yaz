@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.7  1995-12-14 16:28:07  quinn
+ * Revision 1.8  1996-01-02 11:46:41  quinn
+ * Changed 'operator' to 'roperator' to avoid C++ conflict.
+ *
+ * Revision 1.7  1995/12/14  16:28:07  quinn
  * More explain stuff.
  *
  * Revision 1.6  1995/12/14  11:09:09  quinn
@@ -319,7 +322,7 @@ int z_PrivateCapOperator(ODR o, Z_PrivateCapOperator **p, int opt)
     if (!odr_sequence_begin(o, p, sizeof(**p)))
         return opt && odr_ok(o);
     return
-        odr_implicit(o, z_InternationalString, &(*p)->operator, ODR_CONTEXT, 0, 0) &&
+        odr_implicit(o, z_InternationalString, &(*p)->roperator, ODR_CONTEXT, 0, 0) &&
         odr_implicit(o, z_HumanString, &(*p)->description, ODR_CONTEXT, 1, 1) &&
 	odr_sequence_end(o);
 }

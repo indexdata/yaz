@@ -92,7 +92,7 @@ static Z_Complex *ccl_rpn_complex (struct ccl_rpn_node *p)
     zo = xmalloc (sizeof(*zo));
     assert (zo);
 
-    zc->operator = zo;
+    zc->roperator = zo;
     switch (p->kind)
     {
     case CCL_RPN_AND:

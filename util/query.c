@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: query.c,v $
- * Revision 1.2  1995-05-16 08:51:14  quinn
+ * Revision 1.3  1996-01-02 11:46:56  quinn
+ * Changed 'operator' to 'roperator' to avoid C++ conflict.
+ *
+ * Revision 1.2  1995/05/16  08:51:14  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/04/10  10:28:47  quinn
@@ -81,19 +84,19 @@ static Z_Complex *makecomplex(ODR o, char **buf)
     char op[100], *b;
 
     r = odr_malloc(o, sizeof(*r));
-    r->operator = odr_malloc(o, sizeof(*r->operator));
+    r->roperator = odr_malloc(o, sizeof(*r->roperator));
 
     b = op;
     while (**buf && !isspace(**buf))
     	*(b++) = *((*buf)++);
     *b = 0;
     if (!strcmp(op, "and"))
-    	r->operator->which = Z_Operator_and;
+    	r->roperator->which = Z_Operator_and;
     else if (!strcmp(op, "or"))
-    	r->operator->which = Z_Operator_or;
+    	r->roperator->which = Z_Operator_or;
     else if (!strcmp(op, "not"))
-    	r->operator->which = Z_Operator_and_not;
-    r->operator->u.and = "";
+    	r->roperator->which = Z_Operator_and_not;
+    r->roperator->u.and = "";
     while (**buf && !isspace(**buf))
     	(*buf)++;
     if (!(r->s1 = makerpn(o, buf)))
