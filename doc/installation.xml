@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.16 2003-03-18 13:30:21 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.17 2003-05-16 14:39:57 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -458,6 +458,22 @@
       </varlistentry>
 
       <varlistentry>
+       <term><literal>HAVE_BISON</literal>,
+        <literal>BISON</literal></term>
+       <listitem><para>
+         If GNU Bison is present, you might set <literal>HAVE_ICONV</literal>
+         to 1 and specify the Bison executable in <literal>BISON</literal>.
+         Bison is only required if you use the CVS version of
+         YAZ or if you modify the grammar for CQL
+         (<filename>cql.y</filename>).
+        </para>
+        <para>
+         GNU Bison for Windows is part of 
+         <ulink url="http://unxutils.sourceforge.net/">unxutils</ulink>.
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
        <term><literal>HAVE_ICONV</literal>,
         <literal>ICONV_DIR</literal></term>
        <listitem><para>
@@ -466,7 +482,7 @@
          <literal>ICONV_DIR</literal> to the iconv source directory.
         </para></listitem>
       </varlistentry>
-
+      
       <varlistentry>
        <term><literal>HAVE_LIBXML2</literal>,
         <literal>LIBXML2_DIR</literal></term>
@@ -479,7 +495,7 @@
         </para>
 
         <para>
-         You can get libxml2 and iconv binaries from
+         Windows versions of libxml2 and iconv can be found
          <ulink url="http://www.zlatkovic.com/projects/libxml/binaries.html">
           here</ulink>.
         </para>
