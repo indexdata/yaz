@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.262 2004-12-21 20:25:39 adam Exp $
+ * $Id: client.c,v 1.263 2004-12-30 00:20:15 adam Exp $
  */
 
 #include <stdio.h>
@@ -32,6 +32,8 @@
 #include <io.h>
 #define S_ISREG(x) (x & _S_IFREG)
 #define S_ISDIR(x) (x & _S_IFDIR)
+#else
+#include <unistd.h>
 #endif
 
 #include <yaz/yaz-util.h>
@@ -55,7 +57,6 @@
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
-#include <unistd.h>
 #endif
 #if HAVE_READLINE_HISTORY_H
 #include <readline/history.h>
