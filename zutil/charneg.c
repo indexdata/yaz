@@ -1,5 +1,5 @@
 /* 
- $ $Id: charneg.c,v 1.7 2002-10-04 19:06:25 adam Exp $
+ $ $Id: charneg.c,v 1.8 2003-09-02 12:12:13 adam Exp $
  * Helper functions for Character Set and Language Negotiation - 3
  */
 
@@ -10,10 +10,11 @@
 #include <yaz/yaz-util.h>
 
 static Z_External* z_ext_record2(ODR o, int oid_class, int oid_value,
-                                 const char *buf, int len)
+                                 const char *buf)
 {
     Z_External *p;
     oident oid;
+    int len = strlen(buf);
     
     if (!(p = (Z_External *)odr_malloc(o, sizeof(*p)))) return 0;
     
@@ -95,7 +96,6 @@ static Z_OriginProposal_0 *z_get_OriginProposal_0(ODR o, const char *charset)
         Z_PrivateCharacterSet *pc =
             (Z_PrivateCharacterSet *)odr_malloc(o, sizeof(*pc));
 
-        
         memset(pc, 0, sizeof(*pc));
         
         p0->which = Z_OriginProposal_0_private;
@@ -103,7 +103,7 @@ static Z_OriginProposal_0 *z_get_OriginProposal_0(ODR o, const char *charset)
 	
         pc->which = Z_PrivateCharacterSet_externallySpecified;
         pc->u.externallySpecified =
-            z_ext_record2(o, CLASS_RECSYN, VAL_NOP, charset, strlen(charset));
+            z_ext_record2(o, CLASS_NEGOT, VAL_ID_CHARSET, charset);
     }
     return p0;
 }
@@ -158,6 +158,7 @@ static Z_CharSetandLanguageNegotiation *z_get_CharSetandLanguageNegotiation(
     return p;
 }
 
+/* Create EXTERNAL for negotation proposal. Client side */
 Z_External *yaz_set_proposal_charneg(ODR o,
                                      const char **charsets, int num_charsets,
                                      const char **langs, int num_langs,
@@ -184,6 +185,7 @@ Z_External *yaz_set_proposal_charneg(ODR o,
     return p;
 }
 
+/* used by yaz_set_response_charneg */
 static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
                                               const char *lang, int selected)
 {	
@@ -215,7 +217,7 @@ static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
 	
         pc->which = Z_PrivateCharacterSet_externallySpecified;
         pc->u.externallySpecified =
-        z_ext_record2(o, CLASS_RECSYN, VAL_NOP, charset, strlen(charset));
+	    z_ext_record2(o, CLASS_NEGOT, VAL_ID_CHARSET, charset);
     }
     p->recordsInSelectedCharSets = (bool_t *)odr_malloc(o, sizeof(bool_t));
     *p->recordsInSelectedCharSets = (selected) ? 1:0;
@@ -224,6 +226,7 @@ static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
     return p;
 }
 
+/* Create charset response. Server side */
 Z_External *yaz_set_response_charneg(ODR o, const char *charset,
                                      const char *lang, int selected)
 {
@@ -246,6 +249,7 @@ Z_External *yaz_set_response_charneg(ODR o, const char *charset,
     return p;
 }
 
+/* Get negotiation from OtherInformation. Client&Server side */
 Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
 {
     Z_External *pext;
@@ -268,10 +272,10 @@ Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
             }
         }
     }
-	
     return 0;
 }
 
+/* Get charsets, langs, selected from negotiation.. Server side */
 void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
                               char ***charsets, int *num_charsets,
                               char ***langs, int *num_langs, int *selected)
@@ -342,6 +346,7 @@ void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
         *selected = *pro->recordsInSelectedCharSets;
 }
 
+/* Return charset, lang, selected from negotiation.. Client side */
 void yaz_get_response_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
                               char **charset, char **lang, int *selected)
 {

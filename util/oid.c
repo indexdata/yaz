@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.66 2003-07-24 09:44:52 mike Exp $
+ * $Id: oid.c,v 1.67 2003-09-02 12:12:13 adam Exp $
  */
 
 /*
@@ -298,6 +298,8 @@ static oident standard_oids[] =
      "Zthes-tagset"},
     {PROTO_Z3950,   CLASS_NEGOT,   VAL_CHARNEG3,     {15,3,-1},
      "CharSetandLanguageNegotiation-3"},
+    {PROTO_Z3950,   CLASS_NEGOT,   VAL_ID_CHARSET,   {15,1000,81,1,-1},
+     "ID-Charset" },
     {PROTO_Z3950,   CLASS_USERINFO,VAL_CQL,          {16, 2, -1},
      "CQL"},
     {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS2,    {1,0,10646,1,0,2,-1},

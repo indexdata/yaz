@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.206 2003-07-30 22:33:12 adam Exp $
+ * $Id: client.c,v 1.207 2003-09-02 12:12:12 adam Exp $
  */
 
 #include <stdio.h>
@@ -1849,14 +1849,24 @@ static int only_z3950()
     return 0;
 }
 
+static int cmd_update_common(const char *arg, int version);
+
 static int cmd_update(const char *arg)
+{
+    cmd_update_common(arg, 1);
+}
+
+static int cmd_update0(const char *arg)
+{
+    cmd_update_common(arg, 0);
+}
+
+static int cmd_update_common(const char *arg, int version)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *r;
     int oid[OID_SIZE];
-    Z_IUOriginPartToKeep *toKeep;
-    Z_IUSuppliedRecords *notToKeep;
     oident update_oid;
     char action[20], recid[20], fname[80];
     int action_no;
@@ -1920,7 +1930,10 @@ static int cmd_update(const char *arg)
 
     update_oid.proto = PROTO_Z3950;
     update_oid.oclass = CLASS_EXTSERV;
-    update_oid.value = VAL_DBUPDATE;
+    if (version == 0)
+	update_oid.value = VAL_DBUPDATE0;
+    else
+	update_oid.value = VAL_DBUPDATE;
     oid_ent_to_oid (&update_oid, oid);
     req->packageType = odr_oiddup(out,oid);
     req->packageName = esPackageName;
@@ -1932,41 +1945,90 @@ static int cmd_update(const char *arg)
     r->direct_reference = odr_oiddup(out,oid);
     r->indirect_reference = 0;
     r->descriptor = 0;
-    r->which = Z_External_update;
-    r->u.update = (Z_IUUpdate *) odr_malloc(out, sizeof(*r->u.update));
-    r->u.update->which = Z_IUUpdate_esRequest;
-    r->u.update->u.esRequest = (Z_IUUpdateEsRequest *)
-        odr_malloc(out, sizeof(*r->u.update->u.esRequest));
-    toKeep = r->u.update->u.esRequest->toKeep = (Z_IUOriginPartToKeep *)
-        odr_malloc(out, sizeof(*r->u.update->u.esRequest->toKeep));
-    toKeep->databaseName = databaseNames[0];
-    toKeep->schema = 0;
-    toKeep->elementSetName = 0;
-    toKeep->actionQualifier = 0;
-    toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
-    *toKeep->action = action_no;
-
-    notToKeep = r->u.update->u.esRequest->notToKeep = (Z_IUSuppliedRecords *)
-        odr_malloc(out, sizeof(*r->u.update->u.esRequest->notToKeep));
-    notToKeep->num = 1;
-    notToKeep->elements = (Z_IUSuppliedRecords_elem **)
-        odr_malloc(out, sizeof(*notToKeep->elements));
-    notToKeep->elements[0] = (Z_IUSuppliedRecords_elem *)
-        odr_malloc(out, sizeof(**notToKeep->elements));
-    notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
-    if (*recid)
+    if (version == 0)
     {
-        notToKeep->elements[0]->u.opaque = (Odr_oct *)
-            odr_malloc (out, sizeof(Odr_oct));
-        notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
-        notToKeep->elements[0]->u.opaque->size = strlen(recid);
-        notToKeep->elements[0]->u.opaque->len = strlen(recid);
+	Z_IU0OriginPartToKeep *toKeep;
+	Z_IU0SuppliedRecords *notToKeep;
+
+	r->which = Z_External_update0;
+	r->u.update0 = (Z_IU0Update *) odr_malloc(out, sizeof(*r->u.update0));
+	r->u.update0->which = Z_IUUpdate_esRequest;
+	r->u.update0->u.esRequest = (Z_IU0UpdateEsRequest *)
+	    odr_malloc(out, sizeof(*r->u.update0->u.esRequest));
+	toKeep = r->u.update0->u.esRequest->toKeep = (Z_IU0OriginPartToKeep *)
+	    odr_malloc(out, sizeof(*r->u.update0->u.esRequest->toKeep));
+	
+	toKeep->databaseName = databaseNames[0];
+	toKeep->schema = 0;
+	toKeep->elementSetName = 0;
+
+	toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
+	*toKeep->action = action_no;
+	
+	notToKeep = r->u.update0->u.esRequest->notToKeep = (Z_IU0SuppliedRecords *)
+	    odr_malloc(out, sizeof(*r->u.update0->u.esRequest->notToKeep));
+	notToKeep->num = 1;
+	notToKeep->elements = (Z_IU0SuppliedRecords_elem **)
+	    odr_malloc(out, sizeof(*notToKeep->elements));
+	notToKeep->elements[0] = (Z_IU0SuppliedRecords_elem *)
+	    odr_malloc(out, sizeof(**notToKeep->elements));
+	notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
+	if (*recid)
+	{
+	    notToKeep->elements[0]->u.opaque = (Odr_oct *)
+		odr_malloc (out, sizeof(Odr_oct));
+	    notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
+	    notToKeep->elements[0]->u.opaque->size = strlen(recid);
+	    notToKeep->elements[0]->u.opaque->len = strlen(recid);
+	}
+	else
+	    notToKeep->elements[0]->u.opaque = 0;
+	notToKeep->elements[0]->supplementalId = 0;
+	notToKeep->elements[0]->correlationInfo = 0;
+	notToKeep->elements[0]->record = record_this;
     }
     else
-        notToKeep->elements[0]->u.opaque = 0;
-    notToKeep->elements[0]->supplementalId = 0;
-    notToKeep->elements[0]->correlationInfo = 0;
-    notToKeep->elements[0]->record = record_this;
+    {
+	Z_IUOriginPartToKeep *toKeep;
+	Z_IUSuppliedRecords *notToKeep;
+
+	r->which = Z_External_update;
+	r->u.update = (Z_IUUpdate *) odr_malloc(out, sizeof(*r->u.update));
+	r->u.update->which = Z_IUUpdate_esRequest;
+	r->u.update->u.esRequest = (Z_IUUpdateEsRequest *)
+	    odr_malloc(out, sizeof(*r->u.update->u.esRequest));
+	toKeep = r->u.update->u.esRequest->toKeep = (Z_IUOriginPartToKeep *)
+	    odr_malloc(out, sizeof(*r->u.update->u.esRequest->toKeep));
+	
+	toKeep->databaseName = databaseNames[0];
+	toKeep->schema = 0;
+	toKeep->elementSetName = 0;
+	toKeep->actionQualifier = 0;
+	toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
+	*toKeep->action = action_no;
+
+	notToKeep = r->u.update->u.esRequest->notToKeep = (Z_IUSuppliedRecords *)
+	    odr_malloc(out, sizeof(*r->u.update->u.esRequest->notToKeep));
+	notToKeep->num = 1;
+	notToKeep->elements = (Z_IUSuppliedRecords_elem **)
+	    odr_malloc(out, sizeof(*notToKeep->elements));
+	notToKeep->elements[0] = (Z_IUSuppliedRecords_elem *)
+	    odr_malloc(out, sizeof(**notToKeep->elements));
+	notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
+	if (*recid)
+	{
+	    notToKeep->elements[0]->u.opaque = (Odr_oct *)
+		odr_malloc (out, sizeof(Odr_oct));
+	    notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
+	    notToKeep->elements[0]->u.opaque->size = strlen(recid);
+	    notToKeep->elements[0]->u.opaque->len = strlen(recid);
+	}
+	else
+	    notToKeep->elements[0]->u.opaque = 0;
+	notToKeep->elements[0]->supplementalId = 0;
+	notToKeep->elements[0]->correlationInfo = 0;
+	notToKeep->elements[0]->record = record_this;
+    }
     
     send_apdu(apdu);
 
@@ -3586,6 +3648,7 @@ static struct {
     {"refid", cmd_refid, "<id>",NULL,0,NULL},
     {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0,NULL},
     {"update", cmd_update, "<action> <recid> [<file>]",NULL,0,NULL},
+    {"update0", cmd_update0, "<action> <recid> [<file>]",NULL,0,NULL},
     {"packagename", cmd_packagename, "<packagename>",NULL,0,NULL},
     {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0,NULL},
     {"charset", cmd_charset, "<nego_charset> <output_charset>",NULL,0,NULL},

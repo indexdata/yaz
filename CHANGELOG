@@ -2,6 +2,13 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Implemented command update0 in YAZ client which is equivalent to
+update but uses old of Ext Update ASN.1.
+
+Use OID 1.2.840.10003.15.1000.81.1 for privately defined charsets
+in charset negotiation. Added VAL_ID_CHARSET in oid.h.
+Previously no OID was used for this info.
+
 ZOOM uses smallSetUpperBound=1 instead of 0 for piggyback searches.
 It apparantely upsets EBSCO Publishing IR Z39.50 Server which
 returns 'malformed search term' otherwise.

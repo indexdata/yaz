@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.18 2003-07-18 19:54:30 mike Exp $
+ * $Id: oid.h,v 1.19 2003-09-02 12:12:13 adam Exp $
  */
 
 #ifndef OID_H
@@ -212,7 +212,9 @@ typedef enum oid_value
     VAL_ZEEREX,
     VAL_CQL,
     VAL_DBUPDATE1,
+
     VAL_OCLCUI,
+    VAL_ID_CHARSET,
 
 /* VAL_DYNAMIC must have highest value */
     VAL_DYNAMIC,

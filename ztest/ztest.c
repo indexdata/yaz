@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.57 2003-03-24 22:26:51 adam Exp $
+ * $Id: ztest.c,v 1.58 2003-09-02 12:12:13 adam Exp $
  */
 
 /*
@@ -385,6 +385,10 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		}
 	    }
 	}
+    }
+    else if (rr->esr->taskSpecificParameters->which == Z_External_update0)
+    {
+	yaz_log(LOG_LOG, "Received DB Update (version 0)");
     }
     else
     {
