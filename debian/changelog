@@ -1,3 +1,9 @@
+yaz (2.0.5-3) unstable; urgency=low
+
+  * Source restructure. yaz-marcump man page.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 27 Oct 2003 13:30:34 +0100
+
 yaz (2.0.5-2) unstable; urgency=low
 
   * Compress man pages.

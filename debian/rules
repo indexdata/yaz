@@ -108,6 +108,7 @@ binary-arch: build install
 	dh_installman -p libyaz doc/yaz.7
 	dh_installman -p yaz doc/yaz-client.1 doc/yaz-ztest.8 doc/zoomsh.1
 	dh_installman -p yaz doc/yaz-client-ssl.1 doc/yaz-ztest-ssl.8
+	dh_installman -p libyaz-dev doc/yaz-marcdump.1
 
 	dh_strip
 	dh_compress -a
