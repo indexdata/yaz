@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.7  1995-03-07 16:29:33  quinn
+ * Revision 1.8  1995-03-14 16:59:24  quinn
+ * Fixed OPTIONAL flag in attributeelement
+ *
+ * Revision 1.7  1995/03/07  16:29:33  quinn
  * Added authentication stuff.
  *
  * Revision 1.6  1995/03/01  14:46:03  quinn
@@ -199,9 +202,9 @@ int z_AttributeElement(ODR o, Z_AttributeElement **p, int opt)
     	return opt;
     return
     	odr_implicit(o, odr_integer, &(*p)->attributeType, ODR_CONTEXT,
-	    120, 1) &&
+	    120, 0) &&
     	odr_implicit(o, odr_integer, &(*p)->attributeValue, ODR_CONTEXT,
-	    121, 1) &&
+	    121, 0) &&
     	odr_sequence_end(o);
 }
 
