@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.28 2004-12-13 14:21:55 heikki Exp $
+ * $Id: log.h,v 1.29 2004-12-13 14:31:19 heikki Exp $
  */
 
 /**
@@ -41,6 +41,7 @@ YAZ_BEGIN_CDECL
 
 #ifndef YAZ_USE_NEW_LOG
 
+#include <yaz/xmalloc.h>
 
 /* The old LOG_ bit names are here for compatibility only. They may 
  * conflict with bits defined in syslog.h, or other places. 'LOG'
