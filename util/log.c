@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.30 2002-10-22 10:04:51 adam Exp $
+ * $Id: log.c,v 1.31 2002-11-26 16:56:39 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <time.h>
+#include <yaz/nmem.h>
 #include <yaz/log.h>
 
 #define HAS_STRERROR 1
