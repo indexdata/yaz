@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.6 2004-01-07 20:36:44 adam Exp $
+ * $Id: srwutil.c,v 1.7 2004-01-07 22:27:41 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -207,6 +207,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 sr->u.request->sort_type = Z_SRW_sort_type_sort;
                 sr->u.request->sort.sortKeys = sortKeys;
             }
+            sr->u.request->recordXPath = yaz_uri_val(p1, "recordXPath", decode);
             sr->u.request->recordSchema = yaz_uri_val(p1, "recordSchema", decode);
             sr->u.request->recordPacking = yaz_uri_val(p1, "recordPacking", decode);
             sr->u.request->stylesheet = stylesheet;
