@@ -1,6 +1,8 @@
-; $Id: yaz.nsi,v 1.46 2004-05-10 11:25:00 adam Exp $
+; $Id: yaz.nsi,v 1.47 2004-05-10 12:32:01 adam Exp $
 
 !define VERSION "2.0.20"
+
+!include "MUI.nsh"
 
 Name "YAZ"
 Caption "Index Data YAZ ${VERSION} Setup"
@@ -13,18 +15,34 @@ ComponentText "This will install the YAZ Toolkit on your computer:"
 InstType "Full (w/ Source)"
 InstType "Lite (w/o Source)"
 
-; Some default compiler settings (uncomment and change at will):
-; SetCompress auto ; (can be off or force)
-; SetDatablockOptimize on ; (can be off)
-; CRCCheck on ; (can be off)
-; AutoCloseWindow false ; (can be true for the window go away automatically at end)
-; ShowInstDetails hide ; (can be show to have them shown, or nevershow to disable)
-; SetDateSave off ; (can be on to have files restored to their orginal date)
-
 InstallDir "$PROGRAMFILES\YAZ"
 InstallDirRegKey HKLM "SOFTWARE\Index Data\YAZ" ""
-DirShow show ; (make this hide to not let the user change it)
-DirText "Select the directory to install YAZ in:"
+
+
+;----------------------------
+; Pages
+
+
+  !insertmacro MUI_PAGE_LICENSE "license.txt"
+  !insertmacro MUI_PAGE_COMPONENTS
+  !insertmacro MUI_PAGE_DIRECTORY
+  !insertmacro MUI_PAGE_INSTFILES
+  
+  !insertmacro MUI_UNPAGE_CONFIRM
+  !insertmacro MUI_UNPAGE_INSTFILES
+; Page components
+; Page directory
+; Page instfiles
+
+; UninstPage uninstConfirm
+; UninstPage instfiles
+
+;--------------------------------
+;Languages
+ 
+!insertmacro MUI_LANGUAGE "English"
+
+;--------------------------------
 
 Section "" ; (default section)
 	SetOutPath "$INSTDIR"
@@ -57,7 +75,7 @@ Section "" ; (default section)
 
 SectionEnd ; end of default section
 
-Section "YAZ Runtime"
+Section "YAZ Runtime" YAZ_Runtime
 	SectionIn 1 2
 	IfFileExists "$INSTDIR\bin\yaz-ztest.exe" 0 Noservice
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
@@ -77,7 +95,7 @@ Noservice:
                  "$INSTDIR\bin\yaz-ztest.exe" '-remove'
 SectionEnd
 
-Section "YAZ Development"
+Section "YAZ Development" YAZ_Development
 	SectionIn 1 2
 	SetOutPath $INSTDIR\include\yaz
 	File ..\include\yaz\*.h
@@ -85,7 +103,7 @@ Section "YAZ Development"
 	File ..\lib\*.lib
 SectionEnd
 
-Section "YAZ Documentation"
+Section "YAZ Documentation" YAZ_Documentation
 	SectionIn 1 2
 	SetOutPath $INSTDIR\doc
 	File ..\doc\*.html
@@ -103,7 +121,7 @@ Section "YAZ Documentation"
                  "$INSTDIR\doc\yaz.pdf"
 SectionEnd
 
-Section "YAZ Source"
+Section "YAZ Source" YAZ_Source
 	SectionIn 1
 	SetOutPath $INSTDIR\util
 	File ..\util\*.c
@@ -146,4 +164,22 @@ Section Uninstall
                  "Note: $INSTDIR could not be removed."
 Removed:
 SectionEnd
+
+;--------------------------------
+;Descriptions
+
+  ;Language strings
+LangString DESC_YAZ_Runtime ${LANG_ENGLISH} "YAZ runtime files needed in order for YAZ to run, such as DLLs."
+LangString DESC_YAZ_Development ${LANG_ENGLISH} "Header files and import libraries required for developing software using YAZ."
+LangString DESC_YAZ_Documentation ${LANG_ENGLISH} "YAZ Users' guide and reference in HTML and PDF. Describes both YAZ applications and the API."
+LangString DESC_YAZ_Source ${LANG_ENGLISH} "Source code of YAZ. Required if you need to rebuild YAZ (for debugging purposes)."
+
+;Assign language strings to sections
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Runtime} $(DESC_YAZ_Runtime)
+!insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Development} $(DESC_YAZ_Development)
+!insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Documentation} $(DESC_YAZ_Documentation)
+!insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Source} $(DESC_YAZ_Source)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
 ; eof
