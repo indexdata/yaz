@@ -2,6 +2,11 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.7 2002/MM/DD
 
+Fixed bug in ZOOM connect that occurred on OpenBSD (maybe others). Patch
+by Oleg Kolobov.
+
+Fixed bug in zget for parameter ExtendedServicesResponse.
+
 Fix OID for ILL.
 
 --- 1.8.6 2002/03/25

@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.24 2002-02-28 13:21:16 adam Exp $
+ * $Id: zoom-c.c,v 1.25 2002-05-06 07:33:50 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -519,7 +519,15 @@ static int do_connect (ZOOM_connection c)
     {
 	int ret = cs_connect (c->cs, add);
 	yaz_log (LOG_DEBUG, "cs_connect returned %d", ret);
-	if (ret >= 0)
+        if (ret == 0)
+        {
+            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
+            ZOOM_connection_put_event(c, event);
+            ZOOM_connection_send_init(c);
+            c->state = STATE_ESTABLISHED;
+            return 1;
+        }
+        else if (ret > 0)
 	{
 	    c->state = STATE_CONNECTING; 
             c->mask = ZOOM_SELECT_EXCEPT;
