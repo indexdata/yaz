@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.41 2003-02-23 14:25:34 adam Exp $
+## $Id: Makefile.am,v 1.42 2003-03-21 10:48:11 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -54,10 +54,10 @@ yaz.7: yaz-man.sgml
 zoomsh.1: zoomsh.sgml
 	docbook2man $(srcdir)/zoomsh.sgml
 
-yaz-ztest-ssl.8: yaz-ztest.8
+yaz-ztest-ssl.8: 
 	ln -s yaz-ztest.8 yaz-ztest-ssl.8
 
-yaz-client-ssl.1: yaz-client.1
+yaz-client-ssl.1:
 	ln -s yaz-client.1 yaz-client-ssl.1
 
 $(HTMLFILES): $(XMLFILES)  
