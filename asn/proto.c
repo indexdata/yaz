@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.29  1995-06-15 07:44:49  quinn
+ * Revision 1.30  1995-06-15 15:42:01  quinn
+ * Fixed some v3 bugs
+ *
+ * Revision 1.29  1995/06/15  07:44:49  quinn
  * Moving to v3.
  *
  * Revision 1.28  1995/06/14  15:26:35  quinn
@@ -780,6 +783,20 @@ int z_DiagRec(ODR o, Z_DiagRec **p, int opt)
 
 #endif
 
+int z_DiagRecs(ODR o, Z_DiagRecs **p, int opt)
+{
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
+
+	if (odr_sequence_of(o, z_DiagRec, &(*p)->diagRecs,
+    	&(*p)->num_diagRecs))
+    	return 1;
+    *p = 0;
+    return 0;
+}
+
 int z_NamePlusRecord(ODR o, Z_NamePlusRecord **p, int opt)
 {
     static Odr_arm arm[] =
@@ -817,10 +834,12 @@ int z_NamePlusRecordList(ODR o, Z_NamePlusRecordList **p, int opt)
 
 int z_Records(ODR o, Z_Records **p, int opt)
 {
-    Odr_arm arm[] = 
+    static Odr_arm arm[] = 
     {
     	{ODR_IMPLICIT, ODR_CONTEXT, 28, Z_Records_DBOSD, z_NamePlusRecordList},
     	{ODR_IMPLICIT, ODR_CONTEXT, 130, Z_Records_NSD, z_DiagRec},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 205, Z_Records_multipleNSD,
+	    z_DiagRecs},
     	{-1, -1, -1, -1, 0}
     };
 
@@ -1007,20 +1026,6 @@ int z_Entries(ODR o, Z_Entries **p, int opt)
 
     if (odr_sequence_of(o, z_Entry, &(*p)->entries,
     	&(*p)->num_entries))
-    	return 1;
-    *p = 0;
-    return 0;
-}
-
-int z_DiagRecs(ODR o, Z_DiagRecs **p, int opt)
-{
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
-
-	if (odr_sequence_of(o, z_DiagRec, &(*p)->diagRecs,
-    	&(*p)->num_diagRecs))
     	return 1;
     *p = 0;
     return 0;

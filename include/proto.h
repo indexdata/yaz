@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.16  1995-06-15 07:45:06  quinn
+ * Revision 1.17  1995-06-15 15:42:05  quinn
+ * Fixed some v3 bugs
+ *
+ * Revision 1.16  1995/06/15  07:45:06  quinn
  * Moving to v3.
  *
  * Revision 1.15  1995/06/14  15:26:43  quinn
@@ -549,11 +552,11 @@ typedef struct Z_DiagRec
 
 #endif
 
-typedef struct Z_DiagRecList
+typedef struct Z_DiagRecs
 {
-    int num;
-    Z_DiagRec **list;
-} Z_DiagRecList;
+    int num_diagRecs;
+    Z_DiagRec **diagRecs;
+} Z_DiagRecs;
 
 typedef struct Z_NamePlusRecord
 {
@@ -561,15 +564,13 @@ typedef struct Z_NamePlusRecord
     enum
     {
 	Z_NamePlusRecord_databaseRecord,
-	Z_NamePlusRecord_surrogateDiagnostic,
-	Z_NamePlusRecord_multipleNonSurDiagnostics
+	Z_NamePlusRecord_surrogateDiagnostic
     }
     which;
     union
     {
     	Z_DatabaseRecord *databaseRecord;
     	Z_DiagRec *surrogateDiagnostic;
-	Z_DiagRecList *multipleNonSurDiagnostics;
     } u;
 } Z_NamePlusRecord;
 
@@ -591,7 +592,7 @@ typedef struct Z_Records
     {
     	Z_NamePlusRecordList *databaseOrSurDiagnostics;
     	Z_DiagRec *nonSurrogateDiagnostic;
-	Z_DiagRecList *multipleNonSurDiagnostics;
+	Z_DiagRecs *multipleNonSurDiagnostics;
     } u;
 } Z_Records;
 
@@ -857,12 +858,6 @@ typedef struct Z_Entries
     int num_entries;
     Z_Entry **entries;
 } Z_Entries;
-
-typedef struct Z_DiagRecs
-{
-    int num_diagRecs;
-    Z_DiagRec **diagRecs;
-} Z_DiagRecs;
 
 typedef struct Z_ListEntries
 {
