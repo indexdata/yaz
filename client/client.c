@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.57  1998-01-07 12:58:22  adam
+ * Revision 1.58  1998-01-07 13:51:45  adam
+ * Minor change.
+ *
+ * Revision 1.57  1998/01/07 12:58:22  adam
  * Using fgets instead of gets.
  *
  * Revision 1.56  1997/11/05 09:18:31  adam
@@ -1216,8 +1219,11 @@ static int client(int wait)
 #endif
         {
             /* quick & dirty way to get a command line. */
+	    char *end_p;
             if (!fgets(line, 1023, stdin))
                 break;
+	    if ((end_p = strchr (line, '\n')))
+		*end_p = '\0';
             if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
             {
                 strcpy(word, last_cmd);
