@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.19 2000-11-16 13:03:13 adam Exp $
+# $Id: makefile,v 1.20 2000-12-01 17:56:41 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
 
 NEW_Z3950=1  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
@@ -133,9 +133,8 @@ RELEASE_C_OPTIONS=  \
 ### Linker options
 LINK=link.exe
 
-LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   winspool.lib \
-           comdlg32.lib advapi32.lib shell32.lib ole32.lib    \
-           oleaut32.lib uuid.lib     odbc32.lib  odbccp32.lib \
+LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
+           advapi32.lib uuid.lib \
            wsock32.lib  advapi32.lib
 
 COMMON_LNK_OPTIONS= /nologo \
@@ -675,7 +674,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.19  2000-11-16 13:03:13  adam
+# Revision 1.20  2000-12-01 17:56:41  adam
+# on WIN32 function statserv_closedown closes socket(s) to provoke close.
+#
+# Revision 1.19  2000/11/16 13:03:13  adam
 # Function ccl_rpn_query sets attributeSet to Bib-1.
 #
 # Revision 1.18  2000/11/01 14:47:00  adam

@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.68  2000-11-29 14:22:47  adam
+ * Revision 1.69  2000-12-01 17:56:41  adam
+ * on WIN32 function statserv_closedown closes socket(s) to provoke close.
+ *
+ * Revision 1.68  2000/11/29 14:22:47  adam
  * Implemented XML/SGML attributes for data1 so that d1_read reads them
  * and d1_write generates proper attributes for XML/SGML records. Added
  * register locking for threaded version.
@@ -421,6 +424,7 @@ void statserv_closedown()
             {
                 /* Just destroy the IOCHAN, that should do the trick */
                 iochan_destroy(pCurrentThread->pIOChannel);
+                closesocket(pCurrentThread->pIOChannel->fd);
 
                 /* Keep a running count of our handles */
                 iHandles++;
@@ -450,6 +454,7 @@ void statserv_closedown()
         /* Now we can really do something */
         if (iHandles > 0)
         {
+            logf (LOG_LOG, "waiting for %d to die", iHandles);
             /* This will now wait, until all the threads close */
             WaitForMultipleObjects(iHandles, pThreadHandles, TRUE, INFINITE);
 
