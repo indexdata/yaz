@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.7  1995-05-16 08:50:37  quinn
+ * Revision 1.8  1995-05-17 08:41:35  quinn
+ * Added delete to proto & other little things.
+ * Relaying auth info to backend.
+ *
+ * Revision 1.7  1995/05/16  08:50:37  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.6  1995/05/15  11:55:55  quinn
@@ -90,6 +94,37 @@ typedef char Z_DatabaseName;
 typedef char Z_ResultSetId;
 typedef Odr_oct Z_ResultsetId;
 typedef Odr_external Z_UserInformationField;
+
+typedef struct Z_InfoCategory
+{
+    Odr_oid *categoryTypeId;         /* OPTIONAL */
+    int *categoryValue;
+} Z_InfoCategory;
+
+typedef struct Z_OtherInformationUnit
+{
+    Z_InfoCategory *category;        /* OPTIONAL */
+    enum
+    {
+    	Z_OtherInfo_characterInfo,
+	Z_OtherInfo_binaryInfo,
+	Z_OtherInfo_externallyDefinedInfo,
+	Z_OtherInfo_oid
+    } which;
+    union
+    {
+    	char *characterInfo; 
+	Odr_oct *binaryInfo;
+	Odr_external *externallyDefinedInfo;
+	Odr_oid *oid;
+    } u;
+} Z_OtherInformationUnit;
+
+typedef struct Z_OtherInformation
+{
+    int num_elements;
+    Z_OtherInformationUnit **list;
+} Z_OtherInformation;
 
 /* ----------------- INIT SERVICE  ----------------*/
 
@@ -593,6 +628,18 @@ typedef struct Z_PresentResponse
 
 /* ------------------------ DELETE -------------------------- */
 
+#define Z_DeleteStatus_success                          0
+#define Z_DeleteStatus_resultSetDidNotExist             1
+#define Z_DeleteStatus_previouslyDeletedByTarget        2
+#define Z_DeleteStatus_systemProblemAtTarget            3
+#define Z_DeleteStatus_accessNotAllowed                 4
+#define Z_DeleteStatus_resourceControlAtOrigin          5
+#define Z_DeleteStatus_resourceControlAtTarget          6
+#define Z_DeleteStatus_bulkDeleteNotSupported           7
+#define Z_DeleteStatus_notAllRsltSetsDeletedOnBulkDlte  8
+#define Z_DeleteStatus_notAllRequestedResultSetsDeleted 9
+#define Z_DeleteStatus_resultSetInUse                  10
+
 typedef struct Z_ListStatus
 {
     Z_ResultSetId *id;
@@ -606,23 +653,11 @@ typedef struct Z_DeleteResultSetRequest
 #define Z_DeleteRequest_list    0
 #define Z_DeleteRequest_all     1
     int num_ids;
-    Z_ResultSetId *resultSetList;      /* OPTIONAL */
+    Z_ResultSetId **resultSetList;      /* OPTIONAL */
+#ifdef Z_OTHERINFO
+    Z_OtherInformation *otherInfo;
+#endif
 } Z_DeleteResultSetRequest;
-
-typedef enum Z_DeleteSetStatus
-{
-    Z_Delete_success = 0,
-    Z_Delete_resultSetDidNotExist,
-    Z_Delete_previouslyDeletedByTarget,
-    Z_Delete_systemProblemAtTarget,
-    Z_Delete_accessNotAllowed,
-    Z_Delete_resourceControlAtOrigin,
-    Z_Delete_resourceControlAtTarget,
-    Z_Delete_bulkDeleteNotSupported,
-    Z_Delete_notAllRsltSetsDeletedOnBulkDlte,
-    Z_Delete_notAllRequestedResultSetsDeleted,
-    Z_Delete_resultSetInUse
-} Z_DeleteSetStatus;
 
 typedef struct Z_DeleteResultSetResponse
 {
@@ -631,9 +666,12 @@ typedef struct Z_DeleteResultSetResponse
     int num_statuses;
     Z_ListStatus *deleteListStatuses;  /* OPTIONAL */
     int *numberNotDeleted;             /* OPTIONAL */
-    int num_bulkstatuses;
+    int num_bulkStatuses;
     Z_ListStatus *bulkStatuses;        /* OPTIONAL */
     char *deleteMessage;               /* OPTIONAL */
+#ifdef Z_OTHERINFO
+    Z_OtherInformation *otherInfo;
+#endif
 } Z_DeleteResultSetResponse;
 
 /* ------------------------ APDU ---------------------------- */
@@ -648,6 +686,8 @@ typedef struct Z_APDU
 	Z_APDU_searchResponse,
 	Z_APDU_presentRequest,
 	Z_APDU_presentResponse,
+	Z_APDU_deleteResultSetRequest,
+	Z_APDU_deleteResultSetResponse,
 	Z_APDU_resourceControlRequest,
 	Z_APDU_resourceControlResponse,
 	Z_APDU_triggerResourceControlRequest,
@@ -662,6 +702,8 @@ typedef struct Z_APDU
     	Z_SearchResponse *searchResponse;
     	Z_PresentRequest *presentRequest;
     	Z_PresentResponse *presentResponse;
+	Z_DeleteResultSetRequest *deleteResultSetRequest;
+	Z_DeleteResultSetResponse *deleteResultSetResponse;
 	Z_ResourceControlRequest *resourceControlRequest;
 	Z_ResourceControlResponse *resourceControlResponse;
 	Z_TriggerResourceControlRequest *triggerResourceControlRequest;

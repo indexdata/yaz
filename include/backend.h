@@ -33,6 +33,7 @@
 typedef struct bend_initrequest
 {
     char *configname;
+    Z_IdAuthentication *auth;
 } bend_initrequest;
 
 typedef struct bend_initresult
