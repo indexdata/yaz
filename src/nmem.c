@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.12 2005-01-15 19:47:14 adam Exp $
+ * $Id: nmem.c,v 1.13 2005-01-17 13:03:27 adam Exp $
  */
 
 /**
@@ -20,6 +20,7 @@
 #endif
 
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <stddef.h>
