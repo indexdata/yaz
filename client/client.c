@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.109  2001-01-22 10:41:47  adam
+ * Revision 1.110  2001-01-29 11:19:05  adam
+ * Clients prints options in InitResponse.
+ *
+ * Revision 1.109  2001/01/22 10:41:47  adam
  * Multiple attribute may be specified for sorging.
  *
  * Revision 1.108  2000/11/23 10:58:32  adam
@@ -542,6 +545,35 @@ static int process_initResponse(Z_InitResponse *res)
         }
         odr_reset (print);
     }
+    printf ("Options:");
+    if (ODR_MASK_GET(res->options, Z_Options_search))
+        printf (" search");
+    if (ODR_MASK_GET(res->options, Z_Options_present))
+        printf (" present");
+    if (ODR_MASK_GET(res->options, Z_Options_delSet))
+        printf (" delSet");
+    if (ODR_MASK_GET(res->options, Z_Options_resourceReport))
+        printf (" resourceReport");
+    if (ODR_MASK_GET(res->options, Z_Options_resourceCtrl))
+        printf (" resourceCtrl");
+    if (ODR_MASK_GET(res->options, Z_Options_accessCtrl))
+        printf (" accessCtrl");
+    if (ODR_MASK_GET(res->options, Z_Options_scan))
+        printf (" scan");
+    if (ODR_MASK_GET(res->options, Z_Options_sort))
+        printf (" sort");
+    if (ODR_MASK_GET(res->options, Z_Options_extendedServices))
+        printf (" extendedServices");
+    if (ODR_MASK_GET(res->options, Z_Options_level_1Segmentation))
+        printf (" level1Segmentation");
+    if (ODR_MASK_GET(res->options, Z_Options_level_2Segmentation))
+        printf (" level2Segmentation");
+    if (ODR_MASK_GET(res->options, Z_Options_concurrentOperations))
+        printf (" concurrentOperations");
+    if (ODR_MASK_GET(res->options, Z_Options_namedResultSets))
+        printf (" namedResultSets");
+    printf ("\n");
+    fflush (stdout);
     return 0;
 }
 
