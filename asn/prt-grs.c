@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-grs.c,v $
- * Revision 1.4  1995-09-29 17:11:55  quinn
+ * Revision 1.5  1995-10-18 16:12:20  quinn
+ * Added a couple of special cases to handle the WAIS server.
+ *
+ * Revision 1.4  1995/09/29  17:11:55  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:43  quinn
@@ -179,6 +182,8 @@ int z_Triple(ODR o, Z_Triple **p, int opt)
     {
 	{ODR_NONE, -1, -1, Z_Triple_integer, odr_integer},
 	{ODR_NONE, -1, -1, Z_Triple_internationalString, z_InternationalString},
+	/* The entry below provides some backwards compatibility */
+	{ODR_NONE, -1, -1, Z_Triple_internationalString, odr_visiblestring},
 	{ODR_NONE, -1, -1, Z_Triple_octetString, odr_octetstring},
 	{ODR_NONE, -1, -1, Z_Triple_oid, odr_oid},
 	{ODR_NONE, -1, -1, Z_Triple_boolean, odr_bool},
