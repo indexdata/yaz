@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.57 2003-05-13 14:21:13 adam Exp $
+ * $Id: tcpip.c,v 1.58 2003-05-20 20:33:29 adam Exp $
  */
 
 #include <stdio.h>
@@ -726,8 +726,8 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 return -1;
 #ifdef __sun__
 	yaz_set_errno( 0 );
-	// unfortunatly, sun sometimes forgets to set errno in recv
-	// when EWOULDBLOCK etc. would be required (res = -1)
+	/* unfortunatly, sun sometimes forgets to set errno in recv
+	   when EWOULDBLOCK etc. would be required (res = -1) */
 #endif
 	res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0);
 	TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.194 2003-05-20 19:55:29 adam Exp $
+ * $Id: client.c,v 1.195 2003-05-20 20:33:29 adam Exp $
  */
 
 #include <stdio.h>
@@ -77,7 +77,6 @@ static Z_ElementSetNames *elementSetNames = 0;
 static int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 static enum oid_value recordsyntax = VAL_USMARC;
-//static enum oid_value schema = VAL_NONE;
 static char *schema = 0;
 static int sent_close = 0;
 static NMEM session_mem = NULL;         /* memory handle for init-response */
