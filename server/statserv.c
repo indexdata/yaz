@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.49  1998-02-27 14:04:55  adam
+ * Revision 1.50  1998-06-22 11:32:39  adam
+ * Added 'conditional cs_listen' feature.
+ *
+ * Revision 1.49  1998/02/27 14:04:55  adam
  * Fixed bug in statserv_remove.
  *
  * Revision 1.48  1998/02/11 11:53:36  adam
@@ -405,7 +408,7 @@ static void listener(IOCHAN h, int event)
     {
         if ((res = cs_listen(line, 0, 0)) < 0)
         {
-	    logf(LOG_FATAL, "cs_listen failed.");
+	    logf(LOG_FATAL, "cs_listen failed");
     	    return;
         }
         else if (res == 1)
@@ -495,6 +498,19 @@ void statserv_closedown()
         iochan_destroy(p);
 }
 
+static int check_ip(void *cd, const char *addr, int len, int type)
+{
+    const unsigned char *ip = (const unsigned char *) addr;
+    int i;
+    char str[64];
+
+    sprintf (str, "%u", *ip);
+    for (i = 1; i<4; i++)
+	sprintf (str + strlen(str), ".%u", ip[i]);
+    logf (LOG_DEBUG, "ip %s", str);
+    return 0;
+}
+
 static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
@@ -562,9 +578,9 @@ static void listener(IOCHAN h, int event)
 		return;
 	    }
 	}
-	if ((res = cs_listen(line, 0, 0)) < 0)
+	if ((res = cs_listen_check(line, 0, 0, check_ip, 0)) < 0)
 	{
-	    logf(LOG_FATAL, "cs_listen failed.");
+	    logf(LOG_WARN, "cs_listen failed");
 	    return;
 	}
 	else if (res == 1)

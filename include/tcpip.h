@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.10  1998-05-18 13:07:01  adam
+ * Revision 1.11  1998-06-22 11:32:38  adam
+ * Added 'conditional cs_listen' feature.
+ *
+ * Revision 1.10  1998/05/18 13:07:01  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -81,7 +84,6 @@ extern "C" {
 #endif
 
 YAZ_EXPORT struct sockaddr_in *tcpip_strtoaddr(const char *str);
-
 YAZ_EXPORT COMSTACK tcpip_type(int s, int blocking, int protocol);
 
 #ifdef __cplusplus

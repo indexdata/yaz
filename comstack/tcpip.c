@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.21  1998-05-20 09:55:32  adam
+ * Revision 1.22  1998-06-22 11:32:36  adam
+ * Added 'conditional cs_listen' feature.
+ *
+ * Revision 1.21  1998/05/20 09:55:32  adam
  * Function tcpip_get treats EINPROGRESS error in the same way as
  * EWOULDBLOCK. EINPROGRESS shouldn't be returned - but it is on
  * Solaris in some cases.
@@ -158,7 +161,10 @@ int tcpip_connect(COMSTACK h, void *address);
 int tcpip_more(COMSTACK h);
 int tcpip_rcvconnect(COMSTACK h);
 int tcpip_bind(COMSTACK h, void *address, int mode);
-int tcpip_listen(COMSTACK h, char *addrp, int *addrlen);
+int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
+		 int (*check_ip)(void *cd, const char *a, int len, int type),
+		 void *cd);
+
 COMSTACK tcpip_accept(COMSTACK h);
 char *tcpip_addrstr(COMSTACK h);
 void *tcpip_straddr(COMSTACK h, const char *str);
@@ -171,6 +177,7 @@ void *tcpip_straddr(COMSTACK h, const char *str);
 /*int completeBER(unsigned char *buf, int len); */ /* from the ODR module */
 int completeWAIS(unsigned char *buf, int len); /* from waislen.c */
 
+#undef TRACE_TCPIP
 #ifdef TRACE_TCPIP
 #define TRC(x) x
 #else
@@ -410,12 +417,27 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
     return 0;
 }
 
-int tcpip_listen(COMSTACK h, char *raddr, int *addrlen)
+#if 0
+void tcpip_get_ip(COMSTACK h, char *ip_buf)
+{
+    struct tcpip_state *sp = (tcpip_state *)h->cprivate;
+    const char *ip_addr = (const char *) (&sp->addr->sin_addr.s_addr);
+    int i;
+
+    for (i = 0; i<4; i++)
+	TRC (fprintf (stderr, "%u ", ip_addr[i]));
+    TRC (fprintf (stderr, "\n"));
+}
+#endif
+
+int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
+		 int (*check_ip)(void *cd, const char *a, int len, int type),
+		 void *cd)
 {
     struct sockaddr_in addr;
     int len = sizeof(addr);
 
-    TRC(fprintf(stderr, "tcpip_listen\n"));
+    TRC(fprintf(stderr, "tcpip_listen pid=%d\n", getpid()));
     if (h->state != CS_IDLE)
     {
         h->cerrno = CSOUTSTATE;
@@ -434,10 +456,20 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen)
             h->cerrno = CSYSERR;
         return -1;
     }
-    if (addrlen && *addrlen > sizeof(struct sockaddr_in))
+    if (addrlen && *addrlen >= sizeof(struct sockaddr_in))
         memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_in));
     else if (addrlen)
         *addrlen = 0;
+
+#if 1
+    if (check_ip && (*check_ip)(cd, &addr.sin_addr, sizeof(addr.sin_addr),
+				AF_INET))
+    {
+	h->cerrno = CSDENY;
+	close (h->newfd);
+	return -1;
+    }
+#endif
     h->state = CS_INCON;
     return 0;
 }

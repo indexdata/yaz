@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.c,v $
- * Revision 1.4  1997-09-29 07:16:14  adam
+ * Revision 1.5  1998-06-22 11:32:35  adam
+ * Added 'conditional cs_listen' feature.
+ *
+ * Revision 1.4  1997/09/29 07:16:14  adam
  * Array cs_errlist no longer global.
  *
  * Revision 1.3  1997/09/01 08:49:14  adam
@@ -33,7 +36,8 @@ static const char *cs_errlist[] =
     "System (lower-layer) error",
     "Operation out of state",
     "No data (operation would block)",
-    "New data while half of old buffer is on the line (flow control)"
+    "New data while half of old buffer is on the line (flow control)",
+    "Permission denied"
 };
 
 const char *cs_errmsg(int n)

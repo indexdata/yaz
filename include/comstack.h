@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.21  1998-05-20 09:52:39  adam
+ * Revision 1.22  1998-06-22 11:32:37  adam
+ * Added 'conditional cs_listen' feature.
+ *
+ * Revision 1.21  1998/05/20 09:52:39  adam
  * Removed 'dead' definition.
  *
  * Revision 1.20  1998/05/18 13:06:55  adam
@@ -179,7 +182,9 @@ struct comstack
     int (*f_bind)(COMSTACK handle, void *address, int mode);
 #define CS_CLIENT 0
 #define CS_SERVER 1
-    int (*f_listen)(COMSTACK handle, char *addrp, int *addrlen);
+    int (*f_listen)(COMSTACK h, char *raddr, int *addrlen,
+		   int (*check_ip)(void *cd, const char *a, int len, int type),
+		   void *cd);
     COMSTACK (*f_accept)(COMSTACK handle);
     int (*f_close)(COMSTACK handle);
     char *(*f_addrstr)(COMSTACK handle);
@@ -192,7 +197,8 @@ struct comstack
 #define cs_connect(handle, address) ((*(handle)->f_connect)(handle, address))
 #define cs_rcvconnect(handle) ((*(handle)->f_rcvconnect)(handle))
 #define cs_bind(handle, ad, mo) ((*(handle)->f_bind)(handle, ad, mo))
-#define cs_listen(handle, ap, al) ((*(handle)->f_listen)(handle, ap, al))
+#define cs_listen(handle, ap, al) ((*(handle)->f_listen)(handle, ap, al, 0, 0))
+#define cs_listen_check(handle, ap, al, cf, cd) ((*(handle)->f_listen)(handle, ap, al, cf, cd))
 #define cs_accept(handle) ((*(handle)->f_accept)(handle))
 #define cs_close(handle) ((*(handle)->f_close)(handle))
 #define cs_create(type, blocking, proto) ((*type)(-1, blocking, proto))
@@ -219,6 +225,7 @@ YAZ_EXPORT const char *cs_errmsg(int n);
 #define CSOUTSTATE 2
 #define CSNODATA   3
 #define CSWRONGBUF 4
+#define CSDENY     5
 
 /* backwards compatibility */
 #define CS_SR     PROTO_SR
