@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_mem.c,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: odr_mem.c,v 1.2 2004-09-30 11:06:41 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -34,6 +34,8 @@ void *odr_malloc(ODR o, int size)
 
 char *odr_strdup(ODR o, const char *str)
 {
+    if (o && !o->mem)
+	o->mem = nmem_create();
     return nmem_strdup(o->mem, str);
 }
 
@@ -44,6 +46,8 @@ char *odr_strdupn(ODR o, const char *str, size_t n)
 
 int *odr_intdup(ODR o, int v)
 {
+    if (o && !o->mem)
+	o->mem = nmem_create();
     return nmem_intdup(o->mem, v);
 }
 
