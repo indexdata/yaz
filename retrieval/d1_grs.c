@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.7  1996-10-11 11:57:23  quinn
+ * Revision 1.8  1996-12-05 13:17:49  quinn
+ * Fixed GRS-1 null-ref
+ *
+ * Revision 1.7  1996/10/11  11:57:23  quinn
  * Smallish
  *
  * Revision 1.6  1996/07/06  19:58:34  quinn
@@ -143,10 +146,6 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
     ODR o, int *len)
 {
     Z_ElementData *res = odr_malloc(o, sizeof(*res));
-    data1_node *p;
-
-    for (p = n->parent; p && p->which != DATA1N_tag; p = p->parent)
-	;
 
     if (!n)
     {
@@ -157,6 +156,10 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
     {
 	char str[512];
 	int toget;
+	data1_node *p;
+
+	for (p = n->parent; p && p->which != DATA1N_tag; p = p->parent)
+	    ;
 
 	switch (n->u.data.what)
 	{

@@ -1,12 +1,12 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed null-reference problem in GRS-1 output filter.
+
 Proximity operator added to Prefix Query Format (PQF).
 
 In test client command "base" accepts multiple databases.
 
 Fixed bug in cs_close stack that caused trouble with WINSOCK.
-
---- 1.3 1996/10/11
 
 Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
 
