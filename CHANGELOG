@@ -2,6 +2,12 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Frontend server now transfers memory from decoded packages to stream
+ODR for search.
+
+NMEM now clears freed blocks with 'Y' (hex 59) to force bad memory
+references to show up. 
+
 ZOOM-C now supports standard ZOOM option names as described in v1.4 of
 the ZOOM Abstract API.  The older names for the same options are still
 also supported for the benefit of old applications.
