@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.11  1996-07-06 19:58:35  quinn
+ * Revision 1.12  1996-10-11 10:35:38  adam
+ * Fixed a bug that caused data1_read_node to core dump when no abstract
+ * syntax was defined in a "sgml"-record.
+ *
+ * Revision 1.11  1996/07/06 19:58:35  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.10  1996/01/19  15:41:47  quinn
@@ -391,6 +395,8 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	data1_node *partag = get_parent_tag(parent);
 #endif
 
+        if (!parent)      /* abort if abstract syntax is undefined */
+            return 0;
 	/* Determine length and remove newlines/extra blanks */
 	while (**buf && **buf != '<')
 	{
