@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.14  1995-03-31 09:18:58  quinn
+ * Revision 1.15  1995-03-31 10:16:51  quinn
+ * Fixed logging.
+ *
+ * Revision 1.14  1995/03/31  09:18:58  quinn
  * Added logging.
  *
  * Revision 1.13  1995/03/30  16:08:39  quinn
@@ -74,8 +77,9 @@
 #include <dmalloc.h>
 #include <log.h>
 
-static char *me = "";
+static char *me = "statserver";
 static int dynamic = 1;   /* fork on incoming connection */
+static int loglevel = LOG_DEFAULT_LEVEL;
 
 #define DEFAULT_LISTENER "tcp:localhost:9999"
 
@@ -111,8 +115,12 @@ static void listener(IOCHAN h, int event)
 	    }
 	    else if (res == 0) /* child */
 	    {
+	    	char nbuf[100];
+
 		close(hand[0]);
 		child = 1;
+		sprintf(nbuf, "%s(%d)", me, getpid());
+		log_init(loglevel, nbuf, 0);
 	    }
 	    else /* parent */
 	    {
@@ -143,6 +151,7 @@ static void listener(IOCHAN h, int event)
 	}
 	else if (res == 1)
 	    return;
+	logf(LOG_DEBUG, "listen ok");
 	iochan_setevent(h, EVENT_OUTPUT);
 	iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
     }
@@ -158,6 +167,7 @@ static void listener(IOCHAN h, int event)
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
 	    return;
 	}
+	logf(LOG_DEBUG, "accept ok");
 	if (dynamic)
 	{
 	    IOCHAN pp;
@@ -187,6 +197,7 @@ static void listener(IOCHAN h, int event)
 	    exit(1);
 	}
 	iochan_setdata(new_chan, newas);
+	logf(LOG_LOG, "accepted connection");
     }
     else
     {
@@ -206,9 +217,6 @@ static void add_listener(char *where, int what)
     void *ap;
     IOCHAN lst;
 
-    logf(LOG_LOG, "Adding %s %s listener on %s",
-        dynamic ? "dynamic" : "static",
-    	what == PROTO_SR ? "SR" : "Z3950", where);
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
     {
     	fprintf(stderr, "%s: Address format: ('tcp'|'osi')':'<address>.\n",
@@ -240,21 +248,23 @@ static void add_listener(char *where, int what)
     	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");
     	exit(1);
     }
+    logf(LOG_LOG, "Adding %s %s listener on %s",
+        dynamic ? "dynamic" : "static",
+    	what == PROTO_SR ? "SR" : "Z3950", where);
     if (!(l = cs_create(type, 0, what)))
     {
-    	fprintf(stderr, "Failed to create listener\n");
+    	logf(LOG_FATAL|LOG_ERRNO, "Failed to create listener");
     	exit(1);
     }
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
-    	fprintf(stderr, "Failed to bind.\n");
-    	logf(LOG_FATAL|LOG_ERRNO, where);
+    	logf(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s", where);
     	exit(1);
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
    	 EVENT_EXCEPT)))
     {
-    	logf(LOG_FATAL, "Failed to create IOCHAN-type\n");
+    	logf(LOG_FATAL|LOG_ERRNO, "Failed to create IOCHAN-type");
     	exit(1);
     }
     iochan_setdata(lst, l);
@@ -272,7 +282,6 @@ int statserv_main(int argc, char **argv)
     char *arg;
     int protocol = CS_Z3950;
     char *logfile = 0;
-    int loglevel = LOG_DEFAULT_LEVEL;
 
     me = argv[0];
     while ((ret = options("szSl:v:", argv, argc, &arg)) != -2)

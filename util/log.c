@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.1  1995-03-30 10:26:53  quinn
+ * Revision 1.2  1995-03-31 10:16:55  quinn
+ * Fixed logging.
+ *
+ * Revision 1.1  1995/03/30  10:26:53  quinn
  * Logging system
  *
  * Revision 1.9  1994/12/12  12:09:02  quinn
@@ -57,7 +60,7 @@ static struct {
     { LOG_DEBUG, "debug"},
     { LOG_WARN,  "warn" },
     { LOG_LOG,   "log"  },
-    { LOG_ERRNO, "errno"},
+    { LOG_ERRNO, ""},
     { LOG_ALL,   "all"  },
     { 0,         "none" },
     { 0, NULL }
@@ -79,20 +82,23 @@ void logf(int level, const char *fmt, ...)
 {
     va_list ap;
     char buf[4096], flags[1024];
-    int i;
+    int i, p_error = 0;
 
     if (!(level & l_level))
     	return;
+    if (level & LOG_ERRNO)
+    	p_error = 1;
     *flags = '\0';
     for (i = 0; level && mask_names[i].name; i++)
     	if (mask_names[i].mask & level)
     	{
-	    sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
+	    if (*mask_names[i].name)
+		sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
 	    level -= mask_names[i].mask;
 	}
     va_start(ap, fmt);
     vsprintf(buf, fmt, ap);
-    if (level & LOG_ERRNO)
+    if (p_error)
     	sprintf(buf + strlen(buf), " [%s]", strerror(errno));
     fprintf(l_file, "%s: %s %s\n", l_prefix, flags, buf);
     fflush(l_file);
