@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.31  1995-06-06 08:15:37  quinn
+ * Revision 1.32  1995-06-06 08:41:44  quinn
+ * Better diagnostics.
+ *
+ * Revision 1.31  1995/06/06  08:15:37  quinn
  * Cosmetic.
  *
  * Revision 1.30  1995/06/05  10:53:32  quinn
@@ -950,6 +953,10 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     	ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto, 205, 0);
     else
     {
+    	if (req->termListAndStartPoint->term->which == Z_Term_general)
+	    logf(LOG_DEBUG, " term: %.*s",
+		req->termListAndStartPoint->term->u.general->len,
+		req->termListAndStartPoint->term->u.general->buf);
 	srq.num_bases = req->num_databaseNames;
 	srq.basenames = req->databaseNames;
 	srq.num_entries = *req->numberOfTermsRequested;
@@ -1002,6 +1009,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 		o->buf = odr_malloc(assoc->encode, o->len = o->size =
 		    strlen(srs->entries[i].term));
 		memcpy(o->buf, srs->entries[i].term, o->len);
+		logf(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
+		    srs->entries[i].term, srs->entries[i].occurrences);
 	    }
 	    list.num_entries = i;
 	    res.numberOfEntriesReturned = &list.num_entries;
