@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.50 2002-09-25 12:37:07 adam Exp $
+ * $Id: tcpip.c,v 1.51 2002-12-16 13:11:24 adam Exp $
  */
 
 #include <stdio.h>
@@ -26,26 +26,26 @@
 /* Chas added the following, so we get the definition of completeBER */
 #include <yaz/odr.h>
 
-int tcpip_close(COMSTACK h);
-int tcpip_put(COMSTACK h, char *buf, int size);
-int tcpip_get(COMSTACK h, char **buf, int *bufsize);
-int tcpip_connect(COMSTACK h, void *address);
-int tcpip_more(COMSTACK h);
-int tcpip_rcvconnect(COMSTACK h);
-int tcpip_bind(COMSTACK h, void *address, int mode);
-int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
+static int tcpip_close(COMSTACK h);
+static int tcpip_put(COMSTACK h, char *buf, int size);
+static int tcpip_get(COMSTACK h, char **buf, int *bufsize);
+static int tcpip_connect(COMSTACK h, void *address);
+static int tcpip_more(COMSTACK h);
+static int tcpip_rcvconnect(COMSTACK h);
+static int tcpip_bind(COMSTACK h, void *address, int mode);
+static int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 		 int (*check_ip)(void *cd, const char *a, int len, int type),
 		 void *cd);
-int static tcpip_set_blocking(COMSTACK p, int blocking);
+static int tcpip_set_blocking(COMSTACK p, int blocking);
 
 #if HAVE_OPENSSL_SSL_H
-int ssl_get(COMSTACK h, char **buf, int *bufsize);
-int ssl_put(COMSTACK h, char *buf, int size);
+static int ssl_get(COMSTACK h, char **buf, int *bufsize);
+static int ssl_put(COMSTACK h, char *buf, int size);
 #endif
 
-COMSTACK tcpip_accept(COMSTACK h);
-char *tcpip_addrstr(COMSTACK h);
-void *tcpip_straddr(COMSTACK h, const char *str);
+static COMSTACK tcpip_accept(COMSTACK h);
+static char *tcpip_addrstr(COMSTACK h);
+static void *tcpip_straddr(COMSTACK h, const char *str);
 
 #if 0
 #define TRC(x) x
