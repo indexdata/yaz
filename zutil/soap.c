@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.8 2003-03-25 09:55:12 adam Exp $
+ * $Id: soap.c,v 1.9 2003-04-23 20:36:05 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -257,6 +257,6 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
                  char **content_buf, int *content_len,
                  Z_SOAP_Handler *handlers)
 {
-	return z_soap_codec_enc(o, pp, content_buf, content_len, handlers, 0);
+    return z_soap_codec_enc(o, pp, content_buf, content_len, handlers, 0);
 }
 
