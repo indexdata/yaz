@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.20 2005-02-01 14:46:47 adam Exp $
+ * $Id: statserv.c,v 1.21 2005-02-02 20:25:37 adam Exp $
  */
 
 /**
@@ -988,7 +988,9 @@ statserv_options_block *statserv_getcontrol(void)
     else
 	return &control_block;
 #else
-    return current_control_block;
+    if (current_control_block)
+        return current_control_block;
+    return &control_block;
 #endif
 }
 
