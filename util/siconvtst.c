@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconvtst.c,v 1.4 2002-08-28 19:33:53 adam Exp $
+ * $Id: siconvtst.c,v 1.5 2002-12-10 10:23:21 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -15,14 +15,15 @@
 
 #include <yaz/yaz-util.h>
 
-#define CHUNK 8
+#define CHUNK_IN 64
+#define CHUNK_OUT 64
 
 void convert (FILE *inf, yaz_iconv_t cd)
 {
-    char inbuf0[CHUNK], *inbuf = inbuf0;
-    char outbuf0[CHUNK], *outbuf = outbuf0;
-    size_t outbytesleft = CHUNK;
-    size_t inbytesleft = CHUNK;
+    char inbuf0[CHUNK_IN], *inbuf = inbuf0;
+    char outbuf0[CHUNK_OUT], *outbuf = outbuf0;
+    size_t inbytesleft = CHUNK_IN;
+    size_t outbytesleft = CHUNK_OUT;
     int mustread = 1;
 
     while (1)
@@ -61,15 +62,30 @@ void convert (FILE *inf, yaz_iconv_t cd)
                 size_t i;
                 for (i = 0; i<inbytesleft; i++)
                     inbuf0[i] = inbuf[i];
-                inbuf = inbuf0 + i;
-                inbytesleft = CHUNK - inbytesleft;
-                mustread = 1;
+
+                r = fread(inbuf0 + i, 1, CHUNK_IN - i, inf);
+                if (r != CHUNK_IN - i)
+                {
+                    if (ferror(inf))
+                    {
+                        fprintf (stderr, "yaziconv: error reading file\n");
+                        exit(6);
+                    }
+                }
+                if (r == 0)
+                {
+                    fprintf (stderr, "invalid sequence\n");
+                    return ;
+                }
+                inbytesleft += r;
+                inbuf = inbuf0;
+                mustread = 0;
             }
             else if (e == YAZ_ICONV_E2BIG) /* no more output space */
             {
                 fwrite (outbuf0, 1, outbuf - outbuf0, stdout);
                 outbuf = outbuf0;
-                outbytesleft = CHUNK;
+                outbytesleft = CHUNK_OUT;
                 mustread = 0;
             }
             else
@@ -81,11 +97,11 @@ void convert (FILE *inf, yaz_iconv_t cd)
         else
         {
             inbuf = inbuf0;
-            inbytesleft = CHUNK;
+            inbytesleft = CHUNK_IN;
 
             fwrite (outbuf0, 1, outbuf - outbuf0, stdout);
             outbuf = outbuf0;
-            outbytesleft = CHUNK;
+            outbytesleft = CHUNK_OUT;
 
             mustread = 1;
         }
