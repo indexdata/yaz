@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.249 2004-09-13 09:24:42 adam Exp $
+ * $Id: client.c,v 1.250 2004-09-21 16:28:17 adam Exp $
  */
 
 #include <stdio.h>
@@ -1261,7 +1261,7 @@ static int send_SRW_searchRequest(const char *arg)
     setno = 1;
 
     /* save this for later .. when fetching individual records */
-    srw_sr = sr = yaz_srw_get(srw_sr_odr_out, Z_SRW_searchRetrieve_request);
+    srw_sr =  yaz_srw_get(srw_sr_odr_out, Z_SRW_searchRetrieve_request);
     
     /* regular request .. */
     sr = yaz_srw_get(out, Z_SRW_searchRetrieve_request);
@@ -1269,14 +1269,16 @@ static int send_SRW_searchRequest(const char *arg)
     switch(queryType)
     {
     case QueryType_CQL:
-	sr->u.request->query_type = Z_SRW_query_type_cql;
-	sr->u.request->query.cql = odr_strdup(srw_sr_odr_out, arg);
+	srw_sr->u.request->query_type = Z_SRW_query_type_cql;
+	srw_sr->u.request->query.cql = odr_strdup(srw_sr_odr_out, arg);
+
 	sr->u.request->query_type = Z_SRW_query_type_cql;
 	sr->u.request->query.cql = odr_strdup(out, arg);
 	break;
     case QueryType_Prefix:
-	sr->u.request->query_type = Z_SRW_query_type_pqf;
-	sr->u.request->query.pqf = odr_strdup(srw_sr_odr_out, arg);
+	srw_sr->u.request->query_type = Z_SRW_query_type_pqf;
+	srw_sr->u.request->query.pqf = odr_strdup(srw_sr_odr_out, arg);
+
 	sr->u.request->query_type = Z_SRW_query_type_pqf;
 	sr->u.request->query.pqf = odr_strdup(out, arg);
 	break;
