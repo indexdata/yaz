@@ -2,6 +2,10 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+ZOOM uses smallSetUpperBound=1 instead of 0 for piggyback searches.
+It apparantely upsets EBSCO Publishing IR Z39.50 Server which
+returns 'malformed search term' otherwise.
+
 SortResponse member resultCount now set to NULL in sort handler of
 frontend server.
 

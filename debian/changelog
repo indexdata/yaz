@@ -1,3 +1,9 @@
+yaz (2.0.3-7) unstable; urgency=low
+
+  * Use smallSetUpperBound=1 for ZOOM piggyback searches.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 19 Aug 2003 14:31:23 +0200
+
 yaz (2.0.3-6) unstable; urgency=low
 
   * Yet one more OPAC fix.
