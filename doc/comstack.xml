@@ -1,0 +1,739 @@
+<!-- $Header: /home/cvsroot/yaz/doc/comstack.xml,v 1.1 2001-01-04 13:36:24 adam Exp $ -->
+<chapter><title id="comstack">The COMSTACK Module</title>
+
+<sect1><title>Synopsis (blocking mode)</title>
+
+<programlisting>
+
+COMSTACK *stack;
+char *buf = 0;
+int size = 0, length_incoming;
+char *protocol_package; 
+int protocol_package_length;
+char server_address[] = "myserver.com:2100";
+int status;
+
+stack = cs_create(tcpip_type, 1, PROTO_Z3950);
+if (!stack) {
+    perror("cs_create");  /* note use of perror() here since we have no stack yet */
+    exit(1);
+}
+
+status = cs_connect(stack, server_address);
+if (status != 0) {
+    cs_perror(stack, "cs_connect");
+    exit(1);
+}
+
+status = cs_put(stack, protocol_package, protocol_package_length);
+if (status) {
+    cs_perror(stack, "cs_put");
+    exit(1);
+}
+
+/* Now get a response */
+
+length_incoming = cs_get(stack, &amp;buf, &amp;size);
+if (!length_incoming) {
+    fprintf(stderr, "Connection closed\n");
+    exit(1);
+} else if (length_incoming < 0) {
+    cs_perror(stack, "cs_get");
+    exit(1);
+}
+
+/* Do stuff with buf here */
+
+/* clean up */
+cs_close(stack);
+if (buf)
+    free(buf);
+
+</programlisting>
+
+</sect1>
+<sect1><title>Introduction</title>
+
+<para>
+The &comstack;
+subsystem provides a transparent interface to different types of transport
+stacks for the exchange of BER-encoded data. At present, the
+RFC1729 method (BER over TCP/IP), and Peter Furniss' XTImOSI
+stack are supported, but others may be added in time. The philosophy of the
+module is to provide a simple interface by hiding unused options and
+facilities of the underlying libraries. This is always done at the risk
+of losing generality, and it may prove that the interface will need
+extension later on.
+</para>
+
+<para>
+The interface is implemented in such a fashion that only the
+sub-layers constructed to the transport methods that you wish to
+use in your application are linked in.
+</para>
+
+<para>
+You will note that even though simplicity was a goal in the design,
+the interface is still orders of magnitudes more complex than the
+transport systems found in many other packages. One reason is that
+the interface needs to support the somewhat different requirements of
+the different lower-layer communications stacks; another important reason is
+that the interface seeks to provide a more or less industrial-strength
+approach to asynchronous event-handling. When no function is allowed
+to block, things get more complex - particularly on the server
+side. We urge you to have a look at the demonstration client and server
+provided with the package. They are meant to be easily readable and
+instructive, while still being at least moderately useful.
+</para>
+
+</sect1>
+<sect1><title>Common Functions</title>
+
+<sect2><title>Managing Endpoints</title>
+
+<synopsis>
+  COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
+</synopsis>
+
+<para>
+Creates an instance of the protocol stack - a communications endpoint.
+The <literal>type</literal> parameter determines the mode of communication.
+At present, the values
+<literal>tcpip_type</literal>
+and
+<literal>mosi_type</literal>
+are recognized. The function returns a null-pointer if a system error
+occurs. The <literal>blocking</literal> parameter should be one if you wish
+the association to operate in blocking mode, zero otherwise. The
+<literal>protocol</literal> field should be one of
+<literal>PROTO_SR</literal> or <literal>PROTO_Z3950</literal>.
+</para>
+
+
+<synopsis>
+int cs_close(COMSTACK handle);
+</synopsis>
+
+<para>
+Closes the connection (as elegantly as the lower layers will permit),
+and releases the resouces pointed to by the
+<literal>handle</literal>
+parameter. The
+<literal>handle</literal>
+should not be referenced again after this call.
+</para>
+
+<note>
+<para>
+We really need a soft disconnect, don't we?
+</para>
+</note>
+</sect2>
+
+<sect2><title>Data Exchange</title>
+
+<synopsis>
+  (COMSTACK handle, char *buf, int len);
+</synopsis>
+
+<para>
+Sends
+<literal>buf</literal>
+down the wire. In blocking mode, this function will return only when a
+full buffer has been written, or an error has occurred. In nonblocking
+mode, it's possible that the function will be unable to send the full
+buffer at once, which will be indicated by a return value of 1. The
+function will keep track of the number of octets already written; you
+should call it repeatedly with the same values of <literal>buf</literal>
+and <literal>len</literal>, until the buffer has been transmitted.
+When a full buffer has been sent, the function will return 0 for
+success. -1 indicates an error condition (see below).
+</para>
+
+<synopsis>
+  int cs_get(COMSTACK handle, char **buf, int *size);
+</synopsis>
+
+<para>
+Receives a PDU from the peer. Returns the number of bytes
+read. In nonblocking mode, it is possible that not all of the packet can be
+read at once. In this case, the function returns 1. To simplify the
+interface, the function is
+responsible for managing the size of the buffer. It will be reallocated
+if necessary to contain large packages, and will sometimes be moved
+around internally by the subsystem when partial packages are read. Before
+calling
+<function>cs_get</function>
+for the fist time, the buffer can be initialized to the null pointer,
+and the length should also be set to 0 - cs_get will perform a
+<function>malloc(2)</function>
+on the buffer for you. When a full buffer has been read, the size of
+the package is returned (which will always be greater than 1). -1
+indicates an error condition.
+</para>
+
+<para>
+See also the <function>cs_more()</function> function below.
+</para>
+
+<synopsis>
+  int cs_more(COMSTACK handle);
+</synopsis>
+
+<para>
+The <function>cs_more()</function> function should be used in conjunction
+with <function>cs_get</function> and
+<function>select(2)</function>.
+The <function>cs_get()</function> function will sometimes
+(notably in the TCP/IP mode) read more than a single protocol package
+off the network. When this happens, the extra package is stored
+by the subsystem. After callig <function>cs_get()</function>, and before
+waiting for more input, You should always call
+<function>cs_more()</function>
+to check if there's a full protocol package already read. If
+<function>cs_more()</function>
+returns 1,
+<function>cs_get()</function>
+can be used to immediately fetch the new package. For the
+mOSI
+subsystem, the function should always return 0, but if you want your
+stuff to be protocol independent, you should use it.
+</para>
+
+<note>
+<para>
+The <function>cs_more()</function>
+function is required because the RFC1729-method
+does not provide a way of separating individual PDUs, short of
+partially decoding the BER. Some other implementations will carefully
+nibble at the packet by calling
+<function>read(2)</function>
+several times. This was felt to be too inefficient (or at least
+clumsy) - hence the call for this extra function.
+</para>
+</note>
+
+<synopsis>
+  int cs_look(COMSTACK handle);
+</synopsis>
+
+<para>
+This function is useful when you're operating in nonblocking
+mode. Call it when
+<function>select(2)</function>
+tells you there's something happening on the line. It returns one of
+the following values:
+</para>
+
+<variablelist>
+<varlistentry><term>CS_NONE</term><listitem><para>
+No event is pending. The data found on the line was not a complete package.
+</para></listitem></varlistentry>
+
+<varlistentry><term>CS_CONNECT</term><listitem><para>
+A response to your connect request has been received. Call
+<function>cs_rcvconnect</function>
+to process the event and to finalize the connection establishment.
+</para></listitem></varlistentry>
+
+<varlistentry><term>CS_DISCON</term><listitem><para>
+The other side has closed the connection (or maybe sent a disconnect
+request - but do we care? Maybe later). Call
+<function>cs_close</function> to close your end of the association as well.
+</para></listitem></varlistentry>
+
+<varlistentry><term>CS_LISTEN</term><listitem><para>
+A connect request has been received. Call <function>cs_listen</function>
+to process the event.
+</para></listitem></varlistentry>
+
+<varlistentry><term>CS_DATA</term><listitem><para>
+There's data to be found on the line. Call <function>cs_get</function>
+to get it.
+</para></listitem></varlistentry>
+</variablelist>
+
+<note>
+<para>
+You should be aware that even if
+<function>cs_look()</function>
+tells you that there's an event event pending, the corresponding
+function may still return and tell you there was nothing to be found.
+This means that only part of a package was available for reading. The
+same event will show up again, when more data has arrived.
+</para>
+</note>
+
+<synopsis>
+  int cs_fileno(COMSTACK h);
+</synopsis>
+
+<para>
+Returns the file descriptor of the association. Use this when
+file-level operations on the endpoint are required
+(<function>select(2)</function> operations, specifically).
+</para>
+</sect2>
+
+</sect1>
+
+<sect1><title>Client Side</title>
+
+<synopsis>
+  int cs_connect(COMSTACK handle, void *address);
+</synopsis>
+
+<para>
+Initiate a connection with the target at <literal>address</literal>
+(more onaddresses below). The function will return 0 on success, and 1 if
+the operation does not complete immediately (this will only
+happen on a nonblocking endpoint). In this case, use
+<function>cs_rcvconnect</function> to complete the operation,
+when <function>select(2)</function> reports input pending on the
+association.
+</para>
+
+<synopsis>
+  int cs_rcvconnect(COMSTACK handle);
+</synopsis>
+
+<para>
+Complete a connect operation initiated by <function>cs_connect()</function>.
+It will return 0 on success; 1 if the operation has not yet completed (in
+this case, call the function again later); -1 if an error has occured.
+</para>
+
+</sect1>
+
+<sect1><title>Server Side</title>
+
+<para>
+To establish a server under the <application>inetd</application> server, you
+can use
+</para>
+
+<synopsis>
+  COMSTACK cs_createbysocket(int socket, CS_TYPE type, int blocking,
+                             int protocol);
+</synopsis>
+
+<para>
+The <literal>socket</literal> parameter is an established socket (when
+your application is invoked from <application>inetd</application>, the
+socket will typically be 0.
+The following parameters are identical to the ones for
+<function>cs_create</function>.
+</para>
+
+<synopsis>
+  int cs_bind(COMSTACK handle, void *address, int mode)
+</synopsis>
+
+<para>
+Binds a local address to the endpoint. Read about addresses below. The
+<literal>mode</literal> parameter should be either
+<literal>CS_CLIENT</literal> or <literal>CS_SERVER</literal>.
+</para>
+
+<synopsis>
+  int cs_listen(COMSTACK handle, char *addr, int *addrlen);
+</synopsis>
+
+<para>
+Call this to process incoming events on an endpoint that has been
+bound in listening mode. It will return 0 to indicate that the connect
+request has been received, 1 to signal a partial reception, and -1 to
+indicate an error condition.
+</para>
+
+<synopsis>
+  COMSTACK cs_accept(COMSTACK handle);
+</synopsis>
+
+<para>
+This finalises the server-side association establishment, after
+cs_listen has completed successfully. It returns a new connection
+endpoint, which represents the new association. The application will
+typically wish to fork off a process to handle the association at this
+point, and continue listen for new connections on the old
+<literal>handle</literal>.
+</para>
+
+<para>
+You can use the call
+</para>
+
+<synopsis>
+  char *cs_addrstr(COMSTACK);
+</synopsis>
+
+<para>
+on an established connection to retrieve the hostname of the remote host.
+</para>
+
+<note>
+<para>You may need to use this function with some care if your
+name server service is slow or unreliable
+</para>
+</note>
+
+</sect1>
+<sect1><title>Addresses</title>
+
+<para>
+The low-level format of the addresses are different depending on the
+mode of communication you have chosen. A function is provided by each
+of the lower layers to map a user-friendly string-form address to the
+binary form required by the lower layers.
+</para>
+
+<synopsis>
+  struct sockaddr_in *tcpip_strtoaddr(char *str);
+
+  struct netbuf *mosi_strtoaddr(char *str);
+</synopsis>
+
+<para>
+The format for TCP/IP addresses is straightforward:
+</para>
+
+<synopsis>
+&lt;host> &lsqb; ':' &lt;portnum> &rsqb;
+</synopsis>
+
+<para>
+The <literal>hostname</literal> can be either a domain name or an IP address.
+The port number, if omitted, defaults to 210.
+</para>
+
+<para>
+For OSI, the format is
+</para>
+
+<synopsis>
+&lsqb; &lt;t-selector> '/' &rsqb; &lt;host> &lsqb; ':' &lt;port> &rsqb;
+</synopsis>
+
+<para>
+The transport selector is given as an even number of hex digits.
+</para>
+
+<para>
+You'll note that the address format for the OSI mode are just a subset
+of full presentation addresses. We use presentation addresses because
+xtimosi doesn't, in itself, allow access to the X.500 Directory
+service. We use a limited form, because we haven't yet come across an
+implementation that used more of the elements of a full p-address. It
+is a fairly simple matter to add the rest of the elements to the
+address format as needed, however: Xtimosi <emphasis>does</emphasis>
+support the full P-address structure.
+</para>
+
+<para>
+In both transport modes, the special hostname &quot;@&quot; is mapped
+to any local address (the manifest constant <literal>INADDR_ANY</literal>).
+It is used to establish local listening endpoints in the server role.
+</para>
+
+<para>
+When a connection has been established, you can use
+</para>
+
+<synopsis>
+  char cs_addrstr(COMSTACK h);
+</synopsis>
+
+<para>
+to retrieve the host name of the peer system. The function returns a pointer
+to a static area, which is overwritten on the next call to the function.
+</para>
+
+<note>
+<para>
+We have left the issue of X.500 name-to-address mapping open, for the
+moment. It would be a simple matter to provide a table-based mapping,
+if desired. Alternately, we could use the X.500 client-function that
+is provided with the ISODE (although this would defeat some of the
+purpose of using ThinOSI in the first place. We have been told that it
+should be within the realm of the possible to implement a lightweight
+implementation of the necessary X.500 client capabilities on top of
+ThinOSI. This would be the ideal solution, we feel. On the other hand, it
+still remains to be seen just what role the Directory will play in a world
+populated by ThinOSI and other pragmatic solutions.
+</para>
+</note>
+
+</sect1>
+
+<sect1><title>Diagnostics</title>
+
+<para>
+All functions return -1 if an error occurs. Typically, the functions
+will return 0 on success, but the data exchange functions
+(<function>cs_get</function>, <function>cs_put</function>,
+<function>cs_more</function>) follow special rules. Consult their
+descriptions.
+</para>
+
+<para>
+When a function (including the data exchange functions) reports an
+error condition, use the function
+<function>cs_errno()</function> to determine the cause of the
+problem. The function
+</para>
+
+<synopsis>
+  void cs_perror(COMSTACK handle char *message);
+</synopsis>
+
+<para>
+works like <function>perror(2)</function> and prints the
+<literal>message</literal> argument, along with a system message, to
+<literal>stderr</literal>. Use the character array
+</para>
+
+<synopsis>
+  extern const char *cs_errlist&lsqb;&rsqb;;
+</synopsis>
+
+<para>
+to get hold of the message, if you want to process it differently.
+The function
+</para>
+
+<synopsis>
+  const char *cs_stackerr(COMSTACK handle);
+</synopsis>
+
+<para>
+Returns an error message from the lower layer, if one has been
+provided.
+</para>
+</sect1>
+
+<sect1><title>Enabling OSI Communication</title>
+
+<sect2><title>Installing Xtimosi</title>
+<para>
+Although you will have to download Peter Furniss' XTI/mOSI
+implementation for yourself, we've tried to make the integration as
+simple as possible.
+</para>
+
+<para>
+The latest version of xtimosi will generally be under
+</para>
+
+<screen>
+ftp://pluto.ulcc.ac.uk/ulcc/thinosi/xtimosi/
+</screen>
+
+<para>
+When you have downloaded and unpacked the archive, it will (we assume)
+have created a directory called <literal>xtimosi</literal>.
+We suggest that you place this directory <emphasis>in the same
+directory</emphasis> where you unpacked the &yaz;
+distribution. This way, you shouldn't have to fiddle with the
+makefiles of &yaz; beyond uncommenting a few lines.
+</para>
+
+<para>
+Go to <literal>xtimosi/src</literal>, and type &quot;make libmosi.a/&quot;.
+This should generally create the library, ready to use.
+</para>
+
+<note>
+<para>
+The currently available release of xtimosi has some inherent
+problems that make it disfunction on certain platforms - eg. the
+Digital OSF/1 workstations. It is supposedly primarily a
+compiler problem, and we hope to see a release that is generally
+portable. While we can't guarantee that it can be brought to work
+on your platform, we'll be happy to talk to you about problems
+that you might see, and relay information to the author of the
+software. There are some signs that the <application>gcc</application>
+compiler is more likely to produce a fully functional library, but this
+hasn't been verified (we think that the problem is limited to the use
+of hexadecimal escape-codes used in strings, which are silently
+ignored by some compilers).
+</para>
+<para>
+A problem has been encountered in the communication with
+ISODE-based applications. If the ISODE presentation-user calls
+<function>PReadRequest()</function> with a timeout value different
+from <literal>OK</literal> or <literal>NOTOK</literal>,
+he will get an immediate TIMEOUT abort when receiving large (&gt;2041
+bytes, which is the SPDU-size that the ISODE likes to work with) packages
+from an xtimosi-based implementation (probably most
+other implementations as well, in fact). It seems to be a flaw in the
+ISODE API, and the workaround (for ISODE users) is to either not
+use an explicit timeout (switching to either blocking or
+nonblocking mode), or to check that the timer really has expired
+before closing the connection.
+</para>
+</note>
+
+<para>
+The next step in the installation is to modify the makefile in the toplevel
+&yaz;
+directory. The place to change is in the top of the file, and is
+clearly marked with a comment.
+</para>
+
+<para>
+Now run <literal>make</literal> in the &yaz; toplevel directory (do a
+<literal>make clean</literal> first, if the system has been previously
+made without OSI support). Use the &yaz;
+<application>yaz-ztest</application> and <application>yaz-client</application>
+demo programs to verify that OSI communication works OK. Then, you can go
+ahead and try to talk to other implementations.
+</para>
+
+<note>
+<para>
+Our interoperability experience is limited to version
+7 of the Nordic SR-Nett package, which has had several
+protocol errors fixed from the earlier releases. If you have
+problems or successes in interoperating with other
+implementations, we'd be glad to hear about it, or to help
+you make things work, as our resources allow.
+</para>
+</note>
+
+<para>
+If you write your own applications based on &yaz;, and you wish to
+include OSI support, the procedure is equally simple. You should
+include the <filename>xmosi.h</filename> header file in addition to
+<filename>comstack.h</filename>. <filename>xmosi.h</filename>
+will define the manifest constant <literal>mosi_type</literal>, which you
+should pass to the <function>cs_create()</function> function. In
+addition, you should use the function <function>mosi_strtoaddr()</function>
+rather than <function>tcpip_strtoaddr()</function> when you need to
+prepare an address.
+</para>
+
+<para>
+When you link your application, you should include (after the
+<filename>libyaz.a</filename> library) the <literal>libmosi.a</literal>
+library, and the <filename>librfc.a</filename> library provided with
+&yaz; (for OSI transport).
+</para>
+<para>
+As always, it can be very useful, if not essential, to have a look at the
+example applications to see how things are done.
+</para>
+
+</sect2>
+<sect2><title>OSI Transport</title>
+
+<para>
+Xtimosi requires an implementation of the OSI transport service under
+the X/OPEN XTI API. We provide an implementation of the RFC1006
+encapsulation of OSI/TP0 in TCP/IP (through the Berkeley Sockets API),
+as an independent part of &yaz; (it's found under the
+<filename>rfc1006</filename> directory).
+If you have access to an OSI transport provider under XTI,
+you should be able to make that work too, although it may require
+tinkering with the <function>mosi_strtoaddr()</function> function.
+</para>
+</sect2>
+
+<sect2><title>Presentation Context Management</title>
+
+<para>
+To simplify the implementation, we use Peter Furniss' alternative (PRF)
+option format
+for the Control of the presentation negotiation phase. This format
+is enabled by default when you
+compile xtimosi.
+</para>
+
+<para>
+The current version of &yaz; does <emphasis>not</emphasis> support
+presentation-layer negotiation of response record formats. The primary
+reason is that we have had access to no other SR or Z39.50
+implementations over OSI that used this
+method. Secondarily, we believe that the EXPLAIN facility is a superior
+mechanism for relaying target capabilities in this respect. This is not to
+say that we have no intentions of supporting presentation context
+negotiation - we have just hitherto given it a lower priority than other
+aspects of the protocol.
+</para>
+<para>
+One thing is certain: The addition of this capability to &yaz; should
+have only a minimal impact on existing applications, and on the
+interface to the software in general. Most likely, we will add an extra
+layer of interface to the processing of EXPLAIN records, which will
+convert back and forth between <literal>oident</literal> records (see
+section <link linkend="oid">Object Identifiers</link>) and direct or
+indirect references, given the current association setup. Implementations
+based on any of the higher-level interfaces will most likely not have to
+be changed at all.
+</para>
+</sect2>
+</sect1>
+<sect1><title>Summary and Synopsis</title>
+
+<synopsis>
+#include &lt;comstack.h>
+
+#include &lt;tcpip.h>      /* this is for TCP/IP support   */
+#include &lt;xmosi.h>      /* and this is for mOSI support */
+
+COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
+
+COMSTACK cs_createbysocket(int s, CS_TYPE type, int blocking,
+                              int protocol);
+
+int cs_bind(COMSTACK handle, int mode);
+
+int cs_connect(COMSTACK handle, void *address);
+
+int cs_rcvconnect(COMSTACK handle);
+
+int cs_listen(COMSTACK handle);
+
+COMSTACK cs_accept(COMSTACK handle);
+
+int cs_put(COMSTACK handle, char *buf, int len);
+
+int cs_get(COMSTACK handle, char **buf, int *size);
+
+int cs_more(COMSTACK handle);
+
+int cs_close(COMSTACK handle);
+
+int cs_look(COMSTACK handle);
+
+struct sockaddr_in *tcpip_strtoaddr(char *str);
+
+struct netbuf *mosi_strtoaddr(char *str);
+
+extern int cs_errno;
+
+void cs_perror(COMSTACK handle char *message);
+
+const char *cs_stackerr(COMSTACK handle);
+
+extern const char *cs_errlist[];
+</synopsis>
+</sect1>
+
+</chapter>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+sgml-parent-document:"yaz.xml"
+sgml-default-dtd-file:"yaz.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->

@@ -1,0 +1,713 @@
+<!-- $Header: /home/cvsroot/yaz/doc/frontend.xml,v 1.1 2001-01-04 13:36:24 adam Exp $ -->
+<chapter><title id="server">Making an IR Server for Your Database</title>
+
+<sect1><title>Introduction</title>
+
+<para>
+If you aren't into documentation, a good way to learn how the
+backend interface works is to look at the <filename>backend.h</filename>
+file. Then, look at the small dummy-server in
+<filename>server/ztest.c</filename>. Finally, you can have a look at
+the <filename>seshigh.c</filename> file, which is where most of the
+logic of the frontend server is located. The <filename>backend.h</filename>
+file also makes a good reference, once you've chewed your way through
+the prose of this file.
+</para>
+
+<para>
+If you have a database system that you would like to make available by
+means of Z39.50/SR, &yaz; basically offers your two options. You
+can use the APIs provided by the &asn;, &odr;, and &comstack;
+modules to
+create and decode PDUs, and exchange them with a client. Using this
+low-level interface gives you access to all fields and options of the
+protocol, and you can construct your server as close to your existing
+database as you like. It is also a fairly involved process, requiring
+you to set up an event-handling mechanism, protocol state machine,
+etc. To simplify server implementation, we have implemented a compact
+and simple, but reasonably full-functioned server-frontend that will
+handle most of the protocol mechanics, while leaving you to
+concentrate on your database interface.
+</para>
+
+<note>
+<para>
+The backend interface was designed in anticipation of a specific
+integration task, while still attempting to achieve some degree of
+generality. We realise fully that there are points where the
+interface can be improved significantly. If you have specific
+functions or parameters that you think could be useful, send us a
+mail (or better, sign on to the mailing list referred to in the
+toplevel README file). We will try to fit good suggestions into future
+releases, to the extent that it can be done without requiring
+too many structural changes in existing applications.
+</para>
+</note>
+</sect1>
+
+<sect1><title>The Database Frontend</title>
+
+<para>
+We refer to this software as a generic database frontend. Your
+database system is the <emphasis>backend database</emphasis>, and the
+interface between the two is called the <emphasis>backend API</emphasis>.
+The backend API consists of a small number of function prototypes and
+structure definitions. You are required to provide the
+<function>main()</function> routine for the server (which can be
+quite simple), as well as functions to match each of the prototypes.
+The interface functions that you write can use any mechanism you like
+to communicate with your database system: You might link the whole
+thing together with your database application and access it by
+function calls; you might use IPC to talk to a database server
+somewhere; or you might link with third-party software that handles
+the communication for you (like a commercial database client library).
+At any rate, the functions will perform the tasks of:
+</para>
+
+<itemizedlist>
+
+<listitem><para>
+Initialization.
+</para></listitem>
+
+<listitem><para>
+Searching.
+</para></listitem>
+
+<listitem><para>
+Fetching records.
+</para></listitem>
+
+<listitem><para>
+Scanning the database index (if you wish to implement SCAN).
+</para></listitem>
+
+</itemizedlist>
+
+<para>
+(more functions will be added in time to support as much of
+Z39.50-1995 as possible).
+</para>
+
+<para>
+Because the model where pipes or sockets are used to access the backend
+database is a fairly common one, we have added a mechanism that allows this
+communication to take place asynchronously. In this mode, the frontend
+server doesn't have to block while the backend database is processing
+a request, but can wait for additional PDUs from the client.
+</para>
+
+</sect1>
+<sect1><title>The Backend API</title>
+
+<para>
+The headers files that you need to use the interface are in the
+<filename>include/yaz</filename> directory. They are called
+<filename>statserv.h</filename> and <filename>backend.h</filename>. They
+will include other files from the <filename>include/yaz</filename>
+directory, so you'll probably want to use the -I option of your
+compiler to tell it where to find the files. When you run
+<literal>make</literal> in the toplevel &yaz; directory,
+everything you need to create your server is put the
+<filename>lib/libyaz.a</filename> library.
+</para>
+</sect1>
+
+<sect1><title>Your main() Routine</title>
+
+<para>
+As mentioned, your <function>main()</function> routine can be quite brief.
+If you want to initialize global parameters, or read global configuration
+tables, this is the place to do it. At the end of the routine, you should
+call the function
+</para>
+
+<synopsis>
+  int statserv_main(int argc, char **argv);
+</synopsis>
+
+<para>
+<function>statserv_main</function> will establish listening sockets
+according to the parameters given. When connection requests are received,
+the event handler will typically <function>fork()</function> to handle the
+new request. If you do use global variables, you should be aware, then,
+that these cannot be shared between associations, unless you explicitly
+disallow forking by command line parameters (we advise against this for
+any purposes except debugging, as a crash or hang in the server process
+will affect all users currently signed on to the server).
+</para>
+
+<para>
+The server provides a mechanism for controlling some of its behavior
+without using command-line options. The function
+</para>
+
+<synopsis>
+  statserv_options_block *statserv_getcontrol(void);
+</synopsis>
+
+<para>
+Will return a pointer to a <literal>struct statserv_options_block</literal>
+describing the current default settings of the server. The structure
+contains these elements:
+
+<variablelist>
+<varlistentry><term>int dynamic</term><listitem><para>
+A boolean value, which determines whether the server
+will fork on each incoming request (TRUE), or not (FALSE). Default is
+TRUE.
+</para></listitem></varlistentry>
+<varlistentry><term>int loglevel</term><listitem><para>
+Set this by ORing the constants defined in
+<filename>include/yaz/yaz-log.h</filename>.
+</para></listitem></varlistentry>
+<varlistentry><term>char logfile&lsqb;ODR_MAXNAME+1&rsqb;</term>
+<listitem><para>File for diagnostic output (&quot;&quot;: stderr).
+</para></listitem></varlistentry>
+<varlistentry><term>char apdufile&lsqb;ODR_MAXNAME+1&rsqb;</term>
+<listitem><para>
+Name of file for logging incoming and outgoing APDUs (&quot;&quot;: don't
+log APDUs, &quot;-&quot;: <literal>stderr</literal>).
+</para></listitem></varlistentry>
+<varlistentry><term>char default_listen&lsqb;1024&rsqb;</term>
+<listitem><para>Same form as the command-line specification of
+listener address. &quot;&quot;: no default listener address.
+Default is to listen at &quot;tcp:@:9999&quot;. You can only
+specify one default listener address in this fashion.
+</para></listitem></varlistentry>
+<varlistentry><term>enum oid_proto default_proto;</term>
+<listitem><para>Either <literal>PROTO_SR</literal> or
+<literal>PROTO_Z3950</literal>. Default is <literal>PROTO_Z39_50</literal>.
+</para></listitem></varlistentry>
+<varlistentry><term>int idle_timeout;</term>
+<listitem><para>Maximum session idletime, in minutes. Zero indicates
+no (infinite) timeout. Default is 120 minutes.
+</para></listitem></varlistentry>
+<varlistentry><term>int maxrecordsize;</term>
+<listitem><para>Maximum permissible record (message) size. Default
+is 1Mb. This amount of memory will only be allocated if a client requests a
+very large amount of records in one operation (or a big record). Set it
+to a lower number
+if you are worried about resource consumption on your host system.
+</para></listitem></varlistentry>
+<varlistentry><term>char configname&lsqb;ODR_MAXNAME+1&rsqb;</term>
+<listitem><para>Passed to the backend when a new connection is received.
+</para></listitem></varlistentry>
+<varlistentry><term>char setuid&lsqb;ODR_MAXNAME+1&rsqb;</term>
+<listitem><para>Set user id to the user specified, after binding
+the listener addresses.
+</para></listitem></varlistentry>
+</variablelist>
+</para>
+
+<para>
+The pointer returned by <literal>statserv_getcontrol</literal> points to
+a static area. You are allowed to change the contents of the structure,
+but the changes will not take effect before you call
+</para>
+
+<synopsis>
+  void statserv_setcontrol(statserv_options_block *block);
+</synopsis>
+
+<note>
+<para>
+that you should generally update this structure before calling
+<function>statserv_main()</function>.
+</para>
+</note>
+</sect1>
+
+<sect1><title>The Backend Functions</title>
+
+<para>
+For each service of the protocol, the backend interface declares one or
+two functions. You are required to provide implementations of the
+functions representing the services that you wish to implement.
+</para>
+
+<synopsis>
+  bend_initresult *bend_init(bend_initrequest *r);
+</synopsis>
+
+<para>
+This function is called once for each new connection request, after
+a new process has been forked, and an initRequest has been received
+from the client. The parameter and result structures are defined as
+</para>
+
+<synopsis>
+typedef struct bend_initrequest
+{
+    char *configname;
+} bend_initrequest;
+
+typedef struct bend_initresult
+{
+    int errcode;       /* 0==OK */
+    char *errstring;   /* system error string or NULL */
+    void *handle;      /* private handle to the backend module */
+} bend_initresult;
+</synopsis>
+
+<para>
+The <literal>configname</literal> of <literal>bend_initrequest</literal>
+is currently always set to &quot;default-config&quot;. We haven't had
+use for putting anything special in the initrequest yet, but something
+might go there if the need arises (account/password info would be obvious).
+</para>
+
+<para>
+In general, the server frontend expects that the
+<literal>bend_*result</literal> pointer that you return is valid at
+least until the next call to a <literal>bend_* function</literal>.
+This applies to all of the functions described herein. The parameter
+structure passed to you in the call belongs to the server frontend, and
+you should not make assumptions about its contents after the current
+function call has completed. In other words, if you want to retain any
+of the contents of a request structure, you should copy them.
+</para>
+
+<para>
+The <literal>errcode</literal> should be zero if the initialization of
+the backend went well. Any other value will be interpreted as an error.
+The <literal>errstring</literal> isn't used in the current version, but one
+optin would be to stick it in the initResponse as a VisibleString.
+The <literal>handle</literal> is the most important parameter. It should
+be set to some value that uniquely identifies the current session to
+the backend implementation. It is used by the frontend server in any
+future calls to a backend function.
+The typical use is to set it to point to a dynamically allocated state
+structure that is private to your backend module.
+</para>
+
+<synopsis>
+bend_searchresult *bend_search(void *handle, bend_searchrequest *r,
+                               int *fd);
+bend_searchresult *bend_searchresponse(void *handle);
+
+typedef struct bend_searchrequest
+{
+    char *setname;       /* name to give to this set */
+    int replace_set;     /* replace set, if it already exists */
+    int num_bases;       /* number of databases in list */
+    char **basenames;    /* databases to search */
+    Z_Query *query;      /* query structure */
+} bend_searchrequest;
+
+typedef struct bend_searchresult
+{
+    int hits;            /* number of hits */
+    int errcode;         /* 0==OK */
+    char *errstring;     /* system error string or NULL */
+} bend_searchresult;
+</synopsis>
+
+<para>
+The first thing to notice about the search request interface (as well
+as all of the following requests), is that it consists of two separate
+functions. The idea is to provide a simple facility for
+asynchronous communication with the backend server. When a
+searchrequest comes in, the server frontend will fill out the
+<function>bend_searchrequest</function> tructure, and call the
+<function>bend_search</function> function/. The <literal>fd</literal>
+argument will point to an integer variable. If you are able to do
+asynchronous I/O with your database server, you should set
+<literal>*fd</literal> to the file descriptor you use for the
+communication, and return a null pointer.
+The server frontend will then <function>select()</function> on the
+<literal>*fd</literal>, and will call
+<function>bend_searchresult</function> when it sees that data is available.
+If you don't support asynchronous I/O, you should return a pointer to the
+<function>bend_searchresult</function> immediately, and leave 
+<literal>*fd</literal> untouched. This construction is common to
+all of the <function>bend_</function> functions (except 
+<function>bend_init</function>). Note that you can choose to support
+this facility in none, any, or all of the <function>bend_</function>
+functions, and you can respond differently on each request at run-time.
+The server frontend will adapt accordingly.
+</para>
+
+<para>
+The <function>bend_searchrequest</function> is a fairly close
+approximation of a protocol searchRequest PDU. The
+<literal>setname</literal> is the resultSetName from the protocol. You
+are required to establish a mapping between the set name and whatever
+your backend database likes to use. Similarly, the
+<literal>replace_set</literal> is a boolean value corresponding to the
+resultSetIndicator field in the protocol.
+<literal>Num_bases/basenames</literal> is a length of/array of character
+pointers to the database names provided by the client. The
+<literal>query</literal> is the full query structure as defined in the
+protocol ASN.1 specification. It can be either of the possible query
+types, and it's up to you to determine if you can handle the provided
+query type. Rather than reproduce the C interface here, we'll refer you
+to the structure definitions in the file
+<filename>include/yaz/proto.h</filename>. If you want to look at the
+attributeSetId OID of the RPN query, you can either match it against
+your own internal tables, or you can use the
+<literal>oid_getentbyoid</literal> function provided by &yaz;.
+</para>
+
+<para>
+The result structure contains a number of hits, and an
+<literal>errcode/errstring</literal> pair. If an error occurs
+during the search, or if you're unhappy with the request, you should
+set the errcode to a value from the BIB-1 diagnostic set. The value
+will then be returned to the user in a nonsurrogate diagnostic record
+in the response. The <literal>errstring</literal>, if provided, will
+go in the addinfo field. Look at the protocol definition for the
+defined error codes, and the suggested uses of the addinfo field.
+</para>
+
+<synopsis>
+bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r,
+                             int *fd);
+bend_fetchresult *bend_fetchresponse(void *handle);
+
+typedef struct bend_fetchrequest
+{
+    char *setname;       /* set name */
+    int number;          /* record number */
+    oid_value format;
+} bend_fetchrequest;
+
+typedef struct bend_fetchresult
+{
+    char *basename;      /* name of database that provided record */
+    int len;             /* length of record */
+    char *record;        /* record */
+    int last_in_set;     /* is it?  */
+    oid_value format;
+    int errcode;         /* 0==success */
+    char *errstring;     /* system error string or NULL */
+} bend_fetchresult;
+</synopsis>
+
+<note>
+<para>
+The <function>bend_fetchresponse()</function> function is not yet supported
+in this version of the software. Your implementation of
+<function>bend_fetch()</function> should always return a pointer to a
+<literal>bend_fetchresult</literal>.
+</para>
+</note>
+
+<para>
+The frontend server calls <function>bend_fetch</function> when it needs
+database records to fulfill a searchRequest or a presentRequest.
+The <literal>setname</literal> is simply the name of the result set
+that holds the reference to the desired record.
+The <literal>number</literal> is the offset into the set (with 1
+being the first record in the set). The <literal>format</literal> field
+is the record format requested by the client (See section
+<link linkend="oid">Object Identifiers</link>). The value
+<literal>VAL_NONE</literal> indicates that the client did not
+request a specific format. The <literal>stream</literal> argument
+is an &odr; stream which should be used for
+allocating space for structured data records. The stream will be reset when
+all records have been assembled, and the response package has been transmitted.
+For unstructured data, the backend is responsible for maintaining a static
+or dynamic buffer for the record between calls.
+</para>
+
+<para>
+In the result structure, the <literal>basename</literal> is the name of the
+database that holds the
+record. <literal>len</literal> is the length of the record returned, in
+bytes, and <literal>record</literal> is a pointer to the record.
+<literal>Last_in_set</literal> should be nonzero only if the record
+returned is the last one in the given result set. <literal>errcode</literal>
+and <literal>errstring</literal>, if given, will currently be
+interpreted as a global error pertaining to the set, and will be returned in a
+nonSurrogateDiagnostic.
+</para>
+
+<note>
+<para>
+This is silly. Add a flag to say which is which.
+</para>
+</note>
+
+<para>
+If the <literal>len</literal> field has the value -1, then
+<literal>record</literal> is assumed to point to a constructed data
+type. The <literal>format</literal> field will be used to determine
+which encoder should be used to serialize the data.
+</para>
+
+<note>
+<para>
+If your backend generates structured records, it should use
+<function>odr_malloc()</function> on the provided stream for allocating
+data: This allows the frontend server to keep track of the record sizes.
+</para>
+</note>
+
+<para>
+The <literal>format</literal> field is mapped to an object identifier
+in the direct reference of the resulting EXTERNAL representation of the record.
+</para>
+
+<note>
+<para>
+The current version of &yaz; only supports the direct reference mode.
+</para>
+</note>
+
+<synopsis>
+bend_deleteresult *bend_delete(void *handle, bend_deleterequest *r,
+                               int *fd);
+bend_deleteresult *bend_deleteresponse(void *handle);
+
+typedef struct bend_deleterequest
+{
+    char *setname;
+} bend_deleterequest;
+
+typedef struct bend_deleteresult
+{
+    int errcode;         /* 0==success */
+    char *errstring;     /* system error string or NULL */
+} bend_deleteresult;
+</synopsis>
+
+<note>
+<para>
+The &quot;delete&quot; function is not yet supported in this version of
+the software.
+</para>
+</note>
+
+<note>
+<para>
+The delete set function definition is rather primitive, mostly because we
+have had no practical need for it as of yet. If someone wants
+to provide a full delete service, we'd be happy to add the
+extra parameters that are required. Are there clients out there
+that will actually delete sets they no longer need?
+</para>
+</note>
+
+<synopsis>
+bend_scanresult *bend_scan(void *handle, bend_scanrequest *r,
+    int *fd);
+bend_scanresult *bend_scanresponse(void *handle);
+
+typedef struct bend_scanrequest
+{
+    int num_bases;      /* number of elements in databaselist */
+    char **basenames;   /* databases to search */
+    Z_AttributesPlusTerm *term;
+    int term_position;  /* desired index of term in result list */
+    int num_entries;    /* number of entries requested */
+} bend_scanrequest;
+
+typedef struct bend_scanresult
+{
+    int num_entries;
+    struct scan_entry
+    {
+    	char *term;
+	int occurrences;
+    } *entries;
+    int term_position;
+    enum
+    {
+    	BEND_SCAN_SUCCESS,
+	BEND_SCAN_PARTIAL
+    } status;
+    int errcode;
+    char *errstring;
+} bend_scanresult;
+</synopsis>
+
+<note>
+<para>
+The <function>bend_scanresponse()</function> function is not yet supported
+in this version of the software. Your implementation of
+<function>bend_scan()</function> should always return a pointer to a
+<literal>bend_scanresult</literal>.
+</para>
+</note>
+</sect1>
+
+<sect1><title>Application Invocation</title>
+
+<para>
+The finished application has the following
+invocation syntax (by way of <function>statserv_main()</function>):
+</para>
+
+<synopsis>
+appname &lsqb;-szSu -a apdufile -l logfile -v loglevel&rsqb;
+&lsqb;listener ...&rsqb;
+</synopsis>
+
+<para>
+The options are
+
+<variablelist>
+
+<varlistentry><term>-a <replaceable>file</replaceable></term>
+ <listitem><para>
+Specify a file for dumping PDUs (for diagnostic purposes).
+The special name &quot;-&quot; sends output to <literal>stderr</literal>.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-S</term>
+ <listitem><para>
+Don't fork on connection requests. This is good for debugging, but
+not recommended for real operation: Although the server is
+asynchronous and non-blocking, it can be nice to keep a software
+malfunction (okay then, a crash) from affecting all current users.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-s</term>
+<listitem><para>
+Use the SR protocol.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-z</term>
+<listitem><para>
+Use the Z39.50 protocol (default). These two options complement
+eachother. You can use both multiple times on the same command
+line, between listener-specifications (see below). This way, you
+can set up the server to listen for connections in both protocols
+concurrently, on different local ports.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-l <replaceable>file</replaceable></term>
+<listitem><para>The logfile.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-v <replaceable>level</replaceable></term>
+<listitem><para>
+The log level. Use a comma-separated list of members of the set
+{fatal,debug,warn,log,all,none}.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-u <replaceable>userid</replaceable></term>
+<listitem><para>
+Set user ID. Sets the real UID of the server process to that of the
+given user. It's useful if you aren't comfortable with having the
+server run as root, but you need to start it as such to bind a
+privileged port.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-w <replaceable>dir</replaceable></term>
+<listitem><para>
+Working directory.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-i</term>
+<listitem><para>
+Use this when running from the <application>inetd</application> server.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-t <replaceable>minutes</replaceable></term>
+<listitem><para>
+Idle session timeout, in minutes.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-k <replaceable>size</replaceable></term>
+<listitem><para>
+Maximum record size/message size, in kilobytes.
+</para></listitem></varlistentry>
+
+</variablelist>
+</para>
+
+<para>
+A listener specification consists of a transport mode followed by a
+colon (:) followed by a listener address. The transport mode is
+either <literal>osi</literal> or <literal>tcp</literal>.
+</para>
+
+<para>
+For TCP, an address has the form
+</para>
+
+<synopsis>
+  hostname | IP-number &lsqb;: portnumber&rsqb;
+</synopsis>
+
+<para>
+The port number defaults to 210 (standard Z39.50 port).
+</para>
+
+<para>
+For osi, the address form is
+</para>
+
+<synopsis>
+  &lsqb;t-selector /&rsqb; hostname | IP-number &lsqb;: portnumber&rsqb;
+</synopsis>
+
+<para>
+The transport selector is given as a string of hex digits (with an even
+number of digits). The default port number is 102 (RFC1006 port).
+</para>
+
+<para>
+Examples
+</para>
+
+<screen>
+  tcp:dranet.dra.com
+
+  osi:0402/dbserver.osiworld.com:3000
+</screen>
+
+<para>
+In both cases, the special hostname &quot;@&quot; is mapped to
+the address INADDR_ANY, which causes the server to listen on any local
+interface. To start the server listening on the registered ports for
+Z39.50 and SR over OSI/RFC1006, and to drop root privileges once the
+ports are bound, execute the server like this (from a root shell):
+</para>
+
+<screen>
+  my-server -u daemon tcp:@ -s osi:@
+</screen>
+
+<para>
+You can replace <literal>daemon</literal> with another user, eg. your
+own account, or a dedicated IR server account.
+<literal>my-server</literal> should be the name of your
+server application. You can test the procedure with the
+<application>yaz-ztest</application> application.
+</para>
+
+</sect1>
+<sect1><title>Summary and Synopsis</title>
+
+<synopsis>
+#include &lt;backend.h>
+
+bend_initresult *bend_init(bend_initrequest *r);
+
+bend_searchresult *bend_search(void *handle, bend_searchrequest *r,
+                                 int *fd);
+
+bend_searchresult *bend_searchresponse(void *handle);
+
+bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r,
+                               int *fd);
+
+bend_fetchresult *bend_fetchresponse(void *handle);
+
+bend_scanresult *bend_scan(void *handle, bend_scanrequest *r, int *fd);
+
+bend_scanresult *bend_scanresponse(void *handle);
+
+bend_deleteresult *bend_delete(void *handle, bend_deleterequest *r,
+                                  int *fd);
+
+bend_deleteresult *bend_deleteresponse(void *handle);
+
+void bend_close(void *handle);
+</synopsis>
+</sect1>
+</chapter>
+

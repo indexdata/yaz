@@ -87,6 +87,9 @@ doc_DATA = yaz.sgml profiles.sgml  yaz.txt yaz.ps profiles.txt profiles.ps yaz.h
 
 EXTRA_DIST = yaz.sgml profiles.sgml  yaz.txt yaz.ps profiles.txt profiles.ps yaz.html  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html  yaz-6.html yaz-7.html yaz-8.html yaz-9.html
 
+
+XMLFILES = yaz.xml introduction.xml installation.xml indexdata.xml   asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml future.xml
+
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
 DATA =  $(doc_DATA)
@@ -227,6 +230,12 @@ profiles.ps: profiles.sgml
 
 yaz.html: yaz.sgml
 	sgml2html yaz.sgml
+
+book1.htm: $(XMLFILES)
+	jade -E14 -d ../../docbook/docbook/html/docbook.dsl -t sgml xml.dcl yaz.xml
+
+yaz.tex: $(XMLFILES)
+	jade -d ../../docbook/docbook/print/docbook.dsl -t tex xml.dcl yaz.xml
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
