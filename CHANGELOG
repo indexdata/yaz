@@ -2,6 +2,10 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 2.0.9 NOT YET RELEASED
 
+Fixed namespace for SRW/SRU diagnostics.
+
+Fixed SEGV in yaz-client that occured for HTTP connection errors.
+
 --- 2.0.8 2003/12/22
 
 * SRW/SRU 1.1. Since the Namespace has changed for SRW/SRU, it means that
