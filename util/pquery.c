@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.18  1998-02-11 11:53:36  adam
+ * Revision 1.19  1998-03-05 08:09:03  adam
+ * Minor change to make C++ happy.
+ *
+ * Revision 1.18  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.17  1997/11/24 11:33:57  adam
@@ -91,7 +94,7 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o, oid_proto,
                                       int num_attr, int max_attr, 
                                       int *attr_list, oid_value *attr_set);
 
-static int query_oid_getvalbyname (struct lex_info *li)
+static enum oid_value query_oid_getvalbyname (struct lex_info *li)
 {
     char buf[32];
 
