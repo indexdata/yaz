@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.4 1999-06-09 09:41:09 heikki Exp $
+# $Id: makefile,v 1.5 1999-06-09 11:05:30 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -25,7 +25,7 @@
 
 DEBUG=0   # 0 for release, 1 for debug
 
-NEW_Z3950=1  # 0= use old asn files
+NEW_Z3950=0  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
 
 
@@ -159,7 +159,7 @@ ZTEST_LINK_OPTIONS = /subsystem:console
 # TCL
 TCL="C:\Program Files\Tcl\bin\tclsh80.exe"
 
-COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl
+COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl -I $(INCLDIR)
 
 
 # Final opt variables
@@ -289,9 +289,11 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\prt-ext.obj \
    $(OBJDIR)\logrpn.obj \
    $(OBJDIR)\pquery.obj \
-   $(OBJDIR)\query.obj \
    $(OBJDIR)\yaz-ccl.obj \
    $(OBJDIR)\otherinfo.obj
+
+#   $(OBJDIR)\query.obj \
+
 
 YAZ_RET_OBJS= \
    $(OBJDIR)\d1_absyn.obj\
@@ -314,6 +316,9 @@ YAZ_RET_OBJS= \
 
 
 Z3950_OBJS= \
+   $(OBJDIR)\z-date.obj\
+   $(OBJDIR)\z-univ.obj\
+   $(OBJDIR)\zes-update.obj\
    $(OBJDIR)\z-accdes1.obj \
    $(OBJDIR)\z-accform1.obj \
    $(OBJDIR)\z-acckrb1.obj \
@@ -363,7 +368,7 @@ DLL_OBJS= $(YAZ_OBJS)
 ##########################################################
 
 !if $(NEW_Z3950)
-$(PROTOH): makefile $(INCLDIR)\z-proto.h $(Z3950V3_H_FILES)
+$(PROTOH): makefile $(INCLDIR)\z-proto.h
 	copy $(INCLDIR)\z-proto.h $(INCLDIR)\proto.h
 !else
 $(PROTOH): makefile $(INCLDIR)\prt-proto.h 
@@ -526,22 +531,18 @@ $(RESFILE): $(RCFILE) $(IDLGENERATED)
 $(Z3950V3_FILES): $(Z3950DIR)\z3950v3.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) z3950v3.asn
-	copy *.h $(INCLDIR)  >NUL
 
 $(DATETIME_FILES): $(Z3950DIR)\datetime.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) datetime.asn
-	copy *.h $(INCLDIR)  >NUL
 
 $(UNIVRES_FILES): $(Z3950DIR)\univres.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) univres.asn
-	copy *.h $(INCLDIR)  >NUL
 
 $(ESUPDATE_FILES): $(Z3950DIR)\esupdate.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) esupdate.asn
-	copy *.h $(INCLDIR)  >NUL
 
 
 ###########################################################
@@ -656,7 +657,10 @@ $(DLL_OBJS): makefile $(PROTOH) $(GENERATED_C_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.4  1999-06-09 09:41:09  heikki
+# Revision 1.5  1999-06-09 11:05:30  heikki
+# At least it can compile
+#
+# Revision 1.4  1999/06/09 09:41:09  heikki
 # More work on the ASN-generated files.
 #
 # Revision 1.3  1999/06/08 14:32:30  heikki
