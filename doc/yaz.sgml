@@ -2,7 +2,7 @@
 <article>
 <title>YAZ User's Guide and Reference
 <author><htmlurl url="http://www.indexdata.dk/" name="Index Data">, <tt><htmlurl url="mailto:info@indexdata.dk" name="info@indexdata.dk"></>
-<date>$Revision: 1.1 $
+<date>$Revision: 1.2 $
 <abstract>
 This document is the programmer's guide and reference to the YAZ
 package. YAZ is a compact toolkit that provides access to the
@@ -185,7 +185,7 @@ POSIX threads. Specifically, <tt>_REENTRANT</tt> will be defined
 during compilation.
 </descrip>
 
-When configured build the software by typing:
+When configured, build the software by typing:
 <tscreen><verb>
   make
 </verb></tscreen>
@@ -215,7 +215,7 @@ If you wish to install <bf/YAZ/ in system directories such as /usr/local/bin,
 </verb></tscreen>
 
 You probably need to have root access in order to perform this.
-You must to specify the <tt>--prefix</tt> option for configure if you
+You must specify the <tt>--prefix</tt> option for configure if you
 going to install in anything but /usr/local/.
 
 <sect1>WIN32

@@ -26,7 +26,8 @@ details.
 
 Changed name of logging function, logf, to yaz_log, to prevent name
 clash with some math-log functions. The YAZ header log.h defines logf
-to yaz_log so there should be no incompatibilities by this modification.
+to yaz_log (#define) so there should be no incompatibilities by this
+modification.
 
 Added bend_start/bend_stop handlers for server. These handler are
 called on start/stop of server. For windows they are called whenever
@@ -39,8 +40,10 @@ cases, incompatible with the old decoders. There are differences in the
 following C structures Z_DiagRec, Z_External, Z_SortRequest, Z_SortResponse,
 Z_AttributesPlusTerm, Z_ProximityOperator, Z_DefaultDiagFormat.
 The preprocessor variable ASN_COMPILED is defined when the compiled
-ASN.1 is being used. Stuff related to the auto-generated encoders
-are located in sub directory <tt>z39.50</tt>.
+ASN.1 is being used. Encoder/decoder routines as well as the Z39.50
+protocol ASN.1 is located sub directory <tt>z39.50</tt>. If you
+wish to use the old encoders/decoders you can specify --disable-yc
+for configure.
 
 Assigned OID for old DB Update (VAL_DBUPDATE0). Updated YAZ compiled
 version so that it supports both new - and old version of DB Update
