@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.29  1995-06-01 11:25:03  quinn
+ * Revision 1.30  1995-06-05 10:53:32  quinn
+ * Added a better SCAN.
+ *
+ * Revision 1.29  1995/06/01  11:25:03  quinn
  * Smallish.
  *
  * Revision 1.28  1995/06/01  11:21:01  quinn
@@ -266,6 +269,7 @@ void ir_session(IOCHAN h, int event)
 	{
 	    logf(LOG_DEBUG, "ir_session (input)");
 	    assert(assoc && conn);
+	    /* We aren't speaking to this fellow */
 	    if (assoc->rejected)
 	    {
 		logf(LOG_LOG, "Closed connection after reject");
@@ -376,7 +380,7 @@ static int process_request(association *assoc)
 	case Z_APDU_scanRequest:
 	    res = process_scanRequest(assoc, req, &fd); break;
 	default:
-	    logf(LOG_WARN, "Bad APDU");
+	    logf(LOG_WARN, "Bad APDU received");
 	    return -1;
     }
     if (res)
@@ -485,16 +489,15 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
 /*
  * Handle init request.
  * At the moment, we don't check the protocol version or the options
- * anywhere else in the code - we just don't do anything that would
- * break a naive client.
+ * anywhere else in the code - we just try not to do anything that would
+ * break a naive client. We'll toss 'em into the association block when
+ * we need them there.
  */
 static Z_APDU *process_initRequest(association *assoc, request *reqb)
 {
     Z_InitRequest *req = reqb->request->u.initRequest;
-    static Z_APDU apdu;
-    static Z_InitResponse resp;
-    static bool_t result = 1;
-    static Odr_bitmask options, protocolVersion;
+    Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_initResponse);
+    Z_InitResponse *resp = apdu->u.initResponse;
     bend_initrequest binitreq;
     bend_initresult *binitres;
 
@@ -515,51 +518,43 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     }
 
     assoc->backend = binitres->handle;
-    apdu.which = Z_APDU_initResponse;
-    apdu.u.initResponse = &resp;
-    resp.referenceId = req->referenceId;
+    resp->referenceId = req->referenceId;
     /* let's tell the client what we can do */
-    ODR_MASK_ZERO(&options);
     if (ODR_MASK_GET(req->options, Z_Options_search))
-    	ODR_MASK_SET(&options, Z_Options_search);
+    	ODR_MASK_SET(resp->options, Z_Options_search);
     if (ODR_MASK_GET(req->options, Z_Options_present))
-    	ODR_MASK_SET(&options, Z_Options_present);
+    	ODR_MASK_SET(resp->options, Z_Options_present);
 #if 0
     if (ODR_MASK_GET(req->options, Z_Options_delSet))
     	ODR_MASK_SET(&options, Z_Options_delSet);
 #endif
     if (ODR_MASK_GET(req->options, Z_Options_namedResultSets))
-    	ODR_MASK_SET(&options, Z_Options_namedResultSets);
+    	ODR_MASK_SET(resp->options, Z_Options_namedResultSets);
     if (ODR_MASK_GET(req->options, Z_Options_scan))
-    	ODR_MASK_SET(&options, Z_Options_scan);
+    	ODR_MASK_SET(resp->options, Z_Options_scan);
     if (ODR_MASK_GET(req->options, Z_Options_concurrentOperations))
-    	ODR_MASK_SET(&options, Z_Options_concurrentOperations);
-    resp.options = &options;
+    	ODR_MASK_SET(resp->options, Z_Options_concurrentOperations);
 
-    ODR_MASK_ZERO(&protocolVersion);
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
-    	ODR_MASK_SET(&protocolVersion, Z_ProtocolVersion_1);
+    	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_1);
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_2))
-    	ODR_MASK_SET(&protocolVersion, Z_ProtocolVersion_2);
-    resp.protocolVersion = &protocolVersion;
+    	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_2);
     assoc->maximumRecordSize = *req->maximumRecordSize;
     if (assoc->maximumRecordSize > control_block->maxrecordsize)
     	assoc->maximumRecordSize = control_block->maxrecordsize;
     assoc->preferredMessageSize = *req->preferredMessageSize;
     if (assoc->preferredMessageSize > assoc->maximumRecordSize)
     	assoc->preferredMessageSize = assoc->maximumRecordSize;
-    resp.preferredMessageSize = &assoc->preferredMessageSize;
-    resp.maximumRecordSize = &assoc->maximumRecordSize;
-    resp.result = &result;
-    resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.userInformationField = 0;
+    resp->preferredMessageSize = &assoc->preferredMessageSize;
+    resp->maximumRecordSize = &assoc->maximumRecordSize;
+    resp->implementationName = "Index Data/YAZ Generic Frontend Server";
     if (binitres->errcode)
     {
     	logf(LOG_LOG, "Connection rejected by backend.");
-    	result = 0;
+    	*resp->result = 0;
 	assoc->rejected = 1;
     }
-    return &apdu;
+    return apdu;
 }
 
 /*
@@ -931,6 +926,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     bend_scanrequest srq;
     bend_scanresult *srs;
 
+    logf(LOG_LOG, "Got scanrequest");
     apdu.which = Z_APDU_scanResponse;
     apdu.u.scanResponse = &res;
     res.referenceId = req->referenceId;

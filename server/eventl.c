@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.8  1995-05-16 08:51:01  quinn
+ * Revision 1.9  1995-06-05 10:53:31  quinn
+ * Added a better SCAN.
+ *
+ * Revision 1.8  1995/05/16  08:51:01  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.7  1995/03/27  15:02:01  quinn
@@ -38,6 +41,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#ifdef _AIX
+#include <sys/select.h>
+#endif
 
 #include <eventl.h>
 
