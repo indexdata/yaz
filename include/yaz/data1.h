@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.4  2000-02-28 11:20:06  adam
+ * Revision 1.5  2000-11-29 14:22:47  adam
+ * Implemented XML/SGML attributes for data1 so that d1_read reads them
+ * and d1_write generates proper attributes for XML/SGML records. Added
+ * register locking for threaded version.
+ *
+ * Revision 1.4  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.3  2000/01/04 17:46:17  ian
@@ -244,6 +249,8 @@
 #define d1_isspace(c) strchr(" \r\n\t\f", c)
 #define d1_isdigit(c) ((c) <= '9' && (c) >= '0')
 
+#define DATA1_USING_XATTR 1
+
 YAZ_BEGIN_CDECL
 
 #define data1_matchstr(s1, s2) yaz_matchstr(s1, s2)
@@ -393,6 +400,14 @@ typedef struct data1_sub_elements {
     data1_element *elements;
 } data1_sub_elements;
 
+#if DATA1_USING_XATTR
+typedef struct data1_xattr {
+    char *name;
+    char *value;
+    struct data1_xattr *next;
+} data1_xattr;
+#endif
+
 typedef struct data1_absyn
 {
     char *name;
@@ -439,6 +454,9 @@ typedef struct data1_node
 	    int get_bytes;
 	    unsigned node_selected : 1;
 	    unsigned make_variantlist : 1;
+#if DATA1_USING_XATTR
+            data1_xattr *attributes;
+#endif
 	} tag;
 
 	struct
@@ -528,6 +546,7 @@ YAZ_EXPORT data1_element *data1_getelementbyname(data1_handle dh,
 						 data1_absyn *absyn,
 						 const char *name);
 YAZ_EXPORT data1_node *data1_mk_node(data1_handle dh, NMEM m);
+YAZ_EXPORT data1_node *data1_mk_node_type (data1_handle dh, NMEM m, int type);
 YAZ_EXPORT data1_absyn *data1_get_absyn(data1_handle dh, const char *name);
 YAZ_EXPORT data1_attset *data1_get_attset (data1_handle dh, const char *name);
 YAZ_EXPORT data1_maptab *data1_read_maptab(data1_handle dh, const char *file);

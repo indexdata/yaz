@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.17  1999-11-30 13:47:12  adam
+ * Revision 1.18  2000-11-29 14:22:47  adam
+ * Implemented XML/SGML attributes for data1 so that d1_read reads them
+ * and d1_write generates proper attributes for XML/SGML records. Added
+ * register locking for threaded version.
+ *
+ * Revision 1.17  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.16  1999/10/21 12:06:29  adam
@@ -303,11 +308,9 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 		    {
 			if (!cur || mt->new_field || !tagmatch(cur, mt))
 			{
-			    cur = data1_mk_node (dh, mem);
-			    cur->which = DATA1N_tag;
-			    cur->u.tag.element = 0;
+			    cur = data1_mk_node_type (dh, mem, DATA1N_tag);
 			    cur->u.tag.tag = mt->value.string;
-			    cur->u.tag.node_selected = 0;
+
 			    cur->parent = pn;
 			    cur->root = pn->root;
 			    if (!pn->child)

@@ -7,7 +7,12 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.67  2000-11-23 10:58:32  adam
+ * Revision 1.68  2000-11-29 14:22:47  adam
+ * Implemented XML/SGML attributes for data1 so that d1_read reads them
+ * and d1_write generates proper attributes for XML/SGML records. Added
+ * register locking for threaded version.
+ *
+ * Revision 1.67  2000/11/23 10:58:32  adam
  * SSL comstack support. Separate POSIX thread support library.
  *
  * Revision 1.66  2000/10/06 12:00:28  adam
@@ -714,13 +719,11 @@ static void *new_session (void *vp)
 
     if (mask)    
     {
-	yaz_log (LOG_LOG, "new_session , accept incomplete");
 	cs_accept_mask = mask;  /* accept didn't complete */
 	cs_get_mask = 0;
     }
     else
     {
-	yaz_log (LOG_LOG, "new_session , accept complete");
 	cs_accept_mask = 0;     /* accept completed.  */
 	cs_get_mask = mask = EVENT_INPUT;
     }

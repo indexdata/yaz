@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.32  2000-01-06 11:25:59  adam
+ * Revision 1.33  2000-11-29 14:22:47  adam
+ * Implemented XML/SGML attributes for data1 so that d1_read reads them
+ * and d1_write generates proper attributes for XML/SGML records. Added
+ * register locking for threaded version.
+ *
+ * Revision 1.32  2000/01/06 11:25:59  adam
  * Added case to prevent warning.
  *
  * Revision 1.31  1999/12/21 14:16:20  ian
@@ -192,6 +197,41 @@ data1_node *data1_mk_node (data1_handle dh, NMEM m)
     return r;
 }
 
+data1_node *data1_mk_node_type (data1_handle dh, NMEM m, int type)
+{
+    data1_node *r;
+
+    r = data1_mk_node(dh, m);
+    r->which = type;
+    switch(type)
+    {
+    case DATA1N_tag:
+	r->u.tag.tag = 0;
+	r->u.tag.element = 0;
+	r->u.tag.no_data_requested = 0;
+	r->u.tag.node_selected = 0;
+	r->u.tag.make_variantlist = 0;
+	r->u.tag.get_bytes = -1;
+#if DATA1_USING_XATTR
+	r->u.tag.attributes = 0;
+#endif
+	break;
+    case DATA1N_root:
+	r->u.root.type = 0;
+	r->u.root.absyn = 0;
+	break;
+    case DATA1N_data:
+	r->u.data.data = 0;
+	r->u.data.len = 0;
+	r->u.data.what = 0;
+	r->u.data.formatted_text = 0;
+	break;
+    default:
+	logf (LOG_WARN, "data_mk_node_type. bad type = %d\n", type);
+    }
+    return r;
+}
+
 void data1_free_tree (data1_handle dh, data1_node *t)
 {
     data1_node *p = t->child, *pn;
@@ -226,16 +266,11 @@ data1_node *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
 					int first_flag, int local_allowed)
 {
     data1_node *partag = get_parent_tag (dh, at);
-    data1_node *tagn = data1_mk_node (dh, m);
+    data1_node *tagn = data1_mk_node_type (dh, m, DATA1N_tag);
     data1_element *e = NULL;
     data1_node *datn;
 
-    tagn->which = DATA1N_tag;
     tagn->u.tag.tag = data1_insert_string (dh, tagn, m, tagname);
-    tagn->u.tag.node_selected = 0;
-    tagn->u.tag.make_variantlist = 0;
-    tagn->u.tag.no_data_requested = 0;
-    tagn->u.tag.get_bytes = -1;
 
     if (partag)
 	e = partag->u.tag.element;
@@ -243,11 +278,10 @@ data1_node *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
 	data1_getelementbytagname (dh, root->u.root.absyn, e, tagname);
     if (!local_allowed && !tagn->u.tag.element)
 	return NULL;
-    tagn->last_child = tagn->child = datn = data1_mk_node (dh, m);
+    tagn->last_child = tagn->child = datn = data1_mk_node_type (dh, m, DATA1N_data);
     tagn->root = root;
     datn->parent = tagn;
     datn->root = root;
-    datn->which = DATA1N_data;
     datn->u.data.formatted_text = 0;
     tagn->parent = at;
 
@@ -292,6 +326,61 @@ data1_node *data1_insert_taggeddata(data1_handle dh, data1_node *root,
     return data1_add_insert_taggeddata (dh, root, at, tagname, m, 1, 0);
 }
 
+#if DATA1_USING_XATTR
+data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
+			       int (*get_byte)(void *fh), void *fh,
+			       WRBUF wrbuf, int *ch)
+{
+    data1_xattr *p_first = 0;
+    data1_xattr **pp = &p_first;
+    int c = *ch;
+    for (;;)
+    {
+	data1_xattr *p;
+	int len;
+	while (c && d1_isspace(c))
+	    c = (*get_byte)(fh);
+	if (!c  || c == '>' || c == '/')
+	    break;
+	*pp = p = nmem_malloc (m, sizeof(*p));
+	p->next = 0;
+	pp = &p->next;
+	p->value = 0;
+	
+	wrbuf_rewind(wrbuf);
+	while (c && c != '=' && c != '>' && c != '/' && !d1_isspace(c))
+	{
+	    wrbuf_putc (wrbuf, c);
+	    c = (*get_byte)(fh);
+	}
+	wrbuf_putc (wrbuf, '\0');
+	len = wrbuf_len(wrbuf);
+	p->name = nmem_malloc (m, len);
+	strcpy (p->name, wrbuf_buf(wrbuf));
+	if (c == '=')
+	{
+	    c = (*get_byte)(fh);
+	    if (c == '"')
+		c = (*get_byte)(fh);	
+	    wrbuf_rewind(wrbuf);
+	    while (c && c != '"' && c != '>' && c != '/')
+	    {
+		wrbuf_putc (wrbuf, c);
+		c = (*get_byte)(fh);
+	    }
+	    wrbuf_putc (wrbuf, '\0');
+	    len = wrbuf_len(wrbuf);
+	    p->value = nmem_malloc (m, len);
+	    strcpy (p->value, wrbuf_buf(wrbuf));
+	    if (c == '"')
+		c = (*get_byte)(fh);	
+	}
+    }
+    *ch = c;
+    return p_first;
+}
+#endif
+
 /*
  * Ugh. Sometimes functions just grow and grow on you. This one reads a
  * 'node' and its children.
@@ -322,20 +411,27 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	
 	if (c == '<') /* beginning of tag */
 	{
+#if DATA1_USING_XATTR
+	    data1_xattr *xattr;
+#endif
 	    char tag[64];
 	    char args[256];
 	    size_t i;
-	    
 	    for (i = 0; (c=(*get_byte)(fh)) && c != '>' && !d1_isspace(c);)
 		if (i < (sizeof(tag)-1))
 		    tag[i++] = c;
 	    tag[i] = '\0';
+#if DATA1_USING_XATTR
+	    xattr = data1_read_xattr (dh, m, get_byte, fh, wrbuf, &c);
+	    args[0] = '\0';
+#else
 	    while (d1_isspace(c))
 		c = (*get_byte)(fh);
 	    for (i = 0; c && c != '>'; c = (*get_byte)(fh))
 		if (i < (sizeof(args)-1))
 		    args[i++] = c;
 	    args[i] = '\0';
+#endif
 	    if (c != '>')
 	    {
 		yaz_log(LOG_WARN, "d1: %d: Malformed tag", line);
@@ -382,8 +478,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		    yaz_log(LOG_WARN, "Unable to acquire abstract syntax " "for '%s'", tag); 
                     /* It's now OK for a record not to have an absyn */
 		}
-		res = data1_mk_node (dh, m);
-		res->which = DATA1N_root;
+		res = data1_mk_node_type (dh, m, DATA1N_root);
 		res->u.root.type = data1_insert_string (dh, res, m, tag);
 		res->u.root.absyn = absyn;
 		res->root = res;
@@ -448,14 +543,12 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 			localtag = 1; /* our parent is a local tag */
 		
 		elem = data1_getelementbytagname(dh, absyn, e, tag);
-		res = data1_mk_node (dh, m);
-		res->which = DATA1N_tag;
+		res = data1_mk_node_type (dh, m, DATA1N_tag);
 		res->u.tag.tag = data1_insert_string (dh, res, m, tag);
 		res->u.tag.element = elem;
-		res->u.tag.node_selected = 0;
-		res->u.tag.make_variantlist = 0;
-		res->u.tag.no_data_requested = 0;
-		res->u.tag.get_bytes = -1;
+#if DATA1_USING_XATTR
+		res->u.tag.attributes = xattr;
+#endif
 	    }
 	    if (parent)
 	    {
@@ -481,9 +574,8 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		c = (*get_byte)(fh);
 		continue;
 	    }
-	    res = data1_mk_node(dh, m);
+	    res = data1_mk_node_type (dh, m, DATA1N_data);
 	    res->parent = parent;
-	    res->which = DATA1N_data;
 	    res->u.data.what = DATA1I_text;
 	    res->u.data.formatted_text = 0;
 	    res->root = parent->root;
@@ -496,7 +588,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    
 	    wrbuf_rewind(wrbuf);
 
-	    while (c != '<')
+	    while (c && c != '<')
 	    {
 		wrbuf_putc (wrbuf, c);
 		c = (*get_byte)(fh);

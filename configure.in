@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.38 2000-11-23 10:58:32 adam Exp $
+dnl $Id: configure.in,v 1.39 2000-11-29 14:22:47 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -120,10 +120,10 @@ if test "$enable_threads" = "yes"; then
 	AC_CHECK_LIB(pthread,main)
 	AC_MSG_CHECKING(for working POSIX Threads)
 	AC_TRY_LINK([#include <pthread.h>
-	int func(void *p) { return 0; }
+	void *func(void *p) { return 0; }
 	],[
 	pthread_t pthread_id;
-	int r = pthread_create (&pthread_id, 0, func, 0);],
+	pthread_create (&pthread_id, 0, func, 0);],
 		thread_ok=yes,thread_ok=no)
 	if test "$thread_ok" = "yes"; then
 		LIBTHREAD=-lpthread

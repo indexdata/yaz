@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_write.c,v $
- * Revision 1.8  1999-11-30 13:47:12  adam
+ * Revision 1.9  2000-11-29 14:22:47  adam
+ * Implemented XML/SGML attributes for data1 so that d1_read reads them
+ * and d1_write generates proper attributes for XML/SGML records. Added
+ * register locking for threaded version.
+ *
+ * Revision 1.8  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.7  1999/10/21 12:06:29  adam
@@ -73,8 +78,24 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	    }
 	    else
 	    {
-		sprintf(line, "%*s<%s>\n", col, "", tag);
-		wrbuf_write(b, line, strlen(line));
+#if DATA1_USING_XATTR
+		data1_xattr *p;
+#endif
+		sprintf (line, "%*s<", col, "");
+		wrbuf_puts (b, line);
+		wrbuf_puts (b, tag);
+#if DATA1_USING_XATTR
+		for (p = c->u.tag.attributes; p; p = p->next)
+		{
+		    wrbuf_putc (b, ' ');
+		    wrbuf_puts (b, p->name);
+		    wrbuf_putc (b, '=');
+		    wrbuf_putc (b, '"');
+		    wrbuf_puts (b, p->value);
+		    wrbuf_putc (b, '"');
+		}
+#endif
+		wrbuf_puts(b, ">\n");
 		if (nodetoidsgml(c, select, b, (col > 40) ? 40 : col+2) < 0)
 		    return -1;
 		sprintf (line, "%*s</%s>\n", col, "", tag);

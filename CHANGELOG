@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added extended attributes for retrieval module (data1), so that data1
+records carry d1_readXML/SGML attributes.
+
 On UNIX when POSIX threads are available, a separate library libyazthread
 is created. Programmers should link with that library and the yaz library
 when using threads. The reason for the split was that some applications

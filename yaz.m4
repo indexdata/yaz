@@ -1,4 +1,4 @@
-## $Id: yaz.m4,v 1.1 2000-10-11 10:40:56 adam Exp $
+## $Id: yaz.m4,v 1.2 2000-11-29 14:22:47 adam Exp $
 ## 
 # Use this m4 funciton for autoconf if you use YAZ in your own
 # configure script.
@@ -29,14 +29,14 @@ AC_DEFUN([YAZ_INIT],
 	fi
 	AC_MSG_CHECKING(for YAZ)
 	if $yazconfig --version >/dev/null 2>&1; then
-		YAZLIB=`$yazconfig --libs`
+		YAZLIB=`$yazconfig --libs $1`
 		# if this is empty, it's a simple version YAZ 1.6 script
 		# so we have to source it instead...
 		if test "X$YAZLIB" = "X"; then
 			. $yazconfig
 		else
-			YAZLALIB=`$yazconfig --lalibs`
-			YAZINC=`$yazconfig --cflags`
+			YAZLALIB=`$yazconfig --lalibs $1`
+			YAZINC=`$yazconfig --cflags $1`
 			YAZVERSION=`$yazconfig --version`
 		fi
 		AC_MSG_RESULT($yazconfig)

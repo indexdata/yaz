@@ -2453,12 +2453,12 @@ echo "configure:2452: checking for working POSIX Threads" >&5
 #line 2454 "configure"
 #include "confdefs.h"
 #include <pthread.h>
-	int func(void *p) { return 0; }
+	void *func(void *p) { return 0; }
 	
 int main() {
 
 	pthread_t pthread_id;
-	int r = pthread_create (&pthread_id, 0, func, 0);
+	pthread_create (&pthread_id, 0, func, 0);
 ; return 0; }
 EOF
 if { (eval echo configure:2465: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
