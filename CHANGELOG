@@ -1,6 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+SRW support for yaz-client.
+
+yaz-client no longer does (un)intelligent character set conversions
+by default. Can be enabled with charset and marc_charset commands.
+
 xmalloc trace fix for 64-bit systems such as DEC alpha. 
+
+Solaris 2.6 compile fix.
 
 --- 2.0.2 2003/04/28
 
