@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.12  1999-01-08 11:23:19  adam
+ * Revision 1.13  1999-06-16 11:55:24  adam
+ * Added APDU log to client.
+ *
+ * Revision 1.12  1999/01/08 11:23:19  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.11  1998/06/22 11:32:38  adam
@@ -78,8 +81,7 @@
 #ifndef TCPIP_H
 #define TCPIP_H
 
-#define YNETINCLUDE
-#include <yconfig.h>
+#include <comstack.h>
 #include <oid.h>
 
 #ifdef __cplusplus

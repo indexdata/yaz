@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmosi.h,v $
- * Revision 1.6  1997-05-14 06:53:53  adam
+ * Revision 1.7  1999-06-16 11:55:24  adam
+ * Added APDU log to client.
+ *
+ * Revision 1.6  1997/05/14 06:53:53  adam
  * C++ support.
  *
  * Revision 1.5  1996/02/10 12:23:43  quinn
@@ -57,7 +60,7 @@
 #ifndef XMOSI_H
 #define XMOSI_H
 
-#include <yconfig.h>
+#include <comstack.h>
 #include <stdio.h>
 #include <xti.h>
 #include <xti92.h>

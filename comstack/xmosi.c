@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.16  1997-09-17 12:10:30  adam
+ * Revision 1.17  1999-06-16 11:55:24  adam
+ * Added APDU log to client.
+ *
+ * Revision 1.16  1997/09/17 12:10:30  adam
  * YAZ version 1.4.
  *
  * Revision 1.15  1997/05/14 06:53:34  adam
@@ -239,7 +242,7 @@ int hex2oct(char *hex, char *oct)
  * up in a t_mosiaddr in a netbuf (on a stick).
  */
 
-int MDF *mosi_strtoaddr_ex(const char *str, struct netbuf *ret)
+int *mosi_strtoaddr_ex(const char *str, struct netbuf *ret)
 {
     struct sockaddr_in *add = xmalloc(sizeof(struct sockaddr_in));
     struct t_mosiaddr *mosiaddr = xmalloc(sizeof(struct t_mosiaddr));
@@ -312,7 +315,7 @@ int MDF *mosi_strtoaddr_ex(const char *str, struct netbuf *ret)
     return 1;
 }
 
-struct netbuf MDF *mosi_strtoaddr(const char *str)
+struct netbuf *mosi_strtoaddr(const char *str)
 {
     struct netbuf *ret = xmalloc(sizeof(struct netbuf));
 
@@ -324,7 +327,7 @@ struct netbuf MDF *mosi_strtoaddr(const char *str)
     return ret;
 }
 
-struct netbuf MDF *mosi_straddr(COMSTACK h, const char *str)
+struct netbuf *mosi_straddr(COMSTACK h, const char *str)
 {
     mosi_state *st = h->cprivate;
     struct netbuf *ret = &st->netbuf;

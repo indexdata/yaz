@@ -42,12 +42,4 @@
 #endif
 #endif
 
-#ifdef WIN32
-#define MDF
-#else
-#ifndef MDF
-#define MDF
-#endif
-#endif
-
 #endif

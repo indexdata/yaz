@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.84  1999-06-01 14:29:11  adam
+ * Revision 1.85  1999-06-16 11:55:24  adam
+ * Added APDU log to client.
+ *
+ * Revision 1.84  1999/06/01 14:29:11  adam
  * Work on Extended Services.
  *
  * Revision 1.83  1999/05/26 15:24:26  adam
@@ -284,7 +287,6 @@
 
 #include <yaz-util.h>
 
-#include <comstack.h>
 #include <tcpip.h>
 #ifdef USE_XTIMOSI
 #include <xmosi.h>
@@ -310,6 +312,7 @@
 #define C_PROMPT "Z> "
 
 static ODR out, in, print;              /* encoding and decoding streams */
+static FILE *apdu_file = 0;
 static COMSTACK conn = 0;               /* our z-association */
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
 static char *databaseNames[128];
@@ -352,6 +355,11 @@ static void send_apdu(Z_APDU *a)
     {
         odr_perror(out, "Encoding APDU");
         exit(1);
+    }
+    if (apdu_file)
+    {
+        z_APDU(print, &a, 0, 0);
+        odr_reset(print);
     }
     buf = odr_getbuf(out, &len, 0);
     if (cs_put(conn, buf, len) < 0)
@@ -1909,6 +1917,8 @@ static void initialize(void)
         exit(1);
     }
     setvbuf(stdout, 0, _IONBF, 0);
+    if (apdu_file)
+        odr_setprint(print, apdu_file);
 
 #if CCL2RPN
     bibset = ccl_qual_mk (); 
@@ -2061,14 +2071,12 @@ static int client(int wait)
                     fprintf(stderr, "---------\n");
                     exit(1);
                 }
-#if 0
-                if (!z_APDU(print, &apdu, 0))
+                if (apdu_file && !z_APDU(print, &apdu, 0, 0))
                 {
                     odr_perror(print, "Failed to print incoming APDU");
                     odr_reset(print);
                     continue;
                 }
-#endif
                 switch(apdu->which)
                 {
 		case Z_APDU_initResponse:
@@ -2130,7 +2138,7 @@ int main(int argc, char **argv)
     int ret;
     int opened = 0;
 
-    while ((ret = options("m:v:", argv, argc, &arg)) != -2)
+    while ((ret = options("a:m:v:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -2149,11 +2157,18 @@ int main(int argc, char **argv)
                 exit (1);
             }
             break;
+        case 'a':
+            if (!strcmp(arg, "-"))
+                apdu_file=stderr;
+            else
+                apdu_file=fopen(arg, "a");
+            break;
 	case 'v':
 	    log_init (log_mask_str(arg), "", NULL);
 	    break;
         default:
-            fprintf (stderr, "Usage: %s [-m <marclog>] [<server-addr>]\n",
+            fprintf (stderr, "Usage: %s [-m <marclog>] [ -m <apdulog>] "
+                             "[<server-addr>]\n",
                      prog);
             exit (1);
         }
