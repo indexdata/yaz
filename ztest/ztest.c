@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.14  1998-10-13 16:12:25  adam
+ * Revision 1.15  1998-10-13 20:05:57  adam
+ * Minor change.
+ *
+ * Revision 1.14  1998/10/13 16:12:25  adam
  * Added support for Surrogate Diagnostics for Scan Term entries.
  *
  * Revision 1.13  1998/08/19 16:10:09  adam
@@ -322,7 +325,7 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *fd)
 		if (po < 0)
 		    po += 200;
 
-		if (!strcmp (term, "sd") && r->num_entries == 2)
+		if (!strcmp (term, "SD") && r->num_entries == 2)
 		{
 		    list[r->num_entries].term = entries[pos];
 		    list[r->num_entries].occurrences = -1;
