@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.18  1995-06-16 13:16:05  quinn
+ * Revision 1.19  1995-06-19 12:38:28  quinn
+ * Reorganized include-files. Added small features.
+ *
+ * Revision 1.18  1995/06/16  13:16:05  quinn
  * Fixed Defaultdiagformat.
  *
  * Revision 1.17  1995/06/15  15:42:05  quinn
@@ -195,6 +198,8 @@ typedef struct Z_IntUnit
     int *value;
     Z_Unit *unitUsed;
 } Z_IntUnit;
+
+typedef Odr_oct Z_SUTRS;
 
 /* ----------------- INIT SERVICE  ----------------*/
 
@@ -1047,6 +1052,7 @@ typedef struct Z_APDU
 } Z_APDU;
 
 int z_APDU(ODR o, Z_APDU **p, int opt);
+int z_SUTRS(ODR o, Odr_oct **p, int opt);
 
 Z_InitRequest *zget_InitRequest(ODR o);
 Z_InitResponse *zget_InitResponse(ODR o);

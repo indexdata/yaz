@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.4  1995-06-15 07:45:08  quinn
+ * Revision 1.5  1995-06-19 12:38:31  quinn
+ * Reorganized include-files. Added small features.
+ *
+ * Revision 1.4  1995/06/15  07:45:08  quinn
  * Moving to v3.
  *
  * Revision 1.3  1995/05/16  08:50:38  quinn
@@ -42,14 +45,14 @@ typedef struct statserv_options_block
 {
     int dynamic;                  /* fork on incoming requests */
     int loglevel;                 /* desired logging-level */
-    char apdufile[ODR_MAXNAME+1];      /* file for pretty-printed PDUs */
-    char logfile[ODR_MAXNAME+1];       /* file for diagnostic output */
+    char apdufile[ODR_MAXNAME+1]; /* file for pretty-printed PDUs */
+    char logfile[ODR_MAXNAME+1];  /* file for diagnostic output */
     char default_listen[1024];    /* 0 == no default listen */
     enum oid_proto default_proto; /* PROTO_SR or PROTO_Z3950 */
     int idle_timeout;             /* how many minutes to wait before closing */
     int maxrecordsize;            /* maximum value for negotiation */
-    char configname[ODR_MAXNAME+1];    /* given to the backend in bend_init */
-    char setuid[ODR_MAXNAME+1];       /* setuid to this user after binding */
+    char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */
+    char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
 } statserv_options_block;
 
 int statserv_main(int argc, char **argv);

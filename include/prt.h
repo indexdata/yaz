@@ -41,3 +41,4 @@ Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
 int odr_grow_block(odr_ecblock *b, int min_bytes);
 int odr_write(ODR o, unsigned char *buf, int bytes);
 int odr_seek(ODR o, int whence, int offset);
+int odr_dumpBER(FILE *f, char *buf, int len);

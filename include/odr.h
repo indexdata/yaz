@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.8  1995-06-16 13:16:04  quinn
+ * Revision 1.9  1995-06-19 12:38:26  quinn
+ * Reorganized include-files. Added small features.
+ *
+ * Revision 1.8  1995/06/16  13:16:04  quinn
  * Fixed Defaultdiagformat.
  *
  * Revision 1.7  1995/05/29  08:11:32  quinn
@@ -248,6 +251,7 @@ typedef struct odr_arm
 #define OPROTO		7
 #define ODATA		8
 #define OSTACK          9
+#define OCONLEN        10
 
 extern char *odr_errlist[];
 
@@ -285,7 +289,7 @@ void odr_release_mem(ODR_MEM p);
 #define ODR_MASK_GET(mask, num)  ( ((num) >> 3 <= (mask)->top) ? \
     ((mask)->bits[(num) >> 3] & (0X80 >> ((num) & 0X07)) ? 1 : 0) : 0)
 
-/*
+/* Private macro.
  * write a single character at the current position - grow buffer if
  * necessary.
  * (no, we're not usually this anal about our macros, but this baby is

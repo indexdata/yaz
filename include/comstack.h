@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.6  1995-05-30 10:54:51  quinn
+ * Revision 1.7  1995-06-19 12:38:24  quinn
+ * Reorganized include-files. Added small features.
+ *
+ * Revision 1.6  1995/05/30  10:54:51  quinn
  * Added some backwards compatibility to the comstack (CS_SR->PROTO_SR)
  *
  * Revision 1.5  1995/05/29  08:11:31  quinn
@@ -87,7 +90,7 @@
 #include <oid.h>
 #include <dmalloc.h>
 
-#define COMSTACK_DEFAULT_TIMEOUT -1
+#define COMSTACK_DEFAULT_TIMEOUT -1  /* not used yet */
 
 struct comstack;
 typedef struct comstack *COMSTACK;
@@ -99,7 +102,7 @@ struct comstack
     int errno;     /* current error code of this stack */
     char *stackerr;/* current lower-layer error string, or null if none */
     int iofile;    /* UNIX file descriptor for iochannel */
-    int timeout;   /* how long to wait for trailing blocks */          
+    int timeout;   /* how long to wait for trailing blocks (ignored for now) */
     void *private; /* state info for lower stack */
     int more;      /* connection has extra data in buffer */
     int state;     /* current state */

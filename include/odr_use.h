@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr_use.h,v $
- * Revision 1.2  1995-05-16 08:50:34  quinn
+ * Revision 1.3  1995-06-19 12:38:27  quinn
+ * Reorganized include-files. Added small features.
+ *
+ * Revision 1.2  1995/05/16  08:50:34  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/03/30  09:39:41  quinn
@@ -53,7 +56,7 @@ typedef struct Odr_external
     union
     {
 	Odr_any  *single_ASN1_type;
-	Odr_oct  *octet_aligned;          /* should be union */
+	Odr_oct  *octet_aligned; 
 	Odr_bitmask *arbitrary;           /* we aren't really equipped for this*/
     } u;
 } Odr_external;

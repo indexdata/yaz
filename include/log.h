@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.2  1995-05-16 08:50:31  quinn
+ * Revision 1.3  1995-06-19 12:38:25  quinn
+ * Reorganized include-files. Added small features.
+ *
+ * Revision 1.2  1995/05/16  08:50:31  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/03/30  09:39:41  quinn
@@ -51,7 +54,7 @@
 #define LOG_DEBUG 0x0002
 #define LOG_WARN  0x0004
 #define LOG_LOG   0x0008
-#define LOG_ERRNO 0x0010     /* apend strerror to message */
+#define LOG_ERRNO 0x0010     /* append strerror to message */
 
 #define LOG_ALL   0xffff
 
@@ -60,5 +63,6 @@
 void log_init(int level, const char *prefix, const char *name);
 void logf(int level, const char *fmt, ...);
 int log_mask_str (const char *str);
+FILE *log_file(void);
 
 #endif
