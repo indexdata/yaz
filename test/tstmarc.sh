@@ -1,11 +1,11 @@
 #!/bin/sh
-# $Id: tstmarc.sh,v 1.1 2004-10-01 11:43:43 adam Exp $
+# $Id: tstmarc.sh,v 1.2 2004-11-16 17:12:28 adam Exp $
 srcdir=${srcdir:-.}
 ecode=0
 for f in ${srcdir}/marc?; do
-    NEW=${f}.new.xml
+    NEW=`basename ${f}`.new.xml
     OLD=${f}.xml
-    DIFF=${f}.diff
+    DIFF=`basename ${f}`.diff
     ../util/yaz-marcdump -f iso-8859-1 -t utf-8 -X $f > $NEW
     if test $? != "0"; then
 	echo "Failed decode of $f"
@@ -35,3 +35,4 @@ for f in ${srcdir}/marc?; do
     fi
 done
 exit $ecode
+
