@@ -1,13 +1,13 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.24 1995-09-29 17:01:34 quinn Exp $
+# $Id: Makefile,v 1.25 1995-10-06 08:51:13 quinn Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
-#ODEFS=-DUSE_XTIMOSI
-#RFC1006=rfc1006
-#LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
-#XMOSI=xmosi.o
+ODEFS=-DUSE_XTIMOSI
+RFC1006=rfc1006
+LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
+XMOSI=xmosi.o
 
 CDEFS=$(ODEFS)
 #CC=

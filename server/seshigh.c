@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.47  1995-08-29 14:24:16  quinn
+ * Revision 1.48  1995-10-06 08:51:20  quinn
+ * Added Write-buffer.
+ *
+ * Revision 1.47  1995/08/29  14:24:16  quinn
  * Added second half of close-handshake
  *
  * Revision 1.46  1995/08/29  11:17:58  quinn
@@ -20,8 +23,6 @@
  * Updated External
  *
  * Revision 1.42  1995/08/15  11:16:50  quinn
- * CV:e ----------------------------------------------------------------------
- * CV:e ----------------------------------------------------------------------
  *
  * Revision 1.41  1995/08/02  10:23:06  quinn
  * Smallish
@@ -584,7 +585,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
 
 /*
  * Handle init request.
- * At the moment, we don't check the protocol version or the options
+ * At the moment, we don't check the options
  * anywhere else in the code - we just try not to do anything that would
  * break a naive client. We'll toss 'em into the association block when
  * we need them there.
