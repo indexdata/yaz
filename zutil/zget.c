@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.17  1999-04-20 09:56:48  adam
+ * Revision 1.1  1999-06-08 10:10:16  adam
+ * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
+ *
+ * Revision 1.17  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *

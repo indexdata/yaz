@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: logrpn.c,v $
- * Revision 1.1  1998-11-16 16:02:35  adam
+ * Revision 1.1  1999-06-08 10:10:16  adam
+ * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
+ *
+ * Revision 1.1  1998/11/16 16:02:35  adam
  * Added loggin utilies, log_rpn_query and log_scan_term. These used
  * to be part of Zebra.
  *

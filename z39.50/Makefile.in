@@ -1,0 +1,71 @@
+# $Id: Makefile.in,v 1.1 1999-06-08 10:10:16 adam Exp $
+
+SHELL=/bin/sh
+
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+CDEFS=@DEFS@
+LIBS=@LIBS@
+
+INCLUDE=-I. -I../include
+DEFS=$(INCLUDE) $(CDEFS)
+LIBDIR=../lib
+LIBS=$(LIBDIR)/libodr.a $(LIBDIR)/libutil.a
+YCFLAGS=
+
+LIB=$(LIBDIR)/libasn.a
+
+O=yc-tst.o yc-assoc.o yc-set.o yc-get.o yc-query.o 
+
+PO=z-accdes1.o z-accform1.o z-acckrb1.o z-core.o \
+ z-diag1.o z-espec1.o z-estask.o z-exp.o z-grs.o z-opac.o z-uifr1.o \
+ z-rrf1.o z-rrf2.o z-sum.o z-sutrs.o \
+ zes-expi.o zes-exps.o zes-order.o zes-pquery.o zes-psched.o \
+ zes-pset.o zes-update0.o z-date.o z-univ.o \
+ zes-update.o
+
+CF=z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
+ z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c \
+ z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
+ zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
+ zes-pset.c zes-update0.c 
+
+all: $(LIB) 
+
+yc-tst: $(O) $(LIB)
+	$(CC) $(CFLAGS) $(O) -o yc-tst $(LIB) $(LIBS)
+
+
+$(LIB): $(PO)
+	rm -f $(LIB)
+	ar qc $(LIB) $(PO)
+	$(RANLIB) $(LIB)
+
+z-accdes1.h z-core.h: z.tcl z3950v3.asn ../util/yc.tcl
+	../util/yc.tcl -d z.tcl $(YCFLAGS) z3950v3.asn 
+
+z-date.h z-date.c: z.tcl datetime.asn ../util/yc.tcl
+	../util/yc.tcl -d z.tcl $(YCFLAGS) datetime.asn
+
+z-univ.h z-univ.c: z.tcl univres.asn
+	../util/yc.tcl -d z.tcl $(YCFLAGS) univres.asn
+
+zes-update.h zes-update.c: z.tcl esupdate.asn
+	../util/yc.tcl -d z.tcl $(YCFLAGS) esupdate.asn
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(DEFS) $<
+
+clean:
+	-rm -f *.o yc-tst core *.out
+
+realclean: clean
+	-rm -f z-*.[cho] zes-*.[cho]
+
+depend: z-core.h z-date.h z-univ.h zes-update.c
+	sed '/^#Depend/q' <Makefile >Makefile.tmp
+	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
+	mv -f Makefile.tmp Makefile
+
+#Depend --- DOT NOT DELETE THIS LINE

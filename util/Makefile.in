@@ -1,7 +1,7 @@
 # Copyright (C) 1994-1998, Index Data
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.5 1999-04-26 07:25:25 adam Exp $
+# $Id: Makefile.in,v 1.6 1999-06-08 10:10:16 adam Exp $
 
 SHELL=/bin/sh
 
@@ -16,9 +16,9 @@ LIBDIR=../lib
 
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libutil.a
-PO = options.o log.o marcdisp.o yaz-ccl.o pquery.o oid.o wrbuf.o nmemsdup.o \
-   xmalloc.o readconf.o tpath.o nmem.o yaz-util.o atoin.o otherinfo.o \
-   logrpn.o # dmalloc.o 
+PO = options.o log.o marcdisp.o oid.o wrbuf.o nmemsdup.o \
+   xmalloc.o readconf.o tpath.o nmem.o matchstr.o \
+   atoin.o # dmalloc.o 
 
 all: $(LIB) marcdump
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: otherinfo.c,v $
- * Revision 1.1  1999-04-26 07:25:25  adam
+ * Revision 1.1  1999-06-08 10:10:16  adam
+ * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
+ *
+ * Revision 1.1  1999/04/26 07:25:25  adam
  * Implemented OtherInfo utility.
  *
  */

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: query.c,v $
- * Revision 1.3  1996-01-02 11:46:56  quinn
+ * Revision 1.1  1999-06-08 10:10:16  adam
+ * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
+ *
+ * Revision 1.3  1996/01/02 11:46:56  quinn
  * Changed 'operator' to 'roperator' to avoid C++ conflict.
  *
  * Revision 1.2  1995/05/16  08:51:14  quinn

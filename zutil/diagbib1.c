@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.7  1997-09-29 07:22:26  adam
+ * Revision 1.1  1999-06-08 10:10:16  adam
+ * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
+ *
+ * Revision 1.7  1997/09/29 07:22:26  adam
  * Added static modifier to msg_tab.
  *
  * Revision 1.6  1997/07/01 14:15:10  adam

@@ -3,8 +3,11 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: yaz-util.c,v $
- * Revision 1.7  1997-09-30 11:47:47  adam
+ * $Log: matchstr.c,v $
+ * Revision 1.1  1999-06-08 10:10:16  adam
+ * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
+ *
+ * Revision 1.7  1997/09/30 11:47:47  adam
  * Added function 'cause checkergcc doesn't include assert handler.
  *
  * Revision 1.6  1997/09/04 07:54:34  adam

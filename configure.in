@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1999
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.8 1999-05-26 07:49:35 adam Exp $
+dnl $Id: configure.in,v 1.9 1999-06-08 10:10:16 adam Exp $
 AC_INIT(include/yaz-version.h)
 dnl
 dnl ------ Checking programs
@@ -15,19 +15,9 @@ AC_SUBST(ASNMODULE)
 AC_ARG_WITH(yc,[  --with-yc               compile using YC: The Yaz Compiler], [YCDIR=$withval],[YCDIR=""])
 
 if test "$YCDIR" = "yes"; then
-	YCDIR="../yc"
-fi
-if test -d z39.50; then
-	rm z39.50
-fi
-if test "$YCDIR" = ""; then
-	ASNMODULE=asn
-else
-	if test ! -d "$YCDIR"; then
-		AC_MSG_WARN(YC directory ${YCDIR} doesn't exist)
-	fi
-	ln -s ${YCDIR}/z39.50 z39.50
 	ASNMODULE=z39.50
+else
+	ASNMODULE=asn
 fi
 dnl
 dnl ----- Sockets
@@ -87,4 +77,4 @@ if test "$threads_ok" = "yes"; then
 fi
 dnl
 dnl ------ Makefiles
-AC_OUTPUT(Makefile util/Makefile asn/Makefile odr/Makefile comstack/Makefile client/Makefile server/Makefile ztest/Makefile retrieval/Makefile ccl/Makefile lib/Makefile rfc1006/Makefile)
+AC_OUTPUT(Makefile util/Makefile asn/Makefile odr/Makefile zutil/Makefile comstack/Makefile client/Makefile server/Makefile ztest/Makefile retrieval/Makefile ccl/Makefile lib/Makefile rfc1006/Makefile z39.50/Makefile)

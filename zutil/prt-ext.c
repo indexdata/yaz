@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.22  1999-05-26 15:24:26  adam
+ * Revision 1.1  1999-06-08 10:10:16  adam
+ * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
+ *
+ * Revision 1.22  1999/05/26 15:24:26  adam
  * Fixed minor bugs regarding DB Update (introduced by previous commit).
  *
  * Revision 1.21  1999/05/26 14:47:12  adam
