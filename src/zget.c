@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.8 2005-01-15 19:47:14 adam Exp $
+ * $Id: zget.c,v 1.9 2005-01-16 21:56:42 adam Exp $
  */
 /**
  * \file zget.c
@@ -494,8 +494,7 @@ Z_APDU *zget_APDU(ODR o, int which)
         r->u.duplicateDetectionResponse = zget_DuplicateDetectionResponse(o);
         break;
     default:
-        fprintf(stderr, "Bad APDU-type to zget_APDU");
-        exit(1);
+	return 0;
     }
     return r;
 }
