@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.5 2002-09-16 18:45:14 adam Exp $
+## $Id: Makefile.am,v 1.6 2002-09-24 08:00:50 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
@@ -12,8 +12,8 @@ zoomtst3_LDADD = ../lib/libyaz.la
 zoomtst4_LDADD = ../lib/libyaz.la
 zoomtst5_LDADD = ../lib/libyaz.la
 zoomtst6_LDADD = ../lib/libyaz.la
-zoomtst7_LDADD = ../lib/libyaz.la
-zoomtst8_LDADD = ../lib/libyaz.la
+zoomtst7_LDADD =../lib/libyazmalloc.la ../lib/libyaz.la 
+zoomtst8_LDADD = ../lib/libyaz.la 
 zoomsh_LDADD = ../lib/libyaz.la $(READLINE_LIBS)
 
 zoomtst1_SOURCES = zoomtst1.c
