@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.68 2004-12-30 00:18:04 adam Exp $
+ * $Id: ztest.c,v 1.69 2005-01-11 10:44:07 adam Exp $
  */
 
 /*
@@ -535,6 +535,13 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     int i, pos;
     int term_position_req = q->term_position;
     int num_entries_req = q->num_entries;
+
+    if (yaz_matchstr (q->basenames[0], "Default"))
+    {
+        q->errcode = 109;
+        q->errstring = q->basenames[0];
+        return 0;
+    }
 
     q->errcode = 0;
     q->errstring = 0;
