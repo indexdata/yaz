@@ -2,7 +2,7 @@
 <article>
 <title>YAZ User's Guide and Reference
 <author><htmlurl url="http://www.indexdata.dk/" name="Index Data">, <tt><htmlurl url="mailto:info@indexdata.dk" name="info@indexdata.dk"></>
-<date>$Revision: 1.9 $
+<date>$Revision: 1.10 $
 <abstract>
 This document is the programmer's guide and reference to the YAZ
 package. YAZ is a compact toolkit that provides access to the
@@ -2591,7 +2591,7 @@ if (status) {
 
 /* Now get a response */
 
-length_incoming = cs_get(stack, &buf, &size);
+length_incoming = cs_get(stack, &amp;buf, &amp;size);
 if (!length_incoming) {
     fprintf(stderr, "Connection closed\n");
     exit(1);
@@ -3838,7 +3838,7 @@ in general.
 
 <tscreen><verb>
 Index Data Aps
-Købmagergade 43
+K&oslash;bmagergade 43
 DK-1150 Copenhagen K
 </verb></tscreen>
 
