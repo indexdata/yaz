@@ -3,7 +3,18 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.120  2001-04-06 12:26:46  adam
+ * Revision 1.121  2001-04-22 12:26:17  ja7
+ * if Compiled with Command line history a open command is pushed into
+ * the command history if yaz-client is startet with a server on the
+ * command line. eg
+ *   yaz-clinet tcp:server:port/database
+ * hash the commend
+ *   open tcp:server:port/database
+ * in the command history on startup
+ *
+ * Added the refid set with setrefid to the update APDU
+ *
+ * Revision 1.120  2001/04/06 12:26:46  adam
  * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
  *
  * Revision 1.119  2001/04/05 13:08:48  adam
@@ -1563,6 +1574,8 @@ static int cmd_update(char *arg)
     oid_ent_to_oid (&update_oid, oid);
     req->packageType = odr_oiddup(out,oid);
     req->packageName = esPackageName;
+    
+    req->referenceId = set_refid (out);
 
     r = req->taskSpecificParameters = (Z_External *)
         odr_malloc (out, sizeof(*r));
@@ -2635,8 +2648,17 @@ int main(int argc, char **argv)
             if (!opened)
             {
                 initialize ();
-                if (cmd_open (arg) == 2)
-                    opened = 1;
+                if (cmd_open (arg) == 2) {
+#if HAVE_READLINE_HISTORY_H
+		  char* tmp=(char*)malloc(strlen(arg)+6);
+		  *tmp=0;
+		  strcat(tmp,"open ");
+		  strcat(tmp,arg);
+		  add_history(tmp);
+		  free(tmp);
+#endif
+		  opened = 1;
+		};
             }
             break;
         case 'm':
