@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+SortResponse member resultCount now set to NULL in sort handler of
+frontend server.
+
 OPAC support ZOOM. ZOOM_record_get returns OPAC info (as XML) if
 type is "opac".
 

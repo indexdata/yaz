@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.159 2003-05-24 19:34:43 adam Exp $
+ * $Id: seshigh.c,v 1.160 2003-07-16 21:02:06 adam Exp $
  */
 
 /*
@@ -2298,6 +2298,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
 	res->num_diagnostics = 0;
 	res->diagnostics = 0;
     }
+    res->resultCount = 0;
     res->otherInfo = 0;
 
     apdu->which = Z_APDU_sortResponse;
