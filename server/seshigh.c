@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.28  1995-06-01 11:21:01  quinn
+ * Revision 1.29  1995-06-01 11:25:03  quinn
+ * Smallish.
+ *
+ * Revision 1.28  1995/06/01  11:21:01  quinn
  * Attempting to fix a bug in pack-records. replaced break with continue
  * for large records, according to standard.
  *
@@ -548,9 +551,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     resp.preferredMessageSize = &assoc->preferredMessageSize;
     resp.maximumRecordSize = &assoc->maximumRecordSize;
     resp.result = &result;
-    resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = YAZ_VERSION;
     resp.userInformationField = 0;
     if (binitres->errcode)
     {
