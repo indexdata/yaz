@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.1 2003-10-27 12:21:32 adam Exp $
+ * $Id: nmem.c,v 1.2 2003-12-04 11:47:50 adam Exp $
  */
 
 /*
@@ -138,6 +138,7 @@ struct nmem_debug_info *nmem_debug_list = 0;
 
 static void free_block(nmem_block *p)
 {  
+    memset(p->buf, 'Y', p->size);
     p->next = freelist;
     freelist = p;
 #if NMEM_DEBUG
