@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_int.c,v $
- * Revision 1.11  1998-02-11 11:53:34  adam
+ * Revision 1.12  1999-01-08 11:23:28  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.11  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.10  1995/09/29 17:12:24  quinn
@@ -40,7 +43,6 @@
  */
 
 #include <odr.h>
-#include <prt.h>
 
 /*
  * Top level integer en/decoder.

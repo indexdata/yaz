@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.12  1996-07-06 19:58:33  quinn
+ * Revision 1.13  1999-01-08 11:23:22  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.12  1996/07/06 19:58:33  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.11  1995/09/29  17:12:16  quinn
@@ -50,10 +53,9 @@
 #include <string.h>
 
 #include <odr.h>
-#include <prt.h>
 
 static int ber_encinteger(ODR o, int val);
-static int ber_decinteger(unsigned char *buf, int *val);
+static int ber_decinteger(const unsigned char *buf, int *val);
 
 int ber_integer(ODR o, int *val)
 {
@@ -112,9 +114,10 @@ int ber_encinteger(ODR o, int val)
 /*
  * Returns: Number of bytes read or 0 if no match, -1 if error.
  */
-int ber_decinteger(unsigned char *buf, int *val)
+int ber_decinteger(const unsigned char *buf, int *val)
 {
-    unsigned char *b = buf, fill;
+    const unsigned char *b = buf;
+    unsigned char fill;
     int res, len, remains;
     union { int i; unsigned char c[sizeof(int)]; } tmp;
 

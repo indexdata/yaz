@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.14  1998-02-11 11:53:34  adam
+ * Revision 1.15  1999-01-08 11:23:20  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.14  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.13  1997/05/14 06:53:56  adam
@@ -80,10 +83,10 @@ int ber_any(ODR o, Odr_any **p)
 /*
  * Return length of BER-package or 0.
  */
-int completeBER(unsigned char *buf, int len)
+int completeBER(const unsigned char *buf, int len)
 {
     int res, ll, zclass, tag, cons;
-    unsigned char *b = buf;
+    const unsigned char *b = buf;
     
     if (!len)
     	return 0;

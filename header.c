@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
- *
+ 9
  * $Log: header.c,v $
- * Revision 1.6  1998-01-05 09:03:37  adam
+ * Revision 1.7  1999-01-08 11:23:13  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.6  1998/01/05 09:03:37  adam
  * 1998.
  *
  * Revision 1.5  1997/07/02 14:12:52  adam

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.9  1998-01-14 09:53:26  quinn
+ * Revision 1.10  1999-01-08 11:23:26  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.9  1998/01/14 09:53:26  quinn
  * Added a bit more info to dump.
  *
  * Revision 1.8  1997/05/14 06:53:57  adam
@@ -37,10 +40,10 @@
 #include <odr.h>
 #include <stdio.h>
 
-static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
+static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
 {
     int res, ll, zclass, tag, cons, lenlen, taglen;
-    char *b = buf, *bp = buf;
+    const char *b = buf, *bp = buf;
     
     if (!len)
     	return 0;
@@ -133,7 +136,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
     return b - buf;
 }
 
-int odr_dumpBER(FILE *f, char *buf, int len)
+int odr_dumpBER(FILE *f, const char *buf, int len)
 {
     return do_dumpBER(f, buf, len, 0, 0);
 }

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.18  1998-02-11 11:53:34  adam
+ * Revision 1.19  1999-01-08 11:23:25  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.18  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.17  1997/09/30 09:33:10  adam
@@ -199,9 +202,9 @@ int ber_enctag(ODR o, int zclass, int tag, int constructed)
 /* ber_dectag
  * Decode BER identifier octets. Return number of bytes read or -1 for error.
  */
-int ber_dectag(unsigned char *buf, int *zclass, int *tag, int *constructed)
+int ber_dectag(const unsigned char *buf, int *zclass, int *tag, int *constructed)
 {
-    unsigned char *b = buf;
+    const unsigned char *b = buf;
 
     *zclass = *b >> 6;
     *constructed = (*b >> 5) & 0X01;

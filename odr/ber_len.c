@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1995, Index Data.
+ * Copyright (C) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_len.c,v $
- * Revision 1.6  1995-09-29 17:12:17  quinn
+ * Revision 1.7  1999-01-08 11:23:23  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.6  1995/09/29 17:12:17  quinn
  * Smallish
  *
  * Revision 1.5  1995/09/27  15:02:55  quinn
@@ -91,9 +94,9 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
  * len = -1   indefinite.
  * len >= 0    Length.
  */
-int ber_declen(unsigned char *buf, int *len)
+int ber_declen(const unsigned char *buf, int *len)
 {
-    unsigned char *b = buf;
+    const unsigned char *b = buf;
     int n;
 
     if (*b == 0X80)     /* Indefinite */

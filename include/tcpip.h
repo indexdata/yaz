@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.11  1998-06-22 11:32:38  adam
+ * Revision 1.12  1999-01-08 11:23:19  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.11  1998/06/22 11:32:38  adam
  * Added 'conditional cs_listen' feature.
  *
  * Revision 1.10  1998/05/18 13:07:01  adam
@@ -83,6 +86,7 @@
 extern "C" {
 #endif
 
+YAZ_EXPORT int completeWAIS(const unsigned char *buf, int len);
 YAZ_EXPORT struct sockaddr_in *tcpip_strtoaddr(const char *str);
 YAZ_EXPORT COMSTACK tcpip_type(int s, int blocking, int protocol);
 

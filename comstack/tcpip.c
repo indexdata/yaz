@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.25  1998-07-07 15:49:23  adam
+ * Revision 1.26  1999-01-08 11:23:14  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.25  1998/07/07 15:49:23  adam
  * Added braces to avoid warning.
  *
  * Revision 1.24  1998/06/29 07:59:17  adam
@@ -159,9 +162,8 @@
 #include <comstack.h>
 #include <tcpip.h>
 
-/* Chas added the following 2, so we get the definition of completeBER */
+/* Chas added the following, so we get the definition of completeBER */
 #include <odr.h>
-#include <prt.h>
 
 int tcpip_close(COMSTACK h);
 int tcpip_put(COMSTACK h, char *buf, int size);
@@ -178,14 +180,6 @@ COMSTACK tcpip_accept(COMSTACK h);
 char *tcpip_addrstr(COMSTACK h);
 void *tcpip_straddr(COMSTACK h, const char *str);
 
-/*
- * Determine length/completeness of incoming packages
- */
-/* Chas: Removed the definition of completeBERfrom here, use the one in the */
-/* include directory as that as the extern "C" around it */
-/*int completeBER(unsigned char *buf, int len); */ /* from the ODR module */
-int completeWAIS(unsigned char *buf, int len); /* from waislen.c */
-
 #undef TRACE_TCPIP
 #ifdef TRACE_TCPIP
 #define TRC(x) x
@@ -201,7 +195,7 @@ typedef struct tcpip_state
 
     int written;  /* -1 if we aren't writing */
     int towrite;  /* to verify against user input */
-    int (*complete)(unsigned char *buf, int len); /* length/completeness */
+    int (*complete)(const unsigned char *buf, int len); /* length/comple. */
     struct sockaddr_in addr;  /* returned by cs_straddr */
     char buf[128]; /* returned by cs_addrstr */
 } tcpip_state;

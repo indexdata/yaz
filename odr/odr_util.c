@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_util.c,v $
- * Revision 1.14  1998-10-13 15:58:36  adam
+ * Revision 1.15  1999-01-08 11:23:29  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.14  1998/10/13 15:58:36  adam
  * Minor fix in odr_getoidbystr_nmem.
  *
  * Revision 1.13  1998/02/11 11:53:34  adam
@@ -35,7 +38,7 @@ char *odr_indent(ODR o)
     return buf;
 }
 
-int odp_more_chunks(ODR o, unsigned char *base, int len)
+int odp_more_chunks(ODR o, const unsigned char *base, int len)
 {
     if (!len)
     	return 0;

@@ -1,16 +1,18 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_enum.c,v $
- * Revision 1.1  1998-03-20 14:45:01  adam
+ * Revision 1.2  1999-01-08 11:23:27  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.1  1998/03/20 14:45:01  adam
  * Implemented odr_enum and odr_set_of.
  *
  */
 
 #include <odr.h>
-#include <prt.h>
 
 /*
  * Top level enum en/decoder.

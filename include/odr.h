@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.26  1998-03-20 17:29:20  adam
+ * Revision 1.27  1999-01-08 11:23:17  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.26  1998/03/20 17:29:20  adam
  * Include of odr_use.h in odr.h. Added prototype for odr_enum.
  *
  * Revision 1.25  1998/02/11 11:53:33  adam
@@ -237,11 +240,11 @@ typedef int Odr_oid;   /* terminate by -1 */
 
 typedef struct odr_constack
 {
-    unsigned char *base;         /* starting point of data */
+    const unsigned char *base;   /* starting point of data */
     int base_offset;
     int len;                     /* length of data, if known, else -1
                                         (decoding only) */
-    unsigned char *lenb;         /* where to encode length */
+    const unsigned char *lenb;   /* where to encode length */
     int len_offset;
     int lenlen;                  /* length of length-field */
 } odr_constack;
@@ -271,9 +274,9 @@ typedef struct odr
     int direction;       /* the direction of this stream */
 
     int error;           /* current error state (0==OK) */
-    unsigned char *buf;  /* for encoding or decoding */
+    const unsigned char *buf;  /* for encoding or decoding */
     int buflen;          /* size of buffer for encoding, len for decoding */
-    unsigned char *bp;   /* position in buffer */
+    const unsigned char *bp;   /* position in buffer */
     int left;            /* bytes remaining in buffer */
 
     odr_ecblock ecb;     /* memory control block */

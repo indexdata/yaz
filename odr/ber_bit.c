@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bit.c,v $
- * Revision 1.7  1995-09-29 17:12:16  quinn
+ * Revision 1.8  1999-01-08 11:23:21  adam
+ * Added const modifier to some of the BER/ODR encoding routines.
+ *
+ * Revision 1.7  1995/09/29 17:12:16  quinn
  * Smallish
  *
  * Revision 1.6  1995/09/27  15:02:54  quinn
@@ -34,7 +37,7 @@
 int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 {
     int res, len;
-    unsigned char *base;
+    const unsigned char *base;
 
     switch (o->direction)
     {

@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Added const modifier to buffer parameter for some ODR/BER encoding
+routines: ber_dectag, ber_declen, odp_more_chunks, completeBER,
+completeWAIS, odr_dumpBER.
+
 Fixed bug in client.c which caused a crash when a scanResponse didn't
 contain positionOfTerm.
 
