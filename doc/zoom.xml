@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.22 2003-02-21 00:24:26 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.23 2003-02-23 14:24:47 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -11,8 +11,8 @@
   <note>
    <para>
     A recent addition to &yaz; is SRW support. You can now make
-    SRW ZOOM connections by specifying a new scheme for the
-    host name for a connection.
+    SRW ZOOM connections by specifying another scheme for the
+    hostname for a connection.
    </para>
   </note>
 
