@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.28 2004-04-28 22:45:00 adam Exp $
+ * $Id: zoomsh.c,v 1.29 2004-04-29 08:54:56 adam Exp $
  */
 
 /* ZOOM-C Shell */
@@ -29,13 +29,6 @@
 #include <yaz/oid.h>
 
 #define MAX_CON 100
-
-#if 0
-static void dummy()
-{
-	cs_get_ssl(0);
-}
-#endif
 
 static int next_token (const char **cpp, const char **t_start)
 {
@@ -556,12 +549,6 @@ int main (int argc, char **argv)
     ZOOM_connection z39_con[MAX_CON];
     ZOOM_resultset  z39_res[MAX_CON];
 
-    if (0)
-    {
-        COMSTACK cs = 0;
-        cs_get_ssl(cs);
-	cs_create_host(0, 0, 0);
-    }
     nmem_init();
     for (i = 0; i<MAX_CON; i++)
     {
