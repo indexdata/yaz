@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1999-2002, Index Data
+ * Copyright (c) 1999-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: otherinfo.c,v 1.6 2002-02-11 23:25:27 adam Exp $
+ * $Id: otherinfo.c,v 1.7 2003-01-06 08:20:29 adam Exp $
  */
 
 #include <stdio.h>

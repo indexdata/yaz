@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: nmem.h,v 1.9 2002-12-05 12:19:23 adam Exp $
+ * $Id: nmem.h,v 1.10 2003-01-06 08:20:27 adam Exp $
  */
 
 #ifndef NMEM_H

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2001, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.8 2002-12-28 12:13:03 adam Exp $
+ * $Id: logrpn.c,v 1.9 2003-01-06 08:20:29 adam Exp $
  */
 #include <stdio.h>
 
@@ -349,4 +349,18 @@ void log_scan_term (Z_AttributesPlusTerm *zapt, oid_value ast)
     else
 	yaz_log (LOG_LOG, "%*.0s term (not general)", level, "");
     zlog_attributes (zapt, level+2, ast);
+}
+
+void yaz_log_zquery (Z_Query *q)
+{
+    static int cql_oid[] = {1, 2, 840, 10003, 16, 2, -1};
+    switch (q->which)
+    {
+    case Z_Query_type_1: case Z_Query_type_101:
+	log_rpn_query (q->u.type_1);
+        break;
+    case Z_Query_type_104:
+        if (q->u.type_104->which == Z_External_CQL)
+            yaz_log (LOG_LOG, "CQL: %s", q->u.type_104->u.cql);
+    }
 }

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.6 2002-09-24 08:00:50 adam Exp $
+## $Id: Makefile.am,v 1.7 2003-01-06 08:20:28 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
@@ -6,15 +6,15 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8
 bin_PROGRAMS = zoomsh
 
-zoomtst1_LDADD = ../lib/libyaz.la
-zoomtst2_LDADD = ../lib/libyaz.la
-zoomtst3_LDADD = ../lib/libyaz.la
-zoomtst4_LDADD = ../lib/libyaz.la
-zoomtst5_LDADD = ../lib/libyaz.la
-zoomtst6_LDADD = ../lib/libyaz.la
-zoomtst7_LDADD =../lib/libyazmalloc.la ../lib/libyaz.la 
-zoomtst8_LDADD = ../lib/libyaz.la 
-zoomsh_LDADD = ../lib/libyaz.la $(READLINE_LIBS)
+zoomtst1_LDADD = ../lib/libyaz.la $(GSOAP_LIB)
+zoomtst2_LDADD = ../lib/libyaz.la $(GSOAP_LIB)
+zoomtst3_LDADD = ../lib/libyaz.la $(GSOAP_LIB)
+zoomtst4_LDADD = ../lib/libyaz.la $(GSOAP_LIB)
+zoomtst5_LDADD = ../lib/libyaz.la $(GSOAP_LIB)
+zoomtst6_LDADD = ../lib/libyaz.la $(GSOAP_LIB)
+zoomtst7_LDADD = ../lib/libyazmalloc.la ../lib/libyaz.la $(GSOAP_LIB)
+zoomtst8_LDADD = ../lib/libyaz.la $(GSOAP_LIB)
+zoomsh_LDADD = ../lib/libyaz.la $(GSOAP_LIB) $(READLINE_LIBS) 
 
 zoomtst1_SOURCES = zoomtst1.c
 zoomtst2_SOURCES = zoomtst2.c

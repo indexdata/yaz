@@ -1,13 +1,12 @@
 /*
- * $Id: zoom-opt.c,v 1.2 2002-09-24 08:05:42 adam Exp $
+ * $Id: zoom-opt.c,v 1.3 2003-01-06 08:20:29 adam Exp $
  *
  * ZOOM layer for C, options handling
  */
 #include <assert.h>
-#include <yaz/xmalloc.h>
-#include <yaz/log.h>
-
 #include "zoom-p.h"
+
+#include <yaz/xmalloc.h>
 
 ZOOM_API(ZOOM_options)
 ZOOM_options_create_with_parent (ZOOM_options parent)

@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1998-2002, Index Data
+ * Copyright (c) 1998-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: proto.h,v 1.5 2002-12-05 12:07:00 adam Exp $
+ * $Id: proto.h,v 1.6 2003-01-06 08:20:27 adam Exp $
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H

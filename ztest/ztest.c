@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.53 2002-07-31 14:06:29 adam Exp $
+ * $Id: ztest.c,v 1.54 2003-01-06 08:20:29 adam Exp $
  */
 
 /*

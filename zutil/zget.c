@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: zget.c,v 1.12 2002-04-25 08:34:08 adam Exp $
+ * $Id: zget.c,v 1.13 2003-01-06 08:20:29 adam Exp $
  */
 
 #include <yaz/proto.h>

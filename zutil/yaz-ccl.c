@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1996-2002, Index Data.
+ * Copyright (c) 1996-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: yaz-ccl.c,v 1.17 2002-12-28 12:16:26 adam Exp $
+ * $Id: yaz-ccl.c,v 1.18 2003-01-06 08:20:29 adam Exp $
  */
 
 #include <stdio.h>

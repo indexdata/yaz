@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.14 2002-12-09 23:29:00 adam Exp $
+# $Id: yaz-config.in,v 1.15 2003-01-06 08:20:26 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -10,7 +10,7 @@ yaz_echo_comp=no
 yaz_src_root=@YAZ_SRC_ROOT@
 yaz_build_root=@YAZ_BUILD_ROOT@
 
-yazextralibs="@LIBS@"
+yazextralibs="@GSOAP_LIB@ @XSLT_LIB@ @LIBS@"
 YAZVERSION=@VERSION@
 
 usage()

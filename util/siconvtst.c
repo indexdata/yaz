@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1997-2002, Index Data
+ * Copyright (c) 1997-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconvtst.c,v 1.7 2002-12-16 13:13:53 adam Exp $
+ * $Id: siconvtst.c,v 1.8 2003-01-06 08:20:28 adam Exp $
  */
 
 #if HAVE_CONFIG_H

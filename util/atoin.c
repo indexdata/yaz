@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1997-2002, Index Data
+ * Copyright (c) 1997-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: atoin.c,v 1.5 2002-08-27 13:18:26 adam Exp $
+ * $Id: atoin.c,v 1.6 2003-01-06 08:20:28 adam Exp $
  */
 
 #if HAVE_CONFIG_H

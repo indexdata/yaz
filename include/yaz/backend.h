@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.16 2002-09-16 10:48:06 adam Exp $
+ * $Id: backend.h,v 1.17 2003-01-06 08:20:27 adam Exp $
  */
 
 #ifndef BACKEND_H

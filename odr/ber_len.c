@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 1995-2002, Index Data.
+ * Copyright (C) 1995-2003, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_len.c,v 1.10 2002-07-25 12:51:08 adam Exp $
+ * $Id: ber_len.c,v 1.11 2003-01-06 08:20:27 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: z3950oid.c,v 1.4 2002-09-20 22:30:01 adam Exp $
+ * $Id: z3950oid.c,v 1.5 2003-01-06 08:20:29 adam Exp $
  */
 
 #if HAVE_CONFIG_H

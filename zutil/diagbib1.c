@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: diagbib1.c,v 1.5 2002-09-13 11:28:17 adam Exp $
+ * $Id: diagbib1.c,v 1.6 2003-01-06 08:20:29 adam Exp $
  */
 
 #include <stdio.h>

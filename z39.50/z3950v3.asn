@@ -140,7 +140,9 @@ IdAuthentication ::=
         type-2      [2]  OCTET STRING,
         type-100  [100]  OCTET STRING,
         type-101  [101]  IMPLICIT RPNQuery,
-       type-102  [102]  OCTET STRING}
+       type-102  [102]  OCTET STRING,
+       type-104  [104]  IMPLICIT EXTERNAL
+}
 --
 -- Definitions for RPN query
      RPNQuery ::= SEQUENCE{

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.87 2002-11-26 16:04:15 adam Exp $
+ * $Id: statserv.c,v 1.88 2003-01-06 08:20:28 adam Exp $
  */
 
 #include <stdio.h>
@@ -719,7 +719,7 @@ int statserv_start(int argc, char **argv)
 	inetd_connection(control_block.default_proto);
     else
     {
-	logf (LOG_LOG, "Starting server %s pid=%d", me, getpid());
+	yaz_log (LOG_LOG, "Starting server %s pid=%d", me, getpid());
 #if 0
 	sigset_t sigs_to_block;
 	

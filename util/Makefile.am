@@ -1,6 +1,6 @@
-## Copyright (C) 1994-2002, Index Data
+## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.14 2002-12-16 13:13:53 adam Exp $
+## $Id: Makefile.am,v 1.15 2003-01-06 08:20:28 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 

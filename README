@@ -1,11 +1,11 @@
-YAZ toolkit - $Id: README,v 1.41 2002-08-27 13:30:18 adam Exp $
+YAZ toolkit - $Id: README,v 1.42 2003-01-06 08:20:26 adam Exp $
 
-Copyright (C) 1995-2002, Index Data ApS.
+Copyright (C) 1995-2003, Index Data ApS.
 See the file LICENSE for details.
 
 The primary output of the source here is the YAZ library, which
 contains support functions for implementing the server or client
-role of Z39.50.
+role of Z39.50 and SRW.
 
 Windows programmers: refer to the file windows.txt which describes how
 to build the software using Microsoft Visual C++.
@@ -52,10 +52,18 @@ zoom     An implementation of Mike Taylors Z39.50 Object Oriented
          in C this may be good start. You'll find example programs in 
          this directory too.
 
-server   This is the implementation of the server frontend. It
+server   This is the implementation of the Z39.50 server frontend. It
 	 provides event-handling and server managament functions,
 	 and calls the backend primitives (best documentation of these
 	 is in the file include/yaz/backend.h).
+
+ccl      CCL parser.
+
+cql      CQL parser.
+
+srw      SRW support (based on gSOAP).
+
+srwapps  SRW applicaions, most notably a SRW-to-Z39.50 gateway.
 
 client   A demonstration client for testing the protocol. It's bug'n
          ugly. But, it supports many features.

@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.38 2002-12-05 12:19:24 adam Exp $
+ * $Id: nmem.c,v 1.39 2003-01-06 08:20:28 adam Exp $
  */
 
 /*
@@ -460,7 +460,7 @@ void yaz_strerror(char *buf, int max)
     else
 	*buf = '\0';
 #else
-#if YAZ_POSIX_THREADS
+#if HAVE_STRERROR_R
     strerror_r(errno, buf, max);
 #else
     strcpy(buf, strerror(yaz_errno()));

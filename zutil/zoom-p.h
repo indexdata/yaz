@@ -1,17 +1,25 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.2 2002-12-09 23:32:29 adam Exp $
+ * $Id: zoom-p.h,v 1.3 2003-01-06 08:20:29 adam Exp $
  */
+
+#if HAVE_GSOAP
+#include <yaz/srw-util.h>
+#else
+struct soap {
+    int dummy;
+};
+#endif
+
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
 #include <yaz/sortspec.h>
-
 typedef struct ZOOM_Event_p *ZOOM_Event;
 
 struct ZOOM_query_p {
-    Z_Query *query;
+    Z_Query *z_query;
     Z_SortKeySpecList *sort_spec;
     int refcount;
     ODR odr;
@@ -26,6 +34,7 @@ struct ZOOM_query_p {
 #define ZOOM_SELECT_EXCEPT 4
 
 struct ZOOM_connection_p {
+    struct soap *soap;
     COMSTACK cs;
     char *host_port;
     int error;
@@ -75,7 +84,7 @@ struct ZOOM_options_p {
 typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
 
 struct ZOOM_resultset_p {
-    Z_Query *r_query;
+    Z_Query *z_query;
     Z_SortKeySpecList *r_sort_spec;
     ZOOM_query search;
     int refcount;

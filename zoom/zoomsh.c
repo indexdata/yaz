@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.11 2002-06-05 21:09:20 adam Exp $
+ * $Id: zoomsh.c,v 1.12 2003-01-06 08:20:28 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -168,14 +168,14 @@ static void cmd_show (ZOOM_connection *c, ZOOM_resultset *r,
     for (i = 0; i<MAX_CON; i++)
     {
 	int error;
-	const char *errmsg, *addinfo;
+	const char *errmsg, *addinfo, *dset;
 	/* display errors if any */
 	if (!c[i])
 	    continue;
-	if ((error = ZOOM_connection_error(c[i], &errmsg, &addinfo)))
-	    fprintf (stderr, "%s error: %s (%d) %s\n",
+	if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+	    fprintf (stderr, "%s error: %s (%s:%d) %s\n",
 		     ZOOM_connection_option_get(c[i], "host"), errmsg,
-		     error, addinfo);
+		     dset, error, addinfo);
 	else if (r[i])
 	{
 	    /* OK, no major errors. Display records... */
@@ -211,14 +211,14 @@ static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
     for (i = 0; i<MAX_CON; i++)
     {
 	int error;
-	const char *errmsg, *addinfo;
+	const char *errmsg, *addinfo, *dset;
 	/* display errors if any */
 	if (!p[i])
 	    continue;
-	if ((error = ZOOM_connection_error(c[i], &errmsg, &addinfo)))
-	    fprintf (stderr, "%s error: %s (%d) %s\n",
+	if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+	    fprintf (stderr, "%s error: %s (%s:%d) %s\n",
 		     ZOOM_connection_option_get(c[i], "host"), errmsg,
-		     error, addinfo);
+		     dset, error, addinfo);
 	else if (p[i])
 	{
             printf ("ok\n");
@@ -232,12 +232,19 @@ static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
 			const char **args)
 {
     ZOOM_query s;
+    const char *query_str = *args;
     int i;
     
     s = ZOOM_query_create ();
-    if (ZOOM_query_prefix (s, *args))
+    while (*query_str == ' ')
+        query_str++;
+    if (memcmp(query_str, "cql:", 4) == 0)
     {
-	fprintf (stderr, "Bad PQF: %s\n", *args);
+        ZOOM_query_cql (s, query_str + 4);
+    }
+    else if (ZOOM_query_prefix (s, query_str))
+    {
+	fprintf (stderr, "Bad PQF: %s\n", query_str);
 	return;
     }
     for (i = 0; i<MAX_CON; i++)
@@ -257,14 +264,14 @@ static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
     for (i = 0; i<MAX_CON; i++)
     {
 	int error;
-	const char *errmsg, *addinfo;
+	const char *errmsg, *addinfo, *dset;
 	/* display errors if any */
 	if (!c[i])
 	    continue;
-	if ((error = ZOOM_connection_error(c[i], &errmsg, &addinfo)))
-	    fprintf (stderr, "%s error: %s (%d) %s\n",
+	if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+	    fprintf (stderr, "%s error: %s (%s:%d) %s\n",
 		     ZOOM_connection_option_get(c[i], "host"), errmsg,
-		     error, addinfo);
+		     dset, error, addinfo);
 	else if (r[i])
 	{
 	    /* OK, no major errors. Look at the result count */

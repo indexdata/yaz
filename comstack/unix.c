@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.8 2002-12-15 21:22:58 adam Exp $
+ * $Id: unix.c,v 1.9 2003-01-06 08:20:27 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32

@@ -1,6 +1,6 @@
-dnl YAZ Toolkit, Index Data 1994-2002
+dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.99 2002-12-16 13:13:53 adam Exp $
+dnl $Id: configure.in,v 1.100 2003-01-06 08:20:26 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.2)
 dnl
@@ -9,6 +9,8 @@ AC_SUBST(YAZ_CONF_CFLAGS)
 dnl ------ Checking programs
 AC_PROG_CC
 AC_PROG_CPP
+AC_CHECK_PROGS(YACC, 'bison -y')
+test -z "$YACC" && AC_MSG_WARN([GNU bison not found])
 AC_PROG_INSTALL
 AM_DISABLE_SHARED
 AM_PROG_LIBTOOL
@@ -173,7 +175,7 @@ if test "$with_iconv" != "no"; then
 	])
 fi
 dnl ------ various functions
-AC_CHECK_FUNCS(vsnprintf gettimeofday poll)
+AC_CHECK_FUNCS(vsnprintf gettimeofday poll strerror_r)
 if test "$ac_cv_func_poll" = "yes"; then
         AC_CHECK_HEADERS(sys/poll.h)
 fi
@@ -306,6 +308,58 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 fi
 AM_CONDITIONAL(ISTHR, test $HAVETHREADS = "1")
 dnl
+dnl ----- gSOAP
+AC_SUBST(GSOAP_LIB)
+AC_SUBST(GSOAP_INCLUDE)
+AC_SUBST(GSOAP_PREFIX)
+gsoapdir=NONE
+AC_ARG_WITH(gsoap, [  --with-gsoap[=PREFIX]   Use gSOAP in PREFIX/{lib,include}],[gsoapdir=$withval])
+if test "x$gsoapdir" = "xNONE"; then
+	for d in /usr /usr/local; do
+		if test -f $d/include/stdsoap2.h; then
+			gsoapdir=$d
+		fi
+	done
+fi
+AC_MSG_CHECKING(for gSOAP prefix)
+GSOAP_PREFIX=$gsoapdir
+if test -x $gsoapdir/bin/soapcpp2; then
+	AC_MSG_RESULT($gsoapdir)
+	if test "$gsoapdir" != "/usr"; then
+		GSOAP_LIB="-L$gsoapdir/lib -lgsoap"
+		GSOAP_INCLUDE=-I$gsoapdir/include
+	fi
+        AC_DEFINE(HAVE_GSOAP)
+        usesrw=1
+else
+	AC_MSG_RESULT(Not found)
+        usesrw=0
+fi
+AM_CONDITIONAL(SRW, test $usesrw = "1")
+dnl
+dnl ----- XML/XSLT
+AC_SUBST(XSLT_LIB)
+AC_SUBST(XSLT_CFLAGS)
+xsltdir=NONE
+AC_ARG_WITH(xslt, [  --with-xslt[=PREFIX]    Use libxslt in PREFIX/{lib,include}],[xsltdir=$withval])
+if test "x$xsltdir" = "xNONE"; then
+	for d in /usr /usr/local; do
+		if test -x $d/bin/xslt-config; then
+			xsltdir=$d
+		fi
+	done
+fi
+AC_MSG_CHECKING(for XSLT)
+if test -x $xsltdir/bin/xslt-config; then
+	XSLT_LIB=`$xsltdir/bin/xslt-config --libs`
+	XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
+	XSLT_VER=`$xsltdir/bin/xslt-config --version`
+	AC_MSG_RESULT($XSLT_VER)
+	AC_DEFINE(HAVE_XSLT)
+else
+	AC_MSG_RESULT(Not found)
+fi
+dnl
 dnl ------ Memory debugging
 AC_ARG_ENABLE(memdebug, [  --enable-memdebug       enable memory debugging],[enable_memdebug=$enableval],[enable_memdebug=none])
 if test "$enable_memdebug" = "yes"; then
@@ -328,13 +382,16 @@ yaz.spec
 util/Makefile
 odr/Makefile
 z39.50/Makefile
+srw/Makefile
 ill/Makefile
 zutil/Makefile
 comstack/Makefile
 ccl/Makefile
+cql/Makefile
 server/Makefile
 include/Makefile
 include/yaz/Makefile
+srwapps/Makefile
 lib/Makefile
 client/Makefile
 ztest/Makefile
@@ -345,5 +402,6 @@ doc/yazhtml.dsl
 doc/yazphp.dsl
 doc/yazprint.dsl
 doc/tkl.xsl
+etc/Makefile
 yaz-config
 ],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > lib/yaz-config && chmod +x yaz-config lib/yaz-config])

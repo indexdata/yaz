@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: read-grs.c,v 1.7 2002-03-18 21:33:48 adam Exp $
+ * $Id: read-grs.c,v 1.8 2003-01-06 08:20:29 adam Exp $
  */
 
 /*

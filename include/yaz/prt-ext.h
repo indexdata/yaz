@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -85,6 +85,7 @@ struct Z_External
 #define Z_External_acfDes1 24
 #define Z_External_acfKrb1 25
 #define Z_External_multisrch2 26
+#define Z_External_CQL 27
     union
     {
 	/* Generic types */
@@ -122,6 +123,7 @@ struct Z_External
 
         Z_KRBObject *acfKrb1;
         Z_MultipleSearchTerms_2 *multipleSearchTerms_2;
+        Z_InternationalString *cql;
     } u;
 };
 

@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: tpath.c,v 1.8 2002-04-05 12:49:13 adam Exp $
+ * $Id: tpath.c,v 1.9 2003-01-06 08:20:28 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>

@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.8 2002-09-24 08:05:41 adam Exp $
+ * $Id: tabcomplete.c,v 1.9 2003-01-06 08:20:26 adam Exp $
  */
 
 #include <string.h>
@@ -14,11 +14,11 @@
 
 extern char** curret_global_list;
 
-/* *****************************************************************************
+/* ***************************************************************************
  *
- * generic compleater 
+ * generic completer 
  * 
- * *****************************************************************************/
+ * ***************************************************************************/
 
 char* complete_from_list(char* completions[], const char *text, int state)
 {	
@@ -44,11 +44,11 @@ char* complete_from_list(char* completions[], const char *text, int state)
 }
 
 
-/* *****************************************************************************
+/* ***************************************************************************
  * 
  * code for getting a list of valid strings from the oid subsystem
  * 
- * *****************************************************************************/
+ * ***************************************************************************/
    
 
 typedef struct {
@@ -59,8 +59,8 @@ typedef struct {
 } oid_callback_t;
 
 /*!
-  This is the call back function given to oid_trav... it updates the list of pointers into the oid
-  owned data 
+  This is the call back function given to oid_trav... it updates the list
+  of pointers into the oid owned data 
 */
 
 void oid_loader(struct oident* oid, void* data_)
@@ -91,15 +91,15 @@ char** build_list_for_oclass(oid_class oclass) {
 	return data.values;	   
 }
 
-/* *****************************************************************************
+/* ***************************************************************************
  * 
- * the compleater functions 
+ * the completer functions 
  * 
- * *****************************************************************************/
+ * ***************************************************************************/
 
 char* complete_querytype(const char *text, int state)
 {
-    char* querytypes[] = {"ccl2rpn","prefix","cclrpn","ccl",0};
+    char* querytypes[] = {"ccl2rpn","prefix","cclrpn","ccl","cql", 0};
     return complete_from_list(querytypes,text,state);  
 }
 

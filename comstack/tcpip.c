@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.52 2002-12-19 14:04:22 adam Exp $
+ * $Id: tcpip.c,v 1.53 2003-01-06 08:20:27 adam Exp $
  */
 
 #include <stdio.h>

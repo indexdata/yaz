@@ -75,7 +75,7 @@ BEGIN
             VALUE "FileDescription", "YAZ Toolkit\0"
             VALUE "FileVersion", "1, 9, 2, 1\0"
             VALUE "InternalName", "YAZ\0"
-            VALUE "LegalCopyright", "Copyright © 1995-2002 Index Data\0"
+            VALUE "LegalCopyright", "Copyright © 1995-2003 Index Data\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "yaz.rc\0"
             VALUE "PrivateBuild", "\0"

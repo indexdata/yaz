@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.19 2002-12-05 12:07:00 adam Exp $
+ * $Id: pquery.c,v 1.20 2003-01-06 08:20:29 adam Exp $
  */
 
 #include <stdio.h>

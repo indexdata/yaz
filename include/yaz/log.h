@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.7 2002-08-29 09:58:42 adam Exp $
+ * $Id: log.h,v 1.8 2003-01-06 08:20:27 adam Exp $
  */
 
 #ifndef LOG_H

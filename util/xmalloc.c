@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 1994-2002, Index Data
+ * Copyright (C) 1994-2003, Index Data
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: xmalloc.c,v 1.17 2002-06-18 21:30:39 adam Exp $
+ * $Id: xmalloc.c,v 1.18 2003-01-06 08:20:28 adam Exp $
  */
 
 #if HAVE_CONFIG_H

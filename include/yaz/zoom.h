@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.15 2002-12-09 23:32:29 adam Exp $
+ * $Id: zoom.h,v 1.16 2003-01-06 08:20:27 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -92,6 +92,7 @@ ZOOM_diag_str (int error);
 #define ZOOM_ERROR_INIT 10005
 #define ZOOM_ERROR_INTERNAL 10006
 #define ZOOM_ERROR_TIMEOUT 10007
+#define ZOOM_ERROR_UNSUPPORTED_PROTOCOL 10008
 
 ZOOM_API(int)
 ZOOM_connection_last_event(ZOOM_connection cs);
@@ -166,7 +167,10 @@ ZOOM_query_create(void);
 /* destroy it */
 ZOOM_API(void)
 ZOOM_query_destroy(ZOOM_query s);
-/* specify prefix query for search */
+/* CQL */
+ZOOM_API(int)
+ZOOM_query_cql(ZOOM_query s, const char *str);
+/* PQF */
 ZOOM_API(int)
 ZOOM_query_prefix(ZOOM_query s, const char *str);
 /* specify sort criteria for search */

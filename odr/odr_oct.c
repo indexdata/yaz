@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oct.c,v 1.19 2002-09-24 08:05:41 adam Exp $
+ * $Id: odr_oct.c,v 1.20 2003-01-06 08:20:27 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>

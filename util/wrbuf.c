@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: wrbuf.c,v 1.11 2002-10-22 14:40:21 adam Exp $
+ * $Id: wrbuf.c,v 1.12 2003-01-06 08:20:28 adam Exp $
  */
 
 /*

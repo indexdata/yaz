@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.132 2002-09-25 12:37:07 adam Exp $
+ * $Id: seshigh.c,v 1.133 2003-01-06 08:20:28 adam Exp $
  */
 
 /*
@@ -1047,11 +1047,8 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	for (i = 0; i < req->num_databaseNames; i++)
 	    yaz_log (LOG_LOG, "Database '%s'", req->databaseNames[i]);
     }
-    switch (req->query->which)
-    {
-    case Z_Query_type_1: case Z_Query_type_101:
-	log_rpn_query (req->query->u.type_1);
-    }
+    yaz_log_zquery(req->query);
+
     if (assoc->init->bend_search)
     {
 	bsrr->setname = req->resultSetName;
@@ -1593,7 +1590,7 @@ int bend_backend_respond (bend_association a, bend_request req)
     int r;
     r = process_request (a, req, &msg);
     if (r < 0)
-	logf (LOG_WARN, "%s", msg);
+	yaz_log (LOG_WARN, "%s", msg);
     return r;
 }
 

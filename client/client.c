@@ -1,8 +1,8 @@
 /* 
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.177 2002-12-16 13:30:41 adam Exp $
+ * $Id: client.c,v 1.178 2003-01-06 08:20:26 adam Exp $
  */
 
 #include <stdio.h>
@@ -97,7 +97,8 @@ static int auto_reconnect = 0;
 typedef enum {
     QueryType_Prefix,
     QueryType_CCL,
-    QueryType_CCL2RPN
+    QueryType_CCL2RPN,
+    QueryType_CQL
 } QueryType;
 
 static QueryType queryType = QueryType_Prefix;
@@ -144,6 +145,7 @@ const char* query_type_as_string(QueryType q)
     case QueryType_Prefix: return "prefix (RPN sent to server)";
     case QueryType_CCL: return "CCL (CCL sent to server) ";
     case QueryType_CCL2RPN: return "CCL -> RPN (RPN sent to server)";
+    case QueryType_CQL: return "CQL (CQL sent to server)";
     default: 
         return "unknown Query type internal yaz-client error";
     }
@@ -875,6 +877,7 @@ static int send_searchRequest(char *arg)
     Z_RPNQuery *RPNquery;
     Odr_oct ccl_query;
     YAZ_PQF_Parser pqf_parser;
+    Z_External *ext;
 
     if (queryType == QueryType_CCL2RPN)
     {
@@ -960,6 +963,16 @@ static int send_searchRequest(char *arg)
         }
         query.u.type_1 = RPNquery;
         ccl_rpn_delete (rpn);
+        break;
+    case QueryType_CQL:
+        query.which = Z_Query_type_104;
+        ext = odr_malloc(out, sizeof(*ext));
+        ext->direct_reference = odr_getoidbystr(out, "1.2.840.10003.16.2");
+        ext->indirect_reference = 0;
+        ext->descriptor = 0;
+        ext->which = Z_External_CQL;
+        ext->u.cql = odr_strdup(out, arg);
+        query.u.type_104 =  ext;
         break;
     default:
         printf ("Unsupported query type\n");
@@ -2225,12 +2238,15 @@ int cmd_querytype (char *arg)
         queryType = QueryType_Prefix;
     else if (!strcmp (arg, "ccl2rpn") || !strcmp (arg, "cclrpn"))
         queryType = QueryType_CCL2RPN;
+    else if (!strcmp(arg, "cql"))
+        queryType = QueryType_CQL;        
     else
     {
         printf ("Querytype must be one of:\n");
         printf (" prefix         - Prefix query\n");
         printf (" ccl            - CCL query\n");
         printf (" ccl2rpn        - CCL query converted to RPN\n");
+        printf (" cql            - CQL\n");
         return 0;
     }
     return 1;

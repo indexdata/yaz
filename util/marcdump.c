@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.19 2002-12-16 13:13:53 adam Exp $
+ * $Id: marcdump.c,v 1.20 2003-01-06 08:20:28 adam Exp $
  */
 
 #if HAVE_CONFIG_H

@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 1995-2002, Index Data
+ * Copyright (C) 1995-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: session.h,v 1.26 2002-11-26 13:15:42 adam Exp $
+ * $Id: session.h,v 1.27 2003-01-06 08:20:28 adam Exp $
  */
 
 #ifndef SESSION_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: unix.h,v 1.1 2002-06-04 11:36:11 adam Exp $
+ * $Id: unix.h,v 1.2 2003-01-06 08:20:27 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  * 
  */

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.38 2002-09-24 08:05:41 adam Exp $
+ * $Id: odr.c,v 1.39 2003-01-06 08:20:27 adam Exp $
  *
  */
 #if HAVE_CONFIG_H

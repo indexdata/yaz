@@ -1,8 +1,8 @@
-## $Id: Makefile.am,v 1.18 2002-12-16 13:13:53 adam Exp $
+## $Id: Makefile.am,v 1.19 2003-01-06 08:20:27 adam Exp $
 
-pkginclude_HEADERS= backend.h ccl.h comstack.h \
+pkginclude_HEADERS= backend.h ccl.h cql.h comstack.h \
  diagbib1.h sortspec.h log.h logrpn.h marcdisp.h nmem.h odr.h oid.h \
- options.h otherinfo.h pquery.h prt-ext.h readconf.h statserv.h \
+ options.h otherinfo.h pquery.h prt-ext.h readconf.h srw-util.h statserv.h \
  tcpip.h unix.h tpath.h wrbuf.h xmalloc.h \
  yaz-ccl.h yaz-iconv.h yaz-util.h yaz-version.h yconfig.h proto.h \
  \

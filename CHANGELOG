@@ -1,6 +1,20 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 1.9.3 2002/MM/DD
+--- 1.9.3 2003/MM/DD
+
+Support for SRW 1.0. This is an optional feature and requires
+gSOAP to operate. Enable it by specifying --with-gsoap for
+configure. SRW stuff is located in sub directory srw.
+Example applications are located in srwapps. 
+
+Z39.50 Query Type-104 added - to facilitate CQL within Z39.50.
+
+CQL support. Source is directory 'cql'. CQL is supported in ZOOM
+(both SRW and Z39.50) and the YAZ client (Z39.50 only).
+
+ZOOM connections are SRW based if host/port is specified
+as http. e.g.  z = ZOOM_connection_new("http://myserver");
+ZOOM_query may be of type CQL, e.g. ZOOM_query_cql(q, "dc.title=x");
 
 CCL proximity operators !n, %n converts to PQF @prox 0 n 1 2 k 2
 and @prox 0 n 0 1 k 2 respectively, meaning: exlusion=false,

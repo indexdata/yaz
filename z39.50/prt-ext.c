@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.4 2002-12-05 12:07:00 adam Exp $
+ * $Id: prt-ext.c,v 1.5 2003-01-06 08:20:28 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -38,6 +38,7 @@ static Z_ext_typeent type_table[] =
     {VAL_DES1, Z_External_acfDes1, (Odr_fun) z_DES_RN_Object},
     {VAL_KRB1, Z_External_acfKrb1, (Odr_fun) z_KRBObject},
     {VAL_MULTISRCH2, Z_External_multisrch2, (Odr_fun) z_MultipleSearchTerms_2},
+    {VAL_CQL, Z_External_CQL, (Odr_fun) z_InternationalString},
     {VAL_NONE, 0, 0}
 };
 
@@ -117,6 +118,8 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
          (Odr_fun)z_KRBObject, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_multisrch2,
          (Odr_fun)z_MultipleSearchTerms_2, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_CQL,
+         (Odr_fun)z_InternationalString, 0},
 	{-1, -1, -1, -1, 0, 0}
     };
     

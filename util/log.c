@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2002, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.32 2002-12-05 12:19:24 adam Exp $
+ * $Id: log.c,v 1.33 2003-01-06 08:20:28 adam Exp $
  */
 
 #if HAVE_CONFIG_H
