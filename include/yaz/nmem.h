@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.5  2001-03-25 21:55:12  adam
+ * Revision 1.6  2001-06-26 14:11:27  adam
+ * Added MUTEX functions for NMEM module (used by OID utility).
+ *
+ * Revision 1.5  2001/03/25 21:55:12  adam
  * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
  *
  * Revision 1.4  2000/05/09 11:48:58  adam
@@ -82,6 +85,12 @@ typedef struct nmem_control
     nmem_block *blocks;
     struct nmem_control *next;
 } nmem_control;
+
+typedef struct nmem_mutex *NMEM_MUTEX;
+YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *);
+YAZ_EXPORT void nmem_mutex_enter(NMEM_MUTEX);
+YAZ_EXPORT void nmem_mutex_leave(NMEM_MUTEX);
+YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *);
 
 typedef struct nmem_control *NMEM;
 

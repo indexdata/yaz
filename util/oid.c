@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: oid.c,v $
- * Revision 1.45  2001-05-16 07:25:59  adam
+ * Revision 1.46  2001-06-26 14:11:27  adam
+ * Added MUTEX functions for NMEM module (used by OID utility).
+ *
+ * Revision 1.45  2001/05/16 07:25:59  adam
  * Modified oid_ent_to_oid so that if proto is general, then class
  * is ignored (only oid value is compared).
  *
@@ -190,11 +193,13 @@ struct oident_list {
 static struct oident_list *oident_table = NULL;
 static int oid_value_dynamic = VAL_DYNAMIC;
 static int oid_init_flag = 0;
+static NMEM_MUTEX oid_mutex = 0;
+static NMEM oid_nmem = 0;
 
 /*
  * OID database
  */
-static oident oids[] =
+static oident standard_oids[] =
 {
     /* General definitions */
     {PROTO_GENERAL, CLASS_TRANSYN, VAL_BER,          {2,1,1,-1},
@@ -591,21 +596,21 @@ void oid_init (void)
        no thread may exit oid_init before all OID's bave been
        transferred - which is why checked is set after oid_transfer... 
     */
-    oid_transfer (oids);
+    nmem_mutex_create (&oid_mutex);
+    nmem_mutex_enter (oid_mutex);
+    if (!oid_nmem)
+	oid_nmem = nmem_create ();
+    nmem_mutex_leave (oid_mutex);
+    oid_transfer (standard_oids);
     oid_init_flag = 1;
 }
 
 void oid_exit (void)
 {
-    while (oident_table)
-    {
-	struct oident_list *this_p = oident_table;
-	oident_table = oident_table->next;
-
-	xfree (this_p->oident.desc);
-	xfree (this_p);
-    }
     oid_init_flag = 0;
+    oid_nmem = 0;
+    nmem_mutex_destroy (&oid_mutex);
+    nmem_destroy (oid_nmem);
 }
 
 static struct oident *oid_getentbyoid_x(int *o)
@@ -678,13 +683,14 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
 {
     struct oident *oident;
 
-    nmem_critical_enter ();
+    nmem_mutex_enter (oid_mutex);
     oident = oid_getentbyoid_x (oid);
     if (!oident)
     {
 	char desc_str[200];
 	struct oident_list *oident_list;
-	oident_list = (struct oident_list *) xmalloc (sizeof(*oident_list));
+	oident_list = (struct oident_list *)
+	    nmem_malloc (oid_nmem, sizeof(*oident_list));
 	oident = &oident_list->oident;
 	oident->proto = proto;
 	oident->oclass = oclass;
@@ -698,8 +704,7 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
 		sprintf (desc_str+strlen(desc_str), ".%d", oid[i]);
 	    desc = desc_str;
 	}
-	oident->desc = (char *) xmalloc (strlen(desc)+1);
-	strcpy (oident->desc, desc);
+	oident->desc = nmem_strdup (oid_nmem, desc);
 	if (value == VAL_DYNAMIC)
 	    oident->value = (enum oid_value) (++oid_value_dynamic);
 	else
@@ -708,7 +713,7 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
 	oident_list->next = oident_table;
 	oident_table = oident_list;
     }
-    nmem_critical_leave ();
+    nmem_mutex_leave (oid_mutex);
     return oident;
 }
 

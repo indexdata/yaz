@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.24  2000-05-11 14:37:55  adam
+ * Revision 1.25  2001-06-26 14:11:27  adam
+ * Added MUTEX functions for NMEM module (used by OID utility).
+ *
+ * Revision 1.24  2000/05/11 14:37:55  adam
  * Minor changes.
  *
  * Revision 1.23  2000/05/09 10:55:05  adam
@@ -124,6 +127,70 @@ static pthread_mutex_t nmem_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define NMEM_ENTER
 #define NMEM_LEAVE
 #endif
+
+
+struct nmem_mutex {
+#ifdef WIN32
+    CRITICAL_SECTION m_handle;
+#elif _REENTRANT
+    pthread_mutex_t m_handle;
+#else
+    int m_handle;
+#endif
+};
+
+YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
+{
+    NMEM_ENTER;
+    if (!*p)
+    {
+	*p = malloc (sizeof(**p));
+#ifdef WIN32
+	InitializeCriticalSection(&(*p)->m_handle);
+#elif _REENTRANT
+	pthread_mutex_init (&(*p)->m_handle, 0);
+#endif
+    }
+    NMEM_LEAVE;
+}
+
+YAZ_EXPORT void nmem_mutex_enter(NMEM_MUTEX p)
+{
+    if (p)
+    {
+#ifdef WIN32
+	EnterCriticalSection(&p->m_handle);
+#elif _REENTRANT
+	pthread_mutex_lock(&p->m_handle);
+#endif
+    }
+}
+
+YAZ_EXPORT void nmem_mutex_leave(NMEM_MUTEX p)
+{
+    if (p)
+    {
+#ifdef WIN32
+	LeaveCriticalSection(&p->m_handle);
+#elif _REENTRANT
+	pthread_mutex_unlock(&p->m_handle);
+#endif
+    }
+}
+
+YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
+{
+    NMEM_ENTER;
+    if (*p)
+    {
+#ifdef WIN32
+	DeleteCriticalSection(&(*p)->m_handle);
+#endif
+	free (*p);
+	*p = 0;
+    }
+    NMEM_LEAVE;
+}
 
 static nmem_block *freelist = NULL;        /* "global" freelists */
 static nmem_control *cfreelist = NULL;
