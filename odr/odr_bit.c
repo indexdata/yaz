@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_bit.c,v 1.16 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr_bit.c,v 1.17 2003-04-24 12:48:47 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -43,5 +43,12 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt, const char *name)
     	memset((*p)->bits, 0, ODR_BITMASK_SIZE);
     	(*p)->top = -1;
     }
+#if 0
+    /* ignoring the cons helps with at least one target. 
+     * http://bugzilla.indexdata.dk/cgi-bin/bugzilla/show_bug.cgi?id=24
+     */
+    return ber_bitstring(o, *p, 0);
+#else
     return ber_bitstring(o, *p, cons);
+#endif
 }

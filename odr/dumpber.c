@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: dumpber.c,v 1.15 2003-03-11 11:03:31 adam Exp $
+ * $Id: dumpber.c,v 1.16 2003-04-24 12:48:47 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -66,7 +66,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
     	fprintf(f, " len=%d", ll);
     else
     	fprintf(f, " len=?");
-    fprintf(f, "       tl=%d, ll=%d\n", taglen, lenlen);
+    fprintf(f, "       tl=%d, ll=%d cons=%d\n", taglen, lenlen, cons);
     if (!cons)
     {
     	if (ll < 0 || ll > len)
