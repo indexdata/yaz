@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.42 2003-03-21 10:48:11 adam Exp $
+## $Id: Makefile.am,v 1.43 2003-04-24 13:29:50 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -33,7 +33,8 @@ SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
 
 doc_DATA = $(HTMLFILES) yaz.pdf id.png apilayer.png
 
-EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(MANFILES) $(REFFILES) $(doc_DATA)
+EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(MANFILES) $(REFFILES) \
+	$(doc_DATA) Doxyfile
 
 man_MANS = $(MANFILES)
 
