@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.86 2004-10-10 21:48:18 adam Exp $
+# $Id: makefile,v 1.87 2004-11-21 21:56:28 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -359,6 +359,7 @@ YAZ_UTIL_OBJS= \
 
 YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\diagbib1.obj \
+   $(OBJDIR)\diagsrw.obj \
    $(OBJDIR)\zget.obj \
    $(OBJDIR)\logrpn.obj \
    $(OBJDIR)\pquery.obj \
