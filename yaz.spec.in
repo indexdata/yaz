@@ -1,5 +1,5 @@
 Name: yaz
-Version: 1.8.6
+Version: @VERSION@
 Release: 1
 Copyright: YAZ License
 Group: Development/Libraries
