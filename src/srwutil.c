@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.20 2005-01-08 01:20:19 adam Exp $
+ * $Id: srwutil.c,v 1.21 2005-01-09 21:50:26 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -307,7 +307,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 		    version = v;
 		else if (!strcmp(n, "scanClause"))
 		    scanClause = v;
-		else if (!strcmp(n, "x-ScanClause"))
+		else if (!strcmp(n, "x-pScanClause"))
 		    pScanClause = v;
 		else if (!strcmp(n, "maximumRecords"))
 		    maximumRecords = v;
