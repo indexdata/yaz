@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.24 2003-02-18 11:59:15 adam Exp $
+ * $Id: zoom-c.c,v 1.25 2003-02-19 15:22:11 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1063,9 +1063,10 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     if (resultset->z_query->which == Z_Query_type_104
         && resultset->z_query->u.type_104->which == Z_External_CQL)
         sr->u.request->query = resultset->z_query->u.type_104->u.cql;
-    else if (resultset->z_query->which == Z_Query_type_1)
-    { 
-        set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, "Type-1");
+    else if (resultset->z_query->which == Z_Query_type_1 &&
+             resultset->z_query->u.type_1)
+    {
+        set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
         return zoom_complete;
     }
     else
@@ -2728,7 +2729,7 @@ ZOOM_connection_error_x (ZOOM_connection c, const char **cp,
         else if (!strcmp(c->diagset, "Bib-1"))
             *cp = ZOOM_diag_str(error);
         else if (!strcmp(c->diagset, "SRW"))
-            *cp = yaz_srw_error_str(c->error);
+            *cp = yaz_diag_srw_str(c->error);
         else
             *cp = "Unknown error and diagnostic set";
     }

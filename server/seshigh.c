@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.142 2003-02-18 14:47:23 adam Exp $
+ * $Id: seshigh.c,v 1.143 2003-02-19 15:22:11 adam Exp $
  */
 
 /*
@@ -54,6 +54,7 @@
 #include <yaz/charneg.h>
 #include <yaz/otherinfo.h>
 #include <yaz/yaz-util.h>
+#include <yaz/pquery.h>
 
 #include <yaz/srw.h>
 #include <yaz/backend.h>
@@ -450,9 +451,9 @@ static int srw_bend_init(association *assoc)
     return 1;
 }
 
-static void srw_bend_fetch(association *assoc, int pos,
-                           Z_SRW_searchRetrieveRequest *srw_req,
-                           Z_SRW_record *record)
+static int srw_bend_fetch(association *assoc, int pos,
+                          Z_SRW_searchRetrieveRequest *srw_req,
+                          Z_SRW_record *record)
 {
     bend_fetch_rr rr;
     ODR o = assoc->encode;
@@ -507,6 +508,7 @@ static void srw_bend_fetch(association *assoc, int pos,
         if (srw_req->recordSchema)
             record->recordSchema = odr_strdup(o, srw_req->recordSchema);
     }
+    return rr.errcode;
 }
 
 static void srw_bend_search(association *assoc, request *req,
@@ -514,6 +516,7 @@ static void srw_bend_search(association *assoc, request *req,
                             Z_SRW_searchRetrieveResponse *srw_res)
 {
     char *base = "Default";
+    int srw_error = 0;
     bend_search_rr rr;
     Z_External *ext;
     
@@ -528,20 +531,64 @@ static void srw_bend_search(association *assoc, request *req,
     rr.basenames = &srw_req->database;
     rr.referenceId = 0;
 
-    ext = (Z_External *) odr_malloc(assoc->decode, sizeof(*ext));
-    ext->direct_reference = odr_getoidbystr(assoc->decode, 
-                                            "1.2.840.10003.16.2");
-    ext->indirect_reference = 0;
-    ext->descriptor = 0;
-    ext->which = Z_External_CQL;
-    if (srw_req->query)
-        ext->u.cql = srw_req->query;
-    else
-        ext->u.cql = "noterm";
-    
     rr.query = (Z_Query *) odr_malloc (assoc->decode, sizeof(*rr.query));
-    rr.query->which = Z_Query_type_104;
-    rr.query->u.type_104 =  ext;
+
+    if (srw_req->query)
+    {
+        ext = (Z_External *) odr_malloc(assoc->decode, sizeof(*ext));
+        ext->direct_reference = odr_getoidbystr(assoc->decode, 
+                                                "1.2.840.10003.16.2");
+        ext->indirect_reference = 0;
+        ext->descriptor = 0;
+        ext->which = Z_External_CQL;
+        ext->u.cql = srw_req->query;
+
+        rr.query->which = Z_Query_type_104;
+        rr.query->u.type_104 =  ext;
+    }
+    else if (srw_req->pQuery)
+    {
+        Z_RPNQuery *RPNquery;
+        YAZ_PQF_Parser pqf_parser;
+
+        pqf_parser = yaz_pqf_create ();
+
+        yaz_log(LOG_LOG, "PQF: %s", srw_req->pQuery);
+
+        RPNquery = yaz_pqf_parse (pqf_parser, assoc->decode, srw_req->pQuery);
+        if (!RPNquery)
+        {
+            const char *pqf_msg;
+            size_t off;
+            int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
+            yaz_log(LOG_LOG, "%*s^\n", off+4, "");
+            yaz_log(LOG_LOG, "Bad PQF: %s (code %d)\n", pqf_msg, code);
+            
+            srw_error = 10;
+        }
+
+        rr.query->which = Z_Query_type_1;
+        rr.query->u.type_1 =  RPNquery;
+
+        yaz_pqf_destroy (pqf_parser);
+    }
+    else
+        srw_error = 11;
+
+    if (srw_req->sortKeys || srw_req->xSortKeys)
+        srw_error = 80;
+
+    if (srw_error)
+    {
+        srw_res->num_diagnostics = 1;
+        srw_res->diagnostics = (Z_SRW_diagnostic *)
+	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
+        srw_res->diagnostics[0].code = 
+            odr_intdup(assoc->encode, srw_error);
+        srw_res->diagnostics[0].details = 0;
+        return;
+    }
+
     
     rr.stream = assoc->encode;
     rr.decode = assoc->decode;
@@ -562,7 +609,8 @@ static void srw_bend_search(association *assoc, request *req,
         srw_res->diagnostics = (Z_SRW_diagnostic *)
 	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
         srw_res->diagnostics[0].code = 
-            odr_intdup(assoc->encode, rr.errcode);
+            odr_intdup(assoc->encode, 
+                       yaz_diag_bib1_to_srw (rr.errcode));
         srw_res->diagnostics[0].details = rr.errstring;
     }
     else
@@ -585,9 +633,22 @@ static void srw_bend_search(association *assoc, request *req,
                                number * sizeof(*srw_res->records));
                 for (i = 0; i<number; i++)
                 {
+                    int errcode;
                     srw_res->records[j].recordData_buf = 0;
-                    srw_bend_fetch(assoc, i+start, srw_req,
-                                   srw_res->records + j);
+                    errcode = srw_bend_fetch(assoc, i+start, srw_req,
+                                              srw_res->records + j);
+                    if (errcode)
+                    {
+                        srw_res->num_diagnostics = 1;
+                        srw_res->diagnostics = (Z_SRW_diagnostic *)
+                            odr_malloc(assoc->encode, 
+                                       sizeof(*srw_res->diagnostics));
+                        srw_res->diagnostics[0].code = 
+                            odr_intdup(assoc->encode, 
+                                       yaz_diag_bib1_to_srw (errcode));
+                        srw_res->diagnostics[0].details = rr.errstring;
+                        break;
+                    }
                     if (srw_res->records[j].recordData_buf)
                         j++;
                 }

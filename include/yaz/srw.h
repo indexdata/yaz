@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.3 2003-02-17 14:35:42 adam Exp $
+ * $Id: srw.h,v 1.4 2003-02-19 15:22:11 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -64,7 +64,11 @@ YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
                              void *client_data, const char *ns);
 YAZ_EXPORT Z_SRW_searchRetrieve *yaz_srw_get(ODR o, int which);
 
-YAZ_EXPORT const char *yaz_srw_error_str (int code);
+YAZ_EXPORT const char *yaz_diag_srw_str (int code);
+
+YAZ_EXPORT int yaz_diag_bib1_to_srw (int bib1_code);
+
+YAZ_EXPORT int yaz_diag_srw_to_bib1(int srw_code);
 
 
 #endif
