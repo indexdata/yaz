@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.5 2004-11-02 12:57:54 heikki Exp $
+ * $Id: log.c,v 1.6 2004-11-02 13:52:54 heikki Exp $
  */
 
 /**
@@ -47,11 +47,15 @@ static FILE *l_file = NULL;
 static char l_prefix[512] = "";
 static char l_prefix2[512] = "";
 static char l_fname[512] = "";
+
 static char l_old_default_format[]="%H:%M:%S-%d/%m";
 static char l_new_default_format[]="%Y%m%d-%H%M%S";
 #define TIMEFORMAT_LEN 50
 static char l_custom_format[TIMEFORMAT_LEN]="";
 static char *l_actual_format=l_old_default_format;
+
+/** l_max_size tells when to rotate the log. Default to 1 GB */
+/* static int l_max_size=1024*1024*1024;  */
 
 static struct {
     int mask;
@@ -107,13 +111,19 @@ void yaz_log_reopen(void)
     {
         fclose (l_file);
     }
-    setvbuf(new_file, 0, _IONBF, 0);
+    if (l_level & LOG_FLUSH)
+        setvbuf(new_file, 0, _IONBF, 0);
     l_file = new_file;
 }
 
 void yaz_log_init_level (int level)
 {
-    l_level = level;
+    if ( (l_level & LOG_FLUSH) != (level & LOG_FLUSH) )
+    {
+        l_level = level;
+        yaz_log_reopen(); /* make sure we set buffering right */
+    } else
+        l_level = level;
 }
 
 void yaz_log_init_prefix (const char *prefix)
@@ -166,11 +176,18 @@ void yaz_log(int level, const char *fmt, ...)
     struct tm *tim;
     char tbuf[TIMEFORMAT_LEN]="";
     int o_level = level;
+    /* int flen; */
 
     if (!(level & l_level))
     	return;
     if (!l_file)
         l_file = stderr;
+    
+/*    
+    flen=ftell(l_file);
+    if (flen>l_max_size) 
+        rotate_log();
+*/
     *flags = '\0';
     for (i = 0; level && mask_names[i].name; i++)
     	if (mask_names[i].mask & level)
