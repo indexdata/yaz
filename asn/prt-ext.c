@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.13  1997-05-14 06:53:22  adam
+ * Revision 1.14  1998-01-05 09:04:57  adam
+ * Fixed bugs in encoders/decoders - Not operator (!) missing.
+ *
+ * Revision 1.13  1997/05/14 06:53:22  adam
  * C++ support.
  *
  * Revision 1.12  1997/04/30 08:52:02  quinn
@@ -112,7 +115,7 @@ int z_External(ODR o, Z_External **p, int opt)
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_OPAC, z_OPACRecord},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_searchResult1,
 	    z_SearchInfoReport},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update, z_IUUpdate},
 	{-1, -1, -1, -1, 0}
     };
 

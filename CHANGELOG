@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed bugs for encoders/decoders of extended services and 
+SearchInfoReport.
+
 Implemented sub-tree feature for schemas. Sub-trees are
 referenced in *.abs-files. See explain.abs for an example
 of the use of this feature.

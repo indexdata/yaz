@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-add.c,v $
- * Revision 1.2  1997-04-30 08:52:02  quinn
+ * Revision 1.3  1998-01-05 09:04:57  adam
+ * Fixed bugs in encoders/decoders - Not operator (!) missing.
+ *
+ * Revision 1.2  1997/04/30 08:52:02  quinn
  * Null
  *
  * Revision 1.1  1996/10/10  11:52:18  quinn
@@ -17,7 +20,7 @@
 
 int z_ResultsByDBList (ODR o, Z_ResultsByDBList **p, int opt)
 {
-    if (odr_initmember (o, p, sizeof(**p)))
+    if (!odr_initmember (o, p, sizeof(**p)))
         return opt && odr_ok(o);
     if (odr_sequence_of (o, z_DatabaseName, &(*p)->elements,
         &(*p)->num))
@@ -48,7 +51,7 @@ int z_ResultsByDB_elem (ODR o, Z_ResultsByDB_elem **p, int opt)
 
 int z_ResultsByDB (ODR o, Z_ResultsByDB **p, int opt)
 {
-    if (odr_initmember (o, p, sizeof(**p)))
+    if (!odr_initmember (o, p, sizeof(**p)))
         return opt && odr_ok(o);
     if (odr_sequence_of (o, z_ResultsByDB_elem, &(*p)->elements,
         &(*p)->num))
@@ -111,7 +114,7 @@ int z_SearchInfoReport_elem (ODR o, Z_SearchInfoReport_elem **p, int opt)
 
 int z_SearchInfoReport (ODR o, Z_SearchInfoReport **p, int opt)
 {
-    if (odr_initmember (o, p, sizeof(**p)))
+    if (!odr_initmember (o, p, sizeof(**p)))
         return opt && odr_ok(o);
     if (odr_sequence_of (o, z_SearchInfoReport_elem, &(*p)->elements,
         &(*p)->num))

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-acc.c,v $
- * Revision 1.5  1995-09-29 17:11:53  quinn
+ * Revision 1.6  1998-01-05 09:04:57  adam
+ * Fixed bugs in encoders/decoders - Not operator (!) missing.
+ *
+ * Revision 1.5  1995/09/29 17:11:53  quinn
  * Smallish
  *
  * Revision 1.4  1995/09/27  15:02:41  quinn
@@ -136,7 +139,7 @@ int z_ResponseUnit1(ODR o, Z_ResponseUnit1 **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (odr_sequence_begin(o, p, sizeof(**p)))
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
     return
     	odr_explicit(o, z_PromptId1, &(*p)->promptId, ODR_CONTEXT, 1, 0) &&
