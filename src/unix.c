@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.3 2003-12-30 00:29:53 adam Exp $
+ * $Id: unix.c,v 1.4 2004-04-29 21:19:23 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -342,9 +342,6 @@ static int unix_rcvconnect(COMSTACK h)
     h->state = CS_ST_DATAXFER;
     return 0;
 }
-
-#define CERTF "ztest.pem"
-#define KEYF "ztest.pem"
 
 static int unix_bind(COMSTACK h, void *address, int mode)
 {

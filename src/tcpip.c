@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.4 2004-04-29 08:55:17 adam Exp $
+ * $Id: tcpip.c,v 1.5 2004-04-29 21:19:23 adam Exp $
  */
 
 #include <stdio.h>
@@ -76,8 +76,8 @@ typedef struct tcpip_state
     struct sockaddr_in addr;  /* returned by cs_straddr */
     char buf[128]; /* returned by cs_addrstr */
 #if HAVE_OPENSSL_SSL_H
-    SSL_CTX *ctx;
-    SSL_CTX *ctx_alloc;
+    SSL_CTX *ctx;       /* current CTX. */
+    SSL_CTX *ctx_alloc; /* If =ctx it is owned by CS. If 0 it is not owned */
     SSL *ssl;
 #endif
 } tcpip_state;
@@ -204,20 +204,9 @@ COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
     p->f_put = ssl_put;
     p->type = ssl_type;
     state = (tcpip_state *) p->cprivate;
-    if (vp)
-	state->ctx = vp;
-    else
-    {
-	SSL_load_error_strings();
-	SSLeay_add_all_algorithms();
 
-	state->ctx = state->ctx_alloc = SSL_CTX_new (SSLv23_method());
-	if (!state->ctx)
-	{
-	    tcpip_close(p);
-	    return 0;
-	}
-    }
+    state->ctx = vp;  /* may be NULL */
+
     /* note: we don't handle already opened socket in SSL mode - yet */
     return p;
 }
@@ -295,9 +284,6 @@ int tcpip_more(COMSTACK h)
 int tcpip_connect(COMSTACK h, void *address)
 {
     struct sockaddr_in *add = (struct sockaddr_in *)address;
-#if HAVE_OPENSSL_SSL_H
-    tcpip_state *sp = (tcpip_state *)h->cprivate;
-#endif
     int r;
 #ifdef __sun__
     int recbuflen;
@@ -383,6 +369,18 @@ int tcpip_rcvconnect(COMSTACK h)
 	return -1;
     }
 #if HAVE_OPENSSL_SSL_H
+    if (h->type == ssl_type && !sp->ctx)
+    {
+	SSL_load_error_strings();
+	SSLeay_add_all_algorithms();
+
+	sp->ctx = sp->ctx_alloc = SSL_CTX_new (SSLv23_method());
+	if (!sp->ctx)
+	{
+	    h->cerrno = CSERRORSSL;
+	    return -1;
+	}
+    }
     if (sp->ctx)
     {
 	int res;
@@ -451,6 +449,18 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 
 #if HAVE_OPENSSL_SSL_H
     tcpip_state *sp = (tcpip_state *)h->cprivate;
+    if (h->type == ssl_type && !sp->ctx)
+    {
+	SSL_load_error_strings();
+	SSLeay_add_all_algorithms();
+
+	sp->ctx = sp->ctx_alloc = SSL_CTX_new (SSLv23_method());
+	if (!sp->ctx)
+	{
+	    h->cerrno = CSERRORSSL;
+	    return -1;
+	}
+    }
     if (sp->ctx)
     {
 	if (sp->ctx_alloc)
@@ -1098,6 +1108,18 @@ int static tcpip_set_blocking(COMSTACK p, int blocking)
 }
 
 #if HAVE_OPENSSL_SSL_H
+int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
+{
+    struct tcpip_state *state;
+    if (!cs || cs->type != ssl_type)
+        return 0;
+    state = (struct tcpip_state *) cs->cprivate;
+    if (state->ctx_alloc)
+	return 0;
+    state->ctx = ctx;
+    return 1;
+}
+
 void *cs_get_ssl(COMSTACK cs)
 {
     struct tcpip_state *state;
@@ -1129,6 +1151,11 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     return 0;
 }
 #else
+int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
+{
+    return 0;
+}
+
 void *cs_get_ssl(COMSTACK cs)
 {
     return 0;

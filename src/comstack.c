@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.8 2004-04-29 08:55:17 adam Exp $
+ * $Id: comstack.c,v 1.9 2004-04-29 21:19:23 adam Exp $
  */
 
 #include <string.h>
@@ -121,7 +121,6 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
     {
 	t = tcpip_type;
 	host = type_and_host;
-        
     }
     cs = cs_create (t, blocking, proto);
     if (!cs)

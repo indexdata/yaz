@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.13 2004-04-28 22:44:59 adam Exp $
+ * $Id: comstack.h,v 1.14 2004-04-29 21:19:23 adam Exp $
  */
 
 #ifndef COMSTACK_H
@@ -137,11 +137,11 @@ struct comstack
 #define cs_straddr(handle, str) ((*(handle)->f_straddr)(handle, str))
 #define cs_want_read(handle) ((handle)->io_pending & CS_WANT_READ)
 #define cs_want_write(handle) ((handle)->io_pending & CS_WANT_WRITE)
-#define cs_set_blocking(handle,blocking) ((handle)->f_set_blocking(handle, blocking)
+#define cs_set_blocking(handle,blocking) ((handle)->f_set_blocking(handle, blocking))
 					  
 #define CS_WANT_READ 1
 #define CS_WANT_WRITE 2
-					  
+
 YAZ_EXPORT int cs_look (COMSTACK);
 YAZ_EXPORT const char *cs_strerror(COMSTACK h);
 YAZ_EXPORT const char *cs_errmsg(int n);
@@ -150,6 +150,7 @@ YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host,
 YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
 YAZ_EXPORT int cs_complete_auto(const unsigned char *buf, int len);
 YAZ_EXPORT void *cs_get_ssl(COMSTACK cs);
+YAZ_EXPORT int cs_set_ssl_ctx(COMSTACK cs, void *ctx);
 YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
                                           
 /*

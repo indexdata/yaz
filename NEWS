@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implement cs_set_ssl_ctx which sets SSL_CTX for SSL comstack.
+
+Do not create SSL_CTX in cs_create (ssl_type). Create in tcpip_bind,
+tcpip_rcvconnect instead. This allows user to set custom SSL_CTX.
+
 ZOOM now allows inspection of X509 peer certificate for verification.
 The X509 buffer is retrived by reading ZOOM option "sslPeerCert".
 
