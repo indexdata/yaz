@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.2  1995-08-21 09:11:16  quinn
+ * Revision 1.3  1995-09-12 11:32:06  quinn
+ * Added a looker-upper by name.
+ *
+ * Revision 1.2  1995/08/21  09:11:16  quinn
  * Smallish fixes to suppport new formats.
  *
  * Revision 1.1  1995/05/29  08:17:13  quinn
@@ -94,6 +97,10 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
 
+    {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
+    {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
+    {PROTO_Z3950,   CLASS_TAGSET,  VAL_GILS,      {14,3,-1},   "GILS"        },
+
     /* SR definitions. Note that some of them aren't defined by the
     	standard (yet), but are borrowed from Z3950v3 */
     {PROTO_SR,      CLASS_ABSYN,   VAL_APDU,      {2,1,-1},    "SR-APDU"     },
@@ -142,6 +149,10 @@ static oident oids[] =
     {PROTO_SR,      CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,-1},    "DB. Update"  },
     {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
+
+    {PROTO_SR,      CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
+    {PROTO_SR,      CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
+
     {0,             0,             0,             {-1},        0          }
 };
 
@@ -238,4 +249,14 @@ int *oid_getoidbyent(struct oident *ent)
 	    return ret;
 	}
     return 0;
+}
+
+oid_value oid_getvalbyname(char *name)
+{
+    struct oident *p;
+
+    for (p = oids; *p->oidsuffix >= 0; p++)
+	if (!strcmp(p->desc, name))
+	    return p->value;
+    return VAL_NONE;
 }
