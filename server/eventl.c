@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.23  1997-09-01 08:52:59  adam
+ * Revision 1.24  1997-09-04 14:19:13  adam
+ * Added credits.
+ *
+ * Revision 1.23  1997/09/01 08:52:59  adam
  * New windows NT/95 port using MSV5.0. The test server 'ztest' was
  * moved a separate directory. MSV5.0 project server.dsp created.
  * As an option, the server can now operate as an NT service.

@@ -1,10 +1,16 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
+ * NT server based on threads by
+ *   Chas Woodfield, Fretwell Downing Datasystem.
+ *
  * $Log: statserv.c,v $
- * Revision 1.37  1997-09-01 08:53:01  adam
+ * Revision 1.38  1997-09-04 14:19:14  adam
+ * Added credits.
+ *
+ * Revision 1.37  1997/09/01 08:53:01  adam
  * New windows NT/95 port using MSV5.0. The test server 'ztest' was
  * moved a separate directory. MSV5.0 project server.dsp created.
  * As an option, the server can now operate as an NT service.
