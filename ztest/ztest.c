@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.47 2002-01-17 21:04:24 adam Exp $
+ * $Id: ztest.c,v 1.48 2002-01-17 23:22:40 adam Exp $
  */
 
 /*
@@ -74,9 +74,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     {
     	Z_ItemOrder *it = rr->esr->taskSpecificParameters->u.itemOrder;
 	yaz_log (LOG_LOG, "Received ItemOrder");
-	switch (it->which)
-	{
-	case Z_IOItemOrder_esRequest:
+        if (it->which == Z_IOItemOrder_esRequest)
 	{
 	    Z_IORequest *ir = it->u.esRequest;
 	    Z_IOOriginPartToKeep *k = ir->toKeep;
@@ -187,8 +185,54 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		}
 	    }
 #endif
-	}
-	break;
+            if (k)
+            {
+
+		Z_External *ext = (Z_External *)
+                    odr_malloc (rr->stream, sizeof(*ext));
+		Z_IUOriginPartToKeep *keep = (Z_IUOriginPartToKeep *)
+                    odr_malloc (rr->stream, sizeof(*keep));
+		Z_IOTargetPart *targetPart = (Z_IOTargetPart *)
+		    odr_malloc (rr->stream, sizeof(*targetPart));
+
+		rr->taskPackage = (Z_TaskPackage *)
+                    odr_malloc (rr->stream, sizeof(*rr->taskPackage));
+		rr->taskPackage->packageType =
+		    odr_oiddup (rr->stream, rr->esr->packageType);
+		rr->taskPackage->packageName = 0;
+		rr->taskPackage->userId = 0;
+		rr->taskPackage->retentionTime = 0;
+		rr->taskPackage->permissions = 0;
+		rr->taskPackage->description = 0;
+		rr->taskPackage->targetReference = (Odr_oct *)
+		    odr_malloc (rr->stream, sizeof(Odr_oct));
+		rr->taskPackage->targetReference->buf =
+		    (unsigned char *) odr_strdup (rr->stream, "911");
+		rr->taskPackage->targetReference->len =
+		    rr->taskPackage->targetReference->size =
+		    strlen((char *) (rr->taskPackage->targetReference->buf));
+		rr->taskPackage->creationDateTime = 0;
+		rr->taskPackage->taskStatus = odr_intdup(rr->stream, 0);
+		rr->taskPackage->packageDiagnostics = 0;
+		rr->taskPackage->taskSpecificParameters = ext;
+
+		ext->direct_reference =
+		    odr_oiddup (rr->stream, rr->esr->packageType);
+		ext->indirect_reference = 0;
+		ext->descriptor = 0;
+		ext->which = Z_External_itemOrder;
+		ext->u.itemOrder = (Z_ItemOrder *)
+		    odr_malloc (rr->stream, sizeof(*ext->u.update));
+		ext->u.itemOrder->which = Z_IOItemOrder_taskPackage;
+		ext->u.itemOrder->u.taskPackage =  (Z_IOTaskPackage *)
+		    odr_malloc (rr->stream, sizeof(Z_IOTaskPackage));
+		ext->u.itemOrder->u.taskPackage->originPart = k;
+		ext->u.itemOrder->u.taskPackage->targetPart = targetPart;
+
+                targetPart->itemRequest = 0;
+                targetPart->statusOrErrorReport = 0;
+                targetPart->auxiliaryStatus = 0;
+            }
 	}
     }
     else if (rr->esr->taskSpecificParameters->which == Z_External_update)
@@ -244,6 +288,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                     odr_malloc (rr->stream, sizeof(*keep));
 		Z_IUTargetPart *targetPart = (Z_IUTargetPart *)
 		    odr_malloc (rr->stream, sizeof(*targetPart));
+
 		rr->taskPackage = (Z_TaskPackage *)
                     odr_malloc (rr->stream, sizeof(*rr->taskPackage));
 		rr->taskPackage->packageType =
