@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.17 2003-01-27 21:30:59 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.18 2003-01-28 22:34:17 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -923,6 +923,37 @@ int cql_transform_FILE(cql_transform_t ct,
 
        structure.*                = 4=1
       </programlisting>
+      <para>
+       With the mappings above, the CQL query
+       <screen>
+        computer
+       </screen>
+       is converted to the PQF:
+       <screen>
+        @attr 1=1016 @attr 2=3 @attr 4=1 @attr 3=3 @attr 6=1 "computer"
+       </screen>
+       by rules <literal>qualifier.srw.serverChoice</literal>,
+       <literal>relation.scr</literal>, <literal>structure.*</literal>,
+       <literal>position.any</literal>.
+      </para>
+      <para>
+       CQL query
+       <screen>
+        computer^
+       </screen>
+       is rejected, since <literal>position.right</literal> is
+       undefined.
+      </para>
+      <para>
+       CQL query
+       <screen>
+        >my = "http://www.loc.gov/zing/cql/dc-indexes/v1.0/" my.title = x
+       </screen>
+       is converted to
+       <screen>
+        @attr 1=4 @attr 2=3 @attr 4=1 @attr 3=3 @attr 6=1 "x"
+       </screen>
+      </para>
      </example>
     </sect3>
     <sect3 id="tools.cql.xcql"><title>CQL to XCQL conversion</title>
