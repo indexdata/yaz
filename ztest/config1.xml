@@ -1,0 +1,20 @@
+<!-- $Id: config1.xml,v 1.1 2005-03-01 20:37:01 adam Exp $ -->
+<yazgfs>
+  <listen id="public9900">tcp:@:9900</listen>
+  <listen id="public9901">tcp:@:9901</listen>
+  <server>
+    <host>host1</host>
+    <directory>/var/www/s1</directory>
+    <config>zebra1.cfg</config>
+  </server>
+  <server>
+    <host>host2</host>
+    <directory>/var/www/s2</directory>
+    <config>zebra2.cfg</config>
+  </server>
+  <server listenref="public9901">
+    <directory>/var/www/s3</directory>
+    <config>zebra3.cfg</config>
+    <pqf2cql>../etc/pqf.properties</pqf2cql>
+  </server>
+</yazgfs>

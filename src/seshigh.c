@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.47 2005-02-01 14:46:47 adam Exp $
+ * $Id: seshigh.c,v 1.48 2005-03-01 20:37:01 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -177,6 +177,7 @@ association *create_association(IOCHAN channel, COMSTACK link,
     request_initq(&anew->incoming);
     request_initq(&anew->outgoing);
     anew->proto = cs_getproto(link);
+    anew->cql_transform = 0;
     return anew;
 }
 
@@ -475,8 +476,6 @@ static void assoc_init_reset(association *assoc)
         odr_strdup (assoc->encode, cs_addrstr(assoc->client_link));
 
     yaz_log(log_requestdetail, "peer %s", assoc->init->peer_name);
-
-
 }
 
 static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num)
@@ -623,6 +622,79 @@ static int srw_bend_fetch(association *assoc, int pos,
     return rr.errcode;
 }
 
+static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
+		   Z_Query *query_result)
+{
+    /* have a CQL query and  CQL to PQF transform .. */
+    CQL_parser cp = cql_parser_create();
+    int r;
+    int srw_errcode = 0;
+    const char *add = 0;
+    char rpn_buf[512];
+	    
+    r = cql_parser_string(cp, cql);
+    if (r)
+    {
+	/* CQL syntax error */
+	srw_errcode = 10; 
+    }
+    if (!r)
+    {
+	/* Syntax OK */
+	r = cql_transform_buf(ct,
+			      cql_parser_result(cp),
+			      rpn_buf, sizeof(rpn_buf)-1);
+	if (r)
+	    srw_errcode  = cql_transform_error(ct, &add);
+    }
+    if (!r)
+    {
+	/* Syntax & transform OK. */
+	/* Convert PQF string to Z39.50 to RPN query struct */
+	YAZ_PQF_Parser pp = yaz_pqf_create();
+	Z_RPNQuery *rpnquery = yaz_pqf_parse(pp, odr, rpn_buf);
+	if (!rpnquery)
+	{
+	    size_t off;
+	    const char *pqf_msg;
+	    int code = yaz_pqf_error(pp, &pqf_msg, &off);
+	    yaz_log(YLOG_WARN, "PQF Parser Error %s (code %d)",
+		    pqf_msg, code);
+	    srw_errcode = 10;
+	}
+	else
+	{
+	    query_result->which = Z_Query_type_1;
+	    query_result->u.type_1 = rpnquery;
+	}
+	yaz_pqf_destroy(pp);
+    }
+    cql_parser_destroy(cp);
+    return srw_errcode;
+}
+
+static int cql2pqf_scan(ODR odr, const char *cql, cql_transform_t ct,
+			Z_AttributesPlusTerm *result)
+{
+    Z_Query query;
+    Z_RPNQuery *rpn;
+    int srw_error = cql2pqf(odr, cql, ct, &query);
+    if (srw_error)
+	return srw_error;
+    if (query.which != Z_Query_type_1 && query.which != Z_Query_type_101)
+	return 10; /* bad query type */
+    rpn = query.u.type_1;
+    if (!rpn->RPNStructure) 
+	return 10; /* must be structure */
+    if (rpn->RPNStructure->which != Z_RPNStructure_simple)
+	return 10; /* must be simple */
+    if (rpn->RPNStructure->u.simple->which != Z_Operand_APT)
+	return 10; /* must be attributes plus term node .. */
+    memcpy(result, rpn->RPNStructure->u.simple->u.attributesPlusTerm,
+	   sizeof(*result));
+    return 0;
+}
+		   
 static void srw_bend_search(association *assoc, request *req,
                             Z_SRW_searchRetrieveRequest *srw_req,
                             Z_SRW_searchRetrieveResponse *srw_res,
@@ -647,19 +719,36 @@ static void srw_bend_search(association *assoc, request *req,
 	rr.referenceId = 0;
 	
 	rr.query = (Z_Query *) odr_malloc (assoc->decode, sizeof(*rr.query));
+	rr.query->u.type_1 = 0;
 	
 	if (srw_req->query_type == Z_SRW_query_type_cql)
 	{
-	    ext = (Z_External *) odr_malloc(assoc->decode, sizeof(*ext));
-	    ext->direct_reference = odr_getoidbystr(assoc->decode, 
-						    "1.2.840.10003.16.2");
-	    ext->indirect_reference = 0;
-	    ext->descriptor = 0;
-	    ext->which = Z_External_CQL;
-	    ext->u.cql = srw_req->query.cql;
-	    
-	    rr.query->which = Z_Query_type_104;
-	    rr.query->u.type_104 =  ext;
+	    if (assoc->cql_transform)
+	    {
+		int srw_errcode = cql2pqf(assoc->encode, srw_req->query.cql,
+					  assoc->cql_transform, rr.query);
+		if (srw_errcode)
+		{
+		    yaz_add_srw_diagnostic(assoc->encode,
+					   &srw_res->diagnostics,
+					   &srw_res->num_diagnostics,
+					   srw_errcode, 0);
+		}
+	    }
+	    else
+	    {
+		/* CQL query to backend. Wrap it - Z39.50 style */
+		ext = (Z_External *) odr_malloc(assoc->decode, sizeof(*ext));
+		ext->direct_reference = odr_getoidbystr(assoc->decode, 
+							"1.2.840.10003.16.2");
+		ext->indirect_reference = 0;
+		ext->descriptor = 0;
+		ext->which = Z_External_CQL;
+		ext->u.cql = srw_req->query.cql;
+		
+		rr.query->which = Z_Query_type_104;
+		rr.query->u.type_104 =  ext;
+	    }
 	}
 	else if (srw_req->query_type == Z_SRW_query_type_pqf)
 	{
@@ -687,7 +776,6 @@ static void srw_bend_search(association *assoc, request *req,
 	}
 	else
 	{
-	    rr.query->u.type_1 = 0;
 	    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
 				   &srw_res->num_diagnostics, 11, 0);
 	}
@@ -927,11 +1015,33 @@ static void srw_bend_scan(association *assoc, request *req,
 	else if (srw_req->query_type == Z_SRW_query_type_cql
 		 && assoc->init->bend_srw_scan)
 	{
-	    bsrr->term = 0;
-	    bsrr->attributeset = VAL_NONE;
-	    bsrr->scanClause = srw_req->scanClause.cql;
-	    ((int (*)(void *, bend_scan_rr *))
-	     (*assoc->init->bend_srw_scan))(assoc->backend, bsrr);
+	    if (assoc->cql_transform)
+	    {
+		bsrr->scanClause = 0;
+		bsrr->attributeset = VAL_NONE;
+		bsrr->term = odr_malloc(assoc->decode, sizeof(*bsrr->term));
+		int srw_error = cql2pqf_scan(assoc->encode,
+					     srw_req->scanClause.cql,
+					     assoc->cql_transform,
+					     bsrr->term);
+		if (srw_error)
+		    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+					   &srw_res->num_diagnostics,
+					   srw_error, 0);
+		else
+		{
+		    ((int (*)(void *, bend_scan_rr *))
+		     (*assoc->init->bend_scan))(assoc->backend, bsrr);
+		}
+	    }
+	    else
+	    {
+		bsrr->term = 0;
+		bsrr->attributeset = VAL_NONE;
+		bsrr->scanClause = srw_req->scanClause.cql;
+		((int (*)(void *, bend_scan_rr *))
+		 (*assoc->init->bend_srw_scan))(assoc->backend, bsrr);
+	    }
 	}
 	else
 	{
@@ -1602,7 +1712,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.47 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.48 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1866,11 +1976,24 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
         nmem_transfer(bsrr->stream->mem, reqb->request_mem);
         bsrr->decode = assoc->decode;
         bsrr->print = assoc->print;
-        bsrr->errcode = 0;
         bsrr->hits = 0;
+        bsrr->errcode = 0;
         bsrr->errstring = NULL;
         bsrr->search_info = NULL;
-        (assoc->init->bend_search)(assoc->backend, bsrr);
+
+	if (assoc->cql_transform &&
+	    req->query->which == Z_Query_type_104 &&
+	    req->query->u.type_104->which == Z_External_CQL)
+	{
+	    /* have a CQL query and a CQL to PQF transform .. */
+	    int srw_errcode = 
+		cql2pqf(bsrr->stream, req->query->u.type_104->u.cql,
+			assoc->cql_transform, bsrr->query);
+	    if (srw_errcode)
+		bsrr->errcode = yaz_diag_srw_to_bib1(srw_errcode);
+	}
+	if (!bsrr->errcode)
+	    (assoc->init->bend_search)(assoc->backend, bsrr);
         if (!bsrr->request)  /* backend not ready with the search response */
             return 0;  /* should not be used any more */
     }

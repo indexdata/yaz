@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.5 2005-02-01 14:46:47 adam Exp $
+ * $Id: session.h,v 1.6 2005-03-01 20:37:01 adam Exp $
  */
 /**
  * \file session.h
@@ -12,6 +12,7 @@
 #define SESSION_H
 
 #include <yaz/comstack.h>
+#include <yaz/cql.h>
 #include <yaz/odr.h>
 #include <yaz/oid.h>
 #include <yaz/proto.h>
@@ -21,8 +22,15 @@
 struct gfs_server {
     statserv_options_block cb;
     char *host;
-    int port;
+    int listen_ref;
+    cql_transform_t cql_transform;
     struct gfs_server *next;
+};
+
+struct gfs_listen {
+    char *id;
+    char *address;
+    struct gfs_listen *next;
 };
 
 typedef enum {
@@ -97,6 +105,7 @@ typedef struct association
 
     struct bend_initrequest *init;
     statserv_options_block *last_control;
+    cql_transform_t cql_transform;
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link,

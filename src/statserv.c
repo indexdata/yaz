@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.22 2005-02-07 11:23:47 adam Exp $
+ * $Id: statserv.c,v 1.23 2005-03-01 20:37:01 adam Exp $
  */
 
 /**
@@ -64,6 +64,7 @@
 static IOCHAN pListener = NULL;
 
 static struct gfs_server *gfs_server_list = 0;
+static struct gfs_listen *gfs_listen_list = 0;
 static NMEM gfs_nmem = 0;
 
 static char *me = "statserver"; /* log prefix */
@@ -114,7 +115,7 @@ statserv_options_block control_block = {
     "",                         /* PID fname */
     0,                          /* background daemon */
     "",                         /* SSL certificate filename */
-    "",                         /* XML config filename */
+    ""                          /* XML config filename */
 };
 
 static int max_sessions = 0;
@@ -209,7 +210,21 @@ static struct gfs_server * gfs_server_new()
     memcpy(&n->cb, &control_block, sizeof(control_block));
     n->next = 0;
     n->host = 0;
-    n->port = 0;
+    n->listen_ref = 0;
+    n->cql_transform = 0;
+    return n;
+}
+
+static struct gfs_listen * gfs_listen_new(const char *id, 
+					  const char *address)
+{
+    struct gfs_listen *n = nmem_malloc(gfs_nmem, sizeof(*n));
+    if (id)
+	n->id = nmem_strdup(gfs_nmem, id);
+    else
+	n->id = 0;
+    n->next = 0;
+    n->address = nmem_strdup(gfs_nmem, address);
     return n;
 }
 
@@ -230,13 +245,14 @@ int control_association(association *assoc, const char *host, int force_open)
 	struct gfs_server *gfs;
 	for (gfs = gfs_server_list; gfs; gfs = gfs->next)
 	{
-	    int port_match = 0;
+	    int listen_match = 0;
 	    int host_match = 0;
 	    if ( !gfs->host || (host && gfs->host && !strcmp(host, gfs->host)))
 		host_match = 1;
-	    if (assoc->client_chan->port == gfs->port)
-		port_match= 1;
-	    if (port_match && host_match)
+	    if (!gfs->listen_ref ||
+		gfs->listen_ref == assoc->client_chan->chan_id)
+		listen_match = 1;
+	    if (listen_match && host_match)
 	    {
 		if (force_open ||
 		    (assoc->last_control != &gfs->cb && assoc->backend))
@@ -248,6 +264,7 @@ int control_association(association *assoc, const char *host, int force_open)
 		    xfree(assoc->init);
 		    assoc->init = 0;
 		}
+		assoc->cql_transform = gfs->cql_transform;
 		assoc->last_control = &gfs->cb;
 		statserv_setcontrol(&gfs->cb);
 		return 1;
@@ -255,12 +272,14 @@ int control_association(association *assoc, const char *host, int force_open)
 	}
 	statserv_setcontrol(0);
 	assoc->last_control = 0;
+	assoc->cql_transform = 0;
 	return 0;
     }
     else
     {
 	statserv_setcontrol(&control_block);
 	assoc->last_control = &control_block;
+	assoc->cql_transform = 0;
 	return 1;
     }
 }
@@ -268,6 +287,7 @@ int control_association(association *assoc, const char *host, int force_open)
 static void xml_config_read()
 {
     struct gfs_server **gfsp = &gfs_server_list;
+    struct gfs_listen **gfslp = &gfs_listen_list;
 #if HAVE_XML2
     xmlNodePtr ptr = xml_config_get_root();
 
@@ -275,32 +295,72 @@ static void xml_config_read()
 	return;
     for (ptr = ptr->children; ptr; ptr = ptr->next)
     {
-	if (ptr->type == XML_ELEMENT_NODE &&
-	    !strcmp((const char *) ptr->name, "server"))
+	if (ptr->type != XML_ELEMENT_NODE)
+	    continue;
+	struct _xmlAttr *attr = ptr->properties;
+	if (!strcmp((const char *) ptr->name, "listen"))
+	{
+	    /*
+	      <listen id="listenerid">tcp:@:9999</listen>
+	    */
+	    const char *id = 0;
+	    const char *address =
+		nmem_dup_xml_content(gfs_nmem, ptr->children);
+	    for ( ; attr; attr = attr->next)
+		if (!strcmp(attr->name, "id")
+		    && attr->children && attr->children->type == XML_TEXT_NODE)
+		    id = nmem_dup_xml_content(gfs_nmem, attr->children);
+	    if (address)
+	    {
+		*gfslp = gfs_listen_new(id, address);
+		gfslp = &(*gfslp)->next;
+		*gfslp = 0; /* make listener list consistent for search */
+	    }
+	}
+	else if (!strcmp((const char *) ptr->name, "server"))
 	{
 	    xmlNodePtr ptr_children = ptr->children;
 	    xmlNodePtr ptr;
-	    
+	    const char *listenref = 0;
+
+	    for ( ; attr; attr = attr->next)
+		if (!strcmp(attr->name, "listenref")
+		    && attr->children && attr->children->type == XML_TEXT_NODE)
+		    listenref = nmem_dup_xml_content(gfs_nmem, attr->children);
 	    *gfsp = gfs_server_new();
+	    if (listenref)
+	    {
+		int id_no;
+		struct gfs_listen *gl = gfs_listen_list;
+		for (id_no = 1; gl; gl = gl->next, id_no++)
+		    if (gl->id && !strcmp(gl->id, listenref))
+		    {
+			(*gfsp)->listen_ref = id_no;
+			break;
+		    }
+		if (!gl)
+		    yaz_log(YLOG_WARN, "Non-existent listenref '%s' in server "
+			    "config element", listenref);
+	    }
 	    for (ptr = ptr_children; ptr; ptr = ptr->next)
 	    {
-		if (ptr->type == XML_ELEMENT_NODE &&
-		    !strcmp((const char *) ptr->name, "host"))
+		if (ptr->type != XML_ELEMENT_NODE)
+		    continue;
+		if (!strcmp((const char *) ptr->name, "host"))
 		{
 		    (*gfsp)->host = nmem_dup_xml_content(gfs_nmem,
 							 ptr->children);
 		}
-		if (ptr->type == XML_ELEMENT_NODE &&
-		    !strcmp((const char *) ptr->name, "port"))
-		{
-		    (*gfsp)->port = atoi(nmem_dup_xml_content(gfs_nmem,
-							 ptr->children));
-		}
-		if (ptr->type == XML_ELEMENT_NODE &&
-		    !strcmp((const char *) ptr->name, "config"))
+		if (!strcmp((const char *) ptr->name, "config"))
 		{
 		    strcpy((*gfsp)->cb.configname,
 			   nmem_dup_xml_content(gfs_nmem, ptr->children));
+		}
+		if (!strcmp((const char *) ptr->name, "pqf2cql"))
+		{
+		    (*gfsp)->cql_transform = cql_transform_open_fname(
+			nmem_dup_xml_content(gfs_nmem, ptr->children)
+			);
 		}
 	    }
 	    gfsp = &(*gfsp)->next;
@@ -346,30 +406,13 @@ static void xml_config_close()
 
 static void xml_config_add_listeners()
 {
-#define MAX_PORTS 200
-    struct gfs_server *gfs = gfs_server_list;
-    int i, ports[MAX_PORTS];
-    for (i = 0; i<MAX_PORTS; i++)
-	ports[i] = 0;
+    struct gfs_listen *gfs = gfs_listen_list;
+    int id_no;
 
-    for (; gfs; gfs = gfs->next)
+    for (id_no = 1; gfs; gfs = gfs->next, id_no++)
     {
-	int port = gfs->port;
-	if (port)
-	{
-	    for (i = 0; i<MAX_PORTS && ports[i] != port; i++)
-		if (ports[i] == 0)
-		{
-		    ports[i] = port;
-		    break;
-		}
-	}
-    }
-    for (i = 0; i<MAX_PORTS && ports[i]; i++)
-    {
-	char where[80];
-	sprintf(where, "@:%d", ports[i]);
-	add_listener(where, ports[i]);
+	if (gfs->address)
+	    add_listener(gfs->address, id_no);
     }
 }
 
@@ -840,7 +883,7 @@ static void *new_session (void *vp)
     }
 
     if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, mask,
-				   parent_chan->port)))
+				   parent_chan->chan_id)))
     {
 	yaz_log(YLOG_FATAL, "Failed to create iochan");
 	return 0;

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.h,v 1.4 2005-02-01 14:46:47 adam Exp $
+ * $Id: eventl.h,v 1.5 2005-03-01 20:37:01 adam Exp $
  */
 
 /**
@@ -39,7 +39,7 @@ int force_event;
     time_t max_idle;
     
     struct iochan *next;
-    int port; /* listening port (0 if none ) */
+    int chan_id; /* listening port (0 if none ) */
 } *IOCHAN;
 
 #define iochan_destroy(i) (void)((i)->destroyed = 1)
