@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.8 2003-01-06 08:20:27 adam Exp $
+ * $Id: log.h,v 1.9 2003-02-12 14:17:50 heikki Exp $
  */
 
 #ifndef LOG_H
@@ -43,8 +43,9 @@ YAZ_BEGIN_CDECL
 #define LOG_FILE   0x0020
 #define LOG_APP    0x0040     /* For application level events such as new-connection */
 #define LOG_MALLOC 0x0080     /* debugging mallocs */
+#define LOG_NOTIME 0x0100     /* do not output date and time */
 
-#define LOG_ALL   0xff7f
+#define LOG_ALL   (0xffff&~LOG_MALLOC&~LOG_NOTIME)
 
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 

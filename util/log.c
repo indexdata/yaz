@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.35 2003-02-11 16:35:17 heikki Exp $
+ * $Id: log.c,v 1.36 2003-02-12 14:17:50 heikki Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -53,6 +53,7 @@ static struct {
     { LOG_ERRNO, ""},
     { LOG_MALLOC, "malloc"},
     { LOG_APP,   "app"  },
+    { LOG_NOTIME, "" },
  /*   { LOG_ALL,   "all"  }, */
     { 0,         "none" },
     { 0, NULL }
@@ -135,7 +136,7 @@ void yaz_log(int level, const char *fmt, ...)
     int i;
     time_t ti;
     struct tm *tim;
-    char tbuf[50];
+    char tbuf[50]="";
     int o_level = level;
 
     if (!(level & l_level))
@@ -164,17 +165,20 @@ void yaz_log(int level, const char *fmt, ...)
 /* WIN32 */
     if (o_level & LOG_ERRNO)
     {
-	strcat(buf, " [");
-	yaz_strerror(buf+strlen(buf), 2048);
-	strcat(buf, "]");
+        strcat(buf, " [");
+        yaz_strerror(buf+strlen(buf), 2048);
+        strcat(buf, "]");
     }
     va_end (ap);
     if (start_hook_func)
         (*start_hook_func)(o_level, buf, start_hook_info);
     ti = time(0);
     tim = localtime(&ti);
-    strftime(tbuf, 50, "%H:%M:%S-%d/%m", tim);
-    fprintf(l_file, "%s: %s%s %s%s\n", tbuf, l_prefix, flags,
+    if (l_level & LOG_NOTIME)
+      tbuf[0]='\0';
+    else
+      strftime(tbuf, 50, "%H:%M:%S-%d/%m: ", tim);
+    fprintf(l_file, "%s%s%s %s%s\n", tbuf, l_prefix, flags,
             l_prefix2, buf);
     fflush(l_file);
     if (end_hook_func)
