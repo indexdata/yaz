@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.25 2000-04-05 07:39:54 adam Exp $
+dnl $Id: configure.in,v 1.26 2000-04-11 21:22:28 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -32,7 +32,7 @@ else
 fi
 AC_MSG_CHECKING(whether proto.h needs to be generated)
 yaz_include=${srcdir}/include/yaz
-if test -e ${yaz_include}/proto.h && cmp -s ${yaz_include}/$HFILE ${yaz_include}/proto.h; then
+if test -r ${yaz_include}/proto.h && cmp -s ${yaz_include}/$HFILE ${yaz_include}/proto.h; then
 	AC_MSG_RESULT(no)
 else
 	AC_MSG_RESULT(yes)

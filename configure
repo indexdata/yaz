@@ -1638,7 +1638,7 @@ fi
 echo $ac_n "checking whether proto.h needs to be generated""... $ac_c" 1>&6
 echo "configure:1640: checking whether proto.h needs to be generated" >&5
 yaz_include=${srcdir}/include/yaz
-if test -e ${yaz_include}/proto.h && cmp -s ${yaz_include}/$HFILE ${yaz_include}/proto.h; then
+if test -r ${yaz_include}/proto.h && cmp -s ${yaz_include}/$HFILE ${yaz_include}/proto.h; then
 	echo "$ac_t""no" 1>&6
 else
 	echo "$ac_t""yes" 1>&6
