@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.16 2001-11-13 23:00:42 adam Exp $
+## $Id: Makefile.am,v 1.17 2001-11-19 09:16:37 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -31,7 +31,7 @@ $(srcdir)/xmalloc.c: $(top_srcdir)/util/xmalloc.c
 
 LDFLAGS=-version-info 1:0:0
 
-CFLAGS =-DTRACE_XMALLOC=2 -I$(top_srcdir)/include -I$(top_srcdir)/server @CFLAGSTHREADS@
+AM_CFLAGS=-DTRACE_XMALLOC=2 -I$(top_srcdir)/include -I$(top_srcdir)/server @CFLAGSTHREADS@
 
 bin_SCRIPTS = yaz-config
 

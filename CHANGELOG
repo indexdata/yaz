@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.8.3 2001/11/19
+
 YAZ client enables setnames only if target supports it.
 
 *** ZOOM. Prefix for ZOOM definitions changed from Z3950_ to ZOOM_.
