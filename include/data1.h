@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.22  1997-09-01 08:49:48  adam
+ * Revision 1.23  1997-09-01 08:58:04  adam
+ * Removed declaration of data1_matchstr since it's a macro.
+ *
+ * Revision 1.22  1997/09/01 08:49:48  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -393,7 +396,6 @@ YAZ_EXPORT data1_tagset *data1_read_tagset(char *file);
 YAZ_EXPORT data1_element *data1_getelementbytagname(data1_absyn *abs,
     data1_element *parent, char *tagname);
 YAZ_EXPORT Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o, int *len);
-YAZ_EXPORT int data1_matchstr(char *s1, char *s2);
 YAZ_EXPORT data1_tag *data1_gettagbyname(data1_tagset *s, char *name);
 YAZ_EXPORT void data1_free_tree(data1_node *t);
 YAZ_EXPORT char *data1_nodetobuf(data1_node *n, int select, int *len);
