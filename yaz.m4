@@ -1,4 +1,4 @@
-## $Id: yaz.m4,v 1.5 2004-02-05 11:54:09 adam Exp $
+## $Id: yaz.m4,v 1.6 2004-02-05 14:15:42 adam Exp $
 ## 
 # Use this m4 funciton for autoconf if you use YAZ in your own
 # configure script.
@@ -58,8 +58,6 @@ AC_DEFUN([YAZ_INIT],
 			if test "$have_yaz_version" -lt "$req_yaz_version"; then
 				AC_MSG_ERROR([$YAZVERSION. Requires $2 or later])
 			fi
-		else
-			AC_MSG_RESULT([$YAZVERSION])
 		fi
 	fi
 ]) 
