@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-util.h,v 1.11 2004-11-18 15:18:13 heikki Exp $
+ * $Id: yaz-util.h,v 1.12 2004-12-08 09:06:06 adam Exp $
  */
 /**
  * \file yaz-util.h
@@ -36,7 +36,7 @@
 #include <yaz/yconfig.h>
 #include <yaz/yaz-version.h>
 #include <yaz/xmalloc.h>
-#include <yaz/ylog.h>   /* used to be log.h, but that is deprecated */
+#include <yaz/log.h>  
 #include <yaz/tpath.h>
 #include <yaz/options.h>
 #include <yaz/wrbuf.h>
