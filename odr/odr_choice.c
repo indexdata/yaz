@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.18  2000-02-29 13:44:55  adam
+ * Revision 1.19  2002-02-20 14:42:30  adam
+ * Fixed BER decoding of OPTIONAL CHOICE
+ *
+ * Revision 1.18  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.17  1999/11/30 13:47:11  adam
@@ -76,6 +79,12 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
     	return 0;
     if (o->direction != ODR_DECODE && !*(char**)p)
     	return 0;
+
+    if (o->direction == ODR_DECODE)
+    {
+        *which = -1;
+        *(char**)p = 0;
+    }
     o->choice_bias = -1;
 
     if (o->direction == ODR_PRINT)
@@ -131,8 +140,6 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
 	    	return 1;
 	}
     }
-    *which = -1;
-    *(char*)p = 0;
     return 0;
 }
 

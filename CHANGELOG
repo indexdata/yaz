@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.6 2002/MM/DD
 
+Fixed BER decoding of OPTIONAL CHOICE.
+
 Added patch by Rustam T. Usmanov that implements Z39.50 duplicate
 detection service (Z39.50-1995 Amendment 2) and Language Negotiation (3).
 See:
