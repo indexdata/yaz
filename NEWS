@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added CCL facility r=r "range" which is similar to r=o "ordered" but
+does not require white-space before and after the dash in a range, e.g.
+x=-1990 is equivalent to x <= 1990 iff r=r, but equivalent to x= -1980
+iff r=o.
+
 Fixed a few AC_TRY_LINK configure tests that did not operate properly
 due to new GCC removing "redundant" code.
 

@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.3 2004-08-11 20:13:36 adam Exp $
+ * $Id: cclfind.c,v 1.4 2004-09-29 20:37:50 adam Exp $
  *
  * Old Europagate log:
  *
@@ -217,6 +217,7 @@ void ccl_rpn_delete (struct ccl_rpn_node *rpn)
     case CCL_RPN_PROX:
         ccl_rpn_delete (rpn->u.p[0]);
         ccl_rpn_delete (rpn->u.p[1]);
+        ccl_rpn_delete (rpn->u.p[2]);
         break;
     }
     xfree (rpn);
@@ -535,43 +536,13 @@ static struct ccl_rpn_node *search_term (CCL_parser cclp,
     return search_term_x(cclp, qa, list, 0);
 }
 
-static struct ccl_rpn_node *qualifiers2 (CCL_parser cclp,
-                                         struct ccl_rpn_attr **ap)
+static
+struct ccl_rpn_node *qualifiers_order (CCL_parser cclp,
+				       struct ccl_rpn_attr **ap, char *attset)
 {
-    char *attset;
-    int rel;
+    int rel = 0;
+    struct ccl_rpn_node *p;
 
-    if (!qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_ORDER, &attset))
-    {                
-        /* unordered relation */
-        struct ccl_rpn_node *p;
-        if (KIND != CCL_TOK_EQ)
-        {
-            cclp->error_code = CCL_ERR_EQ_EXPECTED;
-            return NULL;
-        }
-        ADVANCE;
-        if (KIND == CCL_TOK_LP)
-        {
-            ADVANCE;
-            if (!(p = find_spec (cclp, ap)))
-            {
-                return NULL;
-            }
-            if (KIND != CCL_TOK_RP)
-            {
-                cclp->error_code = CCL_ERR_RP_EXPECTED;
-                ccl_rpn_delete (p);
-                return NULL;
-            }
-            ADVANCE;
-        }
-        else
-            p = search_terms (cclp, ap);
-        return p;
-    }
-    /* ordered relation ... */
-    rel = 0;
     if (cclp->look_token->len == 1)
     {
         if (cclp->look_token->name[0] == '<')
@@ -591,75 +562,182 @@ static struct ccl_rpn_node *qualifiers2 (CCL_parser cclp,
             rel = 6;
     }
     if (!rel)
+    {
         cclp->error_code = CCL_ERR_BAD_RELATION;
+	return NULL;
+    }
+    ADVANCE;  /* skip relation */
+    if (rel == 3 &&
+	qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_PORDER, 0))
+    {
+	/* allow - inside term and treat it as range _always_ */
+	/* relation is =. Extract "embedded" - to separate terms */
+	if (KIND == CCL_TOK_TERM)
+	{
+	    int i;
+	    for (i = 0; i<cclp->look_token->len; i++)
+	    {
+		if (cclp->look_token->name[i] == '-')
+		    break;
+	    }
+	    
+	    if (cclp->look_token->len > 1 && i == 0)
+	    {   /*  -xx*/
+		struct ccl_token *ntoken = ccl_token_add (cclp->look_token);
+
+		ntoken->kind = CCL_TOK_TERM;
+		ntoken->name = cclp->look_token->name + 1;
+		ntoken->len = cclp->look_token->len - 1;
+
+		cclp->look_token->len = 1;
+		cclp->look_token->name = "-";
+	    }
+	    else if (cclp->look_token->len > 1 && i == cclp->look_token->len-1)
+	    {	/* xx- */
+		struct ccl_token *ntoken = ccl_token_add (cclp->look_token);
+
+		ntoken->kind = CCL_TOK_TERM;
+		ntoken->name = "-";
+		ntoken->len = 1;
+
+		(cclp->look_token->len)--;
+	    }
+	    else if (cclp->look_token->len > 2 && i < cclp->look_token->len)
+	    {	/* xx-yy */
+		struct ccl_token *ntoken1 = ccl_token_add (cclp->look_token);
+		struct ccl_token *ntoken2 = ccl_token_add (ntoken1);
+
+		ntoken1->kind = CCL_TOK_TERM;  /* generate - */
+		ntoken1->name = "-";
+		ntoken1->len = 1;
+
+		ntoken2->kind = CCL_TOK_TERM;  /* generate yy */
+		ntoken2->name = cclp->look_token->name + (i+1);
+		ntoken2->len = cclp->look_token->len - (i+1);
+
+		cclp->look_token->len = i;     /* adjust xx */
+	    }
+	    else if (i == cclp->look_token->len &&
+		     cclp->look_token->next &&
+		     cclp->look_token->next->kind == CCL_TOK_TERM &&
+		     cclp->look_token->next->len > 1 &&
+		     cclp->look_token->next->name[0] == '-')
+		     
+	    {   /* xx -yy */
+		/* we _know_ that xx does not have - in it */
+		struct ccl_token *ntoken = ccl_token_add (cclp->look_token);
+
+		ntoken->kind = CCL_TOK_TERM;    /* generate - */
+		ntoken->name = "-";
+		ntoken->len = 1;
+
+		(ntoken->next->name)++;        /* adjust yy */
+		(ntoken->next->len)--; 
+	    }
+	}
+    }
+        
+    if (rel == 3 &&
+	KIND == CCL_TOK_TERM &&
+	cclp->look_token->next && cclp->look_token->next->len == 1 &&
+	cclp->look_token->next->name[0] == '-')
+    {
+	struct ccl_rpn_node *p1;
+	if (!(p1 = search_term (cclp, ap)))
+	    return NULL;
+	ADVANCE;                   /* skip '-' */
+	if (KIND == CCL_TOK_TERM)  /* = term - term  ? */
+	{
+	    struct ccl_rpn_node *p2;
+	    
+	    if (!(p2 = search_term (cclp, ap)))
+	    {
+		ccl_rpn_delete (p1);
+		return NULL;
+	    }
+	    p = mk_node (CCL_RPN_AND);
+	    p->u.p[0] = p1;
+	    add_attr_numeric (p1, attset, CCL_BIB1_REL, 4);
+	    p->u.p[1] = p2;
+	    add_attr_numeric (p2, attset, CCL_BIB1_REL, 2);
+	    return p;
+	}
+	else                       /* = term -    */
+	{
+	    add_attr_numeric (p1, attset, CCL_BIB1_REL, 4);
+	    return p1;
+	}
+    }
+    else if (rel == 3 &&
+	     cclp->look_token->len == 1 &&
+	     cclp->look_token->name[0] == '-')   /* = - term  ? */
+    {
+	ADVANCE;
+	if (!(p = search_term (cclp, ap)))
+	    return NULL;
+	add_attr_numeric (p, attset, CCL_BIB1_REL, 2);
+	return p;
+    }
+    else if (KIND == CCL_TOK_LP)
+    {
+	ADVANCE;
+	if (!(p = find_spec (cclp, ap)))
+	    return NULL;
+	if (KIND != CCL_TOK_RP)
+	{
+	    cclp->error_code = CCL_ERR_RP_EXPECTED;
+	    ccl_rpn_delete (p);
+	    return NULL;
+	}
+	ADVANCE;
+	return p;
+    }
     else
     {
-        struct ccl_rpn_node *p;
-        
-        ADVANCE;                      /* skip relation */
-        if (KIND == CCL_TOK_TERM &&
-            cclp->look_token->next && cclp->look_token->next->len == 1 &&
-            cclp->look_token->next->name[0] == '-')
-        {
-            struct ccl_rpn_node *p1;
-            if (!(p1 = search_term (cclp, ap)))
-                return NULL;
-            ADVANCE;                   /* skip '-' */
-            if (KIND == CCL_TOK_TERM)  /* = term - term  ? */
-            {
-                struct ccl_rpn_node *p2;
-                
-                if (!(p2 = search_term (cclp, ap)))
-                {
-                    ccl_rpn_delete (p1);
-                    return NULL;
-                }
-                p = mk_node (CCL_RPN_AND);
-                p->u.p[0] = p1;
-                add_attr_numeric (p1, attset, CCL_BIB1_REL, 4);
-                p->u.p[1] = p2;
-                add_attr_numeric (p2, attset, CCL_BIB1_REL, 2);
-                return p;
-            }
-            else                       /* = term -    */
-            {
-                add_attr_numeric (p1, attset, CCL_BIB1_REL, 4);
-                return p1;
-            }
-        }
-        else if (cclp->look_token->len == 1 &&
-                 cclp->look_token->name[0] == '-')   /* = - term  ? */
-        {
-            ADVANCE;
-            if (!(p = search_term (cclp, ap)))
-                return NULL;
-            add_attr_numeric (p, attset, CCL_BIB1_REL, 2);
-            return p;
-        }
-        else if (KIND == CCL_TOK_LP)
-        {
-            ADVANCE;
-            if (!(p = find_spec (cclp, ap)))
-                return NULL;
-            if (KIND != CCL_TOK_RP)
-            {
-                cclp->error_code = CCL_ERR_RP_EXPECTED;
-                ccl_rpn_delete (p);
-                return NULL;
-            }
-            ADVANCE;
-            return p;
-        }
-        else
-        {
-            if (!(p = search_terms (cclp, ap)))
-                return NULL;
-            add_attr_numeric (p, attset, CCL_BIB1_REL, rel);
-            return p;
-        }
-        cclp->error_code = CCL_ERR_TERM_EXPECTED;
+	if (!(p = search_terms (cclp, ap)))
+	    return NULL;
+	add_attr_numeric (p, attset, CCL_BIB1_REL, rel);
+	return p;
     }
+    cclp->error_code = CCL_ERR_TERM_EXPECTED;
     return NULL;
+}
+
+static
+struct ccl_rpn_node *qualifiers2 (CCL_parser cclp, struct ccl_rpn_attr **ap)
+{
+    char *attset;
+    struct ccl_rpn_node *p;
+    
+    if (qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_ORDER, &attset)
+	|| qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_PORDER, &attset))
+	return qualifiers_order(cclp, ap, attset);
+
+    /* unordered relation */
+    if (KIND != CCL_TOK_EQ)
+    {
+	cclp->error_code = CCL_ERR_EQ_EXPECTED;
+	return NULL;
+    }
+    ADVANCE;
+    if (KIND == CCL_TOK_LP)
+    {
+	ADVANCE;
+	if (!(p = find_spec (cclp, ap)))
+	{
+	    return NULL;
+	}
+	if (KIND != CCL_TOK_RP)
+	{
+	    cclp->error_code = CCL_ERR_RP_EXPECTED;
+	    ccl_rpn_delete (p);
+	    return NULL;
+	}
+	ADVANCE;
+    }
+    else
+	p = search_terms (cclp, ap);
+    return p;
 }
 
 /*
@@ -1037,8 +1115,6 @@ static struct ccl_rpn_node *find_spec (CCL_parser cclp,
 struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list)
 {
     struct ccl_rpn_node *p;
-
-    
 
     cclp->look_token = list;
     p = find_spec (cclp, NULL);

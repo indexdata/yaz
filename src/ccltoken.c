@@ -44,7 +44,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.2 2004-08-11 11:44:30 adam Exp $
+ * $Id: ccltoken.c,v 1.3 2004-09-29 20:37:50 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -317,6 +317,22 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
     return first;
 }
 
+struct ccl_token *ccl_token_add (struct ccl_token *at)
+{
+    struct ccl_token *n = (struct ccl_token *)xmalloc (sizeof(*n));
+    ccl_assert(n);
+    n->next = at->next;
+    n->prev = at;
+    at->next = n;
+    if (n->next)
+	n->next->prev = n;
+
+    n->kind = CCL_TOK_TERM;
+    n->name = 0;
+    n->len = 0;
+    return n;
+}
+    
 struct ccl_token *ccl_tokenize (const char *command)
 {
     CCL_parser cclp = ccl_parser_create ();

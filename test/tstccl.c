@@ -1,12 +1,13 @@
 /*
- * Copyright (c) 2002-2003, Index Data
+ * Copyright (c) 2002-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.3 2004-09-22 11:21:51 adam Exp $
+ * $Id: tstccl.c,v 1.4 2004-09-29 20:37:51 adam Exp $
  */
 
 /* CCL test */
 
+#include <string.h>
 #include <yaz/ccl.h>
 
 struct ccl_tst {
@@ -23,10 +24,22 @@ static struct ccl_tst query_str[] = {
     { "x1 and", 0},
     { "tix=x5", 0},
     { "spid%æserne", "@prox 0 1 0 2 k 2 @attr 4=2 @attr 1=1016 spid @attr 4=2 @attr 1=1016 æserne "},
+    { "date=1980", "@attr 2=3 1980 "},
+    { "date=234-1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
+    { "date=234- 1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
+    { "date=234 -1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
+    { "date=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
+    { "date=-1980", "@attr 2=2 1980 "},
+    { "date=- 1980", "@attr 2=2 1980 "},
+    { "x=-1980", "@attr 2=3 -1980 "},
+    { "x=- 1980", "@attr 2=2 1980 "},
+    { "x= -1980", "@attr 2=3 -1980 "},
+    { "x=234-1990", "@attr 2=3 234-1990 "},
+    { "x=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
     {0, 0}
 };
 
-void tst1(int pass)
+void tst1(int pass, int *number_of_errors)
 {
     CCL_parser parser = ccl_parser_create ();
     CCL_bibset bibset = ccl_qual_mk();
@@ -39,6 +52,8 @@ void tst1(int pass)
         ccl_qual_fitem(bibset, "u=4    s=pw t=l,r", "ti");
         ccl_qual_fitem(bibset, "1=1016 s=al,pw",    "term");
         ccl_qual_fitem(bibset, "1=/my/title",         "dc.title");
+        ccl_qual_fitem(bibset, "r=r",         "date");
+        ccl_qual_fitem(bibset, "r=o",         "x");
 	break;
     case 1:
 	strcpy(tstline, "ti u=4    s=pw t=l,r");
@@ -49,12 +64,21 @@ void tst1(int pass)
 
         strcpy(tstline, "dc.title 1=/my/title");
         ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "date r=r # ordered relation");
+        ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "x r=o # ordered relation");
+        ccl_qual_line(bibset, tstline);
 	break;
     case 2:
         ccl_qual_buf(bibset, "ti u=4    s=pw t=l,r\n"
 		     "term 1=1016 s=al,pw\r\n"
 		     "\n"
-		     "dc.title 1=/my/title\n");
+		     "dc.title 1=/my/title\n"
+		     "date r=r\n" 
+		     "x r=o\n"
+	    );
 	break;
     default:
 	exit(23);
@@ -78,14 +102,14 @@ void tst1(int pass)
 		printf ("Failed %s\n", query_str[i].query);
 		printf (" got:%s:\n", wrbuf_buf(wrbuf));
 		printf (" expected failure\n");
-		exit(3);
+		(*number_of_errors)++;
 	    }
 	    else if (strcmp(wrbuf_buf(wrbuf), query_str[i].result))
 	    {
 		printf ("Failed %s\n", query_str[i].query);
 		printf (" got:%s:\n", wrbuf_buf(wrbuf));
 		printf (" expected:%s:\n", query_str[i].result);
-		exit(2);
+		(*number_of_errors)++;
 	    }
 	    ccl_rpn_delete(rpn);
 	    wrbuf_free(wrbuf, 1);
@@ -95,7 +119,7 @@ void tst1(int pass)
 	    printf ("Failed %s\n", query_str[i].query);
 	    printf (" got failure\n");
 	    printf (" expected:%s:\n", query_str[i].result);
-	    exit(4);
+	    (*number_of_errors)++;
 	}
     }	
     ccl_parser_destroy (parser);
@@ -104,8 +128,15 @@ void tst1(int pass)
 
 int main(int argc, char **argv)
 {
-    tst1(0);
-    tst1(1);
-    tst1(2);
+    int number_of_errors = 0;
+    tst1(0, &number_of_errors);
+    if (number_of_errors)
+	exit(1);
+    tst1(1, &number_of_errors);
+    if (number_of_errors)
+	exit(1);
+    tst1(2, &number_of_errors);
+    if (number_of_errors)
+	exit(1);
     exit(0);
 }

@@ -45,7 +45,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.17 2004-09-22 12:17:24 adam Exp $
+ * $Id: ccl.h,v 1.18 2004-09-29 20:37:50 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -182,6 +182,7 @@ typedef struct ccl_qualifiers *CCL_bibset;
 #define CCL_BIB1_STR_AND_LIST (-2)
 #define CCL_BIB1_STR_OR_LIST (-3)
 #define CCL_BIB1_REL_ORDER (-1)
+#define CCL_BIB1_REL_PORDER (-2)
 
 #define CCL_BIB1_TRU_CAN_LEFT (-1)
 #define CCL_BIB1_TRU_CAN_RIGHT (-2)
@@ -250,6 +251,9 @@ YAZ_EXPORT struct ccl_token *ccl_token_simple (const char *command);
 
 /* Delete token list */
 YAZ_EXPORT void ccl_token_del (struct ccl_token *list);
+
+/* Add single token after node at */
+YAZ_EXPORT struct ccl_token *ccl_token_add (struct ccl_token *at);
 
 /* Parse CCL Find command - NULL-terminated string */
 YAZ_EXPORT struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset,

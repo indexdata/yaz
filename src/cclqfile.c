@@ -44,7 +44,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.3 2004-09-22 11:21:51 adam Exp $
+ * $Id: cclqfile.c,v 1.4 2004-09-29 20:37:50 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -132,6 +132,8 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
                 type = CCL_BIB1_REL;
                 if (!ccl_stricmp (qual_value, "o"))
                     value = CCL_BIB1_REL_ORDER;
+                else if (!ccl_stricmp (qual_value, "r"))
+                    value = CCL_BIB1_REL_PORDER;
                 break;                
             case 'p':
             case 'P':
