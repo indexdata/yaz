@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.105  2000-10-02 11:07:44  adam
+ * Revision 1.106  2000-11-13 09:44:59  adam
+ * Work on SCAN: RPN2CCL conversion and proper "next" scan.
+ *
+ * Revision 1.105  2000/10/02 11:07:44  adam
  * Added peer_name member for bend_init handler. Changed the YAZ
  * client so that tcp: can be avoided in target spec.
  *
@@ -400,7 +403,9 @@ static enum oid_value schema = VAL_NONE;
 static int sent_close = 0;
 static NMEM session_mem = NULL;      /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
-static char last_scan[512] = "0";
+static char last_scan_line[512] = "0";
+static char last_scan_query[512] = "0";
+
 static char last_cmd[100] = "?";
 static FILE *marcdump = 0;
 static char *refid = NULL;
@@ -1800,16 +1805,57 @@ int cmd_cancel(char *arg)
     return 2;
 }
 
-int send_scanrequest(char *string, int pp, int num)
+int send_scanrequest(const char *query, int pp, int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
+    int use_rpn = 1;
+    int oid[OID_SIZE];
     
-    if (!(req->termListAndStartPoint =
-	  p_query_scan(out, protocol, &req->attributeSet, string)))
+#if CCL2RPN
+    if (queryType == QueryType_CCL2RPN)
+    {
+	oident bib1;
+	int error, pos;
+	struct ccl_rpn_node *rpn;
+
+	rpn = ccl_find_str (bibset,  query, &error, &pos);
+	if (error)
+	{
+            printf("CCL ERROR: %s\n", ccl_err_msg(error));
+            return 0;
+	}
+	use_rpn = 0;
+	bib1.proto = PROTO_Z3950;
+	bib1.oclass = CLASS_ATTSET;
+	bib1.value = VAL_BIB1;
+	req->attributeSet = oid_ent_to_oid (&bib1, oid);
+	if (!(req->termListAndStartPoint = ccl_scan_query (out, rpn)))
+	{
+	    printf("Couldn't convert CCL to Scan term\n");
+	    return 0;
+	}
+	ccl_rpn_delete (rpn);
+    }
+#endif
+    if (use_rpn && !(req->termListAndStartPoint =
+		     p_query_scan(out, protocol, &req->attributeSet, query)))
     {
 	printf("Prefix query error\n");
 	return -1;
+    }
+    if (term && *term)
+    {
+	if (req->termListAndStartPoint->term &&
+	    req->termListAndStartPoint->term->which == Z_Term_general &&
+	    req->termListAndStartPoint->term->u.general)
+	{
+	    req->termListAndStartPoint->term->u.general->buf =
+		odr_strdup(out, term);
+	    req->termListAndStartPoint->term->u.general->len =
+		req->termListAndStartPoint->term->u.general->size =
+		strlen(term);
+	}
     }
     req->referenceId = set_refid (out);
     req->num_databaseNames = num_databaseNames;
@@ -1956,13 +2002,16 @@ void display_term(Z_TermInfo *t)
 {
     if (t->term->which == Z_Term_general)
     {
-        printf("%.*s (%d)\n", t->term->u.general->len, t->term->u.general->buf,
-            t->globalOccurrences ? *t->globalOccurrences : -1);
-        sprintf(last_scan, "%.*s", t->term->u.general->len,
+        printf("%.*s", t->term->u.general->len, t->term->u.general->buf);
+        sprintf(last_scan_line, "%.*s", t->term->u.general->len,
             t->term->u.general->buf);
     }
     else
-        printf("Term type not general.\n");
+        printf("Term (not general)");
+    if (t->globalOccurrences)
+	printf (" (%d)\n", *t->globalOccurrences);
+    else
+	printf ("\n");
 }
 
 void process_scanResponse(Z_ScanResponse *res)
@@ -2086,12 +2135,15 @@ int cmd_scan(char *arg)
     }
     if (*arg)
     {
-        if (send_scanrequest(arg, 1, 20) < 0)
+	strcpy (last_scan_query, arg);
+        if (send_scanrequest(arg, 1, 20, 0) < 0)
             return 0;
     }
     else
-        if (send_scanrequest(last_scan, 1, 20) < 0)
+    {
+        if (send_scanrequest(last_scan_query, 1, 20, last_scan_line) < 0)
             return 0;
+    }
     return 2;
 }
 
