@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.9  1995-06-06 08:15:19  quinn
+ * Revision 1.10  1995-06-06 14:56:58  quinn
+ * Better diagnostics.
+ *
+ * Revision 1.9  1995/06/06  08:15:19  quinn
  * Cosmetic.
  *
  * Revision 1.8  1995/06/05  10:52:22  quinn
@@ -414,7 +417,7 @@ static int send_searchRequest(char *arg)
 
 static int process_searchResponse(Z_SearchResponse *res)
 {
-    if (res->searchStatus)
+    if (*res->searchStatus)
 	printf("Search was a success.\n");
     else
 	printf("Search was a bloomin' failure.\n");

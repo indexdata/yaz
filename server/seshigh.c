@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.32  1995-06-06 08:41:44  quinn
+ * Revision 1.33  1995-06-06 14:57:05  quinn
+ * Better diagnostics.
+ *
+ * Revision 1.32  1995/06/06  08:41:44  quinn
  * Better diagnostics.
  *
  * Revision 1.31  1995/06/06  08:15:37  quinn
@@ -954,7 +957,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     else
     {
     	if (req->termListAndStartPoint->term->which == Z_Term_general)
-	    logf(LOG_DEBUG, " term: %.*s",
+	    logf(LOG_DEBUG, " term: '%.*s'",
 		req->termListAndStartPoint->term->u.general->len,
 		req->termListAndStartPoint->term->u.general->buf);
 	srq.num_bases = req->num_databaseNames;
@@ -963,10 +966,6 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	srq.term = req->termListAndStartPoint;
 	srq.term_position = req->preferredPositionInResponse ?
 	    *req->preferredPositionInResponse : 1;
-	if (req->termListAndStartPoint->term->which == Z_Term_general)
-	    logf(LOG_DEBUG, "  term: %.*s",
-	    	req->termListAndStartPoint->term->u.general->len,
-		req->termListAndStartPoint->term->u.general->buf);
 	if (!(srs = bend_scan(assoc->backend, &srq, 0)))
 	    ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto, 2, 0);
 	else if (srs->errcode)
