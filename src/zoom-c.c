@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.17 2004-01-07 21:02:42 adam Exp $
+ * $Id: zoom-c.c,v 1.18 2004-01-12 12:10:17 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -918,7 +918,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.17 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.18 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1485,6 +1485,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
 {
     char type[40];
     char charset[40];
+    char xpath[512];
     const char *cp;
     int i;
     Z_NamePlusRecord *npr;
@@ -1507,7 +1508,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
     }
     type[i] = '\0';
     charset[0] = '\0';
-    if (type_spec[i] == ';')
+    while (type_spec[i] == ';')
     {
 	i++;
 	while (type_spec[i] == ' ')
@@ -1523,8 +1524,16 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
 	    }
 	    charset[i] = '\0';
 	}
-    }	
-
+	else if (!strncmp(type_spec+i, "xpath=", 6))
+	{
+	    cp = type_spec+i+6;
+	    for (i = 0; cp[i] && i < sizeof(xpath)-1; i++)
+		xpath[i] = cp[i];
+	    xpath[i] = '\0';
+	} 
+	while (type_spec[i] == ' ')
+	    i++;
+    }
     if (!strcmp (type, "database"))
     {
     	if (len)
@@ -2211,7 +2220,7 @@ ZOOM_scanset_display_term (ZOOM_scanset scan, size_t pos,
 
         if (t->displayTerm)
 	{
-	    term = (const char *) t->term->u.general->buf;
+	    term = t->displayTerm;
 	    *len = strlen(term);
 	}
 	else if (t->term->which == Z_Term_general)
