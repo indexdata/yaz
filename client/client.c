@@ -2,11 +2,12 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.186 2003-03-19 09:45:55 adam Exp $
+ * $Id: client.c,v 1.187 2003-04-29 21:04:46 adam Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif
@@ -38,7 +39,7 @@
 #include <yaz/sortspec.h>
 
 #include <yaz/ill.h>
-
+#include <yaz/srw.h>
 #include <yaz/yaz-ccl.h>
 
 #if HAVE_READLINE_READLINE_H
@@ -59,6 +60,8 @@
 static char *codeset = 0;               /* character set for output */
 
 static ODR out, in, print;              /* encoding and decoding streams */
+static ODR srw_sr_odr_out = 0;
+static Z_SRW_PDU *srw_sr = 0;
 static FILE *apdu_file = 0;
 static FILE *ber_file = 0;
 static COMSTACK conn = 0;               /* our z-association */
@@ -74,7 +77,8 @@ static Z_ElementSetNames *elementSetNames = 0;
 static int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 static enum oid_value recordsyntax = VAL_USMARC;
-static enum oid_value schema = VAL_NONE;
+//static enum oid_value schema = VAL_NONE;
+static char *schema = 0;
 static int sent_close = 0;
 static NMEM session_mem = NULL;         /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
@@ -441,6 +445,17 @@ void cmd_open_remember_last_open_command(const char* arg, char* new_open_command
 
 int cmd_open(const char *arg)
 {
+    static char cur_host[200];
+    if (arg)
+    {
+        strncpy (cur_host, arg, sizeof(cur_host)-1);
+        cur_host[sizeof(cur_host)-1] = 0;
+    }
+    return session_connect(cur_host);
+}
+
+int session_connect(const char *arg)
+{
     void *add;
     char type_and_host[101];
     const char *basep = 0;
@@ -472,13 +487,16 @@ int cmd_open(const char *arg)
         printf ("Couldn't create comstack\n");
         return 0;
     }
-    if (conn->protocol == PROTO_HTTP)
+#if HAVE_XML2
+#else
+    if (conn->protocol == PROTO_Z3950)
     {
-        printf("HTTP transport not supported\n");
+        printf ("SRW not enabled in this YAZ\n");
         cs_close(conn);
         conn = 0;
         return 0;
     }
+#endif
     printf("Connecting...");
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
@@ -495,13 +513,15 @@ int cmd_open(const char *arg)
         return 0;
     }
     printf("OK.\n");
-    if (conn->protocol == PROTO_Z3950)
-        send_initRequest(type_and_host);
     if (basep && *basep)
         cmd_base (basep);
-    return 2;
+    if (conn->protocol == PROTO_Z3950)
+    {
+        send_initRequest(type_and_host);
+        return 2;
+    }
+    return 0;
 }
-
 
 void try_reconnect() 
 {
@@ -865,6 +885,118 @@ static int send_deleteResultSetRequest(const char *arg)
     printf("Sent deleteResultSetRequest.\n");
     return 2;
 }
+
+#if HAVE_XML2
+static int send_srw(Z_SRW_PDU *sr)
+{
+    const char *charset = 0;
+    const char *host_port = 0;
+    const char *path = "/";
+    char ctype[50];
+    Z_SOAP_Handler h[2] = {
+        {"http://www.loc.gov/zing/srw/v1.0/", 0, (Z_SOAP_fun) yaz_srw_codec},
+        {0, 0, 0}
+    };
+    ODR o = odr_createmem(ODR_ENCODE);
+    int ret;
+    Z_SOAP *p = odr_malloc(o, sizeof(*p));
+    Z_GDU *gdu;
+
+
+    gdu = z_get_HTTP_Request(out);
+    gdu->u.HTTP_Request->path = odr_strdup(out, path);
+
+    if (host_port)
+    {
+        const char *cp0 = strstr(host_port, "://");
+        const char *cp1 = 0;
+        if (cp0)
+            cp0 = cp0+3;
+        else
+            cp0 = host_port;
+
+        cp1 = strchr(cp0, '/');
+        if (!cp1)
+            cp1 = cp0+strlen(cp0);
+
+        if (cp0 && cp1)
+        {
+            char *h = odr_malloc(out, cp1 - cp0 + 1);
+            memcpy (h, cp0, cp1 - cp0);
+            h[cp1-cp0] = '\0';
+            z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
+                              "host", h);
+        }
+    }
+
+    strcpy(ctype, "text/xml");
+    if (charset && strlen(charset) < 20)
+    {
+        strcat(ctype, "; charset=");
+        strcat(ctype, charset);
+    }
+    z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
+                      "Content-Type", ctype);
+    z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
+                      "SOAPAction", "\"\"");
+    p->which = Z_SOAP_generic;
+    p->u.generic = odr_malloc(o, sizeof(*p->u.generic));
+    p->u.generic->no = 0;
+    p->u.generic->ns = 0;
+    p->u.generic->p = sr;
+    p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
+
+    ret = z_soap_codec_enc(o, &p,
+                           &gdu->u.HTTP_Request->content_buf,
+                           &gdu->u.HTTP_Request->content_len, h,
+                           charset);
+
+    if (z_GDU(out, &gdu, 0, 0))
+    {
+        /* encode OK */
+        char *buf_out;
+        int len_out;
+        int r;
+        buf_out = odr_getbuf(out, &len_out, 0);
+        
+        /* we don't odr_reset(out), since we may need the buffer again */
+
+        r = cs_put(conn, buf_out, len_out);
+
+        odr_destroy(o);
+        
+        if (r >= 0)
+            return 2;
+    }
+    return 0;
+}
+#endif
+
+#if HAVE_XML2
+static int send_SRW_searchRequest(const char *arg)
+{
+    Z_SRW_PDU *sr = 0;
+    
+    if (!srw_sr)
+    {
+        assert(srw_sr_odr_out == 0);
+        srw_sr_odr_out = odr_createmem(ODR_ENCODE);
+    }
+    odr_reset(srw_sr_odr_out);
+
+    /* save this for later .. when fetching individual records */
+    srw_sr = sr = yaz_srw_get(srw_sr_odr_out, Z_SRW_searchRetrieve_request);
+    sr->u.request->query_type = Z_SRW_query_type_cql;
+    sr->u.request->query.cql = odr_strdup(srw_sr_odr_out, arg);
+
+    sr = yaz_srw_get(out, Z_SRW_searchRetrieve_request);
+    sr->u.request->query_type = Z_SRW_query_type_cql;
+    sr->u.request->query.cql = odr_strdup(out, arg);
+    if (schema)
+        sr->u.request->recordSchema = schema;
+    return send_srw(sr);
+}
+#endif
 
 static int send_searchRequest(const char *arg)
 {
@@ -1516,6 +1648,16 @@ static int send_itemorder(const char *type, int itemno)
     return 0;
 }
 
+static int only_z3950()
+{
+    if (conn && conn->protocol == PROTO_HTTP)
+    {
+	printf ("Not supported by SRW\n");
+	return 1;
+    }
+    return 0;
+}
+
 static int cmd_update(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
@@ -1529,6 +1671,8 @@ static int cmd_update(const char *arg)
     int action_no;
     Z_External *record_this = 0;
 
+    if (only_z3950())
+	return 0;
     *action = 0;
     *recid = 0;
     *fname = 0;
@@ -1642,7 +1786,9 @@ static int cmd_itemorder(const char *arg)
 {
     char type[12];
     int itemno;
-    
+   
+    if (only_z3950())
+	return 0;
     if (sscanf (arg, "%10s %d", type, &itemno) != 2)
         return 0;
 
@@ -1668,8 +1814,20 @@ static int cmd_find(const char *arg)
             return 0;
         }
     }
-    if (!send_searchRequest(arg))
+    if (conn->protocol == PROTO_HTTP)
+    {
+#if HAVE_XML2
+        if (!send_SRW_searchRequest(arg))
+            return 0;
+#else
         return 0;
+#endif
+    }
+    else
+    {
+        if (!send_searchRequest(arg))
+            return 0;
+    }
     return 2;
 }
 
@@ -1680,6 +1838,8 @@ static int cmd_delete(const char *arg)
         printf("Not connected yet\n");
         return 0;
     }
+    if (only_z3950())
+	return 0;
     if (!send_deleteResultSetRequest(arg))
         return 0;
     return 2;
@@ -1694,6 +1854,8 @@ static int cmd_ssub(const char *arg)
 
 static int cmd_lslb(const char *arg)
 {
+    if (only_z3950())
+	return 0;
     if (!(largeSetLowerBound = atoi(arg)))
         return 0;
     return 1;
@@ -1701,6 +1863,8 @@ static int cmd_lslb(const char *arg)
 
 static int cmd_mspn(const char *arg)
 {
+    if (only_z3950())
+	return 0;
     if (!(mediumSetPresentNumber = atoi(arg)))
         return 0;
     return 1;
@@ -1734,6 +1898,30 @@ static int cmd_setnames(const char *arg)
 
 /* PRESENT SERVICE ----------------------------- */
 
+static void parse_show_args(const char *arg_c, char *setstring,
+                            int *start, int *number)
+{
+    char arg[40];
+    char *p;
+
+    strncpy(arg, arg_c, sizeof(arg)-1);
+    arg[sizeof(arg)-1] = '\0';
+
+    if ((p = strchr(arg, '+')))
+    {
+        *number = atoi(p + 1);
+        *p = '\0';
+    }
+    if (*arg)
+        *start = atoi(arg);
+    if (p && (p=strchr(p+1, '+')))
+        strcpy (setstring, p+1);
+    else if (setnumber >= 0)
+        sprintf(setstring, "%d", setnumber);
+    else
+        *setstring = '\0';
+}
+
 static int send_presentRequest(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
@@ -1746,23 +1934,11 @@ static int send_presentRequest(const char *arg)
     char setstring[100];
 
     req->referenceId = set_refid (out);
-    if ((p = strchr(arg, '+')))
-    {
-        nos = atoi(p + 1);
-        *p = 0;
-    }
-    if (*arg)
-        setno = atoi(arg);
-    if (p && (p=strchr(p+1, '+')))
-    {
-        strcpy (setstring, p+1);
+
+    parse_show_args(arg, setstring, &setno, &nos);
+    if (*setstring)
         req->resultSetId = setstring;
-    }
-    else if (setnumber >= 0)
-    {
-        sprintf(setstring, "%d", setnumber);
-        req->resultSetId = setstring;
-    }
+
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
     prefsyn.proto = protocol;
@@ -1771,13 +1947,13 @@ static int send_presentRequest(const char *arg)
     req->preferredRecordSyntax =
         odr_oiddup (out, oid_ent_to_oid(&prefsyn, oid));
 
-    if (schema != VAL_NONE)
+    if (schema)
     {
         oident prefschema;
 
         prefschema.proto = protocol;
         prefschema.oclass = CLASS_SCHEMA;
-        prefschema.value = schema;
+        prefschema.value = oid_getvalbyname(schema);
 
         req->recordComposition = &compo;
         compo.which = Z_RecordComp_complex;
@@ -1825,7 +2001,25 @@ static int send_presentRequest(const char *arg)
     printf("Sent presentRequest (%d+%d).\n", setno, nos);
     return 2;
 }
-    
+
+#if HAVE_XML2
+static int send_SRW_presentRequest(const char *arg)
+{
+    char setstring[100];
+    int nos = 1;
+    Z_SRW_PDU *sr = srw_sr;
+
+    if (!sr)
+        return 0;
+    parse_show_args(arg, setstring, &setno, &nos);
+    sr->u.request->startRecord = odr_intdup(out, setno);
+    sr->u.request->maximumRecords = odr_intdup(out, nos);
+    if (schema)
+        sr->u.request->recordSchema = schema;
+    return send_srw(sr);
+}
+#endif
+
 static void close_session (void)
 {
     cs_close (conn);
@@ -1835,6 +2029,13 @@ static void close_session (void)
         nmem_destroy (session_mem);
         session_mem = NULL;
     }
+    if (srw_sr)
+    {
+        odr_destroy(srw_sr_odr_out);
+        srw_sr_odr_out = 0;
+        srw_sr = 0;
+    }
+    assert (srw_sr_odr_out == 0);
     sent_close = 0;
     odr_reset(out);
     odr_reset(in);
@@ -1880,8 +2081,20 @@ static int cmd_show(const char *arg)
         printf("Not connected yet\n");
         return 0;
     }
-    if (!send_presentRequest(arg))
+    if (conn->protocol == PROTO_HTTP)
+    {
+#if HAVE_XML2
+        if (!send_SRW_presentRequest(arg))
+            return 0;
+#else
         return 0;
+#endif
+    }
+    else
+    {
+        if (!send_presentRequest(arg))
+            return 0;
+    }
     return 2;
 }
 
@@ -1905,6 +2118,8 @@ int cmd_cancel(const char *arg)
         printf("Session not initialized yet\n");
         return 0;
     }
+    if (only_z3950())
+	return 0;
     if (!ODR_MASK_GET(session->options, Z_Options_triggerResourceCtrl))
     {
         printf("Target doesn't support cancel (trigger resource ctrl)\n");
@@ -1924,6 +2139,8 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
     Z_ScanRequest *req = apdu->u.scanRequest;
     int oid[OID_SIZE];
     
+    if (only_z3950())
+	return 0;
     if (queryType == QueryType_CCL2RPN)
     {
         oident bib1;
@@ -1994,6 +2211,8 @@ int send_sortrequest(const char *arg, int newset)
         odr_malloc (out, sizeof(*sksl));
     char setstring[32];
 
+    if (only_z3950())
+	return 0;
     if (setnumber >= 0)
         sprintf (setstring, "%d", setnumber);
     else
@@ -2114,6 +2333,8 @@ int cmd_sort_generic(const char *arg, int newset)
         printf("Session not initialized yet\n");
         return 0;
     }
+    if (only_z3950())
+	return 0;
     if (!ODR_MASK_GET(session->options, Z_Options_sort))
     {
         printf("Target doesn't support sort\n");
@@ -2140,6 +2361,8 @@ int cmd_sort_newset (const char *arg)
 
 int cmd_scan(const char *arg)
 {
+    if (only_z3950())
+	return 0;
     if (!conn)
     {
         try_reconnect();
@@ -2170,17 +2393,10 @@ int cmd_scan(const char *arg)
 
 int cmd_schema(const char *arg)
 {
-    if (!arg || !*arg)
-    {
-        schema = VAL_NONE;
-        return 1;
-    }
-    schema = oid_getvalbyname (arg);
-    if (schema == VAL_NONE)
-    {
-        printf ("unknown schema\n");
-        return 0;
-    }
+    xfree(schema);
+    schema = 0;
+    if (arg && *arg)
+        schema = xstrdup(arg);
     return 1;
 }
 
@@ -2277,6 +2493,8 @@ int cmd_close(const char *arg)
     Z_Close *req;
     if (!conn)
         return 0;
+    if (only_z3950())
+	return 0;
 
     apdu = zget_APDU(out, Z_APDU_close);
     req = apdu->u.close;
@@ -2430,6 +2648,8 @@ int cmd_set_apdufile(const char *arg)
         if (!apdu_file)
             perror("unable to open apdu log file");
     }
+    if (apdu_file)
+        odr_setprint(print, apdu_file);
     return 1;
 }
 
@@ -2655,55 +2875,184 @@ static void initialize(void)
 struct timeval tv_start, tv_end;
 #endif
 
-void wait_and_handle_responce() 
+static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
 {
+    int i;
+
+    printf ("Received SRW SearchRetrieveResponse\n");
     
+    for (i = 0; i<res->num_diagnostics; i++)
+    {
+        printf ("SRW diagnostic %d %s\nDetails: %s\n",
+                *res->diagnostics[i].code,
+                yaz_diag_srw_str(*res->diagnostics[i].code),
+                res->diagnostics[i].details);
+    }
+    if (res->numberOfRecords)
+        printf ("Number of hits: %d\n", *res->numberOfRecords);
+    for (i = 0; i<res->num_records; i++)
+    {
+        int pos;
+        Z_SRW_record *rec = res->records + i;
+
+        if (rec->recordPosition)
+        {
+            printf ("pos=%d", *rec->recordPosition);
+            setno = *rec->recordPosition + 1;
+        }
+        if (rec->recordSchema)
+            printf (" scheam=%d", *rec->recordSchema);
+        printf ("\n");
+        if (rec->recordData_buf && rec->recordData_len)
+        {
+            fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout);
+            printf ("\n");
+        }
+    }
+}
+
+static void set_HTTP_error (int error,
+                            const char *addinfo, const char *addinfo2)
+{
+
+
+}
+
+
+static void http_response(Z_HTTP_Response *hres)
+{
+    int ret = -1;
+    const char *content_type = z_HTTP_header_lookup(hres->headers,
+                                                    "Content-Type");
+    const char *connection_head = z_HTTP_header_lookup(hres->headers,
+                                                       "Connection");
+    yaz_log (LOG_LOG, "http_response");
+
+    if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
+    {
+        Z_SOAP *soap_package = 0;
+        ODR o = odr_createmem(ODR_DECODE);
+        Z_SOAP_Handler soap_handlers[2] = {
+            {"http://www.loc.gov/zing/srw/v1.0/", 0,
+             (Z_SOAP_fun) yaz_srw_codec},
+            {0, 0, 0}
+        };
+        ret = z_soap_codec(o, &soap_package,
+                           &hres->content_buf, &hres->content_len,
+                           soap_handlers);
+        if (!ret && soap_package->which == Z_SOAP_generic &&
+            soap_package->u.generic->no == 0)
+        {
+            Z_SRW_PDU *sr = soap_package->u.generic->p;
+            if (sr->which == Z_SRW_searchRetrieve_response)
+                handle_srw_response(sr->u.response);
+            else
+                ret = -1;
+        }
+        else if (!ret && (soap_package->which == Z_SOAP_fault
+                          || soap_package->which == Z_SOAP_error))
+        {
+            printf ("HTTP Error Status=%d\n", hres->code);
+            printf ("SOAP Fault code %s\n",
+                    soap_package->u.fault->fault_code);
+            printf ("SOAP Fault string %s\n", 
+                    soap_package->u.fault->fault_string);
+        }
+        else
+            ret = -1;
+        odr_destroy(o);
+    }
+    if (ret)
+    {
+        if (hres->code != 200)
+            set_HTTP_error(hres->code, 0, 0);
+        else
+        {
+            printf ("decoding of SRW package failed\n");
+        }
+        close_session();
+    }
+    if (!strcmp(hres->version, "1.0"))
+    {
+        /* HTTP 1.0: only if Keep-Alive we stay alive.. */
+        if (!connection_head || strcmp(connection_head, "Keep-Alive"))
+            close_session();
+    }
+    else 
+    {
+        /* HTTP 1.1: only if no close we stay alive .. */
+        if (connection_head && !strcmp(connection_head, "close"))
+            close_session();
+    }
+}
+
+void wait_and_handle_response() 
+{
+    int reconnect_ok = 1;
     int res;
     char *netbuffer= 0;
     int netbufferlen = 0;
-    Z_APDU *apdu;
+    Z_GDU *gdu;
     
-    
-    if (conn)
+    while(conn)
     {
-        do
+        printf ("cs_get....\n");
+        res = cs_get(conn, &netbuffer, &netbufferlen);
+        if (reconnect_ok && res <= 0 && conn->protocol == PROTO_HTTP)
         {
-            if ((res = cs_get(conn, &netbuffer, &netbufferlen)) < 0)
+            cs_close(conn);
+            conn = 0;
+            cmd_open(0);
+            reconnect_ok = 0;
+            if (conn)
             {
-                printf("Target closed connection\n");
-                close_session ();
-                break;
-            }
-            if (!res)
-            {
-                printf("Target closed connection.\n");
-                close_session ();
-                break;
-            }
-            odr_reset(in); /* release APDU from last round */
-            record_last = 0;
-            odr_setbuf(in, netbuffer, res, 0);
-            if (!z_APDU(in, &apdu, 0, 0))
-            {
-                FILE *f = ber_file ? ber_file : stdout;
-                odr_perror(in, "Decoding incoming APDU");
-                fprintf(f, "[Near %d]\n", odr_offset(in));
-                fprintf(f, "Packet dump:\n---------\n");
-                odr_dumpBER(f, netbuffer, res);
-                fprintf(f, "---------\n");
-                if (apdu_file)
-                    z_APDU(print, &apdu, 0, 0);
-                close_session ();
-                break;
-            }
-            if (ber_file)
-                odr_dumpBER(ber_file, netbuffer, res);
-            if (apdu_file && !z_APDU(print, &apdu, 0, 0))
-            {
-                odr_perror(print, "Failed to print incoming APDU");
-                odr_reset(print);
+                char *buf_out;
+                int len_out;
+                
+                buf_out = odr_getbuf(out, &len_out, 0);
+                
+                cs_put(conn, buf_out, len_out);
+                
+                odr_reset(out);
                 continue;
             }
+        }
+        else if (res <= 0)
+        {
+            printf("Target closed connection\n");
+            close_session();
+            break;
+        }
+        odr_reset(out);
+        odr_reset(in); /* release APDU from last round */
+        record_last = 0;
+        odr_setbuf(in, netbuffer, res, 0);
+        
+        printf ("got input packet %d bytes\n", res);
+        if (!z_GDU(in, &gdu, 0, 0))
+        {
+            FILE *f = ber_file ? ber_file : stdout;
+            odr_perror(in, "Decoding incoming APDU");
+            fprintf(f, "[Near %d]\n", odr_offset(in));
+            fprintf(f, "Packet dump:\n---------\n");
+            odr_dumpBER(f, netbuffer, res);
+            fprintf(f, "---------\n");
+            if (apdu_file)
+                z_GDU(print, &gdu, 0, 0);
+            close_session ();
+            break;
+        }
+        if (ber_file)
+            odr_dumpBER(ber_file, netbuffer, res);
+        if (apdu_file && !z_GDU(print, &gdu, 0, 0))
+        {
+            odr_perror(print, "Failed to print incoming APDU");
+            odr_reset(print);
+                continue;
+        }
+        if (gdu->which == Z_GDU_Z3950)
+        {
+            Z_APDU *apdu = gdu->u.z3950;
             switch(apdu->which)
             {
             case Z_APDU_initResponse:
@@ -2751,7 +3100,15 @@ void wait_and_handle_responce()
                 close_session ();
             }
         }
-        while (conn && cs_more(conn));
+        else if (gdu->which == Z_GDU_HTTP_Response)
+        {
+            http_response(gdu->u.HTTP_Response);
+        }
+        if (conn && !cs_more(conn))
+            break;
+    }
+    if (conn)
+    {
 #if HAVE_GETTIMEOFDAY
         gettimeofday (&tv_end, 0);
 #if 0
@@ -2925,7 +3282,7 @@ int cmd_list_all(const char* args) {
     
     /* print present related options */
     printf("Format               : %s\n",yaz_z3950_oid_value_to_str(recordsyntax,CLASS_RECSYN));
-    printf("Schema               : %s\n",yaz_z3950_oid_value_to_str(schema,CLASS_SCHEMA));
+    printf("Schema               : %s\n",schema);
     printf("Elements             : %s\n",elementSetNames?elementSetNames->u.generic:"");
     
     /* loging options */
@@ -3170,7 +3527,7 @@ void process_cmd_line(char* line)
     if(apdu_file) fflush(apdu_file);
     
     if (res >= 2)
-        wait_and_handle_responce();
+        wait_and_handle_response();
     
     if(apdu_file)
         fflush(apdu_file);
