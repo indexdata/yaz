@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.19  1998-02-11 11:53:33  adam
+ * Revision 1.20  1998-05-18 10:10:40  adam
+ * Minor change to avoid C++ warning.
+ *
+ * Revision 1.19  1998/02/11 11:53:33  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.18  1997/09/29 07:15:25  adam
@@ -250,7 +253,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
 
     p->iofile = s;
     p->type = tcpip_type;
-    p->protocol = protocol;
+    p->protocol = (enum oid_proto) protocol;
 
     p->f_connect = tcpip_connect;
     p->f_rcvconnect = tcpip_rcvconnect;
