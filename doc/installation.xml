@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.10 2002-03-25 11:37:34 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.11 2002-05-22 11:19:20 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -329,7 +329,7 @@
     is located. Customize the installation by editing the
     <filename>makefile</filename> file (for example by using notepad).
     
-    The following summarises the most important settings in that file:
+    The following summarizes the most important settings in that file:
 
     <variablelist>
      <varlistentry><term><literal>DEBUG</literal></term>
@@ -423,7 +423,7 @@
      Some people are confused by the fact that we use the nmake
      tool to build &yaz;. They think they have to do that too - in order
      to make their WIN32 applications work with &yaz;. The good news is that
-     you don't have to. You can use the integrated environement of
+     you don't have to. You can use the integrated environment of
      Visual Studio if desired for your own application.
     </para>
     <para>

@@ -1,4 +1,4 @@
-<!-- $Id: comstack.xml,v 1.7 2002-02-24 12:23:43 adam Exp $ -->
+<!-- $Id: comstack.xml,v 1.8 2002-05-22 11:19:20 adam Exp $ -->
  <chapter id="comstack"><title>The COMSTACK Module</title>
 
   <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>
@@ -299,12 +299,12 @@ if (buf)
 
    <para>
     Initiate a connection with the target at <literal>address</literal>
-    (more onaddresses below). The function will return 0 on success, and 1 if
+    (more on addresses below). The function will return 0 on success, and 1 if
     the operation does not complete immediately (this will only
     happen on a nonblocking endpoint). In this case, use
     <function>cs_rcvconnect</function> to complete the operation,
-    when <function>select(2)</function> reports input pending on the
-    association.
+    when <function>select(2)</function> or <function>poll(2)</function>
+    reports input pending on the association.
    </para>
 
    <synopsis>
@@ -446,7 +446,7 @@ if (buf)
     COMSTACK cs_create_host (const char *str, int blocking, void **vp);
    </synopsis>
    <para>
-    which is just a wrapper around <function>cs_create</function> and
+    which is just a wrapper for <function>cs_create</function> and
     <function>cs_straddr</function>. The <parameter>str</parameter>
     is similar to that described for <function>cs_straddr</function>
     but with a prefix denoting the &comstack; type. Prefixes supported

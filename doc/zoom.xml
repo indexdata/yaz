@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.17 2002-01-28 09:27:48 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.18 2002-05-22 11:19:20 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -14,12 +14,12 @@
    became available,
    an implementation for &yaz; was quickly developed. For the first time, it is
    now as easy (or easier!) to develop clients than servers with &yaz;. This
-   chapter describes the &zoom; C binding. Before going futher, please
+   chapter describes the &zoom; C binding. Before going further, please
    reconsider whether C is the right programming language for the job.
    There are other language bindings available for &yaz;, and still
    more
    are in active development. See the
-   <ulink url="http://zoom.z3950.org/">ZOOM website</ulink> for
+   <ulink url="http://zoom.z3950.org/">ZOOM web-site</ulink> for
    more information.
   </para>
 
@@ -42,7 +42,7 @@
   </para>
   <para>
    In each of the sections below you'll find a sub section called
-   protocol behavior, that descries how the API maps to the Z39.50
+   protocol behavior, that describes how the API maps to the Z39.50
    protocol.
   </para>
   <sect1 id="zoom.connections"><title>Connections</title>
@@ -69,7 +69,7 @@
     a connection immediately, thus allowing you to specify options
     before establishing network connection using the function
     <function>ZOOM_connection_connect</function>. 
-    If the portnumber, <literal>portnum</literal>, is zero, the
+    If the port number, <literal>portnum</literal>, is zero, the
     <literal>host</literal> is consulted for a port specification.
     If no port is given, 210 is used. A colon denotes the beginning of
     a port number in the host string. If the host string includes a
@@ -94,7 +94,7 @@
      Function <function>ZOOM_connection_option_get</function> returns
     the value for an option given by <parameter>key</parameter>.
    </para>
-   <table frame="sides" colsep="1"><title>ZOOM Connection Options</title>
+   <table frame="top"><title>ZOOM Connection Options</title>
     <tgroup cols="3">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
@@ -138,9 +138,21 @@
       <row><entry>
         preferredMessageSize</entry><entry> Maximum size of multiple records.
        </entry><entry>1 MB</entry></row>
+      <row><entry>
+        lang</entry><entry> Language for negotiation.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        charset</entry><entry> Character set for negotiation.
+       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
    </table>
+   <para>
+    If either option <literal>lang</literal> or <literal>charset</literal>
+    are defined, then 
+    <ulink url="http://lcweb.loc.gov/z3950/agency/defns/charneg-3.html">
+    Character Set and Language Negotiation</ulink> is in effect.
+   </para>
    <synopsis>
      int ZOOM_connection_error (ZOOM_connection c, const char **cp,
                                  const char **addinfo);
@@ -156,7 +168,7 @@
    <sect2><title>Protocol behavior</title>
     <para>
      The calls <function>ZOOM_connection_new</function> and
-     <function>ZOOM_connection_connect</function> establises a TCP/IP
+     <function>ZOOM_connection_connect</function> establishes a TCP/IP
       connection and sends an Initialize Request to the target if
       possible. In addition, the calls waits for an Initialize Response
       from the target and the result is inspected (OK or rejected).
@@ -312,14 +324,14 @@
         value, then target will return all records using small element set name
        </entry><entry>0</entry></row>
       <row><entry>
-        largeSetLowerBound</entry><entry>If hits is greator than this
+        largeSetLowerBound</entry><entry>If hits is greater than this
         value, the target will return no records.
        </entry><entry>1</entry></row>
       <row><entry>
         mediumSetPresentNumber</entry><entry>This value represents
         the number of records to be returned as part of a search when when
         hits is less than or equal to large set lower bound and if hits
-        is greator than small set upper bound.
+        is greater than small set upper bound.
        </entry><entry>0</entry></row>
       <row><entry>
         smallSetElementSetName</entry><entry>
@@ -346,11 +358,11 @@
     <para>
      The creation of a result set involves at least a SearchRequest
      - SearchResponse protocol handshake. Following that, if a sort
-     critieria was specified as part of the query, a sortRequest -
+     criteria was specified as part of the query, a SortRequest -
      SortResponse handshake takes place. Note that it is necessary to
      perform sorting before any retrieval takes place, so no records will
      be returned from the target as part of the SearchResponse because these
-     would be unsorted. Hence, piggyback is disabled when sort critieria
+     would be unsorted. Hence, piggyback is disabled when sort criteria
      is set. Following Search - and a Possible sort, Retrieval takes
      place - as one or more Present Requests - Present Response being
      transferred.
@@ -376,7 +388,7 @@
      because of a record size limit, etc. the client will repeat sending
      present requests. As an example, if option <literal>start</literal>
      is 0 (default) and <literal>count</literal> is 4, and
-     <literal>piggyback</literal> is 1 (default) and no sorting critieria
+     <literal>piggyback</literal> is 1 (default) and no sorting criteria
      is specified, then the client will attempt to retrieve the 4
      records as part the search response (using piggyback). On the other
      hand, if either <literal>start</literal> is positive or if
@@ -395,7 +407,7 @@
   </sect1>
   <sect1 id="zoom.records"><title>Records</title>
    <para>
-    A record object is a retrival record on the client side -
+    A record object is a retrieval record on the client side -
     created from result sets.
    </para>
    <synopsis>
@@ -532,7 +544,7 @@
     <function>ZOOM_connection_scan</function> which performs a scan
     operation on the connection and start term given.
     If the operation was successful, the size of the scan set can be
-    retrived by a call to <function>ZOOM_scanset_size</function>.
+    retrieved by a call to <function>ZOOM_scanset_size</function>.
     Like result sets, the items are numbered 0,..size-1.
     To obtain information about a particular scan term, call function
     <function>ZOOM_scanset_term</function>. This function takes
@@ -563,7 +575,7 @@
      <tbody>
       <row><entry>
         number</entry><entry>Number of Scan Terms requested in next scan.
-        After scan it holds the actual number of terms returend.
+        After scan it holds the actual number of terms returned.
        </entry><entry>10</entry></row>
       <row><entry>
         position</entry><entry>Preferred Position of term in response
@@ -625,7 +637,7 @@
     <literal>cs</literal> (<literal>cs[0] ... cs[no-1]</literal>).
     A pending event could be a sending a search, receiving a response,
     etc.
-    When an event has occured for one of the connections, this function
+    When an event has occurred for one of the connections, this function
     returns a positive integer <literal>n</literal> denoting that an event
     occurred for connection <literal>cs[n-1]</literal>.
     When no events are pending for the connections, a value of zero is
