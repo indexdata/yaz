@@ -1,4 +1,4 @@
-<!-- $Id: indexdata.xml,v 1.2 2001-07-19 23:29:40 adam Exp $ -->
+<!-- $Id: indexdata.xml,v 1.3 2001-07-20 21:34:36 adam Exp $ -->
  <appendix><title>About Index Data</title>
 
   <para>
@@ -29,7 +29,6 @@
 
   </para>
   <para>
-
    The Hacker's Jargon File has the following to say about the
    use of the
    prefix &quot;YA&quot; in the name of a software product.

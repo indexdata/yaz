@@ -1,6 +1,5 @@
-<!-- $Id: frontend.xml,v 1.3 2001-07-19 23:29:40 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.4 2001-07-20 21:34:36 adam Exp $ -->
  <chapter><title id="server">Making an IR Server for Your Database</title>
-
   <sect1><title>Introduction</title>
 
    <para>
@@ -45,7 +44,7 @@
     </para>
    </note>
   </sect1>
-
+  
   <sect1><title>The Database Frontend</title>
 
    <para>
@@ -86,7 +85,7 @@
     <listitem><para>
       Extended Services (optional).
      </para></listitem>
-
+    
     <listitem><para>
       Result-Set Delete (optional).
      </para></listitem>
@@ -94,7 +93,7 @@
     <listitem><para>
       Result-Set Sort (optional).
      </para></listitem>
-
+    
    </itemizedlist>
 
    <para>
@@ -128,9 +127,9 @@
    </para>
 
    <synopsis>
-    int statserv_main(int argc, char **argv,
-    bend_initresult *(*bend_init)(bend_initrequest *r),
-    void (*bend_close)(void *handle));
+int statserv_main(int argc, char **argv,
+                  bend_initresult *(*bend_init)(bend_initrequest *r),
+                  void (*bend_close)(void *handle));
    </synopsis>
 
    <para>
@@ -146,95 +145,115 @@
     according to the parameters given. When connection requests are received,
     the event handler will typically <function>fork()</function> and
     create a sub-process to handle a new connection.
-    Alternatively the server may be setup to create threads for each connection.
+    Alternatively the server may be setup to create threads for each
+    connection.
     If you do use global variables and forking, you should be aware, then,
     that these cannot be shared between associations, unless you explicitly
     disable forking by command line parameters. 
    </para>
-
+   
    <para>
     The server provides a mechanism for controlling some of its behavior
     without using command-line options. The function
    </para>
 
    <synopsis>
-    statserv_options_block *statserv_getcontrol(void);
+statserv_options_block *statserv_getcontrol(void);
    </synopsis>
 
    <para>
-    Will return a pointer to a <literal>struct statserv_options_block</literal>
+    will return a pointer to a <literal>struct statserv_options_block</literal>
     describing the current default settings of the server. The structure
     contains these elements:
-
+    
     <variablelist>
-     <varlistentry><term>int dynamic</term><listitem><para>
+     <varlistentry><term>
+       <literal>int dynamic</literal></term><listitem><para>
 	A boolean value, which determines whether the server
 	will fork on each incoming request (TRUE), or not (FALSE). Default is
 	TRUE. This flag is only read by UNIX-based servers (WIN32 based servers
 	doesn't fork).
        </para></listitem></varlistentry>
-
-     <varlistentry><term>int threads</term><listitem><para>
+     
+     <varlistentry><term>
+       <literal>int threads</literal></term><listitem><para>
 	A boolean value, which determines whether the server
 	will create a thread on each incoming request (TRUE), or not (FALSE).
-	Default is FALSE. This flag is only read by UNIX-based servers that offer
-	POSIX Threads support. WIN32-based servers always operate in threaded mode.
+	Default is FALSE. This flag is only read by UNIX-based servers
+	that offer POSIX Threads support.
+	WIN32-based servers always operate in threaded mode.
        </para></listitem></varlistentry>
-
-     <varlistentry><term>int inetd</term><listitem><para>
+     
+     <varlistentry><term>
+       <literal>int inetd</literal></term><listitem><para>
 	A boolean value, which determines whether the server
 	will operates under a UNIX INET daemon (inetd). Default is FALSE.
        </para></listitem></varlistentry>
-
-     <varlistentry><term>int loglevel</term><listitem><para>
+     
+     <varlistentry><term>
+       <literal>int loglevel</literal></term><listitem><para>
 	Set this by ORing the constants defined in
 	<filename>include/yaz/yaz-log.h</filename>.
        </para></listitem></varlistentry>
-
-     <varlistentry><term>char logfile&lsqb;ODR_MAXNAME+1&rsqb;</term>
+     
+     <varlistentry><term>
+       <literal>char logfile&lsqb;ODR_MAXNAME+1&rsqb;</literal></term>
       <listitem><para>File for diagnostic output (&quot;&quot;: stderr).
        </para></listitem></varlistentry>
-     <varlistentry><term>char apdufile&lsqb;ODR_MAXNAME+1&rsqb;</term>
+     
+     <varlistentry><term>
+       <literal>char apdufile&lsqb;ODR_MAXNAME+1&rsqb;</literal></term>
       <listitem><para>
-	Name of file for logging incoming and outgoing APDUs (&quot;&quot;: don't
-	log APDUs, &quot;-&quot;: <literal>stderr</literal>).
+	Name of file for logging incoming and outgoing APDUs
+	(&quot;&quot;: don't log APDUs, &quot;-&quot;:
+	<literal>stderr</literal>).
        </para></listitem></varlistentry>
 
-     <varlistentry><term>char default_listen&lsqb;1024&rsqb;</term>
+     <varlistentry><term>
+      <literal>char default_listen&lsqb;1024&rsqb;</literal></term>
       <listitem><para>Same form as the command-line specification of
 	listener address. &quot;&quot;: no default listener address.
 	Default is to listen at &quot;tcp:@:9999&quot;. You can only
 	specify one default listener address in this fashion.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>enum oid_proto default_proto;</term>
+     <varlistentry><term>
+      <literal>enum oid_proto default_proto;</literal></term>
       <listitem><para>Either <literal>PROTO_SR</literal> or
-	<literal>PROTO_Z3950</literal>. Default is <literal>PROTO_Z39_50</literal>.
+	<literal>PROTO_Z3950</literal>.
+	Default is <literal>PROTO_Z39_50</literal>.
        </para></listitem></varlistentry>
-     <varlistentry><term>int idle_timeout;</term>
+     
+     <varlistentry><term>
+       <literal>int idle_timeout;</literal></term>
       <listitem><para>Maximum session idletime, in minutes. Zero indicates
 	no (infinite) timeout. Default is 120 minutes.
        </para></listitem></varlistentry>
-
-     <varlistentry><term>int maxrecordsize;</term>
+     
+     <varlistentry><term>
+       <literal>int maxrecordsize;</literal></term>
       <listitem><para>Maximum permissible record (message) size. Default
-	is 1Mb. This amount of memory will only be allocated if a client requests a
-	very large amount of records in one operation (or a big record). Set it
-	to a lower number
-	if you are worried about resource consumption on your host system.
+	is 1Mb. This amount of memory will only be allocated if a
+	client requests a very large amount of records in one operation
+	(or a big record).
+	Set it to a lower number if you are worried about resource
+	consumption on your host system.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>char configname&lsqb;ODR_MAXNAME+1&rsqb;</term>
+     <varlistentry><term>
+       <literal>char configname&lsqb;ODR_MAXNAME+1&rsqb;</literal></term>
       <listitem><para>Passed to the backend when a new connection is received.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>char setuid&lsqb;ODR_MAXNAME+1&rsqb;</term>
+     <varlistentry><term>
+       <literal>char setuid&lsqb;ODR_MAXNAME+1&rsqb;</literal></term>
       <listitem><para>Set user id to the user specified, after binding
 	the listener addresses.
        </para></listitem></varlistentry>
-
-     <varlistentry>
-      <term>void (*bend_start)(struct statserv_options_block *p)</term>
+     
+     <varlistentry><term>
+       <literal>void (*bend_start)(struct statserv_options_block *p)</literal>
+      </term>
       <listitem><para>Pointer to function which is called after the
 	command line options have been parsed - but before the server
 	starts listening.
@@ -246,9 +265,10 @@
 	When the server operates as an NT service this handler is called
 	whenever the service is started. 
        </para></listitem></varlistentry>
-
-     <varlistentry>
-      <term>void (*bend_stop)(struct statserv_options_block *p)</term>
+     
+     <varlistentry><term>
+       <literal>void (*bend_stop)(struct statserv_options_block *p)</literal>
+      </term>
       <listitem><para>Pointer to function which is called whenver the server
 	has stopped listening for incoming connections. This function pointer
 	has a default value of NULL in which case it isn't called.
@@ -256,7 +276,8 @@
 	whenever the service is stopped.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>void *handle</term>
+     <varlistentry><term>
+       <literal>void *handle</literal></term>
       <listitem><para>User defined pointer (default value NULL).
 	This is a per-server handle that can be used to specify "user-data".
 	Do not confuse this with the session-handle as returned by bend_init.
@@ -270,9 +291,9 @@
     a static area. You are allowed to change the contents of the structure,
     but the changes will not take effect before you call
    </para>
-
+   
    <synopsis>
-    void statserv_setcontrol(statserv_options_block *block);
+void statserv_setcontrol(statserv_options_block *block);
    </synopsis>
 
    <note>
@@ -294,7 +315,7 @@
    <sect2><title>Init</title>
 
     <synopsis>
-     bend_initresult (*bend_init)(bend_initrequest *r);
+bend_initresult (*bend_init)(bend_initrequest *r);
     </synopsis>
 
     <para>
@@ -431,8 +452,8 @@ typedef struct {
      corresponding to the resultSetIndicator field in the protocol.
      <literal>num_bases/basenames</literal> is a length of/array of character
      pointers to the database names provided by the client.
-     The <literal>query</literal> is the full query structure as defined in the
-     protocol ASN.1 specification.
+     The <literal>query</literal> is the full query structure as defined in
+     the protocol ASN.1 specification.
      It can be either of the possible query types, and it's up to you to
      determine if you can handle the provided query type.
      Rather than reproduce the C interface here, we'll refer you to the
@@ -496,8 +517,8 @@ typedef struct bend_fetch_rr {
      allocating space for structured data records.
      The stream will be reset when all records have been assembled, and
      the response package has been transmitted.
-     For unstructured data, the backend is responsible for maintaining a static
-     or dynamic buffer for the record between calls.
+     For unstructured data, the backend is responsible for maintaining a
+     static or dynamic buffer for the record between calls.
     </para>
 
     <para>
@@ -552,7 +573,7 @@ typedef struct {
     oid_value format;          /* One of the CLASS_RECSYN members */
     Z_ReferenceId *referenceId;/* reference ID */
     Z_RecordComposition *comp; /* Formatting instructions */
-    ODR stream;                /* encoding stream - memory source if required */
+    ODR stream;                /* encoding stream */
     ODR print;                 /* printing stream */
     bend_request request;
     bend_association association;
@@ -604,8 +625,8 @@ typedef struct bend_delete_rr {
 
     <note>
      <para>
-      The delete set function definition is rather primitive, mostly because we
-      have had no practical need for it as of yet. If someone wants
+      The delete set function definition is rather primitive, mostly because
+      we have had no practical need for it as of yet. If someone wants
       to provide a full delete service, we'd be happy to add the
       extra parameters that are required. Are there clients out there
       that will actually delete sets they no longer need?

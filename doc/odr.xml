@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.2 2001-07-19 23:29:40 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.3 2001-07-20 21:34:36 adam Exp $ -->
  <chapter><title id="odr">The ODR Module</title>
   
   <sect1><title>Introduction</title>
@@ -926,10 +926,10 @@ MySequence ::= &lsqb;10&rsqb; IMPLICIT SEQUENCE {
      </para>
 
      <synopsis>
-      int odr_constructed_begin(ODR o, void *p, int class, int tag,
-      const char *name);
+int odr_constructed_begin(ODR o, void *p, int class, int tag,
+                          const char *name);
 
-      int odr_constructed_end(ODR o);
+int odr_constructed_end(ODR o);
      </synopsis>
 
      <para>
@@ -1045,8 +1045,8 @@ int myArray(ODR o, MyArray **p, int optional, const char *name)
     </para>
 
     <synopsis>
-     int odr_choice(ODR o, Odr_arm arm&lsqb;&rsqb;, void *p, void *whichp,
-     const char *name);
+int odr_choice(ODR o, Odr_arm arm&lsqb;&rsqb;, void *p, void *whichp,
+               const char *name);
     </synopsis>
 
     <para>
@@ -1173,10 +1173,9 @@ int myChoice(ODR o, MyChoice **p, int optional, const char *name)
     <para>
      In some cases (say, a non-optional choice which is a member of a
      sequence), you can "embed" the union and its discriminator in the
-structure
-     belonging to the enclosing type, and you won't need to fiddle with
-     memory allocation to create a separate structure to wrap the
-     discriminator and union.
+     structure belonging to the enclosing type, and you won't need to
+     fiddle with memory allocation to create a separate structure to
+     wrap the discriminator and union.
     </para>
 
     <para>
@@ -1199,7 +1198,7 @@ structure
     </para>
 
     <synopsis>
-     void odr_choice_bias(ODR o, int what);
+void odr_choice_bias(ODR o, int what);
     </synopsis>
 
     <para>
