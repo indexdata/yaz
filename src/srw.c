@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.9 2003-12-30 00:16:24 adam Exp $
+ * $Id: srw.c,v 1.10 2003-12-30 00:29:53 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -326,8 +326,6 @@ static int yaz_srw_term(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm *term,
 	term->displayTerm = 0;
 	for (ptr = pptr->children; ptr; ptr = ptr->next)
 	{
-	    char *spack = 0;
-	    
 	    if (match_xsd_string(ptr, "value", o,  &term->value))
 		;
 	    else if (match_xsd_integer(ptr, "numberOfRecords", o, 

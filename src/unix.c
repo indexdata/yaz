@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.2 2003-10-29 13:26:34 adam Exp $
+ * $Id: unix.c,v 1.3 2003-12-30 00:29:53 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -177,11 +177,11 @@ static void *unix_straddr(COMSTACK h, const char *str)
 
     sp->uid = sp->gid = sp->umask = -1;
 
-    if (eol = strchr(s, ','))
+    if ((eol = strchr(s, ',')))
     {
 	do
 	{
-	    if (eol = strchr(s, ','))
+	    if ((eol = strchr(s, ',')))
 		*eol++ = '\0';
 	    if (sp->uid  == -1 && strncmp(s, "user=",  5) == 0)
 	    {
@@ -197,7 +197,7 @@ static void *unix_straddr(COMSTACK h, const char *str)
 		    {
 			printf("No such user\n");
 			free(f);
-			return;
+			return 0;
 		    }
 		    sp->uid = pw->pw_uid;
 		}
@@ -216,7 +216,7 @@ static void *unix_straddr(COMSTACK h, const char *str)
 		    {
 			printf("No such group\n");
 			free(f);
-			return;
+			return 0;
 		    }
 		    sp->gid = gr->gr_gid;
 		}
@@ -232,7 +232,7 @@ static void *unix_straddr(COMSTACK h, const char *str)
 		{
 		    printf("Invalid umask\n");
 		    free(f);
-		    return;
+		    return 0;
 		}
 	    }
 	    else if (file == NULL && strncmp(s, "file=", 5) == 0)
@@ -244,9 +244,9 @@ static void *unix_straddr(COMSTACK h, const char *str)
 	    {
 		printf("invalid or double argument: %s\n", s);
 		free(f);
-		return;
+		return 0;
 	    }
-	} while(s = eol);
+	} while((s = eol));
     }
     else
     {

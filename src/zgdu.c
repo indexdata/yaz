@@ -2,11 +2,12 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.2 2003-12-21 11:33:29 adam Exp $
+ * $Id: zgdu.c,v 1.3 2003-12-30 00:29:53 adam Exp $
  */
 
 #include <yaz/odr.h>
 #include <yaz/yaz-version.h>
+#include <yaz/yaz-iconv.h>
 #include <yaz/zgdu.h>
 
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,

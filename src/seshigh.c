@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.10 2003-12-30 00:13:05 adam Exp $
+ * $Id: seshigh.c,v 1.11 2003-12-30 00:29:53 adam Exp $
  */
 
 /*
@@ -1057,7 +1057,6 @@ static void process_http_request(association *assoc, request *req)
             {
                 /* SRW package */
 		char *db = "Default";
-		char *srw_version = 0;
 		const char *p0 = hreq->path, *p1;
                 Z_SRW_PDU *sr = soap_package->u.generic->p;
 		
@@ -1562,7 +1561,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.10 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.11 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

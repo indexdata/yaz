@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.14 2003-12-20 19:11:39 adam Exp $
+ * $Id: zoom-c.c,v 1.15 2003-12-30 00:29:53 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -918,7 +918,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.14 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.15 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1570,7 +1570,6 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
 				       charset);
         else if (r->which == Z_External_octet)
         {
-            yaz_marc_t mt;
 	    const char *ret_buf;
             switch (ent->value)
             {
@@ -1630,7 +1629,6 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
         else if (r->which == Z_External_octet)
         {
 	    const char *ret_buf;
-            yaz_marc_t mt;
             int marc_decode_type = YAZ_MARC_MARCXML;
 
             if (!strcmp(type, "oai"))

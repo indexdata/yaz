@@ -2,10 +2,11 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.1 2003-12-20 00:51:19 adam Exp $
+ * $Id: srwutil.c,v 1.2 2003-12-30 00:29:53 adam Exp $
  */
 
 #include <yaz/srw.h>
+#include <yaz/yaz-iconv.h>
 
 static int hex_digit (int ch)
 {
@@ -84,7 +85,6 @@ int yaz_check_for_srw(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	    const char *p0 = hreq->path, *p1;
 	    Z_SOAP *soap_package = 0;
             int ret = -1;
-            int http_code = 500;
             const char *charset_p = 0;
             char *charset = 0;
 	    
@@ -152,16 +152,6 @@ int yaz_check_for_sru(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
 	const char *operation = 0;
-#if HAVE_XML2
-        int ret = -1;
-        char *charset = 0;
-        Z_SOAP *soap_package = 0;
-        static Z_SOAP_Handler soap_handlers[2] = {
-            {"http://www.loc.gov/zing/srw/", 0,
-             (Z_SOAP_fun) yaz_srw_codec},
-            {0, 0, 0}
-        };
-#endif
         
         if (*p0 == '/')
             p0++;
