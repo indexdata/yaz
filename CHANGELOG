@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Front-end server automatically switches to original working directory
+when installed as an NT service. Previously -w had to be specified to
+make it work.
+
 Added extended attributes for retrieval module (data1), so that data1
 records carry d1_readXML/SGML attributes. d1_read also supports
 null-data rules ( <tag/>)
@@ -12,7 +16,7 @@ relies on threads.
 
 Added SSL support for the COMSTACK. You start yaz-client and yaz-ztest
 (or any frontend server) in SSL mode by specifying ssl: followed by
-address.
+address. Only tested on UNIX.
 
 Added feature for CCL module. Virtual structure s=al or s=ol generates
 and-list and or-list respectively instead of phrase search.

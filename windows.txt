@@ -1,5 +1,5 @@
 YAZ Compilation guidelines for winNT/95.
-  $Id: windows.txt,v 1.4 2000-04-17 14:21:38 adam Exp $
+  $Id: windows.txt,v 1.5 2000-12-05 19:14:12 adam Exp $
 
 This distribution of YAZ includes makefiles that works with Visual
 C++ version 5 and 6. The makefile is located in sub directory 'win'.
@@ -38,15 +38,12 @@ yaz-ztest.exe - The Z39.50 test server as a console application. It is
 
          As an option ztest may be installed as an NT service
          (not Windows 95). Use 'ztest -install <otherargs>' to install
-         it and 'ztest -remove <otherargs>' to remove it again. Since
-         NT runs the service program in some weird directory, such as
-         \winnt\system32, it's probably a good idea to use the option
-         '-w' to change to some other directory. For example
+         it and 'ztest -remove <otherargs>' to remove it again. Example:
 
-            yaz-ztest -install -w d:\proj\yaz\ztest -l ztest.out tcp:@:210
+            yaz-ztest -install -l ztest.out tcp:@:210
 
-         which specifies both working directory (d:\proj\yaz\ztest) 
-         and a log file (ztest.out). The server is started on port 210.
+         which specifies a log file to be written. The server listens
+         on port 210.
 
 After successful compilation all executables and DLL's are located
 in sub YAZ\BIN. Libraries are located in YAZ\LIB.
