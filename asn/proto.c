@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.15  1995-03-30 09:08:39  quinn
+ * Revision 1.16  1995-03-30 10:26:43  quinn
+ * Added Term structure
+ *
+ * Revision 1.15  1995/03/30  09:08:39  quinn
  * Added Resource control protocol
  *
  * Revision 1.14  1995/03/29  08:06:13  quinn
@@ -309,6 +312,36 @@ int z_AttributeElement(ODR o, Z_AttributeElement **p, int opt)
     	odr_sequence_end(o);
 }
 
+#ifdef Z_V3
+
+int z_Term(ODR o, Z_Term **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+    	{ODR_IMPLICIT, ODR_CONTEXT, 45, Z_Term_general, odr_octetstring},
+	{ODR_IMPLICIT, ODR_CONTEXT, 215, Z_Term_numeric, odr_integer},
+	{ODR_IMPLICIT, ODR_CONTEXT, 216, Z_Term_characterString,
+	    odr_visiblestring},
+	{ODR_IMPLICIT, ODR_CONTEXT, 217, Z_Term_oid, odr_oid},
+	{ODR_IMPLICIT, ODR_CONTEXT, 218, Z_Term_dateTime, odr_cstring},
+	{ODR_IMPLICIT, ODR_CONTEXT, 219, Z_Term_external, odr_external},
+	/* add intUnit here */
+	{ODR_IMPLICIT, ODR_CONTEXT, 221, Z_Term_null, odr_null},
+    	{-1, -1, -1, -1, 0}
+    };
+
+    if (o->direction ==ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+    	return 1;
+    *p = 0;
+    return opt && !o->error;
+}
+
+#endif
+
 int z_AttributesPlusTerm(ODR o, Z_AttributesPlusTerm **p, int opt)
 {
     if (!(odr_implicit_settag(o, ODR_CONTEXT, 102) &&
@@ -318,7 +351,11 @@ int z_AttributesPlusTerm(ODR o, Z_AttributesPlusTerm **p, int opt)
     	odr_implicit_settag(o, ODR_CONTEXT, 44) &&
     	odr_sequence_of(o, z_AttributeElement, &(*p)->attributeList,
 	    &(*p)->num_attributes) &&
+#ifdef Z_V3
+	z_Term(o, &(*p)->term, 0) &&
+#else
 	odr_implicit(o, odr_octetstring, &(*p)->term, ODR_CONTEXT, 45, 0) &&
+#endif
 	odr_sequence_end(o);
 }
 

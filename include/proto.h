@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.h,v $
- * Revision 1.1  1995-03-30 09:39:42  quinn
+ * Revision 1.2  1995-03-30 10:26:48  quinn
+ * Added Term structure
+ *
+ * Revision 1.1  1995/03/30  09:39:42  quinn
  * Moved .h files to include directory
  *
  * Revision 1.11  1995/03/30  09:08:44  quinn
@@ -209,6 +212,7 @@ typedef struct Z_AttributeElement
     int *attributeValue;
 } Z_AttributeElement;
 
+#define Z_V3
 #ifdef Z_V3
 
 typedef struct Z_Term 
@@ -226,13 +230,13 @@ typedef struct Z_Term
     } which;
     union
     {
-    	Odr_oct *general;
+    	Odr_oct *general; /* this is required for v2 */
     	int *numeric;
     	char *characterString;
     	Odr_oid *oid;
     	char *dateTime;
     	Odr_external *external;
-    	Z_IntUnit *integerAndUnit;
+    	/* Z_IntUnit *integerAndUnit; */
     	void *null;
     } u;
 } Z_Term;
