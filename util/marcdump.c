@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.5  1997-09-24 13:29:40  adam
+ * Revision 1.6  1997-12-12 06:32:33  adam
+ * Added include of string.h.
+ *
+ * Revision 1.5  1997/09/24 13:29:40  adam
  * Added verbose option -v to marcdump utility.
  *
  * Revision 1.4  1995/11/01 13:55:05  quinn
@@ -23,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <marcdisp.h>
 #include <xmalloc.h>
