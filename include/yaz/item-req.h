@@ -1,4 +1,4 @@
-/* YC 0.2: Wed Mar 01 10:28:17 CET 2000 */
+/* YC 0.2: Wed Mar 01 14:47:01 CET 2000 */
 /* Module-H Z39.50-extendedService-ItemOrder-ItemRequest-1 */
 
 #ifndef item_req_H

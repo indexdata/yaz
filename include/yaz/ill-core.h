@@ -1,4 +1,4 @@
-/* YC 0.2: Wed Mar 01 10:28:16 CET 2000 */
+/* YC 0.2: Wed Mar 01 14:46:59 CET 2000 */
 /* Module-H ISO-10161-ILL-1 */
 
 #ifndef ill_core_H
