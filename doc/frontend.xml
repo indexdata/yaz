@@ -1,14 +1,12 @@
-<!-- $Id: frontend.xml,v 1.6 2001-10-24 09:27:59 adam Exp $ -->
- <chapter id="server"><title>Making an IR Server for Your Database</title>
+<!-- $Id: frontend.xml,v 1.7 2001-10-24 20:12:36 adam Exp $ -->
+ <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
 
    <para>
     If you aren't into documentation, a good way to learn how the
     back end interface works is to look at the <filename>backend.h</filename>
     file. Then, look at the small dummy-server in
-    <filename>ztest/ztest.c</filename>. Finally, you can have a look at
-    the <filename>seshigh.c</filename> file, which is where most of the
-    logic of the frontend server is located. The <filename>backend.h</filename>
+    <filename>ztest/ztest.c</filename>. The <filename>backend.h</filename>
     file also makes a good reference, once you've chewed your way through
     the prose of this file.
    </para>
@@ -105,15 +103,15 @@
   <sect1 id="server.backend"><title>The Backend API</title>
 
    <para>
-    The headers files that you need to use the interface are in the
-    <filename>include/yaz</filename> directory. They are called
-    <filename>statserv.h</filename> and <filename>backend.h</filename>. They
-    will include other files from the <filename>include/yaz</filename>
-    directory, so you'll probably want to use the -I option of your
-    compiler to tell it where to find the files. When you run
+    The header file that you need to use the interface are in the
+    <filename>include/yaz</filename> directory. It's called
+    <filename>backend.h</filename>. It will include other files from
+    the <filename>include/yaz</filename> directory, so you'll
+    probably want to use the -I option of your compiler to tell it
+    where to find the files. When you run
     <literal>make</literal> in the top-level &yaz; directory,
-    everything you need to create your server is put the
-    <filename>lib/libyaz.a</filename> library.
+    everything you need to create your server is to link with the
+    <filename>lib/libyaz.la</filename> library.
    </para>
   </sect1>
 

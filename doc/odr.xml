@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.5 2001-10-24 09:27:59 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.6 2001-10-24 20:12:36 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -23,9 +23,9 @@
    </para>
 
    <para>
-    This is important, so we'll repeat it for emphasis: <emphasis>You do not
-     need to read section <link linkend="odr-prog">Programming with ODR</link> to
-     implement Z39.50 with &yaz;.</emphasis>
+    This is important, so we'll repeat it for emphasis: <emphasis>You do
+    not need to read section <link linkend="odr-prog">Programming with
+    ODR</link> to implement Z39.50 with &yaz;.</emphasis>
    </para>
 
    <para>
@@ -489,21 +489,18 @@ void do_nothing_useful(int value)
    </para>
 
    <para>
-    The interface is based loosely on that of the Sun Microsystems XDR routines.
+    The interface is based loosely on that of the Sun Microsystems XDR
+    routines.
     Specifically, each function which corresponds to an ASN.1 primitive
     type has a dual function. Depending on the settings of the ODR
     stream which is supplied as a parameter, the function may be used
     either to encode or decode data. The functions that can be built
-    using these primitive functions, to represent more complex data types, share
-    this quality. The result is that you only have to enter the definition
-    for a type once - and you have the functionality of encoding, decoding
-    (and pretty-printing) all in one unit. The resulting C source code is
-    quite compact, and is a pretty straightforward representation of the
-    source ASN.1 specification. Although no ASN.1 compiler is supplied
-    with &odr; at this time, it shouldn't be too difficult to write one, or
-    perhaps even to adapt an existing compiler to output &odr; routines
-    (not surprisingly, writing encoders/decoders using &odr; turns out
-    to be boring work).
+    using these primitive functions, to represent more complex data types,
+    share this quality. The result is that you only have to enter the
+    definition for a type once - and you have the functionality of encoding,
+    decoding (and pretty-printing) all in one unit.
+    The resulting C source code is quite compact, and is a pretty
+    straightforward representation of the source ASN.1 specification. 
    </para>
 
    <para>

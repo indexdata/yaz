@@ -1,9 +1,9 @@
-<!-- $Id: asn.xml,v 1.9 2001-10-24 09:27:59 adam Exp $ -->
- <chapter id="asn"><title>The ASN Module</title>
+<!-- $Id: asn.xml,v 1.10 2001-10-24 20:12:36 adam Exp $ -->
+ <chapter id="asn"><title>The ASN.1 Module</title>
   <sect1 id="asn.introduction"><title>Introduction</title>
    <para>
     The &asn; module provides you with a set of C struct definitions for the
-    various PDUs of the protocol, as well as for the complex types
+    various PDUs of the Z39.50 protocol, as well as for the complex types
     appearing within the PDUs. For the primitive data types, the C
     representation often takes the form of an ordinary C language type,
     such as <literal>int</literal>. For ASN.1 constructs that have no direct
@@ -372,10 +372,10 @@ typedef struct Z_ext_typeent
        idAuthentication</entry><entry>Z_IdAuthentication</entry><entry>NULL
       </entry></row>
      <row><entry>
-       implementationId</entry><entry>char*</entry><entry>"YAZ (id=81)"
+       implementationId</entry><entry>char*</entry><entry>"81"
       </entry></row>
      <row><entry>
-       implementationName</entry><entry>char*</entry><entry>"Index Data/YAZ"
+       implementationName</entry><entry>char*</entry><entry>"YAZ"
       </entry></row>
      <row><entry>
        implementationVersion</entry><entry>char*</entry><entry>YAZ_VERSION
@@ -423,10 +423,10 @@ typedef struct Z_ext_typeent
 	result</entry><entry>bool_t</entry><entry>TRUE
        </entry></row>
       <row><entry>
-	implementationId</entry><entry>char*</entry><entry>"YAZ (id=81)"
+	implementationId</entry><entry>char*</entry><entry>"id)"
        </entry></row>
       <row><entry>
-	implementationName</entry><entry>char*</entry><entry>"Index Data/YAZ"
+	implementationName</entry><entry>char*</entry><entry>"YAZ"
        </entry></row>
       <row><entry>
 	implementationVersion</entry><entry>char*</entry><entry>YAZ_VERSION

@@ -1,17 +1,33 @@
-<!-- $Id: introduction.xml,v 1.4 2001-10-24 09:27:59 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.5 2001-10-24 20:12:36 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   
   <para>
-   The &yaz; toolkit offers several different levels of access to the
-   Z39.50 and SR protocols. The level that you need to use depends on
-   your requirements, and the role (server or client) that you
-   want to implement.
-  </para><para>
-   The basic level, which is independent of the role, consists of three
-   primary interfaces:
+   The <ulink url="http://www.indexdata.dk/yaz/">&yaz;</ulink>
+   toolkit offers several different levels of access to the
+   <ulink url="http://www.loc.gov/z3950/agency/">ISO23950/Z39.50</ulink>
+   and <ulink url="http://www.nlc-bnc.ca/iso/ill/">ILL</ulink> protocols.
+   The level that you need to use depends on your requirements, and
+   the role (server or client) that you want to implement.
+   If you're developing a client application you should consider the
+   <link linkend="zoom">ZOOM</link> API.
+   It is, by far, the easiest way to develop clients in C.
+   Server implementers should consider the 
+   <link linkend="server">generic frontend server</link>.
+   None of those high-level API's support the whole protocol, but
+   they support most facilities used in existing Z39.50
+   applications.
+  </para>
+  <para>
+   If you're developing non-standard extensions to Z39.50 or you're
+   going to develop an ILL application you'll have to learn the lower
+   level API's of &yaz;.
+  </para>
+  <para>
+   The basic low level modules, which is independent of the role,
+   consists of three primary interfaces:
    
    <itemizedlist>
-    <listitem><para>&asn;, which provides a C representation of the Z39.50/SR
+    <listitem><para>&asn;, which provides a C representation of the Z39.50
       protocol packages (PDUs).
      </para></listitem>
     <listitem><para>&odr;, which encodes and decodes the packages according
@@ -23,7 +39,7 @@
    </itemizedlist>
    
    The &asn; module represents the ASN.1 definition of
-   the SR/Z39.50 protocol. It establishes a set of type and
+   the Z39.50 protocol. It establishes a set of type and
    structure definitions, with one structure for each of the top-level
    PDUs, and one structure or type for each of the contained ASN.1 types.
    For primitive types, or other types that are defined by the ASN.1
@@ -31,7 +47,7 @@
    provided by the &odr; (Open Data Representation) subsystem.
   </para>
   <para>
-    &odr; is a basic mechanism for representing an
+   &odr; is a basic mechanism for representing an
    ASN.1 type in the C programming language, and for implementing BER
    encoders and decoders for values of that type. The types defined in
    the &asn; module generally have the prefix <literal>Z_</literal>, and
@@ -68,14 +84,14 @@
    (passively or actively, depending on the role of your application),
    and for exchanging BER-encoded PDUs over that connection. When you
    create a connection endpoint, you need to specify what transport to
-   use (OSI or TCP/IP), and which protocol you want to use (SR or
-   Z39.50). For the remainder of the connection's lifetime, you don't have
+   use (TCP/IP or SSL).
+   For the remainder of the connection's lifetime, you don't have
    to worry about the underlying transport protocol at all - the &comstack;
    will ensure that the correct mechanism is used.
   </para>
   <para>
    We call the combined interfaces to &odr;, &asn;, and &comstack; the service
-   level API. It's the API that most closely models the Z39.50/SR
+   level API. It's the API that most closely models the Z39.50
    service/protocol definition, and it provides unlimited access to all
    fields and facilities of the protocol definitions.
   </para>

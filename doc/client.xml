@@ -1,4 +1,4 @@
-<!-- $Id: client.xml,v 1.3 2001-10-24 09:27:59 adam Exp $ -->
+<!-- $Id: client.xml,v 1.4 2001-10-24 20:12:36 adam Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
@@ -88,7 +88,7 @@
     yaz-client -a - localhost
    </screen>
   </sect1>
-  <sect1 id="client.commands"><title>YAZ client commands</title>
+  <sect1 id="client.commands"><title>Commands</title>
    <para>
     When the YAZ client has read options and connected to a target, if given,
     it will display <literal>Z &gt;</literal> and away your command.

@@ -1,4 +1,4 @@
-<!-- $Id: future.xml,v 1.4 2001-10-24 09:27:59 adam Exp $ -->
+<!-- $Id: future.xml,v 1.5 2001-10-24 20:12:36 adam Exp $ -->
  <chapter id="future"><title>Future Directions</title>
 
   <para>
@@ -10,16 +10,18 @@
   </para>
 
   <para>
-   We now support all PDUs of Z39.50-1995. If there is one of the
-   supporting structures that you need but can't find in the prt*.h
-   files, send us a note; it may be on its way.
-  </para>
-
-  <para>
    The 'retrieval' module needs to be finalized and documented. We think
    it can form a useful resource for people dealing with complex record
    structures, but for now, you'll mostly have to chew through the code
    yourself to make use of it. Not acceptable.
+  </para>
+
+  <para>
+   &yaz; is a BER toolkit and as such should support all protocols
+   out there based on that. We'd like to see running ILL applications.
+   It shouldn't be that hard. Another thing that would be intersting is
+   LDAP. Maybe a generic framework for doing IR using both LDAP and
+   Z39.50 transparently.
   </para>
 
   <para>

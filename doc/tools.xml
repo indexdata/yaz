@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.7 2001-10-24 12:50:44 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.8 2001-10-24 20:12:36 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -83,7 +83,7 @@ int p_query_attset (const char *arg);
 
      AttributeType ::= integer.
 
-     AttributeValue ::= integer.
+     AttributeValue ::= integer || string.
 
      Complex ::= Operator QueryStruct QueryStruct.
 
@@ -156,14 +156,15 @@ int p_query_attset (const char *arg);
     </para>
 
     <para>
-     The EUROPAGATE research project working under the Libraries programme
+     The <ulink url="http://europagate.dtv.dk/">EUROPAGATE</ulink>
+     research project working under the Libraries programme
      of the European Commission's DG XIII has, amongst other useful tools,
      implemented a general-purpose CCL parser which produces an output
      structure that can be trivially converted to the internal RPN
-     representation of YAZ (The <literal>Z_RPNQuery</literal> structure).
+     representation of &yaz; (The <literal>Z_RPNQuery</literal> structure).
      Since the CCL utility - along with the rest of the software
-     produced by EUROPAGATE - is made freely available on a liberal license, it
-     is included as a supplement to YAZ.
+     produced by EUROPAGATE - is made freely available on a liberal
+     license, it is included as a supplement to &yaz;.
     </para>
 
     <sect3><title>CCL Syntax</title>
