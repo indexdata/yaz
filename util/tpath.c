@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: tpath.c,v 1.7 2002-04-05 12:46:07 adam Exp $
+ * $Id: tpath.c,v 1.8 2002-04-05 12:49:13 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -23,7 +23,7 @@ FILE *yaz_path_fopen(const char *path, const char *name, const char *mode)
 
 int yaz_fclose (FILE *f)
 {
-    fclose (f);
+    return fclose (f);
 }
 
 FILE *yaz_fopen(const char *path, const char *name, const char *mode,
