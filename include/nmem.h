@@ -57,6 +57,8 @@ YAZ_EXPORT NMEM nmem_create(void);
 YAZ_EXPORT void nmem_destroy(NMEM n);
 YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
 
+YAZ_EXPORT void nmem_init (void);
+YAZ_EXPORT void nmem_exit (void);
 #ifdef __cplusplus
 }
 #endif
