@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.12  1996-01-18 09:46:34  adam
+ * Revision 1.13  1996-02-20 16:32:48  quinn
+ * Created util file.
+ *
+ * Revision 1.12  1996/01/18  09:46:34  adam
  * Changed prototype for reader function parsed to data1_read_record.
  *
  * Revision 1.11  1995/12/15  16:19:45  quinn
@@ -113,6 +116,8 @@
 
 #include <d1_attset.h>
 #include <d1_map.h>
+
+#define data1_matchstr(s1, s2) yaz_matchstr(s1, s2)
 
 extern char *data1_tabpath; /* global path for tables */
 
