@@ -1,42 +1,9 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: diagbib1.c,v $
- * Revision 1.4  2000-03-20 19:06:25  adam
- * Added Segment request for fronend server. Work on admin for client.
- *
- * Revision 1.3  2000/03/15 12:59:49  adam
- * Added handle member to statserv_control.
- *
- * Revision 1.2  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.1  1999/06/08 10:10:16  adam
- * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
- *
- * Revision 1.7  1997/09/29 07:22:26  adam
- * Added static modifier to msg_tab.
- *
- * Revision 1.6  1997/07/01 14:15:10  adam
- * Added new BIB-1 diagnostic messages.
- *
- * Revision 1.5  1996/01/02 13:57:30  adam
- * Added error messages.
- *
- * Revision 1.4  1995/09/29  17:11:52  quinn
- * Smallish
- *
- * Revision 1.3  1995/09/27  15:02:39  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.2  1995/05/16  08:50:21  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.1  1995/03/15  13:46:09  adam
- * New function diagbib1_str.
- *
+ * $Id: diagbib1.c,v 1.5 2002-09-13 11:28:17 adam Exp $
  */
 
 #include <stdio.h>
@@ -185,6 +152,74 @@ static struct {
 { 1021, "Init/AC: Account has expired"},
 { 1022, "Init/AC: Password has expired so a new one must be supplied"},
 { 1023, "Init/AC: Password has been changed by an administrator so a new one must be supplied"},
+{ 1024, "Unsupported Attribute" },
+{ 1025, "Service not supported for this database" },
+{ 1026, "Record cannot be opened because it is locked"},
+{ 1027, "SQL error" },
+{ 1028, "Record deleted" },
+{ 1029, "Scan: too many terms requested. Addinfo: max terms supported" },
+/* 1030 - 1039 /currently unnassigned */
+    
+/* The following, 1040 - 1047, were approved at the June 1998 ZIG meeting.
+   These were originally proposed for addition to the Extended Services
+   diagnostic set. */
+{ 1040, "ES: Invalid function" },
+{ 1041, "ES: Error in retention time" },
+{ 1042, "ES: Permissions data not understood" },
+{ 1043, "ES: Invalid OID for task specific parameters" },
+{ 1044, "ES: Invalid action" },
+{ 1045, "ES: Unknown schema" },
+{ 1046, "ES: Too many records in package" },
+{ 1047, "ES: Invalid wait action" },
+/* The following, 1048 - 1053, were approved at the October 1998 ZIG
+   meeting. */
+{ 1048, "ES: Cannot create task package -- exceeds maximum permissable size"},
+{ 1049, "ES: Cannot return task package -- exceeds maximum permissable size"},
+{ 1050, "ES: Extended services request too large"},
+{ 1051, "Scan: Attribute set id required -- not supplied"},
+{ 1052, "ES: Cannot process task package record -- exceeds maximum "
+      "permissible record size for ES" },
+{ 1053, "ES: Cannot return task package record -- exceeds maximum "
+      "permissible record size for ES response" },
+/* The following, 1054 - 1057, were approved at the March 1999 ZIG
+   meeting. 1054 and 1055 are added for support of the Model for Z39.50
+   Negotiation During Initialization
+   <http://lcweb.loc.gov/z3950/agency/nego.html>. 1056 was added in
+   conjunction with the clarification Single-PDU, Multi-database Searching
+   -- Status <http://lcweb.loc.gov/z3950/agency/clarify/db-status.html> */
+{ 1054, "Init: Required negotiation record not included"},
+{ 1055, "Init: negotiation option required"},
+{ 1056, "Attribute not supported for database" },
+{ 1057, "ES: Unsupported value of task package parameter"},
+/* The following, 1058 - 1066, were approved at the August 1999 ZIG
+   meeting. 1058 through 1065 are added for support of the Z39.50 Duplicate
+   Detection Service <http://lcweb.loc.gov/z3950/agency/amend/dedup.html>. */
+{ 1058, "Duplicate Detection: Cannot dedup on requested record portion" },  
+{ 1059, "Duplicate Detection: Requested detection criterion not supported" },
+{ 1060, "Duplicate Detection: Requested level of match not supported" },
+{ 1061, "Duplicate Detection: Requested regular expression not supported" },
+{ 1062, "Duplicate Detection: Cannot do clustering" },
+{ 1063, "Duplicate Detection: Retention criterion not supported"},
+{ 1064, "Duplicate Detection: Requested number (or percentage) of entries "
+      "for retention too large" },
+{ 1065, "Duplicate Detection: Requested sort criterion not supported" },
+{ 1066, "CompSpec: Unknown schema, or schema not supported."},
+/* The following, 1067 - 1069, were approved at the January 2000 ZIG
+   meeting. 1067 and 1068 are added for support of encapsulation
+   <http://lcweb.loc.gov/z3950/agency/amend/encapsulation.html> . */
+{ 1067, "Encapsulation: Encapsulated sequence of PDUs not supported" },
+{ 1068, "Encapsulation: Base operation (and encapsulated PDUs) not executed "
+      "based on pre-screening analysis" },
+{ 1069, "No syntaxes available for this request" },
+/* The following, 1070-1071, were approved at the July 2000 ZIG meeting.
+   These are defined in conjunction with the clarification Server Selected
+   Record Syntax <http://lcweb.loc.gov/z3950/agency/clarify/altsyntax.html> */
+{ 1070, "user not authorized to receive record(s) in requested syntax" },
+{ 1071, "preferredRecordSyntax not supplied" },
+/* The following diagnostic was approved at the October 2001 ZIG meeting.
+   See http://lists.w3.org/Archives/Public/www-zig/2001Jun/0006.html */
+{ 1072, "Query term includes characters that do not translate into the "
+      "target character set"},
 { 0, NULL} 
 };
 
