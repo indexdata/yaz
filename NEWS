@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+For yaz-client, command set_marcdump <file> / -m <file> dumps SUTRS/XML/..
+records as well.
+
 Yet another small fix for configure of SSL.
 
 --- 2.0.21 2004/05/14

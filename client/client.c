@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.244 2004-05-27 21:24:44 ja7 Exp $
+ * $Id: client.c,v 1.245 2004-07-30 08:37:52 adam Exp $
  */
 
 #include <stdio.h>
@@ -723,6 +723,8 @@ static void print_record(const unsigned char *buf, size_t len)
     /* add newline if not already added ... */
     if (i <= 0 || buf[i-1] != '\n')
         printf ("\n");
+    if (marc_file)
+	fwrite (buf, 1, len, marc_file);
 }
 
 static void display_record(Z_External *r)
@@ -3325,7 +3327,11 @@ static void handle_srw_record(Z_SRW_record *rec)
 	printf (" schema=%s", rec->recordSchema);
     printf ("\n");
     if (rec->recordData_buf && rec->recordData_len)
+    {
 	fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout);
+	if (marc_file)
+	    fwrite (rec->recordData_buf, 1, rec->recordData_len, marc_file);
+    }
     else
 	printf ("No data!");
     printf("\n");
