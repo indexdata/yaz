@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.189 2003-04-29 21:20:33 adam Exp $
+ * $Id: client.c,v 1.190 2003-04-29 21:53:54 adam Exp $
  */
 
 #include <stdio.h>
@@ -398,16 +398,11 @@ static int process_initResponse(Z_InitResponse *res)
     return 0;
 }
 
-static int cmd_base(const char *arg)
+static int set_base(const char *arg)
 {
     int i;
     const char *cp;
 
-    if (!*arg)
-    {
-        printf("Usage: base <database> <database> ...\n");
-        return 0;
-    }
     for (i = 0; i<num_databaseNames; i++)
         xfree (databaseNames[i]);
     num_databaseNames = 0;
@@ -431,7 +426,22 @@ static int cmd_base(const char *arg)
             break;
         arg = cp+1;
     }
+    if (num_databaseNames == 0)
+    {
+        num_databaseNames = 1;
+        databaseNames[0] = xstrdup("");
+    }
     return 1;
+}
+
+static int cmd_base(const char *arg)
+{
+    if (!*arg)
+    {
+        printf("Usage: base <database> <database> ...\n");
+        return 0;
+    }
+    return set_base(arg);
 }
 
 void cmd_open_remember_last_open_command(const char* arg, char* new_open_command)
@@ -450,8 +460,6 @@ int session_connect(const char *arg)
     const char *basep = 0;
     if (conn)
     {
-        printf("Already connected.\n");
-        
         cs_close (conn);
         conn = NULL;
         if (session_mem)
@@ -478,14 +486,18 @@ int session_connect(const char *arg)
     }
 #if HAVE_XML2
 #else
-    if (conn->protocol == PROTO_Z3950)
+    if (conn->protocol == PROTO_HTTP)
     {
-        printf ("SRW not enabled in this YAZ\n");
+        printf ("SRW/HTTP not enabled in this YAZ\n");
         cs_close(conn);
         conn = 0;
         return 0;
     }
 #endif
+    if (conn->protocol == PROTO_HTTP)
+        set_base("");
+    else
+        set_base("Default");
     printf("Connecting...");
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
@@ -503,7 +515,7 @@ int session_connect(const char *arg)
     }
     printf("OK.\n");
     if (basep && *basep)
-        cmd_base (basep);
+        set_base (basep);
     if (conn->protocol == PROTO_Z3950)
     {
         send_initRequest(type_and_host);
@@ -891,7 +903,7 @@ static int send_srw(Z_SRW_PDU *sr)
 {
     const char *charset = 0;
     const char *host_port = 0;
-    const char *path = "/";
+    char *path = 0;
     char ctype[50];
     Z_SOAP_Handler h[2] = {
         {"http://www.loc.gov/zing/srw/v1.0/", 0, (Z_SOAP_fun) yaz_srw_codec},
@@ -902,6 +914,9 @@ static int send_srw(Z_SRW_PDU *sr)
     Z_SOAP *p = odr_malloc(o, sizeof(*p));
     Z_GDU *gdu;
 
+    path = odr_malloc(out, strlen(databaseNames[0])+2);
+    *path = '/';
+    strcpy(path+1, databaseNames[0]);
 
     gdu = z_get_HTTP_Request(out);
     gdu->u.HTTP_Request->path = odr_strdup(out, path);
@@ -2855,8 +2870,6 @@ static void initialize(void)
         ccl_qual_file (bibset, inf);
         fclose (inf);
     }
-    cmd_base("Default");
-
 #if HAVE_READLINE_READLINE_H
     rl_attempted_completion_function = (CPPFunction*)readline_completer;
 #endif
@@ -2892,7 +2905,6 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
         printf ("Number of hits: %d\n", *res->numberOfRecords);
     for (i = 0; i<res->num_records; i++)
     {
-        int pos;
         Z_SRW_record *rec = res->records + i;
 
         if (rec->recordPosition)
@@ -2911,14 +2923,6 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
     }
 }
 
-static void set_HTTP_error (int error,
-                            const char *addinfo, const char *addinfo2)
-{
-
-
-}
-
-
 static void http_response(Z_HTTP_Response *hres)
 {
     int ret = -1;
@@ -2926,8 +2930,6 @@ static void http_response(Z_HTTP_Response *hres)
                                                     "Content-Type");
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
-    yaz_log (LOG_LOG, "http_response");
-
     if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
     {
         Z_SOAP *soap_package = 0;
@@ -2965,10 +2967,12 @@ static void http_response(Z_HTTP_Response *hres)
     if (ret)
     {
         if (hres->code != 200)
-            set_HTTP_error(hres->code, 0, 0);
+        {
+	    printf ("HTTP Error Status=%d\n", hres->code);
+        }
         else
         {
-            printf ("decoding of SRW package failed\n");
+            printf ("Decoding of SRW package failed\n");
         }
         close_session();
     }
@@ -2997,7 +3001,6 @@ void wait_and_handle_response()
     
     while(conn)
     {
-        printf ("cs_get....\n");
         res = cs_get(conn, &netbuffer, &netbufferlen);
         if (reconnect_ok && res <= 0 && conn->protocol == PROTO_HTTP)
         {
@@ -3029,7 +3032,6 @@ void wait_and_handle_response()
         record_last = 0;
         odr_setbuf(in, netbuffer, res, 0);
         
-        printf ("got input packet %d bytes\n", res);
         if (!z_GDU(in, &gdu, 0, 0))
         {
             FILE *f = ber_file ? ber_file : stdout;
