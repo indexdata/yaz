@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.17  1995-11-08 17:41:27  quinn
+ * Revision 1.18  1996-07-26 13:38:14  quinn
+ * Various smaller things. Gathered header-files.
+ *
+ * Revision 1.17  1995/11/08  17:41:27  quinn
  * Smallish.
  *
  * Revision 1.16  1995/11/01  13:54:36  quinn
@@ -245,6 +248,7 @@ typedef struct odr
     int t_tag;
 
     int choice_bias;     /* force choice */
+    int lenlen;          /* force length-of-lenght (odr_setlen()) */
 
     FILE *print;         /* output file for direction print */
     int indent;          /* current indent level for printing */
@@ -282,6 +286,7 @@ typedef struct odr_arm
 #define ODATA           8
 #define OSTACK          9
 #define OCONLEN        10
+#define OLENOV         11
 
 extern char *odr_errlist[];
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.20  1995-11-08 17:41:32  quinn
+ * Revision 1.21  1996-07-26 13:38:19  quinn
+ * Various smaller things. Gathered header-files.
+ *
+ * Revision 1.20  1995/11/08  17:41:32  quinn
  * Smallish.
  *
  * Revision 1.19  1995/11/01  13:54:41  quinn
@@ -88,7 +91,8 @@ char *odr_errlist[] =
     "Protocol error",
     "Malformed data",
     "Stack overflow",
-    "Length of constructed type different from sum of members"
+    "Length of constructed type different from sum of members",
+    "Overflow writing definite length of constructed type"
 };
 
 char *odr_errmsg(int n)
@@ -142,6 +146,7 @@ void odr_reset(ODR o)
     o->stackp = -1;
     nmem_reset(o->mem);
     o->choice_bias = -1;
+    o->lenlen = 1;
 }
     
 void odr_destroy(ODR o)

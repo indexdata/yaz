@@ -1,4 +1,4 @@
-# $Id: gils-b.est,v 1.6 1996-07-06 19:58:36 quinn Exp $
+# $Id: gils-b.est,v 1.7 1996-07-26 13:38:23 quinn Exp $
 simpleelement (1,1)
 simpleelement (1,10)
 simpleelement (1,12)
@@ -7,3 +7,4 @@ simpleelement (1,14)
 simpleelement (1,16)
 simpleelement (4,1)
 simpleelement (4,52)
+simpleelement (4,70)/(4,17)

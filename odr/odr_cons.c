@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.15  1995-09-29 17:12:23  quinn
+ * Revision 1.16  1996-07-26 13:38:20  quinn
+ * Various smaller things. Gathered header-files.
+ *
+ * Revision 1.15  1995/09/29  17:12:23  quinn
  * Smallish
  *
  * Revision 1.14  1995/09/27  15:02:58  quinn
@@ -57,13 +60,20 @@
 #include <odr.h>
 #include <assert.h>
 
+void odr_setlenlen(ODR o, int len)
+{
+    o->lenlen = len;
+}
+
 int odr_constructed_begin(ODR o, void *p, int class, int tag)
 {
     int res;
     int cons = 1;
+    int lenlen = o->lenlen;
 
     if (o->error)
     	return 0;
+    o->lenlen = 1; /* reset lenlen */
     if (o->t_class < 0)
     {
 	o->t_class = class;
@@ -86,8 +96,11 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
 #endif
     if (o->direction == ODR_ENCODE)
     {
-	o->stack[o->stackp].lenlen = 1;
-	if (odr_putc(o, 0) < 0)     /* dummy */
+	unsigned char dummy[sizeof(int)+1];
+
+	o->stack[o->stackp].lenlen = lenlen;
+
+	if (odr_write(o, dummy, lenlen) < 0) /* dummy */
 	    return 0;
     }
     else if (o->direction == ODR_DECODE)
@@ -167,7 +180,10 @@ int odr_constructed_end(ODR o)
 	    odr_seek(o, ODR_S_SET, o->stack[o->stackp].len_offset);
 	    if ((res = ber_enclen(o, pos - o->stack[o->stackp].base_offset,
 		o->stack[o->stackp].lenlen, 1)) < 0)
+	    {
+		o->error = OLENOV;
 		return 0;
+	    }
 	    odr_seek(o, ODR_S_END, 0);
 	    if (res == 0)   /* indefinite encoding */
 	    {
