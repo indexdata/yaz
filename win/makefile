@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.50 2002-10-24 12:14:01 heikki Exp $
+# $Id: makefile,v 1.51 2002-12-05 12:16:39 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -31,8 +31,8 @@ HAVE_ICONV=0
 ICONV_DIR = c:\libiconv-1.7.0.1
 
 # TCL
-#TCL="C:\Tcl\bin\tclsh83.exe"
-TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
+TCL="C:\Tcl\bin\tclsh83.exe"
+#TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
 
 default: all
@@ -355,7 +355,8 @@ Z3950_OBJS= \
    $(OBJDIR)\zes-pset.obj \
    $(OBJDIR)\zes-update0.obj \
    $(OBJDIR)\prt-ext.obj \
-   $(OBJDIR)\z-charneg.obj
+   $(OBJDIR)\z-charneg.obj \
+   $(OBJDIR)\z-mterm2.obj
 
 ILL_OBJS= \
    $(OBJDIR)\ill-get.obj\
@@ -416,6 +417,10 @@ ESADMIN_C_FILES = $(Z3950_C_DIR)\zes-admin.c
 CHARNEG_H_FILES = $(INCLDIR)\yaz\z-charneg.h
 CHARNEG_C_FILES = $(Z3950_C_DIR)\z-charneg.c
 
+# Files generated from mterm2.asn
+MTERM2_H_FILES = $(INCLDIR)\yaz\z-mterm2.h
+MTERM2_C_FILES = $(Z3950_C_DIR)\z-mterm2.c
+
 # Files created from z3950v3.asn
 Z3950V3_H_FILES= \
    $(INCLDIR)\yaz\z-accdes1.h \
@@ -468,6 +473,7 @@ Z3950V3_FILES= $(Z3950V3_C_FILES) $(Z3950V3_H_FILES)
 ILL_CORE_FILES= $(ILL_CORE_C_FILES) $(ILL_CORE_H_FILES)
 ITEM_REQ_FILES= $(ITEM_REQ_C_FILES) $(ITEM_REQ_H_FILES)
 CHARNEG_FILES = $(CHARNEG_C_FILES) $(CHARNEG_H_FILES)
+MTERM2_FILES = $(MTERM2_C_FILES) $(MTERM2_H_FILES)
 
 GENERATED_C_FILES= \
    $(Z3950V3_C_FILES)  \
@@ -475,7 +481,8 @@ GENERATED_C_FILES= \
    $(UNIVRES_C_FILES)  \
    $(DATETIME_C_FILES) \
    $(ESADMIN_C_FILES) \
-   $(CHARNEG_C_FILES)
+   $(CHARNEG_C_FILES) \
+   $(MTERM2_C_FILES)
 
 GENERATED_H_FILES= \
    $(Z3950V3_H_FILES)  \
@@ -483,7 +490,8 @@ GENERATED_H_FILES= \
    $(UNIVRES_H_FILES)  \
    $(DATETIME_H_FILES) \
    $(ESADMIN_H_FILES) \
-   $(CHARNEG_H_FILES)
+   $(CHARNEG_H_FILES) \
+   $(MTERM2_H_FILES)
 
 generated_files: \
 	$(GENERATED_H_FILES) \
@@ -575,6 +583,11 @@ $(ESADMIN_FILES): $(Z3950DIR)\esadmin.asn
 $(CHARNEG_FILES): $(Z3950DIR)\charneg-3.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) -d z.tcl charneg-3.asn
+	@cd $(WINDIR)
+
+$(MTERM2_FILES): $(Z3950DIR)\mterm2.asn
+	@cd $(Z3950DIR)
+	$(TCL) $(TCLOPT) -d z.tcl mterm2.asn
 	@cd $(WINDIR)
 
 $(ILL_CORE_FILES): $(ILLDIR)\ill9702.asn
@@ -832,7 +845,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.50  2002-10-24 12:14:01  heikki
+# Revision 1.51  2002-12-05 12:16:39  adam
+# yaz_strerror. WIN32 updates for mterm2.asn
+#
+# Revision 1.50  2002/10/24 12:14:01  heikki
 # Using a default path to find tcl
 #
 # Revision 1.49  2002/10/22 13:49:53  adam
