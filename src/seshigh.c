@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.31 2004-09-30 21:51:59 adam Exp $
+ * $Id: seshigh.c,v 1.32 2004-10-09 08:21:38 adam Exp $
  */
 
 /*
@@ -550,7 +550,7 @@ static int srw_bend_fetch(association *assoc, int pos,
     {
 	int code = yaz_diag_bib1_to_srw(rr.errcode);
 	const char *message = yaz_diag_srw_str(code);
-	int len = 120;
+	int len = 200;
 	if (message)
 	    len += strlen(message);
 	if (rr.errstring)
@@ -558,7 +558,8 @@ static int srw_bend_fetch(association *assoc, int pos,
 
         record->recordData_buf = odr_malloc(o, len);
 	
-	sprintf(record->recordData_buf, "<diagnostic>\n"
+	sprintf(record->recordData_buf, "<diagnostic "
+		"xmlns=\"http://www.loc.gov/zing/srw/diagnostic/\">\n"
 		" <uri>info:srw/diagnostic/1/%d</uri>\n", code);
 	if (rr.errstring)
 	    sprintf(record->recordData_buf + strlen(record->recordData_buf),
@@ -1370,7 +1371,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.31 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.32 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
