@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.16 2003-02-23 15:24:27 adam Exp $
+ * $Id: zoomsh.c,v 1.17 2003-02-24 13:14:49 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -297,6 +297,42 @@ static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
     ZOOM_query_destroy (s);
 }
 
+static void cmd_scan (ZOOM_connection *c, ZOOM_resultset *r,
+                      ZOOM_options options,
+                      const char **args)
+{
+    const char *start_term = *args;
+    int i;
+    ZOOM_scanset s[MAX_CON];
+    
+    while (*start_term == ' ')
+        start_term++;
+
+    for (i = 0; i<MAX_CON; i++)
+    {
+        if (c[i])
+            s[i] = ZOOM_connection_scan(c[i], start_term);
+        else
+            s[i] = 0;
+    }
+    while (ZOOM_event(MAX_CON, c))
+        ;
+    for (i = 0; i<MAX_CON; i++)
+    {
+        if (s[i]) {
+            size_t p, sz = ZOOM_scanset_size(s[i]);
+            for (p = 0; p < sz; p++)
+            {
+                int  occ = 0;
+                size_t len = 0;
+                const char *term = ZOOM_scanset_term(s[i], p, &occ, &len);
+                printf ("%.*s %d\n", len, term, occ);
+            }            
+            ZOOM_scanset_destroy(s[i]);
+        }
+    }
+}
+
 static void cmd_help (ZOOM_connection *c, ZOOM_resultset *r,
 		      ZOOM_options options,
 		      const char **args)
@@ -304,6 +340,7 @@ static void cmd_help (ZOOM_connection *c, ZOOM_resultset *r,
     printf ("connect <zurl>\n");
     printf ("search <pqf>\n");
     printf ("show [<start> [<count>]\n");
+    printf ("scan <term>\n");
     printf ("quit\n");
     printf ("close <zurl>\n");
     printf ("set <option> [<value>]\n");
@@ -405,6 +442,8 @@ static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
 	cmd_ext(c, r, options, buf);
     else if (is_command ("debug", cmd_str, cmd_len))
 	cmd_debug(c, r, options, buf);
+    else if (is_command ("scan", cmd_str, cmd_len))
+	cmd_scan(c, r, options, buf);
     else
 	printf ("unknown command %.*s\n", cmd_len, cmd_str);
     return 2;
