@@ -1,3 +1,9 @@
+yaz (2.0.34-2) unstable; urgency=low
+
+  * Fix tests and man page description for yaz-marcdump.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed,  9 Feb 2005 13:40:20 +0100
+
 yaz (2.0.34-1) unstable; urgency=low
 
   * Upstream.
