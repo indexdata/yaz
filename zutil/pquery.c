@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.18 2002-09-24 08:05:42 adam Exp $
+ * $Id: pquery.c,v 1.19 2002-12-05 12:07:00 adam Exp $
  */
 
 #include <stdio.h>
@@ -26,6 +26,7 @@ struct yaz_pqf_parser {
     char *right_sep;
     int escape_char;
     int term_type;
+    int external_type;
     int error;
 };
 
@@ -335,6 +336,10 @@ static Z_AttributesPlusTerm *rpn_term (struct yaz_pqf_parser *li, ODR o,
         term->which = Z_Term_null;
         term->u.null = odr_nullval();
         break;
+    case Z_Term_external:
+        term->which = Z_Term_external;
+	term->u.external = 0;
+	break;
     default:
         term->which = Z_Term_null;
         term->u.null = odr_nullval();
@@ -516,6 +521,12 @@ static void rpn_term_type (struct yaz_pqf_parser *li, ODR o)
         li->term_type = Z_Term_dateTime;
     else if (compare_term (li, "null", 0))
         li->term_type = Z_Term_null;
+    else if (compare_term(li, "range", 0))
+    {
+	/* prepare for external: range search .. */
+        li->term_type = Z_Term_external;
+	li->external_type = VAL_MULTISRCH2;
+    }
     lex (li);
 }
                            

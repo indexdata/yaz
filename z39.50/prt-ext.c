@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.3 2002-02-11 23:25:27 adam Exp $
+ * $Id: prt-ext.c,v 1.4 2002-12-05 12:07:00 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -37,6 +37,7 @@ static Z_ext_typeent type_table[] =
     {VAL_PROMPT1, Z_External_acfPrompt1, (Odr_fun) z_PromptObject1},
     {VAL_DES1, Z_External_acfDes1, (Odr_fun) z_DES_RN_Object},
     {VAL_KRB1, Z_External_acfKrb1, (Odr_fun) z_KRBObject},
+    {VAL_MULTISRCH2, Z_External_multisrch2, (Odr_fun) z_MultipleSearchTerms_2},
     {VAL_NONE, 0, 0}
 };
 
@@ -67,6 +68,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	 (Odr_fun)z_SUTRS, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_explainRecord,
 	 (Odr_fun)z_ExplainRecord, 0},
+
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_resourceReport1,
 	 (Odr_fun)z_ResourceReport1, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_resourceReport2,
@@ -77,6 +79,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	 (Odr_fun)z_GenericRecord, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_extendedService,
 	 (Odr_fun)z_TaskPackage, 0},
+
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder,
 	 (Odr_fun)z_IOItemOrder, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1,
@@ -87,6 +90,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	 (Odr_fun)z_BriefBib, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_OPAC,
 	 (Odr_fun)z_OPACRecord, 0},
+
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_searchResult1,
 	 (Odr_fun)z_SearchInfoReport, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update,
@@ -97,6 +101,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	 (Odr_fun)z_UniverseReport, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_ESAdmin,
 	 (Odr_fun)z_Admin, 0},
+
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update0,
 	 (Odr_fun)z_IU0Update, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_userInfo1,
@@ -107,8 +112,11 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
          (Odr_fun)z_PromptObject1, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_acfDes1,
          (Odr_fun)z_DES_RN_Object, 0},
+
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_acfKrb1,
          (Odr_fun)z_KRBObject, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_multisrch2,
+         (Odr_fun)z_MultipleSearchTerms_2, 0},
 	{-1, -1, -1, -1, 0, 0}
     };
     

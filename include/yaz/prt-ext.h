@@ -84,6 +84,7 @@ struct Z_External
 #define Z_External_acfPrompt1 23
 #define Z_External_acfDes1 24
 #define Z_External_acfKrb1 25
+#define Z_External_multisrch2 26
     union
     {
 	/* Generic types */
@@ -94,27 +95,33 @@ struct Z_External
 	/* Specific types */
 	Z_SUTRS *sutrs;
 	Z_ExplainRecord *explainRecord;
+
 	Z_ResourceReport1 *resourceReport1;
 	Z_ResourceReport2 *resourceReport2;
 	Z_PromptObject1 *promptObject1;
 	Z_GenericRecord *grs1;
 	Z_TaskPackage *extendedService;
+
 	Z_ItemOrder *itemOrder;
 	Z_DiagnosticFormat *diag1;
 	Z_Espec1 *espec1;
 	Z_BriefBib *summary;
         Z_OPACRecord *opac;
+
 	Z_SearchInfoReport *searchResult1;
 	Z_IUUpdate *update;
 	Z_DateTime *dateTime;
         Z_UniverseReport *universeReport;
         Z_Admin *adminService;
+
 	Z_IU0Update *update0;
         Z_OtherInformation *userInfo1;
         Z_CharSetandLanguageNegotiation *charNeg3;
         Z_PromptObject1 *acfPrompt1;
         Z_DES_RN_Object *acfDes1;
+
         Z_KRBObject *acfKrb1;
+        Z_MultipleSearchTerms_2 *multipleSearchTerms_2;
     } u;
 };
 

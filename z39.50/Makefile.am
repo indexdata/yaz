@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.11 2002-09-11 21:25:57 adam Exp $
+## $Id: Makefile.am,v 1.12 2002-12-05 12:07:00 adam Exp $
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
@@ -6,14 +6,15 @@ noinst_LTLIBRARIES = libz39.50.la
 
 tabdatadir = $(pkgdatadir)/z39.50
 tabdata_DATA=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl \
- esadmin.asn charneg-3.asn
+ esadmin.asn charneg-3.asn mterm2.asn
 EXTRA_DIST=$(tabdata_DATA)
 
 YAZCOMP = $(top_srcdir)/util/yaz-comp
+YAZCOMPLINE = ../util/yaz-comp -d z.tcl -i yaz -I../include $(YCFLAGS)
 
 libz39_50_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
- z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c \
- z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
+ z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-mterm2.c z-opac.c \
+ z-uifr1.c z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
  zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c \
  z-charneg.c \
@@ -45,31 +46,35 @@ $(srcdir)/zes-update0.c \
 $(top_srcdir)/include/z-accdes1.h \
 $(top_srcdir)/include/z-core.h: \
 $(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
-	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) z3950v3.asn
+	cd $(srcdir); $(YAZCOMPLINE) z3950v3.asn
 
 # Date extension
 $(srcdir)/z-date.c \
 $(top_srcdir)/include/yaz/z-date.h: $(srcdir)/z.tcl $(srcdir)/datetime.asn $(YAZCOMP)
-	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I../include $(YCFLAGS) datetime.asn
+	cd $(srcdir); $(YAZCOMPLINE) datetime.asn
 
 # UNIverse extension
 $(srcdir)/z-univ.c \
 $(top_srcdir)/include/yaz/z-univ.h: \
 $(srcdir)/z.tcl $(srcdir)/univres.asn $(YAZCOMP)
-	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) univres.asn
+	cd $(srcdir); $(YAZCOMPLINE) univres.asn
 
 # New Update extended service
 $(srcdir)/zes-update.c \
 $(top_srcdir)/include/yaz/zes-update.h: \
 $(srcdir)/z.tcl $(srcdir)/esupdate.asn $(YAZCOMP)
-	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esupdate.asn
+	cd $(srcdir); $(YAZCOMPLINE) esupdate.asn
 
 # Admin extended service
 $(srcdir)/zes-admin.c \
 $(top_srcdir)/include/yaz/zes-admin.h: \
 $(srcdir)/z.tcl $(srcdir)/esadmin.asn $(YAZCOMP)
-	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esadmin.asn
+	cd $(srcdir); $(YAZCOMPLINE) esadmin.asn
 
 # Charset negotiation
 $(srcdir)/z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn
-	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) charneg-3.asn
+	cd $(srcdir); $(YAZCOMPLINE) $(YCFLAGS) charneg-3.asn
+
+# UserInfoFormat-multipleSearchTerms-2
+$(srcdir)/z-mterm2.c: $(srcdir)/z.tcl $(srcdir)/mterm2.asn
+	cd $(srcdir); $(YAZCOMPLINE) mterm2.asn

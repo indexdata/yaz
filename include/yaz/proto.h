@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: proto.h,v 1.4 2002-10-22 10:05:36 adam Exp $
+ * $Id: proto.h,v 1.5 2002-12-05 12:07:00 adam Exp $
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H
@@ -39,6 +39,7 @@
 #include <yaz/z-univ.h>
 #include <yaz/zes-update0.h>
 #include <yaz/z-charneg.h>
+#include <yaz/z-mterm2.h>
 #include <yaz/oid.h>
 #include <yaz/wrbuf.h>
 

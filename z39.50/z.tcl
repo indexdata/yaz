@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.8 2002-08-28 19:12:30 adam Exp $
+# $Id: z.tcl,v 1.9 2002-12-05 12:07:00 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -320,6 +320,9 @@ set map($m,Z3950DateQuarter) DateQuater
 set map($m,Z3950DateSeason) DateSeason
 set map($m,Date_0) DateFlags
 set unionmap($m,DateFlags,era) {}
+# ----
+set m UserInfoFormat-multipleSearchTerms-2
+set filename($m) z-mterm2
 # ----
 set m ResourceReport-Format-Universe-1 
 set filename($m) z-univ
