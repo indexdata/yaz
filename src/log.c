@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.12 2004-11-04 14:19:58 heikki Exp $
+ * $Id: log.c,v 1.13 2004-11-09 20:54:08 adam Exp $
  */
 
 /**
@@ -320,19 +320,16 @@ void yaz_log_time_format(const char *fmt)
 /** cleans a loglevel name from leading paths and suffixes */
 static char *clean_name(const char *name, int len, char *namebuf, int buflen)
 {
-    char *p;
-    char *start;
+    char *p = namebuf;
+    char *start = namebuf;
     if (buflen <len)
         len = buflen; 
     strncpy(namebuf, name, len);
     namebuf[len] = '\0';
-    start = namebuf;
-    p = namebuf;
-    while ((p = index(start,'/')))
+    while ((p = strchr(start,'/')))
         start = p+1;
-    if ((p = rindex(start,'.')))
+    if ((p = strrchr(start,'.')))
         *p = '\0';
-    /*logf(LOG_LOG,"cleaned '%.*s' to '%s' ", len,name, start); */ 
     return start;
 
 }
