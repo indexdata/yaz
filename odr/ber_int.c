@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.10  1995-09-29 17:01:50  quinn
+ * Revision 1.11  1995-09-29 17:12:16  quinn
+ * Smallish
+ *
+ * Revision 1.10  1995/09/29  17:01:50  quinn
  * More Windows work
  *
  * Revision 1.9  1995/09/28  10:12:39  quinn
@@ -51,10 +54,10 @@
 #include <odr.h>
 #include <prt.h>
 
-static int MDF ber_encinteger(ODR o, int val);
-static int MDF ber_decinteger(unsigned char *buf, int *val);
+static int ber_encinteger(ODR o, int val);
+static int ber_decinteger(unsigned char *buf, int *val);
 
-int MDF ber_integer(ODR o, int *val)
+int ber_integer(ODR o, int *val)
 {
     int res;
 
@@ -81,7 +84,7 @@ int MDF ber_integer(ODR o, int *val)
 /*
  * Returns: number of bytes written or -1 for error (out of bounds).
  */
-int MDF ber_encinteger(ODR o, int val)
+int ber_encinteger(ODR o, int val)
 {
     int lenpos;
     int a, len;
@@ -111,7 +114,7 @@ int MDF ber_encinteger(ODR o, int val)
 /*
  * Returns: Number of bytes read or 0 if no match, -1 if error.
  */
-int MDF ber_decinteger(unsigned char *buf, int *val)
+int ber_decinteger(unsigned char *buf, int *val)
 {
     unsigned char *b = buf, fill;
     int res, len, remains;

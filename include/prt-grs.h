@@ -174,6 +174,6 @@ struct Z_GenericRecord
     Z_TaggedElement **elements;
 };
 
-int MDF z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
+int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
 
 #endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.5  1995-09-29 17:01:51  quinn
+ * Revision 1.6  1995-09-29 17:12:35  quinn
+ * Smallish
+ *
+ * Revision 1.5  1995/09/29  17:01:51  quinn
  * More Windows work
  *
  * Revision 1.4  1995/09/27  15:03:03  quinn
@@ -164,19 +167,19 @@ static oident oids[] =
 
 /* OID utilities */
 
-void MDF oid_oidcpy(int *t, int *s)
+void oid_oidcpy(int *t, int *s)
 {
     while ((*(t++) = *(s++)) > -1);
 }
 
-void MDF oid_oidcat(int *t, int *s)
+void oid_oidcat(int *t, int *s)
 {
     while (*t > -1)
         t++;
     while ((*(t++) = *(s++)) > -1);
 }
 
-int MDF oid_oidcmp(int *o1, int *o2)
+int oid_oidcmp(int *o1, int *o2)
 {
     while (*o1 == *o2 && *o1 > -1)
     {
@@ -191,7 +194,7 @@ int MDF oid_oidcmp(int *o1, int *o2)
         return -1;
 }
 
-int MDF oid_oidlen(int *o)
+int oid_oidlen(int *o)
 {
     int len = 0;
 
@@ -211,7 +214,7 @@ static int match_prefix(int *look, int *prefix)
     return 0;
 }
 
-struct oident MDF *oid_getentbyoid(int *o)
+struct oident *oid_getentbyoid(int *o)
 {
     enum oid_proto proto;
     int prelen;
@@ -235,7 +238,7 @@ struct oident MDF *oid_getentbyoid(int *o)
 /*
  * To query, fill out proto, class, and value of the ent parameter.
  */
-int MDF *oid_getoidbyent(struct oident *ent)
+int *oid_getoidbyent(struct oident *ent)
 {
     struct oident *p;
     static int ret[OID_SIZE];
@@ -257,7 +260,7 @@ int MDF *oid_getoidbyent(struct oident *ent)
     return 0;
 }
 
-oid_value MDF oid_getvalbyname(char *name)
+oid_value oid_getvalbyname(char *name)
 {
     struct oident *p;
 

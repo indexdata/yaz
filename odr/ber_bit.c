@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bit.c,v $
- * Revision 1.6  1995-09-27 15:02:54  quinn
+ * Revision 1.7  1995-09-29 17:12:16  quinn
+ * Smallish
+ *
+ * Revision 1.6  1995/09/27  15:02:54  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.5  1995/05/16  08:50:43  quinn
@@ -28,7 +31,7 @@
 
 #include <odr.h>
 
-int MDF ber_bitstring(ODR o, Odr_bitmask *p, int cons)
+int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 {
     int res, len;
     unsigned char *base;

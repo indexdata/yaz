@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.13  1995-09-29 17:01:49  quinn
+ * Revision 1.14  1995-09-29 17:12:04  quinn
+ * Smallish
+ *
+ * Revision 1.13  1995/09/29  17:01:49  quinn
  * More Windows work
  *
  * Revision 1.12  1995/09/27  15:02:48  quinn
@@ -244,7 +247,7 @@ typedef struct odr
     odr_constack stack[ODR_MAX_STACK];
 } *ODR;
 
-typedef int MDF (*Odr_fun)();
+typedef int (*Odr_fun)();
 
 typedef struct odr_arm
 {
@@ -272,17 +275,17 @@ typedef struct odr_arm
 
 extern char *odr_errlist[];
 
-int MDF odr_geterror(ODR o);
-void MDF odr_perror(ODR o, char *message);
-void MDF odr_setprint(ODR o, FILE *file);
-ODR MDF odr_createmem(int direction);
-void MDF odr_reset(ODR o);
-void MDF odr_destroy(ODR o);
-void MDF odr_setbuf(ODR o, char *buf, int len, int can_grow);
-char MDF *odr_getbuf(ODR o, int *len, int *size);
-void MDF *odr_malloc(ODR o, int size);
-ODR_MEM MDF odr_extract_mem(ODR o);
-void MDF odr_release_mem(ODR_MEM p);
+int odr_geterror(ODR o);
+void odr_perror(ODR o, char *message);
+void odr_setprint(ODR o, FILE *file);
+ODR odr_createmem(int direction);
+void odr_reset(ODR o);
+void odr_destroy(ODR o);
+void odr_setbuf(ODR o, char *buf, int len, int can_grow);
+char *odr_getbuf(ODR o, int *len, int *size);
+void *odr_malloc(ODR o, int size);
+ODR_MEM odr_extract_mem(ODR o);
+void odr_release_mem(ODR_MEM p);
 
 #define odr_implicit(o, t, p, cl, tg, opt)\
         (odr_implicit_settag((o), cl, tg), t ((o), (p), opt) )

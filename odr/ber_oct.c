@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.9  1995-09-27 15:02:55  quinn
+ * Revision 1.10  1995-09-29 17:12:18  quinn
+ * Smallish
+ *
+ * Revision 1.9  1995/09/27  15:02:55  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.8  1995/05/16  08:50:47  quinn
@@ -36,7 +39,7 @@
 
 #include <odr.h>
 
-int MDF ber_octetstring(ODR o, Odr_oct *p, int cons)
+int ber_octetstring(ODR o, Odr_oct *p, int cons)
 {
     int res, len;
     unsigned char *base, *c;

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.4  1995-09-28 10:12:36  quinn
+ * Revision 1.5  1995-09-29 17:12:13  quinn
+ * Smallish
+ *
+ * Revision 1.4  1995/09/28  10:12:36  quinn
  * Windows-support changes
  *
  * Revision 1.3  1995/09/27  15:02:53  quinn
@@ -62,8 +65,8 @@
 #include <arpa/inet.h>
 #endif
 
-struct sockaddr_in MDF *tcpip_strtoaddr(const char *str);
+struct sockaddr_in *tcpip_strtoaddr(const char *str);
 
-COMSTACK MDF tcpip_type(int blocking, int protocol);
+COMSTACK tcpip_type(int blocking, int protocol);
 
 #endif

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.4  1995-09-27 15:02:47  quinn
+ * Revision 1.5  1995-09-29 17:12:03  quinn
+ * Smallish
+ *
+ * Revision 1.4  1995/09/27  15:02:47  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.3  1995/06/19  12:38:25  quinn
@@ -65,9 +68,9 @@
 
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 
-void MDF log_init(int level, const char *prefix, const char *name);
-void MDF logf(int level, const char *fmt, ...);
-int MDF log_mask_str (const char *str);
-FILE MDF *log_file(void);
+void log_init(int level, const char *prefix, const char *name);
+void logf(int level, const char *fmt, ...);
+int log_mask_str (const char *str);
+FILE *log_file(void);
 
 #endif

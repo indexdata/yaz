@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dmalloc.c,v $
- * Revision 1.7  1995-09-29 17:01:50  quinn
+ * Revision 1.8  1995-09-29 17:12:33  quinn
+ * Smallish
+ *
+ * Revision 1.7  1995/09/29  17:01:50  quinn
  * More Windows work
  *
  * Revision 1.6  1995/09/27  15:03:02  quinn
@@ -38,7 +41,7 @@ static const unsigned char head[] = {44, 33, 22, 11};
 static const unsigned char tail[] = {11, 22, 33, 44};
 static const unsigned char freed[] = {99, 99, 99, 99};
 
-void MDF *d_malloc(char *file, int line, int nbytes)
+void *d_malloc(char *file, int line, int nbytes)
 {
     char *res;
     int long len;
@@ -55,7 +58,7 @@ void MDF *d_malloc(char *file, int line, int nbytes)
     return res;
 }
 
-void MDF d_free(char *file, int line, char *ptr)
+void d_free(char *file, int line, char *ptr)
 {
     long len;
 
@@ -71,7 +74,7 @@ void MDF d_free(char *file, int line, char *ptr)
     return;
 }
 
-void MDF *d_realloc(char *file, int line, char *ptr, int nbytes)
+void *d_realloc(char *file, int line, char *ptr, int nbytes)
 {
     long len, nlen = nbytes;
     char *p = ptr;

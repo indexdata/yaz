@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_null.c,v $
- * Revision 1.7  1995-09-27 15:02:55  quinn
+ * Revision 1.8  1995-09-29 17:12:18  quinn
+ * Smallish
+ *
+ * Revision 1.7  1995/09/27  15:02:55  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.6  1995/05/22  11:32:01  quinn
@@ -33,7 +36,7 @@
 /*
  * BER-en/decoder for NULL type.
  */
-int MDF ber_null(ODR o)
+int ber_null(ODR o)
 {
     switch (o->direction)
     {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.5  1995-09-29 17:01:48  quinn
+ * Revision 1.6  1995-09-29 17:12:00  quinn
+ * Smallish
+ *
+ * Revision 1.5  1995/09/29  17:01:48  quinn
  * More Windows work
  *
  * Revision 1.4  1995/09/28  10:12:26  quinn
@@ -129,7 +132,7 @@ typedef struct tcpip_state
     int towrite;  /* to verify against user input */
 } tcpip_state;
 
-COMSTACK MDF tcpip_type(int blocking, int protocol)
+COMSTACK tcpip_type(int blocking, int protocol)
 {
     COMSTACK p;
     tcpip_state *state;
@@ -200,7 +203,7 @@ COMSTACK MDF tcpip_type(int blocking, int protocol)
     return p;
 }
 
-struct sockaddr_in MDF *tcpip_strtoaddr(const char *str)
+struct sockaddr_in *tcpip_strtoaddr(const char *str)
 {
     static struct sockaddr_in add;
     struct hostent *hp;

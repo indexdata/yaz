@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: pquery.h,v $
- * Revision 1.3  1995-09-27 15:02:49  quinn
+ * Revision 1.4  1995-09-29 17:12:05  quinn
+ * Smallish
+ *
+ * Revision 1.3  1995/09/27  15:02:49  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.2  1995/05/26  08:56:05  adam
@@ -41,6 +44,6 @@
 #include <yconfig.h>
 #include <proto.h>
 
-Z_RPNQuery MDF *p_query_rpn (ODR o, const char *qbuf);
-Z_AttributesPlusTerm MDF *p_query_scan (ODR o, const char *qbuf);
+Z_RPNQuery *p_query_rpn (ODR o, const char *qbuf);
+Z_AttributesPlusTerm *p_query_scan (ODR o, const char *qbuf);
 #endif

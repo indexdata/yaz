@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-rsc.h,v $
- * Revision 1.4  1995-09-27 15:02:52  quinn
+ * Revision 1.5  1995-09-29 17:12:11  quinn
+ * Smallish
+ *
+ * Revision 1.4  1995/09/27  15:02:52  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.3  1995/08/17  12:45:17  quinn
@@ -77,7 +80,7 @@ typedef struct Z_ResourceReport1
     char *message;
 } Z_ResourceReport1;
 
-int MDF z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt);
+int z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt);
 
 /* -------------------- Resource-2 -------------------- */
 
@@ -94,6 +97,6 @@ typedef struct Z_ResourceReport2
     char *message;                       /* OPTIONAL */
 } Z_ResourceReport2;
 
-int MDF z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt);
+int z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt);
 
 #endif

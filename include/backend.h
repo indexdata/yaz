@@ -45,7 +45,7 @@ typedef struct bend_initresult
     void *handle;              /* private handle to the backend module */
 } bend_initresult;
 
-bend_initresult MDF MDF *bend_init(bend_initrequest *r);   
+bend_initresult MDF *bend_init(bend_initrequest *r);   
 
 typedef struct bend_searchrequest
 {
@@ -63,8 +63,8 @@ typedef struct bend_searchresult
     char *errstring;           /* system error string or NULL */
 } bend_searchresult;
 
-bend_searchresult MDF *bend_search(void *handle, bend_searchrequest *r, int *fd);
-bend_searchresult MDF *bend_searchresponse(void *handle);
+bend_searchresult *bend_search(void *handle, bend_searchrequest *r, int *fd);
+bend_searchresult *bend_searchresponse(void *handle);
 
 typedef struct bend_fetchrequest
 {
@@ -85,8 +85,8 @@ typedef struct bend_fetchresult
     char *errstring;           /* system error string or NULL */
 } bend_fetchresult;
 
-bend_fetchresult MDF *bend_fetch(void *handle, bend_fetchrequest *r, int *fd);
-bend_fetchresult MDF *bend_fetchresponse(void *handle);
+bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r, int *fd);
+bend_fetchresult *bend_fetchresponse(void *handle);
 
 typedef struct bend_scanrequest
 {
@@ -115,8 +115,8 @@ typedef struct bend_scanresult
     char *errstring;
 } bend_scanresult;
 
-bend_scanresult MDF *bend_scan(void *handle, bend_scanrequest *r, int *fd);
-bend_scanresult MDF *bend_scanresponse(void *handle);
+bend_scanresult *bend_scan(void *handle, bend_scanrequest *r, int *fd);
+bend_scanresult *bend_scanresponse(void *handle);
 
 typedef struct bend_deleterequest
 {
@@ -129,9 +129,9 @@ typedef struct bend_deleteresult
     char *errstring;           /* system error string or NULL */
 } bend_deleteresult;
 
-bend_deleteresult MDF *bend_delete(void *handle, bend_deleterequest *r, int *fd);
-bend_deleteresult MDF *bend_deleteresponse(void *handle);
+bend_deleteresult *bend_delete(void *handle, bend_deleterequest *r, int *fd);
+bend_deleteresult *bend_deleteresponse(void *handle);
 
-void MDF bend_close(void *handle);
+void bend_close(void *handle);
 
 #endif

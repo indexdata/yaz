@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: options.c,v $
- * Revision 1.3  1995-09-27 15:03:03  quinn
+ * Revision 1.4  1995-09-29 17:12:35  quinn
+ * Smallish
+ *
+ * Revision 1.3  1995/09/27  15:03:03  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.2  1995/05/16  08:51:13  quinn
@@ -28,7 +31,7 @@
 static int arg_no = 1;
 static int arg_off = 0;
 
-int MDF options (const char *desc, char **argv, int argc, char **arg)
+int options (const char *desc, char **argv, int argc, char **arg)
 {
     int ch, i = 0;
     

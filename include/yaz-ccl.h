@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: yaz-ccl.h,v $
- * Revision 1.4  1995-09-27 15:02:54  quinn
+ * Revision 1.5  1995-09-29 17:12:14  quinn
+ * Smallish
+ *
+ * Revision 1.4  1995/09/27  15:02:54  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.3  1995/05/16  08:50:40  quinn
@@ -40,7 +43,7 @@
 #include <proto.h>
 #include <ccl.h>
 
-Z_RPNQuery MDF *ccl_rpn_query (struct ccl_rpn_node *p);
-Z_AttributesPlusTerm MDF *ccl_scan_query (struct ccl_rpn_node *p);
+Z_RPNQuery *ccl_rpn_query (struct ccl_rpn_node *p);
+Z_AttributesPlusTerm *ccl_scan_query (struct ccl_rpn_node *p);
 
 #endif

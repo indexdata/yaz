@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: options.h,v $
- * Revision 1.3  1995-09-27 15:02:48  quinn
+ * Revision 1.4  1995-09-29 17:12:05  quinn
+ * Smallish
+ *
+ * Revision 1.3  1995/09/27  15:02:48  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.2  1995/05/16  08:50:36  quinn
@@ -48,6 +51,6 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 #include <yconfig.h>
-int MDF options (const char *desc, char **argv, int argc, char **arg);
+int options (const char *desc, char **argv, int argc, char **arg);
 #endif
 	

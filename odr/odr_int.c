@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_int.c,v $
- * Revision 1.9  1995-09-29 17:01:50  quinn
+ * Revision 1.10  1995-09-29 17:12:24  quinn
+ * Smallish
+ *
+ * Revision 1.9  1995/09/29  17:01:50  quinn
  * More Windows work
  *
  * Revision 1.8  1995/09/27  15:02:59  quinn
@@ -40,7 +43,7 @@
  * Top level integer en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int MDF odr_integer(ODR o, int **p, int opt)
+int odr_integer(ODR o, int **p, int opt)
 {
     int res, cons = 0;
 

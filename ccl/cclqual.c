@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.2  1995-09-27 15:02:44  quinn
+ * Revision 1.3  1995-09-29 17:12:00  quinn
+ * Smallish
+ *
+ * Revision 1.2  1995/09/27  15:02:44  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.1  1995/04/10  10:28:20  quinn
@@ -38,7 +41,7 @@ struct ccl_qualifiers {
     struct ccl_qualifier *list;
 };
 
-void MDF ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
+void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
 {
     struct ccl_qualifier *q;
     struct ccl_rpn_attr **attrp;
@@ -80,7 +83,7 @@ void MDF ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
     *attrp = NULL;
 }
 
-CCL_bibset MDF ccl_qual_mk (void)
+CCL_bibset ccl_qual_mk (void)
 {
     CCL_bibset b = malloc (sizeof(*b));
     assert (b);
@@ -88,13 +91,13 @@ CCL_bibset MDF ccl_qual_mk (void)
     return b;
 }
 
-void MDF ccl_qual_rm (CCL_bibset *b)
+void ccl_qual_rm (CCL_bibset *b)
 {
     assert (*b);
     *b = NULL;
 }
 
-struct ccl_rpn_attr MDF *ccl_qual_search (CCL_bibset b, const char *name, int len)
+struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name, int len)
 {
     struct ccl_qualifier *q;
 
@@ -105,7 +108,7 @@ struct ccl_rpn_attr MDF *ccl_qual_search (CCL_bibset b, const char *name, int le
     return NULL;
 }
 
-void MDF ccl_qual_file (CCL_bibset bibset, FILE *inf)
+void ccl_qual_file (CCL_bibset bibset, FILE *inf)
 {
     char line[256];
     char *cp;

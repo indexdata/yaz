@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.5  1995-09-28 10:24:32  quinn
+ * Revision 1.6  1995-09-29 17:12:00  quinn
+ * Smallish
+ *
+ * Revision 1.5  1995/09/28  10:24:32  quinn
  * Windows changes
  *
  * Revision 1.4  1995/09/27  15:02:45  quinn
@@ -141,7 +144,7 @@ static int addopt(struct netbuf *optbuf, unsigned long level, unsigned long
     return 0;
 }
 
-COMSTACK MDF mosi_type(int blocking, int protocol)
+COMSTACK mosi_type(int blocking, int protocol)
 {
     COMSTACK r;
     mosi_state *state;
@@ -199,7 +202,7 @@ int hex2oct(char *hex, char *oct)
  * addressing specific to our hack of OSI transport. A sockaddr_in wrapped
  * up in a t_mosiaddr in a netbuf (on a stick).
  */
-struct MDF netbuf MDF *mosi_strtoaddr(const char *str)
+struct netbuf MDF *mosi_strtoaddr(const char *str)
 {
     struct netbuf *ret = malloc(sizeof(struct netbuf));
     struct sockaddr_in *add = malloc(sizeof(struct sockaddr_in));

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_len.c,v $
- * Revision 1.5  1995-09-27 15:02:55  quinn
+ * Revision 1.6  1995-09-29 17:12:17  quinn
+ * Smallish
+ *
+ * Revision 1.5  1995/09/27  15:02:55  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.4  1995/05/16  08:50:45  quinn
@@ -24,7 +27,7 @@
  * Returns: =0   success, indefinite start-marker set. 1 byte encoded.
  * Returns: -1   failure, out of bounds.
  */
-int MDF ber_enclen(ODR o, int len, int lenlen, int exact)
+int ber_enclen(ODR o, int len, int lenlen, int exact)
 {
     unsigned char octs[sizeof(int)];
     int n = 0;
@@ -88,7 +91,7 @@ int MDF ber_enclen(ODR o, int len, int lenlen, int exact)
  * len = -1   indefinite.
  * len >= 0    Length.
  */
-int MDF ber_declen(unsigned char *buf, int *len)
+int ber_declen(unsigned char *buf, int *len)
 {
     unsigned char *b = buf;
     int n;

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.6  1995-09-27 15:02:53  quinn
+ * Revision 1.7  1995-09-29 17:12:12  quinn
+ * Smallish
+ *
+ * Revision 1.6  1995/09/27  15:02:53  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.5  1995/06/19  12:38:31  quinn
@@ -59,8 +62,8 @@ typedef struct statserv_options_block
     char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
 } statserv_options_block;
 
-int MDF statserv_main(int argc, char **argv);
-statserv_options_block MDF *statserv_getcontrol(void);
-void MDF statserv_setcontrol(statserv_options_block *block);
+int statserv_main(int argc, char **argv);
+statserv_options_block *statserv_getcontrol(void);
+void statserv_setcontrol(statserv_options_block *block);
 
 #endif

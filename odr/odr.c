@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.17  1995-09-29 17:01:50  quinn
+ * Revision 1.18  1995-09-29 17:12:22  quinn
+ * Smallish
+ *
+ * Revision 1.17  1995/09/29  17:01:50  quinn
  * More Windows work
  *
  * Revision 1.16  1995/09/27  15:02:57  quinn
@@ -87,22 +90,22 @@ char *odr_errmsg(int n)
     return odr_errlist[n];
 }
 
-void MDF odr_perror(ODR o, char *message)
+void odr_perror(ODR o, char *message)
 {
     fprintf(stderr, "%s: %s\n", message, odr_errlist[o->error]);
 }
 
-int MDF odr_geterror(ODR o)
+int odr_geterror(ODR o)
 {
     return o->error;
 }
 
-void MDF odr_setprint(ODR o, FILE *file)
+void odr_setprint(ODR o, FILE *file)
 {
     o->print = file;
 }
 
-ODR MDF odr_createmem(int direction)
+ODR odr_createmem(int direction)
 {
     struct odr *r;
 
@@ -120,7 +123,7 @@ ODR MDF odr_createmem(int direction)
     return r;
 }
 
-void MDF odr_reset(ODR o)
+void odr_reset(ODR o)
 {
     o->error = ONONE;
     o->bp = o->buf;
@@ -136,7 +139,7 @@ void MDF odr_reset(ODR o)
     o->choice_bias = -1;
 }
     
-void MDF odr_destroy(ODR o)
+void odr_destroy(ODR o)
 {
     odr_release_mem(o->mem);
     if (o->ecb.buf && o->ecb.can_grow)
@@ -146,7 +149,7 @@ void MDF odr_destroy(ODR o)
     free(o);
 }
 
-void MDF odr_setbuf(ODR o, char *buf, int len, int can_grow)
+void odr_setbuf(ODR o, char *buf, int len, int can_grow)
 {
     o->buf = o->bp = (unsigned char *) buf;
     o->buflen = o->left = len;
@@ -157,7 +160,7 @@ void MDF odr_setbuf(ODR o, char *buf, int len, int can_grow)
     o->ecb.size = len;
 }
 
-char MDF *odr_getbuf(ODR o, int *len, int *size)
+char *odr_getbuf(ODR o, int *len, int *size)
 {
     *len = o->ecb.top;
     if (size)

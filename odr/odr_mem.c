@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.7  1995-09-27 15:02:59  quinn
+ * Revision 1.8  1995-09-29 17:12:24  quinn
+ * Smallish
+ *
+ * Revision 1.7  1995/09/27  15:02:59  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.6  1995/08/21  09:10:41  quinn
@@ -88,7 +91,7 @@ static odr_memblock *get_block(int size)
 /*
  * Return p to the global freelist.
  */
-void MDF odr_release_mem(ODR_MEM p)
+void odr_release_mem(ODR_MEM p)
 {
     odr_memblock *t;
 
@@ -103,7 +106,7 @@ void MDF odr_release_mem(ODR_MEM p)
 /*
  * Extract the memory control block from o.
  */
-ODR_MEM MDF odr_extract_mem(ODR o)
+ODR_MEM odr_extract_mem(ODR o)
 {
     ODR_MEM r = o->mem;
 
@@ -111,7 +114,7 @@ ODR_MEM MDF odr_extract_mem(ODR o)
     return r;
 }
 
-void MDF *odr_malloc(ODR o, int size)
+void *odr_malloc(ODR o, int size)
 {
     struct odr_memblock *p = o->mem;
     char *r;
@@ -133,7 +136,7 @@ void MDF *odr_malloc(ODR o, int size)
     return r;
 }
 
-int MDF odr_total(ODR o)
+int odr_total(ODR o)
 {
     return o->mem ? o->mem->total : 0;
 }
@@ -141,7 +144,7 @@ int MDF odr_total(ODR o)
 /* ---------- memory management for data encoding ----------*/
 
 
-int MDF odr_grow_block(odr_ecblock *b, int min_bytes)
+int odr_grow_block(odr_ecblock *b, int min_bytes)
 {
     int togrow;
 
@@ -163,7 +166,7 @@ int MDF odr_grow_block(odr_ecblock *b, int min_bytes)
     return 0;
 }
 
-int MDF odr_write(ODR o, unsigned char *buf, int bytes)
+int odr_write(ODR o, unsigned char *buf, int bytes)
 {
     if (o->ecb.pos + bytes >= o->ecb.size && odr_grow_block(&o->ecb, bytes))
     {
@@ -177,7 +180,7 @@ int MDF odr_write(ODR o, unsigned char *buf, int bytes)
     return 0;
 }
 
-int MDF odr_seek(ODR o, int whence, int offset)
+int odr_seek(ODR o, int whence, int offset)
 {
     if (whence == ODR_S_CUR)
     	offset += o->ecb.pos;

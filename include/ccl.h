@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: ccl.h,v $
- * Revision 1.2  1995-09-27 15:02:46  quinn
+ * Revision 1.3  1995-09-29 17:12:01  quinn
+ * Smallish
+ *
+ * Revision 1.2  1995/09/27  15:02:46  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.1  1995/04/10  10:28:27  quinn
@@ -141,21 +144,21 @@ struct ccl_qualifier {
     struct ccl_qualifier *next;
 };
 
-struct ccl_token MDF *ccl_tokenize (const char *command);
+struct ccl_token *ccl_tokenize (const char *command);
 
-struct ccl_rpn_node MDF *ccl_find_str (CCL_bibset bibset,
+struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset,
                                    const char *str, int *error, int *pos);
 
-struct ccl_rpn_node MDF *ccl_find (CCL_bibset abibset, struct ccl_token *list,
+struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
                                int *error, const char **pos);
-char MDF *ccl_err_msg (int ccl_errno);
-void MDF ccl_rpn_delete (struct ccl_rpn_node *rpn);
-void MDF ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out);
+char *ccl_err_msg (int ccl_errno);
+void ccl_rpn_delete (struct ccl_rpn_node *rpn);
+void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out);
 
-void MDF ccl_qual_add (CCL_bibset b, const char *name, int no, int *attr);
-void MDF ccl_qual_file (CCL_bibset bibset, FILE *inf);
-CCL_bibset MDF ccl_qual_mk (void);
-void MDF ccl_qual_rm (CCL_bibset *b);
+void ccl_qual_add (CCL_bibset b, const char *name, int no, int *attr);
+void ccl_qual_file (CCL_bibset bibset, FILE *inf);
+CCL_bibset ccl_qual_mk (void);
+void ccl_qual_rm (CCL_bibset *b);
 
 extern const char *ccl_token_and;
 extern const char *ccl_token_or;
@@ -163,6 +166,6 @@ extern const char *ccl_token_not;
 extern const char *ccl_token_set;
 
 
-struct ccl_rpn_attr MDF *ccl_qual_search (CCL_bibset b, const char *name, int len);
+struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name, int len);
 #endif
 

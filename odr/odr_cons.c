@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.14  1995-09-27 15:02:58  quinn
+ * Revision 1.15  1995-09-29 17:12:23  quinn
+ * Smallish
+ *
+ * Revision 1.14  1995/09/27  15:02:58  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.13  1995/08/15  11:16:39  quinn
@@ -54,7 +57,7 @@
 #include <odr.h>
 #include <assert.h>
 
-int MDF odr_constructed_begin(ODR o, void *p, int class, int tag)
+int odr_constructed_begin(ODR o, void *p, int class, int tag)
 {
     int res;
     int cons = 1;
@@ -110,7 +113,7 @@ int MDF odr_constructed_begin(ODR o, void *p, int class, int tag)
     return 1;
 }
 
-int MDF odr_constructed_more(ODR o)
+int odr_constructed_more(ODR o)
 {
     if (o->error)
     	return 0;
@@ -122,7 +125,7 @@ int MDF odr_constructed_more(ODR o)
     	return (!(*o->bp == 0 && *(o->bp + 1) == 0));
 }
 
-int MDF odr_constructed_end(ODR o)
+int odr_constructed_end(ODR o)
 {
     int res;
     int pos;

@@ -344,6 +344,6 @@ typedef struct Z_DiagnosticFormat
     Z_DiagnosticUnit **diagnostics;
 } Z_DiagnosticFormat;
 
-int MDF z_DiagnosticFormat(ODR o, Z_DiagnosticFormat **p, int opt);
+int z_DiagnosticFormat(ODR o, Z_DiagnosticFormat **p, int opt);
 
 #endif

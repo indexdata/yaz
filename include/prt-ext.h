@@ -77,6 +77,6 @@ struct Z_External
     } u;
 };
 
-int MDF z_External(ODR o, Z_External **p, int opt);
+int z_External(ODR o, Z_External **p, int opt);
 
 #endif

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-acc.h,v $
- * Revision 1.4  1995-09-27 15:02:49  quinn
+ * Revision 1.5  1995-09-29 17:12:09  quinn
+ * Smallish
+ *
+ * Revision 1.4  1995/09/27  15:02:49  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.3  1995/08/17  12:45:16  quinn
@@ -155,6 +158,6 @@ typedef struct Z_PromptObject1
     } u;
 } Z_PromptObject1;
 
-int MDF z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);
+int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);
 
 #endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.5  1995-09-27 15:02:42  quinn
+ * Revision 1.6  1995-09-29 17:11:55  quinn
+ * Smallish
+ *
+ * Revision 1.5  1995/09/27  15:02:42  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.4  1995/08/29  11:17:16  quinn
@@ -24,7 +27,7 @@
 
 #include <proto.h>
 
-int MDF z_External(ODR o, Z_External **p, int opt)
+int z_External(ODR o, Z_External **p, int opt)
 {
    oident *oid;
 

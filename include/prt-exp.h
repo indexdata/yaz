@@ -1015,6 +1015,6 @@ typedef struct Z_ExplainRecord
     } u;
 } Z_ExplainRecord;
 
-int MDF z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
+int z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
 
 #endif

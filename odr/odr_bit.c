@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bit.c,v $
- * Revision 1.9  1995-09-27 15:02:58  quinn
+ * Revision 1.10  1995-09-29 17:12:22  quinn
+ * Smallish
+ *
+ * Revision 1.9  1995/09/27  15:02:58  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.8  1995/05/16  08:50:51  quinn
@@ -41,7 +44,7 @@
  * Top level bitstring string en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int MDF odr_bitstring(ODR o, Odr_bitmask **p, int opt)
+int odr_bitstring(ODR o, Odr_bitmask **p, int opt)
 {
     int res, cons = 0;
 

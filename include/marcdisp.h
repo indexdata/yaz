@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: marcdisp.h,v $
- * Revision 1.3  1995-09-27 15:02:47  quinn
+ * Revision 1.4  1995-09-29 17:12:03  quinn
+ * Smallish
+ *
+ * Revision 1.3  1995/09/27  15:02:47  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.2  1995/05/16  08:50:32  quinn
@@ -36,5 +39,5 @@
  */
 
 #include <yconfig.h>
-int MDF marc_display (const char *buf, FILE *outf);
+int marc_display (const char *buf, FILE *outf);
 
