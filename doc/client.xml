@@ -1,4 +1,4 @@
-<!-- $Id: client.xml,v 1.8 2002-01-11 20:16:47 adam Exp $ -->
+<!-- $Id: client.xml,v 1.9 2002-01-28 09:25:08 adam Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
@@ -112,7 +112,7 @@
   <sect1 id="client.commands"><title>Commands</title>
    <para>
     When the YAZ client has read options and connected to a target, if given,
-    it will display <literal>Z &gt;</literal> and away your command.
+    it will display <literal>Z&gt;</literal> and await your command.
     Commands are executed by hitting the return key.
     You can always issue the command <literal>?</literal> to see the list
     of available commands.
@@ -409,12 +409,37 @@
      </term>
      <listitem>
       <para>Sends Item Update Request. This command sends a "minimal"
-       PDU to the target supplying the last received record from the target.
+       PDU Update to the target supplying the last received record from
+       the target.
        If no record has been received from the target this command is ignored
        and nothing is sent to the target.
       </para>
      </listitem>
     </varlistentry>
+
+    <varlistentry><term>
+      <literal>.</literal>
+      <replaceable>filename</replaceable>
+     </term>
+     <listitem>
+      <para>Executes list of commands from
+       file <replaceable>filename</replaceable>, just like source on
+       some UNIX shells.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry><term>
+      <literal>!</literal>
+      <replaceable>args</replaceable>
+     </term>
+     <listitem>
+      <para>Executes command <replaceable>args</replaceable> in subshell
+       using the <literal>system</literal> call.
+      </para>
+     </listitem>
+    </varlistentry>
+
    </variablelist>
   </sect1>
   <sect1 id="client.searching"><title>Searching</title>
