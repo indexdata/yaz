@@ -1,5 +1,18 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.9-6 2004/01/12  Debian/Windows
+
+Make the SRU server more picky WRT unknown params, etc.
+
+Bug fix: ZOOM scan response didn't return displayTerm - when present.
+
+New YAZ client command, options, that sets Z39.50 options.
+
+New utility functions yaz_init_opt_{encode,decode} to encode/decode Z39.50
+options from a string of tokens (one token for each option bit).
+
+Update SRW diagnostic code messages.
+
 --- 2.0.9-5 2004/01/07  Debian/Windows
 
 Handle user defined stylesheet for SRW/SRU.

@@ -1,3 +1,9 @@
+yaz (2.0.9-6) unstable; urgency=low
+
+  * Make the SRU server more picky WRT unknown params, etc.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 12 Jan 2004 14:16:42 +0100
+
 yaz (2.0.9-5) unstable; urgency=low
 
   * Add SRW/SRU stylesheet support.
