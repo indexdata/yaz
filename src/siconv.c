@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.4 2004-03-15 22:51:10 adam Exp $
+ * $Id: siconv.c,v 1.5 2004-03-16 13:12:43 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -25,10 +25,23 @@
 #include <yaz/yaz-util.h>
 
 unsigned long yaz_marc8_conv (unsigned char *inp, size_t inbytesleft,
-                              size_t *no_read);
-    
-unsigned long yaz_marc8_cjk_conv (unsigned char *inp, size_t inbytesleft,
-				  size_t *no_read);
+			      size_t *no_read);
+unsigned long yaz_marc8_2_conv (unsigned char *inp, size_t inbytesleft,
+				size_t *no_read);
+unsigned long yaz_marc8_3_conv (unsigned char *inp, size_t inbytesleft,
+				size_t *no_read);
+unsigned long yaz_marc8_4_conv (unsigned char *inp, size_t inbytesleft,
+				size_t *no_read);
+unsigned long yaz_marc8_5_conv (unsigned char *inp, size_t inbytesleft,
+				size_t *no_read);
+unsigned long yaz_marc8_6_conv (unsigned char *inp, size_t inbytesleft,
+				size_t *no_read);
+unsigned long yaz_marc8_7_conv (unsigned char *inp, size_t inbytesleft,
+				size_t *no_read);
+unsigned long yaz_marc8_8_conv (unsigned char *inp, size_t inbytesleft,
+				size_t *no_read);
+unsigned long yaz_marc8_9_conv (unsigned char *inp, size_t inbytesleft,
+				size_t *no_read);
     
 struct yaz_iconv_struct {
     int my_errno;
@@ -226,7 +239,7 @@ static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
 	size_t inbytesleft0 = inbytesleft;
 	inp++;
 	inbytesleft--;
-	while(inbytesleft > 0 && strchr("(,$", *inp))
+	while(inbytesleft > 0 && strchr("(,$!", *inp))
 	{
 	    inbytesleft--;
 	    inp++;
@@ -236,17 +249,6 @@ static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
 	    *no_read = 0;
 	    cd->my_errno = YAZ_ICONV_EINVAL;
 	    return 0;
-	}
-	if (*inp == '!')
-	{
-	    if (inbytesleft <= 1)
-	    {
-		*no_read = 0;
-		cd->my_errno = YAZ_ICONV_EINVAL;
-		return 0;
-	    }
-	    inbytesleft--;
-	    inp++;
 	}
 	cd->marc8_esc_mode = *inp++;
 	inbytesleft--;
@@ -261,20 +263,44 @@ static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
 
 	switch(cd->marc8_esc_mode)
 	{
-	case 'B':
-	case 'E':
+	case 'B':  /* Basic ASCII */
+	case 'E':  /* ANSEL */
+	case 's':  /* ASCII */
 	    x = yaz_marc8_conv(inp, inbytesleft, &no_read_sub);
-	    *no_read += no_read_sub;
-	    return x;
-	case '1':
-	    x = yaz_marc8_cjk_conv(inp, inbytesleft, &no_read_sub);
-	    *no_read += no_read_sub;
-	    return x;
+	    break;
+	case 'g':  /* Greek */
+	    x = yaz_marc8_2_conv(inp, inbytesleft, &no_read_sub);
+	    break;
+	case 'b':  /* Subscripts */
+	    x = yaz_marc8_3_conv(inp, inbytesleft, &no_read_sub);
+	    break;
+	case 'p':  /* Superscripts */
+	    x = yaz_marc8_4_conv(inp, inbytesleft, &no_read_sub);
+	    break;
+	case '2':  /* Basic Hebrew */
+	    x = yaz_marc8_5_conv(inp, inbytesleft, &no_read_sub);
+	    break;
+	case 'N':  /* Basic Cyrillic */
+	case 'Q':  /* Extended Cyrillic */
+	    x = yaz_marc8_6_conv(inp, inbytesleft, &no_read_sub);
+	    break;
+	case '3':  /* Basic Arabic */
+	case '4':  /* Extended Arabic */
+	    x = yaz_marc8_7_conv(inp, inbytesleft, &no_read_sub);
+	    break;
+	case 'S':  /* Greek */
+	    x = yaz_marc8_8_conv(inp, inbytesleft, &no_read_sub);
+	    break;
+	case '1':  /* Chinese, Japanese, Korean (EACC) */
+	    x = yaz_marc8_9_conv(inp, inbytesleft, &no_read_sub);
+	    break;
 	default:
 	    *no_read = 0;
 	    cd->my_errno = YAZ_ICONV_EILSEQ;
 	    return 0;
 	}
+	*no_read += no_read_sub;
+	return x;
     }
 }
 

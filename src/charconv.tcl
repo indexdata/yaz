@@ -2,11 +2,92 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.2 2004-03-15 23:14:40 adam Exp $
+# $Id: charconv.tcl,v 1.3 2004-03-16 13:12:42 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
     exit 1
+}
+
+proc preamble_trie {ofilehandle} {
+    set f $ofilehandle
+
+    set totype {unsigned short}
+
+    puts $f "\#include <string.h>"
+    puts $f "
+        struct yaz_iconv_trie_flat {
+            char *from;
+            $totype to;
+        };
+        struct yaz_iconv_trie_dir {
+            struct yaz_iconv_trie *ptr;
+            $totype to;
+        };
+        
+        struct yaz_iconv_trie {
+            struct yaz_iconv_trie_flat *flat;
+            struct yaz_iconv_trie_dir *dir;
+        };
+    "
+    puts $f {
+        static unsigned long lookup(struct yaz_iconv_trie *t, unsigned char *inp,
+                                    size_t inbytesleft, size_t *no_read)
+        {
+            if (!t || inbytesleft < 1)
+            return 0;
+            if (t->dir)
+            {
+                size_t ch = inp[0] & 0xff;
+                unsigned long code =
+                lookup(t->dir[ch].ptr, inp+1, inbytesleft-1, no_read);
+                if (code)
+                {
+                    (*no_read)++;
+                    return code;
+                }
+                if (t->dir[ch].to)
+                {
+                    code = t->dir[ch].to;
+                    *no_read = 1;
+                    return code;
+                }
+            }
+            else
+            {
+                struct yaz_iconv_trie_flat *flat = t->flat;
+                while (flat->from)
+                {
+                    size_t len = strlen(flat->from);
+                    if (len <= inbytesleft)
+                    {
+                        if (memcmp(flat->from, inp, len) == 0)
+                        {
+                            *no_read = len;
+                            return flat->to;
+                        }
+                    }
+                    flat++;
+                }
+            }
+            return 0;
+        }
+        
+    }
+}
+
+proc reset_trie {} {
+    global trie
+
+    foreach x [array names trie] {
+	unset trie($x)
+    }
+
+    set trie(no) 1
+    set trie(size) 0
+    set trie(max) 0
+    set trie(split) 40
+    set trie(prefix) {}
 }
 
 proc ins_trie {from to} {
@@ -76,34 +157,12 @@ proc ins_trie_r {from to this} {
     }
 }
 
-proc dump_trie {ofile} {
+proc dump_trie {ofilehandle} {
     global trie
 
-    set f [open $ofile w]
-
-    if {[string length $trie(max)] > 4} {
-	set totype int
-    } else {
-	set totype {unsigned short}
-    }
+    set f $ofilehandle
 
     puts $f "/* TRIE: size $trie(size) */"
-    puts $f "\#include <string.h>"
-    puts $f "
-        struct yaz_iconv_trie_flat {
-            char *from;
-            $totype to;
-        };
-        struct yaz_iconv_trie_dir {
-            struct yaz_iconv_trie *ptr;
-            $totype to;
-        };
-        
-        struct yaz_iconv_trie {
-            struct yaz_iconv_trie_flat *flat;
-            struct yaz_iconv_trie_dir *dir;
-        };
-    "
 
     set this $trie(no)
     while { [incr this -1] >= 0 } {
@@ -156,50 +215,6 @@ proc dump_trie {ofile} {
             puts $f "\};"
         }
     }
-    puts $f {
-        static unsigned long lookup(struct yaz_iconv_trie *t, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read)
-        {
-            if (!t || inbytesleft < 1)
-            return 0;
-            if (t->dir)
-            {
-                size_t ch = inp[0] & 0xff;
-                unsigned long code =
-                lookup(t->dir[ch].ptr, inp+1, inbytesleft-1, no_read);
-                if (code)
-                {
-                    (*no_read)++;
-                    return code;
-                }
-                if (t->dir[ch].to)
-                {
-                    code = t->dir[ch].to;
-                    *no_read = 1;
-                    return code;
-                }
-            }
-            else
-            {
-                struct yaz_iconv_trie_flat *flat = t->flat;
-                while (flat->from)
-                {
-                    size_t len = strlen(flat->from);
-                    if (len <= inbytesleft)
-                    {
-                        if (memcmp(flat->from, inp, len) == 0)
-                        {
-                            *no_read = len;
-                            return flat->to;
-                        }
-                    }
-                    flat++;
-                }
-            }
-            return 0;
-        }
-        
-    }
     puts $f "unsigned long yaz_$trie(prefix)_conv
             (unsigned char *inp, size_t inbytesleft, size_t *no_read)
         {
@@ -214,25 +229,55 @@ proc dump_trie {ofile} {
             return code;
         }
     "
-    close $f
 }
 
-proc readfile {fname} {
+proc readfile {fname ofilehandle prefix omits} {
+    global trie
+
+    set marc_lines 0
+    set ucs_lines 0
     set lineno 0
     set f [open $fname r]
+    set tablenumber x
     while {1} {
         incr lineno
         set cnt [gets $f line]
         if {$cnt < 0} {
             break
         }
-        set hex {}
-        set uni {}
-        regexp {<character hex="([^\"]*)".*<unientity>([0-9A-Z]*)</unientity>} $line s hex uni
-        # puts "$lineno hex=$hex uni=$uni $line"
-        if {[string length $uni]} {
-            ins_trie $hex $uni
-        }
+	if {[regexp {<entitymap>} $line s]} {
+	    reset_trie
+	    set trie(prefix) "${prefix}"
+	    puts "new table $tablenumber"
+	} elseif {[regexp {</entitymap>} $line s]} {
+	    dump_trie $ofilehandle
+	} elseif {[regexp {<character hex="([^\"]*)".*<unientity>([0-9A-Fa-f]*)</unientity>} $line s hex ucs]} {
+	    ins_trie $hex $ucs
+	    unset hex
+	} elseif {[regexp {<codeTable number="([0-9]+)"} $line s tablenumber]} {
+	    reset_trie
+	    set trie(prefix) "${prefix}_$tablenumber"
+	    puts "new table $tablenumber"
+	} elseif {[regexp {</codeTable>} $line s]} {
+	    if {[lsearch $omits $tablenumber] == -1} {
+		dump_trie $ofilehandle
+	    }
+	} elseif {[regexp {</code>} $line s]} {
+	    if {[string length $ucs]} {
+		for {set i 0} {$i < [string length $marc]} {incr i 2} {
+		    lappend hex [string range $marc $i [expr $i+1]]
+		}
+		# puts "ins_trie $hex $ucs"
+		ins_trie $hex $ucs
+		unset hex
+	    }
+	    set marc {}
+	    set uni {}
+	} elseif {[regexp {<marc>([0-9A-Fa-f]*)</marc>} $line s marc]} {
+	    incr marc_lines
+	} elseif {[regexp {<ucs>([0-9A-Fa-f]*)</ucs>} $line s ucs]} {
+	    incr ucs_lines
+	}
     }
     close $f
 }
@@ -241,10 +286,11 @@ set verbose 0
 set ifile {}
 set ofile out.c
 set trie(split) 40
-set trie(prefix) {}
+set prefix {c}
 # Parse command line
 set l [llength $argv]
 set i 0
+set omits {}
 while {$i < $l} {
     set arg [lindex $argv $i]
     switch -glob -- $arg {
@@ -261,14 +307,20 @@ while {$i < $l} {
             if {[string length $arg]} {
                 set arg [lindex $argv [incr i]]
             }
-            set trie(prefix) $arg
+            set prefix $arg
         }
 	-o {
             if {[string length $arg]} {
                 set arg [lindex $argv [incr i]]
             }
             set ofile $arg
-	}	
+	}
+	-O {
+            if {[string length $arg]} {
+                set arg [lindex $argv [incr i]]
+            }
+            lappend omits $arg
+	}
         default {
 	    lappend ifiles $arg
         }
@@ -279,8 +331,13 @@ if {![info exists ifiles]} {
     puts "charconv.tcl: missing input file(s)"
     usage
 }
-foreach ifile $ifiles {
-    readfile $ifile
-}
 
-dump_trie $ofile
+set ofilehandle [open $ofile w]
+preamble_trie $ofilehandle
+
+foreach ifile $ifiles {
+    readfile $ifile $ofilehandle $prefix $omits
+}
+close $ofilehandle
+
+

@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.71 2004-03-15 21:39:07 adam Exp $
+# $Id: makefile,v 1.72 2004-03-16 13:12:43 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -613,13 +613,9 @@ $(ITEM_REQ_FILES): $(SRCDIR)\item-req.asn
 	$(TCL) $(TCLOPT) -d ill.tcl item-req.asn
 	@cd $(WINDIR)
 
-$(SRCDIR)\marc8.c: $(SRCDIR)\charconv.sgm
+$(SRCDIR)\marc8.c: $(SRCDIR)\charconv.sgm $(SRCDIR)\codetables.xml
 	@cd $(SRCDIR)
-	$(TCL) charconv.tcl -p marc8 -s 50 charconv.sgm -o marc8.c
-
-$(SRCDIR)\marc8_cjk.c: $(SRCDIR)\charconv_cjk.xml
-	@cd $(SRCDIR)
-	$(TCL) charconv.tcl -p marc8_cjk -s 50 charconv_cjk.xml -o marc8_cjk.c
+	$(TCL) charconv.tcl -O 1 -p marc8 -s 50 charconv.sgm codetables.xml -o marc8.c
 
 !endif
 

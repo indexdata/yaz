@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.21 2004-02-16 17:57:05 adam Exp $
+ * $Id: seshigh.c,v 1.22 2004-03-16 13:12:43 adam Exp $
  */
 
 /*
@@ -858,6 +858,7 @@ static void process_http_request(association *assoc, request *req)
 	}
 	else
 	{
+		 yaz_log(LOG_LOG, "generate soap error");
 	    http_code = 500;
 	    z_soap_error(assoc->encode, soap_package,
 			 "SOAP-ENV:Client", "Bad method", 0); 
@@ -1318,7 +1319,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.21 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.22 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

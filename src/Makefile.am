@@ -1,6 +1,6 @@
-## Copyright (C) 1994-2003, Index Data
+## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.9 2004-03-15 23:14:59 adam Exp $
+## $Id: Makefile.am,v 1.10 2004-03-16 13:12:42 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -24,7 +24,7 @@ illdatadir=$(pkgdatadir)/ill
 illdata_DATA=ill9702.asn item-req.asn ill.tcl
 
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
- charconv.tcl charconv.sgm charconv_cjk.xml 
+ charconv.tcl codetables.xml charconv.sgm
 
 YAZCOMP = $(top_srcdir)/util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
@@ -33,17 +33,13 @@ AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
 AM_YFLAGS=-p cql_
 THREADED_FLAGS = @CFLAGSTHREADS@
 
-# MARC8 conversion is generated from charconv.sgm
-marc8.c: charconv.sgm charconv.tcl
-	cd $(srcdir); ./charconv.tcl -p marc8 -s 50 charconv.sgm -o marc8.c
-
-# MARC8 conversion is generated from charconv.sgm
-marc8_cjk.c: charconv_cjk.xml charconv.tcl
-	cd $(srcdir); ./charconv.tcl -p marc8_cjk -s 100 charconv_cjk.xml -o marc8_cjk.c
+# MARC8 conversion is generated from charconv.sgm + codetables.xml
+marc8.c: charconv.tcl charconv.sgm codetables.xml
+	cd $(srcdir); ./charconv.tcl -O 1 -p marc8 -s 50 charconv.sgm codetables.xml -o marc8.c
 
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
-  siconv.c marc8.c marc8_cjk.c \
+  siconv.c marc8.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
   odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
   odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \
