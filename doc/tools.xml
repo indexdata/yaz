@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.35 2004-04-22 13:12:49 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.36 2004-07-26 12:16:56 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -772,7 +772,7 @@
        be an alias for <replaceable>q1</replaceable>, 
        <replaceable>q2</replaceable>... such that the CCL
        query <replaceable>q=x</replaceable> is equivalent to
-       <replaceable>q1=x or w2=x or ...</replaceable>.
+       <replaceable>q1=x or q2=x or ...</replaceable>.
       </para>
      </sect4>
 
