@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.77 2004-05-01 23:19:49 adam Exp $
+# $Id: makefile,v 1.78 2004-05-10 11:56:33 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
