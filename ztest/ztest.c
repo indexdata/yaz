@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.32  2000-04-05 07:39:55  adam
+ * Revision 1.33  2000-08-10 08:41:26  adam
+ * Fixes for ILL.
+ *
+ * Revision 1.32  2000/04/05 07:39:55  adam
  * Added shared library support (libtool).
  *
  * Revision 1.31  2000/01/31 13:15:21  adam
@@ -201,7 +204,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 			yaz_log(LOG_LOG, "OID %s", ent->desc);
 		    if (ent && ent->value == VAL_ISO_ILL_1)
 		    {
-			yaz_log (LOG_LOG, "ItemRequest");
+			yaz_log (LOG_LOG, "Decode ItemRequest begin");
 			if (r->which == ODR_EXTERNAL_single)
 			{
 			    odr_setbuf(rr->decode,
@@ -214,11 +217,15 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                     "Couldn't decode ItemRequest %s near %d",
                                        odr_errmsg(odr_geterror(rr->decode)),
                                        odr_offset(rr->decode));
+#if 0
                                 yaz_log(LOG_LOG, "PDU dump:");
                                 odr_dumpBER(log_file(),
                                      r->u.single_ASN1_type->buf,
                                      r->u.single_ASN1_type->len);
+#endif
                             }
+			    else
+			        yaz_log(LOG_LOG, "Decode ItemRequest OK");
 			    if (rr->print)
 			    {
 				ill_ItemRequest (rr->print, &item_req, 0,
@@ -228,7 +235,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 			}
 			if (!item_req && r->which == ODR_EXTERNAL_single)
 			{
-			    yaz_log (LOG_LOG, "ILLRequest");
+			    yaz_log (LOG_LOG, "Decode ILLRequest begin");
 			    odr_setbuf(rr->decode,
 				       r->u.single_ASN1_type->buf,
 				       r->u.single_ASN1_type->len, 0);
@@ -244,6 +251,8 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                      r->u.single_ASN1_type->buf,
                                      r->u.single_ASN1_type->len);
                             }
+			    else
+			        yaz_log(LOG_LOG, "Decode ILLRequest OK");
 			    if (rr->print)
                             {
 				ill_Request (rr->print, &ill_req, 0,

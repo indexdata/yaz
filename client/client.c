@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.102  2000-05-18 11:57:04  adam
+ * Revision 1.103  2000-08-10 08:41:26  adam
+ * Fixes for ILL.
+ *
+ * Revision 1.102  2000/05/18 11:57:04  adam
  * Client display time elapsed.
  *
  * Revision 1.101  2000/04/05 07:39:54  adam
@@ -1262,11 +1265,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
 
 const char *get_ill_element (void *clientData, const char *element)
 {
-    /* printf ("asking for %s\n", element); */
-    if (!strcmp (element, "ill,transaction-id,transaction-group-qualifier"))
-	return "1";
-    if (!strcmp (element, "ill,transaction-id,transaction-qualifier"))
-	return "1";
+    printf ("%s\n", element);
     return 0;
 }
 
@@ -1283,7 +1282,9 @@ static Z_External *create_external_itemRequest()
     ctl.f = get_ill_element;
 
     req = ill_get_ItemRequest(&ctl, "ill", 0);
-
+    if (!req)
+        printf ("ill_get_ItemRequest failed\n");
+	
     if (!ill_ItemRequest (out, &req, 0, 0))
     {
 	if (apdu_file)
@@ -1440,21 +1441,20 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
 	(int *) odr_malloc(out, sizeof(int));
     *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
 
-    switch (*type)
+    if (!strcmp (type, "item") || !strcmp(type, "2"))
     {
-    case '2':
 	printf ("using item-request\n");
 	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
 	    create_external_itemRequest();
-	break;
-    case '1':
+    }
+    else if (!strcmp(type, "ill") || !strcmp(type, "1"))
+    {
 	printf ("using ILL-request\n");
 	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
 	    create_external_ILLRequest();
-	break;
-    default:
-	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
     }
+    else
+	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
     return r;
 }
 
@@ -2278,7 +2278,7 @@ static int client(int wait)
 	{"attributeset", cmd_attributeset, "<attrset>"},
         {"querytype", cmd_querytype, "<type>"},
 	{"refid", cmd_refid, "<id>"},
-	{"itemorder", cmd_itemorder, "1|2 <item>"},
+	{"itemorder", cmd_itemorder, "ill|item <itemno>"},
 	{"update", cmd_update, "<item>"},
 #ifdef ASN_COMPILED
 	/* Server Admin Functions */

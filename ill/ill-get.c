@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: ill-get.c,v $
- * Revision 1.5  2000-02-24 08:52:01  adam
+ * Revision 1.6  2000-08-10 08:41:26  adam
+ * Fixes for ILL.
+ *
+ * Revision 1.5  2000/02/24 08:52:01  adam
  * Bug fix.
  *
  * Revision 1.4  2000/02/04 11:01:15  adam
@@ -75,8 +78,8 @@ int *ill_get_enumerated (struct ill_get_ctl *gc, const char *name,
     return ill_get_int(gc, name, sub, val);
 }
 
-ILL_String *ill_get_ILL_String (struct ill_get_ctl *gc, const char *name,
-				const char *sub)
+ILL_String *ill_get_ILL_String_x (struct ill_get_ctl *gc, const char *name,
+			 	  const char *sub, const char *vdefault)
 {
     ILL_String *r = (ILL_String *) odr_malloc (gc->odr, sizeof(*r));
     char element[128];
@@ -90,12 +93,19 @@ ILL_String *ill_get_ILL_String (struct ill_get_ctl *gc, const char *name,
     }
     v = (gc->f)(gc->clientData, element);
     if (!v)
+        v = vdefault;
+    if (!v)
 	return 0;
     r->which = ILL_String_GeneralString;
     r->u.GeneralString = odr_strdup (gc->odr, v);
     return r;
 }
 
+ILL_String *ill_get_ILL_String(struct ill_get_ctl *gc, const char *name,
+			       const char *sub)
+{
+    return ill_get_ILL_String_x (gc, name, sub, 0);
+}
 
 ILL_ISO_Date *ill_get_ILL_ISO_Date (struct ill_get_ctl *gc, const char *name,
 				    const char *sub, const char *val)
@@ -223,9 +233,9 @@ ILL_Transaction_Id *ill_get_Transaction_Id (struct ill_get_ctl *gc,
     r->initial_requester_id =
 	ill_get_System_Id (gc, element, "initial-requester-id");
     r->transaction_group_qualifier =
-	ill_get_ILL_String (gc, element, "transaction-group-qualifier");
+	ill_get_ILL_String_x (gc, element, "transaction-group-qualifier", "");
     r->transaction_qualifier =
-	ill_get_ILL_String (gc, element, "transaction-qualifier");
+	ill_get_ILL_String_x (gc, element, "transaction-qualifier", "");
     r->sub_transaction_qualifier =
 	ill_get_ILL_String (gc, element, "sub-transaction-qualifier");
     return r;
@@ -349,7 +359,7 @@ ILL_Item_Id *ill_get_Item_Id (
 	ill_get_ILL_String(gc, element, "publication-date-of-component");
     r->author_of_article = ill_get_ILL_String(gc, element,
 					      "author-of-article");
-    r->title_of_article = ill_get_ILL_String(gc, element, "title-or-article");
+    r->title_of_article = ill_get_ILL_String(gc, element, "title-of-article");
     r->pagination = ill_get_ILL_String(gc, element, "pagination");
     r->national_bibliography_no = 0;
     r->iSBN = ill_get_ILL_String(gc, element, "ISBN");
@@ -360,14 +370,6 @@ ILL_Item_Id *ill_get_Item_Id (
     r->verification_reference_source = 
 	ill_get_ILL_String(gc, element, "verification-reference-source");
     return r;
-}
-
-ILL_ItemRequest *ill_get_ItemRequest (
-    struct ill_get_ctl *gc, const char *name, const char *sub)
-{
-    ODR o = gc->odr;
-    ILL_ItemRequest *r = (ILL_ItemRequest *)odr_malloc(o, sizeof(*r));
-    return 0;
 }
 
 
@@ -529,7 +531,74 @@ ILL_Request *ill_get_ILLRequest (
     r->requester_optional_messages =
 	ill_get_Requester_Optional_Messages_Type (
 	    gc, element,"requester-optional-messages");
-    r->search_type = 0;            /* TODO */
+    r->search_type = ill_get_Search_Type(gc, element, "search-type");
+    r->num_supply_medium_info_type = 0;
+    r->supply_medium_info_type = 0;
+
+    r->place_on_hold = ill_get_enumerated (
+	gc, element, "place-on-hold", 
+	ILL_Place_On_Hold_Type_according_to_responder_policy);
+    r->client_id = ill_get_Client_Id (gc, element, "client-id");
+			   
+    r->item_id = ill_get_Item_Id (gc, element, "item-id");
+    r->supplemental_item_description = 0;
+    r->cost_info_type = 0;
+    r->copyright_compliance =
+	ill_get_ILL_String(gc, element, "copyright-complicance");
+    r->third_party_info_type = 0;
+    r->retry_flag = ill_get_bool (gc, element, "retry-flag", 0);
+    r->forward_flag = ill_get_bool (gc, element, "forward-flag", 0);
+    r->requester_note = ill_get_ILL_String(gc, element, "requester-note");
+    r->forward_note = ill_get_ILL_String(gc, element, "forward-note");
+    r->num_iLL_request_extensions = 0;
+    r->iLL_request_extensions = 0;
+    return r;
+}
+
+ILL_ItemRequest *ill_get_ItemRequest (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    ODR o = gc->odr;
+    ILL_ItemRequest *r = (ILL_ItemRequest *)odr_malloc(o, sizeof(*r));
+    char element[128];
+    
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    r->protocol_version_num =
+	ill_get_enumerated (gc, element, "protocol-version-num", 
+			    ILL_Request_version_2);
+    
+    r->transaction_id = ill_get_Transaction_Id (gc, element, "transaction-id");
+    r->service_date_time =
+	ill_get_Service_Date_Time (gc, element, "service-date-time");
+    r->requester_id = ill_get_System_Id (gc, element, "requester-id");
+    r->responder_id = ill_get_System_Id (gc, element, "responder-id");
+    r->transaction_type =
+	ill_get_enumerated(gc, element, "transaction-type", 1);
+
+    r->delivery_address =
+	ill_get_Delivery_Address (gc, element, "delivery-address");
+    r->delivery_service = 0; /* TODO */
+    /* ill_get_Delivery_Service (gc, element, "delivery-service"); */
+    r->billing_address =
+	ill_get_Delivery_Address (gc, element, "billing-address");
+
+    r->num_iLL_service_type = 1;
+    r->iLL_service_type = (ILL_Service_Type **)
+	odr_malloc (o, sizeof(*r->iLL_service_type));
+    *r->iLL_service_type =
+	ill_get_enumerated (gc, element, "ill-service-type",
+			    ILL_Service_Type_copy_non_returnable);
+
+    r->responder_specific_service = 0;
+    r->requester_optional_messages =
+	ill_get_Requester_Optional_Messages_Type (
+	    gc, element,"requester-optional-messages");
+    r->search_type = ill_get_Search_Type(gc, element, "search-type");
     r->num_supply_medium_info_type = 0;
     r->supply_medium_info_type = 0;
 
