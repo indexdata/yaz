@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1996, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: header.c,v $
- * Revision 1.3  1995-05-16 08:50:16  quinn
+ * Revision 1.4  1996-10-29 13:33:52  adam
+ * Updated.
+ *
+ * Revision 1.3  1995/05/16 08:50:16  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.2  1995/05/15  11:55:15  quinn
