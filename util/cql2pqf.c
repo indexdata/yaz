@@ -1,4 +1,4 @@
-/* $Id: cql2pqf.c,v 1.1 2003-10-27 12:21:39 adam Exp $
+/* $Id: cql2pqf.c,v 1.2 2003-12-18 16:45:19 mike Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
     if (argc < 2)
     {
-        fprintf (stderr, "usage\n cqltransform <properties> [<query>] [interations]\n");
+        fprintf (stderr, "usage\n cqltransform <properties> [<query>] [iterations]\n");
         exit (1);
     }
     ct = cql_transform_open_fname(argv[1]);
