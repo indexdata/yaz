@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.h,v $
- * Revision 1.5  1995-04-17 11:28:18  quinn
+ * Revision 1.6  1995-05-15 11:55:55  quinn
+ * Work on asynchronous activity.
+ *
+ * Revision 1.5  1995/04/17  11:28:18  quinn
  * Smallish
  *
  * Revision 1.4  1995/04/10  10:22:47  quinn
@@ -622,6 +625,9 @@ typedef struct Z_APDU
 	Z_APDU_searchResponse,
 	Z_APDU_presentRequest,
 	Z_APDU_presentResponse,
+	Z_APDU_resourceControlRequest,
+	Z_APDU_resourceControlResponse,
+	Z_APDU_triggerResourceControlRequest,
 	Z_APDU_scanRequest,
 	Z_APDU_scanResponse
     } which;
@@ -633,6 +639,9 @@ typedef struct Z_APDU
     	Z_SearchResponse *searchResponse;
     	Z_PresentRequest *presentRequest;
     	Z_PresentResponse *presentResponse;
+	Z_ResourceControlRequest *resourceControlRequest;
+	Z_ResourceControlResponse *resourceControlResponse;
+	Z_TriggerResourceControlRequest *triggerResourceControlRequest;
 	Z_ScanRequest *scanRequest;
 	Z_ScanResponse *scanResponse;
     } u;

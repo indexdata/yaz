@@ -5,7 +5,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.h,v $
- * Revision 1.2  1995-04-18 08:14:37  quinn
+ * Revision 1.3  1995-05-15 11:55:54  quinn
+ * Work on asynchronous activity.
+ *
+ * Revision 1.2  1995/04/18  08:14:37  quinn
  * Added dynamic memory allocation on encoding
  *
  * Revision 1.1  1995/03/30  09:39:41  quinn
@@ -142,6 +145,7 @@ typedef struct odr_constack
 } odr_constack;
 
 struct odr_memblock; /* defined in odr_mem.c */
+typedef struct odr_memblock *ODR_MEM;
 
 #define ODR_S_SET     0
 #define ODR_S_CUR     1
@@ -216,9 +220,11 @@ void odr_setprint(ODR o, FILE *file);
 ODR odr_createmem(int direction);
 void odr_reset(ODR o);
 void odr_destroy(ODR o);
-void odr_setbuf(ODR o, char *buf, int len);
-char *odr_getbuf(ODR o, int *len);
+void odr_setbuf(ODR o, char *buf, int len, int can_grow);
+char *odr_getbuf(ODR o, int *len, int *size);
 void *odr_malloc(ODR o, int size);
+ODR_MEM odr_extract_mem(ODR o);
+void odr_release_mem(ODR_MEM p);
 
 #define odr_implicit(o, t, p, cl, tg, opt)\
 	(odr_implicit_settag((o), cl, tg), t ((o), (p), opt) )
@@ -280,6 +286,9 @@ void *odr_malloc(ODR o, int size);
 ) \
 
 #define odr_tell(o) ((o)->ecb.pos)
+#define odr_ok(o) (!(o)->ecb.error)
+
+#define ODR_MAXNAME 256
 
 #include <prt.h>
 #include <dmalloc.h>
