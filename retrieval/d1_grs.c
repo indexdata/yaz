@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.4  1996-05-01 12:45:30  quinn
+ * Revision 1.5  1996-06-03 09:46:42  quinn
+ * Added OID data type.
+ *
+ * Revision 1.4  1996/05/01  12:45:30  quinn
  * Support use of local tag names in abs file.
  *
  * Revision 1.3  1995/11/13  09:27:35  quinn
@@ -142,6 +145,8 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
     }
     else if (n->which == DATA1N_data && (leaf || n->parent->num_children == 1))
     {
+	char str[512];
+
 	switch (n->u.data.what)
 	{
 	    case DATA1I_num:
@@ -154,6 +159,12 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
 		res->u.string = odr_malloc(o, n->u.data.len+1);
 		memcpy(res->u.string, n->u.data.data, n->u.data.len);
 		res->u.string[n->u.data.len] = '\0';
+		break;
+	    case DATA1I_oid:
+	        res->which = Z_ElementData_oid;
+		strncpy(str, n->u.data.data, n->u.data.len);
+		str[n->u.data.len] = '\0';
+		res->u.oid = odr_getoidbystr(o, str);
 		break;
 	    default:
 	    	logf(LOG_WARN, "Can't handle datatype.");
