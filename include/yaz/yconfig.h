@@ -9,6 +9,12 @@
 # endif
 #endif
 
+#ifndef WIN32
+# ifndef O_BINARY
+#  define O_BINARY 0
+# endif
+#endif
+
 #ifdef __cplusplus
 #define YAZ_BEGIN_CDECL extern "C" {
 #define YAZ_END_CDECL }
