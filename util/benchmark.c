@@ -1,4 +1,4 @@
-/* $Id: benchmark.c,v 1.3 2004-01-07 20:33:57 adam Exp $
+/* $Id: benchmark.c,v 1.4 2004-01-26 21:05:34 mike Exp $
  * Copyright (C) 2003-2004 Index Data Aps
  *
  * This file is part of the YAZ toolkit.
@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #include <yaz/zoom.h>
 
@@ -25,6 +26,7 @@ struct options {
     int full;			/* 1 = fetch full records, 0 = brief */
     int delay;			/* number of ms to delay between ops */
     int random;			/* if true, delay is random 0-specified */
+    int verbosity;		/* 0 = quiet, higher => more verbose */
 } options = {
     3,
     3,
@@ -32,7 +34,12 @@ struct options {
     0,
     1000,
     1,
+    0,
 };
+
+
+static int test(char *host, int port);
+static void dprintf(int level, char *fmt, ...);
 
 
 int main(int argc, char **argv)
@@ -40,8 +47,11 @@ int main(int argc, char **argv)
     char *host;
     int port;
     int c;
+    int i;
+    int ok;
+    int nok = 0;
 
-    while ((c = getopt(argc, argv, "c:s:p:fbd:r")) != -1) {
+    while ((c = getopt(argc, argv, "c:s:p:fbd:rv:")) != -1) {
 	switch (c) {
 	case 'c': options.nconnect = atoi(optarg); break;
 	case 's': options.nsearch = atoi(optarg); break;
@@ -50,6 +60,7 @@ int main(int argc, char **argv)
 	case 'b': options.full = 0; break;
 	case 'd': options.delay = atoi(optarg); break;
 	case 'r': options.random = 1; break;
+	case 'v': options.verbosity = atoi(optarg); break;
 	default: goto USAGE;
 	}
     }
@@ -64,6 +75,7 @@ int main(int argc, char **argv)
 "	-b	Fetch brief records\n"
 "	-d <n>	Delay <n> ms after each operation\n"
 "	-r	Delays are random between 0 and the specified number of ms\n"
+"	-v <n>	Set verbosity level to <n> [0, silent on success]\n"
 , argv[0]);
 	return 1;
     }
@@ -71,5 +83,49 @@ int main(int argc, char **argv)
     host = argv[optind];
     port = atoi(argv[optind+1]);
 
+    for (i = 0; i < options.nconnect; i++) {
+	dprintf(2, "iteration %d of %d", i+1, options.nconnect);
+	ok = test(host, port);
+	if (ok) nok++;
+    }
+
+    dprintf(1, "passed %d of %d tests", nok, options.nconnect);
+    if (nok < options.nconnect)
+	printf("Failed %d of %d tests\n",
+	       options.nconnect-nok, options.nconnect);
+
+
     return 0;
+}
+
+
+static int test(char *host, int port)
+{
+    ZOOM_connection conn;
+    int error;
+    const char *errmsg, *addinfo;
+
+    conn = ZOOM_connection_new(host, port);
+    if ((error = ZOOM_connection_error(conn, &errmsg, &addinfo))) {
+	fprintf(stderr, "ZOOM error: %s (%d): %s\n", errmsg, error, addinfo);
+	return 0;
+    }
+
+    ZOOM_connection_destroy(conn);
+    return 1;
+}
+
+
+static void dprintf(int level, char *fmt, ...)
+{
+    va_list ap;
+
+    if (level > options.verbosity)
+	return;
+
+    fprintf(stderr, "DEBUG(%d): ", level);
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    fputc('\n', stderr);
+    va_end(ap);
 }
