@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.33 2003-11-19 21:17:26 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.34 2003-12-18 17:27:31 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1208,9 +1208,9 @@ int cql_transform_error(cql_transform_t ct, char **addinfop);
       error-code and sets the string-pointer at
       <literal>*addinfop</literal> to point to a string containing
       additional information about the error that occurred: for
-      example, if the error code is 15 (``Illegal or unsupported index
+      example, if the error code is 15 (``Illegal or unsupported context
       set''), the additional information is the name of the requested
-      index set that was not recognised.
+      context set that was not recognised.
      </para>
      <para>
       The SRW error-codes may be translated into brief human-readable
@@ -1266,22 +1266,33 @@ int cql_transform_FILE(cql_transform_t ct,
       The following CQL patterns are recognized:
       <variablelist>
        <varlistentry><term>
-         <literal>qualifier.</literal><replaceable>set</replaceable><literal>.</literal><replaceable>name</replaceable>
+         <literal>index.</literal><replaceable>set</replaceable><literal>.</literal><replaceable>name</replaceable>
         </term>
         <listitem>
          <para>
-          This pattern is invoked when a CQL qualifier, such as 
+          This pattern is invoked when a CQL index, such as 
           dc.title is converted. <replaceable>set</replaceable>
-          and <replaceable>name</replaceable> is the index set and qualifier
+          and <replaceable>name</replaceable> are the context set and index
           name respectively.
           Typically, the RPN specifies an equivalent use attribute.
          </para>
          <para>
-          For terms not bound by a qualifier the pattern
-          <literal>qualifier.srw.serverChoice</literal> is used.
-          Here, the prefix <literal>srw</literal> is defined as
-          <literal>http://www.loc.gov/zing/cql/srw-indexes/v1.0/</literal>.
+          For terms not bound by an index the pattern
+          <literal>index.cql.serverChoice</literal> is used.
+          Here, the prefix <literal>cql</literal> is defined as
+          <literal>http://www.loc.gov/zing/cql/cql-indexes/v1.0/</literal>.
           If this pattern is not defined, the mapping will fail.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry><term>
+         <literal>qualifier.</literal><replaceable>set</replaceable><literal>.</literal><replaceable>name</replaceable>
+	 (DEPRECATED)
+        </term>
+        <listitem>
+         <para>
+	  For backwards compatibility, this is recognised as a synonym of
+          <literal>index.</literal><replaceable>set</replaceable><literal>.</literal><replaceable>name</replaceable>
          </para>
         </listitem>
        </varlistentry>
@@ -1367,10 +1378,10 @@ int cql_transform_FILE(cql_transform_t ct,
         </term>
         <listitem>
          <para>
-          This specification defines a CQL index set for a given prefix.
+          This specification defines a CQL context set for a given prefix.
           The value on the right hand side is the URI for the set - 
           <emphasis>not</emphasis> RPN. All prefixes used in
-          qualifier patterns must be defined this way.
+          index patterns must be defined this way.
          </para>
         </listitem>
        </varlistentry>
@@ -1378,16 +1389,16 @@ int cql_transform_FILE(cql_transform_t ct,
      </para>
      <example><title>CQL to RPN mapping file</title>
       <para>
-       This simple file defines two index sets, three qualifiers and three
+       This simple file defines two context sets, three indexes and three
        relations, a position pattern and a default structure.
       </para>
       <programlisting><![CDATA[
-       set.srw    = http://www.loc.gov/zing/cql/srw-indexes/v1.0/
+       set.cql    = http://www.loc.gov/zing/cql/context-sets/cql/v1.1/
        set.dc     = http://www.loc.gov/zing/cql/dc-indexes/v1.0/
 
-       qualifier.srw.serverChoice = 1=1016
-       qualifier.dc.title         = 1=4
-       qualifier.dc.subject       = 1=21
+       index.cql.serverChoice = 1=1016
+       index.dc.title         = 1=4
+       index.dc.subject       = 1=21
   
        relation.<                 = 2=1
        relation.eq                = 2=3
@@ -1407,7 +1418,7 @@ int cql_transform_FILE(cql_transform_t ct,
        <screen>
         @attr 1=1016 @attr 2=3 @attr 4=1 @attr 3=3 @attr 6=1 "computer"
        </screen>
-       by rules <literal>qualifier.srw.serverChoice</literal>,
+       by rules <literal>index.cql.serverChoice</literal>,
        <literal>relation.scr</literal>, <literal>structure.*</literal>,
        <literal>position.any</literal>.
       </para>
