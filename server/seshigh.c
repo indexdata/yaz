@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.5  1995-03-17 10:44:13  quinn
+ * Revision 1.6  1995-03-21 12:30:09  quinn
+ * Beginning to add support for record packing.
+ *
+ * Revision 1.5  1995/03/17  10:44:13  quinn
  * Added catch of null-string in makediagrec
  *
  * Revision 1.4  1995/03/17  10:18:08  quinn
@@ -229,7 +232,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.5 $";
+    resp.implementationVersion = "$Revision: 1.6 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -257,6 +260,28 @@ static Z_Records *diagrec(int error, char *addinfo)
     dr.condition = &err;
     dr.addinfo = addinfo ? addinfo : "";
     return &rec;
+}
+
+static Z_NamePlusRecord *surrogatediagrec(char *dbname, int error,
+					    char *addinfo)
+{
+    static Z_NamePlusRecord rec;
+    static Z_DiagRec dr;
+    static Odr_oid bib1[] = { 1, 2, 3, 4, 5, -1 };
+    static int err;
+
+    fprintf(stderr, "SurrogateDiagnotic: %d -- %s\n", error, addinfo);
+    rec.databaseName = dbname;
+    rec.which = Z_NamePlusRecord_surrogateDiagnostic;
+    rec.u.surrogateDiagnostic = &dr;
+    dr.diagnosticSetId = bib1;
+    dr.condition = &err;
+    dr.addinfo = addinfo ? addinfo : "";
+    return &rec;
+}
+
+static Z_Records *pack_records(association *a, int num, Z_ElementSetNames *esn)
+{
 }
 
 static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
