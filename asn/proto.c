@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.17  1995-04-10 10:22:22  quinn
+ * Revision 1.18  1995-04-11 11:52:02  quinn
+ * Fixed possible buf in proto.c
+ *
+ * Revision 1.17  1995/04/10  10:22:22  quinn
  * Added SCAN.
  *
  * Revision 1.16  1995/03/30  10:26:43  quinn
@@ -639,7 +642,7 @@ int z_AlternativeTerm(ODR o, Z_AlternativeTerm **p, int opt)
     	&(*p)->num_terms))
     	return 1;
     *p = 0;
-    return 0;
+    return opt && !o->error;
 }
 
 int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
@@ -710,7 +713,7 @@ int z_DiagRecs(ODR o, Z_DiagRecs **p, int opt)
     else if (!*p)
     	return opt;
 
-    if (odr_sequence_of(o, z_DiagRec, &(*p)->diagRecs,
+	if (odr_sequence_of(o, z_DiagRec, &(*p)->diagRecs,
     	&(*p)->num_diagRecs))
     	return 1;
     *p = 0;
