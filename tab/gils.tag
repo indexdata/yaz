@@ -22,9 +22,9 @@ tag 16         timePeriodTextual                        string
 tag 17         linkage                                  string
 tag 18         linkageType                              string
 tag 19         recordSource                             string
-tag 20         controlledTerm                           string
+tag 20         controlledTerm/ct                        string
 tag 21         thesaurus                                string
-tag 22         localSubjectTerm                         string
+tag 22         localSubjectTerm/lst                     string
 tag 23         originalControlIdentifier                string
 
 tag 51         purpose                                  structured
@@ -46,4 +46,4 @@ tag 94         pointOfContact                           structured
 tag 95         controlledVocabulary                     structured
 tag 96         indexTermsControlled                     structured
 tag 97         localSubjectIndex                        structured
-tag 98         crossReference                           structured
+tag 98         crossReference/cr                        structured
