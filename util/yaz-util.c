@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-util.c,v $
- * Revision 1.3  1996-10-29 13:36:28  adam
+ * Revision 1.4  1997-05-01 15:07:55  adam
+ * Added DLL entry point routines.
+ *
+ * Revision 1.3  1996/10/29 13:36:28  adam
  * Added header.
  *
  * Revision 1.2  1996/02/20 17:58:42  adam
@@ -52,3 +55,25 @@ int yaz_matchstr(const char *s1, const char *s2)
     }
     return *s1 || *s2;
 }
+
+
+#ifdef WINDOWS
+ 
+#include <windows.h>
+BOOL APIENTRY DllMain(hInst, reason, reserved)
+    HINSTANCE hInst; /* Library instance handle. */
+    DWORD reason;    /* Reason this function is being called. */
+    LPVOID reserved; /* Not used. */
+{
+    return TRUE;
+}
+ 
+BOOL APIENTRY DllEntryPoint(hInst, reason, reserved)
+    HINSTANCE hInst; /* Library instance handle. */
+    DWORD reason;    /* Reason this function is being called. */
+    LPVOID reserved; /* Not used. */
+{
+    return TRUE;
+}                                                                              
+#endif
+
