@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.83  1998-11-03 10:09:36  adam
+ * Revision 1.84  1998-11-16 16:02:32  adam
+ * Added loggin utilies, log_rpn_query and log_scan_term. These used
+ * to be part of Zebra.
+ *
+ * Revision 1.83  1998/11/03 10:09:36  adam
  * Fixed bug regarding YC.
  *
  * Revision 1.82  1998/10/20 14:00:30  quinn
@@ -305,6 +309,7 @@
 #include <proto.h>
 #include <oid.h>
 #include <log.h>
+#include <logrpn.h>
 #include <statserv.h>
 
 #include <backend.h>
@@ -1007,9 +1012,12 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 {
     int oid[OID_SIZE];
     int recno, total_length = 0, toget = *num, dumped_records = 0;
-    Z_Records *records = (Z_Records *)odr_malloc (a->encode, sizeof(*records));
-    Z_NamePlusRecordList *reclist = (Z_NamePlusRecordList *)odr_malloc (a->encode, sizeof(*reclist));
-    Z_NamePlusRecord **list = (Z_NamePlusRecord **)odr_malloc (a->encode, sizeof(*list) * toget);
+    Z_Records *records =
+	(Z_Records *) odr_malloc (a->encode, sizeof(*records));
+    Z_NamePlusRecordList *reclist =
+	(Z_NamePlusRecordList *) odr_malloc (a->encode, sizeof(*reclist));
+    Z_NamePlusRecord **list =
+	(Z_NamePlusRecord **) odr_malloc (a->encode, sizeof(*list) * toget);
     oident recform;
 
     records->which = Z_Records_DBOSD;
@@ -1020,7 +1028,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     *num = 0;
     *next = 0;
 
-    logf(LOG_DEBUG, "Request to pack %d+%d", start, toget);
+    logf(LOG_LOG, "Request to pack %d+%d", start, toget);
     logf(LOG_DEBUG, "pms=%d, mrs=%d", a->preferredMessageSize,
     	a->maximumRecordSize);
     for (recno = start; reclist->num_records < toget; recno++)
@@ -1189,14 +1197,28 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     int *fd)
 {
     Z_SearchRequest *req = reqb->request->u.searchRequest;
-    bend_search_rr *bsrr = (bend_search_rr *)nmem_malloc (reqb->request_mem, sizeof(*bsrr));
-
+    bend_search_rr *bsrr = 
+	(bend_search_rr *)nmem_malloc (reqb->request_mem, sizeof(*bsrr));
+    
     logf(LOG_LOG, "Got SearchRequest.");
     save_referenceId (reqb, req->referenceId);
     /* store ref id in request */
     bsrr->fd = fd;
     bsrr->request = reqb;
     bsrr->association = assoc;
+
+    logf (LOG_LOG, "ResultSet '%s'", req->resultSetName);
+    if (req->databaseNames)
+    {
+	int i;
+	for (i = 0; i < req->num_databaseNames; i++)
+	    logf (LOG_LOG, "Database '%s'", req->databaseNames[i]);
+    }
+    switch (req->query->which)
+    {
+    case Z_Query_type_1: case Z_Query_type_101:
+	log_rpn_query (req->query->u.type_1);
+    }
     if (assoc->bend_search)
     {
 	bsrr->setname = req->resultSetName;
@@ -1209,7 +1231,8 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrr->errcode = 0;
 	bsrr->hits = 0;
 	bsrr->errstring = NULL;
-	((int (*)(void *, bend_search_rr *))(assoc->bend_search))(assoc->backend, bsrr);
+	((int (*)(void *, bend_search_rr *))(assoc->bend_search))
+	    (assoc->backend, bsrr);
 	if (!bsrr->request)
 	    return 0;
     }
@@ -1468,10 +1491,13 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     	diagrecs_p = diagrecs(assoc, 205, 0);
     else
     {
-    	if (req->termListAndStartPoint->term->which == Z_Term_general)
-	    logf(LOG_DEBUG, " term: '%.*s'",
-		 req->termListAndStartPoint->term->u.general->len,
-		 req->termListAndStartPoint->term->u.general->buf);
+	if (req->databaseNames)
+	{
+	    int i;
+	    for (i = 0; i < req->num_databaseNames; i++)
+		logf (LOG_LOG, "Database '%s'", req->databaseNames[i]);
+	}
+	log_scan_term (req->termListAndStartPoint, attset->value);
 	srq.num_bases = req->num_databaseNames;
 	srq.basenames = req->databaseNames;
 	srq.num_entries = *req->numberOfTermsRequested;
