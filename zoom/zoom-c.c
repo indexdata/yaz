@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.26 2002-05-07 11:00:58 adam Exp $
+ * $Id: zoom-c.c,v 1.27 2002-05-14 13:42:26 oleg Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -895,6 +895,9 @@ void ZOOM_record_destroy (ZOOM_record rec)
 const char *ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 {
     Z_NamePlusRecord *npr;
+    
+    *len = 0; /* if return 0 */
+    
     if (!rec)
 	return 0;
     npr = rec->npr;
@@ -902,6 +905,7 @@ const char *ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 	return 0;
     if (!strcmp (type, "database"))
     {
+    	*len = strlen(npr->databaseName)+1;
 	return npr->databaseName;
     }
     else if (!strcmp (type, "syntax"))
@@ -911,7 +915,10 @@ const char *ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 	    Z_External *r = (Z_External *) npr->u.databaseRecord;
 	    oident *ent = oid_getentbyoid(r->direct_reference);
 	    if (ent)
+	    {
+	    	*len = strlen(ent->desc)+1;
 		return ent->desc;
+	    }
 	}
 	return "none";
     }
