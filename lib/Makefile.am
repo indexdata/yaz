@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.4 2000-04-06 12:32:56 adam Exp $
+## $Id: Makefile.am,v 1.5 2000-05-02 19:32:16 adam Exp $
 
 lib_LTLIBRARIES = libyaz.la
 
@@ -13,10 +13,10 @@ libyaz_la_SOURCES=
 
 LDFLAGS=-version-info 0:0:0
 
-libyaz_la_LIBADD=../odr/libodr.la ../@ASNMODULE@/libasn.la \
+libyaz_la_LIBADD=../odr/libodr.la ../$(ASNMODULE)/libasn.la \
  ../comstack/libcomstack.la ../server/libserver.la \
  ../zutil/libzutil.la ../util/libutil.la ../ccl/libccl.la \
- ../retrieval/libret.la @ILLLIB@
+ ../retrieval/libret.la $(ILLLIB)
 
 #  Public libraries and header files
 LIBDIR=$(exec_prefix)/lib

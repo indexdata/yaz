@@ -74,6 +74,7 @@ NM = @NM@
 OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+READLINE_LIBS = @READLINE_LIBS@
 SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
 
@@ -81,7 +82,7 @@ bin_PROGRAMS = yaz-client
 
 yaz_client_SOURCES = client.c admin.c admin.h
 
-yaz_client_LDADD = ../lib/libyaz.la
+yaz_client_LDADD = ../lib/libyaz.la $(READLINE_LIBS)
 
 INCLUDES = -I$(srcdir)/../include -DCCLRPN=1
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs

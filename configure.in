@@ -1,10 +1,11 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.26 2000-04-11 21:22:28 adam Exp $
+dnl $Id: configure.in,v 1.27 2000-05-02 19:32:15 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
+AC_SUBST(READLINE_LIBS)
 dnl ------ Checking programs
 AC_PROG_CC
 AC_PROG_CPP
@@ -53,11 +54,12 @@ fi
 AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
 dnl
 dnl ------ GNU Readline
-AC_CHECK_LIB(readline, readline, [LIBS="$LIBS -lreadline"])
+READLINE_LIBS=""
+AC_CHECK_LIB(readline, readline, [READLINE_LIBS="$READLINE_LIBS -lreadline"])
 if test "$ac_cv_lib_readline_readline" = "no"; then
-	AC_CHECK_LIB(readline, readline, [LIBS="$LIBS -lreadline -ltermcap"])
+	AC_CHECK_LIB(readline, readline, [READLINE_LIBS="$READLINE_LIBS -lreadline -ltermcap"])
 fi
-AC_CHECK_LIB(history, add_history, [LIBS="$LIBS -lhistory"])
+AC_CHECK_LIB(history, add_history, [READLINE_LIBS="$READLINE_LIBS -lhistory"])
 if test "$ac_cv_lib_readline_readline" = "yes"; then
 	AC_CHECK_HEADERS(readline/readline.h readline/history.h)
 fi
