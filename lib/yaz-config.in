@@ -65,9 +65,9 @@ YAZTAB=$yazprefix/share/yaz/tab
 YAZBIN=$yazprefix/bin
 
 if test "$yazprefix" = "/usr"; then
-	YAZLIB="-L$yazprefix/lib $YAZLIB"
-else
 	YAZLIB="-lyaz $yazlibs"
+else
+	YAZLIB="-L$yazprefix/lib -lyaz $yazlibs"
 fi
 if test "$yazprefix" = "/usr"; then
 	YAZINC=
