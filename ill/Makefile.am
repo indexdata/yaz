@@ -1,8 +1,10 @@
-## $Id: Makefile.am,v 1.6 2001-03-21 15:02:39 adam Exp $
+## $Id: Makefile.am,v 1.7 2001-04-05 13:08:48 adam Exp $
 
 INCLUDES=-I$(top_srcdir)/include
 
-EXTRA_DIST=ill9702.asn item-req.asn ill.tcl
+tabdatadir=$(pkgdatadir)/ill
+tabdata_DATA=ill9702.asn item-req.asn ill.tcl
+EXTRA_DIST=$(tabdata_DATA)
 
 noinst_LTLIBRARIES=libill.la
 

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.118  2001-03-27 14:48:06  adam
+ * Revision 1.119  2001-04-05 13:08:48  adam
+ * New configure options: --enable-module.
+ *
+ * Revision 1.118  2001/03/27 14:48:06  adam
  * Fixed scan for bad CCL.
  *
  * Revision 1.117  2001/03/25 21:55:12  adam
@@ -401,7 +404,7 @@
 
 #include <yaz/pquery.h>
 
-#ifdef ASN_COMPILED
+#if YAZ_MODULE_ill
 #include <yaz/ill.h>
 #endif
 
@@ -1314,7 +1317,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
     }
 }
 
-#ifdef ASN_COMPILED
+#if YAZ_MODULE_ill
 
 const char *get_ill_element (void *clientData, const char *element)
 {
@@ -1378,14 +1381,9 @@ static Z_External *create_external_itemRequest()
     }
     return r;
 }
-#else
-static Z_External *create_external_itemRequest()
-{
-    return 0;
-}
 #endif
 
-#ifdef ASN_COMPILED
+#ifdef YAZ_MODULE_ill
 static Z_External *create_external_ILL_APDU(int which)
 {
     struct ill_get_ctl ctl;
@@ -1441,11 +1439,6 @@ static Z_External *create_external_ILL_APDU(int which)
     }
     return r;
 }
-#else
-static Z_External *create_external_ILLRequest()
-{
-    return 0;
-}
 #endif
 
 
@@ -1496,7 +1489,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
         (int *) odr_malloc(out, sizeof(int));
     *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
 
-#ifdef ASN_COMPILED
+#if YAZ_MODULE_ill
     if (!strcmp (type, "item") || !strcmp(type, "2"))
     {
         printf ("using item-request\n");

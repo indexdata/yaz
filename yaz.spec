@@ -1,6 +1,6 @@
 Name: yaz
 Version: 1.7
-Release: 2
+Release: 3
 Copyright: YAZ License
 Group: Development/Libraries
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -20,7 +20,7 @@ using the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %build
 
 CFLAGS="$RPM_OPT_FLAGS" \
- ./configure --prefix=/usr --enable-shared --enable-tcpd
+ ./configure --prefix=/usr --enable-shared --enable-tcpd --enable-module=ill
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
@@ -45,5 +45,7 @@ cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 /usr/lib/libyazthread.so.1
 /usr/lib/libyazthread.so.1.0.0
 /usr/include/yaz
+/usr/share/yaz/z39.50
+/usr/share/yaz/ill
 /usr/share/yaz/doc
 /usr/share/aclocal/yaz.m4

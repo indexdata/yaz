@@ -1,16 +1,18 @@
-## $Id: Makefile.am,v 1.5 2001-03-21 15:02:39 adam Exp $
+## $Id: Makefile.am,v 1.6 2001-04-05 13:08:48 adam Exp $
 
 INCLUDES=-I$(top_srcdir)/include
 
-noinst_LTLIBRARIES = libasn.la
+noinst_LTLIBRARIES = libz39.50.la
 
-EXTRA_DIST=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl esadmin.asn
+tabdatadir = $(pkgdatadir)/z39.50
+tabdata_DATA=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl esadmin.asn
+EXTRA_DIST=$(tabdata_DATA)
 
 LIBS =
 
 YAZCOMP = $(top_srcdir)/util/yaz-comp
 
-libasn_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
+libz39_50_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c \
  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \

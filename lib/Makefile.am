@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.9 2000-11-23 10:58:32 adam Exp $
+## $Id: Makefile.am,v 1.10 2001-04-05 13:08:48 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -27,8 +27,8 @@ INCLUDES =-I$(srcdir)/../include -I$(srcdir)/../server  -D_REENTRANT=1 -DHAVE_PT
 
 bin_SCRIPTS = yaz-config
 
-libyaz_la_LIBADD=../odr/libodr.la ../$(ASNMODULE)/libasn.la \
+libyaz_la_LIBADD=../odr/libodr.la \
  ../comstack/libcomstack.la ../server/libserver.la \
  ../zutil/libzutil.la ../util/libutil.la ../ccl/libccl.la \
- ../retrieval/libret.la $(ILLLIB)
+ ../retrieval/libret.la $(EXTRALIB)
 

@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.40  2001-03-25 21:55:13  adam
+ * Revision 1.41  2001-04-05 13:08:48  adam
+ * New configure options: --enable-module.
+ *
+ * Revision 1.40  2001/03/25 21:55:13  adam
  * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
  *
  * Revision 1.39  2001/03/12 14:40:57  adam
@@ -142,7 +145,7 @@
 #include <yaz/backend.h>
 #include <yaz/log.h>
 
-#ifdef ASN_COMPILED
+#if YAZ_MODULE_ill
 #include <yaz/ill.h>
 #endif
 
@@ -212,7 +215,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		yaz_log(LOG_LOG, "setId: %s", n->resultSetItem->resultSetId);
 		yaz_log(LOG_LOG, "item: %d", *n->resultSetItem->item);
 	    }
-#ifdef ASN_COMPILED
+#if YAZ_MODULE_ill
 	    if (n->itemRequest)
 	    {
 		Z_External *r = (Z_External*) n->itemRequest;
