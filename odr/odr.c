@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.3  1995-03-07 10:21:31  quinn
+ * Revision 1.4  1995-03-07 13:16:13  quinn
+ * Fixed bug in odr_reset
+ *
+ * Revision 1.3  1995/03/07  10:21:31  quinn
  * odr_errno-->odr_error
  *
  * Revision 1.2  1995/03/07  10:19:05  quinn
@@ -37,7 +40,7 @@ void odr_perror(ODR o, char *message)
     fprintf(stderr, "%s: %s\n", message, odr_errlist[o->error]);
 }
 
-int odr_error(ODR o)
+int odr_geterror(ODR o)
 {
     return o->error;
 }
@@ -64,7 +67,7 @@ ODR odr_createmem(int direction)
 void odr_reset(ODR o)
 {
     o->error = ONONE;
-    o->bp = 0;
+    o->bp = o->buf;
     o->left = o->buflen;
     o->t_class = -1;
     o->t_tag = -1;
