@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.48  1998-02-11 11:53:36  adam
+ * Revision 1.49  1998-02-27 14:04:55  adam
+ * Fixed bug in statserv_remove.
+ *
+ * Revision 1.48  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.47  1998/02/10 10:28:57  adam
@@ -311,6 +314,7 @@ void statserv_remove(IOCHAN pIOChannel)
             {
                 /* We need to look at another thread */
                 pNextThread = pCurrentThread->pNext;
+                pPrevThread = pCurrentThread;
             }
         }
 
