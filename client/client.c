@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.205 2003-07-23 12:57:22 mike Exp $
+ * $Id: client.c,v 1.206 2003-07-30 22:33:12 adam Exp $
  */
 
 #include <stdio.h>
@@ -404,6 +404,15 @@ static int process_initResponse(Z_InitResponse *res)
             
             yaz_get_response_charneg(session_mem, p, &charset, &lang,
                                      &selected);
+
+	    if (outputCharset && negotiationCharset) {
+		    odr_set_charset (out, charset, outputCharset);
+		    odr_set_charset (in, outputCharset, charset);
+	    }
+	    else {
+		    odr_set_charset (out, 0, 0);
+		    odr_set_charset (in, 0, 0);
+	    }
             
             printf("Accepted character set : %s\n", charset);
             printf("Accepted code language : %s\n", lang ? lang : "none");
@@ -2762,16 +2771,7 @@ int cmd_charset(const char* arg)
         else
             printf ("Output charset conversion disabled\n");
     } 
-    if (outputCharset && negotiationCharset)
-    {
-        odr_set_charset (out, negotiationCharset, outputCharset);
-        odr_set_charset (in, outputCharset, negotiationCharset);
-    }
-    else
-    {
-        odr_set_charset (out, 0, 0);
-        odr_set_charset (in, 0, 0);
-    }
+
     return 1;
 }
 
