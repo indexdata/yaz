@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqfile.c,v $
- * Revision 1.5  2000-10-17 19:50:28  adam
+ * Revision 1.6  2000-11-16 09:58:02  adam
+ * Implemented local AttributeSet setting for CCL field maps.
+ *
+ * Revision 1.5  2000/10/17 19:50:28  adam
  * Implemented and-list and or-list for CCL module.
  *
  * Revision 1.4  2000/01/31 13:15:21  adam
@@ -83,25 +86,41 @@
 
 void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
 {
-    char qual_type[128];
+    char qual_spec[128];
     int no_scan;
-    int pair[128];
+    int pair[256];
+    char *attsets[128];
     int pair_no = 0;
 
-    while (1)
+    while (pair_no < 128)
     {
-        char *qual_value;
-        char *split;
+        char *qual_value, *qual_type;
+        char *split, *setp;
         
-        if (sscanf (cp, "%s%n", qual_type, &no_scan) != 1)
-            break;
-        
-        if (!(split = strchr (qual_type, '=')))
+        if (sscanf (cp, "%s%n", qual_spec, &no_scan) != 1)
+	    break;
+
+        if (!(split = strchr (qual_spec, '=')))
             break;
         cp += no_scan;
         
         *split++ = '\0';
-        while (1)
+
+	setp = strchr (qual_spec, ',');
+	if (setp)
+	{
+	    
+	    *setp++ = '\0';
+	    attsets[pair_no] = malloc (strlen(qual_spec)+1);
+	    strcpy (attsets[pair_no], qual_spec);
+            qual_type = setp;
+	}
+	else
+	{
+	    attsets[pair_no] = 0;
+            qual_type = qual_spec;
+	}
+        while (pair_no < 128)
         {
             int type, value;
 
@@ -161,7 +180,7 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
                 break;
         }
     }
-    ccl_qual_add (bibset, qual_name, pair_no, pair);
+    ccl_qual_add_set (bibset, qual_name, pair_no, pair, attsets);
 }
 
 /*
@@ -194,4 +213,14 @@ void ccl_qual_file (CCL_bibset bibset, FILE *inf)
         cp += no_scan;
         ccl_qual_fitem (bibset, cp, qual_name);
     }
+}
+
+int ccl_qual_fname (CCL_bibset bibset, const char *fname)
+{
+    FILE *inf;
+    inf = fopen (fname, "r");
+    if (!inf)
+        return -1;
+    ccl_qual_file (bibset, inf);
+    return 0;
 }

@@ -1,8 +1,8 @@
-# $Id: bib1,v 1.3 2000-10-17 19:50:28 adam Exp $
-# CCL qualifiers and their mapping to a bib-1 subset
+# $Id: bib1,v 1.4 2000-11-16 09:58:02 adam Exp $
+# CCL qualifiers and their mappings
 #
 # Each line takes the form:
-#   name      <type>=<val>,<val>..   <type>=<val> ...
+#   name      [<attributeset>,]<type>=<val>,<val>..   <type>=<val> ...
 # Where type is one of:
 #    u       use-attribute          
 #    r       relation-attribute    )
@@ -18,6 +18,8 @@
 #    pw      phrase/word. The CCL parser will decide whether phrase or word
 #            is needed. Phrase is used if term contain blanks; otherwise
 #            Word is used.
+#    al      and-list. AND operation is put between each term.
+#    ol      or-list. OR operation is put between each term.
 # Special value for truncation:
 #    l       Allow left truncation if ? is at left side of term.
 #    r       Allow right truncation if ? is at left side of term.
@@ -89,4 +91,6 @@ tru:re2     t=103
 com:is      c=1
 com:cs      c=2
 com:cf      c=3
+
+exp:category exp1,1=1
 

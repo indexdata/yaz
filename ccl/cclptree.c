@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclptree.c,v $
- * Revision 1.7  2000-01-31 13:15:21  adam
+ * Revision 1.8  2000-11-16 09:58:02  adam
+ * Implemented local AttributeSet setting for CCL field maps.
+ *
+ * Revision 1.7  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -95,7 +98,11 @@ void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
         {
             struct ccl_rpn_attr *attr;
             for (attr = rpn->u.t.attr_list; attr; attr = attr->next)
-                fprintf (fd_out, " %d=%d", attr->type, attr->value);
+                if (attr->set)
+                    fprintf (fd_out, " %s,%d=%d", attr->set, attr->type,
+                             attr->value);
+                else
+                    fprintf (fd_out, " %d=%d", attr->type, attr->value);
         }
 	break;
     case CCL_RPN_AND:

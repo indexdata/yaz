@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.7  2000-11-01 14:47:00  adam
+ * Revision 1.8  2000-11-16 09:58:02  adam
+ * Implemented local AttributeSet setting for CCL field maps.
+ *
+ * Revision 1.7  2000/11/01 14:47:00  adam
  * Added CCL support for WIN32.
  *
  * Revision 1.6  2000/10/17 19:50:28  adam
@@ -149,6 +152,7 @@ YAZ_BEGIN_CDECL
 /* attribute pair (type, value) */
 struct ccl_rpn_attr {
     struct ccl_rpn_attr *next;
+    char *set;
     int type;
     int value;
 };
@@ -310,10 +314,17 @@ YAZ_EXPORT void ccl_rpn_delete (struct ccl_rpn_node *rpn);
 YAZ_EXPORT void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out);
 
 /* Add CCL qualifier */
-YAZ_EXPORT void ccl_qual_add (CCL_bibset b, const char *name, int no, int *attr);
+YAZ_EXPORT void ccl_qual_add (CCL_bibset b, const char *name, int no,
+			      int *attr);
+
+YAZ_EXPORT void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
+				  int *attr, char **attsets);
 
 /* Read CCL qualifier list spec from file inf */
 YAZ_EXPORT void ccl_qual_file (CCL_bibset bibset, FILE *inf);
+
+/* Read CCL qualifier list spec from file inf */
+YAZ_EXPORT int ccl_qual_fname (CCL_bibset bibset, const char *fname);
 
 /* Add CCL qualifier by using single-line spec */
 YAZ_EXPORT void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name);

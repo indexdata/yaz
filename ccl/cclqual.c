@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.13  2000-01-31 13:15:21  adam
+ * Revision 1.14  2000-11-16 09:58:02  adam
+ * Implemented local AttributeSet setting for CCL field maps.
+ *
+ * Revision 1.13  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -127,7 +130,8 @@ struct ccl_qualifiers {
  * pairs:   Attributes. pairs[0] first type, pair[1] first value,
  *          ... pair[2*no-2] last type, pair[2*no-1] last value.
  */
-void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
+void ccl_qual_add_set (CCL_bibset b, const char *name, int no, int *pairs,
+		       char **attsets)
 {
     struct ccl_qualifier *q;
     struct ccl_rpn_attr **attrp;
@@ -162,6 +166,7 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
 
         attr = (struct ccl_rpn_attr *)malloc (sizeof(*attr));
         ccl_assert (attr);
+	attr->set = *attsets++;
         attr->type = *pairs++;
         attr->value = *pairs++;
         *attrp = attr;
@@ -199,6 +204,8 @@ void ccl_qual_rm (CCL_bibset *b)
         for (attr = q->attr_list; attr; attr = attr1)
 	{
 	    attr1 = attr->next;
+	    if (attr->set)
+		free (attr->set);
 	    free (attr);
 	}
         q1 = q->next;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.6  2000-02-02 15:13:23  adam
+ * Revision 1.7  2000-11-16 09:58:02  adam
+ * Implemented local AttributeSet setting for CCL field maps.
+ *
+ * Revision 1.6  2000/02/02 15:13:23  adam
  * Minor change.
  *
  * Revision 1.5  2000/01/31 13:15:22  adam
@@ -85,6 +88,22 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
 		(int *)odr_malloc(o, sizeof(int));
             *elements[i]->attributeType = attr->type;
 	    elements[i]->attributeSet = 0;
+	    if (attr->set && *attr->set)
+	    {
+		int value = oid_getvalbyname (attr->set);
+
+		if (value != VAL_NONE)
+		{
+		    int oid[OID_SIZE];
+		    struct oident ident;
+
+		    ident.oclass = CLASS_ATTSET;
+		    ident.proto = PROTO_Z3950;
+		    ident.value = value;
+		    elements[i]->attributeSet =
+			odr_oiddup (o, oid_ent_to_oid (&ident, oid));
+		}
+	    }
 	    elements[i]->which = Z_AttributeValue_numeric;
 	    elements[i]->value.numeric =
 		(int *)odr_malloc (o, sizeof(int));
