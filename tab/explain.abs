@@ -2,7 +2,7 @@
 # explain data. On request, records are mapped to the proper Explain ASN.1
 # before transmission.
 #
-# $Id: explain.abs,v 1.12 1998-05-18 13:07:09 adam Exp $
+# $Id: explain.abs,v 1.13 1998-06-09 13:21:32 adam Exp $
 #
 
 name explain
@@ -126,6 +126,7 @@ elm (4,1)/(4,300)/(4,301)/(4,102)	categoryName			-
 elm (4,1)/(4,300)/(4,301)/(4,302)	originalName			-
 elm (4,1)/(4,300)/(4,301)/(4,113)	description			-
 elm (4,1)/(4,300)/(4,301)/(4,303)	asn1Module			-
+elm (4,1)/?				other				-
 
 #
 # TargetInfo
@@ -162,6 +163,7 @@ elm (4,2)/(4,119)/(4,123)/(4,121)	address				-
 elm (4,2)/(4,125)			languages			-
 elm (4,2)/(4,125)/(4,126)		language			-
 elm (4,2)/(4,500):accessInfo		commonAccessInfo		-
+elm (4,2)/?				other				-
 #
 # DatabaseInfo
 #
@@ -204,6 +206,7 @@ elm (4,3)/(4,223):contactInfo		producerContactInfo		-
 elm (4,3)/(4,224):contactInfo		supplierContactInfo		-
 elm (4,3)/(4,225):contactInfo		submissionContactInfo		-
 elm (4,3)/(4,500):accessInfo		databaseAccessInfo		-
+elm (4,3)/?				other				-
 #
 # AttributeSetInfo
 #
@@ -213,6 +216,7 @@ elm (4,7)/(4,1000)			attributeSet		AttributeSetOID
 elm (4,7)/(4,113)			description			-
 elm (4,7)/(4,102)			name				-
 elm (4,7)/(4,750):attributeType		attributes			-
+elm (4,7)/?				other				-
 #
 # AttributeDetails
 #
@@ -222,4 +226,5 @@ elm (4,10)/(4,102)			databaseName		DatabaseName
 elm (4,10)/(4,700)			attributesBySet			-
 elm (4,10)/(4,700)/(4,701):attributeSetDetails attributeSetDetails	-
 elm (4,10)/(4,716):attributeCombinations attributeCombinations		-
+elm (4,10)/?				other				-
 
