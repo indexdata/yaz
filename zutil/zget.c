@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.8  2001-05-17 14:16:15  adam
+ * Revision 1.9  2001-05-18 11:42:03  adam
+ * YAZ Build date for WIN32.
+ *
+ * Revision 1.8  2001/05/17 14:16:15  adam
  * Added EXTERNAL handling for item update0 (1.0).
  *
  * Revision 1.7  2001/05/16 07:22:56  adam
@@ -105,6 +108,9 @@ Z_InitRequest *zget_InitRequest(ODR o)
 #ifdef YAZ_DATE_STR
     " (" YAZ_DATE_STR ")"
 #endif
+#ifdef YAZ_OS
+    " " YAZ_OS
+#endif
 	;
     r->userInformationField = 0;
     r->otherInfo = 0;
@@ -128,6 +134,9 @@ Z_InitResponse *zget_InitResponse(ODR o)
     r->implementationVersion = YAZ_VERSION
 #ifdef YAZ_DATE_STR
     " (" YAZ_DATE_STR ")"
+#endif
+#ifdef YAZ_OS
+    " " YAZ_OS
 #endif
 	;
     r->userInformationField = 0;

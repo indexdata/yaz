@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.22 2001-03-09 14:58:20 adam Exp $
+# $Id: makefile,v 1.23 2001-05-18 11:42:03 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -31,7 +31,7 @@ NEW_Z3950=1  # 0= use old asn files
 
 default: all
 
-all: dirs proto_h dll client ztest 
+all: dirs yaz_date_h proto_h dll client ztest 
 
 generate: generated_files
 
@@ -78,12 +78,14 @@ IMPLIB=$(LIBDIR)\Yaz.lib
 CLIENT=$(BINDIR)\yaz-client.exe
 ZTEST=$(BINDIR)\yaz-ztest.exe
 PROTOH=$(INCLDIR)\yaz\proto.h
+YAZ_DATE_H=$(INCLDIR)\yaz\yaz-date.h
 
 # shortcut names defined here
 dll : $(DLL) 
 client: $(CLIENT)
 ztest: $(ZTEST)
 proto_h: $(PROTOH)
+yaz_date_h: $(YAZ_DATE_H)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -96,6 +98,7 @@ proto_h: $(PROTOH)
 
 COMMON_C_OPTIONS=          \
   /nologo /W3 /GX /FD /c   \
+  /D "YAZ_MODULE_ill=1"    \
   /D "WIN32" /D "_WINDOWS" \
   /D "CCL2RPN=1"           \
   /FR"$(OBJDIR)\\"         \
@@ -526,6 +529,11 @@ generated_files: \
 
 !if $(HAVE_TCL)
 
+$(YAZ_DATE_H):
+	@cd ..
+	$(TCL) util\cvs-date.tcl include\yaz\yaz-date.h
+	@cd win
+
 $(Z3950V3_FILES): $(Z3950DIR)\z3950v3.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) -d z.tcl z3950v3.asn
@@ -698,7 +706,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.22  2001-03-09 14:58:20  adam
+# Revision 1.23  2001-05-18 11:42:03  adam
+# YAZ Build date for WIN32.
+#
+# Revision 1.22  2001/03/09 14:58:20  adam
 # Updated version resource.
 #
 # Revision 1.21  2001/02/28 16:56:33  adam

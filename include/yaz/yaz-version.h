@@ -2,7 +2,10 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.4  2001-05-16 07:37:39  adam
+ * Revision 1.5  2001-05-18 11:42:03  adam
+ * YAZ Build date for WIN32.
+ *
+ * Revision 1.4  2001/05/16 07:37:39  adam
  * Added script cvs-date.tcl that determines last CVS change for YAZ by
  * using output of 'cvs log'. The script generates include/yaz/yaz-date.h
  * which defines YAZ_DATE - format YYYYMMDD.
@@ -93,9 +96,16 @@
  *
  */
 #ifndef YAZ_VERSION
+
 #define YAZ_VERSION "1.7"
-#ifndef WIN32
 #include <yaz/yaz-date.h>
+
+#ifdef WIN32
+#ifdef NDEBUG
+#define YAZ_OS "WIN32 Release"
+#else
+#define YAZ_OS "WIN32 Debug"
 #endif
 #endif
 
+#endif
