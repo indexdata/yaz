@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.13  1998-08-19 16:10:09  adam
+ * Revision 1.14  1998-10-13 16:12:25  adam
+ * Added support for Surrogate Diagnostics for Scan Term entries.
+ *
+ * Revision 1.13  1998/08/19 16:10:09  adam
  * Changed som member names of DeleteResultSetRequest/Response.
  *
  * Revision 1.12  1998/07/20 12:38:44  adam
@@ -260,7 +263,8 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *fd)
  */
 bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *fd)
 {
-    bend_scanresult *r = (bend_scanresult *) odr_malloc (q->stream, sizeof(*r));
+    bend_scanresult *r = (bend_scanresult *)
+	odr_malloc (q->stream, sizeof(*r));
     static FILE *f = 0;
     static struct scan_entry list[200];
     static char entries[200][80];
@@ -317,8 +321,19 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *fd)
 		po = pos - r->term_position + r->num_entries + 1; /* find pos */
 		if (po < 0)
 		    po += 200;
-		list[r->num_entries].term = entries[po];
-		list[r->num_entries].occurrences = hits[po];
+
+		if (!strcmp (term, "sd") && r->num_entries == 2)
+		{
+		    list[r->num_entries].term = entries[pos];
+		    list[r->num_entries].occurrences = -1;
+		    list[r->num_entries].errcode = 233;
+		    list[r->num_entries].errstring = "SD for Scan Term";
+		}
+		else
+		{
+		    list[r->num_entries].term = entries[po];
+		    list[r->num_entries].occurrences = hits[po];
+		}
 	    }
 	}
 	else if (r->num_entries)

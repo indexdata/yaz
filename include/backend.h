@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.22  1998-09-02 12:41:51  adam
+ * Revision 1.23  1998-10-13 16:12:23  adam
+ * Added support for Surrogate Diagnostics for Scan Term entries.
+ *
+ * Revision 1.22  1998/09/02 12:41:51  adam
  * Added decode stream in bend search structures.
  *
  * Revision 1.21  1998/07/20 12:38:41  adam
@@ -157,8 +160,10 @@ typedef struct
 } bend_scanrequest;
 
 struct scan_entry {
-    char *term;
-    int occurrences;
+    char *term;         /* the returned scan term */
+    int occurrences;    /* no of occurrences or -1 if error (see below) */
+    int errcode;        /* Bib-1 diagnostic code; only used when occur.= -1 */
+    char *errstring;    /* Additional string */
 };
 
 typedef enum {

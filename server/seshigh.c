@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.80  1998-09-02 12:41:53  adam
+ * Revision 1.81  1998-10-13 16:12:24  adam
+ * Added support for Surrogate Diagnostics for Scan Term entries.
+ *
+ * Revision 1.80  1998/09/02 12:41:53  adam
  * Added decode stream in bend search structures.
  *
  * Revision 1.79  1998/08/19 16:10:08  adam
@@ -885,11 +888,15 @@ static void set_addinfo (Z_DefaultDiagFormat *dr, char *addinfo)
 static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 {
     int oid[OID_SIZE];
-    Z_Records *rec = (Z_Records *)odr_malloc (assoc->encode, sizeof(*rec));
+    Z_Records *rec = (Z_Records *)
+	odr_malloc (assoc->encode, sizeof(*rec));
     oident bib1;
-    int *err = (int *)odr_malloc (assoc->encode, sizeof(*err));
-    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)odr_malloc (assoc->encode, sizeof(*dr));
+    int *err = (int *)
+	odr_malloc (assoc->encode, sizeof(*err));
+    Z_DiagRec *drec = (Z_DiagRec *)
+	odr_malloc (assoc->encode, sizeof(*drec));
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
+	odr_malloc (assoc->encode, sizeof(*dr));
 
     bib1.proto = assoc->proto;
     bib1.oclass = CLASS_DIAGSET;
@@ -1512,23 +1519,43 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 		Odr_oct *o;
 		
 		tab[i] = e = (Z_Entry *)odr_malloc(assoc->encode, sizeof(*e));
-		e->which = Z_Entry_termInfo;
-		e->u.termInfo = t = (Z_TermInfo *)odr_malloc(assoc->encode, sizeof(*t));
-		t->suggestedAttributes = 0;
-		t->displayTerm = 0;
-		t->alternativeTerm = 0;
-		t->byAttributes = 0;
-		t->otherTermInfo = 0;
-		t->globalOccurrences = &srs->entries[i].occurrences;
-		t->term = (Z_Term *)odr_malloc(assoc->encode, sizeof(*t->term));
-		t->term->which = Z_Term_general;
-		t->term->u.general = o = (Odr_oct *)odr_malloc(assoc->encode,
-		    sizeof(Odr_oct));
-		o->buf = (unsigned char *)odr_malloc(assoc->encode, o->len = o->size =
-		    strlen(srs->entries[i].term));
-		memcpy(o->buf, srs->entries[i].term, o->len);
-		logf(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
-		    srs->entries[i].term, srs->entries[i].occurrences);
+		if (srs->entries[i].occurrences >= 0)
+		{
+		    e->which = Z_Entry_termInfo;
+		    e->u.termInfo = t = (Z_TermInfo *)
+			odr_malloc(assoc->encode, sizeof(*t));
+		    t->suggestedAttributes = 0;
+		    t->displayTerm = 0;
+		    t->alternativeTerm = 0;
+		    t->byAttributes = 0;
+		    t->otherTermInfo = 0;
+		    t->globalOccurrences = &srs->entries[i].occurrences;
+		    t->term = (Z_Term *)
+			odr_malloc(assoc->encode, sizeof(*t->term));
+		    t->term->which = Z_Term_general;
+		    t->term->u.general = o =
+			(Odr_oct *)odr_malloc(assoc->encode, sizeof(Odr_oct));
+		    o->buf = (unsigned char *)
+			odr_malloc(assoc->encode, o->len = o->size =
+				   strlen(srs->entries[i].term));
+		    memcpy(o->buf, srs->entries[i].term, o->len);
+		    logf(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
+			 srs->entries[i].term, srs->entries[i].occurrences);
+		}
+		else
+		{
+		    Z_Records *zrecords = diagrec (assoc,
+						   srs->entries[i].errcode,
+						   srs->entries[i].errstring);
+		    logf(LOG_DEBUG, "  term sd code=%d addinfo=%s",
+			 srs->entries[i].errcode,
+			 (srs->entries[i].errstring?srs->entries[i].errstring :
+			  "<null>"));
+		    assert (zrecords->which == Z_Records_NSD);
+		    e->which = Z_Entry_surrogateDiagnostic;
+		    e->u.surrogateDiagnostic =
+			zrecords->u.nonSurrogateDiagnostic;
+		}
 	    }
 	}
     }
