@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.20  1998-03-31 15:13:20  adam
+ * Revision 1.21  1998-10-13 16:03:37  adam
+ * Better checking for invalid OID's in p_query_rpn.
+ *
+ * Revision 1.20  1998/03/31 15:13:20  adam
  * Development towards compiled ASN.1.
  *
  * Revision 1.19  1998/03/05 08:09:03  adam
@@ -99,13 +102,15 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o, oid_proto,
 
 static enum oid_value query_oid_getvalbyname (struct lex_info *li)
 {
+    enum oid_value value;
     char buf[32];
 
     if (li->lex_len > 31)
         return VAL_NONE;
     memcpy (buf, li->lex_buf, li->lex_len);
     buf[li->lex_len] = '\0';
-    return oid_getvalbyname (buf);
+    value = oid_getvalbyname (buf);
+    return value;
 }
 
 static int compare_term (struct lex_info *li, const char *src, size_t off)
@@ -421,6 +426,8 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
             (size_t) (cp-li->lex_buf) > li->lex_len)
         {
             attr_set[num_attr] = query_oid_getvalbyname (li);
+	    if (attr_set[num_attr] == VAL_NONE)
+		return NULL;
             lex (li);
 
             if (!(cp = strchr (li->lex_buf, '=')))
@@ -495,7 +502,9 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
     oset.oclass = CLASS_ATTSET;
     oset.value = topSet;
 
-    zq->attributeSetId = odr_oiddup (o, oid_ent_to_oid (&oset, oid));
+    if (!oid_ent_to_oid (&oset, oid))
+	return NULL;
+    zq->attributeSetId = odr_oiddup (o, oid);
 
     if (!(zq->RPNStructure = rpn_structure (li, o, proto, 0, 512,
                                             attr_array, attr_set)))
