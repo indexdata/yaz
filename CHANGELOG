@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.8.8 2002/MM/DD
+
+
 --- 1.8.7 2002/05/22
 
 On Windows ZOOM functions are of type __stdcall rather than __cdecl, so
