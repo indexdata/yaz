@@ -1,8 +1,8 @@
 dnl YAZ Toolkit, Index Data 1994-2005
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.171 2005-02-08 14:19:21 adam Exp $
+dnl $Id: configure.in,v 1.172 2005-02-21 14:37:16 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
-AM_INIT_AUTOMAKE(yaz, 2.0.34)
+AM_INIT_AUTOMAKE(yaz, 2.0.35)
 AM_MAINTAINER_MODE
 dnl
 AC_SUBST(READLINE_LIBS)
@@ -40,7 +40,7 @@ if test "$checkBoth" = "1"; then
 	LIBS="$LIBS -lsocket -lnsl"
 	AC_CHECK_FUNC(accept, , [LIBS=$oldLibs])
 fi
-AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
+AC_CHECK_FUNC(gethostbyname, ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
 dnl
 dnl ------ OpenSSL
 AC_SUBST(SSL_CFLAGS)
