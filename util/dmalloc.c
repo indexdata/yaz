@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dmalloc.c,v $
- * Revision 1.1  1995-03-27 08:35:17  quinn
+ * Revision 1.2  1995-04-10 10:23:50  quinn
+ * Fixes.
+ *
+ * Revision 1.1  1995/03/27  08:35:17  quinn
  * Created util library
  * Added memory debugging module. Imported options-manager
  *
@@ -26,7 +29,7 @@ void *d_malloc(char *file, int line, int nbytes)
 
     if (!(res = malloc(nbytes + 3 * sizeof(long))))
     	return 0;
-    fprintf(stderr, "---d_malloc, '%s':%d, %d->0x%p\n",
+    fprintf(stderr, "---d_malloc, '%s':%d, %d->%p\n",
     	file, line, nbytes, res + 2 * sizeof(long));
     len = nbytes;
     memcpy(res, &head, sizeof(long));
@@ -46,7 +49,7 @@ void d_free(char *file, int line, char *ptr)
     memcpy(&len, ptr - sizeof(long), sizeof(long));
     if (memcmp(ptr + len, &tail, sizeof(long)))
     	abort();
-    fprintf(stderr, "---d_free, '%s':%d, 0x%p (%d)\n",
+    fprintf(stderr, "---d_free, '%s':%d, %p (%d)\n",
     	file, line, ptr, len);
     free(ptr - 2 * sizeof(long));
     return;
@@ -65,7 +68,7 @@ void *d_realloc(char *file, int line, char *ptr, int nbytes)
     	abort();
     if (!(r = realloc(ptr, nbytes + 3 * sizeof(long))))
     	return 0;
-    fprintf(stderr, "---d_realloc, '%s':%d, %d->%d, 0x%p->0x%p\n",
+    fprintf(stderr, "---d_realloc, '%s':%d, %d->%d, %p->%p\n",
     	file, line, len, nbytes, p, r + 2 * sizeof(long));
     memcpy(r, &head, sizeof(long));
     memcpy(r + sizeof(long), &nlen, sizeof(long));

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.2  1995-03-31 10:16:55  quinn
+ * Revision 1.3  1995-04-10 10:23:51  quinn
+ * Fixes.
+ *
+ * Revision 1.2  1995/03/31  10:16:55  quinn
  * Fixed logging.
  *
  * Revision 1.1  1995/03/30  10:26:53  quinn
@@ -65,6 +68,16 @@ static struct {
     { 0,         "none" },
     { 0, NULL }
 };  
+
+#ifndef strerror
+
+char *strerror(int n)
+{
+        extern char *sys_errlist[];
+        return sys_errlist[n];
+}
+
+#endif
 
 void log_init(int level, const char *prefix, const char *name)
 {
