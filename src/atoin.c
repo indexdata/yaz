@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1997-2003, Index Data
+ * Copyright (c) 1997-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: atoin.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: atoin.c,v 1.2 2004-08-13 11:35:37 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -19,7 +19,7 @@ int atoi_n (const char *buf, int len)
 
     while (--len >= 0)
     {
-        if (isdigit (*buf))
+        if (isdigit (*(const unsigned char *) buf))
             val = val*10 + (*buf - '0');
 	buf++;
     }
