@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-marcdump-man.xml,v 1.4 2005-02-08 13:51:30 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.5 2005-02-08 23:43:56 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>
@@ -66,7 +66,7 @@
    </varlistentry>
 
    <varlistentry>
-    <term>-X</term>
+    <term>-e</term>
     <listitem><para>
       Print MARC records in MarcXchange format.
       This format is equivalent to YAZ_MARC_XCHANGE in
