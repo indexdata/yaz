@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.30 2003-06-04 09:15:40 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.31 2003-07-09 22:38:12 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -584,8 +584,10 @@
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>syntax</literal></term>
-      <listitem><para>The transfer syntax (OID) of the record is returned
-        as a C null-terminated string. Return type is
+      <listitem><para>The transfer syntax of the record is returned
+        as a C null-terminated string containing the symbolic name of
+	the record syntax, e.g. <literal>Usmarc</literal>. Return type
+	is
         <literal>const char *</literal>. 
        </para></listitem>
      </varlistentry>
