@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.14  1995-03-29 08:06:13  quinn
+ * Revision 1.15  1995-03-30 09:08:39  quinn
+ * Added Resource control protocol
+ *
+ * Revision 1.14  1995/03/29  08:06:13  quinn
  * Added a few v3 elements
  *
  * Revision 1.13  1995/03/20  11:26:52  quinn
@@ -179,6 +182,54 @@ int z_InitResponse(ODR o, Z_InitResponse **p, int opt)
 	odr_implicit(o, odr_visiblestring, &pp->implementationVersion,
 	    ODR_CONTEXT, 112, 1) &&
 	z_UserInformationField(o, &pp->userInformationField, 1) &&
+	odr_sequence_end(o);
+}
+
+/* ------------------ RESOURCE CONTROL ----------------*/
+
+int z_TriggerResourceControlRequest(ODR o, Z_TriggerResourceControlRequest **p,
+				    int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->requestedAction, ODR_CONTEXT,
+	    46, 0) &&
+	odr_implicit(o, odr_oid, &(*p)->prefResourceReportFormat,
+	    ODR_CONTEXT, 47, 1) &&
+	odr_implicit(o, odr_bool, &(*p)->resultSetWanted, ODR_CONTEXT,
+	    48, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_ResourceControlRequest(ODR o, Z_ResourceControlRequest **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_bool, &(*p)->suspendedFlag, ODR_CONTEXT, 39, 1)&&
+	odr_explicit(o, odr_external, &(*p)->resourceReport, ODR_CONTEXT,
+	    40, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->partialResultsAvailable,
+	    ODR_CONTEXT, 41, 1) &&
+	odr_implicit(o, odr_bool, &(*p)->responseRequired, ODR_CONTEXT,
+	    42, 0) &&
+	odr_implicit(o, odr_bool, &(*p)->triggeredRequestFlag,
+	    ODR_CONTEXT, 43, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_ResourceControlResponse(ODR o, Z_ResourceControlResponse **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_bool, &(*p)->continueFlag, ODR_CONTEXT, 44, 0) &&
+	odr_implicit(o, odr_bool, &(*p)->resultSetWanted, ODR_CONTEXT,
+	    45, 1) &&
 	odr_sequence_end(o);
 }
 
