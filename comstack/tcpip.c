@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.47 2002-06-12 19:42:38 adam Exp $
+ * $Id: tcpip.c,v 1.48 2002-09-10 20:56:34 adam Exp $
  */
 
 #include <stdio.h>
@@ -51,6 +51,16 @@ void *tcpip_straddr(COMSTACK h, const char *str);
 #define TRC(x) x
 #else
 #define TRC(X)
+#endif
+
+#if HAVE_SOCKLEN_T
+#define NET_LEN_T socklen_t
+#else
+#if GETPEERNAME_ACCEPTS_SIZE_T_FOR_THIRD_ARGUMENT
+#define NET_LEN_T size_t
+#else
+#define NET_LEN_T int
+#endif
 #endif
 
 /* this state is used for both SSL and straight TCP/IP */
@@ -449,11 +459,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 		 void *cd)
 {
     struct sockaddr_in addr;
-#ifdef __cplusplus
-    socklen_t len = sizeof(addr);
-#else
-    int len = sizeof(addr);
-#endif
+    NET_LEN_T len = sizeof(addr);
 
     TRC(fprintf(stderr, "tcpip_listen pid=%d\n", getpid()));
     if (h->state != CS_ST_IDLE)
@@ -968,7 +974,7 @@ char *tcpip_addrstr(COMSTACK h)
     struct sockaddr_in addr;
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
     char *r, *buf = sp->buf;
-    size_t len;
+    NET_LEN_T len;
     struct hostent *host;
     
     len = sizeof(addr);
