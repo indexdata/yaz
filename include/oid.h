@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.32 1999-04-20 09:56:48 adam Exp $
+ * $Id: oid.h,v 1.33 1999-05-27 13:02:20 adam Exp $
  */
 
 #ifndef OID_H
@@ -118,6 +118,7 @@ typedef enum oid_value
     VAL_PQUERY,
     VAL_PCQUERY,
     VAL_ITEMORDER,
+    VAL_DBUPDATE0,
     VAL_DBUPDATE,
     VAL_EXPORTSPEC,
     VAL_EXPORTINV,

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.89  1999-05-26 15:24:26  adam
+ * Revision 1.90  1999-05-27 13:02:20  adam
+ * Assigned OID for old DB Update (VAL_DBUPDATE0).
+ *
+ * Revision 1.89  1999/05/26 15:24:26  adam
  * Fixed minor bugs regarding DB Update (introduced by previous commit).
  *
  * Revision 1.88  1999/04/20 09:56:48  adam
@@ -1027,7 +1030,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 				int *next, int *pres, oid_value format,
 				Z_ReferenceId *referenceId)
 {
-    int oid[OID_SIZE];
     int recno, total_length = 0, toget = *num, dumped_records = 0;
     Z_Records *records =
 	(Z_Records *) odr_malloc (a->encode, sizeof(*records));
@@ -1035,7 +1037,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	(Z_NamePlusRecordList *) odr_malloc (a->encode, sizeof(*reclist));
     Z_NamePlusRecord **list =
 	(Z_NamePlusRecord **) odr_malloc (a->encode, sizeof(*list) * toget);
-    oident recform;
 
     records->which = Z_Records_DBOSD;
     records->u.databaseOrSurDiagnostics = reclist;
@@ -1053,9 +1054,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     	bend_fetchrequest freq;
 	bend_fetchresult *fres;
 	Z_NamePlusRecord *thisrec;
-	Z_DatabaseRecord *thisext;
 	int this_length = 0;
-
 	/*
 	 * we get the number of bytes allocated on the stream before any
 	 * allocation done by the backend - this should give us a reasonable

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.35  1999-04-20 09:56:49  adam
+ * Revision 1.36  1999-05-27 13:02:20  adam
+ * Assigned OID for old DB Update (VAL_DBUPDATE0).
+ *
+ * Revision 1.35  1999/04/20 09:56:49  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -305,6 +308,8 @@ static oident oids[] =
      "Per'd query"},
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_ITEMORDER,    {9,4,-1},
      "Item order"},
+    {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE0,    {9,5,1,-1},
+     "DB. Update (old version)"},
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE,     {9,5,1,1,-1},
      "DB. Update"},
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTSPEC,   {9,6,-1},

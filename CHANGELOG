@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Assigned OID for old DB Update (VAL_DBUPDATE0). Updated YAZ compiled
+version so that it supports both new - and old version of DB Update
+
 * Added 'name' parameter to ODR encoder/decoder routines to facilitate
 pretty ODR print. Updated whole Z39.50 encoder/decoder to reflect the
 change. The name parameter can be set to 0 in which no name is specified

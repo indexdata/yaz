@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.22  1999-05-26 13:49:12  adam
+ * Revision 1.23  1999-05-27 13:02:20  adam
+ * Assigned OID for old DB Update (VAL_DBUPDATE0).
+ *
+ * Revision 1.22  1999/05/26 13:49:12  adam
  * DB Update implemented in client (very basic).
  *
  * Revision 1.21  1998/12/15 12:45:42  adam
@@ -138,6 +141,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     else if (rr->esr->taskSpecificParameters->which == Z_External_itemOrder)
     {
     	Z_ItemOrder *it = rr->esr->taskSpecificParameters->u.itemOrder;
+	logf (LOG_LOG, "Received ItemOrder");
 	switch (it->which)
 	{
 #ifdef ASN_COMPILED
@@ -174,10 +178,87 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	break;
 	}
     }
+    else if (rr->esr->taskSpecificParameters->which == Z_External_update)
+    {
+    	Z_IUUpdate *up = rr->esr->taskSpecificParameters->u.update;
+	logf (LOG_LOG, "Received DB Update");
+	if (up->which == Z_IUUpdate_esRequest)
+	{
+	    Z_IUUpdateEsRequest *esRequest = up->u.esRequest;
+	    Z_IUOriginPartToKeep *toKeep = esRequest->toKeep;
+	    Z_IUSuppliedRecords *notToKeep = esRequest->notToKeep;
+	    
+	    logf (LOG_LOG, "action");
+	    if (toKeep->action)
+	    {
+		switch (*toKeep->action)
+		{
+		case Z_IUOriginPartToKeep_recordInsert:
+		    logf (LOG_LOG, " recordInsert");
+		    break;
+		case Z_IUOriginPartToKeep_recordReplace:
+		    logf (LOG_LOG, " recordUpdate");
+		    break;
+		case Z_IUOriginPartToKeep_recordDelete:
+		    logf (LOG_LOG, " recordDelete");
+		    break;
+		case Z_IUOriginPartToKeep_elementUpdate:
+		    logf (LOG_LOG, " elementUpdate");
+		    break;
+		case Z_IUOriginPartToKeep_specialUpdate:
+		    logf (LOG_LOG, " specialUpdate");
+		    break;
+		default:
+		    logf (LOG_LOG, " unknown (%d)", *toKeep->action);
+		}
+	    }
+	    logf (LOG_LOG, "database: %s", 
+		  (toKeep->databaseName ? toKeep->databaseName : "<null>"));
+	    if (notToKeep)
+	    {
+		int i;
+		for (i = 0; i < notToKeep->num; i++)
+		{
+		    Z_External *rec = notToKeep->elements[i]->record;
+
+		    if (rec->direct_reference)
+		    {
+			struct oident *oident;
+			oident = oid_getentbyoid(rec->direct_reference);
+			if (oident)
+			    logf (LOG_LOG, "record %d type %s", i,
+				  oident->desc);
+		    }
+		    switch (rec->which)
+		    {
+		    case Z_External_sutrs:
+			if (rec->u.octet_aligned->len > 170)
+			    logf (LOG_LOG, "%d bytes:\n%.168s ...",
+				  rec->u.sutrs->len,
+				  rec->u.sutrs->buf);
+			else
+			    logf (LOG_LOG, "%d bytes:\n%s",
+				  rec->u.sutrs->len,
+				  rec->u.sutrs->buf);
+		    case Z_External_octet        :
+			if (rec->u.octet_aligned->len > 170)
+			    logf (LOG_LOG, "%d bytes:\n%.168s ...",
+				  rec->u.octet_aligned->len,
+				  rec->u.octet_aligned->buf);
+			else
+			    logf (LOG_LOG, "%d bytes\n%s",
+				  rec->u.octet_aligned->len,
+				  rec->u.octet_aligned->buf);
+		    }
+		}
+	    }
+	}
+    }
     else
     {
         logf (LOG_WARN, "Unknown Extended Service(%d)",
 	      rr->esr->taskSpecificParameters->which);
+	
     }
     rr->errcode = 0;
     return 0;
