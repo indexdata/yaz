@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.58  1996-02-20 12:53:04  quinn
+ * Revision 1.59  1996-05-14 09:26:46  quinn
+ * Added attribute set to scan backend
+ *
+ * Revision 1.58  1996/02/20  12:53:04  quinn
  * Chanes to SCAN
  *
  * Revision 1.57  1996/01/02  08:57:47  quinn
@@ -1195,6 +1198,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     static Z_Entry *tab[SCAN_MAX_ENTRIES];
     bend_scanrequest srq;
     bend_scanresult *srs;
+    oident *attset;
 
     logf(LOG_LOG, "Got scanrequest");
     apdu.which = Z_APDU_scanResponse;
@@ -1226,6 +1230,11 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	srq.basenames = req->databaseNames;
 	srq.num_entries = *req->numberOfTermsRequested;
 	srq.term = req->termListAndStartPoint;
+	if (!(attset = oid_getentbyoid(req->attributeSet)) ||
+	    attset->oclass != CLASS_RECSYN)
+	    srq.attributeset = VAL_NONE;
+	else
+	    srq.attributeset = attset->value;
 	srq.term_position = req->preferredPositionInResponse ?
 	    *req->preferredPositionInResponse : 1;
 	if (!(srs = bend_scan(assoc->backend, &srq, 0)))
