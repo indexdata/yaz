@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.22 2004-01-27 21:22:44 adam Exp $
+ * $Id: zoom-c.c,v 1.23 2004-02-11 13:37:17 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -94,7 +94,7 @@ static void set_dset_error (ZOOM_connection c, int error,
     xfree (c->addinfo);
     c->addinfo = 0;
     c->error = error;
-    if (c->diagset && strcmp(dset, c->diagset))
+    if (!c->diagset || strcmp(dset, c->diagset))
     {
         xfree(c->diagset);
         c->diagset = xstrdup(dset);
@@ -431,7 +431,10 @@ ZOOM_query_prefix(ZOOM_query s, const char *str)
     s->z_query->which = Z_Query_type_1;
     s->z_query->u.type_1 =  p_query_rpn(s->odr, PROTO_Z3950, str);
     if (!s->z_query->u.type_1)
+    {
+	s->z_query = 0;
 	return -1;
+    }
     return 0;
 }
 
@@ -932,7 +935,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.22 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.23 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1202,6 +1205,11 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
 
     /* prepare query for the search request */
     search_req->query = r->query->z_query;
+    if (!search_req->query)
+    {
+        set_ZOOM_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
+	return zoom_complete;
+    }
 
     search_req->databaseNames =
 	set_DatabaseNames (c, r->options, &search_req->num_databaseNames);
@@ -3234,6 +3242,8 @@ ZOOM_diag_str (int error)
 	return "Unsupported protocol";
     case ZOOM_ERROR_UNSUPPORTED_QUERY:
 	return "Unsupported query type";
+    case ZOOM_ERROR_INVALID_QUERY:
+	return "Invalid query";
     default:
 	return diagbib1_str (error);
     }

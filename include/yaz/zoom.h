@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.19 2003-11-19 19:07:26 adam Exp $
+ * $Id: zoom.h,v 1.20 2004-02-11 13:37:16 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -94,6 +94,7 @@ ZOOM_diag_str (int error);
 #define ZOOM_ERROR_TIMEOUT 10007
 #define ZOOM_ERROR_UNSUPPORTED_PROTOCOL 10008
 #define ZOOM_ERROR_UNSUPPORTED_QUERY 10009
+#define ZOOM_ERROR_INVALID_QUERY 10010
 
 ZOOM_API(int)
 ZOOM_connection_last_event(ZOOM_connection cs);
