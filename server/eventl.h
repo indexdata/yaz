@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.h,v $
- * Revision 1.7  1995-06-16 10:31:34  quinn
+ * Revision 1.8  1995-06-19 12:39:09  quinn
+ * Fixed bug in timeout code. Added BER dumper.
+ *
+ * Revision 1.7  1995/06/16  10:31:34  quinn
  * Added session timeout.
  *
  * Revision 1.6  1995/05/16  08:51:02  quinn
@@ -68,7 +71,7 @@ int force_event;
 #define iochan_setfun(i, d) ((i)->fun = d)
 #define iochan_setevent(i, e) ((i)->force_event = (e))
 #define iochan_getnext(i) ((i)->next)
-#define iochan_settimeout(i, t) ((i)->max_idle = (t))
+#define iochan_settimeout(i, t) ((i)->max_idle = (t), (i)->last_event = time(0))
 
 IOCHAN iochan_getchan(void);
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags);

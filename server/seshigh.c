@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.37  1995-06-16 13:16:14  quinn
+ * Revision 1.38  1995-06-19 12:39:11  quinn
+ * Fixed bug in timeout code. Added BER dumper.
+ *
+ * Revision 1.37  1995/06/16  13:16:14  quinn
  * Fixed Defaultdiagformat.
  *
  * Revision 1.36  1995/06/16  10:31:36  quinn
@@ -327,8 +330,10 @@ void ir_session(IOCHAN h, int event)
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
 	    if (!z_APDU(assoc->decode, &req->request, 0))
 	    {
-		logf(LOG_WARN, "ODR error: %s",
+		logf(LOG_LOG, "ODR error on incoming PDU: %s",
 		    odr_errlist[odr_geterror(assoc->decode)]);
+		logf(LOG_LOG, "PDU dump:");
+		odr_dumpBER(log_file(), assoc->input_buffer, res);
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.10  1995-06-16 10:31:33  quinn
+ * Revision 1.11  1995-06-19 12:39:09  quinn
+ * Fixed bug in timeout code. Added BER dumper.
+ *
+ * Revision 1.10  1995/06/16  10:31:33  quinn
  * Added session timeout.
  *
  * Revision 1.9  1995/06/05  10:53:31  quinn
@@ -83,18 +86,20 @@ int event_loop()
     	IOCHAN p, nextp;
 	fd_set in, out, except;
 	int res, max;
-	static struct timeval nullto = {0, 0}, to = {60*5, 0};
+	static struct timeval nullto = {0, 0}, to;
 	struct timeval *timeout;
 
 	FD_ZERO(&in);
 	FD_ZERO(&out);
 	FD_ZERO(&except);
 	timeout = &to; /* hang on select */
+	to.tv_sec = 5*60;
+	to.tv_usec = 0;
 	max = 0;
     	for (p = iochans; p; p = p->next)
     	{
 	    if (p->force_event)
-	    	timeout = &nullto;
+	    	timeout = &nullto;        /* polling select */
 	    if (p->flags & EVENT_INPUT)
 	    	FD_SET(p->fd, &in);
 	    if (p->flags & EVENT_OUTPUT)
