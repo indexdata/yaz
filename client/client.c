@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.110  2001-01-29 11:19:05  adam
+ * Revision 1.111  2001-01-30 15:52:48  ja7
+ * added command for setting packageName in ES packages!
+ * command is named packagename default is NULL for server suplyed package name
+ *
+ * Revision 1.110  2001/01/29 11:19:05  adam
  * Clients prints options in InitResponse.
  *
  * Revision 1.109  2001/01/22 10:41:47  adam
@@ -417,6 +421,7 @@ static NMEM session_mem = NULL;      /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
+char* esPackageName = 0;
 
 static char last_cmd[100] = "?";
 static FILE *marcdump = 0;
@@ -1512,7 +1517,7 @@ static int send_itemorder(const char *type, int itemno)
     ItemOrderRequest.oclass = CLASS_EXTSERV;
     ItemOrderRequest.value = VAL_ITEMORDER;
     req->packageType = odr_oiddup(out,oid_getoidbyent(&ItemOrderRequest));
-    req->packageName = "1.Extendedserveq";
+    req->packageName = esPackageName;
 
     req->taskSpecificParameters = create_ItemOrderExternal(type, itemno);
 
@@ -1539,7 +1544,7 @@ static int cmd_update(char *arg)
     update_oid.value = VAL_DBUPDATE;
     oid_ent_to_oid (&update_oid, oid);
     req->packageType = odr_oiddup(out,oid);
-    req->packageName = "1.Extendedserveq";
+    req->packageName = esPackageName;
 
     r = req->taskSpecificParameters = (Z_External *)
         odr_malloc (out, sizeof(*r));
@@ -2324,6 +2329,17 @@ int cmd_close(char *arg)
     return 2;
 }
 
+int cmd_packagename(char* arg) {
+    xfree (esPackageName);
+    esPackageName = NULL;
+    if (*arg)
+    {
+        esPackageName = (char *) xmalloc (strlen(arg)+1);
+        strcpy (esPackageName, arg);
+    }
+    return 1;
+};
+
 static void initialize(void)
 {
 #if CCL2RPN
@@ -2385,6 +2401,7 @@ static int client(int wait)
         {"refid", cmd_refid, "<id>"},
         {"itemorder", cmd_itemorder, "ill|item <itemno>"},
         {"update", cmd_update, "<item>"},
+	{"packagename", cmd_packagename, "<packagename>"},
 #ifdef ASN_COMPILED
         /* Server Admin Functions */
         {"adm-reindex", cmd_adm_reindex, "<database-name>"},
