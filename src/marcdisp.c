@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.16 2005-02-08 13:51:30 adam Exp $
+ * $Id: marcdisp.c,v 1.17 2005-02-25 09:37:53 adam Exp $
  */
 
 /**
@@ -246,10 +246,10 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         if (entry_p >= record_length)
             return -1;
     }
-    if (mt->debug && base_address != entry_p+1)
+    if (base_address != entry_p+1)
     {
 	if (produce_warnings)
-	    wrbuf_printf (wr,"  <!-- base address not at end of directory "
+	    wrbuf_printf (wr,"  <!-- Base address not at end of directory "
 			  "base=%d end=%d -->\n", base_address, entry_p+1);
     }
     base_address = entry_p+1;
@@ -277,8 +277,11 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	    i = data_offset + base_address;
 	    end_offset = i+data_length-1;
 	    
-	    while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS &&
-		   i < end_offset)
+	    if (data_length <= 0 || data_offset < 0 || end_offset >= record_length)
+		return -1;
+        
+	    while (i < end_offset &&
+		    buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
 		i++;
 	    sz1 = 1+i - (data_offset + base_address);
 	    if (mt->iconv_cd)
@@ -326,6 +329,15 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	entry_p += length_starting;
 	i = data_offset + base_address;
 	end_offset = i+data_length-1;
+
+	if (data_length <= 0 || data_offset < 0 || end_offset >= record_length)
+	{
+	    if (produce_warnings)
+	        wrbuf_printf (wr,"  <!-- Bad data-offset=%d or "
+				    "data-length=%d -->\n",
+			                  data_length, data_offset);
+	    break;
+	}
         
 	if (mt->debug)
 	{
@@ -428,7 +440,8 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         }
         if (identifier_flag)
         {
-            while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
+            while (i < end_offset &&
+		    buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
             {
                 int i0;
                 i++;
@@ -467,8 +480,9 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                     break;
                 }
                 i0 = i;
-                while (buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
-                       buf[i] != ISO2709_FS && i < end_offset)
+                while (i < end_offset &&
+			buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
+                        buf[i] != ISO2709_FS)
                     i++;
                 marc_cdata(mt, buf + i0, i - i0, wr);
 
@@ -485,7 +499,8 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         else
         {
             int i0 = i;
-            while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
+            while (i < end_offset && 
+	        buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
                 i++;
 	    marc_cdata(mt, buf + i0, i - i0, wr);
 	    if (mt->xml == YAZ_MARC_ISO2709)
