@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.8  1995-09-27 15:02:46  quinn
+ * Revision 1.9  1995-09-28 10:12:36  quinn
+ * Windows-support changes
+ *
+ * Revision 1.8  1995/09/27  15:02:46  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.7  1995/06/19  12:38:24  quinn
@@ -103,7 +106,7 @@ typedef COMSTACK (*CS_TYPE)(int blocking, int protocol);
 struct comstack
 {
     CS_TYPE type;
-    int errno;     /* current error code of this stack */
+    int cerrno;     /* current error code of this stack */
     char *stackerr;/* current lower-layer error string, or null if none */
     int iofile;    /* UNIX file descriptor for iochannel */
     int timeout;   /* how long to wait for trailing blocks (ignored for now) */
@@ -152,7 +155,7 @@ struct comstack
 #define cs_fileno(handle) ((handle)->iofile)
 #define cs_stackerr(handle) ((handle)->stackerr)
 #define cs_getstate(handle) ((handle)->getstate)
-#define cs_errno(handle) ((handle)->errno)
+#define cs_errno(handle) ((handle)->cerrno)
 #define cs_getproto(handle) ((handle)->protocol)
 
 const char MDF *cs_strerror(COMSTACK h);

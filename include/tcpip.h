@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.3  1995-09-27 15:02:53  quinn
+ * Revision 1.4  1995-09-28 10:12:36  quinn
+ * Windows-support changes
+ *
+ * Revision 1.3  1995/09/27  15:02:53  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.2  1995/05/16  08:50:39  quinn
@@ -50,10 +53,14 @@
 
 #include <yconfig.h>
 #include <sys/types.h>
+#ifdef WINDOWS
+#include <winsock.h>
+#else
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 
 struct sockaddr_in MDF *tcpip_strtoaddr(const char *str);
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.3  1995-09-27 15:02:45  quinn
+ * Revision 1.4  1995-09-28 10:12:26  quinn
+ * Windows-support changes
+ *
+ * Revision 1.3  1995/09/27  15:02:45  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.2  1995/06/15  12:30:06  quinn
@@ -88,7 +91,10 @@
 
 #include <comstack.h>
 #include <tcpip.h>
+
+#ifndef WINDOWS
 #include <sys/time.h>
+#endif
 
 int tcpip_close(COMSTACK h);
 int tcpip_put(COMSTACK h, char *buf, int size);
@@ -108,6 +114,8 @@ int completeBER(unsigned char *buf, int len);
 #define TRC(X)
 #endif
 
+static int initialized = 0;
+
 typedef struct tcpip_state
 {
     char *altbuf; /* alternate buffer for surplus data */
@@ -123,17 +131,38 @@ COMSTACK MDF tcpip_type(int blocking, int protocol)
     COMSTACK p;
     struct protoent *proto;
     tcpip_state *state;
-    int s;
+    int s, tru = 1;
 
+    if (!initialized)
+    {
+#ifdef WINDOWS
+	WORD requested;
+	WSADATA wd;
+
+	requested = MAKEWORD(1, 1);
+	if (WSAStartup(requested, &wd))
+	    return 0;
+#endif
+	initialized = 1;
+    }
+
+#ifndef WINDOWS
     if (!(proto = getprotobyname("tcp")))
     	return 0;
     if ((s = socket(AF_INET, SOCK_STREAM, proto->p_proto)) < 0)
+#else
+    if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+#endif
     	return 0;
     if (!(p = malloc(sizeof(struct comstack))))
     	return 0;
     if (!(state = p->private = malloc(sizeof(tcpip_state))))
     	return 0;
+#ifdef WINDOWS
+    if (!(p->blocking = blocking) && ioctlsocket(s, FIONBIO, &tru) < 0)
+#else
     if (!(p->blocking = blocking) && fcntl(s, F_SETFL, O_NONBLOCK) < 0)
+#endif
     	return 0;
 
     p->iofile = s;
@@ -152,7 +181,7 @@ COMSTACK MDF tcpip_type(int blocking, int protocol)
 
     p->state = CS_UNBND;
     p->event = CS_NONE;
-    p->errno = 0;
+    p->cerrno = 0;
     p->stackerr = 0;
 
     state->altbuf = 0;
@@ -201,8 +230,9 @@ int tcpip_more(COMSTACK h)
 }
 
 /*
- * connect(2) will block - nothing we can do short of doing weird things
- * like spawning subprocesses or threading or some weird junk like that.
+ * connect(2) will block (sometimes) - nothing we can do short of doing
+ * weird things like spawning subprocesses or threading or some weird junk
+ * like that.
  */
 int tcpip_connect(COMSTACK h, void *address)
 {
@@ -211,7 +241,11 @@ int tcpip_connect(COMSTACK h, void *address)
     TRC(fprintf(stderr, "tcpip_connect\n"));
     if (connect(h->iofile, (struct sockaddr *) add, sizeof(*add)) < 0)
     {
+#ifdef WINDOWS
+	if (errno == WSAEWOULDBLOCK)
+#else
     	if (errno == EINPROGRESS)
+#endif
 	    return 1;
     	return -1;
     }
@@ -236,17 +270,17 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
     TRC(fprintf(stderr, "tcpip_bind\n"));
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) < 0)
     {
-    	h->errno = CSYSERR;
+    	h->cerrno = CSYSERR;
 	return -1;
     }
     if (bind(h->iofile, addr, sizeof(struct sockaddr_in)) < 0)
     {
-    	h->errno = CSYSERR;
+    	h->cerrno = CSYSERR;
 	return -1;
     }
     if (mode == CS_SERVER && listen(h->iofile, 3) < 0)
     {
-	h->errno = CSYSERR;
+	h->cerrno = CSYSERR;
 	return -1;
     }
     h->state = CS_IDLE;
@@ -261,15 +295,20 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen)
     TRC(fprintf(stderr, "tcpip_listen\n"));
     if (h->state != CS_IDLE)
     {
-    	h->errno = CSOUTSTATE;
+    	h->cerrno = CSOUTSTATE;
 	return -1;
     }
     if ((h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len)) < 0)
     {
+#ifdef WINDOWS
+	if (errno == WSAEWOULDBLOCK)
+#else
     	if (errno == EWOULDBLOCK)
-	    h->errno = CSNODATA;
+#endif
+
+	    h->cerrno = CSNODATA;
 	else
-	    h->errno = CSYSERR;
+	    h->cerrno = CSYSERR;
 	return -1;
     }
     if (addrlen && *addrlen > sizeof(struct sockaddr_in))
@@ -288,22 +327,26 @@ COMSTACK tcpip_accept(COMSTACK h)
     TRC(fprintf(stderr, "tcpip_accept\n"));
     if (h->state != CS_INCON)
     {
-    	h->errno = CSOUTSTATE;
+    	h->cerrno = CSOUTSTATE;
 	return 0;
     }
     if (!(new = malloc(sizeof(*new))))
     {
-    	h->errno = CSYSERR;
+    	h->cerrno = CSYSERR;
 	return 0;
     }
     memcpy(new, h, sizeof(*h));
     new->iofile = h->newfd;
     if (!(state = new->private = malloc(sizeof(tcpip_state))))
     {
-    	h->errno = CSYSERR;
+    	h->cerrno = CSYSERR;
 	return 0;
     }
+#ifdef WINDOWS
+    if (!new->blocking && ioctlsocket(s, FIONBIO, &tru) < 0)
+#else
     if (!new->blocking && fcntl(new->iofile, F_SETFL, O_NONBLOCK) < 0)
+#endif
     	return 0;
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
@@ -350,8 +393,12 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 	else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
 	    if (!(*buf = realloc(*buf, *bufsize *= 2)))
 	    	return -1;
-	if ((res = read(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK)) < 0)
+	if ((res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0)) < 0)
+#ifdef WINDOWS
+	    if (errno == WSAEWOULDBLOCK)
+#else
 	    if (errno == EWOULDBLOCK)
+#endif
 	    	break;
 	    else
 		return -1;
@@ -403,20 +450,24 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     }
     else if (state->towrite != size)
     {
-    	h->errno = CSWRONGBUF;
+    	h->cerrno = CSWRONGBUF;
 	return -1;
     }
     while (state->towrite > state->written)
     {
-    	if ((res = write(h->iofile, buf + state->written, size -
-	    state->written)) < 0)
+    	if ((res = send(h->iofile, buf + state->written, size -
+	    state->written, 0)) < 0)
 	{
+#ifdef WINDOWS
+	    if (errno == WSAEWOULDBLOCK)
+#else
 	    if (errno == EAGAIN)
+#endif
 	    {
 	    	TRC(fprintf(stderr, "  Flow control stop\n"));
 	    	return 1;
 	    }
-	    h->errno = CSYSERR;
+	    h->cerrno = CSYSERR;
 	    return -1;
 	}
 	state->written += res;

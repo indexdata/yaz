@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.8  1995-09-27 15:02:55  quinn
+ * Revision 1.9  1995-09-28 10:12:39  quinn
+ * Windows-support changes
+ *
+ * Revision 1.8  1995/09/27  15:02:55  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.7  1995/05/16  08:50:44  quinn
@@ -33,7 +36,11 @@
 
 #include <odr.h>
 #include <sys/types.h>
+#ifdef WINDOWS
+#include <winsock.h>
+#else
 #include <netinet/in.h>  /* for htons... */
+#endif
 #include <string.h>
 
 static int ber_encinteger(ODR o, int val);
