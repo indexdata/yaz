@@ -43,7 +43,7 @@ tag 119		address						structured
 #
 tag 201		userFee						bool
 tag 202		available					bool
-tag 203		titleString					bool
+tag 203		titleString					string
 tag 205		associatedDbs					structured
 tag 206		subDbs						structured
 tag 207		disclaimers					string

@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.30  1997-10-31 12:20:07  adam
+ * Revision 1.31  1997-11-18 09:51:08  adam
+ * Removed element num_children from data1_node. Minor changes in
+ * data1 to Explain.
+ *
+ * Revision 1.30  1997/10/31 12:20:07  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -385,18 +389,12 @@ typedef struct data1_node
 	    data1_vartype *type;
 	    char *value;
 	} variant;
-
-	struct
-	{
-	    char *ind;
-	} indicator;
     } u;
 
     void (*destroy)(struct data1_node *n);
 #define DATA1_LOCALDATA 40
     char lbuf[DATA1_LOCALDATA]; /* small buffer for local data */
     int line;
-    int num_children;
     struct data1_node *next;
     struct data1_node *child;
     struct data1_node *last_child;

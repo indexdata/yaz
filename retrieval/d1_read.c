@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.17  1997-11-05 09:20:51  adam
+ * Revision 1.18  1997-11-18 09:51:09  adam
+ * Removed element num_children from data1_node. Minor changes in
+ * data1 to Explain.
+ *
+ * Revision 1.17  1997/11/05 09:20:51  adam
  * Minor change.
  *
  * Revision 1.16  1997/09/17 12:10:37  adam
@@ -128,7 +132,6 @@ data1_node *data1_mk_node (data1_handle dh, NMEM m)
 
     r = nmem_malloc(m, sizeof(*r));
     r->next = r->child = r->last_child = r->parent = 0;
-    r->num_children = 0;
     r->destroy = 0;
     return r;
 }
@@ -171,7 +174,6 @@ data1_node *data1_insert_taggeddata(data1_handle dh, data1_node *root,
 							   0, tagname)))
 	return 0;
     tagn->child = datn = data1_mk_node (dh, m);
-    tagn->num_children = 1;
     datn->parent = tagn;
     datn->root = root;
     datn->which = DATA1N_data;
@@ -179,7 +181,6 @@ data1_node *data1_insert_taggeddata(data1_handle dh, data1_node *root,
     tagn->next = at->child;
     tagn->parent = at;
     at->child = tagn;
-    at->num_children++;
     return datn;
 }
 
@@ -366,8 +367,6 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 	}
 
 	res->parent = parent;
-	res->num_children = 0;
-
 	pp = &res->child;
 	/*
 	 * Read child nodes.
@@ -375,7 +374,6 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 	while ((*pp = data1_read_node(dh, buf, res, line, absyn, m)))
 	{
 	    res->last_child = *pp;
-	    res->num_children++;
 	    pp = &(*pp)->next;
 	}
     }

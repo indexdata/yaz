@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.10  1997-09-17 12:10:36  adam
+ * Revision 1.11  1997-11-18 09:51:09  adam
+ * Removed element num_children from data1_node. Minor changes in
+ * data1 to Explain.
+ *
+ * Revision 1.10  1997/09/17 12:10:36  adam
  * YAZ version 1.4.
  *
  * Revision 1.9  1997/05/14 06:54:03  adam
@@ -157,7 +161,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 	res->which = Z_ElementData_elementNotThere;
 	res->u.elementNotThere = ODR_NULLVAL;
     }
-    else if (n->which == DATA1N_data && (leaf || n->parent->num_children == 1))
+    else if (n->which == DATA1N_data && (leaf || n->next == NULL))
     {
 	char str[512];
 	int toget;
@@ -268,7 +272,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
     res->appliedVariant = 0;
     res->metaData = 0;
     if (n->which == DATA1N_variant || (data && data->which ==
-	DATA1N_variant && data->parent->num_children == 1))
+	DATA1N_variant && data->next == NULL))
     {
 	int nvars = 0;
 
@@ -302,8 +306,12 @@ Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
 {
     Z_GenericRecord *res = odr_malloc(o, sizeof(*res));
     data1_node *c;
+    int num_children = 0;
+    
+    for (c = n->child; c; c = c->next)
+	num_children++;
 
-    res->elements = odr_malloc(o, sizeof(Z_TaggedElement *) * n->num_children);
+    res->elements = odr_malloc(o, sizeof(Z_TaggedElement *) * num_children);
     res->num_elements = 0;
     for (c = n->child; c; c = c->next)
     {

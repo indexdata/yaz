@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.11  1997-09-17 12:10:36  adam
+ * Revision 1.12  1997-11-18 09:51:09  adam
+ * Removed element num_children from data1_node. Minor changes in
+ * data1 to Explain.
+ *
+ * Revision 1.11  1997/09/17 12:10:36  adam
  * YAZ version 1.4.
  *
  * Revision 1.10  1997/09/05 09:50:56  adam
@@ -286,7 +290,6 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 			    if (pn->last_child)
 				pn->last_child->next = cur;
 			    pn->last_child = cur;
-			    pn->num_children++;
 			}
 			
 			if (mt->next)
@@ -295,10 +298,8 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 			{
 			    cur->child = c->child;
 			    cur->last_child = c->last_child;
-			    cur->num_children = c->num_children;
 			    c->child = 0;
 			    c->last_child = 0;
-			    c->num_children = 0;
 			}
 		    }
 		    break;

@@ -1,8 +1,11 @@
+Possible compatibility problems with earlier versions marked with '*'.
+
+* Removed member num_children from data1_node (in data1.h).
+
 Made NT service interface part of the server library. The
 function statserv_main uses the NT service when required and
 calls the statserv_start / statserv_close routines.
 
-Possible compatibility problems with earlier versions marked with '*'.
 
 Routine zget_SearchRequest fills resultSetName member with "default"
 instead of "Default".
