@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.10  1995-11-28 09:30:44  quinn
+ * Revision 1.11  1995-12-13 16:03:35  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.10  1995/11/28  09:30:44  quinn
  * Work.
  *
  * Revision 1.9  1995/11/13  09:27:53  quinn
@@ -105,6 +108,9 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_GRS0,      {5,104,-1},  "GRS-0"       },
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_GRS1,      {5,105,-1},  "GRS-1"       },
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_EXTENDED,  {5,106,-1},  "Extended"    },
+#if 0
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_ID_SGML,   {5,1000,81,1,-1},"ID-SGML" },
+#endif
     {PROTO_Z3950,   CLASS_RESFORM, VAL_RESOURCE1, {7,1,-1},    "Resource-1"  },
     {PROTO_Z3950,   CLASS_RESFORM, VAL_RESOURCE2, {7,2,-1},    "Resource-2"  },
     {PROTO_Z3950,   CLASS_ACCFORM, VAL_PROMPT1,   {8,1,-1},    "Prompt-1"    },
