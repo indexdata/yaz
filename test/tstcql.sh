@@ -1,4 +1,5 @@
 #!/bin/sh
+srcdir=${srcdir:-.}
 oIFS="$IFS"
 IFS='
 '
@@ -6,7 +7,9 @@ secno=0
 testno=0
 comment=0
 ecode=0
-for f in `cat cqlsample`; do
+test -f ${srcdir}/cqlsample || exit 1
+test -d cql || mkdir cql
+for f in `cat ${srcdir}/cqlsample`; do
 	if echo $f | grep '^#' >/dev/null; then
 		comment=1
 	else
@@ -16,8 +19,8 @@ for f in `cat cqlsample`; do
 		fi
 		comment=0
 		testno=`expr $testno + 1`
-		OUT1=cql/$secno.$testno.out
-		ERR1=cql/$secno.$testno.err
+		OUT1=${srcdir}/cql/$secno.$testno.out
+		ERR1=${srcdir}/cql/$secno.$testno.err
 		OUT2=cql/$secno.$testno.out.tmp
 		ERR2=cql/$secno.$testno.err.tmp
 		DIFF=cql/$secno.$testno.diff
