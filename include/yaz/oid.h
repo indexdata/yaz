@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.9 2002-01-29 13:47:33 adam Exp $
+ * $Id: oid.h,v 1.10 2002-02-11 23:25:26 adam Exp $
  */
 
 #ifndef OID_H
@@ -61,7 +61,8 @@ typedef enum oid_class
     CLASS_VARSET,
     CLASS_SCHEMA,
     CLASS_TAGSET,
-    CLASS_GENERAL
+    CLASS_GENERAL,
+    CLASS_NEGOT
 } oid_class;
 
 typedef enum oid_value
@@ -195,7 +196,15 @@ typedef enum oid_value
     VAL_ADMINSERVICE,
     VAL_HOLDINGS,
     VAL_HUNMARC,
-/* add new types here... */
+    VAL_CHARNEG3,
+    VAL_LIB1,
+
+    VAL_VIRT,
+    VAL_UCS2,
+    VAL_UCS4,
+    VAL_UTF16,
+    VAL_UTF8,
+/* 110 */
 
 /* VAL_DYNAMIC must have highest value */
     VAL_DYNAMIC,

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.52 2002-01-29 13:47:33 adam Exp $
+ * $Id: oid.c,v 1.53 2002-02-11 23:25:26 adam Exp $
  */
 
 /*
@@ -283,6 +283,16 @@ static oident standard_oids[] =
      "thesaurus-tagset"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_EXPLAIN,      {14,1000,81,2,-1},
      "Explain-tagset"},
+    {PROTO_Z3950,   CLASS_NEGOT,   VAL_CHARNEG3,     {15,3,-1},
+     "CharSetandLanguageNegotiation-3"},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS2,    {1,0,10646,1,0,2,-1},
+     "UCS-2"},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS4,    {1,0,10646,1,0,4,-1},
+     "UCS-4"},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_UTF16,   {1,0,10646,1,0,5,-1},
+     "UTF-16"},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_UTF8,    {1,0,10646,1,0,8,-1},
+     "UTF-8"},
     {PROTO_NOP,     CLASS_NOP,     VAL_NOP,       {-1},        0          }
 };
 

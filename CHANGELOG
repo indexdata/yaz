@@ -1,5 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.8.6 2002/MM/DD
+
+Added patch by Rustam T. Usmanov that implements Z39.50 duplicate
+detection service (Z39.50-1995 Amendment 2) and Language Negotiation (3).
+See:
+ http://lcweb.loc.gov/z3950/agency/amend/am2.html
+ http://lcweb.loc.gov/z3950/agency/defns/charneg-3.html
+
 --- 1.8.5 2002/02/03
 
 New YAZ client features: Command completion and new commands:

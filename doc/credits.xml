@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.5 2002-01-25 13:38:00 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.6 2002-02-11 23:25:26 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
    <para>
    This appendix lists individuals that have contributed in the development
@@ -61,6 +61,9 @@
     </para></listitem>
    <listitem><para>
      Mike Taylor
+    </para></listitem>
+   <listitem><para>
+     Rustam T. Usmanov
     </para></listitem>
    <listitem><para>
      Charles Woodfield

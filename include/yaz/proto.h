@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.h,v $
- * Revision 1.1  2001-10-23 21:00:19  adam
+ * Revision 1.2  2002-02-11 23:25:26  adam
+ * Rustam's patch
+ *
+ * Revision 1.1  2001/10/23 21:00:19  adam
  * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
  *
  * Revision 1.7  2001/09/24 21:51:55  adam
@@ -75,6 +78,7 @@
 #include <yaz/z-date.h>
 #include <yaz/z-univ.h>
 #include <yaz/zes-update0.h>
+#include <yaz/z-charneg.h>
 
 YAZ_BEGIN_CDECL
 

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.2 2001-11-13 23:00:43 adam Exp $
+ * $Id: prt-ext.c,v 1.3 2002-02-11 23:25:27 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -31,6 +31,12 @@ static Z_ext_typeent type_table[] =
     {VAL_DATETIME, Z_External_dateTime, (Odr_fun)z_DateTime},
     {VAL_UNIVERSE_REPORT, Z_External_universeReport,(Odr_fun)z_UniverseReport},
     {VAL_ADMINSERVICE, Z_External_ESAdmin, (Odr_fun)z_Admin},
+    {VAL_USERINFO1, Z_External_userInfo1, (Odr_fun) z_OtherInformation},
+    {VAL_CHARNEG3, Z_External_charSetandLanguageNegotiation, (Odr_fun)
+                  z_CharSetandLanguageNegotiation},
+    {VAL_PROMPT1, Z_External_acfPrompt1, (Odr_fun) z_PromptObject1},
+    {VAL_DES1, Z_External_acfDes1, (Odr_fun) z_DES_RN_Object},
+    {VAL_KRB1, Z_External_acfKrb1, (Odr_fun) z_KRBObject},
     {VAL_NONE, 0, 0}
 };
 
@@ -93,6 +99,16 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	 (Odr_fun)z_Admin, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update0,
 	 (Odr_fun)z_IU0Update, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_userInfo1,
+         (Odr_fun)z_OtherInformation, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_charSetandLanguageNegotiation,
+         (Odr_fun)z_CharSetandLanguageNegotiation, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_acfPrompt1,
+         (Odr_fun)z_PromptObject1, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_acfDes1,
+         (Odr_fun)z_DES_RN_Object, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_acfKrb1,
+         (Odr_fun)z_KRBObject, 0},
 	{-1, -1, -1, -1, 0, 0}
     };
     

@@ -1,28 +1,9 @@
 /*
- * Copyright (c) 1999-2001, Index Data
+ * Copyright (c) 1999-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: otherinfo.c,v $
- * Revision 1.5  2001-09-24 21:51:56  adam
- * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
- * and yaz_z3950oid_to_str.
- *
- * Revision 1.4  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.3  1999/11/10 09:06:40  adam
- * Fixed yaz_oi_update so that it ignores NULL pointer.
- *
- * Revision 1.2  1999/09/13 12:51:35  adam
- * Fixed bug in yaz_oi_update and added delete option.
- *
- * Revision 1.1  1999/06/08 10:10:16  adam
- * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
- *
- * Revision 1.1  1999/04/26 07:25:25  adam
- * Implemented OtherInfo utility.
- *
+ * $Id: otherinfo.c,v 1.6 2002-02-11 23:25:27 adam Exp $
  */
 
 #include <stdio.h>
@@ -75,6 +56,12 @@ void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 	break;
     case Z_APDU_deleteResultSetResponse:
 	*oip = &apdu->u.deleteResultSetResponse->otherInfo;
+	break;
+    case Z_APDU_duplicateDetectionRequest:
+	*oip = &apdu->u.duplicateDetectionRequest->otherInfo;
+	break;
+    case Z_APDU_duplicateDetectionResponse:
+	*oip = &apdu->u.duplicateDetectionResponse->otherInfo;
 	break;
     default:
 	*oip = 0;

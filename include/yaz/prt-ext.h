@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -79,6 +79,11 @@ struct Z_External
 #define Z_External_universeReport 18
 #define Z_External_ESAdmin 19
 #define Z_External_update0 20
+#define Z_External_userInfo1 21
+#define Z_External_charSetandLanguageNegotiation 22
+#define Z_External_acfPrompt1 23
+#define Z_External_acfDes1 24
+#define Z_External_acfKrb1 25
     union
     {
 	/* Generic types */
@@ -105,6 +110,11 @@ struct Z_External
         Z_UniverseReport *universeReport;
         Z_Admin *adminService;
 	Z_IU0Update *update0;
+        Z_OtherInformation *userInfo1;
+        Z_CharSetandLanguageNegotiation *charNeg3;
+        Z_PromptObject1 *acfPrompt1;
+        Z_DES_RN_Object *acfDes1;
+        Z_KRBObject *acfKrb1;
     } u;
 };
 

@@ -22,7 +22,7 @@
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml,v 1.17 2002-01-11 20:16:47 adam Exp $ -->
+<!-- $Id: yaz.xml,v 1.18 2002-02-11 23:25:26 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
@@ -41,7 +41,7 @@
   </copyright>
   <abstract><simpara>
     This document is the programmer's guide and reference to the &yaz;
-    package version 1.8.5. &yaz; is a compact toolkit that provides
+    package version 1.8.6. &yaz; is a compact toolkit that provides
     access to the Z39.50 protocol, as well as a set of higher-level
     tools for implementing the server and client roles, respectively.
     The documentation can be used on its own, or as a reference when

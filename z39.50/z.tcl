@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.5 2001-03-07 13:24:40 adam Exp $
+# $Id: z.tcl,v 1.6 2002-02-11 23:25:27 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -331,6 +331,9 @@ set map($m,TaskPackage) ESAdminTaskPackage
 set map($m,OriginPartToKeep) ESAdminOriginPartToKeep
 set map($m,OriginPartNotToKeep) ESAdminOriginPartNotToKeep
 set map($m,TargetPart) ESAdminTargetPart
+# ----
+set m NegotiationRecordDefinition-charSetandLanguageNegotiation-3
+set filename($m) z-charneg
 
 # ----------------------------------------------------------
 # "Constructed" types defined by means of C-types are declared here.

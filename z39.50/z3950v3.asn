@@ -31,7 +31,9 @@ PDU ::= CHOICE{
  segmentRequest      [45] IMPLICIT Segment,
  extendedServicesRequest    [46] IMPLICIT ExtendedServicesRequest,
  extendedServicesResponse    [47] IMPLICIT ExtendedServicesResponse,
- close          [48] IMPLICIT Close}
+ close          [48] IMPLICIT Close,
+ duplicateDetectionRequest      [49] IMPLICIT DuplicateDetectionRequest,
+ duplicateDetectionResponse     [50] IMPLICIT DuplicateDetectionResponse}
 
 
 -- Initialize APDUs
@@ -104,7 +106,12 @@ IdAuthentication ::=
       level-1Segmentation    (11),
       level-2Segmentation    (12),
       concurrentOperations  (13),
-      namedResultSets    (14)}
+      namedResultSets    (14),
+      encapsulation    (15),
+      resultCount    (16),
+      negotiationModel    (17),
+      duplicateDetection    (18),
+      queryType104    (19)}
 -- end auxiliary definitions for Init PDUs
 
 
@@ -667,6 +674,66 @@ Close ::= SEQUENCE{
             peerAbort      (8),
             unspecified      (9)}
 
+--Duplicate detection APDUs
+DuplicateDetectionRequest ::= SEQUENCE {
+  referenceId                      ReferenceId  OPTIONAL,
+  inputResultSetIds            [3] IMPLICIT SEQUENCE OF InternationalString,
+  outputResultSetName          [4] IMPLICIT InternationalString,
+  applicablePortionOfRecord    [5] IMPLICIT EXTERNAL OPTIONAL,
+  duplicateDetectionCriteria   [6] IMPLICIT SEQUENCE OF
+                                   DuplicateDetectionCriterion OPTIONAL,
+  clustering                   [7] IMPLICIT BOOLEAN OPTIONAL,
+                                        -- 'true' means "clustered".
+                                        -- This parameter may be omitted
+                                        -- only if retentionCriteria CHOICE is
+                                        -- 'numberOfEntries' and its value is 1.
+  retentionCriteria            [8] IMPLICIT SEQUENCE OF
+                                            RetentionCriterion,
+  sortCriteria                 [9] IMPLICIT SEQUENCE OF
+                                            SortCriterion OPTIONAL,
+  otherInfo                        OtherInformation OPTIONAL}
+
+DuplicateDetectionCriterion ::= CHOICE{
+                           levelOfMatch         [1] IMPLICIT INTEGER,
+                                -- a percentage; 1-100.
+                           caseSensitive        [2] IMPLICIT NULL,
+                           punctuationSensitive [3] IMPLICIT NULL,
+                           regularExpression    [4] IMPLICIT EXTERNAL,
+                           rsDuplicates         [5] IMPLICIT NULL
+                 -- values 6-100 reserved for future assignment.
+                                                       }
+
+RetentionCriterion ::= CHOICE{
+                          numberOfEntries       [1] IMPLICIT INTEGER, 
+                                                        --  greater than 0
+                          percentOfEntries      [2] IMPLICIT INTEGER,
+                                                        -- 1-100,
+                          duplicatesOnly        [3] IMPLICIT NULL,
+                                                 -- should not be chosen 
+                                                 -- if clustering is 'true'
+                          discardRsDuplicates   [4] IMPLICIT NULL
+                 -- values 5-100 reserved for future assignment.
+                                                       }
+
+SortCriterion ::= CHOICE{
+                         mostComprehensive      [1] IMPLICIT NULL,
+                         leastConmprehensive    [2] IMPLICIT NULL,
+                         mostRecent             [3] IMPLICIT NULL,
+                         oldest                 [4] IMPLICIT NULL,
+                         leastCost              [5] IMPLICIT NULL,
+                         preferredDatabases     [6] IMPLICIT
+                                     SEQUENCE OF InternationalString
+                 -- values 7-100 reserved for future assignment.
+}
+
+DuplicateDetectionResponse ::= SEQUENCE {
+  referenceId                          ReferenceId  OPTIONAL,
+  status                       [3]     IMPLICIT INTEGER{
+                                         success               (0),
+                                         failure               (1)},
+  resultSetCount               [4]     IMPLICIT INTEGER OPTIONAL,
+  diagnostics                  [5]     IMPLICIT SEQUENCE OF DiagRec OPTIONAL,
+  otherInfo                           OtherInformation OPTIONAL}
 
 -- Global auxiliary definitions
   ReferenceId       ::=      [2]  IMPLICIT OCTET STRING

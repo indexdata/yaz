@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.32 2002-01-30 22:02:03 adam Exp $
+# $Id: makefile,v 1.33 2002-02-11 23:25:26 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -406,6 +406,10 @@ ESUPDATE_C_FILES = $(Z3950_C_DIR)\zes-update.c
 ESADMIN_H_FILES = $(INCLDIR)\yaz\zes-admin.h
 ESADMIN_C_FILES = $(Z3950_C_DIR)\zes-admin.c
 
+# Files generated from esadmin.asn
+CHARNEG_H_FILES = $(INCLDIR)\yaz\z-charneg.h
+CHARNEG_C_FILES = $(Z3950_C_DIR)\z-charneg.c
+
 # Files created from z3950v3.asn
 Z3950V3_H_FILES= \
    $(INCLDIR)\yaz\z-accdes1.h \
@@ -457,20 +461,23 @@ ESADMIN_FILES = $(ESADMIN_H_FILES) $(ESADMIN_C_FILES)
 Z3950V3_FILES= $(Z3950V3_C_FILES) $(Z3950V3_H_FILES)
 ILL_CORE_FILES= $(ILL_CORE_C_FILES) $(ILL_CORE_H_FILES)
 ITEM_REQ_FILES= $(ITEM_REQ_C_FILES) $(ITEM_REQ_H_FILES)
+CHARNEG_FILES = $(CHARNEG_C_FILES) $(CHARNEG_H_FILES)
 
 GENERATED_C_FILES= \
    $(Z3950V3_C_FILES)  \
    $(ESUPDATE_C_FILES) \
    $(UNIVRES_C_FILES)  \
    $(DATETIME_C_FILES) \
-   $(ESADMIN_C_FILES)
+   $(ESADMIN_C_FILES) \
+   $(CHARNEG_C_FILES)
 
 GENERATED_H_FILES= \
    $(Z3950V3_H_FILES)  \
    $(ESUPDATE_H_FILES) \
    $(UNIVRES_H_FILES)  \
    $(DATETIME_H_FILES) \
-   $(ESADMIN_H_FILES)
+   $(ESADMIN_H_FILES) \
+   $(CHARNEG_H_FILES)
 
 generated_files: \
 	$(GENERATED_H_FILES) \
@@ -562,6 +569,11 @@ $(ESUPDATE_FILES): $(Z3950DIR)\esupdate.asn
 $(ESADMIN_FILES): $(Z3950DIR)\esadmin.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) -d z.tcl esadmin.asn
+	@cd $(WINDIR)
+
+$(CHARNEG_FILES): $(Z3950DIR)\charneg-3.asn
+	@cd $(Z3950DIR)
+	$(TCL) $(TCLOPT) -d z.tcl charneg-3.asn
 	@cd $(WINDIR)
 
 $(ILL_CORE_FILES): $(ILLDIR)\ill9702.asn
@@ -820,7 +832,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.32  2002-01-30 22:02:03  adam
+# Revision 1.33  2002-02-11 23:25:26  adam
+# Rustam's patch
+#
+# Revision 1.32  2002/01/30 22:02:03  adam
 # WIN32 updates for YAZ client.
 #
 # Revision 1.31  2001/12/30 22:21:11  adam
