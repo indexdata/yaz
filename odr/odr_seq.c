@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.12  1995-05-18 13:06:32  quinn
+ * Revision 1.13  1995-05-22 14:56:57  quinn
+ * Fixed problem in decoding empty sequence.
+ *
+ * Revision 1.12  1995/05/18  13:06:32  quinn
  * Smallish.
  *
  * Revision 1.11  1995/05/17  08:41:54  quinn
@@ -92,7 +95,7 @@ int odr_sequence_more(ODR o)
 int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 {
     char ***pp = (char***) p;  /* for dereferencing */
-    char **tmp;
+    char **tmp = 0;
     int size = 0, i;
 
     if (!odr_sequence_begin(o, p, 0))
@@ -102,6 +105,7 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
     {
     	case ODR_DECODE:
 	    *num = 0;
+	    *pp = ODR_NULLVAL;
 	    while (odr_sequence_more(o))
 	    {
 		/* outgrown array? */
