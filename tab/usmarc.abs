@@ -1,0 +1,7 @@
+name usmarc
+reference USmarc
+
+marc usmarc.mar
+
+esetname B usmarc-b.est
+esetname F @

@@ -1,0 +1,57 @@
+#
+# Definition of the variant set Variant-1.
+# Variant triple syntax is '<VAR class type value>'. Eg.
+# <var body iana "application/postscript"> or <var lang lang "eng">.
+#
+
+name variant-1
+reference Variant-1
+
+class 1 variantId
+
+  type	1	variantId		octetstring
+
+class 2 body
+
+  type	1	iana			string
+  type	2	z39.50			string
+  type	3	other			string
+
+class 3 format
+
+  type	1	characters-per-line	int
+  type	2	line-length		int
+
+  # More types here......
+
+class 4 lang
+
+  type	1	lang			string
+  type	2	charset			int
+  type	3	charset-id		oid
+  type	4	encoding-id		oid
+  type	5	private-string		string
+
+class 5 piece
+
+  type	1	fragment-wanted		int
+  type	2	fragment-returned	int
+  type	3	start			intunit
+  type	4	end			intunit
+  type	5	howmuch			intunit
+  type	6	step			intunit
+  type	7	targettoken		octetstring
+
+class 6 metadata-requested
+
+  type	1	cost			int
+
+  # More to follow....
+
+class 7	metadata-returned
+
+  type	1	cost			intunit
+
+  # More...
+
+# More classes, too...
