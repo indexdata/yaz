@@ -4,7 +4,7 @@ Add autoconf m4 macro YAZ_DOC for YAZ documentation setup (docbook).
 
 SSL comstack now uses yaz.pem certificate file on server side
 by default. Certificate filename can be configured by calling
-comstack function cs_set_ssl_cert before cs_bind is used.
+comstack function cs_set_ssl_certificate_file before cs_bind is used.
 
 Fix bug regarding multiple calls to ZOOM_connection_connect.
 

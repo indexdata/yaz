@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.7 2004-04-30 19:10:35 adam Exp $
+ * $Id: statserv.c,v 1.8 2004-05-10 10:47:04 adam Exp $
  */
 
 #include <stdio.h>
@@ -659,7 +659,7 @@ static int add_listener(char *where, int what)
 	return -1;
     }
     if (*control_block.cert_fname)
-	cs_set_ssl_certf(l, control_block.cert_fname);
+	cs_set_ssl_certificate_file(l, control_block.cert_fname);
 
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.7 2004-05-03 09:00:50 adam Exp $
+ * $Id: tcpip.c,v 1.8 2004-05-10 10:47:04 adam Exp $
  */
 
 #include <stdio.h>
@@ -1131,7 +1131,7 @@ void *cs_get_ssl(COMSTACK cs)
     return sp->ssl;  
 }
 
-int cs_set_ssl_certf(COMSTACK cs, const char *fname)
+int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
 {
     struct tcpip_state *sp;
     if (!cs || cs->type != ssl_type)
