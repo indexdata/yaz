@@ -4,10 +4,17 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * NT server based on threads by
- *   Chas Woodfield, Fretwell Downing Datasystem.
+ *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.46  1998-01-30 15:24:57  adam
+ * Revision 1.47  1998-02-10 10:28:57  adam
+ * Added app_name, service_dependencies, service_display_name and
+ * options_func. options_func allows us to specify a different function
+ * to interogate the command line arguments. The other members allow us
+ * to pass the full service details accross to the service manager (CW).
+ *
+ *
+ * Revision 1.46  1998/01/30 15:24:57  adam
  * Fixed bug in inetd code. The server listened on tcp:@:9999 even
  * though it was started in inetd mode.
  *
@@ -193,7 +200,8 @@ static char *me = "statserver";
 /*
  * default behavior.
  */
-static statserv_options_block control_block = {
+int check_options(int argc, char **argv);
+statserv_options_block control_block = {
     1,                          /* dynamic mode */
     LOG_DEFAULT_LEVEL,          /* log level */
     "",                         /* no PDUs */
@@ -205,7 +213,15 @@ static statserv_options_block control_block = {
     "default-config",           /* configuration name to pass to backend */
     "",                         /* set user id */
     NULL,                       /* pre init handler */
-    "Z39.50 Server"             /* NT Service Name */
+    check_options,              /* Default routine, for checking the run-time arguments */
+    0                           /* default value for inet deamon */
+
+#ifdef WINDOWS
+    ,"Z39.50 Server",           /* NT Service Name */
+    "Server",                   /* NT application Name */
+    "",                         /* NT Service Dependencies */
+    "Z39.50 Server"             /* NT Service Display Name */
+#endif /* WINDOWS */
 };
 
 /*
@@ -232,13 +248,13 @@ static BOOL bInitialized = FALSE;
 static void ThreadList_Initialize()
 {
     /* Initialize the critical Sections */
-     InitializeCriticalSection(&Thread_CritSect);
+    InitializeCriticalSection(&Thread_CritSect);
 
      /* Set the first thraed */
-     pFirstThread = NULL;
+    pFirstThread = NULL;
 
-     /* we have been initialized */
-     bInitialized = TRUE;
+    /* we have been initialized */
+    bInitialized = TRUE;
 }
 
 static void statserv_add(HANDLE hThread, IOCHAN pIOChannel)
@@ -406,7 +422,8 @@ static void listener(IOCHAN h, int event)
 	}
 	logf(LOG_DEBUG, "Accept ok");
 
-	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, EVENT_INPUT)))
+	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
+				       EVENT_INPUT)))
 	{
 	    logf(LOG_FATAL, "Failed to create iochan");
             iochan_destroy(h);
@@ -428,17 +445,17 @@ static void listener(IOCHAN h, int event)
 	a = cs_addrstr(new_line);
 	logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
 #endif
-    /* Now what we need todo is create a new thread with this iochan as
-       the parameter */
-    /* if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop_thread,
-			new_chan, 0, &ThreadId) == NULL) */
-    /* Somehow, somewhere we need to store this thread id, otherwise we won't be
-       able to close cleanly */
+	/* Now what we need todo is create a new thread with this iochan as
+	   the parameter */
+	/* if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop_thread,
+	   new_chan, 0, &ThreadId) == NULL) */
+	/* Somehow, somewhere we need to store this thread id, otherwise we
+	   won't be able to close cleanly */
         NewHandle = (HANDLE)_beginthreadex(NULL, 0, event_loop_thread,
-					    new_chan, 0, &ThreadId);
+					   new_chan, 0, &ThreadId);
         if (NewHandle == (HANDLE)-1)
 	{
-
+	    
 	    logf(LOG_FATAL|LOG_ERRNO, "Failed to create new thread.");
             iochan_destroy(h);
             return;
@@ -579,7 +596,7 @@ static void listener(IOCHAN h, int event)
 	}
 	else
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
-
+	
 	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
 	    EVENT_INPUT)))
 	{
@@ -733,9 +750,7 @@ void statserv_setcontrol(statserv_options_block *block)
 
 int statserv_start(int argc, char **argv)
 {
-    int ret, listeners = 0, inetd = 0, r;
-    char *arg;
-    int protocol = control_block.default_proto;
+    int ret;
 
     nmem_init ();
 #ifdef WINDOWS
@@ -751,70 +766,12 @@ int statserv_start(int argc, char **argv)
 #else
     me = argv[0];
 #endif
-    while ((ret = options("a:iszSl:v:u:c:w:t:k:", argv, argc, &arg)) != -2)
-    {
-    	switch (ret)
-    	{
-	    case 0:
-		    add_listener(arg, protocol);
-		    listeners++;
-		break;
-	    case 'z': protocol = PROTO_Z3950; break;
-	    case 's': protocol = PROTO_SR; break;
-	    case 'S': control_block.dynamic = 0; break;
-	    case 'l':
-	    	strcpy(control_block.logfile, arg ? arg : "");
-		log_init(control_block.loglevel, me, control_block.logfile);
-		break;
-	    case 'v':
-		control_block.loglevel = log_mask_str(arg);
-		log_init(control_block.loglevel, me, control_block.logfile);
-		break;
-	    case 'a':
-	    	strcpy(control_block.apdufile, arg ? arg : ""); break;
-	    case 'u':
-	    	strcpy(control_block.setuid, arg ? arg : ""); break;
-            case 'c':
-                strcpy(control_block.configname, arg ? arg : ""); break;
-	    case 't':
-	        if (!arg || !(r = atoi(arg)))
-		{
-		    fprintf(stderr, "%s: Specify positive timeout for -t.\n",
-		        me);
-		    return(1);
-		}
-		control_block.idle_timeout = r;
-		break;
-	    case  'k':
-	        if (!arg || !(r = atoi(arg)))
-		{
-		    fprintf(stderr, "%s: Specify positive timeout for -t.\n",
-			me);
-		    return(1);
-		}
-		control_block.maxrecordsize = r * 1024;
-		break;
-	    case 'i':
-	    	inetd = 1; break;
-	    case 'w':
-	        if (chdir(arg))
-		{
-		    perror(arg);
+    if (control_block.options_func(argc, argv))
+        return(1);
 
-		    return(1);
-		}
-		break;
-	    default:
-	    	fprintf(stderr, "Usage: %s [ -i -a <pdufile> -v <loglevel>"
-                        " -l <logfile> -u <user> -c <config> -t <minutes>"
-			" -k <kilobytes>"
-                        " -zsS <listener-addr> -w <directory> ... ]\n", me);
-	    	return(1);
-            }
-    }
 #ifndef WINDOWS
-    if (inetd)
-	inetd_connection(protocol);
+    if (control_block.inetd)
+	inetd_connection(control_block.default_proto);
     else
     {
 	if (control_block.pre_init)
@@ -840,8 +797,8 @@ int statserv_start(int argc, char **argv)
 #endif /* WINDOWS */
 
     if ((pListener == NULL) && *control_block.default_listen)
-	add_listener(control_block.default_listen, protocol);
-
+	add_listener(control_block.default_listen,
+		     control_block.default_proto);
     logf(LOG_LOG, "Entering event loop.");
 	
     if (pListener == NULL)
@@ -850,6 +807,81 @@ int statserv_start(int argc, char **argv)
         ret = event_loop(&pListener);
     nmem_exit ();
     return ret;
+}
+
+int check_options(int argc, char **argv)
+{
+    int ret = 0, r;
+    char *arg;
+
+    while ((ret = options("a:iszSl:v:u:c:w:t:k:", argv, argc, &arg)) != -2)
+    {
+    	switch (ret)
+    	{
+	case 0:
+	    add_listener(arg, control_block.default_proto);
+	    break;
+	case 'z':
+	    control_block.default_proto = PROTO_Z3950;
+	    break;
+	case 's':
+	    control_block.default_proto = PROTO_SR;
+	    break;
+	case 'S':
+	    control_block.dynamic = 0;
+	    break;
+	case 'l':
+	    strcpy(control_block.logfile, arg ? arg : "");
+	    log_init(control_block.loglevel, me, control_block.logfile);
+	    break;
+	case 'v':
+	    control_block.loglevel = log_mask_str(arg);
+	    log_init(control_block.loglevel, me, control_block.logfile);
+	    break;
+	case 'a':
+	    strcpy(control_block.apdufile, arg ? arg : "");
+	    break;
+	case 'u':
+	    strcpy(control_block.setuid, arg ? arg : "");
+	    break;
+	case 'c':
+	    strcpy(control_block.configname, arg ? arg : "");
+	    break;
+	case 't':
+	    if (!arg || !(r = atoi(arg)))
+	    {
+		fprintf(stderr, "%s: Specify positive timeout for -t.\n", me);
+		return(1);
+	    }
+	    control_block.idle_timeout = r;
+	    break;
+	case  'k':
+	    if (!arg || !(r = atoi(arg)))
+	    {
+		fprintf(stderr, "%s: Specify positive timeout for -t.\n", me);
+		return(1);
+	    }
+	    control_block.maxrecordsize = r * 1024;
+	    break;
+	case 'i':
+	    control_block.inetd = 1;
+	    break;
+	case 'w':
+	    if (chdir(arg))
+	    {
+		perror(arg);		
+		return(1);
+	    }
+	    break;
+	default:
+	    fprintf(stderr, "Usage: %s [ -i -a <pdufile> -v <loglevel>"
+		    " -l <logfile> -u <user> -c <config> -t <minutes>"
+		    " -k <kilobytes>"
+                        " -zsS <listener-addr> -w <directory> ... ]\n", me);
+	    return(1);
+        }
+    }
+    return 0;
 }
 
 #ifdef WINDOWS
@@ -870,16 +902,16 @@ static Args ArgDetails;
 int statserv_main(int argc, char **argv)
 {
     statserv_options_block *cb = statserv_getcontrol();
-
-        /* Lets setup the Arg structure */
+    
+    /* Lets setup the Arg structure */
     ArgDetails.argc = argc;
     ArgDetails.argv = argv;
-
+    
     /* Now setup the service with the service controller */
     SetupService(argc, argv, &ArgDetails, SZAPPNAME,
-        cb->service_name, /* internal service name */
-        cb->service_name, /* displayed name of the service */
-        SZDEPENDENCIES);
+		 cb->service_name, /* internal service name */
+		 cb->service_name, /* displayed name of the service */
+		 SZDEPENDENCIES);
     return 0;
 }
 
@@ -892,7 +924,7 @@ int StartAppService(void *pHandle, int argc, char **argv)
 void RunAppService(void *pHandle)
 {
     Args *pArgs = (Args *)pHandle;
-
+    
     /* Starts the app running */
     statserv_start(pArgs->argc, pArgs->argv);
 }

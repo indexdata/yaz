@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,19 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.12  1997-11-07 13:31:47  adam
+ * Revision 1.13  1998-02-10 10:28:56  adam
+ * Added app_name, service_dependencies, service_display_name and
+ * options_func. options_func allows us to specify a different function
+ * to interogate the command line arguments. The other members allow us
+ * to pass the full service details accross to the service manager (CW).
+ *
+ * Revision 1.??? 1997/12/18   Chas
+ * Added app_name, service_dependencies, service_display_name and 
+ * options_func. options_func allows us to specify a different function 
+ * to interogate the command line arguments. The other members allow us
+ * to pass the full service details accross to the service manager.
+ *
+ * Revision 1.12  1997/11/07 13:31:47  adam
  * Added NT Service name part of statserv_options_block. Moved NT
  * service utility to server library.
  *
@@ -70,7 +82,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 typedef struct statserv_options_block
 {
     int dynamic;                  /* fork on incoming requests */
@@ -84,9 +96,19 @@ typedef struct statserv_options_block
     char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */
     char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
     void (*pre_init)(struct statserv_options_block *p);
-    char service_name[128];       /* NT Service Name */
+    int (*options_func)(int argc, char **argv);
+    int inetd;                    /* Do we use the inet deamon or not */
+    
+#ifdef WINDOWS
+    /* We only have these members for the windows version */
+    /* They seemed a bit large to have them there in general */
+    char service_name[128];         /* NT Service Name */
+    char app_name[128];             /* Application Name */
+    char service_dependencies[128]; /* The services we are dependent on */
+    char service_display_name[128]; /* The service display name */
+#endif /* WINDOWS */
 } statserv_options_block;
-
+    
 int statserv_main(int argc, char **argv);
 int statserv_start(int argc, char **argv);
 void statserv_closedown(void);
