@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1999
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.9 1999-06-08 10:10:16 adam Exp $
+dnl $Id: configure.in,v 1.10 1999-06-08 13:11:55 adam Exp $
 AC_INIT(include/yaz-version.h)
 dnl
 dnl ------ Checking programs
@@ -13,11 +13,12 @@ dnl
 dnl ----- YC: The Yaz Compiler
 AC_SUBST(ASNMODULE)
 AC_ARG_WITH(yc,[  --with-yc               compile using YC: The Yaz Compiler], [YCDIR=$withval],[YCDIR=""])
-
 if test "$YCDIR" = "yes"; then
-	ASNMODULE=z39.50
+	ASNMODULE="z39.50"
+	cp -f include/z-proto.h include/proto.h
 else
 	ASNMODULE=asn
+	cp -f include/prt-proto.h include/proto.h
 fi
 dnl
 dnl ----- Sockets
@@ -77,4 +78,4 @@ if test "$threads_ok" = "yes"; then
 fi
 dnl
 dnl ------ Makefiles
-AC_OUTPUT(Makefile util/Makefile asn/Makefile odr/Makefile zutil/Makefile comstack/Makefile client/Makefile server/Makefile ztest/Makefile retrieval/Makefile ccl/Makefile lib/Makefile rfc1006/Makefile z39.50/Makefile)
+AC_OUTPUT(Makefile util/Makefile odr/Makefile z39.50/Makefile asn/Makefile zutil/Makefile comstack/Makefile client/Makefile server/Makefile ztest/Makefile retrieval/Makefile ccl/Makefile lib/Makefile rfc1006/Makefile)

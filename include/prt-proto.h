@@ -23,188 +23,11 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: proto.h,v $
- * Revision 1.47  1999-04-20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.46  1998/10/20 13:55:44  quinn
- * Fixed Scan bug in asn and client
- *
- * Revision 1.45  1998/08/19 16:10:07  adam
- * Changed som member names of DeleteResultSetRequest/Response.
- *
- * Revision 1.44  1998/05/18 10:14:08  adam
- * Minor change - removed 'dead' definitions.
- *
- * Revision 1.43  1998/03/31 11:07:45  adam
- * Furhter work on UNIverse resource report.
- * Added Extended Services handling in frontend server.
- *
- * Revision 1.42  1998/03/20 14:46:06  adam
- * Added UNIverse Resource Reports.
- *
- * Revision 1.41  1998/02/10 15:31:52  adam
- * Implemented date and time structure. Changed the Update Extended
- * Service.
- *
- * Revision 1.40  1997/09/01 08:49:50  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.39  1997/05/14 06:53:44  adam
- * C++ support.
- *
- * Revision 1.38  1997/04/30 08:52:09  quinn
- * Null
- *
- * Revision 1.37  1996/10/09  15:54:58  quinn
- * Added SearchInfoReport
- *
- * Revision 1.36  1996/10/07  15:29:20  quinn
- * Added SOIF support
- *
- * Revision 1.35  1996/06/10  08:57:38  quinn
- * Added OPAC, ResourceReport
- *
- * Revision 1.34  1996/06/10  08:55:36  quinn
- * Added Summary.
- *
- * Revision 1.33  1996/02/23  10:00:51  quinn
- * SCAN Work
- *
- * Revision 1.32  1996/02/20  12:52:39  quinn
- * Various
- *
- * Revision 1.31  1996/01/22  09:46:45  quinn
- * Added Sort PDU. Moved StringList to main protocol file.
- *
- * Revision 1.30  1996/01/10  15:21:32  quinn
- * Added links to access control PDUs
- *
- * Revision 1.29  1996/01/02  11:46:49  quinn
- * Changed 'operator' to 'roperator' to avoid C++ conflict.
- * Moved to pl3
- *
- * Revision 1.28  1996/01/02  08:57:32  quinn
- * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
- *
- * Revision 1.27  1995/10/12  10:34:46  quinn
- * Added Espec-1.
- *
- * Revision 1.26  1995/09/29  17:12:08  quinn
- * Smallish
- *
- * Revision 1.25  1995/09/27  15:02:49  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.24  1995/08/29  11:17:43  quinn
- * *** empty log message ***
- *
- * Revision 1.23  1995/08/21  09:10:36  quinn
- * Smallish fixes to suppport new formats.
- *
- * Revision 1.22  1995/08/17  12:45:14  quinn
- * Fixed minor problems with GRS-1. Added support in c&s.
- *
- * Revision 1.21  1995/08/15  12:00:11  quinn
- * Updated External
- *
- * Revision 1.20  1995/08/10  08:54:35  quinn
- * Added Explain.
- *
- * Revision 1.19  1995/06/19  12:38:28  quinn
- * Reorganized include-files. Added small features.
- *
- * Revision 1.18  1995/06/16  13:16:05  quinn
- * Fixed Defaultdiagformat.
- *
- * Revision 1.17  1995/06/15  15:42:05  quinn
- * Fixed some v3 bugs
- *
- * Revision 1.16  1995/06/15  07:45:06  quinn
- * Moving to v3.
- *
- * Revision 1.15  1995/06/14  15:26:43  quinn
- * *** empty log message ***
- *
- * Revision 1.14  1995/06/07  14:42:34  quinn
- * Fixed CLOSE
- *
- * Revision 1.13  1995/06/07  14:36:47  quinn
- * Added CLOSE
- *
- * Revision 1.12  1995/06/05  10:53:13  quinn
- * Smallish.
- *
- * Revision 1.11  1995/06/02  09:49:47  quinn
- * Add access control
- *
- * Revision 1.10  1995/05/29  08:11:34  quinn
- * Moved oid from odr/asn to util.
- *
- * Revision 1.9  1995/05/22  11:31:25  quinn
- * Added PDUs
- *
- * Revision 1.8  1995/05/17  08:41:35  quinn
- * Added delete to proto & other little things.
- * Relaying auth info to backend.
- *
- * Revision 1.7  1995/05/16  08:50:37  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.6  1995/05/15  11:55:55  quinn
- * Work on asynchronous activity.
- *
- * Revision 1.5  1995/04/17  11:28:18  quinn
- * Smallish
- *
- * Revision 1.4  1995/04/10  10:22:47  quinn
- * Added SCAN
- *
- * Revision 1.3  1995/03/30  12:18:09  quinn
- * Added info.
- *
- * Revision 1.2  1995/03/30  10:26:48  quinn
- * Added Term structure
- *
- * Revision 1.1  1995/03/30  09:39:42  quinn
- * Moved .h files to include directory
- *
- * Revision 1.11  1995/03/30  09:08:44  quinn
- * Added Resource control protocol
- *
- * Revision 1.10  1995/03/29  15:39:39  quinn
- * Adding some resource control elements, and a null-check to getentbyoid
- *
- * Revision 1.9  1995/03/29  08:06:18  quinn
- * Added a few v3 elements
- *
- * Revision 1.8  1995/03/22  10:12:49  quinn
- * Added Z_PRES constants.
- *
- * Revision 1.7  1995/03/20  09:45:12  quinn
- * Working towards v3
- *
- * Revision 1.5  1995/03/07  16:29:34  quinn
- * Added authentication stuff.
- *
- * Revision 1.4  1995/03/07  10:13:00  quinn
- * Added prototype for z_APDU()
- *
- * Revision 1.3  1995/02/14  11:54:23  quinn
- * Fixing include.
- *
- * Revision 1.2  1995/02/09  15:51:40  quinn
- * Works better now.
- *
- * Revision 1.1  1995/02/06  16:44:48  quinn
- * First hack at Z/SR protocol
- *
+ * $Id: prt-proto.h,v 1.1 1999-06-08 13:11:55 adam Exp $
  */
 
-#ifndef PROTO_H
-#define PROTO_H
+#ifndef PRT_PROTO_H
+#define PRT_PROTO_H
 
 #include <yconfig.h>
 #include <odr.h>
@@ -1276,6 +1099,8 @@ typedef struct Z_APDU
 	Z_Close *close;
     } u;
 } Z_APDU;
+
+#define z_APDU z_APDU_old
 
 YAZ_EXPORT int z_APDU(ODR o, Z_APDU **p, int opt, const char *name);
 YAZ_EXPORT int z_SUTRS(ODR o, Odr_oct **p, int opt, const char *name);

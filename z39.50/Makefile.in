@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.1 1999-06-08 10:10:16 adam Exp $
+# $Id: Makefile.in,v 1.2 1999-06-08 13:11:55 adam Exp $
 
 SHELL=/bin/sh
 
@@ -42,8 +42,8 @@ $(LIB): $(PO)
 	ar qc $(LIB) $(PO)
 	$(RANLIB) $(LIB)
 
-z-accdes1.h z-core.h: z.tcl z3950v3.asn ../util/yc.tcl
-	../util/yc.tcl -d z.tcl $(YCFLAGS) z3950v3.asn 
+$(CF) z-accdes1.h z-core.h: z.tcl z3950v3.asn ../util/yc.tcl
+	../util/yc.tcl -d z.tcl $(YCFLAGS) z3950v3.asn
 
 z-date.h z-date.c: z.tcl datetime.asn ../util/yc.tcl
 	../util/yc.tcl -d z.tcl $(YCFLAGS) datetime.asn
@@ -63,7 +63,9 @@ clean:
 realclean: clean
 	-rm -f z-*.[cho] zes-*.[cho]
 
-depend: z-core.h z-date.h z-univ.h zes-update.c
+comp: z-core.h z-date.h z-univ.h zes-update.h
+
+depend: z-core.h z-date.h z-univ.h zes-update.h
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
 	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
 	mv -f Makefile.tmp Makefile

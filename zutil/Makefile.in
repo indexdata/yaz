@@ -1,7 +1,7 @@
 # Copyright (C) 1994-1999, Index Data
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1999-06-08 10:10:49 adam Exp $
+# $Id: Makefile.in,v 1.2 1999-06-08 13:11:55 adam Exp $
 
 SHELL=/bin/sh
 
@@ -16,8 +16,7 @@ LIBDIR=../lib
 
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libzutil.a
-PO = zget.o prt-ext.o yaz-ccl.o diagbib1.o logrpn.o otherinfo.o query.o \
-     pquery.o
+PO = zget.o prt-ext.o yaz-ccl.o diagbib1.o logrpn.o otherinfo.o pquery.o
 
 all: $(LIB)
 
