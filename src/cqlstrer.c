@@ -1,4 +1,4 @@
-/* $Id: cqlstrer.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+/* $Id: cqlstrer.c,v 1.2 2003-12-18 17:05:01 mike Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -22,9 +22,9 @@ const char *cql_strerror(int code) {
     case 12: return "Too many characters in query";
     case 13: return "Unbalanced or illegal use of parentheses";
     case 14: return "Unbalanced or illegal use of quotes";
-    case 15: return "Illegal or unsupported index set";
+    case 15: return "Illegal or unsupported context set";
     case 16: return "Illegal or unsupported index";
-    case 17: return "Illegal or unsupported combination of index and index set";
+    case 17: return "Illegal or unsupported combination of index and context set";
     case 18: return "Illegal or unsupported combination of indexes";
     case 19: return "Illegal or unsupported relation";
     case 20: return "Illegal or unsupported relation modifier";
@@ -52,7 +52,7 @@ const char *cql_strerror(int code) {
     case 42: return "Illegal or unsupported proximity unit";
     case 43: return "Illegal or unsupported proximity ordering";
     case 44: return "Illegal or unsupported combination of proximity modifiers";
-    case 45: return "Index set name (prefix) assigned to multiple identifiers";
+    case 45: return "Context set name (prefix) assigned to multiple identifiers";
     default: break;
     }
 

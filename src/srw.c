@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.1 2003-10-27 12:21:35 adam Exp $
+ * $Id: srw.c,v 1.2 2003-12-18 17:05:20 mike Exp $
  */
 
 #include <yaz/srw.h>
@@ -576,9 +576,9 @@ static struct {
 {12, "Too many characters in query"}, 
 {13, "Unbalanced or illegal use of parentheses"}, 
 {14, "Unbalanced or illegal use of quotes"}, 
-{15, "Illegal or unsupported index set"}, 
+{15, "Illegal or unsupported context set"}, 
 {16, "Illegal or unsupported index"}, 
-{17, "Illegal or unsupported combination of index and index set"}, 
+{17, "Illegal or unsupported combination of index and context set"}, 
 {18, "Illegal or unsupported combination of indexes"}, 
 {19, "Illegal or unsupported relation"}, 
 {20, "Illegal or unsupported relation modifier"}, 
@@ -606,7 +606,7 @@ static struct {
 {42, "Illegal or unsupported proximity unit"}, 
 {43, "Illegal or unsupported proximity ordering"}, 
 {44, "Illegal or unsupported combination of proximity modifiers"}, 
-{45, "Index set name (prefix) assigned to multiple identifiers"}, 
+{45, "context set name (prefix) assigned to multiple identifiers"}, 
 /* Diagnostics Relating to Result Sets */
 {50, "Result sets not supported"}, 
 {51, "Result set does not exist"}, 
