@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.41 2004-12-22 23:48:34 adam Exp $
+ * $Id: seshigh.c,v 1.42 2004-12-30 00:25:33 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -171,7 +171,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
             }
             else 
             {
-                sprintf(filename + strlen(filename), ".%d", getpid());
+                sprintf(filename + strlen(filename), ".%ld", (long)getpid());
                 if (!(f = fopen(filename, "w")))
                 {
                     yaz_log(YLOG_WARN|YLOG_ERRNO, "%s", filename);
@@ -1033,7 +1033,7 @@ static void process_http_request(association *assoc, request *req)
         int t;
         const char *alive = z_HTTP_header_lookup(hreq->headers, "Keep-Alive");
 
-        if (alive && isdigit(*alive))
+        if (alive && isdigit(*(const unsigned char *) alive))
             t = atoi(alive);
         else
             t = 15;
@@ -1429,7 +1429,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.41 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.42 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.14 2004-12-22 23:47:11 adam Exp $
+ * $Id: statserv.c,v 1.15 2004-12-30 00:25:20 adam Exp $
  */
 
 /**
@@ -539,8 +539,8 @@ static void *new_session (void *vp)
 #else
     a = 0;
 #endif
-    yaz_log(log_session, "Starting session %d from %s (pid=%d)",
-	    no_sessions, a ? a : "[Unknown]", getpid());
+    yaz_log(log_session, "Starting session %d from %s (pid=%ld)",
+	    no_sessions, a ? a : "[Unknown]", (long) getpid());
     if (max_sessions && no_sessions >= max_sessions)
         control_block.one_shot = 1;
     if (control_block.threads)
@@ -754,7 +754,8 @@ int statserv_start(int argc, char **argv)
 	    fclose(f);
 	}
 
-	yaz_log (log_server, "Starting server %s pid=%d", programname, getpid());
+	yaz_log (log_server, "Starting server %s pid=%ld", programname,
+			(long) getpid());
         
 #if 0
 	sigset_t sigs_to_block;
