@@ -26,7 +26,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-tcpd[=PREFIX]  enable TCP wrapper for server if available"
 ac_help="$ac_help
-  --disable-threads       disable threads"
+  --enable-threads        enable POSIX threads"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -2252,7 +2252,7 @@ if test "${enable_threads+set}" = set; then
   enableval="$enable_threads"
   enable_threads=$enableval
 else
-  enable_threads=yes
+  enable_threads=no
 fi
 
 if test "$enable_threads" = "yes"; then
