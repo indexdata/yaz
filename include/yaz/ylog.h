@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: ylog.h,v 1.2 2004-11-19 09:59:31 heikki Exp $
+ * $Id: ylog.h,v 1.3 2004-11-19 10:07:08 heikki Exp $
  */
 
 /**
@@ -65,7 +65,6 @@ YAZ_BEGIN_CDECL
 #define YLOG_LAST_BIT YLOG_LOGLVL /* the last bit used for regular log bits */
                                 /* the rest are for dynamic modules */
 
-#define logf yaz_log
 
 /** 
  * yaz_log_init is a shorthand for initializing the log level and prefixes */
