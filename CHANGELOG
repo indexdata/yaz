@@ -3,6 +3,10 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.7 2002/MM/DD
 
+Attributes from multiple CCL fields may be OR'ed rather than merged
+using directive "@field or". Fields are still merged by default -
+equivalent to "@field merge".
+
 XML reader for data1 (EXPAT).
 
 Fixed bug in ZOOM connect that occurred on OpenBSD (maybe others). Patch
