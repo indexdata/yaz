@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Extended OPAC display utility. OPAC display utility renders
+bibliographic (MARC) record as well. Added yaz_opac_decode_wrbuf
+to supplement yaz_marc_decode_wrbuf.
+
 --- 2.0.34 2005/02/08 
 
 Fixes for UNIX domain sockets. Bug #261.

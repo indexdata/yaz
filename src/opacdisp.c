@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: opacdisp.c,v 1.4 2005-01-15 19:47:14 adam Exp $
+ * $Id: opacdisp.c,v 1.5 2005-02-25 17:05:09 adam Exp $
  */
 /**
  * \file opacdisp.c
@@ -15,6 +15,7 @@
 #include <ctype.h>
 
 #include <yaz/proto.h>
+#include <yaz/marcdisp.h>
 
 static void opac_element_str(WRBUF wrbuf, int l, const char *elem,
 			     const char *data)
@@ -49,11 +50,22 @@ static void opac_element_bool(WRBUF wrbuf, int l, const char *elem, int *data)
     }
 }
 
-void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags)
+void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
 {
     int i;
+
     wrbuf_puts(wrbuf, "<holdings>\n");
 
+    if (r->bibliographicRecord)
+    {
+	Z_External *ext = r->bibliographicRecord;
+	
+	wrbuf_puts (wrbuf, "  <bibliographicRecord>\n");
+	if (ext->which == Z_External_octet)
+	    yaz_marc_decode_wrbuf(mt, ext->u.octet_aligned->buf,
+				  ext->u.octet_aligned->len, wrbuf);
+	wrbuf_puts (wrbuf, "  </bibliographicRecord>\n");
+    }
     for (i = 0; i < r->num_holdingsData; i++)
     {
 	Z_HoldingsRecord *h = r->holdingsData[i];
@@ -61,8 +73,13 @@ void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags)
 
 	if (h->which == Z_HoldingsRecord_marcHoldingsRecord)
 	{
-	    wrbuf_puts (wrbuf, "  <marc/>\n");
-	/*  h->u.marcHoldingsRecord) */
+	    Z_External *ext = h->u.marcHoldingsRecord;
+
+	    wrbuf_puts (wrbuf, "  <marcHoldingsRecord>\n");
+	    if (ext->which == Z_External_octet)
+		yaz_marc_decode_wrbuf(mt, ext->u.octet_aligned->buf,
+				      ext->u.octet_aligned->len, wrbuf);
+	    wrbuf_puts (wrbuf, "  </marcHoldingsRecord>\n");
 	}
 	else if (h->which == Z_HoldingsRecord_holdingsAndCirc)
 	{
@@ -139,3 +156,13 @@ void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags)
     }
     wrbuf_puts(wrbuf, "</holdings>\n");
 }
+
+void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *opac_rec, int flags)
+{
+    yaz_marc_t mt = yaz_marc_create();
+
+    yaz_marc_xml(mt, YAZ_MARC_MARCXML);
+    yaz_opac_decode_wrbuf(mt, opac_rec, wrbuf);
+    yaz_marc_destroy(mt);
+}
+
