@@ -1,5 +1,5 @@
 /* 
- $ $Id: charneg.c,v 1.5 2002-09-24 08:05:42 adam Exp $
+ $ $Id: charneg.c,v 1.6 2002-10-04 11:24:39 adam Exp $
  * Helper functions for Character Set and Language Negotiation - 3
  */
 
@@ -42,13 +42,13 @@ static int get_form(const char *charset)
     int form = -1;
 
 
-    if (!strcmp (charset, "UCS-2"))
+    if (!yaz_matchstr(charset, "UCS-2"))
         form = 2;
-    if (!strcmp (charset, "UCS-4"))
+    if (!yaz_matchstr(charset, "UCS-4"))
         form = 4;
-    if (!strcmp (charset, "UTF-16"))
+    if (!yaz_matchstr(charset, "UTF-16"))
         form = 5;
-    if (!strcmp (charset, "UTF-8"))
+    if (!yaz_matchstr(charset, "UTF-8"))
         form = 8;
 
     return form;
