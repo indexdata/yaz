@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.57 2002-08-30 15:38:26 mike Exp $
+ * $Id: oid.c,v 1.58 2002-12-01 23:22:10 mike Exp $
  */
 
 /*
@@ -288,9 +288,11 @@ static oident standard_oids[] =
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_CIMI1,        {14,6,-1},
      "CIMI-tagset"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_THESAURUS,    {14,1000,81,1,-1},
-     "thesaurus-tagset"},
+     "thesaurus-tagset"},	/* What is this Satan-spawn doing here? */
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_EXPLAIN,      {14,1000,81,2,-1},
      "Explain-tagset"},
+    {PROTO_Z3950,   CLASS_TAGSET,  VAL_ZTHES,        {14,8,-1},
+     "Zthes-tagset"},
     {PROTO_Z3950,   CLASS_NEGOT,   VAL_CHARNEG3,     {15,3,-1},
      "CharSetandLanguageNegotiation-3"},
     {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS2,    {1,0,10646,1,0,2,-1},
