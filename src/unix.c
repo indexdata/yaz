@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.12 2005-02-04 13:28:47 adam Exp $
+ * $Id: unix.c,v 1.13 2005-02-08 13:23:23 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -313,6 +313,7 @@ static int unix_connect(COMSTACK h, void *address)
 {
     struct sockaddr_un *add = (struct sockaddr_un *)address;
     int r;
+    int i;
 
     TRC(fprintf(stderr, "unix_connect\n"));
     h->io_pending = 0;
@@ -321,10 +322,24 @@ static int unix_connect(COMSTACK h, void *address)
 	h->cerrno = CSOUTSTATE;
 	return -1;
     }
-    r = connect(h->iofile, (struct sockaddr *) add, SUN_LEN(add));
+    for (i = 0; i<3; i++)
+    {
+	r = connect(h->iofile, (struct sockaddr *) add, SUN_LEN(add));
+	if (r < 0 && yaz_errno() == EAGAIN)
+	{
+#if HAVE_USLEEP   
+	    usleep(i*10000+1000); /* 1ms, 11ms, 21ms */
+#else
+	    sleep(1);
+#endif
+	    continue;
+	}
+	else
+	    break;
+    }
     if (r < 0)
     {
-	if (yaz_errno() == EINPROGRESS || yaz_errno() == EAGAIN)
+	if (yaz_errno() == EINPROGRESS)
 	{
 	    h->event = CS_CONNECT;
 	    h->state = CS_ST_CONNECTING;
