@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.236 2004-03-17 10:59:41 adam Exp $
+ * $Id: client.c,v 1.237 2004-04-07 13:47:59 adam Exp $
  */
 
 #include <stdio.h>
@@ -741,8 +741,6 @@ static void display_record(Z_External *r)
             }
         }
     }
-    if (ent && ent->oclass != CLASS_RECSYN) 
-        return;
     if (ent && ent->value == VAL_SOIF)
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
