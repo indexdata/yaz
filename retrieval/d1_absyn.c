@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.5  1996-05-09 07:27:43  quinn
+ * Revision 1.6  1996-05-31 13:52:21  quinn
+ * Fixed uninitialized variable for local tags in abstract syntax.
+ *
+ * Revision 1.5  1996/05/09  07:27:43  quinn
  * Multiple local attributes values supported.
  *
  * Revision 1.4  1996/05/01  12:45:28  quinn
@@ -225,6 +228,8 @@ data1_absyn *data1_read_absyn(char *file)
 		nt->names->name = nt->value.string;
 		nt->names->next = 0;
 		nt->kind = DATA1K_string;
+		nt->next = 0;
+		nt->tagset = 0;
 	    }
 	    else
 	    {
