@@ -1,23 +1,26 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.6 1995-03-10 11:44:40 quinn Exp $
+# $Id: Makefile,v 1.7 1995-03-14 10:27:34 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
-CFLAGS= -g -Wall -pedantic -ansi -DODR_DEBUG
+LIBDIR=../../lib
+LIBINCLUDE=-L$(LIBDIR)
+#CFLAGS= -g -Wall -pedantic -ansi -DODR_DEBUG
 DEFS=$(INCLUDE)
-LIB=odr.a
+LIB=$(LIBDIR)/libodr.a
+LIBS=-lodr
 PO = odr_bool.o ber_bool.o ber_len.o ber_tag.o odr_util.o odr_null.o \
 	ber_null.o odr_int.o ber_int.o odr_tag.o odr_cons.o odr_seq.o\
 	odr_oct.o ber_oct.o odr_bit.o ber_bit.o odr_oid.o ber_oid.o odr_use.o \
 	odr_choice.o odr_any.o ber_any.o odr.o
 CPP=cc -E
 
-all: $(LIB)
+all: $(LIBDIR) $(LIB)
 
 test: test.o $(LIB)
-	$(CC) $(CFLAGS) $(INCLUDE) -o test test.o $(LIB)
+	$(CC) $(CFLAGS) $(LIBINCLUDE) -o test test.o $(LIBS)
 
 alll:
 
@@ -25,6 +28,9 @@ $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
 	ranlib $(LIB)
+
+$(LIBDIR):
+	mkdir $(LIBDIR)
 
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<
