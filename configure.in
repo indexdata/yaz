@@ -1,8 +1,8 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.101 2003-01-13 14:33:03 adam Exp $
+dnl $Id: configure.in,v 1.102 2003-02-10 08:59:00 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
-AM_INIT_AUTOMAKE(yaz, 1.9.2)
+AM_INIT_AUTOMAKE(yaz, 1.9.3)
 dnl
 AC_SUBST(READLINE_LIBS)
 AC_SUBST(YAZ_CONF_CFLAGS)
@@ -349,7 +349,7 @@ if test "x$xsltdir" = "xNONE"; then
 		fi
 	done
 fi
-if test "$usesrw" = "1"; then
+if true; then
 	AC_MSG_CHECKING(for XSLT)
 	if test -x $xsltdir/bin/xslt-config; then
 		XSLT_LIB=`$xsltdir/bin/xslt-config --libs`
