@@ -1,3 +1,9 @@
+yaz (2.0.9-4) unstable; urgency=low
+
+  * Fix HTTP decode: Content-Length case insensitive.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue,  6 Jan 2004 14:35:37 +0100
+
 yaz (2.0.9-3) unstable; urgency=low
 
   * Upstream.

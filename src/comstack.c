@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.2 2003-11-17 10:40:56 mike Exp $
+ * $Id: comstack.c,v 1.3 2004-01-06 19:12:19 adam Exp $
  */
 
 #include <string.h>
@@ -222,21 +222,21 @@ int cs_complete_auto(const unsigned char *buf, int len)
                     }
                     break;
                 }
-                else if (i < len - 21 &&
-                         !memcmp(buf+i, "Transfer-Encoding: ", 18))
+                else if (i < len - 20 && 
+                         !strncasecmp(buf+i, "Transfer-Encoding:", 18))
                 {
                     i+=18;
-                    if (buf[i] == ' ')
+                    while (buf[i] == ' ')
                         i++;
                     if (i < len - 8)
-                        if (!memcmp(buf+i, "chunked", 7))
+                        if (!strncasecmp(buf+i, "chunked", 7))
                             chunked = 1;
                 }
-                else if (i < len - 18 &&
-                         !memcmp(buf+i, "Content-Length: ", 15))
+                else if (i < len - 17 &&
+                         !strncasecmp(buf+i, "Content-Length:", 15))
                 {
                     i+= 15;
-                    if (buf[i] == ' ')
+                    while (buf[i] == ' ')
                         i++;
                     content_len = 0;
                     while (i <= len-4 && isdigit(buf[i]))
