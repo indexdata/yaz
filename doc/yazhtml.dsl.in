@@ -3,7 +3,7 @@
   CDATA DSSSL>
 ]>
 <!--
-  $Id: yazhtml.dsl.in,v 1.1 2002-03-21 21:30:45 adam Exp $
+  $Id: yazhtml.dsl.in,v 1.2 2003-11-16 23:02:08 adam Exp $
 -->
 <style-sheet>
 <style-specification use="docbook">
@@ -12,7 +12,7 @@
 (define %use-id-as-filename% #t)
 (define %output-dir% "html")
 (define %html-ext% ".html")
-(define %shade-verbatim% #t)
+(define %stylesheet% "yaz.css")
 
 </style-specification-body>
 </style-specification>
