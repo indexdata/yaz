@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1999, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.6 1999-04-16 14:45:55 adam Exp $
+# $Id: Makefile.in,v 1.7 1999-04-28 15:17:01 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #CDEFS=-DUSE_XTIMOSI
@@ -41,17 +41,17 @@ INCDIR=$(prefix)/include
 YAZDIR=$(prefix)/lib/yaz
 
 all:
-	for i in $(SUBDIR); do cd $$i; if $(MAKE) CC="$(CC)" \
+	for i in $(SUBDIR); do (cd $$i; $(MAKE) CC="$(CC)" \
 		RANLIB="$(RANLIB)" LIBS="$(LIBS)" \
 		INCLUDE="$(INCLUDE)" CFLAGS="$(CFLAGS)" \
 		CDEFS="$(CDEFS)" \
-		LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\
-		then cd ..; else exit 1; fi; done
+		LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)");\
+		done
 
 dep depend:
-	for i in $(SUBDIR); do cd $$i; if $(MAKE) CPP="$(CPP)" \
-		INCLUDE="$(INCLUDE)" CDEFS="$(CDEFS)" depend;\
-		 then cd ..; else exit 1; fi; done
+	for i in $(SUBDIR); do (cd $$i; $(MAKE) CPP="$(CPP)" \
+		INCLUDE="$(INCLUDE)" CDEFS="$(CDEFS)" depend);\
+		 done
 
 clean:
 	for i in $(SUBDIR); do (cd $$i; $(MAKE) clean); done
