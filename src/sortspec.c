@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.1 2003-10-27 12:21:35 adam Exp $
+ * $Id: sortspec.c,v 1.2 2004-05-10 07:48:56 adam Exp $
  */
 
 #include <stdio.h>
@@ -77,8 +77,8 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
             sk->which = Z_SortKey_sortField;
             sk->u.sortField = odr_strdup (out, sort_string);
         }
-        sks->sortRelation = odr_intdup (out, Z_SortRelation_ascending);
-        sks->caseSensitivity = odr_intdup (out, Z_SortCase_caseSensitive);
+        sks->sortRelation = odr_intdup (out, Z_SortKeySpec_ascending);
+        sks->caseSensitivity = odr_intdup (out, Z_SortKeySpec_caseSensitive);
 
         sks->which = Z_SortKeySpec_null;
         sks->u.null = odr_nullval ();
@@ -90,20 +90,20 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
             case 'd':
             case 'D':
             case '>':
-                *sks->sortRelation = Z_SortRelation_descending;
+                *sks->sortRelation = Z_SortKeySpec_descending;
                 break;
             case 'a':
             case 'A':
             case '<':
-                *sks->sortRelation = Z_SortRelation_ascending;
+                *sks->sortRelation = Z_SortKeySpec_ascending;
                 break;
             case 'i':
             case 'I':
-                *sks->caseSensitivity = Z_SortCase_caseInsensitive;
+                *sks->caseSensitivity = Z_SortKeySpec_caseInsensitive;
                 break;
             case 'S':
             case 's':
-                *sks->caseSensitivity = Z_SortCase_caseSensitive;
+                *sks->caseSensitivity = Z_SortKeySpec_caseSensitive;
                 break;
             }
         }

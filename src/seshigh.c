@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.23 2004-03-29 15:09:14 adam Exp $
+ * $Id: seshigh.c,v 1.24 2004-05-10 07:48:56 adam Exp $
  */
 
 /*
@@ -1321,7 +1321,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.23 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.24 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1499,7 +1499,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     records->u.databaseOrSurDiagnostics = reclist;
     reclist->num_records = 0;
     reclist->records = list;
-    *pres = Z_PRES_SUCCESS;
+    *pres = Z_PresentStatus_success;
     *num = 0;
     *next = 0;
 
@@ -1543,7 +1543,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    if (!freq.surrogate_flag)
 	    {
 		char s[20];
-		*pres = Z_PRES_FAILURE;
+		*pres = Z_PresentStatus_failure;
 		/* for 'present request out of range',
                    set addinfo to record position if not set */
 		if (freq.errcode == 13 && freq.errstring == 0)
@@ -1573,7 +1573,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    if (this_length <= a->preferredMessageSize && recno > start)
 	    {
 	    	yaz_log(LOG_DEBUG, "  Dropped last normal-sized record");
-		*pres = Z_PRES_PARTIAL_2;
+		*pres = Z_PresentStatus_partial_2;
 		break;
 	    }
 	    /* record can only be fetched by itself */
@@ -1693,7 +1693,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     int *nulint = odr_intdup (assoc->encode, 0);
     bool_t *sr = odr_intdup(assoc->encode, 1);
     int *next = odr_intdup(assoc->encode, 0);
-    int *none = odr_intdup(assoc->encode, Z_RES_NONE);
+    int *none = odr_intdup(assoc->encode, Z_SearchResponse_none);
 
     apdu->which = Z_APDU_searchResponse;
     apdu->u.searchResponse = resp;
@@ -1839,7 +1839,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	if (bprr->errcode)
 	{
 	    resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
-	    *resp->presentStatus = Z_PRES_FAILURE;
+	    *resp->presentStatus = Z_PresentStatus_failure;
 	}
     }
     apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
@@ -2053,7 +2053,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     bsrr->stream = assoc->encode;
     bsrr->print = assoc->print;
 
-    bsrr->sort_status = Z_SortStatus_failure;
+    bsrr->sort_status = Z_SortResponse_failure;
     bsrr->errcode = 0;
     bsrr->errstring = 0;
     

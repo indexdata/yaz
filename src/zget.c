@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.4 2004-02-15 07:19:42 adam Exp $
+ * $Id: zget.c,v 1.5 2004-05-10 07:48:56 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -146,7 +146,7 @@ Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->deleteFunction = odr_intdup(o, Z_DeleteRequest_list);
+    r->deleteFunction = odr_intdup(o, Z_DeleteResultSetRequest_list);
     r->num_resultSetList = 0;
     r->resultSetList = 0;
     r->otherInfo = 0;
@@ -205,7 +205,7 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
 	odr_malloc(o, sizeof(*r));
     
     r->referenceId = 0;
-    r->requestedAction = odr_intdup(o, Z_TriggerResourceCtrl_resourceReport);
+    r->requestedAction = odr_intdup(o, Z_TriggerResourceControlRequest_resourceReport);
     r->prefResourceReportFormat = 0;
     r->resultSetWanted = 0;
     r->otherInfo = 0;
@@ -245,7 +245,7 @@ Z_AccessControlRequest *zget_AccessControlRequest(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->which = Z_AccessRequest_simpleForm;
+    r->which = Z_AccessControlRequest_simpleForm;
     r->u.simpleForm = 0;
     r->otherInfo = 0;
     return r;
@@ -257,7 +257,7 @@ Z_AccessControlResponse *zget_AccessControlResponse(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->which = Z_AccessResponse_simpleForm;
+    r->which = Z_AccessControlResponse_simpleForm;
     r->u.simpleForm = 0;
     r->diagnostic = 0;
     r->otherInfo = 0;
@@ -307,7 +307,7 @@ Z_ResourceReportResponse *zget_ResourceReportResponse(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->resourceReportStatus = odr_intdup(o, Z_ResourceReportStatus_success);
+    r->resourceReportStatus = odr_intdup(o, Z_ResourceReportResponse_success);
     r->resourceReport = 0;
     r->otherInfo = 0;
     return r;
@@ -330,8 +330,8 @@ Z_SortResponse *zget_SortResponse(ODR o)
     Z_SortResponse *r = (Z_SortResponse *)odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->sortStatus = odr_intdup(o, Z_SortStatus_success);
-    r->resultSetStatus = odr_intdup(o, Z_SortResultSetStatus_empty);
+    r->sortStatus = odr_intdup(o, Z_SortResponse_success);
+    r->resultSetStatus = odr_intdup(o, Z_SortResponse_empty);
     r->diagnostics = 0;
     r->resultCount = 0;
     r->otherInfo = 0;

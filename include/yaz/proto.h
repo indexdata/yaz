@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: proto.h,v 1.13 2004-01-15 10:16:26 adam Exp $
+ * $Id: proto.h,v 1.14 2004-05-10 07:48:56 adam Exp $
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H
@@ -46,6 +46,7 @@
 
 YAZ_BEGIN_CDECL
 
+#if 0
 #define Z_PRES_SUCCESS   Z_PresentStatus_success
 #define Z_PRES_PARTIAL_1 Z_PresentStatus_partial_1
 #define Z_PRES_PARTIAL_2 Z_PresentStatus_partial_2
@@ -95,6 +96,7 @@ YAZ_BEGIN_CDECL
 #define Z_SortResultSetStatus_interim     Z_SortResponse_interim
 #define Z_SortResultSetStatus_unchanged   Z_SortResponse_unchanged
 #define Z_SortResultSetStatus_none        Z_SortResponse_none
+#endif
 
 typedef Z_External Z_DatabaseRecord;
 typedef struct Z_IOItemOrder Z_ItemOrder;
