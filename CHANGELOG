@@ -2,6 +2,10 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.5 2002/XX/XX
 
+New YAZ client features: Command completion and new commands:
+push_command, set_apdufile, set_marcdump, set_cclfields, register_oid.
+Code provide by Jacob Poulsen.
+
 New call oid_trav, that visits all registered OIDs via callback.
 
 Function ZOOM_record_get now returns const char pointer rather than
