@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.28  1995-09-29 17:12:30  quinn
+ * Revision 1.29  1995-10-30 12:41:29  quinn
+ * Added hostname lookup for server.
+ *
+ * Revision 1.28  1995/09/29  17:12:30  quinn
  * Smallish
  *
  * Revision 1.27  1995/09/27  15:03:02  quinn
@@ -131,13 +134,11 @@ static statserv_options_block control_block = {
     "",                         /* diagnostic output to stderr */
     "tcp:@:9999",               /* default listener port */
     PROTO_Z3950,                /* default application protocol */
-    2*60,                       /* idle timeout (minutes) */
+    60,                         /* idle timeout (minutes) */
     1024*1024,                  /* maximum PDU size (approx.) to allow */
     "default-config",           /* configuration name to pass to backend */
     ""                          /* set user id */
 };
-
-#define DEFAULT_LISTENER "tcp:localhost:9999"
 
 /*
  * handle incoming connect requests.
@@ -216,6 +217,7 @@ static void listener(IOCHAN h, int event)
     {
     	COMSTACK new_line;
     	IOCHAN new_chan;
+	char *a;
 
 	if (!(new_line = cs_accept(line)))
 	{
@@ -254,7 +256,8 @@ static void listener(IOCHAN h, int event)
 	}
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
-	logf(LOG_LOG, "accepted connection");
+	a = cs_addrstr(new_line);
+	logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
     }
     else
     {

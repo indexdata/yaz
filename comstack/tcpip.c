@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.6  1995-09-29 17:12:00  quinn
+ * Revision 1.7  1995-10-30 12:41:16  quinn
+ * Added hostname lookup for server.
+ *
+ * Revision 1.6  1995/09/29  17:12:00  quinn
  * Smallish
  *
  * Revision 1.5  1995/09/29  17:01:48  quinn
@@ -111,6 +114,7 @@ int tcpip_rcvconnect(COMSTACK h);
 int tcpip_bind(COMSTACK h, void *address, int mode);
 int tcpip_listen(COMSTACK h, char *addrp, int *addrlen);
 COMSTACK tcpip_accept(COMSTACK h);
+char *tcpip_addrstr(COMSTACK h);
 
 int completeBER(unsigned char *buf, int len);
 
@@ -187,6 +191,7 @@ COMSTACK tcpip_type(int blocking, int protocol)
     p->f_bind = tcpip_bind;
     p->f_listen = tcpip_listen;
     p->f_accept = tcpip_accept;
+    p->f_addrstr = tcpip_addrstr;
 
     p->state = CS_UNBND;
     p->event = CS_NONE;
@@ -502,4 +507,27 @@ int tcpip_close(COMSTACK h)
     free(sp);
     free(h);
     return 0;
+}
+
+char *tcpip_addrstr(COMSTACK h)
+{
+    struct sockaddr_in addr;
+    static char buf[64];
+    char *r;
+    int len;
+    struct hostent *host;
+
+    len = sizeof(addr);
+    if (getpeername(h->iofile, (struct sockaddr*) &addr, &len) < 0)
+    {
+	h->cerrno = CSYSERR;
+	return 0;
+    }
+    if ((host = gethostbyaddr((char*)&addr.sin_addr, sizeof(addr.sin_addr),
+	AF_INET)))
+	r = (char*) host->h_name;
+    else
+	r = inet_ntoa(addr.sin_addr);
+    sprintf(buf, "tcp:%s", r);
+    return buf;
 }

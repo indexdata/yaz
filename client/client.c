@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.23  1995-10-18 16:12:30  quinn
+ * Revision 1.24  1995-10-30 12:41:13  quinn
+ * Added hostname lookup for server.
+ *
+ * Revision 1.23  1995/10/18  16:12:30  quinn
  * Better diagnostics.
  *
  * Revision 1.22  1995/10/11  14:49:12  quinn
@@ -668,13 +671,13 @@ void process_close(Z_Close *req)
     {
         "finished",
         "shutdown",
-        "systemProblem",
-        "costLimit",
+        "system problem",
+        "cost limit reached",
         "resources",
-        "securityViolation",
+        "security violation",
         "protocolError",
-        "lackOfActivity",
-        "peerAbort",
+        "lack of activity",
+        "peer abort",
         "unspecified"
     };
 

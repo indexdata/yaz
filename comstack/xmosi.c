@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.6  1995-09-29 17:12:00  quinn
+ * Revision 1.7  1995-10-30 12:41:17  quinn
+ * Added hostname lookup for server.
+ *
+ * Revision 1.6  1995/09/29  17:12:00  quinn
  * Smallish
  *
  * Revision 1.5  1995/09/28  10:24:32  quinn
@@ -103,6 +106,7 @@ int mosi_rcvconnect(COMSTACK h);
 int mosi_bind(COMSTACK h, void *address, int mode);
 int mosi_listen(COMSTACK h, char *addrp, int *addrlen);
 COMSTACK mosi_accept(COMSTACK h);
+char *mosi_addrstr(COMSTACK h);
 
 typedef struct mosi_state
 {
@@ -171,6 +175,7 @@ COMSTACK mosi_type(int blocking, int protocol)
     r->f_bind = mosi_bind;
     r->f_listen = mosi_listen;
     r->f_accept = mosi_accept;
+    r->f_addrstr = mosi_addrstr;
 
     if (!blocking)
     	flags |= O_NONBLOCK;
@@ -470,3 +475,8 @@ int mosi_close(COMSTACK h)
     free(h);
     return 0;
 }    
+
+char *mosi_addrstr(COMSTACK h)
+{
+    return "osi:[UNIMPLEMENTED";
+}

@@ -15,6 +15,8 @@ Added Diagnostic Format.
 Added simple Close handling to frontend server (no hooks for resource
 reporting yet), and demonstration client.
 
+Added cs_addrstr() command to COMSTACK to retrieve peer hostname/address.
+
 --- 1.0b3 1995/08/24
 
 Fixed bug in the frontend-server. The numberOfRecordsReturned field was

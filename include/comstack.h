@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.11  1995-09-29 17:12:01  quinn
+ * Revision 1.12  1995-10-30 12:41:27  quinn
+ * Added hostname lookup for server.
+ *
+ * Revision 1.11  1995/09/29  17:12:01  quinn
  * Smallish
  *
  * Revision 1.10  1995/09/29  17:01:48  quinn
@@ -145,6 +148,7 @@ struct comstack
     int (*f_listen)(COMSTACK handle, char *addrp, int *addrlen);
     COMSTACK (*f_accept)(COMSTACK handle);
     int (*f_close)(COMSTACK handle);
+    char *(*f_addrstr)(COMSTACK handle);
 };
 
 #define cs_put(handle, buf, size) ((*(handle)->f_put)(handle, buf, size))
@@ -163,6 +167,7 @@ struct comstack
 #define cs_getstate(handle) ((handle)->getstate)
 #define cs_errno(handle) ((handle)->cerrno)
 #define cs_getproto(handle) ((handle)->protocol)
+#define cs_addrstr(handle) ((*(handle)->f_addrstr)(handle))
 
 const char *cs_strerror(COMSTACK h);
 const char *cs_errmsg(int n);
