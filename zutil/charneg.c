@@ -1,5 +1,5 @@
 /* 
- $ $Id: charneg.c,v 1.2 2002-05-19 15:39:54 oleg Exp $
+ $ $Id: charneg.c,v 1.3 2002-05-21 08:36:04 adam Exp $
  * Helper functions for Character Set and Language Negotiation - 3
  */
 
@@ -130,7 +130,6 @@ Z_External *yaz_set_proposal_charneg(ODR o, const char **charsets, int num_chars
 static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
 	const char *lang, int selected)
 {	
-	int i;
 	Z_TargetResponse *p = (Z_TargetResponse *) odr_malloc(o, sizeof(*p));
 	Z_PrivateCharacterSet *pc =
 				(Z_PrivateCharacterSet *)odr_malloc(o, sizeof(*pc));

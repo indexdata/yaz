@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.9 2002-02-20 14:40:42 adam Exp $
+ * $Id: zoomtst7.c,v 1.10 2002-05-21 08:36:03 adam Exp $
  *
  * API test..
  */
@@ -15,7 +15,8 @@
 
 int main(int argc, char **argv)
 {
-    int i, j, block;
+    int block;
+    size_t j, i;
     ZOOM_connection z;
     ZOOM_resultset r[10];  /* and result sets .. */
     ZOOM_options o;
