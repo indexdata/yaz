@@ -52,5 +52,5 @@ cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 /usr/include/yaz
 /usr/share/yaz/z39.50
 /usr/share/yaz/ill
-/usr/share/yaz/doc
+/usr/share/doc/yaz
 /usr/share/aclocal/yaz.m4
