@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- XXXXX  XXXX/XX/XX
+
+Front-end can now start from the inetd in TCP mode. DOC updated.
+
 --- 1.0pl4 1996/1/24
 
 Added Sort PDU.
