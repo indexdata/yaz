@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.52 2002-12-16 14:06:34 adam Exp $
+# $Id: makefile,v 1.53 2003-02-17 22:34:39 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -31,9 +31,15 @@ HAVE_ICONV=0
 ICONV_DIR = c:\libiconv-1.7.0.1
 
 # TCL
-TCL="C:\Tcl\bin\tclsh83.exe"
-#TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
+#TCL="C:\Tcl\bin\tclsh83.exe"
+TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
+
+# libxml2
+LIBXML2_DIR=c:\libxml2-2.5.3.win32
+
+LIBXML2_LIB=$(LIBXML2_DIR)\lib\libxml2.lib
+LIBXML2_DEF=/D HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
 
 default: all
 
@@ -134,6 +140,7 @@ ICONV_LIB=
 COMMON_C_OPTIONS=          \
   /nologo /W3 /GX /FD /c   \
   $(ICONV_DEF)             \
+  $(LIBXML2_DEF)           \
   /D "_WINDOWS"            \
   /D "WIN32"               \
   /D "HAVE_WCHAR_H=1"      \
@@ -175,7 +182,7 @@ LINK=link.exe
 LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
            advapi32.lib uuid.lib \
            wsock32.lib  advapi32.lib \
-           $(ICONV_LIB)
+           $(ICONV_LIB) $(LIBXML2_LIB)
 
 COMMON_LNK_OPTIONS= /nologo \
                     /subsystem:windows \
@@ -326,7 +333,10 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\sortspec.obj \
    $(OBJDIR)\z3950oid.obj \
    $(OBJDIR)\charneg.obj \
-   $(OBJDIR)\grs1disp.obj
+   $(OBJDIR)\grs1disp.obj \
+   $(OBJDIR)\zgdu.obj \
+   $(OBJDIR)\soap.obj \
+   $(OBJDIR)\srw.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -850,7 +860,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.52  2002-12-16 14:06:34  adam
+# Revision 1.53  2003-02-17 22:34:39  adam
+# WIN32 updates
+#
+# Revision 1.52  2002/12/16 14:06:34  adam
 # WIN32 updates for marc8.c
 #
 # Revision 1.51  2002/12/05 12:16:39  adam

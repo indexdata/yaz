@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.137 2003-02-17 21:23:31 adam Exp $
+ * $Id: seshigh.c,v 1.138 2003-02-17 22:34:39 adam Exp $
  */
 
 /*
@@ -33,6 +33,7 @@
 #include <io.h>
 #define S_ISREG(x) (x & _S_IFREG)
 #include <process.h>
+#include <sys/stat.h>
 #else
 #include <sys/stat.h>
 #include <unistd.h>
@@ -661,7 +662,9 @@ static void process_http_request(association *assoc, request *req)
 #endif
 	if (!strcmp(hreq->path, "/")) 
         {
+#ifdef DOCDIR
             struct stat sbuf;
+#endif
             const char *doclink = "";
             p = z_get_HTTP_Response(o, 200);
             hres = p->u.HTTP_Response;
