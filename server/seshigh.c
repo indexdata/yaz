@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.1  1995-03-15 16:02:10  quinn
+ * Revision 1.2  1995-03-16 13:29:01  quinn
+ * Partitioned server.
+ *
+ * Revision 1.1  1995/03/15  16:02:10  quinn
  * Modded session.c seshigh.c
  *
  * Revision 1.10  1995/03/15  15:18:51  quinn
@@ -214,11 +217,11 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.1 $";
+    resp.implementationVersion = "$Revision: 1.2 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
-    	odr_perror(assoc->encode, "Encode init");
+    	odr_perror(assoc->encode, "Encode initres");
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);
@@ -283,78 +286,12 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
 
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
-    	odr_perror(assoc->encode, "Encode init");
+    	odr_perror(assoc->encode, "Encode searchres");
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);
     iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
     return 0;
-}
-
-static Z_Records *dummy_database_records (int start, int no_requested, 
-					  int *no_returned, 
-                                          int preferredMessageSize)
-{
-    static Z_Records rec;
-    static int no_records = 0;
-    static Z_NamePlusRecordList z_nprl;
-    int i, size;
-    static Z_NamePlusRecord **records;
-    
-    rec.which = Z_Records_DBOSD;
-    rec.u.databaseOrSurDiagnostics = &z_nprl;
-    if (!no_records)
-    {
-        FILE *inf;
-        char *buf;
-        Odr_external *oep;
-        
-        inf = fopen ("dummy-records", "r");
-        if (!inf)
-            return NULL;
-        records = malloc (sizeof(*records) * 50);
-        assert (records);
-        for (i=0; i<50; i++)
-        {
-            buf = iso2709_read (inf);
-            if (!buf)
-                break;
-            records[i] = malloc (sizeof(**records));
-            assert (records[i]);
-            records[i]->databaseName = NULL;
-            records[i]->which = Z_NamePlusRecord_databaseRecord;
-            oep = records[i]->u.databaseRecord = 
-                malloc (sizeof(*oep));
-            assert (oep);
-            oep->direct_reference = NULL;
-            oep->indirect_reference = NULL;
-            oep->descriptor = NULL;
-            oep->which = ODR_EXTERNAL_octet;
-            oep->u.octet_aligned = malloc (sizeof(*oep->u.octet_aligned));
-            assert (oep->u.octet_aligned);
-            oep->u.octet_aligned->size = oep->u.octet_aligned->len
-                = strlen(buf);
-            oep->u.octet_aligned->buf = buf;
-        }
-        no_records = i;
-        fclose (inf);
-    }
-    if (no_records < start + no_requested)
-        return NULL;
-    
-    z_nprl.records = records + start -1;
-    for (size = 0, i = 0; i<no_requested; i++)
-    {
-        if (z_nprl.records[i]->which == Z_NamePlusRecord_databaseRecord)
-            size += z_nprl.records[i]->u.databaseRecord->u.octet_aligned->size;
-        printf ("size=%d\n", size);
-        if (size > preferredMessageSize)
-            break;
-    }
-    if (i == 0)
-        return NULL;
-    z_nprl.num_records = *no_returned = i;
-    return &rec;
 }
 
 static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
@@ -374,18 +311,11 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
     resp.nextResultSetPosition = &nrr;
     resp.presentStatus = &nrr;
 
-#if 0
-    resp.records = diagrec(1, "Waiting for records from Adam.  :)");
-#else
-    if (!(resp.records = dummy_database_records (*req->resultSetStartPoint,
-        *req->numberOfRecordsRequested, &nrr, assoc->preferredMessageSize)))
-        resp.records = diagrec (1, "No records from Adam. Sorry");
-    printf ("nrr=%d\n", nrr);
-#endif
+    resp.records = diagrec(1, "No records yet.");
 
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
-    	odr_perror(assoc->encode, "Encode init");
+    	odr_perror(assoc->encode, "Encode presentres");
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);

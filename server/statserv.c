@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.6  1995-03-15 15:18:52  quinn
+ * Revision 1.7  1995-03-16 13:29:04  quinn
+ * Partitioned server.
+ *
+ * Revision 1.6  1995/03/15  15:18:52  quinn
  * Little changes to better support nonblocking I/O
  * Added backend.h
  *
@@ -161,7 +164,7 @@ void add_listener(char *where)
     iochan_setdata(lst, l);
 }
 
-int main(int argc, char **argv)
+int statserv_main(int argc, char **argv)
 {
     int ret, listeners = 0;
     char *arg;
