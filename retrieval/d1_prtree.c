@@ -1,29 +1,9 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: d1_prtree.c,v $
- * Revision 1.6  1999-11-30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.5  1999/01/25 13:49:47  adam
- * Made data1_pr_tree make better printing of data1 buffers.
- *
- * Revision 1.4  1998/05/18 13:07:06  adam
- * Changed the way attribute sets are handled by the retriaval module.
- * Extended Explain conversion / schema.
- * Modified server and client to work with ASN.1 compiled protocol handlers.
- *
- * Revision 1.3  1998/02/27 14:05:34  adam
- * Added printing of integer nodes.
- *
- * Revision 1.2  1997/11/06 11:36:44  adam
- * Implemented variant match on simple elements -data1 tree and Espec-1.
- *
- * Revision 1.1  1997/10/27 14:04:07  adam
- * New debug utility, data1_pr_tree, that dumps a data1 tree.
- *
+ * $Id: d1_prtree.c,v 1.7 2002-01-26 19:20:25 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -52,6 +32,16 @@ static void pr_tree (data1_handle dh, data1_node *n, FILE *out, int level)
          break;
     case DATA1N_tag:
 	fprintf (out, "tag type=%s\n", n->u.tag.tag);
+#if DATA1_USING_XATTR
+        if (n->u.tag.attributes)
+        {
+            data1_xattr *xattr = n->u.tag.attributes;
+            fprintf (out, "%*s attr", level, "");
+            for (; xattr; xattr = xattr->next)
+                fprintf (out, " %s=%s ", xattr->name, xattr->value);
+            fprintf (out, "\n");
+        }
+#endif
 	break;
     case DATA1N_data:
 	fprintf (out, "data type=");
