@@ -1,4 +1,4 @@
-<!-- $Id: comstack.xml,v 1.10 2003-02-21 12:06:05 adam Exp $ -->
+<!-- $Id: comstack.xml,v 1.11 2004-05-10 10:46:26 adam Exp $ -->
  <chapter id="comstack"><title>The COMSTACK Module</title>
   
   <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>
@@ -490,6 +490,47 @@ if (buf)
 
   </sect1>
 
+  <sect1 id="comstack.ssl"><title>SSL</title>
+   <para>
+    <synopsis>
+     void *cs_get_ssl(COMSTACK cs);
+    </synopsis>
+    Returns the SSL handle, <literal>SSL *</literal> for comstack. If comstack
+    is not of type SSL, NULL is returned.
+   </para>
+
+   <para>
+    <synopsis>
+     int cs_set_ssl_ctx(COMSTACK cs, void *ctx);
+    </synopsis>
+    Sets SSL context for comstack. The parameter is expected to be of type
+    <literal>SSL_CTX *</literal>. This function should be called just
+    after comstack has been created (before connect, bind, etc).
+    This function returns 1 for success; 0 for failure.
+   </para>
+
+   <para>
+    <synopsis>
+     int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
+    </synopsis>
+    Sets SSL certificate for comstack as a PEM file. This function
+    returns 1 for success; 0 for failure.
+   </para>
+
+
+   <para>
+    <synopsis>
+     int cs_get_ssl_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
+    </synopsis>
+    This function returns the peer certificate. If successful,
+    <literal>*buf</literal> and <literal>*len</literal> holds
+    X509 buffer and length respectively. Buffer should be freed
+    with <literal>xfree</literal>. This function returns 1 for success;
+    0 for failure.
+   </para>
+
+  </sect1>
+  
   <sect1 id="comstack.diagnostics"><title>Diagnostics</title>
 
    <para>

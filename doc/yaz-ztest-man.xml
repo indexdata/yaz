@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY ztest-options SYSTEM "ztest-options.xml">
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.4 2004-04-28 22:44:59 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.5 2004-05-10 10:46:26 adam Exp $ -->
 <refentry id="yaz-ztest">
  
  <refmeta>
@@ -25,6 +25,7 @@
    <arg choice="opt"><option>-l <replaceable>file</replaceable></option></arg>
    <arg choice="opt"><option>-u <replaceable>uid</replaceable></option></arg>
    <arg choice="opt"><option>-c <replaceable>config</replaceable></option></arg>
+   <arg choice="opt"><option>-C <replaceable>fname</replaceable></option></arg>
    <arg choice="opt"><option>-t <replaceable>minutes</replaceable></option></arg>
    <arg choice="opt"><option>-k <replaceable>kilobytes</replaceable></option></arg>
    <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>

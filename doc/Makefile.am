@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.54 2004-04-28 22:44:59 adam Exp $
+## $Id: Makefile.am,v 1.55 2004-05-10 10:46:26 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -12,7 +12,8 @@ HTMLFILES = \
  client.commands.html client.html client.invoking.html client.searching.html \
  comstack.addresses.html comstack.client.html comstack.common.html \
  comstack.diagnostics.html comstack.html comstack.introduction.html \
- comstack.server.html comstack.summary.html credits.html future.html \
+ comstack.server.html comstack.ssl.html comstack.summary.html \
+ credits.html future.html \
  indexdata.html installation.html installation.unix.html \
  installation.win32.html introduction.api.html introduction.html \
  license.html license.other.html odr.debugging.html odr.html \

@@ -1,4 +1,4 @@
-<!-- $Id: asn.xml,v 1.14 2004-03-19 21:12:13 adam Exp $ -->
+<!-- $Id: asn.xml,v 1.15 2004-05-10 10:46:26 adam Exp $ -->
  <chapter id="asn"><title>The Z39.50 ASN.1 Module</title>
   <sect1 id="asn.introduction"><title>Introduction</title>
    <para>
@@ -635,7 +635,7 @@ typedef struct Z_ext_typeent
 	nextResultSetPosition</entry><entry>int</entry><entry>0
        </entry></row>
       <row><entry>
-	presentStatus</entry><entry>int</entry><entry>Z_PRES_SUCCESS
+	presentStatus</entry><entry>int</entry><entry>Z_PresentStatus_success
        </entry></row>
       <row><entry>
 	records</entry><entry>Z_Records</entry><entry>NULL
@@ -665,7 +665,7 @@ typedef struct Z_ext_typeent
        </entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	deleteFunction</entry><entry>int</entry><entry>Z_DeleteRequest_list
+	deleteFunction</entry><entry>int</entry><entry>Z_DeleteResultSetRequest_list
        </entry></row>
       <row><entry>
 	num_ids</entry><entry>int</entry><entry>0

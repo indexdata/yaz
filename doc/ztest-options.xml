@@ -1,5 +1,5 @@
 <!-- 
-   $Id: ztest-options.xml,v 1.4 2004-01-17 01:20:12 adam Exp $
+   $Id: ztest-options.xml,v 1.5 2004-05-10 10:46:26 adam Exp $
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->
@@ -63,6 +63,11 @@
     The argument to this option is transferred to member
     <literal>configname</literal>of the
     <literal>statserv_options_block</literal>.
+   </para></listitem></varlistentry>
+
+ <varlistentry><term><literal>-C </literal>
+   <replaceable>fname</replaceable></term>
+  <listitem><para>Sets SSL certificate file name for server (PEM).
    </para></listitem></varlistentry>
 
  <varlistentry><term><literal>-v </literal>
