@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.1  1999-06-08 10:12:43  adam
+ * Revision 1.2  1999-06-16 12:00:08  adam
+ * Added proximity.
+ *
+ * Revision 1.1  1999/06/08 10:12:43  adam
  * Moved file to be part of zutil (instead of util).
  *
  * Revision 1.13  1998/03/31 15:13:20  adam
@@ -145,6 +148,36 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
         zo->which = Z_Operator_and_not;
         zo->u.and = odr_nullval();
         break;
+    case CCL_RPN_PROX:
+	zo->which = Z_Operator_prox;
+	zo->u.prox = (Z_ProximityOperator *)
+	    odr_malloc (o, sizeof(*zo->u.prox));
+	zo->u.prox->exclusion = 0;
+
+	zo->u.prox->distance = (int *)
+	    odr_malloc (o, sizeof(*zo->u.prox->distance));
+	*zo->u.prox->distance = 2;
+
+	zo->u.prox->ordered = (bool_t *)
+	    odr_malloc (o, sizeof(*zo->u.prox->ordered));
+	*zo->u.prox->ordered = 0;
+
+	zo->u.prox->relationType = (int *)
+	    odr_malloc (o, sizeof(*zo->u.prox->relationType));
+#ifdef ASN_COMPILED
+	*zo->u.prox->relationType = Z_ProximityOperator_Prox_lessThan;
+	zo->u.prox->which = Z_ProximityOperator_known;
+	zo->u.prox->u.known = 
+	    odr_malloc (o, sizeof(*zo->u.prox->u.known));
+	*zo->u.prox->u.known = Z_ProxUnit_word;
+#else
+	*zo->u.prox->relationType = Z_Prox_lessThan;
+	zo->u.prox->which = Z_ProxCode_known;
+	zo->u.prox->proximityUnitCode = (int*)
+	    odr_malloc (o, sizeof(*zo->u.prox->proximityUnitCode));
+	*zo->u.prox->proximityUnitCode = Z_ProxUnit_word;
+#endif
+	break;
     default:
         assert (0);
     }
