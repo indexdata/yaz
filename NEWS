@@ -1,5 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- IN PROGRESS
+
+Fixed NMEM system to return aligned blocks on the smallest boundaries
+that are suitably aligned for all possible types on the particular
+architecture YAZ is being built for.
+
 --- 2.0.30 2005/01/04 
 
 Fixed numerious warnings that was issued with newer versions of GCC.
