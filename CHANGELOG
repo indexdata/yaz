@@ -1,5 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed bug in plain SGML reader in function data1_read_node:
+tags with prefix "var" was incorrectly interpreted as variants.
+
+Added feature "sub-schemas" to enable references to - and definitions
+of - group of elements.
+
+* Removed member parent from type data1_element (in data1.h).
+
 Implemented function odr_nullval() that returns the value of
 ODR_NULLVAL.
 
@@ -8,7 +16,6 @@ ODR_NULLVAL.
 Made NT service interface part of the server library. The
 function statserv_main uses the NT service when required and
 calls the statserv_start / statserv_close routines.
-
 
 Routine zget_SearchRequest fills resultSetName member with "default"
 instead of "Default".

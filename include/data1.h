@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.31  1997-11-18 09:51:08  adam
+ * Revision 1.32  1997-12-09 16:18:16  adam
+ * Work on EXPLAIN schema. First implementation of sub-schema facility
+ * in the *.abs files.
+ *
+ * Revision 1.31  1997/11/18 09:51:08  adam
  * Removed element num_children from data1_node. Minor changes in
  * data1 to Explain.
  *
@@ -314,10 +318,15 @@ typedef struct data1_element
     char *name;
     data1_tag *tag;
     data1_termlist *termlists;
-    struct data1_element *parent;
     struct data1_element *children;
     struct data1_element *next;
 } data1_element;
+
+typedef struct data1_sub_elements {
+    char *name;
+    struct data1_sub_elements *next;
+    data1_element *elements;
+} data1_sub_elements;
 
 typedef struct data1_absyn
 {
@@ -329,7 +338,8 @@ typedef struct data1_absyn
     data1_esetname *esetnames;
     data1_maptab *maptabs;
     data1_marctab *marc;
-    data1_element *elements;
+    data1_sub_elements *sub_elements;
+    data1_element *main_elements;
 } data1_absyn;
 
 /*

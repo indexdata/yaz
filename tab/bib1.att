@@ -81,7 +81,7 @@ att 1012            Date/time-last-modified
 att 1013            Authority/format-id
 att 1014            Concept-text
 att 1015            Concept-reference
-att 1016            Any 		4,1005,62
+att 1016            Any 		1016,4,1005,62
 att 1017            Server-choice
 att 1018            Publisher
 att 1019            Record-source

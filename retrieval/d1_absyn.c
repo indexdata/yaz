@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.14  1997-10-31 12:20:09  adam
+ * Revision 1.15  1997-12-09 16:18:16  adam
+ * Work on EXPLAIN schema. First implementation of sub-schema facility
+ * in the *.abs files.
+ *
+ * Revision 1.14  1997/10/31 12:20:09  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -130,9 +134,10 @@ data1_element *data1_getelementbytagname (data1_handle dh, data1_absyn *abs,
     data1_element *r;
 
     if (!parent)
-	r = abs->elements;
+        r = abs->main_elements;
     else
 	r = parent->children;
+    assert (abs->main_elements);
     for (; r; r = r->next)
     {
 	data1_name *n;
@@ -148,8 +153,8 @@ data1_element *data1_getelementbyname (data1_handle dh, data1_absyn *absyn,
 				       char *name)
 {
     data1_element *r;
-
-    for (r = absyn->elements; r; r = r->next)
+    assert (absyn->main_elements);
+    for (r = absyn->main_elements; r; r = r->next)
 	if (!data1_matchstr(r->name, name))
 	    return r;
     return 0;
@@ -158,19 +163,20 @@ data1_element *data1_getelementbyname (data1_handle dh, data1_absyn *absyn,
 data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 {
     char line[512], *r, cmd[512], args[512];
+    data1_sub_elements *cur_elements = NULL;
     data1_absyn *res = 0;
     FILE *f;
-    data1_element **ppl[D1_MAX_NESTING], *cur[D1_MAX_NESTING];
+    data1_element **ppl[D1_MAX_NESTING];
     data1_esetname **esetpp;
     data1_maptab **maptabp;
     data1_marctab **marcp;
     data1_termlist *all = 0;
-    int level = 0;
+    int level;
 
     logf (LOG_DEBUG, "begin data1_read_absyn file=%s", file);
     if (!(f = yaz_path_fopen(data1_get_tabpath (dh), file, "r")))
     {
-	logf(LOG_WARN|LOG_ERRNO, "%s", file);
+	logf(LOG_WARN|LOG_ERRNO, "Couldn't open %s", file);
 	return 0;
     }
 
@@ -181,14 +187,14 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     res->attset = 0;
     res->varset = 0;
     res->esetnames = 0;
+    esetpp = &res->esetnames;
     res->maptabs = 0;
     maptabp = &res->maptabs;
     res->marc = 0;
     marcp = &res->marc;
-    res->elements = 0;
-    ppl[0] = &res->elements;
-    cur[0] = 0;
-    esetpp = &res->esetnames;
+
+    res->sub_elements = NULL;
+    res->main_elements = NULL;
 
     for (;;)
     {
@@ -211,6 +217,18 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    int type, value;
 	    data1_termlist **tp;
 
+	    if (!cur_elements)
+	    {
+                cur_elements = nmem_malloc(data1_nmem_get(dh),
+				    	   sizeof(*cur_elements));
+	        cur_elements->next = res->sub_elements;
+		cur_elements->elements = NULL;
+		cur_elements->name = "main";
+		res->sub_elements = cur_elements;
+
+		level = 0;
+    		ppl[level] = &cur_elements->elements;
+            }
 	    if (sscanf(args, "%511s %511s %511s", path, name, termlists) < 3)
 	    {
 		logf(LOG_WARN, "Bad # of args to elm in %s: '%s'", 
@@ -235,12 +253,25 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		return 0;
 	    }
 	    level = i;
-	    new_element = cur[level] = *ppl[level] =
+	    if (*p == '$' && level > 0)
+	    {
+		data1_sub_elements *sub_e = res->sub_elements;
+
+		p++;
+		while (sub_e && strcmp (p, sub_e->name))
+		   sub_e = sub_e->next;
+		if (sub_e)
+		    *ppl[level] = sub_e->elements;
+		if (level)
+		    level--;
+		continue;
+            }
+	    new_element = *ppl[level] =
 		nmem_malloc(data1_nmem_get(dh), sizeof(*new_element));
 	    new_element->next = new_element->children = 0;
 	    new_element->tag = 0;
 	    new_element->termlists = 0;
-	    new_element->parent = level ? cur[level - 1] : 0;
+
 	    tp = &new_element->termlists;
 	    ppl[level] = &new_element->next;
 	    ppl[level+1] = &new_element->children;
@@ -339,6 +370,25 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    new_element->name = nmem_strdup(data1_nmem_get (dh), name);
 	}
+ 	else if (!strcmp(cmd, "section"))
+	{
+	    char name[512];
+	    if (sscanf(args, "%511s", name) < 1)
+	    {
+		logf(LOG_WARN, "Bad # of args to sub in %s: '%s'",
+                                file, args);
+		continue;
+	    }
+            cur_elements = nmem_malloc(data1_nmem_get(dh),
+				    	   sizeof(*cur_elements));
+	    cur_elements->next = res->sub_elements;
+	    cur_elements->elements = NULL;
+	    cur_elements->name = nmem_strdup (data1_nmem_get(dh), name);
+	    res->sub_elements = cur_elements;
+
+	    level = 0;
+    	    ppl[level] = &cur_elements->elements;
+	}
 	else if (!strcmp(cmd, "all"))
 	{
 	    char *p;
@@ -397,13 +447,13 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	{
 	    char name[512];
 
-	    if (!sscanf(args, "%s", name))
+	    if (!sscanf(args, "%511s", name))
 	    {
-		logf(LOG_WARN, "%s malformed name directive in %s", file);
+		logf(LOG_WARN, "Malformed name directive in %s", file);
 		fclose(f);
 		return 0;
 	    }
-	    res->name = nmem_strdup(data1_nmem_get(dh), args);
+	    res->name = nmem_strdup(data1_nmem_get(dh), name);
 	}
 	else if (!strcmp(cmd, "reference"))
 	{
@@ -411,7 +461,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    if (!sscanf(args, "%s", name))
 	    {
-		logf(LOG_WARN, "%s malformed reference directive in %s", file);
+		logf(LOG_WARN, "Malformed reference in %s", file);
 		fclose(f);
 		return 0;
 	    }
@@ -428,7 +478,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    if (!sscanf(args, "%s", name))
 	    {
-		logf(LOG_WARN, "%s malformed attset directive in %s", file);
+		logf(LOG_WARN, "Malformed attset directive in %s", file);
 		fclose(f);
 		return 0;
 	    }
@@ -445,7 +495,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    if (!sscanf(args, "%s", name))
 	    {
-		logf(LOG_WARN, "%s malformed tagset directive in %s", file);
+		logf(LOG_WARN, "Malformed tagset directive in %s", file);
 		fclose(f);
 		return 0;
 	    }
@@ -462,7 +512,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    if (!sscanf(args, "%s", name))
 	    {
-		logf(LOG_WARN, "%s malformed varset directive in %s", file);
+		logf(LOG_WARN, "Malformed varset directive in %s", file);
 		fclose(f);
 		return 0;
 	    }
@@ -479,7 +529,8 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    if (sscanf(args, "%s %s", name, fname) != 2)
 	    {
-		logf(LOG_WARN, "%s: Two arg's required for esetname directive");
+		logf(LOG_WARN, "Two arg's required for esetname in %s",
+                     file);
 		fclose(f);
 		return 0;
 	    }
@@ -502,13 +553,14 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    if (sscanf(args, "%s", name) != 1)
 	    {
-		logf(LOG_WARN, "%s: One argument required for maptab directive",
-		    file);
+		logf(LOG_WARN, "One argument for maptab directive in %s",
+                     file);
 		continue;
 	    }
 	    if (!(*maptabp = data1_read_maptab (dh, name)))
 	    {
-		logf(LOG_WARN, "%s: Failed to read maptab.");
+		logf(LOG_WARN, "Failed to read maptab %s in %s",
+                     name, file);
 		continue;
 	    }
 	    maptabp = &(*maptabp)->next;
@@ -519,13 +571,14 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    if (sscanf(args, "%s", name) != 1)
 	    {
-		logf(LOG_WARN, "%s: One argument required for marc directive",
+		logf(LOG_WARN, "One argument for marc directive in %s",
 		    file);
 		continue;
 	    }
 	    if (!(*marcp = data1_read_marctab (dh, name)))
 	    {
-		logf(LOG_WARN, "%s: Failed to read marctab.");
+		logf(LOG_WARN, "%Failed to read marctab %s in %s",
+                     name, file);
 		continue;
 	    }
 	    marcp = &(*marcp)->next;
@@ -538,6 +591,13 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	}
     }
     fclose(f);
+
+    cur_elements = res->sub_elements;
+    while (cur_elements && strcmp (cur_elements->name, "main"))
+	cur_elements = cur_elements->next;
+    if (cur_elements)
+        res->main_elements = cur_elements->elements;
+
     logf (LOG_DEBUG, "end data1_read_absyn file=%s", file);
     return res;
 }

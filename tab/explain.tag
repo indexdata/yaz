@@ -9,11 +9,11 @@ include tagsetm.tag
 #
 # Explain categories
 #
-tag 0		targetInfo					structured
-tag 1		databaseInfo					structured
-tag 2		schemaInfo					structured
-tag 3		tagSetInfo					structured
-tag 4		recordSyntaxInfo				structured
+tag 1		targetInfo					structured
+tag 2		databaseInfo					structured
+tag 3		schemaInfo					structured
+tag 4		tagSetInfo					structured
+tag 5		recordSyntaxInfo				structured
 # ....
 
 #
@@ -85,6 +85,18 @@ tag 517		unitSystems					structured
 tag 518         privateCapabilities				structured
 tag 519		RpnCapabilities					structured
 tag 520		Iso8777Capabilities				structured
+
+tag 550		rpnOperators					structured
+tag 551		rpnOperator					numeric
+tag 552		resultSetAsOperandSupported			bool
+tag 553		restrictionOperandSupported			bool
+tag 554		proximitySupport				structured
+tag 555		anySupport					bool
+tag 556 	proximityUnitsSupported				structured
+tag 557		proximityUnitSupported				structured
+tag 558		proximityUnitVal				numeric
+tag 559		proximityUnitPrivate				structured
+tag 560		proximityUnitDescription			string
 
 tag 600		commonInfo					structured
 tag 601		dateAdded					generalizedtime
