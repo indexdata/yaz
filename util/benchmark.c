@@ -1,4 +1,4 @@
-/* $Id: benchmark.c,v 1.4 2004-01-26 21:05:34 mike Exp $
+/* $Id: benchmark.c,v 1.5 2004-05-19 05:32:47 oleg Exp $
  * Copyright (C) 2003-2004 Index Data Aps
  *
  * This file is part of the YAZ toolkit.
@@ -39,8 +39,9 @@ struct options {
 
 
 static int test(char *host, int port);
+#ifndef HAVE_DPRINTF
 static void dprintf(int level, char *fmt, ...);
-
+#endif
 
 int main(int argc, char **argv)
 {
@@ -115,7 +116,7 @@ static int test(char *host, int port)
     return 1;
 }
 
-
+#ifndef HAVE_DPRINTF
 static void dprintf(int level, char *fmt, ...)
 {
     va_list ap;
@@ -129,3 +130,4 @@ static void dprintf(int level, char *fmt, ...)
     fputc('\n', stderr);
     va_end(ap);
 }
+#endif
