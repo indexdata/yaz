@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Use default namespace for SRW diagnostic elements.
+
 --- 2.0.13 2004/02/23
 
 Implement ZOOM_resultset_cache_reset which resets record cache.
