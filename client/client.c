@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.198 2003-05-23 08:52:35 adam Exp $
+ * $Id: client.c,v 1.199 2003-05-27 09:42:08 mike Exp $
  */
 
 #include <stdio.h>
@@ -1068,16 +1068,15 @@ static int send_searchRequest(const char *arg)
 	}
 	parser = cql_parser_create();
 	if ((error = cql_parser_string(parser, arg)) != 0) {
-	    /* ### must do better with the reporting here */
-            printf("CQL ERROR %d: presumably a syntax error?\n", error);
+            printf("Can't parse CQL: must be a syntax error\n");
             return 0;
 	}
 	node = cql_parser_result(parser);
 	if ((error = cql_transform_buf(cqltrans, node, pqfbuf,
 				       sizeof pqfbuf)) != 0) {
 	    error = cql_transform_error(cqltrans, &addinfo);
-            printf ("Couldn't convert CQL to PQF: error #%d (addinfo=%s)\n",
-		    error, addinfo);
+	    printf ("Can't convert CQL to PQF: %s (addinfo=%s)\n",
+		    cql_strerror(error), addinfo);
             return 0;
         }
 	arg = pqfbuf;
