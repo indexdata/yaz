@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.208 2003-09-04 18:51:49 adam Exp $
+ * $Id: client.c,v 1.209 2003-10-17 14:13:59 adam Exp $
  */
 
 #include <stdio.h>
@@ -60,6 +60,7 @@
 
 static char *codeset = 0;               /* character set for output */
 static int hex_dump = 0;
+static char *dump_file_prefix = 0;
 static ODR out, in, print;              /* encoding and decoding streams */
 #if HAVE_XML2
 static ODR srw_sr_odr_out = 0;
@@ -174,6 +175,21 @@ static void do_hex_dump(const char* buf, int len)
 	    printf("\n");
 	}
     }
+    if (dump_file_prefix)
+    {
+	static int no = 0;
+	if (++no < 1000 && strlen(dump_file_prefix) < 500)
+	{
+	    char fname[1024];
+	    FILE *of;
+	    sprintf (fname, "%s.%03d.raw", dump_file_prefix, no);
+	    of = fopen(fname, "wb");
+	    
+	    fwrite (buf, 1, len, of);
+	    
+	    fclose(of);
+	}
+    }
 }
 
 void add_otherInfos(Z_APDU *a) 
@@ -212,13 +228,13 @@ int send_apdu(Z_APDU *a)
     if (ber_file)
         odr_dumpBER(ber_file, buf, len);
     /* printf ("sending APDU of size %d\n", len); */
+    do_hex_dump(buf, len);
     if (cs_put(conn, buf, len) < 0)
     {
         fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
         close_session();
         return 0;
     }
-    do_hex_dump(buf,len);
     odr_reset(out); /* release the APDU structure  */
     return 1;
 }
@@ -1122,6 +1138,8 @@ static int send_srw(Z_SRW_PDU *sr)
         buf_out = odr_getbuf(out, &len_out, 0);
         
         /* we don't odr_reset(out), since we may need the buffer again */
+
+	do_hex_dump(buf_out, len_out);
 
         r = cs_put(conn, buf_out, len_out);
 
@@ -3293,6 +3311,8 @@ void wait_and_handle_response()
                 
                 buf_out = odr_getbuf(out, &len_out, 0);
                 
+		do_hex_dump(buf_out, len_out);
+
                 cs_put(conn, buf_out, len_out);
                 
                 odr_reset(out);
@@ -3979,7 +3999,7 @@ int main(int argc, char **argv)
     if (codeset)
 	outputCharset = xstrdup(codeset);
 
-    while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vx", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -3991,6 +4011,9 @@ int main(int argc, char **argv)
                 strcat (open_command, arg);
             }
             break;
+	case 'd':
+	    dump_file_prefix = arg;
+	    break;
         case 'k':
             kilobytes = atoi(arg);
             break;
@@ -4048,7 +4071,7 @@ int main(int argc, char **argv)
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
                      "[-b berdump] [-c cclfields] \n"
 		     "[-q cqlfields] [-p <proxy-addr>] [-u <auth>] "
-                     "[-k size] [-V] [<server-addr>]\n",
+                     "[-k size] [-d dump] [-V] [<server-addr>]\n",
                      prog);
             exit (1);
         }      
