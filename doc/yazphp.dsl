@@ -1,10 +1,9 @@
 <!DOCTYPE style-sheet PUBLIC "-//James Clark//DTD DSSSL Style Sheet//EN" [
-<!ENTITY docbook.dsl SYSTEM "/home/adam/proj/docbook-dsssl-1.70/html/docbook.dsl" CDATA DSSSL>
-<!-- ENTITY docbook.dsl SYSTEM "/usr/lib/sgml/stylesheet/dsssl/docbook/nwalsh/html/docbook.dsl" CDATA DSSSL -->
-<!ENTITY html-common.dsl SYSTEM "./html-common.dsl">
+<!ENTITY docbook.dsl SYSTEM "../../docbook-dsssl/html/docbook.dsl"
+  CDATA DSSSL>
 ]>
 <!--
-  $Header: /home/cvsroot/yaz/doc/Attic/yazphp.dsl,v 1.1 2001-07-19 12:46:57 adam Exp $
+  $Id: yazphp.dsl,v 1.2 2001-07-20 21:33:45 adam Exp $
 -->
 <style-sheet>
 <style-specification use="docbook">
