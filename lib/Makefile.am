@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.10 2001-04-05 13:08:48 adam Exp $
+## $Id: Makefile.am,v 1.11 2001-04-05 13:34:36 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -15,15 +15,15 @@ libyaz_la_SOURCES=
 
 libyazthread_la_SOURCES=nmem.c statserv.c
 
+$(srcdir)/nmem.c: $(top_srcdir)/util/nmem.c
+	cp $(top_srcdir)/util/nmem.c $(srcdir)
+
+$(srcdir)/statserv.c: $(top_srcdir)/server/statserv.c
+	cp $(top_srcdir)/server/statserv.c $(srcdir)
+
 LDFLAGS=-version-info 1:0:0
 
-nmem.c:
-	ln -s $(srcdir)/../util/nmem.c
-
-statserv.c:
-	ln -s $(srcdir)/../server/statserv.c
-
-INCLUDES =-I$(srcdir)/../include -I$(srcdir)/../server  -D_REENTRANT=1 -DHAVE_PTHREAD_H=1
+INCLUDES =-I$(top_srcdir)/include -I$(top_srcdir)/server  -D_REENTRANT=1 -DHAVE_PTHREAD_H=1
 
 bin_SCRIPTS = yaz-config
 
