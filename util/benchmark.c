@@ -1,5 +1,5 @@
-/* $Id: benchmark.c,v 1.2 2003-12-24 16:59:12 mike Exp $
- * Copyright (C) 2003 Index Data Aps
+/* $Id: benchmark.c,v 1.3 2004-01-07 20:33:57 adam Exp $
+ * Copyright (C) 2003-2004 Index Data Aps
  *
  * This file is part of the YAZ toolkit.
  *
@@ -11,6 +11,7 @@
  * and average times for each operation.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 
