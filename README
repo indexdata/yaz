@@ -35,13 +35,13 @@ Use '?' to get a list of the available commands.
 
 The current query language is a bit awkward, but functional:
 
-query::= complex | simple | attr query.
-complex ::= operator query query.
+query    ::= complex | simple | attr query.
+complex  ::= operator query query.
 operator ::= '@and' | '@or' | '@not'.
-simple ::= term | set.
-term ::= <word> | '"' <term> .. '"'.
-set ::= '@set' <setname>.
-attr ::= '@attr' <number> '=' <number>.
+simple   ::= term | set.
+term     ::= <word> | '"' <term> ... '"'.
+set      ::= '@set' <setname>.
+attr     ::= '@attr' <number> '=' <number>.
 
 Eg.:
 
