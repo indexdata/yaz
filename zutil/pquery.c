@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.5  2001-02-21 13:46:54  adam
+ * Revision 1.6  2001-03-07 13:24:40  adam
+ * Member and_not in Z_Operator is kept for backwards compatibility.
+ * Added support for definition of CCL operators in field spec file.
+ *
+ * Revision 1.5  2001/02/21 13:46:54  adam
  * C++ fixes.
  *
  * Revision 1.4  1999/12/21 16:25:20  adam
@@ -378,15 +382,15 @@ static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
     {
     case 'a':
         zo->which = Z_Operator_and;
-        zo->u.op_and = odr_nullval();
+        zo->u.and_not = odr_nullval();
         break;
     case 'o':
         zo->which = Z_Operator_or;
-        zo->u.op_or = odr_nullval();
+        zo->u.and_not = odr_nullval();
         break;
     case 'n':
         zo->which = Z_Operator_and_not;
-        zo->u.op_and_not = odr_nullval();
+        zo->u.and_not = odr_nullval();
         break;
     case 'p':
         zo->which = Z_Operator_prox;

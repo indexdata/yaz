@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.21  2001-02-21 13:46:53  adam
+ * Revision 1.22  2001-03-07 13:24:40  adam
+ * Member and_not in Z_Operator is kept for backwards compatibility.
+ * Added support for definition of CCL operators in field spec file.
+ *
+ * Revision 1.21  2001/02/21 13:46:53  adam
  * C++ fixes.
  *
  * Revision 1.20  2000/11/16 13:03:12  adam
@@ -904,6 +908,8 @@ static struct ccl_rpn_node *find_spec (CCL_parser cclp,
 struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list)
 {
     struct ccl_rpn_node *p;
+
+    
 
     cclp->look_token = list;
     p = find_spec (cclp, NULL);

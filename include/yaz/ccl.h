@@ -46,7 +46,11 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.8  2000-11-16 09:58:02  adam
+ * Revision 1.9  2001-03-07 13:24:40  adam
+ * Member and_not in Z_Operator is kept for backwards compatibility.
+ * Added support for definition of CCL operators in field spec file.
+ *
+ * Revision 1.8  2000/11/16 09:58:02  adam
  * Implemented local AttributeSet setting for CCL field maps.
  *
  * Revision 1.7  2000/11/01 14:47:00  adam
@@ -352,6 +356,10 @@ YAZ_EXPORT CCL_parser ccl_parser_create (void);
 /* Destroy CCL parser */
 YAZ_EXPORT void ccl_parser_destroy (CCL_parser p);
 
+YAZ_EXPORT char *ccl_strdup (const char *str);
+
+YAZ_EXPORT const char *ccl_qual_search_special (CCL_bibset b,
+						const char *name);
 
 #ifndef ccl_assert
 #define ccl_assert(x) ;

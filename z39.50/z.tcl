@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.4 2001-02-21 13:46:54 adam Exp $
+# $Id: z.tcl,v 1.5 2001-03-07 13:24:40 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -59,7 +59,7 @@ int z_ANY_type_0 (ODR o, void **p, int opt)
 set map($m,PDU) APDU
 set membermap($m,Operator,and) {Operator_and op_and}
 set membermap($m,Operator,or) {Operator_or op_or}
-set membermap($m,Operator,and-not) {Operator_and_not op_and_not}
+#set membermap($m,Operator,and-not) {Operator_and_not op_and_not}
 set map($m,AttributeElement_complex) ComplexAttribute
 set map($m,DeleteSetStatus) DeleteStatus
 set membermap($m,ProximityOperator,private) {ProximityOperator_private zprivate}

@@ -1,4 +1,4 @@
-# $Id: bib1,v 1.5 2000-12-29 11:12:12 adam Exp $
+# $Id: bib1,v 1.6 2001-03-07 13:24:40 adam Exp $
 # CCL qualifiers and their mappings
 #
 # Each line takes the form:
@@ -29,8 +29,8 @@
 # This rule is for CCL tokens where no fields are specified
 term s=pw   t=l,r s=al
 # Common short-hand access points.
-au   u=1    s=pw t=l,r
-ti   u=4    s=pw t=l,r
+au   u=1    s=pw t=l,r		# author
+ti   u=4    s=pw t=l,r          # title
 isbn u=7
 issn u=8
 cc   u=20
@@ -97,3 +97,9 @@ com:cf      c=3
 
 exp:category exp1,1=1
 
+# These special directives defines names of keywords for parser
+@and og *             # either 'or' or *
+@or eller   +         # either 'eller' or +
+@not ikke -           # and so on..
+@set s set
+@case 0		      # case insenstive (1 for case sensitive)

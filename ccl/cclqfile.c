@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: cclqfile.c,v $
- * Revision 1.8  2001-02-21 13:46:53  adam
+ * Revision 1.9  2001-03-07 13:24:40  adam
+ * Member and_not in Z_Operator is kept for backwards compatibility.
+ * Added support for definition of CCL operators in field spec file.
+ *
+ * Revision 1.8  2001/02/21 13:46:53  adam
  * C++ fixes.
  *
  * Revision 1.7  2001/01/24 11:55:31  adam
@@ -91,7 +95,7 @@
 
 #include <yaz/ccl.h>
 
-void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
+void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 {
     char qual_spec[128];
     int no_scan;
@@ -191,6 +195,14 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
     ccl_qual_add_set (bibset, qual_name, pair_no, pair, attsets);
 }
 
+void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
+{
+    if (*qual_name == '@')
+	ccl_qual_add_special(bibset, qual_name+1, cp);
+    else
+	ccl_qual_field(bibset, cp, qual_name);
+}
+
 /*
  * ccl_qual_file: Read bibset definition from file.
  * bibset:  Bibset
@@ -207,7 +219,7 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
 void ccl_qual_file (CCL_bibset bibset, FILE *inf)
 {
     char line[256];
-    char *cp;
+    char *cp, *cp1;
     char qual_name[128];
     int  no_scan;
 
@@ -219,6 +231,9 @@ void ccl_qual_file (CCL_bibset bibset, FILE *inf)
         if (sscanf (cp, "%s%n", qual_name, &no_scan) != 1)
             continue;        /* also ignore empty lines */
         cp += no_scan;
+	cp1 = strchr(cp, '#');
+	if (cp1)
+	    *cp1 = '\0';
         ccl_qual_fitem (bibset, cp, qual_name);
     }
 }

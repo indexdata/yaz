@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.11  2001-02-21 13:46:54  adam
+ * Revision 1.12  2001-03-07 13:24:40  adam
+ * Member and_not in Z_Operator is kept for backwards compatibility.
+ * Added support for definition of CCL operators in field spec file.
+ *
+ * Revision 1.11  2001/02/21 13:46:54  adam
  * C++ fixes.
  *
  * Revision 1.10  2001/02/20 11:23:50  adam
@@ -175,15 +179,15 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
     {
     case CCL_RPN_AND:
         zo->which = Z_Operator_and;
-        zo->u.op_and = odr_nullval();
+        zo->u.and_not = odr_nullval();
         break;
     case CCL_RPN_OR:
         zo->which = Z_Operator_or;
-        zo->u.op_or = odr_nullval();
+        zo->u.and_not = odr_nullval();
         break;
     case CCL_RPN_NOT:
         zo->which = Z_Operator_and_not;
-        zo->u.op_and_not = odr_nullval();
+        zo->u.and_not = odr_nullval();
         break;
     case CCL_RPN_PROX:
 	zo->which = Z_Operator_prox;

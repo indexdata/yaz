@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.15  2000-05-01 09:36:50  adam
+ * Revision 1.16  2001-03-07 13:24:40  adam
+ * Member and_not in Z_Operator is kept for backwards compatibility.
+ * Added support for definition of CCL operators in field spec file.
+ *
+ * Revision 1.15  2000/05/01 09:36:50  adam
  * Range operator only treated in ordered ranges so that minus (-) can be
  * used for, say, the and-not operator.
  *
@@ -135,13 +139,19 @@ static int token_cmp (CCL_parser cclp, const char *kw, struct ccl_token *token)
 {
     const char *cp1 = kw;
     const char *cp2;
+    const char *aliases;
+    int case_sensitive = cclp->ccl_case_sensitive;
+
+    aliases = ccl_qual_search_special(cclp->bibset, "case");
+    if (aliases)
+	case_sensitive = atoi(aliases);
     if (!kw)
         return 0;
     while ((cp2 = strchr (cp1, ' ')))
     {
         if (token->len == (size_t) (cp2-cp1))
         {
-            if (cclp->ccl_case_sensitive)
+            if (case_sensitive)
             {
                 if (!memcmp (cp1, token->name, token->len))
                     return 1;
@@ -154,7 +164,7 @@ static int token_cmp (CCL_parser cclp, const char *kw, struct ccl_token *token)
         }
 	cp1 = cp2+1;
     }
-    if (cclp->ccl_case_sensitive)
+    if (case_sensitive)
         return token->len == strlen(cp1) 
             && !memcmp (cp1, token->name, token->len);
     return token->len == strlen(cp1) &&
@@ -229,6 +239,7 @@ struct ccl_token *ccl_token_simple (const char *command)
  */
 struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 {
+    const char *aliases;
     const char *cp = command;
     struct ccl_token *first = NULL;
     struct ccl_token *last = NULL;
@@ -311,16 +322,32 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 		cp++;
 		++ last->len;
 	    }
-	    if (token_cmp (cclp, cclp->ccl_token_and, last))
+	    last->kind = CCL_TOK_TERM;
+
+	    aliases = ccl_qual_search_special(cclp->bibset, "and");
+	    if (!aliases)
+		aliases = cclp->ccl_token_and;
+	    if (token_cmp (cclp, aliases, last))
 	        last->kind = CCL_TOK_AND;
-	    else if (token_cmp (cclp, cclp->ccl_token_or, last))
+
+	    aliases = ccl_qual_search_special(cclp->bibset, "or");
+	    if (!aliases)
+		aliases = cclp->ccl_token_or;
+	    if (token_cmp (cclp, aliases, last))
 	        last->kind = CCL_TOK_OR;
-            else if (token_cmp (cclp, cclp->ccl_token_not, last))
+
+	    aliases = ccl_qual_search_special(cclp->bibset, "not");
+	    if (!aliases)
+		aliases = cclp->ccl_token_not;
+            if (token_cmp (cclp, aliases, last))
 	        last->kind = CCL_TOK_NOT;
-	    else if (token_cmp (cclp, cclp->ccl_token_set, last))
+
+	    aliases = ccl_qual_search_special(cclp->bibset, "set");
+	    if (!aliases)
+		aliases = cclp->ccl_token_set;
+
+	    if (token_cmp (cclp, aliases, last))
 	        last->kind = CCL_TOK_SET;
-	    else
-		last->kind = CCL_TOK_TERM;
 	}
     }
     return first;
@@ -352,7 +379,7 @@ void ccl_token_del (struct ccl_token *list)
     }
 }
 
-static char *ccl_strdup (const char *str)
+char *ccl_strdup (const char *str)
 {
     int len = strlen(str);
     char *p = (char*) malloc (len+1);
@@ -393,23 +420,39 @@ void ccl_parser_destroy (CCL_parser p)
 void ccl_parser_set_op_and (CCL_parser p, const char *op)
 {
     if (p && op)
+    {
+	if (p->ccl_token_and)
+	    free (p->ccl_token_and);
 	p->ccl_token_and = ccl_strdup (op);
+    }
 }
 
 void ccl_parser_set_op_or (CCL_parser p, const char *op)
 {
     if (p && op)
+    {
+	if (p->ccl_token_or)
+	    free (p->ccl_token_or);
 	p->ccl_token_or = ccl_strdup (op);
+    }
 }
 void ccl_parser_set_op_not (CCL_parser p, const char *op)
 {
     if (p && op)
+    {
+	if (p->ccl_token_not)
+	    free (p->ccl_token_not);
 	p->ccl_token_not = ccl_strdup (op);
+    }
 }
 void ccl_parser_set_op_set (CCL_parser p, const char *op)
 {
     if (p && op)
+    {
+	if (p->ccl_token_set)
+	    free (p->ccl_token_set);
 	p->ccl_token_set = ccl_strdup (op);
+    }
 }
 
 void ccl_parser_set_case (CCL_parser p, int case_sensitivity_flag)

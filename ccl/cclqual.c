@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.14  2000-11-16 09:58:02  adam
+ * Revision 1.15  2001-03-07 13:24:40  adam
+ * Member and_not in Z_Operator is kept for backwards compatibility.
+ * Added support for definition of CCL operators in field spec file.
+ *
+ * Revision 1.14  2000/11/16 09:58:02  adam
  * Implemented local AttributeSet setting for CCL field maps.
  *
  * Revision 1.13  2000/01/31 13:15:21  adam
@@ -119,7 +123,45 @@
 /* Definition of CCL_bibset pointer */
 struct ccl_qualifiers {
     struct ccl_qualifier *list;
+    struct ccl_qualifier_special *special;
 };
+
+
+/* CCL Qualifier special */
+struct ccl_qualifier_special {
+    char *name;
+    char *value;
+    struct ccl_qualifier_special *next;
+};
+
+void ccl_qual_add_special (CCL_bibset bibset, const char *n, const char *v)
+{
+    struct ccl_qualifier_special *p;
+    const char *pe;
+
+    for (p = bibset->special; p && strcmp(p->name, n); p = p->next)
+	;
+    if (p)
+	free (p->value);
+    else
+    {
+	p = (struct ccl_qualifier_special *) malloc (sizeof(*p));
+	p->name = ccl_strdup (n);
+	p->value = 0;
+	p->next = bibset->special;
+	bibset->special = p;
+    }
+    while (strchr(" \t", *v))
+	++v;
+    for (pe = v + strlen(v); pe != v; --pe)
+	if (!strchr(" \n\r\t", pe[-1]))
+	    break;
+    p->value = (char*) malloc (pe - v + 1);
+    if (pe - v)
+	memcpy (p->value, v, pe - v);
+    p->value[pe - v] = '\0';
+}
+
 
 /*
  * ccl_qual_add: Add qualifier to Bibset. If qualifier already
@@ -184,6 +226,7 @@ CCL_bibset ccl_qual_mk (void)
     CCL_bibset b = (CCL_bibset)malloc (sizeof(*b));
     ccl_assert (b);
     b->list = NULL;     
+    b->special = NULL;
     return b;
 }
 
@@ -194,6 +237,7 @@ CCL_bibset ccl_qual_mk (void)
 void ccl_qual_rm (CCL_bibset *b)
 {
     struct ccl_qualifier *q, *q1;
+    struct ccl_qualifier_special *sp, *sp1;
 
     if (!*b)
         return;
@@ -211,6 +255,13 @@ void ccl_qual_rm (CCL_bibset *b)
         q1 = q->next;
 	free (q->name);
 	free (q);
+    }
+    for (sp = (*b)->special; sp; sp = sp1)
+    {
+	sp1 = sp->next;
+	free (sp->name);
+	free (sp->value);
+	free (sp);
     }
     free (*b);
     *b = NULL;
@@ -248,3 +299,15 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
     return NULL;
 }
 
+const char *ccl_qual_search_special (CCL_bibset b,
+				     const char *name)
+{
+    struct ccl_qualifier_special *q;
+    if (!b)
+	return 0;
+    for (q = b->special; q && strcmp(q->name, name); q = q->next)
+	;
+    if (q)
+	return q->value;
+    return 0;
+}

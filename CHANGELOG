@@ -1,9 +1,12 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+CCL operator names may be set in field definition files (CCL_bibset).
+See ccl/bib1 for an example.
+
 Fixes in ASN.1 compiler for C++ compatibility.
 
-* Changed member names "and", "or" and "and_not" in struct Z_Operator
-to "op_and", "op_or" and "op_and_not" to avoid conflict with C++.
+* Renamed members "and" and "or" in struct Z_Operator to "op_and"
+and "op_or" to avoid conflict with C++.
 
 Fixed problem with GNU readline detection on Redhat 7.0.
 
