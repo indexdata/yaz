@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.45  1998-08-19 16:10:07  adam
+ * Revision 1.46  1998-10-20 13:55:44  quinn
+ * Fixed Scan bug in asn and client
+ *
+ * Revision 1.45  1998/08/19 16:10:07  adam
  * Changed som member names of DeleteResultSetRequest/Response.
  *
  * Revision 1.44  1998/05/18 10:14:08  adam
@@ -946,6 +949,8 @@ typedef struct Z_Entry
     } u;
 } Z_Entry;
 
+#ifdef BUGGY_LISTENTRIES
+
 typedef struct Z_Entries
 {
     int num_entries;
@@ -962,6 +967,15 @@ typedef struct Z_ListEntries
     	Z_Entries *entries;
 	Z_DiagRecs *nonSurrogateDiagnostics;
     } u;
+} Z_ListEntries;
+
+#endif
+
+typedef struct Z_ListEntries {
+	int num_entries;
+	Z_Entry **entries; /* OPT */
+	int num_nonsurrogateDiagnostics;
+	Z_DiagRec **nonsurrogateDiagnostics; /* OPT */
 } Z_ListEntries;
 
 typedef struct Z_ScanRequest

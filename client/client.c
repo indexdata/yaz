@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.72  1998-10-20 13:23:15  quinn
+ * Revision 1.73  1998-10-20 13:55:43  quinn
+ * Fixed Scan bug in asn and client
+ *
+ * Revision 1.72  1998/10/20 13:23:15  quinn
  * changed preferred pos to 1
  *
  * Revision 1.71  1998/10/20 13:21:43  adam
@@ -1579,16 +1582,8 @@ void process_scanResponse(Z_ScanResponse *res)
         printf("Scan returned code %d\n", *res->scanStatus);
     if (!res->entries)
         return;
-#ifdef ASN_COMPILED
     if ((entries = res->entries->entries))
 	num_entries = res->entries->num_entries;
-#else
-    if (res->entries->which == Z_ListEntries_entries)
-    {
-        entries = res->entries->u.entries->entries;
-	num_entries = res->entries->u.entries->num_entries;
-    }
-#endif
     for (i = 0; i < num_entries; i++)
     {
         int pos_term = res->positionOfTerm ? *res->positionOfTerm : -1;
@@ -1600,15 +1595,9 @@ void process_scanResponse(Z_ScanResponse *res)
 	else
 	    display_diagrecs(&entries[i]->u.surrogateDiagnostic, 1);
     }
-#ifdef ASN_COMPILED
     if (res->entries->nonsurrogateDiagnostics)
 	display_diagrecs (res->entries->nonsurrogateDiagnostics,
 			  res->entries->num_nonsurrogateDiagnostics);
-#else
-    if (res->entries->which == Z_ListEntries_nonSurrogateDiagnostics)
-        display_diagrecs(&res->entries->
-			 u.nonSurrogateDiagnostics->diagRecs[0], 1);
-#endif
 }
 
 void process_sortResponse(Z_SortResponse *res)
@@ -1683,7 +1672,7 @@ int cmd_scan(char *arg)
     }
     if (*arg)
     {
-        if (send_scanrequest(arg, 1 20) < 0)
+        if (send_scanrequest(arg, 1, 20) < 0)
             return 0;
     }
     else

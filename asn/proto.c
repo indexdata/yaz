@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.56  1998-08-19 16:10:04  adam
+ * Revision 1.57  1998-10-20 13:55:37  quinn
+ * Fixed Scan bug in asn and client
+ *
+ * Revision 1.56  1998/08/19 16:10:04  adam
  * Changed som member names of DeleteResultSetRequest/Response.
  *
  * Revision 1.55  1998/02/11 11:53:32  adam
@@ -1202,6 +1205,8 @@ int z_Entry(ODR o, Z_Entry **p, int opt)
     return opt && odr_ok(o);
 }
 
+#ifdef BUGGY_LISTENTRIES
+
 int z_Entries(ODR o, Z_Entries **p, int opt)
 {
     if (o->direction == ODR_DECODE)
@@ -1237,6 +1242,22 @@ int z_ListEntries(ODR o, Z_ListEntries **p, int opt)
     return opt && odr_ok(o);
 }
 
+#endif
+
+int z_ListEntries (ODR o, Z_ListEntries **p, int opt)
+{
+	if (!odr_sequence_begin (o, p, sizeof(**p)))
+		return opt && odr_ok (o);
+	return
+		odr_implicit_settag (o, ODR_CONTEXT, 1) &&
+		(odr_sequence_of(o, (Odr_fun) z_Entry, &(*p)->entries,
+		  &(*p)->num_entries) || odr_ok(o)) &&
+		odr_implicit_settag (o, ODR_CONTEXT, 2) &&
+		(odr_sequence_of(o, (Odr_fun) z_DiagRec, &(*p)->nonsurrogateDiagnostics,
+		  &(*p)->num_nonsurrogateDiagnostics) || odr_ok(o)) &&
+		odr_sequence_end (o);
+}
+
 int z_ScanRequest(ODR o, Z_ScanRequest **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
@@ -1270,7 +1291,7 @@ int z_ScanResponse(ODR o, Z_ScanResponse **p, int opt)
 	odr_implicit(o, odr_integer, &(*p)->numberOfEntriesReturned,
 	    ODR_CONTEXT, 5, 0) &&
 	odr_implicit(o, odr_integer, &(*p)->positionOfTerm, ODR_CONTEXT, 6, 1)&&
-	odr_explicit(o, z_ListEntries, &(*p)->entries, ODR_CONTEXT, 7, 1) &&
+	odr_implicit(o, z_ListEntries, &(*p)->entries, ODR_CONTEXT, 7, 1) &&
 	odr_implicit(o, odr_oid, &(*p)->attributeSet, ODR_CONTEXT, 8, 1) &&
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
 	odr_sequence_end(o);
