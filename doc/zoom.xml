@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.26 2003-05-19 20:45:07 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.27 2003-05-20 08:22:33 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -358,6 +358,10 @@
        </entry><entry>0</entry></row>
       <row><entry>
         count</entry><entry>Number of records to be retrieved.
+       </entry><entry>0</entry></row>
+      <row><entry>
+        step</entry><entry>Number of records to be retrieved in
+        one chunk. The value, 0 means unchunked.
        </entry><entry>0</entry></row>
       <row><entry>
         elementSetName</entry><entry>Element-Set name of records. 

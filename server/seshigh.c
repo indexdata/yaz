@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.155 2003-04-29 21:20:33 adam Exp $
+ * $Id: seshigh.c,v 1.156 2003-05-20 08:22:33 adam Exp $
  */
 
 /*
@@ -658,20 +658,22 @@ static void srw_bend_search(association *assoc, request *req,
     }
     else
     {
+        int number = srw_req->maximumRecords ? *srw_req->maximumRecords : 0;
+        int start = srw_req->startRecord ? *srw_req->startRecord : 1;
+
+        yaz_log(LOG_LOG, "Request to pack %d+%d out of %d",
+                start, number, rr.hits);
+
         srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
-        if (srw_req->maximumRecords && *srw_req->maximumRecords > 0)
+        if (number > 0)
         {
-            int number = *srw_req->maximumRecords;
-            int start = 1;
             int i;
 
-            if (srw_req->startRecord)
-                start = *srw_req->startRecord;
-
-            yaz_log(LOG_DEBUG, "srw_bend_search. start=%d max=%d",
-                    start, *srw_req->maximumRecords);
-
-            if (start <= rr.hits)
+            if (start > rr.hits)
+            {
+                yaz_log(LOG_LOG, "Request out or range");
+            }
+            else
             {
                 int j = 0;
                 int packing = Z_SRW_recordPacking_string;

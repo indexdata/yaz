@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.6 2003-02-20 15:11:58 adam Exp $
+ * $Id: zoom-p.h,v 1.7 2003-05-20 08:22:33 adam Exp $
  */
 
 #if HAVE_XSLT
@@ -88,6 +88,7 @@ struct ZOOM_resultset_p {
     int size;
     int start;
     int count;
+    int step;
     int piggyback;
     char *setname;
     char *schema;

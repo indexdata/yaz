@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+New ZOOM option "step" which specifies number of records to be
+retrieved in one chunk. Used in conjunction with "start" and "count".
+
 SRW support for yaz-client.
 
 yaz-client no longer does (un)intelligent character set conversions

@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.34 2003-05-14 20:58:07 adam Exp $
+ * $Id: zoom-c.c,v 1.35 2003-05-20 08:22:33 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -508,6 +508,7 @@ ZOOM_resultset ZOOM_resultset_create ()
     r->setname = 0;
     r->schema = 0;
     r->count = 0;
+    r->step = 0;
     r->record_cache = 0;
     r->r_sort_spec = 0;
     r->query = 0;
@@ -543,6 +544,7 @@ ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 
     r->start = ZOOM_options_get_int(r->options, "start", 0);
     r->count = ZOOM_options_get_int(r->options, "count", 0);
+    r->step = ZOOM_options_get_int(r->options, "step", 0);
     r->piggyback = ZOOM_options_get_bool (r->options, "piggyback", 1);
     cp = ZOOM_options_get (r->options, "setname");
     if (cp)
@@ -1117,7 +1119,8 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         return zoom_complete;
     }
     sr->u.request->startRecord = odr_intdup (c->odr_out, resultset->start + 1);
-    sr->u.request->maximumRecords = odr_intdup (c->odr_out, resultset->count);
+    sr->u.request->maximumRecords = odr_intdup (
+        c->odr_out, resultset->step>0 ? resultset->step : resultset->count);
     sr->u.request->recordSchema = resultset->schema;
 
     recordPacking = ZOOM_resultset_option_get (resultset, "recordPacking");
@@ -1191,7 +1194,7 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
 	/* Regular piggyback - do it unless we're going to do sort */
 	*search_req->largeSetLowerBound = 2000000000;
 	*search_req->smallSetUpperBound = 0;
-	*search_req->mediumSetPresentNumber = r->count;
+	*search_req->mediumSetPresentNumber = r->step>0 ? r->step : r->count;
 	smallSetElementSetName = 0;
     }
     else
@@ -1814,7 +1817,8 @@ static zoom_ret send_present (ZOOM_connection c)
     resultset->start += i;
     resultset->count -= i;
     *req->resultSetStartPoint = resultset->start + 1;
-    *req->numberOfRecordsRequested = resultset->count;
+    *req->numberOfRecordsRequested = resultset->step>0 ?
+        resultset->step : resultset->count;
     assert (*req->numberOfRecordsRequested > 0);
 
     if (syntax && *syntax)
