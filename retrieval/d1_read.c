@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.43 2002-05-21 07:43:16 adam Exp $
+ * $Id: d1_read.c,v 1.44 2002-07-03 10:04:04 adam Exp $
  */
 
 #include <assert.h>
@@ -14,6 +14,16 @@
 #include <yaz/log.h>
 #include <yaz/data1.h>
 
+data1_node *data1_get_root_tag (data1_handle dh, data1_node *n)
+{
+    if (!n)
+        return 0;
+    n = n->child;
+    while (n && n->which != DATA1N_tag)
+        n = n->next;
+    return n;
+}
+        
 /*
  * get the tag which is the immediate parent of this node (this may mean
  * traversing intermediate things like variants and stuff.
@@ -81,10 +91,20 @@ data1_node *data1_mk_node2 (data1_handle dh, NMEM m, int type,
 	r->u.data.what = 0;
 	r->u.data.formatted_text = 0;
         break;
+    case DATA1N_comment:
+	r->u.data.data = 0;
+	r->u.data.len = 0;
+	r->u.data.what = 0;
+	r->u.data.formatted_text = 1;
+        break;
     case DATA1N_variant:
         r->u.variant.type = 0;
         r->u.variant.value = 0;
 	break;
+    case DATA1N_preprocess:
+        r->u.preprocess.target = 0;
+        r->u.preprocess.attributes = 0;
+        break;
     default:
 	logf (LOG_WARN, "data_mk_node_type. bad type = %d\n", type);
     }
@@ -105,7 +125,7 @@ void data1_free_tree (data1_handle dh, data1_node *t)
 	(*t->destroy)(t);
 }
 
-data1_node *data1_mk_root (data1_handle dh, NMEM nmem,  const char *name)
+data1_node *data1_mk_root (data1_handle dh, NMEM nmem, const char *name)
 {
     data1_absyn *absyn = data1_get_absyn (dh, name);
     data1_node *res;
@@ -118,6 +138,35 @@ data1_node *data1_mk_root (data1_handle dh, NMEM nmem,  const char *name)
     res = data1_mk_node2 (dh, nmem, DATA1N_root, 0);
     res->u.root.type = data1_insert_string (dh, res, nmem, name);
     res->u.root.absyn = absyn;
+    return res;
+}
+
+void data1_set_root(data1_handle dh, data1_node *res,
+                    NMEM nmem, const char *name)
+{
+    data1_absyn *absyn = data1_get_absyn (dh, name);
+
+    res->u.root.type = data1_insert_string (dh, res, nmem, name);
+    res->u.root.absyn = absyn;
+}
+
+data1_node *data1_mk_preprocess (data1_handle dh, NMEM nmem,
+                                 const char *target, const char **attr,
+                                 data1_node *at)
+{
+    data1_xattr **p;
+    data1_node *res = data1_mk_node2 (dh, nmem, DATA1N_preprocess, at);
+    res->u.preprocess.target = data1_insert_string (dh, res, nmem, target);
+
+    p = &res->u.preprocess.attributes;
+    while (attr && *attr)
+    {
+        *p = (data1_xattr*) nmem_malloc (nmem, sizeof(**p));
+        (*p)->name = nmem_strdup (nmem, *attr++);
+        (*p)->value = nmem_strdup (nmem, *attr++);
+        p = &(*p)->next;
+    }
+    *p = 0;
     return res;
 }
 
@@ -149,6 +198,28 @@ data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem,
     return res;
 }
 
+void data1_tag_add_attr (data1_handle dh, NMEM nmem,
+                         data1_node *res, const char **attr)
+{
+    data1_xattr **p;
+
+    if (res->which != DATA1N_tag)
+        return;
+
+    p = &res->u.tag.attributes;
+    while (*p)
+        p = &(*p)->next;
+
+    while (attr && *attr)
+    {
+        *p = (data1_xattr*) nmem_malloc (nmem, sizeof(**p));
+        (*p)->name = nmem_strdup (nmem, *attr++);
+        (*p)->value = nmem_strdup (nmem, *attr++);
+        p = &(*p)->next;
+    }
+    *p = 0;
+}
+
 data1_node *data1_mk_tag (data1_handle dh, NMEM nmem,
                           const char *tag, const char **attr, data1_node *at) 
 {
@@ -158,6 +229,13 @@ data1_node *data1_mk_tag (data1_handle dh, NMEM nmem,
 data1_node *data1_search_tag (data1_handle dh, data1_node *n,
                               const char *tag)
 {
+    if (*tag == '/')
+    {
+        n = data1_get_root_tag (dh, n);
+        if (n)
+            n = n->child;
+        tag++;
+    }
     for (; n; n = n->next)
 	if (n->which == DATA1N_tag && n->u.tag.tag &&
 	    !yaz_matchstr (tag, n->u.tag.tag))
@@ -178,7 +256,6 @@ data1_node *data1_mk_tag_uni (data1_handle dh, NMEM nmem,
     return node;
 }
 
-
 data1_node *data1_mk_text_n (data1_handle dh, NMEM mem,
                              const char *buf, size_t len, data1_node *parent)
 {
@@ -187,6 +264,14 @@ data1_node *data1_mk_text_n (data1_handle dh, NMEM mem,
     res->u.data.len = len;
     
     res->u.data.data = data1_insert_string_n (dh, res, mem, buf, len);
+    return res;
+}
+
+data1_node *data1_mk_text_nf (data1_handle dh, NMEM mem,
+                              const char *buf, size_t len, data1_node *parent)
+{
+    data1_node *res = data1_mk_text_n (dh, mem, buf, len, parent);
+    res->u.data.formatted_text = 1;
     return res;
 }
 
@@ -531,14 +616,10 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 			break;
 		    }
 		}
-		if (level == 0)
+		if (level <= 1)
 		    return d1_stack[0];
 		continue;
 	    }	
-	    if (level == 0) /* root ? */
-	    {
-		res = data1_mk_root (dh, m, tag);
-	    }
 	    else if (!strcmp(tag, "var"))
 	    {
 		char tclass[DATA1_MAX_SYMBOL], type[DATA1_MAX_SYMBOL];
@@ -584,7 +665,13 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    }
 	    else 
             {
-                /* tag.. acquire our element in the abstract syntax */
+                
+                /* tag .. acquire our element in the abstract syntax */
+                if (level == 0)
+                {
+                    parent = data1_mk_root (dh, m, tag);
+                    d1_stack[level++] = parent;
+                }
                 res = data1_mk_tag (dh, m, tag, 0 /* attr */, parent);
                 res->u.tag.attributes = xattr;
             }

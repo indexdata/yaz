@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.11 2002-05-21 07:43:16 adam Exp $
+ * $Id: data1.h,v 1.12 2002-07-03 10:04:04 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -227,9 +227,11 @@ typedef struct data1_node
 #define DATA1N_data 3
     /* variant specification (a triple, actually) */
 #define DATA1N_variant 4
-    int which;
     /* comment (same as data) */
 #define DATA1N_comment 5
+    /* preprocessing instruction */
+#define DATA1N_preprocess 6
+    int which;
     union
     {
 	struct
@@ -272,6 +274,12 @@ typedef struct data1_node
 	    data1_vartype *type;
 	    char *value;
 	} variant;
+
+        struct
+        {
+            char *target;
+            data1_xattr *attributes;
+        } preprocess;
     } u;
 
     void (*destroy)(struct data1_node *n);
@@ -343,10 +351,15 @@ YAZ_EXPORT data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem,
                                        const char *tag, size_t len,
                                        const char **attr,
                                        data1_node *at);
+YAZ_EXPORT void data1_tag_add_attr (data1_handle dh, NMEM nmem,
+                                    data1_node *res, const char **attr);
 
 YAZ_EXPORT data1_node *data1_mk_text_n (data1_handle dh, NMEM mem,
                                         const char *buf, size_t len,
                                         data1_node *parent);
+YAZ_EXPORT data1_node *data1_mk_text_nf (data1_handle dh, NMEM mem,
+                                         const char *buf, size_t len,
+                                         data1_node *parent);
 YAZ_EXPORT data1_node *data1_mk_text (data1_handle dh, NMEM mem,
                                       const char *buf, data1_node *parent);
 
@@ -357,8 +370,15 @@ YAZ_EXPORT data1_node *data1_mk_comment_n (data1_handle dh, NMEM mem,
 YAZ_EXPORT data1_node *data1_mk_comment (data1_handle dh, NMEM mem,
                                          const char *buf, data1_node *parent);
 
+YAZ_EXPORT data1_node *data1_mk_preprocess (data1_handle dh, NMEM nmem,
+                                            const char *target,
+                                            const char **attr,
+                                            data1_node *at);
+
 YAZ_EXPORT data1_node *data1_mk_root (data1_handle dh, NMEM nmem,
                                       const char *name);
+YAZ_EXPORT void data1_set_root(data1_handle dh, data1_node *res,
+                               NMEM nmem, const char *name);
 
 YAZ_EXPORT data1_node *data1_mk_tag_data_int (data1_handle dh, data1_node *at,
                                               const char *tag, int num,
@@ -446,6 +466,8 @@ YAZ_EXPORT data1_node *data1_add_taggeddata (data1_handle dh, data1_node *root,
                                              data1_node *at,
                                              const char *tagname,
                                              NMEM m);
+
+YAZ_EXPORT data1_node *data1_get_root_tag (data1_handle dh, data1_node *n);
 
 YAZ_END_CDECL
 

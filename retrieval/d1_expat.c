@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: d1_expat.c,v 1.2 2002-05-21 07:43:16 adam Exp $
+ * $Id: d1_expat.c,v 1.3 2002-07-03 10:04:04 adam Exp $
  */
 
 #if HAVE_EXPAT_H
@@ -27,10 +27,12 @@ struct user_info {
 static void cb_start (void *user, const char *el, const char **attr)
 {
     struct user_info *ui = (struct user_info*) user;
+    if (ui->level == 1)
+        data1_set_root (ui->dh, ui->d1_stack[0], ui->nmem, el);
     ui->d1_stack[ui->level] = data1_mk_tag (ui->dh, ui->nmem, el, attr,
                                                 ui->d1_stack[ui->level-1]);
     ui->level++;
-    printf ("cb_start %s\n", el);
+    yaz_log (LOG_DEBUG, "cb_start %s", el);
 }
 
 static void cb_end (void *user, const char *el)
@@ -38,7 +40,7 @@ static void cb_end (void *user, const char *el)
     struct user_info *ui = (struct user_info*) user;
 
     ui->level--;
-    printf ("cb_end %s\n", el);
+    yaz_log (LOG_DEBUG, "cb_end %s", el);
 }
 
 static void cb_chardata (void *user, const char *s, int len)
@@ -59,33 +61,61 @@ static void cb_chardata (void *user, const char *s, int len)
 static void cb_decl (void *user, const char *version, const char*encoding,
                      int standalone)
 {
-    printf ("decl version=%s encoding=%s\n", version ? version : "null",
-            encoding ? encoding : "null");
-}
+    struct user_info *ui = (struct user_info*) user;
+    const char *attr_list[7];
 
-static void cb_processing (void *userData, const char *target,
+    attr_list[0] = "version";
+    attr_list[1] = version;
+
+    attr_list[2] = "encoding";
+    attr_list[3] = encoding;
+
+    attr_list[4] = "standalone";
+    attr_list[5] = standalone  ? "yes" : "no";
+
+    attr_list[6] = 0;
+    
+    data1_mk_preprocess (ui->dh, ui->nmem, "xml", attr_list,
+                             ui->d1_stack[ui->level-1]);
+    yaz_log (LOG_DEBUG, "decl version=%s encoding=%s",
+             version ? version : "null",
+             encoding ? encoding : "null");
+}
+    
+static void cb_processing (void *user, const char *target,
                            const char *data)
 {
-    printf ("decl processing target=%s data=%s\n", target ? target : "null",
-            data ? data : "null");
+    struct user_info *ui = (struct user_info*) user;
+    data1_node *res =
+        data1_mk_preprocess (ui->dh, ui->nmem, target, 0,
+                             ui->d1_stack[ui->level-1]);
+    data1_mk_text_nf (ui->dh, ui->nmem, data, strlen(data), res);
+    
+    yaz_log (LOG_DEBUG, "decl processing target=%s data=%s",
+             target ? target : "null",
+             data ? data : "null");
+    
+    
 }
 
-static void cb_comment (void *userData, const char *data)
+static void cb_comment (void *user, const char *data)
 {
-    printf ("decl comment data=%s\n", data ? data : "null");
+    struct user_info *ui = (struct user_info*) user;
+    yaz_log (LOG_DEBUG, "decl comment data=%s", data ? data : "null");
+    data1_mk_comment (ui->dh, ui->nmem, data, ui->d1_stack[ui->level-1]);
 }
 
 static void cb_doctype_start (void *userData, const char *doctypeName,
                               const char *sysid, const char *pubid,
                               int has_internal_subset)
 {
-    printf ("doctype start doctype=%s sysid=%s pubid=%s\n",
-            doctypeName, sysid, pubid);
+    yaz_log (LOG_DEBUG, "doctype start doctype=%s sysid=%s pubid=%s",
+             doctypeName, sysid, pubid);
 }
 
 static void cb_doctype_end (void *userData)
 {
-    printf ("doctype end\n");
+    yaz_log (LOG_DEBUG, "doctype end");
 }
 
 
@@ -95,10 +125,11 @@ static void cb_entity_decl (void *userData, const char *entityName,
                             const char *base, const char *systemId,
                             const char *publicId, const char *notationName)
 {
-    printf ("entity %s is_para_entry=%d value=%.*s base=%s systemId=%s\n"
-            " publicId=%s notationName=%s\n",
-            entityName, is_parameter_entity, value_length, value,
-            base, systemId, publicId, notationName);
+    yaz_log (LOG_DEBUG,
+             "entity %s is_para_entry=%d value=%.*s base=%s systemId=%s"
+             " publicId=%s notationName=%s",
+             entityName, is_parameter_entity, value_length, value,
+             base, systemId, publicId, notationName);
     
 }
 
@@ -115,7 +146,7 @@ data1_node *data1_read_xml (data1_handle dh,
     uinfo.level = 1;
     uinfo.dh = dh;
     uinfo.nmem = m;
-    uinfo.d1_stack[0] = data1_mk_root (dh, m, "root");
+    uinfo.d1_stack[0] = data1_mk_node2 (dh, m, DATA1N_root, 0);
     uinfo.d1_stack[1] = 0; /* indicate no children (see end of routine) */
     
     parser = XML_ParserCreate (0 /* encoding */);

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_write.c,v 1.12 2002-05-21 07:43:16 adam Exp $
+ * $Id: d1_write.c,v 1.13 2002-07-03 10:04:04 adam Exp $
  */
 
 #include <string.h>
@@ -31,7 +31,29 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
     {
 	char *tag;
 
-	if (c->which == DATA1N_tag)
+        if (c->which == DATA1N_preprocess)
+        {
+            data1_xattr *p;
+            
+            sprintf (line, "%*s<?", col, "");
+            wrbuf_puts (b, line);
+            wrbuf_puts (b, c->u.preprocess.target);
+            for (p = c->u.preprocess.attributes; p; p = p->next)
+            {
+                wrbuf_putc (b, ' ');
+                wrbuf_puts (b, p->name);
+                wrbuf_putc (b, '=');
+                wrbuf_putc (b, '"');
+                wrbuf_puts (b, p->value);
+                wrbuf_putc (b, '"');
+            }
+            if (c->child)
+                wrbuf_puts(b, " ");
+            if (nodetoidsgml(c, select, b, (col > 40) ? 40 : col+2) < 0)
+                return -1;
+            wrbuf_puts (b, "?>\n");
+        }
+        else if (c->which == DATA1N_tag)
 	{
 	    if (select && c->u.tag.node_selected)
 		continue;
@@ -125,13 +147,15 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 		break;
 	    case DATA1I_num:
 		wrbuf_write(b, c->u.data.data, c->u.data.len);
+                wrbuf_write(b, "\n", 1);
 		break;
 	    case DATA1I_oid:
 		wrbuf_write(b, c->u.data.data, c->u.data.len);
+                wrbuf_write(b, "\n", 1);
 	    }
             if (c->which == DATA1N_comment)
             {
-                wrbuf_write (b, "-->", 3);
+                wrbuf_write (b, "-->\n", 4);
             }
 	}
     }
@@ -141,16 +165,11 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 char *data1_nodetoidsgml (data1_handle dh, data1_node *n, int select, int *len)
 {
     WRBUF b = data1_get_wrbuf (dh);
-    char line[1024];
     
     wrbuf_rewind(b);
     
-    sprintf(line, "<%s>\n", n->u.root.type);
-    wrbuf_write(b, line, strlen(line));
     if (nodetoidsgml(n, select, b, 0))
 	return 0;
-    sprintf(line, "</%s>\n", n->u.root.type);
-    wrbuf_write(b, line, strlen(line));
     *len = wrbuf_len(b);
     return wrbuf_buf(b);
 }
