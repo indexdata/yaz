@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst6.c,v 1.7 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoomtst6.c,v 1.8 2001-11-28 23:00:19 adam Exp $
  *
  * Asynchronous multi-target client doing two searches
  */
@@ -16,22 +16,24 @@ static void display_records (const char *tname, ZOOM_resultset r)
     int pos;
     printf ("%s: %d hits\n", tname, ZOOM_resultset_size(r));
     /* go through all records at target */
-    for (pos = 0; pos < 2; pos++)
+    for (pos = 0; pos < 4; pos++)
     {
         ZOOM_record rec = ZOOM_resultset_record (r, pos);
-
-	/* get database for record and record itself at pos */
-	const char *db = ZOOM_record_get (rec, "database", 0);
-	int len;
-	const char *render = ZOOM_record_get (rec, "render", &len);
-	/* if rec is non-null, we got a record for display */
-	if (rec)
-	{
-	    printf ("%d %s\n", pos+1, (db ? db : "unknown"));
-	    if (render)
-		fwrite (render, 1, len, stdout);
-	    putchar ('\n');
-	}
+        if (rec)
+        {
+            /* get database for record and record itself at pos */
+            const char *db = ZOOM_record_get (rec, "database", 0);
+            int len;
+            const char *render = ZOOM_record_get (rec, "render", &len);
+            /* if rec is non-null, we got a record for display */
+            if (rec)
+            {
+                printf ("%d %s\n", pos+1, (db ? db : "unknown"));
+                if (render)
+                    fwrite (render, 1, len, stdout);
+                putchar ('\n');
+            }
+        }
     }
 }
 
@@ -86,11 +88,7 @@ int main(int argc, char **argv)
     for (i = 0; i<no; i++)
         r2[i] = ZOOM_connection_search (z[i], q);
 
-
-    /* network I/O */
-    while (ZOOM_event (no, z))
-	;
-
+    /* fetch 5th record from first result set as well */
     for (i = 0; i<no; i++)
         ZOOM_resultset_records (r1[i], 0, 4, 1);
 

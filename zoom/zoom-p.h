@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.6 2001-11-22 09:45:31 adam Exp $
+ * $Id: zoom-p.h,v 1.7 2001-11-28 23:00:19 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
@@ -101,9 +101,15 @@ struct ZOOM_task_p {
     int which;
     union {
 #define ZOOM_TASK_SEARCH 1
-	ZOOM_resultset resultset;
+        struct {
+            ZOOM_resultset resultset;
+        } search;
 #define ZOOM_TASK_RETRIEVE 2
-	/** also resultset here */
+        struct {
+            int start;
+            ZOOM_resultset resultset;
+            int count;
+        } retrieve;
 #define ZOOM_TASK_CONNECT 3
     } u;
     ZOOM_task next;

@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.12 2001-11-22 09:45:31 adam Exp $
+ * $Id: zoom-c.c,v 1.13 2001-11-28 23:00:19 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -81,7 +81,6 @@ ZOOM_task ZOOM_connection_add_task (ZOOM_connection c, int which)
     *taskp = xmalloc (sizeof(**taskp));
     (*taskp)->running = 0;
     (*taskp)->which = which;
-    (*taskp)->u.resultset = 0;  /* one null pointer there at least */
     (*taskp)->next = 0;
     clear_error (c);
     return *taskp;
@@ -97,10 +96,10 @@ void ZOOM_connection_remove_task (ZOOM_connection c)
 	switch (task->which)
 	{
 	case ZOOM_TASK_SEARCH:
-	    ZOOM_resultset_destroy (task->u.resultset);
+	    ZOOM_resultset_destroy (task->u.search.resultset);
 	    break;
 	case ZOOM_TASK_RETRIEVE:
-	    ZOOM_resultset_destroy (task->u.resultset);
+	    ZOOM_resultset_destroy (task->u.retrieve.resultset);
 	    break;
         case ZOOM_TASK_CONNECT:
             break;
@@ -378,7 +377,7 @@ ZOOM_resultset ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     c->resultsets = r;
 
     task = ZOOM_connection_add_task (c, ZOOM_TASK_SEARCH);
-    task->u.resultset = r;
+    task->u.search.resultset = r;
     ZOOM_resultset_addref (r);  
 
     (q->refcount)++;
@@ -447,18 +446,12 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
     c = r->connection;
     if (!c)
 	return;
-    if (start >= r->size)
-        return;
-
-    if (start + count > r->size)
-	count = r->size - start;
-
     task = ZOOM_connection_add_task (c, ZOOM_TASK_RETRIEVE);
-    task->u.resultset = r;
-    ZOOM_resultset_addref (r);
+    task->u.retrieve.resultset = r;
+    task->u.retrieve.start = start;
+    task->u.retrieve.count = count;
 
-    r->start = start;
-    r->count = count;
+    ZOOM_resultset_addref (r);
 
     if (!r->connection->async || force_sync)
 	while (r->connection && ZOOM_event (1, &r->connection))
@@ -670,7 +663,7 @@ static int ZOOM_connection_send_search (ZOOM_connection c)
     assert (c->tasks);
     assert (c->tasks->which == ZOOM_TASK_SEARCH);
 
-    r = c->tasks->u.resultset;
+    r = c->tasks->u.search.resultset;
 
     elementSetName =
 	ZOOM_options_get (r->options, "elementSetName");
@@ -987,12 +980,17 @@ static void handle_records (ZOOM_connection c, Z_Records *sr,
 
     if (!c->tasks)
 	return ;
-    if (c->tasks->which != ZOOM_TASK_SEARCH &&
-	c->tasks->which != ZOOM_TASK_RETRIEVE)
-	return ;
-    
-    resultset = c->tasks->u.resultset;
-
+    switch (c->tasks->which)
+    {
+    case ZOOM_TASK_SEARCH:
+        resultset = c->tasks->u.search.resultset;
+        break;
+    case ZOOM_TASK_RETRIEVE:
+        resultset = c->tasks->u.retrieve.resultset;        
+	break;
+    default:
+        return;
+    }
     if (sr && sr->which == Z_Records_NSD)
     {
 	Z_DiagRec dr, *dr_p = &dr;
@@ -1056,7 +1054,7 @@ static void handle_search_response (ZOOM_connection c, Z_SearchResponse *sr)
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
 	return ;
 
-    resultset = c->tasks->u.resultset;
+    resultset = c->tasks->u.search.resultset;
 
     resultset->size = *sr->resultCount;
     handle_records (c, sr->records, 0);
@@ -1075,7 +1073,7 @@ static int send_sort (ZOOM_connection c)
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
 	return 0;
 
-    resultset = c->tasks->u.resultset;
+    resultset = c->tasks->u.search.resultset;
 
     if (c->error)
     {
@@ -1114,12 +1112,26 @@ static int send_present (ZOOM_connection c)
 
     if (!c->tasks)
 	return 0;
-    if (c->tasks->which != ZOOM_TASK_SEARCH && 
-	c->tasks->which != ZOOM_TASK_RETRIEVE)
-	return 0;
 
-    resultset = c->tasks->u.resultset;
-    
+    switch (c->tasks->which)
+    {
+    case ZOOM_TASK_SEARCH:
+        resultset = c->tasks->u.search.resultset;
+        break;
+    case ZOOM_TASK_RETRIEVE:
+        resultset = c->tasks->u.retrieve.resultset;
+        resultset->start = c->tasks->u.retrieve.start;
+        resultset->count = c->tasks->u.retrieve.count;
+
+        if (resultset->start >= resultset->size)
+            return 0;
+        if (resultset->start + resultset->count > resultset->size)
+            resultset->count = resultset->size - resultset->start;
+	break;
+    default:
+        return 0;
+    }
+
     if (c->error)                  /* don't continue on error */
 	return 0;
     if (resultset->start < 0)
