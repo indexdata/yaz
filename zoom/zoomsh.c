@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.20 2003-05-26 11:35:46 adam Exp $
+ * $Id: zoomsh.c,v 1.21 2003-07-09 23:00:21 mike Exp $
  *
  * ZOOM-C Shell
  */
@@ -21,6 +21,7 @@
 #include <yaz/log.h>
 #include <yaz/nmem.h>
 #include <yaz/zoom.h>
+#include <yaz/oid.h>
 
 #define MAX_CON 100
 
@@ -142,6 +143,35 @@ static void cmd_close (ZOOM_connection *c, ZOOM_resultset *r,
     }
 }
 
+static const char *oid_name_to_dotstring(const char *name) {
+    struct oident ent;
+    int oid[OID_SIZE];
+    static char oidbuf[100];	/* ### bad interface */
+    int i;
+
+    /* Translate syntax to oid_val */
+    oid_value value = oid_getvalbyname(name);
+
+    /* Build it into an oident */
+    ent.proto = PROTO_Z3950;
+    ent.oclass = CLASS_RECSYN;
+    ent.value = value;
+
+    /* Translate to an array of int */
+    (void) oid_ent_to_oid(&ent, oid);
+
+    /* Write the array of int into a dotted string (phew!) */
+    oidbuf[0] = '\0';
+    for (i = 0; oid[i] != -1; i++) {
+	char tmpbuf[20];
+	sprintf(tmpbuf, "%d", oid[i]);
+	if (i > 0) strcat(oidbuf, ".");
+	strcat(oidbuf, tmpbuf);
+    }
+
+    return oidbuf;
+}
+
 static void display_records (ZOOM_connection c,
 			     ZOOM_resultset r,
 			     int start, int count)
@@ -158,7 +188,9 @@ static void display_records (ZOOM_connection c,
 	/* if rec is non-null, we got a record for display */
 	if (rec)
 	{
-	    printf ("%d %s %s\n", pos+1, (db ? db : "unknown"), syntax);
+	    const char *syntax_oid = oid_name_to_dotstring(syntax);
+	    printf ("%d %s %s (%s)\n",
+		    pos+1, (db ? db : "unknown"), syntax, syntax_oid);
 	    if (render)
 		fwrite (render, 1, len, stdout);
 	    printf ("\n");
