@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.74  2001-10-03 23:55:18  adam
+ * Revision 1.75  2001-10-04 00:37:58  adam
+ * Fixes for GNU threads (not working yet).
+ *
+ * Revision 1.74  2001/10/03 23:55:18  adam
  * GNU threads support.
  *
  * Revision 1.73  2001/06/28 09:27:06  adam
@@ -731,10 +734,15 @@ static void listener(IOCHAN h, int event)
 	    pth_attr_t attr;
 	    pth_t child_thread;
 
-            pth_attr_init (attr);
+            attr = pth_attr_new ();
             pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
+            pth_attr_set (attr, PTH_ATTR_STACK_SIZE, 32*1024);
+            pth_attr_set (attr, PTH_ATTR_NAME, "session");
+            yaz_log (LOG_LOG, "pth_spawn");
 	    child_thread = pth_spawn (attr, new_session, new_line);
+#if 0
             pth_attr_destroy (attr);
+#endif
 	}
 	else
 	    new_session(new_line);
@@ -1014,7 +1022,7 @@ int check_options(int argc, char **argv)
 	    control_block.dynamic = 0;
 	    break;
 	case 'T':
-#if HAVE_PTHREAD_H
+#if _REENTRANT
 	    control_block.dynamic = 0;
 	    control_block.threads = 1;
 #else

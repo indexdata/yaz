@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.46 2001-10-03 23:55:18 adam Exp $
+dnl $Id: configure.in,v 1.47 2001-10-04 00:37:58 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -126,7 +126,7 @@ AC_SUBST(LIBTHREAD)
 HAVETHREADS=0
 LIBTHREAD=""
 dnl
-AC_ARG_ENABLE(pth, [  --disable-pth           disable GNU threads],[enable_pth=$enableval],[enable_pth=yes])
+AC_ARG_ENABLE(pth, [  --enable-pth            enable GNU threads],[enable_pth=$enableval],[enable_pth=no])
 AC_SUBST(LIBPTH)
 if test "$enable_pth" = "yes"; then
 	OLIBS=$LIBS

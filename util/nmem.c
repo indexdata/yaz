@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.28  2001-10-03 23:55:18  adam
+ * Revision 1.29  2001-10-04 00:37:58  adam
+ * Fixes for GNU threads (not working yet).
+ *
+ * Revision 1.28  2001/10/03 23:55:18  adam
  * GNU threads support.
  *
  * Revision 1.27  2001/09/27 12:09:18  adam
@@ -153,8 +156,7 @@ static pth_mutex_t nmem_mutex;
 struct nmem_mutex {
 #ifdef WIN32
     CRITICAL_SECTION m_handle;
-#endif
-#if _REENTRANT
+#elif _REENTRANT
 
 #if HAVE_PTHREAD_H
     pthread_mutex_t m_handle;
@@ -479,8 +481,12 @@ void nmem_init (void)
     {
 #ifdef WIN32
 	InitializeCriticalSection(&critical_section);
-#elif HAVE_PTH_H
-#ifdef __REENTRANT
+#endif
+
+#ifdef _REENTRANT
+#if HAVE_PTH_H
+	yaz_log (LOG_LOG, "pth_init");
+        pth_init ();
         pth_mutex_init (&nmem_mutex);
 #endif
 #endif
