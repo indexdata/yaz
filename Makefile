@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.26 1995-11-01 13:54:12 quinn Exp $
+# $Id: Makefile,v 1.27 1995-11-17 11:08:57 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 ODEFS=-DUSE_XTIMOSI
@@ -16,7 +16,16 @@ MAKE=make
 SUBDIR=util odr asn $(RFC1006) ccl comstack retrieval client server makelib
 # Add external libraries to the ELIBS macro
 ELIBS=
-CONTROL=RANLIB="ranlib" ELIBS=$(ELIBS)
+CONTROL=RANLIB="ranlib" ELIBS="$(ELIBS)"
+
+# Installation directories, etc.
+#  Binaries
+BINDIR=/usr/local/bin
+#  Public libraries and header files
+LIBDIR=/usr/local/lib
+INCDIR=/usr/local/include
+#  Misc tables, etc.
+YAZDIR=/usr/local/yaz
 
 all:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) $(CONTROL)\
@@ -58,6 +67,52 @@ gnudepend:
 		sed 's/^#endif/endif/' | \
 		sed 's/^depend: depend1/depend: depend2/g' >Makefile.tmp;then \
 		mv -f Makefile.tmp Makefile; fi); done
+
+install: all install.misc install.lib install.bin
+
+install.bin:
+	@if [ ! -d $(BINDIR) ]; then \
+		echo "Making directory $(BINDIR)"; \
+		mkdir $(BINDIR); \
+	fi
+	@echo "Installing client -> $(BINDIR)"; \
+	cp client/client $(BINDIR)/client; chmod 755 $(BINDIR)/client
+	@echo "Installing ztest -> $(BINDIR)"; \
+	cp server/ztest $(BINDIR)/ztest; chmod 755 $(BINDIR)/ztest
+
+install.lib:
+	@if [ ! -d $(LIBDIR) ]; then \
+		echo "Making directory $(LIBDIR)"; \
+		mkdir $(LIBDIR); \
+	fi
+	@echo "Installing libyaz.a -> $(LIBDIR)"; \
+	cp lib/libyaz.a $(LIBDIR)/libyaz.a; \
+	chmod 644 $(LIBDIR)/libyaz.a
+	@if [ -f lib/librfc.a ]; then \
+		echo "Installing librfc.a -> $(LIBDIR)"; \
+		cp lib/librfc.a $(LIBDIR)/librfc.a; \
+		chmod 644 $(LIBDIR)/librfc.a; \
+        fi
+	@if [ ! -d $(INCDIR) ]; then \
+		echo "Making directory $(INCDIR)"; \
+		mkdir $(INCDIR); \
+	fi
+	@cd include; for f in *.h; do \
+		echo "Installing $$f -> $(INCDIR)"; \
+		cp $$f $(INCDIR)/$$f; chmod 644 $(INCDIR)/$$f; \
+	done
+
+install.misc:
+	@if [ ! -d $(YAZDIR) ]; then \
+		echo "Making directory $(YAZDIR)"; \
+		mkdir $(YAZDIR); \
+	fi
+	@cd tab; for f in *; do \
+		if [ -f $$f ]; then \
+			echo "Installing $$f -> $(YAZDIR)"; \
+			cp $$f $(YAZDIR)/$$f; chmod 644 $(YAZDIR)/$$f; \
+		fi; \
+	done
 
 wc:
 	wc `find . -name '*.[ch]'`
