@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.35  1996-06-03 09:45:50  quinn
+ * Revision 1.36  1996-06-10 08:53:47  quinn
+ * Added Summary
+ *
+ * Revision 1.35  1996/06/03  09:45:50  quinn
  * Added display of OIDs in the GRS routine.
  *
  * Revision 1.34  1996/05/09  07:26:49  quinn
@@ -973,6 +976,12 @@ int cmd_format(char *arg)
     {
         printf("Preferred format is GRS1\n");
         recordsyntax = VAL_GRS1;
+        return 1;
+    }
+    else if (!strcmp(arg, "summary"))
+    {
+        printf("Preferred format is Summary\n");
+        recordsyntax = VAL_SUMMARY;
         return 1;
     }
     else if (!strcmp(arg, "explain"))
