@@ -1,6 +1,9 @@
 /*
  * $Log: admin.c,v $
- * Revision 1.7  2000-04-05 07:39:54  adam
+ * Revision 1.8  2000-04-17 14:21:38  adam
+ * WIN32 update.
+ *
+ * Revision 1.7  2000/04/05 07:39:54  adam
  * Added shared library support (libtool).
  *
  * Revision 1.6  2000/03/20 19:06:25  adam
@@ -29,9 +32,15 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+
+#ifdef WIN32
+
+#else
 #include <dirent.h>
 #include <fnmatch.h>
 #include <sys/stat.h>
+#endif
+
 #include <yaz/yaz-util.h>
 
 #include <yaz/tcpip.h>
@@ -192,6 +201,15 @@ int cmd_adm_drop(char* arg)
    N.B. That in this case, the import may contain instructions to delete records as well as new or updates
    to existing records */
 
+#ifdef WIN32
+int cmd_adm_import(char *arg)
+{
+    printf ("not available on WIN32\n");
+    return 0;
+}
+
+#else
+
 int cmd_adm_import(char *arg)
 {
     char type_str[20], dir_str[1024], pattern_str[1024];
@@ -273,14 +291,12 @@ int cmd_adm_import(char *arg)
     closedir(dir);
     return 2;
 }
+#endif
 
 int cmd_adm_import2(char* arg)
 {
-    /* Size of chunks we wish to read from import file */
-    size_t chunk_size = 8192;
-
-    /* Buffer for reading chunks of data from import file */
-    char chunk_buffer[chunk_size];
+   /* Buffer for reading chunks of data from import file */
+    char chunk_buffer[8192];
     
     if ( arg )
     {

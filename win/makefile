@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.14 2000-03-02 08:48:21 adam Exp $
+# $Id: makefile,v 1.15 2000-04-17 14:21:38 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -31,7 +31,7 @@ NEW_Z3950=1  # 0= use old asn files
 
 default: all
 
-all: dirs proto_h dll client server ztest 
+all: dirs proto_h dll client ztest 
 
 generate: generated_files
 
@@ -75,14 +75,12 @@ DLL=$(BINDIR)\Yaz.dll
 IMPLIB=$(LIBDIR)\Yaz.lib
 
 CLIENT=$(BINDIR)\yaz-client.exe
-SERVER=$(LIBDIR)\server.lib
 ZTEST=$(BINDIR)\yaz-ztest.exe
 PROTOH=$(INCLDIR)\yaz\proto.h
 
 # shortcut names defined here
 dll : $(DLL) 
 client: $(CLIENT)
-server: $(SERVER)
 ztest: $(ZTEST)
 proto_h: $(PROTOH)
 
@@ -154,6 +152,7 @@ ZTEST_LINK_OPTIONS = /subsystem:console
 
 # TCL
 TCL="C:\Program Files\Tcl\bin\tclsh82.exe"
+HAVE_TCL=0
 
 COMMON_TCL_OPTIONS= ..\util\yaz-comp -I$(INCLDIR) -i yaz
 
@@ -184,7 +183,8 @@ TCLOPT= $(COMMON_TCL_OPTIONS)
 # need to be specified, though
 
 YAZ_CLIENT_OBJS= \
-   $(OBJDIR)\client.obj
+   $(OBJDIR)\client.obj \
+   $(OBJDIR)\admin.obj
 
 YAZ_SERVER_OBJS= \
 	"$(OBJDIR)\eventl.obj" \
@@ -197,7 +197,6 @@ YAZ_SERVER_OBJS= \
 ZTEST_OBJS= \
 	"$(OBJDIR)\read-grs.obj" \
 	"$(OBJDIR)\ztest.obj" 
-	
 
 YAZ_ASN_OBJS= \
    $(OBJDIR)\proto.obj \
@@ -314,7 +313,8 @@ Z3950_OBJS= \
    $(OBJDIR)\zes-pquery.obj \
    $(OBJDIR)\zes-psched.obj \
    $(OBJDIR)\zes-pset.obj \
-   $(OBJDIR)\zes-update0.obj 
+   $(OBJDIR)\zes-update0.obj \
+   $(OBJDIR)\zes-admin.obj
 
 ILL_OBJS= \
    $(OBJDIR)\ill-get.obj\
@@ -322,17 +322,18 @@ ILL_OBJS= \
    $(OBJDIR)\item-req.obj
 
 COMMON_YAZ_OBJS= \
-   $(YAZ_COMSTACK_OBJS) \
-   $(YAZ_ODR_OBJS) \
    $(YAZ_UTIL_OBJS) \
+   $(YAZ_ODR_OBJS) \
+   $(YAZ_COMSTACK_OBJS) \
    $(YAZ_ZUTIL_OBJS) \
-   $(YAZ_RET_OBJS)
+   $(YAZ_RET_OBJS) \
+   $(YAZ_SERVER_OBJS)
 
 !if $(NEW_Z3950)
 YAZ_OBJS= \
 	$(COMMON_YAZ_OBJS) \
-	$(ILL_OBJS) \
-	$(Z3950_OBJS)
+	$(Z3950_OBJS) \
+	$(ILL_OBJS) 
 !else
 YAZ_OBJS= \
 	$(COMMON_YAZ_OBJS) \
@@ -344,7 +345,6 @@ DLL_OBJS= $(YAZ_OBJS)
 ALL_OBJS= \
 	$(YAZ_OBJS) \
 	$(YAZ_CLIENT_OBJS) \
-	$(YAZ_SERVER_OBJS) \
 	$(ZTEST_OBJS)
 
 
@@ -365,6 +365,7 @@ $(PROTOH): makefile $(INCLDIR)\yaz\prt-proto.h
 ############### Generated C and H files
 ###########################################################
 
+
 Z3950_C_DIR=$(Z3950DIR)   
 ILL_C_DIR=$(ILLDIR)
 #!!! Should be moved to OBJ, but that requires too much trickery
@@ -380,6 +381,10 @@ UNIVRES_C_FILES = $(Z3950_C_DIR)\z-univ.c
 # Files generated from esupdate.asn
 ESUPDATE_H_FILES = $(INCLDIR)\yaz\zes-update.h
 ESUPDATE_C_FILES = $(Z3950_C_DIR)\zes-update.c
+
+# Files generated from esadmin.asn
+ESADMIN_H_FILES = $(INCLDIR)\yaz\zes-admin.h
+ESADMIN_C_FILES = $(Z3950_C_DIR)\zes-admin.c
 
 # Files created from z3950v3.asn
 Z3950V3_H_FILES= \
@@ -408,7 +413,8 @@ Z3950V3_C_FILES= \
    $(Z3950_C_DIR)\zes-pquery.c \
    $(Z3950_C_DIR)\zes-psched.c \
    $(Z3950_C_DIR)\zes-pset.c \
-   $(Z3950_C_DIR)\zes-update0.c 
+   $(Z3950_C_DIR)\zes-update0.c \
+   $(Z3950_C_DIR)\zes-admin.c
 
 ILL_CORE_H_FILES= \
    $(INCLDIR)\yaz\ill-core.h
@@ -425,6 +431,7 @@ ITEM_REQ_C_FILES= \
 DATETIME_FILES = $(DATETIME_H_FILES) $(DATETIME_C_FILES)
 UNIVRES_FILES = $(UNIVRES_H_FILES) $(UNIVRES_C_FILES)
 ESUPDATE_FILES = $(ESUPDATE_H_FILES) $(ESUPDATE_C_FILES)
+ESADMIN_FILES = $(ESADMIN_H_FILES) $(ESADMIN_C_FILES)
 Z3950V3_FILES= $(Z3950V3_C_FILES) $(Z3950V3_H_FILES)
 ILL_CORE_FILES= $(ILL_CORE_C_FILES) $(ILL_CORE_H_FILES)
 ITEM_REQ_FILES= $(ITEM_REQ_C_FILES) $(ITEM_REQ_H_FILES)
@@ -445,6 +452,7 @@ generated_files: \
 	$(GENERATED_H_FILES) \
 	$(GENERATED_C_FILES) \
 	$(PROTOH)
+
 
 ###########################################################
 ############### Compiling 
@@ -496,6 +504,8 @@ generated_files: \
 
 ############### ASN-generated files
 
+!if $(HAVE_TCL)
+
 $(Z3950V3_FILES): $(Z3950DIR)\z3950v3.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) -d z.tcl z3950v3.asn
@@ -516,6 +526,11 @@ $(ESUPDATE_FILES): $(Z3950DIR)\esupdate.asn
 	$(TCL) $(TCLOPT) -d z.tcl esupdate.asn
 	@cd $(WINDIR)
 
+$(ESADMIN_FILES): $(Z3950DIR)\esadmin.asn
+	@cd $(Z3950DIR)
+	$(TCL) $(TCLOPT) -d z.tcl esadmin.asn
+	@cd $(WINDIR)
+
 $(ILL_CORE_FILES): $(ILLDIR)\ill9702.asn
 	@cd $(ILLDIR)
 	$(TCL) $(TCLOPT) -d ill.tcl ill9702.asn
@@ -525,6 +540,8 @@ $(ITEM_REQ_FILES): $(ILLDIR)\item-req.asn
 	@cd $(ILLDIR)
 	$(TCL) $(TCLOPT) -d ill.tcl item-req.asn
 	@cd $(WINDIR)
+
+!endif
 
 ###########################################################
 ############### Linking
@@ -558,7 +575,7 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS)
 		/out:$(CLIENT)
 <<
 
-$(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
+$(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 	@echo Linking the ztest  $(ZTEST)
 	$(LINK) @<<
         $(LNKOPT) 
@@ -566,7 +583,6 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
 		$(LINK_LIBS) 
 		shell32.lib
 		$(IMPLIB)
-		$(SERVER)
 		$(ZTEST_OBJS) 
 
 		/implib:"$(LIBDIR)/yaz-ztest.lib"
@@ -578,18 +594,7 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
 <<
 
 
-$(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS) 
-	@echo Linking the server  $(SERVER)
-	$(LINK) $(SERVER_LINK_OPTIONS) @<<
-		/nologo
-		$(IMPLIB)
-		$(YAZ_SERVER_OBJS) 
-		/out:$(SERVER) 
-<<
-
 # note that this links a lib, so it uses completely different options.
-
-
 
 ###########################################################
 ############### Special operations
@@ -600,7 +605,6 @@ $(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS)
 clean:
 	del $(DLL) 
 	del $(CLIENT)
-	del $(SERVER)
 	del $(ZTEST)
 	del $(TMPDIR)\*.
 
@@ -635,7 +639,7 @@ $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
 ############### Explicit dependencies
 ###########################################################
 
-$(ALL_OBJS): makefile $(PROTOH)
+$(ALL_OBJS): $(PROTOH)
 
 # force recompilation of everything, if makefile changed
 
@@ -655,7 +659,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.14  2000-03-02 08:48:21  adam
+# Revision 1.15  2000-04-17 14:21:38  adam
+# WIN32 update.
+#
+# Revision 1.14  2000/03/02 08:48:21  adam
 # Renamed ASN.1 compiler to yaz-comp (used to be yc.tcl).
 #
 # Revision 1.13  2000/02/28 11:13:03  adam

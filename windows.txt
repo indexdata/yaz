@@ -1,5 +1,5 @@
 YAZ Compilation guidelines for winNT/95.
-  $Id: windows.txt,v 1.3 1999-12-02 13:54:56 adam Exp $
+  $Id: windows.txt,v 1.4 2000-04-17 14:21:38 adam Exp $
 
 This distribution of YAZ includes makefiles that works with Visual
 C++ version 5 and 6. The makefile is located in sub directory 'win'.
@@ -22,24 +22,19 @@ and LIB respectively.
 The following components are build by the nmake process:
 
 yaz.dll - This DLL is made of the source in all sub directories except
-         for 'server', 'client' and 'ztest'. To export public functions
+         for 'client' and 'ztest'. To export public functions
          the header files contain the modifier YAZ_EXPORT which is
          defined in yconfig.h. The value of this modifier,
          __declspec(dllexport), is probably specific to Visual C++. 
-
-server.lib - The server library, which includes the source from
-         'server'.  Unlike the UNIX version, the server library is
-         multi-threaded.
 
 yaz-client.exe - A Z39.50 client console application. It is linked with
          the import library yaz.lib. This application searches for yaz.dll
          during runtime.
 
 yaz-ztest.exe - The Z39.50 test server as a console application. It is
-         linked with the import library yaz.lib and the regular library
-         server.lib. When running yaz-ztest make sure it is able to find
-         the record test files dummy-records, dummy-grs, and dummy-words
-         in the current directory. 
+         linked with the import library yaz.lib. When running yaz-ztest
+         make sure it is able to find the record test files dummy-records,
+         dummy-grs, and dummy-words in the current directory. 
 
          As an option ztest may be installed as an NT service
          (not Windows 95). Use 'ztest -install <otherargs>' to install
