@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.159 2002-06-17 14:57:34 ja7 Exp $
+ * $Id: client.c,v 1.160 2002-06-18 21:30:25 adam Exp $
  */
 
 #include <stdio.h>
@@ -11,10 +11,7 @@
 
 #include <yaz/yaz-util.h>
 
-#include <yaz/tcpip.h>
-#ifdef USE_XTIMOSI
-#include <yaz/xmosi.h>
-#endif
+#include <yaz/comstack.h>
 
 #include <yaz/proto.h>
 #include <yaz/marcdisp.h>
@@ -31,6 +28,7 @@
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
+#include <unistd.h>
 #endif
 #if HAVE_READLINE_HISTORY_H
 #include <readline/history.h>
@@ -209,7 +207,7 @@ static void send_initRequest(const char* type_and_host)
     	
     	yaz_oi_APDU(apdu, &p);
     	
-    	if (p0=yaz_oi_update(p, out, NULL, 0, 0)) {
+    	if ((p0=yaz_oi_update(p, out, NULL, 0, 0))) {
     		ODR_MASK_SET(req->options, Z_Options_negotiationModel);
     		
     		p0->which = Z_OtherInfo_externallyDefinedInfo;
@@ -352,7 +350,6 @@ int cmd_open(char *arg)
 {
     void *add;
     char type_and_host[101], base[101];
-    CS_TYPE t;
     
     if (conn)
     {
@@ -366,23 +363,20 @@ int cmd_open(char *arg)
             session_mem = NULL;
         }
     }
-	if (strncmp (arg, "unix:", 5) == 0)
-	{
+    if (strncmp (arg, "unix:", 5) == 0)
+    {
         base[0] = '\0';
         conn = cs_create_host(arg, 1, &add);
-	}
-	else
-	{
-		t = tcpip_type;
-		base[0] = '\0';
-		if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
-			return 0;
-		
-		if(yazProxy) 
-			conn = cs_create_host(yazProxy, 1, &add);
-		else 
-			conn = cs_create_host(type_and_host, 1, &add);
-		
+    }
+    else
+    {
+        base[0] = '\0';
+        if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
+            return 0;
+        if (yazProxy) 
+            conn = cs_create_host(yazProxy, 1, &add);
+        else 
+            conn = cs_create_host(type_and_host, 1, &add);
     }
     if (!conn)
     {
@@ -1360,7 +1354,6 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
         (int *) odr_malloc(out, sizeof(int));
     *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
 
-#if YAZ_MODULE_ill
     if (!strcmp (type, "item") || !strcmp(type, "2"))
     {
         printf ("using item-request\n");
@@ -1387,9 +1380,6 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
     else
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
 
-#else
-    r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
-#endif
     return r;
 }
 
@@ -2658,7 +2648,7 @@ static int cmd_help (char *line)
 int cmd_register_tab(char* arg) {
 	
 	char command[101], tabargument[101];
-	int i, res;
+	int i;
 	int num_of_tabs;
 	char** tabslist;
 
@@ -2695,6 +2685,7 @@ int cmd_register_tab(char* arg) {
 	tabslist=cmd[i].local_tabcompletes;
 	tabslist[num_of_tabs]=strdup(tabargument);
 	tabslist[num_of_tabs+1]=NULL;
+    return 1;
 }
 
 void process_cmd_line(char* line)
