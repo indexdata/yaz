@@ -19,7 +19,8 @@ non-NULL - will be called during odr_destroy.
 Fixed bug in CCL parser where truncation char was not removed from
 right side when truncation=both was in effect.
 
-Fixed CQL parser to use unsigned chars (occurred on MS .NET).
+Fixed CQL parser to use unsigned chars for isxxx from ctype.h due
+to VS.NET.
 
 --- 2.0.23 2004/08/11
 
