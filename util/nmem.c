@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.40 2003-01-06 21:52:37 adam Exp $
+ * $Id: nmem.c,v 1.41 2003-02-22 00:08:44 adam Exp $
  */
 
 /*
@@ -463,7 +463,11 @@ void yaz_strerror(char *buf, int max)
 /* UNIX */
 #if HAVE_STRERROR_R
 #if YAZ_POSIX_THREADS
+    *buf = '\0';
     strerror_r(errno, buf, max);
+    /* if buffer is unset - use strerror anyway (GLIBC bug) */
+    if (*buf == '\0')
+        strcpy(buf, strerror(yaz_errno()));
 #else
     strcpy(buf, strerror(yaz_errno()));
 #endif
