@@ -1,5 +1,22 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+On UNIX, the generated makefile now supports a proper 'make install'.
+The prefix can be set via GNU configure to set the install location
+(default is /usr/local).
+
+* YAZ programs client and ztest were renamed to yaz-client and
+yaz-ztest to avoid conflicts when users install YAZ in "standard"
+locations, such as /usr/bin,/usr/local/bin,etc.
+
+* YAZ Header files were moved from include to include/yaz. YAZ Header
+files are referred to as include <yaz/log.h> rather than <log.h>.
+The YAZ include path (-I ..) is therefore the same as before. Programmers
+should update their #include statements or use -Ipath/include/yaz
+instead. The main motivation for doing this change is that YAZ header files
+can be installed in "standard" locations /usr/include,/usr/local/include 
+without introducing conflicts, since ALL YAZ header files are stored
+in subdirectory yaz (under /usr/include for example).
+
 Compilation of YAZ for WIN32 is now handled by an nmake-style makefile 
 rather than project/workspace files. We switched because project files
 are incompatible between Visual C++ 5 and 6. Refer to windows.txt for

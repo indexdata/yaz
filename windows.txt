@@ -1,5 +1,5 @@
 YAZ Compilation guidelines for winNT/95.
-  $Id: windows.txt,v 1.2 1999-08-27 09:40:31 adam Exp $
+  $Id: windows.txt,v 1.3 1999-12-02 13:54:56 adam Exp $
 
 This distribution of YAZ includes makefiles that works with Visual
 C++ version 5 and 6. The makefile is located in sub directory 'win'.
@@ -31,13 +31,13 @@ server.lib - The server library, which includes the source from
          'server'.  Unlike the UNIX version, the server library is
          multi-threaded.
 
-client.exe - A Z39.50 client console application. It links with the
-         import library yaz.lib. This application searches for yaz.dll
+yaz-client.exe - A Z39.50 client console application. It is linked with
+         the import library yaz.lib. This application searches for yaz.dll
          during runtime.
 
-ztest.exe - The Z39.50 test server as a console application. It links
-         with the import library yaz.lib and the regular library
-         server.lib. When running ztest make sure it is able to find
+yaz-ztest.exe - The Z39.50 test server as a console application. It is
+         linked with the import library yaz.lib and the regular library
+         server.lib. When running yaz-ztest make sure it is able to find
          the record test files dummy-records, dummy-grs, and dummy-words
          in the current directory. 
 
@@ -48,7 +48,7 @@ ztest.exe - The Z39.50 test server as a console application. It links
          \winnt\system32, it's probably a good idea to use the option
          '-w' to change to some other directory. For example
 
-            ztest -install -w d:\proj\yaz\ztest -l ztest.out tcp:@:210
+            yaz-ztest -install -w d:\proj\yaz\ztest -l ztest.out tcp:@:210
 
          which specifies both working directory (d:\proj\yaz\ztest) 
          and a log file (ztest.out). The server is started on port 210.

@@ -1,10 +1,9 @@
 
- * Copyright (C) 1995-1999, Index Data ApS.
- * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
+Copyright (C) 1995-1999, Index Data ApS.
+See the file LICENSE for details.
 
-Compilation and installation for YAZ 
-  $Id: README,v 1.27 1999-08-27 09:40:31 adam Exp $
+Compilation and installation instructions for YAZ 
+  $Id: README,v 1.28 1999-12-02 13:54:56 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -17,18 +16,18 @@ On Unix, GNU configure is used to configure YAZ and generate Makefiles.
 Type "./configure", then "make" to build YAZ.
 
 Two test-programs of interest are generated when you type 'make' at the
-top level: ztest/ztest and client/client. Ztest is a dummy database
-server which returns canned responses to all queries. It's good for
-verifying that the protocol works ok, and ztest.c shows an
+top level: ztest/yaz-ztest and client/yaz-client. Ztest is a dummy
+database server which returns canned responses to all queries. It's good
+for verifying that the protocol works ok, and ztest.c shows an
 implementation of a 'backend' interface.
 
-Client is a linemode Z39.50 client. It supports a fair amount of the
+yaz-client is a linemode Z39.50 client. It supports a fair amount of the
 functionality of Z39.50v2/SR, but some things you need to enable or
 disable by recompilation. Its primary purpose is to excersise the
 package, and verify that the protocol works OK. It can be started by
 typing
 
-  client tcp:<hostname>:<port>[/<database>]
+  yaz-client tcp:<hostname>:<port>[/<database>]
 
 at the UNIX prompt, to connect to a Z39.50 server.
 
@@ -80,7 +79,7 @@ The directories:
 doc     - Documentation.
 
 util    - Various little utility functions. Logging, memory debugging,
-	primitive ISO 2709 presentation for the client, etc. You'll
+	primitive ISO 2709 presentation for the yaz-client, etc. You'll
 	find the ASN.1 Compiler for YAZ here as well (yc.tcl).
 
 odr	- Open Data Representation. This module implements the BER
@@ -128,10 +127,8 @@ ztest   - A demonstration server that implements a backend.
 
 include - The various header files.
 
-makelib - This is a simple utility that gathers the libraries from the
-	previous modules into libyaz.a.
-
-lib     - The libraries. Primarily libyaz.a.
+lib     - The libraries. Primarily libyaz.a. The makefile gathers the
+          libraries from previous modules into libyaz.a.
 
 To get more information or assistance, send mail to yaz-help@indexdata.dk.
 
