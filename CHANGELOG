@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implemented cs_look and proper cs_rcvconnect.
+
 Fixed COMSTACK error that occurred on HPUX. Fix by Giannis Kosmas.
 
 Configure detects POSIX threads on OpenBSD.
