@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.4 2001/XX/XX
 
+ZOOM allocates result set name if target supports it.
+
 Two new YAZ client commands: .  (dot, which sources a script of YAZ
 client commands), and ! (to execute shell command.). Implemented
 by Jacob Poulsen.

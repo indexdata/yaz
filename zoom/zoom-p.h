@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.5 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoom-p.h,v 1.6 2001-11-22 09:45:31 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
@@ -41,6 +41,7 @@ struct ZOOM_connection_p {
     char *cookie_out;
     char *cookie_in;
     int async;
+    int support_named_resultsets;
     ZOOM_task tasks;
     ZOOM_options options;
     ZOOM_resultset resultsets;
@@ -74,6 +75,7 @@ struct ZOOM_resultset_p {
     int start;
     int count;
     int piggyback;
+    char *setname;
     ODR odr;
     ZOOM_record_cache record_cache;
     ZOOM_options options;

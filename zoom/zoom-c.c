@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.11 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoom-c.c,v 1.12 2001-11-22 09:45:31 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -149,6 +149,7 @@ ZOOM_connection ZOOM_connection_create (ZOOM_options options)
     c->odr_out = odr_createmem (ODR_ENCODE);
 
     c->async = 0;
+    c->support_named_resultsets = 0;
 
     c->m_queue_front = 0;
     c->m_queue_back = 0;
@@ -329,6 +330,7 @@ ZOOM_resultset ZOOM_resultset_create ()
     r->odr = odr_createmem (ODR_ENCODE);
     r->start = 0;
     r->piggyback = 1;
+    r->setname = 0;
     r->count = 0;
     r->record_cache = 0;
     r->r_sort_spec = 0;
@@ -355,6 +357,7 @@ ZOOM_resultset ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 {
     ZOOM_resultset r = ZOOM_resultset_create ();
     ZOOM_task task;
+    const char *cp;
 
     r->r_sort_spec = q->sort_spec;
     r->r_query = q->query;
@@ -365,6 +368,10 @@ ZOOM_resultset ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     r->start = ZOOM_options_get_int(r->options, "start", 0);
     r->count = ZOOM_options_get_int(r->options, "count", 0);
     r->piggyback = ZOOM_options_get_bool (r->options, "piggyback", 1);
+    cp = ZOOM_options_get (r->options, "setname");
+    if (cp)
+        r->setname = xstrdup (cp);
+
     r->connection = c;
 
     r->next = c->resultsets;
@@ -410,6 +417,7 @@ void ZOOM_resultset_destroy(ZOOM_resultset r)
 	ZOOM_query_destroy (r->search);
 	ZOOM_options_destroy (r->options);
 	odr_destroy (r->odr);
+        xfree (r->setname);
 	xfree (r);
     }
 }
@@ -577,10 +585,8 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     ODR_MASK_SET(ireq->options, Z_Options_present);
     ODR_MASK_SET(ireq->options, Z_Options_scan);
     ODR_MASK_SET(ireq->options, Z_Options_sort);
-#if 0
     ODR_MASK_SET(ireq->options, Z_Options_extendedServices);
     ODR_MASK_SET(ireq->options, Z_Options_namedResultSets);
-#endif
     
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_2);
@@ -736,7 +742,33 @@ static int ZOOM_connection_send_search (ZOOM_connection c)
     if (syntax)
 	search_req->preferredRecordSyntax =
 	    yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, syntax);
-
+    
+    if (!r->setname)
+    {
+        if (c->support_named_resultsets)
+        {
+            char setname[14];
+            int ord;
+            /* find the lowest unused ordinal so that we re-use
+               result sets on the server. */
+            for (ord = 1; ; ord++)
+            {
+                ZOOM_resultset rp;
+                sprintf (setname, "%d", ord);
+                for (rp = c->resultsets; rp; rp = rp->next)
+                    if (rp->setname && !strcmp (rp->setname, setname))
+                        break;
+                if (!rp)
+                    break;
+            }
+            r->setname = xstrdup (setname);
+            yaz_log (LOG_DEBUG, "allocating %s", r->setname);
+        }
+        else
+            r->setname = xstrdup ("default");
+        ZOOM_options_set (r->options, "setname", r->setname);
+    }
+    search_req->resultSetName = odr_strdup(c->odr_out, r->setname);
     /* send search request */
     send_APDU (c, apdu);
     r->r_query = 0;
@@ -1058,8 +1090,9 @@ static int send_sort (ZOOM_connection c)
 	req->num_inputResultSetNames = 1;
 	req->inputResultSetNames = (Z_InternationalString **)
 	    odr_malloc (c->odr_out, sizeof(*req->inputResultSetNames));
-	req->inputResultSetNames[0] = odr_strdup (c->odr_out, "default");
-	req->sortedResultSetName = odr_strdup (c->odr_out, "default");
+	req->inputResultSetNames[0] =
+            odr_strdup (c->odr_out, resultset->setname);
+	req->sortedResultSetName = odr_strdup (c->odr_out, resultset->setname);
 	req->sortSequence = resultset->r_sort_spec;
 	resultset->r_sort_spec = 0;
 	send_APDU (c, apdu);
@@ -1122,6 +1155,7 @@ static int send_present (ZOOM_connection c)
 	compo->u.simple = esn;
 	req->recordComposition = compo;
     }
+    req->resultSetId = odr_strdup(c->odr_out, resultset->setname);
     send_APDU (c, apdu);
     return 1;
 }
@@ -1193,6 +1227,8 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
 	    c->cookie_in = 0;
 	    if (cookie)
 		c->cookie_in = xstrdup(cookie);
+            if (ODR_MASK_GET(initrs->options, Z_Options_namedResultSets))
+                c->support_named_resultsets = 1;
             if (c->tasks)
             {
                 assert (c->tasks->which == ZOOM_TASK_CONNECT);
