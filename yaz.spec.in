@@ -24,32 +24,23 @@ CFLAGS="$RPM_OPT_FLAGS" \
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
-rm -fr $RPM_BUILD_ROOT
-make prefix=$RPM_BUILD_ROOT/usr install
+rm -fr ${RPM_BUILD_ROOT}
+make prefix=${RPM_BUILD_ROOT}/usr mandir=${RPM_BUILD_ROOT}/usr/share/man install
+
+%clean
+rm -fr ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
 %doc README LICENSE CHANGELOG TODO
 %config /usr/share/yaz/tab
-/usr/bin/yaz-client
-/usr/bin/yaz-ztest
-/usr/bin/yaz-config
-/usr/bin/yaz-comp
-/usr/bin/zoomsh
-/usr/lib/libyaz.a
-/usr/lib/libyaz.so
-/usr/lib/libyaz.so.1
-/usr/lib/libyaz.so.1.0.0
-/usr/lib/libyazthread.a
-/usr/lib/libyazthread.so
-/usr/lib/libyazthread.so.1
-/usr/lib/libyazthread.so.1.0.0
-/usr/lib/libyazmalloc.a
-/usr/lib/libyazmalloc.so
-/usr/lib/libyazmalloc.so.1
-/usr/lib/libyazmalloc.so.1.0.0
+/usr/bin/*
+/usr/lib/*.a
+/usr/lib/*.so
+/usr/lib/*.so.*
 /usr/include/yaz
 /usr/share/yaz/z39.50
 /usr/share/yaz/ill
 /usr/share/doc/yaz
 /usr/share/aclocal/yaz.m4
+/usr/share/man/*/*
