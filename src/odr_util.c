@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_util.c,v 1.5 2004-10-15 00:19:00 adam Exp $
+ * $Id: odr_util.c,v 1.6 2004-12-30 00:14:38 adam Exp $
  */
 /**
  * \file odr_util.c
@@ -69,7 +69,7 @@ Odr_oid *odr_getoidbystr_nmem(NMEM nmem, const char *str)
     const char *p = str;
     Odr_oid *ret;
 
-    if (!isdigit(*str))
+    if (!isdigit(*(const unsigned char *) str))
 	return 0;
     while ((p = strchr(p, '.')))
 	num++, p++;

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.18 2004-12-13 14:21:55 heikki Exp $
+ * $Id: log.c,v 1.19 2004-12-30 00:11:00 adam Exp $
  */
 
 /**
@@ -397,15 +397,13 @@ int yaz_log_mask_str_x (const char *str, int level)
 {
     const char *p;
     int i;
-    int found;
-    int negated;
     char clean[255] = "";
     char *n = clean;
 
     while (*str)
     {
-        found = 0;
-        negated=0;
+        int found = 0;
+        int negated = 0;
         for (p = str; *p && *p != ','; p++)
             ;
         if (*str=='-')
@@ -413,7 +411,7 @@ int yaz_log_mask_str_x (const char *str, int level)
             negated=1;
             str++;
         }
-        if (isdigit(*str))
+        if (isdigit(*(unsigned char *) str))
         {
             level = atoi (str);
             found = 1;

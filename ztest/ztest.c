@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.67 2004-11-18 15:18:14 heikki Exp $
+ * $Id: ztest.c,v 1.68 2004-12-30 00:18:04 adam Exp $
  */
 
 /*
@@ -568,7 +568,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     memcpy(term, q->term->term->u.general->buf, q->term->term->u.general->len);
     term[q->term->term->u.general->len] = '\0';
     for (p = term; *p; p++)
-    	if (islower(*p))
+    	if (islower(*(unsigned char *) p))
 	    *p = toupper(*p);
 
     fseek(f, 0, SEEK_SET);

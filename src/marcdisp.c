@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.10 2004-11-26 11:01:05 adam Exp $
+ * $Id: marcdisp.c,v 1.11 2004-12-30 00:12:13 adam Exp $
  */
 
 /**
@@ -84,11 +84,11 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     /* ballout if bsize is known and record_length is less than that */
     if (bsize != -1 && record_length > bsize)
 	return -1;
-    if (isdigit(buf[10]))
+    if (isdigit(((const unsigned char *) buf)[10]))
         indicator_length = atoi_n (buf+10, 1);
     else
         indicator_length = 2;
-    if (isdigit(buf[11]))
+    if (isdigit(((const unsigned char *) buf)[11]))
 	identifier_length = atoi_n (buf+11, 1);
     else
         identifier_length = 2;

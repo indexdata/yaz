@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: read-grs.c,v 1.10 2004-12-13 14:21:59 heikki Exp $
+ * $Id: read-grs.c,v 1.11 2004-12-30 00:18:04 adam Exp $
  */
 
 /*
@@ -32,7 +32,7 @@ static Z_GenericRecord *read_grs1(FILE *f, ODR o)
 
 	while (fgets(buf = line, 512, f))
 	{
-	    while (*buf && isspace(*buf))
+	    while (*buf && isspace(*(unsigned char *) buf))
 		buf++;
 	    if (!*buf || *buf == '#')
 		continue;
@@ -50,7 +50,7 @@ static Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	if (!(buf = strchr(buf, ')')))
 	    return 0;
 	buf++;
-	while (*buf && isspace(*buf))
+	while (*buf && isspace(*(unsigned char *) buf))
 	    buf++;
 	if (!*buf)
 	    return 0;

@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: read-marc.c,v 1.4 2002-12-16 13:13:53 adam Exp $
+ * $Id: read-marc.c,v 1.5 2004-12-30 00:18:04 adam Exp $
  */
 
 /*
@@ -1537,7 +1537,7 @@ static int atoin (const char *buf, int n)
     int val = 0;
     while (--n >= 0)
     {
-        if (isdigit(*buf))
+        if (isdigit(*(const unsigned char *) buf))
             val = val*10 + (*buf - '0');
         buf++;
     }

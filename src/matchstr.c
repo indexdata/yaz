@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: matchstr.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ * $Id: matchstr.c,v 1.3 2004-12-30 00:14:00 adam Exp $
  */
 
 /**
@@ -30,8 +30,8 @@ int yaz_matchstr(const char *s1, const char *s2)
 {
     while (*s1 && *s2)
     {
-	char c1 = *s1;
-	char c2 = *s2;
+	unsigned char c1 = *s1;
+	unsigned char c2 = *s2;
 
         if (c2 == '?')
             return 0;

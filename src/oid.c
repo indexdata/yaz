@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.5 2004-12-22 23:45:13 adam Exp $
+ * $Id: oid.c,v 1.6 2004-12-30 00:12:54 adam Exp $
  */
 
 /**
@@ -542,7 +542,7 @@ static oid_value oid_getval_raw(const char *name)
     int val = 0, i = 0, oid[OID_SIZE];
     struct oident *oident;
     
-    while (isdigit (*name))
+    while (isdigit (*(const unsigned char *) name))
     {
         val = val*10 + (*name - '0');
         name++;
@@ -568,7 +568,7 @@ oid_value oid_getvalbyname(const char *name)
     struct oident_list *ol;
 
     oid_init ();
-    if (isdigit (*name))
+    if (isdigit (*(const unsigned char *) name))
         return oid_getval_raw (name);
     for (ol = oident_table; ol; ol = ol->next)
 	if (!yaz_matchstr(ol->oident.desc, name))
