@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.15  1997-05-14 06:53:33  adam
+ * Revision 1.16  1997-09-01 08:49:14  adam
+ * New windows NT/95 port using MSV5.0. Minor changes only.
+ *
+ * Revision 1.15  1997/05/14 06:53:33  adam
  * C++ support.
  *
  * Revision 1.14  1997/05/01 15:06:32  adam
@@ -415,7 +418,7 @@ COMSTACK tcpip_accept(COMSTACK h)
         return 0;
     }
 #ifdef WINDOWS
-    if (!cnew->blocking && ioctlsocket(new->iofile, FIONBIO, &tru) < 0)
+    if (!cnew->blocking && ioctlsocket(cnew->iofile, FIONBIO, &tru) < 0)
 #else
     if (!cnew->blocking && fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
 #endif
@@ -557,10 +560,11 @@ int tcpip_close(COMSTACK h)
     tcpip_state *sp = h->cprivate;
 
     TRC(fprintf(stderr, "tcpip_close\n"));
+    if (h->iofile != -1)
 #ifdef WINDOWS
-    closesocket(h->iofile);
+        closesocket(h->iofile);
 #else
-    close(h->iofile);
+        close(h->iofile);
 #endif
     if (sp->altbuf)
         xfree(sp->altbuf);

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.c,v $
- * Revision 1.2  1995-09-29 17:01:48  quinn
+ * Revision 1.3  1997-09-01 08:49:14  adam
+ * New windows NT/95 port using MSV5.0. Minor changes only.
+ *
+ * Revision 1.2  1995/09/29 17:01:48  quinn
  * More Windows work
  *
  * Revision 1.1  1995/06/14  09:58:20  quinn
@@ -18,6 +21,8 @@
  *
  *
  */
+
+#include <comstack.h>
 
 const char *cs_errlist[] =
 {
