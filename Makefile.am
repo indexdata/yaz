@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.3 2000-02-29 13:44:54 adam Exp $
+## $Id: Makefile.am,v 1.4 2000-02-29 15:52:33 adam Exp $
 
-AUTOMAKE_OPTIONS = foreign no-dependencies
+AUTOMAKE_OPTIONS = foreign 
 
 DIST_SUBDIRS=util odr z39.50 asn ill zutil comstack ccl tab retrieval server lib include client ztest doc
 
