@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.26 2004-08-02 10:06:34 adam Exp $
+ * $Id: seshigh.c,v 1.27 2004-09-10 11:28:58 adam Exp $
  */
 
 /*
@@ -650,7 +650,6 @@ static void srw_bend_search(association *assoc, request *req,
     rr.search_info = 0;
     yaz_log_zquery(rr.query);
     (assoc->init->bend_search)(assoc->backend, &rr);
-    srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
     if (rr.errcode)
     {
         yaz_log(LOG_DEBUG, "bend_search returned Bib-1 code %d", rr.errcode);
@@ -1326,7 +1325,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.26 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.27 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
