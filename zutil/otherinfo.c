@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: otherinfo.c,v $
- * Revision 1.1  1999-06-08 10:10:16  adam
+ * Revision 1.2  1999-09-13 12:51:35  adam
+ * Fixed bug in yaz_oi_update and added delete option.
+ *
+ * Revision 1.1  1999/06/08 10:10:16  adam
  * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
  *
  * Revision 1.1  1999/04/26 07:25:25  adam
@@ -59,7 +62,7 @@ void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 
 Z_OtherInformationUnit *yaz_oi_update (
     Z_OtherInformation **otherInformationP, ODR odr,
-    int *oid, int categoryValue)
+    int *oid, int categoryValue, int delete_flag)
 {
     int i;
     Z_OtherInformation *otherInformation = *otherInformationP;
@@ -86,7 +89,21 @@ Z_OtherInformationUnit *yaz_oi_update (
 		*otherInformation->list[i]->category->categoryValue &&
 		!oid_oidcmp (oid, otherInformation->list[i]->category->
 			     categoryTypeId))
-		return otherInformation->list[i];
+	    {
+		Z_OtherInformationUnit *this_list = otherInformation->list[i];
+
+		if (delete_flag)
+		{
+		    (otherInformation->num_elements)--;
+		    while (i < otherInformation->num_elements)
+		    {
+			otherInformation->list[i] =
+			    otherInformation->list[i+1];
+			i++;
+		    }
+		}
+		return this_list;
+	    }
 	}
     }
     if (!odr)
@@ -94,7 +111,7 @@ Z_OtherInformationUnit *yaz_oi_update (
     else
     {
 	Z_OtherInformationUnit **newlist = (Z_OtherInformationUnit**)
-	    odr_malloc(odr, otherInformation->num_elements+1 *
+	    odr_malloc(odr, (otherInformation->num_elements+1) *
 		       sizeof(*newlist));
 	for (i = 0; i<otherInformation->num_elements; i++)
 	    newlist[i] = otherInformation->list[i];
@@ -129,7 +146,7 @@ void yaz_oi_set_string_oid (
     const char *str)
 {
     Z_OtherInformationUnit *oi =
-	yaz_oi_update(otherInformation, odr, oid, categoryValue);
+	yaz_oi_update(otherInformation, odr, oid, categoryValue, 0);
     if (!oi)
 	return;
     oi->which = Z_OtherInfo_characterInfo;
@@ -154,18 +171,18 @@ void yaz_oi_set_string_oidval (
 
 char *yaz_oi_get_string_oid (
     Z_OtherInformation **otherInformation,
-    int *oid, int categoryValue)
+    int *oid, int categoryValue, int delete_flag)
 {
     Z_OtherInformationUnit *oi;
     
-    if ((oi = yaz_oi_update(otherInformation, 0, oid, 1)) &&
+    if ((oi = yaz_oi_update(otherInformation, 0, oid, 1, delete_flag)) &&
 	oi->which == Z_OtherInfo_characterInfo)
 	return oi->information.characterInfo;
     return 0;
 }
 
 char *yaz_oi_get_string_oidval(Z_OtherInformation **otherInformation,
-				int oidval, int categoryValue)    
+			       int oidval, int categoryValue, int delete_flag)
 {
     int oid[OID_SIZE];
     struct oident ent;
@@ -175,6 +192,7 @@ char *yaz_oi_get_string_oidval(Z_OtherInformation **otherInformation,
 
     if (!oid_ent_to_oid (&ent, oid))
 	return 0;
-    return yaz_oi_get_string_oid (otherInformation, oid, categoryValue);
+    return yaz_oi_get_string_oid (otherInformation, oid, categoryValue,
+				  delete_flag);
 }
 
