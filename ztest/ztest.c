@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.55 2003-02-20 15:14:10 adam Exp $
+ * $Id: ztest.c,v 1.56 2003-02-28 15:59:02 adam Exp $
  */
 
 /*
@@ -13,9 +13,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include <yaz/yaz-util.h>
 #include <yaz/backend.h>
-#include <yaz/log.h>
-
 #include <yaz/ill.h>
 
 Z_GenericRecord *dummy_grs_record (int num, ODR o);
@@ -35,7 +34,7 @@ int ztest_search (void *handle, bend_search_rr *rr)
         rr->errcode = 23;
         return 0;
     }
-    if (strcmp (rr->basenames[0], "Default"))
+    if (yaz_matchstr (rr->basenames[0], "Default"))
     {
         rr->errcode = 109;
         rr->errstring = rr->basenames[0];
