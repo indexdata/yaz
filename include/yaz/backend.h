@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.6  2000-03-20 19:06:25  adam
+ * Revision 1.7  2000-04-05 07:39:55  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.6  2000/03/20 19:06:25  adam
  * Added Segment request for fronend server. Work on admin for client.
  *
  * Revision 1.5  2000/03/15 12:59:49  adam
@@ -91,34 +94,11 @@
 
 #include <yaz/yconfig.h>
 #include <yaz/proto.h>
-#include <yaz/statserv.h>
 
 YAZ_BEGIN_CDECL
     
 typedef struct request *bend_request;
 typedef struct association *bend_association;
-
-/* old search request input */ 
-typedef struct 
-{
-    char *setname;             /* name to give to this set */
-    int replace_set;           /* replace set, if it already exists */
-    int num_bases;             /* number of databases in list */
-    char **basenames;          /* databases to search */
-    Z_ReferenceId *referenceId;/* reference ID */
-    Z_Query *query;            /* query structure */
-    ODR stream;                /* encoding stream */
-    ODR decode;                /* decoding stream */
-    ODR print;                 /* printing stream */
-} bend_searchrequest;
-
-/* old search request output */
-typedef struct
-{
-    int hits;                  /* number of hits */
-    int errcode;               /* 0==OK */
-    char *errstring;           /* system error string or NULL */
-} bend_searchresult;
 
 /* extended search handler (rr = request response) */
 typedef struct {
@@ -158,49 +138,24 @@ typedef struct {
     char *errstring;           /* system error string or NULL */
 } bend_present_rr;
 
-YAZ_EXPORT bend_searchresult *bend_search(void *handle, bend_searchrequest *r,
-                                          int *fd);
-YAZ_EXPORT int bend_searchresponse(void *handle, bend_search_rr *bsrr);
-
-typedef struct
-{
+typedef struct bend_fetch_rr {
     char *setname;             /* set name */
     int number;                /* record number */
     Z_ReferenceId *referenceId;/* reference ID */
-    oid_value format;          /* One of the CLASS_RECSYN members */
+    oid_value request_format;  /* One of the CLASS_RECSYN members */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
     ODR print;                 /* printing stream */
-    int surrogate_flag;        /* surrogate diagnostic flag (rw) */
-} bend_fetchrequest;
 
-typedef struct
-{
     char *basename;            /* name of database that provided record */
     int len;                   /* length of record or -1 if structured */
     char *record;              /* record */
     int last_in_set;           /* is it?  */
-    oid_value format;          /* format */
+    oid_value output_format;   /* format */
     int errcode;               /* 0==success */
     char *errstring;           /* system error string or NULL */
-} bend_fetchresult;
-
-YAZ_EXPORT bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r,
-                                        int *fd);
-YAZ_EXPORT bend_fetchresult *bend_fetchresponse(void *handle);
-
-typedef struct
-{
-    int num_bases;      /* number of elements in databaselist */
-    char **basenames;   /* databases to search */
-    oid_value attributeset;
-    Z_ReferenceId *referenceId; /* reference ID */
-    Z_AttributesPlusTerm *term;
-    int term_position;  /* desired index of term in result list */
-    int num_entries;    /* number of entries requested */
-    ODR stream;         /* encoding stream - memory source if required */
-    ODR print;          /* printing stream */
-} bend_scanrequest;
+    int surrogate_flag;        /* surrogate diagnostic */
+} bend_fetch_rr;
 
 struct scan_entry {
     char *term;         /* the returned scan term */
@@ -213,16 +168,6 @@ typedef enum {
     BEND_SCAN_SUCCESS,  /* ok */
     BEND_SCAN_PARTIAL   /* not all entries could be found */
 } bend_scan_status;
-
-typedef struct bend_scanresult
-{
-    int num_entries;
-    struct scan_entry *entries;
-    int term_position;
-    bend_scan_status status;
-    int errcode;
-    char *errstring;
-} bend_scanresult;
 
 typedef struct bend_scan_rr {
     int num_bases;      /* number of elements in databaselist */
@@ -242,10 +187,6 @@ typedef struct bend_scan_rr {
     char *errstring;
 } bend_scan_rr;
 
-YAZ_EXPORT bend_scanresult *bend_scan(void *handle, bend_scanrequest *r,
-                                      int *fd);
-YAZ_EXPORT bend_scanresult *bend_scanresponse(void *handle);
-
 /* delete handler */
 typedef struct bend_delete_rr {
     int function;
@@ -257,9 +198,6 @@ typedef struct bend_delete_rr {
     ODR stream;
     ODR print; 
 } bend_delete_rr;
-
-/* close handler */
-YAZ_EXPORT void bend_close(void *handle);
 
 /* sort handler */
 typedef struct bend_sort_rr
@@ -312,6 +250,7 @@ typedef struct bend_initrequest
     char *implementation_version;
     int (*bend_sort) (void *handle, bend_sort_rr *rr);
     int (*bend_search) (void *handle, bend_search_rr *rr);
+    int (*bend_fetch) (void *handle, bend_fetch_rr *rr);
     int (*bend_present) (void *handle, bend_present_rr *rr);
     int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
     int (*bend_delete)(void *handle, bend_delete_rr *rr);
@@ -326,8 +265,6 @@ typedef struct bend_initresult
     void *handle;              /* private handle to the backend module */
 } bend_initresult;
 
-YAZ_EXPORT bend_initresult *bend_init(bend_initrequest *r);
-
 YAZ_EXPORT void bend_request_send (bend_association a, bend_request req,
 				   Z_APDU *res);
 
@@ -339,6 +276,50 @@ YAZ_EXPORT Z_ReferenceId *bend_request_getid (ODR odr, bend_request req);
 YAZ_EXPORT int bend_backend_respond (bend_association a, bend_request req);
 YAZ_EXPORT void bend_request_setdata(bend_request r, void *p);
 YAZ_EXPORT void *bend_request_getdata(bend_request r);
+
+typedef struct statserv_options_block
+{
+    int dynamic;                  /* fork on incoming requests */
+    int threads;                  /* use threads */
+    int one_shot;                 /* one session then exit(1) */
+    int loglevel;                 /* desired logging-level */
+    char apdufile[ODR_MAXNAME+1]; /* file for pretty-printed PDUs */
+    char logfile[ODR_MAXNAME+1];  /* file for diagnostic output */
+    char default_listen[1024];    /* 0 == no default listen */
+    enum oid_proto default_proto; /* PROTO_SR or PROTO_Z3950 */
+    int idle_timeout;             /* how many minutes to wait before closing */
+    int maxrecordsize;            /* maximum value for negotiation */
+    char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */
+    char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
+    void (*bend_start)(struct statserv_options_block *p);
+    void (*bend_stop)(struct statserv_options_block *p);
+    int (*options_func)(int argc, char **argv);
+    int (*check_ip)(void *cd, const char *addr, int len, int type);
+    char daemon_name[128];
+    int inetd;                    /* Do we use the inet deamon or not */
+
+    void *handle;                 /* Handle */
+    bend_initresult *(*bend_init)(bend_initrequest *r);
+    void (*bend_close)(void *handle);
+#ifdef WIN32
+    /* We only have these members for the windows version */
+    /* They seemed a bit large to have them there in general */
+    char service_name[128];         /* NT Service Name */
+    char app_name[128];             /* Application Name */
+    char service_dependencies[128]; /* The services we are dependent on */
+    char service_display_name[128]; /* The service display name */
+#endif /* WIN32 */
+} statserv_options_block;
+
+YAZ_EXPORT int statserv_main(
+    int argc, char **argv,
+    bend_initresult *(*bend_init)(bend_initrequest *r),
+    void (*bend_close)(void *handle));
+YAZ_EXPORT int statserv_start(int argc, char **argv);
+YAZ_EXPORT void statserv_closedown(void);
+YAZ_EXPORT statserv_options_block *statserv_getcontrol(void);
+YAZ_EXPORT void statserv_setcontrol(statserv_options_block *block);
+YAZ_EXPORT int check_ip_tcpd(void *cd, const char *addr, int len, int type);
 
 YAZ_END_CDECL
 

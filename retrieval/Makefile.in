@@ -57,42 +57,53 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AS = @AS@
 ASNMODULE = @ASNMODULE@
 CC = @CC@
 CPP = @CPP@
+DLLTOOL = @DLLTOOL@
 ILLLIB = @ILLLIB@
 ILLMODULE = @ILLMODULE@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
 
-noinst_LIBRARIES = libret.a
+noinst_LTLIBRARIES = libret.la
 
-libret_a_SOURCES = d1_handle.c d1_read.c d1_attset.c d1_tagset.c d1_absyn.c   d1_grs.c d1_sutrs.c d1_varset.c d1_espec.c d1_doespec.c d1_map.c d1_marc.c   d1_write.c d1_expout.c d1_sumout.c d1_soif.c d1_prtree.c d1_if.c
+LIBS = 
+
+libret_la_SOURCES = d1_handle.c d1_read.c d1_attset.c d1_tagset.c d1_absyn.c   d1_grs.c d1_sutrs.c d1_varset.c d1_espec.c d1_doespec.c d1_map.c d1_marc.c   d1_write.c d1_expout.c d1_sumout.c d1_soif.c d1_prtree.c d1_if.c
 
 
-INCLUDES = -I../include 
+INCLUDES = -I$(srcdir)/../include 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
-LIBRARIES =  $(noinst_LIBRARIES)
+LTLIBRARIES =  $(noinst_LTLIBRARIES)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) 
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
-LIBS = @LIBS@
-libret_a_LIBADD = 
-libret_a_OBJECTS =  d1_handle.o d1_read.o d1_attset.o d1_tagset.o \
-d1_absyn.o d1_grs.o d1_sutrs.o d1_varset.o d1_espec.o d1_doespec.o \
-d1_map.o d1_marc.o d1_write.o d1_expout.o d1_sumout.o d1_soif.o \
-d1_prtree.o d1_if.o
-AR = ar
+libret_la_LDFLAGS = 
+libret_la_LIBADD = 
+libret_la_OBJECTS =  d1_handle.lo d1_read.lo d1_attset.lo d1_tagset.lo \
+d1_absyn.lo d1_grs.lo d1_sutrs.lo d1_varset.lo d1_espec.lo \
+d1_doespec.lo d1_map.lo d1_marc.lo d1_write.lo d1_expout.lo \
+d1_sumout.lo d1_soif.lo d1_prtree.lo d1_if.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -105,12 +116,12 @@ DEP_FILES =  .deps/d1_absyn.P .deps/d1_attset.P .deps/d1_doespec.P \
 .deps/d1_if.P .deps/d1_map.P .deps/d1_marc.P .deps/d1_prtree.P \
 .deps/d1_read.P .deps/d1_soif.P .deps/d1_sumout.P .deps/d1_sutrs.P \
 .deps/d1_tagset.P .deps/d1_varset.P .deps/d1_write.P
-SOURCES = $(libret_a_SOURCES)
-OBJECTS = $(libret_a_OBJECTS)
+SOURCES = $(libret_la_SOURCES)
+OBJECTS = $(libret_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .o .s
+.SUFFIXES: .S .c .lo .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu retrieval/Makefile
 
@@ -119,14 +130,14 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 
-mostlyclean-noinstLIBRARIES:
+mostlyclean-noinstLTLIBRARIES:
 
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
 
-distclean-noinstLIBRARIES:
+distclean-noinstLTLIBRARIES:
 
-maintainer-clean-noinstLIBRARIES:
+maintainer-clean-noinstLTLIBRARIES:
 
 .s.o:
 	$(COMPILE) -c $<
@@ -144,10 +155,24 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-libret.a: $(libret_a_OBJECTS) $(libret_a_DEPENDENCIES)
-	-rm -f libret.a
-	$(AR) cru libret.a $(libret_a_OBJECTS) $(libret_a_LIBADD)
-	$(RANLIB) libret.a
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+libret.la: $(libret_la_OBJECTS) $(libret_la_DEPENDENCIES)
+	$(LINK)  $(libret_la_LDFLAGS) $(libret_la_OBJECTS) $(libret_la_LIBADD) $(LIBS)
 
 tags: TAGS
 
@@ -249,7 +274,7 @@ install-am: all-am
 install: install-am
 uninstall-am:
 uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LTLIBRARIES)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
@@ -265,42 +290,46 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
-		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+mostlyclean-am:  mostlyclean-noinstLTLIBRARIES mostlyclean-compile \
+		mostlyclean-libtool mostlyclean-tags mostlyclean-depend \
+		mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-noinstLIBRARIES clean-compile clean-tags clean-depend \
-		clean-generic mostlyclean-am
+clean-am:  clean-noinstLTLIBRARIES clean-compile clean-libtool \
+		clean-tags clean-depend clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-noinstLIBRARIES distclean-compile \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
+distclean-am:  distclean-noinstLTLIBRARIES distclean-compile \
+		distclean-libtool distclean-tags distclean-depend \
+		distclean-generic clean-am
+	-rm -f libtool
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-compile maintainer-clean-tags \
-		maintainer-clean-depend maintainer-clean-generic \
-		distclean-am
+maintainer-clean-am:  maintainer-clean-noinstLTLIBRARIES \
+		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-tags maintainer-clean-depend \
+		maintainer-clean-generic distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
-clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+.PHONY: mostlyclean-noinstLTLIBRARIES distclean-noinstLTLIBRARIES \
+clean-noinstLTLIBRARIES maintainer-clean-noinstLTLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir mostlyclean-depend \
-distclean-depend clean-depend maintainer-clean-depend info-am info \
-dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
-install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+clean-libtool maintainer-clean-libtool tags mostlyclean-tags \
+distclean-tags clean-tags maintainer-clean-tags distdir \
+mostlyclean-depend distclean-depend clean-depend \
+maintainer-clean-depend info-am info dvi-am dvi check check-am \
+installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

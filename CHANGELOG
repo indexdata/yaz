@@ -1,10 +1,20 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Added Segment handlers for backend server.
+Shared library support for UNIX using GNU libtool.
+
+* Modified backend interface. Request/Response struct's replaced by
+one read/write C struct. For example bend_fetchrequest and
+bend_fetchresult have been replaced by single bend_fetch_rr struct.
+Every handler - even search has to be registered in bend_init
+handler. This means that the YAZ library no longer refers to
+external functions and it makes it possible to make the whole
+thing a single DLL/SO.
+
+Added Segment handler for backend server.
 
 Added Zmbol/Zebra administrative functions to YAZ client.
 
-Added multi threading for frontend server when POSIX Threads are available.
+Threaded frontend server on UNIX (when POSIX Threads are available).
 Starting the server with option -T enables multi-threading.
 
 --- 1.6 2000/03/03

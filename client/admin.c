@@ -1,6 +1,9 @@
 /*
  * $Log: admin.c,v $
- * Revision 1.6  2000-03-20 19:06:25  adam
+ * Revision 1.7  2000-04-05 07:39:54  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.6  2000/03/20 19:06:25  adam
  * Added Segment request for fronend server. Work on admin for client.
  *
  * Revision 1.5  2000/03/17 12:47:02  adam
@@ -42,15 +45,19 @@
 
 #include <yaz/pquery.h>
 
+#ifdef ASN_COMPILED
+
 /* Helper functions to get to various statics in the client */
 ODR getODROutputStream();
 void send_apdu(Z_APDU *a);
 
+extern char *databaseNames[];
+extern int num_databaseNames;
 
-
-int sendAdminES(int type, char* dbname, char* param1)
+int sendAdminES(int type, char* param1)
 {
     ODR out = getODROutputStream();
+    char *dbname = odr_strdup (out, databaseNames[0]);
 
     /* Type: 1=reindex, 2=truncate, 3=delete, 4=create, 5=import, 6=refresh, 7=commit */
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
@@ -96,8 +103,8 @@ int sendAdminES(int type, char* dbname, char* param1)
     case Z_ESAdminOriginPartToKeep_truncate:
 	toKeep->u.truncate=odr_nullval();
 	break;
-    case Z_ESAdminOriginPartToKeep_delete:
-	toKeep->u.delete=odr_nullval();
+    case Z_ESAdminOriginPartToKeep_drop:
+	toKeep->u.drop=odr_nullval();
 	break;
     case Z_ESAdminOriginPartToKeep_create:
 	toKeep->u.create=odr_nullval();
@@ -105,12 +112,10 @@ int sendAdminES(int type, char* dbname, char* param1)
     case Z_ESAdminOriginPartToKeep_import:
 	toKeep->u.import = (Z_ImportParameters*)odr_malloc(out, sizeof(*toKeep->u.import));
 	toKeep->u.import->recordType=param1;
-	toKeep->databaseName = dbname;
 	/* Need to add additional setup of records here */
 	break;
     case Z_ESAdminOriginPartToKeep_refresh:
 	toKeep->u.refresh=odr_nullval();
-	toKeep->databaseName = dbname;
 	break;
     case Z_ESAdminOriginPartToKeep_commit:
 	toKeep->u.commit=odr_nullval();
@@ -137,46 +142,46 @@ int sendAdminES(int type, char* dbname, char* param1)
     return 0;
 }
 
-/* cmd_adm_reindex <dbname>
+/* cmd_adm_reindex
    Ask the specified database to fully reindex itself */
 int cmd_adm_reindex(char* arg)
 {
-    sendAdminES(Z_ESAdminOriginPartToKeep_reIndex,arg,NULL);
+    sendAdminES(Z_ESAdminOriginPartToKeep_reIndex, NULL);
     return 2;
 }
 
-/* cmd_adm_truncate <dbname>
+/* cmd_adm_truncate
    Truncate the specified database, removing all records and index entries, but leaving 
    the database & it's explain information intact ready for new records */
 int cmd_adm_truncate(char* arg)
 {
     if ( arg )
     {
-        sendAdminES(Z_ESAdminOriginPartToKeep_truncate,arg,NULL);
+        sendAdminES(Z_ESAdminOriginPartToKeep_truncate, NULL);
 	return 2;
     }
     return 0;
 }
 
-/* cmd_adm_create <dbname>
+/* cmd_adm_create
    Create a new database */
 int cmd_adm_create(char* arg)
 {
     if ( arg )
     {
-        sendAdminES(Z_ESAdminOriginPartToKeep_create,arg,NULL);
+        sendAdminES(Z_ESAdminOriginPartToKeep_create, NULL);
 	return 2;
     }
     return 0;
 }
 
-/* cmd_adm_delete <dbname>
-   Delete a database */
-int cmd_adm_delete(char* arg)
+/* cmd_adm_drop
+   Drop (Delete) a database */
+int cmd_adm_drop(char* arg)
 {
     if ( arg )
     {
-        sendAdminES(Z_ESAdminOriginPartToKeep_delete,arg,NULL);
+        sendAdminES(Z_ESAdminOriginPartToKeep_drop, NULL);
 	return 2;
     }
     return 0;
@@ -186,9 +191,6 @@ int cmd_adm_delete(char* arg)
    Import the specified updated into the database
    N.B. That in this case, the import may contain instructions to delete records as well as new or updates
    to existing records */
-
-extern char *databaseNames[];
-extern int num_databaseNames;
 
 int cmd_adm_import(char *arg)
 {
@@ -210,8 +212,7 @@ int cmd_adm_import(char *arg)
     if (!dir)
 	return 0;
     
-    sendAdminES(Z_ESAdminOriginPartToKeep_import,*databaseNames,
-		type_str);
+    sendAdminES(Z_ESAdminOriginPartToKeep_import, type_str);
 
     printf ("sent es request\n");
     if ((cp=strrchr(dir_str, '/')) && cp[1] == 0)
@@ -266,12 +267,8 @@ int cmd_adm_import(char *arg)
 	}
     }
     if (apdu)
-    {
-	printf ("sending last packet\n");
 	send_apdu(apdu);
-    }
     apdu = zget_APDU(out, Z_APDU_segmentRequest);
-    printf ("sending end of sequence packet\n");
     send_apdu (apdu);
     closedir(dir);
     return 2;
@@ -287,12 +284,11 @@ int cmd_adm_import2(char* arg)
     
     if ( arg )
     {
-        char dbname_buff[32];
         char rectype_buff[32];
         char filename_buff[32];
 	FILE* pImportFile = NULL;
 
-        if (sscanf (arg, "%s %s %s", dbname_buff, rectype_buff, filename_buff) != 3)
+        if (sscanf (arg, "%s %s", rectype_buff, filename_buff) != 3)
 	{
 	    printf("Must specify database-name, record-type and filename for import\n");
 	    return 0;
@@ -310,7 +306,7 @@ int cmd_adm_import2(char* arg)
 
             /* We opened the import file without problems... So no we send the es request, ready to 
 	       start sending fragments of the import file as segment messages */
-            sendAdminES(Z_ESAdminOriginPartToKeep_import,arg,rectype_buff);
+            sendAdminES(Z_ESAdminOriginPartToKeep_import, rectype_buff);
 
 	    while ( ! feof(pImportFile ) )
 	    {
@@ -347,7 +343,7 @@ int cmd_adm_refresh(char* arg)
 {
     if ( arg )
     {
-        sendAdminES(Z_ESAdminOriginPartToKeep_refresh,arg,NULL);
+        sendAdminES(Z_ESAdminOriginPartToKeep_refresh, NULL);
 	return 2;
     }
     return 0;
@@ -357,19 +353,19 @@ int cmd_adm_refresh(char* arg)
    Make imported records a permenant & visible to the live system */
 int cmd_adm_commit(char* arg)
 {
-    sendAdminES(Z_ESAdminOriginPartToKeep_commit,NULL,NULL);
+    sendAdminES(Z_ESAdminOriginPartToKeep_commit, NULL);
     return 2;
 }
 
 int cmd_adm_shutdown(char* arg)
 {
-    sendAdminES(Z_ESAdminOriginPartToKeep_shutdown,NULL,NULL);
+    sendAdminES(Z_ESAdminOriginPartToKeep_shutdown, NULL);
     return 2;
 }
 
 int cmd_adm_startup(char* arg)
 {
-    sendAdminES(Z_ESAdminOriginPartToKeep_start,NULL,NULL);
+    sendAdminES(Z_ESAdminOriginPartToKeep_start, NULL);
     return 2;
 }
-
+#endif

@@ -1,12 +1,14 @@
-## $Id: Makefile.am,v 1.3 2000-03-14 09:22:15 ian Exp $
+## $Id: Makefile.am,v 1.4 2000-04-05 07:39:55 adam Exp $
 
-INCLUDES=-I../include
+INCLUDES=-I$(srcdir)/../include
 
-noinst_LIBRARIES = libasn.a
+noinst_LTLIBRARIES = libasn.la
 
 EXTRA_DIST=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl esadmin.asn
 
-libasn_a_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
+LIBS =
+
+libasn_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c \
  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \

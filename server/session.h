@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.22  2000-03-20 19:06:25  adam
+ * Revision 1.23  2000-04-05 07:39:55  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.22  2000/03/20 19:06:25  adam
  * Added Segment request for fronend server. Work on admin for client.
  *
  * Revision 1.21  1999/11/30 13:47:12  adam
@@ -153,6 +156,8 @@ typedef struct association
     int maximumRecordSize;
     int version;                  /* highest version-bit set (2 or 3) */
 
+    struct bend_initrequest *init;
+#if 0
     int (*bend_sort) ();
     int (*bend_search) ();
     int (*bend_present) ();
@@ -160,6 +165,7 @@ typedef struct association
     int (*bend_delete) ();
     int (*bend_scan) ();
     int (*bend_segment) ();
+#endif
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);

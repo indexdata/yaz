@@ -57,12 +57,21 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AS = @AS@
 ASNMODULE = @ASNMODULE@
 CC = @CC@
 CPP = @CPP@
+DLLTOOL = @DLLTOOL@
 ILLLIB = @ILLLIB@
 ILLMODULE = @ILLMODULE@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SUBDIRS_VAR = @SUBDIRS_VAR@
@@ -254,6 +263,7 @@ clean-am:  clean-tags clean-generic mostlyclean-am
 clean: clean-recursive
 
 distclean-am:  distclean-tags distclean-generic clean-am
+	-rm -f libtool
 
 distclean: distclean-recursive
 

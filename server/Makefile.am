@@ -1,12 +1,12 @@
-## $Id: Makefile.am,v 1.2 2000-02-28 11:44:39 adam Exp $
+## $Id: Makefile.am,v 1.3 2000-04-05 07:39:55 adam Exp $
 
-noinst_LIBRARIES=libserver.a
+noinst_LTLIBRARIES=libserver.la
 
-libserver_a_SOURCES = eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
+libserver_la_SOURCES = eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
  eventl.h service.h session.h
 
 EXTRA_DIST=service.c
 
-INCLUDES=-I../include
+LIBS =
 
-LDADD = ../lib/libyaz.a
+INCLUDES=-I$(srcdir)/../include

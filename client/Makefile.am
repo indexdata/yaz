@@ -1,11 +1,11 @@
 ## Copyright (C) 1995-2000, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.5 2000-03-14 09:27:07 ian Exp $
+## $Id: Makefile.am,v 1.6 2000-04-05 07:39:54 adam Exp $
 
 bin_PROGRAMS=yaz-client
 
-yaz_client_SOURCES=client.c admin.c
+yaz_client_SOURCES=client.c admin.c admin.h
 
-LDADD = ../lib/libyaz.a
+yaz_client_LDADD = ../lib/libyaz.la
 
-INCLUDES=-I../include -DCCLRPN=1
+INCLUDES=-I$(srcdir)/../include -DCCLRPN=1

@@ -1,15 +1,16 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.24 2000-03-14 09:06:11 adam Exp $
+dnl $Id: configure.in,v 1.25 2000-04-05 07:39:54 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
-AM_INIT_AUTOMAKE(yaz, 1.6)
+AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
 dnl ------ Checking programs
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
-AC_PROG_RANLIB
+AM_DISABLE_SHARED
+AM_PROG_LIBTOOL
 dnl 
 dnl ----- yaz-comp: The Yaz Compiler
 AC_SUBST(ASNMODULE)
@@ -19,15 +20,23 @@ AC_ARG_ENABLE(comp,[  --disable-comp          use old encoders, i.e. disable the
 if test "$enable_comp" = "yes"; then
 	ASNMODULE="z39.50"
 	ILLMODULE="ill"
-	ILLLIB=../ill/libill.a
+	ILLLIB=../ill/libill.la
 	ASN_MAKEFILES="z39.50/Makefile ill/Makefile"
-	cp -f include/yaz/z-proto.h include/yaz/proto.h
+	HFILE=z-proto.h
 else
 	ILLMODULE=""
 	ASNMODULE=asn
 	ILLLIB=""
 	ASN_MAKEFILES="asn/Makefile"
-	cp -f include/yaz/prt-proto.h include/yaz/proto.h
+	HFILE=prt-proto.h
+fi
+AC_MSG_CHECKING(whether proto.h needs to be generated)
+yaz_include=${srcdir}/include/yaz
+if test -e ${yaz_include}/proto.h && cmp -s ${yaz_include}/$HFILE ${yaz_include}/proto.h; then
+	AC_MSG_RESULT(no)
+else
+	AC_MSG_RESULT(yes)
+	cp -f ${yaz_include}/$HFILE ${yaz_include}/proto.h
 fi
 dnl
 dnl ----- Sockets

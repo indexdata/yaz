@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.31  2000-01-31 13:15:21  adam
+ * Revision 1.32  2000-04-05 07:39:55  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.31  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -126,22 +129,6 @@ int ztest_sort (void *handle, bend_sort_rr *rr);
 int ztest_present (void *handle, bend_present_rr *rr);
 int ztest_esrequest (void *handle, bend_esrequest_rr *rr);
 int ztest_delete (void *handle, bend_delete_rr *rr);
-
-bend_initresult *bend_init(bend_initrequest *q)
-{
-    bend_initresult *r = (bend_initresult *) odr_malloc (q->stream, sizeof(*r));
-    static char *dummy = "Hej fister";
-
-    r->errcode = 0;
-    r->errstring = 0;
-    r->handle = dummy;
-    q->bend_sort = ztest_sort;       /* register sort handler */
-    q->bend_search = ztest_search;   /* register search handler */
-    q->bend_present = ztest_present; /* register present handle */
-    q->bend_esrequest = ztest_esrequest;
-    q->bend_delete = ztest_delete;
-    return r;
-}
 
 int ztest_search (void *handle, bend_search_rr *rr)
 {
@@ -381,12 +368,6 @@ int ztest_delete (void *handle, bend_delete_rr *rr)
     return 0;
 }
 
-/* Obsolete bend_search, never called because handler is registered */
-bend_searchresult *bend_search(void *handle, bend_searchrequest *q, int *fd)
-{
-    return 0;
-}
-
 /* Our sort handler really doesn't sort... */
 int ztest_sort (void *handle, bend_sort_rr *rr)
 {
@@ -476,67 +457,65 @@ static Z_GenericRecord *dummy_grs_record (int num, ODR o)
     return r;
 }
 
-bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *fd)
+int ztest_fetch(void *handle, bend_fetch_rr *r)
 {
-    bend_fetchresult *r = (bend_fetchresult *)
-			odr_malloc (q->stream, sizeof(*r));
     char *cp;
     r->errstring = 0;
     r->last_in_set = 0;
     r->basename = "DUMMY";
-    r->format = q->format;  
-    if (q->format == VAL_SUTRS)
+    r->output_format = r->request_format;  
+    if (r->request_format == VAL_SUTRS)
     {
     	char buf[100];
 
-	sprintf(buf, "This is dummy SUTRS record number %d\n", q->number);
+	sprintf(buf, "This is dummy SUTRS record number %d\n", r->number);
 	r->len = strlen(buf);
-	r->record = (char *) odr_malloc (q->stream, r->len+1);
+	r->record = (char *) odr_malloc (r->stream, r->len+1);
 	strcpy(r->record, buf);
     }
-    else if (q->format == VAL_GRS1)
+    else if (r->request_format == VAL_GRS1)
     {
 	r->len = -1;
-	r->record = (char*) dummy_grs_record(q->number, q->stream);
+	r->record = (char*) dummy_grs_record(r->number, r->stream);
 	if (!r->record)
 	{
 	    r->errcode = 13;
-	    return r;
+	    return 0;
 	}
     }
-    else if ((cp = dummy_database_record(q->number, q->stream)))
+    else if ((cp = dummy_database_record(r->number, r->stream)))
     {
 	r->len = strlen(cp);
 	r->record = cp;
-	r->format = VAL_USMARC;
+	r->output_format = VAL_USMARC;
     }
     else
     {
     	r->errcode = 13;
-	return r;
+	return 0;
     }
     r->errcode = 0;
-    return r;
+    return 0;
 }
 
 /*
  * silly dummy-scan what reads words from a file.
  */
-bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *fd)
+int ztest_scan(void *handle, bend_scan_rr *q)
 {
-    bend_scanresult *r = (bend_scanresult *)
-	odr_malloc (q->stream, sizeof(*r));
     static FILE *f = 0;
     static struct scan_entry list[200];
     static char entries[200][80];
     int hits[200];
     char term[80], *p;
     int i, pos;
+    int term_position_req = q->term_position;
+    int num_entries_req = q->num_entries;
 
-    r->errcode = 0;
-    r->errstring = 0;
-    r->entries = list;
-    r->status = BEND_SCAN_SUCCESS;
+    q->errcode = 0;
+    q->errstring = 0;
+    q->entries = list;
+    q->status = BEND_SCAN_SUCCESS;
     if (!f && !(f = fopen("dummy-words", "r")))
     {
 	perror("dummy-words");
@@ -544,18 +523,18 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *fd)
     }
     if (q->term->term->which != Z_Term_general)
     {
-    	r->errcode = 229; /* unsupported term type */
-	return r;
+    	q->errcode = 229; /* unsupported term type */
+	return 0;
     }
     if (q->term->term->u.general->len >= 80)
     {
-    	r->errcode = 11; /* term too long */
-	return r;
+    	q->errcode = 11; /* term too long */
+	return 0;
     }
     if (q->num_entries > 200)
     {
-    	r->errcode = 31;
-	return r;
+    	q->errcode = 31;
+	return 0;
     }
     memcpy(term, q->term->term->u.general->buf, q->term->term->u.general->len);
     term[q->term->term->u.general->len] = '\0';
@@ -564,50 +543,69 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *fd)
 	    *p = toupper(*p);
 
     fseek(f, 0, SEEK_SET);
-    r->num_entries = 0;
+    q->num_entries = 0;
+
     for (i = 0, pos = 0; fscanf(f, " %79[^:]:%d", entries[pos], &hits[pos]) == 2;
 	i++, pos < 199 ? pos++ : (pos = 0))
     {
-    	if (!r->num_entries && strcmp(entries[pos], term) >= 0) /* s-point fnd */
+    	if (!q->num_entries && strcmp(entries[pos], term) >= 0) /* s-point fnd */
 	{
-	    if ((r->term_position = q->term_position) > i + 1)
+	    if ((q->term_position = term_position_req) > i + 1)
 	    {
-	    	r->term_position = i + 1;
-		r->status = BEND_SCAN_PARTIAL;
+	    	q->term_position = i + 1;
+		q->status = BEND_SCAN_PARTIAL;
 	    }
-	    for (; r->num_entries < r->term_position; r->num_entries++)
+	    for (; q->num_entries < q->term_position; q->num_entries++)
 	    {
 	    	int po;
 
-		po = pos - r->term_position + r->num_entries + 1; /* find pos */
+		po = pos - q->term_position + q->num_entries+1; /* find pos */
 		if (po < 0)
 		    po += 200;
 
-		if (!strcmp (term, "SD") && r->num_entries == 2)
+		if (!strcmp (term, "SD") && q->num_entries == 2)
 		{
-		    list[r->num_entries].term = entries[pos];
-		    list[r->num_entries].occurrences = -1;
-		    list[r->num_entries].errcode = 233;
-		    list[r->num_entries].errstring = "SD for Scan Term";
+		    list[q->num_entries].term = entries[pos];
+		    list[q->num_entries].occurrences = -1;
+		    list[q->num_entries].errcode = 233;
+		    list[q->num_entries].errstring = "SD for Scan Term";
 		}
 		else
 		{
-		    list[r->num_entries].term = entries[po];
-		    list[r->num_entries].occurrences = hits[po];
+		    list[q->num_entries].term = entries[po];
+		    list[q->num_entries].occurrences = hits[po];
 		}
 	    }
 	}
-	else if (r->num_entries)
+	else if (q->num_entries)
 	{
-	    list[r->num_entries].term = entries[pos];
-	    list[r->num_entries].occurrences = hits[pos];
-	    r->num_entries++;
+	    list[q->num_entries].term = entries[pos];
+	    list[q->num_entries].occurrences = hits[pos];
+	    q->num_entries++;
 	}
-	if (r->num_entries >= q->num_entries)
+	if (q->num_entries >= num_entries_req)
 	    break;
     }
     if (feof(f))
-    	r->status = BEND_SCAN_PARTIAL;
+    	q->status = BEND_SCAN_PARTIAL;
+    return 0;
+}
+
+bend_initresult *bend_init(bend_initrequest *q)
+{
+    bend_initresult *r = (bend_initresult *) odr_malloc (q->stream, sizeof(*r));
+    static char *dummy = "Hej fister";
+
+    r->errcode = 0;
+    r->errstring = 0;
+    r->handle = dummy;
+    q->bend_sort = ztest_sort;              /* register sort handler */
+    q->bend_search = ztest_search;          /* register search handler */
+    q->bend_present = ztest_present;        /* register present handle */
+    q->bend_esrequest = ztest_esrequest;
+    q->bend_delete = ztest_delete;
+    q->bend_fetch = ztest_fetch;
+    q->bend_scan = ztest_scan;
     return r;
 }
 
@@ -618,5 +616,5 @@ void bend_close(void *handle)
 
 int main(int argc, char **argv)
 {
-    return statserv_main(argc, argv);
+    return statserv_main(argc, argv, bend_init, bend_close);
 }

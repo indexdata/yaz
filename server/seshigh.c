@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.103  2000-03-20 19:06:25  adam
+ * Revision 1.104  2000-04-05 07:39:55  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.103  2000/03/20 19:06:25  adam
  * Added Segment request for fronend server. Work on admin for client.
  *
  * Revision 1.102  2000/03/15 12:59:49  adam
@@ -388,7 +391,6 @@ void save_referenceId (request *reqb, Z_ReferenceId *refid);
 static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *process_segmentRequest (association *assoc, request *reqb);
-static int bend_default_scan (void *handle, bend_scan_rr *rr);
 
 static FILE *apduf = 0; /* for use in static mode */
 static statserv_options_block *control_block = 0;
@@ -411,6 +413,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
     	control_block = statserv_getcontrol();
     if (!(anew = (association *)xmalloc(sizeof(*anew))))
     	return 0;
+    anew->init = 0;
     anew->client_chan = channel;
     anew->client_link = link;
     if (!(anew->decode = odr_createmem(ODR_DECODE)) ||
@@ -470,6 +473,9 @@ association *create_association(IOCHAN channel, COMSTACK link)
  */
 void destroy_association(association *h)
 {
+    statserv_options_block *cb = statserv_getcontrol();
+
+    xfree(h->init);
     odr_destroy(h->decode);
     odr_destroy(h->encode);
     if (h->print)
@@ -477,7 +483,7 @@ void destroy_association(association *h)
     if (h->input_buffer)
     xfree(h->input_buffer);
     if (h->backend)
-    	bend_close(h->backend);
+    	(*cb->bend_close)(h->backend);
     while (request_deq(&h->incoming));
     while (request_deq(&h->outgoing));
     request_delq(&h->incoming);
@@ -671,7 +677,7 @@ static int process_request(association *assoc, request *req, char **msg)
     case Z_APDU_presentRequest:
 	res = process_presentRequest(assoc, req, &fd); break;
     case Z_APDU_scanRequest:
-	if (assoc->bend_scan)
+	if (assoc->init->bend_scan)
 	    res = process_scanRequest(assoc, req, &fd);
 	else
 	{
@@ -680,7 +686,7 @@ static int process_request(association *assoc, request *req, char **msg)
 	}
 	break;
     case Z_APDU_extendedServicesRequest:
-	if (assoc->bend_esrequest)
+	if (assoc->init->bend_esrequest)
 	    res = process_ESRequest(assoc, req, &fd);
 	else
 	{
@@ -689,7 +695,7 @@ static int process_request(association *assoc, request *req, char **msg)
 	}
 	break;
     case Z_APDU_sortRequest:
-	if (assoc->bend_sort)
+	if (assoc->init->bend_sort)
 	    res = process_sortRequest(assoc, req, &fd);
 	else
 	{
@@ -701,7 +707,7 @@ static int process_request(association *assoc, request *req, char **msg)
 	process_close(assoc, req);
 	return 0;
     case Z_APDU_deleteResultSetRequest:
-	if (assoc->bend_delete)
+	if (assoc->init->bend_delete)
 	    res = process_deleteRequest(assoc, req, &fd);
 	else
 	{
@@ -710,7 +716,7 @@ static int process_request(association *assoc, request *req, char **msg)
 	}
 	break;
     case Z_APDU_segmentRequest:
-	if (assoc->bend_segment)
+	if (assoc->init->bend_segment)
 	{
 	    res = process_segmentRequest (assoc, req);
 	}
@@ -838,12 +844,15 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
  */
 static Z_APDU *process_initRequest(association *assoc, request *reqb)
 {
+    statserv_options_block *cb = statserv_getcontrol();
     Z_InitRequest *req = reqb->request->u.initRequest;
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_initResponse);
     Z_InitResponse *resp = apdu->u.initResponse;
-    bend_initrequest binitreq;
     bend_initresult *binitres;
     char options[100];
+
+    xfree (assoc->init);
+    assoc->init = xmalloc (sizeof(*assoc->init));
 
     yaz_log(LOG_LOG, "Got initRequest");
     if (req->implementationId)
@@ -853,39 +862,40 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     if (req->implementationVersion)
     	yaz_log(LOG_LOG, "Version:   %s", req->implementationVersion);
 
-    binitreq.stream = assoc->encode;
-    binitreq.print = assoc->print;
-    binitreq.auth = req->idAuthentication;
-    binitreq.referenceId = req->referenceId;
-    binitreq.implementation_version = 0;
-    binitreq.implementation_name = 0;
-    binitreq.bend_sort = NULL;
-    binitreq.bend_search = NULL;
-    binitreq.bend_present = NULL;
-    binitreq.bend_esrequest = NULL;
-    binitreq.bend_delete = NULL;
-    binitreq.bend_scan = bend_default_scan;
-    binitreq.bend_segment = NULL;
-    if (!(binitres = bend_init(&binitreq)))
+    assoc->init->stream = assoc->encode;
+    assoc->init->print = assoc->print;
+    assoc->init->auth = req->idAuthentication;
+    assoc->init->referenceId = req->referenceId;
+    assoc->init->implementation_version = 0;
+    assoc->init->implementation_name = 0;
+    assoc->init->bend_sort = NULL;
+    assoc->init->bend_search = NULL;
+    assoc->init->bend_present = NULL;
+    assoc->init->bend_esrequest = NULL;
+    assoc->init->bend_delete = NULL;
+    assoc->init->bend_scan = NULL;
+    assoc->init->bend_segment = NULL;
+    assoc->init->bend_fetch = NULL;
+    if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
     	yaz_log(LOG_WARN, "Bad response from backend.");
     	return 0;
     }
 
     assoc->backend = binitres->handle;
-    if ((assoc->bend_sort = (int (*)())binitreq.bend_sort))
+    if ((assoc->init->bend_sort))
 	yaz_log (LOG_DEBUG, "Sort handler installed");
-    if ((assoc->bend_search = (int (*)())binitreq.bend_search))
+    if ((assoc->init->bend_search))
 	yaz_log (LOG_DEBUG, "Search handler installed");
-    if ((assoc->bend_present = (int (*)())binitreq.bend_present))
+    if ((assoc->init->bend_present))
 	yaz_log (LOG_DEBUG, "Present handler installed");   
-    if ((assoc->bend_esrequest = (int (*)())binitreq.bend_esrequest))
+    if ((assoc->init->bend_esrequest))
 	yaz_log (LOG_DEBUG, "ESRequest handler installed");   
-    if ((assoc->bend_delete = (int (*)())binitreq.bend_delete))
+    if ((assoc->init->bend_delete))
 	yaz_log (LOG_DEBUG, "Delete handler installed");   
-    if ((assoc->bend_scan = (int (*)())binitreq.bend_scan))
+    if ((assoc->init->bend_scan))
 	yaz_log (LOG_DEBUG, "Scan handler installed");   
-    if ((assoc->bend_segment = (int (*)())binitreq.bend_segment))
+    if ((assoc->init->bend_segment))
 	yaz_log (LOG_DEBUG, "Segment handler installed");   
     
     resp->referenceId = req->referenceId;
@@ -901,13 +911,14 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->options, Z_Options_present);
 	strcat(options, " prst");
     }
-    if (ODR_MASK_GET(req->options, Z_Options_delSet) && binitreq.bend_delete)
+    if (ODR_MASK_GET(req->options, Z_Options_delSet) &&
+	assoc->init->bend_delete)
     {
     	ODR_MASK_SET(resp->options, Z_Options_delSet);
 	strcat(options, " del");
     }
     if (ODR_MASK_GET(req->options, Z_Options_extendedServices) &&
-	binitreq.bend_esrequest)
+	assoc->init->bend_esrequest)
     {
 	ODR_MASK_SET(resp->options, Z_Options_extendedServices);
 	strcat (options, " extendedServices");
@@ -917,7 +928,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->options, Z_Options_namedResultSets);
 	strcat(options, " namedresults");
     }
-    if (ODR_MASK_GET(req->options, Z_Options_scan) && binitreq.bend_scan)
+    if (ODR_MASK_GET(req->options, Z_Options_scan) && assoc->init->bend_scan)
     {
     	ODR_MASK_SET(resp->options, Z_Options_scan);
 	strcat(options, " scan");
@@ -927,7 +938,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->options, Z_Options_concurrentOperations);
 	strcat(options, " concurop");
     }
-    if (ODR_MASK_GET(req->options, Z_Options_sort) && binitreq.bend_sort)
+    if (ODR_MASK_GET(req->options, Z_Options_sort) && assoc->init->bend_sort)
     {
 	ODR_MASK_SET(resp->options, Z_Options_sort);
 	strcat(options, " sort");
@@ -959,24 +970,25 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     resp->implementationName = "GFS";
 
-    if (binitreq.implementation_name)
+    if (assoc->init->implementation_name)
     {
 	char *nv = (char *)
 	    odr_malloc (assoc->encode,
-			strlen(binitreq.implementation_name) + 10 + 
+			strlen(assoc->init->implementation_name) + 10 + 
 			       strlen(resp->implementationName));
 	sprintf (nv, "%s / %s",
-		 resp->implementationName, binitreq.implementation_name);
+		 resp->implementationName, assoc->init->implementation_name);
         resp->implementationName = nv;
     }
-    if (binitreq.implementation_version)
+    if (assoc->init->implementation_version)
     {
 	char *nv = (char *)
 	    odr_malloc (assoc->encode,
-			strlen(binitreq.implementation_version) + 10 + 
+			strlen(assoc->init->implementation_version) + 10 + 
 			       strlen(resp->implementationVersion));
 	sprintf (nv, "YAZ %s / %s",
-		 resp->implementationVersion, binitreq.implementation_version);
+		 resp->implementationVersion,
+		 assoc->init->implementation_version);
         resp->implementationVersion = nv;
     }
 
@@ -1143,8 +1155,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     	a->maximumRecordSize);
     for (recno = start; reclist->num_records < toget; recno++)
     {
-    	bend_fetchrequest freq;
-	bend_fetchresult *fres;
+    	bend_fetch_rr freq;
 	Z_NamePlusRecord *thisrec;
 	int this_length = 0;
 	/*
@@ -1153,37 +1164,41 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	 * idea of the total size of the data so far.
 	 */
 	total_length = odr_total(a->encode) - dumped_records;
+	freq.errcode = 0;
+	freq.errstring = 0;
+	freq.basename = 0;
+	freq.len = 0;
+	freq.record = 0;
+	freq.last_in_set = 0;
 	freq.setname = setname;
+	freq.surrogate_flag = 0;
 	freq.number = recno;
 	freq.comp = comp;
-	freq.format = format;
+	freq.request_format = format;
+	freq.output_format = 0;
 	freq.stream = a->encode;
 	freq.print = a->print;
 	freq.surrogate_flag = 0;
 	freq.referenceId = referenceId;
-	if (!(fres = bend_fetch(a->backend, &freq, 0)))
-	{
-	    *pres = Z_PRES_FAILURE;
-	    return diagrec(a, 2, "Backend interface problem");
-	}
+	(*a->init->bend_fetch)(a->backend, &freq);
 	/* backend should be able to signal whether error is system-wide
 	   or only pertaining to current record */
-	if (fres->errcode)
+	if (freq.errcode)
 	{
 	    if (!freq.surrogate_flag)
 	    {
 		*pres = Z_PRES_FAILURE;
-		return diagrec(a, fres->errcode, fres->errstring);
+		return diagrec(a, freq.errcode, freq.errstring);
 	    }
 	    reclist->records[reclist->num_records] =
-		surrogatediagrec(a, fres->basename, fres->errcode,
-				 fres->errstring);
+		surrogatediagrec(a, freq.basename, freq.errcode,
+				 freq.errstring);
 	    reclist->num_records++;
-	    *next = fres->last_in_set ? 0 : recno + 1;
+	    *next = freq.last_in_set ? 0 : recno + 1;
 	    continue;
 	}
-	if (fres->len >= 0)
-	    this_length = fres->len;
+	if (freq.len >= 0)
+	    this_length = freq.len;
 	else
 	    this_length = odr_total(a->encode) - total_length;
 	yaz_log(LOG_DEBUG, "  fetched record, len=%d, total=%d",
@@ -1205,9 +1220,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		{
 		    yaz_log(LOG_DEBUG, "  Dropped it");
 		    reclist->records[reclist->num_records] =
-		   	 surrogatediagrec(a, fres->basename, 16, 0);
+		   	 surrogatediagrec(a, freq.basename, 16, 0);
 		    reclist->num_records++;
-		    *next = fres->last_in_set ? 0 : recno + 1;
+		    *next = freq.last_in_set ? 0 : recno + 1;
 		    dumped_records += this_length;
 		    continue;
 		}
@@ -1216,9 +1231,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    {
 	    	yaz_log(LOG_DEBUG, "Record > maxrcdsz");
 		reclist->records[reclist->num_records] =
-		    surrogatediagrec(a, fres->basename, 17, 0);
+		    surrogatediagrec(a, freq.basename, 17, 0);
 		reclist->num_records++;
-		*next = fres->last_in_set ? 0 : recno + 1;
+		*next = freq.last_in_set ? 0 : recno + 1;
 		dumped_records += this_length;
 		continue;
 	    }
@@ -1228,17 +1243,17 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	      odr_malloc(a->encode, sizeof(*thisrec))))
 	    return 0;
 	if (!(thisrec->databaseName = (char *)odr_malloc(a->encode,
-	    strlen(fres->basename) + 1)))
+	    strlen(freq.basename) + 1)))
 	    return 0;
-	strcpy(thisrec->databaseName, fres->basename);
+	strcpy(thisrec->databaseName, freq.basename);
 	thisrec->which = Z_NamePlusRecord_databaseRecord;
-	thisrec->u.databaseRecord = z_ext_record(a->encode, fres->format,
-						 fres->record, fres->len);
+	thisrec->u.databaseRecord = z_ext_record(a->encode, freq.output_format,
+						 freq.record, freq.len);
 	if (!thisrec->u.databaseRecord)
 	    return 0;
 	reclist->records[reclist->num_records] = thisrec;
 	reclist->num_records++;
-	*next = fres->last_in_set ? 0 : recno + 1;
+	*next = freq.last_in_set ? 0 : recno + 1;
     }
     *num = reclist->num_records;
     return records;
@@ -1270,7 +1285,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     case Z_Query_type_1: case Z_Query_type_101:
 	log_rpn_query (req->query->u.type_1);
     }
-    if (assoc->bend_search)
+    if (assoc->init->bend_search)
     {
 	bsrr->setname = req->resultSetName;
 	bsrr->replace_set = *req->replaceIndicator;
@@ -1283,11 +1298,11 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrr->errcode = 0;
 	bsrr->hits = 0;
 	bsrr->errstring = NULL;
-	((int (*)(void *, bend_search_rr *))(assoc->bend_search))
-	    (assoc->backend, bsrr);
+	(assoc->init->bend_search)(assoc->backend, bsrr);
 	if (!bsrr->request)
 	    return 0;
     }
+#if 0
     else
     {
 	bend_searchrequest bsrq;
@@ -1308,6 +1323,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrr->errcode = bsrt->errcode;
 	bsrr->errstring = bsrt->errstring;
     }
+#endif
     return response_searchRequest(assoc, reqb, bsrr, fd);
 }
 
@@ -1456,7 +1472,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	form = VAL_NONE;
     else
 	form = prefformat->value;
-    if (assoc->bend_present)
+    if (assoc->init->bend_present)
     {
 	bend_present_rr *bprr = (bend_present_rr *)
 	    nmem_malloc (reqb->request_mem, sizeof(*bprr));
@@ -1472,8 +1488,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	bprr->association = assoc;
 	bprr->errcode = 0;
 	bprr->errstring = NULL;
-	((int (*)(void *, bend_present_rr *))(*assoc->bend_present))(
-	    assoc->backend, bprr);
+	(*assoc->init->bend_present)(assoc->backend, bprr);
 	
 	if (!bprr->request)
 	    return 0;
@@ -1505,6 +1520,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     return apdu;
 }
 
+#if 0
 static int bend_default_scan (void *handle, bend_scan_rr *rr)
 {
     bend_scanrequest srq;
@@ -1530,6 +1546,7 @@ static int bend_default_scan (void *handle, bend_scan_rr *rr)
     rr->errstring = srs->errstring;
     return 0;
 }
+#endif
 
 /*
  * Scan was implemented rather in a hurry, and with support for only the basic
@@ -1601,8 +1618,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	log_scan_term (req->termListAndStartPoint, attset->value);
 	bsrr->term_position = req->preferredPositionInResponse ?
 	    *req->preferredPositionInResponse : 1;
-	((int (*)(void *, bend_scan_rr *))(*assoc->bend_scan))(assoc->backend,
-							       bsrr);
+	((int (*)(void *, bend_scan_rr *))
+	 (*assoc->init->bend_scan))(assoc->backend, bsrr);
 	if (bsrr->errcode)
 	    diagrecs_p = diagrecs(assoc, bsrr->errcode, bsrr->errstring);
 	else
@@ -1700,8 +1717,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     bsrr->errcode = 0;
     bsrr->errstring = 0;
     
-    ((int (*)(void *, bend_sort_rr *))(*assoc->bend_sort))(assoc->backend,
-							   bsrr);
+    (*assoc->init->bend_sort)(assoc->backend, bsrr);
     
     res->referenceId = bsrr->referenceId;
     res->sortStatus = (int *)
@@ -1759,8 +1775,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
 	for (i = 0; i < bdrr->num_setnames; i++)
 	    bdrr->statuses[i] = 0;
     }
-    ((int (*)(void *, bend_delete_rr *))
-     (*assoc->bend_delete))(assoc->backend, bdrr);
+    (*assoc->init->bend_delete)(assoc->backend, bdrr);
     
     res->referenceId = req->referenceId;
 
@@ -1902,8 +1917,7 @@ static Z_APDU *process_segmentRequest (association *assoc, request *reqb)
     request.print = assoc->print;
     request.association = assoc;
     
-    ((int (*)(void *, bend_segment_rr *))(*assoc->bend_segment))
-	(assoc->backend, &request);
+    (*assoc->init->bend_segment)(assoc->backend, &request);
 
     return 0;
 }
@@ -1929,8 +1943,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     esrequest.association = assoc;
     esrequest.referenceId = req->referenceId;
     
-    ((int (*)(void *, bend_esrequest_rr *))(*assoc->bend_esrequest))
-	(assoc->backend, &esrequest);
+    (*assoc->init->bend_esrequest)(assoc->backend, &esrequest);
     
     /* If the response is being delayed, return NULL */
     if (esrequest.request == NULL)

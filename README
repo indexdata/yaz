@@ -3,7 +3,7 @@ Copyright (C) 1995-2000, Index Data ApS.
 See the file LICENSE for details.
 
 Compilation and installation instructions for YAZ 
-  $Id: README,v 1.30 2000-03-01 11:06:09 adam Exp $
+  $Id: README,v 1.31 2000-04-05 07:39:54 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -120,14 +120,14 @@ rfc1006 - Xtimosi requires an implementation of the OSI transport
 server  - This is the implementation of the server frontend. It
 	provides event-handling and server managament functions,
 	and calls the backend primitives (best documentation of these
-	is in the file include/backend.h).
+	is in the file include/yaz/backend.h).
 
 client  - A demonstration client. If we come upon a good design for a
 	higher level client API, that will live here.
 
 ztest   - A demonstration server that implements a backend.
 
-include - The various header files.
+include/yaz - The various header files.
 
 lib     - The libraries. Primarily libyaz.a. The makefile gathers the
           libraries from previous modules into libyaz.a.

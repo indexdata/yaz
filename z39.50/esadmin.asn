@@ -14,10 +14,10 @@ Admin ::= CHOICE{
                        targetPart     [2] TargetPart}}
 
 OriginPartToKeep ::= SEQUENCE{
-action                  [1] CHOICE{
+action              [1] CHOICE{
     reIndex         [1] NULL,
     truncate        [2] NULL,
-    delete          [3] NULL,
+    drop            [3] NULL,
     create          [4] NULL,
     import          [5] ImportParameters,
     refresh         [6] NULL,   -- Review internal representation of records against source files on disk to

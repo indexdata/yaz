@@ -61,7 +61,7 @@ struct Z_ESAdminOriginPartToKeep {
 	union {
 		Odr_null *reIndex;
 		Odr_null *truncate;
-		Odr_null *delete;
+		Odr_null *drop;
 		Odr_null *create;
 		Z_ImportParameters *import;
 		Odr_null *refresh;
@@ -70,7 +70,7 @@ struct Z_ESAdminOriginPartToKeep {
 		Odr_null *start;
 #define Z_ESAdminOriginPartToKeep_reIndex 1
 #define Z_ESAdminOriginPartToKeep_truncate 2
-#define Z_ESAdminOriginPartToKeep_delete 3
+#define Z_ESAdminOriginPartToKeep_drop 3
 #define Z_ESAdminOriginPartToKeep_create 4
 #define Z_ESAdminOriginPartToKeep_import 5
 #define Z_ESAdminOriginPartToKeep_refresh 6

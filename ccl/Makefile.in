@@ -57,49 +57,60 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AS = @AS@
 ASNMODULE = @ASNMODULE@
 CC = @CC@
 CPP = @CPP@
+DLLTOOL = @DLLTOOL@
 ILLLIB = @ILLLIB@
 ILLMODULE = @ILLMODULE@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
 
-noinst_LIBRARIES = libccl.a
+noinst_LTLIBRARIES = libccl.la
 
 noinst_PROGRAMS = cclsh
 
-INCLUDES = -I../include
+LIBS = 
 
-libccl_a_SOURCES = cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c   cclqfile.c cclstr.c
+INCLUDES = -I$(srcdir)/../include
+
+libccl_la_SOURCES = cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c   cclqfile.c cclstr.c
 
 cclsh_SOURCES = cclsh.c
-cclsh_LDADD = libccl.a
+cclsh_LDADD = libccl.la
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
-LIBRARIES =  $(noinst_LIBRARIES)
+LTLIBRARIES =  $(noinst_LTLIBRARIES)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) 
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
-LIBS = @LIBS@
-libccl_a_LIBADD = 
-libccl_a_OBJECTS =  cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o \
-cclqfile.o cclstr.o
-AR = ar
+libccl_la_LDFLAGS = 
+libccl_la_LIBADD = 
+libccl_la_OBJECTS =  cclfind.lo ccltoken.lo cclerrms.lo cclqual.lo \
+cclptree.lo cclqfile.lo cclstr.lo
 PROGRAMS =  $(noinst_PROGRAMS)
 
 cclsh_OBJECTS =  cclsh.o
-cclsh_DEPENDENCIES =  libccl.a
+cclsh_DEPENDENCIES =  libccl.la
 cclsh_LDFLAGS = 
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  README Makefile.am Makefile.in
 
 
@@ -110,12 +121,12 @@ GZIP_ENV = --best
 DEP_FILES =  .deps/cclerrms.P .deps/cclfind.P .deps/cclptree.P \
 .deps/cclqfile.P .deps/cclqual.P .deps/cclsh.P .deps/cclstr.P \
 .deps/ccltoken.P
-SOURCES = $(libccl_a_SOURCES) $(cclsh_SOURCES)
-OBJECTS = $(libccl_a_OBJECTS) $(cclsh_OBJECTS)
+SOURCES = $(libccl_la_SOURCES) $(cclsh_SOURCES)
+OBJECTS = $(libccl_la_OBJECTS) $(cclsh_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .o .s
+.SUFFIXES: .S .c .lo .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu ccl/Makefile
 
@@ -124,14 +135,14 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 
-mostlyclean-noinstLIBRARIES:
+mostlyclean-noinstLTLIBRARIES:
 
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
 
-distclean-noinstLIBRARIES:
+distclean-noinstLTLIBRARIES:
 
-maintainer-clean-noinstLIBRARIES:
+maintainer-clean-noinstLTLIBRARIES:
 
 .s.o:
 	$(COMPILE) -c $<
@@ -149,10 +160,24 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-libccl.a: $(libccl_a_OBJECTS) $(libccl_a_DEPENDENCIES)
-	-rm -f libccl.a
-	$(AR) cru libccl.a $(libccl_a_OBJECTS) $(libccl_a_LIBADD)
-	$(RANLIB) libccl.a
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+libccl.la: $(libccl_la_OBJECTS) $(libccl_la_DEPENDENCIES)
+	$(LINK)  $(libccl_la_LDFLAGS) $(libccl_la_OBJECTS) $(libccl_la_LIBADD) $(LIBS)
 
 mostlyclean-noinstPROGRAMS:
 
@@ -267,7 +292,7 @@ install-am: all-am
 install: install-am
 uninstall-am:
 uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
@@ -283,25 +308,28 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
-		mostlyclean-noinstPROGRAMS mostlyclean-tags \
-		mostlyclean-depend mostlyclean-generic
+mostlyclean-am:  mostlyclean-noinstLTLIBRARIES mostlyclean-compile \
+		mostlyclean-libtool mostlyclean-noinstPROGRAMS \
+		mostlyclean-tags mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-noinstLIBRARIES clean-compile clean-noinstPROGRAMS \
-		clean-tags clean-depend clean-generic mostlyclean-am
+clean-am:  clean-noinstLTLIBRARIES clean-compile clean-libtool \
+		clean-noinstPROGRAMS clean-tags clean-depend \
+		clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-noinstLIBRARIES distclean-compile \
-		distclean-noinstPROGRAMS distclean-tags \
-		distclean-depend distclean-generic clean-am
+distclean-am:  distclean-noinstLTLIBRARIES distclean-compile \
+		distclean-libtool distclean-noinstPROGRAMS \
+		distclean-tags distclean-depend distclean-generic \
+		clean-am
+	-rm -f libtool
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-compile \
+maintainer-clean-am:  maintainer-clean-noinstLTLIBRARIES \
+		maintainer-clean-compile maintainer-clean-libtool \
 		maintainer-clean-noinstPROGRAMS maintainer-clean-tags \
 		maintainer-clean-depend maintainer-clean-generic \
 		distclean-am
@@ -310,10 +338,11 @@ maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
-clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+.PHONY: mostlyclean-noinstLTLIBRARIES distclean-noinstLTLIBRARIES \
+clean-noinstLTLIBRARIES maintainer-clean-noinstLTLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-noinstPROGRAMS \
+maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+clean-libtool maintainer-clean-libtool mostlyclean-noinstPROGRAMS \
 distclean-noinstPROGRAMS clean-noinstPROGRAMS \
 maintainer-clean-noinstPROGRAMS tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir mostlyclean-depend \

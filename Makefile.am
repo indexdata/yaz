@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.6 2000-03-15 12:59:49 adam Exp $
+## $Id: Makefile.am,v 1.7 2000-04-05 07:39:54 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -15,7 +15,7 @@ yaz-config: Makefile
 	@echo "# YAZ settings for developers" >>yaz-config
 	@echo "YAZBIN=\"`pwd`/bin\"" >>yaz-config
 	@echo "YAZTAB=\"`pwd`/tab\"" >>yaz-config
-	@echo "YAZLIB=\"-L`pwd`/lib -lyaz @LIBS@\"" >>yaz-config
+	@echo "YAZLIB=\"-L`pwd`/lib/.libs -lyaz @LIBS@\"" >>yaz-config
 	@echo "YAZINC=\"-I`pwd`/include\"" >>yaz-config
 	chmod +x yaz-config
 

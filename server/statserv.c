@@ -1,13 +1,16 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * NT server based on threads by
- *   Chas Woodfield, Fretwell Downing Datasystems.
+ *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.63  2000-03-20 19:06:25  adam
+ * Revision 1.64  2000-04-05 07:39:55  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.63  2000/03/20 19:06:25  adam
  * Added Segment request for fronend server. Work on admin for client.
  *
  * Revision 1.62  2000/03/17 12:47:02  adam
@@ -275,7 +278,8 @@ statserv_options_block control_block = {
     "",
     0,                          /* default value for inet deamon */
     0,                          /* handle (for service, etc) */
-
+    0,                          /* bend_init handle */
+    0                           /* bend_close handle */
 #ifdef WIN32
     ,"Z39.50 Server",           /* NT Service Name */
     "Server",                   /* NT application Name */
@@ -868,21 +872,22 @@ int statserv_start(int argc, char **argv)
 	me++;
     else
 	me = argv[0];
-    logf (LOG_LOG, "Starting server %s", me);
 #else
     me = argv[0];
-    logf (LOG_LOG, "Starting server %s pid=%d", me, getpid());
 #endif
     if (control_block.options_func(argc, argv))
         return(1);
 
     if (control_block.bend_start)
         (*control_block.bend_start)(&control_block);
-#ifndef WIN32
+#ifdef WIN32
+    logf (LOG_LOG, "Starting server %s", me);
+#else
     if (control_block.inetd)
 	inetd_connection(control_block.default_proto);
     else
     {
+	logf (LOG_LOG, "Starting server %s pid=%d", me, getpid());
 #if 0
 	sigset_t sigs_to_block;
 
@@ -1036,10 +1041,17 @@ static Args ArgDetails;
 /* list of service dependencies - "dep1\0dep2\0\0" */
 #define SZDEPENDENCIES       ""
 
-int statserv_main(int argc, char **argv)
+int statserv_main(int argc, char **argv,
+		  bend_initresult *(*bend_init)(bend_initrequest *r),
+		  void (*bend_close)(void *handle))
 {
     statserv_options_block *cb = statserv_getcontrol();
     
+    cb->bend_init = bend_init;
+    cb->bend_close = bend_close;
+
+    statserv_setcontrol(cb);
+
     /* Lets setup the Arg structure */
     ArgDetails.argc = argc;
     ArgDetails.argv = argv;
@@ -1072,9 +1084,18 @@ void StopAppService(void *pHandle)
     statserv_closedown();
 }
 #else
-int statserv_main(int argc, char **argv)
+int statserv_main(int argc, char **argv,
+		  bend_initresult *(*bend_init)(bend_initrequest *r),
+		  void (*bend_close)(void *handle))
 {
-    int ret = statserv_start (argc, argv);
+    int ret;
+    statserv_options_block *cb = statserv_getcontrol();
+    
+    cb->bend_init = bend_init;
+    cb->bend_close = bend_close;
+
+    statserv_setcontrol(cb);
+    ret = statserv_start (argc, argv);
     statserv_closedown ();
     return ret;
 }

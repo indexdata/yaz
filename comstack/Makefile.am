@@ -1,8 +1,10 @@
-## $Id: Makefile.am,v 1.2 2000-02-28 11:44:39 adam Exp $
+## $Id: Makefile.am,v 1.3 2000-04-05 07:39:54 adam Exp $
 
-noinst_LIBRARIES=libcomstack.a
+noinst_LTLIBRARIES=libcomstack.la
 
-INCLUDES=-I../include
+INCLUDES=-I$(srcdir)/../include
 
-libcomstack_a_SOURCES=comstack.c tcpip.c waislen.c 
+LIBS =
+
+libcomstack_la_SOURCES=comstack.c tcpip.c waislen.c 
 

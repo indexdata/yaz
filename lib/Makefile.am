@@ -1,23 +1,24 @@
-## $Id: Makefile.am,v 1.2 2000-02-28 11:44:39 adam Exp $
+## $Id: Makefile.am,v 1.3 2000-04-05 07:39:55 adam Exp $
 
-lib_LIBRARIES = libyaz.a
+lib_LTLIBRARIES = libyaz.la
 
 bin_SCRIPTS = yaz-config
 
-libyaz_a_SOURCES=
+# If the line below is omitted the LINK variable is
+# not set in Makefile.in and it will NOT work ..
+EXTRA_libyaz_la_SOURCES=x.c
 
-LIB=libyaz.a
+LIBS =
 
-YAZLIBS=../odr/libodr.a ../@ASNMODULE@/libasn.a ../comstack/libcomstack.a \
- ../server/libserver.a ../zutil/libzutil.a ../util/libutil.a \
- ../ccl/libccl.a ../retrieval/libret.a @ILLLIB@
+# No real sources
+libyaz_la_SOURCES=
 
-libyaz.a: $(YAZLIBS)
-	rm -f $(LIB)
-	for i in $(YAZLIBS); do echo $$i; ar x $$i; rm -f __*; done
-	ar qc $(LIB) *.o
-	rm -f *.o
-	$(RANLIB) $(LIB)
+LDFLAGS=-version-info 0:0:0
+
+libyaz_la_LIBADD=../odr/libodr.la ../@ASNMODULE@/libasn.la \
+ ../comstack/libcomstack.la ../server/libserver.la \
+ ../zutil/libzutil.la ../util/libutil.la ../ccl/libccl.la \
+ ../retrieval/libret.la @ILLLIB@
 
 #  Public libraries and header files
 LIBDIR=$(exec_prefix)/lib

@@ -57,45 +57,56 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AS = @AS@
 ASNMODULE = @ASNMODULE@
 CC = @CC@
 CPP = @CPP@
+DLLTOOL = @DLLTOOL@
 ILLLIB = @ILLLIB@
 ILLMODULE = @ILLMODULE@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
 
-INCLUDES = -I../include
+INCLUDES = -I$(srcdir)/../include
 
-noinst_LIBRARIES = libasn.a
+noinst_LTLIBRARIES = libasn.la
 
 EXTRA_DIST = datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl esadmin.asn
 
-libasn_a_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c  zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c
+LIBS = 
+
+libasn_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c  zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
-LIBRARIES =  $(noinst_LIBRARIES)
+LTLIBRARIES =  $(noinst_LTLIBRARIES)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) 
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
-LIBS = @LIBS@
-libasn_a_LIBADD = 
-libasn_a_OBJECTS =  z-accdes1.o z-accform1.o z-acckrb1.o z-core.o \
-z-diag1.o z-espec1.o z-estask.o z-exp.o z-grs.o z-opac.o z-uifr1.o \
-z-rrf1.o z-rrf2.o z-sum.o z-sutrs.o zes-expi.o zes-exps.o zes-order.o \
-zes-pquery.o zes-psched.o zes-pset.o zes-update0.o z-date.o z-univ.o \
-zes-update.o zes-admin.o
-AR = ar
+libasn_la_LDFLAGS = 
+libasn_la_LIBADD = 
+libasn_la_OBJECTS =  z-accdes1.lo z-accform1.lo z-acckrb1.lo z-core.lo \
+z-diag1.lo z-espec1.lo z-estask.lo z-exp.lo z-grs.lo z-opac.lo \
+z-uifr1.lo z-rrf1.lo z-rrf2.lo z-sum.lo z-sutrs.lo zes-expi.lo \
+zes-exps.lo zes-order.lo zes-pquery.lo zes-psched.lo zes-pset.lo \
+zes-update0.lo z-date.lo z-univ.lo zes-update.lo zes-admin.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -111,12 +122,12 @@ DEP_FILES =  .deps/z-accdes1.P .deps/z-accform1.P .deps/z-acckrb1.P \
 .deps/zes-exps.P .deps/zes-order.P .deps/zes-pquery.P \
 .deps/zes-psched.P .deps/zes-pset.P .deps/zes-update.P \
 .deps/zes-update0.P
-SOURCES = $(libasn_a_SOURCES)
-OBJECTS = $(libasn_a_OBJECTS)
+SOURCES = $(libasn_la_SOURCES)
+OBJECTS = $(libasn_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .o .s
+.SUFFIXES: .S .c .lo .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu z39.50/Makefile
 
@@ -125,14 +136,14 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 
-mostlyclean-noinstLIBRARIES:
+mostlyclean-noinstLTLIBRARIES:
 
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
 
-distclean-noinstLIBRARIES:
+distclean-noinstLTLIBRARIES:
 
-maintainer-clean-noinstLIBRARIES:
+maintainer-clean-noinstLTLIBRARIES:
 
 .s.o:
 	$(COMPILE) -c $<
@@ -150,10 +161,24 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-libasn.a: $(libasn_a_OBJECTS) $(libasn_a_DEPENDENCIES)
-	-rm -f libasn.a
-	$(AR) cru libasn.a $(libasn_a_OBJECTS) $(libasn_a_LIBADD)
-	$(RANLIB) libasn.a
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+libasn.la: $(libasn_la_OBJECTS) $(libasn_la_DEPENDENCIES)
+	$(LINK)  $(libasn_la_LDFLAGS) $(libasn_la_OBJECTS) $(libasn_la_LIBADD) $(LIBS)
 
 tags: TAGS
 
@@ -197,7 +222,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
+	    cp -pr $$/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -255,7 +280,7 @@ install-am: all-am
 install: install-am
 uninstall-am:
 uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LTLIBRARIES)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
@@ -271,42 +296,46 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
-		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+mostlyclean-am:  mostlyclean-noinstLTLIBRARIES mostlyclean-compile \
+		mostlyclean-libtool mostlyclean-tags mostlyclean-depend \
+		mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-noinstLIBRARIES clean-compile clean-tags clean-depend \
-		clean-generic mostlyclean-am
+clean-am:  clean-noinstLTLIBRARIES clean-compile clean-libtool \
+		clean-tags clean-depend clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-noinstLIBRARIES distclean-compile \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
+distclean-am:  distclean-noinstLTLIBRARIES distclean-compile \
+		distclean-libtool distclean-tags distclean-depend \
+		distclean-generic clean-am
+	-rm -f libtool
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-compile maintainer-clean-tags \
-		maintainer-clean-depend maintainer-clean-generic \
-		distclean-am
+maintainer-clean-am:  maintainer-clean-noinstLTLIBRARIES \
+		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-tags maintainer-clean-depend \
+		maintainer-clean-generic distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
-clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+.PHONY: mostlyclean-noinstLTLIBRARIES distclean-noinstLTLIBRARIES \
+clean-noinstLTLIBRARIES maintainer-clean-noinstLTLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir mostlyclean-depend \
-distclean-depend clean-depend maintainer-clean-depend info-am info \
-dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
-install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+clean-libtool maintainer-clean-libtool tags mostlyclean-tags \
+distclean-tags clean-tags maintainer-clean-tags distdir \
+mostlyclean-depend distclean-depend clean-depend \
+maintainer-clean-depend info-am info dvi-am dvi check check-am \
+installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
 
 
 z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \

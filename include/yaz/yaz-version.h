@@ -2,7 +2,10 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
+ * Revision 1.3  2000-04-05 07:39:55  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.2  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -85,6 +88,6 @@
  *
  */
 #ifndef YAZ_VERSION
-#define YAZ_VERSION "1.6"
+#define YAZ_VERSION "1.7"
 #endif
 

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.4  2000-03-15 12:59:49  adam
+ * Revision 1.5  2000-04-05 07:39:55  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.4  2000/03/15 12:59:49  adam
  * Added handle member to statserv_control.
  *
  * Revision 1.3  2000/03/14 09:06:11  adam
@@ -104,51 +107,6 @@
 #define STATSERVER_H
 
 #include <yaz/yconfig.h>
-#include <yaz/odr.h>
-#include <yaz/oid.h>
-
-YAZ_BEGIN_CDECL
-    
-typedef struct statserv_options_block
-{
-    int dynamic;                  /* fork on incoming requests */
-    int threads;                  /* use threads */
-    int one_shot;                 /* one session then exit(1) */
-    int loglevel;                 /* desired logging-level */
-    char apdufile[ODR_MAXNAME+1]; /* file for pretty-printed PDUs */
-    char logfile[ODR_MAXNAME+1];  /* file for diagnostic output */
-    char default_listen[1024];    /* 0 == no default listen */
-    enum oid_proto default_proto; /* PROTO_SR or PROTO_Z3950 */
-    int idle_timeout;             /* how many minutes to wait before closing */
-    int maxrecordsize;            /* maximum value for negotiation */
-    char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */
-    char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
-    void (*bend_start)(struct statserv_options_block *p);
-    void (*bend_stop)(struct statserv_options_block *p);
-    int (*options_func)(int argc, char **argv);
-    int (*check_ip)(void *cd, const char *addr, int len, int type);
-    char daemon_name[128];
-    int inetd;                    /* Do we use the inet deamon or not */
-
-    void *handle;                 /* Handle */
-#ifdef WIN32
-    /* We only have these members for the windows version */
-    /* They seemed a bit large to have them there in general */
-    char service_name[128];         /* NT Service Name */
-    char app_name[128];             /* Application Name */
-    char service_dependencies[128]; /* The services we are dependent on */
-    char service_display_name[128]; /* The service display name */
-#endif /* WIN32 */
-} statserv_options_block;
-    
-int statserv_main(int argc, char **argv);
-int statserv_start(int argc, char **argv);
-void statserv_closedown(void);
-statserv_options_block *statserv_getcontrol(void);
-void statserv_setcontrol(statserv_options_block *block);
-
-int check_ip_tcpd(void *cd, const char *addr, int len, int type);
-
-YAZ_END_CDECL
+#include <yaz/backend.h>
 
 #endif

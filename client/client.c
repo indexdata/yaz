@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.100  2000-03-20 19:29:59  adam
+ * Revision 1.101  2000-04-05 07:39:54  adam
+ * Added shared library support (libtool).
+ *
+ * Revision 1.100  2000/03/20 19:29:59  adam
  * Minor change.
  *
  * Revision 1.99  2000/03/20 19:06:25  adam
@@ -2274,16 +2277,18 @@ static int client(int wait)
 	{"refid", cmd_refid, "<id>"},
 	{"itemorder", cmd_itemorder, "1|2 <item>"},
 	{"update", cmd_update, "<item>"},
+#ifdef ASN_COMPILED
 	/* Server Admin Functions */
 	{"adm-reindex", cmd_adm_reindex, "<database-name>"},
 	{"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>"},
-	{"adm-create", cmd_adm_create, "<database-name>"},
-	{"adm-delete", cmd_adm_delete, "('database'|'index')<object-name>"},
+	{"adm-create", cmd_adm_create, ""},
+	{"adm-drop", cmd_adm_drop, "('database'|'index')<object-name>"},
 	{"adm-import", cmd_adm_import, "<record-type> <dir> <pattern>"},
-	{"adm-refresh", cmd_adm_refresh, "<database-name>"},
+	{"adm-refresh", cmd_adm_refresh, ""},
 	{"adm-commit", cmd_adm_commit, ""},
 	{"adm-shutdown", cmd_adm_shutdown, ""},
 	{"adm-startup", cmd_adm_startup, ""},
+#endif
         {0,0}
     };
     char *netbuffer= 0;
