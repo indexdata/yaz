@@ -2,6 +2,8 @@
 #include <odr.h>
 #include <odr_use.h>
 
+#if 0
+
 typedef Odr_bitmask Z_ReferenceId;
 
 typedef struct Z_InitRequest
@@ -133,30 +135,32 @@ int main()
 }    
 #endif
 
+#endif
+
 int main()
 {
-    struct A ch, *chp1, *chp2;
-    int b = 9999;
-    char *c = "Nu tester vi en satans forpulet CHOICE!";
-    struct odr o;
-    unsigned char buf[4096];
-    
-    ch.u.c = c;	
-    ch.which = 1;
-    chp1 = &ch;
+    Odr_bitmask a;
+    char command;
+    int val;
+    char line[100];
 
-    o.buf = buf;
-    o.bp=o.buf;
-    o.left = o.buflen = 1024;
-    o.direction = ODR_ENCODE;
-    o.t_class = -1;
+    ODR_MASK_ZERO(&a);
+    while (gets(line))
+    {
+    	int i;
 
-    f_A(&o, &chp1, 0);
-
-    o.direction = ODR_DECODE;
-    o.bp = o.buf;
-
-    f_A(&o, &chp2, 0);
-
-    return 0;
+    	sscanf(line, "%c %d", &command, &val);
+    	switch (command)
+	{
+	    case 's': ODR_MASK_SET(&a, val); break;
+	    case 'c': ODR_MASK_CLEAR(&a, val); break;
+	    case 'g': printf("%d\n", ODR_MASK_GET(&a, val)); break;
+	    case 'l': break;
+	    default: printf("enter c <v> or s <v> or l\n"); continue;
+	}
+    	printf("top is %d\n", a.top);
+	for (i = 0; i <= a.top; i++)
+	    printf("%2.2x ", a.bits[i] );
+	printf("\n");
+     }
 }
