@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.49 2002-01-21 12:54:06 adam Exp $
+ * $Id: ztest.c,v 1.50 2002-01-23 22:40:36 adam Exp $
  */
 
 /*
@@ -504,7 +504,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     char *cp;
     r->errstring = 0;
     r->last_in_set = 0;
-    r->basename = "DUMMY";
+    r->basename = "Default";
     r->output_format = r->request_format;  
     if (r->request_format == VAL_SUTRS)
     {
@@ -533,6 +533,33 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
 	    r->errcode = 13;
 	    return 0;
 	}
+    }
+    else if (r->request_format == VAL_POSTSCRIPT)
+    {
+        char fname[20];
+        FILE *f;
+        long size;
+
+        sprintf (fname, "part.%d.ps", r->number);
+        f = fopen(fname, "rb");
+        if (!f)
+	{
+            r->errcode = 13;
+            return 0;
+        }
+        fseek (f, 0L, SEEK_END);
+        size = ftell (f);
+        if (size <= 0 || size >= 5000000)
+        {
+            r->errcode = 14;
+            return 0;
+        }
+        fseek (f, 0L, SEEK_SET);
+        r->record = odr_malloc (r->stream, size);
+        r->len = size;
+        r->output_format = VAL_POSTSCRIPT;
+        fread (r->record, size, 1, f);
+        fclose (f);
     }
     else if ((cp = dummy_database_record(r->number, r->stream)))
     {

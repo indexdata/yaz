@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.125 2002-01-23 21:13:30 adam Exp $
+ * $Id: seshigh.c,v 1.126 2002-01-23 22:40:36 adam Exp $
  */
 
 /*
@@ -45,6 +45,7 @@
 #include <yaz/log.h>
 #include <yaz/logrpn.h>
 #include <yaz/statserv.h>
+#include <yaz/diagbib1.h>
 
 #include <yaz/backend.h>
 
@@ -759,7 +760,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 	odr_malloc (assoc->encode, sizeof(*dr));
 
     yaz_log(LOG_LOG, "[%d] %s %s%s", error, diagbib1_str(error),
-        addinfo ? " -- " : "", addinfo ? addinfo : "", error);
+        addinfo ? " -- " : "", addinfo ? addinfo : "");
     rec->which = Z_Records_NSD;
     rec->u.nonSurrogateDiagnostic = dr;
     dr->diagnosticSetId =
@@ -936,7 +937,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    }
 	    else /* too big entirely */
 	    {
-	    	yaz_log(LOG_DEBUG, "Record > maxrcdsz");
+	    	yaz_log(LOG_LOG, "Record > maxrcdsz this=%d max=%d", this_length, a->maximumRecordSize);
 		reclist->records[reclist->num_records] =
 		    surrogatediagrec(a, freq.basename, 17, 0);
 		reclist->num_records++;
@@ -1225,7 +1226,6 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     Z_ListEntries *ents = (Z_ListEntries *)
 	odr_malloc (assoc->encode, sizeof(*ents));
     Z_DiagRecs *diagrecs_p = NULL;
-    oident *attent;
     oident *attset;
     bend_scan_rr *bsrr = (bend_scan_rr *)
         odr_malloc (assoc->encode, sizeof(*bsrr));

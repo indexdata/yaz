@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.135 2002-01-21 12:54:06 adam Exp $
+ * $Id: client.c,v 1.136 2002-01-23 22:40:36 adam Exp $
  */
 
 #include <stdio.h>
@@ -67,6 +67,7 @@ static char last_scan_query[512] = "0";
 static char ccl_fields[512] = "default.bib";
 static char* esPackageName = 0;
 static char* yazProxy = 0;
+static int kilobytes = 1024;
 
 static char last_cmd[32] = "?";
 static FILE *marcdump = 0;
@@ -172,8 +173,8 @@ static void send_initRequest(const char* type_and_host)
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
 
-    *req->maximumRecordSize = 1024*1024;
-    *req->preferredMessageSize = 1024*1024;
+    *req->maximumRecordSize = 1024*kilobytes;
+    *req->preferredMessageSize = 1024*kilobytes;
 
     req->idAuthentication = auth;
 
@@ -508,8 +509,17 @@ static void display_record(Z_External *r)
         const char *octet_buf = (char*)r->u.octet_aligned->buf;
         if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML ||
             ent->value == VAL_HTML)
+        {
             print_record((const unsigned char *) octet_buf,
                          r->u.octet_aligned->len);
+        }
+        else if (ent->value == VAL_POSTSCRIPT)
+        {
+            int size = r->u.octet_aligned->len;
+            if (size > 100)
+                size = 100;
+            print_record((const unsigned char *) octet_buf, size);
+        }
         else
         {
             if ( 
@@ -2273,7 +2283,7 @@ int main(int argc, char **argv)
     char *arg;
     int ret;
 
-    while ((ret = options("c:a:m:v:p:u:", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:a:m:v:p:u:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -2284,6 +2294,9 @@ int main(int argc, char **argv)
                 strcpy (open_command, "open ");
                 strcat (open_command, arg);
             }
+            break;
+        case 'k':
+            kilobytes = atoi(arg);
             break;
         case 'm':
             if (!(marcdump = fopen (arg, "a")))
