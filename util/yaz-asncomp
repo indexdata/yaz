@@ -6,7 +6,7 @@ exec tclsh "$0" "$@"
 # (c) Index Data 1996-2004
 # See the file LICENSE for details.
 #
-# $Id: yaz-asncomp,v 1.2 2004-01-23 11:52:52 adam Exp $
+# $Id: yaz-asncomp,v 1.3 2004-02-11 21:39:45 adam Exp $
 #
 
 set yc_version 0.3
@@ -842,8 +842,6 @@ proc asnChoice {name tag implicit tagtype} {
 	lappend l "\todr_implicit_settag(o, $tagtype, $tag);"
 	lappend l "\tif (odr_choice(o, arm, &(*p)->[lindex $uName 1], &(*p)->[lindex $uName 0], name))"
     } else {
-	lappend l "\tif (!*p && o->direction != ODR_DECODE)"
-	lappend l "\t\treturn opt;"
 	lappend l "\tif (!odr_constructed_begin(o, p, $tagtype, $tag, 0))"
 	lappend l "\t\treturn odr_missing(o, opt, name);"
 	lappend l "\tif (!odr_initmember(o, p, sizeof(**p)))"

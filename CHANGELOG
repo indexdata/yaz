@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed a bug in ASN.1 compiler that caused Type-1 Operator codec to fail.
+
+Make ZOOM error code for "invalid query".
+
 Fixed compilation for SSL which wasn't properly enabled for all platforms.
 
 --- 2.0.10 2004/02/05 
