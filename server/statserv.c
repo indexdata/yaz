@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.30  1995-11-01 13:54:59  quinn
+ * Revision 1.31  1995-11-17 11:09:39  adam
+ * Added new option '-c' to specify configuration name in control block.
+ *
+ * Revision 1.30  1995/11/01  13:54:59  quinn
  * Minor adjustments
  *
  * Revision 1.29  1995/10/30  12:41:29  quinn
@@ -362,7 +365,7 @@ int statserv_main(int argc, char **argv)
     int protocol = control_block.default_proto;
 
     me = argv[0];
-    while ((ret = options("a:szSl:v:u:", argv, argc, &arg)) != -2)
+    while ((ret = options("a:szSl:v:u:c:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -385,10 +388,14 @@ int statserv_main(int argc, char **argv)
 	    	strcpy(control_block.apdufile, arg ? arg : ""); break;
 	    case 'u':
 	    	strcpy(control_block.setuid, arg ? arg : ""); break;
+            case 'c':
+                strcpy(control_block.configname, arg ? arg : ""); break;
 	    default:
-	    	fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel> -l <logfile> -u <user> -zsS <listener-addr> ... ]\n", me);
+	    	fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
+                        " -l <logfile> -u <user> -c <config>"
+                        " -zsS <listener-addr> ... ]\n", me);
 	    	exit(1);
-	}
+            }
     }
     if (control_block.dynamic)
     	signal(SIGCHLD, catchchld);
