@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.16  1997-09-17 12:10:31  adam
+ * Revision 1.17  1998-01-29 13:15:35  adam
+ * Implemented sort for the backend interface.
+ *
+ * Revision 1.16  1997/09/17 12:10:31  adam
  * YAZ version 1.4.
  *
  */
@@ -40,21 +43,6 @@
 extern "C" {
 #endif
 
-typedef struct bend_initrequest
-{
-    char *configname;
-    Z_IdAuthentication *auth;
-    ODR stream;                /* encoding stream */
-} bend_initrequest;
-
-typedef struct bend_initresult
-{
-    int errcode;               /* 0==OK */
-    char *errstring;           /* system error string or NULL */
-    void *handle;              /* private handle to the backend module */
-} bend_initresult;
-
-YAZ_EXPORT bend_initresult MDF *bend_init(bend_initrequest *r);   
 
 typedef struct bend_searchrequest
 {
@@ -152,6 +140,41 @@ YAZ_EXPORT bend_deleteresult *bend_delete(void *handle,
 YAZ_EXPORT bend_deleteresult *bend_deleteresponse(void *handle);
 
 YAZ_EXPORT void bend_close(void *handle);
+
+typedef struct bend_sortrequest 
+{
+    int num_input_setnames;
+    char **input_setnames;
+    char *output_setname;
+    Z_SortKeySpecList *sort_sequence;
+    ODR stream;
+} bend_sortrequest;
+
+typedef struct bend_sortresult
+{
+    int sort_status;
+    int errcode;
+    char *errstring;
+} bend_sortresult;
+
+typedef struct bend_initrequest
+{
+    char *configname;
+    Z_IdAuthentication *auth;
+    ODR stream;                /* encoding stream */
+    
+    int (*bend_sort) (void *handle, bend_sortrequest *req,
+		      bend_sortresult *res);
+} bend_initrequest;
+
+typedef struct bend_initresult
+{
+    int errcode;               /* 0==OK */
+    char *errstring;           /* system error string or NULL */
+    void *handle;              /* private handle to the backend module */
+} bend_initresult;
+
+YAZ_EXPORT bend_initresult MDF *bend_init(bend_initrequest *r);   
 
 #ifdef __cplusplus
 }

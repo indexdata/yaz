@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.69  1997-09-30 11:48:12  adam
+ * Revision 1.70  1998-01-29 13:15:35  adam
+ * Implemented sort for the backend interface.
+ *
+ * Revision 1.69  1997/09/30 11:48:12  adam
  * Fixed bug introduced by previous commit.
  *
  * Revision 1.68  1997/09/29 13:18:59  adam
@@ -277,6 +280,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd);
+static Z_APDU *process_sortRequest(association *assoc, request *reqb, int *fd);
 static void process_close(association *assoc, request *reqb);
 
 static FILE *apduf = 0; /* for use in static mode */
@@ -546,6 +550,15 @@ static int process_request(association *assoc)
 	    res = process_presentRequest(assoc, req, &fd); break;
 	case Z_APDU_scanRequest:
 	    res = process_scanRequest(assoc, req, &fd); break;
+	case Z_APDU_sortRequest:
+	    if (assoc->bend_sort)
+		res = process_sortRequest(assoc, req, &fd);
+	    else
+	    {
+		logf(LOG_WARN, "Cannot handle SORT APDU");
+		return -1;
+	    }
+	    break;
 	case Z_APDU_close:
 	    process_close(assoc, req); return 0;
 	default:
@@ -683,6 +696,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     binitreq.stream = assoc->encode;
     binitreq.configname = "default-config";
     binitreq.auth = req->idAuthentication;
+    binitreq.bend_sort = NULL;
     if (!(binitres = bend_init(&binitreq)))
     {
     	logf(LOG_WARN, "Bad response from backend.");
@@ -690,6 +704,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     }
 
     assoc->backend = binitres->handle;
+    if ((assoc->bend_sort = binitreq.bend_sort))
+	logf (LOG_DEBUG, "Sort handler installed");
     resp->referenceId = req->referenceId;
     *options = '\0';
     /* let's tell the client what we can do */
@@ -725,7 +741,11 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->options, Z_Options_concurrentOperations);
 	strcat(options, " concurop");
     }
-
+    if (ODR_MASK_GET(req->options, Z_Options_sort && binitreq.bend_sort))
+    {
+	ODR_MASK_SET(resp->options, Z_Options_sort);
+	strcat(options, " sort");
+    }
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
     {
     	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_1);
@@ -1236,7 +1256,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     bend_scanresult *srs;
     oident *attset;
 
-    logf(LOG_LOG, "Got scanrequest");
+    logf(LOG_LOG, "Got ScanRequest");
     *scanStatus = Z_Scan_failure;
     *numberOfEntriesReturned = 0;
 
@@ -1328,6 +1348,43 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     return apdu;
 }
 
+static Z_APDU *process_sortRequest(association *assoc, request *reqb,
+    int *fd)
+{
+    Z_SortRequest *req = reqb->request->u.sortRequest;
+    Z_SortResponse *res = odr_malloc (assoc->encode, sizeof(*res));
+    bend_sortrequest bsrq;
+    bend_sortresult *bsrt;
+    Z_APDU *apdu = odr_malloc (assoc->encode, sizeof(*apdu));
+
+    logf(LOG_LOG, "Got SortRequest.");
+
+    bsrq.num_input_setnames = req->inputResultSetNames->num_strings;
+    bsrq.input_setnames = req->inputResultSetNames->strings;
+    bsrq.output_setname = req->sortedResultSetName;
+    bsrq.sort_sequence = req->sortSequence;
+    bsrq.stream = assoc->encode;
+
+    bsrt = odr_malloc (assoc->encode, sizeof(*bsrt));
+    bsrt->sort_status = Z_SortStatus_failure;
+    bsrt->errcode = 0;
+    bsrt->errstring = 0;
+
+    (*assoc->bend_sort)(assoc->backend, &bsrq, bsrt);
+
+    res->referenceId = req->referenceId;
+    res->sortStatus = odr_malloc (assoc->encode, sizeof(*res->sortStatus));
+    *res->sortStatus = bsrt->sort_status;
+    res->resultSetStatus = 0;
+    if (bsrt->errcode)
+	res->diagnostics = diagrecs(assoc, bsrt->errcode, bsrt->errstring);
+    res->otherInfo = 0;
+
+    apdu->which = Z_APDU_sortResponse;
+    apdu->u.sortResponse = res;
+    return apdu;
+}
+
 static void process_close(association *assoc, request *reqb)
 {
     Z_Close *req = reqb->request->u.close;
@@ -1345,7 +1402,7 @@ static void process_close(association *assoc, request *reqb)
 	"unspecified"
     };
 
-    logf(LOG_LOG, "Got close, reason %s, message %s",
+    logf(LOG_LOG, "Got Close, reason %s, message %s",
 	reasons[*req->closeReason], req->diagnosticInformation ?
 	req->diagnosticInformation : "NULL");
     if (assoc->version < 3) /* to make do_force respond with close */
