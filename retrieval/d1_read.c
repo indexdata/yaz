@@ -4,7 +4,15 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.18  1997-11-18 09:51:09  adam
+ * Revision 1.19  1997-12-09 16:17:09  adam
+ * Fix bug regarding variants. Tags with prefix "var" was incorrectly
+ * interpreted as "start of variants". Now, only "var" indicates such
+ * start.
+ * Cleaned up data1_read_node so tag names and variant names are
+ * copied and not pointed to by the generated data1 tree. Data nodes
+ * still point to old buffer.
+ *
+ * Revision 1.18  1997/11/18 09:51:09  adam
  * Removed element num_children from data1_node. Minor changes in
  * data1 to Explain.
  *
@@ -106,6 +114,7 @@
  *
  */
 
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -150,6 +159,20 @@ void data1_free_tree (data1_handle dh, data1_node *t)
 	(*t->destroy)(t);
 }
 
+char *data1_insert_string (data1_handle dh, data1_node *res,
+                           NMEM m, const char *str)
+{
+    int len = strlen(str);
+
+    if (len > DATA1_LOCALDATA-1)
+        return nmem_strdup (m, str);
+    else
+    {
+        strcpy (res->lbuf, str);
+	return res->lbuf;
+    }
+}
+
 /*
  * Insert a tagged node into the record root as first child of the node at
  * which should be root or tag itself). Returns pointer to the data node,
@@ -169,9 +192,8 @@ data1_node *data1_insert_taggeddata(data1_handle dh, data1_node *root,
     tagn->u.tag.make_variantlist = 0;
     tagn->u.tag.no_data_requested = 0;
     tagn->u.tag.get_bytes = -1;
-    if (!(tagn->u.tag.element = data1_getelementbytagname (dh,
-							   root->u.root.absyn,
-							   0, tagname)))
+    if (!(tagn->u.tag.element =
+          data1_getelementbytagname (dh, root->u.root.absyn, 0, tagname)))
 	return 0;
     tagn->child = datn = data1_mk_node (dh, m);
     datn->parent = tagn;
@@ -205,59 +227,42 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 
     if (**buf == '<') /* beginning of tag */
     {
-	char *tag = (*buf) + 1;
-	char *args = 0;
-	char *t = tag;
+	char tag[64];
+	char args[256];
+	int i;
+	char *t = (*buf) + 1;
 	data1_node **pp;
 	data1_element *elem = 0;
-
-	for (; *t && *t != '>' && !isspace(*t); t++);
+	
+	for (i = 0; *t && *t != '>' && !isspace(*t); t++)
+	    if (i < (sizeof(tag)-1))
+		tag[i++] = *t;
+	tag[i] = '\0';
+	while (isspace(*t))
+	    t++;
+	for (i = 0; *t && *t != '>'; t++)
+	    if (i < (sizeof(args)-1))
+		args[i++] = *t;
+	args[i] = '\0';
 	if (*t != '>' && !isspace(*t))
 	{
 	    logf(LOG_WARN, "d1: %d: Malformed tag", *line);
 	    return 0;
 	}
-	if (isspace(*t)) /* the tag has arguments */
-	{
-	    while (isspace(*t))
-		t++;
-	    if (*t != '>')
-	    {
-		args = t;
-		for (; *t && *t != '>'; t++);
-		if (*t != '>' && !isspace(*t))
-		{
-		    logf(LOG_WARN, "d1: %d: Malformed tag", *line);
-		    return 0;
-		}
-	    }
-	}
-
 	/*
 	 * if end-tag, see if we terminate parent. If so, consume and return.
 	 * Else, return.
 	 */
-	*t = '\0';
 	if (*tag == '/')
 	{
-	    if (!parent)
-		return 0;
-	    if (!*(tag +1) ||
-		(parent->which == DATA1N_root &&
-		 !strcmp(tag + 1,parent->u.root.type)) ||
-		(parent->which == DATA1N_tag &&
-		 !strcmp(tag + 1, parent->u.tag.tag)))
-	    {
+	    if (parent && (!*(tag +1) ||
+		    (parent->which == DATA1N_root &&
+		     !strcmp(tag + 1,parent->u.root.type)) ||
+		    (parent->which == DATA1N_tag &&
+		     !strcmp(tag + 1, parent->u.tag.tag))))
 		*buf = t + 1;
-		return 0;
-	    }
-	    else
-	    {
-		*t = '>';
-		return 0;
-	    }
-	}
-
+	    return 0;
+	}	
 	if (!absyn) /* parent node - what are we? */
 	{
 	    if (!(absyn = data1_get_absyn (dh, tag)))
@@ -268,12 +273,12 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 	    }
 	    res = data1_mk_node (dh, m);
 	    res->which = DATA1N_root;
-	    res->u.root.type = tag;
+	    res->u.root.type = data1_insert_string (dh, res, m, tag);
 	    res->u.root.absyn = absyn;
 	    res->root = res;
 	    *buf = t + 1;
 	}
-	else if (!strncmp(tag, "var", 3))
+	else if (!strcmp(tag, "var"))
 	{
 	    char tclass[DATA1_MAX_SYMBOL], type[DATA1_MAX_SYMBOL];
 	    data1_vartype *tp;
@@ -301,7 +306,6 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 		res->u.variant.type = 0;
 		res->u.variant.value = 0;
 		res->root = parent->root;
-		*t = '>';
 	    }
 	    else
 	    {
@@ -314,16 +318,13 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 		 */
 		for (p = parent; p->which == DATA1N_variant; p = p->parent)
 		    if (p->u.variant.type == tp)
-		    {
-			*t = '>';
 			return 0;
-		    }
-
 		res =  data1_mk_node (dh, m);
 		res->which = DATA1N_variant;
 		res->root = parent->root;
 		res->u.variant.type = tp;
-		res->u.variant.value = args + val_offset;
+	        res->u.variant.value =
+                    data1_insert_string (dh, res, m, args + val_offset);
 		*buf = t + 1;
 	    }
 	}
@@ -334,30 +335,16 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 	    int localtag = 0;
 
 	    if (parent->which == DATA1N_variant)
-	    {
-		*t = '>';
 		return 0;
-	    }
 	    if (partag)
 		if (!(e = partag->u.tag.element))
 		    localtag = 1; /* our parent is a local tag */
 
-#if 0
-	    if (!localtag && !(elem = data1_getelementbytagname(absyn,
-		e, tag)) && (data1_gettagbyname(absyn->tagset, tag)))
-	    {
-		if (parent->which == DATA1N_root)
-		    logf(LOG_WARN, "Tag '%s' used out of context", tag);
-		*t = '>';
-		return 0;
-	    }
-#else
 	    elem = data1_getelementbytagname(dh, absyn, e, tag);
-#endif
 	    res = data1_mk_node (dh, m);
 	    res->which = DATA1N_tag;
+            res->u.tag.tag = data1_insert_string (dh, res, m, tag);
 	    res->u.tag.element = elem;
-	    res->u.tag.tag = tag;
 	    res->u.tag.node_selected = 0;
 	    res->u.tag.make_variantlist = 0;
 	    res->u.tag.no_data_requested = 0;
@@ -384,6 +371,7 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 
         if (!parent)      /* abort if abstract syntax is undefined */
             return 0;
+
 	/* Determine length and remove newlines/extra blanks */
 	while (**buf && **buf != '<')
 	{
@@ -406,6 +394,7 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 	res->parent = parent;
 	res->which = DATA1N_data;
 	res->u.data.what = DATA1I_text;
+	assert (len >= 0);
 	res->u.data.len = len;
 	res->u.data.data = data;
 	res->u.data.formatted_text = 0;
