@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.37  2001-02-28 09:00:06  adam
+ * Revision 1.38  2001-03-27 23:06:21  adam
+ * Quotes and slashes may occur within attributes.
+ *
+ * Revision 1.37  2001/02/28 09:00:06  adam
  * Fixed problem with stack overflow for very nested records.
  *
  * Revision 1.36  2001/02/21 13:46:53  adam
@@ -373,19 +376,30 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	{
 	    c = (*get_byte)(fh);
 	    if (c == '"')
-		c = (*get_byte)(fh);	
-	    wrbuf_rewind(wrbuf);
-	    while (c && c != '"' && c != '>' && c != '/')
 	    {
-		wrbuf_putc (wrbuf, c);
-		c = (*get_byte)(fh);
+		c = (*get_byte)(fh);	
+		wrbuf_rewind(wrbuf);
+		while (c && c != '"')
+		{
+		    wrbuf_putc (wrbuf, c);
+		    c = (*get_byte)(fh);
+	        }
+	        if (c)
+		    c = (*get_byte)(fh);	
 	    }
+	    else
+	    {
+	        wrbuf_rewind(wrbuf);
+	        while (c && c != '>' && c != '/')
+	        {
+		    wrbuf_putc (wrbuf, c);
+		    c = (*get_byte)(fh);
+	        }
+            }
 	    wrbuf_putc (wrbuf, '\0');
 	    len = wrbuf_len(wrbuf);
 	    p->value = (char*) nmem_malloc (m, len);
 	    strcpy (p->value, wrbuf_buf(wrbuf));
-	    if (c == '"')
-		c = (*get_byte)(fh);	
 	}
     }
     *ch = c;
