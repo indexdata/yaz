@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: zget.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: zget.c,v 1.2 2003-11-27 15:37:23 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -30,7 +30,7 @@ Z_InitRequest *zget_InitRequest(ODR o)
     r->maximumRecordSize = odr_intdup(o, 30*1024);
     r->idAuthentication = 0;
     r->implementationId = "81";
-    r->implementationName = "Index Data/YAZ";
+    r->implementationName = "YAZ";
     r->implementationVersion = YAZ_VERSION
 #ifdef YAZ_DATE_STR
     " (" YAZ_DATE_STR ")"
