@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.28  1998-10-13 16:01:52  adam
+ * Revision 1.29  1998-12-03 11:33:04  adam
+ * Added OID's for XML.
+ *
+ * Revision 1.28  1998/10/13 16:01:52  adam
  * Implemented support for dynamic object identifiers.
  * Function oid_getvalbyname now accepts raw OID's as well as traditional
  * names.
@@ -239,6 +242,8 @@ typedef enum oid_value
     VAL_TIFFB,
     VAL_WAV,
     VAL_UPDATEES,
+    VAL_TEXT_XML,
+    VAL_APPLICATION_XML,
     VAL_UNIVERSE_REPORT,
 /* add new types here... */
 

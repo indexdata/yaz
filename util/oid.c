@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.30  1998-10-18 07:48:56  adam
+ * Revision 1.31  1998-12-03 11:33:05  adam
+ * Added OID's for XML.
+ *
+ * Revision 1.30  1998/10/18 07:48:56  adam
  * Fixed oid_getentbyoid so that it returns NULL when parsed oid is NULL.
  *
  * Revision 1.29  1998/10/14 13:32:35  adam
@@ -212,7 +215,10 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_ID_SGML,   {5,1000,81,1,-1},"ID-SGML" },
 #endif
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_SOIF,      {5,1000,81,2,-1},"SOIF" },
-
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_TEXT_XML,  {5,109,10,-1}, "text-XML" },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_TEXT_XML,  {5,109,10,-1}, "XML" },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_APPLICATION_XML,
+          {5,109,11,-1}, "application-XML" },
     {PROTO_Z3950,   CLASS_RESFORM, VAL_RESOURCE1, {7,1,-1},    "Resource-1"  },
     {PROTO_Z3950,   CLASS_RESFORM, VAL_RESOURCE2, {7,2,-1},    "Resource-2"  },
     {PROTO_Z3950,   CLASS_RESFORM, VAL_UNIVERSE_REPORT,  {7,1000,81,1,-1}, "UNIverse-Resource-Report"},
