@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.1  1995-11-01 11:56:07  quinn
+ * Revision 1.2  1995-11-01 16:34:56  quinn
+ * Making data1 look for tables in data1_tabpath
+ *
+ * Revision 1.1  1995/11/01  11:56:07  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -20,6 +23,8 @@
 #include <proto.h>
 #include <log.h>
 #include <readconf.h>
+#include <tpath.h>
+#include <data1.h>
 
 /*
  * Read an element-set specification from a file. If !o, use xmalloc for
@@ -32,7 +37,7 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o)
     char *argv[50], line[512];
     Z_Espec1 *res = odr_malloc(o, sizeof(*res));
 
-    if (!(f = fopen(file, "r")))
+    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

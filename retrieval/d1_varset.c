@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_varset.c,v $
- * Revision 1.2  1995-11-01 13:54:50  quinn
+ * Revision 1.3  1995-11-01 16:34:58  quinn
+ * Making data1 look for tables in data1_tabpath
+ *
+ * Revision 1.2  1995/11/01  13:54:50  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/11/01  11:56:09  quinn
@@ -20,6 +23,7 @@
 #include <oid.h>
 #include <log.h>
 
+#include <tpath.h>
 #include <data1.h>
 
 data1_vartype *data1_getvartypebyct(data1_varset *set, char *class, char *type)
@@ -53,7 +57,7 @@ data1_varset *data1_read_varset(char *file)
     res->reference = VAL_NONE;
     res->classes = 0;
 
-    if (!(f = fopen(file, "r")))
+    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.2  1995-11-01 13:54:46  quinn
+ * Revision 1.3  1995-11-01 16:34:56  quinn
+ * Making data1 look for tables in data1_tabpath
+ *
+ * Revision 1.2  1995/11/01  13:54:46  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/11/01  11:56:08  quinn
@@ -22,6 +25,7 @@
 #include <log.h>
 #include <readconf.h>
 
+#include <tpath.h>
 #include <data1.h>
 #include "d1_map.h"
 
@@ -33,7 +37,7 @@ data1_maptab *data1_read_maptab(char *file)
     char *argv[50], line[512];
     data1_mapunit **mapp;
 
-    if (!(f = fopen(file, "r")))
+    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

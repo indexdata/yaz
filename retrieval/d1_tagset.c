@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.2  1995-11-01 13:54:49  quinn
+ * Revision 1.3  1995-11-01 16:34:58  quinn
+ * Making data1 look for tables in data1_tabpath
+ *
+ * Revision 1.2  1995/11/01  13:54:49  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/11/01  11:56:09  quinn
@@ -20,6 +23,7 @@
 
 #include <xmalloc.h>
 #include <log.h>
+#include <tpath.h>
 
 #include <data1.h>
 
@@ -102,7 +106,7 @@ data1_tagset *data1_read_tagset(char *file)
     data1_tag **tagp;
     FILE *f;
 
-    if (!(f = fopen(file, "r")))
+    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

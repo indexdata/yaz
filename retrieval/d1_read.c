@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.2  1995-11-01 13:54:48  quinn
+ * Revision 1.3  1995-11-01 16:34:57  quinn
+ * Making data1 look for tables in data1_tabpath
+ *
+ * Revision 1.2  1995/11/01  13:54:48  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/11/01  11:56:09  quinn
@@ -62,6 +65,11 @@
 #include <xmalloc.h>
 #include <log.h>
 #include <data1.h>
+
+char *data1_tabpath = 0; /* global path for tables */
+
+void data1_set_tabpath(char *p)
+{ data1_tabpath = p; }
 
 static data1_node *freelist = 0;
 

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.2  1995-11-01 13:54:35  quinn
+ * Revision 1.3  1995-11-01 16:34:52  quinn
+ * Making data1 look for tables in data1_tabpath
+ *
+ * Revision 1.2  1995/11/01  13:54:35  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/11/01  13:07:18  quinn
@@ -82,6 +85,8 @@
 
 #include <d1_attset.h>
 #include <d1_map.h>
+
+extern char *data1_tabpath; /* global path for tables */
 
 #define DATA1_MAX_SYMBOL 31
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.1  1995-11-01 11:56:07  quinn
+ * Revision 1.2  1995-11-01 16:34:55  quinn
+ * Making data1 look for tables in data1_tabpath
+ *
+ * Revision 1.1  1995/11/01  11:56:07  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -18,6 +21,8 @@
 #include <xmalloc.h>
 #include <log.h>
 #include <d1_attset.h>
+#include <data1.h>
+#include <tpath.h>
 
 data1_att *data1_getattbyname(data1_attset *s, char *name)
 {
@@ -43,7 +48,7 @@ data1_attset *data1_read_attset(char *file)
     data1_att **attp;
     FILE *f;
 
-    if (!(f = fopen(file, "r")))
+    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
