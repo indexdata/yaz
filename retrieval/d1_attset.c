@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.2  1995-11-01 16:34:55  quinn
+ * Revision 1.3  1995-12-13 17:14:26  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.2  1995/11/01  16:34:55  quinn
  * Making data1 look for tables in data1_tabpath
  *
  * Revision 1.1  1995/11/01  11:56:07  quinn
@@ -32,7 +35,7 @@ data1_att *data1_getattbyname(data1_attset *s, char *name)
     {
 	/* scan local set */
 	for (r = s->atts; r; r = r->next)
-	    if (!strcmp(r->name, name))
+	    if (!data1_matchstr(r->name, name))
 		return r;
 	/* scan included sets */
 	if (s->children && (r = data1_getattbyname(s->children, name)))

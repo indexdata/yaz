@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_write.c,v $
- * Revision 1.1  1995-12-13 15:38:43  quinn
+ * Revision 1.2  1995-12-13 17:14:27  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.1  1995/12/13  15:38:43  quinn
  * Added SGML-output filter.
  *
  *
@@ -52,7 +55,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	    }
 	    if (nodetoidsgml(c, select, b, col) < 0)
 		return -1;
-	    wrbuf_write(b, "</>\n", 5);
+	    wrbuf_write(b, "</>\n", 4);
 	    col = 0;
 	}
 	else if (c->which == DATA1N_data)
