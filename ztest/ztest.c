@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.18  1998-10-20 15:13:45  adam
+ * Revision 1.19  1998-10-20 15:16:22  adam
+ * Minor change to prevent warning.
+ *
+ * Revision 1.18  1998/10/20 15:13:45  adam
  * Minor fix regarding output for Item Order.
  *
  * Revision 1.17  1998/10/18 22:33:35  quinn
@@ -165,7 +168,6 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	    }
 	}
 	break;
-	default:
 	}
     }
     rr->errcode = 0;
