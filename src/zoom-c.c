@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.9 2003-11-26 16:56:00 mike Exp $
+ * $Id: zoom-c.c,v 1.10 2003-12-04 12:57:30 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -889,7 +889,6 @@ static zoom_ret send_APDU (ZOOM_connection c, Z_APDU *a)
 
 static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 {
-    const char *impid, *impname, *impver;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_initRequest);
     Z_InitRequest *ireq = apdu->u.initRequest;
     Z_IdAuthentication *auth = (Z_IdAuthentication *)
@@ -919,7 +918,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.9 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.10 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
