@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.34 2003-12-18 17:27:31 mike Exp $ -->
+<!-- $Id: tools.xml,v 1.35 2004-04-22 13:12:49 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1818,6 +1818,117 @@ typedef struct oident
    </para>
 
   </sect1>
+
+  <sect1 id="tools.marc"><title>MARC</title>
+   
+   <para>
+    YAZ provides a fast utility that decodes MARC records and
+    encodes to a varity of output formats. The MARC records must
+    be encoded in ISO2709.
+   </para>
+   <synopsis><![CDATA[
+    #include <yaz/marcdisp.h>
+
+    /* create handler */
+    yaz_marc_t yaz_marc_create(void);
+    /* destroy */
+    void yaz_marc_destroy(yaz_marc_t mt);
+
+    /* set XML mode YAZ_MARC_LINE, YAZ_MARC_SIMPLEXML, ... */
+    void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
+    #define YAZ_MARC_LINE      0
+    #define YAZ_MARC_SIMPLEXML 1
+    #define YAZ_MARC_OAIMARC   2
+    #define YAZ_MARC_MARCXML   3
+    #define YAZ_MARC_ISO2709   4
+
+    /* supply iconv handle for character set conversion .. */
+    void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
+
+    /* set debug level, 0=none, 1=more, 2=even more, .. */
+    void yaz_marc_debug(yaz_marc_t mt, int level);
+
+    /* decode MARC in buf of size bsize. Returns >0 on success; <=0 on failure.
+    On success, result in *result with size *rsize. */
+    int yaz_marc_decode_buf (yaz_marc_t mt, const char *buf, int bsize,
+                             char **result, int *rsize);
+
+    /* decode MARC in buf of size bsize. Returns >0 on success; <=0 on failure.
+       On success, result in WRBUF */
+    int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf,
+                               int bsize, WRBUF wrbuf);
+]]>
+   </synopsis>
+   <para>
+    A MARC conversion handle must be created by using
+    <function>yaz_marc_create</function> and destroyed
+    by calling <function>yaz_marc_destroy</function>.
+  </para>
+   <para>
+    All other function operate on a <literal>yaz_marc_t</literal> handle.
+    The output is specified by a call to <function>yaz_marc_xml</function>.
+    The <literal>xmlmode</literal> must be one of
+    <variablelist>
+     <varlistentry>
+      <term>YAZ_MARC_LINE</term>
+      <listitem>
+       <para>
+	A simple line-by-line format suitable for display but not
+	recommend for further (machine) processing.
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term>YAZ_MARC_MARXML</term>
+      <listitem>
+       <para>
+	The resulting record is converted to MARCXML.
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term>YAZ_MARC_ISO2709</term>
+      <listitem>
+       <para>
+	The resulting record is converted to ISO2709 (MARC).
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </para>
+   <para>
+    The actual conversion functions are 
+    <function>yaz_marc_decode_buf</function> and
+    <function>yaz_marc_decode_wrbuf</function> which decodes and encodes
+    a MARC record. The former function operates on simple buffers, the
+    stores the resulting record in a WRBUF handle (WRBUF is a simple string
+    type).
+   </para>
+   <example>
+    <title>Display of MARC record</title>
+    <para>
+     The followint program snippet illustrates how the MARC API may
+     be used to convert a MARC record to the line-by-line format:
+     <programlisting><![CDATA[
+      void print_marc(const char *marc_buf, int marc_buf_size)
+      {
+         char *result;      /* for result buf */
+         int result_len;    /* for size of result */
+         yaz_marc_t mt = yaz_marc_create();
+         yaz_marc_xml(mt, YAZ_MARC_LINE);
+         yaz_marc_decode_buf(mt, marc_buf, marc_buf_size,
+                             &result, &result_len);
+         fwrite(result, result_len, 1, stdout);
+         yaz_marc_destroy(mt);  /* note that result is now freed... */
+      }
+]]>
+      </programlisting>
+    </para>
+   </example>
+  </sect1>
+
  </chapter>
  
  <!-- Keep this comment at the end of the file
