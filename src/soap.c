@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.6 2004-01-07 21:02:42 adam Exp $
+ * $Id: soap.c,v 1.7 2004-01-14 00:15:56 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -203,6 +203,8 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         if (p->which == Z_SOAP_generic && !strcmp(p->ns, "SRU"))
         {
             xmlDocSetRootElement(doc, body_ptr->children);
+	    body_ptr->children = 0;
+	    xmlFreeNode(envelope_ptr);
         }
 	if (stylesheet)
 	{
