@@ -2,6 +2,7 @@ Source: yaz
 Standards-Version: 3.5.7.0
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
+Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex
 
 Package: yaz-runtime
 Section: libs
@@ -9,7 +10,7 @@ Architecture: any
 Depends: ${shlibs:Depends}
 Description: The YAZ Z39.50 toolkit (runtime files)
  YAZ is a toolkit that allows you to develop software using the
- Z39.50/ISO23950 standard for information retrieval.
+ ANSI Z39.50/ISO23950 standard for information retrieval.
  .
  Besides development libraries and header files YAZ includes 
  sample clients - and server.
@@ -35,7 +36,7 @@ Architecture: any
 Recommends: yaz-doc
 Description: The YAZ Z39.50 toolkit (development files)
  YAZ is a toolkit that allows you to develop software using the
- Z39.50/ISO23950 standard for information retrieval.
+ ANSI Z39.50/ISO23950 standard for information retrieval.
  .
  Besides development libraries and header files YAZ includes 
  sample clients - and server.
@@ -48,7 +49,7 @@ Section: libs
 Architecture: any
 Description: The YAZ Z39.50 toolkit (SSL support)
  YAZ is a toolkit that allows you to develop software using the
- Z39.50/ISO23950 standard for information retrieval.
+ ANSI Z39.50/ISO23950 standard for information retrieval.
  .
  Besides development libraries and header files YAZ includes 
  sample clients - and server.
