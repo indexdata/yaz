@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.10  1996-02-20 12:52:11  quinn
+ * Revision 1.11  1996-02-23 10:00:39  quinn
+ * WAIS Work
+ *
+ * Revision 1.10  1996/02/20  12:52:11  quinn
  * WAIS protocol support.
  *
  * Revision 1.9  1996/02/10  12:23:11  quinn
@@ -151,6 +154,7 @@ typedef struct tcpip_state
 } tcpip_state;
 
 /*
+ * This function is always called through the cs_create() macro.
  * s >= 0: socket has already been established for us.
  */
 COMSTACK tcpip_type(int s, int blocking, int protocol)
@@ -269,7 +273,8 @@ int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = h->private;
 
-    return sp->altlen && completeBER((unsigned char *) sp->altbuf, sp->altlen);
+    return sp->altlen && (*sp->complete)((unsigned char *) sp->altbuf,
+	sp->altlen);
 }
 
 /*
@@ -365,7 +370,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen)
 COMSTACK tcpip_accept(COMSTACK h)
 {
     COMSTACK new;
-    tcpip_state *state;
+    tcpip_state *state, *st = h->private;
 #ifdef WINDOWS
     unsigned long tru = 1;
 #endif
@@ -397,6 +402,7 @@ COMSTACK tcpip_accept(COMSTACK h)
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
+    state->complete = st->complete;
     new->state = CS_DATAXFER;
     h->state = CS_IDLE;
     return new;
@@ -429,7 +435,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         sp->altbuf = tmpc;
         sp->altsize = tmpi;
     }
-    while (!(berlen = completeBER((unsigned char *)*buf, hasread)))
+    while (!(berlen = (*sp->complete)((unsigned char *)*buf, hasread)))
     {
         if (!*bufsize)
         {

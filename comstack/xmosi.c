@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.10  1996-02-10 12:23:13  quinn
+ * Revision 1.11  1996-02-23 10:00:41  quinn
+ * WAIS Work
+ *
+ * Revision 1.10  1996/02/10  12:23:13  quinn
  * Enablie inetd operations fro TCP/IP stack
  *
  * Revision 1.9  1996/01/02  08:57:28  quinn
@@ -490,5 +493,5 @@ int mosi_close(COMSTACK h)
 
 char *mosi_addrstr(COMSTACK h)
 {
-    return "osi:[UNIMPLEMENTED";
+    return "osi:[UNIMPLEMENTED]";
 }
