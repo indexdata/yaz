@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.34  1995-06-19 17:01:48  quinn
+ * Revision 1.35  1995-08-10 08:53:59  quinn
+ * Added Explain
+ *
+ * Revision 1.34  1995/06/19  17:01:48  quinn
  * This should bring us in sync with the version distributed as 1.0b
  *
  * Revision 1.33  1995/06/19  13:39:56  quinn
@@ -139,6 +142,11 @@ int z_ResultSetId(ODR o, char **p, int opt)
 {
     return odr_implicit(o, odr_visiblestring, (char **) p, ODR_CONTEXT, 31,
 	opt);
+}
+
+int z_ElementSetName(ODR o, char **p, int opt)
+{
+    return odr_implicit(o, odr_visiblestring, p, ODR_CONTEXT, 103, opt);
 }
 
 int z_UserInformationField(ODR o, Odr_external **p, int opt)
@@ -419,12 +427,6 @@ int z_ResourceControlResponse(ODR o, Z_ResourceControlResponse **p, int opt)
 }
 
 /* ------------------------ SEARCH SERVICE ----------------------- */
-
-int z_ElementSetName(ODR o, char **p, int opt)
-{
-    return odr_implicit(o, odr_visiblestring, (char**) p, ODR_CONTEXT, 103,
-    	opt);
-}
 
 int z_DatabaseSpecificUnit(ODR o, Z_DatabaseSpecificUnit **p, int opt)
 {

@@ -5,6 +5,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 Fixed bug in the frontend-server. The numberOfRecordsReturned field was
 handled incorrectly when records were requested in the searchResponse.
 
+Added Explain encoders/decoders to the service-level API. Strictly alfa.
+
 --- 1.0b2 1995/06/27
 Fairly quick maintenance release to add SUTRS support.
 
