@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.39 2004-11-16 17:08:11 heikki Exp $ -->
+<!-- $Id: tools.xml,v 1.40 2004-11-17 13:03:07 heikki Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1850,8 +1850,9 @@ typedef struct oident
    logged. This string should be a comma-separated list of log level names,
    and can contain both hard-coded names and dynamic ones. The log level
    calculation starts with <literal>LOG_DEFAULT_LEVEL</literal> and adds a bit
-   for each word it meets. If the string <literal>'none'</literal> is found,
-   the bits are cleared. Typically this string comes from the command-line,
+   for each word it meets, unless the word starts with a '-', in which case it 
+   clears the bit. If the string <literal>'none'</literal> is found,
+   all bits are cleared. Typically this string comes from the command-line,
    often identified by <literal>-v</literal>. The
    <function>yaz_log_mask_str</function> returns a log level that should be
    passed to <function>yaz_log_init_level</function> for it to take effect.
