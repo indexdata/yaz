@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.15 2004-12-30 00:25:20 adam Exp $
+ * $Id: statserv.c,v 1.16 2005-01-03 09:18:36 adam Exp $
  */
 
 /**
@@ -713,25 +713,48 @@ int statserv_start(int argc, char **argv)
 	inetd_connection(control_block.default_proto);
     else
     {
+	static int hand[2];
 	if (control_block.background)
 	{
+	    /* create pipe so that parent waits until child has created
+	       PID (or failed) */
+	    if (pipe(hand) < 0)
+	    {
+		yaz_log(YLOG_FATAL|YLOG_ERRNO, "pipe");
+		return 1;
+	    }
 	    switch (fork())
 	    {
 	    case 0: 
 		break;
 	    case -1:
 		return 1;
-	    default: 
-	    _exit(0);
+	    default:
+		close(hand[1]);
+		while(1)
+		{
+		    char dummy[1];
+		    int res = read(hand[0], dummy, 1);
+		    if (res < 0 && yaz_errno() != EINTR)
+		    {
+			yaz_log(YLOG_FATAL|YLOG_ERRNO, "read fork handshake");
+			break;
+		    }
+		    else if (res >= 0)
+			break;
+		}
+		close(hand[0]);
+		_exit(0);
 	    }
-	    
+	    /* child */
+	    close(hand[0]);
 	    if (setsid() < 0)
 		return 1;
 	    
 	    close(0);
 	    close(1);
 	    close(2);
-	    open("/dev/null",O_RDWR);
+	    open("/dev/null", O_RDWR);
 	    dup(0); dup(0);
 	}
 	if (!pListener && *control_block.default_listen)
@@ -753,6 +776,9 @@ int statserv_start(int argc, char **argv)
 	    fprintf(f, "%ld", (long) getpid());
 	    fclose(f);
 	}
+
+	if (control_block.background)
+	    close(hand[1]);
 
 	yaz_log (log_server, "Starting server %s pid=%ld", programname,
 			(long) getpid());
