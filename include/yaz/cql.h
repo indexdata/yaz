@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.7 2004-03-15 21:39:06 adam Exp $
+/* $Id: cql.h,v 1.8 2004-10-02 13:41:14 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -82,7 +82,6 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
 
 #define CQL_NODE_ST 1
 #define CQL_NODE_BOOL 2
-#define CQL_NODE_MOD 3
 struct cql_node {
     int which;
     union {
