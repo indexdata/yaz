@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added init command for yaz-client which sends "extra" init request.
+
 Fixed two bugs in OID codec - ber_oidc. Throw error when encoding/decoding
 bad truncated OID. Fix decoding of OID X.Y... when X=2 and Y>39.
 

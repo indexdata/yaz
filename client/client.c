@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.228 2004-01-27 21:22:43 adam Exp $
+ * $Id: client.c,v 1.229 2004-02-14 15:44:15 adam Exp $
  */
 
 #include <stdio.h>
@@ -296,7 +296,7 @@ static void send_initRequest(const char* type_and_host)
 
     req->referenceId = set_refid (out);
 
-    if (yazProxy) 
+    if (yazProxy && type_and_host) 
         yaz_oi_set_string_oidval(&req->otherInfo, out, VAL_PROXY,
         1, type_and_host);
     
@@ -2154,7 +2154,15 @@ static int cmd_explain(const char *arg)
 #endif
     return 0;
 }
-    
+
+static int cmd_init(const char *arg)
+{
+    if (!conn || protocol != PROTO_Z3950)
+       return 0;
+    send_initRequest(0);
+    return 2;
+}
+
 static int cmd_find(const char *arg)
 {
     if (!*arg)
@@ -3812,6 +3820,7 @@ static struct {
     {"options", cmd_options, "", NULL, 0, NULL},
     {"zversion", cmd_zversion, "", NULL, 0, NULL},
     {"help", cmd_help, "", NULL,0,NULL},
+    {"init", cmd_init, "", NULL,0,NULL},
     {0,0,0,0,0,0}
 };
 
