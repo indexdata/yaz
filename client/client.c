@@ -1,8 +1,8 @@
-/*
+/* 
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.166 2002-09-02 13:59:07 adam Exp $
+ * $Id: client.c,v 1.167 2002-09-10 10:20:27 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -3330,7 +3330,7 @@ int main(int argc, char **argv)
 
 /*
  * Local variables:
- * tab-width: 4
+ * tab-width: 8
  * c-basic-offset: 4
  * End:
  */
