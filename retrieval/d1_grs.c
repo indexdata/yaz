@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.17  1999-11-30 13:47:12  adam
+ * Revision 1.18  2002-04-12 14:40:07  adam
+ * GRS-1 writer accepts non-abs
+ *
+ * Revision 1.17  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.16  1999/08/27 09:40:32  adam
@@ -249,7 +252,8 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
      */
     else if (n->which == DATA1N_data || n->which == DATA1N_variant)
     {
-	if (!(tag = data1_gettagbyname (dh, n->root->u.root.absyn->tagset,
+	if (n->root->u.root.absyn &&
+            !(tag = data1_gettagbyname (dh, n->root->u.root.absyn->tagset,
 					"wellKnown")))
 	{
 	    yaz_log(LOG_WARN, "Unable to locate tag for 'wellKnown'");
