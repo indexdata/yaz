@@ -22,21 +22,14 @@
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml.in,v 1.2 2002-03-21 21:30:44 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.3 2002-04-08 13:56:02 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
   <author><firstname>Sebastian</firstname><surname>Hammer</surname></author>
   <editor><firstname>Adam</firstname><surname>Dickmeiss</surname></editor>
   <copyright>
-   <year>1995</year>
-   <year>1996</year>
-   <year>1997</year>
-   <year>1998</year>
-   <year>1999</year>
-   <year>2000</year>
-   <year>2001</year>
-   <year>2002</year>
+   <year>1995-2002</year>
    <holder>Index Data</holder>
   </copyright>
   <abstract><simpara>
