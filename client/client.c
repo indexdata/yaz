@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.41  1996-10-07 15:29:03  quinn
+ * Revision 1.42  1996-10-08 10:44:57  quinn
+ * Resolved conflicts.
+ *
+ * Revision 1.41  1996/10/07  15:29:03  quinn
  * Work
  *
  * Revision 1.40  1996/08/29  14:19:34  quinn
@@ -1000,17 +1003,6 @@ int cmd_format(char *arg)
         recordsyntax = VAL_DANMARC;
         return 1;
     }
-<<<<<<< client.c
-    else if (!strcmp(arg, "grs1"))
-    {
-        printf("Preferred format is GRS1\n");
-        recordsyntax = VAL_GRS1;
-        return 1;
-    }
-    else if (!strcmp(arg, "soif"))
-||||||| 1.40
-    else if (!strcmp(arg, "grs1"))
-=======
     else if (!strcmp(arg, "ukmarc"))
     {
         printf("Preferred format is UKMARC\n");
@@ -1018,7 +1010,12 @@ int cmd_format(char *arg)
         return 1;
     }
     else if (!strcmp(arg, "grs1"))
->>>>>>> /tmp/T4a00171
+    {
+        printf("Preferred format is GRS1\n");
+        recordsyntax = VAL_GRS1;
+        return 1;
+    }
+    else if (!strcmp(arg, "soif"))
     {
         printf("Preferred format is SOIF\n");
         recordsyntax = VAL_SOIF;
