@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.5 2003-12-18 17:00:55 mike Exp $
+/* $Id: cqltransform.c,v 1.6 2003-12-19 12:16:19 mike Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -177,6 +177,27 @@ int cql_pr_attr(cql_transform_t ct, const char *category,
     return 0;
 }
 
+
+/* Returns location of first wildcard character in the `length'
+ * characters starting at `term', or a null pointer of there are
+ * none -- like memchr().
+ */
+static char *wcchar(const char *term, int length)
+{
+    char *best = 0;
+    char *current;
+    char *whichp;
+
+    for (whichp = "*?"; *whichp != '\0'; whichp++) {
+	current = memchr(term, *whichp, length);
+	if (current != 0 && (best == 0 || current < best))
+	    best = current;
+    }
+
+    return best;
+}
+
+
 void emit_term(cql_transform_t ct,
                const char *term, int length,
                void (*pr)(const char *buf, void *client_data),
@@ -197,6 +218,7 @@ void emit_term(cql_transform_t ct,
             cql_pr_attr(ct, "position.", "first", 0,
                         pr, client_data, 32);
             term++;
+	    length--;
         }
         else if (term[length-1] == '^')
         {
@@ -210,6 +232,73 @@ void emit_term(cql_transform_t ct,
                         pr, client_data, 32);
         }
     }
+
+    if (length > 0)
+    {
+	/* Check for well-known globbing patterns that represent
+	 * simple truncation attributes as expected by, for example,
+	 * Bath-compliant server.  If we find such a pattern but
+	 * there's no mapping for it, that's fine: we just use a
+	 * general pattern-matching attribute.
+	 */
+        if (length > 1 && term[0] == '*' && term[length-1] == '*' &&
+	    wcchar(term+1, length-2) == 0 &&
+            cql_pr_attr(ct, "truncation.", "both", 0,
+			pr, client_data, 0)) {
+	    term++;
+	    length -= 2;
+        }
+        else if (term[0] == '*' &&
+		 wcchar(term+1, length-1) == 0 &&
+		 cql_pr_attr(ct, "truncation.", "left", 0,
+			     pr, client_data, 0)) {
+	    term++;
+	    length--;
+        }
+        else if (term[length-1] == '*' &&
+		 wcchar(term, length-1) == 0 &&
+		 cql_pr_attr(ct, "truncation.", "right", 0,
+			     pr, client_data, 0)) {
+	    length--;
+        }
+        else if (wcchar(term, length))
+        {
+	    /* We have one or more wildcard characters, but not in a
+	     * way that can be dealt with using only the standard
+	     * left-, right- and both-truncation attributes.  We need
+	     * to translate the pattern into a Z39.58-type pattern,
+	     * which has been supported in BIB-1 since 1996.  If
+	     * there's no configuration element for "truncation.z3958"
+	     * we indicate this as error 28 "Masking character not
+	     * supported".
+	     */
+	    int i;
+	    char *mem;
+            cql_pr_attr(ct, "truncation.", "z3958", 0,
+                        pr, client_data, 28);
+	    mem = malloc(length+1);
+            for (i = 0; i < length; i++) {
+		if (term[i] == '*')      mem[i] = '?';
+		else if (term[i] == '?') mem[i] = '#';
+		else                     mem[i] = term[i];
+	    }
+	    mem[length] = '\0';
+	    term = mem;
+        }
+        else {
+	    /* No masking characters.  If there's no "truncation.none"
+	     * configuration element, that's an error which we
+	     * indicate (rather tangentially) as 30 "Too many masking
+	     * characters in term".  28 would be equally meaningful
+	     * (or meaningless) but using a different value allows us
+	     * to differentiate between this case and the previous
+	     * one.
+	     */
+            cql_pr_attr(ct, "truncation.", "none", 0,
+                        pr, client_data, 30);
+        }
+    }
+
     (*pr)("\"", client_data);
     for (i = 0; i<length; i++)
     {
