@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.22  1995-10-11 14:49:12  quinn
+ * Revision 1.23  1995-10-18 16:12:30  quinn
+ * Better diagnostics.
+ *
+ * Revision 1.22  1995/10/11  14:49:12  quinn
  * Smallish.
  *
  * Revision 1.21  1995/09/29  17:01:47  quinn
@@ -1002,6 +1005,7 @@ static int client(void)
                 if (!z_APDU(in, &apdu, 0))
                 {
                     odr_perror(in, "Decoding incoming APDU");
+		    fprintf(stderr, "[Near %d]\n", odr_offset(in));
                     fprintf(stderr, "Packet dump:\n---------\n");
                     odr_dumpBER(stderr, netbuffer, res);
                     fprintf(stderr, "---------\n");

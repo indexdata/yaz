@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.14  1995-09-29 17:12:04  quinn
+ * Revision 1.15  1995-10-18 16:12:36  quinn
+ * Better diagnostics.
+ *
+ * Revision 1.14  1995/09/29  17:12:04  quinn
  * Smallish
  *
  * Revision 1.13  1995/09/29  17:01:49  quinn
@@ -347,6 +350,7 @@ void odr_release_mem(ODR_MEM p);
 ) \
 
 #define odr_tell(o) ((o)->ecb.pos)
+#define odr_offset(o) ((o)->bp - (o)->buf)
 #define odr_ok(o) (!(o)->error)
 
 #define ODR_MAXNAME 256
