@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqfile.c,v $
- * Revision 1.10  2001-05-16 07:30:16  adam
+ * Revision 1.11  2001-09-14 10:49:51  adam
+ * Bug fix: file wasn't closed in ccl_qual_fname.
+ *
+ * Revision 1.10  2001/05/16 07:30:16  adam
  * Minor cosmetic changes that makes checker gcc happier.
  *
  * Revision 1.9  2001/03/07 13:24:40  adam
@@ -249,5 +252,6 @@ int ccl_qual_fname (CCL_bibset bibset, const char *fname)
     if (!inf)
         return -1;
     ccl_qual_file (bibset, inf);
+    fclose (inf);
     return 0;
 }
