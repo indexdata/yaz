@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.8 2001/10/25
+
 * Old Z39.50 codecs no longer supported. 
 
 Added ZOOM C binding. See http://zoom.z3950.org/
