@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.152 2002-05-18 09:52:37 oleg Exp $
+ * $Id: client.c,v 1.153 2002-05-19 15:39:54 oleg Exp $
  */
 
 #include <stdio.h>
@@ -218,9 +218,9 @@ static void send_initRequest(const char* type_and_host)
     		
     		p0->which = Z_OtherInfo_externallyDefinedInfo;
     		p0->information.externallyDefinedInfo =
-    			yaz_set_charset_and_lang(out, CLASS_NEGOT, VAL_CHARNEG3,
+    			yaz_set_proposal_charneg(out,
     				(const char**)&yazCharset, (yazCharset)?1:0,
-    				(const char**)&yazLang, (yazLang)?1:0);
+    				(const char**)&yazLang, (yazLang)?1:0, 1);
     	}
     }
     
@@ -301,6 +301,24 @@ static int process_initResponse(Z_InitResponse *res)
     if (ODR_MASK_GET(res->options, Z_Options_queryType104))
         printf (" queryType104");
     printf ("\n");
+    
+    if (ODR_MASK_GET(res->options, Z_Options_negotiationModel)) {
+    
+    	Z_CharSetandLanguageNegotiation *p =
+    		yaz_get_charneg_record(res->otherInfo);
+    	
+    	if (p) {
+    	
+    		char *charset, *lang;
+    		int selected;
+    		
+    		yaz_get_response_charneg(session_mem, p, &charset, &lang, &selected);
+    		
+    		printf("Accepted character set : `%s'\n", charset);
+    		printf("Accepted code language : `%s'\n", lang);
+    		printf("Accepted records in ...: %d\n", selected );
+    	}
+    }
     fflush (stdout);
     return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.29 2002-05-18 09:52:37 oleg Exp $
+ * $Id: zoom-c.c,v 1.30 2002-05-19 15:39:54 oleg Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -735,10 +735,9 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     		
     		oi_unit->which = Z_OtherInfo_externallyDefinedInfo;
     		oi_unit->information.externallyDefinedInfo =
-    			yaz_set_charset_and_lang(c->odr_out,
-    				CLASS_NEGOT, VAL_CHARNEG3,
+    			yaz_set_proposal_charneg(c->odr_out,
     				(const char **)&c->charset, (c->charset) ? 1:0,
-    				(const char **)&c->lang, (c->lang) ? 1:0);
+    				(const char **)&c->lang, (c->lang) ? 1:0, 1);
     	}
     }
     assert (apdu);
@@ -1624,6 +1623,24 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
             }
 	    ZOOM_connection_exec_task (c);
 	}
+	if (ODR_MASK_GET(initrs->options, Z_Options_negotiationModel))
+	{
+		NMEM tmpmem = nmem_create();
+		Z_CharSetandLanguageNegotiation *p =
+			yaz_get_charneg_record(initrs->otherInfo);
+		
+		if (p)
+		{
+			char *charset, *lang;
+			int selected;
+			
+			yaz_get_response_charneg(tmpmem, p, &charset, &lang, &selected);
+			yaz_log(LOG_DEBUG, "Target accepted: charset - %s, language - %s, select - %d",
+				charset, lang, selected);
+			
+			nmem_destroy(tmpmem);
+		}
+	}	
 	break;
     case Z_APDU_searchResponse:
 	handle_search_response (c, apdu->u.searchResponse);
