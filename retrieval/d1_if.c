@@ -1,12 +1,14 @@
 /*
  * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * d1_if.c : A simple interface for extracting strings from data1_node tree structures
  *
  * $Log: d1_if.c,v $
- * Revision 1.3  2000-01-06 11:27:02  adam
+ * Revision 1.4  2000-01-06 14:30:56  adam
+ * Minor change - to prevent warnings.
+ *
+ * Revision 1.3  2000/01/06 11:27:02  adam
  * Minor fix so that this source compiles using Visual C++.
  *
  * Revision 1.2  2000/01/04 17:46:17  ian
@@ -16,7 +18,6 @@
  * Changed retrieval module to allow data1 trees with no associated absyn.
  * Also added a simple interface for extracting values from data1 trees using
  * a string based tagpath.
- *
  *
  */
 
@@ -57,7 +58,7 @@ char data1_ScanNextToken(char* pBuffer,
         else
         {
             if ( strchr(pWhitespaceChars, **pPosInBuffer) != NULL )
-                *pPosInBuffer++;
+                (*pPosInBuffer)++;
             else
                 *pBuff++ = *((*pPosInBuffer)++);
         }
@@ -107,7 +108,9 @@ char *data1_getNodeValue(data1_node* node, char* pTagPath)
 }
 
 
+/* Max length of a tag */
 #define MAX_TAG_SIZE 50
+
 /* 
  * data1_LookupNode : Try and find a node as specified by a tagpath
  */
@@ -118,9 +121,6 @@ data1_node *data1_LookupNode(data1_node* node, char* pTagPath)
 
     /* Current Child node as we search for nodes matching the pattern in the tagpath */
     data1_node* current_child = node->child;
-
-    /* Max length of a tag */
-    int iMaxTagSize=50;
 
     /* Current position in string */
     char* pCurrCharInPath = pTagPath;
