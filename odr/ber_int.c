@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.3  1995-02-09 15:51:46  quinn
+ * Revision 1.4  1995-03-08 12:12:07  quinn
+ * Added better error checking.
+ *
+ * Revision 1.3  1995/02/09  15:51:46  quinn
  * Works better now.
  *
  * Revision 1.2  1995/02/07  17:52:58  quinn
@@ -30,18 +33,24 @@ int ber_integer(ODR o, int *val)
     {
     	case ODR_DECODE:
 	    if ((res = ber_decinteger(o->bp, val)) <= 0)
+	    {
+	    	o->error = OPROTO;
 	    	return 0;
+	    }
 	    o->bp += res;
 	    o->left -= res;
 	    return 1;
     	case ODR_ENCODE:
 	    if ((res = ber_encinteger(o->bp, *val, o->left)) <= 0)
+	    {
+	    	o->error = OSPACE;
 	    	return 0;
+	    }
 	    o->bp += res;
 	    o->left -= res;
 	    return 1;
     	case ODR_PRINT: return 1;
-    	default:  return 0;
+    	default: o->error = OOTHER;  return 0;
     }
 }
 

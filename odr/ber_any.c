@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.5  1995-02-14 20:39:54  quinn
+ * Revision 1.6  1995-03-08 12:12:02  quinn
+ * Added better error checking.
+ *
+ * Revision 1.5  1995/02/14  20:39:54  quinn
  * Fixed bugs in completeBER and (serious one in) ber_oid.
  *
  * Revision 1.4  1995/02/14  11:54:33  quinn
@@ -30,8 +33,11 @@ int ber_any(ODR o, Odr_any **p)
     switch (o->direction)
     {
     	case ODR_DECODE:
-	    if ((res = completeBER(o->bp, 1000)) <= 0)        /* FIX THIS */
+	    if ((res = completeBER(o->bp, o->left)) <= 0)        /* FIX THIS */
+	    {
+	    	o->error = OPROTO;
 	    	return 0;
+	    }
 	    (*p)->buf = nalloc(o, res);
 	    memcpy((*p)->buf, o->bp, res);
 	    (*p)->len = (*p)->size = res;
@@ -40,12 +46,15 @@ int ber_any(ODR o, Odr_any **p)
 	    return 1;
     	case ODR_ENCODE:
 	    if ((*p)->len > o->left)
+	    {
+	    	o->error = OSPACE;
 	    	return 0;
+	    }
 	    memcpy(o->bp , (*p)->buf, (*p)->len);
 	    o->bp += (*p)->len;
 	    o->left -= (*p)->len;
 	    return 1;
-    	default: return 0;
+    	default: o->error = OOTHER; return 0;
     }
 }
 

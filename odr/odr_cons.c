@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.5  1995-02-10 18:57:25  quinn
+ * Revision 1.6  1995-03-08 12:12:23  quinn
+ * Added better error checking.
+ *
+ * Revision 1.5  1995/02/10  18:57:25  quinn
  * More in the way of error-checking.
  *
  * Revision 1.4  1995/02/10  15:55:29  quinn
@@ -28,12 +31,14 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
     int res;
     int cons = 1;
 
+    if (o->error)
+    	return 0;
     if (o->t_class < 0)
     {
 	o->t_class = class;
 	o->t_tag = tag;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, 1)) < 0)
     	return 0;
     if (!res || !cons)
     	return 0;
@@ -61,6 +66,8 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
 
 int odr_constructed_more(ODR o)
 {
+    if (o->error)
+    	return 0;
     if (o->stackp < 0)
     	return 0;
     if (o->stack[o->stackp].len >= 0)
@@ -73,8 +80,13 @@ int odr_constructed_end(ODR o)
 {
     int res;
 
-    if (o->stackp < 0)
+    if (o->error)
     	return 0;
+    if (o->stackp < 0)
+    {
+    	o->error = OOTHER;
+    	return 0;
+    }
     switch (o->direction)
     {
     	case ODR_DECODE:
@@ -86,18 +98,27 @@ int odr_constructed_end(ODR o)
 		    return 1;
 		}
 		else
+		{
+		    o->error = OOTHER;
 		    return 0;
+		}
 	    }
 	    else if (o->bp - o->stack[o->stackp].base !=
 		o->stack[o->stackp].len)
+	    {
+	    	o->error = OOTHER;
 	    	return 0;
+	    }
 	    o->stackp--;
 	    return 1;
     	case ODR_ENCODE:
 	    if ((res = ber_enclen(o->stack[o->stackp].lenb,
 		o->bp - o->stack[o->stackp].base,
 		o->stack[o->stackp].lenlen, 1)) < 0)
-		    return 0;
+	    {
+	    	o->error = OSPACE;
+		return 0;
+	    }
 	    if (res == 0)   /* indefinite encoding */
 	    {
 	    	*(o->bp++) = *(o->bp++) = 0;
@@ -106,6 +127,8 @@ int odr_constructed_end(ODR o)
 	    o->stackp--;
 	    return 1;
     	case ODR_PRINT: return 1;
-    	default: return 0;
+    	default:
+	    o->error = OOTHER;
+	    return 0;
     }
 }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_any.c,v $
- * Revision 1.1  1995-02-09 15:51:47  quinn
+ * Revision 1.2  1995-03-08 12:12:18  quinn
+ * Added better error checking.
+ *
+ * Revision 1.1  1995/02/09  15:51:47  quinn
  * Works better now.
  *
  */
@@ -19,8 +22,8 @@
  */
 int odr_any(ODR o, Odr_any **p, int opt)
 {
-    if (o->direction == ODR_ENCODE && !*p)
-    	return opt;
+    if (o->error)
+    	return 0;
     if (o->direction == ODR_PRINT)
     {
     	fprintf(o->print, "%sANY (len=%d)\n", odr_indent(o), (*p)->len);
@@ -31,5 +34,7 @@ int odr_any(ODR o, Odr_any **p, int opt)
     if (ber_any(o, p))
     	return 1;
     *p = 0;
+    if (!opt)
+    	o->error = OREQUIRED;
     return opt;
 }    

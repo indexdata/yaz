@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.2  1995-02-09 15:51:48  quinn
+ * Revision 1.3  1995-03-08 12:12:22  quinn
+ * Added better error checking.
+ *
+ * Revision 1.2  1995/02/09  15:51:48  quinn
  * Works better now.
  *
  * Revision 1.1  1995/02/07  17:52:59  quinn
@@ -18,6 +21,8 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, int *which)
 {
     int i, cl = -1, tg, cn;
 
+    if (o->error)
+    	return 0;
     if (o->direction != ODR_DECODE && !*(char**)p)
     	return 0;
     for (i = 0; arm[i].fun; i++)

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oid.c,v $
- * Revision 1.3  1995-03-01 08:40:56  quinn
+ * Revision 1.4  1995-03-08 12:12:11  quinn
+ * Added better error checking.
+ *
+ * Revision 1.3  1995/03/01  08:40:56  quinn
  * Smallish changes.
  *
  * Revision 1.2  1995/02/14  20:39:55  quinn
@@ -28,9 +31,15 @@ int ber_oidc(ODR o, Odr_oid *p)
     {
 	case ODR_DECODE:
 	    if ((res = ber_declen(o->bp, &len)) < 1)
+	    {
+	    	o->error = OPROTO;
 	    	return 0;
+	    }
 	    if (len < 0)
+	    {
+	    	o->error = OPROTO;
 	    	return 0;
+	    }
 	    o->bp += res;
 	    o->left -= res;
 	    if (len == 0)
@@ -52,7 +61,10 @@ int ber_oidc(ODR o, Odr_oid *p)
 	    	do
 	    	{
 		    if (!len)
+		    {
+		    	o->error = OPROTO;
 		    	return 0;
+		    }
 		    p[pos] <<= 7;
 		    p[pos] |= *o->bp & 0X7F;
 		    len--;
@@ -70,7 +82,10 @@ int ber_oidc(ODR o, Odr_oid *p)
             o->bp++;
             o->left--;
             if (p[0] < 0 && p[1] <= 0)
+	    {
+	    	o->error = ODATA;
             	return 0;
+	    }
 	    p[1] = p[0] * 40 + p[1];
 	    for (pos = 1; p[pos] >= 0; pos++)
 	    {
@@ -83,14 +98,20 @@ int ber_oidc(ODR o, Odr_oid *p)
 		}
 		while (id);
 		if (n > o->left)
+		{
+		    o->error = OSPACE;
 		    return 0;
+		}
 		o->left -= n;
 		while (n--)
 		    *(o->bp++) = octs[n] | ((n > 0) << 7);
 	    }
 	    if (ber_enclen(lenp, (o->bp - lenp) - 1, 1, 1) != 1)
+	    {
+	    	o->error = OOTHER;
 	    	return 0;
+	    }
 	    return 1;
-    	default: return 0;
+    	default: o->error = OOTHER; return 0;
     }
 }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.5  1995-03-07 13:28:57  quinn
+ * Revision 1.6  1995-03-08 12:12:15  quinn
+ * Added better error checking.
+ *
+ * Revision 1.5  1995/03/07  13:28:57  quinn
  * *** empty log message ***
  *
  * Revision 1.4  1995/03/07  13:16:13  quinn
@@ -30,12 +33,14 @@
 char *odr_errlist[] =
 {
     "No (unknown) error",
-    "Memoy allocation failed",
+    "Memory allocation failed",
     "System error",
     "No space in buffer",
     "Required data element missing",
     "Unexpected tag",
-    "Other error"
+    "Other error",
+    "Protocol error",
+    "Malformed data"
 };
 
 void odr_perror(ODR o, char *message)

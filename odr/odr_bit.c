@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bit.c,v $
- * Revision 1.5  1995-02-10 18:57:25  quinn
+ * Revision 1.6  1995-03-08 12:12:19  quinn
+ * Added better error checking.
+ *
+ * Revision 1.5  1995/02/10  18:57:25  quinn
  * More in the way of error-checking.
  *
  * Revision 1.4  1995/02/09  15:51:47  quinn
@@ -33,18 +36,21 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt)
 {
     int res, cons = 0;
 
+    if (o->error)
+    	return 0;
     if (o->t_class < 0)
     {
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_BITSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt)) < 0)
     	return 0;
     if (!res)
     	return opt;
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "%sBITSTRING(len=%d)\n", odr_indent(o), (*p)->top + 1);
+    	fprintf(o->print, "%sBITSTRING(len=%d)\n", odr_indent(o),
+	    (*p)->top + 1);
     	return 1;
     }
     if (o->direction == ODR_DECODE)

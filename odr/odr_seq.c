@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.6  1995-02-10 15:55:29  quinn
+ * Revision 1.7  1995-03-08 12:12:30  quinn
+ * Added better error checking.
+ *
+ * Revision 1.6  1995/02/10  15:55:29  quinn
  * Bug fixes, mostly.
  *
  * Revision 1.5  1995/02/09  15:51:49  quinn
@@ -31,12 +34,13 @@ int odr_sequence_begin(ODR o, void *p, int size)
 {
     char **pp = (char**) p;
 
+    if (o->error)
+    	return 0;
     if (o->t_class < 0)
     {
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_SEQUENCE;
     }
-
     if (o->direction == ODR_DECODE)
     	*pp = 0;
     if (odr_constructed_begin(o, p, o->t_class, o->t_tag))
@@ -112,7 +116,9 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 	    	if (!(*type)(o, *pp + i, 0))
 		    return 0;
 	    break;
-    	default: return 0;
+    	default:
+	    o->error = OOTHER;
+	    return 0;
     }
     return odr_sequence_end(o);
 }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.6  1995-02-14 11:54:33  quinn
+ * Revision 1.7  1995-03-08 12:12:13  quinn
+ * Added better error checking.
+ *
+ * Revision 1.6  1995/02/14  11:54:33  quinn
  * Adjustments.
  *
  * Revision 1.5  1995/02/10  18:57:24  quinn
@@ -37,7 +40,7 @@
  *
  * Should perhaps be odr_tag?
 */
-int ber_tag(ODR o, void *p, int class, int tag, int *constructed)
+int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 {
     static int lclass = -1, ltag, br, lcons; /* save t&c rather than
 						decoding twice */
@@ -56,10 +59,17 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed)
     {
     	case ODR_ENCODE:
 	    if (!*pp)
+	    {
+	    	if (!opt)
+		    o->error = OREQUIRED;
 	    	return 0;
+	    }
 	    if ((rd = ber_enctag(o->bp, class, tag, *constructed, o->left))
 		<=0)
+	    {
+	    	o->error = OSPACE;
 		return -1;
+	    }
 	    o->bp += rd;
 	    o->left -= rd;
 #ifdef ODR_DEBUG
@@ -69,11 +79,18 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed)
 	    return 1;
     	case ODR_DECODE:
 	    if (o->stackp > -1 && !odr_constructed_more(o))
+	    {
+	    	if (!opt)
+		    o->error = OREQUIRED;
 	    	return 0;
+	    }
 	    if (lclass < 0)
 	    {
 	    	if ((br = ber_dectag(o->bp, &lclass, &ltag, &lcons)) <= 0)
+		{
+		    o->error = OPROTO;
 		    return 0;
+		}
 #ifdef ODR_DEBUG
 		fprintf(stderr, "\n[class=%d,tag=%d,cons=%d]", lclass, ltag,
 		    lcons);
@@ -88,9 +105,16 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed)
 	    	return 1;
 	    }
 	    else
+	    {
+	    	if (!opt)
+		    o->error = OREQUIRED;
 	    	return 0;
-    	case ODR_PRINT: return *pp != 0;
-    	default: return 0;
+	    }
+    	case ODR_PRINT:
+		if (!*pp && !opt)
+		    o->error = OREQUIRED;
+		return *pp != 0;
+    	default: o->error = OOTHER; return 0;
     }
 }
 

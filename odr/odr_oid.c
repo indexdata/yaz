@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.6  1995-03-01 08:40:56  quinn
+ * Revision 1.7  1995-03-08 12:12:29  quinn
+ * Added better error checking.
+ *
+ * Revision 1.6  1995/03/01  08:40:56  quinn
  * Smallish changes.
  *
  * Revision 1.5  1995/02/10  18:57:26  quinn
@@ -35,15 +38,22 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
 {
     int res, cons = 0;
 
+    if (o->error)
+    	return 0;
     if (o->t_class < 0)
     {
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OID;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt)) < 0)
     	return 0;
-    if (!res || cons)
+    if (!res)
     	return opt;
+    if (cons)
+    {
+    	o->error = OPROTO;
+	return 0;
+    }
     if (o->direction == ODR_PRINT)
     {
     	int i;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.6  1995-02-10 18:57:26  quinn
+ * Revision 1.7  1995-03-08 12:12:27  quinn
+ * Added better error checking.
+ *
+ * Revision 1.6  1995/02/10  18:57:26  quinn
  * More in the way of error-checking.
  *
  * Revision 1.5  1995/02/09  15:51:49  quinn
@@ -34,12 +37,14 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
 {
     int res, cons = 0;
 
+    if (o->error)
+    	return 0;
     if (o->t_class < 0)
     {
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OCTETSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt)) < 0)
     	return 0;
     if (!res)
     	return opt;
@@ -57,7 +62,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
     }
     if (ber_octetstring(o, *p, cons))
     	return 1;
-    *p = 0;
+    o->error = OOTHER;
     return 0;
 }
 
@@ -69,12 +74,14 @@ int odr_cstring(ODR o, char **p, int opt)
     int cons = 0, res;
     Odr_oct *t;
 
+    if (o->error)
+    	return 0;
     if (o->t_class < 0)
     {
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OCTETSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt)) < 0)
     	return 0;
     if (!res)
     	return opt;

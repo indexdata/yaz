@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bool.c,v $
- * Revision 1.2  1995-02-09 15:51:45  quinn
+ * Revision 1.3  1995-03-08 12:12:06  quinn
+ * Added better error checking.
+ *
+ * Revision 1.2  1995/02/09  15:51:45  quinn
  * Works better now.
  *
  * Revision 1.1  1995/02/02  16:21:51  quinn
@@ -24,8 +27,16 @@ int ber_boolean(ODR o, int *val)
     switch (o->direction)
     {
     	case ODR_ENCODE:
-	    if (ber_enclen(o->bp, 1, 1, 1) != 1)
+	    if (!o->left)
+	    {
+	    	o->error = OSPACE;
 		return 0;
+	    }
+	    if (ber_enclen(o->bp, 1, 1, 1) != 1)
+	    {
+	    	o->error = OOTHER;
+		return 0;
+	    }
 	    o->bp++;
 	    o->left--;
 	    *(o->bp++) = (unsigned char) *val;
@@ -36,9 +47,15 @@ int ber_boolean(ODR o, int *val)
 	    return 1;
 	case ODR_DECODE:
 	    if ((res = ber_declen(b, &len)) < 0)
+	    {
+	    	o->error = OPROTO;
 		return 0;
+	    }
 	    if (len != 1)
+	    {
+	    	o->error = OPROTO;
 		return 0;
+	    }
 	    o->bp+= res;
 	    o->left -= res;
 	    *val = *b;
@@ -50,6 +67,6 @@ int ber_boolean(ODR o, int *val)
 	    return 1;
 	case ODR_PRINT:
 	    return 1;
-	default: return 0;
+	default: o->error = OOTHER; return 0;
     }
 }

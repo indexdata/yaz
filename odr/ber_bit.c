@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bit.c,v $
- * Revision 1.2  1995-02-03 17:04:31  quinn
+ * Revision 1.3  1995-03-08 12:12:04  quinn
+ * Added better error checking.
+ *
+ * Revision 1.2  1995/02/03  17:04:31  quinn
  * *** empty log message ***
  *
  * Revision 1.1  1995/02/02  20:38:49  quinn
@@ -24,7 +27,10 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
     {
     	case ODR_DECODE:
 	    if ((res = ber_declen(o->bp, &len)) < 0)
+	    {
+	    	o->error = OPROTO;
 	    	return 0;
+	    }
 	    o->bp += res;
 	    o->left -= res;
 	    if (cons)       /* fetch component strings */
@@ -37,11 +43,17 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 	    }
 	    /* primitive bitstring */
 	    if (len < 0)
+	    {
+	    	o->error = OOTHER;
 	    	return 0;
+	    }
 	    if (len == 0)
 	    	return 1;
 	    if (len - 1 > ODR_BITMASK_SIZE)
+	    {
+	    	o->error = OOTHER;
 	    	return 0;
+	    }
 	    o->bp++;      /* silently ignore the unused-bits field */
 	    o->left--;
 	    len--;
@@ -52,11 +64,17 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 	    return 1;
     	case ODR_ENCODE:
 	    if ((res = ber_enclen(o->bp, p->top + 2, 5, 0)) < 0)
+	    {
+	    	o->error = OOTHER;
 	    	return 0;
+	    }
 	    o->bp += res;
 	    o->left -= res;
 	    if (p->top + 2 > o->left)
+	    {
+	    	o->error = OSPACE;
 	    	return 0;
+	    }
 	    *(o->bp++) = 0;    /* no unused bits here */
 	    o->left--;
 	    if (p->top < 0)
@@ -66,6 +84,6 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 	    o->left -= p->top +1;
 	    return 1;
     	case ODR_PRINT: return 1;
-    	default: return 0;
+    	default: o->error = OOTHER; return 0;
     }
 }

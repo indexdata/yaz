@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.4  1995-02-10 15:55:28  quinn
+ * Revision 1.5  1995-03-08 12:12:10  quinn
+ * Added better error checking.
+ *
+ * Revision 1.4  1995/02/10  15:55:28  quinn
  * Bug fixes, mostly.
  *
  * Revision 1.3  1995/02/03  17:04:34  quinn
@@ -29,7 +32,10 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
     {
     	case ODR_DECODE:
 	    if ((res = ber_declen(o->bp, &len)) < 0)
+	    {
+	    	o->error = OPROTO;
 	    	return 0;
+	    }
 	    o->bp += res;
 	    o->left -= res;
 	    if (cons)       /* fetch component strings */
@@ -42,7 +48,10 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    }
 	    /* primitive octetstring */
 	    if (len < 0)
+	    {
+	    	o->error = OOTHER;
 	    	return 0;
+	    }
 	    if (len + 1 > p->size - p->len)
 	    {
 	    	c = nalloc(o, p->size += len + 1);
@@ -58,18 +67,24 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    return 1;
     	case ODR_ENCODE:
 	    if ((res = ber_enclen(o->bp, p->len, 5, 0)) < 0)
+	    {
+	    	o->error = OOTHER;
 	    	return 0;
+	    }
 	    o->bp += res;
 	    o->left -= res;
 	    if (p->len == 0)
 	    	return 1;
 	    if (p->len > o->left)
+	    {
+	    	o->error = OSPACE;
 	    	return 0;
+	    }
 	    memcpy(o->bp, p->buf, p->len);
 	    o->bp += p->len;
 	    o->left -= p->len;
 	    return 1;
     	case ODR_PRINT: return 1;
-    	default: return 0;
+    	default: o->error = OOTHER; return 0;
     }
 }
