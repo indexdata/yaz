@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1997, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.33 1997-09-01 08:47:18 adam Exp $
+# $Id: Makefile,v 1.34 1997-09-05 09:50:55 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
@@ -122,4 +122,4 @@ install.misc:
 
 wc:
 	wc `find . -name '*.[ch]'`
-	
+

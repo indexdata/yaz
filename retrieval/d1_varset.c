@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_varset.c,v $
- * Revision 1.4  1997-05-14 06:54:04  adam
+ * Revision 1.5  1997-09-05 09:50:58  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.4  1997/05/14 06:54:04  adam
  * C++ support.
  *
  * Revision 1.3  1995/11/01 16:34:58  quinn
@@ -60,7 +63,7 @@ data1_varset *data1_read_varset(char *file)
     res->reference = VAL_NONE;
     res->classes = 0;
 
-    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

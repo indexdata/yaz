@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.4  1995-11-13 09:27:38  quinn
+ * Revision 1.5  1997-09-05 09:50:57  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.4  1995/11/13 09:27:38  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.3  1995/11/01  16:34:58  quinn
@@ -110,7 +113,7 @@ data1_tagset *data1_read_tagset(char *file)
     data1_tag **tagp;
     FILE *f;
 
-    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

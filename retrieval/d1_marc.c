@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.6  1997-09-04 13:51:58  adam
+ * Revision 1.7  1997-09-05 09:50:57  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.6  1997/09/04 13:51:58  adam
  * Added data1 to marc conversion with indicators.
  *
  * Revision 1.5  1997/09/04 13:48:04  adam
@@ -46,7 +49,7 @@ data1_marctab *data1_read_marctab(char *file)
     char line[512], *argv[50];
     int argc;
     
-    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1996, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.24  1997-09-01 09:30:39  adam
+ * Revision 1.25  1997-09-05 09:50:55  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.24  1997/09/01 09:30:39  adam
  * Added include of yaz-util.h.
  *
  * Revision 1.23  1997/09/01 08:58:04  adam
@@ -157,8 +160,6 @@ extern "C" {
 #endif
 
 #define data1_matchstr(s1, s2) yaz_matchstr(s1, s2)
-
-extern char *data1_tabpath; /* global path for tables */
 
 #define DATA1_MAX_SYMBOL 31
 
@@ -324,8 +325,6 @@ typedef struct data1_node
 #define DATA1N_data 3
         /* variant specification (a triple, actually) */
 #define DATA1N_variant 4
-        /* ISO2709 indicator */
-#define DATA1N_indicator 5   
     int which;
 
     union
@@ -390,38 +389,48 @@ typedef struct data1_node
 } data1_node;
 
 YAZ_EXPORT data1_node *get_parent_tag(data1_node *n);
-YAZ_EXPORT data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
-    data1_absyn *absyn, NMEM m);
+YAZ_EXPORT data1_node *data1_read_node(char **buf, data1_node *parent,
+				       int *line, data1_absyn *absyn, NMEM m);
 YAZ_EXPORT data1_node *data1_read_record(int (*rf)(void *, char *, size_t),
-    void *fh, NMEM m);
+					 void *fh, NMEM m);
 YAZ_EXPORT data1_absyn *data1_read_absyn(char *file);
 YAZ_EXPORT data1_tag *data1_gettagbynum(data1_tagset *s, int type, int value);
 YAZ_EXPORT data1_tagset *data1_read_tagset(char *file);
 YAZ_EXPORT data1_element *data1_getelementbytagname(data1_absyn *abs,
-    data1_element *parent, char *tagname);
-YAZ_EXPORT Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o, int *len);
+						    data1_element *parent,
+						    char *tagname);
+YAZ_EXPORT Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o,
+					   int *len);
 YAZ_EXPORT data1_tag *data1_gettagbyname(data1_tagset *s, char *name);
 YAZ_EXPORT void data1_free_tree(data1_node *t);
 YAZ_EXPORT char *data1_nodetobuf(data1_node *n, int select, int *len);
-YAZ_EXPORT data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
-    char *tagname, NMEM m);
+YAZ_EXPORT data1_node *data1_insert_taggeddata(data1_node *root,
+					       data1_node *at,
+					       char *tagname, NMEM m);
 YAZ_EXPORT data1_datatype data1_maptype(char *t);
 YAZ_EXPORT data1_varset *data1_read_varset(char *file);
-YAZ_EXPORT data1_vartype *data1_getvartypebyct(data1_varset *set, char *zclass, char *type);
+YAZ_EXPORT data1_vartype *data1_getvartypebyct(data1_varset *set,
+					       char *zclass, char *type);
 YAZ_EXPORT Z_Espec1 *data1_read_espec1(char *file, ODR o);
 YAZ_EXPORT int data1_doespec1(data1_node *n, Z_Espec1 *e);
 YAZ_EXPORT data1_esetname *data1_getesetbyname(data1_absyn *a, char *name);
-YAZ_EXPORT data1_element *data1_getelementbyname(data1_absyn *absyn, char *name);
+YAZ_EXPORT data1_element *data1_getelementbyname(data1_absyn *absyn,
+						 char *name);
 YAZ_EXPORT data1_node *data1_mk_node(NMEM m);
 YAZ_EXPORT data1_absyn *data1_get_absyn(char *name);
 YAZ_EXPORT data1_maptab *data1_read_maptab(char *file);
-YAZ_EXPORT data1_node *data1_map_record(data1_node *n, data1_maptab *map, NMEM m);
+YAZ_EXPORT data1_node *data1_map_record(data1_node *n, data1_maptab *map,
+					NMEM m);
 YAZ_EXPORT data1_marctab *data1_read_marctab(char *file);
-YAZ_EXPORT char *data1_nodetomarc(data1_marctab *p, data1_node *n, int selected, int *len);
+YAZ_EXPORT char *data1_nodetomarc(data1_marctab *p, data1_node *n,
+				  int selected, int *len);
 YAZ_EXPORT char *data1_nodetoidsgml(data1_node *n, int select, int *len);
-YAZ_EXPORT Z_ExplainRecord *data1_nodetoexplain(data1_node *n, int select, ODR o);
-YAZ_EXPORT Z_BriefBib *data1_nodetosummary(data1_node *n, int select, ODR o);
-YAZ_EXPORT char *data1_nodetosoif(data1_node *n, int select, int *len);
+YAZ_EXPORT Z_ExplainRecord *data1_nodetoexplain(data1_node *n, int select,
+						ODR o);
+YAZ_EXPORT Z_BriefBib *data1_nodetosummary(data1_node *n, int select,
+					   ODR o);
+YAZ_EXPORT char *data1_nodetosoif(data1_node *n, int select,
+				  int *len);
 YAZ_EXPORT void data1_set_tabpath(const char *path);
 YAZ_EXPORT const char *data1_get_tabpath(void);
 

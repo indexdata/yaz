@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.7  1997-05-14 06:54:02  adam
+ * Revision 1.8  1997-09-05 09:50:56  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.7  1997/05/14 06:54:02  adam
  * C++ support.
  *
  * Revision 1.6  1996/07/06 19:58:34  quinn
@@ -217,7 +220,7 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o)
     char *argv[50], line[512];
     Z_Espec1 *res = odr_malloc(o, sizeof(*res));
 
-    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
@@ -243,7 +246,7 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o)
 		continue;
 	    }
 
-	    res->elementSetNames = odr_malloc(o, sizeof(char*)*nnames);
+	    res->elementSetNames = odr_malloc(o, sizeof(char**)*nnames);
 	    for (i = 0; i < nnames; i++)
 	    {
 		res->elementSetNames[i] = odr_malloc(o, strlen(argv[i+1])+1);
@@ -286,21 +289,29 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o)
 	    char *path = argv[1];
 	    char *ep;
 	    int num, i = 0;
-
+	    
 	    if (!res->elements)
-		res->elements = odr_malloc(o, size_esn = 24*sizeof(*er));
-	    else if (res->num_elements >= size_esn)
+		res->elements = odr_malloc(o, size_esn = 24*sizeof(er));
+	    else if (res->num_elements >= size_esn/sizeof(er))
 	    {
 		size_esn *= 2;
-		res->elements = o ? odr_malloc(o, size_esn) :
-		    xrealloc(res->elements, size_esn);
+		if (o)
+		{
+		    Z_ElementRequest **oe = res->elements;
+		    
+		    res->elements = odr_malloc (o, size_esn*sizeof(er));
+		    memcpy (res->elements, oe, size_esn/2);
+		}
+		else
+		    res->elements =
+			xrealloc(res->elements, size_esn*sizeof(er));
 	    }
 	    if (argc < 2)
 	    {
 		logf(LOG_WARN, "%s: Empty simpleelement directive", file);
 		continue;
 	    }
-
+	    
 	    res->elements[res->num_elements++] = er =
 		odr_malloc(o, sizeof(*er));
 	    er->which = Z_ERequest_simpleElement;
@@ -311,19 +322,20 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o)
 	    /*
 	     * Parse the element selector.
 	     */
-	    for (num = 1, ep = path; (ep = strchr(ep, '/')); num++, ep++);
+	    for (num = 1, ep = path; (ep = strchr(ep, '/')); num++, ep++)
+		;
 	    tp->tags = odr_malloc(o, sizeof(Z_ETagUnit*)*num);
-
-	    for ((ep = strchr(path, '/')) ; path ; (void)((path = ep) &&
-		(ep = strchr(path, '/'))))
+	    
+	    for ((ep = strchr(path, '/')) ; path ;
+		 (void)((path = ep) && (ep = strchr(path, '/'))))
 	    {
 		if (ep)
 		    ep++;
-
+		
 		assert(i<num);
 		tp->tags[tp->num_tags++] = read_tagunit(path, o);
 	    }
-
+	    
 	    if (argc > 2 && !strcmp(argv[2], "variant"))
 		se->variantRequest= read_variant(argc-3, argv+3, o);
 	}

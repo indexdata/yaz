@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.10  1997-05-14 06:54:01  adam
+ * Revision 1.11  1997-09-05 09:50:55  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.10  1997/05/14 06:54:01  adam
  * C++ support.
  *
  * Revision 1.9  1997/02/19 14:46:15  adam
@@ -136,7 +139,7 @@ data1_absyn *data1_read_absyn(char *file)
     data1_termlist *all = 0;
     int level = 0;
 
-    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

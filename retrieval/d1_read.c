@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.14  1997-05-14 06:54:04  adam
+ * Revision 1.15  1997-09-05 09:50:57  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.14  1997/05/14 06:54:04  adam
  * C++ support.
  *
  * Revision 1.13  1996/10/29 13:35:38  adam
@@ -101,7 +104,7 @@
 #include <log.h>
 #include <data1.h>
 
-char *data1_tabpath = 0; /* global path for tables */
+static char *data1_tabpath = 0; /* global path for tables */
 
 void data1_set_tabpath(const char *p)
 {
@@ -122,9 +125,6 @@ const char *data1_get_tabpath (void)
     return data1_tabpath;
 }
 
-#if 0
-static data1_node *freelist = 0;
-#endif
 
 /*
  * get the tag which is the immediate parent of this node (this may mean
@@ -142,28 +142,12 @@ data1_node *data1_mk_node(NMEM m)
 {
     data1_node *r;
 
-#if 0
-    if ((r = freelist))
-	freelist = r->next;
-    else
-	if (!(r = xmalloc(sizeof(*r))))
-	    abort();
-#else
     r = nmem_malloc(m, sizeof(*r));
-#endif
     r->next = r->child = r->last_child = r->parent = 0;
     r->num_children = 0;
     r->destroy = 0;
     return r;
 }
-
-#if 0
-static void fr_node(data1_node *n)
-{
-    n->next = freelist;
-    freelist = n;
-}
-#endif
 
 void data1_free_tree(data1_node *t)
 {
@@ -177,9 +161,6 @@ void data1_free_tree(data1_node *t)
     }
     if (t->destroy)
 	(*t->destroy)(t);
-#if 0
-    fr_node(t);
-#endif
 }
 
 /*
@@ -413,9 +394,6 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
     {
 	int len = 0;
 	char *data = *buf, *pp = *buf;
-#if 0
-	data1_node *partag = get_parent_tag(parent);
-#endif
 
         if (!parent)      /* abort if abstract syntax is undefined */
             return 0;

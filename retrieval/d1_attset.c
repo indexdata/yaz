@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.5  1996-05-09 07:27:43  quinn
+ * Revision 1.6  1997-09-05 09:50:56  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.5  1996/05/09 07:27:43  quinn
  * Multiple local attributes values supported.
  *
  * Revision 1.4  1996/02/21  15:23:36  quinn
@@ -57,7 +60,7 @@ data1_attset *data1_read_attset(char *file)
     data1_att **attp;
     FILE *f;
 
-    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

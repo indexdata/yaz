@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.9  1996-06-10 08:56:02  quinn
+ * Revision 1.10  1997-09-05 09:50:56  adam
+ * Removed global data1_tabpath - uses data1_get_tabpath() instead.
+ *
+ * Revision 1.9  1996/06/10 08:56:02  quinn
  * Work on Summary.
  *
  * Revision 1.8  1996/05/01  12:45:31  quinn
@@ -58,7 +61,7 @@ data1_maptab *data1_read_maptab(char *file)
     data1_mapunit **mapp;
     int local_numeric = 0;
 
-    if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
