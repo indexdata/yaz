@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.4  1995-03-07 13:16:13  quinn
+ * Revision 1.5  1995-03-07 13:28:57  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.4  1995/03/07  13:16:13  quinn
  * Fixed bug in odr_reset
  *
  * Revision 1.3  1995/03/07  10:21:31  quinn
@@ -72,7 +75,7 @@ void odr_reset(ODR o)
     o->t_class = -1;
     o->t_tag = -1;
     o->indent = 0;
-    o->stackp = 0;
+    o->stackp = -1;
 }
     
 void odr_destroy(ODR o)
@@ -90,4 +93,4 @@ char *odr_getbuf(ODR o, int *len)
 {
     *len = o->bp - o->buf;
     return (char *) o->buf;
-}    
+}
