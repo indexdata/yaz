@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.22  1998-02-11 11:53:34  adam
+ * Revision 1.23  1998-03-20 14:45:01  adam
+ * Implemented odr_enum and odr_set_of.
+ *
+ * Revision 1.22  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.21  1997/11/24 11:33:56  adam
@@ -32,8 +35,6 @@
  *
  * Revision 1.14  1995/08/15  11:16:39  quinn
  * Fixed pretty-printers.
- * CV:e ----------------------------------------------------------------------
- * CV:e ----------------------------------------------------------------------
  *
  * Revision 1.13  1995/05/22  14:56:57  quinn
  * Fixed problem in decoding empty sequence.
@@ -102,27 +103,49 @@ int odr_sequence_begin(ODR o, void *p, int size)
     	return 0;
 }
 
+int odr_set_begin(ODR o, void *p, int size)
+{
+    char **pp = (char**) p;
+
+    if (o->error)
+    	return 0;
+    if (o->t_class < 0)
+    {
+    	o->t_class = ODR_UNIVERSAL;
+    	o->t_tag = ODR_SET;
+    }
+    if (o->direction == ODR_DECODE)
+    	*pp = 0;
+    if (odr_constructed_begin(o, p, o->t_class, o->t_tag))
+    {
+    	if (o->direction == ODR_DECODE && size)
+	    *pp = (char *)odr_malloc(o, size);
+    	return 1;
+    }
+    else
+    	return 0;
+}
+
 int odr_sequence_end(ODR o)
 {
     return odr_constructed_end(o);    
 }
 
-int odr_sequence_more(ODR o)
+int odr_set_end(ODR o)
+{
+    return odr_constructed_end(o);    
+}
+
+static int odr_sequence_more(ODR o)
 {
     return odr_constructed_more(o);
 }
 
-int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
+static int odr_sequence_x (ODR o, Odr_fun type, void *p, int *num)
 {
     char ***pp = (char***) p;  /* for dereferencing */
     char **tmp = 0;
     int size = 0, i;
-
-    if (!odr_sequence_begin(o, p, 0)) {
-	if (o->direction == ODR_DECODE)
-	    *num = 0;
-    	return 0;
-    }
 
     switch (o->direction)
     {
@@ -135,8 +158,8 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 		if (*num * (int) sizeof(void*) >= size)
 		{
 		    /* double the buffer size */
-		    tmp = (char **)odr_malloc(o, sizeof(void*) * (size += size ? size :
-			128));
+		    tmp = (char **)odr_malloc(o, sizeof(void*) *
+					      (size += size ? size : 128));
 		    if (*num)
 		    {
 			memcpy(tmp, *pp, *num * sizeof(void*));
@@ -171,3 +194,24 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
     }
     return odr_sequence_end(o);
 }
+
+int odr_set_of(ODR o, Odr_fun type, void *p, int *num)
+{
+    if (!odr_set_begin(o, p, 0)) {
+	if (o->direction == ODR_DECODE)
+	    *num = 0;
+    	return 0;
+    }
+    return odr_sequence_x (o, type, p, num);
+}
+
+int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
+{
+    if (!odr_sequence_begin(o, p, 0)) {
+	if (o->direction == ODR_DECODE)
+	    *num = 0;
+    	return 0;
+    }
+    return odr_sequence_x (o, type, p, num);
+}
+
