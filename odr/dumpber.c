@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.6  1996-01-19 15:41:34  quinn
+ * Revision 1.7  1996-03-08 14:38:41  quinn
+ * Fixed output.
+ *
+ * Revision 1.6  1996/01/19  15:41:34  quinn
  * dumpber was ignoring the file argument.
  *
  * Revision 1.5  1995/10/18  16:12:55  quinn
@@ -49,7 +52,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
     {
     	static char *nl[] =
 	{
-	    "Ugh", "BOOLEAN", "INTEGER", "BIT STRING", "OCTET STRING",
+	    "[Univ 0]", "BOOLEAN", "INTEGER", "BIT STRING", "OCTET STRING",
 	    "NULL", "OID", "OBJECT DESCIPTOR", "EXTERNAL", "REAL",
 	    "ENUM", "[UNIV 11]", "[UNIV 12]", "[UNIV 13]", "[UNIV 14]",
 	    "[UNIV 15]", "SEQUENCE", "SET", "NUMERICSTRING", "PRINTABLESTRING",
