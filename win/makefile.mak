@@ -1,4 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
+# $Id: makefile.mak,v 1.3 1999-05-19 08:26:22 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -7,11 +8,10 @@
 #  18-05-99 HL Stole this from YazX, cleaning up
 #
 # Missing
-#  - get it to work
-#  - yaz dll
-#  - client
-#  - server
-#  - ztest
+# - Move MS-C's whatnots into win direcotry
+# - Log and ID 
+# - rename to makefile (.nothing)
+# - same to yazx...
 #  
 # Envoronment problems
 # - You need to have the proper path and environment for VC set
@@ -470,7 +470,15 @@ foo:  $(RESFILE)
 
 $(OBJDIR)/client.obj: $(IDLGENERATED)
 
-
+###########################################################
+############### Log
+###########################################################
+#
+# $Log: makefile.mak,v $
+# Revision 1.3  1999-05-19 08:26:22  heikki
+# Added comments
+#
+#
 
 
 
