@@ -5,13 +5,13 @@
 
 #ifndef _VMS_
 
-#ifdef WINDOWS
+#ifdef WIN32
 
 #ifdef YNETINCLUDE
 #include <winsock.h>
 #endif
 
-#else /* #ifdef WINDOWS */
+#else /* #ifdef WIN32 */
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -35,14 +35,14 @@
 #endif /* ifndef _VMS_ */
 
 #ifndef YAZ_EXPORT
-#ifdef WINDOWS
+#ifdef WIN32
 #define YAZ_EXPORT __declspec(dllexport)
 #else
 #define YAZ_EXPORT
 #endif
 #endif
 
-#ifdef WINDOWS
+#ifdef WIN32
 #define MDF
 #else
 #ifndef MDF

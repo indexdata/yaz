@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.26  1999-01-08 11:23:14  adam
+ * Revision 1.27  1999-02-02 13:57:31  adam
+ * Uses preprocessor define WIN32 instead of WINDOWS to build code
+ * for Microsoft WIN32.
+ *
+ * Revision 1.26  1999/01/08 11:23:14  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.25  1998/07/07 15:49:23  adam
@@ -153,7 +157,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifndef WINDOWS
+#ifndef WIN32
 #include <unistd.h>
 #endif
 #include <errno.h>
@@ -200,7 +204,7 @@ typedef struct tcpip_state
     char buf[128]; /* returned by cs_addrstr */
 } tcpip_state;
 
-#ifdef WINDOWS
+#ifdef WIN32
 static int tcpip_init (void)
 {
     static int initialized = 0;
@@ -231,7 +235,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     COMSTACK p;
     tcpip_state *state;
     int new_socket;
-#ifdef WINDOWS
+#ifdef WIN32
     unsigned long tru = 1;
 #else
     struct protoent *proto;
@@ -241,7 +245,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
         return 0;
     if (s < 0)
     {
-#ifndef WINDOWS
+#ifndef WIN32
 	if (!(proto = getprotobyname("tcp")))
 	    return 0;
 	if ((s = socket(AF_INET, SOCK_STREAM, proto->p_proto)) < 0)
@@ -259,7 +263,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
                                          xmalloc(sizeof(tcpip_state)))))
 	return 0;
 
-#ifdef WINDOWS
+#ifdef WIN32
     if (!(p->blocking = blocking) && ioctlsocket(s, FIONBIO, &tru) < 0)
 #else
     if (!(p->blocking = blocking) && fcntl(s, F_SETFL, O_NONBLOCK) < 0)
@@ -369,7 +373,7 @@ int tcpip_connect(COMSTACK h, void *address)
     TRC(fprintf(stderr, "tcpip_connect\n"));
     if (connect(h->iofile, (struct sockaddr *) add, sizeof(*add)) < 0)
     {
-#ifdef WINDOWS
+#ifdef WIN32
         if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
         if (errno == EINPROGRESS)
@@ -393,7 +397,7 @@ int tcpip_rcvconnect(COMSTACK h)
 int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     struct sockaddr *addr = (struct sockaddr *)address;
-#ifdef WINDOWS
+#ifdef WIN32
     BOOL one = 1;
 #else
     unsigned long one = 1;
@@ -448,7 +452,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
     }
     if ((h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len)) < 0)
     {
-#ifdef WINDOWS
+#ifdef WIN32
         if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
         if (errno == EWOULDBLOCK)
@@ -467,7 +471,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         sizeof(addr.sin_addr), AF_INET))
     {
 	h->cerrno = CSDENY;
-#ifdef WINDOWS
+#ifdef WIN32
         closesocket(h->iofile);
 #else
         close(h->iofile);
@@ -482,7 +486,7 @@ COMSTACK tcpip_accept(COMSTACK h)
 {
     COMSTACK cnew;
     tcpip_state *state, *st = (tcpip_state *)h->cprivate;
-#ifdef WINDOWS
+#ifdef WIN32
     unsigned long tru = 1;
 #endif
 
@@ -504,7 +508,7 @@ COMSTACK tcpip_accept(COMSTACK h)
         h->cerrno = CSYSERR;
         return 0;
     }
-#ifdef WINDOWS
+#ifdef WIN32
     if (!cnew->blocking && ioctlsocket(cnew->iofile, FIONBIO, &tru) < 0)
 #else
     if (!cnew->blocking && fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
@@ -558,7 +562,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 return -1;
         if ((res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0)) < 0)
 	{
-#ifdef WINDOWS
+#ifdef WIN32
             if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
 #ifdef EINPROGRESS
@@ -627,7 +631,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
         if ((res = send(h->iofile, buf + state->written, size -
             state->written, 0)) < 0)
         {
-#ifdef WINDOWS
+#ifdef WIN32
             if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
             if (errno == EAGAIN)
@@ -654,7 +658,7 @@ int tcpip_close(COMSTACK h)
 
     TRC(fprintf(stderr, "tcpip_close\n"));
     if (h->iofile != -1)
-#ifdef WINDOWS
+#ifdef WIN32
         closesocket(h->iofile);
 #else
         close(h->iofile);

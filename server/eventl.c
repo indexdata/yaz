@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.26  1998-02-11 11:53:35  adam
+ * Revision 1.27  1999-02-02 13:57:34  adam
+ * Uses preprocessor define WIN32 instead of WINDOWS to build code
+ * for Microsoft WIN32.
+ *
+ * Revision 1.26  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.25  1998/01/29 13:30:23  adam
@@ -90,7 +94,7 @@
 #include <yconfig.h>
 #include <stdio.h>
 #include <assert.h>
-#ifdef WINDOWS
+#ifdef WIN32
 #include <winsock.h>
 #else
 #include <unistd.h>

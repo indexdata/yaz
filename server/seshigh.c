@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.85  1998-11-17 09:52:59  adam
+ * Revision 1.86  1999-02-02 13:57:38  adam
+ * Uses preprocessor define WIN32 instead of WINDOWS to build code
+ * for Microsoft WIN32.
+ *
+ * Revision 1.85  1998/11/17 09:52:59  adam
  * Fixed minor bug (introduced by previous commit).
  *
  * Revision 1.84  1998/11/16 16:02:32  adam
@@ -298,7 +302,7 @@
 #include <yconfig.h>
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef WINDOWS
+#ifdef WIN32
 #include <process.h>
 #else
 #include <unistd.h>

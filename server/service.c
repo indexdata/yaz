@@ -3,7 +3,11 @@
  *  Based on code written by
  *     Chas Woodfield, Fretwell Downing Datasystems.
  * $Log: service.c,v $
- * Revision 1.1  1997-11-07 13:31:52  adam
+ * Revision 1.2  1999-02-02 13:57:36  adam
+ * Uses preprocessor define WIN32 instead of WINDOWS to build code
+ * for Microsoft WIN32.
+ *
+ * Revision 1.1  1997/11/07 13:31:52  adam
  * Added NT Service name part of statserv_options_block. Moved NT
  * service utility to server library.
  *
@@ -29,7 +33,7 @@
 /* For some strange reason it won't work when part of a lib */
 /************************************************************/
 
-#ifdef WINDOWS
+#ifdef WIN32
 
 #include <windows.h>
 #include <stdio.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.13  1998-02-10 10:28:56  adam
+ * Revision 1.14  1999-02-02 13:57:32  adam
+ * Uses preprocessor define WIN32 instead of WINDOWS to build code
+ * for Microsoft WIN32.
+ *
+ * Revision 1.13  1998/02/10 10:28:56  adam
  * Added app_name, service_dependencies, service_display_name and
  * options_func. options_func allows us to specify a different function
  * to interogate the command line arguments. The other members allow us
@@ -99,14 +103,14 @@ typedef struct statserv_options_block
     int (*options_func)(int argc, char **argv);
     int inetd;                    /* Do we use the inet deamon or not */
     
-#ifdef WINDOWS
+#ifdef WIN32
     /* We only have these members for the windows version */
     /* They seemed a bit large to have them there in general */
     char service_name[128];         /* NT Service Name */
     char app_name[128];             /* Application Name */
     char service_dependencies[128]; /* The services we are dependent on */
     char service_display_name[128]; /* The service display name */
-#endif /* WINDOWS */
+#endif /* WIN32 */
 } statserv_options_block;
     
 int statserv_main(int argc, char **argv);

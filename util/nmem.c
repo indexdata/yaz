@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.13  1998-10-19 15:24:21  adam
+ * Revision 1.14  1999-02-02 13:57:40  adam
+ * Uses preprocessor define WIN32 instead of WINDOWS to build code
+ * for Microsoft WIN32.
+ *
+ * Revision 1.13  1998/10/19 15:24:21  adam
  * New nmem utility, nmem_transfer, that transfer blocks from one
  * NMEM to another.
  *
@@ -56,10 +60,11 @@
  * allocation. Evemtually we'll put in something better.
  */
 
+#include <assert.h>
 #include <xmalloc.h>
 #include <nmem.h>
 #include <log.h>
-#ifdef WINDOWS
+#ifdef WIN32
 #include <windows.h>
 #elif _REENTRANT
 
@@ -73,7 +78,7 @@
 
 #define NMEM_CHUNK (4*1024)
 
-#ifdef WINDOWS
+#ifdef WIN32
 static CRITICAL_SECTION critical_section;
 #define NMEM_ENTER EnterCriticalSection(&critical_section)
 #define NMEM_LEAVE LeaveCriticalSection(&critical_section)
@@ -89,6 +94,7 @@ static pthread_mutex_t nmem_mutex = PTHREAD_MUTEX_INITIALIZER;
 static nmem_block *freelist = NULL;        /* "global" freelists */
 static nmem_control *cfreelist = NULL;
 static int nmem_active_no = 0;
+static int nmem_init_flag = 0;
 
 static void free_block(nmem_block *p)
 {  
@@ -173,6 +179,7 @@ void *nmem_malloc(NMEM n, int size)
 #endif
     if (!n)
 	return xmalloc(size);
+    assert (nmem_init_flag);
     NMEM_ENTER;
     p = n->blocks;
     if (!p || p->size - p->top < size)
@@ -266,7 +273,8 @@ void nmem_critical_leave (void)
 
 void nmem_init (void)
 {
-#ifdef WINDOWS
+    nmem_init_flag = 1;
+#ifdef WIN32
     InitializeCriticalSection(&critical_section);
 #endif
     nmem_active_no = 0;
@@ -289,7 +297,7 @@ void nmem_exit (void)
 	cfreelist = cfreelist->next;
 	xfree (cfl);
     }
-#ifdef WINDOWS
+#ifdef WIN32
     DeleteCriticalSection(&critical_section);
 #endif
 }

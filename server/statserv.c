@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
@@ -7,7 +7,11 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.52  1998-08-21 14:13:34  adam
+ * Revision 1.53  1999-02-02 13:57:39  adam
+ * Uses preprocessor define WIN32 instead of WINDOWS to build code
+ * for Microsoft WIN32.
+ *
+ * Revision 1.52  1998/08/21 14:13:34  adam
  * Added GNU Configure script to build Makefiles.
  *
  * Revision 1.51  1998/07/07 15:51:03  adam
@@ -186,7 +190,7 @@
 #include <yconfig.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef WINDOWS
+#ifdef WIN32
 #include <process.h>
 #include <winsock.h>
 #include <direct.h>
@@ -232,12 +236,12 @@ statserv_options_block control_block = {
     check_options,              /* Default routine, for checking the run-time arguments */
     0                           /* default value for inet deamon */
 
-#ifdef WINDOWS
+#ifdef WIN32
     ,"Z39.50 Server",           /* NT Service Name */
     "Server",                   /* NT application Name */
     "",                         /* NT Service Dependencies */
     "Z39.50 Server"             /* NT Service Display Name */
-#endif /* WINDOWS */
+#endif /* WIN32 */
 };
 
 /*
@@ -246,7 +250,7 @@ statserv_options_block control_block = {
  * doing all of the listening and accepting in the parent - it's
  * safer that way.
  */
-#ifdef WINDOWS
+#ifdef WIN32
 
 typedef struct _ThreadList ThreadList;
 
@@ -457,7 +461,7 @@ static void listener(IOCHAN h, int event)
 	logf(LOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
-#ifndef WINDOWS
+#ifndef WIN32
 	logf(LOG_DEBUG, "Determining client address");
 	a = cs_addrstr(new_line);
 	logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
@@ -491,7 +495,7 @@ static void listener(IOCHAN h, int event)
     }
 }
 
-#else /* WINDOWS */
+#else /* WIN32 */
 
 /* To save having an #ifdef in event_loop we need to define this empty function */
 void statserv_remove(IOCHAN pIOChannel)
@@ -655,7 +659,7 @@ static void listener(IOCHAN h, int event)
     }
 }
 
-#endif /* WINDOWS */
+#endif /* WIN32 */
 
 static void inetd_connection(int what)
 {
@@ -760,7 +764,7 @@ static void add_listener(char *where, int what)
     pListener = lst;
 }
 
-#ifndef WINDOWS
+#ifndef WIN32
 /* For windows we don't need to catch the signals */
 static void catchchld(int num)
 {
@@ -768,7 +772,7 @@ static void catchchld(int num)
 	;
     signal(SIGCHLD, catchchld);
 }
-#endif /* WINDOWS */
+#endif /* WIN32 */
 
 statserv_options_block *statserv_getcontrol(void)
 {
@@ -788,12 +792,12 @@ int statserv_start(int argc, char **argv)
     int ret;
 
     nmem_init ();
-#ifdef WINDOWS
+#ifdef WIN32
     /* We need to initialize the thread list */
     ThreadList_Initialize();
-#endif /* WINDOWS */
+#endif /* WIN32 */
 
-#ifdef WINDOWS
+#ifdef WIN32
     if ((me = strrchr (argv[0], '\\')))
 	me++;
     else
@@ -804,7 +808,7 @@ int statserv_start(int argc, char **argv)
     if (control_block.options_func(argc, argv))
         return(1);
 
-#ifndef WINDOWS
+#ifndef WIN32
     if (control_block.inetd)
 	inetd_connection(control_block.default_proto);
     else
@@ -829,7 +833,7 @@ int statserv_start(int argc, char **argv)
 	    exit(1);
 	}
     }
-#endif /* WINDOWS */
+#endif /* WIN32 */
 
     if ((pListener == NULL) && *control_block.default_listen)
 	add_listener(control_block.default_listen,
@@ -921,7 +925,7 @@ int check_options(int argc, char **argv)
     return 0;
 }
 
-#ifdef WINDOWS
+#ifdef WIN32
 typedef struct _Args
 {
     char **argv;
