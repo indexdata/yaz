@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.25  1995-11-13 09:27:22  quinn
+ * Revision 1.26  1995-12-12 14:11:00  quinn
+ * Minimal.
+ *
+ * Revision 1.25  1995/11/13  09:27:22  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.24  1995/10/30  12:41:13  quinn
@@ -1088,7 +1091,7 @@ static int client(void)
                             apdu->which);
                         exit(1);
                 }
-                printf("Z> ");
+                printf(C_PROMPT);
                 fflush(stdout);
             }
             while (cs_more(conn));
