@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.7 2002-09-25 12:37:07 adam Exp $
+ * $Id: unix.c,v 1.8 2002-12-15 21:22:58 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -30,22 +30,22 @@
 #define YAZ_SOCKLEN_T int
 #endif
 
-int unix_close(COMSTACK h);
-int unix_put(COMSTACK h, char *buf, int size);
-int unix_get(COMSTACK h, char **buf, int *bufsize);
-int unix_connect(COMSTACK h, void *address);
-int unix_more(COMSTACK h);
-int unix_rcvconnect(COMSTACK h);
-int unix_bind(COMSTACK h, void *address, int mode);
-int unix_listen(COMSTACK h, char *raddr, int *addrlen,
+static int unix_close(COMSTACK h);
+static int unix_put(COMSTACK h, char *buf, int size);
+static int unix_get(COMSTACK h, char **buf, int *bufsize);
+static int unix_connect(COMSTACK h, void *address);
+static int unix_more(COMSTACK h);
+static int unix_rcvconnect(COMSTACK h);
+static int unix_bind(COMSTACK h, void *address, int mode);
+static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
 		int (*check_ip)(void *cd, const char *a, int len, int type),
 		void *cd);
-int static unix_set_blocking(COMSTACK p, int blocking);
+static int unix_set_blocking(COMSTACK p, int blocking);
 
 
-COMSTACK unix_accept(COMSTACK h);
-char *unix_addrstr(COMSTACK h);
-void *unix_straddr(COMSTACK h, const char *str);
+static COMSTACK unix_accept(COMSTACK h);
+static char *unix_addrstr(COMSTACK h);
+static void *unix_straddr(COMSTACK h, const char *str);
 
 #ifndef SUN_LEN
 #define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) \
@@ -149,7 +149,7 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
 }
 
 
-int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
+static int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
 {
     char *cp;
     if (!unix_init ())
@@ -163,7 +163,7 @@ int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
     return 1;
 }
 
-void *unix_straddr(COMSTACK h, const char *str)
+static void *unix_straddr(COMSTACK h, const char *str)
 {
     unix_state *sp = (unix_state *)h->cprivate;
 
@@ -185,7 +185,7 @@ struct sockaddr_un *unix_strtoaddr(const char *str)
     return &add;
 }
 
-int unix_more(COMSTACK h)
+static int unix_more(COMSTACK h)
 {
     unix_state *sp = (unix_state *)h->cprivate;
 
@@ -198,7 +198,7 @@ int unix_more(COMSTACK h)
  * weird things like spawning subprocesses or threading or some weird junk
  * like that.
  */
-int unix_connect(COMSTACK h, void *address)
+static int unix_connect(COMSTACK h, void *address)
 {
     struct sockaddr_un *add = (struct sockaddr_un *)address;
     int r;
@@ -232,7 +232,7 @@ int unix_connect(COMSTACK h, void *address)
 /*
  * nop
  */
-int unix_rcvconnect(COMSTACK h)
+static int unix_rcvconnect(COMSTACK h)
 {
     TRC(fprintf(stderr, "unix_rcvconnect\n"));
 
@@ -251,7 +251,7 @@ int unix_rcvconnect(COMSTACK h)
 #define CERTF "ztest.pem"
 #define KEYF "ztest.pem"
 
-int unix_bind(COMSTACK h, void *address, int mode)
+static int unix_bind(COMSTACK h, void *address, int mode)
 {
     struct sockaddr *addr = (struct sockaddr *)address;
     const char * path = ((struct sockaddr_un *)addr)->sun_path;
@@ -304,9 +304,9 @@ int unix_bind(COMSTACK h, void *address, int mode)
     return 0;
 }
 
-int unix_listen(COMSTACK h, char *raddr, int *addrlen,
-		int (*check_ip)(void *cd, const char *a, int len, int t),
-		void *cd)
+static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
+                    int (*check_ip)(void *cd, const char *a, int len, int t),
+		    void *cd)
 {
     struct sockaddr_un addr;
     YAZ_SOCKLEN_T len = SUN_LEN(&addr);
@@ -341,7 +341,7 @@ int unix_listen(COMSTACK h, char *raddr, int *addrlen,
     return 0;
 }
 
-COMSTACK unix_accept(COMSTACK h)
+static COMSTACK unix_accept(COMSTACK h)
 {
     COMSTACK cnew;
     unix_state *state, *st = (unix_state *)h->cprivate;
@@ -415,7 +415,7 @@ COMSTACK unix_accept(COMSTACK h)
  * Return: -1 error, >1 good, len of buffer, ==1 incomplete buffer,
  * 0=connection closed.
  */
-int unix_get(COMSTACK h, char **buf, int *bufsize)
+static int unix_get(COMSTACK h, char **buf, int *bufsize)
 {
     unix_state *sp = (unix_state *)h->cprivate;
     char *tmpc;
@@ -504,7 +504,7 @@ int unix_get(COMSTACK h, char **buf, int *bufsize)
  * In nonblocking mode, you must call again with same buffer while
  * return value is 1.
  */
-int unix_put(COMSTACK h, char *buf, int size)
+static int unix_put(COMSTACK h, char *buf, int size)
 {
     int res;
     struct unix_state *state = (struct unix_state *)h->cprivate;
@@ -559,9 +559,7 @@ int unix_put(COMSTACK h, char *buf, int size)
     return 0;
 }
 
-
-
-int unix_close(COMSTACK h)
+static int unix_close(COMSTACK h)
 {
     unix_state *sp = (struct unix_state *)h->cprivate;
 
@@ -577,7 +575,7 @@ int unix_close(COMSTACK h)
     return 0;
 }
 
-char *unix_addrstr(COMSTACK h)
+static char *unix_addrstr(COMSTACK h)
 {
     unix_state *sp = (struct unix_state *)h->cprivate;
     char *buf = sp->buf;
@@ -585,7 +583,7 @@ char *unix_addrstr(COMSTACK h)
     return buf;
 }
 
-int static unix_set_blocking(COMSTACK p, int blocking)
+static int unix_set_blocking(COMSTACK p, int blocking)
 {
     unsigned long flag;
 
