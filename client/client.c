@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.199 2003-05-27 09:42:08 mike Exp $
+ * $Id: client.c,v 1.200 2003-06-11 18:36:57 adam Exp $
  */
 
 #include <stdio.h>
@@ -59,7 +59,7 @@
 #define C_PROMPT "Z> "
 
 static char *codeset = 0;               /* character set for output */
-
+static int hex_dump = 0;
 static ODR out, in, print;              /* encoding and decoding streams */
 #if HAVE_XML2
 static ODR srw_sr_odr_out = 0;
@@ -159,21 +159,21 @@ const char* query_type_as_string(QueryType q)
     }
 }
 
-
-void do_hex_dump(char* buf,int len) 
+static void do_hex_dump(const char* buf, int len) 
 {
-#if 0 
-    int i,x;
-    for( i=0; i<len ; i=i+16 ) 
-    {			
-        printf(" %4.4d ",i);
-        for(x=0 ; i+x<len && x<16; ++x) 
-        {
-            printf("%2.2X ",(unsigned int)((unsigned char)buf[i+x]));
-        }
-        printf("\n");
+    if (hex_dump)
+    {
+	int i,x;
+	for( i=0; i<len ; i=i+16 ) 
+	{			
+	    printf(" %4.4d ",i);
+	    for(x=0 ; i+x<len && x<16; ++x) 
+	    {
+		printf("%2.2X ",(unsigned int)((unsigned char)buf[i+x]));
+	    }
+	    printf("\n");
+	}
     }
-#endif
 }
 
 void add_otherInfos(Z_APDU *a) 
@@ -716,31 +716,35 @@ static void display_record(Z_External *r)
                                         &result, &rlen)> 0)
                 {
                     char *from = 0;
-                    if (marcCharset && strcmp(marcCharset, "auto"))
-                        from = marcCharset;
-                    else
+                    if (marcCharset && !strcmp(marcCharset, "auto"))
                     {
                         if (ent->value == VAL_USMARC)
                         {
                             if (octet_buf[9] == 'a')
                                 from = "UTF-8";
                             else
-                                from = "MARC8";
+                                from = "MARC-8";
                         }
                         else
                             from = "ISO-8859-1";
                     }
+		    else if (marcCharset)
+			from = marcCharset;
                     if (outputCharset && from)
                     {   
-                        printf ("convert from %s to %s\n", from, 
-                                outputCharset);
                         cd = yaz_iconv_open(outputCharset, from);
+                        printf ("convert from %s to %s", from, 
+                                outputCharset);
+			if (!cd)
+			    printf (" unsupported\n");
+			else
+			    printf ("\n");
                     }
                     if (!cd)
                         fwrite (result, 1, rlen, stdout);
                     else
                     {
-                        char outbuf[12];
+                        char outbuf[6];
                         size_t inbytesleft = rlen;
                         const char *inp = result;
                         
@@ -748,9 +752,11 @@ static void display_record(Z_External *r)
                         {
                             size_t outbytesleft = sizeof(outbuf);
                             char *outp = outbuf;
-                            size_t r = yaz_iconv (cd, (char**) &inp,
-                                                  &inbytesleft, 
-                                                  &outp, &outbytesleft);
+			    size_t r;
+
+                            r = yaz_iconv (cd, (char**) &inp,
+					   &inbytesleft, 
+					   &outp, &outbytesleft);
                             if (r == (size_t) (-1))
                             {
                                 int e = yaz_iconv_error(cd);
@@ -3137,6 +3143,7 @@ void wait_and_handle_response()
         odr_reset(out);
         odr_reset(in); /* release APDU from last round */
         record_last = 0;
+        do_hex_dump(netbuffer, res);
         odr_setbuf(in, netbuffer, res, 0);
         
         if (!z_GDU(in, &gdu, 0, 0))
@@ -3802,8 +3809,10 @@ int main(int argc, char **argv)
     codeset = nl_langinfo(CODESET);
 #endif
 #endif
+    if (codeset)
+	outputCharset = xstrdup(codeset);
 
-    while ((ret = options("k:c:q:a:b:m:v:p:u:t:V", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vx", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -3848,6 +3857,9 @@ int main(int argc, char **argv)
             else
                 apdu_file=fopen(arg, "a");
             break;
+	case 'x':
+	    hex_dump = 1;
+	    break;
         case 'p':
             yazProxy=strdup(arg);
             break;
