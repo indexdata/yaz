@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.13  1999-04-20 09:56:48  adam
+ * Revision 1.14  1999-10-19 12:35:55  adam
+ * Better dump of OCTET STRING.
+ *
+ * Revision 1.13  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -69,8 +72,19 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
     	return opt;
     if (o->direction == ODR_PRINT)
     {
+        int i;
 	odr_prname(o, name);
-    	fprintf(o->print, "OCTETSTRING(len=%d)\n", (*p)->len);
+    	fprintf(o->print, "OCTETSTRING(len=%d)", (*p)->len);
+        for (i = 0; i<(*p)->len; i++)
+        {
+	    if (i < 5 || i > ((*p)->len - 4))
+            {
+                fprintf (o->print, " %02X", (*p)->buf[i]);
+            }
+            else if (i == 5)
+                fprintf (o->print, " .. ");
+        }
+        fprintf(o->print, "\n");
     	return 1;
     }
     if (o->direction == ODR_DECODE)
