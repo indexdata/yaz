@@ -1,13 +1,13 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.18 1995-04-18 15:23:58 quinn Exp $
+# $Id: Makefile,v 1.19 1995-04-21 16:31:56 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
-CFLAGS= -g -Wall -pedantic -ansi #  -DODR_DEBUG
+CFLAGS= -g -Wall -pedantic -ansi   -DODR_DEBUG
 DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libodr.a
 LIBS=-lodr
