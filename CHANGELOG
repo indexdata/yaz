@@ -1,5 +1,16 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+New member 'schema' in struct bend_fetch_rr which the name of requested
+schema (SRW/SRU) for record (or NULL if none was given). The fetch
+handler MAY set this to reflect the schema of the returned record.
+
+New member 'display_term' in struct scan_entry. GFS now sets member entries
+and allocates scan entries to be filled by user scan handler. In previous
+version, entries member was allocated by the scan handler. That still works,
+but the GFS will ignore member display_term - assuming it was NOT set by
+the handler. The fact that the GFS now allocates the entries both allows
+for new members and makes a scan handler easier to write.
+
 Fix CQL lex buffer overflow.
 
 SRW/SRU recordPacking. For SRW default recordPacking is string. For

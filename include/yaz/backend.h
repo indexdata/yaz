@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.20 2003-03-24 22:26:50 adam Exp $
+ * $Id: backend.h,v 1.21 2003-04-24 13:30:32 adam Exp $
  */
 
 #ifndef BACKEND_H
@@ -95,6 +95,7 @@ typedef struct bend_fetch_rr {
     int errcode;               /* 0==success */
     char *errstring;           /* system error string or NULL */
     int surrogate_flag;        /* surrogate diagnostic */
+    char *schema;              /* string record schema input/output */
 } bend_fetch_rr;
 
 struct scan_entry {
@@ -102,6 +103,7 @@ struct scan_entry {
     int occurrences;    /* no of occurrences or -1 if error (see below) */
     int errcode;        /* Bib-1 diagnostic code; only used when occur.= -1 */
     char *errstring;    /* Additional string */
+    char *display_term;
 };
 
 typedef enum {
@@ -122,6 +124,8 @@ typedef struct bend_scan_rr {
     int term_position;  /* desired index of term in result list/returned */
     int num_entries;    /* number of entries requested/returned */
 
+    /* scan term entries. The called handler does not have
+       to allocate this. Size of entries is num_entries (see above) */
     struct scan_entry *entries;
     bend_scan_status status;
     int errcode;

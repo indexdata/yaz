@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.153 2003-04-18 15:11:04 adam Exp $
+ * $Id: seshigh.c,v 1.154 2003-04-24 13:30:32 adam Exp $
  */
 
 /*
@@ -515,6 +515,7 @@ static int srw_bend_fetch(association *assoc, int pos,
     rr.errcode = 0;
     rr.errstring = 0;
     rr.surrogate_flag = 0;
+    rr.schema = srw_req->recordSchema;
 
     if (!assoc->init->bend_fetch)
         return 1;
@@ -526,9 +527,10 @@ static int srw_bend_fetch(association *assoc, int pos,
         record->recordData_buf = rr.record;
         record->recordData_len = rr.len;
         record->recordPosition = odr_intdup(o, pos);
-        record->recordSchema = 0;
-        if (srw_req->recordSchema)
-            record->recordSchema = odr_strdup(o, srw_req->recordSchema);
+        if (rr.schema)
+            record->recordSchema = odr_strdup(o, rr.schema);
+        else
+            record->recordSchema = 0;
     }
     return rr.errcode;
 }
@@ -1753,8 +1755,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	freq.output_format_raw = 0;
 	freq.stream = a->encode;
 	freq.print = a->print;
-	freq.surrogate_flag = 0;
 	freq.referenceId = referenceId;
+        freq.schema = 0;
 	(*a->init->bend_fetch)(a->backend, &freq);
 	/* backend should be able to signal whether error is system-wide
 	   or only pertaining to current record */
@@ -2103,6 +2105,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     oident *attset;
     bend_scan_rr *bsrr = (bend_scan_rr *)
         odr_malloc (assoc->encode, sizeof(*bsrr));
+    struct scan_entry *save_entries;
 
     yaz_log(LOG_LOG, "Got ScanRequest");
 
@@ -2140,6 +2143,28 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     bsrr->stream = assoc->encode;
     bsrr->print = assoc->print;
     bsrr->step_size = res->stepSize;
+    bsrr->entries = 0;
+    /* Note that version 2.0 of YAZ and older did not set entries .. 
+       We do now. And when we do it's easier to extend the scan entry 
+       We know that if the scan handler did set entries, it will
+       not know of new member display_term.
+    */
+    if (bsrr->num_entries > 0) 
+    {
+        int i;
+        bsrr->entries = odr_malloc(assoc->decode, sizeof(*bsrr->entries) *
+                                   bsrr->num_entries);
+        for (i = 0; i<bsrr->num_entries; i++)
+        {
+            bsrr->entries[i].term = 0;
+            bsrr->entries[i].occurrences = 0;
+            bsrr->entries[i].errcode = 0;
+            bsrr->entries[i].errstring = 0;
+            bsrr->entries[i].display_term = 0;
+        }
+    }
+    save_entries = bsrr->entries;  /* save it so we can compare later */
+
     if (req->attributeSet &&
         (attset = oid_getentbyoid(req->attributeSet)) &&
         (attset->oclass == CLASS_ATTSET || attset->oclass == CLASS_GENERAL))
@@ -2181,6 +2206,16 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
                     odr_malloc(assoc->encode, sizeof(*t));
                 t->suggestedAttributes = 0;
                 t->displayTerm = 0;
+                if (save_entries == bsrr->entries && 
+                    bsrr->entries[i].display_term)
+                {
+                    /* the entries was NOT set by the handler. So it's
+                       safe to test for new member display_term. It is
+                       NULL'ed by us.
+                    */
+                    t->displayTerm = odr_strdup(assoc->encode,
+                                                bsrr->entries[i].display_term);
+                }
                 t->alternativeTerm = 0;
                 t->byAttributes = 0;
                 t->otherTermInfo = 0;
