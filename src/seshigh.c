@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.4 2003-12-04 11:48:06 adam Exp $
+ * $Id: seshigh.c,v 1.5 2003-12-20 00:51:19 adam Exp $
  */
 
 /*
@@ -749,74 +749,17 @@ static void srw_bend_explain(association *assoc, request *req,
         (*assoc->init->bend_explain)(assoc->backend, &rr);
         if (rr.explain_buf)
         {
-            srw_res->explainData_buf = rr.explain_buf;
-            srw_res->explainData_len = strlen(rr.explain_buf);
+	    int packing = Z_SRW_recordPacking_string;
+	    if (srw_req->recordPacking && 
+		!strcmp(srw_req->recordPacking, "xml"))
+		packing = Z_SRW_recordPacking_XML;
+	    srw_res->record.recordSchema = 0;
+	    srw_res->record.recordPacking = packing;
+            srw_res->record.recordData_buf = rr.explain_buf;
+            srw_res->record.recordData_len = strlen(rr.explain_buf);
+	    srw_res->record.recordPosition = 0;
         }
     }
-}
-
-static int hex_digit (int ch)
-{
-    if (ch >= '0' && ch <= '9')
-        return ch - '0';
-    else if (ch >= 'a' && ch <= 'f')
-        return ch - 'a'+10;
-    else if (ch >= 'A' && ch <= 'F')
-        return ch - 'A'+10;
-    return 0;
-}
-
-static char *uri_val(const char *path, const char *name, ODR o)
-{
-    size_t nlen = strlen(name);
-    if (*path != '?')
-        return 0;
-    path++;
-    while (path && *path)
-    {
-        const char *p1 = strchr(path, '=');
-        if (!p1)
-            break;
-        if ((size_t)(p1 - path) == nlen && !memcmp(path, name, nlen))
-        {
-            size_t i = 0;
-            char *ret;
-            
-            path = p1 + 1;
-            p1 = strchr(path, '&');
-            if (!p1)
-                p1 = strlen(path) + path;
-            ret = odr_malloc(o, p1 - path + 1);
-            while (*path && *path != '&')
-            {
-                if (*path == '+')
-                {
-                    ret[i++] = ' ';
-                    path++;
-                }
-                else if (*path == '%' && path[1] && path[2])
-                {
-                    ret[i++] = hex_digit (path[1])*16 + hex_digit (path[2]);
-                    path = path + 3;
-                }
-                else
-                    ret[i++] = *path++;
-            }
-            ret[i] = '\0';
-            return ret;
-        }
-        path = strchr(p1, '&');
-        if (path)
-            path++;
-    }
-    return 0;
-}
-
-void uri_val_int(const char *path, const char *name, ODR o, int **intp)
-{
-    const char *v = uri_val(path, name, o);
-    if (v)
-        *intp = odr_intdup(o, atoi(v));
 }
 
 static void process_http_request(association *assoc, request *req)
@@ -831,17 +774,17 @@ static void process_http_request(association *assoc, request *req)
     {
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
+	const char *operation = 0;
 #if HAVE_XML2
         int ret = -1;
         char *charset = 0;
         Z_SOAP *soap_package = 0;
         static Z_SOAP_Handler soap_handlers[2] = {
-            {"http://www.loc.gov/zing/srw/v1.0/", 0,
+            {"http://www.loc.gov/zing/srw/", 0,
              (Z_SOAP_fun) yaz_srw_codec},
             {0, 0, 0}
         };
 #endif
-        
         if (*p0 == '/')
             p0++;
         p1 = strchr(p0, '?');
@@ -853,14 +796,18 @@ static void process_http_request(association *assoc, request *req)
             memcpy (db, p0, p1 - p0);
             db[p1 - p0] = '\0';
         }
+	if (p1)
+	    operation = yaz_uri_val(p1, "operation", o);
+	if (!operation)
+	    operation = "explain";
 #if HAVE_XML2
-        if (p1 && *p1 == '?' && p1[1])
+        if (p1 && !strcmp(operation, "searchRetrieve"))
         {
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
             Z_SRW_PDU *sr = yaz_srw_get(o, Z_SRW_searchRetrieve_request);
-            char *query = uri_val(p1, "query", o);
-            char *pQuery = uri_val(p1, "pQuery", o);
-            char *sortKeys = uri_val(p1, "sortKeys", o);
+            char *query = yaz_uri_val(p1, "query", o);
+            char *pQuery = yaz_uri_val(p1, "pQuery", o);
+            char *sortKeys = yaz_uri_val(p1, "sortKeys", o);
             
             if (query)
             {
@@ -877,16 +824,14 @@ static void process_http_request(association *assoc, request *req)
                 sr->u.request->sort_type = Z_SRW_sort_type_sort;
                 sr->u.request->sort.sortKeys = sortKeys;
             }
-            sr->u.request->recordSchema = uri_val(p1, "recordSchema", o);
-            sr->u.request->recordPacking = uri_val(p1, "recordPacking", o);
+            sr->u.request->recordSchema = yaz_uri_val(p1, "recordSchema", o);
+            sr->u.request->recordPacking = yaz_uri_val(p1, "recordPacking", o);
             if (!sr->u.request->recordPacking)
                 sr->u.request->recordPacking = "xml";
-            uri_val_int(p1, "maximumRecords", o, 
+            yaz_uri_val_int(p1, "maximumRecords", o, 
                         &sr->u.request->maximumRecords);
-            uri_val_int(p1, "startRecord", o,
+            yaz_uri_val_int(p1, "startRecord", o,
                         &sr->u.request->startRecord);
-            if (sr->u.request->startRecord)
-                yaz_log(LOG_LOG, "startRecord=%d", *sr->u.request->startRecord);
             sr->u.request->database = db;
             srw_bend_search(assoc, req, sr->u.request, res->u.response);
             
@@ -917,17 +862,21 @@ static void process_http_request(association *assoc, request *req)
                 strcat(ctype, charset);
                 z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
             }
-
         }
-        else
+        else if (p1 && !strcmp(operation, "explain"))
         {
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_explain_response);
             Z_SRW_PDU *sr = yaz_srw_get(o, Z_SRW_explain_request);
 
+            sr->u.explain_request->recordPacking =
+		yaz_uri_val(p1, "recordPacking", o);
+            if (!sr->u.explain_request->recordPacking)
+                sr->u.explain_request->recordPacking = "xml";
+
             srw_bend_explain(assoc, req, sr->u.explain_request,
                             res->u.explain_response);
 
-            if (res->u.explain_response->explainData_buf)
+            if (res->u.explain_response->record.recordData_buf)
             {
                 soap_package = odr_malloc(o, sizeof(*soap_package));
                 soap_package->which = Z_SOAP_generic;
@@ -1062,7 +1011,7 @@ static void process_http_request(association *assoc, request *req)
 
             static Z_SOAP_Handler soap_handlers[2] = {
 #if HAVE_XML2
-                {"http://www.loc.gov/zing/srw/v1.0/", 0,
+                {"http://www.loc.gov/zing/srw/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
 #endif
                 {0, 0, 0}
@@ -1087,8 +1036,22 @@ static void process_http_request(association *assoc, request *req)
                 soap_package->u.generic->no == 0)
             {
                 /* SRW package */
+		char *db = "Default";
+		const char *p0 = hreq->path, *p1;
                 Z_SRW_PDU *sr = soap_package->u.generic->p;
-                
+		
+		if (*p0 == '/')
+		    p0++;
+		p1 = strchr(p0, '?');
+		if (!p1)
+		    p1 = p0 + strlen(p0);
+		if (p1 != p0)
+		{
+		    db = (char*) odr_malloc(assoc->decode, p1 - p0 + 1);
+		    memcpy (db, p0, p1 - p0);
+		    db[p1 - p0] = '\0';
+		}
+
                 if (sr->which == Z_SRW_searchRetrieve_request)
                 {
                     Z_SRW_PDU *res =
@@ -1096,23 +1059,8 @@ static void process_http_request(association *assoc, request *req)
                                     Z_SRW_searchRetrieve_response);
 
                     if (!sr->u.request->database)
-                    {
-                        const char *p0 = hreq->path, *p1;
-                        if (*p0 == '/')
-                            p0++;
-                        p1 = strchr(p0, '?');
-                        if (!p1)
-                            p1 = p0 + strlen(p0);
-                        if (p1 != p0)
-                        {
-                            sr->u.request->database =
-                                odr_malloc(assoc->decode, p1 - p0 + 1);
-                            memcpy (sr->u.request->database, p0, p1 - p0);
-                            sr->u.request->database[p1 - p0] = '\0';
-                        }
-                        else
-                            sr->u.request->database = "Default";
-                    }
+			sr->u.request->database = db;
+
                     srw_bend_search(assoc, req, sr->u.request,
                                     res->u.response);
                     
@@ -1124,9 +1072,12 @@ static void process_http_request(association *assoc, request *req)
                     Z_SRW_PDU *res =
                         yaz_srw_get(assoc->encode, Z_SRW_explain_response);
 
+                    if (!sr->u.explain_request->database)
+			sr->u.explain_request->database = db;
+
                     srw_bend_explain(assoc, req, sr->u.explain_request,
                                      res->u.explain_response);
-                    if (!res->u.explain_response->explainData_buf)
+                    if (!res->u.explain_response->record.recordData_buf)
                     {
                         z_soap_error(assoc->encode, soap_package,
                                      "SOAP-ENV:Client", "Explain Not Supported", 0);
@@ -1589,7 +1540,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.4 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.5 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

@@ -1,11 +1,7 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: zoom-p.h,v 1.2 2003-12-20 00:51:19 adam Exp $
  */
-
-#if HAVE_XSLT
-#include <yaz/srw.h>
-#endif
 
 #include <yaz/proto.h>
 #include <yaz/comstack.h>

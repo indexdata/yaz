@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.2 2003-12-18 23:04:23 adam Exp $
+ * $Id: soap.c,v 1.3 2003-12-20 00:51:19 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -111,6 +111,12 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
             return z_soap_error(o, p, "SOAP-ENV:Client",
                                 "SOAP No content for Body", 0);
         }
+        if (!ptr->ns)
+        {
+            xmlFreeDoc(doc);
+            return z_soap_error(o, p, "SOAP-ENV:Client",
+                                "SOAP No namespace for content", 0);
+        }
         /* check for fault package */
         if (!strcmp(ptr->ns->href, p->ns)
             && !strcmp(ptr->name, "Fault") && ptr->children)
@@ -205,7 +211,6 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
                                     handlers[no].ns);
             if (ret)
 	    {
-		xmlFreeNode(envelope_ptr);
 		xmlFreeDoc(doc);
                 return ret;
 	    }
@@ -227,7 +232,6 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
             memcpy(*content_buf, buf_out, len_out);
             xmlFree(buf_out);
         }
-	xmlFreeNode(envelope_ptr);
         xmlFreeDoc(doc);
         return 0;
     }

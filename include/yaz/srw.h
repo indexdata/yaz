@@ -2,13 +2,14 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.8 2003-12-09 12:51:16 adam Exp $
+ * $Id: srw.h,v 1.9 2003-12-20 00:51:19 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
 #define YAZ_SRW_H
 
 #include <yaz/soap.h>
+#include <yaz/zgdu.h>
 
 YAZ_BEGIN_CDECL
 
@@ -69,13 +70,12 @@ typedef struct {
 } Z_SRW_searchRetrieveResponse;
 
 typedef struct {
-    int dummy;
+    char *recordPacking;
+    char *database;
 } Z_SRW_explainRequest;
 
 typedef struct {
-    int explainPacking;
-    char *explainData_buf;
-    int explainData_len;
+    Z_SRW_record record;
 } Z_SRW_explainResponse;
     
 #define Z_SRW_searchRetrieve_request  1
@@ -91,6 +91,8 @@ typedef struct {
         Z_SRW_explainRequest *explain_request;
         Z_SRW_explainResponse *explain_response;
     } u;
+    char *srw_version;
+    char *database;
 } Z_SRW_PDU;
 
 YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
@@ -104,6 +106,13 @@ YAZ_EXPORT int yaz_diag_bib1_to_srw (int bib1_code);
 
 YAZ_EXPORT int yaz_diag_srw_to_bib1(int srw_code);
 
+YAZ_EXPORT char *yaz_uri_val(const char *path, const char *name, ODR o);
+YAZ_EXPORT void yaz_uri_val_int(const char *path, const char *name,
+				ODR o, int **intp);
+YAZ_EXPORT int yaz_check_for_srw(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
+				 char **soap_ns, ODR decode);
+YAZ_EXPORT int yaz_check_for_sru(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
+				 char **soap_ns, ODR decode);
 YAZ_END_CDECL
 
 #endif

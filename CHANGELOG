@@ -2,6 +2,10 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- NOT YET RELEASED
 
+* SRW/SRU 1.1. Since the Namespace has changed for SRW/SRU, it means that
+this version is incompatible with version 1.0 and older YAZ SRW/SRU
+implementations.
+
 CQL changes to reflect recent changes to the specification:
 * Documentation talks about context sets instead of index sets.
 * Documentation talks about indexes instead of qualifiers.

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.215 2003-12-18 17:02:24 mike Exp $
+ * $Id: client.c,v 1.216 2003-12-20 00:51:19 adam Exp $
  */
 
 #include <stdio.h>
@@ -1131,7 +1131,7 @@ static int send_srw(Z_SRW_PDU *sr)
     char *path = 0;
     char ctype[50];
     Z_SOAP_Handler h[2] = {
-        {"http://www.loc.gov/zing/srw/v1.0/", 0, (Z_SOAP_fun) yaz_srw_codec},
+        {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
         {0, 0, 0}
     };
     ODR o = odr_createmem(ODR_ENCODE);
@@ -2133,6 +2133,29 @@ static int cmd_itemorder(const char *arg)
     return 2;
 }
 
+static int cmd_explain(const char *arg)
+{
+    if (protocol != PROTO_HTTP)
+	return 0;
+#if HAVE_XML2
+    if (!conn)
+	cmd_open(0);
+    if (1)
+    {
+	Z_SRW_PDU *sr = 0;
+	
+	setno = 1;
+	
+	/* save this for later .. when fetching individual records */
+	sr = yaz_srw_get(out, Z_SRW_explain_request);
+	send_srw(sr);
+	return 2;
+    }
+#else
+    return 0;
+#endif
+}
+    
 static int cmd_find(const char *arg)
 {
     if (!*arg)
@@ -3248,6 +3271,28 @@ struct timeval tv_start, tv_end;
 #endif
 
 #if HAVE_XML2
+static void handle_srw_record(Z_SRW_record *rec)
+{
+    if (rec->recordPosition)
+    {
+	printf ("pos=%d", *rec->recordPosition);
+	setno = *rec->recordPosition + 1;
+    }
+    if (rec->recordSchema)
+	printf (" schema=%s", rec->recordSchema);
+    printf ("\n");
+    if (rec->recordData_buf && rec->recordData_len)
+    {
+	fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout);
+	printf ("\n");
+    }
+}
+
+static void handle_srw_explain_response(Z_SRW_explainResponse *res)
+{
+    handle_srw_record(&res->record);
+}
+
 static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
 {
     int i;
@@ -3266,23 +3311,7 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
     if (res->numberOfRecords)
         printf ("Number of hits: %d\n", *res->numberOfRecords);
     for (i = 0; i<res->num_records; i++)
-    {
-        Z_SRW_record *rec = res->records + i;
-
-        if (rec->recordPosition)
-        {
-            printf ("pos=%d", *rec->recordPosition);
-            setno = *rec->recordPosition + 1;
-        }
-        if (rec->recordSchema)
-            printf (" schema=%s", rec->recordSchema);
-        printf ("\n");
-        if (rec->recordData_buf && rec->recordData_len)
-        {
-            fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout);
-            printf ("\n");
-        }
-    }
+	handle_srw_record(res->records + i);
 }
 
 static void http_response(Z_HTTP_Response *hres)
@@ -3297,7 +3326,7 @@ static void http_response(Z_HTTP_Response *hres)
         Z_SOAP *soap_package = 0;
         ODR o = odr_createmem(ODR_DECODE);
         Z_SOAP_Handler soap_handlers[2] = {
-            {"http://www.loc.gov/zing/srw/v1.0/", 0,
+            {"http://www.loc.gov/zing/srw/", 0,
              (Z_SOAP_fun) yaz_srw_codec},
             {0, 0, 0}
         };
@@ -3310,10 +3339,12 @@ static void http_response(Z_HTTP_Response *hres)
             Z_SRW_PDU *sr = soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(sr->u.response);
+            else if (sr->which == Z_SRW_explain_response)
+                handle_srw_explain_response(sr->u.explain_response);
             else
                 ret = -1;
         }
-        else if (!ret && (soap_package->which == Z_SOAP_fault
+        else if (soap_package && (soap_package->which == Z_SOAP_fault
                           || soap_package->which == Z_SOAP_error))
         {
             printf ("HTTP Error Status=%d\n", hres->code);
@@ -3321,6 +3352,9 @@ static void http_response(Z_HTTP_Response *hres)
                     soap_package->u.fault->fault_code);
             printf ("SOAP Fault string %s\n", 
                     soap_package->u.fault->fault_string);
+	    if (soap_package->u.fault->details)
+		printf ("SOAP Details %s\n", 
+			soap_package->u.fault->details);
         }
         else
             ret = -1;
@@ -3555,7 +3589,6 @@ int cmd_set_otherinfo(const char* args)
         printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
     }
     
-    
     oidval = oid_getvalbyname (oid);
     if(oidval == -1 ) {
         printf("Error in set_otherinfo command unknown oid %s \n",oid);
@@ -3769,6 +3802,7 @@ static struct {
     {"adm-commit", cmd_adm_commit, "",NULL,0,NULL},
     {"adm-shutdown", cmd_adm_shutdown, "",NULL,0,NULL},
     {"adm-startup", cmd_adm_startup, "",NULL,0,NULL},
+    {"explain", cmd_explain, "", NULL, 0, NULL},
     {"help", cmd_help, "", NULL,0,NULL},
     {0,0,0,0,0,0}
 };

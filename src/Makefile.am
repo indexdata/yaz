@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.1 2003-10-27 12:21:30 adam Exp $
+## $Id: Makefile.am,v 1.2 2003-12-20 00:51:19 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -56,8 +56,8 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   ill-core.c item-req.c ill-get.c \
   zget.c yaz-ccl.c diagbib1.c logrpn.c \
   otherinfo.c pquery.c sortspec.c z3950oid.c charneg.c \
-  zoom-c.c zoom-opt.c zoom-p.h grs1disp.c zgdu.c soap.c srw.c opacdisp.c \
-  cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c \
+  zoom-c.c zoom-opt.c zoom-p.h grs1disp.c zgdu.c soap.c srw.c srwutil.c \
+  opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c \
   cclqfile.c cclstr.c \
   cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \
   cqlstrer.c lexer.h \

@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.66 2003-10-27 12:32:03 adam Exp $
+# $Id: makefile,v 1.67 2003-12-20 00:51:20 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -350,6 +350,7 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\zgdu.obj \
    $(OBJDIR)\soap.obj \
    $(OBJDIR)\srw.obj \
+   $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
    $(OBJDIR)\zoom-opt.obj
 
