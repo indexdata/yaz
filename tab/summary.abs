@@ -1,0 +1,26 @@
+#
+# Summary record abstract syntax
+#
+
+name summary
+tagset summary.tag
+attset bib1.att
+reference Summary
+
+elm (4,0)		title			!
+elm (4,1)		author			!
+elm (4,2)		callNumber		-
+elm (4,3)		recordType		-
+elm (4,4)		bibliographicLevel	-
+elm (4,5)		formats			-
+elm (4,5)/(4,6)		format			-
+elm (4,5)/(4,6)/(4,7)   format-type		-
+elm (4,5)/(4,6)/(4,8)   format-size		-
+elm (4,5)/(4,6)/(4,9)   format-bestPosn		-
+elm (4,10)		publicationPlace	-
+elm (4,11)		publicationDate		-
+elm (4,12)		targetSystemKey		-
+elm (4,13)		satisfyingElement	-
+elm (4,14)		rank			-
+elm (4,15)		documentId		-
+elm (4,16)		otherInformation	-
