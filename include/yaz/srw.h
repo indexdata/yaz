@@ -2,13 +2,15 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.7 2003-03-23 20:27:16 adam Exp $
+ * $Id: srw.h,v 1.8 2003-12-09 12:51:16 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
 #define YAZ_SRW_H
 
 #include <yaz/soap.h>
+
+YAZ_BEGIN_CDECL
 
 typedef struct {
     char *recordSchema;
@@ -102,5 +104,6 @@ YAZ_EXPORT int yaz_diag_bib1_to_srw (int bib1_code);
 
 YAZ_EXPORT int yaz_diag_srw_to_bib1(int srw_code);
 
+YAZ_END_CDECL
 
 #endif

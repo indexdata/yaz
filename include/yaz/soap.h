@@ -2,13 +2,15 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.h,v 1.4 2003-03-24 22:26:50 adam Exp $
+ * $Id: soap.h,v 1.5 2003-12-09 12:51:16 adam Exp $
  */
 
 #ifndef YAZ_SOAP_H
 #define YAZ_SOAP_H
 
 #include <yaz/odr.h>
+
+YAZ_BEGIN_CDECL
 
 typedef struct {
     char *fault_code;
@@ -54,4 +56,5 @@ YAZ_EXPORT int z_soap_error(ODR o, Z_SOAP *p,
                             const char *fault_code, const char *fault_string,
                             const char *details);
 
+YAZ_END_CDECL
 #endif

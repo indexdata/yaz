@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added missing C decl macros for include/yaz/{soap.h,srw.h}, so that
+functions from there can be used from C++.
+
 --- 2.0.6 2003/12/04
 
 Frontend server now transfers memory from decoded packages to stream
