@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.36 2002-07-11 10:39:05 adam Exp $
+ * $Id: zoom-c.c,v 1.37 2002-07-25 12:51:48 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -2314,7 +2314,7 @@ ZOOM_event (int no, ZOOM_connection *cs)
 #if HAVE_SYS_POLL_H
 
 #else
-    tv.tv_sec = 15;
+    tv.tv_sec = 25;
     tv.tv_usec = 0;
     
     FD_ZERO (&input);
@@ -2375,7 +2375,7 @@ ZOOM_event (int no, ZOOM_connection *cs)
     if (!nfds)
         return 0;
 #if HAVE_SYS_POLL_H
-    r = poll (pollfds, nfds, 15000);
+    r = poll (pollfds, nfds, 25000);
     for (i = 0; i<nfds; i++)
     {
         ZOOM_connection c = poll_cs[i];
