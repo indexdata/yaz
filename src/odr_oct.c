@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_oct.c,v 1.3 2004-08-13 07:30:06 adam Exp $
+ * $Id: odr_oct.c,v 1.4 2004-08-13 08:59:07 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -32,7 +32,6 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
     	return odr_missing(o, opt, name);
     if (o->direction == ODR_PRINT)
     {
-        int i;
 	odr_prname(o, name);
     	odr_printf(o, "OCTETSTRING(len=%d) ", (*p)->len);
 
