@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.44 2001-11-06 17:01:25 adam Exp $
+ * $Id: tcpip.c,v 1.45 2002-01-21 21:50:32 adam Exp $
  */
 
 #include <stdio.h>
@@ -275,40 +275,56 @@ int tcpip_connect(COMSTACK h, void *address)
 {
     struct sockaddr_in *add = (struct sockaddr_in *)address;
 #if HAVE_OPENSSL_SSL_H
-	tcpip_state *sp = (tcpip_state *)h->cprivate;
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
 #endif
     int r;
 
     TRC(fprintf(stderr, "tcpip_connect\n"));
     h->io_pending = 0;
-    if (h->state == CS_ST_UNBND)
+    if (h->state != CS_ST_UNBND)
     {
-	r = connect(h->iofile, (struct sockaddr *) add, sizeof(*add));
-	if (r < 0)
-	{
-#ifdef WIN32
-	    if (WSAGetLastError() == WSAEWOULDBLOCK)
-	    {
-		h->event = CS_CONNECT;
-		h->state = CS_ST_CONNECTING;
-		h->io_pending = CS_WANT_WRITE;
-		return 1;
-	    }
-#else
-	    if (errno == EINPROGRESS)
-	    {
-		h->event = CS_CONNECT;
-		h->state = CS_ST_CONNECTING;
-		h->io_pending = CS_WANT_WRITE|CS_WANT_READ;
-		return 1;
-	    }
-#endif
-	    h->cerrno = CSYSERR;
-	    return -1;
-	}
-	h->event = CS_CONNECT;
-	h->state = CS_ST_CONNECTING;
+        h->cerrno = CSOUTSTATE;
+	return -1;
     }
+    r = connect(h->iofile, (struct sockaddr *) add, sizeof(*add));
+    if (r < 0)
+    {
+#ifdef WIN32
+        if (WSAGetLastError() == WSAEWOULDBLOCK)
+        {
+            h->event = CS_CONNECT;
+            h->state = CS_ST_CONNECTING;
+            h->io_pending = CS_WANT_WRITE;
+            return 1;
+        }
+#else
+        if (errno == EINPROGRESS)
+        {
+            h->event = CS_CONNECT;
+            h->state = CS_ST_CONNECTING;
+            h->io_pending = CS_WANT_WRITE|CS_WANT_READ;
+            return 1;
+        }
+#endif
+        h->cerrno = CSYSERR;
+        return -1;
+    }
+    h->event = CS_CONNECT;
+    h->state = CS_ST_CONNECTING;
+
+    return tcpip_rcvconnect (h);
+}
+
+/*
+ * nop
+ */
+int tcpip_rcvconnect(COMSTACK h)
+{
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
+    TRC(fprintf(stderr, "tcpip_rcvconnect\n"));
+
+    if (h->state == CS_ST_DATAXFER)
+        return 0;
     if (h->state != CS_ST_CONNECTING)
     {
         h->cerrno = CSOUTSTATE;
@@ -330,13 +346,11 @@ int tcpip_connect(COMSTACK h, void *address)
 	    int err = SSL_get_error(sp->ssl, res);
 	    if (err == SSL_ERROR_WANT_READ)
 	    {
-		yaz_log (LOG_LOG, "SSL_connect. want_read");
 		h->io_pending = CS_WANT_READ;
 		return 1;
 	    }
 	    if (err == SSL_ERROR_WANT_WRITE)
 	    {
-		yaz_log (LOG_LOG, "SSL_connect. want_write");
 		h->io_pending = CS_WANT_WRITE;
 		return 1;
 	    }
@@ -348,45 +362,6 @@ int tcpip_connect(COMSTACK h, void *address)
     h->event = CS_DATA;
     h->state = CS_ST_DATAXFER;
     return 0;
-}
-
-/*
- * nop
- */
-int tcpip_rcvconnect(COMSTACK cs)
-{
-    TRC(fprintf(stderr, "tcpip_rcvconnect\n"));
-
-    if (cs->event == CS_CONNECT)
-    {
-	int fd = cs->iofile;
-	fd_set input, output;
-	struct timeval tv;
-	int r;
-	
-	tv.tv_sec = 0;
-	tv.tv_usec = 1;
-	
-	FD_ZERO(&input);
-	FD_ZERO(&output);
-	FD_SET (fd, &input);
-	FD_SET (fd, &output);
-	
-	r = select (fd+1, &input, &output, 0, &tv);
-	if (r > 0)
-	{
-	    if (FD_ISSET(cs->iofile, &output))
-	    {
-		cs->event = CS_DATA;
-		return 0;   /* write OK, we're OK */
-	    }
-	    else
-		return -1;  /* an error, for sure */
-	}
-	else if (r == 0)
-	    return 0;  /* timeout - incomplete */
-    }
-    return -1;    /* wrong state or bad select */
 }
 
 #define CERTF "ztest.pem"
@@ -614,13 +589,11 @@ COMSTACK tcpip_accept(COMSTACK h)
 		if (err == SSL_ERROR_WANT_READ)
 		{
 		    h->io_pending = CS_WANT_READ;
-		    yaz_log (LOG_LOG, "SSL_accept. want_read");
 		    return h;
 		}
 		if (err == SSL_ERROR_WANT_WRITE)
 		{
 		    h->io_pending = CS_WANT_WRITE;
-		    yaz_log (LOG_LOG, "SSL_accept. want_write");
 		    return h;
 		}
 		cs_close (h);
@@ -784,13 +757,11 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
 	    if (ssl_err == SSL_ERROR_WANT_READ)
 	    {
 		h->io_pending = CS_WANT_READ;
-		yaz_log (LOG_LOG, "SSL_read. want_read");
 		break;
 	    }
 	    if (ssl_err == SSL_ERROR_WANT_WRITE)
 	    {
 		h->io_pending = CS_WANT_WRITE;
-		yaz_log (LOG_LOG, "SSL_read. want_write");
 		break;
 	    }
 	    if (res == 0)
@@ -925,13 +896,11 @@ int ssl_put(COMSTACK h, char *buf, int size)
 	    if (ssl_err == SSL_ERROR_WANT_READ)
 	    {
 		h->io_pending = CS_WANT_READ;
-		yaz_log (LOG_LOG, "SSL_write. want_read");
 		return 1;
 	    }
 	    if (ssl_err == SSL_ERROR_WANT_WRITE)
 	    {
 		h->io_pending = CS_WANT_WRITE;
-		yaz_log (LOG_LOG, "SSL_write. want_write");
 		return 1;
 	    }
 	    h->cerrno = CSERRORSSL;

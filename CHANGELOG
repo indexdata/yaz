@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.5 2002/XX/XX
 
+SSL/COMSTACK updates. cs_rcvconnect completes SSL handshake. ZOOM
+works with SSL.
+
 Configure option --with-openssl=<dir> now works when a directory is
 specified. Patch provided by Morten Bøgeskov.
 

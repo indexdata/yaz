@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.20 2002-01-09 12:44:31 adam Exp $
+ * $Id: zoom-c.c,v 1.21 2002-01-21 21:50:32 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -32,7 +32,6 @@ static void ZOOM_Event_destroy (ZOOM_Event event)
 
 static void ZOOM_connection_put_event (ZOOM_connection c, ZOOM_Event event)
 {
-    // put in back of queue
     if (c->m_queue_back)
     {
 	c->m_queue_back->prev = event;
@@ -50,7 +49,6 @@ static void ZOOM_connection_put_event (ZOOM_connection c, ZOOM_Event event)
 
 static ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c)
 {
-    // get from front of queue
     ZOOM_Event event = c->m_queue_front;
     if (!event)
 	return 0;
@@ -518,8 +516,11 @@ static int do_connect (ZOOM_connection c)
 	if (ret >= 0)
 	{
 	    c->state = STATE_CONNECTING; 
-	    c->mask = ZOOM_SELECT_READ | ZOOM_SELECT_WRITE | 
-                ZOOM_SELECT_EXCEPT;
+            c->mask = ZOOM_SELECT_EXCEPT;
+            if (c->cs->io_pending & CS_WANT_WRITE)
+                c->mask += ZOOM_SELECT_WRITE;
+            if (c->cs->io_pending & CS_WANT_READ)
+                c->mask += ZOOM_SELECT_READ;
 	    return 1;
 	}
     }
@@ -1557,14 +1558,18 @@ static int do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
 	return 1;
     }
     else if (r == 1)
-    {
-	c->state = STATE_ESTABLISHED;
-	c->mask = ZOOM_SELECT_READ|ZOOM_SELECT_WRITE|ZOOM_SELECT_EXCEPT;
+    {    
+        c->mask = ZOOM_SELECT_EXCEPT;
+        if (c->cs->io_pending & CS_WANT_WRITE)
+            c->mask += ZOOM_SELECT_WRITE;
+        if (c->cs->io_pending & CS_WANT_READ)
+            c->mask += ZOOM_SELECT_READ;
+        yaz_log (LOG_DEBUG, "do_write_ex 1 mask=%d", c->mask);
     }
     else
     {
-	c->state = STATE_ESTABLISHED;
-	c->mask = ZOOM_SELECT_READ|ZOOM_SELECT_EXCEPT;
+        c->mask = ZOOM_SELECT_READ|ZOOM_SELECT_EXCEPT;
+        yaz_log (LOG_DEBUG, "do_write_ex 2 mask=%d", c->mask);
     }
     return 0;
 }
@@ -1660,73 +1665,53 @@ int ZOOM_connection_error (ZOOM_connection c, const char **cp,
 int ZOOM_connection_do_io(ZOOM_connection c, int mask)
 {
     ZOOM_Event event = 0;
-#if 0
     int r = cs_look(c->cs);
-    yaz_log (LOG_LOG, "ZOOM_connection_do_io c=%p mask=%d cs_look=%d",
+    yaz_log (LOG_DEBUG, "ZOOM_connection_do_io c=%p mask=%d cs_look=%d",
 	     c, mask, r);
     
     if (r == CS_NONE)
     {
-        event = ZOOM_Event_create (ZOOM_EVENT_IO_CONNECT);
+        event = ZOOM_Event_create (ZOOM_EVENT_CONNECT);
 	c->error = ZOOM_ERROR_CONNECT;
 	do_close (c);
         ZOOM_connection_put_event (c, event);
     }
     else if (r == CS_CONNECT)
     {
-        event = ZOOM_Event_create (ZOOM_EVENT_IO_CONNECT);
-	yaz_log (LOG_LOG, "calling rcvconnect");
-	if (cs_rcvconnect (c->cs) < 0)
-	{
-	    c->error = ZOOM_ERROR_CONNECT;
-	    do_close (c);
-            ZOOM_connection_put_event (c, event);
-	}
-	else
-        {
-            ZOOM_connection_put_event (c, event);
-	    ZOOM_connection_send_init (c);
-        }
-    }
-    else
-    {
-	if (mask & ZOOM_SELECT_READ)
-	    do_read (c);
-	if (c->cs && (mask & ZOOM_SELECT_WRITE))
-	    do_write (c);
-    }	
-#else
-    yaz_log (LOG_DEBUG, "ZOOM_connection_do_io c=%p mask=%d", c, mask);
-    if (c->state == STATE_CONNECTING)
-    {
+        int ret;
         event = ZOOM_Event_create (ZOOM_EVENT_CONNECT);
-	if (mask & ZOOM_SELECT_WRITE)
+
+        ret = cs_rcvconnect (c->cs);
+        yaz_log (LOG_DEBUG, "cs_rcvconnect returned %d", ret);
+        if (ret == 1)
+        {
+            c->mask = ZOOM_SELECT_EXCEPT;
+            if (c->cs->io_pending & CS_WANT_WRITE)
+                c->mask += ZOOM_SELECT_WRITE;
+            if (c->cs->io_pending & CS_WANT_READ)
+                c->mask += ZOOM_SELECT_READ;
+            ZOOM_connection_put_event (c, event);
+        }
+        else if (ret == 0)
         {
             ZOOM_connection_put_event (c, event);
-	    ZOOM_connection_send_init (c);
+            ZOOM_connection_send_init (c);
+            c->state = STATE_ESTABLISHED;
         }
-	else
-	{
-	    c->error = ZOOM_ERROR_CONNECT;
-	    do_close (c);
+        else
+        {
+            c->error = ZOOM_ERROR_CONNECT;
+            do_close (c);
             ZOOM_connection_put_event (c, event);
-	}
-    }
-    else if (c->state == STATE_ESTABLISHED)
-    {
-	if (mask & ZOOM_SELECT_READ)
-	    do_read (c);
-	if (c->cs && (mask & ZOOM_SELECT_WRITE))
-	    do_write (c);
+        }
     }
     else
     {
-        event = ZOOM_Event_create (ZOOM_EVENT_UNKNOWN);
-        ZOOM_connection_put_event (c, event);
-	c->error = ZOOM_ERROR_INTERNAL;
-	do_close (c);
+        if (mask & ZOOM_SELECT_READ)
+            do_read (c);
+        if (c->cs && (mask & ZOOM_SELECT_WRITE))
+            do_write (c);
     }
-#endif
     return 1;
 }
 
@@ -1836,9 +1821,7 @@ int ZOOM_event (int no, ZOOM_connection *cs)
     if (!nfds)
         return 0;
 #if HAVE_SYS_POLL_H
-    yaz_log (LOG_DEBUG, "poll start");
     r = poll (pollfds, nfds, 15000);
-    yaz_log (LOG_DEBUG, "poll stop, returned r=%d", r);
     for (i = 0; i<nfds; i++)
     {
         ZOOM_connection c = poll_cs[i];
