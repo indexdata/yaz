@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.4  1995-05-22 15:30:13  adam
+ * Revision 1.5  1995-05-29 08:10:47  quinn
+ * Moved oid.c to util.
+ *
+ * Revision 1.4  1995/05/22  15:30:13  adam
  * Client uses prefix query notation.
  *
  * Revision 1.3  1995/05/22  15:06:53  quinn
@@ -181,7 +184,7 @@ int cmd_open(char *arg)
     	fprintf(stderr, "Bad type: %s\n", type);
     	return 0;
     }
-    if (!(conn = cs_create(t, 1, CS_Z3950)))
+    if (!(conn = cs_create(t, 1, protocol)))
     {
 	perror("cs_create");
 	return 0;
@@ -518,7 +521,11 @@ int cmd_quit(char *arg)
 
 static void initialize(void)
 {
+#ifdef RPN_QUERY
+#ifndef PREFIX_QUERY
     FILE *inf;
+#endif
+#endif
 
     if (!(out = odr_createmem(ODR_ENCODE)) ||
     	!(in = odr_createmem(ODR_DECODE)) ||
