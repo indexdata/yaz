@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 1994-2001, Index Data
+ * Copyright (C) 1994-2002, Index Data
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: xmalloc.c,v 1.16 2002-04-16 13:04:20 heikki Exp $
+ * $Id: xmalloc.c,v 1.17 2002-06-18 21:30:39 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -184,15 +184,15 @@ void xmalloc_trav_d(const char *file, int line)
     size_t size = 0;
     struct dmalloc_info *dinfo = dmalloc_list;
     
-    yaz_log (LOG_LOG, "malloc_trav %s:%d", file, line);
+    yaz_log (LOG_MALLOC, "malloc_trav %s:%d", file, line);
     while (dinfo)
     {
-	yaz_log (LOG_LOG, " %20s:%d p=%p size=%d", dinfo->file, dinfo->line,
+	yaz_log (LOG_MALLOC, " %20s:%d p=%p size=%d", dinfo->file, dinfo->line,
 	      ((char*) dinfo)+sizeof(*dinfo)+4*sizeof(char), dinfo->len);
 	size += dinfo->len;
 	dinfo = dinfo->next;
     }
-    yaz_log (LOG_LOG, "total bytes %ld", (long) size);
+    yaz_log (LOG_MALLOC, "total bytes %ld", (long) size);
 }
 
 #else

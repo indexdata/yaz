@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.129 2002-04-18 13:18:47 adam Exp $
+ * $Id: seshigh.c,v 1.130 2002-06-18 21:30:39 adam Exp $
  */
 
 /*
@@ -167,6 +167,7 @@ void destroy_association(association *h)
     request_delq(&h->incoming);
     request_delq(&h->outgoing);
     xfree(h);
+    xmalloc_trav("session closed");
     if (control_block && control_block->one_shot)
 	exit (0);
 }

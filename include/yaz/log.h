@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.5 2002-04-16 13:04:20 heikki Exp $
+ * $Id: log.h,v 1.6 2002-06-18 21:30:39 adam Exp $
  */
 
 #ifndef LOG_H
@@ -44,7 +44,7 @@ YAZ_BEGIN_CDECL
 #define LOG_APP    0x0040     /* For application level events such as new-connection */
 #define LOG_MALLOC 0x0080     /* debugging mallocs */
 
-#define LOG_ALL   0xffff
+#define LOG_ALL   0xff7f
 
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 

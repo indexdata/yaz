@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.1 2002-06-04 11:36:10 adam Exp $
+ * $Id: unix.c,v 1.2 2002-06-18 21:30:38 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -143,11 +143,6 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
 
 int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
 {
-    struct hostent *hp;
-    char *p, buf[512];
-    short int port = 210;
-    unsigned tmpadd;
-
     if (!unix_init ())
 	return 0;
     TRC(fprintf(stderr, "unix_strtoaddress: %s\n", str ? str : "NULL"));
@@ -227,7 +222,6 @@ int unix_connect(COMSTACK h, void *address)
  */
 int unix_rcvconnect(COMSTACK h)
 {
-    unix_state *sp = (unix_state *)h->cprivate;
     TRC(fprintf(stderr, "unix_rcvconnect\n"));
 
     if (h->state == CS_ST_DATAXFER)
@@ -248,7 +242,6 @@ int unix_rcvconnect(COMSTACK h)
 int unix_bind(COMSTACK h, void *address, int mode)
 {
     struct sockaddr *addr = (struct sockaddr *)address;
-    unsigned long one = 1;
     const char * path = ((struct sockaddr_un *)addr)->sun_path;
     struct stat stat_buf;
 
