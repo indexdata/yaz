@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.135 2003-02-14 18:49:24 adam Exp $
+ * $Id: seshigh.c,v 1.136 2003-02-17 14:35:42 adam Exp $
  */
 
 /*
@@ -502,7 +502,9 @@ static void srw_bend_fetch(association *assoc, int pos,
         record->recordData_buf = rr.record;
         record->recordData_len = rr.len;
         record->recordPosition = odr_intdup(o, pos);
-        record->recordSchema = odr_strdup(o, srw_req->recordSchema);
+        record->recordSchema = 0;
+        if (srw_req->recordSchema)
+            record->recordSchema = odr_strdup(o, srw_req->recordSchema);
     }
 }
 
@@ -520,7 +522,7 @@ static void srw_bend_search(association *assoc, request *req,
     rr.setname = "default";
     rr.replace_set = 1;
     rr.num_bases = 1;
-    rr.basenames = &base;
+    rr.basenames = &srw_req->database;
     rr.referenceId = 0;
 
     ext = (Z_External *) odr_malloc(assoc->decode, sizeof(*ext));
@@ -548,6 +550,7 @@ static void srw_bend_search(association *assoc, request *req,
     rr.errcode = 0;
     rr.errstring = 0;
     rr.search_info = 0;
+    yaz_log_zquery(rr.query);
     (assoc->init->bend_search)(assoc->backend, &rr);
     srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
     if (rr.errcode)
@@ -557,6 +560,7 @@ static void srw_bend_search(association *assoc, request *req,
 	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
         srw_res->diagnostics[0].code = 
             odr_intdup(assoc->encode, rr.errcode);
+        srw_res->diagnostics[0].details = rr.errstring;
     }
     else
     {
@@ -721,8 +725,27 @@ static void process_http_request(association *assoc, request *req)
                     Z_SRW_searchRetrieve *res =
                         yaz_srw_get(assoc->encode,
                                     Z_SRW_searchRetrieve_response);
-                    
-                    srw_bend_search(assoc, req, sr->u.request, res->u.response);
+
+                    if (!sr->u.request->database)
+                    {
+                        const char *p0 = hreq->path, *p1;
+                        if (*p0 == '/')
+                            p0++;
+                        p1 = strchr(p0, '?');
+                        if (!p1)
+                            p1 = p0 + strlen(p0);
+                        if (p1 != p0)
+                        {
+                            sr->u.request->database =
+                                odr_malloc(assoc->decode, p1 - p0 + 1);
+                            memcpy (sr->u.request->database, p0, p1 - p0);
+                            sr->u.request->database[p1 - p0] = '\0';
+                        }
+                        else
+                            sr->u.request->database = "Default";
+                    }
+                    srw_bend_search(assoc, req, sr->u.request,
+                                    res->u.response);
                     
                     soap_package->u.generic->p = res;
                     http_code = 200;
@@ -735,6 +758,7 @@ static void process_http_request(association *assoc, request *req)
                                &hres->content_buf, &hres->content_len,
                                soap_handlers);
             hres->code = http_code;
+            z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
         }
 #endif
         if (!p) /* still no response ? */

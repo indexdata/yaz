@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.19 2003-02-14 19:10:00 adam Exp $
+ * $Id: zoom-c.c,v 1.20 2003-02-17 14:35:42 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -10,6 +10,7 @@
 #include <string.h>
 #include "zoom-p.h"
 
+#include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
 #include <yaz/otherinfo.h>
 #include <yaz/log.h>
@@ -81,23 +82,40 @@ static ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c)
     return event;
 }
 
-static void set_bib1_error (ZOOM_connection c, int error)
+
+static void set_dset_error (ZOOM_connection c, int error,
+                            const char *dset,
+                            const char *addinfo, const char *addinfo2)
 {
     xfree (c->addinfo);
     c->addinfo = 0;
     c->error = error;
-    c->diagset = "Bib-1";
+    c->diagset = dset;
+    if (addinfo && addinfo2)
+    {
+        c->addinfo = xmalloc(strlen(addinfo) + strlen(addinfo2) + 2);
+        strcpy(c->addinfo, addinfo);
+        strcat(c->addinfo, addinfo2);
+    }
+    else if (addinfo)
+        c->addinfo = xstrdup(addinfo);
+    if (error)
+        yaz_log(LOG_LOG, "Error %s %s:%d %s %s",
+                c->host_port ? c->host_port : "<>", dset, error,
+                addinfo ? addinfo : "",
+                addinfo2 ? addinfo2 : "");
+}
+
+static void set_HTTP_error (ZOOM_connection c, int error,
+                            const char *addinfo, const char *addinfo2)
+{
+    return set_dset_error(c, error, "HTTP", addinfo, addinfo2);
 }
 
 static void set_ZOOM_error (ZOOM_connection c, int error,
 		            const char *addinfo)
 {
-    xfree (c->addinfo);
-    c->addinfo = 0;
-    c->error = error;
-    c->diagset = "ZOOM";
-    if (addinfo)
-        c->addinfo = xstrdup(addinfo);
+    return set_dset_error(c, error, "ZOOM", addinfo, 0);
 }
 
 static void clear_error (ZOOM_connection c)
@@ -477,6 +495,7 @@ ZOOM_resultset ZOOM_resultset_create ()
     r->start = 0;
     r->piggyback = 1;
     r->setname = 0;
+    r->schema = 0;
     r->count = 0;
     r->record_cache = 0;
     r->r_sort_spec = 0;
@@ -518,12 +537,29 @@ ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     r->piggyback = ZOOM_options_get_bool (r->options, "piggyback", 1);
     cp = ZOOM_options_get (r->options, "setname");
     if (cp)
-        r->setname = xstrdup (cp);
+        r->setname = xstrdup(cp);
+    cp = ZOOM_options_get (r->options, "schema");
+    if (cp)
+        r->schema = xstrdup(cp);
     
     r->connection = c;
 
     r->next = c->resultsets;
     c->resultsets = r;
+
+    if (c->host_port && c->proto == PROTO_SRW)
+    {
+        if (!c->cs)
+        {
+            yaz_log(LOG_DEBUG, "NO COMSTACK");
+            ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
+        }
+        else
+        {
+            yaz_log(LOG_DEBUG, "PREPARE FOR RECONNECT");
+            c->reconnect_ok = 1;
+        }
+    }
 
     task = ZOOM_connection_add_task (c, ZOOM_TASK_SEARCH);
     task->u.search.resultset = r;
@@ -573,6 +609,7 @@ ZOOM_resultset_destroy(ZOOM_resultset r)
 	ZOOM_options_destroy (r->options);
 	odr_destroy (r->odr);
         xfree (r->setname);
+        xfree (r->schema);
 	xfree (r);
     }
 }
@@ -597,6 +634,7 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
 {
     ZOOM_task task;
     ZOOM_connection c;
+    const char *cp;
 
     if (!r)
 	return;
@@ -607,6 +645,16 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
     task->u.retrieve.resultset = r;
     task->u.retrieve.start = start;
     task->u.retrieve.count = count;
+
+    cp = ZOOM_options_get (r->options, "schema");
+    if (cp)
+    {
+        if (!r->schema || strcmp(r->schema, cp))
+        {
+            xfree(r->schema);
+            r->schema = xstrdup(cp);
+        }
+    }
 
     ZOOM_resultset_addref (r);
 
@@ -792,6 +840,7 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 static zoom_ret send_APDU (ZOOM_connection c, Z_APDU *a)
 {
     ZOOM_Event event;
+    yaz_log(LOG_LOG, "sending Z39.50 APDU");
     assert (a);
     if (encode_APDU(c, a, c->odr_out))
 	return zoom_complete;
@@ -959,25 +1008,60 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_searchRetrieve *sr)
 #if HAVE_XSLT
 static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
-    ZOOM_resultset resultset;
-    Z_SRW_searchRetrieve *sr = yaz_srw_get(c->odr_out,
-                                           Z_SRW_searchRetrieve_request);
+    int i;
+    ZOOM_resultset resultset = 0;
+    Z_SRW_searchRetrieve *sr = 0;
 
+    if (c->error)                  /* don't continue on error */
+	return zoom_complete;
     assert (c->tasks);
-    assert (c->tasks->which == ZOOM_TASK_SEARCH);
-    
-    resultset = c->tasks->u.search.resultset;
-    assert(resultset);
-    assert (resultset->z_query);
+    if (c->tasks->which == ZOOM_TASK_SEARCH)
+        resultset = c->tasks->u.search.resultset;
+    else if(c->tasks->which == ZOOM_TASK_RETRIEVE)
+    {
+        resultset = c->tasks->u.retrieve.resultset;
+
+        resultset->start = c->tasks->u.retrieve.start;
+        resultset->count = c->tasks->u.retrieve.count;
+        
+        if (resultset->start >= resultset->size)
+            return zoom_complete;
+        if (resultset->start + resultset->count > resultset->size)
+            resultset->count = resultset->size - resultset->start;
+
+        for (i = 0; i<resultset->count; i++)
+        {
+            ZOOM_record rec =
+                record_cache_lookup (resultset, i + resultset->start);
+            if (!rec)
+                break;
+        }
+        if (i == resultset->count)
+            return zoom_complete;
+    }
+    assert(resultset->z_query);
+        
+    sr = yaz_srw_get(c->odr_out, Z_SRW_searchRetrieve_request);
 
     if (resultset->z_query->which == Z_Query_type_104
         && resultset->z_query->u.type_104->which == Z_External_CQL)
         sr->u.request->query = resultset->z_query->u.type_104->u.cql;
+    else if (resultset->z_query->which == Z_Query_type_1)
+    { 
+        set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, "Type-1");
+        return zoom_complete;
+    }
     else
-        sr->u.request->query = "dc.title = computer";        
-
+    {
+        set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
+        return zoom_complete;
+    }
     sr->u.request->startRecord = odr_intdup (c->odr_out, resultset->start + 1);
     sr->u.request->maximumRecords = odr_intdup (c->odr_out, resultset->count);
+    sr->u.request->recordSchema = resultset->schema;
+
+    resultset->setname = xstrdup ("default");
+    ZOOM_options_set (resultset->options, "setname", resultset->setname);
  
     return send_srw(c, sr);
 }
@@ -998,7 +1082,6 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
     const char *elementSetName;
     const char *smallSetElementSetName;
     const char *mediumSetElementSetName;
-    const char *schema;
 
     assert (c->tasks);
     assert (c->tasks->which == ZOOM_TASK_SEARCH);
@@ -1011,8 +1094,6 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
 	ZOOM_options_get (r->options, "smallSetElementSetName");
     mediumSetElementSetName =
 	ZOOM_options_get (r->options, "mediumSetElementSetName");
-    schema =
-	ZOOM_options_get (r->options, "schema");
 
     if (!smallSetElementSetName)
 	smallSetElementSetName = elementSetName;
@@ -1043,7 +1124,7 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
 	*search_req->mediumSetPresentNumber = mspn;
     }
     else if (r->start == 0 && r->count > 0
-	     && r->piggyback && !r->r_sort_spec && !schema)
+	     && r->piggyback && !r->r_sort_spec && !r->schema)
     {
 	/* Regular piggyback - do it unless we're going to do sort */
 	*search_req->largeSetLowerBound = 2000000000;
@@ -1124,8 +1205,6 @@ static void response_diag (ZOOM_connection c, Z_DiagRec *p)
 	return;
     }
     r = p->u.defaultFormat;
-    c->diagset = yaz_z3950oid_to_str(r->diagnosticSetId, &oclass);
-
     switch (r->which)
     {
     case Z_DefaultDiagFormat_v2Addinfo:
@@ -1135,9 +1214,9 @@ static void response_diag (ZOOM_connection c, Z_DiagRec *p)
 	addinfo = r->u.v3Addinfo;
 	break;
     }
-    if (addinfo)
-	c->addinfo = xstrdup (addinfo);
-    c->error = *r->condition;
+    set_dset_error(c, *r->condition,
+                   yaz_z3950oid_to_str(r->diagnosticSetId, &oclass),
+                   addinfo, 0);
 }
 
 ZOOM_API(ZOOM_record)
@@ -1368,7 +1447,17 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
     return 0;
 }
 
-static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr, int pos)
+static int strcmp_null(const char *v1, const char *v2)
+{
+    if (!v1 && !v2)
+        return 0;
+    if (!v1 || !v2)
+        return -1;
+    return strcmp(v1, v2);
+}
+
+static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr, 
+                              int pos)
 {
     ZOOM_record_cache rc;
     const char *elementSetName =
@@ -1380,20 +1469,16 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr, int pos)
     {
 	if (pos == rc->pos)
 	{
-	    if ((!elementSetName && !rc->elementSetName)
-		|| (elementSetName && rc->elementSetName &&
-		    !strcmp (elementSetName, rc->elementSetName)))
-	    {
-                if ((!syntax && !rc->syntax)
-                    || (syntax && rc->syntax &&
-                        !strcmp (syntax, rc->syntax)))
-                {
-                    /* not destroying rc->npr (it's handled by nmem )*/
-                    rc->rec.npr = npr;
-                    /* keeping wrbuf_marc too */
-                    return;
-                }
-	    }
+	    if (strcmp_null(r->schema, rc->schema))
+                continue;
+	    if (strcmp_null(elementSetName,rc->elementSetName))
+                continue;
+            if (strcmp_null(syntax, rc->syntax))
+                continue;
+            /* not destroying rc->npr (it's handled by nmem )*/
+            rc->rec.npr = npr;
+            /* keeping wrbuf_marc too */
+            return;
 	}
     }
     rc = (ZOOM_record_cache) odr_malloc (r->odr, sizeof(*rc));
@@ -1409,6 +1494,11 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr, int pos)
 	rc->syntax = odr_strdup (r->odr, syntax);
     else
 	rc->syntax = 0;
+
+    if (r->schema)
+	rc->schema = odr_strdup (r->odr, r->schema);
+    else
+	rc->schema = 0;
 
     rc->pos = pos;
     rc->next = r->record_cache;
@@ -1427,15 +1517,13 @@ static ZOOM_record record_cache_lookup (ZOOM_resultset r, int pos)
     {
 	if (pos == rc->pos)
 	{
-	    if ((!elementSetName && !rc->elementSetName)
-		|| (elementSetName && rc->elementSetName &&
-		    !strcmp (elementSetName, rc->elementSetName)))
-            {
-                if ((!syntax && !rc->syntax)
-                    || (syntax && rc->syntax &&
-                        !strcmp (syntax, rc->syntax)))
-                    return &rc->rec;
-            }
+	    if (strcmp_null(r->schema, rc->schema))
+                continue;
+	    if (strcmp_null(elementSetName,rc->elementSetName))
+                continue;
+            if (strcmp_null(syntax, rc->syntax))
+                continue;
+            return &rc->rec;
 	}
     }
     return 0;
@@ -1599,7 +1687,6 @@ static zoom_ret send_present (ZOOM_connection c)
     int i = 0;
     const char *syntax = 0;
     const char *elementSetName = 0;
-    const char *schema = 0;
     ZOOM_resultset  resultset;
 
     if (!c->tasks)
@@ -1626,7 +1713,6 @@ static zoom_ret send_present (ZOOM_connection c)
 
     syntax = ZOOM_resultset_option_get (resultset, "preferredRecordSyntax");
     elementSetName = ZOOM_resultset_option_get (resultset, "elementSetName");
-    schema = ZOOM_resultset_option_get (resultset, "schema");
 
     if (c->error)                  /* don't continue on error */
 	return zoom_complete;
@@ -1655,7 +1741,7 @@ static zoom_ret send_present (ZOOM_connection c)
 	req->preferredRecordSyntax =
 	    yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, syntax);
 
-    if (schema && *schema)
+    if (resultset->schema && *resultset->schema)
     {
 	Z_RecordComposition *compo = (Z_RecordComposition *)
             odr_malloc (c->odr_out, sizeof(*compo));
@@ -1673,14 +1759,14 @@ static zoom_ret send_present (ZOOM_connection c)
 
         compo->u.complex->generic->which = Z_Specification_oid;
         compo->u.complex->generic->u.oid = (Odr_oid *)
-            yaz_str_to_z3950oid (c->odr_out, CLASS_SCHEMA, schema);
+            yaz_str_to_z3950oid (c->odr_out, CLASS_SCHEMA, resultset->schema);
 
         if (!compo->u.complex->generic->u.oid)
         {
             /* OID wasn't a schema! Try record syntax instead. */
 
             compo->u.complex->generic->u.oid = (Odr_oid *)
-                yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, schema);
+                yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, resultset->schema);
         }
         if (elementSetName && *elementSetName)
         {
@@ -2077,83 +2163,6 @@ ZOOM_package_option_get (ZOOM_package p, const char *key)
     return ZOOM_options_get (p->options, key);
 }
 
-#if HAVE_GSOAP
-static zoom_ret ZOOM_srw_search(ZOOM_connection c, ZOOM_resultset r,
-                                const char *cql)
-{
-    int ret;
-    struct xcql__operandType *xQuery = 0;
-    char *action = 0;
-    xsd__integer startRecord = r->start + 1;
-    xsd__integer maximumRecord = r->count;
-    const char *schema = ZOOM_resultset_option_get (r, "schema");
-    struct zs__searchRetrieveResponse res;
-    xsd__string recordPacking = 0;
-    
-
-    if (!schema)
-        schema = "http://www.loc.gov/marcxml/";
-
-    ret = soap_call_zs__searchRetrieveRequest(c->soap, c->host_port,
-                                              action,
-                                              &r->z_query->u.type_104->u.cql,
-                                              xQuery, 
-                                              0, 0,
-                                              &startRecord, &maximumRecord,
-                                              (char **) &schema,
-                                              &recordPacking,
-                                              &res);
-    if (ret != SOAP_OK)
-    {
-        const char **s = soap_faultdetail(c->soap);
-        xfree (c->addinfo);
-        c->addinfo = 0;
-        if (s && *s)
-            c->addinfo = xstrdup(*s);
-        c->diagset = "SOAP";
-        c->error = ret;
-    }
-    else
-    {
-        if (res.diagnostics.__sizeDiagnostics > 0)
-        {
-            int i = 0;
-            xfree (c->addinfo);
-            c->addinfo = 0;
-            c->diagset = "SRW";
-            c->error = res.diagnostics.diagnostic[i]->code;
-            if (res.diagnostics.diagnostic[i]->details)
-                c->addinfo =
-                    xstrdup(res.diagnostics.diagnostic[i]->details);
-            
-        }
-        else
-        {
-            int i;
-            r->size = res.numberOfRecords;
-            if (res.resultSetId)
-                r->setname = xstrdup(res.resultSetId);
-            for (i = 0; i < res.records.__sizeRecords; i++)
-            {
-                char *rdata = res.records.record[i]->recordData;
-                if (rdata)
-                {
-                    Z_NamePlusRecord *npr =
-                        odr_malloc(r->odr, sizeof(*npr));
-                    Z_External *ext =
-                        z_ext_record(r->odr, VAL_TEXT_XML,
-                                     rdata, strlen(rdata));
-                    npr->databaseName = 0;
-                    npr->which = Z_NamePlusRecord_databaseRecord;
-                    npr->u.databaseRecord = ext;
-                    record_cache_add (r, npr, r->start + i);
-                }
-            }
-        }
-    }
-    return zoom_complete;
-}
-#endif
 
 ZOOM_API(void)
 ZOOM_package_option_set (ZOOM_package p, const char *key,
@@ -2187,38 +2196,6 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
     }
     task->running = 1;
     ret = zoom_complete;
-#if 0
-    if (c->proto == PROTO_SRW)
-    {
-        ZOOM_resultset resultset;
-        switch (task->which)
-        {
-        case ZOOM_TASK_SEARCH:
-            resultset = c->tasks->u.search.resultset;
-            if (resultset->z_query && 
-                resultset->z_query->which == Z_Query_type_104
-                && resultset->z_query->u.type_104->which == Z_External_CQL)
-                ret = ZOOM_srw_search(c, resultset, 
-                                      resultset->z_query->u.type_104->u.cql);
-            break;
-        case ZOOM_TASK_RETRIEVE:
-            resultset = c->tasks->u.retrieve.resultset;
-            resultset->start = c->tasks->u.retrieve.start;
-            resultset->count = c->tasks->u.retrieve.count;
-
-            if (resultset->start >= resultset->size)
-                return zoom_complete;
-            if (resultset->start + resultset->count > resultset->size)
-                resultset->count = resultset->size - resultset->start;
-
-            if (resultset->z_query && 
-                resultset->z_query->which == Z_Query_type_104
-                && resultset->z_query->u.type_104->which == Z_External_CQL)
-                ret = ZOOM_srw_search(c, resultset, 
-                                      resultset->z_query->u.type_104->u.cql);
-            break;
-        }
-#endif
     if (c->cs || task->which == ZOOM_TASK_CONNECT)
     {
         switch (task->which)
@@ -2230,7 +2207,10 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
                 ret = ZOOM_connection_send_search(c);
             break;
         case ZOOM_TASK_RETRIEVE:
-            ret = send_present (c);
+            if (c->proto == PROTO_SRW)
+                ret = ZOOM_connection_srw_send_search(c);
+            else
+                ret = send_present (c);
             break;
         case ZOOM_TASK_CONNECT:
             ret = do_connect(c);
@@ -2396,12 +2376,139 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
     }
 }
 
+#if HAVE_XSLT
+static void handle_srw_response(ZOOM_connection c,
+                                Z_SRW_searchRetrieveResponse *res)
+{
+    ZOOM_resultset resultset = 0;
+    int i;
+    NMEM nmem;
+
+    if (!c->tasks)
+        return;
+
+    if (c->tasks->which == ZOOM_TASK_SEARCH)
+        resultset = c->tasks->u.search.resultset;
+    else if (c->tasks->which == ZOOM_TASK_RETRIEVE)
+        resultset = c->tasks->u.retrieve.resultset;
+    else
+	return ;
+
+    resultset->size = 0;
+
+    yaz_log(LOG_LOG, "got SRW response OK");
+    
+    if (res->numberOfRecords)
+        resultset->size = *res->numberOfRecords;
+
+    for (i = 0; i<res->num_records; i++)
+    {
+        int pos;
+
+        Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
+            odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
+
+        if (res->records[i].recordPosition && 
+            *res->records[i].recordPosition > 0)
+            pos = *res->records[i].recordPosition - 1;
+        else
+            pos = resultset->start + i;
+        
+        npr->databaseName = 0;
+        npr->which = Z_NamePlusRecord_databaseRecord;
+        npr->u.databaseRecord = (Z_External *)
+            odr_malloc(c->odr_in, sizeof(Z_External));
+        npr->u.databaseRecord->descriptor = 0;
+        npr->u.databaseRecord->direct_reference =
+            yaz_oidval_to_z3950oid(c->odr_in, CLASS_RECSYN, VAL_TEXT_XML);
+        npr->u.databaseRecord->which = Z_External_octet;
+        npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)
+            odr_malloc(c->odr_in, sizeof(Odr_oct));
+        npr->u.databaseRecord->u.octet_aligned->buf = 
+            res->records[i].recordData_buf;
+        npr->u.databaseRecord->u.octet_aligned->len = 
+            npr->u.databaseRecord->u.octet_aligned->size = 
+            res->records[i].recordData_len;
+        record_cache_add (resultset, npr, pos);
+        yaz_log(LOG_LOG, "add SRW record to cache to pos %d", pos);
+    }
+    if (res->num_diagnostics > 0)
+    {
+        set_dset_error(c, *res->diagnostics[0].code, "SRW",
+                       res->diagnostics[0].details, 0);
+    }
+    nmem = odr_extract_mem(c->odr_in);
+    nmem_transfer(resultset->odr->mem, nmem);
+    nmem_destroy(nmem);
+}
+#endif
+
+#if HAVE_XSLT
 static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
+    int ret = -1;
+    const char *content_type = z_HTTP_header_lookup(hres->headers,
+                                                    "Content-Type");
+    const char *connection_head = z_HTTP_header_lookup(hres->headers,
+                                                       "Connection");
     c->mask = 0;
     yaz_log (LOG_DEBUG, "handle_http");
+
+    if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
+    {
+        Z_SOAP *soap_package = 0;
+        ODR o = odr_createmem(ODR_DECODE);
+        Z_SOAP_Handler soap_handlers[2] = {
+            {"http://www.loc.gov/zing/srw/v1.0/", 0,
+             (Z_SOAP_fun) yaz_srw_codec},
+            {0, 0, 0}
+        };
+        ret = z_soap_codec(o, &soap_package,
+                           &hres->content_buf, &hres->content_len,
+                           soap_handlers);
+        if (!ret && soap_package->which == Z_SOAP_generic &&
+            soap_package->u.generic->no == 0)
+        {
+            Z_SRW_searchRetrieve *sr = soap_package->u.generic->p;
+            if (sr->which == Z_SRW_searchRetrieve_response)
+                handle_srw_response(c, sr->u.response);
+            else
+                ret = -1;
+        }
+        else if (!ret && (soap_package->which == Z_SOAP_fault
+                          || soap_package->which == Z_SOAP_error))
+        {
+            set_HTTP_error(c, hres->code,
+                           soap_package->u.fault->fault_code,
+                           soap_package->u.fault->fault_string);
+        }
+        else
+            ret = -1;
+        odr_destroy(o);
+    }
+    if (ret)
+    {
+        if (hres->code != 200)
+            set_HTTP_error(c, hres->code, 0, 0);
+        else
+            set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
+        do_close (c);
+    }
     ZOOM_connection_remove_task(c);
+    if (!strcmp(hres->version, "1.0"))
+    {
+        /* HTTP 1.0: only if Keep-Alive we stay alive.. */
+        if (!connection_head || strcmp(connection_head, "Keep-Alive"))
+            do_close(c);
+    }
+    else 
+    {
+        /* HTTP 1.1: only if no close we stay alive .. */
+        if (connection_head && !strcmp(connection_head, "close"))
+            do_close(c);
+    }
 }
+#endif
 
 static int do_read (ZOOM_connection c)
 {
@@ -2449,7 +2556,14 @@ static int do_read (ZOOM_connection c)
 	else if (gdu->which == Z_GDU_Z3950)
 	    handle_apdu (c, gdu->u.z3950);
         else if (gdu->which == Z_GDU_HTTP_Response)
+        {
+#if HAVE_XSLT
             handle_http (c, gdu->u.HTTP_Response);
+#else
+            set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
+	    do_close (c);
+#endif
+        }
         c->reconnect_ok = 0;
     }
     return 1;
@@ -2579,6 +2693,8 @@ ZOOM_diag_str (int error)
 	return "Timeout";
     case ZOOM_ERROR_UNSUPPORTED_PROTOCOL:
 	return "Unsupported protocol";
+    case ZOOM_ERROR_UNSUPPORTED_QUERY:
+	return "Unsupported query type";
     default:
 	return diagbib1_str (error);
     }
@@ -2591,22 +2707,16 @@ ZOOM_connection_error_x (ZOOM_connection c, const char **cp,
     int error = c->error;
     if (cp)
     {
-        if (!c->diagset)
+        if (!c->diagset || !strcmp(c->diagset, "ZOOM"))
             *cp = ZOOM_diag_str(error);
-#if HAVE_GSOAP
+        else if (!strcmp(c->diagset, "HTTP"))
+            *cp = z_HTTP_errmsg(c->error);
+        else if (!strcmp(c->diagset, "Bib-1"))
+            *cp = ZOOM_diag_str(error);
         else if (!strcmp(c->diagset, "SRW"))
-            *cp = yaz_srw_diag_str(error);
-        else if (c->soap && !strcmp(c->diagset, "SOAP"))
-        {
-            const char **s = soap_faultstring(c->soap);
-            if (s && *s)
-                *cp = *s;
-            else
-                *cp = "unknown";
-        }
-#endif
+            *cp = yaz_srw_error_str(c->error);
         else
-            *cp = ZOOM_diag_str(error);
+            *cp = "Unknown error and diagnostic set";
     }
     if (addinfo)
         *addinfo = c->addinfo ? c->addinfo : "";

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.13 2003-02-14 18:49:24 adam Exp $
+ * $Id: zoomsh.c,v 1.14 2003-02-17 14:35:42 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -173,7 +173,7 @@ static void cmd_show (ZOOM_connection *c, ZOOM_resultset *r,
 	if (!c[i])
 	    continue;
 	if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
-	    fprintf (stderr, "%s error: %s (%s:%d) %s\n",
+	    printf ("%s error: %s (%s:%d) %s\n",
 		     ZOOM_connection_option_get(c[i], "host"), errmsg,
 		     dset, error, addinfo);
 	else if (r[i])
@@ -216,7 +216,7 @@ static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
 	if (!p[i])
 	    continue;
 	if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
-	    fprintf (stderr, "%s error: %s (%s:%d) %s\n",
+	    printf ("%s error: %s (%s:%d) %s\n",
 		     ZOOM_connection_option_get(c[i], "host"), errmsg,
 		     dset, error, addinfo);
 	else if (p[i])
@@ -244,7 +244,7 @@ static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
     }
     else if (ZOOM_query_prefix (s, query_str))
     {
-	fprintf (stderr, "Bad PQF: %s\n", query_str);
+	printf ("Bad PQF: %s\n", query_str);
 	return;
     }
     for (i = 0; i<MAX_CON; i++)
@@ -269,9 +269,9 @@ static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
 	if (!c[i])
 	    continue;
 	if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
-	    fprintf (stderr, "%s error: %s (%s:%d) %s\n",
-		     ZOOM_connection_option_get(c[i], "host"), errmsg,
-		     dset, error, addinfo);
+	    printf ("%s error: %s (%s:%d) %s\n",
+		    ZOOM_connection_option_get(c[i], "host"), errmsg,
+		    dset, error, addinfo);
 	else if (r[i])
 	{
 	    /* OK, no major errors. Look at the result count */
@@ -323,7 +323,7 @@ static void cmd_connect (ZOOM_connection *c, ZOOM_resultset *r,
 			 const char **args)
 {
     int error;
-    const char *errmsg, *addinfo;
+    const char *errmsg, *addinfo, *dset;
     char host[60];
     int j, i;
     if (!next_token_copy (args, host, sizeof(host)))
@@ -354,12 +354,11 @@ static void cmd_connect (ZOOM_connection *c, ZOOM_resultset *r,
     }
     c[i] = ZOOM_connection_create (options);
     ZOOM_connection_connect (c[i], host, 0);
-
-    if ((error = ZOOM_connection_error(c[i], &errmsg, &addinfo)))
-	printf ("%s error: %s (%d) %s\n",
-                ZOOM_connection_option_get(c[i], "host"),
-		errmsg, error, addinfo);
-    
+	
+    if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+       printf ("%s error: %s (%s:%d) %s\n",
+	    ZOOM_connection_option_get(c[i], "host"), errmsg,
+	    dset, error, addinfo);
 }
 
 static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
@@ -417,7 +416,7 @@ void shell(ZOOM_connection *c, ZOOM_resultset *r,
 	    add_history(line_in);
 #endif
 	if(strlen(line_in) > 999) {
-	    fprintf(stderr,"Input line too long\n");
+	    printf("Input line too long\n");
 	    break;
 	};
 	strcpy(buf,line_in);
@@ -441,6 +440,9 @@ int main (int argc, char **argv)
     ZOOM_connection z39_con[MAX_CON];
     ZOOM_resultset  z39_res[MAX_CON];
 
+#if 0
+    yaz_log_init_level(65535);
+#endif
     for (i = 0; i<MAX_CON; i++)
     {
 	z39_con[i] = 0;
