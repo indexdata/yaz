@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.9 2001-01-04 13:36:24 adam Exp $
+## $Id: Makefile.am,v 1.10 2001-02-21 23:16:49 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -30,8 +30,8 @@ yaz.html: yaz.sgml
 XMLFILES=yaz.xml introduction.xml installation.xml indexdata.xml \
   asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml future.xml
 
-book1.htm: $(XMLFILES)
-	jade -E14 -d ../../docbook/docbook/html/docbook.dsl -t sgml xml.dcl yaz.xml
+book1.html: $(XMLFILES) yazhtml.dsl
+	jade -E14 -d yazhtml.dsl -t sgml xml.dcl yaz.xml
 
-yaz.tex: $(XMLFILES)
-	jade -d ../../docbook/docbook/print/docbook.dsl -t tex xml.dcl yaz.xml
+yaz.tex: $(XMLFILES) yazprint.dsl
+	jade -d yazprint.dsl -t tex xml.dcl yaz.xml
