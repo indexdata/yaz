@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.9  2001-03-07 13:24:40  adam
+ * Revision 1.10  2001-06-28 12:42:01  adam
+ * Added prototype for ccl_qual_add_special.
+ *
+ * Revision 1.9  2001/03/07 13:24:40  adam
  * Member and_not in Z_Operator is kept for backwards compatibility.
  * Added support for definition of CCL operators in field spec file.
  *
@@ -323,6 +326,8 @@ YAZ_EXPORT void ccl_qual_add (CCL_bibset b, const char *name, int no,
 
 YAZ_EXPORT void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
 				  int *attr, char **attsets);
+
+YAZ_EXPORT void ccl_qual_add_special (CCL_bibset bibset, const char *n, const char *v);
 
 /* Read CCL qualifier list spec from file inf */
 YAZ_EXPORT void ccl_qual_file (CCL_bibset bibset, FILE *inf);
