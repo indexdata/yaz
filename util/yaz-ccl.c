@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1996, Index Data.
+ * Copyright (c) 1996-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.9  1997-06-23 10:31:25  adam
+ * Revision 1.10  1997-09-29 08:58:25  adam
+ * Fixed conversion of trees so that true copy is made.
+ *
+ * Revision 1.9  1997/06/23 10:31:25  adam
  * Added ODR argument to ccl_rpn_query and ccl_scan_query.
  *
  * Revision 1.8  1996/10/29 13:36:27  adam
@@ -52,15 +55,13 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
 		odr_malloc (o, sizeof(**zapt->attributeList));
             assert (zapt->attributeList[i]);
             zapt->attributeList[i]->attributeType =
-                &attr->type;
-#ifdef Z_95
+		odr_malloc(o, sizeof(int));
+            *zapt->attributeList[i]->attributeType = attr->type;
 	    zapt->attributeList[i]->attributeSet = 0;
 	    zapt->attributeList[i]->which = Z_AttributeValue_numeric;
-	    zapt->attributeList[i]->value.numeric = &attr->value;
-#else
-            zapt->attributeList[i]->attributeValue =
-                &attr->value;
-#endif
+	    zapt->attributeList[i]->value.numeric =
+		odr_malloc (o, sizeof(int));
+	    *zapt->attributeList[i]->value.numeric = attr->value;
         }
     }
     else
@@ -69,8 +70,9 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
     zapt->term = term;
     term->which = Z_Term_general;
     term->u.general = term_octet;
-    term_octet->buf = (unsigned char*) p->u.t.term;
     term_octet->len = term_octet->size = strlen (p->u.t.term);
+    term_octet->buf = odr_malloc (o, term_octet->len+1);
+    strcpy ((char*) term_octet->buf, p->u.t.term);
     return zapt;
 }
 
