@@ -42,7 +42,7 @@ Z3950Date ::= SEQUENCE{
  flags        [3] IMPLICIT SEQUENCE{
      circa          [1]   IMPLICIT NULL OPTIONAL,
                           -- if this flag is set then the date is "approximate".
-     era            [2]   IMPLICIT CHOICE{
+     era            [2]   CHOICE{
                           -- If era occurs, partOfYear should not occur.
                           decade         [1] IMPLICIT NULL,
                                               -- year must be multiple of 10.
@@ -76,7 +76,6 @@ Z3950Time ::= SEQUENCE{
      zone           [5]  CHOICE{
                               local      [1]  IMPLICIT NULL,
                               utc        [2]  IMPLICIT NULL,
-
                               utcOffset  [3]  IMPLICIT INTEGER  -- in minutes
                                                     }}             
 END                              
