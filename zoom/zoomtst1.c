@@ -1,12 +1,12 @@
 /*
- * $Id: zoomtst1.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoomtst1.c,v 1.2 2001-11-13 22:57:03 adam Exp $
  *
  * Synchronous single-target client doing search (but no retrieval)
  */
 
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <yaz/xmalloc.h>
 #include <yaz/zoom.h>
 
 int main(int argc, char **argv)

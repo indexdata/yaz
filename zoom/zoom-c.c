@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.4 2001-11-11 22:25:25 adam Exp $
+ * $Id: zoom-c.c,v 1.5 2001-11-13 22:57:03 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -12,15 +12,59 @@
 
 #include "zoom-p.h"
 
-#define USE_POLL 0
-
-#if USE_POLL
+#if HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
 
-static Z3950_record record_cache_lookup (Z3950_resultset r,
-					 int pos,
-					 const char *elementSetName);
+static Z3950_Event Z3950_Event_create (int kind)
+{
+    Z3950_Event event = xmalloc (sizeof(*event));
+    event->kind = kind;
+    event->next = 0;
+    event->prev = 0;
+    return event;
+}
+
+static void Z3950_Event_destroy (Z3950_Event event)
+{
+    xfree (event);
+}
+
+static void Z3950_connection_put_event (Z3950_connection c, Z3950_Event event)
+{
+    // put in back of queue
+    if (c->m_queue_back)
+    {
+	c->m_queue_back->prev = event;
+	assert (c->m_queue_front);
+    }
+    else
+    {
+	assert (!c->m_queue_front);
+	c->m_queue_front = event;
+    }
+    event->next = c->m_queue_back;
+    event->prev = 0;
+    c->m_queue_back = event;
+}
+
+static Z3950_Event Z3950_connection_get_event(Z3950_connection c)
+{
+    // get from front of queue
+    Z3950_Event event = c->m_queue_front;
+    if (!event)
+	return 0;
+    assert (c->m_queue_back);
+    c->m_queue_front = event->prev;
+    if (c->m_queue_front)
+    {
+	assert (c->m_queue_back);
+	c->m_queue_front->next = 0;
+    }
+    else
+	c->m_queue_back = 0;
+    return event;
+}
 
 static void clear_error (Z3950_connection c)
 {
@@ -29,11 +73,58 @@ static void clear_error (Z3950_connection c)
     c->addinfo = 0;
 }
 
+Z3950_task Z3950_connection_add_task (Z3950_connection c, int which)
+{
+    Z3950_task *taskp = &c->tasks;
+    while (*taskp)
+	taskp = &(*taskp)->next;
+    *taskp = xmalloc (sizeof(**taskp));
+    (*taskp)->running = 0;
+    (*taskp)->which = which;
+    (*taskp)->u.resultset = 0;  /* one null pointer there at least */
+    (*taskp)->next = 0;
+    clear_error (c);
+    return *taskp;
+}
+
+void Z3950_connection_remove_task (Z3950_connection c)
+{
+    Z3950_task task = c->tasks;
+
+    if (task)
+    {
+	c->tasks = task->next;
+	switch (task->which)
+	{
+	case Z3950_TASK_SEARCH:
+	    Z3950_resultset_destroy (task->u.resultset);
+	    break;
+	case Z3950_TASK_RETRIEVE:
+	    Z3950_resultset_destroy (task->u.resultset);
+	    break;
+        case Z3950_TASK_CONNECT:
+            break;
+	default:
+	    assert (0);
+	}
+	xfree (task);
+    }
+}
+
+void Z3950_connection_remove_tasks (Z3950_connection c)
+{
+    while (c->tasks)
+	Z3950_connection_remove_task(c);
+}
+
+static Z3950_record record_cache_lookup (Z3950_resultset r,
+					 int pos,
+					 const char *elementSetName);
+
 Z3950_connection Z3950_connection_create (Z3950_options options)
 {
     Z3950_connection c = xmalloc (sizeof(*c));
 
-    c->event_pending = 0;
     c->cs = 0;
     c->mask = 0;
     c->state = STATE_IDLE;
@@ -58,6 +149,9 @@ Z3950_connection Z3950_connection_create (Z3950_options options)
     c->odr_out = odr_createmem (ODR_ENCODE);
 
     c->async = 0;
+
+    c->m_queue_front = 0;
+    c->m_queue_back = 0;
     return c;
 }
 
@@ -125,6 +219,7 @@ void Z3950_connection_connect(Z3950_connection c,
 			      const char *host, int portnum)
 {
     const char *val;
+    Z3950_task task;
 
     val = Z3950_options_get (c->options, "proxy");
     if (val && *val)
@@ -143,6 +238,8 @@ void Z3950_connection_connect(Z3950_connection c,
 
     c->async = Z3950_options_get_bool (c->options, "async", 0);
     
+    task = Z3950_connection_add_task (c, Z3950_TASK_CONNECT);
+
     if (!c->async)
     {
 	while (Z3950_event (1, &c))
@@ -200,49 +297,6 @@ int Z3950_query_sortby(Z3950_query s, const char *criteria)
 }
 
 static int do_write(Z3950_connection c);
-
-
-Z3950_task Z3950_connection_add_task (Z3950_connection c, int which)
-{
-    Z3950_task *taskp = &c->tasks;
-    while (*taskp)
-	taskp = &(*taskp)->next;
-    *taskp = xmalloc (sizeof(**taskp));
-    (*taskp)->running = 0;
-    (*taskp)->which = which;
-    (*taskp)->u.resultset = 0;  /* one null pointer there at least */
-    (*taskp)->next = 0;
-    clear_error (c);
-    return *taskp;
-}
-
-void Z3950_connection_remove_task (Z3950_connection c)
-{
-    Z3950_task task = c->tasks;
-
-    if (task)
-    {
-	c->tasks = task->next;
-	switch (task->which)
-	{
-	case Z3950_TASK_SEARCH:
-	    Z3950_resultset_destroy (task->u.resultset);
-	    break;
-	case Z3950_TASK_RETRIEVE:
-	    Z3950_resultset_destroy (task->u.resultset);
-	    break;
-	default:
-	    assert (0);
-	}
-	xfree (task);
-    }
-}
-
-void Z3950_connection_remove_tasks (Z3950_connection c)
-{
-    while (c->tasks)
-	Z3950_connection_remove_task(c);
-}
 
 void Z3950_connection_destroy(Z3950_connection c)
 {
@@ -418,7 +472,7 @@ void Z3950_resultset_records (Z3950_resultset r, Z3950_record *recs,
     }
 }
 
-static void do_connect (Z3950_connection c)
+static int do_connect (Z3950_connection c)
 {
     void *add;
     const char *effective_host;
@@ -442,12 +496,12 @@ static void do_connect (Z3950_connection c)
 	    c->state = STATE_CONNECTING; 
 	    c->mask = Z3950_SELECT_READ | Z3950_SELECT_WRITE | 
                 Z3950_SELECT_EXCEPT;
-	    return;
+	    return 1;
 	}
     }
-    c->event_pending = 1;
     c->state = STATE_IDLE;
     c->error = Z3950_ERROR_CONNECT;
+    return 0;
 }
 
 int z3950_connection_socket(Z3950_connection c)
@@ -1083,10 +1137,11 @@ static int Z3950_connection_exec_task (Z3950_connection c)
 {
     Z3950_task task = c->tasks;
 
-    yaz_log (LOG_DEBUG, "Z3950_connection_exec_task");
+    yaz_log (LOG_LOG, "Z3950_connection_exec_task");
     if (!task)
 	return 0;
-    if (c->error != Z3950_ERROR_NONE || !c->cs)
+    if (c->error != Z3950_ERROR_NONE ||
+        (!c->cs && task->which != Z3950_TASK_CONNECT))
     {
 	Z3950_connection_remove_tasks (c);
 	return 0;
@@ -1106,6 +1161,9 @@ static int Z3950_connection_exec_task (Z3950_connection c)
 	if (send_present (c))
 	    return 1;
 	break;
+    case Z3950_TASK_CONNECT:
+        if (do_connect(c))
+            return 1;
     }
     Z3950_connection_remove_task (c);
     return 0;
@@ -1142,6 +1200,11 @@ static void handle_apdu (Z3950_connection c, Z_APDU *apdu)
 	    c->cookie_in = 0;
 	    if (cookie)
 		c->cookie_in = xstrdup(cookie);
+            if (c->tasks)
+            {
+                assert (c->tasks->which == Z3950_TASK_CONNECT);
+                Z3950_connection_remove_task (c);
+            }
 	    Z3950_connection_exec_task (c);
 	}
 	break;
@@ -1226,23 +1289,23 @@ static int do_write(Z3950_connection c)
 const char *Z3950_connection_option (Z3950_connection c, const char *key,
 				     const char *val)
 {
-    const char *old_val = Z3950_options_get (c->options, key);
     if (val)
     {
 	Z3950_options_set (c->options, key, val);
+        return val;
     }
-    return old_val;
+    return Z3950_options_get (c->options, key);
 }
 
 const char *Z3950_resultset_option (Z3950_resultset r, const char *key,
 				    const char *val)
 {
-    const char *old_val = Z3950_options_get (r->options, key);
     if (val)
     {
 	Z3950_options_set (r->options, key, val);
+        return val;
     }
-    return old_val;
+    return Z3950_options_get (r->options, key);
 }
 
 
@@ -1307,6 +1370,7 @@ int Z3950_connection_error (Z3950_connection c, const char **cp,
 
 int Z3950_connection_do_io(Z3950_connection c, int mask)
 {
+    Z3950_Event event;
 #if 0
     int r = cs_look(c->cs);
     yaz_log (LOG_LOG, "Z3950_connection_do_io c=%p mask=%d cs_look=%d",
@@ -1360,13 +1424,15 @@ int Z3950_connection_do_io(Z3950_connection c, int mask)
 	do_close (c);
     }
 #endif
-    c->event_pending = 1;
+    event = Z3950_Event_create (1);
+    Z3950_connection_put_event (c, event);
     return 1;
 }
 
+
 int Z3950_event (int no, Z3950_connection *cs)
 {
-#if USE_POLL
+#if HAVE_SYS_POLL_H
     struct pollfd pollfds[1024];
     Z3950_connection poll_cs[1024];
 #else
@@ -1379,14 +1445,20 @@ int Z3950_event (int no, Z3950_connection *cs)
     for (i = 0; i<no; i++)
     {
 	Z3950_connection c = cs[i];
-	if (c && c->event_pending)
-	{
-	    c->event_pending = 0;
+        Z3950_Event event;
+	if (c && (event = Z3950_connection_get_event(c)))
+        {
+            Z3950_Event_destroy (event);
 	    return i+1;
-	}
+        }
     }
-
-#if USE_POLL
+    for (i = 0; i<no; i++)
+    {
+        Z3950_connection c = cs[i];
+        if (c && Z3950_connection_exec_task (c))
+            return i+1;
+    }
+#if HAVE_SYS_POLL_H
 
 #else
     tv.tv_sec = 15;
@@ -1412,7 +1484,7 @@ int Z3950_event (int no, Z3950_connection *cs)
 	if (max_fd < fd)
 	    max_fd = fd;
 
-#if USE_POLL
+#if HAVE_SYS_POLL_H
         if (mask)
         {
             short poll_events = 0;
@@ -1448,27 +1520,8 @@ int Z3950_event (int no, Z3950_connection *cs)
 #endif
     }
     if (!nfds)
-    {
-	for (i = 0; i<no; i++)
-	{
-	    Z3950_connection c = cs[i];
-	    if (!c)
-		continue;
-	    if (!c->cs && c->host_port && c->error == Z3950_ERROR_NONE)
-	    {
-		do_connect (c);
-		return i+1;
-	    }
-	    else
-	    {
-		if (Z3950_connection_exec_task (c))
-		    return i+1;
-	    }
-	}
-	yaz_log (LOG_DEBUG, "no more events");
-	return 0;
-    }
-#if USE_POLL
+        return 0;
+#if HAVE_SYS_POLL_H
     yaz_log (LOG_LOG, "poll start");
     r = poll (pollfds, nfds, 15000);
     yaz_log (LOG_LOG, "poll stop, returned r=%d", r);
@@ -1489,9 +1542,11 @@ int Z3950_event (int no, Z3950_connection *cs)
         }
         else if (r == 0 && c->mask)
         {
+            Z3950_Event event = Z3950_Event_create(0);
 	    /* timeout and this connection was waiting */
 	    c->error = Z3950_ERROR_TIMEOUT;
-	    c->event_pending = 1;
+            do_close (c);
+            Z3950_connection_put_event(c, event);
         }
     }
 #else
@@ -1521,23 +1576,24 @@ int Z3950_event (int no, Z3950_connection *cs)
 	}
 	if (r == 0 && c->mask)
 	{
+            Z3950_Event event = Z3950_Event_create(0);
 	    /* timeout and this connection was waiting */
 	    c->error = Z3950_ERROR_TIMEOUT;
-	    c->event_pending = 1;
+            do_close (c);
+            yaz_log (LOG_LOG, "timeout");
+            Z3950_connection_put_event(c, event);
 	}
     }
 #endif
-
     for (i = 0; i<no; i++)
     {
 	Z3950_connection c = cs[i];
-	if (!c)
-	    continue;
-	if (c->event_pending)
-	{
-	    c->event_pending = 0;
+        Z3950_Event event;
+	if (c && (event = Z3950_connection_get_event(c)))
+        {
+            Z3950_Event_destroy (event);
 	    return i+1;
-	}
+        }
     }
     return 0;
 }

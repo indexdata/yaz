@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.4 2001-11-11 22:25:25 adam Exp $
+ * $Id: zoomtst7.c,v 1.5 2001-11-13 22:57:03 adam Exp $
  *
  * API test..
  */
@@ -75,8 +75,11 @@ int main(int argc, char **argv)
 		r[j] = Z3950_connection_search (z, s); /* non-piggy */
 		
 		Z3950_resultset_records (r[j], recs, 0, 2);  /* first two */
+		Z3950_record_destroy (recs[0]);
+		Z3950_record_destroy (recs[1]);
 		
 		Z3950_resultset_records (r[j], recs, 1, 2);  /* third */
+
 		Z3950_resultset_records (r[j], recs, 0, 0);  /* ignored */
 
 		if (Z3950_resultset_size (r[j]) > 2)
@@ -149,5 +152,3 @@ int main(int argc, char **argv)
     exit (0);
 }
 
-
-    

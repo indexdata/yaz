@@ -1,11 +1,13 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.3 2001-11-06 17:05:19 adam Exp $
+ * $Id: zoom-p.h,v 1.4 2001-11-13 22:57:03 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
+
+typedef struct Z3950_Event_p *Z3950_Event;
 
 struct Z3950_query_p {
     Z_Query *query;
@@ -39,10 +41,11 @@ struct Z3950_connection_p {
     char *cookie_out;
     char *cookie_in;
     int async;
-    int event_pending;
     Z3950_task tasks;
     Z3950_options options;
     Z3950_resultset resultsets;
+    Z3950_Event m_queue_front;
+    Z3950_Event m_queue_back;
 };
 
 
@@ -99,10 +102,17 @@ struct Z3950_task_p {
 	Z3950_resultset resultset;
 #define Z3950_TASK_RETRIEVE 2
 	/** also resultset here */
-
+#define Z3950_TASK_CONNECT 3
     } u;
     Z3950_task next;
 };
+
+struct Z3950_Event_p {
+    int kind;
+    Z3950_Event next;
+    Z3950_Event prev;
+};
+
 
 #ifndef YAZ_DATE
 COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp);
