@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.4 2004-03-16 13:13:34 adam Exp $
+# $Id: charconv.tcl,v 1.5 2004-03-17 11:00:04 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -17,11 +17,11 @@ proc preamble_trie {ofilehandle} {
     puts $f "\#include <string.h>"
     puts $f "
         struct yaz_iconv_trie_flat {
-            char *from;
+            char from\[6\];
             $totype to;
         };
         struct yaz_iconv_trie_dir {
-            struct yaz_iconv_trie *ptr;
+            short ptr;
             $totype to;
         };
         
@@ -31,16 +31,17 @@ proc preamble_trie {ofilehandle} {
         };
     "
     puts $f {
-        static unsigned long lookup(struct yaz_iconv_trie *t, unsigned char *inp,
+        static unsigned long lookup(struct yaz_iconv_trie **ptrs, int ptr, unsigned char *inp,
                                     size_t inbytesleft, size_t *no_read)
         {
+            struct yaz_iconv_trie *t = (ptr >= 0) ? ptrs[ptr] : 0;
             if (!t || inbytesleft < 1)
-            return 0;
+                return 0;
             if (t->dir)
             {
                 size_t ch = inp[0] & 0xff;
                 unsigned long code =
-                lookup(t->dir[ch].ptr, inp+1, inbytesleft-1, no_read);
+                lookup(ptrs, t->dir[ch].ptr, inp+1, inbytesleft-1, no_read);
                 if (code)
                 {
                     (*no_read)++;
@@ -72,7 +73,6 @@ proc preamble_trie {ofilehandle} {
             }
             return 0;
         }
-        
     }
 }
 
@@ -86,7 +86,7 @@ proc reset_trie {} {
     set trie(no) 1
     set trie(size) 0
     set trie(max) 0
-    set trie(split) 40
+    set trie(split) 50
     set trie(prefix) {}
 }
 
@@ -189,10 +189,10 @@ proc dump_trie {ofilehandle} {
                 set ch [format %02X $i]
                 set null 1
                 if {[info exist trie($this,ptr,$ch)]} {
-                    puts -nonewline $f "&$trie(prefix)page$trie($this,ptr,$ch), "
+                    puts -nonewline $f "$trie($this,ptr,$ch), "
                     set null 0
                 } else {
-                    puts -nonewline $f "0, "
+                    puts -nonewline $f "-1, "
                 }
                 if {[info exist trie($this,to,$ch)]} {
                     puts -nonewline $f "0x$trie($this,to,$ch)\}"
@@ -215,12 +215,20 @@ proc dump_trie {ofilehandle} {
             puts $f "\};"
         }
     }
+
+    puts $f "struct yaz_iconv_trie *$trie(prefix)ptrs \[\] = {"
+    for {set this 0} {$this < $trie(no)} {incr this} {
+	puts $f " &$trie(prefix)page$this,"
+    }
+    puts $f "0, };"
+    puts $f ""
+
     puts $f "unsigned long yaz_$trie(prefix)_conv
             (unsigned char *inp, size_t inbytesleft, size_t *no_read)
         {
             unsigned long code;
             
-            code = lookup(&$trie(prefix)page0, inp, inbytesleft, no_read);
+            code = lookup($trie(prefix)ptrs, 0, inp, inbytesleft, no_read);
             if (!code)
             {
                 *no_read = 1;
@@ -283,7 +291,6 @@ proc readfile {fname ofilehandle prefix omits} {
 set verbose 0
 set ifile {}
 set ofile out.c
-set trie(split) 40
 set prefix {c}
 # Parse command line
 set l [llength $argv]
