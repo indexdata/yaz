@@ -13,13 +13,10 @@
   <xsl:param name="next"/>
 
   <document>
-
-    <nonews>1</nonews>
-  
     <title>
        <xsl:apply-templates select="." mode="object.title.markup"/>
     </title>
-
+    <nonews>1</nonews>
     <body>
       <xsl:call-template name="body.attributes"/>
       <xsl:call-template name="user.header.navigation"/>
