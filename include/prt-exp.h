@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -291,7 +291,7 @@ typedef struct Z_AttributeOccurrence
     {
 	Odr_null *anyOrNone;
 	Z_AttributeValueList *specific;
-    } *attributeValues;
+    } attributeValues;
 } Z_AttributeOccurrence;
 
 typedef struct Z_AttributeCombination
