@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.68  1997-09-29 13:18:59  adam
+ * Revision 1.69  1997-09-30 11:48:12  adam
+ * Fixed bug introduced by previous commit.
+ *
+ * Revision 1.68  1997/09/29 13:18:59  adam
  * Added function, oid_ent_to_oid, to replace the function
  * oid_getoidbyent, which is not thread safe.
  *
@@ -790,7 +793,8 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 #else
     rec->u.nonSurrogateDiagnostic = dr;
 #endif
-    dr->diagnosticSetId = oid_ent_to_oid(&bib1, oid);
+    dr->diagnosticSetId = odr_oiddup (assoc->encode,
+                                      oid_ent_to_oid(&bib1, oid));
     dr->condition = err;
     dr->which = Z_DiagForm_v2AddInfo;
     dr->addinfo = addinfo ? addinfo : "";
@@ -821,7 +825,8 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
     rec->u.surrogateDiagnostic = drec;
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = dr;
-    dr->diagnosticSetId = oid_ent_to_oid(&bib1, oid);
+    dr->diagnosticSetId = odr_oiddup (assoc->encode,
+                                      oid_ent_to_oid(&bib1, oid));
     dr->condition = err;
     dr->which = Z_DiagForm_v2AddInfo;
     dr->addinfo = addinfo ? addinfo : "";
@@ -853,7 +858,8 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = rec;
 
-    rec->diagnosticSetId = oid_ent_to_oid(&bib1, oid);
+    rec->diagnosticSetId = odr_oiddup (assoc->encode,
+                                      oid_ent_to_oid(&bib1, oid));
     rec->condition = err;
     rec->which = Z_DiagForm_v2AddInfo;
     rec->addinfo = addinfo ? addinfo : "";
@@ -968,7 +974,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	recform.oclass = CLASS_RECSYN;
 	recform.value = fres->format;
 	thisext->direct_reference = odr_oiddup(a->encode,
-	    oid_ent_to_oid(&recform, oid));
+	                                       oid_ent_to_oid(&recform, oid));
 	thisext->indirect_reference = 0;
 	thisext->descriptor = 0;
 	if (fres->len < 0) /* Structured data */
