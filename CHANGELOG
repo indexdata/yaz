@@ -18,6 +18,9 @@ Added Update extended service.
 
 Added SearchResult-1 additional info structure.
 
+Added CCL optional CCL (ISO8777) interpreter as separate module. Available
+in linemode client.
+
 --- 1.2 1996/6/10 (1st anniversary release)
 
 Added Summary record syntax. Lightly tested.
