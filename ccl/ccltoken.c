@@ -44,7 +44,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.19 2002-06-06 12:54:24 adam Exp $
+ * $Id: ccltoken.c,v 1.20 2002-10-14 19:45:36 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -277,9 +277,9 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 		cp++;
 	    break;
 	default:
-	    if (!strchr ("(),%!><=- \t\n\r", cp[-1]))
+	    if (!strchr ("(),%!><= \t\n\r", cp[-1]))
 	    {
-		while (*cp && !strchr ("(),%!><=- \t\n\r", *cp))
+		while (*cp && !strchr ("(),%!><= \t\n\r", *cp))
 		{
 		    cp++;
 		    ++ last->len;

@@ -1,4 +1,4 @@
-# $Id: bib1,v 1.11 2002-05-17 08:46:01 adam Exp $
+# $Id: bib1,v 1.12 2002-10-14 19:45:36 adam Exp $
 # CCL qualifiers and their mappings
 #
 # Each line takes the form:
@@ -27,6 +27,7 @@
 #    n       Set truncation explicitly to "none" if no ? is given.
 
 # This rule is for CCL tokens where no fields are specified
+#term u=1016 t=l,r s=pw,al
 term u=1016 t=l,r s=pw,al
 # Common short-hand access points.
 au   u=1    s=pw t=l,r		# author
@@ -100,8 +101,8 @@ exp:category exp1,1=1
 
 # These special directives defines names of keywords for parser
 @and og *             # either 'or' or *
-@or eller   +         # either 'eller' or +
-@not ikke -           # and so on..
+@or eller           # either 'eller' or +
+@not ikke            # and so on..
 @set s set
 @case 0		      # case insenstive (1 for case sensitive)
 @truncation * ?
