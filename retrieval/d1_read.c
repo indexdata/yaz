@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.27  1999-08-27 09:40:32  adam
+ * Revision 1.28  1999-10-21 09:50:33  adam
+ * SGML reader uses own isspace - it doesn't do 8-bit on WIN32!
+ *
+ * Revision 1.27  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.26  1999/07/13 13:23:48  adam
@@ -146,7 +149,6 @@
  */
 
 #include <assert.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -154,6 +156,7 @@
 #include <log.h>
 #include <data1.h>
 
+#define d1_isspace(c) strchr(" \r\n\t\f", c)
 /*
  * get the tag which is the immediate parent of this node (this may mean
  * traversing intermediate things like variants and stuff.
@@ -295,7 +298,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
     while (1)
     {
 	data1_node *parent = level ? d1_stack[level-1] : 0;
-	while (c != '\0' && isspace(c))
+	while (c != '\0' && d1_isspace(c))
 	{
 	    if (c == '\n')
 		line++;
@@ -310,11 +313,11 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    char args[256];
 	    size_t i;
 	    
-	    for (i = 0; (c=(*get_byte)(fh)) && c != '>' && !isspace(c);)
+	    for (i = 0; (c=(*get_byte)(fh)) && c != '>' && !d1_isspace(c);)
 		if (i < (sizeof(tag)-1))
 		    tag[i++] = c;
 	    tag[i] = '\0';
-	    while (isspace(c))
+	    while (d1_isspace(c))
 		c = (*get_byte)(fh);
 	    for (i = 0; c && c != '>'; c = (*get_byte)(fh))
 		if (i < (sizeof(args)-1))
@@ -500,7 +503,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    {
 		if (*src == '\n')
 		    line++;
-		if (isspace (*src))
+		if (d1_isspace (*src))
 		    prev_char = ' ';
 		else
 		{
