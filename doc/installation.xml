@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.7 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.8 2001-11-08 12:36:15 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -99,7 +99,7 @@
    </screen>
    
    <para>
-    To customize &yaz; the configure script also accepts a set of options.
+    To customize &yaz;, the configure script also accepts a set of options.
     The most important are:
     
     <variablelist>
@@ -115,13 +115,33 @@
         <ulink url="ftp://ftp.porcupine.org/pub/security/index.html">
          TCP wrapper library</ulink>. It allows you to allow/deny
         clients depending on IP number. The TCP wrapper library is
-        commonly used in Linux/BSD distributions.
+        often used in Linux/BSD distributions.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>--enable-threads</literal></term>
       <listitem><para>&yaz; will be built using POSIX threads.
 	Specifically, <constant>_REENTRANT</constant> will be defined during
 	compilation.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry><term><literal>--with-openssl</literal></term>
+      <listitem><para>&yaz; will be linked with the OpenSSL libraries and
+        an SSL COMSTACK will be provided. Note that SSL support is still
+        exterimental.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry><term><literal>--enable-shared</literal></term>
+      <listitem><para>The make process will create shared
+        libraries (also known as shared objects <filename>.so</filename>).
+        By default, no shared libraries are created -
+        equivalent to <literal>--disable-shared</literal>.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry><term><literal>--disable-shared</literal></term>
+      <listitem><para>The make process will be not create
+        static libraries (<filename>.a</filename>).
+        By default, static libraries are created -
+        equivalent to <literal>--enable-static</literal>.
        </para></listitem>
      </varlistentry>
     </variablelist>
@@ -186,7 +206,7 @@
      <varlistentry><term><filename>zoom/zoomtst1</filename>, 
        <filename>zoom/zoomtst2</filename>, ..</term>
       <listitem><para>
-        Several small applications that demonstrates the use of ZOOM.
+        Several small applications that demonstrates the ZOOM API.
        </para></listitem></varlistentry>
     </variablelist>
     
@@ -223,7 +243,78 @@
     remove directories created by make install, e.g.
     <filename>/usr/local/include/yaz</filename>.
    </para>
-   
+
+   <sect2><title>How to make apps using YAZ on UNIX</title>
+    <para>
+     This section describes how to compile - and link your own
+     applications using the &yaz; toolkit.
+     If you're used to Makefiles this shouldn't be hard. As for
+     other libraries you have used before, you have to set a proper include
+     path for your C/C++ compiler and specify the location of
+     &yaz; libraries. You can do it by hand, but generally we suggest
+     you use the <filename>yaz-config</filename> that is generated
+     by <filename>configure</filename>. This is especially
+     important if you're using the threaded version of &yaz; which
+     require you to pass more options to your linker/compiler.
+    </para>
+    <para>
+     The <filename>yaz-config</filename> script accepts the options
+     that makes the <filename>yaz-config</filename> script print
+     options that you should use in your make process.
+     The most important ones are:
+     <literal>--cflags</literal>, <literal>--libs</literal>
+     which prints C compiler flags, and linker flags respectively.
+     </para>
+    <para>
+     A small and complete <literal>Makefile</literal> for a C
+     application consisting of one source file
+     <filename>myprog.c</filename> may look like this:
+     <screen>
+      YAZCONFIG=/usr/local/bin/yaz-config
+      CFLAGS=`$(YAZCONFIG) --cflags`
+      LIBS=`$(YAZCONFIG) --libs`
+      myprog: myprog.o
+         $(CC) $(CFLAGS) -o myprog myprog.o $(LIBS)
+      </screen>
+     </para>
+    <para>
+     The CFLAGS string will consists of an option that will set the
+     include path to the <emphasis>parent</emphasis> directory
+     of <filename>yaz</filename>. That is, if &yaz; header files were
+     installed in <filename>/usr/local/include/yaz</filename>,
+     then include path is set to <filename>/usr/local/include</filename>.
+     Therefore, in your applications you should use
+     <screen>
+      #include &lt;yaz/proto.h>
+     </screen>
+     and <emphasis>not</emphasis>
+     <screen>
+      #include &lt;proto.h>
+     </screen>
+    </para> 
+    <para>
+     For Libtool users, the <filename>yaz-config</filename> script provides
+     a different variant of option <literal>--libs</literal>, called
+     <literal>--lalibs</literal> that returns the name of the
+     Libtool acrhive(s) for &yaz; rather than the ordinary ones.
+    </para>
+    <para>
+     Applications that wish to use the threaded version of &yaz;
+     should specify <literal>threads</literal> after the
+     other options. When <literal>threads</literal> is given
+     more flags and linker flags will be printed by
+     <filename>yaz-config</filename>. If our previous example was
+      using threads, you'd have to modify the lines that set
+     <literal>CFLAGS</literal> and <literal>LIBS</literal> as
+     follows:
+     <screen>
+      CFLAGS=`$(YAZCONFIG) --cflags threads`
+      LIBS=`$(YAZCONFIG) --libs threads`
+     </screen>
+     There is no need specify POSIX thread libraries in your Makefile.
+     The <literal>LIBS</literal> includes that as well.
+    </para>
+   </sect2>
   </sect1>
   <sect1 id="installation.win32"><title>WIN32</title>
    
@@ -260,7 +351,7 @@
     </variablelist>
    </para>
    <para>
-    When satisfied with the settings in the makefile type
+    When satisfied with the settings in the makefile, type
     <screen>
      nmake
     </screen>
@@ -305,7 +396,7 @@
 	Z39.50 multi-threaded test/example server. It's a WIN32
         console application.
        </para></listitem></varlistentry>
-
+     
      <varlistentry><term><filename>bin/zoomsh.exe</filename></term>
       <listitem><para>
         Simple console application implemented on top of the
@@ -313,16 +404,48 @@
         The application is a command line shell that allows you to enter
         simple commands perform to perform ZOOM operations.
        </para></listitem></varlistentry>
-
+     
      <varlistentry><term><filename>bin/zoomtst1.exe</filename>, 
        <filename>bin/zoomtst2.exe</filename>, ..</term>
       <listitem><para>
-        Several small applications that demonstrates the use of ZOOM.
+        Several small applications that demonstrates the ZOOM API.
        </para></listitem></varlistentry>
-
+     
     </variablelist>
     
    </para>
+   <sect2><title>How to make apps using YAZ on WIN32</title>
+    <para>
+     This section will go though the process of linking your WIN32
+     applications with &yaz;.
+    </para>
+    <para>
+     Some people are confused by the fact that we use the nmake
+     tool to build &yaz;. They think they have to do that too - in order
+     to make WIN32 applications using &yaz;. The good news is that
+     you don't have to. You can use the integrated environement of
+     Visual Studio if desired.
+    </para>
+    <para>
+     When setting up a project or Makefile you have to set the following:
+     <variablelist>
+      <varlistentry><term>include path</term><listitem><para>
+         Set it to the <filename>include</filename> directory of &yaz;.
+        </para></listitem></varlistentry>
+      <varlistentry><term>import library <filename>yaz.lib</filename>
+       </term><listitem><para>
+         You must link with this library. It's located in the 
+         sub directory <filename>lib</filename> of &yaz;.
+        </para></listitem></varlistentry>
+      <varlistentry><term>dynamic link library <filename>yaz.dll</filename>
+       </term><listitem><para>
+         This DLL must be in your execution path when you invoke
+         your application. Specifically, you should distribute this
+         DLL with your application.
+        </para></listitem></varlistentry>
+     </variablelist>
+    </para>
+   </sect2>
   </sect1>
  </chapter>
  
