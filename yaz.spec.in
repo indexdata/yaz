@@ -2,7 +2,7 @@ Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
 Release: 2
-Requires: libxml2 openssl
+Requires: libxml2 openssl libyaz = %{version}
 Copyright: YAZ License
 Group: Other
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -28,6 +28,7 @@ Retrieval.
 %package -n lib%{name}-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
+Requires: libyaz = %{version}
 
 %description -n lib%{name}-devel
 Development libraries and includes for the libyaz package.
