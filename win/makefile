@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.55 2003-02-18 21:27:53 adam Exp $
+# $Id: makefile,v 1.56 2003-05-23 10:41:26 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -10,11 +10,11 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
 
 # TCL
-#TCL="C:\Tcl\bin\tclsh83.exe"
-TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
+TCL="C:\Tcl\bin\tclsh84.exe"
+#TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
 
 # iconv charcter conversion utility
@@ -334,6 +334,7 @@ YAZ_ODR_OBJS= \
    $(OBJDIR)\odr_util.obj 
 
 YAZ_UTIL_OBJS= \
+   $(OBJDIR)\version.obj \
    $(OBJDIR)\atoin.obj \
    $(OBJDIR)\log.obj \
    $(OBJDIR)\marcdisp.obj \
@@ -423,9 +424,9 @@ COMMON_YAZ_OBJS= \
    $(YAZ_CQL_OBJS)
 
 YAZ_OBJS= \
+	$(COMMON_YAZ_OBJS) \
 	$(Z3950_OBJS) \
-	$(ILL_OBJS) \
-	$(COMMON_YAZ_OBJS)
+	$(ILL_OBJS)
 
 DLL_OBJS= $(YAZ_OBJS)
 
@@ -928,7 +929,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.55  2003-02-18 21:27:53  adam
+# Revision 1.56  2003-05-23 10:41:26  adam
+# WIN32 updates
+#
+# Revision 1.55  2003/02/18 21:27:53  adam
 # CQL w/bison on WIN32
 #
 # Revision 1.54  2003/02/18 09:11:50  adam

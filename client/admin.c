@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.16 2003-03-11 11:07:47 adam Exp $
+ * $Id: admin.c,v 1.17 2003-05-23 10:41:26 adam Exp $
  */
 
 #include <stdio.h>
@@ -260,7 +260,7 @@ int cmd_adm_import(const char *arg)
     return 2;
 }
 #else
-int cmd_adm_import(char *arg)
+int cmd_adm_import(const char *arg)
 {
     printf ("not available on WIN32\n");
     return 0;
