@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.18  1995-11-13 09:27:41  quinn
+ * Revision 1.19  1995-12-05 11:17:30  quinn
+ * Moved some paranthesises around. Sigh.
+ *
+ * Revision 1.18  1995/11/13  09:27:41  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.17  1995/11/07  12:37:44  quinn
@@ -160,8 +163,8 @@ int event_loop()
 		p->last_event = now;
 	    	(*p->fun)(p, EVENT_EXCEPT);
 	    }
-	    if (!p->destroyed && (p->max_idle && now - p->last_event >
-	    	p->max_idle) || force_event == EVENT_TIMEOUT)
+	    if (!p->destroyed && ((p->max_idle && now - p->last_event >
+	    	p->max_idle) || force_event == EVENT_TIMEOUT))
 	    {
 	    	p->last_event = now;
 	    	(*p->fun)(p, EVENT_TIMEOUT);
