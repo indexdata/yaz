@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.42  1996-10-08 10:44:57  quinn
+ * Revision 1.43  1996-11-08 11:03:26  adam
+ * Client accepts multiple database names.
+ *
+ * Revision 1.42  1996/10/08 10:44:57  quinn
  * Resolved conflicts.
  *
  * Revision 1.41  1996/10/07  15:29:03  quinn
@@ -166,7 +169,8 @@
 static ODR out, in, print;              /* encoding and decoding streams */
 static COMSTACK conn = 0;               /* our z-association */
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
-static char database[512] = "Default";  /* Database name */
+static char *databaseNames[128];
+static int num_databaseNames = 0;
 static int setnumber = 0;               /* current result set number */
 static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
@@ -581,7 +585,6 @@ static int send_searchRequest(char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
-    char *databaseNames = database;
     Z_Query query;
 #if CCL2RPN
     struct ccl_rpn_node *rpn;
@@ -637,8 +640,8 @@ static int send_searchRequest(char *arg)
         req->smallSetElementSetNames =
             req->mediumSetElementSetNames = elementSetNames;
     }
-    req->num_databaseNames = 1;
-    req->databaseNames = &databaseNames;
+    req->num_databaseNames = num_databaseNames;
+    req->databaseNames = databaseNames;
 
     req->query = &query;
 
@@ -745,12 +748,30 @@ static int cmd_status(char *arg)
 
 static int cmd_base(char *arg)
 {
+    int i;
+    char *cp;
+
     if (!*arg)
     {
-        printf("Usage: base <database>\n");
+        printf("Usage: base <database> <database> ...\n");
         return 0;
     }
-    strcpy(database, arg);
+    for (i = 0; i<num_databaseNames; i++)
+        xfree (databaseNames[i]);
+    num_databaseNames = 0;
+    while (1)
+    {
+        if (!(cp = strchr(arg, ' ')))
+            cp = arg + strlen(arg);
+        if (cp - arg < 1)
+            break;
+        databaseNames[num_databaseNames] = xmalloc (1 + cp - arg);
+        memcpy (databaseNames[num_databaseNames], arg, cp - arg);
+        databaseNames[num_databaseNames++][cp - arg] = '\0';
+        if (!*cp)
+            break;
+        arg = cp+1;
+    }
     return 1;
 }
 
@@ -903,10 +924,9 @@ int send_scanrequest(char *string, int pp, int num)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
-    char *db = database;
 
-    req->num_databaseNames = 1;
-    req->databaseNames = &db;
+    req->num_databaseNames = num_databaseNames;
+    req->databaseNames = databaseNames;
     req->termListAndStartPoint = p_query_scan(out, protocol,
                                               &req->attributeSet, string);
     req->numberOfTermsRequested = &num;
@@ -1301,6 +1321,7 @@ static int client(int wait)
 int main(int argc, char **argv)
 {
     initialize();
+    cmd_base("Default");
     if (argc > 1)
         cmd_open(argv[1]);
     else
