@@ -1,8 +1,8 @@
 <!doctype linuxdoc system>
 <article>
 <title>Specifying and Using Application (Database) Profiles
-<author>Index Data, <tt/info@index.ping.dk/
-<date>$Revision: 1.5 $
+<author>Index Data, <tt/info@indexdata.dk/
+<date>$Revision: 1.6 $
 <abstract>
 YAZ includes a subsystem to manage complex database records, driven
 by a set of configuration tables that reflect a given profile.
@@ -605,7 +605,7 @@ name preceded by a slash (/).
 <sect>License
 
 <p>
-Copyright &copy; 1995, Index Data.
+Copyright &copy; 1995-2000, Index Data.
 
 This is the Index Data &dquot;P&dquot; license - it applies exclusively to
 the record management module of the YAZ system, and to this
@@ -651,16 +651,16 @@ We'll be happy to answer questions about the software, and about ourselves
 in general.
 
 <tscreen>
-Index Data&nl
-Ryesgade 3&nl
-DK-2200 K&oslash;benhavn N&nl
+Index Data
+Ryesgade 3
+DK-2200 Copenhagen N
 </tscreen>
 
 <p>
 <tscreen><verb>
 Phone: +45 3536 3672
 Fax  : +45 3536 0449
-Email: info@index.ping.dk
+Email: info@indexdata.dk
 </verb></tscreen>
 
 </article>
