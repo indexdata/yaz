@@ -147,7 +147,7 @@ typedef struct Z_ProxSupportUnit
 #define Z_ProxSupportUnit_private 1
     union
     {
-    	int known;
+    	int *known;
 	Z_ProxSupportPrivate *private;
     } u;
 } Z_ProxSupportUnit;

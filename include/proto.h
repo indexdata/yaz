@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.36  1996-10-07 15:29:20  quinn
+ * Revision 1.37  1996-10-09 15:54:58  quinn
+ * Added SearchInfoReport
+ *
+ * Revision 1.36  1996/10/07  15:29:20  quinn
  * Added SOIF support
  *
  * Revision 1.35  1996/06/10  08:57:38  quinn
@@ -1347,6 +1350,7 @@ int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
 int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
 int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
 Z_APDU *zget_APDU(ODR o, int which);
+int z_Query(ODR o, Z_Query **p, int opt);
 
 #include <prt-rsc.h>
 #include <prt-acc.h>
@@ -1356,6 +1360,7 @@ Z_APDU *zget_APDU(ODR o, int which);
 #include <prt-exd.h>
 #include <prt-dia.h>
 #include <prt-esp.h>
+#include <prt-add.h>
 
 #include <prt-ext.h>
 

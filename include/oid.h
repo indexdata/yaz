@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.14  1996-10-07 15:29:17  quinn
+ * Revision 1.15  1996-10-09 15:54:57  quinn
+ * Added SearchInfoReport
+ *
+ * Revision 1.14  1996/10/07  15:29:17  quinn
  * Added SOIF support
  *
  * Revision 1.13  1996/02/20  17:57:53  adam
@@ -158,7 +161,8 @@ typedef enum oid_value
     VAL_SETG,
     VAL_VAR1,
     VAL_ESPEC1,
-    VAL_SOIF
+    VAL_SOIF,
+    VAL_SEARCHRES1
 } oid_value;
 
 typedef struct oident

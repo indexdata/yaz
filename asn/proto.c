@@ -1,10 +1,13 @@
-    /*
+/*
  * Copyright (c) 1995, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.52  1996-10-08 12:56:57  adam
+ * Revision 1.53  1996-10-09 15:54:55  quinn
+ * Added SearchInfoReport
+ *
+ * Revision 1.52  1996/10/08  12:56:57  adam
  * Bug fix: tagging of type 101 query.
  *
  * Revision 1.51  1996/07/26  14:07:21  quinn
@@ -1483,7 +1486,7 @@ int z_DeleteResultSetRequest(ODR o, Z_DeleteResultSetRequest **p, int opt)
     	z_ReferenceId(o, &(*p)->referenceId, 1) &&
 	odr_implicit(o, odr_integer, &(*p)->deleteFunction, ODR_CONTEXT, 32,
 	    0) &&
-	(odr_sequence_of(o, z_ListStatus, &(*p)->resultSetList,
+	(odr_sequence_of(o, z_ResultSetId, &(*p)->resultSetList,
 	    &(*p)->num_ids) || odr_ok(o)) &&
 #ifdef Z_95
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
