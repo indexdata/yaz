@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: matchstr.c,v $
- * Revision 1.2  1999-10-15 11:35:41  adam
+ * Revision 1.3  1999-10-19 12:35:42  adam
+ * Minor bug fix (bug introduced by previous commit).
+ *
+ * Revision 1.2  1999/10/15 11:35:41  adam
  * Character '.' matches any single character.
  *
  * Revision 1.1  1999/06/08 10:10:16  adam
@@ -58,9 +61,9 @@ int yaz_matchstr(const char *s1, const char *s2)
         if (c2 == '?')
             return 0;
 	if (c1 == '-')
-	    s1++;
+	    c1 = *++s1;
 	if (c2 == '-')
-	    s2++;
+	    c2 = *++s2;
 	if (!c1 || !c2)
 	    break;
         if (c2 != '.')
