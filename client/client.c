@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.243 2004-05-10 10:45:28 adam Exp $
+ * $Id: client.c,v 1.244 2004-05-27 21:24:44 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -2522,10 +2522,21 @@ int cmd_cancel(const char *arg)
     }
     *req->requestedAction = Z_TriggerResourceControlRequest_cancel;
     req->resultSetWanted = &rfalse;
+    req->referenceId = set_refid (out);
 
     send_apdu(apdu);
     printf("Sent cancel request\n");
     return 2;
+}
+
+
+int cmd_cancel_find(const char *arg) {
+    int fres;
+    fres=cmd_find(arg);
+    if( fres > 0 ) {
+	return cmd_cancel("");
+    };
+    return fres;
 }
 
 int send_scanrequest(const char *query, int pp, int num, const char *term)
@@ -2994,7 +3005,7 @@ int cmd_source(const char* arg)
 {
     /* first should open the file and read one line at a time.. */
     FILE* includeFile;
-    char line[1024], *cp;
+    char line[102400], *cp;
 
     if(strlen(arg)<1) {
         fprintf(stderr,"Error in source command use a filename\n");
@@ -3802,6 +3813,7 @@ static struct {
     {"status", cmd_status, "",NULL,0,NULL},
     {"setnames", cmd_setnames, "",NULL,0,NULL},
     {"cancel", cmd_cancel, "",NULL,0,NULL},
+    {"cancel_find", cmd_cancel_find, "<query>",NULL,0,NULL},
     {"format", cmd_format, "<recordsyntax>",complete_format,0,NULL},
     {"schema", cmd_schema, "<schema>",complete_schema,0,NULL},
     {"elements", cmd_elements, "<elementSetName>",NULL,0,NULL},
@@ -3937,13 +3949,13 @@ int cmd_register_tab(const char* arg) {
 void process_cmd_line(char* line)
 {  
     int i,res;
-    char word[32], arg[1024];
+    char word[32], arg[10240];
     
 #if HAVE_GETTIMEOFDAY
     gettimeofday (&tv_start, 0);
 #endif
     
-    if ((res = sscanf(line, "%31s %1023[^;]", word, arg)) <= 0)
+    if ((res = sscanf(line, "%31s %10239[^;]", word, arg)) <= 0)
     {
         strcpy(word, last_cmd);
         *arg = '\0';
@@ -4028,9 +4040,9 @@ char ** readline_completer(char *text, int start, int end) {
         rl_attempted_completion_over = 1;
         return res;
     } else {
-        char arg[1024],word[32];
+        char arg[10240],word[32];
         int i=0 ,res;
-        if ((res = sscanf(rl_line_buffer, "%31s %1023[^;]", word, arg)) <= 0) {     
+        if ((res = sscanf(rl_line_buffer, "%31s %10239[^;]", word, arg)) <= 0) {     
             rl_attempted_completion_over = 1;
             return NULL;
         }
@@ -4076,9 +4088,9 @@ char ** readline_completer(char *text, int start, int end) {
 
 static void client(void)
 {
-    char line[1024];
+    char line[10240];
 
-    line[1023] = '\0';
+    line[10239] = '\0';
 
 #if HAVE_GETTIMEOFDAY
     gettimeofday (&tv_start, 0);
@@ -4097,7 +4109,7 @@ static void client(void)
             if (*line_in)
                 add_history(line_in);
 #endif
-            strncpy(line, line_in, 1023);
+            strncpy(line, line_in, 10239);
             free (line_in);
         }
 #endif 
@@ -4106,7 +4118,7 @@ static void client(void)
             char *end_p;
             printf (C_PROMPT);
             fflush(stdout);
-            if (!fgets(line, 1023, stdin))
+            if (!fgets(line, 10239, stdin))
                 break;
             if ((end_p = strchr (line, '\n')))
                 *end_p = '\0';
