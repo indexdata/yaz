@@ -1,3 +1,23 @@
+yaz (1.8.6-1MGH) unstable; urgency=low
+
+  * New upstrean release
+  * Heavy debian/rules modification adds yazrelease target for conveniency
+  * Not lintian clean yet. (only warnings left)
+
+ -- Morten Garkier Hendriksen <mgh@dbc.dk>  Mon, 18 Mar 2002 21:46:59 +0100
+
+yaz (1.8.5-1MGH) unstable; urgency=low
+
+  * New upstream version
+
+ -- Morten Garkier Hendriksen <mgh@dbc.dk>  Fri, 15 Feb 2002 13:01:15 +0100
+
+yaz (1.8.4-1MGH) unstable; urgency=low
+
+  * Modified build scripts
+
+ -- Morten Garkier Hendriksen <mgh@dbc.dk>  Sat, 24 Nov 2001 16:09:25 +0100
+
 yaz (1.8.4-1) unstable; urgency=low
 
   * new YAZ version.
