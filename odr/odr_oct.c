@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.3  1995-02-03 17:04:38  quinn
+ * Revision 1.4  1995-02-07 14:13:46  quinn
+ * Bug fixes.
+ *
+ * Revision 1.3  1995/02/03  17:04:38  quinn
  * *** empty log message ***
  *
  * Revision 1.2  1995/02/02  20:38:51  quinn
@@ -31,7 +34,10 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
     	o->t_tag = ODR_OCTETSTRING;
     }
     if ((res = ber_tag(o, *p, o->t_class, o->t_tag, &cons)) < 0)
+    {
+    	*p = 0;
     	return 0;
+    }
     if (!res)
     {
     	*p = 0;
@@ -42,7 +48,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
     	fprintf(o->print, "OCTETSTRING(len=%d)\n", (*p)->len);
     	return 1;
     }
-    if (o->direction == ODR_DECODE && !*p)
+    if (o->direction == ODR_DECODE)
     {
     	*p = nalloc(o, sizeof(Odr_oct));
     	(*p)->size= 0;

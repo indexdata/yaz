@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.2  1995-02-06 16:45:03  quinn
+ * Revision 1.3  1995-02-07 14:13:46  quinn
+ * Bug fixes.
+ *
+ * Revision 1.2  1995/02/06  16:45:03  quinn
  * Small mods.
  *
  * Revision 1.1  1995/02/02  16:21:54  quinn
@@ -51,36 +54,47 @@ int odr_sequence_more(ODR o)
 
 int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 {
-    char **pp = (char**) p;  /* for dereferencing */
-    char *tmp;
-    int size = 0;
+    char ***pp = (char***) p;  /* for dereferencing */
+    char **tmp;
+    int size = 0, i;
 
     if (!odr_sequence_begin(o, p, 0))
     	return 0;
 
-    if (o->direction = ODR_DECODE)
-	*num = 0;
-    while (odr_sequence_more(o))
+    switch (o->direction)
     {
-    	/* outgrown array? */
-    	if (*num * sizeof(void*) >= size)
-    	{
-	    /* double the buffer size */
-	    tmp = nalloc(o, sizeof(void*) * (size += size ? size :
-		128));
-	    if (*num)
+    	case ODR_DECODE:
+	    *num = 0;
+	    while (odr_sequence_more(o))
 	    {
-	    	memcpy(tmp, *pp, *num * sizeof(void*));
-	    	/*
-	    	 * For now, we just throw the old *p away, since we use
-	    	 * nibble memory anyway (disgusting, isn't it?).
-	    	 */
-	    	*pp = tmp;
+		/* outgrown array? */
+		if (*num * sizeof(void*) >= size)
+		{
+		    /* double the buffer size */
+		    tmp = nalloc(o, sizeof(void*) * (size += size ? size :
+			128));
+		    if (*num)
+		    {
+			memcpy(tmp, *pp, *num * sizeof(void*));
+			/*
+			 * For now, we just throw the old *p away, since we use
+			 * nibble memory anyway (disgusting, isn't it?).
+			 */
+		    }
+		    *pp = tmp;
+		}
+		if (!(*type)(o, (*pp) + *num, 0))
+		    return 0;
+		(*num)++;
 	    }
-	}
-	if (!(*type)(o, (*pp)[*num++], 0))
-	    return 0;
-	*num++;
+	    break;
+    	case ODR_ENCODE:
+	    for (i = 0; i < *num; i++)
+	    	if (!(*type)(o, *pp + i, 0))
+		    return 0;
+	    break;
+    	case ODR_PRINT: return 1;
+    	default: return 0;
     }
     return odr_sequence_end(o);
 }

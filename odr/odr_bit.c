@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bit.c,v $
- * Revision 1.2  1995-02-03 17:04:37  quinn
+ * Revision 1.3  1995-02-07 14:13:45  quinn
+ * Bug fixes.
+ *
+ * Revision 1.2  1995/02/03  17:04:37  quinn
  * *** empty log message ***
  *
  * Revision 1.1  1995/02/02  20:38:50  quinn
@@ -41,7 +44,7 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt)
     	fprintf(o->print, "BITSTRING(len=%d)\n", (*p)->top + 1);
     	return 1;
     }
-    if (o->direction == ODR_DECODE && !*p)
+    if (o->direction == ODR_DECODE)
     {
     	*p = nalloc(o, sizeof(Odr_bitmask));
     	memset((*p)->bits, 0, ODR_BITMASK_SIZE);
