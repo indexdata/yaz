@@ -1,5 +1,6 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.13 2002-07-25 12:52:52 adam Exp $
+# $Id: buildconf.sh,v 1.14 2002-08-02 08:20:31 adam Exp $
+set -x
 aclocal
 libtoolize --automake --force 
 automake -a 
