@@ -2,13 +2,13 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: read-marc.c,v 1.1 2002-03-18 21:33:48 adam Exp $
+ * $Id: read-marc.c,v 1.2 2002-03-19 13:48:27 adam Exp $
  */
 
 /*
  * Little toy-thing to read a MARC records from a fixed array.
  */
-
+#include <ctype.h>
 #include <yaz/odr.h>
 #include <yaz/wrbuf.h>
 
