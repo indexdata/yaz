@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.45  1996-02-23 10:00:25  quinn
+ * Revision 1.46  1996-04-10 11:39:42  quinn
+ * Fixed bug in UserInfo
+ *
+ * Revision 1.45  1996/02/23  10:00:25  quinn
  * Fixes to SCAN
  *
  * Revision 1.44  1996/02/20  12:51:41  quinn
@@ -218,7 +221,7 @@ int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt)
     	return opt && odr_ok(o);
     return
     	odr_implicit(o, z_InfoCategory, &(*p)->category, ODR_CONTEXT, 1, 1) &&
-	odr_choice(o, arm, &(*p)->which, &(*p)->information) &&
+	odr_choice(o, arm, &(*p)->information, &(*p)->which) &&
 	odr_sequence_end(o);
 }
     
