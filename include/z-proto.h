@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: z-proto.h,v $
- * Revision 1.1  1999-06-08 13:11:55  adam
+ * Revision 1.2  1999-06-09 10:52:11  adam
+ * Added YAZ_EXPORT.
+ *
+ * Revision 1.1  1999/06/08 13:11:55  adam
  * Fixed problem with proto.h.
  *
  * Revision 1.2  1999/04/20 10:37:04  adam
@@ -103,8 +106,8 @@ extern "C" {
 typedef Z_External Z_DatabaseRecord;
 typedef struct Z_IOItemOrder Z_ItemOrder;
 
-Z_APDU *zget_APDU(ODR o, int which);
-Z_Close *zget_Close (ODR o);
+YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
+YAZ_EXPORT Z_Close *zget_Close (ODR o);
 
 #ifdef __cplusplus
 }
