@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.131 2001-11-18 23:17:45 adam Exp $
+ * $Id: client.c,v 1.132 2001-11-21 11:13:13 adam Exp $
  */
 
 #include <stdio.h>
@@ -83,6 +83,12 @@ static QueryType queryType = QueryType_Prefix;
 #if YAZ_MODULE_ccl
 static CCL_bibset bibset;               /* CCL bibset handle */
 #endif
+
+
+/* set this one to 1, to avoid decode of unknown MARCs  */
+#define AVOID_MARC_DECODE 0
+
+void process_cmd_line(char* line);
 
 ODR getODROutputStream()
 {
@@ -290,13 +296,9 @@ int cmd_open(char *arg)
         return 0;
 
     if(yazProxy) 
-    {
 	conn = cs_create_host(yazProxy, 1, &add);
-    } 
     else 
-    { 
 	conn = cs_create_host(type_and_host, 1, &add);
-    }
 	
     if (!conn)
     {
@@ -502,13 +504,20 @@ static void display_record(Z_DatabaseRecord *p)
                          p->u.octet_aligned->len);
         else
         {
-            if (marc_display_exl (octet_buf, NULL, 0 /* debug */,
-                                  p->u.octet_aligned->len)
-                <= 0)
+            if ( 
+#if AVOID_MARC_DECODE
+                /* primitive check for a marc OID 5.1-29 */
+                ent->oidsuffix[0] == 5 && ent->oidsuffix[1] < 30 && 
+#endif
+                marc_display_exl (octet_buf, NULL, 0 /* debug */,
+                                  p->u.octet_aligned->len) <= 0)
             {
-                printf ("ISO2709 decoding failed, dumping record as is:\n");
+                printf ("Hmm.. doesn't look like a MARC.\n");
                 print_record((const unsigned char*) octet_buf,
-                              p->u.octet_aligned->len);
+                             p->u.octet_aligned->len);
+            } else {
+                print_record((const unsigned char*) octet_buf,
+                             p->u.octet_aligned->len);	    
             }
         }
         if (marcdump)
@@ -1888,6 +1897,51 @@ int cmd_proxy(char* arg) {
     return 1;
 };
 
+int cmd_source(char* arg) 
+{
+    /* first should open the file and read one line at a time.. */
+    FILE* includeFile;
+    char line[1024], *cp;
+    
+    if(strlen(arg)<1) {
+        fprintf(stderr,"Error in source command use a filename");
+        return -1;
+    };
+    
+    includeFile = fopen (arg, "r");
+    
+    if(!includeFile) {
+        fprintf(stderr,"Unable to open file %s for reading\n",arg);
+        return -1;
+    };
+    
+    
+    while(!feof(includeFile)) {
+        memset(line,0,sizeof(line));
+        fgets(line,sizeof(line),includeFile);
+        
+        if(strlen(line) < 2) continue;
+        if(line[0] == '#') continue;
+        
+        if ((cp = strrchr (line, '\n')))
+            *cp = '\0';
+        
+        process_cmd_line(line);
+    };  
+    
+    
+    if(fclose(includeFile)<0) {
+        perror("unable to close include file");
+        exit(1);
+    }
+    return 1;
+}
+
+int cmd_subshell(char* args) {
+    system(args);
+    return 1;
+}
+
 static void initialize(void)
 {
 #if YAZ_MODULE_ccl
@@ -1916,14 +1970,130 @@ static void initialize(void)
     cmd_base("Default");
 }
 
-static int client(int wait)
+
+#if HAVE_GETTIMEOFDAY
+struct timeval tv_start, tv_end;
+#endif
+
+void  wait_and_handle_responce() 
+{
+    
+    int res;
+    char *netbuffer= 0;
+    int netbufferlen = 0;
+    Z_APDU *apdu;
+    
+    
+    if (conn
+#ifdef USE_SELECT
+        && FD_ISSET(cs_fileno(conn), &input)
+#endif
+        )
+    {
+        do
+        {
+            if ((res = cs_get(conn, &netbuffer, &netbufferlen)) < 0)
+            {
+                perror("cs_get");
+                exit(1);
+            }
+            if (!res)
+            {
+                printf("Target closed connection.\n");
+                exit(1);
+            }
+            odr_reset(in); /* release APDU from last round */
+            record_last = 0;
+            odr_setbuf(in, netbuffer, res, 0);
+            if (!z_APDU(in, &apdu, 0, 0))
+            {
+                odr_perror(in, "Decoding incoming APDU");
+                fprintf(stderr, "[Near %d]\n", odr_offset(in));
+                fprintf(stderr, "Packet dump:\n---------\n");
+                odr_dumpBER(stderr, netbuffer, res);
+                fprintf(stderr, "---------\n");
+                if (apdu_file)
+                    z_APDU(print, &apdu, 0, 0);
+                exit(1);
+            }
+            if (apdu_file && !z_APDU(print, &apdu, 0, 0))
+            {
+                odr_perror(print, "Failed to print incoming APDU");
+                odr_reset(print);
+                continue;
+            }
+            switch(apdu->which)
+            {
+            case Z_APDU_initResponse:
+                process_initResponse(apdu->u.initResponse);
+                break;
+            case Z_APDU_searchResponse:
+                process_searchResponse(apdu->u.searchResponse);
+                break;
+            case Z_APDU_scanResponse:
+                process_scanResponse(apdu->u.scanResponse);
+                break;
+            case Z_APDU_presentResponse:
+                print_refid (apdu->u.presentResponse->referenceId);
+                setno +=
+                    *apdu->u.presentResponse->numberOfRecordsReturned;
+                if (apdu->u.presentResponse->records)
+                    display_records(apdu->u.presentResponse->records);
+                else
+                    printf("No records.\n");
+                printf ("nextResultSetPosition = %d\n",
+                        *apdu->u.presentResponse->nextResultSetPosition);
+                break;
+            case Z_APDU_sortResponse:
+                process_sortResponse(apdu->u.sortResponse);
+                break;
+            case Z_APDU_extendedServicesResponse:
+                printf("Got extended services response\n");
+                process_ESResponse(apdu->u.extendedServicesResponse);
+                break;
+            case Z_APDU_close:
+                printf("Target has closed the association.\n");
+                process_close(apdu->u.close);
+                break;
+            case Z_APDU_resourceControlRequest:
+                process_resourceControlRequest
+                    (apdu->u.resourceControlRequest);
+                break;
+            case Z_APDU_deleteResultSetResponse:
+                process_deleteResultSetResponse(apdu->u.
+                                                deleteResultSetResponse);
+                break;
+            default:
+                printf("Received unknown APDU type (%d).\n", 
+                       apdu->which);
+                exit(1);
+            }
+        }
+        while (conn && cs_more(conn));
+#if HAVE_GETTIMEOFDAY
+        gettimeofday (&tv_end, 0);
+#if 0
+        printf ("S/U S/U=%ld/%ld %ld/%ld",
+                (long) tv_start.tv_sec,
+                (long) tv_start.tv_usec,
+                (long) tv_end.tv_sec,
+                (long) tv_end.tv_usec);
+#endif
+        printf ("Elapsed: %.6f\n",
+                (double) tv_end.tv_usec / 1e6 + tv_end.tv_sec -
+                ((double) tv_start.tv_usec / 1e6 + tv_start.tv_sec));
+#endif
+    }
+}
+
+void process_cmd_line(char* line)
 {
     static struct {
         char *cmd;
         int (*fun)(char *arg);
         char *ad;
     } cmd[] = {
-        {"open", cmd_open, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]"},
+        {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]"},
         {"quit", cmd_quit, ""},
         {"find", cmd_find, "<query>"},
         {"delete", cmd_delete, "<setname>"},
@@ -1950,6 +2120,8 @@ static int client(int wait)
         {"update", cmd_update, "<item>"},
 	{"packagename", cmd_packagename, "<packagename>"},
 	{"proxy", cmd_proxy, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]"},
+	{".", cmd_source, "<filename>"},
+	{"!", cmd_subshell, "Subshell command"},
         /* Server Admin Functions */
         {"adm-reindex", cmd_adm_reindex, "<database-name>"},
         {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>"},
@@ -1962,39 +2134,56 @@ static int client(int wait)
         {"adm-startup", cmd_adm_startup, ""},
         {0,0}
     };
-    char *netbuffer= 0;
-    int netbufferlen = 0;
-    int i;
-    Z_APDU *apdu;
+    int i,res;
+    char word[32], arg[1024];
+    
+    
 #if HAVE_GETTIMEOFDAY
-    struct timeval tv_start, tv_end;
+    gettimeofday (&tv_start, 0);
+#endif
+    
+    if ((res = sscanf(line, "%31s %1023[^;]", word, arg)) <= 0)
+    {
+        strcpy(word, last_cmd);
+        *arg = '\0';
+    }
+    else if (res == 1)
+        *arg = 0;
+    strcpy(last_cmd, word);
+    for (i = 0; cmd[i].cmd; i++)
+        if (!strncmp(cmd[i].cmd, word, strlen(word)))
+        {
+            res = (*cmd[i].fun)(arg);
+            break;
+        }
+    if (!cmd[i].cmd) /* dump our help-screen */
+    {
+        printf("Unknown command: %s.\n", word);
+        printf("Currently recognized commands:\n");
+        for (i = 0; cmd[i].cmd; i++)
+            printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
+        return;
+    }
+    if (res >= 2)
+        wait_and_handle_responce();
+}
+
+
+
+static void client(void)
+{
+
+#if HAVE_GETTIMEOFDAY
     gettimeofday (&tv_start, 0);
 #endif
 
     while (1)
     {
-        int res;
 #ifdef USE_SELECT
         fd_set input;
 #endif
-        char line[1024], word[32], arg[1024];
+        char line[1024];
         
-#ifdef USE_SELECT
-        FD_ZERO(&input);
-        FD_SET(0, &input);
-        if (conn)
-            FD_SET(cs_fileno(conn), &input);
-        if ((res = select(20, &input, 0, 0, 0)) < 0)
-        {
-            perror("select");
-            exit(1);
-        }
-        if (!res)
-            continue;
-        if (!wait && FD_ISSET(0, &input))
-#else
-        if (!wait)
-#endif
         {
 #if HAVE_READLINE_READLINE_H
             char* line_in;
@@ -2016,164 +2205,28 @@ static int client(int wait)
             if ((end_p = strchr (line, '\n')))
                 *end_p = '\0';
 #endif 
-#if HAVE_GETTIMEOFDAY
-            gettimeofday (&tv_start, 0);
-#endif
-
-            if ((res = sscanf(line, "%31s %1023[^;]", word, arg)) <= 0)
-            {
-                strcpy(word, last_cmd);
-                *arg = '\0';
-            }
-            else if (res == 1)
-                *arg = 0;
-            strcpy(last_cmd, word);
-            for (i = 0; cmd[i].cmd; i++)
-                if (!strncmp(cmd[i].cmd, word, strlen(word)))
-                {
-                    res = (*cmd[i].fun)(arg);
-                    break;
-                }
-            if (!cmd[i].cmd) /* dump our help-screen */
-            {
-                printf("Unknown command: %s.\n", word);
-                printf("Currently recognized commands:\n");
-                for (i = 0; cmd[i].cmd; i++)
-                    printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
-                res = 1;
-            }
-            if (res < 2)
-            {
-                continue;
-            }
-        }
-        wait = 0;
-        if (conn
-#ifdef USE_SELECT
-            && FD_ISSET(cs_fileno(conn), &input)
-#endif
-            )
-        {
-            do
-            {
-                if ((res = cs_get(conn, &netbuffer, &netbufferlen)) < 0)
-                {
-                    perror("cs_get");
-                    exit(1);
-                }
-                if (!res)
-                {
-                    printf("Target closed connection.\n");
-                    exit(1);
-                }
-                odr_reset(in); /* release APDU from last round */
-                record_last = 0;
-                odr_setbuf(in, netbuffer, res, 0);
-                if (!z_APDU(in, &apdu, 0, 0))
-                {
-                    odr_perror(in, "Decoding incoming APDU");
-                    fprintf(stderr, "[Near %d]\n", odr_offset(in));
-                    fprintf(stderr, "Packet dump:\n---------\n");
-                    odr_dumpBER(stderr, netbuffer, res);
-                    fprintf(stderr, "---------\n");
-                    if (apdu_file)
-                        z_APDU(print, &apdu, 0, 0);
-                    exit(1);
-                }
-                if (apdu_file && !z_APDU(print, &apdu, 0, 0))
-                {
-                    odr_perror(print, "Failed to print incoming APDU");
-                    odr_reset(print);
-                    continue;
-                }
-                switch(apdu->which)
-                {
-                case Z_APDU_initResponse:
-                    process_initResponse(apdu->u.initResponse);
-                    break;
-                case Z_APDU_searchResponse:
-                    process_searchResponse(apdu->u.searchResponse);
-                    break;
-                case Z_APDU_scanResponse:
-                    process_scanResponse(apdu->u.scanResponse);
-                    break;
-                case Z_APDU_presentResponse:
-                    print_refid (apdu->u.presentResponse->referenceId);
-                    setno +=
-                        *apdu->u.presentResponse->numberOfRecordsReturned;
-                    if (apdu->u.presentResponse->records)
-                        display_records(apdu->u.presentResponse->records);
-                    else
-                        printf("No records.\n");
-                    printf ("nextResultSetPosition = %d\n",
-                        *apdu->u.presentResponse->nextResultSetPosition);
-                    break;
-                case Z_APDU_sortResponse:
-                    process_sortResponse(apdu->u.sortResponse);
-                    break;
-                case Z_APDU_extendedServicesResponse:
-                    printf("Got extended services response\n");
-                    process_ESResponse(apdu->u.extendedServicesResponse);
-                    break;
-                case Z_APDU_close:
-                    printf("Target has closed the association.\n");
-                    process_close(apdu->u.close);
-                    break;
-                case Z_APDU_resourceControlRequest:
-                    process_resourceControlRequest
-                        (apdu->u.resourceControlRequest);
-                    break;
-                case Z_APDU_deleteResultSetResponse:
-                    process_deleteResultSetResponse(apdu->u.
-                                                    deleteResultSetResponse);
-                    break;
-                default:
-                    printf("Received unknown APDU type (%d).\n", 
-                           apdu->which);
-                    exit(1);
-                }
-            }
-            while (conn && cs_more(conn));
-#if HAVE_GETTIMEOFDAY
-            gettimeofday (&tv_end, 0);
-            if (1)
-            {
-                printf ("Elapsed: %.6f\n", (double) tv_end.tv_usec /
-                                                1e6 + tv_end.tv_sec -
-                   ((double) tv_start.tv_usec / 1e6 + tv_start.tv_sec));
-            }
-#endif
-        }
+	    process_cmd_line(line);
+	}
     }
-    return 0;
 }
 
 int main(int argc, char **argv)
 {
     char *prog = *argv;
+    char *open_command = 0;
     char *arg;
     int ret;
-    int opened = 0;
 
     while ((ret = options("c:a:m:v:p:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
         case 0:
-            if (!opened)
+            if (!open_command)
             {
-                initialize ();
-                if (cmd_open (arg) == 2) {
-#if HAVE_READLINE_HISTORY_H
-		  char* tmp=(char*)malloc(strlen(arg)+6);
-		  *tmp=0;
-		  strcat(tmp,"open ");
-		  strcat(tmp,arg);
-		  add_history(tmp);
-		  free(tmp);
-#endif
-		  opened = 1;
-		};
+                open_command = xmalloc (strlen(arg)+6);
+                strcpy (open_command, "open ");
+                strcat (open_command, arg);
             }
             break;
         case 'm':
@@ -2201,12 +2254,23 @@ int main(int argc, char **argv)
             break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
-                             "[-c cclfields] [-p <proxy-addr>] [<server-addr>]\n",
+                     "[-c cclfields] [-p <proxy-addr>] [<server-addr>]\n",
                      prog);
             exit (1);
         }
     }
-    if (!opened)
-        initialize ();
-    return client (opened);
+    initialize();
+    if (open_command)
+    {
+#ifdef HAVE_GETTIMEOFDAY
+        gettimeofday (&tv_start, 0);
+#endif
+        process_cmd_line (open_command);
+#if HAVE_READLINE_HISTORY_H
+        add_history(open_command);
+#endif
+        xfree(open_command);
+    }
+    client ();
+    exit (0);
 }
