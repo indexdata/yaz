@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.14 2003-04-24 13:05:04 adam Exp $
+ * $Id: srw.c,v 1.15 2003-05-12 22:36:10 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -109,13 +109,9 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
 
     if (!match_element(ptr, elem))
         return 0;
-    printf ("match_xsd_XML_n: %s\n", elem);
     ptr = ptr->children;
     if (!ptr)
-    {
-        printf ("match_xsd_XML: no TEXT node\n");
         return 0;
-    }
     buf = xmlBufferCreate();
 
     xmlNodeDump(buf, ptr->doc, ptr, 0, 0);
@@ -129,7 +125,6 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
 
     xmlBufferFree(buf);
 
-    printf ("match_XML_string: OK content=%s\n",  *val);
     return 1;
 }
 
