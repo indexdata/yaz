@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.19 2003-02-20 15:15:04 adam Exp $
+ * $Id: backend.h,v 1.20 2003-03-24 22:26:50 adam Exp $
  */
 
 #ifndef BACKEND_H
@@ -181,6 +181,13 @@ typedef struct bend_segment_rr {
     bend_association association;
 } bend_segment_rr;
 
+typedef struct {
+    ODR stream;
+    ODR decode;
+    ODR print;
+    char *explain_buf;
+} bend_explain_rr;
+
 typedef struct bend_initrequest
 {
     Z_IdAuthentication *auth;
@@ -205,6 +212,7 @@ typedef struct bend_initrequest
     /* character set and language negotiation - see include/yaz/z-charneg.h */
     Z_CharSetandLanguageNegotiation *charneg_request;
     Z_External *charneg_response;
+    int (*bend_explain)(void *handle, bend_explain_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult

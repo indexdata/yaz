@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.11 2003-03-23 20:27:16 adam Exp $
+ * $Id: srw.c,v 1.12 2003-03-24 22:26:51 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -373,6 +373,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         {
             Z_SRW_PDU **p = handler_data;
             Z_SRW_explainResponse *res;
+            xmlNodePtr ptr = method->children;
 
             *p = odr_malloc(o, sizeof(**p));
             (*p)->which = Z_SRW_explain_response;
@@ -380,8 +381,12 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             res->explainData_buf = 0;
             res->explainData_len = 0;
             res->explainPacking = Z_SRW_recordPacking_string;
-            match_xsd_string_n(method, "explainResponse", o,
-                               &res->explainData_buf, &res->explainData_len);
+            for (; ptr; ptr = ptr->next)
+            {
+                match_xsd_string_n(ptr, "Explain", o, 
+                                   &res->explainData_buf,
+                                   &res->explainData_len);
+            }
         }
         else
             return -1;
@@ -469,12 +474,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 
             xmlSetNs(ptr, ns_srw);
 
-            if (res->explainData_buf)
-            {
-                xmlNodePtr t = xmlNewTextLen(res->explainData_buf,
-                                             res->explainData_len);
-                xmlAddChild(ptr, t);
-            }
+            add_xsd_string_n(ptr, "Explain", res->explainData_buf,
+                             res->explainData_len);
         }
         else
             return -1;

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.56 2003-02-28 15:59:02 adam Exp $
+ * $Id: ztest.c,v 1.57 2003-03-24 22:26:51 adam Exp $
  */
 
 /*
@@ -596,6 +596,17 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     return 0;
 }
 
+static int ztest_explain(void *handle, bend_explain_rr *rr)
+{
+    rr->explain_buf = "<explain>\n"
+        "\t<serverInfo>\n"
+        "\t\t<host>localhost</host>\n"
+        "\t\t<port>210</port>\n"
+        "\t</serverInfo>\n"
+        "</explain>\n";
+    return 0;
+}
+
 bend_initresult *bend_init(bend_initrequest *q)
 {
     bend_initresult *r = (bend_initresult *)
@@ -613,6 +624,7 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_delete = ztest_delete;
     q->bend_fetch = ztest_fetch;
     q->bend_scan = ztest_scan;
+    q->bend_explain = ztest_explain;
     return r;
 }
 

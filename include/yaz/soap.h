@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.h,v 1.3 2003-03-11 11:09:17 adam Exp $
+ * $Id: soap.h,v 1.4 2003-03-24 22:26:50 adam Exp $
  */
 
 #ifndef YAZ_SOAP_H
@@ -49,5 +49,9 @@ YAZ_EXPORT int z_soap_codec(ODR o, Z_SOAP **pp,
 YAZ_EXPORT int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
                             char **content_buf, int *content_len,
                             Z_SOAP_Handler *handlers, const char *encoding);
+
+YAZ_EXPORT int z_soap_error(ODR o, Z_SOAP *p,
+                            const char *fault_code, const char *fault_string,
+                            const char *details);
 
 #endif

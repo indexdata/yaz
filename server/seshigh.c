@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.150 2003-03-20 21:15:00 adam Exp $
+ * $Id: seshigh.c,v 1.151 2003-03-24 22:26:50 adam Exp $
  */
 
 /*
@@ -436,8 +436,11 @@ static void assoc_init_reset(association *assoc)
     assoc->init->bend_scan = NULL;
     assoc->init->bend_segment = NULL;
     assoc->init->bend_fetch = NULL;
+    assoc->init->bend_explain = NULL;
+
     assoc->init->charneg_request = NULL;
     assoc->init->charneg_response = NULL;
+
     assoc->init->decode = assoc->decode;
     assoc->init->peer_name = 
         odr_strdup (assoc->encode, cs_addrstr(assoc->client_link));
@@ -710,6 +713,35 @@ static void srw_bend_search(association *assoc, request *req,
     }
 }
 
+
+static void srw_bend_explain(association *assoc, request *req,
+                             Z_SRW_explainRequest *srw_req,
+                             Z_SRW_explainResponse *srw_res)
+{
+    yaz_log(LOG_LOG, "Got SRW ExplainRequest");
+    if (!assoc->init)
+    {
+        yaz_log(LOG_DEBUG, "srw_bend_init");
+        if (!srw_bend_init(assoc))
+            return;
+    }
+    if (assoc->init && assoc->init->bend_explain)
+    {
+        bend_explain_rr rr;
+
+        rr.stream = assoc->encode;
+        rr.decode = assoc->decode;
+        rr.print = assoc->print;
+        rr.explain_buf = 0;
+        (*assoc->init->bend_explain)(assoc->backend, &rr);
+        if (rr.explain_buf)
+        {
+            srw_res->explainData_buf = rr.explain_buf;
+            srw_res->explainData_len = strlen(rr.explain_buf);
+        }
+    }
+}
+
 static int hex_digit (int ch)
 {
     if (ch >= '0' && ch <= '9')
@@ -808,7 +840,6 @@ static void process_http_request(association *assoc, request *req)
             memcpy (db, p0, p1 - p0);
             db[p1 - p0] = '\0';
         }
-
         if (p1 && *p1 == '?' && p1[1])
         {
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
@@ -841,8 +872,7 @@ static void process_http_request(association *assoc, request *req)
             if (sr->u.request->startRecord)
                 yaz_log(LOG_LOG, "startRecord=%d", *sr->u.request->startRecord);
             sr->u.request->database = db;
-            srw_bend_search(assoc, req, sr->u.request,
-                            res->u.response);
+            srw_bend_search(assoc, req, sr->u.request, res->u.response);
             
             soap_package = odr_malloc(o, sizeof(*soap_package));
             soap_package->which = Z_SOAP_generic;
@@ -872,6 +902,46 @@ static void process_http_request(association *assoc, request *req)
                 z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
             }
 
+        }
+        else
+        {
+            Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_explain_response);
+            Z_SRW_PDU *sr = yaz_srw_get(o, Z_SRW_explain_request);
+
+            srw_bend_explain(assoc, req, sr->u.explain_request,
+                            res->u.explain_response);
+
+            if (res->u.explain_response->explainData_buf)
+            {
+                soap_package = odr_malloc(o, sizeof(*soap_package));
+                soap_package->which = Z_SOAP_generic;
+                
+                soap_package->u.generic =
+                    odr_malloc(o, sizeof(*soap_package->u.generic));
+                
+                soap_package->u.generic->p = res;
+                soap_package->u.generic->ns = soap_handlers[0].ns;
+                soap_package->u.generic->no = 0;
+                
+                soap_package->ns = "SRU";
+                
+                p = z_get_HTTP_Response(o, 200);
+                hres = p->u.HTTP_Response;
+                
+                ret = z_soap_codec_enc(assoc->encode, &soap_package,
+                                       &hres->content_buf, &hres->content_len,
+                                       soap_handlers, charset);
+                if (!charset)
+                    z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
+                else
+                {
+                    char ctype[60];
+                    strcpy(ctype, "text/xml; charset=");
+                    strcat(ctype, charset);
+                    z_HTTP_header_add(o, &hres->headers, "Content-Type",
+                                      ctype);
+                }
+            }
         }
 #ifdef DOCDIR
 	if (strlen(hreq->path) >= 5 && strlen(hreq->path) < 80 &&
@@ -924,6 +994,8 @@ static void process_http_request(association *assoc, request *req)
 	    }
 	}
 #endif
+
+#if 0
 	if (!strcmp(hreq->path, "/")) 
         {
 #ifdef DOCDIR
@@ -952,6 +1024,8 @@ static void process_http_request(association *assoc, request *req)
             hres->content_len = strlen(hres->content_buf);
             z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/html");
         }
+#endif
+
         if (!p)
         {
             p = z_get_HTTP_Response(o, 404);
@@ -961,10 +1035,7 @@ static void process_http_request(association *assoc, request *req)
     {
         const char *content_type = z_HTTP_header_lookup(hreq->headers,
                                                         "Content-Type");
-        const char *soap_action = z_HTTP_header_lookup(hreq->headers,
-                                                       "SOAPAction");
-        if (content_type && soap_action && 
-            !yaz_strcmp_del("text/xml", content_type, "; "))
+        if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
         {
             Z_SOAP *soap_package = 0;
             int ret = -1;
@@ -975,7 +1046,7 @@ static void process_http_request(association *assoc, request *req)
             static Z_SOAP_Handler soap_handlers[2] = {
 #if HAVE_XML2
                 {"http://www.loc.gov/zing/srw/v1.0/", 0,
-			                 (Z_SOAP_fun) yaz_srw_codec},
+                 (Z_SOAP_fun) yaz_srw_codec},
 #endif
                 {0, 0, 0}
             };
@@ -994,7 +1065,6 @@ static void process_http_request(association *assoc, request *req)
             ret = z_soap_codec(assoc->decode, &soap_package, 
                                &hreq->content_buf, &hreq->content_len,
                                soap_handlers);
-            
 #if HAVE_XML2
             if (!ret && soap_package->which == Z_SOAP_generic &&
                 soap_package->u.generic->no == 0)
@@ -1031,6 +1101,29 @@ static void process_http_request(association *assoc, request *req)
                     
                     soap_package->u.generic->p = res;
                     http_code = 200;
+                }
+                else if (sr->which == Z_SRW_explain_request)
+                {
+                    Z_SRW_PDU *res =
+                        yaz_srw_get(assoc->encode, Z_SRW_explain_response);
+
+                    srw_bend_explain(assoc, req, sr->u.explain_request,
+                                     res->u.explain_response);
+                    if (!res->u.explain_response->explainData_buf)
+                    {
+                        z_soap_error(assoc->encode, soap_package,
+                                     "SOAP-ENV:Client", "Explain Not Supported", 0);
+                    }
+                    else
+                    {
+                        soap_package->u.generic->p = res;
+                        http_code = 200;
+                    }
+                }
+                else
+                {
+                    z_soap_error(assoc->encode, soap_package,
+                                 "SOAP-ENV:Client", "Bad method", 0); 
                 }
             }
 #endif
