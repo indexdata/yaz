@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.23 2004-11-26 10:58:38 heikki Exp $
+ * $Id: log.h,v 1.24 2004-11-26 11:06:29 heikki Exp $
  */
 
 /**
@@ -35,7 +35,13 @@
 #define LOG_H
 
 #include <yaz/ylog.h>
+
+#ifndef YAZ_USE_OLD_LOG
 #warning "use of log.h is deprecated, use ylog.h instead"
+/* if this warning gets on your nerves, run configure like this:
+ * CFLAGS="-Wall -g -D YAZ_USE_OLD_LOG" ./configure
+ */
+#endif
 
 #include <stdio.h>
 #include <yaz/yconfig.h>
