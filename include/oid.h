@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.33 1999-05-27 13:02:20 adam Exp $
+ * $Id: oid.h,v 1.34 1999-09-13 12:51:14 adam Exp $
  */
 
 #ifndef OID_H
@@ -153,6 +153,7 @@ typedef enum oid_value
     VAL_UNIVERSE_REPORT,
     VAL_PROXY,
     VAL_COOKIE,
+    VAL_CLIENT_IP,
 /* add new types here... */
 
 /* VAL_DYNAMIC must have highest value */

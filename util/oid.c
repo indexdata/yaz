@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.36  1999-05-27 13:02:20  adam
+ * Revision 1.37  1999-09-13 12:51:15  adam
+ * Added CLIENT IP OID.
+ *
+ * Revision 1.36  1999/05/27 13:02:20  adam
  * Assigned OID for old DB Update (VAL_DBUPDATE0).
  *
  * Revision 1.35  1999/04/20 09:56:49  adam
@@ -333,6 +336,8 @@ static oident oids[] =
      "Proxy" },
     {PROTO_Z3950,   CLASS_USERINFO,VAL_COOKIE,       {10,1000,81,2,-1},
      "Cookie" },
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_CLIENT_IP,    {10,1000,81,3,-1},
+     "Client-IP" },
     {PROTO_Z3950,   CLASS_ELEMSPEC,VAL_ESPEC1,       {11,1,-1},
      "Espec-1"},
     {PROTO_Z3950,   CLASS_VARSET,  VAL_VAR1,         {12,1,-1},
