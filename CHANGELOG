@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXXX XXXX/XX/XX
 
+Added Sort PDU.
+
 Fixed small problem in SUTRS-filter. A newline was sometimes inserted before
 the rank and record number.
 
