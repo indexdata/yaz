@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.49 2002-08-23 14:27:18 adam Exp $
+ * $Id: d1_read.c,v 1.50 2002-08-26 10:43:52 adam Exp $
  */
 
 #include <assert.h>
@@ -533,9 +533,9 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
     {
 	data1_xattr *p;
 	int len;
-	while (amp || (c && d1_isspace(c)))
+	while (*amp || (c && d1_isspace(c)))
 	    c = ampr (get_byte, fh, amp);
-	if (amp == 0 && (c == 0 || c == '>' || c == '/'))
+	if (*amp == 0 && (c == 0 || c == '>' || c == '/'))
 	    break;
 	*pp = p = (data1_xattr *) nmem_malloc (m, sizeof(*p));
 	p->next = 0;
@@ -555,11 +555,11 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	if (c == '=')
 	{
 	    c = ampr (get_byte, fh, amp);
-	    if (amp == 0 && c == '"')
+	    if (*amp == 0 && c == '"')
 	    {
 		c = ampr (get_byte, fh, amp);	
 		wrbuf_rewind(wrbuf);
-		while (amp || (c && c != '"'))
+		while (*amp || (c && c != '"'))
 		{
 		    wrbuf_putc (wrbuf, c);
 		    c = ampr (get_byte, fh, amp);
@@ -567,11 +567,11 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	        if (c)
 		    c = ampr (get_byte, fh, amp);
 	    }
-	    else if (amp == 0 && c == '\'')
+	    else if (*amp == 0 && c == '\'')
 	    {
 		c = ampr (get_byte, fh, amp);	
 		wrbuf_rewind(wrbuf);
-		while (amp || (c && c != '\''))
+		while (*amp || (c && c != '\''))
 		{
 		    wrbuf_putc (wrbuf, c);
 		    c = ampr (get_byte, fh, amp);
@@ -582,7 +582,7 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	    else
 	    {
 	        wrbuf_rewind(wrbuf);
-	        while (amp || (c && c != '>' && c != '/'))
+	        while (*amp || (c && c != '>' && c != '/'))
 	        {
 		    wrbuf_putc (wrbuf, c);
 		    c = ampr (get_byte, fh, amp);
