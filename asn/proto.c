@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.22  1995-05-17 08:40:56  quinn
+ * Revision 1.23  1995-05-22 11:30:18  quinn
+ * Adding Z39.50-1992 stuff to proto.c. Adding zget.c
+ *
+ * Revision 1.22  1995/05/17  08:40:56  quinn
  * Added delete. Fixed some sequence_begins. Smallish.
  *
  * Revision 1.21  1995/05/16  08:50:24  quinn
@@ -103,6 +106,7 @@ int z_UserInformationField(ODR o, Z_UserInformationField **p, int opt)
 
 /* ---------------------- INITIALIZE SERVICE ------------------- */
 
+#if 0
 int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
@@ -113,6 +117,7 @@ int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
     	odr_visiblestring(o, &(*p)->account, 0) &&
     	odr_sequence_end(o);
 }
+#endif
 
 int z_IdPass(ODR o, Z_IdPass **p, int opt)
 {
@@ -136,7 +141,7 @@ int z_IdAuthentication(ODR o, Z_IdAuthentication **p, int opt)
     static Odr_arm arm[] =
     {
 	{-1, -1, -1, Z_IdAuthentication_open, z_StrAuthentication},
-	{-1, -1, -1, Z_IdAuthentication_idPass, z_NSRAuthentication},
+	{-1, -1, -1, Z_IdAuthentication_idPass, z_IdPass},
 	{-1, -1, -1, Z_IdAuthentication_anonymous, odr_null},
 	{-1, -1, -1, Z_IdAuthentication_other, odr_external},
 	{-1, -1, -1, -1, 0}
@@ -388,6 +393,28 @@ int z_AttributesPlusTerm(ODR o, Z_AttributesPlusTerm **p, int opt)
 	odr_sequence_end(o);
 }
 
+int z_ProximityOperator(ODR o, Z_ProximityOperator **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ProxCode_known, odr_integer},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ProxCode_private, odr_integer},
+    	{-1, -1, -1, -1, 0}
+    };
+
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_implicit(o, odr_bool, &(*p)->exclusion, ODR_CONTEXT, 1, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->distance, ODR_CONTEXT, 2, 0) &&
+	odr_implicit(o, odr_bool, &(*p)->ordered, ODR_CONTEXT, 3, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->relationType, ODR_CONTEXT, 4, 0) &&
+	odr_constructed_begin(o, &(*p)->proximityUnitCode, ODR_CONTEXT, 5) &&
+	odr_choice(o, arm, &(*p)->proximityUnitCode, &(*p)->which) &&
+	odr_constructed_end(o) &&
+	odr_sequence_end(o);
+}
+
 int z_Operator(ODR o, Z_Operator **p, int opt)
 {
     static Odr_arm arm[] =
@@ -395,6 +422,7 @@ int z_Operator(ODR o, Z_Operator **p, int opt)
     	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_Operator_and, odr_null},
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Operator_or, odr_null},
     	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Operator_and_not, odr_null},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Operator_prox, z_ProximityOperator},
     	{-1, -1, -1, -1, 0}
     };
     int dummy = 999;
@@ -602,6 +630,51 @@ int z_Records(ODR o, Z_Records **p, int opt)
     	return 1;
     *p = 0;
     return opt && odr_ok(o);
+}
+
+/* ------------------------ ACCESS CTRL SERVICE ----------------------- */
+
+int z_AccessControlRequest(ODR o, Z_AccessControlRequest **p, int opt)
+{
+    static Odr_arm arm[] = 
+    {
+	{ODR_IMPLICIT, ODR_CONTEXT, 37, Z_AccessRequest_simpleForm,
+	    odr_octetstring},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_AccessRequest_externallyDefined,
+	    odr_external},
+    	{-1, -1, -1, -1, 0}
+    };
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_choice(o, arm, &(*p)->u, &(*p)->which) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
+	odr_sequence_end(o);
+}
+
+int z_AccessControlResponse(ODR o, Z_AccessControlResponse **p, int opt)
+{
+    static Odr_arm arm[] = 
+    {
+	{ODR_IMPLICIT, ODR_CONTEXT, 38, Z_AccessResponse_simpleForm,
+	    odr_octetstring},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_AccessResponse_externallyDefined,
+	    odr_external},
+    	{-1, -1, -1, -1, 0}
+    };
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_choice(o, arm, &(*p)->u, &(*p)->which) &&
+	odr_explicit(o, z_DiagRec, &(*p)->diagnostic, ODR_CONTEXT, 223, 1) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
+	odr_sequence_end(o);
 }
 
 /* ------------------------ SCAN SERVICE -------------------- */
