@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.1  1995-05-22 11:30:31  quinn
+ * Revision 1.2  1995-05-22 14:56:40  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.1  1995/05/22  11:30:31  quinn
  * Added prettier client.
  *
  *
@@ -525,7 +528,6 @@ static int client(void)
     int i;
     Z_APDU *apdu;
 
-    printf(C_PROMPT);
     while (1)
     {
     	int res;
@@ -637,5 +639,7 @@ int main(int argc, char **argv)
     initialize();
     if (argc > 1)
     	cmd_open(argv[1]);
+    else
+	printf(C_PROMPT);
     return client();
 }
