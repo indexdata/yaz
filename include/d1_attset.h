@@ -41,12 +41,18 @@
 
 struct data1_attset;
 
+typedef struct data1_local_attribute
+{
+    int local;
+    struct data1_local_attribute *next;
+} data1_local_attribute;
+
 typedef struct data1_att
 {
     struct data1_attset *parent;   /* attribute set */
-    char *name;                    /* symbolic name of this tag */
-    int value;                     /* tag value */
-    int local;                     /* local index value */
+    char *name;                    /* symbolic name of this attribute */
+    int value;                     /* attribute value */
+    data1_local_attribute *locals; /* local index values */
     struct data1_att *next;
 } data1_att;
 

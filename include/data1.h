@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.13  1996-02-20 16:32:48  quinn
+ * Revision 1.14  1996-05-09 07:27:11  quinn
+ * Multiple local values supported.
+ *
+ * Revision 1.13  1996/02/20  16:32:48  quinn
  * Created util file.
  *
  * Revision 1.12  1996/01/18  09:46:34  adam
@@ -143,6 +146,12 @@ typedef enum data1_datatype
     DATA1K_null
 } data1_datatype;
 
+typedef enum data1_structure
+{
+    DATA1S_word,
+    DATA1S_phrase
+} data1_structure;
+
 typedef struct data1_marctab
 {
     char *name;
@@ -233,6 +242,13 @@ typedef struct data1_tagset
     struct data1_tagset *next;       /* sibling */
 } data1_tagset;
 
+typedef struct data1_termlist
+{
+    data1_att *att;
+    data1_structure structure;
+    struct data1_termlist *next;
+} data1_termlist;
+
 /*
  * abstract syntax specification
  */
@@ -241,7 +257,7 @@ typedef struct data1_element
 {
     char *name;
     data1_tag *tag;
-    data1_att *att;
+    data1_termlist *termlists;
     struct data1_element *children;
     struct data1_element *next;
 } data1_element;
