@@ -2,7 +2,7 @@
 <article>
 <title>YAZ User's Guide and Reference
 <author><htmlurl url="http://www.indexdata.dk/" name="Index Data">, <tt><htmlurl url="mailto:info@indexdata.dk" name="info@indexdata.dk"></>
-<date>$Revision: 1.7 $
+<date>$Revision: 1.8 $
 <abstract>
 This document is the programmer's guide and reference to the YAZ
 package. YAZ is a compact toolkit that provides access to the
@@ -2556,6 +2556,15 @@ protocol specification (Z39.50), it is generally fairly easy to see
 what goes wrong.
 
 <sect>The COMSTACK Module<label id="comstack">
+
+<sect1>Synopsis (blocking mode)
+
+<p>
+
+<tscreen><verb>
+int connect_and_init() {
+}
+</verb></tscreen>
 
 <sect1>Introduction
 
