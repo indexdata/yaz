@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.12  1996-10-11 10:35:38  adam
+ * Revision 1.13  1996-10-29 13:35:38  adam
+ * Implemented data1_set_tabpath and data1_get_tabpath.
+ *
+ * Revision 1.12  1996/10/11 10:35:38  adam
  * Fixed a bug that caused data1_read_node to core dump when no abstract
  * syntax was defined in a "sgml"-record.
  *
@@ -97,8 +100,24 @@
 
 char *data1_tabpath = 0; /* global path for tables */
 
-void data1_set_tabpath(char *p)
-{ data1_tabpath = p; }
+void data1_set_tabpath(const char *p)
+{
+    if (data1_tabpath)
+    {
+        xfree (data1_tabpath);
+        data1_tabpath = NULL;
+    }
+    if (p)
+    {
+        data1_tabpath = xmalloc (strlen(p)+1);
+        strcpy (data1_tabpath, p);
+    }
+}
+
+const char *data1_get_tabpath (void)
+{
+    return data1_tabpath;
+}
 
 #if 0
 static data1_node *freelist = 0;
