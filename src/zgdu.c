@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.5 2003-12-31 00:14:01 adam Exp $
+ * $Id: zgdu.c,v 1.6 2004-02-19 23:21:44 adam Exp $
  */
 
 #include <yaz/odr.h>
@@ -14,6 +14,7 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
 {
     int i = off;
+    int chunked = 0;
 
     *headers = 0;
     while (i < o->size-1 && o->buf[i] == '\r')
@@ -52,6 +53,10 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         memcpy ((*headers)->value, o->buf + po, i - po);
         (*headers)->value[i - po] = '\0';
         
+	if (!strcasecmp((*headers)->name, "Transfer-Encoding")
+	    &&
+	    !strcasecmp((*headers)->value, "chunked"))
+	    chunked = 1;
         headers = &(*headers)->next;
     }
     *headers = 0;
@@ -63,22 +68,70 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
     }
     i++;
 
-    if (i > o->size)
+    if (chunked)
     {
-        o->error = OHTTP;
-        return 0;
+	int off = 0;
+	
+	/* we know buffer will be smaller than o->size - i - 2*/
+	*content_buf = (char*) odr_malloc(o, o->size - i - 2);  
+	
+	while (1)
+	{
+	    int chunk_len = 0;
+	    for (; i  < o->size-2; i++)
+		if (isdigit(o->buf[i]))
+		    chunk_len = chunk_len * 16 + 
+			(o->buf[i] - '0');
+		else if (isupper(o->buf[i]))
+		    chunk_len = chunk_len * 16 + 
+			(o->buf[i] - ('A'-10));
+		else if (islower(o->buf[i]))
+		    chunk_len = chunk_len * 16 + 
+			(o->buf[i] - ('a'-10));
+		else
+		    break;
+	    if (i > o->size - 2)
+		break;
+	    if (o->buf[i] != '\r' || o->buf[i+1] != '\n') 
+	    {   /* chunk length must be followed by \r\n */
+		o->error = OHTTP;
+		return 0;
+	    }
+	    i += 2;
+	    if (chunk_len == 0)
+		break;
+	    if (chunk_len < 0 || off + chunk_len > o->size)
+	    {
+		o->error = OHTTP;
+		return 0;
+	    }
+	    memcpy (*content_buf + off, o->buf + i, chunk_len);
+	    i += chunk_len;
+	    off += chunk_len;
+	}
+	if (!off)
+	    *content_buf = 0;
+	*content_len = off;
     }
-    else if (i == o->size)
+    else
     {
-        *content_buf = 0;
-        *content_len = 0;
-    }
-    else 
-    {
-        *content_len = o->size - i;
-        *content_buf = (char*) odr_malloc(o, *content_len + 1);
-        memcpy(*content_buf, o->buf + i, *content_len);
-        (*content_buf)[*content_len] = '\0';
+	if (i > o->size)
+	{
+	    o->error = OHTTP;
+	    return 0;
+	}
+	else if (i == o->size)
+	{
+	    *content_buf = 0;
+	    *content_len = 0;
+	}
+	else 
+	{
+	    *content_len = o->size - i;
+	    *content_buf = (char*) odr_malloc(o, *content_len + 1);
+	    memcpy(*content_buf, o->buf + i, *content_len);
+	    (*content_buf)[*content_len] = '\0';
+	}
     }
     return 1;
 }
