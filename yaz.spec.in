@@ -1,14 +1,16 @@
+Summary: Z39.50 Library
 Name: yaz
 Version: @VERSION@
 Release: 1
+Requires: libxml2
 Copyright: YAZ License
 Group: Development/Libraries
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
-BuildRoot: /var/tmp/%{name}-%{version}-root
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
+BuildRequires: libxml2 libxml2-devel tcp_wrappers
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.dk/yaz/
-Summary: Z39.50 Library
 
 %description
 YAZ is a C library for developing client - and server applications
