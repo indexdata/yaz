@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.10  1995-12-14 11:09:43  quinn
+ * Revision 1.11  1995-12-15 16:19:45  quinn
+ * Added formatted_text.
+ *
+ * Revision 1.10  1995/12/14  11:09:43  quinn
  * Work on Explain
  *
  * Revision 1.9  1995/12/13  15:32:47  quinn
@@ -289,6 +292,7 @@ typedef struct data1_node
 		DATA1I_text,        /* text data */
 		DATA1I_num          /* numerical data */
 	    } what;
+	    int formatted_text;     /* newlines are significant */
 	    int len;
 	    char *data;      /* filename or data */
 #define DATA1_LOCALDATA 40
