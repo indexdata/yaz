@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.39  1999-12-16 23:36:19  adam
+ * Revision 1.40  2000-01-06 14:59:13  adam
+ * Added oid_init/oid_exit. Changed oid_exit.
+ *
+ * Revision 1.39  1999/12/16 23:36:19  adam
  * Implemented ILL protocol. Minor updates ASN.1 compiler.
  *
  * Revision 1.38  1999/11/30 13:47:12  adam
@@ -168,6 +171,7 @@ struct oident_list {
 
 static struct oident_list *oident_table = NULL;
 static int oid_value_dynamic = VAL_DYNAMIC;
+static int oid_init_flag = 0;
 
 /*
  * OID database
@@ -527,16 +531,31 @@ void oid_transfer (struct oident *oident)
     }
 }
 
-static void oid_init (void)
+void oid_init (void)
 {
-    static int checked = 0;
-    
-    if (checked)
+    if (oid_init_flag)
 	return;
+    /* oid_transfer is thread safe, so there's nothing wrong in having
+       two threads calling it simultaniously. On the other hand
+       no thread may exit oid_init before all OID's bave been
+       transferred - which is why checked is set after oid_transfer... 
+    */
     oid_transfer (oids);
-    checked = 1;
+    oid_init_flag = 1;
 }
 
+void oid_exit (void)
+{
+    while (oident_table)
+    {
+	struct oident_list *this_p = oident_table;
+	oident_table = oident_table->next;
+
+	xfree (this_p->oident.desc);
+	xfree (this_p);
+    }
+    oid_init_flag = 0;
+}
 
 static struct oident *oid_getentbyoid_x(int *o)
 {
@@ -614,7 +633,7 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
     {
 	char desc_str[200];
 	struct oident_list *oident_list;
-	oident_list = (struct oident_list *) malloc (sizeof(*oident_list));
+	oident_list = (struct oident_list *) xmalloc (sizeof(*oident_list));
 	oident = &oident_list->oident;
 	oident->proto = proto;
 	oident->oclass = oclass;
@@ -628,7 +647,7 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
 		sprintf (desc_str+strlen(desc_str), ".%d", oid[i]);
 	    desc = desc_str;
 	}
-	oident->desc = (char *) malloc (strlen(desc)+1);
+	oident->desc = (char *) xmalloc (strlen(desc)+1);
 	strcpy (oident->desc, desc);
 	if (value == VAL_DYNAMIC)
 	    oident->value = (enum oid_value) (++oid_value_dynamic);
