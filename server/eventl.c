@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.2  1995-03-14 10:27:59  quinn
+ * Revision 1.3  1995-03-14 11:30:14  quinn
+ * Works better now.
+ *
+ * Revision 1.2  1995/03/14  10:27:59  quinn
  * More work on demo server.
  *
  * Revision 1.1  1995/03/10  18:22:44  quinn
@@ -51,6 +54,7 @@ int event_loop()
 	FD_ZERO(&out);
 	FD_ZERO(&except);
 	timeout = 0; /* hang on select */
+	max = 0;
     	for (p = iochans; p; p = p->next)
     	{
 	    if (p->force_event)

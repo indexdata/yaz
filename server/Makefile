@@ -1,16 +1,17 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.2 1995-03-14 10:27:57 quinn Exp $
+# $Id: Makefile,v 1.3 1995-03-14 11:30:14 quinn Exp $
 
 SHELL=/bin/sh
-INCLUDE=-I../include -I. -I../asn -I../odr -I../yazlib -I../../egate/include -I../../xtimosi/src
+INCLUDE=-I../include -I. -I../asn -I../odr -I../yazlib -I../../egate/include\
+ -I../../xtimosi/src -I../../alex/include
 LIBDIR=../../lib
 LIBINCLUDE=-L$(LIBDIR)
 #CFLAGS=-Wall -pedantic -g
 DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libserver.a 
-LIBS=-lserver -lasn -lodr -lcomstack options.o
+LIBS=-lserver -lasn -lodr -lcomstack ../../alex/lib/util.a 
 PO = eventl.o 
 CPP=cc -E
 PROG=statserv
@@ -18,7 +19,7 @@ PROGO=statserv.o session.o
 
 all: $(LIBDIR) $(LIB) $(PROG)
 
-$(PROG): $(LIB) $(PROGO) options.o
+$(PROG): $(LIB) $(PROGO)
 	$(CC) $(CFLAGS) $(LIBINCLUDE) -o $(PROG) $(PROGO) $(LIBS)
 
 alll:

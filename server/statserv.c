@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.2  1995-03-14 10:28:03  quinn
+ * Revision 1.3  1995-03-14 11:30:15  quinn
+ * Works better now.
+ *
+ * Revision 1.2  1995/03/14  10:28:03  quinn
  * More work on demo server.
  *
  * Revision 1.1  1995/03/10  18:22:45  quinn
@@ -69,7 +72,7 @@ void listener(IOCHAN h, int event)
 	    fprintf(stderr, "Failed to create new assoc.\n");
 	    exit(1);
 	}
-	iochan_setdata(h, newas);
+	iochan_setdata(new_chan, newas);
     	iochan_setflags(h, EVENT_INPUT); /* reset for listening */
     }
     else
