@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.24 2004-05-10 07:48:56 adam Exp $
+ * $Id: seshigh.c,v 1.25 2004-06-15 10:53:26 adam Exp $
  */
 
 /*
@@ -606,7 +606,8 @@ static void srw_bend_search(association *assoc, request *req,
             const char *pqf_msg;
             size_t off;
             int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
-            yaz_log(LOG_LOG, "%*s^\n", off+4, "");
+	    if (off < 200)
+		yaz_log(LOG_LOG, "%*s^\n", (int)off+4, "");
             yaz_log(LOG_LOG, "Bad PQF: %s (code %d)\n", pqf_msg, code);
             
             srw_error = 10;
@@ -1321,7 +1322,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.24 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.25 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
