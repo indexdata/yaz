@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.9 2002-02-12 21:11:49 adam Exp $
+## $Id: Makefile.am,v 1.10 2002-04-15 09:44:44 adam Exp $
 
-INCLUDES=-I$(top_srcdir)/include
+AM_CPPFLAGS=-I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = libz39.50.la
 

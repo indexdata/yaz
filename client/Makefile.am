@@ -1,6 +1,6 @@
 ## Copyright (C) 1995-2000, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.15 2002-03-18 21:33:48 adam Exp $
+## $Id: Makefile.am,v 1.16 2002-04-15 09:44:41 adam Exp $
 
 if ISSSL
 extra=yaz-client-ssl
@@ -16,4 +16,4 @@ yaz_client_ssl_SOURCES=$(yaz_client_SOURCES)
 yaz_client_LDADD = ../lib/libyaz.la $(READLINE_LIBS)
 yaz_client_ssl_LDADD = ../lib/libyazssl.la ../lib/libyaz.la $(READLINE_LIBS) $(SSL_LIBS)
 
-INCLUDES=-I$(top_srcdir)/include
+AM_CPPFLAGS=-I$(top_srcdir)/include

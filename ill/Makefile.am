@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.7 2001-04-05 13:08:48 adam Exp $
+## $Id: Makefile.am,v 1.8 2002-04-15 09:44:44 adam Exp $
 
-INCLUDES=-I$(top_srcdir)/include
+AM_CPPFLAGS=-I$(top_srcdir)/include
 
 tabdatadir=$(pkgdatadir)/ill
 tabdata_DATA=ill9702.asn item-req.asn ill.tcl

@@ -1,7 +1,7 @@
-## $Id: Makefile.am,v 1.8 2001-10-23 21:00:20 adam Exp $
+## $Id: Makefile.am,v 1.9 2002-04-15 09:44:44 adam Exp $
 noinst_LTLIBRARIES = libzutil.la
 
-INCLUDES=-I$(top_srcdir)/include 
+AM_CPPFLAGS=-I$(top_srcdir)/include 
 
 LIBS =
 

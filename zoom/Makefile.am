@@ -1,7 +1,7 @@
-## $Id: Makefile.am,v 1.2 2001-12-30 22:21:11 adam Exp $
+## $Id: Makefile.am,v 1.3 2002-04-15 09:44:44 adam Exp $
 ## Copyright (C) 2001, Index Data
 
-INCLUDES = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include
 noinst_LTLIBRARIES = libzoom.la
 libzoom_la_SOURCES = zoom-opt.c zoom-c.c zoom-p.h
 
