@@ -1,4 +1,4 @@
-/* $Id: cqlutil.c,v 1.3 2004-03-15 21:39:06 adam Exp $
+/* $Id: cqlutil.c,v 1.4 2004-03-16 13:22:16 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -92,7 +92,8 @@ struct cql_node *cql_apply_prefix(struct cql_node *n, const char *prefix,
 	if (!n->u.st.index_uri && n->u.st.index)
 	{   /* not yet resolved.. */
 	    const char *cp = strchr(n->u.st.index, '.');
-	    if (prefix && cp && strlen(prefix) == cp - n->u.st.index &&
+	    if (prefix && cp && 
+		strlen(prefix) == (size_t) (cp - n->u.st.index) &&
 		!memcmp(n->u.st.index, prefix, strlen(prefix)))
 	    {
 		char *nval = xstrdup(cp+1);
@@ -108,7 +109,8 @@ struct cql_node *cql_apply_prefix(struct cql_node *n, const char *prefix,
 	if (!n->u.st.relation_uri && n->u.st.relation)
 	{
 	    const char *cp = strchr(n->u.st.relation, '.');
-	    if (prefix && cp && strlen(prefix) == cp - n->u.st.relation &&
+	    if (prefix && cp &&
+		strlen(prefix) == (size_t)(cp - n->u.st.relation) &&
 		!memcmp(n->u.st.relation, prefix, strlen(prefix)))
 	    {
 		char *nval = xstrdup(cp+1);
