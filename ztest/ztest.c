@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.9  1998-03-31 11:07:45  adam
+ * Revision 1.10  1998-05-27 16:55:54  adam
+ * Minor changes.
+ *
+ * Revision 1.9  1998/03/31 11:07:45  adam
  * Furhter work on UNIverse resource report.
  * Added Extended Services handling in frontend server.
  *
@@ -191,25 +194,19 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
 {
     bend_fetchresult *r = (bend_fetchresult *)
 			odr_malloc (q->stream, sizeof(*r));
-    static char *bbb = 0;
-
+    char *cp;
     r->errstring = 0;
     r->last_in_set = 0;
     r->basename = "DUMMY";
-    if (bbb)
-    {
-        xfree(bbb);
-	bbb = 0;
-    }
     r->format = q->format;  
     if (q->format == VAL_SUTRS)
     {
     	char buf[100];
 
 	sprintf(buf, "This is dummy SUTRS record number %d\n", q->number);
-	assert(r->record = bbb = (char*) xmalloc(strlen(buf)+1));
-	strcpy(bbb, buf);
 	r->len = strlen(buf);
+	r->record = odr_malloc (q->stream, r->len+1);
+	strcpy(r->record, buf);
     }
     else if (q->format == VAL_GRS1)
     {
@@ -221,14 +218,18 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
 	    return r;
 	}
     }
-    else if (!(r->record = bbb = dummy_database_record(q->number)))
+    else if ((cp = dummy_database_record(q->number)))
     {
-    	r->errcode = 13;
+	r->len = strlen(cp);
+	r->record = (char *) odr_malloc (q->stream, 1+r->len);
+	strcpy (r->record, cp);
 	r->format = VAL_USMARC;
-	return r;
     }
     else
-	r->len = strlen(r->record);
+    {
+    	r->errcode = 13;
+	return r;
+    }
     r->errcode = 0;
     return r;
 }
