@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: atoin.c,v 1.4 2004-12-13 14:21:55 heikki Exp $
+ * $Id: atoin.c,v 1.5 2004-12-16 08:59:56 adam Exp $
  */
 
 /** 
@@ -16,7 +16,7 @@
 
 #include <string.h>
 #include <ctype.h>
-
+#include <yaz/marcdisp.h>
 
 /**
  * atoi_n: like atoi but reads at most len characters.
