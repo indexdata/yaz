@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.14  2000-01-31 13:15:21  adam
+ * Revision 1.15  2000-02-24 23:49:13  adam
+ * Fixed memory allocation problem.
+ *
+ * Revision 1.14  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -287,6 +290,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
 					   struct ccl_rpn_attr **qa,
                                            int *term_list)
 {
+    struct ccl_rpn_attr *qa_tmp[2];
     struct ccl_rpn_node *p;
     struct ccl_token *lookahead = cclp->look_token;
     int len = 0;
@@ -314,7 +318,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
     {
         /* no qualifier(s) applied. Use 'term' if it is defined */
 
-        qa = (struct ccl_rpn_attr **)malloc (2*sizeof(*qa));
+        qa = qa_tmp;
 	ccl_assert (qa);
 	qa[0] = ccl_qual_search (cclp, "term", 4);
 	qa[1] = NULL;
@@ -425,7 +429,6 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_BOTH))
         {
             cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
-            free (qa);
             ccl_rpn_delete (p);
             return NULL;
         }
@@ -436,7 +439,6 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_RIGHT))
         {
             cclp->error_code = CCL_ERR_TRUNC_NOT_RIGHT;
-            free (qa);
             ccl_rpn_delete (p);
             return NULL;
         }
@@ -447,7 +449,6 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_LEFT))
         {
             cclp->error_code = CCL_ERR_TRUNC_NOT_LEFT;
-            free (qa);
             ccl_rpn_delete (p);
             return NULL;
         }
