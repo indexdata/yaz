@@ -23,12 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: prt-ext.h,v 1.11 2005-01-15 19:47:09 adam Exp $
+ * $Id: prt-ext.h,v 1.12 2005-01-27 09:08:42 adam Exp $
  */
 
 /**
  * \file prt-ext.h
- * \brief Header for Z39.50 External utilities
+ * \brief Header for utilities that handles Z39.50 EXTERNALs
  */
 
 /*
@@ -55,6 +55,7 @@ typedef struct Z_ext_typeent
     Odr_fun fun;       /* decoder function */
 } Z_ext_typeent;
 
+/** \brief structure for all known EXTERNALs */
 struct Z_External
 {
     Odr_oid *direct_reference;
@@ -135,8 +136,11 @@ struct Z_External
 };
 
 
+/** \brief codec for BER EXTERNAL */
 YAZ_EXPORT int z_External(ODR o, Z_External **p, int opt, const char *name);
+/** \brief returns type information for OID (NULL if not known) */
 YAZ_EXPORT Z_ext_typeent *z_ext_getentbyref(oid_value val);
+/** \brief encodes EXTERNAL record based on OID (NULL if knot known) */
 YAZ_EXPORT Z_External *z_ext_record(ODR o, int format, const char *buf,
 				    int len);
 

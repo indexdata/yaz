@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.4 2005-01-15 19:47:14 adam Exp $
+ * $Id: prt-ext.c,v 1.5 2005-01-27 09:08:42 adam Exp $
  */
 
 /**
@@ -11,6 +11,12 @@
  */
 
 #include <yaz/proto.h>
+
+#define PRT_EXT_DEBUG 0
+
+#if PRT_EXT_DEBUG
+#include <yaz/log.h>
+#endif
 
 /*
  * The table below should be moved to the ODR structure itself and
@@ -59,6 +65,25 @@ Z_ext_typeent *z_ext_getentbyref(oid_value val)
     return 0;
 }
 
+/**
+  This routine is the BER codec for the EXTERNAL type.
+  It handles information in single-ASN1-type and octet-aligned
+  for known structures.
+
+  <pre>
+    [UNIVERSAL 8] IMPLICIT SEQUENCE {
+    direct-reference      OBJECT IDENTIFIER OPTIONAL,
+    indirect-reference    INTEGER OPTIONAL,
+    data-value-descriptor ObjectDescriptor OPTIONAL,
+    encoding              CHOICE {
+      single-ASN1-type   [0] ABSTRACT_SYNTAX.&Type,
+      octet-aligned      [1] IMPLICIT OCTET STRING,
+      arbitrary          [2] IMPLICIT BIT STRING 
+      }
+    }
+  </pre>
+  arbitrary BIT STRING not handled yet.
+*/
 int z_External(ODR o, Z_External **p, int opt, const char *name)
 {
     oident *oid;
@@ -131,7 +156,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
          (Odr_fun)z_OCLC_UserInformation, 0},
 	{-1, -1, -1, -1, 0, 0}
     };
-    
+
     odr_implicit_settag(o, ODR_UNIVERSAL, ODR_EXTERNAL);
     if (!odr_sequence_begin(o, p, sizeof(**p), name))
 	return opt && odr_ok(o);
@@ -139,22 +164,76 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	  odr_integer(o, &(*p)->indirect_reference, 1, 0) &&
 	  odr_graphicstring(o, &(*p)->descriptor, 1, 0)))
 	return 0;
-    /*
-     * Do we know this beast?
-     */
+#if PRT_EXT_DEBUG
+    /* debugging purposes only */
+    if (o->direction == ODR_DECODE)
+    {
+	yaz_log(YLOG_LOG, "z_external decode");
+	if ((*p)->direct_reference)
+	{
+	    yaz_log(YLOG_LOG, "direct reference");
+	    if ((oid = oid_getentbyoid((*p)->direct_reference)))
+	    {
+		yaz_log(YLOG_LOG, "oid %s", oid->desc);
+		if ((type = z_ext_getentbyref(oid->value)))
+		    yaz_log(YLOG_LOG, "type");
+	    }
+	}
+    }
+#endif
+    /* Do we know this beast? */
     if (o->direction == ODR_DECODE && (*p)->direct_reference &&
 	(oid = oid_getentbyoid((*p)->direct_reference)) &&
 	(type = z_ext_getentbyref(oid->value)))
     {
 	int zclass, tag, cons;
-	
-	/*
-	 * We know it. If it's represented as an ASN.1 type, bias the CHOICE.
-	 */
+	/* OID is present and we know it */
+
 	if (!odr_peektag(o, &zclass, &tag, &cons))
 	    return opt && odr_ok(o);
+#if PRT_EXT_DEBUG
+	yaz_log(YLOG_LOG, "odr_peektag OK tag=%d cons=%d zclass=%d what=%d",
+		tag, cons, zclass, type->what);
+#endif
+	if (zclass == ODR_CONTEXT && tag == 1 && cons == 0)
+	{
+	    /* we have an OCTET STRING. decode BER contents from it */
+	    const unsigned char *o_bp;
+	    unsigned char *o_buf;
+	    int o_size;
+	    char *voidp = 0;
+	    Odr_oct *oct;
+	    int r;
+	    if (!odr_implicit_tag(o, odr_octetstring, &oct,
+				 ODR_CONTEXT, 1, 0, "octetaligned"))
+		return 0;
+
+	    /* Save our decoding ODR members */
+	    o_bp = o->bp; 
+	    o_buf = o->buf;
+	    o_size = o->size;
+
+	    /* Set up the OCTET STRING buffer */
+	    o->bp = o->buf = oct->buf;
+	    o->size = oct->len;
+
+	    /* and decode that */
+	    r = (*type->fun)(o, &voidp, 0, 0);
+	    (*p)->which = type->what;
+	    (*p)->u.single_ASN1_type = (Odr_any*) voidp;
+		
+	    /* Restore our decoding ODR member */
+	    o->bp = o_bp; 
+	    o->buf = o_buf;
+	    o->size = o_size;
+
+	    return r && odr_sequence_end(o);
+	}
 	if (zclass == ODR_CONTEXT && tag == 0 && cons == 1)
+	{ 
+	    /* It's single ASN.1 type, bias the CHOICE. */
 	    odr_choice_bias(o, type->what);
+	}
     }
     return
 	odr_choice(o, arm, &(*p)->u, &(*p)->which, name) &&
@@ -176,7 +255,6 @@ Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
 
     if (len < 0) /* Structured data */
     {
-	
 	/*
 	 * We cheat on the pointers here. Obviously, the record field
 	 * of the backend-fetch structure should have been a union for
