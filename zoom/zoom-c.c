@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.25 2002-05-06 07:33:50 adam Exp $
+ * $Id: zoom-c.c,v 1.26 2002-05-07 11:00:58 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -15,6 +15,8 @@
 #if HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
+
+static int ZOOM_connection_send_init (ZOOM_connection c);
 
 static ZOOM_Event ZOOM_Event_create (int kind)
 {
@@ -331,6 +333,9 @@ void ZOOM_connection_destroy(ZOOM_connection c)
     ZOOM_options_destroy (c->options);
     ZOOM_connection_remove_tasks (c);
     xfree (c->host_port);
+    xfree (c->proxy);
+    xfree (c->cookie_out);
+    xfree (c->cookie_in);
     xfree (c);
 }
 
