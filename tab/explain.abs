@@ -11,15 +11,15 @@ tagset explain.tag
 esetname B @
 esetname F @
 
-elm (4,0)			targetInfo				-
+elm (4,0)			targetInfo		ExplainCategory
 
 elm (4,0)/(4,600)		targetCommonInfo			-
 elm (4,0)/(4,600)/(4,601)	dateAdded				!
 elm (4,0)/(4,600)/(4,602)	dateChanged				!
-elm (4,0)/(4,600)/(4,603)	expiry				DateExpired
+elm (4,0)/(4,600)/(4,603)	expiry			DateExpired
 elm (4,0)/(4,600)/(4,604)	languageCode		HumanStringLanguage
 
-elm (4,0)/(4,102)		targetName				!
+elm (4,0)/(4,102)		targetName		TargetName
 elm (4,0)/(4,103)		recentNews				-
 elm (4,0)/(4,104)		icon					-
 elm (4,0)/(4,105)		namedResultSets				-
@@ -66,7 +66,7 @@ elm (4,1)/(4,600)/(4,601)	dateAdded				!
 elm (4,1)/(4,600)/(4,602)	dateChanged				!
 elm (4,1)/(4,600)/(4,603)	expiry			DateExpired
 elm (4,1)/(4,600)/(4,604)	languageCode		HumanStringLanguage
-elm (4,1)/(4,102)		databaseName				!
+elm (4,1)/(4,102)		databaseName		DatabaseName
 elm (4,1)/(4,226)		explainDatabase				-
 elm (4,1)/(4,114)		nicknames				-
 elm (4,1)/(4,114)/(4,1000)	nickname				-
@@ -103,7 +103,7 @@ elm (4,1)/(4,500)/(4,501)	queryTypesSupported			-
 elm (4,1)/(4,500)/(4,503)	diagnosticSets				-
 elm (4,1)/(4,500)/(4,503)/(4,1000)	diagnosticSet			-
 elm (4,1)/(4,500)/(4,505)	attributeSetIds				-
-elm (4,1)/(4,500)/(4,505)/(4,506)	attributeSetId			-
+elm (4,1)/(4,500)/(4,505)/(4,1000)	attributeSetId			-
 elm (4,1)/(4,500)/(4,1000)	schemas					-
 elm (4,1)/(4,500)/(4,507)/(4,1000)	schema				-
 elm (4,1)/(4,500)/(4,509)	recordSyntaxes				-
