@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.158 2003-05-24 19:20:14 adam Exp $
+ * $Id: seshigh.c,v 1.159 2003-05-24 19:34:43 adam Exp $
  */
 
 /*
@@ -770,7 +770,7 @@ static char *uri_val(const char *path, const char *name, ODR o)
         const char *p1 = strchr(path, '=');
         if (!p1)
             break;
-        if (p1 - path == nlen && !memcmp(path, name, nlen))
+        if ((size_t)(p1 - path) == nlen && !memcmp(path, name, nlen))
         {
             size_t i = 0;
             char *ret;
