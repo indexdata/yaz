@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_tag.c,v 1.26 2003-05-20 19:55:29 adam Exp $
+ * $Id: ber_tag.c,v 1.27 2003-05-24 19:20:14 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -47,7 +47,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
             if (!opt)
             {
                 odr_seterror(o, OREQUIRED, 24);
-                odr_setaddinfo (o, name);
+                odr_setelement (o, name);
             }
             return 0;
         }
@@ -65,7 +65,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
             if (!opt)
             {
                 odr_seterror(o, OREQUIRED, 25);
-                odr_setaddinfo(o, name);
+                odr_setelement(o, name);
             }
             return 0;
         }
@@ -77,7 +77,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
                             odr_max(o))) <= 0)
             {
                 odr_seterror(o, OPROTO, 26);
-                odr_setaddinfo(o, name);
+                odr_setelement(o, name);
                 return 0;
             }
 #ifdef ODR_DEBUG
@@ -99,7 +99,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
             if (!opt)
             {
                 odr_seterror(o, OREQUIRED, 27);
-                odr_setaddinfo(o, name);
+                odr_setelement(o, name);
             }
             return 0;
         }
@@ -107,12 +107,12 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
         if (!*pp && !opt)
         {
             odr_seterror(o,OREQUIRED, 28);
-            odr_setaddinfo(o, name);
+            odr_setelement(o, name);
         }
         return *pp != 0;
     default:
         odr_seterror(o, OOTHER, 29);
-        odr_setaddinfo(o, name);
+        odr_setelement(o, name);
         return 0;
     }
 }

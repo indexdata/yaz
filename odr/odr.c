@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.43 2003-05-20 19:55:29 adam Exp $
+ * $Id: odr.c,v 1.44 2003-05-24 19:20:14 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -46,8 +46,12 @@ char *odr_errmsg(int n)
 
 void odr_perror(ODR o, char *message)
 {
-    fprintf(stderr, "%s: %s: %s\n", message, odr_errlist[o->error],
-            odr_getaddinfo(o));
+    const char *e = odr_getelement(o);
+
+    fprintf(stderr, "%s: %s", message, odr_errlist[o->error]);
+    if (e && *e)
+        fprintf (stderr, " element %s", e);
+    fprintf(stderr, "\n");
 }
 
 int odr_geterror(ODR o)
@@ -62,24 +66,24 @@ int odr_geterrorx(ODR o, int *x)
     return o->error;
 }
 
-char *odr_getaddinfo(ODR o)
+char *odr_getelement(ODR o)
 {
-    return o->op->addinfo;
+    return o->op->element;
 }
 
 void odr_seterror(ODR o, int error, int id)
 {
     o->error = error;
     o->op->error_id = id;
-    o->op->addinfo[0] = '\0';
+    o->op->element[0] = '\0';
 }
 
-void odr_setaddinfo(ODR o, const char *addinfo)
+void odr_setelement(ODR o, const char *element)
 {
-    if (addinfo)
+    if (element)
     {
-        strncpy(o->op->addinfo, addinfo, sizeof(o->op->addinfo)-1);
-        o->op->addinfo[sizeof(o->op->addinfo)-1] = '\0';
+        strncpy(o->op->element, element, sizeof(o->op->element)-1);
+        o->op->element[sizeof(o->op->element)-1] = '\0';
     }
 }
 
