@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.9  1997-09-17 12:10:35  adam
+ * Revision 1.10  1997-09-29 07:21:10  adam
+ * Added typecast to avoid warnings on MSVC.
+ *
+ * Revision 1.9  1997/09/17 12:10:35  adam
  * YAZ version 1.4.
  *
  * Revision 1.8  1997/09/05 09:50:56  adam
@@ -295,7 +298,7 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 	    
 	    if (!res->elements)
 		res->elements = odr_malloc(o, size_esn = 24*sizeof(er));
-	    else if (res->num_elements >= size_esn/sizeof(er))
+	    else if (res->num_elements >= (int) (size_esn/sizeof(er)))
 	    {
 		size_esn *= 2;
 		if (o)

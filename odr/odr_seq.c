@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.19  1997-06-23 10:31:11  adam
+ * Revision 1.20  1997-09-29 07:17:31  adam
+ * Added typecast to avoid warnings on MSVC.
+ *
+ * Revision 1.19  1997/06/23 10:31:11  adam
  * Added RVDM's SEQUENCE OF patch again!
  *
  * Revision 1.18  1997/05/14 06:53:58  adam
@@ -122,7 +125,7 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 	    while (odr_sequence_more(o))
 	    {
 		/* outgrown array? */
-		if (*num * sizeof(void*) >= size)
+		if (*num * (int) sizeof(void*) >= size)
 		{
 		    /* double the buffer size */
 		    tmp = odr_malloc(o, sizeof(void*) * (size += size ? size :
