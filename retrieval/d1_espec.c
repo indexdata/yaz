@@ -1,79 +1,10 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: d1_espec.c,v $
- * Revision 1.19  2001-09-28 14:50:23  adam
- * Simpleelement allows upper case (as well as lower case).
- *
- * Revision 1.18  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.17  1999/10/21 12:06:29  adam
- * Retrieval module no longer uses ctype.h - functions.
- *
- * Revision 1.16  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.15  1998/10/13 16:09:49  adam
- * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
- * Added support for multiple attribute set references and tagset references
- * from an abstract syntax file.
- * Fixed many bad logs-calls in routines that read the various
- * specifications regarding data1 (*.abs,*.att,...) and made the messages
- * consistent whenever possible.
- * Added extra 'lineno' argument to function readconf_line.
- *
- * Revision 1.14  1998/02/11 11:53:35  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.13  1997/11/24 11:33:56  adam
- * Using function odr_nullval() instead of global ODR_NULLVAL when
- * appropriate.
- *
- * Revision 1.12  1997/10/31 12:20:09  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
- *
- * Revision 1.11  1997/09/29 13:18:59  adam
- * Added function, oid_ent_to_oid, to replace the function
- * oid_getoidbyent, which is not thread safe.
- *
- * Revision 1.10  1997/09/29 07:21:10  adam
- * Added typecast to avoid warnings on MSVC.
- *
- * Revision 1.9  1997/09/17 12:10:35  adam
- * YAZ version 1.4.
- *
- * Revision 1.8  1997/09/05 09:50:56  adam
- * Removed global data1_tabpath - uses data1_get_tabpath() instead.
- *
- * Revision 1.7  1997/05/14 06:54:02  adam
- * C++ support.
- *
- * Revision 1.6  1996/07/06 19:58:34  quinn
- * System headerfiles gathered in yconfig
- *
- * Revision 1.5  1996/01/02  08:57:44  quinn
- * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
- *
- * Revision 1.4  1995/12/05  11:16:10  quinn
- * Fixed malloc of 0.
- *
- * Revision 1.3  1995/11/13  09:27:34  quinn
- * Fiddling with the variant stuff.
- *
- * Revision 1.2  1995/11/01  16:34:56  quinn
- * Making data1 look for tables in data1_tabpath
- *
- * Revision 1.1  1995/11/01  11:56:07  quinn
- * Added Retrieval (data management) functions en masse.
- *
- *
+ * $Id: d1_espec.c,v 1.20 2001-09-30 20:15:49 adam Exp $
  */
-
 
 #include <stdlib.h>
 #include <assert.h>
@@ -390,12 +321,19 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	    for ((ep = strchr(path, '/')) ; path ;
 		 (void)((path = ep) && (ep = strchr(path, '/'))))
 	    {
+		Z_ETagUnit *tagunit;
 		if (ep)
 		    ep++;
 		
 		assert(i<num);
-		tp->tags[tp->num_tags++] =
-		    read_tagunit(path, nmem, file, lineno);
+		tagunit = read_tagunit(path, nmem, file, lineno);
+		if (!tagunit)
+		{
+		    yaz_log (LOG_WARN, "%s%d: Bad tag unit at %s",
+			     file, lineno, path);
+		    break;
+		}
+		tp->tags[tp->num_tags++] = tagunit;
 	    }
 	    
 	    if (argc > 2 && !strcmp(argv[2], "variant"))
