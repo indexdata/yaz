@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.34  1996-02-21 13:12:07  quinn
+ * Revision 1.35  1996-05-29 10:03:28  quinn
+ * Options work
+ *
+ * Revision 1.34  1996/02/21  13:12:07  quinn
  * *** empty log message ***
  *
  * Revision 1.33  1996/02/10  12:23:49  quinn
@@ -407,12 +410,12 @@ void statserv_setcontrol(statserv_options_block *block)
 
 int statserv_main(int argc, char **argv)
 {
-    int ret, listeners = 0, inetd = 0;
+    int ret, listeners = 0, inetd = 0, r;
     char *arg;
     int protocol = control_block.default_proto;
 
     me = argv[0];
-    while ((ret = options("a:iszSl:v:u:c:w:", argv, argc, &arg)) != -2)
+    while ((ret = options("a:iszSl:v:u:c:w:t:k:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -437,6 +440,24 @@ int statserv_main(int argc, char **argv)
 	    	strcpy(control_block.setuid, arg ? arg : ""); break;
             case 'c':
                 strcpy(control_block.configname, arg ? arg : ""); break;
+	    case 't':
+	        if (!arg || !(r = atoi(arg)))
+		{
+		    fprintf(stderr, "%s: Specify positive timeout for -t.\n",
+		        me);
+		    exit(1);
+		}
+		control_block.idle_timeout = r;
+		break;
+	    case  'k':
+	        if (!arg || !(r = atoi(arg)))
+		{
+		    fprintf(stderr, "%s: Specify positive timeout for -t.\n",
+			me);
+		    exit(1);
+		}
+		control_block.maxrecordsize = r * 1024;
+		break;
 	    case 'i':
 	    	inetd = 1; break;
 	    case 'w':
@@ -448,7 +469,8 @@ int statserv_main(int argc, char **argv)
 		break;
 	    default:
 	    	fprintf(stderr, "Usage: %s [ -i -a <pdufile> -v <loglevel>"
-                        " -l <logfile> -u <user> -c <config>"
+                        " -l <logfile> -u <user> -c <config> -t <minutes>"
+			" -k <kilobytes>"
                         " -zsS <listener-addr> -w <directory> ... ]\n", me);
 	    	exit(1);
             }
