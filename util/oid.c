@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.24  1997-09-29 13:19:00  adam
+ * Revision 1.25  1998-02-10 15:32:03  adam
+ * Added new Object Identifiers.
+ *
+ * Revision 1.24  1997/09/29 13:19:00  adam
  * Added function, oid_ent_to_oid, to replace the function
  * oid_getoidbyent, which is not thread safe.
  *
@@ -165,6 +168,21 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_GRS1,      {5,105,-1},  "GRS-1"       },
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_EXTENDED,  {5,106,-1},  "Extended"    },
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_FRAGMENT,  {5,107,-1},  "Fragment"    },
+
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_PDF,       {5,109,1,-1},"pdf"         },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_POSTSCRIPT,{5,109,2,-1},"postscript"  },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_HTML,      {5,109,3,-1},"html"        },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_TIFF,      {5,109,4,-1},"tiff"        },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_GIF,       {5,109,5,-1},"gif"         },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_JPEG,      {5,109,6,-1},"jpeg"        },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_PNG,       {5,109,7,-1},"png"         },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_MPEG,      {5,109,8,-1},"mpeg"        },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_SGML,      {5,109,9,-1},"sgml"        },
+
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_TIFFB,     {5,110,1,-1},"tiff-b"      },
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_WAV,       {5,110,2,-1},"wav"         },
+
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_SQLRS,     {5,111,-1},  "SQL-RS"      },
 #if 0
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_ID_SGML,   {5,1000,81,1,-1},"ID-SGML" },
 #endif
@@ -186,6 +204,11 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
 
     {PROTO_Z3950,   CLASS_USERINFO,VAL_SEARCHRES1,{10,1,-1},  "searchResult-1"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_CHARLANG,  {10,2,-1},  "CharSetandLanguageNegotiation"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_USERINFO1, {10,3,-1},  "UserInfo-1"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH1,{10,4,-1},  "MultipleSearchTerms-1"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH2,{10,5,-1},  "MultipleSearchTerms-2"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_DATETIME,  {10,6,-1},  "DateTime"},
 
     {PROTO_Z3950,   CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
 
@@ -196,6 +219,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_COLLECT1,  {13,3,-1},   "Collections-schema" },
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_GEO,       {13,4,-1},   "Geo-schema" },
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_CIMI1,     {13,5,-1},   "CIMI-schema" },
+    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_UPDATEES,  {13,6,-1},   "Update ES" },
 
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
