@@ -1,150 +1,115 @@
 #!/usr/bin/make -f
-# 
-# Script for building YAZ from source to .deb-packages.
-#
-# Created by Morten Hendriksen <mgh@dbc.dk> based on sample
-# debhelper script from Joey Hess. GPL copyright 1997 to 1999 by Joey Hess.
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-# This is the debhelper compatability version to use.
-export DH_COMPAT=2
 
-CONFIG_FLAGS=--with-xml2=/usr --enable-static --enable-shared --enable-tcpd --prefix=/usr --with-openssl
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 
-# Enable parallel builds if CONCURRENCY_LEVEL is set
-ifdef CONCURRENCY_LEVEL
-MCFLAGS=-j$(CONCURRENCY_LEVEL)
+
+CFLAGS = -Wall -g
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
 else
-MCFLAGS=
+	CFLAGS += -O2
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
 endif
 
-YAZSRCDIR?=$(shell pwd)
+# shared library versions, option 1
+version=2.0.5
+major=2
+# option 2, assuming the library is created as src/.libs/libfoo.so.2.0.5 or so
+#version=`ls src/.libs/lib*.so.* | \
+# awk '{if (match($$0,/[0-9]+\.[0-9]+\.[0-9]+$$/)) print substr($$0,RSTART)}'`
+#major=`ls src/.libs/lib*.so.* | \
+# awk '{if (match($$0,/\.so\.[0-9]+$$/)) print substr($$0,RSTART+4)}'`
 
-# Local library path for linking with right dependencies
-LOCAL_LINK=-ldebian/libyaz/usr/lib
-
-$(YAZSRCDIR)/configure: $(YAZSRCDIR)/configure.in
-	cd $(YAZSRCDIR); sh buildconf.sh
-
-stamp-configure: $(YAZSRCDIR)/configure
+config.status: configure
 	dh_testdir
+	# Add here commands to configure the package.
+	CFLAGS="$(CFLAGS)" ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --enable-shared --enable-static --enable-tcpd --with-openssl
 
-	-rm -rf build
-	mkdir build
-	cd build; $(YAZSRCDIR)/configure $(CONFIG_FLAGS)
-	touch stamp-configure
 
-build: stamp-build
-stamp-build: stamp-configure
+build: build-stamp
+build-stamp:  config.status
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) -C build $(MCFLAGS)
+	$(MAKE)
 
-	touch stamp-build
+	touch build-stamp
 
 clean:
 	dh_testdir
-	#dh_testroot
-	-rm -f stamp-*
-	-rm -rf build
+	dh_testroot
+	rm -f build-stamp 
 
-	dh_clean
-	-rm -rf debian/libyaz debian/libyaz-dev \
-	        debian/*.debhelper debian/substvars debian/shlibs.yaz-*
+	# Add here commands to clean up after the build process.
+	-$(MAKE) distclean
+ifneq "$(wildcard /usr/share/misc/config.sub)" ""
+	-cp -f /usr/share/misc/config.sub config.sub
+endif
+ifneq "$(wildcard /usr/share/misc/config.guess)" ""
+	-cp -f /usr/share/misc/config.guess config.guess
+endif
 
-install: stamp-install
-stamp-install: stamp-build
+	dh_clean 
+
+install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k -a
-	dh_installdirs -a
+	dh_clean -k 
+	dh_installdirs
 
-	# Add here commands to install the package into debian/tmp.
-	-mkdirhier debian/tmp/usr
-	$(MAKE) -C build install prefix=`pwd`/debian/tmp/usr
+	# Add here commands to install the package into debian/tmp
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 
-	touch stamp-install
 
 # Build architecture-independent files here.
 binary-indep: build install
-	dh_testdir
-	dh_testroot
-	dh_installdocs -p yaz-doc doc/*.html doc/*.pdf doc/*.png doc/*.css
-	dh_installchangelogs -p yaz-doc
-	dh_link -p yaz-doc
-	dh_strip -p yaz-doc
-	dh_compress -p yaz-doc
-	dh_fixperms -p yaz-doc
-	dh_gencontrol -p yaz-doc
-	dh_md5sums -p yaz-doc
-
-	dh_builddeb -p yaz-doc
+# We have nothing to do by default.
 
 # Build architecture-dependent files here.
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_movefiles -p libyaz-dev  usr/share/aclocal usr/lib/*.a usr/lib/*.la usr/lib/*.so usr/include usr/bin/yaz-config usr/bin/yaz-asncomp usr/share/yaz/ill usr/share/yaz/z39.50
-	dh_movefiles -p yaz usr/bin
-	dh_movefiles -p libyaz usr/lib usr/share/yaz/etc
-	dh_installexamples -p libyaz-dev
-
 	cp LICENSE debian/copyright
-	cp CHANGELOG changelog
-	dh_installdocs --all README TODO changelog debian/copyright
-
-	dh_installchangelogs
+	dh_installdocs -A README
+	dh_installchangelogs CHANGELOG
+	dh_installexamples
+	mv debian/tmp/usr/share/doc/yaz debian/tmp/usr/share/doc/yaz-doc
+	dh_install 
+#	dh_installmenu
+#	dh_installdebconf	
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+	dh_installman
 	dh_link
-
-	dh_installdeb -p libyaz
-	dh_installdeb -p libyaz-dev
-	dh_installdeb -p yaz
-
-	dh_installman -p libyaz-dev doc/yaz-config.8
-	dh_installman -p libyaz-dev doc/yaz-asncomp.1
-	dh_installman -p libyaz doc/yaz.7
-	dh_installman -p yaz doc/yaz-client.1 doc/yaz-ztest.8 doc/zoomsh.1
-	dh_installman -p yaz doc/yaz-client-ssl.1 doc/yaz-ztest-ssl.8
-	dh_installman -p yaz doc/yaz-marcdump.1
-	dh_installman -p yaz doc/yaz-iconv.1
-
 	dh_strip
-	dh_compress -a
-	dh_fixperms -a
-
-	echo "libyaz 2 libyaz (>= 2.0.2)" > debian/libyaz/DEBIAN/shlibs
-	echo "libyazthread 2 libyaz (>= 2.0.2)" >> debian/libyaz/DEBIAN/shlibs
-	echo "libyazssl 2 libyaz (>= 2.0.2)" >> debian/libyaz/DEBIAN/shlibs
-	chmod 644 debian/libyaz/DEBIAN/shlibs
-	dh_shlibdeps -p libyaz $(LOCAL_LINK) 
-
-	dh_gencontrol -p libyaz
-	dh_md5sums -p libyaz
-
-	dh_gencontrol -p libyaz-dev
-	dh_md5sums -p libyaz-dev
-
-	dh_gencontrol -p yaz
-	dh_md5sums -p yaz
-
-	# Go kill those CVS-dirs before build
-	-find debian/tmp -type d -name CVS | xargs rm -rf
-	# For some reason it is necessary to remove empty-dirs in yaz-doc
-	-rm -rf debian/tmp/usr/include debian/tmp/usr/share/aclocal debian/tmp/usr/lib debian/tmp/usr/bin \
-	        debian/tmp/usr/share/yaz
-
-	dh_builddeb -p libyaz
-	dh_builddeb -p libyaz-dev
-	dh_builddeb -p yaz
-
+	dh_compress
+	dh_fixperms
+#	dh_perl
+#	dh_python
+	dh_makeshlibs -V 'libyaz (>= 2.0.9)'
+	dh_installdeb
+	dh_shlibdeps  -l debian/libyaz/usr/lib
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
 
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install install-stamp configure
-
-yazrelease:
-	# Conveniency target for building YAZ
-	dh_testdir
-	dpkg-buildpackage $(EXTRA_OPTS) -rfakeroot
+.PHONY: build clean binary-indep binary-arch binary install 

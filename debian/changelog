@@ -1,3 +1,9 @@
+yaz (2.0.10-1) unstable; urgency=low
+
+  * Update Debian rules to newer policy.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon,  9 Feb 2004 10:59:20 +0100
+
 yaz (2.0.9-6) unstable; urgency=low
 
   * Make the SRU server more picky WRT unknown params, etc.
