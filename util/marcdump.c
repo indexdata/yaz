@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.23 2003-12-11 00:37:23 adam Exp $
+ * $Id: marcdump.c,v 1.24 2004-08-04 09:30:30 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -140,34 +139,7 @@ int main (int argc, char **argv)
                     r = yaz_marc_decode_buf (mt, buf, -1, &result, &rlen);
                     if (r <= 0)
                         break;
-#if 1
 		    fwrite (result, rlen, 1, stdout);
-#else
-                    if (!cd)
-                        fwrite (result, rlen, 1, stdout);
-                    else
-                    {
-                        char outbuf[12];
-                        size_t inbytesleft = rlen;
-                        const char *inp = result;
-                        
-                        while (inbytesleft)
-                        {
-                            size_t outbytesleft = sizeof(outbuf);
-                            char *outp = outbuf;
-                            size_t r = yaz_iconv (cd, (char**) &inp,
-                                                  &inbytesleft, 
-                                                  &outp, &outbytesleft);
-                            if (r == (size_t) (-1))
-                            {
-                                int e = yaz_iconv_error(cd);
-                                if (e != YAZ_ICONV_E2BIG)
-                                    break;
-                            }
-                            fwrite (outbuf, outp - outbuf, 1, stdout);
-                        }
-                    }
-#endif
                     if (cfile)
                     {
                         char *p = buf;
