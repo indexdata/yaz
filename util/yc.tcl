@@ -3,12 +3,14 @@
 exec tclsh "$0" "$@"
 #
 # YC: ASN.1 Compiler for YAZ
-# (c) Index Data 1996-1999
+# (c) Index Data 1996-2000
 # See the file LICENSE for details.
-# Sebastian Hammer, Adam Dickmeiss
 #
 # $Log: yc.tcl,v $
-# Revision 1.4  1999-12-16 23:36:19  adam
+# Revision 1.5  2000-01-15 09:18:42  adam
+# Bug fix: some elements where treated as OPTIONAL when they shouldn't.
+#
+# Revision 1.4  1999/12/16 23:36:19  adam
 # Implemented ILL protocol. Minor updates ASN.1 compiler.
 #
 # Revision 1.3  1999/11/30 13:47:12  adam
@@ -266,7 +268,7 @@ proc asnOptional {} {
         return 1
     } elseif {[lex-name-move DEFAULT]} {
 	lex
-	return 1
+	return 0
     }
     return 0
 }
