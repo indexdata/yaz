@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.12  1997-10-29 12:00:37  adam
+ * Revision 1.13  1998-01-29 13:13:39  adam
+ * Function zget_presentRequest fills resultSetId with "default" instead
+ * of "Default".
+ *
+ * Revision 1.12  1997/10/29 12:00:37  adam
  * Routine zget_SearchRequest fills resultSetName member with "default"
  * instead of "Default".
  *
@@ -150,7 +154,7 @@ Z_PresentRequest *zget_PresentRequest(ODR o)
     Z_PresentRequest *r = odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->resultSetId = "Default";
+    r->resultSetId = "default";
     r->resultSetStartPoint = odr_malloc(o, sizeof(int));
     *r->resultSetStartPoint = 1;
     r->numberOfRecordsRequested = odr_malloc(o, sizeof(int));

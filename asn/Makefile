@@ -1,7 +1,7 @@
-# Copyright (C) 1994, Index Data I/S 
+# Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.25 1997-09-17 12:10:28 adam Exp $
+# $Id: Makefile,v 1.26 1998-01-29 13:13:39 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -9,7 +9,6 @@ LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libasn.a
-LIBS=-lodr -lasn
 PO = proto.o diagbib1.o zget.o prt-rsc.o prt-acc.o prt-exp.o prt-ext.o \
 	prt-grs.o prt-exd.o prt-dia.o prt-esp.o prt-arc.o prt-add.o
 CPP=$(CC) -E
