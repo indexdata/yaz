@@ -47,7 +47,6 @@ tag 203		titleString					bool
 tag 205		associatedDbs					structured
 tag 206		subDbs						structured
 tag 207		disclaimers					string
-tag 208		news						string
 tag 209		recordCount					structured
 tag 210		recordCountActual				numeric
 tag 211		recordCountApprox				numeric
@@ -65,7 +64,8 @@ tag 222		copyrightNotice					string
 tag 223		producerContactInfo				structured
 tag 224		supplierContactInfo				structured
 tag 225		submissionContactInfo				structured
-
+tag 226		explainDatabase					null
+tag 227		keywords					string
 
 #
 # AccessInfo
@@ -73,20 +73,24 @@ tag 225		submissionContactInfo				structured
 tag 500		accessinfo					structured
 tag 501		queryTypesSupported				structured
 tag 503		diagnosticSets					structured
-tag 504		diagnosticSet					oid
 tag 505		attributeSetIds					structured
-tag 506		attributeSetId					oid
 tag 507		schemas						structured
-tag 508		schema						oid
 tag 509		recordSyntaxes					structured
-tag 510		recordSyntax					oid
 tag 511		resourceChallenges				structured
-tag 512		resourceChallenge				oid
 tag 513		restrictedAccess				structured
 tag 514		costInfo					structured
+tag 515		variantSets					structured
+tag 516		elementSetNames					structured
+tag 517		unitSystems					structured
 
 tag 600		commonInfo					structured
 tag 601		dateAdded					generalizedtime
 tag 602		dateChanged					generalizedtime
 tag 603		expiry						generalizedtime
 tag 604		languageCode					string
+
+#
+# General tags for list members, etc.
+#
+tag 1000	oid						oid
+tag 1001	string						string

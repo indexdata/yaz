@@ -1,3 +1,9 @@
+#
+# This Explain schema is used for our internal management and processing of
+# explain data. On request, records are mapped to the proper Explain ASN.1
+# before transmission.
+#
+
 name explain
 attset explain.att
 tagset explain.tag
@@ -31,20 +37,27 @@ elm (4,0)/(4,116)		paymentAddr				-
 elm (4,0)/(4,117)		hours					-
 elm (4,0)/(4,118)		dbCombinations				-
 elm (4,0)/(4,119)		addresses				-
+
 elm (4,0)/(4,500)		commonAccessInfo			-
 elm (4,0)/(4,500)/(4,501)	queryTypesSupported			-
 elm (4,0)/(4,500)/(4,503)	diagnosticSets				-
-elm (4,0)/(4,500)/(4,503)/(4,504)	diagnosticSet			-
+elm (4,0)/(4,500)/(4,503)/(4,1000)	diagnosticSet			-
 elm (4,0)/(4,500)/(4,505)	attributeSetIds				-
-elm (4,0)/(4,500)/(4,505)/(4,506)	attributeSetId			-
+elm (4,0)/(4,500)/(4,505)/(4,1000)	attributeSetId			-
 elm (4,0)/(4,500)/(4,507)	schemas					-
-elm (4,0)/(4,500)/(4,507)/(4,508)	schema				-
+elm (4,0)/(4,500)/(4,507)/(4,1000)	schema				-
 elm (4,0)/(4,500)/(4,509)	recordSyntaxes				-
-elm (4,0)/(4,500)/(4,509/(4,510)	recordSyntax			-
+elm (4,0)/(4,500)/(4,509/(4,1000)	recordSyntax			-
 elm (4,0)/(4,500)/(4,511)	resourceChallenges			-
-elm (4,0)/(4,500)/(4,511)/(4,512)	resourceChallenge		-
+elm (4,0)/(4,500)/(4,511)/(4,1000)	resourceChallenge		-
 elm (4,0)/(4,500)/(4,513)	restrictedAccess			-
 elm (4,0)/(4,500)/(4,514)	costInfo				-
+elm (4,0)/(4,500)/(4,515)	variantSets				-
+elm (4,0)/(4,500)/(4,515)/(4,1000)	variantSets			-
+elm (4,0)/(4,500)/(4,516)	elementSetNames				-
+elm (4,0)/(4,500)/(4,516)/(4,1001)	elementSetName			-
+elm (4,0)/(4,500)/(4,517)	unitSystems				-
+elm (4,0)/(4,500)/(4,517)/(4,1001)	unitSystem			-
 
 elm (4,1)			databaseInfo				-
 elm (4,1)/(4,600)		databaseCommonInfo			-
@@ -54,16 +67,20 @@ elm (4,1)/(4,600)/(4,602)	dateChanged				!
 elm (4,1)/(4,600)/(4,603)	expiry			DateExpired
 elm (4,1)/(4,600)/(4,604)	languageCode		HumanStringLanguage
 elm (4,1)/(4,102)		databaseName				!
+elm (4,1)/(4,226)		explainDatabase				-
 elm (4,1)/(4,114)		nicknames				-
+elm (4,1)/(4,114)/(4,1000)	nickname				-
 elm (4,1)/(4,104)		icon					-
 elm (4,1)/(4,201)		userFee					!
 elm (4,1)/(4,202)		available		Availability
 elm (4,1)/(4,203)		titleString				-
+elm (4,1)/(4,227)		keywords				-
+elm (4,1)/(4,227)/(4,1000)	keyword					-
 elm (4,1)/(4,113)		description				-
 elm (4,1)/(4,205)		associatedDbs				-
 elm (4,1)/(4,206)		subDbs					-
 elm (4,1)/(4,207)		disclaimers				-
-elm (4,1)/(4,208)		recentNews				-
+elm (4,1)/(4,103)		recentNews				-
 elm (4,1)/(4,209)		recordCount				-
 elm (4,1)/(4,209)/(4,210)	recordCountActual			-
 elm (4,1)/(4,209)/(4,211)	recordCountApprox			-
@@ -84,14 +101,20 @@ elm (4,1)/(4,225)		submissionContactInfo			-
 elm (4,1)/(4,500)		databaseAccessInfo			-
 elm (4,1)/(4,500)/(4,501)	queryTypesSupported			-
 elm (4,1)/(4,500)/(4,503)	diagnosticSets				-
-elm (4,1)/(4,500)/(4,503)/(4,504)	diagnosticSet			-
+elm (4,1)/(4,500)/(4,503)/(4,1000)	diagnosticSet			-
 elm (4,1)/(4,500)/(4,505)	attributeSetIds				-
 elm (4,1)/(4,500)/(4,505)/(4,506)	attributeSetId			-
-elm (4,1)/(4,500)/(4,507)	schemas					-
-elm (4,1)/(4,500)/(4,507)/(4,508)	schema				-
+elm (4,1)/(4,500)/(4,1000)	schemas					-
+elm (4,1)/(4,500)/(4,507)/(4,1000)	schema				-
 elm (4,1)/(4,500)/(4,509)	recordSyntaxes				-
-elm (4,1)/(4,500)/(4,509/(4,510)	recordSyntax			-
+elm (4,1)/(4,500)/(4,509/(4,1000)	recordSyntax			-
 elm (4,1)/(4,500)/(4,511)	resourceChallenges			-
-elm (4,1)/(4,500)/(4,511)/(4,512)	resourceChallenge		-
+elm (4,1)/(4,500)/(4,511)/(4,1000)	resourceChallenge		-
 elm (4,1)/(4,500)/(4,513)	restrictedAccess			-
 elm (4,1)/(4,500)/(4,514)	costInfo				-
+elm (4,1)/(4,500)/(4,515)	variantSets				-
+elm (4,1)/(4,500)/(4,515)/(4,1000)	variantSets			-
+elm (4,1)/(4,500)/(4,1001)	elementSetNames				-
+elm (4,1)/(4,500)/(4,516)/(4,1001)	elementSetName			-
+elm (4,1)/(4,500)/(4,1001)	unitSystems				-
+elm (4,1)/(4,500)/(4,517)/(4,1001)	unitSystem			-

@@ -268,7 +268,7 @@ typedef struct Z_AccessInfo
     int num_elementSetNames;
     char **elementSetNames;     /* OPTIONAL */
     int num_unitSystems;
-    char **unitSystems;
+    char **unitSystems;                     /* OPTIONAL */
 } Z_AccessInfo;
 
 typedef struct Z_DatabaseList

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_tag.c,v $
- * Revision 1.5  1995-09-29 17:12:27  quinn
+ * Revision 1.6  1995-12-14 16:28:26  quinn
+ * More explain stuff.
+ *
+ * Revision 1.5  1995/09/29  17:12:27  quinn
  * Smallish
  *
  * Revision 1.4  1995/09/27  15:03:00  quinn
@@ -31,6 +34,22 @@ int odr_implicit_settag(ODR o, int class, int tag)
     {
 	o->t_class = class;
 	o->t_tag = tag;
+    }
+    return 1;
+}
+
+int odr_initmember(ODR o, void *p, int size)
+{
+    char **pp = (char **) p;
+
+    if (o->error)
+	return 0;
+    if (o->direction == ODR_DECODE)
+	*pp = odr_malloc(o, size);
+    else if (!*pp)
+    {
+	o->t_class = -1;
+	return 0;
     }
     return 1;
 }

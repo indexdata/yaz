@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.6  1995-12-14 11:09:09  quinn
+ * Revision 1.7  1995-12-14 16:28:07  quinn
+ * More explain stuff.
+ *
+ * Revision 1.6  1995/12/14  11:09:09  quinn
  * Fixed bug in tagging.
  *
  * Revision 1.5  1995/12/05  11:15:50  quinn
@@ -137,13 +140,8 @@ int z_HumanStringUnit(ODR o, Z_HumanStringUnit **p, int opt)
 
 int z_HumanString(ODR o, Z_HumanString **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    {
-	o->t_class = -1;
-    	return opt && odr_ok(o);
-    }
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_sequence_of(o, z_HumanStringUnit, &(*p)->strings,
 	&(*p)->num_strings))
 	return 1;
@@ -176,13 +174,8 @@ int z_IconObjectUnit(ODR o, Z_IconObjectUnit **p, int opt)
 
 int z_IconObject(ODR o, Z_IconObject **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    {
-	o->t_class = -1;
-    	return opt;
-    }
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_sequence_of(o, z_IconObjectUnit, &(*p)->iconUnits,
     	&(*p)->num_iconUnits))
 	return 1;
@@ -248,10 +241,8 @@ int z_NetworkAddress(ODR o, Z_NetworkAddress **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
@@ -298,31 +289,29 @@ int z_AccessInfo(ODR o, Z_AccessInfo **p, int opt)
 
 int z_QueryTypeDetails(ODR o, Z_QueryTypeDetails **p, int opt)
 {
-	static Odr_arm arm[] =
-	{
-	    {ODR_IMPLICIT, ODR_CONTEXT, 0, Z_QueryTypeDetails_private,
-	    	z_PrivateCapabilities},
-	    {ODR_IMPLICIT, ODR_CONTEXT, 1, Z_QueryTypeDetails_rpn,
-	    	z_RpnCapabilities},
-	    {ODR_IMPLICIT, ODR_CONTEXT, 2, Z_QueryTypeDetails_iso8777,
-	    	z_Iso8777Capabilities},
-	    {ODR_IMPLICIT, ODR_CONTEXT, 3, Z_QueryTypeDetails_z3958,
-	    	z_HumanString},
-	    {ODR_IMPLICIT, ODR_CONTEXT, 4, Z_QueryTypeDetails_erpn,
-	    	z_RpnCapabilities},
-	    {ODR_IMPLICIT, ODR_CONTEXT, 5, Z_QueryTypeDetails_rankedList,
-	    	z_HumanString},
-	    {-1, -1, -1, -1, 0}
-	};
+    static Odr_arm arm[] =
+    {
+	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_QueryTypeDetails_private,
+	    z_PrivateCapabilities},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_QueryTypeDetails_rpn,
+	    z_RpnCapabilities},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_QueryTypeDetails_iso8777,
+	    z_Iso8777Capabilities},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_QueryTypeDetails_z3958,
+	    z_HumanString},
+	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_QueryTypeDetails_erpn,
+	    z_RpnCapabilities},
+	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_QueryTypeDetails_rankedList,
+	    z_HumanString},
+	{-1, -1, -1, -1, 0}
+    };
 
-	if (o->direction == ODR_DECODE)
-	    *p = odr_malloc(o, sizeof(**p));
-	else if (!*p)
-	    return opt;
-	if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
-	    return 1;
-	*p = 0;
-    	return opt && odr_ok(o);
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
 }
 
 int z_PrivateCapOperator(ODR o, Z_PrivateCapOperator **p, int opt)
@@ -402,10 +391,8 @@ int z_ProxSupportUnit(ODR o, Z_ProxSupportUnit **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
@@ -449,10 +436,8 @@ int z_AccessRestrictionsUnit(ODR o, Z_AccessRestrictionsUnit **p, int opt)
 
 int z_AccessRestrictions(ODR o, Z_AccessRestrictions **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_sequence_of(o, z_AccessRestrictionsUnit, &(*p)->restrictions,
     	&(*p)->num_restrictions))
 	return 1;
@@ -499,10 +484,8 @@ int z_Charge(ODR o, Z_Charge **p, int opt)
 
 int z_DatabaseList(ODR o, Z_DatabaseList **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_sequence_of(o, z_DatabaseName, &(*p)->databases,
 	&(*p)->num_databases))
 	return 1;
@@ -525,10 +508,8 @@ int z_AttributeCombinations(ODR o, Z_AttributeCombinations **p, int opt)
 
 int z_AttributeCombination(ODR o, Z_AttributeCombination **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_sequence_of(o, z_AttributeOccurrence, &(*p)->occurrences,
 	&(*p)->num_occurrences))
 	return 1;
@@ -538,10 +519,8 @@ int z_AttributeCombination(ODR o, Z_AttributeCombination **p, int opt)
 
 int z_AttributeValueList(ODR o, Z_AttributeValueList **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_sequence_of(o, z_StringOrNumeric, &(*p)->attributes,
 	&(*p)->num_attributes))
 	return 1;
@@ -748,10 +727,8 @@ int z_PathUnit(ODR o, Z_PathUnit **p, int opt)
 
 int z_Path(ODR o, Z_Path **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     odr_implicit_settag(o, ODR_CONTEXT, 201);
     if (odr_sequence_of(o, z_OtherInformationUnit, &(*p)->list,
 	&(*p)->num))
@@ -762,10 +739,8 @@ int z_Path(ODR o, Z_Path **p, int opt)
 
 int z_ElementInfoList(ODR o, Z_Path **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     odr_implicit_settag(o, ODR_CONTEXT, 201);
     if (odr_sequence_of(o, z_OtherInformationUnit, &(*p)->list,
 	&(*p)->num))
@@ -785,11 +760,8 @@ int z_ElementDataType(ODR o, Z_ElementDataType **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
-
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
@@ -1128,10 +1100,8 @@ int z_SortKeyDetailsSortType(ODR o, Z_SortKeyDetailsSortType **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
@@ -1228,10 +1198,8 @@ int z_VariantValue(ODR o, Z_VariantValue **p, int opt)
 
 int z_ValueSetEnumerated(ODR o, Z_ValueSetEnumerated **p, int opt)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_sequence_of(o, z_ValueDescription, &(*p)->enumerated,
     	&(*p)->num_enumerated))
 	return 1;
@@ -1249,10 +1217,8 @@ int z_ValueSet(ODR o, Z_ValueSet **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
@@ -1282,10 +1248,8 @@ int z_ValueDescription(ODR o, Z_ValueDescription **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt && odr_ok(o);
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
@@ -1396,10 +1360,8 @@ int z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt)
 	{-1, -1, -1, -1, 0}
     };
 
-    if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
