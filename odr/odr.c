@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.44 2003-05-24 19:20:14 adam Exp $
+ * $Id: odr.c,v 1.45 2003-06-19 21:09:25 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -47,8 +47,10 @@ char *odr_errmsg(int n)
 void odr_perror(ODR o, char *message)
 {
     const char *e = odr_getelement(o);
+    int err, x;
 
-    fprintf(stderr, "%s: %s", message, odr_errlist[o->error]);
+    err =  odr_geterrorx(o, &x);
+    fprintf(stderr, "%s: %s (code %d:%d)", message, odr_errlist[err], err, x);
     if (e && *e)
         fprintf (stderr, " element %s", e);
     fprintf(stderr, "\n");
