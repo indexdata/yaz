@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.16  1999-03-31 11:18:25  adam
+ * Revision 1.17  1999-07-13 13:28:25  adam
+ * Better debugging for NMEM routines.
+ *
+ * Revision 1.16  1999/03/31 11:18:25  adam
  * Implemented odr_strdup. Added Reference ID to backend server API.
  *
  * Revision 1.15  1999/02/11 09:10:26  adam
@@ -67,6 +70,7 @@
  */
 
 #include <assert.h>
+#include <string.h>
 #include <xmalloc.h>
 #include <nmem.h>
 #include <log.h>
@@ -102,6 +106,17 @@ static nmem_control *cfreelist = NULL;
 static int nmem_active_no = 0;
 static int nmem_init_flag = 0;
 
+#if NMEM_DEBUG
+struct nmem_debug {
+    void *p;
+    char file[40];
+    int line;
+    struct nmem_debug *next;
+};
+  
+struct nmem_debug *nmem_debug_list = 0;  
+#endif
+
 static void free_block(nmem_block *p)
 {  
     p->next = freelist;
@@ -111,6 +126,18 @@ static void free_block(nmem_block *p)
 #endif
 }
 
+#if NMEM_DEBUG
+void nmem_print_list (void)
+{
+    struct nmem_debug *p;
+
+    logf (LOG_DEBUG, "nmem print list");
+    NMEM_ENTER;
+    for (p = nmem_debug_list; p; p = p->next)
+	logf (LOG_DEBUG, " %s:%d p=%p", p->file, p->line, p->p);
+    NMEM_LEAVE;
+}
+#endif
 /*
  * acquire a block with a minimum of size free bytes.
  */
@@ -219,6 +246,9 @@ NMEM nmem_create(void)
 #endif
 {
     NMEM r;
+#if NMEM_DEBUG
+    struct nmem_debug *debug_p;
+#endif
     
     NMEM_ENTER;
     nmem_active_no++;
@@ -231,11 +261,29 @@ NMEM nmem_create(void)
 
 #if NMEM_DEBUG
     logf (LOG_DEBUG, "%s:%d: nmem_create %d p=%p", file, line,
-                     nmem_active_no-1, r);
+                     nmem_active_no, r);
 #endif
     r->blocks = 0;
     r->total = 0;
     r->next = 0;
+
+#if NMEM_DEBUG
+    for (debug_p = nmem_debug_list; debug_p; debug_p = debug_p->next)
+	if (debug_p->p == r)
+	{
+	    logf (LOG_FATAL, "multi used block in nmem");
+	    abort ();
+	}
+    debug_p = xmalloc (sizeof(*debug_p));
+    strncpy (debug_p->file, file, sizeof(debug_p->file)-1);
+    debug_p->file[sizeof(debug_p->file)-1] = '\0';
+    debug_p->line = line;
+    debug_p->p = r;
+    debug_p->next = nmem_debug_list;
+    nmem_debug_list = debug_p;
+
+    nmem_print_list();
+#endif
     return r;
 }
 
@@ -245,18 +293,41 @@ void nmem_destroy_f(const char *file, int line, NMEM n)
 void nmem_destroy(NMEM n)
 #endif
 {
+#if NMEM_DEBUG
+    struct nmem_debug **debug_p;
+    int ok = 0;
+#endif
     if (!n)
 	return;
+    
+#if NMEM_DEBUG
+    logf (LOG_DEBUG, "%s:%d: nmem_destroy %d p=%p", file, line,
+                     nmem_active_no-1, n);
+    NMEM_ENTER;
+    for (debug_p = &nmem_debug_list; *debug_p; debug_p = &(*debug_p)->next)
+	if ((*debug_p)->p == n)
+	{
+	    struct nmem_debug *debug_save = *debug_p;
+	    *debug_p = (*debug_p)->next;
+	    xfree (debug_save);
+	    ok = 1;
+	    break;
+	}
+    NMEM_LEAVE;
+    nmem_print_list();
+    if (!ok)
+    {
+	logf (LOG_WARN, "%s:%d destroying unallocated nmem block p=%p",
+	      file, line, n);
+	return;
+    }
+#endif
     nmem_reset(n);
     NMEM_ENTER;
     nmem_active_no--;
     n->next = cfreelist;
     cfreelist = n;
     NMEM_LEAVE;
-#if NMEM_DEBUG
-    logf (LOG_DEBUG, "%s:%d: nmem_destroy %d p=%p", file, line,
-                     nmem_active_no, n);
-#endif
 }
 
 void nmem_transfer (NMEM dst, NMEM src)
