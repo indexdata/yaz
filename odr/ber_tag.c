@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.5  1995-02-10 18:57:24  quinn
+ * Revision 1.6  1995-02-14 11:54:33  quinn
+ * Adjustments.
+ *
+ * Revision 1.5  1995/02/10  18:57:24  quinn
  * More in the way of error-checking.
  *
  * Revision 1.4  1995/02/10  15:55:28  quinn
@@ -44,8 +47,11 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed)
     if (o->direction == ODR_DECODE)
     	*pp = 0;
     o->t_class = -1;
-    if (o->buf == o->bp)   /* This is insurance. It shouldn't be necessary */
+    if (o->stackp < 0)
+    {
+    	o->bp = o->buf;
     	lclass = -1;
+    }
     switch (o->direction)
     {
     	case ODR_ENCODE:

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.3  1995-02-10 18:57:24  quinn
+ * Revision 1.4  1995-02-14 11:54:33  quinn
+ * Adjustments.
+ *
+ * Revision 1.3  1995/02/10  18:57:24  quinn
  * More in the way of error-checking.
  *
  * Revision 1.2  1995/02/10  15:55:28  quinn
@@ -44,7 +47,7 @@ int ber_any(ODR o, Odr_any **p)
 }
 
 /*
- * Return length of BER-package or -1.
+ * Return length of BER-package or 0.
  */
 int completeBER(unsigned char *buf, int len)
 {
@@ -66,12 +69,12 @@ int completeBER(unsigned char *buf, int len)
     b += res;
     len -= res;
     if (ll >= 0)
-    	return (len >= ll ? ll + (b-buf) : -1);
+    	return (len >= ll ? ll + (b-buf) : 0);
     if (!cons)
     	return 0;    
     while (1)
     {
-	if ((res = completeBER(b, len)) < 0)
+	if (!(res = completeBER(b, len)))
 	    return 0;
 	b += res;
 	len -= res;
