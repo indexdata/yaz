@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.9 2001-11-19 14:06:11 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.10 2001-11-27 22:12:24 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
 
@@ -687,14 +687,15 @@ typedef struct bend_scan_rr {
 
     <variablelist>
 
-     <varlistentry><term>-a <replaceable>file</replaceable></term>
+     <varlistentry><term><literal>-a </literal>
+       <replaceable>file</replaceable></term>
       <listitem><para>
 	Specify a file for dumping PDUs (for diagnostic purposes).
 	The special name &quot;-&quot; sends output to
 	<literal>stderr</literal>.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-S</term>
+     <varlistentry><term><literal>-S</literal></term>
       <listitem><para>
 	Don't fork or make threads on connection requests. This is good for
 	debugging, but not recommended for real operation: Although the
@@ -703,19 +704,19 @@ typedef struct bend_scan_rr {
 	current users.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-T</term>
+     <varlistentry><term><literal>-T</literal></term>
       <listitem><para>
 	Operate the server in threaded mode. The server creates a thread
 	for each connection rather than a fork a process. Only available
 	on UNIX systems that offers POSIX threads.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-s</term>
+     <varlistentry><term><literal>-s</literal></term>
       <listitem><para>
 	Use the SR protocol (obsolete).
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-z</term>
+     <varlistentry><term><literal>-z</literal></term>
       <listitem><para>
 	Use the Z39.50 protocol (default). These two options complement
 	each other. You can use both multiple times on the same command
@@ -724,11 +725,13 @@ typedef struct bend_scan_rr {
 	concurrently, on different local ports.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-l <replaceable>file</replaceable></term>
+     <varlistentry><term><literal>-l </literal>
+       <replaceable>file</replaceable></term>
       <listitem><para>The logfile.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-c <replaceable>config</replaceable></term>
+     <varlistentry><term><literal>-c </literal>
+       <replaceable>config</replaceable></term>
       <listitem><para>A user option that serves as a specifier for some
 	sort of configuration, e.g. a filename.
 	The argument to this option is transferred to member
@@ -736,13 +739,15 @@ typedef struct bend_scan_rr {
 	<literal>statserv_options_block</literal>.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-v <replaceable>level</replaceable></term>
+     <varlistentry><term><literal>-v </literal>
+       <replaceable>level</replaceable></term>
       <listitem><para>
 	The log level. Use a comma-separated list of members of the set
 	{fatal,debug,warn,log,all,none}.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-u <replaceable>userid</replaceable></term>
+     <varlistentry><term><literal>-u </literal>
+       <replaceable>userid</replaceable></term>
       <listitem><para>
 	Set user ID. Sets the real UID of the server process to that of the
 	given user. It's useful if you aren't comfortable with having the
@@ -750,22 +755,37 @@ typedef struct bend_scan_rr {
 	privileged port.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-w <replaceable>dir</replaceable></term>
+     <varlistentry><term><literal>-w </literal>
+       <replaceable>dir</replaceable></term>
       <listitem><para>
 	Working directory.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-i</term>
+     <varlistentry><term><literal>-i</literal></term>
       <listitem><para>
-	Use this when running from the <application>inetd</application> server.
+	Use this to make the the server run from the
+        <application>inetd</application> server (UNIX only).
+       </para></listitem></varlistentry>
+     
+     <varlistentry><term><literal>-install</literal></term>
+      <listitem><para>
+	Use this to install the server as an NT service (Windows 2000/NT only). 
+        Control the server by going to the Services in the Control Panel.
+       </para></listitem></varlistentry>
+     
+     <varlistentry><term><literal>-remove</literal></term>
+      <listitem><para>
+	Use this to remove the server from the NT services (Windows 2000/NT only). 
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-t <replaceable>minutes</replaceable></term>
+     <varlistentry><term><literal>-t </literal>
+       <replaceable>minutes</replaceable></term>
       <listitem><para>
 	Idle session timeout, in minutes.
        </para></listitem></varlistentry>
 
-     <varlistentry><term>-k <replaceable>size</replaceable></term>
+     <varlistentry><term><literal>-k </literal>
+      <replaceable>size</replaceable></term>
       <listitem><para>
 	Maximum record size/message size, in kilobytes.
        </para></listitem></varlistentry>
@@ -803,8 +823,8 @@ typedef struct bend_scan_rr {
 
    <para>
     In both cases, the special hostname &quot;@&quot; is mapped to
-    the address INADDR_ANY, which causes the server to listen on any local
-    interface. 
+    the address <literal>INADDR_ANY</literal>, which causes the
+    server to listen on any local interface. 
    </para>
 
   </sect1>
