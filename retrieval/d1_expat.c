@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: d1_expat.c,v 1.4 2002-07-05 12:42:52 adam Exp $
+ * $Id: d1_expat.c,v 1.5 2002-07-11 10:39:49 adam Exp $
  */
 
 #if HAVE_EXPAT_H
@@ -10,6 +10,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#if HAVE_ICONV_H
+#include <errno.h>
+#include <iconv.h>
+#endif
 
 #include <yaz/xmalloc.h>
 #include <yaz/log.h>
@@ -139,6 +144,165 @@ static void cb_entity_decl (void *userData, const char *entityName,
     
 }
 
+#if HAVE_ICONV_H
+static int cb_encoding_convert (void *data, const char *s)
+{
+    iconv_t t = (iconv_t) data;
+    size_t ret;
+    size_t outleft = 2;
+    char outbuf_[2], *outbuf = outbuf_;
+    size_t inleft = 4;
+    char *inbuf = (char *) s;
+    unsigned short code;
+
+    ret = iconv (t, &inbuf, &inleft, &outbuf, &outleft);
+    if (ret == (size_t) (-1) && errno != E2BIG)
+    {
+        iconv (t, 0, 0, 0, 0);
+        return -1;
+    }
+    if (outleft != 0)
+        return -1;
+    memcpy (&code, outbuf_, sizeof(short));
+    return code;
+}
+
+static void cb_encoding_release (void *data)
+{
+    iconv_t t = (iconv_t) data;
+    iconv_close (t);
+}
+
+static int cb_encoding_handler (void *userData, const char *name,
+                                XML_Encoding *info)
+{
+    int i = 0;
+    int no_ok = 0;
+
+    iconv_t t = iconv_open ("UNICODE", name);
+    if (t == (iconv_t) (-1))
+        return 0;
+   
+    info->data = 0;  /* signal that multibyte is not in use */
+    yaz_log (LOG_DEBUG, "Encoding handler of %s", name);
+    for (i = 0; i<256; i++)
+    {
+        size_t ret;
+        char outbuf_[5];
+        char inbuf_[5];
+        char *inbuf = inbuf_;
+        char *outbuf = outbuf_;
+        size_t inleft = 1;
+        size_t outleft = 2;
+        inbuf_[0] = i;
+
+        iconv (t, 0, 0, 0, 0);  /* reset iconv */
+
+        ret = iconv(t, &inbuf, &inleft, &outbuf, &outleft);
+        if (ret == (size_t) (-1))
+        {
+            if (errno == EILSEQ)
+            {
+                yaz_log (LOG_DEBUG, "Encoding %d: invalid sequence", i);
+                info->map[i] = -1;  /* invalid sequence */
+            }
+            if (errno == EINVAL)
+            {                       /* multi byte input */
+                int len = 2;
+                int j = 0;
+                info->map[i] = -1;
+                
+                while (len <= 4)
+                {
+                    char sbuf[80];
+                    int k;
+                    inbuf = inbuf_;
+                    inleft = len;
+                    outbuf = outbuf_;
+                    outleft = 2;
+
+                    inbuf_[len-1] = j;
+                    iconv (t, 0,0,0,0);
+
+                    assert (i >= 0 && i<255);
+
+                    *sbuf = 0;
+                    for (k = 0; k<len; k++)
+                    {
+                        sprintf (sbuf+strlen(sbuf), "%d ", inbuf_[k]&255);
+                    }
+                    ret = iconv (t, &inbuf, &inleft, &outbuf, &outleft);
+                    if (ret == (size_t) (-1))
+                    {
+                        if (errno == EILSEQ || errno == E2BIG)
+                        {
+                            j++;
+                            if (j > 255)
+                                break;
+                        }
+                        else if (errno == EINVAL)
+                        {
+                            len++;
+                            j = 7;
+                        }
+                    }
+                    else if (outleft == 0)
+                    {
+                        info->map[i] = -len;
+                        info->data = t;  /* signal that multibyte is in use */
+                        break;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if (info->map[i] < -1)
+                    yaz_log (LOG_DEBUG, "Encoding %d: multibyte input %d",
+                             i, -info->map[i]);
+                else
+                    yaz_log (LOG_DEBUG, "Encoding %d: multibyte input failed",
+                             i);
+            }
+            if (errno == E2BIG)
+            {
+                info->map[i] = -1;  /* no room for output */
+                yaz_log (LOG_WARN, "Encoding %d: no room for output",
+                         i);
+            }
+        }
+        else if (outleft == 0)
+        {
+            unsigned short code;
+            memcpy (&code, outbuf_, sizeof(short));
+            info->map[i] = code;
+            no_ok++;
+        }
+        else
+        {   /* should never happen */
+            info->map[i] = -1;
+            yaz_log (LOG_DEBUG, "Encoding %d: bad state", i);
+        }
+    }
+    if (info->data)
+    {   /* at least one multi byte */
+        info->convert = cb_encoding_convert;
+        info->release = cb_encoding_release;
+    }
+    else
+    {
+        /* no multi byte - we no longer need iconv handler */
+        iconv_close(t);
+        info->convert = 0;
+        info->release = 0;
+    }
+    if (!no_ok)
+        return 0;
+    return 1;
+}
+
+#endif
+
 #define XML_CHUNK 1024
 
 data1_node *data1_read_xml (data1_handle dh,
@@ -165,6 +329,9 @@ data1_node *data1_read_xml (data1_handle dh,
     XML_SetCommentHandler (parser, cb_comment);
     XML_SetDoctypeDeclHandler (parser, cb_doctype_start, cb_doctype_end);
     XML_SetEntityDeclHandler (parser, cb_entity_decl);
+#if HAVE_ICONV_H
+    XML_SetUnknownEncodingHandler (parser, cb_encoding_handler, 0);
+#endif
 
     while (!done)
     {
@@ -173,17 +340,23 @@ data1_node *data1_read_xml (data1_handle dh,
         if (!buf)
         {
             /* error */
+            yaz_log (LOG_FATAL, "XML_GetBuffer fail");
             return 0;
         }
         r = (*rf)(fh, buf, XML_CHUNK);
         if (r < 0)
         {
             /* error */
+            yaz_log (LOG_FATAL, "XML read fail");
             return 0;
         }
         else if (r == 0)
             done = 1;
-        XML_ParseBuffer (parser, r, done);
+        if (!XML_ParseBuffer (parser, r, done))
+        {
+            yaz_log (LOG_FATAL, "XML_ParseBuffer failed %s",
+		     XML_ErrorString(XML_GetErrorCode(parser)));
+	}
     }
     XML_ParserFree (parser);
     if (!uinfo.d1_stack[1])
