@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: requestq.c,v $
- * Revision 1.3  1997-09-01 08:53:00  adam
+ * Revision 1.4  1997-10-27 13:55:03  adam
+ * Fixed memory leak: member response wasn't freed when queue
+ * was destroyed.
+ *
+ * Revision 1.3  1997/09/01 08:53:00  adam
  * New windows NT/95 port using MSV5.0. The test server 'ztest' was
  * moved a separate directory. MSV5.0 project server.dsp created.
  * As an option, the server can now operate as an NT service.
@@ -69,6 +73,7 @@ void request_delq(request_q *q)
     request *r1, *r = q->list;
     while (r)
     {
+	xfree (r->response);
         r1 = r;
         r = r->next;
         xfree (r1);
