@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.15 2002-09-17 20:17:44 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.16 2003-02-23 20:40:01 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -13,7 +13,7 @@
 
    <para>
     If you have a database system that you would like to make available by
-    means of Z39.50, &yaz; basically offers your two options. You
+    means of Z39.50 or SRW, &yaz; basically offers your two options. You
     can use the APIs provided by the &asn;, &odr;, and &comstack;
     modules to
     create and decode PDUs, and exchange them with a client.
@@ -40,6 +40,13 @@
      releases, to the extent that it can be done without requiring
      too many structural changes in existing applications.
     </para>
+   </note>
+
+   <note>
+    <para>
+     The &yaz; server does not provide full SRW functionality.
+     However, it provides an adapter for SRW (to Z39.50).
+     </para>
    </note>
   </sect1>
   
@@ -324,6 +331,13 @@ bend_initresult (*bend_init)(bend_initrequest *r);
      <function>bend_init</function> handler is passed in the call to
      <function>statserv_start</function>.
     </para>
+
+    <para>
+     This handler is also called when operating in SRW mode - when
+     a connection has been made (even though SRW does not offer
+     this service).
+    </para>
+
     <para>
      Unlike previous versions of YAZ, the <function>bend_init</function> also
      serves as a handler that defines the Z39.50 services that the backend
@@ -354,6 +368,11 @@ typedef struct bend_initrequest
     int (*bend_delete)(void *handle, bend_delete_rr *rr);
     int (*bend_scan)(void *handle, bend_scan_rr *rr);
     int (*bend_segment)(void *handle, bend_segment_rr *rr);
+
+    ODR decode;                 /* decoding stream */
+    /* character set and language negotiation - see include/yaz/z-charneg.h */
+    Z_CharSetandLanguageNegotiation *charneg_request;
+    Z_External *charneg_response;
 } bend_initrequest;
 
 typedef struct bend_initresult
@@ -441,12 +460,11 @@ typedef struct {
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
 } bend_search_rr;
-
     </synopsis>
 
     <para>
      The <function>bend_search</function> handler is a fairly close
-     approximation of a protocol Search Request - and Response PDUs
+     approximation of a protocol Z39.50 Search Request - and Response PDUs
      The <literal>setname</literal> is the resultSetName from the protocol.
      You are required to establish a mapping between the set name and whatever
      your backend database likes to use.
@@ -477,7 +495,24 @@ typedef struct {
      defined error codes, and the suggested uses of the addinfo field.
     </para>
 
+    <para>
+     The <function>bend_search</function> handler is also called when
+     the frontend server receives a SRW SearchRetrieveRequest.
+     For SRW, a CQL query is usually provided by the client.
+     The CQL query is available as part of <literal>Z_Query</literal>
+     structure (note that CQL is now part of Z39.50 via an external).
+     To support CQL in existing implementations that only do Type-1,
+     we refer to the CQL-to-PQF tool described
+     <link linkend="tools.cql.pqf">here</link>.
+    </para>
 
+    <para>
+     To maintain backwards compatibility, the frontend server
+     of yaz always assume that error codes are BIB-1 diagnostics.
+     For SRW operation, a Bib-1 diagnostic code is mapped to
+     SRW diagnostic.
+    </para>
+    
     <synopsis>
 int (*bend_fetch) (void *handle, bend_fetch_rr *rr);
 
@@ -505,8 +540,8 @@ typedef struct bend_fetch_rr {
 
     <para>
      The frontend server calls the <function>bend_fetch</function> handler
-     when it needs database records to fulfill a Search Request or a Present
-     Request.
+     when it needs database records to fulfill a Z39.50 Search Request, a
+     Z39.50 Present  Request or a SRW SearchRetrieveRequest.
      The <literal>setname</literal> is simply the name of the result set
      that holds the reference to the desired record.
      The <literal>number</literal> is the offset into the set (with 1
@@ -521,6 +556,16 @@ typedef struct bend_fetch_rr {
      the response package has been transmitted.
      For unstructured data, the backend is responsible for maintaining a
      static or dynamic buffer for the record between calls.
+    </para>
+
+    <para>
+     If a SRW SearchRetrieveRequest is received by the frontend server,
+     the <literal>referenceId</literal> is NULL, the <literal>request_format
+     </literal> (transfer syntax) is XML (OID name 
+     <literal>VAL_TEXT_XML</literal>).
+     The schema for SRW is stored in the
+     <literal>Z_RecordComposition</literal>
+     structure.
     </para>
 
     <para>
@@ -588,7 +633,8 @@ typedef struct {
 
     <para>
      The <function>bend_present</function> handler is called when
-     the server receives a Present Request. The <literal>setname</literal>,
+     the server receives a Z39.50 Present Request.
+     The <literal>setname</literal>,
      <literal>start</literal> and <literal>number</literal> is the
      name of the result set - start position - and number of records to
      be retrieved respectively. <literal>format</literal> and
