@@ -8,3 +8,4 @@ configure
 libtool
 yaz-config
 yaz.spec
+autom4te.cache

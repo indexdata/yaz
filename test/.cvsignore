@@ -1,0 +1,5 @@
+.deps
+Makefile
+Makefile.in
+tstodrcodec.c
+tstodrcodec.h

@@ -7,3 +7,10 @@ marcdump
 yaziconv
 *.lo
 marc8.c
+cclsh
+cql2pqf
+cql2xcql
+srwtst
+yaz-config
+yaz-iconv
+yaz-marcdump
