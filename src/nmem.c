@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2004, Index Data.
+ * Copyright (c) 1995-2005, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.10 2005-01-04 21:27:54 mike Exp $
+ * $Id: nmem.c,v 1.11 2005-01-05 10:23:42 adam Exp $
  */
 
 /**
@@ -49,7 +49,9 @@ struct align {
 	short s;
 	int i;
 	long l;
+#if HAVE_LONG_LONG
 	long long ll;
+#endif
 	float f;
 	double d;
     } u;
