@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.21 2005-02-02 20:25:37 adam Exp $
+ * $Id: statserv.c,v 1.22 2005-02-07 11:23:47 adam Exp $
  */
 
 /**
@@ -593,6 +593,7 @@ void __cdecl event_loop_thread (IOCHAN iochan)
 static void listener(IOCHAN h, int event)   
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
+    IOCHAN parent_chan = line->user;
     association *newas;
     int res;
     HANDLE newHandle;
@@ -625,7 +626,7 @@ static void listener(IOCHAN h, int event)
 	yaz_log(YLOG_DEBUG, "Accept ok");
 
 	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
-				       EVENT_INPUT)))
+				       EVENT_INPUT, parent_chan->port)))
 	{
 	    yaz_log(YLOG_FATAL, "Failed to create iochan");
             iochan_destroy(h);
@@ -634,7 +635,7 @@ static void listener(IOCHAN h, int event)
 
 	yaz_log(YLOG_DEBUG, "Creating association");
 	if (!(newas = create_association(new_chan, new_line,
-					 control_block.apdu_file)))
+					 control_block.apdufile)))
 	{
 	    yaz_log(YLOG_FATAL, "Failed to create new assoc.");
             iochan_destroy(h);
@@ -1308,8 +1309,9 @@ int statserv_main(int argc, char **argv,
 		  bend_initresult *(*bend_init)(bend_initrequest *r),
 		  void (*bend_close)(void *handle))
 {
-    control_block.bend_init = bend_init;
-    control_block.bend_close = bend_close;
+    struct statserv_options_block *cb = &control_block;
+    cb->bend_init = bend_init;
+    cb->bend_close = bend_close;
 
     /* Lets setup the Arg structure */
     ArgDetails.argc = argc;
