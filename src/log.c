@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.11 2004-11-03 22:33:17 adam Exp $
+ * $Id: log.c,v 1.12 2004-11-04 14:19:58 heikki Exp $
  */
 
 /**
@@ -258,8 +258,10 @@ void yaz_log(int level, const char *fmt, ...)
     	{
 	    if (*mask_names[i].name && mask_names[i].mask && 
                  mask_names[i].mask != LOG_ALL)
+            {
 		sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
-	    level -= mask_names[i].mask;
+	        level &= ~mask_names[i].mask;
+            }
 	}
     va_start(ap, fmt);
 #ifdef WIN32

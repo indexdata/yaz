@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.17 2004-11-03 22:33:17 adam Exp $
+ * $Id: log.h,v 1.18 2004-11-04 14:19:58 heikki Exp $
  */
 
 /**
@@ -112,6 +112,7 @@ YAZ_EXPORT int yaz_log_mask_str(const char *str);
 
 /** yaz_log_mask_str_x is like yaz_log_mask_str, but with a given start value*/
 YAZ_EXPORT int yaz_log_mask_str_x(const char *str, int level);
+
 
 /** 
  * yaz_log_module_level returns a log level mask corresponding to the module
