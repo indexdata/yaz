@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.5 2002-09-10 20:56:34 adam Exp $
+ * $Id: unix.c,v 1.6 2002-09-20 22:23:13 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -26,14 +26,8 @@
 /* Chas added the following, so we get the definition of completeBER */
 #include <yaz/odr.h>
 
-#if HAVE_SOCKLEN_T
-#define NET_LEN_T socklen_t
-#else
-#if GETPEERNAME_ACCEPTS_SIZE_T_FOR_THIRD_ARGUMENT
-#define NET_LEN_T size_t
-#else
-#define NET_LEN_T int
-#endif
+#ifndef YAZ_SOCKLEN_T
+#define YAZ_SOCKLEN_T int
 #endif
 
 int unix_close(COMSTACK h);
@@ -315,7 +309,7 @@ int unix_listen(COMSTACK h, char *raddr, int *addrlen,
 		void *cd)
 {
     struct sockaddr_un addr;
-    NET_LEN_T len = SUN_LEN(&addr);
+    YAZ_SOCKLEN_T len = SUN_LEN(&addr);
 
     TRC(fprintf(stderr, "unix_listen pid=%d\n", getpid()));
     if (h->state != CS_ST_IDLE)

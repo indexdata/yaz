@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.90 2002-09-18 20:55:54 adam Exp $
+dnl $Id: configure.in,v 1.91 2002-09-20 22:23:13 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.1)
 dnl
@@ -179,40 +179,22 @@ if test "$ac_cv_func_poll" = "yes"; then
         AC_CHECK_HEADERS(sys/poll.h)
 fi
 dnl ------ socklen_t
-dnl AC_CHECK_TYPES(socklen_t)
-AC_MSG_CHECKING(for socklen_t)
-AC_CACHE_VAL(ac_cv_check_socklen_t,
-[ac_cv_check_socklen_t=''
-AC_TRY_COMPILE([
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/socket.h>
-],
-       [socklen_t len;],
-       ac_cv_check_socklen_t=yes,
-       ac_cv_check_socklen_t=no)])
-AC_MSG_RESULT($ac_cv_check_socklen_t)
-if test "$ac_cv_check_socklen_t" = "yes"; then
-	AC_DEFINE(HAVE_SOCKLEN_T)
-else
-	AC_MSG_CHECKING(whether net size is of type size_t)
-	AC_CACHE_VAL(ac_cv_check_getpeername_accepts_size_t,
-	[ac_cv_check_getpeername_accepts_size_t=''
+AC_MSG_CHECKING([for socklen_t])
+AC_CACHE_VAL(ac_cv_check_socklen_t,[ac_cv_check_socklen_t=''
 	AC_TRY_COMPILE([
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/socket.h>
-],
-	[size_t mylen; getpeername(0, (struct sockaddr *)NULL, &mylen);],
-	ac_cv_check_getpeername_accepts_size_t=yes,
-	ac_cv_check_getpeername_accepts_size_t=no)])
-	AC_MSG_RESULT($ac_cv_check_getpeername_accepts_size_t)
-	if test "$ac_cv_check_getpeername_accepts_size_t" = yes; then
-		AC_DEFINE(GETPEERNAME_ACCEPTS_SIZE_T_FOR_THIRD_ARGUMENT)
-	fi
-fi
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	extern accept(int, struct sockaddr *, socklen_t *);
+	],,[ac_cv_check_socklen_t=socklen_t],[
+		AC_TRY_COMPILE([
+		#include <sys/types.h>
+		#include <sys/socket.h>
+		extern accept(int, struct sockaddr *, size_t t *);
+		],,[ac_cv_check_socklen_t=size_t],[ac_cv_check_socklen_t=int])
+	])
+])
+AC_MSG_RESULT($ac_cv_check_socklen_t)
+AC_DEFINE_UNQUOTED(YAZ_SOCKLEN_T,$ac_cv_check_socklen_t)
 dnl
 dnl ------ tcpd
 AC_ARG_ENABLE(tcpd,[  --enable-tcpd[=PREFIX]  enable TCP wrapper for server if available])
