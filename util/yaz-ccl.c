@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1996-1997, Index Data.
+ * Copyright (c) 1996-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.12  1998-02-11 11:53:36  adam
+ * Revision 1.13  1998-03-31 15:13:20  adam
+ * Development towards compiled ASN.1.
+ *
+ * Revision 1.12  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.11  1997/11/24 11:33:57  adam
@@ -38,6 +41,7 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
     Z_AttributesPlusTerm *zapt;
     Odr_oct *term_octet;
     Z_Term *term;
+    Z_AttributeElement **elements;
 
     zapt = (Z_AttributesPlusTerm *)odr_malloc (o, sizeof(*zapt));
     assert (zapt);
@@ -50,30 +54,37 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
 
     for (attr = p->u.t.attr_list; attr; attr = attr->next)
         num++;
-    zapt->num_attributes = num;
-    if (num)
+    if (!num)
+        elements = (Z_AttributeElement**)odr_nullval();
+    else
     {
         int i = 0;
-        zapt->attributeList = (Z_AttributeElement **)odr_malloc (o, num*sizeof(*zapt->attributeList));
-        assert (zapt->attributeList);
+	elements = (Z_AttributeElement **)
+	    odr_malloc (o, num*sizeof(*elements));
         for (attr = p->u.t.attr_list; attr; attr = attr->next, i++)
         {
-            zapt->attributeList[i] =
-		(Z_AttributeElement *)odr_malloc (o, sizeof(**zapt->attributeList));
-            assert (zapt->attributeList[i]);
-            zapt->attributeList[i]->attributeType =
+            elements[i] = (Z_AttributeElement *)
+		odr_malloc (o, sizeof(**elements));
+            assert (elements[i]);
+            elements[i]->attributeType =
 		(int *)odr_malloc(o, sizeof(int));
-            *zapt->attributeList[i]->attributeType = attr->type;
-	    zapt->attributeList[i]->attributeSet = 0;
-	    zapt->attributeList[i]->which = Z_AttributeValue_numeric;
-	    zapt->attributeList[i]->value.numeric =
+            *elements[i]->attributeType = attr->type;
+	    elements[i]->attributeSet = 0;
+	    elements[i]->which = Z_AttributeValue_numeric;
+	    elements[i]->value.numeric =
 		(int *)odr_malloc (o, sizeof(int));
-	    *zapt->attributeList[i]->value.numeric = attr->value;
+	    *elements[i]->value.numeric = attr->value;
         }
     }
-    else
-        zapt->attributeList = (Z_AttributeElement**)odr_nullval();
-    
+#ifdef ASN_COMPILED
+    zapt->attributes = (Z_AttributeList *)
+	odr_malloc (o, sizeof(*zapt->attributes));
+    zapt->attributes->num_attributes = num;
+    zapt->attributes->attributes = elements;
+#else
+    zapt->num_attributes = num;
+    zapt->attributeList = elements;
+#endif    
     zapt->term = term;
     term->which = Z_Term_general;
     term->u.general = term_octet;

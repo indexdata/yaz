@@ -33,6 +33,7 @@
 #define PRT_EXT_H
 
 #include <yconfig.h>
+#include <oid.h>
 
 #ifdef __cplusplus
 extern "C" {

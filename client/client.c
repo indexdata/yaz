@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.64  1998-03-31 11:07:44  adam
+ * Revision 1.65  1998-03-31 15:13:19  adam
+ * Development towards compiled ASN.1.
+ *
+ * Revision 1.64  1998/03/31 11:07:44  adam
  * Furhter work on UNIverse resource report.
  * Added Extended Services handling in frontend server.
  *
@@ -579,7 +582,7 @@ static void display_record(Z_DatabaseRecord *p)
 	     * Note: we throw away the original, BER-encoded record here.
 	     * Do something else with it if you want to keep it.
 	     */
-	    r->u.sutrs = (Odr_oct *)rr;    /* we don't actually check the type here. */
+	    r->u.sutrs = (Z_SUTRS *) rr; /* we don't actually check the type here. */
 	    r->which = type->what;
 	}
     }
@@ -643,10 +646,22 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
 	    ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
 	    printf("Missing or unknown diagset\n");
 	printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
+#ifdef ASN_COMPILED
+	switch (r->which)
+	{
+	case Z_DefaultDiagFormat_v2Addinfo:
+	    printf (" -- v2 addinfo '%s'\n", r->u.v2Addinfo);
+	    break;
+	case Z_DefaultDiagFormat_v3Addinfo:
+	    printf (" -- v3 addinfo '%s'\n", r->u.v3Addinfo);
+	    break;
+	}
+#else
 	if (r->addinfo && *r->addinfo)
 	    printf(" -- '%s'\n", r->addinfo);
 	else
 	    printf("\n");
+#endif
     }
 }
 
@@ -666,7 +681,16 @@ static void display_records(Z_Records *p)
     int i;
 
     if (p->which == Z_Records_NSD)
+    {
+#ifdef ASN_COMPILED
+	Z_DiagRec dr, *dr_p = &dr;
+	dr.which = Z_DiagRec_defaultFormat;
+	dr.u.defaultFormat = p->u.nonSurrogateDiagnostic;
+	display_diagrecs (&dr_p, 1);
+#else
 	display_diagrecs (&p->u.nonSurrogateDiagnostic, 1);
+#endif
+    }
     else if (p->which == Z_Records_multipleNSD)
 	display_diagrecs (p->u.multipleNonSurDiagnostics->diagRecs,
 			  p->u.multipleNonSurDiagnostics->num_diagRecs);
@@ -985,7 +1009,11 @@ static Z_External *CreateItemOrderExternal(int itemno)
 
     r->u.itemOrder = odr_malloc(out,sizeof(Z_ItemOrder));
     memset(r->u.itemOrder, 0, sizeof(Z_ItemOrder));
+#ifdef ASN_COMPILED
+    r->u.itemOrder->which=Z_IOItemOrder_esRequest;
+#else
     r->u.itemOrder->which=Z_ItemOrder_esRequest;
+#endif
 
     r->u.itemOrder->u.esRequest = odr_malloc(out,sizeof(Z_IORequest));
     memset(r->u.itemOrder->u.esRequest, 0, sizeof(Z_IORequest));
@@ -1306,6 +1334,14 @@ int send_sortrequest(char *arg, int newset)
 
     req->referenceId = set_refid (out);
 
+#ifdef ASN_COMPILED
+    req->num_inputResultSetNames = 1;
+    req->inputResultSetNames = (Z_InternationalString **)
+	odr_malloc (out, sizeof(*req->inputResultSetNames));
+    req->inputResultSetNames[0] = (char *)
+	odr_malloc (out, strlen(setstring)+1);
+    strcpy (req->inputResultSetNames[0], setstring);
+#else
     req->inputResultSetNames =
 	(Z_StringList *)odr_malloc (out, sizeof(*req->inputResultSetNames));
     req->inputResultSetNames->num_strings = 1;
@@ -1314,6 +1350,7 @@ int send_sortrequest(char *arg, int newset)
     req->inputResultSetNames->strings[0] =
 	(char *)odr_malloc (out, strlen(setstring)+1);
     strcpy (req->inputResultSetNames->strings[0], setstring);
+#endif
 
     if (newset && setnumber >= 0)
 	sprintf (setstring, "%d", ++setnumber);
@@ -1374,7 +1411,12 @@ int send_sortrequest(char *arg, int newset)
 	sks->caseSensitivity = (int *)odr_malloc (out, sizeof(*sks->caseSensitivity));
 	*sks->caseSensitivity = Z_SortCase_caseSensitive;
 
+#ifdef ASN_COMPILED
+	sks->which = Z_SortKeySpec_null;
+	sks->u.null = odr_nullval ();
+#else
 	sks->missingValueAction = NULL;
+#endif
 
 	for (i = 0; sort_flags[i]; i++)
 	{
@@ -1426,6 +1468,8 @@ void display_term(Z_TermInfo *t)
 void process_scanResponse(Z_ScanResponse *res)
 {
     int i;
+    Z_Entry **entries = NULL;
+    int num_entries = 0;
    
     printf("Received ScanResponse\n"); 
     print_refid (res->referenceId);
@@ -1437,22 +1481,33 @@ void process_scanResponse(Z_ScanResponse *res)
         printf("Scan returned code %d\n", *res->scanStatus);
     if (!res->entries)
         return;
+#ifdef ASN_COMPILED
+    if ((entries = res->entries->entries))
+	num_entries = res->entries->num_entries;
+#else
     if (res->entries->which == Z_ListEntries_entries)
     {
-        Z_Entries *ent = res->entries->u.entries;
-
-        for (i = 0; i < ent->num_entries; i++)
-            if (ent->entries[i]->which == Z_Entry_termInfo)
-            {
-                printf("%c ", i + 1 == *res->positionOfTerm ? '*' : ' ');
-                display_term(ent->entries[i]->u.termInfo);
-            }
-            else
-                display_diagrecs(&ent->entries[i]->u.surrogateDiagnostic, 1);
+        entries = res->entries->u.entries->entries;
+	num_entries = res->entries->u.entries->num_entries;
     }
-    else
+#endif
+    for (i = 0; i < num_entries; i++)
+	if (entries[i]->which == Z_Entry_termInfo)
+	{
+	    printf("%c ", i + 1 == *res->positionOfTerm ? '*' : ' ');
+	    display_term(entries[i]->u.termInfo);
+	}
+	else
+	    display_diagrecs(&entries[i]->u.surrogateDiagnostic, 1);
+#ifdef ASN_COMPILED
+    if (res->entries->nonsurrogateDiagnostics)
+	display_diagrecs (res->entries->nonsurrogateDiagnostics,
+			  res->entries->num_nonsurrogateDiagnostics);
+#else
+    if (res->entries->which == Z_ListEntries_nonSurrogateDiagnostics)
         display_diagrecs(&res->entries->
 			 u.nonSurrogateDiagnostics->diagRecs[0], 1);
+#endif
 }
 
 void process_sortResponse(Z_SortResponse *res)
@@ -1471,9 +1526,15 @@ void process_sortResponse(Z_SortResponse *res)
     }
     printf ("\n");
     print_refid (res->referenceId);
+#ifdef ASN_COMPILED
+    if (res->diagnostics)
+        display_diagrecs(res->diagnostics,
+			 res->num_diagnostics);
+#else
     if (res->diagnostics)
         display_diagrecs(res->diagnostics->diagRecs,
 			 res->diagnostics->num_diagRecs);
+#endif
 }
 
 int cmd_sort_generic(char *arg, int newset)

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.9  1998-03-05 08:07:58  adam
+ * Revision 1.10  1998-03-31 15:13:20  adam
+ * Development towards compiled ASN.1.
+ *
+ * Revision 1.9  1998/03/05 08:07:58  adam
  * Make data1 to EXPLAIN ignore local tags in root.
  *
  * Revision 1.8  1998/02/11 11:53:35  adam
@@ -390,12 +393,21 @@ static int *f_recordCount(ExpHandle *eh, data1_node *c, int *which)
     c = c->child;
     if (!is_numeric_tag (eh, c))
 	return 0;
+#ifdef ASN_COMPILED
+    if (c->u.tag.element->tag->value.numeric == 210)
+	*wp = Z_DatabaseInfo_actualNumber;
+    else if (c->u.tag.element->tag->value.numeric == 211)
+	*wp = Z_DatabaseInfo_approxNumber;
+    else
+	return 0;
+#else
     if (c->u.tag.element->tag->value.numeric == 210)
 	*wp = Z_Exp_RecordCount_actualNumber;
     else if (c->u.tag.element->tag->value.numeric == 211)
 	*wp = Z_Exp_RecordCount_approxNumber;
     else
 	return 0;
+#endif
     if (!c->child || c->child->which != DATA1N_data)
 	return 0;
     sprintf(intbuf, "%.*s", 63, c->child->u.data.data);
@@ -561,7 +573,11 @@ static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
     res->subDbs = 0;
     res->disclaimers = 0;
     res->news = 0;
+#ifdef ASN_COMPILED
+    res->u.actualNumber = 0;
+#else
     res->recordCount = 0;
+#endif
     res->defaultOrder = 0;
     res->avRecordSize = 0;
     res->maxRecordSize = 0;
@@ -640,8 +656,13 @@ static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
 	    break;
 	case 207: res->disclaimers = f_humstring(eh, c); break;
 	case 103: res->news = f_humstring(eh, c); break;
+#ifdef ASN_COMPILED
+	case 209: res->u.actualNumber =
+		      f_recordCount(eh, c, &res->which); break;
+#else
 	case 209: res->recordCount =
 		      f_recordCount(eh, c, &res->recordCount_which); break;
+#endif
 	case 212: res->defaultOrder = f_humstring(eh, c); break;
 	case 213: res->avRecordSize = f_integer(eh, c); break;
 	case 214: res->maxRecordSize = f_integer(eh, c); break;

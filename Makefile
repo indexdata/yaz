@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.36 1998-01-29 13:43:03 adam Exp $
+# $Id: Makefile,v 1.37 1998-03-31 15:13:19 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
@@ -9,11 +9,18 @@
 #LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
 #XMOSI=xmosi.o
 
-CDEFS=$(ODEFS)
+CDEFS=$(ODEFS) 
+
+#INCLUDE=-I../z39.50 -I. -I../include
+#MOD=z39.50
+
+INCLUDE=-I. -I../include
+MOD=asn
+
 #CC=
 SHELL=/bin/sh
 MAKE=make
-SUBDIR=util odr asn $(RFC1006) ccl comstack retrieval client server ztest makelib
+SUBDIR=$(MOD) util odr $(RFC1006) ccl comstack retrieval client server ztest makelib
 # Add external libraries to the ELIBS macro
 ELIBS=
 CONTROL=RANLIB="ranlib" ELIBS="$(ELIBS)"
@@ -29,11 +36,11 @@ YAZDIR=/usr/local/lib/yaz
 
 all:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) $(CONTROL) \
-	CFLAGS="$(CFLAGS)" CDEFS="$(CDEFS)" LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\
+	INCLUDE="$(INCLUDE)" CFLAGS="$(CFLAGS)" CDEFS="$(CDEFS)" LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\
 	then cd ..; else exit 1; fi; done
 
 dep depend:
-	for i in $(SUBDIR); do cd $$i; if $(MAKE) CDEFS="$(CDEFS)" depend;\
+	for i in $(SUBDIR); do cd $$i; if $(MAKE) INCLUDE="$(INCLUDE)" CDEFS="$(CDEFS)" depend;\
 		 then cd ..; else exit 1; fi; done
 
 clean:

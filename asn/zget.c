@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.14  1998-02-11 11:53:32  adam
+ * Revision 1.15  1998-03-31 15:13:19  adam
+ * Development towards compiled ASN.1.
+ *
+ * Revision 1.14  1998/02/11 11:53:32  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.13  1998/01/29 13:13:39  adam
@@ -204,7 +207,11 @@ Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
     r->referenceId = 0;
     r->deleteFunction = (int *)odr_malloc(o, sizeof(int));
     *r->deleteFunction = Z_DeleteRequest_list;
+#ifdef ASN_COMPILED
+    r->num_resultSetList = 0;
+#else
     r->num_ids = 0;
+#endif
     r->resultSetList = 0;
 #ifdef Z_95
     r->otherInfo = 0;
@@ -219,11 +226,19 @@ Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
     r->referenceId = 0;
     r->deleteOperationStatus = (int *)odr_malloc(o, sizeof(int));
     *r->deleteOperationStatus = Z_DeleteStatus_success;
+#ifdef ASN_COMPILED
+    r->deleteListStatuses = 0;
+#else
     r->num_statuses = 0;
     r->deleteListStatuses = 0;
+#endif
     r->numberNotDeleted = 0;
+#ifdef ASN_COMPILED
+    r->bulkStatuses = 0;
+#else
     r->num_bulkStatuses = 0;
     r->bulkStatuses = 0;
+#endif
     r->deleteMessage = 0;
 #ifdef Z_95
     r->otherInfo = 0;

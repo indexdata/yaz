@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.18  1998-03-31 11:07:44  adam
+ * Revision 1.19  1998-03-31 15:13:19  adam
+ * Development towards compiled ASN.1.
+ *
+ * Revision 1.18  1998/03/31 11:07:44  adam
  * Furhter work on UNIverse resource report.
  * Added Extended Services handling in frontend server.
  *
@@ -79,7 +82,11 @@ static Z_ext_typeent type_table[] =
     {VAL_PROMPT1, Z_External_promptObject1, (Odr_fun)z_PromptObject1 },
     {VAL_GRS1, Z_External_grs1, (Odr_fun)z_GenericRecord},
     {VAL_EXTENDED, Z_External_extendedService, (Odr_fun)z_TaskPackage},
+#ifdef ASN_COMPILED
+    {VAL_ITEMORDER, Z_External_itemOrder, (Odr_fun)z_IOItemOrder},
+#else
     {VAL_ITEMORDER, Z_External_itemOrder, (Odr_fun)z_ItemOrder},
+#endif
     {VAL_DIAG1, Z_External_diag1, (Odr_fun)z_DiagnosticFormat},
     {VAL_ESPEC1, Z_External_espec1, (Odr_fun)z_Espec1},
     {VAL_SUMMARY, Z_External_summary, (Odr_fun)z_BriefBib},
@@ -124,7 +131,11 @@ int z_External(ODR o, Z_External **p, int opt)
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_grs1, (Odr_fun)z_GenericRecord},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_extendedService,
 	    (Odr_fun)z_TaskPackage},
+#ifdef ASN_COMPILED
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, (Odr_fun)z_IOItemOrder},
+#else
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, (Odr_fun)z_ItemOrder},
+#endif
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1, (Odr_fun)z_DiagnosticFormat},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_espec1, (Odr_fun)z_Espec1},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_summary, (Odr_fun)z_BriefBib},

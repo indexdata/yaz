@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.73  1998-03-31 11:07:45  adam
+ * Revision 1.74  1998-03-31 15:13:20  adam
+ * Development towards compiled ASN.1.
+ *
+ * Revision 1.73  1998/03/31 11:07:45  adam
  * Furhter work on UNIverse resource report.
  * Added Extended Services handling in frontend server.
  *
@@ -829,6 +832,17 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
  * These functions should be merged.
  */
 
+static void set_addinfo (Z_DefaultDiagFormat *dr, char *addinfo)
+{
+#if ASN_COMPILED
+    dr->which = Z_DefaultDiagFormat_v2Addinfo;
+    dr->u.v2Addinfo = addinfo ? addinfo : "";
+#else
+    dr->which = Z_DiagForm_v2AddInfo;
+    dr->addinfo = addinfo ? addinfo : "";
+#endif
+}
+
 /*
  * nonsurrogate diagnostic record.
  */
@@ -849,6 +863,9 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 	"NULL");
     *err = error;
     rec->which = Z_Records_NSD;
+#if ASN_COMPILED
+    rec->u.nonSurrogateDiagnostic = dr;
+#else
 #ifdef Z_95
     rec->u.nonSurrogateDiagnostic = drec;
     drec->which = Z_DiagRec_defaultFormat;
@@ -856,11 +873,11 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 #else
     rec->u.nonSurrogateDiagnostic = dr;
 #endif
+#endif
     dr->diagnosticSetId = odr_oiddup (assoc->encode,
                                       oid_ent_to_oid(&bib1, oid));
     dr->condition = err;
-    dr->which = Z_DiagForm_v2AddInfo;
-    dr->addinfo = addinfo ? addinfo : "";
+    set_addinfo (dr, addinfo);
     return rec;
 }
 
@@ -891,8 +908,8 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
     dr->diagnosticSetId = odr_oiddup (assoc->encode,
                                       oid_ent_to_oid(&bib1, oid));
     dr->condition = err;
-    dr->which = Z_DiagForm_v2AddInfo;
-    dr->addinfo = addinfo ? addinfo : "";
+    set_addinfo (dr, addinfo);
+
     return rec;
 }
 
@@ -924,8 +941,14 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     rec->diagnosticSetId = odr_oiddup (assoc->encode,
                                       oid_ent_to_oid(&bib1, oid));
     rec->condition = err;
+
+#ifdef ASN_COMPILED
+    rec->which = Z_DefaultDiagFormat_v2Addinfo;
+    rec->u.v2Addinfo = addinfo ? addinfo : "";
+#else
     rec->which = Z_DiagForm_v2AddInfo;
     rec->addinfo = addinfo ? addinfo : "";
+#endif
     return recs;
 }
 
@@ -1066,6 +1089,12 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	}
 	else if (fres->format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
 	{
+#if 0
+	    Z_SUTRS *sutrs = (Z_SUTRS *)odr_malloc(a->encode, 1+fres->len);
+            
+	    memcpy(sutrs, fres->record, fres->len);
+	    sutrs[fres->len] = '\0';
+#else
 	    Odr_oct *sutrs = (Odr_oct *)odr_malloc(a->encode, sizeof(*sutrs));
 
 	    thisext->which = Z_External_sutrs;
@@ -1073,6 +1102,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    sutrs->buf = (unsigned char *)odr_malloc(a->encode, fres->len);
 	    sutrs->len = sutrs->size = fres->len;
 	    memcpy(sutrs->buf, fres->record, fres->len);
+#endif
 	}
 	else /* octet-aligned record. */
 	{
@@ -1343,6 +1373,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     int *numberOfEntriesReturned =
          (int *)odr_malloc (assoc->encode, sizeof(*numberOfEntriesReturned));
     Z_ListEntries *ents = (Z_ListEntries *)odr_malloc (assoc->encode, sizeof(*ents));
+    Z_DiagRecs *diagrecs_p = NULL;
     oident *attent;
     bend_scanrequest srq;
     bend_scanresult *srs;
@@ -1360,21 +1391,29 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     res->numberOfEntriesReturned = numberOfEntriesReturned;
     res->positionOfTerm = 0;
     res->entries = ents;
-    ents->which = Z_ListEntries_nonSurrogateDiagnostics;
+#if ASN_COMPILED
+    ents->num_entries = 0;
+    ents->entries = NULL;
+    ents->num_nonsurrogateDiagnostics = 0;
+    ents->nonsurrogateDiagnostics = NULL;
+#else
+    ents->which = Z_ListEntries_entries;
+#endif
     res->attributeSet = 0;
     res->otherInfo = 0;
 
     if (req->attributeSet && (!(attent = oid_getentbyoid(req->attributeSet)) ||
-    	attent->oclass != CLASS_ATTSET || attent->value != VAL_BIB1))
-	ents->u.nonSurrogateDiagnostics = diagrecs(assoc, 121, 0);
+			      attent->oclass != CLASS_ATTSET
+			      || attent->value != VAL_BIB1))
+	diagrecs_p = diagrecs(assoc, 121, 0);
     else if (req->stepSize && *req->stepSize > 0)
-    	ents->u.nonSurrogateDiagnostics = diagrecs(assoc, 205, 0);
+    	diagrecs_p = diagrecs(assoc, 205, 0);
     else
     {
     	if (req->termListAndStartPoint->term->which == Z_Term_general)
 	    logf(LOG_DEBUG, " term: '%.*s'",
-		req->termListAndStartPoint->term->u.general->len,
-		req->termListAndStartPoint->term->u.general->buf);
+		 req->termListAndStartPoint->term->u.general->len,
+		 req->termListAndStartPoint->term->u.general->buf);
 	srq.num_bases = req->num_databaseNames;
 	srq.basenames = req->databaseNames;
 	srq.num_entries = *req->numberOfTermsRequested;
@@ -1388,31 +1427,42 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	srq.term_position = req->preferredPositionInResponse ?
 	    *req->preferredPositionInResponse : 1;
 	if (!(srs = bend_scan(assoc->backend, &srq, 0)))
-	    ents->u.nonSurrogateDiagnostics = diagrecs(assoc, 2, 0);
+	    diagrecs_p = diagrecs(assoc, 2, 0);
 	else if (srs->errcode)
-	    ents->u.nonSurrogateDiagnostics = diagrecs(assoc,
-		srs->errcode, srs->errstring);
+	    diagrecs_p = diagrecs(assoc, srs->errcode, srs->errstring);
 	else
 	{
 	    int i;
-	    Z_Entries *list = (Z_Entries *)odr_malloc (assoc->encode, sizeof(*list));
-            Z_Entry **tab = (Z_Entry **)odr_malloc (assoc->encode,
-                                        sizeof(*tab) * srs->num_entries);
-
+#ifdef ASN_COMPILED
+#else
+	    Z_Entries *list = (Z_Entries *)
+		odr_malloc (assoc->encode, sizeof(*list));
+#endif
+            Z_Entry **tab = (Z_Entry **)
+		odr_malloc (assoc->encode, sizeof(*tab) * srs->num_entries);
+	    
 	    if (srs->status == BEND_SCAN_PARTIAL)
 	    	*scanStatus = Z_Scan_partial_5;
 	    else
 	    	*scanStatus = Z_Scan_success;
-	    ents->which = Z_ListEntries_entries;
+#ifdef ASN_COMPILED
+	    ents->entries = tab;
+	    ents->num_entries = srs->num_entries;
+	    res->numberOfEntriesReturned = &ents->num_entries;	    
+#else
 	    ents->u.entries = list;
 	    list->entries = tab;
+	    list->num_entries = srs->num_entries;
+	    res->numberOfEntriesReturned = &list->num_entries;
+#endif
+	    res->positionOfTerm = &srs->term_position;
 	    for (i = 0; i < srs->num_entries; i++)
 	    {
 	    	Z_Entry *e;
 		Z_TermInfo *t;
 		Odr_oct *o;
-
-		list->entries[i] = e = (Z_Entry *)odr_malloc(assoc->encode, sizeof(*e));
+		
+		tab[i] = e = (Z_Entry *)odr_malloc(assoc->encode, sizeof(*e));
 		e->which = Z_Entry_termInfo;
 		e->u.termInfo = t = (Z_TermInfo *)odr_malloc(assoc->encode, sizeof(*t));
 		t->suggestedAttributes = 0;
@@ -1431,12 +1481,18 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 		logf(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
 		    srs->entries[i].term, srs->entries[i].occurrences);
 	    }
-	    list->num_entries = i;
-	    res->numberOfEntriesReturned = &list->num_entries;
-	    res->positionOfTerm = &srs->term_position;
 	}
     }
-
+    if (diagrecs_p)
+    {
+#ifdef ASN_COMPILED
+	ents->num_nonsurrogateDiagnostics = diagrecs_p->num_diagRecs;
+	ents->nonsurrogateDiagnostics = diagrecs_p->diagRecs;
+#else
+	ents->u.nonSurrogateDiagnostics = diagrecs_p;
+	ents->which = Z_ListEntries_nonSurrogateDiagnostics;
+#endif
+    }
     return apdu;
 }
 
@@ -1451,8 +1507,13 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
 
     logf(LOG_LOG, "Got SortRequest.");
 
+#ifdef ASN_COMPILED
+    bsrr->num_input_setnames = req->num_inputResultSetNames;
+    bsrr->input_setnames = req->inputResultSetNames;
+#else
     bsrr->num_input_setnames = req->inputResultSetNames->num_strings;
     bsrr->input_setnames = req->inputResultSetNames->strings;
+#endif
     bsrr->output_setname = req->sortedResultSetName;
     bsrr->sort_sequence = req->sortSequence;
     bsrr->stream = assoc->encode;
@@ -1468,9 +1529,22 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     *res->sortStatus = bsrr->sort_status;
     res->resultSetStatus = 0;
     if (bsrr->errcode)
-	res->diagnostics = diagrecs(assoc, bsrr->errcode, bsrr->errstring);
+    {
+	Z_DiagRecs *dr = diagrecs (assoc, bsrr->errcode, bsrr->errstring);
+#ifdef ASN_COMPILED
+	res->diagnostics = dr->diagRecs;
+	res->num_diagnostics = dr->num_diagRecs;
+#else
+	res->diagnostics = dr;
+#endif
+    }
     else
+    {
+#ifdef ASN_COMPILED
+	res->num_diagnostics = 0;
+#endif
 	res->diagnostics = 0;
+    }
     res->otherInfo = 0;
 
     apdu->which = Z_APDU_sortResponse;

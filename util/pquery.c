@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.19  1998-03-05 08:09:03  adam
+ * Revision 1.20  1998-03-31 15:13:20  adam
+ * Development towards compiled ASN.1.
+ *
+ * Revision 1.19  1998/03/05 08:09:03  adam
  * Minor change to make C++ happy.
  *
  * Revision 1.18  1998/02/11 11:53:36  adam
@@ -182,51 +185,61 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
     Z_AttributesPlusTerm *zapt;
     Odr_oct *term_octet;
     Z_Term *term;
+    Z_AttributeElement **elements;
 
     zapt = (Z_AttributesPlusTerm *)odr_malloc (o, sizeof(*zapt));
     term_octet = (Odr_oct *)odr_malloc (o, sizeof(*term_octet));
     term = (Z_Term *)odr_malloc (o, sizeof(*term));
 
-    zapt->num_attributes = num_attr;
-    if (num_attr)
+    if (!num_attr)
+        elements = (Z_AttributeElement**)odr_nullval();
+    else
     {
         int i;
         int *attr_tmp;
 
-        zapt->attributeList = (Z_AttributeElement**)odr_malloc (o, num_attr * 
-                                          sizeof(*zapt->attributeList));
+        elements = (Z_AttributeElement**)
+	    odr_malloc (o, num_attr * sizeof(*elements));
 
         attr_tmp = (int *)odr_malloc (o, num_attr * 2 * sizeof(int));
         memcpy (attr_tmp, attr_list, num_attr * 2 * sizeof(int));
         for (i = 0; i < num_attr; i++)
         {
-            zapt->attributeList[i] =
-                (Z_AttributeElement*)odr_malloc (o,sizeof(**zapt->attributeList));
-            zapt->attributeList[i]->attributeType = &attr_tmp[2*i];
+            elements[i] =
+                (Z_AttributeElement*)odr_malloc (o,sizeof(**elements));
+            elements[i]->attributeType = &attr_tmp[2*i];
 #ifdef Z_95
             if (attr_set[i] == VAL_NONE)
-                zapt->attributeList[i]->attributeSet = 0;
+                elements[i]->attributeSet = 0;
             else
             {
                 oident attrid;
                 int oid[OID_SIZE];
-
+		
                 attrid.proto = PROTO_Z3950;
                 attrid.oclass = CLASS_ATTSET;
                 attrid.value = attr_set[i];
                    
-                zapt->attributeList[i]->attributeSet = 
-                    odr_oiddup (o, oid_ent_to_oid (&attrid, oid));
+                elements[i]->attributeSet =
+		    odr_oiddup (o, oid_ent_to_oid (&attrid, oid));
             }
-	    zapt->attributeList[i]->which = Z_AttributeValue_numeric;
-	    zapt->attributeList[i]->value.numeric = &attr_tmp[2*i+1];
+	    elements[i]->which = Z_AttributeValue_numeric;
+	    elements[i]->value.numeric = &attr_tmp[2*i+1];
 #else
-            zapt->attributeList[i]->attributeValue = &attr_tmp[2*i+1];
+            elements[i]->attributeValue = &attr_tmp[2*i+1];
 #endif
         }
     }
-    else
-        zapt->attributeList = (Z_AttributeElement**)odr_nullval();
+#ifdef ASN_COMPILED
+    zapt->attributes = (Z_AttributeList *)
+	odr_malloc (o, sizeof(*zapt->attributes));
+    zapt->attributes->num_attributes = num_attr;
+    zapt->attributes->attributes = elements;
+#else
+    zapt->num_attributes = num_attr;
+    zapt->attributeList = elements;
+#endif    
+
     zapt->term = term;
     term->which = Z_Term_general;
     term->u.general = term_octet;
@@ -313,9 +326,14 @@ static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
 
     if (!lex (li))
         return NULL;
+#ifdef ASN_COMPILED
+    p->which = Z_ProximityOperator_known;
+    p->u.known = (int *)odr_malloc (o, sizeof(*p->u.known));
+    *p->u.known = atoi (li->lex_buf);
+#else
     p->proximityUnitCode = (int *)odr_malloc (o, sizeof(*p->proximityUnitCode));
     *p->proximityUnitCode = atoi (li->lex_buf);
-
+#endif
     return p;
 }
 
