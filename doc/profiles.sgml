@@ -2,7 +2,7 @@
 <article>
 <title>Specifying and Using Application (Database) Profiles
 <author>Index Data, <tt/info@index.ping.dk/
-<date>$Revision: 1.1 $
+<date>$Revision: 1.2 $
 <abstract>
 YAZ includes a subsystem to manage complex database records, driven
 by a set of configuration tables that reflect a given profile.
@@ -94,18 +94,18 @@ turn be partitioned into various fields providing details about the
 distributor, like this:
 
 <tscreen><verb>
-&lt;Distributor>
-    &lt;Name> USGS/WRD &lt;/Name>
-    &lt;Organization> USGS/WRD &lt;/Organization>
-    &lt;Street-Address>
+<Distributor>
+    <Name> USGS/WRD &etago;Name>
+    <Organization> USGS/WRD &etago;Organization>
+    <Street-Address>
 	U.S. GEOLOGICAL SURVEY, 505 MARQUETTE, NW
-    &lt;/Street-Address>
-    &lt;City> ALBUQUERQUE &lt;/City>
-    &lt;State> NM &lt;/State>
-    &lt;Zip-Code> 87102 &lt;/Zip-Code>
-    &lt;Country> USA &lt;/Country>
-    &lt;Telephone> (505) 766-5560 &lt;/Telephone>
-&lt;/Distributor>
+    &etago;Street-Address>
+    <City> ALBUQUERQUE &etago;City>
+    <State> NM &etago;State>
+    <Zip-Code> 87102 &etago;Zip-Code>
+    <Country> USA &etago;Country>
+    <Telephone> (505) 766-5560 &etago;Telephone>
+&etago;Distributor>
 </verb></tscreen>
 
 This is how data that the retrieval module reads from an input file
