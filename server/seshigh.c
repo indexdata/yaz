@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.145 2003-02-21 12:08:59 adam Exp $
+ * $Id: seshigh.c,v 1.146 2003-02-23 14:26:57 adam Exp $
  */
 
 /*
@@ -541,7 +541,7 @@ static void srw_bend_search(association *assoc, request *req,
 
     rr.query = (Z_Query *) odr_malloc (assoc->decode, sizeof(*rr.query));
 
-    if (srw_req->query)
+    if (srw_req->query_type == Z_SRW_query_type_cql)
     {
         ext = (Z_External *) odr_malloc(assoc->decode, sizeof(*ext));
         ext->direct_reference = odr_getoidbystr(assoc->decode, 
@@ -549,21 +549,20 @@ static void srw_bend_search(association *assoc, request *req,
         ext->indirect_reference = 0;
         ext->descriptor = 0;
         ext->which = Z_External_CQL;
-        ext->u.cql = srw_req->query;
+        ext->u.cql = srw_req->query.cql;
 
         rr.query->which = Z_Query_type_104;
         rr.query->u.type_104 =  ext;
     }
-    else if (srw_req->pQuery)
+    else if (srw_req->query_type == Z_SRW_query_type_pqf)
     {
         Z_RPNQuery *RPNquery;
         YAZ_PQF_Parser pqf_parser;
 
         pqf_parser = yaz_pqf_create ();
 
-        yaz_log(LOG_LOG, "PQF: %s", srw_req->pQuery);
-
-        RPNquery = yaz_pqf_parse (pqf_parser, assoc->decode, srw_req->pQuery);
+        RPNquery = yaz_pqf_parse (pqf_parser, assoc->decode,
+                                  srw_req->query.pqf);
         if (!RPNquery)
         {
             const char *pqf_msg;
@@ -583,7 +582,7 @@ static void srw_bend_search(association *assoc, request *req,
     else
         srw_error = 11;
 
-    if (srw_req->sortKeys || srw_req->xSortKeys)
+    if (srw_req->sort_type != Z_SRW_sort_type_none)
         srw_error = 80;
 
     if (srw_error)
@@ -791,11 +790,11 @@ static void process_http_request(association *assoc, request *req)
                 soap_package->u.generic->no == 0)
             {
                 /* SRW package */
-                Z_SRW_searchRetrieve *sr = soap_package->u.generic->p;
+                Z_SRW_PDU *sr = soap_package->u.generic->p;
                 
                 if (sr->which == Z_SRW_searchRetrieve_request)
                 {
-                    Z_SRW_searchRetrieve *res =
+                    Z_SRW_PDU *res =
                         yaz_srw_get(assoc->encode,
                                     Z_SRW_searchRetrieve_response);
 
@@ -875,7 +874,7 @@ static void process_http_request(association *assoc, request *req)
         if (alive && isdigit(*alive))
             t = atoi(alive);
         else
-            t = 30;
+            t = 15;
         if (t < 0 || t > 3600)
             t = 3600;
         iochan_settimeout(assoc->client_chan,t);

@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.95 2003-02-20 15:15:04 adam Exp $
+ * $Id: statserv.c,v 1.96 2003-02-23 14:26:58 adam Exp $
  */
 
 #include <stdio.h>
@@ -657,7 +657,8 @@ static int add_listener(char *where, int what)
     }
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
-    	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s", where);
+    	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s",
+                where, errno);
 	cs_close (l);
 	return -1;
     }

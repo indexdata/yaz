@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwtst.c,v 1.3 2003-02-17 22:35:48 adam Exp $
+ * $Id: srwtst.c,v 1.4 2003-02-23 14:26:58 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         if (soap_package->which == Z_SOAP_generic &&
             soap_package->u.generic->no == 0)
         {
-            Z_SRW_searchRetrieve *sr = soap_package->u.generic->p;
+            Z_SRW_PDU *sr = soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_request)
             { 
                 Z_SRW_searchRetrieveRequest *req = sr->u.request;

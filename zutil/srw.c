@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.6 2003-02-19 15:22:11 adam Exp $
+ * $Id: srw.c,v 1.7 2003-02-23 14:26:58 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -221,7 +221,7 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
 }
 
 
-int yaz_srw_codec(ODR o, void * vptr, Z_SRW_searchRetrieve **handler_data,
+int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                   void *client_data, const char *ns)
 {
     xmlNodePtr pptr = vptr;
@@ -236,18 +236,17 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_searchRetrieve **handler_data,
             return -1;
         if (method && !strcmp(method->name, "searchRetrieveRequest"))
         {
-            Z_SRW_searchRetrieve **p = handler_data;
+            Z_SRW_PDU **p = handler_data;
             xmlNodePtr ptr = method->children;
             Z_SRW_searchRetrieveRequest *req;
 
             *p = odr_malloc(o, sizeof(**p));
             (*p)->which = Z_SRW_searchRetrieve_request;
             req = (*p)->u.request = odr_malloc(o, sizeof(*req));
-            req->query = 0;
-            req->pQuery = 0;
-            req->xQuery = 0;
-            req->sortKeys = 0;
-            req->xSortKeys = 0;
+            req->query_type = Z_SRW_query_type_cql;
+            req->query.cql = 0;
+            req->sort_type = Z_SRW_sort_type_none;
+            req->sort.none = 0;
             req->startRecord = 0;
             req->maximumRecords = 0;
             req->recordSchema = 0;
@@ -257,14 +256,17 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_searchRetrieve **handler_data,
             for (; ptr; ptr = ptr->next)
             {
                 if (match_xsd_string(ptr, "query", o, 
-                                     &req->query))
-                    ;
+                                     &req->query.cql))
+                    req->query_type = Z_SRW_query_type_cql;
                 else if (match_xsd_string(ptr, "pQuery", o, 
-                                     &req->pQuery))
-                    ;
+                                     &req->query.pqf))
+                    req->query_type = Z_SRW_query_type_pqf;
+                else if (match_xsd_string(ptr, "xQuery", o, 
+                                     &req->query.xcql))
+                    req->query_type = Z_SRW_query_type_xcql;
                 else if (match_xsd_string(ptr, "sortKeys", o, 
-                                          &req->sortKeys))
-                    ;
+                                          &req->sort.sortKeys))
+                    req->sort_type = Z_SRW_sort_type_sort;
                 else if (match_xsd_string(ptr, "recordSchema", o, 
                                           &req->recordSchema))
                     ;
@@ -285,7 +287,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_searchRetrieve **handler_data,
         }
         else if (method && !strcmp(method->name, "searchRetrieveResponse"))
         {
-            Z_SRW_searchRetrieve **p = handler_data;
+            Z_SRW_PDU **p = handler_data;
             xmlNodePtr ptr = method->children;
             Z_SRW_searchRetrieveResponse *res;
 
@@ -333,17 +335,36 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_searchRetrieve **handler_data,
     }
     else if (o->direction == ODR_ENCODE)
     {
-        Z_SRW_searchRetrieve **p = handler_data;
+        Z_SRW_PDU **p = handler_data;
         if ((*p)->which == Z_SRW_searchRetrieve_request)
         {
             Z_SRW_searchRetrieveRequest *req = (*p)->u.request;
             xmlNsPtr ns_srw = xmlNewNs(pptr, ns, "zs");
             xmlNodePtr ptr = xmlNewChild(pptr, ns_srw,
                                          "searchRetrieveRequest", 0);
-
-            add_xsd_string(ptr, "query", req->query);
-            add_xsd_string(ptr, "pQuery", req->pQuery);
-            add_xsd_string(ptr, "sortKeys", req->sortKeys);
+            switch(req->query_type)
+            {
+            case Z_SRW_query_type_cql:
+                add_xsd_string(ptr, "query", req->query.cql);
+                break;
+            case Z_SRW_query_type_xcql:
+                add_xsd_string(ptr, "xQuery", req->query.xcql);
+                break;
+            case Z_SRW_query_type_pqf:
+                add_xsd_string(ptr, "pQuery", req->query.pqf);
+                break;
+            }
+            switch(req->sort_type)
+            {
+            case Z_SRW_sort_type_none:
+                break;
+            case Z_SRW_sort_type_sort:
+                add_xsd_string(ptr, "sortKeys", req->sort.sortKeys);
+                break;
+            case Z_SRW_sort_type_xSort:
+                add_xsd_string(ptr, "xSortKeys", req->sort.xSortKeys);
+                break;
+            }
             add_xsd_integer(ptr, "startRecord", req->startRecord);
             add_xsd_integer(ptr, "maximumRecords", req->maximumRecords);
             add_xsd_string(ptr, "recordSchema", req->recordSchema);
@@ -381,19 +402,18 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_searchRetrieve **handler_data,
     return 0;
 }
 
-Z_SRW_searchRetrieve *yaz_srw_get(ODR o, int which)
+Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 {
-    Z_SRW_searchRetrieve *sr = odr_malloc(o, sizeof(*o));
+    Z_SRW_PDU *sr = odr_malloc(o, sizeof(*o));
     sr->which = which;
     switch(which)
     {
     case Z_SRW_searchRetrieve_request:
         sr->u.request = odr_malloc(o, sizeof(*sr->u.request));
-        sr->u.request->query = 0;
-        sr->u.request->xQuery = 0;
-        sr->u.request->pQuery = 0;
-        sr->u.request->sortKeys = 0;
-        sr->u.request->xSortKeys = 0;
+        sr->u.request->query_type = Z_SRW_query_type_cql;
+        sr->u.request->query.cql = 0;
+        sr->u.request->sort_type = Z_SRW_sort_type_none;
+        sr->u.request->sort.none = 0;
         sr->u.request->startRecord = 0;
         sr->u.request->maximumRecords = 0;
         sr->u.request->recordSchema = 0;

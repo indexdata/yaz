@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.4 2003-02-19 15:22:11 adam Exp $
+ * $Id: srw.h,v 1.5 2003-02-23 14:26:57 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -23,11 +23,26 @@ typedef struct {
 } Z_SRW_diagnostic;
     
 typedef struct {
-    char *query;
-    char *pQuery;
-    void *xQuery;
-    char *sortKeys;
-    void *xSortKeys;
+
+#define Z_SRW_query_type_cql  1
+#define Z_SRW_query_type_xcql 2
+#define Z_SRW_query_type_pqf  3
+    int query_type;
+    union {
+        char *cql;
+        char *xcql;
+        char *pqf;
+    } query;
+
+#define Z_SRW_sort_type_none 1
+#define Z_SRW_sort_type_sort 2
+#define Z_SRW_sort_type_xSort 3
+    int sort_type;
+    union {
+        char *none;
+        char *sortKeys;
+        char *xSortKeys;
+    } sort;
     int *startRecord;
     int  *maximumRecords;
     char *recordSchema;
@@ -57,12 +72,12 @@ typedef struct {
         Z_SRW_searchRetrieveRequest *request;
         Z_SRW_searchRetrieveResponse *response;
     } u;
-} Z_SRW_searchRetrieve;
+} Z_SRW_PDU;
 
 YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
-                             Z_SRW_searchRetrieve **handler_data,
+                             Z_SRW_PDU **handler_data,
                              void *client_data, const char *ns);
-YAZ_EXPORT Z_SRW_searchRetrieve *yaz_srw_get(ODR o, int which);
+YAZ_EXPORT Z_SRW_PDU *yaz_srw_get(ODR o, int which);
 
 YAZ_EXPORT const char *yaz_diag_srw_str (int code);
 

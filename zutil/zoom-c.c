@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.27 2003-02-21 12:08:59 adam Exp $
+ * $Id: zoom-c.c,v 1.28 2003-02-23 14:26:58 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -979,7 +979,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 }
 
 #if HAVE_XML2
-static zoom_ret send_srw (ZOOM_connection c, Z_SRW_searchRetrieve *sr)
+static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
 {
     Z_SOAP_Handler h[2] = {
         {"http://www.loc.gov/zing/srw/v1.0/", 0, (Z_SOAP_fun) yaz_srw_codec},
@@ -1026,7 +1026,7 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
     int i;
     ZOOM_resultset resultset = 0;
-    Z_SRW_searchRetrieve *sr = 0;
+    Z_SRW_PDU *sr = 0;
 
     if (c->error)                  /* don't continue on error */
 	return zoom_complete;
@@ -1066,12 +1066,15 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     if (resultset->query->z_query->which == Z_Query_type_104
         && resultset->query->z_query->u.type_104->which == Z_External_CQL)
     {
-        sr->u.request->query = resultset->query->z_query->u.type_104->u.cql;
+
+        sr->u.request->query_type = Z_SRW_query_type_cql;
+        sr->u.request->query.cql =resultset->query->z_query->u.type_104->u.cql;
     }
     else if (resultset->query->z_query->which == Z_Query_type_1 &&
              resultset->query->z_query->u.type_1)
     {
-        sr->u.request->pQuery = resultset->query->query_string;
+        sr->u.request->query_type = Z_SRW_query_type_pqf;
+        sr->u.request->query.pqf = resultset->query->query_string;
     }
     else
     {
@@ -2488,7 +2491,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         if (!ret && soap_package->which == Z_SOAP_generic &&
             soap_package->u.generic->no == 0)
         {
-            Z_SRW_searchRetrieve *sr = soap_package->u.generic->p;
+            Z_SRW_PDU *sr = soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(c, sr->u.response);
             else
