@@ -2,11 +2,12 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: comstack.c,v 1.2 2003-11-17 10:40:56 mike Exp $
  */
 
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
@@ -26,8 +27,16 @@ static const char *cs_errlist[] =
 
 const char *cs_errmsg(int n)
 {
-    if (n < 0 || n > 6)
-	n = 0;
+    static char buf[250];
+
+    if (n < CSNONE || n > CSLASTERROR) {
+	sprintf(buf, "unknown comstack error %d", n);
+	return buf;
+    }
+    if (n == CSYSERR) {
+	sprintf(buf, "%s: %s", cs_errlist[n], strerror(errno));
+	return buf;
+    }
     return cs_errlist[n];
 }
 
