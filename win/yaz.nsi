@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.1 2002-03-15 19:32:39 adam Exp $
+; $Id: yaz.nsi,v 1.2 2002-03-15 19:44:16 adam Exp $
 
 !define VERSION "1.8.6"
 
@@ -7,7 +7,7 @@ Caption "Index Data YAZ Setup"
 OutFile "yaz_${VERSION}.exe"
 
 LicenseText "You must read the following license before installing:"
-LicenseData ..\license.txt
+LicenseData license.txt
 
 ComponentText "This will install the YAZ Toolkit v${VERSION} on your computer:"
 InstType "Full (w/ Source)"
@@ -39,7 +39,7 @@ SectionEnd ; end of default section
 Section "yaz core (required)"
 	SectionIn 12
 	SetOutPath $INSTDIR
-	File ..\LICENSE.txt
+	File LICENSE.txt
 	File ..\README
 	SetOutPath $INSTDIR\bin
 	File ..\bin\*.exe
