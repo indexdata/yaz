@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.16 2005-01-03 09:18:36 adam Exp $
+ * $Id: statserv.c,v 1.17 2005-01-03 11:56:08 adam Exp $
  */
 
 /**
@@ -465,7 +465,6 @@ static void listener(IOCHAN h, int event)
 	    pthread_t child_thread;
 	    pthread_create (&child_thread, 0, new_session, new_line);
 	    pthread_detach (child_thread);
-	    new_session(new_line);
 #elif YAZ_GNU_THREADS
 	    pth_attr_t attr;
 	    pth_t child_thread;
