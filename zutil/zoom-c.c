@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.30 2003-04-17 19:43:41 adam Exp $
+ * $Id: zoom-c.c,v 1.31 2003-04-23 20:38:19 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -722,7 +722,9 @@ static zoom_ret do_connect (ZOOM_connection c)
         c->proto = PROTO_HTTP;
         cs_get_host_args(c->host_port, &path);
         xfree(c->path);
-        c->path = xstrdup(path);
+        c->path = xmalloc(strlen(path)+2);
+        c->path[0] = '/';
+        strcpy (c->path+1, path);
 #else
         set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, "SRW");
         do_close(c);
@@ -988,6 +990,29 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
 
     gdu = z_get_HTTP_Request(c->odr_out);
     gdu->u.HTTP_Request->path = c->path;
+
+    if (c->host_port)
+    {
+        const char *cp0 = strstr(c->host_port, "://");
+        const char *cp1 = 0;
+        if (cp0)
+            cp0 = cp0+3;
+        else
+            cp0 = c->host_port;
+
+        cp1 = strchr(cp0, '/');
+        if (!cp1)
+            cp1 = cp0+strlen(cp0);
+
+        if (cp0 && cp1)
+        {
+            char *h = odr_malloc(c->odr_out, cp1 - cp0 + 1);
+            memcpy (h, cp0, cp1 - cp0);
+            h[cp1-cp0] = '\0';
+            z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
+                              "host", h);
+        }
+    }
 
     strcpy(ctype, "text/xml");
     if (c->charset && strlen(c->charset) < 20)
@@ -2091,21 +2116,26 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
     req->u.esRequest->notToKeep = (Z_IOOriginPartNotToKeep *)
         odr_malloc(p->odr_out,sizeof(Z_IOOriginPartNotToKeep));
 	
-    req->u.esRequest->notToKeep->resultSetItem = (Z_IOResultSetItem *)
-        odr_malloc(p->odr_out, sizeof(Z_IOResultSetItem));
-
     str = ZOOM_options_get(p->options, "itemorder-setname");
     if (!str)
         str = "default";
-    req->u.esRequest->notToKeep->resultSetItem->resultSetId =
-        nmem_strdup (p->odr_out->mem, str);
-    req->u.esRequest->notToKeep->resultSetItem->item =
-        (int *) odr_malloc(p->odr_out, sizeof(int));
+
+    if (!*str) 
+        req->u.esRequest->notToKeep->resultSetItem = 0;
+    else
+    {
+        req->u.esRequest->notToKeep->resultSetItem = (Z_IOResultSetItem *)
+           odr_malloc(p->odr_out, sizeof(Z_IOResultSetItem));
+
+        req->u.esRequest->notToKeep->resultSetItem->resultSetId =
+           nmem_strdup (p->odr_out->mem, str);
+        req->u.esRequest->notToKeep->resultSetItem->item =
+            (int *) odr_malloc(p->odr_out, sizeof(int));
 	
-    str = ZOOM_options_get(p->options, "itemorder-item");
-    *req->u.esRequest->notToKeep->resultSetItem->item =
-        (str ? atoi(str) : 1);
-    
+        str = ZOOM_options_get(p->options, "itemorder-item");
+        *req->u.esRequest->notToKeep->resultSetItem->item =
+            (str ? atoi(str) : 1);
+    }
     req->u.esRequest->notToKeep->itemRequest = encode_ill_request(p);
     
     return req;
@@ -2578,6 +2608,7 @@ static int do_read (ZOOM_connection c)
     {
         Z_GDU *gdu;
         ZOOM_Event event;
+
 	odr_reset (c->odr_in);
 	odr_setbuf (c->odr_in, c->buf_in, r, 0);
         event = ZOOM_Event_create (ZOOM_EVENT_RECV_APDU);
