@@ -13,8 +13,8 @@ esetname B wais-b.est
 esetname F @
 esetname VARIANT wais-variant.est
 
-elm (2,1)		Title			!
-elm (2,7)		Name			!
+elm (2,1)		Title			!:p,!:w
+elm (2,7)		Name			!:p,!:w
 elm (1,16)		Date			!
 elm (1,18)		Score			-
 elm (1,14)		RecordId		Local-number
