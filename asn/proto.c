@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.19  1995-04-11 11:58:35  quinn
+ * Revision 1.20  1995-05-15 11:55:25  quinn
+ * Smallish.
+ *
+ * Revision 1.19  1995/04/11  11:58:35  quinn
  * Fixed bug.
  *
  * Revision 1.18  1995/04/11  11:52:02  quinn
@@ -862,9 +865,18 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
     	{ODR_IMPLICIT, ODR_CONTEXT, 20, Z_APDU_initRequest, z_InitRequest},
     	{ODR_IMPLICIT, ODR_CONTEXT, 21, Z_APDU_initResponse, z_InitResponse},
     	{ODR_IMPLICIT, ODR_CONTEXT, 22, Z_APDU_searchRequest, z_SearchRequest},
-    	{ODR_IMPLICIT, ODR_CONTEXT, 23, Z_APDU_searchResponse, z_SearchResponse},
-    	{ODR_IMPLICIT, ODR_CONTEXT, 24, Z_APDU_presentRequest, z_PresentRequest},
-    	{ODR_IMPLICIT, ODR_CONTEXT, 25, Z_APDU_presentResponse, z_PresentResponse},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 23, Z_APDU_searchResponse,
+	    z_SearchResponse},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 24, Z_APDU_presentRequest,
+	    z_PresentRequest},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 25, Z_APDU_presentResponse,
+	    z_PresentResponse},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 30, Z_APDU_resourceControlRequest,
+	    z_ResourceControlRequest},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 31, Z_APDU_resourceControlResponse,
+	    z_ResourceControlResponse},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 32, Z_APDU_triggerResourceControlRequest,
+	    z_TriggerResourceControlRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 35, Z_APDU_scanRequest, z_ScanRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 36, Z_APDU_scanResponse, z_ScanResponse},
 
