@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.13  1996-11-01 08:45:18  adam
+ * Revision 1.14  1997-05-01 15:06:32  adam
+ * Moved WINSOCK init. code to tcpip_init routine.
+ *
+ * Revision 1.13  1996/11/01 08:45:18  adam
  * Bug fix: used close on MS-Windows. Fixed to closesocket.
  *
  * Revision 1.12  1996/07/06 19:58:30  quinn
@@ -112,7 +115,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#ifndef WINDOWS
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 
@@ -142,8 +147,6 @@ int completeWAIS(unsigned char *buf, int len); /* from waislen.c */
 #define TRC(X)
 #endif
 
-static int initialized = 0;
-
 typedef struct tcpip_state
 {
     char *altbuf; /* alternate buffer for surplus data */
@@ -155,6 +158,28 @@ typedef struct tcpip_state
     int (*complete)(unsigned char *buf, int len); /* length/completeness */
 } tcpip_state;
 
+#ifdef WINDOWS
+static int tcpip_init (void)
+{
+    static int initialized = 0;
+    if (!initialized)
+    {
+        WORD requested;
+        WSADATA wd;
+
+        requested = MAKEWORD(1, 1);
+        if (WSAStartup(requested, &wd))
+            return 0;
+        initialized = 1;
+    }
+    return 1;
+}
+#else
+static int tcpip_init (void)
+{
+    return 1;
+}
+#endif
 /*
  * This function is always called through the cs_create() macro.
  * s >= 0: socket has already been established for us.
@@ -170,19 +195,8 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     struct protoent *proto;
 #endif
 
-    if (!initialized)
-    {
-#ifdef WINDOWS
-        WORD requested;
-        WSADATA wd;
-
-        requested = MAKEWORD(1, 1);
-        if (WSAStartup(requested, &wd))
-            return 0;
-#endif
-        initialized = 1;
-    }
-
+    if (!tcpip_init ())
+        return 0;
     if (s < 0)
     {
 #ifndef WINDOWS
@@ -251,6 +265,8 @@ struct sockaddr_in *tcpip_strtoaddr(const char *str)
     short int port = 210;
     unsigned tmpadd;
 
+    if (!tcpip_init ())
+        return 0;
     TRC(fprintf(stderr, "tcpip_strtoaddress: %s\n", str ? str : "NULL"));
     add.sin_family = AF_INET;
     strcpy(buf, str);
