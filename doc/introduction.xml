@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.7 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.8 2002-08-17 07:55:51 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   
   <para>
@@ -56,16 +56,21 @@
    specification of the protocol (generally Z39.50-1995). In the case of
    base types (those originating in the ASN.1 standard itself), the prefix
    <literal>Odr_</literal> is sometimes seen. Either way, look for
-   the actual definition in either <filename>proto.h</filename> (for the types
+   the actual definition in either <filename>z-core.h</filename> (for the types
    from the protocol), <filename>odr.h</filename> (for the primitive ASN.1
-   types, or <filename>odr_use.h</filename> (for the ASN.1
-   <emphasis>useful</emphasis> types). The &asn; library also
-   provides functions (which are, in turn, defined using &odr;
-   primitives) for encoding and decoding data values. Their general form is
+   types).
+   The &asn; library also provides functions (which are, in turn,
+   defined using &odr; primitives) for encoding and decoding data values.
+   Their general form is
 
-   <synopsis>
-    int z_xxx(ODR o, Z_xxx **p, int optional, const char *name);
-   </synopsis>
+   <funcsynopsis>
+    <funcprototype><funcdef>int <function>z_<replaceable>xxx</replaceable></function></funcdef>
+     <paramdef>ODR <parameter>o</parameter></paramdef>
+     <paramdef>Z_<replaceable>xxx</replaceable> **<parameter>p</parameter></paramdef>
+     <paramdef>int <parameter>optional</parameter></paramdef>
+     <paramdef>const char *<parameter>name</parameter></paramdef>
+    </funcprototype>
+   </funcsynopsis>
    (note the lower-case &quot;z&quot; in the function name)
   </para>
 
@@ -85,7 +90,7 @@
    (passively or actively, depending on the role of your application),
    and for exchanging BER-encoded PDUs over that connection. When you
    create a connection endpoint, you need to specify what transport to
-   use (TCP/IP or SSL).
+   use (TCP/IP, SSL or UNIX sockets).
    For the remainder of the connection's lifetime, you don't have
    to worry about the underlying transport protocol at all - the &comstack;
    will ensure that the correct mechanism is used.
@@ -104,8 +109,8 @@
    can use SNACC or BERUtils instead, and still have the benefits of the
    transparent transport approach of the &comstack; module. Secondly,
    we realize that you may have to fit the toolkit into an existing
-   event-processing structure, in a way that
-   is incompatible with the &comstack; interface or some other part of &yaz;.
+   event-processing structure, in a way that is incompatible with
+   the &comstack; interface or some other part of &yaz;.
   </para>
  </chapter>
 

@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.12 2002-05-30 20:57:38 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.13 2002-08-17 07:55:51 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
 
@@ -680,7 +680,7 @@ typedef struct bend_scan_rr {
    </para>
 
    <synopsis>
-    <replaceable>appname</replaceable> &lsqb;-szSiTu -a <replaceable>apdufile</replaceable> -l <replaceable>logfile</replaceable> -v <replaceable>loglevel</replaceable> -c <replaceable>config</replaceable>&rsqb;
+    <replaceable>appname</replaceable> &lsqb;-szSiT1 -u <replaceable>uid</replaceable> -a <replaceable>apdufile</replaceable> -l <replaceable>logfile</replaceable> -v <replaceable>loglevel</replaceable> -c <replaceable>config</replaceable>&rsqb;
     &lsqb;listener ...&rsqb;
    </synopsis>
 
@@ -690,7 +690,7 @@ typedef struct bend_scan_rr {
     <variablelist>
 
      <varlistentry><term><literal>-a </literal>
-       <replaceable>file</replaceable></term>
+       <replaceable>apdufile</replaceable></term>
       <listitem><para>
 	Specify a file for dumping PDUs (for diagnostic purposes).
 	The special name &quot;-&quot; sends output to
@@ -706,6 +706,12 @@ typedef struct bend_scan_rr {
 	current users.
        </para></listitem></varlistentry>
 
+     <varlistentry><term><literal>-1</literal></term>
+      <listitem><para>
+        Like <literal>-S</literal> but after one session the server
+        exits. This mode is for debugging <emphasis>only</emphasis>.
+       </para></listitem></varlistentry>
+     
      <varlistentry><term><literal>-T</literal></term>
       <listitem><para>
 	Operate the server in threaded mode. The server creates a thread
@@ -745,11 +751,11 @@ typedef struct bend_scan_rr {
        <replaceable>level</replaceable></term>
       <listitem><para>
 	The log level. Use a comma-separated list of members of the set
-	{fatal,debug,warn,log,all,none}.
+	{fatal,debug,warn,log,malloc,all,none}.
        </para></listitem></varlistentry>
 
      <varlistentry><term><literal>-u </literal>
-       <replaceable>userid</replaceable></term>
+       <replaceable>uid</replaceable></term>
       <listitem><para>
 	Set user ID. Sets the real UID of the server process to that of the
 	given user. It's useful if you aren't comfortable with having the
@@ -760,7 +766,10 @@ typedef struct bend_scan_rr {
      <varlistentry><term><literal>-w </literal>
        <replaceable>dir</replaceable></term>
       <listitem><para>
-	Working directory.
+	The server changes to this directory during before listening 
+        on incoming connections. This option is useful
+        when the server is operating from the <application>inetd</application>
+         daemon (see <literal>-i</literal>).
        </para></listitem></varlistentry>
 
      <varlistentry><term><literal>-i</literal></term>
@@ -771,36 +780,39 @@ typedef struct bend_scan_rr {
      
      <varlistentry><term><literal>-install</literal></term>
       <listitem><para>
-	Use this to install the server as an NT service (Windows 2000/NT only). 
+	Use this to install the server as an NT service
+        (Windows 2000/NT only). 
         Control the server by going to the Services in the Control Panel.
        </para></listitem></varlistentry>
      
      <varlistentry><term><literal>-remove</literal></term>
       <listitem><para>
-	Use this to remove the server from the NT services (Windows 2000/NT only). 
+	Use this to remove the server from the NT services
+        (Windows 2000/NT only). 
        </para></listitem></varlistentry>
-
+     
      <varlistentry><term><literal>-t </literal>
        <replaceable>minutes</replaceable></term>
       <listitem><para>
 	Idle session timeout, in minutes.
        </para></listitem></varlistentry>
-
+     
      <varlistentry><term><literal>-k </literal>
-      <replaceable>size</replaceable></term>
+       <replaceable>size</replaceable></term>
       <listitem><para>
 	Maximum record size/message size, in kilobytes.
        </para></listitem></varlistentry>
-
+     
     </variablelist>
    </para>
-
+   
    <para>
     A listener specification consists of a transport mode followed by a
     colon (:) followed by a listener address. The transport mode is
-    either <literal>tcp</literal> or <literal>ssl</literal>.
+    either <literal>tcp</literal>, <literal>unix:</literal> or
+    <literal>ssl</literal>.
    </para>
-
+   
    <para>
     For TCP and SSL, an address has the form
    </para>
@@ -814,6 +826,10 @@ typedef struct bend_scan_rr {
    </para>
 
    <para>
+    For UNIX local socket the address is the name local file.
+   </para>
+   
+   <para>
     Examples
    </para>
 
@@ -821,10 +837,12 @@ typedef struct bend_scan_rr {
     tcp:dranet.dra.com
 
     ssl:ssl.enterprise.com:3000
+
+    unix:/tmp/yaz
    </screen>
 
    <para>
-    In both cases, the special hostname &quot;@&quot; is mapped to
+    For TCP/IP and SSL, the special hostname &quot;@&quot; is mapped to
     the address <literal>INADDR_ANY</literal>, which causes the
     server to listen on any local interface. 
    </para>

@@ -1,10 +1,10 @@
-<!-- $Id: comstack.xml,v 1.8 2002-05-22 11:19:20 adam Exp $ -->
+<!-- $Id: comstack.xml,v 1.9 2002-08-17 07:55:51 adam Exp $ -->
  <chapter id="comstack"><title>The COMSTACK Module</title>
-
+  
   <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>
-
+   
    <programlisting>
-
+    
 COMSTACK stack;
 char *buf = 0;
 int size = 0, length_incoming;
@@ -61,14 +61,15 @@ if (buf)
     The &comstack;
     subsystem provides a transparent interface to different types of transport
     stacks for the exchange of BER-encoded data. At present, the
-    RFC1729 method (BER over TCP/IP), and an experimental SSL stack
-    are supported, but others may be added in time. The philosophy of the
+    RFC1729 method (BER over TCP/IP), local UNIX socket and an
+    experimental SSL stack are supported, but others may be added in time.
+    The philosophy of the
     module is to provide a simple interface by hiding unused options and
     facilities of the underlying libraries. This is always done at the risk
     of losing generality, and it may prove that the interface will need
     extension later on.
    </para>
-
+   
    <note>
     <para>
      There hasn't been interest in the XTImOSI stack for some years.
@@ -105,17 +106,35 @@ if (buf)
     <synopsis>
      COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
     </synopsis>
-
+    
     <para>
      Creates an instance of the protocol stack - a communications endpoint.
      The <literal>type</literal> parameter determines the mode
-     of communication.
-     At present, the values
-     <literal>tcpip_type</literal>
-     and
-     <literal>ssl_type</literal>
-     are recognized. The function returns a null-pointer if a system error
-     occurs. The <literal>blocking</literal> parameter should be one if
+     of communication. At present the following values are supported:
+    </para>
+    
+    <variablelist>
+     <varlistentry><term><literal>tcpip_type</literal></term>
+      <listitem><para>TCP/IP (BER over TCP/IP)
+       </para></listitem>
+     </varlistentry>
+     <varlistentry><term><literal>ssl_type</literal></term>
+      <listitem><para>Secure Socket Layer (SSL). This COMSTACK 
+        is experimental and is not fully implemented.
+       </para></listitem>
+     </varlistentry>
+     <varlistentry><term><literal>unix_type</literal></term>
+      <listitem><para>Unix socket (unix only). Fast local transfer via
+        file socket. See <citerefentry><refentrytitle>unix</refentrytitle>
+         <manvolnum>7</manvolnum></citerefentry>.
+       </para></listitem>
+      </varlistentry>
+     </variablelist>
+     
+    <para>
+     The <function>cs_create</function> function returns a null-pointer
+     if a system error occurs.
+     The <literal>blocking</literal> parameter should be one if
      you wish the association to operate in blocking mode, zero otherwise.
      The <literal>protocol</literal> field should be
      <literal>PROTO_Z3950</literal>.
@@ -167,8 +186,8 @@ if (buf)
     </synopsis>
 
     <para>
-     Receives a PDU from the peer. Returns the number of bytes
-     read. In nonblocking mode, it is possible that not all of the packet can be
+     Receives a PDU from the peer. Returns the number of bytes read.
+     In nonblocking mode, it is possible that not all of the packet can be
      read at once. In this case, the function returns 1. To simplify the
      interface, the function is
      responsible for managing the size of the buffer. It will be reallocated
@@ -406,7 +425,7 @@ if (buf)
    </synopsis>
 
    <para>
-    The format for TCP/IP addresses is straightforward:
+    The format for TCP/IP and SSL addresses is:
    </para>
 
    <synopsis>
@@ -419,11 +438,16 @@ if (buf)
    </para>
 
    <para>
-    In all transport modes, the special hostname &quot;@&quot; is mapped
-    to any local address (the manifest constant <literal>INADDR_ANY</literal>).
+    For TCP/IP and SSL transport modes, the special hostname &quot;@&quot;
+    is mapped to any local address
+    (the manifest constant <literal>INADDR_ANY</literal>).
     It is used to establish local listening endpoints in the server role.
    </para>
 
+   <para>
+    For UNIX sockets, the format of an address is the socket filename.
+   </para>
+   
    <para>
     When a connection has been established, you can use
    </para>
@@ -450,15 +474,16 @@ if (buf)
     <function>cs_straddr</function>. The <parameter>str</parameter>
     is similar to that described for <function>cs_straddr</function>
     but with a prefix denoting the &comstack; type. Prefixes supported
-    are <literal>tcp:</literal> and <literal>ssl:</literal> for
-    TCP/IP and SSL respectively. If no prefix is given, then TCP/IP
-    is used. The <parameter>blocking</parameter> is passed to
+    are <literal>tcp:</literal>, <literal>unix:</literal> and
+    <literal>ssl:</literal> for TCP/IP, UNIX and SSL respectively.
+    If no prefix is given, then TCP/IP is used.
+    The <parameter>blocking</parameter> is passed to
     function <function>cs_create</function>. The third parameter
     <parameter>vp</parameter> is a pointer to &comstack; stack type
     specific values.
     For SSL (ssl_type) <parameter>vp</parameter> is an already create
-    OpenSSL CTX. For TCP/IP <parameter>vp</parameter> is unused (can be
-    set to <literal>NULL</literal>.
+    OpenSSL CTX. For TCP/IP and UNIX <parameter>vp</parameter>
+    is unused (can be set to <literal>NULL</literal>.
    </para>
 
   </sect1>
@@ -510,10 +535,12 @@ if (buf)
   </sect1>
   <sect1 id="comstack.summary"><title>Summary and Synopsis</title>
 
-     <synopsis>
-    #include &lt;comstack.h>
-     
-    #include &lt;tcpip.h>      /* this is for TCP/IP and SSL support */
+   <synopsis>
+    #include &lt;yaz/comstack.h>
+    
+    #include &lt;yaz/tcpip.h>  /* this is for TCP/IP and SSL support */
+    #include &lt;yaz/unix.h>   /* this is for UNIX sockeL support */
+    
      
     COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
      

@@ -1,4 +1,4 @@
-<!-- $Id: client.xml,v 1.12 2002-05-30 20:57:38 adam Exp $ -->
+<!-- $Id: client.xml,v 1.13 2002-08-17 07:55:51 adam Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
@@ -16,15 +16,24 @@
    <para>
     It can be started by typing
    </para>
-   <screen>
-     yaz-client [<replaceable>options</replaceable>] [<replaceable>zurl</replaceable>]
-   </screen>
+   <cmdsynopsis>
+    <command>yaz-client</command>
+    <arg>-m <replaceable>fname</replaceable></arg>
+    <arg>-a <replaceable>fname</replaceable></arg>
+    <arg>-c <replaceable>fname</replaceable></arg>
+    <arg>-v <replaceable>level</replaceable></arg>
+    <arg>-p <replaceable>target</replaceable></arg>
+    <arg>-u <replaceable>auth</replaceable></arg>
+    <arg>-k <replaceable>size</replaceable></arg>
+    <arg>zurl</arg>
+   </cmdsynopsis>
+   
    <simpara>
     in a UNIX shell / WIN32 console. The <replaceable>zurl</replaceable>,
     specifies a Z39.50 host and, if specified, the client first tries to
     establish connection with the Z39.50 target on the host.
-    Options are, as usual, are prefixed by
-    <literal>-</literal> followed by a particular letter.
+    Options are prefixed by <literal>-</literal> followed by a
+    particular letter.
     </simpara>
    <simpara>
     The following options are supported:
@@ -66,6 +75,7 @@
        <literal>debug</literal>,
        <literal>warn</literal>,
        <literal>log</literal>,
+       <literal>malloc</literal>,
        <literal>all</literal>,
        <literal>none</literal>.
       </simpara></listitem>
@@ -80,7 +90,7 @@
       </simpara></listitem>
     </varlistentry>
     <varlistentry><term>
-      <literal>-u</literal> <replaceable>authentication</replaceable>
+      <literal>-u</literal> <replaceable>auth</replaceable>
      </term><listitem>
       <simpara>Specifies authentication. Usually the form
        <replaceable>user</replaceable>/<replaceable>password</replaceable>
@@ -90,7 +100,7 @@
     </varlistentry>
 
     <varlistentry><term>
-      <literal>-k</literal> <replaceable>kilobytes</replaceable>
+      <literal>-k</literal> <replaceable>size</replaceable>
      </term><listitem>
       <simpara>Specifies the maximum messages size in kilobytes.
        The default maximum messages for the YAZ client is 1024
@@ -114,6 +124,14 @@
    <screen>
     yaz-client -a - localhost
    </screen>
+   <para>
+    The following command connects to a local server via UNIX
+    socket <filename>/tmp/yaz</filename> and sets maximum message size to
+    5 MB.
+    </para>
+   <screen>
+    yaz-client -k 5120 unix:/tmp/yaz
+    </screen>
   </sect1>
   <sect1 id="client.commands"><title>Commands</title>
    <para>
@@ -140,7 +158,7 @@
        Syntax:
       </para>
       <para>
-       [<literal>(tcp|ssl)':'</literal>]<replaceable>host</replaceable>
+       [<literal>(tcp|ssl|unix)':'</literal>]<replaceable>host</replaceable>
        [:<replaceable>port</replaceable>][/<replaceable>base&gt;</replaceable>]
       </para>
      </listitem>

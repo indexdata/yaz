@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.11 2002-05-22 11:19:20 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.12 2002-08-17 07:55:51 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -22,7 +22,8 @@
        <listitem><para>HP/UX</para></listitem>
        <listitem><para>SunOS/Solaris</para></listitem>
        <listitem><para>DEC Unix</para></listitem>
-       <listitem><para>OpenBSD/FreeBSD</para></listitem>
+       <listitem><para>BSDs: FreeBSD, OpenBSD, NetBSD, MAC OSX
+        </para></listitem>
        <listitem><para>Linux</para></listitem>
        <listitem><para>IBM AIX</para></listitem>
        <listitem><para>Data General DG/UX (with some CFLAGS tinkering)
@@ -45,8 +46,8 @@
     let us know about it. If you run into difficulties, we will try to help
     if we can, and if you solve the problems, we would be happy to include
     your fixes in the next release. So far, we have mostly avoided
-    &num;ifdefs for individual platforms, and we'd like to keep it that
-    way as far as it makes sense.
+    <literal>&num;ifdefs</literal> for individual platforms, and we'd
+    like to keep it that way as far as it makes sense.
    </para>
    
    <para>
@@ -54,7 +55,9 @@
     bug-fixes, as well as general discussion. Subscribe by sending mail to
     <ulink url="mailto:yaz-request@indexdata.dk">
      yaz-request@indexdata.dk
-    </ulink>.
+    </ulink> or fill-in the form
+    <ulink url="http://www.indexdata.dk/mailman/listinfo/yazlist">
+     here</ulink>.
     General questions and problems can be directed at 
     <ulink url="mailto:yaz-help@indexdata.dk">
      yaz-help@indexdata.dk
@@ -67,14 +70,14 @@
    <para>
     Note that if your system doesn't have a native ANSI C compiler, you may
     have to acquire one separately. We recommend
-    <ulink url="http://gcc.gnu.org">GCC</ulink>.
+    <ulink url="http://gcc.gnu.org/">GCC</ulink>.
    </para>
    <para>
     For UNIX, the GNU tools
     <ulink url="http://www.gnu.org/software/autoconf/">Autoconf</ulink>,
     <ulink url="http://www.gnu.org/software/automake/">Automake</ulink> and
     <ulink url="http://www.gnu.org/software/libtool/">Libtool</ulink>
-    is used to generate Makefiles and configure &yaz; for the system.
+    are used to generate Makefiles and configure &yaz; for the system.
     You do <emphasis>not</emphasis> these tools unless you're using the
     CVS version of &yaz;.
     Generally it should be sufficient to run configure without options,
