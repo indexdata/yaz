@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.5 2001-10-24 20:12:36 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.6 2001-10-24 21:30:47 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
  <sect1><title>Introduction</title>
@@ -111,9 +111,11 @@
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>--enable-tcpd</literal></term>
-      <listitem><para>The front end server will be built using the TCP
-        wrapper library. It allows you to disallow/deny clients depending
-        on IP.
+      <listitem><para>The front end server will be built using Wietse's
+        <ulink url="ftp://ftp.porcupine.org/pub/security/index.html">
+        TCP wrapper library</ulink>. It allows you to allow/deny
+        clients depending on IP number. The TCP wrapper library is
+        commonly used in Linux/BSD distributions.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>--enable-threads</literal></term>
@@ -138,7 +140,7 @@
     <variablelist>
      <varlistentry><term><filename>lib/libyaz.la</filename></term>
       <listitem><para>
-	The main &yaz; library. This is no ordinary library. It's
+	Main &yaz; library. This is no ordinary library. It's
         a Libtool archive.
         By default, &yaz; creates a static library in 
         <filename>lib/.libs/libyaz.a</filename>.
@@ -147,16 +149,17 @@
      <varlistentry><term><filename>lib/libyazthread.la</filename></term>
       <listitem><para>
         When threading is supported/enabled by configure this GNU libtool
-        library is created. It include functions that allows &yaz;
+        library is created. It includes functions that allows &yaz;
         to use threads.
        </para></listitem></varlistentry>
      
      <varlistentry><term><filename>ztest/yaz-ztest</filename></term>
-      <listitem><para>A test Z39.50 server. 
+      <listitem><para>Test Z39.50 server. 
        </para></listitem></varlistentry>
      
      <varlistentry><term><filename>client/yaz-client</filename></term>
-      <listitem><para>A YAZ Z39.50 client. See chapter <link linkend="client">
+      <listitem><para>Z39.50 client for testing the protocol.
+       See chapter <link linkend="client">
        YAZ client</link> for more information.
        </para></listitem></varlistentry>
      
@@ -282,25 +285,30 @@
     <variablelist>
      <varlistentry><term><filename>bin/yaz.dll</filename></term>
       <listitem><para>
-	The multi-threaded &yaz; Dynamic Link Library.
+	&yaz; multi-threaded Dynamic Link Library.
+       </para></listitem></varlistentry>
+
+     <varlistentry><term><filename>lib/yaz.lib</filename></term>
+      <listitem><para>
+	Import library for <filename>yaz.dll</filename>.
        </para></listitem></varlistentry>
      
      <varlistentry><term><filename>bin/yaz-client.exe</filename></term>
       <listitem><para>
-        The &yaz; Z39.50 client application. It's a WIN32 console application.
+        &yaz; Z39.50 client application. It's a WIN32 console application.
         See chapter <link linkend="client">YAZ client</link> for more
         information.
        </para></listitem></varlistentry>
      
      <varlistentry><term><filename>bin/yaz-ztest.exe</filename></term>
       <listitem><para>
-	The example/test Z39.50 multi threaded server. It's a WIN32
+	Z39.50 multi-threaded test/example server. It's a WIN32
         console application.
        </para></listitem></varlistentry>
 
      <varlistentry><term><filename>bin/zoomsh.exe</filename></term>
       <listitem><para>
-        A simple console application implemented on top of the
+        Simple console application implemented on top of the
         <link linkend="zoom">ZOOM</link> functions.
         The application is a command line shell that allows you to enter
         simple commands perform to perform ZOOM operations.
