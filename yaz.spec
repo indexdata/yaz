@@ -20,7 +20,7 @@ using the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %build
 
 CFLAGS="$RPM_OPT_FLAGS" \
- ./configure --prefix=/usr --enable-shared
+ ./configure --prefix=/usr --enable-shared --enable-tcpd
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
