@@ -1,10 +1,13 @@
-/*
+    /*
  * Copyright (c) 1995, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.49  1996-07-06 19:58:28  quinn
+ * Revision 1.50  1996-07-26 13:36:15  quinn
+ * Various smallish
+ *
+ * Revision 1.49  1996/07/06  19:58:28  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.48  1996/06/10  08:53:33  quinn
@@ -1817,6 +1820,7 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
 
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
+    odr_setlenlen(o, 5);
     if (!odr_choice(o, arm, &(*p)->u, &(*p)->which))
     {
     	if (o->direction == ODR_DECODE)
