@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.13 2004-01-05 09:34:42 adam Exp $
+ * $Id: seshigh.c,v 1.14 2004-01-07 20:36:44 adam Exp $
  */
 
 /*
@@ -786,6 +786,7 @@ static void process_http_request(association *assoc, request *req)
     char *charset = 0;
     Z_HTTP_Response *hres;
     int keepalive = 1;
+    char *stylesheet = 0;
 
     r = yaz_srw_decode(hreq, &sr, &soap_package, assoc->decode, &charset);
     if (r == 2)  /* not taken */
@@ -797,7 +798,8 @@ static void process_http_request(association *assoc, request *req)
 	{
 	    Z_SRW_PDU *res =
 		yaz_srw_get(assoc->encode, Z_SRW_searchRetrieve_response);
-	    
+
+	    stylesheet = sr->u.request->stylesheet;
 	    srw_bend_search(assoc, req, sr->u.request, res->u.response, 
 			    &http_code);
 	    if (http_code == 200)
@@ -806,6 +808,7 @@ static void process_http_request(association *assoc, request *req)
 	else if (sr->which == Z_SRW_explain_request)
 	{
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_explain_response);
+	    stylesheet = sr->u.explain_request->stylesheet;
             srw_bend_explain(assoc, req, sr->u.explain_request,
 			     res->u.explain_response, &http_code);
 	    if (http_code == 200)
@@ -834,7 +837,7 @@ static void process_http_request(association *assoc, request *req)
 	    hres = p->u.HTTP_Response;
 	    ret = z_soap_codec_enc(assoc->encode, &soap_package,
 				   &hres->content_buf, &hres->content_len,
-				   soap_handlers, charset);
+				   soap_handlers, charset, stylesheet);
 	    hres->code = http_code;
 
 	    strcpy(ctype, "text/xml");
@@ -1271,7 +1274,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.13 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.14 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2003, Index Data.
+ * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.4 2004-01-05 09:34:42 adam Exp $
+ * $Id: soap.c,v 1.5 2004-01-07 20:36:44 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -15,9 +15,10 @@ static const char *soap_v1_1 = "http://schemas.xmlsoap.org/soap/envelope/";
 static const char *soap_v1_2 = "http://www.w3.org/2001/06/soap-envelope";
 
 int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
-                 char **content_buf, int *content_len,
-                 Z_SOAP_Handler *handlers,
-		 const char *encoding)
+		     char **content_buf, int *content_len,
+		     Z_SOAP_Handler *handlers,
+		     const char *encoding,
+		     const char *stylesheet)
 {
     if (o->direction == ODR_DECODE)
     {
@@ -203,6 +204,15 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
         {
             xmlDocSetRootElement(doc, body_ptr->children);
         }
+	if (stylesheet)
+	{
+	    char *content = odr_malloc(o, strlen(stylesheet) + 40);
+	    
+	    xmlNodePtr pi, ptr = xmlDocGetRootElement(doc);
+	    sprintf(content, "type=\"text/xsl\" href=\"%s\"", stylesheet);
+	    pi = xmlNewPI("xml-stylesheet", content);
+	    xmlAddPrevSibling(ptr, pi);
+	}
         if (1)
         {
             xmlChar *buf_out;
@@ -224,7 +234,8 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
 #else
 int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
                      char **content_buf, int *content_len,
-                     Z_SOAP_Handler *handlers, const char *encoding)
+                     Z_SOAP_Handler *handlers, const char *encoding,
+		     const char *stylesheet)
 {
     static char *err_xml =
         "<?xml version=\"1.0\"?>\n"
@@ -250,7 +261,7 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
                  char **content_buf, int *content_len,
                  Z_SOAP_Handler *handlers)
 {
-    return z_soap_codec_enc(o, pp, content_buf, content_len, handlers, 0);
+    return z_soap_codec_enc(o, pp, content_buf, content_len, handlers, 0, 0);
 }
 
 int z_soap_error(ODR o, Z_SOAP *p,

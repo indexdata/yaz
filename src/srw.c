@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.14 2004-01-06 11:21:04 adam Exp $
+ * $Id: srw.c,v 1.15 2004-01-07 20:36:44 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -528,11 +528,15 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             req = (*p)->u.explain_request = odr_malloc(o, sizeof(*req));
 	    req->recordPacking = 0;
 	    req->database = 0;
+	    req->stylesheet = 0;
 	    for (; ptr; ptr = ptr->next)
 	    {
 		if (match_xsd_string(ptr, "database", o,
 				     &req->database))
                     ;
+		else if (match_xsd_string(ptr, "stylesheet", o,
+					  &req->stylesheet))
+		    ;
 		else if (match_xsd_string(ptr, "recordPacking", o,
 				     &req->recordPacking))
 		    ;
@@ -709,11 +713,14 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         }
         else if ((*p)->which == Z_SRW_explain_request)
         {
+            Z_SRW_explainRequest *req = (*p)->u.explain_request;
             xmlNodePtr ptr = xmlNewChild(pptr, 0, "explainRequest", 0);
 	    ns_srw = xmlNewNs(ptr, ns, "zs");
 	    xmlSetNs(ptr, ns_srw);
 
 	    add_xsd_string(ptr, "version", (*p)->srw_version);
+            add_xsd_string(ptr, "recordPacking", req->recordPacking);
+            add_xsd_string(ptr, "stylesheet", req->stylesheet);
         }
         else if ((*p)->which == Z_SRW_explain_response)
         {

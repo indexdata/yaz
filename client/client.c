@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.221 2004-01-06 13:38:39 adam Exp $
+ * $Id: client.c,v 1.222 2004-01-07 20:36:44 adam Exp $
  */
 
 #include <stdio.h>
@@ -1189,7 +1189,7 @@ static int send_srw(Z_SRW_PDU *sr)
     ret = z_soap_codec_enc(o, &p,
                            &gdu->u.HTTP_Request->content_buf,
                            &gdu->u.HTTP_Request->content_len, h,
-                           charset);
+                           charset, 0);
 
     if (z_GDU(out, &gdu, 0, 0))
     {

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2003, Index Data.
+ * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.5 2004-01-06 11:20:15 adam Exp $
+ * $Id: srwutil.c,v 1.6 2004-01-07 20:36:44 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -163,6 +163,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	const char *operation = 0;
 	char *query = 0;
 	char *pQuery = 0;
+	char *stylesheet = 0;
         
 	if (charset)
 	    *charset = 0;
@@ -181,6 +182,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	query = yaz_uri_val(p1, "query", decode);
 	pQuery = yaz_uri_val(p1, "pQuery", decode);
 	operation = yaz_uri_val(p1, "operation", decode);
+	stylesheet = yaz_uri_val(p1, "stylesheet", decode);
 	if (!operation)
 	    operation = "explain";
         if ((operation && !strcmp(operation, "searchRetrieve"))
@@ -207,6 +209,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             }
             sr->u.request->recordSchema = yaz_uri_val(p1, "recordSchema", decode);
             sr->u.request->recordPacking = yaz_uri_val(p1, "recordPacking", decode);
+            sr->u.request->stylesheet = stylesheet;
+
             if (!sr->u.request->recordPacking)
                 sr->u.request->recordPacking = "xml";
             yaz_uri_val_int(p1, "maximumRecords", decode, 
@@ -240,6 +244,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             if (!sr->u.explain_request->recordPacking)
                 sr->u.explain_request->recordPacking = "xml";
 	    sr->u.explain_request->database = db;
+
+            sr->u.explain_request->stylesheet = stylesheet;
 
 	    (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
 	    (*soap_package)->which = Z_SOAP_generic;
@@ -302,6 +308,7 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
             odr_malloc(o, sizeof(*sr->u.explain_request));
         sr->u.explain_request->recordPacking = 0;
 	sr->u.explain_request->database = 0;
+	sr->u.explain_request->stylesheet = 0;
         break;
     case Z_SRW_explain_response:
         sr->u.explain_response = (Z_SRW_explainResponse *)
