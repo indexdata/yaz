@@ -2,7 +2,7 @@
  * Copyright (c) 2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: opacdisp.c,v 1.3 2003-07-30 08:57:35 adam Exp $
+ * $Id: opacdisp.c,v 1.4 2003-07-30 10:00:27 adam Exp $
  */
 
 #include <stdio.h>
@@ -68,7 +68,7 @@ void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags)
 	
 	    opac_element_str(wrbuf, 2, "typeOfRecord", d->typeOfRecord);
 	    opac_element_str(wrbuf, 2, "encodingLevel", d->encodingLevel);
-	    opac_element_str(wrbuf, 2, "encodingLevel", d->encodingLevel);
+	    opac_element_str(wrbuf, 2, "format", d->format);
 	    opac_element_str(wrbuf, 2, "receiptAcqStatus", d->receiptAcqStatus);
 	    opac_element_str (wrbuf, 2, "generalRetention", d->generalRetention);
 	    opac_element_str (wrbuf, 2, "completeness", d->completeness);
