@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: marcdisp.c,v $
- * Revision 1.14  2001-10-23 21:00:20  adam
+ * Revision 1.15  2001-10-29 09:17:19  adam
+ * New function marc_display_exl - used by YAZ client. Server returns
+ * bad record on position 98 (for testing).
+ *
+ * Revision 1.14  2001/10/23 21:00:20  adam
  * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
  *
  * Revision 1.13  2001/10/15 19:36:48  adam
@@ -187,18 +191,24 @@ int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
     return record_length;
 }
 
-int marc_display_ex (const char *buf, FILE *outf, int debug)
+int marc_display_exl (const char *buf, FILE *outf, int debug, int length)
 {
     int record_length;
 
     WRBUF wrbuf = wrbuf_alloc ();
-    record_length = marc_display_wrbuf (buf, wrbuf, debug, -1);
+    record_length = marc_display_wrbuf (buf, wrbuf, debug, length);
     if (!outf)
 	outf = stdout;
     if (record_length > 0)
 	fwrite (wrbuf_buf(wrbuf), 1, wrbuf_len(wrbuf), outf);
     wrbuf_free (wrbuf, 1);
     return record_length;
+}
+
+
+int marc_display_ex (const char *buf, FILE *outf, int debug)
+{
+    return marc_display_exl (buf, outf, debug, -1);
 }
 
 int marc_display (const char *buf, FILE *outf)

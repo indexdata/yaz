@@ -6,7 +6,11 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.44  2001-07-19 19:51:42  adam
+ * Revision 1.45  2001-10-29 09:17:19  adam
+ * New function marc_display_exl - used by YAZ client. Server returns
+ * bad record on position 98 (for testing).
+ *
+ * Revision 1.44  2001/07/19 19:51:42  adam
  * Added typecasts to make C++ happy.
  *
  * Revision 1.43  2001/06/28 09:27:25  adam
@@ -533,23 +537,23 @@ static char *dummy_database_record (int num, ODR odr)
 
     if (!inf)
 	return NULL;
-    while (--num >= 0)
+    if (num == 98) 
+    {   /* this will generate a very bad MARC record (testing only) */
+        buf = (char*) odr_malloc(odr, 2101);
+        memset(buf, '7', 2100);
+        buf[2100] = '\0';
+    }
+    else
     {
-	if (num == 98)
-	{
-	    buf = (char*) odr_malloc(odr, 2101);
-	    memset(buf, 'A', 2100);
-	    buf[2100] = '\0';
-	    break;
-	}
-	else
-	    buf = marc_read (inf, odr);
-	if (!num || !buf)
-	    break;
+        /* OK, try to get proper MARC records from the file */
+        while (--num >= 0)
+        {
+            buf = marc_read (inf, odr);
+            if (!buf)
+                break;
+        }
     }
     fclose(inf);
-    if (num < 0)
-    	return 0;
     return buf;
 }
 

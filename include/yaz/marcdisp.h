@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: marcdisp.h,v $
- * Revision 1.3  2001-04-06 12:26:46  adam
+ * Revision 1.4  2001-10-29 09:17:19  adam
+ * New function marc_display_exl - used by YAZ client. Server returns
+ * bad record on position 98 (for testing).
+ *
+ * Revision 1.3  2001/04/06 12:26:46  adam
  * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
  *
  * Revision 1.2  2000/02/28 11:20:06  adam
@@ -69,6 +73,8 @@ YAZ_BEGIN_CDECL
 
 YAZ_EXPORT int marc_display (const char *buf, FILE *outf);
 YAZ_EXPORT int marc_display_ex (const char *buf, FILE *outf, int debug);
+YAZ_EXPORT int marc_display_exl (const char *buf, FILE *outf, int debug,
+                                 int length);
 YAZ_EXPORT int atoi_n (const char *buf, int len);
 
 #define ISO2709_RS 035

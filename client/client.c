@@ -2,13 +2,8 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.128 2001-10-24 12:24:43 adam Exp $
+ * $Id: client.c,v 1.129 2001-10-29 09:17:19 adam Exp $
  *
- */
-
-/*
- * This is the obligatory little toy client, whose primary purpose is
- * to illustrate the use of the YAZ service-level API.
  */
 
 #include <stdio.h>
@@ -494,7 +489,8 @@ static void display_record(Z_DatabaseRecord *p)
         }
     }
     if (ent && ent->value == VAL_SOIF)
-        print_record((const unsigned char *) r->u.octet_aligned->buf, r->u.octet_aligned->len);
+        print_record((const unsigned char *) r->u.octet_aligned->buf,
+                     r->u.octet_aligned->len);
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
     {
         const char *octet_buf = (char*)p->u.octet_aligned->buf;
@@ -504,7 +500,9 @@ static void display_record(Z_DatabaseRecord *p)
                          p->u.octet_aligned->len);
         else
         {
-            if (marc_display (octet_buf, NULL) <= 0)
+            if (marc_display_exl (octet_buf, NULL, 0 /* debug */,
+                                  p->u.octet_aligned->len)
+                <= 0)
             {
                 printf ("ISO2709 decoding failed, dumping record as is:\n");
                 print_record((const unsigned char*) octet_buf,

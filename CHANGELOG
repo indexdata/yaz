@@ -1,8 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+New MARC decode/display function, marc_display_exl, which better rejects
+bad ISO2709 records. YAZ client uses it.
+
 --- 1.8.1 2001/10/29
 
-Fix bug: local attribute wasn't set correctly in PQF strings.
+Fix bug: local attribute set wasn't set correctly in PQF strings.
 
 --- 1.8 2001/10/25
 
