@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.57  1996-01-02 08:57:47  quinn
+ * Revision 1.58  1996-02-20 12:53:04  quinn
+ * Chanes to SCAN
+ *
+ * Revision 1.57  1996/01/02  08:57:47  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.56  1995/12/14  11:09:57  quinn
@@ -1257,8 +1260,10 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 		e->which = Z_Entry_termInfo;
 		e->u.termInfo = t = odr_malloc(assoc->encode, sizeof(*t));
 		t->suggestedAttributes = 0;
+		t->displayTerm = 0;
 		t->alternativeTerm = 0;
 		t->byAttributes = 0;
+		t->otherTermInfo = 0;
 		t->globalOccurrences = &srs->entries[i].occurrences;
 		t->term = odr_malloc(assoc->encode, sizeof(*t->term));
 		t->term->which = Z_Term_general;
