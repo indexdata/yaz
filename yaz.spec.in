@@ -33,7 +33,6 @@ rm -fr ${RPM_BUILD_ROOT}
 %files
 %defattr(-,root,root)
 %doc README LICENSE CHANGELOG TODO
-%config /usr/share/yaz/tab
 /usr/bin/*
 /usr/lib/*.a
 /usr/lib/*.so
