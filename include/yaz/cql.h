@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.9 2004-10-03 22:34:07 adam Exp $
+/* $Id: cql.h,v 1.10 2004-11-01 20:13:02 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -14,7 +14,7 @@ See the file LICENSE.
 #ifndef CQL_H_INCLUDED
 #define CQL_H_INCLUDED
 #include <stdio.h>
-#include <yaz/yconfig.h>
+#include <yaz/nmem.h>
 
 YAZ_BEGIN_CDECL
 
@@ -141,10 +141,8 @@ void cql_node_print(struct cql_node *cn);
  * This function creates a search clause node (st).
  */
 YAZ_EXPORT
-struct cql_node *cql_node_mk_sc(const char *index,
-                                const char *relation,
-                                const char *term);
-
+struct cql_node *cql_node_mk_sc(NMEM nmem, const char *index,
+                                const char *relation, const char *term);
 
 /**
  * This function applies a prefix+uri to "unresolved" index and relation
@@ -154,15 +152,14 @@ struct cql_node *cql_node_mk_sc(const char *index,
  * is NULL.
  */
 YAZ_EXPORT
-struct cql_node *cql_apply_prefix(struct cql_node *cn,
-				  const char *prefix,
-				  const char *uri);
+struct cql_node *cql_apply_prefix(NMEM nmem, struct cql_node *cn,
+				  const char *prefix, const char *uri);
 
 /**
  * This function creates a boolean node.
  */
 YAZ_EXPORT
-struct cql_node *cql_node_mk_boolean(const char *op);
+struct cql_node *cql_node_mk_boolean(NMEM nmem, const char *op);
 
 /**
  * Destroys a node and its children.
@@ -174,7 +171,7 @@ void cql_node_destroy(struct cql_node *cn);
  * Duplicate a node (returns a copy of supplied node) .
  */
 YAZ_EXPORT
-struct cql_node *cql_node_dup (struct cql_node *cp);
+struct cql_node *cql_node_dup (NMEM nmem, struct cql_node *cp);
 
 /**
  * This function returns the parse tree of the most recently parsed

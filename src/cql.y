@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.7 2004-10-15 00:19:00 adam Exp $
+/* $Id: cql.y,v 1.8 2004-11-01 20:13:02 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -64,7 +64,8 @@ See the file LICENSE.
 %%
 
 top: { 
-    $$.rel = cql_node_mk_sc("cql.serverChoice", "scr", 0);
+    $$.rel = cql_node_mk_sc(((CQL_parser) parm)->nmem,
+			    "cql.serverChoice", "scr", 0);
     ((CQL_parser) parm)->top = 0;
 } cqlQuery1 {
     cql_node_destroy($$.rel);
@@ -85,7 +86,8 @@ cqlQuery:
   cqlQuery boolean modifiers { 
       $$.rel = $0.rel;
   } searchClause {
-      struct cql_node *cn = cql_node_mk_boolean($2.buf);
+      struct cql_node *cn = cql_node_mk_boolean(((CQL_parser) parm)->nmem,
+						$2.buf);
       
       cn->u.boolean.modifiers = $3.cql;
       cn->u.boolean.left = $1.cql;
@@ -104,13 +106,13 @@ searchClause:
   }
 |
   searchTerm {
-      struct cql_node *st = cql_node_dup ($0.rel);
-      st->u.st.term = xstrdup($1.buf);
+      struct cql_node *st = cql_node_dup (((CQL_parser) parm)->nmem, $0.rel);
+      st->u.st.term = nmem_strdup(((CQL_parser)parm)->nmem, $1.buf);
       $$.cql = st;
   }
 | 
   index relation modifiers {
-      $$.rel = cql_node_mk_sc($1.buf, $2.buf, 0);
+      $$.rel = cql_node_mk_sc(((CQL_parser) parm)->nmem, $1.buf, $2.buf, 0);
       $$.rel->u.st.modifiers = $3.cql;
   } searchClause {
       $$.cql = $5.cql;
@@ -119,12 +121,14 @@ searchClause:
 | '>' searchTerm '=' searchTerm {
       $$.rel = $0.rel;
   } cqlQuery {
-    $$.cql = cql_apply_prefix($6.cql, $2.buf, $4.buf);
+    $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem,
+			      $6.cql, $2.buf, $4.buf);
   }
 | '>' searchTerm {
       $$.rel = $0.rel;
   } cqlQuery {
-    $$.cql = cql_apply_prefix($4.cql, 0, $2.buf);
+    $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem, 
+			      $4.cql, 0, $2.buf);
    }
 ;
 
@@ -136,7 +140,8 @@ boolean:
 
 modifiers: modifiers '/' searchTerm
 { 
-    struct cql_node *mod = cql_node_mk_sc($3.buf, "=", 0);
+    struct cql_node *mod = cql_node_mk_sc(((CQL_parser)parm)->nmem,
+					  $3.buf, "=", 0);
 
     mod->u.st.modifiers = $1.cql;
     $$.cql = mod;
@@ -144,7 +149,8 @@ modifiers: modifiers '/' searchTerm
 |
 modifiers '/' searchTerm mrelation searchTerm
 {
-    struct cql_node *mod = cql_node_mk_sc($3.buf, $4.buf, $5.buf);
+    struct cql_node *mod = cql_node_mk_sc(((CQL_parser)parm)->nmem,
+					  $3.buf, $4.buf, $5.buf);
 
     mod->u.st.modifiers = $1.cql;
     $$.cql = mod;

@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.11 2004-10-03 22:34:07 adam Exp $
+/* $Id: cqltransform.c,v 1.12 2004-11-01 20:13:02 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -455,6 +455,7 @@ int cql_transform(cql_transform_t ct,
                   void *client_data)
 {
     struct cql_prop_entry *e;
+    NMEM nmem = nmem_create();
 
     ct->error = 0;
     if (ct->addinfo)
@@ -464,11 +465,12 @@ int cql_transform(cql_transform_t ct,
     for (e = ct->entry; e ; e = e->next)
     {
         if (!memcmp(e->pattern, "set.", 4))
-	    cql_apply_prefix(cn, e->pattern+4, e->value);
+	    cql_apply_prefix(nmem, cn, e->pattern+4, e->value);
         else if (!strcmp(e->pattern, "set"))
-	    cql_apply_prefix(cn, 0, e->value);
+	    cql_apply_prefix(nmem, cn, 0, e->value);
     }
     cql_transform_r (ct, cn, pr, client_data);
+    nmem_destroy(nmem);
     return ct->error;
 }
 
