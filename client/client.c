@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.117  2001-03-25 21:55:12  adam
+ * Revision 1.118  2001-03-27 14:48:06  adam
+ * Fixed scan for bad CCL.
+ *
+ * Revision 1.117  2001/03/25 21:55:12  adam
  * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
  *
  * Revision 1.116  2001/03/21 12:43:36  adam
@@ -1881,7 +1884,7 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
         if (error)
         {
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
-            return 0;
+            return -1;
         }
         use_rpn = 0;
         bib1.proto = PROTO_Z3950;
@@ -1891,7 +1894,7 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
         if (!(req->termListAndStartPoint = ccl_scan_query (out, rpn)))
         {
             printf("Couldn't convert CCL to Scan term\n");
-            return 0;
+            return -1;
         }
         ccl_rpn_delete (rpn);
     }
