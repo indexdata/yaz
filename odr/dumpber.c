@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.8  1997-05-14 06:53:57  adam
+ * Revision 1.9  1998-01-14 09:53:26  quinn
+ * Added a bit more info to dump.
+ *
+ * Revision 1.8  1997/05/14 06:53:57  adam
  * C++ support.
  *
  * Revision 1.7  1996/03/08 14:38:41  quinn
@@ -36,8 +39,8 @@
 
 static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
 {
-    int res, ll, zclass, tag, cons;
-    char *b = buf;
+    int res, ll, zclass, tag, cons, lenlen, taglen;
+    char *b = buf, *bp = buf;
     
     if (!len)
     	return 0;
@@ -73,7 +76,9 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
     else
 	fprintf(f, "[%d:%d]", zclass, tag);
     b += res;
+    taglen = res;
     len -= res;
+    bp = b;
     if ((res = ber_declen((unsigned char*)b, &ll)) <= 0)
     {
     	fprintf(f, "bad length\n");
@@ -84,12 +89,14 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
     	fprintf(f, "Unexpected end of buffer\n");
     	return 0;
     }
+    lenlen = res;
     b += res;
     len -= res;
     if (ll >= 0)
-    	fprintf(f, " len=%d\n", ll);
+    	fprintf(f, " len=%d", ll);
     else
-    	fprintf(f, " len=?\n");
+    	fprintf(f, " len=?");
+    fprintf(f, "       tl=%d, ll=%d\n", taglen, lenlen);
     if (!cons)
     {
     	if (ll < 0)
