@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.4  1995-02-10 15:55:29  quinn
+ * Revision 1.5  1995-02-10 18:57:25  quinn
+ * More in the way of error-checking.
+ *
+ * Revision 1.4  1995/02/10  15:55:29  quinn
  * Bug fixes, mostly.
  *
  * Revision 1.3  1995/02/09  15:51:48  quinn
@@ -30,9 +33,7 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
 	o->t_class = class;
 	o->t_tag = tag;
     }
-    if (o->direction == ODR_DECODE)
-    	*(char**)p = 0;
-    if ((res = ber_tag(o, *(char**)p, o->t_class, o->t_tag, &cons)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons)) < 0)
     	return 0;
     if (!res || !cons)
     	return 0;

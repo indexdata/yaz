@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bool.c,v $
- * Revision 1.2  1995-02-09 15:51:47  quinn
+ * Revision 1.3  1995-02-10 18:57:25  quinn
+ * More in the way of error-checking.
+ *
+ * Revision 1.2  1995/02/09  15:51:47  quinn
  * Works better now.
  *
  * Revision 1.1  1995/02/02  16:21:53  quinn
@@ -28,15 +31,10 @@ int odr_bool(ODR o, int **p, int opt)
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_BOOLEAN;
     }
-    if (o->direction == ODR_DECODE)
-    	*p = 0;
-    if ((res = ber_tag(o, *p, o->t_class, o->t_tag, &cons)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons)) < 0)
     	return 0;
     if (!res)
-    {
-    	*p = 0;
     	return opt;
-    }
     if (o->direction == ODR_PRINT)
     {
     	fprintf(o->print, "%s%s\n", odr_indent(o), (**p ? "TRUE" : "FALSE"));

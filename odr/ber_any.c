@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.2  1995-02-10 15:55:28  quinn
+ * Revision 1.3  1995-02-10 18:57:24  quinn
+ * More in the way of error-checking.
+ *
+ * Revision 1.2  1995/02/10  15:55:28  quinn
  * Bug fixes, mostly.
  *
  * Revision 1.1  1995/02/09  15:51:45  quinn
@@ -49,31 +52,31 @@ int completeBER(unsigned char *buf, int len)
     unsigned char *b = buf;
     
     if (!buf[0] && !buf[1])
-    	return -1;
+    	return 0;
     if ((res = ber_dectag(b, &class, &tag, &cons)) <= 0)
     	return 0;
     if (res > len)
-    	return -1;
+    	return 0;
     b += res;
     len -= res;
     if ((res = ber_declen(b, &ll)) <= 0)
-    	return -1;
+    	return 0;
     if (res > len)
-    	return -1;
+    	return 0;
     b += res;
     len -= res;
     if (ll >= 0)
     	return (len >= ll ? ll + (b-buf) : -1);
     if (!cons)
-    	return -1;    
+    	return 0;    
     while (1)
     {
 	if ((res = completeBER(b, len)) < 0)
-	    return -1;
+	    return 0;
 	b += res;
 	len -= res;
 	if (len < 2)
-	    return -1;
+	    return 0;
 	if (*b == 0 && *(b + 1) == 0)
 	    return (b - buf) + 2;
     }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.4  1995-02-10 15:55:28  quinn
+ * Revision 1.5  1995-02-10 18:57:24  quinn
+ * More in the way of error-checking.
+ *
+ * Revision 1.4  1995/02/10  15:55:28  quinn
  * Bug fixes, mostly.
  *
  * Revision 1.3  1995/02/09  15:51:46  quinn
@@ -28,20 +31,25 @@
  * On decoding:
  *      if tag && class match up, advance pointer and return 1. set cons.
  *      else leave pointer unchanged. Return 0.
+ *
+ * Should perhaps be odr_tag?
 */
-int ber_tag(ODR o, const void *p, int class, int tag, int *constructed)
+int ber_tag(ODR o, void *p, int class, int tag, int *constructed)
 {
     static int lclass = -1, ltag, br, lcons; /* save t&c rather than
 						decoding twice */
     int rd;
+    char **pp = p;
 
+    if (o->direction == ODR_DECODE)
+    	*pp = 0;
     o->t_class = -1;
     if (o->buf == o->bp)   /* This is insurance. It shouldn't be necessary */
     	lclass = -1;
     switch (o->direction)
     {
     	case ODR_ENCODE:
-	    if (!p)
+	    if (!*pp)
 	    	return 0;
 	    if ((rd = ber_enctag(o->bp, class, tag, *constructed, o->left))
 		<=0)
@@ -59,7 +67,7 @@ int ber_tag(ODR o, const void *p, int class, int tag, int *constructed)
 	    if (lclass < 0)
 	    {
 	    	if ((br = ber_dectag(o->bp, &lclass, &ltag, &lcons)) <= 0)
-		    return -1;
+		    return 0;
 #ifdef ODR_DEBUG
 		fprintf(stderr, "\n[class=%d,tag=%d,cons=%d]", lclass, ltag,
 		    lcons);
@@ -75,7 +83,7 @@ int ber_tag(ODR o, const void *p, int class, int tag, int *constructed)
 	    }
 	    else
 	    	return 0;
-    	case ODR_PRINT: return p != 0;
+    	case ODR_PRINT: return *pp != 0;
     	default: return 0;
     }
 }
