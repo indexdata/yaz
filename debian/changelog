@@ -1,3 +1,9 @@
+yaz (2.0.16-1) unstable; urgency=low
+
+  * Character set conversion fixes, MARC-8.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 16 Mar 2004 14:27:01 +0100
+
 yaz (2.0.15-1) unstable; urgency=low
 
   * Upstream.

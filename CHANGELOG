@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.16 2004/03/16 Debian only
+
 Oleg Kolobov Fixed a bug in yaz_iconv regarding conversion to
 UCS4 / UCS4LE.
 
