@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.96 2003-02-23 14:26:58 adam Exp $
+ * $Id: statserv.c,v 1.97 2003-02-23 14:46:10 adam Exp $
  */
 
 #include <stdio.h>
@@ -79,6 +79,8 @@ statserv_options_block control_block = {
 #endif /* WIN32 */
     0                           /* SOAP handlers */
 };
+
+static int max_sessions = 0;
 
 /*
  * handle incoming connect requests.
@@ -370,7 +372,6 @@ void sigterm(int sig)
 
 static void *new_session (void *vp);
 static int no_sessions = 0;
-static int max_sessions = 0;
 
 /* UNIX listener */
 static void listener(IOCHAN h, int event)
