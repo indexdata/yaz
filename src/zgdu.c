@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.7 2004-02-23 10:14:06 adam Exp $
+ * $Id: zgdu.c,v 1.8 2004-02-25 10:37:02 adam Exp $
  */
 
 #include <ctype.h>
@@ -247,6 +247,9 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
 
             hr = (*p)->u.HTTP_Response = (Z_HTTP_Response *)
                 odr_malloc(o, sizeof(*hr));
+            hr->content_buf = 0;
+	    hr->content_len = 0;
+
             po = i = 5;
             while (i < o->size-2 && o->buf[i] != ' ' && o->buf[i] != '\r')
                 i++;
