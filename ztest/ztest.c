@@ -7,7 +7,12 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.2  1997-09-04 13:50:31  adam
+ * Revision 1.3  1997-09-09 10:10:20  adam
+ * Another MSV5.0 port. Changed projects to include proper
+ * library/include paths.
+ * Server starts server in test-mode when no options are given.
+ *
+ * Revision 1.2  1997/09/04 13:50:31  adam
  * Bug fix in ztest.
  *
  */
@@ -48,6 +53,7 @@ bend_searchresult *bend_search(void *handle, bend_searchrequest *q, int *fd)
     r.errcode = 0;
     r.errstring = 0;
     r.hits = rand() % 22;
+
     return &r;
 }
 
@@ -144,10 +150,10 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
     r.basename = "DUMMY";
     if (bbb)
     {
-    xfree(bbb);
+        xfree(bbb);
 	bbb = 0;
     }
-    
+    r.format = q->format;  
     if (q->format == VAL_SUTRS)
     {
     	char buf[100];
@@ -170,11 +176,11 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
     else if (!(r.record = bbb = dummy_database_record(q->number)))
     {
     	r.errcode = 13;
+	r.format = VAL_USMARC;
 	return &r;
     }
     else
 	r.len = strlen(r.record);
-    r.format = q->format;
     r.errcode = 0;
     return &r;
 }

@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.22  1997-08-29 13:34:58  quinn
+ * Revision 1.23  1997-09-09 10:10:19  adam
+ * Another MSV5.0 port. Changed projects to include proper
+ * library/include paths.
+ * Server starts server in test-mode when no options are given.
+ *
+ * Revision 1.22  1997/08/29 13:34:58  quinn
  * Added thesaurus oids
  *
  * Revision 1.21  1997/08/19 08:46:05  quinn
@@ -94,6 +99,7 @@
  * entries to the list at initialization.
  */
 
+#include <stdlib.h>
 #include <oid.h>
 #include <yaz-util.h>
 

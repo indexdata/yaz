@@ -7,7 +7,12 @@
  *   Chas Woodfield, Fretwell Downing Datasystem.
  *
  * $Log: statserv.c,v $
- * Revision 1.38  1997-09-04 14:19:14  adam
+ * Revision 1.39  1997-09-09 10:10:19  adam
+ * Another MSV5.0 port. Changed projects to include proper
+ * library/include paths.
+ * Server starts server in test-mode when no options are given.
+ *
+ * Revision 1.38  1997/09/04 14:19:14  adam
  * Added credits.
  *
  * Revision 1.37  1997/09/01 08:53:01  adam
@@ -125,11 +130,6 @@
  * Revision 1.1  1995/03/10  18:22:45  quinn
  * The rudiments of an asynchronous server.
  *
- */
-
-/*
- * Simple, static server. I wouldn't advise a static server unless you
- * really have to, but it's great for debugging memory management.  :)
  */
 
 #include <yconfig.h>
@@ -276,7 +276,8 @@ void statserv_closedown()
         int iHandles = 0;
         HANDLE *pThreadHandles = NULL;
 
-        /* We need to stop threads adding and removing while we start the closedown process */
+        /* We need to stop threads adding and removing while we */
+	/* start the closedown process */
         EnterCriticalSection(&Thread_CritSect);
 
         {
@@ -344,11 +345,11 @@ static void listener(IOCHAN h, int event)
     {
         if ((res = cs_listen(line, 0, 0)) < 0)
         {
-	        logf(LOG_FATAL, "cs_listen failed.");
+	    logf(LOG_FATAL, "cs_listen failed.");
     	    return;
         }
         else if (res == 1)
-	        return;
+            return;
         logf(LOG_DEBUG, "listen ok");
         iochan_setevent(h, EVENT_OUTPUT);
         iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
@@ -357,46 +358,50 @@ static void listener(IOCHAN h, int event)
     {
     	COMSTACK new_line;
     	IOCHAN new_chan;
-	    char *a;
+	char *a = NULL;
         DWORD ThreadId;
 
-	    if (!(new_line = cs_accept(line)))
-	    {
-	        logf(LOG_FATAL, "Accept failed.");
-	        iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
-	        return;
-	    }
-	    logf(LOG_DEBUG, "accept ok");
+	if (!(new_line = cs_accept(line)))
+	{
+	    logf(LOG_FATAL, "Accept failed.");
+	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+	    return;
+	}
+	logf(LOG_DEBUG, "accept ok");
 
-	    if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, EVENT_INPUT)))
-	    {
-	        logf(LOG_FATAL, "Failed to create iochan");
+	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, EVENT_INPUT)))
+	{
+	    logf(LOG_FATAL, "Failed to create iochan");
             iochan_destroy(h);
             return;
-	    }
-	    if (!(newas = create_association(new_chan, new_line)))
-	    {
-	        logf(LOG_FATAL, "Failed to create new assoc.");
+	}
+
+	logf(LOG_DEBUG, "accept ok 2");
+	if (!(newas = create_association(new_chan, new_line)))
+	{
+	    logf(LOG_FATAL, "Failed to create new assoc.");
             iochan_destroy(h);
             return;
-	    }
-	    iochan_setdata(new_chan, newas);
-	    iochan_settimeout(new_chan, control_block.idle_timeout * 60);
-	    a = cs_addrstr(new_line);
-	    logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
-
-        /* Now what we need todo is create a new thread with this iochan as the parameter */
-/*        if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop, new_chan, 0, &ThreadId) == NULL)
-*/
-        /* Somehow, somewhere we need to store this thread id, otherwise we won't be able to close cleanly */
+	}
+	logf(LOG_DEBUG, "accept ok 3");
+	iochan_setdata(new_chan, newas);
+	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
+	a = cs_addrstr(new_line);
+	logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+    /* Now what we need todo is create a new thread with this iochan as
+       the parameter */
+    /* if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop, new_chan,
+           0, &ThreadId) == NULL) */
+    /* Somehow, somewhere we need to store this thread id, otherwise we won't be
+       able to close cleanly */
         NewHandle = (HANDLE)_beginthreadex(NULL, 0, event_loop, new_chan, 0, &ThreadId);
         if (NewHandle == (HANDLE)-1)
-	    {
-	        logf(LOG_FATAL, "Failed to create new thread.");
+	{
+
+	    logf(LOG_FATAL|LOG_ERRNO, "Failed to create new thread.");
             iochan_destroy(h);
             return;
-	    }
-
+	}
         /* We successfully created the thread, so add it to the list */
         statserv_add(NewHandle, new_chan);
 
@@ -756,7 +761,7 @@ int statserv_main(int argc, char **argv)
             }
     }
 
-#ifdef WINDOWS
+#if 0
     log_init(control_block.loglevel, NULL, control_block.logfile);
 #endif /* WINDOWS */
 
