@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.107 2003-02-18 10:37:08 adam Exp $
+dnl $Id: configure.in,v 1.108 2003-02-18 20:21:22 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.3)
 dnl
@@ -17,7 +17,7 @@ AM_PROG_LIBTOOL
 dnl
 dnl ----- DOCBOOK DTD
 AC_SUBST(DTD_DIR)
-AC_ARG_WITH(dtd, [  --with-dtd[=DIR]        Use docbookx.dtd in DIR],
+AC_ARG_WITH(dtd, [  --with-dtd[=DIR]        use docbookx.dtd in DIR],
 [
    if test -f "$withval/docbookx.dtd"; then
       DTD_DIR=$withval
@@ -41,7 +41,7 @@ AC_ARG_WITH(dtd, [  --with-dtd[=DIR]        Use docbookx.dtd in DIR],
    fi
 ])
 AC_SUBST(DSSSL_DIR)
-AC_ARG_WITH(dsssl,[  --with-dsssl[=DIR]      Use DSSSL in DIR/{html,print}/docbook.dsl],
+AC_ARG_WITH(dsssl,[  --with-dsssl[=DIR]      use Docbook DSSSL in DIR/{html,print}/docbook.dsl],
 [
    if test -f "$withval/html/docbook.dsl"; then
       DSSSL_DIR=$withval
@@ -63,7 +63,7 @@ AC_ARG_WITH(dsssl,[  --with-dsssl[=DIR]      Use DSSSL in DIR/{html,print}/docbo
    fi
 ])
 AC_SUBST(XSL_DIR)
-AC_ARG_WITH(xsl,[  --with-xsl[=DIR]        Use XSL in DIR/{htmlhelp,xhtml}],
+AC_ARG_WITH(xsl,[  --with-xsl[=DIR]        use Docbook XSL in DIR/{htmlhelp,xhtml}],
 [
    if test -f "$withval/htmlhelp/htmlhelp.xsl"; then
       XSL_DIR=$withval
@@ -99,7 +99,7 @@ AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
 dnl
 dnl ------ Open SSL
 openssl=no
-AC_ARG_WITH(openssl, [  --with-openssl[=DIR]    OpenSSL library in DIR], [openssl=$withval])
+AC_ARG_WITH(openssl, [  --with-openssl[=PREFIX] OpenSSL library in PREFIX], [openssl=$withval])
 AC_SUBST(SSL_CFLAGS)
 AC_SUBST(SSL_LIBS)
 AC_SUBST(SSL_DEFS)
@@ -163,7 +163,7 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
         LIBS=$xLIBS
 fi
 dnl ------ iconv
-AC_ARG_WITH(iconv, [  --with-iconv[=DIR]      iconv library in DIR])
+AC_ARG_WITH(iconv, [  --with-iconv[=PREFIX]   iconv library in PREFIX])
 if test "$with_iconv" != "no"; then
         AC_MSG_CHECKING(for iconv)
 	oldLIBS="$LIBS"
@@ -329,36 +329,11 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 fi
 AM_CONDITIONAL(ISTHR, test $HAVETHREADS = "1")
 dnl
-dnl ----- libXSLT
-AC_SUBST(XSLT_LIB)
-AC_SUBST(XSLT_CFLAGS)
-xsltdir=no
-AC_ARG_WITH(xslt, [  --with-xslt[=PREFIX]    Use libxslt in PREFIX/{lib,include}],[xsltdir=$withval])
-if test "$xsltdir" = "yes"; then
-	for d in /usr /usr/local; do
-		if test -x $d/bin/xslt-config; then
-			xsltdir=$d
-		fi
-	done
-fi
-if test "$xsltdir" != "no"; then
-	AC_MSG_CHECKING(for XSLT)
-	if test -x $xsltdir/bin/xslt-config; then
-		XSLT_LIB=`$xsltdir/bin/xslt-config --libs`
-		XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
-		XSLT_VER=`$xsltdir/bin/xslt-config --version`
-		AC_MSG_RESULT($XSLT_VER)
-		AC_DEFINE(HAVE_XSLT)
-	else
-		AC_MSG_RESULT(Not found)
-	fi
-fi
-dnl
 dnl ----- libXML2
 AC_SUBST(XML2_LIBS)
 AC_SUBST(XML2_CFLAGS)
-xml2dir=no
-AC_ARG_WITH(xml2, [  --with-xml2[=PREFIX]    Use libxml2 in PREFIX/{lib,include}],[xml2dir=$withval])
+xml2dir=yes
+AC_ARG_WITH(xml2, [  --with-xml2[=PREFIX]    use libxml2 in PREFIX],[xml2dir=$withval])
 if test "$xml2dir" = "yes"; then
 	for d in /usr /usr/local; do
 		if test -x $d/bin/xml2-config; then

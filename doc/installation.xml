@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.14 2002-09-25 20:38:36 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.15 2003-02-18 20:21:22 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -69,7 +69,10 @@
   <sect1 id="installation.unix"><title>UNIX</title>
 
    <para>
-    We provide Debian GNU/Linux and Redhat packages for YAZ. 
+    We provide 
+    <ulink url="http://www.debian.org/">Debian GNU/Linux</ulink>
+    and 
+    <ulink url="http://www.redhat.com/">Redhat</ulink> packages for &yaz;. 
     Only i386 binary packages are available. You should be able to
     create packages for other CPU's by building them from the source
     package.
@@ -83,8 +86,25 @@
      have to acquire one separately. We recommend
      <ulink url="http://gcc.gnu.org/">GCC</ulink>.
     </para>
+
     <para>
-     For UNIX, the GNU tools
+     If you wish to use character set conversion facilities in &yaz; or if you
+     are compiling &yaz; for use with Zebra it is a good idea to ensure that
+     the iconv library is installed. Some Unixes today already have it
+     - if not, we suggest 
+     <ulink url="http://www.gnu.org/software/libiconv/">GNU iconv</ulink>.
+    </para>
+
+    <para>
+     The XML C library <ulink url="http://www.xmlsoft.org/">libxml2</ulink>
+     is required if &yaz; is to support SRW (and SOAP).
+     This library is very portable and should compile out-of-the
+     box on virtually all Unix platforms. It is available in binary
+     forms for Linux and others.
+    </para>
+
+    <para>
+     The GNU tools
      <ulink url="http://www.gnu.org/software/autoconf/">Autoconf</ulink>,
      <ulink url="http://www.gnu.org/software/automake/">Automake</ulink> and
      <ulink url="http://www.gnu.org/software/libtool/">Libtool</ulink>
@@ -92,15 +112,21 @@
      You do <emphasis>not</emphasis> these tools unless you're using the
      CVS version of &yaz;.
     </para>
-    
+
     <para>
-     If you wish to use character set conversion facilities in YAZ or if you
-     are compiling YAZ for use with Zebra it is a good idea to ensure that
-     the iconv library is installed. Most Unixes today already have it
-     - if not, we suggest 
-     <ulink url="http://www.gnu.org/software/libiconv/">GNU iconv</ulink>.
+     The CQL parser for &yaz; is built using
+     GNU <ulink url="http://www.gnu.org/software/bison/">Bison</ulink>.
+     This tool is only needed if you're using the CVS version of &yaz;.
     </para>
-    
+        
+    <para>
+     &yaz; includes a tiny ASN.1 compiler. This compiler is
+     written in <ulink url="http://www.tcl.tk/">Tcl</ulink>.
+     But as for Bison you do not need it unless you're using CVS
+     version of &yaz; or you're using the compiler to built own codecs
+     for private ASN.1. 
+    </para>
+     
     <para>
      Generally it should be sufficient to run configure without options,
      like this:
@@ -128,8 +154,9 @@
      The most important are:
      
      <variablelist>
-      <varlistentry><term><literal>--prefix </literal>path</term>
-       <listitem><para>Specifies installation prefix. This is
+      <varlistentry><term>
+        <literal>--prefix</literal>=<replaceable>prefix</replaceable></term>
+       <listitem><para>Specifies installation prefix for &yaz;. This is
          only needed if you run <literal>make install</literal> later to
          perform a "system" installation. The prefix is
          <literal>/usr/local</literal> if not specified.
@@ -153,18 +180,14 @@
          </citerefentry>.
         </para></listitem>
       </varlistentry>
+
       <varlistentry><term><literal>--enable-threads</literal></term>
        <listitem><para>&yaz; will be built using POSIX threads.
 	Specifically, <constant>_REENTRANT</constant> will be defined during
          compilation.
         </para></listitem>
       </varlistentry>
-      <varlistentry><term><literal>--with-openssl</literal></term>
-       <listitem><para>&yaz; will be linked with the OpenSSL libraries and
-         an SSL COMSTACK will be provided. Note that SSL support is still
-         experimental.
-        </para></listitem>
-      </varlistentry>
+
       <varlistentry><term><literal>--enable-shared</literal></term>
        <listitem><para>The make process will create shared
          libraries (also known as shared objects <filename>.so</filename>).
@@ -172,6 +195,7 @@
          equivalent to <literal>--disable-shared</literal>.
         </para></listitem>
       </varlistentry>
+
       <varlistentry><term><literal>--disable-shared</literal></term>
        <listitem><para>The make process will not create
          static libraries (<filename>.a</filename>).
@@ -181,13 +205,38 @@
       </varlistentry>
       
       <varlistentry><term>
-        <literal>--with-iconv</literal>[=<replaceable>dir</replaceable>]</term>
-       <listitem><para>Compile YAZ with iconv library in directory
-         <replaceable>dir</replaceable>. By default configure will
+        <literal>--with-iconv</literal>[=<replaceable>prefix</replaceable>]
+       </term>
+       <listitem><para>Compile &yaz; with iconv library in directory
+         <replaceable>prefix</replaceable>. By default configure will
          search for iconv on your system. Use this option if it
          doesn't find iconv. Alternatively you can use 
-         <literal>--without-iconv</literal> to force YAZ not to use
+         <literal>--without-iconv</literal> to force &yaz; not to use
          iconv.
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry><term>
+        <literal>--with-xml2</literal>[=<replaceable>prefix</replaceable>]
+       </term>
+       <listitem><para>Compile &yaz; with 
+         <ulink url="http://www.xmlsoft.org/">libxml2</ulink> in directory
+         <replaceable>prefix</replaceable>. 
+         Use this option if you want SOAP support.
+         By default configure will
+         search for libxml2 on your system. Use this option if it
+         doesn't find libxml2. Alternatively you can use 
+         <literal>--without-xml2</literal> to force &yaz; not to use
+         libxml2.
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry><term>
+        <literal>--with-openssl</literal>[=<replaceable>prefix</replaceable>]
+       </term>
+       <listitem><para>&yaz; will be linked with the OpenSSL libraries and
+         an SSL COMSTACK will be provided. Note that SSL support is still
+         experimental.
         </para></listitem>
       </varlistentry>
       
@@ -271,7 +320,7 @@
     <para>
      You probably need to have root access in order to perform this.
      You must specify the <literal>--prefix</literal> option for configure if
-    you wish to install &yaz; in other directories than the default 
+     you wish to install &yaz; in other directories than the default 
      <filename>/usr/local/</filename>.
     </para>
     
@@ -376,8 +425,10 @@
     <title>Compiling from Source on WIN32</title>
     <para>
      &yaz; is shipped with "makefiles" for the NMAKE tool that comes
-     with Microsoft Visual C++. Version 6 has been tested. We expect that
-     &yaz; should compile with version 5 as well.
+     with <ulink url="http://msdn.microsoft.com/vstudio/">
+      Microsoft Visual C++</ulink>.
+     Version 6 has been tested. We expect that &yaz; compiles
+     with version 5 as well.
     </para>
     <para>
      Start a command prompt and switch the sub directory
@@ -397,21 +448,47 @@
          (code generation is multi-threaded DLL).
         </para></listitem>
       </varlistentry>
-      <varlistentry><term><literal>TCL</literal></term>
+      <varlistentry>
+       <term><literal>HAVE_TCL</literal>, <literal>TCL</literal></term>
        <listitem><para>
-         Specifies the name of the Tcl shell (EXE-file).
-         You do not need setting this or installing Tcl unless you wish
-         to change or add ASN.1 for &yaz;.
+         If <literal>HAVE_TCL</literal> is set to 1, nmake will
+         use the ASN.1 compiler (Tcl based). You must set
+         <literal>TCL</literal> to the full path of the Tcl
+         interpreter.
+        </para>
+        <para>
+         If you do not have Tcl installed, set
+         <literal>HAVE_TCL</literal> to 0.
         </para></listitem>
       </varlistentry>
 
       <varlistentry>
-       <term><literal>HAVE_ICONV</literal>, <literal>ICONV_DIR</literal></term>
+       <term><literal>HAVE_ICONV</literal>,
+        <literal>ICONV_DIR</literal></term>
        <listitem><para>
          If <literal>HAVE_ICONV</literal> is set to 1, YAZ is compiled
          with iconv support. In this configuration, set 
          <literal>ICONV_DIR</literal> to the iconv source directory.
         </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+       <term><literal>HAVE_LIBXML2</literal>,
+        <literal>LIBXML2_DIR</literal></term>
+       <listitem>
+        <para>
+         If <literal>HAVE_LIBXML2</literal> is set to 1, YAZ is compiled
+         with SRW (and SOAP) support. In this configuration, set 
+         <literal>LIBXML2_DIR</literal> to the 
+         <ulink url="http://www.xmlsoft.org/">libxml2</ulink> source directory.
+        </para>
+
+        <para>
+         You can get libxml2 and iconv binaries from
+         <ulink url="http://www.zlatkovic.com/projects/libxml/binaries.html">
+          here</ulink>.
+        </para>
+       </listitem>
       </varlistentry>
 
      </variablelist>
@@ -421,13 +498,17 @@
      <screen>
       nmake
      </screen>
-     If command <filename>nmake</filename> is not found on your system
-     you probably haven't defined the environment variables required to
-     use that tool. To fix that, find and run the batch file
-     <filename>vcvars32.bat</filename>. You need to run it from within
-     the command prompt or set the environment variables "globally";
-     otherwise it doesn't work.
     </para>
+    <note>
+     <para>
+      If the <filename>nmake</filename> command is not found on your system
+      you probably haven't defined the environment variables required to
+      use that tool. To fix that, find and run the batch file
+      <filename>vcvars32.bat</filename>. You need to run it from within
+      the command prompt or set the environment variables "globally";
+      otherwise it doesn't work.
+     </para>
+    </note>
     <para>
      If you wish to recompile &yaz; - for example if you modify
      settings in the <filename>makefile</filename> you can delete
