@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.10 2004-05-03 09:00:50 adam Exp $
+ * $Id: comstack.c,v 1.11 2004-09-21 14:59:01 adam Exp $
  */
 
 #include <string.h>
@@ -147,12 +147,14 @@ int cs_complete_auto(const unsigned char *buf, int len)
 		&& buf[2] >= 0x20 && buf[2] < 0x7f)
     {
         /* deal with HTTP request/response */
-	int i = 2, content_len = 0, chunked = 0;
+	int i = 2, content_len = -1, chunked = 0;
 
         while (i <= len-4)
         {
 	    if (i > 8192)
+	    {
 		return i;  /* do not allow more than 8K HTTP header */
+	    }
             if (buf[i] == '\r' && buf[i+1] == '\n')
             {
                 i += 2;
@@ -236,8 +238,12 @@ int cs_complete_auto(const unsigned char *buf, int len)
                     {   /* not chunked ; inside body */
                         /* i += 2 seems not to work with GCC -O2 .. 
                            so i+2 is used instead .. */
-                        if (len >= (i+2)+ content_len)
+			if (content_len == -1)
+			    return 0;   /* no content length */
+                        else if (len >= (i+2)+ content_len)
+			{
                             return (i+2)+ content_len;
+			}
                     }
                     break;
                 }

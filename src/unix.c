@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.4 2004-04-29 21:19:23 adam Exp $
+ * $Id: unix.c,v 1.5 2004-09-21 14:59:01 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -565,7 +565,7 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
 		return -1;
 	}
 	else if (!res)
-	    return 0;
+	    return hasread;
 	hasread += res;
     }
     TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
