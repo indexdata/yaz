@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.15  1997-09-29 07:13:13  adam
+ * Revision 1.16  1997-10-06 08:55:07  adam
+ * Changed log_init so that previous (if any) is closed.
+ *
+ * Revision 1.15  1997/09/29 07:13:13  adam
  * Minor changes.
  *
  * Revision 1.14  1997/09/18 08:48:09  adam
@@ -123,21 +126,29 @@ char *strerror(int n)
 
 FILE *log_file(void)
 {
+    if (!l_file)
+        l_file = stderr;
     return l_file;
 }
 
 void log_init(int level, const char *prefix, const char *name)
 {
+    FILE *new_file;
     l_level = level;
     if (prefix && *prefix)
     	sprintf(l_prefix, "%.512s", prefix);
+    if (!l_file)
+        l_file = stderr;
     if (!name || !*name)
         return;
-    if (l_file != stderr && l_file != 0)
-	return;
-    if (!(l_file = fopen(name, "a")))
+    if (!(new_file = fopen(name, "a")))
         return;
-    setvbuf(l_file, 0, _IONBF, 0);
+    if (l_file != stderr)
+    {
+        setvbuf(new_file, 0, _IONBF, 0);
+        fclose (l_file);
+    }
+    l_file = new_file;
 }
 
 static void (*start_hook_func)(int, const char *, void *) = NULL;
