@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.9 2003-05-20 19:55:29 adam Exp $
+## $Id: Makefile.am,v 1.10 2003-05-27 21:12:22 adam Exp $
 
 noinst_LTLIBRARIES = libodr.la
 
@@ -14,8 +14,8 @@ tstodr_LDADD = libodr.la ../util/libutil.la
 tstodr_SOURCES = tstodr.c tstodrcodec.c tstodrcodec.h 
 
 # Rule for generating codecs for our small ASN.1 spec
-tstodrcodec.c tstodrcodec.h: $(srcdir)/tstodr.asn $(top_srcdir)/util/yaz-comp
-	cd $(srcdir); $(top_srcdir)/util/yaz-comp tstodr.asn
+tstodrcodec.c tstodrcodec.h: $(srcdir)/tstodr.asn $(top_srcdir)/util/yaz-asncomp
+	cd $(srcdir); $(top_srcdir)/util/yaz-asncomp tstodr.asn
 
 libodr_la_SOURCES = odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
         odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.12 2002-12-05 12:07:00 adam Exp $
+## $Id: Makefile.am,v 1.13 2003-05-27 21:12:23 adam Exp $
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
@@ -9,8 +9,8 @@ tabdata_DATA=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl \
  esadmin.asn charneg-3.asn mterm2.asn
 EXTRA_DIST=$(tabdata_DATA)
 
-YAZCOMP = $(top_srcdir)/util/yaz-comp
-YAZCOMPLINE = ../util/yaz-comp -d z.tcl -i yaz -I../include $(YCFLAGS)
+YAZCOMP = $(top_srcdir)/util/yaz-asncomp
+YAZCOMPLINE = ../util/yaz-asncomp -d z.tcl -i yaz -I../include $(YCFLAGS)
 
 libz39_50_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-mterm2.c z-opac.c \

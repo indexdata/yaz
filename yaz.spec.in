@@ -67,12 +67,13 @@ rm -fr ${RPM_BUILD_ROOT}
 
 %files -n lib%{name}-devel
 /usr/bin/yaz-config
-/usr/bin/yaz-comp
+/usr/bin/yaz-asncomp
 /usr/include/yaz
 /usr/lib/*.so
 /usr/lib/*.a
 /usr/lib/*.la
 /usr/share/aclocal/yaz.m4
+/usr/share/man/man1/yaz-asncomp.*
 /usr/share/man/man8/yaz-config.*
 /usr/share/doc/yaz
 /usr/share/yaz/z39.50

@@ -2,8 +2,9 @@ yaz (2.0.2-3) unstable; urgency=low
 
   * SRW support for YAZ client.
   * Minor updates to documenation Makefiles.
+  * Man page yaz-comp.1.
 
- -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 19 May 2003 23:41:59 +0200
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 27 May 2003 15:50:53 +0200
 
 yaz (2.0.2-2) unstable; urgency=low
 

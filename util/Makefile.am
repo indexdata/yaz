@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.19 2003-05-22 22:44:50 adam Exp $
+## $Id: Makefile.am,v 1.20 2003-05-27 21:12:23 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 
@@ -8,9 +8,9 @@ check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf
 
 TESTS = $(check_PROGRAMS)
 
-bin_SCRIPTS = yaz-comp
+bin_SCRIPTS = yaz-asncomp
 
-EXTRA_DIST = yaz-comp cvs-date.tcl charconv.tcl charconv.sgm
+EXTRA_DIST = yaz-asncomp cvs-date.tcl charconv.tcl charconv.sgm
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
 

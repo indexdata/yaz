@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+YAZ ASN.1 compiler renamed from yaz-comp to yaz-asncomp
+
 New ODR utility, odr_getelement, which returns name of element for
 which encoding/decoding failed.
 

@@ -6,7 +6,7 @@ exec tclsh "$0" "$@"
 # (c) Index Data 1996-2003
 # See the file LICENSE for details.
 #
-# $Id: yaz-comp,v 1.6 2003-05-20 19:55:30 adam Exp $
+# $Id: yaz-asncomp,v 1.1 2003-05-27 21:12:23 adam Exp $
 #
 
 set yc_version 0.3
@@ -1385,9 +1385,10 @@ while {$i < $l} {
 
 if {![info exists inf(iname)]} {
     puts "YAZ ASN.1 Compiler ${yc_version}"
-    puts -nonewline "Usage: ${argv0}"
-    puts { [-v] [-c cfile] [-h hfile] [-p hfile] [-d dfile] [-I path]}
-    puts {    [-x prefix] [-m module] file}
+    puts "Usage:"	
+    puts -nonewline ${argv0}
+    puts { [-v] [-c cfile] [-h hfile] [-p hfile] [-d dfile] [-I iout] [-i idir]}
+    puts {    [-m module] file}
     exit 1
 }
 
