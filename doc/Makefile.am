@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.7 2000-04-05 09:43:45 adam Exp $
+## $Id: Makefile.am,v 1.8 2000-06-08 13:40:14 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -16,13 +16,13 @@ yaz.txt: yaz.sgml
 	sgml2txt -f yaz.sgml
 
 yaz.ps: yaz.sgml
-	sgml2latex -o ps yaz.sgml
+	sgml2latex -p a4 -o ps yaz.sgml
 
 profiles.txt: profiles.sgml
 	sgml2txt -f profiles.sgml
 
 profiles.ps: profiles.sgml
-	sgml2latex -o ps profiles.sgml
+	sgml2latex -p a4 -o ps profiles.sgml
 
 yaz.html: yaz.sgml
 	sgml2html yaz.sgml
