@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.85 2002-09-10 20:56:34 adam Exp $
+dnl $Id: configure.in,v 1.86 2002-09-11 21:19:06 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.1)
 dnl
@@ -141,10 +141,22 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
         LIBS=$xLIBS
 fi
 dnl ------ various functions
-AC_CHECK_FUNCS(vsnprintf gettimeofday poll)
+AC_CHECK_FUNCS(vsnprintf gettimeofday poll iconv_open)
 if test "$ac_cv_func_poll" = "yes"; then
         AC_CHECK_HEADERS(sys/poll.h)
 fi
+if test "$ac_cv_func_iconv_open" = "no"; then
+	oldLibs=$LIBS
+	LIBS="$LIBS -liconv"
+	AC_CHECK_FUNCS(iconv_open)
+	if test "$ac_cv_func_iconv_open" = "no"; then
+		LIBS=$oldLibs
+	fi
+fi
+if test "$ac_cv_func_iconv_open" = "yes"; then
+        AC_CHECK_HEADERS(iconv.h)
+fi
+dnl ------ socklen_t
 dnl AC_CHECK_TYPES(socklen_t)
 AC_MSG_CHECKING(for socklen_t)
 AC_CACHE_VAL(ac_cv_check_socklen_t,
@@ -208,7 +220,7 @@ if test "$enable_tcpd" != ""; then
 fi
 dnl
 dnl ------ Headers
-AC_CHECK_HEADERS(fnmatch.h iconv.h)
+AC_CHECK_HEADERS(fnmatch.h)
 AC_STDC_HEADERS
 if test "$ac_cv_header_stdc" = "no"; then
 	AC_MSG_WARN(Your system doesn't seem to support ANSI C)
