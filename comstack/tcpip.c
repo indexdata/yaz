@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.30  1999-04-20 09:56:48  adam
+ * Revision 1.31  1999-04-29 07:31:23  adam
+ * Changed tcpip_strtoaddr_ex so that only part 'till '/' is considered
+ * part of hostname.
+ *
+ * Revision 1.30  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -333,7 +337,10 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add)
         return 0;
     TRC(fprintf(stderr, "tcpip_strtoaddress: %s\n", str ? str : "NULL"));
     add->sin_family = AF_INET;
-    strcpy(buf, str);
+    strncpy(buf, str, 511);
+    buf[511] = 0;
+    if ((p = strchr(buf, '/')))
+        *p = 0;
     if ((p = strchr(buf, ':')))
     {
         *p = 0;
