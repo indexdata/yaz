@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.h,v $
- * Revision 1.3  1995-03-30 12:18:09  quinn
+ * Revision 1.4  1995-04-10 10:22:47  quinn
+ * Added SCAN
+ *
+ * Revision 1.3  1995/03/30  12:18:09  quinn
  * Added info.
  *
  * Revision 1.2  1995/03/30  10:26:48  quinn
@@ -402,6 +405,119 @@ typedef struct Z_Records
     } u;
 } Z_Records;
 
+/* ------------------------ SCAN SERVICE -------------------- */
+
+typedef struct Z_AttributeList
+{
+    int num_attributes;
+    Z_AttributeElement **attributes;
+} Z_AttributeList;
+
+typedef struct Z_AlternativeTerm
+{
+    int num_terms;
+    Z_AttributesPlusTerm **terms;
+} Z_AlternativeTerm;
+
+typedef struct Z_OccurrenceByAttributes
+{
+    Z_AttributeList *attributes;
+#if 0
+    enum
+    {
+    	Z_OByAtt_global,
+	Z_ObyAtt_byDatabase
+    } which;
+    union
+    {
+#endif
+    	int *global;
+#if 0
+	/* Z_ByDatabase *byDatabase; */
+    } u;
+#endif
+} Z_OccurrenceByAttributes;
+
+typedef struct Z_TermInfo
+{
+    Z_Term *term;
+    Z_AttributeList *suggestedAttributes;  /* OPTIONAL */
+    Z_AlternativeTerm *alternativeTerm;    /* OPTIONAL */
+    int *globalOccurrences;                /* OPTIONAL */
+    Z_OccurrenceByAttributes *byAttributes; /* OPTIONAL */
+} Z_TermInfo;
+
+typedef struct Z_Entry
+{
+    enum
+    {
+    	Z_Entry_termInfo,
+	Z_Entry_surrogateDiagnostic
+    } which;
+    union
+    {
+    	Z_TermInfo *termInfo;
+	Z_DiagRec *surrogateDiagnostic;
+    } u;
+} Z_Entry;
+
+typedef struct Z_Entries
+{
+    int num_entries;
+    Z_Entry **entries;
+} Z_Entries;
+
+typedef struct Z_DiagRecs
+{
+    int num_diagRecs;
+    Z_DiagRec **diagRecs;
+} Z_DiagRecs;
+
+typedef struct Z_ListEntries
+{
+    enum
+    {
+    	Z_ListEntries_entries,
+	Z_ListEntries_nonSurrogateDiagnostics
+    } which;
+    union
+    {
+    	Z_Entries *entries;
+	Z_DiagRecs *nonSurrogateDiagnostics;
+    } u;
+} Z_ListEntries;
+
+typedef struct Z_ScanRequest
+{
+    Z_ReferenceId *referenceId;       /* OPTIONAL */
+    int num_databaseNames;
+    char **databaseNames;
+    Odr_oid *attributeSet;          /* OPTIONAL */
+    Odr_any *eatme1;
+    Z_AttributesPlusTerm *termListAndStartPoint;
+    int *stepSize;                    /* OPTIONAL */
+    int *numberOfTermsRequested;
+    int *preferredPositionInResponse;   /* OPTIONAL */
+} Z_ScanRequest;
+
+typedef struct Z_ScanResponse
+{
+    Z_ReferenceId *referenceId;       /* OPTIONAL */
+    int *stepSize;                    /* OPTIONAL */
+    int *scanStatus;
+#define Z_Scan_success      0
+#define Z_Scan_partial_1    1
+#define Z_Scan_partial_2    2
+#define Z_Scan_partial_3    3
+#define Z_Scan_partial_4    4
+#define Z_Scan_partial_5    5
+#define Z_Scan_failure      6
+    int *numberOfEntriesReturned;
+    int *positionOfTerm;              /* OPTIONAL */
+    Z_ListEntries *entries;           /* OPTIONAL */
+    Odr_oid *attributeSet;            /* OPTIONAL */
+} Z_ScanResponse; 
+
 /* ------------------------ SEARCHRESPONSE ------------------ */
 
 typedef struct Z_SearchResponse
@@ -450,13 +566,17 @@ typedef struct Z_PresentResponse
 
 typedef struct Z_APDU
 {    
-    int which;
-#define Z_APDU_initRequest 0
-#define Z_APDU_initResponse 1
-#define Z_APDU_searchRequest 2
-#define Z_APDU_searchResponse 3
-#define Z_APDU_presentRequest 4
-#define Z_APDU_presentResponse 5
+    enum
+    {
+	Z_APDU_initRequest,
+	Z_APDU_initResponse,
+	Z_APDU_searchRequest,
+	Z_APDU_searchResponse,
+	Z_APDU_presentRequest,
+	Z_APDU_presentResponse,
+	Z_APDU_scanRequest,
+	Z_APDU_scanResponse
+    } which;
     union
     {
 	Z_InitRequest  *initRequest;
@@ -465,6 +585,8 @@ typedef struct Z_APDU
     	Z_SearchResponse *searchResponse;
     	Z_PresentRequest *presentRequest;
     	Z_PresentResponse *presentResponse;
+	Z_ScanRequest *scanRequest;
+	Z_ScanResponse *scanResponse;
     } u;
 } Z_APDU;
 

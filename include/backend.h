@@ -24,6 +24,33 @@ typedef struct bend_searchrequest
     Z_Query *query;            /* query structure */
 } bend_searchrequest;
 
+typedef struct bend_scanrequest
+{
+    int num_bases;      /* number of elements in databaselist */
+    char **basenames;   /* databases to search */
+    Z_AttributesPlusTerm *term;
+    int term_position;  /* desired index of term in result list */
+    int num_entries;    /* number of entries requested */
+} bend_scanrequest;
+
+typedef struct bend_scanresult
+{
+    int num_entries;
+    struct scan_entry
+    {
+    	char *term;
+	int occurrences;
+    } *entries;
+    int term_position;
+    enum
+    {
+    	BEND_SCAN_SUCCESS,   /* ok */
+	BEND_SCAN_PARTIAL   /* not all entries could be found */
+    } status;
+    int errcode;
+    char *errstring;
+} bend_scanresult;
+
 typedef struct bend_searchresult
 {
     int hits;                  /* number of hits */
@@ -65,6 +92,9 @@ bend_searchresult *bend_searchresponse(void *handle);
 
 bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r, int *fd);
 bend_fetchresult *bend_fetchresponse(void *handle);
+
+bend_scanresult *bend_scan(void *handle, bend_scanrequest *r, int *fd);
+bend_scanresult *bend_scanresponse(void *handle);
 
 bend_deleteresult *bend_delete(void *handle, bend_deleterequest *r, int *fd);
 bend_deleteresult *bend_deleteresponse(void *handle);
