@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.7 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoomtst7.c,v 1.8 2001-12-30 22:21:11 adam Exp $
  *
  * API test..
  */
@@ -51,6 +51,7 @@ int main(int argc, char **argv)
 	for (i = 0; i<10; i++)
 	{
 	    char host[40];
+
 	    printf ("session %2d", i);
 	    sprintf (host, "localhost:9999/%d", i);
 	    z = ZOOM_connection_create (o);
@@ -102,8 +103,9 @@ int main(int argc, char **argv)
 	    for (; j < 10; j++)
 		ZOOM_resultset_destroy (r[j]);
 	    printf ("10 searches, 20 presents done\n");
+
 	}
-	
+
 	for (i = 0; i<1; i++)
 	{
 	    ZOOM_query q = ZOOM_query_create ();
@@ -129,6 +131,8 @@ int main(int argc, char **argv)
 		    while (ZOOM_event (1, &z))
 			;
 	    }
+
+
 	    ZOOM_connection_destroy (z);
 	    
 	    for (j = 0; j < 10; j++)
@@ -143,6 +147,36 @@ int main(int argc, char **argv)
 	    ZOOM_query_destroy (q);
 	    printf ("10 searches, 10 ignored presents done\n");
 	}
+
+
+        for (i = 0; i<1; i++)
+        {
+	    char host[40];
+            ZOOM_scanset scan = 0;
+
+	    printf ("session %2d", i);
+	    sprintf (host, "localhost:9999/%d", i);
+	    z = ZOOM_connection_create (o);
+	    ZOOM_connection_connect (z, host, 0);
+
+            scan = ZOOM_connection_scan (z, "@attr 1=4 a");
+            if (block > 0)
+                while (ZOOM_event (1, &z))
+                    ;
+            printf (" scan size = %d\n", ZOOM_scanset_size(scan));
+            for (j = 0; j<ZOOM_scanset_size (scan); j++)
+            {
+                int occur, len;
+                const char *term;
+                term = ZOOM_scanset_term (scan, j, &occur, &len);
+                if (term)
+                    printf ("%d %.*s %d\n", j, len, term, occur);
+                
+            }
+            ZOOM_scanset_destroy (scan);
+	    ZOOM_connection_destroy (z);
+        }
+
     }
     ZOOM_options_destroy (o);
     xmalloc_trav("");

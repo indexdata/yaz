@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst5.c,v 1.6 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoomtst5.c,v 1.7 2001-12-30 22:21:11 adam Exp $
  *
  * Asynchronous multi-target client doing search, sort and present
  */
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 	    int pos;
 	    printf ("%s: %d hits\n", ZOOM_connection_option_get(z[i], "host"),
 		    ZOOM_resultset_size(r[i]));
-	    /* go through all records at target */
+	    /* go through first 20 records at target */
 	    for (pos = 0; pos < 20; pos++)
 	    {
 		ZOOM_record rec;

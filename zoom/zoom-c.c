@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.14 2001-11-30 08:24:06 adam Exp $
+ * $Id: zoom-c.c,v 1.15 2001-12-30 22:21:11 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -63,6 +63,7 @@ static ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c)
     }
     else
 	c->m_queue_back = 0;
+    c->last_event = event->kind;
     return event;
 }
 
@@ -102,6 +103,9 @@ void ZOOM_connection_remove_task (ZOOM_connection c)
 	    ZOOM_resultset_destroy (task->u.retrieve.resultset);
 	    break;
         case ZOOM_TASK_CONNECT:
+            break;
+        case ZOOM_TASK_SCAN:
+            ZOOM_scanset_destroy (task->u.scan.scan);
             break;
 	default:
 	    assert (0);
@@ -149,6 +153,7 @@ ZOOM_connection ZOOM_connection_create (ZOOM_options options)
 
     c->async = 0;
     c->support_named_resultsets = 0;
+    c->last_event = ZOOM_EVENT_NONE;
 
     c->m_queue_front = 0;
     c->m_queue_back = 0;
@@ -157,12 +162,13 @@ ZOOM_connection ZOOM_connection_create (ZOOM_options options)
 
 /* set database names. Take local databases (if set); otherwise
    take databases given in ZURL (if set); otherwise use Default */
-static char **set_DatabaseNames (ZOOM_connection con, int *num)
+static char **set_DatabaseNames (ZOOM_connection con, ZOOM_options options,
+                                 int *num)
 {
     char **databaseNames;
     const char *c;
     int no = 2;
-    const char *cp = ZOOM_options_get (con->options, "databaseName");
+    const char *cp = ZOOM_options_get (options, "databaseName");
     
     if (!cp || !*cp)
     {
@@ -551,15 +557,19 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 	do_close (c);
 	return -1;
     }
+    
     return 0;
 }
 
 static int send_APDU (ZOOM_connection c, Z_APDU *a)
 {
+    ZOOM_Event event;
     assert (a);
     if (encode_APDU(c, a, c->odr_out))
 	return -1;
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
+    event = ZOOM_Event_create (ZOOM_EVENT_SEND_APDU);
+    ZOOM_connection_put_event (c, event);
     odr_reset(c->odr_out);
     do_write (c);
     return 0;	
@@ -689,7 +699,7 @@ static int ZOOM_connection_send_search (ZOOM_connection c)
     search_req->query = r->r_query;
 
     search_req->databaseNames =
-	set_DatabaseNames (c, &search_req->num_databaseNames);
+	set_DatabaseNames (c, r->options, &search_req->num_databaseNames);
 
     /* get syntax (no need to provide unless piggyback is in effect) */
     syntax = ZOOM_options_get (r->options, "preferredRecordSyntax");
@@ -1070,6 +1080,22 @@ static void sort_response (ZOOM_connection c, Z_SortResponse *res)
 	response_diag (c, res->diagnostics[0]);
 }
 
+static int scan_response (ZOOM_connection c, Z_ScanResponse *res)
+{
+    NMEM nmem = odr_extract_mem (c->odr_in);
+    ZOOM_scanset scan;
+
+    if (!c->tasks || c->tasks->which != ZOOM_TASK_SCAN)
+        return 0;
+    scan = c->tasks->u.scan.scan;
+
+    if (res->entries && res->entries->nonsurrogateDiagnostics)
+        response_diag(c, res->entries->nonsurrogateDiagnostics[0]);
+    scan->scan_response = res;
+    nmem_transfer (scan->odr->mem, nmem);
+    nmem_destroy (nmem);
+}
+
 static int send_sort (ZOOM_connection c)
 {
     ZOOM_resultset  resultset;
@@ -1219,6 +1245,110 @@ static int send_present (ZOOM_connection c)
     return 1;
 }
 
+ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c, const char *start)
+{
+    ZOOM_scanset scan = xmalloc (sizeof(*scan));
+
+    scan->connection = c;
+    scan->odr = odr_createmem (ODR_DECODE);
+    scan->options = ZOOM_options_create_with_parent (c->options);
+    scan->refcount = 1;
+    scan->scan_response = 0;
+
+    if ((scan->termListAndStartPoint =
+         p_query_scan(scan->odr, PROTO_Z3950, &scan->attributeSet,
+                      start)))
+    {
+        ZOOM_task task = ZOOM_connection_add_task (c, ZOOM_TASK_SCAN);
+        task->u.scan.scan = scan;
+        
+        (scan->refcount)++;
+        if (!c->async)
+        {
+            while (ZOOM_event (1, &c))
+                ;
+        }
+    }
+    return scan;
+}
+
+void ZOOM_scanset_destroy (ZOOM_scanset scan)
+{
+    if (!scan)
+        return;
+    (scan->refcount)--;
+    if (scan->refcount == 0)
+    {
+        odr_destroy (scan->odr);
+        
+        ZOOM_options_destroy (scan->options);
+        xfree (scan);
+    }
+}
+
+int send_scan (ZOOM_connection c)
+{
+    ZOOM_scanset scan;
+    Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_scanRequest);
+    Z_ScanRequest *req = apdu->u.scanRequest;
+    if (!c->tasks)
+        return 0;
+    assert (c->tasks->which == ZOOM_TASK_SCAN);
+    scan = c->tasks->u.scan.scan;
+
+    req->termListAndStartPoint = scan->termListAndStartPoint;
+    req->attributeSet = scan->attributeSet;
+
+    *req->numberOfTermsRequested =
+        ZOOM_options_get_int(scan->options, "number", 10);
+
+    req->preferredPositionInResponse =
+        odr_intdup (c->odr_out,
+                    ZOOM_options_get_int(scan->options, "position", 1));
+
+    req->stepSize =
+        odr_intdup (c->odr_out,
+                    ZOOM_options_get_int(scan->options, "stepSize", 0));
+    
+    req->databaseNames = set_DatabaseNames (c, scan->options, 
+                                            &req->num_databaseNames);
+
+    send_APDU (c, apdu);
+
+    return 1;
+}
+
+size_t ZOOM_scanset_size (ZOOM_scanset scan)
+{
+    if (!scan || !scan->scan_response || !scan->scan_response->entries)
+        return 0;
+    return scan->scan_response->entries->num_entries;
+}
+
+const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t i, int *occ, size_t *len)
+{
+    const char *term = 0;
+    size_t noent = ZOOM_scanset_size (scan);
+    Z_ScanResponse *res = scan->scan_response;
+    
+    *len = 0;
+    *occ = 0;
+    if (i >= noent)
+        return 0;
+    if (res->entries->entries[i]->which == Z_Entry_termInfo)
+    {
+        Z_TermInfo *t = res->entries->entries[i]->u.termInfo;
+        
+        if (t->term->which == Z_Term_general)
+        {
+            term = t->term->u.general->buf;
+            *len = t->term->u.general->len;
+        }
+        *occ = t->globalOccurrences ? *t->globalOccurrences : 0;
+    }
+    return term;
+}
+
 static int ZOOM_connection_exec_task (ZOOM_connection c)
 {
     ZOOM_task task = c->tasks;
@@ -1249,6 +1379,10 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
 	break;
     case ZOOM_TASK_CONNECT:
         if (do_connect(c))
+            return 1;
+        break;
+    case ZOOM_TASK_SCAN:
+        if (send_scan(c))
             return 1;
     }
     ZOOM_connection_remove_task (c);
@@ -1286,7 +1420,8 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
 	    c->cookie_in = 0;
 	    if (cookie)
 		c->cookie_in = xstrdup(cookie);
-            if (ODR_MASK_GET(initrs->options, Z_Options_namedResultSets))
+            if (ODR_MASK_GET(initrs->options, Z_Options_namedResultSets) &&
+                ODR_MASK_GET(initrs->protocolVersion, Z_ProtocolVersion_3))
                 c->support_named_resultsets = 1;
             if (c->tasks)
             {
@@ -1310,6 +1445,10 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
 	sort_response (c, apdu->u.sortResponse);
 	if (!send_present (c))
 	    ZOOM_connection_remove_task (c);
+        break;
+    case Z_APDU_scanResponse:
+        scan_response (c, apdu->u.scanResponse);
+        ZOOM_connection_remove_task (c);
     }
 }
 
@@ -1317,6 +1456,10 @@ static int do_read (ZOOM_connection c)
 {
     int r;
     Z_APDU *apdu;
+    ZOOM_Event event;
+    
+    event = ZOOM_Event_create (ZOOM_EVENT_RECV_DATA);
+    ZOOM_connection_put_event (c, event);
     
     r = cs_get (c->cs, &c->buf_in, &c->len_in);
     if (r == 1)
@@ -1328,8 +1471,11 @@ static int do_read (ZOOM_connection c)
     }
     else
     {
+        ZOOM_Event event;
 	odr_reset (c->odr_in);
 	odr_setbuf (c->odr_in, c->buf_in, r, 0);
+        event = ZOOM_Event_create (ZOOM_EVENT_RECV_APDU);
+        ZOOM_connection_put_event (c, event);
 	if (!z_APDU (c->odr_in, &apdu, 0, 0))
 	{
 	    c->error = ZOOM_ERROR_DECODE;
@@ -1346,7 +1492,11 @@ static int do_read (ZOOM_connection c)
 static int do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
 {
     int r;
+    ZOOM_Event event;
     
+    event = ZOOM_Event_create(ZOOM_EVENT_SEND_DATA);
+    ZOOM_connection_put_event (c, event);
+
     if ((r=cs_put (c->cs, buf_out, len_out)) < 0)
     {
 	if (c->state == STATE_CONNECTING)
@@ -1459,7 +1609,7 @@ int ZOOM_connection_error (ZOOM_connection c, const char **cp,
 
 int ZOOM_connection_do_io(ZOOM_connection c, int mask)
 {
-    ZOOM_Event event;
+    ZOOM_Event event = 0;
 #if 0
     int r = cs_look(c->cs);
     yaz_log (LOG_LOG, "ZOOM_connection_do_io c=%p mask=%d cs_look=%d",
@@ -1467,19 +1617,26 @@ int ZOOM_connection_do_io(ZOOM_connection c, int mask)
     
     if (r == CS_NONE)
     {
+        event = ZOOM_Event_create (ZOOM_EVENT_IO_CONNECT);
 	c->error = ZOOM_ERROR_CONNECT;
 	do_close (c);
+        ZOOM_connection_put_event (c, event);
     }
     else if (r == CS_CONNECT)
     {
+        event = ZOOM_Event_create (ZOOM_EVENT_IO_CONNECT);
 	yaz_log (LOG_LOG, "calling rcvconnect");
 	if (cs_rcvconnect (c->cs) < 0)
 	{
 	    c->error = ZOOM_ERROR_CONNECT;
 	    do_close (c);
+            ZOOM_connection_put_event (c, event);
 	}
 	else
+        {
+            ZOOM_connection_put_event (c, event);
 	    ZOOM_connection_send_init (c);
+        }
     }
     else
     {
@@ -1492,12 +1649,17 @@ int ZOOM_connection_do_io(ZOOM_connection c, int mask)
     yaz_log (LOG_DEBUG, "ZOOM_connection_do_io c=%p mask=%d", c, mask);
     if (c->state == STATE_CONNECTING)
     {
+        event = ZOOM_Event_create (ZOOM_EVENT_CONNECT);
 	if (mask & ZOOM_SELECT_WRITE)
+        {
+            ZOOM_connection_put_event (c, event);
 	    ZOOM_connection_send_init (c);
+        }
 	else
 	{
 	    c->error = ZOOM_ERROR_CONNECT;
 	    do_close (c);
+            ZOOM_connection_put_event (c, event);
 	}
     }
     else if (c->state == STATE_ESTABLISHED)
@@ -1509,15 +1671,21 @@ int ZOOM_connection_do_io(ZOOM_connection c, int mask)
     }
     else
     {
+        event = ZOOM_Event_create (ZOOM_EVENT_UNKNOWN);
+        ZOOM_connection_put_event (c, event);
 	c->error = ZOOM_ERROR_INTERNAL;
 	do_close (c);
     }
 #endif
-    event = ZOOM_Event_create (1);
-    ZOOM_connection_put_event (c, event);
     return 1;
 }
 
+int ZOOM_connection_last_event(ZOOM_connection cs)
+{
+    if (!cs)
+        return ZOOM_EVENT_NONE;
+    return cs->last_event;
+}
 
 int ZOOM_event (int no, ZOOM_connection *cs)
 {
@@ -1544,8 +1712,15 @@ int ZOOM_event (int no, ZOOM_connection *cs)
     for (i = 0; i<no; i++)
     {
         ZOOM_connection c = cs[i];
+        ZOOM_Event event;
         if (c && ZOOM_connection_exec_task (c))
-            return i+1;
+        {
+            if ((event = ZOOM_connection_get_event(c)))
+            {
+                ZOOM_Event_destroy (event);
+                return i+1;
+            }
+        }
     }
 #if HAVE_SYS_POLL_H
 
@@ -1631,7 +1806,7 @@ int ZOOM_event (int no, ZOOM_connection *cs)
         }
         else if (r == 0 && c->mask)
         {
-            ZOOM_Event event = ZOOM_Event_create(0);
+            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_TIMEOUT);
 	    /* timeout and this connection was waiting */
 	    c->error = ZOOM_ERROR_TIMEOUT;
             do_close (c);
@@ -1665,7 +1840,7 @@ int ZOOM_event (int no, ZOOM_connection *cs)
 	}
 	if (r == 0 && c->mask)
 	{
-            ZOOM_Event event = ZOOM_Event_create(0);
+            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_IO_TIMEOUT);
 	    /* timeout and this connection was waiting */
 	    c->error = ZOOM_ERROR_TIMEOUT;
             do_close (c);

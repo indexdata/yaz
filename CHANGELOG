@@ -2,6 +2,14 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.4 2001/XX/XX
 
+Scan for ZOOM API. New object ZOOM_scanset. New functions
+ZOOM_connection_scan, ZOOM_scanset_size, ZOOM_scanset_term and
+ZOOM_scanset_destroy.
+
+New ZOOM function, ZOOM_connection_last_event, that returns type
+of last event (such as "receive data", "send data", "apdu received",
+etc.
+
 New ZOOM option, schema, that specifies shema OID for retrieval.
 
 New CCL feature. Qualifiers can be aliases for one or more

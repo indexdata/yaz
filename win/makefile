@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.30 2001-10-28 23:28:26 adam Exp $
+# $Id: makefile,v 1.31 2001-12-30 22:21:11 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -84,14 +84,16 @@ ZOOMTST4=$(BINDIR)\zoomtst4.exe
 ZOOMTST5=$(BINDIR)\zoomtst5.exe
 ZOOMTST6=$(BINDIR)\zoomtst6.exe
 ZOOMTST7=$(BINDIR)\zoomtst7.exe
-
+ZOOMTST8=$(BINDIR)\zoomtst8.exe
 
 # shortcut names defined here
 dll : $(DLL) 
 client: $(CLIENT)
 ztest: $(ZTEST)
+
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
- $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7)
+ $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8)
+
 yaz_date_h: $(YAZ_DATE_H)
 
 ###########################################################
@@ -216,6 +218,8 @@ YAZ_ZOOMTST6_OBJS = \
    $(OBJDIR)\zoomtst6.obj
 YAZ_ZOOMTST7_OBJS = \
    $(OBJDIR)\zoomtst7.obj
+YAZ_ZOOMTST8_OBJS = \
+   $(OBJDIR)\zoomtst8.obj
 
 YAZ_SERVER_OBJS= \
 	"$(OBJDIR)\eventl.obj" \
@@ -729,6 +733,19 @@ $(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS)
 		/out:$(ZOOMTST7)
 <<
 
+$(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS) 
+	@echo Linking $(ZOOMTST8)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST8_OBJS)
+		/pdb:"$(LIBDIR)\zoomtst8.pdb"
+		/map:"$(LIBDIR)\zoomtst8.map"
+		/out:$(ZOOMTST8)
+<<
+
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 	@echo Linking the ztest  $(ZTEST)
 	$(LINK) @<<
@@ -780,7 +797,7 @@ realclean: clean
 dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR)
 
 $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
- 	if not exist "$@/$(NUL)" mkdir "$@"
+	if not exist "$@/$(NUL)" mkdir "$@"
 
 
 ###########################################################
@@ -802,7 +819,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.30  2001-10-28 23:28:26  adam
+# Revision 1.31  2001-12-30 22:21:11  adam
+# Scan for ZOOM.
+#
+# Revision 1.30  2001/10/28 23:28:26  adam
 # Enable CCL-to-RPN for YAZ client on WIN32.
 #
 # Revision 1.29  2001/10/25 12:46:07  adam

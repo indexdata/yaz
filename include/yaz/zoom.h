@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.7 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoom.h,v 1.8 2001-12-30 22:21:11 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -20,6 +20,7 @@ typedef struct ZOOM_connection_p *ZOOM_connection;
 typedef	struct ZOOM_resultset_p *ZOOM_resultset;
 typedef struct ZOOM_task_p *ZOOM_task;
 typedef struct ZOOM_record_p *ZOOM_record;
+typedef struct ZOOM_scanset_p *ZOOM_scanset;
 
 /* ----------------------------------------------------------- */
 /* connections */
@@ -77,6 +78,18 @@ const char *ZOOM_connection_addinfo (ZOOM_connection c);
 #define ZOOM_ERROR_INTERNAL 10006
 #define ZOOM_ERROR_TIMEOUT 10007
 
+ZOOM_EXPORT
+int ZOOM_connection_last_event(ZOOM_connection cs);
+
+#define ZOOM_EVENT_NONE 0
+#define ZOOM_EVENT_CONNECT 1
+#define ZOOM_EVENT_SEND_DATA  2
+#define ZOOM_EVENT_RECV_DATA 3
+#define ZOOM_EVENT_TIMEOUT 4
+#define ZOOM_EVENT_UNKNOWN 5
+#define ZOOM_EVENT_SEND_APDU 6
+#define ZOOM_EVENT_RECV_APDU 7
+
 /* ----------------------------------------------------------- */
 /* result sets */
 
@@ -104,7 +117,7 @@ size_t ZOOM_resultset_size (ZOOM_resultset r);
 /* retrieve records */
 ZOOM_EXPORT
 void ZOOM_resultset_records (ZOOM_resultset r, ZOOM_record *recs,
-			      size_t start, size_t count);
+                             size_t start, size_t count);
 
 /* return record object at pos. Returns 0 if unavailable */
 ZOOM_EXPORT
@@ -130,7 +143,7 @@ ZOOM_EXPORT
 ZOOM_record ZOOM_record_clone (ZOOM_record srec);
 
 /* ----------------------------------------------------------- */
-/* searches */
+/* queries */
 
 /* create search object */
 ZOOM_EXPORT
@@ -145,6 +158,19 @@ int ZOOM_query_prefix(ZOOM_query s, const char *str);
 ZOOM_EXPORT
 int ZOOM_query_sortby(ZOOM_query s, const char *criteria);
 
+/* ----------------------------------------------------------- */
+/* scan */
+ZOOM_EXPORT
+ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c, const char *startterm);
+
+ZOOM_EXPORT
+const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t no, int *occ, size_t *len);
+
+ZOOM_EXPORT
+size_t ZOOM_scanset_size(ZOOM_scanset scan);
+
+ZOOM_EXPORT
+void ZOOM_scanset_destroy (ZOOM_scanset scan);
 /* ----------------------------------------------------------- */
 /* options */
 typedef const char *(*ZOOM_options_callback)(void *handle, const char *name);
@@ -182,8 +208,7 @@ void ZOOM_options_addref (ZOOM_options opt);
 /* poll for events on a number of connections. Returns positive
    integer if event occurred ; zero if none occurred and no more
    events are pending. The positive integer specifies the
-   connection for which the event occurred. There's no way to get
-   the details yet, sigh. */
+   connection for which the event occurred. */
 ZOOM_EXPORT
 int ZOOM_event (int no, ZOOM_connection *cs);
 

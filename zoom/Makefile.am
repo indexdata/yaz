@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.1 2001-10-23 21:00:20 adam Exp $
+## $Id: Makefile.am,v 1.2 2001-12-30 22:21:11 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 INCLUDES = -I$(top_srcdir)/include
@@ -15,8 +15,9 @@ zoomtst4_LDADD = $(zoomlibs)
 zoomtst5_LDADD = $(zoomlibs)
 zoomtst6_LDADD = $(zoomlibs)
 zoomtst7_LDADD = $(zoomlibs)
+zoomtst8_LDADD = $(zoomlibs)
 
-noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7
+noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8
 bin_PROGRAMS = zoomsh
 
 zoomtst1_SOURCES = zoomtst1.c
@@ -26,4 +27,5 @@ zoomtst4_SOURCES = zoomtst4.c
 zoomtst5_SOURCES = zoomtst5.c
 zoomtst6_SOURCES = zoomtst6.c
 zoomtst7_SOURCES = zoomtst7.c
+zoomtst8_SOURCES = zoomtst8.c
 zoomsh_SOURCES = zoomsh.c

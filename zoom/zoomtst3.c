@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst3.c,v 1.4 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoomtst3.c,v 1.5 2001-12-30 22:21:11 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -53,8 +53,11 @@ int main(int argc, char **argv)
         r[i] = ZOOM_connection_search_pqf (z[i], argv[argc-1]);
 
     /* network I/O. pass number of connections and array of connections */
-    while (ZOOM_event (no, z))
-	;
+    while ((i = ZOOM_event (no, z)))
+    {
+        printf ("no = %d event = %d\n", i-1,
+                ZOOM_connection_last_event(z[i-1]));
+    }
     
     /* no more to be done. Inspect results */
     for (i = 0; i<no; i++)

@@ -1,11 +1,12 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.7 2001-11-28 23:00:19 adam Exp $
+ * $Id: zoom-p.h,v 1.8 2001-12-30 22:21:11 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
+#include <yaz/sortspec.h>
 
 typedef struct ZOOM_Event_p *ZOOM_Event;
 
@@ -42,6 +43,7 @@ struct ZOOM_connection_p {
     char *cookie_in;
     int async;
     int support_named_resultsets;
+    int last_event;
     ZOOM_task tasks;
     ZOOM_options options;
     ZOOM_resultset resultsets;
@@ -96,6 +98,16 @@ struct ZOOM_record_cache_p {
     ZOOM_record_cache next;
 };
 
+struct ZOOM_scanset_p {
+    int refcount;
+    ODR odr;
+    ZOOM_options options;
+    ZOOM_connection connection;
+    Z_AttributesPlusTerm *termListAndStartPoint;
+    Z_AttributeSetId *attributeSet;
+    Z_ScanResponse *scan_response;
+};
+
 struct ZOOM_task_p {
     int running;
     int which;
@@ -111,6 +123,10 @@ struct ZOOM_task_p {
             int count;
         } retrieve;
 #define ZOOM_TASK_CONNECT 3
+#define ZOOM_TASK_SCAN 4
+        struct {
+            ZOOM_scanset scan;
+        } scan;
     } u;
     ZOOM_task next;
 };
@@ -122,10 +138,3 @@ struct ZOOM_Event_p {
 };
 
 
-#ifndef YAZ_DATE
-COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp);
-Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class, const char *str);
-Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg);
-#else
-#include <yaz/sortspec.h>
-#endif
