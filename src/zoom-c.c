@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.2 2003-11-02 17:58:16 adam Exp $
+ * $Id: zoom-c.c,v 1.3 2003-11-17 16:01:12 mike Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -884,7 +884,7 @@ static zoom_ret send_APDU (ZOOM_connection c, Z_APDU *a)
 
 static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 {
-    const char *impname;
+    const char *impid, *impname, *impver;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_initRequest);
     Z_InitRequest *ireq = apdu->u.initRequest;
     Z_IdAuthentication *auth = (Z_IdAuthentication *)
@@ -904,6 +904,17 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_3);
     
+    impid = ZOOM_options_get (c->options, "implementationId");
+    ireq->implementationId =
+	(char *) odr_malloc (c->odr_out, 15 + (impid ? strlen(impid) : 0));
+    strcpy (ireq->implementationId, "");
+    if (impid)
+    {
+	strcat (ireq->implementationId, impid);
+	strcat (ireq->implementationId, "/");
+    }					       
+    strcat (ireq->implementationId, "81"); /* Index's implementor ID */
+    
     impname = ZOOM_options_get (c->options, "implementationName");
     ireq->implementationName =
 	(char *) odr_malloc (c->odr_out, 15 + (impname ? strlen(impname) : 0));
@@ -915,6 +926,18 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     }					       
     strcat (ireq->implementationName, "ZOOM-C/YAZ");
     
+    impver = ZOOM_options_get (c->options, "implementationVersion");
+    ireq->implementationVersion =
+	(char *) odr_malloc (c->odr_out, strlen("$Revision: 1.3 $") + 2 +
+			     (impver ? strlen(impver) : 0));
+    strcpy (ireq->implementationVersion, "");
+    if (impver)
+    {
+	strcat (ireq->implementationVersion, impver);
+	strcat (ireq->implementationVersion, "/");
+    }					       
+    strcat (ireq->implementationVersion, "$Revision: 1.3 $");
+
     *ireq->maximumRecordSize =
 	ZOOM_options_get_int (c->options, "maximumRecordSize", 1024*1024);
     *ireq->preferredMessageSize =
