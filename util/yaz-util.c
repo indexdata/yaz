@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-util.c,v $
- * Revision 1.4  1997-05-01 15:07:55  adam
+ * Revision 1.5  1997-07-21 12:48:11  adam
+ * Removed windows DLL stubs.
+ *
+ * Revision 1.4  1997/05/01 15:07:55  adam
  * Added DLL entry point routines.
  *
  * Revision 1.3  1996/10/29 13:36:28  adam
@@ -55,25 +58,3 @@ int yaz_matchstr(const char *s1, const char *s2)
     }
     return *s1 || *s2;
 }
-
-
-#ifdef WINDOWS
- 
-#include <windows.h>
-BOOL APIENTRY DllMain(hInst, reason, reserved)
-    HINSTANCE hInst; /* Library instance handle. */
-    DWORD reason;    /* Reason this function is being called. */
-    LPVOID reserved; /* Not used. */
-{
-    return TRUE;
-}
- 
-BOOL APIENTRY DllEntryPoint(hInst, reason, reserved)
-    HINSTANCE hInst; /* Library instance handle. */
-    DWORD reason;    /* Reason this function is being called. */
-    LPVOID reserved; /* Not used. */
-{
-    return TRUE;
-}                                                                              
-#endif
-
