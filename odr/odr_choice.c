@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.3  1995-03-08 12:12:22  quinn
+ * Revision 1.4  1995-03-14 16:59:38  quinn
+ * Added odr_constructed_more check
+ *
+ * Revision 1.3  1995/03/08  12:12:22  quinn
  * Added better error checking.
  *
  * Revision 1.2  1995/02/09  15:51:48  quinn
@@ -36,6 +39,8 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, int *which)
     	{
 	    if (o->direction == ODR_DECODE && cl < 0)
 	    {
+	    	if (o->stackp > -1 && !odr_constructed_more(o))
+		    return 0;
 	    	if (ber_dectag(o->bp, &cl, &tg, &cn) <= 0)
 		    return 0;
 	    }
