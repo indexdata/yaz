@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.12  1998-05-18 13:07:04  adam
+ * Revision 1.13  1998-06-05 08:58:48  adam
+ * Fixed un-initialised var in f_rpnCapabilities.
+ *
+ * Revision 1.12  1998/05/18 13:07:04  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -282,7 +285,7 @@ Z_RpnCapabilities *f_rpnCapabilities (ExpHandle *eh, data1_node *n)
 
     for (c = n->child; n; c = c->next)
     {
-	int i;
+	int i = 0;
 	switch (is_numeric_tag(eh, c))
 	{
 	case 550:
