@@ -12,8 +12,8 @@ int odr_implicit(ODR o, int (*type)(ODR o, void *p, int opt), void *p,
 int ber_enclen(ODR o, int len, int lenlen, int exact);
 int ber_declen(unsigned char *buf, int *len);
 char *odr_indent(ODR o);
-int ber_null(ODR o, int *val);
-int odr_null(ODR o, int **p, int opt);
+int ber_null(ODR o);
+int odr_null(ODR o, Odr_null **p, int opt);
 int ber_integer(ODR o, int *val);
 int odr_constructed_begin(ODR o, void *p, int class, int tag);
 int odr_constructed_end(ODR o);

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.4  1995-05-16 08:50:33  quinn
+ * Revision 1.5  1995-05-22 11:31:24  quinn
+ * Added PDUs
+ *
+ * Revision 1.4  1995/05/16  08:50:33  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.3  1995/05/15  11:55:54  quinn
@@ -142,6 +145,9 @@ typedef struct odr_oct
     int len;
     int size;
 } Odr_oct;
+
+typedef char Odr_null;
+extern Odr_null *ODR_NULLVAL;
 
 typedef Odr_oct Odr_any;
 

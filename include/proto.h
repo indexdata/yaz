@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.8  1995-05-17 08:41:35  quinn
+ * Revision 1.9  1995-05-22 11:31:25  quinn
+ * Added PDUs
+ *
+ * Revision 1.8  1995/05/17  08:41:35  quinn
  * Added delete to proto & other little things.
  * Relaying auth info to backend.
  *
@@ -148,7 +151,7 @@ typedef struct Z_IdAuthentication
     {
     	char *open;
     	Z_IdPass *idPass;
-    	void *anonymous;         /* NULL */
+    	Odr_null *anonymous;
     	Odr_external *other;
     } u;
 } Z_IdAuthentication;
@@ -307,7 +310,7 @@ typedef struct Z_Term
     	char *dateTime;
     	Odr_external *external;
     	/* Z_IntUnit *integerAndUnit; */
-    	void *null;
+    	Odr_null *null;
     } u;
 } Z_Term;
 
@@ -330,16 +333,29 @@ typedef struct Z_ProximityOperator
     int *distance;
     bool_t *ordered;
     int *relationType;
+#define Z_Prox_lessThan           1
+#define Z_Prox_lessThanOrEqual    2
+#define Z_Prox_equal              3
+#define Z_Prox_greaterThanOrEqual 4
+#define Z_Prox_greaterThan        5
+#define Z_Prox_notEqual           6
     enum
     {
-	Z_ProximityOperator_known,
-	Z_ProximityOperator_private
+	Z_ProxCode_known,
+	Z_ProxCode_private
     } which;
-    union
-    {
-    	int *known;
-    	int *private;
-    } u;
+    int *proximityUnitCode;
+#define Z_ProxUnit_character       1
+#define Z_ProxUnit_word            2
+#define Z_ProxUnit_sentence        3
+#define Z_ProxUnit_paragraph       4
+#define Z_ProxUnit_section         5
+#define Z_ProxUnit_chapter         6
+#define Z_ProxUnit_document        7
+#define Z_ProxUnit_element         8
+#define Z_ProxUnit_subelement      9
+#define Z_ProxUnit_elementType    10
+#define Z_ProxUnit_byte           11   /* v3 only */
 } Z_ProximityOperator;
 
 typedef struct Z_Operator
@@ -349,14 +365,14 @@ typedef struct Z_Operator
 	Z_Operator_and,
 	Z_Operator_or,
 	Z_Operator_and_not,
-	Z_Operator_proximity
+	Z_Operator_prox
     } which;
     union
     {
-    	void *and;          /* these guys are nulls. */
-    	void *or;
-    	void *and_not;
-	Z_ProximityOperator *proximity;
+    	Odr_null *and;          /* these guys are nulls. */
+    	Odr_null *or;
+    	Odr_null *and_not;
+	Z_ProximityOperator *prox;
     } u;
 } Z_Operator;
 
@@ -468,6 +484,45 @@ typedef struct Z_Records
     	Z_DiagRec *nonSurrogateDiagnostic;
     } u;
 } Z_Records;
+
+/* ------------------ ACCESS CTRL SERVICE ----------------*/
+
+typedef struct Z_AccessControlRequest
+{
+    Z_ReferenceId *referenceId;           /* OPTIONAL */
+    enum
+    {
+    	Z_AccessRequest_simpleForm,
+	Z_AccessRequest_externallyDefined
+    } which;
+    union
+    {
+    	Odr_oct *simpleForm;
+	Odr_external *externallyDefined;
+    } u;
+#ifdef Z_OTHERINFO
+    Z_OtherInformation *otherInfo;           /* OPTIONAL */
+#endif
+} Z_AccessControlRequest;
+
+typedef struct Z_AccessControlResponse
+{
+    Z_ReferenceId *referenceId;              /* OPTIONAL */
+    enum
+    {
+    	Z_AccessResponse_simpleForm,
+	Z_AccessResponse_externallyDefined
+    } which;
+    union
+    {
+    	Odr_oct *simpleForm;
+	Odr_external *externallyDefined;
+    } u;
+    Z_DiagRec *diagnostic;                   /* OPTIONAL */
+#ifdef Z_OTHERINFO
+    Z_OtherInformation *otherInfo;           /* OPTIONAL */
+#endif
+} Z_AccessControlResponse;
 
 /* ------------------------ SCAN SERVICE -------------------- */
 
@@ -678,7 +733,7 @@ typedef struct Z_DeleteResultSetResponse
 
 typedef struct Z_APDU
 {    
-    enum
+    enum Z_APDU_which
     {
 	Z_APDU_initRequest,
 	Z_APDU_initResponse,
@@ -713,5 +768,20 @@ typedef struct Z_APDU
 } Z_APDU;
 
 int z_APDU(ODR o, Z_APDU **p, int opt);
+
+Z_InitRequest *zget_InitRequest(ODR o);
+Z_InitResponse *zget_InitResponse(ODR o);
+Z_SearchRequest *zget_SearchRequest(ODR o);
+Z_SearchResponse *zget_SearchResponse(ODR o);
+Z_PresentRequest *zget_PresentRequest(ODR o);
+Z_PresentResponse *zget_PresentResponse(ODR o);
+Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o);
+Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o);
+Z_ScanRequest *zget_ScanRequest(ODR o);
+Z_ScanResponse *zget_ScanResponse(ODR o);
+Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
+Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
+Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
+Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 
 #endif
