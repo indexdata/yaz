@@ -137,7 +137,7 @@ typedef struct Z_Espec1
     Z_Variant *defaultVariantRequest;     /* OPTIONAL */
     int *defaultTagType;                  /* OPTIONAL */
     int num_elements;
-    Z_ElementRequest *elements;           /* OPTIONAL */
+    Z_ElementRequest **elements;           /* OPTIONAL */
 } Z_Espec1;
 
 int z_Espec1(ODR o, Z_Espec1 **p, int opt);

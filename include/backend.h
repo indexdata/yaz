@@ -71,6 +71,7 @@ typedef struct bend_fetchrequest
     char *setname;             /* set name */
     int number;                /* record number */
     oid_value format;          /* One of the CLASS_RECSYN members */
+    Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if required */
 } bend_fetchrequest;
 

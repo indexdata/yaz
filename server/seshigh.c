@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.48  1995-10-06 08:51:20  quinn
+ * Revision 1.49  1995-10-16 13:51:53  quinn
+ * Changes to provide Especs to the backend.
+ *
+ * Revision 1.48  1995/10/06  08:51:20  quinn
  * Added Write-buffer.
  *
  * Revision 1.47  1995/08/29  14:24:16  quinn
@@ -807,7 +810,7 @@ static Z_DiagRecs *diagrecs(oid_proto proto, int error, char *addinfo)
 #define MAX_RECORDS 256
 
 static Z_Records *pack_records(association *a, char *setname, int start,
-				int *num, Z_ElementSetNames *esn,
+				int *num, Z_RecordComposition *comp,
 				int *next, int *pres, oid_value format)
 {
     int recno, total_length = 0, toget = *num;
@@ -848,6 +851,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	}
 	freq.setname = setname;
 	freq.number = recno;
+	freq.comp = comp;
 	freq.format = format;
 	freq.stream = a->encode;
 	if (!(fres = bend_fetch(a->backend, &freq, 0)))
@@ -1036,24 +1040,25 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     else
     {
     	static int toget;
-	Z_ElementSetNames *setnames;
+	Z_RecordComposition comp;
 	static int presst = 0;
 
 	resp.records = 0;
 	resp.resultCount = &bsrt->hits;
 
+	comp.which = Z_RecordComp_simple;
 	/* how many records does the user agent want, then? */
 	if (bsrt->hits <= *req->smallSetUpperBound)
 	{
 	    toget = bsrt->hits;
-	    setnames = req->smallSetElementSetNames;
+	    comp.u.simple = req->smallSetElementSetNames;
 	}
 	else if (bsrt->hits < *req->largeSetLowerBound)
 	{
 	    toget = *req->mediumSetPresentNumber;
 	    if (toget > bsrt->hits)
 		toget = bsrt->hits;
-	    setnames = req->mediumSetElementSetNames;
+	    comp.u.simple = req->mediumSetElementSetNames;
 	}
 	else
 	    toget = 0;
@@ -1069,7 +1074,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    else
 	    	form = prefformat->value;
 	    resp.records = pack_records(assoc, req->resultSetName, 1,
-		&toget, setnames, &next, &presst, form);
+		&toget, &comp, &next, &presst, form);
 	    if (!resp.records)
 		return 0;
 	    resp.numberOfRecordsReturned = &toget;
@@ -1133,7 +1138,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	form = prefformat->value;
     num = *req->numberOfRecordsRequested;
     resp.records = pack_records(assoc, req->resultSetId,
-	*req->resultSetStartPoint, &num, 0, &next, &presst, form);
+	*req->resultSetStartPoint, &num, req->recordComposition, &next,
+	&presst, form);
     if (!resp.records)
     	return 0;
     resp.numberOfRecordsReturned = &num;

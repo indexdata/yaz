@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: dmalloc.h,v $
- * Revision 1.4  1995-09-29 17:12:02  quinn
+ * Revision 1.5  1995-10-16 13:51:43  quinn
+ * Changes to provide Especs to the backend.
+ *
+ * Revision 1.4  1995/09/29  17:12:02  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:47  quinn
@@ -47,8 +50,6 @@
 #define DMALLOC_H
 
 #ifdef DEBUG_MALLOC
-
-#include <yconfig.h>
 
 #ifdef malloc
 #undef malloc
