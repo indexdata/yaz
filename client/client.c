@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.217 2003-12-22 19:46:22 adam Exp $
+ * $Id: client.c,v 1.218 2003-12-30 00:22:11 adam Exp $
  */
 
 #include <stdio.h>
@@ -2151,9 +2151,8 @@ static int cmd_explain(const char *arg)
 	send_srw(sr);
 	return 2;
     }
-#else
-    return 0;
 #endif
+    return 0;
 }
     
 static int cmd_find(const char *arg)
