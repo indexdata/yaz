@@ -72,7 +72,7 @@ stamp-install: stamp-build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	dh_installdocs -p yaz-doc doc/*.html doc/*.pdf doc/*.png
+	dh_installdocs -p yaz-doc doc/*.html doc/*.pdf doc/*.png doc/*.css
 	dh_installchangelogs -p yaz-doc
 	dh_link -p yaz-doc
 	dh_strip -p yaz-doc
