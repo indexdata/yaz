@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.10 2001-11-15 21:58:50 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.11 2001-11-16 09:52:39 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -86,8 +86,6 @@
 
     const char *Z3950_connection_option_get (Z3950_connection c,
                                              const char *key);
-
-    const char *Z3950_connection_host (Z3950_connection c);
    </synopsis>
    <para>
     The <function>Z3950_connection_option_set</function> allows you to
@@ -122,6 +120,10 @@
         pass</entry><entry>Authentication password
       </entry><entry>none</entry></row>
       <row><entry>
+        host</entry><entry>Target host. This setting is "read-only".
+        It's automatically set internally when connecting to a target.
+       </entry><entry>none</entry></row>
+      <row><entry>
         proxy</entry><entry>Proxy host
        </entry><entry>none</entry></row>
       <row><entry>
@@ -139,14 +141,6 @@
      </tbody>
     </tgroup>
    </table>
-   <para>
-    Function <function>Z3950_connection_host</function> returns
-     the host for the connection as specified in a call to
-    <function>Z3950_connection_new</function> or 
-    <function>Z3950_connection_connect</function>.
-    This function returns <literal>NULL</literal> if host isn't
-    set for the connection.
-   </para>
    <synopsis>
      int Z3950_connection_error (Z3950_connection c, const char **cp,
                                  const char **addinfo);
@@ -414,7 +408,7 @@
     <function>Z3950_resultset_record</function>.
     </para>
    <para>
-    If a persistent pointer to a record is desired
+    If a persistent reference to a record is desired
     <function>Z3950_record_dup</function> should be used.
     It returns a record reference that at any
     later stage should be destroyed by
@@ -478,16 +472,27 @@
     <para>
      The functions <function>Z3950_resultset_record</function> and
      <function>Z3950_resultset_records</function> inspects the client-side
-     record cache. If the records(s) were not found, i.e. not yet retrieved
-     from, they are fetched using Present Requests.
+     record cache. Records not found in cache are fetched using
+     Present.
+     The functions may block (and perform network I/O)  - even though option
+     <literal>async</literal> is 1, because they return records objects.
+     (and there's no way to return records objects without retrieving them!).
+     </para>
+    <para>
+     There is a trick, however, in the usage of function
+     <function>Z3950_resultset_records</function> that allows for
+     delayed retrieval (and makes it non-blocking). By passing
+     a null pointer for <parameter>recs</parameter> you're indicating
+     you're not interested in getting records objects
+     <emphasis>now</emphasis>.
     </para>
    </sect2>
   </sect1>
   <sect1 id="zoom.options"><title>Options</title>
    <para>
-    Most &zoom; objects provide a way to specify options to default behavior.
+    Most &zoom; objects provide a way to specify options to change behavior.
     From an implementation point of view a set of options is just like
-    an associate array / hash array, etc.
+    an associative array / hash array, etc.
    </para>
    <synopsis>
      Z3950_options Z3950_options_create (void);

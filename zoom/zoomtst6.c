@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst6.c,v 1.5 2001-11-15 21:59:40 adam Exp $
+ * $Id: zoomtst6.c,v 1.6 2001-11-16 09:52:39 adam Exp $
  *
  * Asynchronous multi-target client doing two searches
  */
@@ -105,12 +105,12 @@ int main(int argc, char **argv)
 	const char *errmsg, *addinfo;
 	if ((error = Z3950_connection_error(z[i], &errmsg, &addinfo)))
 	    fprintf (stderr, "%s error: %s (%d) %s\n",
-		     Z3950_connection_host(z[i]),
+		     Z3950_connection_option_get(z[i], "host"),
 		     errmsg, error, addinfo);
 	else
 	{
-	    display_records (Z3950_connection_host(z[i]), r1[i]);
-	    display_records (Z3950_connection_host(z[i]), r2[i]);
+	    display_records (Z3950_connection_option_get(z[i], "host"), r1[i]);
+	    display_records (Z3950_connection_option_get(z[i], "host"), r2[i]);
 	}
     }
     /* destroy stuff and exit */

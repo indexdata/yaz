@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst4.c,v 1.3 2001-11-06 17:05:19 adam Exp $
+ * $Id: zoomtst4.c,v 1.4 2001-11-16 09:52:39 adam Exp $
  *
  * Asynchronous multi-target going through proxy doing search and retrieve
  * using present.
@@ -72,7 +72,8 @@ int main(int argc, char **argv)
 	const char *errmsg, *addinfo;
 	if ((error = Z3950_connection_error(z[i], &errmsg, &addinfo)))
 	    fprintf (stderr, "%s error: %s (%d) %s\n",
-		     Z3950_connection_host(z[i]), errmsg, error, addinfo);
+		     Z3950_connection_option_get(z[i], "host"),
+                     errmsg, error, addinfo);
     }
 
     /* destroy stuff and exit */

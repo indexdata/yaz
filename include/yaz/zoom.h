@@ -1,15 +1,8 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.5 2001-11-15 13:16:02 adam Exp $
+ * $Id: zoom.h,v 1.6 2001-11-16 09:52:39 adam Exp $
  */
 
-/* 1. Renamed type Z3950_search to Z3950_query and the functions
-      that manipulate it..
-      Changed positions/sizes to be of type size_t rather than int.
-   2. Deleted Z3950_resultset_get. Added Z3950_record_dup. Record
-      reference(s) returned by Z350_resultset_records and
-      Z3950_resultset_record are "owned" by result set.
-*/
 #include <yaz/yconfig.h>
 
 #define ZOOM_EXPORT YAZ_EXPORT
@@ -56,9 +49,6 @@ const char *Z3950_connection_option_get (Z3950_connection c, const char *key);
 ZOOM_EXPORT
 void Z3950_connection_option_set (Z3950_connection c, const char *key,
                                   const char *val);
-/* return host for connection */
-ZOOM_EXPORT
-const char *Z3950_connection_host (Z3950_connection c);
 
 /* return error code (0 == success, failure otherwise). cp
    holds error string on failure, addinfo holds addititional info (if any)

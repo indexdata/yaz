@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.8 2001-11-15 21:59:40 adam Exp $
+ * $Id: zoom-c.c,v 1.9 2001-11-16 09:52:39 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -236,6 +236,8 @@ void Z3950_connection_connect(Z3950_connection c,
     else
 	c->host_port = xstrdup(host);
 
+    Z3950_options_set(c->options, "host", c->host_port);
+
     c->async = Z3950_options_get_bool (c->options, "async", 0);
     
     task = Z3950_connection_add_task (c, Z3950_TASK_CONNECT);
@@ -257,11 +259,6 @@ Z3950_query Z3950_query_create(void)
     s->odr = odr_createmem (ODR_ENCODE);
 
     return s;
-}
-
-const char *Z3950_connection_host (Z3950_connection c)
-{
-    return c->host_port;
 }
 
 void Z3950_query_destroy(Z3950_query s)

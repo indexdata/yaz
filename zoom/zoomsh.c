@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.4 2001-11-15 08:58:29 adam Exp $
+ * $Id: zoomsh.c,v 1.5 2001-11-16 09:52:39 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -96,7 +96,8 @@ static void cmd_close (Z3950_connection *c, Z3950_resultset *r,
 	const char *h;
 	if (!c[i])
 	    continue;
-	if ((h = Z3950_connection_host(c[i])) && !strcmp (h, host))
+	if ((h = Z3950_connection_option_get(c[i], "host"))
+            && !strcmp (h, host))
 	{
 	    Z3950_connection_destroy (c[i]);
 	    c[i] = 0;
@@ -160,7 +161,7 @@ static void cmd_show (Z3950_connection *c, Z3950_resultset *r,
 	    continue;
 	if ((error = Z3950_connection_error(c[i], &errmsg, &addinfo)))
 	    fprintf (stderr, "%s error: %s (%d) %s\n",
-		     Z3950_connection_host(c[i]), errmsg,
+		     Z3950_connection_option_get(c[i], "host"), errmsg,
 		     error, addinfo);
 	else if (r[i])
 	{
@@ -208,7 +209,7 @@ static void cmd_search (Z3950_connection *c, Z3950_resultset *r,
 	    continue;
 	if ((error = Z3950_connection_error(c[i], &errmsg, &addinfo)))
 	    fprintf (stderr, "%s error: %s (%d) %s\n",
-		     Z3950_connection_host(c[i]), errmsg,
+		     Z3950_connection_option_get(c[i], "host"), errmsg,
 		     error, addinfo);
 	else if (r[i])
 	{
@@ -216,7 +217,7 @@ static void cmd_search (Z3950_connection *c, Z3950_resultset *r,
 	    int start = Z3950_options_get_int (options, "start", 0);
 	    int count = Z3950_options_get_int (options, "count", 0);
 
-	    printf ("%s: %d hits\n", Z3950_connection_host(c[i]),
+	    printf ("%s: %d hits\n", Z3950_connection_option_get(c[i], "host"),
 		    Z3950_resultset_size(r[i]));
 	    /* and display */
 	    display_records (c[i], r[i], start, count);
@@ -269,7 +270,7 @@ static void cmd_connect (Z3950_connection *c, Z3950_resultset *r,
     for (j = -1, i = 0; i<MAX_CON; i++)
     {
 	const char *h;
-	if (c[i] && (h = Z3950_connection_host(c[i])) &&
+	if (c[i] && (h = Z3950_connection_option_get(c[i], "host")) &&
 	    !strcmp (h, host))
 	{
 	    Z3950_connection_destroy (c[i]);
@@ -291,7 +292,8 @@ static void cmd_connect (Z3950_connection *c, Z3950_resultset *r,
     Z3950_connection_connect (c[i], host, 0);
 
     if ((error = Z3950_connection_error(c[i], &errmsg, &addinfo)))
-	printf ("%s error: %s (%d) %s\n", Z3950_connection_host(c[i]),
+	printf ("%s error: %s (%d) %s\n",
+                Z3950_connection_option_get(c[i], "host"),
 		errmsg, error, addinfo);
     
 }

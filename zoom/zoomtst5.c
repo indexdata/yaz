@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst5.c,v 1.4 2001-11-15 08:58:29 adam Exp $
+ * $Id: zoomtst5.c,v 1.5 2001-11-16 09:52:39 adam Exp $
  *
  * Asynchronous multi-target client doing search, sort and present
  */
@@ -78,13 +78,13 @@ int main(int argc, char **argv)
 	const char *errmsg, *addinfo;
 	if ((error = Z3950_connection_error(z[i], &errmsg, &addinfo)))
 	    fprintf (stderr, "%s error: %s (%d) %s\n",
-		     Z3950_connection_host(z[i]),
+		     Z3950_connection_option_get(z[i], "host"),
 		     errmsg, error, addinfo);
 	else
 	{
 	    /* OK, no major errors. Look at the result count */
 	    int pos;
-	    printf ("%s: %d hits\n", Z3950_connection_host(z[i]),
+	    printf ("%s: %d hits\n", Z3950_connection_option_get(z[i], "host"),
 		    Z3950_resultset_size(r[i]));
 	    /* go through all records at target */
 	    for (pos = 0; pos < 20; pos++)
