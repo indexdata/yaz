@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.18 2003-11-03 10:46:52 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.19 2003-11-19 19:07:26 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -817,7 +817,7 @@ typedef struct bend_scan_rr {
      The above for the Apache 1.3 series.
     </para>
    </example>
-   <example><title>Running a aerver with local access only</title>
+   <example><title>Running a server with local access only</title>
     <para>
      Servers that is only being accessed from the local host should listen
      on UNIX file socket rather than a Internet socket. To listen on

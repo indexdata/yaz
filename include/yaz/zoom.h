@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.18 2003-04-28 11:04:52 adam Exp $
+ * $Id: zoom.h,v 1.19 2003-11-19 19:07:26 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -188,6 +188,10 @@ ZOOM_connection_scan (ZOOM_connection c, const char *startterm);
 ZOOM_API(const char *)
 ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
                   int *occ, int *len);
+
+ZOOM_API(const char *)
+ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
+			  int *occ, int *len);
 
 ZOOM_API(size_t)
 ZOOM_scanset_size(ZOOM_scanset scan);

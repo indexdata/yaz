@@ -2,6 +2,10 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Add function ZOOM_scanset_display_term.
+
+For Scan yaz-client shows displayTerm if present.
+
 Utility yaz-iconv is now installed by default along with the man page 
 yaz-iconv.1.
 

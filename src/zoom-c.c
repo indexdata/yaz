@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.3 2003-11-17 16:01:12 mike Exp $
+ * $Id: zoom-c.c,v 1.4 2003-11-19 19:07:26 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -928,7 +928,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     
     impver = ZOOM_options_get (c->options, "implementationVersion");
     ireq->implementationVersion =
-	(char *) odr_malloc (c->odr_out, strlen("$Revision: 1.3 $") + 2 +
+	(char *) odr_malloc (c->odr_out, strlen("$Revision: 1.4 $") + 2 +
 			     (impver ? strlen(impver) : 0));
     strcpy (ireq->implementationVersion, "");
     if (impver)
@@ -936,7 +936,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	strcat (ireq->implementationVersion, impver);
 	strcat (ireq->implementationVersion, "/");
     }					       
-    strcat (ireq->implementationVersion, "$Revision: 1.3 $");
+    strcat (ireq->implementationVersion, "$Revision: 1.4 $");
 
     *ireq->maximumRecordSize =
 	ZOOM_options_get_int (c->options, "maximumRecordSize", 1024*1024);
@@ -2150,7 +2150,7 @@ ZOOM_scanset_size (ZOOM_scanset scan)
 
 ZOOM_API(const char *)
 ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
-                               int *occ, int *len)
+		   int *occ, int *len)
 {
     const char *term = 0;
     size_t noent = ZOOM_scanset_size (scan);
@@ -2165,6 +2165,37 @@ ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
         Z_TermInfo *t = res->entries->entries[pos]->u.termInfo;
         
         if (t->term->which == Z_Term_general)
+        {
+            term = (const char *) t->term->u.general->buf;
+            *len = t->term->u.general->len;
+        }
+        *occ = t->globalOccurrences ? *t->globalOccurrences : 0;
+    }
+    return term;
+}
+
+ZOOM_API(const char *)
+ZOOM_scanset_display_term (ZOOM_scanset scan, size_t pos,
+			   int *occ, int *len)
+{
+    const char *term = 0;
+    size_t noent = ZOOM_scanset_size (scan);
+    Z_ScanResponse *res = scan->scan_response;
+    
+    *len = 0;
+    *occ = 0;
+    if (pos >= noent)
+        return 0;
+    if (res->entries->entries[pos]->which == Z_Entry_termInfo)
+    {
+        Z_TermInfo *t = res->entries->entries[pos]->u.termInfo;
+
+        if (t->displayTerm)
+	{
+	    term = (const char *) t->term->u.general->buf;
+	    *len = strlen(term);
+	}
+	else if (t->term->which == Z_Term_general)
         {
             term = (const char *) t->term->u.general->buf;
             *len = t->term->u.general->len;

@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.33 2003-11-17 15:00:41 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.34 2003-11-19 19:07:26 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -694,6 +694,8 @@
     const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
                                    int *occ, size_t *len);
 
+    const char * ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
+                                           int *occ, size_t *len);
 
     void ZOOM_scanset_destroy (ZOOM_scanset scan);
 
@@ -706,17 +708,26 @@
    <para>
     The scan set is created by function
     <function>ZOOM_connection_scan</function> which performs a scan
-    operation on the connection and start term given.
+    operation on the connection using the specified startterm.
     If the operation was successful, the size of the scan set can be
     retrieved by a call to <function>ZOOM_scanset_size</function>.
     Like result sets, the items are numbered 0,..size-1.
     To obtain information about a particular scan term, call function
     <function>ZOOM_scanset_term</function>. This function takes
     a scan set offset <literal>pos</literal> and returns a pointer
-    to an actual term or <literal>NULL</literal> if non-present.
+    to a <emphasis>raw term</emphasis> or <literal>NULL</literal> if
+    non-present.
     If present, the <literal>occ</literal> and <literal>len</literal> 
     are set to the number of occurrences and the length
     of the actual term respectively.
+    <function>ZOOM_scanset_display_term</function> is similar to
+    <function>ZOOM_scanset_term</function> except that it returns
+    the <emphasis>display term</emphasis> rather than the raw term.
+    In a few cases, the term is different from display term. Always
+    use the display term for display and the raw term for subsequent
+    scan operations (to get more terms, next scan result, etc).
+   </para>
+   <para>
     A scan set may be freed by a call to function
     <function>ZOOM_scanset_destroy</function>.
     Functions <function>ZOOM_scanset_option_get</function> and
