@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2003, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: logrpn.c,v 1.2 2004-09-13 09:23:33 adam Exp $
  */
 #include <stdio.h>
 
@@ -361,6 +361,13 @@ void yaz_log_zquery (Z_Query *q)
     case Z_Query_type_1: case Z_Query_type_101:
 	log_rpn_query (q->u.type_1);
         break;
+    case Z_Query_type_2:
+	yaz_log(LOG_LOG, "CCL: %.*s", q->u.type_2->len, q->u.type_2->buf);
+	break;
+    case Z_Query_type_100:
+	yaz_log(LOG_LOG, "Z39.58: %.*s", q->u.type_100->len,
+		q->u.type_100->buf);
+	break;
     case Z_Query_type_104:
         if (q->u.type_104->which == Z_External_CQL)
             yaz_log (LOG_LOG, "CQL: %s", q->u.type_104->u.cql);
