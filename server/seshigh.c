@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.146 2003-02-23 14:26:57 adam Exp $
+ * $Id: seshigh.c,v 1.147 2003-02-23 20:39:31 adam Exp $
  */
 
 /*
@@ -506,7 +506,10 @@ static int srw_bend_fetch(association *assoc, int pos,
     rr.errcode = 0;
     rr.errstring = 0;
     rr.surrogate_flag = 0;
-    
+
+    if (!assoc->init->bend_fetch)
+        return 1;
+
     (*assoc->init->bend_fetch)(assoc->backend, &rr);
 
     if (rr.len >= 0)
@@ -531,8 +534,21 @@ static void srw_bend_search(association *assoc, request *req,
     
     yaz_log(LOG_LOG, "Got SRW SearchRetrieveRequest");
     if (!assoc->init)
-        srw_bend_init(assoc);
+    {
+        if (!srw_bend_init(assoc))
+        {
+            srw_error = 3;  /* assume Authentication error */
 
+            srw_res->num_diagnostics = 1;
+            srw_res->diagnostics = (Z_SRW_diagnostic *)
+                odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
+            srw_res->diagnostics[0].code = 
+                odr_intdup(assoc->encode, srw_error);
+            srw_res->diagnostics[0].details = 0;
+            return;
+        }
+    }
+    
     rr.setname = "default";
     rr.replace_set = 1;
     rr.num_bases = 1;
@@ -582,8 +598,11 @@ static void srw_bend_search(association *assoc, request *req,
     else
         srw_error = 11;
 
-    if (srw_req->sort_type != Z_SRW_sort_type_none)
+    if (!srw_error && srw_req->sort_type != Z_SRW_sort_type_none)
         srw_error = 80;
+
+    if (!srw_error && !assoc->init->bend_search)
+        srw_error = 1;
 
     if (srw_error)
     {
@@ -595,7 +614,6 @@ static void srw_bend_search(association *assoc, request *req,
         srw_res->diagnostics[0].details = 0;
         return;
     }
-
     
     rr.stream = assoc->encode;
     rr.decode = assoc->decode;
@@ -643,7 +661,7 @@ static void srw_bend_search(association *assoc, request *req,
                     int errcode;
                     srw_res->records[j].recordData_buf = 0;
                     errcode = srw_bend_fetch(assoc, i+start, srw_req,
-                                              srw_res->records + j);
+                                             srw_res->records + j);
                     if (errcode)
                     {
                         srw_res->num_diagnostics = 1;
