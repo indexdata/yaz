@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: query.c,v $
- * Revision 1.1  1999-06-08 10:10:16  adam
+ * Revision 1.2  1999-06-09 14:01:33  adam
+ * Fixed for compiled ASN.1.
+ *
+ * Revision 1.1  1999/06/08 10:10:16  adam
  * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
  *
  * Revision 1.3  1996/01/02 11:46:56  quinn
@@ -61,8 +64,14 @@ static Z_Operand *makesimple(ODR o, char **buf)
     (*buf)++;
     r->which = Z_Operand_APT;
     r->u.attributesPlusTerm = t = odr_malloc(o, sizeof(*t));
+#ifdef ASN_COMPILED
+    t->attributes = odr_malloc(o, sizeof(*t));
+    t->attributes->num_attributes = 0;
+    t->attributes->attributes = 0;
+#else
     t->num_attributes = 0;
     t->attributeList = 0;
+#endif
     t->term = odr_malloc(o, sizeof(*t->term));
     t->term->which = Z_Term_general;
     t->term->u.general = odr_malloc(o, sizeof(Odr_oct));
