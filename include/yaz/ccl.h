@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.2  2000-01-31 13:15:21  adam
+ * Revision 1.3  2000-02-08 10:39:53  adam
+ * Added a few functions to set name of operands, etc.
+ *
+ * Revision 1.2  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -242,7 +245,7 @@ struct ccl_parser {
     
 /* current bibset */
     CCL_bibset bibset;
-    
+
     char *ccl_token_and;
     char *ccl_token_or;
     char *ccl_token_not;
@@ -271,6 +274,17 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset,
 /* Parse CCL Find command - Tokens read by ccl_tokenize */
 struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
                                int *error, const char **pos);
+
+/* Parse CCL Find command */
+struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list);
+
+/* Set various OPs */
+void ccl_parser_set_op_and (CCL_parser p, const char *op);
+void ccl_parser_set_op_or (CCL_parser p, const char *op);
+void ccl_parser_set_op_not (CCL_parser p, const char *op);
+void ccl_parser_set_op_set (CCL_parser p, const char *op);
+
+void ccl_parser_set_case (CCL_parser p, int case_sensitivity_flag);
 
 /* Return english-readable error message */
 const char *ccl_err_msg (int ccl_errno);
@@ -312,6 +326,7 @@ CCL_parser ccl_parser_create (void);
 
 /* Destroy CCL parser */
 void ccl_parser_destroy (CCL_parser p);
+
 
 #ifndef ccl_assert
 #define ccl_assert(x) ;

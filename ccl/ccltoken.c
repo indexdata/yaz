@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.12  2000-01-31 13:15:21  adam
+ * Revision 1.13  2000-02-08 10:39:53  adam
+ * Added a few functions to set name of operands, etc.
+ *
+ * Revision 1.12  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -346,6 +349,14 @@ void ccl_token_del (struct ccl_token *list)
     }
 }
 
+static char *ccl_strdup (const char *str)
+{
+    int len = strlen(str);
+    char *p = (char*) malloc (len+1);
+    strcpy (p, str);
+    return p;
+}
+
 CCL_parser ccl_parser_create (void)
 {
     CCL_parser p = (CCL_parser)malloc (sizeof(*p));
@@ -356,10 +367,10 @@ CCL_parser ccl_parser_create (void)
     p->error_pos = NULL;
     p->bibset = NULL;
 
-    p->ccl_token_and = "and";
-    p->ccl_token_or = "or";
-    p->ccl_token_not = "not andnot";
-    p->ccl_token_set = "set";
+    p->ccl_token_and = ccl_strdup("and");
+    p->ccl_token_or = ccl_strdup("or");
+    p->ccl_token_not = ccl_strdup("not andnot");
+    p->ccl_token_set = ccl_strdup("set");
     p->ccl_case_sensitive = 1;
 
     return p;
@@ -369,6 +380,37 @@ void ccl_parser_destroy (CCL_parser p)
 {
     if (!p)
 	return;
+    free (p->ccl_token_and);
+    free (p->ccl_token_or);
+    free (p->ccl_token_not);
+    free (p->ccl_token_set);
     free (p);
 }
 
+void ccl_parser_set_op_and (CCL_parser p, const char *op)
+{
+    if (p && op)
+	p->ccl_token_and = ccl_strdup (op);
+}
+
+void ccl_parser_set_op_or (CCL_parser p, const char *op)
+{
+    if (p && op)
+	p->ccl_token_or = ccl_strdup (op);
+}
+void ccl_parser_set_op_not (CCL_parser p, const char *op)
+{
+    if (p && op)
+	p->ccl_token_not = ccl_strdup (op);
+}
+void ccl_parser_set_op_set (CCL_parser p, const char *op)
+{
+    if (p && op)
+	p->ccl_token_set = ccl_strdup (op);
+}
+
+void ccl_parser_set_case (CCL_parser p, int case_sensitivity_flag)
+{
+    if (p)
+	p->ccl_case_sensitive = case_sensitivity_flag;
+}
