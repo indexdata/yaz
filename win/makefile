@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.48 2002-10-22 10:32:46 adam Exp $
+# $Id: makefile,v 1.49 2002-10-22 13:49:53 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -325,26 +325,6 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\charneg.obj \
    $(OBJDIR)\grs1disp.obj
 
-YAZ_RET_OBJS= \
-   $(OBJDIR)\d1_absyn.obj\
-   $(OBJDIR)\d1_attset.obj\
-   $(OBJDIR)\d1_doespec.obj\
-   $(OBJDIR)\d1_espec.obj\
-   $(OBJDIR)\d1_expout.obj\
-   $(OBJDIR)\d1_grs.obj\
-   $(OBJDIR)\d1_handle.obj\
-   $(OBJDIR)\d1_map.obj\
-   $(OBJDIR)\d1_marc.obj\
-   $(OBJDIR)\d1_prtree.obj\
-   $(OBJDIR)\d1_read.obj\
-   $(OBJDIR)\d1_soif.obj\
-   $(OBJDIR)\d1_sumout.obj\
-   $(OBJDIR)\d1_sutrs.obj\
-   $(OBJDIR)\d1_tagset.obj\
-   $(OBJDIR)\d1_varset.obj\
-   $(OBJDIR)\d1_write.obj\
-   $(OBJDIR)\d1_if.obj
-
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
    $(OBJDIR)\z-univ.obj\
@@ -390,7 +370,6 @@ COMMON_YAZ_OBJS= \
    $(YAZ_COMSTACK_OBJS) \
    $(YAZ_ZUTIL_OBJS) \
    $(YAZ_CCL_OBJS) \
-   $(YAZ_RET_OBJS) \
    $(YAZ_SERVER_OBJS) \
    $(YAZ_ZOOM_OBJS)
 
@@ -851,7 +830,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.48  2002-10-22 10:32:46  adam
+# Revision 1.49  2002-10-22 13:49:53  adam
+# data1 gone
+#
+# Revision 1.48  2002/10/22 10:32:46  adam
 # New source grs1disp.c
 #
 # Revision 1.47  2002/09/06 20:04:49  adam

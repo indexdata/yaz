@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.13 2002-09-16 18:45:14 adam Exp $
+; $Id: yaz.nsi,v 1.14 2002-10-22 13:49:53 adam Exp $
 
 !define VERSION "1.9.1"
 
@@ -45,7 +45,6 @@ Section "" ; (default section)
 	File LICENSE.txt
 	File ..\README
 	SetOutPath $INSTDIR
-	File /r ..\tab
 	SetOutPath $INSTDIR\ztest
 	File ..\ztest\dummy-records
 	File ..\ztest\dummy-grs
@@ -117,8 +116,6 @@ Section "YAZ Source"
 	SetOutPath $INSTDIR\server
 	File ..\server\*.c
 	File ..\server\*.h
-	SetOutPath $INSTDIR\retrieval
-	File ..\retrieval\*.c
 	SetOutPath $INSTDIR\ztest
 	File ..\ztest\*.c
 	SetOutPath $INSTDIR\client
