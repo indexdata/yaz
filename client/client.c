@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.85  1999-06-16 11:55:24  adam
+ * Revision 1.86  1999-07-06 12:13:35  adam
+ * Added "schema" command.
+ *
+ * Revision 1.85  1999/06/16 11:55:24  adam
  * Added APDU log to client.
  *
  * Revision 1.84  1999/06/01 14:29:11  adam
@@ -326,6 +329,7 @@ static Z_ElementSetNames *elementSetNames = 0;
 static int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 static enum oid_value recordsyntax = VAL_USMARC;
+static enum oid_value schema = VAL_NONE;
 static int sent_close = 0;
 static NMEM session_mem = NULL;      /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
@@ -411,6 +415,7 @@ static void send_initRequest()
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
 
     *req->maximumRecordSize = 1024*1024;
+    *req->preferredMessageSize = 1024*1024;
 
     req->idAuthentication = auth;
 
@@ -1423,9 +1428,53 @@ static int send_presentRequest(char *arg)
     prefsyn.proto = protocol;
     prefsyn.oclass = CLASS_RECSYN;
     prefsyn.value = recordsyntax;
-    req->preferredRecordSyntax = oid_ent_to_oid(&prefsyn, oid);
+    req->preferredRecordSyntax =
+	odr_oiddup (out, oid_ent_to_oid(&prefsyn, oid));
 
-    if (elementSetNames)
+    if (schema != VAL_NONE)
+    {
+        oident prefschema;
+
+        prefschema.proto = protocol;
+        prefschema.oclass = CLASS_SCHEMA;
+        prefschema.value = schema;
+
+	req->recordComposition = &compo;
+	compo.which = Z_RecordComp_complex;
+	compo.u.complex = (Z_CompSpec *)
+	    odr_malloc(out, sizeof(*compo.u.complex));
+	compo.u.complex->selectAlternativeSyntax = (bool_t *) 
+	    odr_malloc(out, sizeof(bool_t));
+	*compo.u.complex->selectAlternativeSyntax = 0;
+
+	compo.u.complex->generic = (Z_Specification *)
+	    odr_malloc(out, sizeof(*compo.u.complex->generic));
+	compo.u.complex->generic->schema = (Odr_oid *)
+	    odr_oiddup(out, oid_ent_to_oid(&prefschema, oid));
+	if (!compo.u.complex->generic->schema)
+	{
+	    /* OID wasn't a schema! Try record syntax instead. */
+	    prefschema.oclass = CLASS_RECSYN;
+	    compo.u.complex->generic->schema = (Odr_oid *)
+		odr_oiddup(out, oid_ent_to_oid(&prefschema, oid));
+	}
+	if (!elementSetNames)
+	    compo.u.complex->generic->elementSpec = 0;
+	else
+	{
+	    compo.u.complex->generic->elementSpec = (Z_ElementSpec *)
+		odr_malloc(out, sizeof(Z_ElementSpec));
+	    compo.u.complex->generic->elementSpec->which =
+		Z_ElementSpec_elementSetName;
+	    compo.u.complex->generic->elementSpec->u.elementSetName =
+		elementSetNames->u.generic;
+	}
+	compo.u.complex->num_dbSpecific = 0;
+	compo.u.complex->dbSpecific = 0;
+	compo.u.complex->num_recordSyntax = 0;
+	compo.u.complex->recordSyntax = 0;
+    }
+    else if (elementSetNames)
     {
         req->recordComposition = &compo;
         compo.which = Z_RecordComp_simple;
@@ -1801,6 +1850,22 @@ int cmd_scan(char *arg)
     return 2;
 }
 
+int cmd_schema(char *arg)
+{
+    if (!arg || !*arg)
+    {
+	schema = VAL_NONE;
+        return 1;
+    }
+    schema = oid_getvalbyname (arg);
+    if (schema == VAL_NONE)
+    {
+        printf ("unknown schema\n");
+        return 0;
+    }
+    return 1;
+}
+
 int cmd_format(char *arg)
 {
     if (!arg || !*arg)
@@ -1824,8 +1889,8 @@ int cmd_elements(char *arg)
 
     if (!arg || !*arg)
     {
-        printf("Usage: elements <esn>\n");
-        return 0;
+	elementSetNames = 0;
+        return 1;
     }
     strcpy(what, arg);
     esn.which = Z_ElementSetNames_generic;
@@ -1956,6 +2021,7 @@ static int client(int wait)
         {"setnames", cmd_setnames, ""},
         {"cancel", cmd_cancel, ""},
         {"format", cmd_format, "<recordsyntax>"},
+	{"schema", cmd_schema, "<schema>"},
         {"elements", cmd_elements, "<elementSetName>"},
         {"close", cmd_close, ""},
 	{"attributeset", cmd_attributeset, "<attrset>"},
