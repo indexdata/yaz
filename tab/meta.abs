@@ -12,25 +12,22 @@ esetname B meta-b.est
 
 maptab meta-usmarc.map
 
-elm (1,10)		rank			-
-elm (1,12)		url			-
-elm (1,14)		localControlNumber	Local-number
-elm (1,16)		dateOfLastModification	Date/time-last-modified
-elm (4,1)		subject			Subject-heading
 elm (2,1)		title			Title:w,Title:p
-elm (2,2)		author			Author:w,Author:p
-elm (2,3)		publisher		Publisher
-elm (4,2)		otherAgent		-
-elm (2,4)		date			Date
-elm (4,3)		objectType		Content-type
-elm (4,4)		form			Material-type
-elm (4,5)		identifier		-
-elm (4,6)		relation		-
-elm (4,7)		source			-
-elm (4,8)		language		Code-language
-elm (4,9)		coverage		-
-
-# Sorry - I can't bear the thought of not having an abstract.
-
-elm (2,6)		abstract		Abstract
+elm (2,2)		creator			Author:w,Author:p
+elm (2,21)		subject			Subject-heading
 elm (2,17)		description		-
+elm (2,3)		publisher		Publisher
+elm (2,32)		contributor		-
+elm (2,4)		date			Date
+elm (2,22)		type			Content-type
+elm (2,27)		format			Material-type
+elm (2,28)		identifier		-
+elm (2,33)		source			-
+elm (2,20)		language		Code-language
+elm (2,30)		relation		-
+elm (2,34)		coverage		-
+elm (2,29)		rights			-
+
+# These tags are required by Zebra for GRS-1 generation
+elm (1,10)		rank			-
+elm (1,14)		localControlNumber	Local-number
