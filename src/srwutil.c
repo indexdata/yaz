@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.26 2005-01-17 12:53:04 adam Exp $
+ * $Id: srwutil.c,v 1.27 2005-02-01 14:43:50 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -168,7 +168,9 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     {
 	const char *content_type = z_HTTP_header_lookup(hreq->headers,
 							"Content-Type");
-	if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
+	if (content_type && 
+	    (!yaz_strcmp_del("text/xml", content_type, "; ") ||
+	     !yaz_strcmp_del("text/plain", content_type, "; ")))
 	{
 	    char *db = "Default";
 	    const char *p0 = hreq->path, *p1;
