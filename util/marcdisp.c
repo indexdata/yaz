@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdisp.c,v $
- * Revision 1.9  1999-12-21 16:24:48  adam
+ * Revision 1.10  2000-02-05 10:47:19  adam
+ * Identifier-length and indicator-lenght no longer set to 2 (forced).
+ *
+ * Revision 1.9  1999/12/21 16:24:48  adam
  * More robust ISO2709 handling (in case of real bad formats).
  *
  * Revision 1.8  1999/11/30 13:47:12  adam
@@ -55,11 +57,15 @@ int marc_display_ex (const char *buf, FILE *outf, int debug)
     record_length = atoi_n (buf, 5);
     if (record_length < 25)
         return -1;
-    indicator_length = atoi_n (buf+10, 1);
-    identifier_length = atoi_n (buf+11, 1);
+    if (isdigit(buf[10]))
+        indicator_length = atoi_n (buf+10, 1);
+    else
+        indicator_length = 2;
+    if (isdigit(buf[11]))
+	identifier_length = atoi_n (buf+11, 1);
+    else
+        identifier_length = 2;
     base_address = atoi_n (buf+12, 4);
-
-    indicator_length = identifier_length = 2;
 
     length_data_entry = atoi_n (buf+20, 1);
     length_starting = atoi_n (buf+21, 1);
