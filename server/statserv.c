@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.79 2001-11-13 23:00:43 adam Exp $
+ * $Id: statserv.c,v 1.80 2002-01-28 09:26:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -761,7 +761,8 @@ int check_options(int argc, char **argv)
 	    control_block.default_proto = PROTO_Z3950;
 	    break;
 	case 's':
-	    control_block.default_proto = PROTO_SR;
+            fprintf (stderr, "%s: SR protocol no longer supported\n", me);
+            exit (1);
 	    break;
 	case 'S':
 	    control_block.dynamic = 0;
@@ -828,7 +829,7 @@ int check_options(int argc, char **argv)
 	    fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
 		    " -l <logfile> -u <user> -c <config> -t <minutes>"
 		    " -k <kilobytes> -d <daemon>"
-                        " -zsiST -w <directory> <listender-addr>... ]\n", me);
+                        " -ziST -w <directory> <listender-addr>... ]\n", me);
 	    return 1;
         }
     }
