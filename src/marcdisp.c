@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.2 2003-12-11 00:37:22 adam Exp $
+ * $Id: marcdisp.c,v 1.3 2003-12-17 12:28:07 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -211,6 +211,11 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         entry_p += 3+length_data_entry+length_starting;
         if (entry_p >= record_length)
             return -1;
+    }
+    if (mt->debug && base_address != entry_p+1)
+    {
+	wrbuf_printf (wr,"  <!-- base address not at end of directory "
+		      "base=%d end=%d -->\n", base_address, entry_p+1);
     }
     base_address = entry_p+1;
 
