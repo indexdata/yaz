@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.14  1998-06-08 14:26:41  adam
+ * Revision 1.15  1998-09-28 12:44:40  adam
+ * Fixed bug in f_integer.
+ *
+ * Revision 1.14  1998/06/08 14:26:41  adam
  * Fixed bug in f_queryTypeDetails.
  *
  * Revision 1.13  1998/06/05 08:58:48  adam
@@ -109,7 +112,7 @@ static int *f_integer(ExpHandle *eh, data1_node *c)
     if (!is_data_tag (eh, c) || c->u.data.len > 63)
 	return 0;
     r = (int *)odr_malloc(eh->o, sizeof(*r));
-    sprintf(intbuf, "%.*s", 63, c->u.data.data);
+    sprintf(intbuf, "%.*s", c->u.data.len, c->u.data.data);
     *r = atoi(intbuf);
     return r;
 }
