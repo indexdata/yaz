@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.58 2002-01-11 20:26:11 adam Exp $
+dnl $Id: configure.in,v 1.59 2002-01-17 21:04:43 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.5)
 dnl
@@ -111,6 +111,7 @@ if test "$enable_tcpd" != ""; then
 fi
 dnl
 dnl ------ Headers
+AC_CHECK_HEADERS(fnmatch.h)
 AC_STDC_HEADERS
 if test "$ac_cv_header_stdc" = "no"; then
 	AC_MSG_WARN(Your system doesn't seem to support ANSI C)

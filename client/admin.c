@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.11 2001-11-13 23:00:42 adam Exp $
+ * $Id: admin.c,v 1.12 2002-01-17 21:04:43 adam Exp $
  */
 
 #include <stdio.h>
@@ -10,9 +10,7 @@
 #include <time.h>
 #include <assert.h>
 
-#ifdef WIN32
-
-#else
+#if HAVE_FNMATCH_H
 #include <dirent.h>
 #include <fnmatch.h>
 #include <sys/stat.h>
@@ -177,15 +175,7 @@ int cmd_adm_drop(char* arg)
    N.B. That in this case, the import may contain instructions to delete records as well as new or updates
    to existing records */
 
-#ifdef WIN32
-int cmd_adm_import(char *arg)
-{
-    printf ("not available on WIN32\n");
-    return 0;
-}
-
-#else
-
+#if HAVE_FNMATCH_H
 int cmd_adm_import(char *arg)
 {
     char type_str[20], dir_str[1024], pattern_str[1024];
@@ -266,6 +256,12 @@ int cmd_adm_import(char *arg)
     send_apdu (apdu);
     closedir(dir);
     return 2;
+}
+#else
+int cmd_adm_import(char *arg)
+{
+    printf ("not available on WIN32\n");
+    return 0;
 }
 #endif
 
