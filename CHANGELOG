@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.9.1 2002/MM/DD
 
+Added man pages: yaz-client(1), yaz-ztest(8), yaz(7), zoomsh(1).
+
 Fix broken ESpec handling in data1 module.
 
 SGML reader parses comments and makes them part of the data1 tree.
