@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.31 2002-06-06 12:54:24 adam Exp $
+ * $Id: cclfind.c,v 1.32 2002-12-28 12:13:03 adam Exp $
  *
  * Old Europagate log:
  *
@@ -797,6 +797,16 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
     {
         if (KIND == CCL_TOK_PROX)
         {
+            struct ccl_rpn_node *p_prox = 0;
+            /* ! word order specified */
+            /* % word order not specified */
+            p_prox = mk_node(CCL_RPN_TERM);
+            p_prox->u.t.term = xmalloc(cclp->look_token->len);
+            memcpy(p_prox->u.t.term, cclp->look_token->name,
+                   cclp->look_token->len);
+            p_prox->u.t.term[cclp->look_token->len] = 0;
+            p_prox->u.t.attr_list = 0;
+
             ADVANCE;
             p2 = search_term_x (cclp, qa, list, 1);
             if (!p2)
@@ -807,6 +817,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
             pn = mk_node (CCL_RPN_PROX);
             pn->u.p[0] = p1;
             pn->u.p[1] = p2;
+            pn->u.p[2] = p_prox;
             p1 = pn;
         }
         else if (is_term_ok(KIND, list))
@@ -820,6 +831,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
             pn = mk_node (CCL_RPN_PROX);
             pn->u.p[0] = p1;
             pn->u.p[1] = p2;
+            pn->u.p[2] = 0;
             p1 = pn;
         }
         else
@@ -910,6 +922,7 @@ static struct ccl_rpn_node *search_elements (CCL_parser cclp,
                 struct ccl_rpn_node *node_this = mk_node(CCL_RPN_OR);
                 node_this->u.p[0] = node;
                 node_this->u.p[1] = node_sub;
+                node_this->u.p[2] = 0;
                 node = node_this;
             }
             else
@@ -948,6 +961,7 @@ static struct ccl_rpn_node *find_spec (CCL_parser cclp,
             pn = mk_node (CCL_RPN_AND);
             pn->u.p[0] = p1;
             pn->u.p[1] = p2;
+            pn->u.p[2] = 0;
             p1 = pn;
             continue;
         case CCL_TOK_OR:
@@ -961,6 +975,7 @@ static struct ccl_rpn_node *find_spec (CCL_parser cclp,
             pn = mk_node (CCL_RPN_OR);
             pn->u.p[0] = p1;
             pn->u.p[1] = p2;
+            pn->u.p[2] = 0;
             p1 = pn;
             continue;
         case CCL_TOK_NOT:
@@ -974,6 +989,7 @@ static struct ccl_rpn_node *find_spec (CCL_parser cclp,
             pn = mk_node (CCL_RPN_NOT);
             pn->u.p[0] = p1;
             pn->u.p[1] = p2;
+            pn->u.p[2] = 0;
             p1 = pn;
             continue;
         }

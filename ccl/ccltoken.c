@@ -44,7 +44,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.20 2002-10-14 19:45:36 adam Exp $
+ * $Id: ccltoken.c,v 1.21 2002-12-28 12:13:03 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -244,7 +244,7 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 	case '%':
 	case '!':
 	    last->kind = CCL_TOK_PROX;
-	    while (*cp == '%' || *cp == '!')
+            while (isdigit(*cp))
 	    {
 		++ last->len;
 		cp++;

@@ -2,15 +2,34 @@
  * Copyright (C) 1995-2001, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.7 2002-07-25 12:48:54 adam Exp $
+ * $Id: logrpn.c,v 1.8 2002-12-28 12:13:03 adam Exp $
  */
 #include <stdio.h>
 
 #include <yaz/log.h>
 #include <yaz/logrpn.h>
 
+static const char *relToStr(int v)
+{
+    const char *str = 0;
+    switch (v)
+    {
+    case 1: str = "Less than"; break;
+    case 2: str = "Less than or equal"; break;
+    case 3: str = "Equal"; break;
+    case 4: str = "Greater or equal"; break;
+    case 5: str = "Greater than"; break;
+    case 6: str = "Not equal"; break;
+    case 100: str = "Phonetic"; break;
+    case 101: str = "Stem"; break;
+    case 102: str = "Relevance"; break;
+    case 103: str = "AlwaysMatches"; break;
+    }
+    return str;
+}
 static void attrStr (int type, int value, enum oid_value ast, char *str)
 {
+    const char *rstr;
     *str = '\0';
     switch (ast)
     {
@@ -23,41 +42,11 @@ static void attrStr (int type, int value, enum oid_value ast, char *str)
             sprintf (str, "use");
             break;
         case 2:
-            switch (value)
-            {
-            case 1:
-                sprintf (str, "relation=Less than");
-                break;
-            case 2:
-                sprintf (str, "relation=Less than or equal");
-                break;
-            case 3:
-                sprintf (str, "relation=Equal");
-                break;
-            case 4:
-                sprintf (str, "relation=Greater or equal");
-                break;
-            case 5:
-                sprintf (str, "relation=Greater than");
-                break;
-            case 6:
-                sprintf (str, "relation=Not equal");
-                break;
-            case 100:
-                sprintf (str, "relation=Phonetic");
-                break;
-            case 101:
-                sprintf (str, "relation=Stem");
-                break;
-            case 102:
-                sprintf (str, "relation=Relevance");
-                break;
-            case 103:
-                sprintf (str, "relation=AlwaysMatches");
-                break;
-            default:
-                sprintf (str, "relation");
-            }
+            rstr = relToStr(value);
+            if (rstr)
+                sprintf (str, "relation=%s", rstr);
+            else
+                sprintf (str, "relation=%d", value);
             break;
         case 3:
             switch (value)
@@ -239,7 +228,10 @@ static void zlog_structure (Z_RPNStructure *zs, int level, enum oid_value ast)
 {
     if (zs->which == Z_RPNStructure_complex)
     {
-        switch (zs->u.complex->roperator->which)
+        Z_Operator *op = zs->u.complex->roperator;
+        const char *rstr = 0;
+        const char *unit = "private";
+        switch (op->which)
         {
         case Z_Operator_and:
             yaz_log (LOG_LOG, "%*.0s and", level, "");
@@ -251,7 +243,33 @@ static void zlog_structure (Z_RPNStructure *zs, int level, enum oid_value ast)
             yaz_log (LOG_LOG, "%*.0s and-not", level, "");
             break;
 	case Z_Operator_prox:
-            yaz_log (LOG_LOG, "%*.0s proximity", level, "");
+            if (op->u.prox->which == Z_ProximityOperator_known)
+            {
+                switch(*op->u.prox->u.known)
+                {
+                case Z_ProxUnit_character: unit = "character"; break;
+                case Z_ProxUnit_word: unit = "word"; break;
+                case Z_ProxUnit_sentence: unit = "sentence"; break;
+                case Z_ProxUnit_paragraph: unit = "paragraph"; break;
+                case Z_ProxUnit_section: unit = "section"; break;
+                case Z_ProxUnit_chapter: unit = "chapter"; break;
+                case Z_ProxUnit_document: unit = "document"; break;
+                case Z_ProxUnit_element: unit = "element"; break;
+                case Z_ProxUnit_subelement: unit = "subelement"; break;
+                case Z_ProxUnit_elementType: unit = "elementType"; break;
+                case Z_ProxUnit_byte: unit = "byte"; break;
+                default: unit = "unknown"; break;
+                }
+            }
+            rstr = relToStr(*op->u.prox->relationType);
+            yaz_log (LOG_LOG, "%*.0s prox excl=%s dist=%d order=%s "
+                     "rel=%s unit=%s",
+                     level, "", op->u.prox->exclusion ?
+                     (*op->u.prox->exclusion ? "T" : "F") : "N", 
+                     *op->u.prox->distance,
+                     *op->u.prox->ordered ? "T" : "F",
+                     rstr ? rstr : "unknown",
+                     unit);
 	    break;
         default:
             yaz_log (LOG_LOG, "%*.0s unknown complex", level, "");

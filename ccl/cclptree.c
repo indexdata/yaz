@@ -44,7 +44,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.10 2002-07-12 12:11:33 ja7 Exp $
+ * $Id: cclptree.c,v 1.11 2002-12-28 12:13:03 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -98,30 +98,50 @@ void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
                     fprintf (fd_out, "@attr %d=%d ", attr->type, attr->value);
         }
 		fprintf (fd_out, "\"%s\"\n", rpn->u.t.term);
-	break;
+        break;
     case CCL_RPN_AND:
-	fprintf (fd_out, "@and \n");
-	ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
-	ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
-	break;
+        fprintf (fd_out, "@and \n");
+        ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
+        ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
+        break;
     case CCL_RPN_OR:
-	fprintf (fd_out, "@or \n");
-	ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
-	ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
-	break;
+        fprintf (fd_out, "@or \n");
+        ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
+        ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
+        break;
     case CCL_RPN_NOT:
-	fprintf (fd_out, "@not ");
-	ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
-	ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
-	break;
+        fprintf (fd_out, "@not ");
+        ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
+        ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
+        break;
     case CCL_RPN_SET:
-	fprintf (fd_out, "set=%s ", rpn->u.setname);
-	break;
+        fprintf (fd_out, "set=%s ", rpn->u.setname);
+        break;
     case CCL_RPN_PROX:
-	fprintf (fd_out, "@prox ");
-	ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
-	ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
-	break;
+        if (rpn->u.p[2] && rpn->u.p[2]->kind == CCL_RPN_TERM)
+        {
+            const char *cp = rpn->u.p[2]->u.t.term;
+            /* exlusion distance ordered relation which-code unit-code */
+            if (*cp == '!')
+            {   
+                /* word order specified */
+                if (isdigit(cp[1]))
+                    fprintf(fd_out, "@prox 0 %s 1 2 known 2", cp+1);
+                else
+                    fprintf(fd_out, "@prox 0 1 1 2 known 2");
+            } 
+            else if (*cp == '%')
+            {
+                /* word order not specified */
+                if (isdigit(cp[1]))
+                    fprintf(fd_out, "@prox 0 %s 0 2 known 2", cp+1);
+                else
+                    fprintf(fd_out, "@prox 0 1 0 2 known 2");
+            }
+        }
+        ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
+        ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
+        break;
     default:
 		fprintf(stderr,"Internal Error Unknown ccl_rpn node type %d\n",rpn->kind);
     }

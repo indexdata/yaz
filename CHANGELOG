@@ -2,6 +2,11 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.9.3 2002/MM/DD
 
+CCL proximity operators !n, %n converts to PQF @prox 0 n 1 2 k 2
+and @prox 0 n 0 1 k 2 respectively, meaning: exlusion=false,
+distance=n, order=true/false, relation=le, prox unit=word. If
+n is omitted, distance 1 is used.
+
 For TCP/IP COMSTACK, set recv buffer to an appropriate "large" value
 on Solaris. Patch from Ko van der Sloot.
 

@@ -45,7 +45,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.12 2002-06-06 13:02:01 adam Exp $
+ * $Id: ccl.h,v 1.13 2002-12-28 12:13:03 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -125,7 +125,7 @@ struct ccl_rpn_attr {
 struct ccl_rpn_node {
     int kind;
     union {
-	struct ccl_rpn_node *p[2];
+	struct ccl_rpn_node *p[3];
 	struct {
 	    char *term;
 	    struct ccl_rpn_attr *attr_list;
