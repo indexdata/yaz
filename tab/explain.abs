@@ -2,8 +2,7 @@
 # explain data. On request, records are mapped to the proper Explain ASN.1
 # before transmission.
 #
-# $Id: explain.abs,v 1.13 1998-06-09 13:21:32 adam Exp $
-#
+# $Id: explain.abs,v 1.14 1998-10-13 20:52:18 adam Exp $
 
 name explain
 reference Explain-schema

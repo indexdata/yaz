@@ -1,6 +1,6 @@
+# $Id: bib1.att,v 1.8 1998-10-13 20:52:17 adam Exp $
 name bib1
 reference Bib-1
-ordinal 1
 
 att 1               Personal-name
 att 2               Corporate-name

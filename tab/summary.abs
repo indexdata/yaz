@@ -1,6 +1,6 @@
-#
 # Summary record abstract syntax
 #
+# $Id: summary.abs,v 1.2 1998-10-13 20:52:27 adam Exp $
 
 name summary
 tagset summary.tag

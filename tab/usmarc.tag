@@ -1,4 +1,6 @@
 # Pseudo-tagset for USMARC
+#
+# $Id: usmarc.tag,v 1.2 1998-10-13 20:52:32 adam Exp $
 
 name usmarc
 type 4

@@ -1,6 +1,6 @@
-#
 # Tag set for internal Explain-data management
 #
+# $Id: explain.tag,v 1.10 1998-10-13 20:52:20 adam Exp $
 
 name explain
 reference Explain-tagset

@@ -1,6 +1,6 @@
-#
 # Tagset for Summary profile
 #
+# $Id: summary.tag,v 1.2 1998-10-13 20:52:28 adam Exp $
 
 name summary
 type 4

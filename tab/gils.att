@@ -1,23 +1,7 @@
+# $Id: gils.att,v 1.5 1998-10-13 20:52:24 adam Exp $
 name gils
 reference GILS-attset
 include bib1.att
-ordinal 2
-
-# att 4		 Title
-# att 12	 Local-Number				# Local-control-number
-# att 29	 Local-Subject-Index			# Subject Terms Uncont.
-# att 31         Date-of-Publication 
-# att 54         Code-language                          # Language-of-Resource
-# att 59         Place-Publication                      # Place-of-Publication
-# att 62         Abstract
-# att 1003       Author
-# att 1005	 Author-Name-Corporate			# originator
-# att 1007       Identifier-Standard                    # Control-Identifier
-# att 1012	 Date/Time-Last-Modified		# date-of-last-modific.
-# att 1016	 Any
-# att 1019	 Record-Source
-# att 1031       Material-type                          # Medium
-# att 1035	 Anywhere
 
 att 2000         Distributor
 att 2001	 Distributor-Name

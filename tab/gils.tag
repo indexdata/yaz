@@ -1,3 +1,6 @@
+# Tag set for GILS version 2.
+#
+# $Id: gils.tag,v 1.7 1998-10-13 20:52:25 adam Exp $
 name gils
 type 4
 include tagsetm.tag

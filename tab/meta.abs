@@ -1,6 +1,6 @@
-#
 # This is a simple profile based on the Dublin Core of metadata elements.
-# Tags are pulled from tagsetG when 
+#
+# $Id: meta.abs,v 1.5 1998-10-13 20:52:26 adam Exp $
 
 name meta
 attset bib1.att

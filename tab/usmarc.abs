@@ -1,3 +1,4 @@
+# $Id: usmarc.abs,v 1.6 1998-10-13 20:52:30 adam Exp $
 name usmarc
 reference USmarc
 attset bib1.att
