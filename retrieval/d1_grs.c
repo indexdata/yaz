@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.20  2002-05-13 14:13:37  adam
+ * Revision 1.21  2002-05-28 21:09:44  adam
+ * schema mapping supports duplicate maps (copy instead of pointer swap)
+ *
+ * Revision 1.20  2002/05/13 14:13:37  adam
  * XML reader for data1 (EXPAT)
  *
  * Revision 1.19  2002/04/15 09:06:30  adam
@@ -199,32 +202,32 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 
 	switch (n->u.data.what)
 	{
-	    case DATA1I_num:
-	    	res->which = Z_ElementData_numeric;
-		res->u.numeric = (int *)odr_malloc(o, sizeof(int));
-		*res->u.numeric = atoi(n->u.data.data);
-		*len += 4;
-		break;
-	    case DATA1I_text:
-	        toget = n->u.data.len;
-		if (p && p->u.tag.get_bytes > 0 && p->u.tag.get_bytes < toget)
-		    toget = p->u.tag.get_bytes;
-	    	res->which = Z_ElementData_string;
-		res->u.string = (char *)odr_malloc(o, toget+1);
-		memcpy(res->u.string, n->u.data.data, toget);
-		res->u.string[toget] = '\0';
-		*len += toget;
-		break;
-	    case DATA1I_oid:
-	        res->which = Z_ElementData_oid;
-		strncpy(str, n->u.data.data, n->u.data.len);
-		str[n->u.data.len] = '\0';
-		res->u.oid = odr_getoidbystr(o, str);
-		*len += n->u.data.len;
-		break;
-	    default:
-	    	yaz_log(LOG_WARN, "Can't handle datatype.");
-		return 0;
+        case DATA1I_num:
+            res->which = Z_ElementData_numeric;
+            res->u.numeric = (int *)odr_malloc(o, sizeof(int));
+            *res->u.numeric = atoi(n->u.data.data);
+            *len += 4;
+            break;
+        case DATA1I_text:
+            toget = n->u.data.len;
+            if (p && p->u.tag.get_bytes > 0 && p->u.tag.get_bytes < toget)
+                toget = p->u.tag.get_bytes;
+            res->which = Z_ElementData_string;
+            res->u.string = (char *)odr_malloc(o, toget+1);
+            memcpy(res->u.string, n->u.data.data, toget);
+            res->u.string[toget] = '\0';
+            *len += toget;
+            break;
+        case DATA1I_oid:
+            res->which = Z_ElementData_oid;
+            strncpy(str, n->u.data.data, n->u.data.len);
+            str[n->u.data.len] = '\0';
+            res->u.oid = odr_getoidbystr(o, str);
+            *len += n->u.data.len;
+            break;
+        default:
+            yaz_log(LOG_WARN, "Can't handle datatype.");
+            return 0;
 	}
     }
     else
@@ -243,7 +246,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
     Z_TaggedElement *res = (Z_TaggedElement *)odr_malloc(o, sizeof(*res));
     data1_tag *tag = 0;
     data1_node *data;
-    int leaf;
+    int leaf = 0;
 
     if (n->which == DATA1N_tag)
     {
@@ -339,7 +342,8 @@ Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
     for (c = n->child; c; c = c->next)
 	num_children++;
 
-    res->elements = (Z_TaggedElement **)odr_malloc(o, sizeof(Z_TaggedElement *) * num_children);
+    res->elements = (Z_TaggedElement **)
+        odr_malloc(o, sizeof(Z_TaggedElement *) * num_children);
     res->num_elements = 0;
     for (c = n->child; c; c = c->next)
     {

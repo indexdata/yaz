@@ -1,70 +1,9 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: d1_marc.c,v $
- * Revision 1.18  2002-05-27 12:34:24  adam
- * Fixed is_indicator
- *
- * Revision 1.17  2002/04/04 20:49:46  adam
- * New functions yaz_is_abspath, yaz_path_fopen_base
- *
- * Revision 1.16  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.15  1999/10/21 12:06:29  adam
- * Retrieval module no longer uses ctype.h - functions.
- *
- * Revision 1.14  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.13  1998/10/13 16:09:52  adam
- * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
- * Added support for multiple attribute set references and tagset references
- * from an abstract syntax file.
- * Fixed many bad logs-calls in routines that read the various
- * specifications regarding data1 (*.abs,*.att,...) and made the messages
- * consistent whenever possible.
- * Added extra 'lineno' argument to function readconf_line.
- *
- * Revision 1.12  1998/02/23 10:57:09  adam
- * Take care of integer data nodes as well in conversion.
- *
- * Revision 1.11  1998/02/11 11:53:35  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.10  1997/09/30 11:50:04  adam
- * Added handler data1_get_map_buf that is used by data1_nodetomarc.
- *
- * Revision 1.9  1997/09/24 13:35:45  adam
- * Added two members to data1_marctab to ease reading of weird MARC records.
- *
- * Revision 1.8  1997/09/17 12:10:37  adam
- * YAZ version 1.4.
- *
- * Revision 1.7  1997/09/05 09:50:57  adam
- * Removed global data1_tabpath - uses data1_get_tabpath() instead.
- *
- * Revision 1.6  1997/09/04 13:51:58  adam
- * Added data1 to marc conversion with indicators.
- *
- * Revision 1.5  1997/09/04 13:48:04  adam
- * Added data1 to marc conversion.
- *
- * Revision 1.4  1996/03/25 10:18:03  quinn
- * Removed trailing whitespace from data elements
- *
- * Revision 1.3  1995/11/01  16:34:57  quinn
- * Making data1 look for tables in data1_tabpath
- *
- * Revision 1.2  1995/11/01  13:54:48  quinn
- * Minor adjustments
- *
- * Revision 1.1  1995/11/01  11:56:08  quinn
- * Added Retrieval (data management) functions en masse.
- *
- *
+ * $Id: d1_marc.c,v 1.19 2002-05-28 21:09:44 adam Exp $
  */
 
 
@@ -268,6 +207,8 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
     yaz_log (LOG_DEBUG, "nodetomarc");
     for (field = n->child; field; field = field->next)
     {
+        int is00X = 0;
+
 	if (field->which != DATA1N_tag)
 	{
 	    yaz_log(LOG_WARN, "Malformed field composition for marc output.");
@@ -279,23 +220,20 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
             + p->length_implementation;
         base_address += 3 + p->length_data_entry + p->length_starting
             + p->length_implementation;
-	if (strncmp(field->u.tag.tag, "00", 2))
-            len += p->indicator_length;      /* this is fairly bogus */
 	subf = field->child;
+
+	if (subf->which == DATA1N_data)
+            is00X = 1;
 	
+        if (!is00X)
+            len += p->indicator_length;  
 	/*  we'll allow no indicator if length is not 2 */
 	if (is_indicator (p, subf))
 	    subf = subf->child;
 
         for (; subf; subf = subf->next)
         {
-	    if (subf->which != DATA1N_tag)
-	    {
-		yaz_log(LOG_WARN,
-		    "Malformed subfield composition for marc output.");
-		return -1;
-	    }
-            if (strncmp(field->u.tag.tag, "00", 2))
+            if (!is00X)
                 len += p->identifier_length;
 	    get_data(subf, &dlen);
             len += dlen;
@@ -325,6 +263,8 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
 
     for (field = n->child; field; field = field->next)
     {
+        int is00X = 0;
+
         int data_0 = data_p;
 	char *indicator_data = "    ";
 	if (selected && !field->u.tag.node_selected)
@@ -332,12 +272,15 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
 
 	subf = field->child;
 
+        if (subf->which == DATA1N_data)
+            is00X = 1;
+
 	if (is_indicator (p, subf))
 	{
             indicator_data = subf->u.tag.tag;
 	    subf = subf->child;
 	}
-        if (strncmp(field->u.tag.tag, "00", 2))   /* bogus */
+        if (!is00X)
         {
             memcpy (op + data_p, indicator_data, p->indicator_length);
             data_p += p->indicator_length;
@@ -346,10 +289,15 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
         {
 	    char *data;
 
-            if (strncmp(field->u.tag.tag, "00", 2))
+            if (!is00X)
             {
+                const char *identifier = "a";
+                if (subf->which != DATA1N_tag)
+                    yaz_log(LOG_WARN, "Malformed fields for marc output.");
+                else
+                    identifier = subf->u.tag.tag;
                 op[data_p] = ISO2709_IDFS;
-                memcpy (op + data_p+1, subf->u.tag.tag, p->identifier_length-1);
+                memcpy (op + data_p+1, identifier, p->identifier_length-1);
                 data_p += p->identifier_length;
             }
 	    data = get_data(subf, &dlen);

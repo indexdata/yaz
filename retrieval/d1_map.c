@@ -1,83 +1,9 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: d1_map.c,v $
- * Revision 1.21  2002-05-07 11:02:56  adam
- * data1 backwards compatibility
- *
- * Revision 1.20  2002/05/03 13:48:27  adam
- * data1 cleanup
- *
- * Revision 1.19  2002/04/04 20:49:46  adam
- * New functions yaz_is_abspath, yaz_path_fopen_base
- *
- * Revision 1.18  2000/11/29 14:22:47  adam
- * Implemented XML/SGML attributes for data1 so that d1_read reads them
- * and d1_write generates proper attributes for XML/SGML records. Added
- * register locking for threaded version.
- *
- * Revision 1.17  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.16  1999/10/21 12:06:29  adam
- * Retrieval module no longer uses ctype.h - functions.
- *
- * Revision 1.15  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.14  1998/10/13 16:09:50  adam
- * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
- * Added support for multiple attribute set references and tagset references
- * from an abstract syntax file.
- * Fixed many bad logs-calls in routines that read the various
- * specifications regarding data1 (*.abs,*.att,...) and made the messages
- * consistent whenever possible.
- * Added extra 'lineno' argument to function readconf_line.
- *
- * Revision 1.13  1998/02/11 11:53:35  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.12  1997/11/18 09:51:09  adam
- * Removed element num_children from data1_node. Minor changes in
- * data1 to Explain.
- *
- * Revision 1.11  1997/09/17 12:10:36  adam
- * YAZ version 1.4.
- *
- * Revision 1.10  1997/09/05 09:50:56  adam
- * Removed global data1_tabpath - uses data1_get_tabpath() instead.
- *
- * Revision 1.9  1996/06/10 08:56:02  quinn
- * Work on Summary.
- *
- * Revision 1.8  1996/05/01  12:45:31  quinn
- * Support use of local tag names in abs file.
- *
- * Revision 1.7  1995/12/13  13:44:31  quinn
- * Modified Data1-system to use nmem
- *
- * Revision 1.6  1995/12/12  16:37:08  quinn
- * Added destroy element to data1_node.
- *
- * Revision 1.5  1995/12/12  14:11:31  quinn
- * More work on the large-record problem.
- *
- * Revision 1.4  1995/12/11  15:22:37  quinn
- * Added last_child field to the node.
- * Rewrote schema-mapping.
- *
- * Revision 1.3  1995/11/01  16:34:56  quinn
- * Making data1 look for tables in data1_tabpath
- *
- * Revision 1.2  1995/11/01  13:54:46  quinn
- * Minor adjustments
- *
- * Revision 1.1  1995/11/01  11:56:08  quinn
- * Added Retrieval (data management) functions en masse.
- *
- *
+ * $Id: d1_map.c,v 1.22 2002-05-28 21:09:44 adam Exp $
  */
 
 #include <stdio.h>
@@ -290,6 +216,27 @@ static int tagmatch(data1_node *n, data1_maptag *t)
     return 1;
 }
 
+static data1_node *dup_child (data1_handle dh, data1_node *n,
+                              data1_node **last, NMEM mem,
+                              data1_node *parent)
+{
+    data1_node *first = 0;
+    data1_node **m = &first;
+
+    for (; n; n = n->next)
+    {
+        *last = *m = nmem_malloc (mem, sizeof(**m));
+        memcpy (*m, n, sizeof(**m));
+        
+        (*m)->parent = parent;
+        (*m)->root = parent->root;
+        (*m)->child = dup_child(dh, n->child, &(*m)->last_child, mem, *m);
+        m = &(*m)->next;
+    }
+    *m = 0;
+    return first;
+}
+
 static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 			data1_node *res, NMEM mem)
 {
@@ -325,13 +272,11 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 			    pn = cur;
 			else if (!m->no_data)
 			{
-			    cur->child = c->child;
-			    cur->last_child = c->last_child;
-			    c->child = 0;
-			    c->last_child = 0;
+                            cur->child =
+                                dup_child (dh, c->child,
+                                           &cur->last_child, mem, cur);
 			}
 		    }
-		    break;
 		}
 	    }
 	    if (map_children(dh, c, map, res, mem) < 0)
