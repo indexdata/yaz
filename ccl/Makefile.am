@@ -1,8 +1,10 @@
-## $Id: Makefile.am,v 1.4 2001-03-18 20:45:39 ja7 Exp $
+## $Id: Makefile.am,v 1.5 2001-03-19 21:30:06 adam Exp $
 
 noinst_LTLIBRARIES = libccl.la
 
 noinst_PROGRAMS = cclsh
+
+EXTRA_DIST = bib1
 
 LIBS = $(READLINE_LIBS)
 
