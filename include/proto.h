@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.28  1996-01-02 08:57:32  quinn
+ * Revision 1.29  1996-01-02 11:46:49  quinn
+ * Changed 'operator' to 'roperator' to avoid C++ conflict.
+ * Moved to pl3
+ *
+ * Revision 1.28  1996/01/02  08:57:32  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.27  1995/10/12  10:34:46  quinn
@@ -475,7 +479,7 @@ typedef struct Z_Complex
 {
     struct Z_RPNStructure *s1;
     struct Z_RPNStructure *s2;
-    Z_Operator *operator;
+    Z_Operator *roperator;
 } Z_Complex;
 
 typedef struct Z_RPNStructure

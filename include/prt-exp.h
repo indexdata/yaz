@@ -114,7 +114,7 @@ typedef struct Z_NetworkAddress
 
 typedef struct Z_PrivateCapOperator
 {
-    char *operator;
+    char *roperator;
     Z_HumanString *description;             /* OPTIONAL */
 } Z_PrivateCapOperator;
     
