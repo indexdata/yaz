@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implement chunked HTTP transfer.
+
 For SSL, use -lssl -lcrypto on systems that don't have pkg-config.
 
 --- 2.0.12 2004/02/16
