@@ -2,13 +2,14 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaziconv.c,v 1.2 2005-01-15 19:47:15 adam Exp $
+ * $Id: yaziconv.c,v 1.3 2005-01-17 13:09:43 adam Exp $
  */
 
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
+#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
