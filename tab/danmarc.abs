@@ -1,6 +1,12 @@
 name danmarc
 reference DANmarc
-attset bib1.att dan1.att
+attset bib1.att
+attset dan1.att
+
+marc danmarc.mar
+
+esetname B @
+esetname F @
 
 elm 10          DanBib-ID-nummer                    -
 elm 10/?        DanBib-ID-nummer                    Item-number
@@ -38,25 +44,25 @@ elm 20/?/a      Landekode-for-nationalbibliografi   -
 elm 20/?/b      Nationalbibliografisk-nummer        Item-number
 
 elm 21          ISBN                                -
-elm 21/?        ISBN                                ISBN,Identifier--standard,Item-number
-elm 21/?/a      ISBN                                ISBN,Identifier--standard,Item-number
+elm 21/?        ISBN                                ISBN,Identifier-standard,Item-number
+elm 21/?/a      ISBN                                ISBN,Identifier-standard,Item-number
 elm 21/?/b      Tilføjelse                          -
 elm 21/?/c      Bindtype                            -
 elm 21/?/d      Anskaffelsesvilkår/pris             -
 elm 21/?/n      Bestillingsnummer                   Item-number
-elm 21/?/x      Fejltryk-eller-fejlagtigt-anvendt-ISBN  ISBN,Identifier--standard,Item-number
+elm 21/?/x      Fejltryk-eller-fejlagtigt-anvendt-ISBN  ISBN,Identifier-standard,Item-number
 
 elm 22          ISSN                                -
-elm 22/?        ISSN                                ISBN,Identifier--standard,Item-number
-elm 22/?/a      ISSN                                ISBN,Identifier--standard,Item-number
+elm 22/?        ISSN                                ISBN,Identifier-standard,Item-number
+elm 22/?/a      ISSN                                ISBN,Identifier-standard,Item-number
 elm 22/?/b      Tilføjelse                          -
 elm 22/?/c      Bindtype                            -
 elm 22/?/d      Anskaffelsesvilkår/pris             -
-elm 22/?/z      Fejlagtigt-tildelt-ISSN             ISBN,Identifier--standard,Item-number
+elm 22/?/z      Fejlagtigt-tildelt-ISSN             ISBN,Identifier-standard,Item-number
 
 elm 28          ISMN                                -
-elm 28/?        ISMN                                ISBN,Identifier--standard,Item-number
-elm 28/?/a      ISMN                                ISBN,Identifier--standard,Item-number
+elm 28/?        ISMN                                ISBN,Identifier-standard,Item-number
+elm 28/?/a      ISMN                                ISBN,Identifier-standard,Item-number
 elm 28/?/b      Tilføjelse                          -
 elm 28/?/c      Bindtype                            -
 elm 28/?/d      Anskaffelsesvilkår/pris             -
@@ -71,14 +77,14 @@ elm 32/?        Kode-for-natio-eller-fagbibliografi Catalogue-code
 elm 32/?/a      Kode-for-nationalbibliografi        Catalogue-code
 elm 32/?/x      Kode-for-fagbibliografi             Catalogue-code
 
-elm 34          Kodede-matematiske-oplysninger      -
-elm 34/?        Kodede-matematiske-oplysninger      Code-map-scale
-elm 34/?/a      Målestokstype                       Code-map-scale
-elm 34/?/b      Konstant-lineær-vandret-målestok    Code-map-scale
-elm 34/?/d      Koordinater                         Code-map-scale
-elm 34/?/e      Koordinater                         Code-map-scale
-elm 34/?/f      Koordinater                         Code-map-scale
-elm 34/?/g      Koordinater                         Code-map-scale
+#elm 34          Kodede-matematiske-oplysninger      -
+#elm 34/?        Kodede-matematiske-oplysninger      Code-map-scale
+#elm 34/?/a      Målestokstype                       Code-map-scale
+#elm 34/?/b      Konstant-lineær-vandret-målestok    Code-map-scale
+#elm 34/?/d      Koordinater                         Code-map-scale
+#elm 34/?/e      Koordinater                         Code-map-scale
+#elm 34/?/f      Koordinater                         Code-map-scale
+#elm 34/?/g      Koordinater                         Code-map-scale
 
 elm 38          Opstillingskode-for-børnelitteratur -
 elm 38/?        Opstillingskode-for-børnelitteratur -
@@ -91,8 +97,8 @@ elm 39/?/a      Opstillingskode-for-musikoptagelser -
 elm 41          Sprogkode                           -
 elm 41/?        Sprogkode                           -
 elm 41/?/a      Materialets-sprog                   Code-language
-elm 41/?/b      Mellemoriginalens-sprog             Code-language-original
-elm 41/?/c      Originaludgavens-sprog              Code-language-original
+#elm 41/?/b      Mellemoriginalens-sprog             Code-language-original
+#elm 41/?/c      Originaludgavens-sprog              Code-language-original
 elm 41/?/d      Sprog-i-resuméer                    Code-language
 elm 41/?/e      Sprog-i-mindre-dele-af-materialet   Code-language
 elm 41/?/p      Sprog-i-parallel-tekst              Code-language
@@ -113,29 +119,35 @@ elm 44/?/a      Kode-for-skoleretning               Subject-FUI
 elm 44/?/b      Kode-for-fag-og-undervisningsmateriale  Subject-FUI
 
 elm 50          LC-klassifikation                   -
-elm 50/?        LC-klassifikation                   Classification-LC
+#elm 50/?        LC-klassifikation                   Classification-LC
+elm 50/?        LC-klassifikation                   -
 elm 50/?/a      LC-klassifikation                   -
 elm 50/?/b      Materialenummer                     -
 
 elm 60          NLM-klassifikation                  -
-elm 60/?        NLM-klassifikation                  Classification-NLM
+#elm 60/?        NLM-klassifikation                  Classification-NLM
+elm 60/?        NLM-klassifikation                  -
 elm 60/?/a      NLM-klassifikation                  -
 elm 60/?/b      Materialenummer                     -
 
 elm 70          NAL-klassifikation                  -
-elm 70/?        NAL-klassifikation                  Classification-NAL
+#elm 70/?        NAL-klassifikation                  Classification-NAL
+elm 70/?        NAL-klassifikation                  -
 elm 70/?/a      Materialenummer                     -
 
 elm 79          DB-klassifikation                   -
-elm 79/?        DB-klassifikation                   Classification-DB 
+elm 79/?        DB-klassifikation                   -
+#elm 79/?        DB-klassifikation                   Classification-DB 
 elm 79/?/a      Systemkode                          -
 
 elm 80          UDK                                 -
-elm 80/?        UDK                                 Classification-UDC
+#elm 80/?        UDK                                 Classification-UDC
+elm 80/?        UDK                                 -
 elm 80/?/a      UDK-notation                        -
 
 elm 82          DDC                                 -
-elm 82/?        DDC                                 Classification-Dewey
+elm 82/?        DDC                                 -
+#elm 82/?        DDC                                 Classification-Dewey
 elm 82/?/a      Basisnummer                         -
 elm 82/?/b      Udgivelse                           -
 elm 82/?/c      DDC-udgave                          -
@@ -146,19 +158,20 @@ elm 83/?/a      Felt-083                            -
 elm 83/?/b      Felt-083                            -
 
 elm 85          BCM-klassifikation                  -
-elm 85/?        BCM-klassifikation                  Classification-BCM
+elm 85/?        BCM-klassifikation                  -
+#elm 85/?        BCM-klassifikation                  Classification-BCM
 elm 85/?/a      BCM-klassifikation                  -
 elm 85/?/b      BCM-klassifikation                  -
 elm 85/?/c      BCM-klassifikation                  -
 
 elm 87          Lokal-klassifikationsnotation-1     -
 elm 87/?        Lokal-klassifikationsnotation-1     -
-elm 87/?/a      Lokal-klassifikationsnotation-1     Classification-local
+#elm 87/?/a      Lokal-klassifikationsnotation-1     Classification-local
 elm 87/?/b      Lokal-klassifikationsnotation-1     -
 
 elm 88          Lokal-klassifikationsnotation-2     -
 elm 88/?        Lokal-klassifikationsnotation-2     -
-elm 88/?/a      Lokal-klassifikationsnotation-2     Classification-local
+#elm 88/?/a      Lokal-klassifikationsnotation-2     Classification-local
 elm 88/?/b      Lokal-klassifikationsnotation-2     -
 elm 88/?/c      Lokal-klassifikationsnotation-2     -
 elm 88/?/d      Lokal-klassifikationsnotation-2     -
@@ -172,7 +185,7 @@ elm 88/?/u      Lokal-klassifikationsnotation-2     -
 
 elm 89          Lokal-klassifikationsnotation-3     -
 elm 89/?        Lokal-klassifikationsnotation-3     -
-elm 89/?/a      Lokal-klassifikationsnotation-3     Classification-local
+#elm 89/?/a      Lokal-klassifikationsnotation-3     Classification-local
 elm 89/?/b      Lokal-klassifikationsnotation-3     -
 elm 89/?/c      Lokal-klassifikationsnotation-3     -
 
@@ -183,21 +196,21 @@ elm 96/?/n      Lokal-opstillingssignatur           -
 elm 96/?/z      Lokaliseringskode                   -
 
 elm 100         Personnavn                  -
-elm 100/?       Personnavn                  Author-name:w,Author-name:p,Author-name-personal:w,Author-name-personal:p,Shelf-mark
-elm 100/?/a     Efternavn/fornavn-alene     Author-name:w,Author-name:p,Author-name-personal:w,Author-name-personal:p,Shelf-mark
-elm 100/?/c     Fødselsår                   Author-name:w,Author-name:p,Author-name-personal:w,Author-name-personal:p,Shelf-mark
-elm 100/?/f     Tilføjelse                  Author-name:w,Author-name:p,Author-name-personal:w,Author-name-personal:p,Shelf-mark
-elm 100/?/h     Fornavn                     Author-name:w,Author-name:p,Author-name-personal:w,Author-name-personal:p,Shelf-mark
-elm 100/?/k     Fuldt-udskrevet-fornavn     Author-name:w,Author-name:p,Author-name-personal:w,Author-name-personal:p,Shelf-mark
+elm 100/?       Personnavn                  Personal-name:w,Personal-name:p,Shelf-mark
+#elm 100/?/a     Efternavn/fornavn-alene     Personal-name:w,Personal-name:p,Personal-name-personal:w,Personal-name-personal:p,Shelf-mark
+#elm 100/?/c     Fødselsår                   Personal-name:w,Personal-name:p,Personal-name-personal:w,Personal-name-personal:p,Shelf-mark
+#elm 100/?/f     Tilføjelse                  Personal-name:w,Personal-name:p,Personal-name-personal:w,Personal-name-personal:p,Shelf-mark
+#elm 100/?/h     Fornavn                     Personal-name:w,Personal-name:p,Personal-name-personal:w,Personal-name-personal:p,Shelf-mark
+#elm 100/?/k     Fuldt-udskrevet-fornavn     Personal-name:w,Personal-name:p,Personal-name-personal:w,Personal-name-personal:p,Shelf-mark
 
 elm 110         Korporationsnavn-opstillingselement     -
-elm 110/?       Korporationsnavn-opstillingselement     Author-name:w,Author-name:p,Author-name-corporate:w,Author-name-corporate:p,Shelf-mark
-elm 110/?/a     Korporationsnavn                        Author-name:w,Author-name:p,Author-name-corporate:w,Author-name-corporate:p,Shelf-mark
-elm 110/?/c     Underkorporation                        Author-name:w,Author-name:p,Author-name-corporate:w,Author-name-corporate:p,Shelf-mark
-elm 110/?/e     Tilføjelse                              Author-name:w,Author-name:p,Author-name-corporate:w,Author-name-corporate:p,Shelf-mark
-elm 110/?/i     Nummer-på-konference                    Author-name:w,Author-name:p,Author-name-corporate:w,Author-name-corporate:p,Shelf-mark
-elm 110/?/j     Sted-for-konference                     Author-name:w,Author-name:p,Author-name-corporate:w,Author-name-corporate:p,Shelf-mark
-elm 110/?/k     År-for-konference                       Author-name:w,Author-name:p,Author-name-corporate:w,Author-name-corporate:p,Shelf-mark
+elm 110/?       Korporationsnavn-opstillingselement     Personal-name:w,Personal-name:p,Corporate-name:w,Corporate-name:p,Shelf-mark
+#elm 110/?/a     Korporationsnavn                        Personal-name:w,Personal-name:p,Personal-name-corporate:w,Personal-name-corporate:p,Shelf-mark
+#elm 110/?/c     Underkorporation                        Personal-name:w,Personal-name:p,Personal-name-corporate:w,Personal-name-corporate:p,Shelf-mark
+#elm 110/?/e     Tilføjelse                              Personal-name:w,Personal-name:p,Personal-name-corporate:w,Personal-name-corporate:p,Shelf-mark
+#elm 110/?/i     Nummer-på-konference                    Personal-name:w,Personal-name:p,Personal-name-corporate:w,Personal-name-corporate:p,Shelf-mark
+#elm 110/?/j     Sted-for-konference                     Personal-name:w,Personal-name:p,Personal-name-corporate:w,Personal-name-corporate:p,Shelf-mark
+#elm 110/?/k     År-for-konference                       Personal-name:w,Personal-name:p,Personal-name-corporate:w,Personal-name-corporate:p,Shelf-mark
 
 elm 210         Forkortet-nøgletitel                    -
 elm 210/?       Forkortet-nøgletitel                    Title-key,Title,Title:p
@@ -275,21 +288,21 @@ elm 255/?       Nummereringer-og-dateringer   -
 elm 255/?/a     Nummereringer-og-dateringer   -
 
 elm 256         Matematiske-oplysninger-for-kartografiske-materialer    -
-elm 256/?       Matematiske-oplysninger-for-kartografiske-materialer    Code-map-scale
-elm 256/?/a     Målestok                                                Code-map-scale
-elm 256/?/c     Projektion                                              Code-map-scale
+#elm 256/?       Matematiske-oplysninger-for-kartografiske-materialer    Code-map-scale
+#elm 256/?/a     Målestok                                                Code-map-scale
+#elm 256/?/c     Projektion                                              Code-map-scale
 
 elm 260         Publicering/distribution        -
 elm 260/?       Publicering/distribution        -
-elm 260/?/a     Hjemsted-for-forlag             Name-geographic-place-publication
-elm 260/?/b     Navn-på-forlag                  Name-publisher
-elm 260/?/c     Udgivelsesår                    Date-publication
+elm 260/?/a     Hjemsted-for-forlag             Place-publication
+elm 260/?/b     Navn-på-forlag                  Publisher
+elm 260/?/c     Udgivelsesår                    Date-of-Publication
 elm 260/?/d     Adresse-på-forlag               -
 elm 260/?/e     Funktionsangivelse-på-forlag    -
-elm 260/?/f     Hjemsted-for-distributør        Name-geographic-place-publication
+elm 260/?/f     Hjemsted-for-distributør        Place-publication
 elm 260/?/g     Navn-på-distributør             -
 elm 260/?/k     Trykkerioplysninger             -
-elm 260/?/p     Navn-på-forlag/distributør-på-andet-sprog/alfabet   Name-publisher
+elm 260/?/p     Navn-på-forlag/distributør-på-andet-sprog/alfabet   publisher
 
 elm 300         Fysisk-beskrivelse                          -
 elm 300/?       Fysisk-beskrivelse                          -
@@ -314,7 +327,7 @@ elm 440/?/o     Titel-på-sektion                                    Title,Title-
 elm 440/?/p     Seriens-paralleltitel                               Title,Title-series,Title:p
 elm 440/?/v     Nummerering-og-datering-i-serien                    Title,Title-series
 elm 440/?/y     Seriebetegnelse-i-materialets-form                  -
-elm 440/?/z     Seriens-ISSN                                        Identifier-ISSN
+elm 440/?/z     Seriens-ISSN                                        ISSN
 elm 440/?/å     Seriebetegnelse-i-materialets-form                  -
 elm 440/?/æ     Identificerende-ophavsangivelse-til-seriens-titel   -
 elm 440/?/ø     Identificerende-tilføjelse-til-seriens-titel        Title,Title-series,Title:p
@@ -383,7 +396,7 @@ elm 521         Udgavens-oplag          -
 elm 521/?       Udgavens-oplag          -
 elm 521/?/a     Oplagsbetegnelse        -
 elm 521/?/b     Seneste-oplag           -
-elm 521/?/c     Oplagets-udgivelsesår   Date-publication
+elm 521/?/c     Oplagets-udgivelsesår   Date-of-publication
 
 elm 526         Sammenhæng-med-andre-værker -
 elm 526/?       Sammenhæng-med-andre-værker -
@@ -418,7 +431,7 @@ elm 538/?/a     Nummer                          Item-number
 elm 538/?/b     Editionsnummer                  Item-number
 elm 538/?/c     Pladenummer                     Item-number
 elm 538/?/d     Editions-og-pladenummer         Item-number
-elm 538/?/f     Forlag                          Name-publisher
+elm 538/?/f     Forlag                          Publisher
 elm 538/?/g     Forlagsnummer                   Item-number
 
 elm 539         Grundlaget-for-katalogiseringen -
@@ -428,135 +441,136 @@ elm 539/?/a     Grundlaget-for-katalogiseringen -
 elm 557         Periodicum-som-værtspublikation-for-I-analyse   -
 elm 557/?       Periodicum-som-værtspublikation-for-I-analyse   -
 elm 557/?/V     Periodicum-som-værtspublikation-for-I-analyse   -
-elm 557/?/a     Titel                                           Title,Title-host-item,Title:p
+elm 557/?/a     Titel                                           - # Title,Title-host-item,Title:p
 elm 557/?/j     Udgivelsesår                                    -
-elm 557/?/v     Nummerering/datering                            Title,Title-host-item,Title:p
+elm 557/?/v     Nummerering/datering                            - # Title,Title-host-item,Title:p
 
 elm 559         Generel-note            -
 elm 559/?       Generel-note            -
 elm 559/?/a     Generel-note            Note
 
 elm 600         Personnavn-emneord      -
-elm 600/?       Personnavn-emneord      Subject,Subject-name-personal,Subject:p
-elm 600/?/a     Efternavn/fornavn-alene Subject,Subject-name-personal,Subject:p
-elm 600/?/c     Fødselsår               Subject,Subject-name-personal,Subject:p
-elm 600/?/e     Romertal                Subject,Subject-name-personal,Subject:p
-elm 600/?/f     Tilføjelse              Subject,Subject-name-personal,Subject:p
-elm 600/?/h     Fornavn                 Subject,Subject-name-personal,Subject:p
-elm 600/?/k     Fuldt-udskrevet-fornavn Subject,Subject-name-personal,Subject:p
-elm 600/?/x     Underdeling-emne/art    Subject,Subject-name-personal,Subject:p
-elm 600/?/å     Personnavn-emneord      Subject,Subject-name-personal,Subject:p
+#elm 600/?       Personnavn-emneord      Subject-controlled,Subject-name-personal,Subject:p
+#elm 600/?/a     Efternavn/fornavn-alene Subject-controlled,Subject-name-personal,Subject:p
+#elm 600/?/c     Fødselsår               Subject-controlled,Subject-name-personal,Subject:p
+#elm 600/?/e     Romertal                Subject-controlled,Subject-name-personal,Subject:p
+#elm 600/?/f     Tilføjelse              Subject-controlled,Subject-name-personal,Subject:p
+#elm 600/?/h     Fornavn                 Subject-controlled,Subject-name-personal,Subject:p
+#elm 600/?/k     Fuldt-udskrevet-fornavn Subject-controlled,Subject-name-personal,Subject:p
+#elm 600/?/x     Underdeling-emne/art    Subject-controlled,Subject-name-personal,Subject:p
+#elm 600/?/å     Personnavn-emneord      Subject-controlled,Subject-name-personal,Subject:p
 
 elm 610         Korporationsnavn-emneord    -
-elm 610/?       Korporationsnavn-emneord    Subject,Subject-name-corporate,Subject:p
-elm 610/?/a     Korporationsnavn            Subject,Subject-name-corporate,Subject:p
-elm 610/?/c     Underkorporation            Subject,Subject-name-corporate,Subject:p
-elm 610/?/e     Tilføjelse                  Subject,Subject-name-corporate,Subject:p
-elm 610/?/t     Titel                       Subject,Subject-name-corporate,Subject:p
-elm 610/?/x     Underdeling-emne/art        Subject,Subject-name-corporate,Subject:p
-elm 610/?/y     Underdeling-periode         Subject,Subject-name-corporate,Subject:p
+#elm 610/?       Korporationsnavn-emneord    Subject-controlled,Subject-name-corporate,Subject:p
+#elm 610/?/a     Korporationsnavn            Subject-controlled,Subject-name-corporate,Subject:p
+#elm 610/?/c     Underkorporation            Subject-controlled,Subject-name-corporate,Subject:p
+#elm 610/?/e     Tilføjelse                  Subject-controlled,Subject-name-corporate,Subject:p
+#elm 610/?/t     Titel                       Subject-controlled,Subject-name-corporate,Subject:p
+#elm 610/?/x     Underdeling-emne/art        Subject-controlled,Subject-name-corporate,Subject:p
+#elm 610/?/y     Underdeling-periode         Subject-controlled,Subject-name-corporate,Subject:p
 
 elm 621         Emnedata-for-kartografisk-materiale -
-elm 621/?       Emnedata-for-kartografisk-materiale Subject
-elm 621/?/a     Stednavn Subject
-elm 621/?/b     Land/stat Subject
+#elm 621/?       Emnedata-for-kartografisk-materiale Subject
+elm 621/?       Emnedata-for-kartografisk-materiale	-
+#elm 621/?/a     Stednavn Subject
+#elm 621/?/b     Land/stat Subject
 
 elm 630         Kontrolleret-emneord    -
-elm 630/?       Kontrolleret-emneord    Subject,Subject-controlled,Subject:p,Subject-controlled:p
-elm 630/?/a     Kontrolleret-emneord    Subject,Subject-controlled,Subject:p,Subject-controlled:p
-elm 630/?/b     Andre-bibliotekers-kontrollerede-emneord    Subject,Subject-controlled,Subject:p,Subject-controlled:p
-
-elm 631         Ukontrolleret-emneord   -
-elm 631/?       Ukontrolleret-emneord   Subject,Subject-uncontrolled,Subject:p,Subject-uncontrolled:p
-elm 631/?/a     Ukontrolleret-emneord   Subject,Subject-uncontrolled,Subject:p,Subject-uncontrolled:p
-elm 631/?/b     Andre-bibliotekers-ukontrollerede-emneord   Subject,Subject-uncontrolled,Subject:p,Subject-uncontrolled:p
-elm 631/?/f     Ukontrolleret-faglitterært-emneord          Subject,Subject-uncontrolled,Subject:p,Subject-uncontrolled:p
-
+#elm 630/?       Kontrolleret-emneord    Subject-controlled,Subject-controlled,Subject:p,Subject-controlled:p
+#elm 630/?/a     Kontrolleret-emneord    Subject-controlled,Subject-controlled,Subject:p,Subject-controlled:p
+#elm 630/?/b     Andre-bibliotekers-kontrollerede-emneord    Subject-controlled,Subject-controlled,Subject:p,Subject-controlled:p
+#
+#elm 631         Ukontrolleret-emneord   -
+#elm 631/?       Ukontrolleret-emneord   Subject-controlled,Subject-uncontrolled,Subject:p,Subject-uncontrolled:p
+#elm 631/?/a     Ukontrolleret-emneord   Subject-controlled,Subject-uncontrolled,Subject:p,Subject-uncontrolled:p
+#elm 631/?/b     Andre-bibliotekers-ukontrollerede-emneord   Subject-controlled,Subject-uncontrolled,Subject:p,Subject-uncontrolled:p
+#elm 631/?/f     Ukontrolleret-faglitterært-emneord          Subject-controlled,Subject-uncontrolled,Subject:p,Subject-uncontrolled:p
+#
 elm 633         Stednavn                -
-elm 633/?       Stednavn                Subject,Subject-controlled,Subject:p,Subject-controlled:p
-elm 633/?/a     Stednavn                Subject,Subject-controlled,Subject:p,Subject-controlled:p
-
+#elm 633/?       Stednavn                Subject-controlled,Subject-controlled,Subject:p,Subject-controlled:p
+#elm 633/?/a     Stednavn                Subject-controlled,Subject-controlled,Subject:p,Subject-controlled:p
+#
 elm 645         Titel                   -
-elm 645/?       Titel                   Subject,Subject-controlled,Subject:p,Subject-controlled:p
-elm 645/?/c     Titel                   Subject,Subject-controlled,Subject:p,Subject-controlled:p
+elm 645/?       Titel                   Subject-controlled,Subject-controlled:p
+elm 645/?/c     Titel                   Subject-controlled,Subject-controlled:p
 
-elm 650         LC-emneord              -
-elm 650/?       LC-emneord              Subject
-elm 650/?/a     LC-emneord              Subject
-elm 650/?/v     LC-emneord              -
-elm 650/?/x     Underdeling-emne/art    Subject
-elm 650/?/y     Underdeling-periode     Subject
-elm 650/?/z     Underdeling-lokalitet   Subject
+elm 650         LC-emneord              subject-controlled
+#elm 650/?       LC-emneord              Subject-controlled
+#elm 650/?/a     LC-emneord              Subject-controlled
+#elm 650/?/v     LC-emneord              -
+#elm 650/?/x     Underdeling-emne/art    Subject-controlled
+#elm 650/?/y     Underdeling-periode     Subject
+#elm 650/?/z     Underdeling-lokalitet   Subject
 
-elm 651         LC-geografisk-emneord   -
-elm 651/?       LC-geografisk-emneord   Subject
-elm 651/?/a     LC-geografisk-emneord   Subject
-elm 651/?/x     Underdeling-emne/art    Subject
-elm 651/?/z     Underdeling-lokalitet   Subject
+elm 651         LC-geografisk-emneord   subject-controlled
+#elm 651/?       LC-geografisk-emneord   Subject
+#elm 651/?/a     LC-geografisk-emneord   Subject
+#elm 651/?/x     Underdeling-emne/art    Subject
+#elm 651/?/z     Underdeling-lokalitet   Subject
 
 elm 652         DK5-klassemærke         -
 elm 652/?       DK5-klassemærke         -
 elm 652/?/a     Efternavn/navn/korporationsnavn-som-alfabetisk-underdeling  Classification-DK5-alfa-subdivision
-elm 652/?/b     Andet-som-alfabetisk-underdeling                    Classification-DK5-alfa-subdivision,Subject
+elm 652/?/b     Andet-som-alfabetisk-underdeling                    Classification-DK5-alfa-subdivision,Subject-controlled
 elm 652/?/c     Fødselsår                                           Classification-DK5-alfa-subdivision
-elm 652/?/h     Fornavn                                             Classification-DK5-alfa-subdivision,Subject
-elm 652/?/i     Analytisk-klassemærke                               Classification,Classification-DK5-number
-elm 652/?/m     Opstillings-og-hovedplacering                       Classification,Classification-DK5-number,Classification-as-shelf-mark
-elm 652/?/n     Nationalbibliografisk-hovedplacering                Classification,Classification-DK5-number
-elm 652/?/o     Opstillingsklassemærkeog-bibliotekshovedplacering   Classification,Classification-DK5-number
-elm 652/?/p     Biplacering                                         Classification,Classification-DK5-number
-elm 652/?/q     Nationalbibliografisk-biplacering                   Classification,Classification-DK5-number
-elm 652/?/r     Biblioteksbiplacering                               Classification,Classification-DK5-number
+elm 652/?/h     Fornavn                                             Classification-DK5-alfa-subdivision,Subject-controlled
+elm 652/?/i     Analytisk-klassemærke                               Classification-DK5-number
+elm 652/?/m     Opstillings-og-hovedplacering                       Classification-DK5-number,Classification-as-shelf-mark
+elm 652/?/n     Nationalbibliografisk-hovedplacering                Classification-DK5-number
+elm 652/?/o     Opstillingsklassemærkeog-bibliotekshovedplacering   Classification-DK5-number
+elm 652/?/p     Biplacering                                         Classification-DK5-number
+elm 652/?/q     Nationalbibliografisk-biplacering                   Classification-DK5-number
+elm 652/?/r     Biblioteksbiplacering                               Classification-DK5-number
 elm 652/?/v     Tilføjede-cifre-efter-kolon                         -
 elm 652/?/z     Tilføjede-cifre-efter-bindestreg                    -
 elm 652/?/å     Feltnumerator                                       -
 
 elm 654         Forældet-DK5-klassemærke    -
-elm 654/?       Forældet-DK5-klassemærke    Classification
-elm 654/?/p     Biplacering                 Classification
+#elm 654/?       Forældet-DK5-klassemærke    Classification
+#elm 654/?/p     Biplacering                 Classification
 
 elm 660         MeSH-emneord            -
-elm 660/?       MeSH-emneord            Subject,Subject-controlled,Subject-MESH
-elm 660/?/a     MeSH-emneord            Subject,Subject-controlled,Subject-MESH
-elm 660/?/x     Generel-underdeling     Subject,Subject-controlled,Subject-MESH
+elm 660/?       MeSH-emneord            Subject-controlled,Subject-controlled,MESH-Subject
+elm 660/?/a     MeSH-emneord            Subject-controlled,Subject-controlled,MESH-Subject
+elm 660/?/x     Generel-underdeling     Subject-controlled,Subject-controlled,MESH-Subject
 
 elm 661         Europæisk-pædagogisk-tesaurus   -
-elm 661/?       Europæisk-pædagogisk-tesaurus   Subject,Subject-controlled
-elm 661/?/a     Kontrolleret-dansk-emneord      Subject,Subject-controlled
-elm 661/?/b     Kontrolleret-engelsk-emneord    Subject,Subject-controlled
-elm 661/?/c     Ukontrolleret-dansk-emneord     Subject,Subject-controlled
+elm 661/?       Europæisk-pædagogisk-tesaurus   Subject-controlled,Subject-controlled
+elm 661/?/a     Kontrolleret-dansk-emneord      Subject-controlled,Subject-controlled
+elm 661/?/b     Kontrolleret-engelsk-emneord    Subject-controlled,Subject-controlled
+elm 661/?/c     Ukontrolleret-dansk-emneord     Subject-controlled,Subject-controlled
 
 elm 666         Kontrolleret-DBC-emneord            -
 elm 666/?       Kontrolleret-DBC-emneord            -
-elm 666/?/e     Stednavn-som-emneord-faglitteratur  Subject-DBC,Subject,Subject-DBC-non-fiction,Subject-controlled
-elm 666/?/f     Kontrolleret-faglitterært-emneord   Subject-DBC,Subject,Subject-DBC-non-fiction,Subject-controlled
-elm 666/?/i     Tidsangivelse                       Subject-DBC,Subject,Subject-DBC-non-fiction,Subject-controlled
-elm 666/?/l     Stednavn                            Subject-DBC,Subject
-elm 666/?/m     Musikalsk-genre-som-emneord         Subject-DBC,Subject,Subject-DBC-music
-elm 666/?/n     Musikalsk-besætning-som-emneord     Subject-DBC,Subject,Subject-DBC-music
-elm 666/?/o     Formbetegnelse                      Subject-DBC,Subject,Form-as-subject
-elm 666/?/p     Periodebetegnelse                   Subject-DBC,Subject,Subject-DBC-music
-elm 666/?/q     Stednavn-som-emneord-skønlitteratur Subject-DBC,Subject,Subject-DBC-fiction,Subject-controlled
-elm 666/?/s     Kontrolleret-skønlitterært-emneord  Subject-DBC,Subject,Subject-DBC-fiction,Subject-controlled
-elm 666/?/u     Niveau/brugerkategori               Subject-DBC,Subject,Level-as-subject
-elm 666/?/å     Kontrolleret-DBC-emneord            Subject-DBC,Subject
+elm 666/?/e     Stednavn-som-emneord-faglitteratur  Subject-DBC,Subject-controlled,Subject-DBC-non-fiction,Subject-controlled
+elm 666/?/f     Kontrolleret-faglitterært-emneord   Subject-DBC,Subject-controlled,Subject-DBC-non-fiction,Subject-controlled
+elm 666/?/i     Tidsangivelse                       Subject-DBC,Subject-controlled,Subject-DBC-non-fiction,Subject-controlled
+elm 666/?/l     Stednavn                            Subject-DBC,Subject-controlled
+elm 666/?/m     Musikalsk-genre-som-emneord         Subject-DBC,Subject-controlled,Subject-DBC-music
+elm 666/?/n     Musikalsk-besætning-som-emneord     Subject-DBC,Subject-controlled,Subject-DBC-music
+elm 666/?/o     Formbetegnelse                      Subject-DBC,Subject-controlled,Form-as-subject
+elm 666/?/p     Periodebetegnelse                   Subject-DBC,Subject-controlled,Subject-DBC-music
+elm 666/?/q     Stednavn-som-emneord-skønlitteratur Subject-DBC,Subject-controlled,Subject-DBC-fiction,Subject-controlled
+elm 666/?/s     Kontrolleret-skønlitterært-emneord  Subject-DBC,Subject-controlled,Subject-DBC-fiction,Subject-controlled
+elm 666/?/u     Niveau/brugerkategori               Subject-DBC,Subject-controlled,Level-as-subject
+elm 666/?/å     Kontrolleret-DBC-emneord            Subject-DBC,Subject-controlled
 
 elm 668         Genrebetegnelse         -
-elm 668/?       Genrebetegnelse         Subject,Subject-controlled
-elm 668/?/a     Genrebetegnelse         Subject,Subject-controlled
-elm 668/?/b     Underdeling             Subject,Subject-controlled
+elm 668/?       Genrebetegnelse         Subject-controlled
+elm 668/?/a     Genrebetegnelse         Subject-controlled
+elm 668/?/b     Underdeling             Subject-controlled
 
-elm 670         NAL-emneord             -
-elm 670/?       NAL-emneord             Subject-NAL
-elm 670/?/a     NAL-emneord             Subject
+#elm 670         NAL-emneord             -
+#elm 670/?       NAL-emneord             Subject-NAL
+#elm 670/?/a     NAL-emneord             Subject
 
 elm 690         COMPASS-emneord         -
-elm 690/?       COMPASS-emneord         Subject,Subject-COMPASS
-elm 690/?/a     Enkeltord         Subject,Subject-COMPASS
-elm 690/?/b     Flere-ord         Subject,Subject-COMPASS
-elm 690/?/c     Forbindende-tekst         -
-elm 690/?/d     Underdeling-periode         Subject,Subject-COMPASS
-elm 690/?/h     COMPASS-emneord         Subject,Subject-COMPASS
+elm 690/?       COMPASS-emneord         - # Subject-controlled,Subject-COMPASS
+elm 690/?/a     Enkeltord         	- # Subject-controlled,Subject-COMPASS
+elm 690/?/b     Flere-ord         	- # Subject-controlled,Subject-COMPASS
+elm 690/?/c     Forbindende-tekst       -
+elm 690/?/d     Underdeling-periode     - # Subject-controlled,Subject-COMPASS
+elm 690/?/h     COMPASS-emneord         - # Subject-controlled,Subject-COMPASS
 elm 690/?/i     COMPASS-emneord         -
 elm 690/?/m     COMPASS-emneord         -
 elm 690/?/v     COMPASS-emneord         -
@@ -566,25 +580,25 @@ elm 690/?/y     COMPASS-emneord         -
 elm 690/?/z     COMPASS-emneord         -
 
 elm 700         Personnavn              -
-elm 700/?       Personnavn              Author-name,Author-name-personal
-elm 700/?/A     Personnavn              Author-name,Author-name-personal
-elm 700/?/a     Efternavn/fornavn-alene Author-name,Author-name-personal
+elm 700/?       Personnavn              Personal-name
+elm 700/?/A     Personnavn              Personal-name
+elm 700/?/a     Efternavn/fornavn-alene Personal-name
 elm 700/?/b     Funktionsbetegnelse -
-elm 700/?/c     Fødselsår               Author-name,Author-name-personal
-elm 700/?/f     Tilføjelse              Author-name,Author-name-personal
-elm 700/?/h     Fornavn                 Author-name,Author-name-personal
-elm 700/?/k     Fuldt-udskrevet-fornavn Author-name,Author-name-personal
+elm 700/?/c     Fødselsår               Personal-name
+elm 700/?/f     Tilføjelse              Personal-name
+elm 700/?/h     Fornavn                 Personal-name
+elm 700/?/k     Fuldt-udskrevet-fornavn Personal-name
 elm 700/?/å     Personnavn              -
 
 elm 710         Korporationsnavn        -
-elm 710/?       Korporationsnavn        Author-name,Author-name-corporate
-elm 710/?/A     Korporationsnavn        Author-name,Author-name-corporate
-elm 710/?/a     Korporationsnavn        Author-name,Author-name-corporate
-elm 710/?/c     Underkorporation        Author-name,Author-name-corporate
-elm 710/?/e     Tilføjelse              Author-name,Author-name-corporate
-elm 710/?/i     Nummer-på-konference    Author-name,Author-name-corporate
-elm 710/?/j     Sted-for-konference     Author-name,Author-name-corporate
-elm 710/?/k     År-for-konference       Author-name,Author-name-corporate
+elm 710/?       Korporationsnavn        Personal-name
+elm 710/?/A     Korporationsnavn        Personal-name
+elm 710/?/a     Korporationsnavn        Personal-name
+elm 710/?/c     Underkorporation        Personal-name
+elm 710/?/e     Tilføjelse              Personal-name
+elm 710/?/i     Nummer-på-konference    Personal-name
+elm 710/?/j     Sted-for-konference     Personal-name
+elm 710/?/k     År-for-konference       Personal-name
 elm 710/?/å     Korporationsnavn        -
 
 
@@ -604,18 +618,18 @@ elm 745/?/a     Titel                   Title
 elm 745/?/o     Titel-på-afhængig-publikation/supplement    -
 
 elm 770         Personnavn-analyse      -
-elm 770/?       Personnavn-analyse      Author-name,Author-name-personal
+elm 770/?       Personnavn-analyse      Personal-name
 elm 770/?/A     Personnavn-analyse      -
-elm 770/?/a     Efternavn/fornavn-alene Author-name,Author-name-personal
-elm 770/?/c     Fødselsår               Author-name,Author-name-personal
-elm 770/?/f     Tilføjelse              Author-name,Author-name-personal
-elm 770/?/h     Fornavn                 Author-name,Author-name-personal
+elm 770/?/a     Efternavn/fornavn-alene Personal-name
+elm 770/?/c     Fødselsår               Personal-name
+elm 770/?/f     Tilføjelse              Personal-name
+elm 770/?/h     Fornavn                 Personal-name
 elm 770/?/å     Feltnumerator           -
 
 elm 780         Korporationsnavn-analyse    -
-elm 780/?       Korporationsnavn-analyse    Author-name,Author-name-corporate
-elm 780/?/a     Korporationsnavn            Author-name,Author-name-corporate
-elm 780/?/å     Feltnumerator               Author-name,Author-name-corporate
+elm 780/?       Korporationsnavn-analyse    Personal-name,Corporate-name
+elm 780/?/a     Korporationsnavn            Personal-name,Corporate-name
+elm 780/?/å     Feltnumerator               Personal-name,Corporate-name
 
 elm 795         Analytisk-titel                             -
 elm 795/?       Analytisk-titel                             Title
@@ -636,73 +650,73 @@ elm 840/?       Serietitel              -
 elm 840/?/V     Serietitel              -
 elm 840/?/a     Seriens-hovedtitel              Title,Title-series
 elm 840/?/v     Seriens-nummerering/datering    Title,Title-series
-elm 840/?/z     Seriens-ISSN                    Identifier--standard,ISSN,Item-number
+elm 840/?/z     Seriens-ISSN                    Identifier-standard,ISSN,Item-number
 elm 840/?/ø     Identificerende-tilføjelser-til-seriens-titel   Title
 
 elm 860         Tidligere-titel         -
 elm 860/?       Tidligere-titel         -
 elm 860/?/c     Tilføjelse-til-titel    Related-periodical,Title-former
 elm 860/?/t     Hovedtitel              Title-former
-elm 860/?/z     ISSN                    Identifier--standard,ISSN,Item-number
+elm 860/?/z     ISSN                    Identifier-standard,ISSN,Item-number
 
 elm 861         Senere-titel            -
 elm 861/?       Senere-titel            -
-elm 861/?/c     Tilføjelse-til-titel    Related-periodical,Title-later
+elm 861/?/c     Tilføjelse-til-titel    Related-periodical,Title-added-title-page
 elm 861/?/i     Indledende-tekst       -
-elm 861/?/t     Hovedtitel              Related-periodical,Title-later
-elm 861/?/z     ISSN                    Identifier--standard,ISSN,Item-number
+elm 861/?/t     Hovedtitel              Related-periodical,Title-added-title-page
+elm 861/?/z     ISSN                    Identifier-standard,ISSN,Item-number
 
 elm 863         Udgivet-sammen-med      -
 elm 863/?       Udgivet-sammen-med      -
-elm 863/?/t     Hovedtitel              Title-related-periodical
-elm 863/?/z     ISSN                    Identifier--standard,ISSN,Item-number
+elm 863/?/t     Hovedtitel              Title-other-variant
+elm 863/?/z     ISSN                    Identifier-standard,ISSN,Item-number
 
 elm 867         Hovedudgave-på-andet-sprog/andet-indhold    -
 elm 867/?       Hovedudgave-på-andet-sprog/andet-indhold    -
-elm 867/?/t     Hovedtitel                                  Title-related-periodical
-elm 867/?/z     ISSN                                        Identifier--standard,ISSN,Item-number
+elm 867/?/t     Hovedtitel                                  Title-other-variant
+elm 867/?/z     ISSN                                        Identifier-standard,ISSN,Item-number
 
 elm 868         Udgave-på-andet-sprog/andet-indhold     -
 elm 868/?       Udgave-på-andet-sprog/andet-indhold     -
-elm 868/?/t     Hovedtitel                              Title-related-periodical
-elm 868/?/z     ISSN                                    Identifier--standard,ISSN,Item-number
+elm 868/?/t     Hovedtitel                              Title-other-variant
+elm 868/?/z     ISSN                                    Identifier-standard,ISSN,Item-number
 
 elm 870         Hovedpublikation-til-supplement     -
 elm 870/?       Hovedpublikation-til-supplement     -
-elm 870/?/t     Hovedtitel                          Title-related-periodical
-elm 870/?/z     ISSN                                Identifier--standard,ISSN,Item-number
+elm 870/?/t     Hovedtitel                          Title-other-variant
+elm 870/?/z     ISSN                                Identifier-standard,ISSN,Item-number
 
 elm 871         Supplement-til-hovedpublikation     -
 elm 871/?       Supplement-til-hovedpublikation     -
 elm 871/?/c     Tilføjelse-til-titel                -
-elm 871/?/t     Hovedtitel                          Title-related-periodical
+elm 871/?/t     Hovedtitel                          Title-other-variant
 
 elm 874         Underserie              -
 elm 874/?       Underserie              -
-elm 874/?/t     Hovedtitel              Title-related-periodical
-elm 874/?/z     ISSN                    Identifier--standard,ISSN,Item-number
+elm 874/?/t     Hovedtitel              Title-other-variant
+elm 874/?/z     ISSN                    Identifier-standard,ISSN,Item-number
 
 elm 900         Henvisning-fra-personnavn   -
-elm 900/?       Henvisning-fra-personnavn   Author-name,Author-name-personal
+elm 900/?       Henvisning-fra-personnavn   Personal-name
 elm 900/?/A     Henvisning-fra-personnavn   -
-elm 900/?/a     Efternavnet/fornavnet-alene Author-name,Author-name-personal
-elm 900/?/c     Fødselsår                   Author-name,Author-name-personal
-elm 900/?/f     Tilføjelse                  Author-name,Author-name-personal
-elm 900/?/h     Fornavn                     Author-name,Author-name-personal
-elm 900/?/k     Fuldt-udskrevet-fornavn     Author-name,Author-name-personal
+elm 900/?/a     Efternavnet/fornavnet-alene Personal-name
+elm 900/?/c     Fødselsår                   Personal-name
+elm 900/?/f     Tilføjelse                  Personal-name
+elm 900/?/h     Fornavn                     Personal-name
+elm 900/?/k     Fuldt-udskrevet-fornavn     Personal-name
 elm 900/?/w     Ord-hvortil-der-henvises    -
 elm 900/?/x     Forbindende-tekst           -
 elm 900/?/z     Felt/delfeltkode-hvortil-der-henvises   -
 elm 900/?/å     Feltnumerator               -
 
 elm 910         Henvisning-fra-korporationsnavn     -
-elm 910/?       Henvisning-fra-korporationsnavn     Author-name,Author-name-corporate
+elm 910/?       Henvisning-fra-korporationsnavn     Personal-name
 elm 910/?/A     Henvisning-fra-korporationsnavn     -
-elm 910/?/a     Korporationsnavn                    Author-name,Author-name-corporate
-elm 910/?/c     Underkorporation                    Author-name,Author-name-corporate
-elm 910/?/e     Tilføjelse                          Author-name,Author-name-corporate
-elm 910/?/g     Resten-af-korporationsnavn          Author-name,Author-name-corporate
-elm 910/?/h     Forbogstaver/fornavnsforkortelser   Author-name,Author-name-corporate
+elm 910/?/a     Korporationsnavn                    Personal-name
+elm 910/?/c     Underkorporation                    Personal-name
+elm 910/?/e     Tilføjelse                          Personal-name
+elm 910/?/g     Resten-af-korporationsnavn          Personal-name
+elm 910/?/h     Forbogstaver/fornavnsforkortelser   Personal-name
 elm 910/?/w     Ord-hvortil-der-henvises            -
 elm 910/?/x     Forbindende-tekst                   -
 elm 910/?/z     Felt/delfeltkode-hvortil-der-henvises     -
@@ -738,3 +752,4 @@ elm s10/?/a     felt-s10                    -
 elm s45         felt-s45                    -
 elm s45/?       felt-s45                    -
 elm s45/?/a     felt-s45                    -
+
