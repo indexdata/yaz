@@ -71,7 +71,7 @@ elm (4,95)/(4,96)           indexTermsControlled          -
 elm (4,95)/(4,96)/(4,20)    controlledTerm                indexTermsControlled
 elm (4,95)/(4,21)           thesaurus                     !
 elm (4,97)                  localSubjectIndex             -
-elm (4,97)/(4,22)           localSubjectTerm              -
+elm (4,97)/(4,22)           localSubjectTerm              local-subject-index
 elm (4,58)                  methodology                   !
 elm (4,71)                  spatialReference              -
 elm (4,71)/(4,91)           boundingRectangle             -
