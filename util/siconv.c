@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.3 2002-08-28 19:34:36 adam Exp $
+ * $Id: siconv.c,v 1.4 2002-08-30 11:27:44 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -191,47 +191,47 @@ static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
     unsigned char *outp = *outbuf;
     if (x <= 0x7f && *outbytesleft >= 1)
     {
-        *outp++ = x;
+        *outp++ = (unsigned char) x;
         (*outbytesleft)--;
     } 
     else if (x <= 0x7ff && *outbytesleft >= 2)
     {
-        *outp++ = (x >> 6) | 0xc0;
-        *outp++ = (x & 0x3f) | 0x80;
+        *outp++ = (unsigned char) ((x >> 6) | 0xc0);
+        *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
         (*outbytesleft) -= 2;
     }
     else if (x <= 0xffff && *outbytesleft >= 3)
     {
-        *outp++ = (x >> 12) | 0xe0;
-        *outp++ = ((x >> 6) & 0x3f) | 0x80;
-        *outp++ = (x & 0x3f) | 0x80;
+        *outp++ = (unsigned char) ((x >> 12) | 0xe0);
+        *outp++ = (unsigned char) (((x >> 6) & 0x3f) | 0x80);
+        *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
         (*outbytesleft) -= 3;
     }
     else if (x <= 0x1fffff && *outbytesleft >= 4)
     {
-        *outp++ = (x >> 18) | 0xf0;
-        *outp++ = ((x >> 12) & 0x3f) | 0x80;
-        *outp++ = ((x >> 6)  & 0x3f) | 0x80;
-        *outp++ = (x & 0x3f) | 0x80;
+        *outp++ = (unsigned char) ((x >> 18) | 0xf0);
+        *outp++ = (unsigned char) (((x >> 12) & 0x3f) | 0x80);
+        *outp++ = (unsigned char) (((x >> 6)  & 0x3f) | 0x80);
+        *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
         (*outbytesleft) -= 4;
     }
     else if (x <= 0x3ffffff && *outbytesleft >= 5)
     {
-        *outp++ = (x >> 24) | 0xf8;
-        *outp++ = ((x >> 18) & 0x3f) | 0x80;
-        *outp++ = ((x >> 12) & 0x3f) | 0x80;
-        *outp++ = ((x >> 6)  & 0x3f) | 0x80;
-        *outp++ = (x & 0x3f) | 0x80;
+        *outp++ = (unsigned char) ((x >> 24) | 0xf8);
+        *outp++ = (unsigned char) (((x >> 18) & 0x3f) | 0x80);
+        *outp++ = (unsigned char) (((x >> 12) & 0x3f) | 0x80);
+        *outp++ = (unsigned char) (((x >> 6)  & 0x3f) | 0x80);
+        *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
         (*outbytesleft) -= 5;
     }
     else if (*outbytesleft >= 6)
     {
-        *outp++ = (x >> 30) | 0xfc;
-        *outp++ = ((x >> 24) & 0x3f) | 0x80;
-        *outp++ = ((x >> 18) & 0x3f) | 0x80;
-        *outp++ = ((x >> 12) & 0x3f) | 0x80;
-        *outp++ = ((x >> 6)  & 0x3f) | 0x80;
-        *outp++ = (x & 0x3f) | 0x80;
+        *outp++ = (unsigned char) ((x >> 30) | 0xfc);
+        *outp++ = (unsigned char) (((x >> 24) & 0x3f) | 0x80);
+        *outp++ = (unsigned char) (((x >> 18) & 0x3f) | 0x80);
+        *outp++ = (unsigned char) (((x >> 12) & 0x3f) | 0x80);
+        *outp++ = (unsigned char) (((x >> 6)  & 0x3f) | 0x80);
+        *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
         (*outbytesleft) -= 6;
     }
     else 
@@ -254,7 +254,7 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
     }
     else if (*outbytesleft >= 1)
     {
-        *outp++ = x;
+        *outp++ = (unsigned char) x;
         (*outbytesleft)--;
     }
     else 
@@ -273,10 +273,10 @@ static size_t yaz_write_UCS4 (yaz_iconv_t cd, unsigned long x,
     unsigned char *outp = *outbuf;
     if (*outbytesleft >= 4)
     {
-        *outp++ = x<<24;
-        *outp++ = x<<16;
-        *outp++ = x<<8;
-        *outp++ = x;
+        *outp++ = (unsigned char) (x<<24);
+        *outp++ = (unsigned char) (x<<16);
+        *outp++ = (unsigned char) (x<<8);
+        *outp++ = (unsigned char) x;
         (*outbytesleft) -= 4;
     }
     else
@@ -294,10 +294,10 @@ static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
     unsigned char *outp = *outbuf;
     if (*outbytesleft >= 4)
     {
-        *outp++ = x;
-        *outp++ = x<<8;
-        *outp++ = x<<16;
-        *outp++ = x<<24;
+        *outp++ = (unsigned char) x;
+        *outp++ = (unsigned char) (x<<8);
+        *outp++ = (unsigned char) (x<<16);
+        *outp++ = (unsigned char) (x<<24);
         (*outbytesleft) -= 4;
     }
     else
