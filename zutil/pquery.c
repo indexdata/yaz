@@ -2,12 +2,13 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.14 2002-05-01 10:22:52 adam Exp $
+ * $Id: pquery.c,v 1.15 2002-05-07 11:01:14 adam Exp $
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include <yaz/proto.h>
 #include <yaz/oid.h>
