@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.213 2003-11-19 19:06:41 adam Exp $
+ * $Id: client.c,v 1.214 2003-12-09 17:13:35 adam Exp $
  */
 
 #include <stdio.h>
@@ -3338,17 +3338,20 @@ static void http_response(Z_HTTP_Response *hres)
         }
         close_session();
     }
-    if (!strcmp(hres->version, "1.0"))
+    else
     {
-        /* HTTP 1.0: only if Keep-Alive we stay alive.. */
-        if (!connection_head || strcmp(connection_head, "Keep-Alive"))
-            close_session();
-    }
-    else 
-    {
-        /* HTTP 1.1: only if no close we stay alive .. */
-        if (connection_head && !strcmp(connection_head, "close"))
-            close_session();
+	if (!strcmp(hres->version, "1.0"))
+	{
+	    /* HTTP 1.0: only if Keep-Alive we stay alive.. */
+	    if (!connection_head || strcmp(connection_head, "Keep-Alive"))
+		close_session();
+	}
+	else 
+	{
+	    /* HTTP 1.1: only if no close we stay alive .. */
+	    if (connection_head && !strcmp(connection_head, "close"))
+		close_session();
+	}
     }
 }
 #endif
