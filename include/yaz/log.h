@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
+ * Revision 1.3  2000-06-09 13:51:01  ian
+ * Added LOG_APP for logging application (Rather than code) events that might
+ * be useful when creating usage reports.
+ *
+ * Revision 1.2  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -105,6 +109,7 @@ YAZ_BEGIN_CDECL
 #define LOG_LOG   0x0008
 #define LOG_ERRNO 0x0010     /* append strerror to message */
 #define LOG_FILE  0x0020
+#define LOG_APP   0x0040     /* For application level events such as new-connection */
 
 #define LOG_ALL   0xffff
 
