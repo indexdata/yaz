@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.117  2001-06-13 20:47:40  adam
+ * Revision 1.118  2001-07-19 19:51:41  adam
+ * Added typecasts to make C++ happy.
+ *
+ * Revision 1.117  2001/06/13 20:47:40  adam
  * When error is returned from present handler, non-surrogate diagnostic
  * is returned in present response (and fetch handler is no longer called).
  *
@@ -669,7 +672,7 @@ void ir_session(IOCHAN h, int event)
 	    req = request_get(&assoc->incoming); /* get a new request structure */
 	    odr_reset(assoc->decode);
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
-	    if (!z_APDU(assoc->decode, &req->request, 0, 0))
+	    if (!z_APDU(assoc->decode, &req->apdu_request, 0, 0))
 	    {
 		yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
 			odr_errmsg(odr_geterror(assoc->decode)),
@@ -680,7 +683,7 @@ void ir_session(IOCHAN h, int event)
 		return;
 	    }
 	    req->request_mem = odr_extract_mem(assoc->decode);
-	    if (assoc->print && !z_APDU(assoc->print, &req->request, 0, 0))
+	    if (assoc->print && !z_APDU(assoc->print, &req->apdu_request, 0, 0))
 	    {
 		yaz_log(LOG_WARN, "ODR print error: %s", 
 		    odr_errmsg(odr_geterror(assoc->print)));
@@ -753,12 +756,12 @@ static int process_request(association *assoc, request *req, char **msg)
     
     *msg = "Unknown Error";
     assert(req && req->state == REQUEST_IDLE);
-    if (req->request->which != Z_APDU_initRequest && !assoc->init)
+    if (req->apdu_request->which != Z_APDU_initRequest && !assoc->init)
     {
 	*msg = "Missing InitRequest";
 	return -1;
     }
-    switch (req->request->which)
+    switch (req->apdu_request->which)
     {
     case Z_APDU_initRequest:
 	res = process_initRequest(assoc, req); break;
@@ -859,7 +862,7 @@ void backend_response(IOCHAN i, int event)
     yaz_log(LOG_DEBUG, "backend_response");
     assert(assoc && req && req->state != REQUEST_IDLE);
     /* determine what it is we're waiting for */
-    switch (req->request->which)
+    switch (req->apdu_request->which)
     {
 	case Z_APDU_searchRequest:
 	    res = response_searchRequest(assoc, req, 0, &fd); break;
@@ -936,7 +939,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
 static Z_APDU *process_initRequest(association *assoc, request *reqb)
 {
     statserv_options_block *cb = statserv_getcontrol();
-    Z_InitRequest *req = reqb->request->u.initRequest;
+    Z_InitRequest *req = reqb->apdu_request->u.initRequest;
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_initResponse);
     Z_InitResponse *resp = apdu->u.initResponse;
     bend_initresult *binitres;
@@ -1367,7 +1370,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     int *fd)
 {
-    Z_SearchRequest *req = reqb->request->u.searchRequest;
+    Z_SearchRequest *req = reqb->apdu_request->u.searchRequest;
     bend_search_rr *bsrr = 
 	(bend_search_rr *)nmem_malloc (reqb->request_mem, sizeof(*bsrr));
     
@@ -1444,7 +1447,7 @@ int bend_searchresponse(void *handle, bend_search_rr *bsrr) {return 0;}
 static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     bend_search_rr *bsrt, int *fd)
 {
-    Z_SearchRequest *req = reqb->request->u.searchRequest;
+    Z_SearchRequest *req = reqb->apdu_request->u.searchRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
     Z_SearchResponse *resp = (Z_SearchResponse *)
 	odr_malloc (assoc->encode, sizeof(*resp));
@@ -1554,7 +1557,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 				      int *fd)
 {
-    Z_PresentRequest *req = reqb->request->u.presentRequest;
+    Z_PresentRequest *req = reqb->apdu_request->u.presentRequest;
     oident *prefformat;
     oid_value form;
     Z_APDU *apdu;
@@ -1628,7 +1631,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
  */
 static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 {
-    Z_ScanRequest *req = reqb->request->u.scanRequest;
+    Z_ScanRequest *req = reqb->apdu_request->u.scanRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
     Z_ScanResponse *res = (Z_ScanResponse *)
 	odr_malloc (assoc->encode, sizeof(*res));
@@ -1764,7 +1767,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     int *fd)
 {
-    Z_SortRequest *req = reqb->request->u.sortRequest;
+    Z_SortRequest *req = reqb->apdu_request->u.sortRequest;
     Z_SortResponse *res = (Z_SortResponse *)
 	odr_malloc (assoc->encode, sizeof(*res));
     bend_sort_rr *bsrr = (bend_sort_rr *)
@@ -1823,7 +1826,8 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
 static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     int *fd)
 {
-    Z_DeleteResultSetRequest *req = reqb->request->u.deleteResultSetRequest;
+    Z_DeleteResultSetRequest *req =
+        reqb->apdu_request->u.deleteResultSetRequest;
     Z_DeleteResultSetResponse *res = (Z_DeleteResultSetResponse *)
 	odr_malloc (assoc->encode, sizeof(*res));
     bend_delete_rr *bdrr = (bend_delete_rr *)
@@ -1890,7 +1894,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
 
 static void process_close(association *assoc, request *reqb)
 {
-    Z_Close *req = reqb->request->u.close;
+    Z_Close *req = reqb->apdu_request->u.close;
     static char *reasons[] =
     {
 	"finished",
@@ -1984,7 +1988,7 @@ static Z_APDU *process_segmentRequest (association *assoc, request *reqb)
 {
     bend_segment_rr request;
 
-    request.segment = reqb->request->u.segmentRequest;
+    request.segment = reqb->apdu_request->u.segmentRequest;
     request.stream = assoc->encode;
     request.decode = assoc->decode;
     request.print = assoc->print;
@@ -1999,14 +2003,14 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 {
     bend_esrequest_rr esrequest;
 
-    Z_ExtendedServicesRequest *req = reqb->request->u.extendedServicesRequest;
+    Z_ExtendedServicesRequest *req = reqb->apdu_request->u.extendedServicesRequest;
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_extendedServicesResponse);
 
     Z_ExtendedServicesResponse *resp = apdu->u.extendedServicesResponse;
 
     yaz_log(LOG_DEBUG,"inside Process esRequest");
 
-    esrequest.esr = reqb->request->u.extendedServicesRequest;
+    esrequest.esr = reqb->apdu_request->u.extendedServicesRequest;
     esrequest.stream = assoc->encode;
     esrequest.decode = assoc->decode;
     esrequest.print = assoc->print;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: requestq.c,v $
- * Revision 1.7  1999-11-30 13:47:12  adam
+ * Revision 1.8  2001-07-19 19:51:41  adam
+ * Added typecasts to make C++ happy.
+ *
+ * Revision 1.7  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.6  1998/02/11 11:53:35  adam
@@ -105,7 +108,7 @@ request *request_get(request_q *q)
     r->q = q;
     r->len_refid = 0;
     r->refid = 0;
-    r->request = 0;
+    r->apdu_request = 0;
     r->request_mem = 0;
     r->len_response = 0;
     r->clientData = 0;

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.124  2001-07-04 20:13:51  ja7
+ * Revision 1.125  2001-07-19 19:51:41  adam
+ * Added typecasts to make C++ happy.
+ *
+ * Revision 1.124  2001/07/04 20:13:51  ja7
  * Added new commend "proxy" for ysing a yaz-proxy to connect to the target
  * Added new command line option -p for setting the proxy host
  *
@@ -425,6 +428,7 @@
 #include <yaz/proto.h>
 #include <yaz/marcdisp.h>
 #include <yaz/diagbib1.h>
+#include <yaz/otherinfo.h>
 
 #include <yaz/pquery.h>
 
@@ -472,7 +476,7 @@ static char ccl_fields[512] = "default.bib";
 static char* esPackageName = 0;
 static char* yazProxy = 0;
 
-static char last_cmd[100] = "?";
+static char last_cmd[32] = "?";
 static FILE *marcdump = 0;
 static char *refid = NULL;
 
@@ -2505,7 +2509,7 @@ static int client(int wait)
 #ifdef USE_SELECT
         fd_set input;
 #endif
-        char line[1024], word[1024], arg[1024];
+        char line[1024], word[32], arg[1024];
         
 #ifdef USE_SELECT
         FD_ZERO(&input);
@@ -2548,7 +2552,7 @@ static int client(int wait)
             gettimeofday (&tv_start, 0);
 #endif
 
-            if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
+            if ((res = sscanf(line, "%31s %1023[^;]", word, arg)) <= 0)
             {
                 strcpy(word, last_cmd);
                 *arg = '\0';

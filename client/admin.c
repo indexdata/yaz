@@ -1,6 +1,9 @@
 /*
  * $Log: admin.c,v $
- * Revision 1.9  2001-02-21 13:46:53  adam
+ * Revision 1.10  2001-07-19 19:51:41  adam
+ * Added typecasts to make C++ happy.
+ *
+ * Revision 1.9  2001/02/21 13:46:53  adam
  * C++ fixes.
  *
  * Revision 1.8  2000/04/17 14:21:38  adam
@@ -222,6 +225,7 @@ int cmd_adm_import(char *arg)
     struct dirent *ent;
     int chunk = 10;
     Z_APDU *apdu = 0;
+    Z_Segment *segment = 0;
     ODR out = getODROutputStream();
 
     if (arg && sscanf (arg, "%19s %1023s %1023s", type_str,
@@ -252,7 +256,6 @@ int cmd_adm_import(char *arg)
 
 	    if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))
 	    {
-		Z_Segment *segment;
 		Z_NamePlusRecord *rec;
 		Odr_oct *oct = (Odr_oct *) odr_malloc (out, sizeof(*oct));
 

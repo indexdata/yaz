@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.43  2001-06-28 09:27:25  adam
+ * Revision 1.44  2001-07-19 19:51:42  adam
+ * Added typecasts to make C++ happy.
+ *
+ * Revision 1.43  2001/06/28 09:27:25  adam
  * Number of Extended Services Requests logged.
  *
  * Revision 1.42  2001/04/06 12:26:46  adam
@@ -176,7 +179,8 @@ int ztest_present (void *handle, bend_present_rr *rr)
 
 int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 {
-    int *counter = handle;  /* user-defined handle - created in bend_init */
+    /* user-defined handle - created in bend_init */
+    int *counter = (int*) handle;  
 
     yaz_log(LOG_LOG, "ESRequest no %d", *counter);
 
@@ -365,12 +369,14 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	    }
 	    if (toKeep)
 	    {
-		Z_External *ext = odr_malloc (rr->stream, sizeof(*ext));
-		Z_IUOriginPartToKeep *keep =
-		    odr_malloc (rr->stream, sizeof(*keep));
-		Z_IUTargetPart *targetPart =
+		Z_External *ext = (Z_External *)
+                    odr_malloc (rr->stream, sizeof(*ext));
+		Z_IUOriginPartToKeep *keep = (Z_IUOriginPartToKeep *)
+                    odr_malloc (rr->stream, sizeof(*keep));
+		Z_IUTargetPart *targetPart = (Z_IUTargetPart *)
 		    odr_malloc (rr->stream, sizeof(*targetPart));
-		rr->taskPackage = odr_malloc (rr->stream, sizeof(*rr->taskPackage));
+		rr->taskPackage = (Z_TaskPackage *)
+                    odr_malloc (rr->stream, sizeof(*rr->taskPackage));
 		rr->taskPackage->packageType =
 		    odr_oiddup (rr->stream, rr->esr->packageType);
 		rr->taskPackage->packageName = 0;
@@ -381,10 +387,10 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		rr->taskPackage->targetReference = (Odr_oct *)
 		    odr_malloc (rr->stream, sizeof(Odr_oct));
 		rr->taskPackage->targetReference->buf =
-		    odr_strdup (rr->stream, "123");
+		    (unsigned char *) odr_strdup (rr->stream, "123");
 		rr->taskPackage->targetReference->len =
 		    rr->taskPackage->targetReference->size =
-		    strlen(rr->taskPackage->targetReference->buf);
+		    strlen((char *) (rr->taskPackage->targetReference->buf));
 		rr->taskPackage->creationDateTime = 0;
 		rr->taskPackage->taskStatus = odr_intdup(rr->stream, 0);
 		rr->taskPackage->packageDiagnostics = 0;
@@ -403,7 +409,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		ext->u.update->u.taskPackage->originPart = keep;
 		ext->u.update->u.taskPackage->targetPart = targetPart;
 
-		keep->action = odr_malloc (rr->stream, sizeof(int));
+		keep->action = (int *) odr_malloc (rr->stream, sizeof(int));
 		*keep->action = *toKeep->action;
 		keep->databaseName =
 		    odr_strdup (rr->stream, toKeep->databaseName);
@@ -413,9 +419,10 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 
 		targetPart->updateStatus = odr_intdup (rr->stream, 1);
 		targetPart->num_globalDiagnostics = 0;
-		targetPart->globalDiagnostics = odr_nullval();
+		targetPart->globalDiagnostics = (Z_DiagRec **) odr_nullval();
 		targetPart->num_taskPackageRecords = 0;
-		targetPart->taskPackageRecords = odr_nullval();
+		targetPart->taskPackageRecords =
+                    (Z_IUTaskPackageRecordStructure **) odr_nullval();
 	    }
 	    if (notToKeep)
 	    {

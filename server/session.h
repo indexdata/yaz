@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.24  2000-11-23 10:58:32  adam
+ * Revision 1.25  2001-07-19 19:51:42  adam
+ * Added typecasts to make C++ happy.
+ *
+ * Revision 1.24  2000/11/23 10:58:32  adam
  * SSL comstack support. Separate POSIX thread support library.
  *
  * Revision 1.23  2000/04/05 07:39:55  adam
@@ -106,7 +109,7 @@ typedef struct request
     char *refid;            /* referenceid */
     request_state state;
 
-    Z_APDU *request;        /* Current request */
+    Z_APDU *apdu_request;   /* Current request */
     NMEM request_mem;    /* memory handle for request */
 
     int size_response;     /* size of buffer */

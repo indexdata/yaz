@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.25  2001-06-26 14:11:27  adam
+ * Revision 1.26  2001-07-19 19:51:42  adam
+ * Added typecasts to make C++ happy.
+ *
+ * Revision 1.25  2001/06/26 14:11:27  adam
  * Added MUTEX functions for NMEM module (used by OID utility).
  *
  * Revision 1.24  2000/05/11 14:37:55  adam
@@ -144,7 +147,7 @@ YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
     NMEM_ENTER;
     if (!*p)
     {
-	*p = malloc (sizeof(**p));
+	*p = (NMEM_MUTEX) malloc (sizeof(**p));
 #ifdef WIN32
 	InitializeCriticalSection(&(*p)->m_handle);
 #elif _REENTRANT
