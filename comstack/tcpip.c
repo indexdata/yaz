@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.34  2000-11-23 10:58:32  adam
+ * Revision 1.35  2000-11-27 15:17:40  adam
+ * Using SSLeay_add_all_algorithms instead of OpenSSL_add_all_algorithms.
+ *
+ * Revision 1.34  2000/11/23 10:58:32  adam
  * SSL comstack support. Separate POSIX thread support library.
  *
  * Revision 1.33  2000/09/04 08:27:11  adam
@@ -375,7 +378,7 @@ COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
     else
     {
 	SSL_load_error_strings();
-	OpenSSL_add_all_algorithms();
+	SSLeay_add_all_algorithms();
 
 	state->ctx = state->ctx_alloc = SSL_CTX_new (SSLv23_method());
 	if (!state->ctx)
