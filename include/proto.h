@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.h,v $
- * Revision 1.4  1995-04-10 10:22:47  quinn
+ * Revision 1.5  1995-04-17 11:28:18  quinn
+ * Smallish
+ *
+ * Revision 1.4  1995/04/10  10:22:47  quinn
  * Added SCAN
  *
  * Revision 1.3  1995/03/30  12:18:09  quinn
@@ -561,6 +564,51 @@ typedef struct Z_PresentResponse
     int *presentStatus;
     Z_Records *records;
 } Z_PresentResponse;
+
+/* ------------------------ DELETE -------------------------- */
+
+typedef struct Z_ListStatus
+{
+    Z_ResultSetId *id;
+    int *status;
+} Z_ListStatus;
+
+typedef struct Z_DeleteResultSetRequest
+{
+    Z_ReferenceId *referenceId;        /* OPTIONAL */
+    int *deleteFunction;
+#define Z_DeleteRequest_list    0
+#define Z_DeleteRequest_all     1
+    int num_ids;
+    Z_ResultSetId *resultSetList;      /* OPTIONAL */
+} Z_DeleteResultSetRequest;
+
+typedef enum Z_DeleteSetStatus
+{
+    Z_Delete_success = 0,
+    Z_Delete_resultSetDidNotExist,
+    Z_Delete_previouslyDeletedByTarget,
+    Z_Delete_systemProblemAtTarget,
+    Z_Delete_accessNotAllowed,
+    Z_Delete_resourceControlAtOrigin,
+    Z_Delete_resourceControlAtTarget,
+    Z_Delete_bulkDeleteNotSupported,
+    Z_Delete_notAllRsltSetsDeletedOnBulkDlte,
+    Z_Delete_notAllRequestedResultSetsDeleted,
+    Z_Delete_resultSetInUse
+} Z_DeleteSetStatus;
+
+typedef struct Z_DeleteResultSetResponse
+{
+    Z_ReferenceId *referenceId;        /* OPTIONAL */
+    int *deleteOperationStatus;
+    int num_statuses;
+    Z_ListStatus *deleteListStatuses;  /* OPTIONAL */
+    int *numberNotDeleted;             /* OPTIONAL */
+    int num_bulkstatuses;
+    Z_ListStatus *bulkStatuses;        /* OPTIONAL */
+    char *deleteMessage;               /* OPTIONAL */
+} Z_DeleteResultSetResponse;
 
 /* ------------------------ APDU ---------------------------- */
 

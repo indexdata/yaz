@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.17  1995-04-10 10:23:36  quinn
+ * Revision 1.18  1995-04-17 11:28:25  quinn
+ * Smallish
+ *
+ * Revision 1.17  1995/04/10  10:23:36  quinn
  * Some work to add scan and other things.
  *
  * Revision 1.16  1995/03/31  09:18:55  quinn
@@ -162,6 +165,9 @@ void destroy_association(association *h)
     free(h);
 }
 
+/*
+ * process events on the association
+ */
 void ir_session(IOCHAN h, int event)
 {
     int res;
@@ -252,7 +258,7 @@ static int process_apdu(IOCHAN chan)
 	    logf(LOG_WARN, "Bad APDU");
 	    return -1;
     }
-    odr_reset(assoc->decode); /* release incopming APDU */
+    odr_reset(assoc->decode); /* release incoming APDU */
     odr_reset(assoc->encode); /* release stuff alloced before encoding */
     return res;
 }
@@ -278,7 +284,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     binitreq.configname = "default-config";
     if (!(binitres = bend_init(&binitreq)) || binitres->errcode)
     {
-    	logf(LOG_WARN, "Bad response from backend");
+    	logf(LOG_WARN, "Negative response from backend");
     	return -1;
     }
 
@@ -292,10 +298,14 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     	ODR_MASK_SET(&options, Z_Options_search);
     if (ODR_MASK_GET(req->options, Z_Options_present))
     	ODR_MASK_SET(&options, Z_Options_present);
+#if 0
     if (ODR_MASK_GET(req->options, Z_Options_delSet))
     	ODR_MASK_SET(&options, Z_Options_delSet);
+#endif
     if (ODR_MASK_GET(req->options, Z_Options_namedResultSets))
     	ODR_MASK_SET(&options, Z_Options_namedResultSets);
+    if (ODR_MASK_GET(req->options, Z_Options_scan))
+    	ODR_MASK_SET(&options, Z_Options_scan);
     resp.options = &options;
     ODR_MASK_ZERO(&protocolVersion);
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
@@ -318,7 +328,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.17 $";
+    resp.implementationVersion = "$Revision: 1.18 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -727,7 +737,7 @@ static int process_scanRequest(IOCHAN client, Z_ScanRequest *req)
 	    if (srs->status == BEND_SCAN_PARTIAL)
 	    	scanStatus = Z_Scan_partial_5;
 	    else
-	    	scanStatus = 1;  /* Z_Scan_success; */ /* assumption for now */
+	    	scanStatus = Z_Scan_success;
 	    ents.which = Z_ListEntries_entries;
 	    ents.u.entries = &list;
 	    list.entries = tab;

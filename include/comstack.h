@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.h,v $
- * Revision 1.1  1995-03-30 09:39:40  quinn
+ * Revision 1.2  1995-04-17 11:28:17  quinn
+ * Smallish
+ *
+ * Revision 1.1  1995/03/30  09:39:40  quinn
  * Moved .h files to include directory
  *
  * Revision 1.11  1995/03/27  08:36:05  quinn
@@ -96,7 +99,6 @@ struct comstack
     int (*f_listen)(COMSTACK handle, char *addrp, int *addrlen);
     COMSTACK (*f_accept)(COMSTACK handle);
     int (*f_close)(COMSTACK handle);
-    /* to add: commands for the server side (bind, listen, accept) */
 };
 
 #define cs_put(handle, buf, size) ((*(handle)->f_put)(handle, buf, size))
