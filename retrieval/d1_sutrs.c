@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sutrs.c,v $
- * Revision 1.2  1995-11-01 13:54:49  quinn
+ * Revision 1.3  1995-12-15 16:57:11  quinn
+ * Added formatted-text.
+ *
+ * Revision 1.2  1995/11/01  13:54:49  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/11/01  11:56:09  quinn
@@ -65,7 +68,15 @@ static int nodetobuf(data1_node *n, int select, WRBUF b, int indent, int col)
 	    int l = c->u.data.len;
 	    int first = 0;
 
-	    if (c->u.data.what == DATA1I_text)
+	    if (c->u.data.what == DATA1I_text && c->u.data.formatted_text)
+	    {
+		wrbuf_putc(b, '\n');
+		wrbuf_write(b, c->u.data.data, c->u.data.len);
+		sprintf(line, "%*s", indent * NTOBUF_INDENT, "");
+		wrbuf_write(b, line, strlen(line));
+		col = indent * NTOBUF_INDENT;
+	    }
+	    else if (c->u.data.what == DATA1I_text)
 	    {
 		while (l)
 		{
