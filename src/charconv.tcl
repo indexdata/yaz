@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.5 2004-03-17 11:00:04 adam Exp $
+# $Id: charconv.tcl,v 1.6 2004-03-20 07:16:25 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -57,7 +57,7 @@ proc preamble_trie {ofilehandle} {
             else
             {
                 struct yaz_iconv_trie_flat *flat = t->flat;
-                while (flat->from)
+                while (flat->to)
                 {
                     size_t len = strlen(flat->from);
                     if (len <= inbytesleft)
@@ -177,7 +177,7 @@ proc dump_trie {ofilehandle} {
                 puts -nonewline $f "\", 0x[lindex $m 1]"
                 puts $f "\},"
             }
-            puts $f "  \{0, 0\}"
+            puts $f "  \{\"\", 0\}"
             puts $f "\};"
             puts $f "struct yaz_iconv_trie $trie(prefix)page${this} = \{"
             puts $f "  $trie(prefix)page${this}_flat, 0"
