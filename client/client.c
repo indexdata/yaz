@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.203 2003-07-18 19:54:30 mike Exp $
+ * $Id: client.c,v 1.204 2003-07-18 22:41:25 mike Exp $
  */
 
 #include <stdio.h>
@@ -343,10 +343,8 @@ static int process_initResponse(Z_InitResponse *res)
         {
             printf("Guessing visiblestring:\n");
             printf("'%s'\n", uif->u. octet_aligned->buf);
-        } else if (uif->which == Z_External_single
-// && oid_is(uif->direct_reference, "1.2.840.10003.10.1000.17.1")
-		   ) {
-	    /* FirstSearch's crappy private init-diagnostic OID */
+        } else if (uif->which == Z_External_single) {
+	    /* Peek at any private Init-diagnostic APDUs */
 	    Odr_any *sat = uif->u.single_ASN1_type;
 	    printf("### NAUGHTY: External is '%s'\n", sat->buf);
 	}
