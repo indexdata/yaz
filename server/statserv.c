@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.61  2000-03-15 12:59:49  adam
+ * Revision 1.62  2000-03-17 12:47:02  adam
+ * Minor changes to admin client.
+ *
+ * Revision 1.61  2000/03/15 12:59:49  adam
  * Added handle member to statserv_control.
  *
  * Revision 1.60  2000/03/14 09:06:11  adam
@@ -541,8 +544,18 @@ void statserv_remove(IOCHAN pIOChannel)
 void statserv_closedown()
 {
     IOCHAN p;
+
+    if (control_block.bend_stop)
+        (*control_block.bend_stop)(&control_block);
+
     for (p = pListener; p; p = p->next)
         iochan_destroy(p);
+}
+
+void sigterm(int sig)
+{
+    statserv_closedown();
+    exit (0);
 }
 
 static void *new_session (void *vp);
@@ -852,8 +865,10 @@ int statserv_start(int argc, char **argv)
 	me++;
     else
 	me = argv[0];
+    logf (LOG_LOG, "Starting server %s", me);
 #else
     me = argv[0];
+    logf (LOG_LOG, "Starting server %s pid=%d", me, getpid());
 #endif
     if (control_block.options_func(argc, argv))
         return(1);
@@ -868,6 +883,7 @@ int statserv_start(int argc, char **argv)
 	if (control_block.dynamic)
 	    signal(SIGCHLD, catchchld);
     }
+    signal (SIGTERM, sigterm);
     if (*control_block.setuid)
     {
     	struct passwd *pw;

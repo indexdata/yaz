@@ -1,6 +1,9 @@
 /*
  * $Log: admin.c,v $
- * Revision 1.4  2000-03-16 13:55:49  ian
+ * Revision 1.5  2000-03-17 12:47:02  adam
+ * Minor changes to admin client.
+ *
+ * Revision 1.4  2000/03/16 13:55:49  ian
  * Added commands for sending shutdown and startup admin requests via the admin ES.
  *
  * Revision 1.3  2000/03/14 15:23:17  ian
@@ -144,6 +147,7 @@ int sendAdminES(int type, char* dbname, char* param1)
 int cmd_adm_reindex(char* arg)
 {
     sendAdminES(Z_ESAdminOriginPartToKeep_reIndex,arg,NULL);
+    return 2;
 }
 
 /* cmd_adm_truncate <dbname>
@@ -152,7 +156,11 @@ int cmd_adm_reindex(char* arg)
 int cmd_adm_truncate(char* arg)
 {
     if ( arg )
+    {
         sendAdminES(Z_ESAdminOriginPartToKeep_truncate,arg,NULL);
+	return 2;
+    }
+    return 0;
 }
 
 /* cmd_adm_create <dbname>
@@ -160,7 +168,11 @@ int cmd_adm_truncate(char* arg)
 int cmd_adm_create(char* arg)
 {
     if ( arg )
+    {
         sendAdminES(Z_ESAdminOriginPartToKeep_create,arg,NULL);
+	return 2;
+    }
+    return 0;
 }
 
 /* cmd_adm_delete <dbname>
@@ -168,7 +180,11 @@ int cmd_adm_create(char* arg)
 int cmd_adm_delete(char* arg)
 {
     if ( arg )
+    {
         sendAdminES(Z_ESAdminOriginPartToKeep_delete,arg,NULL);
+	return 2;
+    }
+    return 0;
 }
 
 /* cmd_adm_import <dbname> <rectype> <sourcefile>
@@ -234,7 +250,9 @@ int cmd_adm_import(char* arg)
 		iTotalWritten += num_items;
 	    }
 	}
+	return 2;
     }
+    return 0;
 }
 
 /* "Freshen" the specified database, by checking metadata records against the sources from which they were 
@@ -242,7 +260,11 @@ int cmd_adm_import(char* arg)
 int cmd_adm_refresh(char* arg)
 {
     if ( arg )
+    {
         sendAdminES(Z_ESAdminOriginPartToKeep_refresh,arg,NULL);
+	return 2;
+    }
+    return 0;
 }
 
 /* cmd_adm_commit 
@@ -250,15 +272,18 @@ int cmd_adm_refresh(char* arg)
 int cmd_adm_commit(char* arg)
 {
     sendAdminES(Z_ESAdminOriginPartToKeep_commit,NULL,NULL);
+    return 2;
 }
 
 int cmd_adm_shutdown(char* arg)
 {
     sendAdminES(Z_ESAdminOriginPartToKeep_shutdown,NULL,NULL);
+    return 2;
 }
 
 int cmd_adm_startup(char* arg)
 {
     sendAdminES(Z_ESAdminOriginPartToKeep_start,NULL,NULL);
+    return 2;
 }
 

@@ -66,6 +66,8 @@ struct Z_ESAdminOriginPartToKeep {
 		Z_ImportParameters *import;
 		Odr_null *refresh;
 		Odr_null *commit;
+		Odr_null *shutdown;
+		Odr_null *start;
 #define Z_ESAdminOriginPartToKeep_reIndex 1
 #define Z_ESAdminOriginPartToKeep_truncate 2
 #define Z_ESAdminOriginPartToKeep_delete 3
@@ -73,6 +75,8 @@ struct Z_ESAdminOriginPartToKeep {
 #define Z_ESAdminOriginPartToKeep_import 5
 #define Z_ESAdminOriginPartToKeep_refresh 6
 #define Z_ESAdminOriginPartToKeep_commit 7
+#define Z_ESAdminOriginPartToKeep_shutdown 8
+#define Z_ESAdminOriginPartToKeep_start 9
 	} u;
 	Z_InternationalString *databaseName; /* OPT */
 };
