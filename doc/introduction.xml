@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.16 2003-11-19 21:17:26 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.17 2003-11-19 22:05:15 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -181,8 +181,6 @@
     you're going to develop an ILL application you'll have to learn the lower
     level APIs of &yaz;.
    </para>
-
-   
    <para>
     The YAZ toolkit modules is shown in figure <xref linkend="yaz.layer"/>.
    </para>

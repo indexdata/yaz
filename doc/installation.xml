@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.19 2003-11-19 21:17:26 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.20 2003-11-19 22:05:15 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -20,21 +20,23 @@
     <ulink url="http://www.debian.org/">Debian GNU/Linux</ulink>,
     <ulink url="http://www.redhat.com/">Redhat Linux</ulink>,
     <ulink url="http://www.gentoo.org/">Gentoo Linux</ulink>,
-    <ulink url="http://www.netbsd.org/Ports/cobalt/">
-     NetBSD (Cobalt MIPS)</ulink>,
     <ulink url="http://www.freebsd.org/">FreeBSD (i386)</ulink>,
     <ulink url="http://www.apple.com/macosx/">MAC OSX</ulink>,
     <ulink url="http://wwws.sun.com/software/solaris/">
      SunOS 5.8 (sparc)</ulink>,
     <ulink url="http://www.microsoft.com/windows2000/">
-     Windows 2000 SP3</ulink>.
+     Windows 2000</ulink>.
    </para>
    
    <para>
     Some versions have be known to work on HP/UX,
-    DEC Unix, OpenBSD, IBM AIX, Data General DG/UX (with some CFLAGS tinkering),
+    DEC Unix, <ulink url="http://www.netbsd.org/">NetBSD</ulink>,
+    <ulink url="http://www.openbsd.org/">OpenBSD</ulink>,
+    IBM AIX,
+    Data General DG/UX (with some CFLAGS tinkering),
     SGI/IRIX, DDE Supermax, Apple Macintosh (using the Codewarrior programming
-    environment and the GUSI socket libraries), IBM AS/400 .
+    environment and the GUSI socket libraries),
+    IBM AS/400 .
    </para>
 
    <para>
@@ -69,7 +71,7 @@
     and 
     <ulink url="http://www.redhat.com/">Redhat</ulink> packages for &yaz;. 
     Only i386 binary packages are available. You should be able to
-    create packages for other CPU's by building them from the source
+    create packages for other CPUs by building them from the source
     package.
    </para>
    

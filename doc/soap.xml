@@ -1,8 +1,9 @@
-<!-- $Id: soap.xml,v 1.4 2003-11-03 10:47:24 adam Exp $ -->
+<!-- $Id: soap.xml,v 1.5 2003-11-19 22:05:15 adam Exp $ -->
 <chapter id="soap"><title>SOAP and SRW</title>
   <sect1 id="soap.introduction"><title>Introduction</title>
     <para>
-      &yaz; uses a very simple implementation of SOAP that only,
+      &yaz; uses a very simple implementation of 
+      <ulink url="http://www.w3.org/TR/SOAP/">SOAP</ulink> that only,
       currenly, supports what is sufficient to offer SRW functionality.
       The implementation uses the 
       <ulink url="http://www.xmlsoft.org/html/libxml-tree.html">tree
