@@ -1,13 +1,13 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.24 1996-07-26 13:38:18 quinn Exp $
+# $Id: Makefile,v 1.25 1996-08-12 14:09:54 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
-DEFS=$(INCLUDE) -DODR_DEBUG
+DEFS=$(INCLUDE) # -DODR_DEBUG
 LIB=$(LIBDIR)/libodr.a
 LIBS=-lodr
 PO = odr_bool.o ber_bool.o ber_len.o ber_tag.o odr_util.o odr_null.o \
