@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.12  2001-09-24 21:51:56  adam
+ * Revision 1.13  2001-09-30 20:10:28  adam
+ * TRACE_MALLOC=1.
+ *
+ * Revision 1.12  2001/09/24 21:51:56  adam
  * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
  * and yaz_z3950oid_to_str.
  *
@@ -74,7 +77,7 @@
 #include <yaz/log.h>
 #include <yaz/xmalloc.h>
 
-#define TRACE_XMALLOC 2
+#define TRACE_XMALLOC 1
 
 #if TRACE_XMALLOC > 1
 
