@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.12 2002-07-03 10:04:04 adam Exp $
+ * $Id: data1.h,v 1.13 2002-07-05 16:04:28 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -468,6 +468,10 @@ YAZ_EXPORT data1_node *data1_add_taggeddata (data1_handle dh, data1_node *root,
                                              NMEM m);
 
 YAZ_EXPORT data1_node *data1_get_root_tag (data1_handle dh, data1_node *n);
+
+YAZ_EXPORT int data1_iconv (data1_handle dh, NMEM m, data1_node *n,
+                            const char *tocode, 
+                            const char *fromcode);
 
 YAZ_END_CDECL
 

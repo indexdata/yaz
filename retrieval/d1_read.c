@@ -3,12 +3,18 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.44 2002-07-03 10:04:04 adam Exp $
+ * $Id: d1_read.c,v 1.45 2002-07-05 16:04:28 adam Exp $
  */
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <errno.h>
+
+#if HAVE_ICONV_H
+#include <iconv.h>
+#endif
 
 #include <yaz/xmalloc.h>
 #include <yaz/log.h>
@@ -793,3 +799,99 @@ data1_node *data1_read_sgml (data1_handle dh, NMEM m, const char *buf)
     return data1_read_node (dh, &bp, m);
 }
 
+
+#if HAVE_ICONV_H
+
+static int conv_item (NMEM m, iconv_t t, 
+                      WRBUF wrbuf, char *inbuf, size_t inlen)
+{
+    wrbuf_rewind (wrbuf);
+    if (wrbuf->size < 10)
+        wrbuf_grow (wrbuf, 10);
+    for (;;)
+    {
+        char *outbuf = wrbuf->buf + wrbuf->pos;
+        size_t outlen = wrbuf->size - wrbuf->pos;
+        if (iconv (t, &inbuf, &inlen, &outbuf, &outlen) ==
+            (size_t)(-1) && errno != E2BIG)
+        {
+            /* bad data. stop and skip conversion entirely */
+            return -1;
+        }
+        else if (inlen == 0)
+        {   /* finished converting */
+            wrbuf->pos = wrbuf->size - outlen;
+            break;
+        }
+        else
+        {
+            /* buffer too small: make sure we expand buffer */
+            wrbuf->pos = wrbuf->size - outlen;
+            wrbuf_grow(wrbuf, 20);
+        }
+    }
+    return 0;
+}
+
+static void data1_iconv_s (data1_handle dh, NMEM m, data1_node *n,
+                           iconv_t t, WRBUF wrbuf)
+{
+    for (; n; n = n->next)
+    {
+        switch (n->which)
+        {
+        case DATA1N_data:
+        case DATA1N_comment:
+            if (conv_item (m, t, wrbuf, n->u.data.data, n->u.data.len) == 0)
+            {
+                n->u.data.data =
+                    data1_insert_string_n (dh, n, m, wrbuf->buf,
+                                           wrbuf->pos);
+                n->u.data.len = wrbuf->pos;
+            }
+            break;
+        case DATA1N_tag:
+            if (conv_item (m, t, wrbuf, n->u.tag.tag, strlen(n->u.tag.tag))
+                == 0)
+            {
+                n->u.tag.tag =
+                    data1_insert_string_n (dh, n, m, 
+                                           wrbuf->buf, wrbuf->pos);
+            }
+            if (n->u.tag.attributes)
+            {
+                data1_xattr *p;
+                for (p = n->u.tag.attributes; p; p = p->next)
+                {
+                    if (conv_item(m, t, wrbuf, p->value, strlen(p->value))
+                        == 0)
+                    {
+                        wrbuf_puts (wrbuf, "");
+                        p->value = nmem_strdup (m, wrbuf->buf);
+                    }
+                }
+            }
+            break;
+        }
+        data1_iconv_s (dh, m, n->child, t, wrbuf);
+    }
+}
+#endif
+
+int data1_iconv (data1_handle dh, NMEM m, data1_node *n,
+                  const char *tocode, 
+                  const char *fromcode)
+{
+#if HAVE_ICONV_H
+    WRBUF wrbuf = wrbuf_alloc();
+    iconv_t t = iconv_open (tocode, fromcode);
+    if (t == (iconv_t) (-1))
+        return -1;
+    data1_iconv_s (dh, m, n, t, wrbuf);
+    iconv_close (t);
+    wrbuf_free (wrbuf, 1);
+    return 0;
+#else
+    return -2;
+#endif
+}
