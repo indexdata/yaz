@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.127 2004-02-16 18:28:18 adam Exp $
+dnl $Id: configure.in,v 1.128 2004-02-16 23:46:14 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.12)
 AM_MAINTAINER_MODE
@@ -139,7 +139,7 @@ if test "$openssl" != "no"; then
 			AC_CHECK_HEADER(openssl/ssl.h,[sslver=yes])
 		fi
 		if test "$sslver" = "yes"; then
-			SSL_LIBS="$SSL_LIBS -lssl"
+			SSL_LIBS="-lssl $SSL_LIBS"
 		fi
 	fi
 	if test "$sslver" != "no"; then

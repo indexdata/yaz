@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+For SSL, use -lssl -lcrypto on systems that don't have pkg-config.
+
 --- 2.0.12 2004/02/16
 
 Added member 'schema' to bend_explain_rr structure so that backend
