@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.30 2004-12-13 20:16:50 adam Exp $
+ * $Id: log.h,v 1.31 2004-12-20 15:52:53 heikki Exp $
  */
 
 /**
@@ -59,7 +59,10 @@ YAZ_BEGIN_CDECL
 
 #define YLOG_ALL   (0xffff&~YLOG_MALLOC&~YLOG_NOTIME)
 
-#define YLOG_DEFAULT_LEVEL (YLOG_FATAL | YLOG_ERRNO | YLOG_LOG | YLOG_WARN)
+#define YLOG_DEFAULT_LEVEL \
+    (YLOG_FATAL | YLOG_ERRNO | YLOG_LOG | YLOG_WARN | YLOG_FLUSH)
+/* not having flush here confuses Solaris users, who won't see any logs until
+ * (and if) the program exits normally */
 
 #define YLOG_LAST_BIT YLOG_LOGLVL /* the last bit used for regular log bits */
                                 /* the rest are for dynamic modules */
