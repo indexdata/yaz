@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.3  1995-02-07 14:13:46  quinn
+ * Revision 1.4  1995-02-07 17:53:00  quinn
+ * A damn mess, but now things work, I think.
+ *
+ * Revision 1.3  1995/02/07  14:13:46  quinn
  * Bug fixes.
  *
  * Revision 1.2  1995/02/06  16:45:03  quinn
@@ -27,7 +30,7 @@ int odr_sequence_begin(ODR o, void *p, int size)
     	o->t_tag = ODR_SEQUENCE;
     }
 
-    if (odr_constructed_begin(o, p, o->t_class, o->t_tag, 0))
+    if (odr_constructed_begin(o, p, o->t_class, o->t_tag))
     {
     	if (o->direction == ODR_DECODE && size)
 	    *pp = nalloc(o, size);
@@ -56,9 +59,10 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 {
     char ***pp = (char***) p;  /* for dereferencing */
     char **tmp;
+    char *dummy;
     int size = 0, i;
 
-    if (!odr_sequence_begin(o, p, 0))
+    if (!odr_sequence_begin(o, &dummy, 0))
     	return 0;
 
     switch (o->direction)

@@ -4,29 +4,30 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.1  1995-02-02 16:21:53  quinn
+ * Revision 1.2  1995-02-07 17:52:59  quinn
+ * A damn mess, but now things work, I think.
+ *
+ * Revision 1.1  1995/02/02  16:21:53  quinn
  * First kick.
  *
  */
 
 #include <odr.h>
 
-int odr_constructed_begin(ODR o, void *p, int class, int tag, int opt)
+int odr_constructed_begin(ODR o, void *p, int class, int tag)
 {
     int res;
     int cons = 1;
 
-    if (o->direction == ODR_ENCODE && !*(char*)p)
-    	return opt;
     if (o->t_class < 0)
     {
 	o->t_class = class;
 	o->t_tag = tag;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons)) < 0)
+    if ((res = ber_tag(o, *(char**)p, o->t_class, o->t_tag, &cons)) < 0)
     	return 0;
     if (!res || !cons)
-    	return opt;
+    	return 0;
 
     o->stack[++(o->stackp)].lenb = o->bp;
     if (o->direction == ODR_ENCODE || o->direction == ODR_PRINT)
