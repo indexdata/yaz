@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2005, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.30 2005-01-09 21:52:49 adam Exp $
+ * $Id: srw.c,v 1.31 2005-01-11 10:48:47 adam Exp $
  */
 /**
  * \file srw.c
@@ -373,7 +373,7 @@ static int yaz_srw_term(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm *term,
     {
 	xmlNodePtr ptr = pptr;
 	add_xsd_string(ptr, "value", term->value);
-	add_xsd_integer(ptr, "value", term->numberOfRecords);
+	add_xsd_integer(ptr, "numberOfRecords", term->numberOfRecords);
 	add_xsd_string(ptr, "displayTerm", term->displayTerm);
 	add_xsd_string(ptr, "whereInList", term->whereInList);
     }
@@ -625,6 +625,11 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 		else if (match_xsd_string(ptr, "scanClause", o,
 				     &req->scanClause.cql))
 		    ;
+		else if (match_xsd_string(ptr, "pScanClause", o,
+					  &req->scanClause.cql))
+		{
+		    req->query_type = Z_SRW_query_type_pqf;
+		}
 		else if (match_xsd_integer(ptr, "responsePosition", o,
 					   &req->responsePosition))
 		    ;
