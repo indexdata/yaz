@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.117 2003-10-27 12:21:21 adam Exp $
+dnl $Id: configure.in,v 1.118 2003-11-19 14:03:36 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.5)
 AM_MAINTAINER_MODE
@@ -15,6 +15,7 @@ test -z "$YACC" && AC_MSG_WARN([GNU bison not found])
 AC_PROG_INSTALL
 AM_DISABLE_SHARED
 AM_PROG_LIBTOOL
+AC_PATH_PROG(pkgconfig, pkg-config, NONE)
 dnl
 dnl ----- DOCBOOK DTD
 AC_SUBST(DTD_DIR)
@@ -109,23 +110,44 @@ SSL_CFLAGS=""
 SSL_LIBS=""
 SSL_DEFS=""
 if test "$openssl" != "no"; then
+	sslver=no
 	xLIBS="$LIBS";
 	xCFLAGS="$CFLAGS";
 	if test "$openssl" != "yes"; then
-                SSL_CFLAGS="-I$openssl/include -I$openssl/include/openssl"
-                SSL_LIBS="-L$openssl/lib"
-		CFLAGS="$SSL_CFLAGS $CFLAGS"
-		LIBS="$SSL_LIBS $LIBS"
+		if $openssl/bin/pkg-config --exists openssl; then
+			SSL_CFLAGS=`$openssl/bin/pkgconfig --cflags openssl`
+			SSL_LIBS=`$openssl/bin/pkgconfig --libs openssl`
+			sslver=`$openssl/bin/pkgconfig --modversion openssl`
+		else
+                	SSL_CFLAGS="-I$openssl/include -I$openssl/include/openssl"
+                	SSL_LIBS="-L$openssl/lib"
+			CFLAGS="$SSL_CFLAGS $CFLAGS"
+			LIBS="$SSL_LIBS $LIBS"
+		fi
+	else
+		if $pkgconfig --exists openssl; then
+			SSL_CFLAGS=`$pkgconfig --cflags openssl`
+			SSL_LIBS=`$pkgconfig --libs openssl`
+			sslver=`$pkgconfig --modversion openssl`
+		fi	
 	fi
-	AC_CHECK_LIB(crypto, main,[SSL_LIBS="$SSL_LIBS -lcrypto"])
-        LIBS="$LIBS $SSL_LIBS"
-	AC_CHECK_LIB(ssl, SSL_new)
-	if test "$ac_cv_lib_ssl_SSL_new" = "yes"; then
-                SSL_LIBS="$SSL_LIBS -lssl"
-		AC_CHECK_HEADER(openssl/ssl.h,[SSL_DEFS="-DHAVE_OPENSSL_SSL_H=1"; USE_SSL=1])
-        else
-                SSL_LIBS=""
+	if test "$sslver" = "no"; then
+		AC_CHECK_LIB(crypto, main,[SSL_LIBS="$SSL_LIBS -lcrypto"])
+        	LIBS="$LIBS $SSL_LIBS"
+		AC_CHECK_LIB(ssl, SSL_new)
+		if test "$ac_cv_lib_ssl_SSL_new" = "yes"; then
+			AC_CHECK_HEADER(openssl/ssl.h,[sslver=yes])
+		fi
+		if test "$sslver" = "yes"; then
+			SSL_LIBS="$SSL_LIBS -lssl"
+		fi
 	fi
+	if test "$sslver" != "no"; then
+		SSL_DEFS="-DHAVE_OPENSSL_H=1"
+		USE_SSL=1
+	fi
+	AC_MSG_CHECKING([for SSL])
+	AC_MSG_RESULT($sslver)
 	LIBS="$xLIBS"
 	CFLAGS="$xCFLAGS"
 fi

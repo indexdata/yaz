@@ -2,6 +2,12 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Utility yaz-iconv is now installed by default along with the man page 
+yaz-iconv.1.
+
+Extend configure check for OpenSSL to use pkg-config where available (such
+as RedHat 9).
+
 Incorporate patch by Morten Bogeskov which allows a Unix file socket
 server to specify uid/gid/mask for socket using the format
  unix:[user=uid,][group=gid,][umask=mask,]file=path
