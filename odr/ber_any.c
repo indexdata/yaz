@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: ber_any.c,v 1.26 2003-10-20 13:44:05 adam Exp $
+ * $Id: ber_any.c,v 1.27 2003-10-21 09:30:32 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -56,10 +56,10 @@ int completeBER_n(const unsigned char *buf, int len, int level)
 	if (level > 1000)
 	    return -2;
     }
-    if (!len)
+    if (len < 2)
     	return 0;
     if (!buf[0] && !buf[1])
-    	return 0;
+    	return -2;
     if ((res = ber_dectag(b, &zclass, &tag, &cons, len)) <= 0)
     	return 0;
 #if 0
@@ -129,7 +129,7 @@ int completeBER_n(const unsigned char *buf, int len, int level)
     /* constructed - cycle through children */
     while (len >= 2)
     {
-	if (*b == 0 && *(b + 1) == 0)
+	if (b[0] == 0 && b[1] == 0)
 	    break;
 	if (!(res = completeBER_n(b, len, level+1)))
 	    return 0;
