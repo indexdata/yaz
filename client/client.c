@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.235 2004-03-10 19:42:45 adam Exp $
+ * $Id: client.c,v 1.236 2004-03-17 10:59:41 adam Exp $
  */
 
 #include <stdio.h>
@@ -308,15 +308,15 @@ static void send_initRequest(const char* type_and_host)
     	yaz_oi_APDU(apdu, &p);
     	
     	if ((p0=yaz_oi_update(p, out, NULL, 0, 0))) {
-    		ODR_MASK_SET(req->options, Z_Options_negotiationModel);
-    		
-    		p0->which = Z_OtherInfo_externallyDefinedInfo;
-    		p0->information.externallyDefinedInfo =
-    			yaz_set_proposal_charneg(
-                            out,
-                            (const char**)&negotiationCharset, 
-                            negotiationCharset ? 1 : 0,
-                            (const char**)&yazLang, yazLang ? 1 : 0, 1);
+	    ODR_MASK_SET(req->options, Z_Options_negotiationModel);
+	    
+	    p0->which = Z_OtherInfo_externallyDefinedInfo;
+	    p0->information.externallyDefinedInfo =
+		yaz_set_proposal_charneg(
+		    out,
+		    (const char**)&negotiationCharset, 
+		    negotiationCharset ? 1 : 0,
+		    (const char**)&yazLang, yazLang ? 1 : 0, 1);
     	}
     }
     
