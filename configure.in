@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1999
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.7 1999-04-16 14:45:55 adam Exp $
+dnl $Id: configure.in,v 1.8 1999-05-26 07:49:35 adam Exp $
 AC_INIT(include/yaz-version.h)
 dnl
 dnl ------ Checking programs
@@ -51,8 +51,22 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
 fi
 dnl
 dnl ------ tcpd
-AC_CHECK_LIB(wrap, main, [LIBS="$LIBS -lwrap"])
-AC_CHECK_HEADERS(tcpd.h)
+AC_MSG_CHECKING(for working tcpd.h)
+oldLibs=$LIBS
+LIBS="$LIBS -lwrap"
+AC_TRY_LINK([#include <syslog.h>
+#include <tcpd.h>
+int allow_severity = LOG_INFO;
+int deny_severity = LOG_WARNING;],
+[struct request_info request_info; int i;
+i = hosts_access(&request_info);],tcpd_ok=1, tcpd_ok=0)
+if test "$tcpd_ok" = "0"; then
+	AC_MSG_RESULT(no)
+	LIBS=$oldLibs
+else
+	AC_MSG_RESULT(yes)
+	AC_DEFINE(HAVE_TCPD_H)
+fi
 dnl
 dnl ------ Headers
 AC_STDC_HEADERS

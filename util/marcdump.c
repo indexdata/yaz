@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.7  1998-02-11 11:53:36  adam
+ * Revision 1.8  1999-05-26 07:49:35  adam
+ * C++ compilation.
+ *
+ * Revision 1.7  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.6  1997/12/12 06:32:33  adam
@@ -87,7 +90,7 @@ int main (int argc, char **argv)
 			 prog, strerror (errno));
 		exit (1);
 	    }
-	    if (fread (buf, 1, file_size, inf) != file_size)
+	    if ((long) fread (buf, 1, file_size, inf) != file_size)
 	    {
 		fprintf (stderr, "%s: cannot read %s: %s\n",
 			 prog, arg, strerror (errno));

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.13  1999-01-08 11:23:22  adam
+ * Revision 1.14  1999-05-26 07:49:35  adam
+ * C++ compilation.
+ *
+ * Revision 1.13  1999/01/08 11:23:22  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.12  1996/07/06 19:58:33  quinn
@@ -94,7 +97,7 @@ int ber_encinteger(ODR o, int val)
     if (odr_putc(o, 0) < 0)  /* dummy */
         return -1;
     tmp.i = htonl(val);   /* ensure that that we're big-endian */
-    for (a = 0; a < sizeof(int) - 1; a++)  /* skip superfluous octets */
+    for (a = 0; a < (int) sizeof(int) - 1; a++)  /* skip superfluous octets */
         if (!((tmp.c[a] == 0 && !(tmp.c[a+1] & 0X80)) ||
             (tmp.c[a] == 0XFF && (tmp.c[a+1] & 0X80))))
             break;
@@ -123,7 +126,7 @@ int ber_decinteger(const unsigned char *buf, int *val)
 
     if ((res = ber_declen(b, &len)) < 0)
         return -1;
-    if (len > sizeof(int))    /* let's be reasonable, here */
+    if (len > (int) sizeof(int))    /* let's be reasonable, here */
         return -1;
     b+= res;
 
