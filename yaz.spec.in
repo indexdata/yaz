@@ -74,5 +74,6 @@ rm -fr ${RPM_BUILD_ROOT}
 /usr/include/yaz
 /usr/lib/*.so
 /usr/lib/*.a
+/usr/lib/*.[la]
 /usr/share/aclocal/yaz.m4
 /usr/share/man/man1/yaz-config.*
