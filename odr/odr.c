@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.19  1995-11-01 13:54:41  quinn
+ * Revision 1.20  1995-11-08 17:41:32  quinn
+ * Smallish.
+ *
+ * Revision 1.19  1995/11/01  13:54:41  quinn
  * Minor adjustments
  *
  * Revision 1.18  1995/09/29  17:12:22  quinn
@@ -121,7 +124,7 @@ ODR odr_createmem(int direction)
     r->ecb.size = r->ecb.pos = r->ecb.top = 0;
     r->ecb.can_grow = 1;
     r->buflen = 0;
-    r->mem = 0;
+    r->mem = nmem_create();
     odr_reset(r);
     return r;
 }
@@ -137,14 +140,13 @@ void odr_reset(ODR o)
     o->t_tag = -1;
     o->indent = 0;
     o->stackp = -1;
-    odr_release_mem(o->mem);
-    o->mem = 0;
+    nmem_reset(o->mem);
     o->choice_bias = -1;
 }
     
 void odr_destroy(ODR o)
 {
-    odr_release_mem(o->mem);
+    nmem_destroy(o->mem);
     if (o->ecb.buf && o->ecb.can_grow)
        xfree(o->ecb.buf);
     if (o->print != stderr)

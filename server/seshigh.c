@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.54  1995-11-08 15:11:29  quinn
+ * Revision 1.55  1995-11-08 17:41:37  quinn
+ * Smallish.
+ *
+ * Revision 1.54  1995/11/08  15:11:29  quinn
  * Log of close transmit.
  *
  * Revision 1.53  1995/11/01  13:54:58  quinn
@@ -452,7 +455,7 @@ void ir_session(IOCHAN h, int event)
 		break;
 	    case 0: /* all sent - release the request structure */
 	    	logf(LOG_DEBUG, "Wrote PDU, %d bytes", req->len_response);
-		odr_release_mem(req->request_mem);
+		nmem_destroy(req->request_mem);
 		request_deq(&assoc->outgoing);
 		request_release(req);
 		if (!request_head(&assoc->outgoing))

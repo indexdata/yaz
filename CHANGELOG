@@ -1,6 +1,15 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- XXXXX XXXX/XX/XX
+--- 1.0 1995/XX/XX
+
+The shift to v1.0 signals that we now consider the *core* functionality
+of YAZ reasonably stable (the core being more or less equivalent to
+Z39.50-1992). Some of the really nifty v3 stuff is still not heavily
+tested (Explain not at all - though that will happen soonish).
+
+Minor changes to code to support Windows port.
+
+Various minor changes after we're getting to use GRS-1 & co. more.
 
 Added Espec-1 format.
 
@@ -10,7 +19,7 @@ when decoding). Needed to talk to some servers.
 
 Demo client can request simple element set names.
 
-Added Diagnostic Format.
+Added Diagnostic Format encoders/decoders.
 
 Added simple Close handling to frontend server (no hooks for resource
 reporting yet), and demonstration client.

@@ -41,7 +41,6 @@ int ber_any(ODR o, Odr_any **p);
 int completeBER(unsigned char *buf, int len);
 void odr_begin(ODR o);
 void odr_end(ODR o);
-void odr_release_mem(struct odr_memblock *p);
 Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
 int odr_grow_block(odr_ecblock *b, int min_bytes);
 int odr_write(ODR o, unsigned char *buf, int bytes);

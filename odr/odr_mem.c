@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.11  1995-11-01 13:54:43  quinn
+ * Revision 1.12  1995-11-08 17:41:33  quinn
+ * Smallish.
+ *
+ * Revision 1.11  1995/11/01  13:54:43  quinn
  * Minor adjustments
  *
  * Revision 1.10  1995/10/25  16:58:19  quinn
@@ -47,77 +50,12 @@
 
 /* ------------------------ NIBBLE MEMORY ---------------------- */
 
-#define ODR_MEM_CHUNK (10*1024)
-
-typedef struct odr_memblock
-{
-    char *buf;
-    int size;
-    int top;
-    int total;
-    struct odr_memblock *next;
-} odr_memblock;
-
-static odr_memblock *freelist = 0; /* global freelist */
-
-static void free_block(odr_memblock *p)
-{
-    p->next = freelist;
-    freelist = p;
-}
-
-/*
- * acquire a block with a minimum of size free bytes.
- */
-static odr_memblock *get_block(int size)
-{
-    odr_memblock *r, *l;
-
-    for (r = freelist, l = 0; r; l = r, r = r->next)
-    	if (r->size >= size)
-	    break;
-    if (r)
-    	if (l)
-	    l->next = r->next;
-	else
-	    freelist = r->next;
-    else
-    {
-    	int get = ODR_MEM_CHUNK;
-
-	if (get < size)
-	    get = size;
-	if (!(r = xmalloc(sizeof(*r))))
-	    abort();
-	if (!(r->buf = xmalloc(r->size = get)))
-	    abort();
-    }
-    r->top = 0;
-    r->total = 0;
-    return r;
-}
-
-/*
- * Return p to the global freelist.
- */
-void odr_release_mem(ODR_MEM p)
-{
-    odr_memblock *t;
-
-    while (p)
-    {
-    	t = p;
-	p = p->next;
-	free_block(t);
-    }
-}
-
 /*
  * Extract the memory control block from o.
  */
-ODR_MEM odr_extract_mem(ODR o)
+NMEM odr_extract_mem(ODR o)
 {
-    ODR_MEM r = o->mem;
+    NMEM r = o->mem;
 
     o->mem = 0;
     return r;
@@ -125,36 +63,14 @@ ODR_MEM odr_extract_mem(ODR o)
 
 void *odr_malloc(ODR o, int size)
 {
-    struct odr_memblock *p;
-    char *r;
-
-    if (!o)
-    {
-	if (!(r = xmalloc(size)))
-	    abort();
-	return r;
-    }
-    p = o->mem;
-    if (!p || p->size - p->top < size)
-    	if (!(p = get_block(size)))
-	    abort();
-	else
-	{
-	    if (o->mem)
-		p->total = o->mem->total;
-	    p->next = o->mem;
-	    o->mem = p;
-	}
-    r = p->buf + p->top;
-    /* align size */
-    p->top += (size + (sizeof(long) - 1)) & ~(sizeof(long) - 1);
-    p->total += size;
-    return r;
+    if (o && !o->mem)
+	o->mem = nmem_create();
+    return nmem_malloc(o ? o->mem : 0, size);
 }
 
 int odr_total(ODR o)
 {
-    return o->mem ? o->mem->total : 0;
+    return o->mem ? nmem_total(o->mem) : 0;
 }
 
 /* ---------- memory management for data encoding ----------*/

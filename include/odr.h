@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.16  1995-11-01 13:54:36  quinn
+ * Revision 1.17  1995-11-08 17:41:27  quinn
+ * Smallish.
+ *
+ * Revision 1.16  1995/11/01  13:54:36  quinn
  * Minor adjustments
  *
  * Revision 1.15  1995/10/18  16:12:36  quinn
@@ -126,6 +129,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <nmem.h>
 #include <yconfig.h>
 
 #ifndef bool_t
@@ -245,7 +249,7 @@ typedef struct odr
     FILE *print;         /* output file for direction print */
     int indent;          /* current indent level for printing */
 
-    struct odr_memblock *mem;
+    NMEM mem;            /* memory handle for decoding (primarily) */
 
     /* stack for constructed types */
 #define ODR_MAX_STACK 50
@@ -290,8 +294,9 @@ void odr_destroy(ODR o);
 void odr_setbuf(ODR o, char *buf, int len, int can_grow);
 char *odr_getbuf(ODR o, int *len, int *size);
 void *odr_malloc(ODR o, int size);
-ODR_MEM odr_extract_mem(ODR o);
-void odr_release_mem(ODR_MEM p);
+NMEM odr_extract_mem(ODR o);
+#define odr_release_mem(m) nmem_destroy(m)
+#define ODR_MEM NMEM
 
 #define odr_implicit(o, t, p, cl, tg, opt)\
         (odr_implicit_settag((o), cl, tg), t ((o), (p), opt) )
@@ -355,6 +360,8 @@ void odr_release_mem(ODR_MEM p);
 #define odr_tell(o) ((o)->ecb.pos)
 #define odr_offset(o) ((o)->bp - (o)->buf)
 #define odr_ok(o) (!(o)->error)
+#define odr_getmem(o) ((o)->mem)
+#define odr_setmem(o, v) ((o)->mem = (v))
 
 #define ODR_MAXNAME 256
 

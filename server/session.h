@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.10  1995-08-29 11:18:01  quinn
+ * Revision 1.11  1995-11-08 17:41:40  quinn
+ * Smallish.
+ *
+ * Revision 1.10  1995/08/29  11:18:01  quinn
  * Added code to receive close
  *
  * Revision 1.9  1995/06/16  10:31:38  quinn
@@ -59,7 +62,7 @@ typedef struct request
     } state;
 
     Z_APDU *request;        /* Current request */
-    ODR_MEM request_mem;    /* ODR memory handle for request */
+    NMEM request_mem;    /* memory handle for request */
 
     int size_response;     /* size of buffer */
     int len_response;      /* length of encoded data */
