@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.158 2002-06-10 11:07:57 adam Exp $
+ * $Id: client.c,v 1.159 2002-06-17 14:57:34 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -72,6 +72,7 @@ static int kilobytes = 1024;
 static char* yazCharset = 0;
 static char* yazLang = 0;
 
+
 static char last_cmd[32] = "?";
 static FILE *marcdump = 0;
 static char *refid = NULL;
@@ -106,7 +107,8 @@ int rl_attempted_completion_over = 0;
 void process_cmd_line(char* line);
 char ** readline_completer(char *text, int start, int end);
 char *command_generator(const char *text, int state);
-
+char** curret_global_list=NULL;
+int cmd_register_tab(char* arg);
 
 ODR getODROutputStream()
 {
@@ -430,6 +432,15 @@ int cmd_authentication(char *arg)
         auth = &au;
         au.which = Z_IdAuthentication_open;
         au.u.open = user;
+    }
+    if (r == 2)
+    {
+        auth = &au;
+        au.which = Z_IdAuthentication_idPass;
+        au.u.idPass = &idPass;
+        idPass.groupId = NULL;
+        idPass.userId = user;
+        idPass.password = group;
     }
     if (r == 3)
     {
@@ -2355,7 +2366,8 @@ int cmd_register_oid(char* args) {
     return 1;  
 }
 
-int cmd_push_command(char* arg) {
+int cmd_push_command(char* arg) 
+{
 #if HAVE_READLINE_HISTORY_H
     if(strlen(arg)>1) 
         add_history(arg);
@@ -2365,11 +2377,13 @@ int cmd_push_command(char* arg) {
     return 1;
 }
 
-void source_rcfile() {
+void source_rcfile() 
+{
     /*  Look for a $HOME/.yazclientrc and source it if it exists */
     struct stat statbuf;
     char buffer[1000];
     char* homedir=getenv("HOME");
+
     if(!homedir) return;
     
     sprintf(buffer,"%s/.yazclientrc",homedir);
@@ -2539,61 +2553,66 @@ void wait_and_handle_responce()
 
 static int cmd_help (char *line);
 
+typedef char *(*completerFunctionType)(const char *text, int state);
+
 static struct {
     char *cmd;
     int (*fun)(char *arg);
     char *ad;
-    char *(*rl_completerfunction)(const char *text, int state);
+	completerFunctionType rl_completerfunction;
+    //char *(*rl_completerfunction)(const char *text, int state);
     int complete_filenames;
+	char **local_tabcompletes;
 } cmd[] = {
-    {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]",NULL,0},
-    {"quit", cmd_quit, "",NULL,0},
-    {"find", cmd_find, "<query>",NULL,0},
-    {"delete", cmd_delete, "<setname>",NULL,0},
-    {"base", cmd_base, "<base-name>",NULL,0},
-    {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]",NULL,0},
-    {"scan", cmd_scan, "<term>",NULL,0},
-    {"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0},
-    {"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0},
-    {"authentication", cmd_authentication, "<acctstring>",NULL,0},
-    {"lslb", cmd_lslb, "<largeSetLowerBound>",NULL,0},
-    {"ssub", cmd_ssub, "<smallSetUpperBound>",NULL,0},
-    {"mspn", cmd_mspn, "<mediumSetPresentNumber>",NULL,0},
-    {"status", cmd_status, "",NULL,0},
-    {"setnames", cmd_setnames, "",NULL,0},
-    {"cancel", cmd_cancel, "",NULL,0},
-    {"format", cmd_format, "<recordsyntax>",complete_format,0},
-    {"schema", cmd_schema, "<schema>",complete_schema,0},
-    {"elements", cmd_elements, "<elementSetName>",NULL,0},
-    {"close", cmd_close, "",NULL,0},
-    {"attributeset", cmd_attributeset, "<attrset>",complete_attributeset,0},
-    {"querytype", cmd_querytype, "<type>",complete_querytype,0},
-    {"refid", cmd_refid, "<id>",NULL,0},
-    {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0},
-    {"update", cmd_update, "<item>",NULL,0},
-    {"packagename", cmd_packagename, "<packagename>",NULL,0},
-    {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0},
-    {"charset", cmd_charset, "<charset_name>",NULL,0},
-    {"lang", cmd_lang, "<language_code>",NULL,0},
-    {".", cmd_source, "<filename>",NULL,1},
-    {"!", cmd_subshell, "Subshell command",NULL,0},
-    {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,0},
-    {"set_marcdump", cmd_set_marcdump," <filename>",NULL,0},
-    {"set_cclfields", cmd_set_cclfields,"<filename>",NULL,1}, 
-    {"register_oid",cmd_register_oid,"<name> <class> <oid>",NULL,0},
-    {"push_command",cmd_push_command,"<command>",command_generator,0},
+    {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]",NULL,0,NULL},
+    {"quit", cmd_quit, "",NULL,0,NULL},
+    {"find", cmd_find, "<query>",NULL,0,NULL},
+    {"delete", cmd_delete, "<setname>",NULL,0,NULL},
+    {"base", cmd_base, "<base-name>",NULL,0,NULL},
+    {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]",NULL,0,NULL},
+    {"scan", cmd_scan, "<term>",NULL,0,NULL},
+    {"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0,NULL},
+    {"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0,NULL},
+    {"authentication", cmd_authentication, "<acctstring>",NULL,0,NULL},
+    {"lslb", cmd_lslb, "<largeSetLowerBound>",NULL,0,NULL},
+    {"ssub", cmd_ssub, "<smallSetUpperBound>",NULL,0,NULL},
+    {"mspn", cmd_mspn, "<mediumSetPresentNumber>",NULL,0,NULL},
+    {"status", cmd_status, "",NULL,0,NULL},
+    {"setnames", cmd_setnames, "",NULL,0,NULL},
+    {"cancel", cmd_cancel, "",NULL,0,NULL},
+    {"format", cmd_format, "<recordsyntax>",complete_format,0,NULL},
+    {"schema", cmd_schema, "<schema>",complete_schema,0,NULL},
+    {"elements", cmd_elements, "<elementSetName>",NULL,0,NULL},
+    {"close", cmd_close, "",NULL,0,NULL},
+    {"attributeset", cmd_attributeset, "<attrset>",complete_attributeset,0,NULL},
+    {"querytype", cmd_querytype, "<type>",complete_querytype,0,NULL},
+    {"refid", cmd_refid, "<id>",NULL,0,NULL},
+    {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0,NULL},
+    {"update", cmd_update, "<item>",NULL,0,NULL},
+    {"packagename", cmd_packagename, "<packagename>",NULL,0,NULL},
+    {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0,NULL},
+    {"charset", cmd_charset, "<charset_name>",NULL,0,NULL},
+    {"lang", cmd_lang, "<language_code>",NULL,0,NULL},
+    {".", cmd_source, "<filename>",NULL,1,NULL},
+    {"!", cmd_subshell, "Subshell command",NULL,1,NULL},
+    {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,1,NULL},
+    {"set_marcdump", cmd_set_marcdump," <filename>",NULL,1,NULL},
+    {"set_cclfiele", cmd_set_cclfields," <filename>",NULL,1,NULL},
+    {"register_oid", cmd_register_oid,"<name> <class> <oid>",NULL,0,NULL},
+    {"push_command", cmd_push_command,"<command>",command_generator,0,NULL},
+	{"register_tab", cmd_register_tab,"<commandname> <tab>",command_generator,0,NULL},
     /* Server Admin Functions */
-    {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0},
-    {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0},
-    {"adm-create", cmd_adm_create, "",NULL,0},
-    {"adm-drop", cmd_adm_drop, "('database'|'index')<object-name>",NULL,0},
-    {"adm-import", cmd_adm_import, "<record-type> <dir> <pattern>",NULL,0},
-    {"adm-refresh", cmd_adm_refresh, "",NULL,0},
-    {"adm-commit", cmd_adm_commit, "",NULL,0},
-    {"adm-shutdown", cmd_adm_shutdown, "",NULL,0},
-    {"adm-startup", cmd_adm_startup, "",NULL,0},
-    {"help", cmd_help, "", NULL},
-    {0,0,0,0,0}
+    {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0,NULL},
+    {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0,NULL},
+    {"adm-create", cmd_adm_create, "",NULL,0,NULL},
+    {"adm-drop", cmd_adm_drop, "('database'|'index')<object-name>",NULL,0,NULL},
+    {"adm-import", cmd_adm_import, "<record-type> <dir> <pattern>",NULL,0,NULL},
+    {"adm-refresh", cmd_adm_refresh, "",NULL,0,NULL},
+    {"adm-commit", cmd_adm_commit, "",NULL,0,NULL},
+    {"adm-shutdown", cmd_adm_shutdown, "",NULL,0,NULL},
+    {"adm-startup", cmd_adm_startup, "",NULL,0,NULL},
+    {"help", cmd_help, "", NULL,0,NULL},
+    {0,0,0,0,0,0}
 };
 
 static int cmd_help (char *line)
@@ -2634,6 +2653,48 @@ static int cmd_help (char *line)
         printf ("1=Incomplete subfield  2=Complete subfield  3=Complete field\n");
     }
     return 1;
+}
+
+int cmd_register_tab(char* arg) {
+	
+	char command[101], tabargument[101];
+	int i, res;
+	int num_of_tabs;
+	char** tabslist;
+
+	if (sscanf (arg, "%100s %100s", command, tabargument) < 1) {
+		return 0;
+	};
+
+	/* locate the amdn in the list */
+	for (i = 0; cmd[i].cmd; i++) {
+		if (!strncmp(cmd[i].cmd, command, strlen(command))) {
+			break;
+		}
+	}
+	
+	if(!cmd[i].cmd) { 
+		fprintf(stderr,"Unknown command %s\n",command);
+		return 1;
+	};
+	
+
+
+	if(!cmd[i].local_tabcompletes) {
+		cmd[i].local_tabcompletes = calloc(1,sizeof(char**));
+	};
+	
+	num_of_tabs=0;		
+	
+	tabslist = cmd[i].local_tabcompletes;
+	for(;tabslist && *tabslist;tabslist++) {
+		num_of_tabs++;
+	};  
+
+	cmd[i].local_tabcompletes=realloc(cmd[i].local_tabcompletes,(num_of_tabs+2)*sizeof(char**));
+	tabslist=cmd[i].local_tabcompletes;
+	tabslist[num_of_tabs]=strdup(tabargument);
+	tabslist[num_of_tabs+1]=NULL;
 }
 
 void process_cmd_line(char* line)
@@ -2718,6 +2779,8 @@ char *command_generator(const char *text, int state)
 char ** readline_completer(char *text, int start, int end) {
 #if HAVE_READLINE_READLINE_H
 
+	completerFunctionType completerToUse;
+	
     if(start == 0) {
 #if HAVE_READLINE_RL_COMPLETION_MATCHES
         char** res=rl_completion_matches(text,
@@ -2746,23 +2809,31 @@ char ** readline_completer(char *text, int start, int end) {
             }
         }
     
+		if(!cmd[i].cmd) return NULL;
 
-        if(!cmd[i].complete_filenames) 
-            rl_attempted_completion_over = 1;    
-        if(cmd[i].rl_completerfunction) {
+
+		curret_global_list = cmd[i].local_tabcompletes;
+		
+		completerToUse = cmd[i].rl_completerfunction;
+		if(completerToUse==NULL)  /* if no pr. command completer is defined use the default completer */
+			completerToUse = default_completer;
+		
+        if(completerToUse) {
 #ifdef HAVE_READLINE_RL_COMPLETION_MATCHES
             char** res=
                 rl_completion_matches(text,
-                                   cmd[i].rl_completerfunction);
+                                   completerToUse);
 #else
             char** res=
                 completion_matches(text,
-                                   (CPFunction*)cmd[i].rl_completerfunction);
+                                   (CPFunction*)completerToUse);
 #endif
-            rl_attempted_completion_over = 1;    
-            return res;
+			if(!cmd[i].complete_filenames) 
+				rl_attempted_completion_over = 1;
+			return res;
         } else {
-            rl_attempted_completion_over = 1;
+			if(!cmd[i].complete_filenames) 
+				rl_attempted_completion_over = 1;
             return 0;
         }
     }

@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.4 2002-02-24 12:24:40 adam Exp $
+ * $Id: tabcomplete.c,v 1.5 2002-06-17 14:57:34 ja7 Exp $
  */
 
 #include <string.h>
@@ -12,6 +12,8 @@
 #include <yaz/oid.h>
 #include "tabcomplete.h"
 
+extern char** curret_global_list;
+
 /* *****************************************************************************
  *
  * generic compleater 
@@ -19,13 +21,15 @@
  * *****************************************************************************/
 
 char* complete_from_list(char* completions[], const char *text, int state)
-{
+{	
 	static int idx;
+
+	if(!completions) return NULL;
 	if(state==0) {
 		idx = 0;
 	}
 	for(; completions[idx]; ++ idx) {
-		if(!strncmp(completions[idx],text,strlen(text))) {
+		if(!strncasecmp(completions[idx],text,strlen(text))) {
 			++idx; /* skip this entry on the next run */ 
 			return (char*)strdup(completions[idx-1]);
 		};
@@ -121,6 +125,14 @@ char* complete_attributeset(const char* text, int state)
 	free(list);	
 	return res;
 }
+
+
+char* default_completer(const char* text, int state)
+{
+	return complete_from_list(curret_global_list,text,state);
+}
+
+
 
 /*
  * Local variables:
