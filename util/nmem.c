@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.30  2001-10-05 13:55:17  adam
+ * Revision 1.31  2001-10-24 12:24:43  adam
+ * WIN32 updates: ZOOM runs, nmem_init/nmem_exit called in DllMain.
+ *
+ * Revision 1.30  2001/10/05 13:55:17  adam
  * Added defines YAZ_GNU_THREADS, YAZ_POSIX_THREADS in code and yaz-config
  *
  * Revision 1.29  2001/10/04 00:37:58  adam
@@ -509,3 +512,20 @@ void nmem_exit (void)
     }
 }
 
+
+#ifdef WIN32
+BOOL WINAPI DllMain (HINSTANCE hinstDLL,
+		     DWORD reason,
+		     LPVOID reserved)
+{
+    switch (reason)
+    {
+    case DLL_PROCESS_ATTACH:
+	nmem_init ();
+	break;
+    case DLL_PROCESS_DETACH:
+	nmem_exit ();
+    }
+    return TRUE;
+}
+#endif

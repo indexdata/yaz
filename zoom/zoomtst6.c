@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst6.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoomtst6.c,v 1.2 2001-10-24 12:24:43 adam Exp $
  *
  * Asynchronous multi-target client doing two searches
  */
@@ -42,8 +42,6 @@ int main(int argc, char **argv)
     Z3950_resultset r2[500];  /* and result sets .. */
     Z3950_search s;
     Z3950_options o;
-
-    nmem_init ();
 
     o = Z3950_options_create ();
     if (argc < 4)
@@ -114,7 +112,5 @@ int main(int argc, char **argv)
         Z3950_resultset_destroy (r2[i]);
     }
     Z3950_options_destroy(o);
-    nmem_exit ();
-    xmalloc_trav("");
     exit (0);
 }

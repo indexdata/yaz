@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoom-c.c,v 1.2 2001-10-24 12:24:43 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -409,7 +409,7 @@ void Z3950_resultset_records (Z3950_resultset r, Z3950_record *recs,
     Z3950_resultset_retrieve (r, force_present, start, count);
     if (force_present)
     {
-        int i;
+        size_t i;
         for (i = 0; i< *cnt; i++)
             recs[i] = Z3950_resultset_record_immediate (r, i+start);
     }
@@ -432,15 +432,18 @@ static void do_connect (Z3950_connection c)
 
     if (c->cs)
     {
-	cs_connect (c->cs, add);
-	c->state = STATE_CONNECTING; 
-	c->mask = Z3950_SELECT_READ | Z3950_SELECT_WRITE;
+	int ret = cs_connect (c->cs, add);
+	yaz_log (LOG_DEBUG, "cs_connect returned %d", ret);
+	if (ret >= 0)
+	{
+	    c->state = STATE_CONNECTING; 
+	    c->mask = Z3950_SELECT_READ | Z3950_SELECT_WRITE | Z3950_SELECT_EXCEPT;
+	    return;
+	}
     }
-    else
-    {
-	c->state = STATE_IDLE;
-	c->error = Z3950_ERROR_CONNECT;
-    }
+    c->event_pending = 1;
+    c->state = STATE_IDLE;
+    c->error = Z3950_ERROR_CONNECT;
 }
 
 int z3950_connection_socket(Z3950_connection c)
@@ -1293,7 +1296,7 @@ int Z3950_connection_do_io(Z3950_connection c, int mask)
 {
 #if 0
     int r = cs_look(c->cs);
-    yaz_log (LOG_LOG, "Z3950_connection_do_io c=%p mask=%d cs_look=%d",
+    yaz_log (LOG_DEBUG, "Z3950_connection_do_io c=%p mask=%d cs_look=%d",
 	     c, mask, r);
     
     if (r == CS_NONE)
@@ -1303,7 +1306,7 @@ int Z3950_connection_do_io(Z3950_connection c, int mask)
     }
     else if (r == CS_CONNECT)
     {
-	yaz_log (LOG_LOG, "calling rcvconnect");
+	yaz_log (LOG_DEBUG, "calling rcvconnect");
 	if (cs_rcvconnect (c->cs) < 0)
 	{
 	    c->error = Z3950_ERROR_CONNECT;
@@ -1351,7 +1354,7 @@ int Z3950_connection_do_io(Z3950_connection c, int mask)
 int Z3950_event (int no, Z3950_connection *cs)
 {
     struct timeval tv;
-    fd_set input, output;
+    fd_set input, output, except;
     int i, r;
     int max_fd = 0;
 
@@ -1370,6 +1373,7 @@ int Z3950_event (int no, Z3950_connection *cs)
     
     FD_ZERO (&input);
     FD_ZERO (&output);
+    FD_ZERO (&except);
     r = 0;
     for (i = 0; i<no; i++)
     {
@@ -1395,6 +1399,11 @@ int Z3950_event (int no, Z3950_connection *cs)
 	    FD_SET (fd, &output);
 	    r++;
 	}
+	if (mask & Z3950_SELECT_EXCEPT)
+	{
+	    FD_SET (fd, &except);
+	    r++;
+	}
     }
     if (!r)
     {
@@ -1417,7 +1426,9 @@ int Z3950_event (int no, Z3950_connection *cs)
 	yaz_log (LOG_DEBUG, "no more events");
 	return 0;
     }
-    r = select (max_fd+1, &input, &output, 0, &tv);
+    yaz_log (LOG_DEBUG, "select start");
+    r = select (max_fd+1, &input, &output, &except, &tv);
+    yaz_log (LOG_DEBUG, "select stop, returned r=%d", r);
 
     for (i = 0; i<no; i++)
     {
@@ -1435,6 +1446,8 @@ int Z3950_event (int no, Z3950_connection *cs)
 		mask += Z3950_SELECT_READ;
 	    if (FD_ISSET(fd, &output))
 		mask += Z3950_SELECT_WRITE;
+	    if (FD_ISSET(fd, &except))
+		mask += Z3950_SELECT_EXCEPT;
 	    if (mask)
 		Z3950_connection_do_io(c, mask);
 	}

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoomsh.c,v 1.2 2001-10-24 12:24:43 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -8,9 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
-#define HAVE_READLINE_READLINE_H 1
-#define HAVE_READLINE_HISTORY_H 1
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h> 
@@ -32,7 +29,7 @@ static int next_token (const char **cpp, const char **t_start)
     while (*cp == ' ')
 	cp++;
     *t_start = cp;
-    while (*cp && *cp != ' ')
+    while (*cp && *cp != ' ' && *cp != '\r' && *cp != '\n')
     {
 	cp++;
 	len++;

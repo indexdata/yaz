@@ -1,11 +1,12 @@
 /*
- * $Id: zoomtst3.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoomtst3.c,v 1.2 2001-10-24 12:24:43 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <yaz/xmalloc.h>
 

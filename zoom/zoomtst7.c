@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoomtst7.c,v 1.2 2001-10-24 12:24:43 adam Exp $
  *
  * API test..
  */
@@ -19,8 +19,6 @@ int main(int argc, char **argv)
     Z3950_connection z;
     Z3950_resultset r[10];  /* and result sets .. */
     Z3950_options o;
-
-    nmem_init ();
 
     o = Z3950_options_create ();
 
@@ -143,9 +141,6 @@ int main(int argc, char **argv)
 	}
     }
     Z3950_options_destroy (o);
-    nmem_exit ();
-    xmalloc_trav("");
-
     exit (0);
 }
 

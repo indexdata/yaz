@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.127 2001-08-08 19:35:06 adam Exp $
+ * $Id: client.c,v 1.128 2001-10-24 12:24:43 adam Exp $
  *
  */
 
@@ -1919,7 +1919,6 @@ static void initialize(void)
 #if YAZ_MODULE_ccl
     FILE *inf;
 #endif
-    nmem_init();
     if (!(out = odr_createmem(ODR_ENCODE)) ||
         !(in = odr_createmem(ODR_DECODE)) ||
         !(print = odr_createmem(ODR_PRINT)))

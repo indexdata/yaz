@@ -1,13 +1,14 @@
 /*
- * $Id: zoomtst5.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoomtst5.c,v 1.2 2001-10-24 12:24:43 adam Exp $
  *
  * Asynchronous multi-target client doing search, sort and present
  */
 
 #include <stdio.h>
+#include <string.h>
+
 #include <yaz/nmem.h>
 #include <yaz/xmalloc.h>
-
 #include <yaz/zoom.h>
 
 const char *my_callback (void *handle, const char *name)
@@ -25,8 +26,6 @@ int main(int argc, char **argv)
     Z3950_resultset r[500];  /* and result sets .. */
     Z3950_search s;
     Z3950_options o;
-
-    nmem_init ();
 
     o = Z3950_options_create ();
     if (argc < 4)
@@ -122,7 +121,4 @@ int main(int argc, char **argv)
         Z3950_connection_destroy (z[i]);
     }
     Z3950_options_destroy(o);
-    nmem_exit ();
-    xmalloc_trav("");
-    exit (0);
 }

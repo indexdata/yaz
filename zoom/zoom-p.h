@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoom-p.h,v 1.2 2001-10-24 12:24:43 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
@@ -20,6 +20,7 @@ struct Z3950_search_p {
 
 #define Z3950_SELECT_READ 1
 #define Z3950_SELECT_WRITE 2
+#define Z3950_SELECT_EXCEPT 4
 
 struct Z3950_connection_p {
     COMSTACK cs;

@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.26 2001-09-27 12:09:18 adam Exp $
+# $Id: makefile,v 1.27 2001-10-24 12:24:43 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -25,13 +25,9 @@
 
 DEBUG=1   # 0 for release, 1 for debug
 
-NEW_Z3950=1  # 0= use old asn files
-             # 1= generate files from *.asn (needs tcl)
-
-
 default: all
 
-all: dirs yaz_date_h proto_h dll client ztest 
+all: dirs yaz_date_h dll client ztest zoomsh
 
 generate: generated_files
 
@@ -59,6 +55,7 @@ RETDIR=$(SRCDIR)\RETRIEVAL
 Z3950DIR=$(SRCDIR)\Z39.50
 ILLDIR=$(SRCDIR)\ill
 CCLDIR=$(SRCDIR)\ccl
+ZOOMDIR=$(SRCDIR)\zoom
 
 CLIENTDIR=$(SRCDIR)\CLIENT
 SERVERDIR=$(SRCDIR)\SERVER
@@ -76,15 +73,25 @@ DLL=$(BINDIR)\Yaz.dll
 IMPLIB=$(LIBDIR)\Yaz.lib
 
 CLIENT=$(BINDIR)\yaz-client.exe
+ZOOMSH=$(BINDIR)\zoomsh.exe
 ZTEST=$(BINDIR)\yaz-ztest.exe
-PROTOH=$(INCLDIR)\yaz\proto.h
 YAZ_DATE_H=$(INCLDIR)\yaz\yaz-date.h
+
+ZOOMTST1=$(BINDIR)\zoomtst1.exe
+ZOOMTST2=$(BINDIR)\zoomtst2.exe
+ZOOMTST3=$(BINDIR)\zoomtst3.exe
+ZOOMTST4=$(BINDIR)\zoomtst4.exe
+ZOOMTST5=$(BINDIR)\zoomtst5.exe
+ZOOMTST6=$(BINDIR)\zoomtst6.exe
+ZOOMTST7=$(BINDIR)\zoomtst7.exe
+
 
 # shortcut names defined here
 dll : $(DLL) 
 client: $(CLIENT)
 ztest: $(ZTEST)
-proto_h: $(PROTOH)
+zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
+ $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7)
 yaz_date_h: $(YAZ_DATE_H)
 
 ###########################################################
@@ -151,6 +158,7 @@ RELEASE_LNK_OPTIONS=  /pdb:none
 
 DLL_LINK_OPTIONS= /dll  
 CLIENT_LINK_OPTIONS = /subsystem:console  
+ZOOMSH_LINK_OPTIONS = /subsystem:console
 SERVER_LINK_OPTIONS = -lib 
 ZTEST_LINK_OPTIONS = /subsystem:console  
 
@@ -190,6 +198,24 @@ YAZ_CLIENT_OBJS= \
    $(OBJDIR)\client.obj \
    $(OBJDIR)\admin.obj
 
+YAZ_ZOOMSH_OBJS = \
+   $(OBJDIR)\zoomsh.obj
+
+YAZ_ZOOMTST1_OBJS = \
+   $(OBJDIR)\zoomtst1.obj
+YAZ_ZOOMTST2_OBJS = \
+   $(OBJDIR)\zoomtst2.obj
+YAZ_ZOOMTST3_OBJS = \
+   $(OBJDIR)\zoomtst3.obj
+YAZ_ZOOMTST4_OBJS = \
+   $(OBJDIR)\zoomtst4.obj
+YAZ_ZOOMTST5_OBJS = \
+   $(OBJDIR)\zoomtst5.obj
+YAZ_ZOOMTST6_OBJS = \
+   $(OBJDIR)\zoomtst6.obj
+YAZ_ZOOMTST7_OBJS = \
+   $(OBJDIR)\zoomtst7.obj
+
 YAZ_SERVER_OBJS= \
 	"$(OBJDIR)\eventl.obj" \
 	"$(OBJDIR)\requestq.obj" \
@@ -210,20 +236,6 @@ YAZ_CCL_OBJS= \
    $(OBJDIR)\cclqual.obj \
    $(OBJDIR)\cclstr.obj \
    $(OBJDIR)\ccltoken.obj
-
-YAZ_ASN_OBJS= \
-   $(OBJDIR)\proto.obj \
-   $(OBJDIR)\prt-acc.obj \
-   $(OBJDIR)\prt-add.obj \
-   $(OBJDIR)\prt-arc.obj \
-   $(OBJDIR)\prt-dat.obj \
-   $(OBJDIR)\prt-dia.obj \
-   $(OBJDIR)\prt-esp.obj \
-   $(OBJDIR)\prt-exd.obj \
-   $(OBJDIR)\prt-exp.obj \
-   $(OBJDIR)\prt-grs.obj \
-   $(OBJDIR)\prt-rsc.obj \
-   $(OBJDIR)\prt-univ.obj 
 
 YAZ_COMSTACK_OBJS= \
    $(OBJDIR)\comstack.obj \
@@ -275,7 +287,6 @@ YAZ_UTIL_OBJS= \
 YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\diagbib1.obj \
    $(OBJDIR)\zget.obj \
-   $(OBJDIR)\prt-ext.obj \
    $(OBJDIR)\logrpn.obj \
    $(OBJDIR)\pquery.obj \
    $(OBJDIR)\yaz-ccl.obj \
@@ -330,12 +341,17 @@ Z3950_OBJS= \
    $(OBJDIR)\zes-pquery.obj \
    $(OBJDIR)\zes-psched.obj \
    $(OBJDIR)\zes-pset.obj \
-   $(OBJDIR)\zes-update0.obj
+   $(OBJDIR)\zes-update0.obj \
+   $(OBJDIR)\prt-ext.obj
 
 ILL_OBJS= \
    $(OBJDIR)\ill-get.obj\
    $(OBJDIR)\ill-core.obj\
    $(OBJDIR)\item-req.obj
+
+YAZ_ZOOM_OBJS = \
+   $(OBJDIR)\zoom-c.obj \
+   $(OBJDIR)\zoom-opt.obj
 
 COMMON_YAZ_OBJS= \
    $(YAZ_UTIL_OBJS) \
@@ -344,18 +360,13 @@ COMMON_YAZ_OBJS= \
    $(YAZ_ZUTIL_OBJS) \
    $(YAZ_CCL_OBJS) \
    $(YAZ_RET_OBJS) \
-   $(YAZ_SERVER_OBJS) 
+   $(YAZ_SERVER_OBJS) \
+   $(YAZ_ZOOM_OBJS)
 
-!if $(NEW_Z3950)
 YAZ_OBJS= \
 	$(COMMON_YAZ_OBJS) \
 	$(Z3950_OBJS) \
 	$(ILL_OBJS) 
-!else
-YAZ_OBJS= \
-	$(COMMON_YAZ_OBJS) \
-	$(YAZ_ASN_OBJS)
-!endif
 
 DLL_OBJS= $(YAZ_OBJS)
 
@@ -364,26 +375,10 @@ ALL_OBJS= \
 	$(YAZ_CLIENT_OBJS) \
 	$(ZTEST_OBJS)
 
-
-##########################################################
-############## proto.h
-##########################################################
-
-!if $(NEW_Z3950)
-$(PROTOH): $(INCLDIR)\yaz\z-proto.h
-	type $(INCLDIR)\yaz\z-proto.h > $(PROTOH)
-!else	
-$(PROTOH): $(INCLDIR)\yaz\prt-proto.h 
-	copy $(ASNDIR)\*.h $(INCLDIR)\yaz
-	type $(INCLDIR)\yaz\prt-proto.h > $(PROTOH)
-!endif
-
-
 ###########################################################
 ############### Generated C and H files
 #####
 ######################################################
-
 
 Z3950_C_DIR=$(Z3950DIR)   
 ILL_C_DIR=$(ILLDIR)
@@ -474,8 +469,6 @@ GENERATED_H_FILES= \
 generated_files: \
 	$(GENERATED_H_FILES) \
 	$(GENERATED_C_FILES) \
-	$(PROTOH)
-
 
 ###########################################################
 ############### Compiling 
@@ -526,6 +519,9 @@ generated_files: \
 	$(CPP) $(COPT) $< 
 
 {$(CCLDIR)}.c{$(OBJDIR)}.obj:
+	$(CPP) $(COPT) $< 
+
+{$(ZOOMDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
 ############### ASN-generated files
@@ -616,7 +612,7 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 <<
 
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) 
-	@echo Linking the client  $(CLIENT)
+	@echo Linking $(CLIENT)
 	$(LINK) @<<
         $(LNKOPT) 
 		$(CLIENT_LINK_OPTIONS)
@@ -626,6 +622,110 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS)
 		/pdb:"$(LIBDIR)\yaz-client.pdb"
 		/map:"$(LIBDIR)\yaz-client.map"
 		/out:$(CLIENT)
+<<
+
+$(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) 
+	@echo Linking $(ZOOMSH)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMSH_OBJS)
+		/pdb:"$(LIBDIR)\zoomsh.pdb"
+		/map:"$(LIBDIR)\zoomsh.map"
+		/out:$(ZOOMSH)
+<<
+
+$(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS) 
+	@echo Linking $(ZOOMTST1)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST1_OBJS)
+		/pdb:"$(LIBDIR)\zoomtst1.pdb"
+		/map:"$(LIBDIR)\zoomtst1.map"
+		/out:$(ZOOMTST1)
+<<
+
+$(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS) 
+	@echo Linking $(ZOOMTST2)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST2_OBJS)
+		/pdb:"$(LIBDIR)\zoomtst2.pdb"
+		/map:"$(LIBDIR)\zoomtst2.map"
+		/out:$(ZOOMTST2)
+<<
+
+$(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS) 
+	@echo Linking $(ZOOMTST3)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST3_OBJS)
+		/pdb:"$(LIBDIR)\zoomtst3.pdb"
+		/map:"$(LIBDIR)\zoomtst3.map"
+		/out:$(ZOOMTST3)
+<<
+
+$(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS) 
+	@echo Linking $(ZOOMTST4)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST4_OBJS)
+		/pdb:"$(LIBDIR)\zoomtst4.pdb"
+		/map:"$(LIBDIR)\zoomtst4.map"
+		/out:$(ZOOMTST4)
+<<
+
+$(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS) 
+	@echo Linking $(ZOOMTST5)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST5_OBJS)
+		/pdb:"$(LIBDIR)\zoomtst5.pdb"
+		/map:"$(LIBDIR)\zoomtst5.map"
+		/out:$(ZOOMTST5)
+<<
+
+$(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS) 
+	@echo Linking $(ZOOMTST6)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST6_OBJS)
+		/pdb:"$(LIBDIR)\zoomtst6.pdb"
+		/map:"$(LIBDIR)\zoomtst6.map"
+		/out:$(ZOOMTST6)
+<<
+
+$(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS) 
+	@echo Linking $(ZOOMTST7)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(ZOOMSH_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST7_OBJS)
+		/pdb:"$(LIBDIR)\zoomtst7.pdb"
+		/map:"$(LIBDIR)\zoomtst7.map"
+		/out:$(ZOOMTST7)
 <<
 
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
@@ -656,14 +756,13 @@ clean:
 	del $(DLL) 
 	del $(CLIENT)
 	del $(ZTEST)
+	del $(ZOOMSH)
 	del $(TMPDIR)\*.
 
 	del $(LIBDIR)\*.MAP
 
 	del $(LIBDIR)\*.LIB
 	del $(OBJDIR)\*.OBJ
-
-	del $(PROTOH)
 
 realclean: clean
 	del $(Z3950_C_DIR)\*.c
@@ -689,17 +788,12 @@ $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
 ############### Explicit dependencies
 ###########################################################
 
-$(ALL_OBJS): $(PROTOH)
-
 # force recompilation of everything, if makefile changed
 
 $(Z3950_OBJS): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 
 $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 
-!if $(NEW_Z3950)
-$(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
-!endif
 # makes sure we generate before compiling anything, as the
 # new proto.h refers to the generated files, and is included
 # in various places
@@ -709,7 +803,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.26  2001-09-27 12:09:18  adam
+# Revision 1.27  2001-10-24 12:24:43  adam
+# WIN32 updates: ZOOM runs, nmem_init/nmem_exit called in DllMain.
+#
+# Revision 1.26  2001/09/27 12:09:18  adam
 # Function nmem_exit calls oid_exit (when reference is 0).
 #
 # Revision 1.25  2001/09/24 21:51:56  adam

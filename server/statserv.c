@@ -6,7 +6,7 @@
  * NT server based on threads by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.77 2001-10-05 14:43:22 adam Exp $
+ * $Id: statserv.c,v 1.78 2001-10-24 12:24:43 adam Exp $
  */
 
 #include <stdio.h>
@@ -671,7 +671,6 @@ int statserv_start(int argc, char **argv)
 {
     int ret;
 
-    nmem_init ();
 #ifdef WIN32
     /* We need to initialize the thread list */
     ThreadList_Initialize();
@@ -739,7 +738,6 @@ int statserv_start(int argc, char **argv)
 	yaz_log(LOG_LOG, "Entering event loop.");
         ret = event_loop(&pListener);
     }
-    nmem_exit ();
     return ret;
 }
 
