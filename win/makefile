@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.62 2003-07-19 13:48:49 adam Exp $
+# $Id: makefile,v 1.63 2003-07-25 11:11:19 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -18,11 +18,11 @@ TCL="C:\Tcl\bin\tclsh84.exe"
 HAVE_TCL=1
 
 # iconv charcter conversion utility
-HAVE_ICONV=1
+HAVE_ICONV=0
 ICONV_DIR = c:\iconv-1.8.win32
 
 # libxml2
-HAVE_LIBXML2=1
+HAVE_LIBXML2=0
 LIBXML2_DIR=c:\libxml2-2.5.3.win32
 
 # WIN32 binaries libxml2 & iconv from here:
@@ -364,7 +364,9 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\opacdisp.obj \
    $(OBJDIR)\zgdu.obj \
    $(OBJDIR)\soap.obj \
-   $(OBJDIR)\srw.obj
+   $(OBJDIR)\srw.obj \
+   $(OBJDIR)\zoom-c.obj \
+   $(OBJDIR)\zoom-opt.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -403,10 +405,6 @@ ILL_OBJS= \
    $(OBJDIR)\ill-core.obj\
    $(OBJDIR)\item-req.obj
 
-YAZ_ZOOM_OBJS = \
-   $(OBJDIR)\zoom-c.obj \
-   $(OBJDIR)\zoom-opt.obj
-
 YAZ_CQL_OBJS = \
    $(OBJDIR)\cql.obj \
    $(OBJDIR)\cqlstdio.obj \
@@ -416,20 +414,16 @@ YAZ_CQL_OBJS = \
    $(OBJDIR)\cqlstrer.obj \
    $(OBJDIR)\xcqlutil.obj
 
-COMMON_YAZ_OBJS= \
+YAZ_OBJS =\
    $(YAZ_UTIL_OBJS) \
    $(YAZ_ODR_OBJS) \
    $(YAZ_COMSTACK_OBJS) \
+   $(Z3950_OBJS) \
+   $(ILL_OBJS) \
    $(YAZ_ZUTIL_OBJS) \
    $(YAZ_CCL_OBJS) \
-   $(YAZ_SERVER_OBJS) \
-   $(YAZ_ZOOM_OBJS) \
-   $(YAZ_CQL_OBJS)
-
-YAZ_OBJS= \
-	$(COMMON_YAZ_OBJS) \
-	$(Z3950_OBJS) \
-	$(ILL_OBJS)
+   $(YAZ_CQL_OBJS) \
+   $(YAZ_SERVER_OBJS)
 
 DLL_OBJS= $(YAZ_OBJS)
 
@@ -944,7 +938,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.62  2003-07-19 13:48:49  adam
+# Revision 1.63  2003-07-25 11:11:19  adam
+# Change order of compilation to reflect Unix AM.
+#
+# Revision 1.62  2003/07/19 13:48:49  adam
 # makefile updated for oclcui.asn
 #
 # Revision 1.61  2003/07/15 08:26:26  adam
