@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.12  1995-06-19 12:38:47  quinn
+ * Revision 1.13  1995-08-15 11:16:39  quinn
+ * Fixed pretty-printers.
+ * CV:e ----------------------------------------------------------------------
+ * CV:e ----------------------------------------------------------------------
+ *
+ * Revision 1.12  1995/06/19  12:38:47  quinn
  * Added BER dumper.
  *
  * Revision 1.11  1995/05/16  08:50:53  quinn
@@ -44,6 +49,7 @@
  */
 
 #include <odr.h>
+#include <assert.h>
 
 int odr_constructed_begin(ODR o, void *p, int class, int tag)
 {
@@ -72,7 +78,7 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
 #ifdef ODR_DEBUG
     fprintf(stderr, "[cons_begin(%d)]", o->stackp);
 #endif
-    if (o->direction == ODR_ENCODE || o->direction == ODR_PRINT)
+    if (o->direction == ODR_ENCODE)
     {
 	o->stack[o->stackp].lenlen = 1;
 	if (odr_putc(o, 0) < 0)     /* dummy */
@@ -86,8 +92,16 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
 	o->bp += res;
 	o->left -= res;
     }
-    else return 0;
-
+    else if (o->direction == ODR_PRINT)
+    {
+    	fprintf(o->print, "%s{\n", odr_indent(o));
+	o->indent++;
+    }
+    else
+    {
+    	o->error = OOTHER;
+	return 0;
+    }
     o->stack[o->stackp].base = o->bp;
     o->stack[o->stackp].base_offset = odr_tell(o);
     return 1;
@@ -165,7 +179,12 @@ int odr_constructed_end(ODR o)
 #endif
 	    o->stackp--;
 	    return 1;
-    	case ODR_PRINT: o->stackp--;  return 1;
+    	case ODR_PRINT:
+	    assert(o->indent > 0);
+	    o->stackp--;
+	    o->indent--;
+	    fprintf(o->print, "%s}\n", odr_indent(o));
+	    return 1;
     	default:
 	    o->error = OOTHER;
 	    return 0;

@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.13  1995-05-22 14:56:57  quinn
+ * Revision 1.14  1995-08-15 11:16:39  quinn
+ * Fixed pretty-printers.
+ * CV:e ----------------------------------------------------------------------
+ * CV:e ----------------------------------------------------------------------
+ *
+ * Revision 1.13  1995/05/22  14:56:57  quinn
  * Fixed problem in decoding empty sequence.
  *
  * Revision 1.12  1995/05/18  13:06:32  quinn
@@ -65,11 +70,6 @@ int odr_sequence_begin(ODR o, void *p, int size)
     {
     	if (o->direction == ODR_DECODE && size)
 	    *pp = odr_malloc(o, size);
-	if (o->direction == ODR_PRINT)
-	{
-	    fprintf(o->print, "%s{\n", odr_indent(o));
-	    o->indent++;
-	}
     	return 1;
     }
     else
@@ -78,12 +78,6 @@ int odr_sequence_begin(ODR o, void *p, int size)
 
 int odr_sequence_end(ODR o)
 {
-    if (o->direction == ODR_PRINT)
-    {
-    	assert(o->indent > 0);
-    	o->indent--;
-    	fprintf(o->print, "%s}\n", odr_indent(o));
-    }
     return odr_constructed_end(o);    
 }
 
