@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.34 2002-02-12 15:59:12 adam Exp $
+# $Id: makefile,v 1.35 2002-03-16 10:26:57 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -28,6 +28,14 @@ DEBUG=0   # 0 for release, 1 for debug
 default: all
 
 all: dirs yaz_date_h generate dll client ztest zoomsh
+
+NSIS="c:\program files\nsis\makensis.exe"
+
+nsis: all
+	$(NSIS) yaz.nsi
+
+nsishelp:
+	$(NSIS)
 
 generate: generated_files
 
@@ -833,7 +841,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.34  2002-02-12 15:59:12  adam
+# Revision 1.35  2002-03-16 10:26:57  adam
+# Added NSIS rules (nmake nsis).
+#
+# Revision 1.34  2002/02/12 15:59:12  adam
 # added z-charneg.obj
 #
 # Revision 1.33  2002/02/11 23:25:26  adam
