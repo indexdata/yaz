@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.17  2001-06-26 12:14:15  adam
+ * Revision 1.18  2001-06-26 13:03:48  adam
+ * Bug fix: introduced by previous commit.
+ *
+ * Revision 1.17  2001/06/26 12:14:15  adam
  * When BER decoding a null byte is appended to the OCTET buffer.
  *
  * Revision 1.16  2000/02/29 13:44:55  adam
@@ -99,21 +102,17 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    {
 	    	c = (unsigned char *)odr_malloc(o, p->size += len + 1);
 	    	if (p->len)
-		{
 		    memcpy(c, p->buf, p->len);
-		    /* the final null is really not part of the buffer, but */
-		    /* it saves somes applications that assumes C strings */
-		    c[p->len] = '\0';
-		}
 		p->buf = c;
 	    }
 	    if (len)
-	    {
 		memcpy(p->buf + p->len, o->bp, len);
-		p->buf[p->len] = '\0';  /* make it a C string, just in case */
-	    }
 	    p->len += len;
 	    o->bp += len;
+	    /* the final null is really not part of the buffer, but */
+	    /* it helps somes applications that assumes C strings */
+	    if (len)
+		p->buf[p->len] = '\0';
 	    return 1;
     	case ODR_ENCODE:
 	    if ((res = ber_enclen(o, p->len, 5, 0)) < 0)
