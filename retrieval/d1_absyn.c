@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.7  1996-06-10 08:56:01  quinn
+ * Revision 1.8  1997-01-02 10:47:59  quinn
+ * Added optional, physical ANY
+ *
+ * Revision 1.7  1996/06/10 08:56:01  quinn
  * Work on Summary.
  *
  * Revision 1.6  1996/05/31  13:52:21  quinn
@@ -123,6 +126,7 @@ data1_absyn *data1_read_absyn(char *file)
     data1_esetname **esetpp;
     data1_maptab **maptabp;
     data1_marctab **marcp;
+    data1_termlist *all = 0;
     int level = 0;
 
     if (!(f = yaz_path_fopen(data1_tabpath, file, "r")))
@@ -172,7 +176,7 @@ data1_absyn *data1_read_absyn(char *file)
 	    int type, value;
 	    data1_termlist **tp;
 
-	    if (sscanf(args, "%s %s %s", path, name, termlists) < 3)
+	    if (sscanf(args, "%511s %511s %511s", path, name, termlists) < 3)
 	    {
 		logf(LOG_WARN, "Bad # of args to elm in %s: '%s'", 
 		    file, args);
@@ -291,8 +295,62 @@ data1_absyn *data1_read_absyn(char *file)
 		}
 		while ((p = strchr(p, ',')) && *(++p));
 	    }
+	    *tp = all; /* append any ALL entries to the list */
 
 	    new->name = xstrdup(name);
+	}
+	else if (!strcmp(cmd, "all"))
+	{
+	    char *p;
+	    data1_termlist **tp = &all;
+
+	    if (all)
+	    {
+		logf(LOG_WARN, "Too many ALL declarations in %s - ignored",
+		    file);
+		continue;
+	    }
+
+	    p = args;
+	    if (!res->attset)
+	    {
+		logf(LOG_WARN, "No attset loaded in %s", file);
+		fclose(f);
+		return 0;
+	    }
+	    do
+	    {
+		char attname[512], structure[512];
+		int r;
+
+		if (!(r = sscanf(p, "%511[^:,]:%511[^,]", attname,
+		    structure)))
+		{
+		    logf(LOG_WARN, "Syntax error in termlistspec in %s",
+			file);
+		    fclose(f);
+		    return 0;
+		}
+		*tp = xmalloc(sizeof(**tp));
+		if (!((*tp)->att = data1_getattbyname(res->attset,
+		    attname)))
+		{
+		    logf(LOG_WARN, "Couldn't find att '%s' in attset",
+			attname);
+		    fclose(f);
+		    return 0;
+		}
+		if (r < 2) /* is the structure qualified? */
+		    (*tp)->structure = DATA1S_word;
+		else if (!data1_matchstr(structure, "w"))
+		    (*tp)->structure = DATA1S_word;
+		else if (!data1_matchstr(structure, "p"))
+		    (*tp)->structure = DATA1S_phrase;
+
+		(*tp)->next = 0;
+		tp = &(*tp)->next;
+	    }
+	    while ((p = strchr(p, ',')) && *(++p));
 	}
 	else if (!strcmp(cmd, "name"))
 	{

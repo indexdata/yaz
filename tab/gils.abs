@@ -20,6 +20,8 @@ esetname G gils-g.est
 esetname W gils-b.est   # We don't really do bodyOfDisplay yet.
 esetname F @
 
+all Any
+
 elm (1,1)		    schemaIdentifier              -
 elm (1,10)                  rank                          -
 elm (1,12)                  url                           -

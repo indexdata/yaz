@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added optional, physical ANY (key replication)
+
 Fixed null-reference problem in GRS-1 output filter.
 
 Proximity operator added to Prefix Query Format (PQF).
