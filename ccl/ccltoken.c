@@ -44,7 +44,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.21 2002-12-28 12:13:03 adam Exp $
+ * $Id: ccltoken.c,v 1.22 2003-02-14 18:49:23 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -85,6 +85,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include <yaz/ccl.h>
 

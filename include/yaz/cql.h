@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.1 2003-01-06 08:20:27 adam Exp $
+/* $Id: cql.h,v 1.2 2003-02-14 18:49:23 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -91,7 +91,7 @@ struct cql_node {
             struct cql_node *right;
             struct cql_node *modifiers;
             struct cql_node *prefixes;
-        } bool;
+        } boolean;
         struct {
             char *name;
             char *value;

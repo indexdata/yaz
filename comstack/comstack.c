@@ -1,45 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Log: comstack.c,v $
- * Revision 1.10  2002-06-04 11:36:10  adam
- * New COMSTACK: UNIX socket
- *
- * Revision 1.9  2001/10/22 13:57:24  adam
- * Implemented cs_rcvconnect and cs_look as described in the documentation.
- *
- * Revision 1.8  2001/07/19 19:49:02  adam
- * Added include of string.h.
- *
- * Revision 1.7  2001/03/21 12:43:36  adam
- * Implemented cs_create_host. Better error reporting for SSL comstack.
- *
- * Revision 1.6  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.5  1998/06/22 11:32:35  adam
- * Added 'conditional cs_listen' feature.
- *
- * Revision 1.4  1997/09/29 07:16:14  adam
- * Array cs_errlist no longer global.
- *
- * Revision 1.3  1997/09/01 08:49:14  adam
- * New windows NT/95 port using MSV5.0. Minor changes only.
- *
- * Revision 1.2  1995/09/29 17:01:48  quinn
- * More Windows work
- *
- * Revision 1.1  1995/06/14  09:58:20  quinn
- * Renamed yazlib to comstack.
- *
- * Revision 1.2  1995/05/16  08:51:15  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.1  1995/03/14  10:28:34  quinn
- * Adding server-side support to tcpip.c and fixing bugs in nonblocking I/O
- *
- *
+ * $Id: comstack.c,v 1.11 2003-02-14 18:49:23 adam Exp $
  */
 
 #include <string.h>

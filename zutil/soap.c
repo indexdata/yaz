@@ -2,10 +2,14 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.1 2003-02-12 15:06:44 adam Exp $
+ * $Id: soap.c,v 1.2 2003-02-14 18:49:24 adam Exp $
  */
 
 #include <yaz/soap.h>
+
+#if HAVE_XSLT
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 static const char *soap_v1_1 = "http://schemas.xmlsoap.org/soap/envelope/";
 static const char *soap_v1_2 = "http://www.w3.org/2001/06/soap-envelope";
@@ -15,7 +19,8 @@ int z_soap_error(ODR o, Z_SOAP *p,
                  const char *details)
 {
     p->which = Z_SOAP_error;
-    p->u.soap_error = odr_malloc(o, sizeof(*p->u.soap_error));
+    p->u.soap_error = (Z_SOAP_Fault *) 
+        odr_malloc(o, sizeof(*p->u.soap_error));
     p->u.soap_error->fault_code = odr_strdup(o, fault_code);
     p->u.soap_error->fault_string = odr_strdup(o, fault_string);
     if (details)
@@ -39,7 +44,7 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
         if (!content_buf || !*content_buf || !content_len)
             return -1;
 
-        *pp = p = odr_malloc(o, sizeof(*p));
+        *pp = p = (Z_SOAP *) odr_malloc(o, sizeof(*p));
         p->ns = soap_v1_1;
 
         doc = xmlParseMemory(*content_buf, *content_len);
@@ -201,7 +206,7 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
                 return ret;
         }
         xmlDocDumpMemory(doc, &buf_out, &len_out);
-        *content_buf = odr_malloc(o, len_out);
+        *content_buf = (char *) odr_malloc(o, len_out);
         *content_len = len_out;
         memcpy(*content_buf, buf_out, len_out);
         xmlFree(buf_out);
@@ -210,3 +215,4 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
     }
     return 0;
 }
+#endif

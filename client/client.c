@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.180 2003-02-12 15:06:43 adam Exp $
+ * $Id: client.c,v 1.181 2003-02-14 18:49:23 adam Exp $
  */
 
 #include <stdio.h>
@@ -966,7 +966,7 @@ static int send_searchRequest(char *arg)
         break;
     case QueryType_CQL:
         query.which = Z_Query_type_104;
-        ext = odr_malloc(out, sizeof(*ext));
+        ext = (Z_External *) odr_malloc(out, sizeof(*ext));
         ext->direct_reference = odr_getoidbystr(out, "1.2.840.10003.16.2");
         ext->indirect_reference = 0;
         ext->descriptor = 0;

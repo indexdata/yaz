@@ -2,10 +2,14 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.1 2003-02-12 15:06:44 adam Exp $
+ * $Id: srw.c,v 1.2 2003-02-14 18:49:24 adam Exp $
  */
 
 #include <yaz/srw.h>
+
+#if HAVE_XSLT
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 static void add_xsd_string_n(xmlNodePtr ptr, const char *elem, char *val,
                              int len)
@@ -213,9 +217,10 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
 }
 
 
-int yaz_srw_codec(ODR o, xmlNodePtr pptr, Z_SRW_searchRetrieve **handler_data,
+int yaz_srw_codec(ODR o, void * vptr, Z_SRW_searchRetrieve **handler_data,
                   void *client_data, const char *ns)
 {
+    xmlNodePtr pptr = vptr;
     if (o->direction == ODR_DECODE)
     {
         xmlNodePtr method = pptr->children;
@@ -376,6 +381,7 @@ Z_SRW_searchRetrieve *yaz_srw_get(ODR o, int which)
         sr->u.request = odr_malloc(o, sizeof(*sr->u.request));
         sr->u.request->query = 0;
         sr->u.request->xQuery = 0;
+        sr->u.request->pQuery = 0;
         sr->u.request->sortKeys = 0;
         sr->u.request->xSortKeys = 0;
         sr->u.request->startRecord = 0;
@@ -396,3 +402,4 @@ Z_SRW_searchRetrieve *yaz_srw_get(ODR o, int which)
     }
     return sr;
 }
+#endif

@@ -1,4 +1,4 @@
-/* $Id: cqlstring.c,v 1.1 2003-01-06 08:20:27 adam Exp $
+/* $Id: cqlstring.c,v 1.2 2003-02-14 18:49:23 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -15,7 +15,7 @@ struct cql_buf_info {
 
 int getbuf(void *vp)
 {
-    struct cql_buf_info *bi = vp;
+    struct cql_buf_info *bi = (struct cql_buf_info *) vp;
     if (bi->str[bi->off] == 0)
         return 0;
     return bi->str[bi->off++];
@@ -23,7 +23,7 @@ int getbuf(void *vp)
 
 void ungetbuf(int b, void *vp)
 {
-    struct cql_buf_info *bi = vp;
+    struct cql_buf_info *bi = (struct cql_buf_info *) vp;
     if (b)
         (bi->off--);
 }

@@ -1,14 +1,10 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.3 2003-01-06 08:20:29 adam Exp $
+ * $Id: zoom-p.h,v 1.4 2003-02-14 18:49:24 adam Exp $
  */
 
-#if HAVE_GSOAP
-#include <yaz/srw-util.h>
-#else
-struct soap {
-    int dummy;
-};
+#if HAVE_XSLT
+#include <yaz/srw.h>
 #endif
 
 #include <yaz/proto.h>
@@ -34,9 +30,10 @@ struct ZOOM_query_p {
 #define ZOOM_SELECT_EXCEPT 4
 
 struct ZOOM_connection_p {
-    struct soap *soap;
+    enum oid_proto proto;
     COMSTACK cs;
     char *host_port;
+    char *path;
     int error;
     char *addinfo;
     const char *diagset;

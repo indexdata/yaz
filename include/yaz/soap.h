@@ -2,18 +2,13 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.h,v 1.1 2003-02-12 15:06:43 adam Exp $
+ * $Id: soap.h,v 1.2 2003-02-14 18:49:23 adam Exp $
  */
 
 #ifndef YAZ_SOAP_H
 #define YAZ_SOAP_H
 
 #include <yaz/odr.h>
-
-#if HAVE_XSLT
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#endif
 
 typedef struct {
     char *fault_code;
@@ -40,11 +35,12 @@ typedef struct {
     const char *ns;
 } Z_SOAP;
 
+typedef int (*Z_SOAP_fun)(ODR o, void * ptr, void **handler_data,
+		         void *client_data, const char *ns);
 typedef struct {
     char *ns;
     void *client_data;
-    int (*f)(ODR o, xmlNodePtr ptr, void **handler_data,
-             void *client_data, const char *ns);
+    Z_SOAP_fun f;
 } Z_SOAP_Handler;
 
 YAZ_EXPORT int z_soap_codec(ODR o, Z_SOAP **pp, 

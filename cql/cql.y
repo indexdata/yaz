@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.2 2003-01-11 03:18:53 adam Exp $
+/* $Id: cql.y,v 1.3 2003-02-14 18:49:23 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -71,9 +71,9 @@ cqlQuery:
   } searchClause {
       struct cql_node *cn = cql_node_mk_boolean($2.buf);
       
-      cn->u.bool.modifiers = $2.rel;
-      cn->u.bool.left = $1.cql;
-      cn->u.bool.right = $4.cql;
+      cn->u.boolean.modifiers = $2.rel;
+      cn->u.boolean.left = $1.cql;
+      cn->u.boolean.right = $4.cql;
 
       $$.cql = cn;
   }
@@ -250,7 +250,7 @@ int cql_parser_stream(CQL_parser cp,
 
 CQL_parser cql_parser_create(void)
 {
-    CQL_parser cp = malloc (sizeof(*cp));
+    CQL_parser cp = (CQL_parser) malloc (sizeof(*cp));
 
     return cp;
 }

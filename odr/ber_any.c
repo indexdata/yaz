@@ -2,11 +2,13 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: ber_any.c,v 1.21 2003-02-12 15:06:43 adam Exp $
+ * $Id: ber_any.c,v 1.22 2003-02-14 18:49:23 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <ctype.h>
+
 #include "odr-priv.h"
 
 int ber_any(ODR o, Odr_any **p)

@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.18 2003-01-28 22:34:17 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.19 2003-02-14 18:49:23 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -600,7 +600,7 @@ struct cql_node {
             struct cql_node *right;
             struct cql_node *modifiers;
             struct cql_node *prefixes;
-        } bool;
+        } boolean;
         struct {
             char *name;
             char *value;

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.12 2003-01-06 08:20:28 adam Exp $
+ * $Id: zoomsh.c,v 1.13 2003-02-14 18:49:24 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -440,6 +440,7 @@ int main (int argc, char **argv)
     int i, res;
     ZOOM_connection z39_con[MAX_CON];
     ZOOM_resultset  z39_res[MAX_CON];
+
     for (i = 0; i<MAX_CON; i++)
     {
 	z39_con[i] = 0;

@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.2 2003-01-11 03:18:53 adam Exp $
+/* $Id: cqltransform.c,v 1.3 2003-02-14 18:49:23 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -26,7 +26,7 @@ struct cql_transform_t_ {
 cql_transform_t cql_transform_open_FILE(FILE *f)
 {
     char line[1024];
-    cql_transform_t ct = malloc (sizeof(*ct));
+    cql_transform_t ct = (cql_transform_t) malloc (sizeof(*ct));
     struct cql_prop_entry **pp = &ct->entry;
 
     ct->error = 0;
@@ -56,12 +56,12 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
         if (cp_value_end != cp_value_start &&
             strchr(" \t\r\n", cp_value_end[-1]))
             cp_value_end--;
-        *pp = malloc (sizeof(**pp));
-        (*pp)->pattern = malloc (cp_pattern_end - line + 1);
+        *pp = (struct cql_prop_entry *) malloc (sizeof(**pp));
+        (*pp)->pattern = (char *) malloc (cp_pattern_end - line + 1);
         memcpy ((*pp)->pattern, line, cp_pattern_end - line);
         (*pp)->pattern[cp_pattern_end-line] = 0;
 
-        (*pp)->value = malloc (cp_value_end - cp_value_start + 1);
+        (*pp)->value = (char *) malloc (cp_value_end - cp_value_start + 1);
         if (cp_value_start != cp_value_end)
             memcpy ((*pp)->value, cp_value_start, cp_value_end-cp_value_start);
         (*pp)->value[cp_value_end - cp_value_start] = 0;
@@ -389,15 +389,15 @@ void cql_transform_r(cql_transform_t ct,
         }
         break;
     case CQL_NODE_BOOL:
-        if (cn->u.bool.prefixes && prefix_level < 20)
-            prefix_ar[prefix_level++] = cn->u.bool.prefixes;
+        if (cn->u.boolean.prefixes && prefix_level < 20)
+            prefix_ar[prefix_level++] = cn->u.boolean.prefixes;
         (*pr)("@", client_data);
-        (*pr)(cn->u.bool.value, client_data);
+        (*pr)(cn->u.boolean.value, client_data);
         (*pr)(" ", client_data);
 
-        cql_transform_r(ct, cn->u.bool.left, pr, client_data,
+        cql_transform_r(ct, cn->u.boolean.left, pr, client_data,
                         prefix_ar, prefix_level);
-        cql_transform_r(ct, cn->u.bool.right, pr, client_data,
+        cql_transform_r(ct, cn->u.boolean.right, pr, client_data,
                         prefix_ar, prefix_level);
     }
 }

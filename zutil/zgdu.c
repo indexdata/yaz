@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.1 2003-02-12 15:06:44 adam Exp $
+ * $Id: zgdu.c,v 1.2 2003-02-14 18:49:24 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -37,8 +37,8 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
             else if (o->buf[i] == ':')
                 break;
         }
-        *headers = odr_malloc(o, sizeof(**headers));
-        (*headers)->name = odr_malloc(o, i - po + 1);
+        *headers = (Z_HTTP_Header *) odr_malloc(o, sizeof(**headers));
+        (*headers)->name = (char*) odr_malloc(o, i - po + 1);
         memcpy ((*headers)->name, o->buf + po, i - po);
         (*headers)->name[i - po] = '\0';
         i++;
@@ -47,7 +47,7 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         for (po = i; i < o->size-1 && o->buf[i] != '\r' ; i++)
 	    ;
         
-        (*headers)->value = odr_malloc(o, i - po + 1);
+        (*headers)->value = (char*) odr_malloc(o, i - po + 1);
         memcpy ((*headers)->value, o->buf + po, i - po);
         (*headers)->value[i - po] = '\0';
         
@@ -75,7 +75,7 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
     else 
     {
         *content_len = o->size - i;
-        *content_buf = odr_malloc(o, *content_len + 1);
+        *content_buf = (char*) odr_malloc(o, *content_len + 1);
         memcpy(*content_buf, o->buf + i, *content_len);
         (*content_buf)[*content_len] = '\0';
     }
@@ -87,7 +87,7 @@ void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
 {
     while (*hp)
         hp = &(*hp)->next;
-    *hp = odr_malloc(o, sizeof(**hp));
+    *hp = (Z_HTTP_Header *) odr_malloc(o, sizeof(**hp));
     (*hp)->name = odr_strdup(o, n);
     (*hp)->value = odr_strdup(o, v);
     (*hp)->next = 0;
@@ -102,13 +102,33 @@ const char *z_HTTP_header_lookup(Z_HTTP_Header *hp, const char *n)
 }
 
 
+Z_GDU *z_get_HTTP_Request(ODR o)
+{
+    Z_GDU *p = (Z_GDU *) odr_malloc(o, sizeof(*p));
+    Z_HTTP_Request *hreq;
+
+    p->which = Z_GDU_HTTP_Request;
+    p->u.HTTP_Request = (Z_HTTP_Request *) odr_malloc(o, sizeof(*hreq));
+    hreq = p->u.HTTP_Request;
+    hreq->headers = 0;
+    hreq->content_len = 0;
+    hreq->content_buf = 0;
+    hreq->version = "1.1";
+    hreq->method = "POST";
+    hreq->path = "/";
+    z_HTTP_header_add(o, &hreq->headers, "User-Agent",
+                      "YAZ/" YAZ_VERSION);
+    return p;
+}
+
 Z_GDU *z_get_HTTP_Response(ODR o, int code)
 {
-    Z_GDU *p = odr_malloc(o, sizeof(*p));
+    Z_GDU *p = (Z_GDU *) odr_malloc(o, sizeof(*p));
     Z_HTTP_Response *hres;
 
     p->which = Z_GDU_HTTP_Response;
-    hres = p->u.HTTP_Response = odr_malloc(o, sizeof(*hres));
+    p->u.HTTP_Response = (Z_HTTP_Response *) odr_malloc(o, sizeof(*hres));
+    hres = p->u.HTTP_Response;
     hres->headers = 0;
     hres->content_len = 0;
     hres->content_buf = 0;
@@ -118,7 +138,7 @@ Z_GDU *z_get_HTTP_Response(ODR o, int code)
                       "YAZ/" YAZ_VERSION);
     if (code != 200)
     {
-        hres->content_buf = odr_malloc(o, 400);
+        hres->content_buf = (char*) odr_malloc(o, 400);
         sprintf (hres->content_buf, 
                  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
                  "<HTML>\n"
@@ -158,19 +178,22 @@ const char *z_HTTP_errmsg(int code)
 int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
 {
     if (o->direction == ODR_DECODE) {
-        *p = odr_malloc(o, sizeof(**p));
+        *p = (Z_GDU *) odr_malloc(o, sizeof(**p));
         if (o->size > 10 && !memcmp(o->buf, "HTTP/", 5))
         {
             int i, po;
             Z_HTTP_Response *hr;
 	    (*p)->which = Z_GDU_HTTP_Response;
 
-            hr = (*p)->u.HTTP_Response = odr_malloc(o, sizeof(*hr));
-
+#if HTTP_DEBUG
+	    fprintf(stderr, "-- HTTP decode:\n%.*s\n", o->size, o->buf);
+#endif
+            hr = (*p)->u.HTTP_Response = (Z_HTTP_Response *)
+                odr_malloc(o, sizeof(*hr));
             po = i = 5;
             while (i < o->size-2 && o->buf[i] != ' ' && o->buf[i] != '\r')
                 i++;
-            hr->version = odr_malloc(o, i - po + 1);
+            hr->version = (char *) odr_malloc(o, i - po + 1);
             if (i - po)
                 memcpy(hr->version, o->buf + po, i - po);
             hr->version[i-po] = 0;
@@ -201,10 +224,11 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             Z_HTTP_Request *hr;
 
 #if HTTP_DEBUG
-	    fprintf(stderr, "HTTP decode:\n%.*s\n", o->size, o->buf);
+	    fprintf(stderr, "-- HTTP decode:\n%.*s\n", o->size, o->buf);
 #endif
 	    (*p)->which = Z_GDU_HTTP_Request;
-            hr = (*p)->u.HTTP_Request = odr_malloc(o, sizeof(*hr));
+            hr = (*p)->u.HTTP_Request = 
+                (Z_HTTP_Request *) odr_malloc(o, sizeof(*hr));
 
             /* method .. */
             for (i = 0; o->buf[i] != ' '; i++)
@@ -213,7 +237,7 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                     o->error = OHTTP;
                     return 0;
                 }
-            hr->method = odr_malloc(o, i+1);
+            hr->method = (char *) odr_malloc(o, i+1);
             memcpy (hr->method, o->buf, i);
             hr->method[i] = '\0';
             /* path */
@@ -224,7 +248,7 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                     o->error = OHTTP;
                     return 0;
                 }
-            hr->path = odr_malloc(o, i - po + 1);
+            hr->path = (char *) odr_malloc(o, i - po + 1);
             memcpy (hr->path, o->buf+po, i - po);
             hr->path[i - po] = '\0';
             /* HTTP version */
@@ -245,7 +269,7 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                 }
                 i++;
             }
-            hr->version = odr_malloc(o, i - po + 1);
+            hr->version = (char *) odr_malloc(o, i - po + 1);
             memcpy(hr->version, o->buf + po, i - po);
             hr->version[i - po] = '\0';
             /* headers */
@@ -269,7 +293,7 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             sprintf(sbuf, "HTTP/%s %d %s\r\n", (*p)->u.HTTP_Response->version,
                     (*p)->u.HTTP_Response->code,
                     z_HTTP_errmsg((*p)->u.HTTP_Response->code));
-            odr_write(o, sbuf, strlen(sbuf));
+            odr_write(o, (unsigned char *) sbuf, strlen(sbuf));
             /* apply Content-Length if not already applied */
             if (!z_HTTP_header_lookup((*p)->u.HTTP_Response->headers,
                                       "Content-Length"))
@@ -282,42 +306,54 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             }
             for (h = (*p)->u.HTTP_Response->headers; h; h = h->next)
             {
-                odr_write(o, h->name, strlen(h->name));
-                odr_write(o, ": ", 2);
-                odr_write(o, h->value, strlen(h->value));
-                odr_write(o, "\r\n", 2);
+                odr_write(o, (unsigned char *) h->name, strlen(h->name));
+                odr_write(o, (unsigned char *) ": ", 2);
+                odr_write(o, (unsigned char *) h->value, strlen(h->value));
+                odr_write(o, (unsigned char *) "\r\n", 2);
             }
-            odr_write(o, "\r\n", 2);
+            odr_write(o, (unsigned char *) "\r\n", 2);
             if ((*p)->u.HTTP_Response->content_buf)
-                odr_write(o, (*p)->u.HTTP_Response->content_buf,
+                odr_write(o, (unsigned char *) 
+                          (*p)->u.HTTP_Response->content_buf,
                           (*p)->u.HTTP_Response->content_len);
 #if HTTP_DEBUG
-            fprintf(stderr, "HTTP response:\n%.*s\n", o->top, o->buf);
+            fprintf(stderr, "-- HTTP response:\n%.*s\n", o->top, o->buf);
 #endif
             break;
         case Z_GDU_HTTP_Request:
-            odr_write(o, (*p)->u.HTTP_Request->method,
+            odr_write(o, (unsigned char *) (*p)->u.HTTP_Request->method,
                       strlen((*p)->u.HTTP_Request->method));
-            odr_write(o, " ", 1);
-            odr_write(o, (*p)->u.HTTP_Request->path,
+            odr_write(o, (unsigned char *) " ", 1);
+            odr_write(o, (unsigned char *) (*p)->u.HTTP_Request->path,
                       strlen((*p)->u.HTTP_Request->path));
-            odr_write(o, " HTTP/", 6);
-            odr_write(o, (*p)->u.HTTP_Request->version,
+            odr_write(o, (unsigned char *) " HTTP/", 6);
+            odr_write(o, (unsigned char *) (*p)->u.HTTP_Request->version,
                       strlen((*p)->u.HTTP_Request->version));
-            odr_write(o, "\r\n", 2);
+            odr_write(o, (unsigned char *) "\r\n", 2);
+            if ((*p)->u.HTTP_Request->content_len &&
+                !z_HTTP_header_lookup((*p)->u.HTTP_Request->headers,
+                                      "Content-Length"))
+            {
+                char lstr[20];
+                sprintf(lstr, "%d", (*p)->u.HTTP_Request->content_len);
+                z_HTTP_header_add(o,
+                                  &(*p)->u.HTTP_Request->headers,
+                                  "Content-Length", lstr);
+            }
             for (h = (*p)->u.HTTP_Request->headers; h; h = h->next)
             {
-                odr_write(o, h->name, strlen(h->name));
-                odr_write(o, ": ", 2);
-                odr_write(o, h->value, strlen(h->value));
-                odr_write(o, "\r\n", 2);
+                odr_write(o, (unsigned char *) h->name, strlen(h->name));
+                odr_write(o, (unsigned char *) ": ", 2);
+                odr_write(o, (unsigned char *) h->value, strlen(h->value));
+                odr_write(o, (unsigned char *) "\r\n", 2);
             }
-            odr_write(o, "\r\n", 2);
+            odr_write(o, (unsigned char *) "\r\n", 2);
             if ((*p)->u.HTTP_Request->content_buf)
-                odr_write(o, (*p)->u.HTTP_Request->content_buf,
+                odr_write(o, (unsigned char *)
+                          (*p)->u.HTTP_Request->content_buf,
                           (*p)->u.HTTP_Request->content_len);
 #if HTTP_DEBUG
-            fprintf(stderr, "HTTP request:\n%.*s\n", o->top, o->buf);
+            fprintf(stderr, "-- HTTP request:\n%.*s\n", o->top, o->buf);
 #endif
             break;
         case Z_GDU_Z3950:

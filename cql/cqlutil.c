@@ -1,4 +1,4 @@
-/* $Id: cqlutil.c,v 1.1 2003-01-06 08:20:27 adam Exp $
+/* $Id: cqlutil.c,v 1.2 2003-02-14 18:49:23 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -14,7 +14,7 @@ See the file LICENSE.
 
 void cql_fputs(const char *buf, void *client_data)
 {
-    FILE *f = client_data;
+    FILE *f = (FILE *) client_data;
     fputs(buf, f);
 }
 
@@ -39,10 +39,10 @@ struct cql_node *cql_node_dup (struct cql_node *cp)
         cn->u.mod.next = cql_node_dup(cp->u.mod.next);
         break;
     case CQL_NODE_BOOL:
-        cn = cql_node_mk_boolean(cp->u.bool.value);
-        cn->u.bool.left = cql_node_dup(cp->u.bool.left);
-        cn->u.bool.right = cql_node_dup(cp->u.bool.right);
-        cn->u.bool.prefixes = cql_node_dup(cp->u.bool.prefixes);
+        cn = cql_node_mk_boolean(cp->u.boolean.value);
+        cn->u.boolean.left = cql_node_dup(cp->u.boolean.left);
+        cn->u.boolean.right = cql_node_dup(cp->u.boolean.right);
+        cn->u.boolean.prefixes = cql_node_dup(cp->u.boolean.prefixes);
     }
     return cn;
 }
@@ -51,7 +51,7 @@ struct cql_node *cql_node_mk_sc(const char *index,
                                 const char *relation,
                                 const char *term)
 {
-    struct cql_node *p = malloc(sizeof(*p));
+    struct cql_node *p = (struct cql_node *) malloc(sizeof(*p));
     p->which = CQL_NODE_ST;
     p->u.st.index = 0;
     if (index)
@@ -70,7 +70,7 @@ struct cql_node *cql_node_mk_sc(const char *index,
 struct cql_node *cql_node_mk_mod(const char *name,
                                  const char *value)
 {
-    struct cql_node *p = malloc(sizeof(*p));
+    struct cql_node *p = (struct cql_node *) malloc(sizeof(*p));
     p->which = CQL_NODE_MOD;
 
     p->u.mod.name = 0;
@@ -85,15 +85,15 @@ struct cql_node *cql_node_mk_mod(const char *name,
 
 struct cql_node *cql_node_mk_boolean(const char *op)
 {
-    struct cql_node *p = malloc(sizeof(*p));
+    struct cql_node *p = (struct cql_node *) malloc(sizeof(*p));
     p->which = CQL_NODE_BOOL;
-    p->u.bool.value = 0;
+    p->u.boolean.value = 0;
     if (op)
-        p->u.bool.value = strdup(op);
-    p->u.bool.left = 0;
-    p->u.bool.right = 0;
-    p->u.bool.modifiers = 0;
-    p->u.bool.prefixes = 0;
+        p->u.boolean.value = strdup(op);
+    p->u.boolean.left = 0;
+    p->u.boolean.right = 0;
+    p->u.boolean.modifiers = 0;
+    p->u.boolean.prefixes = 0;
     return p;
 }
 
@@ -107,7 +107,7 @@ struct cql_node *cql_node_prefix(struct cql_node *n, const char *prefix,
     }
     else if (n->which == CQL_NODE_BOOL)
     {
-        cpp = &n->u.bool.prefixes;
+        cpp = &n->u.boolean.prefixes;
     }
     if (cpp)
     {
@@ -167,10 +167,10 @@ void cql_node_destroy(struct cql_node *cn)
         cql_node_destroy(cn->u.mod.next);
         break;
     case CQL_NODE_BOOL:
-        free (cn->u.bool.value);
-        cql_node_destroy(cn->u.bool.left);
-        cql_node_destroy(cn->u.bool.right);
-        cql_node_destroy(cn->u.bool.prefixes);
+        free (cn->u.boolean.value);
+        cql_node_destroy(cn->u.boolean.left);
+        cql_node_destroy(cn->u.boolean.right);
+        cql_node_destroy(cn->u.boolean.prefixes);
     }
     free (cn);
 }

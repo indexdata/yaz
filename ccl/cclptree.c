@@ -44,7 +44,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.11 2002-12-28 12:13:03 adam Exp $
+ * $Id: cclptree.c,v 1.12 2003-02-14 18:49:23 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -70,6 +70,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <yaz/ccl.h>
 

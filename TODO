@@ -1,6 +1,12 @@
-YAZ TODO $Id: TODO,v 1.7 2002-08-20 12:03:34 adam Exp $
+YAZ TODO $Id: TODO,v 1.8 2003-02-14 18:49:22 adam Exp $
 
-Complete EXPLAIN support in retrieval module.
+Improve timeouts in GFS.
+
+Database in URL for GFS.
+
+SRW support for ZOOM.
+
+Complete ODR print.
 
 Versions to be put automatically in
    configure.in

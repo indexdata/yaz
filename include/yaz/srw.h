@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.1 2003-02-12 15:06:43 adam Exp $
+ * $Id: srw.h,v 1.2 2003-02-14 18:49:23 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -58,8 +58,14 @@ typedef struct {
     } u;
 } Z_SRW_searchRetrieve;
 
+#if 1
+YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
+                             Z_SRW_searchRetrieve **handler_data,
+                             void *client_data, const char *ns);
+#else
 YAZ_EXPORT int yaz_srw_codec(ODR o, xmlNodePtr pptr,
                              Z_SRW_searchRetrieve **handler_data,
                              void *client_data, const char *ns);
+#endif
 YAZ_EXPORT Z_SRW_searchRetrieve *yaz_srw_get(ODR o, int which);
 #endif

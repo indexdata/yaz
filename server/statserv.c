@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.91 2003-02-12 15:06:43 adam Exp $
+ * $Id: statserv.c,v 1.92 2003-02-14 18:49:24 adam Exp $
  */
 
 #include <stdio.h>
@@ -695,7 +695,8 @@ void statserv_setcontrol(statserv_options_block *block)
 void statserv_add_soap_handler(int (*h)(struct bend_soap_rr *rr),
                                const char *ns)
 {
-    struct bend_soap_handler *sh = xmalloc(sizeof(*sh));
+    struct bend_soap_handler *sh = (struct bend_soap_handler *)
+	    xmalloc(sizeof(*sh));
 
     sh->handler = h;
     sh->ns = xstrdup(ns);

@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.103 2003-02-12 15:06:42 adam Exp $
+dnl $Id: configure.in,v 1.104 2003-02-14 18:49:22 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.3)
 dnl
@@ -308,19 +308,19 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 fi
 AM_CONDITIONAL(ISTHR, test $HAVETHREADS = "1")
 dnl
-dnl ----- XML/XSLT
+dnl ----- libXML2/XSLT
 AC_SUBST(XSLT_LIB)
 AC_SUBST(XSLT_CFLAGS)
-xsltdir=NONE
+xsltdir=no
 AC_ARG_WITH(xslt, [  --with-xslt[=PREFIX]    Use libxslt in PREFIX/{lib,include}],[xsltdir=$withval])
-if test "x$xsltdir" = "xNONE"; then
+if test "$xsltdir" = "yes"; then
 	for d in /usr /usr/local; do
 		if test -x $d/bin/xslt-config; then
 			xsltdir=$d
 		fi
 	done
 fi
-if true; then
+if test "$xsltdir" != "no"; then
 	AC_MSG_CHECKING(for XSLT)
 	if test -x $xsltdir/bin/xslt-config; then
 		XSLT_LIB=`$xsltdir/bin/xslt-config --libs`

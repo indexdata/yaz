@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.134 2003-02-12 15:06:43 adam Exp $
+ * $Id: seshigh.c,v 1.135 2003-02-14 18:49:24 adam Exp $
  */
 
 /*
@@ -28,9 +28,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
 #ifdef WIN32
+#include <io.h>
+#define S_ISREG(x) (x & _S_IFREG)
 #include <process.h>
 #else
+#include <sys/stat.h>
 #include <unistd.h>
 #endif
 #include <assert.h>
@@ -459,9 +463,11 @@ static void srw_bend_fetch(association *assoc, int pos,
     rr.request_format_raw = yaz_oidval_to_z3950oid(assoc->decode,
                                                    CLASS_TRANSYN,
                                                    VAL_TEXT_XML);
-    rr.comp = odr_malloc(assoc->decode, sizeof(*rr.comp));
+    rr.comp = (Z_RecordComposition *)
+	    odr_malloc(assoc->decode, sizeof(*rr.comp));
     rr.comp->which = Z_RecordComp_complex;
-    rr.comp->u.complex = odr_malloc(assoc->decode, sizeof(Z_CompSpec));
+    rr.comp->u.complex = (Z_CompSpec *)
+	    odr_malloc(assoc->decode, sizeof(Z_CompSpec));
     rr.comp->u.complex->selectAlternativeSyntax = (bool_t *)
         odr_malloc(assoc->encode, sizeof(bool_t));
     *rr.comp->u.complex->selectAlternativeSyntax = 0;    
@@ -470,8 +476,8 @@ static void srw_bend_fetch(association *assoc, int pos,
     rr.comp->u.complex->num_recordSyntax = 0; 
     rr.comp->u.complex->recordSyntax = 0;
 
-    rr.comp->u.complex->generic = odr_malloc(assoc->decode,
-                                             sizeof(Z_Specification));
+    rr.comp->u.complex->generic = (Z_Specification *) 
+	    odr_malloc(assoc->decode, sizeof(Z_Specification));
     rr.comp->u.complex->generic->which = Z_Specification_uri;
     rr.comp->u.complex->generic->u.uri = srw_req->recordSchema;
     rr.comp->u.complex->generic->elementSpec = 0;
@@ -547,8 +553,8 @@ static void srw_bend_search(association *assoc, request *req,
     if (rr.errcode)
     {
         srw_res->num_diagnostics = 1;
-        srw_res->diagnostics =
-            odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
+        srw_res->diagnostics = (Z_SRW_diagnostic *)
+	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
         srw_res->diagnostics[0].code = 
             odr_intdup(assoc->encode, rr.errcode);
     }
@@ -567,7 +573,7 @@ static void srw_bend_search(association *assoc, request *req,
                 int j = 0;
                 if (start + number > rr.hits)
                     number = rr.hits - start + 1;
-                srw_res->records = 
+                srw_res->records = (Z_SRW_record *)
                     odr_malloc(assoc->encode,
                                number * sizeof(*srw_res->records));
                 for (i = 0; i<number; i++)
@@ -590,27 +596,76 @@ static void srw_bend_search(association *assoc, request *req,
 static void process_http_request(association *assoc, request *req)
 {
     Z_HTTP_Request *hreq = req->gdu_request->u.HTTP_Request;
-    Z_HTTP_Header *hp;
     ODR o = assoc->encode;
-    Z_GDU *p;
+    Z_GDU *p = 0;
     Z_HTTP_Response *hres = 0;
     int keepalive = 1;
 
-#if 0
-    yaz_log(LOG_LOG, "HTTP Request. method=%s Version=%s Path=%s",
-            hreq->method, hreq->version, hreq->path);
-
-    for (hp = hreq->headers; hp; hp = hp->next)
-	yaz_log(LOG_LOG, "%s: %s", hp->name, hp->value);
-#endif
-
     if (!strcmp(hreq->method, "GET"))
     {
-        if (!strcmp(hreq->path, "/")) 
+#ifdef DOCDIR
+	if (strlen(hreq->path) >= 5 && strlen(hreq->path) < 80 &&
+			 !memcmp(hreq->path, "/doc/", 5))
         {
+	    FILE *f;
+            char fpath[120];
+
+	    strcpy(fpath, DOCDIR);
+	    strcat(fpath, hreq->path+4);
+	    f = fopen(fpath, "rb");
+	    if (f) {
+                struct stat sbuf;
+                if (fstat(fileno(f), &sbuf) || !S_ISREG(sbuf.st_mode))
+                {
+                    fclose(f);
+                    f = 0;
+                }
+            }
+            if (f)
+            {
+		long sz;
+		fseek(f, 0L, SEEK_END);
+		sz = ftell(f);
+		if (sz >= 0 && sz < 500000)
+		{
+		    const char *ctype = "application/octet-stream";
+		    const char *cp;
+
+                    p = z_get_HTTP_Response(o, 200);
+                    hres = p->u.HTTP_Response;
+		    hres->content_buf = (char *) odr_malloc(o, sz + 1);
+		    hres->content_len = sz;
+		    fseek(f, 0L, SEEK_SET);
+		    fread(hres->content_buf, 1, sz, f);
+		    if ((cp = strrchr(fpath, '.'))) {
+			cp++;
+			if (!strcmp(cp, "png"))
+			    ctype = "image/png";
+			else if (!strcmp(cp, "gif"))
+			    ctype = "image/gif";
+			else if (!strcmp(cp, "xml"))
+			    ctype = "text/xml";
+			else if (!strcmp(cp, "html"))
+			    ctype = "text/html";
+		    }
+                    z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+		    yaz_log(LOG_LOG, "OK send page %s size=%ld", fpath, sz);
+		}
+		fclose(f);
+	    }
+	}
+#endif
+	if (!strcmp(hreq->path, "/")) 
+        {
+            struct stat sbuf;
+            const char *doclink = "";
             p = z_get_HTTP_Response(o, 200);
             hres = p->u.HTTP_Response;
-            hres->content_buf = odr_malloc(o, 400);
+            hres->content_buf = (char *) odr_malloc(o, 400);
+#ifdef DOCDIR
+            if (stat(DOCDIR "/yaz.html", &sbuf) == 0 && S_ISREG(sbuf.st_mode))
+                doclink = "<P><A HREF=\"/doc/yaz.html\">Documentation</A></P>";
+#endif
             sprintf (hres->content_buf, 
                      "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
                      "<HTML>\n"
@@ -620,23 +675,24 @@ static void process_http_request(association *assoc, request *req)
                      " <BODY>\n"
                      "  <P><A HREF=\"http://www.indexdata.dk/yaz/\">YAZ</A> " 
                      YAZ_VERSION "</P>\n"
+                     "%s"
                      " </BODY>\n"
-                     "</HTML>\n");
+                     "</HTML>\n", doclink);
             hres->content_len = strlen(hres->content_buf);
             z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/html");
         }
-        else
+        if (!p)
         {
             p = z_get_HTTP_Response(o, 404);
         }
     }
     else if (!strcmp(hreq->method, "POST"))
     {
+#if HAVE_XSLT
         const char *content_type = z_HTTP_header_lookup(hreq->headers,
                                                         "Content-Type");
         const char *soap_action = z_HTTP_header_lookup(hreq->headers,
                                                        "SOAPAction");
-        p = 0;  /* no response yet */
         if (content_type && soap_action && 
             !yaz_strcmp_del("text/xml", content_type, "; "))
         {
@@ -645,7 +701,8 @@ static void process_http_request(association *assoc, request *req)
             int http_code = 500;
 
             static Z_SOAP_Handler soap_handlers[2] = {
-                {"http://www.loc.gov/zing/srw/v1.0/", 0, yaz_srw_codec},
+                {"http://www.loc.gov/zing/srw/v1.0/", 0,
+			                 (Z_SOAP_fun) yaz_srw_codec},
                 {0, 0, 0}
             };
 
@@ -679,6 +736,7 @@ static void process_http_request(association *assoc, request *req)
                                soap_handlers);
             hres->code = http_code;
         }
+#endif
         if (!p) /* still no response ? */
             p = z_get_HTTP_Response(o, 500);
     }

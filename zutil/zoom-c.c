@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.17 2003-02-12 15:06:44 adam Exp $
+ * $Id: zoom-c.c,v 1.18 2003-02-14 18:49:24 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -18,7 +18,7 @@
 #include <yaz/diagbib1.h>
 #include <yaz/charneg.h>
 #include <yaz/ill.h>
-
+#include <yaz/srw.h>
 
 #if HAVE_SYS_POLL_H
 #include <sys/poll.h>
@@ -174,6 +174,8 @@ void ZOOM_connection_remove_task (ZOOM_connection c)
     }
 }
 
+static int ZOOM_connection_exec_task (ZOOM_connection c);
+
 void ZOOM_connection_remove_tasks (ZOOM_connection c)
 {
     while (c->tasks)
@@ -187,7 +189,7 @@ ZOOM_connection_create (ZOOM_options options)
 {
     ZOOM_connection c = (ZOOM_connection) xmalloc (sizeof(*c));
 
-    c->soap = 0;
+    c->proto = PROTO_Z3950;
     c->cs = 0;
     c->mask = 0;
     c->reconnect_ok = 0;
@@ -203,6 +205,7 @@ ZOOM_connection_create (ZOOM_options options)
     c->options = ZOOM_options_create_with_parent(options);
 
     c->host_port = 0;
+    c->path = 0;
     c->proxy = 0;
     
     c->charset = c->lang = 0;
@@ -326,6 +329,7 @@ ZOOM_connection_connect(ZOOM_connection c,
 	c->lang = 0;
 
     xfree (c->host_port);
+    xfree (c->path);
     if (portnum)
     {
 	char hostn[128];
@@ -432,10 +436,6 @@ ZOOM_connection_destroy(ZOOM_connection c)
     ZOOM_resultset r;
     if (!c)
 	return;
-#if HAVE_GSOAP
-    if (c->soap)
-        soap_end(c->soap);
-#endif
     if (c->cs)
 	cs_close (c->cs);
     for (r = c->resultsets; r; r = r->next)
@@ -650,43 +650,59 @@ static zoom_ret do_connect (ZOOM_connection c)
 
     if (memcmp(c->host_port, "http:", 5) == 0)
     {
-#if HAVE_GSOAP
-        c->soap = soap_new();
-        c->soap->namespaces = srw_namespaces;
+#if HAVE_XSLT
+        const char *path;
+        c->proto = PROTO_SRW;
+        effective_host = c->host_port + 5;
+        if (*effective_host == '/')
+            effective_host++;
+        if (*effective_host == '/')
+            effective_host++;
+        if (!(path = strchr(effective_host, '/')))
+            path = "/";
+        xfree(c->path);
+        c->path = xstrdup(path);
 #else
         c->state = STATE_IDLE;
         set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, "SRW");
+        return zoom_complete;
 #endif
     }
-    else
+    c->cs = cs_create_host (effective_host, 0, &add);
+    
+    if (c->cs)
     {
-        c->cs = cs_create_host (effective_host, 0, &add);
-        
-        if (c->cs)
+        int ret = cs_connect (c->cs, add);
+        if (ret == 0)
         {
-            int ret = cs_connect (c->cs, add);
-            if (ret == 0)
-            {
-                ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
-                ZOOM_connection_put_event(c, event);
+            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
+            ZOOM_connection_put_event(c, event);
+            if (c->proto == PROTO_Z3950)
                 ZOOM_connection_send_init(c);
-                c->state = STATE_ESTABLISHED;
-                return zoom_pending;
-            }
-            else if (ret > 0)
+            else
             {
-                c->state = STATE_CONNECTING; 
-                c->mask = ZOOM_SELECT_EXCEPT;
-                if (c->cs->io_pending & CS_WANT_WRITE)
-                    c->mask += ZOOM_SELECT_WRITE;
-                if (c->cs->io_pending & CS_WANT_READ)
-                    c->mask += ZOOM_SELECT_READ;
-                return zoom_pending;
+                /* no init request for SRW .. */
+                assert (c->tasks->which == ZOOM_TASK_CONNECT);
+                ZOOM_connection_remove_task (c);
+                c->mask = 0;
+                ZOOM_connection_exec_task (c);
             }
+            c->state = STATE_ESTABLISHED;
+            return zoom_pending;
         }
-        c->state = STATE_IDLE;
-        set_ZOOM_error(c, ZOOM_ERROR_CONNECT, effective_host);
+        else if (ret > 0)
+        {
+            c->state = STATE_CONNECTING; 
+            c->mask = ZOOM_SELECT_EXCEPT;
+            if (c->cs->io_pending & CS_WANT_WRITE)
+                c->mask += ZOOM_SELECT_WRITE;
+            if (c->cs->io_pending & CS_WANT_READ)
+                c->mask += ZOOM_SELECT_READ;
+            return zoom_pending;
+        }
     }
+    c->state = STATE_IDLE;
+    set_ZOOM_error(c, ZOOM_ERROR_CONNECT, effective_host);
     return zoom_complete;
 }
 
@@ -895,6 +911,72 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     }
     assert (apdu);
     return send_APDU (c, apdu);
+}
+
+static zoom_ret send_srw (ZOOM_connection c, Z_SRW_searchRetrieve *sr)
+{
+    Z_SOAP_Handler h[2] = {
+        {"http://www.loc.gov/zing/srw/v1.0/", 0, (Z_SOAP_fun) yaz_srw_codec},
+        {0, 0, 0}
+    };
+    ODR o = odr_createmem(ODR_ENCODE);
+    int ret;
+    Z_SOAP *p = odr_malloc(o, sizeof(*p));
+    Z_GDU *gdu;
+    ZOOM_Event event;
+
+    gdu = z_get_HTTP_Request(c->odr_out);
+    gdu->u.HTTP_Request->path = c->path;
+    z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
+                      "Content-Type", "text/xml");
+    z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
+                      "SOAPAction", "\"\"");
+    p->which = Z_SOAP_generic;
+    p->u.generic = odr_malloc(o, sizeof(*p->u.generic));
+    p->u.generic->no = 0;
+    p->u.generic->ns = 0;
+    p->u.generic->p = sr;
+    p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
+
+    ret = z_soap_codec(o, &p,
+                       &gdu->u.HTTP_Request->content_buf,
+                       &gdu->u.HTTP_Request->content_len, h);
+
+    if (!z_GDU(c->odr_out, &gdu, 0, 0))
+        return zoom_complete;
+    c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
+
+    odr_destroy(o);
+
+    event = ZOOM_Event_create (ZOOM_EVENT_SEND_APDU);
+    ZOOM_connection_put_event (c, event);
+    odr_reset(c->odr_out);
+    return do_write (c);
+}
+
+static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
+{
+    ZOOM_resultset resultset;
+    Z_SRW_searchRetrieve *sr = yaz_srw_get(c->odr_out,
+                                           Z_SRW_searchRetrieve_request);
+
+    assert (c->tasks);
+    assert (c->tasks->which == ZOOM_TASK_SEARCH);
+    
+    resultset = c->tasks->u.search.resultset;
+    assert(resultset);
+    assert (resultset->z_query);
+
+    if (resultset->z_query->which == Z_Query_type_104
+        && resultset->z_query->u.type_104->which == Z_External_CQL)
+        sr->u.request->query = resultset->z_query->u.type_104->u.cql;
+    else
+        sr->u.request->query = "dc.title = computer";        
+
+    sr->u.request->startRecord = odr_intdup (c->odr_out, resultset->start + 1);
+    sr->u.request->maximumRecords = odr_intdup (c->odr_out, resultset->count);
+ 
+    return send_srw(c, sr);
 }
 
 static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
@@ -2096,9 +2178,9 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
     }
     task->running = 1;
     ret = zoom_complete;
-    if (c->soap)
+#if 0
+    if (c->proto == PROTO_SRW)
     {
-#if HAVE_GSOAP
         ZOOM_resultset resultset;
         switch (task->which)
         {
@@ -2127,16 +2209,16 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
                                       resultset->z_query->u.type_104->u.cql);
             break;
         }
-#else
-        ;
 #endif
-    }
-    else if (c->cs || task->which == ZOOM_TASK_CONNECT)
+    if (c->cs || task->which == ZOOM_TASK_CONNECT)
     {
         switch (task->which)
         {
         case ZOOM_TASK_SEARCH:
-            ret = ZOOM_connection_send_search(c);
+            if (c->proto == PROTO_SRW)
+                ret = ZOOM_connection_srw_send_search(c);
+            else
+                ret = ZOOM_connection_send_search(c);
             break;
         case ZOOM_TASK_RETRIEVE:
             ret = send_present (c);
@@ -2305,10 +2387,16 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
     }
 }
 
+static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
+{
+    c->mask = 0;
+    yaz_log (LOG_DEBUG, "handle_http");
+    ZOOM_connection_remove_task(c);
+}
+
 static int do_read (ZOOM_connection c)
 {
     int r;
-    Z_APDU *apdu;
     ZOOM_Event event;
     
     event = ZOOM_Event_create (ZOOM_EVENT_RECV_DATA);
@@ -2337,18 +2425,22 @@ static int do_read (ZOOM_connection c)
     }
     else
     {
+        Z_GDU *gdu;
         ZOOM_Event event;
 	odr_reset (c->odr_in);
 	odr_setbuf (c->odr_in, c->buf_in, r, 0);
         event = ZOOM_Event_create (ZOOM_EVENT_RECV_APDU);
         ZOOM_connection_put_event (c, event);
-	if (!z_APDU (c->odr_in, &apdu, 0, 0))
+
+	if (!z_GDU (c->odr_in, &gdu, 0, 0))
 	{
             set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
 	    do_close (c);
 	}
-	else
-	    handle_apdu (c, apdu);
+	else if (gdu->which == Z_GDU_Z3950)
+	    handle_apdu (c, gdu->u.z3950);
+        else if (gdu->which == Z_GDU_HTTP_Response)
+            handle_http (c, gdu->u.HTTP_Response);
         c->reconnect_ok = 0;
     }
     return 1;
@@ -2554,7 +2646,16 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
         else if (ret == 0)
         {
             ZOOM_connection_put_event (c, event);
-            ZOOM_connection_send_init (c);
+            if (c->proto == PROTO_Z3950)
+                ZOOM_connection_send_init(c);
+            else
+            {
+                /* no init request for SRW .. */
+                assert (c->tasks->which == ZOOM_TASK_CONNECT);
+                ZOOM_connection_remove_task (c);
+                c->mask = 0;
+                ZOOM_connection_exec_task (c);
+            }
             c->state = STATE_ESTABLISHED;
         }
         else

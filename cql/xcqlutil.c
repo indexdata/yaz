@@ -1,4 +1,4 @@
-/* $Id: xcqlutil.c,v 1.1 2003-01-06 08:20:27 adam Exp $
+/* $Id: xcqlutil.c,v 1.2 2003-02-14 18:49:23 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -126,13 +126,13 @@ static void cql_to_xml_r(struct cql_node *cn,
     case CQL_NODE_BOOL:
         pr_n("<triple>\n", pr, client_data, level);
         prefixes(cn->u.st.prefixes, pr, client_data, level+2);
-        if (cn->u.bool.value)
+        if (cn->u.boolean.value)
         {
-            struct cql_node *m = cn->u.bool.modifiers;
+            struct cql_node *m = cn->u.boolean.modifiers;
             pr_n("<boolean>\n", pr, client_data, level+2);
 
             pr_n("<value>", pr, client_data, level+4);
-            pr_cdata(cn->u.bool.value, pr, client_data);
+            pr_cdata(cn->u.boolean.value, pr, client_data);
             pr_n("</value>\n", pr, client_data, 0);
 
             if (m)
@@ -155,16 +155,16 @@ static void cql_to_xml_r(struct cql_node *cn,
             }
             pr_n("</boolean>\n", pr, client_data, level+2);
         }
-        if (cn->u.bool.left)
+        if (cn->u.boolean.left)
         {
             printf ("%*s<leftOperand>\n", level+2, "");
-            cql_to_xml_r(cn->u.bool.left, pr, client_data, level+4);
+            cql_to_xml_r(cn->u.boolean.left, pr, client_data, level+4);
             printf ("%*s</leftOperand>\n", level+2, "");
         }
-        if (cn->u.bool.right)
+        if (cn->u.boolean.right)
         {
             printf ("%*s<rightOperand>\n", level+2, "");
-            cql_to_xml_r(cn->u.bool.right, pr, client_data, level+4);
+            cql_to_xml_r(cn->u.boolean.right, pr, client_data, level+4);
             printf ("%*s</rightOperand>\n", level+2, "");
         }
         pr_n("</triple>\n", pr, client_data, level);
@@ -185,7 +185,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f)
 
 void cql_buf_write_handler (const char *b, void *client_data)
 {
-    struct cql_buf_write_info *info = client_data;
+    struct cql_buf_write_info *info = (struct cql_buf_write_info *)client_data;
     int l = strlen(b);
     if (info->off < 0 || (info->off + l >= info->max))
     {
