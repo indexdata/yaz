@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.13 2002-03-24 16:19:23 adam Exp $
+ * $Id: pquery.c,v 1.14 2002-05-01 10:22:52 adam Exp $
  */
 
 #include <stdio.h>
@@ -89,7 +89,8 @@ static int query_token (struct lex_info *li)
     }
     if (**qptr)
 	++(*qptr);
-    if (li->lex_len >= 1 && li->lex_buf[0] == li->escape_char)
+    if (sep_char == ' ' &&
+        li->lex_len >= 1 && li->lex_buf[0] == li->escape_char)
     {
 	if (compare_term (li, "and", 1))
 	    return 'a';
