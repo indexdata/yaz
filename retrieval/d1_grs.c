@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_grs.c,v 1.22 2002-07-03 14:09:34 adam Exp $
+ * $Id: d1_grs.c,v 1.23 2002-07-11 10:40:34 adam Exp $
  *
  */
 
@@ -229,7 +229,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 	else if (tag)                    
 	    tagstr = tag->value.string;  /* no take from well-known */
 	else
-	    tagstr = "???";                /* no tag at all! */
+            return 0;
 	res->tagValue->which = Z_StringOrNumeric_string;
 	res->tagValue->u.string = odr_strdup(o, tagstr);
     }
@@ -286,9 +286,9 @@ Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
     {
 	if (c->which == DATA1N_tag && select && !c->u.tag.node_selected)
 	    continue;
-	if (!(res->elements[res->num_elements++] =
-	      nodetotaggedelement (dh, c, select, o, len)))
-	    return 0;
+	if ((res->elements[res->num_elements] =
+             nodetotaggedelement (dh, c, select, o, len)))
+	    res->num_elements++;
     }
     return res;
 }
