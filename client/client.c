@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.13  1995-06-16 10:29:11  quinn
+ * Revision 1.14  1995-06-19 12:37:41  quinn
+ * Added BER dumper.
+ *
+ * Revision 1.13  1995/06/16  10:29:11  quinn
  * *** empty log message ***
  *
  * Revision 1.12  1995/06/15  07:44:57  quinn
@@ -67,6 +70,7 @@
 
 #include <proto.h>
 #include <marcdisp.h>
+#include <diagbib1.h>
 
 #ifdef RPN_QUERY
 #ifdef PREFIX_QUERY
@@ -88,6 +92,7 @@ static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
 static int setno = 1;                   /* current set offset */
 static int protocol = PROTO_Z3950;      /* current app protocol */
+static int recordsyntax = VAL_USMARC;
 static ODR_MEM session_mem;                /* memory handle for init-response */
 static Z_InitResponse *session = 0;        /* session parameters */
 static char last_scan[512] = "0";
@@ -259,11 +264,10 @@ int cmd_authentication(char *arg)
 void display_record(Z_DatabaseRecord *p)
 {
     Odr_external *r = (Odr_external*) p;
+    oident *ent = oid_getentbyoid(r->direct_reference);
 
     if (r->direct_reference)
     {
-    	oident *ent = oid_getentbyoid(r->direct_reference);
-
     	printf("Record type: ");
 	if (ent)
 	    printf("%s\n", ent->desc);
@@ -274,10 +278,20 @@ void display_record(Z_DatabaseRecord *p)
 	}
     }
     if (r->which == ODR_EXTERNAL_octet && p->u.octet_aligned->len)
-    {
 	marc_display ((char*)p->u.octet_aligned->buf, stdout);
+    else if (ent->value == VAL_SUTRS)
+    {
+    	Odr_oct *rc;
+
+	if (!z_SUTRS(in, &rc, 0))
+	{
+	    odr_perror(in, "decoding SUTRS");
+	    odr_reset(in);
+	}
+	else
+	    printf("%.*s", rc->len, rc->buf);
     }
-    else
+    else 
     {
     	printf("Unknown record representation.\n");
     	if (!odr_external(print, &r, 0))
@@ -297,7 +311,7 @@ static void display_diagrec(Z_DiagRec *p)
     Z_DiagRec *r = p;
 #endif
 
-    printf("Diagnostic message from database.\n");
+    printf("Diagnostic message from database:\n");
 #ifdef Z_95
     if (p->which != Z_DiagRec_defaultFormat)
     {
@@ -310,8 +324,11 @@ static void display_diagrec(Z_DiagRec *p)
     if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
     	ent->class != CLASS_DIAGSET || ent->value != VAL_BIB1)
     	printf("Missing or unknown diagset\n");
-    printf("Error condition: %d", *r->condition);
-    printf(" -- %s\n", r->addinfo ? r->addinfo : "");
+    printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
+    if (r->addinfo && *r->addinfo)
+	printf(" -- %s\n", r->addinfo);
+    else
+    	printf("\n");
 }
 
 static void display_nameplusrecord(Z_NamePlusRecord *p)
@@ -389,6 +406,16 @@ static int send_searchRequest(char *arg)
     *req->smallSetUpperBound = smallSetUpperBound;
     *req->largeSetLowerBound = largeSetLowerBound;
     *req->mediumSetPresentNumber = mediumSetPresentNumber;
+    if (smallSetUpperBound > 0 || (largeSetLowerBound > 1 &&
+	mediumSetPresentNumber > 0))
+    {
+    	oident prefsyn;
+
+	prefsyn.proto = protocol;
+	prefsyn.class = CLASS_RECSYN;
+	prefsyn.value = recordsyntax;
+	req->preferredRecordSyntax = odr_oiddup(out, oid_getoidbyent(&prefsyn));
+    }
     req->num_databaseNames = 1;
     req->databaseNames = &databaseNames;
 
@@ -519,6 +546,7 @@ static int send_presentRequest(char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
+    oident prefsyn;
     int nos = 1;
     char *p;
     char setstring[100];
@@ -538,6 +566,10 @@ static int send_presentRequest(char *arg)
     }
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
+    prefsyn.proto = protocol;
+    prefsyn.class = CLASS_RECSYN;
+    prefsyn.value = recordsyntax;
+    req->preferredRecordSyntax = oid_getoidbyent(&prefsyn);
     send_apdu(apdu);
     printf("Sent presentRequest (%d+%d).\n", setno, nos);
     return 2;
@@ -664,6 +696,38 @@ int cmd_scan(char *arg)
     return 2;
 }
 
+int cmd_format(char *arg)
+{
+    if (!arg || !*arg)
+    {
+    	printf("Usage: format <recordsyntax>\n");
+	return 0;
+    }
+    if (!strcmp(arg, "sutrs"))
+    {
+    	printf("Preferred format is SUTRS.\n");
+	recordsyntax = VAL_SUTRS;
+	return 1;
+    }
+    else if (!strcmp(arg, "usmarc"))
+    {
+    	printf("Preferred format is USMARC\n");
+	recordsyntax = VAL_USMARC;
+	return 1;
+    }
+    else if (!strcmp(arg, "danmarc"))
+    {
+    	printf("Preferred format is DANMARC\n");
+	recordsyntax = VAL_DANMARC;
+	return 1;
+    }
+    else
+    {
+    	printf("Specify one of {sutrs,usmarc,danmarc}.\n");
+	return 0;
+    }
+}
+
 static void initialize(void)
 {
 #ifdef RPN_QUERY
@@ -714,6 +778,7 @@ static int client(void)
 	{"status", cmd_status, ""},
 	{"setnames", cmd_setnames, ""},
 	{"cancel", cmd_cancel, ""},
+	{"format", cmd_format, "<recordsyntax>"},
     	{0,0}
     };
     char *netbuffer= 0;
@@ -787,6 +852,9 @@ static int client(void)
 		if (!z_APDU(in, &apdu, 0))
 		{
 		    odr_perror(in, "Decoding incoming APDU");
+		    fprintf(stderr, "Packet dump:\n---------\n");
+		    odr_dumpBER(stderr, netbuffer, res);
+		    fprintf(stderr, "---------\n");
 		    exit(1);
 		}
 #if 0

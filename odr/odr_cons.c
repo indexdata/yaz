@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.11  1995-05-16 08:50:53  quinn
+ * Revision 1.12  1995-06-19 12:38:47  quinn
+ * Added BER dumper.
+ *
+ * Revision 1.11  1995/05/16  08:50:53  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.10  1995/04/18  08:15:21  quinn
@@ -134,7 +137,7 @@ int odr_constructed_end(ODR o)
 	    else if (o->bp - o->stack[o->stackp].base !=
 		o->stack[o->stackp].len)
 	    {
-	    	o->error = OOTHER;
+	    	o->error = OCONLEN;
 	    	return 0;
 	    }
 	    o->stackp--;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.13  1995-05-22 11:32:02  quinn
+ * Revision 1.14  1995-06-19 12:38:46  quinn
+ * Added BER dumper.
+ *
+ * Revision 1.13  1995/05/22  11:32:02  quinn
  * Fixing Interface to odr_null.
  *
  * Revision 1.12  1995/05/16  08:50:49  quinn
@@ -66,7 +69,8 @@ char *odr_errlist[] =
     "Other error",
     "Protocol error",
     "Malformed data",
-    "Stack overflow"
+    "Stack overflow",
+    "Length of constructed type different from sum of members"
 };
 
 void odr_perror(ODR o, char *message)
