@@ -68,6 +68,7 @@ map geographicKeywordName	/(3,651)/(3,a)
 map geographicKeywordType	/(3,655)/(3,z)  # Probably incorrect
 map timeperiodStructured	/(3,045)/(3,c)
 map timeperiodTextual		/(3,513)/(3,b)
+map crossReference              /(3,787):new     nodata
 map crossReferenceTitle		/(3,787)/(3,t)
 map crossReferenceLinkage	/(3,787)/(3,w)
 
