@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.80 2002-01-28 09:26:42 adam Exp $
+ * $Id: statserv.c,v 1.81 2002-05-07 11:01:59 adam Exp $
  */
 
 #include <stdio.h>
@@ -601,7 +601,7 @@ static void inetd_connection(int what)
 /*
  * Set up a listening endpoint, and give it to the event-handler.
  */
-static void add_listener(char *where, int what)
+static int add_listener(char *where, int what)
 {
     COMSTACK l;
     void *ap;
@@ -622,26 +622,27 @@ static void add_listener(char *where, int what)
     if (!l)
     {
 	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to listen on %s", where);
-	return;
+	return -1;
     }
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
     	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s", where);
 	cs_close (l);
-	return;
+	return -1;
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
    	 EVENT_EXCEPT)))
     {
     	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to create IOCHAN-type");
 	cs_close (l);
-	return;
+	return -1;
     }
     iochan_setdata(lst, l);
 
     /* Ensure our listener chain is setup properly */
     lst->next = pListener;
     pListener = lst;
+    return 0; /* OK */
 }
 
 #ifndef WIN32
@@ -751,7 +752,8 @@ int check_options(int argc, char **argv)
     	switch (ret)
     	{
 	case 0:
-	    add_listener(arg, control_block.default_proto);
+	    if (add_listener(arg, control_block.default_proto))
+                return 1;  /* failed to create listener */
 	    break;
 	case '1':	 
 	    control_block.one_shot = 1;
