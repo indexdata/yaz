@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.62  2000-03-17 12:47:02  adam
+ * Revision 1.63  2000-03-20 19:06:25  adam
+ * Added Segment request for fronend server. Work on admin for client.
+ *
+ * Revision 1.62  2000/03/17 12:47:02  adam
  * Minor changes to admin client.
  *
  * Revision 1.61  2000/03/15 12:59:49  adam
@@ -880,9 +883,20 @@ int statserv_start(int argc, char **argv)
 	inetd_connection(control_block.default_proto);
     else
     {
+#if 0
+	sigset_t sigs_to_block;
+
+	sigemptyset(&sigs_to_block);
+	sigaddset (&sigs_to_block, SIGTERM);
+	pthread_sigmask (SIG_BLOCK, &sigs_to_block, 0);
+	pthread_create (&
+
+
+#endif
 	if (control_block.dynamic)
 	    signal(SIGCHLD, catchchld);
     }
+    
     signal (SIGTERM, sigterm);
     if (*control_block.setuid)
     {

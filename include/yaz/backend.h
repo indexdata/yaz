@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.5  2000-03-15 12:59:49  adam
+ * Revision 1.6  2000-03-20 19:06:25  adam
+ * Added Segment request for fronend server. Work on admin for client.
+ *
+ * Revision 1.5  2000/03/15 12:59:49  adam
  * Added handle member to statserv_control.
  *
  * Revision 1.4  2000/02/28 11:20:06  adam
@@ -289,6 +292,15 @@ typedef struct bend_esrequest_rr
     char *errstring;           /* system error string or NULL */
 } bend_esrequest_rr;
 
+typedef struct bend_segment_rr {
+    Z_Segment *segment;
+    ODR stream;
+    ODR decode;
+    ODR print;
+    bend_request request;
+    bend_association association;
+} bend_segment_rr;
+
 typedef struct bend_initrequest
 {
     Z_IdAuthentication *auth;
@@ -304,6 +316,7 @@ typedef struct bend_initrequest
     int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
     int (*bend_delete)(void *handle, bend_delete_rr *rr);
     int (*bend_scan)(void *handle, bend_scan_rr *rr);
+    int (*bend_segment)(void *handle, bend_segment_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.98  2000-03-16 13:55:49  ian
+ * Revision 1.99  2000-03-20 19:06:25  adam
+ * Added Segment request for fronend server. Work on admin for client.
+ *
+ * Revision 1.98  2000/03/16 13:55:49  ian
  * Added commands for sending shutdown and startup admin requests via the admin ES.
  *
  * Revision 1.97  2000/03/14 14:06:04  ian
@@ -363,9 +366,9 @@ static ODR out, in, print;              /* encoding and decoding streams */
 static FILE *apdu_file = 0;
 static COMSTACK conn = 0;               /* our z-association */
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
-static char *databaseNames[128];
+char *databaseNames[128];
+int num_databaseNames = 0;
 static Z_External *record_last = 0;
-static int num_databaseNames = 0;
 static int setnumber = 0;               /* current result set number */
 static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
@@ -2358,9 +2361,11 @@ static int client(int wait)
 	    }
         }
 	wait = 0;
+	if (conn
 #ifdef USE_SELECT
-        if (conn && FD_ISSET(cs_fileno(conn), &input))
+	    && FD_ISSET(cs_fileno(conn), &input)
 #endif
+	    )
         {
             do
             {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.21  1999-11-30 13:47:12  adam
+ * Revision 1.22  2000-03-20 19:06:25  adam
+ * Added Segment request for fronend server. Work on admin for client.
+ *
+ * Revision 1.21  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.20  1999/10/11 10:01:24  adam
@@ -156,6 +159,7 @@ typedef struct association
     int (*bend_esrequest) ();
     int (*bend_delete) ();
     int (*bend_scan) ();
+    int (*bend_segment) ();
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);

@@ -1,6 +1,9 @@
 /*
  * $Log: admin.c,v $
- * Revision 1.5  2000-03-17 12:47:02  adam
+ * Revision 1.6  2000-03-20 19:06:25  adam
+ * Added Segment request for fronend server. Work on admin for client.
+ *
+ * Revision 1.5  2000/03/17 12:47:02  adam
  * Minor changes to admin client.
  *
  * Revision 1.4  2000/03/16 13:55:49  ian
@@ -22,7 +25,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
+#include <assert.h>
+#include <dirent.h>
+#include <fnmatch.h>
+#include <sys/stat.h>
 #include <yaz/yaz-util.h>
 
 #include <yaz/tcpip.h>
@@ -80,65 +86,54 @@ int sendAdminES(int type, char* dbname, char* param1)
                      odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->toKeep));
 
     toKeep->which=type;
-
+    toKeep->databaseName = dbname;
     switch ( type )
     {
-        case Z_ESAdminOriginPartToKeep_reIndex:
-	    toKeep->u.reIndex=odr_nullval();
-            toKeep->databaseName = dbname;
-	    break;
-
-	case Z_ESAdminOriginPartToKeep_truncate:
-	    toKeep->u.truncate=odr_nullval();
-            toKeep->databaseName = dbname;
-	    break;
-
-	case Z_ESAdminOriginPartToKeep_delete:
-	    toKeep->u.delete=odr_nullval();
-            toKeep->databaseName = dbname;
-	    break;
-
-	case Z_ESAdminOriginPartToKeep_create:
-	    toKeep->u.create=odr_nullval();
-            toKeep->databaseName = dbname;
-	    break;
-
-        case Z_ESAdminOriginPartToKeep_import:
-	    toKeep->u.import = (Z_ImportParameters*)odr_malloc(out, sizeof(*toKeep->u.import));
-	    toKeep->u.import->recordType=param1;
-            toKeep->databaseName = dbname;
-	    /* Need to add additional setup of records here */
-	    break;
-
-        case Z_ESAdminOriginPartToKeep_refresh:
-	    toKeep->u.refresh=odr_nullval();
-            toKeep->databaseName = dbname;
-	    break;
-
-        case Z_ESAdminOriginPartToKeep_commit:
-	    toKeep->u.commit=odr_nullval();
-	    break;
-
-	case Z_ESAdminOriginPartToKeep_shutdown:
-	    toKeep->u.commit=odr_nullval();
-	    break;
-	    
-	case Z_ESAdminOriginPartToKeep_start:
-	    toKeep->u.commit=odr_nullval();
-	    break;
-
-        default:
-	    /* Unknown admin service */
-	    break;
+    case Z_ESAdminOriginPartToKeep_reIndex:
+	toKeep->u.reIndex=odr_nullval();
+	break;
+	
+    case Z_ESAdminOriginPartToKeep_truncate:
+	toKeep->u.truncate=odr_nullval();
+	break;
+    case Z_ESAdminOriginPartToKeep_delete:
+	toKeep->u.delete=odr_nullval();
+	break;
+    case Z_ESAdminOriginPartToKeep_create:
+	toKeep->u.create=odr_nullval();
+	break;
+    case Z_ESAdminOriginPartToKeep_import:
+	toKeep->u.import = (Z_ImportParameters*)odr_malloc(out, sizeof(*toKeep->u.import));
+	toKeep->u.import->recordType=param1;
+	toKeep->databaseName = dbname;
+	/* Need to add additional setup of records here */
+	break;
+    case Z_ESAdminOriginPartToKeep_refresh:
+	toKeep->u.refresh=odr_nullval();
+	toKeep->databaseName = dbname;
+	break;
+    case Z_ESAdminOriginPartToKeep_commit:
+	toKeep->u.commit=odr_nullval();
+	break;
+    case Z_ESAdminOriginPartToKeep_shutdown:
+	toKeep->u.commit=odr_nullval();
+	break;
+    case Z_ESAdminOriginPartToKeep_start:
+	toKeep->u.commit=odr_nullval();
+	break;
+    default:
+	/* Unknown admin service */
+	break;
     }
 
-    notToKeep = r->u.adminService->u.esRequest->notToKeep = (Z_ESAdminOriginPartNotToKeep *)
+    notToKeep = r->u.adminService->u.esRequest->notToKeep =
+	(Z_ESAdminOriginPartNotToKeep *)
 	odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->notToKeep));
     notToKeep->which=Z_ESAdminOriginPartNotToKeep_recordsWillFollow;
     notToKeep->u.recordsWillFollow=odr_nullval();
     
     send_apdu(apdu);
-
+    
     return 0;
 }
 
@@ -191,14 +186,105 @@ int cmd_adm_delete(char* arg)
    Import the specified updated into the database
    N.B. That in this case, the import may contain instructions to delete records as well as new or updates
    to existing records */
-int cmd_adm_import(char* arg)
+
+extern char *databaseNames[];
+extern int num_databaseNames;
+
+int cmd_adm_import(char *arg)
+{
+    char type_str[20], dir_str[1024], pattern_str[1024];
+    char *cp;
+    char *sep = "/";
+    DIR *dir;
+    struct dirent *ent;
+    int chunk = 10;
+    Z_APDU *apdu = 0;
+    ODR out = getODROutputStream();
+
+    if (arg && sscanf (arg, "%19s %1023s %1023s", type_str,
+		       dir_str, pattern_str) != 3)
+	return 0;
+    if (num_databaseNames != 1)
+	return 0;
+    dir = opendir(dir_str);
+    if (!dir)
+	return 0;
+    
+    sendAdminES(Z_ESAdminOriginPartToKeep_import,*databaseNames,
+		type_str);
+
+    printf ("sent es request\n");
+    if ((cp=strrchr(dir_str, '/')) && cp[1] == 0)
+	sep="";
+	
+    while ((ent = readdir(dir)))
+    {
+	if (fnmatch (pattern_str, ent->d_name, 0) == 0)
+	{
+	    char fname[1024];
+	    struct stat status;
+	    FILE *inf;
+		
+	    sprintf (fname, "%s%s%s", dir_str, sep, ent->d_name);
+	    stat (fname, &status);
+
+	    if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))
+	    {
+		Z_Segment *segment;
+		Z_NamePlusRecord *rec;
+		Odr_oct *oct = odr_malloc (out, sizeof(*oct));
+
+		if (!apdu)
+		{
+		    apdu = zget_APDU(out, Z_APDU_segmentRequest);
+		    segment = apdu->u.segmentRequest;
+		    segment->segmentRecords = (Z_NamePlusRecord **)
+			odr_malloc (out, chunk * sizeof(*segment->segmentRecords));
+		}
+		rec = (Z_NamePlusRecord *) odr_malloc (out, sizeof(*rec));
+		rec->databaseName = 0;
+		rec->which = Z_NamePlusRecord_intermediateFragment;
+		rec->u.intermediateFragment = (Z_FragmentSyntax *)
+		    odr_malloc (out, sizeof(*rec->u.intermediateFragment));
+		rec->u.intermediateFragment->which =
+		    Z_FragmentSyntax_notExternallyTagged;
+		rec->u.intermediateFragment->u.notExternallyTagged = oct;
+		
+		oct->len = oct->size = status.st_size;
+		oct->buf = odr_malloc (out, oct->size);
+		fread (oct->buf, 1, oct->size, inf);
+		fclose (inf);
+		
+		segment->segmentRecords[segment->num_segmentRecords++] = rec;
+
+		if (segment->num_segmentRecords == chunk)
+		{
+		    send_apdu (apdu);
+		    apdu = 0;
+		}
+	    }	
+	}
+    }
+    if (apdu)
+    {
+	printf ("sending last packet\n");
+	send_apdu(apdu);
+    }
+    apdu = zget_APDU(out, Z_APDU_segmentRequest);
+    printf ("sending end of sequence packet\n");
+    send_apdu (apdu);
+    closedir(dir);
+    return 2;
+}
+
+int cmd_adm_import2(char* arg)
 {
     /* Size of chunks we wish to read from import file */
     size_t chunk_size = 8192;
 
     /* Buffer for reading chunks of data from import file */
     char chunk_buffer[chunk_size];
-
+    
     if ( arg )
     {
         char dbname_buff[32];

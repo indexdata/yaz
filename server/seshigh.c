@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.102  2000-03-15 12:59:49  adam
+ * Revision 1.103  2000-03-20 19:06:25  adam
+ * Added Segment request for fronend server. Work on admin for client.
+ *
+ * Revision 1.102  2000/03/15 12:59:49  adam
  * Added handle member to statserv_control.
  *
  * Revision 1.101  2000/01/12 14:36:07  adam
@@ -384,6 +387,7 @@ static void process_close(association *assoc, request *reqb);
 void save_referenceId (request *reqb, Z_ReferenceId *refid);
 static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     int *fd);
+static Z_APDU *process_segmentRequest (association *assoc, request *reqb);
 static int bend_default_scan (void *handle, bend_scan_rr *rr);
 
 static FILE *apduf = 0; /* for use in static mode */
@@ -655,59 +659,70 @@ static int process_request(association *assoc, request *req, char **msg)
     int fd = -1;
     Z_APDU *res;
     int retval;
-
+    
     *msg = "Unknown Error";
     assert(req && req->state == REQUEST_IDLE);
     switch (req->request->which)
     {
-    	case Z_APDU_initRequest:
-	    res = process_initRequest(assoc, req); break;
-	case Z_APDU_searchRequest:
-	    res = process_searchRequest(assoc, req, &fd); break;
-	case Z_APDU_presentRequest:
-	    res = process_presentRequest(assoc, req, &fd); break;
-	case Z_APDU_scanRequest:
-	    if (assoc->bend_scan)
-		res = process_scanRequest(assoc, req, &fd);
-	    else
-	    {
-		*msg = "Cannot handle Scan APDU";
-		return -1;
-	    }
-	    break;
-        case Z_APDU_extendedServicesRequest:
-	    if (assoc->bend_esrequest)
-		res = process_ESRequest(assoc, req, &fd);
-	    else
-	    {
-		*msg = "Cannot handle Extended Services APDU";
-		return -1;
-	    }
-	    break;
-        case Z_APDU_sortRequest:
-	    if (assoc->bend_sort)
-		res = process_sortRequest(assoc, req, &fd);
-	    else
-	    {
-		*msg = "Cannot handle Sort APDU";
-		return -1;
-	    }
-	    break;
-	case Z_APDU_close:
-	    process_close(assoc, req);
-	    return 0;
-        case Z_APDU_deleteResultSetRequest:
-	    if (assoc->bend_delete)
-		res = process_deleteRequest(assoc, req, &fd);
-	    else
-	    {
-		*msg = "Cannot handle Delete APDU";
-		return -1;
-	    }
-	    break;
-	default:
-	    *msg = "Bad APDU received";
+    case Z_APDU_initRequest:
+	res = process_initRequest(assoc, req); break;
+    case Z_APDU_searchRequest:
+	res = process_searchRequest(assoc, req, &fd); break;
+    case Z_APDU_presentRequest:
+	res = process_presentRequest(assoc, req, &fd); break;
+    case Z_APDU_scanRequest:
+	if (assoc->bend_scan)
+	    res = process_scanRequest(assoc, req, &fd);
+	else
+	{
+	    *msg = "Cannot handle Scan APDU";
 	    return -1;
+	}
+	break;
+    case Z_APDU_extendedServicesRequest:
+	if (assoc->bend_esrequest)
+	    res = process_ESRequest(assoc, req, &fd);
+	else
+	{
+	    *msg = "Cannot handle Extended Services APDU";
+	    return -1;
+	}
+	break;
+    case Z_APDU_sortRequest:
+	if (assoc->bend_sort)
+	    res = process_sortRequest(assoc, req, &fd);
+	else
+	{
+	    *msg = "Cannot handle Sort APDU";
+	    return -1;
+	}
+	break;
+    case Z_APDU_close:
+	process_close(assoc, req);
+	return 0;
+    case Z_APDU_deleteResultSetRequest:
+	if (assoc->bend_delete)
+	    res = process_deleteRequest(assoc, req, &fd);
+	else
+	{
+	    *msg = "Cannot handle Delete APDU";
+	    return -1;
+	}
+	break;
+    case Z_APDU_segmentRequest:
+	if (assoc->bend_segment)
+	{
+	    res = process_segmentRequest (assoc, req);
+	}
+	else
+	{
+	    *msg = "Cannot handle Segment APDU";
+	    return -1;
+	}
+	break;
+    default:
+	*msg = "Bad APDU received";
+	return -1;
     }
     if (res)
     {
@@ -850,6 +865,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     binitreq.bend_esrequest = NULL;
     binitreq.bend_delete = NULL;
     binitreq.bend_scan = bend_default_scan;
+    binitreq.bend_segment = NULL;
     if (!(binitres = bend_init(&binitreq)))
     {
     	yaz_log(LOG_WARN, "Bad response from backend.");
@@ -869,6 +885,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 	yaz_log (LOG_DEBUG, "Delete handler installed");   
     if ((assoc->bend_scan = (int (*)())binitreq.bend_scan))
 	yaz_log (LOG_DEBUG, "Scan handler installed");   
+    if ((assoc->bend_segment = (int (*)())binitreq.bend_segment))
+	yaz_log (LOG_DEBUG, "Segment handler installed");   
     
     resp->referenceId = req->referenceId;
     *options = '\0';
@@ -1872,6 +1890,22 @@ void bend_request_setdata(bend_request r, void *p)
 void *bend_request_getdata(bend_request r)
 {
     return r->clientData;
+}
+
+static Z_APDU *process_segmentRequest (association *assoc, request *reqb)
+{
+    bend_segment_rr request;
+
+    request.segment = reqb->request->u.segmentRequest;
+    request.stream = assoc->encode;
+    request.decode = assoc->decode;
+    request.print = assoc->print;
+    request.association = assoc;
+    
+    ((int (*)(void *, bend_segment_rr *))(*assoc->bend_segment))
+	(assoc->backend, &request);
+
+    return 0;
 }
 
 static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.3  2000-03-15 12:59:49  adam
+ * Revision 1.4  2000-03-20 19:06:25  adam
+ * Added Segment request for fronend server. Work on admin for client.
+ *
+ * Revision 1.3  2000/03/15 12:59:49  adam
  * Added handle member to statserv_control.
  *
  * Revision 1.2  1999/11/30 13:47:12  adam
@@ -177,7 +180,7 @@ static struct {
 { 1016, "Init/AC: Blocked network address"},
 { 1017, "Init/AC: No databases available for specified userId"},
 { 1018, "Init/AC: System temporarily out of resources"},
-{ 1019, "Init/AC: System not available due to maintenance (Addinfo: when it's expected back up)" },
+{ 1019, "Init/AC: System not available due to maintenance" },
 { 1020, "Init/AC: System temporarily unavailable (Addinfo: when it's expected back up)"},
 { 1021, "Init/AC: Account has expired"},
 { 1022, "Init/AC: Password has expired so a new one must be supplied"},
