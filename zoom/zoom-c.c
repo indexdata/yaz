@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.17 2002-01-03 10:23:46 adam Exp $
+ * $Id: zoom-c.c,v 1.18 2002-01-03 12:18:38 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1092,6 +1092,15 @@ static int scan_response (ZOOM_connection c, Z_ScanResponse *res)
         response_diag(c, res->entries->nonsurrogateDiagnostics[0]);
     scan->scan_response = res;
     nmem_transfer (scan->odr->mem, nmem);
+    if (res->stepSize)
+        ZOOM_options_set_int (scan->options, "stepSize", *res->stepSize);
+    if (res->positionOfTerm)
+        ZOOM_options_set_int (scan->options, "position", *res->positionOfTerm);
+    if (res->scanStatus)
+        ZOOM_options_set_int (scan->options, "scanStatus", *res->scanStatus);
+    if (res->numberOfEntriesReturned)
+        ZOOM_options_set_int (scan->options, "number",
+                              *res->numberOfEntriesReturned);
     nmem_destroy (nmem);
     return 1;
 }
@@ -1348,6 +1357,17 @@ const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
         *occ = t->globalOccurrences ? *t->globalOccurrences : 0;
     }
     return term;
+}
+
+const char *ZOOM_scanset_option_get (ZOOM_scanset scan, const char *key)
+{
+    return ZOOM_options_get (scan->options, key);
+}
+
+void ZOOM_scanset_option_set (ZOOM_scanset scan, const char *key,
+                              const char *val)
+{
+    ZOOM_options_set (scan->options, key, val);
 }
 
 static int ZOOM_connection_exec_task (ZOOM_connection c)

@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.15 2002-01-02 10:30:25 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.16 2002-01-03 12:18:37 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -497,6 +497,85 @@
     </para>
    </sect2>
   </sect1>
+  <sect1 id="zoom.scan"><title>Scan</title>
+   <para>
+    This section describes an interface for Scan. Scan is not an
+    official part of the ZOOM model yet. The result of a scan operation
+    is the <literal>ZOOM_scanset</literal> which is a set of terms
+    returned by a target.
+   </para>
+   <synopsis>
+    ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c,
+                                       const char *startterm);
+
+    size_t ZOOM_scanset_size(ZOOM_scanset scan);
+
+    const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
+                                   int *occ, size_t *len);
+
+
+    void ZOOM_scanset_destroy (ZOOM_scanset scan);
+
+    const char *ZOOM_scanset_option_get (ZOOM_scanset scan,
+                                         const char *key);
+
+    void ZOOM_scanset_option_set (ZOOM_scanset scan, const char *key,
+                                  const char *val);
+    </synopsis>
+   <para>
+    The scan set is created by function
+    <function>ZOOM_connection_scan</function> which performs a scan
+    operation on the connection and start term given.
+    If the operation was successful, the size of the scan set can be
+    retrived by a call to <function>ZOOM_scanset_size</function>.
+    Like result sets, the items are numbered 0,..size-1.
+    To obtain information about a particular scan term, call function
+    <function>ZOOM_scanset_term</function>. This function takes
+    a scan set offset <literal>pos</literal> and returns a pointer
+    to an actual term or <literal>NULL</literal> if non-present.
+    If present, the <literal>occ</literal> and <literal>len</literal> 
+    are set to the number of occurrences and the length
+    of the actual term respectively.
+    A scan set may be freed by a call to function
+    <function>ZOOM_scanset_destroy</function>.
+    Functions <function>ZOOM_scanset_option_get</function> and
+    <function>ZOOM_scanset_option_set</function> retrieves and sets
+    an option respectively.
+   </para>
+   
+   <table frame="top"><title>ZOOM Scan Set Options</title>
+    <tgroup cols="3">
+     <colspec colwidth="4*" colname="name"></colspec>
+     <colspec colwidth="7*" colname="description"></colspec>
+     <colspec colwidth="2*" colname="default"></colspec>
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Description</entry>
+       <entry>Default</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row><entry>
+        number</entry><entry>Number of Scan Terms requested in next scan.
+        After scan it holds the actual number of terms returend.
+       </entry><entry>10</entry></row>
+      <row><entry>
+        position</entry><entry>Preferred Position of term in response
+        in next scan; actual position after completion of scan.
+       </entry><entry>1</entry></row>
+      <row><entry>
+        stepSize</entry><entry>Step Size
+       </entry><entry>0</entry></row>
+      <row><entry>
+        scanStatus</entry><entry>An integer indicating the Scan Status
+        of last scan.
+       </entry><entry>0</entry></row>
+     </tbody>
+    </tgroup>
+   </table>
+   
+  </sect1>
   <sect1 id="zoom.options"><title>Options</title>
    <para>
     Most &zoom; objects provide a way to specify options to change behavior.
@@ -526,43 +605,6 @@
                                         void *handle);
    </synopsis>
   </sect1>
-  <sect1 id="zoom.scan"><title>Scsn</title>
-   <para>
-    This section describes an interface for Scan. Scan is not an
-    official part of the ZOOM model yet. The result of a scan operation
-    is the <literal>ZOOM_scanset</literal> which is a set of terms
-    returned by a target.
-   </para>
-   <synopsis>
-    ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c,
-                                       const char *startterm);
-
-    size_t ZOOM_scanset_size(ZOOM_scanset scan);
-
-    const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
-                                   int *occ, size_t *len);
-
-
-    void ZOOM_scanset_destroy (ZOOM_scanset scan);
-    </synopsis>
-   <para>
-    The scan set is created by function
-    <function>ZOOM_connection_scan</function> which performs a scan
-    operation on the connection and start term given.
-    If the operation was successful, the size of the scan set can be
-    retrived by a call to <function>ZOOM_scanset_size</function>.
-    Like result sets, the items are numbered 0,..size-1.
-    To obtain information about a particular scan term, call function
-    <function>ZOOM_scanset_term</function>. This function takes
-    a scan set offset <literal>pos</literal> and returns a pointer
-    to an actual term or <literal>NULL</literal> if non-present.
-    If present, the <literal>occ</literal> and <literal>len</literal> 
-    are set to the number of occurrences and the length
-    of the actual term respectively.
-    A scan set may be freed by a call to function
-    <function>ZOOM_scanset_destroy</function>.
-    </para>
-   </sect1>
   <sect1 id="zoom.events"><title>Events</title>
    <para>
     If you're developing non-blocking applications, you have to deal 

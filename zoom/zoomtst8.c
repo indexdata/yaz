@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst8.c,v 1.1 2001-12-30 22:21:11 adam Exp $
+ * $Id: zoomtst8.c,v 1.2 2002-01-03 12:18:38 adam Exp $
  *
  * Asynchronous multi-target client doing scan
  */
@@ -39,10 +39,16 @@ int main(int argc, char **argv)
 
 	/* connect and init */
     	ZOOM_connection_connect (z[i], argv[1+i], 0);
+        
     }
-    /* search all */
+    /* scan all */
     for (i = 0; i<no; i++)
+    {
+        /* set number of scan terms to be returned. */
+        ZOOM_connection_option_set (z[i], "number", "7");
+        /* and perform scan */
         s[i] = ZOOM_connection_scan (z[i], argv[argc-1]);
+    }
 
     /* network I/O. pass number of connections and array of connections */
     while (ZOOM_event (no, z))
@@ -67,7 +73,6 @@ int main(int argc, char **argv)
                 term = ZOOM_scanset_term (s[i], j, &occur, &len);
                 if (term)
                     printf ("%d %.*s %d\n", j, len, term, occur);
-                
             }
         }
     }

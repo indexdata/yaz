@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-opt.c,v 1.2 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoom-opt.c,v 1.3 2002-01-03 12:18:38 adam Exp $
  *
  * ZOOM layer for C, options handling
  */
@@ -131,4 +131,12 @@ int ZOOM_options_get_int (ZOOM_options opt, const char *name, int defa)
     if (!v || !*v)
 	return defa;
     return atoi(v);
+}
+
+void ZOOM_options_set_int(ZOOM_options opt, const char *name, int value)
+{
+    char s[40];
+
+    sprintf (s, "%d", value);
+    ZOOM_options_set (opt, name, s);
 }

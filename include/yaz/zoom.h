@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.9 2002-01-02 10:30:25 adam Exp $
+ * $Id: zoom.h,v 1.10 2002-01-03 12:18:37 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -172,6 +172,13 @@ size_t ZOOM_scanset_size(ZOOM_scanset scan);
 
 ZOOM_EXPORT
 void ZOOM_scanset_destroy (ZOOM_scanset scan);
+
+ZOOM_EXPORT
+const char *ZOOM_scanset_option_get (ZOOM_scanset scan, const char *key);
+
+ZOOM_EXPORT
+void ZOOM_scanset_option_set (ZOOM_scanset scan, const char *key,
+                              const char *val);
 /* ----------------------------------------------------------- */
 /* options */
 typedef const char *(*ZOOM_options_callback)(void *handle, const char *name);
@@ -200,6 +207,9 @@ int ZOOM_options_get_bool (ZOOM_options opt, const char *name, int defa);
 
 ZOOM_EXPORT
 int ZOOM_options_get_int (ZOOM_options opt, const char *name, int defa);
+
+ZOOM_EXPORT
+void ZOOM_options_set_int(ZOOM_options opt, const char *name, int value);
 
 ZOOM_EXPORT
 void ZOOM_options_addref (ZOOM_options opt);
