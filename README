@@ -9,11 +9,8 @@ The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
 role of Z39.50/SR.
 
-See doc/osi.txt for instructions on how to download and install Peter
-Furniss' ThinOSI-implementation, to provide YAZ with OSI support.
-
 Two test-programs of interest are generated when you type 'make' at
-the top level. server/ztest and yazlib/cli. Ztest is a dummy database
+the top level. server/ztest and client/client. Ztest is a dummy database
 server which returns canned responses to all queries. It's good for
 verifying that the protocol works ok, and ztest.c shows a minimalistic
 implementation of the 'backend' interface.
@@ -27,14 +24,14 @@ client tcp:<hostname>:<port>
 
 at the UNIX prompt, to connect to a Z39.50 server, or
 
-cli osi:[<tsel>'/']<hostname>:<port>
+client osi:[<tsel>'/']<hostname>:<port>
 
 to connect to an OSI SR target (this requires mOSI-support). To connect to
 the DANBIB test target, you might use:
 
-cli osi:0103/find2.denet.dk:4500
+client osi:0103/find2.denet.dk:4500
 
-CLI supports CCL-queries, with the mapping between qualifiers and
+Client supports CCL-queries, with the mapping between qualifiers and
 attribute values specified in the file default.bib in the working
 directory. Use '?' to get a list of the available commands.
 
