@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.81  1999-04-20 09:56:48  adam
+ * Revision 1.82  1999-05-26 13:49:12  adam
+ * DB Update implemented in client (very basic).
+ *
+ * Revision 1.81  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -304,6 +307,7 @@ static ODR out, in, print;              /* encoding and decoding streams */
 static COMSTACK conn = 0;               /* our z-association */
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
 static char *databaseNames[128];
+static Z_External *record_last = 0;
 static int num_databaseNames = 0;
 static int setnumber = 0;               /* current result set number */
 static int smallSetUpperBound = 0;
@@ -642,6 +646,7 @@ static void display_record(Z_DatabaseRecord *p)
     Z_External *r = (Z_External*) p;
     oident *ent = oid_getentbyoid(r->direct_reference);
 
+    record_last = r;
     /*
      * Tell the user what we got.
      */
@@ -785,7 +790,7 @@ static void display_nameplusrecord(Z_NamePlusRecord *p)
         printf("[%s]", p->databaseName);
     if (p->which == Z_NamePlusRecord_surrogateDiagnostic)
         display_diagrecs(&p->u.surrogateDiagnostic, 1);
-    else
+    else if (p->which == Z_NamePlusRecord_databaseRecord)
         display_record(p->u.databaseRecord);
 }
 
@@ -1190,10 +1195,6 @@ static int send_itemorder(char *arg)
 
     /* Set up item order request */
 
-    /* Function being performed by this extended services request */
-    req->function = (int *) odr_malloc(out, sizeof(int));
-    *req->function = Z_ExtendedServicesRequest_create;
-
     /* Package type, Using protocol ILL ( But that's not in the oid.h file yet */
     /* create an object of class Extended Service, value Item Order            */
     ItemOrderRequest.proto = PROTO_Z3950;
@@ -1205,11 +1206,60 @@ static int send_itemorder(char *arg)
     /* ** taskSpecificParameters ** */
     req->taskSpecificParameters = CreateItemOrderExternal(itemno);
 
-    /* waitAction - Create the ILL request and that's it */
-    *req->waitAction = Z_ExtendedServicesRequest_wait;
-
     send_apdu(apdu);
     return 0;
+}
+
+static int cmd_update(char *arg)
+{
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
+    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+    Z_External *r;
+    int oid[OID_SIZE];
+    Z_IUOriginPartToKeep *toKeep;
+    Z_IUSuppliedRecords *notToKeep;
+    oident update_oid;
+    printf ("Update request\n");
+    fflush(stdout);
+
+    if (!record_last)
+	return 0;
+    update_oid.proto = PROTO_Z3950;
+    update_oid.oclass = CLASS_EXTSERV;
+    update_oid.value = VAL_DBUPDATE;
+    oid_ent_to_oid (&update_oid, oid);
+    req->packageType = odr_oiddup(out,oid);
+    req->packageName = "1.Extendedserveq";
+
+    r = req->taskSpecificParameters = (Z_External *)
+	odr_malloc (out, sizeof(*r));
+    r->direct_reference = odr_oiddup(out,oid);
+    r->which = Z_External_update;
+    r->u.update = (Z_IUUpdate *) odr_malloc(out, sizeof(*r->u.update));
+    r->u.update->which = Z_IUUpdate_esRequest;
+    r->u.update->u.esRequest = (Z_IUUpdateEsRequest *)
+	odr_malloc(out, sizeof(*r->u.update->u.esRequest));
+    toKeep = r->u.update->u.esRequest->toKeep = (Z_IUOriginPartToKeep *)
+	odr_malloc(out, sizeof(*r->u.update->u.esRequest->toKeep));
+    toKeep->databaseName = databaseNames[0];
+    toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
+    *toKeep->action = Z_IUOriginPartToKeep_recordInsert;
+
+    notToKeep = r->u.update->u.esRequest->notToKeep = (Z_IUSuppliedRecords *)
+	odr_malloc(out, sizeof(*r->u.update->u.esRequest->notToKeep));
+    notToKeep->num = 1;
+    notToKeep->elements = (Z_IUSuppliedRecords_elem **)
+	odr_malloc(out, sizeof(*notToKeep->elements));
+    notToKeep->elements[0] = (Z_IUSuppliedRecords_elem *)
+	odr_malloc(out, sizeof(**notToKeep->elements));
+    notToKeep->elements[0]->u.number = 0;
+    notToKeep->elements[0]->supplementalId = 0;
+    notToKeep->elements[0]->correlationInfo = 0;
+    notToKeep->elements[0]->record = record_last;
+    
+    send_apdu(apdu);
+
+    return 2;
 }
 
 /* II : Added to do DALI Item Order Extended services request */
@@ -1880,6 +1930,7 @@ static int client(int wait)
         {"querytype", cmd_querytype, "<type>"},
 	{"refid", cmd_refid, "<id>"},
 	{"itemorder", cmd_itemorder, "<item>"},
+	{"update", cmd_update, "<item>"},
         {0,0}
     };
     char *netbuffer= 0;
@@ -1977,6 +2028,7 @@ static int client(int wait)
                     exit(1);
                 }
                 odr_reset(in); /* release APDU from last round */
+		record_last = 0;
                 odr_setbuf(in, netbuffer, res, 0);
                 if (!z_APDU(in, &apdu, 0, 0))
                 {

@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.21  1998-12-15 12:45:42  adam
+ * Revision 1.22  1999-05-26 13:49:12  adam
+ * DB Update implemented in client (very basic).
+ *
+ * Revision 1.21  1998/12/15 12:45:42  adam
  * Minor change.
  *
  * Revision 1.20  1998/12/14 14:48:05  adam
@@ -132,11 +135,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     {
         logf (LOG_WARN, "No task specific parameters");
     }
-    else if (rr->esr->taskSpecificParameters->which != Z_External_itemOrder)
-    {
-        logf (LOG_WARN, "Not Item Order %d", rr->esr->taskSpecificParameters->which);
-    }
-    else
+    else if (rr->esr->taskSpecificParameters->which == Z_External_itemOrder)
     {
     	Z_ItemOrder *it = rr->esr->taskSpecificParameters->u.itemOrder;
 	switch (it->which)
@@ -174,6 +173,11 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	}
 	break;
 	}
+    }
+    else
+    {
+        logf (LOG_WARN, "Unknown Extended Service(%d)",
+	      rr->esr->taskSpecificParameters->which);
     }
     rr->errcode = 0;
     return 0;

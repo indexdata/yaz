@@ -183,7 +183,7 @@ typedef struct Z_IUSuppliedRecords_elem
     } u; /* OPTIONAL */
     Z_IUSuppliedRecordsId *supplementalId; /* OPTIONAL */
     Z_IUCorrelationInfo *correlationInfo;    /* OPTIONAL */
-    Odr_external *record;
+    Z_External *record;
 } Z_IUSuppliedRecords_elem;
 
 typedef struct Z_IUSuppliedRecords

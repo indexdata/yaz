@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exd.c,v $
- * Revision 1.9  1999-04-20 09:56:48  adam
+ * Revision 1.10  1999-05-26 13:49:12  adam
+ * DB Update implemented in client (very basic).
+ *
+ * Revision 1.9  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -285,7 +288,7 @@ int z_IUSuppliedRecords_elem (ODR o, Z_IUSuppliedRecords_elem **p, int opt,
 		      &(*p)->supplementalId, ODR_CONTEXT, 2, 1) &&
         odr_implicit (o, z_IUCorrelationInfo,
 		      &(*p)->correlationInfo, ODR_CONTEXT, 3, 1) &&
-        odr_implicit (o, odr_external,
+        odr_implicit (o, z_External,
 		      &(*p)->record, ODR_CONTEXT, 4, 0) &&
         odr_sequence_end (o);
 }
