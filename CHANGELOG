@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- XXXX 1995/XX/XX
+--- 1.0b3 1995/08/24
 
 Fixed bug in the frontend-server. The numberOfRecordsReturned field was
 handled incorrectly when records were requested in the searchResponse. This
