@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_null.c,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: odr_null.c,v 1.2 2004-03-09 20:49:04 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -42,7 +41,7 @@ int odr_null(ODR o, Odr_null **p, int opt, const char *name)
         odr_seterror(OPROTO, 42);
     	return 0;
 #else
-	fprintf(stderr, "odr: Warning: Bad NULL\n");
+	/* Warning: Bad NULL */
 #endif
     }
     if (o->direction == ODR_DECODE)
