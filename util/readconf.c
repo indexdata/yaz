@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
+ * Copyright (C) 1994-1997, Index Data I/S 
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: readconf.c,v $
- * Revision 1.4  1997-05-14 06:54:07  adam
+ * Revision 1.5  1997-09-04 07:53:02  adam
+ * Added include readconf.h.
+ *
+ * Revision 1.4  1997/05/14 06:54:07  adam
  * C++ support.
  *
  * Revision 1.3  1996/05/29 15:48:48  quinn
@@ -29,6 +32,7 @@
 #include <ctype.h>
 
 #include <log.h>
+#include <readconf.h>
 
 #define l_isspace(c) ((c) == '\t' || (c) == ' ' || (c) == '\n')
 
