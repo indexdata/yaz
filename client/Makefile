@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.10 1996-05-22 08:35:43 adam Exp $
+# $Id: Makefile,v 1.11 1996-10-07 15:29:01 quinn Exp $
 
 LIBDIR=../lib
 
@@ -21,6 +21,9 @@ all: $(PROG)
 
 $(PROG): $(LIB) $(PROGO)
 	$(CC) $(CFLAGS) $(LIBINCLUDE) -o $(PROG) $(PROGO) $(LIBS)
+
+qparser: qparser.o
+	$(CC) $(CFLAGS) $(LIBINCLUDE) -o qparser qparser.o $(LIBS)
 
 alll:
 

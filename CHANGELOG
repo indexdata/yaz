@@ -1,12 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-<<<<<<< 1.43
-=======
 --- XXXXXXXXXXXXX
 
 Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
 
->>>>>>> /tmp/T4a00109
+Added SOIF syntax (using private OID for now) to retrieval module and client.
+
 --- 1.2 1996/6/10 (1st anniversary release)
 
 Added Summary record syntax. Lightly tested.

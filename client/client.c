@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.40  1996-08-29 14:19:34  quinn
+ * Revision 1.41  1996-10-07 15:29:03  quinn
+ * Work
+ *
+ * Revision 1.40  1996/08/29  14:19:34  quinn
  * Fixed conflict (CVS)
  *
  * Revision 1.39  1996/08/27  10:43:22  quinn
@@ -485,7 +488,9 @@ static void display_record(Z_DatabaseRecord *p)
 	    r->which = type->what;
 	}
     }
-    if (r->which == Z_External_octet && p->u.octet_aligned->len)
+    if (ent->value == VAL_SOIF)
+        printf("%.*s", r->u.octet_aligned->len, r->u.octet_aligned->buf);
+    else if (r->which == Z_External_octet && p->u.octet_aligned->len)
         marc_display ((char*)p->u.octet_aligned->buf, stdout);
     else if (ent->value == VAL_SUTRS)
     {
@@ -995,6 +1000,17 @@ int cmd_format(char *arg)
         recordsyntax = VAL_DANMARC;
         return 1;
     }
+<<<<<<< client.c
+    else if (!strcmp(arg, "grs1"))
+    {
+        printf("Preferred format is GRS1\n");
+        recordsyntax = VAL_GRS1;
+        return 1;
+    }
+    else if (!strcmp(arg, "soif"))
+||||||| 1.40
+    else if (!strcmp(arg, "grs1"))
+=======
     else if (!strcmp(arg, "ukmarc"))
     {
         printf("Preferred format is UKMARC\n");
@@ -1002,9 +1018,10 @@ int cmd_format(char *arg)
         return 1;
     }
     else if (!strcmp(arg, "grs1"))
+>>>>>>> /tmp/T4a00171
     {
-        printf("Preferred format is GRS1\n");
-        recordsyntax = VAL_GRS1;
+        printf("Preferred format is SOIF\n");
+        recordsyntax = VAL_SOIF;
         return 1;
     }
     else if (!strcmp(arg, "summary"))
