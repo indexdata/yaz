@@ -117,7 +117,6 @@ binary-arch: build install
 
 	echo "libyaz 2 libyaz (>= 2.0.2)" > debian/libyaz/DEBIAN/shlibs
 	echo "libyazthread 2 libyaz (>= 2.0.2)" >> debian/libyaz/DEBIAN/shlibs
-	echo "libyazmalloc 2 libyaz (>= 2.0.2)" >> debian/libyaz/DEBIAN/shlibs
 	echo "libyazssl 2 libyaz (>= 2.0.2)" >> debian/libyaz/DEBIAN/shlibs
 	chmod 644 debian/libyaz/DEBIAN/shlibs
 	dh_shlibdeps -p libyaz $(LOCAL_LINK) 
