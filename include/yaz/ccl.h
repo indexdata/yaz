@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.4  2000-03-14 09:06:11  adam
+ * Revision 1.5  2000-05-02 17:19:58  adam
+ * Removed MINUS token.
+ *
+ * Revision 1.4  2000/03/14 09:06:11  adam
  * Added POSIX threads support for frontend server.
  *
  * Revision 1.3  2000/02/08 10:39:53  adam
@@ -221,8 +224,7 @@ typedef struct ccl_qualifiers *CCL_bibset;
 #define CCL_TOK_AND   8
 #define CCL_TOK_OR    9
 #define CCL_TOK_NOT   10
-#define CCL_TOK_MINUS 11
-#define CCL_TOK_SET   12
+#define CCL_TOK_SET   11
 
 /* CCL token */
 struct ccl_token {
