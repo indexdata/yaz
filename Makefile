@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.27 1995-11-17 11:08:57 adam Exp $
+# $Id: Makefile,v 1.28 1995-12-06 16:06:20 quinn Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 ODEFS=-DUSE_XTIMOSI
@@ -25,7 +25,7 @@ BINDIR=/usr/local/bin
 LIBDIR=/usr/local/lib
 INCDIR=/usr/local/include
 #  Misc tables, etc.
-YAZDIR=/usr/local/yaz
+YAZDIR=/usr/local/lib/yaz
 
 all:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) $(CONTROL)\
