@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.23  1997-04-30 08:52:10  quinn
+ * Revision 1.24  1997-09-01 08:51:07  adam
+ * New windows NT/95 port using MSV5.0. Had to avoid a few static
+ * variables used in function ber_tag. These are now part of the
+ * ODR structure.
+ *
+ * Revision 1.23  1997/04/30 08:52:10  quinn
  * Null
  *
  * Revision 1.22  1996/10/08  12:58:17  adam
@@ -137,6 +142,7 @@ ODR odr_createmem(int direction)
     r->buflen = 0;
     r->mem = nmem_create();
     r->enable_bias = 1;
+    r->odr_ber_tag.lclass = -1;
     odr_reset(r);
     return r;
 }

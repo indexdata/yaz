@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.14  1997-05-14 06:53:56  adam
+ * Revision 1.15  1997-09-01 08:51:06  adam
+ * New windows NT/95 port using MSV5.0. Had to avoid a few static
+ * variables used in function ber_tag. These are now part of the
+ * ODR structure.
+ *
+ * Revision 1.14  1997/05/14 06:53:56  adam
  * C++ support.
  *
  * Revision 1.13  1995/09/29 17:12:21  quinn
@@ -64,8 +69,11 @@
 */
 int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
 {
+#if 0
     static int lclass = -1, ltag, br, lcons; /* save t&c rather than
 						decoding twice */
+#endif
+    Odr_ber_tag *odr_ber_tag = &o->odr_ber_tag;
     int rd;
     char **pp = p;
 
@@ -75,64 +83,68 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
     if (o->stackp < 0)
     {
     	odr_seek(o, ODR_S_SET, 0);
-	o->ecb.top = 0;
+        o->ecb.top = 0;
     	o->bp = o->buf;
-    	lclass = -1;
+        odr_ber_tag->lclass = -1;
     }
     switch (o->direction)
     {
     	case ODR_ENCODE:
-	    if (!*pp)
-	    {
-	    	if (!opt)
-		    o->error = OREQUIRED;
-	    	return 0;
-	    }
-	    if ((rd = ber_enctag(o, zclass, tag, *constructed)) < 0)
-		return -1;
+	        if (!*pp)
+	        {
+	    	    if (!opt)
+		        o->error = OREQUIRED;
+	    	    return 0;
+	        }
+	        if ((rd = ber_enctag(o, zclass, tag, *constructed)) < 0)
+    		    return -1;
 #ifdef ODR_DEBUG
-	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", zclass, tag,
-		*constructed, o->stackp);
+    	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", zclass, tag,
+	            	*constructed, o->stackp);
 #endif
-	    return 1;
+	        return 1;
+
     	case ODR_DECODE:
-	    if (o->stackp > -1 && !odr_constructed_more(o))
-	    {
-	    	if (!opt)
-		    o->error = OREQUIRED;
-	    	return 0;
-	    }
-	    if (lclass < 0)
-	    {
-	    	if ((br = ber_dectag(o->bp, &lclass, &ltag, &lcons)) <= 0)
-		{
-		    o->error = OPROTO;
-		    return 0;
-		}
-#ifdef ODR_DEBUG
-		fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", lclass, ltag,
-		    lcons, o->stackp);
-#endif
-	    }
-	    if (zclass == lclass && tag == ltag)
-	    {
-	    	o->bp += br;
-	    	o->left -= br;
-	    	*constructed = lcons;
-	    	lclass = -1;
-	    	return 1;
-	    }
-	    else
-	    {
-	    	if (!opt)
-		    o->error = OREQUIRED;
-	    	return 0;
-	    }
+	        if (o->stackp > -1 && !odr_constructed_more(o))
+            {
+	    	    if (!opt)
+		            o->error = OREQUIRED;
+	    	    return 0;
+	        }
+	        if (odr_ber_tag->lclass < 0)
+	        {
+	    	    if ((odr_ber_tag->br = ber_dectag(o->bp, &odr_ber_tag->lclass,
+                                     &odr_ber_tag->ltag, &odr_ber_tag->lcons)) <= 0)
+                {
+                    o->error = OPROTO;
+		            return 0;
+                }
+    #ifdef ODR_DEBUG
+		        fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", odr_ber_tag->lclass, odr_ber_tag->ltag,
+		        odr_ber_tag->lcons, o->stackp);
+    #endif
+	        }
+	        if (zclass == odr_ber_tag->lclass && tag == odr_ber_tag->ltag)
+	        {
+	    	    o->bp += odr_ber_tag->br;
+	    	    o->left -= odr_ber_tag->br;
+	    	    *constructed = odr_ber_tag->lcons;
+	    	    odr_ber_tag->lclass = -1;
+	    	    return 1;
+	        }
+	        else
+	        {
+	    	    if (!opt)
+		            o->error = OREQUIRED;
+	    	    return 0;
+	        }
     	case ODR_PRINT:
-		if (!*pp && !opt)
-		    o->error = OREQUIRED;
-		return *pp != 0;
-    	default: o->error = OOTHER; return 0;
+		    if (!*pp && !opt)
+		        o->error = OREQUIRED;
+		    return *pp != 0;
+    	default:
+            o->error = OOTHER;
+            return 0;
     }
 }
 
