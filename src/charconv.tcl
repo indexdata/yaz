@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.3 2004-03-16 13:12:42 adam Exp $
+# $Id: charconv.tcl,v 1.4 2004-03-16 13:13:34 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -248,7 +248,6 @@ proc readfile {fname ofilehandle prefix omits} {
 	if {[regexp {<entitymap>} $line s]} {
 	    reset_trie
 	    set trie(prefix) "${prefix}"
-	    puts "new table $tablenumber"
 	} elseif {[regexp {</entitymap>} $line s]} {
 	    dump_trie $ofilehandle
 	} elseif {[regexp {<character hex="([^\"]*)".*<unientity>([0-9A-Fa-f]*)</unientity>} $line s hex ucs]} {
@@ -257,7 +256,6 @@ proc readfile {fname ofilehandle prefix omits} {
 	} elseif {[regexp {<codeTable number="([0-9]+)"} $line s tablenumber]} {
 	    reset_trie
 	    set trie(prefix) "${prefix}_$tablenumber"
-	    puts "new table $tablenumber"
 	} elseif {[regexp {</codeTable>} $line s]} {
 	    if {[lsearch $omits $tablenumber] == -1} {
 		dump_trie $ofilehandle
