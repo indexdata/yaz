@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.56 2002-08-26 09:25:56 adam Exp $
+ * $Id: oid.c,v 1.57 2002-08-30 15:38:26 mike Exp $
  */
 
 /*
@@ -87,6 +87,12 @@ static oident standard_oids[] =
      "Dan-1"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_HOLDINGS,     {3,16,-1},
      "Holdings"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_USMARC,       {3,17,-1},
+     "MARC"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_BIB2,         {3,18,-1},
+     "Bib-2"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_ZEEREX,       {3,19,-1},
+     "ZeeRex"},
 
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS,    {3,1000,81,1,-1},     
      "Thesaurus-attset"},
