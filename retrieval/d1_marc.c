@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_marc.c,v 1.26 2002-08-28 19:10:56 adam Exp $
+ * $Id: d1_marc.c,v 1.27 2002-08-28 19:34:50 adam Exp $
  */
 
 
@@ -152,7 +152,6 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 static char *get_data(data1_node *n, int *len)
 {
     char *r;
-    data1_node *np = 0;
 
     while (n)
     {
