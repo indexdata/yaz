@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.1  1996/2/20
 
+Repaired bug in frontend server when running multiple listening
+endpoints in dynamic mode.
+
 z_External() now won't break if a known, ASN.1 value comes encapsulated
 in an octet-string. The value will pass through unmodified in an Odr_oct.
 
