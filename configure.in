@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.154 2004-10-01 13:05:09 adam Exp $
+dnl $Id: configure.in,v 1.155 2004-10-01 23:01:26 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.26)
 AM_MAINTAINER_MODE
@@ -203,7 +203,7 @@ AC_DEFINE_UNQUOTED(YAZ_SOCKLEN_T,$ac_cv_check_socklen_t)
 dnl
 dnl ------ tcpd
 AC_ARG_ENABLE(tcpd,[  --enable-tcpd[=PREFIX]  enable TCP wrapper for server if available])
-if test "$enable_tcpd" != "" && test "$enable_tcpd" != "no"; then
+if test "$enable_tcpd" -a "$enable_tcpd" != "no"; then
 	oldLibs=$LIBS
 	oldCPPFLAGS=$CPPFLAGS
 	if test "$enable_tcpd" != "yes"; then
@@ -221,6 +221,7 @@ if test "$enable_tcpd" != "" && test "$enable_tcpd" != "no"; then
 	tcpd_ok=1, tcpd_ok=0)
 	if test "$tcpd_ok" = "0"; then
 		AC_MSG_RESULT(no)
+		AC_MSG_ERROR([tcpd development libraries missing])
 		LIBS=$oldLibs
 		CPPFLAGS=$oldCPPFLAGS
 	else
@@ -303,9 +304,9 @@ dnl
 dnl ----- libXML2
 AC_SUBST(XML2_LIBS)
 AC_SUBST(XML2_CFLAGS)
-xml2dir=yes
+xml2dir=default
 AC_ARG_WITH(xml2, [  --with-xml2[=PREFIX]      use libxml2 in PREFIX],[xml2dir=$withval])
-if test "$xml2dir" = "yes"; then
+if test "$xml2dir" = "yes" -o "$xml2dir" = "default"; then
 	for d in /usr /usr/local; do
 		if test -x $d/bin/xml2-config; then
 			xml2dir=$d
@@ -322,7 +323,10 @@ if test "$xml2dir" != "no"; then
 		AC_MSG_RESULT($XML2_VER)
 		AC_DEFINE(HAVE_XML2)
 	else
-		AC_MSG_RESULT(Not found)
+		AC_MSG_RESULT([Not found])
+		if test "$xml2dir" != "default"; then
+		        AC_MSG_ERROR([libXML2 development libraries missing])
+		fi
 	fi
 fi
 dnl
