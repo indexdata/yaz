@@ -43,7 +43,7 @@ static Z_AttributesPlusTerm *ccl_rpn_term (struct ccl_rpn_node *p)
         }
     }
     else
-        zapt->attributeList = NULL;
+        zapt->attributeList = ODR_NULLVAL;
     
     zapt->term = term;
     term->which = Z_Term_general;
