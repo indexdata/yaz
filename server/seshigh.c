@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.2  1995-03-16 13:29:01  quinn
+ * Revision 1.3  1995-03-16 17:42:39  quinn
+ * Little changes
+ *
+ * Revision 1.2  1995/03/16  13:29:01  quinn
  * Partitioned server.
  *
  * Revision 1.1  1995/03/15  16:02:10  quinn
@@ -115,7 +118,7 @@ void ir_session(IOCHAN h, int event)
 		assoc->input_apdu_len = res;
 		if (process_apdu(h) < 0)
 		{
-		    fprintf(stderr, "Bad data from peer\n");
+		    fprintf(stderr, "Operation failed\n");
 		    cs_close(conn);
 		    destroy_association(assoc);
 		    iochan_destroy(h);
@@ -217,7 +220,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.2 $";
+    resp.implementationVersion = "$Revision: 1.3 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
