@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_util.c,v 1.2 2003-11-26 16:23:42 mike Exp $
+ * $Id: odr_util.c,v 1.3 2004-01-05 14:46:52 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -54,6 +54,8 @@ Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o)
 
 Odr_oid *odr_oiddup(ODR odr, Odr_oid *o)
 {
+    if (!odr->mem)
+	odr->mem = nmem_create();
     return odr_oiddup_nmem (odr->mem, o);
 }
 
@@ -78,6 +80,8 @@ Odr_oid *odr_getoidbystr_nmem(NMEM nmem, const char *str)
 
 Odr_oid *odr_getoidbystr(ODR o, const char *str)
 {
+    if (!o->mem)
+	o->mem = nmem_create();
     return odr_getoidbystr_nmem (o->mem, str);
 }
 
