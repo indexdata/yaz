@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.21 2003-04-24 13:30:32 adam Exp $
+ * $Id: backend.h,v 1.22 2003-12-29 14:54:33 adam Exp $
  */
 
 #ifndef BACKEND_H
@@ -190,6 +190,7 @@ typedef struct {
     ODR decode;
     ODR print;
     char *explain_buf;
+    char *database;
 } bend_explain_rr;
 
 typedef struct bend_initrequest

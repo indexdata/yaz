@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.9 2003-12-20 00:51:19 adam Exp $
+ * $Id: srw.h,v 1.10 2003-12-29 14:54:33 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -50,10 +50,13 @@ typedef struct {
         char *xSortKeys;
     } sort;
     int *startRecord;
-    int  *maximumRecords;
+    int *maximumRecords;
     char *recordSchema;
     char *recordPacking;
+    char *recordXPath;
     char *database;
+    char *stylesheet;
+    int *resultSetTTL;
 } Z_SRW_searchRetrieveRequest;
 
 typedef struct {
@@ -76,12 +79,37 @@ typedef struct {
 
 typedef struct {
     Z_SRW_record record;
+    Z_SRW_diagnostic *diagnostics;
+    int num_diagnostics;
 } Z_SRW_explainResponse;
     
+typedef struct {
+    char *scanClause;
+    int *responsePosition;
+    int *maximumTerms;
+    char *stylesheet;
+    char *database;
+} Z_SRW_scanRequest;
+
+typedef struct {
+    char *value;
+    int *numberOfRecords;
+    char *displayTerm;
+} Z_SRW_scanTerm;
+
+typedef struct {
+    Z_SRW_scanTerm *terms;
+    int num_terms;
+    Z_SRW_diagnostic *diagnostics;
+    int num_diagnostics;
+} Z_SRW_scanResponse;
+
 #define Z_SRW_searchRetrieve_request  1
 #define Z_SRW_searchRetrieve_response 2
 #define Z_SRW_explain_request 3
 #define Z_SRW_explain_response 4
+#define Z_SRW_scan_request 5
+#define Z_SRW_scan_response 6
 
 typedef struct {
     int which;
@@ -90,9 +118,10 @@ typedef struct {
         Z_SRW_searchRetrieveResponse *response;
         Z_SRW_explainRequest *explain_request;
         Z_SRW_explainResponse *explain_response;
+        Z_SRW_scanRequest *scan_request;
+        Z_SRW_scanResponse *scan_response;
     } u;
     char *srw_version;
-    char *database;
 } Z_SRW_PDU;
 
 YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.8 2003-12-29 13:39:41 adam Exp $
+ * $Id: seshigh.c,v 1.9 2003-12-29 14:54:33 adam Exp $
  */
 
 /*
@@ -546,12 +546,14 @@ static int srw_bend_fetch(association *assoc, int pos,
 
 static void srw_bend_search(association *assoc, request *req,
                             Z_SRW_searchRetrieveRequest *srw_req,
-                            Z_SRW_searchRetrieveResponse *srw_res)
+                            Z_SRW_searchRetrieveResponse *srw_res,
+			    int *http_code)
 {
     int srw_error = 0;
     bend_search_rr rr;
     Z_External *ext;
     
+    *http_code = 200;
     yaz_log(LOG_LOG, "Got SRW SearchRetrieveRequest");
     yaz_log(LOG_DEBUG, "srw_bend_search");
     if (!assoc->init)
@@ -654,6 +656,11 @@ static void srw_bend_search(association *assoc, request *req,
     if (rr.errcode)
     {
         yaz_log(LOG_DEBUG, "bend_search returned Bib-1 code %d", rr.errcode);
+	if (rr.errcode == 109) /* database unavailable */
+	{
+	    *http_code = 404;
+	    return;
+	}
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
 	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
@@ -728,14 +735,18 @@ static void srw_bend_search(association *assoc, request *req,
 
 static void srw_bend_explain(association *assoc, request *req,
                              Z_SRW_explainRequest *srw_req,
-                             Z_SRW_explainResponse *srw_res)
+                             Z_SRW_explainResponse *srw_res,
+			     int *http_code)
 {
     yaz_log(LOG_LOG, "Got SRW ExplainRequest");
+    *http_code = 404;
     if (!assoc->init)
     {
         yaz_log(LOG_DEBUG, "srw_bend_init");
         if (!srw_bend_init(assoc))
+	{
             return;
+	}
     }
     if (assoc->init && assoc->init->bend_explain)
     {
@@ -745,6 +756,7 @@ static void srw_bend_explain(association *assoc, request *req,
         rr.decode = assoc->decode;
         rr.print = assoc->print;
         rr.explain_buf = 0;
+	rr.database = srw_req->database;
         (*assoc->init->bend_explain)(assoc->backend, &rr);
         if (rr.explain_buf)
         {
@@ -757,6 +769,7 @@ static void srw_bend_explain(association *assoc, request *req,
             srw_res->record.recordData_buf = rr.explain_buf;
             srw_res->record.recordData_len = strlen(rr.explain_buf);
 	    srw_res->record.recordPosition = 0;
+	    *http_code = 200;
         }
     }
 }
@@ -807,6 +820,7 @@ static void process_http_request(association *assoc, request *req)
             char *query = yaz_uri_val(p1, "query", o);
             char *pQuery = yaz_uri_val(p1, "pQuery", o);
             char *sortKeys = yaz_uri_val(p1, "sortKeys", o);
+	    int http_code = 200;
             
             if (query)
             {
@@ -832,7 +846,8 @@ static void process_http_request(association *assoc, request *req)
             yaz_uri_val_int(p1, "startRecord", o,
                         &sr->u.request->startRecord);
             sr->u.request->database = db;
-            srw_bend_search(assoc, req, sr->u.request, res->u.response);
+            srw_bend_search(assoc, req, sr->u.request, res->u.response, 
+			    &http_code);
             
             soap_package = odr_malloc(o, sizeof(*soap_package));
             soap_package->which = Z_SOAP_generic;
@@ -846,34 +861,39 @@ static void process_http_request(association *assoc, request *req)
             
             soap_package->ns = "SRU";
 
-            p = z_get_HTTP_Response(o, 200);
-            hres = p->u.HTTP_Response;
-
-            ret = z_soap_codec_enc(assoc->encode, &soap_package,
-                                   &hres->content_buf, &hres->content_len,
-                                   soap_handlers, charset);
-            if (!charset)
-                z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
-            else
-            {
-                char ctype[60];
-                strcpy(ctype, "text/xml; charset=");
-                strcat(ctype, charset);
-                z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
-            }
+            p = z_get_HTTP_Response(o, http_code);
+	    if (http_code == 200)
+	    {
+		hres = p->u.HTTP_Response;
+		
+		ret = z_soap_codec_enc(assoc->encode, &soap_package,
+				       &hres->content_buf, &hres->content_len,
+				       soap_handlers, charset);
+		if (!charset)
+		    z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
+		else
+		{
+		    char ctype[60];
+		    strcpy(ctype, "text/xml; charset=");
+		    strcat(ctype, charset);
+		    z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+		}
+	    }
         }
         else if (p1 && !strcmp(operation, "explain"))
         {
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_explain_response);
             Z_SRW_PDU *sr = yaz_srw_get(o, Z_SRW_explain_request);
+	    int http_code = 200;
 
+            sr->u.explain_request->database = db;
             sr->u.explain_request->recordPacking =
 		yaz_uri_val(p1, "recordPacking", o);
             if (!sr->u.explain_request->recordPacking)
                 sr->u.explain_request->recordPacking = "xml";
 
             srw_bend_explain(assoc, req, sr->u.explain_request,
-                            res->u.explain_response);
+                            res->u.explain_response, &http_code);
 
             if (res->u.explain_response->record.recordData_buf)
             {
@@ -1061,31 +1081,20 @@ static void process_http_request(association *assoc, request *req)
 			sr->u.request->database = db;
 
                     srw_bend_search(assoc, req, sr->u.request,
-                                    res->u.response);
+                                    res->u.response, &http_code);
                     
                     soap_package->u.generic->p = res;
-                    http_code = 200;
                 }
                 else if (sr->which == Z_SRW_explain_request)
                 {
                     Z_SRW_PDU *res =
                         yaz_srw_get(assoc->encode, Z_SRW_explain_response);
-
-                    if (!sr->u.explain_request->database)
-			sr->u.explain_request->database = db;
+		    sr->u.explain_request->database = db;
 
                     srw_bend_explain(assoc, req, sr->u.explain_request,
-                                     res->u.explain_response);
-                    if (!res->u.explain_response->record.recordData_buf)
-                    {
-                        z_soap_error(assoc->encode, soap_package,
-                                     "SOAP-ENV:Client", "Explain Not Supported", 0);
-                    }
-                    else
-                    {
+                                     res->u.explain_response, &http_code);
+		    if (http_code == 200)
                         soap_package->u.generic->p = res;
-                        http_code = 200;
-                    }
                 }
                 else
                 {
@@ -1094,21 +1103,26 @@ static void process_http_request(association *assoc, request *req)
                 }
             }
 #endif
-            p = z_get_HTTP_Response(o, 200);
-            hres = p->u.HTTP_Response;
-            ret = z_soap_codec_enc(assoc->encode, &soap_package,
-                                   &hres->content_buf, &hres->content_len,
-                                   soap_handlers, charset);
-            hres->code = http_code;
-            if (!charset)
-                z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
-            else
-            {
-                char ctype[60];
-                strcpy(ctype, "text/xml; charset=");
-                strcat(ctype, charset);
-                z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
-            }
+	    if (http_code == 200 || http_code == 500)
+	    {
+		p = z_get_HTTP_Response(o, 200);
+		hres = p->u.HTTP_Response;
+		ret = z_soap_codec_enc(assoc->encode, &soap_package,
+				       &hres->content_buf, &hres->content_len,
+				       soap_handlers, charset);
+		hres->code = http_code;
+		if (!charset)
+		    z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
+		else
+		{
+		    char ctype[60];
+		    strcpy(ctype, "text/xml; charset=");
+		    strcat(ctype, charset);
+		    z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+		}
+	    }
+	    else
+		p = z_get_HTTP_Response(o, http_code);
         }
         if (!p) /* still no response ? */
             p = z_get_HTTP_Response(o, 500);
@@ -1539,7 +1553,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.8 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.9 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
