@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.21  1997-08-19 08:43:49  quinn
+ * Revision 1.22  1997-08-19 08:45:13  quinn
+ * Added Thesaurus
+ *
+ * Revision 1.21  1997/08/19 08:43:49  quinn
  * Housekeeping
  *
  * Revision 1.19  1997/07/28 12:34:42  adam
@@ -187,7 +190,8 @@ typedef enum oid_value
     VAL_VAR1,
     VAL_ESPEC1,
     VAL_SOIF,
-    VAL_SEARCHRES1
+    VAL_SEARCHRES1,
+    VAL_THESAURUS
 } oid_value;
 
 typedef struct oident
