@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.8 2002-02-24 12:23:43 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.9 2002-05-06 07:31:48 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
    <para>
    This appendix lists individuals that have contributed in the development
@@ -49,6 +49,9 @@
     </para></listitem>
    <listitem><para>
      David Johnson
+    </para></listitem>
+   <listitem><para>
+     Oleg Kolobov
     </para></listitem>
    <listitem><para>
      Stefan Lohrum
