@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.78  1998-08-03 10:23:55  adam
+ * Revision 1.79  1998-08-19 16:10:08  adam
+ * Changed som member names of DeleteResultSetRequest/Response.
+ *
+ * Revision 1.78  1998/08/03 10:23:55  adam
  * Fixed bug regarding Options for Sort.
  *
  * Revision 1.77  1998/07/20 12:38:42  adam
@@ -1605,7 +1608,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
 
     logf(LOG_LOG, "Got DeleteRequest.");
 
-    bdrr->num_setnames = req->num_ids;
+    bdrr->num_setnames = req->num_resultSetList;
     bdrr->setnames = req->resultSetList;
     bdrr->stream = assoc->encode;
     bdrr->function = *req->deleteFunction;
@@ -1619,10 +1622,8 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
 	odr_malloc (assoc->encode, sizeof(*res->deleteOperationStatus));
     *res->deleteOperationStatus = bdrr->delete_status;
 
-    res->num_statuses = 0;
     res->deleteListStatuses = 0;
     res->numberNotDeleted = 0;
-    res->num_bulkStatuses = 0;
     res->bulkStatuses = 0;
     res->deleteMessage = 0;
     res->otherInfo = 0;

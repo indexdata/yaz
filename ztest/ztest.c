@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.12  1998-07-20 12:38:44  adam
+ * Revision 1.13  1998-08-19 16:10:09  adam
+ * Changed som member names of DeleteResultSetRequest/Response.
+ *
+ * Revision 1.12  1998/07/20 12:38:44  adam
  * Implemented delete result set service to server API.
  *
  * Revision 1.11  1998/06/09 13:55:08  adam
@@ -208,7 +211,7 @@ static Z_GenericRecord *dummy_grs_record (int num, ODR o)
     return r;
 }
 
-bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
+bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *fd)
 {
     bend_fetchresult *r = (bend_fetchresult *)
 			odr_malloc (q->stream, sizeof(*r));
@@ -255,7 +258,7 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
 /*
  * silly dummy-scan what reads words from a file.
  */
-bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
+bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *fd)
 {
     bend_scanresult *r = (bend_scanresult *) odr_malloc (q->stream, sizeof(*r));
     static FILE *f = 0;

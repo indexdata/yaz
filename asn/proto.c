@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.55  1998-02-11 11:53:32  adam
+ * Revision 1.56  1998-08-19 16:10:04  adam
+ * Changed som member names of DeleteResultSetRequest/Response.
+ *
+ * Revision 1.55  1998/02/11 11:53:32  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.54  1996/11/11 13:14:46  adam
@@ -1493,11 +1496,22 @@ int z_DeleteResultSetRequest(ODR o, Z_DeleteResultSetRequest **p, int opt)
 	odr_implicit(o, odr_integer, &(*p)->deleteFunction, ODR_CONTEXT, 32,
 	    0) &&
 	(odr_sequence_of(o, z_ResultSetId, &(*p)->resultSetList,
-	    &(*p)->num_ids) || odr_ok(o)) &&
+	    &(*p)->num_resultSetList) || odr_ok(o)) &&
 #ifdef Z_95
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
 #endif
 	odr_sequence_end(o);
+}
+
+int z_ListStatuses (ODR o, Z_ListStatuses **p, int opt)
+{
+    if (!odr_initmember (o, p, sizeof(**p)))
+        return opt && odr_ok(o);
+    if (odr_sequence_of (o, (Odr_fun) z_ListStatus, &(*p)->elements,
+        &(*p)->num))
+        return 1;
+    *p = 0;
+    return opt && odr_ok(o);
 }
 
 int z_DeleteResultSetResponse(ODR o, Z_DeleteResultSetResponse **p, int opt)
@@ -1507,15 +1521,13 @@ int z_DeleteResultSetResponse(ODR o, Z_DeleteResultSetResponse **p, int opt)
     return
     	z_ReferenceId(o, &(*p)->referenceId, 1) &&
 	odr_implicit(o, z_DeleteSetStatus, &(*p)->deleteOperationStatus,
-	    ODR_CONTEXT, 0, 1) &&
-	odr_implicit_settag(o, ODR_CONTEXT, 1) &&
-	(odr_sequence_of(o, (Odr_fun)z_ListStatus, &(*p)->deleteListStatuses,
-	    &(*p)->num_statuses) || odr_ok(o)) &&
+	    ODR_CONTEXT, 0, 0) &&
+        odr_implicit (o, z_ListStatuses,
+            &(*p)->deleteListStatuses, ODR_CONTEXT, 1, 1) &&
 	odr_implicit(o, odr_integer, &(*p)->numberNotDeleted, ODR_CONTEXT,
 	    34, 1) &&
-	odr_implicit_settag(o, ODR_CONTEXT, 35) &&
-	(odr_sequence_of(o, (Odr_fun)z_ListStatus, &(*p)->bulkStatuses,
-	    &(*p)->num_bulkStatuses) || odr_ok(o)) &&
+        odr_implicit (o, z_ListStatuses,
+             &(*p)->bulkStatuses, ODR_CONTEXT, 35, 1) &&
 	odr_implicit(o, odr_visiblestring, &(*p)->deleteMessage, ODR_CONTEXT,
 	    36, 1) &&
 #ifdef Z_95

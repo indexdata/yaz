@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.68  1998-07-20 12:37:06  adam
+ * Revision 1.69  1998-08-19 16:10:06  adam
+ * Changed som member names of DeleteResultSetRequest/Response.
+ *
+ * Revision 1.68  1998/07/20 12:37:06  adam
  * Added 'delete <resultset>' command. Changed open command so that
  * it reconnects if already connected.
  *
@@ -763,7 +766,7 @@ static int send_deleteResultSetRequest(char *arg)
 
     req->referenceId = set_refid (out);
 
-    req->num_ids = 1;
+    req->num_resultSetList = 1;
     req->resultSetList = (char **)
 	odr_malloc (out, sizeof(*req->resultSetList));
     *req->resultSetList = arg;

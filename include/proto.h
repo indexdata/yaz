@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.44  1998-05-18 10:14:08  adam
+ * Revision 1.45  1998-08-19 16:10:07  adam
+ * Changed som member names of DeleteResultSetRequest/Response.
+ *
+ * Revision 1.44  1998/05/18 10:14:08  adam
  * Minor change - removed 'dead' definitions.
  *
  * Revision 1.43  1998/03/31 11:07:45  adam
@@ -1024,22 +1027,25 @@ typedef struct Z_DeleteResultSetRequest
     int *deleteFunction;
 #define Z_DeleteRequest_list    0
 #define Z_DeleteRequest_all     1
-    int num_ids;
+    int num_resultSetList;
     Z_ResultSetId **resultSetList;      /* OPTIONAL */
 #ifdef Z_95
     Z_OtherInformation *otherInfo;
 #endif
 } Z_DeleteResultSetRequest;
 
+typedef struct Z_ListStatuses {
+    int num;
+    Z_ListStatus **elements;
+} Z_ListStatuses;
+
 typedef struct Z_DeleteResultSetResponse
 {
     Z_ReferenceId *referenceId;        /* OPTIONAL */
     int *deleteOperationStatus;
-    int num_statuses;
-    Z_ListStatus **deleteListStatuses; /* OPTIONAL */
+    Z_ListStatuses *deleteListStatuses;/* OPTIONAL */
     int *numberNotDeleted;             /* OPTIONAL */
-    int num_bulkStatuses;
-    Z_ListStatus **bulkStatuses;       /* OPTIONAL */
+    Z_ListStatuses *bulkStatuses;      /* OPTIONAL */
     char *deleteMessage;               /* OPTIONAL */
 #ifdef Z_95
     Z_OtherInformation *otherInfo;
