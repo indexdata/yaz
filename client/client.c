@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.160 2002-06-18 21:30:25 adam Exp $
+ * $Id: client.c,v 1.161 2002-07-12 12:20:34 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -596,17 +596,18 @@ static void display_record(Z_External *r)
                 odr_perror(in, "Decoding constructed record.");
                 fprintf(stderr, "[Near %d]\n", odr_offset(in));
                 fprintf(stderr, "Packet dump:\n---------\n");
-                odr_dumpBER(stderr, (char*)r->u.octet_aligned->buf,
-                    r->u.octet_aligned->len);
+                odr_dumpBER(stderr, (char*)r->u.octet_aligned->buf,r->u.octet_aligned->len);
                 fprintf(stderr, "---------\n");
-                exit(1);
-            }
-            /*
-             * Note: we throw away the original, BER-encoded record here.
-             * Do something else with it if you want to keep it.
-             */
-            r->u.sutrs = (Z_SUTRS *) rr; /* we don't actually check the type here. */
-            r->which = type->what;
+
+				/* note just ignores the error ant print the bytes form the octet_aligned laiter */
+            } else {
+				/*
+				 * Note: we throw away the original, BER-encoded record here.
+				 * Do something else with it if you want to keep it.
+				 */
+				r->u.sutrs = (Z_SUTRS *) rr; /* we don't actually check the type here. */
+				r->which = type->what;
+			};
         }
     }
     if (ent && ent->oclass != CLASS_RECSYN)
@@ -2390,9 +2391,7 @@ void source_rcfile()
 
 static void initialize(void)
 {
-#if YAZ_MODULE_ccl
     FILE *inf;
-#endif
     if (!(out = odr_createmem(ODR_ENCODE)) ||
         !(in = odr_createmem(ODR_DECODE)) ||
         !(print = odr_createmem(ODR_PRINT)))
@@ -2406,7 +2405,6 @@ static void initialize(void)
     if (apdu_file)
         odr_setprint(print, apdu_file);
 
-#if YAZ_MODULE_ccl
     bibset = ccl_qual_mk (); 
     inf = fopen (ccl_fields, "r");
     if (inf)
@@ -2414,7 +2412,6 @@ static void initialize(void)
         ccl_qual_file (bibset, inf);
         fclose (inf);
     }
-#endif
     cmd_base("Default");
 
 #if HAVE_READLINE_READLINE_H
@@ -2541,6 +2538,33 @@ void wait_and_handle_responce()
 }
 
 
+int cmd_cclparse(char* arg) {
+    int error, pos;
+	struct ccl_rpn_node *rpn=NULL;
+	
+	
+	rpn = ccl_find_str (bibset, arg, &error, &pos);
+	
+	if (error) {
+		printf ("%*s^ - ", 3+strlen(last_cmd)+1+pos, " ");
+		printf ("%s\n", ccl_err_msg (error));
+	}
+	else
+	{
+		if (rpn)
+		{	
+			ccl_pr_tree(rpn, stdout); 
+		}
+	}
+	if (rpn)
+		ccl_rpn_delete(rpn);
+
+    printf ("\n");
+	
+	return 0;
+};
+
+
 static int cmd_help (char *line);
 
 typedef char *(*completerFunctionType)(const char *text, int state);
@@ -2550,7 +2574,6 @@ static struct {
     int (*fun)(char *arg);
     char *ad;
 	completerFunctionType rl_completerfunction;
-    //char *(*rl_completerfunction)(const char *text, int state);
     int complete_filenames;
 	char **local_tabcompletes;
 } cmd[] = {
@@ -2587,10 +2610,11 @@ static struct {
     {"!", cmd_subshell, "Subshell command",NULL,1,NULL},
     {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,1,NULL},
     {"set_marcdump", cmd_set_marcdump," <filename>",NULL,1,NULL},
-    {"set_cclfiele", cmd_set_cclfields," <filename>",NULL,1,NULL},
+    {"set_cclfile", cmd_set_cclfields," <filename>",NULL,1,NULL},
     {"register_oid", cmd_register_oid,"<name> <class> <oid>",NULL,0,NULL},
     {"push_command", cmd_push_command,"<command>",command_generator,0,NULL},
 	{"register_tab", cmd_register_tab,"<commandname> <tab>",command_generator,0,NULL},
+	{"cclparse", cmd_cclparse,"<ccl find command>",NULL,0,NULL},
     /* Server Admin Functions */
     {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0,NULL},
     {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0,NULL},
@@ -2687,6 +2711,7 @@ int cmd_register_tab(char* arg) {
 	tabslist[num_of_tabs+1]=NULL;
     return 1;
 }
+
 
 void process_cmd_line(char* line)
 {  
@@ -2905,19 +2930,19 @@ int main(int argc, char **argv)
                 exit (1);
             }
             break;
-    case 'c':
-        strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
-        ccl_fields[sizeof(ccl_fields)-1] = '\0';
-        break;
+		case 'c':
+			strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
+			ccl_fields[sizeof(ccl_fields)-1] = '\0';
+			break;
         case 'a':
             if (!strcmp(arg, "-"))
                 apdu_file=stderr;
             else
                 apdu_file=fopen(arg, "a");
             break;
-    case 'p':
-        yazProxy=strdup(arg);
-        break;
+		case 'p':
+			yazProxy=strdup(arg);
+			break;
         case 'u':
             if (!auth_command)
             {
