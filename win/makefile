@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.28 2001-10-25 10:45:08 adam Exp $
+# $Id: makefile,v 1.29 2001-10-25 12:46:07 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -27,7 +27,7 @@ DEBUG=0   # 0 for release, 1 for debug
 
 default: all
 
-all: dirs yaz_date_h dll client ztest zoomsh
+all: dirs yaz_date_h generate dll client ztest zoomsh
 
 generate: generated_files
 
@@ -801,7 +801,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.28  2001-10-25 10:45:08  adam
+# Revision 1.29  2001-10-25 12:46:07  adam
+# codecs not built as they should.
+#
+# Revision 1.28  2001/10/25 10:45:08  adam
 # Fixed make clean.
 #
 # Revision 1.27  2001/10/24 12:24:43  adam
