@@ -18,6 +18,9 @@ look in proto.h.
 * Added 'displayTerm' and OtherInformation to the TermInfo structure
 under the SCAN definition. Remember to initialize this, server-people.
 
+Comstack should now support the WAIS protocol in TCP/IP mode. Note
+that this does not extend to ODR and ASN.
+
 Comstack allows insertion of established socket (primarily for
 inetd-operation of servers). Doc updated.
 
