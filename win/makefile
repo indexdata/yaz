@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.46 2002-08-30 11:28:01 adam Exp $
+# $Id: makefile,v 1.47 2002-09-06 20:04:49 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=1   # 0 for release, 1 for debug
+DEBUG=0   # 0 for release, 1 for debug
 
 # iconv
 HAVE_ICONV=0
@@ -851,7 +851,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.46  2002-08-30 11:28:01  adam
+# Revision 1.47  2002-09-06 20:04:49  adam
+# debug=0
+#
+# Revision 1.46  2002/08/30 11:28:01  adam
 # Remove EXPAT reader
 #
 # Revision 1.45  2002/08/27 22:33:30  adam
