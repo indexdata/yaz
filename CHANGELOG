@@ -1,10 +1,16 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-New ZOOM setting, recordCharset, with value "from[,to]"
-where from is the character set of a record as received
-by the target. The character set "to" is desired charset
-of output record as returned by ZOOM_record_get. If
-"to" is omitted, UTF-8 is assumed.
+* ESFormat-Update updates. Packages with OID 1.2.840.10003.9.5.1 and
+1.2.840.10003.9.5 are now handled by the same decoder z_IU0Update .
+Decoder has been updated with ASN.1 changes as listed in
+http://lcweb.loc.gov/z3950/agency/defns/updateES.html
+Note that the "latest" DB Update, OID 1.2.840.10003.9.5.1.1 , handler
+z_IUUpdate, remains unchanged. 
+
+ZOOM_record_get may now return a record in a specific character set.
+For type use "form; charset=from[,to]" where form (render, xml, ..) ,
+"from" is the character set of record as returned by target. "to" is
+the character set to be returned. If omitted, "to" is UTF-8.
 
 YAZ ASN.1 compiler renamed from yaz-comp to yaz-asncomp
 

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.5 2003-01-06 08:20:28 adam Exp $
+ * $Id: prt-ext.c,v 1.6 2003-06-02 12:53:28 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -28,6 +28,8 @@ static Z_ext_typeent type_table[] =
     {VAL_OPAC, Z_External_OPAC, (Odr_fun)z_OPACRecord},
     {VAL_SEARCHRES1, Z_External_searchResult1, (Odr_fun)z_SearchInfoReport},
     {VAL_DBUPDATE, Z_External_update, (Odr_fun)z_IUUpdate},
+    {VAL_DBUPDATE0, Z_External_update0, (Odr_fun)z_IU0Update},
+    {VAL_DBUPDATE1, Z_External_update0, (Odr_fun)z_IU0Update},
     {VAL_DATETIME, Z_External_dateTime, (Odr_fun)z_DateTime},
     {VAL_UNIVERSE_REPORT, Z_External_universeReport,(Odr_fun)z_UniverseReport},
     {VAL_ADMINSERVICE, Z_External_ESAdmin, (Odr_fun)z_Admin},

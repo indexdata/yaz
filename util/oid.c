@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.61 2003-05-26 13:36:48 adam Exp $
+ * $Id: oid.c,v 1.62 2003-06-02 12:53:28 adam Exp $
  */
 
 /*
@@ -224,8 +224,10 @@ static oident standard_oids[] =
      "Per'd query"},
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_ITEMORDER,    {9,4,-1},
      "Item order"},
-    {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE0,    {9,5,1,-1},
-     "DB. Update (old version)"},
+    {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE0,    {9,5,-1},
+     "DB. Update (first version)"},
+    {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE1,    {9,5,1,-1},
+     "DB. Update (second version)"},
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE,     {9,5,1,1,-1},
      "DB. Update"},
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTSPEC,   {9,6,-1},

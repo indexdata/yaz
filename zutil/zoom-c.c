@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.36 2003-05-30 10:24:58 adam Exp $
+ * $Id: zoom-c.c,v 1.37 2003-06-02 12:53:28 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1305,9 +1305,6 @@ ZOOM_record_clone (ZOOM_record srec)
     nrec->odr = odr_createmem(ODR_DECODE);
     nrec->wrbuf_marc = 0;
     nrec->wrbuf_iconv = 0;
-    nrec->record_charset = 0;
-    if (srec->record_charset)
-	nrec->record_charset = odr_strdup(nrec->odr, srec->record_charset);
     odr_setbuf (nrec->odr, buf, size, 0);
     z_NamePlusRecord (nrec->odr, &nrec->npr, 0, 0);
     
@@ -1346,7 +1343,8 @@ ZOOM_record_destroy (ZOOM_record rec)
 }
 
 static const char *record_iconv_return(ZOOM_record rec, int *len,
-				       const char *buf, int sz)
+				       const char *buf, int sz,
+				       const char *record_charset)
 {
     char to[40];
     char from[40];
@@ -1354,26 +1352,26 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
 
     *from = '\0';
     strcpy(to, "UTF-8");
-    if (rec->record_charset)
+    if (record_charset && *record_charset)
     {
 	/* Use "from,to" or just "from" */
-	const char *cp =strchr(rec->record_charset, ',');
-	int clen = strlen(rec->record_charset);
+	const char *cp =strchr(record_charset, ',');
+	int clen = strlen(record_charset);
 	if (cp && cp[1])
 	{
 	    strncpy( to, cp+1, sizeof(to)-1);
 	    to[sizeof(to)-1] = '\0';
-	    clen = cp - rec->record_charset;
+	    clen = cp - record_charset;
 	}
 	if (clen > sizeof(from)-1)
 	    clen = sizeof(from)-1;
 	
 	if (clen)
-	    strncpy(from, rec->record_charset, clen);
+	    strncpy(from, record_charset, clen);
 	from[clen] = '\0';
     }
 
-    if (*from && *to && (cd = yaz_iconv_open("UTF-8", rec->record_charset)))
+    if (*from && *to && (cd = yaz_iconv_open(to, from)))
     {
 	char outbuf[12];
 	size_t inbytesleft = sz;
@@ -1410,8 +1408,12 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
 }
 
 ZOOM_API(const char *)
-ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
+ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
 {
+    char type[40];
+    char charset[40];
+    const char *cp;
+    int i;
     Z_NamePlusRecord *npr;
     
     if (len)
@@ -1422,6 +1424,34 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
     npr = rec->npr;
     if (!npr)
 	return 0;
+
+    cp = type_spec;
+    for (i = 0; cp[i] && i < sizeof(type)-1; i++)
+    {
+	if (cp[i] == ';' || cp[i] == ' ')
+	    break;
+	type[i] = cp[i];
+    }
+    type[i] = '\0';
+    charset[0] = '\0';
+    if (type_spec[i] == ';')
+    {
+	i++;
+	while (type_spec[i] == ' ')
+	    i++;
+	if (!strncmp(type_spec+i, "charset=", 8))
+	{
+	    cp = type_spec+i+8;
+	    for (i = 0; cp[i] && i < sizeof(charset)-1; i++)
+	    {
+		if (cp[i] == ';' || cp[i] == ' ')
+		    break;
+		charset[i] = cp[i];
+	    }
+	    charset[i] = '\0';
+	}
+    }	
+
     if (!strcmp (type, "database"))
     {
     	if (len)
@@ -1452,7 +1482,8 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         
         if (r->which == Z_External_sutrs)
 	    return record_iconv_return(rec, len,
-				       r->u.sutrs->buf, r->u.sutrs->len);
+				       r->u.sutrs->buf, r->u.sutrs->len,
+				       charset);
         else if (r->which == Z_External_octet)
         {
             yaz_marc_t mt;
@@ -1479,13 +1510,15 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
                     yaz_marc_destroy(mt);
 		    return record_iconv_return(rec, len,
 					       wrbuf_buf(rec->wrbuf_marc),
-					       wrbuf_len(rec->wrbuf_marc));
+					       wrbuf_len(rec->wrbuf_marc),
+					       charset);
                 }
                 yaz_marc_destroy(mt);
             }
 	    return record_iconv_return(rec, len,
 				       (const char *) r->u.octet_aligned->buf,
-				       r->u.octet_aligned->len);
+				       r->u.octet_aligned->len,
+				       charset);
         }
         else if (r->which == Z_External_grs1)
         {
@@ -1495,7 +1528,8 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
             yaz_display_grs1(rec->wrbuf_marc, r->u.grs1, 0);
 	    return record_iconv_return(rec, len,
 				       wrbuf_buf(rec->wrbuf_marc),
-				       wrbuf_len(rec->wrbuf_marc));	       
+				       wrbuf_len(rec->wrbuf_marc),
+				       charset);
         }
 	return 0;
     }
@@ -1508,7 +1542,8 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         if (r->which == Z_External_sutrs)
 	    return record_iconv_return(rec, len,
 				       (const char *) r->u.sutrs->buf,
-				       r->u.sutrs->len);       
+				       r->u.sutrs->len,
+				       charset);
         else if (r->which == Z_External_octet)
         {
             yaz_marc_t mt;
@@ -1540,13 +1575,15 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
                     yaz_marc_destroy(mt);
 		    return record_iconv_return(rec, len,
 					       wrbuf_buf(rec->wrbuf_marc),
-					       wrbuf_len(rec->wrbuf_marc));
+					       wrbuf_len(rec->wrbuf_marc),
+					       charset);
                 }
                 yaz_marc_destroy(mt);
             }
 	    return record_iconv_return(rec, len,
 				       (const char *) r->u.octet_aligned->buf,
-				       r->u.octet_aligned->len);
+				       r->u.octet_aligned->len,
+				       charset);
         }
         else if (r->which == Z_External_grs1)
         {
@@ -1610,8 +1647,6 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr,
         ZOOM_resultset_option_get (r, "elementSetName");
     const char *syntax = 
         ZOOM_resultset_option_get (r, "preferredRecordSyntax");
-    const char *recordCharset =
-        ZOOM_resultset_option_get (r, "recordCharset");
     
     ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
     ZOOM_connection_put_event(r->connection, event);
@@ -1625,8 +1660,6 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr,
 	    if (strcmp_null(elementSetName,rc->elementSetName))
                 continue;
             if (strcmp_null(syntax, rc->syntax))
-                continue;
-            if (strcmp_null(recordCharset, rc->rec.record_charset))
                 continue;
             /* not destroying rc->npr (it's handled by nmem )*/
             rc->rec.npr = npr;
@@ -1654,10 +1687,6 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr,
     else
 	rc->schema = 0;
 
-    rc->rec.record_charset = 0;
-    if (recordCharset)
-	rc->rec.record_charset = odr_strdup(r->odr, recordCharset);
-    
     rc->pos = pos;
     rc->next = r->record_cache;
     r->record_cache = rc;

@@ -2401,11 +2401,12 @@ OriginPartToKeep ::= SEQUENCE{
                    recordInsert    (1),
                    recordReplace  (2),
                   recordDelete  (3),
-                  elementUpdate  (4)},
+                  elementUpdate  (4),
+                  specialUpdate (5)},
   databaseName      [2] IMPLICIT InternationalString,
   schema          [3] IMPLICIT OBJECT IDENTIFIER OPTIONAL,
-  elementSetName      [4] IMPLICIT InternationalString OPTIONAL}
-
+  elementSetName      [4] IMPLICIT InternationalString OPTIONAL,
+  actionQualifier [5] IMPLICIT EXTERNAL OPTIONAL} 
 
 OriginPartNotToKeep ::= SuppliedRecords
 
@@ -2445,23 +2446,23 @@ CorrelationInfo ::= SEQUENCE{
   id    [2] IMPLICIT INTEGER OPTIONAL}
 
 TaskPackageRecordStructure ::= SEQUENCE{
-    recordOrSurDiag  [1] CHOICE {
-                record    [1] IMPLICIT EXTERNAL,
-                        -- Choose 'record' if recordStatus is 'success', and
-                        -- elementSetName was supplied.
-                diagnostic  [2] DiagRec
-                        -- Choose 'diagnostic', if RecordStatus is failure.
-                                } OPTIONAL,
-                -- The parameter recordOrSurDiag will thus be omitted only if
-                -- 'elementSetName' was omitted and recordStatus is
-                -- 'success'; or if record status is 'queued' or in 'process'.
-    correlationInfo    [2] IMPLICIT CorrelationInfo OPTIONAL,
+  recordOrSurDiag           [1] CHOICE {
+               record                 [1] IMPLICIT EXTERNAL,
+                          -- ........
+               surrogateDiagnostics   [2] IMPLICIT 
+                             SEQUENCE OF DiagRec
+                            -- Choose 'SurrogateDiagnostics', if
+                            -- RecordStatus is failure.
+                                          } OPTIONAL,
+   correlationInfo           [2] IMPLICIT CorrelationInfo OPTIONAL,
                 -- This should be included if it was supplied by the origin.
-    recordStatus      [3] IMPLICIT INTEGER{
+   recordStatus      [3] IMPLICIT INTEGER{
                   success    (1),
                   queued    (2),
                   inProcess  (3),
-                  failure    (4)}}
+                  failure    (4)},
+   supplementalDiagnostics   [4] IMPLICIT 
+                  SEQUENCE OF DiagRec OPTIONAL}
 END
 
 

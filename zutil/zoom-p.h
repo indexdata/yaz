@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.8 2003-05-30 10:24:58 adam Exp $
+ * $Id: zoom-p.h,v 1.9 2003-06-02 12:53:28 adam Exp $
  */
 
 #if HAVE_XSLT
@@ -63,7 +63,6 @@ struct ZOOM_connection_p {
     ZOOM_Event m_queue_back;
 };
 
-
 struct ZOOM_options_entry {
     char *name;
     char *value;
@@ -104,7 +103,6 @@ struct ZOOM_record_p {
     WRBUF wrbuf_marc;
     WRBUF wrbuf_iconv;
     Z_NamePlusRecord *npr;
-    char *record_charset;
 };
 
 struct ZOOM_record_cache_p {
