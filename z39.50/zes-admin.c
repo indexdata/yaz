@@ -61,6 +61,10 @@ int z_ESAdminOriginPartToKeep (ODR o, Z_ESAdminOriginPartToKeep **p, int opt, co
 		(Odr_fun) odr_null, "refresh"},
 		{ODR_EXPLICIT, ODR_CONTEXT, 7, Z_ESAdminOriginPartToKeep_commit,
 		(Odr_fun) odr_null, "commit"},
+		{ODR_EXPLICIT, ODR_CONTEXT, 8, Z_ESAdminOriginPartToKeep_shutdown,
+		(Odr_fun) odr_null, "shutdown"},
+		{ODR_EXPLICIT, ODR_CONTEXT, 9, Z_ESAdminOriginPartToKeep_start,
+		(Odr_fun) odr_null, "start"},
 		{-1, -1, -1, -1, (Odr_fun) 0, 0}
 	};
 	if (!odr_sequence_begin (o, p, sizeof(**p), name))

@@ -22,7 +22,9 @@ action                  [1] CHOICE{
     import          [5] ImportParameters,
     refresh         [6] NULL,   -- Review internal representation of records against source files on disk to
 		                -- see if they have been updated.
-    commit          [7] NULL},
+    commit          [7] NULL,
+    shutdown        [8] NULL,
+    start           [9] NULL},
 databaseName           [2] IMPLICIT InternationalString OPTIONAL}
 
 OriginPartNotToKeep ::= CHOICE{
