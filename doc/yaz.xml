@@ -6,6 +6,7 @@
      <!ENTITY yaz "YAZ">
      <!ENTITY chap-introduction SYSTEM "introduction.xml">
      <!ENTITY chap-installation SYSTEM "installation.xml">
+     <!ENTITY chap-client SYSTEM "client.xml">
      <!ENTITY chap-asn SYSTEM "asn.xml">
      <!ENTITY chap-tools SYSTEM "tools.xml">
      <!ENTITY chap-odr SYSTEM "odr.xml">
@@ -18,7 +19,7 @@
      <!ENTITY odr "<acronym>ODR</acronym>">
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
 ]>
-<!-- $Id: yaz.xml,v 1.4 2001-07-20 21:31:35 adam Exp $ -->
+<!-- $Id: yaz.xml,v 1.5 2001-08-08 19:33:21 adam Exp $ -->
 <book>
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
@@ -46,6 +47,7 @@
  
  &chap-introduction;
  &chap-installation;
+ &chap-client;
  &chap-asn;
  &chap-tools;
  &chap-odr;
