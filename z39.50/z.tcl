@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.7 2002-02-12 21:11:49 adam Exp $
+# $Id: z.tcl,v 1.8 2002-08-28 19:12:30 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -205,7 +205,7 @@ set m RecordSyntax-SUTRS
 set filename($m) z-sutrs
 #set map($m,SutrsRecord) SUTRS
 set body($m,c) {
-int z_SUTRS (ODR o, Odr_oct **p, int opt)
+int z_SUTRS (ODR o, Odr_oct **p, int opt, const char *name)
 {
     return odr_implicit(o, odr_octetstring, p, ODR_UNIVERSAL,
         ODR_GENERALSTRING, opt);
@@ -214,7 +214,7 @@ int z_SUTRS (ODR o, Odr_oct **p, int opt)
 
 set init($m,h) {
 typedef Odr_oct Z_SUTRS;
-YAZ_EXPORT int z_SUTRS (ODR o, Odr_oct **p, int opt);
+YAZ_EXPORT int z_SUTRS (ODR o, Odr_oct **p, int opt, const char *name);
 }
 # ----
 set m RecordSyntax-opac
