@@ -1,3 +1,9 @@
+yaz (2.0.2-2) unstable; urgency=low
+
+  * yaz.7 moved from yaz to libyaz.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 30 Apr 2003 00:00:11 +0100
+
 yaz (2.0.2-1) unstable; urgency=low
 
   * Upstream.

@@ -108,7 +108,8 @@ binary-arch: build install
 
 	dh_installman -p libyaz-dev doc/yaz-config.8
 	dh_undocumented -p libyaz-dev yaz-comp.1
-	dh_installman -p yaz doc/yaz-client.1 doc/yaz-ztest.8 doc/yaz.7 doc/zoomsh.1
+	dh_installman -p libyaz doc/yaz.7
+	dh_installman -p yaz doc/yaz-client.1 doc/yaz-ztest.8 doc/zoomsh.1
 	dh_installman -p yaz doc/yaz-client-ssl.1 doc/yaz-ztest-ssl.8
 
 	echo "libyaz 2 libyaz (>= 2.0.2)" > debian/libyaz/DEBIAN/shlibs
