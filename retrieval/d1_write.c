@@ -1,41 +1,9 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: d1_write.c,v $
- * Revision 1.9  2000-11-29 14:22:47  adam
- * Implemented XML/SGML attributes for data1 so that d1_read reads them
- * and d1_write generates proper attributes for XML/SGML records. Added
- * register locking for threaded version.
- *
- * Revision 1.8  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.7  1999/10/21 12:06:29  adam
- * Retrieval module no longer uses ctype.h - functions.
- *
- * Revision 1.6  1999/07/06 12:16:00  adam
- * Improved layout generated record in SGML/XML format.
- *
- * Revision 1.5  1998/06/05 08:57:43  adam
- * Fixed problem with function wordlen.
- *
- * Revision 1.4  1998/05/18 13:07:08  adam
- * Changed the way attribute sets are handled by the retriaval module.
- * Extended Explain conversion / schema.
- * Modified server and client to work with ASN.1 compiled protocol handlers.
- *
- * Revision 1.3  1997/09/17 12:10:39  adam
- * YAZ version 1.4.
- *
- * Revision 1.2  1995/12/13 17:14:27  quinn
- * *** empty log message ***
- *
- * Revision 1.1  1995/12/13  15:38:43  quinn
- * Added SGML-output filter.
- *
- *
+ * $Id: d1_write.c,v 1.10 2002-04-15 09:06:30 adam Exp $
  */
 
 #include <string.h>
@@ -67,10 +35,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	{
 	    if (select && c->u.tag.node_selected)
 		continue;
-	    if (c->u.tag.element && c->u.tag.element->tag)
-		tag = c->u.tag.element->tag->names->name; /* first name */
-	    else
-		tag = c->u.tag.tag; /* local string tag */
+            tag = c->u.tag.tag;
 	    if (!data1_matchstr(tag, "wellknown")) /* skip wellknown */
 	    {
 		if (nodetoidsgml(c, select, b, col) < 0)

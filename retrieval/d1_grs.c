@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.18  2002-04-12 14:40:07  adam
+ * Revision 1.19  2002-04-15 09:06:30  adam
+ * Fix explain tags for XML writer
+ *
+ * Revision 1.18  2002/04/12 14:40:07  adam
  * GRS-1 writer accepts non-abs
  *
  * Revision 1.17  1999/11/30 13:47:12  adam
@@ -286,7 +289,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 	else if (tag)                    
 	    tagstr = tag->value.string;  /* no take from well-known */
 	else
-	    tagstr = "?";                /* no tag at all! */
+	    tagstr = "???";                /* no tag at all! */
 	res->tagValue->which = Z_StringOrNumeric_string;
 	res->tagValue->u.string = odr_strdup(o, tagstr);
     }
