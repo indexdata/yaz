@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.163 2002-08-26 12:15:35 adam Exp $
+ * $Id: client.c,v 1.164 2002-08-29 21:35:38 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -74,6 +74,8 @@ static char* yazLang = 0;
 static char last_cmd[32] = "?";
 static FILE *marcdump = 0;
 static char *refid = NULL;
+static char *last_open_command = NULL;
+static int auto_reconnect = 0;
 
 typedef enum {
     QueryType_Prefix,
@@ -101,6 +103,12 @@ int rl_attempted_completion_over = 0;
   while(isspace(*args_end)) {*args_end=0;--args_end;}; \
   }
 
+#define maxOtherInfosSupported 10
+struct {
+    int oidval;
+	char* value;
+} extraOtherInfos[maxOtherInfosSupported];
+	
 
 void process_cmd_line(char* line);
 char ** readline_completer(char *text, int start, int end);
@@ -113,10 +121,55 @@ ODR getODROutputStream()
     return out;
 }
 
+const char* query_type_as_string(QueryType q) 
+{
+	switch (q) { 
+	case QueryType_Prefix: return "prefix (RPN sent to server)";
+	case QueryType_CCL: return "CCL (CCL sent to server) ";
+	case QueryType_CCL2RPN: return "CCL -> RPN (RPN sent to server)";
+	default: 
+		return "unknown Query type internal yaz-client error";
+	};				
+};
+
+
+void do_hex_dump(char* buf,int len) 
+{
+#if 0 
+	int i,x;
+	for( i=0; i<len ; i=i+16 ) 
+    {			
+		printf(" %4.4d ",i);
+		for(x=0 ; i+x<len && x<16; ++x) 
+        {
+			printf("%2.2X ",(unsigned int)((unsigned char)buf[i+x]));
+		};
+		printf("\n");
+	};
+#endif
+};
+
+
+
+void add_otherInfos(Z_APDU *a) 
+{
+	Z_OtherInformation **oi;
+	int i;
+		
+	yaz_oi_APDU(a, &oi);
+	for(i=0; i<maxOtherInfosSupported; ++i) 
+    {
+		if(extraOtherInfos[i].oidval != -1) 
+			yaz_oi_set_string_oidval(oi, out, extraOtherInfos[i].oidval, 1, extraOtherInfos[i].value);
+	};   
+};
+
 void send_apdu(Z_APDU *a)
 {
-    char *buf;
+	char *buf;
     int len;
+
+	add_otherInfos(a);
 
     if (apdu_file)
     {
@@ -135,6 +188,8 @@ void send_apdu(Z_APDU *a)
         fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
         exit(1);
     }
+
+	do_hex_dump(buf,len);
     odr_reset(out); /* release the APDU structure  */
 }
 
@@ -354,10 +409,19 @@ static int cmd_base(char *arg)
     return 1;
 }
 
+void cmd_open_remember_last_open_command(char* arg, char* new_open_command)
+{
+	if(last_open_command != arg) 
+	{
+		if(last_open_command) xfree(last_open_command);
+		last_open_command = xstrdup(new_open_command);
+	};	
+};
+
 int cmd_open(char *arg)
 {
     void *add;
-    char type_and_host[101], base[101];
+    char type_and_host[101], base[101];	
     
     if (conn)
     {
@@ -370,17 +434,21 @@ int cmd_open(char *arg)
             nmem_destroy (session_mem);
             session_mem = NULL;
         }
-    }
+    }   
+
     if (strncmp (arg, "unix:", 5) == 0)
     {
         base[0] = '\0';
         conn = cs_create_host(arg, 1, &add);
+		cmd_open_remember_last_open_command(arg,arg);
     }
     else
     {
         base[0] = '\0';
         if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
             return 0;
+		
+		cmd_open_remember_last_open_command(arg,type_and_host);
         if (yazProxy) 
             conn = cs_create_host(yazProxy, 1, &add);
         else 
@@ -407,8 +475,27 @@ int cmd_open(char *arg)
     send_initRequest(type_and_host);
     if (*base)
         cmd_base (base);
+
     return 2;
 }
+
+
+void try_reconnect() 
+{
+
+	char* open_command;
+	
+	if(!( auto_reconnect && last_open_command) ) return ;
+
+	open_command = (char *) xmalloc (strlen(last_open_command)+6);
+	strcpy (open_command, "open ");
+	
+	strcat (open_command, last_open_command);
+
+	process_cmd_line(open_command);
+	
+	xfree(open_command);				
+};
 
 int cmd_authentication(char *arg)
 {
@@ -618,7 +705,7 @@ static void display_record(Z_External *r)
 			};
         }
     }
-    if (ent && ent->oclass != CLASS_RECSYN)
+    if (ent && ent->oclass != CLASS_RECSYN) 
         return;
     if (ent && ent->value == VAL_SOIF)
         print_record((const unsigned char *) r->u.octet_aligned->buf,
@@ -1270,7 +1357,8 @@ static Z_External *create_external_itemRequest()
         r->u.single_ASN1_type->size = item_request_size;
         memcpy (r->u.single_ASN1_type->buf, item_request_buf,
                 item_request_size);
-        printf ("len = %d\n", item_request_size);
+		
+		do_hex_dump(item_request_buf,item_request_size);
     }
     return r;
 }
@@ -1326,7 +1414,10 @@ static Z_External *create_external_ILL_APDU(int which)
         r->u.single_ASN1_type->len = ill_request_size;
         r->u.single_ASN1_type->size = ill_request_size;
         memcpy (r->u.single_ASN1_type->buf, ill_request_buf, ill_request_size);
-        printf ("len = %d\n", ill_request_size);
+/*         printf ("len = %d\n", ill_request_size); */
+/* 		do_hex_dump(ill_request_buf,ill_request_size); */
+/* 		printf("--- end of extenal\n"); */
+
     }
     return r;
 }
@@ -1504,8 +1595,12 @@ static int cmd_find(char *arg)
     }
     if (!conn)
     {
-        printf("Not connected yet\n");
-        return 0;
+		try_reconnect(); 
+
+		if (!conn) {					
+			printf("Not connected yet\n");
+			return 0;
+		};
     }
     if (!send_searchRequest(arg))
         return 0;
@@ -1968,8 +2063,12 @@ int cmd_scan(char *arg)
 {
     if (!conn)
     {
-        printf("Session not initialized yet\n");
-        return 0;
+		try_reconnect();
+		
+		if (!conn) {								
+			printf("Session not initialized yet\n");
+			return 0;
+		};
     }
     if (!ODR_MASK_GET(session->options, Z_Options_scan))
     {
@@ -2119,8 +2218,9 @@ int cmd_packagename(char* arg)
 int cmd_proxy(char* arg)
 {
     if (*arg == '\0') {
-    	printf("Current proxy is `%s'\n", (yazCharset)?yazProxy:NULL);
-    	return 1;
+		xfree (yazProxy);
+		yazProxy = NULL;
+	
     }
     xfree (yazProxy);
     yazProxy = NULL;
@@ -2139,8 +2239,7 @@ int cmd_charset(char* arg)
     *l1 = *l2 = 0;
     if (sscanf(arg, "%29s %29s", l1, l2) < 1)
     {
-    	printf("Current character set is `%s'\n", (yazCharset) ?
-               yazCharset:NULL);
+    	printf("Current character set is `%s'\n", (yazCharset) ? yazCharset:NULL);
     	return 1;
     }
     xfree (yazCharset);
@@ -2256,7 +2355,7 @@ int cmd_set_apdufile(char* arg)
     return 1;
 }
 
-int cmd_set_cclfields(char* arg)
+int cmd_set_cclfile(char* arg)
 {  
     FILE *inf;
 
@@ -2269,8 +2368,33 @@ int cmd_set_cclfields(char* arg)
         ccl_qual_file (bibset, inf);
         fclose (inf);
     }
-    
-    return 1;
+
+	strcpy(ccl_fields,arg);
+    return 0;
+}
+
+
+int cmd_set_auto_reconnect(char* arg)
+{  
+	REMOVE_TAILING_BLANKS(arg);
+
+	if(strlen(arg)==0) {
+		auto_reconnect = ! auto_reconnect;
+	} else if(strcmp(arg,"on")==0) {
+		auto_reconnect = 1;
+	} else if(strcmp(arg,"off")==0) {
+		auto_reconnect = 0;		
+	} else {
+		printf("Error use on or off\n");
+		return 1;
+	};
+
+    if (auto_reconnect)
+        printf("Set auto reconnect enabled.\n");
+    else
+        printf("Set auto reconnect disabled.\n");
+
+    return 0;
 }
 
 int cmd_set_marcdump(char* arg)
@@ -2419,6 +2543,8 @@ void source_rcfile()
 static void initialize(void)
 {
     FILE *inf;
+	int i;
+
     if (!(out = odr_createmem(ODR_ENCODE)) ||
         !(in = odr_createmem(ODR_DECODE)) ||
         !(print = odr_createmem(ODR_PRINT)))
@@ -2445,7 +2571,12 @@ static void initialize(void)
     rl_attempted_completion_function = (CPPFunction*)readline_completer;
 #endif
 
-    source_rcfile();
+
+	for(i=0; i<maxOtherInfosSupported; ++i) {
+		extraOtherInfos[i].oidval = -1;
+	};
+
+	source_rcfile();
 }
 
 
@@ -2565,7 +2696,8 @@ void wait_and_handle_responce()
 }
 
 
-int cmd_cclparse(char* arg) {
+int cmd_cclparse(char* arg) 
+{
     int error, pos;
 	struct ccl_rpn_node *rpn=NULL;
 	
@@ -2591,6 +2723,165 @@ int cmd_cclparse(char* arg) {
 	return 0;
 };
 
+
+int cmd_set_otherinfo(char* args)
+{
+	char oid[101], otherinfoString[101];
+	int otherinfoNo;
+	int sscan_res;
+	int oidval;
+	
+	sscan_res = sscanf (args, "%d %100[^ ] %100s", &otherinfoNo, oid, otherinfoString);
+	if(sscan_res==1) {
+		/* reset this otherinfo */
+		if(otherinfoNo>=maxOtherInfosSupported) {
+			printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
+		};
+		extraOtherInfos[otherinfoNo].oidval = -1;
+		if(extraOtherInfos[otherinfoNo].value) free(extraOtherInfos[otherinfoNo].value);	 		
+		return 0;
+	};
+	if (sscan_res<3) {
+        printf("Error in set_otherinfo command \n");
+        return 0;
+    }
+
+	if(otherinfoNo>=maxOtherInfosSupported) {
+		printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
+	};
+
+	
+	oidval = oid_getvalbyname (oid);
+	if(oidval == -1 ) {
+        printf("Error in set_otherinfo command unknown oid %s \n",oid);
+		return 0;
+	};
+	extraOtherInfos[otherinfoNo].oidval = oidval;
+	if(extraOtherInfos[otherinfoNo].value) free(extraOtherInfos[otherinfoNo].value);
+	extraOtherInfos[otherinfoNo].value = strdup(otherinfoString);
+	
+	return 0;
+};
+
+int cmd_list_otherinfo(char* args)
+{
+	int i;	   
+
+	if(strlen(args)>0) {
+		i = atoi(args);
+		if( i >= maxOtherInfosSupported ) {
+			printf("Error otherinfo index to large (%d>%d)\n",i,maxOtherInfosSupported);
+			return 0;
+		};
+
+		if(extraOtherInfos[i].oidval != -1) 
+			printf("  otherinfo %d %s %s\n",i,yaz_z3950_oid_value_to_str(extraOtherInfos[i].oidval,CLASS_RECSYN), extraOtherInfos[i].value);
+		
+	} else {		
+		for(i=0; i<maxOtherInfosSupported; ++i) {
+			if(extraOtherInfos[i].oidval != -1) 
+				printf("  otherinfo %d %s %s\n",i,yaz_z3950_oid_value_to_str(extraOtherInfos[i].oidval,CLASS_RECSYN), extraOtherInfos[i].value);
+		}; 
+		
+	}
+	return 0;
+};
+
+
+int cmd_list_all(char* args) {
+	int i;
+
+	/* connection options */
+	if(conn) {
+		printf("Connected to         : %s\n",last_open_command);
+	} else {
+		if(last_open_command) 
+			printf("Not Connected to     : %s\n",last_open_command);
+		else 
+			printf("Not Connected        : \n");
+
+	};
+	if(yazProxy) printf("using proxy          : %s\n",yazProxy);		
+
+	printf("auto_reconnect       : %s\n",auto_reconnect?"on":"off");
+
+	if (!auth) {
+		printf("Authentication       : NONE\n");
+	} else {
+		switch(auth->which) {
+		case Z_IdAuthentication_idPass:
+			printf("Authentication       : IdPass\n"); 
+			printf("    Login            : %s\n",auth->u.idPass->userId?auth->u.idPass->userId:"");
+			printf("    LoginGroup       : %s\n",auth->u.idPass->groupId?auth->u.idPass->groupId:"");
+			printf("    PassWord         : %s\n",auth->u.idPass->password?auth->u.idPass->password:"");
+			break;
+		case Z_IdAuthentication_open:
+			printf("Authentication       : psOpen\n");			
+			printf("    Open string      : %s\n",auth->u.open);	
+			break;
+		default:
+			printf("Authentication       : Unknown\n");
+		};
+	};
+	if ( yazCharset ) printf("Character set        : `%s'\n", (yazCharset) ? yazCharset:NULL);
+		
+	/* bases */
+	printf("Bases                : ");
+    for (i = 0; i<num_databaseNames; i++) printf("%s ",databaseNames[i]);
+	printf("\n");
+	
+	/* Query options */
+	printf("CCL file             : %s\n",ccl_fields);
+	printf("Qurry type           : %s\n",query_type_as_string(queryType));
+	
+	printf("ElementSet numbering : %s\n",setnumber==-1?"off":"on");
+
+	/* piggy back options */
+	printf("ssub/lslb/mspn       : %d/%d/%d\n",smallSetUpperBound,largeSetLowerBound,mediumSetPresentNumber);
+	
+	/* print present related options */
+	printf("format               : %s\n",yaz_z3950_oid_value_to_str(recordsyntax,CLASS_RECSYN));
+	printf("schema               : %s\n",yaz_z3950_oid_value_to_str(schema,CLASS_SCHEMA));
+	printf("elements             : %s\n",elementSetNames?elementSetNames->u.generic:"");
+
+	/* loging options */
+	printf("Apdu log             : %s\n",apdu_file?"on":"off");
+	printf("Record log           : %s\n",marcdump?"on":"off");
+	
+	/* other infos */
+	printf("Other Info: \n");
+	cmd_list_otherinfo("");
+
+	return 0;
+};
+
+int cmd_clear_otherinfo(char* args) 
+{
+	if(strlen(args)>0) {
+		int otherinfoNo;
+		otherinfoNo = atoi(args);
+		if( otherinfoNo >= maxOtherInfosSupported ) {
+			printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
+			return 0;
+		};
+		
+		if(extraOtherInfos[otherinfoNo].oidval != -1) {			
+			/* only clear if set. */
+			extraOtherInfos[otherinfoNo].oidval=-1;
+			free(extraOtherInfos[otherinfoNo].value);
+		}; 
+	} else {
+		int i;
+	
+		for(i=0; i<maxOtherInfosSupported; ++i) {
+			if (extraOtherInfos[i].oidval!=-1 ) {				
+				extraOtherInfos[i].oidval=-1;
+				free(extraOtherInfos[i].value);
+			};
+		};
+	};
+	return 0;
+};
 
 static int cmd_help (char *line);
 
@@ -2637,11 +2928,16 @@ static struct {
     {"!", cmd_subshell, "Subshell command",NULL,1,NULL},
     {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,1,NULL},
     {"set_marcdump", cmd_set_marcdump," <filename>",NULL,1,NULL},
-    {"set_cclfile", cmd_set_cclfields," <filename>",NULL,1,NULL},
+    {"set_cclfile", cmd_set_cclfile," <filename>",NULL,1,NULL},
+    {"set_auto_reconnect", cmd_set_auto_reconnect," on|off",complete_auto_reconnect,1,NULL},
+	{"set_otherinfo", cmd_set_otherinfo,"<otherinfoinddex> <oid> <string>",NULL,0,NULL},
     {"register_oid", cmd_register_oid,"<name> <class> <oid>",NULL,0,NULL},
     {"push_command", cmd_push_command,"<command>",command_generator,0,NULL},
 	{"register_tab", cmd_register_tab,"<commandname> <tab>",command_generator,0,NULL},
 	{"cclparse", cmd_cclparse,"<ccl find command>",NULL,0,NULL},
+	{"list_otherinfo",cmd_list_otherinfo,"[otherinfoinddex]",NULL,0,NULL},
+	{"list_all",cmd_list_all,"",NULL,0,NULL},
+	{"clear_otherinfo",cmd_clear_otherinfo,"",NULL,0,NULL},
     /* Server Admin Functions */
     {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0,NULL},
     {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0,NULL},
@@ -2784,7 +3080,8 @@ void process_cmd_line(char* line)
     if (!cmd[i].cmd) /* dump our help-screen */
     {
         printf("Unknown command: %s.\n", word);
-        cmd_help ("");
+        printf("use help for list of commands\n");
+        /* cmd_help (""); */
         res = 1;
     }
 
@@ -2842,10 +3139,6 @@ char ** readline_completer(char *text, int start, int end) {
             return NULL;
         }
     
-        if(start != strlen(word) +1 ) {
-            rl_attempted_completion_over = 1;
-            return 0;
-        }
         for (i = 0; cmd[i].cmd; i++) {
             if (!strncmp(cmd[i].cmd, word, strlen(word))) {
                 break;
