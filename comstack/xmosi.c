@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.2  1995-06-15 12:30:07  quinn
+ * Revision 1.3  1995-06-16 10:30:38  quinn
+ * Added REUSEADDR.
+ *
+ * Revision 1.2  1995/06/15  12:30:07  quinn
  * Added @ as hostname alias for INADDR ANY.
  *
  * Revision 1.1  1995/06/14  09:58:20  quinn
@@ -323,7 +326,13 @@ int mosi_bind(COMSTACK h, void *address, int mode)
 {
     int res;
     struct t_bind bnd;
+    int one = 1;
 
+    if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) < 0)
+    {
+    	h->errno = CSYSERR;
+	return -1;
+    }
     if (mode == CS_SERVER)
 	bnd.qlen = 3;
     else
