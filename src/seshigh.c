@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.2 2003-11-17 21:32:58 mike Exp $
+ * $Id: seshigh.c,v 1.3 2003-11-26 22:47:42 mike Exp $
  */
 
 /*
@@ -1443,7 +1443,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_initResponse);
     Z_InitResponse *resp = apdu->u.initResponse;
     bend_initresult *binitres;
-
+    char *version;
     char options[140];
 
     yaz_log(LOG_LOG, "Got initRequest");
@@ -1581,41 +1581,21 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     resp->preferredMessageSize = &assoc->preferredMessageSize;
     resp->maximumRecordSize = &assoc->maximumRecordSize;
 
-    resp->implementationName = "GFS/YAZ";
+    resp->implementationId = odr_prepend(assoc->encode,
+		assoc->init->implementation_id,
+		resp->implementationId);
 
-    if (assoc->init->implementation_id)
-    {
-	char *nv = (char *)
-	    odr_malloc (assoc->encode,
-			strlen(assoc->init->implementation_id) + 10 + 
-			       strlen(resp->implementationId));
-	sprintf (nv, "%s/%s",
-		 assoc->init->implementation_id,
-		 resp->implementationId);
-        resp->implementationId = nv;
-    }
-    if (assoc->init->implementation_name)
-    {
-	char *nv = (char *)
-	    odr_malloc (assoc->encode,
-			strlen(assoc->init->implementation_name) + 10 + 
-			       strlen(resp->implementationName));
-	sprintf (nv, "%s/%s",
-		 assoc->init->implementation_name,
-		 resp->implementationName);
-        resp->implementationName = nv;
-    }
-    if (assoc->init->implementation_version)
-    {
-	char *nv = (char *)
-	    odr_malloc (assoc->encode,
-			strlen(assoc->init->implementation_version) + 10 + 
-			       strlen(resp->implementationVersion));
-	sprintf (nv, "%s/YAZ %s",
-		 assoc->init->implementation_version,
-		 resp->implementationVersion);
-        resp->implementationVersion = nv;
-    }
+    resp->implementationName = odr_prepend(assoc->encode,
+		assoc->init->implementation_name,
+		odr_prepend(assoc->encode, "GFS", resp->implementationName));
+
+    version = odr_strdup(assoc->encode, "$Revision: 1.3 $");
+    if (strlen(version) > 10)	/* check for unexpanded CVS strings */
+	version[strlen(version)-2] = '\0';
+    resp->implementationVersion = odr_prepend(assoc->encode,
+		assoc->init->implementation_version,
+		odr_prepend(assoc->encode, &version[11],
+			    resp->implementationVersion));
 
     if (binitres->errcode)
     {
