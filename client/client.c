@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.210 2003-10-21 12:35:50 mike Exp $
+ * $Id: client.c,v 1.211 2003-10-21 12:44:42 mike Exp $
  */
 
 #include <stdio.h>
@@ -478,10 +478,11 @@ static void render_diag(Z_DiagnosticFormat *diag) {
 	case Z_DiagnosticFormat_s_defaultDiagRec: {
 	    Z_DefaultDiagFormat *dd = ds->u.defaultDiagRec;
 	    /* ### should check `dd->diagnosticSetId' */
-	    printf("code=%d", *dd->condition);
+	    printf("code=%d (%s)", *dd->condition,
+		   diagbib1_str(*dd->condition));
 	    /* Both types of addinfo are the same, so use type-pun */
 	    if (dd->u.v2Addinfo != 0)
-		printf(", addinfo='%s'", dd->u.v2Addinfo);
+		printf(",\n\taddinfo='%s'", dd->u.v2Addinfo);
 	    break;
 	}
 	case Z_DiagnosticFormat_s_explicitDiagnostic:
