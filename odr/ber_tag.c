@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.7  1995-03-08 12:12:13  quinn
+ * Revision 1.8  1995-03-10 11:44:40  quinn
+ * Fixed serious stack-bug in odr_cons_begin
+ *
+ * Revision 1.7  1995/03/08  12:12:13  quinn
  * Added better error checking.
  *
  * Revision 1.6  1995/02/14  11:54:33  quinn
@@ -73,8 +76,8 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 	    o->bp += rd;
 	    o->left -= rd;
 #ifdef ODR_DEBUG
-	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d]", class, tag,
-		*constructed);
+	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", class, tag,
+		*constructed, o->stackp);
 #endif
 	    return 1;
     	case ODR_DECODE:
@@ -92,8 +95,8 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 		    return 0;
 		}
 #ifdef ODR_DEBUG
-		fprintf(stderr, "\n[class=%d,tag=%d,cons=%d]", lclass, ltag,
-		    lcons);
+		fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", lclass, ltag,
+		    lcons, o->stackp);
 #endif
 	    }
 	    if (class == lclass && tag == ltag)

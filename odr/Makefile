@@ -1,11 +1,11 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.5 1995-03-08 12:11:59 quinn Exp $
+# $Id: Makefile,v 1.6 1995-03-10 11:44:40 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
-#CFLAGS= -g -Wall -pedantic -ansi -DODR_DEBUG
+CFLAGS= -g -Wall -pedantic -ansi -DODR_DEBUG
 DEFS=$(INCLUDE)
 LIB=odr.a
 PO = odr_bool.o ber_bool.o ber_len.o ber_tag.o odr_util.o odr_null.o \

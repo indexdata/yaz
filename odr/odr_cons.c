@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.6  1995-03-08 12:12:23  quinn
+ * Revision 1.7  1995-03-10 11:44:41  quinn
+ * Fixed serious stack-bug in odr_cons_begin
+ *
+ * Revision 1.6  1995/03/08  12:12:23  quinn
  * Added better error checking.
  *
  * Revision 1.5  1995/02/10  18:57:25  quinn
@@ -43,6 +46,11 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
     if (!res || !cons)
     	return 0;
 
+    if (o->stackp == ODR_MAX_STACK - 1)
+    {
+    	o->error = OSTACK;
+    	return 0;
+    }
     o->stack[++(o->stackp)].lenb = o->bp;
     if (o->direction == ODR_ENCODE || o->direction == ODR_PRINT)
     {
@@ -95,6 +103,7 @@ int odr_constructed_end(ODR o)
 	    	if (*o->bp++ == 0 && *(o->bp++) == 0)
 	    	{
 		    o->left -= 2;
+		    o->stackp--;
 		    return 1;
 		}
 		else

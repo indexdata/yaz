@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.6  1995-03-08 12:12:15  quinn
+ * Revision 1.7  1995-03-10 11:44:41  quinn
+ * Fixed serious stack-bug in odr_cons_begin
+ *
+ * Revision 1.6  1995/03/08  12:12:15  quinn
  * Added better error checking.
  *
  * Revision 1.5  1995/03/07  13:28:57  quinn
@@ -40,7 +43,8 @@ char *odr_errlist[] =
     "Unexpected tag",
     "Other error",
     "Protocol error",
-    "Malformed data"
+    "Malformed data",
+    "Stack overflow"
 };
 
 void odr_perror(ODR o, char *message)
