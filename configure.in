@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.89 2002-09-16 18:45:13 adam Exp $
+dnl $Id: configure.in,v 1.90 2002-09-18 20:55:54 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.1)
 dnl
@@ -140,21 +140,43 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
         ],AC_DEFINE(HAVE_READLINE_RL_COMPLETION_MATCHES))
         LIBS=$xLIBS
 fi
+dnl ------ iconv
+AC_ARG_WITH(iconv, [  --with-iconv[=DIR]      iconv library in DIR])
+if test "$with_iconv" != "no"; then
+        AC_MSG_CHECKING(for iconv)
+	oldLIBS="$LIBS"
+       	oldCPPFLAGS="${CPPFLAGS}"
+	if test "$with_iconv" != "yes" -a "$with_iconv" != ""; then
+	        LIBS="$LIBS -L${with_iconv}/lib"
+       		CPPFLAGS="${CPPFLAGS} -I${with_iconv}/include"
+	fi
+        AC_TRY_LINK([
+		#include <iconv.h>
+	],[
+		static void f() {iconv_t t = iconv_open("", ""); }
+	],[
+		AC_DEFINE(HAVE_ICONV_H)
+		AC_MSG_RESULT(yes)
+	],[
+	        LIBS="$LIBS -liconv"
+	        AC_TRY_LINK([
+			#include <iconv.h>
+		],[
+			static void f() {iconv_t t = iconv_open("", ""); }
+		],[
+			AC_DEFINE(HAVE_ICONV_H)
+			AC_MSG_RESULT(yes)
+		],[
+			LIBS="$oldLIBS"
+			CPPFLAGS="$oldCPPFLAGS"
+			AC_MSG_RESULT(no)
+		])
+	])
+fi
 dnl ------ various functions
-AC_CHECK_FUNCS(vsnprintf gettimeofday poll iconv_open)
+AC_CHECK_FUNCS(vsnprintf gettimeofday poll)
 if test "$ac_cv_func_poll" = "yes"; then
         AC_CHECK_HEADERS(sys/poll.h)
-fi
-if test "$ac_cv_func_iconv_open" = "no"; then
-	oldLibs=$LIBS
-	LIBS="$LIBS -liconv"
-	AC_CHECK_FUNCS(iconv_open)
-	if test "$ac_cv_func_iconv_open" = "no"; then
-		LIBS=$oldLibs
-	fi
-fi
-if test "$ac_cv_func_iconv_open" = "yes"; then
-        AC_CHECK_HEADERS(iconv.h)
 fi
 dnl ------ socklen_t
 dnl AC_CHECK_TYPES(socklen_t)
