@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.60  1998-01-29 14:08:52  adam
+ * Revision 1.61  1998-02-10 11:03:06  adam
+ * Implemented command refid. Client prints reference-ID's, when present,
+ * in responses.
+ *
+ * Revision 1.60  1998/01/29 14:08:52  adam
  * Better sort diagnostics.
  *
  * Revision 1.59  1998/01/29 13:17:56  adam
@@ -243,6 +247,7 @@ static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan[512] = "0";
 static char last_cmd[100] = "?";
 static FILE *marcdump = 0;
+static char *refid = NULL;
 
 typedef enum {
     QueryType_Prefix,
@@ -267,13 +272,33 @@ static void send_apdu(Z_APDU *a)
         exit(1);
     }
     buf = odr_getbuf(out, &len, 0);
-    odr_reset(out); /* release the APDU structure  */
     if (cs_put(conn, buf, len) < 0)
     {
         fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
         exit(1);
     }
+    odr_reset(out); /* release the APDU structure  */
 }
+
+static void print_refid (Z_ReferenceId *id)
+{
+    if (id)
+    {
+	printf ("ReferenceId: '%.*s'\n", id->len, id->buf);
+    }
+}
+
+static Z_ReferenceId *set_refid (ODR out)
+{
+    Z_ReferenceId *id;
+    if (!refid)
+	return 0;
+    id = odr_malloc (out, sizeof(*id));
+    id->size = id->len = strlen(refid);
+    id->buf = odr_malloc (out, id->len);
+    memcpy (id->buf, refid, id->len);
+    return id;
+}   
 
 /* INIT SERVICE ------------------------------- */
 
@@ -668,7 +693,7 @@ static int send_searchRequest(char *arg)
         }
     }
 #endif
-
+    req->referenceId = set_refid (out);
     if (!strcmp(arg, "@big")) /* strictly for troublemaking */
     {
         static unsigned char big[2100];
@@ -680,7 +705,7 @@ static int send_searchRequest(char *arg)
         bigo.buf = big;
         req->referenceId = &bigo;
     }
-
+    
     if (setnumber >= 0)
     {
         sprintf(setstring, "%d", ++setnumber);
@@ -749,6 +774,8 @@ static int send_searchRequest(char *arg)
 
 static int process_searchResponse(Z_SearchResponse *res)
 {
+    printf ("Received SearchResponse.\n");
+    print_refid (res->referenceId);
     if (*res->searchStatus)
         printf("Search was a success.\n");
     else
@@ -760,6 +787,13 @@ static int process_searchResponse(Z_SearchResponse *res)
     setno += *res->numberOfRecordsReturned;
     if (res->records)
         display_records(res->records);
+    return 0;
+}
+
+static int process_resourceControlRequest (Z_ResourceControlRequest *req)
+{
+    printf ("Received ResourceControlRequest.\n");
+    print_refid (req->referenceId);
     return 0;
 }
 
@@ -866,6 +900,7 @@ static int send_presentRequest(char *arg)
     char *p;
     char setstring[100];
 
+    req->referenceId = set_refid (out);
     if ((p = strchr(arg, '+')))
     {
         nos = atoi(p + 1);
@@ -984,6 +1019,7 @@ int send_scanrequest(char *string, int pp, int num)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
 
+    req->referenceId = set_refid (out);
     req->num_databaseNames = num_databaseNames;
     req->databaseNames = databaseNames;
     req->termListAndStartPoint = p_query_scan(out, protocol,
@@ -1009,6 +1045,8 @@ int send_sortrequest(char *arg, int newset)
 	sprintf (setstring, "%d", setnumber);
     else
 	sprintf (setstring, "default");
+
+    req->referenceId = set_refid (out);
 
     req->inputResultSetNames =
 	odr_malloc (out, sizeof(*req->inputResultSetNames));
@@ -1130,9 +1168,13 @@ void display_term(Z_TermInfo *t)
 void process_scanResponse(Z_ScanResponse *res)
 {
     int i;
-
-    printf("SCAN: %d entries, position=%d\n", *res->numberOfEntriesReturned,
-        *res->positionOfTerm);
+   
+    printf("Received ScanResponse\n"); 
+    print_refid (res->referenceId);
+    printf("%d entries", *res->numberOfEntriesReturned);
+    if (res->positionOfTerm)
+	printf (", position=%d", *res->positionOfTerm); 
+    printf ("\n");
     if (*res->scanStatus != Z_Scan_success)
         printf("Scan returned code %d\n", *res->scanStatus);
     if (!res->entries)
@@ -1157,7 +1199,7 @@ void process_scanResponse(Z_ScanResponse *res)
 
 void process_sortResponse(Z_SortResponse *res)
 {
-    printf("Sort: status=");
+    printf("Received SortResponse: status=");
     switch (*res->sortStatus)
     {
     case Z_SortStatus_success:
@@ -1170,6 +1212,7 @@ void process_sortResponse(Z_SortResponse *res)
 	printf ("unknown (%d)", *res->sortStatus);
     }
     printf ("\n");
+    print_refid (res->referenceId);
     if (res->diagnostics)
         display_diagrecs(res->diagnostics->diagRecs,
 			 res->diagnostics->num_diagRecs);
@@ -1303,6 +1346,18 @@ int cmd_querytype (char *arg)
     return 1;
 }
 
+int cmd_refid (char *arg)
+{
+    xfree (refid);
+    refid = NULL;
+    if (*arg)
+    {
+	refid = xmalloc (strlen(arg)+1);
+	strcpy (refid, arg);
+    }
+    return 1;
+}
+
 int cmd_close(char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
@@ -1368,6 +1423,7 @@ static int client(int wait)
         {"close", cmd_close, ""},
 	{"attributeset", cmd_attributeset, "<attrset>"},
         {"querytype", cmd_querytype, "<type>"},
+	{"refid", cmd_refid, "<id>"},
         {0,0}
     };
     char *netbuffer= 0;
@@ -1434,6 +1490,7 @@ static int client(int wait)
 		continue;
 	    }
         }
+	wait = 0;
 #ifdef USE_SELECT
         if (conn && FD_ISSET(cs_fileno(conn), &input))
 #endif
@@ -1481,6 +1538,7 @@ static int client(int wait)
 		    process_scanResponse(apdu->u.scanResponse);
 		    break;
 		case Z_APDU_presentResponse:
+                    print_refid (apdu->u.presentResponse->referenceId);
 		    setno +=
 			*apdu->u.presentResponse->numberOfRecordsReturned;
 		    if (apdu->u.presentResponse->records)
@@ -1495,17 +1553,20 @@ static int client(int wait)
 		    printf("Target has closed the association.\n");
 		    process_close(apdu->u.close);
 		    break;
+		case Z_APDU_resourceControlRequest:
+		    process_resourceControlRequest
+			(apdu->u.resourceControlRequest);
+		    break;
 		default:
 		    printf("Received unknown APDU type (%d).\n", 
 			   apdu->which);
 		    exit(1);
                 }
-                printf(C_PROMPT);
-                fflush(stdout);
             }
             while (cs_more(conn));
+	    printf(C_PROMPT);
+	    fflush(stdout);
         }
-	wait = 0;
     }
     return 0;
 }
