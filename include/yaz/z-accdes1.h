@@ -1,4 +1,4 @@
-/* YC 0.2: Tue Feb 29 16:45:07 CET 2000 */
+/* YC 0.2: Wed Mar 01 10:28:12 CET 2000 */
 /* Module-H AccessControlFormat-des-1 */
 
 #ifndef z_accdes1_H

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.6 2000-02-29 15:52:33 adam Exp $
+## $Id: Makefile.am,v 1.7 2000-03-01 11:06:09 adam Exp $
 
 pkginclude_HEADERS= backend.h ccl.h comstack.h \
  d1_attset.h d1_map.h data1.h diagbib1.h \
@@ -13,5 +13,5 @@ pkginclude_HEADERS= backend.h ccl.h comstack.h \
  \
  zes-pset.h zes-update.h zes-update0.h \
  prt-acc.h prt-add.h prt-arc.h prt-dat.h prt-dia.h prt-esp.h \
- prt-exd.h prt-exp.h prt-grs.h prt-proto.h prt-rsc.h
+ prt-exd.h prt-exp.h prt-grs.h prt-proto.h prt-rsc.h prt-univ.h
 

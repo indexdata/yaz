@@ -67,19 +67,22 @@ PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
+have_sgml2html = @have_sgml2html@
+have_sgml2latex = @have_sgml2latex@
+have_sgml2txt = @have_sgml2txt@
 
 docdir = $(pkgdatadir)/doc
 
-doc_DATA =   yaz.sgml yaz.txt yaz.ps profiles.txt profiles.ps yaz.html  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html  yaz-6.html yaz-7.html yaz-8.html yaz-9.html
+doc_DATA =   yaz.sgml yaz.txt yaz.ps profiles.sgml profiles.txt profiles.ps yaz.html  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html  yaz-6.html yaz-7.html yaz-8.html yaz-9.html
 
 
-EXTRA_DIST =   yaz.sgml yaz.txt yaz.ps profiles.txt profiles.ps yaz.html  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html  yaz-6.html yaz-7.html yaz-8.html yaz-9.html
+EXTRA_DIST =   yaz.sgml yaz.txt yaz.ps profiles.sgml profiles.txt profiles.ps yaz.html  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html  yaz-6.html yaz-7.html yaz-8.html yaz-9.html
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
 DATA =  $(doc_DATA)
 
-DIST_COMMON =  README Makefile.am Makefile.in
+DIST_COMMON =  Makefile.am Makefile.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)

@@ -1,4 +1,4 @@
-/* YC 0.2: Tue Feb 29 16:45:06 CET 2000 */
+/* YC 0.2: Wed Mar 01 10:28:11 CET 2000 */
 /* Module-H DiagnosticFormatDiag1 */
 
 #ifndef z_diag1_H

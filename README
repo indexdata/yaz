@@ -1,9 +1,9 @@
 
-Copyright (C) 1995-1999, Index Data ApS.
+Copyright (C) 1995-2000, Index Data ApS.
 See the file LICENSE for details.
 
 Compilation and installation instructions for YAZ 
-  $Id: README,v 1.29 1999-12-16 23:36:19 adam Exp $
+  $Id: README,v 1.30 2000-03-01 11:06:09 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client

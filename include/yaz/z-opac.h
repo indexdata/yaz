@@ -1,4 +1,4 @@
-/* YC 0.2: Tue Feb 29 16:45:06 CET 2000 */
+/* YC 0.2: Wed Mar 01 10:28:12 CET 2000 */
 /* Module-H RecordSyntax-opac */
 
 #ifndef z_opac_H

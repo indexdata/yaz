@@ -37,3 +37,4 @@ make prefix=$RPM_BUILD_ROOT/usr install
 /usr/bin/yaz-config
 /usr/lib/libyaz.a
 /usr/include/yaz
+/usr/share/yaz/doc
