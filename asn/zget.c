@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.1  1995-05-22 11:30:20  quinn
+ * Revision 1.2  1995-05-30 10:15:49  quinn
+ * Added our implementor's ID
+ *
+ * Revision 1.1  1995/05/22  11:30:20  quinn
  * Adding Z39.50-1992 stuff to proto.c. Adding zget.c
  *
  *
@@ -27,7 +30,7 @@ Z_InitRequest *zget_InitRequest(ODR o)
     r->maximumRecordSize = odr_malloc(o, sizeof(int));
     *r->maximumRecordSize = 30*1024;
     r->idAuthentication = 0;
-    r->implementationId = "YAZ";
+    r->implementationId = "YAZ (id=81)";
     r->implementationName = "Index Data/YAZ";
     r->implementationVersion = YAZ_VERSION;
     r->userInformationField = 0;
