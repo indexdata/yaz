@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.31  1999-12-21 14:16:20  ian
+ * Revision 1.32  2000-01-06 11:25:59  adam
+ * Added case to prevent warning.
+ *
+ * Revision 1.31  1999/12/21 14:16:20  ian
  * Changed retrieval module to allow data1 trees with no associated absyn.
  * Also added a simple interface for extracting values from data1 trees using
  * a string based tagpath.
@@ -543,7 +546,7 @@ data1_node *data1_read_node (data1_handle dh, const char **buf, NMEM m)
     WRBUF wrbuf = wrbuf_alloc();
     data1_node *node;
 
-    node = data1_read_nodex(dh, m, getc_mem, buf, wrbuf);
+    node = data1_read_nodex(dh, m, getc_mem, (void *) (buf), wrbuf);
     wrbuf_free (wrbuf, 1);
     return node;
 }
