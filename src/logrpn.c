@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2004, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.5 2004-11-16 22:10:29 adam Exp $
+ * $Id: logrpn.c,v 1.6 2004-11-17 00:18:54 adam Exp $
  */
 
 /**
@@ -34,6 +34,7 @@ static const char *relToStr(int v)
     }
     return str;
 }
+
 static void attrStr (int type, int value, enum oid_value ast, char *str)
 {
     const char *rstr;
@@ -184,44 +185,65 @@ static void attrStr (int type, int value, enum oid_value ast, char *str)
         sprintf (str, "%d=%d", type, value);
 }
 
+static void wrbuf_term(WRBUF b, const char *term, int len)
+{
+    int i;
+    for (i = 0; i < len; i++)
+	if (strchr(" \"{", term[i]))
+	    break;
+    if (i == len && i)
+	wrbuf_printf(b, "%.*s ", len, term);
+    else
+    {
+	wrbuf_putc(b, '"');
+	for (i = 0; i<len; i++)
+	{
+	    if (term[i] == '"')
+		wrbuf_putc(b, '\\');
+	    wrbuf_putc(b, term[i]);
+	}
+	wrbuf_printf(b, "\" ");
+    }
+}
+
 static void wrbuf_attr(WRBUF b, Z_AttributeElement *element)
 {
     int i;
     char *setname="";
-    char *sep=""; /* optional space after attrset name */
+    char *sep = ""; /* optional space after attrset name */
     if (element->attributeSet)
     {
         oident *attrset;
         attrset = oid_getentbyoid (element->attributeSet);
-        setname=attrset->desc;
-        sep=" ";
+        setname = attrset->desc;
+        sep = " ";
     }
     switch (element->which) 
     {
-        case Z_AttributeValue_numeric:
-            wrbuf_printf(b,"@attr %s%s%d=%d ", setname,sep,
-                    *element->attributeType, *element->value.numeric);
-            break;
-        case Z_AttributeValue_complex:
-            wrbuf_printf(b,"@attr %s%s%d=", setname,sep,*element->attributeType);
-            for (i = 0; i<element->value.complex->num_list; i++)
-            {
-                if (i)
-                    wrbuf_printf(b,",");
-                if (element->value.complex->list[i]->which ==
-                    Z_StringOrNumeric_string)
-                    wrbuf_printf (b, "'%s'",
-			     element->value.complex->list[i]->u.string);
-                else if (element->value.complex->list[i]->which ==
-                         Z_StringOrNumeric_numeric)
-                    wrbuf_printf (b, "%d", 
-			     *element->value.complex->list[i]->u.numeric);
-            }
-            wrbuf_printf(b," ");
-            break;
-        default:
-            wrbuf_printf (b, "(unknown attr type) ");
-		     
+    case Z_AttributeValue_numeric:
+	wrbuf_printf(b,"@attr %s%s%d=%d ", setname, sep,
+		     *element->attributeType, *element->value.numeric);
+	break;
+    case Z_AttributeValue_complex:
+	wrbuf_printf(b,"@attr %s%s\"%d=", setname, sep,
+		     *element->attributeType);
+	for (i = 0; i<element->value.complex->num_list; i++)
+	{
+	    if (i)
+		wrbuf_printf(b,",");
+	    if (element->value.complex->list[i]->which ==
+		Z_StringOrNumeric_string)
+		wrbuf_printf (b, "%s",
+			      element->value.complex->list[i]->u.string);
+	    else if (element->value.complex->list[i]->which ==
+		     Z_StringOrNumeric_numeric)
+		wrbuf_printf (b, "%d", 
+			      *element->value.complex->list[i]->u.numeric);
+	}
+	wrbuf_printf(b, "\" ");
+	break;
+    default:
+	wrbuf_printf (b, "@attr 1=unknown ");
     }
 }
 
@@ -279,16 +301,16 @@ static char *complex_op_name(Z_Operator *op)
 {
     switch (op->which)
     {
-        case Z_Operator_and:
-            return "and";
-        case Z_Operator_or:
-            return "or";
-        case Z_Operator_and_not:
-            return "and-not";
-	case Z_Operator_prox:
-            return "prox";
-        default:
-            return "unknown complex operator";
+    case Z_Operator_and:
+	return "and";
+    case Z_Operator_or:
+	return "or";
+    case Z_Operator_and_not:
+	return "not";
+    case Z_Operator_prox:
+	return "prox";
+    default:
+	return "unknown complex operator";
     }
 }
 
@@ -384,6 +406,35 @@ static void zlog_structure (Z_RPNStructure *zs, int depth,
         yaz_log (loglevel, "%*.0s unknown structure", depth, "");
 }
 
+static void wrbuf_apt(WRBUF b, Z_AttributesPlusTerm *zapt)
+{
+    int num_attributes = zapt->attributes->num_attributes;
+    int i;
+    for (i = 0; i<num_attributes; i++)
+	wrbuf_attr(b,zapt->attributes->attributes[i]);
+    
+    switch (zapt->term->which)
+    {
+    case Z_Term_general:
+	wrbuf_term(b, zapt->term->u.general->buf,
+		   zapt->term->u.general->len);
+	break;
+    case Z_Term_characterString:
+	wrbuf_printf(b, "@term string ");
+	wrbuf_term (b, zapt->term->u.characterString,
+		    strlen(zapt->term->u.characterString));
+	break;
+    case Z_Term_numeric:
+	wrbuf_printf(b, "@term numeric %d ", *zapt->term->u.numeric);
+	break;
+    case Z_Term_null:
+	wrbuf_printf(b, "@term null x");
+	break;
+    default:
+	wrbuf_printf(b, "@term null unknown%d ", zapt->term->which);
+    }
+}
+    
 static void wrbuf_structure (WRBUF b, Z_RPNStructure *zs, enum oid_value ast)
 {
     int i;
@@ -393,14 +444,32 @@ static void wrbuf_structure (WRBUF b, Z_RPNStructure *zs, enum oid_value ast)
         wrbuf_printf(b, "@%s ", complex_op_name(op) );
         if (op->which== Z_Operator_prox)
         {
-            wrbuf_printf(b, "(excl=%s dist=%d order=%s "
-                     "rel=%s unit=%s) ",
-                     op->u.prox->exclusion ?
-                     (*op->u.prox->exclusion ? "T" : "F") : "N", 
-                     *op->u.prox->distance,
-                     *op->u.prox->ordered ? "T" : "F",
-                     relToStr(*op->u.prox->relationType),
-                     prox_unit_name(op->u.prox) );
+	    if (!op->u.prox->exclusion)
+		wrbuf_putc(b, 'n');
+	    else if (*op->u.prox->exclusion)
+		wrbuf_putc(b, '1');
+	    else
+		wrbuf_putc(b, '0');
+
+	    wrbuf_printf(b, " %d %d %d ", *op->u.prox->distance,
+			 *op->u.prox->ordered,
+			 *op->u.prox->relationType);
+
+	    switch(op->u.prox->which)
+	    {
+	    case Z_ProximityOperator_known:
+		wrbuf_putc(b, 'k');
+		break;
+	    case Z_ProximityOperator_private:
+		wrbuf_putc(b, 'p');
+		break;
+	    default:
+		wrbuf_printf(b, "%d", op->u.prox->which);
+	    }
+	    if (op->u.prox->u.known)
+		wrbuf_printf(b, " %d ", *op->u.prox->u.known);
+	    else
+		wrbuf_printf(b, " 0 ");
         }
         wrbuf_structure (b,zs->u.complex->s1, ast);
         wrbuf_structure (b,zs->u.complex->s2, ast);
@@ -408,35 +477,12 @@ static void wrbuf_structure (WRBUF b, Z_RPNStructure *zs, enum oid_value ast)
     else if (zs->which == Z_RPNStructure_simple)
     {
         if (zs->u.simple->which == Z_Operand_APT)
-        {
-            Z_AttributesPlusTerm *zapt = zs->u.simple->u.attributesPlusTerm;
-            int num_attributes = zapt->attributes->num_attributes;
-            for (i=0;i<num_attributes;i++)
-                 wrbuf_attr(b,zapt->attributes->attributes[i]);
-
-            switch (zapt->term->which)
-            {
-            case Z_Term_general:
-                wrbuf_printf(b, "'%.*s' ",
-			 zapt->term->u.general->len,
-			 zapt->term->u.general->buf);
-                break;
-            case Z_Term_characterString:
-                wrbuf_printf(b, "\"%s\" ", zapt->term->u.characterString);
-                break;
-            case Z_Term_numeric:
-                wrbuf_printf(b, "%d ", *zapt->term->u.numeric);
-                break;
-            case Z_Term_null:
-                wrbuf_printf(b, "(null) ");
-                break;
-            default:
-                wrbuf_printf(b, "(unknown term type %d) ", zapt->term->which);
-            }
-        }
+	    wrbuf_apt(b, zs->u.simple->u.attributesPlusTerm);
         else if (zs->u.simple->which == Z_Operand_resultSetId)
         {
-            wrbuf_printf(b, "@set '%s' ", zs->u.simple->u.resultSetId);
+            wrbuf_printf(b, "@set ");
+	    wrbuf_term(b, zs->u.simple->u.resultSetId,
+		       strlen(zs->u.simple->u.resultSetId));
         }
         else
             wrbuf_printf (b, "(unknown simple structure)");
@@ -512,18 +558,7 @@ void log_scan_term (Z_AttributesPlusTerm *zapt, oid_value ast)
 
 void wrbuf_scan_term(WRBUF b, Z_AttributesPlusTerm *zapt, oid_value ast)
 {
-    int num_attributes = zapt->attributes->num_attributes;
-    int i;
-    for (i=0;i<num_attributes;i++)
-        wrbuf_attr(b,zapt->attributes->attributes[i]);
-    if (zapt->term->which == Z_Term_general)
-    {
-        wrbuf_printf (b, "'%.*s' ", 
-           zapt->term->u.general->len, 
-           zapt->term->u.general->buf);
-    }
-    else
-        wrbuf_printf (b, "(not a general term)");
+    wrbuf_apt(b, zapt);
 }
 
 void yaz_log_zquery_level (int loglevel, Z_Query *q)
@@ -559,23 +594,23 @@ void wrbuf_put_zquery(WRBUF b, Z_Query *q)
     assert(b);
     switch (q->which)
     {
-        case Z_Query_type_1: 
-        case Z_Query_type_101:
-            wrbuf_printf(b,"Z:");
-            wrbuf_rpn_query(b,q->u.type_1);
-            break;
-        case Z_Query_type_2:
-	    wrbuf_printf(b, "CCL: %.*s", q->u.type_2->len, q->u.type_2->buf);
-	    break;
-        case Z_Query_type_100:
-	    wrbuf_printf(b, "Z39.58: %.*s", q->u.type_100->len,
-		    q->u.type_100->buf);
-	    break;
-        case Z_Query_type_104:
-            if (q->u.type_104->which == Z_External_CQL)
-                wrbuf_printf(b, "CQL: %s", q->u.type_104->u.cql);
-            else
-                wrbuf_printf(b,"Unknown type 104 query %d", q->u.type_104->which);
+    case Z_Query_type_1: 
+    case Z_Query_type_101:
+	wrbuf_printf(b,"Z:");
+	wrbuf_rpn_query(b,q->u.type_1);
+	break;
+    case Z_Query_type_2:
+	wrbuf_printf(b, "CCL: %.*s", q->u.type_2->len, q->u.type_2->buf);
+	break;
+    case Z_Query_type_100:
+	wrbuf_printf(b, "Z39.58: %.*s", q->u.type_100->len,
+		     q->u.type_100->buf);
+	break;
+    case Z_Query_type_104:
+	if (q->u.type_104->which == Z_External_CQL)
+	    wrbuf_printf(b, "CQL: %s", q->u.type_104->u.cql);
+	else
+	    wrbuf_printf(b,"Unknown type 104 query %d", q->u.type_104->which);
     }
 }
 
