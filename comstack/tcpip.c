@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.32  1999-11-30 13:47:11  adam
+ * Revision 1.33  2000-09-04 08:27:11  adam
+ * Work on error handling for tcpip_accept.
+ *
+ * Revision 1.32  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.31  1999/04/29 07:31:23  adam
@@ -464,17 +467,19 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         h->cerrno = CSOUTSTATE;
         return -1;
     }
-    if ((h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len)) < 0)
+    h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len);
+    if (h->newfd < 0)
     {
+	if (
 #ifdef WIN32
-        if (WSAGetLastError() == WSAEWOULDBLOCK)
+	    WSAGetLastError() == WSAEWOULDBLOCK
 #else
-        if (errno == EWOULDBLOCK)
+	    errno == EWOULDBLOCK
 #endif
-
-            h->cerrno = CSNODATA;
-        else
-            h->cerrno = CSYSERR;
+	    )
+	    h->cerrno = CSNODATA;
+	else
+	    h->cerrno = CSYSERR;
         return -1;
     }
     if (addrlen && (size_t) (*addrlen) >= sizeof(struct sockaddr_in))
@@ -490,6 +495,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #else
         close(h->newfd);
 #endif
+	h->newfd = -1;
 	return -1;
     }
     h->state = CS_INCON;
@@ -513,6 +519,12 @@ COMSTACK tcpip_accept(COMSTACK h)
     if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
     {
         h->cerrno = CSYSERR;
+#ifdef WIN32
+        closesocket(h->newfd);
+#else
+        close(h->newfd);
+#endif
+	h->newfd = -1;
         return 0;
     }
     memcpy(cnew, h, sizeof(*h));
@@ -521,6 +533,15 @@ COMSTACK tcpip_accept(COMSTACK h)
 	  (cnew->cprivate = xmalloc(sizeof(tcpip_state)))))
     {
         h->cerrno = CSYSERR;
+	if (h->newfd != -1)
+	{
+#ifdef WIN32
+	    closesocket(h->newfd);
+#else
+	    close(h->newfd);
+#endif
+	    h->newfd = -1;
+	}
         return 0;
     }
 #ifdef WIN32
@@ -528,7 +549,22 @@ COMSTACK tcpip_accept(COMSTACK h)
 #else
     if (!cnew->blocking && fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
 #endif
+    {
+	h->cerrno = CSYSERR;
+	if (h->newfd != -1)
+	{
+#ifdef WIN32
+	    closesocket(h->newfd);
+#else
+	    close(h->newfd);
+#endif
+	    h->newfd = -1;
+	}
+	xfree (cnew);
+	xfree (state);
         return 0;
+    }
+    h->newfd = -1;
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
