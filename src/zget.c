@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.9 2005-01-16 21:56:42 adam Exp $
+ * $Id: zget.c,v 1.10 2005-01-27 09:06:12 adam Exp $
  */
 /**
  * \file zget.c
@@ -593,6 +593,73 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     e->which = Z_DiagnosticFormat_s_defaultDiagRec;
     e->u.defaultDiagRec = zget_DefaultDiagFormat(odr, error, addinfo);
     e->message = 0;
+    return x;
+}
+
+Z_External *zget_init_diagnostics_octet(ODR odr, int error,
+					const char *addinfo)
+{
+    Z_External *x, *x2;
+    oident oid;
+    Z_OtherInformation *u;
+    Z_OtherInformationUnit *l;
+    Z_DiagnosticFormat *d;
+    Z_DiagnosticFormat_s *e;
+    char *octet_buf;
+    int octet_len;
+    ODR encode;
+
+    u = odr_malloc(odr, sizeof *u);
+    u->num_elements = 1;
+    u->list = (Z_OtherInformationUnit**) odr_malloc(odr, sizeof *u->list);
+    u->list[0] = (Z_OtherInformationUnit*) odr_malloc(odr, sizeof *u->list[0]);
+    l = u->list[0];
+    l->category = 0;
+    l->which = Z_OtherInfo_externallyDefinedInfo;
+
+    x2 = (Z_External*) odr_malloc(odr, sizeof *x);
+    l->information.externallyDefinedInfo = x2;
+    x2->descriptor = 0;
+    x2->indirect_reference = 0;
+    oid.oclass = CLASS_DIAGSET;
+    oid.proto = PROTO_Z3950;
+    oid.value = VAL_DIAG1;
+    x2->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+    x2->which = Z_External_diag1;
+
+    d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
+    x2->u.diag1 = d;
+    d->num = 1;
+    d->elements = (Z_DiagnosticFormat_s**) odr_malloc (odr, sizeof *d->elements);
+    d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc (odr, sizeof *d->elements[0]);
+    e = d->elements[0];
+
+    e->which = Z_DiagnosticFormat_s_defaultDiagRec;
+    e->u.defaultDiagRec = zget_DefaultDiagFormat(odr, error, addinfo);
+    e->message = 0;
+
+    encode = odr_createmem(ODR_ENCODE);
+
+    z_OtherInformation(encode, &u, 0, 0);
+
+    octet_buf = odr_getbuf(encode, &octet_len, 0);
+
+    x = (Z_External*) odr_malloc(odr, sizeof *x);
+    x->descriptor = 0;
+    x->indirect_reference = 0;  
+    oid.proto = PROTO_Z3950;
+    oid.oclass = CLASS_USERINFO;
+    oid.value = VAL_USERINFO1;
+    x->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+
+    x->which = Z_External_octet;
+    x->u.octet_aligned = (Odr_oct *) odr_malloc(odr, sizeof(Odr_oct));
+    x->u.octet_aligned->buf = odr_malloc(odr, octet_len);
+    memcpy(x->u.octet_aligned->buf, octet_buf, octet_len);
+    x->u.octet_aligned->len = octet_len;
+
+    odr_destroy(encode);
+
     return x;
 }
 
