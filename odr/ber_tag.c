@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.8  1995-03-10 11:44:40  quinn
+ * Revision 1.9  1995-03-15 08:37:18  quinn
+ * Fixed protocol bugs.
+ *
+ * Revision 1.8  1995/03/10  11:44:40  quinn
  * Fixed serious stack-bug in odr_cons_begin
  *
  * Revision 1.7  1995/03/08  12:12:13  quinn
@@ -57,6 +60,8 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
     {
     	o->bp = o->buf;
     	lclass = -1;
+	if (o->direction == ODR_ENCODE)
+	    o->left = o->buflen;
     }
     switch (o->direction)
     {
@@ -76,8 +81,8 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 	    o->bp += rd;
 	    o->left -= rd;
 #ifdef ODR_DEBUG
-	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", class, tag,
-		*constructed, o->stackp);
+	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d,left=%d]", class, tag,
+		*constructed, o->stackp, o->left);
 #endif
 	    return 1;
     	case ODR_DECODE:

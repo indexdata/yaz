@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.8  1995-03-14 16:59:24  quinn
+ * Revision 1.9  1995-03-15 08:37:06  quinn
+ * Fixed protocol bugs.
+ *
+ * Revision 1.8  1995/03/14  16:59:24  quinn
  * Fixed OPTIONAL flag in attributeelement
  *
  * Revision 1.7  1995/03/07  16:29:33  quinn
@@ -525,10 +528,8 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
     if (!odr_choice(o, arm, &(*p)->u, &(*p)->which))
     {
     	if (o->direction == ODR_DECODE)
-    	{
 	    *p = 0;
-	    return opt;
-	}
+	return opt;
     }
     return 1;
 }
