@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.82  1999-05-26 13:49:12  adam
+ * Revision 1.83  1999-05-26 15:24:26  adam
+ * Fixed minor bugs regarding DB Update (introduced by previous commit).
+ *
+ * Revision 1.82  1999/05/26 13:49:12  adam
  * DB Update implemented in client (very basic).
  *
  * Revision 1.81  1999/04/20 09:56:48  adam
@@ -1139,10 +1142,8 @@ static Z_External *CreateItemOrderExternal(int itemno)
     ItemOrderRequest.value = VAL_ITEMORDER;
  
     r->direct_reference = odr_oiddup(out,oid_getoidbyent(&ItemOrderRequest)); 
-    r->indirect_reference = (int *) odr_malloc(out,sizeof(int));
-    *r->indirect_reference = 0;
-
-    r->descriptor = "Extended services item order";
+    r->indirect_reference = 0;
+    r->descriptor = 0;
 
     r->which = Z_External_itemOrder;
 
@@ -1234,6 +1235,8 @@ static int cmd_update(char *arg)
     r = req->taskSpecificParameters = (Z_External *)
 	odr_malloc (out, sizeof(*r));
     r->direct_reference = odr_oiddup(out,oid);
+    r->indirect_reference = 0;
+    r->descriptor = 0;
     r->which = Z_External_update;
     r->u.update = (Z_IUUpdate *) odr_malloc(out, sizeof(*r->u.update));
     r->u.update->which = Z_IUUpdate_esRequest;
@@ -1242,6 +1245,9 @@ static int cmd_update(char *arg)
     toKeep = r->u.update->u.esRequest->toKeep = (Z_IUOriginPartToKeep *)
 	odr_malloc(out, sizeof(*r->u.update->u.esRequest->toKeep));
     toKeep->databaseName = databaseNames[0];
+    toKeep->schema = 0;
+    toKeep->elementSetName = 0;
+    toKeep->actionQualifier = 0;
     toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
     *toKeep->action = Z_IUOriginPartToKeep_recordInsert;
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.88  1999-04-20 09:56:48  adam
+ * Revision 1.89  1999-05-26 15:24:26  adam
+ * Fixed minor bugs regarding DB Update (introduced by previous commit).
+ *
+ * Revision 1.88  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -1137,70 +1140,10 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    return 0;
 	strcpy(thisrec->databaseName, fres->basename);
 	thisrec->which = Z_NamePlusRecord_databaseRecord;
-	if (!(thisrec->u.databaseRecord = thisext = (Z_External *)
-	      odr_malloc(a->encode, sizeof(Z_DatabaseRecord))))
+	thisrec->u.databaseRecord = z_ext_record(a->encode, fres->format,
+						 fres->record, fres->len);
+	if (!thisrec->u.databaseRecord)
 	    return 0;
-	recform.proto = a->proto;
-	recform.oclass = CLASS_RECSYN;
-	recform.value = fres->format;
-	thisext->direct_reference =
-	    odr_oiddup(a->encode, oid_ent_to_oid(&recform, oid));
-	thisext->indirect_reference = 0;
-	thisext->descriptor = 0;
-	if (fres->len < 0) /* Structured data */
-	{
-	    switch (fres->format)
-	    {
-		case VAL_SUTRS: thisext->which = Z_External_sutrs; break;
-		case VAL_GRS1: thisext->which = Z_External_grs1; break;
-		case VAL_EXPLAIN: thisext->which = Z_External_explainRecord;
-		    break;
-		case VAL_SUMMARY: thisext->which = Z_External_summary; break;
-		case VAL_OPAC: thisext->which = Z_External_OPAC; break;
-
-		default:
-		    logf(LOG_FATAL, "Unknown structured format from backend.");
-		    return 0;
-	    }
-
-	    /*
-	     * We cheat on the pointers here. Obviously, the record field
-	     * of the backend-fetch structure should have been a union for
-	     * correctness, but we're stuck with this for backwards
-	     * compatibility.
-	     */
-	    thisext->u.grs1 = (Z_GenericRecord*) fres->record;
-	}
-	else if (fres->format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
-	{
-#if 0
-	    Z_SUTRS *sutrs = (Z_SUTRS *)odr_malloc(a->encode, 1+fres->len);
-            
-	    memcpy(sutrs, fres->record, fres->len);
-	    sutrs[fres->len] = '\0';
-#else
-	    Odr_oct *sutrs = (Odr_oct *)odr_malloc(a->encode, sizeof(*sutrs));
-
-	    thisext->which = Z_External_sutrs;
-	    thisext->u.sutrs = sutrs;
-	    sutrs->buf = (unsigned char *)odr_malloc(a->encode, fres->len);
-	    sutrs->len = sutrs->size = fres->len;
-	    memcpy(sutrs->buf, fres->record, fres->len);
-#endif
-	}
-	else /* octet-aligned record. */
-	{
-	    thisext->which = Z_External_octet;
-	    if (!(thisext->u.octet_aligned = (Odr_oct *)odr_malloc(a->encode,
-		sizeof(Odr_oct))))
-		return 0;
-	    if (!(thisext->u.octet_aligned->buf = (unsigned char *)
-		  odr_malloc(a->encode, fres->len)))
-		return 0;
-	    memcpy(thisext->u.octet_aligned->buf, fres->record, fres->len);
-	    thisext->u.octet_aligned->len = thisext->u.octet_aligned->size =
-		fres->len;
-	}
 	reclist->records[reclist->num_records] = thisrec;
 	reclist->num_records++;
 	*next = fres->last_in_set ? 0 : recno + 1;

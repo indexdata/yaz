@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.21  1999-05-26 14:47:12  adam
+ * Revision 1.22  1999-05-26 15:24:26  adam
+ * Fixed minor bugs regarding DB Update (introduced by previous commit).
+ *
+ * Revision 1.21  1999/05/26 14:47:12  adam
  * Implemented z_ext_record.
  *
  * Revision 1.20  1999/04/20 09:56:48  adam
@@ -213,8 +216,6 @@ Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
     if (!oid_ent_to_oid(&recform, oid))
 	return 0;
     thisext->direct_reference = odr_oiddup(o, oid);
-    thisext->indirect_reference = 0;
-    thisext->descriptor = 0;
     
     if (len < 0) /* Structured data */
     {
