@@ -1,0 +1,44 @@
+int ber_boolean(ODR o, int *val);
+int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt);
+int ber_enctag(unsigned char *buf, int class, int tag, int constructed, int len);
+int ber_dectag(unsigned char *buf, int *class, int *tag, int *constructed);
+int odr_bool(ODR o, int **p, int opt);
+int odr_integer(ODR o, int **p, int opt);
+int odr_implicit_settag(ODR o, int class, int tag);
+#if 0
+int odr_implicit(ODR o, int (*type)(ODR o, void *p, int opt), void *p,
+    int class, int tag, int opt);
+#endif
+int ber_enclen(unsigned char *buf, int len, int lenlen, int exact);
+int ber_declen(unsigned char *buf, int *len);
+char *odr_indent(ODR o);
+int ber_null(ODR o, int *val);
+int odr_null(ODR o, int **p, int opt);
+int ber_integer(ODR o, int *val);
+int odr_constructed_begin(ODR o, void *p, int class, int tag);
+int odr_constructed_end(ODR o);
+int odr_sequence_begin(ODR o, void *p, int size);
+int odr_sequence_end(ODR o);
+int ber_octetstring(ODR o, Odr_oct *p, int cons);
+int odr_octetstring(ODR o, Odr_oct **p, int opt);
+int odp_more_chunks(ODR o, unsigned char *base, int len);
+int odr_constructed_more(ODR o);
+int odr_bitstring(ODR o, Odr_bitmask **p, int opt);
+int ber_bitstring(ODR o, Odr_bitmask *p, int cons);
+int odr_visiblestring(ODR o, char **p, int opt);
+int ber_oidc(ODR o, Odr_oid *p);
+int odr_oid(ODR o, Odr_oid **p, int opt);
+int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp);
+int odr_cstring(ODR o, char **p, int opt);
+int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num);
+int odr_any(ODR o, Odr_any **p, int opt);
+int ber_any(ODR o, Odr_any **p);
+int completeBER(unsigned char *buf, int len);
+void odr_begin(ODR o);
+void odr_end(ODR o);
+void odr_release_mem(struct odr_memblock *p);
+void odr_oidcpy(Odr_oid *t, Odr_oid *s);
+void odr_oidcat(Odr_oid *t, Odr_oid *s);
+int odr_oidcmp(Odr_oid *o1, Odr_oid *o2);
+int odr_oidlen(Odr_oid *o);
+Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);

@@ -1,11 +1,11 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.14 1995-03-27 15:02:00 quinn Exp $
+# $Id: Makefile,v 1.15 1995-03-30 09:39:44 quinn Exp $
 
 SHELL=/bin/sh
-INCLUDE=-I../include -I. -I../asn -I../odr -I../yazlib -I../../egate/include\
- -I../../xtimosi/src -I../../alex/include -I../util
+INCLUDE=-I../include -I. -I../../egate/include\
+ -I../../xtimosi/src -I../../alex/include
 LIBDIR=../../lib
 LIBINCLUDE=-L$(LIBDIR)
 #CFLAGS=-Wall -pedantic -g
