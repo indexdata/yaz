@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.44  1996-02-20 12:51:41  quinn
+ * Revision 1.45  1996-02-23 10:00:25  quinn
+ * Fixes to SCAN
+ *
+ * Revision 1.44  1996/02/20  12:51:41  quinn
  * Completed SCAN. Fixed problems with EXTERNAL.
  *
  * Revision 1.43  1996/02/10  12:22:49  quinn
@@ -1082,7 +1085,8 @@ int z_ScanOccurrences(ODR o, Z_ScanOccurrences **p, int opt)
     return opt && odr_ok(o);
 }
 
-int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
+int z_OccurrenceByAttributesElem(ODR o, Z_OccurrenceByAttributesElem **p,
+    int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
 	return opt && odr_ok(o);
@@ -1092,6 +1096,17 @@ int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
 	z_ScanOccurrences(o, &(*p)->occurrences, 1) &&
 	z_OtherInformation(o, &(*p)->otherOccurInfo, 1) &&
 	odr_sequence_end(o);
+}
+
+int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
+{
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (!odr_sequence_of(o, z_OccurrenceByAttributesElem, &(*p)->elements,
+	&(*p)->num_elements))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
 }
 
 #else
