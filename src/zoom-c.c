@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.4 2003-11-19 19:07:26 adam Exp $
+ * $Id: zoom-c.c,v 1.5 2003-11-24 11:25:07 mike Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -928,7 +928,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     
     impver = ZOOM_options_get (c->options, "implementationVersion");
     ireq->implementationVersion =
-	(char *) odr_malloc (c->odr_out, strlen("$Revision: 1.4 $") + 2 +
+	(char *) odr_malloc (c->odr_out, strlen("$Revision: 1.5 $") + 2 +
 			     (impver ? strlen(impver) : 0));
     strcpy (ireq->implementationVersion, "");
     if (impver)
@@ -936,7 +936,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	strcat (ireq->implementationVersion, impver);
 	strcat (ireq->implementationVersion, "/");
     }					       
-    strcat (ireq->implementationVersion, "$Revision: 1.4 $");
+    strcat (ireq->implementationVersion, "$Revision: 1.5 $");
 
     *ireq->maximumRecordSize =
 	ZOOM_options_get_int (c->options, "maximumRecordSize", 1024*1024);
@@ -2565,6 +2565,16 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
     {
     case Z_APDU_initResponse:
 	initrs = apdu->u.initResponse;
+        ZOOM_connection_option_set(c, "serverImplementationId",
+                                   initrs->implementationId ?
+                                   initrs->implementationId : "");
+        ZOOM_connection_option_set(c, "serverImplementationName",
+                                   initrs->implementationName ?
+                                   initrs->implementationName : "");
+        ZOOM_connection_option_set(c, "serverImplementationVersion",
+                                   initrs->implementationVersion ?
+                                   initrs->implementationVersion : "");
+	/* Set the three old options too, for old applications */
         ZOOM_connection_option_set(c, "targetImplementationId",
                                    initrs->implementationId ?
                                    initrs->implementationId : "");
