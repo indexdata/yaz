@@ -129,6 +129,9 @@ AC_DEFUN([YAZ_INIT],
 			if test "$have_yaz_version" -lt "$req_yaz_version"; then
 				AC_MSG_ERROR([$YAZVERSION. Requires $2 or later])
 			fi
+			if test "$req_yaz_version" -gt "2000028"; then
+				YAZINC="$YAZINC -DYAZ_USE_NEW_LOG=1"
+			fi
 		fi
 	fi
 ]) 
