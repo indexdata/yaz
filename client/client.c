@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.247 2004-08-13 11:36:48 adam Exp $
+ * $Id: client.c,v 1.248 2004-09-03 18:55:59 adam Exp $
  */
 
 #include <stdio.h>
@@ -379,9 +379,25 @@ static int process_initResponse(Z_InitResponse *res)
 		printf("Guessing visiblestring:\n");
 		printf("'%s'\n", uif->u. octet_aligned->buf);
 	    } else if (uif->which == Z_External_single) {
-		/* Peek at any private Init-diagnostic APDUs */
 		Odr_any *sat = uif->u.single_ASN1_type;
-		printf("### NAUGHTY: External is '%s'\n", sat->buf);
+		oident *oid = oid_getentbyoid(uif->direct_reference);
+		if (oid->value == VAL_OCLCUI) {
+		    Z_OCLC_UserInformation *oclc_ui;
+		    ODR decode = odr_createmem(ODR_DECODE);
+		    odr_setbuf(decode, sat->buf, sat->len, 0);
+		    if (!z_OCLC_UserInformation(decode, &oclc_ui, 0, 0))
+			printf ("Bad OCLC UserInformation:\n");
+		    else
+			printf ("OCLC UserInformation:\n");
+		    if (!z_OCLC_UserInformation(print, &oclc_ui, 0, 0))
+			printf ("Bad OCLC UserInformation spec\n");
+		    odr_destroy(decode);
+		}
+		else
+		{
+		    /* Peek at any private Init-diagnostic APDUs */
+		    printf("### NAUGHTY: External is '%.*s'\n", sat->len, sat->buf);
+		}
 	    }
 	    odr_reset (print);
 	}
