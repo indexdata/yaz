@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.1 1999-06-08 12:15:41 heikki Exp $
+# $Id: makefile,v 1.2 1999-06-08 14:07:24 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -8,13 +8,13 @@
 #
 # Missing
 # - Move MS-C's whatnots into win direcotry
-# - rename to makefile (.nothing)
 #  
 # Envoronment problems
 # - You need to have the proper path and environment for VC set
 #   up. There is a bat file VCVARS32.BAT that sets most of it up
 #   for you. You can find this somewhere near DevStudio\VC\BIN
 # - RegSvr32 must also be along the path, often in WINDOWS\SYSTEM
+# - TCL has to be available too, if compiling for NEW_Z3950
 
 ###########################################################
 ############### Parameters 
@@ -22,9 +22,13 @@
 
 DEBUG=0   # 0 for release, 1 for debug
 
+NEW_Z3950=0  # 0= use old asn files
+             # 1= generate files from *.asn (needs tcl)
+
+
 default: all
 
-all: dirs dll client server ztest 
+all: dirs proto_h dll client server ztest 
 
 
 ###########################################################
@@ -53,6 +57,9 @@ CLIENTDIR=$(SRCDIR)\CLIENT
 SERVERDIR=$(SRCDIR)\SERVER
 ZTESTDIR=$(SRCDIR)\ZTEST
 
+TMPDIR=$(ROOTDIR)\win\tmp
+TMP=$(TMP)
+
 ###########################################################
 ############### Targets - what to make
 ###########################################################
@@ -64,13 +71,14 @@ IMPLIB=$(BINDIR)\Yaz.lib
 CLIENT=$(BINDIR)\client.exe
 SERVER=$(BINDIR)\server.lib
 ZTEST=$(BINDIR)\ztest.exe
+PROTOH=$(INCLDIR)\proto.h
 
 # shortcut names defined here
 dll : $(DLL) 
 client: $(CLIENT)
 server: $(SERVER)
 ztest: $(ZTEST)
-bsc: $(YAZ_BSCFILE) $(ZTEST_BSCFILE)
+proto_h: $(PROTOH)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -319,17 +327,18 @@ DLL_OBJS= $(YAZ_OBJS)
 
 # Yaz client
 {$(CLIENTDIR)}.c{$(OBJDIR)}.obj:
+	echo MAKING IN CLIENT !!!!!
 	@$(CPP) @<<  
-      /D"_CONSOLE"
 	$(COPT) $< 
+	/D"_CONSOLE"
 <<
 
 # Ztest
 {$(ZTESTDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) @<<  
+	$(COPT) $< 
       /D"_CONSOLE"
 	/D"_MBCS"
-	$(COPT) $< 
 <<
 
 
@@ -382,18 +391,20 @@ $(RESFILE): $(RCFILE) $(IDLGENERATED)
 
 
 $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) 
+	@echo Linking the dll  $(DLL)
 	$(LINK) @<<
-            $(LNKOPT) 
+		$(LNKOPT) 
 		$(LINK_LIBS) 
 		$(DLL_LINK_OPTIONS)
 		$(DLL_OBJS) 
 		/out:$(DLL) 
 		/implib:$(IMPLIB)
-            /pdb:"$(LIBDIR)/yaz.pdb" 
-            /map:"$(LIBDIR)/yaz.map"  
+		/pdb:"$(LIBDIR)/yaz.pdb" 
+		/map:"$(LIBDIR)/yaz.map"  
 <<
 
-$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(IMPLIB)
+$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) #####$(IMPLIB)
+	@echo Linking the client  $(CLIENT)
 	$(LINK) @<<
             $(LNKOPT) 
 		$(CLIENT_LINK_OPTIONS)
@@ -404,6 +415,7 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(IMPLIB)
 <<
 
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
+	@echo Linking the ztest  $(ZTEST)
 	$(LINK) @<<
             $(LNKOPT) 
 		$(ZTEST_LINK_OPTIONS)
@@ -417,6 +429,7 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
 
 
 $(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS) 
+	@echo Linking the server  $(SERVER)
 	$(LINK) $(SERVER_LINK_OPTIONS) @<<
 		/nologo
 		$(LINK_LIBS) 
@@ -424,6 +437,7 @@ $(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS)
 		$(YAZ_SERVER_OBJS) 
 		/out:$(SERVER) 
 <<
+
 # note that this links a lib, so it uses completely different options.
 
 
@@ -441,11 +455,12 @@ clean:
 	del $(CLIENT)
 	del $(SERVER)
 	del $(ZTEST)
+	del $(TMPDIR)\*.
 
 ########### check directories and create if needed
-dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR)
+dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR)
 
-$(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) :
+$(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
  	if not exist "$@/$(NUL)" mkdir "$@"
 
 
@@ -455,12 +470,23 @@ $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) :
 
 $(OBJDIR)/client.obj: $(IDLGENERATED)
 
+$(DLL_OBJS): makefile $(PROTOH)
+
+
+# Debug test
+foo: $(OBJDIR)\ztest.obj
+
 ###########################################################
 ############### Log
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.1  1999-06-08 12:15:41  heikki
+# Revision 1.2  1999-06-08 14:07:24  heikki
+# Renamed a pile of files
+# Tmpdir (to get around Ms leaving temp files around, and crashing
+# when too many with same number...)
+#
+# Revision 1.1  1999/06/08 12:15:41  heikki
 # Renamed to makefile (.nothing) (from .mak)
 # Working on the proto.h problems and alternative confiigurations
 #
