@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.16  1997-09-17 12:10:33  adam
+ * Revision 1.17  1997-09-30 09:33:10  adam
+ * Minor changes - removed indentation of ifdef.
+ *
+ * Revision 1.16  1997/09/17 12:10:33  adam
  * YAZ version 1.4.
  *
  * Revision 1.15  1997/09/01 08:51:06  adam
@@ -118,10 +121,12 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
                     o->error = OPROTO;
 		            return 0;
                 }
-    #ifdef ODR_DEBUG
-		        fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", odr_ber_tag->lclass, odr_ber_tag->ltag,
-		        odr_ber_tag->lcons, o->stackp);
-    #endif
+#ifdef ODR_DEBUG
+		    fprintf(stderr,
+			    "\n[class=%d,tag=%d,cons=%d,stackp=%d]",
+			    odr_ber_tag->lclass, odr_ber_tag->ltag,
+			    odr_ber_tag->lcons, o->stackp);
+#endif
 	        }
 	        if (zclass == odr_ber_tag->lclass && tag == odr_ber_tag->ltag)
 	        {
