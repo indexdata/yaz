@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.121  2001-04-22 12:26:17  ja7
+ * Revision 1.122  2001-05-16 07:27:29  adam
+ * Reference id set for InitRequest.
+ *
+ * Revision 1.121  2001/04/22 12:26:17  ja7
  * if Compiled with Command line history a open command is pushed into
  * the command history if yaz-client is startet with a server on the
  * command line. eg
@@ -551,6 +554,8 @@ static void send_initRequest()
     *req->preferredMessageSize = 1024*1024;
 
     req->idAuthentication = auth;
+
+    req->referenceId = set_refid (out);
 
     send_apdu(apdu);
     printf("Sent initrequest.\n");
