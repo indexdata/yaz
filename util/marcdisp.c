@@ -1,58 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Log: marcdisp.c,v $
- * Revision 1.16  2002-01-22 10:54:46  adam
- * MARC decode fix. Attribute set fix for scan in server. Prox logging.
- *
- * Revision 1.15  2001/10/29 09:17:19  adam
- * New function marc_display_exl - used by YAZ client. Server returns
- * bad record on position 98 (for testing).
- *
- * Revision 1.14  2001/10/23 21:00:20  adam
- * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
- *
- * Revision 1.13  2001/10/15 19:36:48  adam
- * New function marc_display_wrbuf.
- *
- * Revision 1.12  2000/10/02 11:07:44  adam
- * Added peer_name member for bend_init handler. Changed the YAZ
- * client so that tcp: can be avoided in target spec.
- *
- * Revision 1.11  2000/02/29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.10  2000/02/05 10:47:19  adam
- * Identifier-length and indicator-lenght no longer set to 2 (forced).
- *
- * Revision 1.9  1999/12/21 16:24:48  adam
- * More robust ISO2709 handling (in case of real bad formats).
- *
- * Revision 1.8  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.7  1997/09/24 13:29:40  adam
- * Added verbose option -v to marcdump utility.
- *
- * Revision 1.6  1997/09/04 07:52:27  adam
- * Moved atoi_n function to separate source file.
- *
- * Revision 1.5  1997/05/01 15:08:15  adam
- * Added log_mask_str_x routine.
- *
- * Revision 1.4  1995/09/29 17:12:34  quinn
- * Smallish
- *
- * Revision 1.3  1995/09/27  15:03:03  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.2  1995/05/16  08:51:12  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.1  1995/04/10  10:28:46  quinn
- * Added copy of CCL and MARC display
- *
+ * $Id: marcdisp.c,v 1.17 2002-02-01 14:50:29 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -139,6 +89,7 @@ int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
 	int end_offset;
 	int i, j;
 	char tag[4];
+        int identifier_flag = 1;
 
         memcpy (tag, buf+entry_p, 3);
 	entry_p += 3;
@@ -153,18 +104,27 @@ int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
 	entry_p += length_starting;
 	i = data_offset + base_address;
 	end_offset = i+data_length-1;
-	if (debug)
-	    wrbuf_puts (wr, " Ind: ");
-        if (memcmp (tag, "00", 2) && indicator_length)
+        
+        if (indicator_length < 4 && indicator_length > 0)
+        {
+            if (buf[i + indicator_length] != ISO2709_IDFS)
+                identifier_flag = 0;
+        }
+        else if (!memcmp (tag, "00", 2))
+            identifier_flag = 0;
+        
+        if (identifier_flag)
 	{
+            if (debug)
+                wrbuf_puts (wr, " Ind: ");
             for (j = 0; j<indicator_length; j++, i++)
 		wrbuf_putc (wr, buf[i]);
 	}
-	if (debug)
-	    wrbuf_puts (wr, " Fields: ");
+        if (debug)
+            wrbuf_puts (wr, " Fields: ");
 	while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
 	{
-            if (memcmp (tag, "00", 2) && identifier_length)
+            if (identifier_flag)
 	    {
 	        i++;
 		wrbuf_puts (wr, " $"); 
