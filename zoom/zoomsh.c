@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.23 2003-07-14 12:59:23 adam Exp $
+ * $Id: zoomsh.c,v 1.24 2003-11-25 23:19:59 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -220,15 +220,19 @@ static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
                      const char **args)
 {
     ZOOM_package p[MAX_CON];
+    char ext_type_str[10];
     
     int i;
+
+    if (next_token_copy (args, ext_type_str, sizeof(ext_type_str)) < 0)
+	return;
     
     for (i = 0; i<MAX_CON; i++)
     {
 	if (c[i])
         {
             p[i] = ZOOM_connection_package (c[i], 0);
-            ZOOM_package_send(p[i], "itemorder");
+            ZOOM_package_send(p[i], ext_type_str);
         }
         else
             p[i] = 0;
