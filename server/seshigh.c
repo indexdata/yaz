@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.121 2001-11-13 23:00:42 adam Exp $
+ * $Id: seshigh.c,v 1.122 2001-11-22 09:45:03 adam Exp $
  */
 
 /*
@@ -847,7 +847,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     *num = 0;
     *next = 0;
 
-    yaz_log(LOG_LOG, "Request to pack %d+%d", start, toget);
+    yaz_log(LOG_LOG, "Request to pack %d+%d+%s", start, toget, setname);
     yaz_log(LOG_DEBUG, "pms=%d, mrs=%d", a->preferredMessageSize,
     	a->maximumRecordSize);
     for (recno = start; reclist->num_records < toget; recno++)
@@ -1007,28 +1007,6 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	if (!bsrr->request)
 	    return 0;
     }
-#if 0
-    else
-    {
-	bend_searchrequest bsrq;
-	bend_searchresult *bsrt;
-
-	bsrq.setname = req->resultSetName;
-	bsrq.replace_set = *req->replaceIndicator;
-	bsrq.num_bases = req->num_databaseNames;
-	bsrq.basenames = req->databaseNames;
-	bsrq.query = req->query;
-        bsrq.referenceId = req->referenceId;
-	bsrq.stream = assoc->encode;
-	bsrq.decode = assoc->decode;
-	bsrq.print = assoc->print;
-	if (!(bsrt = bend_search (assoc->backend, &bsrq, fd)))
-	    return 0;
-	bsrr->hits = bsrt->hits;
-	bsrr->errcode = bsrt->errcode;
-	bsrr->errstring = bsrt->errstring;
-    }
-#endif
     return response_searchRequest(assoc, reqb, bsrr, fd);
 }
 
@@ -1079,6 +1057,8 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     	int *toget = odr_intdup(assoc->encode, 0);
         int *presst = odr_intdup(assoc->encode, 0);
 	Z_RecordComposition comp, *compp = 0;
+
+        yaz_log (LOG_LOG, "resultCount: %d", bsrt->hits);
 
 	resp->records = 0;
 	resp->resultCount = &bsrt->hits;
