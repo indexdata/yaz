@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: zget.c,v 1.3 2003-11-27 15:39:16 adam Exp $
+ * $Id: zget.c,v 1.4 2004-02-15 07:19:42 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -26,8 +25,8 @@ Z_InitRequest *zget_InitRequest(ODR o)
     ODR_MASK_SET(r->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(r->protocolVersion, Z_ProtocolVersion_2);
 
-    r->preferredMessageSize = odr_intdup(o, 30*1024);
-    r->maximumRecordSize = odr_intdup(o, 30*1024);
+    r->preferredMessageSize = odr_intdup(o, 1024*1024);
+    r->maximumRecordSize = odr_intdup(o, 1024*1024);
     r->idAuthentication = 0;
     r->implementationId = "81";
     r->implementationName = "YAZ";
