@@ -1,6 +1,28 @@
-# $Id: bib1,v 1.1 1995-04-10 10:28:17 quinn Exp $
+# $Id: bib1,v 1.2 1996-10-11 15:00:24 adam Exp $
 # CCL qualifiers and their mapping to a bib-1 subset
 #
+# Each line takes the form:
+#   name      <type>=<val>,<val>..   <type>=<val> ...
+# Where type is one of:
+#    u       use-attribute          
+#    r       relation-attribute    )
+#    p       position-attribute
+#    s       structure-attribute
+#    t       truncation-attribute
+#    c       completeness-attribute
+#
+# Special value for relation:
+#    o       ordered. Tells the CCL parser to convert a ccl relation
+#            to a bib-1 relation (1,2,..6).
+# Special value for structure:
+#    pw      phrase/word. The CCL parser will decide whether phrase or word
+#            is needed. Phrase is used if term contain blanks; otherwise
+#            Word is used.
+# Special value for truncation:
+#    l       Allow left truncation if ? is at left side of term.
+#    r       Allow right truncation if ? is at left side of term.
+#    b       Allow left&right truncation if ? is at left&right side of term.
+#    n       Set truncation explicitly to "none" if no ? is given.
 term s=pw   t=l,r
 au   u=1    s=pw 
 ti   u=4    s=pw
@@ -8,10 +30,63 @@ isbn u=7
 issn u=8
 cc   u=20
 su   u=21   s=pw
-date u=30   r=o
+date u=30   r=o s=pw
 dp   u=31   r=o
 da   u=32   r=o
 la   u=54   s=pw
 ab   u=62   s=pw
 note u=63   s=pw
 af   u=1006 s=pw
+rel         s=9
+cln
+
+# Relation Attributes
+rel:lt      r=1
+rel:le      r=2
+rel:eq      r=3
+rel:ge      r=4
+rel:gt      r=5
+rel:ne      r=6
+rel:phon    r=100
+rel:stem    r=101
+rel:rele    r=102
+rel:alwa    r=103
+
+# Position Attributes
+pos:ff      p=1
+pos:fs      p=2
+pos:af      p=3
+
+# Structure Attributes
+str:wp      s=pw
+str:phrase  s=1
+str:word    s=2
+str:key     s=3
+str:year    s=4
+str:date    s=5
+str:wlist   s=6
+str:dateu   s=100
+str:daten   s=101
+str:nameu   s=102
+str:struc   s=103
+str:urx     s=104
+str:fft     s=105
+str:dt      s=106
+str:ln      s=107
+str:str     s=108
+str:num     s=109
+
+# Truncation Attributes
+tru:right   t=1
+tru:left    t=2
+tru:both    t=3
+tru:none    t=100
+tru:proh    t=101
+tru:re1     t=102
+tru:re2     t=103
+
+# Completeness Attributes
+com:is      c=1
+com:cs      c=2
+com:cf      c=3
+

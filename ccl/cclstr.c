@@ -41,58 +41,70 @@
  * USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-/*
+/* CCL string compare utilities
  * Europagate, 1995
  *
- * $Log: cclerrms.c,v $
- * Revision 1.4  1996-10-11 15:00:24  adam
+ * $Log: cclstr.c,v $
+ * Revision 1.1  1996-10-11 15:00:26  adam
  * CCL parser from Europagate Email gateway 1.0.
  *
- * Revision 1.8  1995/05/16  09:39:25  adam
+ * Revision 1.3  1996/01/24  10:11:19  adam
+ * Added include of stdlib.h.
+ *
+ * Revision 1.2  1995/05/16  09:39:27  adam
  * LICENSE.
  *
- * Revision 1.7  1995/04/17  09:31:40  adam
- * Improved handling of qualifiers. Aliases or reserved words.
- *
- * Revision 1.6  1995/02/23  08:31:59  adam
- * Changed header.
- *
- * Revision 1.4  1995/02/14  16:20:54  adam
- * Qualifiers are read from a file now.
- *
- * Revision 1.3  1995/02/14  10:25:56  adam
- * The constructions 'qualifier rel term ...' implemented.
- *
- * Revision 1.2  1995/02/13  15:15:06  adam
- * Added handling of qualifiers. Not finished yet.
- *
- * Revision 1.1  1995/02/13  12:35:20  adam
- * First version of CCL. Qualifiers aren't handled yet.
+ * Revision 1.1  1995/05/11  14:03:57  adam
+ * Changes in the reading of qualifier(s). New function: ccl_qual_fitem.
+ * New variable ccl_case_sensitive, which controls whether reserved
+ * words and field names are case sensitive or not.
  *
  */
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-char *err_msg_array[] = {
-    "Ok",
-    "Search word expected",
-    "')' expected",
-    "Set name expected",
-    "Operator expected",
-    "Unbalanced ')'",
-    "Unknown qualifier",
-    "Qualifiers applied twice",
-    "'=' expected",
-    "Bad relation",
-    "Left truncation not supported",
-    "Both left - and right truncation not supported",
-    "Right truncation not supported"
-};
+#include <ccl.h>
 
-/*
- * ccl_err_msg: return name of CCL error
- * ccl_errno:   Error no.
- * return:      Name of error.
- */
-const char *ccl_err_msg (int ccl_errno)
+static int ccli_toupper (int c)
 {
-    return err_msg_array[ccl_errno];
+    return toupper (c);
 }
+
+int (*ccl_toupper)(int c) = NULL;
+
+int ccl_stricmp (const char *s1, const char *s2)
+{
+    if (!ccl_toupper)
+        ccl_toupper = ccli_toupper;
+    while (*s1 && *s2)
+    {
+        int c1, c2;
+        c1 = (*ccl_toupper)(*s1);
+        c2 = (*ccl_toupper)(*s2);
+        if (c1 != c2)
+            return c1 - c2;
+        s1++;
+        s2++;
+    }
+    return (*ccl_toupper)(*s1) - (*ccl_toupper)(*s2);
+}
+
+int ccl_memicmp (const char *s1, const char *s2, size_t n)
+{
+    if (!ccl_toupper)
+        ccl_toupper = ccli_toupper;
+    while (1)
+    {
+        int c1, c2;
+
+        c1 = (*ccl_toupper)(*s1);
+        c2 = (*ccl_toupper)(*s2);
+        if (n <= 1 || c1 != c2)
+            return c1 - c2;
+        s1++;
+        s2++;
+        --n;
+    }
+}
+

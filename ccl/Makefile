@@ -2,20 +2,22 @@
 # Europagate, 1995
 #
 # $Log: Makefile,v $
-# Revision 1.5  1996-05-22 08:35:40  adam
-# Removed CFLAGS definiton.
+# Revision 1.6  1996-10-11 15:00:24  adam
+# CCL parser from Europagate Email gateway 1.0.
 #
-# Revision 1.4  1995/06/25 10:53:43  quinn
-# Smallish adjustments.
+# Revision 1.12  1996/05/22  08:37:13  adam
+# Removed CFLAGS definition.
 #
-# Revision 1.3  1995/05/30  10:25:45  quinn
-# Fixed dependency control
+# Revision 1.11  1995/11/10 10:19:10  adam
+# cclsh now build on 'make all'.
 #
-# Revision 1.2  1995/04/17  09:37:36  quinn
-# *** empty log message ***
+# Revision 1.10  1995/05/11  14:03:56  adam
+# Changes in the reading of qualifier(s). New function: ccl_qual_fitem.
+# New variable ccl_case_sensitive, which controls whether reserved
+# words and field names are case sensitive or not.
 #
-# Revision 1.1  1995/04/10  10:28:16  quinn
-# Added copy of CCL.
+# Revision 1.9  1995/04/17  09:31:34  adam
+# Improved handling of qualifiers. Aliases or reserved words.
 #
 # Revision 1.8  1995/04/10  10:22:35  quinn
 # Added ccl directory.
@@ -42,10 +44,9 @@ SHELL=/bin/sh
 INCLUDE=-I../include
 TPROG1=cclsh
 LIB=../lib/ccl.a
-PO=cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o
+PO=cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o cclqfile.o cclstr.o
 CPP=$(CC) -E
 DEFS=$(INCLUDE)
-RANLIB=ranlib
 
 all: $(LIB)
 
@@ -55,7 +56,7 @@ $(TPROG1): $(TPROG1).o $(LIB)
 $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
-	$(RANLIB) $(LIB)
+	ranlib $(LIB)
 
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<
@@ -66,10 +67,14 @@ clean:
 depend: depend2
 
 depend1:
+	sed '/^#Depend/q' <Makefile >Makefile.tmp
+	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
+	mv -f Makefile.tmp Makefile
 
 depend2:
-	$(CPP) $(INCLUDE) -M *.c >.depend	
+	$(CPP) $(DEFS) -M *.c >.depend	
 
+#GNU make style depend
 ifeq (.depend,$(wildcard .depend))
 include .depend
 endif

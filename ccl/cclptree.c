@@ -1,15 +1,55 @@
+/*
+ * Copyright (c) 1995, the EUROPAGATE consortium (see below).
+ *
+ * The EUROPAGATE consortium members are:
+ *
+ *    University College Dublin
+ *    Danmarks Teknologiske Videnscenter
+ *    An Chomhairle Leabharlanna
+ *    Consejo Superior de Investigaciones Cientificas
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and
+ * its documentation, in whole or in part, for any purpose, is hereby granted,
+ * provided that:
+ *
+ * 1. This copyright and permission notice appear in all copies of the
+ * software and its documentation. Notices of copyright or attribution
+ * which appear at the beginning of any file must remain unchanged.
+ *
+ * 2. The names of EUROPAGATE or the project partners may not be used to
+ * endorse or promote products derived from this software without specific
+ * prior written permission.
+ *
+ * 3. Users of this software (implementors and gateway operators) agree to
+ * inform the EUROPAGATE consortium of their use of the software. This
+ * information will be used to evaluate the EUROPAGATE project and the
+ * software, and to plan further developments. The consortium may use
+ * the information in later publications.
+ * 
+ * 4. Users of this software agree to make their best efforts, when
+ * documenting their use of the software, to acknowledge the EUROPAGATE
+ * consortium, and the role played by the software in their work.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED, OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ * IN NO EVENT SHALL THE EUROPAGATE CONSORTIUM OR ITS MEMBERS BE LIABLE
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF
+ * ANY KIND, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA
+ * OR PROFITS, WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND
+ * ON ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
+ * USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ */
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
  * $Log: cclptree.c,v $
- * Revision 1.3  1995-09-29 17:11:59  quinn
- * Smallish
+ * Revision 1.4  1996-10-11 15:00:25  adam
+ * CCL parser from Europagate Email gateway 1.0.
  *
- * Revision 1.2  1995/09/27  15:02:44  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.1  1995/04/10  10:28:20  quinn
- * Added copy of CCL.
+ * Revision 1.6  1995/05/16  09:39:26  adam
+ * LICENSE.
  *
  * Revision 1.5  1995/02/23  08:31:59  adam
  * Changed header.
