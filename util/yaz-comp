@@ -7,7 +7,10 @@ exec tclsh "$0" "$@"
 # See the file LICENSE for details.
 #
 # $Log: yaz-comp,v $
-# Revision 1.2  2001-02-21 13:46:54  adam
+# Revision 1.3  2003-04-14 16:57:58  adam
+# Add include of string.h
+#
+# Revision 1.2  2001/02/21 13:46:54  adam
 # C++ fixes.
 #
 # Revision 1.1  2000/03/02 08:48:20  adam
@@ -761,6 +764,7 @@ proc asnOf {name tag implicit tagtype isset} {
     lappend l "\t\treturn opt && odr_ok(o);"
     if {[string length $tag]} {
         if {$implicit} {
+		lappend l "\t/* ---- IMPLICIT ---- */"
             lappend l "\todr_implicit_settag (o, $tagtype, $tag);"
         } else {
             asnWarning "Constructed SEQUENCE/SET OF not handled"

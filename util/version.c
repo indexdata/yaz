@@ -3,12 +3,13 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: version.c,v 1.1 2003-02-18 14:28:53 adam Exp $
+ * $Id: version.c,v 1.2 2003-04-14 16:57:58 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
+#include <string.h>
 #include <yaz/yaz-version.h>
 
 unsigned long yaz_version(char *version_str, char *sys_str)
