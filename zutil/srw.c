@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.13 2003-04-17 19:43:32 adam Exp $
+ * $Id: srw.c,v 1.14 2003-04-24 13:05:04 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -496,7 +496,6 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         }
         else if ((*p)->which == Z_SRW_explain_request)
         {
-            Z_SRW_explainRequest *req = (*p)->u.explain_request;
             xmlNodePtr ptr = xmlNewChild(pptr, 0, "explainRequest", 0);
             xmlNsPtr ns_srw = xmlNewNs(ptr, ns, "zs");
 
