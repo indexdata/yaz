@@ -1,8 +1,7 @@
+YAZ toolkit - $Id: README,v 1.38 2001-10-25 12:29:35 adam Exp $
 
 Copyright (C) 1995-2001, Index Data ApS.
 See the file LICENSE for details.
-
-$Id: README,v 1.37 2001-10-25 12:28:07 adam Exp $
 
 The primary output of the source here is the YAZ library, which
 contains support functions for implementing the server or client
