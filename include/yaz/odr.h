@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.1 1999-11-30 13:47:11 adam Exp $
+ * $Id: odr.h,v 1.2 2000-01-31 13:15:21 adam Exp $
  */
 
 #ifndef ODR_H
@@ -123,15 +123,6 @@ typedef struct odr_constack
 #define ODR_S_CUR     1
 #define ODR_S_END     2
 
-typedef struct odr_ecblock
-{
-    int can_grow;         /* are we allowed to reallocate */
-    unsigned char *buf;            /* memory handle */
-    int pos;              /* current position */
-    int top;              /* top of buffer */
-    int size;             /* current buffer size */
-} odr_ecblock;
-
 typedef struct {      /* used to be statics in ber_tag... */
     int lclass;
     int ltag;
@@ -144,12 +135,15 @@ typedef struct odr
     int direction;       /* the direction of this stream */
 
     int error;           /* current error state (0==OK) */
-    const unsigned char *buf;  /* for encoding or decoding */
-    int buflen;          /* size of buffer for encoding, len for decoding */
-    const unsigned char *bp;   /* position in buffer */
-    int left;            /* bytes remaining in buffer */
 
-    odr_ecblock ecb;     /* memory control block */
+    int can_grow;         /* are we allowed to reallocate */
+    unsigned char *buf;            /* memory handle */
+    int size;             /* current buffer size */
+
+    int pos;              /* current position */
+    int top;              /* top of buffer (max pos when decoding) */
+
+    const unsigned char *bp; /* position in buffer (decoding) */
 
     int t_class;         /* implicit tagging (-1==default tag) */
     int t_tag;
@@ -255,15 +249,15 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_putc(o, c) \
 ( \
     ( \
-        (o)->ecb.pos < (o)->ecb.size ? \
+        (o)->pos < (o)->size ? \
         ( \
-            (o)->ecb.buf[(o)->ecb.pos++] = (c), \
+            (o)->buf[(o)->pos++] = (c), \
             0 \
         ) : \
         ( \
-            odr_grow_block(&(o)->ecb, 1) == 0 ? \
+            odr_grow_block((o), 1) == 0 ? \
             ( \
-                (o)->ecb.buf[(o)->ecb.pos++] = (c), \
+                (o)->buf[(o)->pos++] = (c), \
                 0 \
             ) : \
             ( \
@@ -273,9 +267,9 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
         ) \
     ) == 0 ? \
     ( \
-        (o)->ecb.pos > (o)->ecb.top ? \
+        (o)->pos > (o)->top ? \
         ( \
-            (o)->ecb.top = (o)->ecb.pos, \
+            (o)->top = (o)->pos, \
             0 \
         ) : \
         0 \
@@ -283,7 +277,7 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
         -1 \
 ) \
 
-#define odr_tell(o) ((o)->ecb.pos)
+#define odr_tell(o) ((o)->pos)
 #define odr_offset(o) ((o)->bp - (o)->buf)
 #define odr_ok(o) (!(o)->error)
 #define odr_getmem(o) ((o)->mem)
@@ -338,7 +332,7 @@ YAZ_EXPORT void odr_begin(ODR o);
 YAZ_EXPORT void odr_end(ODR o);
 YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
 YAZ_EXPORT Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o);
-YAZ_EXPORT int odr_grow_block(odr_ecblock *b, int min_bytes);
+YAZ_EXPORT int odr_grow_block(ODR b, int min_bytes);
 YAZ_EXPORT int odr_write(ODR o, unsigned char *buf, int bytes);
 YAZ_EXPORT int odr_seek(ODR o, int whence, int offset);
 YAZ_EXPORT int odr_dumpBER(FILE *f, const char *buf, int len);

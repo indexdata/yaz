@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.16  1999-11-30 13:47:11  adam
+ * Revision 1.17  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.16  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.15  1999/01/08 11:23:20  adam
@@ -60,11 +64,12 @@
 int ber_any(ODR o, Odr_any **p)
 {
     int res;
+    int left = o->size - (o->bp - o->buf);
 
     switch (o->direction)
     {
     	case ODR_DECODE:
-	    if ((res = completeBER(o->bp, o->left)) <= 0)        /* FIX THIS */
+	    if ((res = completeBER(o->bp, left)) <= 0)        /* FIX THIS */
 	    {
 	    	o->error = OPROTO;
 	    	return 0;
@@ -73,7 +78,6 @@ int ber_any(ODR o, Odr_any **p)
 	    memcpy((*p)->buf, o->bp, res);
 	    (*p)->len = (*p)->size = res;
 	    o->bp += res;
-	    o->left -= res;
 	    return 1;
     	case ODR_ENCODE:
 	    if (odr_write(o, (*p)->buf, (*p)->len) < 0)

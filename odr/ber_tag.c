@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.20  1999-11-30 13:47:11  adam
+ * Revision 1.21  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.20  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.19  1999/01/08 11:23:25  adam
@@ -94,7 +99,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
     if (o->stackp < 0)
     {
     	odr_seek(o, ODR_S_SET, 0);
-        o->ecb.top = 0;
+        o->top = 0;
     	o->bp = o->buf;
         odr_ber_tag->lclass = -1;
     }
@@ -140,7 +145,6 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
 	        if (zclass == odr_ber_tag->lclass && tag == odr_ber_tag->ltag)
 	        {
 	    	    o->bp += odr_ber_tag->br;
-	    	    o->left -= odr_ber_tag->br;
 	    	    *constructed = odr_ber_tag->lcons;
 	    	    odr_ber_tag->lclass = -1;
 	    	    return 1;

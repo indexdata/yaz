@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.31  1999-11-30 13:47:11  adam
+ * Revision 1.32  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.31  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.30  1999/08/27 09:40:32  adam
@@ -167,10 +171,8 @@ ODR odr_createmem(int direction)
     r->direction = direction;
     r->print = stderr;
     r->buf = 0;
-    r->ecb.buf = 0;
-    r->ecb.size = r->ecb.pos = r->ecb.top = 0;
-    r->ecb.can_grow = 1;
-    r->buflen = 0;
+    r->size = r->pos = r->top = 0;
+    r->can_grow = 1;
     r->mem = nmem_create();
     r->enable_bias = 1;
     r->odr_ber_tag.lclass = -1;
@@ -184,8 +186,7 @@ void odr_reset(ODR o)
     o->error = ONONE;
     o->bp = o->buf;
     odr_seek(o, ODR_S_SET, 0);
-    o->ecb.top = 0;
-    o->left = o->buflen;
+    o->top = 0;
     o->t_class = -1;
     o->t_tag = -1;
     o->indent = 0;
@@ -199,8 +200,8 @@ void odr_reset(ODR o)
 void odr_destroy(ODR o)
 {
     nmem_destroy(o->mem);
-    if (o->ecb.buf && o->ecb.can_grow)
-       xfree(o->ecb.buf);
+    if (o->buf && o->can_grow)
+       xfree(o->buf);
     if (o->print && o->print != stderr)
         fclose(o->print);
     xfree(o);
@@ -209,19 +210,18 @@ void odr_destroy(ODR o)
 
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)
 {
-    o->buf = o->bp = (unsigned char *) buf;
-    o->buflen = o->left = len;
+    o->bp = (unsigned char *) buf;
 
-    o->ecb.buf = (unsigned char *) buf;
-    o->ecb.can_grow = can_grow;
-    o->ecb.top = o->ecb.pos = 0;
-    o->ecb.size = len;
+    o->buf = (unsigned char *) buf;
+    o->can_grow = can_grow;
+    o->top = o->pos = 0;
+    o->size = len;
 }
 
 char *odr_getbuf(ODR o, int *len, int *size)
 {
-    *len = o->ecb.top;
+    *len = o->top;
     if (size)
-        *size = o->ecb.size;
-    return (char*) o->ecb.buf;
+        *size = o->size;
+    return (char*) o->buf;
 }

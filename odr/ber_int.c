@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.15  1999-11-30 13:47:11  adam
+ * Revision 1.16  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.15  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.14  1999/05/26 07:49:35  adam
@@ -74,7 +79,6 @@ int ber_integer(ODR o, int *val)
                 return 0;
             }
             o->bp += res;
-            o->left -= res;
             return 1;
         case ODR_ENCODE:
             if ((res = ber_encinteger(o, *val)) < 0)

@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bit.c,v $
- * Revision 1.10  1999-11-30 13:47:11  adam
+ * Revision 1.11  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.10  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.9  1999/04/20 09:56:48  adam
@@ -55,7 +60,6 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 	    	return 0;
 	    }
 	    o->bp += res;
-	    o->left -= res;
 	    if (cons)       /* fetch component strings */
 	    {
 	    	base = o->bp;
@@ -78,12 +82,10 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 	    	return 0;
 	    }
 	    o->bp++;      /* silently ignore the unused-bits field */
-	    o->left--;
 	    len--;
 	    memcpy(p->bits + p->top + 1, o->bp, len);
 	    p->top += len;
 	    o->bp += len;
-	    o->left -= len;
 	    return 1;
     	case ODR_ENCODE:
 	    if ((res = ber_enclen(o, p->top + 2, 5, 0)) < 0)

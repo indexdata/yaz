@@ -45,7 +45,12 @@
  * Europagate, 1995
  *
  * $Log: cclptree.c,v $
- * Revision 1.6  1999-11-30 13:47:11  adam
+ * Revision 1.7  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.6  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.5  1997/04/30 08:52:06  quinn
@@ -75,7 +80,6 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 
 #include <yaz/ccl.h>
@@ -126,6 +130,6 @@ void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
 	fprintf (fd_out, ")");
 	break;
     default:
-	assert (0);
+	ccl_assert (0);
     }
 }

@@ -46,7 +46,12 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.9  1998/02/11 11:53:33  adam
@@ -307,6 +312,10 @@ CCL_parser ccl_parser_create (void);
 
 /* Destroy CCL parser */
 void ccl_parser_destroy (CCL_parser p);
+
+#ifndef ccl_assert
+#define ccl_assert(x) ;
+#endif
 
 #ifdef __cplusplus
 }

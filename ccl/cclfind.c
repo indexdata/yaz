@@ -45,7 +45,12 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.13  1999-12-22 13:13:32  adam
+ * Revision 1.14  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.13  1999/12/22 13:13:32  adam
  * Search terms may include "operators" without causing error.
  *
  * Revision 1.12  1999/11/30 13:47:11  adam
@@ -127,7 +132,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
 #include <yaz/ccl.h>
@@ -185,7 +189,7 @@ static void strxcat (char *n, const char *src, int len)
 static char *copy_token_name (struct ccl_token *tp)
 {
     char *str = (char *)malloc (tp->len + 1);
-    assert (str);
+    ccl_assert (str);
     memcpy (str, tp->name, tp->len);
     str[tp->len] = '\0';
     return str;
@@ -200,7 +204,7 @@ static struct ccl_rpn_node *mk_node (int kind)
 {
     struct ccl_rpn_node *p;
     p = (struct ccl_rpn_node *)malloc (sizeof(*p));
-    assert (p);
+    ccl_assert (p);
     p->kind = kind;
     return p;
 }
@@ -266,7 +270,7 @@ static void add_attr (struct ccl_rpn_node *p, int type, int value)
     struct ccl_rpn_attr *n;
 
     n = (struct ccl_rpn_attr *)malloc (sizeof(*n));
-    assert (n);
+    ccl_assert (n);
     n->type = type;
     n->value = value;
     n->next = p->u.t.attr_list;
@@ -311,7 +315,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         /* no qualifier(s) applied. Use 'term' if it is defined */
 
         qa = (struct ccl_rpn_attr **)malloc (2*sizeof(*qa));
-	assert (qa);
+	ccl_assert (qa);
 	qa[0] = ccl_qual_search (cclp, "term", 4);
 	qa[1] = NULL;
     }
@@ -389,7 +393,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
 
     /* make the RPN token */
     p->u.t.term = (char *)malloc (len);
-    assert (p->u.t.term);
+    ccl_assert (p->u.t.term);
     p->u.t.term[0] = '\0';
     for (i = 0; i<no; i++)
     {
@@ -403,8 +407,16 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         }
         else if (i == no-1 && right_trunc)
             src_len--;
-        if (i)
-            strcat (p->u.t.term, " ");
+        if (src_len)
+        {
+            int len = strlen(p->u.t.term);
+            if (len &&
+                !strchr("-+", *src_str) &&
+                !strchr("-+", p->u.t.term[len-1]))
+            {
+                strcat (p->u.t.term, " ");
+            }
+        }
 	strxcat (p->u.t.term, src_str, src_len);
         ADVANCE;
     }
@@ -484,7 +496,7 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
         for (i=0; qa[i]; i++)
 	    no++;
     ap = (struct ccl_rpn_attr **)malloc ((no+1) * sizeof(*ap));
-    assert (ap);
+    ccl_assert (ap);
     for (i = 0; cclp->look_token != la; i++)
     {
         ap[i] = ccl_qual_search (cclp, cclp->look_token->name,

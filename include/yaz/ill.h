@@ -3,7 +3,12 @@
  * See the file LICENSE for details.
  *
  * $Log: ill.h,v $
- * Revision 1.2  2000-01-15 09:39:50  adam
+ * Revision 1.3  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.2  2000/01/15 09:39:50  adam
  * Implemented ill_get_ILLRequest. More ILL testing for client.
  *
  * Revision 1.1  1999/12/16 23:36:19  adam
@@ -20,8 +25,17 @@
 extern "C" {
 #endif
 
-YAZ_EXPORT ILL_ItemRequest *ill_get_ItemRequest (ODR o);
-YAZ_EXPORT ILL_Request *ill_get_ILLRequest (ODR o);
+struct ill_get_ctl {
+    ODR odr;
+    void *clientData;
+    const char *(*f)(void *clientData, const char *element);
+};
+    
+YAZ_EXPORT ILL_ItemRequest *ill_get_ItemRequest (
+    struct ill_get_ctl *gs, const char *name, const char *sub);
+
+YAZ_EXPORT ILL_Request *ill_get_ILLRequest (
+    struct ill_get_ctl *gs, const char *name, const char *sub);
 
 #ifdef __cplusplus
 }

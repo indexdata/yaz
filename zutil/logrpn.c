@@ -1,10 +1,15 @@
 /*
- * Copyright (C) 1995-1999, Index Data
+ * Copyright (C) 1995-2000, Index Data
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: logrpn.c,v $
- * Revision 1.3  1999-11-30 13:47:12  adam
+ * Revision 1.4  2000-01-31 13:15:22  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.3  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.2  1999/08/27 09:40:33  adam
@@ -52,7 +57,6 @@
  *
  */
 #include <stdio.h>
-#include <assert.h>
 
 #include <yaz/log.h>
 #include <yaz/logrpn.h>

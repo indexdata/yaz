@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.20  1999-11-30 13:47:11  adam
+ * Revision 1.21  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.20  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.19  1999/04/20 09:56:48  adam
@@ -68,7 +72,6 @@
  *
  */
 
-#include <assert.h>
 #include <yaz/odr.h>
 
 void odr_setlenlen(ODR o, int len)
@@ -121,7 +124,6 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
 	    return 0;
 	o->stack[o->stackp].lenlen = res;
 	o->bp += res;
-	o->left -= res;
     }
     else if (o->direction == ODR_PRINT)
     {
@@ -170,7 +172,6 @@ int odr_constructed_end(ODR o)
 	    {
 	    	if (*o->bp++ == 0 && *(o->bp++) == 0)
 	    	{
-		    o->left -= 2;
 		    o->stackp--;
 		    return 1;
 		}
@@ -215,7 +216,6 @@ int odr_constructed_end(ODR o)
 	    o->stackp--;
 	    return 1;
     	case ODR_PRINT:
-	    assert(o->indent > 0);
 	    o->stackp--;
 	    o->indent--;
 	    odr_prname(o, 0);

@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_util.c,v $
- * Revision 1.17  1999-11-30 13:47:12  adam
+ * Revision 1.18  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.17  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.16  1999/04/20 09:56:48  adam
@@ -50,7 +54,6 @@ int odp_more_chunks(ODR o, const unsigned char *base, int len)
 	if (*o->bp == 0 && *(o->bp + 1) == 0)
 	{
 	    o->bp += 2;
-	    o->left -= 2;
 	    return 0;
 	}
 	else

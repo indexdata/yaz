@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.16  1999-11-30 13:47:11  adam
+ * Revision 1.17  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.16  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.15  1999/03/31 11:18:25  adam
@@ -93,7 +97,7 @@ int odr_total(ODR o)
 /* ---------- memory management for data encoding ----------*/
 
 
-int odr_grow_block(odr_ecblock *b, int min_bytes)
+int odr_grow_block(ODR b, int min_bytes)
 {
     int togrow;
 
@@ -105,9 +109,11 @@ int odr_grow_block(odr_ecblock *b, int min_bytes)
     	togrow = b->size;
     if (togrow < min_bytes)
     	togrow = min_bytes;
-    if (b->size && !(b->buf =(unsigned char *)xrealloc(b->buf, b->size += togrow)))
+    if (b->size && !(b->buf =
+		     (unsigned char *) xrealloc(b->buf, b->size += togrow)))
     	abort();
-    else if (!b->size && !(b->buf = (unsigned char *)xmalloc(b->size = togrow)))
+    else if (!b->size && !(b->buf = (unsigned char *)
+			   xmalloc(b->size = togrow)))
     	abort();
 #ifdef ODR_DEBUG
     fprintf(stderr, "New size for encode_buffer: %d\n", b->size);
@@ -117,29 +123,29 @@ int odr_grow_block(odr_ecblock *b, int min_bytes)
 
 int odr_write(ODR o, unsigned char *buf, int bytes)
 {
-    if (o->ecb.pos + bytes >= o->ecb.size && odr_grow_block(&o->ecb, bytes))
+    if (o->pos + bytes >= o->size && odr_grow_block(o, bytes))
     {
     	o->error = OSPACE;
 	return -1;
     }
-    memcpy(o->ecb.buf + o->ecb.pos, buf, bytes);
-    o->ecb.pos += bytes;
-    if (o->ecb.pos > o->ecb.top)
-    	o->ecb.top = o->ecb.pos;
+    memcpy(o->buf + o->pos, buf, bytes);
+    o->pos += bytes;
+    if (o->pos > o->top)
+    	o->top = o->pos;
     return 0;
 }
 
 int odr_seek(ODR o, int whence, int offset)
 {
     if (whence == ODR_S_CUR)
-    	offset += o->ecb.pos;
+    	offset += o->pos;
     else if (whence == ODR_S_END)
-    	offset += o->ecb.top;
-    if (offset > o->ecb.size && odr_grow_block(&o->ecb, offset - o->ecb.size))
+    	offset += o->top;
+    if (offset > o->size && odr_grow_block(o, offset - o->size))
     {
     	o->error = OSPACE;
 	return -1;
     }
-    o->ecb.pos = offset;
+    o->pos = offset;
     return 0;
 }

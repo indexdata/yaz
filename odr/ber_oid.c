@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oid.c,v $
- * Revision 1.10  1999-11-30 13:47:11  adam
+ * Revision 1.11  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.10  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.9  1995/09/29 17:12:19  quinn
@@ -59,7 +64,6 @@ int ber_oidc(ODR o, Odr_oid *p)
 	    	return 0;
 	    }
 	    o->bp += res;
-	    o->left -= res;
 	    if (len == 0)
 	    {
 	    	*p = -1;
@@ -70,7 +74,6 @@ int ber_oidc(ODR o, Odr_oid *p)
 	    	p[0] = 2;
 	    p[1] = *o->bp - p[0] * 40;
 	    o->bp++;
-	    o->left--;
 	    pos = 2;
 	    len--;
 	    while (len)
@@ -86,7 +89,6 @@ int ber_oidc(ODR o, Odr_oid *p)
 		    p[pos] <<= 7;
 		    p[pos] |= *o->bp & 0X7F;
 		    len--;
-		    o->left--;
 		}
 		while (*(o->bp++) & 0X80);
 		pos++;

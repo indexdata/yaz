@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.93  2000-01-15 09:39:50  adam
+ * Revision 1.94  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.93  2000/01/15 09:39:50  adam
  * Implemented ill_get_ILLRequest. More ILL testing for client.
  *
  * Revision 1.92  1999/12/21 16:24:48  adam
@@ -308,7 +313,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <assert.h>
 
 #include <yaz/yaz-util.h>
 
@@ -392,6 +396,7 @@ static void send_apdu(Z_APDU *a)
         odr_reset(print);
     }
     buf = odr_getbuf(out, &len, 0);
+    /* printf ("sending APDU of size %d\n", len); */
     if (cs_put(conn, buf, len) < 0)
     {
         fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
@@ -1000,7 +1005,11 @@ static int send_searchRequest(char *arg)
     case QueryType_CCL2RPN:
         query.which = Z_Query_type_1;
         RPNquery = ccl_rpn_query(out, rpn);
-        assert(RPNquery);
+	if (!RPNquery)
+	{
+	    printf ("Couldn't convert from CCL to RPN\n");
+	    return 0;
+	}
         bib1.proto = protocol;
         bib1.oclass = CLASS_ATTSET;
         bib1.value = VAL_BIB1;
@@ -1216,19 +1225,49 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
 }
 
 #ifdef ASN_COMPILED
+
+const char *get_ill_element (void *clientData, const char *element)
+{
+    /* printf ("asking for %s\n", element); */
+    if (!strcmp (element, "ill,transaction-id,transaction-group-qualifier"))
+	return "1";
+    if (!strcmp (element, "ill,transaction-id,transaction-qualifier"))
+	return "1";
+    return 0;
+}
+
 static Z_External *create_external_itemRequest()
 {
-    ILL_ItemRequest *req = ill_get_ItemRequest(out);
+    struct ill_get_ctl ctl;
+    ILL_ItemRequest *req;
     Z_External *r = 0;
+    int item_request_size = 0;
+    char *item_request_buf = 0;
+
+    ctl.odr = out;
+    ctl.clientData = 0;
+    ctl.f = get_ill_element;
+
+    req = ill_get_ItemRequest(&ctl, "ill", 0);
 
     if (!ill_ItemRequest (out, &req, 0, 0))
+    {
+	if (apdu_file)
+	{
+	    ill_ItemRequest(print, &req, 0, 0);
+	    odr_reset(print);
+	}
+	item_request_buf = odr_getbuf (out, &item_request_size, 0);
+	if (item_request_buf)
+	    odr_setbuf (out, item_request_buf, item_request_size, 1);
+        printf ("Couldn't encode ItemRequest, size %d\n", item_request_size);
 	return 0;
+    }
     else
     {
 	oident oid;
-	int itemRequest_size = 0;
-	char *itemRequest_buf = odr_getbuf (out, &itemRequest_size, 0);
 	
+	item_request_buf = odr_getbuf (out, &item_request_size, 0);
 	oid.proto = PROTO_GENERAL;
 	oid.oclass = CLASS_GENERAL;
 	oid.value = VAL_ISO_ILL_1;
@@ -1241,11 +1280,12 @@ static Z_External *create_external_itemRequest()
 	
 	r->u.single_ASN1_type = (Odr_oct *)
 	    odr_malloc (out, sizeof(*r->u.single_ASN1_type));
-	r->u.single_ASN1_type->buf = odr_malloc (out, itemRequest_size);
-	r->u.single_ASN1_type->len = itemRequest_size;
-	r->u.single_ASN1_type->size = itemRequest_size;
-	memcpy (r->u.single_ASN1_type->buf, itemRequest_buf, itemRequest_size);
-	printf ("len = %d\n", itemRequest_size);
+	r->u.single_ASN1_type->buf = odr_malloc (out, item_request_size);
+	r->u.single_ASN1_type->len = item_request_size;
+	r->u.single_ASN1_type->size = item_request_size;
+	memcpy (r->u.single_ASN1_type->buf, item_request_buf,
+		item_request_size);
+	printf ("len = %d\n", item_request_size);
     }
     return r;
 }
@@ -1259,16 +1299,37 @@ static Z_External *create_external_itemRequest()
 #ifdef ASN_COMPILED
 static Z_External *create_external_ILLRequest()
 {
-    ILL_Request *req = ill_get_ILLRequest(out);
+    struct ill_get_ctl ctl;
+    ILL_Request *req;
     Z_External *r = 0;
+    int ill_request_size = 0;
+    char *ill_request_buf = 0;
+	
+    ctl.odr = out;
+    ctl.clientData = 0;
+    ctl.f = get_ill_element;
+
+    req = ill_get_ILLRequest(&ctl, "ill", 0);
 
     if (!ill_Request (out, &req, 0, 0))
+    {
+	if (apdu_file)
+	{
+	    printf ("-------------------\n");
+	    ill_Request(print, &req, 0, 0);
+	    odr_reset(print);
+	    printf ("-------------------\n");
+	}
+	ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
+	if (ill_request_buf)
+	    odr_setbuf (out, ill_request_buf, ill_request_size, 1);
+        printf ("Couldn't encode ILL-Request, size %d\n", ill_request_size);
 	return 0;
+    }
     else
     {
 	oident oid;
-	int ill_request_size = 0;
-	char *ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
+	ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
 	
 	oid.proto = PROTO_GENERAL;
 	oid.oclass = CLASS_GENERAL;
@@ -1348,10 +1409,12 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
     switch (*type)
     {
     case '2':
+	printf ("using item-request\n");
 	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
 	    create_external_itemRequest();
 	break;
     case '1':
+	printf ("using ILL-request\n");
 	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
 	    create_external_ILLRequest();
 	break;
@@ -1441,12 +1504,12 @@ static int cmd_itemorder(char *arg)
 {
     char type[12];
     int itemno;
-    printf("Item order request\n");
-    fflush(stdout);
 
     if (sscanf (arg, "%10s %d", type, &itemno) != 2)
 	return 0;
 
+    printf("Item order request\n");
+    fflush(stdout);
     send_itemorder(type, itemno);
     return(2);
 }
@@ -2289,6 +2352,8 @@ static int client(int wait)
                     fprintf(stderr, "Packet dump:\n---------\n");
                     odr_dumpBER(stderr, netbuffer, res);
                     fprintf(stderr, "---------\n");
+		    if (apdu_file)
+			z_APDU(print, &apdu, 0, 0);
                     exit(1);
                 }
                 if (apdu_file && !z_APDU(print, &apdu, 0, 0))

@@ -45,7 +45,12 @@
  * Europagate 1995
  *
  * $Log: cclsh.c,v $
- * Revision 1.5  1999-12-16 23:36:19  adam
+ * Revision 1.6  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.5  1999/12/16 23:36:19  adam
  * Implemented ILL protocol. Minor updates ASN.1 compiler.
  *
  * Revision 1.4  1999/03/31 11:15:37  adam
@@ -96,7 +101,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include <yaz/ccl.h>
 
@@ -174,8 +178,7 @@ int main (int argc, char **argv)
             }
             else
             {
-                assert (rpn);
-		if (i == 0)
+		if (rpn && i == 0)
 		{
 		    ccl_pr_tree (rpn, stdout);
 		    putchar ('\n');

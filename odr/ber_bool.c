@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bool.c,v $
- * Revision 1.9  1999-11-30 13:47:11  adam
+ * Revision 1.10  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.9  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.8  1995/09/29 17:12:16  quinn
@@ -64,10 +69,8 @@ int ber_boolean(ODR o, int *val)
 		return 0;
 	    }
 	    o->bp+= res;
-	    o->left -= res;
 	    *val = *o->bp;
 	    o->bp++;
-	    o->left--;
 #ifdef ODR_DEBUG
 	    fprintf(stderr, "[val=%d]\n", *val);
 #endif

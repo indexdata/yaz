@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1996-1999, Index Data.
+ * Copyright (c) 1996-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.4  1999-12-20 15:20:13  adam
+ * Revision 1.5  2000-01-31 13:15:22  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.4  1999/12/20 15:20:13  adam
  * Implemented ccl_pquery to convert from CCL tree to prefix query.
  *
  * Revision 1.3  1999/11/30 13:47:12  adam
@@ -40,7 +45,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <yaz/yaz-ccl.h>
 
@@ -56,13 +60,10 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
     Z_AttributeElement **elements;
 
     zapt = (Z_AttributesPlusTerm *)odr_malloc (o, sizeof(*zapt));
-    assert (zapt);
 
     term_octet = (Odr_oct *)odr_malloc (o, sizeof(*term_octet));
-    assert (term_octet);
 
     term = (Z_Term *)odr_malloc (o, sizeof(*term));
-    assert(term);
 
     for (attr = p->u.t.attr_list; attr; attr = attr->next)
         num++;
@@ -77,7 +78,6 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
         {
             elements[i] = (Z_AttributeElement *)
 		odr_malloc (o, sizeof(**elements));
-            assert (elements[i]);
             elements[i]->attributeType =
 		(int *)odr_malloc(o, sizeof(int));
             *elements[i]->attributeType = attr->type;
@@ -111,7 +111,6 @@ static Z_Operand *ccl_rpn_simple (ODR o, struct ccl_rpn_node *p)
     Z_Operand *zo;
 
     zo = (Z_Operand *)odr_malloc (o, sizeof(*zo));
-    assert (zo);
 
     switch (p->kind)
     {
@@ -124,7 +123,7 @@ static Z_Operand *ccl_rpn_simple (ODR o, struct ccl_rpn_node *p)
         zo->u.resultSetId = p->u.setname;
         break;
     default:
-        assert (0);
+	return 0;
     }
     return zo;
 }
@@ -135,9 +134,7 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
     Z_Operator *zo;
 
     zc = (Z_Complex *)odr_malloc (o, sizeof(*zc));
-    assert (zc);
     zo = (Z_Operator *)odr_malloc (o, sizeof(*zo));
-    assert (zo);
 
     zc->roperator = zo;
     switch (p->kind)
@@ -185,7 +182,7 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
 #endif
 	break;
     default:
-        assert (0);
+	return 0;
     }
     zc->s1 = ccl_rpn_structure (o, p->u.p[0]);
     zc->s2 = ccl_rpn_structure (o, p->u.p[1]);
@@ -197,7 +194,6 @@ static Z_RPNStructure *ccl_rpn_structure (ODR o, struct ccl_rpn_node *p)
     Z_RPNStructure *zs;
 
     zs = (Z_RPNStructure *)odr_malloc (o, sizeof(*zs));
-    assert (zs);
     switch (p->kind)
     {
     case CCL_RPN_AND:
@@ -213,7 +209,7 @@ static Z_RPNStructure *ccl_rpn_structure (ODR o, struct ccl_rpn_node *p)
         zs->u.simple = ccl_rpn_simple (o, p);
         break;
     default:
-        assert (0);
+	return 0;
     }
     return zs;
 }
@@ -223,7 +219,6 @@ Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p)
     Z_RPNQuery *zq;
 
     zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
-    assert (zq);
     zq->attributeSetId = NULL;
     zq->RPNStructure = ccl_rpn_structure (o, p);
     return zq;
@@ -253,7 +248,7 @@ static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
     	wrbuf_puts(w, "@prox 0 2 0 1 known 2 ");
 	break;
     default:
-    	assert(0);
+	wrbuf_puts(w, "@ bad op (unknown) ");
     };
     ccl_pquery(w, p->u.p[0]);
     ccl_pquery(w, p->u.p[1]);
@@ -288,6 +283,5 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
 	wrbuf_puts (w, "} ");
 	break;
     default:
-    	assert (0);
-    };
+    }
 }

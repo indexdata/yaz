@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.14  1999-11-30 13:47:11  adam
+ * Revision 1.15  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.14  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.13  1999/04/20 09:56:48  adam
@@ -67,7 +72,6 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    	return 0;
 	    }
 	    o->bp += res;
-	    o->left -= res;
 	    if (cons)       /* fetch component strings */
 	    {
 	    	base = o->bp;
@@ -93,7 +97,6 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 		memcpy(p->buf + p->len, o->bp, len);
 	    p->len += len;
 	    o->bp += len;
-	    o->left -= len;
 	    return 1;
     	case ODR_ENCODE:
 	    if ((res = ber_enclen(o, p->len, 5, 0)) < 0)

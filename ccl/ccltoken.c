@@ -45,7 +45,12 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.11  1999-11-30 13:47:11  adam
+ * Revision 1.12  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.11  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.10  1998/07/07 15:49:41  adam
@@ -107,7 +112,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include <yaz/ccl.h>
 
@@ -167,13 +171,13 @@ struct ccl_token *ccl_token_simple (const char *command)
 	if (!first)
 	{
 	    first = last = (struct ccl_token *)malloc (sizeof (*first));
-	    assert (first);
+	    ccl_assert (first);
 	    last->prev = NULL;
 	}
 	else
 	{
 	    last->next = (struct ccl_token *)malloc (sizeof(*first));
-	    assert (last->next);
+	    ccl_assert (last->next);
 	    last->next->prev = last;
 	    last = last->next;
 	}
@@ -230,13 +234,13 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 	if (!first)
 	{
 	    first = last = (struct ccl_token *)malloc (sizeof (*first));
-	    assert (first);
+	    ccl_assert (first);
 	    last->prev = NULL;
 	}
 	else
 	{
 	    last->next = (struct ccl_token *)malloc (sizeof(*first));
-	    assert (last->next);
+	    ccl_assert (last->next);
 	    last->next->prev = last;
 	    last = last->next;
 	}

@@ -45,7 +45,12 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.12  1999-11-30 13:47:11  adam
+ * Revision 1.13  2000-01-31 13:15:21  adam
+ * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
+ * that some characters are not surrounded by spaces in resulting term.
+ * ILL-code updates.
+ *
+ * Revision 1.12  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.11  1999/03/31 11:15:37  adam
@@ -104,7 +109,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
 #include <yaz/ccl.h>
@@ -128,20 +132,21 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
     struct ccl_qualifier *q;
     struct ccl_rpn_attr **attrp;
 
-    assert (b);
+    ccl_assert (b);
     for (q = b->list; q; q = q->next)
         if (!strcmp (name, q->name))
             break;
     if (!q)
     {
-        struct ccl_qualifier *new_qual = (struct ccl_qualifier *)malloc (sizeof(*new_qual));
-        assert (new_qual);
+        struct ccl_qualifier *new_qual =
+	    (struct ccl_qualifier *)malloc (sizeof(*new_qual));
+        ccl_assert (new_qual);
         
         new_qual->next = b->list;
         b->list = new_qual;
         
         new_qual->name = (char *)malloc (strlen(name)+1);
-        assert (new_qual->name);
+        ccl_assert (new_qual->name);
         strcpy (new_qual->name, name);
         attrp = &new_qual->attr_list;
     }
@@ -156,7 +161,7 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
         struct ccl_rpn_attr *attr;
 
         attr = (struct ccl_rpn_attr *)malloc (sizeof(*attr));
-        assert (attr);
+        ccl_assert (attr);
         attr->type = *pairs++;
         attr->value = *pairs++;
         *attrp = attr;
@@ -172,7 +177,7 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
 CCL_bibset ccl_qual_mk (void)
 {
     CCL_bibset b = (CCL_bibset)malloc (sizeof(*b));
-    assert (b);
+    ccl_assert (b);
     b->list = NULL;     
     return b;
 }
@@ -216,7 +221,7 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
 {
     struct ccl_qualifier *q;
 
-    assert (cclp);
+    ccl_assert (cclp);
     if (!cclp->bibset)
 	return NULL;
     for (q = cclp->bibset->list; q; q = q->next)
