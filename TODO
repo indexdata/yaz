@@ -1,10 +1,8 @@
-YAZ TODO $Id: TODO,v 1.8 2003-02-14 18:49:22 adam Exp $
+YAZ TODO $Id: TODO,v 1.9 2003-03-11 21:19:16 adam Exp $
 
-Improve timeouts in GFS.
+SRU support in Generic Frontend Server.
 
-Database in URL for GFS.
-
-SRW support for ZOOM.
+SRW support in YAZ client.
 
 Complete ODR print.
 
