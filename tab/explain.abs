@@ -1,0 +1,97 @@
+name explain
+attset explain.att
+tagset explain.tag
+
+esetname B @
+esetname F @
+
+elm (4,0)			targetInfo				-
+
+elm (4,0)/(4,600)		targetCommonInfo			-
+elm (4,0)/(4,600)/(4,601)	dateAdded				!
+elm (4,0)/(4,600)/(4,602)	dateChanged				!
+elm (4,0)/(4,600)/(4,603)	expiry				DateExpired
+elm (4,0)/(4,600)/(4,604)	languageCode		HumanStringLanguage
+
+elm (4,0)/(4,102)		targetName				!
+elm (4,0)/(4,103)		recentNews				-
+elm (4,0)/(4,104)		icon					-
+elm (4,0)/(4,105)		namedResultSets				-
+elm (4,0)/(4,106)		multipleDbSearch			-
+elm (4,0)/(4,107)		maxResultSets				-
+elm (4,0)/(4,108)		maxResultSize				-
+elm (4,0)/(4,109)		maxTerms				-
+elm (4,0)/(4,110)		timeoutInterval				-
+elm (4,0)/(4,111)		welcomeMessage				-
+elm (4,0)/(4,112)		contactInfo				-
+elm (4,0)/(4,113)		description				-
+elm (4,0)/(4,114)		nicknames				-
+elm (4,0)/(4,115)		usageRest				-
+elm (4,0)/(4,116)		paymentAddr				-
+elm (4,0)/(4,117)		hours					-
+elm (4,0)/(4,118)		dbCombinations				-
+elm (4,0)/(4,119)		address					-
+elm (4,0)/(4,500)		commonAccessInfo			-
+elm (4,0)/(4,500)/(4,501)	queryTypesSupported			-
+elm (4,0)/(4,500)/(4,503)	diagnosticSets				-
+elm (4,0)/(4,500)/(4,503)/(4,504)	diagnosticSet			-
+elm (4,0)/(4,500)/(4,505)	attributeSetIds				-
+elm (4,0)/(4,500)/(4,505)/(4,506)	attributeSetId			-
+elm (4,0)/(4,500)/(4,507)	schemas					-
+elm (4,0)/(4,500)/(4,507)/(4,508)	schema				-
+elm (4,0)/(4,500)/(4,509)	recordSyntaxes				-
+elm (4,0)/(4,500)/(4,509/(4,510)	recordSyntax			-
+elm (4,0)/(4,500)/(4,511)	resourceChallenges			-
+elm (4,0)/(4,500)/(4,511)/(4,512)	resourceChallenge		-
+elm (4,0)/(4,500)/(4,513)	restrictedAccess			-
+elm (4,0)/(4,500)/(4,514)	costInfo				-
+
+elm (4,1)			databaseInfo				-
+elm (4,1)/(4,600)		databaseCommonInfo			-
+elm (4,1)/(4,600)		targetCommonInfo			-
+elm (4,1)/(4,600)/(4,601)	dateAdded				!
+elm (4,1)/(4,600)/(4,602)	dateChanged				!
+elm (4,1)/(4,600)/(4,603)	expiry			DateExpired
+elm (4,1)/(4,600)/(4,604)	languageCode		HumanStringLanguage
+elm (4,1)/(4,102)		databaseName				!
+elm (4,1)/(4,114)		nicknames				-
+elm (4,1)/(4,104)		icon					-
+elm (4,1)/(4,201)		userFee					!
+elm (4,1)/(4,202)		available		Availability
+elm (4,1)/(4,203)		titleString				-
+elm (4,1)/(4,113)		description				-
+elm (4,1)/(4,205)		associatedDbs				-
+elm (4,1)/(4,206)		subDbs					-
+elm (4,1)/(4,207)		disclaimers				-
+elm (4,1)/(4,208)		recentNews				-
+elm (4,1)/(4,209)		recordCount				-
+elm (4,1)/(4,209)/(4,210)	recordCountActual			-
+elm (4,1)/(4,209)/(4,211)	recordCountApprox			-
+elm (4,1)/(4,212)		defaultOrder				-
+elm (4,1)/(4,213)		avRecordSize				-
+elm (4,1)/(4,214)		maxRecordSize				-
+elm (4,1)/(4,215)		hours					-
+elm (4,1)/(4,216)		bestTime				-
+elm (4,1)/(4,217)		lastUpdate				-
+elm (4,1)/(4,218)		updateInterval				-
+elm (4,1)/(4,219)		coverage				-
+elm (4,1)/(4,220)		proprietary				!
+elm (4,1)/(4,221)		copyrightText				-
+elm (4,1)/(4,222)		copyrightNotice				-
+elm (4,1)/(4,223)		producerContactInfo			-
+elm (4,1)/(4,224)		supplierContactInfo			-
+elm (4,1)/(4,225)		submissionContactInfo			-
+elm (4,1)/(4,500)		databaseAccessInfo			-
+elm (4,1)/(4,500)/(4,501)	queryTypesSupported			-
+elm (4,1)/(4,500)/(4,503)	diagnosticSets				-
+elm (4,1)/(4,500)/(4,503)/(4,504)	diagnosticSet			-
+elm (4,1)/(4,500)/(4,505)	attributeSetIds				-
+elm (4,1)/(4,500)/(4,505)/(4,506)	attributeSetId			-
+elm (4,1)/(4,500)/(4,507)	schemas					-
+elm (4,1)/(4,500)/(4,507)/(4,508)	schema				-
+elm (4,1)/(4,500)/(4,509)	recordSyntaxes				-
+elm (4,1)/(4,500)/(4,509/(4,510)	recordSyntax			-
+elm (4,1)/(4,500)/(4,511)	resourceChallenges			-
+elm (4,1)/(4,500)/(4,511)/(4,512)	resourceChallenge		-
+elm (4,1)/(4,500)/(4,513)	restrictedAccess			-
+elm (4,1)/(4,500)/(4,514)	costInfo				-
