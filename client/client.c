@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.237 2004-04-07 13:47:59 adam Exp $
+ * $Id: client.c,v 1.238 2004-04-07 13:51:50 adam Exp $
  */
 
 #include <stdio.h>
@@ -747,8 +747,10 @@ static void display_record(Z_External *r)
     else if (r->which == Z_External_octet)
     {
         const char *octet_buf = (char*)r->u.octet_aligned->buf;
-        if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML ||
-            ent->value == VAL_HTML)
+        if (ent->oclass == CLASS_RECSYN && 
+		(ent->value == VAL_TEXT_XML || 
+		 ent->value == VAL_APPLICATION_XML ||
+		 ent->value == VAL_HTML))
         {
             print_record((const unsigned char *) octet_buf,
                          r->u.octet_aligned->len);
