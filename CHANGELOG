@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added missing PQF transform rules for <= and >= . Thanks to Peter Popovics.
+
+Added scan for the ZOOM shell (zoomsh).
+
 --- 2.0 2003/02/23
 
 * String Identifers for Schemas (Amendment 5).

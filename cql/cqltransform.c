@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.3 2003-02-14 18:49:23 adam Exp $
+/* $Id: cqltransform.c,v 1.4 2003-02-25 18:08:46 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -359,6 +359,12 @@ void cql_transform_r(cql_transform_t ct,
 
         if (cn->u.st.relation && !strcmp(cn->u.st.relation, "="))
             cql_pr_attr(ct, "relation.", "eq", "scr",
+                        pr, client_data, 19);
+        else if (cn->u.st.relation && !strcmp(cn->u.st.relation, "<="))
+            cql_pr_attr(ct, "relation.", "le", "scr",
+                        pr, client_data, 19);
+        else if (cn->u.st.relation && !strcmp(cn->u.st.relation, ">="))
+            cql_pr_attr(ct, "relation.", "ge", "scr",
                         pr, client_data, 19);
         else
             cql_pr_attr(ct, "relation.", cn->u.st.relation, "eq",
