@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.2  1995-03-07 10:19:05  quinn
+ * Revision 1.3  1995-03-07 10:21:31  quinn
+ * odr_errno-->odr_error
+ *
+ * Revision 1.2  1995/03/07  10:19:05  quinn
  * Addded some method functions to the ODR type.
  *
  * Revision 1.1  1995/03/07  09:23:15  quinn
@@ -34,7 +37,7 @@ void odr_perror(ODR o, char *message)
     fprintf(stderr, "%s: %s\n", message, odr_errlist[o->error]);
 }
 
-int odr_errno(ODR o)
+int odr_error(ODR o)
 {
     return o->error;
 }
