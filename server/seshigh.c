@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.90  1999-05-27 13:02:20  adam
+ * Revision 1.91  1999-06-01 14:29:12  adam
+ * Work on Extended Services.
+ *
+ * Revision 1.90  1999/05/27 13:02:20  adam
  * Assigned OID for old DB Update (VAL_DBUPDATE0).
  *
  * Revision 1.89  1999/05/26 15:24:26  adam
@@ -1761,21 +1764,31 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 
     resp->referenceId = req->referenceId;
 
-    if ( esrequest.errcode == 0 )
+    if (esrequest.errcode == -1)
     {
         /* Backend service indicates request will be processed */
-        logf(LOG_DEBUG,"Request will be processed...Good !");
+        logf(LOG_DEBUG,"Request could be processed...Accepted !");
+        *resp->operationStatus = Z_ExtendedServicesResponse_accepted;
+    }
+    else if (esrequest.errcode == 0)
+    {
+        /* Backend service indicates request will be processed */
+        logf(LOG_DEBUG,"Request could be processed...Done !");
         *resp->operationStatus = Z_ExtendedServicesResponse_done;
     }
     else
     {
+	Z_DiagRecs *diagRecs = diagrecs (assoc, esrequest.errcode,
+					 esrequest.errstring);
+
         /* Backend indicates error, request will not be processed */
-        logf(LOG_DEBUG,"Request will not be processed...BAD !");
+        logf(LOG_DEBUG,"Request could not be processed...failure !");
         *resp->operationStatus = Z_ExtendedServicesResponse_failure;
+	resp->num_diagnostics = diagRecs->num_diagRecs;
+	resp->diagnostics = diagRecs->diagRecs;
     }
     /* Do something with the members of bend_extendedservice */
 
     logf(LOG_DEBUG,"Send the result apdu");
-
     return apdu;
 }

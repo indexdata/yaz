@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.83  1999-05-26 15:24:26  adam
+ * Revision 1.84  1999-06-01 14:29:11  adam
+ * Work on Extended Services.
+ *
+ * Revision 1.83  1999/05/26 15:24:26  adam
  * Fixed minor bugs regarding DB Update (introduced by previous commit).
  *
  * Revision 1.82  1999/05/26 13:49:12  adam
@@ -1129,7 +1132,20 @@ static int process_resourceControlRequest (Z_ResourceControlRequest *req)
 
 void process_ESResponse(Z_ExtendedServicesResponse *res)
 {
-    printf("process_ESResponse\n");
+    printf("process_ESResponse status=");
+    switch (*res->operationStatus)
+    {
+    case Z_ExtendedServicesResponse_done:
+	printf ("done\n");
+	break;
+    case Z_ExtendedServicesResponse_accepted:
+	printf ("accepted\n");
+	break;
+    case Z_ExtendedServicesResponse_failure:
+	printf ("failure\n");
+	display_diagrecs(res->diagnostics, res->num_diagnostics);
+	break;
+    }
 }
 
 static Z_External *CreateItemOrderExternal(int itemno)

@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.24  1999-05-27 13:07:54  adam
+ * Revision 1.25  1999-06-01 14:29:12  adam
+ * Work on Extended Services.
+ *
+ * Revision 1.24  1999/05/27 13:07:54  adam
  * Fix.
  *
  * Revision 1.23  1999/05/27 13:02:20  adam
@@ -215,8 +218,17 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		    logf (LOG_LOG, " unknown (%d)", *toKeep->action);
 		}
 	    }
-	    logf (LOG_LOG, "database: %s", 
-		  (toKeep->databaseName ? toKeep->databaseName : "<null>"));
+	    if (toKeep->databaseName)
+	    {
+		logf (LOG_LOG, "database: %s", toKeep->databaseName);
+		if (!strcmp(toKeep->databaseName, "fault"))
+		{
+		    rr->errcode = 109;
+		    rr->errstring = toKeep->databaseName;
+		}
+		if (!strcmp(toKeep->databaseName, "accept"))
+		    rr->errcode = -1;
+	    }
 	    if (notToKeep)
 	    {
 		int i;
@@ -264,7 +276,6 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	      rr->esr->taskSpecificParameters->which);
 	
     }
-    rr->errcode = 0;
     return 0;
 }
 

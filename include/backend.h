@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.24  1999-03-31 11:18:24  adam
+ * Revision 1.25  1999-06-01 14:29:12  adam
+ * Work on Extended Services.
+ *
+ * Revision 1.24  1999/03/31 11:18:24  adam
  * Implemented odr_strdup. Added Reference ID to backend server API.
  *
  * Revision 1.23  1998/10/13 16:12:23  adam
@@ -231,7 +234,7 @@ typedef struct bend_esrequest_rr
     Z_ReferenceId *referenceId;/* reference ID */
     bend_request request;
     bend_association association;
-    int errcode;               /* 0==success */
+    int errcode;               /* 0==success, -1==accepted, >0 = failure */
     char *errstring;           /* system error string or NULL */
 } bend_esrequest_rr;
 
