@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_prtree.c,v 1.9 2002-07-11 10:40:50 adam Exp $
+ * $Id: d1_prtree.c,v 1.10 2002-09-24 13:58:13 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -31,7 +31,8 @@ static void pr_tree (data1_handle dh, data1_node *n, FILE *out, int level)
         fprintf (out, "root abstract syntax=%s\n", n->u.root.type);
         break;
     case DATA1N_tag:
-	fprintf (out, "tag type=%s\n", n->u.tag.tag);
+	fprintf (out, "tag type=%s sel=%d\n", n->u.tag.tag,
+                 n->u.tag.node_selected);
         if (n->u.tag.attributes)
         {
             data1_xattr *xattr = n->u.tag.attributes;

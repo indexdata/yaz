@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_write.c,v 1.17 2002-08-23 14:25:07 adam Exp $
+ * $Id: d1_write.c,v 1.18 2002-09-24 13:58:13 adam Exp $
  */
 
 #include <string.h>
@@ -100,7 +100,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col,
         }
         else if (c->which == DATA1N_tag)
 	{
-	    if (select && c->u.tag.node_selected)
+	    if (select && !c->u.tag.node_selected)
 		continue;
             tag = c->u.tag.tag;
 	    if (!data1_matchstr(tag, "wellknown")) /* skip wellknown */

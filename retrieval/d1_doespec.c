@@ -1,54 +1,10 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: d1_doespec.c,v $
- * Revision 1.14  1999-11-30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.13  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.12  1999/04/23 13:34:33  adam
- * Fixed bug in match_triple. Thanks to Franck Falcoz <franck@dtv.dk>.
- *
- * Revision 1.11  1997/11/06 11:36:44  adam
- * Implemented variant match on simple elements -data1 tree and Espec-1.
- *
- * Revision 1.10  1997/10/02 12:10:24  quinn
- * Attempt to fix bug in especs
- *
- * Revision 1.9  1997/09/17 12:10:35  adam
- * YAZ version 1.4.
- *
- * Revision 1.8  1997/05/14 06:54:02  adam
- * C++ support.
- *
- * Revision 1.7  1997/04/30 08:52:11  quinn
- * Null
- *
- * Revision 1.6  1996/10/11  11:57:22  quinn
- * Smallish
- *
- * Revision 1.5  1996/07/06  19:58:34  quinn
- * System headerfiles gathered in yconfig
- *
- * Revision 1.4  1996/06/07  11:04:32  quinn
- * Fixed tag->tagset dependency
- *
- * Revision 1.3  1995/11/13  09:27:33  quinn
- * Fiddling with the variant stuff.
- *
- * Revision 1.2  1995/11/01  13:54:45  quinn
- * Minor adjustments
- *
- * Revision 1.1  1995/11/01  11:56:07  quinn
- * Added Retrieval (data management) functions en masse.
- *
- *
+ * $Id: d1_doespec.c,v 1.15 2002-09-24 13:58:13 adam Exp $
  */
-
 
 #include <assert.h>
 
@@ -188,8 +144,9 @@ static int match_children_here (data1_handle dh, data1_node *n,
     for (c = n->child; c ; c = c->next)
     {
 	data1_tag *tag = 0;
+
 	if (c->which != DATA1N_tag)
-	    return 0;
+            continue;
 
 	if (tp->which == Z_ETagUnit_specificTag)
 	{
@@ -304,13 +261,13 @@ static int match_children(data1_handle dh, data1_node *n, Z_Espec1 *e,
 	return 1;
     switch (t[0]->which)
     {
-	case Z_ETagUnit_wildThing:
-	case Z_ETagUnit_specificTag:
-	    res = match_children_here(dh, n, e, i, t, num); break;
-	case Z_ETagUnit_wildPath:
-	    res = match_children_wildpath(dh, n, e, i, t, num); break;
-	default:
-	    abort();
+    case Z_ETagUnit_wildThing:
+    case Z_ETagUnit_specificTag:
+        res = match_children_here(dh, n, e, i, t, num); break;
+    case Z_ETagUnit_wildPath:
+        res = match_children_wildpath(dh, n, e, i, t, num); break;
+    default:
+        abort();
     }
     return res;
 }
@@ -319,13 +276,17 @@ int data1_doespec1 (data1_handle dh, data1_node *n, Z_Espec1 *e)
 {
     int i;
 
+    n = data1_get_root_tag (dh, n);
+    if (n && n->which == DATA1N_tag)
+        n->u.tag.node_selected = 1;
+    
     for (i = 0; i < e->num_elements; i++)
     {
-	if (e->elements[i]->which != Z_ERequest_simpleElement)
-	    return 100;
-    	match_children(dh, n, e, i,
-		       e->elements[i]->u.simpleElement->path->tags,
-		       e->elements[i]->u.simpleElement->path->num_tags);
+        if (e->elements[i]->which != Z_ERequest_simpleElement)
+            return 100;
+        match_children(dh, n, e, i,
+                       e->elements[i]->u.simpleElement->path->tags,
+                       e->elements[i]->u.simpleElement->path->num_tags);
     }
     return 0;
 }
