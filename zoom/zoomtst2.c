@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst2.c,v 1.3 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoomtst2.c,v 1.4 2002-09-24 08:00:32 adam Exp $
  *
  * Asynchronous single-target client performing search (no retrieval)
  */
@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     {
 	fprintf (stderr, "usage:\n%s target query\n", *argv);
 	fprintf (stderr,
-		 "Verify: aasynchronous single-target client\n");
+		 "Verify: asynchronous single-target client\n");
 	exit (1);
     }
 
