@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.25 2005-03-05 12:14:12 adam Exp $
+ * $Id: statserv.c,v 1.26 2005-03-08 11:07:50 adam Exp $
  */
 
 /**
@@ -216,6 +216,7 @@ static struct gfs_server * gfs_server_new()
     n->listen_ref = 0;
     n->cql_transform = 0;
     n->server_node_ptr = 0;
+    n->directory = 0;
     return n;
 }
 
@@ -267,6 +268,12 @@ int control_association(association *assoc, const char *host, int force_open)
 		    assoc->backend = 0;
 		    xfree(assoc->init);
 		    assoc->init = 0;
+		    if (gfs->directory)
+		    {
+			if (chdir(gfs->directory))
+			    yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s",
+				    gfs->directory);
+		    }
 		}
 		assoc->cql_transform = gfs->cql_transform;
 		assoc->server_node_ptr = gfs->server_node_ptr;
@@ -333,11 +340,18 @@ static void xml_config_read()
 	    xmlNodePtr ptr_server = ptr;
 	    xmlNodePtr ptr;
 	    const char *listenref = 0;
+	    const char *id = 0;
 
 	    for ( ; attr; attr = attr->next)
-		if (!strcmp(attr->name, "listenref")
-		    && attr->children && attr->children->type == XML_TEXT_NODE)
+		if (!strcmp(attr->name, "listenref") && attr->children &&
+		    attr->children->type == XML_TEXT_NODE)
 		    listenref = nmem_dup_xml_content(gfs_nmem, attr->children);
+		else if (!strcmp(attr->name, "id") && attr->children &&
+			 attr->children->type == XML_TEXT_NODE)
+		    id = nmem_dup_xml_content(gfs_nmem, attr->children);
+		else
+		    yaz_log(YLOG_WARN, "Unknown attribute '%s' for server",
+			    attr->name);
 	    *gfsp = gfs_server_new();
 	    (*gfsp)->server_node_ptr = ptr_server;
 	    if (listenref)
@@ -363,16 +377,21 @@ static void xml_config_read()
 		    (*gfsp)->host = nmem_dup_xml_content(gfs_nmem,
 							 ptr->children);
 		}
-		if (!strcmp((const char *) ptr->name, "config"))
+		else if (!strcmp((const char *) ptr->name, "config"))
 		{
 		    strcpy((*gfsp)->cb.configname,
 			   nmem_dup_xml_content(gfs_nmem, ptr->children));
 		}
-		if (!strcmp((const char *) ptr->name, "cql2rpn"))
+		else if (!strcmp((const char *) ptr->name, "cql2rpn"))
 		{
 		    (*gfsp)->cql_transform = cql_transform_open_fname(
 			nmem_dup_xml_content(gfs_nmem, ptr->children)
 			);
+		}
+		else if (!strcmp((const char *) ptr->name, "directory"))
+		{
+		    (*gfsp)->directory = 
+			nmem_dup_xml_content(gfs_nmem, ptr->children);
 		}
 	    }
 	    gfsp = &(*gfsp)->next;

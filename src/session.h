@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.7 2005-03-03 23:16:20 adam Exp $
+ * $Id: session.h,v 1.8 2005-03-08 11:07:49 adam Exp $
  */
 /**
  * \file session.h
@@ -25,6 +25,7 @@ struct gfs_server {
     int listen_ref;
     cql_transform_t cql_transform;
     void *server_node_ptr;
+    char *directory;
     struct gfs_server *next;
 };
 
