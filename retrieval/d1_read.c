@@ -3,20 +3,15 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.50 2002-08-26 10:43:52 adam Exp $
+ * $Id: d1_read.c,v 1.51 2002-08-28 07:54:11 adam Exp $
  */
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <errno.h>
-
-#if HAVE_ICONV_H
-#include <iconv.h>
-#endif
-
 #include <yaz/xmalloc.h>
+#include <yaz/yaz-util.h>
 #include <yaz/log.h>
 #include <yaz/data1.h>
 
@@ -871,9 +866,7 @@ data1_node *data1_read_sgml (data1_handle dh, NMEM m, const char *buf)
 }
 
 
-#if HAVE_ICONV_H
-
-static int conv_item (NMEM m, iconv_t t, 
+static int conv_item (NMEM m, yaz_iconv_t t, 
                       WRBUF wrbuf, char *inbuf, size_t inlen)
 {
     wrbuf_rewind (wrbuf);
@@ -883,8 +876,8 @@ static int conv_item (NMEM m, iconv_t t,
     {
         char *outbuf = wrbuf->buf + wrbuf->pos;
         size_t outlen = wrbuf->size - wrbuf->pos;
-        if (iconv (t, &inbuf, &inlen, &outbuf, &outlen) ==
-            (size_t)(-1) && errno != E2BIG)
+        if (yaz_iconv (t, &inbuf, &inlen, &outbuf, &outlen) ==
+            (size_t)(-1) && yaz_iconv_error(t) != YAZ_ICONV_E2BIG)
         {
             /* bad data. stop and skip conversion entirely */
             return -1;
@@ -905,7 +898,7 @@ static int conv_item (NMEM m, iconv_t t,
 }
 
 static void data1_iconv_s (data1_handle dh, NMEM m, data1_node *n,
-                           iconv_t t, WRBUF wrbuf, const char *tocode)
+                           yaz_iconv_t t, WRBUF wrbuf, const char *tocode)
 {
     for (; n; n = n->next)
     {
@@ -957,7 +950,6 @@ static void data1_iconv_s (data1_handle dh, NMEM m, data1_node *n,
         data1_iconv_s (dh, m, n->child, t, wrbuf, tocode);
     }
 }
-#endif
 
 const char *data1_get_encoding (data1_handle dh, data1_node *n)
 {
@@ -982,19 +974,15 @@ int data1_iconv (data1_handle dh, NMEM m, data1_node *n,
                   const char *tocode, 
                   const char *fromcode)
 {
-#if HAVE_ICONV_H
     if (strcmp (tocode, fromcode))
     {
         WRBUF wrbuf = wrbuf_alloc();
-        iconv_t t = iconv_open (tocode, fromcode);
-        if (t == (iconv_t) (-1))
+        yaz_iconv_t t = yaz_iconv_open (tocode, fromcode);
+        if (!t)
             return -1;
         data1_iconv_s (dh, m, n, t, wrbuf, tocode);
-        iconv_close (t);
+        yaz_iconv_close (t);
         wrbuf_free (wrbuf, 1);
     }
     return 0;
-#else
-    return -2;
-#endif
 }
