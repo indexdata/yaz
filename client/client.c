@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.143 2002-02-18 12:54:02 adam Exp $
+ * $Id: client.c,v 1.144 2002-02-20 14:41:19 adam Exp $
  */
 
 #include <stdio.h>
@@ -140,7 +140,7 @@ static void print_stringn(const unsigned char *buf, size_t len)
    size_t i;
    for (i = 0; i<len; i++)
        if ((buf[i] <= 126 && buf[i] >= 32) || strchr ("\n\r\t\f", buf[i]))
-           fputc (buf[i], stdout);
+           printf ("%c", buf[i]);
        else
            printf ("\\X%02X", buf[i]);
 }
@@ -491,7 +491,7 @@ static void print_record(const unsigned char *buf, size_t len)
     print_stringn (buf, len);
     /* add newline if not already added ... */
     if (i <= 0 || buf[i-1] != '\n')
-       fputc ('\n', stdout);
+       printf ("\n");
 }
 
 static void display_record(Z_External *r)
@@ -569,12 +569,12 @@ static void display_record(Z_External *r)
 #if AVOID_MARC_DECODE
                 /* primitive check for a marc OID 5.1-29 except 16 */
                 ent->oidsuffix[0] == 5 && ent->oidsuffix[1] < 30 &&
-                ent->oidsuffix[1] != 16)
+                ent->oidsuffix[1] != 16
 #else
-        1
+                1
 #endif
-        )
-        {
+                )
+            {
                 if (marc_display_exl (octet_buf, NULL, 0 /* debug */,
                                       r->u.octet_aligned->len) <= 0)
                 {
