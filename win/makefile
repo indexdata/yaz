@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.27 2001-10-24 12:24:43 adam Exp $
+# $Id: makefile,v 1.28 2001-10-25 10:45:08 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=1   # 0 for release, 1 for debug
+DEBUG=0   # 0 for release, 1 for debug
 
 default: all
 
@@ -753,10 +753,8 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 
 ############## clean
 clean:
-	del $(DLL) 
-	del $(CLIENT)
-	del $(ZTEST)
-	del $(ZOOMSH)
+	del $(BINDIR)\*.exe
+	del $(BINDIR)\*.dll
 	del $(TMPDIR)\*.
 
 	del $(LIBDIR)\*.MAP
@@ -803,7 +801,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.27  2001-10-24 12:24:43  adam
+# Revision 1.28  2001-10-25 10:45:08  adam
+# Fixed make clean.
+#
+# Revision 1.27  2001/10/24 12:24:43  adam
 # WIN32 updates: ZOOM runs, nmem_init/nmem_exit called in DllMain.
 #
 # Revision 1.26  2001/09/27 12:09:18  adam
