@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.103  2000-08-10 08:41:26  adam
+ * Revision 1.104  2000-09-04 08:58:15  adam
+ * Added prefix yaz_ for most logging utility functions.
+ *
+ * Revision 1.103  2000/08/10 08:41:26  adam
  * Fixes for ILL.
  *
  * Revision 1.102  2000/05/18 11:57:04  adam
@@ -2513,7 +2516,7 @@ int main(int argc, char **argv)
                 apdu_file=fopen(arg, "a");
             break;
 	case 'v':
-	    log_init (log_mask_str(arg), "", NULL);
+	    yaz_log_init (yaz_log_mask_str(arg), "", NULL);
 	    break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "

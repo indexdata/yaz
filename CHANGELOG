@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Added prefix "yaz_" for the functions log_init.., log_file..  and
+log_mask_str. This was done to avoid name conflicts with other
+libraries (say other PHP extensions).
+
 Added raw OID member for preferred record syntax (request_format_raw)
 and returned record syntax (output_format_raw) for backend fetch method.
 

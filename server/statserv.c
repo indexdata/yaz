@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.64  2000-04-05 07:39:55  adam
+ * Revision 1.65  2000-09-04 08:58:15  adam
+ * Added prefix yaz_ for most logging utility functions.
+ *
+ * Revision 1.64  2000/04/05 07:39:55  adam
  * Added shared library support (libtool).
  *
  * Revision 1.63  2000/03/20 19:06:25  adam
@@ -609,7 +612,7 @@ static void listener(IOCHAN h, int event)
 		    }
 		}
 		sprintf(nbuf, "%s(%d)", me, getpid());
-		log_init(control_block.loglevel, nbuf, 0);
+		yaz_log_init(control_block.loglevel, nbuf, 0);
 	    }
 	    else /* parent */
 	    {
@@ -971,11 +974,11 @@ int check_options(int argc, char **argv)
 	    break;
 	case 'l':
 	    strcpy(control_block.logfile, arg ? arg : "");
-	    log_init(control_block.loglevel, me, control_block.logfile);
+	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
 	    break;
 	case 'v':
-	    control_block.loglevel = log_mask_str(arg);
-	    log_init(control_block.loglevel, me, control_block.logfile);
+	    control_block.loglevel = yaz_log_mask_str(arg);
+	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
 	    break;
 	case 'a':
 	    strcpy(control_block.apdufile, arg ? arg : "");

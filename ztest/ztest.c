@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.33  2000-08-10 08:41:26  adam
+ * Revision 1.34  2000-09-04 08:58:15  adam
+ * Added prefix yaz_ for most logging utility functions.
+ *
+ * Revision 1.33  2000/08/10 08:41:26  adam
  * Fixes for ILL.
  *
  * Revision 1.32  2000/04/05 07:39:55  adam
@@ -219,7 +222,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                        odr_offset(rr->decode));
 #if 0
                                 yaz_log(LOG_LOG, "PDU dump:");
-                                odr_dumpBER(log_file(),
+                                odr_dumpBER(yaz_log_file(),
                                      r->u.single_ASN1_type->buf,
                                      r->u.single_ASN1_type->len);
 #endif
@@ -247,7 +250,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                        odr_errmsg(odr_geterror(rr->decode)),
                                        odr_offset(rr->decode));
                                 yaz_log(LOG_LOG, "PDU dump:");
-                                odr_dumpBER(log_file(),
+                                odr_dumpBER(yaz_log_file(),
                                      r->u.single_ASN1_type->buf,
                                      r->u.single_ASN1_type->len);
                             }

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.107  2000-08-31 10:20:12  adam
+ * Revision 1.108  2000-09-04 08:58:15  adam
+ * Added prefix yaz_ for most logging utility functions.
+ *
+ * Revision 1.107  2000/08/31 10:20:12  adam
  * Added member request_format and output_format for backend fetch method.
  *
  * Revision 1.106  2000/08/31 09:51:25  adam
@@ -608,7 +611,7 @@ void ir_session(IOCHAN h, int event)
 		    odr_errmsg(odr_geterror(assoc->decode)),
 		    odr_offset(assoc->decode));
 		yaz_log(LOG_LOG, "PDU dump:");
-		odr_dumpBER(log_file(), assoc->input_buffer, res);
+		odr_dumpBER(yaz_log_file(), assoc->input_buffer, res);
 		do_close(assoc, Z_Close_protocolError, "Malformed package");
 		return;
 	    }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.23  2000-03-14 09:06:11  adam
+ * Revision 1.24  2000-09-04 08:58:15  adam
+ * Added prefix yaz_ for most logging utility functions.
+ *
+ * Revision 1.23  2000/03/14 09:06:11  adam
  * Added POSIX threads support for frontend server.
  *
  * Revision 1.22  2000/02/29 13:44:55  adam
@@ -150,14 +153,14 @@ static struct {
     { 0, NULL }
 };  
 
-FILE *log_file(void)
+FILE *yaz_log_file(void)
 {
     if (!l_file)
         l_file = stderr;
     return l_file;
 }
 
-void log_init_file (const char *fname)
+void yaz_log_init_file (const char *fname)
 {
     FILE *new_file;
     if (!l_file)
@@ -174,22 +177,22 @@ void log_init_file (const char *fname)
     l_file = new_file;
 }
 
-void log_init_level (int level)
+void yaz_log_init_level (int level)
 {
     l_level = level;
 }
 
-void log_init_prefix (const char *prefix)
+void yaz_log_init_prefix (const char *prefix)
 {
     if (prefix && *prefix)
     	sprintf(l_prefix, "%.512s", prefix);
 }
 
-void log_init(int level, const char *prefix, const char *fname)
+void yaz_log_init(int level, const char *prefix, const char *fname)
 {
-    log_init_level (level);
-    log_init_prefix (prefix);
-    log_init_file (fname);
+    yaz_log_init_level (level);
+    yaz_log_init_prefix (prefix);
+    yaz_log_init_file (fname);
 }
 
 static void (*start_hook_func)(int, const char *, void *) = NULL;
@@ -250,12 +253,12 @@ void yaz_log(int level, const char *fmt, ...)
 	(*end_hook_func)(o_level, buf, end_hook_info);
 }
 
-int log_mask_str (const char *str)
+int yaz_log_mask_str (const char *str)
 {
-    return log_mask_str_x (str, LOG_DEFAULT_LEVEL);
+    return yaz_log_mask_str_x (str, LOG_DEFAULT_LEVEL);
 }
 
-int log_mask_str_x (const char *str, int level)
+int yaz_log_mask_str_x (const char *str, int level)
 {
     const char *p;
     int i;

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.3  2000-06-09 13:51:01  ian
+ * Revision 1.4  2000-09-04 08:58:15  adam
+ * Added prefix yaz_ for most logging utility functions.
+ *
+ * Revision 1.3  2000/06/09 13:51:01  ian
  * Added LOG_APP for logging application (Rather than code) events that might
  * be useful when creating usage reports.
  *
@@ -117,19 +120,19 @@ YAZ_BEGIN_CDECL
 
 #define logf yaz_log
 
-YAZ_EXPORT void log_init(int level, const char *prefix, const char *name);
-YAZ_EXPORT void log_init_file (const char *fname);
-YAZ_EXPORT void log_init_level (int level);
-YAZ_EXPORT void log_init_prefix (const char *prefix);
+YAZ_EXPORT void yaz_log_init(int level, const char *prefix, const char *name);
+YAZ_EXPORT void yaz_log_init_file (const char *fname);
+YAZ_EXPORT void yaz_log_init_level (int level);
+YAZ_EXPORT void yaz_log_init_prefix (const char *prefix);
 
 YAZ_EXPORT void yaz_log(int level, const char *fmt, ...)
 #ifdef __GNUC__
 	__attribute__ ((format (printf, 2, 3)))
 #endif
 	;
-YAZ_EXPORT int log_mask_str (const char *str);
-YAZ_EXPORT int log_mask_str_x (const char *str, int level);
-YAZ_EXPORT FILE *log_file(void);
+YAZ_EXPORT int yaz_log_mask_str (const char *str);
+YAZ_EXPORT int yaz_log_mask_str_x (const char *str, int level);
+YAZ_EXPORT FILE *yaz_log_file(void);
 
 YAZ_EXPORT void log_event_start (void (*func)(int level, const char *msg, void *info),
 	void *info);
