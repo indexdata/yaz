@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.13 2004-10-15 00:18:59 adam Exp $
+ * $Id: log.h,v 1.14 2004-11-02 11:37:21 heikki Exp $
  */
 
 /**
@@ -63,6 +63,14 @@ YAZ_EXPORT void yaz_log_init_file (const char *fname);
 YAZ_EXPORT void yaz_log_init_level (int level);
 YAZ_EXPORT void yaz_log_init_prefix (const char *prefix);
 YAZ_EXPORT void yaz_log_init_prefix2 (const char *prefix);
+/** 
+ * yaz_log_time_format sets the format of the timestamp. See man 3 strftime 
+ * Calling with "old" sets to the old format "11:55:06-02/11"
+ * Calling with NULL or "" sets to the new format "20041102-115719"
+ * If not called at all, the old format is used, for backward compatibility
+ *
+ * */
+YAZ_EXPORT void yaz_log_time_format(const char *fmt);
 
 YAZ_EXPORT void yaz_log(int level, const char *fmt, ...)
 #ifdef __GNUC__

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.254 2004-11-01 21:19:08 adam Exp $
+ * $Id: client.c,v 1.255 2004-11-02 11:37:21 heikki Exp $
  */
 
 #include <stdio.h>
@@ -51,6 +51,7 @@
 #include <yaz/srw.h>
 #include <yaz/yaz-ccl.h>
 #include <yaz/cql.h>
+#include <yaz/log.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>

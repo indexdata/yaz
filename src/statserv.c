@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.9 2004-10-15 00:19:01 adam Exp $
+ * $Id: statserv.c,v 1.10 2004-11-02 11:37:21 heikki Exp $
  */
 
 /**
@@ -426,8 +426,7 @@ static void listener(IOCHAN h, int event)
 		sprintf(nbuf, "%s(%d)", me, getpid());
 		yaz_log_init(control_block.loglevel, nbuf, 0);
                 /* ensure that bend_stop is not called when each child exits -
-                   only for the main process .. 
-                */
+                   only for the main process ..  */
                 control_block.bend_stop = 0;
 	    }
 	    else /* parent */

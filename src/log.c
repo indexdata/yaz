@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ * $Id: log.c,v 1.3 2004-11-02 11:37:21 heikki Exp $
  */
 
 /**
@@ -41,11 +41,17 @@ char *strerror(int n)
 
 #endif
 
+
 static int l_level = LOG_DEFAULT_LEVEL;
 static FILE *l_file = NULL;
 static char l_prefix[512] = "";
 static char l_prefix2[512] = "";
 static char l_fname[512] = "";
+static char l_old_default_format[]="%H:%M:%S-%d/%m";
+static char l_new_default_format[]="%Y%m%d-%H%M%S";
+#define TIMEFORMAT_LEN 50
+static char l_custom_format[TIMEFORMAT_LEN]="";
+static char *l_actual_format=l_old_default_format;
 
 static struct {
     int mask;
@@ -157,7 +163,7 @@ void yaz_log(int level, const char *fmt, ...)
     int i;
     time_t ti;
     struct tm *tim;
-    char tbuf[50]="";
+    char tbuf[TIMEFORMAT_LEN]="";
     int o_level = level;
 
     if (!(level & l_level))
@@ -198,12 +204,31 @@ void yaz_log(int level, const char *fmt, ...)
     if (l_level & LOG_NOTIME)
       tbuf[0]='\0';
     else
-      strftime(tbuf, 50, "%H:%M:%S-%d/%m: ", tim);
-    fprintf(l_file, "%s%s%s %s%s\n", tbuf, l_prefix, flags,
+      strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tim);
+    tbuf[TIMEFORMAT_LEN-1]='\0';
+    fprintf(l_file, "%s %s%s %s%s\n", tbuf, l_prefix, flags,
             l_prefix2, buf);
     fflush(l_file);
     if (end_hook_func)
 	(*end_hook_func)(o_level, buf, end_hook_info);
+}
+
+void yaz_log_time_format(const char *fmt)
+{
+    if ( !fmt || !*fmt) 
+    { /* no format, default to new */
+        l_actual_format = l_new_default_format;
+        return; 
+    }
+    if (0==strcmp(fmt,"old"))
+    { /* force the old format */
+        l_actual_format = l_old_default_format;
+        return; 
+    }
+    /* else use custom format */
+    strncpy(l_custom_format, fmt, TIMEFORMAT_LEN-1);
+    l_custom_format[TIMEFORMAT_LEN-1]='\0';
+    l_actual_format = l_custom_format;
 }
 
 int yaz_log_mask_str (const char *str)
