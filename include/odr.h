@@ -5,7 +5,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.h,v $
- * Revision 1.1  1995-03-30 09:39:41  quinn
+ * Revision 1.2  1995-04-18 08:14:37  quinn
+ * Added dynamic memory allocation on encoding
+ *
+ * Revision 1.1  1995/03/30  09:39:41  quinn
  * Moved .h files to include directory
  *
  * Revision 1.15  1995/03/29  15:39:57  quinn
@@ -130,13 +133,29 @@ typedef int Odr_oid;   /* terminate by -1 */
 typedef struct odr_constack
 {
     unsigned char *base;         /* starting point of data */
+    int base_offset;
     int len;                     /* length of data, if known, else -1
 					(decoding only) */
     unsigned char *lenb;         /* where to encode length */
+    int len_offset;
     int lenlen;                  /* length of length-field */
 } odr_constack;
 
 struct odr_memblock; /* defined in odr_mem.c */
+
+#define ODR_S_SET     0
+#define ODR_S_CUR     1
+#define ODR_S_END     2
+
+typedef struct odr_ecblock
+{
+    int can_grow;         /* are we allowed to reallocate */
+    unsigned char *buf;            /* memory handle */
+    int pos;              /* current position */
+    int top;              /* top of buffer */
+    int size;             /* current buffer size */
+} odr_ecblock;
+
 
 typedef struct odr
 {
@@ -147,6 +166,8 @@ typedef struct odr
     int buflen;          /* size of buffer for encoding, len for decoding */
     unsigned char *bp;   /* position in buffer */
     int left;            /* bytes remaining in buffer */
+
+    odr_ecblock ecb;     /* memory control block */
 
     int t_class;         /* implicit tagging (-1==default tag) */
     int t_tag;
@@ -220,6 +241,45 @@ void *odr_malloc(ODR o, int size);
 
 #define ODR_MASK_GET(mask, num)  ( ((num) >> 3 <= (mask)->top) ? \
     ((mask)->bits[(num) >> 3] & (0X80 >> ((num) & 0X07)) ? 1 : 0) : 0)
+
+/*
+ * write a single character at the current position - grow buffer if
+ * necessary.
+ * (no, we're not usually this anal about our macros, but this one is
+ *  next to unreadable without some indentation  :)
+ */
+#define odr_putc(o, c) \
+( \
+    ( \
+    	(o)->ecb.pos < (o)->ecb.size ? \
+	( \
+	    (o)->ecb.buf[(o)->ecb.pos++] = (c), \
+	    0 \
+	) : \
+	( \
+	    odr_grow_block(&(o)->ecb, 1) == 0 ? \
+	    ( \
+	    	(o)->ecb.buf[(o)->ecb.pos++] = (c), \
+		0 \
+	    ) : \
+	    ( \
+	    	(o)->error = OSPACE, \
+		-1 \
+	    ) \
+	) \
+    ) == 0 ? \
+    ( \
+    	(o)->ecb.pos > (o)->ecb.top ? \
+	( \
+	    (o)->ecb.top = (o)->ecb.pos, \
+	    0 \
+	) : \
+	0 \
+    ) : \
+    	-1 \
+) \
+
+#define odr_tell(o) ((o)->ecb.pos)
 
 #include <prt.h>
 #include <dmalloc.h>

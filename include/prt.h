@@ -1,6 +1,6 @@
 int ber_boolean(ODR o, int *val);
 int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt);
-int ber_enctag(unsigned char *buf, int class, int tag, int constructed, int len);
+int ber_enctag(ODR o, int class, int tag, int constructed);
 int ber_dectag(unsigned char *buf, int *class, int *tag, int *constructed);
 int odr_bool(ODR o, int **p, int opt);
 int odr_integer(ODR o, int **p, int opt);
@@ -9,7 +9,7 @@ int odr_implicit_settag(ODR o, int class, int tag);
 int odr_implicit(ODR o, int (*type)(ODR o, void *p, int opt), void *p,
     int class, int tag, int opt);
 #endif
-int ber_enclen(unsigned char *buf, int len, int lenlen, int exact);
+int ber_enclen(ODR o, int len, int lenlen, int exact);
 int ber_declen(unsigned char *buf, int *len);
 char *odr_indent(ODR o);
 int ber_null(ODR o, int *val);
@@ -42,3 +42,6 @@ void odr_oidcat(Odr_oid *t, Odr_oid *s);
 int odr_oidcmp(Odr_oid *o1, Odr_oid *o2);
 int odr_oidlen(Odr_oid *o);
 Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
+int odr_grow_block(odr_ecblock *b, int min_bytes);
+int odr_write(ODR o, unsigned char *buf, int bytes);
+int odr_seek(ODR o, int whence, int offset);
