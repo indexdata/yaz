@@ -1,4 +1,4 @@
-YAZ toolkit - $Id: README,v 1.38 2001-10-25 12:29:35 adam Exp $
+YAZ toolkit - $Id: README,v 1.39 2001-11-19 20:43:39 adam Exp $
 
 Copyright (C) 1995-2001, Index Data ApS.
 See the file LICENSE for details.
@@ -38,7 +38,7 @@ z39.50   codecs for the Z39.50 protocol. This module does the same job
 zutil    This module implements a collection of Z39.50 utilities, such
          as query parsing, etc.
 
-ill      codesc for the ISO ILL protocol.
+ill      codecs for the ISO ILL protocol.
 
 comstack This module implements the transport transparency
 	 stack (COMSTACK). The comstack implements a generic interface

@@ -1,8 +1,12 @@
-## $Id: Makefile.am,v 1.17 2001-11-19 09:16:37 adam Exp $
+## $Id: Makefile.am,v 1.18 2001-11-19 20:43:39 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
 endif
+
+LDFLAGS=-version-info 1:0:0
+
+bin_SCRIPTS = yaz-config
 
 lib_LTLIBRARIES = libyaz.la $(extra) libyazmalloc.la
 
@@ -13,27 +17,40 @@ EXTRA_libyaz_la_SOURCES=x.c
 # No real sources
 libyaz_la_SOURCES=
 
-libyazthread_la_SOURCES=nmem.c statserv.c eventl.c
+libyazthread_la_LIBADD=nmem.lo statserv.lo eventl.lo
+libyazthread_la_SOURCES=
 
-libyazmalloc_la_SOURCES=xmalloc.c
+libyazmalloc_la_LIBADD=xmalloc.lo
+libyazmalloc_la_SOURCES=
 
-$(srcdir)/nmem.c: $(top_srcdir)/util/nmem.c
-	cp $(top_srcdir)/util/nmem.c $(srcdir)
+THREADED_FLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/server @CFLAGSTHREADS@
 
-$(srcdir)/statserv.c: $(top_srcdir)/server/statserv.c
-	cp $(top_srcdir)/server/statserv.c $(srcdir)
+XMALLOC_FLAGS = -DTRACE_XMALLOC=2 -I$(top_srcdir)/include
 
-$(srcdir)/eventl.c: $(top_srcdir)/server/eventl.c
-	cp $(top_srcdir)/server/eventl.c $(srcdir)
+nmem.lo: $(top_srcdir)/util/nmem.c
+	$(LTCOMPILE) $(THREADED_FLAGS) -c $(top_srcdir)/util/nmem.c
 
-$(srcdir)/xmalloc.c: $(top_srcdir)/util/xmalloc.c
-	cp $(top_srcdir)/util/xmalloc.c $(srcdir)
+nmem.o: $(top_srcdir)/util/nmem.c
+	$(COMPILE) $(THREADED_FLAGS) -c $(top_srcdir)/util/nmem.c
 
-LDFLAGS=-version-info 1:0:0
+statserv.lo: $(top_srcdir)/server/statserv.c
+	$(LTCOMPILE) $(THREADED_FLAGS) -c $(top_srcdir)/server/statserv.c
 
-AM_CFLAGS=-DTRACE_XMALLOC=2 -I$(top_srcdir)/include -I$(top_srcdir)/server @CFLAGSTHREADS@
+statserv.o: $(top_srcdir)/server/statserv.c
+	$(COMPILE) $(THREADED_FLAGS) -c $(top_srcdir)/server/statserv.c
 
-bin_SCRIPTS = yaz-config
+eventl.lo: $(top_srcdir)/server/eventl.c
+	$(LTCOMPILE) $(THREADED_FLAGS) -c $(top_srcdir)/server/eventl.c
+
+eventl.o: $(top_srcdir)/server/eventl.c
+	$(COMPILE) $(THREADED_FLAGS) -c $(top_srcdir)/server/eventl.c
+
+xmalloc.lo: $(top_srcdir)/util/xmalloc.c
+	$(LTCOMPILE) $(XMALLOC_FLAGS) -c $(top_srcdir)/util/xmalloc.c
+
+xmalloc.o: $(top_srcdir)/util/xmalloc.c
+	$(COMPILE) $(XMALLOC_FLAGS) -c $(top_srcdir)/util/xmalloc.c
+
 
 libyaz_la_LIBADD=../odr/libodr.la \
  ../comstack/libcomstack.la ../server/libserver.la \
