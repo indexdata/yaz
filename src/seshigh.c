@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.40 2004-12-21 00:31:03 adam Exp $
+ * $Id: seshigh.c,v 1.41 2004-12-22 23:48:34 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1429,7 +1429,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.40 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.41 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1927,9 +1927,9 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
         if (*resp->presentStatus == Z_PresentStatus_failure)
 	    wr_diag(wr, errcode, errstring);
         else if (*resp->presentStatus == Z_PresentStatus_success)
-            wrbuf_printf(wr," OK %d records returned ", *num);
+            wrbuf_printf(wr,"OK %d records returned ", *num);
         else
-            wrbuf_printf(wr," Partial (%d) OK %d records returned ", 
+            wrbuf_printf(wr,"Partial (%d) OK %d records returned ", 
                     *resp->presentStatus, *num);
         yaz_log(log_request, "%s", wrbuf_buf(wr) );
         wrbuf_free(wr, 1);
