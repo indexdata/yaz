@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.7  1995-03-16 13:29:04  quinn
+ * Revision 1.8  1995-03-20 09:46:26  quinn
+ * Added osi support.
+ *
+ * Revision 1.7  1995/03/16  13:29:04  quinn
  * Partitioned server.
  *
  * Revision 1.6  1995/03/15  15:18:52  quinn
@@ -128,7 +131,6 @@ void add_listener(char *where)
 	}
 	type = tcpip_type;
     }
-#if 0
     else if (!strcmp(mode, "osi"))
     {
     	if (!(ap = mosi_strtoaddr(addr)))
@@ -138,7 +140,6 @@ void add_listener(char *where)
 	}
 	type = mosi_type;
     }
-#endif
     else
     {
     	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");

@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.11 1995-03-16 13:28:59 quinn Exp $
+# $Id: Makefile,v 1.12 1995-03-20 09:46:24 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../asn -I../odr -I../yazlib -I../../egate/include\
@@ -11,7 +11,9 @@ LIBINCLUDE=-L$(LIBDIR)
 #CFLAGS=-Wall -pedantic -g
 DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libserver.a 
-LIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libasn.a $(LIBDIR)/libodr.a $(LIBDIR)/libcomstack.a ../../alex/lib/util.a  ../../egate/lib/util.a
+LIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
+$(LIBDIR)/libcomstack.a ../../alex/lib/util.a  ../../egate/lib/util.a\
+../../xtimosi/src/libmosi.a ../yazlib/rfct.o ../yazlib/makensap.o
 PO = eventl.o seshigh.o statserv.o
 CPP=cc -E
 PROG=ztest
