@@ -45,7 +45,12 @@
  * Europagate, 1995
  *
  * $Log: cclerrms.c,v $
- * Revision 1.5  1997-04-30 08:52:06  quinn
+ * Revision 1.6  1997-09-29 08:56:37  adam
+ * Changed CCL parser to be thread safe. New type, CCL_parser, declared
+ * and a create/destructers ccl_parser_create/ccl_parser/destory has
+ * been added.
+ *
+ * Revision 1.5  1997/04/30 08:52:06  quinn
  * Null
  *
  * Revision 1.4  1996/10/11  15:00:24  adam
@@ -74,7 +79,7 @@
  *
  */
 
-char *err_msg_array[] = {
+static char *err_msg_array[] = {
     "Ok",
     "Search word expected",
     "')' expected",

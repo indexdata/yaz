@@ -45,7 +45,12 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.7  1997-09-01 08:48:12  adam
+ * Revision 1.8  1997-09-29 08:56:38  adam
+ * Changed CCL parser to be thread safe. New type, CCL_parser, declared
+ * and a create/destructers ccl_parser_create/ccl_parser/destory has
+ * been added.
+ *
+ * Revision 1.7  1997/09/01 08:48:12  adam
  * New windows NT/95 port using MSV5.0. Only a few changes made
  * to avoid warnings.
  *
@@ -97,12 +102,6 @@
 
 #include <ccl.h>
 
-const char *ccl_token_and = "and";
-const char *ccl_token_or = "or";
-const char *ccl_token_not = "not andnot";
-const char *ccl_token_set = "set";
-int ccl_case_sensitive = 1;
-
 /*
  * token_cmp: Compare token with keyword(s)
  * kw:     Keyword list. Each keyword is separated by space.
@@ -110,7 +109,7 @@ int ccl_case_sensitive = 1;
  * return: 1 if token string matches one of the keywords in list;
  *         0 otherwise.
  */
-static int token_cmp (const char *kw, struct ccl_token *token)
+static int token_cmp (CCL_parser cclp, const char *kw, struct ccl_token *token)
 {
     const char *cp1 = kw;
     const char *cp2;
@@ -119,7 +118,7 @@ static int token_cmp (const char *kw, struct ccl_token *token)
     while ((cp2 = strchr (cp1, ' ')))
     {
         if (token->len == (size_t) (cp2-cp1))
-            if (ccl_case_sensitive)
+            if (cclp->ccl_case_sensitive)
             {
                 if (!memcmp (cp1, token->name, token->len))
                     return 1;
@@ -131,7 +130,7 @@ static int token_cmp (const char *kw, struct ccl_token *token)
             }
 	cp1 = cp2+1;
     }
-    if (ccl_case_sensitive)
+    if (cclp->ccl_case_sensitive)
         return token->len == strlen(cp1) 
             && !memcmp (cp1, token->name, token->len);
     return token->len == strlen(cp1) &&
@@ -199,11 +198,12 @@ struct ccl_token *ccl_token_simple (const char *command)
     return first;
 }
 
+
 /*
  * ccl_tokenize: tokenize CCL command string.
  * return: CCL token list.
  */
-struct ccl_token *ccl_tokenize (const char *command)
+struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 {
     const char *cp = command;
     struct ccl_token *first = NULL;
@@ -290,19 +290,30 @@ struct ccl_token *ccl_tokenize (const char *command)
 		cp++;
 		++ last->len;
 	    }
-	    if (token_cmp (ccl_token_and, last))
+	    if (token_cmp (cclp, cclp->ccl_token_and, last))
 	        last->kind = CCL_TOK_AND;
-	    else if (token_cmp (ccl_token_or, last))
+	    else if (token_cmp (cclp, cclp->ccl_token_or, last))
 	        last->kind = CCL_TOK_OR;
-            else if (token_cmp (ccl_token_not, last))
+            else if (token_cmp (cclp, cclp->ccl_token_not, last))
 	        last->kind = CCL_TOK_NOT;
-	    else if (token_cmp (ccl_token_set, last))
+	    else if (token_cmp (cclp, cclp->ccl_token_set, last))
 	        last->kind = CCL_TOK_SET;
 	    else
 		last->kind = CCL_TOK_TERM;
 	}
     }
     return first;
+}
+
+struct ccl_token *ccl_tokenize (const char *command)
+{
+    CCL_parser cclp = ccl_parser_create ();
+    struct ccl_token *list;
+
+    list = ccl_parser_tokenize (cclp, command);
+
+    ccl_parser_destroy (cclp);
+    return list;
 }
 
 /*
@@ -319,3 +330,30 @@ void ccl_token_del (struct ccl_token *list)
         list = list1;
     }
 }
+
+CCL_parser ccl_parser_create (void)
+{
+    CCL_parser p = malloc (sizeof(*p));
+    if (!p)
+	return p;
+    p->look_token = NULL;
+    p->error_code = 0;
+    p->error_pos = NULL;
+    p->bibset = NULL;
+
+    p->ccl_token_and = "and";
+    p->ccl_token_or = "or";
+    p->ccl_token_not = "not andnot";
+    p->ccl_token_set = "set";
+    p->ccl_case_sensitive = 1;
+
+    return p;
+}
+
+void ccl_parser_destroy (CCL_parser p)
+{
+    if (!p)
+	return;
+    free (p);
+}
+

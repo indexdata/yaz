@@ -45,7 +45,12 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.8  1997-09-01 08:48:11  adam
+ * Revision 1.9  1997-09-29 08:56:37  adam
+ * Changed CCL parser to be thread safe. New type, CCL_parser, declared
+ * and a create/destructers ccl_parser_create/ccl_parser/destory has
+ * been added.
+ *
+ * Revision 1.8  1997/09/01 08:48:11  adam
  * New windows NT/95 port using MSV5.0. Only a few changes made
  * to avoid warnings.
  *
@@ -115,20 +120,11 @@
 
 #include <ccl.h>
 
-/* current lookahead token */
-static struct ccl_token *look_token;
-
-/* holds error no if error occur */
-static int ccl_error;
-
-/* current bibset */
-static CCL_bibset bibset;
-
 /* returns type of current lookahead */
-#define KIND (look_token->kind)
+#define KIND (cclp->look_token->kind)
 
 /* move one token forward */
-#define ADVANCE look_token = look_token->next
+#define ADVANCE cclp->look_token = cclp->look_token->next
 
 /* 
  * qual_val_type: test for existance of attribute type/value pair.
@@ -233,8 +229,10 @@ void ccl_rpn_delete (struct ccl_rpn_node *rpn)
     free (rpn);
 }
 
-static struct ccl_rpn_node *find_spec (struct ccl_rpn_attr **qa);
-static struct ccl_rpn_node *search_terms (struct ccl_rpn_attr **qa);
+static struct ccl_rpn_node *find_spec (CCL_parser cclp,
+				       struct ccl_rpn_attr **qa);
+static struct ccl_rpn_node *search_terms (CCL_parser cclp,
+					  struct ccl_rpn_attr **qa);
 
 /*
  * add_attr: Add attribute (type/value) to RPN term node.
@@ -256,13 +254,15 @@ static void add_attr (struct ccl_rpn_node *p, int type, int value)
 
 /*
  * search_term: Parse CCL search term. 
+ * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
+static struct ccl_rpn_node *search_term (CCL_parser cclp,
+					 struct ccl_rpn_attr **qa)
 {
     struct ccl_rpn_node *p;
-    struct ccl_token *lookahead = look_token;
+    struct ccl_token *lookahead = cclp->look_token;
     int len = 0;
     size_t no, i;
     int left_trunc = 0;
@@ -276,7 +276,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
 
     if (KIND != CCL_TOK_TERM)
     {
-        ccl_error = CCL_ERR_TERM_EXPECTED;
+        cclp->error_code = CCL_ERR_TERM_EXPECTED;
         return NULL;
     }
     /* create the term node, but wait a moment before adding the term */
@@ -290,7 +290,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
 
         qa = malloc (2*sizeof(*qa));
 	assert (qa);
-	qa[0] = ccl_qual_search (bibset, "term", 4);
+	qa[0] = ccl_qual_search (cclp, "term", 4);
 	qa[1] = NULL;
     }
 
@@ -371,8 +371,8 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
     p->u.t.term[0] = '\0';
     for (i = 0; i<no; i++)
     {
-        const char *src_str = look_token->name;
-        int src_len = look_token->len;
+        const char *src_str = cclp->look_token->name;
+        int src_len = cclp->look_token->len;
         
         if (i == 0 && left_trunc)
         {
@@ -390,7 +390,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
     {
         if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_BOTH))
         {
-            ccl_error = CCL_ERR_TRUNC_NOT_BOTH;
+            cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
             free (qa);
             ccl_rpn_delete (p);
             return NULL;
@@ -401,7 +401,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
     {
         if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_RIGHT))
         {
-            ccl_error = CCL_ERR_TRUNC_NOT_RIGHT;
+            cclp->error_code = CCL_ERR_TRUNC_NOT_RIGHT;
             free (qa);
             ccl_rpn_delete (p);
             return NULL;
@@ -412,7 +412,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
     {
         if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_LEFT))
         {
-            ccl_error = CCL_ERR_TRUNC_NOT_LEFT;
+            cclp->error_code = CCL_ERR_TRUNC_NOT_LEFT;
             free (qa);
             ccl_rpn_delete (p);
             return NULL;
@@ -429,37 +429,40 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
 
 /*
  * qualifiers: Parse CCL qualifiers and search terms. 
+ * cclp:   CCL Parser
  * la:     Token pointer to RELATION token.
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
+static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
                                         struct ccl_rpn_attr **qa)
 {
-    struct ccl_token *lookahead = look_token;
+    struct ccl_token *lookahead = cclp->look_token;
     struct ccl_rpn_attr **ap;
     int no = 0;
     int i, rel;
 #if 0
     if (qa)
     {
-        ccl_error = CCL_ERR_DOUBLE_QUAL;
+        cclp->error_code = CCL_ERR_DOUBLE_QUAL;
         return NULL;
     }
 #endif
-    for (lookahead = look_token; lookahead != la; lookahead=lookahead->next)
+    for (lookahead = cclp->look_token; lookahead != la;
+	 lookahead=lookahead->next)
         no++;
     if (qa)
         for (i=0; qa[i]; i++)
 	    no++;
     ap = malloc ((no+1) * sizeof(*ap));
     assert (ap);
-    for (i = 0; look_token != la; i++)
+    for (i = 0; cclp->look_token != la; i++)
     {
-        ap[i] = ccl_qual_search (bibset, look_token->name, look_token->len);
+        ap[i] = ccl_qual_search (cclp, cclp->look_token->name,
+				 cclp->look_token->len);
         if (!ap[i])
         {
-            ccl_error = CCL_ERR_UNKNOWN_QUAL;
+            cclp->error_code = CCL_ERR_UNKNOWN_QUAL;
             free (ap);
             return NULL;
         }
@@ -477,7 +480,7 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
         struct ccl_rpn_node *p;
         if (KIND != CCL_TOK_EQ)
         {
-            ccl_error = CCL_ERR_EQ_EXPECTED;
+            cclp->error_code = CCL_ERR_EQ_EXPECTED;
             free (ap);
             return NULL;
         }
@@ -485,14 +488,14 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
         if (KIND == CCL_TOK_LP)
         {
             ADVANCE;
-            if (!(p = find_spec (ap)))
+            if (!(p = find_spec (cclp, ap)))
             {
                 free (ap);
                 return NULL;
             }
             if (KIND != CCL_TOK_RP)
             {
-                ccl_error = CCL_ERR_RP_EXPECTED;
+                cclp->error_code = CCL_ERR_RP_EXPECTED;
                 ccl_rpn_delete (p);
                 free (ap);
                 return NULL;
@@ -500,40 +503,41 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
             ADVANCE;
         }
         else
-            p = search_terms (ap);
+            p = search_terms (cclp, ap);
         free (ap);
         return p;
     }
     rel = 0;
-    if (look_token->len == 1)
+    if (cclp->look_token->len == 1)
     {
-        if (look_token->name[0] == '<')
+        if (cclp->look_token->name[0] == '<')
             rel = 1;
-        else if (look_token->name[0] == '=')
+        else if (cclp->look_token->name[0] == '=')
             rel = 3;
-        else if (look_token->name[0] == '>')
+        else if (cclp->look_token->name[0] == '>')
             rel = 5;
     }
-    else if (look_token->len == 2)
+    else if (cclp->look_token->len == 2)
     {
-        if (!memcmp (look_token->name, "<=", 2))
+        if (!memcmp (cclp->look_token->name, "<=", 2))
             rel = 2;
-        else if (!memcmp (look_token->name, ">=", 2))
+        else if (!memcmp (cclp->look_token->name, ">=", 2))
             rel = 4;
-        else if (!memcmp (look_token->name, "<>", 2))
+        else if (!memcmp (cclp->look_token->name, "<>", 2))
             rel = 6;
     }
     if (!rel)
-        ccl_error = CCL_ERR_BAD_RELATION;
+        cclp->error_code = CCL_ERR_BAD_RELATION;
     else
     {
         struct ccl_rpn_node *p;
 
         ADVANCE;                      /* skip relation */
-        if (KIND == CCL_TOK_TERM && look_token->next->kind == CCL_TOK_MINUS)
+        if (KIND == CCL_TOK_TERM &&
+	    cclp->look_token->next->kind == CCL_TOK_MINUS)
         {
             struct ccl_rpn_node *p1;
-            if (!(p1 = search_term (ap)))
+            if (!(p1 = search_term (cclp, ap)))
 	    {
 	        free (ap);
 	        return NULL;
@@ -543,7 +547,7 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
             {
                 struct ccl_rpn_node *p2;
                 
-                if (!(p2 = search_term (ap)))
+                if (!(p2 = search_term (cclp, ap)))
 		{
                     ccl_rpn_delete (p1);
 		    free (ap);
@@ -567,7 +571,7 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
         else if (KIND == CCL_TOK_MINUS)   /* = - term  ? */
         {
             ADVANCE;
-            if (!(p = search_term (ap)))
+            if (!(p = search_term (cclp, ap)))
 	    {
 	        free (ap);
 		return NULL;
@@ -579,14 +583,14 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
 	else if (KIND == CCL_TOK_LP)
 	{
             ADVANCE;
-            if (!(p = find_spec (ap)))
+            if (!(p = find_spec (cclp, ap)))
             {
                 free (ap);
                 return NULL;
             }
             if (KIND != CCL_TOK_RP)
             {
-                ccl_error = CCL_ERR_RP_EXPECTED;
+                cclp->error_code = CCL_ERR_RP_EXPECTED;
                 ccl_rpn_delete (p);
                 free (ap);
                 return NULL;
@@ -597,7 +601,7 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
 	}
 	else
 	{
-            if (!(p = search_terms (ap)))
+            if (!(p = search_terms (cclp, ap)))
 	    {
 	        free (ap);
 		return NULL;
@@ -606,7 +610,7 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
 	    free (ap);
 	    return p;
 	}
-        ccl_error = CCL_ERR_TERM_EXPECTED;
+        cclp->error_code = CCL_ERR_TERM_EXPECTED;
     }
     free (ap);
     return NULL;
@@ -614,13 +618,15 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
 
 /*
  * search_terms: Parse CCL search terms - including proximity.
+ * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *search_terms (struct ccl_rpn_attr **qa)
+static struct ccl_rpn_node *search_terms (CCL_parser cclp,
+					  struct ccl_rpn_attr **qa)
 {
     struct ccl_rpn_node *p1, *p2, *pn;
-    p1 = search_term (qa);
+    p1 = search_term (cclp, qa);
     if (!p1)
         return NULL;
     while (1)
@@ -628,7 +634,7 @@ static struct ccl_rpn_node *search_terms (struct ccl_rpn_attr **qa)
 	if (KIND == CCL_TOK_PROX)
 	{
 	    ADVANCE;
-	    p2 = search_term (qa);
+	    p2 = search_term (cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete (p1);
@@ -641,7 +647,7 @@ static struct ccl_rpn_node *search_terms (struct ccl_rpn_attr **qa)
 	}
 	else if (KIND == CCL_TOK_TERM)
 	{
-	    p2 = search_term (qa);
+	    p2 = search_term (cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete (p1);
@@ -660,22 +666,24 @@ static struct ccl_rpn_node *search_terms (struct ccl_rpn_attr **qa)
 
 /*
  * search_elements: Parse CCL search elements
+ * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *search_elements (struct ccl_rpn_attr **qa)
+static struct ccl_rpn_node *search_elements (CCL_parser cclp,
+					     struct ccl_rpn_attr **qa)
 {
     struct ccl_rpn_node *p1;
     struct ccl_token *lookahead;
     if (KIND == CCL_TOK_LP)
     {
 	ADVANCE;
-	p1 = find_spec (qa);
+	p1 = find_spec (cclp, qa);
         if (!p1)
             return NULL;
         if (KIND != CCL_TOK_RP)
         {
-            ccl_error = CCL_ERR_RP_EXPECTED;
+            cclp->error_code = CCL_ERR_RP_EXPECTED;
             ccl_rpn_delete (p1);
             return NULL;
         }
@@ -689,37 +697,39 @@ static struct ccl_rpn_node *search_elements (struct ccl_rpn_attr **qa)
             ADVANCE;
         if (KIND != CCL_TOK_TERM)
         {
-            ccl_error = CCL_ERR_SETNAME_EXPECTED;
+            cclp->error_code = CCL_ERR_SETNAME_EXPECTED;
             return NULL;
         }
 	p1 = mk_node (CCL_RPN_SET);
-	p1->u.setname = copy_token_name (look_token);
+	p1->u.setname = copy_token_name (cclp->look_token);
 	ADVANCE;
 	return p1;
     }
-    lookahead = look_token;
+    lookahead = cclp->look_token;
 
     while (lookahead->kind==CCL_TOK_TERM)
     {
         lookahead = lookahead->next;
         if (lookahead->kind == CCL_TOK_REL || lookahead->kind == CCL_TOK_EQ)
-	    return qualifiers (lookahead, qa);
+	    return qualifiers (cclp, lookahead, qa);
         if (lookahead->kind != CCL_TOK_COMMA)
             break;
         lookahead = lookahead->next;
     }
-    return search_terms (qa);
+    return search_terms (cclp, qa);
 }
 
 /*
  * find_spec: Parse CCL find specification
+ * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *find_spec (struct ccl_rpn_attr **qa)
+static struct ccl_rpn_node *find_spec (CCL_parser cclp,
+				       struct ccl_rpn_attr **qa)
 {
     struct ccl_rpn_node *p1, *p2, *pn;
-    if (!(p1 = search_elements (qa)))
+    if (!(p1 = search_elements (cclp, qa)))
         return NULL;
     while (1)
     {
@@ -727,7 +737,7 @@ static struct ccl_rpn_node *find_spec (struct ccl_rpn_attr **qa)
 	{
 	case CCL_TOK_AND:
 	    ADVANCE;
-	    p2 = search_elements (qa);
+	    p2 = search_elements (cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete (p1);
@@ -740,7 +750,7 @@ static struct ccl_rpn_node *find_spec (struct ccl_rpn_attr **qa)
 	    continue;
 	case CCL_TOK_OR:
 	    ADVANCE;
-	    p2 = search_elements (qa);
+	    p2 = search_elements (cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete (p1);
@@ -753,7 +763,7 @@ static struct ccl_rpn_node *find_spec (struct ccl_rpn_attr **qa)
 	    continue;
 	case CCL_TOK_NOT:
 	    ADVANCE;
-	    p2 = search_elements (qa);
+	    p2 = search_elements (cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete (p1);
@@ -770,36 +780,52 @@ static struct ccl_rpn_node *find_spec (struct ccl_rpn_attr **qa)
     return p1;
 }
 
+struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list)
+{
+    struct ccl_rpn_node *p;
+
+    cclp->look_token = list;
+    p = find_spec (cclp, NULL);
+    if (p && KIND != CCL_TOK_EOL)
+    {
+        if (KIND == CCL_TOK_RP)
+            cclp->error_code = CCL_ERR_BAD_RP;
+        else
+            cclp->error_code = CCL_ERR_OP_EXPECTED;
+        ccl_rpn_delete (p);
+        p = NULL;
+    }
+    cclp->error_pos = cclp->look_token->name;
+    if (p)
+        cclp->error_code = CCL_ERR_OK;
+    else
+        cclp->error_code = cclp->error_code;
+    return p;
+}
+
 /*
  * ccl_find: Parse CCL find - token representation
- * abibset: Bibset to be used for the parsing
+ * bibset:  Bibset to be used for the parsing
  * list:    List of tokens
  * error:   Pointer to integer. Holds error no. on completion.
  * pos:     Pointer to char position. Holds approximate error position.
  * return:  RPN tree on successful completion; NULL otherwise.
  */
-struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
+struct ccl_rpn_node *ccl_find (CCL_bibset bibset, struct ccl_token *list,
                                int *error, const char **pos)
 {
     struct ccl_rpn_node *p;
+    CCL_parser cclp = ccl_parser_create ();
 
-    look_token = list;
-    bibset = abibset;
-    p = find_spec (NULL);
-    if (p && KIND != CCL_TOK_EOL)
-    {
-        if (KIND == CCL_TOK_RP)
-            ccl_error = CCL_ERR_BAD_RP;
-        else
-            ccl_error = CCL_ERR_OP_EXPECTED;
-        ccl_rpn_delete (p);
-        p = NULL;
-    }
-    *pos = look_token->name;
-    if (p)
-        *error = CCL_ERR_OK;
-    else
-        *error = ccl_error;
+    cclp->bibset = bibset;
+
+    p = ccl_parser_find (cclp, list);
+
+    *error = cclp->error_code;
+    *pos = cclp->error_pos;
+
+    ccl_parser_destroy (cclp);
+
     return p;
 }
 
@@ -814,13 +840,18 @@ struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
 struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
                                    int *error, int *pos)
 {
+    CCL_parser cclp = ccl_parser_create ();
     struct ccl_token *list;
-    struct ccl_rpn_node *rpn;
-    const char *char_pos;
+    struct ccl_rpn_node *p;
 
-    list = ccl_tokenize (str);
-    rpn = ccl_find (bibset, list, error, &char_pos);
+    cclp->bibset = bibset;
+
+    list = ccl_parser_tokenize (cclp, str);
+    p = ccl_parser_find (cclp, list);
+
+    *error = cclp->error_code;
     if (*error)
-        *pos = char_pos - str;
-    return rpn;
+        *pos = cclp->error_pos - str;
+    ccl_parser_destroy (cclp);
+    return p;
 }

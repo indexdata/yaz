@@ -45,7 +45,12 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.7  1997-09-01 08:48:12  adam
+ * Revision 1.8  1997-09-29 08:56:38  adam
+ * Changed CCL parser to be thread safe. New type, CCL_parser, declared
+ * and a create/destructers ccl_parser_create/ccl_parser/destory has
+ * been added.
+ *
+ * Revision 1.7  1997/09/01 08:48:12  adam
  * New windows NT/95 port using MSV5.0. Only a few changes made
  * to avoid warnings.
  *
@@ -193,14 +198,17 @@ void ccl_qual_rm (CCL_bibset *b)
  * len:    Length of name.
  * return: Attribute info. NULL if not found.
  */
-struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name, size_t len)
+struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
+				      const char *name, size_t len)
 {
     struct ccl_qualifier *q;
 
-    assert (b);
-    for (q = b->list; q; q = q->next)
+    assert (cclp);
+    if (!cclp->bibset)
+	return NULL;
+    for (q = cclp->bibset->list; q; q = q->next)
         if (strlen(q->name) == len)
-            if (ccl_case_sensitive)
+            if (cclp->ccl_case_sensitive)
             {
                 if (!memcmp (name, q->name, len))
                     return q->attr_list;
