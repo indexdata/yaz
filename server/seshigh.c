@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.24  1995-05-16 08:51:04  quinn
+ * Revision 1.25  1995-05-17 08:42:26  quinn
+ * Transfer auth info to backend. Allow backend to reject init gracefully.
+ *
+ * Revision 1.24  1995/05/16  08:51:04  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.23  1995/05/15  13:25:10  quinn
@@ -202,6 +205,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
     new->input_buffer = 0;
     new->input_buffer_len = 0;
     new->backend = 0;
+    new->rejected = 0;
     request_initq(&new->incoming);
     request_initq(&new->outgoing);
     if (cs_getproto(link) == CS_Z3950)
@@ -252,6 +256,14 @@ void ir_session(IOCHAN h, int event)
 	{
 	    logf(LOG_DEBUG, "ir_session (input)");
 	    assert(assoc && conn);
+	    if (assoc->rejected)
+	    {
+		logf(LOG_LOG, "Closed connection after reject");
+		cs_close(conn);
+		destroy_association(assoc);
+		iochan_destroy(h);
+		return;
+	    }
 	    if ((res = cs_get(conn, &assoc->input_buffer,
 		&assoc->input_buffer_len)) <= 0)
 	    {
@@ -479,9 +491,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	logf(LOG_LOG, "Version:   %s", req->implementationVersion);
 
     binitreq.configname = "default-config";
-    if (!(binitres = bend_init(&binitreq)) || binitres->errcode)
+    binitreq.auth = req->idAuthentication;
+    if (!(binitres = bend_init(&binitreq)))
     {
-    	logf(LOG_WARN, "Negative response from backend");
+    	logf(LOG_WARN, "Bad response from backend.");
     	return 0;
     }
 
@@ -526,6 +539,12 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
     resp.implementationVersion = YAZ_VERSION;
     resp.userInformationField = 0;
+    if (binitres->errcode)
+    {
+    	logf(LOG_LOG, "Connection rejected by backend.");
+    	result = 0;
+	assoc->rejected = 1;
+    }
     return &apdu;
 }
 

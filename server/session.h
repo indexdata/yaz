@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.7  1995-05-16 08:51:08  quinn
+ * Revision 1.8  1995-05-17 08:42:28  quinn
+ * Transfer auth info to backend. Allow backend to reject init gracefully.
+ *
+ * Revision 1.7  1995/05/16  08:51:08  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.6  1995/05/15  11:56:41  quinn
@@ -84,6 +87,7 @@ typedef struct association
     void *backend;                /* backend handle */
     request_q incoming;           /* Q of incoming PDUs */
     request_q outgoing;           /* Q of outgoing data buffers (enc. PDUs) */
+    int rejected;                 /* session rejected */
 
     /* session parameters */
     int preferredMessageSize;
