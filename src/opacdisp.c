@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: opacdisp.c,v 1.5 2005-02-25 17:05:09 adam Exp $
+ * $Id: opacdisp.c,v 1.6 2005-03-02 23:59:22 adam Exp $
  */
 /**
  * \file opacdisp.c
@@ -54,8 +54,7 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
 {
     int i;
 
-    wrbuf_puts(wrbuf, "<holdings>\n");
-
+    wrbuf_puts(wrbuf, "<opacRecord>\n");
     if (r->bibliographicRecord)
     {
 	Z_External *ext = r->bibliographicRecord;
@@ -66,6 +65,8 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
 				  ext->u.octet_aligned->len, wrbuf);
 	wrbuf_puts (wrbuf, "  </bibliographicRecord>\n");
     }
+    wrbuf_puts(wrbuf, "<holdings>\n");
+
     for (i = 0; i < r->num_holdingsData; i++)
     {
 	Z_HoldingsRecord *h = r->holdingsData[i];
@@ -155,6 +156,7 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
 	wrbuf_puts(wrbuf, " </holding>\n");
     }
     wrbuf_puts(wrbuf, "</holdings>\n");
+    wrbuf_puts(wrbuf, "</opacRecord>\n");
 }
 
 void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *opac_rec, int flags)
