@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.35 2002-06-12 19:42:38 adam Exp $
+ * $Id: nmem.c,v 1.36 2002-09-10 18:41:18 adam Exp $
  */
 
 /*
@@ -16,6 +16,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <errno.h>
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/log.h>
@@ -429,3 +430,8 @@ BOOL WINAPI DllMain (HINSTANCE hinstDLL,
     return TRUE;
 }
 #endif
+
+int yaz_errno(void)
+{
+    return errno;
+}

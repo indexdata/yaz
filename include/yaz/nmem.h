@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.6  2001-06-26 14:11:27  adam
+ * Revision 1.7  2002-09-10 18:41:18  adam
+ * Added yaz_errno
+ *
+ * Revision 1.6  2001/06/26 14:11:27  adam
  * Added MUTEX functions for NMEM module (used by OID utility).
  *
  * Revision 1.5  2001/03/25 21:55:12  adam
@@ -126,6 +129,7 @@ YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 
 YAZ_EXPORT void nmem_init (void);
 YAZ_EXPORT void nmem_exit (void);
+YAZ_EXPORT int yaz_errno (void);
 
 YAZ_END_CDECL
 
