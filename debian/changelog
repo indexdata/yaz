@@ -1,3 +1,9 @@
+yaz (2.0.1-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu, 24 Apr 2003 22:35:57 +0100
+
 yaz (2.0-2) unstable; urgency=low
 
   * Use an older version of libxml2 (2.4.19-4)
