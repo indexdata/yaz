@@ -11,7 +11,7 @@
 # This is the debhelper compatability version to use.
 export DH_COMPAT=2
 
-YAZ_WITH_SSL?=0
+YAZ_WITH_SSL?=1
 CONFIG_FLAGS=--enable-static --enable-shared --enable-tcpd --prefix=/usr
 
 # Enable parallel builds if CONCURRENCY_LEVEL is set
@@ -35,7 +35,7 @@ YAZSRCDIR?=$(shell pwd)
 export YAZ_VERSION
 
 # Local library path for linking with right dependencies
-LOCAL_LINK=-ldebian/yaz-runtime/usr/lib/
+LOCAL_LINK=-ldebian/yaz-runtime/usr/lib:debian/yaz-ssl/usr/lib
 
 $(YAZSRCDIR)/configure: $(YAZSRCDIR)/configure.in
 	cd $(YAZSRCDIR); sh buildconf.sh
@@ -65,7 +65,7 @@ clean:
 	-rm -rf build
 
 	dh_clean
-	-rm -rf debian/yaz-runtime debian/yaz-runtime-ssl debian/yaz-devel \
+	-rm -rf debian/yaz-runtime debian/yaz-ssl debian/yaz-devel \
 	        debian/with-ssl debian/*.debhelper debian/substvars debian/shlibs.yaz-*
 
 install: stamp-install
@@ -100,13 +100,16 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_movefiles -p yaz-devel  usr/share/aclocal usr/lib/*.a usr/include usr/bin
-	dh_movefiles -p yaz-runtime usr/lib usr/share/yaz
+ifeq ($(YAZ_WITH_SSL),1)
+	dh_movefiles -p yaz-ssl usr/bin/*ssl usr/lib/libyazssl* 
+endif
+	dh_movefiles -p yaz-devel  usr/share/aclocal usr/lib/*.a usr/lib/*.la usr/lib/*.so usr/include 
+	dh_movefiles -p yaz-runtime usr/lib usr/share/yaz usr/bin
 	dh_installexamples -p yaz-devel
 
-	dh_installdocs --all README TODO LICENSE CHANGELOG debian/copyright
-	mv debian/yaz-runtime/usr/share/doc/yaz-runtime/CHANGELOG debian/yaz-runtime/usr/share/doc/yaz-runtime/changelog
-	mv debian/yaz-devel/usr/share/doc/yaz-devel/CHANGELOG debian/yaz-devel/usr/share/doc/yaz-devel/changelog
+	cp LICENSE debian/copyright
+	cp CHANGELOG changelog
+	dh_installdocs --all README TODO changelog debian/copyright
 
 	dh_installchangelogs
 	dh_link
@@ -116,40 +119,33 @@ binary-arch: build install
 
 	dh_installdeb -p yaz-runtime
 	dh_installdeb -p yaz-devel
-
-	dh_shlibdeps -p yaz-runtime $(LOCAL_LINK) -- debian/yaz-runtime/usr/lib/*.so
-	dh_shlibdeps -p yaz-devel $(LOCAL_LINK) -- debian/yaz-devel/usr/bin/*
-
-	dh_undocumented -p yaz-devel yaz-client.1 yaz-comp.1 yaz-config.1 yaz-ztest.1 zoomsh.1
-ifeq ($(YAZ_WITH_SSL),1)
-	dh_undocumented -p yaz-devel yaz-client-ssl.1 yaz-ztest-ssl.1
-	echo "libyaz 1 yaz-runtime-ssl" > debian/yaz-runtime/DEBIAN/shlibs
-	echo "libyazthread 1 yaz-runtime-ssl" >> debian/yaz-runtime/DEBIAN/shlibs
-	echo "libyazmalloc 1 yaz-runtime-ssl" >> debian/yaz-runtime/DEBIAN/shlibs
-	echo "libyazssl 1 yaz-runtime-ssl" >> debian/yaz-runtime/DEBIAN/shlibs
-	# Move doc dir
-	mv debian/yaz-runtime/usr/share/doc/yaz-runtime debian/yaz-runtime/usr/share/doc/yaz-runtime-ssl
-	mv debian/yaz-devel/usr/share/doc/yaz-devel debian/yaz-devel/usr/share/doc/yaz-devel-ssl
-else
+	dh_undocumented -p yaz-runtime yaz-client.1 yaz-comp.1 yaz-config.1 yaz-ztest.1 zoomsh.1
 	echo "libyaz 1 yaz-runtime" > debian/yaz-runtime/DEBIAN/shlibs
 	echo "libyazthread 1 yaz-runtime" >> debian/yaz-runtime/DEBIAN/shlibs
 	echo "libyazmalloc 1 yaz-runtime" >> debian/yaz-runtime/DEBIAN/shlibs
-endif
 	chmod 644 debian/yaz-runtime/DEBIAN/shlibs
-
+	dh_shlibdeps -p yaz-runtime $(LOCAL_LINK) 
+ifeq ($(YAZ_WITH_SSL),1)
+	dh_installdeb -p yaz-ssl
+	dh_undocumented -p yaz-ssl yaz-client-ssl.1 yaz-ztest-ssl.1
+	echo "libyazssl 1 yaz-ssl" >> debian/yaz-ssl/DEBIAN/shlibs
+	chmod 644 debian/yaz-ssl/DEBIAN/shlibs
+	dh_shlibdeps -p yaz-ssl $(LOCAL_LINK)
+	cat debian/postinst >> debian/yaz-ssl/DEBIAN/postinst
+endif
 	# Ugh Ugly hack
 	cat debian/postinst >> debian/yaz-runtime/DEBIAN/postinst
 
 	dh_md5sums -p yaz-runtime
-	dh_md5sums -p yaz-devel
-ifeq ($(YAZ_WITH_SSL),1)
-	dh_gencontrol -p yaz-runtime -- -DPackage=yaz-runtime-ssl -DConflicts=yaz-runtime -DReplaces=yaz-runtime -DProvides=yaz-runtime
-	dh_gencontrol -p yaz-devel -- -DPackage=yaz-devel-ssl -DConflicts=yaz-devel -DReplaces=yaz-devel
-else
 	dh_gencontrol -p yaz-runtime
-	dh_gencontrol -p yaz-devel
-endif
 
+	dh_md5sums -p yaz-devel
+	dh_gencontrol -p yaz-devel
+
+ifeq ($(YAZ_WITH_SSL),1)
+	dh_md5sums -p yaz-ssl
+	dh_gencontrol -p yaz-ssl
+endif
 	# Go kill those CVS-dirs before build
 	-find debian/tmp -type d -name CVS | xargs rm -rf
 	# For some reason it is necessary to remove empty-dirs in yaz-doc
@@ -158,6 +154,9 @@ endif
 
 	dh_builddeb -p yaz-runtime
 	dh_builddeb -p yaz-devel
+ifeq ($(YAZ_WITH_SSL),1)
+	dh_builddeb -p yaz-ssl
+endif
 
 
 binary: binary-indep binary-arch

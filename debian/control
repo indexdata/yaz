@@ -21,7 +21,6 @@ Package: yaz-runtime
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
-Conflicts: yaz-runtime-ssl
 Description: The YAZ Z39.50 toolkit (runtime files)
  The YAZ-toolkit is a C-toolkit for building
  origins and/or targets using the Z39.50 protocol for
@@ -49,3 +48,17 @@ Description: The YAZ Z39.50 toolkit (development files)
  YAZ is made by the danish software company Index Data
  and further information is available at http://www.indexdata.dk/
 
+Package: yaz-ssl
+Depends: ${shlibs:Depends}
+Section: libs
+Architecture: any
+Description: The YAZ Z39.50 toolkit (SSL support)
+ The YAZ-toolkit is a C-toolkit for building
+ origins and/or targets using the Z39.50 protocol for
+ information retrieval.
+ .
+ YAZ supports a substantial subset of the Z39.50 standard
+ and features a SSL protocol layer as an option.
+ .
+ YAZ is made by the danish software company Index Data
+ and further information is available at http://www.indexdata.dk/
