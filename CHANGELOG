@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.5 2002/XX/XX
 
+Configure option --with-openssl=<dir> now works when a directory is
+specified. Patch provided by Morten Bøgeskov.
+
 New option for YAZ client, -u <auth>, that sets authentication.
 
 ZOOM fix: error information only cleared for Bib-diagnostics (not

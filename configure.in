@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.57 2002-01-11 20:17:03 adam Exp $
+dnl $Id: configure.in,v 1.58 2002-01-11 20:26:11 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.5)
 dnl
@@ -49,11 +49,20 @@ dnl
 dnl ------ Open SSL
 openssl=no
 AC_ARG_WITH(openssl, [  --with-openssl[=DIR]    OpenSSL library in DIR], [openssl=$withval])
-if test "$openssl" = "yes"; then
+if test "$openssl" != "no"; then
+	xLDFLAGS="$LDFLAGS";
+	xCFLAGS="$CFLAGS";
+	if test "$openssl" != "yes"; then
+		CFLAGS="-I$openssl/include -I$openssl/include/openssl $CFLAGS"
+		LDFLAGS="-L$openssl/lib $LDFLAGS"
+	fi
 	AC_CHECK_LIB(crypto, main)
 	AC_CHECK_LIB(ssl, SSL_new)
 	if test "$ac_cv_lib_ssl_SSL_new" = "yes"; then
 		AC_CHECK_HEADERS(openssl/ssl.h)
+	else
+		LDFLAGS="$xLDFLAGS";
+		CFLAGS="$xCFLAGS";
 	fi
 fi
 dnl ------ GNU Readline
