@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.97  2000-03-14 14:06:04  ian
+ * Revision 1.98  2000-03-16 13:55:49  ian
+ * Added commands for sending shutdown and startup admin requests via the admin ES.
+ *
+ * Revision 1.97  2000/03/14 14:06:04  ian
  * Minor change to order of debugging output for send_apdu,
  * fixed encoding of admin request.
  *
@@ -2273,6 +2276,8 @@ static int client(int wait)
 	{"adm-import", cmd_adm_import, "<database-name> <record-type> <source-file-name>"},
 	{"adm-refresh", cmd_adm_refresh, "<database-name>"},
 	{"adm-commit", cmd_adm_commit, ""},
+	{"adm-shutdown", cmd_adm_shutdown, ""},
+	{"adm-startup", cmd_adm_startup, ""},
         {0,0}
     };
     char *netbuffer= 0;
