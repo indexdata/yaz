@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.20  1998-05-18 13:07:02  adam
+ * Revision 1.21  1998-06-09 13:55:07  adam
+ * Minor changes.
+ *
+ * Revision 1.20  1998/05/18 13:07:02  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -302,7 +305,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     data1_maptab **maptabp;
     data1_marctab **marcp;
     data1_termlist *all = 0;
-    int level;
+    int level = 0;
 
     if (!(f = yaz_path_fopen(data1_get_tabpath (dh), file, "r")))
     {

@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.10  1998-05-27 16:55:54  adam
+ * Revision 1.11  1998-06-09 13:55:08  adam
+ * Minor changes.
+ *
+ * Revision 1.10  1998/05/27 16:55:54  adam
  * Minor changes.
  *
  * Revision 1.9  1998/03/31 11:07:45  adam
@@ -155,7 +158,8 @@ static char *dummy_database_record (int num)
 	   xfree(buf);
 	if (num == 98)
 	{
-	    assert(buf = (char*) xmalloc(2101));
+	    buf = (char*) xmalloc(2101);
+	    assert(buf);
 	    memset(buf, 'A', 2100);
 	    buf[2100] = '\0';
 	    break;

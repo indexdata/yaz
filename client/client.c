@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.66  1998-05-18 13:06:53  adam
+ * Revision 1.67  1998-06-09 13:55:06  adam
+ * Minor changes.
+ *
+ * Revision 1.66  1998/05/18 13:06:53  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -747,7 +750,7 @@ static int send_searchRequest(char *arg)
     Z_Query query;
     int oid[OID_SIZE];
 #if CCL2RPN
-    struct ccl_rpn_node *rpn;
+    struct ccl_rpn_node *rpn = NULL;
     int error, pos;
     oident bib1;
 #endif
@@ -826,7 +829,8 @@ static int send_searchRequest(char *arg)
 #if CCL2RPN
     case QueryType_CCL2RPN:
         query.which = Z_Query_type_1;
-        assert((RPNquery = ccl_rpn_query(out, rpn)));
+        RPNquery = ccl_rpn_query(out, rpn);
+        assert(RPNquery);
         bib1.proto = protocol;
         bib1.oclass = CLASS_ATTSET;
         bib1.value = VAL_BIB1;
