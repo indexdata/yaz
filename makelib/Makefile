@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.2 1995-03-16 17:42:29 quinn Exp $
+# $Id: Makefile,v 1.3 1995-03-20 09:45:34 quinn Exp $
 
 #CC=
 SHELL=/bin/sh
@@ -23,3 +23,5 @@ $(LIB): $(LIBS)
 
 clean:
 	-rm -f *.o
+
+depend:
