@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.9 2004-04-29 21:19:23 adam Exp $
+ * $Id: comstack.c,v 1.10 2004-05-03 09:00:50 adam Exp $
  */
 
 #include <string.h>
@@ -242,17 +242,17 @@ int cs_complete_auto(const unsigned char *buf, int len)
                     break;
                 }
                 else if (i < len - 20 && 
-                         !strncasecmp(buf+i, "Transfer-Encoding:", 18))
+                         !strncasecmp((const char *) buf+i, "Transfer-Encoding:", 18))
                 {
                     i+=18;
                     while (buf[i] == ' ')
                         i++;
                     if (i < len - 8)
-                        if (!strncasecmp(buf+i, "chunked", 7))
+                        if (!strncasecmp((const char *) buf+i, "chunked", 7))
                             chunked = 1;
                 }
                 else if (i < len - 17 &&
-                         !strncasecmp(buf+i, "Content-Length:", 15))
+                         !strncasecmp((const char *)buf+i, "Content-Length:", 15))
                 {
                     i+= 15;
                     while (buf[i] == ' ')

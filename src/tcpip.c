@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.6 2004-04-30 19:10:35 adam Exp $
+ * $Id: tcpip.c,v 1.7 2004-05-03 09:00:50 adam Exp $
  */
 
 #include <stdio.h>
@@ -207,7 +207,7 @@ COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
     p->type = ssl_type;
     sp = (tcpip_state *) p->cprivate;
 
-    sp->ctx = vp;  /* may be NULL */
+    sp->ctx = (SSL_CTX *) vp;  /* may be NULL */
 
     /* note: we don't handle already opened socket in SSL mode - yet */
     return p;
@@ -1118,7 +1118,7 @@ int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
     sp = (struct tcpip_state *) cs->cprivate;
     if (sp->ctx_alloc)
 	return 0;
-    sp->ctx = ctx;
+    sp->ctx = (SSL_CTX *) ctx;
     return 1;
 }
 
@@ -1144,7 +1144,7 @@ int cs_set_ssl_certf(COMSTACK cs, const char *fname)
 
 int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
 {
-    SSL *ssl = cs_get_ssl(cs);
+    SSL *ssl = (SSL *) cs_get_ssl(cs);
     if (ssl)
     {
 	X509 *server_cert = SSL_get_peer_certificate (ssl);
@@ -1155,7 +1155,7 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
 	    /* get PEM buffer in memory */
 	    PEM_write_bio_X509(bio, server_cert);
 	    *len = BIO_get_mem_data(bio, &pem_buf);
-	    *buf = xmalloc(*len);
+	    *buf = (char *) xmalloc(*len);
 	    memcpy(*buf, pem_buf, *len);
 	    BIO_free(bio);
 	    return 1;
