@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconvtst.c,v 1.3 2002-08-27 21:45:28 adam Exp $
+ * $Id: siconvtst.c,v 1.4 2002-08-28 19:33:53 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -144,4 +144,5 @@ int main (int argc, char **argv)
 
     convert (inf, cd);
     yaz_iconv_close (cd);
+    return 0;
 }
