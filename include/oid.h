@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.29  1998-12-03 11:33:04  adam
+ * Revision 1.30  1999-04-09 12:16:11  adam
+ * Added OtherInfo private OID proxy.
+ *
+ * Revision 1.29  1998/12/03 11:33:04  adam
  * Added OID's for XML.
  *
  * Revision 1.28  1998/10/13 16:01:52  adam
@@ -245,6 +248,7 @@ typedef enum oid_value
     VAL_TEXT_XML,
     VAL_APPLICATION_XML,
     VAL_UNIVERSE_REPORT,
+    VAL_PROXY,
 /* add new types here... */
 
 /* VAL_DYNAMIC must have highest value */

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.32  1999-02-18 10:30:46  quinn
+ * Revision 1.33  1999-04-09 12:16:11  adam
+ * Added OtherInfo private OID proxy.
+ *
+ * Revision 1.32  1999/02/18 10:30:46  quinn
  * Changed ES: Update OID
  *
  * Revision 1.31  1998/12/03 11:33:05  adam
@@ -244,6 +247,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH1,{10,4,-1},   "MultipleSearchTerms-1"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH2,{10,5,-1},   "MultipleSearchTerms-2"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_DATETIME,  {10,6,-1},   "DateTime"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_PROXY,     {10,1000,81,1,-1}, "Proxy" },
 
     {PROTO_Z3950,   CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
 
