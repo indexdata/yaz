@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.2  1995-11-01 13:54:45  quinn
+ * Revision 1.3  1995-11-13 09:27:33  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.2  1995/11/01  13:54:45  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/11/01  11:56:07  quinn
@@ -15,16 +18,72 @@
 
 
 #include <assert.h>
+#include <oid.h>
 #include <log.h>
 #include <proto.h>
 #include <data1.h>
 
-static int match_children(data1_node *n, Z_ETagUnit **t, int num);
+static int match_children(data1_node *n, Z_Espec1 *e, int i, Z_ETagUnit **t,
+    int num);
 
-static int match_children_wildpath(data1_node *n, Z_ETagUnit **t, int num)
+static int match_children_wildpath(data1_node *n, Z_Espec1 *e, int i,
+    Z_ETagUnit **t, int num)
 {return 0;}
 
-static int match_children_here(data1_node *n, Z_ETagUnit **t, int num)
+/*
+ * Locate a specific triple within a variant.
+ * set is the set to look for, universal set is the set that applies to a
+ * triple with an unknown set.
+ */
+static Z_Triple *find_triple(Z_Variant *var, oid_value universalset,
+    oid_value set, int class, int type)
+{
+    int i;
+    oident *defaultsetent = oid_getentbyoid(var->globalVariantSetId);
+    oid_value defaultset = defaultsetent ? defaultsetent->value :
+    	universalset;
+
+    for (i = 0; i < var->num_triples; i++)
+    {
+	oident *cursetent =
+	    oid_getentbyoid(var->triples[i]->variantSetId);
+	oid_value curset = cursetent ? cursetent->value : defaultset;
+
+	if (set == curset &&
+	    *var->triples[i]->class == class &&
+	    *var->triples[i]->type == type)
+	    return var->triples[i];
+    }
+    return 0;
+}
+
+static void mark_subtree(data1_node *n, int make_variantlist, int no_data,
+    Z_Variant *vreq)
+{
+    data1_node *c;
+
+    if (n->which == DATA1N_tag && (!n->child || n->child->which != DATA1N_tag))
+    {
+	n->u.tag.node_selected = 1;
+	n->u.tag.make_variantlist = make_variantlist;
+	n->u.tag.no_data_requested = no_data;
+    }
+
+    for (c = n->child; c; c = c->next)
+    {
+	if (c->which == DATA1N_tag && (!n->child ||
+	    n->child->which != DATA1N_tag))
+	{
+	    c->u.tag.node_selected = 1;
+	    c->u.tag.make_variantlist = make_variantlist;
+	    c->u.tag.no_data_requested = no_data;
+	}
+	mark_subtree(c, make_variantlist, no_data, vreq);
+    }
+}
+
+static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
+    Z_ETagUnit **t, int num)
 {
     int counter = 0, hits = 0;
     data1_node *c;
@@ -79,9 +138,41 @@ static int match_children_here(data1_node *n, Z_ETagUnit **t, int num)
 	    (occur->which == Z_Occurrences_values && counter >=
 	    *occur->u.values->start))
 	{
-	    if (match_children(c, t + 1, num - 1))
+	    if (match_children(c, e, i, t + 1, num - 1))
 	    {
 		c->u.tag.node_selected = 1;
+		/*
+		 * Consider the variant specification if this is a complete
+		 * match.
+		 */
+		if (num == 1)
+		{
+		    int show_variantlist = 0;
+		    int no_data = 0;
+		    Z_Variant *vreq =
+			e->elements[i]->u.simpleElement->variantRequest;
+		    oident *defset = oid_getentbyoid(e->defaultVariantSetId);
+		    oid_value defsetval = defset ? defset->value : VAL_NONE;
+		    oid_value var1 = oid_getvalbyname("Variant-1");
+
+		    if (!vreq)
+			vreq = e->defaultVariantRequest;
+
+		    if (vreq)
+		    {
+			/*
+			 * 6,5: meta-data requested, variant list.
+			 */
+			if (find_triple(vreq, defsetval, var1, 6, 5))
+			    show_variantlist = 1;
+			/*
+			 * 9,1: Miscellaneous, no data requested.
+			 */
+			if (find_triple(vreq, defsetval, var1, 9, 1))
+			    no_data = 1;
+		    }
+		    mark_subtree(c, show_variantlist, no_data, vreq);
+		}
 		hits++;
 		/*
 		 * have we looked at enough children?
@@ -96,34 +187,24 @@ static int match_children_here(data1_node *n, Z_ETagUnit **t, int num)
     return hits;
 }
 
-static void mark_children(data1_node *n)
+static int match_children(data1_node *n, Z_Espec1 *e, int i, Z_ETagUnit **t,
+    int num)
 {
-    data1_node *c;
+    int res;
 
-    for (c = n->child; c; c = c->next)
-    {
-	if (c->which != DATA1N_tag)
-	    continue;
-	c->u.tag.node_selected = 1;
-	mark_children(c);
-    }
-}
-
-static int match_children(data1_node *n, Z_ETagUnit **t, int num)
-{
     if (!num)
-    {
-	mark_children(n); /* Here there shall be variants, like, dude */
 	return 1;
-    }
     switch (t[0]->which)
     {
 	case Z_ETagUnit_wildThing:
-	case Z_ETagUnit_specificTag: return match_children_here(n, t, num);
-	case Z_ETagUnit_wildPath: return match_children_wildpath(n, t, num);
+	case Z_ETagUnit_specificTag: res = match_children_here(n, e, i,
+	    t, num); break;
+	case Z_ETagUnit_wildPath: res = match_children_wildpath(n, e, i,
+	    t, num); break;
 	default:
 	    abort();
     }
+    return res;
 }
 
 int data1_doespec1(data1_node *n, Z_Espec1 *e)
@@ -131,7 +212,11 @@ int data1_doespec1(data1_node *n, Z_Espec1 *e)
     int i;
 
     for (i = 0; i < e->num_elements; i++)
-    	match_children(n,  e->elements[i]->u.simpleElement->path->tags,
+    {
+	if (e->elements[i]->which != Z_ERequest_simpleElement)
+	    return 100;
+    	match_children(n, e, i, e->elements[i]->u.simpleElement->path->tags,
 	    e->elements[i]->u.simpleElement->path->num_tags);
+    }
     return 0;
 }

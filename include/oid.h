@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.9  1995-10-12 10:34:45  quinn
+ * Revision 1.10  1995-11-13 09:27:31  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.9  1995/10/12  10:34:45  quinn
  * Added Espec-1.
  *
  * Revision 1.8  1995/10/10  16:27:08  quinn
@@ -86,7 +89,7 @@ typedef struct oident
 	CLASS_USERINFO,
 	CLASS_ELEMSPEC,
 	CLASS_VARSET,
-	CLASS_DBSCHEMA,
+	CLASS_SCHEMA,
 	CLASS_TAGSET
     } class;
     enum oid_value
@@ -99,6 +102,7 @@ typedef struct oident
 	VAL_EXT1,
 	VAL_CCL1,
 	VAL_GILS,
+	VAL_WAIS,
 	VAL_STAS,
 	VAL_DIAG1,
 	VAL_ISO2709,

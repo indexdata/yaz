@@ -44,9 +44,16 @@ class 5 piece
 
 class 6 metadata-requested
 
-  type	1	cost			int
-
-  # More to follow....
+  type	1	cost			intunit
+  type	2	size			intunit
+  type	3	hitsvar			null
+  type	4	hitsnonvar		null
+  type	5	variantlist		null
+  type	6	isvariantsupported	null
+  type	7	documentdescriptor	null
+  type	8	surrogateinformation	null
+  type	998	allmetadata		null
+  type	999	othermetadata		oid
 
 class 7	metadata-returned
 

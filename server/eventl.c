@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.17  1995-11-07 12:37:44  quinn
+ * Revision 1.18  1995-11-13 09:27:41  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.17  1995/11/07  12:37:44  quinn
  * Added support for forcing TIMEOUT event.
  *
  * Revision 1.16  1995/11/01  13:54:56  quinn
@@ -100,7 +103,7 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
 
 int event_loop()
 {
-    do
+    do /* loop as long as there are active associations to process */
     {
     	IOCHAN p, nextp;
 	fd_set in, out, except;

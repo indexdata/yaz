@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.2  1995-11-01 16:34:56  quinn
+ * Revision 1.3  1995-11-13 09:27:34  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.2  1995/11/01  16:34:56  quinn
  * Making data1 look for tables in data1_tabpath
  *
  * Revision 1.1  1995/11/01  11:56:07  quinn
@@ -26,9 +29,165 @@
 #include <tpath.h>
 #include <data1.h>
 
+static Z_Variant *read_variant(int argc, char **argv, ODR o)
+{
+    Z_Variant *r = odr_malloc(o, sizeof(*r));
+    oident var1;
+    int i;
+
+    var1.proto = PROTO_Z3950;
+    var1.class = CLASS_VARSET;
+    var1.value = VAL_VAR1;
+    r->globalVariantSetId = odr_oiddup(o, oid_getoidbyent(&var1));
+
+    r->triples = odr_malloc(o, sizeof(Z_Triple*) * argc);
+    r->num_triples = argc;
+    for (i = 0; i < argc; i++)
+    {
+	int class, type;
+	char value[512];
+	Z_Triple *t;
+
+	if (sscanf(argv[i], "(%d,%d,%[^)])", &class, &type, value) < 3)
+	{
+	    logf(LOG_WARN, "Syntax error in variant component '%s'",
+	    	argv[i]);
+	    return 0;
+	}
+	t = r->triples[i] = odr_malloc(o, sizeof(Z_Triple));
+	t->variantSetId = 0;
+	t->class = odr_malloc(o, sizeof(int));
+	*t->class = class;
+	t->type = odr_malloc(o, sizeof(int));
+	*t->type = type;
+	/*
+	 * This is wrong.. we gotta look up the correct type for the
+	 * variant, I guess... damn this stuff.
+	 */
+	if (*value == '@')
+	{
+	    t->which = Z_Triple_null;
+	    t->value.null = ODR_NULLVAL;
+	}
+	else
+	{
+	    t->which = Z_Triple_internationalString;
+	    t->value.internationalString = odr_malloc(o, strlen(value)+1);
+	    strcpy(t->value.internationalString, value);
+	}
+    }
+    return r;
+}
+
+static Z_Occurrences *read_occurrences(char *occ, ODR o)
+{
+    Z_Occurrences *op = odr_malloc(o, sizeof(*op));
+    char *p;
+
+    if (!occ)
+    {
+	op->which = Z_Occurrences_values;
+	op->u.values = odr_malloc(o, sizeof(Z_OccurValues));
+	op->u.values->start = odr_malloc(o, sizeof(int));
+	*op->u.values->start = 1;
+	op->u.values->howMany = 0;
+    }
+    else if (!strcmp(occ, "all"))
+    {
+	op->which = Z_Occurrences_all;
+	op->u.all = ODR_NULLVAL;
+    }
+    else if (!strcmp(occ, "last"))
+    {
+	op->which = Z_Occurrences_last;
+	op->u.all = ODR_NULLVAL;
+    }
+    else
+    {
+	Z_OccurValues *ov = odr_malloc(o, sizeof(*ov));
+
+	if (!isdigit(*occ))
+	{
+	    logf(LOG_WARN, "Bad occurrences-spec in %s", occ);
+	    return 0;
+	}
+	op->which = Z_Occurrences_values;
+	op->u.values = ov;
+	ov->start = odr_malloc(o, sizeof(*ov->start));
+	*ov->start = atoi(occ);
+	if ((p = strchr(occ, '+')))
+	{
+	    ov->howMany = odr_malloc(o, sizeof(*ov->howMany));
+	    *ov->howMany = atoi(p + 1);
+	}
+	else
+	    ov->howMany = 0;
+    }
+    return op;
+}
+
+
+static Z_ETagUnit *read_tagunit(char *buf, ODR o)
+{
+    Z_ETagUnit *u = odr_malloc(o, sizeof(*u));
+    int terms;
+    int type;
+    char value[512], occ[512];
+
+    if (*buf == '*')
+    {
+	u->which = Z_ETagUnit_wildPath;
+	u->u.wildPath = ODR_NULLVAL;
+    }
+    else if (*buf == '?')
+    {
+	u->which = Z_ETagUnit_wildThing;
+	if (buf[1] == ':')
+	    u->u.wildThing = read_occurrences(buf+2, o);
+	else
+	    u->u.wildThing = read_occurrences(0, o);
+    }
+    else if ((terms = sscanf(buf, "(%d,%[^)]):%[a-z0-9+]", &type, value,
+	occ)) >= 2)
+    {
+	int numval;
+	Z_SpecificTag *t;
+	char *valp = value;
+	int force_string = 0;
+
+	if (*valp == '\'')
+	{
+	    valp++;
+	    force_string = 1;
+	}
+	u->which = Z_ETagUnit_specificTag;
+	u->u.specificTag = t = odr_malloc(o, sizeof(*t));
+	t->tagType = odr_malloc(o, sizeof(*t->tagType));
+	*t->tagType = type;
+	t->tagValue = odr_malloc(o, sizeof(*t->tagValue));
+	if (!force_string && (numval = atoi(valp)))
+	{
+	    t->tagValue->which = Z_StringOrNumeric_numeric;
+	    t->tagValue->u.numeric = odr_malloc(o, sizeof(int));
+	    *t->tagValue->u.numeric = numval;
+	}
+	else
+	{
+	    t->tagValue->which = Z_StringOrNumeric_string;
+	    t->tagValue->u.string = odr_malloc(o, strlen(valp)+1);
+	    strcpy(t->tagValue->u.string, valp);
+	}
+	if (terms > 2) /* an occurrences-spec exists */
+	    t->occurrences = read_occurrences(occ, o);
+	else
+	    t->occurrences = 0;
+    }
+    return u;
+}
+
 /*
- * Read an element-set specification from a file. If !o, use xmalloc for
- * memory allocation.
+ * Read an element-set specification from a file.
+ * NOTE: If !o, memory is allocated directly from the heap by odr_malloc().
  */
 Z_Espec1 *data1_read_espec1(char *file, ODR o)
 {
@@ -92,7 +251,11 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o)
 	}
 	else if (!strcmp(argv[0], "defaultvariantrequest"))
 	{
-	    abort();
+	    if (!(res->defaultVariantRequest = read_variant(argc-1, argv+1, o)))
+	    {
+		logf(LOG_WARN, "%s: Bad defaultvariantrequest", file);
+		continue;
+	    }
 	}
 	else if (!strcmp(argv[0], "simpleelement"))
 	{
@@ -116,6 +279,7 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o)
 		logf(LOG_WARN, "%s: Empty simpleelement directive", file);
 		continue;
 	    }
+
 	    res->elements[res->num_elements++] = er =
 		odr_malloc(o, sizeof(*er));
 	    er->which = Z_ERequest_simpleElement;
@@ -123,53 +287,24 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o)
 	    se->variantRequest = 0;
 	    se->path = tp = odr_malloc(o, sizeof(*tp));
 	    tp->num_tags = 0;
+	    /*
+	     * Parse the element selector.
+	     */
 	    for (num = 1, ep = path; (ep = strchr(ep, '/')); num++, ep++);
 	    tp->tags = odr_malloc(o, sizeof(Z_ETagUnit*)*num);
 
 	    for ((ep = strchr(path, '/')) ; path ; (void)((path = ep) &&
 		(ep = strchr(path, '/'))))
 	    {
-		int type;
-		char value[512];
-		Z_ETagUnit *u;
-
 		if (ep)
 		    ep++;
 
 		assert(i<num);
-		tp->tags[tp->num_tags++] = u = odr_malloc(o, sizeof(*u));
-		if (sscanf(path, "(%d,%[^)])", &type, value) == 2)
-		{
-		    int numval;
-		    Z_SpecificTag *t;
-		    char *valp = value;
-		    int force_string = 0;
-
-		    if (*valp == '\'')
-		    {
-			valp++;
-			force_string = 1;
-		    }
-		    u->which = Z_ETagUnit_specificTag;
-		    u->u.specificTag = t = odr_malloc(o, sizeof(*t));
-		    t->tagType = odr_malloc(o, sizeof(*t->tagType));
-		    *t->tagType = type;
-		    t->tagValue = odr_malloc(o, sizeof(*t->tagValue));
-		    if (!force_string && (numval = atoi(valp)))
-		    {
-			t->tagValue->which = Z_StringOrNumeric_numeric;
-			t->tagValue->u.numeric = odr_malloc(o, sizeof(int));
-			*t->tagValue->u.numeric = numval;
-		    }
-		    else
-		    {
-			t->tagValue->which = Z_StringOrNumeric_string;
-			t->tagValue->u.string = odr_malloc(o, strlen(valp)+1);
-			strcpy(t->tagValue->u.string, valp);
-		    }
-		    t->occurrences = 0; /* for later */
-		}
+		tp->tags[tp->num_tags++] = read_tagunit(path, o);
 	    }
+
+	    if (argc > 2 && !strcmp(argv[2], "variant"))
+		se->variantRequest= read_variant(argc-3, argv+3, o);
 	}
 	else
 	{

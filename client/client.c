@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.24  1995-10-30 12:41:13  quinn
+ * Revision 1.25  1995-11-13 09:27:22  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.24  1995/10/30  12:41:13  quinn
  * Added hostname lookup for server.
  *
  * Revision 1.23  1995/10/18  16:12:30  quinn
@@ -298,7 +301,22 @@ int cmd_authentication(char *arg)
 
 /* SEARCH SERVICE ------------------------------ */
 
-void display_grs1(Z_GenericRecord *r, int level)
+static void display_variant(Z_Variant *v, int level)
+{
+    int i;
+
+    for (i = 0; i < v->num_triples; i++)
+    {
+	printf("%*sclass=%d,type=%d", level * 4, "", *v->triples[i]->class,
+	    *v->triples[i]->type);
+	if (v->triples[i]->which == Z_Triple_internationalString)
+	    printf(",value=%s\n", v->triples[i]->value.internationalString);
+	else
+	    printf("\n");
+    }
+}
+
+static void display_grs1(Z_GenericRecord *r, int level)
 {
     int i;
 
@@ -328,12 +346,31 @@ void display_grs1(Z_GenericRecord *r, int level)
             printf("%s\n", t->content->u.string);
         else if (t->content->which == Z_ElementData_numeric)
 	    printf("%d\n", *t->content->u.numeric);
+	else if (t->content->which == Z_ElementData_noDataRequested)
+	    printf("[No data requested]\n");
+	else if (t->content->which == Z_ElementData_elementEmpty)
+	    printf("[Element empty]\n");
+	else if (t->content->which == Z_ElementData_elementNotThere)
+	    printf("[Element not there]\n");
 	else
             printf("??????\n");
+	if (t->appliedVariant)
+	    display_variant(t->appliedVariant, level+1);
+	if (t->metaData && t->metaData->supportedVariants)
+	{
+	    int c;
+
+	    printf("%*s---- variant list\n", (level+1)*4, "");
+	    for (c = 0; c < t->metaData->num_supportedVariants; c++)
+	    {
+		printf("%*svariant #%d\n", (level+1)*4, "", c);
+		display_variant(t->metaData->supportedVariants[c], level + 2);
+	    }
+	}
     }
 }
 
-void display_record(Z_DatabaseRecord *p)
+static void display_record(Z_DatabaseRecord *p)
 {
     Z_External *r = (Z_External*) p;
     oident *ent = oid_getentbyoid(r->direct_reference);

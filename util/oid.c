@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.8  1995-10-12 10:34:56  quinn
+ * Revision 1.9  1995-11-13 09:27:53  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.8  1995/10/12  10:34:56  quinn
  * Added Espec-1.
  *
  * Revision 1.7  1995/10/10  16:27:12  quinn
@@ -73,8 +76,8 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_EXP1,      {3,2,-1},    "Exp-1"       },
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_EXT1,      {3,3,-1},    "Ext-1"       },
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_CCL1,      {3,4,-1},    "CCL-1"       },
-    {PROTO_Z3950,   CLASS_ATTSET,  VAL_GILS,      {3,5,-1},    "GILS"        },
-    {PROTO_Z3950,   CLASS_ATTSET,  VAL_STAS,      {3,6,-1},    "STAS",       },
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_GILS,      {3,5,-1},    "GILS-attset" },
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_STAS,      {3,6,-1},    "STAS-attset" },
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_BIB1,      {4,1,-1},    "Bib-1"       },
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_DIAG1,     {4,2,-1},    "Diag-1"      },
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_UNIMARC,   {5,1,-1},    "Unimarc"     },
@@ -114,9 +117,12 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
     {PROTO_Z3950,   CLASS_VARSET,  VAL_VAR1,      {12,1,-1},   "Variant-1"   },
 
+    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_WAIS,      {13,1,-1},   "WAIS-schema" },
+    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_GILS,      {13,2,-1},   "GILS-schema" },
+
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
-    {PROTO_Z3950,   CLASS_TAGSET,  VAL_GILS,      {14,3,-1},   "GILS"        },
+    {PROTO_Z3950,   CLASS_TAGSET,  VAL_GILS,      {14,3,-1},   "GILS-tagset" },
 
     /* SR definitions. Note that some of them aren't defined by the
         standard (yet), but are borrowed from Z3950v3 */
@@ -169,8 +175,12 @@ static oident oids[] =
     {PROTO_SR,      CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
     {PROTO_SR,      CLASS_VARSET,  VAL_VAR1,      {12,1,-1},   "Variant-1"   },
 
+    {PROTO_SR,      CLASS_SCHEMA,  VAL_WAIS,      {13,1,-1},   "WAIS-schema" },
+    {PROTO_SR,      CLASS_SCHEMA,  VAL_GILS,      {13,2,-1},   "GILS-schema" },
+
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
+    {PROTO_SR,      CLASS_TAGSET,  VAL_GILS,      {14,3,-1},   "GILS-tagset" },
 
     {0,             0,             0,             {-1},        0          }
 };

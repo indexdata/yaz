@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.3  1995-11-01 16:34:58  quinn
+ * Revision 1.4  1995-11-13 09:27:38  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.3  1995/11/01  16:34:58  quinn
  * Making data1 look for tables in data1_tabpath
  *
  * Revision 1.2  1995/11/01  13:54:49  quinn
@@ -49,6 +52,7 @@ data1_datatype data1_maptype(char *t)
 	{"intunit", DATA1K_intunit},
 	{"int", DATA1K_int},
 	{"octetstring", DATA1K_octetstring},
+	{"null", DATA1K_null},
 	{0, -1}
     };
     int i;

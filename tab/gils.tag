@@ -1,5 +1,5 @@
 name gils
-reference GILS
+reference GILS-tagset
 type 4
 include tagsetm.tag
 include tagsetg.tag

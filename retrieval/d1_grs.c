@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.2  1995-11-01 13:54:46  quinn
+ * Revision 1.3  1995-11-13 09:27:35  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.2  1995/11/01  13:54:46  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/11/01  11:56:07  quinn
@@ -177,6 +180,10 @@ static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o)
 	data = n->child;
 	leaf = 0;
     }
+    /*
+     * If we're a data element at this point, we need to insert a
+     * wellKnown tag to wrap us up.
+     */
     else if (n->which == DATA1N_data || n->which == DATA1N_variant)
     {
 	if (!(tag = data1_gettagbyname(n->root->u.root.absyn->tagset,
@@ -225,16 +232,24 @@ static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o)
 	int nvars = 0;
 
 	res->metaData = get_ElementMetaData(o);
-	if (traverse_triples(data, 0, res->metaData, o) < 0)
-	    return 0;
+	if (n->which == DATA1N_tag && n->u.tag.make_variantlist)
+	    if (traverse_triples(data, 0, res->metaData, o) < 0)
+		return 0;
 	while (data && data->which == DATA1N_variant)
 	{
 	    nvars++;
 	    data = data->child;
 	}
-	res->appliedVariant = make_variant(data->parent, nvars-1, o);
+	if (n->which != DATA1N_tag || !n->u.tag.no_data_requested)
+	    res->appliedVariant = make_variant(data->parent, nvars-1, o);
     }
-    if (!(res->content = nodetoelementdata(data, select, leaf, o)))
+    if (n->which == DATA1N_tag && n->u.tag.no_data_requested)
+    {
+	res->content = odr_malloc(o, sizeof(*res->content));
+	res->content->which = Z_ElementData_noDataRequested;
+	res->content->u.noDataRequested = ODR_NULLVAL;
+    }
+    else if (!(res->content = nodetoelementdata(data, select, leaf, o)))
 	return 0;
     return res;
 }

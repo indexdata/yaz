@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.3  1995-11-01 16:34:57  quinn
+ * Revision 1.4  1995-11-13 09:27:36  quinn
+ * Fiddling with the variant stuff.
+ *
+ * Revision 1.3  1995/11/01  16:34:57  quinn
  * Making data1 look for tables in data1_tabpath
  *
  * Revision 1.2  1995/11/01  13:54:48  quinn
@@ -133,6 +136,8 @@ data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
     tagn->line = -1;
     tagn->u.tag.tag = 0;
     tagn->u.tag.node_selected = 0;
+    tagn->u.tag.make_variantlist = 0;
+    tagn->u.tag.no_data_requested = 0;
     if (!(tagn->u.tag.element = data1_getelementbytagname(root->u.root.absyn,
 	0, tagname)))
     {
@@ -291,7 +296,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 		*buf = t + 1;
 	    }
 	}
-	else /* acquire our element in the abstract syntax */
+	else /* tag.. acquire our element in the abstract syntax */
 	{
 	    data1_node *partag = get_parent_tag(parent);
 	    data1_element *e = 0;
@@ -323,6 +328,8 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	    res->u.tag.element = elem;
 	    res->u.tag.tag = tag;
 	    res->u.tag.node_selected = 0;
+	    res->u.tag.make_variantlist = 0;
+	    res->u.tag.no_data_requested = 0;
 	    res->root = parent->root;
 	    *buf = t + 1;
 	}
