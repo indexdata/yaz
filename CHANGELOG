@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Proximity operator added to Prefix Query Format (PQF).
+
 In test client command "base" accepts multiple databases.
 
 Fixed bug in cs_close stack that caused trouble with WINSOCK.
