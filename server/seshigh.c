@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.76  1998-05-27 16:57:07  adam
+ * Revision 1.77  1998-07-20 12:38:42  adam
+ * Implemented delete result set service to server API.
+ *
+ * Revision 1.76  1998/05/27 16:57:07  adam
  * Support for surrogate diagnostic records added for bend_fetch.
  *
  * Revision 1.75  1998/05/18 10:13:07  adam
@@ -302,6 +305,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd);
 static Z_APDU *process_sortRequest(association *assoc, request *reqb, int *fd);
 static void process_close(association *assoc, request *reqb);
 void save_referenceId (request *reqb, Z_ReferenceId *refid);
+static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
+    int *fd);
 
 static FILE *apduf = 0; /* for use in static mode */
 static statserv_options_block *control_block = 0;
@@ -398,12 +403,12 @@ void destroy_association(association *h)
     xfree(h);
 }
 
-static void do_close(association *a, int reason, char *message)
+static void do_close_req(association *a, int reason, char *message,
+			 request *req)
 {
     Z_APDU apdu;
     Z_Close *cls = zget_Close(a->encode);
-    request *req = request_get(&a->outgoing);
-
+    
     /* Purge request queue */
     while (request_deq(&a->incoming));
     while (request_deq(&a->outgoing));
@@ -424,6 +429,11 @@ static void do_close(association *a, int reason, char *message)
 	iochan_setevent(a->client_chan, EVENT_TIMEOUT); /* force imm close */
     }
     a->state = ASSOC_DEAD;
+}
+
+static void do_close(association *a, int reason, char *message)
+{
+    do_close_req (a, reason, message, request_get(&a->outgoing));
 }
 
 /*
@@ -519,7 +529,8 @@ void ir_session(IOCHAN h, int event)
 	{
 	    request_deq(&assoc->incoming);
 	    if (process_request(assoc, req) < 0)
-		do_close(assoc, Z_Close_systemProblem, "Unknown error");
+		do_close_req(assoc, Z_Close_systemProblem, "Unknown error",
+			     req);
 	}
     }
     if (event & EVENT_OUTPUT)
@@ -576,7 +587,6 @@ static int process_request(association *assoc, request *req)
 	    res = process_presentRequest(assoc, req, &fd); break;
 	case Z_APDU_scanRequest:
 	    res = process_scanRequest(assoc, req, &fd); break;
-/* Chas: Added in from DALI */
         case Z_APDU_extendedServicesRequest:
 	    if (assoc->bend_esrequest)
 		res = process_ESRequest(assoc, req, &fd);
@@ -585,7 +595,6 @@ static int process_request(association *assoc, request *req)
 		logf(LOG_WARN, "Cannot handle EXTENDED SERVICES APDU");
 		return -1;
 	    }
-/* Chas: End of addition from DALI */
 	    break;
         case Z_APDU_sortRequest:
 	    if (assoc->bend_sort)
@@ -598,6 +607,15 @@ static int process_request(association *assoc, request *req)
 	    break;
 	case Z_APDU_close:
 	    process_close(assoc, req); return 0;
+        case Z_APDU_deleteResultSetRequest:
+	    if (assoc->bend_delete)
+		res = process_deleteRequest(assoc, req, &fd);
+	    else
+	    {
+		logf (LOG_WARN, "Cannot handle Delete APDU");
+		return -1;
+	    }
+	    break;
 	default:
 	    logf(LOG_WARN, "Bad APDU received");
 	    return -1;
@@ -738,6 +756,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     binitreq.bend_search = NULL;
     binitreq.bend_present = NULL;
     binitreq.bend_esrequest = NULL;
+    binitreq.bend_delete = NULL;
     if (!(binitres = bend_init(&binitreq)))
     {
     	logf(LOG_WARN, "Bad response from backend.");
@@ -753,6 +772,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 	logf (LOG_DEBUG, "Present handler installed");   
     if ((assoc->bend_esrequest = (int (*)())binitreq.bend_esrequest))
 	logf (LOG_DEBUG, "ESRequest handler installed");   
+    if ((assoc->bend_delete = (int (*)())binitreq.bend_delete))
+	logf (LOG_DEBUG, "Delete handler installed");   
     
     resp->referenceId = req->referenceId;
     *options = '\0';
@@ -767,7 +788,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->options, Z_Options_present);
 	strcat(options, " prst");
     }
-    if (ODR_MASK_GET(req->options, Z_Options_delSet))
+    if (ODR_MASK_GET(req->options, Z_Options_delSet) && binitreq.bend_delete)
     {
     	ODR_MASK_SET(resp->options, Z_Options_delSet);
 	strcat(options, " del");
@@ -1569,6 +1590,45 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     return apdu;
 }
 
+static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
+    int *fd)
+{
+    Z_DeleteResultSetRequest *req = reqb->request->u.deleteResultSetRequest;
+    Z_DeleteResultSetResponse *res = (Z_DeleteResultSetResponse *)
+	odr_malloc (assoc->encode, sizeof(*res));
+    bend_delete_rr *bdrr = (bend_delete_rr *)
+	odr_malloc (assoc->encode, sizeof(*bdrr));
+    Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
+
+    logf(LOG_LOG, "Got DeleteRequest.");
+
+    bdrr->num_setnames = req->num_ids;
+    bdrr->setnames = req->resultSetList;
+    bdrr->stream = assoc->encode;
+    bdrr->function = *req->deleteFunction;
+
+    ((int (*)(void *, bend_delete_rr *))
+     (*assoc->bend_delete))(assoc->backend, bdrr);
+    
+    res->referenceId = req->referenceId;
+
+    res->deleteOperationStatus = (int *)
+	odr_malloc (assoc->encode, sizeof(*res->deleteOperationStatus));
+    *res->deleteOperationStatus = bdrr->delete_status;
+
+    res->num_statuses = 0;
+    res->deleteListStatuses = 0;
+    res->numberNotDeleted = 0;
+    res->num_bulkStatuses = 0;
+    res->bulkStatuses = 0;
+    res->deleteMessage = 0;
+    res->otherInfo = 0;
+
+    apdu->which = Z_APDU_deleteResultSetResponse;
+    apdu->u.deleteResultSetResponse = res;
+    return apdu;
+}
+
 static void process_close(association *assoc, request *reqb)
 {
     Z_Close *req = reqb->request->u.close;
@@ -1591,7 +1651,8 @@ static void process_close(association *assoc, request *reqb)
 	req->diagnosticInformation : "NULL");
     if (assoc->version < 3) /* to make do_force respond with close */
     	assoc->version = 3;
-    do_close(assoc, Z_Close_finished, "Association terminated by client");
+    do_close_req(assoc, Z_Close_finished, "Association terminated by client",
+		 reqb);
 }
 
 void save_referenceId (request *reqb, Z_ReferenceId *refid)

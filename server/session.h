@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.16  1998-03-31 11:07:45  adam
+ * Revision 1.17  1998-07-20 12:38:43  adam
+ * Implemented delete result set service to server API.
+ *
+ * Revision 1.16  1998/03/31 11:07:45  adam
  * Furhter work on UNIverse resource report.
  * Added Extended Services handling in frontend server.
  *
@@ -138,6 +141,7 @@ typedef struct association
     int (*bend_search) ();
     int (*bend_present) ();
     int (*bend_esrequest) ();
+    int (*bend_delete) ();
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);

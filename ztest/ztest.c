@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.11  1998-06-09 13:55:08  adam
+ * Revision 1.12  1998-07-20 12:38:44  adam
+ * Implemented delete result set service to server API.
+ *
+ * Revision 1.11  1998/06/09 13:55:08  adam
  * Minor changes.
  *
  * Revision 1.10  1998/05/27 16:55:54  adam
@@ -63,6 +66,7 @@ int ztest_search (void *handle, bend_search_rr *rr);
 int ztest_sort (void *handle, bend_sort_rr *rr);
 int ztest_present (void *handle, bend_present_rr *rr);
 int ztest_esrequest (void *handle, bend_esrequest_rr *rr);
+int ztest_delete (void *handle, bend_delete_rr *rr);
 
 bend_initresult *bend_init(bend_initrequest *q)
 {
@@ -76,6 +80,7 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_search = ztest_search;   /* register search handler */
     q->bend_present = ztest_present; /* register present handle */
     q->bend_esrequest = ztest_esrequest;
+    q->bend_delete = ztest_delete;
     return r;
 }
 
@@ -93,6 +98,15 @@ int ztest_present (void *handle, bend_present_rr *rr)
 int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 {
     rr->errcode = 0;
+    return 0;
+}
+
+int ztest_delete (void *handle, bend_delete_rr *rr)
+{
+    if (rr->num_setnames == 1 && !strcmp (rr->setnames[0], "1"))
+	rr->delete_status = Z_DeleteStatus_success;
+    else
+        rr->delete_status = Z_DeleteStatus_resultSetDidNotExist;
     return 0;
 }
 
@@ -236,11 +250,6 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
     }
     r->errcode = 0;
     return r;
-}
-
-bend_deleteresult *bend_delete(void *handle, bend_deleterequest *q, int *num)
-{
-    return 0;
 }
 
 /*

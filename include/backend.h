@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.20  1998-05-27 16:57:06  adam
+ * Revision 1.21  1998-07-20 12:38:41  adam
+ * Implemented delete result set service to server API.
+ *
+ * Revision 1.20  1998/05/27 16:57:06  adam
  * Support for surrogate diagnostic records added for bend_fetch.
  *
  * Revision 1.19  1998/03/31 11:07:45  adam
@@ -172,21 +175,16 @@ YAZ_EXPORT bend_scanresult *bend_scan(void *handle, bend_scanrequest *r,
                                       int *fd);
 YAZ_EXPORT bend_scanresult *bend_scanresponse(void *handle);
 
-typedef struct bend_deleterequest
-{
-    char *setname;
-} bend_deleterequest;
+/* delete handler */
+typedef struct bend_delete_rr {
+    int function;
+    int num_setnames;
+    char **setnames;
+    int delete_status;
+    ODR stream;
+} bend_delete_rr;
 
-typedef struct bend_deleteresult
-{
-    int errcode;               /* 0==success */
-    char *errstring;           /* system error string or NULL */
-} bend_deleteresult;
-
-YAZ_EXPORT bend_deleteresult *bend_delete(void *handle,
-                                          bend_deleterequest *r, int *fd);
-YAZ_EXPORT bend_deleteresult *bend_deleteresponse(void *handle);
-
+/* close handler */
 YAZ_EXPORT void bend_close(void *handle);
 
 /* sort handler */
@@ -225,6 +223,7 @@ typedef struct bend_initrequest
     int (*bend_search) (void *handle, bend_search_rr *rr);
     int (*bend_present) (void *handle, bend_present_rr *rr);
     int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
+    int (*bend_delete)(void *handle, bend_delete_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult
@@ -247,7 +246,6 @@ YAZ_EXPORT Z_ReferenceId *bend_request_getid (ODR odr, bend_request req);
 YAZ_EXPORT int bend_backend_respond (bend_association a, bend_request req);
 YAZ_EXPORT void bend_request_setdata(bend_request r, void *p);
 YAZ_EXPORT void *bend_request_getdata(bend_request r);
-
 
 #ifdef __cplusplus
 }
