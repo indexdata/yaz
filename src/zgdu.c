@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.8 2004-02-25 10:37:02 adam Exp $
+ * $Id: zgdu.c,v 1.9 2004-02-25 12:59:56 adam Exp $
  */
 
 #include <ctype.h>
@@ -78,11 +78,12 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
     {
 	int off = 0;
 	
-	/* we know buffer will be smaller than o->size - i - 2*/
-	*content_buf = (char*) odr_malloc(o, o->size - i - 2);  
+	/* we know buffer will be smaller than o->size - i*/
+	*content_buf = (char*) odr_malloc(o, o->size - i);  
 	
 	while (1)
 	{
+	    /* chunk length .. */
 	    int chunk_len = 0;
 	    for (; i  < o->size-2; i++)
 		if (isdigit(o->buf[i]))
@@ -96,14 +97,17 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
 			(o->buf[i] - ('a'-10));
 		else
 		    break;
-	    if (i > o->size - 2)
-		break;
-	    if (o->buf[i] != '\r' || o->buf[i+1] != '\n') 
-	    {   /* chunk length must be followed by \r\n */
-		o->error = OHTTP;
-		return 0;
+	    /* chunk extension ... */
+	    while (o->buf[i] != '\r' && o->buf[i+1] != '\n')
+	    {
+		if (i >= o->size-2)
+		{
+		    o->error = OHTTP;
+		    return 0;
+		}
+		i++;
 	    }
-	    i += 2;
+	    i += 2;  /* skip CRLF */
 	    if (chunk_len == 0)
 		break;
 	    if (chunk_len < 0 || off + chunk_len > o->size)
@@ -111,8 +115,9 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
 		o->error = OHTTP;
 		return 0;
 	    }
+	    /* copy chunk .. */
 	    memcpy (*content_buf + off, o->buf + i, chunk_len);
-	    i += chunk_len;
+	    i += chunk_len + 2; /* skip chunk+CRLF */
 	    off += chunk_len;
 	}
 	if (!off)

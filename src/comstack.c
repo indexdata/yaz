@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.5 2004-02-19 23:20:44 adam Exp $
+ * $Id: comstack.c,v 1.6 2004-02-25 12:59:56 adam Exp $
  */
 
 #include <string.h>
@@ -164,7 +164,7 @@ int cs_complete_auto(const unsigned char *buf, int len)
 			/* inside chunked body .. */
                         while(1)
                         {
-                            int chunk_len = 0;
+                            int j, chunk_len = 0;
                             i += 2;
 #if CHUNK_DEBUG
 /* debugging */
@@ -177,6 +177,7 @@ int cs_complete_auto(const unsigned char *buf, int len)
                                 printf (">>>\n");
                             }
 #endif
+			    /* read chunk length */
                             while (1)
                                 if (i >= len-2) {
 #if CHUNK_DEBUG
@@ -196,32 +197,41 @@ int cs_complete_auto(const unsigned char *buf, int len)
                                         (buf[i++] - ('a'-10));
                                 else
                                     break;
-                            if (buf[i] != '\r' || buf[i+1] != '\n' ||
-                                chunk_len < 0)
-                                return i+2;    /* bad. stop now */
+			    /* move forward until CRLF - skip chunk ext */
+			    j = 0;
+			    while (buf[i] != '\r' && buf[i+1] != '\n')
+			    {
+				if (i >= len-2)
+				    return 0;   /* need more buffer .. */
+				if (++j > 1000)
+				    return i; /* enough.. stop */
+				i++;
+			    }
+			    /* got CRLF */
 #if CHUNK_DEBUG
 			    printf ("XXXXXX chunk_len=%d\n", chunk_len);
 #endif			    
+			    if (chunk_len < 0)
+				return i+2;    /* bad chunk_len */
                             if (chunk_len == 0)
-                            {
-                                /* consider trailing headers .. */
-                                while(i <= len-4)
-                                {
-                                    if (buf[i] == '\r' &&  buf[i+1] == '\n' &&
-                                        buf[i+2] == '\r' && buf[i+3] == '\n')
-                                        if (len >= i+4)
-                                            return i+4;
-                                    i++;
-                                }
-#if CHUNK_DEBUG
-/* debugging */
-                                printf ("XXXXXXXXX not there yet 2\n");
-                                printf ("i=%d len=%d\n", i, len);
-#endif
-                                return 0;
-                            }
+				break;
                             i += chunk_len+2;
                         }
+			/* consider trailing headers .. */
+			while(i <= len-4)
+			{
+			    if (buf[i] == '\r' &&  buf[i+1] == '\n' &&
+				buf[i+2] == '\r' && buf[i+3] == '\n')
+				if (len >= i+4)
+				    return i+4;
+			    i++;
+			}
+#if CHUNK_DEBUG
+/* debugging */
+			printf ("XXXXXXXXX not there yet 2\n");
+			printf ("i=%d len=%d\n", i, len);
+#endif
+			return 0;
                     }
                     else
                     {   /* not chunked ; inside body */

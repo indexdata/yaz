@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixes for Chunked encoding. White space not ignored after length spec.
+
 Update NS and use default NS for SRW diagnostic elements.
 
 --- 2.0.13 2004/02/23
