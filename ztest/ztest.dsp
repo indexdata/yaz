@@ -52,9 +52,12 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib yaz.lib server.lib /nologo /subsystem:console /machine:I386 /libpath:"..\release" /libpath:"..\server\release"
 # Begin Special Build Tool
+OutDir=.\Release
 ProjDir=.
+TargetName=ztest
 SOURCE=$(InputPath)
-PostBuild_Cmds=copy ..\..\yaz\release\yaz.dll $(ProjDir)
+PostBuild_Desc=Copy ztest.exe
+PostBuild_Cmds=copy $(OutDir)\$(TargetName).exe $(ProjDir)\..\..\bin
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "ztest - Win32 Debug"
@@ -82,9 +85,12 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib yaz.lib server.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /pdbtype:sept /libpath:"..\debug" /libpath:"..\server\debug"
 # Begin Special Build Tool
+OutDir=.\Debug
 ProjDir=.
+TargetName=ztest
 SOURCE=$(InputPath)
-PostBuild_Cmds=copy ..\..\yaz\debug\yaz.dll $(ProjDir)
+PostBuild_Desc=Copy ztest.exe
+PostBuild_Cmds=copy $(OutDir)\$(TargetName).exe $(ProjDir)\..\..\bin
 # End Special Build Tool
 
 !ENDIF 

@@ -47,14 +47,6 @@ BSC32=bscmake.exe
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
-# Begin Special Build Tool
-OutDir=.\Release
-ProjDir=.
-TargetName=server
-SOURCE=$(InputPath)
-PostBuild_Desc=Copy lib
-PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\..\lib
-# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "server - Win32 Debug"
 
@@ -77,14 +69,6 @@ BSC32=bscmake.exe
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
-# Begin Special Build Tool
-OutDir=.\Debug
-ProjDir=.
-TargetName=server
-SOURCE=$(InputPath)
-PostBuild_Desc=Copy lib
-PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\..\lib
-# End Special Build Tool
 
 !ENDIF 
 
