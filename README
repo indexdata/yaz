@@ -18,12 +18,12 @@ server which returns canned responses to all queries. It's good for
 verifying that the protocol works ok, and ztest.c shows a minimalistic
 implementation of the 'backend' interface.
 
-Cli is a linemode Z39.50 client. It supports a fair amount of the
-functionality of Z39.50v2/SR, but some things you need to enable by
-recompilation. Its primary purpose is to excersise the package, and
+Client is a linemode Z39.50 client. It supports a fair amount of the
+functionality of Z39.50v2/SR, but some things you need to enable or disable
+by recompilation. Its primary purpose is to excersise the package, and
 verify that the protocol works OK. It can be started by typing
 
-cli tcp:<hostname>:<port>
+client tcp:<hostname>:<port>
 
 at the UNIX prompt, to connect to a Z39.50 server, or
 
@@ -75,6 +75,9 @@ server  - This is the implementation of the server frontend. It
 	provides event-handling and server managament functions,
 	and calls the backend primitives (best documentation of these
 	is in the file include/backend.h). See server.txt.
+
+client  - A demonstration client. If we come upon a good design for a
+	higher level client API, that will live here.
 
 include - The various header files.
 

@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.11 1995-05-15 13:20:38 quinn Exp $
+# $Id: Makefile,v 1.12 1995-05-22 11:29:19 quinn Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 DEFS=-DUSE_XTIMOSI
@@ -12,7 +12,7 @@ XMOSI=xmosi.o
 #CC=
 SHELL=/bin/sh
 MAKE=make
-SUBDIR=util odr asn $(RFC1006) ccl yazlib server makelib
+SUBDIR=util odr asn $(RFC1006) ccl yazlib client server makelib
 
 all:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) CFLAGS="$(CFLAGS) $(DEFS)" LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)"; then cd ..; else exit 1; fi; done
