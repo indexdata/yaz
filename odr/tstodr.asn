@@ -1,0 +1,16 @@
+-- Small ASN.1 spec for tstodr test
+-- $Id: tstodr.asn,v 1.1 2003-05-06 10:08:30 adam Exp $
+tstodrcodec
+{tstodrcodec} DEFINITIONS ::=
+BEGIN
+MySequence ::= SEQUENCE {
+	first [1] IMPLICIT INTEGER,
+	second [2] IMPLICIT OCTET STRING,
+        third [3] IMPLICIT BOOLEAN,
+        fourth [4] IMPLICIT NULL,
+        fifth [5] IMPLICIT INTEGER {
+                enum1(0),
+                enum2(1)
+        }
+}
+END                              
