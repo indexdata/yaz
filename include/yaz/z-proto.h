@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: z-proto.h,v $
- * Revision 1.3  2000-02-28 11:20:06  adam
+ * Revision 1.4  2000-03-14 09:19:49  ian
+ * Added admin extended service encoders & decoders.
+ *
+ * Revision 1.3  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.2  1999/12/16 23:36:19  adam
@@ -55,6 +58,7 @@
 #include <yaz/zes-psched.h>
 #include <yaz/zes-pset.h>
 #include <yaz/zes-update.h>
+#include <yaz/zes-admin.h>
 #include <yaz/z-date.h>
 #include <yaz/z-univ.h>
 
