@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.10  1995-12-06 09:51:27  quinn
+ * Revision 1.11  1996-02-05 12:24:32  adam
+ * Implemented log_event_{start,end}-functions.
+ *
+ * Revision 1.10  1995/12/06  09:51:27  quinn
  * Fixed the log-prefix buffer - it was too small and the setup code lacked
  * a bounds-check.
  *
@@ -119,19 +122,35 @@ void log_init(int level, const char *prefix, const char *name)
     setvbuf(l_file, 0, _IONBF, 0);
 }
 
+static void (*start_hook_func)(int, const char *, void *) = NULL;
+void *start_hook_info;
+static void (*end_hook_func)(int, const char *, void *) = NULL;
+void *end_hook_info;
+
+void log_event_start (void (*func)(int, const char *, void *), void *info)
+{
+    start_hook_func = func;
+    start_hook_info = info;
+}
+
+void log_event_end (void (*func)(int, const char *, void *), void *info)
+{
+    end_hook_func = func;
+    end_hook_info = info;
+}
+
 void logf(int level, const char *fmt, ...)
 {
     va_list ap;
     char buf[4096], flags[1024];
-    int i, p_error = 0;
+    int i;
     time_t ti;
     struct tm *tim;
     char tbuf[50];
+    int o_level = level;
 
     if (!(level & l_level))
     	return;
-    if (level & LOG_ERRNO)
-    	p_error = 1;
     *flags = '\0';
     for (i = 0; level && mask_names[i].name; i++)
     	if (mask_names[i].mask & level)
@@ -142,13 +161,17 @@ void logf(int level, const char *fmt, ...)
 	}
     va_start(ap, fmt);
     vsprintf(buf, fmt, ap);
-    if (p_error)
+    if (o_level & LOG_ERRNO)
     	sprintf(buf + strlen(buf), " [%s]", strerror(errno));
+    if (start_hook_func)
+        (*start_hook_func)(o_level, buf, start_hook_info);
     ti = time(0);
     tim = localtime(&ti);
     strftime(tbuf, 50, "%H:%M:%S-%d/%m", tim);
     fprintf(l_file, "%s: %s: %s %s\n", tbuf, l_prefix, flags, buf);
     fflush(l_file);
+    if (end_hook_func)
+	(*end_hook_func)(o_level, buf, end_hook_info);
 }
 
 int log_mask_str (const char *str)

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.6  1995-10-10 16:27:06  quinn
+ * Revision 1.7  1996-02-05 12:24:26  adam
+ * Implemented log_event_{start,end}-functions.
+ *
+ * Revision 1.6  1995/10/10  16:27:06  quinn
  * *** empty log message ***
  *
  * Revision 1.5  1995/09/29  17:12:03  quinn
@@ -76,5 +79,10 @@ void log_init(int level, const char *prefix, const char *name);
 void logf(int level, const char *fmt, ...);
 int log_mask_str (const char *str);
 FILE *log_file(void);
+
+void log_event_start (void (*func)(int level, const char *msg, void *info),
+	void *info);
+void log_event_end (void (*func)(int level, const char *msg, void *info),
+	void *info);
 
 #endif
