@@ -1,4 +1,4 @@
-# $Id: bib1,v 1.6 2001-03-07 13:24:40 adam Exp $
+# $Id: bib1,v 1.7 2001-03-20 11:22:58 adam Exp $
 # CCL qualifiers and their mappings
 #
 # Each line takes the form:
@@ -103,3 +103,4 @@ exp:category exp1,1=1
 @not ikke -           # and so on..
 @set s set
 @case 0		      # case insenstive (1 for case sensitive)
+@truncation * ?

@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.22  2001-03-07 13:24:40  adam
+ * Revision 1.23  2001-03-20 11:22:58  adam
+ * CCL Truncation character may be defined.
+ *
+ * Revision 1.22  2001/03/07 13:24:40  adam
  * Member and_not in Z_Operator is kept for backwards compatibility.
  * Added support for definition of CCL operators in field spec file.
  *
@@ -334,6 +337,12 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
     int and_list = 0;
     int or_list = 0;
     char *attset;
+    const char *truncation_aliases;
+
+    truncation_aliases =
+	ccl_qual_search_special(cclp->bibset, "truncation");
+    if (!truncation_aliases)
+	truncation_aliases = "?";
 
     if (!qa)
     {
@@ -371,7 +380,8 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         for (no = 0; no < max && is_term_ok(lookahead->kind, term_list); no++)
         {
             for (i = 0; i<lookahead->len; i++)
-                if (truncation_value == -1 && lookahead->name[i] == '?')
+                if (truncation_value == -1 && strchr(truncation_aliases,
+						     lookahead->name[i]))
                 {
                     if (no == 0 && i == 0 && lookahead->len >= 1)
                         left_trunc = 1;

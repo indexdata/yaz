@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+CCL trunction character may be defined (@truncation in file)
+
 * function zget_ExtendedServicesRequest sets waitAction to
   waitIfPossible (was wait).
 
