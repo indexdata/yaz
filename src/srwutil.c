@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.3 2004-01-05 09:34:42 adam Exp $
+ * $Id: srwutil.c,v 1.4 2004-01-06 09:10:02 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -446,10 +446,10 @@ static int srw_bib1_map[] = {
     20, 56, 
     21, 52,
     22, 50,
-    23, 1,  /* bad map */
-    24, 63, /* bad map */
-    25, 63, /* bad map */
-    26, 63, /* bad map */
+    23, 3,
+    24, 66,
+    25, 66,
+    26, 66,
     27, 51,
     28, 52,
     29, 52,
