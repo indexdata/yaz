@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.53 2003-02-17 22:34:39 adam Exp $
+# $Id: makefile,v 1.54 2003-02-18 09:11:50 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -26,24 +26,25 @@
 
 DEBUG=0   # 0 for release, 1 for debug
 
-# iconv
-HAVE_ICONV=0
-ICONV_DIR = c:\libiconv-1.7.0.1
-
 # TCL
 #TCL="C:\Tcl\bin\tclsh83.exe"
 TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
 
+# iconv charcter conversion utility
+HAVE_ICONV=1
+ICONV_DIR = c:\iconv-1.8.win32
+
 # libxml2
+HAVE_LIBXML2=1
 LIBXML2_DIR=c:\libxml2-2.5.3.win32
 
-LIBXML2_LIB=$(LIBXML2_DIR)\lib\libxml2.lib
-LIBXML2_DEF=/D HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
+# WIN32 binaries libxml2 & iconv from here:
+#  http://www.zlatkovic.com/projects/libxml/binaries.html
 
 default: all
 
-all: dirs generate dll client ztest zoomsh
+all: dirs generate dll client ztest zoomsh iconv libxml2
 
 NSIS="c:\program files\nsis\makensis-bz2.exe"
 
@@ -92,7 +93,6 @@ TMP=$(TMPDIR)
 ############### Targets - what to make
 ###########################################################
 
-
 DLL=$(BINDIR)\Yaz.dll
 IMPLIB=$(LIBDIR)\Yaz.lib
 
@@ -127,11 +127,32 @@ ICONV_DEF= \
   /I"$(ICONV_DIR)\include"
 ICONV_LIB= \
   $(ICONV_DIR)\lib\iconv.lib
+iconv: $(BINDIR)\iconv.dll
+
+$(BINDIR)\iconv.dll:
+  copy $(ICONV_DIR)\lib\iconv.dll $(BINDIR)
 !else
 ICONV_DEF= \
   /D HAVE_ICONV_H=0
 ICONV_LIB=
+iconv:
+
 !endif
+
+!if $(HAVE_LIBXML2)
+LIBXML2_LIB=$(LIBXML2_DIR)\lib\libxml2.lib
+LIBXML2_DEF=/D HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
+libxml2: $(BINDIR)\libxml2.dll
+
+$(BINDIR)\libxml2.dll:
+  copy $(LIBXML2_DIR)\lib\libxml2.dll $(BINDIR)
+!else
+LIBXML2_LIB=
+LIBXML2_DEF=/D HAVE_XML2=0
+libxml2: 
+
+!endif
+
 
 ### C and CPP compiler  (the same thing)
 # Note: $(CPP) has already been defined in the environment
@@ -860,7 +881,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.53  2003-02-17 22:34:39  adam
+# Revision 1.54  2003-02-18 09:11:50  adam
+# Prepare for external utilties: iconv, libxml2 on WIN32
+#
+# Revision 1.53  2003/02/17 22:34:39  adam
 # WIN32 updates
 #
 # Revision 1.52  2002/12/16 14:06:34  adam
