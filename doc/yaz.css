@@ -3,9 +3,9 @@
 	border-collapse;
 	border: 1px solid black;
 	border-spacing: 0;	
-	width: 92%;
+	width: 94%;
 	margin-left: auto;
-	margin-right: auto;
+	margin-right: 0;
 }
 
 .author {
@@ -14,6 +14,18 @@
 
 .TITLEPAGE, .LOT, .TOC {
 	font-family: sans-serif;
+}
+
+.TITLEPAGE .abstract {
+	margin: 0 150px 1em 0;	
+	font-style: oblique;
+}
+
+.TITLEPAGE .inlinemediaobject {
+	position: absolute;
+	top: 60px;
+	right: 0;
+	width: 140px;
 }
 
 .table th {
@@ -39,12 +51,11 @@ h2 {
 }
 
 .example , .figure {
-	margin-left: 2%;
+	margin-left: 3%;
 }
 
 .screen, .synopsis, .programlisting {
-	margin-left: 4%;
-	margin-right: 4%;
+	margin-left: 6%;
 	padding: 4px;
 	border-style: solid;
 	border-width: 1px;
