@@ -1,3 +1,4 @@
+## $Id: Makefile.am,v 1.2 2000-02-28 11:44:39 adam Exp $
 
 tabdatadir = $(pkgdatadir)/tab
 tabdata_DATA = bib1.att dan1.att danmarc.abs explain.abs explain.att \

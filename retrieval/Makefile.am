@@ -1,3 +1,5 @@
+## $Id: Makefile.am,v 1.2 2000-02-28 11:44:39 adam Exp $
+
 noinst_LIBRARIES=libret.a
 
 libret_a_SOURCES = d1_handle.c d1_read.c d1_attset.c d1_tagset.c d1_absyn.c \
