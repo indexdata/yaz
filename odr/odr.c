@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.16  1995-09-27 15:02:57  quinn
+ * Revision 1.17  1995-09-29 17:01:50  quinn
+ * More Windows work
+ *
+ * Revision 1.16  1995/09/27  15:02:57  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.15  1995/08/15  12:00:22  quinn
@@ -79,6 +82,11 @@ char *odr_errlist[] =
     "Length of constructed type different from sum of members"
 };
 
+char *odr_errmsg(int n)
+{
+    return odr_errlist[n];
+}
+
 void MDF odr_perror(ODR o, char *message)
 {
     fprintf(stderr, "%s: %s\n", message, odr_errlist[o->error]);
@@ -99,7 +107,7 @@ ODR MDF odr_createmem(int direction)
     struct odr *r;
 
     if (!(r = malloc(sizeof(*r))))
-    	return 0;
+        return 0;
     r->direction = direction;
     r->print = stderr;
     r->buf = 0;
@@ -132,9 +140,9 @@ void MDF odr_destroy(ODR o)
 {
     odr_release_mem(o->mem);
     if (o->ecb.buf && o->ecb.can_grow)
-    	free(o->ecb.buf);
+        free(o->ecb.buf);
     if (o->print != stderr)
-    	fclose(o->print);
+        fclose(o->print);
     free(o);
 }
 
@@ -153,6 +161,6 @@ char MDF *odr_getbuf(ODR o, int *len, int *size)
 {
     *len = o->ecb.top;
     if (size)
-    	*size = o->ecb.size;
+        *size = o->ecb.size;
     return (char*) o->ecb.buf;
 }

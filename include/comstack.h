@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.9  1995-09-28 10:12:36  quinn
+ * Revision 1.10  1995-09-29 17:01:48  quinn
+ * More Windows work
+ *
+ * Revision 1.9  1995/09/28  10:12:36  quinn
  * Windows-support changes
  *
  * Revision 1.8  1995/09/27  15:02:46  quinn
@@ -159,6 +162,7 @@ struct comstack
 #define cs_getproto(handle) ((handle)->protocol)
 
 const char MDF *cs_strerror(COMSTACK h);
+const char *cs_errmsg(int n);
 
 /*
  * error management.

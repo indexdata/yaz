@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.20  1995-08-29 14:24:13  quinn
+ * Revision 1.21  1995-09-29 17:01:47  quinn
+ * More Windows work
+ *
+ * Revision 1.20  1995/08/29  14:24:13  quinn
  * Added second half of close-handshake
  *
  * Revision 1.19  1995/08/29  11:17:28  quinn
@@ -74,7 +77,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef WINDOWS
+#include <time.h>
+#else
 #include <sys/time.h>
+#endif
 #include <assert.h>
 #ifdef _AIX
 #include <sys/select.h>
@@ -130,15 +137,15 @@ static void send_apdu(Z_APDU *a)
 
     if (!z_APDU(out, &a, 0))
     {
-    	odr_perror(out, "Encoding APDU");
-	exit(1);
+        odr_perror(out, "Encoding APDU");
+        exit(1);
     }
     buf = odr_getbuf(out, &len, 0);
     odr_reset(out); /* release the APDU */
     if (cs_put(conn, buf, len) < 0)
     {
-    	fprintf(stderr, "cs_put: %s", cs_errlist[cs_errno(conn)]);
-	exit(1);
+        fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
+        exit(1);
     }
 }
 
@@ -172,29 +179,29 @@ static int process_initResponse(Z_InitResponse *res)
     session = res;
 
     if (!*res->result)
-	printf("Connection rejected by target.\n");
+        printf("Connection rejected by target.\n");
     else
-	printf("Connection accepted by target.\n");
+        printf("Connection accepted by target.\n");
     if (res->implementationId)
-	printf("ID     : %s\n", res->implementationId);
+        printf("ID     : %s\n", res->implementationId);
     if (res->implementationName)
-	printf("Name   : %s\n", res->implementationName);
+        printf("Name   : %s\n", res->implementationName);
     if (res->implementationVersion)
-	printf("Version: %s\n", res->implementationVersion);
+        printf("Version: %s\n", res->implementationVersion);
     if (res->userInformationField)
     {
-	printf("UserInformationfield:\n");
-	if (!z_External(print, (Z_External**)&res-> userInformationField,
-	    0))
-	{
-	    odr_perror(print, "Printing userinfo\n");
-	    odr_reset(print);
-	}
-	if (res->userInformationField->which == Z_External_octet)
-	{
-	    printf("Guessing visiblestring:\n");
-	    printf("'%s'\n", res->userInformationField->u. octet_aligned->buf);
-	}
+        printf("UserInformationfield:\n");
+        if (!z_External(print, (Z_External**)&res-> userInformationField,
+            0))
+        {
+            odr_perror(print, "Printing userinfo\n");
+            odr_reset(print);
+        }
+        if (res->userInformationField->which == Z_External_octet)
+        {
+            printf("Guessing visiblestring:\n");
+            printf("'%s'\n", res->userInformationField->u. octet_aligned->buf);
+        }
     }
     return 0;
 }
@@ -207,55 +214,55 @@ int cmd_open(char *arg)
 
     if (conn)
     {
-    	printf("Already connected.\n");
-    	return 0;
+        printf("Already connected.\n");
+        return 0;
     }
     if (!*arg || sscanf(arg, "%[^:]:%s", type, addr) < 2)
     {
-    	fprintf(stderr, "Usage: open (osi|tcp) ':' [tsel '/']host[':'port]\n");
-    	return 0;
+        fprintf(stderr, "Usage: open (osi|tcp) ':' [tsel '/']host[':'port]\n");
+        return 0;
     }
 #ifdef USE_XTIMOSI
     if (!strcmp(type, "osi"))
     {
-	if (!(add = mosi_strtoaddr(addr)))
-	{
-	    perror(arg);
-	    return 0;
-	}
-	t = mosi_type;
-	protocol = PROTO_SR;
+        if (!(add = mosi_strtoaddr(addr)))
+        {
+            perror(arg);
+            return 0;
+        }
+        t = mosi_type;
+        protocol = PROTO_SR;
     }
     else
 #endif
     if (!strcmp(type, "tcp"))
     {
-    	if (!(add = tcpip_strtoaddr(addr)))
-	{
-	    perror(arg);
-	    return 0;
-	}
-	t = tcpip_type;
-	protocol = PROTO_Z3950;
+        if (!(add = tcpip_strtoaddr(addr)))
+        {
+            perror(arg);
+            return 0;
+        }
+        t = tcpip_type;
+        protocol = PROTO_Z3950;
     }
     else
     {
-    	fprintf(stderr, "Bad type: %s\n", type);
-    	return 0;
+        fprintf(stderr, "Bad type: %s\n", type);
+        return 0;
     }
     if (!(conn = cs_create(t, 1, protocol)))
     {
-	perror("cs_create");
-	return 0;
+        perror("cs_create");
+        return 0;
     }
     printf("Connecting...");
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
     {
-    	perror("connect");
-    	cs_close(conn);
-    	conn = 0;
-    	return 0;
+        perror("connect");
+        cs_close(conn);
+        conn = 0;
+        return 0;
     }
     printf("Ok.\n");
     send_initRequest();
@@ -269,9 +276,9 @@ int cmd_authentication(char *arg)
 
     if (!*arg)
     {
-    	printf("Auth field set to null\n");
-	auth = 0;
-    	return 1;
+        printf("Auth field set to null\n");
+        auth = 0;
+        return 1;
     }
     auth = &au;
     au.which = Z_IdAuthentication_open;
@@ -287,31 +294,31 @@ void display_grs1(Z_GenericRecord *r, int level)
     int i;
 
     if (!r)
-	return;
+        return;
     for (i = 0; i < r->num_elements; i++)
     {
-	Z_TaggedElement *t;
+        Z_TaggedElement *t;
 
-	printf("%*s", level * 4, "");
-	t = r->elements[i];
-	printf("(");
-	if (t->tagType)
-	    printf("%d,", *t->tagType);
-	else
-	    printf("?,");
-	if (t->tagValue->which == Z_StringOrNumeric_numeric)
-	    printf("%d) ", *t->tagValue->u.numeric);
-	else
-	    printf("%s) ", t->tagValue->u.string);
-	if (t->content->which == Z_ElementData_subtree)
-	{
-	    printf("\n");
-	    display_grs1(t->content->u.subtree, level+1);
-	}
-	else if (t->content->which == Z_ElementData_string)
-	    printf("%s\n", t->content->u.string);
-	else
-	    printf("??????\n");
+        printf("%*s", level * 4, "");
+        t = r->elements[i];
+        printf("(");
+        if (t->tagType)
+            printf("%d,", *t->tagType);
+        else
+            printf("?,");
+        if (t->tagValue->which == Z_StringOrNumeric_numeric)
+            printf("%d) ", *t->tagValue->u.numeric);
+        else
+            printf("%s) ", t->tagValue->u.string);
+        if (t->content->which == Z_ElementData_subtree)
+        {
+            printf("\n");
+            display_grs1(t->content->u.subtree, level+1);
+        }
+        else if (t->content->which == Z_ElementData_string)
+            printf("%s\n", t->content->u.string);
+        else
+            printf("??????\n");
     }
 }
 
@@ -322,43 +329,43 @@ void display_record(Z_DatabaseRecord *p)
 
     if (r->direct_reference)
     {
-    	printf("Record type: ");
-	if (ent)
-	    printf("%s\n", ent->desc);
-	else if (!odr_oid(print, &r->direct_reference, 0))
-    	{
-	    odr_perror(print, "print oid");
-	    odr_reset(print);
-	}
+        printf("Record type: ");
+        if (ent)
+            printf("%s\n", ent->desc);
+        else if (!odr_oid(print, &r->direct_reference, 0))
+        {
+            odr_perror(print, "print oid");
+            odr_reset(print);
+        }
     }
     if (r->which == Z_External_octet && p->u.octet_aligned->len)
-	marc_display ((char*)p->u.octet_aligned->buf, stdout);
+        marc_display ((char*)p->u.octet_aligned->buf, stdout);
     else if (ent->value == VAL_SUTRS)
     {
-	if (r->which != Z_External_sutrs)
-	{
-	    printf("Expecting single SUTRS type for SUTRS.\n");
-	    return;
-	}
-	printf("%.*s", r->u.sutrs->len, r->u.sutrs->buf);
+        if (r->which != Z_External_sutrs)
+        {
+            printf("Expecting single SUTRS type for SUTRS.\n");
+            return;
+        }
+        printf("%.*s", r->u.sutrs->len, r->u.sutrs->buf);
     }
     else if (ent->value == VAL_GRS1)
     {
-	if (r->which != Z_External_grs1)
-	{
-	    printf("Expecting single GRS type for GRS.\n");
-	    return;
-	}
-	display_grs1(r->u.grs1, 0);
+        if (r->which != Z_External_grs1)
+        {
+            printf("Expecting single GRS type for GRS.\n");
+            return;
+        }
+        display_grs1(r->u.grs1, 0);
     }
     else 
     {
-    	printf("Unknown record representation.\n");
-    	if (!z_External(print, &r, 0))
-    	{
-	    odr_perror(print, "Printing external");
-	    odr_reset(print);
-	}
+        printf("Unknown record representation.\n");
+        if (!z_External(print, &r, 0))
+        {
+            odr_perror(print, "Printing external");
+            odr_reset(print);
+        }
     }
 }
 
@@ -375,30 +382,30 @@ static void display_diagrec(Z_DiagRec *p)
 #ifdef Z_95
     if (p->which != Z_DiagRec_defaultFormat)
     {
-    	printf("Diagnostic record not in default format.\n");
-	return;
+        printf("Diagnostic record not in default format.\n");
+        return;
     }
     else
-    	r = p->u.defaultFormat;
+        r = p->u.defaultFormat;
 #endif
     if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
-    	ent->class != CLASS_DIAGSET || ent->value != VAL_BIB1)
-    	printf("Missing or unknown diagset\n");
+        ent->class != CLASS_DIAGSET || ent->value != VAL_BIB1)
+        printf("Missing or unknown diagset\n");
     printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
     if (r->addinfo && *r->addinfo)
-	printf(" -- %s\n", r->addinfo);
+        printf(" -- %s\n", r->addinfo);
     else
-    	printf("\n");
+        printf("\n");
 }
 
 static void display_nameplusrecord(Z_NamePlusRecord *p)
 {
     if (p->databaseName)
-    	printf("[%s]", p->databaseName);
+        printf("[%s]", p->databaseName);
     if (p->which == Z_NamePlusRecord_surrogateDiagnostic)
-    	display_diagrec(p->u.surrogateDiagnostic);
+        display_diagrec(p->u.surrogateDiagnostic);
     else
-    	display_record(p->u.databaseRecord);
+        display_record(p->u.databaseRecord);
 }
 
 static void display_records(Z_Records *p)
@@ -406,12 +413,12 @@ static void display_records(Z_Records *p)
     int i;
 
     if (p->which == Z_Records_NSD)
-    	display_diagrec(p->u.nonSurrogateDiagnostic);
+        display_diagrec(p->u.nonSurrogateDiagnostic);
     else
     {
-    	printf("Records: %d\n", p->u.databaseOrSurDiagnostics->num_records);
-    	for (i = 0; i < p->u.databaseOrSurDiagnostics->num_records; i++)
-	    display_nameplusrecord(p->u.databaseOrSurDiagnostics->records[i]);
+        printf("Records: %d\n", p->u.databaseOrSurDiagnostics->num_records);
+        for (i = 0; i < p->u.databaseOrSurDiagnostics->num_records; i++)
+            display_nameplusrecord(p->u.databaseOrSurDiagnostics->records[i]);
     }
 }
 
@@ -440,43 +447,43 @@ static int send_searchRequest(char *arg)
     rpn = ccl_find_str(bibset, arg, &error, &pos);
     if (error)
     {
-    	printf("CCL ERROR: %s\n", ccl_err_msg(error));
-    	return 0;
+        printf("CCL ERROR: %s\n", ccl_err_msg(error));
+        return 0;
     }
 #endif
 #endif
 
     if (!strcmp(arg, "@big")) /* strictly for troublemaking */
     {
-	static unsigned char big[2100];
-	static Odr_oct bigo;
+        static unsigned char big[2100];
+        static Odr_oct bigo;
 
-	/* send a very big referenceid to test transport stack etc. */
-	memset(big, 'A', 2100);
-	bigo.len = bigo.size = 2100;
-	bigo.buf = big;
-	req->referenceId = &bigo;
+        /* send a very big referenceid to test transport stack etc. */
+        memset(big, 'A', 2100);
+        bigo.len = bigo.size = 2100;
+        bigo.buf = big;
+        req->referenceId = &bigo;
     }
 
     if (setnumber >= 0)
     {
-	sprintf(setstring, "%d", ++setnumber);
-	req->resultSetName = setstring;
+        sprintf(setstring, "%d", ++setnumber);
+        req->resultSetName = setstring;
     }
     *req->smallSetUpperBound = smallSetUpperBound;
     *req->largeSetLowerBound = largeSetLowerBound;
     *req->mediumSetPresentNumber = mediumSetPresentNumber;
     if (smallSetUpperBound > 0 || (largeSetLowerBound > 1 &&
-	mediumSetPresentNumber > 0))
+        mediumSetPresentNumber > 0))
     {
-    	oident prefsyn;
+        oident prefsyn;
 
-	prefsyn.proto = protocol;
-	prefsyn.class = CLASS_RECSYN;
-	prefsyn.value = recordsyntax;
-	req->preferredRecordSyntax = odr_oiddup(out, oid_getoidbyent(&prefsyn));
-	req->smallSetElementSetNames =
-	    req->mediumSetElementSetNames = elementSetNames;
+        prefsyn.proto = protocol;
+        prefsyn.class = CLASS_RECSYN;
+        prefsyn.value = recordsyntax;
+        req->preferredRecordSyntax = odr_oiddup(out, oid_getoidbyent(&prefsyn));
+        req->smallSetElementSetNames =
+            req->mediumSetElementSetNames = elementSetNames;
     }
     req->num_databaseNames = 1;
     req->databaseNames = &databaseNames;
@@ -517,16 +524,16 @@ static int send_searchRequest(char *arg)
 static int process_searchResponse(Z_SearchResponse *res)
 {
     if (*res->searchStatus)
-	printf("Search was a success.\n");
+        printf("Search was a success.\n");
     else
-	printf("Search was a bloomin' failure.\n");
+        printf("Search was a bloomin' failure.\n");
     printf("Number of hits: %d, setno %d\n",
-	*res->resultCount, setnumber);
+        *res->resultCount, setnumber);
     printf("records returned: %d\n",
-	*res->numberOfRecordsReturned);
+        *res->numberOfRecordsReturned);
     setno += *res->numberOfRecordsReturned;
     if (res->records)
-	display_records(res->records);
+        display_records(res->records);
     return 0;
 }
 
@@ -534,37 +541,37 @@ static int cmd_find(char *arg)
 {
     if (!*arg)
     {
-    	printf("Find what?\n");
-    	return 0;
+        printf("Find what?\n");
+        return 0;
     }
     if (!conn)
     {
-    	printf("Not connected yet\n");
-	return 0;
+        printf("Not connected yet\n");
+        return 0;
     }
     if (!send_searchRequest(arg))
-	return 0;
+        return 0;
     return 2;
 }
 
 static int cmd_ssub(char *arg)
 {
     if (!(smallSetUpperBound = atoi(arg)))
-    	return 0;
+        return 0;
     return 1;
 }
 
 static int cmd_lslb(char *arg)
 {
     if (!(largeSetLowerBound = atoi(arg)))
-    	return 0;
+        return 0;
     return 1;
 }
 
 static int cmd_mspn(char *arg)
 {
     if (!(mediumSetPresentNumber = atoi(arg)))
-    	return 0;
+        return 0;
     return 1;
 }
 
@@ -580,8 +587,8 @@ static int cmd_base(char *arg)
 {
     if (!*arg)
     {
-    	printf("Usage: base <database>\n");
-    	return 0;
+        printf("Usage: base <database>\n");
+        return 0;
     }
     strcpy(database, arg);
     return 1;
@@ -591,13 +598,13 @@ static int cmd_setnames(char *arg)
 {
     if (setnumber < 0)
     {
-    	printf("Set numbering enabled.\n");
-	setnumber = 0;
+        printf("Set numbering enabled.\n");
+        setnumber = 0;
     }
     else
     {
-    	printf("Set numbering disabled.\n");
-	setnumber = -1;
+        printf("Set numbering disabled.\n");
+        setnumber = -1;
     }
     return 1;
 }
@@ -616,16 +623,16 @@ static int send_presentRequest(char *arg)
 
     if ((p = strchr(arg, '+')))
     {
-    	nos = atoi(p + 1);
-    	*p = 0;
+        nos = atoi(p + 1);
+        *p = 0;
     }
     if (*arg)
-    	setno = atoi(arg);
+        setno = atoi(arg);
 
     if (setnumber >= 0)
     {
-	sprintf(setstring, "%d", setnumber);
-	req->resultSetId = setstring;
+        sprintf(setstring, "%d", setnumber);
+        req->resultSetId = setstring;
     }
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
@@ -635,9 +642,9 @@ static int send_presentRequest(char *arg)
     req->preferredRecordSyntax = oid_getoidbyent(&prefsyn);
     if (elementSetNames)
     {
-    	req->recordComposition = &compo;
-	compo.which = Z_RecordComp_simple;
-	compo.u.simple = elementSetNames;
+        req->recordComposition = &compo;
+        compo.which = Z_RecordComp_simple;
+        compo.u.simple = elementSetNames;
     }
     send_apdu(apdu);
     printf("Sent presentRequest (%d+%d).\n", setno, nos);
@@ -651,24 +658,24 @@ void process_close(Z_Close *req)
 
     static char *reasons[] =
     {
-	"finished",
-	"shutdown",
-	"systemProblem",
-	"costLimit",
-	"resources",
-	"securityViolation",
-	"protocolError",
-	"lackOfActivity",
-	"peerAbort",
-	"unspecified"
+        "finished",
+        "shutdown",
+        "systemProblem",
+        "costLimit",
+        "resources",
+        "securityViolation",
+        "protocolError",
+        "lackOfActivity",
+        "peerAbort",
+        "unspecified"
     };
 
     printf("Reason: %s, message: %s\n", reasons[*req->closeReason],
-    	req->diagnosticInformation ? req->diagnosticInformation : "NULL");
+        req->diagnosticInformation ? req->diagnosticInformation : "NULL");
     if (sent_close)
     {
-    	printf("Goodbye.\n");
-    	exit(0);
+        printf("Goodbye.\n");
+        exit(0);
     }
     *res->closeReason = Z_Close_finished;
     send_apdu(apdu);
@@ -679,7 +686,7 @@ void process_close(Z_Close *req)
 static int cmd_show(char *arg)
 {
     if (!send_presentRequest(arg))
-    	return 0;
+        return 0;
     return 2;
 }
 
@@ -693,18 +700,18 @@ int cmd_cancel(char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
     Z_TriggerResourceControlRequest *req =
-	apdu->u.triggerResourceControlRequest;
+        apdu->u.triggerResourceControlRequest;
     bool_t false = 0;
     
     if (!session)
     {
-    	printf("Session not initialized yet\n");
-	return 0;
+        printf("Session not initialized yet\n");
+        return 0;
     }
     if (!ODR_MASK_GET(session->options, Z_Options_triggerResourceCtrl))
     {
-    	printf("Target doesn't support cancel (trigger resource ctrl)\n");
-	return 0;
+        printf("Target doesn't support cancel (trigger resource ctrl)\n");
+        return 0;
     }
     *req->requestedAction = Z_TriggerResourceCtrl_cancel;
     req->resultSetWanted = &false;
@@ -738,13 +745,13 @@ void display_term(Z_TermInfo *t)
 {
     if (t->term->which == Z_Term_general)
     {
-    	printf("%.*s (%d)\n", t->term->u.general->len, t->term->u.general->buf,
-	    t->globalOccurrences ? *t->globalOccurrences : -1);
-	sprintf(last_scan, "%.*s", t->term->u.general->len,
-	    t->term->u.general->buf);
+        printf("%.*s (%d)\n", t->term->u.general->len, t->term->u.general->buf,
+            t->globalOccurrences ? *t->globalOccurrences : -1);
+        sprintf(last_scan, "%.*s", t->term->u.general->len,
+            t->term->u.general->buf);
     }
     else
-    	printf("Term type not general.\n");
+        printf("Term type not general.\n");
 }
 
 void process_scanResponse(Z_ScanResponse *res)
@@ -752,48 +759,48 @@ void process_scanResponse(Z_ScanResponse *res)
     int i;
 
     printf("SCAN: %d entries, position=%d\n", *res->numberOfEntriesReturned,
-    	*res->positionOfTerm);
+        *res->positionOfTerm);
     if (*res->scanStatus != Z_Scan_success)
-    	printf("Scan returned code %d\n", *res->scanStatus);
+        printf("Scan returned code %d\n", *res->scanStatus);
     if (!res->entries)
-    	return;
+        return;
     if (res->entries->which == Z_ListEntries_entries)
     {
-    	Z_Entries *ent = res->entries->u.entries;
+        Z_Entries *ent = res->entries->u.entries;
 
-	for (i = 0; i < ent->num_entries; i++)
-	    if (ent->entries[i]->which == Z_Entry_termInfo)
-	    {
-	    	printf("%c ", i + 1 == *res->positionOfTerm ? '*' : ' ');
-	    	display_term(ent->entries[i]->u.termInfo);
-	    }
-	    else
-	    	display_diagrec(ent->entries[i]->u.surrogateDiagnostic);
+        for (i = 0; i < ent->num_entries; i++)
+            if (ent->entries[i]->which == Z_Entry_termInfo)
+            {
+                printf("%c ", i + 1 == *res->positionOfTerm ? '*' : ' ');
+                display_term(ent->entries[i]->u.termInfo);
+            }
+            else
+                display_diagrec(ent->entries[i]->u.surrogateDiagnostic);
     }
     else
-    	display_diagrec(res->entries->u.nonSurrogateDiagnostics->diagRecs[0]);
+        display_diagrec(res->entries->u.nonSurrogateDiagnostics->diagRecs[0]);
 }
 
 int cmd_scan(char *arg)
 {
     if (!session)
     {
-    	printf("Session not initialized yet\n");
-	return 0;
+        printf("Session not initialized yet\n");
+        return 0;
     }
     if (!ODR_MASK_GET(session->options, Z_Options_scan))
     {
-    	printf("Target doesn't support scan\n");
-	return 0;
+        printf("Target doesn't support scan\n");
+        return 0;
     }
     if (*arg)
     {
-    	if (send_scanrequest(arg, 5, 20) < 0)
-	    return 0;
+        if (send_scanrequest(arg, 5, 20) < 0)
+            return 0;
     }
     else
-    	if (send_scanrequest(last_scan, 1, 20) < 0)
-	    return 0;
+        if (send_scanrequest(last_scan, 1, 20) < 0)
+            return 0;
     return 2;
 }
 
@@ -801,37 +808,37 @@ int cmd_format(char *arg)
 {
     if (!arg || !*arg)
     {
-    	printf("Usage: format <recordsyntax>\n");
-	return 0;
+        printf("Usage: format <recordsyntax>\n");
+        return 0;
     }
     if (!strcmp(arg, "sutrs"))
     {
-    	printf("Preferred format is SUTRS.\n");
-	recordsyntax = VAL_SUTRS;
-	return 1;
+        printf("Preferred format is SUTRS.\n");
+        recordsyntax = VAL_SUTRS;
+        return 1;
     }
     else if (!strcmp(arg, "usmarc"))
     {
-    	printf("Preferred format is USMARC\n");
-	recordsyntax = VAL_USMARC;
-	return 1;
+        printf("Preferred format is USMARC\n");
+        recordsyntax = VAL_USMARC;
+        return 1;
     }
     else if (!strcmp(arg, "danmarc"))
     {
-    	printf("Preferred format is DANMARC\n");
-	recordsyntax = VAL_DANMARC;
-	return 1;
+        printf("Preferred format is DANMARC\n");
+        recordsyntax = VAL_DANMARC;
+        return 1;
     }
     else if (!strcmp(arg, "grs1"))
     {
-    	printf("Preferred format is GRS1\n");
-	recordsyntax = VAL_GRS1;
-	return 1;
+        printf("Preferred format is GRS1\n");
+        recordsyntax = VAL_GRS1;
+        return 1;
     }
     else
     {
-    	printf("Specify one of {sutrs,usmarc,danmarc,grs1}.\n");
-	return 0;
+        printf("Specify one of {sutrs,usmarc,danmarc,grs1}.\n");
+        return 0;
     }
 }
 
@@ -842,8 +849,8 @@ int cmd_elements(char *arg)
 
     if (!arg || !*arg)
     {
-    	printf("Usage: elements <esn>\n");
-	return 0;
+        printf("Usage: elements <esn>\n");
+        return 0;
     }
     strcpy(what, arg);
     esn.which = Z_ElementSetNames_generic;
@@ -873,11 +880,11 @@ static void initialize(void)
 #endif
 
     if (!(out = odr_createmem(ODR_ENCODE)) ||
-    	!(in = odr_createmem(ODR_DECODE)) ||
-    	!(print = odr_createmem(ODR_PRINT)))
+        !(in = odr_createmem(ODR_DECODE)) ||
+        !(print = odr_createmem(ODR_PRINT)))
     {
-    	fprintf(stderr, "failed to allocate ODR streams\n");
-    	exit(1);
+        fprintf(stderr, "failed to allocate ODR streams\n");
+        exit(1);
     }
     setvbuf(stdout, 0, _IONBF, 0);
 
@@ -887,8 +894,8 @@ static void initialize(void)
     inf = fopen ("default.bib", "r");
     if (inf)
     {
-    	ccl_qual_file (bibset, inf);
-    	fclose (inf);
+        ccl_qual_file (bibset, inf);
+        fclose (inf);
     }
 #endif
 #endif
@@ -897,27 +904,27 @@ static void initialize(void)
 static int client(void)
 {
     static struct {
-	char *cmd;
-	int (*fun)(char *arg);
-	char *ad;
+        char *cmd;
+        int (*fun)(char *arg);
+        char *ad;
     } cmd[] = {
-    	{"open", cmd_open, "('tcp'|'osi')':'[<TSEL>'/']<HOST>[':'<PORT>]"},
-    	{"quit", cmd_quit, ""},
-    	{"find", cmd_find, "<CCL-QUERY>"},
-    	{"base", cmd_base, "<BASE-NAME>"},
-    	{"show", cmd_show, "<REC#>['+'<#RECS>]"},
-	{"scan", cmd_scan, "<TERM>"},
-    	{"authentication", cmd_authentication, "<ACCTSTRING>"},
-	{"lslb", cmd_lslb, "<largeSetLowerBound>"},
-	{"ssub", cmd_ssub, "<smallSetUpperBound>"},
-	{"mspn", cmd_mspn, "<mediumSetPresentNumber>"},
-	{"status", cmd_status, ""},
-	{"setnames", cmd_setnames, ""},
-	{"cancel", cmd_cancel, ""},
-	{"format", cmd_format, "<recordsyntax>"},
-	{"elements", cmd_elements, "<elementSetName>"},
-	{"close", cmd_close, ""},
-    	{0,0}
+        {"open", cmd_open, "('tcp'|'osi')':'[<TSEL>'/']<HOST>[':'<PORT>]"},
+        {"quit", cmd_quit, ""},
+        {"find", cmd_find, "<CCL-QUERY>"},
+        {"base", cmd_base, "<BASE-NAME>"},
+        {"show", cmd_show, "<REC#>['+'<#RECS>]"},
+        {"scan", cmd_scan, "<TERM>"},
+        {"authentication", cmd_authentication, "<ACCTSTRING>"},
+        {"lslb", cmd_lslb, "<largeSetLowerBound>"},
+        {"ssub", cmd_ssub, "<smallSetUpperBound>"},
+        {"mspn", cmd_mspn, "<mediumSetPresentNumber>"},
+        {"status", cmd_status, ""},
+        {"setnames", cmd_setnames, ""},
+        {"cancel", cmd_cancel, ""},
+        {"format", cmd_format, "<recordsyntax>"},
+        {"elements", cmd_elements, "<elementSetName>"},
+        {"close", cmd_close, ""},
+        {0,0}
     };
     char *netbuffer= 0;
     int netbufferlen = 0;
@@ -926,117 +933,117 @@ static int client(void)
 
     while (1)
     {
-    	int res;
-	fd_set input;
-	char line[1024], word[1024], arg[1024];
+        int res;
+        fd_set input;
+        char line[1024], word[1024], arg[1024];
 
-    	FD_ZERO(&input);
-    	FD_SET(0, &input);
-    	if (conn)
-	    FD_SET(cs_fileno(conn), &input);
-	if ((res = select(20, &input, 0, 0, 0)) < 0)
-	{
-	    perror("select");
-	    exit(1);
-	}
-	if (!res)
-	    continue;
-	if (FD_ISSET(0, &input))
-	{
-	    /* quick & dirty way to get a command line. */
-	    if (!gets(line))
-		break;
-	    if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
-	    {
-		strcpy(word, last_cmd);
-		*arg = '\0';
-	    }
-	    else if (res == 1)
-		*arg = 0;
-	    strcpy(last_cmd, word);
-	    for (i = 0; cmd[i].cmd; i++)
-		if (!strncmp(cmd[i].cmd, word, strlen(word)))
-		{
-		    res = (*cmd[i].fun)(arg);
-		    break;
-		}
-	    if (!cmd[i].cmd) /* dump our help-screen */
-	    {
-		printf("Unknown command: %s.\n", word);
-		printf("Currently recognized commands:\n");
-		for (i = 0; cmd[i].cmd; i++)
-		    printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
-		res = 1;
-	    }
-	    if (res < 2)
-		printf(C_PROMPT);
-	}
-	if (conn && FD_ISSET(cs_fileno(conn), &input))
-	{
-	    do
-	    {
-	    	if ((res = cs_get(conn, &netbuffer, &netbufferlen)) < 0)
-	    	{
-		    perror("cs_get");
-		    exit(1);
-		}
-		if (!res)
-		{
-		    printf("Target closed connection.\n");
-		    exit(1);
-		}
-		odr_reset(in); /* release APDU from last round */
-		odr_setbuf(in, netbuffer, res, 0);
-		if (!z_APDU(in, &apdu, 0))
-		{
-		    odr_perror(in, "Decoding incoming APDU");
-		    fprintf(stderr, "Packet dump:\n---------\n");
-		    odr_dumpBER(stderr, netbuffer, res);
-		    fprintf(stderr, "---------\n");
-		    exit(1);
-		}
+        FD_ZERO(&input);
+        FD_SET(0, &input);
+        if (conn)
+            FD_SET(cs_fileno(conn), &input);
+        if ((res = select(20, &input, 0, 0, 0)) < 0)
+        {
+            perror("select");
+            exit(1);
+        }
+        if (!res)
+            continue;
+        if (FD_ISSET(0, &input))
+        {
+            /* quick & dirty way to get a command line. */
+            if (!gets(line))
+                break;
+            if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
+            {
+                strcpy(word, last_cmd);
+                *arg = '\0';
+            }
+            else if (res == 1)
+                *arg = 0;
+            strcpy(last_cmd, word);
+            for (i = 0; cmd[i].cmd; i++)
+                if (!strncmp(cmd[i].cmd, word, strlen(word)))
+                {
+                    res = (*cmd[i].fun)(arg);
+                    break;
+                }
+            if (!cmd[i].cmd) /* dump our help-screen */
+            {
+                printf("Unknown command: %s.\n", word);
+                printf("Currently recognized commands:\n");
+                for (i = 0; cmd[i].cmd; i++)
+                    printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
+                res = 1;
+            }
+            if (res < 2)
+                printf(C_PROMPT);
+        }
+        if (conn && FD_ISSET(cs_fileno(conn), &input))
+        {
+            do
+            {
+                if ((res = cs_get(conn, &netbuffer, &netbufferlen)) < 0)
+                {
+                    perror("cs_get");
+                    exit(1);
+                }
+                if (!res)
+                {
+                    printf("Target closed connection.\n");
+                    exit(1);
+                }
+                odr_reset(in); /* release APDU from last round */
+                odr_setbuf(in, netbuffer, res, 0);
+                if (!z_APDU(in, &apdu, 0))
+                {
+                    odr_perror(in, "Decoding incoming APDU");
+                    fprintf(stderr, "Packet dump:\n---------\n");
+                    odr_dumpBER(stderr, netbuffer, res);
+                    fprintf(stderr, "---------\n");
+                    exit(1);
+                }
 #if 0
-		if (!z_APDU(print, &apdu, 0))
-		{
-		    odr_perror(print, "Failed to print incoming APDU");
-		    odr_reset(print);
-		    continue;
-		}
+                if (!z_APDU(print, &apdu, 0))
+                {
+                    odr_perror(print, "Failed to print incoming APDU");
+                    odr_reset(print);
+                    continue;
+                }
 #endif
-		switch(apdu->which)
-		{
-		    case Z_APDU_initResponse:
-		    	process_initResponse(apdu->u.initResponse);
-			break;
-		    case Z_APDU_searchResponse:
-		    	process_searchResponse(apdu->u.searchResponse);
-			break;
-		    case Z_APDU_scanResponse:
-		    	process_scanResponse(apdu->u.scanResponse);
-			break;
-		    case Z_APDU_presentResponse:
-		    	printf("Received presentResponse.\n");
-			setno +=
-			    *apdu->u.presentResponse->numberOfRecordsReturned;
-		    	if (apdu->u.presentResponse->records)
-			    display_records(apdu->u.presentResponse->records);
-			else
-			    printf("No records.\n");
-			break;
-		    case Z_APDU_close:
-		    	printf("Target has closed the association.\n");
-			process_close(apdu->u.close);
-			break;
-		    default:
-		    	printf("Received unknown APDU type (%d).\n", 
-			    apdu->which);
-			exit(1);
-		}
-		printf("Z> ");
-		fflush(stdout);
-	    }
-	    while (cs_more(conn));
-	}
+                switch(apdu->which)
+                {
+                    case Z_APDU_initResponse:
+                        process_initResponse(apdu->u.initResponse);
+                        break;
+                    case Z_APDU_searchResponse:
+                        process_searchResponse(apdu->u.searchResponse);
+                        break;
+                    case Z_APDU_scanResponse:
+                        process_scanResponse(apdu->u.scanResponse);
+                        break;
+                    case Z_APDU_presentResponse:
+                        printf("Received presentResponse.\n");
+                        setno +=
+                            *apdu->u.presentResponse->numberOfRecordsReturned;
+                        if (apdu->u.presentResponse->records)
+                            display_records(apdu->u.presentResponse->records);
+                        else
+                            printf("No records.\n");
+                        break;
+                    case Z_APDU_close:
+                        printf("Target has closed the association.\n");
+                        process_close(apdu->u.close);
+                        break;
+                    default:
+                        printf("Received unknown APDU type (%d).\n", 
+                            apdu->which);
+                        exit(1);
+                }
+                printf("Z> ");
+                fflush(stdout);
+            }
+            while (cs_more(conn));
+        }
     }
     return 0;
 }
@@ -1045,8 +1052,8 @@ int main(int argc, char **argv)
 {
     initialize();
     if (argc > 1)
-    	cmd_open(argv[1]);
+        cmd_open(argv[1]);
     else
-	printf(C_PROMPT);
+        printf(C_PROMPT);
     return client();
 }

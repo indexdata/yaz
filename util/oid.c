@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.4  1995-09-27 15:03:03  quinn
+ * Revision 1.5  1995-09-29 17:01:51  quinn
+ * More Windows work
+ *
+ * Revision 1.4  1995/09/27  15:03:03  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.3  1995/09/12  11:32:06  quinn
@@ -105,7 +108,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_GILS,      {14,3,-1},   "GILS"        },
 
     /* SR definitions. Note that some of them aren't defined by the
-    	standard (yet), but are borrowed from Z3950v3 */
+        standard (yet), but are borrowed from Z3950v3 */
     {PROTO_SR,      CLASS_ABSYN,   VAL_APDU,      {2,1,-1},    "SR-APDU"     },
     {PROTO_SR,      CLASS_APPCTX,  VAL_BASIC_CTX, {1,1,-1},    "SR-BASIC"    },
     {PROTO_SR,      CLASS_ATTSET,  VAL_BIB1,      {3,1,-1},    "Bib-1"       },
@@ -169,7 +172,7 @@ void MDF oid_oidcpy(int *t, int *s)
 void MDF oid_oidcat(int *t, int *s)
 {
     while (*t > -1)
-    	t++;
+        t++;
     while ((*(t++) = *(s++)) > -1);
 }
 
@@ -177,15 +180,15 @@ int MDF oid_oidcmp(int *o1, int *o2)
 {
     while (*o1 == *o2 && *o1 > -1)
     {
-    	o1++;
-	o2++;
+        o1++;
+        o2++;
     }
     if (*o1 == *o2)
-    	return 0;
+        return 0;
     else if (*o1 > *o2)
-    	return 1;
+        return 1;
     else
-    	return -1;
+        return -1;
 }
 
 int MDF oid_oidlen(int *o)
@@ -193,7 +196,7 @@ int MDF oid_oidlen(int *o)
     int len = 0;
 
     while (*(o++) >= 0)
-    	len++;
+        len++;
     return len;
 }
 
@@ -204,11 +207,11 @@ static int match_prefix(int *look, int *prefix)
 
     for (len = 0; *look == *prefix; look++, prefix++, len++);
     if (*prefix < 0) /* did we reach the end of the prefix? */
-	return len;
+        return len;
     return 0;
 }
 
-struct MDF oident *oid_getentbyoid(int *o)
+struct oident MDF *oid_getentbyoid(int *o)
 {
     enum oid_proto proto;
     int prelen;
@@ -216,16 +219,16 @@ struct MDF oident *oid_getentbyoid(int *o)
 
     /* determine protocol type */
     if (!o)
-    	return 0;
+        return 0;
     if ((prelen = match_prefix(o, z3950_prefix)))
-    	proto = PROTO_Z3950;
+        proto = PROTO_Z3950;
     else if ((prelen = match_prefix(o, sr_prefix)))
-    	proto = PROTO_SR;
+        proto = PROTO_SR;
     else
-    	proto = PROTO_GENERAL;
+        proto = PROTO_GENERAL;
     for (p = oids; *p->oidsuffix >= 0; p++)
-    	if (p->proto == proto && !oid_oidcmp(o + prelen, p->oidsuffix))
-	    return p;
+        if (p->proto == proto && !oid_oidcmp(o + prelen, p->oidsuffix))
+            return p;
     return 0;
 }
 
@@ -238,19 +241,19 @@ int MDF *oid_getoidbyent(struct oident *ent)
     static int ret[OID_SIZE];
 
     for (p = oids; *p->oidsuffix >= 0; p++)
-    	if (ent->proto == p->proto &&
-	    ent->class == p->class &&
-	    ent->value == p->value)
-	{
-	    if (ent->proto == PROTO_Z3950)
-		oid_oidcpy(ret, z3950_prefix);
-	    else if (ent->proto == PROTO_SR)
-	    	oid_oidcpy(ret, sr_prefix);
-	    else
-	    	ret[0] = -1;
-	    oid_oidcat(ret, p->oidsuffix);
-	    return ret;
-	}
+        if (ent->proto == p->proto &&
+            ent->class == p->class &&
+            ent->value == p->value)
+        {
+            if (ent->proto == PROTO_Z3950)
+                oid_oidcpy(ret, z3950_prefix);
+            else if (ent->proto == PROTO_SR)
+                oid_oidcpy(ret, sr_prefix);
+            else
+                ret[0] = -1;
+            oid_oidcat(ret, p->oidsuffix);
+            return ret;
+        }
     return 0;
 }
 
@@ -259,7 +262,7 @@ oid_value MDF oid_getvalbyname(char *name)
     struct oident *p;
 
     for (p = oids; *p->oidsuffix >= 0; p++)
-	if (!strcmp(p->desc, name))
-	    return p->value;
+        if (!strcmp(p->desc, name))
+            return p->value;
     return VAL_NONE;
 }

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.12  1995-09-27 15:02:48  quinn
+ * Revision 1.13  1995-09-29 17:01:49  quinn
+ * More Windows work
+ *
+ * Revision 1.12  1995/09/27  15:02:48  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.11  1995/08/15  12:00:09  quinn
@@ -190,7 +193,7 @@ typedef struct odr_constack
     unsigned char *base;         /* starting point of data */
     int base_offset;
     int len;                     /* length of data, if known, else -1
-					(decoding only) */
+                                        (decoding only) */
     unsigned char *lenb;         /* where to encode length */
     int len_offset;
     int lenlen;                  /* length of length-field */
@@ -241,7 +244,7 @@ typedef struct odr
     odr_constack stack[ODR_MAX_STACK];
 } *ODR;
 
-typedef int (*Odr_fun)();
+typedef int MDF (*Odr_fun)();
 
 typedef struct odr_arm
 {
@@ -255,15 +258,15 @@ typedef struct odr_arm
 /*
  * Error control.
  */
-#define ONONE		0
-#define OMEMORY		1
-#define OSYSERR		2
-#define OSPACE		3
-#define OREQUIRED	4
-#define OUNEXPECTED	5
-#define OOTHER		6
-#define OPROTO		7
-#define ODATA		8
+#define ONONE           0
+#define OMEMORY         1
+#define OSYSERR         2
+#define OSPACE          3
+#define OREQUIRED       4
+#define OUNEXPECTED     5
+#define OOTHER          6
+#define OPROTO          7
+#define ODATA           8
 #define OSTACK          9
 #define OCONLEN        10
 
@@ -282,12 +285,12 @@ ODR_MEM MDF odr_extract_mem(ODR o);
 void MDF odr_release_mem(ODR_MEM p);
 
 #define odr_implicit(o, t, p, cl, tg, opt)\
-	(odr_implicit_settag((o), cl, tg), t ((o), (p), opt) )
+        (odr_implicit_settag((o), cl, tg), t ((o), (p), opt) )
 
 #define odr_explicit(o, t, p, cl, tg, opt)\
-	((int) (odr_constructed_begin((o), (p), (cl), (tg)) ? \
-	t ((o), (p), (opt)) &&\
-	odr_constructed_end(o) : opt))
+        ((int) (odr_constructed_begin((o), (p), (cl), (tg)) ? \
+        t ((o), (p), (opt)) &&\
+        odr_constructed_end(o) : opt))
 
 #define ODR_MASK_ZERO(mask)\
     ((void) (memset((mask)->bits, 0, ODR_BITMASK_SIZE),\
@@ -312,32 +315,32 @@ void MDF odr_release_mem(ODR_MEM p);
 #define odr_putc(o, c) \
 ( \
     ( \
-    	(o)->ecb.pos < (o)->ecb.size ? \
-	( \
-	    (o)->ecb.buf[(o)->ecb.pos++] = (c), \
-	    0 \
-	) : \
-	( \
-	    odr_grow_block(&(o)->ecb, 1) == 0 ? \
-	    ( \
-	    	(o)->ecb.buf[(o)->ecb.pos++] = (c), \
-		0 \
-	    ) : \
-	    ( \
-	    	(o)->error = OSPACE, \
-		-1 \
-	    ) \
-	) \
+        (o)->ecb.pos < (o)->ecb.size ? \
+        ( \
+            (o)->ecb.buf[(o)->ecb.pos++] = (c), \
+            0 \
+        ) : \
+        ( \
+            odr_grow_block(&(o)->ecb, 1) == 0 ? \
+            ( \
+                (o)->ecb.buf[(o)->ecb.pos++] = (c), \
+                0 \
+            ) : \
+            ( \
+                (o)->error = OSPACE, \
+                -1 \
+            ) \
+        ) \
     ) == 0 ? \
     ( \
-    	(o)->ecb.pos > (o)->ecb.top ? \
-	( \
-	    (o)->ecb.top = (o)->ecb.pos, \
-	    0 \
-	) : \
-	0 \
+        (o)->ecb.pos > (o)->ecb.top ? \
+        ( \
+            (o)->ecb.top = (o)->ecb.pos, \
+            0 \
+        ) : \
+        0 \
     ) : \
-    	-1 \
+        -1 \
 ) \
 
 #define odr_tell(o) ((o)->ecb.pos)

@@ -2,7 +2,7 @@
 #define YCONFIG_H
 
 #ifdef WINDOWS
-#define MDF pascal
+#define MDF
 #else
 #ifndef MDF
 #define MDF

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.9  1995-09-28 10:12:39  quinn
+ * Revision 1.10  1995-09-29 17:01:50  quinn
+ * More Windows work
+ *
+ * Revision 1.9  1995/09/28  10:12:39  quinn
  * Windows-support changes
  *
  * Revision 1.8  1995/09/27  15:02:55  quinn
@@ -34,17 +37,22 @@
  *
  */
 
-#include <odr.h>
+
 #include <sys/types.h>
+
 #ifdef WINDOWS
 #include <winsock.h>
 #else
 #include <netinet/in.h>  /* for htons... */
 #endif
+
 #include <string.h>
 
-static int ber_encinteger(ODR o, int val);
-static int ber_decinteger(unsigned char *buf, int *val);
+#include <odr.h>
+#include <prt.h>
+
+static int MDF ber_encinteger(ODR o, int val);
+static int MDF ber_decinteger(unsigned char *buf, int *val);
 
 int MDF ber_integer(ODR o, int *val)
 {
@@ -52,28 +60,28 @@ int MDF ber_integer(ODR o, int *val)
 
     switch (o->direction)
     {
-    	case ODR_DECODE:
-	    if ((res = ber_decinteger(o->bp, val)) <= 0)
-	    {
-	    	o->error = OPROTO;
-	    	return 0;
-	    }
-	    o->bp += res;
-	    o->left -= res;
-	    return 1;
-    	case ODR_ENCODE:
-	    if ((res = ber_encinteger(o, *val)) < 0)
-	    	return 0;
-	    return 1;
-    	case ODR_PRINT: return 1;
-    	default: o->error = OOTHER;  return 0;
+        case ODR_DECODE:
+            if ((res = ber_decinteger(o->bp, val)) <= 0)
+            {
+                o->error = OPROTO;
+                return 0;
+            }
+            o->bp += res;
+            o->left -= res;
+            return 1;
+        case ODR_ENCODE:
+            if ((res = ber_encinteger(o, *val)) < 0)
+                return 0;
+            return 1;
+        case ODR_PRINT: return 1;
+        default: o->error = OOTHER;  return 0;
     }
 }
 
 /*
  * Returns: number of bytes written or -1 for error (out of bounds).
  */
-int ber_encinteger(ODR o, int val)
+int MDF ber_encinteger(ODR o, int val)
 {
     int lenpos;
     int a, len;
@@ -81,19 +89,18 @@ int ber_encinteger(ODR o, int val)
 
     lenpos = odr_tell(o);
     if (odr_putc(o, 0) < 0)  /* dummy */
-    	return -1;
-
+        return -1;
     tmp.i = htonl(val);   /* ensure that that we're big-endian */
     for (a = 0; a < sizeof(int) - 1; a++)  /* skip superfluous octets */
-    	if (!((tmp.c[a] == 0 && !(tmp.c[a+1] & 0X80)) ||
-	    (tmp.c[a] == 0XFF && (tmp.c[a+1] & 0X80))))
-	    break;
+        if (!((tmp.c[a] == 0 && !(tmp.c[a+1] & 0X80)) ||
+            (tmp.c[a] == 0XFF && (tmp.c[a+1] & 0X80))))
+            break;
     len = sizeof(int) - a;
     if (odr_write(o, (unsigned char*) tmp.c + a, len) < 0)
-    	return -1;
+        return -1;
     odr_seek(o, ODR_S_SET, lenpos);
     if (ber_enclen(o, len, 1, 1) != 1)
-    	return -1;
+        return -1;
     odr_seek(o, ODR_S_END, 0);
 #ifdef ODR_DEBUG
     fprintf(stderr, "[val=%d]", val);
@@ -104,24 +111,24 @@ int ber_encinteger(ODR o, int val)
 /*
  * Returns: Number of bytes read or 0 if no match, -1 if error.
  */
-int ber_decinteger(unsigned char *buf, int *val)
+int MDF ber_decinteger(unsigned char *buf, int *val)
 {
     unsigned char *b = buf, fill;
     int res, len, remains;
     union { int i; unsigned char c[sizeof(int)]; } tmp;
 
     if ((res = ber_declen(b, &len)) < 0)
-    	return -1;
+        return -1;
     if (len > sizeof(int))    /* let's be reasonable, here */
-    	return -1;
+        return -1;
     b+= res;
 
     remains = sizeof(int) - len;
     memcpy(tmp.c + remains, b, len);
     if (*b & 0X80)
-    	fill = 0XFF;
+        fill = 0XFF;
     else
-    	fill = 0X00;
+        fill = 0X00;
     memset(tmp.c, fill, remains);
     *val = ntohl(tmp.i);
 

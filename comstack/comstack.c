@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.c,v $
- * Revision 1.1  1995-06-14 09:58:20  quinn
+ * Revision 1.2  1995-09-29 17:01:48  quinn
+ * More Windows work
+ *
+ * Revision 1.1  1995/06/14  09:58:20  quinn
  * Renamed yazlib to comstack.
  *
  * Revision 1.2  1995/05/16  08:51:15  quinn
@@ -24,3 +27,8 @@ const char *cs_errlist[] =
     "No data (operation would block)",
     "New data while half of old buffer is on the line (flow control)"
 };
+
+const char *cs_errmsg(int n)
+{
+    return cs_errlist[n];
+}

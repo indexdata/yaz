@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.4  1995-09-28 10:12:26  quinn
+ * Revision 1.5  1995-09-29 17:01:48  quinn
+ * More Windows work
+ *
+ * Revision 1.4  1995/09/28  10:12:26  quinn
  * Windows-support changes
  *
  * Revision 1.3  1995/09/27  15:02:45  quinn
@@ -129,42 +132,45 @@ typedef struct tcpip_state
 COMSTACK MDF tcpip_type(int blocking, int protocol)
 {
     COMSTACK p;
-    struct protoent *proto;
     tcpip_state *state;
-    int s, tru = 1;
+    int s;
+#ifdef WINDOWS
+    unsigned long tru = 1;
+#else
+    struct protoent *proto;
+#endif
 
     if (!initialized)
     {
 #ifdef WINDOWS
-	WORD requested;
-	WSADATA wd;
+        WORD requested;
+        WSADATA wd;
 
-	requested = MAKEWORD(1, 1);
-	if (WSAStartup(requested, &wd))
-	    return 0;
+        requested = MAKEWORD(1, 1);
+        if (WSAStartup(requested, &wd))
+            return 0;
 #endif
-	initialized = 1;
+        initialized = 1;
     }
 
 #ifndef WINDOWS
     if (!(proto = getprotobyname("tcp")))
-    	return 0;
+        return 0;
     if ((s = socket(AF_INET, SOCK_STREAM, proto->p_proto)) < 0)
 #else
     if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 #endif
-    	return 0;
+        return 0;
     if (!(p = malloc(sizeof(struct comstack))))
-    	return 0;
+        return 0;
     if (!(state = p->private = malloc(sizeof(tcpip_state))))
-    	return 0;
+        return 0;
 #ifdef WINDOWS
     if (!(p->blocking = blocking) && ioctlsocket(s, FIONBIO, &tru) < 0)
 #else
     if (!(p->blocking = blocking) && fcntl(s, F_SETFL, O_NONBLOCK) < 0)
 #endif
-    	return 0;
-
+        return 0;
     p->iofile = s;
     p->type = tcpip_type;
     p->protocol = protocol;
@@ -207,18 +213,18 @@ struct sockaddr_in MDF *tcpip_strtoaddr(const char *str)
     strcpy(buf, str);
     if ((p = strchr(buf, ':')))
     {
-    	*p = 0;
-    	port = atoi(p + 1);
+        *p = 0;
+        port = atoi(p + 1);
     }
     add.sin_port = htons(port);
     if (!strcmp("@", buf))
-    	add.sin_addr.s_addr = INADDR_ANY;
+        add.sin_addr.s_addr = INADDR_ANY;
     else if ((hp = gethostbyname(buf)))
-    	memcpy(&add.sin_addr.s_addr, *hp->h_addr_list, sizeof(struct in_addr));
+        memcpy(&add.sin_addr.s_addr, *hp->h_addr_list, sizeof(struct in_addr));
     else if ((tmpadd = (unsigned) inet_addr(buf)) != 0)
-    	memcpy(&add.sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
+        memcpy(&add.sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
     else
-    	return 0;
+        return 0;
     return &add;
 }
 
@@ -242,12 +248,12 @@ int tcpip_connect(COMSTACK h, void *address)
     if (connect(h->iofile, (struct sockaddr *) add, sizeof(*add)) < 0)
     {
 #ifdef WINDOWS
-	if (errno == WSAEWOULDBLOCK)
+        if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
-    	if (errno == EINPROGRESS)
+        if (errno == EINPROGRESS)
 #endif
-	    return 1;
-    	return -1;
+            return 1;
+        return -1;
     }
     h->state = CS_DATAXFER;
     return 0;
@@ -265,23 +271,23 @@ int tcpip_rcvconnect(COMSTACK h)
 int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     struct sockaddr *addr = address;
-    int one = 1;
+    unsigned long one = 1;
 
     TRC(fprintf(stderr, "tcpip_bind\n"));
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) < 0)
     {
-    	h->cerrno = CSYSERR;
-	return -1;
+        h->cerrno = CSYSERR;
+        return -1;
     }
     if (bind(h->iofile, addr, sizeof(struct sockaddr_in)) < 0)
     {
-    	h->cerrno = CSYSERR;
-	return -1;
+        h->cerrno = CSYSERR;
+        return -1;
     }
     if (mode == CS_SERVER && listen(h->iofile, 3) < 0)
     {
-	h->cerrno = CSYSERR;
-	return -1;
+        h->cerrno = CSYSERR;
+        return -1;
     }
     h->state = CS_IDLE;
     return 0;
@@ -295,26 +301,26 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen)
     TRC(fprintf(stderr, "tcpip_listen\n"));
     if (h->state != CS_IDLE)
     {
-    	h->cerrno = CSOUTSTATE;
-	return -1;
+        h->cerrno = CSOUTSTATE;
+        return -1;
     }
     if ((h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len)) < 0)
     {
 #ifdef WINDOWS
-	if (errno == WSAEWOULDBLOCK)
+        if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
-    	if (errno == EWOULDBLOCK)
+        if (errno == EWOULDBLOCK)
 #endif
 
-	    h->cerrno = CSNODATA;
-	else
-	    h->cerrno = CSYSERR;
-	return -1;
+            h->cerrno = CSNODATA;
+        else
+            h->cerrno = CSYSERR;
+        return -1;
     }
     if (addrlen && *addrlen > sizeof(struct sockaddr_in))
-    	memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_in));
+        memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_in));
     else if (addrlen)
-    	*addrlen = 0;
+        *addrlen = 0;
     h->state = CS_INCON;
     return 0;
 }
@@ -323,31 +329,34 @@ COMSTACK tcpip_accept(COMSTACK h)
 {
     COMSTACK new;
     tcpip_state *state;
+#ifdef WINDOWS
+    unsigned long tru = 1;
+#endif
 
     TRC(fprintf(stderr, "tcpip_accept\n"));
     if (h->state != CS_INCON)
     {
-    	h->cerrno = CSOUTSTATE;
-	return 0;
+        h->cerrno = CSOUTSTATE;
+        return 0;
     }
     if (!(new = malloc(sizeof(*new))))
     {
-    	h->cerrno = CSYSERR;
-	return 0;
+        h->cerrno = CSYSERR;
+        return 0;
     }
     memcpy(new, h, sizeof(*h));
     new->iofile = h->newfd;
     if (!(state = new->private = malloc(sizeof(tcpip_state))))
     {
-    	h->cerrno = CSYSERR;
-	return 0;
+        h->cerrno = CSYSERR;
+        return 0;
     }
 #ifdef WINDOWS
-    if (!new->blocking && ioctlsocket(s, FIONBIO, &tru) < 0)
+    if (!new->blocking && ioctlsocket(new->iofile, FIONBIO, &tru) < 0)
 #else
     if (!new->blocking && fcntl(new->iofile, F_SETFL, O_NONBLOCK) < 0)
 #endif
-    	return 0;
+        return 0;
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
@@ -372,63 +381,63 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     TRC(fprintf(stderr, "tcpip_get: bufsize=%d\n", *bufsize));
     if (sp->altlen) /* switch buffers */
     {
-    	TRC(fprintf(stderr, "  %d bytes in altbuf (0x%x)\n", sp->altlen,
-	    (unsigned) sp->altbuf));
-    	tmpc = *buf;
-    	tmpi = *bufsize;
-    	*buf = sp->altbuf;
-    	*bufsize = sp->altsize;
-    	hasread = sp->altlen;
-    	sp->altlen = 0;
-    	sp->altbuf = tmpc;
-    	sp->altsize = tmpi;
+        TRC(fprintf(stderr, "  %d bytes in altbuf (0x%x)\n", sp->altlen,
+            (unsigned) sp->altbuf));
+        tmpc = *buf;
+        tmpi = *bufsize;
+        *buf = sp->altbuf;
+        *bufsize = sp->altsize;
+        hasread = sp->altlen;
+        sp->altlen = 0;
+        sp->altbuf = tmpc;
+        sp->altsize = tmpi;
     }
     while (!(berlen = completeBER((unsigned char *)*buf, hasread)))
     {
-    	if (!*bufsize)
-    	{
-	    if (!(*buf = malloc(*bufsize = CS_TCPIP_BUFCHUNK)))
-	    	return -1;
-	}
-	else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
-	    if (!(*buf = realloc(*buf, *bufsize *= 2)))
-	    	return -1;
-	if ((res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0)) < 0)
+        if (!*bufsize)
+        {
+            if (!(*buf = malloc(*bufsize = CS_TCPIP_BUFCHUNK)))
+                return -1;
+        }
+        else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
+            if (!(*buf = realloc(*buf, *bufsize *= 2)))
+                return -1;
+        if ((res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0)) < 0)
 #ifdef WINDOWS
-	    if (errno == WSAEWOULDBLOCK)
+            if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
-	    if (errno == EWOULDBLOCK)
+            if (errno == EWOULDBLOCK)
 #endif
-	    	break;
-	    else
-		return -1;
-	if (!res)
-	    return 0;
-	hasread += res;
-	TRC(fprintf(stderr, "  res=%d, hasread=%d\n", res, hasread));
+                break;
+            else
+                return -1;
+        if (!res)
+            return 0;
+        hasread += res;
+        TRC(fprintf(stderr, "  res=%d, hasread=%d\n", res, hasread));
     }
     TRC(fprintf(stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
-    	hasread, berlen));
+        hasread, berlen));
     /* move surplus buffer (or everything if we didn't get a BER rec.) */
     if (hasread > berlen)
     {
-    	tomove = req = hasread - berlen;
-    	rest = tomove % CS_TCPIP_BUFCHUNK;
-    	if (rest)
-	    req += CS_TCPIP_BUFCHUNK - rest;
-    	if (!sp->altbuf)
-    	{
-	    if (!(sp->altbuf = malloc(sp->altsize = req)))
-	    	return -1;
-	} else if (sp->altsize < req)
-	    if (!(sp->altbuf = realloc(sp->altbuf, sp->altsize = req)))
-	    	return -1;
-    	TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
-	    (unsigned) sp->altbuf));
-	memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
+        tomove = req = hasread - berlen;
+        rest = tomove % CS_TCPIP_BUFCHUNK;
+        if (rest)
+            req += CS_TCPIP_BUFCHUNK - rest;
+        if (!sp->altbuf)
+        {
+            if (!(sp->altbuf = malloc(sp->altsize = req)))
+                return -1;
+        } else if (sp->altsize < req)
+            if (!(sp->altbuf = realloc(sp->altbuf, sp->altsize = req)))
+                return -1;
+        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
+            (unsigned) sp->altbuf));
+        memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
     }
     if (berlen < CS_TCPIP_BUFCHUNK - 1)
-    	*(*buf + berlen) = '\0';
+        *(*buf + berlen) = '\0';
     return berlen ? berlen : 1;
 }
 
@@ -445,34 +454,34 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     TRC(fprintf(stderr, "tcpip_put: size=%d\n", size));
     if (state->towrite < 0)
     {
-    	state->towrite = size;
-	state->written = 0;
+        state->towrite = size;
+        state->written = 0;
     }
     else if (state->towrite != size)
     {
-    	h->cerrno = CSWRONGBUF;
-	return -1;
+        h->cerrno = CSWRONGBUF;
+        return -1;
     }
     while (state->towrite > state->written)
     {
-    	if ((res = send(h->iofile, buf + state->written, size -
-	    state->written, 0)) < 0)
-	{
+        if ((res = send(h->iofile, buf + state->written, size -
+            state->written, 0)) < 0)
+        {
 #ifdef WINDOWS
-	    if (errno == WSAEWOULDBLOCK)
+            if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
-	    if (errno == EAGAIN)
+            if (errno == EAGAIN)
 #endif
-	    {
-	    	TRC(fprintf(stderr, "  Flow control stop\n"));
-	    	return 1;
-	    }
-	    h->cerrno = CSYSERR;
-	    return -1;
-	}
-	state->written += res;
-	TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
-	    res, state->written, size));
+            {
+                TRC(fprintf(stderr, "  Flow control stop\n"));
+                return 1;
+            }
+            h->cerrno = CSYSERR;
+            return -1;
+        }
+        state->written += res;
+        TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
+            res, state->written, size));
     }
     state->towrite = state->written = -1;
     TRC(fprintf(stderr, "  Ok\n"));
@@ -486,7 +495,7 @@ int tcpip_close(COMSTACK h)
     TRC(fprintf(stderr, "tcpip_close\n"));
     close(h->iofile);
     if (sp->altbuf)
-    	free(sp->altbuf);
+        free(sp->altbuf);
     free(sp);
     free(h);
     return 0;

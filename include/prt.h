@@ -49,5 +49,6 @@ int MDF odr_seek(ODR o, int whence, int offset);
 int MDF odr_dumpBER(FILE *f, char *buf, int len);
 void MDF odr_choice_bias(ODR o, int what);
 int MDF odr_total(ODR o);
+char *odr_errmsg(int n);
 
 #endif
