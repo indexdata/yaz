@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.1  1995-05-29 08:17:13  quinn
+ * Revision 1.2  1995-08-21 09:11:16  quinn
+ * Smallish fixes to suppport new formats.
+ *
+ * Revision 1.1  1995/05/29  08:17:13  quinn
  * iMoved oid to util to support comstack.
  *
  * Revision 1.5  1995/05/22  11:30:16  quinn
@@ -118,6 +121,27 @@ static oident oids[] =
     {PROTO_SR,      CLASS_RECSYN,  VAL_CANMARC,   {5,17,-1},   "Canmarc"     },
     {PROTO_SR,      CLASS_RECSYN,  VAL_SBN,       {5,18,-1},   "SBN"         },
     {PROTO_SR,      CLASS_RECSYN,  VAL_PICAMARC,  {5,19,-1},   "Picamarc"    },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_AUSMARC,   {5,20,-1},   "Ausmarc"     },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_IBERMARC,  {5,21,-1},   "Ibermarc"    },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_EXPLAIN,   {5,100,-1},  "Explain"     },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_SUTRS,     {5,101,-1},  "SUTRS"       },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_OPAC,      {5,102,-1},  "OPAC"        },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_SUMMARY,   {5,103,-1},  "Summary"     },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_GRS0,      {5,104,-1},  "GRS-0"       },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_GRS1,      {5,105,-1},  "GRS-1"       },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_EXTENDED,  {5,106,-1},  "Extended"    },
+    {PROTO_SR,      CLASS_RESFORM, VAL_RESOURCE1, {7,1,-1},    "Resource-1"  },
+    {PROTO_SR,      CLASS_RESFORM, VAL_RESOURCE2, {7,2,-1},    "Resource-2"  },
+    {PROTO_SR,      CLASS_ACCFORM, VAL_PROMPT1,   {8,1,-1},    "Prompt-1"    },
+    {PROTO_SR,      CLASS_ACCFORM, VAL_DES1,      {8,2,-1},    "Des-1"       },
+    {PROTO_SR,      CLASS_ACCFORM, VAL_KRB1,      {8,3,-1},    "Krb-1"       },
+    {PROTO_SR,      CLASS_EXTSERV, VAL_PRESSET,   {9,1,-1},    "Pers. set"   },
+    {PROTO_SR,      CLASS_EXTSERV, VAL_PQUERY,    {9,2,-1},    "Pers. query" },
+    {PROTO_SR,      CLASS_EXTSERV, VAL_PCQUERY,   {9,3,-1},    "Per'd query" },
+    {PROTO_SR,      CLASS_EXTSERV, VAL_ITEMORDER, {9,4,-1},    "Item order"  },
+    {PROTO_SR,      CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,-1},    "DB. Update"  },
+    {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
+    {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
     {0,             0,             0,             {-1},        0          }
 };
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.2  1995-08-17 12:45:00  quinn
+ * Revision 1.3  1995-08-21 09:10:18  quinn
+ * Smallish fixes to suppport new formats.
+ *
+ * Revision 1.2  1995/08/17  12:45:00  quinn
  * Fixed minor problems with GRS-1. Added support in c&s.
  *
  * Revision 1.1  1995/08/15  13:37:41  quinn
@@ -35,6 +38,9 @@ int z_External(ODR o, Z_External **p, int opt)
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_promptObject1,
 	    z_PromptObject1},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_grs1, z_GenericRecord},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_extendedService,
+	    z_TaskPackage},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, z_ItemOrder},
 	{-1, -1, -1, -1, 0}
     };
     /*

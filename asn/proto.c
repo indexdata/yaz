@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.36  1995-08-15 11:59:39  quinn
+ * Revision 1.37  1995-08-21 09:10:15  quinn
+ * Smallish fixes to suppport new formats.
+ *
+ * Revision 1.36  1995/08/15  11:59:39  quinn
  * Updated External
  *
  * Revision 1.35  1995/08/10  08:53:59  quinn
@@ -1417,6 +1420,56 @@ int z_Close(ODR o, Z_Close **p, int opt)
 
 /* ------------------------ APDU ------------------------- */
 
+int z_Permissions(ODR o, Z_Permissions **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+        return opt && odr_ok(o);
+    return
+        odr_implicit(o, z_InternationalString, &(*p)->userId, ODR_CONTEXT,
+	    1, 0) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 2) &&
+	odr_sequence_of(o, odr_integer, &(*p)->allowableFunctions,
+	    &(*p)->num_allowableFunctions) &&
+	odr_sequence_end(o);
+}
+
+int z_ExtendedServicesRequest(ODR o, Z_ExtendedServicesRequest **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+        return opt && odr_ok(o);
+    return
+        z_ReferenceId(o, &(*p)->referenceId, 1) &&
+        odr_implicit(o, odr_integer, &(*p)->function, ODR_CONTEXT, 3, 0) &&
+        odr_implicit(o, odr_oid, &(*p)->packageType, ODR_CONTEXT, 4, 0) &&
+        odr_implicit(o, z_InternationalString, &(*p)->packageName, ODR_CONTEXT, 5, 1) &&
+        odr_implicit(o, z_InternationalString, &(*p)->userId, ODR_CONTEXT, 6, 1) &&
+        odr_implicit(o, z_IntUnit, &(*p)->retentionTime, ODR_CONTEXT, 7, 1) &&
+        odr_implicit(o, z_Permissions, &(*p)->permissions, ODR_CONTEXT, 8, 1) &&
+        odr_implicit(o, z_InternationalString, &(*p)->description, ODR_CONTEXT, 9, 1) &&
+        odr_implicit(o, z_External, &(*p)->taskSpecificParameters, ODR_CONTEXT, 10, 1) &&
+        odr_implicit(o, odr_integer, &(*p)->waitAction, ODR_CONTEXT, 11, 0) &&
+        z_ElementSetName(o, &(*p)->elements, 1) &&
+        z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+        odr_sequence_end(o);
+}
+
+int z_ExtendedServicesResponse(ODR o, Z_ExtendedServicesResponse **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+        return opt && odr_ok(o);
+    return
+        z_ReferenceId(o, &(*p)->referenceId, 1) &&
+        odr_implicit(o, odr_integer, &(*p)->operationStatus, ODR_CONTEXT, 3, 0) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 4) &&
+	(odr_sequence_of(o, z_DiagRec, &(*p)->diagnostics,
+	    &(*p)->num_diagnostics) || odr_ok(o)) &&
+        odr_implicit(o, z_External, &(*p)->taskPackage, ODR_CONTEXT, 5, 1) &&
+        z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+        odr_sequence_end(o);
+}
+
+/* ------------------------ APDU ------------------------- */
+
 int z_APDU(ODR o, Z_APDU **p, int opt)
 {
     static Odr_arm arm[] =
@@ -1443,6 +1496,10 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
 	{ODR_IMPLICIT, ODR_CONTEXT, 35, Z_APDU_scanRequest, z_ScanRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 36, Z_APDU_scanResponse, z_ScanResponse},
 	{ODR_IMPLICIT, ODR_CONTEXT, 45, Z_APDU_segmentRequest, z_Segment},
+	{ODR_IMPLICIT, ODR_CONTEXT, 46, Z_APDU_extendedServicesRequest,
+	    z_ExtendedServicesRequest},
+	{ODR_IMPLICIT, ODR_CONTEXT, 47, Z_APDU_extendedServicesResponse,
+	    z_ExtendedServicesResponse},
 	{ODR_IMPLICIT, ODR_CONTEXT, 48, Z_APDU_close, z_Close},
 
     	{-1, -1, -1, -1, 0}

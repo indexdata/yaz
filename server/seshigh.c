@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.44  1995-08-17 12:45:25  quinn
+ * Revision 1.45  1995-08-21 09:11:00  quinn
+ * Smallish fixes to suppport new formats.
+ *
+ * Revision 1.44  1995/08/17  12:45:25  quinn
  * Fixed minor problems with GRS-1. Added support in c&s.
  *
  * Revision 1.43  1995/08/15  12:00:31  quinn
@@ -756,7 +759,14 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	bend_fetchresult *fres;
 	Z_NamePlusRecord *thisrec;
 	Z_DatabaseRecord *thisext;
+	int this_length;
 
+	/*
+	 * we get the number of bytes allocated on the stream before any
+	 * allocation done by the backend - this should give us a reasonable
+	 * idea of the total size of the data so far.
+	 */
+	total_length = odr_total(a->encode);
 	if (reclist.num_records == MAX_RECORDS - 1)
 	{
 	    *pres = Z_PRES_PARTIAL_2;
@@ -778,19 +788,23 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    *pres = Z_PRES_FAILURE;
 	    return diagrec(a->proto, fres->errcode, fres->errstring);
 	}
+	if (fres->len >= 0)
+	    this_length = fres->len;
+	else
+	    this_length = odr_total(a->encode) - total_length;
 	logf(LOG_DEBUG, "  fetched record, len=%d, total=%d",
-	    fres->len, total_length);
-	if (fres->len + total_length > a->preferredMessageSize)
+	    this_length, total_length);
+	if (this_length + total_length > a->preferredMessageSize)
 	{
 	    /* record is small enough, really */
-	    if (fres->len <= a->preferredMessageSize)
+	    if (this_length <= a->preferredMessageSize)
 	    {
 	    	logf(LOG_DEBUG, "  Dropped last normal-sized record");
 		*pres = Z_PRES_PARTIAL_2;
 		break;
 	    }
 	    /* record can only be fetched by itself */
-	    if (fres->len < a->maximumRecordSize)
+	    if (this_length < a->maximumRecordSize)
 	    {
 	    	logf(LOG_DEBUG, "  Record > prefmsgsz");
 	    	if (toget > 1)
@@ -799,7 +813,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		    reclist.records[reclist.num_records] =
 		   	 surrogatediagrec(a->proto, fres->basename, 16, 0);
 		    reclist.num_records++;
-		    total_length += 10; /* totally arbitrary */
 		    continue;
 		}
 	    }
@@ -809,7 +822,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		reclist.records[reclist.num_records] =
 		    surrogatediagrec(a->proto, fres->basename, 17, 0);
 		reclist.num_records++;
-		total_length += 10; /* totally arbitrary */
 		continue;
 	    }
 	}
@@ -877,7 +889,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	}
 	reclist.records[reclist.num_records] = thisrec;
 	reclist.num_records++;
-	total_length += fres->len;
 	*next = fres->last_in_set ? 0 : recno + 1;
     }
     *num = reclist.num_records;

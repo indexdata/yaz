@@ -47,7 +47,9 @@ struct Z_External
 	Z_External_resourceReport1,
 	Z_External_resourceReport2,
 	Z_External_promptObject1,
-	Z_External_grs1
+	Z_External_grs1,
+	Z_External_extendedService,
+	Z_External_itemOrder
     } which;
     union
     {
@@ -63,6 +65,8 @@ struct Z_External
 	Z_ResourceReport2 *resourceReport2;
 	Z_PromptObject1 *promptObject1;
 	Z_GenericRecord *grs1;
+	Z_TaskPackage *extendedService;
+	Z_ItemOrder *itemOrder;
     } u;
 };
 

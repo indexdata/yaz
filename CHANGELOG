@@ -9,8 +9,12 @@ will only affect you if you use the frontend-server.
 Added Explain encoders/decoders to the service-level API. Untested.
 
 Added GRS-1 encoders/decoders to the service-level API. Lightly tested.
-Test-client will ask for and ODR pretty-print GRS1. Ztest will return
-dummy records.
+Test-client will ask for and print GRS1. Ztest will return dummy records
+on request.
+
+Added Extended Services: Item Order encoders and decoders to the Service-
+level API. Untested. Would anyone be willing to fax or mail the pertinent
+bits of the ILL protocol to us?
 
 Moved pretty-printing of structure-wrappers ({..}) from odr_seq.c to
 odr_cons.c, which causes a more correct output.
@@ -19,10 +23,13 @@ Fixed handling of searchRequest in frontend server. NextResultSetPosition
 was always set to 0 when no records were requested in the searchRequest.
 
 * Added better external-handling. This shouldn't harm old code that *encodes*
-externals. It will break code that looks for a 'single-ASN1-type'
+externals. It can break code that looks for a 'single-ASN1-type'
 representation, since those types that are known are now decoded
 immediately. Look at the SUTRS sample code in seshigh.c and client.c.
 Documentation updated.
+
+Better, but backwards-compatible handling of records in bend_fetchresponse.
+Length -1 marks structured record, type is deduced from format field.
 
 --- 1.0b2 1995/06/27
 Fairly quick maintenance release to add SUTRS support.

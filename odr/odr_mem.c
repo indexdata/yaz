@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.5  1995-05-16 08:50:55  quinn
+ * Revision 1.6  1995-08-21 09:10:41  quinn
+ * Smallish fixes to suppport new formats.
+ *
+ * Revision 1.5  1995/05/16  08:50:55  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.4  1995/05/15  11:56:09  quinn
@@ -36,6 +39,7 @@ typedef struct odr_memblock
     char *buf;
     int size;
     int top;
+    int total;
     struct odr_memblock *next;
 } odr_memblock;
 
@@ -74,6 +78,7 @@ static odr_memblock *get_block(int size)
 	    abort();
     }
     r->top = 0;
+    r->total = 0;
     return r;
 }
 
@@ -113,13 +118,21 @@ void *odr_malloc(ODR o, int size)
 	    abort();
 	else
 	{
+	    if (o->mem)
+		p->total = o->mem->total;
 	    p->next = o->mem;
 	    o->mem = p;
 	}
     r = p->buf + p->top;
     /* align size */
     p->top += (size + (sizeof(long) - 1)) & ~(sizeof(long) - 1);
+    p->total += size;
     return r;
+}
+
+int odr_total(ODR o)
+{
+    return o->mem ? o->mem->total : 0;
 }
 
 /* ---------- memory management for data encoding ----------*/

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.22  1995-08-17 12:45:14  quinn
+ * Revision 1.23  1995-08-21 09:10:36  quinn
+ * Smallish fixes to suppport new formats.
+ *
+ * Revision 1.22  1995/08/17  12:45:14  quinn
  * Fixed minor problems with GRS-1. Added support in c&s.
  *
  * Revision 1.21  1995/08/15  12:00:11  quinn
@@ -1020,6 +1023,55 @@ typedef struct Z_Segment
     Z_OtherInformation *otherInfo;  /* OPTIONAL */
 } Z_Segment;
 
+/* ----------------------- Extended Services ---------------- */
+
+typedef struct Z_Permissions
+{
+    char *userId;                         
+    int num_allowableFunctions;
+    int **allowableFunctions;             
+#define Z_Permissions_delete              1
+#define Z_Permissions_modifyContents      2
+#define Z_Permissions_modifyPermissions   3
+#define Z_Permissions_present             4
+#define Z_Permissions_invoke              5
+} Z_Permissions;
+
+typedef struct Z_ExtendedServicesRequest
+{
+    Z_ReferenceId *referenceId;             /* OPTIONAL */
+    int *function;                        
+#define Z_ExtendedServicesRequest_create              1
+#define Z_ExtendedServicesRequest_delete              2
+#define Z_ExtendedServicesRequest_modify              3
+    Odr_oid *packageType;                 
+    char *packageName;                      /* OPTIONAL */
+    char *userId;                           /* OPTIONAL */
+    Z_IntUnit *retentionTime;               /* OPTIONAL */
+    Z_Permissions *permissions;             /* OPTIONAL */
+    char *description;                      /* OPTIONAL */
+    Z_External *taskSpecificParameters;     /* OPTIONAL */
+    int *waitAction;                      
+#define Z_ExtendedServicesRequest_wait                1
+#define Z_ExtendedServicesRequest_waitIfPossible      2
+#define Z_ExtendedServicesRequest_dontWait            3
+#define Z_ExtendedServicesRequest_dontReturnPackage   4
+    char *elements;             /* OPTIONAL */
+    Z_OtherInformation *otherInfo;          /* OPTIONAL */
+} Z_ExtendedServicesRequest;
+
+typedef struct Z_ExtendedServicesResponse
+{
+    Z_ReferenceId *referenceId;             /* OPTIONAL */
+    int *operationStatus;                 
+#define Z_ExtendedServicesResponse_done                1
+#define Z_ExtendedServicesResponse_accepted            2
+#define Z_ExtendedServicesResponse_failure             3
+    int num_diagnostics;
+    Z_DiagRec **diagnostics;                /* OPTIONAL */
+    Z_External *taskPackage;                /* OPTIONAL */
+    Z_OtherInformation *otherInfo;          /* OPTIONAL */
+} Z_ExtendedServicesResponse;
 
 /* ------------------------ APDU ---------------------------- */
 
@@ -1041,6 +1093,8 @@ typedef struct Z_APDU
 	Z_APDU_scanRequest,
 	Z_APDU_scanResponse,
 	Z_APDU_segmentRequest,
+	Z_APDU_extendedServicesRequest,
+	Z_APDU_extendedServicesResponse,
 	Z_APDU_close
     } which;
     union
@@ -1059,6 +1113,8 @@ typedef struct Z_APDU
 	Z_ScanRequest *scanRequest;
 	Z_ScanResponse *scanResponse;
 	Z_Segment *segmentRequest;
+	Z_ExtendedServicesRequest *extendedServicesRequest;
+	Z_ExtendedServicesResponse *extendedServicesResponse;
 	Z_Close *close;
     } u;
 } Z_APDU;
@@ -1090,12 +1146,15 @@ int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt);
 int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt);
 int z_Term(ODR o, Z_Term **p, int opt);
 int z_Specification(ODR o, Z_Specification **p, int opt);
+int z_Permissions(ODR o, Z_Permissions **p, int opt);
+int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
 Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 
 #include <prt-rsc.h>
 #include <prt-acc.h>
 #include <prt-exp.h>
 #include <prt-grs.h>
+#include <prt-exd.h>
 
 #include <prt-ext.h>
 

@@ -43,3 +43,4 @@ int odr_write(ODR o, unsigned char *buf, int bytes);
 int odr_seek(ODR o, int whence, int offset);
 int odr_dumpBER(FILE *f, char *buf, int len);
 void odr_choice_bias(ODR o, int what);
+int odr_total(ODR o);
