@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.35 2000-10-03 13:17:53 adam Exp $
+dnl $Id: configure.in,v 1.36 2000-10-03 13:26:24 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -22,21 +22,21 @@ if test "$enable_comp" = "yes"; then
 	ILLMODULE="ill"
 	ILLLIB=../ill/libill.la
 	ASN_MAKEFILES="z39.50/Makefile ill/Makefile"
-	HFILE=z-proto.h
+	HFILE=${srcdir}/include/yaz/z-proto.h
 else
 	ILLMODULE=""
 	ASNMODULE=asn
 	ILLLIB=""
 	ASN_MAKEFILES="asn/Makefile"
-	HFILE=prt-proto.h
+	HFILE=${srcdir}/asn/prt-proto.h
 fi
 AC_MSG_CHECKING(whether proto.h needs to be generated)
 yaz_include=${srcdir}/include/yaz
-if test -r ${yaz_include}/proto.h && cmp -s ${yaz_include}/$HFILE ${yaz_include}/proto.h; then
+if test -r ${yaz_include}/proto.h && cmp -s $HFILE ${yaz_include}/proto.h; then
 	AC_MSG_RESULT(no)
 else
 	AC_MSG_RESULT(yes)
-	cp -f ${yaz_include}/$HFILE ${yaz_include}/proto.h
+	cp -f $HFILE ${yaz_include}/proto.h
 	if test "$enable_comp" != "yes"; then
 		cp ${srcdir}/asn/*.h ${yaz_include}
 	fi
