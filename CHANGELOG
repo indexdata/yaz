@@ -9,11 +9,11 @@ but returns diagnostic set as well.
 New function yaz_strerror which is a portable wrapper for
 strerror/strerror_r/GetLastMessage.
 
-ZOOM_record_get supports type "xml" in which case OAI MARC is
-returned for MARC. If type is "MarcXML" , MARC XML is returned.
+* ZOOM_record_get supports type "xml" in which case MARC XML (from LOC)
+is returned for MARC. If type is "oai", then OAI MARC is returned.
 
 yaz_marc_decode supports MARC XML as well. The xml parameter
-specifies type. See include/marcdisp.h
+specifies type. See include/yaz/marcdisp.h
 
 Fix creation of lib/yaz-config so it works if srcdir != objdir. Patch
 from Kang-Jin Lee.

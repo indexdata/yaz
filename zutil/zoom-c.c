@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.10 2002-12-09 23:32:29 adam Exp $
+ * $Id: zoom-c.c,v 1.11 2002-12-10 13:14:14 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1133,7 +1133,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 	return 0;
     }
     else if (npr->which == Z_NamePlusRecord_databaseRecord &&
-             (!strcmp (type, "xml") || !strcmp(type, "MarcXML")))
+             (!strcmp (type, "xml") || !strcmp(type, "oai")))
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
         oident *ent = oid_getentbyoid(r->direct_reference);
@@ -1145,10 +1145,10 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         }
         else if (r->which == Z_External_octet)
         {
-            int marc_decode_type = YAZ_MARC_OAIMARC;
+            int marc_decode_type = YAZ_MARC_MARCXML;
 
-            if (!strcmp(type, "MarcXML"))
-                marc_decode_type = YAZ_MARC_MARCXML;
+            if (!strcmp(type, "oai"))
+                marc_decode_type = YAZ_MARC_OAIMARC;
             switch (ent->value)
             {
             case VAL_SOIF:
