@@ -1,4 +1,4 @@
-/* $Id: srw-client.c,v 1.1 2003-01-06 08:20:28 adam Exp $
+/* $Id: srw-client.c,v 1.2 2003-01-13 14:32:41 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -9,6 +9,7 @@ See file LICENSE for details.
 
 #include <stdio.h>
 
+#include <yaz/options.h>
 #include <yaz/srw-util.h>
 
 int main (int argc, char **argv)
