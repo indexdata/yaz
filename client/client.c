@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.142 2002-02-12 21:12:39 adam Exp $
+ * $Id: client.c,v 1.143 2002-02-18 12:54:02 adam Exp $
  */
 
 #include <stdio.h>
@@ -567,8 +567,9 @@ static void display_record(Z_External *r)
         {
             if ( 
 #if AVOID_MARC_DECODE
-                /* primitive check for a marc OID 5.1-29 */
-                ent->oidsuffix[0] == 5 && ent->oidsuffix[1] < 30 
+                /* primitive check for a marc OID 5.1-29 except 16 */
+                ent->oidsuffix[0] == 5 && ent->oidsuffix[1] < 30 &&
+                ent->oidsuffix[1] != 16)
 #else
         1
 #endif
