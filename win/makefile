@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.9 1999-11-30 13:47:12 adam Exp $
+# $Id: makefile,v 1.10 1999-12-08 13:10:48 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -25,7 +25,7 @@
 
 DEBUG=0   # 0 for release, 1 for debug
 
-NEW_Z3950=0  # 0= use old asn files
+NEW_Z3950=1  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
 
 
@@ -611,7 +611,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.9  1999-11-30 13:47:12  adam
+# Revision 1.10  1999-12-08 13:10:48  adam
+# New version.
+#
+# Revision 1.9  1999/11/30 13:47:12  adam
 # Improved installation. Moved header files to include/yaz.
 #
 # Revision 1.8  1999/07/21 08:48:02  adam

@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1999
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.12 1999-11-30 13:47:10 adam Exp $
+dnl $Id: configure.in,v 1.13 1999-12-08 13:10:48 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 dnl
 dnl ------ Checking programs
@@ -16,7 +16,7 @@ AC_ARG_WITH(build-root, [  --with-buildroot        RPM Build root],[build_root=$
 dnl
 dnl ----- YC: The Yaz Compiler
 AC_SUBST(ASNMODULE)
-AC_ARG_ENABLE(yc,[  --enable-yc             compile using YAZ' ASN.1 Compiler (YC)])
+AC_ARG_ENABLE(yc,[  --enable-yc             compile using YAZ' ASN.1 Compiler], , enable_yc=yes)
 if test "$enable_yc" = "yes"; then
 	ASNMODULE="z39.50"
 	cp -f include/yaz/z-proto.h include/yaz/proto.h

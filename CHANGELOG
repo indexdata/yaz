@@ -30,6 +30,16 @@ Added bend_start/bend_stop handlers for server. These handler are
 called on start/stop of server. For windows they are called whenever
 a service is started/stopped.
 
+* YAZ now auto-generates decoders/encoders for the Z39.50 protocol using
+a fairly small ASN.1 compiler written in Tcl. The compiler is located
+in util/yc.tcl. The auto-generated C code structures are, in a few
+cases, incompatible with the old decoders. There are differences in the
+following C structures Z_DiagRec, Z_External, Z_SortRequest, Z_SortResponse,
+Z_AttributesPlusTerm, Z_ProximityOperator, Z_DefaultDiagFormat.
+The preprocessor variable ASN_COMPILED is defined when the compiled
+ASN.1 is being used. Stuff related to the auto-generated encoders
+are located in sub directory <tt>z39.50</tt>.
+
 Assigned OID for old DB Update (VAL_DBUPDATE0). Updated YAZ compiled
 version so that it supports both new - and old version of DB Update
 

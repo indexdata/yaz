@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.4 1999-11-30 13:47:12 adam Exp $
+# $Id: Makefile.in,v 1.5 1999-12-08 13:10:48 adam Exp $
 
 SHELL=/bin/sh
 
@@ -33,6 +33,8 @@ CF=z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
 
 all: $(LIB) 
 
+comp: $(CF) z-date.c z-univ.c zes-update.c
+
 yc-tst: $(O) $(LIB)
 	$(CC) $(CFLAGS) $(O) -o yc-tst $(LIB) $(LIBS)
 
@@ -62,12 +64,6 @@ clean:
 
 realclean: clean
 	-rm -f z-*.[co] zes-*.[co]
-
-comp:
-	../util/yc.tcl -d z.tcl -I ../include $(YCFLAGS) z3950v3.asn
-	../util/yc.tcl -d z.tcl -I ../include $(YCFLAGS) datetime.asn
-	../util/yc.tcl -d z.tcl -I ../include $(YCFLAGS) univres.asn
-	../util/yc.tcl -d z.tcl -I ../include $(YCFLAGS) esupdate.asn
 
 depend: z-core.c z-date.c z-univ.c zes-update.c ../include/z-accdes1.h ../include/z-date.h ../include/z-univ.h ../include/zes-update.h
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
