@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_use.c,v $
- * Revision 1.3  1995-05-16 08:51:00  quinn
+ * Revision 1.4  1995-06-16 13:16:12  quinn
+ * Fixed Defaultdiagformat.
+ *
+ * Revision 1.3  1995/05/16  08:51:00  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.2  1995/02/09  15:51:50  quinn
@@ -44,6 +47,16 @@ int odr_external(ODR o, Odr_external **p, int opt)
 int odr_visiblestring(ODR o, char **p, int opt)
 {
     return odr_implicit(o, odr_cstring, p, ODR_UNIVERSAL, ODR_VISIBLESTRING,
+    	opt);
+}    
+
+/*
+ * a char may not be sufficient to hold a general string, but we'll deal
+ * with that once we start looking more closely at UniCode & co.
+ */
+int odr_generalstring(ODR o, char **p, int opt)
+{
+    return odr_implicit(o, odr_cstring, p, ODR_UNIVERSAL, ODR_GENERALSTRING,
     	opt);
 }    
 

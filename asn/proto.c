@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.30  1995-06-15 15:42:01  quinn
+ * Revision 1.31  1995-06-16 13:15:56  quinn
+ * Fixed Defaultdiagformat.
+ *
+ * Revision 1.30  1995/06/15  15:42:01  quinn
  * Fixed some v3 bugs
  *
  * Revision 1.29  1995/06/15  07:44:49  quinn
@@ -123,6 +126,11 @@ int z_UserInformationField(ODR o, Odr_external **p, int opt)
 {
     return odr_explicit(o, odr_external, (Odr_external **)p, ODR_CONTEXT,
     	11, opt);
+}
+
+int z_InternationalString(ODR o, char **p, int opt)
+{
+    return odr_generalstring(o, p, opt);
 }
 
 int z_InfoCategory(ODR o, Z_InfoCategory **p, int opt)
@@ -724,6 +732,14 @@ int z_DatabaseRecord(ODR o, Z_DatabaseRecord **p, int opt)
 
 int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt)
 {
+    static Odr_arm arm[] =
+    {
+    	{-1, -1, -1, Z_DiagForm_v2AddInfo, odr_visiblestring},
+	{-1, -1, -1, Z_DiagForm_v3AddInfo, z_InternationalString},
+    	{ODR_IMPLICIT, ODR_CONTEXT, ODR_VISIBLESTRING, Z_DiagForm_v2AddInfo,
+	    odr_visiblestring}, /* to match some weird server.. */
+	{-1, -1, -1, -1, 0}
+    };
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
     return
@@ -735,9 +751,7 @@ int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt)
 	 * We need to turn it into a choice, or something, because of
 	 * that damn generalstring in v3.
 	 */
-    	(odr_visiblestring(o, &(*p)->addinfo, 0) ||
-	    odr_implicit(o, odr_cstring, &(*p)->addinfo, ODR_CONTEXT,
-	    ODR_VISIBLESTRING, 1)) &&
+	odr_choice(o, arm, &(*p)->addinfo, &(*p)->which) &&
     	odr_sequence_end(o);
 }
 

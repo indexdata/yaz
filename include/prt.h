@@ -25,7 +25,7 @@ int odp_more_chunks(ODR o, unsigned char *base, int len);
 int odr_constructed_more(ODR o);
 int odr_bitstring(ODR o, Odr_bitmask **p, int opt);
 int ber_bitstring(ODR o, Odr_bitmask *p, int cons);
-int odr_visiblestring(ODR o, char **p, int opt);
+int odr_generalstring(ODR o, char **p, int opt);
 int ber_oidc(ODR o, Odr_oid *p);
 int odr_oid(ODR o, Odr_oid **p, int opt);
 int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp);

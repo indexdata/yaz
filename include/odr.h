@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.7  1995-05-29 08:11:32  quinn
+ * Revision 1.8  1995-06-16 13:16:04  quinn
+ * Fixed Defaultdiagformat.
+ *
+ * Revision 1.7  1995/05/29  08:11:32  quinn
  * Moved oid from odr/asn to util.
  *
  * Revision 1.6  1995/05/22  14:47:00  quinn
@@ -137,6 +140,7 @@
 #define ODR_PRINTABLESTRING 19
 #define ODR_GRAPHICSTRING   25
 #define ODR_VISIBLESTRING   26
+#define ODR_GENERALSTRING   27
 
 /*
  * odr stream directions

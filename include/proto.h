@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.17  1995-06-15 15:42:05  quinn
+ * Revision 1.18  1995-06-16 13:16:05  quinn
+ * Fixed Defaultdiagformat.
+ *
+ * Revision 1.17  1995/06/15  15:42:05  quinn
  * Fixed some v3 bugs
  *
  * Revision 1.16  1995/06/15  07:45:06  quinn
@@ -524,6 +527,13 @@ typedef struct Z_DefaultDiagFormat
 {
     Odr_oid *diagnosticSetId; /* This is opt'l to interwork with bad targets */
     int *condition;
+    /* until the whole character set issue becomes more definite,
+     * you can probably ignore this on input. */
+    enum  
+    {
+    	Z_DiagForm_v2AddInfo,
+	Z_DiagForm_v3AddInfo
+    } which;
     char *addinfo;
 } Z_DefaultDiagFormat;
 

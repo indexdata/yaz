@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.36  1995-06-16 10:31:36  quinn
+ * Revision 1.37  1995-06-16 13:16:14  quinn
+ * Fixed Defaultdiagformat.
+ *
+ * Revision 1.36  1995/06/16  10:31:36  quinn
  * Added session timeout.
  *
  * Revision 1.35  1995/06/15  07:45:14  quinn
@@ -620,6 +623,7 @@ static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
 #endif
     dr.diagnosticSetId = oid_getoidbyent(&bib1);
     dr.condition = &err;
+    dr.which = Z_DiagForm_v2AddInfo;
     dr.addinfo = addinfo ? addinfo : "";
     return &rec;
 }
@@ -657,6 +661,7 @@ static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
 #endif
     dr.diagnosticSetId = oid_getoidbyent(&bib1);
     dr.condition = &err;
+    dr.which = Z_DiagForm_v2AddInfo;
     dr.addinfo = addinfo ? addinfo : "";
     return &rec;
 }
@@ -693,6 +698,7 @@ static Z_DiagRecs *diagrecs(oid_proto proto, int error, char *addinfo)
 #endif
     rec.diagnosticSetId = oid_getoidbyent(&bib1);
     rec.condition = &err;
+    rec.which = Z_DiagForm_v2AddInfo;
     rec.addinfo = addinfo ? addinfo : "";
     return &recs;
 }
