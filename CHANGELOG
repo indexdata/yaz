@@ -1,5 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.0pl1 1995/12/5
+
+Bug in Explain DatabaseInfo module fixed.
+
+Some '\r' snuck into one or two of the config tables. Curse on Windows.
+
+Occasional malloc() of 0 bytes fixed in d1_espec.c.
+
 --- 1.0 1995/11/28
 
 The shift to v1.0 signals that we now consider the *core* functionality
