@@ -23,7 +23,7 @@ elm (1,10)                  rank                          -
 elm (1,12)                  url                           -
 elm (1,14)                  localControlNumber            Local-number
 elm (1,16)                  dateOfLastModification       Date/time-last-modified
-elm (2,1)                   Title                          !
+elm (2,1)                   Title                         !:p,!:w
 elm (4,1)                   controlIdentifier             Identifier-standard
 elm (2,6)                   abstract                      Abstract
 elm (4,51)                  purpose                       !
@@ -53,7 +53,7 @@ elm (4,70)/(4,17)           linkage                availableLinkage
 elm (4,70)/(4,18)           linkageType            availableLinkageType
 elm (4,94)                  pointOfContact                -
 elm (4,94)/(2,7)            contactName                   !
-elm (4,94)/(2,10)           contactOrganization           !
+elm (4,94)/(2,10)           contactOrganization           !:p,!:w
 elm (4,94)/(4,2)            contactStreetAddress          !
 elm (4,94)/(4,3)            contactCity                   !
 elm (4,94)/(4,4)            contactState                  !
@@ -71,7 +71,7 @@ elm (4,95)/(4,96)           indexTermsControlled          -
 elm (4,95)/(4,96)/(4,20)    controlledTerm                indexTermsControlled
 elm (4,95)/(4,21)           thesaurus                     !
 elm (4,97)                  localSubjectIndex             -
-elm (4,97)/(4,22)           localSubjectTerm              local-subject-index
+elm (4,97)/(4,22)           localSubjectTerm              local-subject-index:p,local-subject-index:w
 elm (4,58)                  methodology                   !
 elm (4,71)                  spatialReference              -
 elm (4,71)/(4,91)           boundingRectangle             -
