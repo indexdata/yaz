@@ -56,10 +56,12 @@ rm -fr ${RPM_BUILD_ROOT}
 /usr/bin/yaz-ztest*
 /usr/bin/zoomsh*
 /usr/bin/yaz-marcdump
+/usr/bin/yaz-iconv
 /usr/share/man/man1/yaz-client-ssl.*
 /usr/share/man/man1/yaz-client.*
 /usr/share/man/man1/zoomsh.*
 /usr/share/man/man1/yaz-marcdump.*
+/usr/share/man/man1/yaz-iconv.*
 /usr/share/man/man8/yaz-ztest-ssl.*
 /usr/share/man/man8/yaz-ztest.*
 
