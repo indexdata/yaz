@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.6 2004-10-01 13:16:18 adam Exp $
+ * $Id: odr.c,v 1.7 2004-10-02 13:28:26 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -145,7 +145,7 @@ void odr_set_stream(ODR o, void *handle,
 					 const char *buf, int len),
 		    void (*stream_close)(void *handle))
 {
-    o->print = handle;
+    o->print = (FILE*) handle;
     o->op->stream_write = stream_write;
     o->op->stream_close = stream_close;
 }

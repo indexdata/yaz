@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.25 2004-03-17 18:43:35 adam Exp $
+ * $Id: srw.c,v 1.26 2004-10-02 13:28:26 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -243,7 +243,7 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
         }
         if (!*num)
             return 1;
-        *recs = odr_malloc(o, *num * sizeof(**recs));
+        *recs = (Z_SRW_record *) odr_malloc(o, *num * sizeof(**recs));
         for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next)
         {
             if (ptr->type == XML_ELEMENT_NODE &&
@@ -282,7 +282,7 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
         }
         if (!*num)
             return 1;
-        *recs = odr_malloc(o, *num * sizeof(**recs));
+        *recs = (Z_SRW_diagnostic *) odr_malloc(o, *num * sizeof(**recs));
 	for (i = 0; i < *num; i++)
 	{
             (*recs)[i].uri = 0;
@@ -387,7 +387,7 @@ static int yaz_srw_terms(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm **terms,
         }
         if (!*num)
             return 1;
-        *terms = odr_malloc(o, *num * sizeof(**terms));
+        *terms = (Z_SRW_scanTerm *) odr_malloc(o, *num * sizeof(**terms));
         for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next, i++)
         {
             if (ptr->type == XML_ELEMENT_NODE &&
@@ -410,7 +410,7 @@ static int yaz_srw_terms(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm **terms,
 int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                   void *client_data, const char *ns)
 {
-    xmlNodePtr pptr = vptr;
+    xmlNodePtr pptr = (xmlNodePtr) vptr;
     if (o->direction == ODR_DECODE)
     {
 	Z_SRW_PDU **p = handler_data;
@@ -424,7 +424,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         if (method->type != XML_ELEMENT_NODE)
             return -1;
 
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_SRW_PDU *) odr_malloc(o, sizeof(**p));
 	(*p)->srw_version = odr_strdup(o, "1.1");
 	
         if (!strcmp(method->name, "searchRetrieveRequest"))
@@ -433,7 +433,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             Z_SRW_searchRetrieveRequest *req;
 
             (*p)->which = Z_SRW_searchRetrieve_request;
-            req = (*p)->u.request = odr_malloc(o, sizeof(*req));
+            req = (*p)->u.request = (Z_SRW_searchRetrieveRequest *)
+		odr_malloc(o, sizeof(*req));
             req->query_type = Z_SRW_query_type_cql;
             req->query.cql = 0;
             req->sort_type = Z_SRW_sort_type_none;
@@ -497,7 +498,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             Z_SRW_searchRetrieveResponse *res;
 
             (*p)->which = Z_SRW_searchRetrieve_response;
-            res = (*p)->u.response = odr_malloc(o, sizeof(*res));
+            res = (*p)->u.response = (Z_SRW_searchRetrieveResponse *)
+		odr_malloc(o, sizeof(*res));
 
             res->numberOfRecords = 0;
             res->resultSetId = 0;
@@ -541,7 +543,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 	    xmlNodePtr ptr = method->children;
             
             (*p)->which = Z_SRW_explain_request;
-            req = (*p)->u.explain_request = odr_malloc(o, sizeof(*req));
+            req = (*p)->u.explain_request = (Z_SRW_explainRequest *)
+		odr_malloc(o, sizeof(*req));
 	    req->recordPacking = 0;
 	    req->database = 0;
 	    req->stylesheet = 0;
@@ -567,7 +570,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             xmlNodePtr ptr = method->children;
 
             (*p)->which = Z_SRW_explain_response;
-            res = (*p)->u.explain_response = odr_malloc(o, sizeof(*res));
+            res = (*p)->u.explain_response = (Z_SRW_explainResponse*)
+		odr_malloc(o, sizeof(*res));
             res->diagnostics = 0;
             res->num_diagnostics = 0;
 
@@ -591,7 +595,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             xmlNodePtr ptr = method->children;
 
             (*p)->which = Z_SRW_scan_request;
-            req = (*p)->u.scan_request = odr_malloc(o, sizeof(*req));
+            req = (*p)->u.scan_request = (Z_SRW_scanRequest *)
+		odr_malloc(o, sizeof(*req));
 	    req->database = 0;
 	    req->scanClause = 0;
 	    req->stylesheet = 0;
@@ -626,7 +631,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             xmlNodePtr ptr = method->children;
 
             (*p)->which = Z_SRW_scan_response;
-            res = (*p)->u.scan_response = odr_malloc(o, sizeof(*res));
+            res = (*p)->u.scan_response = (Z_SRW_scanResponse *)
+		odr_malloc(o, sizeof(*res));
 	    res->terms = 0;
 	    res->num_terms = 0;
 	    res->diagnostics = 0;

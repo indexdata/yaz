@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.29 2004-08-02 10:06:34 adam Exp $
+ * $Id: zoom-c.c,v 1.30 2004-10-02 13:28:26 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -104,7 +104,7 @@ static void set_dset_error (ZOOM_connection c, int error,
     }
     if (addinfo && addinfo2)
     {
-        c->addinfo = xmalloc(strlen(addinfo) + strlen(addinfo2) + 2);
+        c->addinfo = (char*) xmalloc(strlen(addinfo) + strlen(addinfo2) + 2);
         strcpy(c->addinfo, addinfo);
         strcat(c->addinfo, addinfo2);
     }
@@ -819,7 +819,7 @@ static zoom_ret do_connect (ZOOM_connection c)
         c->proto = PROTO_HTTP;
         cs_get_host_args(c->host_port, &path);
         xfree(c->path);
-        c->path = xmalloc(strlen(path)+2);
+        c->path = (char*) xmalloc(strlen(path)+2);
         c->path[0] = '/';
         strcpy (c->path+1, path);
 #else
@@ -1001,7 +1001,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.29 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.30 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1092,7 +1092,7 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
     };
     ODR o = odr_createmem(ODR_ENCODE);
     int ret;
-    Z_SOAP *p = odr_malloc(o, sizeof(*p));
+    Z_SOAP *p = (Z_SOAP*) odr_malloc(o, sizeof(*p));
     Z_GDU *gdu;
     ZOOM_Event event;
 
@@ -1114,7 +1114,7 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
 
         if (cp0 && cp1)
         {
-            char *h = odr_malloc(c->odr_out, cp1 - cp0 + 1);
+            char *h = (char*) odr_malloc(c->odr_out, cp1 - cp0 + 1);
             memcpy (h, cp0, cp1 - cp0);
             h[cp1-cp0] = '\0';
             z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
@@ -1133,7 +1133,7 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
     z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
                       "SOAPAction", "\"\"");
     p->which = Z_SOAP_generic;
-    p->u.generic = odr_malloc(o, sizeof(*p->u.generic));
+    p->u.generic = (Z_SOAP_Generic *) odr_malloc(o, sizeof(*p->u.generic));
     p->u.generic->no = 0;
     p->u.generic->ns = 0;
     p->u.generic->p = sr;
@@ -1665,7 +1665,8 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
 	}
         if (r->which == Z_External_sutrs)
 	    return record_iconv_return(rec, len,
-				       r->u.sutrs->buf, r->u.sutrs->len,
+				       (char*) r->u.sutrs->buf,
+				       r->u.sutrs->len,
 				       charset);
         else if (r->which == Z_External_octet)
         {
@@ -2613,7 +2614,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
 		odr_malloc (p->odr_out, sizeof(Odr_oct));
 	    notToKeep->elements[0]->u.opaque->size =
 		notToKeep->elements[0]->u.opaque->len = strlen(recordIdOpaque);
-	    notToKeep->elements[0]->u.opaque->buf =
+	    notToKeep->elements[0]->u.opaque->buf = (unsigned char*)
 		odr_strdup(p->odr_out, recordIdOpaque);
 	}
 	else if (recordIdNumber)
@@ -3030,7 +3031,7 @@ static void handle_srw_response(ZOOM_connection c,
         npr->u.databaseRecord->which = Z_External_octet;
         npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)
             odr_malloc(c->odr_in, sizeof(Odr_oct));
-        npr->u.databaseRecord->u.octet_aligned->buf = 
+        npr->u.databaseRecord->u.octet_aligned->buf = (unsigned char*)
             res->records[i].recordData_buf;
         npr->u.databaseRecord->u.octet_aligned->len = 
             npr->u.databaseRecord->u.octet_aligned->size = 
@@ -3082,7 +3083,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         if (!ret && soap_package->which == Z_SOAP_generic &&
             soap_package->u.generic->no == 0)
         {
-            Z_SRW_PDU *sr = soap_package->u.generic->p;
+            Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(c, sr->u.response);
             else

@@ -44,7 +44,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.4 2004-09-29 20:37:50 adam Exp $
+ * $Id: cclqfile.c,v 1.5 2004-10-02 13:28:26 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -188,7 +188,7 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 		    len = split - qual_value;
 		else
 		    len = strlen(qual_value);
-		svalue_ar[pair_no] = xmalloc(len+1);
+		svalue_ar[pair_no] = (char *) xmalloc(len+1);
 		memcpy(svalue_ar[pair_no], qual_value, len);
 		svalue_ar[pair_no][len] = '\0';
 	    }

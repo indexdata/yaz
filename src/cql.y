@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.4 2004-03-17 18:31:11 adam Exp $
+/* $Id: cql.y,v 1.5 2004-10-02 13:28:26 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -187,7 +187,8 @@ static void putb(YYSTYPE *lval, CQL_parser cp, int c)
 {
     if (lval->len+1 >= lval->size)
     {
-        char *nb = nmem_malloc(cp->nmem, (lval->size = lval->len * 2 + 20));
+        char *nb = (char *)
+	    nmem_malloc(cp->nmem, (lval->size = lval->len * 2 + 20));
         memcpy (nb, lval->buf, lval->len);
         lval->buf = nb;
     }
@@ -205,7 +206,7 @@ int yylex(YYSTYPE *lval, void *vp)
     lval->rel = 0;
     lval->len = 0;
     lval->size = 10;
-    lval->buf = nmem_malloc(cp->nmem, lval->size);
+    lval->buf = (char *) nmem_malloc(cp->nmem, lval->size);
     lval->buf[0] = '\0';
     do
     {

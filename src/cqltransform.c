@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.9 2004-05-25 14:06:15 adam Exp $
+/* $Id: cqltransform.c,v 1.10 2004-10-02 13:28:26 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -208,14 +208,14 @@ int cql_pr_attr(cql_transform_t ct, const char *category,
  * characters starting at `term', or a null pointer of there are
  * none -- like memchr().
  */
-static char *wcchar(const char *term, int length)
+static const char *wcchar(const char *term, int length)
 {
-    char *best = 0;
-    char *current;
+    const char *best = 0;
+    const char *current;
     char *whichp;
 
     for (whichp = "*?"; *whichp != '\0'; whichp++) {
-	current = memchr(term, *whichp, length);
+	current = (const char *) memchr(term, *whichp, length);
 	if (current != 0 && (best == 0 || current < best))
 	    best = current;
     }
@@ -302,7 +302,7 @@ void emit_term(cql_transform_t ct,
 	    char *mem;
             cql_pr_attr(ct, "truncation", "z3958", 0,
                         pr, client_data, 28);
-	    mem = xmalloc(length+1);
+	    mem = (char *) xmalloc(length+1);
             for (i = 0; i < length; i++) {
 		if (term[i] == '*')      mem[i] = '?';
 		else if (term[i] == '?') mem[i] = '#';

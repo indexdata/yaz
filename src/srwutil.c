@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.15 2004-03-24 10:14:24 adam Exp $
+ * $Id: srwutil.c,v 1.16 2004-10-02 13:28:26 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -98,7 +98,7 @@ char *yaz_uri_val(const char *path, const char *name, ODR o)
             p1 = strchr(path, '&');
             if (!p1)
                 p1 = strlen(path) + path;
-            ret = odr_malloc(o, p1 - path + 1);
+            ret = (char *) odr_malloc(o, p1 - path + 1);
             while (*path && *path != '&')
             {
                 if (*path == '+')
@@ -460,7 +460,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 
 Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 {
-    Z_SRW_PDU *sr = odr_malloc(o, sizeof(*o));
+    Z_SRW_PDU *sr = (Z_SRW_PDU *) odr_malloc(o, sizeof(*o));
 
     sr->srw_version = odr_strdup(o, "1.1");
     sr->which = which;

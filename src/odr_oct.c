@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_oct.c,v 1.4 2004-08-13 08:59:07 adam Exp $
+ * $Id: odr_oct.c,v 1.5 2004-10-02 13:28:26 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -36,7 +36,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
     	odr_printf(o, "OCTETSTRING(len=%d) ", (*p)->len);
 
 	o->op->stream_write(o, o->print, ODR_OCTETSTRING,
-			    (*p)->buf, (*p)->len);
+			    (char*) (*p)->buf, (*p)->len);
         odr_printf(o, "\n");
     	return 1;
     }

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.7 2004-01-14 00:15:56 adam Exp $
+ * $Id: soap.c,v 1.8 2004-10-02 13:28:26 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -109,7 +109,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             ptr = ptr->children;
 
             p->which = Z_SOAP_fault;
-            p->u.fault = odr_malloc(o, sizeof(*p->u.fault));
+            p->u.fault = (Z_SOAP_Fault *) odr_malloc(o, sizeof(*p->u.fault));
             p->u.fault->fault_code = 0;
             p->u.fault->fault_string = 0;
             p->u.fault->details = 0;
@@ -148,7 +148,8 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                 else
                 {
                     p->which = Z_SOAP_generic;
-                    p->u.generic = odr_malloc(o, sizeof(*p->u.generic));
+                    p->u.generic = (Z_SOAP_Generic *)
+			odr_malloc(o, sizeof(*p->u.generic));
                     p->u.generic->no = i;
                     p->u.generic->ns = handlers[i].ns;
                     p->u.generic->p = handler_data;
