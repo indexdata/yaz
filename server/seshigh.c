@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.115  2001-03-25 21:55:12  adam
+ * Revision 1.116  2001-05-16 07:21:36  adam
+ * Accept any OID for record syntax.
+ *
+ * Revision 1.115  2001/03/25 21:55:12  adam
  * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
  *
  * Revision 1.114  2001/02/21 13:46:53  adam
@@ -1500,8 +1503,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    oident *prefformat;
 	    oid_value form;
 
-	    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)) ||
-	    	prefformat->oclass != CLASS_RECSYN)
+	    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)))
 		form = VAL_NONE;
 	    else
 	    	form = prefformat->value;
@@ -1559,8 +1561,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 
     yaz_log(LOG_LOG, "Got PresentRequest.");
 
-    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)) ||
-	prefformat->oclass != CLASS_RECSYN)
+    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)))
 	form = VAL_NONE;
     else
 	form = prefformat->value;
