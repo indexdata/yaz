@@ -9,17 +9,8 @@ The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
 role of Z39.50/SR.
 
-The toplevel makefile contains directions on how to enable Peter
-Furniss' XTIMOSI package. The package can be downloaded from
-ftp://pluto.ulcc.ac.uk/ulcc/thinosi/... (or something close to that).
-If you place the xtimosi directory on the same level as the yaz
-directory, and simply follow the directions in the toplevel YAZ
-makefile, the libmosi.a library from xtimosi should link in with no
-problems. The xtimosi library is needed to support a full OSI stack,
-but is *not* required to talk to American-style Z39.50 implementations
-over TCP/IP. Don't worry about compiling the test applications in the
-xtimosi package. Just do a "make libmosi.a", and do whatever is
-required to make the compilation complete on your local ystem.
+See doc/osi.txt for instructions on how to download and install Peter
+Furniss' ThinOSI-implementation, to provide YAZ with OSI support.
 
 Two test-programs of interest are generated when you type 'make' at
 the top level. server/ztest and yazlib/cli. Ztest is a dummy database
@@ -38,14 +29,14 @@ at the UNIX prompt, to connect to a Z39.50 server, or
 
 cli osi:[<tsel>'/']<hostname>:<port>
 
-to connect to an OSI SR target (this requires XTIMOSI). To connect to
+to connect to an OSI SR target (this requires mOSI-support). To connect to
 the DANBIB test target, you might use:
 
 cli osi:0103/find2.denet.dk:4500
 
 CLI supports CCL-queries, with the mapping between qualifiers and
 attribute values specified in the file default.bib in the working
-directory.
+directory. Use '?' to get a list of the available commands.
 
 The directories:
 
@@ -65,19 +56,20 @@ asn     - This module implements the Z39.50/SR protocol. The best way
 	which defines structure and type definitions for each of the
 	types introduced in the protocol specification.
 
-yazlib  - This module primarily implements the transport transparency
+yazlib  - This module implements the transport transparency
 	stack (COMSTACK). The comstack implements a generic interface
 	for exchanging BER-encoded records over a network. It supports
-	the American mode of exchanging the records straight over
+	the 'American' mode of exchanging the records straight over
 	TCP/IP, and uses Peter Furniss' XTIMOSI package over RFC1006.
 	Look for documentation in the file comstack.man.
 
 rfc1006 - Xtimosi requires an implementation of the OSI transport
-	with an XTI-based API. Some systems (HP and DEC, notably)
-	provide this. For others, we provide an implementation of the
-	RFC1006 protocol (which is what ISODE-based implementations
-	typically use). This module is not neeeded if you don't use
-	xtimosi.
+	layer with an XTI-based API. Some systems (HP and DEC,
+	notably) provide this. For others, we provide an
+	implementation of the RFC1006 protocol (which is what
+	ISODE-based implementations often use). This module is not
+	neeeded if you don't use xtimosi, and it's not included in the
+	libyaz.a library.
 
 server  - This is the implementation of the server frontend. It
 	provides event-handling and server managament functions,
