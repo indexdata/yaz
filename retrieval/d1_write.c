@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_write.c,v 1.11 2002-05-13 14:13:37 adam Exp $
+ * $Id: d1_write.c,v 1.12 2002-05-21 07:43:16 adam Exp $
  */
 
 #include <string.h>
@@ -64,50 +64,64 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 		wrbuf_write(b, line, strlen(line));
 	    }
 	}
-	else if (c->which == DATA1N_data)
+	else if (c->which == DATA1N_data || c->which == DATA1N_comment)
 	{
 	    char *p = c->u.data.data;
 	    int l = c->u.data.len;
 	    int first = 1;
 	    int lcol = col;
 
-	    sprintf(line, "%*s", col, "");
-	    wrbuf_write(b, line, strlen(line));
+            if (!c->u.data.formatted_text)
+            {
+                sprintf(line, "%*s", col, "");
+                wrbuf_write(b, line, strlen(line));
+            }
+            if (c->which == DATA1N_comment)
+            {
+                wrbuf_write (b, "<!--", 4);
+            }
 	    switch (c->u.data.what)
 	    {
 	    case DATA1I_text:
-		while (l)
-		{
-		    int wlen;
-		    
-		    while (l && d1_isspace(*p))
-			p++, l--;
-		    if (!l)
-			break;
-		    /* break if we'll cross margin and word is not too long */
-		    if (lcol + (wlen = wordlen(p, l)) > IDSGML_MARGIN && wlen <
-			IDSGML_MARGIN)
-		    {
-			sprintf(line, "\n%*s", col, "");
-			lcol = col;
-			wrbuf_write(b, line, strlen(line));
-			first = 1;
-		    }
-		    if (!first)
-		    {
-			wrbuf_putc(b, ' ');
-			lcol++;
-		    }
-		    while (l && !d1_isspace(*p))
-		    {
-			wrbuf_putc(b, *p);
-			p++;
-			l--;
-			lcol++;
-		    }
-		    first = 0;
-		}
-		wrbuf_write(b, "\n", 1);
+                if (c->u.data.formatted_text)
+                {
+                    wrbuf_write (b, p, l);
+                }
+                else
+                {
+                    while (l)
+                    {
+                        int wlen;
+                        
+                        while (l && d1_isspace(*p))
+                            p++, l--;
+                        if (!l)
+                            break;
+                        /* break if we cross margin and word is not too long */
+                        if (lcol + (wlen = wordlen(p, l)) > IDSGML_MARGIN &&
+                            wlen < IDSGML_MARGIN)
+                        {
+                            sprintf(line, "\n%*s", col, "");
+                            lcol = col;
+                            wrbuf_write(b, line, strlen(line));
+                            first = 1;
+                        }
+                        if (!first)
+                        {
+                            wrbuf_putc(b, ' ');
+                            lcol++;
+                        }
+                        while (l && !d1_isspace(*p))
+                        {
+                            wrbuf_putc(b, *p);
+                            p++;
+                            l--;
+                            lcol++;
+                        }
+                        first = 0;
+                    }
+                    wrbuf_write(b, "\n", 1);
+                }
 		break;
 	    case DATA1I_num:
 		wrbuf_write(b, c->u.data.data, c->u.data.len);
@@ -115,6 +129,10 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	    case DATA1I_oid:
 		wrbuf_write(b, c->u.data.data, c->u.data.len);
 	    }
+            if (c->which == DATA1N_comment)
+            {
+                wrbuf_write (b, "-->", 3);
+            }
 	}
     }
     return 0;

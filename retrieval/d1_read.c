@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.42 2002-05-13 14:13:37 adam Exp $
+ * $Id: d1_read.c,v 1.43 2002-05-21 07:43:16 adam Exp $
  */
 
 #include <assert.h>
@@ -141,8 +141,8 @@ data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem,
     while (attr && *attr)
     {
         *p = (data1_xattr*) nmem_malloc (nmem, sizeof(**p));
-        (*p)->name = nmem_strdup (nmem, attr[0]);
-        (*p)->value = nmem_strdup (nmem, attr[1]);
+        (*p)->name = nmem_strdup (nmem, *attr++);
+        (*p)->value = nmem_strdup (nmem, *attr++);
         p = &(*p)->next;
     }
     *p = 0;
@@ -190,11 +190,28 @@ data1_node *data1_mk_text_n (data1_handle dh, NMEM mem,
     return res;
 }
 
-
 data1_node *data1_mk_text (data1_handle dh, NMEM mem,
                            const char *buf, data1_node *parent)
 {
     return data1_mk_text_n (dh, mem, buf, strlen(buf), parent);
+}
+
+data1_node *data1_mk_comment_n (data1_handle dh, NMEM mem,
+                                const char *buf, size_t len,
+                                data1_node *parent)
+{
+    data1_node *res = data1_mk_node2 (dh, mem, DATA1N_comment, parent);
+    res->u.data.what = DATA1I_text;
+    res->u.data.len = len;
+    
+    res->u.data.data = data1_insert_string_n (dh, res, mem, buf, len);
+    return res;
+}
+
+data1_node *data1_mk_comment (data1_handle dh, NMEM mem,
+                              const char *buf, data1_node *parent)
+{
+    return data1_mk_comment_n (dh, mem, buf, strlen(buf), parent);
 }
 
 char *data1_insert_string_n (data1_handle dh, data1_node *res,

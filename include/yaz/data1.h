@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.10 2002-05-13 14:13:37 adam Exp $
+ * $Id: data1.h,v 1.11 2002-05-21 07:43:16 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -228,7 +228,8 @@ typedef struct data1_node
     /* variant specification (a triple, actually) */
 #define DATA1N_variant 4
     int which;
-
+    /* comment (same as data) */
+#define DATA1N_comment 5
     union
     {
 	struct
@@ -348,6 +349,13 @@ YAZ_EXPORT data1_node *data1_mk_text_n (data1_handle dh, NMEM mem,
                                         data1_node *parent);
 YAZ_EXPORT data1_node *data1_mk_text (data1_handle dh, NMEM mem,
                                       const char *buf, data1_node *parent);
+
+YAZ_EXPORT data1_node *data1_mk_comment_n (data1_handle dh, NMEM mem,
+                                           const char *buf, size_t len,
+                                           data1_node *parent);
+
+YAZ_EXPORT data1_node *data1_mk_comment (data1_handle dh, NMEM mem,
+                                         const char *buf, data1_node *parent);
 
 YAZ_EXPORT data1_node *data1_mk_root (data1_handle dh, NMEM nmem,
                                       const char *name);
