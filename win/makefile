@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.7 1999-06-09 15:10:08 heikki Exp $
+# $Id: makefile,v 1.8 1999-07-21 08:48:02 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -249,7 +249,6 @@ YAZ_ODR_OBJS= \
 
 YAZ_UTIL_OBJS= \
    $(OBJDIR)\atoin.obj \
-   $(OBJDIR)\dmalloc.obj \
    $(OBJDIR)\log.obj \
    $(OBJDIR)\marcdisp.obj \
    $(OBJDIR)\nmem.obj \
@@ -607,7 +606,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.7  1999-06-09 15:10:08  heikki
+# Revision 1.8  1999-07-21 08:48:02  adam
+# Removed dmalloc.obj.
+#
+# Revision 1.7  1999/06/09 15:10:08  heikki
 # Cleaning up. Seems to work all right
 #
 # Revision 1.6  1999/06/09 13:33:32  heikki
