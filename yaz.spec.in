@@ -64,6 +64,7 @@ rm -fr ${RPM_BUILD_ROOT}
 %files -n lib%{name}
 /usr/lib/*.so.*
 /usr/share/man/man7/yaz.*
+/usr/share/yaz/etc
 
 %files -n lib%{name}-devel
 /usr/bin/yaz-config

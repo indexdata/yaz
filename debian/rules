@@ -87,9 +87,9 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_movefiles -p libyaz-dev  usr/share/aclocal usr/lib/*.a usr/lib/*.la usr/lib/*.so usr/include usr/bin/yaz-config usr/bin/yaz-asncomp usr/share/yaz
+	dh_movefiles -p libyaz-dev  usr/share/aclocal usr/lib/*.a usr/lib/*.la usr/lib/*.so usr/include usr/bin/yaz-config usr/bin/yaz-asncomp usr/share/yaz/ill usr/share/yaz/z39.50
 	dh_movefiles -p yaz usr/bin
-	dh_movefiles -p libyaz usr/lib
+	dh_movefiles -p libyaz usr/lib usr/share/yaz/etc
 	dh_installexamples -p libyaz-dev
 
 	cp LICENSE debian/copyright
