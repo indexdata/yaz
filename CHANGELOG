@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 1.8.4 2002/XX/XX
+--- 1.8.4 2002/01/04
 
 Scan for ZOOM API. New object ZOOM_scanset. New functions
 ZOOM_connection_scan, ZOOM_scanset_size, ZOOM_scanset_term and
