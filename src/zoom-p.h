@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.2 2003-12-20 00:51:19 adam Exp $
+ * $Id: zoom-p.h,v 1.3 2004-01-27 21:22:44 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -33,7 +33,7 @@ struct ZOOM_connection_p {
     char *path;
     int error;
     char *addinfo;
-    const char *diagset;
+    char *diagset;
     int state;
     int mask;
     int reconnect_ok;

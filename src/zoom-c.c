@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.21 2004-01-27 12:15:12 adam Exp $
+ * $Id: zoom-c.c,v 1.22 2004-01-27 21:22:44 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -90,10 +90,18 @@ static void set_dset_error (ZOOM_connection c, int error,
                             const char *dset,
                             const char *addinfo, const char *addinfo2)
 {
+    char *cp;
     xfree (c->addinfo);
     c->addinfo = 0;
     c->error = error;
-    c->diagset = dset;
+    if (c->diagset && strcmp(dset, c->diagset))
+    {
+        xfree(c->diagset);
+        c->diagset = xstrdup(dset);
+	/* remove integer part from SRW diagset .. */
+        if ((cp = strrchr(c->diagset, '/')))
+	   *cp = '\0';
+    }
     if (addinfo && addinfo2)
     {
         c->addinfo = xmalloc(strlen(addinfo) + strlen(addinfo2) + 2);
@@ -219,6 +227,7 @@ ZOOM_connection_create (ZOOM_options options)
     c->reconnect_ok = 0;
     c->state = STATE_IDLE;
     c->addinfo = 0;
+    c->diagset = 0;
     set_ZOOM_error(c, ZOOM_ERROR_NONE, 0);
     c->buf_in = 0;
     c->len_in = 0;
@@ -471,6 +480,7 @@ ZOOM_connection_destroy(ZOOM_connection c)
 
     xfree (c->buf_in);
     xfree (c->addinfo);
+    xfree (c->diagset);
     odr_destroy (c->odr_in);
     odr_destroy (c->odr_out);
     ZOOM_options_destroy (c->options);
@@ -922,7 +932,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.21 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.22 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2949,20 +2959,16 @@ static void handle_srw_response(ZOOM_connection c,
     }
     if (res->num_diagnostics > 0)
     {
-	const char *std_diag = "info:srw/diagnostic/1/1/";
 	const char *code = res->diagnostics[0].code;
-	const char *cp;
-	const char *category = code;
-	int code_int = 0;
-
-	if (code && (cp = strrchr(code, '/')))
-	    code_int = atoi(cp+1);
-	if (code && !strncmp(code, std_diag, strlen(std_diag)))
-	    category = "SRW";
-
-	if (category)
-	    set_dset_error(c, code_int, category,
+	if (code)
+	{
+	    int code_int = 0;	
+	    const char *cp;
+	    if ((cp = strrchr(code, '/')))
+		code_int = atoi(cp+1);
+	    set_dset_error(c, code_int, code,
 			   res->diagnostics[0].details, 0);
+	}
     }
     nmem = odr_extract_mem(c->odr_in);
     nmem_transfer(resultset->odr->mem, nmem);
@@ -3246,7 +3252,7 @@ ZOOM_connection_error_x (ZOOM_connection c, const char **cp,
             *cp = z_HTTP_errmsg(c->error);
         else if (!strcmp(c->diagset, "Bib-1"))
             *cp = ZOOM_diag_str(error);
-        else if (!strcmp(c->diagset, "SRW"))
+        else if (!strcmp(c->diagset, "info:srw/diagnostic/1"))
             *cp = yaz_diag_srw_str(c->error);
         else
             *cp = "Unknown error and diagnostic set";

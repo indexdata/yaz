@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.10 2004-01-27 12:15:12 adam Exp $
+ * $Id: srwutil.c,v 1.11 2004-01-27 21:22:44 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -135,7 +135,7 @@ void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d,
 			   int code, const char *details)
 {
     d->code = (char *) odr_malloc(o, 50);
-    sprintf(d->code, "info:srw/diagnostic/1/1/%d", code);
+    sprintf(d->code, "info:srw/diagnostic/1/%d", code);
     d->message = 0;
     if (details)
 	d->details = odr_strdup(o, details);

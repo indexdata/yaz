@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.227 2004-01-27 12:15:11 adam Exp $
+ * $Id: client.c,v 1.228 2004-01-27 21:22:43 adam Exp $
  */
 
 #include <stdio.h>
@@ -3306,7 +3306,6 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
     {
         printf ("SRW diagnostic %s\n",
                 res->diagnostics[i].code);
-
 	if (res->diagnostics[i].message)
             printf ("Message: %s\n", res->diagnostics[i].message);
 	if (res->diagnostics[i].details)

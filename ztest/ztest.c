@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.61 2004-01-27 12:15:12 adam Exp $
+ * $Id: ztest.c,v 1.62 2004-01-27 21:22:44 adam Exp $
  */
 
 /*
@@ -437,7 +437,7 @@ int ztest_present (void *handle, bend_present_rr *rr)
 int ztest_fetch(void *handle, bend_fetch_rr *r)
 {
     char *cp;
-    r->errstring = 0;
+
     r->last_in_set = 0;
     r->basename = "Default";
     r->output_format = r->request_format;  
