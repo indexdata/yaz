@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: initopt.c,v 1.1 2004-01-12 12:11:57 adam Exp $
+ * $Id: initopt.c,v 1.2 2004-01-15 10:16:27 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -78,10 +78,12 @@ int yaz_init_opt_encode(Z_Options *opt, const char *opt_str, int *error_pos)
     return 0;
 }
 
-void yaz_init_opt_decode(Z_Options *opt, void (*pr)(const char *name))
+void yaz_init_opt_decode(Z_Options *opt, void (*pr)(const char *name,
+						    void *clientData),
+			 void *clientData)
 {
     int i;
     for (i = 0; opt_array[i].name; i++)
 	if (ODR_MASK_GET(opt, opt_array[i].opt))
-	    (*pr)(opt_array[i].name);
+	    (*pr)(opt_array[i].name, clientData);
 }

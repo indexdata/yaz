@@ -1,5 +1,12 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed a bug in Generic Frontend Server that could make it crash if a
+client sets characterSetNegotation bit, but didn't pass negotiation stuff
+in InitRequest.
+
+New YAZ client command, zversion, that sets Z39.50 version (1,2,3..).
+Must be issued before open, in order to be in effect.
+
 --- 2.0.9-6 2004/01/12  Debian/Windows
 
 Make the SRU server more picky WRT unknown params, etc.

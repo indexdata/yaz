@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.16 2004-01-09 18:10:31 adam Exp $
+ * $Id: seshigh.c,v 1.17 2004-01-15 10:16:27 adam Exp $
  */
 
 /*
@@ -775,21 +775,36 @@ static void process_http_request(association *assoc, request *req)
 {
     Z_HTTP_Request *hreq = req->gdu_request->u.HTTP_Request;
     ODR o = assoc->encode;
-    int r;
+    int r = 2;  /* 2=NOT TAKEN, 1=TAKEN, 0=SOAP TAKEN */
     Z_SRW_PDU *sr = 0;
     Z_SOAP *soap_package = 0;
     Z_GDU *p = 0;
     char *charset = 0;
-    Z_HTTP_Response *hres;
+    Z_HTTP_Response *hres = 0;
     int keepalive = 1;
     char *stylesheet = 0;
     Z_SRW_diagnostic *diagnostic = 0;
     int num_diagnostic = 0;
 
-    r = yaz_srw_decode(hreq, &sr, &soap_package, assoc->decode, &charset);
+    if (!strcmp(hreq->path, "/test")) 
+    {	
+	p = z_get_HTTP_Response(o, 200);
+	hres = p->u.HTTP_Response;
+	hres->content_buf = "1234567890\n";
+	hres->content_len = strlen(hres->content_buf);
+	r = 1;
+    }
+    if (r == 2)
+    {
+	r = yaz_srw_decode(hreq, &sr, &soap_package, assoc->decode, &charset);
+	yaz_log(LOG_DEBUG, "yaz_srw_decode returned %d", r);
+    }
     if (r == 2)  /* not taken */
+    {
 	r = yaz_sru_decode(hreq, &sr, &soap_package, assoc->decode, &charset,
 			   &diagnostic, &num_diagnostic);
+	yaz_log(LOG_DEBUG, "yaz_sru_decode returned %d", r);
+    }
     if (r == 0)  /* decode SRW/SRU OK .. */
     {
 	int http_code = 200;
@@ -879,7 +894,8 @@ static void process_http_request(association *assoc, request *req)
 	else
 	    p = z_get_HTTP_Response(o, http_code);
     }
-    else
+
+    if (p == 0)
 	p = z_get_HTTP_Response(o, 500);
     hres = p->u.HTTP_Response;
     if (!strcmp(hreq->version, "1.0")) 
@@ -1176,7 +1192,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     {
         Z_CharSetandLanguageNegotiation *negotiation =
             yaz_get_charneg_record (req->otherInfo);
-        if (negotiation->which == Z_CharSetandLanguageNegotiation_proposal)
+        if (negotiation &&
+	    negotiation->which == Z_CharSetandLanguageNegotiation_proposal)
             assoc->init->charneg_request = negotiation;
     }
     
@@ -1270,7 +1287,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
     {
     	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_1);
-	assoc->version = 2; /* 1 & 2 are equivalent */
+	assoc->version = 1; /* 1 & 2 are equivalent */
     }
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_2))
     {
@@ -1302,7 +1319,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.16 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.17 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

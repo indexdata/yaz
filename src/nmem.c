@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.2 2003-12-04 11:47:50 adam Exp $
+ * $Id: nmem.c,v 1.3 2004-01-15 10:16:27 adam Exp $
  */
 
 /*
@@ -149,12 +149,17 @@ static void free_block(nmem_block *p)
 #if NMEM_DEBUG
 void nmem_print_list (void)
 {
+    nmem_print_list_l(LOG_DEBUG);
+}
+
+void nmem_print_list_l (int level)
+{
     struct nmem_debug_info *p;
 
-    yaz_log (LOG_DEBUG, "nmem print list");
+    yaz_log (level, "nmem print list");
     NMEM_ENTER;
     for (p = nmem_debug_list; p; p = p->next)
-	yaz_log (LOG_DEBUG, " %s:%d p=%p size=%d", p->file, p->line, p->p,
+	yaz_log (level, " %s:%d p=%p size=%d", p->file, p->line, p->p,
 		 nmem_total(p->p));
     NMEM_LEAVE;
 }

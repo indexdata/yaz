@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: nmem.h,v 1.11 2003-03-18 13:34:35 adam Exp $
+ * $Id: nmem.h,v 1.12 2004-01-15 10:16:26 adam Exp $
  */
 
 #ifndef NMEM_H
@@ -81,6 +81,7 @@ YAZ_EXPORT void *nmem_malloc_f(const char *file, int line, NMEM n, int size);
 #define nmem_malloc(x, y) nmem_malloc_f(__FILE__, __LINE__, (x), (y))
 
 YAZ_EXPORT void nmem_print_list (void);
+YAZ_EXPORT void nmem_print_list_l (int level);
 
 #else
 

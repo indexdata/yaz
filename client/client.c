@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.225 2004-01-13 11:19:24 adam Exp $
+ * $Id: client.c,v 1.226 2004-01-15 10:16:26 adam Exp $
  */
 
 #include <stdio.h>
@@ -104,6 +104,7 @@ static char *refid = NULL;
 static char *last_open_command = NULL;
 static int auto_reconnect = 0;
 static Odr_bitmask z3950_options;
+static int z3950_version = 3;
 
 static char cur_host[200];
 
@@ -280,12 +281,13 @@ static void send_initRequest(const char* type_and_host)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
+    int i;
 
     req->options = &z3950_options;
 
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
-    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
+    ODR_MASK_ZERO(req->protocolVersion);
+    for (i = 0; i<z3950_version; i++)
+	ODR_MASK_SET(req->protocolVersion, i);
 
     *req->maximumRecordSize = 1024*kilobytes;
     *req->preferredMessageSize = 1024*kilobytes;
@@ -326,7 +328,7 @@ static void send_initRequest(const char* type_and_host)
 static void render_initUserInfo(Z_OtherInformation *ui1);
 static void render_diag(Z_DiagnosticFormat *diag);
 
-static void pr_opt(const char *opt)
+static void pr_opt(const char *opt, void *clientData)
 {
     printf (" %s", opt);
 }
@@ -338,7 +340,7 @@ static int process_initResponse(Z_InitResponse *res)
     session_mem = odr_extract_mem(in);
     session = res;
 
-    for (ver = 0; ver<5; ver++)
+    for (ver = 0; ver < 8; ver++)
         if (!ODR_MASK_GET(res->protocolVersion, ver))
             break;
 
@@ -375,7 +377,7 @@ static int process_initResponse(Z_InitResponse *res)
 	}
     }
     printf ("Options:");
-    yaz_init_opt_decode(res->options, pr_opt);
+    yaz_init_opt_decode(res->options, pr_opt, 0);
     printf ("\n");
 
     if (ODR_MASK_GET(res->options, Z_Options_namedResultSets))
@@ -2101,9 +2103,18 @@ static int cmd_itemorder(const char *arg)
     return 2;
 }
 
-static void show_opt(const char *arg)
+static void show_opt(const char *arg, void *clientData)
 {
     printf ("%s ", arg);
+}
+
+static int cmd_zversion(const char *arg)
+{
+    if (*arg && arg)
+	z3950_version = atoi(arg);
+    else
+	printf ("version is %d\n", z3950_version);
+    return 0;
 }
 
 static int cmd_options(const char *arg)
@@ -2116,7 +2127,7 @@ static int cmd_options(const char *arg)
     }
     else
     {
-	yaz_init_opt_decode(&z3950_options, show_opt);
+	yaz_init_opt_decode(&z3950_options, show_opt, 0);
 	printf ("\n");
     }
     return 0;
@@ -3799,6 +3810,7 @@ static struct {
     {"adm-startup", cmd_adm_startup, "",NULL,0,NULL},
     {"explain", cmd_explain, "", NULL, 0, NULL},
     {"options", cmd_options, "", NULL, 0, NULL},
+    {"zversion", cmd_zversion, "", NULL, 0, NULL},
     {"help", cmd_help, "", NULL,0,NULL},
     {0,0,0,0,0,0}
 };
