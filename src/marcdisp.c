@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.17 2005-02-25 09:37:53 adam Exp $
+ * $Id: marcdisp.c,v 1.18 2005-02-25 17:04:45 adam Exp $
  */
 
 /**
@@ -99,18 +99,12 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	|| mt->xml == YAZ_MARC_MARCXML || mt->xml == YAZ_MARC_XCHANGE)
 	produce_warnings = 1;
 
-    wrbuf_rewind(wr);
-
     record_length = atoi_n (buf, 5);
     if (record_length < 25)
     {
 	if (mt->debug)
-	{
-	    char str[40];
-	    
 	    wrbuf_printf(wr, "<!-- Record length %d - aborting -->\n",
 			    record_length);
-	}
         return -1;
     }
     memcpy(lead, buf, 24);  /* se can modify the header for output */
