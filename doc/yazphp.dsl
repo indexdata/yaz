@@ -3,7 +3,7 @@
   CDATA DSSSL>
 ]>
 <!--
-  $Id: yazphp.dsl,v 1.2 2001-07-20 21:33:45 adam Exp $
+  $Id: yazphp.dsl,v 1.3 2001-08-14 11:50:07 adam Exp $
 -->
 <style-sheet>
 <style-specification use="docbook">
@@ -12,9 +12,7 @@
 (define %html-ext% ".php")
 (define %shade-verbatim% #t)
 
-(define (php-code code)
-  (make processing-instruction
-    data: (string-append "php " code "?")))
+(define newline "\U-000D")
 
 (define (html-document title-sosofo body-sosofo)
   (let* (;; Let's look these up once, so that we can avoid calculating
@@ -38,21 +36,27 @@
          (doc-sosofo 
           (if make-head?
 	      (make sequence
-		(php-code "require \"../id_common.inc\"")
-		(make element gi: "HTML"
-		      (make element gi: "HEAD"
-			    (make element gi: "TITLE " title-sosofo)
-			    ($standard-html-header$ prev next prevm nextm))
-		      (make element gi: "BODY"
-			    attributes: (append
-					 (list (list "CLASS" (gi)))
-					 %body-attr%)
-			    (header-navigation (current-node) navlist)
-			    body-sosofo
-			    (footer-navigation (current-node) navlist)
-			    )
+		(make formatting-instruction data:
+		      (string-append "<" "?php "
+				     newline
+				     "require \"../../id_common.inc\";"
+				     newline
+				     "id_header(\""
+				     )
 		      )
-		(php-code "id_footer();")
+		title-sosofo
+		(make formatting-instruction data:
+		      (string-append "\");"
+				     newline
+				     "?" ">"
+				     )
+		      )
+		(header-navigation (current-node) navlist)
+		body-sosofo
+		(footer-navigation (current-node) navlist)
+		(make formatting-instruction data:
+		      (string-append "<" "?php id_footer() ?>")
+		      )
 		)
 	      body-sosofo
 	      )
@@ -75,10 +79,18 @@
 		    public-id: %html-pubid%)
 		  (empty-sosofo))
 	      doc-sosofo)
-	    doc-sosofo))))
+	    doc-sosofo)
+	)
+    )
+  )
 
 </style-specification-body>
 </style-specification>
 <external-specification id="docbook" document="docbook.dsl">
 </style-sheet>
-  
+
+<!--
+Local Variables:
+mode: scheme
+End:
+-->

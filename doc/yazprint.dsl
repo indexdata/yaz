@@ -3,7 +3,7 @@
   CDATA DSSSL>
 ]>
 <!--
-  $Id: yazprint.dsl,v 1.3 2001-07-20 21:33:45 adam Exp $
+  $Id: yazprint.dsl,v 1.4 2001-08-14 11:50:07 adam Exp $
 -->
 <style-sheet>
 <style-specification use="docbook">
@@ -14,3 +14,8 @@
 <external-specification id="docbook" document="docbook.dsl">
 </style-sheet>
 
+<!--
+Local Variables:
+mode: scheme
+End:
+-->
