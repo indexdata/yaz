@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.1 2003-05-06 10:08:30 adam Exp $
+ * $Id: tstodr.c,v 1.2 2003-05-06 13:09:15 adam Exp $
  *
  */
 #include <stdio.h>
@@ -30,7 +30,7 @@ void tst_MySequence(ODR encode, ODR decode)
     
     ber_buf = odr_getbuf(encode, &ber_len, 0);
 
-    odr_setbuf(decode, ber_buf, ber_len, 1);
+    odr_setbuf(decode, ber_buf, ber_len, 0);
 
     if (!yc_MySequence(decode, &t, 0, 0))
         exit(2);
