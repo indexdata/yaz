@@ -1,3 +1,9 @@
+yaz (2.0.3-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed,  4 Jun 2003 15:26:52 +0200
+
 yaz (2.0.2-3) unstable; urgency=low
 
   * SRW support for YAZ client.
