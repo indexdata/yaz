@@ -1,5 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- XXXXX XXXX/XX/XX
+
+Added VisibleString field body type to GRS-1. It is illegal acc. to my copy
+of the protocol and it cannot be selected when encoding (maps into 'string'
+when decoding). Needed to talk to some servers.
+
+Demo client can request simple element set names.
+
 --- 1.0b3 1995/08/24
 
 Fixed bug in the frontend-server. The numberOfRecordsReturned field was
