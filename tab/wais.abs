@@ -15,7 +15,7 @@ esetname VARIANT wais-variant.est
 
 elm (2,1)		Title			!:p,!:w
 elm (2,7)		Name			!:p,!:w
-elm (1,16)		Date			!
+elm (2,8)		Date			!
 elm (1,18)		Score			-
 elm (1,14)		RecordId		Local-number
 
