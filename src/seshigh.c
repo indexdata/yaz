@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.30 2004-09-30 18:40:13 adam Exp $
+ * $Id: seshigh.c,v 1.31 2004-09-30 21:51:59 adam Exp $
  */
 
 /*
@@ -546,7 +546,34 @@ static int srw_bend_fetch(association *assoc, int pos,
 
     (*assoc->init->bend_fetch)(assoc->backend, &rr);
 
-    if (rr.len >= 0)
+    if (rr.errcode && rr.surrogate_flag)
+    {
+	int code = yaz_diag_bib1_to_srw(rr.errcode);
+	const char *message = yaz_diag_srw_str(code);
+	int len = 120;
+	if (message)
+	    len += strlen(message);
+	if (rr.errstring)
+	    len += strlen(rr.errstring);
+
+        record->recordData_buf = odr_malloc(o, len);
+	
+	sprintf(record->recordData_buf, "<diagnostic>\n"
+		" <uri>info:srw/diagnostic/1/%d</uri>\n", code);
+	if (rr.errstring)
+	    sprintf(record->recordData_buf + strlen(record->recordData_buf),
+		    " <details>%s</details>\n", rr.errstring);
+	if (message)
+	    sprintf(record->recordData_buf + strlen(record->recordData_buf),
+		    " <message>%s</message>\n", message);
+	sprintf(record->recordData_buf + strlen(record->recordData_buf),
+		"</diagnostic>\n");
+	record->recordData_len = strlen(record->recordData_buf);
+        record->recordPosition = odr_intdup(o, pos);
+	record->recordSchema = "info:srw/schema/1/diagnostics-v1.1";
+	return 0;
+    }
+    else if (rr.len >= 0)
     {
         record->recordData_buf = rr.record;
         record->recordData_len = rr.len;
@@ -695,7 +722,12 @@ static void srw_bend_search(association *assoc, request *req,
 
             if (start > rr.hits)
             {
-                yaz_log(LOG_LOG, "Request out or range");
+		srw_res->num_diagnostics = 1;
+		srw_res->diagnostics = (Z_SRW_diagnostic *)
+		    odr_malloc(assoc->encode, 
+			       sizeof(*srw_res->diagnostics));
+		yaz_mk_std_diagnostic(assoc->encode,  srw_res->diagnostics,
+				      61, 0);
             }
             else
             {
@@ -1338,7 +1370,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.30 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.31 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
