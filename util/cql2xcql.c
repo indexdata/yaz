@@ -1,4 +1,4 @@
-/* $Id: cql2xcql.c,v 1.4 2004-03-16 13:22:16 adam Exp $
+/* $Id: cql2xcql.c,v 1.5 2004-04-29 21:15:14 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -16,7 +16,7 @@ See the file LICENSE.
 int main(int argc, char **argv)
 {
     CQL_parser cp;
-    int r;
+    int r = 0;
     const char *fname = 0;
     int iterations = 1;
     int ret;

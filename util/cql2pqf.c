@@ -1,4 +1,4 @@
-/* $Id: cql2pqf.c,v 1.4 2004-03-16 13:22:16 adam Exp $
+/* $Id: cql2pqf.c,v 1.5 2004-04-29 21:15:14 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -22,7 +22,7 @@ static void usage()
 int main(int argc, char **argv)
 {
     cql_transform_t ct;
-    int r;
+    int r = 0;
     int i, iterations = 1;
     CQL_parser cp = cql_parser_create();
     char *query = 0;
