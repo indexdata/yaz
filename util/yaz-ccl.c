@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.8  1996-10-29 13:36:27  adam
+ * Revision 1.9  1997-06-23 10:31:25  adam
+ * Added ODR argument to ccl_rpn_query and ccl_scan_query.
+ *
+ * Revision 1.8  1996/10/29 13:36:27  adam
  * Added header.
  *
  */
@@ -16,9 +19,9 @@
 
 #include <yaz-ccl.h>
 
-static Z_RPNStructure *ccl_rpn_structure (struct ccl_rpn_node *p);
+static Z_RPNStructure *ccl_rpn_structure (ODR o, struct ccl_rpn_node *p);
 
-static Z_AttributesPlusTerm *ccl_rpn_term (struct ccl_rpn_node *p)
+static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
 {
     struct ccl_rpn_attr *attr;
     int num = 0;
@@ -26,13 +29,13 @@ static Z_AttributesPlusTerm *ccl_rpn_term (struct ccl_rpn_node *p)
     Odr_oct *term_octet;
     Z_Term *term;
 
-    zapt = xmalloc (sizeof(*zapt));
+    zapt = odr_malloc (o, sizeof(*zapt));
     assert (zapt);
 
-    term_octet = xmalloc (sizeof(*term_octet));
+    term_octet = odr_malloc (o, sizeof(*term_octet));
     assert (term_octet);
 
-    term = xmalloc(sizeof(*term));
+    term = odr_malloc (o, sizeof(*term));
     assert(term);
 
     for (attr = p->u.t.attr_list; attr; attr = attr->next)
@@ -41,11 +44,12 @@ static Z_AttributesPlusTerm *ccl_rpn_term (struct ccl_rpn_node *p)
     if (num)
     {
         int i = 0;
-        zapt->attributeList = xmalloc (num*sizeof(*zapt->attributeList));
+        zapt->attributeList = odr_malloc (o, num*sizeof(*zapt->attributeList));
         assert (zapt->attributeList);
         for (attr = p->u.t.attr_list; attr; attr = attr->next, i++)
         {
-            zapt->attributeList[i] = xmalloc (sizeof(**zapt->attributeList));
+            zapt->attributeList[i] =
+		odr_malloc (o, sizeof(**zapt->attributeList));
             assert (zapt->attributeList[i]);
             zapt->attributeList[i]->attributeType =
                 &attr->type;
@@ -70,18 +74,18 @@ static Z_AttributesPlusTerm *ccl_rpn_term (struct ccl_rpn_node *p)
     return zapt;
 }
 
-static Z_Operand *ccl_rpn_simple (struct ccl_rpn_node *p)
+static Z_Operand *ccl_rpn_simple (ODR o, struct ccl_rpn_node *p)
 {
     Z_Operand *zo;
 
-    zo = xmalloc (sizeof(*zo));
+    zo = odr_malloc (o, sizeof(*zo));
     assert (zo);
 
     switch (p->kind)
     {
     case CCL_RPN_TERM:
         zo->which = Z_Operand_APT;
-        zo->u.attributesPlusTerm = ccl_rpn_term (p);
+        zo->u.attributesPlusTerm = ccl_rpn_term (o, p);
         break;
     case CCL_RPN_SET:
         zo->which = Z_Operand_resultSetId;
@@ -93,14 +97,14 @@ static Z_Operand *ccl_rpn_simple (struct ccl_rpn_node *p)
     return zo;
 }
 
-static Z_Complex *ccl_rpn_complex (struct ccl_rpn_node *p)
+static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
 {
     Z_Complex *zc;
     Z_Operator *zo;
 
-    zc = xmalloc (sizeof(*zc));
+    zc = odr_malloc (o, sizeof(*zc));
     assert (zc);
-    zo = xmalloc (sizeof(*zo));
+    zo = odr_malloc (o, sizeof(*zo));
     assert (zo);
 
     zc->roperator = zo;
@@ -121,16 +125,16 @@ static Z_Complex *ccl_rpn_complex (struct ccl_rpn_node *p)
     default:
         assert (0);
     }
-    zc->s1 = ccl_rpn_structure (p->u.p[0]);
-    zc->s2 = ccl_rpn_structure (p->u.p[1]);
+    zc->s1 = ccl_rpn_structure (o, p->u.p[0]);
+    zc->s2 = ccl_rpn_structure (o, p->u.p[1]);
     return zc;
 }
 
-static Z_RPNStructure *ccl_rpn_structure (struct ccl_rpn_node *p)
+static Z_RPNStructure *ccl_rpn_structure (ODR o, struct ccl_rpn_node *p)
 {
     Z_RPNStructure *zs;
 
-    zs = xmalloc (sizeof(*zs));
+    zs = odr_malloc (o, sizeof(*zs));
     assert (zs);
     switch (p->kind)
     {
@@ -139,12 +143,12 @@ static Z_RPNStructure *ccl_rpn_structure (struct ccl_rpn_node *p)
     case CCL_RPN_NOT:
     case CCL_RPN_PROX:
         zs->which = Z_RPNStructure_complex;
-        zs->u.complex = ccl_rpn_complex (p);
+        zs->u.complex = ccl_rpn_complex (o, p);
         break;
     case CCL_RPN_TERM:
     case CCL_RPN_SET:
         zs->which = Z_RPNStructure_simple;
-        zs->u.simple = ccl_rpn_simple (p);
+        zs->u.simple = ccl_rpn_simple (o, p);
         break;
     default:
         assert (0);
@@ -152,20 +156,20 @@ static Z_RPNStructure *ccl_rpn_structure (struct ccl_rpn_node *p)
     return zs;
 }
 
-Z_RPNQuery *ccl_rpn_query (struct ccl_rpn_node *p)
+Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p)
 {
     Z_RPNQuery *zq;
 
-    zq = xmalloc (sizeof(*zq));
+    zq = odr_malloc (o, sizeof(*zq));
     assert (zq);
     zq->attributeSetId = NULL;
-    zq->RPNStructure = ccl_rpn_structure (p);
+    zq->RPNStructure = ccl_rpn_structure (o, p);
     return zq;
 }
 
-Z_AttributesPlusTerm *ccl_scan_query (struct ccl_rpn_node *p)
+Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p)
 {
     if (p->kind != CCL_RPN_TERM)
         return NULL;
-    return ccl_rpn_term (p);
+    return ccl_rpn_term (o, p);
 }
