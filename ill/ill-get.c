@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: ill-get.c,v $
- * Revision 1.4  2000-02-04 11:01:15  adam
+ * Revision 1.5  2000-02-24 08:52:01  adam
+ * Bug fix.
+ *
+ * Revision 1.4  2000/02/04 11:01:15  adam
  * Added more elements.
  *
  * Revision 1.3  2000/01/31 13:15:21  adam
@@ -410,6 +413,8 @@ ILL_Postal_Address *ill_get_Postal_Address (
 	    gc, element, "extended-postal-delivery-address");
     r->street_and_number =
 	ill_get_ILL_String (gc, element, "street-and-number");
+    r->post_office_box =
+	ill_get_ILL_String (gc, element, "post-office-box");
     r->city = ill_get_ILL_String (gc, element, "city");
     r->region = ill_get_ILL_String (gc, element, "region");
     r->country = ill_get_ILL_String (gc, element, "country");
