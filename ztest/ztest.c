@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.23  1999-05-27 13:02:20  adam
+ * Revision 1.24  1999-05-27 13:07:54  adam
+ * Fix.
+ *
+ * Revision 1.23  1999/05/27 13:02:20  adam
  * Assigned OID for old DB Update (VAL_DBUPDATE0).
  *
  * Revision 1.22  1999/05/26 13:49:12  adam
@@ -240,6 +243,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 			    logf (LOG_LOG, "%d bytes:\n%s",
 				  rec->u.sutrs->len,
 				  rec->u.sutrs->buf);
+                        break;
 		    case Z_External_octet        :
 			if (rec->u.octet_aligned->len > 170)
 			    logf (LOG_LOG, "%d bytes:\n%.168s ...",
