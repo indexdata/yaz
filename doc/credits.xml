@@ -1,10 +1,10 @@
-<!-- $Id: credits.xml,v 1.4 2002-01-22 10:56:22 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.5 2002-01-25 13:38:00 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
    <para>
    This appendix lists individuals that have contributed in the development
    of &yaz;. Some have contributed with code, while others have provided bug
    fixes or suggestions. If we're missing somebody, of if you, for
-   whatever reason, don't like to be listed here let us know.
+   whatever reason, don't like to be listed here, let us know.
   </para>
 
   <itemizedlist>
@@ -22,6 +22,9 @@
     </para></listitem>
    <listitem><para>
      Irina Dijour
+    </para></listitem>
+   <listitem><para>
+     Hans van Dalen
     </para></listitem>
    <listitem><para>
      Hans van den Dool
