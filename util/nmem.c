@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.39 2003-01-06 08:20:28 adam Exp $
+ * $Id: nmem.c,v 1.40 2003-01-06 21:52:37 adam Exp $
  */
 
 /*
@@ -460,11 +460,17 @@ void yaz_strerror(char *buf, int max)
     else
 	*buf = '\0';
 #else
+/* UNIX */
 #if HAVE_STRERROR_R
+#if YAZ_POSIX_THREADS
     strerror_r(errno, buf, max);
 #else
     strcpy(buf, strerror(yaz_errno()));
 #endif
+#else
+    strcpy(buf, strerror(yaz_errno()));
+#endif
+/* UNIX */
 #endif
     if ((cp=strrchr(buf, '\n')))
 	*cp = '\0';
