@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.17 2002-02-01 14:50:29 adam Exp $
+ * $Id: marcdisp.c,v 1.18 2002-02-28 13:21:16 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -16,8 +16,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 
-int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
-			int bsize)
+int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 {
     int entry_p;
     int record_length;
@@ -94,10 +93,19 @@ int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
         memcpy (tag, buf+entry_p, 3);
 	entry_p += 3;
         tag[3] = '\0';
-	if (debug)
-	    wrbuf_puts (wr, "Tag: ");
-	wrbuf_puts (wr, tag);
-	wrbuf_puts (wr, " ");
+        if (xml)
+        {
+            wrbuf_puts (wr, "<field name=\"");
+            wrbuf_puts (wr, tag);
+            wrbuf_puts (wr, "\"");
+        }
+        else
+        {
+            if (debug)
+                wrbuf_puts (wr, "Tag: ");
+            wrbuf_puts (wr, tag);
+            wrbuf_puts (wr, " ");
+        }
 	data_length = atoi_n (buf+entry_p, length_data_entry);
 	entry_p += length_data_entry;
 	data_offset = atoi_n (buf+entry_p, length_starting);
@@ -118,25 +126,55 @@ int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
             if (debug)
                 wrbuf_puts (wr, " Ind: ");
             for (j = 0; j<indicator_length; j++, i++)
-		wrbuf_putc (wr, buf[i]);
+            {
+                if (xml)
+                {
+                    char nostr[30];
+                    sprintf (nostr, " indicator%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_puts (wr, nostr);
+                }
+                else
+                    wrbuf_putc (wr, buf[i]);
+            }
 	}
-        if (debug)
-            wrbuf_puts (wr, " Fields: ");
+        if (xml)
+        {
+            wrbuf_puts (wr, ">");
+            if (identifier_flag)
+                wrbuf_puts (wr, "\n");
+        }
+        else
+        {
+            if (debug)
+                wrbuf_puts (wr, " Fields: ");
+        }
 	while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
 	{
             if (identifier_flag)
 	    {
 	        i++;
-		wrbuf_puts (wr, " $"); 
-                for (j = 1; j<identifier_length; j++, i++)
-		    wrbuf_putc (wr, buf[i]);
-		wrbuf_putc (wr, ' ');
+                if (xml)
+                {
+                    wrbuf_puts (wr, "  <field name=\"");
+                    for (j = 1; j<identifier_length; j++, i++)
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_puts (wr, "\">");
+                }
+                else
+                {
+                    wrbuf_puts (wr, " $"); 
+                    for (j = 1; j<identifier_length; j++, i++)
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_putc (wr, ' ');
+                }
 	        while (buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
 	               buf[i] != ISO2709_FS && i < end_offset)
 		{
 		    wrbuf_putc (wr, buf[i]);
 		    i++;
 		}
+                if (xml)
+                    wrbuf_puts (wr, "</field>\n");
 	    }
 	    else
 	    {
@@ -144,14 +182,23 @@ int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
 		i++;
 	    }
 	}
-	wrbuf_putc (wr, '\n');
+        if (!xml)
+            wrbuf_putc (wr, '\n');
 	if (i < end_offset)
-	    wrbuf_puts (wr, "-- separator but not at end of field\n");
+	    wrbuf_puts (wr, "  <!-- separator but not at end of field -->\n");
 	if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
-	    wrbuf_puts (wr, "-- no separator at end of field\n");
+	    wrbuf_puts (wr, "  <!-- no separator at end of field -->\n");
+        if (xml)
+            wrbuf_puts (wr, "</field>\n");
     }
     wrbuf_puts (wr, "");
     return record_length;
+}
+
+int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
+                        int bsize)
+{
+    return yaz_marc_decode (buf, wr, debug, bsize, 0);
 }
 
 int marc_display_exl (const char *buf, FILE *outf, int debug, int length)
@@ -167,7 +214,6 @@ int marc_display_exl (const char *buf, FILE *outf, int debug, int length)
     wrbuf_free (wrbuf, 1);
     return record_length;
 }
-
 
 int marc_display_ex (const char *buf, FILE *outf, int debug)
 {

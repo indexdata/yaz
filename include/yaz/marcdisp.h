@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,45 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: marcdisp.h,v $
- * Revision 1.4  2001-10-29 09:17:19  adam
- * New function marc_display_exl - used by YAZ client. Server returns
- * bad record on position 98 (for testing).
- *
- * Revision 1.3  2001/04/06 12:26:46  adam
- * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
- *
- * Revision 1.2  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.8  1997/09/24 13:35:45  adam
- * Added two members to data1_marctab to ease reading of weird MARC records.
- *
- * Revision 1.7  1997/09/04 07:57:51  adam
- * Definition of ISO2709 control characters to this file.
- *
- * Revision 1.6  1997/09/01 08:49:49  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.5  1997/05/14 06:53:40  adam
- * C++ support.
- *
- * Revision 1.4  1995/09/29 17:12:03  quinn
- * Smallish
- *
- * Revision 1.3  1995/09/27  15:02:47  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.2  1995/05/16  08:50:32  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.1  1995/04/10  10:28:28  quinn
- * Added copy of CCL.
- *
+ * $Id: marcdisp.h,v 1.5 2002-02-28 13:21:16 adam Exp $
  */
 
 #ifndef MARCDISP_H

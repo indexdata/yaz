@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.6 2002/MM/DD
 
+Added function yaz_marc_decode that decodes MARC for line mode
+display or XML.
+
 Fixed BER decoding of OPTIONAL CHOICE. The bug didn't affect the
 Z39.50. But ISO/ILL was, however.
 

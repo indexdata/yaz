@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.23 2002-01-28 09:27:48 adam Exp $
+ * $Id: zoom-c.c,v 1.24 2002-02-28 13:21:16 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -902,51 +902,96 @@ const char *ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 	}
 	return "none";
     }
-    else if (!strcmp (type, "render"))
+    else if (!strcmp (type, "render") && 
+             npr->which == Z_NamePlusRecord_databaseRecord)
     {
-	if (npr->which == Z_NamePlusRecord_databaseRecord)
-	{
-	    Z_External *r = (Z_External *) npr->u.databaseRecord;
-	    oident *ent = oid_getentbyoid(r->direct_reference);
-	    
-	    if (r->which == Z_External_sutrs)
-	    {
-		*len = r->u.sutrs->len;
-		return (const char *) r->u.sutrs->buf;
-	    }
-	    else if (r->which == Z_External_octet)
-	    {
-		switch (ent->value)
-		{
-		case VAL_SOIF:
-		case VAL_HTML:
-		case VAL_SUTRS:
-		    break;
-		case VAL_TEXT_XML:
-		case VAL_APPLICATION_XML:
-		    break;
-		default:
-		    if (!rec->wrbuf_marc)
-			rec->wrbuf_marc = wrbuf_alloc();
-                    wrbuf_rewind (rec->wrbuf_marc);
-		    if (marc_display_wrbuf ((const char *)
-                                            r->u.octet_aligned->buf,
-                                            rec->wrbuf_marc, 0,
-					    r->u.octet_aligned->len) > 0)
-		    {
-			*len = wrbuf_len(rec->wrbuf_marc);
-			return wrbuf_buf(rec->wrbuf_marc);
-		    }
-		}
-		*len = r->u.octet_aligned->len;
-		return (const char *) r->u.octet_aligned->buf;
-	    }
-	    else if (r->which == Z_External_grs1)
-	    {
-		*len = 5;
-		return "GRS-1";
-	    }
-	}
+        Z_External *r = (Z_External *) npr->u.databaseRecord;
+        oident *ent = oid_getentbyoid(r->direct_reference);
+        
+        if (r->which == Z_External_sutrs)
+        {
+            *len = r->u.sutrs->len;
+            return (const char *) r->u.sutrs->buf;
+        }
+        else if (r->which == Z_External_octet)
+        {
+            switch (ent->value)
+            {
+            case VAL_SOIF:
+            case VAL_HTML:
+            case VAL_SUTRS:
+                break;
+            case VAL_TEXT_XML:
+            case VAL_APPLICATION_XML:
+                break;
+            default:
+                if (!rec->wrbuf_marc)
+                    rec->wrbuf_marc = wrbuf_alloc();
+                wrbuf_rewind (rec->wrbuf_marc);
+                if (yaz_marc_decode ((const char *)
+                                     r->u.octet_aligned->buf,
+                                     rec->wrbuf_marc, 0,
+                                     r->u.octet_aligned->len,
+                                     0) > 0)
+                {
+                    *len = wrbuf_len(rec->wrbuf_marc);
+                    return wrbuf_buf(rec->wrbuf_marc);
+                }
+            }
+            *len = r->u.octet_aligned->len;
+            return (const char *) r->u.octet_aligned->buf;
+        }
+        else if (r->which == Z_External_grs1)
+        {
+            *len = 5;
+            return "GRS-1";
+        }
+	return 0;
+    }
+    else if (!strcmp (type, "xml") && 
+             npr->which == Z_NamePlusRecord_databaseRecord)
+    {
+        Z_External *r = (Z_External *) npr->u.databaseRecord;
+        oident *ent = oid_getentbyoid(r->direct_reference);
+        
+        if (r->which == Z_External_sutrs)
+        {
+            *len = r->u.sutrs->len;
+            return (const char *) r->u.sutrs->buf;
+        }
+        else if (r->which == Z_External_octet)
+        {
+            switch (ent->value)
+            {
+            case VAL_SOIF:
+            case VAL_HTML:
+            case VAL_SUTRS:
+                break;
+            case VAL_TEXT_XML:
+            case VAL_APPLICATION_XML:
+                break;
+            default:
+                if (!rec->wrbuf_marc)
+                    rec->wrbuf_marc = wrbuf_alloc();
+                wrbuf_rewind (rec->wrbuf_marc);
+                if (yaz_marc_decode ((const char *)
+                                     r->u.octet_aligned->buf,
+                                     rec->wrbuf_marc, 0,
+                                     r->u.octet_aligned->len,
+                                     1) > 0)
+                {
+                    *len = wrbuf_len(rec->wrbuf_marc);
+                    return wrbuf_buf(rec->wrbuf_marc);
+                }
+            }
+            *len = r->u.octet_aligned->len;
+            return (const char *) r->u.octet_aligned->buf;
+        }
+        else if (r->which == Z_External_grs1)
+        {
+            *len = 5;
+            return "GRS-1";
+        }
 	return 0;
     }
     else if (!strcmp (type, "raw"))

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst5.c,v 1.8 2002-02-20 14:40:42 adam Exp $
+ * $Id: zoomtst5.c,v 1.9 2002-02-28 13:21:16 adam Exp $
  *
  * Asynchronous multi-target client doing search, sort and present
  */
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 		/* get database for record and record itself at pos */
 
 		db = ZOOM_record_get (rec,  "database", 0);
-		str = ZOOM_record_get (rec, "render", &len);
+		str = ZOOM_record_get (rec, "xml", &len);
 		syntax = ZOOM_record_get (rec, "syntax", &len);
 		/* if rec is non-null, we got a record for display */
 		if (str)

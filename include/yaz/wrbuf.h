@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,32 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: wrbuf.h,v $
- * Revision 1.4  2001-10-23 21:00:19  adam
- * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
- *
- * Revision 1.3  2001/10/15 19:36:48  adam
- * New function marc_display_wrbuf.
- *
- * Revision 1.2  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.8  1999/11/03 09:05:56  adam
- * Implemented wrbuf_puts.
- *
- * Revision 1.7  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.6  1997/10/31 12:20:08  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
- *
- * Revision 1.5  1997/09/17 12:10:32  adam
- * YAZ version 1.4.
+ * $Id: wrbuf.h,v 1.5 2002-02-28 13:21:16 adam Exp $
  *
  */
 
@@ -82,6 +57,9 @@ YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
 
 YAZ_EXPORT int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
 				   int bsize);
+
+YAZ_EXPORT int yaz_marc_decode (const char *buf, WRBUF wr, int debug,
+                                int bsize, int xml);
 
 YAZ_END_CDECL
 

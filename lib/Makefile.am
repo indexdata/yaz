@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.18 2001-11-19 20:43:39 adam Exp $
+## $Id: Makefile.am,v 1.19 2002-02-28 13:21:16 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -50,7 +50,6 @@ xmalloc.lo: $(top_srcdir)/util/xmalloc.c
 
 xmalloc.o: $(top_srcdir)/util/xmalloc.c
 	$(COMPILE) $(XMALLOC_FLAGS) -c $(top_srcdir)/util/xmalloc.c
-
 
 libyaz_la_LIBADD=../odr/libodr.la \
  ../comstack/libcomstack.la ../server/libserver.la \
