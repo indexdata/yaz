@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.23  1997-09-01 08:58:04  adam
+ * Revision 1.24  1997-09-01 09:30:39  adam
+ * Added include of yaz-util.h.
+ *
+ * Revision 1.23  1997/09/01 08:58:04  adam
  * Removed declaration of data1_matchstr since it's a macro.
  *
  * Revision 1.22  1997/09/01 08:49:48  adam
@@ -147,6 +150,7 @@
 
 #include <d1_attset.h>
 #include <d1_map.h>
+#include <yaz-util.h>
 
 #ifdef __cplusplus
 extern "C" {
