@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.67 2003-12-20 00:51:20 adam Exp $
+# $Id: makefile,v 1.68 2003-12-30 00:23:28 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -197,7 +197,7 @@ COMMON_LNK_OPTIONS= /nologo \
 
 DEBUG_LNK_OPTIONS= /debug 
 
-RELEASE_LNK_OPTIONS=  /pdb:none
+RELEASE_LNK_OPTIONS=
 
 DLL_LINK_OPTIONS= /dll  
 CLIENT_LINK_OPTIONS = /subsystem:console  
@@ -661,7 +661,6 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 		$(YAZ_RES)
 		/out:$(DLL) 
 		/implib:"$(LIBDIR)\yaz.lib"
-		/pdb:"$(LIBDIR)\yaz.pdb" 
 		/map:"$(LIBDIR)\yaz.map"  
 <<
 
@@ -673,7 +672,6 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_CLIENT_OBJS)
-		/pdb:"$(LIBDIR)\yaz-client.pdb"
 		/map:"$(LIBDIR)\yaz-client.map"
 		/out:$(CLIENT)
 <<
@@ -686,7 +684,6 @@ $(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMSH_OBJS)
-		/pdb:"$(LIBDIR)\zoomsh.pdb"
 		/map:"$(LIBDIR)\zoomsh.map"
 		/out:$(ZOOMSH)
 <<
@@ -699,7 +696,6 @@ $(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST1_OBJS)
-		/pdb:"$(LIBDIR)\zoomtst1.pdb"
 		/map:"$(LIBDIR)\zoomtst1.map"
 		/out:$(ZOOMTST1)
 <<
@@ -712,7 +708,6 @@ $(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST2_OBJS)
-		/pdb:"$(LIBDIR)\zoomtst2.pdb"
 		/map:"$(LIBDIR)\zoomtst2.map"
 		/out:$(ZOOMTST2)
 <<
@@ -725,7 +720,6 @@ $(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST3_OBJS)
-		/pdb:"$(LIBDIR)\zoomtst3.pdb"
 		/map:"$(LIBDIR)\zoomtst3.map"
 		/out:$(ZOOMTST3)
 <<
@@ -738,7 +732,6 @@ $(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST4_OBJS)
-		/pdb:"$(LIBDIR)\zoomtst4.pdb"
 		/map:"$(LIBDIR)\zoomtst4.map"
 		/out:$(ZOOMTST4)
 <<
@@ -751,7 +744,6 @@ $(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST5_OBJS)
-		/pdb:"$(LIBDIR)\zoomtst5.pdb"
 		/map:"$(LIBDIR)\zoomtst5.map"
 		/out:$(ZOOMTST5)
 <<
@@ -764,7 +756,6 @@ $(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST6_OBJS)
-		/pdb:"$(LIBDIR)\zoomtst6.pdb"
 		/map:"$(LIBDIR)\zoomtst6.map"
 		/out:$(ZOOMTST6)
 <<
@@ -777,7 +768,6 @@ $(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST7_OBJS)
-		/pdb:"$(LIBDIR)\zoomtst7.pdb"
 		/map:"$(LIBDIR)\zoomtst7.map"
 		/out:$(ZOOMTST7)
 <<
@@ -790,7 +780,6 @@ $(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST8_OBJS)
-		/pdb:"$(LIBDIR)\zoomtst8.pdb"
 		/map:"$(LIBDIR)\zoomtst8.map"
 		/out:$(ZOOMTST8)
 <<
@@ -803,7 +792,6 @@ $(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_CQL2PQF_OBJS)
-		/pdb:"$(LIBDIR)\cql2pqf.pdb"
 		/map:"$(LIBDIR)\cql2pqf.map"
 		/out:$(CQL2PQF)
 <<
@@ -816,7 +804,6 @@ $(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_CQL2XCQL_OBJS)
-		/pdb:"$(LIBDIR)\cql2xcql.pdb"
 		/map:"$(LIBDIR)\cql2xcql.map"
 		/out:$(CQL2XCQL)
 <<
@@ -831,7 +818,6 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 		$(IMPLIB)
 		$(ZTEST_OBJS) 
 		/implib:"$(LIBDIR)\yaz-ztest.lib"
-		/pdb:"$(LIBDIR)\yaz-ztest.pdb"
 		/map:"$(LIBDIR)\yaz-ztest.map"
 		/out:$(ZTEST) 
 <<
@@ -845,7 +831,6 @@ $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(DLL)
 		shell32.lib
 		$(IMPLIB)
 		$(YAZ_MARCDUMP_OBJS) 
-		/pdb:"$(LIBDIR)\yaz-marcdump.pdb"
 		/map:"$(LIBDIR)\yaz-marcdump.map"
 		/out:$(YAZ_MARCDUMP) 
 <<
