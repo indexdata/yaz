@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.3 2003-05-20 19:55:30 adam Exp $
+ * $Id: tstodr.c,v 1.4 2003-05-20 20:21:34 adam Exp $
  *
  */
 #include <stdio.h>
@@ -78,6 +78,28 @@ void tst_MySequence2(ODR encode, ODR decode)
         exit(13);
 }
 
+void tst_MySequence3(ODR encode, ODR decode)
+{
+    char buf[40];
+    int i;
+    Yc_MySequence *t;
+
+    srand(123);
+    for (i = 0; i<1000; i++)
+    {
+        int j;
+        for (j = 0; j<sizeof(buf); j++)
+            buf[j] = rand();
+
+        for (j = 1; j<sizeof(buf); j++)
+        {
+            odr_setbuf(decode, buf, j, 0);
+            yc_MySequence(decode, &t, 0, 0);
+            odr_reset(decode);
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     ODR odr_encode = odr_createmem(ODR_ENCODE);
@@ -85,6 +107,7 @@ int main(int argc, char **argv)
 
     tst_MySequence1(odr_encode, odr_decode);
     tst_MySequence2(odr_encode, odr_decode);
+    tst_MySequence3(odr_encode, odr_decode);
 
     odr_destroy(odr_encode);
     odr_destroy(odr_decode);

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_util.c,v 1.23 2003-05-20 19:55:30 adam Exp $
+ * $Id: odr_util.c,v 1.24 2003-05-20 20:21:34 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -87,8 +87,7 @@ int odr_missing(ODR o, int opt, const char *name)
         return 0;
     if (!opt)
     {
-        printf ("odr_missing set error : %s\n", name);
-        odr_seterror(o, OREQUIRED, 55);
+        odr_seterror(o, OREQUIRED, 53);
         odr_setaddinfo(o, name);
     }
     return opt;
