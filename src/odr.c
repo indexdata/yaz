@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.3 2004-08-13 07:30:06 adam Exp $
+ * $Id: odr.c,v 1.4 2004-08-13 08:58:59 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -110,12 +110,12 @@ void odr_FILE_write(ODR o, void *handle, int type,
 #endif
     for (i = 0; i<len; i++)
     {
+	unsigned c = ((const unsigned char *) buf)[i];
 	if (i == 2000 && len > 3100)
 	{
 	    fputs(" ..... ", (FILE*) handle);
 		i = len - 1000;
 	}
-	unsigned c = ((const unsigned char *) buf)[i];
 	if (strchr("\r\n\f\t", c) || c >= ' ' && c <= 126)
 	    putc(c, (FILE*) handle);
 	else
