@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.5 1995-05-30 10:25:45 quinn Exp $
+# $Id: Makefile,v 1.6 1995-06-27 13:20:06 quinn Exp $
 
 LIBDIR=../lib
 
@@ -13,7 +13,7 @@ LIBINCLUDE=-L$(LIBDIR)
 #CFLAGS=-Wall -pedantic -g
 DEFS=$(INCLUDE) -DRPN_QUERY -DPREFIX_QUERY
 LIBS=$(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
-  $(LIBDIR)/libcomstack.a ../lib/ccl.a $(LIBMOSI) $(LIBDIR)/libutil.a
+  $(LIBDIR)/libcomstack.a ../lib/ccl.a $(LIBMOSI) $(LIBDIR)/libutil.a $(ELIBS)
 CPP=$(CC) -E
 PROG=client
 PROGO=client.o
