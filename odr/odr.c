@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.10  1995-04-18 08:15:20  quinn
+ * Revision 1.11  1995-05-15 11:56:08  quinn
+ * More work on memory management.
+ *
+ * Revision 1.10  1995/04/18  08:15:20  quinn
  * Added dynamic memory allocation on encoding (whew). Code is now somewhat
  * neater. We'll make the same change for decoding one day.
  *
@@ -41,6 +44,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <dmalloc.h>
 #include <odr.h>
 
 char *odr_errlist[] =
@@ -115,19 +119,21 @@ void odr_destroy(ODR o)
     free(o);
 }
 
-void odr_setbuf(ODR o, char *buf, int len)
+void odr_setbuf(ODR o, char *buf, int len, int can_grow)
 {
     o->buf = o->bp = (unsigned char *) buf;
     o->buflen = o->left = len;
 
     o->ecb.buf = (unsigned char *) buf;
-    o->ecb.can_grow = 0;
+    o->ecb.can_grow = can_grow;
     o->ecb.top = o->ecb.pos = 0;
     o->ecb.size = len;
 }
 
-char *odr_getbuf(ODR o, int *len)
+char *odr_getbuf(ODR o, int *len, int *size)
 {
     *len = o->ecb.top;
+    if (size)
+    	*size = o->ecb.size;
     return (char*) o->ecb.buf;
 }

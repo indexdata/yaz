@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.3  1995-04-18 08:15:21  quinn
+ * Revision 1.4  1995-05-15 11:56:09  quinn
+ * More work on memory management.
+ *
+ * Revision 1.3  1995/04/18  08:15:21  quinn
  * Added dynamic memory allocation on encoding (whew). Code is now somewhat
  * neater. We'll make the same change for decoding one day.
  *
@@ -19,6 +22,7 @@
 
 #include <stdlib.h>
 #include <odr.h>
+#include <dmalloc.h>
 
 /* ------------------------ NIBBLE MEMORY ---------------------- */
 
@@ -32,7 +36,7 @@ typedef struct odr_memblock
     struct odr_memblock *next;
 } odr_memblock;
 
-static odr_memblock *freelist = 0;
+static odr_memblock *freelist = 0; /* global freelist */
 
 static void free_block(odr_memblock *p)
 {
@@ -40,6 +44,9 @@ static void free_block(odr_memblock *p)
     freelist = p;
 }
 
+/*
+ * acquire a block with a minimum of size free bytes.
+ */
 static odr_memblock *get_block(int size)
 {
     odr_memblock *r, *l;
@@ -67,7 +74,10 @@ static odr_memblock *get_block(int size)
     return r;
 }
 
-void odr_release_mem(odr_memblock *p)
+/*
+ * Return p to the global freelist.
+ */
+void odr_release_mem(ODR_MEM p)
 {
     odr_memblock *t;
 
@@ -79,6 +89,17 @@ void odr_release_mem(odr_memblock *p)
     }
 }
 
+/*
+ * Extract the memory control block from o.
+ */
+ODR_MEM odr_extract_mem(ODR o)
+{
+    ODR_MEM r = o->mem;
+
+    o->mem = 0;
+    return r;
+}
+
 void *odr_malloc(ODR o, int size)
 {
     struct odr_memblock *p = o->mem;
@@ -86,16 +107,14 @@ void *odr_malloc(ODR o, int size)
 
     if (!p || p->size - p->top < size)
     	if (!(p = get_block(size)))
-	{
-	    o->error = OMEMORY;
-	    return 0;
-	}
+	    abort();
 	else
 	{
 	    p->next = o->mem;
 	    o->mem = p;
 	}
     r = p->buf + p->top;
+    /* align size */
     p->top += (size + (sizeof(long) - 1)) & ~(sizeof(long) - 1);
     return r;
 }
