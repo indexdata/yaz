@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.122 2001-11-22 09:45:03 adam Exp $
+ * $Id: seshigh.c,v 1.123 2002-01-17 21:03:36 adam Exp $
  */
 
 /*
@@ -758,8 +758,8 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
 	odr_malloc (assoc->encode, sizeof(*dr));
 
-    yaz_log(LOG_DEBUG, "Diagnostic: %d -- %s", error, addinfo ? addinfo :
-	"NULL");
+    yaz_log(LOG_LOG, "[%d] %s %s%s", error, diagbib1_str(error),
+        addinfo ? " -- " : "", addinfo ? addinfo : "", error);
     rec->which = Z_Records_NSD;
     rec->u.nonSurrogateDiagnostic = dr;
     dr->diagnosticSetId =
@@ -886,7 +886,15 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	{
 	    if (!freq.surrogate_flag)
 	    {
+		char s[20];
 		*pres = Z_PRES_FAILURE;
+		/* for 'present request out of range',
+                   set addinfo to record position if not set */
+		if (freq.errcode == 13 && freq.errstring == 0)
+		{
+		    sprintf (s, "%d", recno);
+		    freq.errstring = s;
+		}
 		return diagrec(a, freq.errcode, freq.errstring);
 	    }
 	    reclist->records[reclist->num_records] =
