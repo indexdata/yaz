@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.59  1996-05-14 09:26:46  quinn
+ * Revision 1.60  1996-05-30 11:03:10  quinn
+ * Fixed NextresultSetPosition bug fixed.
+ *
+ * Revision 1.59  1996/05/14  09:26:46  quinn
  * Added attribute set to scan backend
  *
  * Revision 1.58  1996/02/20  12:53:04  quinn
@@ -921,6 +924,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		    reclist.records[reclist.num_records] =
 		   	 surrogatediagrec(a->proto, fres->basename, 16, 0);
 		    reclist.num_records++;
+		    *next = fres->last_in_set ? 0 : recno + 1;
 		    continue;
 		}
 	    }
@@ -930,6 +934,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		reclist.records[reclist.num_records] =
 		    surrogatediagrec(a->proto, fres->basename, 17, 0);
 		reclist.num_records++;
+		*next = fres->last_in_set ? 0 : recno + 1;
 		continue;
 	    }
 	}
