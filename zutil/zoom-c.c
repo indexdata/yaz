@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.29 2003-03-11 11:09:17 adam Exp $
+ * $Id: zoom-c.c,v 1.30 2003-04-17 19:43:41 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1030,6 +1030,7 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     int i;
     ZOOM_resultset resultset = 0;
     Z_SRW_PDU *sr = 0;
+    const char *recordPacking = 0;
 
     if (c->error)                  /* don't continue on error */
 	return zoom_complete;
@@ -1088,7 +1089,11 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     sr->u.request->maximumRecords = odr_intdup (c->odr_out, resultset->count);
     sr->u.request->recordSchema = resultset->schema;
 
- 
+    recordPacking = ZOOM_resultset_option_get (resultset, "recordPacking");
+
+    if (recordPacking)
+        sr->u.request->recordPacking = odr_strdup(c->odr_out, recordPacking);
+    
     return send_srw(c, sr);
 }
 #else
@@ -1437,6 +1442,11 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         {
             if (len) *len = 5;
             return "GRS-1";
+        }
+	else if (r->which == Z_External_OPAC)
+        {
+            if (len) *len = 4;
+            return "OPAC";
         }
 	return 0;
     }
