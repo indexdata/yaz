@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.11  1996-02-23 10:00:41  quinn
+ * Revision 1.12  1996-05-22 08:34:44  adam
+ * Added ifdef USE_XTIMOSI; so that 'make depend' works.
+ *
+ * Revision 1.11  1996/02/23 10:00:41  quinn
  * WAIS Work
  *
  * Revision 1.10  1996/02/10  12:23:13  quinn
@@ -89,6 +92,7 @@
  *
  */
 
+#ifdef USE_XTIMOSI
 /*
  * Glue layer for Peter Furniss' xtimosi package.
  */
@@ -495,3 +499,5 @@ char *mosi_addrstr(COMSTACK h)
 {
     return "osi:[UNIMPLEMENTED]";
 }
+
+#endif
