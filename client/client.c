@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.252 2004-09-22 13:21:37 adam Exp $
+ * $Id: client.c,v 1.253 2004-10-12 13:23:46 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -3710,6 +3710,16 @@ int cmd_set_otherinfo(const char* args)
     return 0;
 }
 
+int cmd_sleep(const char* args ) 
+{
+    int sec=atoi(args);
+    if( sec > 0 ) {
+	sleep(sec);
+	printf("Done sleeping %d secunds\n", sec);	
+    }
+    return 1;    
+}
+
 int cmd_list_otherinfo(const char* args)
 {
     int i;	   
@@ -3896,7 +3906,8 @@ static struct {
     {"set_cclfile", cmd_set_cclfile," <filename>",NULL,1,NULL},
     {"set_cqlfile", cmd_set_cqlfile," <filename>",NULL,1,NULL},
     {"set_auto_reconnect", cmd_set_auto_reconnect," on|off",complete_auto_reconnect,1,NULL},
-	{"set_otherinfo", cmd_set_otherinfo,"<otherinfoinddex> <oid> <string>",NULL,0,NULL},
+    {"set_otherinfo", cmd_set_otherinfo,"<otherinfoinddex> <oid> <string>",NULL,0,NULL},
+    {"sleep", cmd_sleep,"<seconds>",NULL,0,NULL},
     {"register_oid", cmd_register_oid,"<name> <class> <oid>",NULL,0,NULL},
     {"push_command", cmd_push_command,"<command>",command_generator,0,NULL},
     {"register_tab", cmd_register_tab,"<commandname> <tab>",command_generator,0,NULL},
