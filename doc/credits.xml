@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.1 2001-11-01 14:30:44 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.2 2001-11-06 17:03:33 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
    <para>
    This appendix lists individuals that have contributed in the development
@@ -9,48 +9,59 @@
 
   <itemizedlist>
    <listitem><para>
-     Dimitrios Andreadis, UCD Ireland
+     Dimitrios Andreadis
     </para></listitem>
    <listitem><para>
-     Morten B&oslash;geskov, DBC
+     Morten B&oslash;geskov
+    </para></listitem>
+   <listitem><para>
+     Rocco Carbone
     </para></listitem>
    <listitem><para>
      Matthew Carey
     </para></listitem>
    <listitem><para>
-     Hans van den Dool, Tilburg University Library
+     Hans van den Dool
     </para></listitem>
    <listitem><para>
-     Franck Falcoz, DTV
+     Franck Falcoz
     </para></listitem>
    <listitem><para>
-     Morten Garkier Hendriksen, DBC
+     Kevin Gamiel
     </para></listitem>
    <listitem><para>
-     Morten Holmqvist, DBC
+     Morten Garkier Hendriksen
     </para></listitem>
    <listitem><para>
-     Ian Ibbotson, Knowledge Integration
+     Morten Holmqvist
     </para></listitem>
    <listitem><para>
-     Ronald van der Meer, Adlib Information Systems B.V.
+     Ian Ibbotson
     </para></listitem>
    <listitem><para>
-     Thomas W. Place, Tilburg University Library
+     David Johnson
     </para></listitem>
    <listitem><para>
-     Jacob Poulsen, DBC
+     Ronald van der Meer
     </para></listitem>
    <listitem><para>
-     Mike Taylor, TECC
+     Thomas W. Place
     </para></listitem>
    <listitem><para>
-     Charles Woodfield, Fretwell Downing Informatics
+     Jacob Chr. Poulsen
+    </para></listitem>
+   <listitem><para>
+     Mike Taylor
+    </para></listitem>
+   <listitem><para>
+     Charles Woodfield
+    </para></listitem>
+   <listitem><para>
+     Tom Andr&eacute &Oslash;verland
     </para></listitem>
   </itemizedlist>
  </appendix>
  
-  
  <!-- Keep this comment at the end of the file
  Local variables:
  mode: sgml
