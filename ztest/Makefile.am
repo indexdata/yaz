@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.6 2001-10-05 13:55:17 adam Exp $
+## $Id: Makefile.am,v 1.7 2001-10-06 08:16:30 adam Exp $
 
 bin_PROGRAMS=yaz-ztest
 
@@ -11,4 +11,6 @@ extra=../lib/libyazthread.la
 endif
 yaz_ztest_LDADD=$(extra) ../lib/libyaz.la $(LIBTHREAD)
 
-INCLUDES=-I$(top_srcdir)/include @CFLAGSTHREADS@
+CFLAGS=@CFLAGSTHREADS@
+
+INCLUDES=-I$(top_srcdir)/include
