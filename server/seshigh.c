@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.139 2003-02-17 22:35:48 adam Exp $
+ * $Id: seshigh.c,v 1.140 2003-02-18 11:59:14 adam Exp $
  */
 
 /*
@@ -516,6 +516,8 @@ static void srw_bend_search(association *assoc, request *req,
     char *base = "Default";
     bend_search_rr rr;
     Z_External *ext;
+    
+    yaz_log(LOG_LOG, "Got SRW SearchRetrieveRequest");
 
     if (!assoc->init)
         srw_bend_init(assoc);
@@ -592,7 +594,6 @@ static void srw_bend_search(association *assoc, request *req,
                 srw_res->num_records = j;
                 if (!j)
                     srw_res->records = 0;
-                yaz_log(LOG_LOG, "got %d records", j);
             }
         }
     }
@@ -654,7 +655,6 @@ static void process_http_request(association *assoc, request *req)
 			    ctype = "text/html";
 		    }
                     z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
-		    yaz_log(LOG_LOG, "OK send page %s size=%ld", fpath, sz);
 		}
 		fclose(f);
 	    }

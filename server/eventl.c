@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: eventl.c,v 1.36 2003-02-17 21:23:31 adam Exp $
+ * $Id: eventl.c,v 1.37 2003-02-18 11:59:14 adam Exp $
  */
 
 #include <stdio.h>
@@ -74,7 +74,7 @@ int event_loop(IOCHAN *iochans)
     	for (p = *iochans; p; p = p->next)
     	{
             time_t w, ftime;
-            yaz_log(LOG_LOG, "fd=%d flags=%d force_event=%d",
+            yaz_log(LOG_DEBUG, "fd=%d flags=%d force_event=%d",
                     p->fd, p->flags, p->force_event);
 	    if (p->force_event)
                 to.tv_sec = 0;          /* polling select */
@@ -97,9 +97,9 @@ int event_loop(IOCHAN *iochans)
                     to.tv_sec = w;
             }
 	}
-        yaz_log(LOG_LOG, "select start %d", to.tv_sec);
+        yaz_log(LOG_DEBUG, "select start %d", to.tv_sec);
 	res = YAZ_EV_SELECT(max + 1, &in, &out, &except, &to);
-        yaz_log(LOG_LOG, "select end");
+        yaz_log(LOG_DEBUG, "select end");
 	if (res < 0)
 	{
 	    if (yaz_errno() == EINTR)

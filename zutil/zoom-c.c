@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.23 2003-02-18 09:12:14 adam Exp $
+ * $Id: zoom-c.c,v 1.24 2003-02-18 11:59:15 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -100,7 +100,7 @@ static void set_dset_error (ZOOM_connection c, int error,
     else if (addinfo)
         c->addinfo = xstrdup(addinfo);
     if (error)
-        yaz_log(LOG_LOG, "Error %s %s:%d %s %s",
+        yaz_log(LOG_DEBUG, "Error %s %s:%d %s %s",
                 c->host_port ? c->host_port : "<>", dset, error,
                 addinfo ? addinfo : "",
                 addinfo2 ? addinfo2 : "");
@@ -2411,7 +2411,7 @@ static void handle_srw_response(ZOOM_connection c,
 
     resultset->size = 0;
 
-    yaz_log(LOG_LOG, "got SRW response OK");
+    yaz_log(LOG_DEBUG, "got SRW response OK");
     
     if (res->numberOfRecords)
         resultset->size = *res->numberOfRecords;
@@ -2445,7 +2445,6 @@ static void handle_srw_response(ZOOM_connection c,
             npr->u.databaseRecord->u.octet_aligned->size = 
             res->records[i].recordData_len;
         record_cache_add (resultset, npr, pos);
-        yaz_log(LOG_LOG, "add SRW record to cache to pos %d", pos);
     }
     if (res->num_diagnostics > 0)
     {
