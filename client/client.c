@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.38  1996-08-12 14:09:11  adam
+ * Revision 1.39  1996-08-27 10:43:22  quinn
+ * Made select() optional
+ *
+ * Revision 1.38  1996/08/12  14:09:11  adam
  * Default prefix query attribute set defined by using p_query_attset.
  *
  * Revision 1.37  1996/07/06  19:58:29  quinn
@@ -1110,7 +1113,7 @@ static void initialize(void)
 #endif
 }
 
-static int client(void)
+static int client(int wait)
 {
     static struct {
         char *cmd;
@@ -1145,9 +1148,12 @@ static int client(void)
     while (1)
     {
         int res;
+#ifdef USE_SELECT
         fd_set input;
+#endif
         char line[1024], word[1024], arg[1024];
 
+#ifdef USE_SELECT
         FD_ZERO(&input);
         FD_SET(0, &input);
         if (conn)
@@ -1159,7 +1165,10 @@ static int client(void)
         }
         if (!res)
             continue;
-        if (FD_ISSET(0, &input))
+        if (!wait && FD_ISSET(0, &input))
+#else
+	if (!wait)
+#endif
         {
             /* quick & dirty way to get a command line. */
             if (!gets(line))
@@ -1187,9 +1196,14 @@ static int client(void)
                 res = 1;
             }
             if (res < 2)
+	    {
                 printf(C_PROMPT);
+		continue;
+	    }
         }
+#ifdef USE_SELECT
         if (conn && FD_ISSET(cs_fileno(conn), &input))
+#endif
         {
             do
             {
@@ -1256,6 +1270,7 @@ static int client(void)
             }
             while (cs_more(conn));
         }
+	wait = 0;
     }
     return 0;
 }
@@ -1272,5 +1287,5 @@ int main(int argc, char **argv)
 	perror(marcdump_file);
 	exit(1);
     }
-    return client();
+    return client((argc > 1));
 }
