@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.37 2003-02-18 14:28:53 adam Exp $
+ * $Id: log.c,v 1.38 2003-05-22 13:15:08 heikki Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -54,6 +54,8 @@ static struct {
     { LOG_MALLOC, "malloc"},
     { LOG_APP,   "app"  },
     { LOG_NOTIME, "" },
+    { LOG_APP2  , "app2" },
+    { LOG_APP3  , "app3" },
     { LOG_ALL,   "all"  },
     { 0,         "none" },
     { 0, NULL }

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.9 2003-02-12 14:17:50 heikki Exp $
+ * $Id: log.h,v 1.10 2003-05-22 13:15:07 heikki Exp $
  */
 
 #ifndef LOG_H
@@ -44,6 +44,8 @@ YAZ_BEGIN_CDECL
 #define LOG_APP    0x0040     /* For application level events such as new-connection */
 #define LOG_MALLOC 0x0080     /* debugging mallocs */
 #define LOG_NOTIME 0x0100     /* do not output date and time */
+#define LOG_APP2   0x0200     /* For application-level events, such as api calls */
+#define LOG_APP3   0x0200     /* For more application-level events */
 
 #define LOG_ALL   (0xffff&~LOG_MALLOC&~LOG_NOTIME)
 
