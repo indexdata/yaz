@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.242 2004-05-03 09:00:29 adam Exp $
+ * $Id: client.c,v 1.243 2004-05-10 10:45:28 adam Exp $
  */
 
 #include <stdio.h>
@@ -1110,7 +1110,7 @@ static int send_deleteResultSetRequest(const char *arg)
         odr_malloc (out, sizeof(*req->deleteFunction));
     if (req->num_resultSetList > 0)
     {
-        *req->deleteFunction = Z_DeleteRequest_list;
+        *req->deleteFunction = Z_DeleteResultSetRequest_list;
         req->resultSetList = (char **)
             odr_malloc (out, sizeof(*req->resultSetList)*
                         req->num_resultSetList);
@@ -1119,7 +1119,7 @@ static int send_deleteResultSetRequest(const char *arg)
     }
     else
     {
-        *req->deleteFunction = Z_DeleteRequest_all;
+        *req->deleteFunction = Z_DeleteResultSetRequest_all;
         req->resultSetList = 0;
     }
     
@@ -2520,7 +2520,7 @@ int cmd_cancel(const char *arg)
         printf("Target doesn't support cancel (trigger resource ctrl)\n");
         return 0;
     }
-    *req->requestedAction = Z_TriggerResourceCtrl_cancel;
+    *req->requestedAction = Z_TriggerResourceControlRequest_cancel;
     req->resultSetWanted = &rfalse;
 
     send_apdu(apdu);
@@ -2688,11 +2688,11 @@ void process_sortResponse(Z_SortResponse *res)
     printf("Received SortResponse: status=");
     switch (*res->sortStatus)
     {
-    case Z_SortStatus_success:
+    case Z_SortResponse_success:
         printf ("success"); break;
-    case Z_SortStatus_partial_1:
+    case Z_SortResponse_partial_1:
         printf ("partial"); break;
-    case Z_SortStatus_failure:
+    case Z_SortResponse_failure:
         printf ("failure"); break;
     default:
         printf ("unknown (%d)", *res->sortStatus);

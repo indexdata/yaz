@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.63 2004-03-29 15:09:14 adam Exp $
+ * $Id: ztest.c,v 1.64 2004-05-10 10:46:42 adam Exp $
  */
 
 /*
@@ -422,7 +422,7 @@ int ztest_delete (void *handle, bend_delete_rr *rr)
 int ztest_sort (void *handle, bend_sort_rr *rr)
 {
     rr->errcode = 0;
-    rr->sort_status = Z_SortStatus_success;
+    rr->sort_status = Z_SortResponse_success;
     return 0;
 }
 
