@@ -44,7 +44,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.14 2003-06-24 23:03:04 adam Exp $
+ * $Id: cclptree.c,v 1.15 2003-10-16 10:18:29 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -79,8 +79,7 @@ void fprintSpaces(int indent,FILE * fd_out)
 	char buf[100];
 	sprintf(buf,"%%%d.s",indent);
 	fprintf(fd_out,buf," ");
-};
-
+}
 
 void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
 {
