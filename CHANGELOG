@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.9.1 2002/MM/DD
 
+Fix broken ESpec handling in data1 module.
+
 SGML reader parses comments and makes them part of the data1 tree.
 
 Added several type casts so that YAZ compiles as C++ code.
