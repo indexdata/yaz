@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.84  1998-11-16 16:02:32  adam
+ * Revision 1.85  1998-11-17 09:52:59  adam
+ * Fixed minor bug (introduced by previous commit).
+ *
+ * Revision 1.84  1998/11/16 16:02:32  adam
  * Added loggin utilies, log_rpn_query and log_scan_term. These used
  * to be part of Zebra.
  *
@@ -1497,7 +1500,6 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	    for (i = 0; i < req->num_databaseNames; i++)
 		logf (LOG_LOG, "Database '%s'", req->databaseNames[i]);
 	}
-	log_scan_term (req->termListAndStartPoint, attset->value);
 	srq.num_bases = req->num_databaseNames;
 	srq.basenames = req->databaseNames;
 	srq.num_entries = *req->numberOfTermsRequested;
@@ -1508,6 +1510,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	    srq.attributeset = VAL_NONE;
 	else
 	    srq.attributeset = attset->value;
+	log_scan_term (req->termListAndStartPoint, attset->value);
 	srq.term_position = req->preferredPositionInResponse ?
 	    *req->preferredPositionInResponse : 1;
 	if (!(srs = bend_scan(assoc->backend, &srq, 0)))
