@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Add support for more "commit changes" in ZOOM (uses Extended Services).
+
 For yaz-client, command set_marcdump <file> / -m <file> dumps SUTRS/XML/..
 records as well.
 
