@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.19  2002-04-04 20:49:46  adam
+ * Revision 1.20  2002-05-03 13:48:27  adam
+ * data1 cleanup
+ *
+ * Revision 1.19  2002/04/04 20:49:46  adam
  * New functions yaz_is_abspath, yaz_path_fopen_base
  *
  * Revision 1.18  2000/11/29 14:22:47  adam
@@ -180,7 +183,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 
 		if (ep)
 		    ep++;
-		if ((np = sscanf(path, "(%d,%[^)]):%[^/]", &type, valstr,
+		if ((np = sscanf(path, "(%d,%511[^)]):%511[^/]", &type, valstr,
 		    parm)) < 2)
 		{
 		    yaz_log(LOG_WARN, "%s:%d: Syntax error in map "
@@ -311,16 +314,8 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 		    {
 			if (!cur || mt->new_field || !tagmatch(cur, mt))
 			{
-			    cur = data1_mk_node_type (dh, mem, DATA1N_tag);
+			    cur = data1_mk_node (dh, mem, DATA1N_tag, pn);
 			    cur->u.tag.tag = mt->value.string;
-
-			    cur->parent = pn;
-			    cur->root = pn->root;
-			    if (!pn->child)
-				pn->child = cur;
-			    if (pn->last_child)
-				pn->last_child->next = cur;
-			    pn->last_child = cur;
 			}
 			
 			if (mt->next)
@@ -350,7 +345,7 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 data1_node *data1_map_record (data1_handle dh, data1_node *n,
 			      data1_maptab *map, NMEM m)
 {
-    data1_node *res = data1_mk_node(dh, m);
+    data1_node *res = data1_mk_node(dh, m, DATA1N_root, 0);
 
     res->which = DATA1N_root;
     res->u.root.type = map->target_absyn_name;
@@ -359,9 +354,6 @@ data1_node *data1_map_record (data1_handle dh, data1_node *n,
 	yaz_log(LOG_WARN, "%s: Failed to load target absyn '%s'",
 		map->name, map->target_absyn_name);
     }
-    res->parent = 0;
-    res->root = res;
-
     if (map_children(dh, n, map, res, m) < 0)
     {
 	data1_free_tree(dh, res);

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.150 2002-04-15 11:19:32 adam Exp $
+ * $Id: client.c,v 1.151 2002-05-03 13:48:27 adam Exp $
  */
 
 #include <stdio.h>
@@ -2645,7 +2645,7 @@ char ** readline_completer(char *text, int start, int end) {
 #if HAVE_READLINE_READLINE_H
 
     if(start == 0) {
-#ifdef RL_READLINE_VERSION
+#if HAVE_READLINE_RL_COMPLETION_MATCHES
         char** res=rl_completion_matches(text,
                                       command_generator); 
 #else
@@ -2676,7 +2676,7 @@ char ** readline_completer(char *text, int start, int end) {
         if(!cmd[i].complete_filenames) 
             rl_attempted_completion_over = 1;    
         if(cmd[i].rl_completerfunction) {
-#ifdef RL_READLINE_VERSION
+#ifdef HAVE_READLINE_RL_COMPLETION_MATCHES
             char** res=
                 rl_completion_matches(text,
                                    cmd[i].rl_completerfunction);

@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_espec.c,v 1.21 2002-04-04 20:49:46 adam Exp $
+ * $Id: d1_espec.c,v 1.22 2002-05-03 13:48:27 adam Exp $
  */
 
 #include <stdlib.h>
@@ -39,7 +39,7 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem,
 	char value[512];
 	Z_Triple *t;
 
-	if (sscanf(argv[i], "(%d,%d,%[^)])", &zclass, &type, value) < 3)
+	if (sscanf(argv[i], "(%d,%d,%511[^)])", &zclass, &type, value) < 3)
 	{
 	    yaz_log(LOG_WARN, "%s:%d: Syntax error in variant component '%s'",
 		    file, lineno, argv[i]);
@@ -150,8 +150,8 @@ static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem,
 	else
 	    u->u.wildThing = read_occurrences(0, nmem, file, lineno);
     }
-    else if ((terms = sscanf(buf, "(%d,%[^)]):%[a-zA-Z0-9+]", &type, value,
-			     occ)) >= 2)
+    else if ((terms = sscanf(buf, "(%d,%511[^)]):%511[a-zA-Z0-9+]",
+                             &type, value, occ)) >= 2)
     {
 	int numval;
 	Z_SpecificTag *t;
