@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: tpath.c,v 1.6 2002-04-04 20:49:46 adam Exp $
+ * $Id: tpath.c,v 1.7 2002-04-05 12:46:07 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -18,11 +18,16 @@
 
 FILE *yaz_path_fopen(const char *path, const char *name, const char *mode)
 {
-    return yaz_path_fopen_base (path, name, mode, 0);
+    return yaz_fopen (path, name, mode, 0);
 }
 
-FILE *yaz_path_fopen_base(const char *path, const char *name, const char *mode,
-                          const char *base)
+int yaz_fclose (FILE *f)
+{
+    fclose (f);
+}
+
+FILE *yaz_fopen(const char *path, const char *name, const char *mode,
+                const char *base)
 {
     char spath[1024];
 

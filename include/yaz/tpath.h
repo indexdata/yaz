@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: tpath.h,v 1.3 2002-04-04 20:49:46 adam Exp $
+ * $Id: tpath.h,v 1.4 2002-04-05 12:46:07 adam Exp $
  *
  */
 
@@ -34,10 +34,12 @@
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT FILE *yaz_path_fopen_base(const char *path, const char *name,
-                                     const char *mode, const char *base);
+YAZ_EXPORT FILE *yaz_fopen(const char *path, const char *name,
+                           const char *mode, const char *base);
 YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *name,
-                                const char *mode);
+                           const char *mode);
+
+YAZ_EXPORT int yaz_fclose(FILE *f);
 
 YAZ_EXPORT int yaz_is_abspath (const char *p);
 

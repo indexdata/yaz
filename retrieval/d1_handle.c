@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: d1_handle.c,v 1.7 2002-04-04 20:49:46 adam Exp $
+ * $Id: d1_handle.c,v 1.8 2002-04-05 12:46:07 adam Exp $
  */
 
 #include <stdio.h>
@@ -128,5 +128,5 @@ FILE *data1_path_fopen (data1_handle dh, const char *file, const char *mode)
 {
     const char *path = data1_get_tabpath(dh);
     const char *root = data1_get_tabroot(dh);
-    return yaz_path_fopen_base (path, file, "r", root);
+    return yaz_fopen (path, file, "r", root);
 }
