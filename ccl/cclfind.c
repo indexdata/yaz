@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.24  2001-03-22 21:23:30  adam
+ * Revision 1.25  2001-10-03 23:54:41  adam
+ * Fixes for numeric ranges (date=1980-1990).
+ *
+ * Revision 1.24  2001/03/22 21:23:30  adam
  * Directive s=pw sets structure to phrase if term includes blank(s).
  *
  * Revision 1.23  2001/03/20 11:22:58  adam
@@ -328,11 +331,13 @@ static void add_attr (struct ccl_rpn_node *p, const char *set,
  * search_term: Parse CCL search term. 
  * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
+ * term_list: tokens we accept as terms in context
+ * multi:  whether we accept "multiple" tokens
  * return: pointer to node(s); NULL on error.
  */
 static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
                                            struct ccl_rpn_attr **qa,
-                                           int *term_list)
+                                           int *term_list, int multi)
 {
     struct ccl_rpn_attr *qa_tmp[2];
     struct ccl_rpn_node *p_top = 0;
@@ -375,7 +380,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         int completeness_value = -1;
         int len = 0;
         size_t max = 200;
-        if (and_list || or_list)
+        if (and_list || or_list || !multi)
             max = 1;
 
         /* go through each TERM token. If no truncation attribute is yet
@@ -548,6 +553,8 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
                                &attset))
                 add_attr (p, attset, CCL_BIB1_TRU, 100);
         }
+        if (!multi)
+            break;
     }
     if (!p_top)
         cclp->error_code = CCL_ERR_TERM_EXPECTED;
@@ -558,7 +565,7 @@ static struct ccl_rpn_node *search_term (CCL_parser cclp,
                                          struct ccl_rpn_attr **qa)
 {
     static int list[] = {CCL_TOK_TERM, CCL_TOK_COMMA, -1};
-    return search_term_x(cclp, qa, list);
+    return search_term_x(cclp, qa, list, 0);
 }
 
 /*
@@ -670,8 +677,8 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
 
         ADVANCE;                      /* skip relation */
         if (KIND == CCL_TOK_TERM &&
-            cclp->look_token->next->len == 1 &&
-            cclp->look_token->next->name[0] == '-')
+            cclp->look_token->next && cclp->look_token->next->len == 1 &&
+	    cclp->look_token->next->name[0] == '-')
         {
             struct ccl_rpn_node *p1;
             if (!(p1 = search_term (cclp, ap)))
@@ -679,7 +686,7 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
                 free (ap);
                 return NULL;
             }
-            ADVANCE;                   /* skip '-' */
+	    ADVANCE;                   /* skip '-' */
             if (KIND == CCL_TOK_TERM)  /* = term - term  ? */
             {
                 struct ccl_rpn_node *p2;
@@ -766,7 +773,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
     static int list[] = {
         CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ, CCL_TOK_REL, -1};
     struct ccl_rpn_node *p1, *p2, *pn;
-    p1 = search_term_x (cclp, qa, list);
+    p1 = search_term_x (cclp, qa, list, 1);
     if (!p1)
         return NULL;
     while (1)
@@ -774,7 +781,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
         if (KIND == CCL_TOK_PROX)
         {
             ADVANCE;
-            p2 = search_term_x (cclp, qa, list);
+            p2 = search_term_x (cclp, qa, list, 1);
             if (!p2)
             {
                 ccl_rpn_delete (p1);
@@ -787,7 +794,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
         }
         else if (is_term_ok(KIND, list))
         {
-            p2 = search_term_x (cclp, qa, list);
+            p2 = search_term_x (cclp, qa, list, 1);
             if (!p2)
             {
                 ccl_rpn_delete (p1);

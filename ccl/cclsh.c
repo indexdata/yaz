@@ -45,7 +45,10 @@
  * Europagate 1995
  *
  * $Log: cclsh.c,v $
- * Revision 1.9  2001-05-16 07:30:16  adam
+ * Revision 1.10  2001-10-03 23:54:41  adam
+ * Fixes for numeric ranges (date=1980-1990).
+ *
+ * Revision 1.9  2001/05/16 07:30:16  adam
  * Minor cosmetic changes that makes checker gcc happier.
  *
  * Revision 1.8  2001/03/18 20:45:39  ja7
@@ -210,7 +213,19 @@ int main (int argc, char **argv)
 
         for (i = 0; i<1; i++)
         {
-	    rpn = ccl_find_str (bibset, buf, &error, &pos);
+	    CCL_parser cclp = ccl_parser_create ();
+	    struct ccl_token *list;
+	    struct ccl_rpn_node *p;
+	    
+	    cclp->bibset = bibset;
+	    
+	    list = ccl_parser_tokenize (cclp, buf);
+	    rpn = ccl_parser_find (cclp, list);
+	    
+	    error = cclp->error_code;
+	    if (error)
+		pos = cclp->error_pos - buf;
+
             if (error)
             {
                 printf ("%*s^ - ", 6+pos, " ");
@@ -224,6 +239,14 @@ int main (int argc, char **argv)
 		    printf ("\n");
 		}
             }
+	    if (debug)
+	    {
+		struct ccl_token *lp;
+		for (lp = list; lp; lp = lp->next)
+		    printf ("%d %.*s\n", lp->kind, lp->len, lp->name);
+	    }
+	    ccl_token_del (list);
+	    ccl_parser_destroy (cclp);
             if (rpn)
                 ccl_rpn_delete(rpn);
         }

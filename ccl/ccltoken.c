@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.16  2001-03-07 13:24:40  adam
+ * Revision 1.17  2001-10-03 23:54:41  adam
+ * Fixes for numeric ranges (date=1980-1990).
+ *
+ * Revision 1.16  2001/03/07 13:24:40  adam
  * Member and_not in Z_Operator is kept for backwards compatibility.
  * Added support for definition of CCL operators in field spec file.
  *
@@ -317,10 +320,13 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 		cp++;
 	    break;
 	default:
-	    while (*cp && !strchr ("(),%!><=- \t\n\r", *cp))
+	    if (!strchr ("(),%!><=- \t\n\r", cp[-1]))
 	    {
-		cp++;
-		++ last->len;
+		while (*cp && !strchr ("(),%!><=- \t\n\r", *cp))
+		{
+		    cp++;
+		    ++ last->len;
+		}
 	    }
 	    last->kind = CCL_TOK_TERM;
 
