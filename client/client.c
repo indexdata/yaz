@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.232 2004-02-19 23:37:36 adam Exp $
+ * $Id: client.c,v 1.233 2004-02-19 23:39:13 adam Exp $
  */
 
 #include <stdio.h>
@@ -97,7 +97,7 @@ static char *negotiationCharset = 0;
 static char *outputCharset = 0;
 static char *marcCharset = 0;
 static char* yazLang = 0;
-static char* http_version = "1.0";
+static char* http_version = "1.1";
 
 static char last_cmd[32] = "?";
 static FILE *marc_file = 0;
