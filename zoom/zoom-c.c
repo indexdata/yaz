@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.16 2002-01-02 10:30:25 adam Exp $
+ * $Id: zoom-c.c,v 1.17 2002-01-03 10:23:46 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -446,7 +446,6 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
 {
     ZOOM_task task;
     ZOOM_connection c;
-    const char *cp;
 
     if (!r)
 	return;
@@ -1094,6 +1093,7 @@ static int scan_response (ZOOM_connection c, Z_ScanResponse *res)
     scan->scan_response = res;
     nmem_transfer (scan->odr->mem, nmem);
     nmem_destroy (nmem);
+    return 1;
 }
 
 static int send_sort (ZOOM_connection c)
@@ -1841,7 +1841,7 @@ int ZOOM_event (int no, ZOOM_connection *cs)
 	}
 	if (r == 0 && c->mask)
 	{
-            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_IO_TIMEOUT);
+            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_TIMEOUT);
 	    /* timeout and this connection was waiting */
 	    c->error = ZOOM_ERROR_TIMEOUT;
             do_close (c);
