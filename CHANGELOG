@@ -2,6 +2,13 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+ZOOM-C now supports standard ZOOM option names as described in v1.4 of
+the ZOOM Abstract API.  The older names for the same options are still
+also supported for the benefit of old applications.
+
+ZOOM-C supports "implementationId" and "implementationVersion" options
+to go along with "implementationName".  These allow the user code to
+specify identification strings to be sent to servers.
 Add OID for the new ExtLite attribute set.
 
 Add OIDs for NACSIS-CATP, FINMARC2000 and MARC21-fin record-syntaxes,
@@ -59,10 +66,6 @@ The generic front-end server (server/seshigh.c) now supports returning
 Init diagnostics to the client in User-information-field, in
 accordance with Z35.90 Implementor Agreement 5 (Returning diagnostics
 in an InitResponse)
-
-ZOOM-C supports "implementationId" and "implementationVersion" options
-to go along with "implementationName".  These allow the user code to
-specify identification strings to be sent to servers.
 
 
 --- 2.0.4 2003/09/04
