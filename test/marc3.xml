@@ -1,5 +1,6 @@
+<!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
 <record xmlns="http://www.loc.gov/MARC21/slim">
-  <leader>00914naa a2200337   45  </leader>
+  <leader>00914naa a2200337   450 </leader>
   <datafield tag="001" ind1=" " ind2=" ">
     <subfield code="a">a00001508</subfield>
     <subfield code="f">a</subfield>
