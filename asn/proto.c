@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.40  1996-01-02 11:46:40  quinn
+ * Revision 1.41  1996-01-10 15:21:24  quinn
+ * Added links to access control PDUs
+ *
+ * Revision 1.40  1996/01/02  11:46:40  quinn
  * Changed 'operator' to 'roperator' to avoid C++ conflict.
  *
  * Revision 1.39  1995/09/29  17:11:53  quinn
@@ -1496,6 +1499,10 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
 	    z_DeleteResultSetRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 27, Z_APDU_deleteResultSetResponse,
 	    z_DeleteResultSetResponse},
+	{ODR_IMPLICIT, ODR_CONTEXT, 28, Z_APDU_accessControlRequest,
+	    z_AccessControlRequest},
+	{ODR_IMPLICIT, ODR_CONTEXT, 29, Z_APDU_accessControlResponse,
+	    z_AccessControlResponse},
     	{ODR_IMPLICIT, ODR_CONTEXT, 30, Z_APDU_resourceControlRequest,
 	    z_ResourceControlRequest},
     	{ODR_IMPLICIT, ODR_CONTEXT, 31, Z_APDU_resourceControlResponse,

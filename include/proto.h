@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.29  1996-01-02 11:46:49  quinn
+ * Revision 1.30  1996-01-10 15:21:32  quinn
+ * Added links to access control PDUs
+ *
+ * Revision 1.29  1996/01/02  11:46:49  quinn
  * Changed 'operator' to 'roperator' to avoid C++ conflict.
  * Moved to pl3
  *
@@ -1071,6 +1074,8 @@ typedef struct Z_APDU
 #define Z_APDU_extendedServicesRequest 14
 #define Z_APDU_extendedServicesResponse 15
 #define Z_APDU_close 16
+#define Z_APDU_accessControlRequest 17
+#define Z_APDU_accessControlResponse 18
     union
     {
 	Z_InitRequest  *initRequest;
@@ -1081,6 +1086,8 @@ typedef struct Z_APDU
     	Z_PresentResponse *presentResponse;
 	Z_DeleteResultSetRequest *deleteResultSetRequest;
 	Z_DeleteResultSetResponse *deleteResultSetResponse;
+	Z_AccessControlRequest *accessControlRequest;
+	Z_AccessControlResponse *accessControlResponse;
 	Z_ResourceControlRequest *resourceControlRequest;
 	Z_ResourceControlResponse *resourceControlResponse;
 	Z_TriggerResourceControlRequest *triggerResourceControlRequest;
