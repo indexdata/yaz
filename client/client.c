@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.216 2003-12-20 00:51:19 adam Exp $
+ * $Id: client.c,v 1.217 2003-12-22 19:46:22 adam Exp $
  */
 
 #include <stdio.h>
@@ -2140,7 +2140,7 @@ static int cmd_explain(const char *arg)
 #if HAVE_XML2
     if (!conn)
 	cmd_open(0);
-    if (1)
+    if (conn)
     {
 	Z_SRW_PDU *sr = 0;
 	
@@ -2168,6 +2168,8 @@ static int cmd_find(const char *arg)
 #if HAVE_XML2
         if (!conn)
             cmd_open(0);
+	if (!conn)
+	    return 0;
         if (!send_SRW_searchRequest(arg))
             return 0;
 #else
@@ -2434,6 +2436,8 @@ static int cmd_show(const char *arg)
 #if HAVE_XML2
         if (!conn)
             cmd_open(0);
+	if (!conn)
+	    return 0;
         if (!send_SRW_presentRequest(arg))
             return 0;
 #else
