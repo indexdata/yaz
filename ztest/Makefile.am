@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.16 2004-04-28 22:45:00 adam Exp $
+## $Id: Makefile.am,v 1.17 2004-05-01 23:32:21 adam Exp $
 
 bin_PROGRAMS=yaz-ztest
 
@@ -10,7 +10,7 @@ if ISTHR
 extra=../src/libyazthread.la
 endif
 
-yaz_ztest_LDADD=$(extra) ../src/libyaz.la $(SSL_LIBS) $(LIBTHREAD)
+yaz_ztest_LDADD=$(extra) ../src/libyaz.la $(LIBTHREAD)
 
 AM_CFLAGS=@CFLAGSTHREADS@
 

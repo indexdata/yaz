@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.13 2004-04-28 22:45:00 adam Exp $
+## $Id: Makefile.am,v 1.14 2004-05-01 23:32:20 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
@@ -6,7 +6,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 EXTRA_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8
 bin_PROGRAMS = zoomsh 
 
-LDADD = ../src/libyaz.la $(READLINE_LIBS) $(SSL_LIBS)
+LDADD = ../src/libyaz.la $(READLINE_LIBS)
 
 zoomtst1_SOURCES = zoomtst1.c
 zoomtst2_SOURCES = zoomtst2.c

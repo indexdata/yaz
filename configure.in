@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.138 2004-04-30 19:34:05 adam Exp $
+dnl $Id: configure.in,v 1.139 2004-05-01 23:32:20 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.19)
 AM_MAINTAINER_MODE
@@ -35,17 +35,11 @@ dnl
 dnl ------ OpenSSL
 openssl=no
 AC_ARG_WITH(openssl, [  --with-openssl[=PREFIX] OpenSSL library in PREFIX], [openssl=$withval])
-AC_SUBST(SSL_CFLAGS)
-AC_SUBST(SSL_LIBS)
-AC_SUBST(SSL_DEFS)
 USE_SSL=0
 SSL_CFLAGS=""
 SSL_LIBS=""
-SSL_DEFS=""
 if test "$openssl" != "no"; then
 	sslver=no
-	xLIBS="$LIBS";
-	xCFLAGS="$CFLAGS";
 	if test "$openssl" != "yes"; then
 		if $openssl/bin/pkg-config --exists openssl; then
 			SSL_CFLAGS=`$openssl/bin/pkg-config --cflags openssl`
@@ -54,8 +48,6 @@ if test "$openssl" != "no"; then
 		else
                 	SSL_CFLAGS="-I$openssl/include -I$openssl/include/openssl"
                 	SSL_LIBS="-L$openssl/lib"
-			CFLAGS="$SSL_CFLAGS $CFLAGS"
-			LIBS="$SSL_LIBS $LIBS"
 		fi
 	else
 		if $pkgconfig --exists openssl; then
@@ -65,6 +57,10 @@ if test "$openssl" != "no"; then
 		fi	
 	fi
 	if test "$sslver" = "no"; then
+		xLIBS="$LIBS";
+		xCFLAGS="$CFLAGS";
+		CFLAGS="$CFLAGS $SSL_CFLAGS"
+		LIBS="$SSL_LIBS $LIBS"
 		AC_CHECK_LIB(crypto, main,[SSL_LIBS="$SSL_LIBS -lcrypto"])
         	LIBS="$LIBS $SSL_LIBS"
 		AC_CHECK_LIB(ssl, SSL_new)
@@ -74,15 +70,16 @@ if test "$openssl" != "no"; then
 		if test "$sslver" = "yes"; then
 			SSL_LIBS="-lssl $SSL_LIBS"
 		fi
+		LIBS="$xLIBS"
+		CFLAGS="$xCFLAGS"
 	fi
 	if test "$sslver" != "no"; then
-		SSL_DEFS="-DHAVE_OPENSSL_SSL_H=1"
+		LIBS="$SSL_LIBS $LIBS"
+		CFLAGS="$CFLAGS -DHAVE_OPENSSL_SSL_H=1 $SSL_CFLAGS"
 		USE_SSL=1
 	fi
 	AC_MSG_CHECKING([for SSL])
 	AC_MSG_RESULT($sslver)
-	LIBS="$xLIBS"
-	CFLAGS="$xCFLAGS"
 fi
 dnl
 dnl ------ GNU Readline
