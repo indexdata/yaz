@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.145 2002-02-24 12:24:40 adam Exp $
+ * $Id: client.c,v 1.146 2002-03-06 01:22:41 adam Exp $
  */
 
 #include <stdio.h>
@@ -308,17 +308,16 @@ static int cmd_base(char *arg)
     return 1;
 }
 
-
 int cmd_open(char *arg)
 {
     void *add;
     char type_and_host[101], base[101];
     CS_TYPE t;
-
+    
     if (conn)
     {
         printf("Already connected.\n");
-
+        
         cs_close (conn);
         conn = NULL;
         if (session_mem)
@@ -331,30 +330,30 @@ int cmd_open(char *arg)
     base[0] = '\0';
     if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
         return 0;
-
+    
     if(yazProxy) 
-    conn = cs_create_host(yazProxy, 1, &add);
+        conn = cs_create_host(yazProxy, 1, &add);
     else 
-    conn = cs_create_host(type_and_host, 1, &add);
+        conn = cs_create_host(type_and_host, 1, &add);
     
     if (!conn)
     {
-    printf ("Couldn't create comstack\n");
-    return 0;
+        printf ("Couldn't create comstack\n");
+        return 0;
     }
     printf("Connecting...");
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
     {
-    printf ("error = %s\n", cs_strerror(conn));
-    if (conn->cerrno == CSYSERR)
-        perror("system");
+        printf ("error = %s\n", cs_strerror(conn));
+        if (conn->cerrno == CSYSERR)
+            perror("system");
         cs_close(conn);
         conn = 0;
         return 0;
     }
     printf("Ok.\n");
-
+    
     send_initRequest(type_and_host);
     if (*base)
         cmd_base (base);
@@ -449,7 +448,7 @@ static void display_grs1(Z_GenericRecord *r, int level)
         {
             int *ip = t->content->u.oid;
             oident *oent;
-
+            
             if ((oent = oid_getentbyoid(t->content->u.oid)))
                 printf("OID: %s\n", oent->desc);
             else
@@ -491,7 +490,7 @@ static void print_record(const unsigned char *buf, size_t len)
     print_stringn (buf, len);
     /* add newline if not already added ... */
     if (i <= 0 || buf[i-1] != '\n')
-       printf ("\n");
+        printf ("\n");
 }
 
 static void display_record(Z_External *r)
@@ -620,7 +619,6 @@ static void display_record(Z_External *r)
         }
     }
 }
-
 
 static void display_diagrecs(Z_DiagRec **pp, int num)
 {
@@ -842,7 +840,7 @@ static int process_searchResponse(Z_SearchResponse *res)
     if (setnumber >= 0)
         printf (", setno %d", setnumber);
     printf("\nrecords returned: %d\n",
-        *res->numberOfRecordsReturned);
+           *res->numberOfRecordsReturned);
     setno += *res->numberOfRecordsReturned;
     if (res->records)
         display_records(res->records);
@@ -908,18 +906,18 @@ static void print_string_or_numeric(int iLevel, const char *pTag, Z_StringOrNume
     {
         switch (pStringNumeric->which)
         {
-            case Z_StringOrNumeric_string:
-                print_string(iLevel, pTag, pStringNumeric->u.string);
-                break;
-
-            case Z_StringOrNumeric_numeric:
-                print_int(iLevel, pTag, pStringNumeric->u.numeric);
-                break;
-
-            default:
-                print_level(iLevel);
-                printf("%s: valid type for Z_StringOrNumeric\n", pTag);
-                break;
+        case Z_StringOrNumeric_string:
+            print_string(iLevel, pTag, pStringNumeric->u.string);
+            break;
+            
+        case Z_StringOrNumeric_numeric:
+            print_int(iLevel, pTag, pStringNumeric->u.numeric);
+            break;
+            
+        default:
+            print_level(iLevel);
+            printf("%s: valid type for Z_StringOrNumeric\n", pTag);
+            break;
         }
     }
 }
@@ -931,18 +929,22 @@ static void print_universe_report_duplicate(int iLevel, Z_UniverseReportDuplicat
         print_level(iLevel);
         printf("Universe Report Duplicate: \n");
         iLevel++;
-        print_string_or_numeric(iLevel, "Hit No", pUniverseReportDuplicate->hitno);
+        print_string_or_numeric(iLevel, "Hit No",
+                                pUniverseReportDuplicate->hitno);
     }
 }
 
-static void print_universe_report_hits(int iLevel, Z_UniverseReportHits *pUniverseReportHits)
+static void
+print_universe_report_hits(int iLevel,
+                           Z_UniverseReportHits *pUniverseReportHits)
 {
     if (pUniverseReportHits != NULL)
     {
         print_level(iLevel);
         printf("Universe Report Hits: \n");
         iLevel++;
-        print_string_or_numeric(iLevel, "Database", pUniverseReportHits->database);
+        print_string_or_numeric(iLevel, "Database",
+                                pUniverseReportHits->database);
         print_string_or_numeric(iLevel, "Hits", pUniverseReportHits->hits);
     }
 }
@@ -957,18 +959,18 @@ static void print_universe_report(int iLevel, Z_UniverseReport *pUniverseReport)
         print_int(iLevel, "Total Hits", pUniverseReport->totalHits);
         switch (pUniverseReport->which)
         {
-            case Z_UniverseReport_databaseHits:
-                print_universe_report_hits(iLevel, pUniverseReport->u.databaseHits);
-                break;
-
-            case Z_UniverseReport_duplicate:
-                print_universe_report_duplicate(iLevel, pUniverseReport->u.duplicate);
-                break;
-
-            default:
-                print_level(iLevel);
-                printf("Type: %d\n", pUniverseReport->which);
-                break;
+        case Z_UniverseReport_databaseHits:
+            print_universe_report_hits(iLevel, pUniverseReport->u.databaseHits);
+            break;
+            
+        case Z_UniverseReport_duplicate:
+            print_universe_report_duplicate(iLevel, pUniverseReport->u.duplicate);
+            break;
+            
+        default:
+            print_level(iLevel);
+            printf("Type: %d\n", pUniverseReport->which);
+            break;
         }
     }
 }
@@ -985,14 +987,14 @@ static void print_external(int iLevel, Z_External *pExternal)
         print_string(iLevel, "Descriptor", pExternal->descriptor);
         switch (pExternal->which)
         {
-            case Z_External_universeReport:
-                print_universe_report(iLevel, pExternal->u.universeReport);
-                break;
-
-            default:
-                print_level(iLevel);
-                printf("Type: %d\n", pExternal->which);
-                break;
+        case Z_External_universeReport:
+            print_universe_report(iLevel, pExternal->u.universeReport);
+            break;
+            
+        default:
+            print_level(iLevel);
+            printf("Type: %d\n", pExternal->which);
+            break;
         }
     }
 }
@@ -1091,7 +1093,7 @@ static Z_External *create_external_itemRequest()
     ctl.odr = out;
     ctl.clientData = 0;
     ctl.f = get_ill_element;
-
+    
     req = ill_get_ItemRequest(&ctl, "ill", 0);
     if (!req)
         printf ("ill_get_ItemRequest failed\n");
@@ -1302,7 +1304,7 @@ static int cmd_update(char *arg)
     oident update_oid;
     printf ("Update request\n");
     fflush(stdout);
-
+    
     if (!record_last)
         return 0;
     update_oid.proto = PROTO_Z3950;
@@ -1350,19 +1352,18 @@ static int cmd_update(char *arg)
     return 2;
 }
 
-/* II : Added to do DALI Item Order Extended services request */
 static int cmd_itemorder(char *arg)
 {
     char type[12];
     int itemno;
-
+    
     if (sscanf (arg, "%10s %d", type, &itemno) != 2)
         return 0;
 
     printf("Item order request\n");
     fflush(stdout);
     send_itemorder(type, itemno);
-    return(2);
+    return 2;
 }
 
 static int cmd_find(char *arg)
@@ -1472,13 +1473,6 @@ static int send_presentRequest(char *arg)
         sprintf(setstring, "%d", setnumber);
         req->resultSetId = setstring;
     }
-#if 0
-    if (1)
-    {
-        static Z_Range range;
-        static Z_Range *rangep = &range;
-    req->num_ranges = 1;
-#endif
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
     prefsyn.proto = protocol;
@@ -1540,6 +1534,18 @@ static int send_presentRequest(char *arg)
     printf("Sent presentRequest (%d+%d).\n", setno, nos);
     return 2;
 }
+    
+static void close_session (void)
+{
+    cs_close (conn);
+    conn = 0;
+    if (session_mem)
+    {
+        nmem_destroy (session_mem);
+        session_mem = NULL;
+    }
+    sent_close = 0;
+}
 
 void process_close(Z_Close *req)
 {
@@ -1563,16 +1569,7 @@ void process_close(Z_Close *req)
     printf("Reason: %s, message: %s\n", reasons[*req->closeReason],
         req->diagnosticInformation ? req->diagnosticInformation : "NULL");
     if (sent_close)
-    {
-        cs_close (conn);
-        conn = NULL;
-        if (session_mem)
-        {
-            nmem_destroy (session_mem);
-            session_mem = NULL;
-        }
-        sent_close = 0;
-    }
+        close_session ();
     else
     {
         *res->closeReason = Z_Close_finished;
@@ -2310,13 +2307,15 @@ void wait_and_handle_responce()
         {
             if ((res = cs_get(conn, &netbuffer, &netbufferlen)) < 0)
             {
-                perror("cs_get");
-                exit(1);
+                printf("Target closed connection\n");
+                close_session ();
+                break;
             }
             if (!res)
             {
                 printf("Target closed connection.\n");
-                exit(1);
+                close_session ();
+                break;
             }
             odr_reset(in); /* release APDU from last round */
             record_last = 0;
@@ -2330,7 +2329,8 @@ void wait_and_handle_responce()
                 fprintf(stderr, "---------\n");
                 if (apdu_file)
                     z_APDU(print, &apdu, 0, 0);
-                exit(1);
+                close_session ();
+                break;
             }
             if (apdu_file && !z_APDU(print, &apdu, 0, 0))
             {
@@ -2382,7 +2382,7 @@ void wait_and_handle_responce()
             default:
                 printf("Received unknown APDU type (%d).\n", 
                        apdu->which);
-                exit(1);
+                close_session ();
             }
         }
         while (conn && cs_more(conn));
@@ -2403,6 +2403,8 @@ void wait_and_handle_responce()
     xfree (netbuffer);
 }
 
+
+static int cmd_help (char *line);
 
 static struct {
     char *cmd;
@@ -2455,8 +2457,49 @@ static struct {
     {"adm-commit", cmd_adm_commit, "",NULL,0},
     {"adm-shutdown", cmd_adm_shutdown, "",NULL,0},
     {"adm-startup", cmd_adm_startup, "",NULL,0},
+    {"help", cmd_help, "", NULL},
     {0,0,0,0,0}
 };
+
+static int cmd_help (char *line)
+{
+    int i;
+    char topic[21];
+    
+    *topic = 0;
+    sscanf (line, "%20s", topic);
+
+    if (*topic == 0)
+        printf("Commands:\n");
+    for (i = 0; cmd[i].cmd; i++)
+        if (*topic == 0 || strcmp (topic, cmd[i].cmd) == 0)
+            printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
+    if (strcmp (topic, "find") == 0)
+    {
+        printf ("RPN:\n");
+        printf (" \"term\"                        Simple Term\n");
+        printf (" @attr [attset] type=value op  Attribute\n");
+        printf (" @and opl opr                  And\n");
+        printf (" @or opl opr                   Or\n");
+        printf (" @not opl opr                  And-Not\n");
+        printf (" @set set                      Result set\n");
+        printf ("\n");
+        printf ("Bib-1 attribute types\n");
+        printf ("1=Use:         ");
+        printf ("4=Title 7=ISBN 8=ISSN 30=Date 62=Abstract 1003=Author 1016=Any\n");
+        printf ("2=Relation:    ");
+        printf ("1<   2<=  3=  4>=  5>  6!=  102=Relevance\n");
+        printf ("3=Position:    ");
+        printf ("1=First in Field  2=First in subfield  3=Any position\n");
+        printf ("4=Structure:   ");
+        printf ("1=Phrase  2=Word  3=Key  4=Year  5=Date  6=WordList\n");
+        printf ("5=Truncation:  ");
+        printf ("1=Right  2=Left  3=L&R  100=No  101=#  102=Re-1  103=Re-2\n");
+        printf ("6=Completeness:");
+        printf ("1=Incomplete subfield  2=Complete subfield  3=Complete field\n");
+    }
+    return 1;
+}
 
 void process_cmd_line(char* line)
 {  
@@ -2498,13 +2541,12 @@ void process_cmd_line(char* line)
             res = (*cmd[i].fun)(arg);
             break;
         }
+
     if (!cmd[i].cmd) /* dump our help-screen */
     {
         printf("Unknown command: %s.\n", word);
-        printf("Currently recognized commands:\n");
-        for (i = 0; cmd[i].cmd; i++)
-            printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
-        return;
+        cmd_help ("");
+
     }
 
     if(apdu_file) fflush(apdu_file);
@@ -2724,8 +2766,6 @@ int main(int argc, char **argv)
     client ();
     exit (0);
 }
-
-
 
 
 /*
