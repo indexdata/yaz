@@ -1,7 +1,7 @@
-<!-- $Id: frontend.xml,v 1.13 2002-08-17 07:55:51 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.14 2002-09-16 14:16:31 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
-
+   
    <para>
     If you aren't into documentation, a good way to learn how the
     back end interface works is to look at the <filename>backend.h</filename>
@@ -52,7 +52,8 @@
     The backend API consists of a small number of function handlers and
     structure definitions. You are required to provide the
     <function>main()</function> routine for the server (which can be
-    quite simple), as well as a set of handlers to match each of the prototypes.
+    quite simple), as well as a set of handlers to match each of the
+    prototypes.
     The interface functions that you write can use any mechanism you like
     to communicate with your database system: You might link the whole
     thing together with your database application and access it by
@@ -397,7 +398,8 @@ typedef struct bend_initresult
      The members <literal>peer_name</literal>,
      <literal>implementation_id</literal>,
      <literal>implementation_name</literal> and
-     <literal>implementation_version</literal> holds DNS of client, ID of implementor, name
+     <literal>implementation_version</literal> holds
+     DNS of client, ID of implementor, name
      of client (Z39.50) implementation - and version.
     </para>
 
@@ -678,132 +680,28 @@ typedef struct bend_scan_rr {
     The finished application has the following
     invocation syntax (by way of <function>statserv_main()</function>):
    </para>
-
-   <synopsis>
-    <replaceable>appname</replaceable> &lsqb;-szSiT1 -u <replaceable>uid</replaceable> -a <replaceable>apdufile</replaceable> -l <replaceable>logfile</replaceable> -v <replaceable>loglevel</replaceable> -c <replaceable>config</replaceable>&rsqb;
-    &lsqb;listener ...&rsqb;
-   </synopsis>
-
+   
+   <cmdsynopsis>
+    <command>appname</command>
+    <arg choice="opt"><option>-a <replaceable>file</replaceable></option></arg>
+    <arg choice="opt"><option>-v <replaceable>level</replaceable></option></arg>
+    <arg choice="opt"><option>-l <replaceable>file</replaceable></option></arg>
+    <arg choice="opt"><option>-u <replaceable>uid</replaceable></option></arg>
+    <arg choice="opt"><option>-c <replaceable>config</replaceable></option></arg>
+    <arg choice="opt"><option>-t <replaceable>minutes</replaceable></option></arg>
+    <sbr/>
+    <arg choice="opt"><option>-k <replaceable>kilobytes</replaceable></option></arg>
+    <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>
+    <arg choice="opt"><option>-ziST1</option></arg>
+    <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
+    <arg choice="opt" rep="repeat">listener-spec</arg>
+   </cmdsynopsis>
+   
    <para>
-    The options are
+    The options are:
 
-    <variablelist>
+    &ztest-options;
 
-     <varlistentry><term><literal>-a </literal>
-       <replaceable>apdufile</replaceable></term>
-      <listitem><para>
-	Specify a file for dumping PDUs (for diagnostic purposes).
-	The special name &quot;-&quot; sends output to
-	<literal>stderr</literal>.
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-S</literal></term>
-      <listitem><para>
-	Don't fork or make threads on connection requests. This is good for
-	debugging, but not recommended for real operation: Although the
-	server is asynchronous and non-blocking, it can be nice to keep
-	a software malfunction (okay then, a crash) from affecting all
-	current users.
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-1</literal></term>
-      <listitem><para>
-        Like <literal>-S</literal> but after one session the server
-        exits. This mode is for debugging <emphasis>only</emphasis>.
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term><literal>-T</literal></term>
-      <listitem><para>
-	Operate the server in threaded mode. The server creates a thread
-	for each connection rather than a fork a process. Only available
-	on UNIX systems that offers POSIX threads.
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-s</literal></term>
-      <listitem><para>
-	Use the SR protocol (obsolete).
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-z</literal></term>
-      <listitem><para>
-	Use the Z39.50 protocol (default). These two options complement
-	each other. You can use both multiple times on the same command
-	line, between listener-specifications (see below). This way, you
-	can set up the server to listen for connections in both protocols
-	concurrently, on different local ports.
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-l </literal>
-       <replaceable>file</replaceable></term>
-      <listitem><para>The logfile.
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-c </literal>
-       <replaceable>config</replaceable></term>
-      <listitem><para>A user option that serves as a specifier for some
-	sort of configuration, e.g. a filename.
-	The argument to this option is transferred to member
-	<literal>configname</literal>of the
-	<literal>statserv_options_block</literal>.
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-v </literal>
-       <replaceable>level</replaceable></term>
-      <listitem><para>
-	The log level. Use a comma-separated list of members of the set
-	{fatal,debug,warn,log,malloc,all,none}.
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-u </literal>
-       <replaceable>uid</replaceable></term>
-      <listitem><para>
-	Set user ID. Sets the real UID of the server process to that of the
-	given user. It's useful if you aren't comfortable with having the
-	server run as root, but you need to start it as such to bind a
-	privileged port.
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-w </literal>
-       <replaceable>dir</replaceable></term>
-      <listitem><para>
-	The server changes to this directory during before listening 
-        on incoming connections. This option is useful
-        when the server is operating from the <application>inetd</application>
-         daemon (see <literal>-i</literal>).
-       </para></listitem></varlistentry>
-
-     <varlistentry><term><literal>-i</literal></term>
-      <listitem><para>
-	Use this to make the the server run from the
-        <application>inetd</application> server (UNIX only).
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term><literal>-install</literal></term>
-      <listitem><para>
-	Use this to install the server as an NT service
-        (Windows 2000/NT only). 
-        Control the server by going to the Services in the Control Panel.
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term><literal>-remove</literal></term>
-      <listitem><para>
-	Use this to remove the server from the NT services
-        (Windows 2000/NT only). 
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term><literal>-t </literal>
-       <replaceable>minutes</replaceable></term>
-      <listitem><para>
-	Idle session timeout, in minutes.
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term><literal>-k </literal>
-       <replaceable>size</replaceable></term>
-      <listitem><para>
-	Maximum record size/message size, in kilobytes.
-       </para></listitem></varlistentry>
-     
-    </variablelist>
    </para>
    
    <para>
@@ -826,7 +724,7 @@ typedef struct bend_scan_rr {
    </para>
 
    <para>
-    For UNIX local socket the address is the name local file.
+    For UNIX, the address is the filename of socket.
    </para>
    
    <para>
@@ -849,7 +747,7 @@ typedef struct bend_scan_rr {
 
   </sect1>
  </chapter>
-
+ 
  <!-- Keep this comment at the end of the file
  Local variables:
  mode: sgml

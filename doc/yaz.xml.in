@@ -17,12 +17,14 @@
      <!ENTITY app-license SYSTEM "license.xml">
      <!ENTITY app-indexdata SYSTEM "indexdata.xml">
      <!ENTITY app-credits SYSTEM "credits.xml">
+     <!ENTITY ztest-options SYSTEM "ztest-options.xml">
+     <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
      <!ENTITY asn "Z39.50 ASN.1">
      <!ENTITY odr "<acronym>ODR</acronym>">
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml.in,v 1.4 2002-05-02 10:35:44 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.5 2002-09-16 14:16:31 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>

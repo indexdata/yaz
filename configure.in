@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.87 2002-09-11 21:25:56 adam Exp $
+dnl $Id: configure.in,v 1.88 2002-09-16 14:16:31 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.1)
 dnl
@@ -183,7 +183,7 @@ else
 #include <unistd.h>
 #include <sys/socket.h>
 ],
-	[getpeername(0, (struct sockaddr *)NULL, (size_t *)0);],
+	[size_t mylen; getpeername(0, (struct sockaddr *)NULL, &mylen);],
 	ac_cv_check_getpeername_accepts_size_t=yes,
 	ac_cv_check_getpeername_accepts_size_t=no)])
 	AC_MSG_RESULT($ac_cv_check_getpeername_accepts_size_t)

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.31 2002-06-02 18:50:40 adam Exp $
+## $Id: Makefile.am,v 1.32 2002-09-16 14:16:31 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -6,7 +6,8 @@ XMLFILES=$(srcdir)/yaz.xml.in $(srcdir)/introduction.xml \
  $(srcdir)/installation.xml $(srcdir)/indexdata.xml $(srcdir)/asn.xml \
  $(srcdir)/tools.xml $(srcdir)/odr.xml $(srcdir)/comstack.xml \
  $(srcdir)/frontend.xml $(srcdir)/license.xml $(srcdir)/future.xml  \
- $(srcdir)/client.xml $(srcdir)/zoom.xml $(srcdir)/credits.xml
+ $(srcdir)/client.xml $(srcdir)/zoom.xml $(srcdir)/credits.xml \
+ $(srcdir)/ztest-options.xml $(srcdir)/yaz-client-commands.xml
 
 HTMLFILES = asn.external.html asn.html asn.oid.html asn.pdu.html \
  asn.preparing.html client.commands.html client.html client.invoking.html \
@@ -25,12 +26,34 @@ HTMLFILES = asn.external.html asn.html asn.oid.html asn.pdu.html \
  zoom.scan.html
 
 DOCFILES=$(HTMLFILES) yaz.pdf
+MANFILES=yaz-client.1 yaz-client-ssl.1 yaz-ztest.8 \
+	yaz-ztest-ssl.8 yaz-config.1 yaz.7
+REFFILES=yaz-client.sgml yaz-ztest.sgml yaz-config.sgml yaz-man.sgml
 
 SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl xml.dcl id.eps id.png
 
-EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(DOCFILES)
+EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(DOCFILES) $(MANFILES) $(REFFILES)
 
 doc_DATA = $(DOCFILES)
+man_MANS = $(MANFILES)
+
+yaz-client.1: yaz-client.sgml
+	cd $(srcdir); docbook2man yaz-client.sgml
+
+yaz-ztest.8: yaz-ztest.sgml
+	cd $(srcdir); docbook2man yaz-ztest.sgml
+
+yaz-config.1: yaz-config.sgml
+	cd $(srcdir); docbook2man yaz-config.sgml
+
+yaz.7: yaz-man.sgml
+	cd $(srcdir); docbook2man yaz-man.sgml
+
+yaz-ztest-ssl.8: yaz-ztest.8
+	ln -s yaz-ztest.8 yaz-ztest-ssl.8
+
+yaz-client-ssl.1: yaz-client.1
+	ln -s yaz-client.1 yaz-client-ssl.1
 
 $(HTMLFILES): $(XMLFILES) 
 	cd $(srcdir); jade -E14 -d yazhtml.dsl -t sgml xml.dcl yaz.xml
