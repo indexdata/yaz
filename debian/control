@@ -2,7 +2,7 @@ Source: yaz
 Standards-Version: 3.5.9.0
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,libxml2-dev, libssl-dev
+Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,libxml2-dev, libssl-dev, libwrap0-dev
 
 Package: yaz
 Section: utils
@@ -37,7 +37,7 @@ Description: The YAZ Z39.50 toolkit (documentation)
  This packages includes documentation for YAZ in HTML and PDF.
 
 Package: libyaz-dev
-Depends: libyaz, libxml2-dev
+Depends: libyaz, libxml2-dev, libwrap0-dev
 Replaces: yaz-devel
 Conflicts: yaz-devel
 Section: devel
