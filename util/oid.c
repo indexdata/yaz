@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.67 2003-09-02 12:12:13 adam Exp $
+ * $Id: oid.c,v 1.68 2003-09-11 12:30:59 mike Exp $
  */
 
 /*
@@ -93,10 +93,9 @@ static oident standard_oids[] =
      "Bib-2"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_ZEEREX,       {3,19,-1},
      "ZeeRex"},
-#if 0  /* This is the spawn of Satan.  Use Zthes-1 instead */
-    {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS,    {3,1000,81,1,-1},     
+    /* New applications should use Zthes-1 instead of this Satan-spawn */
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS,    {3,1000,81,1,-1},
      "Thesaurus-attset"},
-#endif /*0*/
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_IDXPATH,      {3,1000,81,2,-1},
      "IDXPATH"},
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_BIB1,         {4,1,-1},
