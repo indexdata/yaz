@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.12 2003-05-24 19:20:14 adam Exp $
+ * $Id: odr.h,v 1.13 2003-10-16 10:37:06 adam Exp $
  */
 
 #ifndef ODR_H
@@ -187,7 +187,7 @@ YAZ_EXPORT int odr_geterrorx(ODR o, int *x);
 YAZ_EXPORT void odr_seterror(ODR o, int errorno, int errorid);
 YAZ_EXPORT void odr_setelement(ODR o, const char *addinfo);
 YAZ_EXPORT char *odr_getelement(ODR o);
-YAZ_EXPORT void odr_perror(ODR o, char *message);
+YAZ_EXPORT void odr_perror(ODR o, const char *message);
 YAZ_EXPORT void odr_setprint(ODR o, FILE *file);
 YAZ_EXPORT ODR odr_createmem(int direction);
 YAZ_EXPORT void odr_reset(ODR o);

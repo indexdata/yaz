@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Change prototype of odr_perror: add const to message string.
+
 New function yaz_log_reopen which reopens log file (for log rotate, etc.)
 
 * Blocking parameter for COMSTACK cs_create is now a bit mask rather

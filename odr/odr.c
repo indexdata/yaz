@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.45 2003-06-19 21:09:25 adam Exp $
+ * $Id: odr.c,v 1.46 2003-10-16 10:37:06 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -44,7 +44,7 @@ char *odr_errmsg(int n)
     return odr_errlist[n];
 }
 
-void odr_perror(ODR o, char *message)
+void odr_perror(ODR o, const char *message)
 {
     const char *e = odr_getelement(o);
     int err, x;
