@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.6  1995-06-15 15:45:03  quinn
+ * Revision 1.7  1995-06-19 12:40:18  quinn
+ * Added log_file()
+ *
+ * Revision 1.6  1995/06/15  15:45:03  quinn
  * Added date info.
  *
  * Revision 1.5  1995/05/16  08:51:11  quinn
@@ -52,13 +55,13 @@
  *
  */
 
-#include <log.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <time.h>
+#include <log.h>
 
 static int l_level = LOG_DEFAULT_LEVEL;
 static FILE *l_file = stderr;
@@ -88,6 +91,11 @@ char *strerror(int n)
 }
 
 #endif
+
+FILE *log_file(void)
+{
+    return l_file;
+}
 
 void log_init(int level, const char *prefix, const char *name)
 {
