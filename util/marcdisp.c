@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.18 2002-02-28 13:21:16 adam Exp $
+ * $Id: marcdisp.c,v 1.19 2002-03-18 18:11:45 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -56,9 +56,28 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
     length_starting = atoi_n (buf+21, 1);
     length_implementation = atoi_n (buf+22, 1);
 
+    if (xml)
+    {
+        char str[40];
+        int i;
+        wrbuf_puts (wr, "<iso2709\n");
+        sprintf (str, " RecordStatus=\"%c\"\n", buf[5]);
+        wrbuf_puts (wr, str);
+        sprintf (str, " TypeOfRecord=\"%c\"\n", buf[6]);
+        wrbuf_puts (wr, str);
+        for (i = 1; i<=19; i++)
+        {
+            sprintf (str, " ImplDefined%d=\"%c\"\n", i, buf[6+i]);
+            wrbuf_puts (wr, str);
+        }
+        wrbuf_puts (wr, ">\n");
+    }
     if (debug)
     {
 	char str[40];
+
+        if (xml)
+            wrbuf_puts (wr, "<!--\n");
 	sprintf (str, "Record length         %5d\n", record_length);
 	wrbuf_puts (wr, str);
 	sprintf (str, "Indicator length      %5d\n", indicator_length);
@@ -73,7 +92,10 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 	wrbuf_puts (wr, str);
 	sprintf (str, "Length implementation %5d\n", length_implementation);
 	wrbuf_puts (wr, str);
+        if (xml)
+            wrbuf_puts (wr, "-->\n");
     }
+
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
     {
         entry_p += 3+length_data_entry+length_starting;
@@ -95,7 +117,7 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         tag[3] = '\0';
         if (xml)
         {
-            wrbuf_puts (wr, "<field name=\"");
+            wrbuf_puts (wr, "<field tag=\"");
             wrbuf_puts (wr, tag);
             wrbuf_puts (wr, "\"");
         }
@@ -123,14 +145,14 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         
         if (identifier_flag)
 	{
-            if (debug)
+            if (debug && !xml)
                 wrbuf_puts (wr, " Ind: ");
             for (j = 0; j<indicator_length; j++, i++)
             {
                 if (xml)
                 {
                     char nostr[30];
-                    sprintf (nostr, " indicator%d=\"%c\"", j+1, buf[i]);
+                    sprintf (nostr, " Indicator%d=\"%c\"", j+1, buf[i]);
                     wrbuf_puts (wr, nostr);
                 }
                 else
@@ -145,7 +167,7 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         }
         else
         {
-            if (debug)
+            if (debug && !xml)
                 wrbuf_puts (wr, " Fields: ");
         }
 	while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
@@ -155,7 +177,7 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 	        i++;
                 if (xml)
                 {
-                    wrbuf_puts (wr, "  <field name=\"");
+                    wrbuf_puts (wr, "  <subfield code=\"");
                     for (j = 1; j<identifier_length; j++, i++)
                         wrbuf_putc (wr, buf[i]);
                     wrbuf_puts (wr, "\">");
@@ -174,7 +196,7 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 		    i++;
 		}
                 if (xml)
-                    wrbuf_puts (wr, "</field>\n");
+                    wrbuf_puts (wr, "</subfield>\n");
 	    }
 	    else
 	    {
@@ -191,6 +213,8 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         if (xml)
             wrbuf_puts (wr, "</field>\n");
     }
+    if (xml)
+        wrbuf_puts (wr, "</iso2709>\n");
     wrbuf_puts (wr, "");
     return record_length;
 }

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.14 2002-02-28 14:28:40 adam Exp $
+ * $Id: marcdump.c,v 1.15 2002-03-18 18:11:45 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -26,7 +26,12 @@
 #ifndef SEEK_END
 #define SEEK_END 2
 #endif
- 
+
+static void usage(const char *prog)
+{
+    fprintf (stderr, "Usage: %s [-c cfile] [-x] [-v] file...\n", prog);
+} 
+
 int main (int argc, char **argv)
 {
     int r;
@@ -112,7 +117,7 @@ int main (int argc, char **argv)
 	    verbose++;
             break;
         default:
-            fprintf (stderr, "Usage: %s [-c cfile] [-v] file...\n", prog);
+            usage(prog);
             exit (1);
         }
     }
@@ -120,7 +125,7 @@ int main (int argc, char **argv)
 	fclose (cfile);
     if (!no)
     {
-	fprintf (stderr, "Usage: %s [-v] file...\n", prog);
+        usage(prog);
 	exit (1);
     }
     exit (0);
