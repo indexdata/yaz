@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.9 2002-03-18 12:22:00 adam Exp $
+## $Id: Makefile.am,v 1.10 2002-03-18 21:33:48 adam Exp $
 
 
 if ISSSL
@@ -7,8 +7,8 @@ endif
 
 bin_PROGRAMS=yaz-ztest $(sslbin)
 
-yaz_ztest_SOURCES=ztest.c read-grs.c
-yaz_ztest_ssl_SOURCES=ztest.c read-grs.c
+yaz_ztest_SOURCES=ztest.c read-grs.c read-marc.c
+yaz_ztest_ssl_SOURCES=$(yaz_ztest_SOURCES)
 
 EXTRA_DIST=dummy-records dummy-words dummy-grs
 

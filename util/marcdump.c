@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.15 2002-03-18 18:11:45 adam Exp $
+ * $Id: marcdump.c,v 1.16 2002-03-18 21:33:48 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -95,7 +95,7 @@ int main (int argc, char **argv)
 		    int i;
 		    if (count)
 			fprintf (cfile, ",");
-		    fprintf (cfile, "{\n");
+		    fprintf (cfile, "\n");
 		    for (i = 0; i < r; i++)
 		    {
 			if ((i & 15) == 0)
@@ -106,7 +106,7 @@ int main (int argc, char **argv)
 			    fprintf (cfile, "\"\n");
 			
 			}
-		    fprintf (cfile, "\"\n}");
+		    fprintf (cfile, "\"\n");
 		}
 		count++;
 	    }

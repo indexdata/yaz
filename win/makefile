@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.35 2002-03-16 10:26:57 adam Exp $
+# $Id: makefile,v 1.36 2002-03-18 21:33:48 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -239,6 +239,7 @@ YAZ_SERVER_OBJS= \
 	"$(OBJDIR)\tcpdchk.obj" 
 
 ZTEST_OBJS= \
+	"$(OBJDIR)\read-marc.obj" \
 	"$(OBJDIR)\read-grs.obj" \
 	"$(OBJDIR)\ztest.obj" 
 
@@ -841,7 +842,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.35  2002-03-16 10:26:57  adam
+# Revision 1.36  2002-03-18 21:33:48  adam
+# MARC records embedded in C code for test server
+#
+# Revision 1.35  2002/03/16 10:26:57  adam
 # Added NSIS rules (nmake nsis).
 #
 # Revision 1.34  2002/02/12 15:59:12  adam

@@ -1,37 +1,12 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Log: read-grs.c,v $
- * Revision 1.6  2001-03-25 21:55:13  adam
- * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
- *
- * Revision 1.5  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.4  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.3  1999/03/31 11:18:25  adam
- * Implemented odr_strdup. Added Reference ID to backend server API.
- *
- * Revision 1.2  1998/02/11 11:53:36  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.1  1997/09/01 08:55:53  adam
- * New windows NT/95 port using MSV5.0. Test server ztest now in
- * separate directory. When using NT, this test server may operate
- * as an NT service. Note that the service.[ch] should be part of
- * generic, but it isn't yet.
- *
- * Revision 1.1  1995/08/17 12:45:23  quinn
- * Fixed minor problems with GRS-1. Added support in c&s.
- *
- *
+ * $Id: read-grs.c,v 1.7 2002-03-18 21:33:48 adam Exp $
  */
 
 /*
- * Little toy-thing to read a GRS-1 record from a file.
+ * Little toy-thing to read a GRS-1 records from a file.
  */
 
 #include <stdio.h>
@@ -43,7 +18,7 @@
 
 #define GRS_MAX_FIELDS 50
 
-Z_GenericRecord *read_grs1(FILE *f, ODR o)
+static Z_GenericRecord *read_grs1(FILE *f, ODR o)
 {
     char line[512], *buf;
     int type, ivalue;
@@ -120,3 +95,23 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	r->num_elements++;
     }
 }
+
+Z_GenericRecord *dummy_grs_record (int num, ODR o)
+{
+    FILE *f = fopen("dummy-grs", "r");
+    char line[512];
+    Z_GenericRecord *r = 0;
+    int n;
+
+    if (!f)
+	return 0;
+    while (fgets(line, 512, f))
+	if (*line == '#' && sscanf(line, "#%d", &n) == 1 && n == num)
+	{
+	    r = read_grs1(f, o);
+	    break;
+	}
+    fclose(f);
+    return r;
+}
+

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.51 2002-01-28 09:26:14 adam Exp $
+ * $Id: ztest.c,v 1.52 2002-03-18 21:33:48 adam Exp $
  */
 
 /*
@@ -20,7 +20,9 @@
 #include <yaz/ill.h>
 #endif
 
-Z_GenericRecord *read_grs1(FILE *f, ODR o);
+Z_GenericRecord *dummy_grs_record (int num, ODR o);
+char *dummy_marc_record (int num, ODR odr);
+char *dummy_xml_record (int num, ODR odr);
 
 int ztest_search (void *handle, bend_search_rr *rr);
 int ztest_sort (void *handle, bend_sort_rr *rr);
@@ -41,15 +43,12 @@ int ztest_search (void *handle, bend_search_rr *rr)
         rr->errstring = rr->basenames[0];
         return 0;
     }
-    rr->hits = rand() % 22;
+    rr->hits = rand() % 24;
     return 0;
 }
 
-int ztest_present (void *handle, bend_present_rr *rr)
-{
-    return 0;
-}
 
+/* this huge function handles extended services */
 int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 {
     /* user-defined handle - created in bend_init */
@@ -401,6 +400,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     return 0;
 }
 
+/* result set delete */
 int ztest_delete (void *handle, bend_delete_rr *rr)
 {
     if (rr->num_setnames == 1 && !strcmp (rr->setnames[0], "1"))
@@ -418,87 +418,14 @@ int ztest_sort (void *handle, bend_sort_rr *rr)
     return 0;
 }
 
-static int atoin (const char *buf, int n)
+
+/* present request handler */
+int ztest_present (void *handle, bend_present_rr *rr)
 {
-    int val = 0;
-    while (--n >= 0)
-    {
-        if (isdigit(*buf))
-            val = val*10 + (*buf - '0');
-        buf++;
-    }
-    return val;
+    return 0;
 }
 
-char *marc_read(FILE *inf, ODR odr)
-{
-    char length_str[5];
-    size_t size;
-    char *buf;
-
-    if (fread (length_str, 1, 5, inf) != 5)
-        return NULL;
-    size = atoin (length_str, 5);
-    if (size <= 6)
-        return NULL;
-    if (!(buf = (char*) odr_malloc (odr, size+1)))
-        return NULL;
-    if (fread (buf+5, 1, size-5, inf) != (size-5))
-    {
-        xfree (buf);
-        return NULL;
-    }
-    memcpy (buf, length_str, 5);
-    buf[size] = '\0';
-    return buf;
-}
-
-static char *dummy_database_record (int num, ODR odr)
-{
-    FILE *inf = fopen ("dummy-records", "r");
-    char *buf = 0;
-
-    if (!inf)
-	return NULL;
-    if (num == 98) 
-    {   /* this will generate a very bad MARC record (testing only) */
-        buf = (char*) odr_malloc(odr, 2101);
-        memset(buf, '7', 2100);
-        buf[2100] = '\0';
-    }
-    else
-    {
-        /* OK, try to get proper MARC records from the file */
-        while (--num >= 0)
-        {
-            buf = marc_read (inf, odr);
-            if (!buf)
-                break;
-        }
-    }
-    fclose(inf);
-    return buf;
-}
-
-static Z_GenericRecord *dummy_grs_record (int num, ODR o)
-{
-    FILE *f = fopen("dummy-grs", "r");
-    char line[512];
-    Z_GenericRecord *r = 0;
-    int n;
-
-    if (!f)
-	return 0;
-    while (fgets(line, 512, f))
-	if (*line == '#' && sscanf(line, "#%d", &n) == 1 && n == num)
-	{
-	    r = read_grs1(f, o);
-	    break;
-	}
-    fclose(f);
-    return r;
-}
-
+/* retrieval of a single record (present, and piggy back search) */
 int ztest_fetch(void *handle, bend_fetch_rr *r)
 {
     char *cp;
@@ -508,21 +435,14 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     r->output_format = r->request_format;  
     if (r->request_format == VAL_SUTRS)
     {
-#if 0
-/* this section returns a huge record (for testing non-blocking write, etc) */
-	r->len = 980000;
-	r->record = odr_malloc (r->stream, r->len);
-	memset (r->record, 'x', r->len);
-#else
-/* this section returns a small record */
+        /* this section returns a small record */
     	char buf[100];
-
+        
 	sprintf(buf, "This is dummy SUTRS record number %d\n", r->number);
 
 	r->len = strlen(buf);
 	r->record = (char *) odr_malloc (r->stream, r->len+1);
 	strcpy(r->record, buf);
-#endif
     }
     else if (r->request_format == VAL_GRS1)
     {
@@ -561,7 +481,14 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         fread (r->record, size, 1, f);
         fclose (f);
     }
-    else if ((cp = dummy_database_record(r->number, r->stream)))
+    else if (r->request_format == VAL_TEXT_XML &&
+             (cp = dummy_xml_record (r->number, r->stream)))
+    {
+        r->len = strlen(cp);
+        r->record = cp;
+        r->output_format = VAL_TEXT_XML;
+    }
+    else if ((cp = dummy_marc_record(r->number, r->stream)))
     {
 	r->len = strlen(cp);
 	r->record = cp;
