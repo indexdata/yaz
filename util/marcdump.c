@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.10  2000-02-29 13:44:55  adam
+ * Revision 1.11  2000-07-04 08:53:22  adam
+ * Fixed bug.
+ *
+ * Revision 1.10  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.9  1999/11/30 13:47:12  adam
@@ -62,7 +65,7 @@ int main (int argc, char **argv)
     int verbose = 0;
     FILE *inf;
     long file_size;
-    char *buf;
+    char *buf, *p;
     char *prog = *argv;
     int count = 0;
     int no = 0;
@@ -106,9 +109,9 @@ int main (int argc, char **argv)
 			 prog, arg, strerror (errno));
 		exit (1);
 	    }
-	    while ((ret = marc_display_ex (buf, stdout, verbose)) > 0)
+	    for (p = buf; (ret = marc_display_ex (p, stdout, verbose)) > 0;)
 	    {
-		buf += ret;
+		p += ret;
 		count++;
 	    }
 	    fclose (inf);
