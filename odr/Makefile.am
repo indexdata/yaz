@@ -1,6 +1,4 @@
-# Copyright (C) 1995-2000 Index Data
-# All rights reserved.
-# $Id: Makefile.am,v 1.1 2000-02-28 11:20:06 adam Exp $
+## $Id: Makefile.am,v 1.2 2000-02-28 11:46:25 adam Exp $
 
 noinst_LIBRARIES = libodr.a
 
