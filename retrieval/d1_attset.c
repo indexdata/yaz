@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.6  1997-09-05 09:50:56  adam
+ * Revision 1.7  1997-09-17 12:10:34  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.6  1997/09/05 09:50:56  adam
  * Removed global data1_tabpath - uses data1_get_tabpath() instead.
  *
  * Revision 1.5  1996/05/09 07:27:43  quinn
@@ -30,13 +33,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <xmalloc.h>
 #include <log.h>
 #include <d1_attset.h>
 #include <data1.h>
 #include <tpath.h>
 
-data1_att *data1_getattbyname(data1_attset *s, char *name)
+data1_att *data1_getattbyname(data1_handle dh, data1_attset *s, char *name)
 {
     data1_att *r;
 
@@ -47,27 +49,27 @@ data1_att *data1_getattbyname(data1_attset *s, char *name)
 	    if (!data1_matchstr(r->name, name))
 		return r;
 	/* scan included sets */
-	if (s->children && (r = data1_getattbyname(s->children, name)))
+	if (s->children && (r = data1_getattbyname (dh, s->children, name)))
 	    return r;
     }
     return 0;
 }
 
-data1_attset *data1_read_attset(char *file)
+data1_attset *data1_read_attset(data1_handle dh, char *file)
 {
     char line[512], *r, cmd[512], args[512];
     data1_attset *res = 0, **childp;
     data1_att **attp;
     FILE *f;
+    NMEM mem = data1_nmem_get (dh);
 
-    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
 
-    if (!(res = xmalloc(sizeof(*res))))
-	abort();
+    res = nmem_malloc(mem, sizeof(*res));
     res->name = 0;
     res->reference = VAL_NONE;
     res->ordinal = -1;
@@ -108,7 +110,7 @@ data1_attset *data1_read_attset(char *file)
 	    }
 	    if (rr < 3) /* no local attributes given */
 	    {
-		locals = xmalloc(sizeof(*locals));
+		locals = nmem_malloc(mem, sizeof(*locals));
 		locals->local = num;
 		locals->next = 0;
 	    }
@@ -118,19 +120,16 @@ data1_attset *data1_read_attset(char *file)
 		data1_local_attribute **ap = &locals;
 		do
 		{
-		    *ap = xmalloc(sizeof(**ap));
+		    *ap = nmem_malloc(mem, sizeof(**ap));
 		    (*ap)->local = atoi(p);
 		    (*ap)->next = 0;
 		    ap = &(*ap)->next;
 		}
 		while ((p = strchr(p, ',')) && *(++p));
 	    }
-	    if (!(t = *attp = xmalloc(sizeof(*t))))
-		abort();
+	    t = *attp = nmem_malloc(mem, sizeof(*t));
 	    t->parent = res;
-	    if (!(t->name = xmalloc(strlen(name)+1)))
-		abort();
-	    strcpy(t->name, name);
+	    t->name = nmem_strdup(mem, name);
 	    t->value = num;
 	    t->locals = locals;
 	    t->next = 0;
@@ -146,9 +145,7 @@ data1_attset *data1_read_attset(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(res->name = xmalloc(strlen(args)+1)))
-		abort();
-	    strcpy(res->name, name);
+	    res->name = nmem_strdup(mem, args);
 	}
 	else if (!strcmp(cmd, "reference"))
 	{
@@ -186,7 +183,7 @@ data1_attset *data1_read_attset(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(*childp = data1_read_attset(name)))
+	    if (!(*childp = data1_read_attset (dh, name)))
 	    {
 		logf(LOG_WARN, "Inclusion failed in %s", file);
 		fclose(f);

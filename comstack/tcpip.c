@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.16  1997-09-01 08:49:14  adam
+ * Revision 1.17  1997-09-17 12:10:30  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.16  1997/09/01 08:49:14  adam
  * New windows NT/95 port using MSV5.0. Minor changes only.
  *
  * Revision 1.15  1997/05/14 06:53:33  adam
@@ -140,6 +143,7 @@ int tcpip_bind(COMSTACK h, void *address, int mode);
 int tcpip_listen(COMSTACK h, char *addrp, int *addrlen);
 COMSTACK tcpip_accept(COMSTACK h);
 char *tcpip_addrstr(COMSTACK h);
+void *tcpip_straddr(COMSTACK h, const char *str);
 
 /*
  * Determine length/completeness of incoming packages
@@ -162,6 +166,8 @@ typedef struct tcpip_state
     int written;  /* -1 if we aren't writing */
     int towrite;  /* to verify against user input */
     int (*complete)(unsigned char *buf, int len); /* length/completeness */
+    struct sockaddr_in addr;  /* returned by cs_straddr */
+    char buf[128]; /* returned by cs_addrstr */
 } tcpip_state;
 
 #ifdef WINDOWS
@@ -243,6 +249,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     p->f_listen = tcpip_listen;
     p->f_accept = tcpip_accept;
     p->f_addrstr = tcpip_addrstr;
+    p->f_straddr = tcpip_straddr;
 
     p->state = new_socket ? CS_UNBND : CS_IDLE; /* state of line */
     p->event = CS_NONE;
@@ -263,9 +270,8 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     return p;
 }
 
-struct sockaddr_in *tcpip_strtoaddr(const char *str)
+static int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add)
 {
-    static struct sockaddr_in add;
     struct hostent *hp;
     char *p, buf[512];
     short int port = 210;
@@ -274,29 +280,48 @@ struct sockaddr_in *tcpip_strtoaddr(const char *str)
     if (!tcpip_init ())
         return 0;
     TRC(fprintf(stderr, "tcpip_strtoaddress: %s\n", str ? str : "NULL"));
-    add.sin_family = AF_INET;
+    add->sin_family = AF_INET;
     strcpy(buf, str);
     if ((p = strchr(buf, ':')))
     {
         *p = 0;
         port = atoi(p + 1);
     }
-    add.sin_port = htons(port);
+    add->sin_port = htons(port);
     if (!strcmp("@", buf))
-        add.sin_addr.s_addr = INADDR_ANY;
+        add->sin_addr.s_addr = INADDR_ANY;
     else if ((hp = gethostbyname(buf)))
-        memcpy(&add.sin_addr.s_addr, *hp->h_addr_list, sizeof(struct in_addr));
+        memcpy(&add->sin_addr.s_addr, *hp->h_addr_list,
+	       sizeof(struct in_addr));
     else if ((tmpadd = (unsigned) inet_addr(buf)) != 0)
-        memcpy(&add.sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
+        memcpy(&add->sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
     else
         return 0;
+    return 1;
+}
+
+void *tcpip_straddr(COMSTACK h, const char *str)
+{
+    tcpip_state *sp = h->cprivate;
+
+    if (!tcpip_strtoaddr_ex (str, &sp->addr))
+	return 0;
+    return &sp->addr;
+}
+
+struct sockaddr_in *tcpip_strtoaddr(const char *str)
+{
+    static struct sockaddr_in add;
+    
+    if (!tcpip_strtoaddr_ex (str, &add))
+	return 0;
     return &add;
 }
 
 int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = h->cprivate;
-
+    
     return sp->altlen && (*sp->complete)((unsigned char *) sp->altbuf,
 	sp->altlen);
 }
@@ -576,11 +601,11 @@ int tcpip_close(COMSTACK h)
 char *tcpip_addrstr(COMSTACK h)
 {
     struct sockaddr_in addr;
-    static char buf[64];
-    char *r;
+    tcpip_state *sp = h->cprivate;
+    char *r, *buf = sp->buf;
     int len;
     struct hostent *host;
-
+    
     len = sizeof(addr);
     if (getpeername(h->iofile, (struct sockaddr*) &addr, &len) < 0)
     {
@@ -588,7 +613,7 @@ char *tcpip_addrstr(COMSTACK h)
 	return 0;
     }
     if ((host = gethostbyaddr((char*)&addr.sin_addr, sizeof(addr.sin_addr),
-	AF_INET)))
+			      AF_INET)))
 	r = (char*) host->h_name;
     else
 	r = inet_ntoa(addr.sin_addr);

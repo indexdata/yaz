@@ -1,11 +1,13 @@
-
 /*
- * Copyright (c) 1995-1996, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.49  1997-09-04 13:45:17  adam
+ * Revision 1.50  1997-09-17 12:10:29  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.49  1997/09/04 13:45:17  adam
  * Added UNImarc to list of available syntaxes.
  *
  * Revision 1.48  1997/09/01 08:48:44  adam
@@ -315,38 +317,33 @@ int cmd_open(char *arg)
         fprintf(stderr, "Usage: open (osi|tcp) ':' [tsel '/']host[':'port]\n");
         return 0;
     }
+    if (!strcmp(type, "tcp"))
+    {
+	t = tcpip_type;
+	protocol = PROTO_Z3950;
+    }
+    else
 #ifdef USE_XTIMOSI
     if (!strcmp(type, "osi"))
     {
-        if (!(add = mosi_strtoaddr(addr)))
-        {
-            perror(arg);
-            return 0;
-        }
         t = mosi_type;
         protocol = PROTO_SR;
     }
     else
 #endif
-    if (!strcmp(type, "tcp"))
     {
-        if (!(add = tcpip_strtoaddr(addr)))
-        {
-            perror(arg);
-            return 0;
-        }
-        t = tcpip_type;
-        protocol = PROTO_Z3950;
-    }
-    else
-    {
-        fprintf(stderr, "Bad type: %s\n", type);
-        return 0;
+	fprintf(stderr, "Bad type: %s\n", type);
+	return 0;
     }
     if (!(conn = cs_create(t, 1, protocol)))
     {
         perror("cs_create");
         return 0;
+    }
+    if (!(add = cs_straddr(conn, addr)))
+    {
+	perror(arg);
+	return 0;
     }
     printf("Connecting...");
     fflush(stdout);

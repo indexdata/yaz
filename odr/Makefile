@@ -1,19 +1,20 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.25 1996-08-12 14:09:54 adam Exp $
+# $Id: Makefile,v 1.26 1997-09-17 12:10:33 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
-DEFS=$(INCLUDE) # -DODR_DEBUG
+DEFS=$(INCLUDE) $(CDEFS) # -DODR_DEBUG
 LIB=$(LIBDIR)/libodr.a
 LIBS=-lodr
 PO = odr_bool.o ber_bool.o ber_len.o ber_tag.o odr_util.o odr_null.o \
 	ber_null.o odr_int.o ber_int.o odr_tag.o odr_cons.o odr_seq.o\
 	odr_oct.o ber_oct.o odr_bit.o ber_bit.o odr_oid.o ber_oid.o odr_use.o \
-	odr_choice.o odr_any.o ber_any.o odr.o odr_mem.o dumpber.o
+	odr_choice.o odr_any.o ber_any.o odr.o odr_mem.o dumpber.o \
+	odr_unicode.o
 CPP=$(CC) -E
 RANLIB=ranlib
 
@@ -46,7 +47,7 @@ depend1:
 	mv -f Makefile.tmp Makefile
 
 depend2:
-	$(CPP) $(INCLUDE) -M *.c >.depend	
+	$(CPP) $(DEFS) -M *.c >.depend	
 
 ifeq (.depend,$(wildcard .depend))
 include .depend

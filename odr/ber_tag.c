@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.15  1997-09-01 08:51:06  adam
+ * Revision 1.16  1997-09-17 12:10:33  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.15  1997/09/01 08:51:06  adam
  * New windows NT/95 port using MSV5.0. Had to avoid a few static
  * variables used in function ber_tag. These are now part of the
  * ODR structure.
@@ -66,13 +69,9 @@
  *      else leave pointer unchanged. Return 0.
  *
  * Should perhaps be odr_tag?
-*/
+ */
 int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
 {
-#if 0
-    static int lclass = -1, ltag, br, lcons; /* save t&c rather than
-						decoding twice */
-#endif
     Odr_ber_tag *odr_ber_tag = &o->odr_ber_tag;
     int rd;
     char **pp = p;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -22,6 +22,10 @@
  * NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
+ *
+ * $Log: wrbuf.h,v $
+ * Revision 1.5  1997-09-17 12:10:32  adam
+ * YAZ version 1.4.
  *
  */
 

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1996, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.12  1997-09-01 08:54:13  adam
+ * Revision 1.13  1997-09-17 12:10:42  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.12  1997/09/01 08:54:13  adam
  * New windows NT/95 port using MSV5.0. Made prefix query handling
  * thread safe. The function options ignores empty arguments when met.
  *
@@ -64,6 +67,7 @@ struct lex_info {
     char *left_sep;
     char *right_sep;
     int escape_char;
+    int term_type;
 };
 
 static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o, oid_proto, 
@@ -79,6 +83,15 @@ static int query_oid_getvalbyname (struct lex_info *li)
     memcpy (buf, li->lex_buf, li->lex_len);
     buf[li->lex_len] = '\0';
     return oid_getvalbyname (buf);
+}
+
+static int compare_term (struct lex_info *li, const char *src, int off)
+{
+    size_t len=strlen(src);
+
+    if (li->lex_len == len && !memcmp (li->lex_buf+off, src, len-off))
+	return 1;
+    return 0;
 }
 
 static int query_token (struct lex_info *li)
@@ -116,20 +129,22 @@ static int query_token (struct lex_info *li)
     }
     if (li->lex_len >= 1 && li->lex_buf[0] == li->escape_char)
     {
-        if (li->lex_len == 4 && !memcmp (li->lex_buf+1, "and", 3))
-            return 'a';
-        if (li->lex_len == 3 && !memcmp (li->lex_buf+1, "or", 2))
+	if (compare_term (li, "and", 1))
+	    return 'a';
+        if (compare_term (li, "or", 1))
             return 'o';
-        if (li->lex_len == 4 && !memcmp (li->lex_buf+1, "not", 3))
+        if (compare_term (li, "not", 1))
             return 'n';
-        if (li->lex_len == 5 && !memcmp (li->lex_buf+1, "attr", 4))
+        if (compare_term (li, "attr", 1))
             return 'l';
-        if (li->lex_len == 4 && !memcmp (li->lex_buf+1, "set", 3))
+        if (compare_term (li, "set", 1))
             return 's';
-        if (li->lex_len == 8 && !memcmp (li->lex_buf+1, "attrset", 7))
+        if (compare_term (li, "attrset", 1))
             return 'r';
-        if (li->lex_len == 5 && !memcmp (li->lex_buf+1, "prox", 4))
+        if (compare_term (li, "prox", 1))
             return 'p';
+        if (compare_term (li, "term", 1))
+            return 'y';
     }
     return 't';
 }
@@ -386,6 +401,26 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
         return
             rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
                            attr_set);
+    case 'y':
+	lex (li);
+	if (!li->query_look)
+	    return NULL;
+	if (compare_term (li, "general", 0))
+	    li->term_type = Z_Term_general;
+	else if (compare_term (li, "numeric", 0))
+	    li->term_type = Z_Term_numeric;
+	else if (compare_term (li, "string", 0))
+	    li->term_type = Z_Term_characterString;
+	else if (compare_term (li, "oid", 0))
+	    li->term_type = Z_Term_oid;
+	else if (compare_term (li, "datetime", 0))
+	    li->term_type = Z_Term_dateTime;
+	else if (compare_term (li, "null", 0))
+	    li->term_type = Z_Term_null;
+	lex (li);
+        return
+            rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
+                           attr_set);
     case 0:                /* operator/operand expected! */
         return NULL;
     }
@@ -436,6 +471,7 @@ Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto,
     li.left_sep = "{\"";
     li.right_sep = "}\"";
     li.escape_char = '@';
+    li.term_type = Z_Term_general;
     li.query_buf = qbuf;
     return p_query_rpn_mk (o, &li, proto, qbuf);
 }
@@ -514,6 +550,7 @@ Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
     li.left_sep = "{\"";
     li.right_sep = "}\"";
     li.escape_char = '@';
+    li.term_type = Z_Term_general;
     li.query_buf = qbuf;
 
     return p_query_scan_mk (&li, o, proto, attributeSetP, qbuf);

@@ -58,7 +58,6 @@ YAZ_EXPORT Odr_oid *odr_getoidbystr(ODR o, char *str);
 YAZ_EXPORT int odr_initmember(ODR o, void *p, int size);
 YAZ_EXPORT int odr_peektag(ODR o, int *zclass, int *tag, int *cons);
 YAZ_EXPORT void odr_setlenlen(ODR o, int len);
-
 #ifdef __cplusplus
 }
 #endif

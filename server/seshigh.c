@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.66  1997-09-05 15:26:44  adam
+ * Revision 1.67  1997-09-17 12:10:40  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.66  1997/09/05 15:26:44  adam
  * Added ODR encode in search and scen bend request structures.
  * Fixed a few enums that caused trouble with C++.
  *
@@ -670,6 +673,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     if (req->implementationVersion)
     	logf(LOG_LOG, "Version:   %s", req->implementationVersion);
 
+    binitreq.stream = assoc->encode;
     binitreq.configname = "default-config";
     binitreq.auth = req->idAuthentication;
     if (!(binitres = bend_init(&binitreq)))

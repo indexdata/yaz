@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.2  1995-12-14 16:28:30  quinn
+ * Revision 1.3  1997-09-17 12:10:36  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.2  1995/12/14 16:28:30  quinn
  * More explain stuff.
  *
  * Revision 1.1  1995/12/14  11:09:51  quinn
@@ -181,14 +184,15 @@ static Z_TargetInfo *f_targetInfo(data1_node *n, int select, ODR o)
 {
     Z_TargetInfo *res = odr_malloc(o, sizeof(*res));
     data1_node *c;
-    static bool_t fl = 0;
+    bool_t *fl = odr_malloc(o,sizeof(*fl));
 
+    *fl = 0;
     res->commonInfo = 0;
     res->name = 0;
     res->recentNews = 0;
     res->icon = 0;
-    res->namedResultSets = &fl;
-    res->multipleDbSearch = &fl;
+    res->namedResultSets = fl;
+    res->multipleDbSearch = fl;
     res->maxResultSets = 0;
     res->maxResultSize = 0;
     res->maxTerms = 0;
@@ -249,16 +253,19 @@ static Z_DatabaseInfo *f_databaseInfo(data1_node *n, int select, ODR o)
 {
     Z_DatabaseInfo *res = odr_malloc(o, sizeof(*res));
     data1_node *c;
-    static bool_t fl = 0, tr = 1;
+    bool_t *fl = odr_malloc(o,sizeof(*fl));
+    bool_t *tr = odr_malloc(o,sizeof(*tr));
 
+    *fl = 0;
+    *tr = 1;
     res->commonInfo = 0;
     res->name = 0;
     res->explainDatabase = 0;
     res->num_nicknames = 0;
     res->nicknames = 0;
     res->icon = 0;
-    res->userFee = &fl;
-    res->available = &tr;
+    res->userFee = fl;
+    res->available = tr;
     res->titleString = 0;
     res->num_keywords = 0;
     res->keywords = 0;
@@ -334,7 +341,8 @@ static Z_DatabaseInfo *f_databaseInfo(data1_node *n, int select, ODR o)
     return res;
 }
 
-Z_ExplainRecord *data1_nodetoexplain(data1_node *n, int select, ODR o)
+Z_ExplainRecord *data1_nodetoexplain (data1_handle dh, data1_node *n,
+				      int select, ODR o)
 {
     Z_ExplainRecord *res = odr_malloc(o, sizeof(*res));
 

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.15  1997-09-05 09:50:57  adam
+ * Revision 1.16  1997-09-17 12:10:37  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.15  1997/09/05 09:50:57  adam
  * Removed global data1_tabpath - uses data1_get_tabpath() instead.
  *
  * Revision 1.14  1997/05/14 06:54:04  adam
@@ -104,33 +107,11 @@
 #include <log.h>
 #include <data1.h>
 
-static char *data1_tabpath = 0; /* global path for tables */
-
-void data1_set_tabpath(const char *p)
-{
-    if (data1_tabpath)
-    {
-        xfree (data1_tabpath);
-        data1_tabpath = NULL;
-    }
-    if (p)
-    {
-        data1_tabpath = xmalloc (strlen(p)+1);
-        strcpy (data1_tabpath, p);
-    }
-}
-
-const char *data1_get_tabpath (void)
-{
-    return data1_tabpath;
-}
-
-
 /*
  * get the tag which is the immediate parent of this node (this may mean
  * traversing intermediate things like variants and stuff.
  */
-data1_node *get_parent_tag(data1_node *n)
+data1_node *get_parent_tag (data1_handle dh, data1_node *n)
 {
     for (; n && n->which != DATA1N_root; n = n->parent)
 	if (n->which == DATA1N_tag)
@@ -138,7 +119,7 @@ data1_node *get_parent_tag(data1_node *n)
     return 0;
 }
 
-data1_node *data1_mk_node(NMEM m)
+data1_node *data1_mk_node (data1_handle dh, NMEM m)
 {
     data1_node *r;
 
@@ -149,14 +130,14 @@ data1_node *data1_mk_node(NMEM m)
     return r;
 }
 
-void data1_free_tree(data1_node *t)
+void data1_free_tree (data1_handle dh, data1_node *t)
 {
     data1_node *p = t->child, *pn;
 
     while (p)
     {
 	pn = p->next;
-	data1_free_tree(p);
+	data1_free_tree (dh, p);
 	p = pn;
     }
     if (t->destroy)
@@ -168,10 +149,11 @@ void data1_free_tree(data1_node *t)
  * which should be root or tag itself). Returns pointer to the data node,
  * which can then be modified.
  */
-data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
-    char *tagname, NMEM m)
+data1_node *data1_insert_taggeddata(data1_handle dh, data1_node *root,
+				    data1_node *at,
+				    char *tagname, NMEM m)
 {
-    data1_node *tagn = data1_mk_node(m);
+    data1_node *tagn = data1_mk_node (dh, m);
     data1_node *datn;
 
     tagn->which = DATA1N_tag;
@@ -181,10 +163,11 @@ data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
     tagn->u.tag.make_variantlist = 0;
     tagn->u.tag.no_data_requested = 0;
     tagn->u.tag.get_bytes = -1;
-    if (!(tagn->u.tag.element = data1_getelementbytagname(root->u.root.absyn,
-	0, tagname)))
+    if (!(tagn->u.tag.element = data1_getelementbytagname (dh,
+							   root->u.root.absyn,
+							   0, tagname)))
 	return 0;
-    tagn->child = datn = data1_mk_node(m);
+    tagn->child = datn = data1_mk_node (dh, m);
     tagn->num_children = 1;
     datn->parent = tagn;
     datn->root = root;
@@ -201,8 +184,9 @@ data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
  * Ugh. Sometimes functions just grow and grow on you. This one reads a
  * 'node' and its children.
  */
-data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
-    data1_absyn *absyn, NMEM m)
+data1_node *data1_read_node (data1_handle dh, char **buf,
+			     data1_node *parent, int *line,
+			     data1_absyn *absyn, NMEM m)
 {
     data1_node *res;
 
@@ -271,13 +255,13 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 
 	if (!absyn) /* parent node - what are we? */
 	{
-	    if (!(absyn = data1_get_absyn(tag)))
+	    if (!(absyn = data1_get_absyn (dh, tag)))
 	    {
 		logf(LOG_WARN, "Unable to acquire abstract syntax for '%s'",
 		    tag);
 		return 0;
 	    }
-	    res = data1_mk_node(m);
+	    res = data1_mk_node (dh, m);
 	    res->which = DATA1N_root;
 	    res->u.root.type = tag;
 	    res->u.root.absyn = absyn;
@@ -296,7 +280,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 		logf(LOG_WARN, "Malformed variant triple at '%s'", tag);
 		return 0;
 	    }
-	    if (!(tp = data1_getvartypebyct(parent->root->u.root.absyn->varset,
+	    if (!(tp = data1_getvartypebyct(dh, parent->root->u.root.absyn->varset,
 		tclass, type)))
 		return 0;
 	    
@@ -306,7 +290,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	     */
 	    if (parent->which != DATA1N_variant)
 	    {
-		res = data1_mk_node(m);
+		res = data1_mk_node (dh, m);
 		res->which = DATA1N_variant;
 		res->u.variant.type = 0;
 		res->u.variant.value = 0;
@@ -329,7 +313,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 			return 0;
 		    }
 
-		res =  data1_mk_node(m);
+		res =  data1_mk_node (dh, m);
 		res->which = DATA1N_variant;
 		res->root = parent->root;
 		res->u.variant.type = tp;
@@ -339,7 +323,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	}
 	else /* tag.. acquire our element in the abstract syntax */
 	{
-	    data1_node *partag = get_parent_tag(parent);
+	    data1_node *partag = get_parent_tag (dh, parent);
 	    data1_element *e = 0;
 	    int localtag = 0;
 
@@ -362,9 +346,9 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 		return 0;
 	    }
 #else
-	    elem = data1_getelementbytagname(absyn, e, tag);
+	    elem = data1_getelementbytagname(dh, absyn, e, tag);
 #endif
-	    res = data1_mk_node(m);
+	    res = data1_mk_node (dh, m);
 	    res->which = DATA1N_tag;
 	    res->u.tag.element = elem;
 	    res->u.tag.tag = tag;
@@ -383,7 +367,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	/*
 	 * Read child nodes.
 	 */
-	while ((*pp = data1_read_node(buf, res, line, absyn, m)))
+	while ((*pp = data1_read_node(dh, buf, res, line, absyn, m)))
 	{
 	    res->last_child = *pp;
 	    res->num_children++;
@@ -415,7 +399,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	}
 	while (isspace(data[len-1]))
 	    len--;
-	res = data1_mk_node(m);
+	res = data1_mk_node(dh, m);
 	res->parent = parent;
 	res->which = DATA1N_data;
 	res->u.data.what = DATA1I_text;
@@ -430,28 +414,29 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 /*
  * Read a record in the native syntax.
  */
-data1_node *data1_read_record(int (*rf)(void *, char *, size_t), void *fh,
+data1_node *data1_read_record(data1_handle dh,
+			      int (*rf)(void *, char *, size_t), void *fh,
                               NMEM m)
 {
-    static char *buf = 0;
+    int *size;
+    char **buf = data1_get_read_buf (dh, &size);
     char *bp;
-    static int size;
     int rd = 0, res;
     int line = 0;
-
-    if (!buf && !(buf = xmalloc(size = 4096)))
-	abort();
-
+    
+    if (!*buf)
+	*buf = xmalloc(*size = 4096);
+    
     for (;;)
     {
-	if (rd + 4096 > size && !(buf =xrealloc(buf, size *= 2)))
+	if (rd + 4096 > *size && !(*buf =xrealloc(*buf, *size *= 2)))
 	    abort();
-	if ((res = (*rf)(fh, buf + rd, 4096)) <= 0)
+	if ((res = (*rf)(fh, *buf + rd, 4096)) <= 0)
 	{
 	    if (!res)
 	    {
-		bp = buf;
-		return data1_read_node(&bp, 0, &line, 0, m);
+		bp = *buf;
+		return data1_read_node(dh, &bp, 0, &line, 0, m);
 	    }
 	    else
 		return 0;

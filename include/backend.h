@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,6 +23,10 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
+ * $Log: backend.h,v $
+ * Revision 1.16  1997-09-17 12:10:31  adam
+ * YAZ version 1.4.
+ *
  */
 
 #ifndef BACKEND_H
@@ -40,6 +44,7 @@ typedef struct bend_initrequest
 {
     char *configname;
     Z_IdAuthentication *auth;
+    ODR stream;                /* encoding stream */
 } bend_initrequest;
 
 typedef struct bend_initresult

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_write.c,v $
- * Revision 1.2  1995-12-13 17:14:27  quinn
+ * Revision 1.3  1997-09-17 12:10:39  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.2  1995/12/13 17:14:27  quinn
  * *** empty log message ***
  *
  * Revision 1.1  1995/12/13  15:38:43  quinn
@@ -120,15 +123,12 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
     return 0;
 }
 
-char *data1_nodetoidsgml(data1_node *n, int select, int *len)
+char *data1_nodetoidsgml (data1_handle dh, data1_node *n, int select, int *len)
 {
-    static WRBUF b = 0;
+    WRBUF b = data1_get_wrbuf (dh);
     char line[1024];
 
-    if (!b)
-	b = wrbuf_alloc();
-    else
-	wrbuf_rewind(b);
+    wrbuf_rewind(b);
     
     sprintf(line, "<%s>\n", n->u.root.type);
     wrbuf_write(b, line, strlen(line));

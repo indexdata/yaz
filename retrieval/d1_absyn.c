@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.11  1997-09-05 09:50:55  adam
+ * Revision 1.12  1997-09-17 12:10:34  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.11  1997/09/05 09:50:55  adam
  * Removed global data1_tabpath - uses data1_get_tabpath() instead.
  *
  * Revision 1.10  1997/05/14 06:54:01  adam
@@ -47,7 +50,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <xmalloc.h>
 #include <oid.h>
 #include <log.h>
 #include <tpath.h>
@@ -55,39 +57,54 @@
 #include <data1.h>
 
 #define D1_MAX_NESTING  128
-#define DATA1_MAX_SYNTAXES 30 /* max no of syntaxes to handle in one session */
 
-static struct /* cache of abstract syntaxes */
+struct data1_absyn_cache_info 
 {
     char *name;
     data1_absyn *absyn;
-} syntaxes[DATA1_MAX_SYNTAXES] = {{0,0}};
+    data1_absyn_cache next;
+};
 
-data1_absyn *data1_get_absyn(char *name)
+data1_absyn *data1_absyn_search (data1_handle dh, const char *name)
 {
-    char fname[512];
-    int i;
+    data1_absyn_cache p = *data1_absyn_cache_get (dh);
 
-    for (i = 0; syntaxes[i].name; i++)
-	if (!strcmp(name, syntaxes[i].name))
-	    return syntaxes[i].absyn;
-
-    if (i >= DATA1_MAX_SYNTAXES - 1)
+    while (p)
     {
-	logf(LOG_WARN, "Too many abstract syntaxes loaded");
-	return 0;
+	if (!strcmp (name, p->name))
+	    return p->absyn;
+	p = p->next;
     }
-    sprintf(fname, "%s.abs", name);
-    if (!(syntaxes[i].absyn = data1_read_absyn(fname)))
-	return 0;
-    if (!(syntaxes[i].name = xmalloc(strlen(name)+1)))
-	abort();
-    strcpy(syntaxes[i].name, name);
-    syntaxes[i+1].name = 0;
-    return syntaxes[i].absyn;
+    return NULL;
 }
 
-data1_esetname *data1_getesetbyname(data1_absyn *a, char *name)
+data1_absyn *data1_absyn_add (data1_handle dh, const char *name)
+{
+    char fname[512];
+    NMEM mem = data1_nmem_get (dh);
+
+    data1_absyn_cache p = nmem_malloc (mem, sizeof(*p));
+    data1_absyn_cache *pp = data1_absyn_cache_get (dh);
+
+    sprintf(fname, "%s.abs", name);
+    p->absyn = data1_read_absyn (dh, fname);
+    p->name = nmem_strdup (mem, name);
+    p->next = *pp;
+    *pp = p;
+    return p->absyn;
+}
+
+data1_absyn *data1_get_absyn (data1_handle dh, char *name)
+{
+    data1_absyn *absyn;
+
+    if (!(absyn = data1_absyn_search (dh, name)))
+	absyn = data1_absyn_add (dh, name);
+    return absyn;
+}
+
+data1_esetname *data1_getesetbyname(data1_handle dh, data1_absyn *a,
+				    char *name)
 {
     data1_esetname *r;
 
@@ -97,8 +114,9 @@ data1_esetname *data1_getesetbyname(data1_absyn *a, char *name)
     return 0;
 }
 
-data1_element *data1_getelementbytagname(data1_absyn *abs,
-    data1_element *parent, char *tagname)
+data1_element *data1_getelementbytagname (data1_handle dh, data1_absyn *abs,
+					  data1_element *parent,
+					  char *tagname)
 {
     data1_element *r;
 
@@ -117,7 +135,8 @@ data1_element *data1_getelementbytagname(data1_absyn *abs,
     return 0;
 }
 
-data1_element *data1_getelementbyname(data1_absyn *absyn, char *name)
+data1_element *data1_getelementbyname (data1_handle dh, data1_absyn *absyn,
+				       char *name)
 {
     data1_element *r;
 
@@ -127,7 +146,7 @@ data1_element *data1_getelementbyname(data1_absyn *absyn, char *name)
     return 0;
 }
 
-data1_absyn *data1_read_absyn(char *file)
+data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 {
     char line[512], *r, cmd[512], args[512];
     data1_absyn *res = 0;
@@ -139,14 +158,13 @@ data1_absyn *data1_read_absyn(char *file)
     data1_termlist *all = 0;
     int level = 0;
 
-    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath (dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
 
-    if (!(res = xmalloc(sizeof(*res))))
-	abort();
+    res = nmem_malloc(data1_nmem_get(dh), sizeof(*res));
     res->name = 0;
     res->reference = VAL_NONE;
     res->tagset = 0;
@@ -210,8 +228,8 @@ data1_absyn *data1_read_absyn(char *file)
 		return 0;
 	    }
 	    level = i;
-	    if (!(new_element = cur[level] = *ppl[level] = xmalloc(sizeof(*new_element))))
-		abort;
+	    new_element = cur[level] = *ppl[level] =
+		nmem_malloc(data1_nmem_get(dh), sizeof(*new_element));
 	    new_element->next = new_element->children = 0;
 	    new_element->tag = 0;
 	    new_element->termlists = 0;
@@ -219,7 +237,7 @@ data1_absyn *data1_read_absyn(char *file)
 	    tp = &new_element->termlists;
 	    ppl[level] = &new_element->next;
 	    ppl[level+1] = &new_element->children;
-
+	    
 	    /* well-defined tag */
 	    if (sscanf(p, "(%d,%d)", &type, &value) == 2)
 	    {
@@ -229,7 +247,8 @@ data1_absyn *data1_read_absyn(char *file)
 		    fclose(f);
 		    return 0;
 		}
-		if (!(new_element->tag = data1_gettagbynum(res->tagset, type, value)))
+		if (!(new_element->tag = data1_gettagbynum (dh, res->tagset,
+							    type, value)))
 		{
 		    logf(LOG_WARN, "Couldn't find tag %s in tagset in %s",
 			p, file);
@@ -240,10 +259,13 @@ data1_absyn *data1_read_absyn(char *file)
 	    /* private tag */
 	    else if (*p)
 	    {
-		data1_tag *nt = new_element->tag = xmalloc(sizeof(*new_element->tag));
+		data1_tag *nt =
+		    new_element->tag = nmem_malloc(data1_nmem_get (dh),
+						   sizeof(*new_element->tag));
 		nt->which = DATA1T_string;
 		nt->value.string = xstrdup(p);
-		nt->names = xmalloc(sizeof(*new_element->tag->names));
+		nt->names = nmem_malloc(data1_nmem_get(dh), 
+					sizeof(*new_element->tag->names));
 		nt->names->name = nt->value.string;
 		nt->names->next = 0;
 		nt->kind = DATA1K_string;
@@ -284,12 +306,13 @@ data1_absyn *data1_read_absyn(char *file)
 		    }
 		    if (*attname == '!')
 			strcpy(attname, name);
-		    *tp = xmalloc(sizeof(**tp));
-		    if (!((*tp)->att = data1_getattbyname(res->attset,
-			attname)))
+		    *tp = nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
+		    (*tp)->next = 0;
+		    if (!((*tp)->att = data1_getattbyname(dh, res->attset,
+							  attname)))
 		    {
 			logf(LOG_WARN, "Couldn't find att '%s' in attset",
-			    attname);
+			     attname);
 			fclose(f);
 			return 0;
 		    }
@@ -300,7 +323,6 @@ data1_absyn *data1_read_absyn(char *file)
 		    else if (!data1_matchstr(structure, "p"))
 			(*tp)->structure = DATA1S_phrase;
 
-		    (*tp)->next = 0;
 		    tp = &(*tp)->next;
 		}
 		while ((p = strchr(p, ',')) && *(++p));
@@ -341,12 +363,12 @@ data1_absyn *data1_read_absyn(char *file)
 		    fclose(f);
 		    return 0;
 		}
-		*tp = xmalloc(sizeof(**tp));
-		if (!((*tp)->att = data1_getattbyname(res->attset,
-		    attname)))
+		*tp = nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
+		if (!((*tp)->att = data1_getattbyname (dh, res->attset,
+						       attname)))
 		{
 		    logf(LOG_WARN, "Couldn't find att '%s' in attset",
-			attname);
+			 attname);
 		    fclose(f);
 		    return 0;
 		}
@@ -356,7 +378,7 @@ data1_absyn *data1_read_absyn(char *file)
 		    (*tp)->structure = DATA1S_word;
 		else if (!data1_matchstr(structure, "p"))
 		    (*tp)->structure = DATA1S_phrase;
-
+		
 		(*tp)->next = 0;
 		tp = &(*tp)->next;
 	    }
@@ -372,9 +394,7 @@ data1_absyn *data1_read_absyn(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(res->name = xmalloc(strlen(args)+1)))
-		abort();
-	    strcpy(res->name, name);
+	    res->name = nmem_strdup(data1_nmem_get(dh), args);
 	}
 	else if (!strcmp(cmd, "reference"))
 	{
@@ -403,7 +423,7 @@ data1_absyn *data1_read_absyn(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(res->attset = data1_read_attset(name)))
+	    if (!(res->attset = data1_read_attset (dh, name)))
 	    {
 		logf(LOG_WARN, "Attset failed in %s", file);
 		fclose(f);
@@ -420,7 +440,7 @@ data1_absyn *data1_read_absyn(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(res->tagset = data1_read_tagset(name)))
+	    if (!(res->tagset = data1_read_tagset (dh, name)))
 	    {
 		logf(LOG_WARN, "Tagset failed in %s", file);
 		fclose(f);
@@ -437,7 +457,7 @@ data1_absyn *data1_read_absyn(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(res->varset = data1_read_varset(name)))
+	    if (!(res->varset = data1_read_varset (dh, name)))
 	    {
 		logf(LOG_WARN, "Varset failed in %s", file);
 		fclose(f);
@@ -454,18 +474,17 @@ data1_absyn *data1_read_absyn(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    *esetpp = xmalloc(sizeof(**esetpp));
-	    (*esetpp)->name = xmalloc(strlen(name)+1);
-	    strcpy((*esetpp)->name, name);
+	    *esetpp = nmem_malloc(data1_nmem_get(dh), sizeof(**esetpp));
+	    (*esetpp)->name = nmem_strdup(data1_nmem_get(dh), name);
+	    (*esetpp)->next = 0;
 	    if (*fname == '@')
 		(*esetpp)->spec = 0;
-	    else if (!((*esetpp)->spec = data1_read_espec1(fname, 0)))
+	    else if (!((*esetpp)->spec = data1_read_espec1 (dh, fname, 0)))
 	    {
 		logf(LOG_WARN, "%s: Espec-1 read failed", file);
 		fclose(f);
 		return 0;
 	    }
-	    (*esetpp)->next = 0;
 	    esetpp = &(*esetpp)->next;
 	}
 	else if (!strcmp(cmd, "maptab"))
@@ -478,7 +497,7 @@ data1_absyn *data1_read_absyn(char *file)
 		    file);
 		continue;
 	    }
-	    if (!(*maptabp = data1_read_maptab(name)))
+	    if (!(*maptabp = data1_read_maptab (dh, name)))
 	    {
 		logf(LOG_WARN, "%s: Failed to read maptab.");
 		continue;
@@ -495,7 +514,7 @@ data1_absyn *data1_read_absyn(char *file)
 		    file);
 		continue;
 	    }
-	    if (!(*marcp = data1_read_marctab(name)))
+	    if (!(*marcp = data1_read_marctab (dh, name)))
 	    {
 		logf(LOG_WARN, "%s: Failed to read marctab.");
 		continue;

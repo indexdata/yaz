@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.8  1997-09-05 09:50:56  adam
+ * Revision 1.9  1997-09-17 12:10:35  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.8  1997/09/05 09:50:56  adam
  * Removed global data1_tabpath - uses data1_get_tabpath() instead.
  *
  * Revision 1.7  1997/05/14 06:54:02  adam
@@ -213,14 +216,14 @@ static Z_ETagUnit *read_tagunit(char *buf, ODR o)
  * Read an element-set specification from a file.
  * NOTE: If !o, memory is allocated directly from the heap by odr_malloc().
  */
-Z_Espec1 *data1_read_espec1(char *file, ODR o)
+Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 {
     FILE *f;
     int argc, size_esn = 0;
     char *argv[50], line[512];
     Z_Espec1 *res = odr_malloc(o, sizeof(*res));
 
-    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.5  1997-09-05 09:50:57  adam
+ * Revision 1.6  1997-09-17 12:10:38  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.5  1997/09/05 09:50:57  adam
  * Removed global data1_tabpath - uses data1_get_tabpath() instead.
  *
  * Revision 1.4  1995/11/13 09:27:38  quinn
@@ -27,7 +30,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#include <xmalloc.h>
 #include <log.h>
 #include <tpath.h>
 
@@ -38,7 +40,7 @@
  * functions eventually.
  */
 
-data1_datatype data1_maptype(char *t)
+data1_datatype data1_maptype (data1_handle dh, char *t)
 {
     static struct
     {
@@ -66,7 +68,8 @@ data1_datatype data1_maptype(char *t)
     return 0;
 }
 
-data1_tag *data1_gettagbynum(data1_tagset *s, int type, int value)
+data1_tag *data1_gettagbynum (data1_handle dh, data1_tagset *s,
+			      int type, int value)
 {
     data1_tag *r;
 
@@ -78,13 +81,14 @@ data1_tag *data1_gettagbynum(data1_tagset *s, int type, int value)
 		if (r->which == DATA1T_numeric && r->value.numeric == value)
 		    return r;
 	/* scan included sets */
-	if (s->children && (r = data1_gettagbynum(s->children, type, value)))
+	if (s->children && (r = data1_gettagbynum (dh, s->children,
+						   type, value)))
 	    return r;
     }
     return 0;
 }
 
-data1_tag *data1_gettagbyname(data1_tagset *s, char *name)
+data1_tag *data1_gettagbyname (data1_handle dh, data1_tagset *s, char *name)
 {
     data1_tag *r;
 
@@ -100,27 +104,27 @@ data1_tag *data1_gettagbyname(data1_tagset *s, char *name)
 		    return r;
 	}
 	/* scan included sets */
-	if (s->children && (r = data1_gettagbyname(s->children, name)))
+	if (s->children && (r = data1_gettagbyname (dh, s->children, name)))
 	    return r;
     }
     return 0;
 }
 
-data1_tagset *data1_read_tagset(char *file)
+data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 {
+    NMEM mem = data1_nmem_get (dh);
     char line[512], *r, cmd[512], args[512];
     data1_tagset *res = 0, **childp;
     data1_tag **tagp;
     FILE *f;
 
-    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
 
-    if (!(res = xmalloc(sizeof(*res))))
-	abort();
+    res = nmem_malloc(mem, sizeof(*res));
     res->name = 0;
     res->type = 0;
     res->tags = 0;
@@ -159,9 +163,7 @@ data1_tagset *data1_read_tagset(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(rr = *tagp = xmalloc(sizeof(*rr))))
-		abort();
-
+	    rr = *tagp = nmem_malloc(mem, sizeof(*rr));
 	    rr->tagset = res;
 	    rr->next = 0;
 	    rr->which = DATA1T_numeric;
@@ -170,7 +172,7 @@ data1_tagset *data1_read_tagset(char *file)
 	     * how to deal with local numeric tags?
 	     */
 
-	    if (!(rr->kind = data1_maptype(type)))
+	    if (!(rr->kind = data1_maptype(dh, type)))
 	    {
 		logf(LOG_WARN, "Unknown datatype %s in %s", type, file);
 		fclose(f);
@@ -184,13 +186,10 @@ data1_tagset *data1_read_tagset(char *file)
 	    {
 		char *e;
 
-		if (!(*npp = xmalloc(sizeof(**npp))))
-		    abort();
+		*npp = nmem_malloc(mem, sizeof(**npp));
 		if ((e = strchr(nm, '/')))
 		    *(e++) = '\0';
-		if (!((*npp)->name = xmalloc(strlen(nm)+1)))
-		    abort();
-		strcpy((*npp)->name, nm);
+		(*npp)->name = nmem_strdup(mem, nm);
 		(*npp)->next = 0;
 		npp = &(*npp)->next;
 		nm = e;
@@ -208,9 +207,7 @@ data1_tagset *data1_read_tagset(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(res->name = xmalloc(strlen(args)+1)))
-		abort();
-	    strcpy(res->name, name);
+	    res->name = nmem_strdup(mem, args);
 	}
 	else if (!strcmp(cmd, "reference"))
 	{
@@ -248,7 +245,7 @@ data1_tagset *data1_read_tagset(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(*childp = data1_read_tagset(name)))
+	    if (!(*childp = data1_read_tagset (dh, name)))
 	    {
 		logf(LOG_WARN, "Inclusion failed in %s", file);
 		fclose(f);

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.25  1997-09-05 09:50:55  adam
+ * Revision 1.26  1997-09-17 12:10:32  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.25  1997/09/05 09:50:55  adam
  * Removed global data1_tabpath - uses data1_get_tabpath() instead.
  *
  * Revision 1.24  1997/09/01 09:30:39  adam
@@ -154,6 +157,7 @@
 #include <d1_attset.h>
 #include <d1_map.h>
 #include <yaz-util.h>
+#include <wrbuf.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -168,6 +172,8 @@ typedef struct data1_name
     char *name;
     struct data1_name *next;
 } data1_name;
+
+typedef struct data1_absyn_cache_info *data1_absyn_cache;
 
 typedef enum data1_datatype
 {
@@ -388,51 +394,74 @@ typedef struct data1_node
     struct data1_node *root;
 } data1_node;
 
-YAZ_EXPORT data1_node *get_parent_tag(data1_node *n);
-YAZ_EXPORT data1_node *data1_read_node(char **buf, data1_node *parent,
+YAZ_EXPORT data1_handle data1_create (void);
+YAZ_EXPORT void data1_destroy(data1_handle dh);
+YAZ_EXPORT data1_node *get_parent_tag(data1_handle dh, data1_node *n);
+YAZ_EXPORT data1_node *data1_read_node(data1_handle dh, char **buf,
+				       data1_node *parent,
 				       int *line, data1_absyn *absyn, NMEM m);
-YAZ_EXPORT data1_node *data1_read_record(int (*rf)(void *, char *, size_t),
+YAZ_EXPORT data1_node *data1_read_record(data1_handle dh, 
+					 int (*rf)(void *, char *, size_t),
 					 void *fh, NMEM m);
-YAZ_EXPORT data1_absyn *data1_read_absyn(char *file);
-YAZ_EXPORT data1_tag *data1_gettagbynum(data1_tagset *s, int type, int value);
-YAZ_EXPORT data1_tagset *data1_read_tagset(char *file);
-YAZ_EXPORT data1_element *data1_getelementbytagname(data1_absyn *abs,
+YAZ_EXPORT data1_absyn *data1_read_absyn(data1_handle dh, const char *file);
+YAZ_EXPORT data1_tag *data1_gettagbynum(data1_handle dh, data1_tagset *s,
+					int type, int value);
+YAZ_EXPORT data1_tagset *data1_read_tagset(data1_handle dh, char *file);
+YAZ_EXPORT data1_element *data1_getelementbytagname(data1_handle dh, 
+						    data1_absyn *abs,
 						    data1_element *parent,
 						    char *tagname);
-YAZ_EXPORT Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o,
+YAZ_EXPORT Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
+					   int select, ODR o,
 					   int *len);
-YAZ_EXPORT data1_tag *data1_gettagbyname(data1_tagset *s, char *name);
-YAZ_EXPORT void data1_free_tree(data1_node *t);
-YAZ_EXPORT char *data1_nodetobuf(data1_node *n, int select, int *len);
-YAZ_EXPORT data1_node *data1_insert_taggeddata(data1_node *root,
+YAZ_EXPORT data1_tag *data1_gettagbyname(data1_handle dh, data1_tagset *s,
+					 char *name);
+YAZ_EXPORT void data1_free_tree(data1_handle dh, data1_node *t);
+YAZ_EXPORT char *data1_nodetobuf(data1_handle dh, data1_node *n,
+				 int select, int *len);
+YAZ_EXPORT data1_node *data1_insert_taggeddata(data1_handle dh,
+					       data1_node *root,
 					       data1_node *at,
 					       char *tagname, NMEM m);
-YAZ_EXPORT data1_datatype data1_maptype(char *t);
-YAZ_EXPORT data1_varset *data1_read_varset(char *file);
-YAZ_EXPORT data1_vartype *data1_getvartypebyct(data1_varset *set,
+YAZ_EXPORT data1_datatype data1_maptype(data1_handle dh, char *t);
+YAZ_EXPORT data1_varset *data1_read_varset(data1_handle dh, const char *file);
+YAZ_EXPORT data1_vartype *data1_getvartypebyct(data1_handle dh,
+					       data1_varset *set,
 					       char *zclass, char *type);
-YAZ_EXPORT Z_Espec1 *data1_read_espec1(char *file, ODR o);
-YAZ_EXPORT int data1_doespec1(data1_node *n, Z_Espec1 *e);
-YAZ_EXPORT data1_esetname *data1_getesetbyname(data1_absyn *a, char *name);
-YAZ_EXPORT data1_element *data1_getelementbyname(data1_absyn *absyn,
+YAZ_EXPORT Z_Espec1 *data1_read_espec1(data1_handle dh, const char *file,
+				       ODR o);
+YAZ_EXPORT int data1_doespec1(data1_handle dh, data1_node *n, Z_Espec1 *e);
+YAZ_EXPORT data1_esetname *data1_getesetbyname(data1_handle dh, 
+					       data1_absyn *a, char *name);
+YAZ_EXPORT data1_element *data1_getelementbyname(data1_handle dh,
+						 data1_absyn *absyn,
 						 char *name);
-YAZ_EXPORT data1_node *data1_mk_node(NMEM m);
-YAZ_EXPORT data1_absyn *data1_get_absyn(char *name);
-YAZ_EXPORT data1_maptab *data1_read_maptab(char *file);
-YAZ_EXPORT data1_node *data1_map_record(data1_node *n, data1_maptab *map,
-					NMEM m);
-YAZ_EXPORT data1_marctab *data1_read_marctab(char *file);
-YAZ_EXPORT char *data1_nodetomarc(data1_marctab *p, data1_node *n,
-				  int selected, int *len);
-YAZ_EXPORT char *data1_nodetoidsgml(data1_node *n, int select, int *len);
-YAZ_EXPORT Z_ExplainRecord *data1_nodetoexplain(data1_node *n, int select,
+YAZ_EXPORT data1_node *data1_mk_node(data1_handle dh, NMEM m);
+YAZ_EXPORT data1_absyn *data1_get_absyn(data1_handle dh, char *name);
+YAZ_EXPORT data1_maptab *data1_read_maptab(data1_handle dh, const char *file);
+YAZ_EXPORT data1_node *data1_map_record(data1_handle dh, data1_node *n,
+					data1_maptab *map, NMEM m);
+YAZ_EXPORT data1_marctab *data1_read_marctab (data1_handle dh,
+					      const char *file);
+YAZ_EXPORT char *data1_nodetomarc(data1_handle dh, data1_marctab *p,
+				  data1_node *n, int selected, int *len);
+YAZ_EXPORT char *data1_nodetoidsgml(data1_handle dh, data1_node *n,
+				    int select, int *len);
+YAZ_EXPORT Z_ExplainRecord *data1_nodetoexplain(data1_handle dh,
+						data1_node *n, int select,
 						ODR o);
-YAZ_EXPORT Z_BriefBib *data1_nodetosummary(data1_node *n, int select,
+YAZ_EXPORT Z_BriefBib *data1_nodetosummary(data1_handle dh, 
+					   data1_node *n, int select,
 					   ODR o);
-YAZ_EXPORT char *data1_nodetosoif(data1_node *n, int select,
+YAZ_EXPORT char *data1_nodetosoif(data1_handle dh, data1_node *n, int select,
 				  int *len);
-YAZ_EXPORT void data1_set_tabpath(const char *path);
-YAZ_EXPORT const char *data1_get_tabpath(void);
+YAZ_EXPORT void data1_set_tabpath(data1_handle dh, const char *path);
+YAZ_EXPORT const char *data1_get_tabpath(data1_handle dh);
+
+YAZ_EXPORT WRBUF data1_get_wrbuf (data1_handle dp);
+YAZ_EXPORT char **data1_get_read_buf (data1_handle dp, int **lenp);
+YAZ_EXPORT data1_absyn_cache *data1_absyn_cache_get (data1_handle dh);
+YAZ_EXPORT NMEM data1_nmem_get (data1_handle dh);
 
 #ifdef __cplusplus
 }

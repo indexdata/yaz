@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sutrs.c,v $
- * Revision 1.3  1995-12-15 16:57:11  quinn
+ * Revision 1.4  1997-09-17 12:10:38  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.3  1995/12/15 16:57:11  quinn
  * Added formatted-text.
  *
  * Revision 1.2  1995/11/01  13:54:49  quinn
@@ -17,8 +20,6 @@
  */
 
 #include <ctype.h>
-
-#include <wrbuf.h>
 
 #include <data1.h>
 
@@ -134,14 +135,11 @@ static int nodetobuf(data1_node *n, int select, WRBUF b, int indent, int col)
  * need changing.
  */
 
-char *data1_nodetobuf(data1_node *n, int select, int *len)
+char *data1_nodetobuf (data1_handle dh, data1_node *n, int select, int *len)
 {
-    static WRBUF b = 0;
+    WRBUF b = data1_get_wrbuf (dh);
 
-    if (!b)
-	b = wrbuf_alloc();
-    else
-	wrbuf_rewind(b);
+    wrbuf_rewind(b);
     if (nodetobuf(n, select, b, 0, 0))
 	return 0;
     wrbuf_putc(b, '\n');

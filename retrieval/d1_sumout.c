@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sumout.c,v $
- * Revision 1.1  1996-06-10 08:56:03  quinn
+ * Revision 1.2  1997-09-17 12:10:38  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.1  1996/06/10 08:56:03  quinn
  * Work on Summary.
  *
  *
@@ -44,7 +47,8 @@ static char *f_string(data1_node *c, ODR o)
     return r;
 }
 
-Z_BriefBib *data1_nodetosummary(data1_node *n, int select, ODR o)
+Z_BriefBib *data1_nodetosummary (data1_handle dh, data1_node *n,
+				 int select, ODR o)
 {
     Z_BriefBib *res = odr_malloc(o, sizeof(*res));
     data1_node *c;

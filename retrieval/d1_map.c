@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.10  1997-09-05 09:50:56  adam
+ * Revision 1.11  1997-09-17 12:10:36  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.10  1997/09/05 09:50:56  adam
  * Removed global data1_tabpath - uses data1_get_tabpath() instead.
  *
  * Revision 1.9  1996/06/10 08:56:02  quinn
@@ -44,7 +47,6 @@
 #include <ctype.h>
 
 #include <oid.h>
-#include <xmalloc.h>
 #include <log.h>
 #include <readconf.h>
 
@@ -52,16 +54,17 @@
 #include <data1.h>
 #include <d1_map.h>
 
-data1_maptab *data1_read_maptab(char *file)
+data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 {
-    data1_maptab *res = xmalloc(sizeof(*res));
+    NMEM mem = data1_nmem_get (dh);
+    data1_maptab *res = nmem_malloc(mem, sizeof(*res));
     FILE *f;
     int argc;
     char *argv[50], line[512];
     data1_mapunit **mapp;
     int local_numeric = 0;
 
-    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
@@ -96,7 +99,7 @@ data1_maptab *data1_read_maptab(char *file)
 		    file);
 		continue;
 	    }
-	    res->target_absyn_name = xmalloc(strlen(argv[1])+1);
+	    res->target_absyn_name = nmem_malloc(mem, strlen(argv[1])+1);
 	    strcpy(res->target_absyn_name, argv[1]);
 	}
 	else if (!yaz_matchstr(argv[0], "localnumeric"))
@@ -109,7 +112,7 @@ data1_maptab *data1_read_maptab(char *file)
 		    file);
 		continue;
 	    }
-	    res->name = xmalloc(strlen(argv[1])+1);
+	    res->name = nmem_malloc(mem, strlen(argv[1])+1);
 	    strcpy(res->name, argv[1]);
 	}
 	else if (!strcmp(argv[0], "map"))
@@ -123,13 +126,13 @@ data1_maptab *data1_read_maptab(char *file)
 		    file);
 		continue;
 	    }
-	    *mapp = xmalloc(sizeof(**mapp));
+	    *mapp = nmem_malloc(mem, sizeof(**mapp));
 	    (*mapp)->next = 0;
 	    if (argc > 3 && !data1_matchstr(argv[3], "nodata"))
 		(*mapp)->no_data = 1;
 	    else
 		(*mapp)->no_data = 0;
-	    (*mapp)->source_element_name = xmalloc(strlen(argv[1])+1);
+	    (*mapp)->source_element_name = nmem_malloc(mem, strlen(argv[1])+1);
 	    strcpy((*mapp)->source_element_name, argv[1]);
 	    mtp = &(*mapp)->target_path;
 	    if (*path == '/')
@@ -150,7 +153,7 @@ data1_maptab *data1_read_maptab(char *file)
 		    fclose(f);
 		    return 0;
 		}
-		*mtp = xmalloc(sizeof(**mtp));
+		*mtp = nmem_malloc(mem, sizeof(**mtp));
 		(*mtp)->next = 0;
 		(*mtp)->type = type;
 		if (np > 2 && !data1_matchstr(parm, "new"))
@@ -165,7 +168,7 @@ data1_maptab *data1_read_maptab(char *file)
 		else
 		{
 		    (*mtp)->which = D1_MAPTAG_string;
-		    (*mtp)->value.string = xmalloc(strlen(valstr)+1);
+		    (*mtp)->value.string = nmem_malloc(mem, strlen(valstr)+1);
 		    strcpy((*mtp)->value.string, valstr);
 		}
 		mtp = &(*mtp)->next;
@@ -244,8 +247,8 @@ static int tagmatch(data1_node *n, data1_maptag *t)
     return 1;
 }
 
-static int map_children(data1_node *n, data1_maptab *map, data1_node *res,
-    NMEM mem)
+static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
+			data1_node *res, NMEM mem)
 {
     data1_node *c;
     data1_mapunit *m;
@@ -271,7 +274,7 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res,
 		    {
 			if (!cur || mt->new_field || !tagmatch(cur, mt))
 			{
-			    cur = data1_mk_node(mem);
+			    cur = data1_mk_node (dh, mem);
 			    cur->which = DATA1N_tag;
 			    cur->u.tag.element = 0;
 			    cur->u.tag.tag = mt->value.string;
@@ -301,7 +304,7 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res,
 		    break;
 		}
 	    }
-	    if (map_children(c, map, res, mem) < 0)
+	    if (map_children(dh, c, map, res, mem) < 0)
 		return -1;
 	}
     return 0;
@@ -312,13 +315,14 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res,
  * table. The new copy will refer back to the data of the original record,
  * which should not be discarded during the lifetime of the copy.
  */
-data1_node *data1_map_record(data1_node *n, data1_maptab *map, NMEM m)
+data1_node *data1_map_record (data1_handle dh, data1_node *n,
+			      data1_maptab *map, NMEM m)
 {
-    data1_node *res = data1_mk_node(m);
+    data1_node *res = data1_mk_node(dh, m);
 
     res->which = DATA1N_root;
     res->u.root.type = map->target_absyn_name;
-    if (!(res->u.root.absyn = data1_get_absyn(map->target_absyn_name)))
+    if (!(res->u.root.absyn = data1_get_absyn(dh, map->target_absyn_name)))
     {
 	logf(LOG_WARN, "%s: Failed to load target absyn '%s'",
 	    map->name, map->target_absyn_name);
@@ -326,9 +330,9 @@ data1_node *data1_map_record(data1_node *n, data1_maptab *map, NMEM m)
     res->parent = 0;
     res->root = res;
 
-    if (map_children(n, map, res, m) < 0)
+    if (map_children(dh, n, map, res, m) < 0)
     {
-	data1_free_tree(res);
+	data1_free_tree(dh, res);
 	return 0;
     }
     return res;

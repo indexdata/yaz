@@ -55,6 +55,7 @@ YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 YAZ_EXPORT int nmem_total(NMEM n);
 YAZ_EXPORT NMEM nmem_create(void);
 YAZ_EXPORT void nmem_destroy(NMEM n);
+YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,29 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX
 
-New windows 95/NT port using MSV5.0.
+Added NT Services interface for Z39.50 Server. 
+
+Windows 95/NT port using MSV5.0. Project files are included in
+the distribution.
+
+* Defined new 'global' handle for the retrieval (data1) system. The
+new handled, data1_handle, describes the state of the data1 system.
+This handle is passed as first argument to virtually all
+data1 related routines. The functions data1_create and data1_destroy
+creates and destroys a data1 handle respectively.
+
+Added ODR encode stream member to all backend request structures
+init, search, scan etc. This stream should be used to allocate all
+memory used for the response when thread safe operation is needed.
+
+Changed the comstack utility, cs_addstr, to be thread safe. The
+returned hostname string returned by the function is now part the
+COMSTACK instance.
+
+Added comstack utility, cs_straddr, which replaces the tcpip_strtoaddr
+function. The cs_straddr takes a COMSTACK handle as argument, so this
+function must be used after cs_create and before bind/connect.
+This function is thread safe.
 
 Moved test server to 'ztest' directory - generic server code still
 in 'server' directory.

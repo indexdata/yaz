@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.8  1997-05-14 06:54:02  adam
+ * Revision 1.9  1997-09-17 12:10:35  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.8  1997/05/14 06:54:02  adam
  * C++ support.
  *
  * Revision 1.7  1997/04/30 08:52:11  quinn
@@ -235,7 +238,7 @@ static int match_children(data1_node *n, Z_Espec1 *e, int i, Z_ETagUnit **t,
     return res;
 }
 
-int data1_doespec1(data1_node *n, Z_Espec1 *e)
+int data1_doespec1 (data1_handle dh, data1_node *n, Z_Espec1 *e)
 {
     int i;
 

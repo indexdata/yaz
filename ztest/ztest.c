@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.3  1997-09-09 10:10:20  adam
+ * Revision 1.4  1997-09-17 12:10:43  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.3  1997/09/09 10:10:20  adam
  * Another MSV5.0 port. Changed projects to include proper
  * library/include paths.
  * Server starts server in test-mode when no options are given.
@@ -37,24 +40,24 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o);
 
 bend_initresult *bend_init(bend_initrequest *q)
 {
-    static bend_initresult r;
+    bend_initresult *r = odr_malloc (q->stream, sizeof(*r));
     static char *dummy = "Hej fister";
 
-    r.errcode = 0;
-    r.errstring = 0;
-    r.handle = dummy;
-    return &r;
+    r->errcode = 0;
+    r->errstring = 0;
+    r->handle = dummy;
+    return r;
 }
 
 bend_searchresult *bend_search(void *handle, bend_searchrequest *q, int *fd)
 {
-    static bend_searchresult r;
+    bend_searchresult *r = odr_malloc (q->stream, sizeof(*r));
 
-    r.errcode = 0;
-    r.errstring = 0;
-    r.hits = rand() % 22;
+    r->errcode = 0;
+    r->errstring = 0;
+    r->hits = rand() % 22;
 
-    return &r;
+    return r;
 }
 
 static int atoin (const char *buf, int n)
@@ -142,47 +145,47 @@ static Z_GenericRecord *dummy_grs_record (int num, ODR o)
 
 bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
 {
-    static bend_fetchresult r;
+    bend_fetchresult *r = odr_malloc (q->stream, sizeof(*r));
     static char *bbb = 0;
 
-    r.errstring = 0;
-    r.last_in_set = 0;
-    r.basename = "DUMMY";
+    r->errstring = 0;
+    r->last_in_set = 0;
+    r->basename = "DUMMY";
     if (bbb)
     {
         xfree(bbb);
 	bbb = 0;
     }
-    r.format = q->format;  
+    r->format = q->format;  
     if (q->format == VAL_SUTRS)
     {
     	char buf[100];
 
 	sprintf(buf, "This is dummy SUTRS record number %d\n", q->number);
-	assert(r.record = bbb = xmalloc(strlen(buf)+1));
+	assert(r->record = bbb = xmalloc(strlen(buf)+1));
 	strcpy(bbb, buf);
-	r.len = strlen(buf);
+	r->len = strlen(buf);
     }
     else if (q->format == VAL_GRS1)
     {
-	r.len = -1;
-	r.record = (char*) dummy_grs_record(q->number, q->stream);
-	if (!r.record)
+	r->len = -1;
+	r->record = (char*) dummy_grs_record(q->number, q->stream);
+	if (!r->record)
 	{
-	    r.errcode = 13;
-	    return &r;
+	    r->errcode = 13;
+	    return r;
 	}
     }
-    else if (!(r.record = bbb = dummy_database_record(q->number)))
+    else if (!(r->record = bbb = dummy_database_record(q->number)))
     {
-    	r.errcode = 13;
-	r.format = VAL_USMARC;
-	return &r;
+    	r->errcode = 13;
+	r->format = VAL_USMARC;
+	return r;
     }
     else
-	r.len = strlen(r.record);
-    r.errcode = 0;
-    return &r;
+	r->len = strlen(r->record);
+    r->errcode = 0;
+    return r;
 }
 
 bend_deleteresult *bend_delete(void *handle, bend_deleterequest *q, int *num)
@@ -217,7 +220,7 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
  */
 bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
 {
-    static bend_scanresult r;
+    bend_scanresult *r = odr_malloc (q->stream, sizeof(*r));
     static FILE *f = 0;
     static struct scan_entry list[200];
     static char entries[200][80];
@@ -225,9 +228,9 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
     char term[80], *p;
     int i, pos;
 
-    r.errstring = 0;
-    r.entries = list;
-    r.status = BEND_SCAN_SUCCESS;
+    r->errstring = 0;
+    r->entries = list;
+    r->status = BEND_SCAN_SUCCESS;
     if (!f && !(f = fopen("dummy-words", "r")))
     {
 	perror("dummy-words");
@@ -235,18 +238,18 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
     }
     if (q->term->term->which != Z_Term_general)
     {
-    	r.errcode = 229; /* unsupported term type */
-	return &r;
+    	r->errcode = 229; /* unsupported term type */
+	return r;
     }
     if (q->term->term->u.general->len >= 80)
     {
-    	r.errcode = 11; /* term too long */
-	return &r;
+    	r->errcode = 11; /* term too long */
+	return r;
     }
     if (q->num_entries > 200)
     {
-    	r.errcode = 31;
-	return &r;
+    	r->errcode = 31;
+	return r;
     }
     memcpy(term, q->term->term->u.general->buf, q->term->term->u.general->len);
     term[q->term->term->u.general->len] = '\0';
@@ -255,40 +258,40 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
 	    *p = toupper(*p);
 
     fseek(f, 0, 0);
-    r.num_entries = 0;
+    r->num_entries = 0;
     for (i = 0, pos = 0; fscanf(f, " %79[^:]:%d", entries[pos], &hits[pos]) == 2;
 	i++, pos < 199 ? pos++ : (pos = 0))
     {
-    	if (!r.num_entries && strcmp(entries[pos], term) >= 0) /* s-point fnd */
+    	if (!r->num_entries && strcmp(entries[pos], term) >= 0) /* s-point fnd */
 	{
-	    if ((r.term_position = q->term_position) > i + 1)
+	    if ((r->term_position = q->term_position) > i + 1)
 	    {
-	    	r.term_position = i + 1;
-		r.status = BEND_SCAN_PARTIAL;
+	    	r->term_position = i + 1;
+		r->status = BEND_SCAN_PARTIAL;
 	    }
-	    for (; r.num_entries < r.term_position; r.num_entries++)
+	    for (; r->num_entries < r->term_position; r->num_entries++)
 	    {
 	    	int po;
 
-		po = pos - r.term_position + r.num_entries + 1; /* find pos */
+		po = pos - r->term_position + r->num_entries + 1; /* find pos */
 		if (po < 0)
 		    po += 200;
-		list[r.num_entries].term = entries[po];
-		list[r.num_entries].occurrences = hits[po];
+		list[r->num_entries].term = entries[po];
+		list[r->num_entries].occurrences = hits[po];
 	    }
 	}
-	else if (r.num_entries)
+	else if (r->num_entries)
 	{
-	    list[r.num_entries].term = entries[pos];
-	    list[r.num_entries].occurrences = hits[pos];
-	    r.num_entries++;
+	    list[r->num_entries].term = entries[pos];
+	    list[r->num_entries].occurrences = hits[pos];
+	    r->num_entries++;
 	}
-	if (r.num_entries >= q->num_entries)
+	if (r->num_entries >= q->num_entries)
 	    break;
     }
     if (feof(f))
-    	r.status = BEND_SCAN_PARTIAL;
-    return &r;
+    	r->status = BEND_SCAN_PARTIAL;
+    return r;
 }
 
 #endif
@@ -297,6 +300,17 @@ void bend_close(void *handle)
 {
     return;
 }
+
+#ifndef WINDOWS
+/* UNIX version */
+int main(int argc, char **argv)
+{
+    statserv_main(argc, argv);
+    statserv_closedown();
+    exit (0);
+}
+#else
+/* Windows version with Service support */
 
 typedef struct _Args
 {
@@ -324,22 +338,8 @@ int main(int argc, char **argv)
     ArgDetails.argc = argc;
     ArgDetails.argv = argv;
 
-#ifdef WIN32
-
     /* Now setup the service with the service controller */
     SetupService(argc, argv, &ArgDetails, SZAPPNAME, SZSERVICENAME, SZSERVICEDISPLAYNAME, SZDEPENDENCIES);
-
-#else /* WIN32 */
-
-    /* The service controller does the following for us under windows */
-    if (StartAppService(NULL, argc, argv))
-        RunAppService(&ArgDetails);
-
-    /* Ensure the service has been stopped */
-    StopAppService(NULL);
-
-#endif /* WIN32 */
-
     return(0);
 }
 
@@ -362,3 +362,4 @@ void StopAppService(void *pHandle)
     /* Stops the app */
     statserv_closedown();
 }
+#endif

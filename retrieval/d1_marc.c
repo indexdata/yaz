@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.7  1997-09-05 09:50:57  adam
+ * Revision 1.8  1997-09-17 12:10:37  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.7  1997/09/05 09:50:57  adam
  * Removed global data1_tabpath - uses data1_get_tabpath() instead.
  *
  * Revision 1.6  1997/09/04 13:51:58  adam
@@ -42,14 +45,15 @@
 #include <data1.h>
 #include <tpath.h>
 
-data1_marctab *data1_read_marctab(char *file)
+data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 {
     FILE *f;
-    data1_marctab *res = xmalloc(sizeof(*res));
+    NMEM mem = data1_nmem_get (dh);
+    data1_marctab *res = nmem_malloc(mem, sizeof(*res));
     char line[512], *argv[50];
     int argc;
     
-    if (!(f = yaz_path_fopen(data1_get_tabpath(), file, "r")))
+    if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
@@ -77,8 +81,7 @@ data1_marctab *data1_read_marctab(char *file)
 		logf(LOG_WARN, "%s: Bad name directive");
 		continue;
 	    }
-	    res->name = xmalloc(strlen(argv[1])+1);
-	    strcpy(res->name, argv[1]);
+	    res->name = nmem_strdup(mem, argv[1]);
 	}
 	else if (!strcmp(argv[0], "reference"))
 	{
@@ -162,7 +165,7 @@ static char *get_data(data1_node *n, int *len)
 
 static void memint (char *p, int val, int len)
 {
-    static char buf[9];
+    char buf[10];
 
     if (len == 1)
         *p = val + '0';
@@ -303,11 +306,12 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
     return len;
 }
 
-char *data1_nodetomarc(data1_marctab *p, data1_node *n, int selected, int *len)
+char *data1_nodetomarc(data1_handle dh, data1_marctab *p, data1_node *n,
+		       int selected, int *len)
 {
-    static char *buf = 0;
-    static int size = 0;
+    int *size;
+    char **buf = data1_get_read_buf (dh, &size);
 
-    *len = nodetomarc(p, n, selected, &buf, &size);
-    return buf;
+    *len = nodetomarc(p, n, selected, buf, size);
+    return *buf;
 }

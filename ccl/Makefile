@@ -2,7 +2,10 @@
 # Europagate, 1995
 #
 # $Log: Makefile,v $
-# Revision 1.7  1997-04-30 08:52:05  quinn
+# Revision 1.8  1997-09-17 12:10:28  adam
+# YAZ version 1.4.
+#
+# Revision 1.7  1997/04/30 08:52:05  quinn
 # Null
 #
 # Revision 1.6  1996/10/11  15:00:24  adam
@@ -49,7 +52,7 @@ TPROG1=cclsh
 LIB=../lib/ccl.a
 PO=cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o cclqfile.o cclstr.o
 CPP=$(CC) -E
-DEFS=$(INCLUDE)
+DEFS=$(INCLUDE) $(CDEFS)
 
 all: $(LIB)
 

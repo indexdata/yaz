@@ -70,8 +70,11 @@ typedef struct data1_attset
     struct data1_attset *next;       /* sibling */
 } data1_attset;
 
-YAZ_EXPORT data1_att *data1_getattbyname(data1_attset *s, char *name);
-YAZ_EXPORT data1_attset *data1_read_attset(char *file);
+typedef struct data1_handle_info *data1_handle;
+
+YAZ_EXPORT data1_att *data1_getattbyname(data1_handle dh, data1_attset *s,
+					 char *name);
+YAZ_EXPORT data1_attset *data1_read_attset(data1_handle dh, char *file);
 
 #ifdef __cplusplus
 }

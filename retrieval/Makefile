@@ -1,11 +1,11 @@
-# $Id: Makefile,v 1.8 1996-10-07 15:29:32 quinn Exp $
+# $Id: Makefile,v 1.9 1997-09-17 12:10:34 adam Exp $
 
 SHELL=/bin/sh
 RANLIB=ranlib
 INCLUDE=-I../include -I.
-DEFS=$(INCLUDE)
+DEFS=$(INCLUDE) $(CDEFS)
 LIB=../lib/libret.a
-PO = d1_read.o d1_attset.o d1_tagset.o d1_absyn.o d1_grs.o \
+PO = d1_handle.o d1_read.o d1_attset.o d1_tagset.o d1_absyn.o d1_grs.o \
 	d1_sutrs.o d1_varset.o d1_espec.o \
 	d1_doespec.o d1_map.o d1_marc.o d1_write.o d1_expout.o d1_sumout.o \
 	d1_soif.o
@@ -33,11 +33,11 @@ depend: depend2
 depend1:
 	mv Makefile Makefile.tmp
 	sed '/^#Depend/q' <Makefile.tmp >Makefile
-	$(CPP) $(INCLUDE) -M *.c >>Makefile
+	$(CPP) $(DEFS) -M *.c >>Makefile
 	-rm Makefile.tmp
 
 depend2:
-	$(CPP) $(INCLUDE) -M *.c >.depend	
+	$(CPP) $(DEFS) -M *.c >.depend	
 
 ifeq (.depend,$(wildcard .depend))
 include .depend

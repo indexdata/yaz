@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.15  1997-05-14 06:53:34  adam
+ * Revision 1.16  1997-09-17 12:10:30  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.15  1997/05/14 06:53:34  adam
  * C++ support.
  *
  * Revision 1.14  1996/07/26 12:34:07  quinn
@@ -111,16 +114,8 @@
 #include <string.h>
 #include <assert.h>
 
-<<<<<<< 1.13
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-=======
 #define YNETINCLUDE
 #include <yconfig.h>
->>>>>>> /tmp/T4a00144
 
 #include <comstack.h>
 #include <xmosi.h>
@@ -137,6 +132,7 @@ int mosi_bind(COMSTACK h, void *address, int mode);
 int mosi_listen(COMSTACK h, char *addrp, int *addrlen);
 COMSTACK mosi_accept(COMSTACK h);
 char *mosi_addrstr(COMSTACK h);
+void *mosi_straddr(COMSTACK h, const char *str);
 
 typedef struct mosi_state
 {
@@ -144,6 +140,7 @@ typedef struct mosi_state
     struct t_call *call;
     int hasread;               /* how many bytes read of current PDU */
     int haswrit;               /* how many bytes have we written */
+    struct netbuf netbuf;
 } mosi_state;
 
 static char *oidtostr(int *o)
@@ -209,6 +206,7 @@ COMSTACK mosi_type(int s, int blocking, int protocol)
     r->f_listen = mosi_listen;
     r->f_accept = mosi_accept;
     r->f_addrstr = mosi_addrstr;
+    r->r_straddr = mosi_straddr;
 
     if (!blocking)
     	flags |= O_NONBLOCK;
@@ -240,9 +238,9 @@ int hex2oct(char *hex, char *oct)
  * addressing specific to our hack of OSI transport. A sockaddr_in wrapped
  * up in a t_mosiaddr in a netbuf (on a stick).
  */
-struct netbuf MDF *mosi_strtoaddr(const char *str)
+
+int MDF *mosi_strtoaddr_ex(const char *str, struct netbuf *ret)
 {
-    struct netbuf *ret = xmalloc(sizeof(struct netbuf));
     struct sockaddr_in *add = xmalloc(sizeof(struct sockaddr_in));
     struct t_mosiaddr *mosiaddr = xmalloc(sizeof(struct t_mosiaddr));
     struct hostent *hp;
@@ -311,6 +309,31 @@ struct netbuf MDF *mosi_strtoaddr(const char *str)
     ret->buf = (char*)mosiaddr;
     ret->len = ret->maxlen = 100 /* sizeof(*mosiaddr) */ ;
 
+    return 1;
+}
+
+struct netbuf MDF *mosi_strtoaddr(const char *str)
+{
+    struct netbuf *ret = xmalloc(sizeof(struct netbuf));
+
+    if (!mosi_strtoaddr_ex (str, ret))
+    {
+	xfree (ret);
+	return 0;
+    }
+    return ret;
+}
+
+struct netbuf MDF *mosi_straddr(COMSTACK h, const char *str)
+{
+    mosi_state *st = h->cprivate;
+    struct netbuf *ret = &st->netbuf;
+
+    if (!mosi_strtoaddr_ex (str, ret))
+    {
+	xfree (ret);
+	return 0;
+    }
     return ret;
 }
 

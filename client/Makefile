@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.11 1996-10-07 15:29:01 quinn Exp $
+# $Id: Makefile,v 1.12 1997-09-17 12:10:28 adam Exp $
 
 LIBDIR=../lib
 
@@ -10,7 +10,7 @@ LIBDIR=../lib
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBINCLUDE=-L$(LIBDIR)
-DEFS=$(INCLUDE) -DCCL2RPN=1
+DEFS=$(INCLUDE) $(CDEFS) -DCCL2RPN=1
 LIBS=$(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
   $(LIBDIR)/libcomstack.a ../lib/ccl.a $(LIBMOSI) $(LIBDIR)/libutil.a $(ELIBS)
 CPP=$(CC) -E
@@ -44,7 +44,7 @@ depend1:
 	mv -f Makefile.tmp Makefile
 
 depend2:
-	$(CPP) $(INCLUDE) -M *.c >.depend	
+	$(CPP) $(DEFS) -M *.c >.depend	
 
 ifeq (.depend,$(wildcard .depend))
 include .depend

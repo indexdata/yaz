@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_soif.c,v $
- * Revision 1.2  1997-04-30 08:52:11  quinn
+ * Revision 1.3  1997-09-17 12:10:37  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.2  1997/04/30 08:52:11  quinn
  * Null
  *
  * Revision 1.1  1996/10/08  10:43:20  quinn
@@ -65,15 +68,12 @@ static int nodetoelement(data1_node *n, int select, char *prefix, WRBUF b)
     return 0;
 }
 
-char *data1_nodetosoif(data1_node *n, int select, int *len)
+char *data1_nodetosoif (data1_handle dh, data1_node *n, int select, int *len)
 {
-    static WRBUF b = 0;
+    WRBUF b = data1_get_wrbuf (dh);
     char buf[128];
 
-    if (!b)
-	b = wrbuf_alloc();
-    else
-	wrbuf_rewind(b);
+    wrbuf_rewind(b);
     
     if (n->which != DATA1N_root)
 	return 0;

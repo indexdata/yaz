@@ -3,14 +3,17 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
 
-Compilation and installation
+Compilation and installation for YAZ 
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
 role of Z39.50/SR.
 
+Windows programmers: refer to the file MSVC.txt which describes
+how to compile the software using Microsoft Visual C++.
+
 Two test-programs of interest are generated when you type 'make' at
-the top level. server/ztest and client/client. Ztest is a dummy database
+the top level: ztest/ztest and client/client. Ztest is a dummy database
 server which returns canned responses to all queries. It's good for
 verifying that the protocol works ok, and ztest.c shows a minimalistic
 implementation of the 'backend' interface.

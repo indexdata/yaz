@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.9  1997-05-14 06:54:03  adam
+ * Revision 1.10  1997-09-17 12:10:36  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.9  1997/05/14 06:54:03  adam
  * C++ support.
  *
  * Revision 1.8  1996/12/05 13:17:49  quinn
@@ -43,8 +46,6 @@
 #include <data1.h>
 
 #define D1_VARIANTARRAY 20 /* fixed max length on sup'd variant-list. Lazy me */
-
-Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o, int *len);
 
 static Z_ElementMetaData *get_ElementMetaData(ODR o)
 {
@@ -145,8 +146,9 @@ static int traverse_triples(data1_node *n, int level, Z_ElementMetaData *m,
     return 0;
 }
 
-static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
-    ODR o, int *len)
+static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
+					int select, int leaf,
+					ODR o, int *len)
 {
     Z_ElementData *res = odr_malloc(o, sizeof(*res));
 
@@ -197,14 +199,15 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
     else
     {
 	res->which = Z_ElementData_subtree;
-	if (!(res->u.subtree = data1_nodetogr(n->parent, select, o, len)))
+	if (!(res->u.subtree = data1_nodetogr (dh, n->parent, select, o, len)))
 	    return 0;
     }
     return res;
 }
 
-static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o,
-    int *len)
+static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
+					    int select, ODR o,
+					    int *len)
 {
     Z_TaggedElement *res = odr_malloc(o, sizeof(*res));
     data1_tag *tag = 0;
@@ -224,8 +227,8 @@ static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o,
      */
     else if (n->which == DATA1N_data || n->which == DATA1N_variant)
     {
-	if (!(tag = data1_gettagbyname(n->root->u.root.absyn->tagset,
-	    "wellKnown")))
+	if (!(tag = data1_gettagbyname (dh, n->root->u.root.absyn->tagset,
+					"wellKnown")))
 	{
 	    logf(LOG_WARN, "Unable to locate tag for 'wellKnown'");
 	    return 0;
@@ -287,13 +290,15 @@ static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o,
 	res->content->which = Z_ElementData_noDataRequested;
 	res->content->u.noDataRequested = ODR_NULLVAL;
     }
-    else if (!(res->content = nodetoelementdata(data, select, leaf, o, len)))
+    else if (!(res->content = nodetoelementdata (dh, data, select, leaf,
+						 o, len)))
 	return 0;
     *len += 10;
     return res;
 }
 
-Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o, int *len)
+Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
+				int select, ODR o, int *len)
 {
     Z_GenericRecord *res = odr_malloc(o, sizeof(*res));
     data1_node *c;
@@ -305,7 +310,7 @@ Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o, int *len)
 	if (c->which == DATA1N_tag && select && !c->u.tag.node_selected)
 	    continue;
 	if (!(res->elements[res->num_elements++] =
-	    nodetotaggedelement(c, select, o, len)))
+	      nodetotaggedelement (dh, c, select, o, len)))
 	    return 0;
     }
     return res;

@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystem.
  *
  * $Log: statserv.c,v $
- * Revision 1.39  1997-09-09 10:10:19  adam
+ * Revision 1.40  1997-09-17 12:10:41  adam
+ * YAZ version 1.4.
+ *
+ * Revision 1.39  1997/09/09 10:10:19  adam
  * Another MSV5.0 port. Changed projects to include proper
  * library/include paths.
  * Server starts server in test-mode when no options are given.
@@ -614,32 +617,24 @@ static void add_listener(char *where, int what)
 
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
     {
-    	fprintf(stderr, "%s: Address format: ('tcp'|'osi')':'<address>.\n",
-	    me);
+	logf (LOG_WARN, "%s: Address format: ('tcp'|'osi')':'<address>", me);
+	return;
     }
     if (!strcmp(mode, "tcp"))
-    {
-    	if (!(ap = tcpip_strtoaddr(addr)))
-    	{
-	    fprintf(stderr, "Address resolution failed for TCP.\n");
-	}
 	type = tcpip_type;
-    }
     else if (!strcmp(mode, "osi"))
     {
 #ifdef USE_XTIMOSI
-    	if (!(ap = mosi_strtoaddr(addr)))
-    	{
-	    fprintf(stderr, "Address resolution failed for TCP.\n");
-	}
 	type = mosi_type;
 #else
-	fprintf(stderr, "OSI Transport not allowed by configuration.\n");
+	logf (LOG_WARN, "OSI Transport not allowed by configuration.");
+	return;
 #endif
     }
     else
     {
-    	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");
+    	logf (LOG_WARN, "You must specify either 'osi:' or 'tcp:'");
+	return;
     }
     logf(LOG_LOG, "Adding %s %s listener on %s",
         control_block.dynamic ? "dynamic" : "static",
@@ -647,6 +642,13 @@ static void add_listener(char *where, int what)
     if (!(l = cs_create(type, 0, what)))
     {
     	logf(LOG_FATAL|LOG_ERRNO, "Failed to create listener");
+    }
+    ap = cs_straddr (l, addr);
+    if (!ap)
+    {
+	fprintf(stderr, "Address resolution failed.\n");
+	cs_close (l);
+	return;
     }
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {

@@ -62,7 +62,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
-   $(OutDir)\$(TargetName).dll $(ProjDir)\lib
+    $(OutDir)\$(TargetName).dll $(ProjDir)\lib
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
@@ -79,7 +79,7 @@ PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D WINDOWS=1 /FR /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D WINDOWS=1 /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -99,7 +99,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
-   $(OutDir)\$(TargetName).dll $(ProjDir)\lib
+    $(OutDir)\$(TargetName).dll $(ProjDir)\lib
 # End Special Build Tool
 
 !ENDIF 
@@ -425,6 +425,10 @@ SOURCE=.\retrieval\d1_grs.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\retrieval\d1_handle.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\retrieval\d1_map.c
 
 !IF  "$(CFG)" == "yaz - Win32 Release"
@@ -617,6 +621,10 @@ SOURCE=.\util\nmem.c
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\util\nmemsdup.c
 # End Source File
 # Begin Source File
 

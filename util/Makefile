@@ -1,17 +1,17 @@
 # Copyright (C) 1994-1997, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.23 1997-09-04 07:59:29 adam Exp $
+# $Id: Makefile,v 1.24 1997-09-17 12:10:42 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
-DEFS=$(INCLUDE)
+DEFS=$(INCLUDE) $(CDEFS)
 #DEFS=$(INCLUDE) -DTRACE_XMALLOC=1
 LIB=$(LIBDIR)/libutil.a
 LIBS=
-PO = options.o log.o marcdisp.o yaz-ccl.o pquery.o oid.o wrbuf.o \
+PO = options.o log.o marcdisp.o yaz-ccl.o pquery.o oid.o wrbuf.o nmemsdup.o \
 	xmalloc.o readconf.o tpath.o nmem.o yaz-util.o atoin.o # dmalloc.o 
 CPP=$(CC) -E
 RANLIB=ranlib
@@ -48,7 +48,7 @@ depend1:
 	mv -f Makefile.tmp Makefile
 
 depend2:
-	$(CPP) $(INCLUDE) -M *.c >.depend	
+	$(CPP) $(DEFS) -M *.c >.depend	
 
 ifeq (.depend,$(wildcard .depend))
 include .depend

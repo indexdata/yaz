@@ -1,13 +1,13 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.24 1996-10-09 15:54:54 quinn Exp $
+# $Id: Makefile,v 1.25 1997-09-17 12:10:28 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
-DEFS=$(INCLUDE)
+DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libasn.a
 LIBS=-lodr -lasn
 PO = proto.o diagbib1.o zget.o prt-rsc.o prt-acc.o prt-exp.o prt-ext.o \
@@ -41,7 +41,7 @@ depend1:
 	mv -f Makefile.tmp Makefile
 
 depend2:
-	$(CPP) $(INCLUDE) -M *.c >.depend	
+	$(CPP) $(DEFS) -M *.c >.depend	
 
 ifeq (.depend,$(wildcard .depend))
 include .depend
