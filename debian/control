@@ -1,0 +1,13 @@
+Source: yaz
+Section: libs
+Priority: optional
+Maintainer: Adam Dickmeiss <adam@indexdata.dk>
+Standards-Version: 1.7
+
+Package: yaz
+Architecture: any
+Depends: ${shlibs:Depends}
+Provides: yaz
+Description: Z39.50 library
+ YAZ is a library implementing the Z39.50 protocol
+ for information retrieval.

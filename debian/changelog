@@ -1,0 +1,9 @@
+yaz (1.7) experimental; urgency=low
+  * Initial version.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 28 May 2001 14:42:18 +0200
+
+Local variables:
+mode: debian-changelog
+End:
+
