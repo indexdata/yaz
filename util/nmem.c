@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.22  2000-05-03 22:00:00  adam
+ * Revision 1.23  2000-05-09 10:55:05  adam
+ * Public nmem_print_list (for debugging).
+ *
+ * Revision 1.22  2000/05/03 22:00:00  adam
  * Reference counter (if multiple modules are init/freeing nmem).
  *
  * Revision 1.21  2000/02/29 13:44:55  adam
@@ -125,14 +128,14 @@ static int nmem_active_no = 0;
 static int nmem_init_flag = 0;
 
 #if NMEM_DEBUG
-struct nmem_debug {
+struct nmem_debug_info {
     void *p;
     char file[40];
     int line;
-    struct nmem_debug *next;
+    struct nmem_debug_info *next;
 };
   
-struct nmem_debug *nmem_debug_list = 0;  
+struct nmem_debug_info *nmem_debug_list = 0;  
 #endif
 
 static void free_block(nmem_block *p)
@@ -147,12 +150,13 @@ static void free_block(nmem_block *p)
 #if NMEM_DEBUG
 void nmem_print_list (void)
 {
-    struct nmem_debug *p;
+    struct nmem_debug_info *p;
 
     yaz_log (LOG_DEBUG, "nmem print list");
     NMEM_ENTER;
     for (p = nmem_debug_list; p; p = p->next)
-	yaz_log (LOG_DEBUG, " %s:%d p=%p", p->file, p->line, p->p);
+	yaz_log (LOG_LOG, " %s:%d p=%p size=%d", p->file, p->line, p->p,
+		 nmem_total(p->p));
     NMEM_LEAVE;
 }
 #endif
@@ -265,7 +269,7 @@ NMEM nmem_create(void)
 {
     NMEM r;
 #if NMEM_DEBUG
-    struct nmem_debug *debug_p;
+    struct nmem_debug_info *debug_p;
 #endif
     
     NMEM_ENTER;
@@ -312,7 +316,7 @@ void nmem_destroy(NMEM n)
 #endif
 {
 #if NMEM_DEBUG
-    struct nmem_debug **debug_p;
+    struct nmem_debug_info **debug_p;
     int ok = 0;
 #endif
     if (!n)
@@ -325,7 +329,7 @@ void nmem_destroy(NMEM n)
     for (debug_p = &nmem_debug_list; *debug_p; debug_p = &(*debug_p)->next)
 	if ((*debug_p)->p == n)
 	{
-	    struct nmem_debug *debug_save = *debug_p;
+	    struct nmem_debug_info *debug_save = *debug_p;
 	    *debug_p = (*debug_p)->next;
 	    xfree (debug_save);
 	    ok = 1;

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
+ * Revision 1.3  2000-05-09 10:55:05  adam
+ * Public nmem_print_list (for debugging).
+ *
+ * Revision 1.2  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -51,7 +54,7 @@
 #define NMEM_H
 #include <yaz/yconfig.h>
 
-#define NMEM_DEBUG 0
+#define NMEM_DEBUG 1
 
 #ifndef NMEM_DEBUG
 #define NMEM_DEBUG 0
@@ -93,11 +96,15 @@ YAZ_EXPORT void *nmem_malloc_f(const char *file, int line, NMEM n, int size);
 #define nmem_destroy(x) nmem_destroy_f(__FILE__, __LINE__, (x))
 #define nmem_malloc(x, y) nmem_malloc_f(__FILE__, __LINE__, (x), (y))
 
+YAZ_EXPORT void nmem_print_list (void);
+
 #else
 
 YAZ_EXPORT NMEM nmem_create(void);
 YAZ_EXPORT void nmem_destroy(NMEM n);
 YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
+
+#define nmem_print_list
 
 #endif
 
