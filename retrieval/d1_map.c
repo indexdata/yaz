@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_map.c,v 1.22 2002-05-28 21:09:44 adam Exp $
+ * $Id: d1_map.c,v 1.23 2002-07-03 14:09:34 adam Exp $
  */
 
 #include <stdio.h>
@@ -293,7 +293,7 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 data1_node *data1_map_record (data1_handle dh, data1_node *n,
 			      data1_maptab *map, NMEM m)
 {
-    data1_node *res = data1_mk_node2 (dh, m, DATA1N_root, 0);
+    data1_node *res1, *res = data1_mk_node2 (dh, m, DATA1N_root, 0);
 
     res->which = DATA1N_root;
     res->u.root.type = map->target_absyn_name;
@@ -302,7 +302,12 @@ data1_node *data1_map_record (data1_handle dh, data1_node *n,
 	yaz_log(LOG_WARN, "%s: Failed to load target absyn '%s'",
 		map->name, map->target_absyn_name);
     }
-    if (map_children(dh, n, map, res, m) < 0)
+    n = n->child;
+    if (!n)
+        return 0;
+    res1 = data1_mk_tag (dh, m, map->target_absyn_name, 0, res);
+
+    if (map_children(dh, n, map, res1, m) < 0)
     {
 	data1_free_tree(dh, res);
 	return 0;

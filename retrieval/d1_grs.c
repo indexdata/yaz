@@ -1,75 +1,9 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: d1_grs.c,v $
- * Revision 1.21  2002-05-28 21:09:44  adam
- * schema mapping supports duplicate maps (copy instead of pointer swap)
- *
- * Revision 1.20  2002/05/13 14:13:37  adam
- * XML reader for data1 (EXPAT)
- *
- * Revision 1.19  2002/04/15 09:06:30  adam
- * Fix explain tags for XML writer
- *
- * Revision 1.18  2002/04/12 14:40:07  adam
- * GRS-1 writer accepts non-abs
- *
- * Revision 1.17  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.16  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.15  1999/03/31 11:18:25  adam
- * Implemented odr_strdup. Added Reference ID to backend server API.
- *
- * Revision 1.14  1998/03/16 12:21:15  adam
- * Fixed problem with tag names that weren't set to the right value
- * when wildcards were used.
- *
- * Revision 1.13  1998/02/11 11:53:35  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.12  1997/11/24 11:33:56  adam
- * Using function odr_nullval() instead of global ODR_NULLVAL when
- * appropriate.
- *
- * Revision 1.11  1997/11/18 09:51:09  adam
- * Removed element num_children from data1_node. Minor changes in
- * data1 to Explain.
- *
- * Revision 1.10  1997/09/17 12:10:36  adam
- * YAZ version 1.4.
- *
- * Revision 1.9  1997/05/14 06:54:03  adam
- * C++ support.
- *
- * Revision 1.8  1996/12/05 13:17:49  quinn
- * Fixed GRS-1 null-ref
- *
- * Revision 1.7  1996/10/11  11:57:23  quinn
- * Smallish
- *
- * Revision 1.6  1996/07/06  19:58:34  quinn
- * System headerfiles gathered in yconfig
- *
- * Revision 1.5  1996/06/03  09:46:42  quinn
- * Added OID data type.
- *
- * Revision 1.4  1996/05/01  12:45:30  quinn
- * Support use of local tag names in abs file.
- *
- * Revision 1.3  1995/11/13  09:27:35  quinn
- * Fiddling with the variant stuff.
- *
- * Revision 1.2  1995/11/01  13:54:46  quinn
- * Minor adjustments
- *
- * Revision 1.1  1995/11/01  11:56:07  quinn
- * Added Retrieval (data management) functions en masse.
- *
+ * $Id: d1_grs.c,v 1.22 2002-07-03 14:09:34 adam Exp $
  *
  */
 
@@ -338,7 +272,10 @@ Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
     Z_GenericRecord *res = (Z_GenericRecord *)odr_malloc(o, sizeof(*res));
     data1_node *c;
     int num_children = 0;
-    
+
+    if (n->which == DATA1N_root)
+        n = data1_get_root_tag (dh, n);
+        
     for (c = n->child; c; c = c->next)
 	num_children++;
 

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_marc.c,v 1.19 2002-05-28 21:09:44 adam Exp $
+ * $Id: d1_marc.c,v 1.20 2002-07-03 14:09:34 adam Exp $
  */
 
 
@@ -205,6 +205,7 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
     data1_node *field, *subf;
 
     yaz_log (LOG_DEBUG, "nodetomarc");
+
     for (field = n->child; field; field = field->next)
     {
         int is00X = 0;
@@ -327,6 +328,9 @@ char *data1_nodetomarc(data1_handle dh, data1_marctab *p, data1_node *n,
     int *size;
     char **buf = data1_get_map_buf (dh, &size);
 
+    n = data1_get_root_tag (dh, n);
+    if (!n)
+        return 0;
     *len = nodetomarc(p, n, selected, buf, size);
     return *buf;
 }
