@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.5  1995-03-15 08:37:45  quinn
+ * Revision 1.6  1995-03-15 15:18:52  quinn
+ * Little changes to better support nonblocking I/O
+ * Added backend.h
+ *
+ * Revision 1.5  1995/03/15  08:37:45  quinn
  * Now we're pretty much set for nonblocking I/O.
  *
  * Revision 1.4  1995/03/14  16:59:48  quinn
@@ -35,6 +39,9 @@
 #include <comstack.h>
 #include <tcpip.h>
 #include <xmosi.h>
+
+#include <unistd.h>
+#include <fcntl.h>
 
 static char *me = "";
 
@@ -134,7 +141,7 @@ void add_listener(char *where)
     	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");
     	exit(1);
     }
-    if (!(l = cs_create(type, 1)))
+    if (!(l = cs_create(type, 0)))
     {
     	fprintf(stderr, "Failed to create listener\n");
     	exit(1);
