@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.13  1995-11-01 13:54:33  quinn
+ * Revision 1.14  1996-02-10 12:23:41  quinn
+ * Enable inetd operations fro TCP/IP stack
+ *
+ * Revision 1.13  1995/11/01  13:54:33  quinn
  * Minor adjustments
  *
  * Revision 1.12  1995/10/30  12:41:27  quinn
@@ -113,7 +116,7 @@
 
 struct comstack;
 typedef struct comstack *COMSTACK;
-typedef COMSTACK (*CS_TYPE)(int blocking, int protocol);
+typedef COMSTACK (*CS_TYPE)(int s, int blocking, int protocol);
 
 struct comstack
 {
@@ -163,7 +166,9 @@ struct comstack
 #define cs_listen(handle, ap, al) ((*(handle)->f_listen)(handle, ap, al))
 #define cs_accept(handle) ((*(handle)->f_accept)(handle))
 #define cs_close(handle) ((*(handle)->f_close)(handle))
-#define cs_create(type, blocking, proto) ((*type)(blocking, proto))
+#define cs_create(type, blocking, proto) ((*type)(-1, blocking, proto))
+#define cs_createbysocket(sock, type, blocking, proto) \
+	((*type)(sock, blocking, proto))
 #define cs_type(handle) ((handle)->type)
 #define cs_fileno(handle) ((handle)->iofile)
 #define cs_stackerr(handle) ((handle)->stackerr)

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.5  1995-09-29 17:12:13  quinn
+ * Revision 1.6  1996-02-10 12:23:42  quinn
+ * Enable inetd operations fro TCP/IP stack
+ *
+ * Revision 1.5  1995/09/29  17:12:13  quinn
  * Smallish
  *
  * Revision 1.4  1995/09/28  10:12:36  quinn
@@ -67,6 +70,6 @@
 
 struct sockaddr_in *tcpip_strtoaddr(const char *str);
 
-COMSTACK tcpip_type(int blocking, int protocol);
+COMSTACK tcpip_type(int s, int blocking, int protocol);
 
 #endif

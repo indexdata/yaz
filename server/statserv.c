@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.32  1996-01-19 15:41:52  quinn
+ * Revision 1.33  1996-02-10 12:23:49  quinn
+ * Enable inetd operations fro TCP/IP stack
+ *
+ * Revision 1.32  1996/01/19  15:41:52  quinn
  * *** empty log message ***
  *
  * Revision 1.31  1995/11/17  11:09:39  adam
@@ -274,6 +277,34 @@ static void listener(IOCHAN h, int event)
     }
 }
 
+static void inetd_connection(int what)
+{
+    COMSTACK line;
+    IOCHAN chan;
+    association *assoc;
+    char *addr;
+
+    if (!(line = cs_createbysocket(0, tcpip_type, 0, what)))
+    {
+	logf(LOG_ERRNO|LOG_FATAL, "Failed to create comstack on socket 0");
+	exit(1);
+    }
+    if (!(chan = iochan_create(cs_fileno(line), ir_session, EVENT_INPUT)))
+    {
+	logf(LOG_FATAL, "Failed to create iochan");
+	exit(1);
+    }
+    if (!(assoc = create_association(chan, line)))
+    {
+	logf(LOG_FATAL, "Failed to create association structure");
+	exit(1);
+    }
+    iochan_setdata(chan, assoc);
+    iochan_settimeout(chan, control_block.idle_timeout * 60);
+    addr = cs_addrstr(line);
+    logf(LOG_LOG, "Inetd association from %s", addr ? addr : "[UNKNOWN]");
+}
+
 /*
  * Set up a listening endpoint, and give it to the event-handler.
  */
@@ -363,12 +394,12 @@ void statserv_setcontrol(statserv_options_block *block)
 
 int statserv_main(int argc, char **argv)
 {
-    int ret, listeners = 0;
+    int ret, listeners = 0, inetd = 0;
     char *arg;
     int protocol = control_block.default_proto;
 
     me = argv[0];
-    while ((ret = options("a:szSl:v:u:c:", argv, argc, &arg)) != -2)
+    while ((ret = options("a:iszSl:v:u:c:w:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -393,17 +424,31 @@ int statserv_main(int argc, char **argv)
 	    	strcpy(control_block.setuid, arg ? arg : ""); break;
             case 'c':
                 strcpy(control_block.configname, arg ? arg : ""); break;
+	    case 'i':
+	    	inetd = 1; break;
+	    case 'w':
+	        if (chdir(arg))
+		{
+		    perror(arg);
+		    exit(1);
+		}
+		break;
 	    default:
-	    	fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
+	    	fprintf(stderr, "Usage: %s [ -i -a <pdufile> -v <loglevel>"
                         " -l <logfile> -u <user> -c <config>"
-                        " -zsS <listener-addr> ... ]\n", me);
+                        " -zsS <listener-addr> -w <directory> ... ]\n", me);
 	    	exit(1);
             }
     }
-    if (control_block.dynamic)
-    	signal(SIGCHLD, catchchld);
-    if (!listeners && *control_block.default_listen)
-	add_listener(control_block.default_listen, protocol);
+    if (inetd)
+	inetd_connection(protocol);
+    else
+    {
+	if (control_block.dynamic)
+	    signal(SIGCHLD, catchchld);
+	if (!listeners && *control_block.default_listen)
+	    add_listener(control_block.default_listen, protocol);
+    }
     if (*control_block.setuid)
     {
     	struct passwd *pw;

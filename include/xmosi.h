@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmosi.h,v $
- * Revision 1.4  1995-09-29 17:12:13  quinn
+ * Revision 1.5  1996-02-10 12:23:43  quinn
+ * Enable inetd operations fro TCP/IP stack
+ *
+ * Revision 1.4  1995/09/29  17:12:13  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:53  quinn
@@ -60,6 +63,6 @@
 
 struct netbuf *mosi_strtoaddr(const char *str);
 
-COMSTACK mosi_type(int blocking, int protocol);
+COMSTACK mosi_type(int s, int blocking, int protocol);
 
 #endif
