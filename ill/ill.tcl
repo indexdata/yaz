@@ -1,5 +1,5 @@
 # Config File for ILL
-# $Id: ill.tcl,v 1.1 1999-12-16 23:36:19 adam Exp $
+# $Id: ill.tcl,v 1.2 2000-01-15 09:38:51 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -42,6 +42,9 @@ set map($m,ILL-Answer) Answer
 set map($m,ILL-String) String
 set map($m,ILL-APDU-Type) APDU_Type
 set map($m,ILL-Service-Type) Service_Type
+set map($m,Service_Date_Time_0) Service_Date_this
+set map($m,Service_Date_Time_1) Service_Date_original
+set map($m,Overdue_0) Overdue_Extension
 
 # ----------------------------------------------------------
 set m Z39.50-extendedService-ItemOrder-ItemRequest-1

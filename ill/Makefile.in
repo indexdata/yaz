@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.1 1999-12-16 23:36:19 adam Exp $
+# $Id: Makefile.in,v 1.2 2000-01-15 09:38:51 adam Exp $
 
 SHELL=/bin/sh
 
@@ -29,7 +29,7 @@ $(LIB): $(PO)
 	ar qc $(LIB) $(PO)
 	$(RANLIB) $(LIB)
 
-ill-core.c ../include/yaz/ill.h: ill.tcl ill9702.asn ../util/yc.tcl
+ill-core.c ../include/yaz/ill-core.h: ill.tcl ill9702.asn ../util/yc.tcl
 	../util/yc.tcl -d ill.tcl -i yaz -I ../include $(YCFLAGS) ill9702.asn
 
 item-req.c ../include/yaz/item-req.h: ill.tcl item-req.asn ../util/yc.tcl
