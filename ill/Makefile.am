@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.2 2000-02-28 11:44:39 adam Exp $
+## $Id: Makefile.am,v 1.3 2000-02-29 14:13:44 adam Exp $
 
 INCLUDES=-I../include
 
@@ -13,6 +13,3 @@ ill-core.c ../include/yaz/ill-core.h: ill.tcl ill9702.asn ../util/yc.tcl
 
 item-req.c ../include/yaz/item-req.h: ill.tcl item-req.asn ../util/yc.tcl
 	../util/yc.tcl -d ill.tcl -i yaz -I ../include $(YCFLAGS) item-req.asn
-
-#dist-hook: ill-core.c item-req.c
-

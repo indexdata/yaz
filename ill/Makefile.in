@@ -303,8 +303,6 @@ ill-core.c ../include/yaz/ill-core.h: ill.tcl ill9702.asn ../util/yc.tcl
 item-req.c ../include/yaz/item-req.h: ill.tcl item-req.asn ../util/yc.tcl
 	../util/yc.tcl -d ill.tcl -i yaz -I ../include $(YCFLAGS) item-req.asn
 
-#dist-hook: ill-core.c item-req.c
-
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
