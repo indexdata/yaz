@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.13  1995-03-20 11:26:52  quinn
+ * Revision 1.14  1995-03-29 08:06:13  quinn
+ * Added a few v3 elements
+ *
+ * Revision 1.13  1995/03/20  11:26:52  quinn
  * *** empty log message ***
  *
  * Revision 1.12  1995/03/20  09:45:09  quinn
@@ -87,18 +90,31 @@ int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
     	odr_sequence_end(o);
 }
 
+int z_IdPass(ODR o, Z_IdPass **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	odr_implicit(o, odr_visiblestring, &(*p)->groupId, ODR_CONTEXT, 0, 0) &&
+    	odr_implicit(o, odr_visiblestring, &(*p)->userId, ODR_CONTEXT, 1, 0) &&
+    	odr_implicit(o, odr_visiblestring, &(*p)->password, ODR_CONTEXT, 2,
+	    0) &&
+    	odr_sequence_end(o);
+}
+
 int z_StrAuthentication(ODR o, char **p, int opt)
 {
     return odr_visiblestring(o, p, opt);
 }
 
-#if 0
 int z_IdAuthentication(ODR o, Z_IdAuthentication **p, int opt)
 {
     static Odr_arm arm[] =
     {
 	{-1, -1, -1, Z_IdAuthentication_open, z_StrAuthentication},
-	{-1, -1, -1, Z_IdAuthentication_NSR, z_NSRAuthentication},
+	{-1, -1, -1, Z_IdAuthentication_idPass, z_NSRAuthentication},
+	{-1, -1, -1, Z_IdAuthentication_anonymous, odr_null},
+	{-1, -1, -1, Z_IdAuthentication_other, odr_external},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -110,7 +126,6 @@ int z_IdAuthentication(ODR o, Z_IdAuthentication **p, int opt)
     *p = 0;
     return opt && !o->error;
 }
-#endif
 
 int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 {
@@ -128,7 +143,7 @@ int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 	    5, 0) &&
 	odr_implicit(o, odr_integer, &pp->maximumRecordSize, ODR_CONTEXT,
 	    6, 0) &&
-	odr_explicit(o, odr_null, &pp->idAuthentication, ODR_CONTEXT,
+	odr_explicit(o, z_IdAuthentication, &pp->idAuthentication, ODR_CONTEXT,
 	    7, 1) &&
 	odr_implicit(o, odr_visiblestring, &pp->implementationId, ODR_CONTEXT,
 	    110, 1) &&
