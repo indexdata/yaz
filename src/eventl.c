@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.5 2005-01-15 19:47:13 adam Exp $
+ * $Id: eventl.c,v 1.6 2005-01-17 12:53:04 adam Exp $
  */
 
 /**
@@ -13,16 +13,27 @@
  * Server. It uses select(2).
  */
 
-#include <stdio.h>
 #include <assert.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef WIN32
 #include <winsock.h>
-#else
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
 #include <yaz/yconfig.h>
 #include <yaz/log.h>

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.25 2005-01-17 10:19:48 adam Exp $
+ * $Id: srwutil.c,v 1.26 2005-01-17 12:53:04 adam Exp $
  */
 /**
  * \file srwutil.c
