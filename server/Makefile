@@ -1,7 +1,7 @@
-# Copyright (C) 1994-1998, Index Data I/S 
+# Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.34 1998-01-07 12:59:27 adam Exp $
+# $Id: Makefile,v 1.35 1998-01-07 13:34:06 adam Exp $
 
 LIBDIR=../lib
 
