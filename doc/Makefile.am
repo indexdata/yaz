@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.44 2003-04-28 21:02:16 adam Exp $
+## $Id: Makefile.am,v 1.45 2003-05-12 22:37:56 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -32,11 +32,10 @@ SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
 	apilayer.obj
 
 doc_DATA = $(HTMLFILES) yaz.pdf id.png apilayer.png
-
-EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(MANFILES) $(REFFILES) \
-	$(doc_DATA) Doxyfile
-
 man_MANS = $(MANFILES)
+
+EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
+	$(doc_DATA) Doxyfile
 
 yaz-client.1: $(srcdir)/yaz-client.sgml $(srcdir)/yaz-client-commands.xml
 	if test ! -f yaz-client-commands.xml ; then ln -s $(srcdir)/yaz-client-commands.xml .; fi
