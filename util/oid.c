@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.29  1998-10-14 13:32:35  adam
+ * Revision 1.30  1998-10-18 07:48:56  adam
+ * Fixed oid_getentbyoid so that it returns NULL when parsed oid is NULL.
+ *
+ * Revision 1.29  1998/10/14 13:32:35  adam
  * Added include of string.h.
  *
  * Revision 1.28  1998/10/13 16:01:53  adam
@@ -416,8 +419,6 @@ static struct oident *oid_getentbyoid_x(int *o)
     struct oident_list *ol;
     
     /* determine protocol type */
-    if (!o)
-        return 0;
     if ((prelen = match_prefix(o, z3950_prefix)) != 0)
         proto = PROTO_Z3950;
     else if ((prelen = match_prefix(o, sr_prefix)) != 0)
@@ -517,6 +518,9 @@ struct oident *oid_addent (int *oid, int proto, int oclass,
 struct oident *oid_getentbyoid(int *oid)
 {
     struct oident *oident;
+
+    if (!oid)
+	return 0;
     oid_init ();
     oident = oid_getentbyoid_x (oid);
     if (!oident)
