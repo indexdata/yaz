@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.42  1996-01-22 09:46:31  quinn
+ * Revision 1.43  1996-02-10 12:22:49  quinn
+ * Work on SCAN
+ *
+ * Revision 1.42  1996/01/22  09:46:31  quinn
  * Added Sort PDU. Moved StringList to main protocol file.
  *
  * Revision 1.41  1996/01/10  15:21:24  quinn
@@ -1154,6 +1157,7 @@ int z_ScanResponse(ODR o, Z_ScanResponse **p, int opt)
 	odr_implicit(o, odr_integer, &(*p)->positionOfTerm, ODR_CONTEXT, 6, 1)&&
 	odr_explicit(o, z_ListEntries, &(*p)->entries, ODR_CONTEXT, 7, 1) &&
 	odr_implicit(o, odr_oid, &(*p)->attributeSet, ODR_CONTEXT, 8, 1) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
 	odr_sequence_end(o);
 }
 
