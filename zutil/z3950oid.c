@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: z3950oid.c,v 1.1 2001-09-25 07:35:37 adam Exp $
+ * $Id: z3950oid.c,v 1.2 2002-01-28 09:27:17 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -17,8 +17,8 @@ Odr_oid *yaz_oidval_to_z3950oid (ODR o, int oid_class, int oid_value)
     int oid[OID_SIZE];
 
     ident.proto = PROTO_Z3950;
-    ident.oclass = oid_class;
-    ident.value = oid_value;
+    ident.oclass = (enum oid_class) oid_class;
+    ident.value = (enum oid_value) oid_value;
 
     if (ident.value == VAL_NONE)
 	return 0;
@@ -32,7 +32,7 @@ Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class, const char *str)
     int oid[OID_SIZE];
 
     ident.proto = PROTO_Z3950;
-    ident.oclass = oid_class;
+    ident.oclass = (enum oid_class) oid_class;
     ident.value = oid_getvalbyname(str);
 
     if (ident.value == VAL_NONE)

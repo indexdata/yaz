@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.50 2002-01-23 22:40:36 adam Exp $
+ * $Id: ztest.c,v 1.51 2002-01-28 09:26:14 adam Exp $
  */
 
 /*
@@ -555,7 +555,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
             return 0;
         }
         fseek (f, 0L, SEEK_SET);
-        r->record = odr_malloc (r->stream, size);
+        r->record = (char*) odr_malloc (r->stream, size);
         r->len = size;
         r->output_format = VAL_POSTSCRIPT;
         fread (r->record, size, 1, f);
