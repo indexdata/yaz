@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.46  1995-08-29 11:17:58  quinn
+ * Revision 1.47  1995-08-29 14:24:16  quinn
+ * Added second half of close-handshake
+ *
+ * Revision 1.46  1995/08/29  11:17:58  quinn
  * Added code to receive close
  *
  * Revision 1.45  1995/08/21  09:11:00  quinn
@@ -205,6 +208,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd);
+static void process_close(association *assoc, request *reqb);
 
 static FILE *apduf = 0; /* for use in static mode */
 static statserv_options_block *control_block = 0;
@@ -469,6 +473,8 @@ static int process_request(association *assoc)
 	    res = process_presentRequest(assoc, req, &fd); break;
 	case Z_APDU_scanRequest:
 	    res = process_scanRequest(assoc, req, &fd); break;
+	case Z_APDU_close:
+	    process_close(assoc, req); return 0;
 	default:
 	    logf(LOG_WARN, "Bad APDU received");
 	    return -1;
@@ -1238,4 +1244,29 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     }
 
     return &apdu;
+}
+
+static void process_close(association *assoc, request *reqb)
+{
+    Z_Close *req = reqb->request->u.close;
+    static char *reasons[] =
+    {
+	"finished",
+	"shutdown",
+	"systemProblem",
+	"costLimit",
+	"resources",
+	"securityViolation",
+	"protocolError",
+	"lackOfActivity",
+	"peerAbort",
+	"unspecified"
+    };
+
+    logf(LOG_LOG, "Got close, reason %s, message %s",
+	reasons[*req->closeReason], req->diagnosticInformation ?
+	req->diagnosticInformation : "NULL");
+    if (assoc->version < 3) /* to make do_force respond with close */
+    	assoc->version = 3;
+    do_close(assoc, Z_Close_finished, "Association terminated by client");
 }

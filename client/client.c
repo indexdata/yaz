@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.19  1995-08-29 11:17:28  quinn
+ * Revision 1.20  1995-08-29 14:24:13  quinn
+ * Added second half of close-handshake
+ *
+ * Revision 1.19  1995/08/29  11:17:28  quinn
  * Added code to receive close
  *
  * Revision 1.18  1995/08/28  12:21:27  quinn
@@ -109,6 +112,7 @@ static Z_ElementSetNames *elementSetNames = 0;
 static int setno = 1;                   /* current set offset */
 static int protocol = PROTO_Z3950;      /* current app protocol */
 static int recordsyntax = VAL_USMARC;
+static int sent_close = 0;
 static ODR_MEM session_mem;                /* memory handle for init-response */
 static Z_InitResponse *session = 0;        /* session parameters */
 static char last_scan[512] = "0";
@@ -642,6 +646,9 @@ static int send_presentRequest(char *arg)
 
 void process_close(Z_Close *req)
 {
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
+    Z_Close *res = apdu->u.close;
+
     static char *reasons[] =
     {
 	"finished",
@@ -658,6 +665,15 @@ void process_close(Z_Close *req)
 
     printf("Reason: %s, message: %s\n", reasons[*req->closeReason],
     	req->diagnosticInformation ? req->diagnosticInformation : "NULL");
+    if (sent_close)
+    {
+    	printf("Goodbye.\n");
+    	exit(0);
+    }
+    *res->closeReason = Z_Close_finished;
+    send_apdu(apdu);
+    printf("Sent response.\n");
+    sent_close = 1;
 }
 
 static int cmd_show(char *arg)
@@ -836,6 +852,18 @@ int cmd_elements(char *arg)
     return 1;
 }
 
+int cmd_close(char *arg)
+{
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
+    Z_Close *req = apdu->u.close;
+
+    *req->closeReason = Z_Close_finished;
+    send_apdu(apdu);
+    printf("Sent close request.\n");
+    sent_close = 1;
+    return 2;
+}
+
 static void initialize(void)
 {
 #ifdef RPN_QUERY
@@ -888,6 +916,7 @@ static int client(void)
 	{"cancel", cmd_cancel, ""},
 	{"format", cmd_format, "<recordsyntax>"},
 	{"elements", cmd_elements, "<elementSetName>"},
+	{"close", cmd_close, ""},
     	{0,0}
     };
     char *netbuffer= 0;
