@@ -2,6 +2,14 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+New function yaz_log_reopen which reopens log file (for log rotate, etc.)
+
+* Blocking parameter for COMSTACK cs_create is now a bit mask rather
+than a blocking flag. Bit 0 is set for blocking, reset for non-blocking.
+Bit 1 is set if cs_addrstr should avoid DNS lookup; reset for full
+DNS lookup. There should not be any compatibility problems with this
+assuming that blocking=1 or 0 is used.
+
 Fix bad reference in UNIX comstack in function cs_addrstr.
 
 Fix for AIX compile.

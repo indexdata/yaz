@@ -1,3 +1,9 @@
+yaz (2.0.5-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 13 Oct 2003 23:22:06 +0200
+
 yaz (2.0.4-2) unstable; urgency=low
 
   * Reinstate THESAURUS since Elvil (better named 'evil') uses it.
