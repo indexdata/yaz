@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 2.0.9 NOT YET RELEASED
+--- 2.0.9 2004/01/05
 
 Fixed bug in Generic Frontend Server which could drop records exceeding
 preferred message size. Reported and fixed by Irina Dijour.

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.10 2003-12-29 14:54:33 adam Exp $
+ * $Id: srw.h,v 1.11 2004-01-05 09:34:42 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -138,10 +138,10 @@ YAZ_EXPORT int yaz_diag_srw_to_bib1(int srw_code);
 YAZ_EXPORT char *yaz_uri_val(const char *path, const char *name, ODR o);
 YAZ_EXPORT void yaz_uri_val_int(const char *path, const char *name,
 				ODR o, int **intp);
-YAZ_EXPORT int yaz_check_for_srw(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-				 char **soap_ns, ODR decode);
-YAZ_EXPORT int yaz_check_for_sru(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-				 char **soap_ns, ODR decode);
+YAZ_EXPORT int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
+			      Z_SOAP **soap_package, ODR decode, char **charset);
+YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
+			      Z_SOAP **soap_package, ODR decode, char **charset);
 YAZ_END_CDECL
 
 #endif

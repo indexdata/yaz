@@ -1,6 +1,6 @@
-YAZ toolkit - $Id: README,v 1.44 2003-10-27 12:21:21 adam Exp $
+YAZ toolkit - $Id: README,v 1.45 2004-01-05 09:34:41 adam Exp $
 
-Copyright (C) 1995-2003, Index Data ApS.
+Copyright (C) 1995-2004, Index Data ApS.
 See the file LICENSE for details.
 
 The primary output of the source here is the YAZ library, which

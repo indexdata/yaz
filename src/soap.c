@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.3 2003-12-20 00:51:19 adam Exp $
+ * $Id: soap.c,v 1.4 2004-01-05 09:34:42 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -13,22 +13,6 @@
 
 static const char *soap_v1_1 = "http://schemas.xmlsoap.org/soap/envelope/";
 static const char *soap_v1_2 = "http://www.w3.org/2001/06/soap-envelope";
-
-int z_soap_error(ODR o, Z_SOAP *p,
-                 const char *fault_code, const char *fault_string,
-                 const char *details)
-{
-    p->which = Z_SOAP_error;
-    p->u.soap_error = (Z_SOAP_Fault *) 
-        odr_malloc(o, sizeof(*p->u.soap_error));
-    p->u.soap_error->fault_code = odr_strdup(o, fault_code);
-    p->u.soap_error->fault_string = odr_strdup(o, fault_string);
-    if (details)
-        p->u.soap_error->details = odr_strdup(o, details);
-    else
-        p->u.soap_error->details = 0;
-    return -1;
-}
 
 int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
                  char **content_buf, int *content_len,
@@ -267,5 +251,21 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
                  Z_SOAP_Handler *handlers)
 {
     return z_soap_codec_enc(o, pp, content_buf, content_len, handlers, 0);
+}
+
+int z_soap_error(ODR o, Z_SOAP *p,
+                 const char *fault_code, const char *fault_string,
+                 const char *details)
+{
+    p->which = Z_SOAP_error;
+    p->u.soap_error = (Z_SOAP_Fault *) 
+        odr_malloc(o, sizeof(*p->u.soap_error));
+    p->u.soap_error->fault_code = odr_strdup(o, fault_code);
+    p->u.soap_error->fault_string = odr_strdup(o, fault_string);
+    if (details)
+        p->u.soap_error->details = odr_strdup(o, details);
+    else
+        p->u.soap_error->details = 0;
+    return -1;
 }
 

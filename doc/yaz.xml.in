@@ -25,7 +25,7 @@
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml.in,v 1.12 2003-11-03 10:56:15 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.13 2004-01-05 09:35:12 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User&apos;s Guide and Reference</title>
@@ -33,7 +33,7 @@
   <author><firstname>Adam</firstname><surname>Dickmeiss</surname></author>
   <author><firstname>Mike</firstname><surname>Taylor</surname></author>
   <copyright>
-   <year>1995-2003</year>
+   <year>1995-2004</year>
    <holder>Index Data</holder>
   </copyright>
   <abstract><simpara>
