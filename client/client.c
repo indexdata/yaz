@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.132 2001-11-21 11:13:13 adam Exp $
+ * $Id: client.c,v 1.133 2001-11-22 11:04:48 adam Exp $
  */
 
 #include <stdio.h>
@@ -86,7 +86,7 @@ static CCL_bibset bibset;               /* CCL bibset handle */
 
 
 /* set this one to 1, to avoid decode of unknown MARCs  */
-#define AVOID_MARC_DECODE 0
+#define AVOID_MARC_DECODE 1
 
 void process_cmd_line(char* line);
 
@@ -507,17 +507,24 @@ static void display_record(Z_DatabaseRecord *p)
             if ( 
 #if AVOID_MARC_DECODE
                 /* primitive check for a marc OID 5.1-29 */
-                ent->oidsuffix[0] == 5 && ent->oidsuffix[1] < 30 && 
+                ent->oidsuffix[0] == 5 && ent->oidsuffix[1] < 30 
+#else
+		1
 #endif
-                marc_display_exl (octet_buf, NULL, 0 /* debug */,
-                                  p->u.octet_aligned->len) <= 0)
+		)
+	    {
+                if (marc_display_exl (octet_buf, NULL, 0 /* debug */,
+                                      p->u.octet_aligned->len) <= 0)
+                {
+                    printf ("bad MARC. Dumping as it is:\n");
+                    print_record((const unsigned char*) octet_buf,
+                                 p->u.octet_aligned->len);
+                }
+            }
+            else
             {
-                printf ("Hmm.. doesn't look like a MARC.\n");
                 print_record((const unsigned char*) octet_buf,
                              p->u.octet_aligned->len);
-            } else {
-                print_record((const unsigned char*) octet_buf,
-                             p->u.octet_aligned->len);	    
             }
         }
         if (marcdump)
