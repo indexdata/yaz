@@ -3,14 +3,14 @@ Possible compatibility problems with earlier versions marked with '*'.
 Documentation updates for COMSTACK.
 
 * ZOOM changes. Query object renamed from Z3950_search to Z3950_query.
-Changed prototype Z3950_records. For some functions int parameters
+Changed prototype Z3950_records. For some functions, int parameters
 were changed to size_t.
 
 TCP/IP COMSTACK no longer uses getprotobyname to avoid memory leak
 on some Unices.
 
-New MARC decode/display function, marc_display_exl, which better rejects
-bad ISO2709 records. YAZ client uses it.
+New MARC decode/display function, marc_display_exl, which properly rejects
+non-ISO2709 records. YAZ client uses it.
 
 --- 1.8.1 2001/10/29
 
