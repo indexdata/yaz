@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.14  1997-09-18 08:48:09  adam
+ * Revision 1.15  1997-09-29 07:13:13  adam
+ * Minor changes.
+ *
+ * Revision 1.14  1997/09/18 08:48:09  adam
  * Fixed minor bug that caused log_init to ignore filename.
  *
  * Revision 1.13  1997/09/01 08:54:13  adam
@@ -138,9 +141,9 @@ void log_init(int level, const char *prefix, const char *name)
 }
 
 static void (*start_hook_func)(int, const char *, void *) = NULL;
-void *start_hook_info;
+static void *start_hook_info;
 static void (*end_hook_func)(int, const char *, void *) = NULL;
-void *end_hook_info;
+static void *end_hook_info;
 
 void log_event_start (void (*func)(int, const char *, void *), void *info)
 {
