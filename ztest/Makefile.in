@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.2 1998-08-25 16:19:46 adam Exp $
+# $Id: Makefile.in,v 1.3 1998-09-30 15:06:04 adam Exp $
 
 SHELL=/bin/sh
 
@@ -27,7 +27,7 @@ RANLIB=ranlib
 
 all: $(PROG)
 
-$(PROG): $(LIB) $(PROGO) $(LIBS)
+$(PROG): $(LIB) $(PROGO) $(YAZLIBS)
 	$(CC) $(CFLAGS) -o $(PROG) $(PROGO) $(YAZLIBS) $(LIBS)
 
 alll:
