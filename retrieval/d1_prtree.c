@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_prtree.c,v $
- * Revision 1.5  1999-01-25 13:49:47  adam
+ * Revision 1.6  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.5  1999/01/25 13:49:47  adam
  * Made data1_pr_tree make better printing of data1 buffers.
  *
  * Revision 1.4  1998/05/18 13:07:06  adam
@@ -23,8 +26,8 @@
  *
  */
 
-#include <log.h>
-#include <data1.h>
+#include <yaz/log.h>
+#include <yaz/data1.h>
 
 static void pr_string (FILE *out, const char *str, int len)
 {

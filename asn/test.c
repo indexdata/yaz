@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <odr.h>
-#include <odr_use.h>
-#include <proto.h>
+#include <yaz/odr.h>
+#include <yaz/odr_use.h>
+#include <yaz/proto.h>
 
 int main()
 {

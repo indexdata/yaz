@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.29  1999-10-21 12:06:29  adam
+ * Revision 1.30  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.29  1999/10/21 12:06:29  adam
  * Retrieval module no longer uses ctype.h - functions.
  *
  * Revision 1.28  1999/10/21 09:50:33  adam
@@ -155,9 +158,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <xmalloc.h>
-#include <log.h>
-#include <data1.h>
+#include <yaz/xmalloc.h>
+#include <yaz/log.h>
+#include <yaz/data1.h>
 
 /*
  * get the tag which is the immediate parent of this node (this may mean

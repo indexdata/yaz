@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.26  1999-08-27 09:40:32  adam
+ * Revision 1.27  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.26  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.25  1999/06/01 14:29:12  adam
@@ -97,9 +100,8 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include <backend.h>
-#include <proto.h>
-#include <log.h>
+#include <yaz/backend.h>
+#include <yaz/log.h>
 
 Z_GenericRecord *read_grs1(FILE *f, ODR o);
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.15  1999-01-08 11:23:20  adam
+ * Revision 1.16  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.15  1999/01/08 11:23:20  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.14  1998/02/11 11:53:34  adam
@@ -52,7 +55,7 @@
  *
  */
 
-#include <odr.h>
+#include <yaz/odr.h>
 
 int ber_any(ODR o, Odr_any **p)
 {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.19  1999-01-08 11:23:25  adam
+ * Revision 1.20  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.19  1999/01/08 11:23:25  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.18  1998/02/11 11:53:34  adam
@@ -67,7 +70,7 @@
  */
 
 #include <stdio.h>
-#include <odr.h>
+#include <yaz/odr.h>
 
 /* ber_tag
  * On encoding:

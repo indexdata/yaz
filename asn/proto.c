@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.60  1999-06-11 16:45:59  adam
+ * Revision 1.61  1999-11-30 13:47:10  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.60  1999/06/11 16:45:59  adam
  * Fixed minor bug in ScanRequest encoder.
  *
  * Revision 1.59  1999/04/21 11:46:00  adam
@@ -187,9 +190,9 @@
  *
  */
 
-#include <odr.h>
+#include <yaz/odr.h>
 
-#include <proto.h>
+#include <yaz/proto.h>
 
 /* ---------------------- GLOBAL DEFS ------------------- */
 

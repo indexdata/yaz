@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.37  1999-09-13 12:51:15  adam
+ * Revision 1.38  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.37  1999/09/13 12:51:15  adam
  * Added CLIENT IP OID.
  *
  * Revision 1.36  1999/05/27 13:02:20  adam
@@ -149,8 +152,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <oid.h>
-#include <yaz-util.h>
+#include <yaz/oid.h>
+#include <yaz/yaz-util.h>
 
 static int z3950_prefix[] = { 1, 2, 840, 10003, -1 };
 static int sr_prefix[]    = { 1, 0, 10163, -1 };

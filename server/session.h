@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.20  1999-10-11 10:01:24  adam
+ * Revision 1.21  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.20  1999/10/11 10:01:24  adam
  * Implemented bend_sort_rr handler for frontend server.
  *
  * Revision 1.19  1999/04/20 09:56:48  adam
@@ -75,11 +78,11 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include <comstack.h>
-#include <odr.h>
-#include <oid.h>
-#include <proto.h>
 #include <sys/types.h>
+#include <yaz/comstack.h>
+#include <yaz/odr.h>
+#include <yaz/oid.h>
+#include <yaz/proto.h>
 #include "eventl.h"
 
 typedef enum {

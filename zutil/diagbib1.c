@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.1  1999-06-08 10:10:16  adam
+ * Revision 1.2  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.1  1999/06/08 10:10:16  adam
  * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
  *
  * Revision 1.7  1997/09/29 07:22:26  adam
@@ -32,7 +35,7 @@
 
 #include <stdio.h>
 
-#include "diagbib1.h"
+#include <yaz/diagbib1.h>
 
 static struct {
     int code;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_handle.c,v $
- * Revision 1.5  1999-08-27 09:40:32  adam
+ * Revision 1.6  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.5  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.4  1998/05/18 13:07:05  adam
@@ -26,8 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <log.h>
-#include <data1.h>
+#include <yaz/log.h>
+#include <yaz/data1.h>
 
 struct data1_handle_info {
     WRBUF wrbuf;

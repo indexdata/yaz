@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: requestq.c,v $
- * Revision 1.6  1998-02-11 11:53:35  adam
+ * Revision 1.7  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.6  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.5  1998/02/10 11:03:56  adam
@@ -37,7 +40,7 @@
 
 #include <stdlib.h>
 
-#include <xmalloc.h>
+#include <yaz/xmalloc.h>
 #include "session.h"
 
 void request_enq(request_q *q, request *r)

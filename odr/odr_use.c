@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_use.c,v $
- * Revision 1.9  1999-04-20 09:56:48  adam
+ * Revision 1.10  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.9  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -34,8 +37,7 @@
  *
  */
 
-#include <odr.h>
-#include <odr_use.h>
+#include <yaz/odr.h>
 
 int odr_external(ODR o, Odr_external **p, int opt, const char *name)
 {

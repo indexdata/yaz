@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: matchstr.c,v $
- * Revision 1.3  1999-10-19 12:35:42  adam
+ * Revision 1.4  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.3  1999/10/19 12:35:42  adam
  * Minor bug fix (bug introduced by previous commit).
  *
  * Revision 1.2  1999/10/15 11:35:41  adam
@@ -43,7 +46,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <ctype.h>
-#include <yaz-util.h>
+#include <yaz/yaz-util.h>
 
 /*
  * Match strings, independently of case and occurences of '-'.

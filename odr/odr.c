@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.30  1999-08-27 09:40:32  adam
+ * Revision 1.31  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.30  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.29  1999/04/27 08:34:10  adam
@@ -107,8 +110,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <xmalloc.h>
-#include <odr.h>
+#include <yaz/xmalloc.h>
+#include <yaz/odr.h>
 
 Odr_null *ODR_NULLVAL = "NULL";  /* the presence of a null value */
 
@@ -153,7 +156,7 @@ void odr_setprint(ODR o, FILE *file)
     o->print = file;
 }
 
-#include <log.h>
+#include <yaz/log.h>
 
 ODR odr_createmem(int direction)
 {

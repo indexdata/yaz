@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.c,v $
- * Revision 1.5  1998-06-22 11:32:35  adam
+ * Revision 1.6  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.5  1998/06/22 11:32:35  adam
  * Added 'conditional cs_listen' feature.
  *
  * Revision 1.4  1997/09/29 07:16:14  adam
@@ -28,7 +31,7 @@
  *
  */
 
-#include <comstack.h>
+#include <yaz/comstack.h>
 
 static const char *cs_errlist[] =
 {

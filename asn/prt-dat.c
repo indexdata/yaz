@@ -8,7 +8,10 @@
  *  Databasix Information Systems B.V., Utrecht, The Netherlands.
  *
  * $Log: prt-dat.c,v $
- * Revision 1.3  1999-04-20 09:56:47  adam
+ * Revision 1.4  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.3  1999/04/20 09:56:47  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -21,7 +24,7 @@
  *
  */
 
-#include <proto.h>
+#include <yaz/proto.h>
 
 int z_MonthAndDay(ODR o, Z_MonthAndDay **p, int opt, const char *name)
 {

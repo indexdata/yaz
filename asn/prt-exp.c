@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.12  1999-04-20 09:56:48  adam
+ * Revision 1.13  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.12  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -46,7 +49,7 @@
  *
  */
 
-#include <proto.h>
+#include <yaz/proto.h>
 
 int z_LanguageCode(ODR o, char **p, int opt, const char *name);
 int z_CommonInfo(ODR o, Z_CommonInfo **p, int opt, const char *name);

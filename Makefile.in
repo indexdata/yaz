@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1999, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.12 1999-06-09 09:43:31 adam Exp $
+# $Id: Makefile.in,v 1.13 1999-11-30 13:47:10 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #CDEFS=-DUSE_XTIMOSI
@@ -28,19 +28,25 @@ LIBS=@LIBS@
 
 RANLIB=@RANLIB@
 
+INSTALL=@INSTALL@
+INSTALL_PROGRAM=@INSTALL_PROGRAM@
+INSTALL_DATA=@INSTALL_DATA@
+
 # Installation directories, etc.
 #  Binaries
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 
+BUILD=@build_root@
 BINDIR=$(exec_prefix)/bin
 #  Public libraries and header files
 LIBDIR=$(exec_prefix)/lib
 INCDIR=$(prefix)/include
 #  Misc tables, etc.
 YAZDIR=$(prefix)/lib/yaz
+YAZTAB=$(prefix)/lib/yaz/tab
 
-all:
+all: yaz-config 
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) CC="$(CC)" \
 		RANLIB="$(RANLIB)" LIBS="$(LIBS)" \
 		INCLUDE="$(INCLUDE)" CFLAGS="$(CFLAGS)" \
@@ -63,10 +69,11 @@ oclean:
 	cd ztest; strip ztest
 
 cleanup:
-	rm -f `find $(SUBDIR) -name "*.[oa]" -print`
-	rm -f `find $(SUBDIR) -name "core" -print`
-	rm -f `find $(SUBDIR) -name "errlist" -print`
-	rm -f `find $(SUBDIR) -name "a.out" -print`
+	rm -f `find . -name "*.[oa]" -print`
+	rm -f `find . -name "core" -print`
+	rm -f `find . -name "errlist" -print`
+	rm -f `find . -name "a.out" -print`
+	rm -f `find . -name "yaz-config" -print`
 
 distclean: clean cleandepend
 
@@ -78,49 +85,42 @@ cleandepend:
 		if sed '/^#Depend/q' <Makefile >Makefile.tmp; then \
 		mv -f Makefile.tmp Makefile; fi; rm -f .depend); done
 
-install: all install.misc install.lib install.bin
+yaz-config: Makefile
+	@echo "#!/bin/sh" >yaz-config
+	@echo "# YAZ settings for developers" >>yaz-config
+	@echo "YAZBIN=\"`pwd`/bin\"" >>yaz-config
+	@echo "YAZLIB=\"`pwd`/lib\"" >>yaz-config
+	@echo "YAZTAB=\"`pwd`/tab\"" >>yaz-config
+	@echo "YAZLIB=\"-L`pwd`/lib -lyaz $(LIBS)\"" >>yaz-config
+	@echo "YAZINC=\"-I`pwd`/include\"" >>yaz-config
 
-install.bin:
-	@if [ ! -d $(BINDIR) ]; then \
-		echo "Making directory $(BINDIR)"; \
-		mkdir $(BINDIR); \
-	fi
-	@echo "Installing client -> $(BINDIR)"; \
-	cp client/client $(BINDIR)/client; chmod 755 $(BINDIR)/client
-	@echo "Installing ztest -> $(BINDIR)"; \
-	cp ztest/ztest $(BINDIR)/ztest; chmod 755 $(BINDIR)/ztest
+lib/yaz-config: Makefile
+	@echo "#!/bin/sh" >lib/yaz-config
+	@echo "# YAZ settings for developers" >>lib/yaz-config
+	@echo "YAZBIN='$(BINDIR)'" >>lib/yaz-config
+	@echo "YAZLIB='$(LIBDIR)'" >>lib/yaz-config
+	@echo "YAZTAB='$(YAZTAB)'" >>lib/yaz-config
+	@echo "YAZLIB='-L$(LIBDIR) -l yaz $(LIBS)'" >>lib/yaz-config
+	@echo "YAZINC='-I$(INCDIR)'" >>lib/yaz-config
 
-install.lib:
-	@if [ ! -d $(LIBDIR) ]; then \
-		echo "Making directory $(LIBDIR)"; \
-		mkdir $(LIBDIR); \
-	fi
-	@echo "Installing libyaz.a -> $(LIBDIR)"; \
-	cp lib/libyaz.a $(LIBDIR)/libyaz.a; \
-	chmod 644 $(LIBDIR)/libyaz.a
+install: all lib/yaz-config
+	$(INSTALL) -d $(BUILD)$(BINDIR)
+	$(INSTALL_PROGRAM) client/yaz-client $(BUILD)$(BINDIR)
+	$(INSTALL_PROGRAM) ztest/yaz-ztest $(BUILD)$(BINDIR)
+	$(INSTALL_PROGRAM) lib/yaz-config $(BUILD)$(BINDIR)
+	$(INSTALL) -d $(BUILD)$(LIBDIR)
+	$(INSTALL_DATA) lib/libyaz.a $(BUILD)$(LIBDIR)
 	@if [ -f lib/librfc.a ]; then \
-		echo "Installing librfc.a -> $(LIBDIR)"; \
-		cp lib/librfc.a $(LIBDIR)/librfc.a; \
-		chmod 644 $(LIBDIR)/librfc.a; \
+		$(INSTALL_DATA) lib/librfc.a $(BUILD)$(LIBDIR); \
         fi
-	@if [ ! -d $(INCDIR) ]; then \
-		echo "Making directory $(INCDIR)"; \
-		mkdir $(INCDIR); \
-	fi
-	@cd include; for f in *.h; do \
-		echo "Installing $$f -> $(INCDIR)"; \
-		cp $$f $(INCDIR)/$$f; chmod 644 $(INCDIR)/$$f; \
+	$(INSTALL) -d $(BUILD)$(INCDIR)/yaz
+	@cd include/yaz; for f in *.h; do \
+		$(INSTALL_DATA) $$f $(BUILD)$(INCDIR)/yaz; \
 	done
-
-install.misc:
-	@if [ ! -d $(YAZDIR) ]; then \
-		echo "Making directory $(YAZDIR)"; \
-		mkdir $(YAZDIR); \
-	fi
+	$(INSTALL) -d $(BUILD)$(YAZTAB)
 	@cd tab; for f in *; do \
 		if [ -f $$f ]; then \
-			echo "Installing $$f -> $(YAZDIR)"; \
-			cp $$f $(YAZDIR)/$$f; chmod 644 $(YAZDIR)/$$f; \
+			$(INSTALL_DATA) $$f $(BUILD)$(YAZTAB); \
 		fi; \
 	done
 

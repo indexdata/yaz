@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclptree.c,v $
- * Revision 1.5  1997-04-30 08:52:06  quinn
+ * Revision 1.6  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.5  1997/04/30 08:52:06  quinn
  * Null
  *
  * Revision 1.4  1996/10/11  15:00:25  adam
@@ -75,7 +78,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include <ccl.h>
+#include <yaz/ccl.h>
 
 void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
 {

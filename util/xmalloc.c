@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.9  1999-09-10 08:58:32  adam
+ * Revision 1.10  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.9  1999/09/10 08:58:32  adam
  * Set TRACE_XMALLOC to 1.
  *
  * Revision 1.8  1999/08/27 09:40:32  adam
@@ -57,8 +60,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <log.h>
-#include <xmalloc.h>
+#include <yaz/log.h>
+#include <yaz/xmalloc.h>
 
 #define TRACE_XMALLOC 1
 

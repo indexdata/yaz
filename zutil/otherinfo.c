@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: otherinfo.c,v $
- * Revision 1.3  1999-11-10 09:06:40  adam
+ * Revision 1.4  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.3  1999/11/10 09:06:40  adam
  * Fixed yaz_oi_update so that it ignores NULL pointer.
  *
  * Revision 1.2  1999/09/13 12:51:35  adam
@@ -21,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <otherinfo.h>
+#include <yaz/otherinfo.h>
 
 void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 {

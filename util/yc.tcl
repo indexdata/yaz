@@ -8,7 +8,10 @@ exec tclsh "$0" "$@"
 # Sebastian Hammer, Adam Dickmeiss
 #
 # $Log: yc.tcl,v $
-# Revision 1.2  1999-06-09 09:43:11  adam
+# Revision 1.3  1999-11-30 13:47:12  adam
+# Improved installation. Moved header files to include/yaz.
+#
+# Revision 1.2  1999/06/09 09:43:11  adam
 # Added option -I and variable h-path to specify path for header files.
 #
 # Revision 1.1  1999/06/08 10:10:16  adam
@@ -907,7 +910,7 @@ proc asnImports {} {
 	    } else {
 		set fname $val
 	    }
-	    puts $file(outh) "\#include \"${fname}.h\""
+	    puts $file(outh) "\#include <$inf(h-dir)${fname}.h>"
 
             if {[info exists inf(prefix,$val)]} {
                 set prefix $inf(prefix,$val)
@@ -1104,12 +1107,12 @@ proc asnModules {} {
 	    if {![info exists inf(h-file)]} {
 		set inf(h-file) ${fname}.h
 	    }
-	    set file(outh) [open $inf(h-path)/$inf(h-file) w]
+	    set file(outh) [open $inf(h-path)/$inf(h-dir)$inf(h-file) w]
 
 	    if {![info exists inf(p-file)]} {
 		set inf(p-file) ${fname}-p.h
 	    }
-	    set file(outp) [open $inf(h-path)/$inf(p-file) w]
+	    set file(outp) [open $inf(h-path)/$inf(h-dir)$inf(p-file) w]
 
 	    set md [clock format [clock seconds]]
 	    
@@ -1125,17 +1128,17 @@ proc asnModules {} {
 	    puts $file(outp) "/* Module-P: $inf(module) */"
 	    puts $file(outp) {}
 
-	    puts $file(outc) "\#include \"$inf(p-file)\""
+	    puts $file(outc) "\#include <$inf(h-dir)$inf(p-file)>"
 
 	    puts $file(outh) "\#ifndef ${ppname}_H"
 	    puts $file(outh) "\#define ${ppname}_H"
 	    puts $file(outh) {}
-	    puts $file(outh) "\#include <odr.h>"
+	    puts $file(outh) "\#include <$inf(h-dir)odr.h>"
 	    
 	    puts $file(outp) "\#ifndef ${ppname}_P_H"
 	    puts $file(outp) "\#define ${ppname}_P_H"
 	    puts $file(outp) {}
-	    puts $file(outp) "\#include \"$inf(h-file)\""
+	    puts $file(outp) "\#include <$inf(h-dir)$inf(h-file)>"
 
 
 	    puts $file(outp) "\#ifdef __cplusplus"
@@ -1304,6 +1307,7 @@ proc userDef {name} {
 set inf(verbose) 0
 set inf(prefix) {yc_ Yc_ YC_}
 set inf(h-path) .
+set inf(h-dir) ""
 
 # Parse command line
 set l [llength $argv]
@@ -1328,6 +1332,13 @@ while {$i < $l} {
              }
 	    set inf(h-path) $p
         }
+	-i* {
+	    set p [string range $arg 2 end]
+	    if {![string length $p]} {
+                 set p [lindex $argv [incr i]]
+            }
+	    set inf(h-dir) [string trim $p \\/]/
+	}
         -h* {
 	    set p [string range $arg 2 end]
 	    if {![string length $p]} {
@@ -1379,7 +1390,7 @@ while {$i < $l} {
 }
 
 if {![info exists inf(iname)]} {
-    puts "YAZ ODR Compiler ${yc_version}"
+    puts "YAZ ASN.1 Compiler ${yc_version}"
     puts -nonewline "Usage: ${argv0}"
     puts { [-v] [-c cfile] [-h hfile] [-p hfile] [-d dfile] [-I path]}
     puts {    [-x prefix] [-m module] file}

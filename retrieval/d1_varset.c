@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_varset.c,v $
- * Revision 1.9  1999-08-27 09:40:32  adam
+ * Revision 1.10  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.9  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.8  1998/10/13 16:09:54  adam
@@ -43,10 +46,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <oid.h>
-#include <log.h>
-
-#include <data1.h>
+#include <yaz/oid.h>
+#include <yaz/log.h>
+#include <yaz/data1.h>
 
 data1_vartype *data1_getvartypebyct (data1_handle dh, data1_varset *set,
 				     char *zclass, char *type)

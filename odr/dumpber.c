@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.10  1999-01-08 11:23:26  adam
+ * Revision 1.11  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.10  1999/01/08 11:23:26  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.9  1998/01/14 09:53:26  quinn
@@ -37,8 +40,8 @@
  *
  */
 
-#include <odr.h>
 #include <stdio.h>
+#include <yaz/odr.h>
 
 static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
 {

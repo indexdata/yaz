@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.15  1999-03-31 11:18:25  adam
+ * Revision 1.16  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.15  1999/03/31 11:18:25  adam
  * Implemented odr_strdup. Added Reference ID to backend server API.
  *
  * Revision 1.14  1998/07/20 12:38:15  adam
@@ -54,8 +57,8 @@
  */
 
 #include <stdlib.h>
-#include <odr.h>
-#include <xmalloc.h>
+#include <yaz/odr.h>
+#include <yaz/xmalloc.h>
 
 /* ------------------------ NIBBLE MEMORY ---------------------- */
 

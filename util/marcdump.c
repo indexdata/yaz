@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.8  1999-05-26 07:49:35  adam
+ * Revision 1.9  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.8  1999/05/26 07:49:35  adam
  * C++ compilation.
  *
  * Revision 1.7  1998/02/11 11:53:36  adam
@@ -34,9 +37,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <marcdisp.h>
-#include <xmalloc.h>
-#include <options.h>
+#include <yaz/marcdisp.h>
+#include <yaz/xmalloc.h>
+#include <yaz/options.h>
 
 #ifndef SEEK_SET
 #define SEEK_SET 0

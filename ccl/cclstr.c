@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclstr.c,v $
- * Revision 1.2  1997-04-30 08:52:07  quinn
+ * Revision 1.3  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.2  1997/04/30 08:52:07  quinn
  * Null
  *
  * Revision 1.1  1996/10/11  15:00:26  adam
@@ -67,7 +70,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <ccl.h>
+#include <yaz/ccl.h>
 
 static int ccli_toupper (int c)
 {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: waislen.c,v $
- * Revision 1.4  1999-01-08 11:23:15  adam
+ * Revision 1.5  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.4  1999/01/08 11:23:15  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.3  1996/02/29 14:23:13  adam
@@ -20,8 +23,8 @@
  */
 
 #include <stdio.h>
-#include <comstack.h>
-#include <tcpip.h>
+#include <yaz/comstack.h>
+#include <yaz/tcpip.h>
 /*
  * Return length of WAIS package or 0
  */

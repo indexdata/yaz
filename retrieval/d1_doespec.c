@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.13  1999-08-27 09:40:32  adam
+ * Revision 1.14  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.13  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.12  1999/04/23 13:34:33  adam
@@ -48,10 +51,11 @@
 
 
 #include <assert.h>
-#include <oid.h>
-#include <log.h>
-#include <proto.h>
-#include <data1.h>
+
+#include <yaz/oid.h>
+#include <yaz/log.h>
+#include <yaz/proto.h>
+#include <yaz/data1.h>
 
 static int match_children(data1_handle dh, data1_node *n,
 			  Z_Espec1 *e, int i, Z_ETagUnit **t,

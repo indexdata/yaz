@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.1  1999-06-08 10:10:16  adam
+ * Revision 1.2  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.1  1999/06/08 10:10:16  adam
  * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
  *
  * Revision 1.22  1999/04/20 09:56:49  adam
@@ -85,10 +88,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <proto.h>
-#include <oid.h>
-
-#include <pquery.h>
+#include <yaz/proto.h>
+#include <yaz/oid.h>
+#include <yaz/pquery.h>
 
 static oid_value p_query_dfset = VAL_NONE;
 

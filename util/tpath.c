@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tpath.c,v $
- * Revision 1.2  1996-10-29 13:36:26  adam
+ * Revision 1.3  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.2  1996/10/29 13:36:26  adam
  * Added header.
  *
  * Revision 1.1  1995/11/01 16:35:00  quinn
@@ -15,7 +18,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <tpath.h>
+#include <yaz/tpath.h>
 
 FILE *yaz_path_fopen(const char *path, const char *name, const char *mode)
 {

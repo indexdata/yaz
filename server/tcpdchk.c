@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpdchk.c,v $
- * Revision 1.3  1999-08-27 09:40:32  adam
+ * Revision 1.4  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.3  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.2  1999/04/20 09:56:48  adam
@@ -41,9 +44,9 @@ int deny_severity = LOG_WARNING;
 #include <unistd.h>
 #endif
 
-#include <comstack.h>
-#include <statserv.h>
-#include <log.h>
+#include <yaz/comstack.h>
+#include <yaz/statserv.h>
+#include <yaz/log.h>
 
 int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 {

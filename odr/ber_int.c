@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.14  1999-05-26 07:49:35  adam
+ * Revision 1.15  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.14  1999/05/26 07:49:35  adam
  * C++ compilation.
  *
  * Revision 1.13  1999/01/08 11:23:22  adam
@@ -49,13 +52,11 @@
  *
  */
 
-
-#define YNETINCLUDE
-#include <yconfig.h>
-
 #include <string.h>
 
-#include <odr.h>
+#define YNETINCLUDE
+
+#include <yaz/odr.h>
 
 static int ber_encinteger(ODR o, int val);
 static int ber_decinteger(const unsigned char *buf, int *val);

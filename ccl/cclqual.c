@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.11  1999-03-31 11:15:37  adam
+ * Revision 1.12  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.11  1999/03/31 11:15:37  adam
  * Fixed memory leaks in ccl_find_str and ccl_qual_rm.
  *
  * Revision 1.10  1998/07/07 15:49:40  adam
@@ -104,7 +107,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include <ccl.h>
+#include <yaz/ccl.h>
 
 /* Definition of CCL_bibset pointer */
 struct ccl_qualifiers {

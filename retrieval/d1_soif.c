@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_soif.c,v $
- * Revision 1.3  1997-09-17 12:10:37  adam
+ * Revision 1.4  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.3  1997/09/17 12:10:37  adam
  * YAZ version 1.4.
  *
  * Revision 1.2  1997/04/30 08:52:11  quinn
@@ -16,9 +19,8 @@
  *
  */
 
-#include <wrbuf.h>
-
-#include <data1.h>
+#include <yaz/wrbuf.h>
+#include <yaz/data1.h>
 
 /*
  * This module generates SOIF (Simple Object Interchange Format) records

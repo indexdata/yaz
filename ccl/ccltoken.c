@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.10  1998-07-07 15:49:41  adam
+ * Revision 1.11  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.10  1998/07/07 15:49:41  adam
  * Added braces to avoid warning.
  *
  * Revision 1.9  1998/02/11 11:53:33  adam
@@ -106,7 +109,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <ccl.h>
+#include <yaz/ccl.h>
 
 /*
  * token_cmp: Compare token with keyword(s)

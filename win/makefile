@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.8 1999-07-21 08:48:02 adam Exp $
+# $Id: makefile,v 1.9 1999-11-30 13:47:12 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -73,10 +73,10 @@ TMP=$(TMPDIR)
 DLL=$(BINDIR)\Yaz.dll
 IMPLIB=$(LIBDIR)\Yaz.lib
 
-CLIENT=$(BINDIR)\client.exe
+CLIENT=$(BINDIR)\yaz-client.exe
 SERVER=$(LIBDIR)\server.lib
-ZTEST=$(BINDIR)\ztest.exe
-PROTOH=$(INCLDIR)\proto.h
+ZTEST=$(BINDIR)\yaz-ztest.exe
+PROTOH=$(INCLDIR)\yaz\proto.h
 
 # shortcut names defined here
 dll : $(DLL) 
@@ -154,8 +154,7 @@ ZTEST_LINK_OPTIONS = /subsystem:console
 # TCL
 TCL="C:\Program Files\Tcl\bin\tclsh80.exe"
 
-COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl -I$(INCLDIR)
-
+COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl -I$(INCLDIR) -i yaz
 
 # Final opt variables
 !if $(DEBUG)
@@ -347,11 +346,11 @@ ALL_OBJS= \
 ##########################################################
 
 !if $(NEW_Z3950)
-$(PROTOH): makefile $(INCLDIR)\z-proto.h
-	type $(INCLDIR)\z-proto.h > $(INCLDIR)\proto.h
+$(PROTOH): makefile $(INCLDIR)\yaz\z-proto.h
+	type $(INCLDIR)\yaz\z-proto.h > $(PROTOH)
 !else
-$(PROTOH): makefile $(INCLDIR)\prt-proto.h 
-	type $(INCLDIR)\prt-proto.h > $(INCLDIR)\proto.h
+$(PROTOH): makefile $(INCLDIR)\yaz\prt-proto.h 
+	type $(INCLDIR)\yaz\prt-proto.h > $(PROTOH)
 !endif
 
 
@@ -363,21 +362,21 @@ Z3950_C_DIR=$(Z3950DIR)
 #!!! Should be moved to OBJ, but that requires too much trickery
 
 # Files generated from datetime.asn
-DATETIME_H_FILES = $(INCLDIR)\z-date.h
+DATETIME_H_FILES = $(INCLDIR)\yaz\z-date.h
 DATETIME_C_FILES = $(Z3950_C_DIR)\z-date.c
 
 # Files generated from univres.asn
-UNIVRES_H_FILES = $(INCLDIR)\z-univ.h
+UNIVRES_H_FILES = $(INCLDIR)\yaz\z-univ.h
 UNIVRES_C_FILES = $(Z3950_C_DIR)\z-univ.c
 
 # Files generated from esupdate.asn
-ESUPDATE_H_FILES = $(INCLDIR)\zes-update.h
+ESUPDATE_H_FILES = $(INCLDIR)\yaz\zes-update.h
 ESUPDATE_C_FILES = $(Z3950_C_DIR)\zes-update.c
 
 # Files created from z3950v3.asn
 Z3950V3_H_FILES= \
-   $(INCLDIR)\z-accdes1.h \
-   $(INCLDIR)\z-core.h
+   $(INCLDIR)\yaz\z-accdes1.h \
+   $(INCLDIR)\yaz\z-core.h
 
 Z3950V3_C_FILES= \
    $(Z3950_C_DIR)\z-accdes1.c \
@@ -438,11 +437,11 @@ generated_files: \
 
 # Yaz client
 {$(CLIENTDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 	/D"_CONSOLE"
+	@$(CPP) $(COPT) $< /D"_CONSOLE"
 
 # Ztest
 {$(ZTESTDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< /D"_CONSOLE"	/D"_MBCS"
+	@$(CPP) $(COPT) $< /D"_CONSOLE"
 
 # Server
 {$(SERVERDIR)}.c{$(OBJDIR)}.obj:
@@ -505,7 +504,7 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS)
 		$(DLL_LINK_OPTIONS)
 		$(DLL_OBJS) 
 		/out:$(DLL) 
-		/implib:$(IMPLIB)
+		/implib:"$(LIBDIR)/yaz.lib"
 		/pdb:"$(LIBDIR)/yaz.pdb" 
 		/map:"$(LIBDIR)/yaz.map"  
 <<
@@ -517,8 +516,10 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS)
 		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
-		$(YAZ_CLIENT_OBJS) 
-		/out:$(CLIENT) 
+		$(YAZ_CLIENT_OBJS)
+		/pdb:"$(LIBDIR)/yaz-client.pdb"
+		/map:"$(LIBDIR)/yaz-client.map"
+		/out:$(CLIENT)
 <<
 
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
@@ -527,10 +528,13 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
         $(LNKOPT) 
 		$(ZTEST_LINK_OPTIONS)
 		$(LINK_LIBS) 
-		shell32.lib 
+		shell32.lib
 		$(IMPLIB)
 		$(SERVER)
 		$(ZTEST_OBJS) 
+		/implib:"$(LIBDIR)/yaz-ztest.lib"
+		/pdb:"$(LIBDIR)/yaz-ztest.pdb"
+		/map:"$(LIBDIR)/yaz-ztest.map"
 		/out:$(ZTEST) 
 <<
 
@@ -555,20 +559,21 @@ $(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS)
 
 ############## clean
 clean:
-	del $(OBJDIR)\*.obj
-	del $(OBJDIR)\*.sbr
 	del $(DLL) 
 	del $(CLIENT)
 	del $(SERVER)
 	del $(ZTEST)
 	del $(TMPDIR)\*.
+	del $(LIBDIR)\*.MAP
+	del $(LIBDIR)\*.LIB
+	del $(OBJDIR)\*.OBJ
 	del $(PROTOH)
 
 realclean: clean
 	del $(Z3950_C_DIR)\*.c
 	del $(Z3950_C_DIR)\*.h
-	del $(INCLDIR)\z-accdes1.h
-	del $(INCLDIR)\z-core.h
+	del $(INCLDIR)\yaz\z-accdes1.h
+	del $(INCLDIR)\yaz\z-core.h
 	del $(DATETIME_H_FILES)
 	del $(UNIVRES_H_FILES)
 	del $(ESUPDATE_H_FILES)
@@ -606,7 +611,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.8  1999-07-21 08:48:02  adam
+# Revision 1.9  1999-11-30 13:47:12  adam
+# Improved installation. Moved header files to include/yaz.
+#
+# Revision 1.8  1999/07/21 08:48:02  adam
 # Removed dmalloc.obj.
 #
 # Revision 1.7  1999/06/09 15:10:08  heikki

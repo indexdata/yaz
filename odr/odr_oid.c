@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.14  1999-04-20 09:56:48  adam
+ * Revision 1.15  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.14  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -50,8 +53,8 @@
  *
  */
 
-#include <odr.h>
-#include <oid.h>
+#include <yaz/odr.h>
+#include <yaz/oid.h>
 
 /*
  * Top level oid en/decoder.

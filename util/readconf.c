@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: readconf.c,v $
- * Revision 1.8  1999-08-27 09:40:32  adam
+ * Revision 1.9  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.8  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.7  1999/06/30 09:10:32  adam
@@ -46,8 +49,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include <log.h>
-#include <readconf.h>
+#include <yaz/log.h>
+#include <yaz/readconf.h>
 
 #define l_isspace(c) ((c) == '\t' || (c) == ' ' || (c) == '\n' || (c) == '\r')
 

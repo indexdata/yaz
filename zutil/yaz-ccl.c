@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.2  1999-06-16 12:00:08  adam
+ * Revision 1.3  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.2  1999/06/16 12:00:08  adam
  * Added proximity.
  *
  * Revision 1.1  1999/06/08 10:12:43  adam
@@ -36,7 +39,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include <yaz-ccl.h>
+#include <yaz/yaz-ccl.h>
 
 static Z_RPNStructure *ccl_rpn_structure (ODR o, struct ccl_rpn_node *p);
 

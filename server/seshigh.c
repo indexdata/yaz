@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.98  1999-11-29 15:12:27  adam
+ * Revision 1.99  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.98  1999/11/29 15:12:27  adam
  * Changed the way implementationName - and version is set.
  *
  * Revision 1.96  1999/11/04 14:58:44  adam
@@ -344,18 +347,18 @@
 #endif
 #include <assert.h>
 
-#include <yconfig.h>
-#include <xmalloc.h>
-#include <comstack.h>
+#include <yaz/yconfig.h>
+#include <yaz/xmalloc.h>
+#include <yaz/comstack.h>
 #include "eventl.h"
 #include "session.h"
-#include <proto.h>
-#include <oid.h>
-#include <log.h>
-#include <logrpn.h>
-#include <statserv.h>
+#include <yaz/proto.h>
+#include <yaz/oid.h>
+#include <yaz/log.h>
+#include <yaz/logrpn.h>
+#include <yaz/statserv.h>
 
-#include <backend.h>
+#include <yaz/backend.h>
 
 static int process_request(association *assoc, request *req, char **msg);
 void backend_response(IOCHAN i, int event);

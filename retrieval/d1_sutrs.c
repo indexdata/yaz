@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sutrs.c,v $
- * Revision 1.5  1999-10-21 12:06:29  adam
+ * Revision 1.6  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.5  1999/10/21 12:06:29  adam
  * Retrieval module no longer uses ctype.h - functions.
  *
  * Revision 1.4  1997/09/17 12:10:38  adam
@@ -22,7 +25,7 @@
  *
  */
 
-#include <data1.h>
+#include <yaz/data1.h>
 
 #define NTOBUF_INDENT   2
 #define NTOBUF_MARGIN 75

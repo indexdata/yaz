@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.19  1999-04-20 09:56:48  adam
+ * Revision 1.20  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.19  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -65,8 +68,8 @@
  *
  */
 
-#include <odr.h>
 #include <assert.h>
+#include <yaz/odr.h>
 
 void odr_setlenlen(ODR o, int len)
 {

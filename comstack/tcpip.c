@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.31  1999-04-29 07:31:23  adam
+ * Revision 1.32  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.31  1999/04/29 07:31:23  adam
  * Changed tcpip_strtoaddr_ex so that only part 'till '/' is considered
  * part of hostname.
  *
@@ -178,12 +181,12 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include <comstack.h>
-#include <tcpip.h>
-#include <log.h>
+#include <yaz/comstack.h>
+#include <yaz/tcpip.h>
+#include <yaz/log.h>
 
 /* Chas added the following, so we get the definition of completeBER */
-#include <odr.h>
+#include <yaz/odr.h>
 
 int tcpip_close(COMSTACK h);
 int tcpip_put(COMSTACK h, char *buf, int size);

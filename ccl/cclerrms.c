@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclerrms.c,v $
- * Revision 1.7  1998-02-11 11:53:33  adam
+ * Revision 1.8  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.7  1998/02/11 11:53:33  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.6  1997/09/29 08:56:37  adam
@@ -83,7 +86,7 @@
  */
 
 /* Chas: Required for the correct definition of ccl_err_msg */
-#include "yaz-ccl.h"
+#include <yaz/yaz-ccl.h>
 
 static char *err_msg_array[] = {
     "Ok",

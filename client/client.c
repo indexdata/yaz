@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.89  1999-11-04 14:58:44  adam
+ * Revision 1.90  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.89  1999/11/04 14:58:44  adam
  * Added status elements for backend delete result set handler.
  * Updated delete result result set command for client.
  *
@@ -298,21 +301,21 @@
 #include <time.h>
 #include <assert.h>
 
-#include <yaz-util.h>
+#include <yaz/yaz-util.h>
 
-#include <tcpip.h>
+#include <yaz/tcpip.h>
 #ifdef USE_XTIMOSI
-#include <xmosi.h>
+#include <yaz/xmosi.h>
 #endif
 
-#include <proto.h>
-#include <marcdisp.h>
-#include <diagbib1.h>
+#include <yaz/proto.h>
+#include <yaz/marcdisp.h>
+#include <yaz/diagbib1.h>
 
-#include <pquery.h>
+#include <yaz/pquery.h>
 
 #if CCL2RPN
-#include <yaz-ccl.h>
+#include <yaz/yaz-ccl.h>
 #endif
 
 #if HAVE_READLINE_READLINE_H

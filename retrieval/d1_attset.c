@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.13  1999-10-21 12:06:29  adam
+ * Revision 1.14  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.13  1999/10/21 12:06:29  adam
  * Retrieval module no longer uses ctype.h - functions.
  *
  * Revision 1.12  1999/08/27 09:40:32  adam
@@ -58,9 +61,9 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <log.h>
-#include <d1_attset.h>
-#include <data1.h>
+#include <yaz/log.h>
+#include <yaz/d1_attset.h>
+#include <yaz/data1.h>
 
 data1_att *data1_getattbyname(data1_handle dh, data1_attset *s, char *name)
 {

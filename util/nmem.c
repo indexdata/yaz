@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.18  1999-08-27 09:40:32  adam
+ * Revision 1.19  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.18  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.17  1999/07/13 13:28:25  adam
@@ -74,9 +77,9 @@
 
 #include <assert.h>
 #include <string.h>
-#include <xmalloc.h>
-#include <nmem.h>
-#include <log.h>
+#include <yaz/xmalloc.h>
+#include <yaz/nmem.h>
+#include <yaz/log.h>
 #ifdef WIN32
 #include <windows.h>
 #elif _REENTRANT

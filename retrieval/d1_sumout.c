@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sumout.c,v $
- * Revision 1.4  1999-08-27 09:40:32  adam
+ * Revision 1.5  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.4  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.3  1998/02/11 11:53:35  adam
@@ -23,9 +26,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <log.h>
-#include <proto.h>
-#include <data1.h>
+#include <yaz/log.h>
+#include <yaz/proto.h>
+#include <yaz/data1.h>
 
 static int *f_integer(data1_node *c, ODR o)
 {

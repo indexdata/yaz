@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.3 1999-06-09 09:43:31 adam Exp $
+# $Id: Makefile.in,v 1.4 1999-11-30 13:47:12 adam Exp $
 
 SHELL=/bin/sh
 
@@ -43,16 +43,16 @@ $(LIB): $(PO)
 	$(RANLIB) $(LIB)
 
 $(CF) ../include/z-accdes1.h: z.tcl z3950v3.asn ../util/yc.tcl
-	../util/yc.tcl -d z.tcl -I ../include $(YCFLAGS) z3950v3.asn
+	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) z3950v3.asn
 
 z-date.c ../include/z-date.h: z.tcl datetime.asn ../util/yc.tcl
-	../util/yc.tcl -d z.tcl -I ../include $(YCFLAGS) datetime.asn
+	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) datetime.asn
 
 z-univ.c ../include/z-univ.h: z.tcl univres.asn
-	../util/yc.tcl -d z.tcl -I ../include $(YCFLAGS) univres.asn
+	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) univres.asn
 
 zes-update.c ../include/zes-update.h: z.tcl esupdate.asn
-	../util/yc.tcl -d z.tcl -I ../include $(YCFLAGS) esupdate.asn
+	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) esupdate.asn
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(DEFS) $<

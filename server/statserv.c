@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.58  1999-08-27 09:40:32  adam
+ * Revision 1.59  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.58  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.57  1999/07/06 12:17:15  adam
@@ -219,16 +222,16 @@
 #include <signal.h>
 #include <errno.h>
 
-#include <comstack.h>
-#include <tcpip.h>
-#include <options.h>
+#include <yaz/comstack.h>
+#include <yaz/tcpip.h>
+#include <yaz/options.h>
 #ifdef USE_XTIMOSI
-#include <xmosi.h>
+#include <yaz/xmosi.h>
 #endif
-#include <log.h>
+#include <yaz/log.h>
 #include "eventl.h"
 #include "session.h"
-#include <statserv.h>
+#include <yaz/statserv.h>
 
 static IOCHAN pListener = NULL;
 

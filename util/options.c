@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: options.c,v $
- * Revision 1.6  1997-09-01 08:54:13  adam
+ * Revision 1.7  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.6  1997/09/01 08:54:13  adam
  * New windows NT/95 port using MSV5.0. Made prefix query handling
  * thread safe. The function options ignores empty arguments when met.
  *
@@ -33,7 +36,7 @@
  */
 #include <stdlib.h>
 
-#include <options.h>
+#include <yaz/options.h>
 
 static int arg_no = 1;
 static int arg_off = 0;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.15  1999-10-21 12:06:29  adam
+ * Revision 1.16  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.15  1999/10/21 12:06:29  adam
  * Retrieval module no longer uses ctype.h - functions.
  *
  * Revision 1.14  1999/08/27 09:40:32  adam
@@ -63,13 +66,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <oid.h>
-#include <log.h>
-#include <marcdisp.h>
-#include <readconf.h>
-#include <xmalloc.h>
-#include <data1.h>
-#include <tpath.h>
+#include <yaz/oid.h>
+#include <yaz/log.h>
+#include <yaz/marcdisp.h>
+#include <yaz/readconf.h>
+#include <yaz/xmalloc.h>
+#include <yaz/data1.h>
+#include <yaz/tpath.h>
 
 data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 {

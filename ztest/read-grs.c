@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: read-grs.c,v $
- * Revision 1.4  1999-08-27 09:40:32  adam
+ * Revision 1.5  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.4  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.3  1999/03/31 11:18:25  adam
@@ -33,8 +36,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include <proto.h>
-#include <log.h>
+#include <yaz/proto.h>
+#include <yaz/log.h>
 
 #define GRS_MAX_FIELDS 50
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdisp.c,v $
- * Revision 1.7  1997-09-24 13:29:40  adam
+ * Revision 1.8  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.7  1997/09/24 13:29:40  adam
  * Added verbose option -v to marcdump utility.
  *
  * Revision 1.6  1997/09/04 07:52:27  adam
@@ -30,8 +33,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <marcdisp.h>
-#include <yaz-util.h>
+#include <yaz/marcdisp.h>
+#include <yaz/yaz-util.h>
 
 int marc_display_ex (const char *buf, FILE *outf, int debug)
 {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_tag.c,v $
- * Revision 1.9  1998-02-11 11:53:34  adam
+ * Revision 1.10  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.9  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.8  1997/05/14 06:53:59  adam
@@ -33,7 +36,7 @@
  *
  */
 
-#include <odr.h>
+#include <yaz/odr.h>
 
 int odr_peektag(ODR o, int *zclass, int *tag, int *cons)
 {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_null.c,v $
- * Revision 1.8  1995-09-29 17:12:18  quinn
+ * Revision 1.9  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.8  1995/09/29 17:12:18  quinn
  * Smallish
  *
  * Revision 1.7  1995/09/27  15:02:55  quinn
@@ -31,7 +34,7 @@
  *
  */
 
-#include <odr.h>
+#include <yaz/odr.h>
 
 /*
  * BER-en/decoder for NULL type.

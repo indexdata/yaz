@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.19  1999-08-27 09:40:32  adam
+ * Revision 1.20  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.19  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.18  1998/10/28 10:27:00  adam
@@ -100,7 +103,7 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <time.h>
-#include <log.h>
+#include <yaz/log.h>
 
 #define HAS_STRERROR 1
 

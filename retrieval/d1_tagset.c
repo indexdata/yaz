@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.13  1999-10-21 12:06:29  adam
+ * Revision 1.14  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.13  1999/10/21 12:06:29  adam
  * Retrieval module no longer uses ctype.h - functions.
  *
  * Revision 1.12  1999/08/27 09:40:32  adam
@@ -59,8 +62,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <log.h>
-#include <data1.h>
+#include <yaz/log.h>
+#include <yaz/data1.h>
 
 /*
  * We'll probably want to add some sort of hashed index to these lookup-

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.28  1999-08-27 09:40:32  adam
+ * Revision 1.29  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.28  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.27  1999/02/02 13:57:34  adam
@@ -94,7 +97,6 @@
  *
  */
 
-#include <yconfig.h>
 #include <stdio.h>
 #include <assert.h>
 #ifdef WIN32
@@ -106,12 +108,13 @@
 #include <errno.h>
 #include <string.h>
 
-#include <log.h>
-#include <comstack.h>
-#include <xmalloc.h>
+#include <yaz/yconfig.h>
+#include <yaz/log.h>
+#include <yaz/comstack.h>
+#include <yaz/xmalloc.h>
 #include "eventl.h"
 #include "session.h"
-#include <statserv.h>
+#include <yaz/statserv.h>
 
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
 {

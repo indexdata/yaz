@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: logrpn.c,v $
- * Revision 1.2  1999-08-27 09:40:33  adam
+ * Revision 1.3  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.2  1999/08/27 09:40:33  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.1  1999/06/08 10:10:16  adam
@@ -51,8 +54,8 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <log.h>
-#include <logrpn.h>
+#include <yaz/log.h>
+#include <yaz/logrpn.h>
 
 static void attrStr (int type, int value, enum oid_value ast, char *str)
 {

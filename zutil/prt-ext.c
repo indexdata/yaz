@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.1  1999-06-08 10:10:16  adam
+ * Revision 1.2  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.1  1999/06/08 10:10:16  adam
  * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
  *
  * Revision 1.22  1999/05/26 15:24:26  adam
@@ -79,7 +82,7 @@
  *
  */
 
-#include <proto.h>
+#include <yaz/proto.h>
 
 /*
  * The table below should be moved to the ODR structure itself and

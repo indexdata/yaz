@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oid.c,v $
- * Revision 1.9  1995-09-29 17:12:19  quinn
+ * Revision 1.10  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.9  1995/09/29 17:12:19  quinn
  * Smallish
  *
  * Revision 1.8  1995/09/27  15:02:56  quinn
@@ -34,7 +37,7 @@
  *
  */
 
-#include <odr.h>
+#include <yaz/odr.h>
 
 int ber_oidc(ODR o, Odr_oid *p)
 {

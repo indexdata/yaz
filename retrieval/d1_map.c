@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.16  1999-10-21 12:06:29  adam
+ * Revision 1.17  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.16  1999/10/21 12:06:29  adam
  * Retrieval module no longer uses ctype.h - functions.
  *
  * Revision 1.15  1999/08/27 09:40:32  adam
@@ -67,13 +70,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <oid.h>
-#include <log.h>
-#include <readconf.h>
-
-#include <tpath.h>
-#include <data1.h>
-#include <d1_map.h>
+#include <yaz/oid.h>
+#include <yaz/log.h>
+#include <yaz/readconf.h>
+#include <yaz/tpath.h>
+#include <yaz/data1.h>
+#include <yaz/d1_map.h>
 
 data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 {

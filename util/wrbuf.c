@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: wrbuf.c,v $
- * Revision 1.7  1999-11-03 09:05:56  adam
+ * Revision 1.8  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.7  1999/11/03 09:05:56  adam
  * Implemented wrbuf_puts.
  *
  * Revision 1.6  1999/10/28 11:36:40  adam
@@ -35,7 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <wrbuf.h>
+#include <yaz/wrbuf.h>
 
 WRBUF wrbuf_alloc(void)
 {

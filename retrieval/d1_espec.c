@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.17  1999-10-21 12:06:29  adam
+ * Revision 1.18  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.17  1999/10/21 12:06:29  adam
  * Retrieval module no longer uses ctype.h - functions.
  *
  * Revision 1.16  1999/08/27 09:40:32  adam
@@ -72,10 +75,11 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <odr.h>
-#include <proto.h>
-#include <log.h>
-#include <data1.h>
+
+#include <yaz/odr.h>
+#include <yaz/proto.h>
+#include <yaz/log.h>
+#include <yaz/data1.h>
 
 static Z_Variant *read_variant(int argc, char **argv, NMEM nmem,
 			       const char *file, int lineno)

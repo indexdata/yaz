@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bool.c,v $
- * Revision 1.8  1995-09-29 17:12:16  quinn
+ * Revision 1.9  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.8  1995/09/29 17:12:16  quinn
  * Smallish
  *
  * Revision 1.7  1995/09/27  15:02:55  quinn
@@ -32,8 +35,7 @@
  */
 
 #include <stdio.h>
-#include <odr.h>
-
+#include <yaz/odr.h>
 
 int ber_boolean(ODR o, int *val)
 {

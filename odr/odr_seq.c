@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.24  1999-04-20 09:56:48  adam
+ * Revision 1.25  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.24  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -81,8 +84,8 @@
  *
  */
 
-#include <odr.h>
 #include <assert.h>
+#include <yaz/odr.h>
 
 int odr_sequence_begin(ODR o, void *p, int size, const char *name)
 {

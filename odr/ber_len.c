@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_len.c,v $
- * Revision 1.7  1999-01-08 11:23:23  adam
+ * Revision 1.8  1999-11-30 13:47:11  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.7  1999/01/08 11:23:23  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.6  1995/09/29 17:12:17  quinn
@@ -20,7 +23,7 @@
  */
 
 #include <stdio.h>
-#include <odr.h>
+#include <yaz/odr.h>
 
 /*
  * Encode BER length octets. If exact, lenlen is the exact desired

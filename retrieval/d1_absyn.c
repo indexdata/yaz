@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.25  1999-10-21 12:06:29  adam
+ * Revision 1.26  1999-11-30 13:47:12  adam
+ * Improved installation. Moved header files to include/yaz.
+ *
+ * Revision 1.25  1999/10/21 12:06:29  adam
  * Retrieval module no longer uses ctype.h - functions.
  *
  * Revision 1.24  1999/08/27 09:40:32  adam
@@ -104,9 +107,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <oid.h>
-#include <log.h>
-#include <data1.h>
+#include <yaz/oid.h>
+#include <yaz/log.h>
+#include <yaz/data1.h>
 
 #define D1_MAX_NESTING  128
 
