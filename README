@@ -31,9 +31,7 @@ the DANBIB test target, you might use:
 
 client osi:0103/find2.denet.dk:4500
 
-Client supports CCL-queries, with the mapping between qualifiers and
-attribute values specified in the file default.bib in the working
-directory. Use '?' to get a list of the available commands.
+Use '?' to get a list of the available commands.
 
 The directories:
 

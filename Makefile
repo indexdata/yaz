@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.16 1995-06-14 15:26:30 quinn Exp $
+# $Id: Makefile,v 1.17 1995-06-15 07:44:39 quinn Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 ODEFS=-DUSE_XTIMOSI
@@ -10,7 +10,7 @@ LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
 XMOSI=xmosi.o
 
 # Take out the Z_95 if you based your app on v.21b or earlier.
-DEFS=$(ODEFS) -DZ_95
+DEFS=$(ODEFS)
 #CC=
 SHELL=/bin/sh
 MAKE=make
