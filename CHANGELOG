@@ -1,5 +1,18 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- NOT YET RELEASED
+
+CQL changes to reflect recent changes to the specification:
+* Documentation talks about context sets instead of index sets.
+* Documentation talks about indexes instead of qualifiers.
+* The CQL-to-PQF transformer's configuration file now uses
+	"index.set.name = <attributes>" instead of the old form
+	"qualifier.set.name = <attributes>".  (Both forms are still
+	understood but the latter is deprecated.)
+* CQL terms with no explicit index specified are now interpreted as
+	cql.serverChoice instead of srw.serverChoice (which of course
+	behaves exactly the same.)
+
 --- 2.0.7 2003/12/16
 
 MARC conversion can now generate ISO2709 output in another
