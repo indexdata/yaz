@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.7  1995-03-08 12:12:30  quinn
+ * Revision 1.8  1995-03-15 11:18:05  quinn
+ * Fixed serious bug in odr_cons
+ *
+ * Revision 1.7  1995/03/08  12:12:30  quinn
  * Added better error checking.
  *
  * Revision 1.6  1995/02/10  15:55:29  quinn
@@ -112,9 +115,17 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 	    }
 	    break;
     	case ODR_ENCODE: case ODR_PRINT:
+#ifdef ODR_DEBUG
+	    fprintf(stderr, "[seqof: num=%d]", *num);
+#endif
 	    for (i = 0; i < *num; i++)
+	    {
+#ifdef ODR_DEBUG
+		fprintf(stderr, "[seqof: elem #%d]", i);
+#endif
 	    	if (!(*type)(o, *pp + i, 0))
 		    return 0;
+	    }
 	    break;
     	default:
 	    o->error = OOTHER;

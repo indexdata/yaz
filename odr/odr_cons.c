@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.7  1995-03-10 11:44:41  quinn
+ * Revision 1.8  1995-03-15 11:18:04  quinn
+ * Fixed serious bug in odr_cons
+ *
+ * Revision 1.7  1995/03/10  11:44:41  quinn
  * Fixed serious stack-bug in odr_cons_begin
  *
  * Revision 1.6  1995/03/08  12:12:23  quinn
@@ -52,6 +55,9 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
     	return 0;
     }
     o->stack[++(o->stackp)].lenb = o->bp;
+#ifdef ODR_DEBUG
+    fprintf(stderr, "[cons_begin(%d)]", o->stackp);
+#endif
     if (o->direction == ODR_ENCODE || o->direction == ODR_PRINT)
     {
 	o->stack[o->stackp].lenlen = 1;
@@ -130,9 +136,19 @@ int odr_constructed_end(ODR o)
 	    }
 	    if (res == 0)   /* indefinite encoding */
 	    {
-	    	*(o->bp++) = *(o->bp++) = 0;
-	    	o->left--;
+#ifdef ODR_DEBUG
+		fprintf(stderr, "[cons_end(%d): indefinite]", o->stackp);
+#endif
+	    	*(o->bp++) = 0;
+	    	*(o->bp++) = 0;
+	    	o->left -= 2;
 	    }
+#ifdef ODR_DEBUG
+	    else
+	    {
+	    	fprintf(stderr, "[cons_end(%d): definite]", o->stackp);
+	    }
+#endif
 	    o->stackp--;
 	    return 1;
     	case ODR_PRINT: return 1;
