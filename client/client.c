@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.73  1998-10-20 13:55:43  quinn
+ * Revision 1.74  1999-02-01 15:35:21  adam
+ * Added XML display.
+ *
+ * Revision 1.73  1998/10/20 13:55:43  quinn
  * Fixed Scan bug in asn and client
  *
  * Revision 1.72  1998/10/20 13:23:15  quinn
@@ -659,10 +662,16 @@ static void display_record(Z_DatabaseRecord *p)
         printf("%.*s", r->u.octet_aligned->len, r->u.octet_aligned->buf);
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
     {
-        const char *marc_buf = (char*)p->u.octet_aligned->buf;
-        marc_display (marc_buf, NULL);
+        const char *octet_buf = (char*)p->u.octet_aligned->buf;
+	if (ent->value == VAL_TEXT_XML || VAL_APPLICATION_XML)
+	{
+	    fwrite (octet_buf, 1, p->u.octet_aligned->len, stdout);
+	    printf ("\n");
+        }
+	else
+            marc_display (octet_buf, NULL);
         if (marcdump)
-            fwrite (marc_buf, strlen (marc_buf), 1, marcdump);
+            fwrite (octet_buf, 1, p->u.octet_aligned->len, marcdump);
     }
     else if (ent && ent->value == VAL_SUTRS)
     {
