@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2002-2003, Index Data
+ * Copyright (c) 2002-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstmatchstr.c,v 1.1 2003-10-27 12:21:38 adam Exp $
+ * $Id: tstmatchstr.c,v 1.2 2004-09-29 20:15:42 adam Exp $
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <yaz/yaz-iconv.h>
 

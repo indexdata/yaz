@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2003, Index Data
+ * Copyright (c) 2002-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstnmem.c,v 1.1 2003-10-27 12:21:38 adam Exp $
+ * $Id: tstnmem.c,v 1.2 2004-09-29 20:15:48 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -11,6 +11,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 #include <yaz/nmem.h>
