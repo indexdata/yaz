@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.33  2000-11-29 14:22:47  adam
+ * Revision 1.34  2000-12-05 10:06:23  adam
+ * Added support for null-data rules like <tag/>.
+ *
+ * Revision 1.33  2000/11/29 14:22:47  adam
  * Implemented XML/SGML attributes for data1 so that d1_read reads them
  * and d1_write generates proper attributes for XML/SGML records. Added
  * register locking for threaded version.
@@ -416,10 +419,22 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 #endif
 	    char tag[64];
 	    char args[256];
-	    size_t i;
-	    for (i = 0; (c=(*get_byte)(fh)) && c != '>' && !d1_isspace(c);)
+	    int null_tag = 0;
+	    int end_tag = 0;
+	    size_t i = 0;
+
+	    c = (*get_byte)(fh);
+	    if (c == '/')
+	    {
+		end_tag = 1;
+		c = (*get_byte)(fh);
+	    }
+	    while (c && c != '>' && c != '/' && !d1_isspace(c))
+	    {
 		if (i < (sizeof(tag)-1))
 		    tag[i++] = c;
+		c = (*get_byte)(fh);
+	    }
 	    tag[i] = '\0';
 #if DATA1_USING_XATTR
 	    xattr = data1_read_xattr (dh, m, get_byte, fh, wrbuf, &c);
@@ -427,11 +442,16 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 #else
 	    while (d1_isspace(c))
 		c = (*get_byte)(fh);
-	    for (i = 0; c && c != '>'; c = (*get_byte)(fh))
+	    for (i = 0; c && c != '>' && c != '/'; c = (*get_byte)(fh))
 		if (i < (sizeof(args)-1))
 		    args[i++] = c;
 	    args[i] = '\0';
 #endif
+	    if (c == '/')
+	    {    /* <tag attrs/> or <tag/> */
+		null_tag = 1;
+		c = (*get_byte)(fh);
+	    }
 	    if (c != '>')
 	    {
 		yaz_log(LOG_WARN, "d1: %d: Malformed tag", line);
@@ -441,9 +461,9 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		c = (*get_byte)(fh);
 
 	    /* End tag? */
-	    if (*tag == '/')       
+	    if (end_tag)       
 	    {
-		if (tag[1] == '\0')
+		if (*tag == '\0')
 		    --level;        /* </> */
 		else
 		{                   /* </tag> */
@@ -452,9 +472,9 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		    {
 			parent = d1_stack[--i];
 			if ((parent->which == DATA1N_root &&
-			     !strcmp(tag+1, parent->u.root.type)) ||
+			     !strcmp(tag, parent->u.root.type)) ||
 			    (parent->which == DATA1N_tag &&
-			     !strcmp(tag+1, parent->u.tag.tag)))
+			     !strcmp(tag, parent->u.tag.tag)))
 			{
 			    level = i;
 			    break;
@@ -561,7 +581,9 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    else if (parent)
 		parent->child = res;
 	    d1_stack[level] = res;
-	    d1_stack[++level] = 0;
+	    d1_stack[level+1] = 0;
+	    if (!null_tag)
+		++level;
 	}
 	else /* != '<'... this is a body of text */
 	{
