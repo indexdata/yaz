@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.50  1997-09-17 12:10:29  adam
+ * Revision 1.51  1997-09-26 09:41:55  adam
+ * Updated client to handle multiple diagnostics.
+ *
+ * Revision 1.50  1997/09/17 12:10:29  adam
  * YAZ version 1.4.
  *
  * Revision 1.49  1997/09/04 13:45:17  adam
@@ -552,41 +555,42 @@ static void display_record(Z_DatabaseRecord *p)
     }
 }
 
-static void display_diagrec(Z_DiagRec *p)
-{
-    oident *ent;
-#ifdef Z_95
-    Z_DefaultDiagFormat *r;
-#else
-    Z_DiagRec *r = p;
-#endif
 
-    printf("Diagnostic message from database:\n");
-#ifdef Z_95
-    if (p->which != Z_DiagRec_defaultFormat)
+static void display_diagrecs(Z_DiagRec **pp, int num)
+{
+    int i;
+    oident *ent;
+    Z_DefaultDiagFormat *r;
+
+    printf("Diagnostic message(s) from database:\n");
+    for (i = 0; i<num; i++)
     {
-        printf("Diagnostic record not in default format.\n");
-        return;
+	Z_DiagRec *p = pp[i];
+	if (p->which != Z_DiagRec_defaultFormat)
+	{
+	    printf("Diagnostic record not in default format.\n");
+	    return;
+	}
+	else
+	    r = p->u.defaultFormat;
+	if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
+	    ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
+	    printf("Missing or unknown diagset\n");
+	printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
+	if (r->addinfo && *r->addinfo)
+	    printf(" -- '%s'\n", r->addinfo);
+	else
+	    printf("\n");
     }
-    else
-        r = p->u.defaultFormat;
-#endif
-    if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
-        ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
-        printf("Missing or unknown diagset\n");
-    printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
-    if (r->addinfo && *r->addinfo)
-        printf(" -- '%s'\n", r->addinfo);
-    else
-        printf("\n");
 }
+
 
 static void display_nameplusrecord(Z_NamePlusRecord *p)
 {
     if (p->databaseName)
         printf("[%s]", p->databaseName);
     if (p->which == Z_NamePlusRecord_surrogateDiagnostic)
-        display_diagrec(p->u.surrogateDiagnostic);
+        display_diagrecs(&p->u.surrogateDiagnostic, 1);
     else
         display_record(p->u.databaseRecord);
 }
@@ -596,8 +600,11 @@ static void display_records(Z_Records *p)
     int i;
 
     if (p->which == Z_Records_NSD)
-        display_diagrec(p->u.nonSurrogateDiagnostic);
-    else
+	display_diagrecs (&p->u.nonSurrogateDiagnostic, 1);
+    else if (p->which == Z_Records_multipleNSD)
+	display_diagrecs (p->u.multipleNonSurDiagnostics->diagRecs,
+			  p->u.multipleNonSurDiagnostics->num_diagRecs);
+    else 
     {
         printf("Records: %d\n", p->u.databaseOrSurDiagnostics->num_records);
         for (i = 0; i < p->u.databaseOrSurDiagnostics->num_records; i++)
@@ -909,7 +916,7 @@ int cmd_quit(char *arg)
 {
     printf("See you later, alligator.\n");
     exit(0);
-	return 0;
+    return 0;
 }
 
 int cmd_cancel(char *arg)
@@ -986,10 +993,11 @@ void process_scanResponse(Z_ScanResponse *res)
                 display_term(ent->entries[i]->u.termInfo);
             }
             else
-                display_diagrec(ent->entries[i]->u.surrogateDiagnostic);
+                display_diagrecs(&ent->entries[i]->u.surrogateDiagnostic, 1);
     }
     else
-        display_diagrec(res->entries->u.nonSurrogateDiagnostics->diagRecs[0]);
+        display_diagrecs(&res->entries->
+			 u.nonSurrogateDiagnostics->diagRecs[0], 1);
 }
 
 int cmd_scan(char *arg)
