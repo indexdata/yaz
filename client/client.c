@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.122  2001-05-16 07:27:29  adam
+ * Revision 1.123  2001-06-11 12:54:47  heikki
+ * Displayng diags in EsResponse, even if they should not be there...
+ *
+ * Revision 1.122  2001/05/16 07:27:29  adam
  * Reference id set for InitRequest.
  *
  * Revision 1.121  2001/04/22 12:26:17  ja7
@@ -1334,6 +1337,11 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
         display_diagrecs(res->diagnostics, res->num_diagnostics);
         break;
     }
+    if ( (*res->operationStatus != Z_ExtendedServicesResponse_failure) &&
+        (res->num_diagnostics != 0) ) {
+        display_diagrecs(res->diagnostics, res->num_diagnostics);
+    }
+
 }
 
 #if YAZ_MODULE_ill
