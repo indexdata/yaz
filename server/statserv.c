@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.23  1995-06-15 12:30:48  quinn
+ * Revision 1.24  1995-06-16 10:31:39  quinn
+ * Added session timeout.
+ *
+ * Revision 1.23  1995/06/15  12:30:48  quinn
  * Setuid-facility.
  *
  * Revision 1.22  1995/06/15  07:45:17  quinn
@@ -113,10 +116,10 @@ static statserv_options_block control_block = {
     LOG_DEFAULT_LEVEL,          /* log level */
     "",                         /* no PDUs */
     "",                         /* diagnostic output to stderr */
-    "tcp:@:9999",       /* default listener port */
-    PROTO_Z3950,                /* application protocol */
-    60,                         /* idle timeout (minutes) */
-    1024*1024*4,                /* maximum PDU size (approx.) to allow */
+    "tcp:@:9999",               /* default listener port */
+    PROTO_Z3950,                /* default application protocol */
+    2*60,                       /* idle timeout (minutes) */
+    1024*1024,                  /* maximum PDU size (approx.) to allow */
     "default-config",           /* configuration name to pass to backend */
     ""                          /* set user id */
 };
@@ -237,6 +240,7 @@ static void listener(IOCHAN h, int event)
 	    exit(1);
 	}
 	iochan_setdata(new_chan, newas);
+	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
 	logf(LOG_LOG, "accepted connection");
     }
     else
@@ -272,17 +276,20 @@ static void add_listener(char *where, int what)
 	}
 	type = tcpip_type;
     }
-#ifdef USE_XTIMOSI
     else if (!strcmp(mode, "osi"))
     {
+#ifdef USE_XTIMOSI
     	if (!(ap = mosi_strtoaddr(addr)))
     	{
 	    fprintf(stderr, "Address resolution failed for TCP.\n");
 	    exit(1);
 	}
 	type = mosi_type;
-    }
+#else
+	fprintf(stderr, "OSI Transport not allowed by configuration.\n");
+	exit(1);
 #endif
+    }
     else
     {
     	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");
@@ -375,7 +382,7 @@ int statserv_main(int argc, char **argv)
 	
 	if (!(pw = getpwnam(control_block.setuid)))
 	{
-	    logf(LOG_FATAL|LOG_ERRNO, "%s", control_block.setuid);
+	    logf(LOG_FATAL, "%s: Unknown user", control_block.setuid);
 	    exit(1);
 	}
 	if (setuid(pw->pw_uid) < 0)

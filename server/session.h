@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.8  1995-05-17 08:42:28  quinn
+ * Revision 1.9  1995-06-16 10:31:38  quinn
+ * Added session timeout.
+ *
+ * Revision 1.8  1995/05/17  08:42:28  quinn
  * Transfer auth info to backend. Allow backend to reject init gracefully.
  *
  * Revision 1.7  1995/05/16  08:51:08  quinn
@@ -39,6 +42,7 @@
 #include <odr.h>
 #include <oid.h>
 #include <proto.h>
+#include <sys/types.h>
 #include <eventl.h>
 
 typedef struct request

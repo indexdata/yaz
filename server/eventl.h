@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.h,v $
- * Revision 1.6  1995-05-16 08:51:02  quinn
+ * Revision 1.7  1995-06-16 10:31:34  quinn
+ * Added session timeout.
+ *
+ * Revision 1.6  1995/05/16  08:51:02  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.5  1995/05/15  11:56:37  quinn
@@ -45,6 +48,8 @@ int force_event;
     IOC_CALLBACK fun;
     void *data;
     int destroyed;
+    time_t last_event;
+    time_t max_idle;
     
     struct iochan *next;
 } *IOCHAN;
@@ -63,6 +68,7 @@ int force_event;
 #define iochan_setfun(i, d) ((i)->fun = d)
 #define iochan_setevent(i, e) ((i)->force_event = (e))
 #define iochan_getnext(i) ((i)->next)
+#define iochan_settimeout(i, t) ((i)->max_idle = (t))
 
 IOCHAN iochan_getchan(void);
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags);

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.35  1995-06-15 07:45:14  quinn
+ * Revision 1.36  1995-06-16 10:31:36  quinn
+ * Added session timeout.
+ *
+ * Revision 1.35  1995/06/15  07:45:14  quinn
  * Moving to v3.
  *
  * Revision 1.34  1995/06/14  15:26:46  quinn
@@ -277,6 +280,14 @@ void ir_session(IOCHAN h, int event)
     request *req;
 
     assert(h && conn && assoc);
+    if (event == EVENT_TIMEOUT)
+    {
+    	logf(LOG_LOG, "Timeout - closing connection.");
+	cs_close(conn);
+	destroy_association(assoc);
+	iochan_destroy(h);
+	return;
+    }
     if (event & EVENT_INPUT || event & EVENT_WORK) /* input */
     {
     	if (event & EVENT_INPUT)

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.9  1995-06-05 10:53:31  quinn
+ * Revision 1.10  1995-06-16 10:31:33  quinn
+ * Added session timeout.
+ *
+ * Revision 1.9  1995/06/05  10:53:31  quinn
  * Added a better SCAN.
  *
  * Revision 1.8  1995/05/16  08:51:01  quinn
@@ -68,6 +71,7 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
     new->fun = cb;
     new->next = iochans;
     new->force_event = 0;
+    new->last_event = new->max_idle = 0;
     iochans = new;
     return new;
 }
@@ -79,13 +83,13 @@ int event_loop()
     	IOCHAN p, nextp;
 	fd_set in, out, except;
 	int res, max;
-	static struct timeval nullto = {0, 0};
+	static struct timeval nullto = {0, 0}, to = {60*5, 0};
 	struct timeval *timeout;
 
 	FD_ZERO(&in);
 	FD_ZERO(&out);
 	FD_ZERO(&except);
-	timeout = 0; /* hang on select */
+	timeout = &to; /* hang on select */
 	max = 0;
     	for (p = iochans; p; p = p->next)
     	{
@@ -109,16 +113,29 @@ int event_loop()
     	for (p = iochans; p; p = p->next)
     	{
 	    int force_event = p->force_event;
+	    time_t now = time(0);
 
 	    p->force_event = 0;
 	    if (FD_ISSET(p->fd, &in) || force_event == EVENT_INPUT)
+	    {
+		p->last_event = now;
 	    	(*p->fun)(p, EVENT_INPUT);
+	    }
 	    if (!p->destroyed && (FD_ISSET(p->fd, &out) ||
-	   	 force_event == EVENT_OUTPUT))
+		force_event == EVENT_OUTPUT))
+	    {
+		p->last_event = now;
 	    	(*p->fun)(p, EVENT_OUTPUT);
+	    }
 	    if (!p->destroyed && (FD_ISSET(p->fd, &except) ||
 	    	force_event == EVENT_EXCEPT))
+	    {
+		p->last_event = now;
 	    	(*p->fun)(p, EVENT_EXCEPT);
+	    }
+	    if (!p->destroyed && p->max_idle && now - p->last_event >
+	    	p->max_idle)
+	    	(*p->fun)(p, EVENT_TIMEOUT);
 	}
 	for (p = iochans; p; p = nextp)
 	{
@@ -135,7 +152,7 @@ int event_loop()
 		    for (pr = iochans; pr; pr = pr->next)
 		    	if (pr->next == p)
 			    break;
-		    assert(pr);
+		    assert(pr); /* grave error if it weren't there */
 		    pr->next = p->next;
 		}
 		if (nextp == p)
