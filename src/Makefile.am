@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.16 2004-10-01 13:16:30 adam Exp $
+## $Id: Makefile.am,v 1.17 2004-10-09 08:03:26 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -23,7 +23,7 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
 YAZCOMP = $(top_srcdir)/util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) 
+AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS)
 AM_YFLAGS=-p cql_
 THREADED_FLAGS = @CFLAGSTHREADS@
 
