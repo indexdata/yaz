@@ -1,5 +1,21 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.34 2005/02/08 
+
+Fixes for UNIX domain sockets. Bug #261.
+
+Fixes for MARC-8 to UTF-8 conversion. Bugs #258 and #260.
+
+Fixed bug #263: YAZ MARCXML dump shows extra spaces after control fields.
+Added yaz_marc_subfield_str which defines subfield lead string which is
+used in YAZ_MARC_LINE format. Default string is blank+$. Added
+yaz_marc_endline_str which defines end of fields string used in
+YAZ_MARC_LINE format. Default string is newline.
+
+Experimental support for MarcXChange. This format can be produced
+by yaz-marcdump and is implemented in yaz_marc_decode - functions.
+ http://www.bs.dk/standards/MarcXchange.xsd
+
 Added yaz-client commands scansize that sets maximum number of
 entries to be returned by scan.
 
