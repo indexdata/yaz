@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Fix for AIX compile.
+
 The generic front-end server (server/seshigh.c) now supports returning
 Init diagnostics to the client in User-information-field, in
 accordance with Z35.90 Implementor Agreement 5 (Returning diagnostics
