@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.25 2003-10-09 15:51:36 adam Exp $
+; $Id: yaz.nsi,v 1.26 2003-10-27 13:35:24 adam Exp $
 
 !define VERSION "2.0.5"
 
@@ -49,6 +49,11 @@ Section "" ; (default section)
 	File ..\ztest\dummy-records
 	File ..\ztest\dummy-grs
 	File ..\ztest\dummy-words
+	SetOutPath $INSTDIR\etc
+	File ..\etc\*.xml
+	File ..\etc\*.xsl
+	File ..\etc\pqf.properties
+
 SectionEnd ; end of default section
 
 Section "YAZ Runtime"
@@ -81,8 +86,14 @@ SectionEnd
 
 Section "YAZ Documentation"
 	SectionIn 1 2
-	SetOutPath $INSTDIR
-	File /r ..\doc
+	SetOutPath $INSTDIR\doc
+	File doc\*.html
+	File doc\*.png
+	File doc\*.pdf
+	File doc\*.xml
+	File doc\*.in
+	File doc\*.dsl
+	File doc\*.xsl
 	SetOutPath $SMPROGRAMS\YAZ
 	CreateShortCut "$SMPROGRAMS\YAZ\HTML Documentation.lnk" \
                  "$INSTDIR\doc\yaz.html"
@@ -94,36 +105,16 @@ Section "YAZ Source"
 	SectionIn 1
 	SetOutPath $INSTDIR\util
 	File ..\util\*.c
-	File ..\util\*.tcl
-	File ..\util\*.sgm
-	File ..\util\*.xml
 	File ..\util\yaz-asncomp
-	SetOutPath $INSTDIR\odr
-	File ..\odr\*.c
-	File ..\odr\*.h
-	SetOutPath $INSTDIR\z39.50
-	File ..\z39.50\*.c
-	File ..\z39.50\*.asn
-	File ..\z39.50\*.tcl
-	SetOutPath $INSTDIR\ill
-	File ..\ill\*.c
-	File ..\ill\*.asn
-	File ..\ill\*.tcl
-	SetOutPath $INSTDIR\cql
-	File ..\cql\*.c
-	File ..\cql\*.y
-	SetOutPath $INSTDIR\zutil
-	File ..\zutil\*.c
-	File ..\zutil\*.h
-	SetOutPath $INSTDIR\ccl
-	File ..\ccl\*.c
+	SetOutPath $INSTDIR\src
+	File ..\src\*.c
+	File ..\src\*.h
+	File ..\src\*.y
+	File ..\src\*.tcl
+	File ..\src\*.asn
+	File ..\src\*.sgm
 	SetOutPath $INSTDIR\zoom
 	File ..\zoom\*.c
-	SetOutPath $INSTDIR\comstack
-	File ..\comstack\*.c
-	SetOutPath $INSTDIR\server
-	File ..\server\*.c
-	File ..\server\*.h
 	SetOutPath $INSTDIR\ztest
 	File ..\ztest\*.c
 	SetOutPath $INSTDIR\client
