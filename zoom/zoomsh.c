@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.24 2003-11-25 23:19:59 adam Exp $
+ * $Id: zoomsh.c,v 1.25 2004-01-12 12:10:44 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -355,7 +355,8 @@ static void cmd_scan (ZOOM_connection *c, ZOOM_resultset *r,
             {
                 int occ = 0;
                 int len = 0;
-                const char *term = ZOOM_scanset_term(s[i], p, &occ, &len);
+                const char *term = ZOOM_scanset_display_term(s[i], p,
+				&occ, &len);
                 fwrite(term, 1, len, stdout);
                 printf (" %d\n", occ);
             }            
