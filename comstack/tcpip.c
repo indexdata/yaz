@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.27  1999-02-02 13:57:31  adam
+ * Revision 1.28  1999-03-31 11:11:14  adam
+ * Function getprotobyname only called once. Minor change in tcpip_get
+ * to handle multi-threaded conditions.
+ *
+ * Revision 1.27  1999/02/02 13:57:31  adam
  * Uses preprocessor define WIN32 instead of WINDOWS to build code
  * for Microsoft WIN32.
  *
@@ -221,8 +225,16 @@ static int tcpip_init (void)
     return 1;
 }
 #else
+
+static int proto_number = 0;
+
 static int tcpip_init (void)
 {
+    struct protoent *proto;
+    /* only call getprotobyname once, in case it allocates memory */
+    if (!(proto = getprotobyname("tcp")))
+	return 0;
+    proto_number = proto->p_proto;
     return 1;
 }
 #endif
@@ -237,22 +249,19 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     int new_socket;
 #ifdef WIN32
     unsigned long tru = 1;
-#else
-    struct protoent *proto;
 #endif
 
     if (!tcpip_init ())
         return 0;
     if (s < 0)
     {
-#ifndef WIN32
-	if (!(proto = getprotobyname("tcp")))
-	    return 0;
-	if ((s = socket(AF_INET, SOCK_STREAM, proto->p_proto)) < 0)
-#else
+#ifdef WIN32
 	if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-#endif
 	    return 0;
+#else
+	if ((s = socket(AF_INET, SOCK_STREAM, proto_number)) < 0)
+	    return 0;
+#endif
 	new_socket = 1;
     }
     else
@@ -305,7 +314,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     return p;
 }
 
-static int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add)
+int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add)
 {
     struct hostent *hp;
     char *p, buf[512];
@@ -503,7 +512,8 @@ COMSTACK tcpip_accept(COMSTACK h)
     }
     memcpy(cnew, h, sizeof(*h));
     cnew->iofile = h->newfd;
-    if (!(state = (tcpip_state *)(cnew->cprivate = xmalloc(sizeof(tcpip_state)))))
+    if (!(state = (tcpip_state *)
+	  (cnew->cprivate = xmalloc(sizeof(tcpip_state)))))
     {
         h->cerrno = CSYSERR;
         return 0;
@@ -564,16 +574,21 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 	{
 #ifdef WIN32
             if (WSAGetLastError() == WSAEWOULDBLOCK)
+		break;
+	    else
+		return -1;
 #else
+	    if (errno == EWOULDBLOCK
 #ifdef EINPROGRESS
-	    if (errno == EINPROGRESS || errno == EWOULDBLOCK)
-#else
-            if (errno == EWOULDBLOCK)
+		|| errno == EINPROGRESS
 #endif
-#endif
-                break;
-            else
+		)
+		break;
+            else if (errno == 0)
+		continue;
+	    else
                 return -1;
+#endif
 	}
         if (!res)
             return 0;
