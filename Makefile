@@ -1,13 +1,13 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.28 1995-12-06 16:06:20 quinn Exp $
+# $Id: Makefile,v 1.29 1996-05-22 08:35:24 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
-ODEFS=-DUSE_XTIMOSI
-RFC1006=rfc1006
-LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
-XMOSI=xmosi.o
+#ODEFS=-DUSE_XTIMOSI
+#RFC1006=rfc1006
+#LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
+#XMOSI=xmosi.o
 
 CDEFS=$(ODEFS)
 #CC=
@@ -28,7 +28,7 @@ INCDIR=/usr/local/include
 YAZDIR=/usr/local/lib/yaz
 
 all:
-	for i in $(SUBDIR); do cd $$i; if $(MAKE) $(CONTROL)\
+	for i in $(SUBDIR); do cd $$i; if $(MAKE) $(CONTROL) \
 	CFLAGS="$(CFLAGS) $(CDEFS)" LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\
 	then cd ..; else exit 1; fi; done
 
