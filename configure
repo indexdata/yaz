@@ -1635,18 +1635,18 @@ else
 	ILLLIB=""
 	ASN_MAKEFILES="asn/Makefile"
 	HFILE=prt-proto.h
-	if ! test -r include/yaz/prt-rsc.h ; then
-		cp asn/*.h include/yaz
-	fi
 fi
 echo $ac_n "checking whether proto.h needs to be generated""... $ac_c" 1>&6
-echo "configure:1644: checking whether proto.h needs to be generated" >&5
+echo "configure:1641: checking whether proto.h needs to be generated" >&5
 yaz_include=${srcdir}/include/yaz
 if test -r ${yaz_include}/proto.h && cmp -s ${yaz_include}/$HFILE ${yaz_include}/proto.h; then
 	echo "$ac_t""no" 1>&6
 else
 	echo "$ac_t""yes" 1>&6
 	cp -f ${yaz_include}/$HFILE ${yaz_include}/proto.h
+	if test "$enable_comp" != "yes"; then
+		cp ${srcdir}/asn/*.h ${yaz_include}
+	fi
 fi
 checkBoth=0
 echo $ac_n "checking for connect""... $ac_c" 1>&6
