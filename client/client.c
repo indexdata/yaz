@@ -2,11 +2,19 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.175 2002-12-05 12:19:23 adam Exp $
+ * $Id: client.c,v 1.176 2002-12-16 13:13:53 adam Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#if HAVE_LOCALE_H
+#include <locale.h>
+#endif
+
+#if HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif
+
 #include <time.h>
 #include <ctype.h>
 
@@ -48,6 +56,8 @@
 #include "tabcomplete.h"
 
 #define C_PROMPT "Z> "
+
+static char *codeset = 0;               /* character set for output */
 
 static ODR out, in, print;              /* encoding and decoding streams */
 static FILE *apdu_file = 0;
@@ -155,8 +165,6 @@ void do_hex_dump(char* buf,int len)
     }
 #endif
 }
-
-
 
 void add_otherInfos(Z_APDU *a) 
 {
@@ -651,13 +659,65 @@ static void display_record(Z_External *r)
 #endif
                 )
             {
-                if (marc_display_exl (octet_buf, NULL, 0 /* debug */,
-                                      r->u.octet_aligned->len) <= 0)
+                char *result;
+                int rlen;
+                yaz_iconv_t cd = 0;
+                yaz_marc_t mt = yaz_marc_create();
+                    
+                if (yaz_marc_decode_buf(mt, octet_buf,r->u.octet_aligned->len,
+                                        &result, &rlen)> 0)
+                {
+                    char *from = 0;
+                    if (ent->value == VAL_USMARC)
+                    {
+                        if (octet_buf[9] == 'a')
+                            from = "UTF-8";
+                        else
+                            from = "MARC8";
+                    }
+                    else
+                        from = "ISO-8859-1";
+
+                    if (codeset && from)
+                    {   
+                        printf ("convert from %s to %s\n", from, codeset);
+                        cd = yaz_iconv_open(codeset, from);
+                    }
+                    if (!cd)
+                        fwrite (result, 1, rlen, stdout);
+                    else
+                    {
+                        char outbuf[12];
+                        size_t inbytesleft = rlen;
+                        const char *inp = result;
+                        
+                        while (inbytesleft)
+                        {
+                            int i;
+                            size_t outbytesleft = sizeof(outbuf);
+                            char *outp = outbuf;
+                            size_t r = yaz_iconv (cd, (char**) &inp,
+                                                  &inbytesleft, 
+                                                  &outp, &outbytesleft);
+                            if (r == (size_t) (-1))
+                            {
+                                int e = yaz_iconv_error(cd);
+                                if (e != YAZ_ICONV_E2BIG)
+                                    break;
+                            }
+                            fwrite (outbuf, outp - outbuf, 1, stdout);
+                        }
+                    }
+                }
+		else
                 {
                     printf ("bad MARC. Dumping as it is:\n");
                     print_record((const unsigned char*) octet_buf,
-                                 r->u.octet_aligned->len);
-                }
+                                  r->u.octet_aligned->len);
+		}	
+                yaz_marc_destroy(mt);
+                if (cd)
+                    yaz_iconv_close(cd);
             }
             else
             {
@@ -3239,7 +3299,15 @@ int main(int argc, char **argv)
     char *arg;
     int ret;
     
-    while ((ret = options("k:c:a:m:v:p:u:", argv, argc, &arg)) != -2)
+#if HAVE_LOCALE_H
+    if (!setlocale(LC_CTYPE, ""))
+        fprintf (stderr, "setlocale failed\n");
+#endif
+#if HAVE_LANGINFO_H
+    codeset = nl_langinfo(CODESET);
+#endif
+
+    while ((ret = options("k:c:a:m:v:p:u:t:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -3261,19 +3329,22 @@ int main(int argc, char **argv)
                 exit (1);
             }
             break;
-		case 'c':
-			strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
-			ccl_fields[sizeof(ccl_fields)-1] = '\0';
-			break;
+        case 't':
+            codeset = arg;
+            break;
+        case 'c':
+            strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
+            ccl_fields[sizeof(ccl_fields)-1] = '\0';
+            break;
         case 'a':
             if (!strcmp(arg, "-"))
                 apdu_file=stderr;
             else
                 apdu_file=fopen(arg, "a");
             break;
-		case 'p':
-			yazProxy=strdup(arg);
-			break;
+        case 'p':
+            yazProxy=strdup(arg);
+            break;
         case 'u':
             if (!auth_command)
             {

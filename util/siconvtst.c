@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconvtst.c,v 1.6 2002-12-10 10:59:28 adam Exp $
+ * $Id: siconvtst.c,v 1.7 2002-12-16 13:13:53 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -18,7 +18,7 @@
 #define CHUNK_IN 64
 #define CHUNK_OUT 64
 
-void convert (FILE *inf, yaz_iconv_t cd)
+void convert (FILE *inf, yaz_iconv_t cd, int verbose)
 {
     char inbuf0[CHUNK_IN], *inbuf = inbuf0;
     char outbuf0[CHUNK_OUT], *outbuf = outbuf0;
@@ -47,6 +47,12 @@ void convert (FILE *inf, yaz_iconv_t cd)
                 }
                 inbytesleft = r;
             }
+        }
+        if (verbose > 1)
+        {
+            fprintf (stderr, "yaz_iconv: inbytesleft=%d outbytesleft=%d\n",
+                     inbytesleft, outbytesleft);
+
         }
         r = yaz_iconv (cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         if (r == (size_t)(-1))
@@ -169,7 +175,7 @@ int main (int argc, char **argv)
                      yaz_iconv_isbuiltin(cd) ? "YAZ" : "iconv");
         }
     }
-    convert (inf, cd);
+    convert (inf, cd, verbose);
     yaz_iconv_close (cd);
     return 0;
 }

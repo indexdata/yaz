@@ -2,15 +2,16 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: read-marc.c,v 1.3 2002-09-24 08:05:41 adam Exp $
+ * $Id: read-marc.c,v 1.4 2002-12-16 13:13:53 adam Exp $
  */
 
 /*
  * Little toy-thing to read a MARC records from a fixed array.
  */
 #include <ctype.h>
-#include <yaz/odr.h>
 #include <yaz/wrbuf.h>
+#include <yaz/marcdisp.h>
+#include <yaz/odr.h>
 
 char *marc_records[] = {
 
@@ -1600,20 +1601,19 @@ char *dummy_marc_record (int num, ODR odr)
 /* read MARC record and convert to XML */
 char *dummy_xml_record (int num, ODR odr)
 {
-    WRBUF wr = wrbuf_alloc ();
+    yaz_marc_t mt = yaz_marc_create();
+    char *result;
+    int rlen;
     char *rec = dummy_marc_record (num, odr);
     int len;
+
     if (!rec)
         return 0;
 
-    len = yaz_marc_decode (rec, wr, 0, -1, 1);
+    yaz_marc_xml(mt, YAZ_MARC_MARCXML);
+    len = yaz_marc_decode_buf (mt, rec, -1, &result, &rlen);
     if (len > 1)
-    {
-        len = wrbuf_len(wr);
-        rec = (char *) odr_malloc (odr, len+1);
-        memcpy (rec, wrbuf_buf(wr), len+1);
-        rec[len] = 0;
-    }
-    wrbuf_free (wr, 1);
+        rec = (char *) odr_strdup(odr, result);
+    yaz_marc_destroy(mt);
     return rec;
 }

@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.11 2002-12-10 13:14:14 adam Exp $
+ * $Id: zoom-c.c,v 1.12 2002-12-16 13:13:54 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1094,6 +1094,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         }
         else if (r->which == Z_External_octet)
         {
+            yaz_marc_t mt;
             switch (ent->value)
             {
             case VAL_SOIF:
@@ -1106,18 +1107,23 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
             default:
                 if (!rec->wrbuf_marc)
                     rec->wrbuf_marc = wrbuf_alloc();
+
+                mt = yaz_marc_create();
                 wrbuf_rewind (rec->wrbuf_marc);
-                if (yaz_marc_decode ((const char *)
-                                     r->u.octet_aligned->buf,
-                                     rec->wrbuf_marc, 0,
-                                     r->u.octet_aligned->len,
-                                     0) > 0)
+                if (yaz_marc_decode_wrbuf (
+                        mt, (const char *) r->u.octet_aligned->buf,
+                        r->u.octet_aligned->len,
+                        rec->wrbuf_marc) > 0)
                 {
-                    if (len) *len = wrbuf_len(rec->wrbuf_marc);
+                    if (len)
+                        *len = wrbuf_len(rec->wrbuf_marc);
+                    yaz_marc_destroy(mt);
                     return wrbuf_buf(rec->wrbuf_marc);
                 }
+                yaz_marc_destroy(mt);
             }
-            if (len) *len = r->u.octet_aligned->len;
+            if (len) 
+                *len = r->u.octet_aligned->len;
             return (const char *) r->u.octet_aligned->buf;
         }
         else if (r->which == Z_External_grs1)
@@ -1145,6 +1151,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         }
         else if (r->which == Z_External_octet)
         {
+            yaz_marc_t mt;
             int marc_decode_type = YAZ_MARC_MARCXML;
 
             if (!strcmp(type, "oai"))
@@ -1162,15 +1169,20 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
                 if (!rec->wrbuf_marc)
                     rec->wrbuf_marc = wrbuf_alloc();
                 wrbuf_rewind (rec->wrbuf_marc);
-                if (yaz_marc_decode ((const char *)
-                                     r->u.octet_aligned->buf,
-                                     rec->wrbuf_marc, 0,
-                                     r->u.octet_aligned->len,
-                                     marc_decode_type) > 0)
+                mt = yaz_marc_create();
+
+                yaz_marc_xml(mt, YAZ_MARC_MARCXML);
+                if (yaz_marc_decode_wrbuf (
+                        mt, (const char *) r->u.octet_aligned->buf,
+                        r->u.octet_aligned->len,
+                        rec->wrbuf_marc) > 0)
                 {
-                    if (len) *len = wrbuf_len(rec->wrbuf_marc);
+                    if (len) 
+                        *len = wrbuf_len(rec->wrbuf_marc);
+                    yaz_marc_destroy(mt);
                     return wrbuf_buf(rec->wrbuf_marc);
                 }
+                yaz_marc_destroy(mt);
             }
             if (len) *len = r->u.octet_aligned->len;
             return (const char *) r->u.octet_aligned->buf;

@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.7 2002-12-10 10:59:28 adam Exp $
+ * $Id: siconv.c,v 1.8 2002-12-16 13:13:53 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -14,6 +14,9 @@
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
+#if HAVE_WCHAR_H
+#include <wchar.h>
+#endif
 
 #if HAVE_ICONV_H
 #include <iconv.h>
@@ -21,6 +24,9 @@
 
 #include <yaz/yaz-util.h>
 
+unsigned long yaz_marc8_conv (unsigned char *inp, size_t inbytesleft,
+                              size_t *no_read);
+    
 struct yaz_iconv_struct {
     int my_errno;
     int init_flag;
@@ -185,6 +191,34 @@ static unsigned long yaz_read_UCS4LE (yaz_iconv_t cd, unsigned char *inp,
     return x;
 }
 
+#if HAVE_WCHAR_H
+static unsigned long yaz_read_wchar_t (yaz_iconv_t cd, unsigned char *inp,
+                                       size_t inbytesleft, size_t *no_read)
+{
+    unsigned long x = 0;
+    
+    if (inbytesleft < sizeof(wchar_t))
+    {
+        cd->my_errno = YAZ_ICONV_EINVAL; /* incomplete input */
+        *no_read = 0;
+    }
+    else
+    {
+        wchar_t wch;
+        memcpy (&wch, inp, sizeof(wch));
+        x = wch;
+        *no_read = sizeof(wch);
+    }
+    return x;
+}
+#endif
+
+static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
+                                     size_t inbytesleft, size_t *no_read)
+{
+    return yaz_marc8_conv(inp, inbytesleft, no_read);
+}
+
 static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
                               char **outbuf, size_t *outbytesleft)
 {
@@ -309,6 +343,29 @@ static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
     return 0;
 }
 
+#if HAVE_WCHAR_H
+static size_t yaz_write_wchar_t (yaz_iconv_t cd, unsigned long x,
+                                 char **outbuf, size_t *outbytesleft)
+{
+    unsigned char *outp = (unsigned char *) *outbuf;
+
+    if (*outbytesleft >= sizeof(wchar_t))
+    {
+        wchar_t wch = x;
+        memcpy(outp, &wch, sizeof(wch));
+        outp += sizeof(wch);
+        (*outbytesleft) -= sizeof(wch);
+    }
+    else
+    {
+        cd->my_errno = YAZ_ICONV_E2BIG;
+        return (size_t)(-1);
+    }
+    *outbuf = (char *) outp;
+    return 0;
+}
+#endif
+
 int yaz_iconv_isbuiltin(yaz_iconv_t cd)
 {
     return cd->read_handle && cd->write_handle;
@@ -340,6 +397,12 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
             cd->read_handle = yaz_read_UCS4;
         else if (!yaz_matchstr(fromcode, "UCS4LE"))
             cd->read_handle = yaz_read_UCS4LE;
+        else if (!yaz_matchstr(fromcode, "MARC8"))
+            cd->read_handle = yaz_read_marc8;
+#if HAVE_WCHAR_H
+        else if (!yaz_matchstr(fromcode, "WCHAR_T"))
+            cd->read_handle = yaz_read_wchar_t;
+#endif
         
         if (!yaz_matchstr(tocode, "UTF8"))
             cd->write_handle = yaz_write_UTF8;
@@ -349,6 +412,10 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
             cd->write_handle = yaz_write_UCS4;
         else if (!yaz_matchstr(tocode, "UCS4LE"))
             cd->write_handle = yaz_write_UCS4LE;
+#if HAVE_WCHAR_H
+        else if (!yaz_matchstr(tocode, "WCHAR_T"))
+            cd->write_handle = yaz_write_wchar_t;
+#endif
     }
 #if HAVE_ICONV_H
     cd->iconv_cd = 0;

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: yaz-util.h,v 1.6 2002-12-10 10:59:28 adam Exp $
+ * $Id: yaz-util.h,v 1.7 2002-12-16 13:13:53 adam Exp $
  */
 
 #ifndef YAZ_UTIL_H
@@ -18,27 +18,6 @@
 #include <yaz/nmem.h>
 #include <yaz/readconf.h>
 #include <yaz/marcdisp.h>
-
-YAZ_BEGIN_CDECL
-
-typedef struct yaz_iconv_struct *yaz_iconv_t;
-#define YAZ_ICONV_UNKNOWN 1
-#define YAZ_ICONV_E2BIG 2
-#define YAZ_ICONV_EILSEQ 3
-#define YAZ_ICONV_EINVAL 4
-
-YAZ_EXPORT yaz_iconv_t yaz_iconv_open (const char *tocode,
-                                       const char *fromcode);
-YAZ_EXPORT size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
-                             char **outbuf, size_t *outbytesleft);
-YAZ_EXPORT int yaz_iconv_error (yaz_iconv_t cd);
-
-YAZ_EXPORT int yaz_iconv_close (yaz_iconv_t cd);
-
-YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
-
-YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
-
-YAZ_END_CDECL
+#include <yaz/yaz-iconv.h>
 
 #endif

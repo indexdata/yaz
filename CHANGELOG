@@ -1,5 +1,20 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.9.3 2002/MM/DD
+
+New MARC decode API. All new functions operate on a yaz_marc_t
+handle. The most important new functions are: yaz_marc_create,
+yaz_marc_decode_{buf,wrbuf}, yaz_marc_destroy, .. to create handler,
+decode and destroy respectively. Decoder can produce formats
+MARC line, simple XML, OAI MARC and MARC XML (LoC). See
+include/yaz/marcdisp.h.
+
+YAZ Iconv utility now supports MARC8 decoding (marc8.c). Converts
+to UTF-8, UCS-32, wchar_t or Latin-1.
+
+* Prototypes for yaz_iconv_-functions moved to separate header 
+include/yaz/yaz-iconv.h.
+
 Make a few private functions 'static' in unix.c. This prevents
 duplicate unix_close in PHP with YAZ and imap. PHP Bug 20977.
 
@@ -14,9 +29,6 @@ strerror/strerror_r/GetLastMessage.
 
 * ZOOM_record_get supports type "xml" in which case MARC XML (from LOC)
 is returned for MARC. If type is "oai", then OAI MARC is returned.
-
-yaz_marc_decode supports MARC XML as well. The xml parameter
-specifies type. See include/yaz/marcdisp.h
 
 Fix creation of lib/yaz-config so it works if srcdir != objdir. Patch
 from Kang-Jin Lee.
