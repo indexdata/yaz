@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.6  1997-07-01 14:15:10  adam
+ * Revision 1.7  1997-09-29 07:22:26  adam
+ * Added static modifier to msg_tab.
+ *
+ * Revision 1.6  1997/07/01 14:15:10  adam
  * Added new BIB-1 diagnostic messages.
  *
  * Revision 1.5  1996/01/02 13:57:30  adam
@@ -28,7 +31,7 @@
 
 #include "diagbib1.h"
 
-struct {
+static struct {
     int code;
     char *msg;
 } msg_tab[] = {
