@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_prtree.c,v 1.10 2002-09-24 13:58:13 adam Exp $
+ * $Id: d1_prtree.c,v 1.11 2002-10-08 20:14:44 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -71,6 +71,11 @@ static void pr_tree (data1_handle dh, data1_node *n, FILE *out, int level)
 	    pr_string (out, n->u.data.data, n->u.data.len);
 	    fprintf (out, "'\n");
 	    break;
+	case DATA1I_xmltext:
+	    fprintf (out, "xml text '");
+	    pr_string (out, n->u.data.data, n->u.data.len);
+	    fprintf (out, "'\n");
+            break;
 	default:
 	    fprintf (out, "unknown(%d)\n", n->u.data.what);
 	    break;

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.52 2002-09-24 07:58:59 adam Exp $
+ * $Id: d1_read.c,v 1.53 2002-10-08 20:14:44 adam Exp $
  */
 
 #include <assert.h>
@@ -187,6 +187,8 @@ data1_node *data1_mk_preprocess_n (data1_handle dh, NMEM nmem,
         *p = (data1_xattr*) nmem_malloc (nmem, sizeof(**p));
         (*p)->name = nmem_strdup (nmem, *attr++);
         (*p)->value = nmem_strdup (nmem, *attr++);
+        (*p)->what = DATA1I_text;
+
         p = &(*p)->next;
     }
     *p = 0;
@@ -223,6 +225,7 @@ data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem,
         *p = (data1_xattr*) nmem_malloc (nmem, sizeof(**p));
         (*p)->name = nmem_strdup (nmem, *attr++);
         (*p)->value = nmem_strdup (nmem, *attr++);
+        (*p)->what = DATA1I_text;
         p = &(*p)->next;
     }
     *p = 0;
@@ -246,6 +249,7 @@ void data1_tag_add_attr (data1_handle dh, NMEM nmem,
         *p = (data1_xattr*) nmem_malloc (nmem, sizeof(**p));
         (*p)->name = nmem_strdup (nmem, *attr++);
         (*p)->value = nmem_strdup (nmem, *attr++);
+        (*p)->what = DATA1I_text;
         p = &(*p)->next;
     }
     *p = 0;
@@ -489,6 +493,11 @@ data1_node *data1_mk_tag_data_text_uni (data1_handle dh, data1_node *at,
 
 static int ampr (int (*get_byte)(void *fh), void *fh, int *amp)
 {
+#if 1
+    int c = (*get_byte)(fh);
+    *amp = 0;
+    return c;
+#else
     int c = (*get_byte)(fh);
     *amp = 0;
     if (c == '&')
@@ -524,6 +533,7 @@ static int ampr (int (*get_byte)(void *fh), void *fh, int *amp)
         }
     }
     return c;
+#endif
 }
 
 data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
@@ -545,6 +555,7 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	p->next = 0;
 	pp = &p->next;
 	p->value = 0;
+        p->what = DATA1I_xmltext;
 	
 	wrbuf_rewind(wrbuf);
 	while (c && c != '=' && c != '>' && c != '/' && !d1_isspace(c))
@@ -837,7 +848,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		continue;
 	    }
 	    res = data1_mk_node2 (dh, m, DATA1N_data, parent);
-	    res->u.data.what = DATA1I_text;
+	    res->u.data.what = DATA1I_xmltext;
 	    res->u.data.formatted_text = 0;
 	    d1_stack[level] = res;
 	    

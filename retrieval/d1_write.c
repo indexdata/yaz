@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_write.c,v 1.18 2002-09-24 13:58:13 adam Exp $
+ * $Id: d1_write.c,v 1.19 2002-10-08 20:14:44 adam Exp $
  */
 
 #include <string.h>
@@ -65,6 +65,28 @@ static void wrbuf_put_cdata(WRBUF b, const char *msg)
     wrbuf_write_cdata (b, msg, strlen(msg));
 }
 
+static void wrbuf_put_xattr(WRBUF b, data1_xattr *p)
+{
+    for (; p; p = p->next)
+    {
+        wrbuf_putc (b, ' ');
+        if (p->what == DATA1I_xmltext)
+            wrbuf_puts (b, p->name);
+        else
+            wrbuf_put_cdata (b, p->name);
+        if (p->value)
+        {
+            wrbuf_putc (b, '=');
+            wrbuf_putc (b, '"');
+            if (p->what == DATA1I_text)
+                wrbuf_put_cdata (b, p->value);
+            else
+                wrbuf_puts (b, p->value);
+            wrbuf_putc (b, '"');
+        }
+    }
+}
+
 static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col,
                         int pretty_format)
 {
@@ -82,15 +104,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col,
                 indent (b, col);
 	    wrbuf_puts (b, "<?");
             wrbuf_put_cdata (b, c->u.preprocess.target);
-            for (p = c->u.preprocess.attributes; p; p = p->next)
-            {
-                wrbuf_putc (b, ' ');
-                wrbuf_put_cdata (b, p->name);
-                wrbuf_putc (b, '=');
-                wrbuf_putc (b, '"');
-                wrbuf_put_cdata (b, p->value);
-                wrbuf_putc (b, '"');
-            }
+            wrbuf_put_xattr (b, c->u.preprocess.attributes);
             if (c->child)
                 wrbuf_puts(b, " ");
             if (nodetoidsgml(c, select, b, (col > 40) ? 40 : col+2,
@@ -116,15 +130,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col,
                     indent (b, col);
 		wrbuf_puts (b, "<");	
 		wrbuf_put_cdata (b, tag);
-		for (p = c->u.tag.attributes; p; p = p->next)
-		{
-		    wrbuf_putc (b, ' ');
-		    wrbuf_put_cdata (b, p->name);
-		    wrbuf_putc (b, '=');
-		    wrbuf_putc (b, '"');
-		    wrbuf_put_cdata (b, p->value);
-		    wrbuf_putc (b, '"');
-		}
+                wrbuf_put_xattr (b, c->u.tag.attributes);
 		wrbuf_puts(b, ">");
                 if (pretty_format)
                     wrbuf_puts(b, "\n");
@@ -153,6 +159,9 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col,
                 wrbuf_puts (b, "<!--");
 	    switch (c->u.data.what)
 	    {
+            case DATA1I_xmltext:
+		wrbuf_write(b, c->u.data.data, c->u.data.len);
+                break;
 	    case DATA1I_text:
                 if (!pretty_format || c->u.data.formatted_text)
                 {

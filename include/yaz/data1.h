@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.17 2002-09-24 07:58:59 adam Exp $
+ * $Id: data1.h,v 1.18 2002-10-08 20:14:44 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -197,6 +197,7 @@ typedef struct data1_xattr {
     char *name;
     char *value;
     struct data1_xattr *next;
+    unsigned short what;  /* DATA1I_text, .. see data1_node.u.data */
 } data1_xattr;
 
 typedef struct data1_absyn
@@ -257,16 +258,18 @@ typedef struct data1_node
 	{
 	    char *data;      /* filename or data */
 	    int len;
-        /* text inclusion */
+            /* text inclusion */
 #define DATA1I_inctxt 1
-        /* binary data inclusion */
+            /* binary data inclusion */
 #define DATA1I_incbin 2
         /* text data */
 #define DATA1I_text 3 
-        /* numerical data */
+            /* numerical data */
 #define DATA1I_num 4
-        /* object identifier */
-#define DATA1I_oid 5         
+            /* object identifier */
+#define DATA1I_oid 5
+            /* XML text */
+#define DATA1I_xmltext 6
             unsigned what:7;
 	    unsigned formatted_text : 1;   /* newlines are significant */
 	} data;
