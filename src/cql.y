@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.3 2004-03-15 21:39:06 adam Exp $
+/* $Id: cql.y,v 1.4 2004-03-17 18:31:11 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -250,7 +250,7 @@ int yylex(YYSTYPE *lval, void *vp)
     }
     if (c == '"')
     {
-        while ((c = cp->getbyte(cp->client_data)) != EOF && c != '"')
+        while ((c = cp->getbyte(cp->client_data)) != 0 && c != '"')
         {
             if (c == '\\')
                 c = cp->getbyte(cp->client_data);

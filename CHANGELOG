@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fix endless loop in CQL parser with unbalanced ".
+
 Use a more compact way to store MARC-8 conversion tables.
 
 --- 2.0.16 2004/03/16 Debian only
