@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.146 2002-03-06 01:22:41 adam Exp $
+ * $Id: client.c,v 1.147 2002-03-20 14:35:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -828,6 +828,59 @@ static int send_searchRequest(char *arg)
     return 2;
 }
 
+/* display Query Expression as part of searchResult-1 */
+static void display_queryExpression (Z_QueryExpression *qe)
+{
+    if (!qe)
+        return;
+    if (qe->which == Z_QueryExpression_term)
+    {
+        if (qe->u.term->queryTerm)
+        {
+            Z_Term *term = qe->u.term->queryTerm;
+            if (term->which == Z_Term_general)
+                printf (" %.*s", term->u.general->len, term->u.general->buf);
+        }
+    }
+
+}
+
+/* see if we can find USR:SearchResult-1 */
+static void display_searchResult (Z_OtherInformation *o)
+{
+    int i;
+    if (!o)
+        return ;
+    for (i = 0; i < o->num_elements; i++)
+    {
+        if (o->list[i]->which == Z_OtherInfo_externallyDefinedInfo)
+        {
+            Z_External *ext = o->list[i]->information.externallyDefinedInfo;
+            
+            if (ext->which == Z_External_searchResult1)
+            {
+                int j;
+                Z_SearchInfoReport *sr = ext->u.searchResult1;
+                printf ("SearchResult-1:");
+                for (j = 0; j < sr->num; j++)
+                {
+                    if (!sr->elements[j]->subqueryExpression)
+                        printf (" %d", j);
+                    display_queryExpression (
+                        sr->elements[j]->subqueryExpression);
+                    display_queryExpression (
+                        sr->elements[j]->subqueryInterpretation);
+                    display_queryExpression (
+                        sr->elements[j]->subqueryRecommendation);
+                    if (sr->elements[j]->subqueryCount)
+                        printf ("(%d)", *sr->elements[j]->subqueryCount);
+                }
+                printf ("\n");
+            }
+        }
+    }
+}
+
 static int process_searchResponse(Z_SearchResponse *res)
 {
     printf ("Received SearchResponse.\n");
@@ -839,7 +892,9 @@ static int process_searchResponse(Z_SearchResponse *res)
     printf("Number of hits: %d", *res->resultCount);
     if (setnumber >= 0)
         printf (", setno %d", setnumber);
-    printf("\nrecords returned: %d\n",
+    printf ("\n");
+    display_searchResult (res->additionalSearchInfo);
+    printf("records returned: %d\n",
            *res->numberOfRecordsReturned);
     setno += *res->numberOfRecordsReturned;
     if (res->records)
