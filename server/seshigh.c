@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.124 2002-01-22 10:54:46 adam Exp $
+ * $Id: seshigh.c,v 1.125 2002-01-23 21:13:30 adam Exp $
  */
 
 /*
@@ -1227,16 +1227,20 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     Z_DiagRecs *diagrecs_p = NULL;
     oident *attent;
     oident *attset;
+    bend_scan_rr *bsrr = (bend_scan_rr *)
+        odr_malloc (assoc->encode, sizeof(*bsrr));
 
     yaz_log(LOG_LOG, "Got ScanRequest");
 
     apdu->which = Z_APDU_scanResponse;
     apdu->u.scanResponse = res;
     res->referenceId = req->referenceId;
-    res->stepSize = odr_intdup(assoc->encode, 0);
 
+    /* if step is absent, set it to 0 */
+    res->stepSize = odr_intdup(assoc->encode, 0);
     if (req->stepSize)
 	*res->stepSize = *req->stepSize;
+
     res->scanStatus = scanStatus;
     res->numberOfEntriesReturned = numberOfEntriesReturned;
     res->positionOfTerm = 0;
@@ -1248,98 +1252,88 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     res->attributeSet = 0;
     res->otherInfo = 0;
 
-    if (req->attributeSet && (!(attent = oid_getentbyoid(req->attributeSet)) ||
-			      attent->oclass != CLASS_ATTSET
-			      || attent->value != VAL_BIB1))
-	diagrecs_p = diagrecs(assoc, 121, 0);
-    else if (req->stepSize && *req->stepSize > 0)
-    	diagrecs_p = diagrecs(assoc, 205, 0);
+    if (req->databaseNames)
+    {
+        int i;
+        for (i = 0; i < req->num_databaseNames; i++)
+            yaz_log (LOG_LOG, "Database '%s'", req->databaseNames[i]);
+    }
+    bsrr->num_bases = req->num_databaseNames;
+    bsrr->basenames = req->databaseNames;
+    bsrr->num_entries = *req->numberOfTermsRequested;
+    bsrr->term = req->termListAndStartPoint;
+    bsrr->referenceId = req->referenceId;
+    bsrr->stream = assoc->encode;
+    bsrr->print = assoc->print;
+    bsrr->step_size = res->stepSize;
+    if (req->attributeSet &&
+        (attset = oid_getentbyoid(req->attributeSet)) &&
+        (attset->oclass == CLASS_ATTSET || attset->oclass == CLASS_GENERAL))
+        bsrr->attributeset = attset->value;
+    else
+        bsrr->attributeset = VAL_NONE;
+    log_scan_term (req->termListAndStartPoint, bsrr->attributeset);
+    bsrr->term_position = req->preferredPositionInResponse ?
+        *req->preferredPositionInResponse : 1;
+    ((int (*)(void *, bend_scan_rr *))
+     (*assoc->init->bend_scan))(assoc->backend, bsrr);
+    if (bsrr->errcode)
+        diagrecs_p = diagrecs(assoc, bsrr->errcode, bsrr->errstring);
     else
     {
-	bend_scan_rr *bsrr = (bend_scan_rr *)
-	    odr_malloc (assoc->encode, sizeof(*bsrr));
-	if (req->databaseNames)
-	{
-	    int i;
-	    for (i = 0; i < req->num_databaseNames; i++)
-		yaz_log (LOG_LOG, "Database '%s'", req->databaseNames[i]);
-	}
-	bsrr->num_bases = req->num_databaseNames;
-	bsrr->basenames = req->databaseNames;
-	bsrr->num_entries = *req->numberOfTermsRequested;
-	bsrr->term = req->termListAndStartPoint;
-	bsrr->referenceId = req->referenceId;
-	bsrr->stream = assoc->encode;
-	bsrr->print = assoc->print;
-	bsrr->step_size = res->stepSize;
-	if (!(attset = oid_getentbyoid(req->attributeSet)) ||
-	    attset->oclass != CLASS_ATTSET)
-	    bsrr->attributeset = VAL_NONE;
-	else
-	    bsrr->attributeset = attset->value;
-	log_scan_term (req->termListAndStartPoint, bsrr->attributeset);
-	bsrr->term_position = req->preferredPositionInResponse ?
-	    *req->preferredPositionInResponse : 1;
-	((int (*)(void *, bend_scan_rr *))
-	 (*assoc->init->bend_scan))(assoc->backend, bsrr);
-	if (bsrr->errcode)
-	    diagrecs_p = diagrecs(assoc, bsrr->errcode, bsrr->errstring);
-	else
-	{
-	    int i;
-            Z_Entry **tab = (Z_Entry **)
-		odr_malloc (assoc->encode, sizeof(*tab) * bsrr->num_entries);
-	    
-	    if (bsrr->status == BEND_SCAN_PARTIAL)
-	    	*scanStatus = Z_Scan_partial_5;
-	    else
-	    	*scanStatus = Z_Scan_success;
-	    ents->entries = tab;
-	    ents->num_entries = bsrr->num_entries;
-	    res->numberOfEntriesReturned = &ents->num_entries;	    
-	    res->positionOfTerm = &bsrr->term_position;
-	    for (i = 0; i < bsrr->num_entries; i++)
-	    {
-	    	Z_Entry *e;
-		Z_TermInfo *t;
-		Odr_oct *o;
-		
-		tab[i] = e = (Z_Entry *)odr_malloc(assoc->encode, sizeof(*e));
-		if (bsrr->entries[i].occurrences >= 0)
-		{
-		    e->which = Z_Entry_termInfo;
-		    e->u.termInfo = t = (Z_TermInfo *)
-			odr_malloc(assoc->encode, sizeof(*t));
-		    t->suggestedAttributes = 0;
-		    t->displayTerm = 0;
-		    t->alternativeTerm = 0;
-		    t->byAttributes = 0;
-		    t->otherTermInfo = 0;
-		    t->globalOccurrences = &bsrr->entries[i].occurrences;
-		    t->term = (Z_Term *)
-			odr_malloc(assoc->encode, sizeof(*t->term));
-		    t->term->which = Z_Term_general;
-		    t->term->u.general = o =
-			(Odr_oct *)odr_malloc(assoc->encode, sizeof(Odr_oct));
-		    o->buf = (unsigned char *)
-			odr_malloc(assoc->encode, o->len = o->size =
-				   strlen(bsrr->entries[i].term));
-		    memcpy(o->buf, bsrr->entries[i].term, o->len);
-		    yaz_log(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
+        int i;
+        Z_Entry **tab = (Z_Entry **)
+            odr_malloc (assoc->encode, sizeof(*tab) * bsrr->num_entries);
+        
+        if (bsrr->status == BEND_SCAN_PARTIAL)
+            *scanStatus = Z_Scan_partial_5;
+        else
+            *scanStatus = Z_Scan_success;
+        ents->entries = tab;
+        ents->num_entries = bsrr->num_entries;
+        res->numberOfEntriesReturned = &ents->num_entries;	    
+        res->positionOfTerm = &bsrr->term_position;
+        for (i = 0; i < bsrr->num_entries; i++)
+        {
+            Z_Entry *e;
+            Z_TermInfo *t;
+            Odr_oct *o;
+            
+            tab[i] = e = (Z_Entry *)odr_malloc(assoc->encode, sizeof(*e));
+            if (bsrr->entries[i].occurrences >= 0)
+            {
+                e->which = Z_Entry_termInfo;
+                e->u.termInfo = t = (Z_TermInfo *)
+                    odr_malloc(assoc->encode, sizeof(*t));
+                t->suggestedAttributes = 0;
+                t->displayTerm = 0;
+                t->alternativeTerm = 0;
+                t->byAttributes = 0;
+                t->otherTermInfo = 0;
+                t->globalOccurrences = &bsrr->entries[i].occurrences;
+                t->term = (Z_Term *)
+                    odr_malloc(assoc->encode, sizeof(*t->term));
+                t->term->which = Z_Term_general;
+                t->term->u.general = o =
+                    (Odr_oct *)odr_malloc(assoc->encode, sizeof(Odr_oct));
+                o->buf = (unsigned char *)
+                    odr_malloc(assoc->encode, o->len = o->size =
+                               strlen(bsrr->entries[i].term));
+                memcpy(o->buf, bsrr->entries[i].term, o->len);
+                yaz_log(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
 			 bsrr->entries[i].term, bsrr->entries[i].occurrences);
-		}
-		else
-		{
-		    Z_DiagRecs *drecs = diagrecs (assoc,
-						  bsrr->entries[i].errcode,
-						  bsrr->entries[i].errstring);
-		    assert (drecs->num_diagRecs == 1);
-		    e->which = Z_Entry_surrogateDiagnostic;
-		    assert (drecs->diagRecs[0]);
-		    e->u.surrogateDiagnostic = drecs->diagRecs[0];
-		}
-	    }
-	}
+            }
+            else
+            {
+                Z_DiagRecs *drecs = diagrecs (assoc,
+                                              bsrr->entries[i].errcode,
+                                              bsrr->entries[i].errstring);
+                assert (drecs->num_diagRecs == 1);
+                e->which = Z_Entry_surrogateDiagnostic;
+                assert (drecs->diagRecs[0]);
+                e->u.surrogateDiagnostic = drecs->diagRecs[0];
+            }
+        }
     }
     if (diagrecs_p)
     {
