@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.1  1995-03-30 14:03:17  quinn
+ * Revision 1.2  1995-05-02 08:53:09  quinn
+ * Trying in vain to fix comm with ISODE
+ *
+ * Revision 1.1  1995/03/30  14:03:17  quinn
  * Added RFC1006 as separate library
  *
  * Revision 1.15  1995/03/30  10:54:43  quinn
@@ -245,16 +248,16 @@ int t_open(char *name, int oflag, struct t_info *info)
     /*
      * RFC1006 sets a higher than standard default max TPDU size, but the
      * Isode seems to like to negotiate it down. We'll keep it here to be
-     * safe. Not that there's no harm in jumping it up. If it's higher
+     * safe. Note that there's no harm in jumping it up. If it's higher
      * than 2048, t_connect won't try to negotiate.
      */
-    cnt->tsize = 128;
+    cnt->tsize = 2048;
 
     if (info)
     {
 	info->addr = TSEL_MAXLEN + sizeof(struct sockaddr_in) + 1;
 	info->options = 1024;
-	info->tsdu = -1;
+	info->tsdu = 2041; /* trying to please the ISODE */
 	info->etsdu = 0;
 	info->connect = -2;
 	info->discon = -2;
@@ -1356,7 +1359,7 @@ int t_accept(int fd, int resfd, struct t_call *call)
     for (i = 7; i <= 11 && (1 << i) < res->tsize; i++) ; /* encode TPDU size */
     parm[2] = i;
     /* give our TSEL. ## Must we echo theirs, if given? check spec */
-    /* I think it was ok to give an empty TSEL. Does it have semantic sig? */
+    /* I thought it was ok to give an empty TSEL. Does it have semantic sig? */
     parm[3] = TPDU_PARM_CLDID;
     parm[4] = res->ltsel_len; 
     if (res->ltsel_len)
