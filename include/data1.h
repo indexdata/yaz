@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.34  1998-02-27 14:08:04  adam
+ * Revision 1.35  1998-03-05 08:15:32  adam
+ * Implemented data1_add_insert_taggeddata utility which is more flexible
+ * than data1_insert_taggeddata.
+ *
+ * Revision 1.34  1998/02/27 14:08:04  adam
  * Added const to some char pointer arguments.
  * Reworked data1_read_node so that it doesn't create a tree with
  * pointers to original "SGML"-buffer.
@@ -499,6 +503,13 @@ YAZ_EXPORT char *data1_insert_string (data1_handle dh, data1_node *res,
 				      NMEM m, const char *str);
 YAZ_EXPORT data1_node *data1_read_sgml (data1_handle dh, NMEM m,
 					const char *buf);
+YAZ_EXPORT void data1_absyn_trav (data1_handle dh, void *handle,
+				  void (*fh)(data1_handle dh,
+					     void *h, data1_absyn *a));
+YAZ_EXPORT data1_node 
+*data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
+                             data1_node *at, const char *tagname, NMEM m,
+                             int first_flag, int local_allowed);
 #ifdef __cplusplus
 }
 #endif

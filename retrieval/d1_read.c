@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.21  1998-02-27 14:08:05  adam
+ * Revision 1.22  1998-03-05 08:15:32  adam
+ * Implemented data1_add_insert_taggeddata utility which is more flexible
+ * than data1_insert_taggeddata.
+ *
+ * Revision 1.21  1998/02/27 14:08:05  adam
  * Added const to some char pointer arguments.
  * Reworked data1_read_node so that it doesn't create a tree with
  * pointers to original "SGML"-buffer.
@@ -185,7 +189,7 @@ char *data1_insert_string (data1_handle dh, data1_node *res,
 data1_node *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
 					data1_node *at,
 					const char *tagname, NMEM m,
-					int first_flag)
+					int first_flag, int local_allowed)
 {
     data1_node *partag = get_parent_tag (dh, at);
     data1_node *tagn = data1_mk_node (dh, m);
@@ -204,6 +208,8 @@ data1_node *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
 	e = partag->u.tag.element;
     tagn->u.tag.element =
 	data1_getelementbytagname (dh, root->u.root.absyn, e, tagname);
+    if (!local_allowed && !tagn->u.tag.element)
+	return NULL;
     tagn->last_child = tagn->child = datn = data1_mk_node (dh, m);
     datn->parent = tagn;
     datn->root = root;
@@ -236,7 +242,7 @@ data1_node *data1_add_taggeddata(data1_handle dh, data1_node *root,
 				 data1_node *at,
 				 const char *tagname, NMEM m)
 {
-    return data1_add_insert_taggeddata (dh, root, at, tagname, m, 0);
+    return data1_add_insert_taggeddata (dh, root, at, tagname, m, 0, 1);
 }
 
 
@@ -249,7 +255,7 @@ data1_node *data1_insert_taggeddata(data1_handle dh, data1_node *root,
 				    data1_node *at,
 				    const char *tagname, NMEM m)
 {
-    return data1_add_insert_taggeddata (dh, root, at, tagname, m, 1);
+    return data1_add_insert_taggeddata (dh, root, at, tagname, m, 1, 0);
 }
 
 /*
@@ -435,7 +441,7 @@ data1_node *data1_read_node (data1_handle dh, const char **buf,
 
 	/* use local buffer of nmem if too large */
 	if (len >= DATA1_LOCALDATA)
-	    res->u.data.data = nmem_malloc (m, len);
+	    res->u.data.data = (char*) nmem_malloc (m, len);
 	else
 	    res->u.data.data = res->lbuf;
 

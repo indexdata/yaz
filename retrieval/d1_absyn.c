@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.18  1998-02-27 14:08:04  adam
+ * Revision 1.19  1998-03-05 08:15:32  adam
+ * Implemented data1_add_insert_taggeddata utility which is more flexible
+ * than data1_insert_taggeddata.
+ *
+ * Revision 1.18  1998/02/27 14:08:04  adam
  * Added const to some char pointer arguments.
  * Reworked data1_read_node so that it doesn't create a tree with
  * pointers to original "SGML"-buffer.
@@ -101,6 +105,18 @@ data1_absyn *data1_absyn_search (data1_handle dh, const char *name)
 	p = p->next;
     }
     return NULL;
+}
+
+void data1_absyn_trav (data1_handle dh, void *handle,
+		       void (*fh)(data1_handle dh, void *h, data1_absyn *a))
+{
+    data1_absyn_cache p = *data1_absyn_cache_get (dh);
+
+    while (p)
+    {
+	(*fh)(dh, handle, p->absyn);
+	p = p->next;
+    }
 }
 
 data1_absyn *data1_absyn_add (data1_handle dh, const char *name)
