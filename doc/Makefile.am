@@ -1,37 +1,45 @@
-## $Id: Makefile.am,v 1.10 2001-02-21 23:16:49 adam Exp $
+## $Id: Makefile.am,v 1.11 2001-03-25 21:54:24 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
-doc_DATA = yaz.sgml profiles.sgml \
+doc_DATA = $(srcdir)/yaz.sgml $(srcdir)/profiles.sgml \
  yaz.txt yaz.ps profiles.txt profiles.ps yaz.html \
  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html \
  yaz-6.html yaz-7.html yaz-8.html yaz-9.html
 
-EXTRA_DIST = yaz.sgml profiles.sgml \
+EXTRA_DIST = $(srcdir)/yaz.sgml $(srcdir)/profiles.sgml \
  yaz.txt yaz.ps profiles.txt profiles.ps yaz.html \
  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html \
  yaz-6.html yaz-7.html yaz-8.html yaz-9.html
 
-yaz.txt: yaz.sgml
-	sgml2txt -f yaz.sgml
+yaz.txt: $(srcdir)/yaz.sgml
+	sgml2txt -f $(srcdir)/yaz.sgml
 
-yaz.ps: yaz.sgml
-	sgml2latex -p a4 -o ps yaz.sgml
+yaz.dvi: $(srcdir)/yaz.sgml
+	sgml2latex -p a4 -o dvi $(srcdir)/yaz.sgml
 
-profiles.txt: profiles.sgml
-	sgml2txt -f profiles.sgml
+yaz.ps: $(srcdir)/yaz.sgml
+	sgml2latex -p a4 -o ps $(srcdir)/yaz.sgml
 
-profiles.ps: profiles.sgml
-	sgml2latex -p a4 -o ps profiles.sgml
+profiles.txt: $(srcdir)/profiles.sgml
+	sgml2txt -f $(srcdir)/profiles.sgml
 
-yaz.html: yaz.sgml
-	sgml2html yaz.sgml
+profiles.dvi: $(srcdir)/profiles.sgml
+	sgml2latex -p a4 -o dvi $(srcdir)/profiles.sgml
 
-XMLFILES=yaz.xml introduction.xml installation.xml indexdata.xml \
-  asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml future.xml
+profiles.ps: $(srcdir)/profiles.sgml
+	sgml2latex -p a4 -o ps $(srcdir)/profiles.sgml
 
-book1.html: $(XMLFILES) yazhtml.dsl
-	jade -E14 -d yazhtml.dsl -t sgml xml.dcl yaz.xml
+yaz.html: $(srcdir)/yaz.sgml
+	sgml2html $(srcdir)/yaz.sgml
 
-yaz.tex: $(XMLFILES) yazprint.dsl
-	jade -d yazprint.dsl -t tex xml.dcl yaz.xml
+XMLFILES=$(srcdir)/yaz.xml $(srcdir)/introduction.xml \
+ $(srcdir)/installation.xml $(srcdir)/indexdata.xml $(srcdir)/asn.xml \
+ $(srcdir)/tools.xml $(srcdir)/odr.xml $(srcdir)/comstack.xml \
+ $(srcdir)/frontend.xml $(srcdir)/license.xml $(srcdir)/future.xml
+
+$(srcdir)/book1.html: $(XMLFILES) $(srcdir)/yazhtml.dsl
+	cd $(srcdir); jade -E14 -d yazhtml.dsl -t sgml xml.dcl yaz.xml
+
+$(srcdir)/yaz.tex: $(XMLFILES) $(srcdir)/yazprint.dsl
+	cd $(srcdir); jade -d yazprint.dsl -t tex xml.dcl yaz.xml
