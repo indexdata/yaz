@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.5 1999-06-09 11:05:30 heikki Exp $
+# $Id: makefile,v 1.6 1999-06-09 13:33:32 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -25,7 +25,7 @@
 
 DEBUG=0   # 0 for release, 1 for debug
 
-NEW_Z3950=0  # 0= use old asn files
+NEW_Z3950=1  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
 
 
@@ -159,7 +159,9 @@ ZTEST_LINK_OPTIONS = /subsystem:console
 # TCL
 TCL="C:\Program Files\Tcl\bin\tclsh80.exe"
 
-COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl -I $(INCLDIR)
+COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl -I$(INCLDIR)
+
+#-I../include
 
 
 # Final opt variables
@@ -185,20 +187,18 @@ TCLOPT= $(COMMON_TCL_OPTIONS)
 ###########################################################
 
 # The resource files
-
-RCFILE=$(SRCDIR)\compmak.rc
+#RCFILE=$(SRCDIR)\compmak.rc
 # Horrible Hack: The resfile contains just one line, pointing
 # to the component.tlb file (which is created by the idl compiler)
 # Devstudio wants that file to live in YazX3950, this makefile in
 # win/obj. So we need to RC files!
 
-RESFILE=$(OBJDIR)\component.res
-
+#RESFILE=$(OBJDIR)\component.res
 
 # The def file
 #DEF_FILE= $(ROOTDIR)\component.def 
 
-
+### !!! Delete the stuff above !!!
 
 # Note: Ordinary source files are not specified here at 
 # all, make finds them in suitable dirs. The object modules
@@ -369,12 +369,11 @@ DLL_OBJS= $(YAZ_OBJS)
 
 !if $(NEW_Z3950)
 $(PROTOH): makefile $(INCLDIR)\z-proto.h
-	copy $(INCLDIR)\z-proto.h $(INCLDIR)\proto.h
+	type $(INCLDIR)\z-proto.h > $(INCLDIR)\proto.h
 !else
 $(PROTOH): makefile $(INCLDIR)\prt-proto.h 
-	copy $(INCLDIR)\prt-proto.h $(INCLDIR)\proto.h
+	type $(INCLDIR)\prt-proto.h > $(INCLDIR)\proto.h
 !endif
-
 
 
 ###########################################################
@@ -384,24 +383,16 @@ $(PROTOH): makefile $(INCLDIR)\prt-proto.h
 Z3950_C_DIR=$(Z3950DIR)   #!!! Should be moved to OBJ
 
 # Files generated from datetime.asn
-DATETIME_H_FILES = z-date.h
-DATETIME_C_FILES = z-date.c
-DATETIME_FILES = $(DATETIME_H_FILES) $(DATETIME_C_FILES)
-$(DATETIME_C_FILES): $(DATETIME_H_FILES) 
-
+DATETIME_H_FILES = $(INCLDIR)\z-date.h
+DATETIME_C_FILES = $(Z3950_C_DIR)\z-date.c
 
 # Files generated from univres.asn
-UNIVRES_H_FILES = z-univ.h
-UNIVRES_C_FILES = z-univ.c
-UNIVRES_FILES = $(UNIVRES_H_FILES) $(UNIVRES_C_FILES)
-$(UNIVRES_C_FILES): $(UNIVRES_H_FILES) 
+UNIVRES_H_FILES = $(INCLDIR)\z-univ.h
+UNIVRES_C_FILES = $(Z3950_C_DIR)\z-univ.c
 
 # Files generated from esupdate.asn
-ESUPDATE_H_FILES = zes-update.h
-ESUPDATE_C_FILES = zes-update.c
-ESUPDATE_FILES = $(ESUPDATE_H_FILES) $(ESUPDATE_C_FILES)
-$(ESUPDATE_C_FILES): $(ESUPDATE_H_FILES) 
-
+ESUPDATE_H_FILES = $(INCLDIR)\zes-update.h
+ESUPDATE_C_FILES = $(Z3950_C_DIR)\zes-update.c
 
 # Files created from z3950v3.asn
 Z3950V3_H_FILES= \
@@ -432,9 +423,10 @@ Z3950V3_C_FILES= \
    $(Z3950_C_DIR)\zes-pset.c \
    $(Z3950_C_DIR)\zes-update0.c 
 
+DATETIME_FILES = $(DATETIME_H_FILES) $(DATETIME_C_FILES)
+UNIVRES_FILES = $(UNIVRES_H_FILES) $(UNIVRES_C_FILES)
+ESUPDATE_FILES = $(ESUPDATE_H_FILES) $(ESUPDATE_C_FILES)
 Z3950V3_FILES= $(Z3950V3_C_FILES) $(Z3950V3_H_FILES)
-
-$(Z3950V3_C_FILES): $(Z3950V3_H_FILES)
 
 GENERATED_C_FILES= \
    $(Z3950V3_C_FILES)  \
@@ -522,8 +514,8 @@ GENERATED_H_FILES= \
 <<
 
 ### Resource file
-$(RESFILE): $(RCFILE) $(IDLGENERATED)
-	$(RSC) $(RCOPT) /fo"$(RESFILE)" $(RCFILE) 
+#$(RESFILE): $(RCFILE) $(IDLGENERATED)
+#	$(RSC) $(RCOPT) /fo"$(RESFILE)" $(RCFILE) 
 
 ############### ASN-generated files
 
@@ -542,6 +534,9 @@ $(UNIVRES_FILES): $(Z3950DIR)\univres.asn
 
 $(ESUPDATE_FILES): $(Z3950DIR)\esupdate.asn
 	@cd $(Z3950DIR)
+	dir esupdate.asn | find "-"
+	dir $(ESUPDATE_C_FILES) | find "-"
+	dir $(ESUPDATE_H_FILES) | find "-"
 	$(TCL) $(TCLOPT) esupdate.asn
 
 
@@ -569,9 +564,9 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS)
 #	pause
 #	rem $(DLL_OBJS)
 
-foo: $(OBJDIR)\comstack.obj
-	echo foo
-
+#foo: $(ESUPDATE_FILES)
+#	dir $(INCLDIR)\zes-update.*
+#	dir $(Z3950DIR)\zes-update.*
 
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) 
 	@echo Linking the client  $(CLIENT)
@@ -641,15 +636,9 @@ $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
 ############### Explicit dependencies
 ###########################################################
 
-$(DLL_OBJS): makefile $(PROTOH) $(GENERATED_C_FILES)
+$(DLL_OBJS): makefile $(PROTOH)
 
-# Note: The objects depend on their own C file already, the
-# dependency here is actually to make sure we get the 
-# proper H files generated before trying to compile anything
-# Unfortunately make clean can not delete the H files so
-# easily. This hack assures that if the C's are deleted 
-# (as make clean does), the H's will be generated anew...
-
+$(Z3950_OBJS): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 
 
 ###########################################################
@@ -657,7 +646,10 @@ $(DLL_OBJS): makefile $(PROTOH) $(GENERATED_C_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.5  1999-06-09 11:05:30  heikki
+# Revision 1.6  1999-06-09 13:33:32  heikki
+# Compiles and links both old and new type stuff all right
+#
+# Revision 1.5  1999/06/09 11:05:30  heikki
 # At least it can compile
 #
 # Revision 1.4  1999/06/09 09:41:09  heikki
