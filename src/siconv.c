@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.9 2005-02-01 21:06:37 adam Exp $
+ * $Id: siconv.c,v 1.10 2005-02-02 23:26:38 adam Exp $
  */
 /**
  * \file siconv.c
@@ -50,6 +50,8 @@ unsigned long yaz_marc8_8_conv (unsigned char *inp, size_t inbytesleft,
 unsigned long yaz_marc8_9_conv (unsigned char *inp, size_t inbytesleft,
 				size_t *no_read, int *combining);
     
+#define NEW_COMB 1
+
 struct yaz_iconv_struct {
     int my_errno;
     int init_flag;
@@ -60,8 +62,15 @@ struct yaz_iconv_struct {
     size_t (*write_handle)(yaz_iconv_t cd, unsigned long x,
                            char **outbuf, size_t *outbytesleft);
     int marc8_esc_mode;
+#if NEW_COMB
+    int comb_offset;
+    int comb_size;
+    unsigned long comb_x[8];
+    size_t comb_no_read[8];
+#else
     int marc8_comb_x;
     int marc8_comb_no_read;
+#endif
     size_t no_read_x;
     unsigned unget_x;
 #if HAVE_ICONV_H
@@ -241,6 +250,115 @@ static unsigned long yaz_read_wchar_t (yaz_iconv_t cd, unsigned char *inp,
 }
 #endif
 
+
+#if NEW_COMB
+static unsigned long yaz_read_marc8_comb (yaz_iconv_t cd, unsigned char *inp,
+					  size_t inbytesleft, size_t *no_read,
+					  int *comb);
+
+static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
+				     size_t inbytesleft, size_t *no_read)
+{
+    unsigned long x;
+    if (cd->comb_offset < cd->comb_size)
+    {
+	*no_read = cd->comb_no_read[cd->comb_offset];
+	x = cd->comb_x[cd->comb_offset];
+	cd->comb_offset++;
+	return x;
+    }
+
+    cd->comb_offset = 0;
+    for (cd->comb_size = 0; cd->comb_size < 8; cd->comb_size++)
+    {
+	int comb = 0;
+	x = yaz_read_marc8_comb(cd, inp, inbytesleft, no_read, &comb);
+	if (!comb || !x)
+	    break;
+	cd->comb_x[cd->comb_size] = x;
+	cd->comb_no_read[cd->comb_size] = *no_read;
+	inp += *no_read;
+	inbytesleft = inbytesleft - *no_read;
+    }
+    return x;
+}
+
+static unsigned long yaz_read_marc8_comb (yaz_iconv_t cd, unsigned char *inp,
+					  size_t inbytesleft, size_t *no_read,
+					  int *comb)
+{
+    *no_read = 0;
+    while(inbytesleft >= 1 && inp[0] == 27)
+    {
+	size_t inbytesleft0 = inbytesleft;
+	inp++;
+	inbytesleft--;
+	while(inbytesleft > 0 && strchr("(,$!", *inp))
+	{
+	    inbytesleft--;
+	    inp++;
+	}
+	if (inbytesleft <= 0)
+	{
+	    *no_read = 0;
+	    cd->my_errno = YAZ_ICONV_EINVAL;
+	    return 0;
+	}
+	cd->marc8_esc_mode = *inp++;
+	inbytesleft--;
+	(*no_read) += inbytesleft0 - inbytesleft;
+    }
+    if (inbytesleft <= 0)
+	return 0;
+    else
+    {
+	unsigned long x;
+	*comb = 0;
+	size_t no_read_sub = 0;
+
+	switch(cd->marc8_esc_mode)
+	{
+	case 'B':  /* Basic ASCII */
+	case 'E':  /* ANSEL */
+	case 's':  /* ASCII */
+	    x = yaz_marc8_1_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	case 'g':  /* Greek */
+	    x = yaz_marc8_2_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	case 'b':  /* Subscripts */
+	    x = yaz_marc8_3_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	case 'p':  /* Superscripts */
+	    x = yaz_marc8_4_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	case '2':  /* Basic Hebrew */
+	    x = yaz_marc8_5_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	case 'N':  /* Basic Cyrillic */
+	case 'Q':  /* Extended Cyrillic */
+	    x = yaz_marc8_6_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	case '3':  /* Basic Arabic */
+	case '4':  /* Extended Arabic */
+	    x = yaz_marc8_7_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	case 'S':  /* Greek */
+	    x = yaz_marc8_8_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	case '1':  /* Chinese, Japanese, Korean (EACC) */
+	    x = yaz_marc8_9_conv(inp, inbytesleft, &no_read_sub, comb);
+	    break;
+	default:
+	    *no_read = 0;
+	    cd->my_errno = YAZ_ICONV_EILSEQ;
+	    return 0;
+	}
+	*no_read += no_read_sub;
+	return x;
+    }
+}
+#else
 static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
                                      size_t inbytesleft, size_t *no_read)
 {
@@ -341,6 +459,7 @@ static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
 	return x;
     }
 }
+#endif
 
 static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
                               char **outbuf, size_t *outbytesleft)
@@ -503,7 +622,11 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
     cd->init_handle = 0;
     cd->my_errno = YAZ_ICONV_UNKNOWN;
     cd->marc8_esc_mode = 'B';
+#if NEW_COMB
+    cd->comb_offset = cd->comb_size = 0;
+#else
     cd->marc8_comb_x = 0;
+#endif
 
     /* a useful hack: if fromcode has leading @,
        the library not use YAZ's own conversions .. */
