@@ -150,12 +150,6 @@ typedef struct Z_Scan
     } u;
 } Z_Scan;
 
-typedef struct Z_StringList
-{
-    int num_strings;
-    char **strings;
-} Z_StringList;
-
 typedef struct Z_Sort
 {
     int which;

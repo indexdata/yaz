@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.30  1996-01-10 15:21:32  quinn
+ * Revision 1.31  1996-01-22 09:46:45  quinn
+ * Added Sort PDU. Moved StringList to main protocol file.
+ *
+ * Revision 1.30  1996/01/10  15:21:32  quinn
  * Added links to access control PDUs
  *
  * Revision 1.29  1996/01/02  11:46:49  quinn
@@ -234,6 +237,12 @@ typedef struct Z_IntUnit
 } Z_IntUnit;
 
 typedef Odr_oct Z_SUTRS;
+
+typedef struct Z_StringList
+{
+    int num_strings;
+    char **strings;
+} Z_StringList;
 
 /* ----------------- INIT SERVICE  ----------------*/
 
@@ -1052,6 +1061,111 @@ typedef struct Z_ExtendedServicesResponse
     Z_OtherInformation *otherInfo;          /* OPTIONAL */
 } Z_ExtendedServicesResponse;
 
+/* ------------------------ Sort --------------------------- */
+
+typedef struct Z_SortAttributes
+{
+    Odr_oid *id;
+    Z_AttributeList *list;
+} Z_SortAttributes;
+
+typedef struct Z_SortKey
+{
+    int which;
+#define Z_SortKey_sortField             0
+#define Z_SortKey_elementSpec           1
+#define Z_SortKey_sortAttributes        2
+    union
+    {
+	char *sortField;
+	Z_Specification *elementSpec;
+	Z_SortAttributes *sortAttributes;
+    } u;
+} Z_SortKey;
+
+typedef struct Z_SortDbSpecific
+{
+    char *databaseName;
+    Z_SortKey *dbSort;
+} Z_SortDbSpecific;
+
+typedef struct Z_SortDbSpecificList
+{
+    int num_dbSpecific;
+    Z_SortDbSpecific **dbSpecific;
+} Z_SortDbSpecificList;
+
+typedef struct Z_SortElement
+{
+    int which;
+#define Z_SortElement_generic               0
+#define Z_SortElement_databaseSpecific      1
+    union
+    {
+	Z_SortKey *generic;
+	Z_SortDbSpecificList *databaseSpecific;
+    } u;
+} Z_SortElement;
+
+typedef struct Z_SortMissingValueAction
+{
+    int which;
+#define Z_SortMissingValAct_abort           0
+#define Z_SortMissingValAct_null            1
+#define Z_SortMissingValAct_valData         2
+    union
+    {
+	Odr_null *abort;
+	Odr_null *null;
+	Odr_oct *valData;
+    } u;
+} Z_SortMissingValueAction;
+
+typedef struct Z_SortKeySpec
+{
+    Z_SortElement *sortElement;
+    int *sortRelation;
+#define Z_SortRelation_ascending            0
+#define Z_SortRelation_descending           1
+#define Z_SortRelation_ascendingByFreq      3
+#define Z_SortRelation_descendingByFreq     4
+    int *caseSensitivity;
+#define Z_SortCase_caseSensitive            0
+#define Z_SortCase_caseInsensitive          1
+    Z_SortMissingValueAction *missingValueAction;  /* OPTIONAL */
+} Z_SortKeySpec;
+
+typedef struct Z_SortResponse
+{
+    Z_ReferenceId *referenceId;             /* OPTIONAL */
+    int *sortStatus;
+#define Z_SortStatus_success              0
+#define Z_SortStatus_partial_1            1
+#define Z_SortStatus_failure              2
+    int *resultSetStatus;                   /* OPTIONAL */
+#define Z_SortResultSetStatus_empty       1
+#define Z_SortResultSetStatus_interim     2
+#define Z_SortResultSetStatus_unchanged   3
+#define Z_SortResultSetStatus_none        4
+    Z_DiagRecs *diagnostics;                /* OPTIONAL */
+    Z_OtherInformation *otherInfo;          /* OPTIONAL */
+} Z_SortResponse;
+
+typedef struct Z_SortKeySpecList
+{
+    int num_specs;
+    Z_SortKeySpec **specs;
+} Z_SortKeySpecList;
+
+typedef struct Z_SortRequest
+{
+    Z_ReferenceId *referenceId;             /* OPTIONAL */
+    Z_StringList *inputResultSetNames;
+    char *sortedResultSetName;
+    Z_SortKeySpecList *sortSequence;
+    Z_OtherInformation *otherInfo;          /* OPTIONAL */
+} Z_SortRequest;
+
 /* ------------------------ APDU ---------------------------- */
 
 typedef struct Z_APDU
@@ -1076,6 +1190,8 @@ typedef struct Z_APDU
 #define Z_APDU_close 16
 #define Z_APDU_accessControlRequest 17
 #define Z_APDU_accessControlResponse 18
+#define Z_APDU_sortRequest 20
+#define Z_APDU_sortResponse 21
     union
     {
 	Z_InitRequest  *initRequest;
@@ -1093,6 +1209,8 @@ typedef struct Z_APDU
 	Z_TriggerResourceControlRequest *triggerResourceControlRequest;
 	Z_ScanRequest *scanRequest;
 	Z_ScanResponse *scanResponse;
+	Z_SortRequest *sortRequest;
+	Z_SortResponse *sortResponse;
 	Z_Segment *segmentRequest;
 	Z_ExtendedServicesRequest *extendedServicesRequest;
 	Z_ExtendedServicesResponse *extendedServicesResponse;
@@ -1117,6 +1235,7 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
 Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
 Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
 Z_Close *zget_Close(ODR o);
+int z_StringList(ODR o, Z_StringList **p, int opt);
 int z_InternationalString(ODR o, char **p, int opt);
 int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt);
 int z_ElementSetName(ODR o, char **p, int opt);

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.41  1996-01-10 15:21:24  quinn
+ * Revision 1.42  1996-01-22 09:46:31  quinn
+ * Added Sort PDU. Moved StringList to main protocol file.
+ *
+ * Revision 1.41  1996/01/10  15:21:24  quinn
  * Added links to access control PDUs
  *
  * Revision 1.40  1996/01/02  11:46:40  quinn
@@ -270,6 +273,19 @@ int z_IntUnit(ODR o, Z_IntUnit **p, int opt)
     	odr_implicit(o, odr_integer, &(*p)->value, ODR_CONTEXT, 1, 0) &&
 	odr_implicit(o, z_Unit, &(*p)->unitUsed, ODR_CONTEXT, 2, 0) &&
 	odr_sequence_end(o);
+}
+
+int z_StringList(ODR o, Z_StringList **p, int opt)
+{
+    if (o->direction == ODR_DECODE)
+	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+	return opt;
+    if (odr_sequence_of(o, z_InternationalString, &(*p)->strings,
+	&(*p)->num_strings))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
 }
 
 /* ---------------------- INITIALIZE SERVICE ------------------- */
@@ -1480,6 +1496,151 @@ int z_ExtendedServicesResponse(ODR o, Z_ExtendedServicesResponse **p, int opt)
         odr_sequence_end(o);
 }
 
+/* ------------------------ SORT ------------------------- */
+
+int z_SortAttributes(ODR o, Z_SortAttributes **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        odr_oid(o, &(*p)->id, 0) &&
+	z_AttributeList(o, &(*p)->list, 0) &&
+	odr_sequence_end(o);
+}
+
+int z_SortKey(ODR o, Z_SortKey **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_SortKey_sortField,
+	    z_InternationalString},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_SortKey_elementSpec, z_Specification},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_SortKey_sortAttributes,
+	    z_SortAttributes},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_SortDbSpecific(ODR o, Z_SortDbSpecific **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        z_DatabaseName(o, &(*p)->databaseName, 0) &&
+	z_SortKey(o, &(*p)->dbSort, 0) &&
+	odr_sequence_end(o);
+}
+
+int z_SortDbSpecificList(ODR o, Z_SortDbSpecificList **p, int opt)
+{
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (odr_sequence_of(o, z_SortDbSpecific, &(*p)->dbSpecific,
+	&(*p)->num_dbSpecific))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_SortElement(ODR o, Z_SortElement **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+	{ODR_EXPLICIT, ODR_CONTEXT, 1, Z_SortElement_generic, z_SortKey},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_SortElement_databaseSpecific,
+	    z_SortDbSpecificList},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_SortMissingValueAction(ODR o, Z_SortMissingValueAction **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_SortMissingValAct_abort, odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_SortMissingValAct_null, odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_SortMissingValAct_valData,
+	    odr_octetstring},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_SortKeySpec(ODR o, Z_SortKeySpec **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        z_SortElement(o, &(*p)->sortElement, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->sortRelation, ODR_CONTEXT, 1, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->caseSensitivity, ODR_CONTEXT,
+	    2, 0) &&
+	odr_explicit(o, z_SortMissingValueAction, &(*p)->missingValueAction,
+	    ODR_CONTEXT, 3, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_SortResponse(ODR o, Z_SortResponse **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->sortStatus, ODR_CONTEXT,
+	    3, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->resultSetStatus, ODR_CONTEXT,
+	    4, 1) &&
+	odr_implicit(o, z_DiagRecs, &(*p)->diagnostics, ODR_CONTEXT, 5, 1) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_SortKeySpecList(ODR o, Z_SortKeySpecList **p, int opt)
+{
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (odr_sequence_of(o, z_SortKeySpec, &(*p)->specs, &(*p)->num_specs))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_SortRequest(ODR o, Z_SortRequest **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, z_StringList, &(*p)->inputResultSetNames, 
+	    ODR_CONTEXT, 3, 0) &&
+	odr_implicit(o, z_InternationalString, &(*p)->sortedResultSetName,
+	    ODR_CONTEXT, 4, 0) &&
+	odr_implicit(o, z_SortKeySpecList, &(*p)->sortSequence, ODR_CONTEXT,
+	    5, 0) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+	odr_sequence_end(o);
+}
+
 /* ------------------------ APDU ------------------------- */
 
 int z_APDU(ODR o, Z_APDU **p, int opt)
@@ -1511,6 +1672,8 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
 	    z_TriggerResourceControlRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 35, Z_APDU_scanRequest, z_ScanRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 36, Z_APDU_scanResponse, z_ScanResponse},
+	{ODR_IMPLICIT, ODR_CONTEXT, 43, Z_APDU_sortRequest, z_SortRequest},
+	{ODR_IMPLICIT, ODR_CONTEXT, 44, Z_APDU_sortResponse, z_SortResponse},
 	{ODR_IMPLICIT, ODR_CONTEXT, 45, Z_APDU_segmentRequest, z_Segment},
 	{ODR_IMPLICIT, ODR_CONTEXT, 46, Z_APDU_extendedServicesRequest,
 	    z_ExtendedServicesRequest},

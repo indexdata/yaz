@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-dia.c,v $
- * Revision 1.3  1995-09-29 17:11:54  quinn
+ * Revision 1.4  1996-01-22 09:46:34  quinn
+ * Added Sort PDU. Moved StringList to main protocol file.
+ *
+ * Revision 1.3  1995/09/29  17:11:54  quinn
  * Smallish
  *
  * Revision 1.2  1995/09/27  15:02:41  quinn
@@ -154,19 +157,6 @@ int z_Scan(ODR o, Z_Scan **p, int opt)
     else if (!*p)
 	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
-	return 1;
-    *p = 0;
-    return opt && odr_ok(o);
-}
-
-int z_StringList(ODR o, Z_StringList **p, int opt)
-{
-    if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
-    else if (!*p)
-	return opt;
-    if (odr_sequence_of(o, z_InternationalString, &(*p)->strings,
-	&(*p)->num_strings))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);
