@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.269 2005-01-16 22:12:39 adam Exp $
+ * $Id: client.c,v 1.270 2005-01-17 13:08:53 adam Exp $
  */
 
 #include <stdio.h>
@@ -21,6 +21,9 @@
 #endif
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
 #endif
 
 #if HAVE_OPENSSL_SSL_H
