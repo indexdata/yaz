@@ -1,3 +1,9 @@
+yaz (2.0.23-2) unstable; urgency=low
+
+  * Fix bug regarding HTTP GET.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 22 Sep 2004 11:29:53 +0200
+
 yaz (2.0.23-1) unstable; urgency=low
 
   * Upstream.
