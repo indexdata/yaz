@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.125  2001-07-19 19:51:41  adam
+ * Revision 1.126  2001-08-06 20:22:23  adam
+ * Client doesn't set VAL_PROXY otherinfo unless -p is specified.
+ *
+ * Revision 1.125  2001/07/19 19:51:41  adam
  * Added typecasts to make C++ happy.
  *
  * Revision 1.124  2001/07/04 20:13:51  ja7
@@ -569,9 +572,9 @@ static void send_initRequest(const char* type_and_host)
 
     req->referenceId = set_refid (out);
 
-
-    yaz_oi_set_string_oidval(&req->otherInfo, out, VAL_PROXY, 1, type_and_host);
-
+    if (yazProxy) 
+        yaz_oi_set_string_oidval(&req->otherInfo, out, VAL_PROXY,
+        1, type_and_host);
     
     send_apdu(apdu);
     printf("Sent initrequest.\n");
@@ -696,12 +699,12 @@ int cmd_open(char *arg)
 
     if(yazProxy) 
     {
-      conn = cs_create_host(yazProxy, 1, &add);
+	conn = cs_create_host(yazProxy, 1, &add);
     } 
     else 
     { 
-      conn = cs_create_host(type_and_host, 1, &add);
-    };
+	conn = cs_create_host(type_and_host, 1, &add);
+    }
 	
     if (!conn)
     {
@@ -2726,8 +2729,8 @@ int main(int argc, char **argv)
                 apdu_file=fopen(arg, "a");
             break;
 	case 'p':
-	  yazProxy=strdup(arg);
-	  break;
+	    yazProxy=strdup(arg);
+	    break;
         case 'v':
             yaz_log_init (yaz_log_mask_str(arg), "", NULL);
             break;
