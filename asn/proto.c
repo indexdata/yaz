@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.11  1995-03-17 10:17:25  quinn
+ * Revision 1.12  1995-03-20 09:45:09  quinn
+ * Working towards v3
+ *
+ * Revision 1.11  1995/03/17  10:17:25  quinn
  * Added memory management.
  *
  * Revision 1.10  1995/03/15  11:17:40  quinn
@@ -70,6 +73,42 @@ int z_UserInformationField(ODR o, Z_UserInformationField **p, int opt)
 
 /* ---------------------- INITIALIZE SERVICE ------------------- */
 
+int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	odr_visiblestring(o, &(*p)->user, 0) &&
+    	odr_visiblestring(o, &(*p)->password, 0) &&
+    	odr_visiblestring(o, &(*p)->account, 0) &&
+    	odr_sequence_end(o);
+}
+
+int z_StrAuthentication(ODR o, char **p, int opt)
+{
+    return odr_visiblestring(o, p, opt);
+}
+
+#if 0
+int z_IdAuthentication(ODR o, Z_IdAuthentication **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+	{-1, -1, -1, Z_IdAuthentication_open, z_StrAuthentication},
+	{-1, -1, -1, Z_IdAuthentication_NSR, z_NSRAuthentication},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+    	return 1;
+    *p = 0;
+    return opt && !o->error;
+}
+#endif
+
 int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 {
     Z_InitRequest *pp;
@@ -86,7 +125,7 @@ int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 	    5, 0) &&
 	odr_implicit(o, odr_integer, &pp->maximumRecordSize, ODR_CONTEXT,
 	    6, 0) &&
-	odr_explicit(o, odr_any, &pp->idAuthentication, ODR_CONTEXT,
+	odr_explicit(o, odr_null, &pp->idAuthentication, ODR_CONTEXT,
 	    7, 1) &&
 	odr_implicit(o, odr_visiblestring, &pp->implementationId, ODR_CONTEXT,
 	    110, 1) &&
@@ -123,22 +162,6 @@ int z_InitResponse(ODR o, Z_InitResponse **p, int opt)
 	    ODR_CONTEXT, 112, 1) &&
 	z_UserInformationField(o, &pp->userInformationField, 1) &&
 	odr_sequence_end(o);
-}
-
-int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
-{
-    if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
-    return
-    	odr_visiblestring(o, &(*p)->user, 0) &&
-    	odr_visiblestring(o, &(*p)->password, 0) &&
-    	odr_visiblestring(o, &(*p)->account, 0) &&
-    	odr_sequence_end(o);
-}
-
-int z_StrAuthentication(ODR o, char **p, int opt)
-{
-    return odr_visiblestring(o, p, opt);
 }
 
 /* ------------------------ SEARCH SERVICE ----------------------- */
