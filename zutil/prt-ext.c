@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: prt-ext.c,v $
- * Revision 1.5  2001-03-25 21:55:13  adam
+ * Revision 1.6  2001-05-17 14:16:15  adam
+ * Added EXTERNAL handling for item update0 (1.0).
+ *
+ * Revision 1.5  2001/03/25 21:55:13  adam
  * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
  *
  * Revision 1.4  2000/03/14 15:22:04  ian
@@ -188,8 +191,9 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 #ifdef ASN_COMPILED
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_ESAdmin,
 	 (Odr_fun)z_Admin, 0},
-#endif
-	{-1, -1, -1, -1, 0, 0}
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update0,
+	 (Odr_fun)z_IU0Update, 0},
+#endif	{-1, -1, -1, -1, 0, 0}
     };
     
     odr_implicit_settag(o, ODR_UNIVERSAL, ODR_EXTERNAL);

@@ -2,7 +2,7 @@
 #  the next line restarts using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: cvs-date.tcl,v 1.1 2001-05-16 07:37:39 adam Exp $
+# $Id: cvs-date.tcl,v 1.2 2001-05-17 14:16:15 adam Exp $
 set sec 0
 
 proc cvslog {} {
@@ -25,7 +25,8 @@ if {$sec} {
 	set fname [lindex $argv 0]
 	if {[string length $fname]} {
 		set f [open [lindex $argv 0] w]
-		puts $f  "#define YAZ_DATE \"$sec\""
+		puts $f  "#define YAZ_DATE ${sec}L"
+		puts $f  "#define YAZ_DATE_STR \"$sec\""
 		close $f
 	} else {
 		puts $sec

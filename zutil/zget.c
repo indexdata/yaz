@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.7  2001-05-16 07:22:56  adam
+ * Revision 1.8  2001-05-17 14:16:15  adam
+ * Added EXTERNAL handling for item update0 (1.0).
+ *
+ * Revision 1.7  2001/05/16 07:22:56  adam
  * YAZ CVS Date part of implementationVersion in init{request,Response}.
  *
  * Revision 1.6  2001/03/25 21:55:13  adam
@@ -99,8 +102,8 @@ Z_InitRequest *zget_InitRequest(ODR o)
     r->implementationId = "81";
     r->implementationName = "Index Data/YAZ";
     r->implementationVersion = YAZ_VERSION
-#ifdef YAZ_DATE
-    " (" YAZ_DATE ")"
+#ifdef YAZ_DATE_STR
+    " (" YAZ_DATE_STR ")"
 #endif
 	;
     r->userInformationField = 0;
@@ -123,8 +126,8 @@ Z_InitResponse *zget_InitResponse(ODR o)
     r->implementationId = "81";
     r->implementationName = "Index Data/YAZ";
     r->implementationVersion = YAZ_VERSION
-#ifdef YAZ_DATE
-    " (" YAZ_DATE ")"
+#ifdef YAZ_DATE_STR
+    " (" YAZ_DATE_STR ")"
 #endif
 	;
     r->userInformationField = 0;

@@ -78,6 +78,7 @@ struct Z_External
 #define Z_External_dateTime 17
 #define Z_External_universeReport 18
 #define Z_External_ESAdmin 19
+#define Z_External_update0 20
     union
     {
 	/* Generic types */
@@ -103,6 +104,7 @@ struct Z_External
         Z_UniverseReport *universeReport;
 #ifdef ASN_COMPILED
         Z_Admin *adminService;
+	Z_IU0Update *update0;
 #endif
     } u;
 };

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: z-proto.h,v $
- * Revision 1.4  2000-03-14 09:19:49  ian
+ * Revision 1.5  2001-05-17 14:16:15  adam
+ * Added EXTERNAL handling for item update0 (1.0).
+ *
+ * Revision 1.4  2000/03/14 09:19:49  ian
  * Added admin extended service encoders & decoders.
  *
  * Revision 1.3  2000/02/28 11:20:06  adam
@@ -61,6 +64,7 @@
 #include <yaz/zes-admin.h>
 #include <yaz/z-date.h>
 #include <yaz/z-univ.h>
+#include <yaz/zes-update0.h>
 
 YAZ_BEGIN_CDECL
 
