@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2004, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.8 2004-12-13 14:21:55 heikki Exp $
+ * $Id: logrpn.c,v 1.9 2004-12-20 23:38:39 adam Exp $
  */
 
 /**
@@ -596,7 +596,7 @@ void wrbuf_put_zquery(WRBUF b, Z_Query *q)
     {
     case Z_Query_type_1: 
     case Z_Query_type_101:
-	wrbuf_printf(b,"Z:");
+	wrbuf_printf(b,"RPN:");
 	wrbuf_rpn_query(b,q->u.type_1);
 	break;
     case Z_Query_type_2:
