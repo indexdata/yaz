@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.3 2004-08-07 08:18:19 adam Exp $
+ * $Id: tsticonv.c,v 1.4 2004-11-16 22:51:52 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -263,7 +263,6 @@ static void dconvert(int mandatory, const char *tmpcode)
 	
 int main (int argc, char **argv)
 {
-    yaz_log_init_file("tsticonv.log");
     dconvert(1, "UTF-8");
     dconvert(1, "ISO-8859-1");
     dconvert(1, "UCS4");
