@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.53  1995-11-01 13:54:58  quinn
+ * Revision 1.54  1995-11-08 15:11:29  quinn
+ * Log of close transmit.
+ *
+ * Revision 1.53  1995/11/01  13:54:58  quinn
  * Minor adjustments
  *
  * Revision 1.52  1995/11/01  12:19:13  quinn
@@ -323,7 +326,8 @@ static void do_close(association *a, int reason, char *message)
     while (request_deq(&a->outgoing));
     if (a->version >= 3)
     {
-	logf(LOG_DEBUG, "Generating Close PDU");
+	logf(LOG_LOG, "Sending Close PDU, reason=%d, message=%s",
+	    reason, message ? message : "none");
 	apdu.which = Z_APDU_close;
 	apdu.u.close = cls;
 	*cls->closeReason = reason;
