@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.5 2003-11-24 11:25:07 mike Exp $
+ * $Id: zoom-c.c,v 1.6 2003-11-25 09:50:35 mike Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -544,7 +544,12 @@ ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 
     r->start = ZOOM_options_get_int(r->options, "start", 0);
     r->count = ZOOM_options_get_int(r->options, "count", 0);
-    r->step = ZOOM_options_get_int(r->options, "step", 0);
+    {
+	/* If "presentChunk" is defined use that; otherwise "step" */
+	const char *cp = ZOOM_options_get (r->options, "presentChunk");
+	r->step = ZOOM_options_get_int(r->options,
+				       (cp != 0 ? "presentChunk": "step"), 0);
+    }
     r->piggyback = ZOOM_options_get_bool (r->options, "piggyback", 1);
     cp = ZOOM_options_get (r->options, "setname");
     if (cp)
@@ -928,7 +933,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     
     impver = ZOOM_options_get (c->options, "implementationVersion");
     ireq->implementationVersion =
-	(char *) odr_malloc (c->odr_out, strlen("$Revision: 1.5 $") + 2 +
+	(char *) odr_malloc (c->odr_out, strlen("$Revision: 1.6 $") + 2 +
 			     (impver ? strlen(impver) : 0));
     strcpy (ireq->implementationVersion, "");
     if (impver)
@@ -936,7 +941,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	strcat (ireq->implementationVersion, impver);
 	strcat (ireq->implementationVersion, "/");
     }					       
-    strcat (ireq->implementationVersion, "$Revision: 1.5 $");
+    strcat (ireq->implementationVersion, "$Revision: 1.6 $");
 
     *ireq->maximumRecordSize =
 	ZOOM_options_get_int (c->options, "maximumRecordSize", 1024*1024);
