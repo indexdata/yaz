@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXXXXXXXXXX
 
+Fixed tagging bug of type 101 query in SearchRequest-Query PDU encoder/decoder.
+
 Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
 
 Added SOIF syntax (using private OID for now) to retrieval module and client.
