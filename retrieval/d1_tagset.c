@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.14  1999-11-30 13:47:12  adam
+ * Revision 1.15  2002-04-04 20:49:46  adam
+ * New functions yaz_is_abspath, yaz_path_fopen_base
+ *
+ * Revision 1.14  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.13  1999/10/21 12:06:29  adam
@@ -165,7 +168,7 @@ data1_tagset *data1_read_tagset (data1_handle dh, const char *file, int type)
     int argc;
     char *argv[50], line[512];
 
-    if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
+    if (!(f = data1_path_fopen(dh, file, "r")))
     {
 	yaz_log(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

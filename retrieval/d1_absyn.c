@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.30  2000-12-05 19:07:24  adam
+ * Revision 1.31  2002-04-04 20:49:46  adam
+ * New functions yaz_is_abspath, yaz_path_fopen_base
+ *
+ * Revision 1.30  2000/12/05 19:07:24  adam
  * Fixed problem with element level in reading of abstract syntax.
  *
  * Revision 1.29  2000/12/05 14:34:49  adam
@@ -416,7 +419,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     int argc;
     char *argv[50], line[512];
 
-    if (!(f = yaz_path_fopen(data1_get_tabpath (dh), file, "r")))
+    if (!(f = data1_path_fopen(dh, file, "r")))
     {
 	yaz_log(LOG_WARN|LOG_ERRNO, "Couldn't open %s", file);
 	return 0;

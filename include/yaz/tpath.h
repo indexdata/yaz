@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,17 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: tpath.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.4  1997/10/31 12:20:08  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
+ * $Id: tpath.h,v 1.3 2002-04-04 20:49:46 adam Exp $
  *
  */
 
@@ -44,8 +34,12 @@
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT FILE *yaz_path_fopen(const char *path,
-				const char *name, const char *mode);
+YAZ_EXPORT FILE *yaz_path_fopen_base(const char *path, const char *name,
+                                     const char *mode, const char *base);
+YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *name,
+                                const char *mode);
+
+YAZ_EXPORT int yaz_is_abspath (const char *p);
 
 YAZ_END_CDECL
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.18  2000-11-29 14:22:47  adam
+ * Revision 1.19  2002-04-04 20:49:46  adam
+ * New functions yaz_is_abspath, yaz_path_fopen_base
+ *
+ * Revision 1.18  2000/11/29 14:22:47  adam
  * Implemented XML/SGML attributes for data1 so that d1_read reads them
  * and d1_write generates proper attributes for XML/SGML records. Added
  * register locking for threaded version.
@@ -93,7 +96,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
     data1_mapunit **mapp;
     int local_numeric = 0;
 
-    if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
+    if (!(f = data1_path_fopen(dh, file, "r")))
     {
 	yaz_log(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;

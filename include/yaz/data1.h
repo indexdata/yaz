@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.6  2000-12-05 12:21:45  adam
+ * Revision 1.7  2002-04-04 20:49:46  adam
+ * New functions yaz_is_abspath, yaz_path_fopen_base
+ *
+ * Revision 1.6  2000/12/05 12:21:45  adam
  * Added termlist source for data1 system.
  *
  * Revision 1.5  2000/11/29 14:22:47  adam
@@ -571,7 +574,9 @@ YAZ_EXPORT Z_BriefBib *data1_nodetosummary(data1_handle dh,
 YAZ_EXPORT char *data1_nodetosoif(data1_handle dh, data1_node *n, int select,
 				  int *len);
 YAZ_EXPORT void data1_set_tabpath(data1_handle dh, const char *path);
+YAZ_EXPORT void data1_set_tabroot (data1_handle dp, const char *p);
 YAZ_EXPORT const char *data1_get_tabpath(data1_handle dh);
+YAZ_EXPORT const char *data1_get_tabroot(data1_handle dh);
 
 YAZ_EXPORT WRBUF data1_get_wrbuf (data1_handle dp);
 YAZ_EXPORT char **data1_get_read_buf (data1_handle dp, int **lenp);
@@ -598,6 +603,9 @@ YAZ_EXPORT data1_node
 YAZ_EXPORT char *data1_getNodeValue(data1_node* node, char* pTagPath);
 YAZ_EXPORT data1_node *data1_LookupNode(data1_node* node, char* pTagPath);
 YAZ_EXPORT int data1_CountOccurences(data1_node* node, char* pTagPath);
+
+YAZ_EXPORT FILE *data1_path_fopen (data1_handle dh, const char *file,
+                                   const char *mode);
 
 YAZ_END_CDECL
 

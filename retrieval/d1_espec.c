@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_espec.c,v 1.20 2001-09-30 20:15:49 adam Exp $
+ * $Id: d1_espec.c,v 1.21 2002-04-04 20:49:46 adam Exp $
  */
 
 #include <stdlib.h>
@@ -202,7 +202,7 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
     char *argv[50], line[512];
     Z_Espec1 *res = (Z_Espec1 *)nmem_malloc(nmem, sizeof(*res));
     
-    if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
+    if (!(f = data1_path_fopen(dh, file, "r")))
     {
 	yaz_log(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
