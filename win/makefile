@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.68 2003-12-30 00:23:28 adam Exp $
+# $Id: makefile,v 1.69 2004-01-12 12:11:58 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -352,7 +352,8 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\srw.obj \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
-   $(OBJDIR)\zoom-opt.obj
+   $(OBJDIR)\zoom-opt.obj \
+   $(OBJDIR)\initopt.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\

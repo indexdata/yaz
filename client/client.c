@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.223 2004-01-07 21:02:42 adam Exp $
+ * $Id: client.c,v 1.224 2004-01-12 12:11:57 adam Exp $
  */
 
 #include <stdio.h>
@@ -103,6 +103,7 @@ static FILE *marc_file = 0;
 static char *refid = NULL;
 static char *last_open_command = NULL;
 static int auto_reconnect = 0;
+static Odr_bitmask z3950_options;
 
 static char cur_host[200];
 
@@ -280,14 +281,7 @@ static void send_initRequest(const char* type_and_host)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
 
-    ODR_MASK_SET(req->options, Z_Options_search);
-    ODR_MASK_SET(req->options, Z_Options_present);
-    ODR_MASK_SET(req->options, Z_Options_namedResultSets);
-    ODR_MASK_SET(req->options, Z_Options_triggerResourceCtrl);
-    ODR_MASK_SET(req->options, Z_Options_scan);
-    ODR_MASK_SET(req->options, Z_Options_sort);
-    ODR_MASK_SET(req->options, Z_Options_extendedServices);
-    ODR_MASK_SET(req->options, Z_Options_delSet);
+    req->options = &z3950_options;
 
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
@@ -2137,6 +2131,27 @@ static int cmd_itemorder(const char *arg)
     return 2;
 }
 
+static void show_opt(const char *arg)
+{
+    printf ("%s ", arg);
+}
+
+static int cmd_options(const char *arg)
+{
+    if (*arg)
+    {
+	int r;
+	int pos;
+	r = yaz_init_opt_encode(&z3950_options, arg, &pos);
+    }
+    else
+    {
+	yaz_init_opt_decode(&z3950_options, show_opt);
+	printf ("\n");
+    }
+    return 0;
+}
+
 static int cmd_explain(const char *arg)
 {
     if (protocol != PROTO_HTTP)
@@ -3813,6 +3828,7 @@ static struct {
     {"adm-shutdown", cmd_adm_shutdown, "",NULL,0,NULL},
     {"adm-startup", cmd_adm_startup, "",NULL,0,NULL},
     {"explain", cmd_explain, "", NULL, 0, NULL},
+    {"options", cmd_options, "", NULL, 0, NULL},
     {"help", cmd_help, "", NULL,0,NULL},
     {0,0,0,0,0,0}
 };
@@ -4111,6 +4127,15 @@ int main(int argc, char **argv)
 #endif
     if (codeset)
 	outputCharset = xstrdup(codeset);
+    
+    ODR_MASK_SET(&z3950_options, Z_Options_search);
+    ODR_MASK_SET(&z3950_options, Z_Options_present);
+    ODR_MASK_SET(&z3950_options, Z_Options_namedResultSets);
+    ODR_MASK_SET(&z3950_options, Z_Options_triggerResourceCtrl);
+    ODR_MASK_SET(&z3950_options, Z_Options_scan);
+    ODR_MASK_SET(&z3950_options, Z_Options_sort);
+    ODR_MASK_SET(&z3950_options, Z_Options_extendedServices);
+    ODR_MASK_SET(&z3950_options, Z_Options_delSet);
 
     while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:", argv, argc, &arg)) != -2)
     {

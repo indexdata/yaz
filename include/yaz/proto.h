@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1998-2003, Index Data
+ * Copyright (c) 1998-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: proto.h,v 1.11 2003-07-18 19:54:30 mike Exp $
+ * $Id: proto.h,v 1.12 2004-01-12 12:11:57 adam Exp $
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H
@@ -114,6 +113,10 @@ YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);
 
 YAZ_EXPORT void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags);
 
+YAZ_EXPORT int yaz_init_opt_encode(Z_Options *opt, const char *opt_str,
+				   int *error_pos);
+YAZ_EXPORT void yaz_init_opt_decode(Z_Options *opt,
+				    void (*pr)(const char *name));
 YAZ_END_CDECL
 
 #include <yaz/prt-ext.h>
