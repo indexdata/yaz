@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.1 2002-09-16 14:16:31 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.2 2003-02-27 19:55:37 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -249,7 +249,7 @@
     The following is supported: <literal>prefix</literal> for 
     <link linkend="PQF">Prefix Query Notation</link> (Type-1 Query);
     <literal>ccl</literal> for CCL search (Type-2
-    Query) or <literal>ccl2rpn</literal> for
+    Query), <literal>cql</literal> for CQL or <literal>ccl2rpn</literal> for
     <link linkend="CCL">CCL</link> to RPN conversion (Type-1 Query).
    </para>
   </listitem>
