@@ -17,6 +17,18 @@
 	padding: 3px 6px;
 }
 
+h1, h2, h3, h4 {
+	font-family: sans-serif;
+}
+
+.figure b, .table b, .example b {
+	font-style: italic;
+}
+
+.example , .figure {
+	margin-left: 2%;
+}
+
 .screen, .synopsis, .programlisting {
 	margin-left: 4%;
 	margin-right: 4%;
