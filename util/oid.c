@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.20  1997-07-28 12:34:43  adam
+ * Revision 1.21  1997-08-19 08:46:05  quinn
+ * Added Thesaurus OID
+ *
+ * Revision 1.20  1997/07/28 12:34:43  adam
  * Added new OID entries (RVDM).
  *
  * Revision 1.19  1997/05/02 08:39:41  quinn
@@ -119,6 +122,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_COLLECT1,  {3,7,-1},    "Collections-attset"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_CIMI1,     {3,8,-1},    "CIMI-attset"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_GEO,       {3,9,-1},    "Geo-attset"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS, {3,1000,81,1,-1},"Thesaurus-attset"},
 
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_BIB1,      {4,1,-1},    "Bib-1"       },
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_DIAG1,     {4,2,-1},    "Diag-1"      },
