@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.31 2002-05-20 09:13:39 oleg Exp $
+ * $Id: zoom-c.c,v 1.32 2002-05-21 19:39:57 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -729,7 +729,7 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     	
     	yaz_oi_APDU(apdu, &oi);
     	
-    	if (oi_unit = yaz_oi_update(oi, c->odr_out, NULL, 0, 0))
+    	if ((oi_unit = yaz_oi_update(oi, c->odr_out, NULL, 0, 0)))
     	{
     		ODR_MASK_SET(ireq->options, Z_Options_negotiationModel);
     		
