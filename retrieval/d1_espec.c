@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.3  1995-11-13 09:27:34  quinn
+ * Revision 1.4  1995-12-05 11:16:10  quinn
+ * Fixed malloc of 0.
+ *
+ * Revision 1.3  1995/11/13  09:27:34  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.2  1995/11/01  16:34:56  quinn
@@ -40,7 +43,10 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
     var1.value = VAL_VAR1;
     r->globalVariantSetId = odr_oiddup(o, oid_getoidbyent(&var1));
 
-    r->triples = odr_malloc(o, sizeof(Z_Triple*) * argc);
+    if (argc)
+	r->triples = odr_malloc(o, sizeof(Z_Triple*) * argc);
+    else
+	r->triples = 0;
     r->num_triples = argc;
     for (i = 0; i < argc; i++)
     {
