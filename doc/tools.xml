@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.6 2001-10-24 09:27:59 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.7 2001-10-24 12:50:44 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -660,6 +660,7 @@ typedef struct oident
     void nmem_reset(NMEM n);
     int nmem_total(NMEM n);
     void nmem_init(void);
+    void nmem_exit(void);
    </screen>
 
    <para>
@@ -675,15 +676,18 @@ typedef struct oident
     allocated on the handle.
    </para>
 
-   <note>
-    <para>
-     The nibble memory pool is shared amongst threads. POSIX
-     mutex'es and WIN32 Critical sections are introduced to keep the
-     module thread safe. On WIN32 function <function>nmem_init()</function>
-     initializes the Critical Section handle and should be called once
-     before any other nmem function is used.
-    </para>
-   </note>
+   <para>
+    The nibble memory pool is shared amongst threads. POSIX
+    mutex'es and WIN32 Critical sections are introduced to keep the
+    module thread safe. Function <function>nmem_init()</function>
+    initializes the nibble memory library and it is called automatically
+    the first time the <literal>YAZ.DLL</literal> is loaded. &yaz; uses
+    function <function>DllMain</function> to achieve this. You should
+    <emphasis>not</emphasis> call <function>nmem_init</function> or
+    <function>nmem_exit</function> unless you're absolute sure what
+    you're doing. Note that in previous &yaz; versions you'd have to call
+    <function>nmem_init</function> yourself. 
+   </para>
 
   </sect1>
  </chapter>

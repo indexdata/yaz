@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.3 2001-10-24 09:27:59 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.4 2001-10-24 12:50:44 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <para>
@@ -99,11 +99,10 @@
 	<literal>/usr/local</literal> if not specified.
        </para></listitem>
      </varlistentry>
-     <varlistentry>
-      <term><literal>--enable-comp </literal></term>
-      <listitem><para> &yaz; will be built using the ASN.1 compiler for &yaz;
-	(default). If you wish to use the old decoders (in sub directory asn)
-	use <literal>--disable-comp</literal> instead.
+     <varlistentry><term><literal>--enable-tcpd</literal></term>
+      <listitem><para>The front end server will be built using the TCP
+        wrapper library. It allows you to disallow/deny clients depending
+        on IP.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>--enable-threads</literal></term>
@@ -207,16 +206,6 @@
        </row>
       </thead>
       <tbody>
-       
-       <row>
-	<entry><literal>NEW_Z3950</literal></entry>
-	<entry> If 1, the auto-generated decoder/encoders
-	 for Z39.50 as written by the ASN.1 compiler will be used. If 0,
-	 the old decoders for Z39.50 will be used. Note, when 1, the
-	 setting TCL should point to the Tcl shell on your system.
-	</entry>
-       </row>
-       
        <row>
 	<entry><literal>DEBUG</literal></entry>
 	<entry> If set to 1, the software is
