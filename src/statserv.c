@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.1 2003-10-27 12:21:35 adam Exp $
+ * $Id: statserv.c,v 1.2 2003-11-28 09:02:19 mike Exp $
  */
 
 #include <stdio.h>
@@ -874,7 +874,7 @@ int check_options(int argc, char **argv)
 	    fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
 		    " -l <logfile> -u <user> -c <config> -t <minutes>"
 		    " -k <kilobytes> -d <daemon>"
-                        " -ziST1 -w <directory> <listender-addr>... ]\n", me);
+                        " -ziST1 -w <directory> <listener-addr>... ]\n", me);
 	    return 1;
         }
     }
