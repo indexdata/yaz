@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.231 2004-02-16 21:40:39 adam Exp $
+ * $Id: client.c,v 1.232 2004-02-19 23:37:36 adam Exp $
  */
 
 #include <stdio.h>
@@ -97,6 +97,7 @@ static char *negotiationCharset = 0;
 static char *outputCharset = 0;
 static char *marcCharset = 0;
 static char* yazLang = 0;
+static char* http_version = "1.0";
 
 static char last_cmd[32] = "?";
 static FILE *marc_file = 0;
@@ -1110,6 +1111,7 @@ static int send_srw(Z_SRW_PDU *sr)
     strcpy(path+1, databaseNames[0]);
 
     gdu = z_get_HTTP_Request(out);
+    gdu->u.HTTP_Request->version = http_version;
     gdu->u.HTTP_Request->path = odr_strdup(out, path);
 
     if (host_port)
