@@ -1,37 +1,45 @@
 Source: yaz
-Standards-Version: 3.5.7.0
+Standards-Version: 3.5.9.0
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,libxml2-dev
+Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,libxml2-dev, libssl-dev
 
-Package: yaz-runtime
-Section: libs
+Package: yaz
+Section: utils
 Architecture: any
-Depends: ${shlibs:Depends}
-Conflicts: idzebra (<= 1.3.4-2), php4-yaz (<= 4.1.2-5)
-Description: The YAZ Z39.50 toolkit (runtime files)
+Depends: libyaz, ${shlibs:Depends}
+Conflicts: yaz-runtime, yaz-ssl
+Description: The YAZ Z39.50 toolkit (utilities)
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
- Besides development libraries and header files YAZ includes 
- sample clients - and server.
+ This packages includes utility programs.
+
+Package: libyaz
+Section: libs
+Architecture: any
+Depends: libssl0.9.6, ${shlibs:Depends}
+Replaces: yaz-runtime, yaz-ssl
+Conflicts: yaz-runtime, yaz-ssl, idzebra (<= 1.3.4-2), php4-yaz (<= 4.1.2-5)
+Description: The YAZ Z39.50 toolkit (runtime files)
+ YAZ is a toolkit that allows you to develop software using the
+ ANSI Z39.50/ISO23950 standard for information retrieval.
  .
  This packages includes runtime files.
 
 Package: yaz-doc
 Section: doc
-Architecture: any
+Architecture: all
 Description: The YAZ Z39.50 toolkit (documentation)
  YAZ is a toolkit that allows you to develop software using the
  Z39.50/ISO23950 standard for information retrieval.
  .
- Besides development libraries and header files YAZ includes 
- sample clients - and server.
- .
  This packages includes documentation for YAZ in HTML and PDF.
 
-Package: yaz-devel
-Depends: yaz-runtime
+Package: libyaz-dev
+Depends: libyaz
+Replaces: yaz-devel
+Conflicts: yaz-devel
 Section: devel
 Architecture: any
 Recommends: yaz-doc, libxml2-dev
@@ -39,20 +47,5 @@ Description: The YAZ Z39.50 toolkit (development files)
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
- Besides development libraries and header files YAZ includes 
- sample clients - and server.
- .
  This packages includes development libraries and C/C++ header files.
 
-Package: yaz-ssl
-Depends: ${shlibs:Depends}
-Section: libs
-Architecture: any
-Description: The YAZ Z39.50 toolkit (SSL support)
- YAZ is a toolkit that allows you to develop software using the
- ANSI Z39.50/ISO23950 standard for information retrieval.
- .
- Besides development libraries and header files YAZ includes 
- sample clients - and server.
- .
- This packages includes SSL support (Z39.50 protocol over SSL).

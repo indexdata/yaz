@@ -25,7 +25,7 @@
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml.in,v 1.9 2003-02-21 12:06:05 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.10 2003-04-28 21:02:16 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User&apos;s Guide and Reference</title>
@@ -39,8 +39,9 @@
   <abstract><simpara>
     This document is the programmer's guide and reference to the &yaz;
     package version @VERSION@. &yaz; is a compact toolkit that provides
-    access to the Z39.50 and SRW protocols, as well as a set of higher-level
-    tools for implementing the server and client roles, respectively.
+    access to the Z39.50 and SRW/SRU protocols, as well as a set of
+    higher-level tools for implementing the server and client
+    roles, respectively.
     The documentation can be used on its own, or as a reference when
     looking at the example applications provided with the package.
    </simpara>

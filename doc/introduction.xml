@@ -1,9 +1,9 @@
-<!-- $Id: introduction.xml,v 1.13 2003-03-07 08:39:40 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.14 2003-04-28 21:02:16 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
    &yaz; is a C/C++ library for information retrieval applications
-   using the Z39.50/SRW protocols for information retrieval.
+   using the Z39.50/SRW/SRU protocols for information retrieval.
   </para>
 
   <para>
@@ -17,7 +17,7 @@
      </para></listitem>
     <listitem><para>
       Supports 
-      <ulink url="http://www.loc.gov/z3950/agency/zing/srw/">SRW</ulink>
+      <ulink url="http://www.loc.gov/z3950/agency/zing/srw/">SRW/SRU</ulink>
       version 1.0 (over HTTP and HTTPS).
      </para></listitem>
     <listitem><para>
@@ -82,13 +82,13 @@
     </listitem>
 
     <listitem>
-      <para>
+     <para>
       <xref linkend="zoom"/> describes the ZOOM API of &yaz;.
       This is definitely worth a read if you wish to develop a Z39.50/SRW
      client.
     </para>
     </listitem>
-
+    
     <listitem>
      <para>
       <xref linkend="server"/> describes the generic frontend server
@@ -126,7 +126,7 @@
      <para>
       <xref linkend="tools"/> contains sections for the various
       tools offered by &yaz;. Scan through the material quickly
-      and see what's relevant to you! SRW implementors
+      and see what's relevant to you! SRW/SRU implementors
       might find the <link linkend="tools.cql">CQL</link> section
       particularly useful.
      </para>

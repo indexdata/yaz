@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.43 2003-04-24 13:29:50 adam Exp $
+## $Id: Makefile.am,v 1.44 2003-04-28 21:02:16 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -24,7 +24,7 @@ HTMLFILES = \
  zoom.records.html zoom.resultsets.html zoom.scan.html
 
 MANFILES=yaz-client.1 yaz-client-ssl.1 yaz-ztest.8 \
-	yaz-ztest-ssl.8 yaz-config.1 yaz.7 zoomsh.1
+	yaz-ztest-ssl.8 yaz-config.8 yaz.7 zoomsh.1
 REFFILES=yaz-client.sgml yaz-ztest.sgml yaz-config.sgml \
 	yaz-man.sgml zoomsh.sgml
 
@@ -46,7 +46,7 @@ yaz-ztest.8: yaz-ztest.sgml ztest-options.xml
 	if test ! -f ztest-options.xml ; then ln -s $(srcdir)/ztest-options .; fi
 	docbook2man $(srcdir)/yaz-ztest.sgml
 
-yaz-config.1: yaz-config.sgml
+yaz-config.8: yaz-config.sgml
 	docbook2man $(srcdir)/yaz-config.sgml
 
 yaz.7: yaz-man.sgml

@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-man.sgml,v 1.4 2002-10-08 09:07:29 adam Exp $ -->
+<!-- $Id: yaz-man.sgml,v 1.5 2003-04-28 21:02:16 adam Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -73,7 +73,7 @@
     </citerefentry>,
     <citerefentry>
      <refentrytitle>yaz-config</refentrytitle>
-     <manvolnum>1</manvolnum>
+     <manvolnum>8</manvolnum>
     </citerefentry>,
     <citerefentry>
      <refentrytitle>zoomsh</refentrytitle>

@@ -1,7 +1,7 @@
 Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
-Release: 2
+Release: 1
 Requires: libxml2 openssl readline libyaz = %{version}
 Copyright: YAZ License
 Group: Other
@@ -63,8 +63,6 @@ rm -fr ${RPM_BUILD_ROOT}
 
 %files -n lib%{name}
 /usr/lib/*.so.*
-/usr/share/yaz/z39.50
-/usr/share/yaz/ill
 /usr/share/man/man7/yaz.*
 
 %files -n lib%{name}-devel
@@ -75,5 +73,7 @@ rm -fr ${RPM_BUILD_ROOT}
 /usr/lib/*.a
 /usr/lib/*.la
 /usr/share/aclocal/yaz.m4
-/usr/share/man/man1/yaz-config.*
+/usr/share/man/man8/yaz-config.*
 /usr/share/doc/yaz
+/usr/share/yaz/z39.50
+/usr/share/yaz/ill

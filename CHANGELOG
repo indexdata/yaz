@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.2 2003/04/28
+
+New Debian package layout similar to the Redhat Package layout.
+
 New ZOOM events ZOOM_EVENT_RECV_{RECORD,SEARCH} for receiving a record
 and search result respectively.
 
