@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.157 2002-06-04 11:36:10 adam Exp $
+ * $Id: client.c,v 1.158 2002-06-10 11:07:57 adam Exp $
  */
 
 #include <stdio.h>
@@ -1736,7 +1736,6 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
     int use_rpn = 1;
-#if YAZ_MODULE_ccl
     int oid[OID_SIZE];
     
     if (queryType == QueryType_CCL2RPN)
@@ -1763,7 +1762,6 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
         }
         ccl_rpn_delete (rpn);
     }
-#endif
     if (use_rpn && !(req->termListAndStartPoint =
                      p_query_scan(out, protocol, &req->attributeSet, query)))
     {
@@ -2043,18 +2041,14 @@ int cmd_querytype (char *arg)
         queryType = QueryType_CCL;
     else if (!strcmp (arg, "prefix") || !strcmp(arg, "rpn"))
         queryType = QueryType_Prefix;
-#if YAZ_MODULE_ccl
     else if (!strcmp (arg, "ccl2rpn") || !strcmp (arg, "cclrpn"))
         queryType = QueryType_CCL2RPN;
-#endif
     else
     {
         printf ("Querytype must be one of:\n");
         printf (" prefix         - Prefix query\n");
         printf (" ccl            - CCL query\n");
-#if YAZ_MODULE_ccl
         printf (" ccl2rpn        - CCL query converted to RPN\n");
-#endif
         return 0;
     }
     return 1;
@@ -2235,7 +2229,6 @@ int cmd_set_apdufile(char* arg)
 
 int cmd_set_cclfields(char* arg)
 {  
-#if YAZ_MODULE_ccl
     FILE *inf;
 
     REMOVE_TAILING_BLANKS(arg);
@@ -2247,9 +2240,6 @@ int cmd_set_cclfields(char* arg)
         ccl_qual_file (bibset, inf);
         fclose (inf);
     }
-#else 
-    fprintf(stderr,"Not compiled with the yaz ccl module\n");
-#endif
     
     return 1;
 }
