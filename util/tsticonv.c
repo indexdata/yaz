@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.2 2003-05-06 10:07:33 adam Exp $
+ * $Id: tsticonv.c,v 1.3 2003-05-22 22:44:50 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -17,10 +17,58 @@
 
 /* some test strings in ISO-8859-1 format */
 const char *buf[] = {
-	"ax" ,
-	"\330",
-	"eneb\346r",
-       	0 };
+    "ax" ,
+    "\330",
+    "eneb\346r",
+    "\xfc",
+    "\xfb",
+    "\xfbr",
+    0 };
+
+/* some test strings in MARC-8 format */
+const char *marc8_strings[] = {
+    "ax",   
+    "\xa2",          /* latin capital letter o with stroke */
+    "eneb\xb5r",     /* latin small letter ae */
+    "\xe8\x75",      /* latin small letter u with umlaut */
+    "\xe3\x75",      /* latin small letter u with circumflex */
+    "\xe3\x75r",     /* latin small letter u with circumflex */
+    0
+};
+
+static marc8_tst()
+{
+    int i;
+    yaz_iconv_t cd;
+
+    cd = yaz_iconv_open("ISO-8859-1", "MARC8");
+    for (i = 0; buf[i]; i++)
+    {
+        size_t r;
+        char *inbuf= (char*) marc8_strings[i];
+        size_t inbytesleft = strlen(inbuf);
+        char outbuf0[24];
+        char *outbuf = outbuf0;
+        size_t outbytesleft = sizeof(outbuf0);
+
+        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        if (r == (size_t) (-1))
+        {
+            int e = yaz_iconv_error(cd);
+
+            printf ("tsticonv 6 i=%d e=%d\n", i, e);
+	    exit(6);
+        }
+        if ((outbuf - outbuf0) != strlen(buf[i]) 
+            || memcmp(outbuf0, buf[i], strlen(buf[i])))
+        {
+            printf ("tsticonv 7 i=%d\n", i);
+            printf ("buf=%s   out=%s\n", buf[i], outbuf0);
+	    exit(7);
+        }
+    }
+    yaz_iconv_close(cd);
+}
 
 static dconvert(int mandatory, const char *tmpcode)
 {
@@ -91,5 +139,6 @@ int main (int argc, char **argv)
     dconvert(1, "ISO-8859-1");
     dconvert(1, "UCS4");
     dconvert(0, "CP865");
+    marc8_tst();
     exit (0);
 }

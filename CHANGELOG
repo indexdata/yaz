@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Bug fix: some MARC8 sequences were not converted.
+
 New ZOOM option "step" which specifies number of records to be
 retrieved in one chunk. Used in conjunction with "start" and "count".
 

@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.1 2002-12-16 13:13:53 adam Exp $
+# $Id: charconv.tcl,v 1.2 2003-05-22 22:44:50 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] input output}
@@ -103,7 +103,7 @@ proc dump_trie {ofile} {
             foreach m $trie($this,content) {
                 puts -nonewline $f "  \{\""
                 foreach d [lindex $m 0] {
-                    puts -nonewline $f "\\0x$d"
+                    puts -nonewline $f "\\x$d"
                 }
                 puts -nonewline $f "\", 0x[lindex $m 1]"
                 puts $f "\},"
@@ -175,7 +175,7 @@ proc dump_trie {ofile} {
                 while (flat->from)
                 {
                     size_t len = strlen(flat->from);
-                    if (len >= inbytesleft)
+                    if (len <= inbytesleft)
                     {
                         if (memcmp(flat->from, inp, len) == 0)
                         {

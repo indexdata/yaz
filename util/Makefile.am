@@ -1,10 +1,12 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.18 2003-05-06 10:07:33 adam Exp $
+## $Id: Makefile.am,v 1.19 2003-05-22 22:44:50 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 
-TESTS = tsticonv tstnmem tstmatchstr tstwrbuf
+check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf
+
+TESTS = $(check_PROGRAMS)
 
 bin_SCRIPTS = yaz-comp
 
@@ -13,8 +15,6 @@ EXTRA_DIST = yaz-comp cvs-date.tcl charconv.tcl charconv.sgm
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
 noinst_PROGRAMS = marcdump yaziconv
-
-EXTRA_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf
 
 # MARC dumper utility
 marcdump_LDADD = libutil.la 
