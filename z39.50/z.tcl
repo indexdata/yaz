@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.11 2003-05-20 19:55:30 adam Exp $
+# $Id: z.tcl,v 1.12 2003-07-18 19:53:28 mike Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -327,6 +327,9 @@ set filename($m) z-mterm2
 # ----
 set m ResourceReport-Format-Universe-1 
 set filename($m) z-univ
+# ----
+set m UserInfoFormat-oclcUserInformation
+set filename($m) z-oclcui
 # ----
 set m ESFormat-Admin
 set filename($m) zes-admin

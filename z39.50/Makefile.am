@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.13 2003-05-27 21:12:23 adam Exp $
+## $Id: Makefile.am,v 1.14 2003-07-18 19:53:28 mike Exp $
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
@@ -6,7 +6,7 @@ noinst_LTLIBRARIES = libz39.50.la
 
 tabdatadir = $(pkgdatadir)/z39.50
 tabdata_DATA=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl \
- esadmin.asn charneg-3.asn mterm2.asn
+ esadmin.asn charneg-3.asn mterm2.asn oclcui.asn
 EXTRA_DIST=$(tabdata_DATA)
 
 YAZCOMP = $(top_srcdir)/util/yaz-asncomp
@@ -14,7 +14,7 @@ YAZCOMPLINE = ../util/yaz-asncomp -d z.tcl -i yaz -I../include $(YCFLAGS)
 
 libz39_50_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-mterm2.c z-opac.c \
- z-uifr1.c z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
+ z-uifr1.c z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c z-oclcui.c\
  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
  zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c \
  z-charneg.c \
@@ -78,3 +78,7 @@ $(srcdir)/z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn
 # UserInfoFormat-multipleSearchTerms-2
 $(srcdir)/z-mterm2.c: $(srcdir)/z.tcl $(srcdir)/mterm2.asn
 	cd $(srcdir); $(YAZCOMPLINE) mterm2.asn
+
+# UserInfoFormat-multipleSearchTerms-2
+$(srcdir)/z-oclcui.c: $(srcdir)/z.tcl $(srcdir)/oclcui.asn
+	cd $(srcdir); $(YAZCOMPLINE) oclcui.asn

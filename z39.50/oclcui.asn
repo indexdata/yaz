@@ -1,0 +1,31 @@
+UserInfoFormat-oclcUserInformation
+{Z39-50-userInfoFormat OCLCUserInformation (7)} DEFINITIONS ::=
+BEGIN
+
+-- $Id: oclcui.asn,v 1.1 2003-07-18 19:53:28 mike Exp $
+--
+-- This format is returned from the server at
+--	fsz3950test.oclc.org:210
+-- I found the definition at
+--	http://www.oclc.org/firstsearch/documentation/z3950/config_guide.htm
+--
+-- I have added OPTIONAL modifiers to the `dblist', `diagnosticSetId'
+-- and `code' elements because they appear to be admitted from the
+-- APDU returned as an Init diagnostic from fsz3950test.oclc.org:210
+-- but this still doesn't work yet: I get "Decoding incoming APDU:
+-- Length of constructed type different from sum of members (code
+-- 10:36)"
+
+OCLC-UserInformation ::= SEQUENCE {
+    motd        [1] IMPLICIT VisibleString,
+    dblist      SEQUENCE OF DBName OPTIONAL,
+    failReason  [3] IMPLICIT SEQUENCE {
+        diagnosticSetId OBJECT IDENTIFIER OPTIONAL,
+        code    [1] IMPLICIT INTEGER OPTIONAL,
+        text    [2] IMPLICIT VisibleString OPTIONAL } OPTIONAL
+}
+
+DBName ::= [2] IMPLICIT VisibleString
+
+END
+
