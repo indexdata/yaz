@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.73  2001-06-28 09:27:06  adam
+ * Revision 1.74  2001-10-03 23:55:18  adam
+ * GNU threads support.
+ *
+ * Revision 1.73  2001/06/28 09:27:06  adam
  * Number of started sessions logged.
  *
  * Revision 1.72  2001/03/25 21:55:13  adam
@@ -259,9 +262,15 @@
 #include <direct.h>
 #include "service.h"
 #else
+
+#ifdef _REENTRANT
 #if HAVE_PTHREAD_H
 #include <pthread.h>
+#elif HAVE_PTH_H
+#include <pth.h>
 #endif
+#endif
+
 #include <unistd.h>
 #include <pwd.h>
 #endif
@@ -706,6 +715,7 @@ static void listener(IOCHAN h, int event)
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
 	    ++no_sessions;
 	}
+#ifdef _REENTRANT
 #if HAVE_PTHREAD_H
 	if (control_block.threads)
 	{
@@ -715,6 +725,21 @@ static void listener(IOCHAN h, int event)
 	}
 	else
 	    new_session(new_line);
+#elif HAVE_PTH_H
+	if (control_block.threads)
+	{
+	    pth_attr_t attr;
+	    pth_t child_thread;
+
+            pth_attr_init (attr);
+            pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
+	    child_thread = pth_spawn (attr, new_session, new_line);
+            pth_attr_destroy (attr);
+	}
+	else
+	    new_session(new_line);
+#endif
+
 #else
 	new_session(new_line);
 #endif

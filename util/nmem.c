@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.27  2001-09-27 12:09:18  adam
+ * Revision 1.28  2001-10-03 23:55:18  adam
+ * GNU threads support.
+ *
+ * Revision 1.27  2001/09/27 12:09:18  adam
  * Function nmem_exit calls oid_exit (when reference is 0).
  *
  * Revision 1.26  2001/07/19 19:51:42  adam
@@ -108,14 +111,16 @@
 #include <yaz/nmem.h>
 #include <yaz/log.h>
 #include <yaz/oid.h>
+
 #ifdef WIN32
 #include <windows.h>
-#elif _REENTRANT
+#endif
 
+#ifdef _REENTRANT
 #if HAVE_PTHREAD_H
 #include <pthread.h>
-#elif HAVE_THREAD_H
-#include <thread.h>
+#elif HAVE_PTH_H
+#include <pth.h>
 #endif
 
 #endif
@@ -126,21 +131,37 @@
 static CRITICAL_SECTION critical_section;
 #define NMEM_ENTER EnterCriticalSection(&critical_section)
 #define NMEM_LEAVE LeaveCriticalSection(&critical_section)
-#elif _REENTRANT
+#endif
+
+#ifdef _REENTRANT
+#if HAVE_PTHREAD_H
 static pthread_mutex_t nmem_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define NMEM_ENTER pthread_mutex_lock(&nmem_mutex);
 #define NMEM_LEAVE pthread_mutex_unlock(&nmem_mutex);
+#elif HAVE_PTH_H
+static pth_mutex_t nmem_mutex;
+#define NMEM_ENTER pth_mutex_acquire(&nmem_mutex, 0, 0)
+#define NMEM_LEAVE pth_mutex_release(&nmem_mutex)
+#else
+#error x
+#endif
 #else
 #define NMEM_ENTER
 #define NMEM_LEAVE
 #endif
 
-
 struct nmem_mutex {
 #ifdef WIN32
     CRITICAL_SECTION m_handle;
-#elif _REENTRANT
+#endif
+#if _REENTRANT
+
+#if HAVE_PTHREAD_H
     pthread_mutex_t m_handle;
+#elif HAVE_PTH_H
+    pth_mutex_t m_handle;
+#endif
+
 #else
     int m_handle;
 #endif
@@ -458,6 +479,10 @@ void nmem_init (void)
     {
 #ifdef WIN32
 	InitializeCriticalSection(&critical_section);
+#elif HAVE_PTH_H
+#ifdef __REENTRANT
+        pth_mutex_init (&nmem_mutex);
+#endif
 #endif
 	nmem_active_no = 0;
 	freelist = NULL;

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.12 2001-05-07 12:01:00 adam Exp $
+## $Id: Makefile.am,v 1.13 2001-10-03 23:55:18 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -23,7 +23,7 @@ $(srcdir)/statserv.c: $(top_srcdir)/server/statserv.c
 
 LDFLAGS=-version-info 1:0:0
 
-INCLUDES =-I$(top_srcdir)/include -I$(top_srcdir)/server  -D_REENTRANT=1 -DHAVE_PTHREAD_H=1
+INCLUDES =-I$(top_srcdir)/include -I$(top_srcdir)/server  -D_REENTRANT=1 
 
 bin_SCRIPTS = yaz-config
 
