@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.17 2003-11-19 22:05:15 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.18 2004-02-05 11:55:56 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -18,7 +18,7 @@
     <listitem><para>
       Supports 
       <ulink url="http://www.loc.gov/z3950/agency/zing/srw/">SRW/SRU</ulink>
-      version 1.0 (over HTTP and HTTPS).
+      version 1.1 (over HTTP and HTTPS).
      </para></listitem>
     <listitem><para>
       Includes BER encoders/decoders for the 

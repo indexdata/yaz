@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: yaz-version.h,v 1.34 2004-01-05 09:34:42 adam Exp $
+ * $Id: yaz-version.h,v 1.35 2004-02-05 11:55:56 adam Exp $
  */
 
 /*
@@ -12,8 +12,8 @@
 
 #include <yaz/yconfig.h>
 
-#define YAZ_VERSION "2.0.9"
-#define YAZ_VERSIONL 0x020009
+#define YAZ_VERSION "2.0.10"
+#define YAZ_VERSIONL 0x02000A
 
 #define YAZ_DATE 1
 

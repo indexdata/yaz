@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.10 2004/02/05 
+
+For yaz.m4, allow second argument for YAZ_INIT to hold minimal version of
+YAZ required.
+
 * SRW/SRU 1.1 updates. Diagnostic code now a URI.
 
 Added option -p <file> to make Generic Frontend Server to write PID file.
