@@ -2,13 +2,16 @@
 # the next line restarts using tclsh \
 exec tclsh "$0" "$@"
 #
-# YC: YAZ ODR Compiler
-# (c) Index Data 1996-1998
+# YC: ASN.1 Compiler for YAZ
+# (c) Index Data 1996-1999
 # See the file LICENSE for details.
 # Sebastian Hammer, Adam Dickmeiss
 #
 # $Log: yc.tcl,v $
-# Revision 1.1  1999-06-08 10:10:16  adam
+# Revision 1.2  1999-06-09 09:43:11  adam
+# Added option -I and variable h-path to specify path for header files.
+#
+# Revision 1.1  1999/06/08 10:10:16  adam
 # New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
 #
 # Revision 1.8  1999/04/20 10:37:04  adam
@@ -1101,12 +1104,12 @@ proc asnModules {} {
 	    if {![info exists inf(h-file)]} {
 		set inf(h-file) ${fname}.h
 	    }
-	    set file(outh) [open $inf(h-file) w]
+	    set file(outh) [open $inf(h-path)/$inf(h-file) w]
 
 	    if {![info exists inf(p-file)]} {
 		set inf(p-file) ${fname}-p.h
 	    }
-	    set file(outp) [open $inf(p-file) w]
+	    set file(outp) [open $inf(h-path)/$inf(p-file) w]
 
 	    set md [clock format [clock seconds]]
 	    
@@ -1272,6 +1275,9 @@ proc userDef {name} {
     if {[info exists default-prefix]} {
         set inf(prefix) ${default-prefix}
     }
+    if {[info exists h-path]} {
+        set inf(h-path) ${h-path}
+    }
     foreach m [array names prefix] {
         set inf(prefix,$m) $prefix($m)
     }
@@ -1297,6 +1303,7 @@ proc userDef {name} {
 
 set inf(verbose) 0
 set inf(prefix) {yc_ Yc_ YC_}
+set inf(h-path) .
 
 # Parse command line
 set l [llength $argv]
@@ -1313,6 +1320,13 @@ while {$i < $l} {
                  set p [lindex $argv [incr i]]
              }
 	    set inf(c-file) $p
+        }
+        -I* {
+	    set p [string range $arg 2 end]
+	    if {![string length $p]} {
+                 set p [lindex $argv [incr i]]
+             }
+	    set inf(h-path) $p
         }
         -h* {
 	    set p [string range $arg 2 end]
@@ -1367,7 +1381,7 @@ while {$i < $l} {
 if {![info exists inf(iname)]} {
     puts "YAZ ODR Compiler ${yc_version}"
     puts -nonewline "Usage: ${argv0}"
-    puts { [-v] [-c cfile] [-h hfile] [-p hfile] [-d dfile] }
+    puts { [-v] [-c cfile] [-h hfile] [-p hfile] [-d dfile] [-I path]}
     puts {    [-x prefix] [-m module] file}
     exit 1
 }
