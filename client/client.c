@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.230 2004-02-14 15:58:42 adam Exp $
+ * $Id: client.c,v 1.231 2004-02-16 21:40:39 adam Exp $
  */
 
 #include <stdio.h>
@@ -711,7 +711,7 @@ static void display_record(Z_External *r)
     if (ent && r->which == Z_External_octet)
     {
         Z_ext_typeent *type = z_ext_getentbyref(ent->value);
-        void *rr;
+        char *rr;
 
         if (type)
         {
@@ -720,7 +720,7 @@ static void display_record(Z_External *r)
              */
             odr_setbuf(in, (char*)r->u.octet_aligned->buf,
                 r->u.octet_aligned->len, 0);
-            if (!(*type->fun)(in, (char **)&rr, 0, 0))
+            if (!(*type->fun)(in, &rr, 0, 0))
             {
                 odr_perror(in, "Decoding constructed record.");
                 fprintf(stdout, "[Near %d]\n", odr_offset(in));
