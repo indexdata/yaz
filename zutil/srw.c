@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.12 2003-03-24 22:26:51 adam Exp $
+ * $Id: srw.c,v 1.13 2003-04-17 19:43:32 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -101,6 +101,38 @@ static int match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o,
 {
     return match_xsd_string_n(ptr, elem, o, val, 0);
 }
+
+static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
+                           char **val, int *len)
+{
+    xmlBufferPtr buf;
+
+    if (!match_element(ptr, elem))
+        return 0;
+    printf ("match_xsd_XML_n: %s\n", elem);
+    ptr = ptr->children;
+    if (!ptr)
+    {
+        printf ("match_xsd_XML: no TEXT node\n");
+        return 0;
+    }
+    buf = xmlBufferCreate();
+
+    xmlNodeDump(buf, ptr->doc, ptr, 0, 0);
+
+    *val = odr_malloc(o, buf->use+1);
+    memcpy (*val, buf->content, buf->use);
+    (*val)[buf->use] = '\0';
+
+    if (len)
+        *len = buf->use;
+
+    xmlBufferFree(buf);
+
+    printf ("match_XML_string: OK content=%s\n",  *val);
+    return 1;
+}
+
                      
 static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o, int **val)
 {
@@ -169,6 +201,10 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
                                                 &(*recs)[i].recordData_buf,
                                                 &(*recs)[i].recordData_len))
                         ;
+                    else if (match_xsd_XML_n(rptr, "recordXML", o, 
+                                             &(*recs)[i].recordData_buf,
+                                             &(*recs)[i].recordData_len))
+                        (*recs)[i].recordPacking = Z_SRW_recordPacking_XML;
                     else if (match_xsd_integer(rptr, "recordPosition", o, 
                                                &(*recs)[i].recordPosition))
                         ;
