@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: z3950oid.c,v 1.2 2002-01-28 09:27:17 adam Exp $
+ * $Id: z3950oid.c,v 1.3 2002-08-29 19:36:09 ja7 Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -50,3 +50,31 @@ const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class)
     *oid_class = ident->oclass;
     return ident->desc;
 }
+
+
+const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc) {
+	struct oident tmpentry;
+	int tmp_oid[OID_SIZE];
+	
+
+	tmpentry.proto = PROTO_Z3950;
+	tmpentry.oclass = oc;
+	tmpentry.value = ov; 
+	
+	if( oid_ent_to_oid(&tmpentry,tmp_oid) ) 
+	{
+		return tmpentry.desc;
+	} 
+	else 
+	{
+		return "";
+	};		  
+};
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.h,v $
- * Revision 1.2  2002-02-11 23:25:26  adam
+ * Revision 1.3  2002-08-29 19:36:09  ja7
+ * Added
+ * YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
+ * Used for gettting ui friendly names for oid_value's
+ *
+ * Revision 1.2  2002/02/11 23:25:26  adam
  * Rustam's patch
  *
  * Revision 1.1  2001/10/23 21:00:19  adam
@@ -79,6 +84,7 @@
 #include <yaz/z-univ.h>
 #include <yaz/zes-update0.h>
 #include <yaz/z-charneg.h>
+#include <yaz/oid.h>
 
 YAZ_BEGIN_CDECL
 
@@ -142,6 +148,8 @@ YAZ_EXPORT Odr_oid *yaz_oidval_to_z3950oid (ODR o, int oid_class,
 YAZ_EXPORT Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class,
 					 const char *str);
 YAZ_EXPORT const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class);
+
+YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
 
 YAZ_END_CDECL
 
