@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: matchstr.c,v 1.6 2003-02-12 15:06:44 adam Exp $
+ * $Id: matchstr.c,v 1.7 2003-02-12 21:34:57 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <ctype.h>
+#include <string.h>
 #include <yaz/yaz-util.h>
 
 /*
