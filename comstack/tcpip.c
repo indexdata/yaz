@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.51 2002-12-16 13:11:24 adam Exp $
+ * $Id: tcpip.c,v 1.52 2002-12-19 14:04:22 adam Exp $
  */
 
 #include <stdio.h>
@@ -290,7 +290,10 @@ int tcpip_connect(COMSTACK h, void *address)
     tcpip_state *sp = (tcpip_state *)h->cprivate;
 #endif
     int r;
-
+#ifdef __sun__
+    int recbuflen;
+    socklen_t rbufsize = sizeof(recbuflen);
+#endif
     TRC(fprintf(stderr, "tcpip_connect\n"));
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
@@ -298,6 +301,32 @@ int tcpip_connect(COMSTACK h, void *address)
         h->cerrno = CSOUTSTATE;
 	return -1;
     }
+#ifdef __sun__
+    /* On Suns, you must set a bigger Receive Buffer BEFORE a call to connect
+     * This gives the connect a chance to negotiate with the other side
+     * (see 'man tcp') 
+     */
+    if ( getsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, &rbufsize ) < 0 )
+    {
+        h->cerrno = CSYSERR;
+        return -1;
+    }
+    TRC(fprintf( stderr, "Current Size of TCP Receive Buffer= %d\n",
+		 recbuflen ));
+    recbuflen *= 10; /* lets be optimistic */
+    if ( setsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, rbufsize ) < 0 )
+    {
+        h->cerrno = CSYSERR;
+        return -1;
+    }
+    if ( getsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, &rbufsize ) )
+    {
+        h->cerrno = CSYSERR;
+        return -1;
+    }
+    TRC(fprintf( stderr, "New Size of TCP Receive Buffer = %d\n",
+		 recbuflen ));
+#endif
     r = connect(h->iofile, (struct sockaddr *) add, sizeof(*add));
     if (r < 0)
     {
@@ -659,10 +688,17 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
             if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
                 return -1;
+#ifdef __sun__
+	yaz_set_errno( 0 );
+	// unfortunatly, sun sometimes forgets to set errno in recv
+	// when EWOULDBLOCK etc. would be required (res = -1)
+#endif
 	res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0);
 	TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
 	if (res < 0)
 	{
+	  TRC(fprintf(stderr, "  recv errno=%d, (%s)\n", yaz_errno(), 
+		      strerror(yaz_errno())));
 #ifdef WIN32
 	    if (WSAGetLastError() == WSAEWOULDBLOCK)
 	    {
@@ -690,7 +726,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 	    else if (yaz_errno() == 0)
 		continue;
 	    else
-		return -1;
+	        return -1;
 #endif
 	}
 	else if (!res)
@@ -853,6 +889,10 @@ int tcpip_put(COMSTACK h, char *buf, int size)
              || yaz_errno() == EAGAIN
 #endif
 #endif
+#ifdef __sun__
+                || yaz_errno() == ENOENT /* Sun's sometimes set errno to this value! */
+#endif
+		|| yaz_errno() == EINPROGRESS
 #endif
 		)
 	    {

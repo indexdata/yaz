@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.9.3 2002/MM/DD
 
+For TCP/IP COMSTACK, set recv buffer to an appropriate "large" value
+on Solaris. Patch from Ko van der Sloot.
+
 New MARC decode API. All new functions operate on a yaz_marc_t
 handle. The most important new functions are: yaz_marc_create,
 yaz_marc_decode_{buf,wrbuf}, yaz_marc_destroy, .. to create handler,
