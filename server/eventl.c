@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: eventl.c,v 1.32 2002-09-25 12:37:07 adam Exp $
+ * $Id: eventl.c,v 1.33 2002-11-26 13:15:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -60,6 +60,13 @@ int event_loop(IOCHAN *iochans)
 	static struct timeval nullto = {0, 0}, to;
 	struct timeval *timeout;
 
+        if (statserv_must_terminate())
+        {
+            fprintf (stderr, "must terminate 1\n");
+
+            for (p = *iochans; p; p = p->next)
+                p->force_event = EVENT_TIMEOUT;
+        }
 	FD_ZERO(&in);
 	FD_ZERO(&out);
 	FD_ZERO(&except);
@@ -84,7 +91,14 @@ int event_loop(IOCHAN *iochans)
 	if (res < 0)
 	{
 	    if (yaz_errno() == EINTR)
-    		continue;
+            {
+                if (statserv_must_terminate())
+                {
+                    for (p = *iochans; p; p = p->next)
+                        p->force_event = EVENT_TIMEOUT;
+                }
+                continue;
+            }
             else
             {
                 /* Destroy the first member in the chain, and try again */

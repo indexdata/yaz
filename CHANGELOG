@@ -1,7 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Move retrieval (data1) module to Zebra since nobody seems
-to be using it.
+Fix bad race conditions on SIGTERM and terminate gracefully in
+frontend server.
+
+Move retrieval (data1) module to Zebra since nobody seems to be
+using it.
 
 Add GRS-1 render for ZOOM using same format as yaz-client.
 

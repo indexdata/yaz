@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.85 2002-09-25 12:37:07 adam Exp $
+ * $Id: statserv.c,v 1.86 2002-11-26 13:15:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -332,7 +332,15 @@ static void listener(IOCHAN h, int event)
 
 #else /* ! WIN32 */
 
-/* To save having an #ifdef in event_loop we need to define this empty function */
+static int term_flag = 0;
+/* To save having an #ifdef in event_loop we need to
+   define this empty function 
+*/
+int statserv_must_terminate(void)
+{
+    return term_flag;
+}
+
 void statserv_remove(IOCHAN pIOChannel)
 {
 }
@@ -341,17 +349,18 @@ void statserv_closedown()
 {
     IOCHAN p;
 
+/* CHANGE */
     if (control_block.bend_stop)
         (*control_block.bend_stop)(&control_block);
-
     for (p = pListener; p; p = p->next)
+    {
         iochan_destroy(p);
+    }
 }
 
 void sigterm(int sig)
 {
-    statserv_closedown();
-    exit (0);
+    term_flag = 1;
 }
 
 static void *new_session (void *vp);
@@ -499,11 +508,15 @@ static void listener(IOCHAN h, int event)
 	new_session(new_line);
 #endif
     }
+    else if (event == EVENT_TIMEOUT)
+    {
+    	yaz_log(LOG_LOG, "Shutting down listener.");
+        iochan_destroy(h);
+    }
     else
     {
     	yaz_log(LOG_FATAL, "Bad event on listener.");
         iochan_destroy(h);
-        return;
     }
 }
 
@@ -559,7 +572,8 @@ static void *new_session (void *vp)
     return 0;
 }
 
-#endif /* WIN32 */
+/* UNIX */
+#endif
 
 static void inetd_connection(int what)
 {
@@ -647,14 +661,14 @@ static int add_listener(char *where, int what)
 }
 
 #ifndef WIN32
-/* For windows we don't need to catch the signals */
+/* UNIX only (for windows we don't need to catch the signals) */
 static void catchchld(int num)
 {
     while (waitpid(-1, 0, WNOHANG) > 0)
 	;
     signal(SIGCHLD, catchchld);
 }
-#endif /* WIN32 */
+#endif
 
 statserv_options_block *statserv_getcontrol(void)
 {
@@ -676,7 +690,8 @@ int statserv_start(int argc, char **argv)
 #ifdef WIN32
     /* We need to initialize the thread list */
     ThreadList_Initialize();
-#endif /* WIN32 */
+/* WIN32 */
+#endif
     
 #ifdef WIN32
     if ((me = strrchr (argv[0], '\\')))
@@ -694,6 +709,7 @@ int statserv_start(int argc, char **argv)
 #ifdef WIN32
     logf (LOG_LOG, "Starting server %s", me);
 #else
+/* UNIX */
     if (control_block.inetd)
 	inetd_connection(control_block.default_proto);
     else
@@ -727,8 +743,10 @@ int statserv_start(int argc, char **argv)
 	    exit(1);
 	}
     }
-#endif /* WIN32 */
-
+/* UNIX */
+#endif
+    
+    
     if ((pListener == NULL) && *control_block.default_listen)
 	add_listener(control_block.default_listen,
 		     control_block.default_proto);
@@ -896,7 +914,9 @@ void StopAppService(void *pHandle)
     /* Stops the app */
     statserv_closedown();
 }
+/* WIN32 */
 #else
+/* UNIX */
 int statserv_main(int argc, char **argv,
 		  bend_initresult *(*bend_init)(bend_initrequest *r),
 		  void (*bend_close)(void *handle))
