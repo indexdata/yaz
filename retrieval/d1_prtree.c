@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_prtree.c,v $
- * Revision 1.2  1997-11-06 11:36:44  adam
+ * Revision 1.3  1998-02-27 14:05:34  adam
+ * Added printing of integer nodes.
+ *
+ * Revision 1.2  1997/11/06 11:36:44  adam
  * Implemented variant match on simple elements -data1 tree and Espec-1.
  *
  * Revision 1.1  1997/10/27 14:04:07  adam
@@ -40,7 +43,7 @@ static void pr_tree (data1_handle dh, data1_node *n, FILE *out, int level)
              fprintf (out, "text '%.*s'\n", n->u.data.len, n->u.data.data);
              break;
          case DATA1I_num:
-             fprintf (out, "num\n");
+             fprintf (out, "num %.*s\n", n->u.data.len, n->u.data.data);
              break;
          case DATA1I_oid:
              fprintf (out, "oid\n");
