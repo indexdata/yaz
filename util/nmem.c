@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.14  1999-02-02 13:57:40  adam
+ * Revision 1.15  1999-02-11 09:10:26  adam
+ * Function nmem_init only mandatory on Windows.
+ *
+ * Revision 1.14  1999/02/02 13:57:40  adam
  * Uses preprocessor define WIN32 instead of WINDOWS to build code
  * for Microsoft WIN32.
  *
@@ -179,7 +182,9 @@ void *nmem_malloc(NMEM n, int size)
 #endif
     if (!n)
 	return xmalloc(size);
+#ifdef WIN32
     assert (nmem_init_flag);
+#endif
     NMEM_ENTER;
     p = n->blocks;
     if (!p || p->size - p->top < size)
