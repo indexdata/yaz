@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.16  1999-06-10 11:45:30  adam
+ * Revision 1.17  1999-07-06 12:17:15  adam
+ * Added option -1 that runs server once (for profiling purposes).
+ *
+ * Revision 1.16  1999/06/10 11:45:30  adam
  * Added bend_start, bend_stop handlers and removed pre_init.
  * Handlers bend_start/bend_stop are called when service/daemon is
  * started/stopped.
@@ -99,6 +102,7 @@ extern "C" {
 typedef struct statserv_options_block
 {
     int dynamic;                  /* fork on incoming requests */
+    int one_shot;                 /* one session then exit(1) */
     int loglevel;                 /* desired logging-level */
     char apdufile[ODR_MAXNAME+1]; /* file for pretty-printed PDUs */
     char logfile[ODR_MAXNAME+1];  /* file for diagnostic output */

@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.56  1999-06-10 11:45:30  adam
+ * Revision 1.57  1999-07-06 12:17:15  adam
+ * Added option -1 that runs server once (for profiling purposes).
+ *
+ * Revision 1.56  1999/06/10 11:45:30  adam
  * Added bend_start, bend_stop handlers and removed pre_init.
  * Handlers bend_start/bend_stop are called when service/daemon is
  * started/stopped.
@@ -233,6 +236,7 @@ static char *me = "statserver";
 int check_options(int argc, char **argv);
 statserv_options_block control_block = {
     1,                          /* dynamic mode */
+    0,                          /* one shot (single session) */
     LOG_DEFAULT_LEVEL,          /* log level */
     "",                         /* no PDUs */
     "",                         /* diagnostic output to stderr */
@@ -858,12 +862,16 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    while ((ret = options("a:iszSl:v:u:c:w:t:k:d:", argv, argc, &arg)) != -2)
+    while ((ret = options("1a:iszSl:v:u:c:w:t:k:d:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
 	case 0:
 	    add_listener(arg, control_block.default_proto);
+	    break;
+	case '1':	 
+	    control_block.one_shot = 1;
+	    control_block.dynamic = 0;
 	    break;
 	case 'z':
 	    control_block.default_proto = PROTO_Z3950;

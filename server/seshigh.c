@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.92  1999-06-17 10:54:45  adam
+ * Revision 1.93  1999-07-06 12:17:15  adam
+ * Added option -1 that runs server once (for profiling purposes).
+ *
+ * Revision 1.92  1999/06/17 10:54:45  adam
  * Added facility to specify implementation version - and name
  * for server.
  *
@@ -451,6 +454,8 @@ void destroy_association(association *h)
     request_delq(&h->incoming);
     request_delq(&h->outgoing);
     xfree(h);
+    if (control_block && control_block->one_shot)
+	exit (0);
 }
 
 static void do_close_req(association *a, int reason, char *message,
