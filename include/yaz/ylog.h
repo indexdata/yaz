@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: ylog.h,v 1.1 2004-11-18 15:18:13 heikki Exp $
+ * $Id: ylog.h,v 1.2 2004-11-19 09:59:31 heikki Exp $
  */
 
 /**
@@ -136,6 +136,7 @@ YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg, void *inf
 	void *info);
 
 YAZ_EXPORT void yaz_log_reopen(void);
+
 YAZ_END_CDECL
 
 #endif

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.20 2004-11-18 15:18:13 heikki Exp $
+ * $Id: log.h,v 1.21 2004-11-19 09:59:31 heikki Exp $
  */
 
 /**
@@ -35,7 +35,7 @@
 #define LOG_H
 
 #include <yaz/ylog.h>
-#warning "use of log.h is deprecated, use logf.h instead"
+#warning "use of log.h is deprecated, use ylog.h instead"
 
 #include <stdio.h>
 #include <yaz/yconfig.h>
@@ -68,3 +68,4 @@ YAZ_BEGIN_CDECL
 
 
 #endif
+YAZ_END_CDECL
