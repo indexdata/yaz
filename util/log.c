@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.5  1995-05-16 08:51:11  quinn
+ * Revision 1.6  1995-06-15 15:45:03  quinn
+ * Added date info.
+ *
+ * Revision 1.5  1995/05/16  08:51:11  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.4  1995/05/15  11:56:55  quinn
@@ -55,6 +58,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <time.h>
 
 static int l_level = LOG_DEFAULT_LEVEL;
 static FILE *l_file = stderr;
@@ -102,6 +106,9 @@ void logf(int level, const char *fmt, ...)
     va_list ap;
     char buf[4096], flags[1024];
     int i, p_error = 0;
+    time_t ti;
+    struct tm *tim;
+    char tbuf[50];
 
     if (!(level & l_level))
     	return;
@@ -119,7 +126,10 @@ void logf(int level, const char *fmt, ...)
     vsprintf(buf, fmt, ap);
     if (p_error)
     	sprintf(buf + strlen(buf), " [%s]", strerror(errno));
-    fprintf(l_file, "%s: %s %s\n", l_prefix, flags, buf);
+    ti = time(0);
+    tim = localtime(&ti);
+    strftime(tbuf, 50, "%H:%M:%S-%d/%m", tim);
+    fprintf(l_file, "%s: %s: %s %s\n", tbuf, l_prefix, flags, buf);
     fflush(l_file);
 }
 
