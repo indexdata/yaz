@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.9 2003-05-20 19:55:29 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.10 2003-11-03 10:45:05 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -259,16 +259,14 @@
      data you wish to decode (eg, <function>odr_integer()</function> odr
      <function>z_APDU()</function>).
     </para>
-
-    <para>
-     Examples of encoding/decoding functions:
-    </para>
-
-    <synopsis>
-     int odr_integer(ODR o, int **p, int optional, const char *name);
-
-     int z_APDU(ODR o, Z_APDU **p, int optional, const char *name);
-    </synopsis>
+    
+    <example><title>Encoding and decoding functions</title>
+     <synopsis>
+      int odr_integer(ODR o, int **p, int optional, const char *name);
+      
+      int z_APDU(ODR o, Z_APDU **p, int optional, const char *name);
+     </synopsis>
+    </example>
 
     <para>
      If the data is absent (or doesn't match the tag corresponding to
@@ -300,16 +298,15 @@
      last call to <function>odr_reset()</function> will be released.
     </para>
 
-    <para>
-     The use of the double indirection can be a little confusing at first
-     (its purpose will become clear later on, hopefully),
-     so an example is in order. We'll encode an integer value, and
-     immediately decode it again using a different stream. A useless, but
-     informative operation.
-    </para>
-
-    <programlisting>
-
+    <example><title>Encoding and decoding of an integer</title>
+     <para>
+      The use of the double indirection can be a little confusing at first
+      (its purpose will become clear later on, hopefully),
+      so an example is in order. We'll encode an integer value, and
+      immediately decode it again using a different stream. A useless, but
+      informative operation.
+     </para>
+     <programlisting><![CDATA[
 void do_nothing_useful(int value)
 {
     ODR encode, decode;
@@ -345,16 +342,17 @@ void do_nothing_useful(int value)
     odr_destroy(encode);
     odr_destroy(decode);
 }
-    </programlisting>
-
-    <para>
-     This looks like a lot of work, offhand. In practice, the &odr; streams
-     will typically be allocated once, in the beginning of your program
-     (or at the beginning of a new network session), and the encoding
-     and decoding will only take place in a few, isolated places in your
-     program, so the overhead is quite manageable.
-    </para>
-
+]]>
+     </programlisting>
+     <para>
+      This looks like a lot of work, offhand. In practice, the &odr; streams
+      will typically be allocated once, in the beginning of your program
+      (or at the beginning of a new network session), and the encoding
+      and decoding will only take place in a few, isolated places in your
+      program, so the overhead is quite manageable.
+     </para>
+    </example>
+    
    </sect2>
 
    <sect2><title>Diagnostics</title>
@@ -488,9 +486,18 @@ void do_nothing_useful(int value)
     other external forms.
    </para>
 
+   <tip>
+    <para>
+     There is an ASN.1 tutorial available at
+     <ulink url="http://asn1.elibel.tm.fr/en/introduction/">this site</ulink>.
+     This site also has standards for ASN.1 (X.680) and BER (X.690) 
+     <ulink url="http://asn1.elibel.tm.fr/en/standards/">online</ulink>.
+    </para>
+   </tip>
+   
    <para>
-    The interface is based loosely on that of the Sun Microsystems XDR
-    routines.
+    The ODR interface is based loosely on that of the Sun Microsystems
+    XDR routines.
     Specifically, each function which corresponds to an ASN.1 primitive
     type has a dual function. Depending on the settings of the ODR
     stream which is supplied as a parameter, the function may be used
@@ -502,7 +509,7 @@ void do_nothing_useful(int value)
     The resulting C source code is quite compact, and is a pretty
     straightforward representation of the source ASN.1 specification. 
    </para>
-
+   
    <para>
     In many cases, the model of the XDR functions works quite well in this
     role.
@@ -525,13 +532,13 @@ void do_nothing_useful(int value)
      </para>
 
      <synopsis>
-int odr_integer(ODR o, int **p, int optional, const char *name);
+      int odr_integer(ODR o, int **p, int optional, const char *name);
      </synopsis>
 
      <para>
       (we don't allow values that can't be contained in a C integer.)
      </para>
-
+     
      <para>
       This form is typical of the primitive &odr; functions. They are named
       after the type of data that they encode or decode. They take an &odr;
