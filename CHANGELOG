@@ -1,5 +1,12 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.18 2004/03/20
+
+Use wrbuf_xmlputs_n instead of wrbuf_write_cdata to avoid clash with
+Zebra symbol.
+
+Ensure zlib.dll is packed with Windows install.
+
 --- 2.0.17 2004/03/17
 
 Fix encoding of xsd:string to use text instead of CDATA.

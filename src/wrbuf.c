@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.3 2004-03-15 21:39:06 adam Exp $
+ * $Id: wrbuf.c,v 1.4 2004-03-20 07:02:23 adam Exp $
  */
 
 /*
@@ -82,10 +82,10 @@ int wrbuf_puts(WRBUF b, const char *buf)
 
 int wrbuf_xmlputs(WRBUF b, const char *cp)
 {
-    return wrbuf_write_cdata(b, cp, strlen(cp));
+    return wrbuf_xmlputs_n(b, cp, strlen(cp));
 }
 
-int wrbuf_write_cdata(WRBUF b, const char *cp, int size)
+int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size)
 {
     while (--size >= 0)
     {
@@ -158,7 +158,7 @@ static int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
 		    break;
 	    }
 	    if (cdata)
-		wrbuf_write_cdata(b, outbuf, outp - outbuf);
+		wrbuf_xmlputs_n(b, outbuf, outp - outbuf);
 	    else
 		wrbuf_write(b, outbuf, outp - outbuf);
 	}
@@ -166,7 +166,7 @@ static int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
     else
     {
 	if (cdata)
-	    wrbuf_write_cdata(b, buf, size);
+	    wrbuf_xmlputs_n(b, buf, size);
 	else
 	    wrbuf_write(b, buf, size);
     }
