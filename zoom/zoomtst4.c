@@ -1,11 +1,12 @@
 /*
- * $Id: zoomtst4.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoomtst4.c,v 1.2 2001-10-24 21:35:46 adam Exp $
  *
  * Asynchronous multi-target going through proxy doing search and retrieve
  * using present.
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <yaz/xmalloc.h>
 
 #include <yaz/zoom.h>
