@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: cclqfile.c,v $
- * Revision 1.6  2000-11-16 09:58:02  adam
+ * Revision 1.7  2001-01-24 11:55:31  adam
+ * Fixed nasty bug introduced by previous commit (attribute sets not
+ * properly allocated).
+ *
+ * Revision 1.6  2000/11/16 09:58:02  adam
  * Implemented local AttributeSet setting for CCL field maps.
  *
  * Revision 1.5  2000/10/17 19:50:28  adam
@@ -109,17 +113,11 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
 	setp = strchr (qual_spec, ',');
 	if (setp)
 	{
-	    
 	    *setp++ = '\0';
-	    attsets[pair_no] = malloc (strlen(qual_spec)+1);
-	    strcpy (attsets[pair_no], qual_spec);
             qual_type = setp;
 	}
 	else
-	{
-	    attsets[pair_no] = 0;
             qual_type = qual_spec;
-	}
         while (pair_no < 128)
         {
             int type, value;
@@ -175,6 +173,13 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
             }
             pair[pair_no*2] = type;
             pair[pair_no*2+1] = value;
+	    if (setp)
+	    {
+	        attsets[pair_no] = malloc (strlen(qual_spec)+1);
+	        strcpy (attsets[pair_no], qual_spec);
+	    }
+	    else
+	        attsets[pair_no] = 0;
             pair_no++;
             if (!split)
                 break;
