@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.8  1995-11-01 13:54:52  quinn
+ * Revision 1.9  1996-02-23 10:01:00  quinn
+ * Smallish
+ *
+ * Revision 1.8  1995/11/01  13:54:52  quinn
  * Minor adjustments
  *
  * Revision 1.7  1995/06/16  10:46:48  quinn
@@ -1294,7 +1297,8 @@ int t_listen(int fd, struct t_call *call)
  */
 int t_unbind(int fd)
 {
-    fprintf(stderr, "T_UNBIND [not supported by transport implementation]\n");
+    TRC(fprintf(stderr,
+	"T_UNBIND [not supported by transport implementation]\n"));
     t_errno = TNOTSUPPORT;
     return -1;
 }    
