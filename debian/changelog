@@ -1,8 +1,9 @@
 yaz (2.0.2-2) unstable; urgency=low
 
   * yaz.7 moved from yaz to libyaz.
+    Fix last event setting.
 
- -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 30 Apr 2003 00:00:11 +0100
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 14 May 2003 22:56:32 +0100
 
 yaz (2.0.2-1) unstable; urgency=low
 
