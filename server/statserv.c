@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.22  1995-06-15 07:45:17  quinn
+ * Revision 1.23  1995-06-15 12:30:48  quinn
+ * Setuid-facility.
+ *
+ * Revision 1.22  1995/06/15  07:45:17  quinn
  * Moving to v3.
  *
  * Revision 1.21  1995/06/06  08:15:40  quinn
@@ -110,7 +113,7 @@ static statserv_options_block control_block = {
     LOG_DEFAULT_LEVEL,          /* log level */
     "",                         /* no PDUs */
     "",                         /* diagnostic output to stderr */
-    "tcp:localhost:9999",       /* default listener port */
+    "tcp:@:9999",       /* default listener port */
     PROTO_Z3950,                /* application protocol */
     60,                         /* idle timeout (minutes) */
     1024*1024*4,                /* maximum PDU size (approx.) to allow */
