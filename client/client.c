@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.258 2004-12-02 14:04:17 adam Exp $
+ * $Id: client.c,v 1.259 2004-12-09 07:53:21 adam Exp $
  */
 
 #include <stdio.h>
@@ -2995,6 +2995,61 @@ int cmd_marccharset(const char *arg)
     return 1;
 }
 
+int cmd_displaycharset(const char *arg)
+{
+    char l1[30];
+
+    *l1 = 0;
+    if (sscanf(arg, "%29s", l1) < 1)
+    {
+    	printf("Display character set is `%s'\n", 
+               outputCharset ? outputCharset: "none");
+    }
+    else
+    {
+        xfree (outputCharset);
+        outputCharset = 0;
+        if (!strcmp(l1, "auto") && codeset)
+        {
+            if (codeset)
+            {
+                printf ("Display character set: %s\n", codeset);
+                outputCharset = xstrdup(codeset);
+            }
+            else
+                printf ("No codeset found on this system\n");
+        }
+        else if (strcmp(l1, "-") && strcmp(l1, "none"))
+            outputCharset = xstrdup(l1);
+        else
+            printf ("Display character set conversion disabled\n");
+    } 
+    return 1;
+}
+
+int cmd_negcharset(const char *arg)
+{
+    char l1[30];
+
+    *l1 = 0;
+    if (sscanf(arg, "%29s", l1) < 1)
+    {
+    	printf("Current negotiation character set is `%s'\n", 
+               negotiationCharset ? negotiationCharset: "none");
+    	return 1;
+    }
+    xfree (negotiationCharset);
+    negotiationCharset = NULL;
+    if (*l1 && strcmp(l1, "-") && strcmp(l1, "none"))
+    {
+        negotiationCharset = xstrdup(l1);
+        printf ("Character set negotiation : %s\n", negotiationCharset);
+    }
+    else
+        printf ("Character set negotiation disabled\n");
+    return 1;
+}
+
 int cmd_charset(const char* arg)
 {
     char l1[30], l2[30];
@@ -3002,43 +3057,15 @@ int cmd_charset(const char* arg)
     *l1 = *l2 = 0;
     if (sscanf(arg, "%29s %29s", l1, l2) < 1)
     {
-    	printf("Current negotiation character set is `%s'\n", 
-               negotiationCharset ? negotiationCharset: "none");
-    	printf("Current output character set is `%s'\n", 
-               outputCharset ? outputCharset: "none");
-    	return 1;
-    }
-    xfree (negotiationCharset);
-    negotiationCharset = NULL;
-    if (*l1 && strcmp(l1, "-"))
-    {
-        negotiationCharset = xstrdup(l1);
-        printf ("Character set negotiation : %s\n", negotiationCharset);
+	cmd_negcharset("");
+	cmd_displaycharset("");
     }
     else
-        printf ("Character set negotiation disabled\n");
-    if (*l2)
     {
-        xfree (outputCharset);
-        outputCharset = 0;
-        if (!strcmp(l2, "auto") && codeset)
-        {
-            if (codeset)
-            {
-                printf ("output charset: %s\n", codeset);
-                outputCharset = xstrdup(codeset);
-
-
-            }
-            else
-                printf ("No codeset found on this system\n");
-        }
-        else if (strcmp(l2, "-"))
-            outputCharset = xstrdup(l2);
-        else
-            printf ("Output charset conversion disabled\n");
-    } 
-
+	cmd_negcharset(l1);
+	if (*l2)
+	    cmd_displaycharset(l2);
+    }
     return 1;
 }
 
@@ -3919,6 +3946,8 @@ static struct {
     {"packagename", cmd_packagename, "<packagename>",NULL,0,NULL},
     {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0,NULL},
     {"charset", cmd_charset, "<nego_charset> <output_charset>",NULL,0,NULL},
+    {"negcharset", cmd_negcharset, "<nego_charset>",NULL,0,NULL},
+    {"displaycharset", cmd_displaycharset, "<output_charset>",NULL,0,NULL},
     {"marccharset", cmd_marccharset, "<charset_name>",NULL,0,NULL},
     {"lang", cmd_lang, "<language_code>",NULL,0,NULL},
     {".", cmd_source_echo, "<filename>",NULL,1,NULL},
