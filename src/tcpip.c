@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.8 2004-05-10 10:47:04 adam Exp $
+ * $Id: tcpip.c,v 1.9 2004-05-10 11:40:51 adam Exp $
  */
 
 #include <stdio.h>
@@ -1179,7 +1179,7 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     return 0;
 }
 
-int cs_set_ssl_certf(COMSTACK cs, const char *fname)
+int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
 {
     return 0;
 }
