@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.5  1995-12-05 14:26:40  quinn
+ * Revision 1.6  1995-12-11 15:22:12  quinn
+ * Added last_child field to the node.
+ *
+ * Revision 1.5  1995/12/05  14:26:40  quinn
  * Added global lbuf to data1_node.
  *
  * Revision 1.4  1995/11/13  09:27:29  quinn
@@ -296,6 +299,7 @@ typedef struct data1_node
     int num_children;
     struct data1_node *next;
     struct data1_node *child;
+    struct data1_node *last_child;
     struct data1_node *parent;
     struct data1_node *root;
 } data1_node;
