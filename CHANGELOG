@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 2.0.9 NOT YET RELEASED
 
+Fixed bug in Generic Frontend Server which could drop records exceeding
+preferred message size. Reported and fixed by Irina Dijour.
+
 Fixed calculation of package size for structured records in Generic
 Frontend Server. Reported and fixed by Irina Dijour.
 
