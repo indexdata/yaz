@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+When sort flag 'i' was specified in yaz-client the caseSensitivy flag
+was set to a wrong value.  Thanks to Robert Sanderson for reporting this.
+
 When error is returned from present handler, non-surrogate diagnostic
 is returned in present response (and fetch handler is no longer called).
 

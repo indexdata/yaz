@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: z-proto.h,v $
- * Revision 1.5  2001-05-17 14:16:15  adam
+ * Revision 1.6  2001-09-19 10:19:07  adam
+ * Z_SortCase_caseInsensitive was set to wrong value.
+ *
+ * Revision 1.5  2001/05/17 14:16:15  adam
  * Added EXTERNAL handling for item update0 (1.0).
  *
  * Revision 1.4  2000/03/14 09:19:49  ian
@@ -89,7 +92,7 @@ YAZ_BEGIN_CDECL
 #define Z_SortRelation_descendingByFreq     Z_SortKeySpec_descendingByfrequency 
 
 #define Z_SortCase_caseSensitive            Z_SortKeySpec_caseSensitive
-#define Z_SortCase_caseInsensitive          Z_SortKeySpec_descendingByfrequency
+#define Z_SortCase_caseInsensitive          Z_SortKeySpec_caseInsensitive
 
 #define Z_TriggerResourceCtrl_resourceReport Z_TriggerResourceControlRequest_resourceReport
 #define Z_TriggerResourceCtrl_resourceControl  Z_TriggerResourceControlRequest_resourceControl
