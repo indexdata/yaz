@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.60 2003-04-03 21:01:28 mike Exp $
+ * $Id: oid.c,v 1.61 2003-05-26 13:36:48 adam Exp $
  */
 
 /*
@@ -358,14 +358,14 @@ static int match_prefix(int *look, int *prefix)
     return 0;
 }
 
-void oid_transfer (struct oident *oident)
+void oid_transfer (struct oident *oidentp)
 {
-    while (*oident->oidsuffix >= 0)
+    while (*oidentp->oidsuffix >= 0)
     {
-	oid_addent (oident->oidsuffix, oident->proto,
-		    oident->oclass,
-		    oident->desc, oident->value);
-	oident++;
+	oid_addent (oidentp->oidsuffix, oidentp->proto,
+		    oidentp->oclass,
+		    oidentp->desc, oidentp->value);
+	oidentp++;
     }
 }
 
