@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.192 2003-05-12 22:35:06 adam Exp $
+ * $Id: client.c,v 1.193 2003-05-19 20:44:33 adam Exp $
  */
 
 #include <stdio.h>
@@ -85,10 +85,12 @@ static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
 static char ccl_fields[512] = "default.bib";
-static char* esPackageName = 0;
-static char* yazProxy = 0;
+static char *esPackageName = 0;
+static char *yazProxy = 0;
 static int kilobytes = 1024;
-static char* yazCharset = 0;
+static char *negotiationCharset = 0;
+static char *outputCharset = 0;
+static char *marcCharset = 0;
 static char* yazLang = 0;
 
 static char last_cmd[32] = "?";
@@ -276,7 +278,7 @@ static void send_initRequest(const char* type_and_host)
         yaz_oi_set_string_oidval(&req->otherInfo, out, VAL_PROXY,
         1, type_and_host);
     
-    if (yazCharset || yazLang) {
+    if (negotiationCharset || yazLang) {
     	Z_OtherInformation **p;
     	Z_OtherInformationUnit *p0;
     	
@@ -287,9 +289,11 @@ static void send_initRequest(const char* type_and_host)
     		
     		p0->which = Z_OtherInfo_externallyDefinedInfo;
     		p0->information.externallyDefinedInfo =
-    			yaz_set_proposal_charneg(out,
-    				(const char**)&yazCharset, (yazCharset)?1:0,
-    				(const char**)&yazLang, (yazLang)?1:0, 1);
+    			yaz_set_proposal_charneg(
+                            out,
+                            (const char**)&negotiationCharset, 
+                            negotiationCharset ? 1 : 0,
+                            (const char**)&yazLang, yazLang ? 1 : 0, 1);
     	}
     }
     
@@ -704,20 +708,25 @@ static void display_record(Z_External *r)
                                         &result, &rlen)> 0)
                 {
                     char *from = 0;
-                    if (ent->value == VAL_USMARC)
-                    {
-                        if (octet_buf[9] == 'a')
-                            from = "UTF-8";
-                        else
-                            from = "MARC8";
-                    }
+                    if (marcCharset && strcmp(marcCharset, "auto"))
+                        from = marcCharset;
                     else
-                        from = "ISO-8859-1";
-
-                    if (codeset && from)
+                    {
+                        if (ent->value == VAL_USMARC)
+                        {
+                            if (octet_buf[9] == 'a')
+                                from = "UTF-8";
+                            else
+                                from = "MARC8";
+                        }
+                        else
+                            from = "ISO-8859-1";
+                    }
+                    if (outputCharset && from)
                     {   
-                        printf ("convert from %s to %s\n", from, codeset);
-                        cd = yaz_iconv_open(codeset, from);
+                        printf ("convert from %s to %s\n", from, 
+                                outputCharset);
+                        cd = yaz_iconv_open(outputCharset, from);
                     }
                     if (!cd)
                         fwrite (result, 1, rlen, stdout);
@@ -902,7 +911,7 @@ static int send_deleteResultSetRequest(const char *arg)
 #if HAVE_XML2
 static int send_srw(Z_SRW_PDU *sr)
 {
-    const char *charset = 0;
+    const char *charset = negotiationCharset;
     const char *host_port = 0;
     char *path = 0;
     char ctype[50];
@@ -2525,27 +2534,30 @@ int cmd_packagename(const char* arg)
     xfree (esPackageName);
     esPackageName = NULL;
     if (*arg)
-    {
-        esPackageName = (char *) xmalloc (strlen(arg)+1);
-        strcpy (esPackageName, arg);
-    }
+        esPackageName = xstrdup(arg);
     return 1;
 }
 
 int cmd_proxy(const char* arg)
 {
-    if (*arg == '\0') {
-		xfree (yazProxy);
-		yazProxy = NULL;
-	
-    }
     xfree (yazProxy);
     yazProxy = NULL;
     if (*arg)
-    {
-        yazProxy = (char *) xmalloc (strlen(arg)+1);
-        strcpy (yazProxy, arg);
-    } 
+        yazProxy = xstrdup (arg);
+    return 1;
+}
+
+int cmd_marccharset(const char *arg)
+{
+    char l1[30];
+
+    *l1 = 0;
+    if (sscanf(arg, "%29s", l1) < 1)
+        return 1;
+    xfree (marcCharset);
+    marcCharset = 0;
+    if (strcmp(l1, "-"))
+        marcCharset = xstrdup(l1);
     return 1;
 }
 
@@ -2556,17 +2568,51 @@ int cmd_charset(const char* arg)
     *l1 = *l2 = 0;
     if (sscanf(arg, "%29s %29s", l1, l2) < 1)
     {
-    	printf("Current character set is `%s'\n", (yazCharset) ? yazCharset:NULL);
+    	printf("Current negotiation character set is `%s'\n", 
+               negotiationCharset ? negotiationCharset: "none");
+    	printf("Current output character set is `%s'\n", 
+               outputCharset ? outputCharset: "none");
     	return 1;
     }
-    xfree (yazCharset);
-    yazCharset = NULL;
-    if (*l1)
-        yazCharset = xstrdup(l1);
+    xfree (negotiationCharset);
+    negotiationCharset = NULL;
+    if (*l1 && strcmp(l1, "-"))
+    {
+        negotiationCharset = xstrdup(l1);
+        printf ("Character set negotiation : %s\n", negotiationCharset);
+    }
+    else
+        printf ("Character set negotiation disabled\n");
     if (*l2)
     {
-        odr_set_charset (out, l1, l2);
-        odr_set_charset (in, l2, l1);
+        xfree (outputCharset);
+        outputCharset = 0;
+        if (!strcmp(l2, "auto") && codeset)
+        {
+            if (codeset)
+            {
+                printf ("output charset: %s\n", codeset);
+                outputCharset = xstrdup(codeset);
+
+
+            }
+            else
+                printf ("No codeset found on this system\n");
+        }
+        else if (strcmp(l2, "-"))
+            outputCharset = xstrdup(l2);
+        else
+            printf ("Output charset conversion disabled\n");
+    } 
+    if (outputCharset && negotiationCharset)
+    {
+        odr_set_charset (out, negotiationCharset, outputCharset);
+        odr_set_charset (in, outputCharset, negotiationCharset);
+    }
+    else
+    {
+        odr_set_charset (out, 0, 0);
+        odr_set_charset (in, 0, 0);
     }
     return 1;
 }
@@ -2893,7 +2939,7 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
 {
     int i;
 
-    printf ("Received SRW SearchRetrieveResponse\n");
+    printf ("Received SRW SearchRetrieve Response\n");
     
     for (i = 0; i<res->num_diagnostics; i++)
     {
@@ -3272,7 +3318,8 @@ int cmd_list_all(const char* args) {
             printf("Authentication       : Unknown\n");
         }
     }
-    if ( yazCharset ) printf("Character set        : `%s'\n", (yazCharset) ? yazCharset:NULL);
+    if (negotiationCharset)
+        printf("Neg. Character set   : `%s'\n", negotiationCharset);
     
     /* bases */
     printf("Bases                : ");
@@ -3371,7 +3418,8 @@ static struct {
     {"update", cmd_update, "<action> <recid> [<file>]",NULL,0,NULL},
     {"packagename", cmd_packagename, "<packagename>",NULL,0,NULL},
     {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0,NULL},
-    {"charset", cmd_charset, "<charset_name>",NULL,0,NULL},
+    {"charset", cmd_charset, "<nego_charset> <output_charset>",NULL,0,NULL},
+    {"marccharset", cmd_marccharset, "<charset_name>",NULL,0,NULL},
     {"lang", cmd_lang, "<language_code>",NULL,0,NULL},
     {".", cmd_source, "<filename>",NULL,1,NULL},
     {"!", cmd_subshell, "Subshell command",NULL,1,NULL},
@@ -3666,6 +3714,17 @@ static void client(void)
     }
 }
 
+static void show_version(void)
+{
+    char vstr[20];
+
+    yaz_version(vstr, 0);
+    printf ("YAZ version: %s\n", YAZ_VERSION);
+    if (strcmp(vstr, YAZ_VERSION))
+	printf ("YAZ DLL/SO: %s\n", vstr);
+    exit(0);
+}
+
 int main(int argc, char **argv)
 {
     char *prog = *argv;
@@ -3684,7 +3743,7 @@ int main(int argc, char **argv)
 #endif
 #endif
 
-    while ((ret = options("k:c:a:b:m:v:p:u:t:", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:a:b:m:v:p:u:t:V", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -3707,7 +3766,7 @@ int main(int argc, char **argv)
             }
             break;
         case 't':
-            codeset = arg;
+            outputCharset = xstrdup(arg);
             break;
         case 'c':
             strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
@@ -3737,12 +3796,15 @@ int main(int argc, char **argv)
             }
             break;
         case 'v':
-            yaz_log_init (yaz_log_mask_str(arg), "", NULL);
+            yaz_log_init(yaz_log_mask_str(arg), "", 0);
+            break;
+        case 'V':
+	    show_version();
             break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
                      "[-b berdump] [-c cclfields]\n      [-p <proxy-addr>] [-u <auth>] "
-                     "[-k size] [<server-addr>]\n",
+                     "[-k size] [-V] [<server-addr>]\n",
                      prog);
             exit (1);
         }      
