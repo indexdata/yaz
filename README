@@ -4,7 +4,7 @@
  * Sebastian Hammer, Adam Dickmeiss
 
 Compilation and installation for YAZ 
-  $Id: README,v 1.22 1998-08-21 14:13:23 adam Exp $
+  $Id: README,v 1.23 1998-09-22 09:41:21 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -79,8 +79,8 @@ value. If no = is in the SortKey it is treated as a sortfield-type
 of type InternationalString. Flags observed are s (sort case
 sensitive), i (sort case insensitive), < (ascending), > (descending).
 Eg.:
-   1=4   i>                  (use is title, insensitive, ascending).
-   Title s<                  (String Title, sensitive, descending).
+   1=4   i<                  (use is title, insensitive, ascending).
+   Title s>                  (String Title, sensitive, descending).
 
 The directories:
 
