@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.191 2003-04-30 14:04:45 adam Exp $
+ * $Id: client.c,v 1.192 2003-05-12 22:35:06 adam Exp $
  */
 
 #include <stdio.h>
@@ -2041,7 +2041,8 @@ static int send_SRW_presentRequest(const char *arg)
 
 static void close_session (void)
 {
-    cs_close (conn);
+    if (conn)
+        cs_close (conn);
     conn = 0;
     if (session_mem)
     {
@@ -2896,10 +2897,12 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
     
     for (i = 0; i<res->num_diagnostics; i++)
     {
-        printf ("SRW diagnostic %d %s\nDetails: %s\n",
+        printf ("SRW diagnostic %d %s\n",
                 *res->diagnostics[i].code,
-                yaz_diag_srw_str(*res->diagnostics[i].code),
-                res->diagnostics[i].details);
+                yaz_diag_srw_str(*res->diagnostics[i].code));
+
+	if (res->diagnostics[i].details)
+            printf ("Details: %s\n", res->diagnostics[i].details);
     }
     if (res->numberOfRecords)
         printf ("Number of hits: %d\n", *res->numberOfRecords);
