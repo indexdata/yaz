@@ -2,7 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 Fix CQL lex buffer overflow.
 
-recordPacking.
+SRW/SRU recordPacking. For SRW default recordPacking is string. For
+SRU default recordPacking is string.
 
 SRU protocol support for frontend server.
 
