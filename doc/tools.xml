@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.27 2003-07-11 09:51:13 mike Exp $ -->
+<!-- $Id: tools.xml,v 1.28 2003-10-23 09:56:57 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -322,7 +322,7 @@
       <screen>
        @attr 1=4 computer
        @attr 1=4 @attr 4=1 "self portrait"
-       @attr exp1 @attr 1=1 CategoryList
+       @attrset exp1 @attr 1=1 CategoryList
        @attr gils 1=2008 Copenhagen
        @attr 1=/book/title computer
       </screen>
