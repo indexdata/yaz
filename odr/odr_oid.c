@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oid.c,v 1.18 2003-01-06 08:20:28 adam Exp $
+ * $Id: odr_oid.c,v 1.19 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -33,7 +33,7 @@ int odr_oid(ODR o, Odr_oid **p, int opt, const char *name)
     	return opt;
     if (cons)
     {
-    	o->error = OPROTO;
+        odr_seterror(o, OPROTO, 46);
 	return 0;
     }
     if (o->direction == ODR_PRINT)

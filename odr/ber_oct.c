@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_oct.c,v 1.20 2003-01-06 08:20:27 adam Exp $
+ * $Id: ber_oct.c,v 1.21 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -20,9 +20,9 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
     switch (o->direction)
     {
     	case ODR_DECODE:
-	    if ((res = ber_declen(o->bp, &len)) < 0)
+	    if ((res = ber_declen(o->bp, &len, odr_max(o))) < 0)
 	    {
-	    	o->error = OPROTO;
+                odr_seterror(o, OPROTO, 14);
 	    	return 0;
 	    }
 	    o->bp += res;
@@ -37,9 +37,14 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    /* primitive octetstring */
 	    if (len < 0)
 	    {
-	    	o->error = OOTHER;
+                odr_seterror(o, OOTHER, 15);
 	    	return 0;
 	    }
+            if (len > odr_max(o))
+            {
+                odr_seterror(o, OOTHER, 16);
+                return 0;
+            }
 	    if (len + 1 > p->size - p->len)
 	    {
 	    	c = (unsigned char *)odr_malloc(o, p->size += len + 1);
@@ -65,6 +70,6 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    	return 0;
 	    return 1;
     	case ODR_PRINT: return 1;
-    	default: o->error = OOTHER; return 0;
+    	default: odr_seterror(o, OOTHER, 17); return 0;
     }
 }

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_cons.c,v 1.24 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr_cons.c,v 1.25 2003-03-11 11:03:31 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -38,7 +38,7 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
 
     if (o->op->stackp == ODR_MAX_STACK - 1)
     {
-    	o->error = OSTACK;
+        odr_seterror(o, OSTACK, 30);
     	return 0;
     }
     o->op->stack[++(o->op->stackp)].lenb = o->bp;
@@ -52,15 +52,29 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
 
 	o->op->stack[o->op->stackp].lenlen = lenlen;
 
-	if (odr_write(o, dummy, lenlen) < 0) /* dummy */
+	if (odr_write(o, dummy, lenlen) < 0)  /* dummy */
+        {
+            --(o->op->stackp);
 	    return 0;
+        }
     }
     else if (o->direction == ODR_DECODE)
     {
-    	if ((res = ber_declen(o->bp, &o->op->stack[o->op->stackp].len)) < 0)
+    	if ((res = ber_declen(o->bp, &o->op->stack[o->op->stackp].len,
+                              odr_max(o))) < 0)
+        {
+            odr_seterror(o, OOTHER, 31);
+            --(o->op->stackp);
 	    return 0;
+        }
 	o->op->stack[o->op->stackp].lenlen = res;
 	o->bp += res;
+        if (o->op->stack[o->op->stackp].len > odr_max(o))
+        {
+            odr_seterror(o, OOTHER, 32);
+            --(o->op->stackp);
+	    return 0;
+        }
     }
     else if (o->direction == ODR_PRINT)
     {
@@ -70,7 +84,8 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
     }
     else
     {
-    	o->error = OOTHER;
+        odr_seterror(o, OOTHER, 33);
+        --(o->op->stackp);
 	return 0;
     }
     o->op->stack[o->op->stackp].base = o->bp;
@@ -99,7 +114,7 @@ int odr_constructed_end(ODR o)
     	return 0;
     if (o->op->stackp < 0)
     {
-    	o->error = OOTHER;
+        odr_seterror(o, OOTHER, 34);
     	return 0;
     }
     switch (o->direction)
@@ -114,14 +129,14 @@ int odr_constructed_end(ODR o)
             }
             else
             {
-                o->error = OOTHER;
+                odr_seterror(o, OOTHER, 35);
                 return 0;
             }
         }
         else if (o->bp - o->op->stack[o->op->stackp].base !=
                  o->op->stack[o->op->stackp].len)
         {
-            o->error = OCONLEN;
+            odr_seterror(o, OCONLEN, 36);
             return 0;
         }
         o->op->stackp--;
@@ -132,7 +147,7 @@ int odr_constructed_end(ODR o)
         if ((res = ber_enclen(o, pos - o->op->stack[o->op->stackp].base_offset,
                               o->op->stack[o->op->stackp].lenlen, 1)) < 0)
         {
-            o->error = OLENOV;
+            odr_seterror(o, OLENOV, 37);
             return 0;
         }
         odr_seek(o, ODR_S_END, 0);
@@ -159,7 +174,7 @@ int odr_constructed_end(ODR o)
         fprintf(o->print, "}\n");
         return 1;
     default:
-        o->error = OOTHER;
+        odr_seterror(o, OOTHER, 38);
         return 0;
     }
 }

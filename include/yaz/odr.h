@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.8 2003-02-12 15:06:43 adam Exp $
+ * $Id: odr.h,v 1.9 2003-03-11 11:03:30 adam Exp $
  */
 
 #ifndef ODR_H
@@ -183,6 +183,8 @@ typedef struct odr_arm
 extern char *odr_errlist[];
 
 YAZ_EXPORT int odr_geterror(ODR o);
+YAZ_EXPORT int odr_geterrorx(ODR o, int *x);
+YAZ_EXPORT void odr_seterror(ODR o, int errorno, int errorid);
 YAZ_EXPORT void odr_perror(ODR o, char *message);
 YAZ_EXPORT void odr_setprint(ODR o, FILE *file);
 YAZ_EXPORT ODR odr_createmem(int direction);
@@ -242,13 +244,13 @@ YAZ_EXPORT int ber_tag(ODR o, void *p, int zclass, int tag,
 		       int *constructed, int opt);
 YAZ_EXPORT int ber_enctag(ODR o, int zclass, int tag, int constructed);
 YAZ_EXPORT int ber_dectag(const unsigned char *buf, int *zclass,
-			  int *tag, int *constructed);
+			  int *tag, int *constructed, int max);
 YAZ_EXPORT int odr_bool(ODR o, int **p, int opt, const char *name);
 YAZ_EXPORT int odr_integer(ODR o, int **p, int opt, const char *name);
 YAZ_EXPORT int odr_enum(ODR o, int **p, int opt, const char *name);
 YAZ_EXPORT int odr_implicit_settag(ODR o, int zclass, int tag);
 YAZ_EXPORT int ber_enclen(ODR o, int len, int lenlen, int exact);
-YAZ_EXPORT int ber_declen(const unsigned char *buf, int *len);
+YAZ_EXPORT int ber_declen(const unsigned char *buf, int *len, int max);
 YAZ_EXPORT void odr_prname(ODR o, const char *name);
 YAZ_EXPORT int ber_null(ODR o);
 YAZ_EXPORT int odr_null(ODR o, Odr_null **p, int opt, const char *name);

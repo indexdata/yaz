@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_any.c,v 1.12 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr_any.c,v 1.13 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -33,6 +33,6 @@ int odr_any(ODR o, Odr_any **p, int opt, const char *name)
     	return 1;
     *p = 0;
     if (!opt)
-    	o->error = OREQUIRED;
+        odr_seterror(o, OREQUIRED, 53);
     return opt;
 }    

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.40 2003-02-12 15:06:43 adam Exp $
+ * $Id: odr.c,v 1.41 2003-03-11 11:03:31 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -54,6 +54,19 @@ int odr_geterror(ODR o)
     return o->error;
 }
 
+int odr_geterrorx(ODR o, int *x)
+{
+    if (x)
+        *x = o->op->error_id;
+    return o->error;
+}
+
+void odr_seterror(ODR o, int error, int id)
+{
+    o->error = error;
+    o->op->error_id = id;
+}
+
 void odr_setprint(ODR o, FILE *file)
 {
     o->print = file;
@@ -95,7 +108,7 @@ ODR odr_createmem(int direction)
 
 void odr_reset(ODR o)
 {
-    o->error = ONONE;
+    odr_seterror(o, ONONE, 0);
     o->bp = o->buf;
     odr_seek(o, ODR_S_SET, 0);
     o->top = 0;
@@ -142,3 +155,4 @@ char *odr_getbuf(ODR o, int *len, int *size)
         *size = o->size;
     return (char*) o->buf;
 }
+

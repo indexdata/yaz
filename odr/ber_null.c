@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_null.c,v 1.13 2003-01-06 08:20:27 adam Exp $
+ * $Id: ber_null.c,v 1.14 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -26,9 +26,14 @@ int ber_null(ODR o)
 #endif
         return 1;
     case ODR_DECODE:
+        if (odr_max(o) < 1)
+        {
+            odr_seterror(o, OPROTO, 39);
+            return 0;
+        }
         if (*(o->bp++) != 0X00)
         {
-            o->error = OPROTO;
+            odr_seterror(o, OPROTO, 12);
             return 0;
         }
 #ifdef ODR_DEBUG
@@ -36,6 +41,6 @@ int ber_null(ODR o)
 #endif
         return 1;
     case ODR_PRINT: return 1;
-    default: o->error = OOTHER; return 0;
+    default: odr_seterror(o, OOTHER, 13); return 0;
     }
 }

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oct.c,v 1.20 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr_oct.c,v 1.21 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -57,7 +57,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
     }
     if (ber_octetstring(o, *p, cons))
     	return 1;
-    o->error = OOTHER;
+    odr_seterror(o, OOTHER, 43);
     return 0;
 }
 
@@ -152,7 +152,7 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
                              &outbuf, &outleft);
             if (ret == (size_t)(-1))
             {
-                o->error = ODATA;
+                odr_seterror(o, ODATA, 44);
                 return 0;
             }
             t->size = t->len = outbuf - (char*) t->buf;
@@ -189,7 +189,7 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
                              &outbuf, &outleft);
             if (ret == (size_t)(-1))
             {
-                o->error = ODATA;
+                odr_seterror(o, ODATA, 45);
                 return 0;
             }
             inleft = outbuf - (char*) *p;

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: ber_any.c,v 1.23 2003-02-21 12:08:58 adam Exp $
+ * $Id: ber_any.c,v 1.24 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -13,14 +13,13 @@
 int ber_any(ODR o, Odr_any **p)
 {
     int res;
-    int left = o->size - (o->bp - o->buf);
 
     switch (o->direction)
     {
     	case ODR_DECODE:
-	    if ((res = completeBER(o->bp, left)) <= 0)        /* FIX THIS */
+	    if ((res = completeBER(o->bp, odr_max(o))) <= 0)        /* FIX THIS */
 	    {
-	    	o->error = OPROTO;
+                odr_seterror(o, OPROTO, 2);
 	    	return 0;
 	    }
 	    (*p)->buf = (unsigned char *)odr_malloc(o, res);
@@ -32,7 +31,7 @@ int ber_any(ODR o, Odr_any **p)
 	    if (odr_write(o, (*p)->buf, (*p)->len) < 0)
 	    	return 0;
 	    return 1;
-    	default: o->error = OOTHER; return 0;
+    	default: odr_seterror(o, OOTHER, 3); return 0;
     }
 }
 
@@ -48,13 +47,13 @@ int completeBER(const unsigned char *buf, int len)
     	return 0;
     if (!buf[0] && !buf[1])
     	return 0;
-    if ((res = ber_dectag(b, &zclass, &tag, &cons)) <= 0)
+    if ((res = ber_dectag(b, &zclass, &tag, &cons, len)) <= 0)
     	return 0;
     if (res > len)
     	return 0;
     b += res;
     len -= res;
-    if ((res = ber_declen(b, &ll)) <= 0)
+    if ((res = ber_declen(b, &ll, len)) <= 0)
     	return 0;
     if (res > len)
     	return 0;

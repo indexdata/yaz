@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_int.c,v 1.17 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr_int.c,v 1.18 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -38,7 +38,7 @@ int odr_integer(ODR o, int **p, int opt, const char *name)
     }
     if (cons)
     {
-        o->error = OPROTO;
+        odr_seterror(o, OPROTO, 1);
         return 0;
     }
     if (o->direction == ODR_DECODE)

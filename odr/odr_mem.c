@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_mem.c,v 1.21 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr_mem.c,v 1.22 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -78,7 +78,7 @@ int odr_write(ODR o, unsigned char *buf, int bytes)
 {
     if (o->pos + bytes >= o->size && odr_grow_block(o, bytes))
     {
-    	o->error = OSPACE;
+        odr_seterror(o, OSPACE, 40);
 	return -1;
     }
     memcpy(o->buf + o->pos, buf, bytes);
@@ -96,7 +96,7 @@ int odr_seek(ODR o, int whence, int offset)
     	offset += o->top;
     if (offset > o->size && odr_grow_block(o, offset - o->size))
     {
-    	o->error = OSPACE;
+        odr_seterror(o, OSPACE, 41);
 	return -1;
     }
     o->pos = offset;

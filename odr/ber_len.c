@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_len.c,v 1.11 2003-01-06 08:20:27 adam Exp $
+ * $Id: ber_len.c,v 1.12 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -84,11 +84,13 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
  * len = -1   indefinite.
  * len >= 0    Length.
  */
-int ber_declen(const unsigned char *buf, int *len)
+int ber_declen(const unsigned char *buf, int *len, int max)
 {
     const unsigned char *b = buf;
     int n;
 
+    if (max < 1)
+        return -1;
     if (*b == 0X80)     /* Indefinite */
     {
     	*len = -1;
@@ -109,13 +111,17 @@ int ber_declen(const unsigned char *buf, int *len)
 	return -1;
     /* indefinite long form */ 
     n = *b & 0X7F;
+    if (n >= max)
+        return -1;
     *len = 0;
     b++;
-    while (n--)
+    while (--n >= 0)
     {
     	*len <<= 8;
     	*len |= *(b++);
     }
+    if (*len < 0)
+        return -1;
 #ifdef ODR_DEBUG
     fprintf(stderr, "[len=%d]", *len);
 #endif

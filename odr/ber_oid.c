@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_oid.c,v 1.14 2003-01-06 08:20:27 adam Exp $
+ * $Id: ber_oid.c,v 1.15 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -20,14 +20,14 @@ int ber_oidc(ODR o, Odr_oid *p)
     switch (o->direction)
     {
     case ODR_DECODE:
-        if ((res = ber_declen(o->bp, &len)) < 1)
+        if ((res = ber_declen(o->bp, &len, odr_max(o))) < 1)
         {
-            o->error = OPROTO;
+            odr_seterror(o, OPROTO, 18);
             return 0;
         }
         if (len < 0)
         {
-            o->error = OPROTO;
+            odr_seterror(o, OPROTO, 19);
             return 0;
         }
         o->bp += res;
@@ -35,6 +35,11 @@ int ber_oidc(ODR o, Odr_oid *p)
         {
             *p = -1;
             return 1;
+        }
+        if (len > odr_max(o))
+        {
+            odr_seterror(o, OPROTO, 20);
+            return 0;
         }
         p[0] = *o->bp / 40;
         if (p[0] > 2)
@@ -50,7 +55,7 @@ int ber_oidc(ODR o, Odr_oid *p)
             {
                 if (!len)
                 {
-                    o->error = OPROTO;
+                    odr_seterror(o, OPROTO, 21);
                     return 0;
                 }
                 p[pos] <<= 7;
@@ -70,7 +75,7 @@ int ber_oidc(ODR o, Odr_oid *p)
             return 0;
         if (p[0] < 0 && p[1] <= 0)
         {
-            o->error = ODATA;
+            odr_seterror(o, ODATA, 23);
             return 0;
         }
         for (pos = 1; p[pos] >= 0; pos++)
@@ -96,12 +101,13 @@ int ber_oidc(ODR o, Odr_oid *p)
         odr_seek(o, ODR_S_SET, lenp);
         if (ber_enclen(o, (end - lenp) - 1, 1, 1) != 1)
         {
-            o->error = OOTHER;
+            odr_seterror(o, OOTHER, 52);
             return 0;
         }
         odr_seek(o, ODR_S_END, 0);
         return 1;
     default: 
-        o->error = OOTHER; return 0;
+        odr_seterror(o, OOTHER, 22);
+        return 0;
     }
 }

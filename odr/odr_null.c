@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_null.c,v 1.15 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr_null.c,v 1.16 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -39,7 +39,7 @@ int odr_null(ODR o, Odr_null **p, int opt, const char *name)
     if (cons)
     {
 #ifdef ODR_STRICT_NULL
-    	o->error = OPROTO;
+        odr_seterror(OPROTO, 42);
     	return 0;
 #else
 	fprintf(stderr, "odr: Warning: Bad NULL\n");

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_int.c,v 1.21 2003-01-06 08:20:27 adam Exp $
+ * $Id: ber_int.c,v 1.22 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -21,7 +21,7 @@
 #include "odr-priv.h"
 
 static int ber_encinteger(ODR o, int val);
-static int ber_decinteger(const unsigned char *buf, int *val);
+static int ber_decinteger(const unsigned char *buf, int *val, int max);
 
 int ber_integer(ODR o, int *val)
 {
@@ -30,9 +30,9 @@ int ber_integer(ODR o, int *val)
     switch (o->direction)
     {
         case ODR_DECODE:
-            if ((res = ber_decinteger(o->bp, val)) <= 0)
+            if ((res = ber_decinteger(o->bp, val, odr_max(o))) <= 0)
             {
-                o->error = OPROTO;
+                odr_seterror(o, OPROTO, 50);
                 return 0;
             }
             o->bp += res;
@@ -42,7 +42,7 @@ int ber_integer(ODR o, int *val)
                 return 0;
             return 1;
         case ODR_PRINT: return 1;
-        default: o->error = OOTHER;  return 0;
+        default: odr_seterror(o, OOTHER, 51);  return 0;
     }
 }
 
@@ -51,25 +51,19 @@ int ber_integer(ODR o, int *val)
  */
 int ber_encinteger(ODR o, int val)
 {
-    int lenpos;
     int a, len;
     union { int i; unsigned char c[sizeof(int)]; } tmp;
 
-    lenpos = odr_tell(o);
-    if (odr_putc(o, 0) < 0)  /* dummy */
-        return -1;
     tmp.i = htonl(val);   /* ensure that that we're big-endian */
     for (a = 0; a < (int) sizeof(int) - 1; a++)  /* skip superfluous octets */
         if (!((tmp.c[a] == 0 && !(tmp.c[a+1] & 0X80)) ||
             (tmp.c[a] == 0XFF && (tmp.c[a+1] & 0X80))))
             break;
     len = sizeof(int) - a;
-    if (odr_write(o, (unsigned char*) tmp.c + a, len) < 0)
-        return -1;
-    odr_seek(o, ODR_S_SET, lenpos);
     if (ber_enclen(o, len, 1, 1) != 1)
         return -1;
-    odr_seek(o, ODR_S_END, 0);
+    if (odr_write(o, (unsigned char*) tmp.c + a, len) < 0)
+        return -1;
 #ifdef ODR_DEBUG
     fprintf(stderr, "[val=%d]", val);
 #endif
@@ -79,16 +73,18 @@ int ber_encinteger(ODR o, int val)
 /*
  * Returns: Number of bytes read or 0 if no match, -1 if error.
  */
-int ber_decinteger(const unsigned char *buf, int *val)
+int ber_decinteger(const unsigned char *buf, int *val, int max)
 {
     const unsigned char *b = buf;
     unsigned char fill;
     int res, len, remains;
     union { int i; unsigned char c[sizeof(int)]; } tmp;
 
-    if ((res = ber_declen(b, &len)) < 0)
+    if ((res = ber_declen(b, &len, max)) < 0)
         return -1;
-    if (len > (int) sizeof(int))    /* let's be reasonable, here */
+    if (len+res > max || len < 0) /* out of bounds or indefinite encoding */
+        return -1;  
+    if (len > (int) sizeof(int))  /* let's be reasonable, here */
         return -1;
     b+= res;
 

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_tag.c,v 1.24 2003-01-06 08:20:27 adam Exp $
+ * $Id: ber_tag.c,v 1.25 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -44,7 +44,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
         if (!*pp)
         {
             if (!opt)
-                o->error = OREQUIRED;
+                odr_seterror(o, OREQUIRED, 24);
             return 0;
         }
         if ((rd = ber_enctag(o, zclass, tag, *constructed)) < 0)
@@ -59,15 +59,17 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
         if (o->op->stackp > -1 && !odr_constructed_more(o))
         {
             if (!opt)
-                o->error = OREQUIRED;
+                odr_seterror(o, OREQUIRED, 25);
             return 0;
         }
         if (odr_ber_tag->lclass < 0)
         {
-            if ((odr_ber_tag->br = ber_dectag(o->bp, &odr_ber_tag->lclass,
-                                              &odr_ber_tag->ltag, &odr_ber_tag->lcons)) <= 0)
+            if ((odr_ber_tag->br =
+                 ber_dectag(o->bp, &odr_ber_tag->lclass,
+                            &odr_ber_tag->ltag, &odr_ber_tag->lcons,
+                            odr_max(o))) <= 0)
             {
-                o->error = OPROTO;
+                odr_seterror(o, OPROTO, 26);
                 return 0;
             }
 #ifdef ODR_DEBUG
@@ -87,15 +89,15 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
         else
         {
             if (!opt)
-                o->error = OREQUIRED;
+                odr_seterror(o, OREQUIRED, 27);
             return 0;
         }
     case ODR_PRINT:
         if (!*pp && !opt)
-            o->error = OREQUIRED;
+            odr_seterror(o,OREQUIRED, 28);
         return *pp != 0;
     default:
-        o->error = OOTHER;
+        odr_seterror(o, OOTHER, 29);
         return 0;
     }
 }
@@ -144,23 +146,26 @@ int ber_enctag(ODR o, int zclass, int tag, int constructed)
 /* ber_dectag
  * Decode BER identifier octets. Return number of bytes read or -1 for error.
  */
-int ber_dectag(const unsigned char *buf, int *zclass, int *tag, int *constructed)
+int ber_dectag(const unsigned char *b, int *zclass, int *tag,
+               int *constructed, int max)
 {
-    const unsigned char *b = buf;
+    int l = 1;
+
+    if (l > max)
+        return -1;
 
     *zclass = *b >> 6;
     *constructed = (*b >> 5) & 0X01;
     if ((*tag = *b & 0x1F) <= 30)
     	return 1;
-    b++;
     *tag = 0;
     do
     {
+        if (l >= max)
+            return -1;
     	*tag <<= 7;
-    	*tag |= *b & 0X7F;
-    	if (b - buf >= 5) /* Precaution */
-	    return -1;
+    	*tag |= b[l] & 0X7F;
     }
-    while (*(b++) & 0X80);
-    return b - buf;
+    while (b[l++] & 0X80);
+    return l;
 }

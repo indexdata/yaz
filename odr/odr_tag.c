@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_tag.c,v 1.13 2003-01-06 08:20:28 adam Exp $
+ * $Id: odr_tag.c,v 1.14 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -15,14 +15,14 @@ int odr_peektag(ODR o, int *zclass, int *tag, int *cons)
 {
     if (o->direction != ODR_DECODE)
     {
-	o->error = OOTHER;
+        odr_seterror(o, OOTHER, 48);
 	return 0;
     }
     if (o->op->stackp > -1 && !odr_constructed_more(o))
 	return 0;
-    if (ber_dectag(o->bp, zclass, tag, cons) <= 0)
+    if (ber_dectag(o->bp, zclass, tag, cons, odr_max(o)) <= 0)
     {
-	o->error = OREQUIRED;
+        odr_seterror(o, OREQUIRED, 49);
 	return 0;
     }
     return 1;

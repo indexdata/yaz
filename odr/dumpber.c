@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: dumpber.c,v 1.14 2003-01-06 08:20:27 adam Exp $
+ * $Id: dumpber.c,v 1.15 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -21,7 +21,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
     	return 0;
     if (!buf[0] && !buf[1])
     	return 0;
-    if ((res = ber_dectag((unsigned char*)b, &zclass, &tag, &cons)) <= 0)
+    if ((res = ber_dectag((unsigned char*)b, &zclass, &tag, &cons, len)) <= 0)
     	return 0;
     if (res > len)
     {
@@ -41,7 +41,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
 	    "GRAPHICSTRING", "VISIBLESTRING", "GENERALSTRING", "[UNIV 28]"
 	};
 
-	if (tag < 28)
+	if (tag >= 0 && tag < 28)
 	    fprintf(f, "%s", nl[tag]);
 	else
 	    fprintf(f, "[UNIV %d]", tag);
@@ -54,14 +54,9 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
     taglen = res;
     len -= res;
     bp = b;
-    if ((res = ber_declen((unsigned char*)b, &ll)) <= 0)
+    if ((res = ber_declen((unsigned char*)b, &ll, len)) <= 0)
     {
-    	fprintf(f, "bad length\n");
-    	return 0;
-    }
-    if (res > len)
-    {
-    	fprintf(f, "Unexpected end of buffer\n");
+    	fprintf(f, "\n%*sBad length\n", level*4+5, "");
     	return 0;
     }
     lenlen = res;
@@ -74,15 +69,24 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
     fprintf(f, "       tl=%d, ll=%d\n", taglen, lenlen);
     if (!cons)
     {
-    	if (ll < 0)
+    	if (ll < 0 || ll > len)
 	{
-	    fprintf(f, "Bad length on primitive type.\n");
+	    fprintf(f, "%*sBad length on primitive type. ll=%d len=%d\n",
+                    level*4+5, "", ll, len);
 	    return 0;
 	}
     	return ll + (b - buf);
     }
     if (ll >= 0)
+    {
+        if (ll > len)
+        {
+	    fprintf(f, "%*sBad length of constructed type ll=%d len=%d.\n",
+                    level*4+5, "", ll, len);
+	    return 0;
+        }
     	len = ll;
+    }
     /* constructed - cycle through children */
     while ((ll == -1 && len >= 2) || (ll >= 0 && len))
     {
@@ -90,17 +94,23 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
 	    break;
 	if (!(res = do_dumpBER(f, b, len, level + 1, offset + (b - buf))))
 	{
-	    fprintf(f, "Dump of content element failed.\n");
+	    fprintf(f, "%*sDump of content element failed.\n", level*4+5, "");
 	    return 0;
 	}
 	b += res;
 	len -= res;
+        if (len < 0)
+        {
+            fprintf(f, "%*sBad length\n", level*4+5, "");
+            return 0;
+        }
     }
     if (ll == -1)
     {
     	if (len < 2)
 	{
-	    fprintf(f, "Buffer too short in indefinite lenght.\n");
+	    fprintf(f, "%*sBuffer too short in indefinite length.\n",
+                    level*4+5, "");
 	    return 0;
 	}
 	return (b - buf) + 2;

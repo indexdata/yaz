@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_seq.c,v 1.29 2003-01-06 08:20:28 adam Exp $
+ * $Id: odr_seq.c,v 1.30 2003-03-11 11:03:31 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -121,7 +121,7 @@ static int odr_sequence_x (ODR o, Odr_fun type, void *p, int *num)
 	    }
 	    break;
     	default:
-	    o->error = OOTHER;
+            odr_seterror(o, OOTHER, 47);
 	    return 0;
     }
     return odr_sequence_end(o);

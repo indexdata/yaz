@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_bit.c,v 1.14 2003-01-06 08:20:27 adam Exp $
+ * $Id: ber_bit.c,v 1.15 2003-03-11 11:03:31 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -20,9 +20,9 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
     switch (o->direction)
     {
     	case ODR_DECODE:
-	    if ((res = ber_declen(o->bp, &len)) < 0)
+	    if ((res = ber_declen(o->bp, &len, odr_max(o))) < 0)
 	    {
-	    	o->error = OPROTO;
+                odr_seterror(o, OPROTO, 4);
 	    	return 0;
 	    }
 	    o->bp += res;
@@ -37,16 +37,21 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 	    /* primitive bitstring */
 	    if (len < 0)
 	    {
-	    	o->error = OOTHER;
+                odr_seterror(o, OOTHER, 5);
 	    	return 0;
 	    }
 	    if (len == 0)
 	    	return 1;
 	    if (len - 1 > ODR_BITMASK_SIZE)
 	    {
-	    	o->error = OOTHER;
+                odr_seterror(o, OOTHER, 6);
 	    	return 0;
 	    }
+            if (len > odr_max(o))
+            {
+                odr_seterror(o, OOTHER, 7);
+                return 0;
+            }
 	    o->bp++;      /* silently ignore the unused-bits field */
 	    len--;
 	    memcpy(p->bits + p->top + 1, o->bp, len);
@@ -64,6 +69,6 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 	    	return 0;
 	    return 1;
     	case ODR_PRINT: return 1;
-    	default: o->error = OOTHER; return 0;
+    	default: odr_seterror(o, OOTHER, 8); return 0;
     }
 }

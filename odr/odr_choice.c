@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_choice.c,v 1.21 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr_choice.c,v 1.22 2003-03-11 11:03:31 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -53,7 +53,7 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
 	    {
 	    	if (o->op->stackp > -1 && !odr_constructed_more(o))
 		    return 0;
-	    	if (ber_dectag(o->bp, &cl, &tg, &cn) <= 0)
+	    	if (ber_dectag(o->bp, &cl, &tg, &cn, odr_max(o)) <= 0)
 		    return 0;
 	    }
 	    else if (o->direction != ODR_DECODE)
