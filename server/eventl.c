@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.14  1995-08-29 14:44:50  quinn
+ * Revision 1.15  1995-09-15 14:44:15  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.14  1995/08/29  14:44:50  quinn
  * Reset timeouts.
  *
  * Revision 1.13  1995/08/29  11:17:56  quinn
@@ -49,6 +52,7 @@
  *
  */
 
+#include <stdio.h>
 #include <assert.h>
 #include <sys/time.h>
 #include <sys/types.h>
