@@ -17,12 +17,13 @@ esetname B gils-b.est
 esetname G gils-g.est
 esetname W gils-b.est   # We don't really do bodyOfDisplay yet.
 esetname F @
+esetname VARIANT @
 
 elm (1,10)                  rank                          -
 elm (1,12)                  url                           -
 elm (1,14)                  localControlNumber            Local-number
 elm (1,16)                  dateOfLastModification       Date/time-last-modified
-elm (4,50)                  Title                         !
+elm (2,1)                   Title                          !
 elm (4,1)                   controlIdentifier             Identifier-standard
 elm (2,6)                   abstract                      Abstract
 elm (4,51)                  purpose                       !
@@ -85,7 +86,8 @@ elm (4,93)                  timePeriod                    -
 elm (4,93)/(4,15)           timePeriodStructured          !
 elm (4,93)/(4,16)           timePeriodTextual             !
 elm (4,98)                  crossReference                -
-elm (4,98)/(4,50)           crossReferenceTitle           !
+#elm (4,98)/(4,50)           crossReferenceTitle           !
+elm (4,98)/(2,1)           crossReferenceTitle           !
 elm (4,98)/(4,17)           crossReferenceLinkage         !
 elm (4,98)/(4,18)           crossReferenceType            !
 elm (4,23)                  originalControlIdentifier     !

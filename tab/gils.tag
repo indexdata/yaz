@@ -28,7 +28,6 @@ tag 21         thesaurus                                string
 tag 22         localSubjectTerm                         string
 tag 23         originalControlIdentifier                string
 
-tag 50         title                                    structured
 tag 51         purpose                                  structured
 tag 52         originator                               structured
 tag 53         accessConstraints                        structured
