@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.1 2003-10-27 12:21:35 adam Exp $
+ * $Id: tcpip.c,v 1.2 2004-04-28 12:10:53 adam Exp $
  */
 
 #include <stdio.h>
@@ -1098,3 +1098,19 @@ int static tcpip_set_blocking(COMSTACK p, int blocking)
     p->blocking = blocking;
     return 1;
 }
+
+#if HAVE_OPENSSL_SSL_H
+void *cs_get_ssl(COMSTACK cs)
+{
+    struct tcpip_state *state;
+    if (!cs || cs->type != ssl_type)
+        return 0;
+    state = (struct tcpip_state *) cs->cprivate;
+    return state->ssl;  
+}
+#else
+void *cs_get_ssl(COMSTACK cs)
+{
+    return 0;
+}
+#endif

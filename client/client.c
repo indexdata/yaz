@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.238 2004-04-07 13:51:50 adam Exp $
+ * $Id: client.c,v 1.239 2004-04-28 12:10:51 adam Exp $
  */
 
 #include <stdio.h>
@@ -14,6 +14,14 @@
 
 #if HAVE_LANGINFO_H
 #include <langinfo.h>
+#endif
+
+#if HAVE_OPENSSL_SSL_H
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #endif
 
 #include <time.h>
@@ -529,6 +537,9 @@ int session_connect(const char *arg)
     void *add;
     char type_and_host[101];
     const char *basep = 0;
+#if HAVE_OPENSSL_SSL_H
+    SSL *ssl;
+#endif
     if (conn)
     {
         cs_close (conn);
@@ -586,6 +597,31 @@ int session_connect(const char *arg)
         return 0;
     }
     printf("OK.\n");
+#if HAVE_OPENSSL_SSL_H
+    if ((ssl = (SSL *) cs_get_ssl(conn)))
+    {
+	X509 *server_cert = SSL_get_peer_certificate (ssl);
+	char *str;
+	if (server_cert)
+	{
+	    printf ("Server certificate:\n");
+	    
+	    str = X509_NAME_oneline (X509_get_subject_name (server_cert),0,0);
+	    if (str)
+	    {
+		printf ("\t subject: %s\n", str);
+		free (str);
+	    }
+	    str = X509_NAME_oneline (X509_get_issuer_name  (server_cert),0,0);
+	    if (str)
+	    {
+		printf ("\t issuer: %s\n", str);
+		free (str);
+	    }
+	    X509_free (server_cert);
+	}
+    }
+#endif
     if (basep && *basep)
         set_base (basep);
     if (protocol == PROTO_Z3950)

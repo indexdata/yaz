@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added cs_get_ssl that returns SSL handle (SSL *) for SSL comstack; returns
+NULL if SSL is unavailable.
+
 Documentation about MARC decoding tools.
 
 Fix --disable-tcpd to really disable tcpd. Patch by Robin H. Johnson.
