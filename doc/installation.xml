@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.17 2003-05-16 14:39:57 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.18 2003-05-27 21:44:10 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -279,7 +279,7 @@
          &yaz;.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>yaz-comp</filename></term>
+      <varlistentry><term><filename>yaz-asncomp</filename></term>
        <listitem><para>The ASN.1 compiler for &yaz;. Requires the
          Tcl Shell, <application>tclsh</application>, in
          <literal>PATH</literal> to operate.
