@@ -1,36 +1,32 @@
 Source: yaz
-Standards-Version: 2.5.0.0
+Standards-Version: 3.5.7.0
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-
-Package: yaz-doc
-Section: doc
-Architecture: any
-Description: The YAZ Z39.50 toolkit (documentation)
- The YAZ-toolkit is a C-toolkit for building
- origins and/or targets using the Z39.50 protocol for
- information retrieval.
- .
- YAZ supports a substantial subset of the Z39.50 standard
- and features a SSL protocol layer as an option.
- .
- YAZ is made by the danish software company Index Data
- and further information is available at http://www.indexdata.dk/
 
 Package: yaz-runtime
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: The YAZ Z39.50 toolkit (runtime files)
- The YAZ-toolkit is a C-toolkit for building
- origins and/or targets using the Z39.50 protocol for
- information retrieval.
+ YAZ is a toolkit that allows you to develop software using the
+ Z39.50/ISO23950 standard for information retrieval.
  .
- YAZ supports a substantial subset of the Z39.50 standard
- and features a SSL protocol layer as an option.
+ Besides development libraries and header files YAZ includes 
+ sample clients - and server.
  .
- YAZ is made by the danish software company Index Data
- and further information is available at http://www.indexdata.dk/
+ This packages includes runtime files.
+
+Package: yaz-doc
+Section: doc
+Architecture: any
+Description: The YAZ Z39.50 toolkit (documentation)
+ YAZ is a toolkit that allows you to develop software using the
+ Z39.50/ISO23950 standard for information retrieval.
+ .
+ Besides development libraries and header files YAZ includes 
+ sample clients - and server.
+ .
+ This packages includes documentation for YAZ in HTML and PDF.
 
 Package: yaz-devel
 Depends: yaz-runtime
@@ -38,27 +34,23 @@ Section: devel
 Architecture: any
 Recommends: yaz-doc
 Description: The YAZ Z39.50 toolkit (development files)
- The YAZ-toolkit is a C-toolkit for building
- origins and/or targets using the Z39.50 protocol for
- information retrieval.
+ YAZ is a toolkit that allows you to develop software using the
+ Z39.50/ISO23950 standard for information retrieval.
  .
- YAZ supports a substantial subset of the Z39.50 standard
- and features a SSL protocol layer as an option.
+ Besides development libraries and header files YAZ includes 
+ sample clients - and server.
  .
- YAZ is made by the danish software company Index Data
- and further information is available at http://www.indexdata.dk/
+ This packages includes development libraries and C/C++ header files.
 
 Package: yaz-ssl
 Depends: ${shlibs:Depends}
 Section: libs
 Architecture: any
 Description: The YAZ Z39.50 toolkit (SSL support)
- The YAZ-toolkit is a C-toolkit for building
- origins and/or targets using the Z39.50 protocol for
- information retrieval.
+ YAZ is a toolkit that allows you to develop software using the
+ Z39.50/ISO23950 standard for information retrieval.
  .
- YAZ supports a substantial subset of the Z39.50 standard
- and features a SSL protocol layer as an option.
+ Besides development libraries and header files YAZ includes 
+ sample clients - and server.
  .
- YAZ is made by the danish software company Index Data
- and further information is available at http://www.indexdata.dk/
+ This packages includes SSL support (Z39.50 protocol over SSL).
