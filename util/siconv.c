@@ -2,8 +2,10 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.1 2002-08-27 14:02:13 adam Exp $
+ * $Id: siconv.c,v 1.2 2002-08-27 21:45:28 adam Exp $
  */
+
+/* mini iconv and wrapper for system iconv library (if present) */
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -21,8 +23,11 @@
 
 struct yaz_iconv_struct {
     int my_errno;
-    unsigned long (*read_handle)(yaz_iconv_t cd, char **inbuf,
-                                 size_t *inbytesleft);
+    int init_flag;
+    size_t (*init_handle)(yaz_iconv_t cd, unsigned char *inbuf,
+                          size_t inbytesleft, size_t *no_read);
+    unsigned long (*read_handle)(yaz_iconv_t cd, unsigned char *inbuf,
+                                 size_t inbytesleft, size_t *no_read);
     size_t (*write_handle)(yaz_iconv_t cd, unsigned long x,
                            char **outbuf, size_t *outbytesleft);
 #if HAVE_ICONV_H
@@ -30,78 +35,153 @@ struct yaz_iconv_struct {
 #endif
 };
 
-
-static unsigned long yaz_read_ISO8859_1 (yaz_iconv_t cd,
-                                         char **inbuf, size_t *inbytesleft)
+static unsigned long yaz_read_ISO8859_1 (yaz_iconv_t cd, unsigned char *inp,
+                                         size_t inbytesleft, size_t *no_read)
 {
-    unsigned char *inp = *inbuf;
-    unsigned long x = 0;
-    x = inp[0];
-    (*inbytesleft)--;
-    inp++;
-    *inbuf = inp;
+    unsigned long x = inp[0];
+    *no_read = 1;
     return x;
 }
 
-static unsigned long yaz_read_UTF8 (yaz_iconv_t cd,
-                                    char **inbuf, size_t *inbytesleft)
+static size_t yaz_init_UTF8 (yaz_iconv_t cd, unsigned char *inp,
+                             size_t inbytesleft, size_t *no_read)
 {
-    unsigned char *inp = *inbuf;
+    if (inp[0] != 0xef)
+    {
+        *no_read = 0;
+        return 0;
+    }
+    if (inbytesleft < 3)
+    {
+        cd->my_errno = YAZ_ICONV_EINVAL;
+        return (size_t) -1;
+    }
+    if (inp[1] != 0xbb || inp[2] != 0xbf)
+    {
+        cd->my_errno = YAZ_ICONV_EILSEQ;
+        return (size_t) -1;
+    }
+    *no_read = 3;
+    return 0;
+}
+
+static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
+                                    size_t inbytesleft, size_t *no_read)
+{
     unsigned long x = 0;
+
     if (inp[0] <= 0x7f)
     {
         x = inp[0];
-        
-        (*inbytesleft)--;
-        inp++;
+        *no_read = 1;
     }
-    else if (inp[0] <= 0xdf && *inbytesleft >= 2)
+    else if (inp[0] <= 0xbf || inp[0] >= 0xfe)
     {
-        x = ((inp[0] & 0x1f) << 6) + (inp[1] & 0x3f);
-        
-        (*inbytesleft) -= 2;
-        inp += 2;
+        *no_read = 0;
+        cd->my_errno = YAZ_ICONV_EILSEQ;
     }
-    else if (inp[0] <= 0xef && *inbytesleft >= 3)
+    else if (inp[0] <= 0xdf && inbytesleft >= 2)
     {
-        x =  ((inp[0] & 0x0f) << 12) +
-            ((inp[1] & 0x3f) << 6) +  (inp[1] & 0x3f);
-        
-        (*inbytesleft) -= 3;
-        inp += 3;
+        x = ((inp[0] & 0x1f) << 6) | (inp[1] & 0x3f);
+        if (x >= 0x80)
+            *no_read = 2;
+        else
+        {
+            *no_read = 0;
+            cd->my_errno = YAZ_ICONV_EILSEQ;
+        }
     }
-    else if (inp[0] <= 0xef && *inbytesleft >= 4)
+    else if (inp[0] <= 0xef && inbytesleft >= 3)
     {
-        x =  ((inp[0] & 0x07) << 18) +
-            ((inp[1] & 0x3f) << 12) + ((inp[2] & 0x3f) << 6) +
-            (inp[3] & 0x3f);
-        
-        (*inbytesleft) -= 4;
-        inp += 4;
+        x = ((inp[0] & 0x0f) << 12) | ((inp[1] & 0x3f) << 6) |
+            (inp[1] & 0x3f);
+        if (x >= 0x800)
+            *no_read = 3;
+        else
+        {
+            *no_read = 0;
+            cd->my_errno = YAZ_ICONV_EILSEQ;
+        }
+    }
+    else if (inp[0] <= 0xf7 && inbytesleft >= 4)
+    {
+        x =  ((inp[0] & 0x07) << 18) | ((inp[1] & 0x3f) << 12) |
+            ((inp[2] & 0x3f) << 6) | (inp[3] & 0x3f);
+        if (x >= 0x10000)
+            *no_read = 4;
+        else
+        {
+            *no_read = 0;
+            cd->my_errno = YAZ_ICONV_EILSEQ;
+        }
+    }
+    else if (inp[0] <= 0xfb && inbytesleft >= 5)
+    {
+        x =  ((inp[0] & 0x03) << 24) | ((inp[1] & 0x3f) << 18) |
+            ((inp[2] & 0x3f) << 12) | ((inp[3] & 0x3f) << 6) |
+            (inp[4] & 0x3f);
+        if (x >= 0x200000)
+            *no_read = 5;
+        else
+        {
+            *no_read = 0;
+            cd->my_errno = YAZ_ICONV_EILSEQ;
+        }
+    }
+    else if (inp[0] <= 0xfd && inbytesleft >= 6)
+    {
+        x =  ((inp[0] & 0x01) << 30) | ((inp[1] & 0x3f) << 24) |
+            ((inp[2] & 0x3f) << 18) | ((inp[3] & 0x3f) << 12) |
+            ((inp[4] & 0x3f) << 6) | (inp[5] & 0x3f);
+        if (x >= 0x4000000)
+            *no_read = 6;
+        else
+        {
+            *no_read = 0;
+            cd->my_errno = YAZ_ICONV_EILSEQ;
+        }
     }
     else
     {
+        *no_read = 0;
         cd->my_errno = YAZ_ICONV_EINVAL;
     }
-    *inbuf = inp;
     return x;
 }
 
-static unsigned long yaz_read_UCS4 (yaz_iconv_t cd,
-                                    char **inbuf, size_t *inbytesleft)
+static unsigned long yaz_read_UCS4 (yaz_iconv_t cd, unsigned char *inp,
+                                    size_t inbytesleft, size_t *no_read)
 {
-    unsigned char *inp = *inbuf;
     unsigned long x = 0;
     
-    if (*inbytesleft < 4)
+    if (inbytesleft < 4)
     {
         cd->my_errno = YAZ_ICONV_EINVAL; /* incomplete input */
-        return 0;
+        *no_read = 0;
     }
-    memcpy (&x, inp, sizeof(x));
-    (*inbytesleft) -= 4;
-    inp += 4;
-    *inbuf = inp;
+    else
+    {
+        x = (inp[0]<<24) | (inp[1]<<16) | (inp[2]<<8) | inp[3];
+        *no_read = 4;
+    }
+    return x;
+}
+
+static unsigned long yaz_read_UCS4LE (yaz_iconv_t cd, unsigned char *inp,
+                                      size_t inbytesleft, size_t *no_read)
+{
+    unsigned long x = 0;
+    
+    if (inbytesleft < 4)
+    {
+        cd->my_errno = YAZ_ICONV_EINVAL; /* incomplete input */
+        *no_read = 0;
+    }
+    else
+    {
+        x = (inp[3]<<24) | (inp[2]<<16) | (inp[1]<<8) | inp[0];
+        *no_read = 4;
+    }
     return x;
 }
 
@@ -131,14 +211,28 @@ static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
     {
         *outp++ = (x >> 18) | 0xf0;
         *outp++ = ((x >> 12) & 0x3f) | 0x80;
-        *outp++ = ((x >> 6) & 0x3f) | 0x80;
+        *outp++ = ((x >> 6)  & 0x3f) | 0x80;
         *outp++ = (x & 0x3f) | 0x80;
         (*outbytesleft) -= 4;
     }
-    else if (x > 0x1fffff)
+    else if (x <= 0x3ffffff && *outbytesleft >= 5)
     {
-        cd->my_errno = YAZ_ICONV_EILSEQ;  /* invalid sequence */
-        return (size_t)(-1);
+        *outp++ = (x >> 24) | 0xf8;
+        *outp++ = ((x >> 18) & 0x3f) | 0x80;
+        *outp++ = ((x >> 12) & 0x3f) | 0x80;
+        *outp++ = ((x >> 6)  & 0x3f) | 0x80;
+        *outp++ = (x & 0x3f) | 0x80;
+        (*outbytesleft) -= 5;
+    }
+    else if (*outbytesleft >= 6)
+    {
+        *outp++ = (x >> 30) | 0xfc;
+        *outp++ = ((x >> 24) & 0x3f) | 0x80;
+        *outp++ = ((x >> 18) & 0x3f) | 0x80;
+        *outp++ = ((x >> 12) & 0x3f) | 0x80;
+        *outp++ = ((x >> 6)  & 0x3f) | 0x80;
+        *outp++ = (x & 0x3f) | 0x80;
+        (*outbytesleft) -= 6;
     }
     else 
     {
@@ -177,15 +271,33 @@ static size_t yaz_write_UCS4 (yaz_iconv_t cd, unsigned long x,
                               char **outbuf, size_t *outbytesleft)
 {
     unsigned char *outp = *outbuf;
-    if (x < 1 || x > 0x1fffff)
+    if (*outbytesleft >= 4)
     {
-        cd->my_errno = YAZ_ICONV_EILSEQ;
+        *outp++ = x<<24;
+        *outp++ = x<<16;
+        *outp++ = x<<8;
+        *outp++ = x;
+        (*outbytesleft) -= 4;
+    }
+    else
+    {
+        cd->my_errno = YAZ_ICONV_E2BIG;
         return (size_t)(-1);
     }
-    else if (*outbytesleft >= 4)
+    *outbuf = outp;
+    return 0;
+}
+
+static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
+                                char **outbuf, size_t *outbytesleft)
+{
+    unsigned char *outp = *outbuf;
+    if (*outbytesleft >= 4)
     {
-        memcpy (outp, &x, sizeof(x));
-        outp += 4;
+        *outp++ = x;
+        *outp++ = x<<8;
+        *outp++ = x<<16;
+        *outp++ = x<<24;
         (*outbytesleft) -= 4;
     }
     else
@@ -203,22 +315,29 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
 
     cd->write_handle = 0;
     cd->read_handle = 0;
+    cd->init_handle = 0;
     cd->my_errno = YAZ_ICONV_UNKNOWN;
 
-    if (!strcmp(fromcode, "UTF-8"))
+    if (!yaz_matchstr(fromcode, "UTF8"))
+    {
         cd->read_handle = yaz_read_UTF8;
-    else if (!strcmp(fromcode, "ISO-8859-1"))
+        cd->init_handle = yaz_init_UTF8;
+    }
+    else if (!yaz_matchstr(fromcode, "ISO88591"))
         cd->read_handle = yaz_read_ISO8859_1;
-    else if (!strcmp(fromcode, "UCS-4"))
+    else if (!yaz_matchstr(fromcode, "UCS4"))
         cd->read_handle = yaz_read_UCS4;
-
-
-    if (!strcmp(tocode, "UTF-8"))
+    else if (!yaz_matchstr(fromcode, "UCS4LE"))
+        cd->read_handle = yaz_read_UCS4LE;
+    
+    if (!yaz_matchstr(tocode, "UTF8"))
         cd->write_handle = yaz_write_UTF8;
-    else if (!strcmp (tocode, "ISO-8859-1"))
+    else if (!yaz_matchstr(tocode, "ISO88591"))
         cd->write_handle = yaz_write_ISO8859_1;
-    else if (!strcmp (tocode, "UCS-4"))
+    else if (!yaz_matchstr (tocode, "UCS4"))
         cd->write_handle = yaz_write_UCS4;
+    else if (!yaz_matchstr(tocode, "UCS4LE"))
+        cd->write_handle = yaz_write_UCS4LE;
 
 #if HAVE_ICONV_H
     cd->iconv_cd = 0;
@@ -232,12 +351,13 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
         }
     }
 #else
-    if (!cd->to_UCS4 || !cd->from_UCS4)
+    if (!cd->read_handle || !cd->write_handle)
     {
         xfree (cd);
         return 0;
     }
 #endif
+    cd->init_flag = 1;
     return cd;
 }
 
@@ -272,11 +392,40 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
     }
 #endif
     if (inbuf == 0 || *inbuf == 0)
+    {
+        cd->init_flag = 1;
+        cd->my_errno = YAZ_ICONV_UNKNOWN;
         return 0;
+    }
     inbuf0 = *inbuf;
+
+    if (cd->init_flag)
+    {
+        if (cd->init_handle)
+        {
+            size_t no_read;
+            size_t r = (cd->init_handle)(cd, *inbuf, *inbytesleft, &no_read);
+            if (r)
+            {
+                if (cd->my_errno == YAZ_ICONV_EINVAL)
+                    return r;
+                cd->init_flag = 0;
+                if (cd->my_errno == YAZ_ICONV_EILSEQ)
+                {
+                    *inbytesleft++;
+                    (*inbuf)++;
+                }
+                return r;
+            }
+            *inbytesleft -= no_read;
+            *inbuf += no_read;
+        }
+        cd->init_flag = 0;
+    }
     while (1)
     {
         unsigned long x;
+        size_t no_read;
 
         if (*inbytesleft == 0)
         {
@@ -284,8 +433,8 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             break;
         }
         
-        x = (cd->read_handle)(cd, inbuf, inbytesleft);
-        if (x == 0)
+        x = (cd->read_handle)(cd, *inbuf, *inbytesleft, &no_read);
+        if (no_read == 0)
         {
             r = (size_t)(-1);
             break;
@@ -293,6 +442,8 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
         r = (cd->write_handle)(cd, x, outbuf, outbytesleft);
         if (r)
             break;
+        *inbytesleft -= no_read;
+        (*inbuf) += no_read;
     }
     return r;
 }
