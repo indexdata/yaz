@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.12 2002-09-03 09:50:34 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.13 2002-09-03 10:46:06 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -159,8 +159,7 @@
 
      unit-code ::= integer.
 
-     term-type ::= 'general' | 'numeric' | 'string' | 'oid' |
-                   'datetime' | 'null'.
+     term-type ::= 'general' | 'numeric' | 'string' | 'oid' | 'datetime' | 'null'.
     </literallayout>
 
     <para>
