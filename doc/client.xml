@@ -1,9 +1,9 @@
-<!-- $Id: client.xml,v 1.14 2002-09-16 14:16:31 adam Exp $ -->
+<!-- $Id: client.xml,v 1.15 2003-05-19 20:45:07 adam Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
-    yaz-client is a line-mode Z39.50 client. It supports a fair amount
-    of the functionality of the Z39.50-1995 standard
+    yaz-client is a line-mode Z39.50/SRW client. It supports a fair amount
+    of the functionality of the Z39.50v3 standard.
     Its primary purpose is to exercise the package, and verify that
     the protocol works OK.
     For the same reason some commands offers more functionality than others.
@@ -30,8 +30,10 @@
    
    <simpara>
     in a UNIX shell / WIN32 console. The <replaceable>zurl</replaceable>,
-    specifies a Z39.50 host and, if specified, the client first tries to
-    establish connection with the Z39.50 target on the host.
+    specifies a Z39.50/SRW host and, if specified, the client first tries to
+    establish connection with the Z39.50/SRW target.
+   </simpara>
+   <simpara>
     Options are prefixed by <literal>-</literal> followed by a
     particular letter.
     </simpara>
@@ -112,26 +114,33 @@
    <para>
     In order to connect to Index Data's test Z39.50 server on
     <literal>bagel.indexdata.dk</literal>, port 210 and with the
-    database name marc, one would have to type
+    database name <literal>marc</literal>, one could type
+    <screen>
+     yaz-client bagel.indexdata.dk:210/marc
+    </screen>
    </para>
-   <screen>
-    yaz-client bagel.indexdata.dk:210/marc
-   </screen>
+   <para>
+    The same server is also a SOAP SRW service. Connect to it via HTTP
+    as follows:
+    <screen>
+     yaz-client http://bagel.indexdata.dk:210/marc
+    </screen>
+   </para>
    <para>
     In order to enable APDU log and connect to localhost, port 210 (default)
     and database Default (default) you'd write:
-   </para>
-   <screen>
-    yaz-client -a - localhost
-   </screen>
+    <screen>
+     yaz-client -a - localhost
+    </screen>
+   </para> 
    <para>
     The following command connects to a local server via UNIX
     socket <filename>/tmp/yaz</filename> and sets maximum message size to
     5 MB.
-    </para>
    <screen>
     yaz-client -k 5120 unix:/tmp/yaz
-    </screen>
+   </screen> 
+   </para>
   </sect1>
   <sect1 id="client.commands"><title>Commands</title>
    <para>

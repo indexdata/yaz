@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.2 2003-02-27 19:55:37 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.3 2003-05-19 20:45:07 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -16,8 +16,8 @@
     Syntax:
    </para>
    <para>
-    [<literal>(tcp|ssl|unix)':'</literal>]<replaceable>host</replaceable>
-    [:<replaceable>port</replaceable>][/<replaceable>base&gt;</replaceable>]
+    [<literal>(tcp|ssl|unix|http)':'</literal>]<replaceable>host</replaceable>
+    [:<replaceable>port</replaceable>][/<replaceable>base</replaceable>]
    </para>
   </listitem>
  </varlistentry>
@@ -25,7 +25,7 @@
    <literal>quit</literal>
   </term>
   <listitem>
-   <para>Ends YAZ client</para>
+   <para>Quits YAZ client</para>
   </listitem>
  </varlistentry>
  <varlistentry><term>
@@ -353,6 +353,74 @@
    <para>Specifies that all retrieved records should be appended ot
     file <replaceable>filename</replaceable>. This command does the
     thing as option <literal>-m</literal>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>schema</literal>
+   <replaceable>schemaid</replaceable>
+  </term>
+  <listitem>
+   <para>Specifies schema for retrieval.
+    Schema may be specified as an OID for Z39.50.
+    For SRW, schema is a simple string URI.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>charset</literal>
+   <replaceable>negotiationcharset</replaceable>
+   [<replaceable>outputcharset</replaceable>]
+  </term>
+  <listitem>
+   <para>Specifies character set (encoding) for Z39.50
+    negotiation / SRW encoding and/or character set for output (terminal).
+   </para>
+   <para>
+    <replaceable>negotiationcharset</replaceable> is the name
+    of the character set to be negotiated by the server. The special name
+    <literal>-</literal> for <replaceable>negotiationcharset</replaceable>
+    specifies <emphasis>no</emphasis> character set to be negotiated.
+   </para>
+   <para>
+    If <replaceable>outputcharset</replaceable> is given, it specifies name
+    of the character set of the output (on the terminal on which
+    YAZ client is running). To disable conversion of characters
+    to the output encoding, the special name <literal>-</literal> (dash)
+    can be used.
+    If the special name <literal>auto</literal> is given, YAZ client will
+    convert strings to the encoding of the
+    terminal as returned by <function>nl_langinfo</function> call.
+   </para>
+   <note>
+    <para>
+     Since character set negotation takes effect in the Z39.50
+     Initialize Request you should issue this command before
+     command <literal>open</literal> is used.
+    </para>
+   </note>
+   <note>
+    <para>
+     MARC records are not covered by Z39.50 character set negotiation.
+     See <literal>marccharset</literal>.
+    </para>
+   </note>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>marccharset</literal>
+   <replaceable>charset</replaceable>
+  </term>
+  <listitem>
+   <para>Specifies character set for retrieved MARC records so
+    that YAZ client can display them in a character suitable
+    for your display. See <literal>charset</literal> command.
+    If <literal>auto</literal> is given, YAZ will assume
+    that MARC21/USMARC is using MARC8/UTF8 and ISO-8859-1
+    for all other MARC variants.
    </para>
   </listitem>
  </varlistentry>

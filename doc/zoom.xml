@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.25 2003-05-12 22:38:40 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.26 2003-05-19 20:45:07 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -238,16 +238,18 @@
     </sect2>
    <sect2><title>SRW Protocol behavior</title>
     <para>
-     The SRW protocol doesn't feature an Init Request, so
+     The SRW protocol doesn't feature an Inititialize Request, so
      the connection phase merely establishes a TCP/IP connection
      with the SOAP service.
     </para>
-    <para>None of the ZOOM connection options
+    <para>Most of the ZOOM connection options do not
      affect SRW and they are ignored. However, future versions
      of &yaz; might honor <literal>implementationName</literal> and
      put that as part of User-Agent header for HTTP requests.
-     The <literal>charset</literal>, and <literal>lang</literal>
-     might also affect HTTP headers in future releases.
+     </para>
+    <para>
+     The <literal>charset</literal> is used in the Content-Type header
+     of HTTP requests.
     </para>
    </sect2>
   </sect1>

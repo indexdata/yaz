@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
 ]>
-<!-- $Id: yaz-client.sgml,v 1.4 2002-10-23 10:11:44 adam Exp $ -->
+<!-- $Id: yaz-client.sgml,v 1.5 2003-05-19 20:45:07 adam Exp $ -->
 <refentry id="yaz-client">
  
  <refmeta>
@@ -11,7 +11,7 @@
  
  <refnamediv>
   <refname>yaz-client</refname>
-  <refpurpose>Z39.50 client for implementors</refpurpose>
+  <refpurpose>Z39.50/SRW client for implementors</refpurpose>
  </refnamediv>
 
  <refsynopsisdiv>
@@ -36,9 +36,9 @@
   
   <refsect1><title>DESCRIPTION</title>
    <para>
-    <command>yaz-client</command> is a Z39.50 client (origin) with a
+    <command>yaz-client</command> is a Z39.50/SRW client (origin) with a
     simple command line interface that allows you to test behavior and
-    performance of Z39.50 servers (targets).
+    performance of Z39.50 targets and SRW servers.
    </para>
    <para>
     <command>yaz-client-ssl</command> is identical to
@@ -46,7 +46,7 @@
    </para>
    <para>
     If the <replaceable>addr</replaceable> is specified, the client creates
-    a connection to the Z39.50 target at the address.
+    a connection to the Z39.50/SRW target at the address.
    </para>
   </refsect1>
   <refsect1>
