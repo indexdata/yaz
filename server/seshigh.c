@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.14  1995-03-30 12:18:17  quinn
+ * Revision 1.15  1995-03-30 14:03:23  quinn
+ * Added RFC1006 as separate library
+ *
+ * Revision 1.14  1995/03/30  12:18:17  quinn
  * Fixed bug.
  *
  * Revision 1.13  1995/03/30  09:09:24  quinn
@@ -86,6 +89,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
     new->state = ASSOC_UNINIT;
     new->input_buffer = 0;
     new->input_buffer_len = 0;
+    new->backend = 0;
     if (cs_getproto(link) == CS_Z3950)
 	new->proto = PROTO_Z3950;
     else
@@ -253,7 +257,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.14 $";
+    resp.implementationVersion = "$Revision: 1.15 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {

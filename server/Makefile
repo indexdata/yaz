@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.15 1995-03-30 09:39:44 quinn Exp $
+# $Id: Makefile,v 1.16 1995-03-30 14:03:22 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../egate/include\
@@ -13,10 +13,10 @@ DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libserver.a 
 LIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
 $(LIBDIR)/libcomstack.a ../../egate/lib/util.a\
-../../xtimosi/src/libmosi.a ../yazlib/rfct.o ../yazlib/makensap.o \
+../../xtimosi/src/libmosi.a ../../lib/librfc.a \
 $(LIBDIR)/libutil.a
 PO = eventl.o seshigh.o statserv.o
-CPP=cc -E
+CPP=$(CC) -E
 PROG=ztest
 PROGO=ztest.o
 
