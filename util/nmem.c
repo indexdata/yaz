@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.41 2003-02-22 00:08:44 adam Exp $
+ * $Id: nmem.c,v 1.42 2003-09-16 19:46:56 adam Exp $
  */
 
 /*
@@ -452,7 +452,7 @@ void yaz_strerror(char *buf, int max)
 		FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL,
 		err,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default lang */
 		(LPTSTR) buf,
 		max-1,
 		NULL);
