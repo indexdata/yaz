@@ -7,7 +7,10 @@ exec tclsh "$0" "$@"
 # See the file LICENSE for details.
 #
 # $Log: yc.tcl,v $
-# Revision 1.5  2000-01-15 09:18:42  adam
+# Revision 1.6  2000-02-10 13:44:02  adam
+# Tcl command clock not used if unavailable (Tcl7.4 and earlier).
+#
+# Revision 1.5  2000/01/15 09:18:42  adam
 # Bug fix: some elements where treated as OPTIONAL when they shouldn't.
 #
 # Revision 1.4  1999/12/16 23:36:19  adam
@@ -1124,7 +1127,8 @@ proc asnModules {} {
 	        set file(outp) [open $inf(h-path)/$inf(h-dir)$inf(p-file) w]
             }
 
-	    set md [clock format [clock seconds]]
+	    set md ""
+	    catch {set md [clock format [clock seconds]]}
 	    
 	    puts $file(outc) "/* YC ${yc_version} $md */"
 	    puts $file(outc) "/* Module-C: $inf(module) */"
