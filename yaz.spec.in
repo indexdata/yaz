@@ -1,8 +1,8 @@
 Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
-Release: 1
-Requires: libxml2 openssl libyaz = %{version}
+Release: 2
+Requires: libxml2 openssl readline libyaz = %{version}
 Copyright: YAZ License
 Group: Other
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -19,7 +19,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %package -n lib%{name}
 Summary: Z39.50 Library
 Group: Libraries
-Requires: libxml2 openssl readline
+Requires: libxml2 openssl
 
 %description -n lib%{name}
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
