@@ -1,6 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.0b2 1995/06/27
+Fairly quick maintenance release to add SUTRS support.
+
 Fixed handling of SUTRS records in the demonstration client.
 
 * Added format field to the bend_fetchrequest and bend_fetchresponce
@@ -13,6 +15,9 @@ updated accordingly. Test server (ztest) will return a fixed dummy
 SUTRS record if your client requests SUTRS.
 
 Documentation updated accordingly.
+
+You can now set external libraries and RANLIB support in the top-level
+Makefile.
 
 --- 1.0b 1995/06/19
 First public release.
