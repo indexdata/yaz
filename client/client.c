@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.30  1996-02-12 18:18:09  quinn
+ * Revision 1.31  1996-02-20 12:51:54  quinn
+ * Fixed problems with EXTERNAL.
+ *
+ * Revision 1.30  1996/02/12  18:18:09  quinn
  * Fidgeting.
  *
  * Revision 1.29  1996/01/02  08:57:25  quinn
@@ -172,7 +175,7 @@ static void send_apdu(Z_APDU *a)
         exit(1);
     }
     buf = odr_getbuf(out, &len, 0);
-    odr_reset(out); /* release the APDU */
+    odr_reset(out); /* release the APDU structure  */
     if (cs_put(conn, buf, len) < 0)
     {
         fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
@@ -396,6 +399,9 @@ static void display_record(Z_DatabaseRecord *p)
     Z_External *r = (Z_External*) p;
     oident *ent = oid_getentbyoid(r->direct_reference);
 
+    /*
+     * Tell the user what we got.
+     */
     if (r->direct_reference)
     {
         printf("Record type: ");
@@ -407,30 +413,40 @@ static void display_record(Z_DatabaseRecord *p)
             odr_reset(print);
         }
     }
-    if (r->which == Z_External_octet && p->u.octet_aligned->len)
+
+    /* Check if this is a known, ASN.1 type tucked away in an octet string */
+    if (ent && r->which == Z_External_octet)
     {
-#if 0
-	if (marcdump)
-	    fwrite(p->u.octet_aligned->buf, p->u.octet_aligned->len, 1,
-		marcdump);
-#endif
-        static count = 0;
-        FILE *f;
-        char buf[256];
+	Z_ext_typeent *type = z_ext_getentbyref(ent->value);
+	void *rr;
 
-        sprintf(buf, "marc.%d", count++);
-        if (!(f = fopen(buf, "w")))
-        {
-            perror(buf);
-            exit(1);
-
-        }
-        fwrite(p->u.octet_aligned->buf, p->u.octet_aligned->len, 1, f);
-        fclose(f);
-
-
-        marc_display ((char*)p->u.octet_aligned->buf, stdout);
+	if (type)
+	{
+	    /*
+	     * Call the given decoder to process the record.
+	     */
+	    odr_setbuf(in, (char*)p->u.octet_aligned->buf,
+		p->u.octet_aligned->len, 0);
+	    if (!(*type->fun)(in, &rr, 0))
+	    {
+		odr_perror(in, "Decoding constructed record.");
+		fprintf(stderr, "[Near %d]\n", odr_offset(in));
+		fprintf(stderr, "Packet dump:\n---------\n");
+		odr_dumpBER(stderr, (char*)p->u.octet_aligned->buf,
+		    p->u.octet_aligned->len);
+		fprintf(stderr, "---------\n");
+		exit(1);
+	    }
+	    /*
+	     * Note: we throw away the original, BER-encoded record here.
+	     * Do something else with it if you want to keep it.
+	     */
+	    r->u.sutrs = rr;    /* we don't actually check the type here. */
+	    r->which = type->what;
+	}
     }
+    if (r->which == Z_External_octet && p->u.octet_aligned->len)
+        marc_display ((char*)p->u.octet_aligned->buf, stdout);
     else if (ent->value == VAL_SUTRS)
     {
         if (r->which != Z_External_sutrs)
