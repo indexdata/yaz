@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.3  1995-05-29 08:11:33  quinn
+ * Revision 1.4  1995-06-27 13:20:32  quinn
+ * Added SUTRS support
+ *
+ * Revision 1.3  1995/05/29  08:11:33  quinn
  * Moved oid from odr/asn to util.
  *
  * Revision 1.2  1995/05/16  08:50:35  quinn
@@ -115,7 +118,8 @@ typedef struct oident
 	VAL_ITEMORDER,
 	VAL_DBUPDATE,
 	VAL_EXPORTSPEC,
-	VAL_EXPORTINV
+	VAL_EXPORTINV,
+	VAL_NONE
     } value;
     int oidsuffix[20];
     char *desc;

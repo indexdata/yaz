@@ -69,6 +69,7 @@ typedef struct bend_fetchrequest
 {
     char *setname;             /* set name */
     int number;                /* record number */
+    oid_value format;          /* One of the CLASS_RECSYN members */
 } bend_fetchrequest;
 
 typedef struct bend_fetchresult
@@ -77,6 +78,7 @@ typedef struct bend_fetchresult
     int len;                   /* length of record */
     char *record;              /* record */
     int last_in_set;           /* is it?  */
+    oid_value format;          /* format */
     int errcode;               /* 0==success */
     char *errstring;           /* system error string or NULL */
 } bend_fetchresult;
