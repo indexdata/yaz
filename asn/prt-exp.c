@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.4  1995-09-29 17:11:54  quinn
+ * Revision 1.5  1995-12-05 11:15:50  quinn
+ * Work.
+ *
+ * Revision 1.4  1995/09/29  17:11:54  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:42  quinn
@@ -650,7 +653,7 @@ int z_DatabaseInfo(ODR o, Z_DatabaseInfo **p, int opt)
         odr_implicit(o, z_HumanString, &(*p)->disclaimers, ODR_CONTEXT,
 	    12, 1) &&
         odr_implicit(o, z_HumanString, &(*p)->news, ODR_CONTEXT, 13, 1) &&
-	((odr_constructed_begin(o, p, ODR_CONTEXT, 14) &&
+	((odr_constructed_begin(o, &(*p)->recordCount, ODR_CONTEXT, 14) &&
 	    odr_choice(o, arm, &(*p)->recordCount, &(*p)->recordCount_which) &&
 	    odr_constructed_end(o)) || odr_ok(o)) &&
         odr_implicit(o, z_HumanString, &(*p)->defaultOrder, ODR_CONTEXT,
