@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: marcdisp.h,v $
- * Revision 1.6  1997-09-01 08:49:49  adam
+ * Revision 1.7  1997-09-04 07:57:51  adam
+ * Definition of ISO2709 control characters to this file.
+ *
+ * Revision 1.6  1997/09/01 08:49:49  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -55,6 +58,10 @@ extern "C" {
 #endif
 
 YAZ_EXPORT int marc_display (const char *buf, FILE *outf);
+
+#define ISO2709_RS 035
+#define ISO2709_FS 036
+#define ISO2709_IDFS 037
 
 #ifdef __cplusplus
 }
