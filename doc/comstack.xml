@@ -1,25 +1,28 @@
-<!-- $Id: comstack.xml,v 1.5 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: comstack.xml,v 1.6 2001-11-06 17:04:32 adam Exp $ -->
  <chapter id="comstack"><title>The COMSTACK Module</title>
 
   <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>
 
    <programlisting>
 
-COMSTACK *stack;
+COMSTACK stack;
 char *buf = 0;
 int size = 0, length_incoming;
 char *protocol_package; 
 int protocol_package_length;
-char server_address[] = "myserver.com:2100";
+char server_address_str[] = "myserver.com:2100";
+void *server_address_ip;
 int status;
 
 stack = cs_create(tcpip_type, 1, PROTO_Z3950);
 if (!stack) {
-    perror("cs_create");  /* note use of perror() here since we have no stack yet */
+    perror("cs_create");  /* use perror() here since we have no stack yet */
     exit(1);
 }
 
-status = cs_connect(stack, server_address);
+server_address_ip = cs_addrstr (stack, server_address_str);
+
+status = cs_connect(stack, server_address_ip);
 if (status != 0) {
     cs_perror(stack, "cs_connect");
     exit(1);
@@ -58,13 +61,20 @@ if (buf)
     The &comstack;
     subsystem provides a transparent interface to different types of transport
     stacks for the exchange of BER-encoded data. At present, the
-    RFC1729 method (BER over TCP/IP), and Peter Furniss' XTImOSI
-    stack are supported, but others may be added in time. The philosophy of the
+    RFC1729 method (BER over TCP/IP), and an experimental SSL stack
+    are supported, but others may be added in time. The philosophy of the
     module is to provide a simple interface by hiding unused options and
     facilities of the underlying libraries. This is always done at the risk
     of losing generality, and it may prove that the interface will need
     extension later on.
    </para>
+
+   <note>
+    <para>
+     There hasn't been interest in the XTImOSI stack for some years.
+     Therefore, it is no longer supported.
+     </para>
+   </note>
 
    <para>
     The interface is implemented in such a fashion that only the
@@ -77,11 +87,12 @@ if (buf)
     the interface is still orders of magnitudes more complex than the
     transport systems found in many other packages. One reason is that
     the interface needs to support the somewhat different requirements of
-    the different lower-layer communications stacks; another important reason is
-    that the interface seeks to provide a more or less industrial-strength
-    approach to asynchronous event-handling. When no function is allowed
-    to block, things get more complex - particularly on the server
-    side. We urge you to have a look at the demonstration client and server
+    the different lower-layer communications stacks; another important
+    reason is that the interface seeks to provide a more or less
+    industrial-strength approach to asynchronous event-handling.
+    When no function is allowed to block, things get more complex -
+    particularly on the server side.
+    We urge you to have a look at the demonstration client and server
     provided with the package. They are meant to be easily readable and
     instructive, while still being at least moderately useful.
    </para>
@@ -97,18 +108,19 @@ if (buf)
 
     <para>
      Creates an instance of the protocol stack - a communications endpoint.
-     The <literal>type</literal> parameter determines the mode of communication.
+     The <literal>type</literal> parameter determines the mode
+     of communication.
      At present, the values
      <literal>tcpip_type</literal>
      and
-     <literal>mosi_type</literal>
+     <literal>ssl_type</literal>
      are recognized. The function returns a null-pointer if a system error
-     occurs. The <literal>blocking</literal> parameter should be one if you wish
-     the association to operate in blocking mode, zero otherwise. The
-     <literal>protocol</literal> field should be one of
-     <literal>PROTO_SR</literal> or <literal>PROTO_Z3950</literal>.
+     occurs. The <literal>blocking</literal> parameter should be one if
+     you wish the association to operate in blocking mode, zero otherwise.
+     The <literal>protocol</literal> field should be
+     <literal>PROTO_Z3950</literal>.
+     Protocol <literal>PROTO_SR</literal> is no longer supported.
     </para>
-
 
     <synopsis>
      int cs_close(COMSTACK handle);
@@ -227,7 +239,8 @@ if (buf)
 
     <variablelist>
      <varlistentry><term>CS_NONE</term><listitem><para>
-	No event is pending. The data found on the line was not a complete package.
+	No event is pending. The data found on the line was not a
+        complete package.
        </para></listitem></varlistentry>
 
      <varlistentry><term>CS_CONNECT</term><listitem><para>
@@ -239,17 +252,18 @@ if (buf)
      <varlistentry><term>CS_DISCON</term><listitem><para>
 	The other side has closed the connection (or maybe sent a disconnect
 	request - but do we care? Maybe later). Call
-	<function>cs_close</function> to close your end of the association as well.
+	<function>cs_close</function> to close your end of the association
+        as well.
        </para></listitem></varlistentry>
 
      <varlistentry><term>CS_LISTEN</term><listitem><para>
-	A connect request has been received. Call <function>cs_listen</function>
-	to process the event.
+	A connect request has been received.
+        Call <function>cs_listen</function> to process the event.
        </para></listitem></varlistentry>
 
      <varlistentry><term>CS_DATA</term><listitem><para>
-	There's data to be found on the line. Call <function>cs_get</function>
-	to get it.
+	There's data to be found on the line.
+        Call <function>cs_get</function> to get it.
        </para></listitem></varlistentry>
     </variablelist>
 
@@ -308,13 +322,13 @@ if (buf)
   <sect1 id="comstack.server"><title>Server Side</title>
 
    <para>
-    To establish a server under the <application>inetd</application> server, you
-    can use
+    To establish a server under the <application>inetd</application>
+    server, you can use
    </para>
 
    <synopsis>
     COMSTACK cs_createbysocket(int socket, CS_TYPE type, int blocking,
-    int protocol);
+                               int protocol);
    </synopsis>
 
    <para>
@@ -388,9 +402,7 @@ if (buf)
    </para>
 
    <synopsis>
-    struct sockaddr_in *tcpip_strtoaddr(char *str);
-
-    struct netbuf *mosi_strtoaddr(char *str);
+    void *cs_straddr(COMSTACK handle, const char *str);
    </synopsis>
 
    <para>
@@ -402,35 +414,12 @@ if (buf)
    </synopsis>
 
    <para>
-    The <literal>hostname</literal> can be either a domain name or an IP address.
-    The port number, if omitted, defaults to 210.
+    The <literal>hostname</literal> can be either a domain name or an
+    IP address. The port number, if omitted, defaults to 210.
    </para>
 
    <para>
-    For OSI, the format is
-   </para>
-
-   <synopsis>
-    &lsqb; &lt;t-selector> '/' &rsqb; &lt;host> &lsqb; ':' &lt;port> &rsqb;
-   </synopsis>
-
-   <para>
-    The transport selector is given as an even number of hex digits.
-   </para>
-
-   <para>
-    You'll note that the address format for the OSI mode are just a subset
-    of full presentation addresses. We use presentation addresses because
-    xtimosi doesn't, in itself, allow access to the X.500 Directory
-    service. We use a limited form, because we haven't yet come across an
-    implementation that used more of the elements of a full p-address. It
-    is a fairly simple matter to add the rest of the elements to the
-    address format as needed, however: Xtimosi <emphasis>does</emphasis>
-    support the full P-address structure.
-   </para>
-
-   <para>
-    In both transport modes, the special hostname &quot;@&quot; is mapped
+    In all transport modes, the special hostname &quot;@&quot; is mapped
     to any local address (the manifest constant <literal>INADDR_ANY</literal>).
     It is used to establish local listening endpoints in the server role.
    </para>
@@ -440,28 +429,37 @@ if (buf)
    </para>
 
    <synopsis>
-    char cs_addrstr(COMSTACK h);
+    char *cs_addrstr(COMSTACK h);
    </synopsis>
 
    <para>
-    to retrieve the host name of the peer system. The function returns a pointer
-    to a static area, which is overwritten on the next call to the function.
+    to retrieve the host name of the peer system. The function returns
+    a pointer to a static area, which is overwritten on the next call
+    to the function.
    </para>
 
-   <note>
-    <para>
-     We have left the issue of X.500 name-to-address mapping open, for the
-     moment. It would be a simple matter to provide a table-based mapping,
-     if desired. Alternately, we could use the X.500 client-function that
-     is provided with the ISODE (although this would defeat some of the
-     purpose of using ThinOSI in the first place. We have been told that it
-     should be within the realm of the possible to implement a lightweight
-     implementation of the necessary X.500 client capabilities on top of
-     ThinOSI. This would be the ideal solution, we feel. On the other hand, it
-     still remains to be seen just what role the Directory will play in a world
-     populated by ThinOSI and other pragmatic solutions.
-    </para>
-   </note>
+   <para>
+    A fairly recent addition to the &comstack; module is the utility
+    function
+   </para>
+   <synopsis>
+    COMSTACK cs_create_host (const char *str, int blocking, void **vp);
+   </synopsis>
+   <para>
+    which is just a wrapper around <function>cs_create</function> and
+    <function>cs_straddr</function>. The <parameter>str</parameter>
+    is similar to that described for <function>cs_straddr</function>
+    but with a prefix denoting the &comstack; type. Prefixes supported
+    are <literal>tcp:</literal> and <literal>ssl:</literal> for
+    TCP/IP and SSL respectively. If no prefix is given, then TCP/IP
+    is used. The <parameter>blocking</parameter> is passed to
+    function <function>cs_create</function>. The third parameter
+    <parameter>vp</parameter> is a pointer to &comstack; stack type
+    specific values.
+    For SSL (ssl_type) <parameter>vp</parameter> is an already create
+    OpenSSL CTX. For TCP/IP <parameter>vp</parameter> is unused (can be
+    set to <literal>NULL</literal>.
+   </para>
 
   </sect1>
 
@@ -515,13 +513,14 @@ if (buf)
      <synopsis>
     #include &lt;comstack.h>
      
-    #include &lt;tcpip.h>      /* this is for TCP/IP support   */
-    #include &lt;xmosi.h>      /* and this is for mOSI support */
+    #include &lt;tcpip.h>      /* this is for TCP/IP and SSL support */
      
     COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
      
     COMSTACK cs_createbysocket(int s, CS_TYPE type, int blocking,
                                int protocol);
+    COMSTACK cs_create_host (const char *str, int blocking,
+                             void **vp);
      
     int cs_bind(COMSTACK handle, int mode);
      
@@ -543,9 +542,9 @@ if (buf)
 
     int cs_look(COMSTACK handle);
 
-    struct sockaddr_in *tcpip_strtoaddr(char *str);
+    void *cs_straddr(COMSTACK handle, const char *str);
 
-    struct netbuf *mosi_strtoaddr(char *str);
+    char *cs_addrstr(COMSTACK h);
 
     extern int cs_errno;
 
