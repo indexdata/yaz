@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.28 2003-10-23 09:56:57 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.29 2003-11-03 09:34:02 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -131,7 +131,7 @@
 
      top-set ::= &lsqb; '@attrset' string &rsqb;
 
-     query-struct ::= attr-spec | simple | complex | '@term' term-type
+     query-struct ::= attr-spec | simple | complex | '@term' term-type query
 
      attr-spec ::= '@attr' &lsqb; string &rsqb; string query-struct
 
