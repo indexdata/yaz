@@ -2,18 +2,52 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.5 2005-01-15 19:47:15 adam Exp $
+ * $Id: tsticonv.c,v 1.6 2005-02-01 21:07:19 adam Exp $
  */
 
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
+#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
 
 #include <yaz/yaz-util.h>
+
+static int compare_buffers(char *msg, int no,
+			   int expect_len, const unsigned char *expect_buf,
+			   int got_len, const unsigned char *got_buf)
+{
+    int i;
+    if (expect_len == got_len
+	&& !memcmp(expect_buf, got_buf, expect_len))
+	return 1;
+    printf("tsticonv test=%s i=%d failed\n", msg, no);
+    printf("off got exp\n");
+    for (i = 0; i<got_len || i<expect_len; i++)
+    {
+	char got_char[10];
+	char expect_char[10];
+
+	if (i < got_len)
+	    sprintf(got_char, "%02X", got_buf[i]);
+	else
+	    sprintf(got_char, "?  ");
+
+	if (i < expect_len)
+	    sprintf(expect_char, "%02X", expect_buf[i]);
+	else
+	    sprintf(expect_char, "?  ");
+	
+	printf("%02d  %s  %s %c\n",
+	       i, got_char, expect_char, got_buf[i] == expect_buf[i] ?
+	       ' ' : '*');
+
+    }
+    exit(1);
+}
 
 /* some test strings in ISO-8859-1 format */
 static const char *iso_8859_1_a[] = {
@@ -30,7 +64,7 @@ static const char *marc8_a[] = {
     0
 };
 
-static void marc8_tst_a()
+static void tst_marc8_to_iso_8859_1()
 {
     int i;
     yaz_iconv_t cd;
@@ -46,7 +80,7 @@ static void marc8_tst_a()
         size_t r;
         char *inbuf= (char*) marc8_a[i];
         size_t inbytesleft = strlen(inbuf);
-        char outbuf0[24];
+        char outbuf0[32];
         char *outbuf = outbuf0;
         size_t outbytesleft = sizeof(outbuf0);
 
@@ -58,26 +92,27 @@ static void marc8_tst_a()
             printf ("tsticonv 11 i=%d e=%d\n", i, e);
 	    exit(11);
         }
-        if ((outbuf - outbuf0) != strlen(iso_8859_1_a[i]) 
-            || memcmp(outbuf0, iso_8859_1_a[i],
-		      strlen(iso_8859_1_a[i])))
-        {
-            printf ("tsticonv 12 i=%d\n", i);
-            printf ("buf=%s   out=%s\n", iso_8859_1_a[i], outbuf0);
-	    exit(12);
-        }
+	compare_buffers("tsticonv 11", i,
+			strlen(iso_8859_1_a[i]), iso_8859_1_a[i],
+			outbuf - outbuf0, outbuf0);
     }
     yaz_iconv_close(cd);
 }
 
-static void marc8_tst_b()
+static void tst_marc8_to_ucs4b()
 {
-    static const char *marc8_b[] = {
-	/* 0 */	
-	"\033$1" "\x21\x2B\x3B" /* FF1F */ "\033(B" "o",
-	/* 1 */ 
+    static struct {
+	const unsigned char *marc8_b;
+	int len;
+	const unsigned char *ucs4_b;
+    } ar[] = {
+    { 
+        "\033$1" "\x21\x2B\x3B" /* FF1F */ "\033(B" "o",
+	8, "\x00\x00\xFF\x1F" "\x00\x00\x00o"
+    }, {
 	"\033$1" "\x6F\x77\x29" /* AE0E */ "\x6F\x52\x7C" /* c0F4 */ "\033(B",
-	/* 2 */ 
+	8, "\x00\x00\xAE\x0E" "\x00\x00\xC0\xF4",
+    }, {
 	"\033$1"
 	"\x21\x50\x6E"  /* UCS 7CFB */
 	"\x21\x51\x31"  /* UCS 7D71 */
@@ -86,27 +121,35 @@ static void marc8_tst_b()
 	"\x21\x33\x53"  /* UCS 5206 */
 	"\x21\x44\x2B"  /* UCS 6790 */
 	"\033(B",
-	/* 3 */
-	"\xB0\xB2",     /* AYN and oSLASH */
-	/* 4 */
-	"\xF6\x61",     /* a underscore */
-	/* 5 */
-	"\x61\xC2",     /* a, phonorecord mark */
-	0
-    };
-    static const char *ucs4_b[] = {
-	"\x00\x00\xFF\x1F" "\x00\x00\x00o",
-	"\x00\x00\xAE\x0E" "\x00\x00\xC0\xF4",
-	"\x00\x00\x7C\xFB"
+	24, "\x00\x00\x7C\xFB"
 	"\x00\x00\x7D\x71"
 	"\x00\x00\x5B\x89"
 	"\x00\x00\x51\x68"
 	"\x00\x00\x52\x06"
-	"\x00\x00\x67\x90",
-	"\x00\x00\x02\xBB"  "\x00\x00\x00\xF8",
-	"\x00\x00\x00\x61"  "\x00\x00\x03\x32",
-	"\x00\x00\x00\x61"  "\x00\x00\x21\x17",
-	0
+	"\x00\x00\x67\x90"
+    }, {
+	"\xB0\xB2",     /* AYN and oSLASH */
+	8, "\x00\x00\x02\xBB"  "\x00\x00\x00\xF8"
+    }, {
+	"\xF6\x61",     /* a underscore */
+	8, "\x00\x00\x00\x61"  "\x00\x00\x03\x32"
+    }, {
+	"\x61\xC2",     /* a, phonorecord mark */
+	8, "\x00\x00\x00\x61"  "\x00\x00\x21\x17"
+    }, {
+	"el" "\xe8" "am\xe8" "an", /* elaman where a is a" */
+	32,
+	"\x00\x00\x00" "e"
+	"\x00\x00\x00" "l"
+	"\x00\x00\x00" "a"
+	"\x00\x00\x03\x08"
+	"\x00\x00\x00" "m"
+	"\x00\x00\x00" "a"
+	"\x00\x00\x03\x08"
+	"\x00\x00\x00" "n"
+    }, {
+	0, 0, 0
+    }
     };
     int i;
     yaz_iconv_t cd;
@@ -117,36 +160,41 @@ static void marc8_tst_b()
 	printf ("tsticonv 20 yaz_iconv_open failed\n");
 	exit(20);
     }
-    for (i = 0; marc8_b[i]; i++)
+    for (i = 6; ar[i].len; i++)
     {
         size_t r;
-	size_t len;
-	size_t expect_len = i == 2 ? 24 : 8;
-        char *inbuf= (char*) marc8_b[i];
+	size_t expect_len = ar[i].len;
+        char *inbuf= (char*) ar[i].marc8_b;
         size_t inbytesleft = strlen(inbuf);
-        char outbuf0[24];
+        char outbuf0[64];
         char *outbuf = outbuf0;
-        size_t outbytesleft = sizeof(outbuf0);
 
-        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-        if (r == (size_t) (-1))
-        {
-            int e = yaz_iconv_error(cd);
-
-            printf ("tsticonv 21 i=%d e=%d\n", i, e);
-	    exit(21);
+	while (inbytesleft)
+	{
+	    size_t outbytesleft = outbuf0 + sizeof(outbuf0) - outbuf;
+	    if (outbytesleft > 12)
+		outbytesleft = 12;
+            r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+            if (r == (size_t) (-1))
+            {
+                int e = yaz_iconv_error(cd);
+		if (e != YAZ_ICONV_E2BIG)
+	        {
+                    printf ("tsticonv 21 i=%d e=%d\n", i, e);
+	            exit(21);
+		}
+	    }
+	    else
+		break;
         }
-	len = outbuf - outbuf0;
-	if (len != expect_len || memcmp(outbuf0, ucs4_b[i], len))
-        {
-            printf ("tsticonv 22 len=%d gotlen=%d i=%d\n", expect_len, len, i);
-	    exit(22);
-        }
+	compare_buffers("tsticonv 22", i,
+			expect_len, ar[i].ucs4_b,
+			outbuf - outbuf0, outbuf0);
     }
     yaz_iconv_close(cd);
 }
 
-static void marc8_tst_c()
+static void tst_ucs4b_to_utf8()
 {
     static const char *ucs4_c[] = {
 	"\x00\x00\xFF\x1F\x00\x00\x00o",
@@ -171,7 +219,6 @@ static void marc8_tst_c()
     for (i = 0; ucs4_c[i]; i++)
     {
         size_t r;
-	size_t len;
         char *inbuf= (char*) ucs4_c[i];
         size_t inbytesleft = 8;
         char outbuf0[24];
@@ -186,13 +233,9 @@ static void marc8_tst_c()
             printf ("tsticonv 31 i=%d e=%d\n", i, e);
 	    exit(31);
         }
-	len = outbuf - outbuf0;
-	if (len != strlen(utf8_c[i]) || memcmp(outbuf0, utf8_c[i], len))
-        {
-            printf ("tsticonv 32 len=%d gotlen=%d i=%d\n",
-		    strlen(utf8_c[i]), len, i);
-	    exit(32);
-        }
+	compare_buffers("tsticonv 32", i,
+			strlen(utf8_c[i]), utf8_c[i],
+			outbuf - outbuf0, outbuf0);
     }
     yaz_iconv_close(cd);
 }
@@ -249,14 +292,9 @@ static void dconvert(int mandatory, const char *tmpcode)
             printf ("tsticonv code=%s 4 e=%d\n", tmpcode, e);
 	    exit(4);
 	}
-	if (strlen(iso_8859_1_a[i]) == 
-	    (sizeof(outbuf1) - outbytesleft) &&
-            memcmp(outbuf1, iso_8859_1_a[i],
-		   strlen(iso_8859_1_a[i])))
-        {
-            printf ("tsticonv code=%s 5\n", tmpcode);
-            exit(5);
-	}
+	compare_buffers("dconvert", i,
+			strlen(iso_8859_1_a[i]), iso_8859_1_a[i],
+			sizeof(outbuf1) - outbytesleft, outbuf1);
 	yaz_iconv_close(cd);
     }
 }
@@ -268,8 +306,8 @@ int main (int argc, char **argv)
     dconvert(1, "UCS4");
     dconvert(1, "UCS4LE");
     dconvert(0, "CP865");
-    marc8_tst_a();
-    marc8_tst_b();
-    marc8_tst_c();
+    tst_marc8_to_iso_8859_1();
+    tst_marc8_to_ucs4b();
+    tst_ucs4b_to_utf8();
     exit (0);
 }
