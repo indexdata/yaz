@@ -21,6 +21,15 @@ xmalloc trace fix for 64-bit systems such as DEC alpha.
 
 Solaris 2.6 compile fix.
 
+New function, cql_strerror() translates SRW error codes, as returned
+by cql_transform_error(), into human-readable English strings.  Used
+in yaz-client diagnostics when appropriate.
+
+New CQL2RPN query-type for the command-line yaz-client, parses CQL and
+converts it into a type-1 query which is sent to the server.  This
+makes CQL available for use with all Z-servers, as opposed to the tiny
+minority that can handle CQL queries themselves.
+
 --- 2.0.2 2003/04/28
 
 New Debian package layout similar to the Redhat Package layout.
