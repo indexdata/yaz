@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.187 2003-04-29 21:04:46 adam Exp $
+ * $Id: client.c,v 1.188 2003-04-29 21:13:08 adam Exp $
  */
 
 #include <stdio.h>
@@ -2875,6 +2875,7 @@ static void initialize(void)
 struct timeval tv_start, tv_end;
 #endif
 
+#if HAVE_XML2
 static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
 {
     int i;
@@ -2985,6 +2986,7 @@ static void http_response(Z_HTTP_Response *hres)
             close_session();
     }
 }
+#endif
 
 void wait_and_handle_response() 
 {
@@ -3100,10 +3102,12 @@ void wait_and_handle_response()
                 close_session ();
             }
         }
+#if HAVE_XML2
         else if (gdu->which == Z_GDU_HTTP_Response)
         {
             http_response(gdu->u.HTTP_Response);
         }
+#endif
         if (conn && !cs_more(conn))
             break;
     }
