@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Bug fix: in YAZ GFS schema was not returned in explainResponse.
+Bug fix: YAZ GFS did not return schema in explainResponse.
 
 --- 2.0.25 2004/09/30
 
