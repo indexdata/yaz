@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.2 2002-08-27 21:45:28 adam Exp $
+ * $Id: siconv.c,v 1.3 2002-08-28 19:34:36 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -410,11 +410,6 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
                 if (cd->my_errno == YAZ_ICONV_EINVAL)
                     return r;
                 cd->init_flag = 0;
-                if (cd->my_errno == YAZ_ICONV_EILSEQ)
-                {
-                    *inbytesleft++;
-                    (*inbuf)++;
-                }
                 return r;
             }
             *inbytesleft -= no_read;
