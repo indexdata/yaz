@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.15  1995-09-15 14:44:15  quinn
+ * Revision 1.16  1995-11-01 13:54:56  quinn
+ * Minor adjustments
+ *
+ * Revision 1.15  1995/09/15  14:44:15  quinn
  * *** empty log message ***
  *
  * Revision 1.14  1995/08/29  14:44:50  quinn
@@ -66,7 +69,7 @@
 
 #include <eventl.h>
 
-#include <dmalloc.h>
+#include <xmalloc.h>
 
 static IOCHAN iochans = 0;
 
@@ -79,7 +82,7 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
 {
     IOCHAN new;
 
-    if (!(new = malloc(sizeof(*new))))
+    if (!(new = xmalloc(sizeof(*new))))
     	return 0;
     new->destroyed = 0;
     new->fd = fd;
@@ -178,7 +181,7 @@ int event_loop()
 		}
 		if (nextp == p)
 		    nextp = p->next;
-		free(tmp);
+		xfree(tmp);
 	    }
 	}
     }

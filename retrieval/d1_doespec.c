@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.1  1995-11-01 11:56:07  quinn
+ * Revision 1.2  1995-11-01 13:54:45  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  11:56:07  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -14,7 +17,7 @@
 #include <assert.h>
 #include <log.h>
 #include <proto.h>
-#include "data1.h"
+#include <data1.h>
 
 static int match_children(data1_node *n, Z_ETagUnit **t, int num);
 

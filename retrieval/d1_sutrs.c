@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sutrs.c,v $
- * Revision 1.1  1995-11-01 11:56:09  quinn
+ * Revision 1.2  1995-11-01 13:54:49  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  11:56:09  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -14,7 +17,7 @@
 
 #include <wrbuf.h>
 
-#include "data1.h"
+#include <data1.h>
 
 #define NTOBUF_INDENT   2
 #define NTOBUF_MARGIN 75

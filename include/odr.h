@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.15  1995-10-18 16:12:36  quinn
+ * Revision 1.16  1995-11-01 13:54:36  quinn
+ * Minor adjustments
+ *
+ * Revision 1.15  1995/10/18  16:12:36  quinn
  * Better diagnostics.
  *
  * Revision 1.14  1995/09/29  17:12:04  quinn
@@ -356,6 +359,6 @@ void odr_release_mem(ODR_MEM p);
 #define ODR_MAXNAME 256
 
 #include <prt.h>
-#include <dmalloc.h>
+#include <xmalloc.h>
 
 #endif

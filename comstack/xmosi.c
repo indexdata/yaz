@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.7  1995-10-30 12:41:17  quinn
+ * Revision 1.8  1995-11-01 13:54:29  quinn
+ * Minor adjustments
+ *
+ * Revision 1.7  1995/10/30  12:41:17  quinn
  * Added hostname lookup for server.
  *
  * Revision 1.6  1995/09/29  17:12:00  quinn
@@ -154,9 +157,9 @@ COMSTACK mosi_type(int blocking, int protocol)
     mosi_state *state;
     int flags = O_RDWR;
 
-    if (!(r = malloc(sizeof(*r))))
+    if (!(r = xmalloc(sizeof(*r))))
     	return 0;
-    if (!(state = r->private = malloc(sizeof(*state))))
+    if (!(state = r->private = xmalloc(sizeof(*state))))
     	return 0;
 
     state->call = 0;
@@ -209,9 +212,9 @@ int hex2oct(char *hex, char *oct)
  */
 struct netbuf MDF *mosi_strtoaddr(const char *str)
 {
-    struct netbuf *ret = malloc(sizeof(struct netbuf));
-    struct sockaddr_in *add = malloc(sizeof(struct sockaddr_in));
-    struct t_mosiaddr *mosiaddr = malloc(sizeof(struct t_mosiaddr));
+    struct netbuf *ret = xmalloc(sizeof(struct netbuf));
+    struct sockaddr_in *add = xmalloc(sizeof(struct sockaddr_in));
+    struct t_mosiaddr *mosiaddr = xmalloc(sizeof(struct t_mosiaddr));
     struct hostent *hp;
     char *p, *b, buf[512], *nsap;
     short int port = 102;
@@ -388,10 +391,10 @@ COMSTACK mosi_accept(COMSTACK h)
     	h->cerrno = CSOUTSTATE;
 	return 0;
     }
-    if (!(new = malloc(sizeof(*new))))
+    if (!(new = xmalloc(sizeof(*new))))
     	return 0;
     *new = *h;
-    if (!(new->private = ns = malloc(sizeof(*ns))))
+    if (!(new->private = ns = xmalloc(sizeof(*ns))))
     	return 0;
     *ns = *st;
     if (!h->blocking)
@@ -423,11 +426,11 @@ int mosi_get(COMSTACK h, char **buf, int *bufsize)
     {
     	if (!*bufsize)
     	{
-	    if (!(*buf = malloc(*bufsize = CS_MOSI_BUFCHUNK)))
+	    if (!(*buf = xmalloc(*bufsize = CS_MOSI_BUFCHUNK)))
 	    	return -1;
 	}
 	else if (*bufsize - ct->hasread < CS_MOSI_BUFCHUNK)
-	    if (!(*buf = realloc(*buf, *bufsize *= 2)))
+	    if (!(*buf =xrealloc(*buf, *bufsize *= 2)))
 	    	return -1;
 
     	if ((res = u_rcv(h->iofile, *buf + ct->hasread, CS_MOSI_BUFCHUNK,
@@ -469,10 +472,10 @@ int mosi_put(COMSTACK h, char *buf, int size)
 
 int mosi_close(COMSTACK h)
 {
-    free(h->private);
+    xfree(h->private);
     if (h->iofile >= 0)
 	u_close(h->iofile);
-    free(h);
+   xfree(h);
     return 0;
 }    
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.7  1995-10-30 12:41:16  quinn
+ * Revision 1.8  1995-11-01 13:54:27  quinn
+ * Minor adjustments
+ *
+ * Revision 1.7  1995/10/30  12:41:16  quinn
  * Added hostname lookup for server.
  *
  * Revision 1.6  1995/09/29  17:12:00  quinn
@@ -129,7 +132,7 @@ static int initialized = 0;
 typedef struct tcpip_state
 {
     char *altbuf; /* alternate buffer for surplus data */
-    int altsize;  /* size as malloced */
+    int altsize;  /* size as xmalloced */
     int altlen;   /* length of data or 0 if none */
 
     int written;  /* -1 if we aren't writing */
@@ -168,9 +171,9 @@ COMSTACK tcpip_type(int blocking, int protocol)
     if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 #endif
         return 0;
-    if (!(p = malloc(sizeof(struct comstack))))
+    if (!(p = xmalloc(sizeof(struct comstack))))
         return 0;
-    if (!(state = p->private = malloc(sizeof(tcpip_state))))
+    if (!(state = p->private = xmalloc(sizeof(tcpip_state))))
         return 0;
 #ifdef WINDOWS
     if (!(p->blocking = blocking) && ioctlsocket(s, FIONBIO, &tru) < 0)
@@ -347,14 +350,14 @@ COMSTACK tcpip_accept(COMSTACK h)
         h->cerrno = CSOUTSTATE;
         return 0;
     }
-    if (!(new = malloc(sizeof(*new))))
+    if (!(new = xmalloc(sizeof(*new))))
     {
         h->cerrno = CSYSERR;
         return 0;
     }
     memcpy(new, h, sizeof(*h));
     new->iofile = h->newfd;
-    if (!(state = new->private = malloc(sizeof(tcpip_state))))
+    if (!(state = new->private = xmalloc(sizeof(tcpip_state))))
     {
         h->cerrno = CSYSERR;
         return 0;
@@ -404,11 +407,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     {
         if (!*bufsize)
         {
-            if (!(*buf = malloc(*bufsize = CS_TCPIP_BUFCHUNK)))
+            if (!(*buf = xmalloc(*bufsize = CS_TCPIP_BUFCHUNK)))
                 return -1;
         }
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
-            if (!(*buf = realloc(*buf, *bufsize *= 2)))
+            if (!(*buf =xrealloc(*buf, *bufsize *= 2)))
                 return -1;
         if ((res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0)) < 0)
 #ifdef WINDOWS
@@ -435,10 +438,10 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             req += CS_TCPIP_BUFCHUNK - rest;
         if (!sp->altbuf)
         {
-            if (!(sp->altbuf = malloc(sp->altsize = req)))
+            if (!(sp->altbuf = xmalloc(sp->altsize = req)))
                 return -1;
         } else if (sp->altsize < req)
-            if (!(sp->altbuf = realloc(sp->altbuf, sp->altsize = req)))
+            if (!(sp->altbuf =xrealloc(sp->altbuf, sp->altsize = req)))
                 return -1;
         TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
             (unsigned) sp->altbuf));
@@ -503,9 +506,9 @@ int tcpip_close(COMSTACK h)
     TRC(fprintf(stderr, "tcpip_close\n"));
     close(h->iofile);
     if (sp->altbuf)
-        free(sp->altbuf);
-    free(sp);
-    free(h);
+        xfree(sp->altbuf);
+    xfree(sp);
+    xfree(h);
     return 0;
 }
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_varset.c,v $
- * Revision 1.1  1995-11-01 11:56:09  quinn
+ * Revision 1.2  1995-11-01 13:54:50  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  11:56:09  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -15,10 +18,9 @@
 
 #include <readconf.h>
 #include <oid.h>
-#include <alexutil.h>
 #include <log.h>
 
-#include "data1.h"
+#include <data1.h>
 
 data1_vartype *data1_getvartypebyct(data1_varset *set, char *class, char *type)
 {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.7  1995-06-16 10:46:48  quinn
+ * Revision 1.8  1995-11-01 13:54:52  quinn
+ * Minor adjustments
+ *
+ * Revision 1.7  1995/06/16  10:46:48  quinn
  * *** empty log message ***
  *
  * Revision 1.6  1995/06/15  07:45:11  quinn
@@ -111,7 +114,6 @@
 #ifdef __linux__
 #include <linux/limits.h>
 #endif
-#include <dmalloc.h>  /* project memory debugging - delete if you don't have it */
 
 #ifdef TRACE_TRANSPORT
 #define TRC(x) x

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.3  1995-05-16 08:51:12  quinn
+ * Revision 1.4  1995-11-01 13:55:05  quinn
+ * Minor adjustments
+ *
+ * Revision 1.3  1995/05/16  08:51:12  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.2  1995/05/15  11:56:56  quinn
@@ -19,7 +22,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <marcdisp.h>
-#include <dmalloc.h>
+#include <xmalloc.h>
 
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -60,10 +63,10 @@ int main (int argc, char **argv)
 		 *argv, argv[1], strerror (errno));
         exit (1);
     }
-    buf = malloc (file_size);
+    buf = xmalloc (file_size);
     if (!buf)
     {
-        fprintf (stderr, "%s: cannot malloc: %s\n",
+        fprintf (stderr, "%s: cannot xmalloc: %s\n",
 		 *argv, strerror (errno));
         exit (1);
     }

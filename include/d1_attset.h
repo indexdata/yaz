@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 1995, Index Data.
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and
+ * its documentation, in whole or in part, for any purpose, is hereby granted,
+ * provided that:
+ *
+ * 1. This copyright and permission notice appear in all copies of the
+ * software and its documentation. Notices of copyright or attribution
+ * which appear at the beginning of any file must remain unchanged.
+ *
+ * 2. The names of Index Data or the individual authors may not be used to
+ * endorse or promote products derived from this software without specific
+ * prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED, OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ * IN NO EVENT SHALL INDEX DATA BE LIABLE FOR ANY SPECIAL, INCIDENTAL,
+ * INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER OR
+ * NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+ * OF THIS SOFTWARE.
+ *
+ */
+
+#ifndef D1_ATTSET_H
+#define D1_ATTSET_H
+
+#include <oid.h>
+
+/*
+ * This structure describes a attset, perhaps made up by inclusion
+ * (supersetting) of other attribute sets. When indexing and searching,
+ * we perform a normalisation, where we associate a given tag with
+ * the set that originally defined it, rather than the superset. This
+ * allows the most flexible access. Eg, the tags common to GILS and BIB-1
+ * should be searchable by both names.
+ */
+
+struct data1_attset;
+
+typedef struct data1_att
+{
+    struct data1_attset *parent;   /* attribute set */
+    char *name;                    /* symbolic name of this tag */
+    int value;                     /* tag value */
+    int local;                     /* local index value */
+    struct data1_att *next;
+} data1_att;
+
+typedef struct data1_attset
+{
+    char *name;          /* symbolic name */
+    oid_value reference;   /* external ID of attset */
+    int ordinal;           /* attset identification in index */
+    data1_att *atts;          /* attributes */
+    struct data1_attset *children;  /* included attset */
+    struct data1_attset *next;       /* sibling */
+} data1_attset;
+
+data1_att *data1_getattbyname(data1_attset *s, char *name);
+data1_attset *data1_read_attset(char *file);
+
+#endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.1  1995-11-01 11:56:08  quinn
+ * Revision 1.2  1995-11-01 13:54:48  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  11:56:08  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -19,7 +22,7 @@
 #include <log.h>
 #include <readconf.h>
 #include <xmalloc.h>
-#include "data1.h"
+#include <data1.h>
 
 #define ISO2709_RS 035
 #define ISO2709_FS 036

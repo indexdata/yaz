@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: wrbuf.c,v $
- * Revision 1.1  1995-10-06 08:51:25  quinn
+ * Revision 1.2  1995-11-01 13:55:06  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/10/06  08:51:25  quinn
  * Added Write-buffer.
  *
  *
@@ -22,7 +25,7 @@ WRBUF wrbuf_alloc(void)
 {
     WRBUF n;
 
-    if (!(n = malloc(sizeof(*n))))
+    if (!(n = xmalloc(sizeof(*n))))
 	abort();
     n->buf = 0;
     n->size = 0;
@@ -33,8 +36,8 @@ WRBUF wrbuf_alloc(void)
 void wrbuf_free(WRBUF b, int free_buf)
 {
     if (free_buf && b->buf)
-	free(b->buf);
-    free(b);
+	xfree(b->buf);
+    xfree(b);
 }
 
 void wrbuf_rewind(WRBUF b)
@@ -52,9 +55,9 @@ int wrbuf_grow(WRBUF b, int minsize)
     	togrow = b->size;
     if (togrow < minsize)
     	togrow = minsize;
-    if (b->size && !(b->buf = realloc(b->buf, b->size += togrow)))
+    if (b->size && !(b->buf =xrealloc(b->buf, b->size += togrow)))
     	abort();
-    else if (!b->size && !(b->buf = malloc(b->size = togrow)))
+    else if (!b->size && !(b->buf = xmalloc(b->size = togrow)))
     	abort();
     return 0;
 }

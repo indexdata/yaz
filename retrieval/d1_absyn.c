@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.1  1995-11-01 11:56:06  quinn
+ * Revision 1.2  1995-11-01 13:54:44  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  11:56:06  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -20,7 +23,7 @@
 #include <oid.h>
 #include <log.h>
 
-#include "data1.h"
+#include <data1.h>
 
 #define D1_MAX_NESTING  128
 #define DATA1_MAX_SYNTAXES 30 /* max no of syntaxes to handle in one session */

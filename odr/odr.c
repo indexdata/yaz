@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.18  1995-09-29 17:12:22  quinn
+ * Revision 1.19  1995-11-01 13:54:41  quinn
+ * Minor adjustments
+ *
+ * Revision 1.18  1995/09/29  17:12:22  quinn
  * Smallish
  *
  * Revision 1.17  1995/09/29  17:01:50  quinn
@@ -65,7 +68,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <dmalloc.h>
+#include <xmalloc.h>
 #include <odr.h>
 
 Odr_null *ODR_NULLVAL = "NULL";  /* the presence of a null value */
@@ -109,7 +112,7 @@ ODR odr_createmem(int direction)
 {
     struct odr *r;
 
-    if (!(r = malloc(sizeof(*r))))
+    if (!(r = xmalloc(sizeof(*r))))
         return 0;
     r->direction = direction;
     r->print = stderr;
@@ -143,10 +146,10 @@ void odr_destroy(ODR o)
 {
     odr_release_mem(o->mem);
     if (o->ecb.buf && o->ecb.can_grow)
-        free(o->ecb.buf);
+       xfree(o->ecb.buf);
     if (o->print != stderr)
         fclose(o->print);
-    free(o);
+   xfree(o);
 }
 
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)

@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.3  1995-09-29 17:12:00  quinn
+ * Revision 1.4  1995-11-01 13:54:22  quinn
+ * Minor adjustments
+ *
+ * Revision 1.3  1995/09/29  17:12:00  quinn
  * Smallish
  *
  * Revision 1.2  1995/09/27  15:02:44  quinn
@@ -65,13 +68,13 @@ struct ccl_token *ccl_tokenize (const char *command)
 	}
 	if (!first)
 	{
-	    first = last = malloc (sizeof (*first));
+	    first = last = xmalloc (sizeof (*first));
 	    assert (first);
 	    last->prev = NULL;
 	}
 	else
 	{
-	    last->next = malloc (sizeof(*first));
+	    last->next = xmalloc (sizeof(*first));
 	    assert (last->next);
 	    last->next->prev = last;
 	    last = last->next;

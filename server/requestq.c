@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: requestq.c,v $
- * Revision 1.1  1995-05-15 12:12:22  quinn
+ * Revision 1.2  1995-11-01 13:54:57  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/05/15  12:12:22  quinn
  * Request queue.
  *
  *
@@ -14,12 +17,12 @@
  * Simple queue management.
  *
  * We also use the request-freelist to store encoding buffers, rather than
- * freeing and malloc'ing them on each cycle.
+ * freeing and xmalloc'ing them on each cycle.
  */
 
 #include <stdlib.h>
 
-#include <dmalloc.h>
+#include <xmalloc.h>
 #include <session.h>
 
 static request *request_list = 0;  /* global freelist for requests */
@@ -66,7 +69,7 @@ request *request_get(void)
     	request_list = r->next;
     else
     {
-    	if (!(r = malloc(sizeof(*r))))
+    	if (!(r = xmalloc(sizeof(*r))))
 	    abort();
 	r->response = 0;
 	r->size_response = 0;

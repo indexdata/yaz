@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.52  1995-11-01 12:19:13  quinn
+ * Revision 1.53  1995-11-01 13:54:58  quinn
+ * Minor adjustments
+ *
+ * Revision 1.52  1995/11/01  12:19:13  quinn
  * Second attempt to fix same bug.
  *
  * Revision 1.50  1995/10/25  16:58:32  quinn
@@ -196,7 +199,7 @@
 #include <assert.h>
 #include <sys/time.h>
 
-#include <dmalloc.h>
+#include <xmalloc.h>
 #include <comstack.h>
 #include <eventl.h>
 #include <session.h>
@@ -235,7 +238,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
 
     if (!control_block)
     	control_block = statserv_getcontrol();
-    if (!(new = malloc(sizeof(*new))))
+    if (!(new = xmalloc(sizeof(*new))))
     	return 0;
     new->client_chan = channel;
     new->client_link = link;
@@ -301,12 +304,12 @@ void destroy_association(association *h)
     if (h->print)
 	odr_destroy(h->print);
     if (h->input_buffer)
-    	free(h->input_buffer);
+    xfree(h->input_buffer);
     if (h->backend)
     	bend_close(h->backend);
     while (request_deq(&h->incoming));
     while (request_deq(&h->outgoing));
-    free(h);
+   xfree(h);
 }
 
 static void do_close(association *a, int reason, char *message)
@@ -570,7 +573,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,
 	&req->size_response);
-    odr_setbuf(assoc->encode, 0, 0, 0); /* don't free if we abort later */
+    odr_setbuf(assoc->encode, 0, 0, 0); /* don'txfree if we abort later */
     odr_reset(assoc->encode);
     if (assoc->print && !z_APDU(assoc->print, &res, 0))
     {

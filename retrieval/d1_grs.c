@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.1  1995-11-01 11:56:07  quinn
+ * Revision 1.2  1995-11-01 13:54:46  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  11:56:07  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -16,7 +19,7 @@
 #include <proto.h>
 #include <log.h>
 
-#include "data1.h"
+#include <data1.h>
 
 #define D1_VARIANTARRAY 20 /* fixed max length on sup'd variant-list. Lazy me */
 

@@ -1,13 +1,13 @@
-# $Id: Makefile,v 1.1 1995-11-01 11:56:06 quinn Exp $
+# $Id: Makefile,v 1.2 1995-11-01 13:54:43 quinn Exp $
 
 SHELL=/bin/sh
 RANLIB=ranlib
 INCLUDE=-I../include -I.
 CFLAGS=-g -Wall -pedantic -ansi
 DEFS=$(INCLUDE)
-LIB=../lib/data1.a
-PO = d1_read.o d1_attset.o d1_tagset.o d1_absyn.o d1_grs.o d1_grs_key.o \
-	attribute.o d1_matchstr.o d1_sutrs.o d1_varset.o d1_espec.o \
+LIB=../lib/libret.a
+PO = d1_read.o d1_attset.o d1_tagset.o d1_absyn.o d1_grs.o \
+	d1_matchstr.o d1_sutrs.o d1_varset.o d1_espec.o \
 	d1_doespec.o d1_map.o d1_marc.o
 CPP=$(CC) -E
 

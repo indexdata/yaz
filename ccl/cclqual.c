@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.3  1995-09-29 17:12:00  quinn
+ * Revision 1.4  1995-11-01 13:54:21  quinn
+ * Minor adjustments
+ *
+ * Revision 1.3  1995/09/29  17:12:00  quinn
  * Smallish
  *
  * Revision 1.2  1995/09/27  15:02:44  quinn
@@ -52,13 +55,13 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
             break;
     if (!q)
     {
-        struct ccl_qualifier *new_qual = malloc (sizeof(*new_qual));
+        struct ccl_qualifier *new_qual = xmalloc (sizeof(*new_qual));
         assert (new_qual);
         
         new_qual->next = b->list;
         b->list = new_qual;
         
-        new_qual->name = malloc (strlen(name)+1);
+        new_qual->name = xmalloc (strlen(name)+1);
         assert (new_qual->name);
         strcpy (new_qual->name, name);
         attrp = &new_qual->attr_list;
@@ -73,7 +76,7 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
     {
         struct ccl_rpn_attr *attr;
 
-        attr = malloc (sizeof(*attr));
+        attr = xmalloc (sizeof(*attr));
         assert (attr);
         attr->type = *pairs++;
         attr->value = *pairs++;
@@ -85,7 +88,7 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
 
 CCL_bibset ccl_qual_mk (void)
 {
-    CCL_bibset b = malloc (sizeof(*b));
+    CCL_bibset b = xmalloc (sizeof(*b));
     assert (b);
     b->list = NULL;     
     return b;

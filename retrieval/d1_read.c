@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.1  1995-11-01 11:56:09  quinn
+ * Revision 1.2  1995-11-01 13:54:48  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  11:56:09  quinn
  * Added Retrieval (data management) functions en masse.
  *
  * Revision 1.14  1995/10/30  12:40:55  quinn
@@ -58,7 +61,7 @@
 
 #include <xmalloc.h>
 #include <log.h>
-#include "data1.h"
+#include <data1.h>
 
 static data1_node *freelist = 0;
 
@@ -414,7 +417,7 @@ data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd)
 	abort();
     for (;;)
     {
-	if (rd + 4096 > size && !(buf = realloc(buf, size *= 2)))
+	if (rd + 4096 > size && !(buf =xrealloc(buf, size *= 2)))
 	    abort();
 	if ((res = (*rf)(fd, buf + rd, 4096)) <= 0)
 	{

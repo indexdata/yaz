@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.25 1995-10-06 08:51:13 quinn Exp $
+# $Id: Makefile,v 1.26 1995-11-01 13:54:12 quinn Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 ODEFS=-DUSE_XTIMOSI
@@ -13,7 +13,7 @@ CDEFS=$(ODEFS)
 #CC=
 SHELL=/bin/sh
 MAKE=make
-SUBDIR=util odr asn $(RFC1006) ccl comstack client server makelib
+SUBDIR=util odr asn $(RFC1006) ccl comstack retrieval client server makelib
 # Add external libraries to the ELIBS macro
 ELIBS=
 CONTROL=RANLIB="ranlib" ELIBS=$(ELIBS)

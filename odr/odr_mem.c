@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.10  1995-10-25 16:58:19  quinn
+ * Revision 1.11  1995-11-01 13:54:43  quinn
+ * Minor adjustments
+ *
+ * Revision 1.10  1995/10/25  16:58:19  quinn
  * Stupid bug in odr_malloc
  *
  * Revision 1.9  1995/10/13  16:08:08  quinn
@@ -40,7 +43,7 @@
 
 #include <stdlib.h>
 #include <odr.h>
-#include <dmalloc.h>
+#include <xmalloc.h>
 
 /* ------------------------ NIBBLE MEMORY ---------------------- */
 
@@ -84,9 +87,9 @@ static odr_memblock *get_block(int size)
 
 	if (get < size)
 	    get = size;
-	if (!(r = malloc(sizeof(*r))))
+	if (!(r = xmalloc(sizeof(*r))))
 	    abort();
-	if (!(r->buf = malloc(r->size = get)))
+	if (!(r->buf = xmalloc(r->size = get)))
 	    abort();
     }
     r->top = 0;
@@ -127,7 +130,7 @@ void *odr_malloc(ODR o, int size)
 
     if (!o)
     {
-	if (!(r = malloc(size)))
+	if (!(r = xmalloc(size)))
 	    abort();
 	return r;
     }
@@ -169,9 +172,9 @@ int odr_grow_block(odr_ecblock *b, int min_bytes)
     	togrow = b->size;
     if (togrow < min_bytes)
     	togrow = min_bytes;
-    if (b->size && !(b->buf = realloc(b->buf, b->size += togrow)))
+    if (b->size && !(b->buf =xrealloc(b->buf, b->size += togrow)))
     	abort();
-    else if (!b->size && !(b->buf = malloc(b->size = togrow)))
+    else if (!b->size && !(b->buf = xmalloc(b->size = togrow)))
     	abort();
 #ifdef ODR_DEBUG
     fprintf(stderr, "New size for encode_buffer: %d\n", b->size);

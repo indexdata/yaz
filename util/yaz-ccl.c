@@ -15,13 +15,13 @@ static Z_AttributesPlusTerm *ccl_rpn_term (struct ccl_rpn_node *p)
     Odr_oct *term_octet;
     Z_Term *term;
 
-    zapt = malloc (sizeof(*zapt));
+    zapt = xmalloc (sizeof(*zapt));
     assert (zapt);
 
-    term_octet = malloc (sizeof(*term_octet));
+    term_octet = xmalloc (sizeof(*term_octet));
     assert (term_octet);
 
-    term = malloc(sizeof(*term));
+    term = xmalloc(sizeof(*term));
     assert(term);
 
     for (attr = p->u.t.attr_list; attr; attr = attr->next)
@@ -30,11 +30,11 @@ static Z_AttributesPlusTerm *ccl_rpn_term (struct ccl_rpn_node *p)
     if (num)
     {
         int i = 0;
-        zapt->attributeList = malloc (num*sizeof(*zapt->attributeList));
+        zapt->attributeList = xmalloc (num*sizeof(*zapt->attributeList));
         assert (zapt->attributeList);
         for (attr = p->u.t.attr_list; attr; attr = attr->next, i++)
         {
-            zapt->attributeList[i] = malloc (sizeof(**zapt->attributeList));
+            zapt->attributeList[i] = xmalloc (sizeof(**zapt->attributeList));
             assert (zapt->attributeList[i]);
             zapt->attributeList[i]->attributeType =
                 &attr->type;
@@ -63,7 +63,7 @@ static Z_Operand *ccl_rpn_simple (struct ccl_rpn_node *p)
 {
     Z_Operand *zo;
 
-    zo = malloc (sizeof(*zo));
+    zo = xmalloc (sizeof(*zo));
     assert (zo);
 
     switch (p->kind)
@@ -87,9 +87,9 @@ static Z_Complex *ccl_rpn_complex (struct ccl_rpn_node *p)
     Z_Complex *zc;
     Z_Operator *zo;
 
-    zc = malloc (sizeof(*zc));
+    zc = xmalloc (sizeof(*zc));
     assert (zc);
-    zo = malloc (sizeof(*zo));
+    zo = xmalloc (sizeof(*zo));
     assert (zo);
 
     zc->operator = zo;
@@ -119,7 +119,7 @@ static Z_RPNStructure *ccl_rpn_structure (struct ccl_rpn_node *p)
 {
     Z_RPNStructure *zs;
 
-    zs = malloc (sizeof(*zs));
+    zs = xmalloc (sizeof(*zs));
     assert (zs);
     switch (p->kind)
     {
@@ -145,7 +145,7 @@ Z_RPNQuery *ccl_rpn_query (struct ccl_rpn_node *p)
 {
     Z_RPNQuery *zq;
 
-    zq = malloc (sizeof(*zq));
+    zq = xmalloc (sizeof(*zq));
     assert (zq);
     zq->attributeSetId = NULL;
     zq->RPNStructure = ccl_rpn_structure (p);

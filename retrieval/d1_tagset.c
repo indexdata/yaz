@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.1  1995-11-01 11:56:09  quinn
+ * Revision 1.2  1995-11-01 13:54:49  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  11:56:09  quinn
  * Added Retrieval (data management) functions en masse.
  *
  *
@@ -18,7 +21,7 @@
 #include <xmalloc.h>
 #include <log.h>
 
-#include "data1.h"
+#include <data1.h>
 
 /*
  * We'll probably want to add some sort of hashed index to these lookup-

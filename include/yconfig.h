@@ -1,7 +1,7 @@
 #ifndef YCONFIG_H
 #define YCONFIG_H
 
-#include <dmalloc.h>
+#include <xmalloc.h>
 
 #ifdef WINDOWS
 #define MDF

@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.3  1995-09-29 17:11:59  quinn
+ * Revision 1.4  1995-11-01 13:54:20  quinn
+ * Minor adjustments
+ *
+ * Revision 1.3  1995/09/29  17:11:59  quinn
  * Smallish
  *
  * Revision 1.2  1995/09/27  15:02:44  quinn
@@ -96,7 +99,7 @@ static void strxcat (char *n, const char *src, int len)
 
 static char *copy_token_name (struct ccl_token *tp)
 {
-    char *str = malloc (tp->len + 1);
+    char *str = xmalloc (tp->len + 1);
     assert (str);
     memcpy (str, tp->name, tp->len);
     str[tp->len] = '\0';
@@ -106,7 +109,7 @@ static char *copy_token_name (struct ccl_token *tp)
 static struct ccl_rpn_node *mk_node (enum rpn_node_kind kind)
 {
     struct ccl_rpn_node *p;
-    p = malloc (sizeof(*p));
+    p = xmalloc (sizeof(*p));
     assert (p);
     p->kind = kind;
     return p;
@@ -126,22 +129,22 @@ void ccl_rpn_delete (struct ccl_rpn_node *rpn)
         ccl_rpn_delete (rpn->u.p[1]);
         break;
     case CCL_RPN_TERM:
-        free (rpn->u.t.term);
+        xfree (rpn->u.t.term);
         for (attr = rpn->u.t.attr_list; attr; attr = attr1)
         {
             attr1 = attr->next;
-            free (attr);
+            xfree (attr);
         }
         break;
     case CCL_RPN_SET:
-        free (rpn->u.setname);
+        xfree (rpn->u.setname);
         break;
     case CCL_RPN_PROX:
         ccl_rpn_delete (rpn->u.p[0]);
         ccl_rpn_delete (rpn->u.p[1]);
         break;
     }
-    free (rpn);
+    xfree (rpn);
 }
 
 static struct ccl_rpn_node *find_spec (struct ccl_rpn_attr **qa);
@@ -151,7 +154,7 @@ static void add_attr (struct ccl_rpn_node *p, int type, int value)
 {
     struct ccl_rpn_attr *n;
 
-    n = malloc (sizeof(*n));
+    n = xmalloc (sizeof(*n));
     assert (n);
     n->type = type;
     n->value = value;
@@ -192,7 +195,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
 	lookahead = lookahead->next;
     }
     p = mk_node (CCL_RPN_TERM);
-    p->u.t.term = malloc (len);
+    p->u.t.term = xmalloc (len);
     assert (p->u.t.term);
     p->u.t.attr_list = NULL;
     p->u.t.term[0] = '\0';
@@ -241,7 +244,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
         {
             ccl_error = CCL_ERR_TRUNC_NOT_BOTH;
             if (qa)
-                free (qa);
+                xfree (qa);
             ccl_rpn_delete (p);
             return NULL;
         }
@@ -253,7 +256,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
         {
             ccl_error = CCL_ERR_TRUNC_NOT_RIGHT;
             if (qa)
-                free (qa);
+                xfree (qa);
             ccl_rpn_delete (p);
             return NULL;
         }
@@ -265,7 +268,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
         {
             ccl_error = CCL_ERR_TRUNC_NOT_LEFT;
             if (qa)
-                free (qa);
+                xfree (qa);
             ccl_rpn_delete (p);
             return NULL;
         }
@@ -295,7 +298,7 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
     }
     for (lookahead = look_token; lookahead != la; lookahead=lookahead->next)
         no++;
-    ap = malloc (no * sizeof(*ap));
+    ap = xmalloc (no * sizeof(*ap));
     assert (ap);
     for (i=0; look_token != la; i++)
     {
@@ -303,7 +306,7 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
         if (!ap[i])
         {
             ccl_error = CCL_ERR_UNKNOWN_QUAL;
-            free (ap);
+            xfree (ap);
             return NULL;
         }
         ADVANCE;
@@ -319,7 +322,7 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
         if (KIND != CCL_TOK_EQ)
         {
             ccl_error = CCL_ERR_EQ_EXPECTED;
-            free (ap);
+            xfree (ap);
             return NULL;
         }
         ADVANCE;
@@ -328,21 +331,21 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
             ADVANCE;
             if (!(p = find_spec (ap)))
             {
-                free (ap);
+                xfree (ap);
                 return NULL;
             }
             if (KIND != CCL_TOK_RP)
             {
                 ccl_error = CCL_ERR_RP_EXPECTED;
                 ccl_rpn_delete (p);
-                free (ap);
+                xfree (ap);
                 return NULL;
             }
             ADVANCE;
         }
         else
             p = search_terms (ap);
-        free (ap);
+        xfree (ap);
         return p;
     }
     rel = 0;
@@ -388,20 +391,20 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
                     add_attr (p1, CCL_BIB1_REL, 4);
                     p->u.p[1] = p2;
                     add_attr (p2, CCL_BIB1_REL, 2);
-                    free (ap);
+                    xfree (ap);
                     return p;
                 }
                 else                       /* = term -    */
                 {
                     add_attr (p1, CCL_BIB1_REL, 4);
-                    free (ap);
+                    xfree (ap);
                     return p1;
                 }
             }
             else
             {
                 add_attr (p1, CCL_BIB1_REL, rel);
-                free (ap);
+                xfree (ap);
                 return p1;
             }
         }
@@ -410,12 +413,12 @@ static struct ccl_rpn_node *qualifiers (struct ccl_token *la,
             ADVANCE;
             p = search_term (ap);
             add_attr (p, CCL_BIB1_REL, 2);
-            free (ap);
+            xfree (ap);
             return p;
         }
         ccl_error = CCL_ERR_TERM_EXPECTED;
     }
-    free (ap);
+    xfree (ap);
     return NULL;
 }
 

@@ -1,10 +1,33 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
- * Sebastian Hammer, Adam Dickmeiss
+ * Copyright (c) 1995, Index Data.
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and
+ * its documentation, in whole or in part, for any purpose, is hereby granted,
+ * provided that:
+ *
+ * 1. This copyright and permission notice appear in all copies of the
+ * software and its documentation. Notices of copyright or attribution
+ * which appear at the beginning of any file must remain unchanged.
+ *
+ * 2. The names of Index Data or the individual authors may not be used to
+ * endorse or promote products derived from this software without specific
+ * prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED, OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ * IN NO EVENT SHALL INDEX DATA BE LIABLE FOR ANY SPECIAL, INCIDENTAL,
+ * INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER OR
+ * NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+ * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.1  1995-11-01 13:07:18  quinn
+ * Revision 1.2  1995-11-01 13:54:35  quinn
+ * Minor adjustments
+ *
+ * Revision 1.1  1995/11/01  13:07:18  quinn
  * Data1 module now lives in YAZ.
  *
  * Revision 1.13  1995/10/25  16:00:49  quinn
@@ -58,7 +81,7 @@
 #include <proto.h>
 
 #include <d1_attset.h>
-#include "d1_map.h"
+#include <d1_map.h>
 
 #define DATA1_MAX_SYMBOL 31
 

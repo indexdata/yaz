@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.29  1995-10-30 12:41:29  quinn
+ * Revision 1.30  1995-11-01 13:54:59  quinn
+ * Minor adjustments
+ *
+ * Revision 1.29  1995/10/30  12:41:29  quinn
  * Added hostname lookup for server.
  *
  * Revision 1.28  1995/09/29  17:12:30  quinn
@@ -119,7 +122,6 @@
 #ifdef USE_XTIMOSI
 #include <xmosi.h>
 #endif
-#include <dmalloc.h>
 #include <log.h>
 #include <statserv.h>
 

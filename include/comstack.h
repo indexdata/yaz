@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.12  1995-10-30 12:41:27  quinn
+ * Revision 1.13  1995-11-01 13:54:33  quinn
+ * Minor adjustments
+ *
+ * Revision 1.12  1995/10/30  12:41:27  quinn
  * Added hostname lookup for server.
  *
  * Revision 1.11  1995/09/29  17:12:01  quinn
@@ -104,7 +107,7 @@
 
 #include <yconfig.h>
 #include <oid.h>
-#include <dmalloc.h>
+#include <xmalloc.h>
 
 #define COMSTACK_DEFAULT_TIMEOUT -1  /* not used yet */
 
