@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.51 2002-08-28 07:54:11 adam Exp $
+ * $Id: d1_read.c,v 1.52 2002-09-24 07:58:59 adam Exp $
  */
 
 #include <assert.h>
@@ -165,13 +165,22 @@ void data1_set_root(data1_handle dh, data1_node *res,
 }
 
 data1_node *data1_mk_preprocess (data1_handle dh, NMEM nmem,
-                                 const char *target, const char **attr,
-                                 data1_node *at)
+                                 const char *target,
+                                 const char **attr, data1_node *at)
+{
+    return data1_mk_preprocess_n (dh, nmem, target, strlen(target),
+                                  attr, at);
+}
+
+data1_node *data1_mk_preprocess_n (data1_handle dh, NMEM nmem,
+                                   const char *target, size_t len,
+                                   const char **attr, data1_node *at)
 {
     data1_xattr **p;
     data1_node *res = data1_mk_node2 (dh, nmem, DATA1N_preprocess, at);
-    res->u.preprocess.target = data1_insert_string (dh, res, nmem, target);
-
+    res->u.preprocess.target = data1_insert_string_n (dh, res, nmem,
+                                                      target, len);
+    
     p = &res->u.preprocess.attributes;
     while (attr && *attr)
     {
@@ -326,7 +335,7 @@ char *data1_insert_string_n (data1_handle dh, data1_node *res,
 {
     char *b;
     if (len >= DATA1_LOCALDATA)
-        b = nmem_malloc (m, len+1);
+        b = (char *) nmem_malloc (m, len+1);
     else
         b = res->lbuf;
     memcpy (b, str, len);
@@ -629,13 +638,63 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		c = ampr (get_byte, fh, &amp);
 	    }
 	    else if (amp == 0 && c == '!')
-                /* tags/comments that we don't deal with yet */
 	    {
-		while (amp || (c && c != '>'))
-		    c = ampr (get_byte, fh, &amp);
-		if (c)
-		    c = ampr (get_byte, fh, &amp);
-		continue;
+                int c0, amp0;
+              
+                wrbuf_rewind(wrbuf);
+                
+                c0 = ampr (get_byte, fh, &amp0);
+                if (amp0 == 0 && c0 == '\0')
+                    break;
+                c = ampr (get_byte, fh, &amp);
+                
+                if (amp0 == 0 && c0 == '-' && amp == 0 && c == '-')
+                {
+                    /* COMMENT: <!-- ... --> */
+                    int no_dash = 0;
+                    
+                    c = ampr (get_byte, fh, &amp);
+                    while (amp || c)
+                    {
+                        if (amp == 0 && c == '-')
+                            no_dash++;
+                        else if (amp == 0 && c == '>' && no_dash >= 2)
+                        {
+                            if (level > 0)
+                                d1_stack[level] = 
+                                    data1_mk_comment_n (
+                                        dh, m,
+                                        wrbuf_buf(wrbuf), wrbuf_len(wrbuf)-2,
+                                        d1_stack[level-1]);
+                            c = ampr (get_byte, fh, &amp); /* skip > */
+                            break;
+                        }
+                        else
+                            no_dash = 0;
+                        wrbuf_putc (wrbuf, c);
+                        c = ampr (get_byte, fh, &amp);
+                    }
+                    continue;
+                }
+                else
+                {   /* DIRECTIVE: <! .. > */
+	
+		    int blevel = 0;
+                    while (amp || c)
+                    {
+                        if (amp == 0 && c == '>' && blevel == 0)
+                        {
+                            c = ampr (get_byte, fh, &amp);
+			    break;
+                        }
+			if (amp == 0 && c == '[')
+			    blevel++;
+			if (amp == 0 && c == ']' && blevel > 0)
+			    blevel--;
+                        c = ampr (get_byte, fh, &amp);
+                    }
+                    continue;
+                }
 	    }
 	    while (amp || (c && c != '>' && c != '/' && !d1_isspace(c)))
 	    {

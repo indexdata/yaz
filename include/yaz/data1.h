@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.16 2002-08-17 07:56:59 adam Exp $
+ * $Id: data1.h,v 1.17 2002-09-24 07:58:59 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -376,6 +376,11 @@ YAZ_EXPORT data1_node *data1_mk_comment_n (data1_handle dh, NMEM mem,
 
 YAZ_EXPORT data1_node *data1_mk_comment (data1_handle dh, NMEM mem,
                                          const char *buf, data1_node *parent);
+
+YAZ_EXPORT data1_node *data1_mk_preprocess_n (data1_handle dh, NMEM nmem,
+                                              const char *target, size_t len,
+                                              const char **attr,
+                                              data1_node *at);
 
 YAZ_EXPORT data1_node *data1_mk_preprocess (data1_handle dh, NMEM nmem,
                                             const char *target,
