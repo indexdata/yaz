@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.2 1998-08-25 16:19:37 adam Exp $
+# $Id: Makefile.in,v 1.3 1998-09-02 12:41:48 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
@@ -29,7 +29,7 @@ CC=@CC@
 CPP=@CPP@
 SHELL=/bin/sh
 MAKE=make
-SUBDIR=$(MOD) util odr $(RFC1006) ccl comstack retrieval client server ztest makelib
+SUBDIR=$(MOD) util odr $(RFC1006) ccl comstack retrieval client server ztest lib
 # Add external libraries to the LIBS macro
 LIBS=@LIBS@
 

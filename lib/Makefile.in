@@ -1,0 +1,27 @@
+# Copyright (C) 1994-1998, Index Data 
+# All rights reserved.
+# Sebastian Hammer, Adam Dickmeiss
+# $Id: Makefile.in,v 1.1 1998-09-02 12:41:52 adam Exp $
+
+SHELL=/bin/sh
+
+RANLIB=@RANLIB@
+
+MAKE=make
+YAZLIBS=libodr.a libasn.a libcomstack.a \
+	libserver.a libutil.a libret.a
+LIB=libyaz.a
+
+all: $(LIB)
+
+$(LIB): $(LIBS)
+	rm -f $(LIB)
+	for i in $(YAZLIBS); do echo $$i; ar x $$i; rm -f __*; done
+	ar qc $(LIB) *.o
+	rm -f *.o
+	$(RANLIB) $(LIB)
+
+clean:
+	-rm -f *.o $(LIB)
+
+depend:

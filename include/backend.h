@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.21  1998-07-20 12:38:41  adam
+ * Revision 1.22  1998-09-02 12:41:51  adam
+ * Added decode stream in bend search structures.
+ *
+ * Revision 1.21  1998/07/20 12:38:41  adam
  * Implemented delete result set service to server API.
  *
  * Revision 1.20  1998/05/27 16:57:06  adam
@@ -68,6 +71,7 @@ typedef struct
     char **basenames;          /* databases to search */
     Z_Query *query;            /* query structure */
     ODR stream;                /* encoding stream */
+    ODR decode;                /* decoding stream */
 } bend_searchrequest;
 
 /* old search request output */
@@ -86,6 +90,7 @@ typedef struct {
     char **basenames;          /* databases to search */
     Z_Query *query;            /* query structure */
     ODR stream;                /* encode stream */
+    ODR decode;                /* decode stream */
 
     bend_request request;
     bend_association association;

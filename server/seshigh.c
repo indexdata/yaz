@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.79  1998-08-19 16:10:08  adam
+ * Revision 1.80  1998-09-02 12:41:53  adam
+ * Added decode stream in bend search structures.
+ *
+ * Revision 1.79  1998/08/19 16:10:08  adam
  * Changed som member names of DeleteResultSetRequest/Response.
  *
  * Revision 1.78  1998/08/03 10:23:55  adam
@@ -1189,6 +1192,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrr->basenames = req->databaseNames;
 	bsrr->query = req->query;
 	bsrr->stream = assoc->encode;
+	bsrr->decode = assoc->decode;
 	bsrr->errcode = 0;
 	bsrr->hits = 0;
 	bsrr->errstring = NULL;
@@ -1207,6 +1211,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrq.basenames = req->databaseNames;
 	bsrq.query = req->query;
 	bsrq.stream = assoc->encode;
+	bsrq.decode = assoc->decode;
 	if (!(bsrt = bend_search(assoc->backend, &bsrq, fd)))
 	    return 0;
 	bsrr->hits = bsrt->hits;

@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1998
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.1 1998-08-21 14:13:24 adam Exp $
+dnl $Id: configure.in,v 1.2 1998-09-02 12:41:50 adam Exp $
 AC_INIT(include/yaz-version.h)
 dnl ------ Substitutions
 AC_SUBST(ODEFS)
@@ -51,4 +51,4 @@ if test "$ac_cv_header_stdc" = "no"; then
 fi
 dnl
 dnl ------ Makefiles
-AC_OUTPUT(Makefile util/Makefile asn/Makefile odr/Makefile comstack/Makefile client/Makefile server/Makefile ztest/Makefile retrieval/Makefile ccl/Makefile makelib/Makefile rfc1006/Makefile)
+AC_OUTPUT(Makefile util/Makefile asn/Makefile odr/Makefile comstack/Makefile client/Makefile server/Makefile ztest/Makefile retrieval/Makefile ccl/Makefile lib/Makefile rfc1006/Makefile)
