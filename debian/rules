@@ -102,7 +102,7 @@ binary-arch: build install
 ifeq ($(YAZ_WITH_SSL),1)
 	dh_movefiles -p yaz-ssl usr/bin/*ssl usr/lib/libyazssl* 
 endif
-	dh_movefiles -p yaz-devel  usr/share/aclocal usr/lib/*.a usr/lib/*.la usr/lib/*.so usr/include 
+	dh_movefiles -p yaz-devel  usr/share/aclocal usr/lib/*.a usr/lib/*.la usr/lib/*.so usr/include usr/bin/yaz-config usr/bin/yaz-comp
 	dh_movefiles -p yaz-runtime usr/lib usr/share/yaz usr/bin
 	dh_installexamples -p yaz-devel
 
@@ -118,8 +118,9 @@ endif
 
 	dh_installdeb -p yaz-runtime
 	dh_installdeb -p yaz-devel
-	dh_installman -p yaz-runtime doc/yaz-client.1 doc/yaz-ztest.8 doc/yaz-config.1 doc/yaz.7 doc/zoomsh.1
-	dh_undocumented -p yaz-runtime yaz-comp.1
+	dh_installman -p yaz-devel doc/yaz-config.1
+	dh_undocumented -p yaz-devel yaz-comp.1
+	dh_installman -p yaz-runtime doc/yaz-client.1 doc/yaz-ztest.8 doc/yaz.7 doc/zoomsh.1
 	echo "libyaz 1 yaz-runtime" > debian/yaz-runtime/DEBIAN/shlibs
 	echo "libyazthread 1 yaz-runtime" >> debian/yaz-runtime/DEBIAN/shlibs
 	echo "libyazmalloc 1 yaz-runtime" >> debian/yaz-runtime/DEBIAN/shlibs
