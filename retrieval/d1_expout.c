@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.13  1998-06-05 08:58:48  adam
+ * Revision 1.14  1998-06-08 14:26:41  adam
+ * Fixed bug in f_queryTypeDetails.
+ *
+ * Revision 1.13  1998/06/05 08:58:48  adam
  * Fixed un-initialised var in f_rpnCapabilities.
  *
  * Revision 1.12  1998/05/18 13:07:04  adam
@@ -283,7 +286,7 @@ Z_RpnCapabilities *f_rpnCapabilities (ExpHandle *eh, data1_node *n)
     res->restrictionOperandSupported = eh->false_value;
     res->proximity = NULL;
 
-    for (c = n->child; n; c = c->next)
+    for (c = n->child; c; c = c->next)
     {
 	int i = 0;
 	switch (is_numeric_tag(eh, c))
@@ -330,7 +333,7 @@ Z_QueryTypeDetails *f_queryTypeDetails (ExpHandle *eh, data1_node *n)
     res->u.rpn = 0;
     for (c = n->child; c; c = c->next)
     {
-	switch (is_numeric_tag(eh, n))
+	switch (is_numeric_tag(eh, c))
 	{
 	case 519:
 	    res->which = Z_QueryTypeDetails_rpn;
