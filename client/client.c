@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.16  1995-08-15 12:00:04  quinn
+ * Revision 1.17  1995-08-17 12:45:02  quinn
+ * Fixed minor problems with GRS-1. Added support in c&s.
+ *
+ * Revision 1.16  1995/08/15  12:00:04  quinn
  * Updated External
  *
  * Revision 1.15  1995/06/22  09:28:03  quinn
@@ -267,9 +270,42 @@ int cmd_authentication(char *arg)
 
 /* SEARCH SERVICE ------------------------------ */
 
+void display_grs1(Z_GenericRecord *r, int level)
+{
+    int i;
+
+    if (!r)
+	return;
+    for (i = 0; i < r->num_elements; i++)
+    {
+	Z_TaggedElement *t;
+
+	printf("%*s", level * 4, "");
+	t = r->elements[i];
+	printf("(");
+	if (t->tagType)
+	    printf("%d,", *t->tagType);
+	else
+	    printf("?,");
+	if (t->tagValue->which == Z_StringOrNumeric_numeric)
+	    printf("%d) ", *t->tagValue->u.numeric);
+	else
+	    printf("%s) ", t->tagValue->u.string);
+	if (t->content->which == Z_ElementData_subtree)
+	{
+	    printf("\n");
+	    display_grs1(t->content->u.subtree, level+1);
+	}
+	else if (t->content->which == Z_ElementData_string)
+	    printf("%s\n", t->content->u.string);
+	else
+	    printf("??????\n");
+    }
+}
+
 void display_record(Z_DatabaseRecord *p)
 {
-    Z_External *r = (Odr_external*) p;
+    Z_External *r = (Z_External*) p;
     oident *ent = oid_getentbyoid(r->direct_reference);
 
     if (r->direct_reference)
@@ -287,12 +323,21 @@ void display_record(Z_DatabaseRecord *p)
 	marc_display ((char*)p->u.octet_aligned->buf, stdout);
     else if (ent->value == VAL_SUTRS)
     {
-	if (r->which != Z_External_SUTRS)
+	if (r->which != Z_External_sutrs)
 	{
 	    printf("Expecting single SUTRS type for SUTRS.\n");
 	    return;
 	}
 	printf("%.*s", r->u.sutrs->len, r->u.sutrs->buf);
+    }
+    else if (ent->value == VAL_GRS1)
+    {
+	if (r->which != Z_External_grs1)
+	{
+	    printf("Expecting single GRS type for GRS.\n");
+	    return;
+	}
+	display_grs1(r->u.grs1, 0);
     }
     else 
     {
@@ -724,9 +769,15 @@ int cmd_format(char *arg)
 	recordsyntax = VAL_DANMARC;
 	return 1;
     }
+    else if (!strcmp(arg, "grs1"))
+    {
+    	printf("Preferred format is GRS1\n");
+	recordsyntax = VAL_GRS1;
+	return 1;
+    }
     else
     {
-    	printf("Specify one of {sutrs,usmarc,danmarc}.\n");
+    	printf("Specify one of {sutrs,usmarc,danmarc,grs1}.\n");
 	return 0;
     }
 }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.43  1995-08-15 12:00:31  quinn
+ * Revision 1.44  1995-08-17 12:45:25  quinn
+ * Fixed minor problems with GRS-1. Added support in c&s.
+ *
+ * Revision 1.43  1995/08/15  12:00:31  quinn
  * Updated External
  *
  * Revision 1.42  1995/08/15  11:16:50  quinn
@@ -762,6 +765,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	freq.setname = setname;
 	freq.number = recno;
 	freq.format = format;
+	freq.stream = a->encode;
 	if (!(fres = bend_fetch(a->backend, &freq, 0)))
 	{
 	    *pres = Z_PRES_FAILURE;
@@ -826,50 +830,39 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    oid_getoidbyent(&recform));
 	thisext->indirect_reference = 0;
 	thisext->descriptor = 0;
-	if (fres->format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
+	if (fres->len < 0) /* Structured data */
+	{
+	    switch (fres->format)
+	    {
+		case VAL_SUTRS: thisext->which = Z_External_sutrs; break;
+		case VAL_GRS1: thisext->which = Z_External_grs1; break;
+		case VAL_EXPLAIN: thisext->which = Z_External_explainRecord;
+		    break;
+
+		default:
+		    logf(LOG_FATAL, "Unknown structured format from backend.");
+		    return 0;
+	    }
+
+	    /*
+	     * We cheat on the pointers here. Obviously, the record field
+	     * of the backend-fetch structure should have been a union for
+	     * correctness, but we're stuck with this for backwards
+	     * compatibility.
+	     */
+	    thisext->u.grs1 = (Z_GenericRecord*) fres->record;
+	}
+	else if (fres->format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
 	{
 	    Odr_oct *sutrs = odr_malloc(a->encode, sizeof(*sutrs));
 
-	    thisext->which = Z_External_SUTRS;
+	    thisext->which = Z_External_sutrs;
 	    thisext->u.sutrs = sutrs;
 	    sutrs->buf = odr_malloc(a->encode, fres->len);
 	    sutrs->len = sutrs->size = fres->len;
 	    memcpy(sutrs->buf, fres->record, fres->len);
-#if 0
-	    Odr_oct sutrs_asn;
-	    Odr_oct *sp = &sutrs_asn;
-	    Odr_any *single = odr_malloc(a->encode, sizeof(*single));
-	    char *buf, *remember;
-	    int len, s_remember;
-
-	    sutrs_asn.buf = (unsigned char*) fres->record;
-	    sutrs_asn.len = sutrs_asn.size = fres->len;
-	    /*
-	     * we borrow the encoding stream for preparing the buffer. This
-	     * is not the most elegant solution - a better way might have been
-	     * to reserve a different stream, or to devise a better system
-	     * for handling externals in general.
-	     */
-	    remember = odr_getbuf(a->encode, &len, &s_remember);
-	    buf = odr_malloc(a->encode, fres->len + 10); /* buf for encoding */
-	    odr_setbuf(a->encode, buf, fres->len + 10, 0); /* can_grow==0 */
-	    if (!z_SUTRS(a->encode, &sp, 0))
-	    {
-		logf(LOG_LOG, "ODR error encoding SUTRS: %s",
-		    odr_errlist[odr_geterror(a->encode)]);
-		return 0;
-	    }
-	    thisext->which = ODR_EXTERNAL_single;
-	    thisext->u.single_ASN1_type = single;
-	    single->buf = (unsigned char*)odr_getbuf(a->encode, &single->len,
-		&single->size);
-	    /* Now restore the encoding stream */
-	    odr_setbuf(a->encode, remember, s_remember, 1);
-	    logf(LOG_DEBUG, "   Format is SUTRS. len %d, encoded len %d",
-	    	fres->len, single->len);
-#endif
 	}
-	else /* octet-aligned record. Easy as pie */
+	else /* octet-aligned record. */
 	{
 	    thisext->which = Z_External_octet;
 	    if (!(thisext->u.octet_aligned = odr_malloc(a->encode,

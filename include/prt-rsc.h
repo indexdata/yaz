@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-rsc.h,v $
- * Revision 1.2  1995-06-02 09:49:50  quinn
+ * Revision 1.3  1995-08-17 12:45:17  quinn
+ * Fixed minor problems with GRS-1. Added support in c&s.
+ *
+ * Revision 1.2  1995/06/02  09:49:50  quinn
  * Add access control
  *
  * Revision 1.1  1995/06/01  11:24:52  quinn
@@ -69,6 +72,8 @@ typedef struct Z_ResourceReport1
     char *message;
 } Z_ResourceReport1;
 
+int z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt);
+
 /* -------------------- Resource-2 -------------------- */
 
 typedef struct Z_Estimate2
@@ -83,5 +88,7 @@ typedef struct Z_ResourceReport2
     Z_Estimate2 **estimates;             /* OPTIONAL */
     char *message;                       /* OPTIONAL */
 } Z_ResourceReport2;
+
+int z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt);
 
 #endif

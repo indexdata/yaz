@@ -6,7 +6,11 @@ Fixed bug in the frontend-server. The numberOfRecordsReturned field was
 handled incorrectly when records were requested in the searchResponse. This
 will only affect you if you use the frontend-server.
 
-Added Explain encoders/decoders to the service-level API. Strictly alfa.
+Added Explain encoders/decoders to the service-level API. Untested.
+
+Added GRS-1 encoders/decoders to the service-level API. Lightly tested.
+Test-client will ask for and ODR pretty-print GRS1. Ztest will return
+dummy records.
 
 Moved pretty-printing of structure-wrappers ({..}) from odr_seq.c to
 odr_cons.c, which causes a more correct output.

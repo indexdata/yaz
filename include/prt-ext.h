@@ -42,8 +42,12 @@ struct Z_External
 	Z_External_arbitrary,
 
 	/* Specific types */
-	Z_External_SUTRS,
-	Z_External_explainRecord
+	Z_External_sutrs,
+	Z_External_explainRecord,
+	Z_External_resourceReport1,
+	Z_External_resourceReport2,
+	Z_External_promptObject1,
+	Z_External_grs1
     } which;
     union
     {
@@ -55,6 +59,10 @@ struct Z_External
 	/* Specific types */
 	Z_SUTRS *sutrs;
 	Z_ExplainRecord *explainRecord;
+	Z_ResourceReport1 *resourceReport1;
+	Z_ResourceReport2 *resourceReport2;
+	Z_PromptObject1 *promptObject1;
+	Z_GenericRecord *grs1;
     } u;
 };
 

@@ -5,8 +5,11 @@
 char *odr_indent(ODR o)
 {
     static char buf[512];
+    int i = o->indent;
 
     memset(buf, ' ', 512);
+    if (i >= 128)
+	i = 127;
     buf[o->indent * 4] = 0;
     return buf;
 }

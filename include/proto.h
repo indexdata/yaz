@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.21  1995-08-15 12:00:11  quinn
+ * Revision 1.22  1995-08-17 12:45:14  quinn
+ * Fixed minor problems with GRS-1. Added support in c&s.
+ *
+ * Revision 1.21  1995/08/15  12:00:11  quinn
  * Updated External
  *
  * Revision 1.20  1995/08/10  08:54:35  quinn
@@ -1092,6 +1095,8 @@ Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 #include <prt-rsc.h>
 #include <prt-acc.h>
 #include <prt-exp.h>
+#include <prt-grs.h>
+
 #include <prt-ext.h>
 
 #endif

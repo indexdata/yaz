@@ -70,12 +70,13 @@ typedef struct bend_fetchrequest
     char *setname;             /* set name */
     int number;                /* record number */
     oid_value format;          /* One of the CLASS_RECSYN members */
+    ODR stream;                /* encoding stream - memory source if required */
 } bend_fetchrequest;
 
 typedef struct bend_fetchresult
 {
     char *basename;            /* name of database that provided record */
-    int len;                   /* length of record */
+    int len;                   /* length of record or -1 if structured */
     char *record;              /* record */
     int last_in_set;           /* is it?  */
     oid_value format;          /* format */

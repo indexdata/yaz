@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-acc.h,v $
- * Revision 1.2  1995-08-15 12:00:13  quinn
+ * Revision 1.3  1995-08-17 12:45:16  quinn
+ * Fixed minor problems with GRS-1. Added support in c&s.
+ *
+ * Revision 1.2  1995/08/15  12:00:13  quinn
  * Updated External
  *
  * Revision 1.1  1995/06/02  09:49:49  quinn
@@ -145,3 +148,5 @@ typedef struct Z_PromptObject1
 	Z_Response1 *response;
     } u;
 } Z_PromptObject1;
+
+int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);

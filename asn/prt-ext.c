@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.1  1995-08-15 13:37:41  quinn
+ * Revision 1.2  1995-08-17 12:45:00  quinn
+ * Fixed minor problems with GRS-1. Added support in c&s.
+ *
+ * Revision 1.1  1995/08/15  13:37:41  quinn
  * Improved EXTERNAL
  *
  *
@@ -22,9 +25,16 @@ int z_External(ODR o, Z_External **p, int opt)
 	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_External_octet, odr_octetstring},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_External_arbitrary, odr_bitstring},
 
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_SUTRS, z_SUTRS},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_sutrs, z_SUTRS},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_explainRecord,
 	    z_ExplainRecord},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_resourceReport1,
+	    z_ResourceReport1},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_resourceReport2,
+	    z_ResourceReport2},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_promptObject1,
+	    z_PromptObject1},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_grs1, z_GenericRecord},
 	{-1, -1, -1, -1, 0}
     };
     /*
@@ -38,8 +48,12 @@ int z_External(ODR o, Z_External **p, int opt)
 	int what;          /* discriminator value for the external CHOICE */
     } tab[] =
     {
-    	{VAL_SUTRS, Z_External_SUTRS},
+    	{VAL_SUTRS, Z_External_sutrs},
 	{VAL_EXPLAIN, Z_External_explainRecord},
+	{VAL_RESOURCE1, Z_External_resourceReport1},
+	{VAL_RESOURCE2, Z_External_resourceReport2},
+	{VAL_PROMPT1, Z_External_promptObject1},
+	{VAL_GRS1, Z_External_grs1},
 	{VAL_NONE, 0}
     };
 
