@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.24  1997-09-29 13:18:59  adam
+ * Revision 1.25  1998-02-10 15:31:52  adam
+ * Implemented date and time structure. Changed the Update Extended
+ * Service.
+ *
+ * Revision 1.24  1997/09/29 13:18:59  adam
  * Added function, oid_ent_to_oid, to replace the function
  * oid_getoidbyent, which is not thread safe.
  *
@@ -199,7 +203,25 @@ typedef enum oid_value
     VAL_ESPEC1,
     VAL_SOIF,
     VAL_SEARCHRES1,
-    VAL_THESAURUS
+    VAL_THESAURUS,
+    VAL_CHARLANG,
+    VAL_USERINFO1,
+    VAL_MULTISRCH1,
+    VAL_MULTISRCH2,
+    VAL_DATETIME,
+    VAL_SQLRS,
+    VAL_PDF,
+    VAL_POSTSCRIPT,
+    VAL_HTML,
+    VAL_TIFF,
+    VAL_GIF,
+    VAL_JPEG,
+    VAL_PNG,
+    VAL_MPEG,
+    VAL_SGML,
+    VAL_TIFFB,
+    VAL_WAV,
+    VAL_UPDATEES
 } oid_value;
 
 typedef struct oident

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exd.c,v $
- * Revision 1.6  1998-01-05 09:04:57  adam
+ * Revision 1.7  1998-02-10 15:31:46  adam
+ * Implemented date and time structure. Changed the Update Extended
+ * Service.
+ *
+ * Revision 1.6  1998/01/05 09:04:57  adam
  * Fixed bugs in encoders/decoders - Not operator (!) missing.
  *
  * Revision 1.5  1997/04/30 08:52:02  quinn
@@ -283,8 +287,8 @@ int z_IUTaskPackageRecordStructure (ODR o, Z_IUTaskPackageRecordStructure **p,
     static Odr_arm arm[] = {
         {ODR_IMPLICIT, ODR_CONTEXT, 1, Z_IUTaskPackageRecordStructure_record,
          odr_external},
-        {ODR_EXPLICIT, ODR_CONTEXT, 2, Z_IUTaskPackageRecordStructure_diagnostic,
-         z_DiagRec},
+        {ODR_EXPLICIT, ODR_CONTEXT, 2, Z_IUTaskPackageRecordStructure_surrogateDiagnostics,
+         z_DiagRecs},
         {-1, -1, -1, -1, 0}
     };
     if (!odr_sequence_begin (o, p, sizeof(**p)))
@@ -297,6 +301,8 @@ int z_IUTaskPackageRecordStructure (ODR o, Z_IUTaskPackageRecordStructure **p,
             &(*p)->correlationInfo, ODR_CONTEXT, 2, 1) &&
         odr_implicit (o, odr_integer,
             &(*p)->recordStatus, ODR_CONTEXT, 3, 0) &&
+	odr_implicit (o, z_DiagRecs, 
+	    &(*p)->supplementalDiagnostics, ODR_CONTEXT, 4, 1) &&
         odr_sequence_end (o);
 }
 
@@ -313,6 +319,8 @@ int z_IUOriginPartToKeep (ODR o, Z_IUOriginPartToKeep **p, int opt)
             &(*p)->schema, ODR_CONTEXT, 3, 1) &&
         odr_implicit (o, z_InternationalString,
             &(*p)->elementSetName, ODR_CONTEXT, 4, 1) &&
+	odr_implicit (o, odr_external,
+	    &(*p)->actionQualifier, ODR_CONTEXT, 5, 1) &&
         odr_sequence_end (o);
 }
 

@@ -56,6 +56,7 @@ typedef struct Z_Occurrences
 
 typedef struct Z_SpecificTag
 {
+    Odr_oid *schemaId;                      /* OPTIONAL */
     int *tagType;                           /* OPTIONAL */
     Z_StringOrNumeric *tagValue;
     Z_Occurrences *occurrences;             /* OPTIONAL */

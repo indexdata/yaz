@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.40  1997-09-01 08:49:50  adam
+ * Revision 1.41  1998-02-10 15:31:52  adam
+ * Implemented date and time structure. Changed the Update Extended
+ * Service.
+ *
+ * Revision 1.40  1997/09/01 08:49:50  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -1361,6 +1365,7 @@ YAZ_EXPORT int z_Term(ODR o, Z_Term **p, int opt);
 YAZ_EXPORT int z_Specification(ODR o, Z_Specification **p, int opt);
 YAZ_EXPORT int z_Permissions(ODR o, Z_Permissions **p, int opt);
 YAZ_EXPORT int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
+YAZ_EXPORT int z_DiagRecs(ODR o, Z_DiagRecs **p, int opt);
 YAZ_EXPORT int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
 YAZ_EXPORT int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
@@ -1381,5 +1386,6 @@ YAZ_EXPORT int z_Query(ODR o, Z_Query **p, int opt);
 #include <prt-add.h>
 
 #include <prt-ext.h>
+#include <prt-dat.h>
 
 #endif

@@ -33,6 +33,7 @@
 #define PRT_EXT_H
 
 #include <yconfig.h>
+#include <prt-dat.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,6 +76,7 @@ struct Z_External
 #define Z_External_OPAC 14
 #define Z_External_searchResult1 15
 #define Z_External_update 16
+#define Z_External_dateTime 17
     union
     {
 	/* Generic types */
@@ -96,6 +98,7 @@ struct Z_External
 	Z_BriefBib *summary;
 	Z_SearchInfoReport *searchResult1;
 	Z_IUUpdate *update;
+	Z_DateTime *dateTime;
     } u;
 };
 

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.14  1998-01-05 09:04:57  adam
+ * Revision 1.15  1998-02-10 15:31:46  adam
+ * Implemented date and time structure. Changed the Update Extended
+ * Service.
+ *
+ * Revision 1.14  1998/01/05 09:04:57  adam
  * Fixed bugs in encoders/decoders - Not operator (!) missing.
  *
  * Revision 1.13  1997/05/14 06:53:22  adam
@@ -72,6 +76,7 @@ static Z_ext_typeent type_table[] =
     {VAL_OPAC, Z_External_OPAC, z_OPACRecord},
     {VAL_SEARCHRES1, Z_External_searchResult1, z_SearchInfoReport},
     {VAL_DBUPDATE, Z_External_update, z_IUUpdate},
+    {VAL_DATETIME, Z_External_dateTime, z_DateTime},
     {VAL_NONE, 0, 0}
 };
 
@@ -116,6 +121,7 @@ int z_External(ODR o, Z_External **p, int opt)
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_searchResult1,
 	    z_SearchInfoReport},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update, z_IUUpdate},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_dateTime, z_DateTime},
 	{-1, -1, -1, -1, 0}
     };
 

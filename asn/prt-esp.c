@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-esp.c,v $
- * Revision 1.1  1995-10-12 10:34:37  quinn
+ * Revision 1.2  1998-02-10 15:31:46  adam
+ * Implemented date and time structure. Changed the Update Extended
+ * Service.
+ *
+ * Revision 1.1  1995/10/12 10:34:37  quinn
  * Added Espec-1.
  *
  *
@@ -47,6 +51,7 @@ int z_SpecificTag(ODR o, Z_SpecificTag **p, int opt)
     if (!odr_sequence_begin(o, p, sizeof(**p)))
 	return opt && odr_ok(o);
     return
+        odr_implicit(o, odr_oid, &(*p)->schemaId, ODR_CONTEXT, 0, 1) &&
         odr_implicit(o, odr_integer, &(*p)->tagType, ODR_CONTEXT, 1, 1) &&
 	odr_explicit(o, z_StringOrNumeric, &(*p)->tagValue, ODR_CONTEXT,
 	    2, 0) &&

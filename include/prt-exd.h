@@ -199,19 +199,21 @@ typedef struct Z_IUOriginPartToKeep
 #define Z_IUOriginPartToKeep_recordReplace 2
 #define Z_IUOriginPartToKeep_recordDelete 3
 #define Z_IUOriginPartToKeep_elementUpdate 4
+#define Z_IUOriginPartToKeep_specialUpdate 5
     char *databaseName;
-    Odr_oid *schema; /* OPTIONAL */
-    char *elementSetName; /* OPTIONAL */
+    Odr_oid *schema;               /* OPTIONAL */
+    char *elementSetName;          /* OPTIONAL */
+    Odr_external *actionQualifier; /* OPTIONAL */
 } Z_IUOriginPartToKeep;
 
 typedef struct Z_IUTaskPackageRecordStructure
 {
     int which;
 #define Z_IUTaskPackageRecordStructure_record 1
-#define Z_IUTaskPackageRecordStructure_diagnostic 2
+#define Z_IUTaskPackageRecordStructure_surrogateDiagnostics 2
     union {
         Odr_external *record;
-        Z_DiagRec *diagnostic;
+        Z_DiagRecs *surrogateDiagnostics;
     } u; /* OPTIONAL */
     Z_IUCorrelationInfo *correlationInfo; /* OPTIONAL */
     int *recordStatus;
@@ -219,6 +221,7 @@ typedef struct Z_IUTaskPackageRecordStructure
 #define Z_IUTaskPackageRecordStructureS_queued 2
 #define Z_IUTaskPackageRecordStructureS_inProcess 3
 #define Z_IUTaskPackageRecordStructureS_failure 4
+    Z_DiagRecs *supplementalDiagnostics;  /* OPTIONAL */
 } Z_IUTaskPackageRecordStructure;
 
 typedef struct Z_IUTargetPart
