@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: otherinfo.c,v $
- * Revision 1.2  1999-09-13 12:51:35  adam
+ * Revision 1.3  1999-11-10 09:06:40  adam
+ * Fixed yaz_oi_update so that it ignores NULL pointer.
+ *
+ * Revision 1.2  1999/09/13 12:51:35  adam
  * Fixed bug in yaz_oi_update and added delete option.
  *
  * Revision 1.1  1999/06/08 10:10:16  adam
@@ -39,6 +42,12 @@ void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip)
     case Z_APDU_scanRequest:
 	*oip = &apdu->u.scanRequest->otherInfo;
 	break;
+    case Z_APDU_extendedServicesRequest:
+	*oip = &apdu->u.extendedServicesRequest->otherInfo;
+	break;
+    case Z_APDU_deleteResultSetRequest:
+	*oip = &apdu->u.deleteResultSetRequest->otherInfo;
+	break;
     case Z_APDU_initResponse:
 	*oip = &apdu->u.initResponse->otherInfo;
 	break;
@@ -54,6 +63,12 @@ void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip)
     case Z_APDU_scanResponse:
 	*oip = &apdu->u.scanResponse->otherInfo;
 	break;
+    case Z_APDU_extendedServicesResponse:
+	*oip = &apdu->u.extendedServicesResponse->otherInfo;
+	break;
+    case Z_APDU_deleteResultSetResponse:
+	*oip = &apdu->u.deleteResultSetResponse->otherInfo;
+	break;
     default:
 	*oip = 0;
 	break;
@@ -65,7 +80,11 @@ Z_OtherInformationUnit *yaz_oi_update (
     int *oid, int categoryValue, int delete_flag)
 {
     int i;
-    Z_OtherInformation *otherInformation = *otherInformationP;
+    Z_OtherInformation *otherInformation;
+
+    if (!otherInformationP)
+        return 0;
+    otherInformation = *otherInformationP;
     if (!otherInformation)
     {
 	if (!odr)
