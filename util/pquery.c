@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.10  1996-08-12 14:10:35  adam
+ * Revision 1.11  1996-11-11 13:15:29  adam
+ * Added proximity operator.
+ *
+ * Revision 1.10  1996/08/12 14:10:35  adam
  * New function p_query_attset to define default attribute set.
  *
  * Revision 1.9  1996/03/15  11:03:46  adam
@@ -118,6 +121,8 @@ static int query_token (const char **qptr, const char **lex_buf, int *lex_len)
             return 's';
         if (*lex_len == 8 && !memcmp (*lex_buf+1, "attrset", 7))
             return 'r';
+        if (*lex_len == 5 && !memcmp (*lex_buf+1, "prox", 4))
+            return 'p';
     }
     return 't';
 }
@@ -220,6 +225,57 @@ static Z_Operand *rpn_simple (ODR o, oid_proto proto,
     return zo;
 }
 
+static Z_ProximityOperator *rpn_proximity (ODR o)
+{
+    Z_ProximityOperator *p = odr_malloc (o, sizeof(*p));
+
+    if (!lex ())
+        return NULL;
+    if (*query_lex_buf == '1')
+    {
+        p->exclusion = odr_malloc (o, sizeof(*p->exclusion));
+        *p->exclusion = 1;
+    } 
+    else if (*query_lex_buf == '0')
+    {
+        p->exclusion = odr_malloc (o, sizeof(*p->exclusion));
+        *p->exclusion = 0;
+    }
+    else
+        p->exclusion = NULL;
+
+    if (!lex ())
+        return NULL;
+    p->distance = odr_malloc (o, sizeof(*p->distance));
+    *p->distance = atoi (query_lex_buf);
+
+    if (!lex ())
+        return NULL;
+    p->ordered = odr_malloc (o, sizeof(*p->ordered));
+    *p->ordered = atoi (query_lex_buf);
+    
+    if (!lex ())
+        return NULL;
+    p->relationType = odr_malloc (o, sizeof(*p->relationType));
+    *p->relationType = atoi (query_lex_buf);
+
+    if (!lex ())
+        return NULL;
+    if (*query_lex_buf == 'k')
+        p->which = 0;
+    else if (*query_lex_buf == 'p')
+        p->which = 1;
+    else
+        p->which = atoi (query_lex_buf);
+
+    if (!lex ())
+        return NULL;
+    p->proximityUnitCode = odr_malloc (o, sizeof(*p->proximityUnitCode));
+    *p->proximityUnitCode = atoi (query_lex_buf);
+
+    return p;
+}
+
 static Z_Complex *rpn_complex (ODR o, oid_proto proto,
                                int num_attr, int max_attr, 
                                int *attr_list, oid_value *attr_set)
@@ -243,6 +299,12 @@ static Z_Complex *rpn_complex (ODR o, oid_proto proto,
     case 'n':
         zo->which = Z_Operator_and_not;
         zo->u.and = ODR_NULLVAL;
+        break;
+    case 'p':
+        zo->which = Z_Operator_prox;
+        zo->u.prox = rpn_proximity (o);
+        if (!zo->u.prox)
+            return NULL;
         break;
     default:
         return NULL;
@@ -270,6 +332,7 @@ static Z_RPNStructure *rpn_structure (ODR o, oid_proto proto,
     case 'a':
     case 'o':
     case 'n':
+    case 'p':
         sz->which = Z_RPNStructure_complex;
         if (!(sz->u.complex =
               rpn_complex (o, proto, num_attr, max_attr, attr_list, attr_set)))
