@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.4 2004-01-06 09:10:02 adam Exp $
+ * $Id: srwutil.c,v 1.5 2004-01-06 11:20:15 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -327,8 +327,8 @@ static struct {
 {2, "System temporarily unavailable"}, 
 {3, "Authentication error"}, 
 /* Diagnostics Relating to CQL */
-{10, "Illegal query"}, 
-{11, "Unsupported query type (XCQL vs CQL)"}, 
+{10, "Query syntax error"}, 
+{11, "Unsupported query type"}, 
 {12, "Too many characters in query"}, 
 {13, "Unbalanced or illegal use of parentheses"}, 
 {14, "Unbalanced or illegal use of quotes"}, 
@@ -428,6 +428,7 @@ static int srw_bib1_map[] = {
     7, 30,
     8, 32,
     9, 29,
+    108, 10,  /* Malformed query : Syntax error */
     10, 10,
     11, 12,
     11, 23,
