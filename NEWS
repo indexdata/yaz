@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Yet another small fix for configure of SSL.
+
 --- 2.0.21 2004/05/14
 
 Fix SSL libs for configure when --with-openssl=DIR is given.  

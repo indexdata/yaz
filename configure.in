@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.145 2004-05-19 05:28:06 oleg Exp $
+dnl $Id: configure.in,v 1.146 2004-05-26 11:14:29 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.21)
 AM_MAINTAINER_MODE
@@ -15,7 +15,7 @@ test -z "$YACC" && AC_MSG_WARN([GNU bison not found])
 AC_PROG_INSTALL
 AM_DISABLE_SHARED
 AM_PROG_LIBTOOL
-AC_PATH_PROG(pkgconfig, pkg-config, NONE)
+AC_PATH_PROG(pkgconfigpath, pkg-config, NONE)
 dnl
 YAZ_DOC
 dnl 
@@ -41,7 +41,7 @@ SSL_LIBPATH=""
 if test "$openssl" != "no"; then
 	sslver=no
 	if test "$openssl" != "yes"; then
-		if test "$pkgconfig" != "NONE"; then
+		if test -x $openssl/bin/pkg-config; then
 			if $openssl/bin/pkg-config --exists openssl; then
 				SSL_CFLAGS=`$openssl/bin/pkg-config --cflags openssl`
 				LIBS="$LIBS `$openssl/bin/pkg-config --libs openssl`"
@@ -53,11 +53,11 @@ if test "$openssl" != "no"; then
                 	SSL_LIBPATH="-L$openssl/lib"
 		fi
 	else
-		if test "$pkgconfig" != "NONE"; then
-			if $pkgconfig --exists openssl; then
-				SSL_CFLAGS=`$pkgconfig --cflags openssl`
-				LIBS="$LIBS `$pkgconfig --libs openssl`"
-				sslver=`$pkgconfig --modversion openssl`
+		if test "$pkgconfigpath" != "NONE"; then
+			if $pkgconfigpath --exists openssl; then
+				SSL_CFLAGS=`$pkgconfigpath --cflags openssl`
+				LIBS="$LIBS `$pkgconfigpath --libs openssl`"
+				sslver=`$pkgconfigpath --modversion openssl`
 			fi
 		fi
 		if test "$sslver" = "no"; then
