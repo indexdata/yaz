@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.5  1996-01-02 13:57:30  adam
+ * Revision 1.6  1997-07-01 14:15:10  adam
+ * Added new BIB-1 diagnostic messages.
+ *
+ * Revision 1.5  1996/01/02 13:57:30  adam
  * Added error messages.
  *
  * Revision 1.4  1995/09/29  17:11:52  quinn
@@ -143,8 +146,30 @@ struct {
 { 244, "Present:  comp-spec parameter not supported" },
 { 245, "Type-1 query: restriction ('resultAttr') operand not supported" },
 { 246, "Type-1 query: 'complex' attributeValue not supported" },
-{ 247, "Type-1 query: 'attributeSet' as part of AttributeElement not supported"
-},
+{ 247, "Type-1 query: 'attributeSet' as part of AttributeElement not supported" },
+{ 1001, "Malformed APDU"}, 
+{ 1002, "ES: EXTERNAL form of Item Order request not supported" },
+{ 1003, "ES: Result set item form of Item Order request not supported" },
+{ 1004, "ES: Extended services not supported unless access control is in effect" },
+{ 1005, "Response records in Search response not supported" },
+{ 1006, "Response records in Search response not possible for specified database (or database combination)" },
+{ 1007, "No Explain server. Addinfo: pointers to servers that have a surrogate Explain database for this server" },
+{ 1008, "ES: missing mandatory parameter for specified function. Addinfo: parameter" },
+{ 1009, "ES: Item Order, unsupported OID in itemRequest. Addinfo: OID" },
+{ 1010, "Init/AC: Bad Userid" },
+{ 1011, "Init/AC: Bad Userid and/or Password" },
+{ 1012, "Init/AC: No searches remaining (pre-purchased searches exhausted)" },
+{ 1013, "Init/AC: Incorrect interface type (specified id valid only when used with a particular access method or client)" },
+{ 1014, "Init/AC: Authentication System error" },
+{ 1015, "Init/AC: Maximum number of simultaneous sessions for Userid" },
+{ 1016, "Init/AC: Blocked network address"},
+{ 1017, "Init/AC: No databases available for specified userId"},
+{ 1018, "Init/AC: System temporarily out of resources"},
+{ 1019, "Init/AC: System not available due to maintenance (Addinfo: when it's expected back up)" },
+{ 1020, "Init/AC: System temporarily unavailable (Addinfo: when it's expected back up)"},
+{ 1021, "Init/AC: Account has expired"},
+{ 1022, "Init/AC: Password has expired so a new one must be supplied"},
+{ 1023, "Init/AC: Password has been changed by an administrator so a new one must be supplied"},
 { 0, NULL} 
 };
 
