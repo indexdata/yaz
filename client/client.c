@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.108  2000-11-23 10:58:32  adam
+ * Revision 1.109  2001-01-22 10:41:47  adam
+ * Multiple attribute may be specified for sorging.
+ *
+ * Revision 1.108  2000/11/23 10:58:32  adam
  * SSL comstack support. Separate POSIX thread support library.
  *
  * Revision 1.107  2000/11/16 13:11:07  adam
@@ -1883,7 +1886,7 @@ int send_sortrequest(char *arg, int newset)
     Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
         odr_malloc (out, sizeof(*sksl));
     char setstring[32];
-    char sort_string[32], sort_flags[32];
+    char sort_string_buf[32], sort_flags[32];
     int off;
     int oid[OID_SIZE];
     oident bib1;
@@ -1922,11 +1925,12 @@ int send_sortrequest(char *arg, int newset)
     bib1.proto = protocol;
     bib1.oclass = CLASS_ATTSET;
     bib1.value = VAL_BIB1;
-    while ((sscanf (arg, "%31s %31s%n", sort_string, sort_flags, &off)) == 2 
+    while ((sscanf (arg, "%31s %31s%n", sort_string_buf, sort_flags, &off)) == 2 
            && off > 1)
     {
         int i;
         char *sort_string_sep;
+	char *sort_string = sort_string_buf;
         Z_SortKeySpec *sks = (Z_SortKeySpec *)odr_malloc (out, sizeof(*sks));
         Z_SortKey *sk = (Z_SortKey *)odr_malloc (out, sizeof(*sk));
 
@@ -1938,24 +1942,37 @@ int send_sortrequest(char *arg, int newset)
         
         if ((sort_string_sep = strchr (sort_string, '=')))
         {
-            Z_AttributeElement *el = (Z_AttributeElement *)odr_malloc (out, sizeof(*el));
+	    int i = 0;
             sk->which = Z_SortKey_sortAttributes;
             sk->u.sortAttributes =
                 (Z_SortAttributes *)odr_malloc (out, sizeof(*sk->u.sortAttributes));
             sk->u.sortAttributes->id = oid_ent_to_oid(&bib1, oid);
             sk->u.sortAttributes->list =
                 (Z_AttributeList *)odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
-            sk->u.sortAttributes->list->num_attributes = 1;
             sk->u.sortAttributes->list->attributes =
-                (Z_AttributeElement **)odr_malloc (out,
-                            sizeof(*sk->u.sortAttributes->list->attributes));
-            sk->u.sortAttributes->list->attributes[0] = el;
-            el->attributeSet = 0;
-            el->attributeType = (int *)odr_malloc (out, sizeof(*el->attributeType));
-            *el->attributeType = atoi (sort_string);
-            el->which = Z_AttributeValue_numeric;
-            el->value.numeric = (int *)odr_malloc (out, sizeof(*el->value.numeric));
-            *el->value.numeric = atoi (sort_string_sep + 1);
+                (Z_AttributeElement **)
+		odr_malloc (out, 10 *
+			    sizeof(*sk->u.sortAttributes->list->attributes));
+	    while (i < 10 && sort_string && sort_string_sep)
+	    {
+		Z_AttributeElement *el = (Z_AttributeElement *)
+		    odr_malloc (out, sizeof(*el));
+		sk->u.sortAttributes->list->attributes[i] = el;
+		el->attributeSet = 0;
+		el->attributeType = (int *)odr_malloc (out, sizeof(*el->attributeType));
+		*el->attributeType = atoi (sort_string);
+		el->which = Z_AttributeValue_numeric;
+		el->value.numeric = (int *)odr_malloc (out, sizeof(*el->value.numeric));
+		*el->value.numeric = atoi (sort_string_sep + 1);
+		i++;
+		sort_string = strchr(sort_string, ',');
+		if (sort_string)
+		{
+		    sort_string++;
+		    sort_string_sep = strchr (sort_string, '=');
+		}
+	    }
+            sk->u.sortAttributes->list->num_attributes = i;
         }
         else
         {
