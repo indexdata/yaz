@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.51  1996-07-26 14:07:21  quinn
+ * Revision 1.52  1996-10-08 12:56:57  adam
+ * Bug fix: tagging of type 101 query.
+ *
+ * Revision 1.51  1996/07/26  14:07:21  quinn
  * Small
  *
  * Revision 1.50  1996/07/26  13:36:15  quinn
@@ -751,7 +754,7 @@ int z_Query(ODR o, Z_Query **p, int opt)
     {
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Query_type_1, z_RPNQuery},
     	{ODR_EXPLICIT, ODR_CONTEXT, 2, Z_Query_type_2, odr_octetstring},
-    	{ODR_EXPLICIT, ODR_CONTEXT, 101, Z_Query_type_101, z_RPNQuery},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 101, Z_Query_type_101, z_RPNQuery},
     	{-1, -1, -1, -1, 0}
     };
 
