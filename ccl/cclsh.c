@@ -45,7 +45,10 @@
  * Europagate 1995
  *
  * $Log: cclsh.c,v $
- * Revision 1.8  2001-03-18 20:45:39  ja7
+ * Revision 1.9  2001-05-16 07:30:16  adam
+ * Minor cosmetic changes that makes checker gcc happier.
+ *
+ * Revision 1.8  2001/03/18 20:45:39  ja7
  * Added readline and history support to cclsh
  *
  * Revision 1.7  2000/10/17 19:50:28  adam
@@ -218,13 +221,13 @@ int main (int argc, char **argv)
 		if (rpn && i == 0)
 		{
 		    ccl_pr_tree (rpn, stdout);
-		    putchar ('\n');
+		    printf ("\n");
 		}
             }
             if (rpn)
                 ccl_rpn_delete(rpn);
         }
     }
-    putchar ('\n');
+    printf ("\n");
     return 0;
 }

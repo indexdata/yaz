@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqfile.c,v $
- * Revision 1.9  2001-03-07 13:24:40  adam
+ * Revision 1.10  2001-05-16 07:30:16  adam
+ * Minor cosmetic changes that makes checker gcc happier.
+ *
+ * Revision 1.9  2001/03/07 13:24:40  adam
  * Member and_not in Z_Operator is kept for backwards compatibility.
  * Added support for definition of CCL operators in field spec file.
  *
@@ -98,7 +101,6 @@
 void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 {
     char qual_spec[128];
-    int no_scan;
     int pair[256];
     char *attsets[128];
     int pair_no = 0;
@@ -107,8 +109,9 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
     {
         char *qual_value, *qual_type;
         char *split, *setp;
+        int no_scan = 0;
         
-        if (sscanf (cp, "%s%n", qual_spec, &no_scan) != 1)
+        if (sscanf (cp, "%100s%n", qual_spec, &no_scan) < 1)
 	    break;
 
         if (!(split = strchr (qual_spec, '=')))
@@ -221,14 +224,15 @@ void ccl_qual_file (CCL_bibset bibset, FILE *inf)
     char line[256];
     char *cp, *cp1;
     char qual_name[128];
-    int  no_scan;
 
     while (fgets (line, 255, inf))
     {
+        int  no_scan = 0;
+
         cp = line;
         if (*cp == '#')
             continue;        /* ignore lines starting with # */
-        if (sscanf (cp, "%s%n", qual_name, &no_scan) != 1)
+        if (sscanf (cp, "%100s%n", qual_name, &no_scan) < 1)
             continue;        /* also ignore empty lines */
         cp += no_scan;
 	cp1 = strchr(cp, '#');
