@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.9  1996-02-10 12:23:11  quinn
+ * Revision 1.10  1996-02-20 12:52:11  quinn
+ * WAIS protocol support.
+ *
+ * Revision 1.9  1996/02/10  12:23:11  quinn
  * Enablie inetd operations fro TCP/IP stack
  *
  * Revision 1.8  1995/11/01  13:54:27  quinn
@@ -122,7 +125,11 @@ int tcpip_listen(COMSTACK h, char *addrp, int *addrlen);
 COMSTACK tcpip_accept(COMSTACK h);
 char *tcpip_addrstr(COMSTACK h);
 
-int completeBER(unsigned char *buf, int len);
+/*
+ * Determine length/completeness of incoming packages
+ */
+int completeBER(unsigned char *buf, int len); /* from the ODR module */
+int completeWAIS(unsigned char *buf, int len); /* from waislen.c */
 
 #ifdef TRACE_TCPIP
 #define TRC(x) x
@@ -140,6 +147,7 @@ typedef struct tcpip_state
 
     int written;  /* -1 if we aren't writing */
     int towrite;  /* to verify against user input */
+    int (*complete)(unsigned char *buf, int len); /* length/completeness */
 } tcpip_state;
 
 /*
@@ -218,6 +226,10 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
+    if (protocol == PROTO_WAIS)
+	state->complete = completeWAIS;
+    else
+	state->complete = completeBER;
 
     p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new TCPIP comstack\n"));
