@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.10 2002-02-24 12:23:43 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.11 2002-05-30 20:57:31 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -72,47 +72,43 @@ int p_query_attset (const char *arg);
      The grammar of the PQF is as follows:
     </para>
 
-    <screen>
-     Query ::= &lsqb; '@attrset' AttSet &rsqb; QueryStruct.
+    <literallayout>
+     query ::= top-set query-struct.
 
-     AttSet ::= string.
+     top-set ::= &lsqb; '@attrset' string &rsqb;
 
-     QueryStruct ::= &lsqb; Attribute &rsqb; Simple | Complex.
+     query-struct ::= attr-spec | simple | complex
 
-     Attribute ::= '@attr' &lsqb; AttSet &rsqb; AttributeType '=' AttributeValue.
+     attr-spec ::= '@attr' &lsqb; string &rsqb; string query-struct
 
-     AttributeType ::= integer.
+     complex ::= operator query-struct query-struct.
 
-     AttributeValue ::= integer || string.
+     operator ::= '@and' | '@or' | '@not' | '@prox' proximity.
 
-     Complex ::= Operator QueryStruct QueryStruct.
+     simple ::= result-set | term.
 
-     Operator ::= '@and' | '@or' | '@not' | '@prox' Proximity.
+     result-set ::= '@set' string.
 
-     Simple ::= ResultSet | Term.
+     term ::= string
 
-     ResultSet ::= '@set' string.
+     proximity ::= exclusion distance ordered relation which-code unit-code.
 
-     Term ::= string | '"' string '"'.
+     exclusion ::= '1' | '0' | 'void'.
 
-     Proximity ::= Exclusion Distance Ordered Relation WhichCode UnitCode.
+     distance ::= integer.
 
-     Exclusion ::= '1' | '0' | 'void'.
+     ordered ::= '1' | '0'.
 
-     Distance ::= integer.
+     relation ::= integer.
 
-     Ordered ::= '1' | '0'.
+     which-code ::= 'known' | 'private' | integer.
 
-     Relation ::= integer.
-
-     WhichCode ::= 'known' | 'private' | integer.
-
-     UnitCode ::= integer.
-    </screen>
+     unit-code ::= integer.
+    </literallayout>
 
     <para>
      You will note that the syntax above is a fairly faithful
-     representation of RPN, except for the Attibute, which has been
+     representation of RPN, except for the Attribute, which has been
      moved a step away from the term, allowing you to associate one or more
      attributes with an entire query structure. The parser will
      automatically apply the given attributes to each term as required.
@@ -418,7 +414,7 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
 
    <para>
     The OID module provides a higher-level representation of the
-    family of object identifers which describe the Z39.50 protocol and its
+    family of object identifiers which describe the Z39.50 protocol and its
     related objects. The definition of the module interface is given in
     the <filename>oid.h</filename> file.
    </para>
@@ -584,7 +580,7 @@ typedef struct oident
 
     The <function>oid_ent_to_oid()</function> function can be used whenever
     you need to prepare a PDU containing one or more OIDs. The separation of
-    the <literal>protocol</literal> element from the remainer of the
+    the <literal>protocol</literal> element from the remainder of the
     OID-description makes it simple to write applications that can
     communicate with either Z39.50 or OSI SR-based applications.
    </para>
