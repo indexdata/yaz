@@ -1,5 +1,5 @@
 /* 
- $ $Id: charneg.c,v 1.6 2002-10-04 11:24:39 adam Exp $
+ $ $Id: charneg.c,v 1.7 2002-10-04 19:06:25 adam Exp $
  * Helper functions for Character Set and Language Negotiation - 3
  */
 
@@ -7,6 +7,7 @@
 #include <yaz/otherinfo.h>
 #include <yaz/z-charneg.h>
 #include <yaz/charneg.h>
+#include <yaz/yaz-util.h>
 
 static Z_External* z_ext_record2(ODR o, int oid_class, int oid_value,
                                  const char *buf, int len)
