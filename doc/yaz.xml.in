@@ -27,8 +27,9 @@
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
      <!ENTITY gfs-synopsis-app "application">
+     <!ENTITY reference-tools-cql-map "<xref linkend='tools.cql.map'/>">
 ]>
-<!-- $Id: yaz.xml.in,v 1.16 2005-03-13 21:43:00 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.17 2005-03-14 11:12:16 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User&apos;s Guide and Reference</title>

@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.24 2005-03-13 21:43:00 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.25 2005-03-14 11:12:16 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -97,6 +97,10 @@
 
     <listitem><para>
       Result-Set Sort (optional).
+     </para></listitem>
+    
+    <listitem><para>
+      Return Explain for SRW/SRU (optional).
      </para></listitem>
     
    </itemizedlist>
@@ -372,6 +376,8 @@ typedef struct bend_initrequest
     /* character set and language negotiation - see include/yaz/z-charneg.h */
     Z_CharSetandLanguageNegotiation *charneg_request;
     Z_External *charneg_response;
+    int (*bend_srw_explain)(void *handle, bend_explain_rr *rr);
+    int (*bend_srw_scan)(void *handle, bend_scan_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult
@@ -458,6 +464,7 @@ typedef struct {
     int hits;                  /* number of hits */
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
+    Z_OtherInformation *search_info;
 } bend_search_rr;
     </synopsis>
 
@@ -715,8 +722,22 @@ typedef struct bend_scan_rr {
     bend_scan_status status;
     int errcode;
     char *errstring;
+    char *scanClause;   /* CQL scan clause */
 } bend_scan_rr;
     </synopsis>
+   <para>
+    This backend server handles both Z39.50 scan 
+    and SRW/SRU scan. In order for a
+    handler to distinguish between SRW/SRU (CQL) scan 
+    Z39.50 Scan , it must check for a non-NULL value of 
+    <literal>scanClause</literal>.
+   </para>
+   <note>
+    <para>
+     if designed today, it would be a choice using a union or similar,
+     but that would break binary compatibility with existing servers.
+    </para>
+    </note>
    </sect2>
   </sect1>
 
@@ -814,7 +835,7 @@ typedef struct bend_scan_rr {
     </para>
    </example>
   </sect1>
-  <sect1 id="server.vhosts"><title>Virtual hosts</title>
+  <sect1 id="server.vhosts"><title>Virtual Hosts</title>
      &gfs-virtual;
   </sect1>
  </chapter>

@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.44 2005-02-08 13:51:30 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.45 2005-03-14 11:12:16 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1214,7 +1214,7 @@ int cql_transform_FILE(cql_transform_t ct,
      </para>
     </sect3>
     <sect3 id="tools.cql.map">
-     <title>Specification of CQL to RPN mapping</title>
+     <title>Specification of CQL to RPN mappings</title>
      <para>
       The file supplied to functions 
       <function>cql_transform_open_FILE</function>,

@@ -1,6 +1,6 @@
 <!-- 
-   $Id: gfs-virtual.xml,v 1.1 2005-03-13 21:43:00 adam Exp $
-   Description of the virtual hosts mechanism in YAZ GFS
+   $Id: gfs-virtual.xml,v 1.2 2005-03-14 11:12:16 adam Exp $
+   Description of the virtual host mechanism in YAZ GFS
    Included in both manual and man page for yaz-ztest
 -->
 
@@ -8,6 +8,13 @@
  The Virtual hosts mechanism allows a YAZ frontend server to
  support multiple backends. A backend is selected on the basis of
  the TCP/IP binding (port+listening adddress) and/or the virtual host.
+</para>
+<para>
+ A backend can be configured to execute in a particular working
+ directory. Or the YAZ frontend may perform CQL to RPN conversion, thus
+ allowing traditional Z39.50 backends to be offered as a SRW/SRU
+ service. SRW/SRU Explain information for a particular backend may also
+ be specified.
 </para>
 <para>
  For the HTTP protocol, the virtual host is specified in the Host header.
@@ -33,44 +40,167 @@
 </para>
 <para>
  The <literal>listen</literal> describes listener (transport end point),
- such as TCP/IP, Unix file socket or SSL server.
+ such as TCP/IP, Unix file socket or SSL server. Content for 
+ a listener:
+ <variablelist>
+  <varlistentry><term>CDATA (required)</term>
+   <listitem>
+    <para>
+     The CDATA for the <literal>listen</literal> element holds the
+     listener string, such as <literal>tcp:@:210</literal>, 
+     <literal>tcp:server1:2100</literal>,
+     etc.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry><term>attribute <literal>id</literal> (optional)</term>
+    <listitem>
+     <para>
+      identifier for this listener. This may be referred to from
+      server sections.
+     </para>
+    </listitem>
+   </varlistentry>
+ </variablelist>
+ <note>
+  <para>
+   We expect more information to be added for the listen section in
+   a future version, such as CERT file for SSL servers.
+  </para>
+ </note>
 </para>
 <para>
- The <literal>server</literal> describes a server and includes sub
- elements which servers as parameters for this server.
-</para>
-<para>
- The XML below configures a server with 2 listeners and 3 backend
- servers. The server listens on port 9900 and 9901 identified 
- with references "public9900" and "public9901".
+ The <literal>server</literal> describes a server and the parameters
+ for this server type. Content for a server:
+ <variablelist>
+  <varlistentry><term>attribute <literal>id</literal> (optional)</term>
+   <listitem>
+    <para>
+     Identifier for this server. Currently not used for anything,
+     but it might be for logging purposes.
+   </para>
+   </listitem>
+  </varlistentry>
 
- [More to be written]
+  <varlistentry><term>attribute <literal>listenref</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies listener for this server. If this attribute is not
+     given, the server is accessible from all listener. In order
+     for the server to be used for real, howeever, the virtual host
+     must match (if specified in the configuration).
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry><term>element <literal>config</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies the server configuration. This is equivalent
+     to the config specified using command line option
+     <literal>-c</literal>.
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry><term>element <literal>directory</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies a working directory for this backend server. If
+     specifid, the YAZ fronend changes current working directory
+     to this directory whenever a backend of this type is
+     started (backend handler bend_start), stopped (backend handler hand_stop)
+     and initialized (bend_init).
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry><term>element <literal>host</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies the virtual host for this server. If this is specified
+     a client <emphasis>must</emphasis> specify this host string in
+     order to use this backend.
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry><term>element <literal>cql2rpn</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies a filename that includes CQL to RPN conversion for this
+     backend server. See &reference-tools-cql-map;
+     If given, the backend server will only "see" a Type-1/RPN query. 
+    </para>
+   </listitem>
+  </varlistentry>
+   
+  <varlistentry><term>element <literal>explain</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies SRW/SRU ZeeRex content for this server. Copied verbatim
+     to the client. As things are now, some of the Explain content
+     seeem redundant because host information, etc. is also stored
+     elsewhere.
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</para>
+ 
+<para>
+ The XML below configures a server that accepts connections from
+ two ports, TCP/IP port 9900 and a local UNIX file socket.
+ We name the TCP/IP server <literal>public</literal> and the
+ other server <literal>internal</literal>.
+ </para>
  <screen>
   <![CDATA[
-<yazgfs>
-  <listen id="public9900">tcp:@:9900</listen>
-  <listen id="public9901">tcp:@:9901</listen>
-  <server>
-    <host>host1</host>
+
+  <listen id="public">tcp:@:9900</listen>
+  <listen id="internal">unix:/var/tmp/socket</listen>
+  <server id="server1">
+    <host>server1.mydomain</host>
     <directory>/var/www/s1</directory>
-    <config>zebra1.cfg</config>
+    <config>config.cfg</config>
   </server>
-  <server>
-    <host>host2</host>
+  <server id="server2">
+    <host>server2.mydomain</host>
     <directory>/var/www/s2</directory>
-    <config>zebra2.cfg</config>
-  </server>
-  <server listenref="public9901">
-    <directory>/var/www/s3</directory>
-    <config>zebra3.cfg</config>
+    <config>config.cfg</config>
     <cql2rpn>../etc/pqf.properties</cql2rpn>
-    <explain>
-      <my>explain</my>
+    <explain xmlns="http://explain.z3950.org/dtd/2.0/">
+      <serverInfo>
+        <host>server2.mydomain</host>
+        <port>9900</port>
+        <database>a</database>
+      </serverInfo>
     </explain>
+  </server>
+  <server id="server3" listenref="internal">
+    <directory>/var/www/s3</directory>
+    <config>config.cfg</config>
   </server>
  </yazgfs>
 ]]>
  </screen>
+<para>
+ There are three configured backend servers. The first two
+ servers, <literal>"server1"</literal> and <literal>"server2"</literal>,
+ can be reached by both listener addresses - since
+ no <literal>listenref</literal> attribute is specified.
+ In order to distinguish between the two a virtual host has
+ been specified for each of server in the <literal>host</literal>
+ elements.
+</para>
+<para>
+ For <literal>"server2"</literal> elements for CQL to RPN conversion
+ is supported and explain information has been added (a short one here
+ to keep the example small).
+</para>
+<para>
+ The third server, <literal>"server3"</literal> can only be reached
+ via listener <literal>"internal"</literal>.
 </para>
 
 <!-- Keep this comment at the end of the file

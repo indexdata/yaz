@@ -1,5 +1,5 @@
 <!-- 
-   $Id: gfs-options.xml,v 1.1 2005-03-13 21:43:00 adam Exp $
+   $Id: gfs-options.xml,v 1.2 2005-03-14 11:12:16 adam Exp $
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->
@@ -61,7 +61,7 @@
   <listitem><para>A user option that serves as a specifier for some
     sort of configuration, usually a filename.
     The argument to this option is transferred to member
-    <literal>configname</literal>of the
+    <literal>configname</literal> of the
     <literal>statserv_options_block</literal>.
    </para></listitem></varlistentry>
 

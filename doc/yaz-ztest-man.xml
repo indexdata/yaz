@@ -3,8 +3,9 @@
      <!ENTITY gfs-virtual SYSTEM "gfs-virtual.xml">
      <!ENTITY gfs-synopsis SYSTEM "gfs-synopsis.xml">
      <!ENTITY gfs-synopsis-app "yaz-ztest">
+     <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.6 2005-03-13 21:43:00 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.7 2005-03-14 11:12:16 adam Exp $ -->
 <refentry id="yaz-ztest">
  
  <refmeta>
@@ -23,7 +24,7 @@
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yaz-ztest</command> is a Z39.50 test server that uses
-   the YAZ frontend server API.
+   the YAZ generic frontend server API.
    The server acts as a real Z39.50 server but does not use a database.
    It returns a random hit count and returns a subset of a few built-in
    records.
@@ -48,6 +49,9 @@
   <title>OPTIONS</title>
   &gfs-options;
  </refsect1>
+ <refsect1><title>VIRTUAL HOSTS</title>
+  &gfs-virtual;
+ </refsect1>
  <refsect1><title>FILES</title>
   <para>
    <filename>yaz-&lt;version&gt;/ztest/yaz-ztest.c</filename>
@@ -56,10 +60,7 @@
    <filename>yaz-&lt;version&gt;/include/yaz/backend.h</filename>
   </para>
  </refsect1>
- <refsect1><title>VIRTUAL HOSTS</title>
-  &gfs-virtual;
- </refsect1>
- <refsect1><title>SEE ALSO</title>
+ <refsect1 id="tools.cql.map"><title>SEE ALSO</title>
   <para>
    <citerefentry>
     <refentrytitle>yaz</refentrytitle>
