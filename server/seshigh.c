@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.12  1995-03-29 15:40:16  quinn
+ * Revision 1.13  1995-03-30 09:09:24  quinn
+ * Added state-handle and some support for asynchronous activities.
+ *
+ * Revision 1.12  1995/03/29  15:40:16  quinn
  * Ongoing work. Statserv is now dynamic by default
  *
  * Revision 1.11  1995/03/28  09:16:21  quinn
@@ -94,6 +97,8 @@ void destroy_association(association *h)
     free(h->encode_buffer);
     if (h->input_buffer)
     	free(h->input_buffer);
+    if (h->backend)
+    	bend_close(h->backend);
     free(h);
 }
 
@@ -209,6 +214,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     	return -1;
     }
 
+    assoc->backend = binitres->handle;
     apdup = &apdu;
     apdu.which = Z_APDU_initResponse;
     apdu.u.initResponse = &resp;
@@ -244,7 +250,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.12 $";
+    resp.implementationVersion = "$Revision: 1.13 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -346,7 +352,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	}
 	freq.setname = setname;
 	freq.number = recno;
-	if (!(fres = bend_fetch(&freq)))
+	if (!(fres = bend_fetch(a->backend, &freq, 0)))
 	{
 	    *pres = Z_PRES_FAILURE;
 	    return diagrec(a->proto, 2, "Backend interface problem");
@@ -465,7 +471,7 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
 	bsrq.basenames = req->databaseNames;
 	bsrq.query = req->query;
 
-	if (!(bsrt = bend_search(&bsrq)))
+	if (!(bsrt = bend_search(assoc->backend, &bsrq, 0)))
 	    return -1;
 	else if (bsrt->errcode)
 	    resp.records = diagrec(assoc->proto, bsrt->errcode,

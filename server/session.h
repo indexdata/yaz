@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.2  1995-03-27 08:34:29  quinn
+ * Revision 1.3  1995-03-30 09:09:27  quinn
+ * Added state-handle and some support for asynchronous activities.
+ *
+ * Revision 1.2  1995/03/27  08:34:29  quinn
  * Added dynamic server functionality.
  * Released bindings to session.c (is now redundant)
  *
@@ -35,6 +38,7 @@ typedef struct association
     int input_apdu_len;
     int state;
     oid_proto proto;
+    void *backend;
 #define ASSOC_UNINIT       0
 #define ASSOC_IDLE         1
 
