@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.14 2003-01-13 22:11:34 adam Exp $
+ * $Id: zoom-c.c,v 1.15 2003-01-24 11:52:57 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -960,7 +960,6 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
 	*search_req->largeSetLowerBound = 2000000000;
 	*search_req->smallSetUpperBound = r->count;
 	*search_req->mediumSetPresentNumber = r->count;
-	smallSetElementSetName = 0;  /* no need to provide this */
     }
     else
     {
