@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.4 2001/XX/XX
 
+New ZOOM option, schema, that specifies shema OID for retrieval.
+
 New CCL feature. Qualifiers can be aliases for one or more
 other qualifiers (if more than one is given, OR is used).
 

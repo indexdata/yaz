@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst4.c,v 1.6 2001-11-22 09:45:31 adam Exp $
+ * $Id: zoomtst4.c,v 1.7 2001-11-30 08:24:06 adam Exp $
  *
  * Asynchronous multi-target going through proxy doing search and retrieve
  * using present.
@@ -42,6 +42,8 @@ int main(int argc, char **argv)
     /* get 20 (at most) records from offset 5 */
     ZOOM_options_set (o, "start", "5");
     ZOOM_options_set (o, "count", "20");
+    ZOOM_options_set (o, "schema", "gils-schema");
+    ZOOM_options_set (o, "elementSetName", "F");
 
     /* set proxy */
     ZOOM_options_set (o, "proxy", argv[1]);

@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.13 2001-11-22 09:45:31 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.14 2001-11-30 08:24:06 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -302,6 +302,10 @@
       <row><entry>
         preferredRecordSyntax</entry><entry>Preferred Syntax, such as
         <literal>USMARC</literal>, <literal>SUTRS</literal>, etc.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        schema</entry><entry>Schema for retrieval, such as
+        <literal>Gils-schema</literal>, <literal>Geo-schema</literal>, etc.
        </entry><entry>none</entry></row>
       <row><entry>
         smallSetUpperBound</entry><entry>If hits is less than or equal to this

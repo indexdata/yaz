@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.13 2001-11-28 23:00:19 adam Exp $
+ * $Id: zoom-c.c,v 1.14 2001-11-30 08:24:06 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -370,7 +370,7 @@ ZOOM_resultset ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     cp = ZOOM_options_get (r->options, "setname");
     if (cp)
         r->setname = xstrdup (cp);
-
+    
     r->connection = c;
 
     r->next = c->resultsets;
@@ -440,6 +440,7 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
 {
     ZOOM_task task;
     ZOOM_connection c;
+    const char *cp;
 
     if (!r)
 	return;
@@ -659,6 +660,7 @@ static int ZOOM_connection_send_search (ZOOM_connection c)
     const char *elementSetName;
     const char *smallSetElementSetName;
     const char *mediumSetElementSetName;
+    const char *schema;
 
     assert (c->tasks);
     assert (c->tasks->which == ZOOM_TASK_SEARCH);
@@ -671,6 +673,8 @@ static int ZOOM_connection_send_search (ZOOM_connection c)
 	ZOOM_options_get (r->options, "smallSetElementSetName");
     mediumSetElementSetName =
 	ZOOM_options_get (r->options, "mediumSetElementSetName");
+    schema =
+	ZOOM_options_get (r->options, "schema");
 
     if (!smallSetElementSetName)
 	smallSetElementSetName = elementSetName;
@@ -701,7 +705,7 @@ static int ZOOM_connection_send_search (ZOOM_connection c)
 	*search_req->mediumSetPresentNumber = mspn;
     }
     else if (r->start == 0 && r->count > 0
-	     && r->piggyback && !r->r_sort_spec)
+	     && r->piggyback && !r->r_sort_spec && !schema)
     {
 	/* Regular piggyback - do it unless we're going to do sort */
 	*search_req->largeSetLowerBound = 2000000000;
@@ -1108,6 +1112,8 @@ static int send_present (ZOOM_connection c)
 	ZOOM_options_get (c->options, "preferredRecordSyntax");
     const char *element =
 	ZOOM_options_get (c->options, "elementSetName");
+    const char *schema =
+	ZOOM_options_get (c->options, "schema");
     ZOOM_resultset  resultset;
 
     if (!c->tasks)
@@ -1156,7 +1162,48 @@ static int send_present (ZOOM_connection c)
 	req->preferredRecordSyntax =
 	    yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, syntax);
 
-    if (element && *element)
+    if (schema && *schema)
+    {
+	Z_RecordComposition *compo = odr_malloc (c->odr_out, sizeof(*compo));
+
+        req->recordComposition = compo;
+        compo->which = Z_RecordComp_complex;
+        compo->u.complex = (Z_CompSpec *)
+            odr_malloc(c->odr_out, sizeof(*compo->u.complex));
+        compo->u.complex->selectAlternativeSyntax = (bool_t *) 
+            odr_malloc(c->odr_out, sizeof(bool_t));
+        *compo->u.complex->selectAlternativeSyntax = 0;
+
+        compo->u.complex->generic = (Z_Specification *)
+            odr_malloc(c->odr_out, sizeof(*compo->u.complex->generic));
+
+        compo->u.complex->generic->schema = (Odr_oid *)
+            yaz_str_to_z3950oid (c->odr_out, CLASS_SCHEMA, schema);
+
+        if (!compo->u.complex->generic->schema)
+        {
+            /* OID wasn't a schema! Try record syntax instead. */
+
+            compo->u.complex->generic->schema = (Odr_oid *)
+                yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, schema);
+        }
+        if (element && *element)
+        {
+            compo->u.complex->generic->elementSpec = (Z_ElementSpec *)
+                odr_malloc(c->odr_out, sizeof(Z_ElementSpec));
+            compo->u.complex->generic->elementSpec->which =
+                Z_ElementSpec_elementSetName;
+            compo->u.complex->generic->elementSpec->u.elementSetName =
+                odr_strdup (c->odr_out, element);
+        }
+        else
+            compo->u.complex->generic->elementSpec = 0;
+        compo->u.complex->num_dbSpecific = 0;
+        compo->u.complex->dbSpecific = 0;
+        compo->u.complex->num_recordSyntax = 0;
+        compo->u.complex->recordSyntax = 0;
+    }
+    else if (element && *element)
     {
 	Z_ElementSetNames *esn = odr_malloc (c->odr_out, sizeof(*esn));
 	Z_RecordComposition *compo = odr_malloc (c->odr_out, sizeof(*compo));
