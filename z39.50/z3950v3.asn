@@ -4,7 +4,7 @@ BEGIN   -- Z39.50 Maintenance Agency Official Text for ANSI/NISO Z39.50-1995 - J
 --
 EXPORTS OtherInformation, Term, AttributeSetId, AttributeList, AttributeElement, ElementSetName, SortElement, DatabaseName,
 CompSpec, Specification, Permissions, InternationalString, IntUnit, Unit, StringOrNumeric, Query, Records, ResultSetId,
-DefaultDiagFormat, DiagRec;
+DefaultDiagFormat, DiagRec, Segment;
 --
 
 PDU ::= CHOICE{
@@ -1016,6 +1016,7 @@ RecordSyntax-explain
 BEGIN 
 IMPORTS AttributeSetId, Term, OtherInformation, DatabaseName, ElementSetName, IntUnit, Unit,
  StringOrNumeric, Specification, InternationalString, AttributeList, AttributeElement FROM Z39-50-APDU-1995;
+EXPORTS LanguageCode;
 
 Explain-Record ::= CHOICE{
   -- Each of these may be used as search term  when Use attribute is 'explain-category'.
