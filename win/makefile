@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.47 2002-09-06 20:04:49 adam Exp $
+# $Id: makefile,v 1.48 2002-10-22 10:32:46 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -30,7 +30,7 @@ HAVE_ICONV=0
 ICONV_DIR = c:\libiconv-1.7.0.1
 
 # TCL
-TCL="C:\program files\Tcl\bin\tclsh83.exe"
+TCL="C:\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
 
 default: all
@@ -322,8 +322,8 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\otherinfo.obj \
    $(OBJDIR)\sortspec.obj \
    $(OBJDIR)\z3950oid.obj \
-   $(OBJDIR)\charneg.obj
-
+   $(OBJDIR)\charneg.obj \
+   $(OBJDIR)\grs1disp.obj
 
 YAZ_RET_OBJS= \
    $(OBJDIR)\d1_absyn.obj\
@@ -851,7 +851,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.47  2002-09-06 20:04:49  adam
+# Revision 1.48  2002-10-22 10:32:46  adam
+# New source grs1disp.c
+#
+# Revision 1.47  2002/09/06 20:04:49  adam
 # debug=0
 #
 # Revision 1.46  2002/08/30 11:28:01  adam
