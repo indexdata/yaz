@@ -1,13 +1,12 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.8 1995-06-25 10:53:56 quinn Exp $
+# $Id: Makefile,v 1.9 1996-05-22 08:35:58 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
-CFLAGS= -g -Wall -pedantic -ansi
 DEFS=$(INCLUDE) # -DTRACE_TRANSPORT
 LIB=$(LIBDIR)/librfc.a
 LIBS=-lodr

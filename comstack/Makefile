@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.4 1996-02-20 12:52:09 quinn Exp $
+# $Id: Makefile,v 1.5 1996-05-22 08:35:46 adam Exp $
 
 
 LIBDIR=../lib
@@ -12,8 +12,6 @@ LIBDIR=../lib
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBINCLUDE=-L$(LIBDIR) -L../../xtimosi/src
-#CFLAGS=-Wall -pedantic -g
-#CFLAGS=-g
 DEFS=$(INCLUDE) # -DTRACE_TCPIP
 LIB= $(LIBDIR)/libcomstack.a 
 LIBS=$(LIBDIR)/libasn.a $(LIBDIR)/libodr.a $(LIBDIR)/libcomstack.a \

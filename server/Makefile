@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.28 1995-08-17 12:45:22 quinn Exp $
+# $Id: Makefile,v 1.29 1996-05-22 08:36:02 adam Exp $
 
 LIBDIR=../lib
 
@@ -10,7 +10,6 @@ LIBDIR=../lib
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBINCLUDE=-L$(LIBDIR)
-#CFLAGS=-Wall -pedantic -g
 DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libserver.a 
 LIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \

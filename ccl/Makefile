@@ -2,7 +2,10 @@
 # Europagate, 1995
 #
 # $Log: Makefile,v $
-# Revision 1.4  1995-06-25 10:53:43  quinn
+# Revision 1.5  1996-05-22 08:35:40  adam
+# Removed CFLAGS definiton.
+#
+# Revision 1.4  1995/06/25 10:53:43  quinn
 # Smallish adjustments.
 #
 # Revision 1.3  1995/05/30  10:25:45  quinn
@@ -37,7 +40,6 @@
 #
 SHELL=/bin/sh
 INCLUDE=-I../include
-#CFLAGS=-g -Wall -pedantic -ansi
 TPROG1=cclsh
 LIB=../lib/ccl.a
 PO=cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o

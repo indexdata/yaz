@@ -1,13 +1,12 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.19 1996-02-20 16:41:36 adam Exp $
+# $Id: Makefile,v 1.20 1996-05-22 08:36:07 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
-#CFLAGS=-g -Wall -pedantic -ansi
 DEFS=$(INCLUDE)
 #DEFS=$(INCLUDE) -DTRACE_XMALLOC=1
 LIB=$(LIBDIR)/libutil.a

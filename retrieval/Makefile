@@ -1,9 +1,8 @@
-# $Id: Makefile,v 1.5 1996-02-20 16:33:02 quinn Exp $
+# $Id: Makefile,v 1.6 1996-05-22 08:35:55 adam Exp $
 
 SHELL=/bin/sh
 RANLIB=ranlib
 INCLUDE=-I../include -I.
-CFLAGS=-g -Wall -pedantic -ansi
 DEFS=$(INCLUDE)
 LIB=../lib/libret.a
 PO = d1_read.o d1_attset.o d1_tagset.o d1_absyn.o d1_grs.o \
