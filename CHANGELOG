@@ -1,5 +1,12 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.12 2004/02/16
+
+Added member 'schema' to bend_explain_rr structure so that backend
+can specify explain record identifier. Defaults to Zeerex 2.0.
+
+Fix encoding of OID's of form 1.0.X. Bug introduced in 2.0.11.
+
 --- 2.0.11 2004/02/16
 
 * SRW/SRU 1.1 updates: updated diagnostic in srw.h to use uri instead

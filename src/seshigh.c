@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.20 2004-02-14 15:58:42 adam Exp $
+ * $Id: seshigh.c,v 1.21 2004-02-16 17:57:05 adam Exp $
  */
 
 /*
@@ -752,6 +752,7 @@ static void srw_bend_explain(association *assoc, request *req,
         rr.print = assoc->print;
         rr.explain_buf = 0;
 	rr.database = srw_req->database;
+	rr.schema = "http://explain.z3950.org/dtd/2.0/";
         (*assoc->init->bend_explain)(assoc->backend, &rr);
         if (rr.explain_buf)
         {
@@ -1317,7 +1318,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.20 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.21 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

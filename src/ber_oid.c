@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: ber_oid.c,v 1.2 2004-02-11 23:49:28 adam Exp $
+ * $Id: ber_oid.c,v 1.3 2004-02-16 17:57:05 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -70,7 +70,7 @@ int ber_oidc(ODR o, Odr_oid *p)
         lenp = odr_tell(o);
         if (odr_putc(o, 0) < 0)   /* dummy */
             return 0;
-        if (p[0] < 0 || p[1] <= 0)
+        if (p[0] < 0 || p[1] < 0)
         {
             odr_seterror(o, ODATA, 23);
             return 0;
