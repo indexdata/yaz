@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.1.2 2005/03/16 
+
+Fixed bug #273: Update for recent MARC-8 -> UNICODE changes. 
+
 Fixed bug #272: Preserve spacing for CCL terms.
 
 --- 2.1.0 2005/03/14 
