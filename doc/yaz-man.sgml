@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-man.sgml,v 1.5 2003-04-28 21:02:16 adam Exp $ -->
+<!-- $Id: yaz-man.sgml,v 1.6 2003-05-14 21:12:41 adam Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -21,8 +21,8 @@
   <para>
    YAZ is a C/C++ programmer's toolkit supporting the development
    of Z39.50v3 clients and servers. The YAZ toolkit offers
-   several different levels of acess to the ISO23950/Z39.50 and
-   ILL protocols. The level that you need to use depends
+   several different levels of access to the ISO23950/Z39.50, SRW/SRU
+   and ILL protocols. The level that you need to use depends
    on your requirements, and the role (server of client) that you want
    to implement.
   </para>
@@ -30,7 +30,7 @@
 
  <refsect1><title>COPYRIGHT</title>
   <para>
-   Copyright (c) 1995-2002, Index Data.
+   Copyright (c) 1995-2003, Index Data.
   </para>
   <para>
    Permission to use, copy, modify, distribute, and sell this software and
