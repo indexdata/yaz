@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data.
+ * Copyright (c) 2002-2005, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.21 2005-01-09 21:50:26 adam Exp $
+ * $Id: srwutil.c,v 1.22 2005-01-11 10:50:06 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -234,6 +234,9 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     return 2;
 }
 
+/**
+  http://www.loc.gov/z3950/agency/zing/srw/service.html
+*/ 
 int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 		   Z_SOAP **soap_package, ODR decode, char **charset,
 		   Z_SRW_diagnostic **diag, int *num_diag)
@@ -262,6 +265,9 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	char *recordPacking = "xml";  /* xml packing is default for SRU */
 	char *maximumRecords = 0;
 	char *startRecord = 0;
+	char *maximumTerms = 0;
+	char *responsePosition = 0;
+	char *extraRequestData = 0;
 	char **uri_name;
 	char **uri_val;
 
@@ -313,6 +319,12 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 		    maximumRecords = v;
 		else if (!strcmp(n, "startRecord"))
 		    startRecord = v;
+		else if (!strcmp(n, "maximumTerms"))
+		    maximumTerms = v;
+		else if (!strcmp(n, "responsePosition"))
+		    responsePosition = v;
+		else if (!strcmp(n, "extraRequestData"))
+		    extraRequestData = v;
 		else
 		    yaz_add_srw_diagnostic(decode, diag, num_diag, 8, n);
 	    }
@@ -385,6 +397,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         }
 	else if (!strcmp(operation, "explain"))
 	{
+	    /* Transfer SRU explain parameters to common struct */
+	    /* http://www.loc.gov/z3950/agency/zing/srw/explain.html */
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_explain_request);
 
 	    sr->srw_version = version;
@@ -410,7 +424,12 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	}
 	else if (!strcmp(operation, "scan"))
 	{
+	    /* Transfer SRU scan parameters to common struct */
+	    /* http://www.loc.gov/z3950/agency/zing/srw/scan.html */
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_scan_request);
+
+	    sr->srw_version = version;
+	    *srw_pdu = sr;
 
             if (scanClause)
             {
@@ -425,9 +444,15 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	    else
 		yaz_add_srw_diagnostic(decode, diag, num_diag, 7,
 				       "scanClause");
-	    sr->srw_version = version;
-	    *srw_pdu = sr;
 	    sr->u.scan_request->database = db;
+
+	    if (maximumTerms)
+		sr->u.scan_request->maximumTerms =
+		    odr_intdup(decode, atoi(maximumTerms));
+	    if (responsePosition)
+		sr->u.scan_request->responsePosition =
+		    odr_intdup(decode, atoi(responsePosition));
+
             sr->u.scan_request->stylesheet = stylesheet;
 
 	    (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
