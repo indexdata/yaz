@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.21 2001-02-28 16:56:33 adam Exp $
+# $Id: makefile,v 1.22 2001-03-09 14:58:20 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=1   # 0 for release, 1 for debug
+DEBUG=0   # 0 for release, 1 for debug
 
 NEW_Z3950=1  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
@@ -698,7 +698,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.21  2001-02-28 16:56:33  adam
+# Revision 1.22  2001-03-09 14:58:20  adam
+# Updated version resource.
+#
+# Revision 1.21  2001/02/28 16:56:33  adam
 # Added version info for WIN32.
 #
 # Revision 1.20  2000/12/01 17:56:41  adam
