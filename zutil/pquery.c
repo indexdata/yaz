@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.11 2001-11-13 23:00:43 adam Exp $
+ * $Id: pquery.c,v 1.12 2002-01-23 20:25:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -253,6 +253,7 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
             elements[k]->attributeType = &attr_tmp[2*i];
 	    elements[k]->attributeSet =
 		yaz_oidval_to_z3950oid(o, CLASS_ATTSET, attr_set[i]);
+
 	    if (attr_clist[i])
 	    {
 		elements[k]->which = Z_AttributeValue_complex;
@@ -310,13 +311,13 @@ static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
         if (!(zo->u.attributesPlusTerm =
               rpn_term (li, o, proto, num_attr, attr_list, attr_clist,
 			attr_set)))
-            return NULL;
+            return 0;
         lex (li);
         break;
     case 's':
         lex (li);
         if (!li->query_look)
-            return NULL;
+            return 0;
         zo->which = Z_Operand_resultSetId;
         zo->u.resultSetId = (char *)odr_malloc (o, li->lex_len+1);
         memcpy (zo->u.resultSetId, li->lex_buf, li->lex_len);
@@ -324,7 +325,7 @@ static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
         lex (li);
         break;
     default:
-        return NULL;
+        return 0;
     }
     return zo;
 }
@@ -462,7 +463,9 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
             return NULL;
         if (num_attr >= max_attr)
             return NULL;
-	p_query_parse_attr(li, o, num_attr, attr_list, attr_clist, attr_set);
+	if (!p_query_parse_attr(li, o, num_attr, attr_list,
+                                attr_clist, attr_set))
+            return 0;
 	num_attr++;
         lex (li);
         return
@@ -575,10 +578,12 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
     {
         lex (li);
         if (!li->query_look)
-            return NULL;
+            return 0;
         if (num_attr >= max_attr)
-            return NULL;
-        p_query_parse_attr(li, o, num_attr, attr_list, attr_clist, attr_set);
+            return 0;
+        if (!p_query_parse_attr(li, o, num_attr, attr_list,
+                                attr_clist, attr_set))
+            return 0;
         num_attr++;
         lex (li);
     }

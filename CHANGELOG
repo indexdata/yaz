@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.5 2002/XX/XX
 
+Prefix query parser reports "fail" when bad attribute set is given.
+
 Fix in MARC decoder. Proximity logging. Fix for attribute set
 in scan handler for server. Patches by Shigeru Ishida.
 
