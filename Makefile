@@ -1,12 +1,12 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.1 1995-02-09 15:57:16 quinn Exp $
+# $Id: Makefile,v 1.2 1995-03-14 16:59:05 quinn Exp $
 
 #CC=
 SHELL=/bin/sh
 MAKE=make
-SUBDIR=odr asn yazlib
+SUBDIR=odr asn yazlib server
 
 all:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) CFLAGS="$(CFLAGS)"; then cd ..; else exit 1; fi; done
