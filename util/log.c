@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.22  2000-02-29 13:44:55  adam
+ * Revision 1.23  2000-03-14 09:06:11  adam
+ * Added POSIX threads support for frontend server.
+ *
+ * Revision 1.22  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.21  2000/02/28 11:20:06  adam
@@ -229,7 +232,11 @@ void yaz_log(int level, const char *fmt, ...)
 	    level -= mask_names[i].mask;
 	}
     va_start(ap, fmt);
+#if HAVE_VSNPRINTF
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+#else
     vsprintf(buf, fmt, ap);
+#endif
     if (o_level & LOG_ERRNO)
     	sprintf(buf + strlen(buf), " [%s]", strerror(errno));
     if (start_hook_func)

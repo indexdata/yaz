@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.13  2000-02-08 10:39:53  adam
+ * Revision 1.14  2000-03-14 09:06:11  adam
+ * Added POSIX threads support for frontend server.
+ *
+ * Revision 1.13  2000/02/08 10:39:53  adam
  * Added a few functions to set name of operands, etc.
  *
  * Revision 1.12  2000/01/31 13:15:21  adam
@@ -112,7 +115,6 @@
  *
  */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
+ * Revision 1.3  2000-03-14 09:06:11  adam
+ * Added POSIX threads support for frontend server.
+ *
+ * Revision 1.2  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -106,6 +109,7 @@ YAZ_BEGIN_CDECL
 typedef struct statserv_options_block
 {
     int dynamic;                  /* fork on incoming requests */
+    int threads;                  /* use threads */
     int one_shot;                 /* one session then exit(1) */
     int loglevel;                 /* desired logging-level */
     char apdufile[ODR_MAXNAME+1]; /* file for pretty-printed PDUs */

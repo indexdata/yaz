@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.15  2000-02-24 23:49:13  adam
+ * Revision 1.16  2000-03-14 09:06:11  adam
+ * Added POSIX threads support for frontend server.
+ *
+ * Revision 1.15  2000/02/24 23:49:13  adam
  * Fixed memory allocation problem.
  *
  * Revision 1.14  2000/01/31 13:15:21  adam
@@ -133,7 +136,6 @@
  *
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

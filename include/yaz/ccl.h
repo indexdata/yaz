@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.3  2000-02-08 10:39:53  adam
+ * Revision 1.4  2000-03-14 09:06:11  adam
+ * Added POSIX threads support for frontend server.
+ *
+ * Revision 1.3  2000/02/08 10:39:53  adam
  * Added a few functions to set name of operands, etc.
  *
  * Revision 1.2  2000/01/31 13:15:21  adam
@@ -113,6 +116,8 @@
 
 #ifndef CCL_H
 #define CCL_H
+
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {

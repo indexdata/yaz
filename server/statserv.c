@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.59  1999-11-30 13:47:12  adam
+ * Revision 1.60  2000-03-14 09:06:11  adam
+ * Added POSIX threads support for frontend server.
+ *
+ * Revision 1.59  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.58  1999/08/27 09:40:32  adam
@@ -215,6 +218,9 @@
 #include <direct.h>
 #include "service.h"
 #else
+#if HAVE_PTHREAD_H
+#include <pthread.h>
+#endif
 #include <unistd.h>
 #include <pwd.h>
 #endif
@@ -242,6 +248,7 @@ static char *me = "statserver";
 int check_options(int argc, char **argv);
 statserv_options_block control_block = {
     1,                          /* dynamic mode */
+    0,                          /* threaded mode */
     0,                          /* one shot (single session) */
     LOG_DEFAULT_LEVEL,          /* log level */
     "",                         /* no PDUs */
@@ -534,10 +541,11 @@ void statserv_closedown()
         iochan_destroy(p);
 }
 
+static void *new_session (void *vp);
+
 static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
-    association *newas;
     static int hand[2];
     static int child = 0;
     int res;
@@ -617,8 +625,6 @@ static void listener(IOCHAN h, int event)
     else if (event == EVENT_OUTPUT)
     {
     	COMSTACK new_line;
-    	IOCHAN new_chan;
-	char *a;
 
 	if (!(new_line = cs_accept(line)))
 	{
@@ -643,26 +649,19 @@ static void listener(IOCHAN h, int event)
 	}
 	else
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
-	
-	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
-	    EVENT_INPUT)))
+
+#if HAVE_PTHREAD_H
+	if (control_block.threads)
 	{
-	    yaz_log(LOG_FATAL, "Failed to create iochan");
-            iochan_destroy(h);
-            return;
+	    pthread_t child_thread;
+	    pthread_create (&child_thread, 0, new_session, new_line);
+	    pthread_detach (child_thread);
 	}
-        new_chan->next = pListener;
-        pListener = new_chan;
-	if (!(newas = create_association(new_chan, new_line)))
-	{
-	    yaz_log(LOG_FATAL, "Failed to create new assoc.");
-            iochan_destroy(h);
-            return;
-	}
-	iochan_setdata(new_chan, newas);
-	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
-	a = cs_addrstr(new_line);
-	yaz_log(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+	else
+	    new_session(new_line);
+#else
+	new_session(new_line);
+#endif
     }
     else
     {
@@ -670,6 +669,39 @@ static void listener(IOCHAN h, int event)
         iochan_destroy(h);
         return;
     }
+}
+
+static void *new_session (void *vp)
+{
+    char *a;
+    association *newas;
+    IOCHAN new_chan;
+    COMSTACK new_line = (COMSTACK) vp;
+    if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
+				   EVENT_INPUT)))
+    {
+	yaz_log(LOG_FATAL, "Failed to create iochan");
+	return 0;
+    }
+    if (!(newas = create_association(new_chan, new_line)))
+    {
+	yaz_log(LOG_FATAL, "Failed to create new assoc.");
+	return 0;
+    }
+    iochan_setdata(new_chan, newas);
+    iochan_settimeout(new_chan, control_block.idle_timeout * 60);
+    a = cs_addrstr(new_line);
+    yaz_log(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+    if (control_block.threads)
+    {
+	event_loop(&new_chan);
+    }
+    else
+    {
+	new_chan->next = pListener;
+	pListener = new_chan;
+    }
+    return 0;
 }
 
 #endif /* WIN32 */
@@ -743,7 +775,8 @@ static void add_listener(char *where, int what)
 	return;
     }
     yaz_log(LOG_LOG, "Adding %s %s listener on %s",
-        control_block.dynamic ? "dynamic" : "static",
+	    control_block.dynamic ? "dynamic" : 
+	    (control_block.threads ? "threaded" : "static"),
     	what == PROTO_SR ? "SR" : "Z3950", where);
     if (!(l = cs_create(type, 0, what)))
     {
@@ -868,7 +901,7 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    while ((ret = options("1a:iszSl:v:u:c:w:t:k:d:", argv, argc, &arg)) != -2)
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -887,6 +920,14 @@ int check_options(int argc, char **argv)
 	    break;
 	case 'S':
 	    control_block.dynamic = 0;
+	    break;
+	case 'T':
+#if HAVE_PTHREAD_H
+	    control_block.dynamic = 0;
+	    control_block.threads = 1;
+#else
+	    fprintf(stderr, "%s: Threaded mode not available.\n", me);
+#endif
 	    break;
 	case 'l':
 	    strcpy(control_block.logfile, arg ? arg : "");
@@ -935,10 +976,10 @@ int check_options(int argc, char **argv)
 	    }
 	    break;
 	default:
-	    fprintf(stderr, "Usage: %s [ -i -a <pdufile> -v <loglevel>"
+	    fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
 		    " -l <logfile> -u <user> -c <config> -t <minutes>"
 		    " -k <kilobytes> -d <daemon>"
-                        " -zsS <listener-addr> -w <directory> ... ]\n", me);
+                        " -zsiST -w <directory> <listender-addr>... ]\n", me);
 	    return(1);
         }
     }
