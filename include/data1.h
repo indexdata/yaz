@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.4  1995-11-13 09:27:29  quinn
+ * Revision 1.5  1995-12-05 14:26:40  quinn
+ * Added global lbuf to data1_node.
+ *
+ * Revision 1.4  1995/11/13  09:27:29  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.3  1995/11/01  16:34:52  quinn
@@ -272,7 +275,7 @@ typedef struct data1_node
 	    } what;
 	    int len;
 	    char *data;      /* filename or data */
-#define DATA1_LOCALDATA 15
+#define DATA1_LOCALDATA 40
 	    char lbuf[DATA1_LOCALDATA]; /* small buffer for local data */
 	} data;
 
@@ -288,6 +291,7 @@ typedef struct data1_node
 	} indicator;
     } u;
 
+    char lbuf[DATA1_LOCALDATA]; /* small buffer for local data */
     int line;
     int num_children;
     struct data1_node *next;
