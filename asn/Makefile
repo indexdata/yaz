@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.7 1995-03-30 09:39:31 quinn Exp $
+# $Id: Makefile,v 1.8 1995-03-30 14:02:50 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -12,7 +12,7 @@ DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libasn.a
 LIBS=-lodr -lasn
 PO = proto.o diagbib1.o oid.o
-CPP=cc -E
+CPP=$(CC) -E
 
 all: $(LIBDIR) $(LIB)
 

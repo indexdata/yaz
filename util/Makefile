@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.3 1995-03-30 11:10:56 quinn Exp $
+# $Id: Makefile,v 1.4 1995-03-30 14:03:32 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -12,7 +12,7 @@ DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libutil.a
 LIBS=
 PO = dmalloc.o options.o log.o
-CPP=cc -E
+CPP=$(CC) -E
 
 all: $(LIBDIR) $(LIB)
 
