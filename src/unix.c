@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.10 2005-01-17 10:29:00 adam Exp $
+ * $Id: unix.c,v 1.11 2005-02-01 14:37:47 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -22,6 +22,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 
@@ -30,9 +33,6 @@
 #include <pwd.h>
 #endif
 
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
@@ -152,6 +152,7 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
     p->event = CS_NONE;
     p->cerrno = 0;
     p->stackerr = 0;
+    p->user = 0;
 
     state->altbuf = 0;
     state->altsize = state->altlen = 0;

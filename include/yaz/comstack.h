@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.19 2005-01-16 21:51:49 adam Exp $
+ * $Id: comstack.h,v 1.20 2005-02-01 14:37:47 adam Exp $
  */
 
 /** 
@@ -89,6 +89,7 @@ struct comstack
     char *(*f_addrstr)(COMSTACK handle);
     void *(*f_straddr)(COMSTACK handle, const char *str);
     int (*f_set_blocking)(COMSTACK handle, int blocking);
+    void *user;       /* user defined data associated with COMSTACK */
 };
 
 #define cs_put(handle, buf, size) ((*(handle)->f_put)(handle, buf, size))

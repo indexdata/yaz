@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.14 2005-01-16 21:51:50 adam Exp $
+ * $Id: tcpip.c,v 1.15 2005-02-01 14:37:47 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -192,6 +192,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
     p->event = CS_NONE;
     p->cerrno = 0;
     p->stackerr = 0;
+    p->user = 0;
 
 #if HAVE_OPENSSL_SSL_H
     sp->ctx = sp->ctx_alloc = 0;
