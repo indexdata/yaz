@@ -1,11 +1,11 @@
-## $Id: Makefile.am,v 1.3 2002-04-15 09:44:44 adam Exp $
+## $Id: Makefile.am,v 1.4 2002-06-02 21:27:17 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
 noinst_LTLIBRARIES = libzoom.la
 libzoom_la_SOURCES = zoom-opt.c zoom-c.c zoom-p.h
 
-zoomlibs = libzoom.la ../comstack/libcomstack.la ../z39.50/libz39.50.la ../zutil/libzutil.la  ../odr/libodr.la ../util/libutil.la $(READLINE_LIBS)
+zoomlibs = libzoom.la ../comstack/libcomstack.la ../z39.50/libz39.50.la ../ill/libill.la ../zutil/libzutil.la  ../odr/libodr.la ../util/libutil.la $(READLINE_LIBS)
 
 zoomsh_LDADD = $(zoomlibs)
 zoomtst1_LDADD = $(zoomlibs)

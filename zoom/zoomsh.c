@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.9 2002-05-18 09:52:37 oleg Exp $
+ * $Id: zoomsh.c,v 1.10 2002-06-02 21:27:17 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -76,12 +76,25 @@ static void cmd_set (ZOOM_connection *c, ZOOM_resultset *r,
 	return ;
     }
     if (!next_token_copy (args, val, sizeof(val)))
-    {
-	const char *val = ZOOM_options_get(options, key);
-	printf ("%s = %s\n", key, val ? val : "<null>");
-    }
+	ZOOM_options_set(options, key, 0);
     else
 	ZOOM_options_set(options, key, val);
+}
+
+static void cmd_get (ZOOM_connection *c, ZOOM_resultset *r,
+		     ZOOM_options options,
+		     const char **args)
+{
+    char key[40], val[80];
+    if (!next_token_copy (args, key, sizeof(key)))
+    {
+	printf ("missing argument for get\n");
+    }
+    else
+    {
+        const char *val = ZOOM_options_get(options, key);
+        printf ("%s = %s\n", key, val ? val : "<null>");
+    }
 }
 
 static void cmd_close (ZOOM_connection *c, ZOOM_resultset *r,
@@ -173,6 +186,48 @@ static void cmd_show (ZOOM_connection *c, ZOOM_resultset *r,
     }
 }
 
+static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options,
+                     const char **args)
+{
+    ZOOM_query s;
+    ZOOM_package p[MAX_CON];
+    
+    int i;
+    
+    for (i = 0; i<MAX_CON; i++)
+    {
+	if (c[i])
+        {
+            p[i] = ZOOM_connection_package (c[i], 0);
+            ZOOM_package_send(p[i], "itemorder");
+        }
+        else
+            p[i] = 0;
+    }
+
+    while (ZOOM_event (MAX_CON, c))
+	;
+
+    for (i = 0; i<MAX_CON; i++)
+    {
+	int error;
+	const char *errmsg, *addinfo;
+	/* display errors if any */
+	if (!p[i])
+	    continue;
+	if ((error = ZOOM_connection_error(c[i], &errmsg, &addinfo)))
+	    fprintf (stderr, "%s error: %s (%d) %s\n",
+		     ZOOM_connection_option_get(c[i], "host"), errmsg,
+		     error, addinfo);
+	else if (p[i])
+	{
+            printf ("ok\n");
+	}
+        ZOOM_package_destroy (p[i]);
+    }
+}
+
 static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
 			ZOOM_options options,
 			const char **args)
@@ -235,7 +290,8 @@ static void cmd_help (ZOOM_connection *c, ZOOM_resultset *r,
     printf ("show [<start> [<count>]\n");
     printf ("quit\n");
     printf ("close <zurl>\n");
-    printf ("set <option> [<value>]]\n");
+    printf ("set <option> [<value>]\n");
+    printf ("get <option>\n");
     printf ("\n");
     printf ("options:\n");
     printf (" start\n");
@@ -314,9 +370,15 @@ static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
 	return 0;
     else if (is_command ("set", cmd_str, cmd_len))
 	cmd_set (c, r, options, buf);
+    else if (is_command ("get", cmd_str, cmd_len))
+	cmd_get (c, r, options, buf);
     else if (is_command ("connect", cmd_str, cmd_len))
 	cmd_connect (c, r, options, buf);
+    else if (is_command ("open", cmd_str, cmd_len))
+	cmd_connect (c, r, options, buf);
     else if (is_command ("search", cmd_str, cmd_len))
+	cmd_search (c, r, options, buf);
+    else if (is_command ("find", cmd_str, cmd_len))
 	cmd_search (c, r, options, buf);
     else if (is_command ("show", cmd_str, cmd_len))
 	cmd_show (c, r, options, buf);
@@ -324,12 +386,15 @@ static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
 	cmd_close (c, r, options, buf);
     else if (is_command ("help", cmd_str, cmd_len))
 	cmd_help(c, r, options, buf);
+    else if (is_command ("ext", cmd_str, cmd_len))
+	cmd_ext(c, r, options, buf);
     else
 	printf ("unknown command %.*s\n", cmd_len, cmd_str);
     return 2;
 }
 
-void shell(ZOOM_connection *c, ZOOM_resultset *r, ZOOM_options options)
+void shell(ZOOM_connection *c, ZOOM_resultset *r,
+           ZOOM_options options)
 {
     while (1)
     {

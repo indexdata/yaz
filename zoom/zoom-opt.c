@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-opt.c,v 1.5 2002-05-17 12:48:30 adam Exp $
+ * $Id: zoom-opt.c,v 1.6 2002-06-02 21:27:17 adam Exp $
  *
  * ZOOM layer for C, options handling
  */
@@ -10,13 +10,20 @@
 #include "zoom-p.h"
 
 ZOOM_API(ZOOM_options)
+ZOOM_options_create_with_parent (ZOOM_options parent)
+{
+    return ZOOM_options_create_with_parent2(parent, 0);
+}
+
+ZOOM_API(ZOOM_options)
 ZOOM_options_create (void)
 {
     return ZOOM_options_create_with_parent (0);
 }
 
+
 ZOOM_API(ZOOM_options)
-ZOOM_options_create_with_parent (ZOOM_options parent)
+ZOOM_options_create_with_parent2 (ZOOM_options parent1, ZOOM_options parent2)
 {
     ZOOM_options opt = (ZOOM_options) xmalloc (sizeof(*opt));
 
@@ -24,11 +31,15 @@ ZOOM_options_create_with_parent (ZOOM_options parent)
     opt->callback_func = 0;
     opt->callback_handle = 0;
     opt->entries = 0;
-    opt->parent= parent;
-    if (parent)
-	(parent->refcount)++;
+    opt->parent1= parent1;
+    if (parent1)
+	(parent1->refcount)++;
+    opt->parent2= parent2;
+    if (parent2)
+	(parent2->refcount)++;
     return opt;
 }
+
 
 void ZOOM_options_addref (ZOOM_options opt)
 {
@@ -60,7 +71,8 @@ ZOOM_options_destroy (ZOOM_options opt)
     {
 	struct ZOOM_options_entry *e;
 	
-	ZOOM_options_destroy (opt->parent);
+	ZOOM_options_destroy (opt->parent1);
+	ZOOM_options_destroy (opt->parent2);
 	e = opt->entries;
 	while (e)
 	{
@@ -75,7 +87,8 @@ ZOOM_options_destroy (ZOOM_options opt)
 }
 
 ZOOM_API(void)
-ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
+ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
+                   int len)
 {
     struct ZOOM_options_entry **e;
 
@@ -85,15 +98,33 @@ ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
 	if (!strcmp((*e)->name, name))
 	{
 	    xfree ((*e)->value);
-	    (*e)->value = xstrdup(value);
+            (*e)->value = 0;
+            if (value)
+            {
+                (*e)->value = xmalloc (len+1);
+                memcpy ((*e)->value, value, len);
+                (*e)->value[len] = '\0';
+            }
 	    return;
 	}
 	e = &(*e)->next;
     }
     *e = (struct ZOOM_options_entry *) xmalloc (sizeof(**e));
     (*e)->name = xstrdup (name);
-    (*e)->value = xstrdup (value);
+    (*e)->value = 0;
+    if (value)
+    {
+        (*e)->value = xmalloc (len+1);
+        memcpy ((*e)->value, value, len);
+        (*e)->value[len] = '\0';
+    }
     (*e)->next = 0;
+}
+
+ZOOM_API(void)
+ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
+{
+    return ZOOM_options_setl (opt, name, value, value ? strlen(value): 0);
 }
 
 ZOOM_API(const char *)
@@ -115,7 +146,9 @@ ZOOM_options_get (ZOOM_options opt, const char *name)
 	    }
     }
     if (!v)
-	return ZOOM_options_get(opt->parent, name);
+	v = ZOOM_options_get(opt->parent1, name);
+    if (!v)
+	v = ZOOM_options_get(opt->parent2, name);
     return v;
 }
 

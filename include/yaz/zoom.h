@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.12 2002-05-17 12:48:29 adam Exp $
+ * $Id: zoom.h,v 1.13 2002-06-02 21:27:17 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -26,6 +26,9 @@ typedef	struct ZOOM_resultset_p *ZOOM_resultset;
 typedef struct ZOOM_task_p *ZOOM_task;
 typedef struct ZOOM_record_p *ZOOM_record;
 typedef struct ZOOM_scanset_p *ZOOM_scanset;
+typedef struct ZOOM_package_p *ZOOM_package;
+
+typedef const char *(*ZOOM_options_callback)(void *handle, const char *name);
 
 /* ----------------------------------------------------------- */
 /* connections */
@@ -179,30 +182,56 @@ ZOOM_API(void)
 ZOOM_scanset_destroy (ZOOM_scanset scan);
 
 ZOOM_API(const char *)
-ZOOM_scanset_option_get (ZOOM_scanset scan, const char *key);
+    ZOOM_scanset_option_get (ZOOM_scanset scan, const char *key);
 
 ZOOM_API(void)
-ZOOM_scanset_option_set (ZOOM_scanset scan, const char *key,
-                         const char *val);
+    ZOOM_scanset_option_set (ZOOM_scanset scan, const char *key,
+                             const char *val);
+/* ----------------------------------------------------------- */
+/* Extended Services Packages */
+
+ZOOM_API(ZOOM_package)
+    ZOOM_connection_package (ZOOM_connection c, ZOOM_options options);
+
+ZOOM_API(void)
+    ZOOM_package_destroy(ZOOM_package p);
+
+ZOOM_API(void)
+    ZOOM_package_send (ZOOM_package p, const char *type);
+
+ZOOM_API(const char *)
+    ZOOM_package_option_get (ZOOM_package p, const char *key);
+
+ZOOM_API(void)
+    ZOOM_package_option_set (ZOOM_package p, const char *key,
+                             const char *val);
+
 /* ----------------------------------------------------------- */
 /* options */
-typedef const char *(*ZOOM_options_callback)(void *handle, const char *name);
 
 ZOOM_API(ZOOM_options_callback)
-ZOOM_options_set_callback (ZOOM_options opt,
-						   ZOOM_options_callback c,
-						   void *handle);
+    ZOOM_options_set_callback (ZOOM_options opt,
+                               ZOOM_options_callback c,
+                               void *handle);
 ZOOM_API(ZOOM_options)
 ZOOM_options_create (void);
 
 ZOOM_API(ZOOM_options)
 ZOOM_options_create_with_parent (ZOOM_options parent);
 
+ZOOM_API(ZOOM_options)
+    ZOOM_options_create_with_parent2 (ZOOM_options parent1,
+                                      ZOOM_options parent2);
+
 ZOOM_API(const char *)
 ZOOM_options_get (ZOOM_options opt, const char *name);
 
 ZOOM_API(void)
 ZOOM_options_set (ZOOM_options opt, const char *name, const char *v);
+
+ZOOM_API(void)
+ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
+                   int len);
 
 ZOOM_API(void)
 ZOOM_options_destroy (ZOOM_options opt);

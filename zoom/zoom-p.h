@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.10 2002-05-18 09:52:37 oleg Exp $
+ * $Id: zoom-p.h,v 1.11 2002-06-02 21:27:17 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
@@ -32,6 +32,7 @@ struct ZOOM_connection_p {
     char *addinfo;
     int state;
     int mask;
+    int reconnect_ok;
     ODR odr_in;
     ODR odr_out;
     char *buf_in;
@@ -43,6 +44,7 @@ struct ZOOM_connection_p {
     char *lang;
     char *cookie_out;
     char *cookie_in;
+    char *client_IP;
     int async;
     int support_named_resultsets;
     int last_event;
@@ -65,7 +67,8 @@ struct ZOOM_options_p {
     void *callback_handle;
     ZOOM_options_callback callback_func;
     struct ZOOM_options_entry *entries;
-    ZOOM_options parent;
+    ZOOM_options parent1;
+    ZOOM_options parent2;
 };
 
 typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
@@ -110,6 +113,15 @@ struct ZOOM_scanset_p {
     Z_ScanResponse *scan_response;
 };
 
+struct ZOOM_package_p {
+    int refcount;
+    ODR odr_out;
+    ZOOM_options options;
+    ZOOM_connection connection;
+    char *buf_out;
+    int len_out;
+};
+
 struct ZOOM_task_p {
     int running;
     int which;
@@ -129,6 +141,8 @@ struct ZOOM_task_p {
         struct {
             ZOOM_scanset scan;
         } scan;
+#define ZOOM_TASK_PACKAGE 5
+        ZOOM_package package;
     } u;
     ZOOM_task next;
 };
