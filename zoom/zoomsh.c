@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.10 2002-06-02 21:27:17 adam Exp $
+ * $Id: zoomsh.c,v 1.11 2002-06-05 21:09:20 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -85,7 +85,7 @@ static void cmd_get (ZOOM_connection *c, ZOOM_resultset *r,
 		     ZOOM_options options,
 		     const char **args)
 {
-    char key[40], val[80];
+    char key[40];
     if (!next_token_copy (args, key, sizeof(key)))
     {
 	printf ("missing argument for get\n");
@@ -190,7 +190,6 @@ static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
                      ZOOM_options options,
                      const char **args)
 {
-    ZOOM_query s;
     ZOOM_package p[MAX_CON];
     
     int i;
