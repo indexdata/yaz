@@ -82,3 +82,9 @@ makelib - This is a simple utility that gathers the libraries from the
 	previous modules into libyaz.a.
 
 lib     - The libraries. Primarily libyaz.a.
+
+To get more information or assistance, send mail to yaz-help@index.ping.dk.
+
+We maintain a mailing-list for the purpose of announcing new versions of
+the software, bug-reports, discussion etc. You can sign up by sending
+mail to yaz-request@index.ping.dk.
