@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.19 2003-11-19 19:07:26 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.20 2003-11-25 19:46:18 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -729,6 +729,9 @@ typedef struct bend_scan_rr {
    
    <cmdsynopsis>
     <command>appname</command>
+    <arg choice="opt"><option>-install</option></arg>
+    <arg choice="opt"><option>-installa</option></arg>
+    <arg choice="opt"><option>-remove</option></arg>
     <arg choice="opt"><option>-a <replaceable>file</replaceable></option></arg>
     <arg choice="opt"><option>-v <replaceable>level</replaceable></option></arg>
     <arg choice="opt"><option>-l <replaceable>file</replaceable></option></arg>
@@ -764,7 +767,7 @@ typedef struct bend_scan_rr {
    <synopsis>
     hostname | IP-number &lsqb;: portnumber&rsqb;
    </synopsis>
-
+   
    <para>
     The port number defaults to 210 (standard Z39.50 port).
    </para>

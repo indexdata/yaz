@@ -1,5 +1,5 @@
 <!-- 
-   $Id: ztest-options.xml,v 1.2 2002-09-17 20:17:44 adam Exp $
+   $Id: ztest-options.xml,v 1.3 2003-11-25 19:46:18 adam Exp $
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->
@@ -99,14 +99,21 @@
  <varlistentry><term><literal>-install</literal></term>
   <listitem><para>
     Use this to install the server as an NT service
-    (Windows 2000/NT only). 
+    (Windows NT/2000/XP only). 
+    Control the server by going to the Services in the Control Panel.
+   </para></listitem></varlistentry>
+ 
+ <varlistentry><term><literal>-installa</literal></term>
+  <listitem><para>
+    Use this to install and activate the server as an NT service
+    (Windows NT/2000/XP only). 
     Control the server by going to the Services in the Control Panel.
    </para></listitem></varlistentry>
  
  <varlistentry><term><literal>-remove</literal></term>
   <listitem><para>
     Use this to remove the server from the NT services
-    (Windows 2000/NT only). 
+    (Windows NT/2000/XP only). 
    </para></listitem></varlistentry>
  
  <varlistentry><term><literal>-t </literal>

@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY ztest-options SYSTEM "ztest-options.xml">
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.1 2003-10-27 12:21:24 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.2 2003-11-25 19:46:18 adam Exp $ -->
 <refentry id="yaz-ztest">
  
  <refmeta>
@@ -17,6 +17,9 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-ztest</command>
+   <arg choice="opt"><option>-install</option></arg>
+   <arg choice="opt"><option>-installa</option></arg>
+   <arg choice="opt"><option>-remove</option></arg>
    <arg choice="opt"><option>-a <replaceable>file</replaceable></option></arg>
    <arg choice="opt"><option>-v <replaceable>level</replaceable></option></arg>
    <arg choice="opt"><option>-l <replaceable>file</replaceable></option></arg>
@@ -35,14 +38,15 @@
    <arg rep="repeat" choice="opt"><option>option</option></arg>
    <arg choice="opt" rep="repeat">addr</arg>
   </cmdsynopsis>
-
+  
  </refsynopsisdiv>
-  <refsect1><title>DESCRIPTION</title>
-   <para>
-    <command>yaz-ztest</command> is a Z39.50 test server. 
-    The server acts as a real Z39.50 server but does not use a database.
-    It returns a random hit count and returns a subset of a few built-in
-    records.
+ <refsect1><title>DESCRIPTION</title>
+  <para>
+   <command>yaz-ztest</command> is a Z39.50 test server that uses
+   the YAZ frontend server API.
+   The server acts as a real Z39.50 server but does not use a database.
+   It returns a random hit count and returns a subset of a few built-in
+   records.
    </para>
    <para>
     <command>yaz-ztest-ssl</command> is identical to
