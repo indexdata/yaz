@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.21  1995-09-29 17:01:47  quinn
+ * Revision 1.22  1995-10-11 14:49:12  quinn
+ * Smallish.
+ *
+ * Revision 1.21  1995/09/29  17:01:47  quinn
  * More Windows work
  *
  * Revision 1.20  1995/08/29  14:24:13  quinn
@@ -317,7 +320,9 @@ void display_grs1(Z_GenericRecord *r, int level)
         }
         else if (t->content->which == Z_ElementData_string)
             printf("%s\n", t->content->u.string);
-        else
+        else if (t->content->which == Z_ElementData_numeric)
+	    printf("%d\n", *t->content->u.numeric);
+	else
             printf("??????\n");
     }
 }
