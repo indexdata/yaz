@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.25 2004-12-08 09:08:01 adam Exp $
+ * $Id: log.h,v 1.26 2004-12-09 09:37:00 adam Exp $
  */
 
 /**
@@ -72,5 +72,6 @@ YAZ_BEGIN_CDECL
 /* logf is deprecated, as it conflicts with a math function */
 #define logf yaz_log
 
-#endif
 YAZ_END_CDECL
+
+#endif
