@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.26  1997-09-17 12:10:32  adam
+ * Revision 1.27  1997-09-24 13:35:44  adam
+ * Added two members to data1_marctab to ease reading of weird MARC records.
+ *
+ * Revision 1.26  1997/09/17 12:10:32  adam
  * YAZ version 1.4.
  *
  * Revision 1.25  1997/09/05 09:50:55  adam
@@ -211,6 +214,8 @@ typedef struct data1_marctab
     int  length_implementation;
     char future_use[2];
 
+    int  force_indicator_length;
+    int  force_identifier_length;
     struct data1_marctab *next;
 } data1_marctab;
 

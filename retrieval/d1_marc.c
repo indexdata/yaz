@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.8  1997-09-17 12:10:37  adam
+ * Revision 1.9  1997-09-24 13:35:45  adam
+ * Added two members to data1_marctab to ease reading of weird MARC records.
+ *
+ * Revision 1.8  1997/09/17 12:10:37  adam
  * YAZ version 1.4.
  *
  * Revision 1.7  1997/09/05 09:50:57  adam
@@ -71,6 +74,8 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
     strcpy(res->implementation_codes, "    ");
     res->indicator_length = 2;
     res->identifier_length = 2;
+    res->force_indicator_length = -1;
+    res->force_identifier_length = -1;
     strcpy(res->user_systems, "z  ");
 
     while ((argc = readconf_line(f, line, 512, argv, 50)))
@@ -132,6 +137,24 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 		continue;
 	    }
 	    strncpy(res->future_use, argv[1], 2);
+	}
+	else if (!strcmp(argv[0], "force-indicator-length"))
+	{
+	    if (argc != 2)
+	    {
+		logf(LOG_WARN, "%s: Bad future-use");
+		continue;
+	    }
+	    res->force_indicator_length = atoi(argv[1]);
+	}
+	else if (!strcmp(argv[0], "force-identifier-length"))
+	{
+	    if (argc != 2)
+	    {
+		logf(LOG_WARN, "%s: Bad future-use");
+		continue;
+	    }
+	    res->force_identifier_length = atoi(argv[1]);
 	}
 	else
 	    logf(LOG_WARN, "%s: Bad directive '%s'", file, argv[0]);
