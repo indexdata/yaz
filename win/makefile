@@ -1,5 +1,5 @@
-# Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.16 2000-05-05 13:48:15 adam Exp $
+# makefile.mak - makefile for MS NMAKE 
+# $Id: makefile,v 1.17 2000-10-06 12:01:12 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -151,8 +151,8 @@ SERVER_LINK_OPTIONS = -lib
 ZTEST_LINK_OPTIONS = /subsystem:console  
 
 # TCL
-TCL="C:\Program Files\Tcl\bin\tclsh82.exe"
-HAVE_TCL=0
+TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
+HAVE_TCL=1
 
 COMMON_TCL_OPTIONS= ..\util\yaz-comp -I$(INCLDIR) -i yaz
 
@@ -292,6 +292,7 @@ Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
    $(OBJDIR)\z-univ.obj\
    $(OBJDIR)\zes-update.obj\
+   $(OBJDIR)\zes-admin.obj \
    $(OBJDIR)\z-accdes1.obj \
    $(OBJDIR)\z-accform1.obj \
    $(OBJDIR)\z-acckrb1.obj \
@@ -313,8 +314,7 @@ Z3950_OBJS= \
    $(OBJDIR)\zes-pquery.obj \
    $(OBJDIR)\zes-psched.obj \
    $(OBJDIR)\zes-pset.obj \
-   $(OBJDIR)\zes-update0.obj \
-   $(OBJDIR)\zes-admin.obj
+   $(OBJDIR)\zes-update0.obj
 
 ILL_OBJS= \
    $(OBJDIR)\ill-get.obj\
@@ -355,15 +355,17 @@ ALL_OBJS= \
 !if $(NEW_Z3950)
 $(PROTOH): makefile $(INCLDIR)\yaz\z-proto.h
 	type $(INCLDIR)\yaz\z-proto.h > $(PROTOH)
-!else
+!else	
 $(PROTOH): makefile $(INCLDIR)\yaz\prt-proto.h 
+	copy $(ASNDIR)\*.h $(INCLDIR)\yaz
 	type $(INCLDIR)\yaz\prt-proto.h > $(PROTOH)
 !endif
 
 
 ###########################################################
 ############### Generated C and H files
-###########################################################
+#####
+######################################################
 
 
 Z3950_C_DIR=$(Z3950DIR)   
@@ -413,21 +415,23 @@ Z3950V3_C_FILES= \
    $(Z3950_C_DIR)\zes-pquery.c \
    $(Z3950_C_DIR)\zes-psched.c \
    $(Z3950_C_DIR)\zes-pset.c \
-   $(Z3950_C_DIR)\zes-update0.c \
-   $(Z3950_C_DIR)\zes-admin.c
+   $(Z3950_C_DIR)\zes-update0.c
 
+# Files generated from ill9702.asn
 ILL_CORE_H_FILES= \
    $(INCLDIR)\yaz\ill-core.h
 
 ILL_CORE_C_FILES= \
    $(ILL_C_DIR)\ill-core.c
 
+# Files generated from itemreq.asn
 ITEM_REQ_H_FILES= \
    $(INCLDIR)\yaz\item-req.h
 
 ITEM_REQ_C_FILES= \
    $(ILL_C_DIR)\item-req.c
 
+# Combined..
 DATETIME_FILES = $(DATETIME_H_FILES) $(DATETIME_C_FILES)
 UNIVRES_FILES = $(UNIVRES_H_FILES) $(UNIVRES_C_FILES)
 ESUPDATE_FILES = $(ESUPDATE_H_FILES) $(ESUPDATE_C_FILES)
@@ -440,13 +444,15 @@ GENERATED_C_FILES= \
    $(Z3950V3_C_FILES)  \
    $(ESUPDATE_C_FILES) \
    $(UNIVRES_C_FILES)  \
-   $(DATETIME_C_FILES)
+   $(DATETIME_C_FILES) \
+   $(ESADMIN_C_FILES)
 
 GENERATED_H_FILES= \
    $(Z3950V3_H_FILES)  \
    $(ESUPDATE_H_FILES) \
    $(UNIVRES_H_FILES)  \
-   $(DATETIME_H_FILES)
+   $(DATETIME_H_FILES) \
+   $(ESADMIN_H_FILES)
 
 generated_files: \
 	$(GENERATED_H_FILES) \
@@ -654,7 +660,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.16  2000-05-05 13:48:15  adam
+# Revision 1.17  2000-10-06 12:01:12  adam
+# Updates regarding ASN-code generation (mostly).
+#
+# Revision 1.16  2000/05/05 13:48:15  adam
 # Minor changes.
 #
 # Revision 1.15  2000/04/17 14:21:38  adam
