@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.220 2004-01-06 09:09:13 adam Exp $
+ * $Id: client.c,v 1.221 2004-01-06 13:38:39 adam Exp $
  */
 
 #include <stdio.h>
@@ -3289,10 +3289,10 @@ static void handle_srw_record(Z_SRW_record *rec)
 	printf (" schema=%s", rec->recordSchema);
     printf ("\n");
     if (rec->recordData_buf && rec->recordData_len)
-    {
 	fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout);
-	printf ("\n");
-    }
+    else
+	printf ("No data!");
+    printf("\n");
 }
 
 static void handle_srw_explain_response(Z_SRW_explainResponse *res)
