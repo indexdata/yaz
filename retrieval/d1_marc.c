@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_marc.c,v 1.24 2002-08-23 14:27:18 adam Exp $
+ * $Id: d1_marc.c,v 1.25 2002-08-28 12:44:35 adam Exp $
  */
 
 
@@ -171,13 +171,7 @@ static char *get_data(data1_node *n, int *len)
                 return n->u.data.data + i;
         }
         if (n->which == DATA1N_tag)
-            np = n->child;
-        n = n->next;
-        if (!n)
-        {
-            n = np;
-            np = 0;
-        }
+            n = n->child;
     }
     r = "";
     *len = strlen(r);
