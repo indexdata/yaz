@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.81  1998-10-13 16:12:24  adam
+ * Revision 1.82  1998-10-20 14:00:30  quinn
+ * Fixed Scan
+ *
+ * Revision 1.81  1998/10/13 16:12:24  adam
  * Added support for Surrogate Diagnostics for Scan Term entries.
  *
  * Revision 1.80  1998/09/02 12:41:53  adam
@@ -1447,14 +1450,10 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     res->numberOfEntriesReturned = numberOfEntriesReturned;
     res->positionOfTerm = 0;
     res->entries = ents;
-#if ASN_COMPILED
     ents->num_entries = 0;
     ents->entries = NULL;
     ents->num_nonsurrogateDiagnostics = 0;
     ents->nonsurrogateDiagnostics = NULL;
-#else
-    ents->which = Z_ListEntries_entries;
-#endif
     res->attributeSet = 0;
     res->otherInfo = 0;
 
@@ -1489,11 +1488,6 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	else
 	{
 	    int i;
-#ifdef ASN_COMPILED
-#else
-	    Z_Entries *list = (Z_Entries *)
-		odr_malloc (assoc->encode, sizeof(*list));
-#endif
             Z_Entry **tab = (Z_Entry **)
 		odr_malloc (assoc->encode, sizeof(*tab) * srs->num_entries);
 	    
@@ -1501,16 +1495,9 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	    	*scanStatus = Z_Scan_partial_5;
 	    else
 	    	*scanStatus = Z_Scan_success;
-#ifdef ASN_COMPILED
 	    ents->entries = tab;
 	    ents->num_entries = srs->num_entries;
 	    res->numberOfEntriesReturned = &ents->num_entries;	    
-#else
-	    ents->u.entries = list;
-	    list->entries = tab;
-	    list->num_entries = srs->num_entries;
-	    res->numberOfEntriesReturned = &list->num_entries;
-#endif
 	    res->positionOfTerm = &srs->term_position;
 	    for (i = 0; i < srs->num_entries; i++)
 	    {
@@ -1561,13 +1548,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     }
     if (diagrecs_p)
     {
-#ifdef ASN_COMPILED
 	ents->num_nonsurrogateDiagnostics = diagrecs_p->num_diagRecs;
 	ents->nonsurrogateDiagnostics = diagrecs_p->diagRecs;
-#else
-	ents->u.nonSurrogateDiagnostics = diagrecs_p;
-	ents->which = Z_ListEntries_nonSurrogateDiagnostics;
-#endif
     }
     return apdu;
 }
