@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oid.c,v $
- * Revision 1.1  1995-02-03 17:04:36  quinn
+ * Revision 1.2  1995-02-14 20:39:55  quinn
+ * Fixed bugs in completeBER and (serious one in) ber_oid.
+ *
+ * Revision 1.1  1995/02/03  17:04:36  quinn
  * Initial revision
  *
  */
@@ -72,7 +75,7 @@ int ber_oid(ODR o, Odr_oid *p)
 	    	n = 0;
 	    	do
 	    	{
-		    octs[n++] = id &= 0X7F;
+		    octs[n++] = id & 0X7F;
 		    id >>= 7;
 		}
 		while (id);
