@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.9.1 2002/MM/DD
+
 --- 1.9 2002/09/06
 
 PQF parser rejects bad queries - including those with extra

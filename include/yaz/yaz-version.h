@@ -1,12 +1,12 @@
 /*
  * Current software version.
  *
- * $Id: yaz-version.h,v 1.19 2002-09-05 13:36:53 adam Exp $
+ * $Id: yaz-version.h,v 1.20 2002-09-10 18:43:02 adam Exp $
  */
 #ifndef YAZ_VERSION
 
-#define YAZ_VERSION "1.9"
-#define YAZ_VERSIONL 0x010900
+#define YAZ_VERSION "1.9.1"
+#define YAZ_VERSIONL 0x010901
 
 #define YAZ_DATE 1
 
