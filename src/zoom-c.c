@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.6 2003-11-25 09:50:35 mike Exp $
+ * $Id: zoom-c.c,v 1.7 2003-11-25 23:18:08 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -933,7 +933,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     
     impver = ZOOM_options_get (c->options, "implementationVersion");
     ireq->implementationVersion =
-	(char *) odr_malloc (c->odr_out, strlen("$Revision: 1.6 $") + 2 +
+	(char *) odr_malloc (c->odr_out, strlen(YAZ_VERSION) + 2 +
 			     (impver ? strlen(impver) : 0));
     strcpy (ireq->implementationVersion, "");
     if (impver)
@@ -941,7 +941,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	strcat (ireq->implementationVersion, impver);
 	strcat (ireq->implementationVersion, "/");
     }					       
-    strcat (ireq->implementationVersion, "$Revision: 1.6 $");
+    strcat (ireq->implementationVersion, YAZ_VERSION);
 
     *ireq->maximumRecordSize =
 	ZOOM_options_get_int (c->options, "maximumRecordSize", 1024*1024);
@@ -1509,8 +1509,11 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
             *len = strlen(desc);
 	return desc;
     }
-    else if (!strcmp (type, "render") && 
-             npr->which == Z_NamePlusRecord_databaseRecord)
+    if (npr->which != Z_NamePlusRecord_databaseRecord)
+	return 0;
+
+    /* from now on - we have a database record .. */
+    if (!strcmp (type, "render"))
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
         oident *ent = oid_getentbyoid(r->direct_reference);
@@ -1576,8 +1579,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
         }
 	return 0;
     }
-    else if (npr->which == Z_NamePlusRecord_databaseRecord &&
-             (!strcmp (type, "xml") || !strcmp(type, "oai")))
+    else if (!strcmp (type, "xml") || !strcmp(type, "oai"))
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
         oident *ent = oid_getentbyoid(r->direct_reference);
@@ -1646,36 +1648,31 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
     }
     else if (!strcmp (type, "raw"))
     {
-	if (npr->which == Z_NamePlusRecord_databaseRecord)
+	Z_External *r = (Z_External *) npr->u.databaseRecord;
+	
+	if (r->which == Z_External_sutrs)
 	{
-	    Z_External *r = (Z_External *) npr->u.databaseRecord;
-	    
-	    if (r->which == Z_External_sutrs)
-	    {
-		if (len) *len = r->u.sutrs->len;
-		return (const char *) r->u.sutrs->buf;
-	    }
-	    else if (r->which == Z_External_octet)
-	    {
-		if (len) *len = r->u.octet_aligned->len;
-		return (const char *) r->u.octet_aligned->buf;
-	    }
-	    else /* grs-1, explain, OPAC, ... */
-	    {
-		if (len) *len = -1;
-                return (const char *) npr->u.databaseRecord;
-	    }
+	    if (len) *len = r->u.sutrs->len;
+	    return (const char *) r->u.sutrs->buf;
+	}
+	else if (r->which == Z_External_octet)
+	{
+	    if (len) *len = r->u.octet_aligned->len;
+	    return (const char *) r->u.octet_aligned->buf;
+	}
+	else /* grs-1, explain, OPAC, ... */
+	{
+	    if (len) *len = -1;
+	    return (const char *) npr->u.databaseRecord;
 	}
 	return 0;
     }
     else if (!strcmp (type, "ext"))
     {
-	if (npr->which == Z_NamePlusRecord_databaseRecord)
-            return (const char *) npr->u.databaseRecord;
-	return 0;
+	if (len) *len = -1;
+	return (const char *) npr->u.databaseRecord;
     }
-    else if (npr->which == Z_NamePlusRecord_databaseRecord &&
-             !strcmp (type, "opac"))
+    else if (!strcmp (type, "opac"))
 	     
     {
 	Z_External *r = (Z_External *) npr->u.databaseRecord;
@@ -2368,6 +2365,167 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
     return req;
 }
 
+Z_APDU *create_admin_package(ZOOM_package p, int type, 
+			     Z_ESAdminOriginPartToKeep **toKeepP,
+			     Z_ESAdminOriginPartNotToKeep **notToKeepP)
+{
+    Z_APDU *apdu = create_es_package (p, VAL_ADMINSERVICE);
+    if (apdu)
+    {
+	Z_ESAdminOriginPartToKeep  *toKeep;
+	Z_ESAdminOriginPartNotToKeep  *notToKeep;
+	Z_External *r = (Z_External *) odr_malloc (p->odr_out, sizeof(*r));
+	const char *first_db = "Default";
+	int num_db;
+	char **db = set_DatabaseNames(p->connection, p->options, &num_db);
+	if (num_db > 0)
+	    first_db = db[0];
+	    
+	r->direct_reference =
+	    yaz_oidval_to_z3950oid(p->odr_out, CLASS_EXTSERV,
+				   VAL_ADMINSERVICE);
+	r->descriptor = 0;
+	r->indirect_reference = 0;
+	r->which = Z_External_ESAdmin;
+	
+	r->u.adminService = (Z_Admin *)
+	    odr_malloc(p->odr_out, sizeof(*r->u.adminService));
+	r->u.adminService->which = Z_Admin_esRequest;
+	r->u.adminService->u.esRequest = (Z_AdminEsRequest *)
+	    odr_malloc(p->odr_out, sizeof(*r->u.adminService->u.esRequest));
+	
+	toKeep = r->u.adminService->u.esRequest->toKeep =
+	    (Z_ESAdminOriginPartToKeep *) 
+	    odr_malloc(p->odr_out, sizeof(*r->u.adminService->u.esRequest->toKeep));
+	toKeep->which=type;
+	toKeep->databaseName = odr_strdup(p->odr_out, first_db);
+	toKeep->u.create=odr_nullval();
+	apdu->u.extendedServicesRequest->taskSpecificParameters = r;
+	
+	r->u.adminService->u.esRequest->notToKeep = notToKeep =
+	    (Z_ESAdminOriginPartNotToKeep *)
+	    odr_malloc(p->odr_out,
+		       sizeof(*r->u.adminService->u.esRequest->notToKeep));
+	notToKeep->which=Z_ESAdminOriginPartNotToKeep_recordsWillFollow;
+	notToKeep->u.recordsWillFollow=odr_nullval();
+	if (toKeepP)
+	    *toKeepP = toKeep;
+	if (notToKeepP)
+	    *notToKeepP = notToKeep;
+    }
+    return apdu;
+}
+
+static Z_APDU *create_update_package(ZOOM_package p)
+{
+    Z_APDU *apdu = 0;
+    const char *first_db = "Default";
+    int num_db;
+    char **db = set_DatabaseNames(p->connection, p->options, &num_db);
+    const char *action = ZOOM_options_get(p->options, "action");
+    const char *recordId = ZOOM_options_get(p->options, "recordId");
+    const char *record_buf = ZOOM_options_get(p->options, "record");
+    const char *syntax_str = ZOOM_options_get(p->options, "syntax");
+    int syntax_oid = VAL_NONE;
+    int action_no = -1;
+    
+    if (syntax_str)
+	syntax_oid = oid_getvalbyname(syntax_str);
+    if (!record_buf)
+    {
+	record_buf = "void";
+	syntax_oid = VAL_SUTRS;
+    }
+    if (syntax_oid != VAL_NONE)
+	syntax_oid = VAL_TEXT_XML;
+    
+    if (num_db > 0)
+	first_db = db[0];
+    
+    if (!action)
+	action = "specialUpdate";
+    
+    if (!strcmp(action, "recordInsert"))
+	action_no = Z_IUOriginPartToKeep_recordInsert;
+    else if (!strcmp(action, "recordReplace"))
+	action_no = Z_IUOriginPartToKeep_recordReplace;
+    else if (!strcmp(action, "recordDelete"))
+	action_no = Z_IUOriginPartToKeep_recordDelete;
+    else if (!strcmp(action, "elementUpdate"))
+	action_no = Z_IUOriginPartToKeep_elementUpdate;
+    else if (!strcmp(action, "specialUpdate"))
+	action_no = Z_IUOriginPartToKeep_specialUpdate;
+    else
+	return 0;
+
+    apdu = create_es_package (p, VAL_DBUPDATE);
+    if (apdu)
+    {
+	Z_IUOriginPartToKeep *toKeep;
+	Z_IUSuppliedRecords *notToKeep;
+	Z_External *r = (Z_External *)
+	    odr_malloc (p->odr_out, sizeof(*r));
+	
+	apdu->u.extendedServicesRequest->taskSpecificParameters = r;
+	
+	r->direct_reference =
+	    yaz_oidval_to_z3950oid(p->odr_out, CLASS_EXTSERV,
+				   VAL_DBUPDATE);
+	r->descriptor = 0;
+	r->which = Z_External_update;
+	r->indirect_reference = 0;
+	r->u.update = (Z_IUUpdate *)
+	    odr_malloc(p->odr_out, sizeof(*r->u.update));
+	
+	r->u.update->which = Z_IUUpdate_esRequest;
+	r->u.update->u.esRequest = (Z_IUUpdateEsRequest *)
+	    odr_malloc(p->odr_out, sizeof(*r->u.update->u.esRequest));
+	toKeep = r->u.update->u.esRequest->toKeep = 
+	    (Z_IUOriginPartToKeep *)
+	    odr_malloc(p->odr_out, sizeof(*toKeep));
+	
+	toKeep->databaseName = odr_strdup(p->odr_out, first_db);
+	toKeep->schema = 0;
+	toKeep->elementSetName = 0;
+	toKeep->actionQualifier = 0;
+	toKeep->action = odr_intdup(p->odr_out, action_no);
+	
+	notToKeep = r->u.update->u.esRequest->notToKeep = 
+	    (Z_IUSuppliedRecords *)
+	    odr_malloc(p->odr_out, sizeof(*notToKeep));
+	notToKeep->num = 1;
+	notToKeep->elements = (Z_IUSuppliedRecords_elem **)
+	    odr_malloc(p->odr_out, sizeof(*notToKeep->elements));
+	notToKeep->elements[0] = (Z_IUSuppliedRecords_elem *)
+	    odr_malloc(p->odr_out, sizeof(**notToKeep->elements));
+	notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
+	if (recordId)
+	{
+	    notToKeep->elements[0]->u.opaque = (Odr_oct *)
+		odr_malloc (p->odr_out, sizeof(Odr_oct));
+	    notToKeep->elements[0]->u.opaque->size = strlen(recordId);
+	    notToKeep->elements[0]->u.opaque->len = strlen(recordId);
+	    notToKeep->elements[0]->u.opaque->buf =
+		odr_strdup(p->odr_out, recordId);
+	}
+	else
+	    notToKeep->elements[0]->u.opaque = 0;
+	notToKeep->elements[0]->supplementalId = 0;
+	notToKeep->elements[0]->correlationInfo = 0;
+	notToKeep->elements[0]->record =
+	    z_ext_record(p->odr_out, syntax_oid,
+			 record_buf, strlen(record_buf));
+    }
+    if (0 && apdu)
+    {
+       ODR print = odr_createmem(ODR_PRINT);
+
+       z_APDU(print, &apdu, 0, 0);
+       odr_destroy(print);
+    }
+    return apdu;
+}
+
 ZOOM_API(void)
     ZOOM_package_send (ZOOM_package p, const char *type)
 {
@@ -2381,11 +2539,10 @@ ZOOM_API(void)
     p->buf_out = 0;
     if (!strcmp(type, "itemorder"))
     {
-        Z_External *r;
         apdu = create_es_package (p, VAL_ITEMORDER);
         if (apdu)
         {
-            r = (Z_External *) odr_malloc (p->odr_out, sizeof(*r));
+            Z_External *r = (Z_External *) odr_malloc (p->odr_out, sizeof(*r));
             
             r->direct_reference =
                 yaz_oidval_to_z3950oid(p->odr_out, CLASS_EXTSERV,
@@ -2397,6 +2554,20 @@ ZOOM_API(void)
 
             apdu->u.extendedServicesRequest->taskSpecificParameters = r;
         }
+    }
+    if (!strcmp(type, "create"))  /* create database */
+    {
+	apdu = create_admin_package(p, Z_ESAdminOriginPartToKeep_create,
+				    0, 0);
+    }	
+    if (!strcmp(type, "drop"))  /* drop database */
+    {
+	apdu = create_admin_package(p, Z_ESAdminOriginPartToKeep_drop,
+				    0, 0);
+    }
+    if (!strcmp(type, "update")) /* update record(s) */
+    {
+	apdu = create_update_package(p);
     }
     if (apdu)
     {
@@ -2824,7 +2995,6 @@ static int do_read (ZOOM_connection c)
     event = ZOOM_Event_create (ZOOM_EVENT_RECV_DATA);
     ZOOM_connection_put_event (c, event);
     
-
     r = cs_get (c->cs, &c->buf_in, &c->len_in);
     more = cs_more(c->cs);
     yaz_log (LOG_DEBUG, "do_read len=%d more=%d", r, more);
@@ -2858,7 +3028,13 @@ static int do_read (ZOOM_connection c)
 
 	if (!z_GDU (c->odr_in, &gdu, 0, 0))
 	{
-            set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
+	    int x;
+	    int err = odr_geterrorx(c->odr_in, &x);
+	    char msg[60];
+	    const char *element = odr_getelement(c->odr_in);
+	    sprintf (msg, "ODR code %d:%d element=%-20s",
+		     err, x, element ? element : "<unknown>");
+	    set_ZOOM_error(c, ZOOM_ERROR_DECODE, msg);
 	    do_close (c);
 	}
 	else if (gdu->which == Z_GDU_Z3950)
