@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.16 2004-10-02 13:28:26 adam Exp $
+ * $Id: srwutil.c,v 1.17 2004-10-09 08:49:55 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -311,12 +311,17 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	    }
 	}
 	if (!version)
-	    yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "version");
-	else if (version && strcmp(version, "1.1"))
+	{
+	    if (uri_name)
+		yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "version");
+	    version = "1.1";
+	}
+	if (strcmp(version, "1.1"))
 	    yaz_add_srw_diagnostic(decode, diag, num_diag, 5, "1.1");
 	if (!operation)
 	{
-	    yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "operation");
+	    if (uri_name)
+		yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "operation");
 	    operation = "explain";
 	}
         if (!strcmp(operation, "searchRetrieve"))
