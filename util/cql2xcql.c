@@ -1,4 +1,4 @@
-/* $Id: cql2xcql.c,v 1.1 2003-10-27 12:21:39 adam Exp $
+/* $Id: cql2xcql.c,v 1.2 2004-03-10 16:34:31 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -13,10 +13,33 @@ See the file LICENSE.
 
 int main(int argc, char **argv)
 {
+    CQL_parser cp;
     int r;
-    CQL_parser cp = cql_parser_create();
-    if (argc == 2)
-        r = cql_parser_string(cp, argv[1]);
+    const char *fname = 0;
+    int iterations = 1;
+    int ret;
+    char *arg;
+
+    while ((ret = options("n:", argv, argc, &arg)) != -2)
+    {
+        switch (ret)
+        {
+        case 0:
+	    fname = arg;
+            break;
+	case 'n':
+	    iterations = atoi(arg);
+	    break;
+	}
+    }
+
+    cp = cql_parser_create();
+    if (fname)
+    {
+	int i;
+	for (i = 0; i<iterations; i++)
+	    r = cql_parser_string(cp, fname);
+    }
     else
         r = cql_parser_stdio(cp, stdin);
     if (r)

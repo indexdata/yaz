@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Update CQL parser to use new CQL 1.1 modifiers for booleans and
+relations.
+
+Add CQL test cases.
+
 --- 2.0.15 2004/03/01
 
 Another fix for decoding of XML packed records.

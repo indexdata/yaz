@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.6 2003-12-19 12:16:19 mike Exp $
+/* $Id: cqltransform.c,v 1.7 2004-03-10 16:34:29 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -172,7 +172,10 @@ int cql_pr_attr(cql_transform_t ct, const char *category,
     if (errcode && !ct->error)
     {
         ct->error = errcode;
-        ct->addinfo = strdup(val);
+	if (val)
+	    ct->addinfo = strdup(val);
+	else
+	    ct->addinfo = 0;
     }
     return 0;
 }
@@ -369,17 +372,17 @@ static const char *cql_get_ns(cql_transform_t ct,
     for (i = prefix_level; !ns && --i >= 0; )
     {
         struct cql_node *cn_prefix = prefix_ar[i];
-        for (; cn_prefix; cn_prefix = cn_prefix->u.mod.next)
+        for (; cn_prefix; cn_prefix = cn_prefix->u.st.modifiers)
         {
-            if (*prefix && cn_prefix->u.mod.name &&
-                !strcmp(prefix, cn_prefix->u.mod.name))
+            if (*prefix && cn_prefix->u.st.index &&
+                !strcmp(prefix, cn_prefix->u.st.index))
             {
-                ns = cn_prefix->u.mod.value;
+                ns = cn_prefix->u.st.term;
                 break;
             }
-            else if (!*prefix && !cn_prefix->u.mod.name)
+            else if (!*prefix && !cn_prefix->u.st.index)
             {
-                ns = cn_prefix->u.mod.value;
+                ns = cn_prefix->u.st.term;
                 break;
             }
         }
@@ -469,9 +472,9 @@ void cql_transform_r(cql_transform_t ct,
         if (cn->u.st.modifiers)
         {
             struct cql_node *mod = cn->u.st.modifiers;
-            for (; mod; mod = mod->u.mod.next)
+            for (; mod; mod = mod->u.st.modifiers)
             {
-                cql_pr_attr(ct, "relationModifier.", mod->u.mod.value, 0,
+                cql_pr_attr(ct, "relationModifier.", mod->u.st.term, 0,
                             pr, client_data, 20);
             }
         }
@@ -524,13 +527,13 @@ int cql_transform(cql_transform_t ct,
     {
         if (!memcmp(e->pattern, "set.", 4))
         {
-            *pp = cql_node_mk_mod(e->pattern+4, e->value);
-            pp = &(*pp)->u.mod.next;
+            *pp = cql_node_mk_sc(e->pattern+4, "=", e->value);
+            pp = &(*pp)->u.st.modifiers;
         }
         else if (!strcmp(e->pattern, "set"))
         {
-            *pp = cql_node_mk_mod(0, e->value);
-            pp = &(*pp)->u.mod.next;
+            *pp = cql_node_mk_sc(e->value, 0, 0);
+            pp = &(*pp)->u.st.modifiers;
         }
     }
     cql_transform_r (ct, cn, pr, client_data, prefix_ar, 1);

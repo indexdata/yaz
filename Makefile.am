@@ -1,10 +1,10 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.24 2004-02-09 12:38:57 adam Exp $
+## $Id: Makefile.am,v 1.25 2004-03-10 16:34:29 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
-SUBDIRS = src include test util client ztest zoom doc etc
+SUBDIRS = src include util test client ztest zoom doc etc
 
 aclocaldir=$(datadir)/aclocal
 

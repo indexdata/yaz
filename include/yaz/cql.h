@@ -1,5 +1,5 @@
-/* $Id: cql.h,v 1.5 2003-12-16 14:36:28 adam Exp $
-   Copyright (C) 2002-2003
+/* $Id: cql.h,v 1.6 2004-03-10 16:34:29 adam Exp $
+   Copyright (C) 2002-2004
    Index Data Aps
 
 This file is part of the YAZ toolkit.
@@ -100,11 +100,6 @@ struct cql_node {
             struct cql_node *modifiers;
             struct cql_node *prefixes;
         } boolean;
-        struct {
-            char *name;
-            char *value;
-            struct cql_node *next;
-        } mod;
     } u;
 };
 
@@ -133,10 +128,6 @@ YAZ_EXPORT
 struct cql_node *cql_node_prefix(struct cql_node *n, 
                                  const char *prefix,
                                  const char *uri);
-YAZ_EXPORT
-struct cql_node *cql_node_mk_mod(const char *name,
-                                 const char *value);
-
 YAZ_EXPORT
 struct cql_node *cql_node_dup (struct cql_node *cp);
 YAZ_EXPORT

@@ -1,0 +1,16 @@
+<searchClause>
+  <prefixes>
+    <prefix>
+      <identifier>any</identifier>
+    </prefix>
+    <prefix>
+      <name>any</name>
+      <identifier>exact</identifier>
+    </prefix>
+  </prefixes>
+  <index>any</index>
+  <relation>
+    <value>&gt;</value>
+  </relation>
+  <term>any</term>
+</searchClause>

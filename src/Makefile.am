@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.6 2004-02-09 09:54:58 adam Exp $
+## $Id: Makefile.am,v 1.7 2004-03-10 16:34:29 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -60,7 +60,7 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c \
   cclqfile.c cclstr.c \
   cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \
-  cqlstrer.c lexer.h \
+  cqlstrer.c \
   eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
   eventl.h service.c service.h session.h
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)

@@ -1,5 +1,5 @@
-/* $Id: xcqlutil.c,v 1.1 2003-10-27 12:21:36 adam Exp $
-   Copyright (C) 2002-2003
+/* $Id: xcqlutil.c,v 1.2 2004-03-10 16:34:29 adam Exp $
+   Copyright (C) 2002-2004
    Index Data Aps
 
 This file is part of the YAZ toolkit.
@@ -57,19 +57,19 @@ static void prefixes(struct cql_node *cn,
     if (cn)
     {
         pr_n("<prefixes>\n", pr, client_data, level);
-        for (; cn; cn = cn->u.mod.next)
+        for (; cn; cn = cn->u.st.modifiers)
         {
             pr_n("<prefix>\n", pr, client_data, level+2);
-            if (cn->u.mod.name)
+            if (cn->u.st.index)
             {
                 pr_n("<name>", pr, client_data, level+4);
-                pr_cdata(cn->u.mod.name, pr, client_data);
+                pr_cdata(cn->u.st.index, pr, client_data);
                 pr_n("</name>\n", pr, client_data, 0);
             }
-            if (cn->u.mod.value)
+            if (cn->u.st.term)
             {
                 pr_n("<identifier>", pr, client_data, level+4);
-                pr_cdata(cn->u.mod.value, pr, client_data);
+                pr_cdata(cn->u.st.term, pr, client_data);
                 pr_n("</identifier>\n", pr, client_data, 0);
             }
             pr_n("</prefix>\n", pr, client_data, level+2);
@@ -78,6 +78,37 @@ static void prefixes(struct cql_node *cn,
     }
 }
                      
+static void cql_to_xml_mod(struct cql_node *m,
+			   void (*pr)(const char *buf, void *client_data),
+			   void *client_data, int level)
+{
+    if (m)
+    {
+	pr_n("<modifiers>\n", pr, client_data, level);
+	for (; m; m = m->u.st.modifiers)
+	{
+	    pr_n("<modifier>\n", pr, client_data, level+2);
+	    pr_n("<type>", pr, client_data, level+4);
+	    pr_cdata(m->u.st.index, pr, client_data);
+	    pr_n("</type>\n", pr, client_data, 0);
+	    if (m->u.st.relation)
+	    {
+		pr_n("<relation>", pr, client_data, level+4);
+		pr_cdata(m->u.st.relation, pr, client_data);
+		pr_n("</relation>\n", pr, client_data, 0);
+	    }
+	    if (m->u.st.term)
+	    {
+		pr_n("<value>", pr, client_data, level+4);
+		pr_cdata(m->u.st.term, pr, client_data);
+		pr_n("</value>\n", pr, client_data, 0);
+	    }
+	    pr_n("</modifier>\n", pr, client_data, level+2);
+	}
+	pr_n("</modifiers>\n", pr, client_data, level);
+    }
+}
+
 static void cql_to_xml_r(struct cql_node *cn,
                          void (*pr)(const char *buf, void *client_data),
                          void *client_data, int level)
@@ -97,22 +128,14 @@ static void cql_to_xml_r(struct cql_node *cn,
         }
         if (cn->u.st.relation)
         {
-            struct cql_node *m = cn->u.st.modifiers;
             pr_n("<relation>\n", pr, client_data, level+2);
             pr_n("<value>", pr, client_data, level+4);
             pr_cdata(cn->u.st.relation, pr, client_data);
             pr_n("</value>\n", pr, client_data, 0);
-            if (m)
-            {
-                pr_n("<modifiers>\n", pr, client_data, level+4);
-                for (; m; m = m->u.mod.next)
-                {
-                    pr_n("<modifier><value>", pr, client_data, level+6);
-                    pr_cdata(m->u.mod.value, pr, client_data);
-                    pr_n("</value></modifier>\n", pr, client_data, 0);
-                }
-                pr_n("</modifiers>\n", pr, client_data, level+4);
-            }
+
+	    cql_to_xml_mod(cn->u.st.modifiers,
+			   pr, client_data, level+4);
+
             pr_n("</relation>\n", pr, client_data, level+2);
         }
         if (cn->u.st.term)
@@ -128,31 +151,15 @@ static void cql_to_xml_r(struct cql_node *cn,
         prefixes(cn->u.st.prefixes, pr, client_data, level+2);
         if (cn->u.boolean.value)
         {
-            struct cql_node *m = cn->u.boolean.modifiers;
             pr_n("<boolean>\n", pr, client_data, level+2);
 
             pr_n("<value>", pr, client_data, level+4);
             pr_cdata(cn->u.boolean.value, pr, client_data);
             pr_n("</value>\n", pr, client_data, 0);
 
-            if (m)
-            {
-                pr_n("<modifiers>\n", pr, client_data, level+4);
-                for (; m; m = m->u.mod.next)
-                {
-                    pr_n("<modifier><type>", pr, client_data, level+6);
-                    pr_cdata(m->u.mod.name, pr, client_data);
-                    pr_n("</type>", pr, client_data, 0);
-                    if (m->u.mod.value)
-                    {
-                        pr_n("<value>", pr, client_data, 0);
-                        pr_cdata(m->u.mod.value, pr, client_data);
-                        pr_n("</value>", pr, client_data, 0);
-                    }
-                    pr_n("</modifier>\n", pr, client_data, 0);
-                }
-                pr_n("</modifiers>\n", pr, client_data, level+4);
-            }
+	    cql_to_xml_mod(cn->u.boolean.modifiers,
+			   pr, client_data, level+4);
+
             pr_n("</boolean>\n", pr, client_data, level+2);
         }
         if (cn->u.boolean.left)
