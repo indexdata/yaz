@@ -1,7 +1,7 @@
 Name: yaz
 Version: 1.7
 Release: 1
-Copyright: BSD
+Copyright: YAZ License
 Group: Development/Libraries
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
