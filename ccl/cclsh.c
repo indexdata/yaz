@@ -45,7 +45,10 @@
  * Europagate 1995
  *
  * $Log: cclsh.c,v $
- * Revision 1.6  2000-01-31 13:15:21  adam
+ * Revision 1.7  2000-10-17 19:50:28  adam
+ * Implemented and-list and or-list for CCL module.
+ *
+ * Revision 1.6  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -107,6 +110,12 @@
 static int debug = 0;
 static char *prog;
 
+void usage(const char *prog)
+{
+    fprintf (stderr, "%s: [-d] [-b configfile]\n", prog);
+    exit (1);
+}
+
 int main (int argc, char **argv)
 {
     CCL_bibset bibset;
@@ -148,9 +157,7 @@ int main (int argc, char **argv)
                 fclose (bib_inf);
                 break;
             default:
-                fprintf (stderr, "%s: unknown option '%s'\n",
-                    prog, *argv);
-                exit (1);
+		usage(prog);
             }
         }
         else

@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.5  2000-05-02 17:19:58  adam
+ * Revision 1.6  2000-10-17 19:50:28  adam
+ * Implemented and-list and or-list for CCL module.
+ *
+ * Revision 1.5  2000/05/02 17:19:58  adam
  * Removed MINUS token.
  *
  * Revision 1.4  2000/03/14 09:06:11  adam
@@ -206,6 +209,8 @@ typedef struct ccl_qualifiers *CCL_bibset;
 #define CCL_BIB1_COM 6
 
 #define CCL_BIB1_STR_WP (-1)
+#define CCL_BIB1_STR_AND_LIST (-2)
+#define CCL_BIB1_STR_OR_LIST (-3)
 #define CCL_BIB1_REL_ORDER (-1)
 
 #define CCL_BIB1_TRU_CAN_LEFT (-1)

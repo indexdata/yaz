@@ -1,6 +1,6 @@
 CCL test module
 
-This module is required to parse the queries given to the 'cli'
+This module is required to parse the queries given to the yaz-client
 test program. It is *not* a part of the YAZ module, and it is
 distributed under a different license.
 
@@ -11,5 +11,5 @@ of this software to organisations that are not partners in EUROPAGATE.
 
 If you need to distribute copies of YAZ to organisations which are not
 partners in EUROPAGATE, you should remove this module, and, if
-necessary, modify yazlib/tst.c to work wihout it. The test program is
-not essential to the general working of YAZ.
+necessary, modify client/yaz-client.c to work wihout it. The test program
+is not essential to the general working of YAZ.

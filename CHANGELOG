@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added feature for CCL module. Virtual structure s=al or s=ol generates
+and-list and or-list respectively instead of phrase search.
+
 Added some OID's.
 
 * Added prefix "yaz_" for the functions log_init.., log_file..  and

@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.17  2000-05-01 09:36:50  adam
+ * Revision 1.18  2000-10-17 19:50:28  adam
+ * Implemented and-list and or-list for CCL module.
+ *
+ * Revision 1.17  2000/05/01 09:36:50  adam
  * Range operator only treated in ordered ranges so that minus (-) can be
  * used for, say, the and-not operator.
  *
@@ -297,175 +300,209 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
                                            int *term_list)
 {
     struct ccl_rpn_attr *qa_tmp[2];
-    struct ccl_rpn_node *p;
+    struct ccl_rpn_node *p_top = 0;
     struct ccl_token *lookahead = cclp->look_token;
-    int len = 0;
-    size_t no, i;
-    int left_trunc = 0;
-    int right_trunc = 0;
-    int mid_trunc = 0;
-    int relation_value = -1;
-    int position_value = -1;
-    int structure_value = -1;
-    int truncation_value = -1;
-    int completeness_value = -1;
-
-    if (!is_term_ok(KIND, term_list))
-    {
-        cclp->error_code = CCL_ERR_TERM_EXPECTED;
-        return NULL;
-    }
-    /* create the term node, but wait a moment before adding the term */
-    p = mk_node (CCL_RPN_TERM);
-    p->u.t.attr_list = NULL;
-    p->u.t.term = NULL;
+    int and_list = 0;
+    int or_list = 0;
 
     if (!qa)
     {
-        /* no qualifier(s) applied. Use 'term' if it is defined */
-
-        qa = qa_tmp;
+	/* no qualifier(s) applied. Use 'term' if it is defined */
+	
+	qa = qa_tmp;
 	ccl_assert (qa);
 	qa[0] = ccl_qual_search (cclp, "term", 4);
 	qa[1] = NULL;
     }
-
-    /* go through all attributes and add them to the attribute list */
-    for (i=0; qa && qa[i]; i++)
+    if (qual_val_type (qa, CCL_BIB1_STR, CCL_BIB1_STR_AND_LIST))
+	and_list = 1;
+    if (qual_val_type (qa, CCL_BIB1_STR, CCL_BIB1_STR_OR_LIST))
+	or_list = 1;
+    while (1)
     {
-        struct ccl_rpn_attr *attr;
+	struct ccl_rpn_node *p;
+	size_t no, i;
+	int left_trunc = 0;
+	int right_trunc = 0;
+	int mid_trunc = 0;
+	int relation_value = -1;
+	int position_value = -1;
+	int structure_value = -1;
+	int truncation_value = -1;
+	int completeness_value = -1;
+	int len = 0;
+	int max = 200;
+	if (and_list || or_list)
+	    max = 1;
 
-        for (attr = qa[i]; attr; attr = attr->next)
-            if (attr->value > 0)
-	    {   /* deal only with REAL attributes (positive) */
-	        switch (attr->type)
+	/* go through each TERM token. If no truncation attribute is yet
+	   met, then look for left/right truncation markers (?) and
+	   set left_trunc/right_trunc/mid_trunc accordingly */
+	for (no = 0; no < max && is_term_ok(lookahead->kind, term_list); no++)
+	{
+	    for (i = 0; i<lookahead->len; i++)
+		if (truncation_value == -1 && lookahead->name[i] == '?')
 		{
-		case CCL_BIB1_REL:
-		    if (relation_value != -1)
-		        continue;
-		    relation_value = attr->value;
-		    break;
-		case CCL_BIB1_POS:
-		    if (position_value != -1)
-		        continue;
-		    position_value = attr->value;
-		    break;
-		case CCL_BIB1_STR:
-		    if (structure_value != -1)
-		        continue;
-		    structure_value = attr->value;
-		    break;
-		case CCL_BIB1_TRU:
-		    if (truncation_value != -1)
-		        continue;
-		    truncation_value = attr->value;
-		    break;
-		case CCL_BIB1_COM:
-		    if (completeness_value != -1)
-		        continue;
-		    completeness_value = attr->value;
-		    break;
+		    if (no == 0 && i == 0 && lookahead->len >= 1)
+			left_trunc = 1;
+		    else if (!is_term_ok(lookahead->next->kind, term_list) &&
+			     i == lookahead->len-1 && i >= 1)
+			right_trunc = 1;
+		    else
+			mid_trunc = 1;
 		}
-                add_attr (p, attr->type, attr->value);
+	    len += 1+lookahead->len;
+	    lookahead = lookahead->next;
+	}
+
+	if (len == 0)
+	    break;      /* no more terms . stop . */
+
+	if (p_top)
+	{
+	    if (or_list)
+		p = mk_node (CCL_RPN_OR);
+	    else if (and_list)
+		p = mk_node (CCL_RPN_AND);
+	    else
+		p = mk_node (CCL_RPN_AND);
+	    p->u.p[0] = p_top;
+	    p_top = p;
+	}
+		
+	/* create the term node, but wait a moment before adding the term */
+	p = mk_node (CCL_RPN_TERM);
+	p->u.t.attr_list = NULL;
+	p->u.t.term = NULL;
+
+	/* make the top node point to us.. */
+	if (p_top)
+	    p_top->u.p[1] = p;
+	else
+	    p_top = p;
+
+	
+	/* go through all attributes and add them to the attribute list */
+	for (i=0; qa && qa[i]; i++)
+	{
+	    struct ccl_rpn_attr *attr;
+	    
+	    for (attr = qa[i]; attr; attr = attr->next)
+		if (attr->value > 0)
+		{   /* deal only with REAL attributes (positive) */
+		    switch (attr->type)
+		    {
+		    case CCL_BIB1_REL:
+			if (relation_value != -1)
+			    continue;
+			relation_value = attr->value;
+			break;
+		    case CCL_BIB1_POS:
+			if (position_value != -1)
+			    continue;
+			position_value = attr->value;
+			break;
+		    case CCL_BIB1_STR:
+			if (structure_value != -1)
+			    continue;
+			structure_value = attr->value;
+			break;
+		    case CCL_BIB1_TRU:
+			if (truncation_value != -1)
+			    continue;
+			truncation_value = attr->value;
+			left_trunc = right_trunc = mid_trunc = 0;
+			break;
+		    case CCL_BIB1_COM:
+			if (completeness_value != -1)
+			    continue;
+			completeness_value = attr->value;
+			break;
+		    }
+		    add_attr (p, attr->type, attr->value);
 	    }
+	}
+	/* len now holds the number of characters in the RPN term */
+	/* no holds the number of CCL tokens (1 or more) */
+	
+	if (structure_value == -1 && 
+	    qual_val_type (qa, CCL_BIB1_STR, CCL_BIB1_STR_WP))
+	{   /* no structure attribute met. Apply either structure attribute 
+	       WORD or PHRASE depending on number of CCL tokens */
+	    if (no == 1)
+		add_attr (p, CCL_BIB1_STR, 2);
+	    else
+		add_attr (p, CCL_BIB1_STR, 1);
+	}
+	
+	/* make the RPN token */
+	p->u.t.term = (char *)malloc (len);
+	ccl_assert (p->u.t.term);
+	p->u.t.term[0] = '\0';
+	for (i = 0; i<no; i++)
+	{
+	    const char *src_str = cclp->look_token->name;
+	    int src_len = cclp->look_token->len;
+	    
+	    if (i == 0 && left_trunc)
+	    {
+		src_len--;
+		src_str++;
+	    }
+	    else if (i == no-1 && right_trunc)
+		src_len--;
+	    if (src_len)
+	    {
+		int len = strlen(p->u.t.term);
+		if (len &&
+		    !strchr("-+", *src_str) &&
+		    !strchr("-+", p->u.t.term[len-1]))
+		{
+		    strcat (p->u.t.term, " ");
+		}
+	    }
+	    strxcat (p->u.t.term, src_str, src_len);
+	    ADVANCE;
+	}
+	if (left_trunc && right_trunc)
+	{
+	    if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_BOTH))
+	    {
+		cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
+		ccl_rpn_delete (p);
+		return NULL;
+	    }
+	    add_attr (p, CCL_BIB1_TRU, 3);
+	}
+	else if (right_trunc)
+	{
+	    if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_RIGHT))
+	    {
+		cclp->error_code = CCL_ERR_TRUNC_NOT_RIGHT;
+		ccl_rpn_delete (p);
+		return NULL;
+	    }
+	    add_attr (p, CCL_BIB1_TRU, 1);
+	}
+	else if (left_trunc)
+	{
+	    if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_LEFT))
+	    {
+		cclp->error_code = CCL_ERR_TRUNC_NOT_LEFT;
+		ccl_rpn_delete (p);
+		return NULL;
+	    }
+	    add_attr (p, CCL_BIB1_TRU, 2);
+	}
+	else
+	{
+	    if (qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_NONE))
+		add_attr (p, CCL_BIB1_TRU, 100);
+	}
     }
-    /* go through each TERM token. If no truncation attribute is yet
-       met, then look for left/right truncation markers (?) and
-       set left_trunc/right_trunc/mid_trunc accordingly */
-    for (no = 0; is_term_ok(lookahead->kind, term_list); no++)
-    {
-        for (i = 0; i<lookahead->len; i++)
-            if (truncation_value == -1 && lookahead->name[i] == '?')
-            {
-                if (no == 0 && i == 0 && lookahead->len >= 1)
-                    left_trunc = 1;
-                else if (!is_term_ok(lookahead->next->kind, term_list) &&
-                         i == lookahead->len-1 && i >= 1)
-                    right_trunc = 1;
-                else
-                    mid_trunc = 1;
-            }
-        len += 1+lookahead->len;
-	lookahead = lookahead->next;
-    }
-    /* len now holds the number of characters in the RPN term */
-    /* no holds the number of CCL tokens (1 or more) */
-
-    if (structure_value == -1 && 
-        qual_val_type (qa, CCL_BIB1_STR, CCL_BIB1_STR_WP))
-    {   /* no structure attribute met. Apply either structure attribute 
-           WORD or PHRASE depending on number of CCL tokens */
-        if (no == 1)
-            add_attr (p, CCL_BIB1_STR, 2);
-        else
-            add_attr (p, CCL_BIB1_STR, 1);
-    }
-
-    /* make the RPN token */
-    p->u.t.term = (char *)malloc (len);
-    ccl_assert (p->u.t.term);
-    p->u.t.term[0] = '\0';
-    for (i = 0; i<no; i++)
-    {
-        const char *src_str = cclp->look_token->name;
-        int src_len = cclp->look_token->len;
-        
-        if (i == 0 && left_trunc)
-        {
-            src_len--;
-            src_str++;
-        }
-        else if (i == no-1 && right_trunc)
-            src_len--;
-        if (src_len)
-        {
-            int len = strlen(p->u.t.term);
-            if (len &&
-                !strchr("-+", *src_str) &&
-                !strchr("-+", p->u.t.term[len-1]))
-            {
-                strcat (p->u.t.term, " ");
-            }
-        }
-	strxcat (p->u.t.term, src_str, src_len);
-        ADVANCE;
-    }
-    if (left_trunc && right_trunc)
-    {
-        if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_BOTH))
-        {
-            cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
-            ccl_rpn_delete (p);
-            return NULL;
-        }
-        add_attr (p, CCL_BIB1_TRU, 3);
-    }
-    else if (right_trunc)
-    {
-        if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_RIGHT))
-        {
-            cclp->error_code = CCL_ERR_TRUNC_NOT_RIGHT;
-            ccl_rpn_delete (p);
-            return NULL;
-        }
-        add_attr (p, CCL_BIB1_TRU, 1);
-    }
-    else if (left_trunc)
-    {
-        if (!qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_LEFT))
-        {
-            cclp->error_code = CCL_ERR_TRUNC_NOT_LEFT;
-            ccl_rpn_delete (p);
-            return NULL;
-        }
-        add_attr (p, CCL_BIB1_TRU, 2);
-    }
-    else
-    {
-        if (qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_NONE))
-            add_attr (p, CCL_BIB1_TRU, 100);
-    }
-    return p;
+    if (!p_top)
+        cclp->error_code = CCL_ERR_TERM_EXPECTED;
+    return p_top;
 }
 
 static struct ccl_rpn_node *search_term (CCL_parser cclp,
