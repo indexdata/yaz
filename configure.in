@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.63 2002-03-16 11:58:41 adam Exp $
+dnl $Id: configure.in,v 1.64 2002-03-18 12:22:00 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.6)
 dnl
@@ -49,22 +49,35 @@ dnl
 dnl ------ Open SSL
 openssl=no
 AC_ARG_WITH(openssl, [  --with-openssl[=DIR]    OpenSSL library in DIR], [openssl=$withval])
+AC_SUBST(SSL_CFLAGS)
+AC_SUBST(SSL_LIBS)
+AC_SUBST(SSL_DEFS)
+USE_SSL=0
+SSL_CFLAGS=""
+SSL_LIBS=""
+SSL_DEFS=""
 if test "$openssl" != "no"; then
-	xLDFLAGS="$LDFLAGS";
+	xLIBS="$LIBS";
 	xCFLAGS="$CFLAGS";
 	if test "$openssl" != "yes"; then
-		CFLAGS="-I$openssl/include -I$openssl/include/openssl $CFLAGS"
-		LDFLAGS="-L$openssl/lib $LDFLAGS"
+                SSL_CFLAGS="-I$openssl/include -I$openssl/include/openssl"
+                SSL_LIBS="-L$openssl/lib"
+		CFLAGS="$SSL_CFLAGS $CFLAGS"
+		LIBS="$SSL_LIBS $LIBS"
 	fi
-	AC_CHECK_LIB(crypto, main)
+	AC_CHECK_LIB(crypto, main,[SSL_LIBS="$SSL_LIBS -lcrypto"])
+        LIBS="$LIBS $SSL_LIBS"
 	AC_CHECK_LIB(ssl, SSL_new)
 	if test "$ac_cv_lib_ssl_SSL_new" = "yes"; then
-		AC_CHECK_HEADERS(openssl/ssl.h)
-	else
-		LDFLAGS="$xLDFLAGS";
-		CFLAGS="$xCFLAGS";
+                SSL_LIBS="$SSL_LIBS -lssl"
+		AC_CHECK_HEADER(openssl/ssl.h,[SSL_DEFS="-DHAVE_OPENSSL_SSL_H=1"; USE_SSL=1])
+        else
+                SSL_LIBS=""
 	fi
+	LIBS="$xLIBS"
+	CFLAGS="$xCFLAGS"
 fi
+AM_CONDITIONAL(ISSSL, test $USE_SSL = "1")
 dnl ------ GNU Readline
 READLINE_SHARED_LIBADD=""
 AC_CHECK_LIB(ncurses, tgetent, [READLINE_SHARED_LIBADD="-lncurses"],

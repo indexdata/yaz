@@ -1,14 +1,18 @@
-## $Id: Makefile.am,v 1.19 2002-02-28 13:21:16 adam Exp $
+## $Id: Makefile.am,v 1.20 2002-03-18 12:22:00 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
+endif
+
+if ISSSL
+ssllib=libyazssl.la
 endif
 
 LDFLAGS=-version-info 1:0:0
 
 bin_SCRIPTS = yaz-config
 
-lib_LTLIBRARIES = libyaz.la $(extra) libyazmalloc.la
+lib_LTLIBRARIES = libyaz.la $(extra) $(ssllib) libyazmalloc.la
 
 # If the line below is omitted the LINK variable is
 # not set in Makefile.in and it will NOT work ..
@@ -22,6 +26,9 @@ libyazthread_la_SOURCES=
 
 libyazmalloc_la_LIBADD=xmalloc.lo
 libyazmalloc_la_SOURCES=
+
+libyazssl_la_LIBADD=tcpip.lo comstack.lo
+libyazssl_la_SOURCES=
 
 THREADED_FLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/server @CFLAGSTHREADS@
 
@@ -50,6 +57,18 @@ xmalloc.lo: $(top_srcdir)/util/xmalloc.c
 
 xmalloc.o: $(top_srcdir)/util/xmalloc.c
 	$(COMPILE) $(XMALLOC_FLAGS) -c $(top_srcdir)/util/xmalloc.c
+
+comstack.lo: $(top_srcdir)/comstack/comstack.c
+	$(LTCOMPILE) $(SSL_DEFS) $(SSL_CFLAGS) -c $(top_srcdir)/comstack/comstack.c
+
+comstack.o: $(top_srcdir)/comstack/comstack.c
+	$(COMPILE) $(SSL_DEFS) $(SSL_CFLAGS) -c $(top_srcdir)/comstack/comstack.c
+
+tcpip.lo: $(top_srcdir)/comstack/tcpip.c
+	$(LTCOMPILE) $(SSL_DEFS) $(SSL_CFLAGS) -c $(top_srcdir)/comstack/tcpip.c
+
+tcpip.o: $(top_srcdir)/comstack/tcpip.c
+	$(COMPILE) $(SSL_DEFS) $(SSL_CFLAGS) -c $(top_srcdir)/comstack/tcpip.c
 
 libyaz_la_LIBADD=../odr/libodr.la \
  ../comstack/libcomstack.la ../server/libserver.la \
