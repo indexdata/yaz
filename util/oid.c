@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: oid.c,v $
- * Revision 1.43  2000-03-14 09:21:08  ian
+ * Revision 1.44  2000-10-02 13:58:50  adam
+ * Added some OID's.
+ *
+ * Revision 1.43  2000/03/14 09:21:08  ian
  * Added Admin Extended Service OID
  *
  * Revision 1.42  2000/02/29 13:44:55  adam
@@ -232,6 +235,8 @@ static oident oids[] =
      "Fin-1"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_DAN1,         {3,15,-1},
      "Dan-1"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_HOLDINGS,     {3,16,-1},
+     "Holdings"},
 
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS,    {3,1000,81,1,-1},
      "Thesaurus-attset"},
@@ -287,6 +292,8 @@ static oident oids[] =
      "ISDSmarc"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_RUSMARC,      {5,28,-1},
      "RUSmarc"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_HUNMARC,      {5,29,-1},
+     "Hunmarc"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_EXPLAIN,      {5,100,-1},
      "Explain"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_SUTRS,        {5,101,-1},
@@ -402,6 +409,10 @@ static oident oids[] =
      "CIMI-schema"},
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_UPDATEES,     {13,6,-1},
      "Update ES"},
+    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_HOLDINGS,     {13,7,-1},
+     "Holdings"},
+    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_ZTHES,        {13,8,-1},
+     "Zthes"},
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_THESAURUS,    {13,1000,81,1,-1},
      "thesaurus-schema"},
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_EXPLAIN,      {13,1000,81,2,-1},

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.6 2000-03-14 09:19:49 ian Exp $
+ * $Id: oid.h,v 1.7 2000-10-02 13:58:50 adam Exp $
  */
 
 #ifndef OID_H
@@ -167,6 +167,8 @@ typedef enum oid_value
     VAL_ISDSMARC,
     VAL_RUSMARC,
     VAL_ADMINSERVICE,
+    VAL_HOLDINGS,
+    VAL_HUNMARC,
 /* add new types here... */
 
 /* VAL_DYNAMIC must have highest value */
