@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -115,7 +115,7 @@ typedef struct Z_Triple
 	char *internationalString;
 	Odr_oct *octetString;
 	Odr_oid *oid;
-	bool_t *boolean;
+	bool_t *zboolean;
 	Odr_null *null;
 	Z_Unit *unit;
 	Z_IntUnit *valueAndUnit;
