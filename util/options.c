@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: options.c,v $
- * Revision 1.4  1995-09-29 17:12:35  quinn
+ * Revision 1.5  1995-12-06 13:00:19  adam
+ * Minus alone not treated as an option.
+ *
+ * Revision 1.4  1995/09/29  17:12:35  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:03:03  quinn
@@ -39,7 +42,7 @@ int options (const char *desc, char **argv, int argc, char **arg)
         return -2;
     if (arg_off == 0)
     {
-        if (argv[arg_no][0] != '-')
+        if (argv[arg_no][0] != '-' || argv[arg_no][1] == '\0')
         {
             *arg = argv[arg_no++];
             return 0;
