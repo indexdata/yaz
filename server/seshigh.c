@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.7  1995-03-21 15:53:31  quinn
+ * Revision 1.8  1995-03-22 10:13:21  quinn
+ * Working on record packer
+ *
+ * Revision 1.7  1995/03/21  15:53:31  quinn
  * Little changes.
  *
  * Revision 1.6  1995/03/21  12:30:09  quinn
@@ -235,7 +238,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.7 $";
+    resp.implementationVersion = "$Revision: 1.8 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -284,8 +287,108 @@ static Z_NamePlusRecord *surrogatediagrec(char *dbname, int error,
     return &rec;
 }
 
-static Z_Records *pack_records(association *a, int num, Z_ElementSetNames *esn)
+#define MAX_RECORDS 50
+
+static Z_Records *pack_records(association *a, char *setname, int start,
+				int *num, Z_ElementSetNames *esn,
+				int *next, int *pres)
 {
+    int recno, total_length = 0, toget = *num;
+    static Z_Records records;
+    static Z_NamePlusRecordList reclist;
+    static Z_NamePlusRecord *list[MAX_RECORDS];
+
+    records.which = Z_Records_DBOSD;
+    records.u.databaseOrSurDiagnostics = &reclist;
+    reclist.num_records = 0;
+    reclist.records = list;
+    *pres = Z_PRES_SUCCESS;
+    *num = 0;
+    *next = 0;
+
+    for (recno = start; recno < toget; recno++)
+    {
+    	bend_fetchrequest freq;
+	bend_fetchresult *fres;
+	Z_NamePlusRecord *thisrec;
+	Z_DatabaseRecord *thisext;
+
+	if (reclist.num_records == MAX_RECORDS - 1)
+	{
+	    *pres = Z_PRES_PARTIAL_2;
+	    break;
+	}
+	freq.setname = setname;
+	freq.number = recno;
+	if (!(fres = bend_fetch(&freq)))
+	{
+	    *pres = Z_PRES_FAILURE;
+	    return diagrec(2, "Backend interface problem");
+	}
+	/* backend should be able to signal whether error is system-wide
+	   or only pertaining to current record */
+	if (fres->errcode)
+	{
+	    *pres = Z_PRES_FAILURE;
+	    return diagrec(fres->errcode, fres->errstring);
+	}
+	if (fres->len + total_length > a->preferredMessageSize)
+	{
+	    /* record is small enough, really */
+	    if (fres->len <= a->preferredMessageSize)
+	    {
+		*pres = Z_PRES_PARTIAL_2;
+		break;
+	    }
+	    /* record canonly be fetched by itself */
+	    if (fres->len < a->maximumRecordSize)
+	    {
+	    	if (toget > 1)
+		{
+		    reclist.records[reclist.num_records] =
+		   	 surrogatediagrec(fres->basename, 16, 0);
+		    reclist.num_records++;
+		    *pres = Z_PRES_PARTIAL_2;
+		}
+	    }
+	    else /* too big entirely */
+	    {
+		reclist.records[reclist.num_records] =
+		    surrogatediagrec(fres->basename,
+		    17, 0);
+		reclist.num_records++;
+		*pres = Z_PRES_PARTIAL_2;
+	    }
+	}
+	if (!(thisrec = odr_malloc(a->encode, sizeof(*thisrec))))
+	    return 0;
+	if (!(thisrec->databaseName = odr_malloc(a->encode,
+	    strlen(fres->basename) + 1)))
+	    return 0;
+	strcpy(thisrec->databaseName, fres->basename);
+	thisrec->which = Z_NamePlusRecord_databaseRecord;
+	if (!(thisrec->u.databaseRecord = thisext =  odr_malloc(a->encode,
+	    sizeof(Z_DatabaseRecord))))
+	    return 0;
+	thisext->direct_reference = 0; /* should be OID for current MARC */
+	thisext->indirect_reference = 0;
+	thisext->descriptor = 0;
+	thisext->which = ODR_EXTERNAL_octet;
+	if (!(thisext->u.octet_aligned = odr_malloc(a->encode,
+	    sizeof(Odr_oct))))
+	    return 0;
+	if (!(thisext->u.octet_aligned->buf = odr_malloc(a->encode, fres->len)))
+	    return 0;
+	memcpy(thisext->u.octet_aligned->buf, fres->record, fres->len);
+	thisext->u.octet_aligned->len = thisext->u.octet_aligned->size =
+	    fres->len;
+	reclist.records[reclist.num_records] = thisrec;
+	reclist.num_records++;
+	total_length = fres->len;
+	(*num)++;
+	*next = fres->last_in_set ? 0 : recno + 1;
+    }
+    return &records;
 }
 
 static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
@@ -342,7 +445,7 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
     Z_APDU apdu, *apdup;
     Z_PresentResponse resp;
     association *assoc = iochan_getdata(client);
-    int nrr = 1;
+    int presst, next, num;
 
     fprintf(stderr, "Got PresentRequest.\n");
     apdup = &apdu;
@@ -350,11 +453,14 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
     apdu.u.presentResponse = &resp;
     resp.referenceId = req->referenceId;
 
-    resp.numberOfRecordsReturned = &nrr;
-    resp.nextResultSetPosition = &nrr;
-    resp.presentStatus = &nrr;
-
-    resp.records = diagrec(1, "No records yet.");
+    num = *req->numberOfRecordsRequested;
+    resp.records = pack_records(assoc, req->resultSetId,
+	*req->resultSetStartPoint, &num, req->elementSetNames, &next, &presst);
+    if (!resp.records)
+    	return -1;
+    resp.numberOfRecordsReturned = &num;
+    resp.presentStatus = &presst;
+    resp.nextResultSetPosition = &next;
 
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
