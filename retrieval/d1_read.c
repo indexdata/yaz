@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.28  1999-10-21 09:50:33  adam
+ * Revision 1.29  1999-10-21 12:06:29  adam
+ * Retrieval module no longer uses ctype.h - functions.
+ *
+ * Revision 1.28  1999/10/21 09:50:33  adam
  * SGML reader uses own isspace - it doesn't do 8-bit on WIN32!
  *
  * Revision 1.27  1999/08/27 09:40:32  adam
@@ -156,7 +159,6 @@
 #include <log.h>
 #include <data1.h>
 
-#define d1_isspace(c) strchr(" \r\n\t\f", c)
 /*
  * get the tag which is the immediate parent of this node (this may mean
  * traversing intermediate things like variants and stuff.

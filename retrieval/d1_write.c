@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_write.c,v $
- * Revision 1.6  1999-07-06 12:16:00  adam
+ * Revision 1.7  1999-10-21 12:06:29  adam
+ * Retrieval module no longer uses ctype.h - functions.
+ *
+ * Revision 1.6  1999/07/06 12:16:00  adam
  * Improved layout generated record in SGML/XML format.
  *
  * Revision 1.5  1998/06/05 08:57:43  adam
@@ -28,7 +31,6 @@
  */
 
 #include <string.h>
-#include <ctype.h>
 
 #include <data1.h>
 #include <wrbuf.h>
@@ -39,7 +41,7 @@ static int wordlen(char *b, int max)
 {
     int l = 0;
 
-    while (l < max && !isspace(*b))
+    while (l < max && !d1_isspace(*b))
 	l++, b++;
     return l;
 }
@@ -92,7 +94,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 		{
 		    int wlen;
 		    
-		    while (l && isspace(*p))
+		    while (l && d1_isspace(*p))
 			p++, l--;
 		    if (!l)
 			break;
@@ -110,7 +112,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 			wrbuf_putc(b, ' ');
 			lcol++;
 		    }
-		    while (l && !isspace(*p))
+		    while (l && !d1_isspace(*p))
 		    {
 			wrbuf_putc(b, *p);
 			p++;

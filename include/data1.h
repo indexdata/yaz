@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.41  1999-07-13 13:23:47  adam
+ * Revision 1.42  1999-10-21 12:06:28  adam
+ * Retrieval module no longer uses ctype.h - functions.
+ *
+ * Revision 1.41  1999/07/13 13:23:47  adam
  * Non-recursive version of data1_read_node. data1_read_nodex reads
  * stream of bytes (instead of buffer in memory).
  *
@@ -224,6 +227,8 @@
 #include <yaz-util.h>
 #include <wrbuf.h>
 
+#define d1_isspace(c) strchr(" \r\n\t\f", c)
+#define d1_isdigit(c) ((c) <= '9' && (c) >= '0')
 #ifdef __cplusplus
 extern "C" {
 #endif

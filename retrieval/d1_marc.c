@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.14  1999-08-27 09:40:32  adam
+ * Revision 1.15  1999-10-21 12:06:29  adam
+ * Retrieval module no longer uses ctype.h - functions.
+ *
+ * Revision 1.14  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.13  1998/10/13 16:09:52  adam
@@ -59,7 +62,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <oid.h>
 #include <log.h>
@@ -213,7 +215,7 @@ static char *get_data(data1_node *n, int *len)
     }
 
     *len = n->u.data.len;
-    while (*len && isspace(n->u.data.data[*len - 1]))
+    while (*len && d1_isspace(n->u.data.data[*len - 1]))
 	(*len)--;
     return n->u.data.data;
 }

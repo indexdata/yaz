@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.16  1999-08-27 09:40:32  adam
+ * Revision 1.17  1999-10-21 12:06:29  adam
+ * Retrieval module no longer uses ctype.h - functions.
+ *
+ * Revision 1.16  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.15  1998/10/13 16:09:49  adam
@@ -69,7 +72,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <ctype.h>
 #include <odr.h>
 #include <proto.h>
 #include <log.h>
@@ -120,7 +122,7 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem,
 	    t->which = Z_Triple_null;
 	    t->value.null = odr_nullval();
 	}
-	else if (isdigit(*value))
+	else if (d1_isdigit(*value))
 	{
 	    t->which = Z_Triple_integer;
 	    t->value.integer = (int *)
@@ -167,7 +169,7 @@ static Z_Occurrences *read_occurrences(char *occ, NMEM nmem,
     {
 	Z_OccurValues *ov = (Z_OccurValues *)nmem_malloc(nmem, sizeof(*ov));
     
-	if (!isdigit(*occ))
+	if (!d1_isdigit(*occ))
 	{
 	    yaz_log(LOG_WARN, "%s:%d: Bad occurrences-spec %s",
 		    file, lineno, occ);

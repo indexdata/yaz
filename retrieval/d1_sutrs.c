@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sutrs.c,v $
- * Revision 1.4  1997-09-17 12:10:38  adam
+ * Revision 1.5  1999-10-21 12:06:29  adam
+ * Retrieval module no longer uses ctype.h - functions.
+ *
+ * Revision 1.4  1997/09/17 12:10:38  adam
  * YAZ version 1.4.
  *
  * Revision 1.3  1995/12/15 16:57:11  quinn
@@ -19,8 +22,6 @@
  *
  */
 
-#include <ctype.h>
-
 #include <data1.h>
 
 #define NTOBUF_INDENT   2
@@ -30,7 +31,7 @@ static int wordlen(char *b)
 {
     int l = 0;
 
-    while (*b && !isspace(*b))
+    while (*b && !d1_isspace(*b))
 	l++, b++;
     return l;
 }
@@ -83,7 +84,7 @@ static int nodetobuf(data1_node *n, int select, WRBUF b, int indent, int col)
 		{
 		    int wlen;
 
-		    while (l && isspace(*p))
+		    while (l && d1_isspace(*p))
 			p++, l--;
 		    if (!l)
 			break;
@@ -101,7 +102,7 @@ static int nodetobuf(data1_node *n, int select, WRBUF b, int indent, int col)
 			wrbuf_putc(b, ' ');
 			col++;
 		    }
-		    while (l && !isspace(*p))
+		    while (l && !d1_isspace(*p))
 		    {
 			if (col > NTOBUF_MARGIN)
 			{

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.15  1999-08-27 09:40:32  adam
+ * Revision 1.16  1999-10-21 12:06:29  adam
+ * Retrieval module no longer uses ctype.h - functions.
+ *
+ * Revision 1.15  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.14  1998/10/13 16:09:50  adam
@@ -63,7 +66,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <oid.h>
 #include <log.h>
@@ -183,7 +185,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		    (*mtp)->new_field = 1;
 		else
 		    (*mtp)->new_field = 0;
-		if ((type != 3 || local_numeric) && isdigit(*valstr))
+		if ((type != 3 || local_numeric) && d1_isdigit(*valstr))
                 {
 		    (*mtp)->which = D1_MAPTAG_numeric;
 		    (*mtp)->value.numeric = atoi(valstr);

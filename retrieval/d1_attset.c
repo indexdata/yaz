@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.12  1999-08-27 09:40:32  adam
+ * Revision 1.13  1999-10-21 12:06:29  adam
+ * Retrieval module no longer uses ctype.h - functions.
+ *
+ * Revision 1.12  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.11  1998/10/14 13:31:56  adam
@@ -51,7 +54,6 @@
  *
  */
 
-#include <ctype.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
