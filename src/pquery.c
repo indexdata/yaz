@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.3 2004-11-17 00:17:17 adam Exp $
+ * $Id: pquery.c,v 1.4 2004-12-30 00:21:12 adam Exp $
  */
 /**
  * \file pquery.c
@@ -80,7 +80,7 @@ static int query_token (struct yaz_pqf_parser *li)
     }
     li->lex_buf = *qptr;
    
-    if (**qptr == li->escape_char && isdigit ((*qptr)[1]))
+    if (**qptr == li->escape_char && isdigit (((const unsigned char *) *qptr)[1]))
     {
 	++(li->lex_len);
 	++(*qptr);

@@ -53,7 +53,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.3 2004-10-15 00:18:59 adam Exp $
+ * $Id: cclptree.c,v 1.4 2004-12-30 00:22:25 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -145,7 +145,7 @@ void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
             if (*cp == '!')
             {   
                 /* word order specified */
-                if (isdigit(cp[1]))
+                if (isdigit(((const unsigned char *) cp)[1]))
                     fprintf(fd_out, "@prox 0 %s 1 2 known 2", cp+1);
                 else
                     fprintf(fd_out, "@prox 0 1 1 2 known 2");
@@ -153,7 +153,7 @@ void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
             else if (*cp == '%')
             {
                 /* word order not specified */
-                if (isdigit(cp[1]))
+                if (isdigit(((const unsigned char *) cp)[1]))
                     fprintf(fd_out, "@prox 0 %s 0 2 known 2", cp+1);
                 else
                     fprintf(fd_out, "@prox 0 1 0 2 known 2");
@@ -195,7 +195,7 @@ static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
             if (*cp == '!')
             {   
                 /* word order specified */
-                if (isdigit(cp[1]))
+                if (isdigit(((const unsigned char *) cp)[1]))
                     wrbuf_printf(w, "@prox 0 %s 1 2 k 2 ", cp+1);
                 else
                     wrbuf_printf(w, "@prox 0 1 1 2 k 2 ");
@@ -203,7 +203,7 @@ static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
             else if (*cp == '%')
             {
                 /* word order not specified */
-                if (isdigit(cp[1]))
+                if (isdigit(((const unsigned char *) cp)[1]))
                     wrbuf_printf(w, "@prox 0 %s 0 2 k 2 ", cp+1);
                 else
                     wrbuf_printf(w, "@prox 0 1 0 2 k 2 ");
