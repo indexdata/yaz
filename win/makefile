@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.49 2002-10-22 13:49:53 adam Exp $
+# $Id: makefile,v 1.50 2002-10-24 12:14:01 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -18,6 +18,7 @@
 #   for you. You can find this somewhere near DevStudio\VC\BIN
 # - RegSvr32 must also be along the path, often in WINDOWS\SYSTEM
 # - TCL has to be available too, if compiling for NEW_Z3950
+# - You may have to edit the path to tcl below
 
 ###########################################################
 ############### Parameters 
@@ -30,7 +31,8 @@ HAVE_ICONV=0
 ICONV_DIR = c:\libiconv-1.7.0.1
 
 # TCL
-TCL="C:\Tcl\bin\tclsh83.exe"
+#TCL="C:\Tcl\bin\tclsh83.exe"
+TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
 
 default: all
@@ -830,7 +832,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.49  2002-10-22 13:49:53  adam
+# Revision 1.50  2002-10-24 12:14:01  heikki
+# Using a default path to find tcl
+#
+# Revision 1.49  2002/10/22 13:49:53  adam
 # data1 gone
 #
 # Revision 1.48  2002/10/22 10:32:46  adam
