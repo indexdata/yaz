@@ -2,7 +2,10 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.3  1995-06-27 13:12:07  quinn
+ * Revision 1.4  1995-08-24 15:13:18  quinn
+ * Beta 3
+ *
+ * Revision 1.3  1995/06/27  13:12:07  quinn
  * v1.0b2
  * See CHANGELOG for update info now.
  *
@@ -34,5 +37,5 @@
  */
 
 #ifndef YAZ_VERSION
-#define YAZ_VERSION "1.0 beta 2"
+#define YAZ_VERSION "1.0 beta 3"
 #endif
