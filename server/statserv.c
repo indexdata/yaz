@@ -7,7 +7,11 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.50  1998-06-22 11:32:39  adam
+ * Revision 1.51  1998-07-07 15:51:03  adam
+ * Changed server so that it stops if bind fails - "address already in
+ * use" typically causes this.
+ *
+ * Revision 1.50  1998/06/22 11:32:39  adam
  * Added 'conditional cs_listen' feature.
  *
  * Revision 1.49  1998/02/27 14:04:55  adam
@@ -735,11 +739,15 @@ static void add_listener(char *where, int what)
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
     	logf(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s", where);
+	cs_close (l);
+	return;
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
    	 EVENT_EXCEPT)))
     {
     	logf(LOG_FATAL|LOG_ERRNO, "Failed to create IOCHAN-type");
+	cs_close (l);
+	return;
     }
     iochan_setdata(lst, l);
 
@@ -822,12 +830,14 @@ int statserv_start(int argc, char **argv)
     if ((pListener == NULL) && *control_block.default_listen)
 	add_listener(control_block.default_listen,
 		     control_block.default_proto);
-    logf(LOG_LOG, "Entering event loop.");
 	
     if (pListener == NULL)
 	ret = 1;
     else
+    {
+	logf(LOG_LOG, "Entering event loop.");
         ret = event_loop(&pListener);
+    }
     nmem_exit ();
     return ret;
 }
