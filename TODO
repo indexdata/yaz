@@ -1,4 +1,4 @@
-YAZ TODO $Id: TODO,v 1.5 2002-03-16 11:45:00 adam Exp $
+YAZ TODO $Id: TODO,v 1.6 2002-08-02 08:54:04 adam Exp $
 
 Complete Unicode support.
 
@@ -6,7 +6,7 @@ Complete EXPLAIN support in retrieval module.
 
 Versions to be put automatically in
    configure.in
-   yaz/include/yaz-version.h
+   include/yaz/yaz-version.h
    debian/rules
    CHANGELOG
    win/yaz.rc (4 places)
