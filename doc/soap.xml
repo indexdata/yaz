@@ -1,4 +1,4 @@
-<!-- $Id: soap.xml,v 1.3 2003-02-23 14:24:09 adam Exp $ -->
+<!-- $Id: soap.xml,v 1.4 2003-11-03 10:47:24 adam Exp $ -->
 <chapter id="soap"><title>SOAP and SRW</title>
   <sect1 id="soap.introduction"><title>Introduction</title>
     <para>
@@ -168,7 +168,7 @@ int yaz_srw_codec(ODR o, void * pptr,
                   void *client_data, const char *ns);
       </synopsis>
       Here, <literal>Z_SRW_GDU</literal> is either
-      searchRetrieverequest or a searchRetrieveResponse. 
+      searchRetrieveRequest or a searchRetrieveResponse. 
     </para>
     <note>
       <para>
