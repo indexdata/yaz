@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.10 2002-06-12 19:47:44 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.11 2002-11-29 11:53:55 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
    <para>
    This appendix lists individuals that have contributed in the development
@@ -52,6 +52,9 @@
     </para></listitem>
    <listitem><para>
      Oleg Kolobov
+    </para></listitem>
+   <listitem><para>
+     Kang-Jin Lee
     </para></listitem>
    <listitem><para>
      Stefan Lohrum

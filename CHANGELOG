@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fix creation of lib/yaz-config so it works if srcdir != objdir. Patch
+from Kang-Jin Lee.
+
 --- 1.9.2 2002/11/26
 
 yaz_marc_decode uses OAI MARC as XML format for ISO2709 records.
