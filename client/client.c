@@ -5,7 +5,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.47  1997-07-01 13:49:56  adam
+ * Revision 1.48  1997-09-01 08:48:44  adam
+ * New windows NT/95 port using MSV5.0. Only a few changes made
+ * to avoid warnings. Sub project created: client.dsp.
+ *
+ * Revision 1.47  1997/07/01 13:49:56  adam
  * Take care of case when invalid target is specified on command line.
  *
  * Revision 1.46  1997/06/23 10:30:18  adam
@@ -515,7 +519,7 @@ static void display_record(Z_DatabaseRecord *p)
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
     {
         const char *marc_buf = (char*)p->u.octet_aligned->buf;
-        marc_display (marc_buf, stdout);
+        marc_display (marc_buf, NULL);
         if (marcdump)
             fwrite (marc_buf, strlen (marc_buf), 1, marcdump);
     }
@@ -905,6 +909,7 @@ int cmd_quit(char *arg)
 {
     printf("See you later, alligator.\n");
     exit(0);
+	return 0;
 }
 
 int cmd_cancel(char *arg)
