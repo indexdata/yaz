@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: pquery.h,v $
- * Revision 1.4  1995-09-29 17:12:05  quinn
+ * Revision 1.5  1996-03-15 11:01:46  adam
+ * Extra argument to p_query_rpn: protocol.
+ * Extra arguments to p_query_scan: protocol and attributeSet.
+ *
+ * Revision 1.4  1995/09/29  17:12:05  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:49  quinn
@@ -44,6 +48,8 @@
 #include <yconfig.h>
 #include <proto.h>
 
-Z_RPNQuery *p_query_rpn (ODR o, const char *qbuf);
-Z_AttributesPlusTerm *p_query_scan (ODR o, const char *qbuf);
+Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
+
+Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
+                                    Odr_oid **attributeSetP, const char *qbuf);
 #endif
