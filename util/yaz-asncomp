@@ -3,10 +3,10 @@
 exec tclsh "$0" "$@"
 #
 # yaz-comp: ASN.1 Compiler for YAZ
-# (c) Index Data 1996-2003
+# (c) Index Data 1996-2004
 # See the file LICENSE for details.
 #
-# $Id: yaz-asncomp,v 1.1 2003-05-27 21:12:23 adam Exp $
+# $Id: yaz-asncomp,v 1.2 2004-01-23 11:52:52 adam Exp $
 #
 
 set yc_version 0.3
@@ -523,7 +523,8 @@ proc asnSequence {name tag implicit tagtype} {
 
         lappend l "\tif (!odr_sequence_begin (o, p, sizeof(**p), 0))"
         lappend l "\t\{"
-        lappend l "\t\t*p = 0;"
+	lappend l "\t\tif(o->direction == ODR_DECODE)"
+        lappend l "\t\t\t*p = 0;"
         lappend l "\t\treturn 0;"
         lappend l "\t\}"
     }
@@ -735,7 +736,8 @@ proc asnOf {name tag implicit tagtype isset} {
     }
     lappend j "\}"
     lappend l "\t\treturn 1;"
-    lappend l "\t*p = 0;"
+    lappend l "\tif(o->direction == ODR_DECODE)"
+    lappend l "\t\t*p = 0;"
     lappend l "\treturn odr_missing(o, opt, name);"
     return [list [join $l \n] [join $j \n]]
 }
@@ -850,7 +852,10 @@ proc asnChoice {name tag implicit tagtype} {
 	lappend l "\t\todr_constructed_end(o))"
     }
     lappend l "\t\treturn 1;"
-    lappend l "\t*p = 0;"
+
+    lappend l "\tif(o->direction == ODR_DECODE)"
+    lappend l "\t\t*p = 0;"
+
     lappend l "\treturn odr_missing(o, opt, name);"
     return [list [join $l \n] [join $j \n]]
 }
