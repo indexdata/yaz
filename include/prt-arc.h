@@ -127,8 +127,8 @@ typedef struct Z_OPACRecord
     Z_HoldingsRecord **holdingsData;   /* OPTIONAL */
 } Z_OPACRecord;
 
-int z_BriefBib(ODR o, Z_BriefBib **p, int opt);
-int z_OPACRecord(ODR o, Z_OPACRecord **p, int opt);
+YAZ_EXPORT int z_BriefBib(ODR o, Z_BriefBib **p, int opt);
+YAZ_EXPORT int z_OPACRecord(ODR o, Z_OPACRecord **p, int opt);
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.39  1997-05-14 06:53:44  adam
+ * Revision 1.40  1997-09-01 08:49:50  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.39  1997/05/14 06:53:44  adam
  * C++ support.
  *
  * Revision 1.38  1997/04/30 08:52:09  quinn
@@ -1327,40 +1331,40 @@ typedef struct Z_APDU
     } u;
 } Z_APDU;
 
-int z_APDU(ODR o, Z_APDU **p, int opt);
-int z_SUTRS(ODR o, Odr_oct **p, int opt);
+YAZ_EXPORT int z_APDU(ODR o, Z_APDU **p, int opt);
+YAZ_EXPORT int z_SUTRS(ODR o, Odr_oct **p, int opt);
 
-Z_InitRequest *zget_InitRequest(ODR o);
-Z_InitResponse *zget_InitResponse(ODR o);
-Z_SearchRequest *zget_SearchRequest(ODR o);
-Z_SearchResponse *zget_SearchResponse(ODR o);
-Z_PresentRequest *zget_PresentRequest(ODR o);
-Z_PresentResponse *zget_PresentResponse(ODR o);
-Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o);
-Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o);
-Z_ScanRequest *zget_ScanRequest(ODR o);
-Z_ScanResponse *zget_ScanResponse(ODR o);
-Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
-Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
-Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
-Z_Close *zget_Close(ODR o);
-int z_StringList(ODR o, Z_StringList **p, int opt);
-int z_InternationalString(ODR o, char **p, int opt);
-int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt);
-int z_ElementSetName(ODR o, char **p, int opt);
-int z_IntUnit(ODR o, Z_IntUnit **p, int opt);
-int z_Unit(ODR o, Z_Unit **p, int opt);
-int z_DatabaseName(ODR o, Z_DatabaseName **p, int opt);
-int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt);
-int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt);
-int z_Term(ODR o, Z_Term **p, int opt);
-int z_Specification(ODR o, Z_Specification **p, int opt);
-int z_Permissions(ODR o, Z_Permissions **p, int opt);
-int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
-int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
-int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
-Z_APDU *zget_APDU(ODR o, int which);
-int z_Query(ODR o, Z_Query **p, int opt);
+YAZ_EXPORT Z_InitRequest *zget_InitRequest(ODR o);
+YAZ_EXPORT Z_InitResponse *zget_InitResponse(ODR o);
+YAZ_EXPORT Z_SearchRequest *zget_SearchRequest(ODR o);
+YAZ_EXPORT Z_SearchResponse *zget_SearchResponse(ODR o);
+YAZ_EXPORT Z_PresentRequest *zget_PresentRequest(ODR o);
+YAZ_EXPORT Z_PresentResponse *zget_PresentResponse(ODR o);
+YAZ_EXPORT Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o);
+YAZ_EXPORT Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o);
+YAZ_EXPORT Z_ScanRequest *zget_ScanRequest(ODR o);
+YAZ_EXPORT Z_ScanResponse *zget_ScanResponse(ODR o);
+YAZ_EXPORT Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
+YAZ_EXPORT Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
+YAZ_EXPORT Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
+YAZ_EXPORT Z_Close *zget_Close(ODR o);
+YAZ_EXPORT int z_StringList(ODR o, Z_StringList **p, int opt);
+YAZ_EXPORT int z_InternationalString(ODR o, char **p, int opt);
+YAZ_EXPORT int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt);
+YAZ_EXPORT int z_ElementSetName(ODR o, char **p, int opt);
+YAZ_EXPORT int z_IntUnit(ODR o, Z_IntUnit **p, int opt);
+YAZ_EXPORT int z_Unit(ODR o, Z_Unit **p, int opt);
+YAZ_EXPORT int z_DatabaseName(ODR o, Z_DatabaseName **p, int opt);
+YAZ_EXPORT int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt);
+YAZ_EXPORT int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt);
+YAZ_EXPORT int z_Term(ODR o, Z_Term **p, int opt);
+YAZ_EXPORT int z_Specification(ODR o, Z_Specification **p, int opt);
+YAZ_EXPORT int z_Permissions(ODR o, Z_Permissions **p, int opt);
+YAZ_EXPORT int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
+YAZ_EXPORT int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
+YAZ_EXPORT int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
+YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
+YAZ_EXPORT int z_Query(ODR o, Z_Query **p, int opt);
 
 #ifdef __cplusplus
 }

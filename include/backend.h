@@ -49,7 +49,7 @@ typedef struct bend_initresult
     void *handle;              /* private handle to the backend module */
 } bend_initresult;
 
-bend_initresult MDF *bend_init(bend_initrequest *r);   
+YAZ_EXPORT bend_initresult MDF *bend_init(bend_initrequest *r);   
 
 typedef struct bend_searchrequest
 {
@@ -67,8 +67,9 @@ typedef struct bend_searchresult
     char *errstring;           /* system error string or NULL */
 } bend_searchresult;
 
-bend_searchresult *bend_search(void *handle, bend_searchrequest *r, int *fd);
-bend_searchresult *bend_searchresponse(void *handle);
+YAZ_EXPORT bend_searchresult *bend_search(void *handle, bend_searchrequest *r,
+                                          int *fd);
+YAZ_EXPORT bend_searchresult *bend_searchresponse(void *handle);
 
 typedef struct bend_fetchrequest
 {
@@ -90,8 +91,9 @@ typedef struct bend_fetchresult
     char *errstring;           /* system error string or NULL */
 } bend_fetchresult;
 
-bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r, int *fd);
-bend_fetchresult *bend_fetchresponse(void *handle);
+YAZ_EXPORT bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r,
+                                        int *fd);
+YAZ_EXPORT bend_fetchresult *bend_fetchresponse(void *handle);
 
 typedef struct bend_scanrequest
 {
@@ -121,8 +123,9 @@ typedef struct bend_scanresult
     char *errstring;
 } bend_scanresult;
 
-bend_scanresult *bend_scan(void *handle, bend_scanrequest *r, int *fd);
-bend_scanresult *bend_scanresponse(void *handle);
+YAZ_EXPORT bend_scanresult *bend_scan(void *handle, bend_scanrequest *r,
+                                      int *fd);
+YAZ_EXPORT bend_scanresult *bend_scanresponse(void *handle);
 
 typedef struct bend_deleterequest
 {
@@ -135,10 +138,11 @@ typedef struct bend_deleteresult
     char *errstring;           /* system error string or NULL */
 } bend_deleteresult;
 
-bend_deleteresult *bend_delete(void *handle, bend_deleterequest *r, int *fd);
-bend_deleteresult *bend_deleteresponse(void *handle);
+YAZ_EXPORT bend_deleteresult *bend_delete(void *handle,
+                                          bend_deleterequest *r, int *fd);
+YAZ_EXPORT bend_deleteresult *bend_deleteresponse(void *handle);
 
-void bend_close(void *handle);
+YAZ_EXPORT void bend_close(void *handle);
 
 #ifdef __cplusplus
 }

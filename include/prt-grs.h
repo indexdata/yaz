@@ -174,8 +174,8 @@ struct Z_GenericRecord
     Z_TaggedElement **elements;
 };
 
-int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
-int z_Variant(ODR o, Z_Variant **p, int opt);
+YAZ_EXPORT int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
+YAZ_EXPORT int z_Variant(ODR o, Z_Variant **p, int opt);
 
 #ifdef __cplusplus
 }

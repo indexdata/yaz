@@ -326,7 +326,7 @@ typedef struct Z_DiagnosticFormat
     Z_DiagnosticUnit **diagnostics;
 } Z_DiagnosticFormat;
 
-int z_DiagnosticFormat(ODR o, Z_DiagnosticFormat **p, int opt);
+YAZ_EXPORT int z_DiagnosticFormat(ODR o, Z_DiagnosticFormat **p, int opt);
 
 #ifdef __cplusplus
 }

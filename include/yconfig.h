@@ -34,7 +34,13 @@
 #endif
 #endif /* ifndef _VMS_ */
 
-#include <xmalloc.h>
+#ifndef YAZ_EXPORT
+#ifdef WINDOWS
+#define YAZ_EXPORT __declspec(dllexport)
+#else
+#define YAZ_EXPORT
+#endif
+#endif
 
 #ifdef WINDOWS
 #define MDF

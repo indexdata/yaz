@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.22  1997-07-21 12:44:30  adam
+ * Revision 1.23  1997-09-01 08:49:49  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.22  1997/07/21 12:44:30  adam
  * Moved definitions of nmem_block and nmem_control.
  *
  * Revision 1.21  1997/05/14 06:53:41  adam
@@ -245,6 +249,12 @@ typedef struct odr_ecblock
     int size;             /* current buffer size */
 } odr_ecblock;
 
+typedef struct {      /* used to be statics in ber_tag... */
+    int lclass;
+    int ltag;
+    int br;
+    int lcons;
+} Odr_ber_tag;
 
 typedef struct odr
 {
@@ -274,6 +284,8 @@ typedef struct odr
 #define ODR_MAX_STACK 50
     int stackp;          /* top of stack (-1 == initial state) */
     odr_constack stack[ODR_MAX_STACK];
+
+    Odr_ber_tag odr_ber_tag;
 } *ODR;
 
 typedef int (*Odr_fun)();
@@ -305,16 +317,16 @@ typedef struct odr_arm
 
 extern char *odr_errlist[];
 
-int odr_geterror(ODR o);
-void odr_perror(ODR o, char *message);
-void odr_setprint(ODR o, FILE *file);
-ODR odr_createmem(int direction);
-void odr_reset(ODR o);
-void odr_destroy(ODR o);
-void odr_setbuf(ODR o, char *buf, int len, int can_grow);
-char *odr_getbuf(ODR o, int *len, int *size);
-void *odr_malloc(ODR o, int size);
-NMEM odr_extract_mem(ODR o);
+YAZ_EXPORT int odr_geterror(ODR o);
+YAZ_EXPORT void odr_perror(ODR o, char *message);
+YAZ_EXPORT void odr_setprint(ODR o, FILE *file);
+YAZ_EXPORT ODR odr_createmem(int direction);
+YAZ_EXPORT void odr_reset(ODR o);
+YAZ_EXPORT void odr_destroy(ODR o);
+YAZ_EXPORT void odr_setbuf(ODR o, char *buf, int len, int can_grow);
+YAZ_EXPORT char *odr_getbuf(ODR o, int *len, int *size);
+YAZ_EXPORT void *odr_malloc(ODR o, int size);
+YAZ_EXPORT NMEM odr_extract_mem(ODR o);
 #define odr_release_mem(m) nmem_destroy(m)
 #define ODR_MEM NMEM
 

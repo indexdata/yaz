@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: options.h,v $
- * Revision 1.5  1997-05-14 06:53:43  adam
+ * Revision 1.6  1997-09-01 08:49:50  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.5  1997/05/14 06:53:43  adam
  * C++ support.
  *
  * Revision 1.4  1995/09/29 17:12:05  quinn
@@ -59,7 +63,7 @@
 extern "C" {
 #endif
 
-int options (const char *desc, char **argv, int argc, char **arg);
+YAZ_EXPORT int options (const char *desc, char **argv, int argc, char **arg);
 
 #ifdef __cplusplus
 }

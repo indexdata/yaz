@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr_use.h,v $
- * Revision 1.7  1997-05-14 06:53:42  adam
+ * Revision 1.8  1997-09-01 08:49:49  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.7  1997/05/14 06:53:42  adam
  * C++ support.
  *
  * Revision 1.6  1995/09/29 17:12:04  quinn
@@ -79,11 +83,11 @@ typedef struct Odr_external
     } u;
 } Odr_external;
 
-int odr_external(ODR o, Odr_external **p, int opt);
+YAZ_EXPORT int odr_external(ODR o, Odr_external **p, int opt);
 
-int odr_visiblestring(ODR o, char **p, int opt);
-int odr_graphicstring(ODR o, char **p, int opt);
-int odr_generalizedtime(ODR o, char **p, int opt);
+YAZ_EXPORT int odr_visiblestring(ODR o, char **p, int opt);
+YAZ_EXPORT int odr_graphicstring(ODR o, char **p, int opt);
+YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt);
 
 #ifdef __cplusplus
 }

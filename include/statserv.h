@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.8  1997-05-14 06:53:51  adam
+ * Revision 1.9  1997-09-01 08:49:53  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.8  1997/05/14 06:53:51  adam
  * C++ support.
  *
  * Revision 1.7  1995/09/29 17:12:12  quinn
@@ -50,6 +54,7 @@
 
 #include <yconfig.h>
 #include <oid.h>
+#include "eventl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,8 +75,10 @@ typedef struct statserv_options_block
 } statserv_options_block;
 
 int statserv_main(int argc, char **argv);
+void statserv_closedown(void);
 statserv_options_block *statserv_getcontrol(void);
 void statserv_setcontrol(statserv_options_block *block);
+void statserv_remove(IOCHAN pIOChannel);
 
 #ifdef __cplusplus
 }

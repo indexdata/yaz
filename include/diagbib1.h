@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: diagbib1.h,v $
- * Revision 1.5  1997-05-14 06:53:39  adam
+ * Revision 1.6  1997-09-01 08:49:48  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.5  1997/05/14 06:53:39  adam
  * C++ support.
  *
  * Revision 1.4  1995/09/29 17:12:02  quinn
@@ -53,7 +57,7 @@
 extern "C" {
 #endif
 
-const char *diagbib1_str (int code);
+YAZ_EXPORT const char *diagbib1_str (int code);
 
 #ifdef __cplusplus
 }

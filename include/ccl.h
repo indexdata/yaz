@@ -46,7 +46,11 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.6  1997-05-14 06:53:37  adam
+ * Revision 1.7  1997-09-01 08:49:47  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.6  1997/05/14 06:53:37  adam
  * C++ support.
  *
  * Revision 1.5  1997/04/30 08:52:08  quinn
@@ -199,7 +203,7 @@ typedef struct ccl_qualifiers *CCL_bibset;
 /* CCL token */
 struct ccl_token {
     char kind;
-    char len;
+    size_t len;
     const char *name;
     struct ccl_token *next;
     struct ccl_token *prev;
@@ -271,7 +275,8 @@ int ccl_stricmp (const char *s1, const char *s2);
 int ccl_memicmp (const char *s1, const char *s2, size_t n);
 
 /* Search for qualifier 'name' in set 'b'. */
-struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name, int len);
+struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name,
+                                      size_t len);
 
 #ifdef __cplusplus
 }

@@ -28,7 +28,7 @@
 
 #ifndef NMEM_H
 #define NMEM_H
-
+#include <yconfig.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -50,11 +50,11 @@ typedef struct nmem_control
 
 typedef struct nmem_control *NMEM;
 
-void nmem_reset(NMEM n);
-void *nmem_malloc(NMEM n, int size);
-int nmem_total(NMEM n);
-NMEM nmem_create(void);
-void nmem_destroy(NMEM n);
+YAZ_EXPORT void nmem_reset(NMEM n);
+YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
+YAZ_EXPORT int nmem_total(NMEM n);
+YAZ_EXPORT NMEM nmem_create(void);
+YAZ_EXPORT void nmem_destroy(NMEM n);
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: yaz-ccl.h,v $
- * Revision 1.7  1997-06-23 10:30:45  adam
+ * Revision 1.8  1997-09-01 08:49:54  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.7  1997/06/23 10:30:45  adam
  * Added ODR stream as parameter to ccl_rpn_query and ccl_scan_query.
  *
  * Revision 1.6  1997/05/14 06:53:54  adam
@@ -54,8 +58,8 @@
 extern "C" {
 #endif
 
-Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p);
-Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p);
+YAZ_EXPORT Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p);
+YAZ_EXPORT Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p);
 
 #ifdef __cplusplus
 }

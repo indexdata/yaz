@@ -999,7 +999,7 @@ typedef struct Z_ExplainRecord
     } u;
 } Z_ExplainRecord;
 
-int z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
+YAZ_EXPORT int z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
 
 #ifdef __cplusplus
 }

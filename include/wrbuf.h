@@ -28,7 +28,7 @@
 #ifndef WRBUF_H
 #define WRBUF_H
 
-#include <yconfig.h>
+#include <xmalloc.h>
 
 #ifdef __cplusplus
 extern "C" {

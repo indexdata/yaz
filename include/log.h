@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.10  1997-05-14 06:53:40  adam
+ * Revision 1.11  1997-09-01 08:49:48  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.10  1997/05/14 06:53:40  adam
  * C++ support.
  *
  * Revision 1.9  1997/05/01 15:06:42  adam
@@ -89,15 +93,15 @@ extern "C" {
 
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 
-void log_init(int level, const char *prefix, const char *name);
-void logf(int level, const char *fmt, ...);
-int log_mask_str (const char *str);
-int log_mask_str_x (const char *str, int level);
-FILE *log_file(void);
+YAZ_EXPORT void log_init(int level, const char *prefix, const char *name);
+YAZ_EXPORT void logf(int level, const char *fmt, ...);
+YAZ_EXPORT int log_mask_str (const char *str);
+YAZ_EXPORT int log_mask_str_x (const char *str, int level);
+YAZ_EXPORT FILE *log_file(void);
 
-void log_event_start (void (*func)(int level, const char *msg, void *info),
+YAZ_EXPORT void log_event_start (void (*func)(int level, const char *msg, void *info),
 	void *info);
-void log_event_end (void (*func)(int level, const char *msg, void *info),
+YAZ_EXPORT void log_event_end (void (*func)(int level, const char *msg, void *info),
 	void *info);
 
 #ifdef __cplusplus

@@ -256,7 +256,7 @@ typedef struct Z_IUUpdate
     } u;
 } Z_IUUpdate;
 
-int z_IUUpdate(ODR o, Z_IUUpdate **p, int opt);
+YAZ_EXPORT int z_IUUpdate(ODR o, Z_IUUpdate **p, int opt);
 
 #ifdef __cplusplus
 }

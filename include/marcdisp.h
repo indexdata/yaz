@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: marcdisp.h,v $
- * Revision 1.5  1997-05-14 06:53:40  adam
+ * Revision 1.6  1997-09-01 08:49:49  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.5  1997/05/14 06:53:40  adam
  * C++ support.
  *
  * Revision 1.4  1995/09/29 17:12:03  quinn
@@ -50,7 +54,7 @@
 extern "C" {
 #endif
 
-int marc_display (const char *buf, FILE *outf);
+YAZ_EXPORT int marc_display (const char *buf, FILE *outf);
 
 #ifdef __cplusplus
 }

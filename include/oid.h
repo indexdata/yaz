@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.22  1997-08-19 08:45:13  quinn
+ * Revision 1.23  1997-09-01 08:49:50  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.22  1997/08/19 08:45:13  quinn
  * Added Thesaurus
  *
  * Revision 1.21  1997/08/19 08:43:49  quinn
@@ -203,14 +207,14 @@ typedef struct oident
     char *desc;
 } oident;
 
-int *oid_getoidbyent(struct oident *ent);
-struct oident *oid_getentbyoid(int *o);
-void oid_oidcpy(int *t, int *s);
-void oid_oidcat(int *t, int *s);
-int oid_oidcmp(int *o1, int *o2);
-int oid_oidlen(int *o);
-oid_value oid_getvalbyname(const char *name);
-void oid_setprivateoids(oident *list);
+YAZ_EXPORT int *oid_getoidbyent(struct oident *ent);
+YAZ_EXPORT struct oident *oid_getentbyoid(int *o);
+YAZ_EXPORT void oid_oidcpy(int *t, int *s);
+YAZ_EXPORT void oid_oidcat(int *t, int *s);
+YAZ_EXPORT int oid_oidcmp(int *o1, int *o2);
+YAZ_EXPORT int oid_oidlen(int *o);
+YAZ_EXPORT oid_value oid_getvalbyname(const char *name);
+YAZ_EXPORT void oid_setprivateoids(oident *list);
 
 #ifdef __cplusplus
 }

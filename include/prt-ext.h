@@ -99,8 +99,8 @@ struct Z_External
     } u;
 };
 
-int z_External(ODR o, Z_External **p, int opt);
-Z_ext_typeent *z_ext_getentbyref(oid_value val);
+YAZ_EXPORT int z_External(ODR o, Z_External **p, int opt);
+YAZ_EXPORT Z_ext_typeent *z_ext_getentbyref(oid_value val);
 
 #ifdef __cplusplus
 }

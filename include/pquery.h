@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: pquery.h,v $
- * Revision 1.7  1997-05-14 06:53:43  adam
+ * Revision 1.8  1997-09-01 08:49:50  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.7  1997/05/14 06:53:43  adam
  * C++ support.
  *
  * Revision 1.6  1996/08/12 14:09:24  adam
@@ -58,11 +62,11 @@
 extern "C" {
 #endif
 
-Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
+YAZ_EXPORT Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
 
-Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
-                                    Odr_oid **attributeSetP, const char *qbuf);
-int p_query_attset (const char *arg);
+YAZ_EXPORT Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
+           Odr_oid **attributeSetP, const char *qbuf);
+YAZ_EXPORT int p_query_attset (const char *arg);
 
 #ifdef __cplusplus
 }

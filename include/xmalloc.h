@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmalloc.h,v $
- * Revision 1.2  1997-05-14 06:53:53  adam
+ * Revision 1.3  1997-09-01 08:49:54  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.2  1997/05/14 06:53:53  adam
  * C++ support.
  *
  * Revision 1.1  1995/11/01 11:55:41  quinn
@@ -65,15 +69,17 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#include <yconfig.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void *xrealloc_f (void *o, size_t size, char *file, int line);
-void *xmalloc_f (size_t size, char *file, int line);
-void *xcalloc_f (size_t nmemb, size_t size, char *file, int line);
-char *xstrdup_f (const char *, char *file, int line);
-void xfree_f (void *p, char *file, int line);
+YAZ_EXPORT void *xrealloc_f (void *o, size_t size, char *file, int line);
+YAZ_EXPORT void *xmalloc_f (size_t size, char *file, int line);
+YAZ_EXPORT void *xcalloc_f (size_t nmemb, size_t size, char *file, int line);
+YAZ_EXPORT char *xstrdup_f (const char *, char *file, int line);
+YAZ_EXPORT void xfree_f (void *p, char *file, int line);
 
 #define xrealloc(o, x) xrealloc_f(o, x, __FILE__, __LINE__)
 #define xmalloc(x) xmalloc_f(x, __FILE__, __LINE__)

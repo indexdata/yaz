@@ -136,7 +136,7 @@ typedef struct Z_Espec1
     Z_ElementRequest **elements;           /* OPTIONAL */
 } Z_Espec1;
 
-int z_Espec1(ODR o, Z_Espec1 **p, int opt);
+YAZ_EXPORT int z_Espec1(ODR o, Z_Espec1 **p, int opt);
 
 #ifdef __cplusplus
 }

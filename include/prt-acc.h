@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-acc.h,v $
- * Revision 1.7  1997-05-14 06:53:46  adam
+ * Revision 1.8  1997-09-01 08:49:51  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.7  1997/05/14 06:53:46  adam
  * C++ support.
  *
  * Revision 1.6  1996/01/02 08:57:35  quinn
@@ -160,7 +164,7 @@ typedef struct Z_PromptObject1
     } u;
 } Z_PromptObject1;
 
-int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);
+YAZ_EXPORT int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.8  1997-05-14 06:53:52  adam
+ * Revision 1.9  1997-09-01 08:49:54  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.8  1997/05/14 06:53:52  adam
  * C++ support.
  *
  * Revision 1.7  1996/07/06 19:58:32  quinn
@@ -70,9 +74,9 @@
 extern "C" {
 #endif
 
-struct sockaddr_in *tcpip_strtoaddr(const char *str);
+YAZ_EXPORT struct sockaddr_in *tcpip_strtoaddr(const char *str);
 
-COMSTACK tcpip_type(int s, int blocking, int protocol);
+YAZ_EXPORT COMSTACK tcpip_type(int s, int blocking, int protocol);
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.16  1997-05-14 06:53:37  adam
+ * Revision 1.17  1997-09-01 08:49:47  adam
+ * New windows NT/95 port using MSV5.0. To export DLL functions the
+ * YAZ_EXPORT modifier was added. Defined in yconfig.h.
+ *
+ * Revision 1.16  1997/05/14 06:53:37  adam
  * C++ support.
  *
  * Revision 1.15  1996/07/06 19:58:32  quinn
@@ -188,8 +192,8 @@ struct comstack
 #define cs_getproto(handle) ((handle)->protocol)
 #define cs_addrstr(handle) ((*(handle)->f_addrstr)(handle))
 
-const char *cs_strerror(COMSTACK h);
-const char *cs_errmsg(int n);
+YAZ_EXPORT const char *cs_strerror(COMSTACK h);
+YAZ_EXPORT const char *cs_errmsg(int n);
 
 /*
  * error management.
@@ -201,7 +205,7 @@ const char *cs_errmsg(int n);
 #define CSNODATA   3
 #define CSWRONGBUF 4
 
-extern char *cs_errlist[];
+extern const char *cs_errlist[];
 
 /* backwards compatibility */
 #define CS_SR     PROTO_SR

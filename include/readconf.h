@@ -3,15 +3,16 @@
 #define READCONF_H
 
 #include <stdio.h>
+#include <yconfig.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int readconf(char *name, void *rprivate,
-int (*fun)(char *name, void *rprivate, int argc, char *argv[]));
+YAZ_EXPORT int readconf(char *name, void *rprivate,
+     int (*fun)(char *name, void *rprivate, int argc, char *argv[]));
 
-int readconf_line(FILE *f, char *line, int len, char *argv[], int num);
+YAZ_EXPORT int readconf_line(FILE *f, char *line, int len, char *argv[], int num);
 
 #ifdef __cplusplus
 }
