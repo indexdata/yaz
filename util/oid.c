@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.64 2003-07-18 19:54:30 mike Exp $
+ * $Id: oid.c,v 1.65 2003-07-23 12:07:30 mike Exp $
  */
 
 /*
@@ -234,6 +234,7 @@ static oident standard_oids[] =
      "exp. spec."},
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV,    {9,7,-1},
      "exp. inv."},
+    /* ### Next line should be {9,1000,81,1,-1} */
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_ADMINSERVICE, {9,81,1,-1},
      "Admin"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_SEARCHRES1,   {10,1,-1},
