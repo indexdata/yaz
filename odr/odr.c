@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.9  1995-04-10 10:23:11  quinn
+ * Revision 1.10  1995-04-18 08:15:20  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.9  1995/04/10  10:23:11  quinn
  * Smallish changes.
  *
  * Revision 1.8  1995/03/17  10:17:43  quinn
@@ -77,6 +81,9 @@ ODR odr_createmem(int direction)
     r->direction = direction;
     r->print = stderr;
     r->buf = 0;
+    r->ecb.buf = 0;
+    r->ecb.size = r->ecb.pos = r->ecb.top = 0;
+    r->ecb.can_grow = 1;
     r->buflen = 0;
     r->mem = 0;
     odr_reset(r);
@@ -87,6 +94,8 @@ void odr_reset(ODR o)
 {
     o->error = ONONE;
     o->bp = o->buf;
+    odr_seek(o, ODR_S_SET, 0);
+    o->ecb.top = 0;
     o->left = o->buflen;
     o->t_class = -1;
     o->t_tag = -1;
@@ -99,6 +108,8 @@ void odr_reset(ODR o)
 void odr_destroy(ODR o)
 {
     odr_release_mem(o->mem);
+    if (o->ecb.buf && o->ecb.can_grow)
+    	free(o->ecb.buf);
     if (o->print != stderr)
     	fclose(o->print);
     free(o);
@@ -108,10 +119,15 @@ void odr_setbuf(ODR o, char *buf, int len)
 {
     o->buf = o->bp = (unsigned char *) buf;
     o->buflen = o->left = len;
+
+    o->ecb.buf = (unsigned char *) buf;
+    o->ecb.can_grow = 0;
+    o->ecb.top = o->ecb.pos = 0;
+    o->ecb.size = len;
 }
 
 char *odr_getbuf(ODR o, int *len)
 {
-    *len = o->bp - o->buf;
-    return (char *) o->buf;
+    *len = o->ecb.top;
+    return (char*) o->ecb.buf;
 }

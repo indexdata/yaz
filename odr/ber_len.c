@@ -9,18 +9,19 @@
  * Returns: =0   success, indefinite start-marker set. 1 byte encoded.
  * Returns: -1   failure, out of bounds.
  */
-int ber_enclen(unsigned char *buf, int len, int lenlen, int exact)
+int ber_enclen(ODR o, int len, int lenlen, int exact)
 {
-    unsigned char *b = buf;
     unsigned char octs[sizeof(int)];
     int n = 0;
+    int lenpos, end;
 
 #ifdef ODR_DEBUG
     fprintf(stderr, "[len=%d]", len);
 #endif
     if (len < 0)      /* Indefinite */
     {
-	*b = 0X80;
+    	if (odr_putc(o, 0x80) < 0)
+	    return 0;
 #ifdef ODR_DEBUG
 	fprintf(stderr, "[indefinite]");
 #endif
@@ -28,12 +29,14 @@ int ber_enclen(unsigned char *buf, int len, int lenlen, int exact)
     }
     if (len <= 127 && (lenlen == 1 || !exact)) /* definite short form */
     {
-    	*b = len;
+    	if (odr_putc(o, (unsigned char) len) < 0)
+	    return 0;
     	return 1;
     }
     if (lenlen == 1)
     {
-    	*b = 0X80;
+    	if (odr_putc(o, 0x80) < 0)
+	    return 0;
     	return 0;
     }
     /* definite long form */
@@ -45,14 +48,23 @@ int ber_enclen(unsigned char *buf, int len, int lenlen, int exact)
     while (len);
     if (n >= lenlen)
     	return -1;
-    b++;
+    lenpos = odr_tell(o); /* remember length-of-length position */
+    if (odr_putc(o, 0) < 0)  /* dummy */
+    	return 0;
     if (exact)
     	while (n < --lenlen)        /* pad length octets */
-	    *(++b) = 0;
+	    if (odr_putc(o, 0) < 0)
+	    	return 0;
     while (n--)
-    	*(b++) = octs[n];
-    *buf = (b - buf - 1) | 0X80;
-    return b - buf;
+    	if (odr_putc(o, octs[n]) < 0)
+	    return 0;
+    /* set length of length */
+    end = odr_tell(o);
+    odr_seek(o, ODR_S_SET, lenpos);
+    if (odr_putc(o, (end - lenpos - 1) | 0X80) < 0)
+    	return 0;
+    odr_seek(o, ODR_S_END, 0);
+    return odr_tell(o) - lenpos;
 }
 
 /*

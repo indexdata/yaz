@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.9  1995-03-15 08:37:18  quinn
+ * Revision 1.10  1995-04-18 08:15:18  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.9  1995/03/15  08:37:18  quinn
  * Fixed protocol bugs.
  *
  * Revision 1.8  1995/03/10  11:44:40  quinn
@@ -58,10 +62,10 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
     o->t_class = -1;
     if (o->stackp < 0)
     {
+    	odr_seek(o, ODR_S_SET, 0);
+	o->ecb.top = 0;
     	o->bp = o->buf;
     	lclass = -1;
-	if (o->direction == ODR_ENCODE)
-	    o->left = o->buflen;
     }
     switch (o->direction)
     {
@@ -72,17 +76,11 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 		    o->error = OREQUIRED;
 	    	return 0;
 	    }
-	    if ((rd = ber_enctag(o->bp, class, tag, *constructed, o->left))
-		<=0)
-	    {
-	    	o->error = OSPACE;
+	    if ((rd = ber_enctag(o, class, tag, *constructed)) < 0)
 		return -1;
-	    }
-	    o->bp += rd;
-	    o->left -= rd;
 #ifdef ODR_DEBUG
-	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d,left=%d]", class, tag,
-		*constructed, o->stackp, o->left);
+	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", class, tag,
+		*constructed, o->stackp);
 #endif
 	    return 1;
     	case ODR_DECODE:
@@ -130,32 +128,40 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
  * BER-encode a class/tag/constructed package (identifier octets). Return
  * number of bytes encoded, or -1 if out of bounds.
  */
-int ber_enctag(unsigned char *buf, int class, int tag, int constructed, int len)
+int ber_enctag(ODR o, int class, int tag, int constructed)
 {
     int cons = (constructed ? 1 : 0), n = 0;
-    unsigned char octs[sizeof(int)], *b = buf;
+    unsigned char octs[sizeof(int)], b;
 
-    *b = (class << 6) & 0XC0;
-    *b |= (cons << 5) & 0X20;
+    b = (class << 6) & 0XC0;
+    b |= (cons << 5) & 0X20;
     if (tag <= 30)
     {
-    	*b |= tag & 0X1F;
+    	b |= tag & 0X1F;
+	if (odr_putc(o, b) < 0)
+	    return -1;
     	return 1;
     }
     else
     {
-	*(b++) |= 0x1F;
+	b |= 0X1F;
+	if (odr_putc(o, b) < 0)
+	    return -1;
 	do
     	{
 	    octs[n++] = tag & 0X7F;
 	    tag >>= 7;
-	    if (n >= len) /* bounds check */
-	    	return -1;
 	}
 	while (tag);
 	while (n--)
-	    *(b++) = octs[n] | ((n > 0) << 7);
-	return b - buf;
+	{
+	    unsigned char oo;
+
+	    oo = octs[n] | ((n > 0) << 7);
+	    if (odr_putc(o, oo) < 0)
+	    	return -1;
+	}
+	return 0;
     }
 }
 

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bool.c,v $
- * Revision 1.4  1995-03-21 10:17:27  quinn
+ * Revision 1.5  1995-04-18 08:15:14  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.4  1995/03/21  10:17:27  quinn
  * Fixed little bug in decoder.
  *
  * Revision 1.3  1995/03/08  12:12:06  quinn
@@ -29,23 +33,13 @@ int ber_boolean(ODR o, int *val)
     switch (o->direction)
     {
     	case ODR_ENCODE:
-	    if (!o->left)
-	    {
-	    	o->error = OSPACE;
-		return 0;
-	    }
-	    if (ber_enclen(o->bp, 1, 1, 1) != 1)
-	    {
-	    	o->error = OOTHER;
-		return 0;
-	    }
-	    o->bp++;
-	    o->left--;
-	    *(o->bp++) = (unsigned char) *val;
+	    if (ber_enclen(o, 1, 1, 1) != 1)
+	    	return 0;
+	    if (odr_putc(o, *val) < 0)
+	    	return 0;
 #ifdef ODR_DEBUG
 	    fprintf(stderr, "[val=%d]\n", *val);
 #endif
-	    o->left--;
 	    return 1;
 	case ODR_DECODE:
 	    if ((res = ber_declen(o->bp, &len)) < 0)

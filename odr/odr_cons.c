@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.9  1995-03-28 09:15:49  quinn
+ * Revision 1.10  1995-04-18 08:15:21  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.9  1995/03/28  09:15:49  quinn
  * Fixed bug in the printing mode
  *
  * Revision 1.8  1995/03/15  11:18:04  quinn
@@ -58,14 +62,15 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
     	return 0;
     }
     o->stack[++(o->stackp)].lenb = o->bp;
+    o->stack[o->stackp].len_offset = odr_tell(o);
 #ifdef ODR_DEBUG
     fprintf(stderr, "[cons_begin(%d)]", o->stackp);
 #endif
     if (o->direction == ODR_ENCODE || o->direction == ODR_PRINT)
     {
 	o->stack[o->stackp].lenlen = 1;
-	o->bp++;
-	o->left--;
+	if (odr_putc(o, 0) < 0)     /* dummy */
+	    return 0;
     }
     else if (o->direction == ODR_DECODE)
     {
@@ -78,6 +83,7 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
     else return 0;
 
     o->stack[o->stackp].base = o->bp;
+    o->stack[o->stackp].base_offset = odr_tell(o);
     return 1;
 }
 
@@ -96,6 +102,7 @@ int odr_constructed_more(ODR o)
 int odr_constructed_end(ODR o)
 {
     int res;
+    int pos;
 
     if (o->error)
     	return 0;
@@ -130,21 +137,19 @@ int odr_constructed_end(ODR o)
 	    o->stackp--;
 	    return 1;
     	case ODR_ENCODE:
-	    if ((res = ber_enclen(o->stack[o->stackp].lenb,
-		o->bp - o->stack[o->stackp].base,
+	    pos = odr_tell(o);
+	    odr_seek(o, ODR_S_SET, o->stack[o->stackp].len_offset);
+	    if ((res = ber_enclen(o, pos - o->stack[o->stackp].base_offset,
 		o->stack[o->stackp].lenlen, 1)) < 0)
-	    {
-	    	o->error = OSPACE;
 		return 0;
-	    }
+	    odr_seek(o, ODR_S_END, 0);
 	    if (res == 0)   /* indefinite encoding */
 	    {
 #ifdef ODR_DEBUG
 		fprintf(stderr, "[cons_end(%d): indefinite]", o->stackp);
 #endif
-	    	*(o->bp++) = 0;
-	    	*(o->bp++) = 0;
-	    	o->left -= 2;
+		if (odr_putc(o, 0) < 0 || odr_putc(o, 0) < 0)
+		    return 0;
 	    }
 #ifdef ODR_DEBUG
 	    else

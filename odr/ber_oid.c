@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oid.c,v $
- * Revision 1.5  1995-03-20 12:18:22  quinn
+ * Revision 1.6  1995-04-18 08:15:18  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.5  1995/03/20  12:18:22  quinn
  * Fixed bug in ber_oid
  *
  * Revision 1.4  1995/03/08  12:12:11  quinn
@@ -25,8 +29,7 @@
 
 int ber_oidc(ODR o, Odr_oid *p)
 {
-    int len;
-    unsigned char *lenp;
+    int len, lenp, end;
     int pos, n, res, id;
     unsigned char octs[8];
 
@@ -81,9 +84,9 @@ int ber_oidc(ODR o, Odr_oid *p)
     	case ODR_ENCODE:
 	    /* we'll allow ourselves the quiet luxury of only doing encodings
     	       shorter than 127 */
-            lenp = o->bp;
-            o->bp++;
-            o->left--;
+            lenp = odr_tell(o);
+	    if (odr_putc(o, 0) < 0)   /* dummy */
+	    	return 0;
             if (p[0] < 0 && p[1] <= 0)
 	    {
 	    	o->error = ODATA;
@@ -99,20 +102,23 @@ int ber_oidc(ODR o, Odr_oid *p)
 		    id >>= 7;
 		}
 		while (id);
-		if (n > o->left)
-		{
-		    o->error = OSPACE;
-		    return 0;
-		}
-		o->left -= n;
 		while (n--)
-		    *(o->bp++) = octs[n] | ((n > 0) << 7);
+		{
+		    unsigned char p;
+
+		    p = octs[n] | ((n > 0) << 7);
+		    if (odr_putc(o, p) < 0)
+		    	return 0;
+		}
 	    }
-	    if (ber_enclen(lenp, (o->bp - lenp) - 1, 1, 1) != 1)
+	    end = odr_tell(o);
+	    odr_seek(o, ODR_S_SET, lenp);
+	    if (ber_enclen(o, (end - lenp) - 1, 1, 1) != 1)
 	    {
 	    	o->error = OOTHER;
 	    	return 0;
 	    }
+	    odr_seek(o, ODR_S_END, 0);
 	    return 1;
     	default: o->error = OOTHER; return 0;
     }

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_null.c,v $
- * Revision 1.3  1995-03-08 12:12:09  quinn
+ * Revision 1.4  1995-04-18 08:15:16  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.3  1995/03/08  12:12:09  quinn
  * Added better error checking.
  *
  * Revision 1.2  1995/02/09  15:51:46  quinn
@@ -25,13 +29,8 @@ int ber_null(ODR o, int *val)
     switch (o->direction)
     {
     	case ODR_ENCODE:
-	    if (!o->left)
-	    {
-	    	o->error = OSPACE;
-		return 0;
-	    }
-	    *(o->bp++) = 0X00;
-	    o->left--;
+	    if (odr_putc(o, 0X00) < 0)
+	    	return 0;
 #ifdef ODR_DEBUG
 	    fprintf(stderr, "[NULL]\n");
 #endif

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.2  1995-03-17 10:17:52  quinn
+ * Revision 1.3  1995-04-18 08:15:21  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.2  1995/03/17  10:17:52  quinn
  * Added memory management.
  *
  * Revision 1.1  1995/03/14  10:27:40  quinn
@@ -15,6 +19,8 @@
 
 #include <stdlib.h>
 #include <odr.h>
+
+/* ------------------------ NIBBLE MEMORY ---------------------- */
 
 #define ODR_MEM_CHUNK (10*1024)
 
@@ -53,9 +59,9 @@ static odr_memblock *get_block(int size)
 	if (get < size)
 	    get = size;
 	if (!(r = malloc(sizeof(*r))))
-	    return 0;
+	    abort();
 	if (!(r->buf = malloc(r->size = get)))
-	    return 0;
+	    abort();
     }
     r->top = 0;
     return r;
@@ -92,4 +98,58 @@ void *odr_malloc(ODR o, int size)
     r = p->buf + p->top;
     p->top += (size + (sizeof(long) - 1)) & ~(sizeof(long) - 1);
     return r;
+}
+
+/* ---------- memory management for data encoding ----------*/
+
+
+int odr_grow_block(odr_ecblock *b, int min_bytes)
+{
+    int togrow;
+
+    if (!b->can_grow)
+    	return -1;
+    if (!b->size)
+    	togrow = 1024;
+    else
+    	togrow = b->size;
+    if (togrow < min_bytes)
+    	togrow = min_bytes;
+    if (b->size && !(b->buf = realloc(b->buf, b->size += togrow)))
+    	abort();
+    else if (!b->size && !(b->buf = malloc(b->size = togrow)))
+    	abort();
+#ifdef ODR_DEBUG
+    fprintf(stderr, "New size for encode_buffer: %d\n", b->size);
+#endif
+    return 0;
+}
+
+int odr_write(ODR o, unsigned char *buf, int bytes)
+{
+    if (o->ecb.pos + bytes >= o->ecb.size && odr_grow_block(&o->ecb, bytes))
+    {
+    	o->error = OSPACE;
+	return -1;
+    }
+    memcpy(o->ecb.buf + o->ecb.pos, buf, bytes);
+    o->ecb.pos += bytes;
+    if (o->ecb.pos > o->ecb.top)
+    	o->ecb.top = o->ecb.pos;
+    return 0;
+}
+
+int odr_seek(ODR o, int whence, int offset)
+{
+    if (whence == ODR_S_CUR)
+    	offset += o->ecb.pos;
+    else if (whence == ODR_S_END)
+    	offset += o->ecb.top;
+    if (offset > o->ecb.size && odr_grow_block(&o->ecb, offset - o->ecb.size))
+    {
+    	o->error = OSPACE;
+	return -1;
+    }
+    o->ecb.pos = offset;
+    return 0;
 }

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.8  1995-04-17 09:37:42  quinn
+ * Revision 1.9  1995-04-18 08:15:12  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.8  1995/04/17  09:37:42  quinn
  * *** empty log message ***
  *
  * Revision 1.7  1995/03/17  10:17:39  quinn
@@ -51,14 +55,8 @@ int ber_any(ODR o, Odr_any **p)
 	    o->left -= res;
 	    return 1;
     	case ODR_ENCODE:
-	    if ((*p)->len > o->left)
-	    {
-	    	o->error = OSPACE;
+	    if (odr_write(o, (*p)->buf, (*p)->len) < 0)
 	    	return 0;
-	    }
-	    memcpy(o->bp , (*p)->buf, (*p)->len);
-	    o->bp += (*p)->len;
-	    o->left -= (*p)->len;
 	    return 1;
     	default: o->error = OOTHER; return 0;
     }

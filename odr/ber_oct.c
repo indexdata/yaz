@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.6  1995-03-17 10:17:41  quinn
+ * Revision 1.7  1995-04-18 08:15:17  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.6  1995/03/17  10:17:41  quinn
  * Added memory management.
  *
  * Revision 1.5  1995/03/08  12:12:10  quinn
@@ -69,23 +73,12 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    o->left -= len;
 	    return 1;
     	case ODR_ENCODE:
-	    if ((res = ber_enclen(o->bp, p->len, 5, 0)) < 0)
-	    {
-	    	o->error = OOTHER;
+	    if ((res = ber_enclen(o, p->len, 5, 0)) < 0)
 	    	return 0;
-	    }
-	    o->bp += res;
-	    o->left -= res;
 	    if (p->len == 0)
 	    	return 1;
-	    if (p->len > o->left)
-	    {
-	    	o->error = OSPACE;
+	    if (odr_write(o, p->buf, p->len) < 0)
 	    	return 0;
-	    }
-	    memcpy(o->bp, p->buf, p->len);
-	    o->bp += p->len;
-	    o->left -= p->len;
 	    return 1;
     	case ODR_PRINT: return 1;
     	default: o->error = OOTHER; return 0;

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.5  1995-03-27 15:01:44  quinn
+ * Revision 1.6  1995-04-18 08:15:14  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.5  1995/03/27  15:01:44  quinn
  * Added include of sys/types to further portability
  *
  * Revision 1.4  1995/03/08  12:12:07  quinn
@@ -26,7 +30,7 @@
 #include <netinet/in.h>  /* for htons... */
 #include <string.h>
 
-static int ber_encinteger(unsigned char *buf, int val, int maxlen);
+static int ber_encinteger(ODR o, int val);
 static int ber_decinteger(unsigned char *buf, int *val);
 
 int ber_integer(ODR o, int *val)
@@ -45,13 +49,8 @@ int ber_integer(ODR o, int *val)
 	    o->left -= res;
 	    return 1;
     	case ODR_ENCODE:
-	    if ((res = ber_encinteger(o->bp, *val, o->left)) <= 0)
-	    {
-	    	o->error = OSPACE;
+	    if ((res = ber_encinteger(o, *val)) < 0)
 	    	return 0;
-	    }
-	    o->bp += res;
-	    o->left -= res;
 	    return 1;
     	case ODR_PRINT: return 1;
     	default: o->error = OOTHER;  return 0;
@@ -61,31 +60,32 @@ int ber_integer(ODR o, int *val)
 /*
  * Returns: number of bytes written or -1 for error (out of bounds).
  */
-int ber_encinteger(unsigned char *buf, int val, int maxlen)
+int ber_encinteger(ODR o, int val)
 {
-    unsigned char *b = buf, *lenpos;
+    int lenpos;
     int a, len;
     union { int i; unsigned char c[sizeof(int)]; } tmp;
 
-    lenpos = b;
-    maxlen--;
-    b++;
+    lenpos = odr_tell(o);
+    if (odr_putc(o, 0) < 0)  /* dummy */
+    	return -1;
 
     tmp.i = htonl(val);   /* ensure that that we're big-endian */
     for (a = 0; a < sizeof(int) - 1; a++)  /* skip superfluous octets */
     	if (!((tmp.c[a] == 0 && !(tmp.c[a+1] & 0X80)) ||
 	    (tmp.c[a] == 0XFF && (tmp.c[a+1] & 0X80))))
 	    break;
-    if ((len = sizeof(int) - a) > maxlen)
+    len = sizeof(int) - a;
+    if (odr_write(o, (unsigned char*) tmp.c + a, len) < 0)
     	return -1;
-    memcpy(b, tmp.c + a, len);
-    b += len;
-    if (ber_enclen(lenpos, len, 1, 1) != 1)
+    odr_seek(o, ODR_S_SET, lenpos);
+    if (ber_enclen(o, len, 1, 1) != 1)
     	return -1;
+    odr_seek(o, ODR_S_END, 0);
 #ifdef ODR_DEBUG
     fprintf(stderr, "[val=%d]", val);
 #endif
-    return b - buf;
+    return 0;
 }
 
 /*

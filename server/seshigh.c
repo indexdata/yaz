@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.18  1995-04-17 11:28:25  quinn
+ * Revision 1.19  1995-04-18 08:15:34  quinn
+ * Added dynamic memory allocation on encoding (whew). Code is now somewhat
+ * neater. We'll make the same change for decoding one day.
+ *
+ * Revision 1.18  1995/04/17  11:28:25  quinn
  * Smallish
  *
  * Revision 1.17  1995/04/10  10:23:36  quinn
@@ -75,7 +79,7 @@
 
 #include <backend.h>
 
-#define ENCODE_BUFFER_SIZE 10000
+#define MAXRECORDSIZE 1024*1024
 
 static int process_apdu(IOCHAN chan);
 static int process_initRequest(IOCHAN client, Z_InitRequest *req);
@@ -137,9 +141,6 @@ association *create_association(IOCHAN channel, COMSTACK link)
     }
     else
     	new->print = 0;
-    if (!(new->encode_buffer = malloc(ENCODE_BUFFER_SIZE)))
-    	return 0;
-    odr_setbuf(new->encode, new->encode_buffer, ENCODE_BUFFER_SIZE);
     new->state = ASSOC_UNINIT;
     new->input_buffer = 0;
     new->input_buffer_len = 0;
@@ -157,7 +158,6 @@ void destroy_association(association *h)
     odr_destroy(h->encode);
     if (h->print)
 	odr_destroy(h->print);
-    free(h->encode_buffer);
     if (h->input_buffer)
     	free(h->input_buffer);
     if (h->backend)
@@ -318,8 +318,8 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
      * This is not so hot. The big todo for ODR is dynamic memory allocation
      * on encoding.
      */
-    if (assoc->maximumRecordSize > ENCODE_BUFFER_SIZE - 1000)
-    	assoc->maximumRecordSize = ENCODE_BUFFER_SIZE - 1000;
+    if (assoc->maximumRecordSize > MAXRECORDSIZE)
+    	assoc->maximumRecordSize = MAXRECORDSIZE;
     assoc->preferredMessageSize = *req->preferredMessageSize;
     if (assoc->preferredMessageSize > assoc->maximumRecordSize)
     	assoc->preferredMessageSize = assoc->maximumRecordSize;
@@ -328,7 +328,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.18 $";
+    resp.implementationVersion = "$Revision: 1.19 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -336,7 +336,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
 	    odr_errlist[odr_geterror(assoc->encode)]);
 	return -1;
     }
-    odr_getbuf(assoc->encode, &assoc->encoded_len);
+    assoc->encode_buffer = odr_getbuf(assoc->encode, &assoc->encoded_len);
     odr_reset(assoc->encode);
     iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
     return 0;
@@ -645,7 +645,7 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
 	    odr_errlist[odr_geterror(assoc->encode)]);
 	return -1;
     }
-    odr_getbuf(assoc->encode, &assoc->encoded_len);
+    assoc->encode_buffer = odr_getbuf(assoc->encode, &assoc->encoded_len);
     odr_reset(assoc->encode);
     iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
     return 0;
@@ -679,7 +679,7 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
 	    odr_errlist[odr_geterror(assoc->encode)]);
 	return -1;
     }
-    odr_getbuf(assoc->encode, &assoc->encoded_len);
+    assoc->encode_buffer = odr_getbuf(assoc->encode, &assoc->encoded_len);
     odr_reset(assoc->encode);
     iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
     return 0;
@@ -778,7 +778,7 @@ static int process_scanRequest(IOCHAN client, Z_ScanRequest *req)
 	    odr_errlist[odr_geterror(assoc->encode)]);
 	return -1;
     }
-    odr_getbuf(assoc->encode, &assoc->encoded_len);
+    assoc->encode_buffer = odr_getbuf(assoc->encode, &assoc->encoded_len);
     odr_reset(assoc->encode);
     iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
     return 0;
