@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.13 2003-01-06 08:20:29 adam Exp $
+ * $Id: zoom-c.c,v 1.14 2003-01-13 22:11:34 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -2745,7 +2745,7 @@ ZOOM_event (int no, ZOOM_connection *cs)
 	{
             ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_TIMEOUT);
 	    /* timeout and this connection was waiting */
-	    set_ZOOM_error(c, ZOOM_ERROR_TIMEOUT);
+	    set_ZOOM_error(c, ZOOM_ERROR_TIMEOUT, 0);
             do_close (c);
             yaz_log (LOG_DEBUG, "timeout");
             ZOOM_connection_put_event(c, event);
