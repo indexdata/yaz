@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.28  1998-07-20 12:38:13  adam
+ * Revision 1.29  1999-04-27 08:34:10  adam
+ * Modified odr_destroy so that file is not closed when file is 0.
+ *
+ * Revision 1.28  1998/07/20 12:38:13  adam
  * More LOG_DEBUG-diagnostics.
  *
  * Revision 1.27  1998/02/11 11:53:34  adam
@@ -192,7 +195,7 @@ void odr_destroy(ODR o)
     nmem_destroy(o->mem);
     if (o->ecb.buf && o->ecb.can_grow)
        xfree(o->ecb.buf);
-    if (o->print != stderr)
+    if (o->print && o->print != stderr)
         fclose(o->print);
     xfree(o);
     logf (LOG_DEBUG, "odr_destroy o=%p", o);
