@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.28 2003-02-20 15:05:40 adam Exp $
+## $Id: Makefile.am,v 1.29 2003-04-17 23:24:00 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -8,8 +8,6 @@ if ISSSL
 ssllib=libyazssl.la
 endif
 
-LDFLAGS=-version-info 2:0:0
-
 bin_SCRIPTS = yaz-config
 
 lib_LTLIBRARIES = libyaz.la $(extra) $(ssllib) libyazmalloc.la
@@ -18,17 +16,23 @@ lib_LTLIBRARIES = libyaz.la $(extra) $(ssllib) libyazmalloc.la
 # not set in Makefile.in and it will NOT work ..
 EXTRA_libyaz_la_SOURCES=x.c
 
+YAZ_VERSION_INFO=2:0:0
+
 # No real sources
 libyaz_la_SOURCES=
+libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 libyazthread_la_LIBADD=nmem.lo statserv.lo eventl.lo
 libyazthread_la_SOURCES=
+libyazthread_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 libyazmalloc_la_LIBADD=xmalloc.lo
 libyazmalloc_la_SOURCES=
+libyazmalloc_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 libyazssl_la_LIBADD=tcpip.lo comstack.lo
 libyazssl_la_SOURCES=
+libyazssl_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/server
 THREADED_FLAGS = @CFLAGSTHREADS@
