@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: oid.c,v $
- * Revision 1.48  2001-09-27 12:09:18  adam
+ * Revision 1.49  2001-10-24 20:11:46  adam
+ * Removed SR OID's.
+ *
+ * Revision 1.48  2001/09/27 12:09:18  adam
  * Function nmem_exit calls oid_exit (when reference is 0).
  *
  * Revision 1.47  2001/09/24 21:51:55  adam
@@ -449,88 +452,6 @@ static oident standard_oids[] =
      "thesaurus-tagset"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_EXPLAIN,      {14,1000,81,2,-1},
      "Explain-tagset"},
-    
-
-    /* SR definitions. Note that some of them aren't defined by the
-        standard (yet), but are borrowed from Z3950v3 */
-    {PROTO_SR,      CLASS_ABSYN,   VAL_APDU,      {2,1,-1},    "SR-APDU"     },
-
-    {PROTO_SR,      CLASS_APPCTX,  VAL_BASIC_CTX, {1,1,-1},    "SR-BASIC"    },
-
-    {PROTO_SR,      CLASS_ATTSET,  VAL_BIB1,      {3,1,-1},    "Bib-1"       },
-    {PROTO_SR,      CLASS_ATTSET,  VAL_EXP1,      {3,2,-1},    "Exp-1"       },
-    {PROTO_SR,      CLASS_ATTSET,  VAL_EXT1,      {3,3,-1},    "Ext-1"       },
-    {PROTO_SR,      CLASS_ATTSET,  VAL_CCL1,      {3,4,-1},    "CCL-1"       },
-    {PROTO_SR,      CLASS_ATTSET,  VAL_GILS,      {3,5,-1},    "GILS"        },
-    {PROTO_SR,      CLASS_ATTSET,  VAL_STAS,      {3,6,-1},    "STAS",       },
-    {PROTO_SR,      CLASS_ATTSET,  VAL_COLLECT1,  {3,7,-1},    "Collections-attset"},
-    {PROTO_SR,      CLASS_ATTSET,  VAL_CIMI1,     {3,8,-1},    "CIMI-attset"},
-    {PROTO_SR,      CLASS_ATTSET,  VAL_GEO,       {3,9,-1},    "Geo-attset"},
-
-    {PROTO_SR,      CLASS_DIAGSET, VAL_BIB1,      {4,1,-1},    "Bib-1"       },
-    {PROTO_SR,      CLASS_DIAGSET, VAL_DIAG1,     {4,2,-1},    "Diag-1"      },
-
-    {PROTO_SR,      CLASS_RECSYN,  VAL_UNIMARC,   {5,1,-1},    "Unimarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_INTERMARC, {5,2,-1},    "Intermarc"   },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_CCF,       {5,3,-1},    "CCF"        },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_USMARC,    {5,10,-1},   "USmarc"      },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_UKMARC,    {5,11,-1},   "UKmarc"      },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_NORMARC,   {5,12,-1},   "Normarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_LIBRISMARC,{5,13,-1},   "Librismarc"  },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_DANMARC,   {5,14,-1},   "Danmarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_FINMARC,   {5,15,-1},   "Finmarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_MAB,       {5,16,-1},   "MAB"         },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_CANMARC,   {5,17,-1},   "Canmarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_MAB,       {5,16,-1},   "MAB"         },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_CANMARC,   {5,17,-1},   "Canmarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_SBN,       {5,18,-1},   "SBN"         },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_PICAMARC,  {5,19,-1},   "Picamarc"    },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_AUSMARC,   {5,20,-1},   "Ausmarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_IBERMARC,  {5,21,-1},   "Ibermarc"    },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_CATMARC,   {5,22,-1},   "Catmarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_MALMARC,   {5,23,-1},   "Malmarc"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_EXPLAIN,   {5,100,-1},  "Explain"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_SUTRS,     {5,101,-1},  "SUTRS"       },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_OPAC,      {5,102,-1},  "OPAC"        },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_SUMMARY,   {5,103,-1},  "Summary"     },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_GRS0,      {5,104,-1},  "GRS-0"       },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_GRS1,      {5,105,-1},  "GRS-1"       },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_EXTENDED,  {5,106,-1},  "Extended"    },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_FRAGMENT,  {5,107,-1},  "Fragment"    },
-
-    {PROTO_SR,      CLASS_RESFORM, VAL_RESOURCE1, {7,1,-1},    "Resource-1"  },
-    {PROTO_SR,      CLASS_RESFORM, VAL_RESOURCE2, {7,2,-1},    "Resource-2"  },
-
-    {PROTO_SR,      CLASS_ACCFORM, VAL_PROMPT1,   {8,1,-1},    "Prompt-1"    },
-    {PROTO_SR,      CLASS_ACCFORM, VAL_DES1,      {8,2,-1},    "Des-1"       },
-    {PROTO_SR,      CLASS_ACCFORM, VAL_KRB1,      {8,3,-1},    "Krb-1"       },
-
-    {PROTO_SR,      CLASS_EXTSERV, VAL_PRESSET,   {9,1,-1},    "Pers. set"   },
-    {PROTO_SR,      CLASS_EXTSERV, VAL_PQUERY,    {9,2,-1},    "Pers. query" },
-    {PROTO_SR,      CLASS_EXTSERV, VAL_PCQUERY,   {9,3,-1},    "Per'd query" },
-    {PROTO_SR,      CLASS_EXTSERV, VAL_ITEMORDER, {9,4,-1},    "Item order"  },
-    {PROTO_SR,      CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,-1},    "DB. Update"  },
-    {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
-    {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
-
-    {PROTO_SR,      CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
-
-    {PROTO_SR,      CLASS_VARSET,  VAL_VAR1,      {12,1,-1},   "Variant-1"   },
-
-    {PROTO_SR,      CLASS_SCHEMA,  VAL_WAIS,      {13,1,-1},   "WAIS-schema" },
-    {PROTO_SR,      CLASS_SCHEMA,  VAL_GILS,      {13,2,-1},   "GILS-schema" },
-    {PROTO_SR,      CLASS_SCHEMA,  VAL_COLLECT1,  {13,3,-1},   "Collections-schema" },
-    {PROTO_SR,      CLASS_SCHEMA,  VAL_GEO,       {13,4,-1},   "Geo-schema" },
-    {PROTO_SR,      CLASS_SCHEMA,  VAL_CIMI1,     {13,5,-1},   "CIMI-schema" },
-
-    {PROTO_SR,      CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
-    {PROTO_SR,      CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
-
-    {PROTO_SR,      CLASS_TAGSET,  VAL_STAS,      {14,3,-1},   "STAS-tagset" },
-    {PROTO_SR,      CLASS_TAGSET,  VAL_GILS,      {14,4,-1},   "GILS-tagset" },
-    {PROTO_SR,      CLASS_TAGSET,  VAL_COLLECT1,  {14,5,-1},   "Collections-tagset"},
-    {PROTO_SR,      CLASS_TAGSET,  VAL_CIMI1,     {14,6,-1},   "CIMI-tagset" },
-
     {PROTO_NOP,     CLASS_NOP,     VAL_NOP,       {-1},        0          }
 };
 
