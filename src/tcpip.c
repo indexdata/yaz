@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.3 2004-04-28 22:44:59 adam Exp $
+ * $Id: tcpip.c,v 1.4 2004-04-29 08:55:17 adam Exp $
  */
 
 #include <stdio.h>
@@ -196,7 +196,6 @@ COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
 {
     tcpip_state *state;
     COMSTACK p;
-    yaz_log(LOG_LOG, "ssl_type begin");
 
     p = tcpip_type (s, blocking, protocol, 0);
     if (!p)
@@ -220,7 +219,6 @@ COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
 	}
     }
     /* note: we don't handle already opened socket in SSL mode - yet */
-    yaz_log(LOG_LOG, "ssl_type end");
     return p;
 }
 #endif
