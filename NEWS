@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added CCL utility ccl_qual_line which adds CCL qualifier line consisting
+of name and value - ignoring empty lines and comments.
+
 On Windows, the debug version DLL is now named yazdebug.dll (import
 library yazdebug.lib). WIN32 installer includes these files when
 development section is selected.

@@ -44,7 +44,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: cclqfile.c,v 1.2 2004-08-18 10:03:01 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -214,6 +214,23 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
 	ccl_qual_field(bibset, cp, qual_name);
 }
 
+void ccl_qual_line(CCL_bibset bibset, char *line)
+{
+    int  no_scan = 0;
+    char qual_name[128];
+    char *cp1, *cp = line;
+    
+    if (*cp == '#')
+	return;        /* ignore lines starting with # */
+    if (sscanf (cp, "%100s%n", qual_name, &no_scan) < 1)
+	return;        /* also ignore empty lines */
+    cp += no_scan;
+    cp1 = strchr(cp, '#');
+    if (cp1)
+	*cp1 = '\0';
+    ccl_qual_fitem (bibset, cp, qual_name);
+}
+
 /*
  * ccl_qual_file: Read bibset definition from file.
  * bibset:  Bibset
@@ -230,24 +247,9 @@ void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
 void ccl_qual_file (CCL_bibset bibset, FILE *inf)
 {
     char line[256];
-    char *cp, *cp1;
-    char qual_name[128];
 
     while (fgets (line, 255, inf))
-    {
-        int  no_scan = 0;
-
-        cp = line;
-        if (*cp == '#')
-            continue;        /* ignore lines starting with # */
-        if (sscanf (cp, "%100s%n", qual_name, &no_scan) < 1)
-            continue;        /* also ignore empty lines */
-        cp += no_scan;
-	cp1 = strchr(cp, '#');
-	if (cp1)
-	    *cp1 = '\0';
-        ccl_qual_fitem (bibset, cp, qual_name);
-    }
+	ccl_qual_line(bibset, line);
 }
 
 int ccl_qual_fname (CCL_bibset bibset, const char *fname)
