@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_util.c,v $
- * Revision 1.13  1998-02-11 11:53:34  adam
+ * Revision 1.14  1998-10-13 15:58:36  adam
+ * Minor fix in odr_getoidbystr_nmem.
+ *
+ * Revision 1.13  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.12  1997/10/31 12:20:08  adam
@@ -82,7 +85,7 @@ Odr_oid *odr_getoidbystr_nmem(NMEM nmem, char *str)
     p = str;
     do
 	ret[i++] = atoi(p);
-    while ((p = strchr(p, '.')) && ++p);
+    while ((p = strchr(p, '.')) && *++p);
     ret[i] = -1;
     return ret;
 }
