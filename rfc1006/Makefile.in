@@ -1,23 +1,22 @@
-# Copyright (C) 1994, Index Data I/S 
+# Copyright (C) 1994-1998, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.10 1998-02-11 11:53:35 adam Exp $
+# $Id: Makefile.in,v 1.1 1998-08-21 14:13:33 adam Exp $
 
 SHELL=/bin/sh
+
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+CDEFS=@ODEFS@ @ODEFS@
+
 INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBDIR=../lib
-LIBINCLUDE=-L$(LIBDIR)
-DEFS=$(INCLUDE) # -DTRACE_TRANSPORT
+DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/librfc.a
-LIBS=-lodr
 PO = rfct.o makensap.o
-CPP=$(CC) -E
-RANLIB=ranlib
 
-all: $(LIBDIR) $(INCDIR) $(LIB)
-
-test: test.o $(LIB)
-	$(CC) $(CFLAGS) $(LIBINCLUDE) -o test test.o $(LIBS)
+all: $(LIB)
 
 alll:
 
@@ -26,27 +25,15 @@ $(LIB): $(PO)
 	ar qc $(LIB) $(PO)
 	$(RANLIB) $(LIB)
 
-$(LIBDIR):
-	mkdir $(LIBDIR)
-
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<
 
 clean:
 	rm -f *.[oa] test core mon.out gmon.out errlist
 
-depend: depend2
-
-depend1:
+depend:
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
 	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
 	mv -f Makefile.tmp Makefile
-
-depend2:
-	$(CPP) $(INCLUDE) -M *.c >.depend	
-
-#ifeq (.depend,$(wildcard .depend))
-#include .depend
-#endif
 
 #Depend --- DOT NOT DELETE THIS LINE

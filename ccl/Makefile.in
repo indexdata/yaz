@@ -1,8 +1,11 @@
 # Makefile for Email gateway CCL
 # Europagate, 1995
 #
-# $Log: Makefile,v $
-# Revision 1.8  1997-09-17 12:10:28  adam
+# $Log: Makefile.in,v $
+# Revision 1.1  1998-08-21 14:13:26  adam
+# Added GNU Configure script to build Makefiles.
+#
+# Revision 1.8  1997/09/17 12:10:28  adam
 # YAZ version 1.4.
 #
 # Revision 1.7  1997/04/30 08:52:05  quinn
@@ -47,42 +50,38 @@
 # First version of CCL. Qualifiers aren't handled yet.
 #
 SHELL=/bin/sh
+
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+CDEFS=@DEFS@ @ODEFS@
+ELIBS=@LIBS@
+
 INCLUDE=-I../include
-TPROG1=cclsh
+PROG=cclsh
 LIB=../lib/ccl.a
 PO=cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o cclqfile.o cclstr.o
-CPP=$(CC) -E
 DEFS=$(INCLUDE) $(CDEFS)
 
 all: $(LIB)
 
-$(TPROG1): $(TPROG1).o $(LIB)
-	$(CC) $(CFLAGS) -o $(TPROG1) $(TPROG1).o $(LIB)
+$(PROG): $(PROG).o $(LIB)
+	$(CC) $(CFLAGS) -o $(PROG) $(PROG).o $(LIB)
 
 $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
-	ranlib $(LIB)
+	$(RANLIB) $(LIB)
 
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<
 
 clean:
-	rm -f *.log *.[oa] $(TPROG1) $(TPROG2) core mon.out gmon.out errlist *~
+	rm -f *.log *.[oa] $(PROG) core mon.out gmon.out errlist *~
 
-depend: depend2
-
-depend1:
+depend:
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
 	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
 	mv -f Makefile.tmp Makefile
-
-depend2:
-	$(CPP) $(DEFS) -M *.c >.depend	
-
-#GNU make style depend
-ifeq (.depend,$(wildcard .depend))
-include .depend
-endif
 
 #Depend --- DOT NOT DELETE THIS LINE

@@ -1,8 +1,14 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.6 1997-09-17 12:10:30 adam Exp $
+# $Id: Makefile.in,v 1.1 1998-08-21 14:13:28 adam Exp $
+SHELL=/bin/sh
 
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+CDEFS=@DEFS@ @ODEFS@
+ELIBS=@LIBS@
 
 LIBDIR=../lib
 
@@ -12,19 +18,14 @@ LIBDIR=../lib
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBINCLUDE=-L$(LIBDIR) -L../../xtimosi/src
-DEFS=$(INCLUDE) $(CDEFS) # -DTRACE_TCPIP
+DEFS=$(INCLUDE) $(CDEFS)
+# -DTRACE_TCPIP
 LIB= $(LIBDIR)/libcomstack.a 
 LIBS=$(LIBDIR)/libasn.a $(LIBDIR)/libodr.a $(LIBDIR)/libcomstack.a \
 	 ../lib/ccl.a $(LIBDIR)/libutil.a $(LIBMOSI)
 PO = comstack.o tcpip.o waislen.o $(XMOSI)
-CPP=$(CC) -E
-#CC=checkergcc
-RANLIB=ranlib
 
-all: $(LIBDIR) $(LIB)
-
-cli: tst.o $(LIB)
-	$(CC) $(CFLAGS) $(LIBINCLUDE) -o cli tst.o $(LIBINCLUDE) $(LIBS)
+all: $(LIB)
 
 alll:
 
@@ -33,26 +34,15 @@ $(LIB): $(PO)
 	ar qc $(LIB) $(PO)
 	$(RANLIB) $(LIB)
 
-$(LIBDIR):
-	mkdir $(LIBDIR)
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<
 
 clean:
-	rm -f *.[oa] test core mon.out gmon.out errlist tst cli
+	rm -f *.[oa] test core mon.out gmon.out errlist
 
-depend: depend2
-
-depend1:
+depend:
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
 	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
 	mv -f Makefile.tmp Makefile
-
-depend2:
-	$(CPP) $(DEFS) -M *.c >.depend	
-
-ifeq (.depend,$(wildcard .depend))
-include .depend
-endif
 
 #Depend --- DOT NOT DELETE THIS LINE

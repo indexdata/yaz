@@ -1,7 +1,7 @@
-# Copyright (C) 1995-1998, Index Data I/S 
+# Copyright (C) 1995-1998, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.40 1998-06-02 10:23:07 adam Exp $
+# $Id: Makefile.in,v 1.1 1998-08-21 14:13:23 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
@@ -9,7 +9,7 @@
 #LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
 #XMOSI=xmosi.o
 
-CDEFS=$(ODEFS) 
+CDEFS=@DEFS@ @ODEFS@
 
 # Standard include path and original protocol encoders.
 INCLUDE=-I. -I../include
@@ -25,33 +25,39 @@ MOD=asn
 #INCLUDE=-I../z39.50 -I. -I../include
 #MOD=z39.50
 
-#CC=
+CC=@CC@
+CPP=@CPP@
 SHELL=/bin/sh
 MAKE=make
 SUBDIR=$(MOD) util odr $(RFC1006) ccl comstack retrieval client server ztest makelib
 # Add external libraries to the ELIBS macro
-ELIBS=
-# For Solaris use:
-#ELIBS=-lnsl -lsocket
+ELIBS=@LIBS@
 
-CONTROL=RANLIB="ranlib" ELIBS="$(ELIBS)"
+RANLIB=@RANLIB@
 
 # Installation directories, etc.
 #  Binaries
-BINDIR=/usr/local/bin
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+BINDIR=$(exec_prefix)/bin
 #  Public libraries and header files
-LIBDIR=/usr/local/lib
-INCDIR=/usr/local/include
+LIBDIR=$(exec_prefix)/lib
+INCDIR=$(prefix)/include
 #  Misc tables, etc.
-YAZDIR=/usr/local/lib/yaz
+YAZDIR=$(prefix)/lib/yaz
 
 all:
-	for i in $(SUBDIR); do cd $$i; if $(MAKE) $(CONTROL) \
-	INCLUDE="$(INCLUDE)" CFLAGS="$(CFLAGS)" CDEFS="$(CDEFS)" LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\
-	then cd ..; else exit 1; fi; done
+	for i in $(SUBDIR); do cd $$i; if $(MAKE) CC="$(CC)" \
+		RANLIB="$(RANLIB)" ELIBS="$(ELIBS)" \
+		INCLUDE="$(INCLUDE)" CFLAGS="$(CFLAGS)" \
+		CDEFS="$(CDEFS)" \
+		LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\
+		then cd ..; else exit 1; fi; done
 
 dep depend:
-	for i in $(SUBDIR); do cd $$i; if $(MAKE) INCLUDE="$(INCLUDE)" CDEFS="$(CDEFS)" depend;\
+	for i in $(SUBDIR); do cd $$i; if $(MAKE) CPP="$(CPP)" \
+		INCLUDE="$(INCLUDE)" CDEFS="$(CDEFS)" depend;\
 		 then cd ..; else exit 1; fi; done
 
 clean:
@@ -76,22 +82,6 @@ cleandepend:
 	for i in $(SUBDIR); do (cd $$i; \
 		if sed '/^#Depend/q' <Makefile >Makefile.tmp; then \
 		mv -f Makefile.tmp Makefile; fi; rm -f .depend); done
-
-taildepend:
-	for i in $(SUBDIR); do (cd $$i; \
-		if sed 's/^if/#if/' <Makefile|sed 's/^include/#include/'| \
-		sed 's/^endif/#endif/' | \
-		sed 's/^depend: depend2/depend: depend1/g' | \
-		sed '/^#Depend/q' >Makefile.tmp; then \
-		mv -f Makefile.tmp Makefile; fi); done
-
-gnudepend:
-	for i in $(SUBDIR); do (cd $$i; \
-		if sed '/^#Depend/q' <Makefile| \
-		sed 's/^#if/if/' |sed 's/^#include/include/'| \
-		sed 's/^#endif/endif/' | \
-		sed 's/^depend: depend1/depend: depend2/g' >Makefile.tmp;then \
-		mv -f Makefile.tmp Makefile; fi); done
 
 install: all install.misc install.lib install.bin
 

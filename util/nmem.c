@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.10  1998-07-20 12:35:57  adam
+ * Revision 1.11  1998-08-21 14:13:36  adam
+ * Added GNU Configure script to build Makefiles.
+ *
+ * Revision 1.10  1998/07/20 12:35:57  adam
  * Added more memory diagnostics (when NMEM_DEBUG is 1).
  *
  * Revision 1.9  1998/07/07 15:49:01  adam
@@ -52,7 +55,13 @@
 #ifdef WINDOWS
 #include <windows.h>
 #elif _REENTRANT
+
+#if HAVE_PTHREAD_H
 #include <pthread.h>
+#elif HAVE_THREAD_H
+#include <thread.h>
+#endif
+
 #endif
 
 #define NMEM_CHUNK (4*1024)
@@ -62,7 +71,7 @@ static CRITICAL_SECTION critical_section;
 #define NMEM_ENTER EnterCriticalSection(&critical_section)
 #define NMEM_LEAVE LeaveCriticalSection(&critical_section)
 #elif _REENTRANT
-static pthread_mutex_t nmem_mutex;
+static pthread_mutex_t nmem_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define NMEM_ENTER pthread_mutex_lock(&nmem_mutex);
 #define NMEM_LEAVE pthread_mutex_unlock(&nmem_mutex);
 #else

@@ -4,7 +4,7 @@
  * Sebastian Hammer, Adam Dickmeiss
 
 Compilation and installation for YAZ 
-  $Id: README,v 1.21 1998-01-29 14:08:43 adam Exp $
+  $Id: README,v 1.22 1998-08-21 14:13:23 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -12,6 +12,9 @@ role of Z39.50/SR.
 
 Windows programmers: refer to the file windows.txt which describes
 how to compile the software using Microsoft Visual C++.
+
+On Unix, GNU configure is used to configure YAZ and generate Makefiles.
+Type "./configure", then "make" to build YAZ.
 
 Two test-programs of interest are generated when you type 'make' at the
 top level: ztest/ztest and client/client. Ztest is a dummy database
@@ -115,7 +118,7 @@ rfc1006 - Xtimosi requires an implementation of the OSI transport
 server  - This is the implementation of the server frontend. It
 	provides event-handling and server managament functions,
 	and calls the backend primitives (best documentation of these
-	is in the file include/backend.h). See server.txt.
+	is in the file include/backend.h).
 
 client  - A demonstration client. If we come upon a good design for a
 	higher level client API, that will live here.

@@ -1,10 +1,12 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.9 1996-10-29 13:34:56 adam Exp $
+# $Id: Makefile.in,v 1.1 1998-08-21 14:13:29 adam Exp $
 
-#CC=
 SHELL=/bin/sh
+
+RANLIB=@RANLIB@
+
 MAKE=make
 LIBDIR=../lib
 LIBS=$(LIBDIR)/libodr.a $(LIBDIR)/libasn.a $(LIBDIR)/libcomstack.a \
@@ -18,7 +20,7 @@ $(LIB): $(LIBS)
 	for i in $(LIBS); do echo $$i; ar x $$i; rm -f __*; done
 	ar qc $(LIB) *.o
 	rm -f *.o
-	ranlib $(LIB)
+	$(RANLIB) $(LIB)
 
 clean:
 	-rm -f *.o

@@ -1,27 +1,28 @@
 # Copyright (C) 1994-1997, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.27 1998-05-18 10:10:01 adam Exp $
+# $Id: Makefile.in,v 1.1 1998-08-21 14:13:36 adam Exp $
 
 SHELL=/bin/sh
+
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+CDEFS=@DEFS@ @ODEFS@
+ELIBS=@LIBS@
+
 INCLUDE=-I../include -I.
 LIBDIR=../lib
-LIBINCLUDE=-L$(LIBDIR)
+
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libutil.a
-LIBS=
 PO = options.o log.o marcdisp.o yaz-ccl.o pquery.o oid.o wrbuf.o nmemsdup.o \
 	xmalloc.o readconf.o tpath.o nmem.o yaz-util.o atoin.o # dmalloc.o 
-CPP=$(CC) -E
-RANLIB=ranlib
 
-all: $(LIBDIR) $(LIB) marcdump
-
-#test: test.o $(LIB) ../odr/odr.a
-#	$(CC) $(CFLAGS) $(INCLUDE) -o test test.o $(LIB) ../odr/odr.a
+all: $(LIB) marcdump
 
 marcdump: marcdump.o $(LIB)
-	$(CC) $(CFLAGS) $(INCLUDE) -o marcdump marcdump.o $(LIB)
+	$(CC) $(CFLAGS) $(INCLUDE) -o marcdump marcdump.o $(LIB) $(ELIBS)
 
 alll:
 
@@ -36,18 +37,9 @@ $(LIB): $(PO)
 clean:
 	rm -f *.[oa] test marcdump core mon.out gmon.out errlist
 
-depend: depend2
-
-depend1:
+depend:
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
 	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
 	mv -f Makefile.tmp Makefile
-
-depend2:
-	$(CPP) $(DEFS) -M *.c >.depend	
-
-ifeq (.depend,$(wildcard .depend))
-include .depend
-endif
 
 #Depend --- DOT NOT DELETE THIS LINE

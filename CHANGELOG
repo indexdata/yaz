@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+YAZ now uses GNU configure to generate Makefile(s).
+
 * Slightly changed some member names of DeleteResultSetRequest/Response.
 
 * Changed some C definitions regarding EXPLAIN record syntax (prt-exp.h)

@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.51  1998-07-07 15:51:03  adam
+ * Revision 1.52  1998-08-21 14:13:34  adam
+ * Added GNU Configure script to build Makefiles.
+ *
+ * Revision 1.51  1998/07/07 15:51:03  adam
  * Changed server so that it stops if bind fails - "address already in
  * use" typically causes this.
  *
@@ -728,6 +731,7 @@ static void add_listener(char *where, int what)
     if (!(l = cs_create(type, 0, what)))
     {
     	logf(LOG_FATAL|LOG_ERRNO, "Failed to create listener");
+	return;
     }
     ap = cs_straddr (l, addr);
     if (!ap)

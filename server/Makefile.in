@@ -1,0 +1,42 @@
+# Copyright (C) 1995-1998, Index Data I/S 
+# All rights reserved.
+# Sebastian Hammer, Adam Dickmeiss
+# $Id: Makefile.in,v 1.1 1998-08-21 14:13:34 adam Exp $
+
+SHELL=/bin/sh
+
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+
+LIBDIR=../lib
+
+#LIBMOSI=../../xtimosi/src/libmosi.a $(LIBDIR)/librfc.a
+
+INCLUDE=-I../include -I. -I../../xtimosi/src
+LIBINCLUDE=-L$(LIBDIR)
+CDEFS=@DEFS@ @ODEFS@
+DEFS=$(INCLUDE) $(CDEFS)
+LIB=$(LIBDIR)/libserver.a 
+PO = eventl.o seshigh.o statserv.o requestq.o
+ELIBS=@LIBS@
+
+all: $(LIB) 
+
+$(LIB): $(PO)
+	rm -f $(LIB)
+	ar qc $(LIB) $(PO)
+	$(RANLIB) $(LIB)
+
+.c.o:
+	$(CC) -c $(DEFS) $(CFLAGS) $<
+
+clean:
+	rm -f *.[oa] core mon.out gmon.out errlist
+
+depend:
+	sed '/^#Depend/q' <Makefile >Makefile.tmp
+	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
+	mv -f Makefile.tmp Makefile
+
+#Depend --- DOT NOT DELETE THIS LINE

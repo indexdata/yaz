@@ -1,24 +1,29 @@
 # Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.30 1998-05-18 13:06:51 adam Exp $
+# $Id: Makefile.in,v 1.1 1998-08-21 14:13:25 adam Exp $
 
 SHELL=/bin/sh
+
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+CDEFS=@DEFS@ @ODEFS@
+ELIBS=@LIBS@
+
 INCLUDE=-I../include -I.
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
+
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libasn.a
 PO = proto.o diagbib1.o zget.o prt-rsc.o prt-acc.o prt-exp.o prt-ext.o \
 	prt-grs.o prt-exd.o prt-dia.o prt-esp.o prt-arc.o prt-add.o \
 	prt-dat.o prt-univ.o
-CPP=$(CC) -E
-RANLIB=ranlib
-
 all: $(LIB)
 
 test: test.o $(LIB) ../odr/odr.a
-	$(CC) $(CFLAGS) $(INCLUDE) -o test test.o $(LIB) ../odr/odr.a
+	$(CC) $(CFLAGS) $(INCLUDE) -o test test.o $(LIB) ../odr/odr.a $(ELIBS)
 
 alll:
 
@@ -33,18 +38,9 @@ $(LIB): $(PO)
 clean:
 	rm -f *.[oa] test core mon.out gmon.out errlist
 
-depend: depend2
-
-depend1:
+depend:
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
 	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
 	mv -f Makefile.tmp Makefile
-
-depend2:
-	$(CPP) $(DEFS) -M *.c >.depend	
-
-ifeq (.depend,$(wildcard .depend))
-include .depend
-endif
 
 #Depend --- DOT NOT DELETE THIS LINE
