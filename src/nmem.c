@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.8 2004-12-16 08:59:36 adam Exp $
+ * $Id: nmem.c,v 1.9 2005-01-04 01:25:20 adam Exp $
  */
 
 /**
@@ -40,6 +40,7 @@
 #endif
 
 #define NMEM_CHUNK (4*1024)
+#define NMEM_ALIGN (sizeof(long)*2)
 
 static int log_level=0;
 static int log_level_initialized=0;
@@ -266,7 +267,7 @@ void *nmem_malloc(NMEM n, int size)
     }
     r = p->buf + p->top;
     /* align size */
-    p->top += (size + (sizeof(long) - 1)) & ~(sizeof(long) - 1);
+    p->top += (size + (NMEM_ALIGN - 1)) & ~(NMEM_ALIGN - 1);
     n->total += size;
     NMEM_LEAVE;
     return r;
