@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.12 2002-01-17 21:04:43 adam Exp $
+ * $Id: admin.c,v 1.13 2002-09-17 11:07:30 adam Exp $
  */
 
 #include <stdio.h>
@@ -19,9 +19,6 @@
 #include <yaz/yaz-util.h>
 
 #include <yaz/tcpip.h>
-#ifdef USE_XTIMOSI
-#include <yaz/xmosi.h>
-#endif
 
 #include <yaz/proto.h>
 #include <yaz/marcdisp.h>
@@ -32,7 +29,6 @@
 
 /* Helper functions to get to various statics in the client */
 ODR getODROutputStream();
-void send_apdu(Z_APDU *a);
 
 extern char *databaseNames[];
 extern int num_databaseNames;
@@ -41,7 +37,7 @@ int sendAdminES(int type, char* param1)
 {
     ODR out = getODROutputStream();
     char *dbname = odr_strdup (out, databaseNames[0]);
-
+    
     /* Type: 1=reindex, 2=truncate, 3=delete, 4=create, 5=import, 6=refresh, 7=commit */
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -63,18 +59,22 @@ int sendAdminES(int type, char* param1)
     req->packageName = "1.Extendedserveq";
 
     /* Allocate the external */
-    r = req->taskSpecificParameters = (Z_External *) odr_malloc (out, sizeof(*r));
+    r = req->taskSpecificParameters = (Z_External *)
+        odr_malloc (out, sizeof(*r));
     r->direct_reference = odr_oiddup(out,oid);
     r->indirect_reference = 0;
     r->descriptor = 0;
     r->which = Z_External_ESAdmin;
-    r->u.adminService = (Z_Admin *) odr_malloc(out, sizeof(*r->u.adminService));
+    r->u.adminService = (Z_Admin *)
+        odr_malloc(out, sizeof(*r->u.adminService));
     r->u.adminService->which = Z_Admin_esRequest;
-    r->u.adminService->u.esRequest = (Z_AdminEsRequest *) odr_malloc(out, sizeof(*r->u.adminService->u.esRequest));
-
-    toKeep = r->u.adminService->u.esRequest->toKeep = (Z_ESAdminOriginPartToKeep *) 
-                     odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->toKeep));
-
+    r->u.adminService->u.esRequest = (Z_AdminEsRequest *)
+        odr_malloc(out, sizeof(*r->u.adminService->u.esRequest));
+    
+    toKeep = r->u.adminService->u.esRequest->toKeep =
+        (Z_ESAdminOriginPartToKeep *) 
+        odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->toKeep));
+    
     toKeep->which=type;
     toKeep->databaseName = dbname;
     switch ( type )
@@ -93,7 +93,8 @@ int sendAdminES(int type, char* param1)
 	toKeep->u.create=odr_nullval();
 	break;
     case Z_ESAdminOriginPartToKeep_import:
-	toKeep->u.import = (Z_ImportParameters*)odr_malloc(out, sizeof(*toKeep->u.import));
+	toKeep->u.import = (Z_ImportParameters*)
+            odr_malloc(out, sizeof(*toKeep->u.import));
 	toKeep->u.import->recordType=param1;
 	/* Need to add additional setup of records here */
 	break;
@@ -113,7 +114,7 @@ int sendAdminES(int type, char* param1)
 	/* Unknown admin service */
 	break;
     }
-
+    
     notToKeep = r->u.adminService->u.esRequest->notToKeep =
 	(Z_ESAdminOriginPartNotToKeep *)
 	odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->notToKeep));
@@ -198,7 +199,7 @@ int cmd_adm_import(char *arg)
 	return 0;
     
     sendAdminES(Z_ESAdminOriginPartToKeep_import, type_str);
-
+    
     printf ("sent es request\n");
     if ((cp=strrchr(dir_str, '/')) && cp[1] == 0)
 	sep="";
@@ -265,65 +266,6 @@ int cmd_adm_import(char *arg)
 }
 #endif
 
-int cmd_adm_import2(char* arg)
-{
-   /* Buffer for reading chunks of data from import file */
-    char chunk_buffer[8192];
-    
-    if ( arg )
-    {
-        char rectype_buff[32];
-        char filename_buff[32];
-	FILE* pImportFile = NULL;
-
-        if (sscanf (arg, "%s %s", rectype_buff, filename_buff) != 3)
-	{
-	    printf("Must specify database-name, record-type and filename for import\n");
-	    return 0;
-	}
-
-        /* Attempt to open the file */
-
-	pImportFile = fopen(filename_buff,"r");
-
-        /* This chunk of code should move into client.c sometime soon for sending files via the update es */
-	/* This function will then refer to the standard client.c one for uploading a file using es update */
-	if ( pImportFile )
-	{
-	    int iTotalWritten = 0;
-
-            /* We opened the import file without problems... So no we send the es request, ready to 
-	       start sending fragments of the import file as segment messages */
-            sendAdminES(Z_ESAdminOriginPartToKeep_import, rectype_buff);
-
-	    while ( ! feof(pImportFile ) )
-	    {
-	        /* Read buffer_size bytes from the file */
-	        size_t num_items = fread((void*)chunk_buffer, 1, sizeof(chunk_buffer),  pImportFile);
-
-		/* Write num_bytes of data to */
-
-		if ( feof(pImportFile ) )
-		{
-		    /* This is the last chunk... Write it as the last fragment */
-		    printf("Last segment of %d bytes\n", num_items);
-		}
-		else if ( iTotalWritten == 0 )
-		{
-		    printf("First segment of %d bytes\n",num_items);
-		}
-		else
-		{
-		    printf("Writing %d bytes\n", num_items);
-		}
-
-		iTotalWritten += num_items;
-	    }
-	}
-	return 2;
-    }
-    return 0;
-}
 
 /* "Freshen" the specified database, by checking metadata records against the sources from which they were 
    generated, and creating a new record if the source has been touched since the last extraction */
@@ -356,3 +298,12 @@ int cmd_adm_startup(char* arg)
     sendAdminES(Z_ESAdminOriginPartToKeep_start, NULL);
     return 2;
 }
+
+/*
+ * Local variables:
+ * tab-width: 8
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=8 fdm=marker
+ * vim<600: sw=4 ts=8
+ */

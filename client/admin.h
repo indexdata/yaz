@@ -1,15 +1,8 @@
 /*
- * $Log: admin.h,v $
- * Revision 1.3  2000-04-05 07:39:54  adam
- * Added shared library support (libtool).
+ * Copyright (c) 1995-2002, Index Data
+ * See the file LICENSE for details.
  *
- * Revision 1.2  2000/03/16 13:55:49  ian
- * Added commands for sending shutdown and startup admin requests via the admin ES.
- *
- * Revision 1.1  2000/03/14 09:27:07  ian
- * Added code to enable sending of admin extended service requests
- *
- *
+ * $Id: admin.h,v 1.4 2002-09-17 11:07:30 adam Exp $
  */
 
 int cmd_adm_reindex(char* arg);
@@ -21,3 +14,13 @@ int cmd_adm_refresh(char* arg);
 int cmd_adm_commit(char* arg);
 int cmd_adm_shutdown(char* arg);
 int cmd_adm_startup(char* arg);
+
+void send_apdu(Z_APDU *a);
+/*
+ * Local variables:
+ * tab-width: 8
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=8 fdm=marker
+ * vim<600: sw=4 ts=8
+ */
