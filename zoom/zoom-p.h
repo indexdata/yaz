@@ -1,15 +1,15 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.4 2001-11-13 22:57:03 adam Exp $
+ * $Id: zoom-p.h,v 1.5 2001-11-18 21:14:23 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
 
-typedef struct Z3950_Event_p *Z3950_Event;
+typedef struct ZOOM_Event_p *ZOOM_Event;
 
-struct Z3950_query_p {
+struct ZOOM_query_p {
     Z_Query *query;
     Z_SortKeySpecList *sort_spec;
     int refcount;
@@ -20,11 +20,11 @@ struct Z3950_query_p {
 #define STATE_CONNECTING 1
 #define STATE_ESTABLISHED 2
 
-#define Z3950_SELECT_READ 1
-#define Z3950_SELECT_WRITE 2
-#define Z3950_SELECT_EXCEPT 4
+#define ZOOM_SELECT_READ 1
+#define ZOOM_SELECT_WRITE 2
+#define ZOOM_SELECT_EXCEPT 4
 
-struct Z3950_connection_p {
+struct ZOOM_connection_p {
     COMSTACK cs;
     char *host_port;
     int error;
@@ -41,76 +41,76 @@ struct Z3950_connection_p {
     char *cookie_out;
     char *cookie_in;
     int async;
-    Z3950_task tasks;
-    Z3950_options options;
-    Z3950_resultset resultsets;
-    Z3950_Event m_queue_front;
-    Z3950_Event m_queue_back;
+    ZOOM_task tasks;
+    ZOOM_options options;
+    ZOOM_resultset resultsets;
+    ZOOM_Event m_queue_front;
+    ZOOM_Event m_queue_back;
 };
 
 
-struct Z3950_options_entry {
+struct ZOOM_options_entry {
     char *name;
     char *value;
-    struct Z3950_options_entry *next;
+    struct ZOOM_options_entry *next;
 };
 
-struct Z3950_options_p {
+struct ZOOM_options_p {
     int refcount;
     void *callback_handle;
-    Z3950_options_callback callback_func;
-    struct Z3950_options_entry *entries;
-    Z3950_options parent;
+    ZOOM_options_callback callback_func;
+    struct ZOOM_options_entry *entries;
+    ZOOM_options parent;
 };
 
-typedef struct Z3950_record_cache_p *Z3950_record_cache;
+typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
 
-struct Z3950_resultset_p {
+struct ZOOM_resultset_p {
     Z_Query *r_query;
     Z_SortKeySpecList *r_sort_spec;
-    Z3950_query search;
+    ZOOM_query search;
     int refcount;
     int size;
     int start;
     int count;
     int piggyback;
     ODR odr;
-    Z3950_record_cache record_cache;
-    Z3950_options options;
-    Z3950_connection connection;
-    Z3950_resultset next;
+    ZOOM_record_cache record_cache;
+    ZOOM_options options;
+    ZOOM_connection connection;
+    ZOOM_resultset next;
 };
 
-struct Z3950_record_p {
+struct ZOOM_record_p {
     ODR odr;
     WRBUF wrbuf_marc;
     Z_NamePlusRecord *npr;
 };
 
-struct Z3950_record_cache_p {
-    struct Z3950_record_p rec;
+struct ZOOM_record_cache_p {
+    struct ZOOM_record_p rec;
     char *elementSetName;
     int pos;
-    Z3950_record_cache next;
+    ZOOM_record_cache next;
 };
 
-struct Z3950_task_p {
+struct ZOOM_task_p {
     int running;
     int which;
     union {
-#define Z3950_TASK_SEARCH 1
-	Z3950_resultset resultset;
-#define Z3950_TASK_RETRIEVE 2
+#define ZOOM_TASK_SEARCH 1
+	ZOOM_resultset resultset;
+#define ZOOM_TASK_RETRIEVE 2
 	/** also resultset here */
-#define Z3950_TASK_CONNECT 3
+#define ZOOM_TASK_CONNECT 3
     } u;
-    Z3950_task next;
+    ZOOM_task next;
 };
 
-struct Z3950_Event_p {
+struct ZOOM_Event_p {
     int kind;
-    Z3950_Event next;
-    Z3950_Event prev;
+    ZOOM_Event next;
+    ZOOM_Event prev;
 };
 
 

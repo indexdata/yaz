@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-opt.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoom-opt.c,v 1.2 2001-11-18 21:14:23 adam Exp $
  *
  * ZOOM layer for C, options handling
  */
@@ -9,14 +9,14 @@
 
 #include "zoom-p.h"
 
-Z3950_options Z3950_options_create (void)
+ZOOM_options ZOOM_options_create (void)
 {
-    return Z3950_options_create_with_parent (0);
+    return ZOOM_options_create_with_parent (0);
 }
 
-Z3950_options Z3950_options_create_with_parent (Z3950_options parent)
+ZOOM_options ZOOM_options_create_with_parent (ZOOM_options parent)
 {
-    Z3950_options opt = xmalloc (sizeof(*opt));
+    ZOOM_options opt = xmalloc (sizeof(*opt));
 
     opt->refcount = 1;
     opt->callback_func = 0;
@@ -28,17 +28,17 @@ Z3950_options Z3950_options_create_with_parent (Z3950_options parent)
     return opt;
 }
 
-void Z3950_options_addref (Z3950_options opt)
+void ZOOM_options_addref (ZOOM_options opt)
 {
     (opt->refcount)++;
 }
 
-Z3950_options_callback Z3950_options_set_callback (
-    Z3950_options opt,
-    Z3950_options_callback callback_func,
+ZOOM_options_callback ZOOM_options_set_callback (
+    ZOOM_options opt,
+    ZOOM_options_callback callback_func,
     void *callback_handle)
 {
-    Z3950_options_callback callback_old;
+    ZOOM_options_callback callback_old;
 
     assert (opt);
     callback_old = opt->callback_func;
@@ -47,20 +47,20 @@ Z3950_options_callback Z3950_options_set_callback (
     return callback_old;
 }
 
-void Z3950_options_destroy (Z3950_options opt)
+void ZOOM_options_destroy (ZOOM_options opt)
 {
     if (!opt)
 	return;
     (opt->refcount)--;
     if (opt->refcount == 0)
     {
-	struct Z3950_options_entry *e;
+	struct ZOOM_options_entry *e;
 	
-	Z3950_options_destroy (opt->parent);
+	ZOOM_options_destroy (opt->parent);
 	e = opt->entries;
 	while (e)
 	{
-	    struct Z3950_options_entry *e0 = e;
+	    struct ZOOM_options_entry *e0 = e;
 	    xfree (e->name);
 	    xfree (e->value);
 	    e = e->next;
@@ -70,9 +70,9 @@ void Z3950_options_destroy (Z3950_options opt)
     }
 }
 
-void Z3950_options_set (Z3950_options opt, const char *name, const char *value)
+void ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
 {
-    struct Z3950_options_entry **e;
+    struct ZOOM_options_entry **e;
 
     e = &opt->entries;
     while (*e)
@@ -91,7 +91,7 @@ void Z3950_options_set (Z3950_options opt, const char *name, const char *value)
     (*e)->next = 0;
 }
 
-const char *Z3950_options_get (Z3950_options opt, const char *name)
+const char *ZOOM_options_get (ZOOM_options opt, const char *name)
 {
     const char *v = 0;
     if (!opt)
@@ -100,7 +100,7 @@ const char *Z3950_options_get (Z3950_options opt, const char *name)
 	v = (*opt->callback_func)(opt->callback_handle, name);
     if (!v)
     {
-	struct Z3950_options_entry *e;
+	struct ZOOM_options_entry *e;
 	for (e = opt->entries; e; e = e->next)
 	    if (!strcmp(e->name, name))
 	    {
@@ -109,13 +109,13 @@ const char *Z3950_options_get (Z3950_options opt, const char *name)
 	    }
     }
     if (!v)
-	return Z3950_options_get(opt->parent, name);
+	return ZOOM_options_get(opt->parent, name);
     return v;
 }
 
-int Z3950_options_get_bool (Z3950_options opt, const char *name, int defa)
+int ZOOM_options_get_bool (ZOOM_options opt, const char *name, int defa)
 {
-    const char *v = Z3950_options_get (opt, name);
+    const char *v = ZOOM_options_get (opt, name);
 
     if (!v)
 	return defa;
@@ -124,9 +124,9 @@ int Z3950_options_get_bool (Z3950_options opt, const char *name, int defa)
     return 0;
 }
 
-int Z3950_options_get_int (Z3950_options opt, const char *name, int defa)
+int ZOOM_options_get_int (ZOOM_options opt, const char *name, int defa)
 {
-    const char *v = Z3950_options_get (opt, name);
+    const char *v = ZOOM_options_get (opt, name);
 
     if (!v || !*v)
 	return defa;

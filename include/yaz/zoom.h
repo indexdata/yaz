@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.6 2001-11-16 09:52:39 adam Exp $
+ * $Id: zoom.h,v 1.7 2001-11-18 21:14:23 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -14,12 +14,12 @@ ZOOM_BEGIN_CDECL
 /* ----------------------------------------------------------- */
 /* the types we use */
 
-typedef struct Z3950_options_p *Z3950_options;
-typedef struct Z3950_query_p *Z3950_query;
-typedef struct Z3950_connection_p *Z3950_connection;
-typedef	struct Z3950_resultset_p *Z3950_resultset;
-typedef struct Z3950_task_p *Z3950_task;
-typedef struct Z3950_record_p *Z3950_record;
+typedef struct ZOOM_options_p *ZOOM_options;
+typedef struct ZOOM_query_p *ZOOM_query;
+typedef struct ZOOM_connection_p *ZOOM_connection;
+typedef	struct ZOOM_resultset_p *ZOOM_resultset;
+typedef struct ZOOM_task_p *ZOOM_task;
+typedef struct ZOOM_record_p *ZOOM_record;
 
 /* ----------------------------------------------------------- */
 /* connections */
@@ -27,155 +27,155 @@ typedef struct Z3950_record_p *Z3950_record;
 /* create connection, connect to host, if portnum is 0, then port is
 read from host string (e.g. myhost:9821) */
 ZOOM_EXPORT
-Z3950_connection Z3950_connection_new (const char *host, int portnum);
+ZOOM_connection ZOOM_connection_new (const char *host, int portnum);
 
 /* create connection, don't connect, apply options */
 ZOOM_EXPORT
-Z3950_connection Z3950_connection_create (Z3950_options options);
+ZOOM_connection ZOOM_connection_create (ZOOM_options options);
 
 /* connect given existing connection */
 ZOOM_EXPORT
-void Z3950_connection_connect(Z3950_connection c, const char *host,
+void ZOOM_connection_connect(ZOOM_connection c, const char *host,
 			      int portnum);
 
 /* destroy connection (close connection also) */
 ZOOM_EXPORT
-void Z3950_connection_destroy (Z3950_connection c);
+void ZOOM_connection_destroy (ZOOM_connection c);
 
 /* get/set option for connection */
 ZOOM_EXPORT
-const char *Z3950_connection_option_get (Z3950_connection c, const char *key);
+const char *ZOOM_connection_option_get (ZOOM_connection c, const char *key);
 
 ZOOM_EXPORT
-void Z3950_connection_option_set (Z3950_connection c, const char *key,
+void ZOOM_connection_option_set (ZOOM_connection c, const char *key,
                                   const char *val);
 
 /* return error code (0 == success, failure otherwise). cp
    holds error string on failure, addinfo holds addititional info (if any)
 */
 ZOOM_EXPORT
-int Z3950_connection_error (Z3950_connection c, const char **cp,
+int ZOOM_connection_error (ZOOM_connection c, const char **cp,
 			    const char **addinfo);
 
 /* returns error code */
 ZOOM_EXPORT
-int Z3950_connection_errcode (Z3950_connection c);
+int ZOOM_connection_errcode (ZOOM_connection c);
 /* returns error message */
 ZOOM_EXPORT
-const char *Z3950_connection_errmsg (Z3950_connection c);
+const char *ZOOM_connection_errmsg (ZOOM_connection c);
 /* returns additional info */
 ZOOM_EXPORT
-const char *Z3950_connection_addinfo (Z3950_connection c);
+const char *ZOOM_connection_addinfo (ZOOM_connection c);
 
-#define Z3950_ERROR_NONE 0
-#define Z3950_ERROR_CONNECT 10000
-#define Z3950_ERROR_MEMORY  10001
-#define Z3950_ERROR_ENCODE  10002
-#define Z3950_ERROR_DECODE  10003
-#define Z3950_ERROR_CONNECTION_LOST 10004
-#define Z3950_ERROR_INIT 10005
-#define Z3950_ERROR_INTERNAL 10006
-#define Z3950_ERROR_TIMEOUT 10007
+#define ZOOM_ERROR_NONE 0
+#define ZOOM_ERROR_CONNECT 10000
+#define ZOOM_ERROR_MEMORY  10001
+#define ZOOM_ERROR_ENCODE  10002
+#define ZOOM_ERROR_DECODE  10003
+#define ZOOM_ERROR_CONNECTION_LOST 10004
+#define ZOOM_ERROR_INIT 10005
+#define ZOOM_ERROR_INTERNAL 10006
+#define ZOOM_ERROR_TIMEOUT 10007
 
 /* ----------------------------------------------------------- */
 /* result sets */
 
 /* create result set given a search */
 ZOOM_EXPORT
-Z3950_resultset Z3950_connection_search(Z3950_connection, Z3950_query q);
+ZOOM_resultset ZOOM_connection_search(ZOOM_connection, ZOOM_query q);
 /* create result set given PQF query */
 ZOOM_EXPORT
-Z3950_resultset Z3950_connection_search_pqf(Z3950_connection c, const char *q);
+ZOOM_resultset ZOOM_connection_search_pqf(ZOOM_connection c, const char *q);
 
 /* destroy result set */
 ZOOM_EXPORT
-void Z3950_resultset_destroy(Z3950_resultset r);
+void ZOOM_resultset_destroy(ZOOM_resultset r);
 
 /* result set option */
 ZOOM_EXPORT
-const char *Z3950_resultset_option_get (Z3950_resultset r, const char *key);
+const char *ZOOM_resultset_option_get (ZOOM_resultset r, const char *key);
 ZOOM_EXPORT
-void Z3950_resultset_option_set (Z3950_resultset r, const char *key, const char *val);
+void ZOOM_resultset_option_set (ZOOM_resultset r, const char *key, const char *val);
 
 /* return size of result set (alias hit count AKA result count) */
 ZOOM_EXPORT
-size_t Z3950_resultset_size (Z3950_resultset r);
+size_t ZOOM_resultset_size (ZOOM_resultset r);
 
 /* retrieve records */
 ZOOM_EXPORT
-void Z3950_resultset_records (Z3950_resultset r, Z3950_record *recs,
+void ZOOM_resultset_records (ZOOM_resultset r, ZOOM_record *recs,
 			      size_t start, size_t count);
 
 /* return record object at pos. Returns 0 if unavailable */
 ZOOM_EXPORT
-Z3950_record Z3950_resultset_record (Z3950_resultset s, size_t pos);
+ZOOM_record ZOOM_resultset_record (ZOOM_resultset s, size_t pos);
 
-/* like Z3950_resultset_record - but never blocks .. */
+/* like ZOOM_resultset_record - but never blocks .. */
 ZOOM_EXPORT
-Z3950_record Z3950_resultset_record_immediate (Z3950_resultset s, size_t pos);
+ZOOM_record ZOOM_resultset_record_immediate (ZOOM_resultset s, size_t pos);
 
 /* ----------------------------------------------------------- */
 /* records */
 
 /* get record information, in a form given by type */
 ZOOM_EXPORT
-void *Z3950_record_get (Z3950_record rec, const char *type, size_t *len);
+void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len);
 
 /* destroy record */
 ZOOM_EXPORT
-void Z3950_record_destroy (Z3950_record rec);
+void ZOOM_record_destroy (ZOOM_record rec);
 
 /* return copy of record */
 ZOOM_EXPORT
-Z3950_record Z3950_record_dup (Z3950_record srec);
+ZOOM_record ZOOM_record_clone (ZOOM_record srec);
 
 /* ----------------------------------------------------------- */
 /* searches */
 
 /* create search object */
 ZOOM_EXPORT
-Z3950_query Z3950_query_create(void);
+ZOOM_query ZOOM_query_create(void);
 /* destroy it */
 ZOOM_EXPORT
-void Z3950_query_destroy(Z3950_query s);
+void ZOOM_query_destroy(ZOOM_query s);
 /* specify prefix query for search */
 ZOOM_EXPORT
-int Z3950_query_prefix(Z3950_query s, const char *str);
+int ZOOM_query_prefix(ZOOM_query s, const char *str);
 /* specify sort criteria for search */
 ZOOM_EXPORT
-int Z3950_query_sortby(Z3950_query s, const char *criteria);
+int ZOOM_query_sortby(ZOOM_query s, const char *criteria);
 
 /* ----------------------------------------------------------- */
 /* options */
-typedef const char *(*Z3950_options_callback)(void *handle, const char *name);
+typedef const char *(*ZOOM_options_callback)(void *handle, const char *name);
 
 ZOOM_EXPORT
-Z3950_options_callback Z3950_options_set_callback (Z3950_options opt,
-						   Z3950_options_callback c,
+ZOOM_options_callback ZOOM_options_set_callback (ZOOM_options opt,
+						   ZOOM_options_callback c,
 						   void *handle);
 ZOOM_EXPORT
-Z3950_options Z3950_options_create (void);
+ZOOM_options ZOOM_options_create (void);
 
 ZOOM_EXPORT
-Z3950_options Z3950_options_create_with_parent (Z3950_options parent);
+ZOOM_options ZOOM_options_create_with_parent (ZOOM_options parent);
 
 ZOOM_EXPORT
-const char *Z3950_options_get (Z3950_options opt, const char *name);
+const char *ZOOM_options_get (ZOOM_options opt, const char *name);
 
 ZOOM_EXPORT
-void Z3950_options_set (Z3950_options opt, const char *name, const char *v);
+void ZOOM_options_set (ZOOM_options opt, const char *name, const char *v);
 
 ZOOM_EXPORT
-void Z3950_options_destroy (Z3950_options opt);
+void ZOOM_options_destroy (ZOOM_options opt);
 
 ZOOM_EXPORT
-int Z3950_options_get_bool (Z3950_options opt, const char *name, int defa);
+int ZOOM_options_get_bool (ZOOM_options opt, const char *name, int defa);
 
 ZOOM_EXPORT
-int Z3950_options_get_int (Z3950_options opt, const char *name, int defa);
+int ZOOM_options_get_int (ZOOM_options opt, const char *name, int defa);
 
 ZOOM_EXPORT
-void Z3950_options_addref (Z3950_options opt);
+void ZOOM_options_addref (ZOOM_options opt);
 
 /* ----------------------------------------------------------- */
 /* events */
@@ -185,6 +185,6 @@ void Z3950_options_addref (Z3950_options opt);
    connection for which the event occurred. There's no way to get
    the details yet, sigh. */
 ZOOM_EXPORT
-int Z3950_event (int no, Z3950_connection *cs);
+int ZOOM_event (int no, ZOOM_connection *cs);
 
 ZOOM_END_CDECL

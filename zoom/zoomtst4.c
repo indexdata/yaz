@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst4.c,v 1.4 2001-11-16 09:52:39 adam Exp $
+ * $Id: zoomtst4.c,v 1.5 2001-11-18 21:14:23 adam Exp $
  *
  * Asynchronous multi-target going through proxy doing search and retrieve
  * using present.
@@ -22,10 +22,10 @@ int main(int argc, char **argv)
 {
     int i;
     int no = argc-3;
-    Z3950_connection z[500]; /* allow at most 500 connections */
-    Z3950_resultset r[500];  /* and result sets .. */
-    Z3950_query q;
-    Z3950_options o = Z3950_options_create ();
+    ZOOM_connection z[500]; /* allow at most 500 connections */
+    ZOOM_resultset r[500];  /* and result sets .. */
+    ZOOM_query q;
+    ZOOM_options o = ZOOM_options_create ();
 
     if (argc < 4)
     {
@@ -37,18 +37,18 @@ int main(int argc, char **argv)
         no = 500;
 
     /* function my_callback called when reading options .. */
-    Z3950_options_set_callback (o, my_callback, 0);
+    ZOOM_options_set_callback (o, my_callback, 0);
 
     /* get 20 (at most) records from offset 5 */
-    Z3950_options_set (o, "start", "5");
-    Z3950_options_set (o, "count", "20");
+    ZOOM_options_set (o, "start", "5");
+    ZOOM_options_set (o, "count", "20");
 
     /* set proxy */
-    Z3950_options_set (o, "proxy", argv[1]);
+    ZOOM_options_set (o, "proxy", argv[1]);
     
     /* create query */
-    q = Z3950_query_create ();
-    if (Z3950_query_prefix (q, argv[argc-1]))
+    q = ZOOM_query_create ();
+    if (ZOOM_query_prefix (q, argv[argc-1]))
     {
 	printf ("bad PQF: %s\n", argv[argc-1]);
 	exit (1);
@@ -56,13 +56,13 @@ int main(int argc, char **argv)
     /* connect - and search all */
     for (i = 0; i<no; i++)
     {
-    	z[i] = Z3950_connection_create (o);
-    	Z3950_connection_connect (z[i], argv[i+2], 0);
-        r[i] = Z3950_connection_search (z[i], q);
+    	z[i] = ZOOM_connection_create (o);
+    	ZOOM_connection_connect (z[i], argv[i+2], 0);
+        r[i] = ZOOM_connection_search (z[i], q);
     }
 
     /* network I/O */
-    while (Z3950_event (no, z))
+    while (ZOOM_event (no, z))
 	;
 
     /* handle errors */
@@ -70,19 +70,19 @@ int main(int argc, char **argv)
     {
 	int error;
 	const char *errmsg, *addinfo;
-	if ((error = Z3950_connection_error(z[i], &errmsg, &addinfo)))
+	if ((error = ZOOM_connection_error(z[i], &errmsg, &addinfo)))
 	    fprintf (stderr, "%s error: %s (%d) %s\n",
-		     Z3950_connection_option_get(z[i], "host"),
+		     ZOOM_connection_option_get(z[i], "host"),
                      errmsg, error, addinfo);
     }
 
     /* destroy stuff and exit */
-    Z3950_query_destroy (q);
+    ZOOM_query_destroy (q);
     for (i = 0; i<no; i++)
     {
-        Z3950_resultset_destroy (r[i]);
-        Z3950_connection_destroy (z[i]);
+        ZOOM_resultset_destroy (r[i]);
+        ZOOM_connection_destroy (z[i]);
     }
-    Z3950_options_destroy(o);
+    ZOOM_options_destroy(o);
     exit (0);
 }

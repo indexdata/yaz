@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.10 2001-11-16 10:18:20 adam Exp $
+ * $Id: zoom-c.c,v 1.11 2001-11-18 21:14:23 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -16,21 +16,21 @@
 #include <sys/poll.h>
 #endif
 
-static Z3950_Event Z3950_Event_create (int kind)
+static ZOOM_Event ZOOM_Event_create (int kind)
 {
-    Z3950_Event event = xmalloc (sizeof(*event));
+    ZOOM_Event event = xmalloc (sizeof(*event));
     event->kind = kind;
     event->next = 0;
     event->prev = 0;
     return event;
 }
 
-static void Z3950_Event_destroy (Z3950_Event event)
+static void ZOOM_Event_destroy (ZOOM_Event event)
 {
     xfree (event);
 }
 
-static void Z3950_connection_put_event (Z3950_connection c, Z3950_Event event)
+static void ZOOM_connection_put_event (ZOOM_connection c, ZOOM_Event event)
 {
     // put in back of queue
     if (c->m_queue_back)
@@ -48,10 +48,10 @@ static void Z3950_connection_put_event (Z3950_connection c, Z3950_Event event)
     c->m_queue_back = event;
 }
 
-static Z3950_Event Z3950_connection_get_event(Z3950_connection c)
+static ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c)
 {
     // get from front of queue
-    Z3950_Event event = c->m_queue_front;
+    ZOOM_Event event = c->m_queue_front;
     if (!event)
 	return 0;
     assert (c->m_queue_back);
@@ -66,16 +66,16 @@ static Z3950_Event Z3950_connection_get_event(Z3950_connection c)
     return event;
 }
 
-static void clear_error (Z3950_connection c)
+static void clear_error (ZOOM_connection c)
 {
-    c->error = Z3950_ERROR_NONE;
+    c->error = ZOOM_ERROR_NONE;
     xfree (c->addinfo);
     c->addinfo = 0;
 }
 
-Z3950_task Z3950_connection_add_task (Z3950_connection c, int which)
+ZOOM_task ZOOM_connection_add_task (ZOOM_connection c, int which)
 {
-    Z3950_task *taskp = &c->tasks;
+    ZOOM_task *taskp = &c->tasks;
     while (*taskp)
 	taskp = &(*taskp)->next;
     *taskp = xmalloc (sizeof(**taskp));
@@ -87,22 +87,22 @@ Z3950_task Z3950_connection_add_task (Z3950_connection c, int which)
     return *taskp;
 }
 
-void Z3950_connection_remove_task (Z3950_connection c)
+void ZOOM_connection_remove_task (ZOOM_connection c)
 {
-    Z3950_task task = c->tasks;
+    ZOOM_task task = c->tasks;
 
     if (task)
     {
 	c->tasks = task->next;
 	switch (task->which)
 	{
-	case Z3950_TASK_SEARCH:
-	    Z3950_resultset_destroy (task->u.resultset);
+	case ZOOM_TASK_SEARCH:
+	    ZOOM_resultset_destroy (task->u.resultset);
 	    break;
-	case Z3950_TASK_RETRIEVE:
-	    Z3950_resultset_destroy (task->u.resultset);
+	case ZOOM_TASK_RETRIEVE:
+	    ZOOM_resultset_destroy (task->u.resultset);
 	    break;
-        case Z3950_TASK_CONNECT:
+        case ZOOM_TASK_CONNECT:
             break;
 	default:
 	    assert (0);
@@ -111,24 +111,24 @@ void Z3950_connection_remove_task (Z3950_connection c)
     }
 }
 
-void Z3950_connection_remove_tasks (Z3950_connection c)
+void ZOOM_connection_remove_tasks (ZOOM_connection c)
 {
     while (c->tasks)
-	Z3950_connection_remove_task(c);
+	ZOOM_connection_remove_task(c);
 }
 
-static Z3950_record record_cache_lookup (Z3950_resultset r,
+static ZOOM_record record_cache_lookup (ZOOM_resultset r,
 					 int pos,
 					 const char *elementSetName);
 
-Z3950_connection Z3950_connection_create (Z3950_options options)
+ZOOM_connection ZOOM_connection_create (ZOOM_options options)
 {
-    Z3950_connection c = xmalloc (sizeof(*c));
+    ZOOM_connection c = xmalloc (sizeof(*c));
 
     c->cs = 0;
     c->mask = 0;
     c->state = STATE_IDLE;
-    c->error = Z3950_ERROR_NONE;
+    c->error = ZOOM_ERROR_NONE;
     c->addinfo = 0;
     c->buf_in = 0;
     c->len_in = 0;
@@ -136,7 +136,7 @@ Z3950_connection Z3950_connection_create (Z3950_options options)
     c->len_out = 0;
     c->resultsets = 0;
 
-    c->options = Z3950_options_create_with_parent(options);
+    c->options = ZOOM_options_create_with_parent(options);
 
     c->host_port = 0;
     c->proxy = 0;
@@ -157,12 +157,12 @@ Z3950_connection Z3950_connection_create (Z3950_options options)
 
 /* set database names. Take local databases (if set); otherwise
    take databases given in ZURL (if set); otherwise use Default */
-static char **set_DatabaseNames (Z3950_connection con, int *num)
+static char **set_DatabaseNames (ZOOM_connection con, int *num)
 {
     char **databaseNames;
     const char *c;
     int no = 2;
-    const char *cp = Z3950_options_get (con->options, "databaseName");
+    const char *cp = ZOOM_options_get (con->options, "databaseName");
     
     if (!cp || !*cp)
     {
@@ -207,21 +207,21 @@ static char **set_DatabaseNames (Z3950_connection con, int *num)
     return databaseNames;
 }
 
-Z3950_connection Z3950_connection_new (const char *host, int portnum)
+ZOOM_connection ZOOM_connection_new (const char *host, int portnum)
 {
-    Z3950_connection c = Z3950_connection_create (0);
+    ZOOM_connection c = ZOOM_connection_create (0);
 
-    Z3950_connection_connect (c, host, portnum);
+    ZOOM_connection_connect (c, host, portnum);
     return c;
 }
 
-void Z3950_connection_connect(Z3950_connection c,
+void ZOOM_connection_connect(ZOOM_connection c,
 			      const char *host, int portnum)
 {
     const char *val;
-    Z3950_task task;
+    ZOOM_task task;
 
-    val = Z3950_options_get (c->options, "proxy");
+    val = ZOOM_options_get (c->options, "proxy");
     if (val && *val)
 	c->proxy = xstrdup (val);
     else
@@ -236,22 +236,22 @@ void Z3950_connection_connect(Z3950_connection c,
     else
 	c->host_port = xstrdup(host);
 
-    Z3950_options_set(c->options, "host", c->host_port);
+    ZOOM_options_set(c->options, "host", c->host_port);
 
-    c->async = Z3950_options_get_bool (c->options, "async", 0);
+    c->async = ZOOM_options_get_bool (c->options, "async", 0);
     
-    task = Z3950_connection_add_task (c, Z3950_TASK_CONNECT);
+    task = ZOOM_connection_add_task (c, ZOOM_TASK_CONNECT);
 
     if (!c->async)
     {
-	while (Z3950_event (1, &c))
+	while (ZOOM_event (1, &c))
 	    ;
     }
 }
 
-Z3950_query Z3950_query_create(void)
+ZOOM_query ZOOM_query_create(void)
 {
-    Z3950_query s = xmalloc (sizeof(*s));
+    ZOOM_query s = xmalloc (sizeof(*s));
 
     s->refcount = 1;
     s->query = 0;
@@ -261,13 +261,13 @@ Z3950_query Z3950_query_create(void)
     return s;
 }
 
-void Z3950_query_destroy(Z3950_query s)
+void ZOOM_query_destroy(ZOOM_query s)
 {
     if (!s)
 	return;
 
     (s->refcount)--;
-    yaz_log (LOG_DEBUG, "Z3950_query_destroy count=%d", s->refcount);
+    yaz_log (LOG_DEBUG, "ZOOM_query_destroy count=%d", s->refcount);
     if (s->refcount == 0)
     {
 	odr_destroy (s->odr);
@@ -275,7 +275,7 @@ void Z3950_query_destroy(Z3950_query s)
     }
 }
 
-int Z3950_query_prefix(Z3950_query s, const char *str)
+int ZOOM_query_prefix(ZOOM_query s, const char *str)
 {
     s->query = odr_malloc (s->odr, sizeof(*s->query));
     s->query->which = Z_Query_type_1;
@@ -285,7 +285,7 @@ int Z3950_query_prefix(Z3950_query s, const char *str)
     return 0;
 }
 
-int Z3950_query_sortby(Z3950_query s, const char *criteria)
+int ZOOM_query_sortby(ZOOM_query s, const char *criteria)
 {
     s->sort_spec = yaz_sort_spec (s->odr, criteria);
     if (!s->sort_spec)
@@ -293,11 +293,11 @@ int Z3950_query_sortby(Z3950_query s, const char *criteria)
     return 0;
 }
 
-static int do_write(Z3950_connection c);
+static int do_write(ZOOM_connection c);
 
-void Z3950_connection_destroy(Z3950_connection c)
+void ZOOM_connection_destroy(ZOOM_connection c)
 {
-    Z3950_resultset r;
+    ZOOM_resultset r;
     if (!c)
 	return;
     if (c->cs)
@@ -309,20 +309,20 @@ void Z3950_connection_destroy(Z3950_connection c)
     xfree (c->addinfo);
     odr_destroy (c->odr_in);
     odr_destroy (c->odr_out);
-    Z3950_options_destroy (c->options);
-    Z3950_connection_remove_tasks (c);
+    ZOOM_options_destroy (c->options);
+    ZOOM_connection_remove_tasks (c);
     xfree (c->host_port);
     xfree (c);
 }
 
-void Z3950_resultset_addref (Z3950_resultset r)
+void ZOOM_resultset_addref (ZOOM_resultset r)
 {
     if (r)
 	(r->refcount)++;
 }
-Z3950_resultset Z3950_resultset_create ()
+ZOOM_resultset ZOOM_resultset_create ()
 {
-    Z3950_resultset r = xmalloc (sizeof(*r));
+    ZOOM_resultset r = xmalloc (sizeof(*r));
 
     r->refcount = 1;
     r->size = 0;
@@ -339,52 +339,52 @@ Z3950_resultset Z3950_resultset_create ()
     return r;
 }
 
-Z3950_resultset Z3950_connection_search_pqf(Z3950_connection c, const char *q)
+ZOOM_resultset ZOOM_connection_search_pqf(ZOOM_connection c, const char *q)
 {
-    Z3950_resultset r;
-    Z3950_query s = Z3950_query_create();
+    ZOOM_resultset r;
+    ZOOM_query s = ZOOM_query_create();
 
-    Z3950_query_prefix (s, q);
+    ZOOM_query_prefix (s, q);
 
-    r = Z3950_connection_search (c, s);
-    Z3950_query_destroy (s);
+    r = ZOOM_connection_search (c, s);
+    ZOOM_query_destroy (s);
     return r;
 }
 
-Z3950_resultset Z3950_connection_search(Z3950_connection c, Z3950_query q)
+ZOOM_resultset ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 {
-    Z3950_resultset r = Z3950_resultset_create ();
-    Z3950_task task;
+    ZOOM_resultset r = ZOOM_resultset_create ();
+    ZOOM_task task;
 
     r->r_sort_spec = q->sort_spec;
     r->r_query = q->query;
     r->search = q;
 
-    r->options = Z3950_options_create_with_parent(c->options);
+    r->options = ZOOM_options_create_with_parent(c->options);
 
-    r->start = Z3950_options_get_int(r->options, "start", 0);
-    r->count = Z3950_options_get_int(r->options, "count", 0);
-    r->piggyback = Z3950_options_get_bool (r->options, "piggyback", 1);
+    r->start = ZOOM_options_get_int(r->options, "start", 0);
+    r->count = ZOOM_options_get_int(r->options, "count", 0);
+    r->piggyback = ZOOM_options_get_bool (r->options, "piggyback", 1);
     r->connection = c;
 
     r->next = c->resultsets;
     c->resultsets = r;
 
-    task = Z3950_connection_add_task (c, Z3950_TASK_SEARCH);
+    task = ZOOM_connection_add_task (c, ZOOM_TASK_SEARCH);
     task->u.resultset = r;
-    Z3950_resultset_addref (r);  
+    ZOOM_resultset_addref (r);  
 
     (q->refcount)++;
 
     if (!c->async)
     {
-	while (Z3950_event (1, &c))
+	while (ZOOM_event (1, &c))
 	    ;
     }
     return r;
 }
 
-void Z3950_resultset_destroy(Z3950_resultset r)
+void ZOOM_resultset_destroy(ZOOM_resultset r)
 {
     if (!r)
         return;
@@ -395,7 +395,7 @@ void Z3950_resultset_destroy(Z3950_resultset r)
 	if (r->connection)
 	{
 	    /* remove ourselves from the resultsets in connection */
-	    Z3950_resultset *rp = &r->connection->resultsets;
+	    ZOOM_resultset *rp = &r->connection->resultsets;
 	    while (1)
 	    {
 		assert (*rp);   /* we must be in this list!! */
@@ -407,19 +407,19 @@ void Z3950_resultset_destroy(Z3950_resultset r)
 		rp = &(*rp)->next;
 	    }
 	}
-	Z3950_query_destroy (r->search);
-	Z3950_options_destroy (r->options);
+	ZOOM_query_destroy (r->search);
+	ZOOM_options_destroy (r->options);
 	odr_destroy (r->odr);
 	xfree (r);
     }
 }
 
-size_t Z3950_resultset_size (Z3950_resultset r)
+size_t ZOOM_resultset_size (ZOOM_resultset r)
 {
     return r->size;
 }
 
-static void do_close (Z3950_connection c)
+static void do_close (ZOOM_connection c)
 {
     if (c->cs)
 	cs_close(c->cs);
@@ -428,11 +428,11 @@ static void do_close (Z3950_connection c)
     c->state = STATE_IDLE;
 }
 
-static void Z3950_resultset_retrieve (Z3950_resultset r,
+static void ZOOM_resultset_retrieve (ZOOM_resultset r,
 				      int force_sync, int start, int count)
 {
-    Z3950_task task;
-    Z3950_connection c;
+    ZOOM_task task;
+    ZOOM_connection c;
 
     if (!r)
 	return;
@@ -445,19 +445,19 @@ static void Z3950_resultset_retrieve (Z3950_resultset r,
     if (start + count > r->size)
 	count = r->size - start;
 
-    task = Z3950_connection_add_task (c, Z3950_TASK_RETRIEVE);
+    task = ZOOM_connection_add_task (c, ZOOM_TASK_RETRIEVE);
     task->u.resultset = r;
-    Z3950_resultset_addref (r);
+    ZOOM_resultset_addref (r);
 
     r->start = start;
     r->count = count;
 
     if (!r->connection->async || force_sync)
-	while (r->connection && Z3950_event (1, &r->connection))
+	while (r->connection && ZOOM_event (1, &r->connection))
 	    ;
 }
 
-void Z3950_resultset_records (Z3950_resultset r, Z3950_record *recs,
+void ZOOM_resultset_records (ZOOM_resultset r, ZOOM_record *recs,
 			      size_t start, size_t count)
 {
     int force_present = 0;
@@ -466,16 +466,16 @@ void Z3950_resultset_records (Z3950_resultset r, Z3950_record *recs,
 	return ;
     if (count && recs)
         force_present = 1;
-    Z3950_resultset_retrieve (r, force_present, start, count);
+    ZOOM_resultset_retrieve (r, force_present, start, count);
     if (force_present)
     {
         size_t i;
         for (i = 0; i< count; i++)
-            recs[i] = Z3950_resultset_record_immediate (r, i+start);
+            recs[i] = ZOOM_resultset_record_immediate (r, i+start);
     }
 }
 
-static int do_connect (Z3950_connection c)
+static int do_connect (ZOOM_connection c)
 {
     void *add;
     const char *effective_host;
@@ -497,31 +497,31 @@ static int do_connect (Z3950_connection c)
 	if (ret >= 0)
 	{
 	    c->state = STATE_CONNECTING; 
-	    c->mask = Z3950_SELECT_READ | Z3950_SELECT_WRITE | 
-                Z3950_SELECT_EXCEPT;
+	    c->mask = ZOOM_SELECT_READ | ZOOM_SELECT_WRITE | 
+                ZOOM_SELECT_EXCEPT;
 	    return 1;
 	}
     }
     c->state = STATE_IDLE;
-    c->error = Z3950_ERROR_CONNECT;
+    c->error = ZOOM_ERROR_CONNECT;
     return 0;
 }
 
-int z3950_connection_socket(Z3950_connection c)
+int z3950_connection_socket(ZOOM_connection c)
 {
     if (c->cs)
 	return cs_fileno(c->cs);
     return -1;
 }
 
-int z3950_connection_mask(Z3950_connection c)
+int z3950_connection_mask(ZOOM_connection c)
 {
     if (c->cs)
 	return c->mask;
     return 0;
 }
 
-static int encode_APDU(Z3950_connection c, Z_APDU *a, ODR out)
+static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 {
     char str[120];
 
@@ -545,14 +545,14 @@ static int encode_APDU(Z3950_connection c, Z_APDU *a, ODR out)
 	    odr_destroy(odr_pr);
 	    fclose (outf);
 	}
-	c->error = Z3950_ERROR_ENCODE;
+	c->error = ZOOM_ERROR_ENCODE;
 	do_close (c);
 	return -1;
     }
     return 0;
 }
 
-static int send_APDU (Z3950_connection c, Z_APDU *a)
+static int send_APDU (ZOOM_connection c, Z_APDU *a)
 {
     assert (a);
     if (encode_APDU(c, a, c->odr_out))
@@ -563,15 +563,15 @@ static int send_APDU (Z3950_connection c, Z_APDU *a)
     return 0;	
 }
 
-static int Z3950_connection_send_init (Z3950_connection c)
+static int ZOOM_connection_send_init (ZOOM_connection c)
 {
     const char *impname;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_initRequest);
     Z_InitRequest *ireq = apdu->u.initRequest;
     Z_IdAuthentication *auth = odr_malloc(c->odr_out, sizeof(*auth));
-    const char *auth_groupId = Z3950_options_get (c->options, "group");
-    const char *auth_userId = Z3950_options_get (c->options, "user");
-    const char *auth_password = Z3950_options_get (c->options, "pass");
+    const char *auth_groupId = ZOOM_options_get (c->options, "group");
+    const char *auth_userId = ZOOM_options_get (c->options, "user");
+    const char *auth_password = ZOOM_options_get (c->options, "pass");
     
     ODR_MASK_SET(ireq->options, Z_Options_search);
     ODR_MASK_SET(ireq->options, Z_Options_present);
@@ -586,7 +586,7 @@ static int Z3950_connection_send_init (Z3950_connection c)
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_3);
     
-    impname = Z3950_options_get (c->options, "implementationName");
+    impname = ZOOM_options_get (c->options, "implementationName");
     ireq->implementationName =
 	odr_malloc (c->odr_out, 15 + (impname ? strlen(impname) : 0));
     strcpy (ireq->implementationName, "");
@@ -598,9 +598,9 @@ static int Z3950_connection_send_init (Z3950_connection c)
     strcat (ireq->implementationName, "ZOOM-C/YAZ");
     
     *ireq->maximumRecordSize =
-	Z3950_options_get_int (c->options, "maximumRecordSize", 1024*1024);
+	ZOOM_options_get_int (c->options, "maximumRecordSize", 1024*1024);
     *ireq->preferredMessageSize =
-	Z3950_options_get_int (c->options, "preferredMessageSize", 1024*1024);
+	ZOOM_options_get_int (c->options, "preferredMessageSize", 1024*1024);
     
     if (auth_groupId || auth_password)
     {
@@ -650,9 +650,9 @@ static int Z3950_connection_send_init (Z3950_connection c)
     return 0;
 }
 
-static int Z3950_connection_send_search (Z3950_connection c)
+static int ZOOM_connection_send_search (ZOOM_connection c)
 {
-    Z3950_resultset r;
+    ZOOM_resultset r;
     int lslb, ssub, mspn;
     const char *syntax;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_searchRequest);
@@ -662,16 +662,16 @@ static int Z3950_connection_send_search (Z3950_connection c)
     const char *mediumSetElementSetName;
 
     assert (c->tasks);
-    assert (c->tasks->which == Z3950_TASK_SEARCH);
+    assert (c->tasks->which == ZOOM_TASK_SEARCH);
 
     r = c->tasks->u.resultset;
 
     elementSetName =
-	Z3950_options_get (r->options, "elementSetName");
+	ZOOM_options_get (r->options, "elementSetName");
     smallSetElementSetName  =
-	Z3950_options_get (r->options, "smallSetElementSetName");
+	ZOOM_options_get (r->options, "smallSetElementSetName");
     mediumSetElementSetName =
-	Z3950_options_get (r->options, "mediumSetElementSetName");
+	ZOOM_options_get (r->options, "mediumSetElementSetName");
 
     if (!smallSetElementSetName)
 	smallSetElementSetName = elementSetName;
@@ -689,11 +689,11 @@ static int Z3950_connection_send_search (Z3950_connection c)
 	set_DatabaseNames (c, &search_req->num_databaseNames);
 
     /* get syntax (no need to provide unless piggyback is in effect) */
-    syntax = Z3950_options_get (r->options, "preferredRecordSyntax");
+    syntax = ZOOM_options_get (r->options, "preferredRecordSyntax");
 
-    lslb = Z3950_options_get_int (r->options, "largeSetLowerBound", -1);
-    ssub = Z3950_options_get_int (r->options, "smallSetUpperBound", -1);
-    mspn = Z3950_options_get_int (r->options, "mediumSetPresentNumber", -1);
+    lslb = ZOOM_options_get_int (r->options, "largeSetLowerBound", -1);
+    ssub = ZOOM_options_get_int (r->options, "smallSetUpperBound", -1);
+    mspn = ZOOM_options_get_int (r->options, "mediumSetPresentNumber", -1);
     if (lslb != -1 && ssub != -1 && mspn != -1)
     {
 	/* So're a Z39.50 expert? Let's hope you don't do sort */
@@ -743,7 +743,7 @@ static int Z3950_connection_send_search (Z3950_connection c)
     return 1;
 }
 
-static void response_diag (Z3950_connection c, Z_DiagRec *p)
+static void response_diag (ZOOM_connection c, Z_DiagRec *p)
 {
     Z_DefaultDiagFormat *r;
     char *addinfo = 0;
@@ -752,7 +752,7 @@ static void response_diag (Z3950_connection c, Z_DiagRec *p)
     c->addinfo = 0;
     if (p->which != Z_DiagRec_defaultFormat)
     {
-	c->error = Z3950_ERROR_DECODE;
+	c->error = ZOOM_ERROR_DECODE;
 	return;
     }
     r = p->u.defaultFormat;
@@ -770,12 +770,12 @@ static void response_diag (Z3950_connection c, Z_DiagRec *p)
     c->error = *r->condition;
 }
 
-Z3950_record Z3950_record_dup (Z3950_record srec)
+ZOOM_record ZOOM_record_clone (ZOOM_record srec)
 {
     char *buf;
     int size;
     ODR odr_enc;
-    Z3950_record nrec;
+    ZOOM_record nrec;
 
     odr_enc = odr_createmem(ODR_ENCODE);
     if (!z_NamePlusRecord (odr_enc, &srec->npr, 0, 0))
@@ -792,18 +792,18 @@ Z3950_record Z3950_record_dup (Z3950_record srec)
     return nrec;
 }
 
-Z3950_record Z3950_resultset_record_immediate (Z3950_resultset s,size_t pos)
+ZOOM_record ZOOM_resultset_record_immediate (ZOOM_resultset s,size_t pos)
 {
     return record_cache_lookup (s, pos, 0);
 }
 
-Z3950_record Z3950_resultset_record (Z3950_resultset r, size_t pos)
+ZOOM_record ZOOM_resultset_record (ZOOM_resultset r, size_t pos)
 {
-    Z3950_resultset_retrieve (r, 1, pos, 1);
-    return Z3950_resultset_record_immediate (r, pos);
+    ZOOM_resultset_retrieve (r, 1, pos, 1);
+    return ZOOM_resultset_record_immediate (r, pos);
 }
 
-void Z3950_record_destroy (Z3950_record rec)
+void ZOOM_record_destroy (ZOOM_record rec)
 {
     if (!rec)
 	return;
@@ -813,7 +813,7 @@ void Z3950_record_destroy (Z3950_record rec)
     xfree (rec);
 }
 
-void *Z3950_record_get (Z3950_record rec, const char *type, size_t *len)
+void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len)
 {
     Z_NamePlusRecord *npr;
     if (!rec)
@@ -893,12 +893,12 @@ void *Z3950_record_get (Z3950_record rec, const char *type, size_t *len)
     return 0;
 }
 
-static void record_cache_add (Z3950_resultset r,
+static void record_cache_add (ZOOM_resultset r,
 			      Z_NamePlusRecord *npr,
 			      int pos,
 			      const char *elementSetName)
 {
-    Z3950_record_cache rc;
+    ZOOM_record_cache rc;
 
     for (rc = r->record_cache; rc; rc = rc->next)
     {
@@ -929,11 +929,11 @@ static void record_cache_add (Z3950_resultset r,
     r->record_cache = rc;
 }
 
-static Z3950_record record_cache_lookup (Z3950_resultset r,
+static ZOOM_record record_cache_lookup (ZOOM_resultset r,
 					 int pos,
 					 const char *elementSetName)
 {
-    Z3950_record_cache rc;
+    ZOOM_record_cache rc;
 
     for (rc = r->record_cache; rc; rc = rc->next)
     {
@@ -948,15 +948,15 @@ static Z3950_record record_cache_lookup (Z3950_resultset r,
     return 0;
 }
 					     
-static void handle_records (Z3950_connection c, Z_Records *sr,
+static void handle_records (ZOOM_connection c, Z_Records *sr,
 			    int present_phase)
 {
-    Z3950_resultset resultset;
+    ZOOM_resultset resultset;
 
     if (!c->tasks)
 	return ;
-    if (c->tasks->which != Z3950_TASK_SEARCH &&
-	c->tasks->which != Z3950_TASK_RETRIEVE)
+    if (c->tasks->which != ZOOM_TASK_SEARCH &&
+	c->tasks->which != ZOOM_TASK_RETRIEVE)
 	return ;
     
     resultset = c->tasks->u.resultset;
@@ -974,7 +974,7 @@ static void handle_records (Z3950_connection c, Z_Records *sr,
 	if (sr->u.multipleNonSurDiagnostics->num_diagRecs >= 1)
 	    response_diag(c, sr->u.multipleNonSurDiagnostics->diagRecs[0]);
 	else
-	    c->error = Z3950_ERROR_DECODE;
+	    c->error = ZOOM_ERROR_DECODE;
     }
     else 
     {
@@ -999,29 +999,29 @@ static void handle_records (Z3950_connection c, Z_Records *sr,
 	    if (present_phase && p->num_records == 0)
 	    {
 		/* present response and we didn't get any records! */
-		c->error = Z3950_ERROR_DECODE;
+		c->error = ZOOM_ERROR_DECODE;
 	    }
 	}
 	else if (present_phase)
 	{
 	    /* present response and we didn't get any records! */
-	    c->error = Z3950_ERROR_DECODE;
+	    c->error = ZOOM_ERROR_DECODE;
 	}
     }
 }
 
-static void handle_present_response (Z3950_connection c, Z_PresentResponse *pr)
+static void handle_present_response (ZOOM_connection c, Z_PresentResponse *pr)
 {
     handle_records (c, pr->records, 1);
 }
 
-static void handle_search_response (Z3950_connection c, Z_SearchResponse *sr)
+static void handle_search_response (ZOOM_connection c, Z_SearchResponse *sr)
 {
-    Z3950_resultset resultset;
+    ZOOM_resultset resultset;
 
     yaz_log (LOG_DEBUG, "got search response");
 
-    if (!c->tasks || c->tasks->which != Z3950_TASK_SEARCH)
+    if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
 	return ;
 
     resultset = c->tasks->u.resultset;
@@ -1030,17 +1030,17 @@ static void handle_search_response (Z3950_connection c, Z_SearchResponse *sr)
     handle_records (c, sr->records, 0);
 }
 
-static void sort_response (Z3950_connection c, Z_SortResponse *res)
+static void sort_response (ZOOM_connection c, Z_SortResponse *res)
 {
     if (res->diagnostics && res->num_diagnostics > 0)
 	response_diag (c, res->diagnostics[0]);
 }
 
-static int send_sort (Z3950_connection c)
+static int send_sort (ZOOM_connection c)
 {
-    Z3950_resultset  resultset;
+    ZOOM_resultset  resultset;
 
-    if (!c->tasks || c->tasks->which != Z3950_TASK_SEARCH)
+    if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
 	return 0;
 
     resultset = c->tasks->u.resultset;
@@ -1068,21 +1068,21 @@ static int send_sort (Z3950_connection c)
     return 0;
 }
 
-static int send_present (Z3950_connection c)
+static int send_present (ZOOM_connection c)
 {
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
     int i = 0;
     const char *syntax = 
-	Z3950_options_get (c->options, "preferredRecordSyntax");
+	ZOOM_options_get (c->options, "preferredRecordSyntax");
     const char *element =
-	Z3950_options_get (c->options, "elementSetName");
-    Z3950_resultset  resultset;
+	ZOOM_options_get (c->options, "elementSetName");
+    ZOOM_resultset  resultset;
 
     if (!c->tasks)
 	return 0;
-    if (c->tasks->which != Z3950_TASK_SEARCH && 
-	c->tasks->which != Z3950_TASK_RETRIEVE)
+    if (c->tasks->which != ZOOM_TASK_SEARCH && 
+	c->tasks->which != ZOOM_TASK_RETRIEVE)
 	return 0;
 
     resultset = c->tasks->u.resultset;
@@ -1093,7 +1093,7 @@ static int send_present (Z3950_connection c)
 	return 0;
     for (i = 0; i<resultset->count; i++)
     {
-	Z3950_record rec =
+	ZOOM_record rec =
 	    record_cache_lookup (resultset, i + resultset->start, 0);
 	if (!rec)
 	    break;
@@ -1126,43 +1126,43 @@ static int send_present (Z3950_connection c)
     return 1;
 }
 
-static int Z3950_connection_exec_task (Z3950_connection c)
+static int ZOOM_connection_exec_task (ZOOM_connection c)
 {
-    Z3950_task task = c->tasks;
+    ZOOM_task task = c->tasks;
 
-    yaz_log (LOG_LOG, "Z3950_connection_exec_task");
+    yaz_log (LOG_DEBUG, "ZOOM_connection_exec_task");
     if (!task)
 	return 0;
-    if (c->error != Z3950_ERROR_NONE ||
-        (!c->cs && task->which != Z3950_TASK_CONNECT))
+    if (c->error != ZOOM_ERROR_NONE ||
+        (!c->cs && task->which != ZOOM_TASK_CONNECT))
     {
-	Z3950_connection_remove_tasks (c);
+	ZOOM_connection_remove_tasks (c);
 	return 0;
     }
-    yaz_log (LOG_DEBUG, "Z3950_connection_exec_task type=%d", task->which);
+    yaz_log (LOG_DEBUG, "ZOOM_connection_exec_task type=%d", task->which);
     if (task->running)
 	return 0;
     task->running = 1;
     switch (task->which)
     {
-    case Z3950_TASK_SEARCH:
+    case ZOOM_TASK_SEARCH:
 	/* see if search hasn't been sent yet. */
-	if (Z3950_connection_send_search (c))
+	if (ZOOM_connection_send_search (c))
 	    return 1;
 	break;
-    case Z3950_TASK_RETRIEVE:
+    case ZOOM_TASK_RETRIEVE:
 	if (send_present (c))
 	    return 1;
 	break;
-    case Z3950_TASK_CONNECT:
+    case ZOOM_TASK_CONNECT:
         if (do_connect(c))
             return 1;
     }
-    Z3950_connection_remove_task (c);
+    ZOOM_connection_remove_task (c);
     return 0;
 }
 
-static int send_sort_present (Z3950_connection c)
+static int send_sort_present (ZOOM_connection c)
 {
     int r = send_sort (c);
     if (!r)
@@ -1170,7 +1170,7 @@ static int send_sort_present (Z3950_connection c)
     return r;
 }
 
-static void handle_apdu (Z3950_connection c, Z_APDU *apdu)
+static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
 {
     Z_InitResponse *initrs;
     
@@ -1182,7 +1182,7 @@ static void handle_apdu (Z3950_connection c, Z_APDU *apdu)
 	initrs = apdu->u.initResponse;
 	if (!*initrs->result)
 	{
-	    c->error = Z3950_ERROR_INIT;
+	    c->error = ZOOM_ERROR_INIT;
 	}
 	else
 	{
@@ -1195,30 +1195,30 @@ static void handle_apdu (Z3950_connection c, Z_APDU *apdu)
 		c->cookie_in = xstrdup(cookie);
             if (c->tasks)
             {
-                assert (c->tasks->which == Z3950_TASK_CONNECT);
-                Z3950_connection_remove_task (c);
+                assert (c->tasks->which == ZOOM_TASK_CONNECT);
+                ZOOM_connection_remove_task (c);
             }
-	    Z3950_connection_exec_task (c);
+	    ZOOM_connection_exec_task (c);
 	}
 	break;
     case Z_APDU_searchResponse:
 	handle_search_response (c, apdu->u.searchResponse);
 	if (!send_sort_present (c))
-	    Z3950_connection_remove_task (c);
+	    ZOOM_connection_remove_task (c);
 	break;
     case Z_APDU_presentResponse:
 	handle_present_response (c, apdu->u.presentResponse);
 	if (!send_present (c))
-	    Z3950_connection_remove_task (c);
+	    ZOOM_connection_remove_task (c);
 	break;
     case Z_APDU_sortResponse:
 	sort_response (c, apdu->u.sortResponse);
 	if (!send_present (c))
-	    Z3950_connection_remove_task (c);
+	    ZOOM_connection_remove_task (c);
     }
 }
 
-static int do_read (Z3950_connection c)
+static int do_read (ZOOM_connection c)
 {
     int r;
     Z_APDU *apdu;
@@ -1228,7 +1228,7 @@ static int do_read (Z3950_connection c)
 	return 0;
     if (r <= 0)
     {
-	c->error= Z3950_ERROR_CONNECTION_LOST;
+	c->error= ZOOM_ERROR_CONNECTION_LOST;
 	do_close (c);
     }
     else
@@ -1237,7 +1237,7 @@ static int do_read (Z3950_connection c)
 	odr_setbuf (c->odr_in, c->buf_in, r, 0);
 	if (!z_APDU (c->odr_in, &apdu, 0, 0))
 	{
-	    c->error = Z3950_ERROR_DECODE;
+	    c->error = ZOOM_ERROR_DECODE;
 	    do_close (c);
 	}
 	else
@@ -1248,81 +1248,81 @@ static int do_read (Z3950_connection c)
     return 1;
 }
 
-static int do_write_ex (Z3950_connection c, char *buf_out, int len_out)
+static int do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
 {
     int r;
     
     if ((r=cs_put (c->cs, buf_out, len_out)) < 0)
     {
 	if (c->state == STATE_CONNECTING)
-	    c->error = Z3950_ERROR_CONNECT;
+	    c->error = ZOOM_ERROR_CONNECT;
 	else
-	    c->error = Z3950_ERROR_CONNECTION_LOST;
+	    c->error = ZOOM_ERROR_CONNECTION_LOST;
 	do_close (c);
 	return 1;
     }
     else if (r == 1)
     {
 	c->state = STATE_ESTABLISHED;
-	c->mask = Z3950_SELECT_READ|Z3950_SELECT_WRITE|Z3950_SELECT_EXCEPT;
+	c->mask = ZOOM_SELECT_READ|ZOOM_SELECT_WRITE|ZOOM_SELECT_EXCEPT;
     }
     else
     {
 	c->state = STATE_ESTABLISHED;
-	c->mask = Z3950_SELECT_READ|Z3950_SELECT_EXCEPT;
+	c->mask = ZOOM_SELECT_READ|ZOOM_SELECT_EXCEPT;
     }
     return 0;
 }
 
-static int do_write(Z3950_connection c)
+static int do_write(ZOOM_connection c)
 {
     return do_write_ex (c, c->buf_out, c->len_out);
 }
 
 
-const char *Z3950_connection_option_get (Z3950_connection c, const char *key)
+const char *ZOOM_connection_option_get (ZOOM_connection c, const char *key)
 {
-    return Z3950_options_get (c->options, key);
+    return ZOOM_options_get (c->options, key);
 }
 
-void Z3950_connection_option_set (Z3950_connection c, const char *key,
+void ZOOM_connection_option_set (ZOOM_connection c, const char *key,
                                   const char *val)
 {
-    Z3950_options_set (c->options, key, val);
+    ZOOM_options_set (c->options, key, val);
 }
 
-const char *Z3950_resultset_option_get (Z3950_resultset r, const char *key)
+const char *ZOOM_resultset_option_get (ZOOM_resultset r, const char *key)
 {
-    return Z3950_options_get (r->options, key);
+    return ZOOM_options_get (r->options, key);
 }
 
-void Z3950_resultset_option_set (Z3950_resultset r, const char *key,
+void ZOOM_resultset_option_set (ZOOM_resultset r, const char *key,
                                   const char *val)
 {
-    Z3950_options_set (r->options, key, val);
+    ZOOM_options_set (r->options, key, val);
 }
 
 
-int Z3950_connection_errcode (Z3950_connection c)
+int ZOOM_connection_errcode (ZOOM_connection c)
 {
-    return Z3950_connection_error (c, 0, 0);
+    return ZOOM_connection_error (c, 0, 0);
 }
 
-const char *Z3950_connection_errmsg (Z3950_connection c)
+const char *ZOOM_connection_errmsg (ZOOM_connection c)
 {
     const char *msg;
-    Z3950_connection_error (c, &msg, 0);
+    ZOOM_connection_error (c, &msg, 0);
     return msg;
 }
 
-const char *Z3950_connection_addinfo (Z3950_connection c)
+const char *ZOOM_connection_addinfo (ZOOM_connection c)
 {
     const char *addinfo;
-    Z3950_connection_error (c, 0, &addinfo);
+    ZOOM_connection_error (c, 0, &addinfo);
     return addinfo;
 }
 
-int Z3950_connection_error (Z3950_connection c, const char **cp,
+int ZOOM_connection_error (ZOOM_connection c, const char **cp,
 			    const char **addinfo)
 {
     int error = c->error;
@@ -1330,23 +1330,23 @@ int Z3950_connection_error (Z3950_connection c, const char **cp,
     {
 	switch (error)
 	{
-	case Z3950_ERROR_NONE:
+	case ZOOM_ERROR_NONE:
 	    *cp = "No error"; break;
-	case Z3950_ERROR_CONNECT:
+	case ZOOM_ERROR_CONNECT:
 	    *cp = "Connect failed"; break;
-	case Z3950_ERROR_MEMORY:
+	case ZOOM_ERROR_MEMORY:
 	    *cp = "Out of memory"; break;
-	case Z3950_ERROR_ENCODE:
+	case ZOOM_ERROR_ENCODE:
 	    *cp = "Encoding failed"; break;
-	case Z3950_ERROR_DECODE:
+	case ZOOM_ERROR_DECODE:
 	    *cp = "Decoding failed"; break;
-	case Z3950_ERROR_CONNECTION_LOST:
+	case ZOOM_ERROR_CONNECTION_LOST:
 	    *cp = "Connection lost"; break;
-	case Z3950_ERROR_INIT:
+	case ZOOM_ERROR_INIT:
 	    *cp = "Init rejected"; break;
-	case Z3950_ERROR_INTERNAL:
+	case ZOOM_ERROR_INTERNAL:
 	    *cp = "Internal failure"; break;
-	case Z3950_ERROR_TIMEOUT:
+	case ZOOM_ERROR_TIMEOUT:
 	    *cp = "Timeout"; break;
 	default:
 	    *cp = diagbib1_str (error);
@@ -1362,17 +1362,17 @@ int Z3950_connection_error (Z3950_connection c, const char **cp,
     return c->error;
 }
 
-int Z3950_connection_do_io(Z3950_connection c, int mask)
+int ZOOM_connection_do_io(ZOOM_connection c, int mask)
 {
-    Z3950_Event event;
+    ZOOM_Event event;
 #if 0
     int r = cs_look(c->cs);
-    yaz_log (LOG_LOG, "Z3950_connection_do_io c=%p mask=%d cs_look=%d",
+    yaz_log (LOG_LOG, "ZOOM_connection_do_io c=%p mask=%d cs_look=%d",
 	     c, mask, r);
     
     if (r == CS_NONE)
     {
-	c->error = Z3950_ERROR_CONNECT;
+	c->error = ZOOM_ERROR_CONNECT;
 	do_close (c);
     }
     else if (r == CS_CONNECT)
@@ -1380,55 +1380,55 @@ int Z3950_connection_do_io(Z3950_connection c, int mask)
 	yaz_log (LOG_LOG, "calling rcvconnect");
 	if (cs_rcvconnect (c->cs) < 0)
 	{
-	    c->error = Z3950_ERROR_CONNECT;
+	    c->error = ZOOM_ERROR_CONNECT;
 	    do_close (c);
 	}
 	else
-	    Z3950_connection_send_init (c);
+	    ZOOM_connection_send_init (c);
     }
     else
     {
-	if (mask & Z3950_SELECT_READ)
+	if (mask & ZOOM_SELECT_READ)
 	    do_read (c);
-	if (c->cs && (mask & Z3950_SELECT_WRITE))
+	if (c->cs && (mask & ZOOM_SELECT_WRITE))
 	    do_write (c);
     }	
 #else
-    yaz_log (LOG_DEBUG, "Z3950_connection_do_io c=%p mask=%d", c, mask);
+    yaz_log (LOG_DEBUG, "ZOOM_connection_do_io c=%p mask=%d", c, mask);
     if (c->state == STATE_CONNECTING)
     {
-	if (mask & Z3950_SELECT_WRITE)
-	    Z3950_connection_send_init (c);
+	if (mask & ZOOM_SELECT_WRITE)
+	    ZOOM_connection_send_init (c);
 	else
 	{
-	    c->error = Z3950_ERROR_CONNECT;
+	    c->error = ZOOM_ERROR_CONNECT;
 	    do_close (c);
 	}
     }
     else if (c->state == STATE_ESTABLISHED)
     {
-	if (mask & Z3950_SELECT_READ)
+	if (mask & ZOOM_SELECT_READ)
 	    do_read (c);
-	if (c->cs && (mask & Z3950_SELECT_WRITE))
+	if (c->cs && (mask & ZOOM_SELECT_WRITE))
 	    do_write (c);
     }
     else
     {
-	c->error = Z3950_ERROR_INTERNAL;
+	c->error = ZOOM_ERROR_INTERNAL;
 	do_close (c);
     }
 #endif
-    event = Z3950_Event_create (1);
-    Z3950_connection_put_event (c, event);
+    event = ZOOM_Event_create (1);
+    ZOOM_connection_put_event (c, event);
     return 1;
 }
 
 
-int Z3950_event (int no, Z3950_connection *cs)
+int ZOOM_event (int no, ZOOM_connection *cs)
 {
 #if HAVE_SYS_POLL_H
     struct pollfd pollfds[1024];
-    Z3950_connection poll_cs[1024];
+    ZOOM_connection poll_cs[1024];
 #else
     struct timeval tv;
     fd_set input, output, except;
@@ -1438,18 +1438,18 @@ int Z3950_event (int no, Z3950_connection *cs)
 
     for (i = 0; i<no; i++)
     {
-	Z3950_connection c = cs[i];
-        Z3950_Event event;
-	if (c && (event = Z3950_connection_get_event(c)))
+	ZOOM_connection c = cs[i];
+        ZOOM_Event event;
+	if (c && (event = ZOOM_connection_get_event(c)))
         {
-            Z3950_Event_destroy (event);
+            ZOOM_Event_destroy (event);
 	    return i+1;
         }
     }
     for (i = 0; i<no; i++)
     {
-        Z3950_connection c = cs[i];
-        if (c && Z3950_connection_exec_task (c))
+        ZOOM_connection c = cs[i];
+        if (c && ZOOM_connection_exec_task (c))
             return i+1;
     }
 #if HAVE_SYS_POLL_H
@@ -1465,7 +1465,7 @@ int Z3950_event (int no, Z3950_connection *cs)
     nfds = 0;
     for (i = 0; i<no; i++)
     {
-	Z3950_connection c = cs[i];
+	ZOOM_connection c = cs[i];
 	int fd, mask;
 	
 	if (!c)
@@ -1483,11 +1483,11 @@ int Z3950_event (int no, Z3950_connection *cs)
         {
             short poll_events = 0;
 
-            if (mask & Z3950_SELECT_READ)
+            if (mask & ZOOM_SELECT_READ)
                 poll_events += POLLIN;
-            if (mask & Z3950_SELECT_WRITE)
+            if (mask & ZOOM_SELECT_WRITE)
                 poll_events += POLLOUT;
-            if (mask & Z3950_SELECT_EXCEPT)
+            if (mask & ZOOM_SELECT_EXCEPT)
                 poll_events += POLLERR;
             pollfds[nfds].fd = fd;
             pollfds[nfds].events = poll_events;
@@ -1496,17 +1496,17 @@ int Z3950_event (int no, Z3950_connection *cs)
             nfds++;
         }
 #else
-	if (mask & Z3950_SELECT_READ)
+	if (mask & ZOOM_SELECT_READ)
 	{
 	    FD_SET (fd, &input);
 	    nfds++;
 	}
-	if (mask & Z3950_SELECT_WRITE)
+	if (mask & ZOOM_SELECT_WRITE)
 	{
 	    FD_SET (fd, &output);
 	    nfds++;
 	}
-	if (mask & Z3950_SELECT_EXCEPT)
+	if (mask & ZOOM_SELECT_EXCEPT)
 	{
 	    FD_SET (fd, &except);
 	    nfds++;
@@ -1516,31 +1516,31 @@ int Z3950_event (int no, Z3950_connection *cs)
     if (!nfds)
         return 0;
 #if HAVE_SYS_POLL_H
-    yaz_log (LOG_LOG, "poll start");
+    yaz_log (LOG_DEBUG, "poll start");
     r = poll (pollfds, nfds, 15000);
-    yaz_log (LOG_LOG, "poll stop, returned r=%d", r);
+    yaz_log (LOG_DEBUG, "poll stop, returned r=%d", r);
     for (i = 0; i<nfds; i++)
     {
-        Z3950_connection c = poll_cs[i];
+        ZOOM_connection c = poll_cs[i];
         if (r && c->mask)
         {
             int mask = 0;
             if (pollfds[i].revents & POLLIN)
-                mask += Z3950_SELECT_READ;
+                mask += ZOOM_SELECT_READ;
             if (pollfds[i].revents & POLLOUT)
-                mask += Z3950_SELECT_WRITE;
+                mask += ZOOM_SELECT_WRITE;
             if (pollfds[i].revents & POLLERR)
-                mask += Z3950_SELECT_EXCEPT;
+                mask += ZOOM_SELECT_EXCEPT;
             if (mask)
-                Z3950_connection_do_io(c, mask);
+                ZOOM_connection_do_io(c, mask);
         }
         else if (r == 0 && c->mask)
         {
-            Z3950_Event event = Z3950_Event_create(0);
+            ZOOM_Event event = ZOOM_Event_create(0);
 	    /* timeout and this connection was waiting */
-	    c->error = Z3950_ERROR_TIMEOUT;
+	    c->error = ZOOM_ERROR_TIMEOUT;
             do_close (c);
-            Z3950_connection_put_event(c, event);
+            ZOOM_connection_put_event(c, event);
         }
     }
 #else
@@ -1549,7 +1549,7 @@ int Z3950_event (int no, Z3950_connection *cs)
     yaz_log (LOG_DEBUG, "select stop, returned r=%d", r);
     for (i = 0; i<no; i++)
     {
-	Z3950_connection c = cs[i];
+	ZOOM_connection c = cs[i];
 	int fd, mask;
 
 	if (!c)
@@ -1560,32 +1560,32 @@ int Z3950_event (int no, Z3950_connection *cs)
 	{
 	    /* no timeout and real socket */
 	    if (FD_ISSET(fd, &input))
-		mask += Z3950_SELECT_READ;
+		mask += ZOOM_SELECT_READ;
 	    if (FD_ISSET(fd, &output))
-		mask += Z3950_SELECT_WRITE;
+		mask += ZOOM_SELECT_WRITE;
 	    if (FD_ISSET(fd, &except))
-		mask += Z3950_SELECT_EXCEPT;
+		mask += ZOOM_SELECT_EXCEPT;
 	    if (mask)
-		Z3950_connection_do_io(c, mask);
+		ZOOM_connection_do_io(c, mask);
 	}
 	if (r == 0 && c->mask)
 	{
-            Z3950_Event event = Z3950_Event_create(0);
+            ZOOM_Event event = ZOOM_Event_create(0);
 	    /* timeout and this connection was waiting */
-	    c->error = Z3950_ERROR_TIMEOUT;
+	    c->error = ZOOM_ERROR_TIMEOUT;
             do_close (c);
-            yaz_log (LOG_LOG, "timeout");
-            Z3950_connection_put_event(c, event);
+            yaz_log (LOG_DEBUG, "timeout");
+            ZOOM_connection_put_event(c, event);
 	}
     }
 #endif
     for (i = 0; i<no; i++)
     {
-	Z3950_connection c = cs[i];
-        Z3950_Event event;
-	if (c && (event = Z3950_connection_get_event(c)))
+	ZOOM_connection c = cs[i];
+        ZOOM_Event event;
+	if (c && (event = ZOOM_connection_get_event(c)))
         {
-            Z3950_Event_destroy (event);
+            ZOOM_Event_destroy (event);
 	    return i+1;
         }
     }

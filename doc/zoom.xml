@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.11 2001-11-16 09:52:39 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.12 2001-11-18 21:14:22 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -52,23 +52,23 @@
    <synopsis>
    #include &lt;yaz/zoom.h>
     
-   Z3950_connection Z3950_connection_new (const char *host, int portnum);
+   ZOOM_connection ZOOM_connection_new (const char *host, int portnum);
     
-   Z3950_connection Z3950_connection_create (Z3950_options options);
+   ZOOM_connection ZOOM_connection_create (ZOOM_options options);
 
-   void Z3950_connection_connect(Z3950_connection c, const char *host,
+   void ZOOM_connection_connect(ZOOM_connection c, const char *host,
                                  int portnum);
-   void Z3950_connection_destroy (Z3950_connection c);
+   void ZOOM_connection_destroy (ZOOM_connection c);
    </synopsis>
    <para>
     Connection objects are created with either function
-    <function>Z3950_connection_new</function> or 
-    <function>Z3950_connection_create</function>.
+    <function>ZOOM_connection_new</function> or 
+    <function>ZOOM_connection_create</function>.
     The former creates and automatically attempts to establish a network
     connection with the target. The latter doesn't establish
     a connection immediately, thus allowing you to specify options
     before establishing network connection using the function
-    <function>Z3950_connection_connect</function>. 
+    <function>ZOOM_connection_connect</function>. 
     If the portnumber, <literal>portnum</literal>, is zero, the
     <literal>host</literal> is consulted for a port specification.
     If no port is given, 210 is used. A colon denotes the beginning of
@@ -77,24 +77,24 @@
    </para>
    <para>
     Connection objects should be destroyed using the function
-    <function>Z3950_connection_destroy</function>.
+    <function>ZOOM_connection_destroy</function>.
    </para>
    <synopsis>
-    void Z3950_connection_option_set (Z3950_connection c,
-                                      const char *key,
-                                      const char *val);
+    void ZOOM_connection_option_set (ZOOM_connection c,
+                                     const char *key,
+                                     const char *val);
 
-    const char *Z3950_connection_option_get (Z3950_connection c,
-                                             const char *key);
+    const char *ZOOM_connection_option_get (ZOOM_connection c,
+                                            const char *key);
    </synopsis>
    <para>
-    The <function>Z3950_connection_option_set</function> allows you to
+    The <function>ZOOM_connection_option_set</function> allows you to
     set an option given by <parameter>key</parameter> to the value
     <parameter>value</parameter> for the connection.
-     Function <function>Z3950_connection_option_get</function> returns
+     Function <function>ZOOM_connection_option_get</function> returns
     the value for an option given by <parameter>key</parameter>.
    </para>
-   <table frame="top"><title>ZOOM Connection Options</title>
+   <table frame="sides" colsep="1"><title>ZOOM Connection Options</title>
     <tgroup cols="3">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
@@ -130,7 +130,7 @@
         async</entry><entry>If true (1) the connection operates in 
         asynchronous operation which means that all calls are non-blocking
         except
-        <link linkend="zoom.events"><function>Z3950_event</function></link>.
+        <link linkend="zoom.events"><function>ZOOM_event</function></link>.
        </entry><entry>0</entry></row>
       <row><entry>
         maximumRecordSize</entry><entry> Maximum size of single record.
@@ -142,11 +142,11 @@
     </tgroup>
    </table>
    <synopsis>
-     int Z3950_connection_error (Z3950_connection c, const char **cp,
+     int ZOOM_connection_error (ZOOM_connection c, const char **cp,
                                  const char **addinfo);
    </synopsis>
    <para>
-    Use <function>Z3950_connection_error</function> to check for
+    Use <function>ZOOM_connection_error</function> to check for
     errors for the last operation(s) performed. The function returns
     zero if no errors occurred; non-zero otherwise indicating the error.
     Pointers <parameter>cp</parameter> and <parameter>addinfo</parameter>
@@ -155,8 +155,8 @@
    </para>
    <sect2><title>Protocol behavior</title>
     <para>
-     The calls <function>Z3950_connection_new</function> and
-     <function>Z3950_connection_connect</function> establises a TCP/IP
+     The calls <function>ZOOM_connection_new</function> and
+     <function>ZOOM_connection_connect</function> establises a TCP/IP
       connection and sends an Initialize Request to the target if
       possible. In addition, the calls waits for an Initialize Response
       from the target and the result is inspected (OK or rejected).
@@ -184,9 +184,9 @@
     <para>
      When option <literal>async</literal> is 1, it really means that
      all network operations are postponed (and queued) until the
-     function <literal>Z3950_event</literal> is invoked. When doing so
+     function <literal>ZOOM_event</literal> is invoked. When doing so
      it doesn't make sense to check for errors after
-     <literal>Z3950_connection_new</literal> is called since that
+     <literal>ZOOM_connection_new</literal> is called since that
      operation "connecting - and init" is still incomplete and the
      API cannot tell the outcome (yet).
     </para>
@@ -197,24 +197,24 @@
     Query objects represents queries.
    </para>
    <synopsis>
-     Z3950_query Z3950_query_create(void);
+     ZOOM_query ZOOM_query_create(void);
 
-     void Z3950_query_destroy(Z3950_query q);
+     void ZOOM_query_destroy(ZOOM_query q);
 
-     int Z3950_query_prefix(Z3950_query q, const char *str);
+     int ZOOM_query_prefix(ZOOM_query q, const char *str);
 
-     int Z3950_query_sortby(Z3950_query q, const char *criteria);
+     int ZOOM_query_sortby(ZOOM_query q, const char *criteria);
    </synopsis>
    <para>
-    Create query objects using <function>Z3950_query_create</function>
-    and destroy them by calling <function>Z3950_query_destroy</function>.
+    Create query objects using <function>ZOOM_query_create</function>
+    and destroy them by calling <function>ZOOM_query_destroy</function>.
     RPN-queries can be specified in <link linkend="PQF">PQF</link>
     notation by using the
-    function <function>Z3950_query_prefix</function>. More
+    function <function>ZOOM_query_prefix</function>. More
     query types will be added later, such as
     <link linkend="CCL">CCL</link> to RPN-mapping, native CCL query,
     etc. In addition to a search, a sort criteria may be set. Function
-    <function>Z3950_query_sortby</function> specifies a 
+    <function>ZOOM_query_sortby</function> specifies a 
     sort criteria using the same string notation for sort as offered by
     the <link linkend="sortspec">YAZ client</link>.
    </para>
@@ -232,42 +232,42 @@
     a target.
    </para>
    <synopsis>
-     Z3950_resultset Z3950_connection_search(Z3950_connection,
-                                             Z3950_query q);
+     ZOOM_resultset ZOOM_connection_search(ZOOM_connection,
+                                           ZOOM_query q);
 
-     Z3950_resultset Z3950_connection_search_pqf(Z3950_connection c,
-                                                 const char *q);
+     ZOOM_resultset ZOOM_connection_search_pqf(ZOOM_connection c,
+                                               const char *q);
 
-     void Z3950_resultset_destroy(Z3950_resultset r);
+     void ZOOM_resultset_destroy(ZOOM_resultset r);
    </synopsis>
    <para>
-    Function <function>Z3950_connection_search</function> creates
+    Function <function>ZOOM_connection_search</function> creates
      a result set given a connection and query.
     Destroy a result set by calling
-    <function>Z3950_resultset_destroy</function>.
+    <function>ZOOM_resultset_destroy</function>.
     Simple clients may using PQF only may use function
-    <function>Z3950_connection_search_pqf</function> in which case
+    <function>ZOOM_connection_search_pqf</function> in which case
     creating query objects is not necessary.
    </para>
    <synopsis>
-     void Z3950_resultset_option_set (Z3950_resultset r,
+     void ZOOM_resultset_option_set (ZOOM_resultset r,
                                       const char *key,
                                       const char *val);
 
-     const char *Z3950_resultset_option_get (Z3950_resultset r,
+     const char *ZOOM_resultset_option_get (ZOOM_resultset r,
                                              const char *key);
 
-     size_t Z3950_resultset_size (Z3950_resultset r);
+     size_t ZOOM_resultset_size (ZOOM_resultset r);
    </synopsis>
    <para>
-    Functions <function>Z3950_resultset_options_set</function> and
-    <function>Z3950_resultset_get</function> sets and gets an option
-    for a result set similar to <function>Z3950_connection_option_get</function>
-    and <function>Z3950_connection_option_set</function>.
+    Functions <function>ZOOM_resultset_options_set</function> and
+    <function>ZOOM_resultset_get</function> sets and gets an option
+    for a result set similar to <function>ZOOM_connection_option_get</function>
+    and <function>ZOOM_connection_option_set</function>.
    </para>
    <para>
     The number of hits also called result-count is returned by
-    function <function>Z3950_resultset_size</function>.
+    function <function>ZOOM_resultset_size</function>.
    </para>
    <table frame="top"><title>ZOOM Result set Options</title>
     <tgroup cols="3">
@@ -390,54 +390,54 @@
     created from result sets.
    </para>
    <synopsis>
-     void Z3950_resultset_records (Z3950_resultset r,
-                                   Z3950_record *recs,
-			           size_t start, size_t count);
-     Z3950_record Z3950_resultset_record (Z3950_resultset s, size_t pos);
+     void ZOOM_resultset_records (ZOOM_resultset r,
+                                  ZOOM_record *recs,
+                                  size_t start, size_t count);
+     ZOOM_record ZOOM_resultset_record (ZOOM_resultset s, size_t pos);
 
-     void *Z3950_record_get (Z3950_record rec, const char *type,
-                             size_t *len);
+     void *ZOOM_record_get (ZOOM_record rec, const char *type,
+                            size_t *len);
 
-     Z3950_record Z3950_record_dup (Z3950_record rec);
+     ZOOM_record ZOOM_record_clone (ZOOM_record rec);
 
-     void Z3950_record_destroy (Z3950_record rec);
+     void ZOOM_record_destroy (ZOOM_record rec);
    </synopsis>
    <para>
     References to temporary records are returned by functions 
-    <function>Z3950_resultset_records</function> or
-    <function>Z3950_resultset_record</function>.
+    <function>ZOOM_resultset_records</function> or
+    <function>ZOOM_resultset_record</function>.
     </para>
    <para>
     If a persistent reference to a record is desired
-    <function>Z3950_record_dup</function> should be used.
-    It returns a record reference that at any
-    later stage should be destroyed by
-    <function>Z3950_record_destroy</function>.
+    <function>ZOOM_record_clone</function> should be used.
+    It returns a record reference that should be destroyed
+    by a call to <function>ZOOM_record_destroy</function>.
    </para>
    <para>
     A single record is returned by function
-    <function>Z3950_resultset_record</function> that takes a 
+    <function>ZOOM_resultset_record</function> that takes a 
     position as argument. First record has position zero.
     If no record could be obtained <literal>NULL</literal> is returned.
    </para>
    <para>
-    Function <function>Z3950_resultset_records</function> retrieves
+    Function <function>ZOOM_resultset_records</function> retrieves
     a number of records from a result set. Parameter <literal>start</literal>
     and <literal>count</literal> specifies the range of records to
     be returned. Upon completion array
     <literal>recs[0], ..recs[count-1]</literal>
     holds record objects for the records. The array of records
-     <literal>recs</literal> should be allocate prior to calling 
-    <function>Z3950_resultset_records</function>. Note that for those
+     <literal>recs</literal> should be allocated prior the call
+    <function>ZOOM_resultset_records</function>. Note that for those
     records that couldn't be retrieved from the target
     <literal>recs[ ..]</literal> is set to <literal>NULL</literal>.
    </para>
    <para id="zoom.record.get">
     In order to extract information about a single record,
-    <function>Z3950_record_get</function> is provided. The
+    <function>ZOOM_record_get</function> is provided. The
     function returns a pointer to certain record information. The
-    nature (type) of the pointer depends on the <function>type</function>
-    given. In addition for certain types, the length
+    nature (type) of the pointer depends on the parameter,
+    <function>type</function>.
+    In addition, for certain types, the length
     <literal>len</literal> passed will be set to the size in bytes of
     the returned information.
     <variablelist>
@@ -470,8 +470,8 @@
    </para>
    <sect2><title>Protocol behavior</title>
     <para>
-     The functions <function>Z3950_resultset_record</function> and
-     <function>Z3950_resultset_records</function> inspects the client-side
+     The functions <function>ZOOM_resultset_record</function> and
+     <function>ZOOM_resultset_records</function> inspects the client-side
      record cache. Records not found in cache are fetched using
      Present.
      The functions may block (and perform network I/O)  - even though option
@@ -480,7 +480,7 @@
      </para>
     <para>
      There is a trick, however, in the usage of function
-     <function>Z3950_resultset_records</function> that allows for
+     <function>ZOOM_resultset_records</function> that allows for
      delayed retrieval (and makes it non-blocking). By passing
      a null pointer for <parameter>recs</parameter> you're indicating
      you're not interested in getting records objects
@@ -495,26 +495,26 @@
     an associative array / hash array, etc.
    </para>
    <synopsis>
-     Z3950_options Z3950_options_create (void);
+     ZOOM_options ZOOM_options_create (void);
 
-     Z3950_options Z3950_options_create_with_parent (Z3950_options parent);
+     ZOOM_options ZOOM_options_create_with_parent (ZOOM_options parent);
 
-     void Z3950_options_destroy (Z3950_options opt);
+     void ZOOM_options_destroy (ZOOM_options opt);
    </synopsis>
    <synopsis>
-     const char *Z3950_options_get (Z3950_options opt, const char *name);
+     const char *ZOOM_options_get (ZOOM_options opt, const char *name);
 
-     void Z3950_options_set (Z3950_options opt, const char *name,
-                             const char *v);
+     void ZOOM_options_set (ZOOM_options opt, const char *name,
+                            const char *v);
    </synopsis>
    <synopsis>
-     typedef const char *(*Z3950_options_callback)
+     typedef const char *(*ZOOM_options_callback)
                                      (void *handle, const char *name);
 
-     Z3950_options_callback
-             Z3950_options_set_callback (Z3950_options opt,
-                                         Z3950_options_callback c,
-					 void *handle);
+     ZOOM_options_callback
+             ZOOM_options_set_callback (ZOOM_options opt,
+                                        ZOOM_options_callback c,
+                                        void *handle);
    </synopsis>
   </sect1>
   <sect1 id="zoom.events"><title>Events</title>
@@ -523,16 +523,16 @@
     with events.
    </para>
    <synopsis>
-    int Z3950_event (int no, Z3950_connection *cs);
+    int ZOOM_event (int no, ZOOM_connection *cs);
    </synopsis>
    <para>
-    The <function>Z3950_event</function> executes pending events for
+    The <function>ZOOM_event</function> executes pending events for
     a number of connections. Supply the number of connections in
     <literal>no</literal> and an array of connections in
     <literal>cs</literal> (<literal>cs[0] ... cs[no-1]</literal>).
     A pending event could be a sending a search, receiving a response,
     etc.
-    When an event has a occured for one of the connections, this function
+    When an event has occured for one of the connections, this function
     returns a positive integer <literal>n</literal> denoting that an event
     occurred for connection <literal>cs[n-1]</literal>.
     When no events are pending for the connections, a value of zero is
