@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.6  1995-03-21 12:30:09  quinn
+ * Revision 1.7  1995-03-21 15:53:31  quinn
+ * Little changes.
+ *
+ * Revision 1.6  1995/03/21  12:30:09  quinn
  * Beginning to add support for record packing.
  *
  * Revision 1.5  1995/03/17  10:44:13  quinn
@@ -232,7 +235,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.6 $";
+    resp.implementationVersion = "$Revision: 1.7 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -252,7 +255,8 @@ static Z_Records *diagrec(int error, char *addinfo)
     static Z_DiagRec dr;
     static int err;
 
-    fprintf(stderr, "Diagnostic: %d -- %s\n", error, addinfo);
+    fprintf(stderr, "Diagnostic: %d -- %s\n", error, addinfo ? addinfo :
+	"NULL");
     err = error;
     rec.which = Z_Records_NSD;
     rec.u.nonSurrogateDiagnostic = &dr;
