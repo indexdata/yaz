@@ -1,8 +1,22 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Backend interface change. Individual Scan terms returned from
+bend_scan may also be tagged as Surrogate Diagnostics. Refer
+to struct scan_entry in include/backend.h.
+
+Retrieval module enhancements. Multiple tag sets and attribute sets
+may be specified in abstract syntax specs. Revised the error/warning
+logging messages reported by the retrieval module when reading the
+various spec files.
+
+Object Identifier system (oid_..) changed. The API is backwards
+compatible but the oid-routines now allocates new OID's
+when needed. Raw OID's may be specified in oid_getvalbyname.
+
 YAZ now uses GNU configure to generate Makefile(s).
 
-* Slightly changed some member names of DeleteResultSetRequest/Response.
+* Minor changes in some of the member names of DeleteResultSetRequest and
+DeleteResultSetResponse. See include/proto.h.
 
 * Changed some C definitions regarding EXPLAIN record syntax (prt-exp.h)
 and added member 'languages' in TargetInfo (which was missing).
