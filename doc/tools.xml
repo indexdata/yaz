@@ -1,5 +1,5 @@
-<!-- $Id: tools.xml,v 1.5 2001-08-13 09:42:54 adam Exp $ -->
- <chapter><title>Supporting Tools</title>
+<!-- $Id: tools.xml,v 1.6 2001-10-24 09:27:59 adam Exp $ -->
+ <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
    In support of the service API - primarily the ASN module, which
@@ -7,7 +7,7 @@
    a collection of tools that support the development of applications.
   </para>
 
-  <sect1><title>Query Syntax Parsers</title>
+  <sect1 id="tools.query"><title>Query Syntax Parsers</title>
 
    <para>
     Since the type-1 (RPN) query structure has no direct, useful string
@@ -386,7 +386,7 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
     </sect3>
    </sect2>
   </sect1>
-  <sect1><title>Object Identifiers</title>
+  <sect1 id="tools.oid"><title>Object Identifiers</title>
 
    <para>
     The basic YAZ representation of an OID is an array of integers,
@@ -632,7 +632,7 @@ typedef struct oident
 
   </sect1>
 
-  <sect1><title>Nibble Memory</title>
+  <sect1 id="tools.nmem"><title>Nibble Memory</title>
 
    <para>
     Sometimes when you need to allocate and construct a large,

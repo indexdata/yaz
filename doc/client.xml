@@ -1,6 +1,6 @@
-<!-- $Id: client.xml,v 1.2 2001-08-13 09:42:54 adam Exp $ -->
- <chapter><title>The YAZ client</title>
-  <sect1><title>Introduction</title>
+<!-- $Id: client.xml,v 1.3 2001-10-24 09:27:59 adam Exp $ -->
+ <chapter id="client"><title>The YAZ client</title>
+  <sect1 id="client.introduction"><title>Introduction</title>
    <para>
     yaz-client is a line-mode Z39.50 client. It supports a fair amount
     of the functionality of the Z39.50-1995 standard, but some things you
@@ -13,7 +13,7 @@
     Services (ItemOrder, ItemUpdate,..).
    </para>
   </sect1>
-  <sect1><title>Invoking the YAZ client</title>
+  <sect1 id="client.invoking"><title>Invoking the YAZ client</title>
    <para>
     It can be started by typing
    </para>
@@ -88,7 +88,7 @@
     yaz-client -a - localhost
    </screen>
   </sect1>
-  <sect1><title>YAZ client commands</title>
+  <sect1 id="client.commands"><title>YAZ client commands</title>
    <para>
     When the YAZ client has read options and connected to a target, if given,
     it will display <literal>Z &gt;</literal> and away your command.
@@ -190,12 +190,12 @@
       </screen>
      </listitem>
     </varlistentry>
-    <varlistentry><term>
+    <varlistentry id="sortspec"><term>
       <literal>sort</literal> <replaceable>sortspecs</replaceable>
      </term>
      <listitem>
-      <para>Sorts a result set. The sort command takes a sequence of
-       sort specifications. A sort
+      <para>Sorts a result set. The sort command takes a
+       sequence of sort specifications. A sort
        specification holds a field (sort criteria) and is followed by flags.
        If the sort criteria includes <literal>=</literal> it is assumed
        that the sort SortKey is of type sortAttributes using Bib-1.
@@ -392,7 +392,7 @@
     </varlistentry>
    </variablelist>
   </sect1>
-  <sect1><title>Searching</title>
+  <sect1 id="client.searching"><title>Searching</title>
    <para>
     The simplest example of a Prefix Query would be something like
     <screen>

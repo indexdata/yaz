@@ -3,12 +3,14 @@
   CDATA DSSSL>
 ]>
 <!--
-  $Id: yazhtml.dsl,v 1.5 2001-10-22 13:57:24 adam Exp $
+  $Id: yazhtml.dsl,v 1.6 2001-10-24 09:27:59 adam Exp $
 -->
 <style-sheet>
 <style-specification use="docbook">
 <style-specification-body>
 
+(define %use-id-as-filename% #t)
+(define %output-dir% "html")
 (define %html-ext% ".html")
 (define %shade-verbatim% #t)
 

@@ -3,12 +3,14 @@
   CDATA DSSSL>
 ]>
 <!--
-  $Id: yazphp.dsl,v 1.4 2001-10-22 13:57:24 adam Exp $
+  $Id: yazphp.dsl,v 1.5 2001-10-24 09:27:59 adam Exp $
 -->
 <style-sheet>
 <style-specification use="docbook">
 <style-specification-body>
 
+(define %use-id-as-filename% #t)
+(define %output-dir% "php")
 (define %html-ext% ".php")
 (define %shade-verbatim% #t)
 

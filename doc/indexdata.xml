@@ -1,5 +1,5 @@
-<!-- $Id: indexdata.xml,v 1.4 2001-08-13 09:42:54 adam Exp $ -->
- <appendix><title>About Index Data</title>
+<!-- $Id: indexdata.xml,v 1.5 2001-10-24 09:27:59 adam Exp $ -->
+ <appendix id="indexdata"><title>About Index Data</title>
 
   <para>
    Index Data is a consulting and software-development enterprise that

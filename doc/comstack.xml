@@ -1,7 +1,7 @@
-<!-- $Id: comstack.xml,v 1.3 2001-08-13 09:42:54 adam Exp $ -->
- <chapter><title id="comstack">The COMSTACK Module</title>
+<!-- $Id: comstack.xml,v 1.4 2001-10-24 09:27:59 adam Exp $ -->
+ <chapter id="comstack"><title>The COMSTACK Module</title>
 
-  <sect1><title>Synopsis (blocking mode)</title>
+  <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>
 
    <programlisting>
 
@@ -52,7 +52,7 @@ if (buf)
    </programlisting>
 
   </sect1>
-  <sect1><title>Introduction</title>
+  <sect1 id="comstack.introduction"><title>Introduction</title>
 
    <para>
     The &comstack;
@@ -87,7 +87,7 @@ if (buf)
    </para>
 
   </sect1>
-  <sect1><title>Common Functions</title>
+  <sect1 id="comstack.common"><title>Common Functions</title>
 
    <sect2><title>Managing Endpoints</title>
 
@@ -277,7 +277,7 @@ if (buf)
 
   </sect1>
 
-  <sect1><title>Client Side</title>
+  <sect1 id="comstack.client"><title>Client Side</title>
 
    <synopsis>
     int cs_connect(COMSTACK handle, void *address);
@@ -305,7 +305,7 @@ if (buf)
 
   </sect1>
 
-  <sect1><title>Server Side</title>
+  <sect1 id="comstack.server"><title>Server Side</title>
 
    <para>
     To establish a server under the <application>inetd</application> server, you
@@ -378,7 +378,7 @@ if (buf)
    </note>
 
   </sect1>
-  <sect1><title>Addresses</title>
+  <sect1 id="comstack.addresses"><title>Addresses</title>
 
    <para>
     The low-level format of the addresses are different depending on the
@@ -465,7 +465,7 @@ if (buf)
 
   </sect1>
 
-  <sect1><title>Diagnostics</title>
+  <sect1 id="comstack.diagnostics"><title>Diagnostics</title>
 
    <para>
     All functions return -1 if an error occurs. Typically, the functions
@@ -510,169 +510,7 @@ if (buf)
     provided.
    </para>
   </sect1>
-
-  <sect1><title>Enabling OSI Communication</title>
-
-   <sect2><title>Installing Xtimosi</title>
-    <para>
-     Although you will have to down-load Peter Furniss' XTI/mOSI
-     implementation for yourself, we've tried to make the integration as
-     simple as possible.
-    </para>
-
-    <para>
-     The latest version of xtimosi will generally be under
-    </para>
-
-    <screen>
-     ftp://pluto.ulcc.ac.uk/ulcc/thinosi/xtimosi/
-    </screen>
-
-    <para>
-     When you have down-loaded and unpacked the archive, it will (we assume)
-     have created a directory called <literal>xtimosi</literal>.
-     We suggest that you place this directory <emphasis>in the same
-      directory</emphasis> where you unpacked the &yaz;
-     distribution. This way, you shouldn't have to fiddle with the
-     makefiles of &yaz; beyond uncommenting a few lines.
-    </para>
-
-    <para>
-     Go to <literal>xtimosi/src</literal>, and type &quot;make libmosi.a/&quot;.
-     This should generally create the library, ready to use.
-    </para>
-
-    <note>
-     <para>
-      The currently available release of xtimosi has some inherent
-      problems that make it disfunction on certain platforms - eg. the
-      Digital OSF/1 workstations. It is supposedly primarily a
-      compiler problem, and we hope to see a release that is generally
-      portable. While we can't guarantee that it can be brought to work
-      on your platform, we'll be happy to talk to you about problems
-      that you might see, and relay information to the author of the
-      software. There are some signs that the <application>gcc</application>
-      compiler is more likely to produce a fully functional library, but this
-      hasn't been verified (we think that the problem is limited to the use
-      of hexadecimal escape-codes used in strings, which are silently
-      ignored by some compilers).
-     </para>
-     <para>
-      A problem has been encountered in the communication with
-      ISODE-based applications. If the ISODE presentation-user calls
-      <function>PReadRequest()</function> with a timeout value different
-      from <literal>OK</literal> or <literal>NOTOK</literal>,
-      he will get an immediate TIMEOUT abort when receiving large (&gt;2041
-      bytes, which is the SPDU-size that the ISODE likes to work with) packages
-      from an xtimosi-based implementation (probably most
-      other implementations as well, in fact). It seems to be a flaw in the
-      ISODE API, and the workaround (for ISODE users) is to either not
-      use an explicit timeout (switching to either blocking or
-      nonblocking mode), or to check that the timer really has expired
-      before closing the connection.
-     </para>
-    </note>
-
-    <para>
-     The next step in the installation is to modify the makefile in the toplevel
-     &yaz;
-     directory. The place to change is in the top of the file, and is
-     clearly marked with a comment.
-    </para>
-
-    <para>
-     Now run <literal>make</literal> in the &yaz; toplevel directory (do a
-     <literal>make clean</literal> first, if the system has been previously
-     made without OSI support). Use the &yaz;
-     <application>yaz-ztest</application> and <application>yaz-client</application>
-     demo programs to verify that OSI communication works OK. Then, you can go
-     ahead and try to talk to other implementations.
-    </para>
-
-    <note>
-     <para>
-      Our interoperability experience is limited to version
-      7 of the Nordic SR-Nett package, which has had several
-      protocol errors fixed from the earlier releases. If you have
-      problems or successes in interoperating with other
-      implementations, we'd be glad to hear about it, or to help
-      you make things work, as our resources allow.
-     </para>
-    </note>
-
-    <para>
-     If you write your own applications based on &yaz;, and you wish to
-     include OSI support, the procedure is equally simple. You should
-     include the <filename>xmosi.h</filename> header file in addition to
-     <filename>comstack.h</filename>. <filename>xmosi.h</filename>
-     will define the manifest constant <literal>mosi_type</literal>, which you
-     should pass to the <function>cs_create()</function> function. In
-     addition, you should use the function <function>mosi_strtoaddr()</function>
-     rather than <function>tcpip_strtoaddr()</function> when you need to
-     prepare an address.
-    </para>
-
-    <para>
-     When you link your application, you should include (after the
-     <filename>libyaz.a</filename> library) the <literal>libmosi.a</literal>
-     library, and the <filename>librfc.a</filename> library provided with
-     &yaz; (for OSI transport).
-    </para>
-    <para>
-     As always, it can be very useful, if not essential, to have a look at the
-     example applications to see how things are done.
-    </para>
-
-   </sect2>
-   <sect2><title>OSI Transport</title>
-
-    <para>
-     Xtimosi requires an implementation of the OSI transport service under
-     the X/OPEN XTI API. We provide an implementation of the RFC1006
-     encapsulation of OSI/TP0 in TCP/IP (through the Berkeley Sockets API),
-     as an independent part of &yaz; (it's found under the
-     <filename>rfc1006</filename> directory).
-     If you have access to an OSI transport provider under XTI,
-     you should be able to make that work too, although it may require
-     tinkering with the <function>mosi_strtoaddr()</function> function.
-    </para>
-   </sect2>
-
-   <sect2><title>Presentation Context Management</title>
-
-    <para>
-     To simplify the implementation, we use Peter Furniss' alternative (PRF)
-     option format
-     for the Control of the presentation negotiation phase. This format
-     is enabled by default when you
-     compile xtimosi.
-    </para>
-
-    <para>
-     The current version of &yaz; does <emphasis>not</emphasis> support
-     presentation-layer negotiation of response record formats. The primary
-     reason is that we have had access to no other SR or Z39.50
-     implementations over OSI that used this
-     method. Secondarily, we believe that the EXPLAIN facility is a superior
-     mechanism for relaying target capabilities in this respect. This is not to
-     say that we have no intentions of supporting presentation context
-     negotiation - we have just hitherto given it a lower priority than other
-     aspects of the protocol.
-    </para>
-    <para>
-     One thing is certain: The addition of this capability to &yaz; should
-     have only a minimal impact on existing applications, and on the
-     interface to the software in general. Most likely, we will add an extra
-     layer of interface to the processing of EXPLAIN records, which will
-     convert back and forth between <literal>oident</literal> records (see
-     section <link linkend="oid">Object Identifiers</link>) and direct or
-     indirect references, given the current association setup. Implementations
-     based on any of the higher-level interfaces will most likely not have to
-     be changed at all.
-    </para>
-   </sect2>
-  </sect1>
-  <sect1><title>Summary and Synopsis</title>
+  <sect1 id="comstack.summary"><title>Summary and Synopsis</title>
 
      <synopsis>
     #include &lt;comstack.h>

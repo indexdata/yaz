@@ -1,7 +1,7 @@
-<!-- $Id: odr.xml,v 1.4 2001-08-13 09:42:54 adam Exp $ -->
- <chapter><title id="odr">The ODR Module</title>
+<!-- $Id: odr.xml,v 1.5 2001-10-24 09:27:59 adam Exp $ -->
+ <chapter id="odr"><title>The ODR Module</title>
   
-  <sect1><title>Introduction</title>
+  <sect1 id="odr.introduction"><title>Introduction</title>
 
    <para>
      &odr; is the BER-encoding/decoding subsystem of &yaz;. Care as been taken
@@ -37,7 +37,7 @@
    </para>
 
   </sect1>
-  <sect1><title id="odr-use">Using ODR</title>
+  <sect1 id="odr.use"><title id="odr-use">Using ODR</title>
 
    <sect2><title>ODR Streams</title>
 
@@ -480,7 +480,7 @@ void do_nothing_useful(int value)
    </sect2>
   </sect1>
 
-  <sect1><title id="odr-prog">Programming with ODR</title>
+  <sect1 id="odr.programming"><title id="odr-prog">Programming with ODR</title>
 
    <para>
     The API of &odr; is designed to reflect the structure of ASN.1, rather
@@ -1219,7 +1219,7 @@ void odr_choice_bias(ODR o, int what);
    </sect2>
   </sect1>
 
-  <sect1><title>Debugging</title>
+  <sect1 id="odr.debugging"><title>Debugging</title>
 
    <para>
     The protocol modules are suffering somewhat from a lack of diagnostic

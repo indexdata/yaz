@@ -21,8 +21,8 @@
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml,v 1.7 2001-10-23 21:00:19 adam Exp $ -->
-<book>
+<!-- $Id: yaz.xml,v 1.8 2001-10-24 09:27:59 adam Exp $ -->
+<book id="yaz">
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
   <author><firstname>Sebastian</firstname><surname>Hammer</surname></author>

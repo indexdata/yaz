@@ -1,5 +1,5 @@
-<!-- $Id: frontend.xml,v 1.5 2001-08-13 09:42:54 adam Exp $ -->
- <chapter><title id="server">Making an IR Server for Your Database</title>
+<!-- $Id: frontend.xml,v 1.6 2001-10-24 09:27:59 adam Exp $ -->
+ <chapter id="server"><title>Making an IR Server for Your Database</title>
   <sect1><title>Introduction</title>
 
    <para>
@@ -45,7 +45,7 @@
    </note>
   </sect1>
   
-  <sect1><title>The Database Frontend</title>
+  <sect1 id="server.frontend"><title>The Database Frontend</title>
 
    <para>
     We refer to this software as a generic database frontend. Your
@@ -102,7 +102,7 @@
    </para>
 
   </sect1>
-  <sect1><title>The Backend API</title>
+  <sect1 id="server.backend"><title>The Backend API</title>
 
    <para>
     The headers files that you need to use the interface are in the
@@ -117,7 +117,7 @@
    </para>
   </sect1>
 
-  <sect1><title>Your main() Routine</title>
+  <sect1 id="server.main"><title>Your main() Routine</title>
 
    <para>
     As mentioned, your <function>main()</function> routine can be quite brief.
@@ -304,7 +304,7 @@ void statserv_setcontrol(statserv_options_block *block);
    </note>
   </sect1>
 
-  <sect1><title>The Backend Functions</title>
+  <sect1 id="server.backendfunctions"><title>The Backend Functions</title>
 
    <para>
     For each service of the protocol, the backend interface declares one or
@@ -672,7 +672,7 @@ typedef struct bend_scan_rr {
    </sect2>
   </sect1>
 
-  <sect1><title>Application Invocation</title>
+  <sect1 id="server.invocation"><title>Application Invocation</title>
 
    <para>
     The finished application has the following

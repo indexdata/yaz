@@ -1,6 +1,6 @@
-<!-- $Id: asn.xml,v 1.8 2001-08-23 09:12:09 adam Exp $ -->
- <chapter><title>The ASN Module</title>
-  <sect1><title>Introduction</title>
+<!-- $Id: asn.xml,v 1.9 2001-10-24 09:27:59 adam Exp $ -->
+ <chapter id="asn"><title>The ASN Module</title>
+  <sect1 id="asn.introduction"><title>Introduction</title>
    <para>
     The &asn; module provides you with a set of C struct definitions for the
     various PDUs of the protocol, as well as for the complex types
@@ -12,7 +12,7 @@
     provides auxiliary definitions.
    </para>
   </sect1>
-  <sect1><title>Preparing PDUs</title>
+  <sect1 id="asn.preparing"><title>Preparing PDUs</title>
    
    <para>
     A structure representing a complex ASN.1 type doesn't in itself contain the
@@ -125,7 +125,7 @@
     
    </para>
   </sect1>
-  <sect1><title id="oid">Object Identifiers</title>
+  <sect1 id="asn.oid"><title id="oid">Object Identifiers</title>
   <para>
     When you refer to object identifiers in your application, you need to
     be aware that SR and Z39.50 use two different set of OIDs to refer to
@@ -187,7 +187,7 @@ struct oident *oid_getentbyoid(int *o);
    </note>
   
   </sect1>
-  <sect1><title>EXTERNAL Data</title>
+  <sect1 id="asn.external"><title>EXTERNAL Data</title>
    
    <para>
     In order to achieve extensibility and adaptability to different
@@ -333,7 +333,7 @@ typedef struct Z_ext_typeent
    </note>
   
   </sect1>
-  <sect1><title>PDU Contents Table</title>
+  <sect1 id="asn.pdu"><title>PDU Contents Table</title>
    
   <para>
     We include, for reference, a listing of the fields of each top-level
