@@ -4,6 +4,7 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 Redhat package is now several packages: libyaz (runtime libraries),
 libyaz-devel (development and documentation, and yaz (utility programs).
+Package spec file by Morten Bøgeskov.
 
 New member 'schema' in struct bend_fetch_rr which the name of requested
 schema (SRW/SRU) for record (or NULL if none was given). The fetch
