@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.184 2003-02-25 18:35:48 adam Exp $
+ * $Id: client.c,v 1.185 2003-03-11 11:07:47 adam Exp $
  */
 
 #include <stdio.h>
@@ -51,7 +51,6 @@
 
 #include <sys/stat.h>
 
-
 #include "admin.h"
 #include "tabcomplete.h"
 
@@ -61,6 +60,7 @@ static char *codeset = 0;               /* character set for output */
 
 static ODR out, in, print;              /* encoding and decoding streams */
 static FILE *apdu_file = 0;
+static FILE *ber_file = 0;
 static COMSTACK conn = 0;               /* our z-association */
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
 char *databaseNames[128];
@@ -87,9 +87,8 @@ static int kilobytes = 1024;
 static char* yazCharset = 0;
 static char* yazLang = 0;
 
-
 static char last_cmd[32] = "?";
-static FILE *marcdump = 0;
+static FILE *marc_file = 0;
 static char *refid = NULL;
 static char *last_open_command = NULL;
 static int auto_reconnect = 0;
@@ -115,12 +114,6 @@ int rl_attempted_completion_over = 0;
 /* set this one to 1, to avoid decode of unknown MARCs  */
 #define AVOID_MARC_DECODE 1
 
-/* nice helper macro as extensive tabbing gives spaces at the en of the args lines */
-#define REMOVE_TAILING_BLANKS(a) {\
-  char* args_end=(a)+strlen(a)-1; \
-  while(isspace(*args_end)) {*args_end=0;--args_end;}; \
-  }
-
 #define maxOtherInfosSupported 10
 struct {
     int oidval;
@@ -132,7 +125,9 @@ void process_cmd_line(char* line);
 char ** readline_completer(char *text, int start, int end);
 char *command_generator(const char *text, int state);
 char** curret_global_list=NULL;
-int cmd_register_tab(char* arg);
+int cmd_register_tab(const char* arg);
+
+static void close_session (void);
 
 ODR getODROutputStream()
 {
@@ -177,7 +172,8 @@ void add_otherInfos(Z_APDU *a)
     for(i=0; i<maxOtherInfosSupported; ++i) 
     {
         if(extraOtherInfos[i].oidval != -1) 
-            yaz_oi_set_string_oidval(oi, out, extraOtherInfos[i].oidval, 1, extraOtherInfos[i].value);
+            yaz_oi_set_string_oidval(oi, out, extraOtherInfos[i].oidval,
+                                     1, extraOtherInfos[i].value);
     }   
 }
 
@@ -196,16 +192,19 @@ void send_apdu(Z_APDU *a)
     if (!z_APDU(out, &a, 0, 0))
     {
         odr_perror(out, "Encoding APDU");
-        exit(1);
+        close_session();
+        return;
     }
     buf = odr_getbuf(out, &len, 0);
+    if (ber_file)
+        odr_dumpBER(ber_file, buf, len);
     /* printf ("sending APDU of size %d\n", len); */
     if (cs_put(conn, buf, len) < 0)
     {
         fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
-        exit(1);
+        close_session();
+        return;
     }
-    
     do_hex_dump(buf,len);
     odr_reset(out); /* release the APDU structure  */
 }
@@ -296,14 +295,19 @@ static void send_initRequest(const char* type_and_host)
 
 static int process_initResponse(Z_InitResponse *res)
 {
+    int ver = 0;
     /* save session parameters for later use */
     session_mem = odr_extract_mem(in);
     session = res;
 
+    for (ver = 0; ver<5; ver++)
+        if (!ODR_MASK_GET(res->protocolVersion, ver))
+            break;
+
     if (!*res->result)
-        printf("Connection rejected by target.\n");
+        printf("Connection rejected by v%d target.\n", ver);
     else
-        printf("Connection accepted by target.\n");
+        printf("Connection accepted by v%d target.\n", ver);
     if (res->implementationId)
         printf("ID     : %s\n", res->implementationId);
     if (res->implementationName)
@@ -390,10 +394,10 @@ static int process_initResponse(Z_InitResponse *res)
     return 0;
 }
 
-static int cmd_base(char *arg)
+static int cmd_base(const char *arg)
 {
     int i;
-    char *cp;
+    const char *cp;
 
     if (!*arg)
     {
@@ -426,7 +430,7 @@ static int cmd_base(char *arg)
     return 1;
 }
 
-void cmd_open_remember_last_open_command(char* arg, char* new_open_command)
+void cmd_open_remember_last_open_command(const char* arg, char* new_open_command)
 {
     if(last_open_command != arg) 
     {
@@ -435,11 +439,11 @@ void cmd_open_remember_last_open_command(char* arg, char* new_open_command)
     }
 }
 
-int cmd_open(char *arg)
+int cmd_open(const char *arg)
 {
     void *add;
-    char type_and_host[101], base[101];	
-    
+    char type_and_host[101];
+    const char *basep = 0;
     if (conn)
     {
         printf("Already connected.\n");
@@ -452,28 +456,24 @@ int cmd_open(char *arg)
             session_mem = NULL;
         }
     }   
+    cs_get_host_args(arg, &basep);
 
-    if (strncmp (arg, "unix:", 5) == 0)
-    {
-        base[0] = '\0';
-        conn = cs_create_host(arg, 1, &add);
-	cmd_open_remember_last_open_command(arg,arg);
-    }
+    cmd_open_remember_last_open_command(arg,type_and_host);
+
+    if (yazProxy)
+        conn = cs_create_host(yazProxy, 1, &add);
     else
-    {
-        base[0] = '\0';
-        if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
-            return 0;
-		
-	cmd_open_remember_last_open_command(arg,type_and_host);
-        if (yazProxy) 
-            conn = cs_create_host(yazProxy, 1, &add);
-        else 
-            conn = cs_create_host(type_and_host, 1, &add);
-    }
+        conn = cs_create_host(arg, 1, &add);
     if (!conn)
     {
         printf ("Couldn't create comstack\n");
+        return 0;
+    }
+    if (conn->protocol == PROTO_HTTP)
+    {
+        printf("HTTP transport not supported\n");
+        cs_close(conn);
+        conn = 0;
         return 0;
     }
     printf("Connecting...");
@@ -491,12 +491,11 @@ int cmd_open(char *arg)
         conn = 0;
         return 0;
     }
-    printf("Ok.\n");
-    
-    send_initRequest(type_and_host);
-    if (*base)
-        cmd_base (base);
-
+    printf("OK.\n");
+    if (conn->protocol == PROTO_Z3950)
+        send_initRequest(type_and_host);
+    if (basep && *basep)
+        cmd_base (basep);
     return 2;
 }
 
@@ -517,7 +516,7 @@ void try_reconnect()
     xfree(open_command);				
 }
 
-int cmd_authentication(char *arg)
+int cmd_authentication(const char *arg)
 {
     static Z_IdAuthentication au;
     static char user[40], group[40], pass[40];
@@ -610,11 +609,11 @@ static void display_record(Z_External *r)
             if (!(*type->fun)(in, (char **)&rr, 0, 0))
             {
                 odr_perror(in, "Decoding constructed record.");
-                fprintf(stderr, "[Near %d]\n", odr_offset(in));
-                fprintf(stderr, "Packet dump:\n---------\n");
-                odr_dumpBER(stderr, (char*)r->u.octet_aligned->buf,
+                fprintf(stdout, "[Near %d]\n", odr_offset(in));
+                fprintf(stdout, "Packet dump:\n---------\n");
+                odr_dumpBER(stdout, (char*)r->u.octet_aligned->buf,
                             r->u.octet_aligned->len);
-                fprintf(stderr, "---------\n");
+                fprintf(stdout, "---------\n");
                 
 		/* note just ignores the error ant print the bytes form the octet_aligned later */
             } else {
@@ -725,8 +724,8 @@ static void display_record(Z_External *r)
                              r->u.octet_aligned->len);
             }
         }
-        if (marcdump)
-            fwrite (octet_buf, 1, r->u.octet_aligned->len, marcdump);
+        if (marc_file)
+            fwrite (octet_buf, 1, r->u.octet_aligned->len, marc_file);
     }
     else if (ent && ent->value == VAL_SUTRS)
     {
@@ -827,7 +826,7 @@ static void display_records(Z_Records *p)
     }
 }
 
-static int send_deleteResultSetRequest(char *arg)
+static int send_deleteResultSetRequest(const char *arg)
 {
     char names[8][32];
     int i;
@@ -864,7 +863,7 @@ static int send_deleteResultSetRequest(char *arg)
     return 2;
 }
 
-static int send_searchRequest(char *arg)
+static int send_searchRequest(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
@@ -1358,8 +1357,8 @@ static Z_External *create_external_itemRequest()
         r->u.single_ASN1_type->size = item_request_size;
         memcpy (r->u.single_ASN1_type->buf, item_request_buf,
                 item_request_size);
-		
-		do_hex_dump(item_request_buf,item_request_size);
+        
+        do_hex_dump(item_request_buf,item_request_size);
     }
     return r;
 }
@@ -1514,7 +1513,7 @@ static int send_itemorder(const char *type, int itemno)
     return 0;
 }
 
-static int cmd_update(char *arg)
+static int cmd_update(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -1636,7 +1635,7 @@ static int cmd_update(char *arg)
     return 2;
 }
 
-static int cmd_itemorder(char *arg)
+static int cmd_itemorder(const char *arg)
 {
     char type[12];
     int itemno;
@@ -1650,7 +1649,7 @@ static int cmd_itemorder(char *arg)
     return 2;
 }
 
-static int cmd_find(char *arg)
+static int cmd_find(const char *arg)
 {
     if (!*arg)
     {
@@ -1659,19 +1658,19 @@ static int cmd_find(char *arg)
     }
     if (!conn)
     {
-		try_reconnect(); 
-
-		if (!conn) {					
-			printf("Not connected yet\n");
-			return 0;
-		};
+        try_reconnect(); 
+        
+        if (!conn) {					
+            printf("Not connected yet\n");
+            return 0;
+        }
     }
     if (!send_searchRequest(arg))
         return 0;
     return 2;
 }
 
-static int cmd_delete(char *arg)
+static int cmd_delete(const char *arg)
 {
     if (!conn)
     {
@@ -1683,28 +1682,28 @@ static int cmd_delete(char *arg)
     return 2;
 }
 
-static int cmd_ssub(char *arg)
+static int cmd_ssub(const char *arg)
 {
     if (!(smallSetUpperBound = atoi(arg)))
         return 0;
     return 1;
 }
 
-static int cmd_lslb(char *arg)
+static int cmd_lslb(const char *arg)
 {
     if (!(largeSetLowerBound = atoi(arg)))
         return 0;
     return 1;
 }
 
-static int cmd_mspn(char *arg)
+static int cmd_mspn(const char *arg)
 {
     if (!(mediumSetPresentNumber = atoi(arg)))
         return 0;
     return 1;
 }
 
-static int cmd_status(char *arg)
+static int cmd_status(const char *arg)
 {
     printf("smallSetUpperBound: %d\n", smallSetUpperBound);
     printf("largeSetLowerBound: %d\n", largeSetLowerBound);
@@ -1712,7 +1711,7 @@ static int cmd_status(char *arg)
     return 1;
 }
 
-static int cmd_setnames(char *arg)
+static int cmd_setnames(const char *arg)
 {
     if (*arg == '1')         /* enable ? */
         setnumber = 0;
@@ -1732,7 +1731,7 @@ static int cmd_setnames(char *arg)
 
 /* PRESENT SERVICE ----------------------------- */
 
-static int send_presentRequest(char *arg)
+static int send_presentRequest(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
@@ -1834,6 +1833,9 @@ static void close_session (void)
         session_mem = NULL;
     }
     sent_close = 0;
+    odr_reset(out);
+    odr_reset(in);
+    odr_reset(print);
 }
 
 void process_close(Z_Close *req)
@@ -1868,7 +1870,7 @@ void process_close(Z_Close *req)
     }
 }
 
-static int cmd_show(char *arg)
+static int cmd_show(const char *arg)
 {
     if (!conn)
     {
@@ -1880,7 +1882,7 @@ static int cmd_show(char *arg)
     return 2;
 }
 
-int cmd_quit(char *arg)
+int cmd_quit(const char *arg)
 {
     printf("See you later, alligator.\n");
     xmalloc_trav ("");
@@ -1888,7 +1890,7 @@ int cmd_quit(char *arg)
     return 0;
 }
 
-int cmd_cancel(char *arg)
+int cmd_cancel(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
     Z_TriggerResourceControlRequest *req =
@@ -1981,7 +1983,7 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
     return 2;
 }
 
-int send_sortrequest(char *arg, int newset)
+int send_sortrequest(const char *arg, int newset)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_sortRequest);
     Z_SortRequest *req = apdu->u.sortRequest;
@@ -2102,7 +2104,7 @@ void process_deleteResultSetResponse (Z_DeleteResultSetResponse *res)
     }
 }
 
-int cmd_sort_generic(char *arg, int newset)
+int cmd_sort_generic(const char *arg, int newset)
 {
     if (!conn)
     {
@@ -2123,26 +2125,26 @@ int cmd_sort_generic(char *arg, int newset)
     return 0;
 }
 
-int cmd_sort(char *arg)
+int cmd_sort(const char *arg)
 {
     return cmd_sort_generic (arg, 0);
 }
 
-int cmd_sort_newset (char *arg)
+int cmd_sort_newset (const char *arg)
 {
     return cmd_sort_generic (arg, 1);
 }
 
-int cmd_scan(char *arg)
+int cmd_scan(const char *arg)
 {
     if (!conn)
     {
-		try_reconnect();
-		
-		if (!conn) {								
-			printf("Session not initialized yet\n");
-			return 0;
-		};
+        try_reconnect();
+        
+        if (!conn) {								
+            printf("Session not initialized yet\n");
+            return 0;
+        }
     }
     if (!ODR_MASK_GET(session->options, Z_Options_scan))
     {
@@ -2163,7 +2165,7 @@ int cmd_scan(char *arg)
     return 2;
 }
 
-int cmd_schema(char *arg)
+int cmd_schema(const char *arg)
 {
     if (!arg || !*arg)
     {
@@ -2179,7 +2181,7 @@ int cmd_schema(char *arg)
     return 1;
 }
 
-int cmd_format(char *arg)
+int cmd_format(const char *arg)
 {
     oid_value nsyntax;
     if (!arg || !*arg)
@@ -2197,7 +2199,7 @@ int cmd_format(char *arg)
     return 1;
 }
 
-int cmd_elements(char *arg)
+int cmd_elements(const char *arg)
 {
     static Z_ElementSetNames esn;
     static char what[100];
@@ -2214,7 +2216,7 @@ int cmd_elements(char *arg)
     return 1;
 }
 
-int cmd_attributeset(char *arg)
+int cmd_attributeset(const char *arg)
 {
     char what[100];
 
@@ -2232,7 +2234,7 @@ int cmd_attributeset(char *arg)
     return 1;
 }
 
-int cmd_querytype (char *arg)
+int cmd_querytype (const char *arg)
 {
     if (!strcmp (arg, "ccl"))
         queryType = QueryType_CCL;
@@ -2254,7 +2256,7 @@ int cmd_querytype (char *arg)
     return 1;
 }
 
-int cmd_refid (char *arg)
+int cmd_refid (const char *arg)
 {
     xfree (refid);
     refid = NULL;
@@ -2266,7 +2268,7 @@ int cmd_refid (char *arg)
     return 1;
 }
 
-int cmd_close(char *arg)
+int cmd_close(const char *arg)
 {
     Z_APDU *apdu;
     Z_Close *req;
@@ -2282,7 +2284,7 @@ int cmd_close(char *arg)
     return 2;
 }
 
-int cmd_packagename(char* arg)
+int cmd_packagename(const char* arg)
 {
     xfree (esPackageName);
     esPackageName = NULL;
@@ -2294,7 +2296,7 @@ int cmd_packagename(char* arg)
     return 1;
 }
 
-int cmd_proxy(char* arg)
+int cmd_proxy(const char* arg)
 {
     if (*arg == '\0') {
 		xfree (yazProxy);
@@ -2311,7 +2313,7 @@ int cmd_proxy(char* arg)
     return 1;
 }
 
-int cmd_charset(char* arg)
+int cmd_charset(const char* arg)
 {
     char l1[30], l2[30];
 
@@ -2333,7 +2335,7 @@ int cmd_charset(char* arg)
     return 1;
 }
 
-int cmd_lang(char* arg)
+int cmd_lang(const char* arg)
 {
     if (*arg == '\0') {
     	printf("Current language is `%s'\n", (yazLang)?yazLang:NULL);
@@ -2349,21 +2351,12 @@ int cmd_lang(char* arg)
     return 1;
 }
 
-int cmd_source(char* arg) 
+int cmd_source(const char* arg) 
 {
     /* first should open the file and read one line at a time.. */
     FILE* includeFile;
     char line[1024], *cp;
 
-    {
-        char* args_end=(arg)+strlen(arg)-1; 
-        while(isspace(*args_end)) 
-        {*args_end=0;
-        --args_end;}; 
-    }
-
-    REMOVE_TAILING_BLANKS(arg);
-    
     if(strlen(arg)<1) {
         fprintf(stderr,"Error in source command use a filename\n");
         return -1;
@@ -2396,7 +2389,7 @@ int cmd_source(char* arg)
     return 1;
 }
 
-int cmd_subshell(char* args)
+int cmd_subshell(const char* args)
 {
     if(strlen(args)) 
         system(args);
@@ -2407,42 +2400,45 @@ int cmd_subshell(char* args)
     return 1;
 }
 
-int cmd_set_apdufile(char* arg)
+int cmd_set_berfile(const char *arg)
 {
-    REMOVE_TAILING_BLANKS(arg);
-  
-    if(apdu_file && apdu_file != stderr) { /* don't close stdout*/
-        perror("unable to close apdu log file");      
-    }
-    apdu_file=NULL;
-  
-    if(strlen(arg)<1) {
-        return 1;
-    }
-  
-    if(!strcmp(arg,"-")) 
-        apdu_file=stderr;      
-    else 
-        apdu_file=fopen(arg, "a");
-  
-    if(!apdu_file) {
-        perror("unable to open apdu log file no apdu log loaded");
-    } else {
-        odr_setprint(print, apdu_file); 
-    }
-  
+    if (ber_file && ber_file != stdout && ber_file != stderr)
+        fclose(ber_file);
+    if (!strcmp(arg, ""))
+        ber_file = 0;
+    else if (!strcmp(arg, "-"))
+        ber_file = stdout;
+    else
+        ber_file = fopen(arg, "a");
     return 1;
 }
 
-int cmd_set_cclfile(char* arg)
+int cmd_set_apdufile(const char *arg)
+{
+    if(apdu_file && apdu_file != stderr && apdu_file != stderr)
+        fclose(apdu_file);
+    if (!strcmp(arg, ""))
+        apdu_file = 0;
+    else if (!strcmp(arg, "-"))
+        apdu_file = stderr;
+    else
+    {
+        apdu_file = fopen(arg, "a");
+        if (!apdu_file)
+            perror("unable to open apdu log file");
+    }
+    return 1;
+}
+
+int cmd_set_cclfile(const char* arg)
 {  
     FILE *inf;
 
-    REMOVE_TAILING_BLANKS(arg);
-
     bibset = ccl_qual_mk (); 
     inf = fopen (arg, "r");
-    if (inf)
+    if (!inf)
+        perror("unable to open CCL file");
+    else
     {
         ccl_qual_file (bibset, inf);
         fclose (inf);
@@ -2451,11 +2447,8 @@ int cmd_set_cclfile(char* arg)
     return 0;
 }
 
-
-int cmd_set_auto_reconnect(char* arg)
+int cmd_set_auto_reconnect(const char* arg)
 {  
-    REMOVE_TAILING_BLANKS(arg);
-    
     if(strlen(arg)==0) {
         auto_reconnect = ! auto_reconnect;
     } else if(strcmp(arg,"on")==0) {
@@ -2475,30 +2468,26 @@ int cmd_set_auto_reconnect(char* arg)
     return 0;
 }
 
-int cmd_set_marcdump(char* arg)
+int cmd_set_marcdump(const char* arg)
 {
-    if(marcdump && marcdump != stderr) { /* don't close stdout*/
-        perror("unable to close apdu log file");      
+    if(marc_file && marc_file != stderr) { /* don't close stdout*/
+        fclose(marc_file);
     }
-    marcdump=NULL;
-    
-    if(strlen(arg)<1) {
-        return 1;
+
+    if (!strcmp(arg, ""))
+        marc_file = 0;
+    else if (!strcmp(arg, "-"))
+        marc_file = stderr;
+    else
+    {
+        marc_file = fopen(arg, "a");
+        if (!marc_file)
+            perror("unable to open marc log file");
     }
-    
-    if(!strcmp(arg,"-")) 
-        marcdump=stderr;      
-    else 
-        marcdump=fopen(arg, "a");
-    
-    if(!marcdump) {
-        perror("unable to open apdu marcdump file no marcdump done\n");
-    }
-    
     return 1;
 }
 
-int cmd_set_proxy(char* arg)
+int cmd_set_proxy(const char* arg)
 {
     if(yazProxy) free(yazProxy);
     yazProxy=NULL;
@@ -2512,7 +2501,7 @@ int cmd_set_proxy(char* arg)
 /* 
    this command takes 3 arge {name class oid} 
 */
-int cmd_register_oid(char* args) {
+int cmd_register_oid(const char* args) {
     static struct {
         char* className;
         oid_class oclass;
@@ -2587,7 +2576,7 @@ int cmd_register_oid(char* args) {
     return 1;  
 }
 
-int cmd_push_command(char* arg) 
+int cmd_push_command(const char* arg) 
 {
 #if HAVE_READLINE_HISTORY_H
     if(strlen(arg)>1) 
@@ -2693,16 +2682,19 @@ void wait_and_handle_responce()
             odr_setbuf(in, netbuffer, res, 0);
             if (!z_APDU(in, &apdu, 0, 0))
             {
+                FILE *f = ber_file ? ber_file : stdout;
                 odr_perror(in, "Decoding incoming APDU");
-                fprintf(stderr, "[Near %d]\n", odr_offset(in));
-                fprintf(stderr, "Packet dump:\n---------\n");
-                odr_dumpBER(stderr, netbuffer, res);
-                fprintf(stderr, "---------\n");
+                fprintf(f, "[Near %d]\n", odr_offset(in));
+                fprintf(f, "Packet dump:\n---------\n");
+                odr_dumpBER(f, netbuffer, res);
+                fprintf(f, "---------\n");
                 if (apdu_file)
                     z_APDU(print, &apdu, 0, 0);
                 close_session ();
                 break;
             }
+            if (ber_file)
+                odr_dumpBER(ber_file, netbuffer, res);
             if (apdu_file && !z_APDU(print, &apdu, 0, 0))
             {
                 odr_perror(print, "Failed to print incoming APDU");
@@ -2775,7 +2767,7 @@ void wait_and_handle_responce()
 }
 
 
-int cmd_cclparse(char* arg) 
+int cmd_cclparse(const char* arg) 
 {
     int error, pos;
     struct ccl_rpn_node *rpn=NULL;
@@ -2803,7 +2795,7 @@ int cmd_cclparse(char* arg)
 }
 
 
-int cmd_set_otherinfo(char* args)
+int cmd_set_otherinfo(const char* args)
 {
     char oid[101], otherinfoString[101];
     int otherinfoNo;
@@ -2842,7 +2834,7 @@ int cmd_set_otherinfo(char* args)
     return 0;
 }
 
-int cmd_list_otherinfo(char* args)
+int cmd_list_otherinfo(const char* args)
 {
     int i;	   
     
@@ -2877,7 +2869,7 @@ int cmd_list_otherinfo(char* args)
 }
 
 
-int cmd_list_all(char* args) {
+int cmd_list_all(const char* args) {
     int i;
     
     /* connection options */
@@ -2935,7 +2927,7 @@ int cmd_list_all(char* args) {
     
     /* loging options */
     printf("APDU log             : %s\n",apdu_file?"on":"off");
-    printf("Record log           : %s\n",marcdump?"on":"off");
+    printf("Record log           : %s\n",marc_file?"on":"off");
     
     /* other infos */
     printf("Other Info: \n");
@@ -2944,7 +2936,7 @@ int cmd_list_all(char* args) {
     return 0;
 }
 
-int cmd_clear_otherinfo(char* args) 
+int cmd_clear_otherinfo(const char* args) 
 {
     if(strlen(args)>0) {
         int otherinfoNo;
@@ -2972,18 +2964,18 @@ int cmd_clear_otherinfo(char* args)
     return 0;
 }
 
-static int cmd_help (char *line);
+static int cmd_help (const char *line);
 
 typedef char *(*completerFunctionType)(const char *text, int state);
 
 static struct {
     char *cmd;
-    int (*fun)(char *arg);
+    int (*fun)(const char *arg);
     char *ad;
 	completerFunctionType rl_completerfunction;
     int complete_filenames;
     char **local_tabcompletes;
-} cmd[] = {
+} cmd_array[] = {
     {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]",NULL,0,NULL},
     {"quit", cmd_quit, "",NULL,0,NULL},
     {"find", cmd_find, "<query>",NULL,0,NULL},
@@ -3016,17 +3008,18 @@ static struct {
     {".", cmd_source, "<filename>",NULL,1,NULL},
     {"!", cmd_subshell, "Subshell command",NULL,1,NULL},
     {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,1,NULL},
+    {"set_berfile", cmd_set_berfile, "<filename>",NULL,1,NULL},
     {"set_marcdump", cmd_set_marcdump," <filename>",NULL,1,NULL},
     {"set_cclfile", cmd_set_cclfile," <filename>",NULL,1,NULL},
     {"set_auto_reconnect", cmd_set_auto_reconnect," on|off",complete_auto_reconnect,1,NULL},
 	{"set_otherinfo", cmd_set_otherinfo,"<otherinfoinddex> <oid> <string>",NULL,0,NULL},
     {"register_oid", cmd_register_oid,"<name> <class> <oid>",NULL,0,NULL},
     {"push_command", cmd_push_command,"<command>",command_generator,0,NULL},
-	{"register_tab", cmd_register_tab,"<commandname> <tab>",command_generator,0,NULL},
-	{"cclparse", cmd_cclparse,"<ccl find command>",NULL,0,NULL},
-	{"list_otherinfo",cmd_list_otherinfo,"[otherinfoinddex]",NULL,0,NULL},
-	{"list_all",cmd_list_all,"",NULL,0,NULL},
-	{"clear_otherinfo",cmd_clear_otherinfo,"",NULL,0,NULL},
+    {"register_tab", cmd_register_tab,"<commandname> <tab>",command_generator,0,NULL},
+    {"cclparse", cmd_cclparse,"<ccl find command>",NULL,0,NULL},
+    {"list_otherinfo",cmd_list_otherinfo,"[otherinfoinddex]",NULL,0,NULL},
+    {"list_all",cmd_list_all,"",NULL,0,NULL},
+    {"clear_otherinfo",cmd_clear_otherinfo,"",NULL,0,NULL},
     /* Server Admin Functions */
     {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0,NULL},
     {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0,NULL},
@@ -3041,7 +3034,7 @@ static struct {
     {0,0,0,0,0,0}
 };
 
-static int cmd_help (char *line)
+static int cmd_help (const char *line)
 {
     int i;
     char topic[21];
@@ -3051,9 +3044,9 @@ static int cmd_help (char *line)
 
     if (*topic == 0)
         printf("Commands:\n");
-    for (i = 0; cmd[i].cmd; i++)
-        if (*topic == 0 || strcmp (topic, cmd[i].cmd) == 0)
-            printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
+    for (i = 0; cmd_array[i].cmd; i++)
+        if (*topic == 0 || strcmp (topic, cmd_array[i].cmd) == 0)
+            printf("   %s %s\n", cmd_array[i].cmd, cmd_array[i].ad);
     if (strcmp (topic, "find") == 0)
     {
         printf ("RPN:\n");
@@ -3081,7 +3074,7 @@ static int cmd_help (char *line)
     return 1;
 }
 
-int cmd_register_tab(char* arg) {
+int cmd_register_tab(const char* arg) {
 	
     char command[101], tabargument[101];
     int i;
@@ -3093,31 +3086,31 @@ int cmd_register_tab(char* arg) {
     }
     
     /* locate the amdn in the list */
-    for (i = 0; cmd[i].cmd; i++) {
-        if (!strncmp(cmd[i].cmd, command, strlen(command))) {
+    for (i = 0; cmd_array[i].cmd; i++) {
+        if (!strncmp(cmd_array[i].cmd, command, strlen(command))) {
             break;
         }
     }
     
-    if(!cmd[i].cmd) { 
+    if(!cmd_array[i].cmd) { 
         fprintf(stderr,"Unknown command %s\n",command);
         return 1;
     }
     
         
-    if(!cmd[i].local_tabcompletes)
-        cmd[i].local_tabcompletes = (char **) calloc(1,sizeof(char**));
+    if(!cmd_array[i].local_tabcompletes)
+        cmd_array[i].local_tabcompletes = (char **) calloc(1,sizeof(char**));
     
     num_of_tabs=0;		
     
-    tabslist = cmd[i].local_tabcompletes;
+    tabslist = cmd_array[i].local_tabcompletes;
     for(;tabslist && *tabslist;tabslist++) {
         num_of_tabs++;
     }
     
-    cmd[i].local_tabcompletes =  (char **)
-        realloc(cmd[i].local_tabcompletes,(num_of_tabs+2)*sizeof(char**));
-    tabslist=cmd[i].local_tabcompletes;
+    cmd_array[i].local_tabcompletes =  (char **)
+        realloc(cmd_array[i].local_tabcompletes,(num_of_tabs+2)*sizeof(char**));
+    tabslist=cmd_array[i].local_tabcompletes;
     tabslist[num_of_tabs]=strdup(tabargument);
     tabslist[num_of_tabs+1]=NULL;
     return 1;
@@ -3144,9 +3137,8 @@ void process_cmd_line(char* line)
     
     /* removed tailing spaces from the arg command */
     { 
-        char* p;
+        char* p = arg;
         char* lastnonspace=NULL;
-        p = arg;
         
         for(;*p; ++p) {
             if(!isspace(*p)) {
@@ -3157,15 +3149,14 @@ void process_cmd_line(char* line)
             *(++lastnonspace) = 0;
     }
     
-    
-    for (i = 0; cmd[i].cmd; i++)
-        if (!strncmp(cmd[i].cmd, word, strlen(word)))
+    for (i = 0; cmd_array[i].cmd; i++)
+        if (!strncmp(cmd_array[i].cmd, word, strlen(word)))
         {
-            res = (*cmd[i].fun)(arg);
+            res = (*cmd_array[i].fun)(arg);
             break;
         }
     
-    if (!cmd[i].cmd) /* dump our help-screen */
+    if (!cmd_array[i].cmd) /* dump our help-screen */
     {
         printf("Unknown command: %s.\n", word);
         printf("use help for list of commands\n");
@@ -3180,8 +3171,8 @@ void process_cmd_line(char* line)
     
     if(apdu_file)
         fflush(apdu_file);
-    if(marcdump)
-        fflush(marcdump);
+    if(marc_file)
+        fflush(marc_file);
 }
 
 
@@ -3191,10 +3182,10 @@ char *command_generator(const char *text, int state)
     if (state==0) {
         idx = 0;
     }
-    for( ; cmd[idx].cmd; ++idx) {
-        if (!strncmp(cmd[idx].cmd,text,strlen(text))) {
+    for( ; cmd_array[idx].cmd; ++idx) {
+        if (!strncmp(cmd_array[idx].cmd,text,strlen(text))) {
             ++idx;  /* skip this entry on the next run */
-            return strdup(cmd[idx-1].cmd);
+            return strdup(cmd_array[idx-1].cmd);
         }
     }
     return NULL;
@@ -3227,18 +3218,17 @@ char ** readline_completer(char *text, int start, int end) {
             return NULL;
         }
         
-        for (i = 0; cmd[i].cmd; i++) {
-            if (!strncmp(cmd[i].cmd, word, strlen(word))) {
+        for (i = 0; cmd_array[i].cmd; i++) {
+            if (!strncmp(cmd_array[i].cmd, word, strlen(word))) {
                 break;
             }
         }
         
-        if(!cmd[i].cmd) return NULL;
+        if(!cmd_array[i].cmd) return NULL;
         
+        curret_global_list = cmd_array[i].local_tabcompletes;
         
-        curret_global_list = cmd[i].local_tabcompletes;
-        
-        completerToUse = cmd[i].rl_completerfunction;
+        completerToUse = cmd_array[i].rl_completerfunction;
         if(completerToUse==NULL)  /* if no pr. command completer is defined use the default completer */
             completerToUse = default_completer;
         
@@ -3252,11 +3242,11 @@ char ** readline_completer(char *text, int start, int end) {
                 completion_matches(text,
                                    (CPFunction*)completerToUse);
 #endif
-            if(!cmd[i].complete_filenames) 
+            if(!cmd_array[i].complete_filenames) 
                 rl_attempted_completion_over = 1;
             return res;
         } else {
-            if(!cmd[i].complete_filenames) 
+            if(!cmd_array[i].complete_filenames) 
                 rl_attempted_completion_over = 1;
             return 0;
         }
@@ -3326,7 +3316,7 @@ int main(int argc, char **argv)
 #endif
 #endif
 
-    while ((ret = options("k:c:a:m:v:p:u:t:", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:a:b:m:v:p:u:t:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -3342,7 +3332,7 @@ int main(int argc, char **argv)
             kilobytes = atoi(arg);
             break;
         case 'm':
-            if (!(marcdump = fopen (arg, "a")))
+            if (!(marc_file = fopen (arg, "a")))
             {
                 perror (arg);
                 exit (1);
@@ -3354,6 +3344,12 @@ int main(int argc, char **argv)
         case 'c':
             strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
             ccl_fields[sizeof(ccl_fields)-1] = '\0';
+            break;
+        case 'b':
+            if (!strcmp(arg, "-"))
+                ber_file=stderr;
+            else
+                ber_file=fopen(arg, "a");
             break;
         case 'a':
             if (!strcmp(arg, "-"))
@@ -3377,7 +3373,7 @@ int main(int argc, char **argv)
             break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
-                     "[-c cclfields]\n      [-p <proxy-addr>] [-u <auth>] "
+                     "[-b berdump] [-c cclfields]\n      [-p <proxy-addr>] [-u <auth>] "
                      "[-k size] [<server-addr>]\n",
                      prog);
             exit (1);

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.15 2003-01-06 08:20:26 adam Exp $
+ * $Id: admin.c,v 1.16 2003-03-11 11:07:47 adam Exp $
  */
 
 #include <stdio.h>
@@ -129,7 +129,7 @@ int sendAdminES(int type, char* param1)
 
 /* cmd_adm_reindex
    Ask the specified database to fully reindex itself */
-int cmd_adm_reindex(char* arg)
+int cmd_adm_reindex(const char *arg)
 {
     sendAdminES(Z_ESAdminOriginPartToKeep_reIndex, NULL);
     return 2;
@@ -138,7 +138,7 @@ int cmd_adm_reindex(char* arg)
 /* cmd_adm_truncate
    Truncate the specified database, removing all records and index entries, but leaving 
    the database & it's explain information intact ready for new records */
-int cmd_adm_truncate(char* arg)
+int cmd_adm_truncate(const char *arg)
 {
     if ( arg )
     {
@@ -150,7 +150,7 @@ int cmd_adm_truncate(char* arg)
 
 /* cmd_adm_create
    Create a new database */
-int cmd_adm_create(char* arg)
+int cmd_adm_create(const char *arg)
 {
     if ( arg )
     {
@@ -162,7 +162,7 @@ int cmd_adm_create(char* arg)
 
 /* cmd_adm_drop
    Drop (Delete) a database */
-int cmd_adm_drop(char* arg)
+int cmd_adm_drop(const char *arg)
 {
     if ( arg )
     {
@@ -178,7 +178,7 @@ int cmd_adm_drop(char* arg)
    to existing records */
 
 #if HAVE_FNMATCH_H
-int cmd_adm_import(char *arg)
+int cmd_adm_import(const char *arg)
 {
     char type_str[20], dir_str[1024], pattern_str[1024];
     char *cp;
@@ -270,7 +270,7 @@ int cmd_adm_import(char *arg)
 
 /* "Freshen" the specified database, by checking metadata records against the sources from which they were 
    generated, and creating a new record if the source has been touched since the last extraction */
-int cmd_adm_refresh(char* arg)
+int cmd_adm_refresh(const char *arg)
 {
     if ( arg )
     {
@@ -282,19 +282,19 @@ int cmd_adm_refresh(char* arg)
 
 /* cmd_adm_commit 
    Make imported records a permenant & visible to the live system */
-int cmd_adm_commit(char* arg)
+int cmd_adm_commit(const char *arg)
 {
     sendAdminES(Z_ESAdminOriginPartToKeep_commit, NULL);
     return 2;
 }
 
-int cmd_adm_shutdown(char* arg)
+int cmd_adm_shutdown(const char *arg)
 {
     sendAdminES(Z_ESAdminOriginPartToKeep_shutdown, NULL);
     return 2;
 }
 
-int cmd_adm_startup(char* arg)
+int cmd_adm_startup(const char *arg)
 {
     sendAdminES(Z_ESAdminOriginPartToKeep_start, NULL);
     return 2;
