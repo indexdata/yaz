@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.34  2000-12-05 10:06:23  adam
+ * Revision 1.35  2000-12-05 14:44:25  adam
+ * Readers skips <! ...> sections.
+ *
+ * Revision 1.34  2000/12/05 10:06:23  adam
  * Added support for null-data rules like <tag/>.
  *
  * Revision 1.33  2000/11/29 14:22:47  adam
@@ -428,6 +431,14 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    {
 		end_tag = 1;
 		c = (*get_byte)(fh);
+	    }
+	    else if (c == '!')  /* tags/comments that we don't deal with yet */
+	    {
+		while (c && c != '>')
+		    c = (*get_byte)(fh);
+		if (c)
+		    c = (*get_byte)(fh);
+		continue;
 	    }
 	    while (c && c != '>' && c != '/' && !d1_isspace(c))
 	    {
