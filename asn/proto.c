@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.5  1995-02-14 11:54:22  quinn
+ * Revision 1.6  1995-03-01 14:46:03  quinn
+ * Fixed protocol bug in 8777query.
+ *
+ * Revision 1.5  1995/02/14  11:54:22  quinn
  * Fixing include.
  *
  * Revision 1.4  1995/02/10  15:54:30  quinn
@@ -291,7 +294,7 @@ int z_Query(ODR o, Z_Query **p, int opt)
     static Odr_arm arm[] = 
     {
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Query_type_1, z_RPNQuery},
-    	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Query_type_2, odr_octetstring},
+    	{ODR_EXPLICIT, ODR_CONTEXT, 2, Z_Query_type_2, odr_octetstring},
     	{-1, -1, -1, -1, 0}
     };
 
