@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.6  1997-04-30 08:52:07  quinn
+ * Revision 1.7  1997-09-01 08:48:12  adam
+ * New windows NT/95 port using MSV5.0. Only a few changes made
+ * to avoid warnings.
+ *
+ * Revision 1.6  1997/04/30 08:52:07  quinn
  * Null
  *
  * Revision 1.5  1996/10/11  15:00:25  adam
@@ -189,7 +193,7 @@ void ccl_qual_rm (CCL_bibset *b)
  * len:    Length of name.
  * return: Attribute info. NULL if not found.
  */
-struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name, int len)
+struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name, size_t len)
 {
     struct ccl_qualifier *q;
 

@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.6  1997-04-30 08:52:07  quinn
+ * Revision 1.7  1997-09-01 08:48:12  adam
+ * New windows NT/95 port using MSV5.0. Only a few changes made
+ * to avoid warnings.
+ *
+ * Revision 1.6  1997/04/30 08:52:07  quinn
  * Null
  *
  * Revision 1.5  1996/10/11  15:00:26  adam
@@ -114,7 +118,7 @@ static int token_cmp (const char *kw, struct ccl_token *token)
         return 0;
     while ((cp2 = strchr (cp1, ' ')))
     {
-        if (token->len == cp2-cp1)
+        if (token->len == (size_t) (cp2-cp1))
             if (ccl_case_sensitive)
             {
                 if (!memcmp (cp1, token->name, token->len))

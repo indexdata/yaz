@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.7  1997-05-14 06:53:26  adam
+ * Revision 1.8  1997-09-01 08:48:11  adam
+ * New windows NT/95 port using MSV5.0. Only a few changes made
+ * to avoid warnings.
+ *
+ * Revision 1.7  1997/05/14 06:53:26  adam
  * C++ support.
  *
  * Revision 1.6  1997/04/30 08:52:06  quinn
@@ -260,7 +264,7 @@ static struct ccl_rpn_node *search_term (struct ccl_rpn_attr **qa)
     struct ccl_rpn_node *p;
     struct ccl_token *lookahead = look_token;
     int len = 0;
-    int no, i;
+    size_t no, i;
     int left_trunc = 0;
     int right_trunc = 0;
     int mid_trunc = 0;
