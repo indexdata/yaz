@@ -8,6 +8,8 @@ when decoding). Needed to talk to some servers.
 
 Demo client can request simple element set names.
 
+Added Diagnostic Format.
+
 --- 1.0b3 1995/08/24
 
 Fixed bug in the frontend-server. The numberOfRecordsReturned field was
