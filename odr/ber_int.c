@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.18  2000-02-29 13:44:55  adam
+ * Revision 1.19  2000-10-06 12:46:27  adam
+ * Including sys/types.h and netinet/in.h instead on arpa/inet.h on Unix.
+ *
+ * Revision 1.18  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.17  2000/02/28 11:20:06  adam
@@ -71,7 +74,8 @@
 #ifdef WIN32
 #include <winsock.h>
 #else
-#include <arpa/inet.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 #endif
 
 #include <yaz/odr.h>
