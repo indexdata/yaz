@@ -102,6 +102,8 @@ server  - This is the implementation of the server frontend. It
 client  - A demonstration client. If we come upon a good design for a
 	higher level client API, that will live here.
 
+ztest   - A demonstration server that implements a backend.
+
 include - The various header files.
 
 makelib - This is a simple utility that gathers the libraries from the
