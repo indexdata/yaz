@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX
 
+Added new BIB-1 diagnostic messages to the handler diagbib1_str.
+
 Added call to ccl_rpn_delete in client program.
 
 Added ODR argument to ccl_rpn_query and ccl_scan_query to provide
