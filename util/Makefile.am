@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.20 2003-05-27 21:12:23 adam Exp $
+## $Id: Makefile.am,v 1.21 2003-06-03 09:17:12 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 
@@ -10,7 +10,8 @@ TESTS = $(check_PROGRAMS)
 
 bin_SCRIPTS = yaz-asncomp
 
-EXTRA_DIST = yaz-asncomp cvs-date.tcl charconv.tcl charconv.sgm
+EXTRA_DIST = yaz-asncomp cvs-date.tcl \
+ charconv.tcl charconv.sgm charconv_cjk.xml
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
@@ -37,9 +38,9 @@ tstmatchstr_SOURCES = tstmatchstr.c
 tstwrbuf_LDADD = libutil.la
 tstwrbuf_SOURCES = tstwrbuf.c
 
-# MARC8 C conversion is generated from charconv.sgm
+# MARC8 conversion is generated from charconv.sgm
 marc8.c: charconv.sgm charconv.tcl
-	cd $(srcdir); ./charconv.tcl -p marc8 -s 50 charconv.sgm marc8.c
+	cd $(srcdir); ./charconv.tcl -p marc8 -s 50 charconv.sgm charconv_cjk.xml -o marc8.c
 
 libutil_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
    nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
