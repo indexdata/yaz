@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.72  2001-03-25 21:55:13  adam
+ * Revision 1.73  2001-06-28 09:27:06  adam
+ * Number of started sessions logged.
+ *
+ * Revision 1.72  2001/03/25 21:55:13  adam
  * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
  *
  * Revision 1.71  2001/03/21 12:43:36  adam
@@ -590,6 +593,7 @@ void sigterm(int sig)
 }
 
 static void *new_session (void *vp);
+static int no_sessions = 0;
 
 /* UNIX listener */
 static void listener(IOCHAN h, int event)
@@ -605,6 +609,7 @@ static void listener(IOCHAN h, int event)
 	{
 	    int res;
 
+            ++no_sessions;
 	    if (pipe(hand) < 0)
 	    {
 		yaz_log(LOG_FATAL|LOG_ERRNO, "pipe");
@@ -697,8 +702,10 @@ static void listener(IOCHAN h, int event)
 	    close(hand[1]);
 	}
 	else
+	{
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
-
+	    ++no_sessions;
+	}
 #if HAVE_PTHREAD_H
 	if (control_block.threads)
 	{
@@ -758,7 +765,7 @@ static void *new_session (void *vp)
     iochan_setdata(new_chan, newas);
     iochan_settimeout(new_chan, control_block.idle_timeout * 60);
     a = cs_addrstr(new_line);
-    yaz_log(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+    yaz_log(LOG_LOG, "Starting session %d from %s", no_sessions, a ? a : "[Unknown]");
     
     if (control_block.threads)
     {
