@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+MARC conversion can now generate ISO2709 output in another
+character set. yaz-marcdump uses this facility if you invoke it
+with option -O.
+
 Added missing C decl macros for include/yaz/{soap.h,srw.h}, so that
 functions from there can be used from C++.
 

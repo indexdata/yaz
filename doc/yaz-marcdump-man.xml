@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-marcdump-man.xml,v 1.2 2003-11-18 20:34:34 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.3 2003-12-11 00:37:21 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>
@@ -16,6 +16,7 @@
    <command>yaz-marcdump</command>
    <arg choice="opt"><option>-x</option></arg>
    <arg choice="opt"><option>-X</option></arg>
+   <arg choice="opt"><option>-I</option></arg>
    <arg choice="opt"><option>-O</option></arg>
    <arg choice="opt"><option>-f <replaceable>from</replaceable></option></arg>
    <arg choice="opt"><option>-t <replaceable>to</replaceable></option></arg>
@@ -64,6 +65,15 @@
    </varlistentry>
 
    <varlistentry>
+    <term>-I</term>
+    <listitem><para>
+      Print MARC records in ISO2709 format.
+      This format is equivalent to YAZ_MARC_ISO2709 in
+      <filename>yaz/marcdisp.h</filename>.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
     <term>-O</term>
     <listitem><para>
       Print MARC records in OAIMARC. Another XML variant.
@@ -103,8 +113,14 @@
 
  <refsect1><title>EXAMPLES</title>
   <para>
-   The following command converts MARC21/USMARC using MARC-8 encoding to
-   MARCXML in UTF-8 encoding.
+   The following command converts MARC21/USMARC in MARC-8 encoding to
+   MARC21/USMARC in UTF-8 encoding. (Both input and output is in ISO2709).
+   <screen>
+    yaz-marcdump -f MARC-8 -t UTF-8 -I marc21.raw >marc21.utf8.raw
+   </screen>
+  </para>
+  <para>
+   The same records may be converted to MARCXML instead in UTF-8:
    <screen>
     yaz-marcdump -f MARC-8 -t UTF-8 -X marc21.raw >marcxml.xml
    </screen>

@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.10 2003-12-04 12:57:30 adam Exp $
+ * $Id: zoom-c.c,v 1.11 2003-12-11 00:37:22 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -918,7 +918,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.10 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.11 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1359,6 +1359,62 @@ ZOOM_record_destroy (ZOOM_record rec)
     xfree (rec);
 }
 
+static const char *marc_iconv_return(ZOOM_record rec, int marc_type,
+				     int *len,
+				     const char *buf, int sz,
+				     const char *record_charset)
+{
+    char to[40];
+    char from[40];
+    yaz_iconv_t cd = 0;
+    yaz_marc_t mt = yaz_marc_create();
+
+    *from = '\0';
+    strcpy(to, "UTF-8");
+    if (record_charset && *record_charset)
+    {
+	/* Use "from,to" or just "from" */
+	const char *cp =strchr(record_charset, ',');
+	int clen = strlen(record_charset);
+	if (cp && cp[1])
+	{
+	    strncpy( to, cp+1, sizeof(to)-1);
+	    to[sizeof(to)-1] = '\0';
+	    clen = cp - record_charset;
+	}
+	if (clen > sizeof(from)-1)
+	    clen = sizeof(from)-1;
+	
+	if (clen)
+	    strncpy(from, record_charset, clen);
+	from[clen] = '\0';
+    }
+
+    if (*from && *to)
+    {
+	cd = yaz_iconv_open(to, from);
+	yaz_marc_iconv(mt, cd);
+    }
+
+    yaz_marc_xml(mt, marc_type);
+    if (!rec->wrbuf_marc)
+	rec->wrbuf_marc = wrbuf_alloc();
+    wrbuf_rewind (rec->wrbuf_marc);
+    if (yaz_marc_decode_wrbuf (mt, buf, sz, rec->wrbuf_marc) > 0)
+    {
+	yaz_marc_destroy(mt);
+	if (cd)
+	    yaz_iconv_close(cd);
+	if (len)
+	    *len = wrbuf_len(rec->wrbuf_marc);
+	return wrbuf_buf(rec->wrbuf_marc);
+    }
+    yaz_marc_destroy(mt);
+    if (cd)
+	yaz_iconv_close(cd);
+    return 0;
+}
+
 static const char *record_iconv_return(ZOOM_record rec, int *len,
 				       const char *buf, int sz,
 				       const char *record_charset)
@@ -1515,6 +1571,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
         else if (r->which == Z_External_octet)
         {
             yaz_marc_t mt;
+	    const char *ret_buf;
             switch (ent->value)
             {
             case VAL_SOIF:
@@ -1525,23 +1582,13 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
             case VAL_APPLICATION_XML:
                 break;
             default:
-                if (!rec->wrbuf_marc)
-                    rec->wrbuf_marc = wrbuf_alloc();
-
-                mt = yaz_marc_create();
-                wrbuf_rewind (rec->wrbuf_marc);
-                if (yaz_marc_decode_wrbuf (
-                        mt, (const char *) r->u.octet_aligned->buf,
-                        r->u.octet_aligned->len,
-                        rec->wrbuf_marc) > 0)
-                {
-                    yaz_marc_destroy(mt);
-		    return record_iconv_return(rec, len,
-					       wrbuf_buf(rec->wrbuf_marc),
-					       wrbuf_len(rec->wrbuf_marc),
-					       charset);
-                }
-                yaz_marc_destroy(mt);
+		ret_buf = marc_iconv_return(
+		    rec, YAZ_MARC_LINE, len,
+		    (const char *) r->u.octet_aligned->buf,
+		    r->u.octet_aligned->len,
+		    charset);
+		if (ret_buf)
+		    return ret_buf;
             }
 	    return record_iconv_return(rec, len,
 				       (const char *) r->u.octet_aligned->buf,
@@ -1582,6 +1629,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
 				       charset);
         else if (r->which == Z_External_octet)
         {
+	    const char *ret_buf;
             yaz_marc_t mt;
             int marc_decode_type = YAZ_MARC_MARCXML;
 
@@ -1597,24 +1645,13 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
             case VAL_APPLICATION_XML:
                 break;
             default:
-                if (!rec->wrbuf_marc)
-                    rec->wrbuf_marc = wrbuf_alloc();
-                wrbuf_rewind (rec->wrbuf_marc);
-                mt = yaz_marc_create();
-
-                yaz_marc_xml(mt, YAZ_MARC_MARCXML);
-                if (yaz_marc_decode_wrbuf (
-                        mt, (const char *) r->u.octet_aligned->buf,
-                        r->u.octet_aligned->len,
-                        rec->wrbuf_marc) > 0)
-                {
-                    yaz_marc_destroy(mt);
-		    return record_iconv_return(rec, len,
-					       wrbuf_buf(rec->wrbuf_marc),
-					       wrbuf_len(rec->wrbuf_marc),
-					       charset);
-                }
-                yaz_marc_destroy(mt);
+		ret_buf = marc_iconv_return(
+		    rec, marc_decode_type, len,
+		    (const char *) r->u.octet_aligned->buf,
+		    r->u.octet_aligned->len,
+		    charset);
+		if (ret_buf)
+		    return ret_buf;
             }
 	    return record_iconv_return(rec, len,
 				       (const char *) r->u.octet_aligned->buf,

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: wrbuf.c,v 1.2 2003-12-11 00:37:22 adam Exp $
  */
 
 /*
@@ -19,6 +19,7 @@
 #include <stdarg.h>
 
 #include <yaz/wrbuf.h>
+#include <yaz/yaz-iconv.h>
 
 WRBUF wrbuf_alloc(void)
 {
@@ -131,3 +132,29 @@ void wrbuf_printf(WRBUF b, const char *fmt, ...)
     va_end(ap);
 }
 
+int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
+{
+    if (cd)
+    {
+	char outbuf[12];
+	size_t inbytesleft = size;
+	const char *inp = buf;
+	while (inbytesleft)
+	{
+	    size_t outbytesleft = sizeof(outbuf);
+	    char *outp = outbuf;
+	    size_t r = yaz_iconv(cd, (char**) &inp,  &inbytesleft,
+				 &outp, &outbytesleft);
+	    if (r == (size_t) (-1))
+	    {
+		int e = yaz_iconv_error(cd);
+		if (e != YAZ_ICONV_E2BIG)
+		    break;
+	    }
+	    wrbuf_write(b, outbuf, outp - outbuf);
+	}
+    }
+    else
+	wrbuf_write(b, buf, size);
+    return wrbuf_len(b);
+}

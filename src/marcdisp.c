@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: marcdisp.c,v 1.2 2003-12-11 00:37:22 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -20,6 +20,7 @@ struct yaz_marc_t_ {
     WRBUF m_wr;
     int xml;
     int debug;
+    yaz_iconv_t iconv_cd;
 };
 
 yaz_marc_t yaz_marc_create(void)
@@ -28,6 +29,7 @@ yaz_marc_t yaz_marc_create(void)
     mt->xml = YAZ_MARC_LINE;
     mt->debug = 0;
     mt->m_wr = wrbuf_alloc();
+    mt->iconv_cd = 0;
     return mt;
 }
 
@@ -42,63 +44,56 @@ void yaz_marc_destroy(yaz_marc_t mt)
 static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
 {
     size_t i;
-    for (i = 0; i<len; i++)
+    if (mt->xml == YAZ_MARC_ISO2709)
     {
-        if (mt->xml)
-        {
-            switch (buf[i]) {
-            case '<':
-                wrbuf_puts(wr, "&lt;");
-                break;
-            case '>':
-                wrbuf_puts(wr, "&gt;");
-                break;
-            case '&':
-                wrbuf_puts(wr, "&amp;");
-                break;
-	    case '"':
-		wrbuf_puts(wr, "&quot;");
-		break;
-	    case '\'':
-		wrbuf_puts(wr, "&apos;");
-		break;
-            default:
-                wrbuf_putc(wr, buf[i]);
-            }
-        }
-        else
-            wrbuf_putc(wr, buf[i]);
+	wrbuf_iconv_write(wr, mt->iconv_cd, buf, len);
     }
-}
-
-#if 0
-static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len)
-{
-    if (!mt->cd)
-        marc_cdata2 (mt, buf, len);
+    else if (mt->xml == YAZ_MARC_LINE)
+    {
+	wrbuf_iconv_write(wr, mt->iconv_cd, buf, len);
+    }
     else
     {
-        char outbuf[12];
-        size_t inbytesleft = len;
-        const char *inp = buf;
-        
-        while (inbytesleft)
-        {
-            size_t outbytesleft = sizeof(outbuf);
-            char *outp = outbuf;
-            size_t r = yaz_iconv (mt->cd, (char**) &inp, &inbytesleft, 
-                                  &outp, &outbytesleft);
-            if (r == (size_t) (-1))
-            {
-                int e = yaz_iconv_error(mt->cd);
-                if (e != YAZ_ICONV_E2BIG)
-                    break;
+	int j = 0;
+	for (i = 0; i<len; i++)
+	{
+	    switch (buf[i]) {
+	    case '<':
+		if (i > j)
+		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
+		wrbuf_puts(wr, "&lt;");
+		j=i+1;
+		break;
+	    case '>':
+		if (i > j)
+		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
+		wrbuf_puts(wr, "&gt;");
+		j=i+1;
+		break;
+	    case '&':
+		if (i > j)
+		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
+		wrbuf_puts(wr, "&amp;");
+		j=i+1;
+                break;
+	    case '"':
+		if (i > j)
+		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
+		wrbuf_puts(wr, "&quot;");
+		j=i+1;
+		break;
+	    case '\'':
+		if (i > j)
+		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
+		wrbuf_puts(wr, "&apos;");
+		j=i+1;
+		break;
             }
-            marc_cdata2 (mt, outbuf, outp - outbuf);
-        }
+	}
+	if (i > j)
+	    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
     }
 }
-#endif
 
 int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 {
@@ -125,7 +120,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	}
         return -1;
     }
-    /* ballout if bsize is known and record_length is than that */
+    /* ballout if bsize is known and record_length is less than that */
     if (bsize != -1 && record_length > bsize)
 	return -1;
     if (isdigit(buf[10]))
@@ -142,12 +137,14 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     length_starting = atoi_n (buf+21, 1);
     length_implementation = atoi_n (buf+22, 1);
 
-    if (mt->xml)
+    if (mt->xml != YAZ_MARC_LINE)
     {
         char str[80];
         int i;
         switch(mt->xml)
         {
+	case YAZ_MARC_ISO2709:
+	    break;
         case YAZ_MARC_SIMPLEXML:
             wrbuf_puts (wr, "<iso2709\n");
             sprintf (str, " RecordStatus=\"%c\"\n", buf[5]);
@@ -208,6 +205,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             wrbuf_puts (wr, "-->\n");
     }
 
+    /* first pass. determine length of directory & base of data */
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
     {
         entry_p += 3+length_data_entry+length_starting;
@@ -215,6 +213,59 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             return -1;
     }
     base_address = entry_p+1;
+
+    if (mt->xml == YAZ_MARC_ISO2709)
+    {
+	WRBUF wr_head = wrbuf_alloc();
+	WRBUF wr_dir = wrbuf_alloc();
+	WRBUF wr_tmp = wrbuf_alloc();
+
+	int data_p = 0;
+	/* second pass. create directory for ISO2709 output */
+	for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
+	{
+	    int data_length, data_offset, end_offset;
+	    int i, sz1, sz2;
+	    
+	    wrbuf_write(wr_dir, buf+entry_p, 3);
+	    entry_p += 3;
+	    
+	    data_length = atoi_n (buf+entry_p, length_data_entry);
+	    entry_p += length_data_entry;
+	    data_offset = atoi_n (buf+entry_p, length_starting);
+	    entry_p += length_starting;
+	    i = data_offset + base_address;
+	    end_offset = i+data_length-1;
+	    
+	    while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS &&
+		   i < end_offset)
+		i++;
+	    sz1 = 1+i - (data_offset + base_address);
+	    if (mt->iconv_cd)
+	    {
+		sz2 = wrbuf_iconv_write(wr_tmp, mt->iconv_cd,
+					buf + data_offset+base_address, sz1);
+		wrbuf_rewind(wr_tmp);
+	    }
+	    else
+		sz2 = sz1;
+	    wrbuf_printf(wr_dir, "%0*d", length_data_entry, sz2);
+	    wrbuf_printf(wr_dir, "%0*d", length_starting, data_p);
+	    data_p += sz2;
+	}
+	wrbuf_putc(wr_dir, ISO2709_FS);
+	wrbuf_printf(wr_head, "%05d", data_p+1 + base_address);
+	wrbuf_write(wr_head, buf+5, 7);
+	wrbuf_printf(wr_head, "%05d", base_address);
+	wrbuf_write(wr_head, buf+17, 7);
+
+	wrbuf_write(wr, wrbuf_buf(wr_head), 24);
+	wrbuf_write(wr, wrbuf_buf(wr_dir), wrbuf_len(wr_dir));
+	wrbuf_free(wr_head, 1);
+	wrbuf_free(wr_dir, 1);
+	wrbuf_free(wr_tmp, 1);
+    }
+    /* third pass. create data output */
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
     {
         int data_length;
@@ -272,31 +323,35 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             {
                 switch(mt->xml)
                 {
+		case YAZ_MARC_ISO2709:
+		    wrbuf_putc(wr, buf[i]);
+		    break;
                 case YAZ_MARC_LINE:
                     if (mt->debug)
                         wrbuf_puts (wr, " Ind: ");
-                    wrbuf_putc (wr, buf[i]);
+                    wrbuf_putc(wr, buf[i]);
                     break;
                 case YAZ_MARC_SIMPLEXML:
-                    wrbuf_printf (wr, " Indicator%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf(wr, " Indicator%d=\"%c\"", j+1, buf[i]);
                     break;
                 case YAZ_MARC_OAIMARC:
-                    wrbuf_printf (wr, " i%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf(wr, " i%d=\"%c\"", j+1, buf[i]);
                     break;
                 case YAZ_MARC_MARCXML:
-                    wrbuf_printf (wr, " ind%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf(wr, " ind%d=\"%c\"", j+1, buf[i]);
                 }
             }
 	}
-        if (mt->xml)
+        if (mt->xml == YAZ_MARC_SIMPLEXML || mt->xml == YAZ_MARC_MARCXML
+	    || mt->xml == YAZ_MARC_OAIMARC)
         {
             wrbuf_puts (wr, ">");
             if (identifier_flag)
                 wrbuf_puts (wr, "\n");
         }
-        else
+        if (mt->xml == YAZ_MARC_LINE)
         {
-            if (mt->debug && !mt->xml)
+            if (mt->debug)
                 wrbuf_puts (wr, " Fields: ");
         }
         if (identifier_flag)
@@ -307,6 +362,12 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                 i++;
                 switch(mt->xml)
                 {
+		case YAZ_MARC_ISO2709:
+		    --i;
+		    wrbuf_iconv_write(wr, mt->iconv_cd, 
+				      buf+i, identifier_length);
+		    i += identifier_length;
+		    break;
                 case YAZ_MARC_LINE: 
                     wrbuf_puts (wr, " $"); 
                     for (j = 1; j<identifier_length; j++, i++)
@@ -337,8 +398,13 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                        buf[i] != ISO2709_FS && i < end_offset)
                     i++;
                 marc_cdata(mt, buf + i0, i - i0, wr);
-                
-                if (mt->xml)
+
+		if (mt->xml == YAZ_MARC_ISO2709 && buf[i] != ISO2709_IDFS)
+		    marc_cdata(mt, buf + i, 1, wr);
+
+		if (mt->xml == YAZ_MARC_SIMPLEXML || 
+		    mt->xml == YAZ_MARC_MARCXML ||
+		    mt->xml == YAZ_MARC_OAIMARC)
                     wrbuf_puts (wr, "</subfield>\n");
             }
         }
@@ -347,9 +413,11 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             int i0 = i;
             while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
                 i++;
-            marc_cdata(mt, buf + i0, i - i0, wr);
+	    marc_cdata(mt, buf + i0, i - i0, wr);
+	    if (mt->xml == YAZ_MARC_ISO2709)
+		marc_cdata(mt, buf + i, 1, wr);
 	}
-        if (!mt->xml)
+        if (mt->xml == YAZ_MARC_LINE)
             wrbuf_putc (wr, '\n');
 	if (i < end_offset)
 	    wrbuf_puts (wr, "  <!-- separator but not at end of field -->\n");
@@ -388,6 +456,9 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     case YAZ_MARC_MARCXML:
         wrbuf_puts (wr, "</record>\n");
         break;
+    case YAZ_MARC_ISO2709:
+	wrbuf_putc (wr, ISO2709_RS);
+	break;
     }
     return record_length;
 }
@@ -416,6 +487,11 @@ void yaz_marc_debug(yaz_marc_t mt, int level)
 {
     if (mt)
         mt->debug = level;
+}
+
+void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd)
+{
+    mt->iconv_cd = cd;
 }
 
 /* depricated */

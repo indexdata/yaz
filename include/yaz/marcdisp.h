@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: marcdisp.h,v 1.8 2003-01-06 08:20:27 adam Exp $
+ * $Id: marcdisp.h,v 1.9 2003-12-11 00:37:21 adam Exp $
  */
 
 #ifndef MARCDISP_H
@@ -48,6 +48,10 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 #define YAZ_MARC_SIMPLEXML 1
 #define YAZ_MARC_OAIMARC   2
 #define YAZ_MARC_MARCXML   3
+#define YAZ_MARC_ISO2709   4
+
+/* supply iconv handle for character set conversion .. */
+YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
 
 /* set debug level, 0=none, 1=more, 2=even more, .. */
 YAZ_EXPORT void yaz_marc_debug(yaz_marc_t mt, int level);

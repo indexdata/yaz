@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: wrbuf.h,v 1.9 2003-07-14 12:58:18 adam Exp $
+ * $Id: wrbuf.h,v 1.10 2003-12-11 00:37:21 adam Exp $
  *
  */
 
@@ -31,6 +31,7 @@
 #define WRBUF_H
 
 #include <yaz/xmalloc.h>
+#include <yaz/yaz-iconv.h>
 
 YAZ_BEGIN_CDECL
 
@@ -49,6 +50,8 @@ YAZ_EXPORT int wrbuf_write(WRBUF b, const char *buf, int size);
 YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
 YAZ_EXPORT int wrbuf_xmlputs(WRBUF b, const char *cp);
 YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...);
+YAZ_EXPORT int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf,
+				 int size);
 
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)

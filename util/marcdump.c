@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.22 2003-02-25 18:35:49 adam Exp $
+ * $Id: marcdump.c,v 1.23 2003-12-11 00:37:23 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -36,7 +36,7 @@
 
 static void usage(const char *prog)
 {
-    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] [-x] [-O] [-X] [-v] file...\n",
+    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] [-x] [-O] [-X] [-I] [-v] file...\n",
              prog);
 } 
 
@@ -63,7 +63,7 @@ int main (int argc, char **argv)
 #endif
 #endif
 
-    while ((r = options("vc:xOXf:t:", argv, argc, &arg)) != -2)
+    while ((r = options("vc:xOXIf:t:", argv, argc, &arg)) != -2)
     {
 	int count;
 	no++;
@@ -89,8 +89,11 @@ int main (int argc, char **argv)
         case 'X':
             xml = YAZ_MARC_MARCXML;
             break;
+	case 'I':
+	    xml = YAZ_MARC_ISO2709;
+	    break;
         case 0:
-	    inf = fopen (arg, "r");
+	    inf = fopen (arg, "rb");
 	    count = 0;
 	    if (!inf)
 	    {
@@ -114,6 +117,7 @@ int main (int argc, char **argv)
                                 "unsupported\n", from, to);
                         exit(2);
                     }
+		    yaz_marc_iconv(mt, cd);
                 }
                 yaz_marc_xml(mt, xml);
                 yaz_marc_debug(mt, verbose);
@@ -136,6 +140,9 @@ int main (int argc, char **argv)
                     r = yaz_marc_decode_buf (mt, buf, -1, &result, &rlen);
                     if (r <= 0)
                         break;
+#if 1
+		    fwrite (result, rlen, 1, stdout);
+#else
                     if (!cd)
                         fwrite (result, rlen, 1, stdout);
                     else
@@ -160,7 +167,7 @@ int main (int argc, char **argv)
                             fwrite (outbuf, outp - outbuf, 1, stdout);
                         }
                     }
-
+#endif
                     if (cfile)
                     {
                         char *p = buf;
@@ -184,9 +191,11 @@ int main (int argc, char **argv)
                 count++;
                 if (cd)
                     yaz_iconv_close(cd);
+                yaz_marc_destroy(mt);
 	    }
 	    if (cfile)
 		fprintf (cfile, "};\n");
+	    fclose(inf);
             break;
         case 'v':
 	    verbose++;
