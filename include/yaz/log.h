@@ -23,78 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: log.h,v $
- * Revision 1.4  2000-09-04 08:58:15  adam
- * Added prefix yaz_ for most logging utility functions.
- *
- * Revision 1.3  2000/06/09 13:51:01  ian
- * Added LOG_APP for logging application (Rather than code) events that might
- * be useful when creating usage reports.
- *
- * Revision 1.2  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.15  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.14  1998/10/28 10:26:59  adam
- * New functions log_init_file, log_init_level, log_init_prefix.
- *
- * Revision 1.13  1998/10/13 16:11:11  adam
- * Added printf-format check for logf when using GNUC.
- *
- * Revision 1.12  1997/09/04 07:59:02  adam
- * Added include of xmalloc.h.
- *
- * Revision 1.11  1997/09/01 08:49:48  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.10  1997/05/14 06:53:40  adam
- * C++ support.
- *
- * Revision 1.9  1997/05/01 15:06:42  adam
- * Added log_mask_str_x routine.
- *
- * Revision 1.8  1996/05/01 12:45:00  quinn
- * *** empty log message ***
- *
- * Revision 1.7  1996/02/05  12:24:26  adam
- * Implemented log_event_{start,end}-functions.
- *
- * Revision 1.6  1995/10/10  16:27:06  quinn
- * *** empty log message ***
- *
- * Revision 1.5  1995/09/29  17:12:03  quinn
- * Smallish
- *
- * Revision 1.4  1995/09/27  15:02:47  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.3  1995/06/19  12:38:25  quinn
- * Reorganized include-files. Added small features.
- *
- * Revision 1.2  1995/05/16  08:50:31  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.1  1995/03/30  09:39:41  quinn
- * Moved .h files to include directory
- *
- * Revision 1.4  1994/09/28  13:07:22  adam
- * Added log_mask_str.
- *
- * Revision 1.3  1994/08/18  08:18:45  quinn
- * Added prefix to log_init.
- *
- * Revision 1.2  1994/08/17  14:27:46  quinn
- * added LOG_ERRNO
- *
- * Revision 1.1  1994/08/17  13:22:52  quinn
- * First version
- *
+ * $Id: log.h,v 1.5 2002-04-16 13:04:20 heikki Exp $
  */
 
 #ifndef LOG_H
@@ -106,13 +35,14 @@
 
 YAZ_BEGIN_CDECL
 
-#define LOG_FATAL 0x0001
-#define LOG_DEBUG 0x0002
-#define LOG_WARN  0x0004
-#define LOG_LOG   0x0008
-#define LOG_ERRNO 0x0010     /* append strerror to message */
-#define LOG_FILE  0x0020
-#define LOG_APP   0x0040     /* For application level events such as new-connection */
+#define LOG_FATAL  0x0001
+#define LOG_DEBUG  0x0002
+#define LOG_WARN   0x0004
+#define LOG_LOG    0x0008
+#define LOG_ERRNO  0x0010     /* append strerror to message */
+#define LOG_FILE   0x0020
+#define LOG_APP    0x0040     /* For application level events such as new-connection */
+#define LOG_MALLOC 0x0080     /* debugging mallocs */
 
 #define LOG_ALL   0xffff
 

@@ -3,7 +3,7 @@
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: xmalloc.c,v 1.15 2001-11-13 23:00:43 adam Exp $
+ * $Id: xmalloc.c,v 1.16 2002-04-16 13:04:20 heikki Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -214,7 +214,7 @@ void *xrealloc_f (void *o, size_t size, const char *file, int line)
     void *p = xrealloc_d (o, size, file, line);
 
 #if TRACE_XMALLOC
-    yaz_log (LOG_DEBUG,
+    yaz_log (LOG_MALLOC,
             "%s:%d: xrealloc(s=%d) %p -> %p", file, line, size, o, p);
 #endif
     if (!p)
@@ -231,7 +231,7 @@ void *xmalloc_f (size_t size, const char *file, int line)
     void *p = xmalloc_d (size, file, line);
     
 #if TRACE_XMALLOC
-    yaz_log (LOG_DEBUG, "%s:%d: xmalloc(s=%d) %p", file, line, size, p);
+    yaz_log (LOG_MALLOC, "%s:%d: xmalloc(s=%d) %p", file, line, size, p);
 #endif
     if (!p)
     {
@@ -245,7 +245,7 @@ void *xcalloc_f (size_t nmemb, size_t size, const char *file, int line)
 {
     void *p = xcalloc_d (nmemb, size, file, line);
 #if TRACE_XMALLOC
-    yaz_log (LOG_DEBUG, "%s:%d: xcalloc(s=%d) %p", file, line, size, p);
+    yaz_log (LOG_MALLOC, "%s:%d: xcalloc(s=%d) %p", file, line, size, p);
 #endif
     if (!p)
     {
@@ -259,7 +259,7 @@ char *xstrdup_f (const char *s, const char *file, int line)
 {
     char *p = (char *)xmalloc_d (strlen(s)+1, file, line);
 #if TRACE_XMALLOC
-    yaz_log (LOG_DEBUG, "%s:%d: xstrdup(s=%d) %p", file, line, strlen(s)+1, p);
+    yaz_log (LOG_MALLOC, "%s:%d: xstrdup(s=%d) %p", file, line, strlen(s)+1, p);
 #endif
     strcpy (p, s);
     return p;
@@ -271,7 +271,7 @@ void xfree_f(void *p, const char *file, int line)
         return ;
 #if TRACE_XMALLOC
     if (p)
-        yaz_log (LOG_DEBUG, "%s:%d: xfree %p", file, line, p);
+        yaz_log (LOG_MALLOC, "%s:%d: xfree %p", file, line, p);
 #endif
     xfree_d(p, file, line);
 }
