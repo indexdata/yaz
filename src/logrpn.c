@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2004, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.4 2004-11-16 17:08:11 heikki Exp $
+ * $Id: logrpn.c,v 1.5 2004-11-16 22:10:29 adam Exp $
  */
 
 /**
@@ -492,9 +492,9 @@ void log_rpn_query (Z_RPNQuery *rpn)
 void log_scan_term_level (int loglevel, 
          Z_AttributesPlusTerm *zapt, oid_value ast)
 {
+    int depth = 0;
     if (!loglevel)
         return;
-    int depth = 0;
     if (zapt->term->which == Z_Term_general) 
     {
 	yaz_log (loglevel, "%*.0s term '%.*s' (general)", depth, "",

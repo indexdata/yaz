@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.34 2004-11-16 17:08:11 heikki Exp $
+ * $Id: seshigh.c,v 1.35 2004-11-16 22:14:44 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1420,7 +1420,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.34 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.35 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1599,7 +1599,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
                                int *oid, int *errcode)
 {
     int recno, total_length = 0, toget = *num, dumped_records = 0;
-    *errcode=0;
     Z_Records *records =
         (Z_Records *) odr_malloc (a->encode, sizeof(*records));
     Z_NamePlusRecordList *reclist =
@@ -1607,6 +1606,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     Z_NamePlusRecord **list =
         (Z_NamePlusRecord **) odr_malloc (a->encode, sizeof(*list) * toget);
 
+    *errcode=0;
     records->which = Z_Records_DBOSD;
     records->u.databaseOrSurDiagnostics = reclist;
     reclist->num_records = 0;
