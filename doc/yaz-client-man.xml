@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
 ]>
-<!-- $Id: yaz-client-man.xml,v 1.1 2003-10-27 12:21:24 adam Exp $ -->
+<!-- $Id: yaz-client-man.xml,v 1.2 2004-04-28 22:44:59 adam Exp $ -->
 <refentry id="yaz-client">
  
  <refmeta>
@@ -28,12 +28,6 @@
    <arg choice="opt">addr</arg>
   </cmdsynopsis>
 
-  <cmdsynopsis>
-   <command>yaz-client-ssl</command>
-   <arg rep="repeat" choice="opt"><option>option</option></arg>
-   <arg choice="opt">addr</arg>
-  </cmdsynopsis>
-
  </refsynopsisdiv>
   
   <refsect1><title>DESCRIPTION</title>
@@ -41,10 +35,6 @@
     <command>yaz-client</command> is a Z39.50/SRW client (origin) with a
     simple command line interface that allows you to test behavior and
     performance of Z39.50 targets and SRW servers.
-   </para>
-   <para>
-    <command>yaz-client-ssl</command> is identical to
-    <command>yaz-client</command> except that it supports SSL transport.
    </para>
    <para>
     If the <replaceable>addr</replaceable> is specified, the client creates

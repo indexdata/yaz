@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.136 2004-04-17 08:24:03 adam Exp $
+dnl $Id: configure.in,v 1.137 2004-04-28 22:44:58 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.19)
 AM_MAINTAINER_MODE
@@ -151,7 +151,6 @@ if test "$openssl" != "no"; then
 	LIBS="$xLIBS"
 	CFLAGS="$xCFLAGS"
 fi
-AM_CONDITIONAL(ISSSL, test $USE_SSL = "1")
 dnl
 dnl ------ GNU Readline
 READLINE_SHARED_LIBADD=""

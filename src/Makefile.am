@@ -1,18 +1,14 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.11 2004-03-17 11:00:04 adam Exp $
+## $Id: Makefile.am,v 1.12 2004-04-28 22:44:59 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
 endif
 
-if ISSSL
-ssllib=libyazssl.la
-endif
-
 YAZ_VERSION_INFO=2:0:0
 
-lib_LTLIBRARIES = libyaz.la $(thrlib) $(ssllib)
+lib_LTLIBRARIES = libyaz.la $(thrlib) 
 
 TESTS = $(check_PROGRAMS)
 
@@ -29,7 +25,7 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
 YAZCOMP = $(top_srcdir)/util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) $(SSL_DEFS)
 AM_YFLAGS=-p cql_
 THREADED_FLAGS = @CFLAGSTHREADS@
 
@@ -68,10 +64,6 @@ libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 libyazthread_la_SOURCES=
 libyazthread_la_LIBADD=thr-nmem.lo thr-statserv.lo thr-eventl.lo
 libyazthread_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
-
-libyazssl_la_SOURCES=
-libyazssl_la_LIBADD=ssl-comstack.lo ssl-tcpip.lo
-libyazssl_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # Rules for Z39.50 V3
 $(srcdir)/z-accdes1.c \
@@ -156,12 +148,5 @@ thr-statserv.lo: statserv.c
 	$(LTCOMPILE) $(THREADED_FLAGS) -c $(srcdir)/statserv.c -o thr-statserv.lo
 thr-eventl.lo: eventl.c
 	$(LTCOMPILE) $(THREADED_FLAGS) -c $(srcdir)/eventl.c -o thr-eventl.lo
-
-# SSL versions of objects.
-ssl-comstack.lo: comstack.c
-	$(LTCOMPILE) $(SSL_CFLAGS) $(SSL_DEFS) -c $(srcdir)/comstack.c -o ssl-comstack.lo
-
-ssl-tcpip.lo: tcpip.c
-	$(LTCOMPILE) $(SSL_CFLAGS) $(SSL_DEFS) -c $(srcdir)/tcpip.c -o ssl-tcpip.lo
 
 

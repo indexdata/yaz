@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.26 2004-04-06 17:47:24 adam Exp $
+ * $Id: zoom-c.c,v 1.27 2004-04-28 22:44:59 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -185,7 +185,6 @@ void ZOOM_connection_remove_task (ZOOM_connection c)
 	switch (task->which)
 	{
 	case ZOOM_TASK_SEARCH:
-
 	    ZOOM_resultset_destroy (task->u.search.resultset);
 	    break;
 	case ZOOM_TASK_RETRIEVE:
@@ -783,6 +782,19 @@ ZOOM_resultset_records (ZOOM_resultset r, ZOOM_record *recs,
     }
 }
 
+static void get_cert(ZOOM_connection c)
+{
+    char *cert_buf;
+    int cert_len;
+    
+    if (cs_get_peer_certificate_x509(c->cs, &cert_buf, &cert_len))
+    {
+        ZOOM_connection_option_setl(c, "sslPeerCert",
+				    cert_buf, cert_len);
+	xfree(cert_buf);
+    }
+}
+
 static zoom_ret do_connect (ZOOM_connection c)
 {
     void *add;
@@ -822,6 +834,7 @@ static zoom_ret do_connect (ZOOM_connection c)
         {
             ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
             ZOOM_connection_put_event(c, event);
+	    get_cert(c);
             if (c->proto == PROTO_Z3950)
                 ZOOM_connection_send_init(c);
             else
@@ -987,7 +1000,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.26 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.27 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -3227,9 +3240,16 @@ ZOOM_connection_option_get (ZOOM_connection c, const char *key)
 
 ZOOM_API(void)
 ZOOM_connection_option_set (ZOOM_connection c, const char *key,
-                                  const char *val)
+			    const char *val)
 {
     ZOOM_options_set (c->options, key, val);
+}
+
+ZOOM_API(void)
+ZOOM_connection_option_setl (ZOOM_connection c, const char *key,
+			     const char *val, int len)
+{
+    ZOOM_options_setl (c->options, key, val, len);
 }
 
 ZOOM_API(const char *)
@@ -3367,6 +3387,7 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
         else if (ret == 0)
         {
             ZOOM_connection_put_event (c, event);
+	    get_cert(c);
             if (c->proto == PROTO_Z3950)
                 ZOOM_connection_send_init(c);
             else

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.240 2004-04-28 13:25:57 adam Exp $
+ * $Id: client.c,v 1.241 2004-04-28 22:44:58 adam Exp $
  */
 
 #include <stdio.h>
@@ -602,7 +602,6 @@ int session_connect(const char *arg)
     if ((ssl = (SSL *) cs_get_ssl(conn)))
     {
 	X509 *server_cert = SSL_get_peer_certificate (ssl);
-	char *str;
 
 	if (server_cert)
 	{

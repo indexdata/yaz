@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.53 2004-04-22 18:44:40 adam Exp $
+## $Id: Makefile.am,v 1.54 2004-04-28 22:44:59 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -23,8 +23,8 @@ HTMLFILES = \
  zoom.events.html zoom.html zoom.options.html zoom.query.html \
  zoom.records.html zoom.resultsets.html zoom.scan.html
 
-MANFILES=yaz-client.1 yaz-client-ssl.1 yaz-ztest.8 \
-	yaz-ztest-ssl.8 yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
+MANFILES=yaz-client.1 yaz-ztest.8 \
+	yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
 	yaz-marcdump.1 yaz-iconv.1
 REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
@@ -53,12 +53,6 @@ yaz.7: yaz-man.xml
 
 zoomsh.1: zoomsh-man.xml
 	docbook2man $(srcdir)/zoomsh-man.xml
-
-yaz-ztest-ssl.8: 
-	ln -s yaz-ztest.8 yaz-ztest-ssl.8
-
-yaz-client-ssl.1:
-	ln -s yaz-client.1 yaz-client-ssl.1
 
 yaz-asncomp.1: yaz-asncomp-man.xml
 	docbook2man $(srcdir)/yaz-asncomp-man.xml

@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-config-man.xml,v 1.1 2003-10-27 12:21:24 adam Exp $ -->
+<!-- $Id: yaz-config-man.xml,v 1.2 2004-04-28 22:44:59 adam Exp $ -->
 <refentry id="yaz-config">
  <refmeta>
   <refentrytitle>yaz-config</refentrytitle>
@@ -39,12 +39,6 @@
     <term>threads</term>
     <listitem><para>
       Use the threaded version of YAZ.
-     </para></listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>ssl</term>
-    <listitem><para>
-      Use YAZ with SSL support.
      </para></listitem>
    </varlistentry>
   </variablelist>

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.6 2004-02-25 12:59:56 adam Exp $
+ * $Id: comstack.c,v 1.7 2004-04-28 22:44:59 adam Exp $
  */
 
 #include <string.h>
@@ -74,6 +74,13 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
     COMSTACK cs;
     CS_TYPE t;
 
+    printf (
+#if HAVE_OPENSSL_SSL_H
+	    "cs_create_host SSL\n"
+#else
+	    "cs_create_host\n"
+#endif
+	);
     if (strncmp (type_and_host, "tcp:", 4) == 0)
     {
 	t = tcpip_type;

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.2 2004-04-28 12:10:53 adam Exp $
+ * $Id: tcpip.c,v 1.3 2004-04-28 22:44:59 adam Exp $
  */
 
 #include <stdio.h>
@@ -1108,9 +1108,38 @@ void *cs_get_ssl(COMSTACK cs)
     state = (struct tcpip_state *) cs->cprivate;
     return state->ssl;  
 }
+
+int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
+{
+    SSL *ssl = cs_get_ssl(cs);
+    if (ssl)
+    {
+	X509 *server_cert = SSL_get_peer_certificate (ssl);
+	if (server_cert)
+	{
+	    BIO *bio = BIO_new(BIO_s_mem());
+	    char *pem_buf;
+	    /* get PEM buffer in memory */
+	    PEM_write_bio_X509(bio, server_cert);
+	    *len = BIO_get_mem_data(bio, &pem_buf);
+	    *buf = xmalloc(*len);
+	    memcpy(*buf, pem_buf, *len);
+	    BIO_free(bio);
+	    return 1;
+	}
+    }
+    return 0;
+}
 #else
 void *cs_get_ssl(COMSTACK cs)
 {
     return 0;
 }
+
+int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
+{
+    return 0;
+}
+
 #endif
+

@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.22 2004-02-23 09:26:11 adam Exp $
+ * $Id: zoom.h,v 1.23 2004-04-28 22:44:59 adam Exp $
  */
 
 #include <stdlib.h>
@@ -59,6 +59,10 @@ ZOOM_connection_option_get (ZOOM_connection c, const char *key);
 ZOOM_API(void)
 ZOOM_connection_option_set (ZOOM_connection c, const char *key,
                             const char *val);
+
+ZOOM_API(void)
+ZOOM_connection_option_setl (ZOOM_connection c, const char *key,
+			     const char *val, int len);
 
 /* return error code (0 == success, failure otherwise). cp
    holds error string on failure, addinfo holds addititional info (if any)

@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY ztest-options SYSTEM "ztest-options.xml">
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.3 2004-01-17 01:20:12 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.4 2004-04-28 22:44:59 adam Exp $ -->
 <refentry id="yaz-ztest">
  
  <refmeta>
@@ -34,12 +34,6 @@
    <arg choice="opt" rep="repeat">listener-spec</arg>
   </cmdsynopsis>
 
-  <cmdsynopsis>
-   <command>yaz-ztest-ssl</command>
-   <arg rep="repeat" choice="opt"><option>option</option></arg>
-   <arg choice="opt" rep="repeat">addr</arg>
-  </cmdsynopsis>
-  
  </refsynopsisdiv>
  <refsect1><title>DESCRIPTION</title>
   <para>
@@ -50,14 +44,10 @@
    records.
    </para>
    <para>
-    <command>yaz-ztest-ssl</command> is identical to
-    <command>yaz-ztest</command> except that it supports SSL transport.
-   </para>
-   <para>
     The <replaceable>listener-spec</replaceable> consists of a transport
     mode followed by a colon, followed by a listener address. The
     transport mode is either <literal>tcp</literal>, <literal>unix</literal>,
-    or <literal>ssl</literal> (<command>yaz-ztest-ssl</command> only).
+    or <literal>ssl</literal>.
    </para>
    <para>
     For TCP and SSL, an address has the form:

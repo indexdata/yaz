@@ -1,5 +1,14 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+ZOOM now allows inspection of X509 peer certificate for verification.
+The X509 buffer is retrived by reading ZOOM option "sslPeerCert".
+
+Removed libyazssl.la. When SSL is enabled, libyaz.la has SSL support and
+all programs have too (yaz-ztest, yaz-client, zoom..). May not be
+as "modular" but it simplifies things.
+
+Added cs_get_peer_certificate to that returns peer X509 PEM.
+
 Added cs_get_ssl that returns SSL handle (SSL *) for SSL comstack; returns
 NULL if SSL is unavailable.
 
