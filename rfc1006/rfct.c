@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.6  1995-06-15 07:45:11  quinn
+ * Revision 1.7  1995-06-16 10:46:48  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.6  1995/06/15  07:45:11  quinn
  * Moving to v3.
  *
  * Revision 1.5  1995/05/31  08:29:35  quinn
@@ -608,7 +611,7 @@ int t_snd(int fd, char *buf, unsigned nbytes, int flags)
     return nbytes;
 }
 
-int t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
+int _t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
 {
     struct rfct_control *cnt = control[fd];
     struct tpdu_data_header dhead;
@@ -722,7 +725,7 @@ int t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
     return got;
 }
 
-#if 0
+#if 1
 
 int t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
 {
