@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1996, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.19  1996-10-11 11:57:16  quinn
+ * Revision 1.20  1996-10-29 13:34:39  adam
+ * New functions to get/set data1_tabpath.
+ *
+ * Revision 1.19  1996/10/11 11:57:16  quinn
  * Smallish
  *
  * Revision 1.18  1996/10/07  15:29:16  quinn
@@ -398,5 +401,7 @@ char *data1_nodetoidsgml(data1_node *n, int select, int *len);
 Z_ExplainRecord *data1_nodetoexplain(data1_node *n, int select, ODR o);
 Z_BriefBib *data1_nodetosummary(data1_node *n, int select, ODR o);
 char *data1_nodetosoif(data1_node *n, int select, int *len);
+void data1_set_tabpath(const char *path);
+const char *data1_get_tabpath(void);
 
 #endif

@@ -25,4 +25,4 @@
  *
  */
 
-FILE *yaz_path_fopen(char *path, char *name, char *mode);
+FILE *yaz_path_fopen(const char *path, const char *name, const char *mode);
