@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.75  1999-02-01 15:37:32  adam
+ * Revision 1.76  1999-03-11 11:12:07  adam
+ * Added GNU readline support. HTML display in client.
+ *
+ * Revision 1.75  1999/02/01 15:37:32  adam
  * Fixed minor bug introduced by previous commit.
  *
  * Revision 1.74  1999/02/01 15:35:21  adam
@@ -270,6 +273,13 @@
 
 #if CCL2RPN
 #include <yaz-ccl.h>
+#endif
+
+#if HAVE_READLINE_READLINE_H
+#include <readline/readline.h>
+#endif
+#if HAVE_READLINE_HISTORY_H
+#include <readline/history.h>
 #endif
 
 #define C_PROMPT "Z> "
@@ -666,9 +676,15 @@ static void display_record(Z_DatabaseRecord *p)
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
     {
         const char *octet_buf = (char*)p->u.octet_aligned->buf;
-	if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML)
+	if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML ||
+            ent->value == VAL_HTML)
 	{
-	    fwrite (octet_buf, 1, p->u.octet_aligned->len, stdout);
+            int i;
+            for (i = 0; i<p->u.octet_aligned->len; i++)
+                if (octet_buf[i] > 126 || octet_buf[i] < 7)
+                    printf ("<%02X>", octet_buf[i]);
+                else
+                    fputc (octet_buf[i], stdout);
 	    printf ("\n");
         }
 	else
@@ -1883,13 +1899,25 @@ static int client(int wait)
 #else
 	if (!wait)
 #endif
-	    {
-            /* quick & dirty way to get a command line. */
-		char *end_p;
-		if (!fgets(line, 1023, stdin))
-		    break;
-		if ((end_p = strchr (line, '\n')))
-		    *end_p = '\0';
+	{
+#if HAVE_READLINE_READLINE_H
+	    char* line_in;
+	    line_in=readline(C_PROMPT);
+#if HAVE_READLINE_HISTORY_H
+	    if (*line_in)
+		add_history(line_in);
+#endif
+	    strcpy(line,line_in);
+            free (line_in);
+#else    
+	    char *end_p;
+            printf (C_PROMPT);
+	    fflush(stdout);
+	    if (!fgets(line, 1023, stdin))
+	        break;
+	    if ((end_p = strchr (line, '\n')))
+	        *end_p = '\0';
+#endif 
             if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
             {
                 strcpy(word, last_cmd);
@@ -1914,7 +1942,6 @@ static int client(int wait)
             }
             if (res < 2)
 	    {
-                printf(C_PROMPT);
 		continue;
 	    }
         }
@@ -2003,8 +2030,6 @@ static int client(int wait)
                 }
             }
             while (conn && cs_more(conn));
-	    printf(C_PROMPT);
-	    fflush(stdout);
         }
     }
     return 0;
@@ -2046,10 +2071,7 @@ int main(int argc, char **argv)
         }
     }
     if (!opened)
-    {
 	initialize ();
-        printf (C_PROMPT);
-    }
     return client (opened);
 }
 

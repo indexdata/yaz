@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1998
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.5 1998-11-09 13:39:46 adam Exp $
+dnl $Id: configure.in,v 1.6 1999-03-11 11:12:07 adam Exp $
 AC_INIT(include/yaz-version.h)
 dnl
 dnl ------ Checking programs
@@ -42,6 +42,13 @@ if test "$checkBoth" = "1"; then
 	AC_CHECK_FUNC(accept, , [LIBS=$oldLibs])
 fi
 AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
+dnl
+dnl ------ GNU Readline
+AC_CHECK_LIB(readline, readline, [LIBS="$LIBS -lreadline"])
+AC_CHECK_LIB(history, add_history, [LIBS="$LIBS -lhistory"])
+if test "$ac_cv_lib_readline_readline" = "yes"; then
+	AC_CHECK_HEADERS(readline/readline.h readline/history.h)
+fi
 dnl
 dnl ------ Headers
 AC_STDC_HEADERS
