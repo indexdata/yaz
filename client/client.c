@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.263 2004-12-30 00:20:15 adam Exp $
+ * $Id: client.c,v 1.264 2005-01-02 20:31:39 adam Exp $
  */
 
 #include <stdio.h>
@@ -105,7 +105,7 @@ static char *esPackageName = 0;
 static char *yazProxy = 0;
 static int kilobytes = 1024;
 static char *negotiationCharset = 0;
-static char negotiationCharsetRecords = 1;
+static int  negotiationCharsetRecords = 1;
 static int  negotiationCharsetVersion = 3;
 static char *outputCharset = 0;
 static char *marcCharset = 0;
