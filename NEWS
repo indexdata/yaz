@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.20 2004/05/10
+
 Add autoconf m4 macro YAZ_DOC for YAZ documentation setup (docbook).
 
 SSL comstack now uses yaz.pem certificate file on server side
