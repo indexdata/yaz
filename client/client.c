@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.202 2003-07-14 12:59:23 adam Exp $
+ * $Id: client.c,v 1.203 2003-07-18 19:54:30 mike Exp $
  */
 
 #include <stdio.h>
@@ -332,18 +332,24 @@ static int process_initResponse(Z_InitResponse *res)
         printf("Version: %s\n", res->implementationVersion);
     if (res->userInformationField)
     {
+	Z_External *uif = res->userInformationField;
         printf("UserInformationfield:\n");
-        if (!z_External(print, (Z_External**)&res-> userInformationField,
-            0, 0))
+        if (!z_External(print, (Z_External**)&uif, 0, 0))
         {
             odr_perror(print, "Printing userinfo\n");
             odr_reset(print);
         }
-        if (res->userInformationField->which == Z_External_octet)
+        if (uif->which == Z_External_octet)
         {
             printf("Guessing visiblestring:\n");
-            printf("'%s'\n", res->userInformationField->u. octet_aligned->buf);
-        }
+            printf("'%s'\n", uif->u. octet_aligned->buf);
+        } else if (uif->which == Z_External_single
+// && oid_is(uif->direct_reference, "1.2.840.10003.10.1000.17.1")
+		   ) {
+	    /* FirstSearch's crappy private init-diagnostic OID */
+	    Odr_any *sat = uif->u.single_ASN1_type;
+	    printf("### NAUGHTY: External is '%s'\n", sat->buf);
+	}
         odr_reset (print);
     }
     printf ("Options:");
@@ -580,7 +586,7 @@ int cmd_authentication(const char *arg)
     r = sscanf (arg, "%39s %39s %39s", user, group, pass);
     if (r == 0)
     {
-        printf("Auth field set to null\n");
+        printf("Authentication set to null\n");
         auth = 0;
     }
     if (r == 1)
@@ -588,6 +594,7 @@ int cmd_authentication(const char *arg)
         auth = &au;
         au.which = Z_IdAuthentication_open;
         au.u.open = user;
+	printf("Authentication set to Open (%s)\n", user);
     }
     if (r == 2)
     {
@@ -597,6 +604,7 @@ int cmd_authentication(const char *arg)
         idPass.groupId = NULL;
         idPass.userId = user;
         idPass.password = group;
+	printf("Authentication set to User (%s), Pass (%s)\n", user, group);
     }
     if (r == 3)
     {
@@ -606,6 +614,8 @@ int cmd_authentication(const char *arg)
         idPass.groupId = group;
         idPass.userId = user;
         idPass.password = pass;
+	printf("Authentication set to User (%s), Group (%s), Pass (%s)\n",
+	       user, group, pass);
     }
     return 1;
 }

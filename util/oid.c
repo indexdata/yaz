@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.63 2003-07-10 11:52:37 mike Exp $
+ * $Id: oid.c,v 1.64 2003-07-18 19:54:30 mike Exp $
  */
 
 /*
@@ -299,7 +299,7 @@ static oident standard_oids[] =
     {PROTO_Z3950,   CLASS_NEGOT,   VAL_CHARNEG3,     {15,3,-1},
      "CharSetandLanguageNegotiation-3"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_CQL,          {16, 2, -1},
-     "CQL"},
+     "OCLC-userInfo"},
     {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS2,    {1,0,10646,1,0,2,-1},
      "UCS-2"},
     {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS4,    {1,0,10646,1,0,4,-1},
@@ -308,6 +308,8 @@ static oident standard_oids[] =
      "UTF-16"},
     {PROTO_GENERAL, CLASS_GENERAL, VAL_UTF8,    {1,0,10646,1,0,8,-1},
      "UTF-8"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_OCLCUI,  {10, 1000, 17, 1, -1},
+     "CQL"},
     {PROTO_NOP,     CLASS_NOP,     VAL_NOP,       {-1},        0          }
 };
 

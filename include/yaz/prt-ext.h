@@ -86,6 +86,7 @@ struct Z_External
 #define Z_External_acfKrb1 25
 #define Z_External_multisrch2 26
 #define Z_External_CQL 27
+#define Z_External_OCLCUserInfo 28
     union
     {
 	/* Generic types */
@@ -124,6 +125,7 @@ struct Z_External
         Z_KRBObject *acfKrb1;
         Z_MultipleSearchTerms_2 *multipleSearchTerms_2;
         Z_InternationalString *cql;
+	Z_OCLC_UserInformation *oclc;
     } u;
 };
 

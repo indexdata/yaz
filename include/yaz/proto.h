@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: proto.h,v 1.10 2003-07-14 12:59:23 adam Exp $
+ * $Id: proto.h,v 1.11 2003-07-18 19:54:30 mike Exp $
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H
@@ -43,6 +43,7 @@
 #include <yaz/oid.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zgdu.h>
+#include <yaz/z-oclcui.h>
 
 YAZ_BEGIN_CDECL
 
