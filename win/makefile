@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.59 2003-06-03 09:11:13 adam Exp $
+# $Id: makefile,v 1.60 2003-06-11 18:37:10 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -653,7 +653,7 @@ $(ITEM_REQ_FILES): $(ILLDIR)\item-req.asn
 
 $(UTILDIR)\marc8.c: $(UTILDIR)\charconv.sgm
 	@cd $(UTILDIR)
-	$(TCL) charconv.tcl -p marc8 -s 50 charconv.sgm charconv_cjk.xml -o marc8.c
+	$(TCL) charconv.tcl -p marc8 -s 50 charconv.sgm -o marc8.c
 
 !endif
 
@@ -930,7 +930,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.59  2003-06-03 09:11:13  adam
+# Revision 1.60  2003-06-11 18:37:10  adam
+# Dont use charconv_cjk.xml
+#
+# Revision 1.59  2003/06/03 09:11:13  adam
 # WIN32 updates
 #
 # Revision 1.58  2003/06/02 13:44:54  adam
