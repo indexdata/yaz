@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+xmalloc trace fix for 64-bit systems such as DEC alpha. 
+
 --- 2.0.2 2003/04/28
 
 New Debian package layout similar to the Redhat Package layout.
