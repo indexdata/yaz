@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-opt.c,v 1.6 2002-06-02 21:27:17 adam Exp $
+ * $Id: zoom-opt.c,v 1.7 2002-06-04 08:33:49 adam Exp $
  *
  * ZOOM layer for C, options handling
  */
@@ -124,7 +124,7 @@ ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
 ZOOM_API(void)
 ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
 {
-    return ZOOM_options_setl (opt, name, value, value ? strlen(value): 0);
+    ZOOM_options_setl (opt, name, value, value ? strlen(value): 0);
 }
 
 ZOOM_API(const char *)
