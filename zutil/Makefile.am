@@ -1,7 +1,7 @@
-## $Id: Makefile.am,v 1.17 2003-02-18 10:37:09 adam Exp $
+## $Id: Makefile.am,v 1.18 2003-03-02 15:34:51 adam Exp $
 noinst_LTLIBRARIES = libzutil.la
 
-AM_CPPFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/srw $(XML2_CFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
 
 libzutil_la_SOURCES = zget.c yaz-ccl.c diagbib1.c logrpn.c \
   otherinfo.c pquery.c sortspec.c z3950oid.c charneg.c \
