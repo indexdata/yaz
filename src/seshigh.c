@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.11 2003-12-30 00:29:53 adam Exp $
+ * $Id: seshigh.c,v 1.12 2003-12-31 00:14:01 adam Exp $
  */
 
 /*
@@ -353,10 +353,11 @@ void ir_session(IOCHAN h, int event)
 		return;
 	    }
 	    req->request_mem = odr_extract_mem(assoc->decode);
-	    if (assoc->print && !z_GDU(assoc->print, &req->gdu_request, 0, 0))
-	    {
-		yaz_log(LOG_WARN, "ODR print error: %s", 
-		    odr_errmsg(odr_geterror(assoc->print)));
+	    if (assoc->print) 
+            {
+		if (!z_GDU(assoc->print, &req->gdu_request, 0, 0))
+		    yaz_log(LOG_WARN, "ODR print error: %s", 
+		       odr_errmsg(odr_geterror(assoc->print)));
 		odr_reset(assoc->print);
 	    }
 	    request_enq(&assoc->incoming, req);
@@ -1354,10 +1355,11 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
 {
     odr_setbuf(assoc->encode, req->response, req->size_response, 1);
 
-    if (assoc->print && !z_GDU(assoc->print, &res, 0, 0))
+    if (assoc->print)
     {
-	yaz_log(LOG_WARN, "ODR print error: %s", 
-	    odr_errmsg(odr_geterror(assoc->print)));
+	if (!z_GDU(assoc->print, &res, 0, 0))
+	    yaz_log(LOG_WARN, "ODR print error: %s", 
+	        odr_errmsg(odr_geterror(assoc->print)));
 	odr_reset(assoc->print);
     }
     if (!z_GDU(assoc->encode, &res, 0, 0))
@@ -1561,7 +1563,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.11 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.12 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.218 2003-12-30 00:22:11 adam Exp $
+ * $Id: client.c,v 1.219 2003-12-31 00:14:00 adam Exp $
  */
 
 #include <stdio.h>
@@ -1197,8 +1197,12 @@ static int send_srw(Z_SRW_PDU *sr)
         char *buf_out;
         int len_out;
         int r;
-	if (apdu_file && !z_GDU(print, &gdu, 0, 0))
-            printf ("Failed to print outgoing APDU\n");
+	if (apdu_file)
+	{
+	    if (!z_GDU(print, &gdu, 0, 0))
+		printf ("Failed to print outgoing APDU\n");
+	    odr_reset(print);
+	}
         buf_out = odr_getbuf(out, &len_out, 0);
         
         /* we don't odr_reset(out), since we may need the buffer again */
@@ -3446,7 +3450,10 @@ void wait_and_handle_response()
             odr_dumpBER(f, netbuffer, res);
             fprintf(f, "---------\n");
             if (apdu_file)
+	    {
                 z_GDU(print, &gdu, 0, 0);
+		odr_reset(print);
+	    }
             if (conn && cs_more(conn))
                 continue;
 	    break;

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.4 2003-12-30 15:18:53 adam Exp $
+ * $Id: zgdu.c,v 1.5 2003-12-31 00:14:01 adam Exp $
  */
 
 #include <yaz/odr.h>
@@ -294,11 +294,10 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             if (!z_HTTP_header_lookup((*p)->u.HTTP_Response->headers,
                                       "Content-Length"))
             {
-                char lstr[20];
-                sprintf(lstr, "%d", (*p)->u.HTTP_Response->content_len);
-                z_HTTP_header_add(o,
-                                  &(*p)->u.HTTP_Response->headers,
-                                  "Content-Length", lstr);
+                char lstr[60];
+                sprintf(lstr, "Content-Length: %d\r\n",
+			(*p)->u.HTTP_Response->content_len);
+                odr_write(o, (unsigned char *) lstr, strlen(lstr));
             }
             for (h = (*p)->u.HTTP_Response->headers; h; h = h->next)
             {
@@ -333,11 +332,10 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                 !z_HTTP_header_lookup((*p)->u.HTTP_Request->headers,
                                       "Content-Length"))
             {
-                char lstr[20];
-                sprintf(lstr, "%d", (*p)->u.HTTP_Request->content_len);
-                z_HTTP_header_add(o,
-                                  &(*p)->u.HTTP_Request->headers,
-                                  "Content-Length", lstr);
+                char lstr[60];
+                sprintf(lstr, "Content-Length: %d\r\n",
+			(*p)->u.HTTP_Request->content_len);
+                odr_write(o, (unsigned char *) lstr, strlen(lstr));
             }
             for (h = (*p)->u.HTTP_Request->headers; h; h = h->next)
             {
