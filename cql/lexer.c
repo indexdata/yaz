@@ -1,4 +1,4 @@
-/* $Id: lexer.c,v 1.2 2003-04-11 15:53:39 adam Exp $
+/* $Id: lexer.c,v 1.3 2003-04-14 15:40:03 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -28,6 +28,13 @@ int yylex(YYSTYPE *lval, void *vp)
 {
     CQL_parser cp = (CQL_parser) vp;
     int c;
+    lval->cql = 0;
+    lval->rel = 0;
+    lval->rel = 0;
+    lval->len = 0;
+    lval->size = 10;
+    lval->buf = nmem_malloc(cp->nmem, lval->size);
+    lval->buf[0] = '\0';
     do
     {
         c = cp->getbyte(cp->client_data);
@@ -36,10 +43,6 @@ int yylex(YYSTYPE *lval, void *vp)
         if (c == '\n')
             return 0;
     } while (isspace(c));
-    lval->rel = 0;
-    lval->len = 0;
-    lval->size = 10;
-    lval->buf = nmem_malloc(cp->nmem, lval->size);
     if (strchr("()=></", c))
     {
         int c1;
