@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.5  1995-02-10 18:57:26  quinn
+ * Revision 1.6  1995-03-01 08:40:56  quinn
+ * Smallish changes.
+ *
+ * Revision 1.5  1995/02/10  18:57:26  quinn
  * More in the way of error-checking.
  *
  * Revision 1.4  1995/02/10  15:55:29  quinn
@@ -53,5 +56,5 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
     }
     if (o->direction == ODR_DECODE)
     	*p = nalloc(o, ODR_OID_SIZE * sizeof(**p));
-    return ber_oid(o, *p);
+    return ber_oidc(o, *p);
 }
