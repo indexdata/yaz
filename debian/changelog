@@ -1,3 +1,9 @@
+yaz (2.0.9-5) unstable; urgency=low
+
+  * Add SRW/SRU stylesheet support.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed,  7 Jan 2004 22:42:39 +0100
+
 yaz (2.0.9-4) unstable; urgency=low
 
   * Fix HTTP decode: Content-Length case insensitive.

@@ -1,6 +1,12 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.9-5 2004/01/07  Debian/Windows
+
 Handle user defined stylesheet for SRW/SRU.
+
+--- 2.0.9-4 2004/01/06  Debian/Windows
+
+Fix bug in decoding of Content-Length.
 
 --- 2.0.9-3 2004/01/06  Debian/Windows
 
