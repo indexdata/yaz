@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.80 2002-08-28 12:48:47 adam Exp $
+dnl $Id: configure.in,v 1.81 2002-08-28 21:00:29 mike Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.9)
 dnl
@@ -24,6 +24,7 @@ AC_ARG_WITH(dtd, [  --with-dtd[=DIR]        Use docbookx.dtd in DIR],
    AC_MSG_CHECKING(for docbookx.dtd)
    for d in /usr/share/sgml/docbook/dtd/xml/4.1.2 \
          /usr/share/sgml/docbook/xml-dtd-4.1.2 \
+         /usr/share/sgml/docbook/xml-dtd-4.1 \
          /usr/share/sgml/docbook/dtd/xml/4.0 \
 	    /usr/lib/sgml/dtd/docbook-xml 
    do
