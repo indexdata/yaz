@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.24 2004-03-01 17:33:03 adam Exp $
+ * $Id: srw.c,v 1.25 2004-03-17 18:43:35 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -42,7 +42,7 @@ xmlNodePtr add_xsd_string_n(xmlNodePtr ptr, const char *elem, const char *val,
 xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, const char *val)
 {
     if (val)
-        return xmlNewChild(ptr, 0, elem, val);
+        return xmlNewTextChild(ptr, 0, elem, val);
     return 0;
 }
 
@@ -52,7 +52,7 @@ static void add_xsd_integer(xmlNodePtr ptr, const char *elem, const int *val)
     {
         char str[30];
         sprintf(str, "%d", *val);
-        xmlNewChild(ptr, 0, elem, str);
+        xmlNewTextChild(ptr, 0, elem, str);
     }
 }
 
