@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.45  1995-08-21 09:11:00  quinn
+ * Revision 1.46  1995-08-29 11:17:58  quinn
+ * Added code to receive close
+ *
+ * Revision 1.45  1995/08/21  09:11:00  quinn
  * Smallish fixes to suppport new formats.
  *
  * Revision 1.44  1995/08/17  12:45:25  quinn
@@ -178,6 +181,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
+#include <sys/time.h>
 
 #include <dmalloc.h>
 #include <comstack.h>
@@ -266,7 +270,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
     new->input_buffer = 0;
     new->input_buffer_len = 0;
     new->backend = 0;
-    new->rejected = 0;
+    new->state = ASSOC_NEW;
     request_initq(&new->incoming);
     request_initq(&new->outgoing);
     new->proto = cs_getproto(link);
@@ -291,6 +295,33 @@ void destroy_association(association *h)
     free(h);
 }
 
+static void do_close(association *a, int reason, char *message)
+{
+    Z_APDU apdu;
+    Z_Close *cls = zget_Close(a->encode);
+    request *req = request_get();
+
+    /* Purge request queue */
+    while (request_deq(&a->incoming));
+    while (request_deq(&a->outgoing));
+    if (a->version >= 3)
+    {
+	logf(LOG_DEBUG, "Generating Close PDU");
+	apdu.which = Z_APDU_close;
+	apdu.u.close = cls;
+	*cls->closeReason = reason;
+	cls->diagnosticInformation = message;
+	process_response(a, req, &apdu);
+	iochan_settimeout(a->client_chan, 60);
+    }
+    else
+    {
+	logf(LOG_DEBUG, "v2 client. No Close PDU");
+	iochan_setevent(a->client_chan, EVENT_TIMEOUT); /* force imm close */
+    }
+    a->state = ASSOC_DEAD;
+}
+
 /*
  * This is where PDUs from the client are read and the further
  * processing is initiated. Flow of control moves down through the
@@ -310,10 +341,18 @@ void ir_session(IOCHAN h, int event)
     assert(h && conn && assoc);
     if (event == EVENT_TIMEOUT)
     {
-    	logf(LOG_LOG, "Timeout - closing connection.");
-	cs_close(conn);
-	destroy_association(assoc);
-	iochan_destroy(h);
+	if (assoc->state != ASSOC_UP)
+	{
+	    logf(LOG_LOG, "Final timeout - closing connection.");
+	    cs_close(conn);
+	    destroy_association(assoc);
+	    iochan_destroy(h);
+	}
+	else
+	{
+	    logf(LOG_LOG, "Session idle too long. Sending close.");
+	    do_close(assoc, Z_Close_lackOfActivity, 0);
+	}
 	return;
     }
     if (event & EVENT_INPUT || event & EVENT_WORK) /* input */
@@ -323,7 +362,7 @@ void ir_session(IOCHAN h, int event)
 	    logf(LOG_DEBUG, "ir_session (input)");
 	    assert(assoc && conn);
 	    /* We aren't speaking to this fellow */
-	    if (assoc->rejected)
+	    if (assoc->state == ASSOC_DEAD)
 	    {
 		logf(LOG_LOG, "Closed connection after reject");
 		cs_close(conn);
@@ -356,9 +395,7 @@ void ir_session(IOCHAN h, int event)
 		    odr_errlist[odr_geterror(assoc->decode)]);
 		logf(LOG_LOG, "PDU dump:");
 		odr_dumpBER(log_file(), assoc->input_buffer, res);
-		cs_close(conn);
-		destroy_association(assoc);
-		iochan_destroy(h);
+		do_close(assoc, Z_Close_protocolError, "Malformed package");
 		return;
 	    }
 	    req->request_mem = odr_extract_mem(assoc->decode);
@@ -375,11 +412,7 @@ void ir_session(IOCHAN h, int event)
 	req = request_head(&assoc->incoming);
 	if (req->state == REQUEST_IDLE)
 	    if (process_request(assoc) < 0)
-	    {
-		cs_close(conn);
-		destroy_association(assoc);
-		iochan_destroy(h);
-	    }
+		do_close(assoc, Z_Close_systemProblem, "Unknown error");
     }
     if (event & EVENT_OUTPUT)
     {
@@ -495,9 +528,7 @@ void backend_response(IOCHAN i, int event)
     if ((res && process_response(assoc, req, res) < 0) || fd < 0)
     {
 	logf(LOG_LOG, "Fatal error when talking to backend");
-	cs_close(assoc->client_link);
-	destroy_association(assoc);
-	iochan_destroy(assoc->client_chan);
+	do_close(assoc, Z_Close_systemProblem, 0);
 	iochan_destroy(i);
 	return;
     }
@@ -531,9 +562,11 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
 	odr_reset(assoc->print);
     }
     /* change this when we make the backend reentrant */
-    assert(req == request_head(&assoc->incoming));
-    req->state = REQUEST_IDLE;
-    request_deq(&assoc->incoming);
+    if (req == request_head(&assoc->incoming))
+    {
+	req->state = REQUEST_IDLE;
+	request_deq(&assoc->incoming);
+    }
     request_enq(&assoc->outgoing, req);
     /* turn the work over to the ir_session handler */
     iochan_setflag(assoc->client_chan, EVENT_OUTPUT);
@@ -557,6 +590,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     Z_InitResponse *resp = apdu->u.initResponse;
     bend_initrequest binitreq;
     bend_initresult *binitres;
+    char options[100];
 
     logf(LOG_LOG, "Got initRequest");
     if (req->implementationId)
@@ -576,26 +610,57 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     assoc->backend = binitres->handle;
     resp->referenceId = req->referenceId;
+    *options = '\0';
     /* let's tell the client what we can do */
     if (ODR_MASK_GET(req->options, Z_Options_search))
+    {
     	ODR_MASK_SET(resp->options, Z_Options_search);
+	strcat(options, "srch");
+    }
     if (ODR_MASK_GET(req->options, Z_Options_present))
+    {
     	ODR_MASK_SET(resp->options, Z_Options_present);
+	strcat(options, " prst");
+    }
 #if 0
     if (ODR_MASK_GET(req->options, Z_Options_delSet))
+    {
     	ODR_MASK_SET(&options, Z_Options_delSet);
+	strcat(options, " del");
+    }
 #endif
     if (ODR_MASK_GET(req->options, Z_Options_namedResultSets))
+    {
     	ODR_MASK_SET(resp->options, Z_Options_namedResultSets);
+	strcat(options, " namedresults");
+    }
     if (ODR_MASK_GET(req->options, Z_Options_scan))
+    {
     	ODR_MASK_SET(resp->options, Z_Options_scan);
+	strcat(options, " scan");
+    }
     if (ODR_MASK_GET(req->options, Z_Options_concurrentOperations))
+    {
     	ODR_MASK_SET(resp->options, Z_Options_concurrentOperations);
+	strcat(options, " concurop");
+    }
 
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
+    {
     	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_1);
+	assoc->version = 2; /* 1 & 2 are equivalent */
+    }
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_2))
+    {
     	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_2);
+	assoc->version = 2;
+    }
+    if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_3))
+    {
+    	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_3);
+	assoc->version = 3;
+    }
+    logf(LOG_LOG, "Negotiated to v%d: %s", assoc->version, options);
     assoc->maximumRecordSize = *req->maximumRecordSize;
     if (assoc->maximumRecordSize > control_block->maxrecordsize)
     	assoc->maximumRecordSize = control_block->maxrecordsize;
@@ -609,8 +674,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     {
     	logf(LOG_LOG, "Connection rejected by backend.");
     	*resp->result = 0;
-	assoc->rejected = 1;
+	assoc->state = ASSOC_DEAD;
     }
+    else
+	assoc->state = ASSOC_UP;
     return apdu;
 }
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.9  1995-06-16 10:31:38  quinn
+ * Revision 1.10  1995-08-29 11:18:01  quinn
+ * Added code to receive close
+ *
+ * Revision 1.9  1995/06/16  10:31:38  quinn
  * Added session timeout.
  *
  * Revision 1.8  1995/05/17  08:42:28  quinn
@@ -91,11 +94,17 @@ typedef struct association
     void *backend;                /* backend handle */
     request_q incoming;           /* Q of incoming PDUs */
     request_q outgoing;           /* Q of outgoing data buffers (enc. PDUs) */
-    int rejected;                 /* session rejected */
+    enum
+    {
+    	ASSOC_NEW,                /* not initialized yet */
+	ASSOC_UP,                 /* normal operation */
+	ASSOC_DEAD                /* dead. Close if input arrives */
+    } state;
 
     /* session parameters */
     int preferredMessageSize;
     int maximumRecordSize;
+    int version;                  /* highest version-bit set (2 or 3) */
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.18  1995-08-28 12:21:27  quinn
+ * Revision 1.19  1995-08-29 11:17:28  quinn
+ * Added code to receive close
+ *
+ * Revision 1.18  1995/08/28  12:21:27  quinn
  * Client can now ask for simple element set names.
  *
  * Revision 1.17  1995/08/17  12:45:02  quinn
@@ -150,6 +153,7 @@ static void send_initRequest()
 
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
+    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
 
     req->idAuthentication = auth;
 
@@ -182,7 +186,7 @@ static int process_initResponse(Z_InitResponse *res)
 	    odr_perror(print, "Printing userinfo\n");
 	    odr_reset(print);
 	}
-	if (res->userInformationField->which == ODR_EXTERNAL_octet)
+	if (res->userInformationField->which == Z_External_octet)
 	{
 	    printf("Guessing visiblestring:\n");
 	    printf("'%s'\n", res->userInformationField->u. octet_aligned->buf);
@@ -323,7 +327,7 @@ void display_record(Z_DatabaseRecord *p)
 	    odr_reset(print);
 	}
     }
-    if (r->which == ODR_EXTERNAL_octet && p->u.octet_aligned->len)
+    if (r->which == Z_External_octet && p->u.octet_aligned->len)
 	marc_display ((char*)p->u.octet_aligned->buf, stdout);
     else if (ent->value == VAL_SUTRS)
     {
@@ -634,6 +638,26 @@ static int send_presentRequest(char *arg)
     send_apdu(apdu);
     printf("Sent presentRequest (%d+%d).\n", setno, nos);
     return 2;
+}
+
+void process_close(Z_Close *req)
+{
+    static char *reasons[] =
+    {
+	"finished",
+	"shutdown",
+	"systemProblem",
+	"costLimit",
+	"resources",
+	"securityViolation",
+	"protocolError",
+	"lackOfActivity",
+	"peerAbort",
+	"unspecified"
+    };
+
+    printf("Reason: %s, message: %s\n", reasons[*req->closeReason],
+    	req->diagnosticInformation ? req->diagnosticInformation : "NULL");
 }
 
 static int cmd_show(char *arg)
@@ -969,6 +993,10 @@ static int client(void)
 			    display_records(apdu->u.presentResponse->records);
 			else
 			    printf("No records.\n");
+			break;
+		    case Z_APDU_close:
+		    	printf("Target has closed the association.\n");
+			process_close(apdu->u.close);
 			break;
 		    default:
 		    	printf("Received unknown APDU type (%d).\n", 

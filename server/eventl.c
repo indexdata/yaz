@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.12  1995-08-29 10:41:18  quinn
+ * Revision 1.13  1995-08-29 11:17:56  quinn
+ * Added code to receive close
+ *
+ * Revision 1.12  1995/08/29  10:41:18  quinn
  * Small.
  *
  * Revision 1.11  1995/06/19  12:39:09  quinn
@@ -96,7 +99,7 @@ int event_loop()
 	FD_ZERO(&out);
 	FD_ZERO(&except);
 	timeout = &to; /* hang on select */
-	to.tv_sec = 5*60;
+	to.tv_sec = 10/*5*60*/;
 	to.tv_usec = 0;
 	max = 0;
     	for (p = iochans; p; p = p->next)

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.24  1995-06-16 10:31:39  quinn
+ * Revision 1.25  1995-08-29 11:18:02  quinn
+ * Added code to receive close
+ *
+ * Revision 1.24  1995/06/16  10:31:39  quinn
  * Added session timeout.
  *
  * Revision 1.23  1995/06/15  12:30:48  quinn
@@ -93,6 +96,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <sys/time.h>
 
 #include <options.h>
 #include <eventl.h>
@@ -118,7 +122,7 @@ static statserv_options_block control_block = {
     "",                         /* diagnostic output to stderr */
     "tcp:@:9999",               /* default listener port */
     PROTO_Z3950,                /* default application protocol */
-    2*60,                       /* idle timeout (minutes) */
+    1, /*2*60,*/                       /* idle timeout (minutes) */
     1024*1024,                  /* maximum PDU size (approx.) to allow */
     "default-config",           /* configuration name to pass to backend */
     ""                          /* set user id */
