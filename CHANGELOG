@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 1.9.1 2002/MM/DD
+--- 1.9.1 2002/10/05
 
 Added man pages: yaz-client(1), yaz-ztest(8), yaz(7), zoomsh(1).
 
@@ -14,7 +14,7 @@ ZOOM didn't handle PDU encoding failures properly.
 
 Added more Bib-1 diagnostics (approved extensions).
 
-Better check for iconv.
+GNU configure: better check for iconv.
 
 More portable use of accept, getpeername. Check for socklen_t. Use
 int/size_t if socklen_t is not defined.
