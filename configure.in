@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1998
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.4 1998-11-09 13:23:09 adam Exp $
+dnl $Id: configure.in,v 1.5 1998-11-09 13:39:46 adam Exp $
 AC_INIT(include/yaz-version.h)
 dnl
 dnl ------ Checking programs
@@ -12,20 +12,20 @@ AC_PROG_RANLIB
 dnl
 dnl ----- YC: The Yaz Compiler
 AC_SUBST(ASNMODULE)
-AC_ARG_WITH(yc,[  --with-yc               compile using YC: The Yaz Compiler], [YCDIR=$withval])
+AC_ARG_WITH(yc,[  --with-yc               compile using YC: The Yaz Compiler], [YCDIR=$withval],[YCDIR=""])
 
 if test "$YCDIR" = "yes"; then
 	YCDIR="../yc"
 fi
-if test -L z39.50; then
+if test -d z39.50; then
 	rm z39.50
-fi
-if test ! -d "$YCDIR"; then
-	AC_MSG_WARN(YC directory ${YCDIR} doesn't exist)
 fi
 if test "$YCDIR" = ""; then
 	ASNMODULE=asn
 else
+	if test ! -d "$YCDIR"; then
+		AC_MSG_WARN(YC directory ${YCDIR} doesn't exist)
+	fi
 	ln -s ${YCDIR}/z39.50 z39.50
 	ASNMODULE=z39.50
 fi
