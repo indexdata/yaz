@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.1 2003-10-27 12:21:38 adam Exp $
+ * $Id: tstccl.c,v 1.2 2004-08-11 12:01:22 adam Exp $
  */
 
 /* CCL test */
@@ -22,6 +22,7 @@ static struct ccl_tst query_str[] = {
     { "dc.title=x4", "@attr 1=/my/title x4 "},
     { "x1 and", 0},
     { "tix=x5", 0},
+    { "spid%æserne", "@prox 0 1 0 2 k 2 @attr 4=2 @attr 1=1016 spid @attr 4=2 @attr 1=1016 æserne "},
     {0, 0}
 };
 
