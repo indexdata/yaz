@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.63 2003-07-25 11:11:19 adam Exp $
+# $Id: makefile,v 1.64 2003-09-04 18:52:02 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -18,12 +18,12 @@ TCL="C:\Tcl\bin\tclsh84.exe"
 HAVE_TCL=1
 
 # iconv charcter conversion utility
-HAVE_ICONV=0
+HAVE_ICONV=1
 ICONV_DIR = c:\iconv-1.8.win32
 
 # libxml2
-HAVE_LIBXML2=0
-LIBXML2_DIR=c:\libxml2-2.5.3.win32
+HAVE_LIBXML2=1
+LIBXML2_DIR=c:\libxml2-2.5.10.win32
 
 # WIN32 binaries libxml2 & iconv from here:
 #  http://www.zlatkovic.com/projects/libxml/binaries.html
@@ -50,8 +50,8 @@ generate: generated_files
 ############### Directories
 ###########################################################
 # The current directory is supposed to be something like
-# ..../Yaz/Win, everything is relative to that
-ROOTDIR=..   # The home of Yaz
+# ..../yaz/win, everything is relative to that
+ROOTDIR=..   # The home of yaz
 
 INCLDIR=$(ROOTDIR)\include  # our includes
 LIBDIR=$(ROOTDIR)\lib       # We produce .lib, .exp etc there
@@ -85,8 +85,8 @@ TMP=$(TMPDIR)
 ############### Targets - what to make
 ###########################################################
 
-DLL=$(BINDIR)\Yaz.dll
-IMPLIB=$(LIBDIR)\Yaz.lib
+DLL=$(BINDIR)\yaz.dll
+IMPLIB=$(LIBDIR)\yaz.lib
 
 CLIENT=$(BINDIR)\yaz-client.exe
 ZOOMSH=$(BINDIR)\zoomsh.exe
@@ -559,7 +559,7 @@ generated_files: \
 {$(SRCDIR)}.cpp{$(OBJDIR)}.obj:
 	@$(CPP) $(COPT) $<
 
-# Yaz client
+# yaz client
 {$(CLIENTDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) $(COPT) $< /D"_CONSOLE"
 
@@ -938,7 +938,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.63  2003-07-25 11:11:19  adam
+# Revision 1.64  2003-09-04 18:52:02  adam
+# Minor changes. Use libxml-2.5.10
+#
+# Revision 1.63  2003/07/25 11:11:19  adam
 # Change order of compilation to reflect Unix AM.
 #
 # Revision 1.62  2003/07/19 13:48:49  adam
