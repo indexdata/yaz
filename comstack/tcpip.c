@@ -2,15 +2,18 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.53 2003-01-06 08:20:27 adam Exp $
+ * $Id: tcpip.c,v 1.54 2003-02-20 15:10:24 adam Exp $
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifndef WIN32
+
+#ifdef WIN32
 #include <unistd.h>
+#else
 #endif
+
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -22,6 +25,11 @@
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 #include <yaz/log.h>
+
+#ifdef WIN32
+#else
+#include <netinet/tcp.h>
+#endif
 
 /* Chas added the following, so we get the definition of completeBER */
 #include <yaz/odr.h>
@@ -361,7 +369,9 @@ int tcpip_connect(COMSTACK h, void *address)
  */
 int tcpip_rcvconnect(COMSTACK h)
 {
+#if HAVE_OPENSSL_SSL_H
     tcpip_state *sp = (tcpip_state *)h->cprivate;
+#endif
     TRC(fprintf(stderr, "tcpip_rcvconnect\n"));
 
     if (h->state == CS_ST_DATAXFER)
@@ -408,7 +418,28 @@ int tcpip_rcvconnect(COMSTACK h)
 #define CERTF "ztest.pem"
 #define KEYF "ztest.pem"
 
-int tcpip_bind(COMSTACK h, void *address, int mode)
+static void tcpip_setsockopt (int fd)
+{
+#if 0
+    int len = 4096;
+    int set = 1;
+    
+    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&set, sizeof(int)))
+    {
+        yaz_log(LOG_WARN|LOG_ERRNO, "setsockopt TCP_NODELAY");
+    }
+    if (setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char*)&len, sizeof(int)))
+    {
+        yaz_log(LOG_WARN|LOG_ERRNO, "setsockopt SNDBUF");
+    }
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, (char*)&len, sizeof(int)))
+    {
+        yaz_log(LOG_WARN|LOG_ERRNO, "setsockopt RCVBUF");
+    }
+#endif
+}
+
+static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     struct sockaddr *addr = (struct sockaddr *)address;
 #ifdef WIN32
@@ -462,6 +493,7 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
         return -1;
     }
 #endif
+    tcpip_setsockopt(h->iofile);
     if (bind(h->iofile, addr, sizeof(struct sockaddr_in)))
     {
         h->cerrno = CSYSERR;
@@ -527,6 +559,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 	return -1;
     }
     h->state = CS_ST_INCON;
+    tcpip_setsockopt (h->newfd);
     return 0;
 }
 
