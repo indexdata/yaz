@@ -1,7 +1,111 @@
 #!/bin/sh
-# yaz-config for source tree
+# $Id: yaz-config.in,v 1.2 2000-10-11 10:40:56 adam Exp $
+yazprefix=@prefix@
+yaz_echo_cflags=no
+yaz_echo_libs=no
+yaz_echo_help=no
+yaz_echo_tabs=no
+yaz_echo_source=yes
+yaz_echo_lalibs=no
+yaz_src_root=@YAZ_SRC_ROOT@
+
+yazlibs="@LIBS@"
 YAZVERSION=@VERSION@
-YAZBIN="@YAZ_SRC_ROOT@/bin"
-YAZTAB="@YAZ_SRC_ROOT@/tab"
-YAZLIB="-L@YAZ_SRC_ROOT@/lib/.libs -lyaz"
-YAZINC="-I@YAZ_SRC_ROOT@/include"
+
+usage()
+{
+	cat <<EOF
+Usage: yaz-config [OPTIONS] [LIBRARIES]
+Options:
+	[--prefix[=DIR]]
+	[--version]
+	[--libs]
+	[--lalibs]
+	[--cflags]
+	[--tabs]
+EOF
+	exit $1
+}
+
+#if test $# -eq 0; then
+#	yaz_echo_help=yes
+#fi
+
+while test $# -gt 0; do
+  case "$1" in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *) optarg= ;;
+  esac
+
+  case $1 in
+    --prefix=*)
+      yazprefix=$optarg
+      ;;
+    --prefix)
+      echo $yazprefix
+      exit 0
+      ;;
+    --version)
+      echo $YAZVERSION
+      exit 0
+      ;;
+    --cflags)
+      yaz_echo_cflags=yes
+      ;;
+    --libs)
+      yaz_echo_libs=yes
+      ;;
+    --tabs)
+      yaz_echo_tabs=yes
+      ;;
+    --source)
+      yaz_echo_source=yes
+      ;;
+    --lalibs)
+      yaz_echo_lalibs=yes
+      ;;
+    -*)
+      yaz_echo_help=yes
+      ;;
+  esac
+  shift
+done
+
+if test "$yaz_echo_source" = "yes"; then
+    YAZTAB=${yaz_src_root}/tab
+    YAZBIN=${yaz_src_root}/bin
+    YAZLIB="-L${yaz_src_root}/lib/.libs -lyaz $yazlibs"
+    YAZLALIB="${yaz_src_root}/lib/libyaz.la $yazlibs"
+    YAZINC="-I${yaz_src_root}/include"
+else
+    YAZTAB=$yazprefix/share/yaz/tab
+    YAZBIN=$yazprefix/bin
+
+    if test "$yazprefix" = "/usr"; then
+	YAZLIB="-lyaz $yazlibs"
+    else
+	YAZLIB="-L$yazprefix/lib -lyaz $yazlibs"
+    fi
+    YAZLALIB=$YAZLIB
+    if test "$yazprefix" = "/usr"; then
+	YAZINC=
+    else
+	YAZINC=-I$yazprefix/include
+    fi
+fi
+
+if test "$yaz_echo_help" = "yes"; then
+	usage 1 1>&2
+fi
+if test "$yaz_echo_cflags" = "yes"; then
+	echo $YAZINC
+fi
+if test "$yaz_echo_libs" = "yes"; then
+	echo $YAZLIB
+fi
+if test "$yaz_echo_tabs" = "yes"; then
+	echo $YAZTAB
+fi
+if test "$yaz_echo_lalibs" = "yes"; then
+	echo $YAZLALIB
+fi

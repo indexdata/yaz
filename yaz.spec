@@ -42,3 +42,4 @@ cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 /usr/lib/libyaz.so.0.0.0
 /usr/include/yaz
 /usr/share/yaz/doc
+/usr/share/aclocal/yaz.m4

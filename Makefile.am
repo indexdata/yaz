@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.9 2000-10-02 12:31:43 adam Exp $
+## $Id: Makefile.am,v 1.10 2000-10-11 10:40:56 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -6,8 +6,13 @@ DIST_SUBDIRS=util odr z39.50 asn ill zutil comstack ccl tab retrieval server lib
 
 SUBDIRS = @SUBDIRS_VAR@
 
+aclocaldir=$(datadir)/aclocal
+
+aclocal_DATA = yaz.m4
+
 SPEC_FILE=$(PACKAGE).spec
-EXTRA_DIST=$(SPEC_FILE) README LICENSE CHANGELOG TODO windows.txt
+EXTRA_DIST=$(SPEC_FILE) README LICENSE CHANGELOG TODO windows.txt \
+	yaz-config.in yaz.m4
 
 dist-hook:
 	cd doc; make

@@ -85,11 +85,18 @@ DIST_SUBDIRS = util odr z39.50 asn ill zutil comstack ccl tab retrieval server l
 
 SUBDIRS = @SUBDIRS_VAR@
 
+aclocaldir = $(datadir)/aclocal
+
+aclocal_DATA = yaz.m4
+
 SPEC_FILE = $(PACKAGE).spec
-EXTRA_DIST = $(SPEC_FILE) README LICENSE CHANGELOG TODO windows.txt
+EXTRA_DIST = $(SPEC_FILE) README LICENSE CHANGELOG TODO windows.txt 	yaz-config.in yaz.m4
+
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES =  yaz-config
+DATA =  $(aclocal_DATA)
+
 DIST_COMMON =  README Makefile.am Makefile.in TODO aclocal.m4 \
 config.guess config.sub configure configure.in install-sh ltconfig \
 ltmain.sh missing mkinstalldirs yaz-config.in
@@ -118,12 +125,33 @@ $(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCI
 yaz-config: $(top_builddir)/config.status yaz-config.in
 	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
+install-aclocalDATA: $(aclocal_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(aclocaldir)
+	@list='$(aclocal_DATA)'; for p in $$list; do \
+	  if test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(aclocaldir)/$$p"; \
+	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(aclocaldir)/$$p; \
+	  else if test -f $$p; then \
+	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(aclocaldir)/$$p"; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(aclocaldir)/$$p; \
+	  fi; fi; \
+	done
+
+uninstall-aclocalDATA:
+	@$(NORMAL_UNINSTALL)
+	list='$(aclocal_DATA)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(aclocaldir)/$$p; \
+	done
+
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
 # To change the values of `make' variables: instead of editing Makefiles,
 # (1) if the variable is set in `config.status', edit `config.status'
 #     (which will cause the Makefiles to be regenerated when you run `make');
 # (2) otherwise, pass the desired values on the `make' command line.
+
+@SET_MAKE@
 
 all-recursive install-data-recursive install-exec-recursive \
 installdirs-recursive install-recursive uninstall-recursive  \
@@ -151,11 +179,10 @@ maintainer-clean-recursive:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = "."; then :; else \
-	    rev="$$subdir $$rev"; \
-	  fi; \
+	  rev="$$subdir $$rev"; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
-	rev="$$rev ."; \
+	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
 	for subdir in $$rev; do \
 	  echo "Making $$target in $$subdir"; \
@@ -281,20 +308,21 @@ installcheck: installcheck-recursive
 install-exec-am:
 install-exec: install-exec-recursive
 
-install-data-am:
+install-data-am: install-aclocalDATA
 install-data: install-data-recursive
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-recursive
-uninstall-am:
+uninstall-am: uninstall-aclocalDATA
 uninstall: uninstall-recursive
-all-am: Makefile
+all-am: Makefile $(DATA)
 all-redirect: all-recursive
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs: installdirs-recursive
 installdirs-am:
+	$(mkinstalldirs)  $(DESTDIR)$(aclocaldir)
 
 
 mostlyclean-generic:
@@ -328,11 +356,11 @@ maintainer-clean-am:  maintainer-clean-tags maintainer-clean-generic \
 maintainer-clean: maintainer-clean-recursive
 	-rm -f config.status
 
-.PHONY: install-data-recursive uninstall-data-recursive \
-install-exec-recursive uninstall-exec-recursive installdirs-recursive \
-uninstalldirs-recursive all-recursive check-recursive \
-installcheck-recursive info-recursive dvi-recursive \
-mostlyclean-recursive distclean-recursive clean-recursive \
+.PHONY: uninstall-aclocalDATA install-aclocalDATA install-data-recursive \
+uninstall-data-recursive install-exec-recursive \
+uninstall-exec-recursive installdirs-recursive uninstalldirs-recursive \
+all-recursive check-recursive installcheck-recursive info-recursive \
+dvi-recursive mostlyclean-recursive distclean-recursive clean-recursive \
 maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
 distclean-tags clean-tags maintainer-clean-tags distdir info-am info \
 dvi-am dvi check check-am installcheck-am installcheck install-exec-am \

@@ -2344,6 +2344,10 @@ fi
 YAZ_SRC_ROOT=`pwd`
 SUBDIRS_VAR="util odr $ASNMODULE $ILLMODULE zutil comstack ccl tab retrieval server include lib client ztest"
 
+if test -f lib/yaz-config.in; then
+	rm lib/yaz-config.in
+fi
+sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config.in >lib/yaz-config.in
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -2477,7 +2481,8 @@ client/Makefile
 ztest/Makefile
 doc/Makefile
 yaz-config
-lib/yaz-config" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+lib/yaz-config
+" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2603,7 +2608,8 @@ client/Makefile
 ztest/Makefile
 doc/Makefile
 yaz-config
-lib/yaz-config"}
+lib/yaz-config
+"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -2667,7 +2673,7 @@ cat >> $CONFIG_STATUS <<EOF
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF
-chmod +x lib/yaz-config yaz-config
+chmod +x yaz-config lib/yaz-config
 exit 0
 EOF
 chmod +x $CONFIG_STATUS
