@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.6 2002-07-12 13:42:20 adam Exp $
+ * $Id: tabcomplete.c,v 1.7 2002-08-29 19:34:44 ja7 Exp $
  */
 
 #include <string.h>
@@ -100,6 +100,12 @@ char** build_list_for_oclass(oid_class oclass) {
 char* complete_querytype(const char *text, int state)
 {
     char* querytypes[] = {"ccl2rpn","prefix","cclrpn","ccl",0};
+    return complete_from_list(querytypes,text,state);  
+}
+
+char* complete_auto_reconnect(const char *text, int state)
+{
+    char* querytypes[] = {"on","off",0};
     return complete_from_list(querytypes,text,state);  
 }
 
