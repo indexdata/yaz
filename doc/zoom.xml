@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.23 2003-02-23 14:24:47 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.24 2003-05-12 13:34:00 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -167,6 +167,11 @@
         targetImplementationVersion</entry><entry> Implementation Version
         of target.
        </entry><entry>none</entry></row>
+      <row><entry>
+        databaseName</entry><entry>One or more database names
+        separated by character plus (<literal>+</literal>), which to
+        be used by subsequent search requests on this Connection.
+       </entry><entry>Default</entry></row>
      </tbody>
     </tgroup>
    </table>
@@ -387,10 +392,6 @@
         mediumSetElementSetName</entry><entry>
         The element set name to be for medium-sized result sets.
        </entry><entry>none</entry></row>
-      <row><entry>
-        databaseName</entry><entry>One or more database names
-        separated by character plus (<literal>+</literal>).
-       </entry><entry>Default</entry></row>
       <row><entry>
         setname</entry><entry>Name of Result Set (Result Set ID).
         If this option isn't set, the ZOOM module will automatically
