@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.16  1995-04-10 10:23:40  quinn
+ * Revision 1.17  1995-05-15 11:56:42  quinn
+ * Asynchronous facilities. Restructuring of seshigh code.
+ *
+ * Revision 1.16  1995/04/10  10:23:40  quinn
  * Some work to add scan and other things.
  *
  * Revision 1.15  1995/03/31  10:16:51  quinn
@@ -79,11 +82,23 @@
 #endif
 #include <dmalloc.h>
 #include <log.h>
+#include <statserv.h>
 
 static char *me = "statserver";
-int dynamic = 1;   /* fork on incoming connection */
-static int loglevel = LOG_DEFAULT_LEVEL;
-char *apdufile = 0;
+/*
+ * default behavior.
+ */
+static statserv_options_block control_block = {
+    1,                          /* dynamic mode */
+    LOG_DEFAULT_LEVEL,          /* log level */
+    "",                         /* no PDUs */
+    "",                         /* diagnostic output to stderr */
+    "tcp:localhost:9999",       /* default listener port */
+    PROTO_Z3950,                /* application protocol */
+    60,                         /* idle timeout (minutes) */
+    1024*1024*4,                /* maximum PDU size (approx.) to allow */
+    "default-config"            /* configuration name to pass to backend */
+};
 
 #define DEFAULT_LISTENER "tcp:localhost:9999"
 
@@ -103,7 +118,7 @@ static void listener(IOCHAN h, int event)
 
     if (event == EVENT_INPUT)
     {
-	if (dynamic && !child) 
+	if (control_block.dynamic && !child) 
 	{
 	    int res;
 
@@ -124,7 +139,7 @@ static void listener(IOCHAN h, int event)
 		close(hand[0]);
 		child = 1;
 		sprintf(nbuf, "%s(%d)", me, getpid());
-		log_init(loglevel, nbuf, 0);
+		log_init(control_block.loglevel, nbuf, 0);
 	    }
 	    else /* parent */
 	    {
@@ -172,7 +187,7 @@ static void listener(IOCHAN h, int event)
 	    return;
 	}
 	logf(LOG_DEBUG, "accept ok");
-	if (dynamic)
+	if (control_block.dynamic)
 	{
 	    IOCHAN pp;
 	    /* close our half of the listener sockets */
@@ -253,7 +268,7 @@ static void add_listener(char *where, int what)
     	exit(1);
     }
     logf(LOG_LOG, "Adding %s %s listener on %s",
-        dynamic ? "dynamic" : "static",
+        control_block.dynamic ? "dynamic" : "static",
     	what == PROTO_SR ? "SR" : "Z3950", where);
     if (!(l = cs_create(type, 0, what)))
     {
@@ -280,12 +295,24 @@ static void catchchld(int num)
     signal(SIGCHLD, catchchld);
 }
 
+statserv_options_block *statserv_getcontrol(void)
+{
+    static statserv_options_block cb;
+
+    memcpy(&cb, &control_block, sizeof(cb));
+    return &cb;
+}
+
+void statserv_setcontrol(statserv_options_block *block)
+{
+    memcpy(&control_block, block, sizeof(*block));
+}
+
 int statserv_main(int argc, char **argv)
 {
     int ret, listeners = 0;
     char *arg;
-    int protocol = CS_Z3950;
-    char *logfile = 0;
+    int protocol = control_block.default_proto;
 
     me = argv[0];
     while ((ret = options("a:szSl:v:", argv, argc, &arg)) != -2)
@@ -297,25 +324,25 @@ int statserv_main(int argc, char **argv)
 		break;
 	    case 'z': protocol = CS_Z3950; break;
 	    case 's': protocol = CS_SR; break;
-	    case 'S': dynamic = 0; break;
+	    case 'S': control_block.dynamic = 0; break;
 	    case 'l':
-	   	logfile = arg;
-		log_init(loglevel, me, logfile);
+	    	strcpy(control_block.logfile, arg);
+		log_init(control_block.loglevel, me, control_block.logfile);
 		break;
 	    case 'v':
-		loglevel = log_mask_str(arg);
-		log_init(loglevel, me, logfile);
+		control_block.loglevel = log_mask_str(arg);
+		log_init(control_block.loglevel, me, control_block.logfile);
 		break;
 	    case 'a':
-	    	apdufile = arg; break;
+	    	strcpy(control_block.apdufile, arg); break;
 	    default:
 	    	fprintf(stderr, "Usage: %s [ -v <loglevel> -l <logfile> -zsS <listener-addr> ... ]\n", me);
 	    	exit(1);
 	}
-    if (dynamic)
+    if (control_block.dynamic)
     	signal(SIGCHLD, catchchld);
-    if (!listeners)
-	add_listener(DEFAULT_LISTENER, protocol);
+    if (!listeners && *control_block.default_listen)
+	add_listener(control_block.default_listen, protocol);
     logf(LOG_LOG, "Entering event loop.");
 	    
     return event_loop();

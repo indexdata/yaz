@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.21  1995-05-02 08:53:19  quinn
+ * Revision 1.22  1995-05-15 11:56:39  quinn
+ * Asynchronous facilities. Restructuring of seshigh code.
+ *
+ * Revision 1.21  1995/05/02  08:53:19  quinn
  * Trying in vain to fix comm with ISODE
  *
  * Revision 1.20  1995/04/20  15:13:00  quinn
@@ -71,35 +74,68 @@
  *
  */
 
+/*
+ * Frontend server logic.
+ *
+ * This code receives incoming APDUs, and handles client requests by means
+ * of the backend API.
+ *
+ * Some of the code is getting quite involved, compared to simpler servers -
+ * primarily because it is asynchronous both in the communication with
+ * the user and the backend. We think the complexity will pay off in
+ * the form of greater flexibility when more asynchronous facilities
+ * are implemented.
+ *
+ * Memory management has become somewhat involved. In the simple case, where
+ * only one PDU is pending at a time, it will simply reuse the same memory,
+ * once it has found its working size. When we enable multiple concurrent
+ * operations, perhaps even with multiple parallel calls to the backend, it
+ * will maintain a pool of buffers for encoding and decoding, trying to
+ * minimize memory allocation/deallocation during normal operation.
+ *
+ * TODOs include (and will be done in order of public interest):
+ * 
+ * Support for EXPLAIN - provide simple meta-database system.
+ * Support for access control.
+ * Support for resource control.
+ * Support for extended services - primarily Item Order.
+ * Rest of Z39.50-1994
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
 
+#include <dmalloc.h>
 #include <comstack.h>
 #include <eventl.h>
 #include <session.h>
 #include <proto.h>
 #include <oid.h>
 #include <log.h>
+#include <statserv.h>
 
 #include <backend.h>
 
-#define MAXRECORDSIZE 1024*1024*5 /* should be configurable, of course */
-
-static int process_apdu(IOCHAN chan);
-static int process_initRequest(IOCHAN client, Z_InitRequest *req);
-static int process_searchRequest(IOCHAN client, Z_SearchRequest *req);
-static int process_presentRequest(IOCHAN client, Z_PresentRequest *req);
-static int process_scanRequest(IOCHAN client, Z_ScanRequest *req);
-
-extern int dynamic;
-extern char *apdufile;
+static int process_request(association *assoc);
+void backend_response(IOCHAN i, int event);
+static int process_response(association *assoc, request *req, Z_APDU *res);
+static Z_APDU *process_initRequest(association *assoc, request *reqb);
+static Z_APDU *process_searchRequest(association *assoc, request *reqb,
+    int *fd);
+static Z_APDU *response_searchRequest(association *assoc, request *reqb,
+    bend_searchresult *bsrt, int *fd);
+static Z_APDU *process_presentRequest(association *assoc, request *reqb,
+    int *fd);
+static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd);
 
 static FILE *apduf = 0; /* for use in static mode */
+static statserv_options_block *control_block = 0;
 
 /*
- * Create a new association-handle.
+ * Create and initialize a new association-handle.
  *  channel  : iochannel for the current line.
  *  link     : communications channel.
  * Returns: 0 or a new association handle.
@@ -108,6 +144,8 @@ association *create_association(IOCHAN channel, COMSTACK link)
 {
     association *new;
 
+    if (!control_block)
+    	control_block = statserv_getcontrol();
     if (!(new = malloc(sizeof(*new))))
     	return 0;
     new->client_chan = channel;
@@ -115,17 +153,17 @@ association *create_association(IOCHAN channel, COMSTACK link)
     if (!(new->decode = odr_createmem(ODR_DECODE)) ||
     	!(new->encode = odr_createmem(ODR_ENCODE)))
 	return 0;
-    if (apdufile)
+    if (*control_block->apdufile)
     {
     	char filename[256];
 	FILE *f;
 
 	if (!(new->print = odr_createmem(ODR_PRINT)))
 	    return 0;
-	if (*apdufile)
+	if (*control_block->apdufile != '-')
 	{
-	    strcpy(filename, apdufile);
-	    if (!dynamic)
+	    strcpy(filename, control_block->apdufile);
+	    if (!control_block->dynamic)
 	    {
 		if (!apduf)
 		{
@@ -156,6 +194,8 @@ association *create_association(IOCHAN channel, COMSTACK link)
     new->input_buffer = 0;
     new->input_buffer_len = 0;
     new->backend = 0;
+    request_initq(&new->incoming);
+    request_initq(&new->outgoing);
     if (cs_getproto(link) == CS_Z3950)
 	new->proto = PROTO_Z3950;
     else
@@ -176,13 +216,18 @@ void destroy_association(association *h)
     	free(h->input_buffer);
     if (h->backend)
     	bend_close(h->backend);
+    while (request_deq(&h->incoming));
+    while (request_deq(&h->outgoing));
     free(h);
 }
 
 /*
- * process events on the association. Called when the event loop detects an
- * event.
- *  h : the I/O channel that has an outstanding event.
+ * This is where PDUs from the client are read and the further
+ * processing is initiated. Flow of control moves down through the
+ * various process_* functions below, until the encoded result comes back up
+ * to the output handler in here.
+ * 
+ *  h     : the I/O channel that has an outstanding event.
  *  event : the current outstanding event.
  */
 void ir_session(IOCHAN h, int event)
@@ -190,52 +235,90 @@ void ir_session(IOCHAN h, int event)
     int res;
     association *assoc = iochan_getdata(h);
     COMSTACK conn = assoc->client_link;
+    request *req;
 
-    if (event == EVENT_INPUT)
+    assert(h && conn && assoc);
+    if (event & EVENT_INPUT || event & EVENT_WORK) /* input */
     {
-	assert(assoc && conn);
-	res = cs_get(conn, &assoc->input_buffer, &assoc->input_buffer_len);
-	switch (res)
+    	if (event & EVENT_INPUT)
 	{
-	    case 0: case -1: /* connection closed by peer */
-	    	logf(LOG_LOG, "Connection closed by client");
+	    logf(LOG_DEBUG, "ir_session (input)");
+	    assert(assoc && conn);
+	    if ((res = cs_get(conn, &assoc->input_buffer,
+		&assoc->input_buffer_len)) <= 0)
+	    {
+		logf(LOG_LOG, "Connection closed by client");
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);
 		return;
-	    case 1:  /* incomplete read */
+	    }
+	    else if (res == 1) /* incomplete read - wait for more  */
 		return;
-	    default: /* data! */
-		assoc->input_apdu_len = res;
-		if (process_apdu(h) < 0)
-		{
-		    cs_close(conn);
-		    destroy_association(assoc);
-		    iochan_destroy(h);
-		}
-		else if (cs_more(conn)) /* arrange to be called again */
-		    iochan_setevent(h, EVENT_INPUT);
+	    if (cs_more(conn)) /* more stuff - call us again later, please */
+		iochan_setevent(h, EVENT_INPUT);
+	    	
+	    /* we got a complete PDU. Let's decode it */
+	    req = request_get(); /* get a new request structure */
+	    odr_reset(assoc->decode);
+	    odr_setbuf(assoc->decode, assoc->input_buffer,
+		assoc->input_apdu_len, 0);
+	    if (!z_APDU(assoc->decode, &req->request, 0))
+	    {
+		logf(LOG_WARN, "ODR error: %s",
+		    odr_errlist[odr_geterror(assoc->decode)]);
+		cs_close(conn);
+		destroy_association(assoc);
+		iochan_destroy(h);
+		return;
+	    }
+	    req->request_mem = odr_extract_mem(assoc->decode);
+	    if (assoc->print && !z_APDU(assoc->print, &req->request, 0))
+	    {
+		logf(LOG_WARN, "ODR print error: %s", 
+		    odr_errlist[odr_geterror(assoc->print)]);
+		odr_reset(assoc->print);
+	    }
+	    request_enq(&assoc->incoming, req);
 	}
+
+	/* can we do something yet? */
+	req = request_head(&assoc->incoming);
+	if (req->state == REQUEST_IDLE)
+	    if (process_request(assoc) < 0)
+	    {
+		cs_close(conn);
+		destroy_association(assoc);
+		iochan_destroy(h);
+	    }
     }
-    else if (event == EVENT_OUTPUT)
+    if (event & EVENT_OUTPUT)
     {
-    	switch (res = cs_put(conn, assoc->encode_buffer, assoc->encoded_len))
+    	request *req = request_head(&assoc->outgoing);
+
+	logf(LOG_DEBUG, "ir_session (output)");
+	req->state = REQUEST_PENDING;
+    	switch (res = cs_put(conn, req->response, req->len_response))
 	{
 	    case -1:
 	    	logf(LOG_LOG, "Connection closed by client");
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);
-	    case 0: /* all sent */
-	    	iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset */
 		break;
-	    case 1: /* partial send */
-	    	break; /* we'll get called again */
+	    case 0: /* all sent - release the request structure */
+		odr_release_mem(req->request_mem);
+		request_deq(&assoc->outgoing);
+		request_release(req);
+		if (!request_head(&assoc->outgoing))
+		    iochan_clearflag(h, EVENT_OUTPUT);
+		break;
+	    /* value of 1 -- partial send -- is simply ignored */
 	}
     }
-    else if (event == EVENT_EXCEPT)
+    if (event & EVENT_EXCEPT)
     {
-	logf(LOG_LOG, "Exception on line");
+	logf(LOG_DEBUG, "ir_session (exception)");
 	cs_close(conn);
 	destroy_association(assoc);
 	iochan_destroy(h);
@@ -243,55 +326,135 @@ void ir_session(IOCHAN h, int event)
 }
 
 /*
- * Process the current outstanding APDU.
+ * Initiate request processing.
  */
-static int process_apdu(IOCHAN chan)
+static int process_request(association *assoc)
 {
-    Z_APDU *apdu;
-    int res;
-    association *assoc = iochan_getdata(chan);
+    request *req = request_head(&assoc->incoming);
+    int fd = -1;
+    Z_APDU *res;
 
-    odr_setbuf(assoc->decode, assoc->input_buffer, assoc->input_apdu_len);
-    if (!z_APDU(assoc->decode, &apdu, 0))
-    {
-    	logf(LOG_WARN, "ODR error: %s",
-	    odr_errlist[odr_geterror(assoc->decode)]);
-	return -1;
-    }
-    if (assoc->print && !z_APDU(assoc->print, &apdu, 0))
-    {
-    	logf(LOG_WARN, "ODR print error: %s", 
-	    odr_errlist[odr_geterror(assoc->print)]);
-	return -1;
-    }
-    switch (apdu->which)
+    logf(LOG_DEBUG, "process_request");
+    assert(req && req->state == REQUEST_IDLE);
+    switch (req->request->which)
     {
     	case Z_APDU_initRequest:
-	    res = process_initRequest(chan, apdu->u.initRequest); break;
+	    res = process_initRequest(assoc, req); break;
 	case Z_APDU_searchRequest:
-	    res = process_searchRequest(chan, apdu->u.searchRequest); break;
+	    res = process_searchRequest(assoc, req, &fd); break;
 	case Z_APDU_presentRequest:
-	    res = process_presentRequest(chan, apdu->u.presentRequest); break;
+	    res = process_presentRequest(assoc, req, &fd); break;
 	case Z_APDU_scanRequest:
-	    res = process_scanRequest(chan, apdu->u.scanRequest); break;
+	    res = process_scanRequest(assoc, req, &fd); break;
 	default:
 	    logf(LOG_WARN, "Bad APDU");
 	    return -1;
     }
-    odr_reset(assoc->decode); /* release incoming APDU */
-    odr_reset(assoc->encode); /* release stuff alloced before encoding */
-    return res;
+    if (res)
+    {
+    	logf(LOG_DEBUG, "  result immediately available");
+    	return process_response(assoc, req, res);
+    }
+    else if (fd < 0)
+    {
+    	logf(LOG_WARN, "   bad result");
+    	return -1;
+    }
+    else /* no result yet - one will be provided later */
+    {
+    	IOCHAN chan;
+
+	/* Set up an I/O handler for the fd supplied by the backend */
+
+	logf(LOG_DEBUG, "   establishing handler for result");
+	req->state = REQUEST_PENDING;
+	if (!(chan = iochan_create(fd, backend_response, EVENT_INPUT)))
+	    abort();
+	iochan_setdata(chan, assoc);
+	return 0;
+    }
 }
 
-static int process_initRequest(IOCHAN client, Z_InitRequest *req)
+/*
+ * Handle message from the backend.
+ */
+void backend_response(IOCHAN i, int event)
 {
-    Z_APDU apdu, *apdup;
-    Z_InitResponse resp;
-    bool_t result = 1;
-    association *assoc = iochan_getdata(client);
+    association *assoc = iochan_getdata(i);
+    request *req = request_head(&assoc->incoming);
+    Z_APDU *res;
+    int fd;
+
+    logf(LOG_DEBUG, "backend_response");
+    assert(assoc && req && req->state != REQUEST_IDLE);
+    /* determine what it is we're waiting for */
+    switch (req->request->which)
+    {
+	case Z_APDU_searchRequest:
+	    res = response_searchRequest(assoc, req, 0, &fd); break;
+#if 0
+	case Z_APDU_presentRequest:
+	    res = response_presentRequest(assoc, req, 0, &fd); break;
+	case Z_APDU_scanRequest:
+	    res = response_scanRequest(assoc, req, 0, &fd); break;
+#endif
+	default:
+	    logf(LOG_WARN, "Serious programmer's lapse or bug");
+	    abort();
+    }
+    if ((res && process_response(assoc, req, res) < 0) || fd < 0)
+    {
+	logf(LOG_LOG, "Fatal error when talking to backend");
+	cs_close(assoc->client_link);
+	destroy_association(assoc);
+	iochan_destroy(assoc->client_chan);
+	iochan_destroy(i);
+	return;
+    }
+    else if (!res) /* no result yet - try again later */
+    {
+    	logf(LOG_DEBUG, "   no result yet");
+    	iochan_setfd(i, fd); /* in case fd has changed */
+    }
+}
+
+/*
+ * Encode response, and transfer the request structure to the outgoing queue.
+ */
+static int process_response(association *assoc, request *req, Z_APDU *res)
+{
+    odr_setbuf(assoc->encode, req->response, req->size_response, 1);
+    if (!z_APDU(assoc->encode, &res, 0))
+    {
+    	logf(LOG_WARN, "ODR error when encoding response: %s",
+	    odr_errlist[odr_geterror(assoc->decode)]);
+	return -1;
+    }
+    req->response = odr_getbuf(assoc->encode, &req->len_response,
+	&req->size_response);
+    odr_reset(assoc->encode);
+    /* change this when we make the backend reentrant */
+    assert(req == request_head(&assoc->incoming));
+    req->state = REQUEST_IDLE;
+    request_deq(&assoc->incoming);
+    request_enq(&assoc->outgoing, req);
+    /* turn the work over to the ir_session handler */
+    iochan_setflag(assoc->client_chan, EVENT_OUTPUT);
+    /* Is there more work to be done? */
+    if (request_head(&assoc->incoming))
+    	iochan_setevent(assoc->client_chan, EVENT_WORK);
+    return 0;
+}
+
+static Z_APDU *process_initRequest(association *assoc, request *reqb)
+{
+    Z_InitRequest *req = reqb->request->u.initRequest;
+    static Z_APDU apdu;
+    static Z_InitResponse resp;
+    static bool_t result = 1;
+    static Odr_bitmask options, protocolVersion;
     bend_initrequest binitreq;
     bend_initresult *binitres;
-    Odr_bitmask options, protocolVersion;
 
     logf(LOG_LOG, "Got initRequest");
     if (req->implementationId)
@@ -305,14 +468,14 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     if (!(binitres = bend_init(&binitreq)) || binitres->errcode)
     {
     	logf(LOG_WARN, "Negative response from backend");
-    	return -1;
+    	return 0;
     }
 
     assoc->backend = binitres->handle;
-    apdup = &apdu;
     apdu.which = Z_APDU_initResponse;
     apdu.u.initResponse = &resp;
     resp.referenceId = req->referenceId;
+    /* let's tell the client what we can do */
     ODR_MASK_ZERO(&options);
     if (ODR_MASK_GET(req->options, Z_Options_search))
     	ODR_MASK_SET(&options, Z_Options_search);
@@ -326,7 +489,10 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     	ODR_MASK_SET(&options, Z_Options_namedResultSets);
     if (ODR_MASK_GET(req->options, Z_Options_scan))
     	ODR_MASK_SET(&options, Z_Options_scan);
+    if (ODR_MASK_GET(req->options, Z_Options_concurrentOperations))
+    	ODR_MASK_SET(&options, Z_Options_concurrentOperations);
     resp.options = &options;
+
     ODR_MASK_ZERO(&protocolVersion);
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
     	ODR_MASK_SET(&protocolVersion, Z_ProtocolVersion_1);
@@ -334,8 +500,8 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     	ODR_MASK_SET(&protocolVersion, Z_ProtocolVersion_2);
     resp.protocolVersion = &protocolVersion;
     assoc->maximumRecordSize = *req->maximumRecordSize;
-    if (assoc->maximumRecordSize > MAXRECORDSIZE)
-    	assoc->maximumRecordSize = MAXRECORDSIZE;
+    if (assoc->maximumRecordSize > control_block->maxrecordsize)
+    	assoc->maximumRecordSize = control_block->maxrecordsize;
     assoc->preferredMessageSize = *req->preferredMessageSize;
     if (assoc->preferredMessageSize > assoc->maximumRecordSize)
     	assoc->preferredMessageSize = assoc->maximumRecordSize;
@@ -343,22 +509,10 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.maximumRecordSize = &assoc->maximumRecordSize;
     resp.result = &result;
     resp.implementationId = "YAZ";
-#if 0
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-#endif
-    resp.implementationName = "High Level API Server aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddduuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    resp.implementationVersion = "$Revision: 1.21 $";
+    resp.implementationVersion = "$Revision: 1.22 $";
     resp.userInformationField = 0;
-    if (!z_APDU(assoc->encode, &apdup, 0))
-    {
-	logf(LOG_FATAL, "ODR error encoding initres: %s",
-	    odr_errlist[odr_geterror(assoc->encode)]);
-	return -1;
-    }
-    assoc->encode_buffer = odr_getbuf(assoc->encode, &assoc->encoded_len);
-    odr_reset(assoc->encode);
-    iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
-    return 0;
+    return &apdu;
 }
 
 static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
@@ -526,7 +680,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    return 0;
 	strcpy(thisrec->databaseName, fres->basename);
 	thisrec->which = Z_NamePlusRecord_databaseRecord;
-	if (!(thisrec->u.databaseRecord = thisext =  odr_malloc(a->encode,
+	if (!(thisrec->u.databaseRecord = thisext = odr_malloc(a->encode,
 	    sizeof(Z_DatabaseRecord))))
 	    return 0;
 	thisext->direct_reference = oid; /* should be OID for current MARC */
@@ -550,135 +704,139 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     return &records;
 }
 
-static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
+static Z_APDU *process_searchRequest(association *assoc, request *reqb,
+    int *fd)
 {
-    Z_APDU apdu, *apdup;
-    Z_SearchResponse resp;
-    association *assoc = iochan_getdata(client);
-    int nulint = 0;
-    bool_t sr = 1;
+    Z_SearchRequest *req = reqb->request->u.searchRequest;
     bend_searchrequest bsrq;
     bend_searchresult *bsrt;
-    oident *oent;
-    int next = 0;
-    static int none = Z_RES_NONE;
 
     logf(LOG_LOG, "Got SearchRequest.");
-    apdup = &apdu;
+
+    bsrq.setname = req->resultSetName;
+    bsrq.replace_set = *req->replaceIndicator;
+    bsrq.num_bases = req->num_databaseNames;
+    bsrq.basenames = req->databaseNames;
+    bsrq.query = req->query;
+
+    if (!(bsrt = bend_search(assoc->backend, &bsrq, fd)))
+	return 0;
+    return response_searchRequest(assoc, reqb, bsrt, fd);
+}
+
+bend_searchresult *bend_searchresponse(void *handle) {return 0;}
+
+/*
+ * Prepare a searchresponse based on the backend results. We probably want
+ * to look at making the fetching of records nonblocking as well, but
+ * so far, we'll keep things simple.
+ * If bsrt is null, that means we're called in response to a communications
+ * event, and we'll have to get the response for ourselves.
+ */
+static Z_APDU *response_searchRequest(association *assoc, request *reqb,
+    bend_searchresult *bsrt, int *fd)
+{
+    Z_SearchRequest *req = reqb->request->u.searchRequest;
+    static Z_APDU apdu;
+    static Z_SearchResponse resp;
+    static int nulint = 0;
+    static bool_t sr = 1;
+    static int next = 0;
+    static int none = Z_RES_NONE;
+
     apdu.which = Z_APDU_searchResponse;
     apdu.u.searchResponse = &resp;
     resp.referenceId = req->referenceId;
-
-    resp.records = 0;
-    if (req->query->which == Z_Query_type_1)
+    *fd = -1;
+    if (!bsrt && !(bsrt = bend_searchresponse(assoc->backend)))
     {
-    	Z_RPNQuery *q = req->query->u.type_1;
-
-    	if (!(oent = oid_getentbyoid(q->attributeSetId)) ||
-	    oent->class != CLASS_ATTSET ||
-	    oent->value != VAL_BIB1)
-	{
-	    resp.records = diagrec(assoc->proto, 121, 0);
-	    resp.resultCount = &nulint;
-	    resp.numberOfRecordsReturned = &nulint;
-	    resp.nextResultSetPosition = &nulint;
-	    resp.searchStatus = &none;
-	    resp.resultSetStatus = 0;
-	    resp.presentStatus = 0;
-	}
+    	logf(LOG_FATAL, "Bad result from backend");
+    	return 0;
     }
-    if (!resp.records)
+    else if (bsrt->errcode)
+    {
+	resp.records = diagrec(assoc->proto, bsrt->errcode,
+	    bsrt->errstring);
+	resp.resultCount = &nulint;
+	resp.numberOfRecordsReturned = &nulint;
+	resp.nextResultSetPosition = &nulint;
+	resp.searchStatus = &nulint;
+	resp.resultSetStatus = &none;
+	resp.presentStatus = 0;
+    }
+    else
     {
     	int toget;
 	Z_ElementSetNames *setnames;
 	int presst = 0;
 
-	bsrq.setname = req->resultSetName;
-	bsrq.replace_set = *req->replaceIndicator;
-	bsrq.num_bases = req->num_databaseNames;
-	bsrq.basenames = req->databaseNames;
-	bsrq.query = req->query;
+	resp.records = 0;
+	resp.resultCount = &bsrt->hits;
 
-	if (!(bsrt = bend_search(assoc->backend, &bsrq, 0)))
-	    return -1;
-	else if (bsrt->errcode)
+	/* how many records does the user agent want, then? */
+	if (bsrt->hits <= *req->smallSetUpperBound)
 	{
+	    toget = bsrt->hits;
+	    setnames = req->smallSetElementSetNames;
+	}
+	else if (bsrt->hits < *req->largeSetLowerBound)
+	{
+	    toget = *req->mediumSetPresentNumber;
+	    if (toget > bsrt->hits)
+		toget = bsrt->hits;
+	    setnames = req->mediumSetElementSetNames;
+	}
+	else
+	    toget = 0;
 
-	    resp.records = diagrec(assoc->proto, bsrt->errcode,
-		bsrt->errstring);
-	    resp.resultCount = &nulint;
-	    resp.numberOfRecordsReturned = &nulint;
-	    resp.nextResultSetPosition = &nulint;
-	    resp.searchStatus = &nulint;
-	    resp.resultSetStatus = &none;
-	    resp.presentStatus = 0;
+	if (toget && !resp.records)
+	{
+	    resp.records = pack_records(assoc, req->resultSetName, 1,
+		&toget, setnames, &next, &presst);
+	    if (!resp.records)
+		return 0;
+	    resp.numberOfRecordsReturned = &toget;
+	    resp.nextResultSetPosition = &next;
+	    resp.searchStatus = &sr;
+	    resp.resultSetStatus = 0;
+	    resp.presentStatus = &presst;
 	}
 	else
 	{
-	    resp.records = 0;
-
-	    resp.resultCount = &bsrt->hits;
-
-	    /* how many records does the user agent want, then? */
-	    if (bsrt->hits <= *req->smallSetUpperBound)
-	    {
-		toget = bsrt->hits;
-		setnames = req->smallSetElementSetNames;
-	    }
-	    else if (bsrt->hits < *req->largeSetLowerBound)
-	    {
-		toget = *req->mediumSetPresentNumber;
-		if (toget > bsrt->hits)
-		    toget = bsrt->hits;
-		setnames = req->mediumSetElementSetNames;
-	    }
-	    else
-		toget = 0;
-
-	    if (toget && !resp.records)
-	    {
-		resp.records = pack_records(assoc, req->resultSetName, 1,
-		    &toget, setnames, &next, &presst);
-		if (!resp.records)
-		    return -1;
-		resp.numberOfRecordsReturned = &toget;
-		resp.nextResultSetPosition = &next;
-		resp.searchStatus = &sr;
-		resp.resultSetStatus = 0;
-		resp.presentStatus = &presst;
-	    }
-	    else
-	    {
-		resp.numberOfRecordsReturned = &nulint;
-		resp.nextResultSetPosition = &next;
-		resp.searchStatus = &sr;
-		resp.resultSetStatus = 0;
-		resp.presentStatus = 0;
-	    }
+	    resp.numberOfRecordsReturned = &nulint;
+	    resp.nextResultSetPosition = &next;
+	    resp.searchStatus = &sr;
+	    resp.resultSetStatus = 0;
+	    resp.presentStatus = 0;
 	}
     }
-
-    if (!z_APDU(assoc->encode, &apdup, 0))
-    {
-	logf(LOG_FATAL, "ODR error encoding searchres: %s",
-	    odr_errlist[odr_geterror(assoc->encode)]);
-	return -1;
-    }
-    assoc->encode_buffer = odr_getbuf(assoc->encode, &assoc->encoded_len);
-    odr_reset(assoc->encode);
-    iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
-    return 0;
+    return &apdu;
 }
 
-static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
+/*
+ * Maybe we got a little over-friendly when we designed bend_fetch to
+ * get only one record at a time. Some backends can optimise multiple-record
+ * fetches, and at any rate, there is some overhead involved in
+ * all that selecting and hopping around. Problem is, of course, that the
+ * frontend can't know ahead of time how many records it'll need to
+ * fill the negotiated PDU size. Annoying. Segmentation or not, Z/SR
+ * is downright lousy as a bulk data transfer protocol.
+ *
+ * To start with, we'll do the fetching of records from the backend
+ * in one operation: To save some trips in and out of the event-handler,
+ * and to simplify the interface to pack_records. At any rate, asynch
+ * operation is more fun in operations that have an unpredictable execution
+ * speed - which is normally more true for search than for present.
+ */
+static Z_APDU *process_presentRequest(association *assoc, request *reqb,
+    int *fd)
 {
-    Z_APDU apdu, *apdup;
-    Z_PresentResponse resp;
-    association *assoc = iochan_getdata(client);
-    int presst, next, num;
+    Z_PresentRequest *req = reqb->request->u.presentRequest;
+    static Z_APDU apdu;
+    static Z_PresentResponse resp;
+    static int presst, next, num;
 
     logf(LOG_LOG, "Got PresentRequest.");
-    apdup = &apdu;
     apdu.which = Z_APDU_presentResponse;
     apdu.u.presentResponse = &resp;
     resp.referenceId = req->referenceId;
@@ -687,38 +845,32 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
     resp.records = pack_records(assoc, req->resultSetId,
 	*req->resultSetStartPoint, &num, req->elementSetNames, &next, &presst);
     if (!resp.records)
-    	return -1;
+    	return 0;
     resp.numberOfRecordsReturned = &num;
     resp.presentStatus = &presst;
     resp.nextResultSetPosition = &next;
 
-    if (!z_APDU(assoc->encode, &apdup, 0))
-    {
-	logf(LOG_FATAL, "ODR error encoding initres: %s",
-	    odr_errlist[odr_geterror(assoc->encode)]);
-	return -1;
-    }
-    assoc->encode_buffer = odr_getbuf(assoc->encode, &assoc->encoded_len);
-    odr_reset(assoc->encode);
-    iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
-    return 0;
+    return &apdu;
 }
 
-static int process_scanRequest(IOCHAN client, Z_ScanRequest *req)
+/*
+ * Scan was implemented rather in a hurry, and with support for only the basic
+ * elements of the service in the backend API. Suggestions are welcome.
+ */
+static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 {
-    association *assoc = iochan_getdata(client);
-    Z_APDU apdu, *apdup;
-    Z_ScanResponse res;
+    Z_ScanRequest *req = reqb->request->u.scanRequest;
+    static Z_APDU apdu;
+    static Z_ScanResponse res;
+    static int scanStatus = Z_Scan_failure;
+    static int numberOfEntriesReturned = 0;
+    oident *attent;
+    static Z_ListEntries ents;
+#define SCAN_MAX_ENTRIES 200
+    static Z_Entry *tab[SCAN_MAX_ENTRIES];
     bend_scanrequest srq;
     bend_scanresult *srs;
-    int scanStatus = Z_Scan_failure;
-    int numberOfEntriesReturned = 0;
-    oident *attent;
-    Z_ListEntries ents;
-#define SCAN_MAX_ENTRIES 200
-    Z_Entry *tab[SCAN_MAX_ENTRIES];
 
-    apdup = &apdu;
     apdu.which = Z_APDU_scanResponse;
     apdu.u.scanResponse = &res;
     res.referenceId = req->referenceId;
@@ -791,23 +943,6 @@ static int process_scanRequest(IOCHAN client, Z_ScanRequest *req)
 	    res.positionOfTerm = &srs->term_position;
 	}
     }
-    if (!z_APDU(assoc->encode, &apdup, 0))
-    {
-	logf(LOG_FATAL, "ODR error encoding scanres: %s",
-	    odr_errlist[odr_geterror(assoc->encode)]);
-	return -1;
-    }
-#if 0
-    odr_reset(assoc->print);
-    if (!z_APDU(assoc->print, &apdup, 0))
-    {
-	logf(LOG_FATAL, "ODR error priniting scanres: %s",
-	    odr_errlist[odr_geterror(assoc->encode)]);
-	return -1;
-    }
-#endif
-    assoc->encode_buffer = odr_getbuf(assoc->encode, &assoc->encoded_len);
-    odr_reset(assoc->encode);
-    iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
-    return 0;
+
+    return &apdu;
 }
