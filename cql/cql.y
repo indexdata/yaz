@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.1 2003-01-06 08:20:27 adam Exp $
+/* $Id: cql.y,v 1.2 2003-01-11 03:18:53 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -98,7 +98,7 @@ searchClause:
       $$.rel->u.st.index = strdup($1.buf);
   } searchClause {
       $$.cql = $4.cql;
-      cql_node_destroy($$.rel);
+      cql_node_destroy($2.rel);
   }
 | '>' searchTerm '=' searchTerm {
       $$.rel = $0.rel;

@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.1 2003-01-06 08:20:27 adam Exp $
+/* $Id: cqltransform.c,v 1.2 2003-01-11 03:18:53 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -431,6 +431,7 @@ int cql_transform(cql_transform_t ct,
         }
     }
     cql_transform_r (ct, cn, pr, client_data, prefix_ar, 1);
+    cql_node_destroy(prefix_ar[0]);
     return ct->error;
 }
 
