@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstnmem.c,v 1.2 2004-09-29 20:15:48 adam Exp $
+ * $Id: tstnmem.c,v 1.3 2005-01-05 10:29:42 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -31,6 +31,14 @@ int main (int argc, char **argv)
         cp = nmem_malloc(n, j);
         if (!cp)
             exit(2);
+	if (sizeof(long) >= j)
+	    *(long*) cp = 123L;
+#if HAVE_LONG_LONG
+	if (sizeof(long long) >= j)
+	    *(long long*) cp = 123L;
+#endif
+	if (sizeof(double) >= j)
+	    *(double*) cp = 12.2;
     }
     
     for (j = 2000; j<20000; j+= 2000)
