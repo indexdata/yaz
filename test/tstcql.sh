@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: tstcql.sh,v 1.3 2004-10-01 11:43:43 adam Exp $
+# $Id: tstcql.sh,v 1.4 2004-11-16 22:44:31 adam Exp $
 srcdir=${srcdir:-.}
 oIFS="$IFS"
 IFS='
@@ -29,6 +29,7 @@ for f in `cat ${srcdir}/cqlsample`; do
 		if test -f $OUT1 -a -f $ERR1; then
 			if diff $OUT1 $OUT2 >$DIFF; then
 				rm $DIFF
+				rm $OUT2
 			else
 				echo "diff out $secno $testno $f"
 				cat $DIFF
@@ -36,6 +37,7 @@ for f in `cat ${srcdir}/cqlsample`; do
 			fi
 			if diff $ERR1 $ERR2 >$DIFF; then
 				rm $DIFF
+				rm $ERR2
 			else
 				echo "diff err $secno $testno $f"
 				cat $DIFF
