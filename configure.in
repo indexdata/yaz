@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.68 2002-03-25 15:12:25 adam Exp $
+dnl $Id: configure.in,v 1.69 2002-04-14 21:27:47 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.7)
 dnl
@@ -215,7 +215,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 		thread_ok=yes,thread_ok=no)
 	if test "$thread_ok" = "yes"; then
 		AC_MSG_RESULT(yes)
-		LIBTHREAD=-lpthread
+		LIBTHREAD="-lpthread"
 		CFLAGSTHREADS="-DYAZ_POSIX_THREADS=1 -D_REENTRANT"
 		HAVETHREADS=1
 	else
@@ -229,6 +229,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 		if test "$thread_ok" = "yes"; then
 			AC_MSG_RESULT([yes,BSD])
 			CFLAGSTHREADS="-pthread -DYAZ_POSIX_THREADS=1 -D_REENTRANT"
+			LIBTHREAD="-pthread"
 			HAVETHREADS=1
 		fi
 	fi
