@@ -35,13 +35,14 @@ Use '?' to get a list of the available commands.
 
 The current query language is a bit awkward, but functional:
 
-query    ::= complex | simple | attr query.
-complex  ::= operator query query.
+query    ::= ['@attrset' <attribute-set>] rpn
+rpn      ::= complex | simple | attr rpn
+complex  ::= operator rpn rpn
 operator ::= '@and' | '@or' | '@not'.
 simple   ::= term | set.
 term     ::= <word> | '"' <term> ... '"'.
 set      ::= '@set' <setname>.
-attr     ::= '@attr' <number> '=' <number>.
+attr     ::= '@attr' [<attribute-set>] <number> '=' <number>.
 
 Eg.:
 
@@ -50,6 +51,8 @@ Andersen
 "Hans Andersen"
 
 @and @attr 1=1 andersen @attr 1=4 @attr 4=2 duckling
+
+@attrset Bib-1 @and @attr GILS 2=2008 Washington @attr 1=21 weather
 
 The directories:
 
