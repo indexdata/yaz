@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_prtree.c,v 1.8 2002-05-13 14:13:37 adam Exp $
+ * $Id: d1_prtree.c,v 1.9 2002-07-11 10:40:50 adam Exp $
  */
 
 #include <yaz/log.h>
@@ -16,7 +16,7 @@ static void pr_string (FILE *out, const char *str, int len)
     {
 	int c = str[i];
 	if (c < 32 || c >126)
-	    fprintf (out, "\\x%02x", c);
+	    fprintf (out, "\\x%02x", c & 255);
 	else
 	    fputc (c, out);
     }
@@ -42,7 +42,11 @@ static void pr_tree (data1_handle dh, data1_node *n, FILE *out, int level)
         }
 	break;
     case DATA1N_data:
-	fprintf (out, "data type=");
+    case DATA1N_comment:
+        if (n->which == DATA1N_data)
+            fprintf (out, "data type=");
+        else
+            fprintf (out, "comment type=");
 	switch (n->u.data.what)
 	{
 	case DATA1I_inctxt:
@@ -70,6 +74,17 @@ static void pr_tree (data1_handle dh, data1_node *n, FILE *out, int level)
 	    fprintf (out, "unknown(%d)\n", n->u.data.what);
 	    break;
 	}
+	break;
+    case DATA1N_preprocess:
+	fprintf (out, "preprocess target=%s\n", n->u.preprocess.target);
+        if (n->u.preprocess.attributes)
+        {
+            data1_xattr *xattr = n->u.preprocess.attributes;
+            fprintf (out, "%*s attr", level, "");
+            for (; xattr; xattr = xattr->next)
+                fprintf (out, " %s=%s ", xattr->name, xattr->value);
+            fprintf (out, "\n");
+        }
 	break;
     case DATA1N_variant:
 	fprintf (out, "variant\n");
