@@ -1,3 +1,7 @@
+Made NT service interface part of the server library. The
+function statserv_main uses the NT service when required and
+calls the statserv_start / statserv_close routines.
+
 Possible compatibility problems with earlier versions marked with '*'.
 
 Routine zget_SearchRequest fills resultSetName member with "default"
