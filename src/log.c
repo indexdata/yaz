@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.16 2004-11-18 15:18:13 heikki Exp $
+ * $Id: log.c,v 1.17 2004-11-23 14:10:47 heikki Exp $
  */
 
 /**
@@ -83,7 +83,7 @@ static struct {
     { YLOG_ERRNO,  ""},
     { YLOG_MALLOC, "malloc"},
  /*   { YLOG_APP,    "app"  }, */
-    { YLOG_NOTIME, "" },
+    { YLOG_NOTIME, "notime" },
  /*   { YLOG_APP2,   "app2" }, */
  /*   { YLOG_APP3,   "app3" }, */
     { YLOG_ALL,    "all"  },
