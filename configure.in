@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.150 2004-09-09 09:53:08 adam Exp $
+dnl $Id: configure.in,v 1.151 2004-09-22 14:50:04 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.23)
 AM_MAINTAINER_MODE
@@ -103,20 +103,14 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
 	#include <stdio.h>
 	#include <readline/readline.h>
 	],[
-        static void f()
-        {
                 rl_attempted_completion_over = 0;
-        }
         ],AC_DEFINE(HAVE_READLINE_COMPLETION_OVER))
         AC_TRY_LINK([
 	#include <stdio.h>
 	#include <readline/readline.h>
 	],[
-        static void f()
-        {
                 rl_completion_matches (0, 0);
-        }
-        ],AC_DEFINE(HAVE_READLINE_RL_COMPLETION_MATCHES))
+        ],[AC_DEFINE(HAVE_READLINE_RL_COMPLETION_MATCHES)])
         LIBS=$xLIBS
 fi
 dnl ------ iconv
@@ -132,7 +126,7 @@ if test "$with_iconv" != "no"; then
         AC_TRY_LINK([
 		#include <iconv.h>
 	],[
-		static void f() {iconv_t t = iconv_open("", ""); }
+		iconv_t t = iconv_open("", "");
 	],[
 		AC_DEFINE(HAVE_ICONV_H)
 		AC_MSG_RESULT(yes)
@@ -141,7 +135,7 @@ if test "$with_iconv" != "no"; then
 	        AC_TRY_LINK([
 			#include <iconv.h>
 		],[
-			static void f() {iconv_t t = iconv_open("", ""); }
+			iconv_t t = iconv_open("", "");
 		],[
 			AC_DEFINE(HAVE_ICONV_H)
 			AC_MSG_RESULT(yes)
