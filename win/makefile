@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.41 2002-06-04 08:29:53 adam Exp $
+# $Id: makefile,v 1.42 2002-06-05 21:11:00 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -29,7 +29,7 @@ default: all
 
 all: dirs generate dll client ztest zoomsh
 
-NSIS="c:\program files\nsis\makensis.exe"
+NSIS="c:\program files\nsis\makensis-bz2.exe"
 
 nsis: all
 	$(NSIS) yaz.nsi
@@ -795,13 +795,12 @@ clean:
 	-del $(OBJDIR)\*.OBJ
 
 realclean: clean
-	del $(Z3950_C_DIR)\*.c
-	del $(Z3950_C_DIR)\*.h
-	del $(INCLDIR)\yaz\z-accdes1.h
-	del $(INCLDIR)\yaz\z-core.h
-	del $(DATETIME_H_FILES)
-	del $(UNIVRES_H_FILES)
-	del $(ESUPDATE_H_FILES)
+	-del $(Z3950_C_DIR)\z*.c
+	-del $(INCLDIR)\yaz\z-accdes1.h
+	-del $(INCLDIR)\yaz\z-core.h
+	-del $(DATETIME_H_FILES)
+	-del $(UNIVRES_H_FILES)
+	-del $(ESUPDATE_H_FILES)
 
 # Because DOS del will only accept one file name to delete,
 # the _H_ files work only on sets that have just one file.
@@ -833,7 +832,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.41  2002-06-04 08:29:53  adam
+# Revision 1.42  2002-06-05 21:11:00  adam
+# NSIS bz2
+#
+# Revision 1.41  2002/06/04 08:29:53  adam
 # ignore errors on del.
 #
 # Revision 1.40  2002/06/02 21:34:45  adam
