@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.13 2004/02/23
+
 Implement ZOOM_resultset_cache_reset which resets record cache.
 
 Implement ZOOM_resultset_sort which sorts a result set.
