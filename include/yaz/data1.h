@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,222 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: data1.h,v $
- * Revision 1.8  2002-05-03 13:48:27  adam
- * data1 cleanup
- *
- * Revision 1.7  2002/04/04 20:49:46  adam
- * New functions yaz_is_abspath, yaz_path_fopen_base
- *
- * Revision 1.6  2000/12/05 12:21:45  adam
- * Added termlist source for data1 system.
- *
- * Revision 1.5  2000/11/29 14:22:47  adam
- * Implemented XML/SGML attributes for data1 so that d1_read reads them
- * and d1_write generates proper attributes for XML/SGML records. Added
- * register locking for threaded version.
- *
- * Revision 1.4  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.3  2000/01/04 17:46:17  ian
- * Added function to count occurences of a tag spec in a data1 tree.
- *
- * Revision 1.2  1999/12/21 14:16:19  ian
- * Changed retrieval module to allow data1 trees with no associated absyn.
- * Also added a simple interface for extracting values from data1 trees using
- * a string based tagpath.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.42  1999/10/21 12:06:28  adam
- * Retrieval module no longer uses ctype.h - functions.
- *
- * Revision 1.41  1999/07/13 13:23:47  adam
- * Non-recursive version of data1_read_node. data1_read_nodex reads
- * stream of bytes (instead of buffer in memory).
- *
- * Revision 1.40  1998/11/03 10:14:12  adam
- * Changed definition of data1 node so that it uses less space.
- *
- * Revision 1.39  1998/10/28 15:10:06  adam
- * Added --with-yc option to configure. For the data1_node in data1.h:
- * decreased size of localdata and removed member "line" which wasn't useful.
- *
- * Revision 1.38  1998/10/15 08:29:15  adam
- * Tag set type may be specified in reference to it using "tagset"
- * directive in .abs-files and "include" directive in .tag-files.
- *
- * Revision 1.37  1998/10/13 16:09:46  adam
- * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
- * Added support for multiple attribute set references and tagset references
- * from an abstract syntax file.
- * Fixed many bad logs-calls in routines that read the various
- * specifications regarding data1 (*.abs,*.att,...) and made the messages
- * consistent whenever possible.
- * Added extra 'lineno' argument to function readconf_line.
- *
- * Revision 1.36  1998/05/18 13:06:57  adam
- * Changed the way attribute sets are handled by the retriaval module.
- * Extended Explain conversion / schema.
- * Modified server and client to work with ASN.1 compiled protocol handlers.
- *
- * Revision 1.35  1998/03/05 08:15:32  adam
- * Implemented data1_add_insert_taggeddata utility which is more flexible
- * than data1_insert_taggeddata.
- *
- * Revision 1.34  1998/02/27 14:08:04  adam
- * Added const to some char pointer arguments.
- * Reworked data1_read_node so that it doesn't create a tree with
- * pointers to original "SGML"-buffer.
- *
- * Revision 1.33  1997/12/18 10:51:30  adam
- * Implemented sub-trees feature for schemas - including forward
- * references.
- *
- * Revision 1.32  1997/12/09 16:18:16  adam
- * Work on EXPLAIN schema. First implementation of sub-schema facility
- * in the *.abs files.
- *
- * Revision 1.31  1997/11/18 09:51:08  adam
- * Removed element num_children from data1_node. Minor changes in
- * data1 to Explain.
- *
- * Revision 1.30  1997/10/31 12:20:07  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
- *
- * Revision 1.29  1997/10/27 13:54:18  adam
- * Changed structure field in data1 node to be simple string which
- * is "unknown" to the retrieval system itself.
- *
- * Revision 1.28  1997/10/06 09:37:53  adam
- * Added prototype for data1_get_map_buf.
- *
- * Revision 1.27  1997/09/24 13:35:44  adam
- * Added two members to data1_marctab to ease reading of weird MARC records.
- *
- * Revision 1.26  1997/09/17 12:10:32  adam
- * YAZ version 1.4.
- *
- * Revision 1.25  1997/09/05 09:50:55  adam
- * Removed global data1_tabpath - uses data1_get_tabpath() instead.
- *
- * Revision 1.24  1997/09/01 09:30:39  adam
- * Added include of yaz-util.h.
- *
- * Revision 1.23  1997/09/01 08:58:04  adam
- * Removed declaration of data1_matchstr since it's a macro.
- *
- * Revision 1.22  1997/09/01 08:49:48  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.21  1997/05/14 06:53:38  adam
- * C++ support.
- *
- * Revision 1.20  1996/10/29 13:34:39  adam
- * New functions to get/set data1_tabpath.
- *
- * Revision 1.19  1996/10/11 11:57:16  quinn
- * Smallish
- *
- * Revision 1.18  1996/10/07  15:29:16  quinn
- * Added SOIF support
- *
- * Revision 1.17  1996/07/06  19:58:32  quinn
- * System headerfiles gathered in yconfig
- *
- * Revision 1.16  1996/06/10  08:55:34  quinn
- * Added Summary. Unfinished work
- *
- * Revision 1.15  1996/06/03  09:46:03  quinn
- * Added OID type.
- *
- * Revision 1.14  1996/05/09  07:27:11  quinn
- * Multiple local values supported.
- *
- * Revision 1.13  1996/02/20  16:32:48  quinn
- * Created util file.
- *
- * Revision 1.12  1996/01/18  09:46:34  adam
- * Changed prototype for reader function parsed to data1_read_record.
- *
- * Revision 1.11  1995/12/15  16:19:45  quinn
- * Added formatted_text.
- *
- * Revision 1.10  1995/12/14  11:09:43  quinn
- * Work on Explain
- *
- * Revision 1.9  1995/12/13  15:32:47  quinn
- * Added sgml-output.
- *
- * Revision 1.8  1995/12/13  13:44:23  quinn
- * Modified Data1-system to use nmem
- *
- * Revision 1.7  1995/12/12  16:37:05  quinn
- * Added destroy element to data1_node.
- *
- * Revision 1.6  1995/12/11  15:22:12  quinn
- * Added last_child field to the node.
- *
- * Revision 1.5  1995/12/05  14:26:40  quinn
- * Added global lbuf to data1_node.
- *
- * Revision 1.4  1995/11/13  09:27:29  quinn
- * Fiddling with the variant stuff.
- *
- * Revision 1.3  1995/11/01  16:34:52  quinn
- * Making data1 look for tables in data1_tabpath
- *
- * Revision 1.2  1995/11/01  13:54:35  quinn
- * Minor adjustments
- *
- * Revision 1.1  1995/11/01  13:07:18  quinn
- * Data1 module now lives in YAZ.
- *
- * Revision 1.13  1995/10/25  16:00:49  quinn
- * USMARC support is now almost operational
- *
- * Revision 1.12  1995/10/16  14:02:59  quinn
- * Changes to support element set names and espec1
- *
- * Revision 1.11  1995/10/13  16:05:10  quinn
- * Adding Espec1-processing
- *
- * Revision 1.10  1995/10/11  14:53:46  quinn
- * Work on variants.
- *
- * Revision 1.9  1995/10/10  16:27:59  quinn
- * *** empty log message ***
- *
- * Revision 1.8  1995/10/06  16:44:14  quinn
- * Work on attribute set mapping, etc.
- *
- * Revision 1.7  1995/10/06  12:58:36  quinn
- * SUTRS support
- *
- * Revision 1.6  1995/10/04  09:29:51  quinn
- * Adjustments to support USGS test data
- *
- * Revision 1.5  1995/10/03  17:56:44  quinn
- * Fixing GRS code.
- *
- * Revision 1.4  1995/10/02  14:55:43  quinn
- * *** empty log message ***
- *
- * Revision 1.3  1995/09/15  14:41:43  quinn
- * GRS1 work
- *
- * Revision 1.2  1995/09/14  15:18:14  quinn
- * Work
- *
- * Revision 1.1  1995/09/12  11:24:33  quinn
- * Beginning to add code for structured records.
- *
- *
+ * $Id: data1.h,v 1.9 2002-05-07 11:02:56 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -536,11 +321,9 @@ YAZ_EXPORT void data1_free_tree(data1_handle dh, data1_node *t);
 YAZ_EXPORT char *data1_nodetobuf(data1_handle dh, data1_node *n,
 				 int select, int *len);
 YAZ_EXPORT data1_node *data1_mk_tag_data_wd(data1_handle dh,
-                                            data1_node *root,
                                             data1_node *at,
                                             const char *tagname, NMEM m);
-YAZ_EXPORT data1_node *data1_mk_tag_data(data1_handle dh, data1_node *root,
-                                         data1_node *at,
+YAZ_EXPORT data1_node *data1_mk_tag_data(data1_handle dh, data1_node *at,
                                          const char *tagname, NMEM m);
 YAZ_EXPORT data1_datatype data1_maptype(data1_handle dh, char *t);
 YAZ_EXPORT data1_varset *data1_read_varset(data1_handle dh, const char *file);
@@ -555,8 +338,8 @@ YAZ_EXPORT data1_esetname *data1_getesetbyname(data1_handle dh,
 YAZ_EXPORT data1_element *data1_getelementbyname(data1_handle dh,
 						 data1_absyn *absyn,
 						 const char *name);
-YAZ_EXPORT data1_node *data1_mk_node(data1_handle dh, NMEM m,
-                                     int type, data1_node *parent);
+YAZ_EXPORT data1_node *data1_mk_node2(data1_handle dh, NMEM m,
+                                      int type, data1_node *parent);
 
 YAZ_EXPORT data1_node *data1_mk_tag (data1_handle dh, NMEM nmem, 
                                      const char *tag, data1_node *at);
@@ -643,6 +426,19 @@ YAZ_EXPORT int data1_CountOccurences(data1_node* node, char* pTagPath);
 
 YAZ_EXPORT FILE *data1_path_fopen (data1_handle dh, const char *file,
                                    const char *mode);
+
+/* obsolete functions ... */
+
+YAZ_EXPORT data1_node *data1_mk_node (data1_handle dh, NMEM m);
+YAZ_EXPORT data1_node *data1_insert_taggeddata (data1_handle dh,
+                                                data1_node *root,
+                                                data1_node *at,
+                                                const char *tagname, NMEM m);
+YAZ_EXPORT data1_node *data1_mk_node_type (data1_handle dh, NMEM m, int type);
+YAZ_EXPORT data1_node *data1_add_taggeddata (data1_handle dh, data1_node *root,
+                                             data1_node *at,
+                                             const char *tagname,
+                                             NMEM m);
 
 YAZ_END_CDECL
 

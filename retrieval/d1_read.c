@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.40 2002-05-03 13:48:27 adam Exp $
+ * $Id: d1_read.c,v 1.41 2002-05-07 11:02:56 adam Exp $
  */
 
 #include <assert.h>
@@ -26,11 +26,21 @@ data1_node *get_parent_tag (data1_handle dh, data1_node *n)
     return 0;
 }
 
-data1_node *data1_mk_node (data1_handle dh, NMEM m, int type,
-                           data1_node *parent)
+data1_node *data1_mk_node (data1_handle dh, NMEM m)
+{
+    return data1_mk_node2 (dh, m, DATA1N_root, 0);
+}
+
+data1_node *data1_mk_node_type (data1_handle dh, NMEM m, int type)
+{
+    return data1_mk_node2 (dh, m, type, 0);
+}
+
+data1_node *data1_mk_node2 (data1_handle dh, NMEM m, int type,
+                            data1_node *parent)
 {
     data1_node *r;
-
+    
     r = (data1_node *)nmem_malloc(m, sizeof(*r));
     r->next = r->child = r->last_child = 0;
     r->destroy = 0;
@@ -38,7 +48,6 @@ data1_node *data1_mk_node (data1_handle dh, NMEM m, int type,
     if (!parent)
     {
         r->root = r;
-        assert (type == DATA1N_root);
     }
     else
     {
@@ -108,7 +117,7 @@ data1_node *data1_mk_root (data1_handle dh, NMEM nmem,  const char *name)
                 name); 
         /* It's now OK for a record not to have an absyn */
     }
-    res = data1_mk_node (dh, nmem, DATA1N_root, 0);
+    res = data1_mk_node2 (dh, nmem, DATA1N_root, 0);
     res->u.root.type = data1_insert_string (dh, res, nmem, name);
     res->u.root.absyn = absyn;
     return res;
@@ -118,7 +127,7 @@ data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem,
                             const char *tag, size_t len, data1_node *at)
 {
     data1_node *partag = get_parent_tag(dh, at);
-    data1_node *res = data1_mk_node (dh, nmem, DATA1N_tag, at);
+    data1_node *res = data1_mk_node2 (dh, nmem, DATA1N_tag, at);
     data1_element *e = NULL;
     
     res->u.tag.tag = data1_insert_string_n (dh, res, nmem, tag, len);
@@ -155,6 +164,8 @@ data1_node *data1_mk_tag_uni (data1_handle dh, NMEM nmem,
     data1_node *node = data1_search_tag (dh, at->child, tag);
     if (!node)
 	node = data1_mk_tag (dh, nmem, tag, at);
+    else
+        node->child = node->last_child = 0;
     return node;
 }
 
@@ -162,7 +173,7 @@ data1_node *data1_mk_tag_uni (data1_handle dh, NMEM nmem,
 data1_node *data1_mk_text_n (data1_handle dh, NMEM mem,
                              const char *buf, size_t len, data1_node *parent)
 {
-    data1_node *res = data1_mk_node (dh, mem, DATA1N_data, parent);
+    data1_node *res = data1_mk_node2 (dh, mem, DATA1N_data, parent);
     res->u.data.what = DATA1I_text;
     res->u.data.len = len;
     
@@ -197,11 +208,11 @@ char *data1_insert_string (data1_handle dh, data1_node *res,
 }
 
 static data1_node *data1_add_insert_taggeddata(data1_handle dh,
-                                               data1_node *root,
                                                data1_node *at,
                                                const char *tagname, NMEM m,
                                                int local_allowed)
 {
+    data1_node *root = at->root;
     data1_node *partag = get_parent_tag (dh, at);
     data1_element *e = NULL;
     data1_node *datn = 0;
@@ -212,19 +223,18 @@ static data1_node *data1_add_insert_taggeddata(data1_handle dh,
     e = data1_getelementbytagname (dh, root->u.root.absyn, e, tagname);
     if (local_allowed || e)
     {
-        tagn = data1_mk_node (dh, m, DATA1N_tag, at);
+        tagn = data1_mk_node2 (dh, m, DATA1N_tag, at);
         tagn->u.tag.tag = data1_insert_string (dh, tagn, m, tagname);
         tagn->u.tag.element = e;
-        datn = data1_mk_node (dh, m, DATA1N_data, tagn);
+        datn = data1_mk_node2 (dh, m, DATA1N_data, tagn);
     }
     return datn;
 }
 
-data1_node *data1_mk_tag_data(data1_handle dh, data1_node *root,
-                              data1_node *at,
+data1_node *data1_mk_tag_data(data1_handle dh, data1_node *at,
                               const char *tagname, NMEM m)
 {
-    return data1_add_insert_taggeddata (dh, root, at, tagname, m, 1);
+    return data1_add_insert_taggeddata (dh, at, tagname, m, 1);
 }
 
 
@@ -233,13 +243,25 @@ data1_node *data1_mk_tag_data(data1_handle dh, data1_node *root,
  * which should be root or tag itself). Returns pointer to the data node,
  * which can then be modified.
  */
-data1_node *data1_mk_tag_data_wd(data1_handle dh, data1_node *root,
-                                 data1_node *at,
+data1_node *data1_mk_tag_data_wd(data1_handle dh, data1_node *at,
                                  const char *tagname, NMEM m)
 {
-    return data1_add_insert_taggeddata (dh, root, at, tagname, m, 0);
+    return data1_add_insert_taggeddata (dh, at, tagname, m, 0);
 }
 
+data1_node *data1_insert_taggeddata (data1_handle dh, data1_node *root,
+                                     data1_node *at, const char *tagname,
+                                     NMEM m)
+{
+    return data1_add_insert_taggeddata (dh, at, tagname, m, 0);
+}
+
+data1_node *data1_add_taggeddata (data1_handle dh, data1_node *root,
+                                  data1_node *at, const char *tagname,
+                                  NMEM m)
+{
+    return data1_add_insert_taggeddata (dh, at, tagname, m, 1);
+}
 
 data1_node *data1_mk_tag_data_int (data1_handle dh, data1_node *at,
                                    const char *tag, int num,
@@ -247,7 +269,7 @@ data1_node *data1_mk_tag_data_int (data1_handle dh, data1_node *at,
 {
     data1_node *node_data;
     
-    node_data = data1_mk_tag_data (dh, at->root, at, tag, nmem);
+    node_data = data1_mk_tag_data (dh, at, tag, nmem);
     if (!node_data)
 	return 0;
     node_data->u.data.what = DATA1I_num;
@@ -265,7 +287,7 @@ data1_node *data1_mk_tag_data_oid (data1_handle dh, data1_node *at,
     char str[128], *p = str;
     Odr_oid *ii;
     
-    node_data = data1_mk_tag_data (dh, at->root, at, tag, nmem);
+    node_data = data1_mk_tag_data (dh, at, tag, nmem);
     if (!node_data)
 	return 0;
     
@@ -289,7 +311,7 @@ data1_node *data1_mk_tag_data_text (data1_handle dh, data1_node *at,
 {
     data1_node *node_data;
     
-    node_data = data1_mk_tag_data (dh, at->root, at, tag, nmem);
+    node_data = data1_mk_tag_data (dh, at, tag, nmem);
     if (!node_data)
 	return 0;
     node_data->u.data.what = DATA1I_text;
@@ -313,6 +335,7 @@ data1_node *data1_mk_tag_data_text_uni (data1_handle dh, data1_node *at,
 	node_data->u.data.len = strlen (str);
 	node_data->u.data.data = data1_insert_string (dh, node_data,
 						      nmem, str);
+        node_data->child = node_data->last_child = 0;
 	return node_data;
     }
 }
@@ -524,7 +547,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		 */
 		if (parent->which != DATA1N_variant)
 		{
-		    res = data1_mk_node (dh, m, DATA1N_variant, parent);
+		    res = data1_mk_node2 (dh, m, DATA1N_variant, parent);
 		}
 		else
 		{
@@ -539,7 +562,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 			    level = i;
 			    break;
 			}
-		    res = data1_mk_node (dh, m, DATA1N_variant, parent);
+		    res = data1_mk_node2 (dh, m, DATA1N_variant, parent);
 		    res->u.variant.type = tp;
 		    res->u.variant.value =
 			data1_insert_string (dh, res, m, args + val_offset);
@@ -563,7 +586,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		c = (*get_byte)(fh);
 		continue;
 	    }
-	    res = data1_mk_node (dh, m, DATA1N_data, parent);
+	    res = data1_mk_node2 (dh, m, DATA1N_data, parent);
 	    res->u.data.what = DATA1I_text;
 	    res->u.data.formatted_text = 0;
 	    d1_stack[level] = res;

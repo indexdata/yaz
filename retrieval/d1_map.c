@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.20  2002-05-03 13:48:27  adam
+ * Revision 1.21  2002-05-07 11:02:56  adam
+ * data1 backwards compatibility
+ *
+ * Revision 1.20  2002/05/03 13:48:27  adam
  * data1 cleanup
  *
  * Revision 1.19  2002/04/04 20:49:46  adam
@@ -314,7 +317,7 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 		    {
 			if (!cur || mt->new_field || !tagmatch(cur, mt))
 			{
-			    cur = data1_mk_node (dh, mem, DATA1N_tag, pn);
+			    cur = data1_mk_node2 (dh, mem, DATA1N_tag, pn);
 			    cur->u.tag.tag = mt->value.string;
 			}
 			
@@ -345,7 +348,7 @@ static int map_children(data1_handle dh, data1_node *n, data1_maptab *map,
 data1_node *data1_map_record (data1_handle dh, data1_node *n,
 			      data1_maptab *map, NMEM m)
 {
-    data1_node *res = data1_mk_node(dh, m, DATA1N_root, 0);
+    data1_node *res = data1_mk_node2 (dh, m, DATA1N_root, 0);
 
     res->which = DATA1N_root;
     res->u.root.type = map->target_absyn_name;
