@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.6 2001-04-05 13:08:48 adam Exp $
+## $Id: Makefile.am,v 1.7 2001-10-23 21:00:20 adam Exp $
 
 INCLUDES=-I$(top_srcdir)/include
 
@@ -16,7 +16,7 @@ libz39_50_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c \
  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
- zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c
+ zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c prt-ext.c
 
 # Rules for Z39.50 V3
 $(srcdir)/z-accdes1.c \

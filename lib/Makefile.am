@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.14 2001-10-05 13:55:17 adam Exp $
+## $Id: Makefile.am,v 1.15 2001-10-23 21:00:19 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -32,6 +32,6 @@ bin_SCRIPTS = yaz-config
 
 libyaz_la_LIBADD=../odr/libodr.la \
  ../comstack/libcomstack.la ../server/libserver.la \
- ../zutil/libzutil.la ../util/libutil.la ../retrieval/libret.la \
+ ../util/libutil.la ../retrieval/libret.la \
  $(EXTRALIB)
 

@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.49 2001-10-06 08:16:30 adam Exp $
+dnl $Id: configure.in,v 1.50 2001-10-23 21:00:19 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -15,20 +15,15 @@ dnl
 dnl ----- yaz-comp: The Yaz Compiler
 AC_SUBST(EXTRAMODULE)
 AC_SUBST(EXTRALIB)
-AC_ARG_ENABLE(comp,[  --disable-comp          use old encoders, i.e. disable the YAZ ASN.1 Compiler], , enable_comp=yes)
-if test "$enable_comp" = "yes"; then
-	EXTRAMODULE="z39.50"
-	HFILE=${srcdir}/include/yaz/z-proto.h
-else
-	EXTRAMODULE=asn
-	HFILE=${srcdir}/asn/prt-proto.h
-fi
+
+EXTRAMODULE="z39.50 zutil"
+
 AC_ARG_ENABLE(modules,[  --enable-modules=\"mod ..\" ill],[
 if test "$enable_modules" != "no"; then
 		EXTRAMODULE="$EXTRAMODULE $enable_modules"
 fi
 ],[
-EXTRAMODULE="$EXTRAMODULE ill ccl"
+EXTRAMODULE="$EXTRAMODULE ill ccl zoom"
 ])
 EXTRALIB=""
 for module in $EXTRAMODULE; do
@@ -38,19 +33,6 @@ for module in $EXTRAMODULE; do
 	fi
 	AC_DEFINE_UNQUOTED(YAZ_MODULE_${module})
 done
-	
-AC_MSG_CHECKING(whether proto.h needs to be generated)
-yaz_include=${srcdir}/include/yaz
-if test -r ${yaz_include}/proto.h && cmp -s $HFILE ${yaz_include}/proto.h; then
-	AC_MSG_RESULT(no)
-else
-	AC_MSG_RESULT(yes)
-	cp -f $HFILE ${yaz_include}/proto.h
-	if test "$enable_comp" != "yes"; then
-		cp ${srcdir}/asn/*.h ${yaz_include}
-	fi
-fi
-dnl
 dnl ----- Sockets
 checkBoth=0
 AC_CHECK_FUNC(connect)
@@ -194,7 +176,7 @@ if test -f ${srcdir}/lib/yaz-config.in; then
 fi
 sed s%yaz_echo_source=yes%yaz_echo_source=no%g < ${srcdir}/yaz-config.in >${srcdir}/lib/yaz-config.in
 dnl
-SUBDIRS_VAR="util odr $EXTRAMODULE zutil comstack tab retrieval server include lib client ztest"
+SUBDIRS_VAR="util odr comstack $EXTRAMODULE tab retrieval server include lib include client ztest"
 AC_SUBST(SUBDIRS_VAR)
 dnl ------ Makefiles
 dnl
@@ -203,7 +185,6 @@ Makefile
 util/Makefile
 odr/Makefile
 z39.50/Makefile
-asn/Makefile
 ill/Makefile
 zutil/Makefile
 comstack/Makefile
@@ -214,6 +195,7 @@ server/Makefile
 include/Makefile
 include/yaz/Makefile
 lib/Makefile
+zoom/Makefile
 client/Makefile
 ztest/Makefile
 doc/Makefile

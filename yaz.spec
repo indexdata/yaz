@@ -20,7 +20,7 @@ using the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %build
 
 CFLAGS="$RPM_OPT_FLAGS" \
- ./configure --prefix=/usr --enable-shared --enable-tcpd --enable-module=ill
+ ./configure --prefix=/usr --enable-shared --enable-tcpd
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
@@ -36,6 +36,7 @@ cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 /usr/bin/yaz-ztest
 /usr/bin/yaz-config
 /usr/bin/yaz-comp
+/usr/bin/zoomsh
 /usr/lib/libyaz.a
 /usr/lib/libyaz.so
 /usr/lib/libyaz.so.1

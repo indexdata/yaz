@@ -3,7 +3,7 @@ Copyright (C) 1995-2001, Index Data ApS.
 See the file LICENSE for details.
 
 Compilation and installation instructions for YAZ 
-  $Id: README,v 1.35 2001-04-06 12:26:45 adam Exp $
+  $Id: README,v 1.36 2001-10-23 21:00:19 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -26,12 +26,12 @@ for verifying that the protocol works ok, and ztest.c shows an
 implementation of a 'backend' interface.
 
 yaz-client is a linemode Z39.50 client. It supports a fair amount of the
-functionality of Z39.50v2/SR, but some things you need to enable or
+functionality of Z39.50V3, but some things you need to enable or
 disable by recompilation. Its primary purpose is to excersise the
 package, and verify that the protocol works OK. It can be started by
 typing
 
-  yaz-client tcp:<hostname>:<port>[/<database>]
+  yaz-client <hostname>[:<port>[/<database>]]
 
 at the UNIX prompt, to connect to a Z39.50 server.
 
@@ -90,12 +90,12 @@ odr	- Open Data Representation. This module implements the BER
 	encoding rules. Documentation is found in the files odr-use.man
 	and odr.txt.
 
-z39.50  - This module implements the Z39.50 protocol. This module
-        does the same job as the old 'asn' module except that the source
-        files are auto-generated using an YAZ' ASN.1 Compiler (yaz-comp).
+z39.50  - CODECS for the Z39.50 protocol. This module does the same job
+        as the old 'asn' module except that the source files are
+        auto-generated using an YAZ' ASN.1 Compiler (yaz-comp).
 
 zutil   - This module implements a collection of Z39.50 utilities, such
-        as query parsing, EXTERNAL handling, etc.
+        as query parsing, etc.
 
 ill     - This module implements the ISO ILL protocol.
 
@@ -106,21 +106,18 @@ comstack - This module implements the transport transparency
 	TCP/IP, and uses Peter Furniss' XTIMOSI package over RFC1006.
 	Look for documentation in the file comstack.man.
 
-rfc1006 - Xtimosi requires an implementation of the OSI transport
-	layer with an XTI-based API. Some systems (HP and DEC,
-	notably) provide this. For others, we provide an
-	implementation of the RFC1006 protocol (which is what
-	ISODE-based implementations often use). This module is not
-	needed if you don't use xtimosi, and it's not included in the
-	libyaz.a library.
+zoom    - An implementation of Mike Taylors Z39.50 Object Oriented
+        Model : ZOOM. If you'd like to build Z39.50 client applications
+        in C this may be good start. You'll find example programs in 
+        this directory too.
 
 server  - This is the implementation of the server frontend. It
 	provides event-handling and server managament functions,
 	and calls the backend primitives (best documentation of these
 	is in the file include/yaz/backend.h).
 
-client  - A demonstration client. If we come upon a good design for a
-	higher level client API, that will live here.
+client  - A demonstration client for testing the protocol. It's bug'n
+        ugly. But, it supports many features.
 
 ztest   - A demonstration server that implements a backend.
 
@@ -128,10 +125,6 @@ include/yaz - The various header files.
 
 lib     - The libraries. Primarily libyaz.a. The makefile gathers the
           libraries from previous modules into libyaz.a.
-
-asn     - Obsolete - replaced by the codecs in directory z39.50.
-        This module implements the Z39.50 protocol and is only provided
-        for backwareds compatibility. 
 
 To get more information or assistance, send mail to yaz-help@indexdata.dk.
 

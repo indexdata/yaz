@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: marcdisp.c,v $
- * Revision 1.13  2001-10-15 19:36:48  adam
+ * Revision 1.14  2001-10-23 21:00:20  adam
+ * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
+ *
+ * Revision 1.13  2001/10/15 19:36:48  adam
  * New function marc_display_wrbuf.
  *
  * Revision 1.12  2000/10/02 11:07:44  adam
@@ -56,7 +59,8 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 
-int marc_display_wrbuf (const char *buf, WRBUF wr, int debug)
+int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
+			int bsize)
 {
     int entry_p;
     int record_length;
@@ -79,6 +83,9 @@ int marc_display_wrbuf (const char *buf, WRBUF wr, int debug)
 	}
         return -1;
     }
+    /* ballout if bsize is known and record_length is than that */
+    if (bsize != -1 && record_length > bsize)
+	return -1;
     if (isdigit(buf[10]))
         indicator_length = atoi_n (buf+10, 1);
     else
@@ -185,7 +192,7 @@ int marc_display_ex (const char *buf, FILE *outf, int debug)
     int record_length;
 
     WRBUF wrbuf = wrbuf_alloc ();
-    record_length = marc_display_wrbuf (buf, wrbuf, debug);
+    record_length = marc_display_wrbuf (buf, wrbuf, debug, -1);
     if (!outf)
 	outf = stdout;
     if (record_length > 0)

@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Old Z39.50 codecs no longer supported. 
+
+Added ZOOM C binding. See http://zoom.z3950.org/
+
 Renamed states for COMSTACKs to avoid confusion with events.
 
 Implemented cs_look and proper cs_rcvconnect.

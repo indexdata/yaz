@@ -6,6 +6,7 @@
      <!ENTITY yaz "YAZ">
      <!ENTITY chap-introduction SYSTEM "introduction.xml">
      <!ENTITY chap-installation SYSTEM "installation.xml">
+     <!ENTITY chap-zoom SYSTEM "zoom.xml">
      <!ENTITY chap-client SYSTEM "client.xml">
      <!ENTITY chap-asn SYSTEM "asn.xml">
      <!ENTITY chap-tools SYSTEM "tools.xml">
@@ -18,8 +19,9 @@
      <!ENTITY asn "<acronym>ASN</acronym>">
      <!ENTITY odr "<acronym>ODR</acronym>">
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
+     <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml,v 1.6 2001-10-22 13:57:24 adam Exp $ -->
+<!-- $Id: yaz.xml,v 1.7 2001-10-23 21:00:19 adam Exp $ -->
 <book>
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
@@ -47,6 +49,7 @@
  
  &chap-introduction;
  &chap-installation;
+ &chap-zoom;
  &chap-client;
  &chap-asn;
  &chap-tools;
@@ -68,7 +71,7 @@ sgml-always-quote-attributes:t
 sgml-indent-step:1
 sgml-indent-data:t
 sgml-parent-document:nil
-sgml-local-catalogs: "../../docbook/docbook.cat"
+sgml-local-catalogs: "/usr/share/sgml/docbook/dtd/xml/4.1.2/docbook.cat"
 sgml-namecase-general:t
 End:
 -->

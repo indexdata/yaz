@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: wrbuf.h,v $
- * Revision 1.3  2001-10-15 19:36:48  adam
+ * Revision 1.4  2001-10-23 21:00:19  adam
+ * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
+ *
+ * Revision 1.3  2001/10/15 19:36:48  adam
  * New function marc_display_wrbuf.
  *
  * Revision 1.2  2000/02/28 11:20:06  adam
@@ -77,7 +80,8 @@ YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
     (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
     (b)->buf[(b)->pos++] = (c), 0)
 
-YAZ_EXPORT int marc_display_wrbuf (const char *buf, WRBUF wr, int debug);
+YAZ_EXPORT int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
+				   int bsize);
 
 YAZ_END_CDECL
 

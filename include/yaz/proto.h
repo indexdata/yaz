@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1998-2000, Index Data
+ * Copyright (c) 1998-2001, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: z-proto.h,v $
- * Revision 1.7  2001-09-24 21:51:55  adam
+ * $Log: proto.h,v $
+ * Revision 1.1  2001-10-23 21:00:19  adam
+ * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
+ *
+ * Revision 1.7  2001/09/24 21:51:55  adam
  * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
  * and yaz_z3950oid_to_str.
  *
