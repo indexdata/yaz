@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-rsc.h,v $
- * Revision 1.1  1995-06-01 11:24:52  quinn
+ * Revision 1.2  1995-06-02 09:49:50  quinn
+ * Add access control
+ *
+ * Revision 1.1  1995/06/01  11:24:52  quinn
  * Resource Control
  *
  *
@@ -62,7 +65,7 @@ typedef struct Z_Estimate1
 typedef struct Z_ResourceReport1
 {
     int num_estimates;
-    Z_Estimate **estimates;
+    Z_Estimate1 **estimates;
     char *message;
 } Z_ResourceReport1;
 
@@ -77,7 +80,7 @@ typedef struct Z_Estimate2
 typedef struct Z_ResourceReport2
 {
     int num_estimates;
-    Z_Estimate2 **setimates;             /* OPTIONAL */
+    Z_Estimate2 **estimates;             /* OPTIONAL */
     char *message;                       /* OPTIONAL */
 } Z_ResourceReport2;
 

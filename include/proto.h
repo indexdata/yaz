@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.10  1995-05-29 08:11:34  quinn
+ * Revision 1.11  1995-06-02 09:49:47  quinn
+ * Add access control
+ *
+ * Revision 1.10  1995/05/29  08:11:34  quinn
  * Moved oid from odr/asn to util.
  *
  * Revision 1.9  1995/05/22  11:31:25  quinn
@@ -124,7 +127,7 @@ typedef struct Z_OtherInformationUnit
 	Odr_oct *binaryInfo;
 	Odr_external *externallyDefinedInfo;
 	Odr_oid *oid;
-    } u;
+    } information;
 } Z_OtherInformationUnit;
 
 typedef struct Z_OtherInformation
@@ -132,6 +135,34 @@ typedef struct Z_OtherInformation
     int num_elements;
     Z_OtherInformationUnit **list;
 } Z_OtherInformation;
+
+typedef struct Z_StringOrNumeric
+{
+    enum
+    {
+    	Z_StringOrNumeric_string,
+	Z_StringOrNumeric_numeric
+    } which;
+    union
+    {
+    	char *string;
+	int *numeric;
+    } u;
+} Z_StringOrNumeric;
+
+typedef struct Z_Unit
+{
+    char *unitSystem;               /* OPTIONAL */
+    Z_StringOrNumeric *unitType;    /* OPTIONAL */
+    Z_StringOrNumeric *unit;        /* OPTIONAL */
+    int *scaleFactor;               /* OPTIONAL */
+} Z_Unit;
+
+typedef struct Z_IntUnit
+{
+    int *value;
+    Z_Unit *unitUsed;
+} Z_IntUnit;
 
 /* ----------------- INIT SERVICE  ----------------*/
 
@@ -787,5 +818,8 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
 Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
 Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
 Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
+
+#include <prt-rsc.h>
+#include <prt-acc.h>
 
 #endif
