@@ -3,12 +3,14 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: zgdu.h,v 1.1 2003-02-21 12:08:58 adam Exp $
+ * $Id: zgdu.h,v 1.2 2003-12-04 11:46:36 adam Exp $
  */
 #ifndef Z_GDU_H
 #define Z_GDU_H
 
 #include <yaz/z-core.h>
+
+YAZ_BEGIN_CDECL
 
 typedef struct Z_HTTP_Header Z_HTTP_Header;
 
@@ -55,5 +57,7 @@ YAZ_EXPORT const char *z_HTTP_errmsg(int code);
 
 YAZ_EXPORT Z_GDU *z_get_HTTP_Response(ODR o, int code);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request(ODR o);
+
+YAZ_END_CDECL
 
 #endif
