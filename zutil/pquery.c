@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.12 2002-01-23 20:25:42 adam Exp $
+ * $Id: pquery.c,v 1.13 2002-03-24 16:19:23 adam Exp $
  */
 
 #include <stdio.h>
@@ -70,7 +70,13 @@ static int query_token (struct lex_info *li)
         ++(*qptr);
     }
     li->lex_buf = *qptr;
-    
+   
+    if (**qptr == li->escape_char && isdigit ((*qptr)[1]))
+    {
+	++(li->lex_len);
+	++(*qptr);
+	return 'l';
+    }
     while (**qptr && **qptr != sep_char)
     {
 	if (**qptr == '\\')
