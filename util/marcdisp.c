@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.28 2003-01-06 08:20:28 adam Exp $
+ * $Id: marcdisp.c,v 1.29 2003-02-12 22:02:47 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -24,7 +24,7 @@ struct yaz_marc_t_ {
 
 yaz_marc_t yaz_marc_create(void)
 {
-    yaz_marc_t mt = xmalloc(sizeof(*mt));
+    yaz_marc_t mt = (yaz_marc_t) xmalloc(sizeof(*mt));
     mt->xml = YAZ_MARC_LINE;
     mt->debug = 0;
     mt->m_wr = wrbuf_alloc();
