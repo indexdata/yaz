@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implement ZOOM_resultset_cache_reset which resets record cache.
+
+Implement ZOOM_resultset_sort which sorts a result set.
+
 Implement chunked HTTP transfer.
 
 For SSL, use -lssl -lcrypto on systems that don't have pkg-config.

@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.3 2004-01-27 21:22:44 adam Exp $
+ * $Id: zoom-p.h,v 1.4 2004-02-23 09:26:11 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -151,6 +151,11 @@ struct ZOOM_task_p {
         } scan;
 #define ZOOM_TASK_PACKAGE 5
         ZOOM_package package;
+#define ZOOM_TASK_SORT 6
+	struct {
+	    ZOOM_resultset resultset;
+	    ZOOM_query q;
+	} sort;
     } u;
     ZOOM_task next;
 };

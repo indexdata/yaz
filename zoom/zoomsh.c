@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.26 2004-01-16 10:04:55 adam Exp $
+ * $Id: zoomsh.c,v 1.27 2004-02-23 09:26:11 adam Exp $
  */
 
 /* ZOOM-C Shell */
@@ -368,6 +368,25 @@ static void cmd_scan (ZOOM_connection *c, ZOOM_resultset *r,
     }
 }
 
+static void cmd_sort (ZOOM_connection *c, ZOOM_resultset *r,
+                      ZOOM_options options,
+                      const char **args)
+{
+    const char *sort_spec = *args;
+    int i;
+    
+    while (*sort_spec == ' ')
+        sort_spec++;
+    
+    for (i = 0; i<MAX_CON; i++)
+    {
+        if (r[i])
+            ZOOM_resultset_sort(r[i], "yaz", sort_spec);
+    }
+    while (ZOOM_event(MAX_CON, c))
+        ;
+}
+
 static void cmd_help (ZOOM_connection *c, ZOOM_resultset *r,
 		      ZOOM_options options,
 		      const char **args)
@@ -479,6 +498,8 @@ static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
 	cmd_debug(c, r, options, buf);
     else if (is_command ("scan", cmd_str, cmd_len))
 	cmd_scan(c, r, options, buf);
+    else if (is_command ("sort", cmd_str, cmd_len))
+	cmd_sort(c, r, options, buf);
     else
 	printf ("unknown command %.*s\n", cmd_len, cmd_str);
     return 2;

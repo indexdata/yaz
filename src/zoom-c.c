@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.24 2004-02-14 15:58:42 adam Exp $
+ * $Id: zoom-c.c,v 1.25 2004-02-23 09:26:11 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -199,6 +199,10 @@ void ZOOM_connection_remove_task (ZOOM_connection c)
         case ZOOM_TASK_PACKAGE:
             ZOOM_package_destroy (task->u.package);
             break;
+	case ZOOM_TASK_SORT:
+	    ZOOM_resultset_destroy (task->u.sort.resultset);
+	    ZOOM_query_destroy(task->u.sort.q);
+	    break;
 	default:
 	    assert (0);
 	}
@@ -508,6 +512,7 @@ void ZOOM_resultset_addref (ZOOM_resultset r)
                  r, r->refcount);
     }
 }
+
 ZOOM_resultset ZOOM_resultset_create ()
 {
     ZOOM_resultset r = (ZOOM_resultset) xmalloc (sizeof(*r));
@@ -605,6 +610,62 @@ ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 }
 
 ZOOM_API(void)
+    ZOOM_resultset_sort(ZOOM_resultset r,
+			const char *sort_type, const char *sort_spec)
+{
+    ZOOM_connection c = r->connection;
+    ZOOM_task task;
+
+    if (!c)
+	return;
+
+    if (c->host_port && c->proto == PROTO_HTTP)
+    {
+        if (!c->cs)
+        {
+            yaz_log(LOG_DEBUG, "NO COMSTACK");
+            ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
+        }
+        else
+        {
+            yaz_log(LOG_DEBUG, "PREPARE FOR RECONNECT");
+            c->reconnect_ok = 1;
+        }
+    }
+    
+    ZOOM_resultset_cache_reset(r);
+    task = ZOOM_connection_add_task (c, ZOOM_TASK_SORT);
+    task->u.sort.resultset = r;
+    task->u.sort.q = ZOOM_query_create();
+    ZOOM_query_sortby(task->u.sort.q, sort_spec);
+
+    ZOOM_resultset_addref (r);  
+
+    if (!c->async)
+    {
+	while (ZOOM_event (1, &c))
+	    ;
+    }
+}
+
+ZOOM_API(void)
+    ZOOM_resultset_cache_reset(ZOOM_resultset r)
+{
+    ZOOM_record_cache rc;
+    
+    for (rc = r->record_cache; rc; rc = rc->next)
+    {
+	if (rc->rec.wrbuf_marc)
+	    wrbuf_free (rc->rec.wrbuf_marc, 1);
+	if (rc->rec.wrbuf_iconv)
+	    wrbuf_free (rc->rec.wrbuf_iconv, 1);
+	if (rc->rec.wrbuf_opac)
+	    wrbuf_free (rc->rec.wrbuf_opac, 1);
+    }
+    r->record_cache = 0;
+}
+
+ZOOM_API(void)
 ZOOM_resultset_destroy(ZOOM_resultset r)
 {
     if (!r)
@@ -614,17 +675,8 @@ ZOOM_resultset_destroy(ZOOM_resultset r)
              r, r->refcount);
     if (r->refcount == 0)
     {
-        ZOOM_record_cache rc;
+	ZOOM_resultset_cache_reset(r);
 
-        for (rc = r->record_cache; rc; rc = rc->next)
-	{
-            if (rc->rec.wrbuf_marc)
-                wrbuf_free (rc->rec.wrbuf_marc, 1);
-            if (rc->rec.wrbuf_iconv)
-                wrbuf_free (rc->rec.wrbuf_iconv, 1);
-            if (rc->rec.wrbuf_opac)
-                wrbuf_free (rc->rec.wrbuf_opac, 1);
-	}
 	if (r->connection)
 	{
 	    /* remove ourselves from the resultsets in connection */
@@ -935,7 +987,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.24 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.25 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1949,20 +2001,11 @@ static int scan_response (ZOOM_connection c, Z_ScanResponse *res)
     return 1;
 }
 
-static zoom_ret send_sort (ZOOM_connection c)
+static zoom_ret send_sort (ZOOM_connection c,
+			   ZOOM_resultset resultset)
 {
-    ZOOM_resultset  resultset;
-
-    if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
-	return zoom_complete;
-
-    resultset = c->tasks->u.search.resultset;
-
     if (c->error)
-    {
 	resultset->r_sort_spec = 0;
-	return zoom_complete;
-    }
     if (resultset->r_sort_spec)
     {
 	Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_sortRequest);
@@ -2740,6 +2783,11 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
             break;
         case ZOOM_TASK_PACKAGE:
             ret = send_package(c);
+	    break;
+	case ZOOM_TASK_SORT:
+	    c->tasks->u.sort.resultset->r_sort_spec = 
+		c->tasks->u.sort.q->sort_spec;
+	    ret = send_sort(c, c->tasks->u.sort.resultset);
             break;
         }
     }
@@ -2760,7 +2808,10 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
 
 static zoom_ret send_sort_present (ZOOM_connection c)
 {
-    zoom_ret r = send_sort (c);
+    zoom_ret r = zoom_complete;
+
+    if (c->tasks && c->tasks->which == ZOOM_TASK_SEARCH)
+	r = send_sort (c, c->tasks->u.search.resultset);
     if (r == zoom_complete)
 	r = send_present (c);
     return r;

@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.21 2004-02-16 11:22:34 adam Exp $
+ * $Id: zoom.h,v 1.22 2004-02-23 09:26:11 adam Exp $
  */
 
 #include <stdlib.h>
@@ -148,6 +148,10 @@ ZOOM_resultset_record (ZOOM_resultset s, size_t pos);
 ZOOM_API(ZOOM_record)
 ZOOM_resultset_record_immediate (ZOOM_resultset s, size_t pos);
 
+/* reset record cache for result set */
+ZOOM_API(void)
+ZOOM_resultset_cache_reset(ZOOM_resultset r);
+
 /* ----------------------------------------------------------- */
 /* records */
 
@@ -225,6 +229,12 @@ ZOOM_API(const char *)
 ZOOM_API(void)
     ZOOM_package_option_set (ZOOM_package p, const char *key,
                              const char *val);
+
+/* ----------------------------------------------------------- */
+/* Sort */
+ZOOM_API(void)
+    ZOOM_resultset_sort(ZOOM_resultset r,
+			const char *sort_type, const char *sort_spec);
 
 /* ----------------------------------------------------------- */
 /* options */
