@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.5 2003-12-22 14:24:10 adam Exp $
+ * $Id: srw.c,v 1.6 2003-12-22 22:47:20 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -302,9 +302,11 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
     else if (o->direction == ODR_ENCODE)
     {
         int i;
+	xmlNsPtr ns_diag =
+	    xmlNewNs(pptr, "http://www.loc.gov/zing/srw/diagnostics/", "diag");
         for (i = 0; i < *num; i++)
         {
-            xmlNodePtr rptr = xmlNewChild(pptr, 0, "diagnostic", 0);
+            xmlNodePtr rptr = xmlNewChild(pptr, ns_diag, "diagnostic", 0);
             add_xsd_integer(rptr, "code", (*recs)[i].code);
             add_xsd_string(rptr, "details", (*recs)[i].details);
         }
