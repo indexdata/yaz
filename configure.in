@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.142 2004-05-13 10:07:14 adam Exp $
+dnl $Id: configure.in,v 1.143 2004-05-13 13:11:24 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.20)
 AM_MAINTAINER_MODE
@@ -37,15 +37,18 @@ openssl=no
 AC_ARG_WITH(openssl, [  --with-openssl[=PREFIX] OpenSSL library in PREFIX], [openssl=$withval])
 USE_SSL=0
 SSL_CFLAGS=""
-SSL_PATH=""
+SSL_LIBPATH=""
 if test "$openssl" != "no"; then
 	sslver=no
 	if test "$openssl" != "yes"; then
-		if $openssl/bin/pkg-config --exists openssl; then
-			SSL_CFLAGS=`$openssl/bin/pkg-config --cflags openssl`
-			LIBS="$LIBS `$openssl/bin/pkg-config --libs openssl`"
-			sslver=`$openssl/bin/pkg-config --modversion openssl`
-		else
+		if test "$pkgconfig" != "NONE"; then
+			if $openssl/bin/pkg-config --exists openssl; then
+				SSL_CFLAGS=`$openssl/bin/pkg-config --cflags openssl`
+				LIBS="$LIBS `$openssl/bin/pkg-config --libs openssl`"
+				sslver=`$openssl/bin/pkg-config --modversion openssl`
+			fi
+		fi
+		if test "$sslver" = "no"; then
                 	SSL_CFLAGS="-I$openssl/include -I$openssl/include/openssl"
                 	SSL_LIBPATH="-L$openssl/lib"
 		fi
@@ -59,23 +62,22 @@ if test "$openssl" != "no"; then
 		fi
 		if test "$sslver" = "no"; then
                 	SSL_CFLAGS="-I/usr/include/openssl"
-                	SSL_LIBPATH=""
 		fi
 	fi
 	if test "$sslver" = "no"; then
 		xLIBS="$LIBS";
-		xCFLAGS="$CFLAGS";
-		CFLAGS="$CFLAGS $SSL_CFLAGS"
-		LIBS="$SSL_LIBPATH $LIBS"
+		xCPPFLAGS="$CPPFLAGS";
+		CPPFLAGS="$CPPFLAGS $SSL_CFLAGS $SSL_LIBPATH"
 		AC_CHECK_LIB(crypto, main)
 		AC_CHECK_LIB(ssl, SSL_new)
 		if test "$ac_cv_lib_ssl_SSL_new" = "yes"; then
 			AC_CHECK_HEADER(openssl/ssl.h,[sslver=yes])
+			LIBS="$SSL_LIBPATH $LIBS"
 		fi
 		if test "$sslver" != "yes"; then
 			LIBS="$xLIBS"
 		fi
-		CFLAGS="$xCFLAGS"
+		CPPFLAGS="$xCPPFLAGS"
 	fi
 	if test "$sslver" != "no"; then
 		CFLAGS="$CFLAGS -DHAVE_OPENSSL_SSL_H=1 $SSL_CFLAGS"

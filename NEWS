@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fix SSL libs for configure when --with-openssl=DIR is given.  
+
 --- 2.0.20 2004/05/10
 
 Add autoconf m4 macro YAZ_DOC for YAZ documentation setup (docbook).
