@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.4 2004-09-29 20:37:50 adam Exp $
+ * $Id: cclfind.c,v 1.5 2004-10-10 21:43:21 adam Exp $
  *
  * Old Europagate log:
  *
@@ -574,7 +574,7 @@ struct ccl_rpn_node *qualifiers_order (CCL_parser cclp,
 	/* relation is =. Extract "embedded" - to separate terms */
 	if (KIND == CCL_TOK_TERM)
 	{
-	    int i;
+	    size_t i;
 	    for (i = 0; i<cclp->look_token->len; i++)
 	    {
 		if (cclp->look_token->name[i] == '-')
