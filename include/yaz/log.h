@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.15 2004-11-02 12:55:04 heikki Exp $
+ * $Id: log.h,v 1.16 2004-11-03 14:25:06 heikki Exp $
  */
 
 /**
@@ -57,29 +57,71 @@ YAZ_BEGIN_CDECL
 
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 
+#define LOG_LAST_BIT LOG_FLUSH  /* the last bit used for regular log bits */
+                                /* the rest are for dynamic modules */
+
 #define logf yaz_log
 
+/** 
+ * yaz_log_init is a shorthand for initializing the log level and prefixes */
 YAZ_EXPORT void yaz_log_init(int level, const char *prefix, const char *name);
+
+/** yaz_log_init_file sets the file name used for yaz_log */
 YAZ_EXPORT void yaz_log_init_file (const char *fname);
+
+/** yaz_log_init_level sets the logging level. Use an OR of the bits above */
 YAZ_EXPORT void yaz_log_init_level (int level);
+
+/** yaz_log_init_prefix sets the log prefix */
 YAZ_EXPORT void yaz_log_init_prefix (const char *prefix);
+
+/** yaz_log_init_prefix2 sets an optional second prefix */
 YAZ_EXPORT void yaz_log_init_prefix2 (const char *prefix);
+
 /** 
  * yaz_log_time_format sets the format of the timestamp. See man 3 strftime 
  * Calling with "old" sets to the old format "11:55:06-02/11"
  * Calling with NULL or "" sets to the new format "20041102-115719"
  * If not called at all, the old format is used, for backward compatibility
- *
- * */
+ */
 YAZ_EXPORT void yaz_log_time_format(const char *fmt);
 
+/** 
+ * yaz_log_init_max_size sets the max size for a log file. 
+ * zero means no limit. Negative means built-in limit (1GB)
+ */
+YAZ_EXPORT void yaz_log_init_max_size(int mx);
+
+/**
+ * yaz_log writes an entry in the log. Defaults to stderr if not initialized
+ * to a file with yaz_log_init_file. The level must match the level set via
+ * yaz_log_init_level, optionally defined via yaz_log_mask_str. */
 YAZ_EXPORT void yaz_log(int level, const char *fmt, ...)
 #ifdef __GNUC__
 	__attribute__ ((format (printf, 2, 3)))
 #endif
 	;
+
+/** 
+ * yaz_log_mask_str converts a comma-separated list of log levels to a bit 
+ * mask. Starts from default level, and adds bits as specified, unless 'none'
+ * is specified, which clears the list. If a name matches the name of a
+ * LOG_BIT above, that one is set. Otherwise a new value is picked, and given
+ * to that name, to be found with yaz_log_module_level */
 YAZ_EXPORT int yaz_log_mask_str (const char *str);
+
+/** yaz_log_mask_str_x is like yaz_log_mask_str, but with a given start value*/
 YAZ_EXPORT int yaz_log_mask_str_x (const char *str, int level);
+
+/** 
+ * yaz_log_module_level returns a log level mask corresponding to the module
+ * name. If that had been specified on the -v arguments (that is, passed to
+ * yaz_log_mask_str), then a non-zero mask is returned. If not, we get a 
+ * zero. This can later be used in yaz_log for the level argument
+ */
+YAZ_EXPORT int yaz_log_module_level(const char *name);
+
+/** yaz_log_file returns the file handle for yaz_log. */
 YAZ_EXPORT FILE *yaz_log_file(void);
 
 YAZ_EXPORT void log_event_start (void (*func)(int level, const char *msg, void *info),
