@@ -1,10 +1,12 @@
 /*
  * Copyright (c) 1996-2001, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.12  2001-03-07 13:24:40  adam
+ * Revision 1.13  2001-05-09 23:31:35  adam
+ * String attribute values for PQF. Proper C-backslash escaping for PQF.
+ *
+ * Revision 1.12  2001/03/07 13:24:40  adam
  * Member and_not in Z_Operator is kept for backwards compatibility.
  * Added support for definition of CCL operators in field spec file.
  *
@@ -300,6 +302,7 @@ static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
 void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
 {
     struct ccl_rpn_attr *att;
+    const char *cp;
 
     switch (p->kind)
     {
@@ -327,9 +330,13 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
 	    sprintf(tmpattr, "%d=%d ", att->type, att->value);
 	    wrbuf_puts (w, tmpattr);
 	}
-	wrbuf_puts (w, "{");
-	wrbuf_puts (w, p->u.t.term);
-	wrbuf_puts (w, "} ");
+	for (cp = p->u.t.term; *cp; cp++)
+	{
+	    if (*cp == ' ' || *cp == '\\')
+		wrbuf_putc (w, '\\');
+	    wrbuf_putc (w, *cp);
+	}
+	wrbuf_puts (w, " ");
 	break;
     }
 }
