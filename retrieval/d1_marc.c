@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.4  1996-03-25 10:18:03  quinn
+ * Revision 1.5  1997-09-04 13:48:04  adam
+ * Added data1 to marc conversion.
+ *
+ * Revision 1.4  1996/03/25 10:18:03  quinn
  * Removed trailing whitespace from data elements
  *
  * Revision 1.3  1995/11/01  16:34:57  quinn
@@ -27,14 +30,11 @@
 
 #include <oid.h>
 #include <log.h>
+#include <marcdisp.h>
 #include <readconf.h>
 #include <xmalloc.h>
 #include <data1.h>
 #include <tpath.h>
-
-#define ISO2709_RS 035
-#define ISO2709_FS 036
-#define ISO2709_IDFS 037
 
 data1_marctab *data1_read_marctab(char *file)
 {
@@ -167,6 +167,19 @@ static void memint (char *p, int val, int len)
     }
 }
 
+static int is_indicator (data1_marctab *p, data1_node *subf)
+{
+#if 1
+    if (p->indicator_length != 2 ||
+	(subf->which == DATA1N_tag && strlen(subf->u.tag.tag) == 2))
+	return 1;
+#else
+    if (subf->which == DATA1N_tag && subf->child->which == DATA1N_tag)
+	return 1;
+#endif
+    return 0;
+}
+
 static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
     char **buf, int *size)
 {
@@ -192,7 +205,13 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
             + p->length_implementation;
 	if (strncmp(field->u.tag.tag, "00", 2))
             len += p->indicator_length;      /* this is fairly bogus */
-        for (subf = field->child; subf; subf = subf->next)
+	subf = field->child;
+	
+	/*  we'll allow no indicator if length is not 2 */
+	if (is_indicator (p, subf))
+	    subf = subf->child;
+
+        for (; subf; subf = subf->next)
         {
 	    if (subf->which != DATA1N_tag)
 	    {
@@ -231,14 +250,23 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
     for (field = n->child; field; field = field->next)
     {
         int data_0 = data_p;
+	char *indicator_data = "    ";
 	if (selected && !field->u.tag.node_selected)
 	    continue;
+
+	subf = field->child;
+
+	if (is_indicator (p, subf))
+	{
+            indicator_data = subf->u.tag.tag;
+	    subf = subf->child;
+	}
         if (strncmp(field->u.tag.tag, "00", 2))   /* bogus */
         {
-            memcpy (op + data_p, "  ", p->indicator_length);
+            memcpy (op + data_p, indicator_data, p->indicator_length);
             data_p += p->indicator_length;
         }
-        for (subf = field->child; subf; subf = subf->next)
+        for (; subf; subf = subf->next)
         {
 	    char *data;
 
