@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Fixes for OCLC UI ASN.1 to make it work with SilverPlatter targets
+that features the same UI.
+
 Implemented command update0 in YAZ client which is equivalent to
 update but uses old of Ext Update ASN.1.
 

@@ -2,7 +2,7 @@ UserInfoFormat-oclcUserInformation
 {Z39-50-userInfoFormat OCLCUserInformation (7)} DEFINITIONS ::=
 BEGIN
 
--- $Id: oclcui.asn,v 1.3 2003-08-25 19:53:33 mike Exp $
+-- $Id: oclcui.asn,v 1.4 2003-09-04 17:44:49 adam Exp $
 --
 -- This format is returned from the server at
 --	fsz3950test.oclc.org:210
@@ -20,9 +20,9 @@ BEGIN
 -- could remove the OPTIONAL on dblist).
 
 OCLC-UserInformation ::= SEQUENCE {
-    motd        [1] IMPLICIT VisibleString,
+    motd        [1] IMPLICIT VisibleString OPTIONAL,
     dblist      SEQUENCE OF DBName OPTIONAL,
-    failReason  [3] IMPLICIT BOOLEAN,
+    failReason  [3] IMPLICIT BOOLEAN OPTIONAL,
     code        [1] IMPLICIT INTEGER OPTIONAL,
     text        [2] IMPLICIT VisibleString OPTIONAL
 }
