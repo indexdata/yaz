@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.10  1995-05-16 08:50:59  quinn
+ * Revision 1.11  1995-05-17 08:41:54  quinn
+ * Small, hopefully insignificant change.
+ *
+ * Revision 1.10  1995/05/16  08:50:59  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.9  1995/03/17  10:17:57  quinn
@@ -90,7 +93,7 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
     char *dummy = "Nothing";
     int size = 0, i;
 
-    if (!odr_sequence_begin(o, &dummy, 0))
+    if (!odr_sequence_begin(o, p, 0))
     	return 0;
 
     switch (o->direction)
