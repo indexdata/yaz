@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.33 2002-02-11 23:25:26 adam Exp $
+# $Id: makefile,v 1.34 2002-02-12 15:59:12 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -348,7 +348,8 @@ Z3950_OBJS= \
    $(OBJDIR)\zes-psched.obj \
    $(OBJDIR)\zes-pset.obj \
    $(OBJDIR)\zes-update0.obj \
-   $(OBJDIR)\prt-ext.obj
+   $(OBJDIR)\prt-ext.obj \
+   $(OBJDIR)\z-charneg.obj
 
 ILL_OBJS= \
    $(OBJDIR)\ill-get.obj\
@@ -832,7 +833,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.33  2002-02-11 23:25:26  adam
+# Revision 1.34  2002-02-12 15:59:12  adam
+# added z-charneg.obj
+#
+# Revision 1.33  2002/02/11 23:25:26  adam
 # Rustam's patch
 #
 # Revision 1.32  2002/01/30 22:02:03  adam
