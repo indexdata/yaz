@@ -4,3 +4,4 @@ yaz.xml
 yazhtml.dsl
 yazphp.dsl
 yazprint.dsl
+*.html

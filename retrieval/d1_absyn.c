@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_absyn.c,v 1.33 2002-08-17 07:56:59 adam Exp $
+ * $Id: d1_absyn.c,v 1.34 2002-08-29 21:26:08 mike Exp $
  */
 
 #include <stdio.h>
@@ -329,7 +329,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file,
     while (f && (argc = readconf_line(f, &lineno, line, 512, argv, 50)))
     {
 	char *cmd = *argv;
-	if (!strcmp(cmd, "elm"))
+	if (!strcmp(cmd, "elm") || !strcmp(cmd, "element"))
 	{
 	    data1_element *new_element;
 	    int i;
