@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.5 1999/12/8
+
 On UNIX, the generated makefile now supports a proper 'make install'.
 The prefix can be set via GNU configure to set the install location
 (default is /usr/local).
