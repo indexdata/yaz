@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.53 2002-10-08 20:14:44 adam Exp $
+ * $Id: d1_read.c,v 1.54 2002-10-08 23:00:09 adam Exp $
  */
 
 #include <assert.h>
@@ -60,29 +60,8 @@ data1_node *data1_mk_node_type (data1_handle dh, NMEM m, int type)
     return data1_mk_node2 (dh, m, type, 0);
 }
 
-data1_node *data1_mk_node2 (data1_handle dh, NMEM m, int type,
-                            data1_node *parent)
+static void data1_init_node (data1_handle dh, data1_node *r, int type)
 {
-    data1_node *r;
-    
-    r = (data1_node *)nmem_malloc(m, sizeof(*r));
-    r->next = r->child = r->last_child = 0;
-    r->destroy = 0;
-
-    if (!parent)
-    {
-        r->root = r;
-    }
-    else
-    {
-        r->root = parent->root;
-        r->parent = parent;
-        if (!parent->child)
-            parent->child = parent->last_child = r;
-        else
-            parent->last_child->next = r;
-        parent->last_child = r;
-    }
     r->which = type;
     switch(type)
     {
@@ -122,6 +101,57 @@ data1_node *data1_mk_node2 (data1_handle dh, NMEM m, int type,
     default:
 	logf (LOG_WARN, "data_mk_node_type. bad type = %d\n", type);
     }
+}
+
+data1_node *data1_append_node (data1_handle dh, NMEM m, int type,
+                               data1_node *parent)
+{
+    data1_node *r = (data1_node *)nmem_malloc(m, sizeof(*r));
+    r->next = r->child = r->last_child = 0;
+    r->destroy = 0;
+    
+    if (!parent)
+        r->root = r;
+    else
+    {
+        r->root = parent->root;
+        r->parent = parent;
+        if (!parent->child)
+            parent->child = parent->last_child = r;
+        else
+            parent->last_child->next = r;
+        parent->last_child = r;
+    }
+    data1_init_node(dh, r, type);
+    return r;
+}
+
+data1_node *data1_mk_node2 (data1_handle dh, NMEM m, int type,
+                            data1_node *parent)
+{
+    return data1_append_node (dh, m, type, parent);
+}
+
+data1_node *data1_insert_node (data1_handle dh, NMEM m, int type,
+                               data1_node *parent)
+{
+    data1_node *r = (data1_node *)nmem_malloc(m, sizeof(*r));
+    r->next = r->child = r->last_child = 0;
+    r->destroy = 0;
+    
+    if (!parent)
+        r->root = r;
+    else
+    {
+        r->root = parent->root;
+        r->parent = parent;
+        if (!parent->child)
+            parent->last_child = r;
+        else
+            r->next = parent->child;
+        parent->child = r;
+    }
+    data1_init_node(dh, r, type);
     return r;
 }
 
@@ -356,7 +386,8 @@ char *data1_insert_string (data1_handle dh, data1_node *res,
 static data1_node *data1_add_insert_taggeddata(data1_handle dh,
                                                data1_node *at,
                                                const char *tagname, NMEM m,
-                                               int local_allowed)
+                                               int local_allowed,
+					       int insert_mode)
 {
     data1_node *root = at->root;
     data1_node *partag = get_parent_tag (dh, at);
@@ -374,7 +405,10 @@ static data1_node *data1_add_insert_taggeddata(data1_handle dh,
     }
     if (local_allowed || e)
     {
-        tagn = data1_mk_node2 (dh, m, DATA1N_tag, at);
+        if (insert_mode)
+            tagn = data1_insert_node (dh, m, DATA1N_tag, at);
+        else
+            tagn = data1_append_node (dh, m, DATA1N_tag, at);
         tagn->u.tag.tag = data1_insert_string (dh, tagn, m, tagname);
         tagn->u.tag.element = e;
         datn = data1_mk_node2 (dh, m, DATA1N_data, tagn);
@@ -385,7 +419,7 @@ static data1_node *data1_add_insert_taggeddata(data1_handle dh,
 data1_node *data1_mk_tag_data(data1_handle dh, data1_node *at,
                               const char *tagname, NMEM m)
 {
-    return data1_add_insert_taggeddata (dh, at, tagname, m, 1);
+    return data1_add_insert_taggeddata (dh, at, tagname, m, 1, 0);
 }
 
 
@@ -397,21 +431,21 @@ data1_node *data1_mk_tag_data(data1_handle dh, data1_node *at,
 data1_node *data1_mk_tag_data_wd(data1_handle dh, data1_node *at,
                                  const char *tagname, NMEM m)
 {
-    return data1_add_insert_taggeddata (dh, at, tagname, m, 0);
+    return data1_add_insert_taggeddata (dh, at, tagname, m, 0, 1);
 }
 
 data1_node *data1_insert_taggeddata (data1_handle dh, data1_node *root,
                                      data1_node *at, const char *tagname,
                                      NMEM m)
 {
-    return data1_add_insert_taggeddata (dh, at, tagname, m, 0);
+    return data1_add_insert_taggeddata (dh, at, tagname, m, 0, 1);
 }
 
 data1_node *data1_add_taggeddata (data1_handle dh, data1_node *root,
                                   data1_node *at, const char *tagname,
                                   NMEM m)
 {
-    return data1_add_insert_taggeddata (dh, at, tagname, m, 1);
+    return data1_add_insert_taggeddata (dh, at, tagname, m, 1, 0);
 }
 
 data1_node *data1_mk_tag_data_int (data1_handle dh, data1_node *at,
