@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.3 1999-06-08 14:32:30 heikki Exp $
+# $Id: makefile,v 1.4 1999-06-09 09:41:09 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -8,6 +8,9 @@
 #
 # Missing
 # - Move MS-C's whatnots into win direcotry
+# - The TCL script produces C and H files in the same dir as the 
+#   ASN files. H's are copied to INCL, C's are left there.
+#   They should be produced into OBJ...
 #  
 # Envoronment problems
 # - You need to have the proper path and environment for VC set
@@ -22,7 +25,7 @@
 
 DEBUG=0   # 0 for release, 1 for debug
 
-NEW_Z3950=0  # 0= use old asn files
+NEW_Z3950=1  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
 
 
@@ -52,6 +55,7 @@ ODRDIR=$(SRCDIR)\ODR
 UTILDIR=$(SRCDIR)\UTIL
 ZUTILDIR=$(SRCDIR)\ZUTIL
 RETDIR=$(SRCDIR)\RETRIEVAL
+Z3950DIR=$(SRCDIR)\Z39.50
 
 CLIENTDIR=$(SRCDIR)\CLIENT
 SERVERDIR=$(SRCDIR)\SERVER
@@ -152,6 +156,11 @@ CLIENT_LINK_OPTIONS = /subsystem:console
 SERVER_LINK_OPTIONS = -lib 
 ZTEST_LINK_OPTIONS = /subsystem:console  
 
+# TCL
+TCL="C:\Program Files\Tcl\bin\tclsh80.exe"
+
+COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl
+
 
 # Final opt variables
 !if $(DEBUG)
@@ -159,12 +168,14 @@ COPT=   $(COMMON_C_OPTIONS)   $(DEBUG_C_OPTIONS)     $(COMMON_C_INCLUDES)
 MTLOPT= $(COMMON_MTL_OPTIONS) $(DEBUG_MTL_OPTIONS)
 RCOPT=  $(COMMON_RC_OPTIONS)  $(DEBUG_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(DEBUG_LNK_OPTIONS)   $(LNK_LIBS)
+TCLOPT= $(COMMON_TCL_OPTIONS)
 
 !else
 COPT=   $(COMMON_C_OPTIONS)   $(RELEASE_C_OPTIONS)   $(COMMON_C_INCLUDES) 
 MTLOPT= $(COMMON_MTL_OPTIONS) $(RELEASE_MTL_OPTIONS)
 RCOPT=  $(COMMON_RC_OPTIONS)  $(RELEASE_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
+TCLOPT= $(COMMON_TCL_OPTIONS)
 !endif
 
 
@@ -301,15 +312,50 @@ YAZ_RET_OBJS= \
    $(OBJDIR)\d1_varset.obj\
    $(OBJDIR)\d1_write.obj
 
-YAZ_OBJS= \
-   $(YAZ_ASN_OBJS) \
+
+Z3950_OBJS= \
+   $(OBJDIR)\z-accdes1.obj \
+   $(OBJDIR)\z-accform1.obj \
+   $(OBJDIR)\z-acckrb1.obj \
+   $(OBJDIR)\z-core.obj \
+   $(OBJDIR)\z-diag1.obj \
+   $(OBJDIR)\z-espec1.obj \
+   $(OBJDIR)\z-estask.obj \
+   $(OBJDIR)\z-exp.obj \
+   $(OBJDIR)\z-grs.obj \
+   $(OBJDIR)\z-opac.obj \
+   $(OBJDIR)\z-uifr1.obj \
+   $(OBJDIR)\z-rrf1.obj \
+   $(OBJDIR)\z-rrf2.obj \
+   $(OBJDIR)\z-sum.obj \
+   $(OBJDIR)\z-sutrs.obj \
+   $(OBJDIR)\zes-expi.obj \
+   $(OBJDIR)\zes-exps.obj \
+   $(OBJDIR)\zes-order.obj \
+   $(OBJDIR)\zes-pquery.obj \
+   $(OBJDIR)\zes-psched.obj \
+   $(OBJDIR)\zes-pset.obj \
+   $(OBJDIR)\zes-update0.obj 
+
+COMMON_YAZ_OBJS= \
    $(YAZ_COMSTACK_OBJS) \
    $(YAZ_ODR_OBJS) \
    $(YAZ_UTIL_OBJS) \
    $(YAZ_ZUTIL_OBJS) \
    $(YAZ_RET_OBJS)
 
+!if $(NEW_Z3950)
+YAZ_OBJS= \
+	$(COMMON_YAZ_OBJS) \
+	$(Z3950_OBJS)
+!else
+YAZ_OBJS= \
+	$(COMMON_YAZ_OBJS) \
+	$(YAZ_ASN_OBJS)
+!endif
+
 DLL_OBJS= $(YAZ_OBJS)
+
 
 
 ##########################################################
@@ -317,13 +363,85 @@ DLL_OBJS= $(YAZ_OBJS)
 ##########################################################
 
 !if $(NEW_Z3950)
-$(PROTOH):
+$(PROTOH): makefile $(INCLDIR)\z-proto.h $(Z3950V3_H_FILES)
 	copy $(INCLDIR)\z-proto.h $(INCLDIR)\proto.h
 !else
-$(PROTOH):
+$(PROTOH): makefile $(INCLDIR)\prt-proto.h 
 	copy $(INCLDIR)\prt-proto.h $(INCLDIR)\proto.h
 !endif
 
+
+
+###########################################################
+############### Generated C and H files
+###########################################################
+
+Z3950_C_DIR=$(Z3950DIR)   #!!! Should be moved to OBJ
+
+# Files generated from datetime.asn
+DATETIME_H_FILES = z-date.h
+DATETIME_C_FILES = z-date.c
+DATETIME_FILES = $(DATETIME_H_FILES) $(DATETIME_C_FILES)
+$(DATETIME_C_FILES): $(DATETIME_H_FILES) 
+
+
+# Files generated from univres.asn
+UNIVRES_H_FILES = z-univ.h
+UNIVRES_C_FILES = z-univ.c
+UNIVRES_FILES = $(UNIVRES_H_FILES) $(UNIVRES_C_FILES)
+$(UNIVRES_C_FILES): $(UNIVRES_H_FILES) 
+
+# Files generated from esupdate.asn
+ESUPDATE_H_FILES = zes-update.h
+ESUPDATE_C_FILES = zes-update.c
+ESUPDATE_FILES = $(ESUPDATE_H_FILES) $(ESUPDATE_C_FILES)
+$(ESUPDATE_C_FILES): $(ESUPDATE_H_FILES) 
+
+
+# Files created from z3950v3.asn
+Z3950V3_H_FILES= \
+   $(INCLDIR)\z-accdes1.h \
+   $(INCLDIR)\z-core.h
+
+Z3950V3_C_FILES= \
+   $(Z3950_C_DIR)\z-accdes1.c \
+   $(Z3950_C_DIR)\z-accform1.c \
+   $(Z3950_C_DIR)\z-acckrb1.c \
+   $(Z3950_C_DIR)\z-core.c \
+   $(Z3950_C_DIR)\z-diag1.c \
+   $(Z3950_C_DIR)\z-espec1.c \
+   $(Z3950_C_DIR)\z-estask.c \
+   $(Z3950_C_DIR)\z-exp.c \
+   $(Z3950_C_DIR)\z-grs.c \
+   $(Z3950_C_DIR)\z-opac.c \
+   $(Z3950_C_DIR)\z-uifr1.c \
+   $(Z3950_C_DIR)\z-rrf1.c \
+   $(Z3950_C_DIR)\z-rrf2.c \
+   $(Z3950_C_DIR)\z-sum.c \
+   $(Z3950_C_DIR)\z-sutrs.c \
+   $(Z3950_C_DIR)\zes-expi.c \
+   $(Z3950_C_DIR)\zes-exps.c \
+   $(Z3950_C_DIR)\zes-order.c \
+   $(Z3950_C_DIR)\zes-pquery.c \
+   $(Z3950_C_DIR)\zes-psched.c \
+   $(Z3950_C_DIR)\zes-pset.c \
+   $(Z3950_C_DIR)\zes-update0.c 
+
+Z3950V3_FILES= $(Z3950V3_C_FILES) $(Z3950V3_H_FILES)
+
+$(Z3950V3_C_FILES): $(Z3950V3_H_FILES)
+
+GENERATED_C_FILES= \
+   $(Z3950V3_C_FILES)  \
+   $(ESUPDATE_C_FILES) \
+   $(UNIVRES_C_FILES)  \
+   $(DATETIME_C_FILES)
+
+GENERATED_H_FILES= \
+   $(Z3950V3_H_FILES)  \
+   $(ESUPDATE_H_FILES) \
+   $(UNIVRES_H_FILES)  \
+   $(DATETIME_H_FILES)
 
 
 ###########################################################
@@ -393,15 +511,44 @@ $(PROTOH):
 <<
 
 
+{$(Z3950_C_DIR)}.c{$(OBJDIR)}.obj:
+	@$(CPP) @<<  
+	$(COPT) $< 
+<<
+
 ### Resource file
 $(RESFILE): $(RCFILE) $(IDLGENERATED)
 	$(RSC) $(RCOPT) /fo"$(RESFILE)" $(RCFILE) 
+
+############### ASN-generated files
+
+
+$(Z3950V3_FILES): $(Z3950DIR)\z3950v3.asn
+	@cd $(Z3950DIR)
+	$(TCL) $(TCLOPT) z3950v3.asn
+	copy *.h $(INCLDIR)  >NUL
+
+$(DATETIME_FILES): $(Z3950DIR)\datetime.asn
+	@cd $(Z3950DIR)
+	$(TCL) $(TCLOPT) datetime.asn
+	copy *.h $(INCLDIR)  >NUL
+
+$(UNIVRES_FILES): $(Z3950DIR)\univres.asn
+	@cd $(Z3950DIR)
+	$(TCL) $(TCLOPT) univres.asn
+	copy *.h $(INCLDIR)  >NUL
+
+$(ESUPDATE_FILES): $(Z3950DIR)\esupdate.asn
+	@cd $(Z3950DIR)
+	$(TCL) $(TCLOPT) esupdate.asn
+	copy *.h $(INCLDIR)  >NUL
 
 
 ###########################################################
 ############### Linking
 ###########################################################
 
+###$(DLL) $(IMPLIB): "$(BINDIR)" $(Z3950_OBJS)
 
 $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) 
 	@echo Linking the dll  $(DLL)
@@ -416,7 +563,16 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS)
 		/map:"$(LIBDIR)/yaz.map"  
 <<
 
-$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) #####$(IMPLIB)
+#foo: 
+#	rem $(Z3950_OBJS)
+#	pause
+#	rem $(DLL_OBJS)
+
+foo: $(OBJDIR)\comstack.obj
+	echo foo
+
+
+$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) 
 	@echo Linking the client  $(CLIENT)
 	$(LINK) @<<
             $(LNKOPT) 
@@ -470,6 +626,8 @@ clean:
 	del $(SERVER)
 	del $(ZTEST)
 	del $(TMPDIR)\*.
+	del $(PROTOH)
+	del $(Z3950_C_DIR)\*.c
 
 ########### check directories and create if needed
 dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR)
@@ -482,20 +640,26 @@ $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
 ############### Explicit dependencies
 ###########################################################
 
-$(OBJDIR)/client.obj: $(IDLGENERATED)
+$(DLL_OBJS): makefile $(PROTOH) $(GENERATED_C_FILES)
 
-$(DLL_OBJS): makefile $(PROTOH)
+# Note: The objects depend on their own C file already, the
+# dependency here is actually to make sure we get the 
+# proper H files generated before trying to compile anything
+# Unfortunately make clean can not delete the H files so
+# easily. This hack assures that if the C's are deleted 
+# (as make clean does), the H's will be generated anew...
 
 
-# Debug test
-foo: $(OBJDIR)\ztest.obj
 
 ###########################################################
 ############### Log
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.3  1999-06-08 14:32:30  heikki
+# Revision 1.4  1999-06-09 09:41:09  heikki
+# More work on the ASN-generated files.
+#
+# Revision 1.3  1999/06/08 14:32:30  heikki
 # Proto.h works all right, removed linker warnings from server.lib
 #
 # Revision 1.2  1999/06/08 14:07:24  heikki
