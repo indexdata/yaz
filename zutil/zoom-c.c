@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.3 2002-09-25 20:41:02 adam Exp $
+ * $Id: zoom-c.c,v 1.4 2002-10-04 11:23:50 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1143,7 +1143,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
                                      r->u.octet_aligned->buf,
                                      rec->wrbuf_marc, 0,
                                      r->u.octet_aligned->len,
-                                     1) > 0)
+                                     2) > 0)
                 {
                     if (len) *len = wrbuf_len(rec->wrbuf_marc);
                     return wrbuf_buf(rec->wrbuf_marc);
