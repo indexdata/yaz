@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.19 2003-02-14 18:49:23 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.20 2003-02-14 20:33:00 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -907,7 +907,7 @@ int cql_transform_FILE(cql_transform_t ct,
        This small file defines two index sets, three qualifiers and three
        relations, a position pattern and a default structure.
       </para>
-      <programlisting>
+      <programlisting><![CDATA[
        set.srw    = http://www.loc.gov/zing/cql/srw-indexes/v1.0/
        set.dc     = http://www.loc.gov/zing/cql/dc-indexes/v1.0/
 
@@ -922,6 +922,7 @@ int cql_transform_FILE(cql_transform_t ct,
        position.any               = 3=3 6=1
 
        structure.*                = 4=1
+]]>
       </programlisting>
       <para>
        With the mappings above, the CQL query

@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.104 2003-02-14 18:49:22 adam Exp $
+dnl $Id: configure.in,v 1.105 2003-02-14 20:32:59 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.3)
 dnl
@@ -59,6 +59,27 @@ AC_ARG_WITH(dsssl,[  --with-dsssl[=DIR]      Use DSSSL in DIR/{html,print}/docbo
      fi
    done
    if test -z "$DSSSL_DIR"; then
+      AC_MSG_RESULT(Not found)
+   fi
+])
+AC_SUBST(XSL_DIR)
+AC_ARG_WITH(xsl,[  --with-xsl[=DIR]        Use XSL in DIR/{htmlhelp,xhtml}],
+[
+   if test -f "$withval/htmlhelp/htmlhelp.xsl"; then
+      XSL_DIR=$withval
+   fi
+],[
+   AC_MSG_CHECKING(for htmlhelp.xsl)
+   for d in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh \
+            /usr/share/sgml/docbook/xsl-stylesheets-1.* 
+   do
+     if test -f $d/htmlhelp/htmlhelp.xsl; then
+       AC_MSG_RESULT($d)
+       XSL_DIR=$d
+       break
+     fi
+   done
+   if test -z "$XSL_DIR"; then
       AC_MSG_RESULT(Not found)
    fi
 ])
@@ -373,6 +394,7 @@ doc/yazhtml.dsl
 doc/yazphp.dsl
 doc/yazprint.dsl
 doc/tkl.xsl
+doc/yazhtml.xsl
 etc/Makefile
 yaz-config
 ],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > lib/yaz-config && chmod +x yaz-config lib/yaz-config])
