@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.19 2001-10-24 20:27:00 adam Exp $
+## $Id: Makefile.am,v 1.20 2001-10-24 20:33:29 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -13,7 +13,7 @@ HTMLFILES = asn.external.html asn.html asn.oid.html asn.pdu.html \
  client.searching.html comstack.addresses.html comstack.client.html \
  comstack.common.html comstack.diagnostics.html comstack.html \
  comstack.introduction.html comstack.server.html comstack.summary.html \
- future.html indexdata.html installation.html installation.unix.html
+ future.html indexdata.html installation.html installation.unix.html \
  installation.win32.html introduction.html \
  license.html license.other.html odr.debugging.html \
  odr.html odr.programming.html odr.use.html server.backend.html \
