@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.58  1999-04-20 09:56:47  adam
+ * Revision 1.59  1999-04-21 11:46:00  adam
+ * Fixed bug in {en,de}coder for OtherInformation.
+ *
+ * Revision 1.58  1999/04/20 09:56:47  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -258,24 +261,22 @@ int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt,
 	{-1, -1, -1, -1, 0, 0}
     };
 
-    if (!odr_sequence_begin(o, p, sizeof(**p), 0))
+    if (!odr_sequence_begin(o, p, sizeof(**p), name))
     	return opt && odr_ok(o);
     return
     	odr_implicit(o, z_InfoCategory, &(*p)->category, ODR_CONTEXT, 1, 1) &&
-	odr_choice(o, arm, &(*p)->information, &(*p)->which, 0) &&
+	odr_choice(o, arm, &(*p)->information, &(*p)->which, name) &&
 	odr_sequence_end(o);
 }
     
 int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt,
 		       const char *name)
 {
-    if (o->direction == ODR_DECODE)
-    	*p = (Z_OtherInformation *)odr_malloc(o, sizeof(**p));
-    else if (!*p)
-    	return opt;
+    if (!odr_initmember (o, p, sizeof(**p)))
+	return opt && odr_ok(o);
     odr_implicit_settag(o, ODR_CONTEXT, 201);
     if (odr_sequence_of(o, (Odr_fun)z_OtherInformationUnit, &(*p)->list,
-	&(*p)->num_elements, 0))
+	&(*p)->num_elements, name))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);
@@ -826,8 +827,8 @@ int z_SearchRequest(ODR o, Z_SearchRequest **p, int opt, const char *name)
 	odr_implicit(o, odr_oid, &pp->preferredRecordSyntax,
 	    ODR_CONTEXT, 104, 1) &&
 	odr_explicit(o, z_Query, &pp->query, ODR_CONTEXT, 21, 0) &&
-	odr_implicit(o, z_OtherInformation, &(*p)->additionalSearchInfo,
-	    ODR_CONTEXT, 203, 1) &&
+	odr_implicit_tag(o, z_OtherInformation, &(*p)->additionalSearchInfo,
+	    ODR_CONTEXT, 203, 1, 0) &&
 	z_OtherInformation(o, &(*p)->otherInfo, 1, 0) &&
 	odr_sequence_end(o);
 }
