@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.8 2004-03-15 21:39:06 adam Exp $
+/* $Id: cqltransform.c,v 1.9 2004-05-25 14:06:15 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -312,16 +312,9 @@ void emit_term(cql_transform_t ct,
 	    term = mem;
         }
         else {
-	    /* No masking characters.  If there's no "truncation.none"
-	     * configuration element, that's an error which we
-	     * indicate (rather tangentially) as 30 "Too many masking
-	     * characters in term".  28 would be equally meaningful
-	     * (or meaningless) but using a different value allows us
-	     * to differentiate between this case and the previous
-	     * one.
-	     */
+	    /* No masking characters.  Use "truncation.none" if given. */
             cql_pr_attr(ct, "truncation", "none", 0,
-                        pr, client_data, 30);
+                        pr, client_data, 0);
         }
     }
 
