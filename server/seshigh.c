@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.8  1995-03-22 10:13:21  quinn
+ * Revision 1.9  1995-03-22 15:01:26  quinn
+ * Adjusting record packing.
+ *
+ * Revision 1.8  1995/03/22  10:13:21  quinn
  * Working on record packer
  *
  * Revision 1.7  1995/03/21  15:53:31  quinn
@@ -26,39 +29,7 @@
  * Partitioned server.
  *
  * Revision 1.1  1995/03/15  16:02:10  quinn
- * Modded session.c seshigh.c
- *
- * Revision 1.10  1995/03/15  15:18:51  quinn
- * Little changes to better support nonblocking I/O
- * Added backend.h
- *
- * Revision 1.9  1995/03/15  13:20:23  adam
- * Yet another bug fix in very dummy_database...
- *
- * Revision 1.8  1995/03/15  11:18:17  quinn
- * Smallish changes.
- *
- * Revision 1.7  1995/03/15  09:40:15  adam
- * Bug fixes in dummy_database_...
- *
- * Revision 1.6  1995/03/15  09:08:30  adam
- * Take care of preferredMessageSize.
- *
- * Revision 1.5  1995/03/15  08:37:44  quinn
- * Now we're pretty much set for nonblocking I/O.
- *
- * Revision 1.4  1995/03/15  08:27:20  adam
- * PresentRequest changed to return MARC records from file 'dummy-records'.
- *
- * Revision 1.3  1995/03/14  16:59:48  quinn
- * Bug-fixes
- *
- * Revision 1.2  1995/03/14  11:30:14  quinn
- * Works better now.
- *
- * Revision 1.1  1995/03/14  10:28:01  quinn
- * More work on demo server.
- *
+ * Modded session.c to seshigh.c
  *
  */
 
@@ -193,7 +164,8 @@ static int process_apdu(IOCHAN chan)
 	    fprintf(stderr, "Bad APDU\n");
 	    return -1;
     }
-    odr_reset(assoc->decode);
+    odr_reset(assoc->decode); /* release incopming APDU */
+    odr_reset(assoc->encode); /* release stuff alloced before encoding */
     return res;
 }
 
@@ -228,8 +200,12 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.options = req->options; /* should check these */
     resp.protocolVersion = req->protocolVersion;
     assoc->maximumRecordSize = *req->maximumRecordSize;
-    if (assoc->maximumRecordSize > ENCODE_BUFFER_SIZE - 500)
-    	assoc->maximumRecordSize = ENCODE_BUFFER_SIZE - 500;
+    /*
+     * This is not so hot. The big todo for ODR is dynamic memory allocation
+     * on encoding.
+     */
+    if (assoc->maximumRecordSize > ENCODE_BUFFER_SIZE - 1000)
+    	assoc->maximumRecordSize = ENCODE_BUFFER_SIZE - 1000;
     assoc->preferredMessageSize = *req->preferredMessageSize;
     if (assoc->preferredMessageSize > assoc->maximumRecordSize)
     	assoc->preferredMessageSize = assoc->maximumRecordSize;
@@ -238,7 +214,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.8 $";
+    resp.implementationVersion = "$Revision: 1.9 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -278,6 +254,7 @@ static Z_NamePlusRecord *surrogatediagrec(char *dbname, int error,
     static int err;
 
     fprintf(stderr, "SurrogateDiagnotic: %d -- %s\n", error, addinfo);
+    err = error;
     rec.databaseName = dbname;
     rec.which = Z_NamePlusRecord_surrogateDiagnostic;
     rec.u.surrogateDiagnostic = &dr;
@@ -287,7 +264,7 @@ static Z_NamePlusRecord *surrogatediagrec(char *dbname, int error,
     return &rec;
 }
 
-#define MAX_RECORDS 50
+#define MAX_RECORDS 256
 
 static Z_Records *pack_records(association *a, char *setname, int start,
 				int *num, Z_ElementSetNames *esn,
@@ -306,7 +283,10 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     *num = 0;
     *next = 0;
 
-    for (recno = start; recno < toget; recno++)
+    fprintf(stderr, "Request to pack %d+%d\n", start, toget);
+    fprintf(stderr, "pms=%d, mrs=%d\n", a->preferredMessageSize,
+    	a->maximumRecordSize);
+    for (recno = start; reclist.num_records < toget; recno++)
     {
     	bend_fetchrequest freq;
 	bend_fetchresult *fres;
@@ -332,32 +312,41 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    *pres = Z_PRES_FAILURE;
 	    return diagrec(fres->errcode, fres->errstring);
 	}
+	fprintf(stderr, "  Got record, len=%d, total=%d\n",
+	    fres->len, total_length);
 	if (fres->len + total_length > a->preferredMessageSize)
 	{
+	    fprintf(stderr, "  In drop-zone\n");
 	    /* record is small enough, really */
 	    if (fres->len <= a->preferredMessageSize)
 	    {
+	    	fprintf(stderr, "  Dropped last normal-sized record\n");
 		*pres = Z_PRES_PARTIAL_2;
 		break;
 	    }
-	    /* record canonly be fetched by itself */
+	    /* record can only be fetched by itself */
 	    if (fres->len < a->maximumRecordSize)
 	    {
+	    	fprintf(stderr, "  Record > prefmsgsz\n");
 	    	if (toget > 1)
 		{
+		    fprintf(stderr, "  Dropped it\n");
 		    reclist.records[reclist.num_records] =
 		   	 surrogatediagrec(fres->basename, 16, 0);
 		    reclist.num_records++;
 		    *pres = Z_PRES_PARTIAL_2;
+		    break;
 		}
 	    }
 	    else /* too big entirely */
 	    {
+	    	fprintf(stderr, "Record > maxrcdsz\n");
 		reclist.records[reclist.num_records] =
 		    surrogatediagrec(fres->basename,
 		    17, 0);
 		reclist.num_records++;
 		*pres = Z_PRES_PARTIAL_2;
+		break;
 	    }
 	}
 	if (!(thisrec = odr_malloc(a->encode, sizeof(*thisrec))))
@@ -384,7 +373,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    fres->len;
 	reclist.records[reclist.num_records] = thisrec;
 	reclist.num_records++;
-	total_length = fres->len;
+	total_length += fres->len;
 	(*num)++;
 	*next = fres->last_in_set ? 0 : recno + 1;
     }
