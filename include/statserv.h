@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.11  1997-10-27 14:03:01  adam
+ * Revision 1.12  1997-11-07 13:31:47  adam
+ * Added NT Service name part of statserv_options_block. Moved NT
+ * service utility to server library.
+ *
+ * Revision 1.11  1997/10/27 14:03:01  adam
  * Added new member to statserver_options_block, pre_init, which
  * specifies a callback to be invoked after command line parsing and
  * before the server listens for the first time.
@@ -79,11 +83,12 @@ typedef struct statserv_options_block
     int maxrecordsize;            /* maximum value for negotiation */
     char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */
     char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
-
     void (*pre_init)(struct statserv_options_block *p);
+    char service_name[128];       /* NT Service Name */
 } statserv_options_block;
 
 int statserv_main(int argc, char **argv);
+int statserv_start(int argc, char **argv);
 void statserv_closedown(void);
 statserv_options_block *statserv_getcontrol(void);
 void statserv_setcontrol(statserv_options_block *block);

@@ -7,7 +7,11 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.4  1997-09-17 12:10:43  adam
+ * Revision 1.5  1997-11-07 13:31:58  adam
+ * Added NT Service name part of statserv_options_block. Moved NT
+ * service utility to server library.
+ *
+ * Revision 1.4  1997/09/17 12:10:43  adam
  * YAZ version 1.4.
  *
  * Revision 1.3  1997/09/09 10:10:20  adam
@@ -32,9 +36,6 @@
 #include <backend.h>
 #include <xmalloc.h>
 #include <proto.h>
-
-/* Specifically for NT Services - Shouldn't cause problems on UNIX */
-#include "service.h"
 
 Z_GenericRecord *read_grs1(FILE *f, ODR o);
 
@@ -301,65 +302,7 @@ void bend_close(void *handle)
     return;
 }
 
-#ifndef WINDOWS
-/* UNIX version */
 int main(int argc, char **argv)
 {
-    statserv_main(argc, argv);
-    statserv_closedown();
-    exit (0);
+    return statserv_main(argc, argv);
 }
-#else
-/* Windows version with Service support */
-
-typedef struct _Args
-{
-    char **argv;
-    int argc;
-} Args; 
-
-static Args ArgDetails;
-
-/* name of the executable */
-#define SZAPPNAME            "server"
-
-/* internal name of the service */
-#define SZSERVICENAME        "Z3950 Test Server"
-
-/* displayed name of the service */
-#define SZSERVICEDISPLAYNAME "Z3950 Test Server"
-
-/* list of service dependencies - "dep1\0dep2\0\0" */
-#define SZDEPENDENCIES       ""
-
-int main(int argc, char **argv)
-{
-    /* Lets setup the Arg structure */
-    ArgDetails.argc = argc;
-    ArgDetails.argv = argv;
-
-    /* Now setup the service with the service controller */
-    SetupService(argc, argv, &ArgDetails, SZAPPNAME, SZSERVICENAME, SZSERVICEDISPLAYNAME, SZDEPENDENCIES);
-    return(0);
-}
-
-int StartAppService(void *pHandle, int argc, char **argv)
-{
-    /* Initializes the App */
-    return 1;
-}
-
-void RunAppService(void *pHandle)
-{
-    Args *pArgs = (Args *)pHandle;
-
-    /* Starts the app running */
-    statserv_main(pArgs->argc, pArgs->argv);
-}
-
-void StopAppService(void *pHandle)
-{
-    /* Stops the app */
-    statserv_closedown();
-}
-#endif

@@ -99,14 +99,6 @@ SOURCE=".\read-grs.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\service.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\service.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\ztest.c
 # End Source File
 # End Target

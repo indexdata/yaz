@@ -7,7 +7,11 @@
  *   Chas Woodfield, Fretwell Downing Datasystem.
  *
  * $Log: statserv.c,v $
- * Revision 1.43  1997-10-31 12:20:09  adam
+ * Revision 1.44  1997-11-07 13:31:52  adam
+ * Added NT Service name part of statserv_options_block. Moved NT
+ * service utility to server library.
+ *
+ * Revision 1.43  1997/10/31 12:20:09  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -156,6 +160,7 @@
 #include <process.h>
 #include <winsock.h>
 #include <direct.h>
+#include "service.h"
 #else
 #include <unistd.h>
 #include <pwd.h>
@@ -192,7 +197,8 @@ static statserv_options_block control_block = {
     1024*1024,                  /* maximum PDU size (approx.) to allow */
     "default-config",           /* configuration name to pass to backend */
     "",                         /* set user id */
-    NULL
+    NULL,                       /* pre init handler */
+    "Z39.50 Server"             /* NT Service Name */
 };
 
 /*
@@ -708,7 +714,8 @@ void statserv_setcontrol(statserv_options_block *block)
     memcpy(&control_block, block, sizeof(*block));
 }
 
-int statserv_main(int argc, char **argv)
+
+int statserv_start(int argc, char **argv)
 {
     int ret, listeners = 0, inetd = 0, r;
     char *arg;
@@ -829,3 +836,62 @@ int statserv_main(int argc, char **argv)
     nmem_exit ();
     return ret;
 }
+
+#ifdef WINDOWS
+typedef struct _Args
+{
+    char **argv;
+    int argc;
+} Args; 
+
+static Args ArgDetails;
+
+/* name of the executable */
+#define SZAPPNAME            "server"
+
+/* list of service dependencies - "dep1\0dep2\0\0" */
+#define SZDEPENDENCIES       ""
+
+int statserv_main(int argc, char **argv)
+{
+    statserv_options_block *cb = statserv_getcontrol();
+
+        /* Lets setup the Arg structure */
+    ArgDetails.argc = argc;
+    ArgDetails.argv = argv;
+
+    /* Now setup the service with the service controller */
+    SetupService(argc, argv, &ArgDetails, SZAPPNAME,
+        cb->service_name, /* internal service name */
+        cb->service_name, /* displayed name of the service */
+        SZDEPENDENCIES);
+    return 0;
+}
+
+int StartAppService(void *pHandle, int argc, char **argv)
+{
+    /* Initializes the App */
+    return 1;
+}
+
+void RunAppService(void *pHandle)
+{
+    Args *pArgs = (Args *)pHandle;
+
+    /* Starts the app running */
+    statserv_start(pArgs->argc, pArgs->argv);
+}
+
+void StopAppService(void *pHandle)
+{
+    /* Stops the app */
+    statserv_closedown();
+}
+#else
+int statserv_main(int argc, char **argv)
+{
+    int ret = statserv_start (argc, argv);
+    statserv_closedown ();
+    return ret;
+}
+#endif

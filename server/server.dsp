@@ -102,6 +102,10 @@ SOURCE=.\requestq.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\service.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\seshigh.c
 # End Source File
 # Begin Source File
