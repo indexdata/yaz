@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.9 2004-11-03 14:25:06 heikki Exp $
+ * $Id: log.c,v 1.10 2004-11-03 17:52:53 heikki Exp $
  */
 
 /**
@@ -324,11 +324,13 @@ static char *clean_name(const char *name, int len, char *namebuf, int buflen)
         len=buflen; 
     strncpy(namebuf, name, len);
     namebuf[len]='\0';
-    start=p=namebuf;
+    start=namebuf;
+    p=namebuf;
     while ((p=index(start,'/')))
         start=p+1;
     if ((p=rindex(start,'.')))
         *p='\0';
+    /*logf(LOG_LOG,"cleaned '%.*s' to '%s' ", len,name, start); */ 
     return start;
 
 }
@@ -372,8 +374,8 @@ int yaz_log_mask_str_x (const char *str, int level)
     const char *p;
     int i;
     int found;
-    char clean[255];
-    char *n;
+    char clean[255]="";
+    char *n=clean;
 
     while (*str)
     {
@@ -385,7 +387,8 @@ int yaz_log_mask_str_x (const char *str, int level)
             level = atoi (str);
             found=1;
         }
-        else
+        else 
+        {
             n=clean_name(str, p-str, clean, sizeof(clean));
             for (i = 0; mask_names[i].name; i++)
                 /*if (strlen (mask_names[i].name) == (size_t) (p-str) &&
@@ -398,6 +401,7 @@ int yaz_log_mask_str_x (const char *str, int level)
                         level = 0;
                     found=1;
                 }
+        }
         if (!found)
             level |= define_module_bit(n);
         if (*p == ',')
