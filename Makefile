@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.38 1998-04-02 14:33:29 adam Exp $
+# $Id: Makefile,v 1.39 1998-05-20 13:51:46 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
@@ -11,11 +11,19 @@
 
 CDEFS=$(ODEFS) 
 
-#INCLUDE=-I../z39.50 -I. -I../include
-#MOD=z39.50
-
+# Standard include path and original protocol encoders.
 INCLUDE=-I. -I../include
 MOD=asn
+
+# Uncomment the two lines below if you want to try the ASN.1 compiler
+# (yc) for YAZ. Download yc separately and untar it along with YAZ:
+#  gunzip -c yaz.tar.gz | tar xvf -
+#  gunzip -c yc.tar.gz | tar xvf -
+#  cd yaz
+#  ln -s ../yc/z39.50 
+# You must run 'make depend' before 'make'.
+#INCLUDE=-I../z39.50 -I. -I../include
+#MOD=z39.50
 
 #CC=
 SHELL=/bin/sh
