@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.10  1996-01-02 08:57:23  quinn
+ * Revision 1.11  1997-05-02 08:39:10  quinn
+ * New PDUs added, thanks to Ronald van der Meer
+ *
+ * Revision 1.10  1996/01/02 08:57:23  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.9  1995/09/29  17:11:55  quinn
@@ -357,36 +360,130 @@ Z_Close *zget_Close(ODR o)
     return r;
 }
 
+Z_ResourceReportRequest *zget_ResourceReportRequest(ODR o)
+{
+    Z_ResourceReportRequest *r = odr_malloc(o, sizeof(*r));
+
+    r->referenceId = 0;
+    r->opId = 0;
+    r->prefResourceReportFormat = 0;
+    r->otherInfo = 0;
+    return r;
+}
+
+Z_ResourceReportResponse *zget_ResourceReportResponse(ODR o)
+{
+    Z_ResourceReportResponse *r = odr_malloc(o, sizeof(*r));
+
+    r->referenceId = 0;
+    r->resourceReportStatus = odr_malloc(o, sizeof(int));
+    *r->resourceReportStatus = Z_ResourceReportStatus_success;
+    r->resourceReport = 0;
+    r->otherInfo = 0;
+    return r;
+}
+
+Z_SortRequest *zget_SortRequest(ODR o)
+{
+    Z_SortRequest *r = odr_malloc(o, sizeof(*r));
+
+    r->referenceId = 0;
+    r->inputResultSetNames = 0;
+    r->sortedResultSetName = 0;
+    r->sortSequence = 0;
+    r->otherInfo = 0;
+    return r;
+}
+
+Z_SortResponse *zget_SortResponse(ODR o)
+{
+    Z_SortResponse *r = odr_malloc(o, sizeof(*r));
+
+    r->referenceId = 0;
+    r->sortStatus = odr_malloc(o, sizeof(int));
+    *r->sortStatus = Z_SortStatus_success;
+    r->resultSetStatus = odr_malloc(o, sizeof(int));
+    *r->resultSetStatus = Z_SortResultSetStatus_empty;
+    r->diagnostics = 0;
+    r->otherInfo = 0;
+    return r;
+}
+
+Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
+{
+    Z_ExtendedServicesRequest *r = odr_malloc(o, sizeof(*r));
+
+    r->referenceId = 0;
+    r->function = odr_malloc(o, sizeof(int));
+    *r->function = Z_ExtendedServicesRequest_create;
+    r->packageType = 0;
+    r->packageName = 0;
+    r->userId = 0;
+    r->retentionTime = 0;
+    r->permissions = 0;
+    r->description = 0;
+    r->taskSpecificParameters = 0;
+    r->waitAction = odr_malloc(o, sizeof(int));
+    *r->waitAction = Z_ExtendedServicesRequest_wait;
+    r->elements = 0;
+    r->otherInfo = 0;
+    return r;
+}
+
+Z_ExtendedServicesResponse *zget_ExtendedServicesResponse(ODR o)
+{
+    Z_ExtendedServicesResponse *r = odr_malloc(o, sizeof(*r));
+
+    r->referenceId = 0;
+    r->operationStatus = odr_malloc(o, sizeof(int));
+    *r->operationStatus = Z_ExtendedServicesResponse_done;
+    r->num_diagnostics = 0;
+    r->diagnostics = 0;
+    r->taskPackage = 0;
+    r->otherInfo = 0;
+    return r;
+}
+
 Z_APDU *zget_APDU(ODR o, int which)
 {
     Z_APDU *r = odr_malloc(o, sizeof(*r));
-    
+
     switch (r->which = which)
     {
     	case Z_APDU_initRequest:
-	    r->u.initRequest = zget_InitRequest(o); break;
+	    r->u.initRequest = zget_InitRequest(o);
+            break;
 	case Z_APDU_initResponse:
-	    r->u.initResponse = zget_InitResponse(o); break;
-	case Z_APDU_searchRequest:	
-	    r->u.searchRequest = zget_SearchRequest(o); break;
+	    r->u.initResponse = zget_InitResponse(o);
+            break;
+	case Z_APDU_searchRequest:
+	    r->u.searchRequest = zget_SearchRequest(o);
+            break;
 	case Z_APDU_searchResponse:
-	    r->u.searchResponse = zget_SearchResponse(o); break;
+	    r->u.searchResponse = zget_SearchResponse(o);
+            break;
 	case Z_APDU_presentRequest:
-	    r->u.presentRequest = zget_PresentRequest(o); break;
+	    r->u.presentRequest = zget_PresentRequest(o);
+            break;
 	case Z_APDU_presentResponse:
-	    r->u.presentResponse = zget_PresentResponse(o); break;
+	    r->u.presentResponse = zget_PresentResponse(o);
+            break;
 	case Z_APDU_deleteResultSetRequest:
-	    r->u.deleteResultSetRequest = zget_DeleteResultSetRequest(o); break;
+	    r->u.deleteResultSetRequest = zget_DeleteResultSetRequest(o);
+            break;
 	case Z_APDU_deleteResultSetResponse:
 	    r->u.deleteResultSetResponse = zget_DeleteResultSetResponse(o);
 	    break;
 	case Z_APDU_scanRequest:
-	    r->u.scanRequest = zget_ScanRequest(o); break;
+	    r->u.scanRequest = zget_ScanRequest(o);
+            break;
 	case Z_APDU_scanResponse:
-	    r->u.scanResponse = zget_ScanResponse(o); break;
+	    r->u.scanResponse = zget_ScanResponse(o);
+            break;
 	case Z_APDU_triggerResourceControlRequest:
 	    r->u.triggerResourceControlRequest =
-		zget_TriggerResourceControlRequest(o); break;
+                zget_TriggerResourceControlRequest(o);
+            break;
 	case Z_APDU_resourceControlRequest:
 	    r->u.resourceControlRequest = zget_ResourceControlRequest(o);
 	    break;
@@ -398,6 +495,30 @@ Z_APDU *zget_APDU(ODR o, int which)
 	    break;
 	case Z_APDU_close:
 	    r->u.close = zget_Close(o);
+	    break;
+	case Z_APDU_accessControlRequest:
+	    r->u.accessControlRequest = zget_AccessControlRequest(o);
+	    break;
+	case Z_APDU_accessControlResponse:
+	    r->u.accessControlResponse = zget_AccessControlResponse(o);
+	    break;
+	case Z_APDU_resourceReportRequest:
+	    r->u.resourceReportRequest = zget_ResourceReportRequest(o);
+	    break;
+	case Z_APDU_resourceReportResponse:
+	    r->u.resourceReportResponse = zget_ResourceReportResponse(o);
+	    break;
+	case Z_APDU_sortRequest:
+	    r->u.sortRequest = zget_SortRequest(o);
+	    break;
+	case Z_APDU_sortResponse:
+	    r->u.sortResponse = zget_SortResponse(o);
+	    break;
+	case Z_APDU_extendedServicesRequest:
+	    r->u.extendedServicesRequest = zget_ExtendedServicesRequest(o);
+	    break;
+	case Z_APDU_extendedServicesResponse:
+	    r->u.extendedServicesResponse = zget_ExtendedServicesResponse(o);
 	    break;
 	default:
 	    fprintf(stderr, "Bad APDU-type to zget_APDU");
