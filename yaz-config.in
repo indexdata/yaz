@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.7 2001-04-05 13:08:48 adam Exp $
+# $Id: yaz-config.in,v 1.8 2001-09-28 10:42:28 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -79,7 +79,7 @@ while test $# -gt 0; do
   shift
 done
 
-if test "$lib_thread" = "yes"; then
+if test "$lib_thread" = "yes" -a -n "@LIBTHREAD@"; then
     yazextralibs="@LIBTHREAD@ $yazextralibs"
     lyaz="-lyazthread -lyaz"
 else
