@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.209 2003-10-17 14:13:59 adam Exp $
+ * $Id: client.c,v 1.210 2003-10-21 12:35:50 mike Exp $
  */
 
 #include <stdio.h>
@@ -325,6 +325,11 @@ static void send_initRequest(const char* type_and_host)
         printf("Sent initrequest.\n");
 }
 
+
+/* These two are used only from process_initResponse() */
+static void render_initUserInfo(Z_OtherInformation *ui1);
+static void render_diag(Z_DiagnosticFormat *diag);
+
 static int process_initResponse(Z_InitResponse *res)
 {
     int ver = 0;
@@ -349,22 +354,24 @@ static int process_initResponse(Z_InitResponse *res)
     if (res->userInformationField)
     {
 	Z_External *uif = res->userInformationField;
-        printf("UserInformationfield:\n");
-        if (!z_External(print, (Z_External**)&uif, 0, 0))
-        {
-            odr_perror(print, "Printing userinfo\n");
-            odr_reset(print);
-        }
-        if (uif->which == Z_External_octet)
-        {
-            printf("Guessing visiblestring:\n");
-            printf("'%s'\n", uif->u. octet_aligned->buf);
-        } else if (uif->which == Z_External_single) {
-	    /* Peek at any private Init-diagnostic APDUs */
-	    Odr_any *sat = uif->u.single_ASN1_type;
-	    printf("### NAUGHTY: External is '%s'\n", sat->buf);
+	if (uif->which == Z_External_userInfo1) {
+	    render_initUserInfo(uif->u.userInfo1);
+	} else {
+	    printf("UserInformationfield:\n");
+	    if (!z_External(print, (Z_External**)&uif, 0, 0)) {
+		odr_perror(print, "Printing userinfo\n");
+		odr_reset(print);
+	    }
+	    if (uif->which == Z_External_octet) {
+		printf("Guessing visiblestring:\n");
+		printf("'%s'\n", uif->u. octet_aligned->buf);
+	    } else if (uif->which == Z_External_single) {
+		/* Peek at any private Init-diagnostic APDUs */
+		Odr_any *sat = uif->u.single_ASN1_type;
+		printf("### NAUGHTY: External is '%s'\n", sat->buf);
+	    }
+	    odr_reset (print);
 	}
-        odr_reset (print);
     }
     printf ("Options:");
     if (ODR_MASK_GET(res->options, Z_Options_search))
@@ -438,6 +445,59 @@ static int process_initResponse(Z_InitResponse *res)
     fflush (stdout);
     return 0;
 }
+
+
+static void render_initUserInfo(Z_OtherInformation *ui1) {
+    int i;
+    printf("Init response contains %d otherInfo unit%s:\n",
+	   ui1->num_elements, ui1->num_elements == 1 ? "" : "s");
+
+    for (i = 0; i < ui1->num_elements; i++) {
+	Z_OtherInformationUnit *unit = ui1->list[i];
+	printf("  %d: otherInfo unit contains ", i+1);
+	if (unit->which == Z_OtherInfo_externallyDefinedInfo &&
+	    unit->information.externallyDefinedInfo->which ==
+	    Z_External_diag1) {
+	    render_diag(unit->information.externallyDefinedInfo->u.diag1);
+	} else {
+	    printf("unsupported otherInfo unit type %d\n", unit->which);
+	}
+    }
+}
+
+
+/* ### should this share code with display_diagrecs()? */
+static void render_diag(Z_DiagnosticFormat *diag) {
+    int i;
+
+    printf("%d diagnostic%s:\n", diag->num, diag->num == 1 ? "" : "s");
+    for (i = 0; i < diag->num; i++) {
+	Z_DiagnosticFormat_s *ds = diag->elements[i];
+	printf("    %d: ", i+1);
+	switch (ds->which) {
+	case Z_DiagnosticFormat_s_defaultDiagRec: {
+	    Z_DefaultDiagFormat *dd = ds->u.defaultDiagRec;
+	    /* ### should check `dd->diagnosticSetId' */
+	    printf("code=%d", *dd->condition);
+	    /* Both types of addinfo are the same, so use type-pun */
+	    if (dd->u.v2Addinfo != 0)
+		printf(", addinfo='%s'", dd->u.v2Addinfo);
+	    break;
+	}
+	case Z_DiagnosticFormat_s_explicitDiagnostic:
+	    printf("Explicit diagnostic (not supported)");
+	    break;
+	default:
+	    printf("Unrecognised diagnostic type %d", ds->which);
+	    break;
+	}
+
+	if (ds->message != 0)
+	    printf(", message='%s'", ds->message);
+	printf("\n");
+    }
+}
+
 
 static int set_base(const char *arg)
 {
