@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-util.h,v $
- * Revision 1.3  2001-04-06 12:26:46  adam
+ * Revision 1.4  2002-08-27 14:02:43  adam
+ * Simple iconv library
+ *
+ * Revision 1.3  2001/04/06 12:26:46  adam
  * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
  *
  * Revision 1.2  2000/02/28 11:20:06  adam
@@ -48,7 +51,22 @@
 
 YAZ_BEGIN_CDECL
 
+typedef struct yaz_iconv_struct *yaz_iconv_t;
+#define YAZ_ICONV_UNKNOWN 1
+#define YAZ_ICONV_E2BIG 2
+#define YAZ_ICONV_EILSEQ 3
+#define YAZ_ICONV_EINVAL 4
+
+YAZ_EXPORT yaz_iconv_t yaz_iconv_open (const char *tocode,
+                                       const char *fromcode);
+YAZ_EXPORT size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
+                             char **outbuf, size_t *outbytesleft);
+YAZ_EXPORT int yaz_iconv_error (yaz_iconv_t cd);
+
+YAZ_EXPORT int yaz_iconv_close (yaz_iconv_t cd);
+
 YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
+
 
 YAZ_END_CDECL
 
