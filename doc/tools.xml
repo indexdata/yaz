@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.31 2003-11-03 10:47:24 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.32 2003-11-03 10:54:01 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -421,8 +421,7 @@
     </para>
 
     <para>
-     The <ulink url="http://europagate.dtv.dk/">EUROPAGATE</ulink>
-     research project working under the Libraries programme
+     The EUROPAGATE research project working under the Libraries programme
      of the European Commission's DG XIII has, amongst other useful tools,
      implemented a general-purpose CCL parser which produces an output
      structure that can be trivially converted to the internal RPN
