@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: tcpip.c,v $
- * Revision 1.37  2001-03-08 20:18:55  adam
+ * Revision 1.38  2001-03-21 12:43:36  adam
+ * Implemented cs_create_host. Better error reporting for SSL comstack.
+ *
+ * Revision 1.37  2001/03/08 20:18:55  adam
  * Added cs_set_blocking. Patch from Matthew Carey.
  *
  * Revision 1.36  2001/02/21 13:46:53  adam
@@ -494,6 +497,7 @@ int tcpip_connect(COMSTACK h, void *address)
 		return 1;
 	    }
 #endif
+	    h->cerrno = CSYSERR;
 	    return -1;
 	}
 	h->state = CS_CONNECTING;
@@ -529,6 +533,7 @@ int tcpip_connect(COMSTACK h, void *address)
 		h->io_pending = CS_WANT_WRITE;
 		return 1;
 	    }
+	    h->cerrno = CSERRORSSL;
 	    return -1;
 	}
     }
@@ -940,6 +945,7 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
 	    }
 	    if (res == 0)
 		return 0;
+	    h->cerrno = CSERRORSSL;
 	    return -1;
 	}
 	hasread += res;
@@ -1064,6 +1070,7 @@ int ssl_put(COMSTACK h, char *buf, int size)
 		yaz_log (LOG_LOG, "SSL_write. want_write");
 		return 1;
 	    }
+	    h->cerrno = CSERRORSSL;
 	    return -1;
 	}
 	state->written += res;

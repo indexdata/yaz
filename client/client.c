@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.115  2001-03-13 18:10:58  adam
+ * Revision 1.116  2001-03-21 12:43:36  adam
+ * Implemented cs_create_host. Better error reporting for SSL comstack.
+ *
+ * Revision 1.115  2001/03/13 18:10:58  adam
  * Added option -c to set CCL config file.
  *
  * Revision 1.114  2001/02/21 13:46:53  adam
@@ -647,44 +650,28 @@ int cmd_open(char *arg)
     base[0] = '\0';
     if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
         return 0;
-    if (strncmp (type_and_host, "tcp:", 4) == 0)
-        host = type_and_host + 4;
-    else if (strncmp (type_and_host, "ssl:", 4) == 0)
-    {
-#if HAVE_OPENSSL_SSL_H
-	t = ssl_type;
-#else
-	printf ("SSL not supported\n");
-#endif
-        host = type_and_host + 4;
-    }
-    else
-        host = type_and_host;
-    if (*base)
-        cmd_base (base);
-    protocol = PROTO_Z3950;
 
-    if (!(conn = cs_create(t, 1, protocol)))
+    conn = cs_create_host(type_and_host, 1, &add);
+    if (!conn)
     {
-        perror("cs_create");
-        return 0;
-    }
-    if (!(add = cs_straddr(conn, host)))
-    {
-        perror(arg);
-        return 0;
+	printf ("Couldn't create comstack\n");
+	return 0;
     }
     printf("Connecting...");
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
     {
-        perror("connect");
+	printf ("error = %s\n", cs_strerror(conn));
+	if (conn->cerrno == CSYSERR)
+	    perror("system");
         cs_close(conn);
         conn = 0;
         return 0;
     }
     printf("Ok.\n");
     send_initRequest();
+    if (*base)
+        cmd_base (base);
     return 2;
 }
 

@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.70  2001-02-01 08:52:26  adam
+ * Revision 1.71  2001-03-21 12:43:36  adam
+ * Implemented cs_create_host. Better error reporting for SSL comstack.
+ *
+ * Revision 1.70  2001/02/01 08:52:26  adam
  * Fixed bug regarding inetd mode.
  *
  * Revision 1.69  2000/12/01 17:56:41  adam
@@ -811,47 +814,13 @@ static void inetd_connection(int what)
 static void add_listener(char *where, int what)
 {
     COMSTACK l;
-    CS_TYPE type;
-    char mode[100], addr[100];
     void *ap;
     IOCHAN lst = NULL;
 
-    if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
+    l = cs_create_host(where, 0, &ap);
+    if (!l)
     {
-	yaz_log (LOG_WARN, "%s: Address format: ('tcp'|'ssl')':'<address>",
-		 me);
-	return;
-    }
-    if (!strcmp(mode, "tcp"))
-	type = tcpip_type;
-    else if (!strcmp(mode, "ssl"))
-    {
-#if HAVE_OPENSSL_SSL_H
-	type = ssl_type;
-#else
-	yaz_log (LOG_WARN, "SSL Transport not allowed by configuration.");
-	return;
-#endif
-    }
-    else
-    {
-    	yaz_log (LOG_WARN, "You must specify either 'ssl:' or 'tcp:'");
-	return;
-    }
-    yaz_log(LOG_LOG, "Adding %s %s listener on %s",
-	    control_block.dynamic ? "dynamic" : 
-	    (control_block.threads ? "threaded" : "static"),
-    	what == PROTO_SR ? "SR" : "Z3950", where);
-    if (!(l = cs_create(type, 0, what)))
-    {
-    	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to create listener");
-	return;
-    }
-    ap = cs_straddr (l, addr);
-    if (!ap)
-    {
-	fprintf(stderr, "Address resolution failed.\n");
-	cs_close (l);
+	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to listen on %s", where);
 	return;
     }
     if (cs_bind(l, ap, CS_SERVER) < 0)

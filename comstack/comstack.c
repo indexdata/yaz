@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.c,v $
- * Revision 1.6  1999-11-30 13:47:11  adam
+ * Revision 1.7  2001-03-21 12:43:36  adam
+ * Implemented cs_create_host. Better error reporting for SSL comstack.
+ *
+ * Revision 1.6  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.5  1998/06/22 11:32:35  adam
@@ -32,6 +35,7 @@
  */
 
 #include <yaz/comstack.h>
+#include <yaz/tcpip.h>
 
 static const char *cs_errlist[] =
 {
@@ -40,10 +44,56 @@ static const char *cs_errlist[] =
     "Operation out of state",
     "No data (operation would block)",
     "New data while half of old buffer is on the line (flow control)",
-    "Permission denied"
+    "Permission denied",
+    "SSL error"
 };
 
 const char *cs_errmsg(int n)
 {
+    if (n < 0 || n > 6)
+	n = 0;
     return cs_errlist[n];
+}
+
+const char *cs_strerror(COMSTACK h)
+{
+    return cs_errmsg(h->cerrno);
+}
+
+COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
+{
+    const char *host = 0;
+    COMSTACK cs;
+    CS_TYPE t;
+
+    if (strncmp (type_and_host, "tcp:", 4) == 0)
+    {
+	t = tcpip_type;
+        host = type_and_host + 4;
+    }
+    else if (strncmp (type_and_host, "ssl:", 4) == 0)
+    {
+#if HAVE_OPENSSL_SSL_H
+	t = ssl_type;
+        host = type_and_host + 4;
+#else
+	return 0;
+#endif
+    }
+    else
+    {
+	t = tcpip_type;
+	host = type_and_host;
+
+    }
+    cs = cs_create (t, blocking, PROTO_Z3950);
+    if (!cs)
+	return 0;
+
+    if (!(*vp = cs_straddr(cs, host)))
+    {
+	cs_close (cs);
+	return 0;
+    }    
+    return cs;
 }

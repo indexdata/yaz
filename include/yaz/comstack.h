@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.4 2001-03-08 20:18:55 adam Exp $
+ * $Id: comstack.h,v 1.5 2001-03-21 12:43:36 adam Exp $
  */
 
 #ifndef COMSTACK_H
@@ -143,6 +143,8 @@ struct comstack
 #define CS_WANT_WRITE 2
 YAZ_EXPORT const char *cs_strerror(COMSTACK h);
 YAZ_EXPORT const char *cs_errmsg(int n);
+YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host, 
+				   int blocking, void **vp);
 
 /*
  * error management.
@@ -154,6 +156,7 @@ YAZ_EXPORT const char *cs_errmsg(int n);
 #define CSNODATA   3
 #define CSWRONGBUF 4
 #define CSDENY     5
+#define CSERRORSSL 6
 
 /* backwards compatibility */
 #define CS_SR     PROTO_SR
