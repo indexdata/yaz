@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.10  1997-09-30 11:50:04  adam
+ * Revision 1.11  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.10  1997/09/30 11:50:04  adam
  * Added handler data1_get_map_buf that is used by data1_nodetomarc.
  *
  * Revision 1.9  1997/09/24 13:35:45  adam
@@ -55,7 +58,7 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 {
     FILE *f;
     NMEM mem = data1_nmem_get (dh);
-    data1_marctab *res = nmem_malloc(mem, sizeof(*res));
+    data1_marctab *res = (data1_marctab *)nmem_malloc(mem, sizeof(*res));
     char line[512], *argv[50];
     int argc;
     
@@ -263,9 +266,9 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
     }
 
     if (!*buf)
-	*buf = xmalloc(*size = len);
+	*buf = (char *)xmalloc(*size = len);
     else if (*size <= len)
-	*buf = xrealloc(*buf, *size = len);
+	*buf = (char *)xrealloc(*buf, *size = len);
 	
     op = *buf;
     memint (op, len, 5);

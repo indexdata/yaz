@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-esp.c,v $
- * Revision 1.2  1998-02-10 15:31:46  adam
+ * Revision 1.3  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.2  1998/02/10 15:31:46  adam
  * Implemented date and time structure. Changed the Update Extended
  * Service.
  *
@@ -30,14 +33,14 @@ int z_Occurrences(ODR o, Z_Occurrences **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Occurrences_all, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Occurrences_last, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Occurrences_values, z_OccurValues},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Occurrences_all, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Occurrences_last, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Occurrences_values, (Odr_fun)z_OccurValues},
 	{-1, -1, -1, -1, 0}
     };
 
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_Occurrences *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -63,14 +66,14 @@ int z_ETagUnit(ODR o, Z_ETagUnit **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ETagUnit_specificTag, z_SpecificTag},
-	{ODR_EXPLICIT, ODR_CONTEXT, 2, Z_ETagUnit_wildThing, z_Occurrences},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_ETagUnit_wildPath, odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ETagUnit_specificTag, (Odr_fun)z_SpecificTag},
+	{ODR_EXPLICIT, ODR_CONTEXT, 2, Z_ETagUnit_wildThing, (Odr_fun)z_Occurrences},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_ETagUnit_wildPath, (Odr_fun)odr_null},
 	{-1, -1, -1 -1, 0}
     };
 
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_ETagUnit *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -82,10 +85,10 @@ int z_ETagUnit(ODR o, Z_ETagUnit **p, int opt)
 int z_ETagPath(ODR o, Z_ETagPath **p, int opt)
 {
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_ETagPath *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
-    if (odr_sequence_of(o, z_ETagUnit, &(*p)->tags, &(*p)->num_tags))
+    if (odr_sequence_of(o, (Odr_fun)z_ETagUnit, &(*p)->tags, &(*p)->num_tags))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);
@@ -105,7 +108,7 @@ int z_SimpleElement(ODR o, Z_SimpleElement **p, int opt)
 int z_CompoPrimitives(ODR o, Z_CompoPrimitives **p, int opt)
 {
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_CompoPrimitives *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
     if (odr_sequence_of(o, z_InternationalString, &(*p)->primitives,
@@ -118,10 +121,10 @@ int z_CompoPrimitives(ODR o, Z_CompoPrimitives **p, int opt)
 int z_CompoSpecs(ODR o, Z_CompoSpecs **p, int opt)
 {
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_CompoSpecs *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
-    if (odr_sequence_of(o, z_SimpleElement, &(*p)->specs, &(*p)->num_specs))
+    if (odr_sequence_of(o, (Odr_fun)z_SimpleElement, &(*p)->specs, &(*p)->num_specs))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);
@@ -132,9 +135,9 @@ int z_CompositeElement(ODR o, Z_CompositeElement **p, int opt)
     static Odr_arm arm[] =
     {
 	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_CompoElement_primitives,
-	    z_CompoPrimitives},
+	    (Odr_fun)z_CompoPrimitives},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_CompoElement_specs,
-	    z_CompoSpecs},
+	    (Odr_fun)z_CompoSpecs},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -154,14 +157,14 @@ int z_ElementRequest(ODR o, Z_ElementRequest **p, int opt)
     static Odr_arm arm[] =
     {
 	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ERequest_simpleElement,
-	    z_SimpleElement},
+	    (Odr_fun)z_SimpleElement},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ERequest_compositeElement,
-	    z_CompositeElement},
+	    (Odr_fun)z_CompositeElement},
 	{-1, -1, -1 -1, 0}
     };
 
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_ElementRequest *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -185,7 +188,7 @@ int z_Espec1(ODR o, Z_Espec1 **p, int opt)
 	odr_implicit(o, odr_integer, &(*p)->defaultTagType, ODR_CONTEXT,
 	    4, 1) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 5) &&
-	(odr_sequence_of(o, z_ElementRequest, &(*p)->elements,
+	(odr_sequence_of(o, (Odr_fun)z_ElementRequest, &(*p)->elements,
 	    &(*p)->num_elements) || odr_ok(o)) &&
 	odr_sequence_end(o);
 }

@@ -1,5 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Changed code so that it compiles under C++. The type definition
+of Odr_fun which is a member of Odr_arm was changed. The result is,
+that an explicit typecast is needed for the fun pointer when
+using Odr_arm - as in:
+    {1, -1, -1, Z_IdAuthentication_idPass, (Odr_fun)z_IdPass},
+
 Updated TagSet-G and -M definitions (tagsetm.tag and tagsetg.tag).
 
 Implemented the new structured date and time definition as approved

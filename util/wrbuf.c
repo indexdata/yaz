@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: wrbuf.c,v $
- * Revision 1.3  1997-05-01 15:08:15  adam
+ * Revision 1.4  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.3  1997/05/01 15:08:15  adam
  * Added log_mask_str_x routine.
  *
  * Revision 1.2  1995/11/01 13:55:06  quinn
@@ -29,7 +32,7 @@ WRBUF wrbuf_alloc(void)
 {
     WRBUF n;
 
-    if (!(n = xmalloc(sizeof(*n))))
+    if (!(n = (WRBUF)xmalloc(sizeof(*n))))
 	abort();
     n->buf = 0;
     n->size = 0;
@@ -59,9 +62,9 @@ int wrbuf_grow(WRBUF b, int minsize)
     	togrow = b->size;
     if (togrow < minsize)
     	togrow = minsize;
-    if (b->size && !(b->buf =xrealloc(b->buf, b->size += togrow)))
+    if (b->size && !(b->buf =(char *)xrealloc(b->buf, b->size += togrow)))
     	abort();
-    else if (!b->size && !(b->buf = xmalloc(b->size = togrow)))
+    else if (!b->size && !(b->buf = (char *)xmalloc(b->size = togrow)))
     	abort();
     return 0;
 }

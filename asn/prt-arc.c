@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-arc.c,v $
- * Revision 1.1  1996-06-10 08:55:20  quinn
+ * Revision 1.2  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.1  1996/06/10 08:55:20  quinn
  * Added Summary, OPAC
  *
  *
@@ -42,7 +45,7 @@ int z_BriefBib(ODR o, Z_BriefBib **p, int opt)
 	odr_implicit(o, z_InternationalString, &(*p)->bibliographicLevel,
 	    ODR_CONTEXT, 5, 1) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 6) &&
-	(odr_sequence_of(o, z_FormatSpec, &(*p)->format, &(*p)->num_format) ||
+	(odr_sequence_of(o, (Odr_fun)z_FormatSpec, &(*p)->format, &(*p)->num_format) ||
 	    odr_ok(o)) &&
 	odr_implicit(o, z_InternationalString, &(*p)->publicationPlace,
 	    ODR_CONTEXT, 7, 1) &&
@@ -142,10 +145,10 @@ int z_HoldingsAndCircData(ODR o, Z_HoldingsAndCircData **p, int opt)
         odr_implicit(o, z_InternationalString, &(*p)->enumAndChron,
 	    ODR_CONTEXT, 17, 1) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 18) &&
-	(odr_sequence_of(o, z_Volume, &(*p)->volumes, &(*p)->num_volumes) ||
+	(odr_sequence_of(o, (Odr_fun)z_Volume, &(*p)->volumes, &(*p)->num_volumes) ||
 	    odr_ok(o)) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 19) &&
-	(odr_sequence_of(o, z_CircRecord, &(*p)->circulationData,
+	(odr_sequence_of(o, (Odr_fun)z_CircRecord, &(*p)->circulationData,
 	    &(*p)->num_circulationData) || odr_ok(o)) &&
 	odr_sequence_end(o);
 }
@@ -155,9 +158,9 @@ int z_HoldingsRecord(ODR o, Z_HoldingsRecord **p, int opt)
     static Odr_arm arm[] =
     {
 	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_HoldingsRecord_marcHoldingsRecord,
-	    z_External},
+	    (Odr_fun)z_External},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_HoldingsRecord_holdingsAndCirc,
-	    z_HoldingsAndCircData},
+	    (Odr_fun)z_HoldingsAndCircData},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -177,7 +180,7 @@ int z_OPACRecord(ODR o, Z_OPACRecord **p, int opt)
         odr_implicit(o, z_External, &(*p)->bibliographicRecord,
 	    ODR_CONTEXT, 1, 1) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 2) &&
-	(odr_sequence_of(o, z_HoldingsRecord, &(*p)->holdingsData,
+	(odr_sequence_of(o, (Odr_fun)z_HoldingsRecord, &(*p)->holdingsData,
 	    &(*p)->num_holdingsData) || odr_ok(o)) &&
 	odr_sequence_end(o);
 }

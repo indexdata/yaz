@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sumout.c,v $
- * Revision 1.2  1997-09-17 12:10:38  adam
+ * Revision 1.3  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.2  1997/09/17 12:10:38  adam
  * YAZ version 1.4.
  *
  * Revision 1.1  1996/06/10 08:56:03  quinn
@@ -29,7 +32,7 @@ static int *f_integer(data1_node *c, ODR o)
     if (!c->child || c->child->which != DATA1N_data ||
 	c->child->u.data.len > 63)
 	return 0;
-    r = odr_malloc(o, sizeof(*r));
+    r = (int *)odr_malloc(o, sizeof(*r));
     sprintf(intbuf, "%.*s", 63, c->child->u.data.data);
     *r = atoi(intbuf);
     return r;
@@ -41,7 +44,7 @@ static char *f_string(data1_node *c, ODR o)
 
     if (!c->child || c->child->which != DATA1N_data)
 	return 0;
-    r = odr_malloc(o, c->child->u.data.len+1);
+    r = (char *)odr_malloc(o, c->child->u.data.len+1);
     memcpy(r, c->child->u.data.data, c->child->u.data.len);
     r[c->child->u.data.len] = '\0';
     return r;
@@ -50,7 +53,7 @@ static char *f_string(data1_node *c, ODR o)
 Z_BriefBib *data1_nodetosummary (data1_handle dh, data1_node *n,
 				 int select, ODR o)
 {
-    Z_BriefBib *res = odr_malloc(o, sizeof(*res));
+    Z_BriefBib *res = (Z_BriefBib *)odr_malloc(o, sizeof(*res));
     data1_node *c;
 
     assert(n->which == DATA1N_root);

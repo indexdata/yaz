@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.5  1997-10-31 12:20:09  adam
+ * Revision 1.6  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.5  1997/10/31 12:20:09  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -96,7 +99,7 @@ void *xcalloc_f (size_t nmemb, size_t size, char *file, int line)
 
 char *xstrdup_f (const char *s, char *file, int line)
 {
-    char *p = xmalloc (strlen(s)+1);
+    char *p = (char *)xmalloc (strlen(s)+1);
 #if TRACE_XMALLOC
     logf (LOG_DEBUG, "%s:%d: xstrdup(s=%d) %p", file, line, strlen(s)+1, p);
 #endif

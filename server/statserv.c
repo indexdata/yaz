@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.47  1998-02-10 10:28:57  adam
+ * Revision 1.48  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.47  1998/02/10 10:28:57  adam
  * Added app_name, service_dependencies, service_display_name and
  * options_func. options_func allows us to specify a different function
  * to interogate the command line arguments. The other members allow us
@@ -525,7 +528,7 @@ static void listener(IOCHAN h, int event)
 		{
 		    if (pp != h)
 		    {
-			COMSTACK l = iochan_getdata(pp);
+			COMSTACK l = (COMSTACK)iochan_getdata(pp);
 			cs_close(l);
 			iochan_destroy(pp);
 		    }
@@ -586,7 +589,7 @@ static void listener(IOCHAN h, int event)
 	    /* close our half of the listener socket */
 	    for (pp = pListener; pp; pp = iochan_getnext(pp))
 	    {
-		COMSTACK l = iochan_getdata(pp);
+		COMSTACK l = (COMSTACK)iochan_getdata(pp);
 		cs_close(l);
 		iochan_destroy(pp);
 	    }

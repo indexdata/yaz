@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.21  1997-11-24 11:33:56  adam
+ * Revision 1.22  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.21  1997/11/24 11:33:56  adam
  * Using function odr_nullval() instead of global ODR_NULLVAL when
  * appropriate.
  *
@@ -92,7 +95,7 @@ int odr_sequence_begin(ODR o, void *p, int size)
     if (odr_constructed_begin(o, p, o->t_class, o->t_tag))
     {
     	if (o->direction == ODR_DECODE && size)
-	    *pp = odr_malloc(o, size);
+	    *pp = (char *)odr_malloc(o, size);
     	return 1;
     }
     else
@@ -125,14 +128,14 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
     {
     	case ODR_DECODE:
 	    *num = 0;
-	    *pp = odr_nullval();
+	    *pp = (char **)odr_nullval();
 	    while (odr_sequence_more(o))
 	    {
 		/* outgrown array? */
 		if (*num * (int) sizeof(void*) >= size)
 		{
 		    /* double the buffer size */
-		    tmp = odr_malloc(o, sizeof(void*) * (size += size ? size :
+		    tmp = (char **)odr_malloc(o, sizeof(void*) * (size += size ? size :
 			128));
 		    if (*num)
 		    {

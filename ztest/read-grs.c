@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: read-grs.c,v $
- * Revision 1.1  1997-09-01 08:55:53  adam
+ * Revision 1.2  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.1  1997/09/01 08:55:53  adam
  * New windows NT/95 port using MSV5.0. Test server ztest now in
  * separate directory. When using NT, this test server may operate
  * as an NT service. Note that the service.[ch] should be part of
@@ -67,32 +70,32 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	    return 0;
 	if (!r)
 	{
-	    r = odr_malloc(o, sizeof(*r));
-	    r->elements = odr_malloc(o, sizeof(Z_TaggedElement*) *
+	    r = (Z_GenericRecord *)odr_malloc(o, sizeof(*r));
+	    r->elements = (Z_TaggedElement **)odr_malloc(o, sizeof(Z_TaggedElement*) *
 		GRS_MAX_FIELDS);
 	    r->num_elements = 0;
 	}
-	r->elements[r->num_elements] = t = odr_malloc(o,
+	r->elements[r->num_elements] = t = (Z_TaggedElement *)odr_malloc(o,
 	    sizeof(Z_TaggedElement));
-	t->tagType = odr_malloc(o, sizeof(int));
+	t->tagType = (int *)odr_malloc(o, sizeof(int));
 	*t->tagType = type;
-	t->tagValue = odr_malloc(o, sizeof(Z_StringOrNumeric));
+	t->tagValue = (Z_StringOrNumeric *)odr_malloc(o, sizeof(Z_StringOrNumeric));
 	if ((ivalue = atoi(value)))
 	{
 	    t->tagValue->which = Z_StringOrNumeric_numeric;
-	    t->tagValue->u.numeric = odr_malloc(o, sizeof(int));
+	    t->tagValue->u.numeric = (int *)odr_malloc(o, sizeof(int));
 	    *t->tagValue->u.numeric = ivalue;
 	}
 	else
 	{
 	    t->tagValue->which = Z_StringOrNumeric_string;
-	    t->tagValue->u.string = odr_malloc(o, strlen(value)+1);
+	    t->tagValue->u.string = (char *)odr_malloc(o, strlen(value)+1);
 	    strcpy(t->tagValue->u.string, value);
 	}
 	t->tagOccurrence = 0;
 	t->metaData = 0;
 	t->appliedVariant = 0;
-	t->content = c = odr_malloc(o, sizeof(Z_ElementData));
+	t->content = c = (Z_ElementData *)odr_malloc(o, sizeof(Z_ElementData));
 	if (*buf == '{')
 	{
 	    c->which = Z_ElementData_subtree;
@@ -102,7 +105,7 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	{
 	    c->which = Z_ElementData_string;
 	    buf[strlen(buf)-1] = '\0';
-	    c->u.string = odr_malloc(o, strlen(buf)+1);
+	    c->u.string = (char *)odr_malloc(o, strlen(buf)+1);
 	    strcpy(c->u.string, buf);
 	}
 	r->num_elements++;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.12  1997-11-24 11:33:56  adam
+ * Revision 1.13  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.12  1997/11/24 11:33:56  adam
  * Using function odr_nullval() instead of global ODR_NULLVAL when
  * appropriate.
  *
@@ -57,7 +60,7 @@
 
 static Z_ElementMetaData *get_ElementMetaData(ODR o)
 {
-    Z_ElementMetaData *r = odr_malloc(o, sizeof(*r));
+    Z_ElementMetaData *r = (Z_ElementMetaData *)odr_malloc(o, sizeof(*r));
 
     r->seriesOrder = 0;
     r->usageRight = 0;
@@ -83,12 +86,12 @@ static Z_ElementMetaData *get_ElementMetaData(ODR o)
  */
 static Z_Variant *make_variant(data1_node *n, int num, ODR o)
 {
-    Z_Variant *v = odr_malloc(o, sizeof(*v));
+    Z_Variant *v = (Z_Variant *)odr_malloc(o, sizeof(*v));
     data1_node *p;
 
     v->globalVariantSetId = 0;
     v->num_triples = num;
-    v->triples = odr_malloc(o, sizeof(Z_Triple*) * num);
+    v->triples = (Z_Triple **)odr_malloc(o, sizeof(Z_Triple*) * num);
 
     /*
      * cycle back up through the tree of variants
@@ -99,18 +102,18 @@ static Z_Variant *make_variant(data1_node *n, int num, ODR o)
 	Z_Triple *t;
 
 	assert(p->which == DATA1N_variant);
-	t = v->triples[num] = odr_malloc(o, sizeof(*t));
+	t = v->triples[num] = (Z_Triple *)odr_malloc(o, sizeof(*t));
 	t->variantSetId = 0;
-	t->zclass = odr_malloc(o, sizeof(int));
+	t->zclass = (int *)odr_malloc(o, sizeof(int));
 	*t->zclass = p->u.variant.type->zclass->zclass;
-	t->type = odr_malloc(o, sizeof(int));
+	t->type = (int *)odr_malloc(o, sizeof(int));
 	*t->type = p->u.variant.type->type;
 
 	switch (p->u.variant.type->datatype)
 	{
 	    case DATA1K_string:
 		t->which = Z_Triple_internationalString;
-		t->value.internationalString = odr_malloc(o,
+		t->value.internationalString = (char *)odr_malloc(o,
 		    strlen(p->u.variant.value)+1);
 		strcpy(t->value.internationalString, p->u.variant.value);
 		break;
@@ -135,7 +138,7 @@ static int traverse_triples(data1_node *n, int level, Z_ElementMetaData *m,
 	if (c->which == DATA1N_data && level)
 	{
 	    if (!m->supportedVariants)
-		m->supportedVariants = odr_malloc(o, sizeof(Z_Variant*) *
+		m->supportedVariants = (Z_Variant **)odr_malloc(o, sizeof(Z_Variant*) *
 		    D1_VARIANTARRAY);
 	    else if (m->num_supportedVariants >= D1_VARIANTARRAY)
 	    {
@@ -158,7 +161,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 					int select, int leaf,
 					ODR o, int *len)
 {
-    Z_ElementData *res = odr_malloc(o, sizeof(*res));
+    Z_ElementData *res = (Z_ElementData *)odr_malloc(o, sizeof(*res));
 
     if (!n)
     {
@@ -178,7 +181,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 	{
 	    case DATA1I_num:
 	    	res->which = Z_ElementData_numeric;
-		res->u.numeric = odr_malloc(o, sizeof(int));
+		res->u.numeric = (int *)odr_malloc(o, sizeof(int));
 		*res->u.numeric = atoi(n->u.data.data);
 		*len += 4;
 		break;
@@ -187,7 +190,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 		if (p->u.tag.get_bytes > 0 && p->u.tag.get_bytes < toget)
 		    toget = p->u.tag.get_bytes;
 	    	res->which = Z_ElementData_string;
-		res->u.string = odr_malloc(o, toget+1);
+		res->u.string = (char *)odr_malloc(o, toget+1);
 		memcpy(res->u.string, n->u.data.data, toget);
 		res->u.string[toget] = '\0';
 		*len += toget;
@@ -217,7 +220,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 					    int select, ODR o,
 					    int *len)
 {
-    Z_TaggedElement *res = odr_malloc(o, sizeof(*res));
+    Z_TaggedElement *res = (Z_TaggedElement *)odr_malloc(o, sizeof(*res));
     data1_tag *tag = 0;
     data1_node *data;
     int leaf;
@@ -250,13 +253,13 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 	return 0;
     }
 
-    res->tagType = odr_malloc(o, sizeof(int));
+    res->tagType = (int *)odr_malloc(o, sizeof(int));
     *res->tagType = (tag && tag->tagset) ? tag->tagset->type : 3;
-    res->tagValue = odr_malloc(o, sizeof(Z_StringOrNumeric));
+    res->tagValue = (Z_StringOrNumeric *)odr_malloc(o, sizeof(Z_StringOrNumeric));
     if (tag && tag->which == DATA1T_numeric)
     {
 	res->tagValue->which = Z_StringOrNumeric_numeric;
-	res->tagValue->u.numeric = odr_malloc(o, sizeof(int));
+	res->tagValue->u.numeric = (int *)odr_malloc(o, sizeof(int));
 	*res->tagValue->u.numeric = tag->value.numeric;
     }
     else
@@ -269,7 +272,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 	    tagstr = n->u.tag.tag;
 
 	res->tagValue->which = Z_StringOrNumeric_string;
-	res->tagValue->u.string = odr_malloc(o, strlen(tagstr)+1);
+	res->tagValue->u.string = (char *)odr_malloc(o, strlen(tagstr)+1);
 	strcpy(res->tagValue->u.string, tagstr);
     }
     res->tagOccurrence = 0;
@@ -294,7 +297,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
     }
     if (n->which == DATA1N_tag && n->u.tag.no_data_requested)
     {
-	res->content = odr_malloc(o, sizeof(*res->content));
+	res->content = (Z_ElementData *)odr_malloc(o, sizeof(*res->content));
 	res->content->which = Z_ElementData_noDataRequested;
 	res->content->u.noDataRequested = odr_nullval();
     }
@@ -308,14 +311,14 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
 				int select, ODR o, int *len)
 {
-    Z_GenericRecord *res = odr_malloc(o, sizeof(*res));
+    Z_GenericRecord *res = (Z_GenericRecord *)odr_malloc(o, sizeof(*res));
     data1_node *c;
     int num_children = 0;
     
     for (c = n->child; c; c = c->next)
 	num_children++;
 
-    res->elements = odr_malloc(o, sizeof(Z_TaggedElement *) * num_children);
+    res->elements = (Z_TaggedElement **)odr_malloc(o, sizeof(Z_TaggedElement *) * num_children);
     res->num_elements = 0;
     for (c = n->child; c; c = c->next)
     {

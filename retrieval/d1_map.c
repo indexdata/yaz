@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.12  1997-11-18 09:51:09  adam
+ * Revision 1.13  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.12  1997/11/18 09:51:09  adam
  * Removed element num_children from data1_node. Minor changes in
  * data1 to Explain.
  *
@@ -61,7 +64,7 @@
 data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 {
     NMEM mem = data1_nmem_get (dh);
-    data1_maptab *res = nmem_malloc(mem, sizeof(*res));
+    data1_maptab *res = (data1_maptab *)nmem_malloc(mem, sizeof(*res));
     FILE *f;
     int argc;
     char *argv[50], line[512];
@@ -103,7 +106,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		    file);
 		continue;
 	    }
-	    res->target_absyn_name = nmem_malloc(mem, strlen(argv[1])+1);
+	    res->target_absyn_name = (char *)nmem_malloc(mem, strlen(argv[1])+1);
 	    strcpy(res->target_absyn_name, argv[1]);
 	}
 	else if (!yaz_matchstr(argv[0], "localnumeric"))
@@ -116,7 +119,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		    file);
 		continue;
 	    }
-	    res->name = nmem_malloc(mem, strlen(argv[1])+1);
+	    res->name = (char *)nmem_malloc(mem, strlen(argv[1])+1);
 	    strcpy(res->name, argv[1]);
 	}
 	else if (!strcmp(argv[0], "map"))
@@ -130,13 +133,13 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		    file);
 		continue;
 	    }
-	    *mapp = nmem_malloc(mem, sizeof(**mapp));
+	    *mapp = (data1_mapunit *)nmem_malloc(mem, sizeof(**mapp));
 	    (*mapp)->next = 0;
 	    if (argc > 3 && !data1_matchstr(argv[3], "nodata"))
 		(*mapp)->no_data = 1;
 	    else
 		(*mapp)->no_data = 0;
-	    (*mapp)->source_element_name = nmem_malloc(mem, strlen(argv[1])+1);
+	    (*mapp)->source_element_name = (char *)nmem_malloc(mem, strlen(argv[1])+1);
 	    strcpy((*mapp)->source_element_name, argv[1]);
 	    mtp = &(*mapp)->target_path;
 	    if (*path == '/')
@@ -157,7 +160,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		    fclose(f);
 		    return 0;
 		}
-		*mtp = nmem_malloc(mem, sizeof(**mtp));
+		*mtp = (data1_maptag *)nmem_malloc(mem, sizeof(**mtp));
 		(*mtp)->next = 0;
 		(*mtp)->type = type;
 		if (np > 2 && !data1_matchstr(parm, "new"))
@@ -172,7 +175,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		else
 		{
 		    (*mtp)->which = D1_MAPTAG_string;
-		    (*mtp)->value.string = nmem_malloc(mem, strlen(valstr)+1);
+		    (*mtp)->value.string = (char *)nmem_malloc(mem, strlen(valstr)+1);
 		    strcpy((*mtp)->value.string, valstr);
 		}
 		mtp = &(*mtp)->next;

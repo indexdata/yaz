@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.7  1997-12-09 16:18:16  adam
+ * Revision 1.8  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.7  1997/12/09 16:18:16  adam
  * Work on EXPLAIN schema. First implementation of sub-schema facility
  * in the *.abs files.
  *
@@ -84,7 +87,7 @@ static int *f_integer(ExpHandle *eh, data1_node *c)
     c = c->child;
     if (!is_data_tag (eh, c) || c->u.data.len > 63)
 	return 0;
-    r = odr_malloc(eh->o, sizeof(*r));
+    r = (int *)odr_malloc(eh->o, sizeof(*r));
     sprintf(intbuf, "%.*s", 63, c->u.data.data);
     *r = atoi(intbuf);
     return r;
@@ -97,7 +100,7 @@ static char *f_string(ExpHandle *eh, data1_node *c)
     c = c->child;
     if (!is_data_tag (eh, c))
 	return 0;
-    r = odr_malloc(eh->o, c->u.data.len+1);
+    r = (char *)odr_malloc(eh->o, c->u.data.len+1);
     memcpy(r, c->u.data.data, c->u.data.len);
     r[c->u.data.len] = '\0';
     return r;
@@ -111,7 +114,7 @@ static bool_t *f_bool(ExpHandle *eh, data1_node *c)
     c = c->child;
     if (!is_data_tag (eh, c) || c->u.data.len > 63)
 	return 0;
-    tf = odr_malloc (eh->o, sizeof(*tf));
+    tf = (int *)odr_malloc (eh->o, sizeof(*tf));
     sprintf(intbuf, "%.*s", c->u.data.len, c->u.data.data);
     *tf = atoi(intbuf);
     return tf;
@@ -157,12 +160,12 @@ static Z_HumanString *f_humstring(ExpHandle *eh, data1_node *c)
     c = c->child;
     if (!is_data_tag (eh, c))
 	return 0;
-    r = odr_malloc(eh->o, sizeof(*r));
+    r = (Z_HumanString *)odr_malloc(eh->o, sizeof(*r));
     r->num_strings = 1;
-    r->strings = odr_malloc(eh->o, sizeof(Z_HumanStringUnit*));
-    r->strings[0] = u = odr_malloc(eh->o, sizeof(*u));
+    r->strings = (Z_HumanStringUnit **)odr_malloc(eh->o, sizeof(Z_HumanStringUnit*));
+    r->strings[0] = u = (Z_HumanStringUnit *)odr_malloc(eh->o, sizeof(*u));
     u->language = 0;
-    u->text = odr_malloc(eh->o, c->u.data.len+1);
+    u->text = (char *)odr_malloc(eh->o, c->u.data.len+1);
     memcpy(u->text, c->u.data.data, c->u.data.len);
     u->text[c->u.data.len] = '\0';
     return r;
@@ -170,7 +173,7 @@ static Z_HumanString *f_humstring(ExpHandle *eh, data1_node *c)
 
 static Z_CommonInfo *f_commonInfo(ExpHandle *eh, data1_node *n)
 {
-    Z_CommonInfo *res = odr_malloc(eh->o, sizeof(*res));
+    Z_CommonInfo *res = (Z_CommonInfo *)odr_malloc(eh->o, sizeof(*res));
     data1_node *c;
 
     res->dateAdded = 0;
@@ -213,7 +216,7 @@ Odr_oid **f_oid_seq (ExpHandle *eh, data1_node *n, int *num, oid_class oclass)
     }
     if (!*num)
 	return NULL;
-    res = odr_malloc (eh->o, sizeof(*res) * (*num));
+    res = (int **)odr_malloc (eh->o, sizeof(*res) * (*num));
     for (c = n->child, i = 0 ; c; c = c->next)
     {
 	if (is_numeric_tag (eh, c) != 1000)
@@ -238,7 +241,7 @@ char **f_string_seq (ExpHandle *eh, data1_node *n, int *num)
     }
     if (!*num)
 	return NULL;
-    res = odr_malloc (eh->o, sizeof(*res) * (*num));
+    res = (char **)odr_malloc (eh->o, sizeof(*res) * (*num));
     for (c = n->child, i = 0 ; c; c = c->next)
     {
 	if (!is_numeric_tag (eh, c) != 1001)
@@ -257,7 +260,7 @@ char **f_humstring_seq (ExpHandle *eh, data1_node *n, int *num)
 
 Z_RpnCapabilities *f_rpnCapabilities (ExpHandle *eh, data1_node *c)
 {
-    Z_RpnCapabilities *res = odr_malloc (eh->o, sizeof(*res));
+    Z_RpnCapabilities *res = (Z_RpnCapabilities *)odr_malloc (eh->o, sizeof(*res));
 
     res->num_operators = 0;
     res->operators = NULL;
@@ -285,13 +288,13 @@ Z_QueryTypeDetails **f_queryTypesSupported (ExpHandle *eh, data1_node *c,
     }
     if (!*num)
 	return NULL;
-    res = odr_malloc (eh->o, *num * sizeof(*res));
+    res = (Z_QueryTypeDetails **)odr_malloc (eh->o, *num * sizeof(*res));
     i = 0;
     for (n = c->child; n; n = n->next)
     {
 	if (is_numeric_tag(eh, n) == 519)
 	{
-	    res[i] = odr_malloc (eh->o, sizeof(**res));
+	    res[i] = (Z_QueryTypeDetails *)odr_malloc (eh->o, sizeof(**res));
 	    res[i]->which = Z_QueryTypeDetails_rpn;
 	    res[i]->u.rpn = f_rpnCapabilities (eh, n);
 	    i++;
@@ -305,7 +308,7 @@ Z_QueryTypeDetails **f_queryTypesSupported (ExpHandle *eh, data1_node *c,
 
 static Z_AccessInfo *f_accessInfo(ExpHandle *eh, data1_node *n)
 {
-    Z_AccessInfo *res = odr_malloc(eh->o, sizeof(*res));
+    Z_AccessInfo *res = (Z_AccessInfo *)odr_malloc(eh->o, sizeof(*res));
     data1_node *c;
 
     res->num_queryTypesSupported = 0;
@@ -377,7 +380,7 @@ static Z_AccessInfo *f_accessInfo(ExpHandle *eh, data1_node *n)
 
 static int *f_recordCount(ExpHandle *eh, data1_node *c, int *which)
 {
-    int *r= odr_malloc(eh->o, sizeof(*r));
+    int *r= (int *)odr_malloc(eh->o, sizeof(*r));
     int *wp = which;
     char intbuf[64];
 
@@ -418,10 +421,10 @@ static Z_DatabaseList *f_databaseList(ExpHandle *eh, data1_node *n)
     if (!i)
 	return NULL;
 
-    res = odr_malloc (eh->o, sizeof(*res));
+    res = (Z_DatabaseList *)odr_malloc (eh->o, sizeof(*res));
     
     res->num_databases = i;
-    res->databases = odr_malloc (eh->o, sizeof(*res->databases) * i);
+    res->databases = (char **)odr_malloc (eh->o, sizeof(*res->databases) * i);
     i = 0;
     for (c = n->child; c; c = c->next)
     {
@@ -434,7 +437,7 @@ static Z_DatabaseList *f_databaseList(ExpHandle *eh, data1_node *n)
 
 static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
 {
-    Z_TargetInfo *res = odr_malloc(eh->o, sizeof(*res));
+    Z_TargetInfo *res = (Z_TargetInfo *)odr_malloc(eh->o, sizeof(*res));
     data1_node *c;
 
     res->commonInfo = 0;
@@ -492,7 +495,7 @@ static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
 	    }
 	    if (res->num_nicknames)
 		res->nicknames =
-		    odr_malloc (eh->o, res->num_nicknames 
+		    (char **)odr_malloc (eh->o, res->num_nicknames 
 				* sizeof(*res->nicknames));
 	    for (n = c->child; n; n = n->next)
 	    {
@@ -514,7 +517,7 @@ static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
 	    }
 	    if (res->num_dbCombinations)
 		res->dbCombinations =
-		    odr_malloc (eh->o, res->num_dbCombinations
+		    (Z_DatabaseList **)odr_malloc (eh->o, res->num_dbCombinations
 				* sizeof(*res->dbCombinations));
 	    for (n = c->child; n; n = n->next)
 	    {
@@ -536,7 +539,7 @@ static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
 
 static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
 {
-    Z_DatabaseInfo *res = odr_malloc(eh->o, sizeof(*res));
+    Z_DatabaseInfo *res = (Z_DatabaseInfo *)odr_malloc(eh->o, sizeof(*res));
     data1_node *c;
 
     res->commonInfo = 0;
@@ -592,7 +595,7 @@ static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
 	    }
 	    if (res->num_nicknames)
 		res->nicknames =
-		    odr_malloc (eh->o, res->num_nicknames 
+		    (char **)odr_malloc (eh->o, res->num_nicknames 
 				* sizeof(*res->nicknames));
 	    for (n = c->child; n; n = n->next)
 	    {
@@ -616,7 +619,7 @@ static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
 	    }
 	    if (res->num_keywords)
 		res->keywords =
-		    odr_malloc (eh->o, res->num_keywords 
+		    (Z_HumanString **)odr_malloc (eh->o, res->num_keywords 
 				* sizeof(*res->keywords));
 	    for (n = c->child; n; n = n->next)
 	    {
@@ -664,14 +667,14 @@ Z_ExplainRecord *data1_nodetoexplain (data1_handle dh, data1_node *n,
 				      int select, ODR o)
 {
     ExpHandle eh;
-    Z_ExplainRecord *res = odr_malloc(o, sizeof(*res));
+    Z_ExplainRecord *res = (Z_ExplainRecord *)odr_malloc(o, sizeof(*res));
 
     eh.dh = dh;
     eh.select = select;
     eh.o = o;
-    eh.false_value = odr_malloc(eh.o, sizeof(eh.false_value));
+    eh.false_value = (int *)odr_malloc(eh.o, sizeof(eh.false_value));
     *eh.false_value = 0;
-    eh.true_value = odr_malloc(eh.o, sizeof(eh.true_value));
+    eh.true_value = (int *)odr_malloc(eh.o, sizeof(eh.true_value));
     *eh.true_value = 1;
 
     assert(n->which == DATA1N_root);

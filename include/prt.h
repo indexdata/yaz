@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt.h,v $
- * Revision 1.21  1997-10-31 12:20:08  adam
+ * Revision 1.22  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.21  1997/10/31 12:20:08  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.

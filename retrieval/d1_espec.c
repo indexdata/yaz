@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.13  1997-11-24 11:33:56  adam
+ * Revision 1.14  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.13  1997/11/24 11:33:56  adam
  * Using function odr_nullval() instead of global ODR_NULLVAL when
  * appropriate.
  *
@@ -64,7 +67,7 @@
 
 static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
 {
-    Z_Variant *r = nmem_malloc(nmem, sizeof(*r));
+    Z_Variant *r = (Z_Variant *)nmem_malloc(nmem, sizeof(*r));
     oident var1;
     int i;
     int oid[OID_SIZE];
@@ -75,7 +78,7 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
     r->globalVariantSetId = odr_oiddup_nmem(nmem, oid_ent_to_oid(&var1, oid));
 
     if (argc)
-	r->triples = nmem_malloc(nmem, sizeof(Z_Triple*) * argc);
+	r->triples = (Z_Triple **)nmem_malloc(nmem, sizeof(Z_Triple*) * argc);
     else
 	r->triples = 0;
     r->num_triples = argc;
@@ -91,11 +94,11 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
 	    	argv[i]);
 	    return 0;
 	}
-	t = r->triples[i] = nmem_malloc(nmem, sizeof(Z_Triple));
+	t = r->triples[i] = (Z_Triple *)nmem_malloc(nmem, sizeof(Z_Triple));
 	t->variantSetId = 0;
-	t->zclass = nmem_malloc(nmem, sizeof(int));
+	t->zclass = (int *)nmem_malloc(nmem, sizeof(int));
 	*t->zclass = zclass;
-	t->type = nmem_malloc(nmem, sizeof(int));
+	t->type = (int *)nmem_malloc(nmem, sizeof(int));
 	*t->type = type;
 	/*
 	 * This is wrong.. we gotta look up the correct type for the
@@ -109,13 +112,13 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
 	else if (isdigit(*value))
 	{
 	    t->which = Z_Triple_integer;
-	    t->value.integer = nmem_malloc(nmem, sizeof(*t->value.integer));
+	    t->value.integer = (int *)nmem_malloc(nmem, sizeof(*t->value.integer));
 	    *t->value.integer = atoi(value);
 	}
 	else
 	{
 	    t->which = Z_Triple_internationalString;
-	    t->value.internationalString = nmem_malloc(nmem, strlen(value)+1);
+	    t->value.internationalString = (char *)nmem_malloc(nmem, strlen(value)+1);
 	    strcpy(t->value.internationalString, value);
 	}
     }
@@ -124,14 +127,14 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
 
 static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
 {
-    Z_Occurrences *op = nmem_malloc(nmem, sizeof(*op));
+    Z_Occurrences *op = (Z_Occurrences *)nmem_malloc(nmem, sizeof(*op));
     char *p;
 
     if (!occ)
     {
 	op->which = Z_Occurrences_values;
-	op->u.values = nmem_malloc(nmem, sizeof(Z_OccurValues));
-	op->u.values->start = nmem_malloc(nmem, sizeof(int));
+	op->u.values = (Z_OccurValues *)nmem_malloc(nmem, sizeof(Z_OccurValues));
+	op->u.values->start = (int *)nmem_malloc(nmem, sizeof(int));
 	*op->u.values->start = 1;
 	op->u.values->howMany = 0;
     }
@@ -147,7 +150,7 @@ static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
     }
     else
     {
-	Z_OccurValues *ov = nmem_malloc(nmem, sizeof(*ov));
+	Z_OccurValues *ov = (Z_OccurValues *)nmem_malloc(nmem, sizeof(*ov));
 
 	if (!isdigit(*occ))
 	{
@@ -156,11 +159,11 @@ static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
 	}
 	op->which = Z_Occurrences_values;
 	op->u.values = ov;
-	ov->start = nmem_malloc(nmem, sizeof(*ov->start));
+	ov->start = (int *)nmem_malloc(nmem, sizeof(*ov->start));
 	*ov->start = atoi(occ);
 	if ((p = strchr(occ, '+')))
 	{
-	    ov->howMany = nmem_malloc(nmem, sizeof(*ov->howMany));
+	    ov->howMany = (int *)nmem_malloc(nmem, sizeof(*ov->howMany));
 	    *ov->howMany = atoi(p + 1);
 	}
 	else
@@ -172,7 +175,7 @@ static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
 
 static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem)
 {
-    Z_ETagUnit *u = nmem_malloc(nmem, sizeof(*u));
+    Z_ETagUnit *u = (Z_ETagUnit *)nmem_malloc(nmem, sizeof(*u));
     int terms;
     int type;
     char value[512], occ[512];
@@ -204,20 +207,20 @@ static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem)
 	    force_string = 1;
 	}
 	u->which = Z_ETagUnit_specificTag;
-	u->u.specificTag = t = nmem_malloc(nmem, sizeof(*t));
-	t->tagType = nmem_malloc(nmem, sizeof(*t->tagType));
+	u->u.specificTag = t = (Z_SpecificTag *)nmem_malloc(nmem, sizeof(*t));
+	t->tagType = (int *)nmem_malloc(nmem, sizeof(*t->tagType));
 	*t->tagType = type;
-	t->tagValue = nmem_malloc(nmem, sizeof(*t->tagValue));
+	t->tagValue = (Z_StringOrNumeric *)nmem_malloc(nmem, sizeof(*t->tagValue));
 	if (!force_string && (numval = atoi(valp)))
 	{
 	    t->tagValue->which = Z_StringOrNumeric_numeric;
-	    t->tagValue->u.numeric = nmem_malloc(nmem, sizeof(int));
+	    t->tagValue->u.numeric = (int *)nmem_malloc(nmem, sizeof(int));
 	    *t->tagValue->u.numeric = numval;
 	}
 	else
 	{
 	    t->tagValue->which = Z_StringOrNumeric_string;
-	    t->tagValue->u.string = nmem_malloc(nmem, strlen(valp)+1);
+	    t->tagValue->u.string = (char *)nmem_malloc(nmem, strlen(valp)+1);
 	    strcpy(t->tagValue->u.string, valp);
 	}
 	if (terms > 2) /* an occurrences-spec exists */
@@ -238,7 +241,7 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
     NMEM nmem = data1_nmem_get (dh);
     int argc, size_esn = 0;
     char *argv[50], line[512];
-    Z_Espec1 *res = nmem_malloc(nmem, sizeof(*res));
+    Z_Espec1 *res = (Z_Espec1 *)nmem_malloc(nmem, sizeof(*res));
 
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
@@ -266,10 +269,10 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 		continue;
 	    }
 
-	    res->elementSetNames = nmem_malloc(nmem, sizeof(char**)*nnames);
+	    res->elementSetNames = (char **)nmem_malloc(nmem, sizeof(char**)*nnames);
 	    for (i = 0; i < nnames; i++)
 	    {
-		res->elementSetNames[i] = nmem_malloc(nmem,
+		res->elementSetNames[i] = (char *)nmem_malloc(nmem,
                                                       strlen(argv[i+1])+1);
 		strcpy(res->elementSetNames[i], argv[i+1]);
 	    }
@@ -291,7 +294,7 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 		logf(LOG_WARN, "%s: Bad defaulttagtype directive", file);
 		continue;
 	    }
-	    res->defaultTagType = nmem_malloc(nmem, sizeof(int));
+	    res->defaultTagType = (int *)nmem_malloc(nmem, sizeof(int));
 	    *res->defaultTagType = atoi(argv[1]);
 	}
 	else if (!strcmp(argv[0], "defaultvariantrequest"))
@@ -313,12 +316,12 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	    int num, i = 0;
 	    
 	    if (!res->elements)
-		res->elements = nmem_malloc(nmem, size_esn = 24*sizeof(er));
+		res->elements = (Z_ElementRequest **)nmem_malloc(nmem, size_esn = 24*sizeof(er));
 	    else if (res->num_elements >= (int) (size_esn/sizeof(er)))
 	    {
 		Z_ElementRequest **oe = res->elements;
 		size_esn *= 2;
-		res->elements = nmem_malloc (nmem, size_esn*sizeof(er));
+		res->elements = (Z_ElementRequest **)nmem_malloc (nmem, size_esn*sizeof(er));
 		memcpy (res->elements, oe, size_esn/2);
 	    }
 	    if (argc < 2)
@@ -328,18 +331,18 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	    }
 	    
 	    res->elements[res->num_elements++] = er =
-		nmem_malloc(nmem, sizeof(*er));
+		(Z_ElementRequest *)nmem_malloc(nmem, sizeof(*er));
 	    er->which = Z_ERequest_simpleElement;
-	    er->u.simpleElement = se = nmem_malloc(nmem, sizeof(*se));
+	    er->u.simpleElement = se = (Z_SimpleElement *)nmem_malloc(nmem, sizeof(*se));
 	    se->variantRequest = 0;
-	    se->path = tp = nmem_malloc(nmem, sizeof(*tp));
+	    se->path = tp = (Z_ETagPath *)nmem_malloc(nmem, sizeof(*tp));
 	    tp->num_tags = 0;
 	    /*
 	     * Parse the element selector.
 	     */
 	    for (num = 1, ep = path; (ep = strchr(ep, '/')); num++, ep++)
 		;
-	    tp->tags = nmem_malloc(nmem, sizeof(Z_ETagUnit*)*num);
+	    tp->tags = (Z_ETagUnit **)nmem_malloc(nmem, sizeof(Z_ETagUnit*)*num);
 	    
 	    for ((ep = strchr(path, '/')) ; path ;
 		 (void)((path = ep) && (ep = strchr(path, '/'))))

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.61  1998-02-10 11:03:06  adam
+ * Revision 1.62  1998-02-11 11:53:33  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.61  1998/02/10 11:03:06  adam
  * Implemented command refid. Client prints reference-ID's, when present,
  * in responses.
  *
@@ -554,7 +557,7 @@ static void display_record(Z_DatabaseRecord *p)
 	     */
 	    odr_setbuf(in, (char*)p->u.octet_aligned->buf,
 		p->u.octet_aligned->len, 0);
-	    if (!(*type->fun)(in, &rr, 0))
+	    if (!(*type->fun)(in, (char **)&rr, 0))
 	    {
 		odr_perror(in, "Decoding constructed record.");
 		fprintf(stderr, "[Near %d]\n", odr_offset(in));
@@ -568,7 +571,7 @@ static void display_record(Z_DatabaseRecord *p)
 	     * Note: we throw away the original, BER-encoded record here.
 	     * Do something else with it if you want to keep it.
 	     */
-	    r->u.sutrs = rr;    /* we don't actually check the type here. */
+	    r->u.sutrs = (Odr_oct *)rr;    /* we don't actually check the type here. */
 	    r->which = type->what;
 	}
     }
@@ -862,7 +865,7 @@ static int cmd_base(char *arg)
             cp = arg + strlen(arg);
         if (cp - arg < 1)
             break;
-        databaseNames[num_databaseNames] = xmalloc (1 + cp - arg);
+        databaseNames[num_databaseNames] = (char *)xmalloc (1 + cp - arg);
         memcpy (databaseNames[num_databaseNames], arg, cp - arg);
         databaseNames[num_databaseNames++][cp - arg] = '\0';
         if (!*cp)
@@ -1034,7 +1037,7 @@ int send_sortrequest(char *arg, int newset)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_sortRequest);
     Z_SortRequest *req = apdu->u.sortRequest;
-    Z_SortKeySpecList *sksl = odr_malloc (out, sizeof(*sksl));
+    Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)odr_malloc (out, sizeof(*sksl));
     char setstring[32];
     char sort_string[32], sort_flags[32];
     int off;
@@ -1049,23 +1052,23 @@ int send_sortrequest(char *arg, int newset)
     req->referenceId = set_refid (out);
 
     req->inputResultSetNames =
-	odr_malloc (out, sizeof(*req->inputResultSetNames));
+	(Z_StringList *)odr_malloc (out, sizeof(*req->inputResultSetNames));
     req->inputResultSetNames->num_strings = 1;
     req->inputResultSetNames->strings =
-	odr_malloc (out, sizeof(*req->inputResultSetNames->strings));
+	(char **)odr_malloc (out, sizeof(*req->inputResultSetNames->strings));
     req->inputResultSetNames->strings[0] =
-	odr_malloc (out, strlen(setstring)+1);
+	(char *)odr_malloc (out, strlen(setstring)+1);
     strcpy (req->inputResultSetNames->strings[0], setstring);
 
     if (newset && setnumber >= 0)
 	sprintf (setstring, "%d", ++setnumber);
 
-    req->sortedResultSetName = odr_malloc (out, strlen(setstring)+1);
+    req->sortedResultSetName = (char *)odr_malloc (out, strlen(setstring)+1);
     strcpy (req->sortedResultSetName, setstring);
 
     req->sortSequence = sksl;
     sksl->num_specs = 0;
-    sksl->specs = odr_malloc (out, sizeof(sksl->specs) * 20);
+    sksl->specs = (Z_SortKeySpec **)odr_malloc (out, sizeof(sksl->specs) * 20);
     
     bib1.proto = protocol;
     bib1.oclass = CLASS_ATTSET;
@@ -1075,45 +1078,45 @@ int send_sortrequest(char *arg, int newset)
     {
 	int i;
 	char *sort_string_sep;
-	Z_SortKeySpec *sks = odr_malloc (out, sizeof(*sks));
-	Z_SortKey *sk = odr_malloc (out, sizeof(*sk));
+	Z_SortKeySpec *sks = (Z_SortKeySpec *)odr_malloc (out, sizeof(*sks));
+	Z_SortKey *sk = (Z_SortKey *)odr_malloc (out, sizeof(*sk));
 
 	arg += off;
 	sksl->specs[sksl->num_specs++] = sks;
-	sks->sortElement = odr_malloc (out, sizeof(*sks->sortElement));
+	sks->sortElement = (Z_SortElement *)odr_malloc (out, sizeof(*sks->sortElement));
 	sks->sortElement->which = Z_SortElement_generic;
 	sks->sortElement->u.generic = sk;
 	
 	if ((sort_string_sep = strchr (sort_string, '=')))
 	{
-	    Z_AttributeElement *el = odr_malloc (out, sizeof(*el));
+	    Z_AttributeElement *el = (Z_AttributeElement *)odr_malloc (out, sizeof(*el));
 	    sk->which = Z_SortKey_sortAttributes;
 	    sk->u.sortAttributes =
-		odr_malloc (out, sizeof(*sk->u.sortAttributes));
+		(Z_SortAttributes *)odr_malloc (out, sizeof(*sk->u.sortAttributes));
 	    sk->u.sortAttributes->id = oid_ent_to_oid(&bib1, oid);
 	    sk->u.sortAttributes->list =
-		odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
+		(Z_AttributeList *)odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
 	    sk->u.sortAttributes->list->num_attributes = 1;
 	    sk->u.sortAttributes->list->attributes =
-		odr_malloc (out,
+		(Z_AttributeElement **)odr_malloc (out,
 			    sizeof(*sk->u.sortAttributes->list->attributes));
 	    sk->u.sortAttributes->list->attributes[0] = el;
 	    el->attributeSet = 0;
-	    el->attributeType = odr_malloc (out, sizeof(*el->attributeType));
+	    el->attributeType = (int *)odr_malloc (out, sizeof(*el->attributeType));
 	    *el->attributeType = atoi (sort_string);
 	    el->which = Z_AttributeValue_numeric;
-	    el->value.numeric = odr_malloc (out, sizeof(*el->value.numeric));
+	    el->value.numeric = (int *)odr_malloc (out, sizeof(*el->value.numeric));
 	    *el->value.numeric = atoi (sort_string_sep + 1);
 	}
 	else
 	{
 	    sk->which = Z_SortKey_sortField;
-	    sk->u.sortField = odr_malloc (out, strlen(sort_string)+1);
+	    sk->u.sortField = (char *)odr_malloc (out, strlen(sort_string)+1);
 	    strcpy (sk->u.sortField, sort_string);
 	}
-	sks->sortRelation = odr_malloc (out, sizeof(*sks->sortRelation));
+	sks->sortRelation = (int *)odr_malloc (out, sizeof(*sks->sortRelation));
 	*sks->sortRelation = Z_SortRelation_ascending;
-	sks->caseSensitivity = odr_malloc (out, sizeof(*sks->caseSensitivity));
+	sks->caseSensitivity = (int *)odr_malloc (out, sizeof(*sks->caseSensitivity));
 	*sks->caseSensitivity = Z_SortCase_caseSensitive;
 
 	sks->missingValueAction = NULL;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-acc.c,v $
- * Revision 1.6  1998-01-05 09:04:57  adam
+ * Revision 1.7  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.6  1998/01/05 09:04:57  adam
  * Fixed bugs in encoders/decoders - Not operator (!) missing.
  *
  * Revision 1.5  1995/09/29 17:11:53  quinn
@@ -55,14 +58,14 @@ int z_PromptId1(ODR o, Z_PromptId1 **p, int opt)
     static Odr_arm arm[] =
     {
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_PromptId1_enumeratedPrompt,
-	    z_EnumeratedPrompt1},
+	    (Odr_fun)z_EnumeratedPrompt1},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_PromptId1_nonEnumeratedPrompt,
 	    odr_visiblestring},
 	{-1, -1, -1, -1, 0}
     };
 
     if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
+    	*p = (Z_PromptId1 *)odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -78,12 +81,12 @@ int z_PromptInfo1(ODR o, Z_PromptInfo1 **p, int opt)
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Challenge1_character,
 	    odr_visiblestring},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Challenge1_encrypted,
-	    z_Encryption1},
+	    (Odr_fun)z_Encryption1},
 	{-1, -1, -1, -1, 0}
     };
 
     if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
+    	*p = (Z_PromptInfo1 *)odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -115,10 +118,10 @@ int z_ChallengeUnit1(ODR o, Z_ChallengeUnit1 **p, int opt)
 int z_Challenge1(ODR o, Z_Challenge1 **p, int opt)
 {
     if (o->direction == ODR_ENCODE)
-    	*p = odr_malloc(o, sizeof(**p));
+    	*p = (Z_Challenge1 *)odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
-    if (odr_sequence_of(o, z_ChallengeUnit1, &(*p)->list,
+    if (odr_sequence_of(o, (Odr_fun)z_ChallengeUnit1, &(*p)->list,
 	&(*p)->num_challenges))
 	return 1;
     *p = 0;
@@ -132,10 +135,10 @@ int z_ResponseUnit1(ODR o, Z_ResponseUnit1 **p, int opt)
     static Odr_arm arm[] = 
     {
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Response1_string, odr_visiblestring},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Response1_accept, odr_bool},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Response1_acknowledge, odr_null},
-	{ODR_EXPLICIT, ODR_CONTEXT, 4, Z_Response1_diagnostic, z_DiagRec},
-	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_Response1_encrypted, z_Encryption1},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Response1_accept, (Odr_fun)odr_bool},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Response1_acknowledge, (Odr_fun)odr_null},
+	{ODR_EXPLICIT, ODR_CONTEXT, 4, Z_Response1_diagnostic, (Odr_fun)z_DiagRec},
+	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_Response1_encrypted, (Odr_fun)z_Encryption1},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -152,10 +155,10 @@ int z_ResponseUnit1(ODR o, Z_ResponseUnit1 **p, int opt)
 int z_Response1(ODR o, Z_Response1 **p, int opt)
 {
     if (o->direction == ODR_ENCODE)
-    	*p = odr_malloc(o, sizeof(**p));
+    	*p = (Z_Response1 *)odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
-    if (odr_sequence_of(o, z_ResponseUnit1, &(*p)->list,
+    if (odr_sequence_of(o, (Odr_fun)z_ResponseUnit1, &(*p)->list,
 	&(*p)->num_responses))
 	return 1;
     *p = 0;
@@ -166,13 +169,13 @@ int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt)
 {
     static Odr_arm arm[] =
     {
-    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_PromptObject1_challenge, z_Challenge1},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_PromptObject1_response, z_Response1},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_PromptObject1_challenge, (Odr_fun)z_Challenge1},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_PromptObject1_response, (Odr_fun)z_Response1},
 	{-1, -1, -1, -1, 0}
     };
 
     if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
+    	*p = (Z_PromptObject1 *)odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: requestq.c,v $
- * Revision 1.5  1998-02-10 11:03:56  adam
+ * Revision 1.6  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.5  1998/02/10 11:03:56  adam
  * Added support for extended handlers in backend server interface.
  *
  * Revision 1.4  1997/10/27 13:55:03  adam
@@ -91,7 +94,7 @@ request *request_get(request_q *q)
     	q->list = r->next;
     else
     {
-    	if (!(r = xmalloc(sizeof(*r))))
+    	if (!(r = (request *)xmalloc(sizeof(*r))))
 	    abort();
 	r->response = 0;
 	r->size_response = 0;

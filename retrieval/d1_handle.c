@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_handle.c,v $
- * Revision 1.2  1997-09-30 11:50:04  adam
+ * Revision 1.3  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.2  1997/09/30 11:50:04  adam
  * Added handler data1_get_map_buf that is used by data1_nodetomarc.
  *
  * Revision 1.1  1997/09/17 12:28:24  adam
@@ -35,7 +38,7 @@ struct data1_handle_info {
 
 data1_handle data1_create (void)
 {
-    data1_handle p = xmalloc (sizeof(*p));
+    data1_handle p = (data1_handle)xmalloc (sizeof(*p));
     if (!p)
 	return NULL;
     p->tab_path = NULL;
@@ -103,7 +106,7 @@ void data1_set_tabpath (data1_handle dp, const char *p)
     }
     if (p)
     {
-        dp->tab_path = xmalloc (strlen(p)+1);
+        dp->tab_path = (char *)xmalloc (strlen(p)+1);
         strcpy (dp->tab_path, p);
     }
 }

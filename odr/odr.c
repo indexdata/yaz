@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.26  1997-11-24 11:33:56  adam
+ * Revision 1.27  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.26  1997/11/24 11:33:56  adam
  * Using function odr_nullval() instead of global ODR_NULLVAL when
  * appropriate.
  *
@@ -145,11 +148,11 @@ void odr_setprint(ODR o, FILE *file)
 
 ODR odr_createmem(int direction)
 {
-    struct odr *r;
+    ODR r;
 
 
     logf (LOG_DEBUG, "odr_createmem dir=%d", direction);
-    if (!(r = xmalloc(sizeof(*r))))
+    if (!(r = (ODR)xmalloc(sizeof(*r))))
         return 0;
     r->direction = direction;
     r->print = stderr;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_util.c,v $
- * Revision 1.12  1997-10-31 12:20:08  adam
+ * Revision 1.13  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.12  1997/10/31 12:20:08  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -54,7 +57,7 @@ Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o)
 
     if (!o)
     	return 0;
-    if (!(r = nmem_malloc(nmem, (oid_oidlen(o) + 1) * sizeof(int))))
+    if (!(r = (int *)nmem_malloc(nmem, (oid_oidlen(o) + 1) * sizeof(int))))
     	return 0;
     oid_oidcpy(r, o);
     return r;
@@ -75,7 +78,7 @@ Odr_oid *odr_getoidbystr_nmem(NMEM nmem, char *str)
 	return 0;
     while ((p = strchr(p, '.')))
 	num++, p++;
-    ret = nmem_malloc(nmem, sizeof(*ret)*(num + 1));
+    ret = (int *)nmem_malloc(nmem, sizeof(*ret)*(num + 1));
     p = str;
     do
 	ret[i++] = atoi(p);

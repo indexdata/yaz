@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.9 1996-05-22 08:35:58 adam Exp $
+# $Id: Makefile,v 1.10 1998-02-11 11:53:35 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
@@ -45,8 +45,8 @@ depend1:
 depend2:
 	$(CPP) $(INCLUDE) -M *.c >.depend	
 
-ifeq (.depend,$(wildcard .depend))
-include .depend
-endif
+#ifeq (.depend,$(wildcard .depend))
+#include .depend
+#endif
 
 #Depend --- DOT NOT DELETE THIS LINE

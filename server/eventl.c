@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.25  1998-01-29 13:30:23  adam
+ * Revision 1.26  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.25  1998/01/29 13:30:23  adam
  * Better event handle system for NT/Unix.
  *
  * Revision 1.24  1997/09/04 14:19:13  adam
@@ -107,7 +110,7 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
 {
     IOCHAN new_iochan;
 
-    if (!(new_iochan = xmalloc(sizeof(*new_iochan))))
+    if (!(new_iochan = (IOCHAN)xmalloc(sizeof(*new_iochan))))
     	return 0;
     new_iochan->destroyed = 0;
     new_iochan->fd = fd;
@@ -156,7 +159,7 @@ int event_loop(IOCHAN *iochans)
             else
             {
                 /* Destroy the first member in the chain, and try again */
-                association *assoc = iochan_getdata(*iochans);
+                association *assoc = (association *)iochan_getdata(*iochans);
                 COMSTACK conn = assoc->client_link;
 
                 cs_close(conn);

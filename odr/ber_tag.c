@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.17  1997-09-30 09:33:10  adam
+ * Revision 1.18  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.17  1997/09/30 09:33:10  adam
  * Minor changes - removed indentation of ifdef.
  *
  * Revision 1.16  1997/09/17 12:10:33  adam
@@ -77,7 +80,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
 {
     Odr_ber_tag *odr_ber_tag = &o->odr_ber_tag;
     int rd;
-    char **pp = p;
+    char **pp = (char **)p;
 
     if (o->direction == ODR_DECODE)
     	*pp = 0;

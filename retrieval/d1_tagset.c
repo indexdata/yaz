@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.6  1997-09-17 12:10:38  adam
+ * Revision 1.7  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.6  1997/09/17 12:10:38  adam
  * YAZ version 1.4.
  *
  * Revision 1.5  1997/09/05 09:50:57  adam
@@ -124,7 +127,7 @@ data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 	return 0;
     }
 
-    res = nmem_malloc(mem, sizeof(*res));
+    res = (data1_tagset *)nmem_malloc(mem, sizeof(*res));
     res->name = 0;
     res->type = 0;
     res->tags = 0;
@@ -163,7 +166,7 @@ data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 		fclose(f);
 		return 0;
 	    }
-	    rr = *tagp = nmem_malloc(mem, sizeof(*rr));
+	    rr = *tagp = (data1_tag *)nmem_malloc(mem, sizeof(*rr));
 	    rr->tagset = res;
 	    rr->next = 0;
 	    rr->which = DATA1T_numeric;
@@ -186,7 +189,7 @@ data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 	    {
 		char *e;
 
-		*npp = nmem_malloc(mem, sizeof(**npp));
+		*npp = (data1_name *)nmem_malloc(mem, sizeof(**npp));
 		if ((e = strchr(nm, '/')))
 		    *(e++) = '\0';
 		(*npp)->name = nmem_strdup(mem, nm);

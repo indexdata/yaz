@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.19  1997-12-09 16:17:09  adam
+ * Revision 1.20  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.19  1997/12/09 16:17:09  adam
  * Fix bug regarding variants. Tags with prefix "var" was incorrectly
  * interpreted as "start of variants". Now, only "var" indicates such
  * start.
@@ -139,7 +142,7 @@ data1_node *data1_mk_node (data1_handle dh, NMEM m)
 {
     data1_node *r;
 
-    r = nmem_malloc(m, sizeof(*r));
+    r = (data1_node *)nmem_malloc(m, sizeof(*r));
     r->next = r->child = r->last_child = r->parent = 0;
     r->destroy = 0;
     return r;
@@ -417,11 +420,11 @@ data1_node *data1_read_record(data1_handle dh,
     int line = 0;
     
     if (!*buf)
-	*buf = xmalloc(*size = 4096);
+	*buf = (char *)xmalloc(*size = 4096);
     
     for (;;)
     {
-	if (rd + 4096 > *size && !(*buf =xrealloc(*buf, *size *= 2)))
+	if (rd + 4096 > *size && !(*buf =(char *)xrealloc(*buf, *size *= 2)))
 	    abort();
 	if ((res = (*rf)(fh, *buf + rd, 4096)) <= 0)
 	{

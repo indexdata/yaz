@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.71  1998-02-10 11:03:57  adam
+ * Revision 1.72  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.71  1998/02/10 11:03:57  adam
  * Added support for extended handlers in backend server interface.
  *
  * Revision 1.70  1998/01/29 13:15:35  adam
@@ -302,7 +305,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
 
     if (!control_block)
     	control_block = statserv_getcontrol();
-    if (!(anew = xmalloc(sizeof(*anew))))
+    if (!(anew = (association *)xmalloc(sizeof(*anew))))
     	return 0;
     anew->client_chan = channel;
     anew->client_link = link;
@@ -418,7 +421,7 @@ static void do_close(association *a, int reason, char *message)
 void ir_session(IOCHAN h, int event)
 {
     int res;
-    association *assoc = iochan_getdata(h);
+    association *assoc = (association *)iochan_getdata(h);
     COMSTACK conn = assoc->client_link;
     request *req;
 
@@ -602,7 +605,7 @@ static int process_request(association *assoc, request *req)
  */
 void backend_response(IOCHAN i, int event)
 {
-    association *assoc = iochan_getdata(i);
+    association *assoc = (association *)iochan_getdata(i);
     request *req = request_head(&assoc->incoming);
     Z_APDU *res;
     int fd;
@@ -713,12 +716,12 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     }
 
     assoc->backend = binitres->handle;
-    if ((assoc->bend_sort = binitreq.bend_sort))
+    if ((assoc->bend_sort = (int (*)())binitreq.bend_sort))
 	logf (LOG_DEBUG, "Sort handler installed");
-    if ((assoc->bend_search = binitreq.bend_search))
+    if ((assoc->bend_search = (int (*)())binitreq.bend_search))
 	logf (LOG_DEBUG, "Search handler installed");
-    if ((assoc->bend_present = binitreq.bend_present))
-	logf (LOG_DEBUG, "Present handler installed");
+    if ((assoc->bend_present = (int (*)())binitreq.bend_present))
+	logf (LOG_DEBUG, "Present handler installed");   
     resp->referenceId = req->referenceId;
     *options = '\0';
     /* let's tell the client what we can do */
@@ -805,11 +808,11 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 {
     int oid[OID_SIZE];
-    Z_Records *rec = odr_malloc (assoc->encode, sizeof(*rec));
+    Z_Records *rec = (Z_Records *)odr_malloc (assoc->encode, sizeof(*rec));
     oident bib1;
-    int *err = odr_malloc (assoc->encode, sizeof(*err));
-    Z_DiagRec *drec = odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *dr = odr_malloc (assoc->encode, sizeof(*dr));
+    int *err = (int *)odr_malloc (assoc->encode, sizeof(*err));
+    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)odr_malloc (assoc->encode, sizeof(*dr));
 
     bib1.proto = assoc->proto;
     bib1.oclass = CLASS_DIAGSET;
@@ -841,11 +844,11 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
 					    int error, char *addinfo)
 {
     int oid[OID_SIZE];
-    Z_NamePlusRecord *rec = odr_malloc (assoc->encode, sizeof(*rec));
-    int *err = odr_malloc (assoc->encode, sizeof(*err));
+    Z_NamePlusRecord *rec = (Z_NamePlusRecord *)odr_malloc (assoc->encode, sizeof(*rec));
+    int *err = (int *)odr_malloc (assoc->encode, sizeof(*err));
     oident bib1;
-    Z_DiagRec *drec = odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *dr = odr_malloc (assoc->encode, sizeof(*dr));
+    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)odr_malloc (assoc->encode, sizeof(*dr));
 
     bib1.proto = assoc->proto;
     bib1.oclass = CLASS_DIAGSET;
@@ -872,12 +875,12 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
 static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 {
     int oid[OID_SIZE];
-    Z_DiagRecs *recs = odr_malloc (assoc->encode, sizeof(*recs));
-    int *err = odr_malloc (assoc->encode, sizeof(*err));
+    Z_DiagRecs *recs = (Z_DiagRecs *)odr_malloc (assoc->encode, sizeof(*recs));
+    int *err = (int *)odr_malloc (assoc->encode, sizeof(*err));
     oident bib1;
-    Z_DiagRec **recp = odr_malloc (assoc->encode, sizeof(*recp));
-    Z_DiagRec *drec = odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *rec = odr_malloc (assoc->encode, sizeof(*rec));
+    Z_DiagRec **recp = (Z_DiagRec **)odr_malloc (assoc->encode, sizeof(*recp));
+    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
+    Z_DefaultDiagFormat *rec = (Z_DefaultDiagFormat *)odr_malloc (assoc->encode, sizeof(*rec));
 
     logf(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo);
     bib1.proto = assoc->proto;
@@ -905,9 +908,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 {
     int oid[OID_SIZE];
     int recno, total_length = 0, toget = *num, dumped_records = 0;
-    Z_Records *records = odr_malloc (a->encode, sizeof(*records));
-    Z_NamePlusRecordList *reclist = odr_malloc (a->encode, sizeof(*reclist));
-    Z_NamePlusRecord **list = odr_malloc (a->encode, sizeof(*list) * toget);
+    Z_Records *records = (Z_Records *)odr_malloc (a->encode, sizeof(*records));
+    Z_NamePlusRecordList *reclist = (Z_NamePlusRecordList *)odr_malloc (a->encode, sizeof(*reclist));
+    Z_NamePlusRecord **list = (Z_NamePlusRecord **)odr_malloc (a->encode, sizeof(*list) * toget);
     oident recform;
 
     records->which = Z_Records_DBOSD;
@@ -993,14 +996,14 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		continue;
 	    }
 	}
-	if (!(thisrec = odr_malloc(a->encode, sizeof(*thisrec))))
+	if (!(thisrec = (Z_NamePlusRecord *)odr_malloc(a->encode, sizeof(*thisrec))))
 	    return 0;
-	if (!(thisrec->databaseName = odr_malloc(a->encode,
+	if (!(thisrec->databaseName = (char *)odr_malloc(a->encode,
 	    strlen(fres->basename) + 1)))
 	    return 0;
 	strcpy(thisrec->databaseName, fres->basename);
 	thisrec->which = Z_NamePlusRecord_databaseRecord;
-	if (!(thisrec->u.databaseRecord = thisext = odr_malloc(a->encode,
+	if (!(thisrec->u.databaseRecord = thisext = (Z_External *)odr_malloc(a->encode,
 	    sizeof(Z_DatabaseRecord))))
 	    return 0;
 	recform.proto = a->proto;
@@ -1036,21 +1039,21 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	}
 	else if (fres->format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
 	{
-	    Odr_oct *sutrs = odr_malloc(a->encode, sizeof(*sutrs));
+	    Odr_oct *sutrs = (Odr_oct *)odr_malloc(a->encode, sizeof(*sutrs));
 
 	    thisext->which = Z_External_sutrs;
 	    thisext->u.sutrs = sutrs;
-	    sutrs->buf = odr_malloc(a->encode, fres->len);
+	    sutrs->buf = (unsigned char *)odr_malloc(a->encode, fres->len);
 	    sutrs->len = sutrs->size = fres->len;
 	    memcpy(sutrs->buf, fres->record, fres->len);
 	}
 	else /* octet-aligned record. */
 	{
 	    thisext->which = Z_External_octet;
-	    if (!(thisext->u.octet_aligned = odr_malloc(a->encode,
+	    if (!(thisext->u.octet_aligned = (Odr_oct *)odr_malloc(a->encode,
 		sizeof(Odr_oct))))
 		return 0;
-	    if (!(thisext->u.octet_aligned->buf = odr_malloc(a->encode,
+	    if (!(thisext->u.octet_aligned->buf = (unsigned char *)odr_malloc(a->encode,
 		fres->len)))
 		return 0;
 	    memcpy(thisext->u.octet_aligned->buf, fres->record, fres->len);
@@ -1069,10 +1072,9 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     int *fd)
 {
     Z_SearchRequest *req = reqb->request->u.searchRequest;
-    bend_search_rr *bsrr = nmem_malloc (reqb->request_mem, sizeof(*bsrr));
+    bend_search_rr *bsrr = (bend_search_rr *)nmem_malloc (reqb->request_mem, sizeof(*bsrr));
 
     logf(LOG_LOG, "Got SearchRequest.");
-
     save_referenceId (reqb, req->referenceId);
     /* store ref id in request */
     bsrr->fd = fd;
@@ -1089,7 +1091,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrr->errcode = 0;
 	bsrr->hits = 0;
 	bsrr->errstring = NULL;
-	(*assoc->bend_search)(assoc->backend, bsrr);
+	((int (*)(void *, bend_search_rr *))(assoc->bend_search))(assoc->backend, bsrr);
 	if (!bsrr->request)
 	    return 0;
     }
@@ -1126,12 +1128,12 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     bend_search_rr *bsrt, int *fd)
 {
     Z_SearchRequest *req = reqb->request->u.searchRequest;
-    Z_APDU *apdu = odr_malloc (assoc->encode, sizeof(*apdu));
-    Z_SearchResponse *resp = odr_malloc (assoc->encode, sizeof(*resp));
-    int *nulint = odr_malloc (assoc->encode, sizeof(*nulint));
-    bool_t *sr = odr_malloc (assoc->encode, sizeof(*sr));
-    int *next = odr_malloc (assoc->encode, sizeof(*next));
-    int *none = odr_malloc (assoc->encode, sizeof(*none));
+    Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
+    Z_SearchResponse *resp = (Z_SearchResponse *)odr_malloc (assoc->encode, sizeof(*resp));
+    int *nulint = (int *)odr_malloc (assoc->encode, sizeof(*nulint));
+    bool_t *sr = (bool_t *)odr_malloc (assoc->encode, sizeof(*sr));
+    int *next = (int *)odr_malloc (assoc->encode, sizeof(*next));
+    int *none = (int *)odr_malloc (assoc->encode, sizeof(*none));
 
     *nulint = 0;
     *sr = 1;
@@ -1161,8 +1163,8 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     }
     else
     {
-    	int *toget = odr_malloc (assoc->encode, sizeof(*toget));
-        int *presst = odr_malloc (assoc->encode, sizeof(*presst));
+    	int *toget = (int *)odr_malloc (assoc->encode, sizeof(*toget));
+        int *presst = (int *)odr_malloc (assoc->encode, sizeof(*presst));
 	Z_RecordComposition comp, *compp = 0;
 
         *toget = 0;
@@ -1259,7 +1261,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	form = prefformat->value;
     if (assoc->bend_present)
     {
-	bend_present_rr *bprr = nmem_malloc (reqb->request_mem, sizeof(*bprr));
+	bend_present_rr *bprr = (bend_present_rr *)nmem_malloc (reqb->request_mem, sizeof(*bprr));
 	bprr->setname = req->resultSetId;
 	bprr->start = *req->resultSetStartPoint;
 	bprr->number = *req->numberOfRecordsRequested;
@@ -1270,16 +1272,16 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	bprr->association = assoc;
 	bprr->errcode = 0;
 	bprr->errstring = NULL;
-	(*assoc->bend_present)(assoc->backend, bprr);
+	((int (*)(void *, bend_present_rr *))(*assoc->bend_present))(assoc->backend, bprr);
 
 	if (!bprr->request)
 	    return 0;
     }
-    apdu = odr_malloc (assoc->encode, sizeof(*apdu));
-    resp = odr_malloc (assoc->encode, sizeof(*resp));
-    presst = odr_malloc (assoc->encode, sizeof(*presst));
-    next = odr_malloc (assoc->encode, sizeof(*next));
-    num = odr_malloc (assoc->encode, sizeof(*num));
+    apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
+    resp = (Z_PresentResponse *)odr_malloc (assoc->encode, sizeof(*resp));
+    presst = (int *)odr_malloc (assoc->encode, sizeof(*presst));
+    next = (int *)odr_malloc (assoc->encode, sizeof(*next));
+    num = (int *)odr_malloc (assoc->encode, sizeof(*num));
     *presst = 0;
     *next = 0;
     *num = *req->numberOfRecordsRequested;
@@ -1308,12 +1310,12 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 {
     Z_ScanRequest *req = reqb->request->u.scanRequest;
-    Z_APDU *apdu = odr_malloc (assoc->encode, sizeof(*apdu));
-    Z_ScanResponse *res = odr_malloc (assoc->encode, sizeof(*res));
-    int *scanStatus = odr_malloc (assoc->encode, sizeof(*scanStatus));
+    Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
+    Z_ScanResponse *res = (Z_ScanResponse *)odr_malloc (assoc->encode, sizeof(*res));
+    int *scanStatus = (int *)odr_malloc (assoc->encode, sizeof(*scanStatus));
     int *numberOfEntriesReturned =
-         odr_malloc (assoc->encode, sizeof(*numberOfEntriesReturned));
-    Z_ListEntries *ents = odr_malloc (assoc->encode, sizeof(*ents));
+         (int *)odr_malloc (assoc->encode, sizeof(*numberOfEntriesReturned));
+    Z_ListEntries *ents = (Z_ListEntries *)odr_malloc (assoc->encode, sizeof(*ents));
     oident *attent;
     bend_scanrequest srq;
     bend_scanresult *srs;
@@ -1366,8 +1368,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	else
 	{
 	    int i;
-	    Z_Entries *list = odr_malloc (assoc->encode, sizeof(*list));
-            Z_Entry **tab = odr_malloc (assoc->encode,
+	    Z_Entries *list = (Z_Entries *)odr_malloc (assoc->encode, sizeof(*list));
+            Z_Entry **tab = (Z_Entry **)odr_malloc (assoc->encode,
                                         sizeof(*tab) * srs->num_entries);
 
 	    if (srs->status == BEND_SCAN_PARTIAL)
@@ -1383,20 +1385,20 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 		Z_TermInfo *t;
 		Odr_oct *o;
 
-		list->entries[i] = e = odr_malloc(assoc->encode, sizeof(*e));
+		list->entries[i] = e = (Z_Entry *)odr_malloc(assoc->encode, sizeof(*e));
 		e->which = Z_Entry_termInfo;
-		e->u.termInfo = t = odr_malloc(assoc->encode, sizeof(*t));
+		e->u.termInfo = t = (Z_TermInfo *)odr_malloc(assoc->encode, sizeof(*t));
 		t->suggestedAttributes = 0;
 		t->displayTerm = 0;
 		t->alternativeTerm = 0;
 		t->byAttributes = 0;
 		t->otherTermInfo = 0;
 		t->globalOccurrences = &srs->entries[i].occurrences;
-		t->term = odr_malloc(assoc->encode, sizeof(*t->term));
+		t->term = (Z_Term *)odr_malloc(assoc->encode, sizeof(*t->term));
 		t->term->which = Z_Term_general;
-		t->term->u.general = o = odr_malloc(assoc->encode,
+		t->term->u.general = o = (Odr_oct *)odr_malloc(assoc->encode,
 		    sizeof(Odr_oct));
-		o->buf = odr_malloc(assoc->encode, o->len = o->size =
+		o->buf = (unsigned char *)odr_malloc(assoc->encode, o->len = o->size =
 		    strlen(srs->entries[i].term));
 		memcpy(o->buf, srs->entries[i].term, o->len);
 		logf(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
@@ -1415,10 +1417,10 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     int *fd)
 {
     Z_SortRequest *req = reqb->request->u.sortRequest;
-    Z_SortResponse *res = odr_malloc (assoc->encode, sizeof(*res));
-    bend_sort_rr *bsrr = odr_malloc (assoc->encode, sizeof(*bsrr));
+    Z_SortResponse *res = (Z_SortResponse *)odr_malloc (assoc->encode, sizeof(*res));
+    bend_sort_rr *bsrr = (bend_sort_rr *)odr_malloc (assoc->encode, sizeof(*bsrr));
 
-    Z_APDU *apdu = odr_malloc (assoc->encode, sizeof(*apdu));
+    Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
 
     logf(LOG_LOG, "Got SortRequest.");
 
@@ -1432,10 +1434,10 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     bsrr->errcode = 0;
     bsrr->errstring = 0;
 
-    (*assoc->bend_sort)(assoc->backend, bsrr);
+    ((int (*)(void *, bend_sort_rr *))(*assoc->bend_sort))(assoc->backend, bsrr);
 
     res->referenceId = req->referenceId;
-    res->sortStatus = odr_malloc (assoc->encode, sizeof(*res->sortStatus));
+    res->sortStatus = (int *)odr_malloc (assoc->encode, sizeof(*res->sortStatus));
     *res->sortStatus = bsrr->sort_status;
     res->resultSetStatus = 0;
     if (bsrr->errcode)
@@ -1479,7 +1481,7 @@ void save_referenceId (request *reqb, Z_ReferenceId *refid)
     if (refid)
     {
 	reqb->len_refid = refid->len;
-	reqb->refid = nmem_malloc (reqb->request_mem, refid->len);
+	reqb->refid = (char *)nmem_malloc (reqb->request_mem, refid->len);
 	memcpy (reqb->refid, refid->buf, refid->len);
     }
     else
@@ -1506,8 +1508,8 @@ Z_ReferenceId *bend_request_getid (ODR odr, bend_request req)
     Z_ReferenceId *id;
     if (!req->refid)
 	return 0;
-    id = odr_malloc (odr, sizeof(*odr));
-    id->buf = odr_malloc (odr, req->len_refid);
+    id = (Odr_oct *)odr_malloc (odr, sizeof(*odr));
+    id->buf = (unsigned char *)odr_malloc (odr, req->len_refid);
     id->len = id->size = req->len_refid;
     memcpy (id->buf, req->refid, req->len_refid);
     return id;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_varset.c,v $
- * Revision 1.6  1997-09-17 12:10:39  adam
+ * Revision 1.7  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.6  1997/09/17 12:10:39  adam
  * YAZ version 1.4.
  *
  * Revision 1.5  1997/09/05 09:50:58  adam
@@ -57,7 +60,7 @@ data1_vartype *data1_getvartypebyct (data1_handle dh, data1_varset *set,
 data1_varset *data1_read_varset (data1_handle dh, const char *file)
 {
     NMEM mem = data1_nmem_get (dh);
-    data1_varset *res = nmem_malloc(mem, sizeof(*res));
+    data1_varset *res = (data1_varset *)nmem_malloc(mem, sizeof(*res));
     data1_varclass **classp = &res->classes, *zclass = 0;
     data1_vartype **typep = 0;
     FILE *f;
@@ -84,7 +87,7 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 		fclose(f);
 		return 0;
 	    }
-	    *classp = r = zclass = nmem_malloc(mem, sizeof(*r));
+	    *classp = r = zclass = (data1_varclass *)nmem_malloc(mem, sizeof(*r));
 	    r->set = res;
 	    r->zclass = atoi(argv[1]);
 	    r->name = nmem_strdup(mem, argv[2]);
@@ -109,7 +112,7 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 		fclose(f);
 		return 0;
 	    }
-	    *typep = r = nmem_malloc(mem, sizeof(*r));
+	    *typep = r = (data1_vartype *)nmem_malloc(mem, sizeof(*r));
 	    r->name = nmem_strdup(mem, argv[2]);
 	    r->zclass = zclass;
 	    r->type = atoi(argv[1]);

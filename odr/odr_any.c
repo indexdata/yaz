@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_any.c,v $
- * Revision 1.6  1995-09-29 17:12:22  quinn
+ * Revision 1.7  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.6  1995/09/29 17:12:22  quinn
  * Smallish
  *
  * Revision 1.5  1995/09/27  15:02:58  quinn
@@ -42,7 +45,7 @@ int odr_any(ODR o, Odr_any **p, int opt)
     	return 1;
     }
     if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(**p));
+    	*p = (Odr_oct *)odr_malloc(o, sizeof(**p));
     if (ber_any(o, p))
     	return 1;
     *p = 0;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.6  1997-12-12 06:32:33  adam
+ * Revision 1.7  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.6  1997/12/12 06:32:33  adam
  * Added include of string.h.
  *
  * Revision 1.5  1997/09/24 13:29:40  adam
@@ -77,7 +80,7 @@ int main (int argc, char **argv)
 			 prog, arg, strerror (errno));
 		exit (1);
 	    }
-	    buf = xmalloc (file_size);
+	    buf = (char *)xmalloc (file_size);
 	    if (!buf)
 	    {
 		fprintf (stderr, "%s: cannot xmalloc: %s\n",

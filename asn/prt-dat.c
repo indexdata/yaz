@@ -8,7 +8,10 @@
  *  Databasix Information Systems B.V., Utrecht, The Netherlands.
  *
  * $Log: prt-dat.c,v $
- * Revision 1.1  1998-02-10 15:31:46  adam
+ * Revision 1.2  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.1  1998/02/10 15:31:46  adam
  * Implemented date and time structure. Changed the Update Extended
  * Service.
  *
@@ -30,10 +33,10 @@ int z_Quarter(ODR o, Z_Quarter **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Quarter_first, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Quarter_second, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Quarter_third, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_Quarter_fourth, odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Quarter_first, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Quarter_second, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Quarter_third, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_Quarter_fourth, (Odr_fun)odr_null},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -49,10 +52,10 @@ int z_Season(ODR o, Z_Season **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Season_winter, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Season_spring, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Season_summer, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_Season_autumn, odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Season_winter, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Season_spring, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Season_summer, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_Season_autumn, (Odr_fun)odr_null},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -68,11 +71,16 @@ int z_PartOfYear(ODR o, Z_PartOfYear **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_PartOfYear_monthAndDay, z_MonthAndDay},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_PartOfYear_julianDay, odr_integer},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_PartOfYear_weekNumber, odr_integer},
-	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_PartOfYear_quarter, z_Quarter},
-	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_PartOfYear_season, z_Season},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_PartOfYear_monthAndDay,
+		(Odr_fun) z_MonthAndDay},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_PartOfYear_julianDay,
+		(Odr_fun) odr_integer},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_PartOfYear_weekNumber,
+		(Odr_fun) odr_integer},
+	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_PartOfYear_quarter,
+		(Odr_fun) z_Quarter},
+	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_PartOfYear_season,
+		(Odr_fun) z_Season},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -88,9 +96,9 @@ int z_Era(ODR o, Z_Era **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Era_decade, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Era_century, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Era_millennium, odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Era_decade, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Era_century, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Era_millennium, (Odr_fun)odr_null},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -127,9 +135,9 @@ int z_Zone(ODR o, Z_Zone **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Zone_local, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Zone_utc, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Zone_utcOffset, odr_integer},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Zone_local, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Zone_utc, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_Zone_utcOffset, (Odr_fun)odr_integer},
 	{-1, -1, -1, -1, 0}
     };
 

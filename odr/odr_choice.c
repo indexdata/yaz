@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.14  1997-05-14 06:53:57  adam
+ * Revision 1.15  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.14  1997/05/14 06:53:57  adam
  * C++ support.
  *
  * Revision 1.13  1997/04/30 08:52:10  quinn
@@ -53,7 +56,7 @@
 
 int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 {
-    int i, cl = -1, tg, cn, *which = whichp, bias = o->choice_bias;
+    int i, cl = -1, tg, cn, *which = (int *)whichp, bias = o->choice_bias;
 
     if (o->error)
     	return 0;
@@ -90,18 +93,18 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 	    	if (arm[i].tagmode == ODR_IMPLICIT)
 	    	{
 		    odr_implicit_settag(o, cl, tg);
-	    	    return (*arm[i].fun)(o, p, 0);
+	    	    return (*arm[i].fun)(o, (char **)p, 0);
 		}
 		/* explicit */
 		if (!odr_constructed_begin(o, p, cl, tg))
 		    return 0;
-		return (*arm[i].fun)(o, p, 0) &&
+		return (*arm[i].fun)(o, (char **)p, 0) &&
 		    odr_constructed_end(o);
 	    }
 	}
 	else  /* no tagging. Have to poll type */
 	{
-	    if ((*arm[i].fun)(o, p, 1) && *(char**)p)
+	    if ((*arm[i].fun)(o, (char **)p, 1) && *(char**)p)
 	    	return 1;
 	}
     }

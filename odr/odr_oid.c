@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.12  1995-09-29 17:12:25  quinn
+ * Revision 1.13  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.12  1995/09/29 17:12:25  quinn
  * Smallish
  *
  * Revision 1.11  1995/09/27  15:03:00  quinn
@@ -81,6 +84,6 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
     	return 1;
     }
     if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, OID_SIZE * sizeof(**p));
+    	*p = (int *)odr_malloc(o, OID_SIZE * sizeof(**p));
     return ber_oidc(o, *p);
 }

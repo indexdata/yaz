@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.10  1995-09-29 17:12:18  quinn
+ * Revision 1.11  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.10  1995/09/29 17:12:18  quinn
  * Smallish
  *
  * Revision 1.9  1995/09/27  15:02:55  quinn
@@ -70,7 +73,7 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    }
 	    if (len + 1 > p->size - p->len)
 	    {
-	    	c = odr_malloc(o, p->size += len + 1);
+	    	c = (unsigned char *)odr_malloc(o, p->size += len + 1);
 	    	if (p->len)
 		    memcpy(c, p->buf, p->len);
 		p->buf = c;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bool.c,v $
- * Revision 1.8  1995-09-29 17:12:23  quinn
+ * Revision 1.9  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.8  1995/09/29 17:12:23  quinn
  * Smallish
  *
  * Revision 1.7  1995/09/27  15:02:58  quinn
@@ -60,6 +63,6 @@ int odr_bool(ODR o, int **p, int opt)
     if (cons)
     	return 0;
     if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, sizeof(int));
+    	*p = (int *)odr_malloc(o, sizeof(int));
     return ber_boolean(o, *p);
 }

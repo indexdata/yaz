@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.15  1998-02-10 15:31:46  adam
+ * Revision 1.16  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.15  1998/02/10 15:31:46  adam
  * Implemented date and time structure. Changed the Update Extended
  * Service.
  *
@@ -62,21 +65,21 @@
  */
 static Z_ext_typeent type_table[] =
 {
-    {VAL_SUTRS, Z_External_sutrs, z_SUTRS},
-    {VAL_EXPLAIN, Z_External_explainRecord, z_ExplainRecord},
-    {VAL_RESOURCE1, Z_External_resourceReport1, z_ResourceReport1},
-    {VAL_RESOURCE2, Z_External_resourceReport2, z_ResourceReport2},
-    {VAL_PROMPT1, Z_External_promptObject1, z_PromptObject1 },
-    {VAL_GRS1, Z_External_grs1, z_GenericRecord},
-    {VAL_EXTENDED, Z_External_extendedService, z_TaskPackage},
-    {VAL_ITEMORDER, Z_External_itemOrder, z_ItemOrder},
-    {VAL_DIAG1, Z_External_diag1, z_DiagnosticFormat},
-    {VAL_ESPEC1, Z_External_espec1, z_Espec1},
-    {VAL_SUMMARY, Z_External_summary, z_BriefBib},
-    {VAL_OPAC, Z_External_OPAC, z_OPACRecord},
-    {VAL_SEARCHRES1, Z_External_searchResult1, z_SearchInfoReport},
-    {VAL_DBUPDATE, Z_External_update, z_IUUpdate},
-    {VAL_DATETIME, Z_External_dateTime, z_DateTime},
+    {VAL_SUTRS, Z_External_sutrs, (Odr_fun) z_SUTRS},
+    {VAL_EXPLAIN, Z_External_explainRecord, (Odr_fun)z_ExplainRecord},
+    {VAL_RESOURCE1, Z_External_resourceReport1, (Odr_fun)z_ResourceReport1},
+    {VAL_RESOURCE2, Z_External_resourceReport2, (Odr_fun)z_ResourceReport2},
+    {VAL_PROMPT1, Z_External_promptObject1, (Odr_fun)z_PromptObject1 },
+    {VAL_GRS1, Z_External_grs1, (Odr_fun)z_GenericRecord},
+    {VAL_EXTENDED, Z_External_extendedService, (Odr_fun)z_TaskPackage},
+    {VAL_ITEMORDER, Z_External_itemOrder, (Odr_fun)z_ItemOrder},
+    {VAL_DIAG1, Z_External_diag1, (Odr_fun)z_DiagnosticFormat},
+    {VAL_ESPEC1, Z_External_espec1, (Odr_fun)z_Espec1},
+    {VAL_SUMMARY, Z_External_summary, (Odr_fun)z_BriefBib},
+    {VAL_OPAC, Z_External_OPAC, (Odr_fun)z_OPACRecord},
+    {VAL_SEARCHRES1, Z_External_searchResult1, (Odr_fun)z_SearchInfoReport},
+    {VAL_DBUPDATE, Z_External_update, (Odr_fun)z_IUUpdate},
+    {VAL_DATETIME, Z_External_dateTime, (Odr_fun)z_DateTime},
     {VAL_NONE, 0, 0}
 };
 
@@ -97,31 +100,31 @@ int z_External(ODR o, Z_External **p, int opt)
 
     static Odr_arm arm[] =
     {
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_single, odr_any},
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_External_octet, odr_octetstring},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_External_arbitrary, odr_bitstring},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_single, (Odr_fun)odr_any},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_External_octet, (Odr_fun)odr_octetstring},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_External_arbitrary, (Odr_fun)odr_bitstring},
 
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_sutrs, z_SUTRS},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_sutrs, (Odr_fun)z_SUTRS},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_explainRecord,
-	    z_ExplainRecord},
+	    (Odr_fun)z_ExplainRecord},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_resourceReport1,
-	    z_ResourceReport1},
+	    (Odr_fun)z_ResourceReport1},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_resourceReport2,
-	    z_ResourceReport2},
+	    (Odr_fun)z_ResourceReport2},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_promptObject1,
-	    z_PromptObject1},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_grs1, z_GenericRecord},
+	    (Odr_fun)z_PromptObject1},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_grs1, (Odr_fun)z_GenericRecord},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_extendedService,
-	    z_TaskPackage},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, z_ItemOrder},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1, z_DiagnosticFormat},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_espec1, z_Espec1},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_summary, z_BriefBib},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_OPAC, z_OPACRecord},
+	    (Odr_fun)z_TaskPackage},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, (Odr_fun)z_ItemOrder},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1, (Odr_fun)z_DiagnosticFormat},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_espec1, (Odr_fun)z_Espec1},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_summary, (Odr_fun)z_BriefBib},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_OPAC, (Odr_fun)z_OPACRecord},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_searchResult1,
-	    z_SearchInfoReport},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update, z_IUUpdate},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_dateTime, z_DateTime},
+	    (Odr_fun)z_SearchInfoReport},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update, (Odr_fun)z_IUUpdate},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_dateTime, (Odr_fun)z_DateTime},
 	{-1, -1, -1, -1, 0}
     };
 

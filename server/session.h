@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.14  1998-02-10 11:03:57  adam
+ * Revision 1.15  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.14  1998/02/10 11:03:57  adam
  * Added support for extended handlers in backend server interface.
  *
  * Revision 1.13  1998/01/29 13:30:23  adam
@@ -62,15 +65,17 @@
 #include <sys/types.h>
 #include "eventl.h"
 
+typedef enum {
+   	REQUEST_IDLE,    /* the request is just sitting in the queue */
+	REQUEST_PENDING  /* operation pending (b'end processing or network I/O*/
+	/* this list will have more elements when acc/res control is added */
+} request_state;
+
 typedef struct request
 {
     int len_refid;          /* length of referenceid */
     char *refid;            /* referenceid */
-    enum {
-    	REQUEST_IDLE,    /* the request is just sitting in the queue */
-	REQUEST_PENDING  /* operation pending (b'end processing or network I/O*/
-	/* this list will have more elements when acc/res control is added */
-    } state;
+    request_state state;
 
     Z_APDU *request;        /* Current request */
     NMEM request_mem;    /* memory handle for request */
@@ -95,6 +100,13 @@ typedef struct request_q
 /*
  * association state.
  */
+typedef enum
+{
+   	ASSOC_NEW,                /* not initialized yet */
+	ASSOC_UP,                 /* normal operation */
+	ASSOC_DEAD                /* dead. Close if input arrives */
+} association_state;
+
 typedef struct association
 {
     IOCHAN client_chan;           /* event-loop control */
@@ -111,12 +123,7 @@ typedef struct association
     void *backend;                /* backend handle */
     request_q incoming;           /* Q of incoming PDUs */
     request_q outgoing;           /* Q of outgoing data buffers (enc. PDUs) */
-    enum
-    {
-    	ASSOC_NEW,                /* not initialized yet */
-	ASSOC_UP,                 /* normal operation */
-	ASSOC_DEAD                /* dead. Close if input arrives */
-    } state;
+    association_state state;
 
     /* session parameters */
     int preferredMessageSize;
@@ -135,6 +142,7 @@ void ir_session(IOCHAN h, int event);
 void request_enq(request_q *q, request *r);
 request *request_head(request_q *q);
 request *request_deq(request_q *q);
+request *request_deq_x(request_q *q, request *r);
 void request_initq(request_q *q);
 void request_delq(request_q *q);
 request *request_get(request_q *q);

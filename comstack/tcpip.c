@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.18  1997-09-29 07:15:25  adam
+ * Revision 1.19  1998-02-11 11:53:33  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.18  1997/09/29 07:15:25  adam
  * Changed use of setsockopt to avoid warnings on MSVC.
  *
  * Revision 1.17  1997/09/17 12:10:30  adam
@@ -136,6 +139,10 @@
 #include <comstack.h>
 #include <tcpip.h>
 
+/* Chas added the following 2, so we get the definition of completeBER */
+#include <odr.h>
+#include <prt.h>
+
 int tcpip_close(COMSTACK h);
 int tcpip_put(COMSTACK h, char *buf, int size);
 int tcpip_get(COMSTACK h, char **buf, int *bufsize);
@@ -151,7 +158,9 @@ void *tcpip_straddr(COMSTACK h, const char *str);
 /*
  * Determine length/completeness of incoming packages
  */
-int completeBER(unsigned char *buf, int len); /* from the ODR module */
+/* Chas: Removed the definition of completeBERfrom here, use the one in the */
+/* include directory as that as the extern "C" around it */
+/*int completeBER(unsigned char *buf, int len); */ /* from the ODR module */
 int completeWAIS(unsigned char *buf, int len); /* from waislen.c */
 
 #ifdef TRACE_TCPIP
@@ -226,9 +235,10 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
     }
     else
 	new_socket = 0;
-    if (!(p = xmalloc(sizeof(struct comstack))))
+    if (!(p = (struct comstack *)xmalloc(sizeof(struct comstack))))
 	return 0;
-    if (!(state = p->cprivate = xmalloc(sizeof(tcpip_state))))
+    if (!(state = (struct tcpip_state *)(p->cprivate =
+                                         xmalloc(sizeof(tcpip_state)))))
 	return 0;
 
 #ifdef WINDOWS
@@ -305,7 +315,7 @@ static int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add)
 
 void *tcpip_straddr(COMSTACK h, const char *str)
 {
-    tcpip_state *sp = h->cprivate;
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
 
     if (!tcpip_strtoaddr_ex (str, &sp->addr))
 	return 0;
@@ -323,7 +333,7 @@ struct sockaddr_in *tcpip_strtoaddr(const char *str)
 
 int tcpip_more(COMSTACK h)
 {
-    tcpip_state *sp = h->cprivate;
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
     
     return sp->altlen && (*sp->complete)((unsigned char *) sp->altbuf,
 	sp->altlen);
@@ -336,7 +346,7 @@ int tcpip_more(COMSTACK h)
  */
 int tcpip_connect(COMSTACK h, void *address)
 {
-    struct sockaddr_in *add = address;
+    struct sockaddr_in *add = (struct sockaddr_in *)address;
 
     TRC(fprintf(stderr, "tcpip_connect\n"));
     if (connect(h->iofile, (struct sockaddr *) add, sizeof(*add)) < 0)
@@ -364,7 +374,7 @@ int tcpip_rcvconnect(COMSTACK h)
 
 int tcpip_bind(COMSTACK h, void *address, int mode)
 {
-    struct sockaddr *addr = address;
+    struct sockaddr *addr = (struct sockaddr *)address;
 #ifdef WINDOWS
     BOOL one = 1;
 #else
@@ -372,7 +382,7 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
 #endif
 
     TRC(fprintf(stderr, "tcpip_bind\n"));
-    if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (void*) 
+    if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*) 
 	&one, sizeof(one)) < 0)
     {
         h->cerrno = CSYSERR;
@@ -427,7 +437,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen)
 COMSTACK tcpip_accept(COMSTACK h)
 {
     COMSTACK cnew;
-    tcpip_state *state, *st = h->cprivate;
+    tcpip_state *state, *st = (tcpip_state *)h->cprivate;
 #ifdef WINDOWS
     unsigned long tru = 1;
 #endif
@@ -438,14 +448,14 @@ COMSTACK tcpip_accept(COMSTACK h)
         h->cerrno = CSOUTSTATE;
         return 0;
     }
-    if (!(cnew = xmalloc(sizeof(*cnew))))
+    if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
     {
         h->cerrno = CSYSERR;
         return 0;
     }
     memcpy(cnew, h, sizeof(*h));
     cnew->iofile = h->newfd;
-    if (!(state = cnew->cprivate = xmalloc(sizeof(tcpip_state))))
+    if (!(state = (tcpip_state *)(cnew->cprivate = xmalloc(sizeof(tcpip_state)))))
     {
         h->cerrno = CSYSERR;
         return 0;
@@ -473,7 +483,7 @@ COMSTACK tcpip_accept(COMSTACK h)
  */
 int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 {
-    tcpip_state *sp = h->cprivate;
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
     char *tmpc;
     int tmpi, berlen, rest, req, tomove;
     int hasread = 0, res;
@@ -496,11 +506,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     {
         if (!*bufsize)
         {
-            if (!(*buf = xmalloc(*bufsize = CS_TCPIP_BUFCHUNK)))
+            if (!(*buf = (char *)xmalloc(*bufsize = CS_TCPIP_BUFCHUNK)))
                 return -1;
         }
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
-            if (!(*buf =xrealloc(*buf, *bufsize *= 2)))
+            if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
                 return -1;
         if ((res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0)) < 0)
 #ifdef WINDOWS
@@ -527,10 +537,10 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             req += CS_TCPIP_BUFCHUNK - rest;
         if (!sp->altbuf)
         {
-            if (!(sp->altbuf = xmalloc(sp->altsize = req)))
+            if (!(sp->altbuf = (char *)xmalloc(sp->altsize = req)))
                 return -1;
         } else if (sp->altsize < req)
-            if (!(sp->altbuf =xrealloc(sp->altbuf, sp->altsize = req)))
+            if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
                 return -1;
         TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
             (unsigned) sp->altbuf));
@@ -549,7 +559,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 int tcpip_put(COMSTACK h, char *buf, int size)
 {
     int res;
-    struct tcpip_state *state = h->cprivate;
+    struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
 
     TRC(fprintf(stderr, "tcpip_put: size=%d\n", size));
     if (state->towrite < 0)
@@ -590,7 +600,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 
 int tcpip_close(COMSTACK h)
 {
-    tcpip_state *sp = h->cprivate;
+    tcpip_state *sp = (struct tcpip_state *)h->cprivate;
 
     TRC(fprintf(stderr, "tcpip_close\n"));
     if (h->iofile != -1)
@@ -609,7 +619,7 @@ int tcpip_close(COMSTACK h)
 char *tcpip_addrstr(COMSTACK h)
 {
     struct sockaddr_in addr;
-    tcpip_state *sp = h->cprivate;
+    tcpip_state *sp = (struct tcpip_state *)h->cprivate;
     char *r, *buf = sp->buf;
     int len;
     struct hostent *host;

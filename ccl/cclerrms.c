@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclerrms.c,v $
- * Revision 1.6  1997-09-29 08:56:37  adam
+ * Revision 1.7  1998-02-11 11:53:33  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.6  1997/09/29 08:56:37  adam
  * Changed CCL parser to be thread safe. New type, CCL_parser, declared
  * and a create/destructers ccl_parser_create/ccl_parser/destory has
  * been added.
@@ -78,6 +81,9 @@
  * First version of CCL. Qualifiers aren't handled yet.
  *
  */
+
+/* Chas: Required for the correct definition of ccl_err_msg */
+#include "yaz-ccl.h"
 
 static char *err_msg_array[] = {
     "Ok",

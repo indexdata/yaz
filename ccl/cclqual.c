@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.8  1997-09-29 08:56:38  adam
+ * Revision 1.9  1998-02-11 11:53:33  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.8  1997/09/29 08:56:38  adam
  * Changed CCL parser to be thread safe. New type, CCL_parser, declared
  * and a create/destructers ccl_parser_create/ccl_parser/destory has
  * been added.
@@ -122,13 +125,13 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
             break;
     if (!q)
     {
-        struct ccl_qualifier *new_qual = malloc (sizeof(*new_qual));
+        struct ccl_qualifier *new_qual = (struct ccl_qualifier *)malloc (sizeof(*new_qual));
         assert (new_qual);
         
         new_qual->next = b->list;
         b->list = new_qual;
         
-        new_qual->name = malloc (strlen(name)+1);
+        new_qual->name = (char *)malloc (strlen(name)+1);
         assert (new_qual->name);
         strcpy (new_qual->name, name);
         attrp = &new_qual->attr_list;
@@ -143,7 +146,7 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
     {
         struct ccl_rpn_attr *attr;
 
-        attr = malloc (sizeof(*attr));
+        attr = (struct ccl_rpn_attr *)malloc (sizeof(*attr));
         assert (attr);
         attr->type = *pairs++;
         attr->value = *pairs++;
@@ -159,7 +162,7 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *pairs)
  */
 CCL_bibset ccl_qual_mk (void)
 {
-    CCL_bibset b = malloc (sizeof(*b));
+    CCL_bibset b = (CCL_bibset)malloc (sizeof(*b));
     assert (b);
     b->list = NULL;     
     return b;

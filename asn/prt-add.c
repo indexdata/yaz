@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-add.c,v $
- * Revision 1.3  1998-01-05 09:04:57  adam
+ * Revision 1.4  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.3  1998/01/05 09:04:57  adam
  * Fixed bugs in encoders/decoders - Not operator (!) missing.
  *
  * Revision 1.2  1997/04/30 08:52:02  quinn
@@ -32,8 +35,8 @@ int z_ResultsByDBList (ODR o, Z_ResultsByDBList **p, int opt)
 int z_ResultsByDB_elem (ODR o, Z_ResultsByDB_elem **p, int opt)
 {
     static Odr_arm arm[] = {
-        {ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ResultsByDB_all, odr_null},
-        {ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ResultsByDB_list, z_ResultsByDBList},
+        {ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ResultsByDB_all, (Odr_fun)odr_null},
+        {ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ResultsByDB_list, (Odr_fun)z_ResultsByDBList},
         {-1, -1, -1, -1, 0}
     };
     if (!odr_sequence_begin (o, p, sizeof(**p)))
@@ -53,7 +56,7 @@ int z_ResultsByDB (ODR o, Z_ResultsByDB **p, int opt)
 {
     if (!odr_initmember (o, p, sizeof(**p)))
         return opt && odr_ok(o);
-    if (odr_sequence_of (o, z_ResultsByDB_elem, &(*p)->elements,
+    if (odr_sequence_of (o, (Odr_fun)z_ResultsByDB_elem, &(*p)->elements,
         &(*p)->num))
         return 1;
     *p = 0;
@@ -76,8 +79,8 @@ int z_QueryExpression (ODR o, Z_QueryExpression **p, int opt)
 {
     static Odr_arm arm[] = {
         {ODR_IMPLICIT, ODR_CONTEXT, 1, Z_QueryExpression_term,
-         z_QueryExpressionTerm},
-        {ODR_EXPLICIT, ODR_CONTEXT, 2, Z_QueryExpression_query, z_Query},
+         (Odr_fun)z_QueryExpressionTerm},
+        {ODR_EXPLICIT, ODR_CONTEXT, 2, Z_QueryExpression_query, (Odr_fun)z_Query},
         {-1, -1, -1, -1, 0}
     };
     if (!odr_initmember(o, p, sizeof(**p)))
@@ -116,7 +119,7 @@ int z_SearchInfoReport (ODR o, Z_SearchInfoReport **p, int opt)
 {
     if (!odr_initmember (o, p, sizeof(**p)))
         return opt && odr_ok(o);
-    if (odr_sequence_of (o, z_SearchInfoReport_elem, &(*p)->elements,
+    if (odr_sequence_of (o, (Odr_fun)z_SearchInfoReport_elem, &(*p)->elements,
         &(*p)->num))
         return 1;
     *p = 0;

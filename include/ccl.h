@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.8  1997-09-29 09:01:19  adam
+ * Revision 1.9  1998-02-11 11:53:33  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.8  1997/09/29 09:01:19  adam
  * Changed CCL parser to be thread safe. New type, CCL-parser, declared
  * and a create/destructor ccl_parser_create/ccl_parser_destroy has been
  * added.
@@ -262,7 +265,7 @@ struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
                                int *error, const char **pos);
 
 /* Return english-readable error message */
-char *ccl_err_msg (int ccl_errno);
+const char *ccl_err_msg (int ccl_errno);
 
 /* Delete RPN tree returned by ccl_find */
 void ccl_rpn_delete (struct ccl_rpn_node *rpn);

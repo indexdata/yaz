@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.24  1997-11-24 11:33:56  adam
+ * Revision 1.25  1998-02-11 11:53:33  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.24  1997/11/24 11:33:56  adam
  * Using function odr_nullval() instead of global ODR_NULLVAL when
  * appropriate.
  *
@@ -292,7 +295,7 @@ typedef struct odr
     Odr_ber_tag odr_ber_tag;
 } *ODR;
 
-typedef int (*Odr_fun)();
+typedef int (*Odr_fun)(ODR, char **, int);
 
 typedef struct odr_arm
 {

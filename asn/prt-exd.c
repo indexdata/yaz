@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exd.c,v $
- * Revision 1.7  1998-02-10 15:31:46  adam
+ * Revision 1.8  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.7  1998/02/10 15:31:46  adam
  * Implemented date and time structure. Changed the Update Extended
  * Service.
  *
@@ -52,7 +55,7 @@ int z_TaskPackage(ODR o, Z_TaskPackage **p, int opt)
 	    8, 1) &&
         odr_implicit(o, odr_integer, &(*p)->taskStatus, ODR_CONTEXT, 9, 0) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 10) &&
-	(odr_sequence_of(o, z_DiagRec, &(*p)->packageDiagnostics,
+	(odr_sequence_of(o, (Odr_fun)z_DiagRec, &(*p)->packageDiagnostics,
 	    &(*p)->num_packageDiagnostics) || odr_ok(o)) &&
         odr_implicit(o, z_External, &(*p)->taskSpecificParameters, ODR_CONTEXT,
 	    11, 0) &&
@@ -128,16 +131,16 @@ int z_IOBilling(ODR o, Z_IOBilling **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_IOBilling_billInvoice, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_IOBilling_prepay, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_IOBilling_depositAccount, odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_IOBilling_billInvoice, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_IOBilling_prepay, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_IOBilling_depositAccount, (Odr_fun)odr_null},
 	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_IOBilling_creditCard,
-	    z_IOCreditCardInfo},
+	    (Odr_fun)z_IOCreditCardInfo},
 	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_IOBilling_cardInfoPreviouslySupplied,
-	    odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_IOBilling_privateKnown, odr_null},
+	    (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_IOBilling_privateKnown, (Odr_fun)odr_null},
 	{ODR_IMPLICIT, ODR_CONTEXT, 6, Z_IOBilling_privateNotKnown,
-	    z_External},
+	    (Odr_fun)z_External},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -195,14 +198,14 @@ int z_ItemOrder(ODR o, Z_ItemOrder **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ItemOrder_esRequest, z_IORequest},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ItemOrder_esRequest, (Odr_fun)z_IORequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ItemOrder_taskPackage,
-	    z_IOTaskPackage},
+	    (Odr_fun)z_IOTaskPackage},
 	{-1, -1, -1, -1, 0}
     };
 
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_ItemOrder *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -221,7 +224,7 @@ int z_IUSuppliedRecordsId (ODR o, Z_IUSuppliedRecordsId **p, int opt)
         {ODR_IMPLICIT, ODR_CONTEXT, 2, Z_IUSuppliedRecordsId_versionNumber,
          z_InternationalString},
         {ODR_IMPLICIT, ODR_CONTEXT, 3, Z_IUSuppliedRecordsId_previousVersion,
-         odr_external},
+         (Odr_fun)odr_external},
         {-1, -1, -1, -1, 0}
     };
     if (!odr_initmember(o, p, sizeof(**p)))
@@ -248,11 +251,11 @@ int z_IUSuppliedRecords_elem (ODR o, Z_IUSuppliedRecords_elem **p, int opt)
 {
     static Odr_arm arm[] = {
         {ODR_IMPLICIT, ODR_CONTEXT, 1, Z_IUSuppliedRecords_number,
-         odr_integer},
+         (Odr_fun)odr_integer},
         {ODR_IMPLICIT, ODR_CONTEXT, 2, Z_IUSuppliedRecords_string,
-         z_InternationalString},
+         (Odr_fun)z_InternationalString},
         {ODR_IMPLICIT, ODR_CONTEXT, 3, Z_IUSuppliedRecords_opaque,
-         odr_octetstring},
+         (Odr_fun)odr_octetstring},
         {-1, -1, -1, -1, 0}
     };
     if (!odr_sequence_begin (o, p, sizeof(**p)))
@@ -274,7 +277,7 @@ int z_IUSuppliedRecords (ODR o, Z_IUSuppliedRecords **p, int opt)
 {
     if (!odr_initmember (o, p, sizeof(**p)))
         return opt && odr_ok(o);
-    if (odr_sequence_of (o, z_IUSuppliedRecords_elem, &(*p)->elements,
+    if (odr_sequence_of (o, (Odr_fun)z_IUSuppliedRecords_elem, &(*p)->elements,
         &(*p)->num))
         return 1;
     *p = 0;
@@ -286,9 +289,9 @@ int z_IUTaskPackageRecordStructure (ODR o, Z_IUTaskPackageRecordStructure **p,
 {
     static Odr_arm arm[] = {
         {ODR_IMPLICIT, ODR_CONTEXT, 1, Z_IUTaskPackageRecordStructure_record,
-         odr_external},
+         (Odr_fun)odr_external},
         {ODR_EXPLICIT, ODR_CONTEXT, 2, Z_IUTaskPackageRecordStructure_surrogateDiagnostics,
-         z_DiagRecs},
+         (Odr_fun)z_DiagRecs},
         {-1, -1, -1, -1, 0}
     };
     if (!odr_sequence_begin (o, p, sizeof(**p)))
@@ -332,10 +335,10 @@ int z_IUTargetPart (ODR o, Z_IUTargetPart **p, int opt)
         odr_implicit (o, odr_integer,
             &(*p)->updateStatus, ODR_CONTEXT, 1, 0) &&
         odr_implicit_settag (o, ODR_CONTEXT, 2) &&
-        (odr_sequence_of(o, z_DiagRec, &(*p)->globalDiagnostics,
+        (odr_sequence_of(o, (Odr_fun)z_DiagRec, &(*p)->globalDiagnostics,
           &(*p)->num_globalDiagnostics) || odr_ok(o)) &&
         odr_implicit_settag (o, ODR_CONTEXT, 3) &&
-        odr_sequence_of(o, z_IUTaskPackageRecordStructure, &(*p)->taskPackageRecords,
+        odr_sequence_of(o, (Odr_fun)z_IUTaskPackageRecordStructure, &(*p)->taskPackageRecords,
           &(*p)->num_taskPackageRecords) &&
         odr_sequence_end (o);
 }
@@ -368,9 +371,9 @@ int z_IUUpdate (ODR o, Z_IUUpdate **p, int opt)
 {
     static Odr_arm arm[] = {
         {ODR_IMPLICIT, ODR_CONTEXT, 1, Z_IUUpdate_esRequest,
-         z_IUUpdateEsRequest},
+         (Odr_fun)z_IUUpdateEsRequest},
         {ODR_IMPLICIT, ODR_CONTEXT, 2, Z_IUUpdate_taskPackage,
-         z_IUUpdateTaskPackage},
+         (Odr_fun)z_IUUpdateTaskPackage},
         {-1, -1, -1, -1, 0}
     };
     if (!odr_initmember(o, p, sizeof(**p)))

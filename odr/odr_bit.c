@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bit.c,v $
- * Revision 1.10  1995-09-29 17:12:22  quinn
+ * Revision 1.11  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.10  1995/09/29 17:12:22  quinn
  * Smallish
  *
  * Revision 1.9  1995/09/27  15:02:58  quinn
@@ -67,7 +70,7 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt)
     }
     if (o->direction == ODR_DECODE)
     {
-    	*p = odr_malloc(o, sizeof(Odr_bitmask));
+    	*p = (Odr_bitmask *)odr_malloc(o, sizeof(Odr_bitmask));
     	memset((*p)->bits, 0, ODR_BITMASK_SIZE);
     	(*p)->top = -1;
     }

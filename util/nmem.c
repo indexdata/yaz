@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.6  1997-10-31 12:20:09  adam
+ * Revision 1.7  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.6  1997/10/31 12:20:09  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -82,8 +85,8 @@ static nmem_block *get_block(int size)
 
 	if (get < size)
 	    get = size;
-	r = xmalloc(sizeof(*r));
-	r->buf = xmalloc(r->size = get);
+	r = (nmem_block *)xmalloc(sizeof(*r));
+	r->buf = (char *)xmalloc(r->size = get);
     }
     r->top = 0;
     return r;
@@ -148,7 +151,7 @@ NMEM nmem_create(void)
     if (r)
 	cfreelist = cfreelist->next;
     else
-	r = xmalloc(sizeof(*r));
+	r = (nmem_control *)xmalloc(sizeof(*r));
     NMEM_LEAVE;
 
 #if NMEM_DEBUG

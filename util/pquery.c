@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.17  1997-11-24 11:33:57  adam
+ * Revision 1.18  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.17  1997/11/24 11:33:57  adam
  * Using function odr_nullval() instead of global ODR_NULLVAL when
  * appropriate.
  *
@@ -177,9 +180,9 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
     Odr_oct *term_octet;
     Z_Term *term;
 
-    zapt = odr_malloc (o, sizeof(*zapt));
-    term_octet = odr_malloc (o, sizeof(*term_octet));
-    term = odr_malloc (o, sizeof(*term));
+    zapt = (Z_AttributesPlusTerm *)odr_malloc (o, sizeof(*zapt));
+    term_octet = (Odr_oct *)odr_malloc (o, sizeof(*term_octet));
+    term = (Z_Term *)odr_malloc (o, sizeof(*term));
 
     zapt->num_attributes = num_attr;
     if (num_attr)
@@ -187,15 +190,15 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
         int i;
         int *attr_tmp;
 
-        zapt->attributeList = odr_malloc (o, num_attr * 
+        zapt->attributeList = (Z_AttributeElement**)odr_malloc (o, num_attr * 
                                           sizeof(*zapt->attributeList));
 
-        attr_tmp = odr_malloc (o, num_attr * 2 * sizeof(int));
+        attr_tmp = (int *)odr_malloc (o, num_attr * 2 * sizeof(int));
         memcpy (attr_tmp, attr_list, num_attr * 2 * sizeof(int));
         for (i = 0; i < num_attr; i++)
         {
             zapt->attributeList[i] =
-                odr_malloc (o,sizeof(**zapt->attributeList));
+                (Z_AttributeElement*)odr_malloc (o,sizeof(**zapt->attributeList));
             zapt->attributeList[i]->attributeType = &attr_tmp[2*i];
 #ifdef Z_95
             if (attr_set[i] == VAL_NONE)
@@ -220,11 +223,11 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
         }
     }
     else
-        zapt->attributeList = odr_nullval();
+        zapt->attributeList = (Z_AttributeElement**)odr_nullval();
     zapt->term = term;
     term->which = Z_Term_general;
     term->u.general = term_octet;
-    term_octet->buf = odr_malloc (o, li->lex_len);
+    term_octet->buf = (unsigned char *)odr_malloc (o, li->lex_len);
     term_octet->size = term_octet->len = li->lex_len;
     memcpy (term_octet->buf, li->lex_buf, li->lex_len);
     return zapt;
@@ -236,7 +239,7 @@ static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
 {
     Z_Operand *zo;
 
-    zo = odr_malloc (o, sizeof(*zo));
+    zo = (Z_Operand *)odr_malloc (o, sizeof(*zo));
     switch (li->query_look)
     {
     case 't':
@@ -251,7 +254,7 @@ static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
         if (!li->query_look)
             return NULL;
         zo->which = Z_Operand_resultSetId;
-        zo->u.resultSetId = odr_malloc (o, li->lex_len+1);
+        zo->u.resultSetId = (char *)odr_malloc (o, li->lex_len+1);
         memcpy (zo->u.resultSetId, li->lex_buf, li->lex_len);
         zo->u.resultSetId[li->lex_len] = '\0';
         lex (li);
@@ -264,18 +267,18 @@ static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
 
 static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
 {
-    Z_ProximityOperator *p = odr_malloc (o, sizeof(*p));
+    Z_ProximityOperator *p = (Z_ProximityOperator *)odr_malloc (o, sizeof(*p));
 
     if (!lex (li))
         return NULL;
     if (*li->lex_buf == '1')
     {
-        p->exclusion = odr_malloc (o, sizeof(*p->exclusion));
+        p->exclusion = (int *)odr_malloc (o, sizeof(*p->exclusion));
         *p->exclusion = 1;
     } 
     else if (*li->lex_buf == '0')
     {
-        p->exclusion = odr_malloc (o, sizeof(*p->exclusion));
+        p->exclusion = (int *)odr_malloc (o, sizeof(*p->exclusion));
         *p->exclusion = 0;
     }
     else
@@ -283,17 +286,17 @@ static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
 
     if (!lex (li))
         return NULL;
-    p->distance = odr_malloc (o, sizeof(*p->distance));
+    p->distance = (int *)odr_malloc (o, sizeof(*p->distance));
     *p->distance = atoi (li->lex_buf);
 
     if (!lex (li))
         return NULL;
-    p->ordered = odr_malloc (o, sizeof(*p->ordered));
+    p->ordered = (int *)odr_malloc (o, sizeof(*p->ordered));
     *p->ordered = atoi (li->lex_buf);
     
     if (!lex (li))
         return NULL;
-    p->relationType = odr_malloc (o, sizeof(*p->relationType));
+    p->relationType = (int *)odr_malloc (o, sizeof(*p->relationType));
     *p->relationType = atoi (li->lex_buf);
 
     if (!lex (li))
@@ -307,7 +310,7 @@ static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
 
     if (!lex (li))
         return NULL;
-    p->proximityUnitCode = odr_malloc (o, sizeof(*p->proximityUnitCode));
+    p->proximityUnitCode = (int *)odr_malloc (o, sizeof(*p->proximityUnitCode));
     *p->proximityUnitCode = atoi (li->lex_buf);
 
     return p;
@@ -320,8 +323,8 @@ static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
     Z_Complex *zc;
     Z_Operator *zo;
 
-    zc = odr_malloc (o, sizeof(*zc));
-    zo = odr_malloc (o, sizeof(*zo));
+    zc = (Z_Complex *)odr_malloc (o, sizeof(*zc));
+    zo = (Z_Operator *)odr_malloc (o, sizeof(*zo));
     zc->roperator = zo;
     switch (li->query_look)
     {
@@ -366,7 +369,7 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
     Z_RPNStructure *sz;
     const char *cp;
 
-    sz = odr_malloc (o, sizeof(*sz));
+    sz = (Z_RPNStructure *)odr_malloc (o, sizeof(*sz));
     switch (li->query_look)
     {
     case 'a':
@@ -452,7 +455,7 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
     oident oset;
     int oid[OID_SIZE];
 
-    zq = odr_malloc (o, sizeof(*zq));
+    zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
     lex (li);
     if (li->query_look == 'r')
     {

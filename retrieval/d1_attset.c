@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.7  1997-09-17 12:10:34  adam
+ * Revision 1.8  1998-02-11 11:53:35  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.7  1997/09/17 12:10:34  adam
  * YAZ version 1.4.
  *
  * Revision 1.6  1997/09/05 09:50:56  adam
@@ -69,7 +72,7 @@ data1_attset *data1_read_attset(data1_handle dh, char *file)
 	return 0;
     }
 
-    res = nmem_malloc(mem, sizeof(*res));
+    res = (data1_attset *)nmem_malloc(mem, sizeof(*res));
     res->name = 0;
     res->reference = VAL_NONE;
     res->ordinal = -1;
@@ -110,7 +113,7 @@ data1_attset *data1_read_attset(data1_handle dh, char *file)
 	    }
 	    if (rr < 3) /* no local attributes given */
 	    {
-		locals = nmem_malloc(mem, sizeof(*locals));
+		locals = (data1_local_attribute *)nmem_malloc(mem, sizeof(*locals));
 		locals->local = num;
 		locals->next = 0;
 	    }
@@ -120,14 +123,14 @@ data1_attset *data1_read_attset(data1_handle dh, char *file)
 		data1_local_attribute **ap = &locals;
 		do
 		{
-		    *ap = nmem_malloc(mem, sizeof(**ap));
+		    *ap = (data1_local_attribute *)nmem_malloc(mem, sizeof(**ap));
 		    (*ap)->local = atoi(p);
 		    (*ap)->next = 0;
 		    ap = &(*ap)->next;
 		}
 		while ((p = strchr(p, ',')) && *(++p));
 	    }
-	    t = *attp = nmem_malloc(mem, sizeof(*t));
+	    t = *attp = (data1_att *)nmem_malloc(mem, sizeof(*t));
 	    t->parent = res;
 	    t->name = nmem_strdup(mem, name);
 	    t->value = num;

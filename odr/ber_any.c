@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.13  1997-05-14 06:53:56  adam
+ * Revision 1.14  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.13  1997/05/14 06:53:56  adam
  * C++ support.
  *
  * Revision 1.12  1995/09/29 17:12:15  quinn
@@ -60,7 +63,7 @@ int ber_any(ODR o, Odr_any **p)
 	    	o->error = OPROTO;
 	    	return 0;
 	    }
-	    (*p)->buf = odr_malloc(o, res);
+	    (*p)->buf = (unsigned char *)odr_malloc(o, res);
 	    memcpy((*p)->buf, o->bp, res);
 	    (*p)->len = (*p)->size = res;
 	    o->bp += res;

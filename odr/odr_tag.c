@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_tag.c,v $
- * Revision 1.8  1997-05-14 06:53:59  adam
+ * Revision 1.9  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.8  1997/05/14 06:53:59  adam
  * C++ support.
  *
  * Revision 1.7  1996/02/20 12:52:54  quinn
@@ -68,7 +71,7 @@ int odr_initmember(ODR o, void *p, int size)
     if (o->error)
 	return 0;
     if (o->direction == ODR_DECODE)
-	*pp = odr_malloc(o, size);
+	*pp = (char *)odr_malloc(o, size);
     else if (!*pp)
     {
 	o->t_class = -1;

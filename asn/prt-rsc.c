@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-rsc.c,v $
- * Revision 1.5  1995-09-29 17:11:55  quinn
+ * Revision 1.6  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.5  1995/09/29 17:11:55  quinn
  * Smallish
  *
  * Revision 1.4  1995/09/27  15:02:43  quinn
@@ -43,7 +46,7 @@ int z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt)
     	return opt && odr_ok(o);
     return
     	odr_implicit_settag(o, ODR_CONTEXT, 1) &&
-	odr_sequence_of(o, z_Estimate1, &(*p)->estimates,
+	odr_sequence_of(o, (Odr_fun)z_Estimate1, &(*p)->estimates,
 	    &(*p)->num_estimates) &&
 	odr_implicit(o, odr_visiblestring, &(*p)->message, ODR_CONTEXT, 2, 0) &&
 	odr_sequence_end(o);
@@ -70,7 +73,7 @@ if (!odr_sequence_begin(o, p, sizeof(**p)))
     return opt && odr_ok(o);
 return
     odr_implicit_settag(o, ODR_CONTEXT, 1) &&
-    (odr_sequence_of(o, z_Estimate2, &(*p)->estimates,
+    (odr_sequence_of(o, (Odr_fun)z_Estimate2, &(*p)->estimates,
 	&(*p)->num_estimates) || odr_ok(o)) &&
     odr_implicit(o, odr_visiblestring, &(*p)->message, ODR_CONTEXT, 2, 1) &&
     odr_sequence_end(o);

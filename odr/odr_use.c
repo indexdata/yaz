@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_use.c,v $
- * Revision 1.7  1995-09-29 17:12:27  quinn
+ * Revision 1.8  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.7  1995/09/29 17:12:27  quinn
  * Smallish
  *
  * Revision 1.6  1995/09/27  15:03:00  quinn
@@ -35,9 +38,9 @@ int odr_external(ODR o, Odr_external **p, int opt)
     Odr_external *pp;
     static Odr_arm arm[] =
     {
-    	{ODR_EXPLICIT, ODR_CONTEXT, 0, ODR_EXTERNAL_single, odr_any},
-    	{ODR_IMPLICIT, ODR_CONTEXT, 1, ODR_EXTERNAL_octet, odr_octetstring},
-    	{ODR_IMPLICIT, ODR_CONTEXT, 2, ODR_EXTERNAL_arbitrary, odr_bitstring},
+    	{ODR_EXPLICIT, ODR_CONTEXT, 0, ODR_EXTERNAL_single, (Odr_fun)odr_any},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 1, ODR_EXTERNAL_octet, (Odr_fun)odr_octetstring},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 2, ODR_EXTERNAL_arbitrary, (Odr_fun)odr_bitstring},
     	{-1, -1, -1, -1, 0}
     };
 

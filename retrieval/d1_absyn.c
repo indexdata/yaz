@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.16  1997-12-18 10:51:30  adam
+ * Revision 1.17  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.16  1997/12/18 10:51:30  adam
  * Implemented sub-trees feature for schemas - including forward
  * references.
  *
@@ -100,7 +103,7 @@ data1_absyn *data1_absyn_add (data1_handle dh, const char *name)
     char fname[512];
     NMEM mem = data1_nmem_get (dh);
 
-    data1_absyn_cache p = nmem_malloc (mem, sizeof(*p));
+    data1_absyn_cache p = (data1_absyn_cache)nmem_malloc (mem, sizeof(*p));
     data1_absyn_cache *pp = data1_absyn_cache_get (dh);
 
     sprintf(fname, "%s.abs", name);
@@ -208,7 +211,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	return 0;
     }
 
-    res = nmem_malloc(data1_nmem_get(dh), sizeof(*res));
+    res = (data1_absyn *)nmem_malloc(data1_nmem_get(dh), sizeof(*res));
     res->name = 0;
     res->reference = VAL_NONE;
     res->tagset = 0;
@@ -247,7 +250,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
 	    if (!cur_elements)
 	    {
-                cur_elements = nmem_malloc(data1_nmem_get(dh),
+                cur_elements = (data1_sub_elements *)nmem_malloc(data1_nmem_get(dh),
 				    	   sizeof(*cur_elements));
 	        cur_elements->next = res->sub_elements;
 		cur_elements->elements = NULL;
@@ -282,7 +285,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    }
 	    level = i;
 	    new_element = *ppl[level] =
-		nmem_malloc(data1_nmem_get(dh), sizeof(*new_element));
+		(data1_element *)nmem_malloc(data1_nmem_get(dh), sizeof(*new_element));
 	    new_element->next = new_element->children = 0;
 	    new_element->tag = 0;
 	    new_element->termlists = 0;
@@ -321,11 +324,11 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    else if (*p)
 	    {
 		data1_tag *nt =
-		    new_element->tag = nmem_malloc(data1_nmem_get (dh),
+		    new_element->tag = (data1_tag *)nmem_malloc(data1_nmem_get (dh),
 						   sizeof(*new_element->tag));
 		nt->which = DATA1T_string;
 		nt->value.string = nmem_strdup(data1_nmem_get (dh), p);
-		nt->names = nmem_malloc(data1_nmem_get(dh), 
+		nt->names = (data1_name *)nmem_malloc(data1_nmem_get(dh), 
 					sizeof(*new_element->tag->names));
 		nt->names->name = nt->value.string;
 		nt->names->next = 0;
@@ -366,7 +369,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		    }
 		    if (*attname == '!')
 			strcpy(attname, name);
-		    *tp = nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
+		    *tp = (data1_termlist *)nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
 		    (*tp)->next = 0;
 		    if (!((*tp)->att = data1_getattbyname(dh, res->attset,
 							  attname)))
@@ -380,7 +383,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 			(*tp)->structure = "w";
 		    else 
 		    {
-			(*tp)->structure = nmem_malloc (data1_nmem_get (dh),
+			(*tp)->structure = (char *)nmem_malloc (data1_nmem_get (dh),
 							strlen(structure)+1);
 			strcpy ((*tp)->structure, structure);
 		    }
@@ -400,7 +403,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
                                 file, args);
 		continue;
 	    }
-            cur_elements = nmem_malloc(data1_nmem_get(dh),
+            cur_elements = (data1_sub_elements *)nmem_malloc(data1_nmem_get(dh),
 				    	   sizeof(*cur_elements));
 	    cur_elements->next = res->sub_elements;
 	    cur_elements->elements = NULL;
@@ -442,7 +445,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		    fclose(f);
 		    return 0;
 		}
-		*tp = nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
+		*tp = (data1_termlist *)nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
 		if (!((*tp)->att = data1_getattbyname (dh, res->attset,
 						       attname)))
 		{
@@ -455,7 +458,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		    (*tp)->structure = "w";
 		else 
 		{
-		    (*tp)->structure = nmem_malloc (data1_nmem_get (dh),
+		    (*tp)->structure = (char *)nmem_malloc (data1_nmem_get (dh),
 						    strlen(structure)+1);
 		    strcpy ((*tp)->structure, structure);
 		}
@@ -555,7 +558,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		fclose(f);
 		return 0;
 	    }
-	    *esetpp = nmem_malloc(data1_nmem_get(dh), sizeof(**esetpp));
+	    *esetpp = (data1_esetname *)nmem_malloc(data1_nmem_get(dh), sizeof(**esetpp));
 	    (*esetpp)->name = nmem_strdup(data1_nmem_get(dh), name);
 	    (*esetpp)->next = 0;
 	    if (*fname == '@')

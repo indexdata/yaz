@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.7  1998-02-10 11:03:57  adam
+ * Revision 1.8  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.7  1998/02/10 11:03:57  adam
  * Added support for extended handlers in backend server interface.
  *
  * Revision 1.6  1998/01/29 13:16:02  adam
@@ -52,7 +55,7 @@ int ztest_present (void *handle, bend_present_rr *rr);
 
 bend_initresult *bend_init(bend_initrequest *q)
 {
-    bend_initresult *r = odr_malloc (q->stream, sizeof(*r));
+    bend_initresult *r = (bend_initresult *) odr_malloc (q->stream, sizeof(*r));
     static char *dummy = "Hej fister";
 
     r->errcode = 0;
@@ -112,7 +115,7 @@ char *marc_read(FILE *inf)
     size = atoin (length_str, 5);
     if (size <= 6)
         return NULL;
-    if (!(buf = xmalloc (size+1)))
+    if (!(buf = (char*) xmalloc (size+1)))
         return NULL;
     if (fread (buf+5, 1, size-5, inf) != (size-5))
     {
@@ -137,7 +140,7 @@ static char *dummy_database_record (int num)
 	   xfree(buf);
 	if (num == 98)
 	{
-	    assert(buf = xmalloc(2101));
+	    assert(buf = (char*) xmalloc(2101));
 	    memset(buf, 'A', 2100);
 	    buf[2100] = '\0';
 	    break;
@@ -174,7 +177,8 @@ static Z_GenericRecord *dummy_grs_record (int num, ODR o)
 
 bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
 {
-    bend_fetchresult *r = odr_malloc (q->stream, sizeof(*r));
+    bend_fetchresult *r = (bend_fetchresult *)
+			odr_malloc (q->stream, sizeof(*r));
     static char *bbb = 0;
 
     r->errstring = 0;
@@ -191,7 +195,7 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
     	char buf[100];
 
 	sprintf(buf, "This is dummy SUTRS record number %d\n", q->number);
-	assert(r->record = bbb = xmalloc(strlen(buf)+1));
+	assert(r->record = bbb = (char*) xmalloc(strlen(buf)+1));
 	strcpy(bbb, buf);
 	r->len = strlen(buf);
     }
@@ -249,7 +253,7 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
  */
 bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
 {
-    bend_scanresult *r = odr_malloc (q->stream, sizeof(*r));
+    bend_scanresult *r = (bend_scanresult *) odr_malloc (q->stream, sizeof(*r));
     static FILE *f = 0;
     static struct scan_entry list[200];
     static char entries[200][80];

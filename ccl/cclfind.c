@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.9  1997-09-29 08:56:37  adam
+ * Revision 1.10  1998-02-11 11:53:33  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.9  1997/09/29 08:56:37  adam
  * Changed CCL parser to be thread safe. New type, CCL_parser, declared
  * and a create/destructers ccl_parser_create/ccl_parser/destory has
  * been added.
@@ -172,7 +175,7 @@ static void strxcat (char *n, const char *src, int len)
  */
 static char *copy_token_name (struct ccl_token *tp)
 {
-    char *str = malloc (tp->len + 1);
+    char *str = (char *)malloc (tp->len + 1);
     assert (str);
     memcpy (str, tp->name, tp->len);
     str[tp->len] = '\0';
@@ -187,7 +190,7 @@ static char *copy_token_name (struct ccl_token *tp)
 static struct ccl_rpn_node *mk_node (int kind)
 {
     struct ccl_rpn_node *p;
-    p = malloc (sizeof(*p));
+    p = (struct ccl_rpn_node *)malloc (sizeof(*p));
     assert (p);
     p->kind = kind;
     return p;
@@ -244,7 +247,7 @@ static void add_attr (struct ccl_rpn_node *p, int type, int value)
 {
     struct ccl_rpn_attr *n;
 
-    n = malloc (sizeof(*n));
+    n = (struct ccl_rpn_attr *)malloc (sizeof(*n));
     assert (n);
     n->type = type;
     n->value = value;
@@ -288,7 +291,7 @@ static struct ccl_rpn_node *search_term (CCL_parser cclp,
     {
         /* no qualifier(s) applied. Use 'term' if it is defined */
 
-        qa = malloc (2*sizeof(*qa));
+        qa = (struct ccl_rpn_attr **)malloc (2*sizeof(*qa));
 	assert (qa);
 	qa[0] = ccl_qual_search (cclp, "term", 4);
 	qa[1] = NULL;
@@ -366,7 +369,7 @@ static struct ccl_rpn_node *search_term (CCL_parser cclp,
     }
 
     /* make the RPN token */
-    p->u.t.term = malloc (len);
+    p->u.t.term = (char *)malloc (len);
     assert (p->u.t.term);
     p->u.t.term[0] = '\0';
     for (i = 0; i<no; i++)
@@ -454,7 +457,7 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
     if (qa)
         for (i=0; qa[i]; i++)
 	    no++;
-    ap = malloc ((no+1) * sizeof(*ap));
+    ap = (struct ccl_rpn_attr **)malloc ((no+1) * sizeof(*ap));
     assert (ap);
     for (i = 0; cclp->look_token != la; i++)
     {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.11  1997-11-24 11:33:57  adam
+ * Revision 1.12  1998-02-11 11:53:36  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.11  1997/11/24 11:33:57  adam
  * Using function odr_nullval() instead of global ODR_NULLVAL when
  * appropriate.
  *
@@ -36,13 +39,13 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
     Odr_oct *term_octet;
     Z_Term *term;
 
-    zapt = odr_malloc (o, sizeof(*zapt));
+    zapt = (Z_AttributesPlusTerm *)odr_malloc (o, sizeof(*zapt));
     assert (zapt);
 
-    term_octet = odr_malloc (o, sizeof(*term_octet));
+    term_octet = (Odr_oct *)odr_malloc (o, sizeof(*term_octet));
     assert (term_octet);
 
-    term = odr_malloc (o, sizeof(*term));
+    term = (Z_Term *)odr_malloc (o, sizeof(*term));
     assert(term);
 
     for (attr = p->u.t.attr_list; attr; attr = attr->next)
@@ -51,31 +54,31 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
     if (num)
     {
         int i = 0;
-        zapt->attributeList = odr_malloc (o, num*sizeof(*zapt->attributeList));
+        zapt->attributeList = (Z_AttributeElement **)odr_malloc (o, num*sizeof(*zapt->attributeList));
         assert (zapt->attributeList);
         for (attr = p->u.t.attr_list; attr; attr = attr->next, i++)
         {
             zapt->attributeList[i] =
-		odr_malloc (o, sizeof(**zapt->attributeList));
+		(Z_AttributeElement *)odr_malloc (o, sizeof(**zapt->attributeList));
             assert (zapt->attributeList[i]);
             zapt->attributeList[i]->attributeType =
-		odr_malloc(o, sizeof(int));
+		(int *)odr_malloc(o, sizeof(int));
             *zapt->attributeList[i]->attributeType = attr->type;
 	    zapt->attributeList[i]->attributeSet = 0;
 	    zapt->attributeList[i]->which = Z_AttributeValue_numeric;
 	    zapt->attributeList[i]->value.numeric =
-		odr_malloc (o, sizeof(int));
+		(int *)odr_malloc (o, sizeof(int));
 	    *zapt->attributeList[i]->value.numeric = attr->value;
         }
     }
     else
-        zapt->attributeList = odr_nullval();
+        zapt->attributeList = (Z_AttributeElement**)odr_nullval();
     
     zapt->term = term;
     term->which = Z_Term_general;
     term->u.general = term_octet;
     term_octet->len = term_octet->size = strlen (p->u.t.term);
-    term_octet->buf = odr_malloc (o, term_octet->len+1);
+    term_octet->buf = (unsigned char *)odr_malloc (o, term_octet->len+1);
     strcpy ((char*) term_octet->buf, p->u.t.term);
     return zapt;
 }
@@ -84,7 +87,7 @@ static Z_Operand *ccl_rpn_simple (ODR o, struct ccl_rpn_node *p)
 {
     Z_Operand *zo;
 
-    zo = odr_malloc (o, sizeof(*zo));
+    zo = (Z_Operand *)odr_malloc (o, sizeof(*zo));
     assert (zo);
 
     switch (p->kind)
@@ -108,9 +111,9 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
     Z_Complex *zc;
     Z_Operator *zo;
 
-    zc = odr_malloc (o, sizeof(*zc));
+    zc = (Z_Complex *)odr_malloc (o, sizeof(*zc));
     assert (zc);
-    zo = odr_malloc (o, sizeof(*zo));
+    zo = (Z_Operator *)odr_malloc (o, sizeof(*zo));
     assert (zo);
 
     zc->roperator = zo;
@@ -140,7 +143,7 @@ static Z_RPNStructure *ccl_rpn_structure (ODR o, struct ccl_rpn_node *p)
 {
     Z_RPNStructure *zs;
 
-    zs = odr_malloc (o, sizeof(*zs));
+    zs = (Z_RPNStructure *)odr_malloc (o, sizeof(*zs));
     assert (zs);
     switch (p->kind)
     {
@@ -166,7 +169,7 @@ Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p)
 {
     Z_RPNQuery *zq;
 
-    zq = odr_malloc (o, sizeof(*zq));
+    zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
     assert (zq);
     zq->attributeSetId = NULL;
     zq->RPNStructure = ccl_rpn_structure (o, p);

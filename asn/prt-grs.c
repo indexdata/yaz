@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-grs.c,v $
- * Revision 1.6  1997-05-14 06:53:23  adam
+ * Revision 1.7  1998-02-11 11:53:32  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.6  1997/05/14 06:53:23  adam
  * C++ support.
  *
  * Revision 1.5  1995/10/18 16:12:20  quinn
@@ -41,10 +44,10 @@ int z_Variant(ODR o, Z_Variant **p, int opt);
 int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt)
 {
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_GenericRecord *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
-    if (odr_sequence_of(o, z_TaggedElement, &(*p)->elements, &(*p)->num_elements))
+    if (odr_sequence_of(o, (Odr_fun)z_TaggedElement, &(*p)->elements, &(*p)->num_elements))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);
@@ -68,26 +71,26 @@ int z_ElementData(ODR o, Z_ElementData **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_NONE, -1, -1, Z_ElementData_octets, odr_octetstring},
-	{ODR_NONE, -1, -1, Z_ElementData_numeric, odr_integer},
-	{ODR_NONE, -1, -1, Z_ElementData_date, odr_generalizedtime},
-	{ODR_NONE, -1, -1, Z_ElementData_ext, z_External},
-	{ODR_NONE, -1, -1, Z_ElementData_string, z_InternationalString},
+	{ODR_NONE, -1, -1, Z_ElementData_octets, (Odr_fun)odr_octetstring},
+	{ODR_NONE, -1, -1, Z_ElementData_numeric, (Odr_fun)odr_integer},
+	{ODR_NONE, -1, -1, Z_ElementData_date, (Odr_fun)odr_generalizedtime},
+	{ODR_NONE, -1, -1, Z_ElementData_ext, (Odr_fun)z_External},
+	{ODR_NONE, -1, -1, Z_ElementData_string, (Odr_fun)z_InternationalString},
 	/* The entry below provides some backwards compatibility */
-	{ODR_NONE, -1, -1, Z_ElementData_string, odr_visiblestring},
-	{ODR_NONE, -1, -1, Z_ElementData_trueOrFalse, odr_bool},
-	{ODR_NONE, -1, -1, Z_ElementData_oid, odr_oid},
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ElementData_intUnit, z_IntUnit},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ElementData_elementNotThere, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_ElementData_elementEmpty, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_ElementData_noDataRequested, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_ElementData_diagnostic, z_External},
-	{ODR_EXPLICIT, ODR_CONTEXT, 6, Z_ElementData_subtree, z_GenericRecord},
+	{ODR_NONE, -1, -1, Z_ElementData_string, (Odr_fun)odr_visiblestring},
+	{ODR_NONE, -1, -1, Z_ElementData_trueOrFalse, (Odr_fun)odr_bool},
+	{ODR_NONE, -1, -1, Z_ElementData_oid, (Odr_fun)odr_oid},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ElementData_intUnit, (Odr_fun)z_IntUnit},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ElementData_elementNotThere, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_ElementData_elementEmpty, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_ElementData_noDataRequested, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_ElementData_diagnostic, (Odr_fun)z_External},
+	{ODR_EXPLICIT, ODR_CONTEXT, 6, Z_ElementData_subtree, (Odr_fun)z_GenericRecord},
 	{-1, -1, -1, -1, 0}
     };
     
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_ElementData *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -104,12 +107,12 @@ int z_ElementMetaData(ODR o, Z_ElementMetaData **p, int opt)
         odr_implicit(o, z_Order, &(*p)->seriesOrder, ODR_CONTEXT, 1, 1) &&
         odr_implicit(o, z_Usage, &(*p)->usageRight, ODR_CONTEXT, 2, 1) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 3) &&
-	(odr_sequence_of(o, z_HitVector, &(*p)->hits, &(*p)->num_hits) ||
+	(odr_sequence_of(o, (Odr_fun)z_HitVector, &(*p)->hits, &(*p)->num_hits) ||
 	    odr_ok(o)) &&
         odr_implicit(o, z_InternationalString, &(*p)->displayName, ODR_CONTEXT,
 	    4, 1) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 5) &&
-	(odr_sequence_of(o, z_Variant, &(*p)->supportedVariants,
+	(odr_sequence_of(o, (Odr_fun)z_Variant, &(*p)->supportedVariants,
 	    &(*p)->num_supportedVariants) || odr_ok(o)) &&
         odr_implicit(o, z_InternationalString, &(*p)->message, ODR_CONTEXT,
 	    6, 1) &&
@@ -135,10 +138,10 @@ int z_TagUnit(ODR o, Z_TagUnit **p, int opt)
 int z_TagPath(ODR o, Z_TagPath **p, int opt)
 {
     if (o->direction == ODR_DECODE)
-	*p = odr_malloc(o, sizeof(**p));
+	*p = (Z_TagPath *)odr_malloc(o, sizeof(**p));
     else if (!*p)
 	return opt;
-    if (odr_sequence_of(o, z_TagUnit, &(*p)->tags, &(*p)->num_tags))
+    if (odr_sequence_of(o, (Odr_fun)z_TagUnit, &(*p)->tags, &(*p)->num_tags))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);
@@ -183,16 +186,16 @@ int z_Triple(ODR o, Z_Triple **p, int opt)
 {
     static Odr_arm arm[] =
     {
-	{ODR_NONE, -1, -1, Z_Triple_integer, odr_integer},
-	{ODR_NONE, -1, -1, Z_Triple_internationalString, z_InternationalString},
+	{ODR_NONE, -1, -1, Z_Triple_integer, (Odr_fun)odr_integer},
+	{ODR_NONE, -1, -1, Z_Triple_internationalString, (Odr_fun)z_InternationalString},
 	/* The entry below provides some backwards compatibility */
-	{ODR_NONE, -1, -1, Z_Triple_internationalString, odr_visiblestring},
-	{ODR_NONE, -1, -1, Z_Triple_octetString, odr_octetstring},
-	{ODR_NONE, -1, -1, Z_Triple_oid, odr_oid},
-	{ODR_NONE, -1, -1, Z_Triple_boolean, odr_bool},
-	{ODR_NONE, -1, -1, Z_Triple_null, odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Triple_unit, z_Unit},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Triple_valueAndUnit, z_IntUnit},
+	{ODR_NONE, -1, -1, Z_Triple_internationalString, (Odr_fun)odr_visiblestring},
+	{ODR_NONE, -1, -1, Z_Triple_octetString, (Odr_fun)odr_octetstring},
+	{ODR_NONE, -1, -1, Z_Triple_oid, (Odr_fun)odr_oid},
+	{ODR_NONE, -1, -1, Z_Triple_boolean, (Odr_fun)odr_bool},
+	{ODR_NONE, -1, -1, Z_Triple_null, (Odr_fun)odr_null},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Triple_unit, (Odr_fun)z_Unit},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_Triple_valueAndUnit, (Odr_fun)z_IntUnit},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -216,6 +219,6 @@ int z_Variant(ODR o, Z_Variant **p, int opt)
         odr_implicit(o, odr_oid, &(*p)->globalVariantSetId, ODR_CONTEXT,
 	    1, 1) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 2) &&
-	odr_sequence_of(o, z_Triple, &(*p)->triples, &(*p)->num_triples) &&
+	odr_sequence_of(o, (Odr_fun)z_Triple, &(*p)->triples, &(*p)->num_triples) &&
 	odr_sequence_end(o);
 }

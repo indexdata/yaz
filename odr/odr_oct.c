@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.11  1995-09-29 17:12:25  quinn
+ * Revision 1.12  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.11  1995/09/29 17:12:25  quinn
  * Smallish
  *
  * Revision 1.10  1995/09/27  15:02:59  quinn
@@ -67,7 +70,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
     }
     if (o->direction == ODR_DECODE)
     {
-    	*p = odr_malloc(o, sizeof(Odr_oct));
+    	*p = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct));
     	(*p)->size= 0;
     	(*p)->len = 0;
     	(*p)->buf = 0;
@@ -102,7 +105,7 @@ int odr_cstring(ODR o, char **p, int opt)
     	fprintf(o->print, "%s'%s'\n", odr_indent(o), *p);
     	return 1;
     }
-    t = odr_malloc(o, sizeof(Odr_oct));   /* wrapper for octstring */
+    t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct));   /* wrapper for octstring */
     if (o->direction == ODR_ENCODE)
     {
     	t->buf = (unsigned char *) *p;

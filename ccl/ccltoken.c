@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.8  1997-09-29 08:56:38  adam
+ * Revision 1.9  1998-02-11 11:53:33  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.8  1997/09/29 08:56:38  adam
  * Changed CCL parser to be thread safe. New type, CCL_parser, declared
  * and a create/destructers ccl_parser_create/ccl_parser/destory has
  * been added.
@@ -155,13 +158,13 @@ struct ccl_token *ccl_token_simple (const char *command)
 	}
 	if (!first)
 	{
-	    first = last = malloc (sizeof (*first));
+	    first = last = (struct ccl_token *)malloc (sizeof (*first));
 	    assert (first);
 	    last->prev = NULL;
 	}
 	else
 	{
-	    last->next = malloc (sizeof(*first));
+	    last->next = (struct ccl_token *)malloc (sizeof(*first));
 	    assert (last->next);
 	    last->next->prev = last;
 	    last = last->next;
@@ -218,13 +221,13 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 	}
 	if (!first)
 	{
-	    first = last = malloc (sizeof (*first));
+	    first = last = (struct ccl_token *)malloc (sizeof (*first));
 	    assert (first);
 	    last->prev = NULL;
 	}
 	else
 	{
-	    last->next = malloc (sizeof(*first));
+	    last->next = (struct ccl_token *)malloc (sizeof(*first));
 	    assert (last->next);
 	    last->next->prev = last;
 	    last = last->next;
@@ -333,7 +336,7 @@ void ccl_token_del (struct ccl_token *list)
 
 CCL_parser ccl_parser_create (void)
 {
-    CCL_parser p = malloc (sizeof(*p));
+    CCL_parser p = (CCL_parser)malloc (sizeof(*p));
     if (!p)
 	return p;
     p->look_token = NULL;

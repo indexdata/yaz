@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.12  1995-11-08 17:41:33  quinn
+ * Revision 1.13  1998-02-11 11:53:34  adam
+ * Changed code so that it compiles as C++.
+ *
+ * Revision 1.12  1995/11/08 17:41:33  quinn
  * Smallish.
  *
  * Revision 1.11  1995/11/01  13:54:43  quinn
@@ -88,9 +91,9 @@ int odr_grow_block(odr_ecblock *b, int min_bytes)
     	togrow = b->size;
     if (togrow < min_bytes)
     	togrow = min_bytes;
-    if (b->size && !(b->buf =xrealloc(b->buf, b->size += togrow)))
+    if (b->size && !(b->buf =(unsigned char *)xrealloc(b->buf, b->size += togrow)))
     	abort();
-    else if (!b->size && !(b->buf = xmalloc(b->size = togrow)))
+    else if (!b->size && !(b->buf = (unsigned char *)xmalloc(b->size = togrow)))
     	abort();
 #ifdef ODR_DEBUG
     fprintf(stderr, "New size for encode_buffer: %d\n", b->size);
