@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.13 2005-02-02 20:50:38 adam Exp $
+ * $Id: marcdisp.c,v 1.14 2005-02-02 23:07:56 adam Exp $
  */
 
 /**
@@ -459,7 +459,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             break;
         case YAZ_MARC_MARCXML:
             if (identifier_flag)
-                wrbuf_puts (wr, "</datafield>\n");
+                wrbuf_puts (wr, "  </datafield>\n");
             else
                 wrbuf_puts (wr, "</controlfield>\n");
             break;
