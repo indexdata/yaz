@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.28 2005-03-08 13:59:08 adam Exp $
+ * $Id: statserv.c,v 1.29 2005-03-14 11:14:21 adam Exp $
  */
 
 /**
@@ -38,6 +38,7 @@
 #if HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/xinclude.h>
 #endif
 
 #if YAZ_POSIX_THREADS
@@ -442,6 +443,16 @@ static void xml_config_open()
 	{
 	    yaz_log(YLOG_FATAL, "Could not parse %s", control_block.xml_config);
 	    exit(1);
+	}
+	else
+	{
+	    int noSubstitutions = xmlXIncludeProcess(xml_config_doc);
+	    if (noSubstitutions == -1)
+	    {
+		yaz_log(YLOG_WARN, "XInclude processing failed for config %s",
+			control_block.xml_config);
+		exit(1);
+	    }
 	}
     }
     xml_config_read();
