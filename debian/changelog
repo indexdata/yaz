@@ -1,3 +1,9 @@
+yaz (2.0.11-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 16 Feb 2004 12:30:20 +0100
+
 yaz (2.0.10-1) unstable; urgency=low
 
   * Update Debian rules to newer policy.
