@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.32 2003-07-14 12:59:23 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.33 2003-11-17 15:00:41 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -172,6 +172,32 @@
         separated by character plus (<literal>+</literal>), which to
         be used by subsequent search requests on this Connection.
        </entry><entry>Default</entry></row>
+      <row><entry>
+        piggyback</entry><entry>True (1) if piggyback should be
+        used in searches; false (0) if not.
+       </entry><entry>1</entry></row>
+      <row><entry>
+        smallSetUpperBound</entry><entry>If hits is less than or equal to this
+        value, then target will return all records using small element set name
+       </entry><entry>0</entry></row>
+      <row><entry>
+        largeSetLowerBound</entry><entry>If hits is greater than this
+        value, the target will return no records.
+       </entry><entry>1</entry></row>
+      <row><entry>
+        mediumSetPresentNumber</entry><entry>This value represents
+        the number of records to be returned as part of a search when when
+        hits is less than or equal to large set lower bound and if hits
+        is greater than small set upper bound.
+       </entry><entry>0</entry></row>
+      <row><entry>
+        smallSetElementSetName</entry><entry>
+        The element set name to be used for small result sets.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        mediumSetElementSetName</entry><entry>
+        The element set name to be for medium-sized result sets.
+       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
    </table>
@@ -348,10 +374,6 @@
      </thead>
      <tbody>
       <row><entry>
-        piggyback</entry><entry>True (1) if piggyback should be
-        used in searches; false (0) if not.
-       </entry><entry>1</entry></row>
-      <row><entry>
         start</entry><entry>Offset of first record to be 
         retrieved from target. First record has offset 0 unlike the
         protocol specifications where first record has position 1.
@@ -377,28 +399,6 @@
         <literal>Gils-schema</literal>, <literal>Geo-schema</literal>, etc.
        </entry><entry>none</entry></row>
       <row><entry>
-        smallSetUpperBound</entry><entry>If hits is less than or equal to this
-        value, then target will return all records using small element set name
-       </entry><entry>0</entry></row>
-      <row><entry>
-        largeSetLowerBound</entry><entry>If hits is greater than this
-        value, the target will return no records.
-       </entry><entry>1</entry></row>
-      <row><entry>
-        mediumSetPresentNumber</entry><entry>This value represents
-        the number of records to be returned as part of a search when when
-        hits is less than or equal to large set lower bound and if hits
-        is greater than small set upper bound.
-       </entry><entry>0</entry></row>
-      <row><entry>
-        smallSetElementSetName</entry><entry>
-        The element set name to be used for small result sets.
-       </entry><entry>none</entry></row>
-      <row><entry>
-        mediumSetElementSetName</entry><entry>
-        The element set name to be for medium-sized result sets.
-       </entry><entry>none</entry></row>
-      <row><entry>
         setname</entry><entry>Name of Result Set (Result Set ID).
         If this option isn't set, the ZOOM module will automatically
         allocate a result set name.
@@ -416,14 +416,15 @@
      perform sorting before any retrieval takes place, so no records will
      be returned from the target as part of the SearchResponse because these
      would be unsorted. Hence, piggyback is disabled when sort criteria
-     is set. Following Search - and a Possible sort, Retrieval takes
-     place - as one or more Present Requests - Present Response being
+     are set. Following Search - and a possible sort - Retrieval takes
+     place - as one or more Present Requests/Response pairs being
      transferred.
      </para>
     <para>
      The API allows for two different modes for retrieval. A high level
      mode which is somewhat more powerful and a low level one.
-     The low level is "enabled" when the settings
+     The low level is enabled when searching on a Connection object
+     for which the settings
      <literal>smallSetUpperBound</literal>,
      <literal>mediumSetPresentNumber</literal> and
      <literal>largeSetLowerBound</literal> are set. The low level mode
