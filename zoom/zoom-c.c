@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.41 2002-08-24 09:28:30 oleg Exp $
+ * $Id: zoom-c.c,v 1.42 2002-08-25 06:48:18 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -142,12 +142,6 @@ void ZOOM_connection_remove_task (ZOOM_connection c)
 	    assert (0);
 	}
 	xfree (task);
-	/* 
-	Fix me!!! May be it is not right place for reset of the ODR stream,
-	but if happens to read records from cache we will be get memory leaks
-	without it (see send_present()).
-	*/
-	odr_reset(c->odr_out);
     }
 }
 
@@ -1413,8 +1407,8 @@ static int send_sort (ZOOM_connection c)
 
 static int send_present (ZOOM_connection c)
 {
-    Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_presentRequest);
-    Z_PresentRequest *req = apdu->u.presentRequest;
+    Z_APDU *apdu = 0;
+    Z_PresentRequest *req = 0;
     int i = 0;
     const char *syntax = 0;
     const char *elementSetName = 0;
@@ -1460,6 +1454,9 @@ static int send_present (ZOOM_connection c)
     }
     if (i == resultset->count)
 	return 0;
+
+    apdu = zget_APDU(c->odr_out, Z_APDU_presentRequest);
+    req = apdu->u.presentRequest;
 
     resultset->start += i;
     resultset->count -= i;
