@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.20 2003-11-19 22:05:15 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.21 2003-12-16 14:51:45 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -444,8 +444,8 @@
     <para>
      &yaz; is shipped with "makefiles" for the NMAKE tool that comes
      with <ulink url="http://msdn.microsoft.com/vstudio/">
-      Microsoft Visual C++</ulink>.
-     Version 6 has been tested. We expect that &yaz; compiles
+      Microsoft Visual Studio</ulink>.
+     Version 6 and .NET has been tested. We expect that &yaz; compiles
      with version 5 as well.
     </para>
     <para>
