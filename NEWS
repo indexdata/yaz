@@ -1,5 +1,17 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.26 2004/10/01
+
+Fixed MARC->MARCXML conversion to properly deal with
+fields, subfields, indicators having non-ASCII characters.
+
+Fixed MARC->MARCXML conversion so that ASCII control characters
+except TAB,CR,LF are removed from resulting XML (XML 1.0 does not
+support these).
+
+Added YAZ GFS support for conversion from Z39.50 surrogate
+diagnostics to SRW surrogate diagnostics.
+
 Bug fix: YAZ GFS did not return schema in explainResponse.
 
 --- 2.0.25 2004/09/30

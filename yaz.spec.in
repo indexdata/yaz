@@ -58,10 +58,10 @@ rm -fr ${RPM_BUILD_ROOT}
 /usr/bin/yaz-marcdump
 /usr/bin/yaz-iconv
 /usr/share/man/man1/yaz-client.*
+/usr/share/man/man8/yaz-ztest.*
 /usr/share/man/man1/zoomsh.*
 /usr/share/man/man1/yaz-marcdump.*
 /usr/share/man/man1/yaz-iconv.*
-/usr/share/man/man8/yaz-ztest.*
 
 %files -n lib%{name}
 /usr/lib/*.so.*
