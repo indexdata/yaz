@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.9  1995-11-13 09:27:53  quinn
+ * Revision 1.10  1995-11-28 09:30:44  quinn
+ * Work.
+ *
+ * Revision 1.9  1995/11/13  09:27:53  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.8  1995/10/12  10:34:56  quinn
@@ -122,7 +125,9 @@ static oident oids[] =
 
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
+#if 0
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_GILS,      {14,3,-1},   "GILS-tagset" },
+#endif
 
     /* SR definitions. Note that some of them aren't defined by the
         standard (yet), but are borrowed from Z3950v3 */
@@ -180,7 +185,9 @@ static oident oids[] =
 
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
+#if 0
     {PROTO_SR,      CLASS_TAGSET,  VAL_GILS,      {14,3,-1},   "GILS-tagset" },
+#endif
 
     {0,             0,             0,             {-1},        0          }
 };
