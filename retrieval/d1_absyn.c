@@ -1,125 +1,9 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: d1_absyn.c,v $
- * Revision 1.32  2002-07-25 12:52:53  adam
- * Character set negotiation updates
- *
- * Revision 1.31  2002/04/04 20:49:46  adam
- * New functions yaz_is_abspath, yaz_path_fopen_base
- *
- * Revision 1.30  2000/12/05 19:07:24  adam
- * Fixed problem with element level in reading of abstract syntax.
- *
- * Revision 1.29  2000/12/05 14:34:49  adam
- * Fixed bug with termlists (introduced by previous commit).
- *
- * Revision 1.28  2000/12/05 12:21:45  adam
- * Added termlist source for data1 system.
- *
- * Revision 1.27  1999/12/21 14:16:19  ian
- * Changed retrieval module to allow data1 trees with no associated absyn.
- * Also added a simple interface for extracting values from data1 trees using
- * a string based tagpath.
- *
- * Revision 1.26  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.25  1999/10/21 12:06:29  adam
- * Retrieval module no longer uses ctype.h - functions.
- *
- * Revision 1.24  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.23  1998/10/15 08:29:16  adam
- * Tag set type may be specified in reference to it using "tagset"
- * directive in .abs-files and "include" directive in .tag-files.
- *
- * Revision 1.22  1998/10/13 16:09:47  adam
- * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
- * Added support for multiple attribute set references and tagset references
- * from an abstract syntax file.
- * Fixed many bad logs-calls in routines that read the various
- * specifications regarding data1 (*.abs,*.att,...) and made the messages
- * consistent whenever possible.
- * Added extra 'lineno' argument to function readconf_line.
- *
- * Revision 1.21  1998/06/09 13:55:07  adam
- * Minor changes.
- *
- * Revision 1.20  1998/05/18 13:07:02  adam
- * Changed the way attribute sets are handled by the retriaval module.
- * Extended Explain conversion / schema.
- * Modified server and client to work with ASN.1 compiled protocol handlers.
- *
- * Revision 1.19  1998/03/05 08:15:32  adam
- * Implemented data1_add_insert_taggeddata utility which is more flexible
- * than data1_insert_taggeddata.
- *
- * Revision 1.18  1998/02/27 14:08:04  adam
- * Added const to some char pointer arguments.
- * Reworked data1_read_node so that it doesn't create a tree with
- * pointers to original "SGML"-buffer.
- *
- * Revision 1.17  1998/02/11 11:53:34  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.16  1997/12/18 10:51:30  adam
- * Implemented sub-trees feature for schemas - including forward
- * references.
- *
- * Revision 1.15  1997/12/09 16:18:16  adam
- * Work on EXPLAIN schema. First implementation of sub-schema facility
- * in the *.abs files.
- *
- * Revision 1.14  1997/10/31 12:20:09  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
- *
- * Revision 1.13  1997/10/27 13:54:18  adam
- * Changed structure field in data1 node to be simple string which
- * is "unknown" to the retrieval system itself.
- *
- * Revision 1.12  1997/09/17 12:10:34  adam
- * YAZ version 1.4.
- *
- * Revision 1.11  1997/09/05 09:50:55  adam
- * Removed global data1_tabpath - uses data1_get_tabpath() instead.
- *
- * Revision 1.10  1997/05/14 06:54:01  adam
- * C++ support.
- *
- * Revision 1.9  1997/02/19 14:46:15  adam
- * The "all" specifier only affects elements that are indexed (and not
- * all elements).
- *
- * Revision 1.8  1997/01/02 10:47:59  quinn
- * Added optional, physical ANY
- *
- * Revision 1.7  1996/06/10 08:56:01  quinn
- * Work on Summary.
- *
- * Revision 1.6  1996/05/31  13:52:21  quinn
- * Fixed uninitialized variable for local tags in abstract syntax.
- *
- * Revision 1.5  1996/05/09  07:27:43  quinn
- * Multiple local attributes values supported.
- *
- * Revision 1.4  1996/05/01  12:45:28  quinn
- * Support use of local tag names in abs file.
- *
- * Revision 1.3  1995/11/01  16:34:55  quinn
- * Making data1 look for tables in data1_tabpath
- *
- * Revision 1.2  1995/11/01  13:54:44  quinn
- * Minor adjustments
- *
- * Revision 1.1  1995/11/01  11:56:06  quinn
- * Added Retrieval (data management) functions en masse.
- *
+ * $Id: d1_absyn.c,v 1.33 2002-08-17 07:56:59 adam Exp $
  */
 
 #include <stdio.h>
@@ -181,7 +65,7 @@ data1_absyn *data1_absyn_add (data1_handle dh, const char *name)
     data1_absyn_cache *pp = data1_absyn_cache_get (dh);
 
     sprintf(fname, "%s.abs", name);
-    p->absyn = data1_read_absyn (dh, fname);
+    p->absyn = data1_read_absyn (dh, fname, 0);
     p->name = nmem_strdup (mem, name);
     p->next = *pp;
     *pp = p;
@@ -289,7 +173,7 @@ data1_element *data1_getelementbytagname (data1_handle dh, data1_absyn *abs,
         r = abs->main_elements;
     else
 	r = parent->children;
-    assert (abs->main_elements);
+
     for (; r; r = r->next)
     {
 	data1_name *n;
@@ -309,8 +193,6 @@ data1_element *data1_getelementbyname (data1_handle dh, data1_absyn *absyn,
     /* It's now possible to have a data1 tree with no abstract syntax */
     if ( !absyn )
         return 0;
-    
-    assert (absyn->main_elements);
     for (r = absyn->main_elements; r; r = r->next)
 	if (!data1_matchstr(r->name, name))
 	    return r;
@@ -364,10 +246,6 @@ static int parse_termlists (data1_handle dh, data1_termlist ***tpp,
 		    "%s:%d: Syntax error in termlistspec '%s'",
 		    file, lineno, p);
 	    return -1;
-/*
-  fclose(f);
-  return 0;
-*/
 	}
 	if (*attname == '!')
 	    strcpy(attname, element_name);
@@ -381,10 +259,6 @@ static int parse_termlists (data1_handle dh, data1_termlist ***tpp,
 		    "%s:%d: Couldn't find att '%s' in attset",
 		    file, lineno, attname);
 	    return -1;
-/*
-	    fclose(f);
-	    return 0;
-*/
 	}
 	if (r == 2 && (source = strchr(structure, ':')))
 	    *source++ = '\0';   /* cut off structure .. */
@@ -405,7 +279,8 @@ static int parse_termlists (data1_handle dh, data1_termlist ***tpp,
     return 0;
 }
 
-data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
+data1_absyn *data1_read_absyn (data1_handle dh, const char *file,
+                               int file_must_exist)
 {
     data1_sub_elements *cur_elements = NULL;
     data1_absyn *res = 0;
@@ -425,7 +300,8 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     if (!(f = data1_path_fopen(dh, file, "r")))
     {
 	yaz_log(LOG_WARN|LOG_ERRNO, "Couldn't open %s", file);
-	return 0;
+        if (file_must_exist)
+            return 0;
     }
     
     res = (data1_absyn *) nmem_malloc(data1_nmem_get(dh), sizeof(*res));
@@ -433,6 +309,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     res->reference = VAL_NONE;
     res->tagset = 0;
     res->encoding = 0;
+    res->enable_xpath_indexing = (f ? 0 : 1);
     tagset_childp = &res->tagset;
 
     res->attset = data1_empty_attset (dh);
@@ -448,8 +325,8 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 
     res->sub_elements = NULL;
     res->main_elements = NULL;
-
-    while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
+    
+    while (f && (argc = readconf_line(f, &lineno, line, 512, argv, 50)))
     {
 	char *cmd = *argv;
 	if (!strcmp(cmd, "elm"))
@@ -595,6 +472,24 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    level = 0;
     	    ppl[level] = &cur_elements->elements;
 	}
+        else if (!strcmp(cmd, "xpath"))
+        {
+            if (argc != 2)
+            {
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args to 'xpath' directive",
+		     file, lineno);
+		continue;
+            }
+            if (!strcmp(argv[1], "enable"))
+                res->enable_xpath_indexing = 1;
+            else if (!strcmp (argv[1], "disable"))
+                res->enable_xpath_indexing = 0;
+            else
+            {
+		yaz_log(LOG_WARN, "%s:%d: Expecting disable/enable "
+                        "after 'xpath' directive", file, lineno);
+            }
+        }
 	else if (!strcmp(cmd, "all"))
 	{
 	    data1_termlist **tp = &all;
@@ -785,11 +680,13 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	}
 	else
 	{
-	    yaz_log(LOG_WARN, "%s:%d: Unknown directive '%s'", file, lineno, cmd);
+	    yaz_log(LOG_WARN, "%s:%d: Unknown directive '%s'", file, 
+                    lineno, cmd);
 	    continue;
 	}
     }
-    fclose(f);
+    if (f)
+        fclose(f);
     
     for (cur_elements = res->sub_elements; cur_elements;
 	 cur_elements = cur_elements->next)

@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.8.9 2002/MM/DD
+
 --- 1.8.8 2002/08/02
 
 Added three members in bend_initrequest structure to facilitate

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.15 2002-07-29 20:04:08 adam Exp $
+ * $Id: data1.h,v 1.16 2002-08-17 07:56:59 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -212,6 +212,7 @@ typedef struct data1_absyn
     data1_sub_elements *sub_elements;
     data1_element *main_elements;
     char *encoding;
+    int  enable_xpath_indexing;
 } data1_absyn;
 
 /*
@@ -308,7 +309,8 @@ YAZ_EXPORT data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 YAZ_EXPORT data1_node *data1_read_record(data1_handle dh, 
 					 int (*rf)(void *, char *, size_t),
 					 void *fh, NMEM m);
-YAZ_EXPORT data1_absyn *data1_read_absyn(data1_handle dh, const char *file);
+YAZ_EXPORT data1_absyn *data1_read_absyn(data1_handle dh, const char *file,
+                                         int file_must_exist);
 YAZ_EXPORT data1_tag *data1_gettagbynum(data1_handle dh,
 					data1_tagset *s,
 					int type, int value);

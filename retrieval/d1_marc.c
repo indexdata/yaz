@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_marc.c,v 1.21 2002-07-25 12:52:53 adam Exp $
+ * $Id: d1_marc.c,v 1.22 2002-08-17 07:56:59 adam Exp $
  */
 
 
@@ -204,8 +204,9 @@ static int is_indicator (data1_marctab *p, data1_node *subf)
     return 0;
 }
 
-static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
-    char **buf, int *size)
+static int nodetomarc(data1_handle dh,
+		      data1_marctab *p, data1_node *n, int selected,
+                      char **buf, int *size)
 {
     int len = 26;
     int dlen;
@@ -235,6 +236,12 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
 
 	if (subf->which == DATA1N_data)
             is00X = 1;
+	if (!data1_is_xmlmode(dh))
+        {
+            if (subf->which == DATA1N_tag && !strcmp(subf->u.tag.tag, "@"))
+                is00X = 1;
+        }
+            
 	
         if (!is00X)
             len += p->indicator_length;  
@@ -285,6 +292,11 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
 
         if (subf->which == DATA1N_data)
             is00X = 1;
+	if (!data1_is_xmlmode(dh))
+        {
+            if (subf->which == DATA1N_tag && !strcmp(subf->u.tag.tag, "@"))
+                is00X = 1;
+        }
 
 	if (is_indicator (p, subf))
 	{
@@ -341,6 +353,6 @@ char *data1_nodetomarc(data1_handle dh, data1_marctab *p, data1_node *n,
     n = data1_get_root_tag (dh, n);
     if (!n)
         return 0;
-    *len = nodetomarc(p, n, selected, buf, size);
+    *len = nodetomarc(dh, p, n, selected, buf, size);
     return *buf;
 }
