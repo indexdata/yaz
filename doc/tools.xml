@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.14 2002-10-09 23:07:12 mike Exp $ -->
+<!-- $Id: tools.xml,v 1.15 2003-01-22 09:43:32 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -462,6 +462,228 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
       An operator may have aliases, i.e. there may be more than one name for
       the operator. To do this, separate each alias with a space character.
      </para>
+    </sect3>
+   </sect2>
+   <sect2 id="tools.cql"><title>CQL</title>
+    <para>
+     <ulink url="http://www.loc.gov/z3950/agency/zing/cql/">CQL</ulink>
+      - Common Query Language - was defined for the
+     <ulink url="http://www.loc.gov/z3950/agency/zing/srw/">SRW</ulink>
+     protocol.
+     In many ways CQL has a similar syntax to CCL.
+     The objective of CQL is different. Where CCL aims to be
+     an end-user language, CQL is <emphasis>the</emphasis> protocol
+     query language for SRW. Unlike PQF (Z39.50 Type-1), CQL is easy
+     to read.
+    </para>
+    <tip>
+     <para>
+      If you are new to CQL, read the 
+      <ulink url="http://zing.z3950.org/cql/intro.html">Gentle
+       Introduction</ulink>.
+     </para>
+    </tip>
+    <para>
+     The CQL parser in &yaz; provides the following:
+     <itemizedlist>
+      <listitem>
+       <para>
+        It parses and validates a CQL query.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        It generates a C structure that allows you to convert
+        a CQL query to some other query language, such as SQL.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The parser converts a valid CQL query to PQF, thus providing a
+        way to use CQL for both SRW/SRU servers and Z39.50 targets at the
+        same time.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The parser converts CQL to
+        <ulink url="http://www.loc.gov/z3950/agency/zing/cql/xcql.html">
+         XCQL</ulink>.
+        XCQL is an XML representation of CQL.
+        XCQL is part of the SRW specification. However, since SRU
+        supports CQL only, we don't expect XCQL to be widely used.
+        Furthermore, CQL has the advantage over XCQL that it is
+        easy to read.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </para>
+    <sect3 id="tools.cql.parsing"><title>CQL parsing</title>
+     <para>
+      A CQL parser is represented by the <literal>CQL_parser</literal>
+      handle. Its contents should be considered &yaz; internal (private).
+      <synopsis>
+#include &lt;yaz/cql.h&gt;
+
+typedef struct cql_parser *CQL_parser;
+
+CQL_parser cql_parser_create(void);
+void cql_parser_destroy(CQL_parser cp);
+
+int cql_parser_string(CQL_parser cp, const char *str);
+      </synopsis>
+     A parser is created by <function>cql_parser_create</function> and
+     is destroyed by <function>cql_parser_destroy</function>.
+     </para>
+     <para>
+      A CQL query is parsed by the <function>cql_parser_string</function>
+      which takes a query <parameter>str</parameter>.
+      If the query was valid (no syntax errors), then zero is returned;
+      otherwise a non-zero error code is returned.
+     </para>
+     <para>
+      <synopsis>
+int cql_parser_stream(CQL_parser cp,
+                      int (*getbyte)(void *client_data),
+                      void (*ungetbyte)(int b, void *client_data),
+                      void *client_data);
+
+int cql_parser_stdio(CQL_parser cp, FILE *f);
+      </synopsis>
+      The functions <function>cql_parser_stream</function> and
+      <function>cql_parser_stdio</function> parses a CQL query
+      - just like <function>cql_parser_string</function>.
+      The only difference is that the CQL query can be
+      fed to the parser in different ways.
+      The <function>cql_parser_stream</function> uses a generic
+      byte stream as input. The <function>cql_parser_stdio</function>
+      uses a <literal>FILE</literal> handle which is opened for reading.
+     </para>
+    </sect3>
+    <sect3 id="tools.cql.tree"><title>CQL tree</title>
+     <para>
+      We now turn to the tree representation of a valid CQL query.
+      <synopsis>
+#define CQL_NODE_ST 1
+#define CQL_NODE_BOOL 2
+#define CQL_NODE_MOD 3
+struct cql_node {
+    int which;
+    union {
+        struct {
+            char *index;
+            char *term;
+            char *relation;
+            struct cql_node *modifiers;
+            struct cql_node *prefixes;
+        } st;
+        struct {
+            char *value;
+            struct cql_node *left;
+            struct cql_node *right;
+            struct cql_node *modifiers;
+            struct cql_node *prefixes;
+        } bool;
+        struct {
+            char *name;
+            char *value;
+            struct cql_node *next;
+        } mod;
+    } u;
+};
+      </synopsis>
+      There are three kinds of nodes, search term (ST), boolean (BOOL),
+      and modifier (MOD).
+     </para>
+     <para>
+      The search term node has five members:
+      <itemizedlist>
+       <listitem>
+        <para>
+         <literal>index</literal>: index for search term.
+         If an index is unspecified for a search term,
+         <literal>index</literal> will be NULL.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>term</literal>: the search term itself.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>relation</literal>: relation for search term.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>modifiers</literal>: relation modifiers for search
+         term. The <literal>modifiers</literal> is a simple linked
+         list (NULL for last entry). Each relation modifier node
+         is of type <literal>MOD</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>prefixes</literal>: index prefixes for search
+         term. The <literal>prefixes</literal> is a simple linked
+         list (NULL for last entry). Each prefix node
+         is of type <literal>MOD</literal>.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </para>
+
+     <para>
+      The boolean node represents both <literal>and</literal>,
+      <literal>or</literal>, not as well as
+      proximity.
+      <itemizedlist>
+       <listitem>
+        <para>
+         <literal>left</literal> and <literal>right</literal>: left
+         - and right operand respectively.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>modifiers</literal>: proximity arguments.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>prefixes</literal>: index prefixes.
+         The <literal>prefixes</literal> is a simple linked
+         list (NULL for last entry). Each prefix node
+         is of type <literal>MOD</literal>.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </para>
+
+     <para>
+      The modifier node is a "utility" node used for name-value pairs,
+      such as prefixes, proximity arguements, etc.
+      <itemizedlist>
+       <listitem>
+        <para>
+         <literal>name</literal> name of mod node.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>value</literal> value of mod node.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>next</literal>: pointer to next node which is
+         always a mod node (NULL for last entry).
+        </para>
+       </listitem>
+      </itemizedlist>
+     </para>
+
     </sect3>
    </sect2>
   </sect1>
