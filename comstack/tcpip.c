@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.22  1998-06-22 11:32:36  adam
+ * Revision 1.23  1998-06-23 15:37:50  adam
+ * Added type cast to prevent warning.
+ *
+ * Revision 1.22  1998/06/22 11:32:36  adam
  * Added 'conditional cs_listen' feature.
  *
  * Revision 1.21  1998/05/20 09:55:32  adam
@@ -462,8 +465,8 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         *addrlen = 0;
 
 #if 1
-    if (check_ip && (*check_ip)(cd, &addr.sin_addr, sizeof(addr.sin_addr),
-				AF_INET))
+    if (check_ip && (*check_ip)(cd, (const char *) &addr.sin_addr,
+        sizeof(addr.sin_addr), AF_INET))
     {
 	h->cerrno = CSDENY;
 	close (h->newfd);
