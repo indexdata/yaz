@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.3 2002-07-03 13:36:55 adam Exp $
+ * $Id: unix.c,v 1.4 2002-07-22 23:16:10 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -43,6 +43,10 @@ COMSTACK unix_accept(COMSTACK h);
 char *unix_addrstr(COMSTACK h);
 void *unix_straddr(COMSTACK h, const char *str);
 
+#ifndef SUN_LEN
+#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) \
+  		      + strlen ((ptr)->sun_path))
+#endif
 #if 0
 #define TRC(x) x
 #else
