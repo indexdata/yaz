@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.167 2002-09-10 10:20:27 ja7 Exp $
+ * $Id: client.c,v 1.168 2002-09-15 20:41:01 adam Exp $
  */
 
 #include <stdio.h>
@@ -129,8 +129,8 @@ const char* query_type_as_string(QueryType q)
 	case QueryType_CCL2RPN: return "CCL -> RPN (RPN sent to server)";
 	default: 
 		return "unknown Query type internal yaz-client error";
-	};				
-};
+	}
+}
 
 
 void do_hex_dump(char* buf,int len) 
@@ -143,11 +143,11 @@ void do_hex_dump(char* buf,int len)
 		for(x=0 ; i+x<len && x<16; ++x) 
         {
 			printf("%2.2X ",(unsigned int)((unsigned char)buf[i+x]));
-		};
+		}
 		printf("\n");
-	};
+	}
 #endif
-};
+}
 
 
 
@@ -161,8 +161,8 @@ void add_otherInfos(Z_APDU *a)
     {
 		if(extraOtherInfos[i].oidval != -1) 
 			yaz_oi_set_string_oidval(oi, out, extraOtherInfos[i].oidval, 1, extraOtherInfos[i].value);
-	};   
-};
+	}   
+}
 
 void send_apdu(Z_APDU *a)
 {
@@ -415,8 +415,8 @@ void cmd_open_remember_last_open_command(char* arg, char* new_open_command)
 	{
 		if(last_open_command) xfree(last_open_command);
 		last_open_command = xstrdup(new_open_command);
-	};	
-};
+	}
+}
 
 int cmd_open(char *arg)
 {
@@ -495,7 +495,7 @@ void try_reconnect()
 	process_cmd_line(open_command);
 	
 	xfree(open_command);				
-};
+}
 
 int cmd_authentication(char *arg)
 {
@@ -2739,7 +2739,7 @@ int cmd_cclparse(char* arg)
     printf ("\n");
 	
 	return 0;
-};
+}
 
 
 int cmd_set_otherinfo(char* args)
@@ -2754,11 +2754,11 @@ int cmd_set_otherinfo(char* args)
 		/* reset this otherinfo */
 		if(otherinfoNo>=maxOtherInfosSupported) {
 			printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
-		};
+		}
 		extraOtherInfos[otherinfoNo].oidval = -1;
 		if(extraOtherInfos[otherinfoNo].value) free(extraOtherInfos[otherinfoNo].value);	 		
 		return 0;
-	};
+	}
 	if (sscan_res<3) {
         printf("Error in set_otherinfo command \n");
         return 0;
@@ -2766,20 +2766,20 @@ int cmd_set_otherinfo(char* args)
 
 	if(otherinfoNo>=maxOtherInfosSupported) {
 		printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
-	};
+	}
 
 	
 	oidval = oid_getvalbyname (oid);
 	if(oidval == -1 ) {
         printf("Error in set_otherinfo command unknown oid %s \n",oid);
 		return 0;
-	};
+	}
 	extraOtherInfos[otherinfoNo].oidval = oidval;
 	if(extraOtherInfos[otherinfoNo].value) free(extraOtherInfos[otherinfoNo].value);
 	extraOtherInfos[otherinfoNo].value = strdup(otherinfoString);
 	
 	return 0;
-};
+}
 
 int cmd_list_otherinfo(char* args)
 {
@@ -2790,7 +2790,7 @@ int cmd_list_otherinfo(char* args)
 		if( i >= maxOtherInfosSupported ) {
 			printf("Error otherinfo index to large (%d>%d)\n",i,maxOtherInfosSupported);
 			return 0;
-		};
+		}
 
 		if(extraOtherInfos[i].oidval != -1) 
 			printf("  otherinfo %d %s %s\n",i,yaz_z3950_oid_value_to_str(extraOtherInfos[i].oidval,CLASS_RECSYN), extraOtherInfos[i].value);
@@ -2799,11 +2799,11 @@ int cmd_list_otherinfo(char* args)
 		for(i=0; i<maxOtherInfosSupported; ++i) {
 			if(extraOtherInfos[i].oidval != -1) 
 				printf("  otherinfo %d %s %s\n",i,yaz_z3950_oid_value_to_str(extraOtherInfos[i].oidval,CLASS_RECSYN), extraOtherInfos[i].value);
-		}; 
+		}
 		
 	}
 	return 0;
-};
+}
 
 
 int cmd_list_all(char* args) {
@@ -2818,7 +2818,7 @@ int cmd_list_all(char* args) {
 		else 
 			printf("Not connected        : \n");
 
-	};
+	}
 	if(yazProxy) printf("using proxy          : %s\n",yazProxy);		
 
 	printf("auto_reconnect       : %s\n",auto_reconnect?"on":"off");
@@ -2839,8 +2839,8 @@ int cmd_list_all(char* args) {
 			break;
 		default:
 			printf("Authentication       : Unknown\n");
-		};
-	};
+		}
+	}
 	if ( yazCharset ) printf("Character set        : `%s'\n", (yazCharset) ? yazCharset:NULL);
 		
 	/* bases */
@@ -2871,7 +2871,7 @@ int cmd_list_all(char* args) {
 	cmd_list_otherinfo("");
 
 	return 0;
-};
+}
 
 int cmd_clear_otherinfo(char* args) 
 {
@@ -2881,13 +2881,13 @@ int cmd_clear_otherinfo(char* args)
 		if( otherinfoNo >= maxOtherInfosSupported ) {
 			printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
 			return 0;
-		};
+		}
 		
 		if(extraOtherInfos[otherinfoNo].oidval != -1) {			
 			/* only clear if set. */
 			extraOtherInfos[otherinfoNo].oidval=-1;
 			free(extraOtherInfos[otherinfoNo].value);
-		}; 
+		}
 	} else {
 		int i;
 	
@@ -2895,11 +2895,11 @@ int cmd_clear_otherinfo(char* args)
 			if (extraOtherInfos[i].oidval!=-1 ) {				
 				extraOtherInfos[i].oidval=-1;
 				free(extraOtherInfos[i].value);
-			};
-		};
-	};
+			}
+		}
+	}
 	return 0;
-};
+}
 
 static int cmd_help (char *line);
 
