@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.3 2003-12-30 00:29:53 adam Exp $
+ * $Id: zgdu.c,v 1.4 2003-12-30 15:18:53 adam Exp $
  */
 
 #include <yaz/odr.h>
@@ -353,7 +353,9 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                           (*p)->u.HTTP_Request->content_len);
             if (o->direction == ODR_PRINT)
             {
-                fprintf(o->print, "-- HTTP request:\n%.*s\n", o->top, o->buf);
+                fprintf(o->print, "-- HTTP request:\n%.*s\n", o->top - top0,
+                        o->buf + top0);
+                fprintf(o->print, "-- \n");
             }
             break;
         case Z_GDU_Z3950:
