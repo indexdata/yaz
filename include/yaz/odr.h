@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.18 2005-01-15 19:47:09 adam Exp $
+ * $Id: odr.h,v 1.19 2005-01-27 09:04:07 adam Exp $
  */
 
 /**
@@ -123,10 +123,10 @@ typedef struct odr
 
     int can_grow;         /* are we allowed to reallocate */
     unsigned char *buf;            /* memory handle */
-    int size;             /* current buffer size */
+    int size;             /* current buffer size (encoding+decoding) */
 
-    int pos;              /* current position */
-    int top;              /* top of buffer (max pos when decoding) */
+    int pos;              /* current position (encoding) */
+    int top;              /* top of buffer (max pos when encoding) */
 
     const unsigned char *bp; /* position in buffer (decoding) */
 
