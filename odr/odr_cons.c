@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.8  1995-03-15 11:18:04  quinn
+ * Revision 1.9  1995-03-28 09:15:49  quinn
+ * Fixed bug in the printing mode
+ *
+ * Revision 1.8  1995/03/15  11:18:04  quinn
  * Fixed serious bug in odr_cons
  *
  * Revision 1.7  1995/03/10  11:44:41  quinn
@@ -151,7 +154,7 @@ int odr_constructed_end(ODR o)
 #endif
 	    o->stackp--;
 	    return 1;
-    	case ODR_PRINT: return 1;
+    	case ODR_PRINT: o->stackp--;  return 1;
     	default:
 	    o->error = OOTHER;
 	    return 0;
