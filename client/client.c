@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.259 2004-12-09 07:53:21 adam Exp $
+ * $Id: client.c,v 1.260 2004-12-09 09:25:44 adam Exp $
  */
 
 #include <stdio.h>
@@ -2987,7 +2987,11 @@ int cmd_marccharset(const char *arg)
 
     *l1 = 0;
     if (sscanf(arg, "%29s", l1) < 1)
+    {
+    	printf("MARC character set is `%s'\n", 
+               marcCharset ? marcCharset: "none");
         return 1;
+    }
     xfree (marcCharset);
     marcCharset = 0;
     if (strcmp(l1, "-"))
@@ -3021,8 +3025,6 @@ int cmd_displaycharset(const char *arg)
         }
         else if (strcmp(l1, "-") && strcmp(l1, "none"))
             outputCharset = xstrdup(l1);
-        else
-            printf ("Display character set conversion disabled\n");
     } 
     return 1;
 }
@@ -3045,26 +3047,27 @@ int cmd_negcharset(const char *arg)
         negotiationCharset = xstrdup(l1);
         printf ("Character set negotiation : %s\n", negotiationCharset);
     }
-    else
-        printf ("Character set negotiation disabled\n");
     return 1;
 }
 
 int cmd_charset(const char* arg)
 {
-    char l1[30], l2[30];
+    char l1[30], l2[30], l3[30];
 
-    *l1 = *l2 = 0;
-    if (sscanf(arg, "%29s %29s", l1, l2) < 1)
+    *l1 = *l2 = *l3 = 0;
+    if (sscanf(arg, "%29s %29s %29s", l1, l2, l3) < 1)
     {
 	cmd_negcharset("");
 	cmd_displaycharset("");
+	cmd_marccharset("");
     }
     else
     {
 	cmd_negcharset(l1);
 	if (*l2)
 	    cmd_displaycharset(l2);
+	if (*l3)
+	    cmd_marccharset(l3);
     }
     return 1;
 }
