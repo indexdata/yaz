@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.3  2000-05-09 10:55:05  adam
+ * Revision 1.4  2000-05-09 11:48:58  adam
+ * Fix (bug introduced by previous commit).
+ *
+ * Revision 1.3  2000/05/09 10:55:05  adam
  * Public nmem_print_list (for debugging).
  *
  * Revision 1.2  2000/02/28 11:20:06  adam
@@ -54,7 +57,7 @@
 #define NMEM_H
 #include <yaz/yconfig.h>
 
-#define NMEM_DEBUG 1
+#define NMEM_DEBUG 0
 
 #ifndef NMEM_DEBUG
 #define NMEM_DEBUG 0
@@ -104,7 +107,7 @@ YAZ_EXPORT NMEM nmem_create(void);
 YAZ_EXPORT void nmem_destroy(NMEM n);
 YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 
-#define nmem_print_list
+#define nmem_print_list()
 
 #endif
 
