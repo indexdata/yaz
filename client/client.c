@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.207 2003-09-02 12:12:12 adam Exp $
+ * $Id: client.c,v 1.208 2003-09-04 18:51:49 adam Exp $
  */
 
 #include <stdio.h>
@@ -1853,12 +1853,12 @@ static int cmd_update_common(const char *arg, int version);
 
 static int cmd_update(const char *arg)
 {
-    cmd_update_common(arg, 1);
+    return cmd_update_common(arg, 1);
 }
 
 static int cmd_update0(const char *arg)
 {
-    cmd_update_common(arg, 0);
+    return cmd_update_common(arg, 0);
 }
 
 static int cmd_update_common(const char *arg, int version)
