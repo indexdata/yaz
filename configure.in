@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.79 2002-08-17 07:56:59 adam Exp $
+dnl $Id: configure.in,v 1.80 2002-08-28 12:48:47 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.9)
 dnl
@@ -72,31 +72,6 @@ if test "$checkBoth" = "1"; then
 	AC_CHECK_FUNC(accept, , [LIBS=$oldLibs])
 fi
 AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
-dnl
-dnl
-dnl ------ EXPAT
-expat=yes
-AC_ARG_WITH(expat,   [  --with-expat[=DIR]      EXPAT library in DIR],[expat=$withval])
-if test "$expat" != "no"; then
-	xLIBS="$LIBS";
-	xCFLAGS="$CFLAGS";
-	if test "$expat" != "yes"; then
-                EXPAT_CFLAGS="-I$expat/include"
-                EXPAT_LIBS="-L$expat/lib"
-		CFLAGS="$EXPAT_CFLAGS $CFLAGS"
-		LIBS="$EXPAT_LIBS $LIBS"
-	fi
-	AC_CHECK_LIB(expat,XML_ParserCreate,[LIBS="$LIBS -lexpat"])
-	if test "$ac_cv_lib_expat_XML_ParserCreate" = "yes"; then
-		AC_CHECK_HEADERS(expat.h)
-                if test "$ac_cv_header_expat_h" = "yes"; then
-                        YAZ_CONF_CFLAGS="$YAZ_CONF_CFLAGS -DYAZ_HAVE_EXPAT=1"
-                fi
-	else
-		LIBS="$xLIBS"
-		CFLAGS="$xCFLAGS"
-	fi
-fi
 dnl
 dnl ------ Open SSL
 openssl=no
