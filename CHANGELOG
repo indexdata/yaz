@@ -2,6 +2,13 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Incorporate patch by Morten Bogeskov which allows a Unix file socket
+server to specify uid/gid/mask for socket using the format
+ unix:[user=uid,][group=gid,][umask=mask,]file=path
+If file= is omitted the existing format is assumed, e.g.
+ unix:path
+in which case the mask is 0666 (rw for everybody).
+
 Major restructure of YAZ source. All source in libyaz is in src directory.
 Programs in client (yaz-client), ztest (yaz-ztest), zoom (zoom programs),
 util (utility programs such as ASN.1 compiler, yaz-marcdump). 

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: unix.c,v 1.2 2003-10-29 13:26:34 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -14,6 +14,10 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+
+#include <grp.h>
+#include <pwd.h>
+#include <sys/types.h>
 
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -65,6 +69,9 @@ typedef struct unix_state
     int towrite;  /* to verify against user input */
     int (*complete)(const unsigned char *buf, int len); /* length/comple. */
     struct sockaddr_un addr;  /* returned by cs_straddr */
+    int uid;
+    int gid;
+    int umask;
     char buf[128]; /* returned by cs_addrstr */
 } unix_state;
 
@@ -163,11 +170,102 @@ static int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
 static void *unix_straddr(COMSTACK h, const char *str)
 {
     unix_state *sp = (unix_state *)h->cprivate;
+    char * s = strdup(str);
+    char * f = s;
+    const char * file = NULL;
+    char * eol;
+
+    sp->uid = sp->gid = sp->umask = -1;
+
+    if (eol = strchr(s, ','))
+    {
+	do
+	{
+	    if (eol = strchr(s, ','))
+		*eol++ = '\0';
+	    if (sp->uid  == -1 && strncmp(s, "user=",  5) == 0)
+	    {
+		char * arg = s + 5;
+		if (strspn(arg, "0123456789") == strlen(arg))
+		{
+		    sp->uid = atoi(arg);
+		}
+		else
+		{
+		    struct passwd * pw = getpwnam(arg);
+		    if(pw == NULL)
+		    {
+			printf("No such user\n");
+			free(f);
+			return;
+		    }
+		    sp->uid = pw->pw_uid;
+		}
+	    }
+	    else if (sp->gid == -1 && strncmp(s, "group=", 6) == 0)
+	    {
+		char * arg = s + 6;
+		if (strspn(arg, "0123456789") == strlen(arg))
+		{
+		    sp->gid = atoi(arg);
+		}
+		else
+		{
+		    struct group * gr = getgrnam(arg);
+		    if (gr == NULL)
+		    {
+			printf("No such group\n");
+			free(f);
+			return;
+		    }
+		    sp->gid = gr->gr_gid;
+		}
+	    }
+	    else if (sp->umask == -1 && strncmp(s, "umask=", 6) == 0)
+	    {
+		char * end;
+		char * arg = s + 6;
+		
+		sp->umask = strtol(arg, &end, 8);
+		if (errno == EINVAL ||
+		    *end)
+		{
+		    printf("Invalid umask\n");
+		    free(f);
+		    return;
+		}
+	    }
+	    else if (file == NULL && strncmp(s, "file=", 5) == 0)
+	    {
+		char * arg = s + 5;
+		file = arg;
+	    }
+	    else
+	    {
+		printf("invalid or double argument: %s\n", s);
+		free(f);
+		return;
+	    }
+	} while(s = eol);
+    }
+    else
+    {
+	file = str;
+    }
+    if(! file)
+    {
+	errno = EINVAL;
+	return 0;
+    }
 
     TRC(fprintf(stderr, "unix_straddr: %s\n", str ? str : "NULL"));
 
-    if (!unix_strtoaddr_ex (str, &sp->addr))
+    if (!unix_strtoaddr_ex (file, &sp->addr))
+    {
+	free(f);
 	return 0;
+    }
+    free(f);
     return &sp->addr;
 }
 
@@ -250,6 +348,7 @@ static int unix_rcvconnect(COMSTACK h)
 
 static int unix_bind(COMSTACK h, void *address, int mode)
 {
+    unix_state *sp = (unix_state *)h->cprivate;
     struct sockaddr *addr = (struct sockaddr *)address;
     const char * path = ((struct sockaddr_un *)addr)->sun_path;
     struct stat stat_buf;
@@ -291,7 +390,8 @@ static int unix_bind(COMSTACK h, void *address, int mode)
 	h->cerrno = CSYSERR;
 	return -1;
     }
-    chmod(path, 0777);
+    chown(path, sp->uid, sp->gid);
+    chmod(path, sp->umask != -1 ? sp->umask : 0666);
     if (mode == CS_SERVER && listen(h->iofile, 3) < 0)
     {
 	h->cerrno = CSYSERR;
