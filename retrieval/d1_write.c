@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_write.c,v $
- * Revision 1.3  1997-09-17 12:10:39  adam
+ * Revision 1.4  1998-05-18 13:07:08  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.3  1997/09/17 12:10:39  adam
  * YAZ version 1.4.
  *
  * Revision 1.2  1995/12/13 17:14:27  quinn
@@ -67,8 +72,9 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	    int l = c->u.data.len;
 	    int first = 1;
 
-	    if (c->u.data.what == DATA1I_text)
+	    switch (c->u.data.what)
 	    {
+	    case DATA1I_text:
 		while (l)
 		{
 		    int wlen;
@@ -112,9 +118,12 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 		}
 		wrbuf_write(b, "\n", 1);
 		col = 0;
-	    }
-	    else if (c->u.data.what == DATA1I_num)
-	    {
+		break;
+	    case DATA1I_num:
+		wrbuf_putc(b, ' ');
+		wrbuf_write(b, c->u.data.data, c->u.data.len);
+		break;
+	    case DATA1I_oid:
 		wrbuf_putc(b, ' ');
 		wrbuf_write(b, c->u.data.data, c->u.data.len);
 	    }

@@ -1,5 +1,20 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Changed some C definitions regarding EXPLAIN record syntax (prt-exp.h)
+and added member 'languages' in TargetInfo (which was missing).
+
+Changed the way attribute sets are handled in the retrieval
+module. These are now cached, just like the abstract syntaxes
+(schemas).
+
+Changed YAZ so that it links with compiled ASN.1.
+
+Added Explain-schema definitions and mapping routines. The following
+Explain categories have been implemented: AttributeDetails,
+AttributeSetInfo, DatabaseInfo, CategoryList and TargetInfo.
+
+Fixed minor bug in Windows version of Server Library.
+
 --- 1.4pl2+ 1998/4/17 (Released with Zebra)
 
 Added Extended Services to server (backend.h). Thanks to Charles Woodfield.

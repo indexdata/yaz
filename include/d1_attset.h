@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -51,30 +51,38 @@ typedef struct data1_local_attribute
     struct data1_local_attribute *next;
 } data1_local_attribute;
 
-typedef struct data1_att
+typedef struct data1_attset data1_attset;    
+typedef struct data1_att data1_att;
+typedef struct data1_attset_child data1_attset_child;
+
+struct data1_att
 {
-    struct data1_attset *parent;   /* attribute set */
+    data1_attset *parent;          /* attribute set */
     char *name;                    /* symbolic name of this attribute */
     int value;                     /* attribute value */
     data1_local_attribute *locals; /* local index values */
-    struct data1_att *next;
-} data1_att;
+    data1_att *next;
+};
 
-typedef struct data1_attset
+struct data1_attset_child {
+    data1_attset *child;
+    data1_attset_child *next;
+};
+
+struct data1_attset
 {
     char *name;          /* symbolic name */
     oid_value reference;   /* external ID of attset */
-    int ordinal;           /* attset identification in index */
     data1_att *atts;          /* attributes */
-    struct data1_attset *children;  /* included attset */
-    struct data1_attset *next;       /* sibling */
-} data1_attset;
+    data1_attset_child *children;  /* included attset */
+    data1_attset *next;       /* sibling */
+};
 
 typedef struct data1_handle_info *data1_handle;
 
 YAZ_EXPORT data1_att *data1_getattbyname(data1_handle dh, data1_attset *s,
 					 char *name);
-YAZ_EXPORT data1_attset *data1_read_attset(data1_handle dh, char *file);
+YAZ_EXPORT data1_attset *data1_read_attset(data1_handle dh, const char *file);
 
 #ifdef __cplusplus
 }

@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.65  1998-03-31 15:13:19  adam
+ * Revision 1.66  1998-05-18 13:06:53  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.65  1998/03/31 15:13:19  adam
  * Development towards compiled ASN.1.
  *
  * Revision 1.64  1998/03/31 11:07:44  adam
@@ -252,8 +257,8 @@ static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
 static Z_ElementSetNames *elementSetNames = 0; 
 static int setno = 1;                   /* current set offset */
-static int protocol = PROTO_Z3950;      /* current app protocol */
-static int recordsyntax = VAL_USMARC;
+static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
+static enum oid_value recordsyntax = VAL_USMARC;
 static int sent_close = 0;
 static ODR_MEM session_mem;             /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
@@ -374,10 +379,40 @@ static int process_initResponse(Z_InitResponse *res)
     return 0;
 }
 
+static int cmd_base(char *arg)
+{
+    int i;
+    char *cp;
+
+    if (!*arg)
+    {
+        printf("Usage: base <database> <database> ...\n");
+        return 0;
+    }
+    for (i = 0; i<num_databaseNames; i++)
+        xfree (databaseNames[i]);
+    num_databaseNames = 0;
+    while (1)
+    {
+        if (!(cp = strchr(arg, ' ')))
+            cp = arg + strlen(arg);
+        if (cp - arg < 1)
+            break;
+        databaseNames[num_databaseNames] = (char *)xmalloc (1 + cp - arg);
+        memcpy (databaseNames[num_databaseNames], arg, cp - arg);
+        databaseNames[num_databaseNames++][cp - arg] = '\0';
+        if (!*cp)
+            break;
+        arg = cp+1;
+    }
+    return 1;
+}
+
+
 int cmd_open(char *arg)
 {
     void *add;
-    char type[100], addr[100];
+    char type[100], addr[100], base[100];
     CS_TYPE t;
 
     if (conn)
@@ -385,11 +420,14 @@ int cmd_open(char *arg)
         printf("Already connected.\n");
         return 0;
     }
-    if (!*arg || sscanf(arg, "%[^:]:%s", type, addr) < 2)
+    base[0] = '\0';
+    if (!*arg || sscanf(arg, "%[^:]:%[^/]/%s", type, addr, base) < 2)
     {
         fprintf(stderr, "Usage: open (osi|tcp) ':' [tsel '/']host[':'port]\n");
         return 0;
     }
+    if (*base)
+        cmd_base (base);
     if (!strcmp(type, "tcp"))
     {
 	t = tcpip_type;
@@ -992,7 +1030,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
 
 static Z_External *CreateItemOrderExternal(int itemno)
 {
-    Z_External *r = odr_malloc(out, sizeof(Z_External));
+    Z_External *r = (Z_External *) odr_malloc(out, sizeof(Z_External));
     oident ItemOrderRequest;
   
     ItemOrderRequest.proto = PROTO_Z3950;
@@ -1000,14 +1038,14 @@ static Z_External *CreateItemOrderExternal(int itemno)
     ItemOrderRequest.value = VAL_ITEMORDER;
  
     r->direct_reference = odr_oiddup(out,oid_getoidbyent(&ItemOrderRequest)); 
-    r->indirect_reference = odr_malloc(out,sizeof(int));
+    r->indirect_reference = (int *) odr_malloc(out,sizeof(int));
     *r->indirect_reference = 0;
 
     r->descriptor = "Extended services item order";
 
     r->which = Z_External_itemOrder;
 
-    r->u.itemOrder = odr_malloc(out,sizeof(Z_ItemOrder));
+    r->u.itemOrder = (Z_ItemOrder *) odr_malloc(out,sizeof(Z_ItemOrder));
     memset(r->u.itemOrder, 0, sizeof(Z_ItemOrder));
 #ifdef ASN_COMPILED
     r->u.itemOrder->which=Z_IOItemOrder_esRequest;
@@ -1015,23 +1053,28 @@ static Z_External *CreateItemOrderExternal(int itemno)
     r->u.itemOrder->which=Z_ItemOrder_esRequest;
 #endif
 
-    r->u.itemOrder->u.esRequest = odr_malloc(out,sizeof(Z_IORequest));
+    r->u.itemOrder->u.esRequest = (Z_IORequest *) 
+	odr_malloc(out,sizeof(Z_IORequest));
     memset(r->u.itemOrder->u.esRequest, 0, sizeof(Z_IORequest));
 
-    r->u.itemOrder->u.esRequest->toKeep = odr_malloc(out,sizeof(Z_IOOriginPartToKeep));
+    r->u.itemOrder->u.esRequest->toKeep = (Z_IOOriginPartToKeep *)
+	odr_malloc(out,sizeof(Z_IOOriginPartToKeep));
     memset(r->u.itemOrder->u.esRequest->toKeep, 0, sizeof(Z_IOOriginPartToKeep));
-    r->u.itemOrder->u.esRequest->notToKeep = odr_malloc(out,sizeof(Z_IOOriginPartNotToKeep));
+    r->u.itemOrder->u.esRequest->notToKeep = (Z_IOOriginPartNotToKeep *)
+	odr_malloc(out,sizeof(Z_IOOriginPartNotToKeep));
     memset(r->u.itemOrder->u.esRequest->notToKeep, 0, sizeof(Z_IOOriginPartNotToKeep));
 
     r->u.itemOrder->u.esRequest->toKeep->supplDescription = NULL;
     r->u.itemOrder->u.esRequest->toKeep->contact = NULL;
     r->u.itemOrder->u.esRequest->toKeep->addlBilling = NULL;
 
-    r->u.itemOrder->u.esRequest->notToKeep->resultSetItem = odr_malloc(out, sizeof(Z_IOResultSetItem));
+    r->u.itemOrder->u.esRequest->notToKeep->resultSetItem =
+	(Z_IOResultSetItem *) odr_malloc(out, sizeof(Z_IOResultSetItem));
     memset(r->u.itemOrder->u.esRequest->notToKeep->resultSetItem, 0, sizeof(Z_IOResultSetItem));
     r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->resultSetId = "1";
 
-    r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = odr_malloc(out, sizeof(int));
+    r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item =
+	(int *) odr_malloc(out, sizeof(int));
     *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
 
     r->u.itemOrder->u.esRequest->notToKeep->itemRequest = NULL;
@@ -1052,7 +1095,7 @@ static int send_itemorder(char *arg)
     /* Set up item order request */
 
     /* Function being performed by this extended services request */
-    req->function = odr_malloc(out, sizeof(int));
+    req->function = (int *) odr_malloc(out, sizeof(int));
     *req->function = Z_ExtendedServicesRequest_create;
 
     /* Package type, Using protocol ILL ( But that's not in the oid.h file yet */
@@ -1126,35 +1169,6 @@ static int cmd_status(char *arg)
     printf("smallSetUpperBound: %d\n", smallSetUpperBound);
     printf("largeSetLowerBound: %d\n", largeSetLowerBound);
     printf("mediumSetPresentNumber: %d\n", mediumSetPresentNumber);
-    return 1;
-}
-
-static int cmd_base(char *arg)
-{
-    int i;
-    char *cp;
-
-    if (!*arg)
-    {
-        printf("Usage: base <database> <database> ...\n");
-        return 0;
-    }
-    for (i = 0; i<num_databaseNames; i++)
-        xfree (databaseNames[i]);
-    num_databaseNames = 0;
-    while (1)
-    {
-        if (!(cp = strchr(arg, ' ')))
-            cp = arg + strlen(arg);
-        if (cp - arg < 1)
-            break;
-        databaseNames[num_databaseNames] = (char *)xmalloc (1 + cp - arg);
-        memcpy (databaseNames[num_databaseNames], arg, cp - arg);
-        databaseNames[num_databaseNames++][cp - arg] = '\0';
-        if (!*cp)
-            break;
-        arg = cp+1;
-    }
     return 1;
 }
 
@@ -1304,12 +1318,16 @@ int send_scanrequest(char *string, int pp, int num)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
-
+    
+    if (!(req->termListAndStartPoint =
+	  p_query_scan(out, protocol, &req->attributeSet, string)))
+    {
+	printf("Prefix query error\n");
+	return -1;
+    }
     req->referenceId = set_refid (out);
     req->num_databaseNames = num_databaseNames;
     req->databaseNames = databaseNames;
-    req->termListAndStartPoint = p_query_scan(out, protocol,
-                                              &req->attributeSet, string);
     req->numberOfTermsRequested = &num;
     req->preferredPositionInResponse = &pp;
     send_apdu(apdu);
@@ -1865,6 +1883,8 @@ static int client(int wait)
 			display_records(apdu->u.presentResponse->records);
 		    else
 			printf("No records.\n");
+                    printf ("nextResultSetPosition = %d\n",
+			*apdu->u.presentResponse->nextResultSetPosition);
 		    break;
 		case Z_APDU_sortResponse:
 		    process_sortResponse(apdu->u.sortResponse);

@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.9  1998-02-11 11:53:32  adam
+ * Revision 1.10  1998-05-18 13:06:52  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.9  1998/02/11 11:53:32  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.8  1996/01/02 11:46:41  quinn
@@ -97,7 +102,6 @@ int z_RetrievalRecordDetails(ODR o, Z_RetrievalRecordDetails **p, int opt);
 int z_PerElementDetails(ODR o, Z_PerElementDetails **p, int opt);
 int z_RecordTag(ODR o, Z_RecordTag **p, int opt);
 int z_SortDetails(ODR o, Z_SortDetails **p, int opt);
-int z_SortKeyDetailsSortType(ODR o, Z_SortKeyDetailsSortType **p, int opt);
 int z_SortKeyDetails(ODR o, Z_SortKeyDetails **p, int opt);
 int z_ProcessingInformation(ODR o, Z_ProcessingInformation **p, int opt);
 int z_VariantSetInfo(ODR o, Z_VariantSetInfo **p, int opt);
@@ -159,11 +163,11 @@ int z_IconObjectUnit(ODR o, Z_IconObjectUnit **p, int opt)
 {
     static Odr_arm arm[] = 
     {
-    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_IconObject_ianaType,
+    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_IconObjectUnit_ianaType,
 	    z_InternationalString},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_IconObject_z3950type,
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_IconObjectUnit_z3950type,
 	    z_InternationalString},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_IconObject_otherType,
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_IconObjectUnit_otherType,
 	    z_InternationalString},
 	{-1, -1, -1, -1, 0}
     };
@@ -182,8 +186,8 @@ int z_IconObject(ODR o, Z_IconObject **p, int opt)
 {
     if (!odr_initmember(o, p, sizeof(**p)))
 	return opt && odr_ok(o);
-    if (odr_sequence_of(o, (Odr_fun)z_IconObjectUnit, &(*p)->iconUnits,
-    	&(*p)->num_iconUnits))
+    if (odr_sequence_of(o, (Odr_fun)z_IconObjectUnit, &(*p)->elements,
+    	&(*p)->num))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);
@@ -303,7 +307,7 @@ int z_QueryTypeDetails(ODR o, Z_QueryTypeDetails **p, int opt)
 	    (Odr_fun)z_RpnCapabilities},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_QueryTypeDetails_iso8777,
 	    (Odr_fun)z_Iso8777Capabilities},
-	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_QueryTypeDetails_z3958,
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_QueryTypeDetails_z39_58,
 	    (Odr_fun)z_HumanString},
 	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_QueryTypeDetails_erpn,
 	    (Odr_fun)z_RpnCapabilities},
@@ -444,8 +448,8 @@ int z_AccessRestrictions(ODR o, Z_AccessRestrictions **p, int opt)
 {
     if (!odr_initmember(o, p, sizeof(**p)))
 	return opt && odr_ok(o);
-    if (odr_sequence_of(o, (Odr_fun)z_AccessRestrictionsUnit, &(*p)->restrictions,
-    	&(*p)->num_restrictions))
+    if (odr_sequence_of(o, (Odr_fun)z_AccessRestrictionsUnit, &(*p)->elements,
+    	&(*p)->num))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);
@@ -538,7 +542,7 @@ int z_AttributeOccurrence(ODR o, Z_AttributeOccurrence **p, int opt)
 {
     static Odr_arm arm[] =
     {
-    	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_AttributeOcc_anyOrNone, (Odr_fun)odr_null},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_AttributeOcc_any_or_none, (Odr_fun)odr_null},
 	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_AttributeOcc_specific,
 	    (Odr_fun)z_AttributeValueList},
 	{-1, -1, -1, -1, 0}
@@ -608,6 +612,8 @@ int z_TargetInfo(ODR o, Z_TargetInfo **p, int opt)
 	odr_implicit_settag(o, ODR_CONTEXT, 18) &&
 	(odr_sequence_of(o, (Odr_fun)z_NetworkAddress, &(*p)->addresses,
 	    &(*p)->num_addresses) || odr_ok(o)) &&
+	(odr_sequence_of(o, (Odr_fun)z_InternationalString, &(*p)->languages,
+	    &(*p)->num_languages) || odr_ok(o)) &&
         odr_implicit(o, z_AccessInfo, &(*p)->commonAccessInfo, ODR_CONTEXT,
 	    19, 1) &&
         odr_sequence_end(o);
@@ -617,9 +623,9 @@ int z_DatabaseInfo(ODR o, Z_DatabaseInfo **p, int opt)
 {
     static Odr_arm arm[] =
     {
-    	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_Exp_RecordCount_actualNumber,
+    	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_DatabaseInfo_actualNumber,
 	    (Odr_fun)odr_integer},
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Exp_RecordCount_approxNumber,
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_DatabaseInfo_approxNumber,
 	    (Odr_fun)odr_integer},
 	{-1, -1, -1, -1, 0}
     };
@@ -647,8 +653,8 @@ int z_DatabaseInfo(ODR o, Z_DatabaseInfo **p, int opt)
         odr_implicit(o, z_HumanString, &(*p)->disclaimers, ODR_CONTEXT,
 	    12, 1) &&
         odr_implicit(o, z_HumanString, &(*p)->news, ODR_CONTEXT, 13, 1) &&
-	((odr_constructed_begin(o, &(*p)->recordCount, ODR_CONTEXT, 14) &&
-	    odr_choice(o, arm, &(*p)->recordCount, &(*p)->recordCount_which) &&
+	((odr_constructed_begin(o, &(*p)->u.actualNumber, ODR_CONTEXT, 14) &&
+	    odr_choice(o, arm, &(*p)->u.actualNumber, &(*p)->which) &&
 	    odr_constructed_end(o)) || odr_ok(o)) &&
         odr_implicit(o, z_HumanString, &(*p)->defaultOrder, ODR_CONTEXT,
 	    15, 1) &&
@@ -779,7 +785,7 @@ int z_TagSetInfoElements(ODR o, Z_TagSetInfoElements **p, int opt)
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt;
     return
-    	odr_implicit(o, z_InternationalString, &(*p)->elementName,
+    	odr_implicit(o, z_InternationalString, &(*p)->elementname,
 	    ODR_CONTEXT, 1, 0) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 2) &&
 	(odr_sequence_of(o, z_InternationalString, &(*p)->nicknames,
@@ -959,7 +965,8 @@ int z_AttributeTypeDetails(ODR o, Z_AttributeTypeDetails **p, int opt)
         return opt && odr_ok(o);
     return
         odr_implicit(o, odr_integer, &(*p)->attributeType, ODR_CONTEXT, 0, 0) &&
-        odr_implicit(o, z_OmittedAttributeInterpretation, &(*p)->optionalType, ODR_CONTEXT, 1, 1) &&
+        odr_implicit(o, z_OmittedAttributeInterpretation, &(*p)->defaultIfOmitted,
+		     ODR_CONTEXT, 1, 1) &&
 	odr_implicit_settag(o, ODR_CONTEXT, 2) &&
 	(odr_sequence_of(o, (Odr_fun)z_AttributeValue, &(*p)->attributeValues,
 	    &(*p)->num_attributeValues) || odr_ok(o)) &&
@@ -1093,43 +1100,33 @@ int z_SortDetails(ODR o, Z_SortDetails **p, int opt)
         odr_sequence_end(o);
 }
 
-int z_SortKeyDetailsSortType(ODR o, Z_SortKeyDetailsSortType **p, int opt)
+int z_SortKeyDetails (ODR o, Z_SortKeyDetails **p, int opt)
 {
-    static Odr_arm arm[] =
-    {
-	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_SortKeyDetailsSortType_character,
-	    (Odr_fun)odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_SortKeyDetailsSortType_numeric,
-	    (Odr_fun)odr_null},
-	{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_SortKeyDetailsSortType_structured,
-	    (Odr_fun)z_HumanString},
-	{-1, -1, -1, -1, 0}
-    };
-
-    if (!odr_initmember(o, p, sizeof(**p)))
-	return opt && odr_ok(o);
-    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
-    	return 1;
-    *p = 0;
-    return opt && odr_ok(o);
-}
-    	
-int z_SortKeyDetails(ODR o, Z_SortKeyDetails **p, int opt)
-{
-    if (!odr_sequence_begin(o, p, sizeof(**p)))
-        return opt && odr_ok(o);
-    return
-        odr_implicit(o, z_HumanString, &(*p)->description, ODR_CONTEXT, 0, 1) &&
-	odr_implicit_settag(o, ODR_CONTEXT, 1) &&
-	(odr_sequence_of(o, (Odr_fun)z_Specification, &(*p)->elementSpecifications,
-	    &(*p)->num_elementSpecifications) || odr_ok(o)) &&
-        odr_implicit(o, z_AttributeCombinations, &(*p)->attributeSpecifications,
-	    ODR_CONTEXT, 2, 1) &&
-	odr_explicit(o, z_SortKeyDetailsSortType, &(*p)->sortType, ODR_CONTEXT,
-	    3, 1) &&
-        odr_implicit(o, odr_integer, &(*p)->caseSensitivity, ODR_CONTEXT,
-	    4, 1) &&
-        odr_sequence_end(o);
+	static Odr_arm arm[] = {
+		{ODR_IMPLICIT, ODR_CONTEXT, 0, Z_SortKeyDetails_character,
+		(Odr_fun) odr_null},
+		{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_SortKeyDetails_numeric,
+		(Odr_fun) odr_null},
+		{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_SortKeyDetails_structured,
+		(Odr_fun) z_HumanString},
+		{-1, -1, -1, -1, (Odr_fun) 0}
+	};
+	if (!odr_sequence_begin (o, p, sizeof(**p)))
+		return opt && odr_ok (o);
+	return
+		odr_implicit (o, z_HumanString,
+			&(*p)->description, ODR_CONTEXT, 0, 1) &&
+		odr_implicit_settag (o, ODR_CONTEXT, 1) &&
+		(odr_sequence_of(o, (Odr_fun) z_Specification, &(*p)->elementSpecifications,
+		  &(*p)->num_elementSpecifications) || odr_ok(o)) &&
+		odr_implicit (o, z_AttributeCombinations,
+			&(*p)->attributeSpecifications, ODR_CONTEXT, 2, 1) &&
+		((odr_constructed_begin (o, &(*p)->u, ODR_CONTEXT, 3) &&
+		odr_choice (o, arm, &(*p)->u, &(*p)->which) &&
+		odr_constructed_end (o)) || odr_ok(o)) &&
+		odr_implicit (o, odr_integer,
+			&(*p)->caseSensitivity, ODR_CONTEXT, 4, 1) &&
+		odr_sequence_end (o);
 }
 
 int z_ProcessingInformation(ODR o, Z_ProcessingInformation **p, int opt)
@@ -1206,8 +1203,8 @@ int z_ValueSetEnumerated(ODR o, Z_ValueSetEnumerated **p, int opt)
 {
     if (!odr_initmember(o, p, sizeof(**p)))
 	return opt && odr_ok(o);
-    if (odr_sequence_of(o, (Odr_fun)z_ValueDescription, &(*p)->enumerated,
-    	&(*p)->num_enumerated))
+    if (odr_sequence_of(o, (Odr_fun)z_ValueDescription, &(*p)->elements,
+    	&(*p)->num))
 	return 1;
     *p = 0;
     return opt && odr_ok(o);

@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.8  1998-02-11 11:53:35  adam
+ * Revision 1.9  1998-05-18 13:07:03  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.8  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.7  1997/09/17 12:10:34  adam
@@ -44,40 +49,38 @@
 data1_att *data1_getattbyname(data1_handle dh, data1_attset *s, char *name)
 {
     data1_att *r;
-
-    for (; s; s = s->next)
+    data1_attset_child *c;
+    
+    /* scan local set */
+    for (r = s->atts; r; r = r->next)
+	if (!data1_matchstr(r->name, name))
+	    return r;
+    for (c = s->children; c; c = c->next)
     {
-	/* scan local set */
-	for (r = s->atts; r; r = r->next)
-	    if (!data1_matchstr(r->name, name))
-		return r;
+	assert (c->child);
 	/* scan included sets */
-	if (s->children && (r = data1_getattbyname (dh, s->children, name)))
+	if ((r = data1_getattbyname (dh, c->child, name)))
 	    return r;
     }
     return 0;
 }
 
-data1_attset *data1_read_attset(data1_handle dh, char *file)
+data1_attset *data1_read_attset(data1_handle dh, const char *file)
 {
     char line[512], *r, cmd[512], args[512];
-    data1_attset *res = 0, **childp;
+    data1_attset *res = 0;
+    data1_attset_child **childp;
     data1_att **attp;
     FILE *f;
     NMEM mem = data1_nmem_get (dh);
 
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
-    {
-	logf(LOG_WARN|LOG_ERRNO, "%s", file);
-	return 0;
-    }
-
+	return NULL;
     res = (data1_attset *)nmem_malloc(mem, sizeof(*res));
     res->name = 0;
     res->reference = VAL_NONE;
-    res->ordinal = -1;
     res->atts = 0;
-    res->children = res->next = 0;
+    res->children = 0;
     childp = &res->children;
     attp = &res->atts;
 
@@ -148,7 +151,6 @@ data1_attset *data1_read_attset(data1_handle dh, char *file)
 		fclose(f);
 		return 0;
 	    }
-	    res->name = nmem_strdup(mem, args);
 	}
 	else if (!strcmp(cmd, "reference"))
 	{
@@ -169,7 +171,8 @@ data1_attset *data1_read_attset(data1_handle dh, char *file)
 	}
 	else if (!strcmp(cmd, "ordinal"))
 	{
-	    if (!sscanf(args, "%d", &res->ordinal))
+	    int dummy;
+	    if (!sscanf(args, "%d", &dummy))
 	    {
 		logf(LOG_WARN, "%s malformed ordinal directive in %s", file);
 		fclose(f);
@@ -186,12 +189,15 @@ data1_attset *data1_read_attset(data1_handle dh, char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(*childp = data1_read_attset (dh, name)))
+	    *childp = (data1_attset_child *)
+		nmem_malloc (mem, sizeof(**childp));
+	    if (!((*childp)->child = data1_get_attset (dh, name)))
 	    {
 		logf(LOG_WARN, "Inclusion failed in %s", file);
 		fclose(f);
 		return 0;
 	    }
+	    (*childp)->next = 0;
 	    childp = &(*childp)->next;
 	}
 	else

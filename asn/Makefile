@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.29 1998-04-26 11:08:09 adam Exp $
+# $Id: Makefile,v 1.30 1998-05-18 13:06:51 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -23,7 +23,6 @@ test: test.o $(LIB) ../odr/odr.a
 alll:
 
 $(LIB): $(PO)
-	-mkdir $(LIBDIR)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
 	$(RANLIB) $(LIB)

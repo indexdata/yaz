@@ -58,17 +58,17 @@ typedef struct Z_HumanString
 typedef struct Z_IconObjectUnit
 {
     int which;
-#define Z_IconObject_ianaType 0
-#define Z_IconObject_z3950type 1
-#define Z_IconObject_otherType 2
+#define Z_IconObjectUnit_ianaType 0
+#define Z_IconObjectUnit_z3950type 1
+#define Z_IconObjectUnit_otherType 2
     char *bodyType;
     Odr_oct *content;
 } Z_IconObjectUnit;
 
 typedef struct Z_IconObject
 {
-    int num_iconUnits;
-    Z_IconObjectUnit **iconUnits;
+    int num;
+    Z_IconObjectUnit **elements;
 } Z_IconObject;
 
 typedef struct Z_ContactInfo
@@ -183,7 +183,7 @@ typedef struct Z_QueryTypeDetails
 #define Z_QueryTypeDetails_private 0
 #define Z_QueryTypeDetails_rpn 1
 #define Z_QueryTypeDetails_iso8777 2
-#define Z_QueryTypeDetails_z3958 3
+#define Z_QueryTypeDetails_z39_58 3
 #define Z_QueryTypeDetails_erpn 4
 #define Z_QueryTypeDetails_rankedList 5
     union
@@ -200,12 +200,12 @@ typedef struct Z_QueryTypeDetails
 typedef struct Z_AccessRestrictionsUnit
 {
     int *accessType;
-#define Z_AccessRestrictions_any                 0
-#define Z_AccessRestrictions_search              1
-#define Z_AccessRestrictions_present             2
-#define Z_AccessRestrictions_specific_elements   3
-#define Z_AccessRestrictions_extended_services   4
-#define Z_AccessRestrictions_by_database         5
+#define Z_AccessRestrictionsUnit_any                 0
+#define Z_AccessRestrictionsUnit_search              1
+#define Z_AccessRestrictionsUnit_present             2
+#define Z_AccessRestrictionsUnit_specific_elements   3
+#define Z_AccessRestrictionsUnit_extended_services   4
+#define Z_AccessRestrictionsUnit_by_database         5
     Z_HumanString *accessText;              /* OPTIONAL */
     int num_accessChallenges;
     Odr_oid **accessChallenges;             /* OPTIONAL */
@@ -213,8 +213,8 @@ typedef struct Z_AccessRestrictionsUnit
 
 typedef struct Z_AccessRestrictions
 {
-    int num_restrictions;
-    Z_AccessRestrictionsUnit **restrictions;
+    int num;
+    Z_AccessRestrictionsUnit **elements;
 } Z_AccessRestrictions;
 
 typedef struct Z_Charge
@@ -283,11 +283,11 @@ typedef struct Z_AttributeOccurrence
     int *attributeType;
     Odr_null *mustBeSupplied;               /* OPTIONAL */
     int which;
-#define Z_AttributeOcc_anyOrNone 0
+#define Z_AttributeOcc_any_or_none 0
 #define Z_AttributeOcc_specific 1
     union
     {
-	Odr_null *anyOrNone;
+	Odr_null *any_or_none;
 	Z_AttributeValueList *specific;
     } attributeValues;
 } Z_AttributeOccurrence;
@@ -349,6 +349,9 @@ typedef struct Z_TargetInfo
     Z_DatabaseList **dbCombinations;        /* OPTIONAL */
     int num_addresses;
     Z_NetworkAddress **addresses;           /* OPTIONAL */
+    int num_languages;
+    char **languages;                       /* OPTIONAL */
+
     Z_AccessInfo *commonAccessInfo;         /* OPTIONAL */
 } Z_TargetInfo;
 
@@ -379,10 +382,22 @@ typedef struct Z_DatabaseInfo
     Z_DatabaseList *subDbs;                 /* OPTIONAL */
     Z_HumanString *disclaimers;             /* OPTIONAL */
     Z_HumanString *news;                    /* OPTIONAL */
+
+#if 1
+    int which;
+    union {
+	int *actualNumber;
+	int *approxNumber;
+#define Z_DatabaseInfo_actualNumber 1
+#define Z_DatabaseInfo_approxNumber 2
+    } u; /* OPT */
+
+#else
     int recordCount_which;
-#define Z_Exp_RecordCount_actualNumber 0
-#define Z_Exp_RecordCount_approxNumber 1
+#define Z_DatabaseInfo_actualNumber 0
+#define Z_DatabaseInfo_approxNumber 1
     int *recordCount;                       /* OPTIONAL */
+#endif
     Z_HumanString *defaultOrder;            /* OPTIONAL */
     int *avRecordSize;                      /* OPTIONAL */
     int *maxRecordSize;                     /* OPTIONAL */
@@ -446,23 +461,23 @@ struct Z_ElementDataType
     union
     {
     	int *primitive;
-#define Z_PrimitiveElement_octetString         0
-#define Z_PrimitiveElement_numeric             1
-#define Z_PrimitiveElement_date                2
-#define Z_PrimitiveElement_external            3
-#define Z_PrimitiveElement_string              4
-#define Z_PrimitiveElement_trueOrFalse         5
-#define Z_PrimitiveElement_oid                 6
-#define Z_PrimitiveElement_intUnit             7
-#define Z_PrimitiveElement_empty               8
-#define Z_PrimitiveElement_noneOfTheAbove      100
+#define Z_PrimitiveDataType_octetString         0
+#define Z_PrimitiveDataType_numeric             1
+#define Z_PrimitiveDataType_date                2
+#define Z_PrimitiveDataType_external            3
+#define Z_PrimitiveDataType_string              4
+#define Z_PrimitiveDataType_trueOrFalse         5
+#define Z_PrimitiveDataType_oid                 6
+#define Z_PrimitiveDataType_intUnit             7
+#define Z_PrimitiveDataType_empty               8
+#define Z_PrimitiveDataType_noneOfTheAbove      100
 	Z_ElementInfoList *structured;
     } u;
 };
 
 typedef struct Z_TagSetInfoElements
 {
-    char *elementName;
+    char *elementname;
     int num_nicknames;
     char **nicknames;                       /* OPTIONAL */
     Z_StringOrNumeric *elementTag;
@@ -577,10 +592,10 @@ typedef struct Z_TermListElement
     char *name;
     Z_HumanString *title;                   /* OPTIONAL */
     int *searchCost;                        /* OPTIONAL */
-#define Z_TermListInfo_optimized           0
-#define Z_TermListInfo_normal              1
-#define Z_TermListInfo_expensive           2
-#define Z_TermListInfo_filter              3
+#define Z_TermListElement_optimized           0
+#define Z_TermListElement_normal              1
+#define Z_TermListElement_expensive           2
+#define Z_TermListElement_filter              3
     bool_t *scanable;
     int num_broader;
     char **broader;                         /* OPTIONAL */
@@ -641,7 +656,7 @@ typedef struct Z_OmittedAttributeInterpretation
 typedef struct Z_AttributeTypeDetails
 {
     int *attributeType;
-    Z_OmittedAttributeInterpretation *optionalType;  /* OPTIONAL */
+    Z_OmittedAttributeInterpretation *defaultIfOmitted;  /* OPTIONAL */
     int num_attributeValues;
     Z_AttributeValue **attributeValues;     /* OPTIONAL */
 } Z_AttributeTypeDetails;
@@ -760,32 +775,27 @@ typedef struct Z_RetrievalRecordDetails
     Z_PerElementDetails **detailsPerElement;  /* OPTIONAL */
 } Z_RetrievalRecordDetails;
 
-typedef struct Z_SortKeyDetailsSortType
-{
-    int which;
-#define Z_SortKeyDetailsSortType_character 0
-#define Z_SortKeyDetailsSortType_numeric 1
-#define Z_SortKeyDetailsSortType_structured 2
-    union
-    {
-	Odr_null *character;
-	Odr_null *numeric;
-	Z_HumanString *structured;
-    } u;
-} Z_SortKeyDetailsSortType;
-
 typedef struct Z_SortKeyDetails
 {
     Z_HumanString *description;                        /* OPTIONAL */
     int num_elementSpecifications;
     Z_Specification **elementSpecifications;           /* OPTIONAL */
     Z_AttributeCombinations *attributeSpecifications;  /* OPTIONAL */
-    Z_SortKeyDetailsSortType *sortType;                /* OPTIONAL */
+    int which;
+#define Z_SortKeyDetails_character 0
+#define Z_SortKeyDetails_numeric 1
+#define Z_SortKeyDetails_structured 2
+    union
+    {
+	Odr_null *character;
+	Odr_null *numeric;
+	Z_HumanString *structured;
+    } u;
     int *caseSensitivity;                              /* OPTIONAL */
 #define Z_SortKeyDetails_always              0
 #define Z_SortKeyDetails_never               1
-#define Z_SortKeyDetails_defaultYes          2
-#define Z_SortKeyDetails_defaultNo           3
+#define Z_SortKeyDetails_default_yes         2
+#define Z_SortKeyDetails_default_no          3
 } Z_SortKeyDetails;
 
 typedef struct Z_SortDetails
@@ -810,11 +820,11 @@ typedef struct Z_ProcessingInformation
      */
     Z_DatabaseName *databaseName;
     int *processingContext;
-#define Z_ProcessingInformation_access              0
-#define Z_ProcessingInformation_search              1
-#define Z_ProcessingInformation_retrieval           2
-#define Z_ProcessingInformation_recordPresentation  3
-#define Z_ProcessingInformation_recordHandling      4
+#define Z_ProcessingInformation_access               0
+#define Z_ProcessingInformation_search               1
+#define Z_ProcessingInformation_retrieval            2
+#define Z_ProcessingInformation_record_presentation  3
+#define Z_ProcessingInformation_record_handling      4
     char *name;
     Odr_oid *oid;
     /*
@@ -852,8 +862,8 @@ typedef struct Z_ValueRange
 
 typedef struct Z_ValueSetEnumerated
 {
-    int num_enumerated;
-    Z_ValueDescription **enumerated;
+    int num;
+    Z_ValueDescription **elements;
 } Z_ValueSetEnumerated;
 
 typedef struct Z_ValueSet

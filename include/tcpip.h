@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.9  1997-09-01 08:49:54  adam
+ * Revision 1.10  1998-05-18 13:07:01  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.9  1997/09/01 08:49:54  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -69,6 +74,7 @@
 
 #define YNETINCLUDE
 #include <yconfig.h>
+#include <oid.h>
 
 #ifdef __cplusplus
 extern "C" {

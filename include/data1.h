@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.35  1998-03-05 08:15:32  adam
+ * Revision 1.36  1998-05-18 13:06:57  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.35  1998/03/05 08:15:32  adam
  * Implemented data1_add_insert_taggeddata utility which is more flexible
  * than data1_insert_taggeddata.
  *
@@ -210,6 +215,7 @@ typedef struct data1_name
 } data1_name;
 
 typedef struct data1_absyn_cache_info *data1_absyn_cache;
+typedef struct data1_attset_cache_info *data1_attset_cache;
 
 typedef enum data1_datatype
 {
@@ -473,6 +479,7 @@ YAZ_EXPORT data1_element *data1_getelementbyname(data1_handle dh,
 						 const char *name);
 YAZ_EXPORT data1_node *data1_mk_node(data1_handle dh, NMEM m);
 YAZ_EXPORT data1_absyn *data1_get_absyn(data1_handle dh, const char *name);
+YAZ_EXPORT data1_attset *data1_get_attset (data1_handle dh, const char *name);
 YAZ_EXPORT data1_maptab *data1_read_maptab(data1_handle dh, const char *file);
 YAZ_EXPORT data1_node *data1_map_record(data1_handle dh, data1_node *n,
 					data1_maptab *map, NMEM m);
@@ -497,6 +504,7 @@ YAZ_EXPORT WRBUF data1_get_wrbuf (data1_handle dp);
 YAZ_EXPORT char **data1_get_read_buf (data1_handle dp, int **lenp);
 YAZ_EXPORT char **data1_get_map_buf (data1_handle dp, int **lenp);
 YAZ_EXPORT data1_absyn_cache *data1_absyn_cache_get (data1_handle dh);
+YAZ_EXPORT data1_attset_cache *data1_attset_cache_get (data1_handle dh);
 YAZ_EXPORT NMEM data1_nmem_get (data1_handle dh);
 YAZ_EXPORT void data1_pr_tree (data1_handle dh, data1_node *n, FILE *out);
 YAZ_EXPORT char *data1_insert_string (data1_handle dh, data1_node *res,
@@ -506,6 +514,9 @@ YAZ_EXPORT data1_node *data1_read_sgml (data1_handle dh, NMEM m,
 YAZ_EXPORT void data1_absyn_trav (data1_handle dh, void *handle,
 				  void (*fh)(data1_handle dh,
 					     void *h, data1_absyn *a));
+
+YAZ_EXPORT data1_attset *data1_attset_search_id (data1_handle dh, int id);
+
 YAZ_EXPORT data1_node 
 *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
                              data1_node *at, const char *tagname, NMEM m,

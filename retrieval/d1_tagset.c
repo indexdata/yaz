@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.7  1998-02-11 11:53:35  adam
+ * Revision 1.8  1998-05-18 13:07:07  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.7  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.6  1997/09/17 12:10:38  adam
@@ -61,7 +66,7 @@ data1_datatype data1_maptype (data1_handle dh, char *t)
 	{"int", DATA1K_int},
 	{"octetstring", DATA1K_octetstring},
 	{"null", DATA1K_null},
-	{0, -1}
+	{NULL, (data1_datatype) -1}
     };
     int i;
 

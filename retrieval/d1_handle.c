@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_handle.c,v $
- * Revision 1.3  1998-02-11 11:53:35  adam
+ * Revision 1.4  1998-05-18 13:07:05  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.3  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.2  1997/09/30 11:50:04  adam
@@ -29,6 +34,7 @@ struct data1_handle_info {
     int read_len;
 
     data1_absyn_cache absyn_cache;
+    data1_attset_cache attset_cache;
 
     char *map_buf;
     int map_len;
@@ -48,6 +54,7 @@ data1_handle data1_create (void)
     p->map_buf = NULL;
     p->map_len = 0;
     p->absyn_cache = NULL;
+    p->attset_cache = NULL;
     p->mem = nmem_create ();
     return p;
 }
@@ -60,6 +67,11 @@ NMEM data1_nmem_get (data1_handle dh)
 data1_absyn_cache *data1_absyn_cache_get (data1_handle dh)
 {
     return &dh->absyn_cache;
+}
+
+data1_attset_cache *data1_attset_cache_get (data1_handle dh)
+{
+    return &dh->attset_cache;
 }
 
 void data1_destroy (data1_handle dh)

@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.11  1998-04-02 08:27:37  adam
+ * Revision 1.12  1998-05-18 13:07:04  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.11  1998/04/02 08:27:37  adam
  * Minor change in definition of Z_TargetInfo. Furhter work on Explain
  * schema - added AttributeDetails.
  *
@@ -142,7 +147,11 @@ static Odr_oid *f_oid(ExpHandle *eh, data1_node *c, oid_class oclass)
     sprintf(oidstr, "%.*s", c->u.data.len, c->u.data.data);
     value_for_this = oid_getvalbyname(oidstr);
     if (value_for_this == VAL_NONE)
-	return NULL; /* fix */
+    {
+	Odr_oid *oid = odr_getoidbystr(eh->o, oidstr);
+	assert (oid);
+	return oid;
+    }
     else
     {
 	struct oident ident;
@@ -205,12 +214,6 @@ static Z_CommonInfo *f_commonInfo(ExpHandle *eh, data1_node *n)
     return res;
 }
 
-Z_QueryTypeDetails *f_queryTypeDetails (ExpHandle *eh, data1_node *n)
-{
-    /* fix */
-    return NULL;
-}
-
 Odr_oid **f_oid_seq (ExpHandle *eh, data1_node *n, int *num, oid_class oclass)
 {
     Odr_oid **res;
@@ -219,20 +222,14 @@ Odr_oid **f_oid_seq (ExpHandle *eh, data1_node *n, int *num, oid_class oclass)
 
     *num = 0;
     for (c = n->child ; c; c = c->next)
-    {
-	if (is_numeric_tag (eh, c) != 1000)
-	    continue;
-	++(*num);
-    }
+	if (is_numeric_tag (eh, c) == 1000)
+	    ++(*num);
     if (!*num)
 	return NULL;
     res = (int **)odr_malloc (eh->o, sizeof(*res) * (*num));
     for (c = n->child, i = 0 ; c; c = c->next)
-    {
-	if (is_numeric_tag (eh, c) != 1000)
-	    continue;
-	res[i++] = f_oid (eh, c, oclass);
-    }
+	if (is_numeric_tag (eh, c) == 1000)
+	    res[i++] = f_oid (eh, c, oclass);
     return res;
 }
     
@@ -245,7 +242,7 @@ char **f_string_seq (ExpHandle *eh, data1_node *n, int *num)
     *num = 0;
     for (c = n->child ; c; c = c->next)
     {
-	if (!is_numeric_tag (eh, c) != 1001)
+	if (is_numeric_tag (eh, c) != 1001)
 	    continue;
 	++(*num);
     }
@@ -254,64 +251,93 @@ char **f_string_seq (ExpHandle *eh, data1_node *n, int *num)
     res = (char **)odr_malloc (eh->o, sizeof(*res) * (*num));
     for (c = n->child, i = 0 ; c; c = c->next)
     {
-	if (!is_numeric_tag (eh, c) != 1001)
+	if (is_numeric_tag (eh, c) != 1001)
 	    continue;
 	res[i++] = f_string (eh, c);
     }
     return res;
 }
 
-char **f_humstring_seq (ExpHandle *eh, data1_node *n, int *num)
+Z_ProximitySupport *f_proximitySupport (ExpHandle *eh, data1_node *n)
 {
-    /* fix */
-    return NULL;
+    Z_ProximitySupport *res = (Z_ProximitySupport *)
+	odr_malloc (eh->o, sizeof(*res));
+    res->anySupport = eh->false_value;
+    res->num_unitsSupported = 0;
+    res->unitsSupported = 0;
+    return res;
 }
 
-
-Z_RpnCapabilities *f_rpnCapabilities (ExpHandle *eh, data1_node *c)
+Z_RpnCapabilities *f_rpnCapabilities (ExpHandle *eh, data1_node *n)
 {
-    Z_RpnCapabilities *res = (Z_RpnCapabilities *)odr_malloc (eh->o, sizeof(*res));
+    Z_RpnCapabilities *res = (Z_RpnCapabilities *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
 
     res->num_operators = 0;
     res->operators = NULL;
     res->resultSetAsOperandSupported = eh->false_value;
     res->restrictionOperandSupported = eh->false_value;
     res->proximity = NULL;
-    /* fix */ /* 550 - 560 */
+
+    for (c = n->child; n; c = c->next)
+    {
+	int i;
+	switch (is_numeric_tag(eh, c))
+	{
+	case 550:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 551)
+		    continue;
+		(res->num_operators)++;
+	    }
+	    if (res->num_operators)
+		res->operators = (int **)
+		    odr_malloc (eh->o, res->num_operators
+				* sizeof(*res->operators));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 551)
+		    continue;
+		res->operators[i++] = f_integer (eh, n);
+	    }
+	    break;
+	case 552:
+	    res->resultSetAsOperandSupported = f_bool (eh, c);
+	    break;
+	case 553:
+	    res->restrictionOperandSupported = f_bool (eh, c);
+	    break;
+	case 554:
+	    res->proximity = f_proximitySupport (eh, c);
+	    break;
+	}
+    }
     return res;
 }
 
-Z_QueryTypeDetails **f_queryTypesSupported (ExpHandle *eh, data1_node *c,
-					    int *num)
+Z_QueryTypeDetails *f_queryTypeDetails (ExpHandle *eh, data1_node *n)
 {
-    data1_node *n;
-    Z_QueryTypeDetails **res;
-    int i;
+    Z_QueryTypeDetails *res = (Z_QueryTypeDetails *)
+	odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
 
-    *num = 0;
-    for (n = c->child; n; n = n->next)
+    res->which = Z_QueryTypeDetails_rpn;
+    res->u.rpn = 0;
+    for (c = n->child; c; c = c->next)
     {
-	if (is_numeric_tag(eh, n) != 519)
-	    continue;
-	/* fix */ /* 518 and 520 */
-	(*num)++;
-    }
-    if (!*num)
-	return NULL;
-    res = (Z_QueryTypeDetails **)odr_malloc (eh->o, *num * sizeof(*res));
-    i = 0;
-    for (n = c->child; n; n = n->next)
-    {
-	if (is_numeric_tag(eh, n) == 519)
+	switch (is_numeric_tag(eh, n))
 	{
-	    res[i] = (Z_QueryTypeDetails *)odr_malloc (eh->o, sizeof(**res));
-	    res[i]->which = Z_QueryTypeDetails_rpn;
-	    res[i]->u.rpn = f_rpnCapabilities (eh, n);
-	    i++;
+	case 519:
+	    res->which = Z_QueryTypeDetails_rpn;
+	    res->u.rpn = f_rpnCapabilities (eh, c);
+	    break;
+	case 520:
+	    break;
+	case 521:
+	    break;
 	}
-	else
-	    continue;
-	/* fix */ /* 518 and 520 */
     }
     return res;
 }
@@ -344,11 +370,27 @@ static Z_AccessInfo *f_accessInfo(ExpHandle *eh, data1_node *n)
 
     for (c = n->child; c; c = c->next)
     {
+	int i = 0;
 	switch (is_numeric_tag (eh, c))
 	{
 	case 501:
-	    res->queryTypesSupported =
-		f_queryTypesSupported (eh, c, &res->num_queryTypesSupported);
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 518)
+		    continue;
+		(res->num_queryTypesSupported)++;
+	    }
+	    if (res->num_queryTypesSupported)
+		res->queryTypesSupported =
+		    (Z_QueryTypeDetails **)
+		    odr_malloc (eh->o, res->num_queryTypesSupported
+				* sizeof(*res->queryTypesSupported));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 518)
+		    continue;
+		res->queryTypesSupported[i++] = f_queryTypeDetails (eh, n);
+	    }
 	    break;
 	case 503:
 	    res->diagnosticsSets =
@@ -397,32 +439,43 @@ static int *f_recordCount(ExpHandle *eh, data1_node *c, int *which)
     c = c->child;
     if (!is_numeric_tag (eh, c))
 	return 0;
-#ifdef ASN_COMPILED
     if (c->u.tag.element->tag->value.numeric == 210)
 	*wp = Z_DatabaseInfo_actualNumber;
     else if (c->u.tag.element->tag->value.numeric == 211)
 	*wp = Z_DatabaseInfo_approxNumber;
     else
 	return 0;
-#else
-    if (c->u.tag.element->tag->value.numeric == 210)
-	*wp = Z_Exp_RecordCount_actualNumber;
-    else if (c->u.tag.element->tag->value.numeric == 211)
-	*wp = Z_Exp_RecordCount_approxNumber;
-    else
-	return 0;
-#endif
     if (!c->child || c->child->which != DATA1N_data)
 	return 0;
-    sprintf(intbuf, "%.*s", 63, c->child->u.data.data);
+    sprintf(intbuf, "%.*s", c->child->u.data.len, c->child->u.data.data);
     *r = atoi(intbuf);
     return r;
 }
 
 static Z_ContactInfo *f_contactInfo(ExpHandle *eh, data1_node *n)
 {
-    /* fix */
-    return 0;
+    Z_ContactInfo *res = (Z_ContactInfo *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+    
+    res->name = 0;
+    res->description = 0;
+    res->address = 0;
+    res->email = 0;
+    res->phone = 0;
+    
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 102: res->name = f_string (eh, c); break;
+	case 113: res->description = f_humstring (eh, c); break;
+	case 127: res->address = f_humstring (eh, c); break;
+	case 128: res->email = f_string (eh, c); break;
+	case 129: res->phone = f_string (eh, c); break;
+	}
+    }
+    return res;
 }
 
 static Z_DatabaseList *f_databaseList(ExpHandle *eh, data1_node *n)
@@ -454,6 +507,152 @@ static Z_DatabaseList *f_databaseList(ExpHandle *eh, data1_node *n)
     return res;
 }
 
+static Z_NetworkAddressIA *f_networkAddressIA(ExpHandle *eh, data1_node *n)
+{
+    Z_NetworkAddressIA *res = (Z_NetworkAddressIA *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+    
+    res->hostAddress = 0;
+    res->port = 0;
+
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 121: res->hostAddress = f_string (eh, c); break;
+	case 122: res->port = f_integer (eh, c); break;
+	}
+    }
+    return res;
+}
+
+static Z_NetworkAddressOther *f_networkAddressOther(ExpHandle *eh,
+						    data1_node *n)
+{
+    Z_NetworkAddressOther *res = (Z_NetworkAddressOther *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->type = 0;
+    res->address = 0;
+
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 124: res->type = f_string (eh, c); break;
+	case 121: res->address = f_string (eh, c); break;
+	}
+    }
+    return res;
+}
+
+static Z_NetworkAddress **f_networkAddresses(ExpHandle *eh, data1_node *n, 
+					     int *num)
+{
+    Z_NetworkAddress **res = NULL;
+    data1_node *c;
+    int i = 0;
+    
+    *num = 0;
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 120:
+	case 123:
+	    (*num)++;
+	    break;
+	}
+    }
+
+    if (*num)
+	res = (Z_NetworkAddress **) odr_malloc (eh->o, sizeof(*res) * (*num));
+					       
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 120:
+	    res[i] = (Z_NetworkAddress *) odr_malloc (eh->o, sizeof(**res));
+	    res[i]->which = Z_NetworkAddress_iA;
+	    res[i]->u.internetAddress = f_networkAddressIA(eh, c);
+	    i++;
+	    break;
+	case 123:
+	    res[i] = (Z_NetworkAddress *) odr_malloc (eh->o, sizeof(**res));
+	    res[i]->which = Z_NetworkAddress_other;
+	    res[i]->u.other = f_networkAddressOther(eh, c);
+	    i++;
+	    break;
+	}
+    }
+    return res;
+}
+
+static Z_CategoryInfo *f_categoryInfo(ExpHandle *eh, data1_node *n)
+{
+    Z_CategoryInfo *res = (Z_CategoryInfo *)odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->category = 0;
+    res->originalCategory = 0;
+    res->description = 0;
+    res->asn1Module = 0;
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 102: res->category = f_string(eh, c); break;
+	case 302: res->originalCategory = f_string(eh, c); break;
+	case 113: res->description = f_humstring(eh, c); break;
+	case 303: res->asn1Module = f_string (eh, c); break;
+	}
+    }
+    return res;
+}
+
+static Z_CategoryList *f_categoryList(ExpHandle *eh, data1_node *n)
+{
+    Z_CategoryList *res = (Z_CategoryList *)odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->commonInfo = 0;
+    res->num_categories = 0;
+    res->categories = NULL;
+
+    for (c = n->child; c; c = c->next)
+    {
+	int i = 0;
+
+	switch (is_numeric_tag (eh, c))
+	{
+	case 600: res->commonInfo = f_commonInfo(eh, c); break;
+	case 300:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 301)
+		    continue;
+		(res->num_categories)++;
+	    }
+	    if (res->num_categories)
+		res->categories =
+		    (Z_CategoryInfo **)odr_malloc (eh->o, res->num_categories 
+						   * sizeof(*res->categories));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 301)
+		    continue;
+		res->categories[i++] = f_categoryInfo (eh, n);
+	    }
+	    break;
+	}
+    }
+    assert (res->num_categories && res->categories);
+    return res;
+}
+
 static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
 {
     Z_TargetInfo *res = (Z_TargetInfo *)odr_malloc(eh->o, sizeof(*res));
@@ -481,15 +680,15 @@ static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
     res->dbCombinations = 0;
     res->num_addresses = 0;
     res->addresses = 0;
+    res->num_languages = 0;
+    res->languages = NULL;
     res->commonAccessInfo = 0;
     
     for (c = n->child; c; c = c->next)
     {
 	int i = 0;
 
-	if (!is_numeric_tag (eh, c))
-	    continue;
-	switch (c->u.tag.element->tag->value.numeric)
+	switch (is_numeric_tag (eh, c))
 	{
 	case 600: res->commonInfo = f_commonInfo(eh, c); break;
 	case 102: res->name = f_string(eh, c); break;
@@ -545,7 +744,29 @@ static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
 		res->dbCombinations[i++] = f_databaseList (eh, n);
 	    }
 	    break;
-	case 119: res->addresses = 0; break; /* fix */
+	case 119: 
+	    res->addresses =
+		f_networkAddresses (eh, c, &res->num_addresses);
+	    break;
+	case 125:
+	    res->num_languages = 0;
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (!is_numeric_tag(eh, n) != 126)
+		    continue;
+		(res->num_languages)++;
+	    }
+	    if (res->num_languages)
+		res->languages = (char **)
+		    odr_malloc (eh->o, res->num_languages *
+				sizeof(*res->languages));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (!is_numeric_tag(eh, n) != 126)
+		    continue;
+		res->languages[i++] = f_string (eh, n);
+	    }
+	    break;
 	case 500: res->commonAccessInfo = f_accessInfo(eh, c); break;
 	}
     }
@@ -577,11 +798,7 @@ static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
     res->subDbs = 0;
     res->disclaimers = 0;
     res->news = 0;
-#ifdef ASN_COMPILED
     res->u.actualNumber = 0;
-#else
-    res->recordCount = 0;
-#endif
     res->defaultOrder = 0;
     res->avRecordSize = 0;
     res->maxRecordSize = 0;
@@ -660,13 +877,8 @@ static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
 	    break;
 	case 207: res->disclaimers = f_humstring(eh, c); break;
 	case 103: res->news = f_humstring(eh, c); break;
-#ifdef ASN_COMPILED
 	case 209: res->u.actualNumber =
 		      f_recordCount(eh, c, &res->which); break;
-#else
-	case 209: res->recordCount =
-		      f_recordCount(eh, c, &res->recordCount_which); break;
-#endif
 	case 212: res->defaultOrder = f_humstring(eh, c); break;
 	case 213: res->avRecordSize = f_integer(eh, c); break;
 	case 214: res->maxRecordSize = f_integer(eh, c); break;
@@ -688,6 +900,492 @@ static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
 	res->userFee = eh->false_value;
     if (!res->available)
 	res->available = eh->true_value;
+    return res;
+}
+
+Z_StringOrNumeric *f_stringOrNumeric (ExpHandle *eh, data1_node *n)
+{
+    Z_StringOrNumeric *res = (Z_StringOrNumeric *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 1001:
+	    res->which = Z_StringOrNumeric_string;
+	    res->u.string = f_string (eh, c);
+	    break;
+	case 1002:
+	    res->which = Z_StringOrNumeric_numeric;
+	    res->u.numeric = f_integer (eh, c);
+	    break;
+	}
+    }
+    return res;
+}
+
+Z_AttributeDescription *f_attributeDescription (
+    ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeDescription *res = (Z_AttributeDescription *)
+	odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
+    int i = 0;
+	
+    res->name = 0;
+    res->description = 0;
+    res->attributeValue = 0;
+    res->num_equivalentAttributes = 0;
+    res->equivalentAttributes = 0;
+
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 102: res->name = f_string (eh, c); break;
+	case 113: res->description = f_humstring (eh, c); break;
+	case 710: res->attributeValue = f_stringOrNumeric (eh, c); break;
+	case 752: (res->num_equivalentAttributes++); break;
+	}
+    }
+    if (res->num_equivalentAttributes)
+	res->equivalentAttributes = (Z_StringOrNumeric **)
+	    odr_malloc (eh->o, sizeof(*res->equivalentAttributes) *
+			res->num_equivalentAttributes);
+    for (c = n->child; c; c = c->next)
+	if (is_numeric_tag (eh, c) == 752)
+	    res->equivalentAttributes[i++] = f_stringOrNumeric (eh, c);
+    return res;
+}
+
+Z_AttributeType *f_attributeType (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeType *res = (Z_AttributeType *)
+	odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->name = 0;
+    res->description = 0;
+    res->attributeType = 0;
+    res->num_attributeValues = 0;
+    res->attributeValues = 0;
+
+    for (c = n->child; c; c = c->next)
+    {
+	int i = 0;
+	switch (is_numeric_tag (eh, c))
+	{
+	case 102: res->name = f_string (eh, c); break;
+	case 113: res->description = f_humstring (eh, c); break;
+	case 704: res->attributeType = f_integer (eh, c); break;
+	case 708:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 709)
+		    continue;
+		(res->num_attributeValues)++;
+	    }
+	    if (res->num_attributeValues)
+		res->attributeValues = (Z_AttributeDescription **)
+		    odr_malloc (eh->o, res->num_attributeValues
+				* sizeof(*res->attributeValues));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 709)
+		    continue;
+		res->attributeValues[i++] = f_attributeDescription (eh, n);
+	    }
+	    break;
+	}
+    }
+    return res;
+}
+
+Z_AttributeSetInfo *f_attributeSetInfo (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeSetInfo *res = (Z_AttributeSetInfo *)
+	odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->commonInfo = 0;
+    res->attributeSet = 0;
+    res->name = 0;
+    res->num_attributes = 0;
+    res->attributes = 0;
+    res->description = 0;
+    for (c = n->child; c; c = c->next)
+    {
+	int i = 0;
+	switch (is_numeric_tag (eh, c))
+	{
+	case 600: res->commonInfo = f_commonInfo (eh, c); break;
+	case 1000: res->attributeSet = f_oid (eh, c, CLASS_ATTSET); break;
+	case 102: res->name = f_string (eh, c); break;
+	case 750:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 751)
+		    continue;
+		(res->num_attributes)++;
+	    }
+	    if (res->num_attributes)
+		res->attributes = (Z_AttributeType **)
+		    odr_malloc (eh->o, res->num_attributes
+				* sizeof(*res->attributes));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 751)
+		    continue;
+		res->attributes[i++] = f_attributeType (eh, n);
+	    }
+	    break;
+	case 113: res->description = f_humstring (eh, c); break;
+	}
+    }
+    return res;
+}
+
+Z_OmittedAttributeInterpretation *f_omittedAttributeInterpretation (
+    ExpHandle *eh, data1_node *n)
+{
+    Z_OmittedAttributeInterpretation *res = (Z_OmittedAttributeInterpretation*)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->defaultValue = 0;
+    res->defaultDescription = 0;
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 706:
+	    res->defaultValue = f_stringOrNumeric (eh, c);
+	    break;
+	case 113:
+	    res->defaultDescription = f_humstring(eh, c);
+	    break;
+	}
+    }
+    return res;
+}
+
+Z_AttributeValue *f_attributeValue (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeValue *res = (Z_AttributeValue *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->value = 0;
+    res->description = 0;
+    res->num_subAttributes = 0;
+    res->subAttributes = 0;
+    res->num_superAttributes = 0;
+    res->superAttributes = 0;
+    res->partialSupport = 0;
+    for (c = n->child; c; c = c->next)
+    {
+	int i = 0;
+	switch (is_numeric_tag (eh, c))
+	{
+	case 710:
+	    res->value = f_stringOrNumeric (eh, c);  break;
+	case 113:
+	    res->description = f_humstring (eh, c); break;
+	case 712:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 713)
+		    continue;
+		(res->num_subAttributes)++;
+	    }
+	    if (res->num_subAttributes)
+		res->subAttributes =
+		    (Z_StringOrNumeric **)
+		    odr_malloc (eh->o, res->num_subAttributes
+				* sizeof(*res->subAttributes));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 713)
+		    continue;
+		res->subAttributes[i++] = f_stringOrNumeric (eh, n);
+	    }
+	    break;
+	case 714:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 715)
+		    continue;
+		(res->num_superAttributes)++;
+	    }
+	    if (res->num_superAttributes)
+		res->superAttributes =
+		    (Z_StringOrNumeric **)
+		    odr_malloc (eh->o, res->num_superAttributes
+				* sizeof(*res->superAttributes));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 715)
+		    continue;
+		res->superAttributes[i++] = f_stringOrNumeric (eh, n);
+	    }
+	    break;
+	case 711:
+	    res->partialSupport = odr_nullval ();
+	    break;
+	}
+    }
+    return res;
+}
+
+Z_AttributeTypeDetails *f_attributeTypeDetails (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeTypeDetails *res = (Z_AttributeTypeDetails *)
+	odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
+    res->attributeType = 0;
+    res->defaultIfOmitted = 0;
+    res->num_attributeValues = 0;
+    res->attributeValues = 0;
+    for (c = n->child; c; c = c->next)
+    {
+	int i = 0;
+	switch (is_numeric_tag (eh, c))
+	{
+	case 704: res->attributeType = f_integer (eh, c); break;
+	case 705:
+	    res->defaultIfOmitted = f_omittedAttributeInterpretation (eh, c);
+	    break;
+	case 708:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 709)
+		    continue;
+		(res->num_attributeValues)++;
+	    }
+	    if (res->num_attributeValues)
+		res->attributeValues =
+		    (Z_AttributeValue **)
+		    odr_malloc (eh->o, res->num_attributeValues
+				* sizeof(*res->attributeValues));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 709)
+		    continue;
+		res->attributeValues[i++] = f_attributeValue (eh, n);
+	    }
+	    break;
+	}
+    }
+    return res;
+}
+
+Z_AttributeSetDetails *f_attributeSetDetails (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeSetDetails *res = (Z_AttributeSetDetails *)
+	odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
+    
+    res->attributeSet = 0;
+    res->num_attributesByType = 0;
+    res->attributesByType = 0;
+    for (c = n->child; c; c = c->next)
+    {
+	int i = 0;
+	switch (is_numeric_tag (eh, c))
+	{
+	case 1000: res->attributeSet = f_oid(eh, c, CLASS_ATTSET); break;
+	case 702:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 703)
+		    continue;
+		(res->num_attributesByType)++;
+	    }
+	    if (res->num_attributesByType)
+		res->attributesByType =
+		    (Z_AttributeTypeDetails **)
+		    odr_malloc (eh->o, res->num_attributesByType
+				* sizeof(*res->attributesByType));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 703)
+		    continue;
+		res->attributesByType[i++] = f_attributeTypeDetails (eh, n);
+	    }
+	    break;
+	}
+    }
+    return res;
+}
+
+Z_AttributeValueList *f_attributeValueList (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeValueList *res = (Z_AttributeValueList *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+    int i = 0;
+
+    res->num_attributes = 0;
+    res->attributes = 0;
+    for (c = n->child; c; c = c->next)
+	if (is_numeric_tag (eh, c) == 710)
+	    (res->num_attributes)++;
+    if (res->num_attributes)
+    {
+	res->attributes = (Z_StringOrNumeric **)
+	    odr_malloc (eh->o, res->num_attributes * sizeof(*res->attributes));
+    }
+    for (c = n->child; c; c = c->next)
+	if (is_numeric_tag(eh, c) == 710)
+	    res->attributes[i++] = f_stringOrNumeric (eh, c);
+    return res;
+}
+
+Z_AttributeOccurrence *f_attributeOccurrence (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeOccurrence *res = (Z_AttributeOccurrence *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->attributeSet = 0;
+    res->attributeType = 0;
+    res->mustBeSupplied = 0;
+    res->which = Z_AttributeOcc_any_or_none;
+    res->attributeValues.any_or_none = odr_nullval ();
+
+    for (c = n->child; c; c = c->next)
+    {
+	switch (is_numeric_tag (eh, c))
+	{
+	case 1000:
+	    res->attributeSet = f_oid (eh, c, CLASS_ATTSET); break;
+	case 704:
+	    res->attributeType = f_integer (eh, c); break;
+	case 720:
+	    res->mustBeSupplied = odr_nullval (); break;
+	case 721:
+	    res->which = Z_AttributeOcc_any_or_none;
+	    res->attributeValues.any_or_none = odr_nullval ();
+	    break;
+	case 722:
+	    res->which = Z_AttributeOcc_specific;
+	    res->attributeValues.specific = f_attributeValueList (eh, c);
+	    break;
+	}
+    }
+    return res;
+}
+
+Z_AttributeCombination *f_attributeCombination (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeCombination *res = (Z_AttributeCombination *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+    int i = 0;
+
+    res->num_occurrences = 0;
+    res->occurrences = 0;
+    for (c = n->child; c; c = c->next)
+	if (is_numeric_tag (eh, c) == 719)
+	    (res->num_occurrences)++;
+    if (res->num_occurrences)
+    {
+	res->occurrences = (Z_AttributeOccurrence **)
+	    odr_malloc (eh->o, res->num_occurrences * sizeof(*res->occurrences));
+    }
+    for (c = n->child; c; c = c->next)
+	if (is_numeric_tag(eh, c) == 719)
+	    res->occurrences[i++] = f_attributeOccurrence (eh, c);
+    assert (res->num_occurrences);
+    return res;
+}
+
+Z_AttributeCombinations *f_attributeCombinations (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeCombinations *res = (Z_AttributeCombinations *)
+	odr_malloc (eh->o, sizeof(*res));
+    data1_node *c;
+    res->defaultAttributeSet = 0;
+    res->num_legalCombinations = 0;
+    res->legalCombinations = 0;
+
+    for (c = n->child; c; c = c->next)
+    {
+	int i = 0;
+	switch (is_numeric_tag (eh, c))
+	{
+	case 1000:
+	    res->defaultAttributeSet = f_oid (eh, c, CLASS_ATTSET);
+	    break;
+	case 717:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 718)
+		    continue;
+		(res->num_legalCombinations)++;
+	    }
+	    if (res->num_legalCombinations)
+		res->legalCombinations =
+		    (Z_AttributeCombination **)
+		    odr_malloc (eh->o, res->num_legalCombinations
+				* sizeof(*res->legalCombinations));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 718)
+		    continue;
+		res->legalCombinations[i++] = f_attributeCombination (eh, n);
+	    }
+	    break;
+	}
+    }
+    assert (res->num_legalCombinations);
+    return res;
+}
+
+Z_AttributeDetails *f_attributeDetails (ExpHandle *eh, data1_node *n)
+{
+    Z_AttributeDetails *res = (Z_AttributeDetails *)
+	odr_malloc(eh->o, sizeof(*res));
+    data1_node *c;
+
+    res->commonInfo = 0;
+    res->databaseName = 0;
+    res->num_attributesBySet = 0;
+    res->attributesBySet = NULL;
+    res->attributeCombinations = NULL;
+
+    for (c = n->child; c; c = c->next)
+    {
+	int i = 0;
+	switch (is_numeric_tag (eh, c))
+	{
+	case 600: res->commonInfo = f_commonInfo(eh, c); break;
+	case 102: res->databaseName = f_string (eh, c); break;
+	case 700:
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 701)
+		    continue;
+		(res->num_attributesBySet)++;
+	    }
+	    if (res->num_attributesBySet)
+		res->attributesBySet =
+		    (Z_AttributeSetDetails **)
+		    odr_malloc (eh->o, res->num_attributesBySet
+				* sizeof(*res->attributesBySet));
+	    for (n = c->child; n; n = n->next)
+	    {
+		if (is_numeric_tag(eh, n) != 701)
+		    continue;
+		res->attributesBySet[i++] = f_attributeSetDetails (eh, n);
+	    }
+	    break;
+	case 716:
+	    res->attributeCombinations = f_attributeCombinations (eh, c);
+	    break;
+	}
+    }
     return res;
 }
 
@@ -716,13 +1414,28 @@ Z_ExplainRecord *data1_nodetoexplain (data1_handle dh, data1_node *n,
 	switch (is_numeric_tag (&eh, n))
 	{
 	case 1:
+	    res->which = Z_Explain_categoryList;
+	    if (!(res->u.categoryList = f_categoryList(&eh, n)))
+		return 0;
+	    return res;	    
+	case 2:
 	    res->which = Z_Explain_targetInfo;
 	    if (!(res->u.targetInfo = f_targetInfo(&eh, n)))
 		return 0;
 	    return res;
-	case 2:
+	case 3:
 	    res->which = Z_Explain_databaseInfo;
 	    if (!(res->u.databaseInfo = f_databaseInfo(&eh, n)))
+		return 0;
+	    return res;
+	case 7:
+	    res->which = Z_Explain_attributeSetInfo;
+	    if (!(res->u.attributeSetInfo = f_attributeSetInfo(&eh, n)))
+		return 0;
+	    return res;	    
+	case 10:
+	    res->which = Z_Explain_attributeDetails;
+	    if (!(res->u.attributeDetails = f_attributeDetails(&eh, n)))
 		return 0;
 	    return res;
 	}

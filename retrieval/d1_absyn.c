@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.19  1998-03-05 08:15:32  adam
+ * Revision 1.20  1998-05-18 13:07:02  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.19  1998/03/05 08:15:32  adam
  * Implemented data1_add_insert_taggeddata utility which is more flexible
  * than data1_insert_taggeddata.
  *
@@ -94,6 +99,13 @@ struct data1_absyn_cache_info
     data1_absyn_cache next;
 };
 
+struct data1_attset_cache_info 
+{
+    char *name;
+    data1_attset *attset;
+    data1_attset_cache next;
+};
+
 data1_absyn *data1_absyn_search (data1_handle dh, const char *name)
 {
     data1_absyn_cache p = *data1_absyn_cache_get (dh);
@@ -142,6 +154,73 @@ data1_absyn *data1_get_absyn (data1_handle dh, const char *name)
     if (!(absyn = data1_absyn_search (dh, name)))
 	absyn = data1_absyn_add (dh, name);
     return absyn;
+}
+
+data1_attset *data1_attset_search_name (data1_handle dh, const char *name)
+{
+    data1_attset_cache p = *data1_attset_cache_get (dh);
+
+    while (p)
+    {
+	if (!strcmp (name, p->name))
+	    return p->attset;
+	p = p->next;
+    }
+    return NULL;
+}
+
+data1_attset *data1_attset_search_id (data1_handle dh, int id)
+{
+    data1_attset_cache p = *data1_attset_cache_get (dh);
+
+    while (p)
+    {
+	if (id == p->attset->reference)
+	    return p->attset;
+	p = p->next;
+    }
+    return NULL;
+}
+
+data1_attset *data1_attset_add (data1_handle dh, const char *name)
+{
+    char fname[512], aname[512];
+    NMEM mem = data1_nmem_get (dh);
+    data1_attset *attset;
+
+    strcpy (aname, name);
+    sprintf(fname, "%s.att", name);
+    attset = data1_read_attset (dh, fname);
+    if (!attset)
+    {
+	char *cp;
+	attset = data1_read_attset (dh, name);
+	if (attset && (cp = strrchr (aname, '.')))
+	    *cp = '\0';
+    }
+    if (!attset)
+	logf (LOG_WARN|LOG_ERRNO, "couldn't load attribute set %s", name);
+    else
+    {
+	data1_attset_cache p = (data1_attset_cache)
+	    nmem_malloc (mem, sizeof(*p));
+	data1_attset_cache *pp = data1_attset_cache_get (dh);
+	
+	attset->name = p->name = nmem_strdup (mem, aname);
+	p->attset = attset;
+	p->next = *pp;
+	*pp = p;
+    }
+    return attset;
+}
+
+data1_attset *data1_get_attset (data1_handle dh, const char *name)
+{
+    data1_attset *attset;
+
+    if (!(attset = data1_attset_search_name (dh, name)))
+	attset = data1_attset_add (dh, name);
+    return attset;
 }
 
 data1_esetname *data1_getesetbyname(data1_handle dh, data1_absyn *a,
@@ -225,7 +304,6 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     data1_termlist *all = 0;
     int level;
 
-    logf (LOG_DEBUG, "begin data1_read_absyn file=%s", file);
     if (!(f = yaz_path_fopen(data1_get_tabpath (dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "Couldn't open %s", file);
@@ -527,7 +605,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		fclose(f);
 		return 0;
 	    }
-	    if (!(res->attset = data1_read_attset (dh, name)))
+	    if (!(res->attset = data1_get_attset (dh, name)))
 	    {
 		logf(LOG_WARN, "Attset failed in %s", file);
 		fclose(f);

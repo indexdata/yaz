@@ -3,29 +3,30 @@
 #
 
 name explain
+reference Explain-tagset
 type 4
 include tagsetm.tag
 
 #
 # Explain categories
 #
-tag 1		targetInfo					structured
-tag 2		databaseInfo					structured
-tag 3		schemaInfo					structured
-tag 4		tagSetInfo					structured
-tag 5		recordSyntaxInfo				structured
-tag 6           attributeSetInfo				structured
-tag 7		termListInfo					structured
-tag 8		extendedServicesInfo				structured
-tag 9		attributeDetails				structured
-tag 10		termListDetails					structured
-tag 11		elementSetDetails				structured
-tag 12		retrievalRecordDetails				structured
-tag 13		sortDetails					structured
-tag 14		processing					structured
-tag 15		variants					structured
-tag 16		units						structured
-tag 100		categoryList					structured
+tag 1		categoryList					structured
+tag 2		targetInfo					structured
+tag 3		databaseInfo					structured
+tag 4		schemaInfo					structured
+tag 5		tagSetInfo					structured
+tag 6		recordSyntaxInfo				structured
+tag 7           attributeSetInfo				structured
+tag 8		termListInfo					structured
+tag 9		extendedServicesInfo				structured
+tag 10		attributeDetails				structured
+tag 11		termListDetails					structured
+tag 12		elementSetDetails				structured
+tag 13		retrievalRecordDetails				structured
+tag 14		sortDetails					structured
+tag 15		processing					structured
+tag 16		variants					structured
+tag 17		units						structured
 
 #
 # TargetInfo
@@ -47,7 +48,17 @@ tag 115		usageRest					string
 tag 116		paymentAddr					string
 tag 117		hours						string
 tag 118		dbCombinations					structured
-tag 119		address						structured
+tag 119		addresses					structured
+tag 120		internetAddress					structured
+tag 121		host						string
+tag 122		port						numeric
+tag 123		otherAddress					structured
+tag 124		addressType					string
+tag 125		languages					structured
+tag 126		language					string
+tag 127		address						string
+tag 128		email						string
+tag 129		phone						string
 
 #
 # DatabaseInfo
@@ -78,6 +89,11 @@ tag 225		submissionContactInfo				structured
 tag 226		explainDatabase					null
 tag 227		keywords					string
 
+# CategoryList
+tag 300		categories					structured
+tag 301		category					structured
+tag 302		originalName					string
+tag 303		asn1Module					string
 #
 # AccessInfo
 #
@@ -93,9 +109,10 @@ tag 514		costInfo					structured
 tag 515		variantSets					structured
 tag 516		elementSetNames					structured
 tag 517		unitSystems					structured
-tag 518         privateCapabilities				structured
-tag 519		RpnCapabilities					structured
+tag 518         queryTypeDetails				structured
+tag 519		rpnCapabilities					structured
 tag 520		Iso8777Capabilities				structured
+tag 521         privateCapabilities				structured
 
 tag 550		rpnOperators					structured
 tag 551		rpnOperator					numeric
@@ -124,14 +141,13 @@ tag 700		attributesBySet					structured
 tag 701		attributeSetDetails				structured
 tag 702		attributesByType				structured
 tag 703		attributeTypeDetails				structured
-tag 704		attributeType					numeric
+tag 704		type						numeric
 tag 705		defaultIfOmitted				structured
 tag 706		defaultValue					structured
-tag 707		defaultDescription				structured
 tag 708		attributeValues					structured
 tag 709		attributeValue					structured
 tag 710		value						structured
-tag 711		description					string
+tag 711		partialSupport					string
 tag 712		subAttributes					structured
 tag 713		subAttribute					structured
 tag 714		superAttributes					structured
@@ -141,9 +157,15 @@ tag 717		legalAttributeCombinations			structured
 tag 718		attributeCombination				structured
 tag 719		attributeOccurrence				structured
 tag 720		mustBeSupplied					bool
-tag 721		anyOrNone					bool
+tag 721		anyOrNone					string
 tag 722		specific					structured
 
+#
+# AttributeSetInfo
+#
+tag 750		attributes					structured
+tag 751		attributeType					structured
+tag 752		equivalentAttribute				structured
 #
 # General tags for list members, etc.
 #

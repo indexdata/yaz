@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.26  1998-03-20 14:46:06  adam
+ * Revision 1.27  1998-05-18 13:06:58  adam
+ * Changed the way attribute sets are handled by the retriaval module.
+ * Extended Explain conversion / schema.
+ * Modified server and client to work with ASN.1 compiled protocol handlers.
+ *
+ * Revision 1.26  1998/03/20 14:46:06  adam
  * Added UNIverse Resource Reports.
  *
  * Revision 1.25  1998/02/10 15:31:52  adam
@@ -121,6 +126,7 @@ extern "C" {
     
 typedef enum oid_proto
 {
+    PROTO_NOP=0,
     PROTO_Z3950,
     PROTO_SR,
     PROTO_GENERAL,
@@ -129,6 +135,7 @@ typedef enum oid_proto
 
 typedef enum oid_class
 {
+    CLASS_NOP=0,
     CLASS_APPCTX,
     CLASS_ABSYN,
     CLASS_ATTSET,
@@ -147,6 +154,7 @@ typedef enum oid_class
 
 typedef enum oid_value
 {
+    VAL_NOP=0,
     VAL_APDU,
     VAL_BER,
     VAL_BASIC_CTX,
