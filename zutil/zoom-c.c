@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.2 2002-09-24 08:05:42 adam Exp $
+ * $Id: zoom-c.c,v 1.3 2002-09-25 20:41:02 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -2035,10 +2035,15 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
                 int sel;
                 
                 yaz_get_response_charneg(tmpmem, p, &charset, &lang, &sel);
-                yaz_log(LOG_DEBUG, "Target accepted: charset - %s,"
-                        "language - %s, select - %d",
-                        charset, lang, sel);
-                
+                yaz_log(LOG_DEBUG, "Target accepted: charset %s, "
+                        "language %s, select %d",
+                        charset ? charset : "none", lang ? lang : "none", sel);
+                if (charset)
+                    ZOOM_connection_option_set (c, "negotiation-charset",
+                                                charset);
+                if (lang)
+                    ZOOM_connection_option_set (c, "negotiation-lang",
+                                                lang);
                 nmem_destroy(tmpmem);
             }
 	}	
