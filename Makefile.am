@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.7 2000-04-05 07:39:54 adam Exp $
+## $Id: Makefile.am,v 1.8 2000-06-19 09:49:35 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -11,8 +11,10 @@ SPEC_FILE=$(PACKAGE).spec
 EXTRA_DIST=$(SPEC_FILE) README LICENSE CHANGELOG TODO windows.txt
 
 yaz-config: Makefile
+	@rm -f yaz-config
 	@echo "#!/bin/sh" >yaz-config
-	@echo "# YAZ settings for developers" >>yaz-config
+	@echo "# yaz-config for source tree" >>yaz-config
+	@echo "YAZVERSION=@VERSION@" >>yaz-config
 	@echo "YAZBIN=\"`pwd`/bin\"" >>yaz-config
 	@echo "YAZTAB=\"`pwd`/tab\"" >>yaz-config
 	@echo "YAZLIB=\"-L`pwd`/lib/.libs -lyaz @LIBS@\"" >>yaz-config

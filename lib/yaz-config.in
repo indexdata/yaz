@@ -1,0 +1,89 @@
+#!/bin/sh
+
+yazprefix=@prefix@
+echo_cflags=no
+echo_libs=no
+echo_help=no
+echo_tabs=no
+
+yazlibs=@LIBS@
+YAZVERSION=@VERSION@
+
+usage()
+{
+	cat <<EOF
+Usage: yaz-config [OPTIONS] [LIBRARIES]
+Options:
+	[--prefix[=DIR]]
+	[--version]
+	[--libs]
+	[--cflags]
+	[--tabs]
+EOF
+	exit $1
+}
+
+#if test $# -eq 0; then
+#	echo_help=yes
+#fi
+
+while test $# -gt 0; do
+  case "$1" in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *) optarg= ;;
+  esac
+
+  case $1 in
+    --prefix=*)
+      yazprefix=$optarg
+      ;;
+    --prefix)
+      echo $yazprefix
+      exit 0
+      ;;
+    --version)
+      echo $YAZVERSION
+      exit 0
+      ;;
+    --cflags)
+      echo_cflags=yes
+      ;;
+    --libs)
+      echo_libs=yes
+      ;;
+    --tabs)
+      echo_tabs=yes
+      ;;
+    *)
+      echo_help=yes
+      ;;
+  esac
+  shift
+done
+
+YAZTAB=$yazprefix/share/yaz/tab
+YAZBIN=$yazprefix/bin
+
+if test "$yazprefix" = "/usr"; then
+	YAZLIB="-L$yazprefix/lib $YAZLIB"
+else
+	YAZLIB="-lyaz $yazlibs"
+fi
+if test "$yazprefix" = "/usr"; then
+	YAZINC=
+else
+	YAZINC=-I$yazprefix/include
+fi
+
+if test "$echo_help" = "yes"; then
+	usage 1 1>&2
+fi
+if test "$echo_cflags" = "yes"; then
+	echo $YAZINC
+fi
+if test "$echo_libs" = "yes"; then
+	echo $YAZLIB
+fi
+if test "$echo_tabs" = "yes"; then
+	echo $YAZTAB
+fi

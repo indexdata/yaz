@@ -11,9 +11,8 @@ URL: http://www.indexdata.dk/yaz/
 Summary: Z39.50 Library
 
 %description
-The YAZ package is a C library for developing client - and
-server applications using the ANSI/NISO Z39.50 protocol for Information
-Retrieval. 
+YAZ is a C library for developing client - and server applications
+using the ANSI/NISO Z39.50 protocol for Information Retrieval. 
 
 %prep
 %setup
