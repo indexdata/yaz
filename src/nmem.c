@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.13 2005-01-17 13:03:27 adam Exp $
+ * $Id: nmem.c,v 1.14 2005-01-21 09:23:27 adam Exp $
  */
 
 /**
@@ -60,8 +60,8 @@ struct align {
 
 #define NMEM_ALIGN (offsetof(struct align, u))
 
-static int log_level=0;
-static int log_level_initialized=0;
+static int log_level = 0;
+static int log_level_initialized = 0;
 
 #ifdef WIN32
 static CRITICAL_SECTION critical_section;
@@ -96,11 +96,10 @@ YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
 {
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("nmem");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("nmem");
+        log_level_initialized = 1;
     }
 
-    NMEM_ENTER;
     if (!*p)
     {
 	*p = (NMEM_MUTEX) malloc (sizeof(**p));
@@ -112,7 +111,6 @@ YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
         pth_mutex_init (&(*p)->m_handle);
 #endif
     }
-    NMEM_LEAVE;
 }
 
 YAZ_EXPORT void nmem_mutex_enter(NMEM_MUTEX p)
@@ -141,7 +139,6 @@ YAZ_EXPORT void nmem_mutex_leave(NMEM_MUTEX p)
 
 YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
 {
-    NMEM_ENTER;
     if (*p)
     {
 #ifdef WIN32
@@ -150,7 +147,6 @@ YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
 	free (*p);
 	*p = 0;
     }
-    NMEM_LEAVE;
 }
 
 static nmem_block *freelist = NULL;        /* "global" freelists */
@@ -308,8 +304,8 @@ NMEM nmem_create(void)
 #endif
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("nmem");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("nmem");
+        log_level_initialized = 1;
     }
     
     NMEM_ENTER;
@@ -417,23 +413,22 @@ void nmem_critical_leave (void)
 
 void nmem_init (void)
 {
-    if (!log_level_initialized)
-    {
-        log_level=yaz_log_module_level("nmem");
-        log_level_initialized=1;
-    }
     
     if (++nmem_init_flag == 1)
     {
 #ifdef WIN32
 	InitializeCriticalSection(&critical_section);
 #elif YAZ_GNU_THREADS
-	yaz_log (log_level, "pth_init"); /* ??? */
         pth_init ();
 #endif
 	nmem_active_no = 0;
 	freelist = NULL;
 	cfreelist = NULL;
+    }
+    if (!log_level_initialized)
+    {
+        log_level = yaz_log_module_level("nmem");
+        log_level_initialized = 1;
     }
 }
 
