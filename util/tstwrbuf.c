@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstwrbuf.c,v 1.1 2003-05-06 10:07:33 adam Exp $
+ * $Id: tstwrbuf.c,v 1.2 2003-06-23 10:22:21 adam Exp $
  */
 
 #include <stdio.h>
@@ -45,7 +45,7 @@ int main (int argc, char **argv)
             {
                 if (cp[k] != i+1)
                 {
-                    printf ("tstwrbuf 2 %d k=%d\n", k);
+                    printf ("tstwrbuf 2 %d k=%d\n", step, k);
                     exit(1);
                 }
                 k++;

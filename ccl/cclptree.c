@@ -44,7 +44,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.12 2003-02-14 18:49:23 adam Exp $
+ * $Id: cclptree.c,v 1.13 2003-06-23 10:22:21 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -92,11 +92,22 @@ void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
         {
             struct ccl_rpn_attr *attr;
             for (attr = rpn->u.t.attr_list; attr; attr = attr->next)
-                if (attr->set)
-                    fprintf (fd_out, "@attr %s %d=%d ", attr->set, attr->type,
-                             attr->value);
-                else
-                    fprintf (fd_out, "@attr %d=%d ", attr->type, attr->value);
+			{
+				if (attr->set)
+					fprintf(fd_out, "@attr %s", attr->set);
+				else
+					fprintf(fd_out, "@attr ");
+				switch(attr->kind)
+				{
+				case CCL_RPN_ATTR_NUMERIC:
+                    fprintf (fd_out, "%d=%d ", attr->type,
+                             attr->value.numeric);
+					break;
+				case CCL_RPN_ATTR_STRING:
+                    fprintf (fd_out, "%d=%s ", attr->type,
+							 attr->value.str);
+				}
+			}
         }
 		fprintf (fd_out, "\"%s\"\n", rpn->u.t.term);
         break;

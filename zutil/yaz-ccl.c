@@ -2,7 +2,7 @@
  * Copyright (c) 1996-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: yaz-ccl.c,v 1.19 2003-02-12 15:06:44 adam Exp $
+ * $Id: yaz-ccl.c,v 1.20 2003-06-23 10:22:21 adam Exp $
  */
 
 #include <stdio.h>
@@ -117,8 +117,18 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
 		wrbuf_puts (w, att->set);
 		wrbuf_puts (w, " ");
 	    }
-	    sprintf(tmpattr, "%d=%d ", att->type, att->value);
-	    wrbuf_puts (w, tmpattr);
+	    switch(att->kind)
+	    {
+	    case CCL_RPN_ATTR_NUMERIC:
+		sprintf(tmpattr, "%d=%d ", att->type, att->value.numeric);
+		wrbuf_puts (w, tmpattr);
+		break;
+	    case CCL_RPN_ATTR_STRING:
+		sprintf(tmpattr, "%d ", att->type);
+		wrbuf_puts (w, tmpattr);
+		wrbuf_puts(w, att->value.str);
+		break;
+	    }
 	}
 	for (cp = p->u.t.term; *cp; cp++)
 	{

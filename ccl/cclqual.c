@@ -44,7 +44,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.18 2003-06-19 19:51:40 adam Exp $
+ * $Id: cclqual.c,v 1.19 2003-06-23 10:22:21 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -193,7 +193,9 @@ void ccl_qual_add_combi (CCL_bibset b, const char *n, const char *names)
  * pairs:   Attributes. pairs[0] first type, pair[1] first value,
  *          ... pair[2*no-2] last type, pair[2*no-1] last value.
  */
-void ccl_qual_add_set (CCL_bibset b, const char *name, int no, int *pairs,
+
+void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
+		       int *type_ar, int *value_ar, char **svalue_ar,
 		       char **attsets)
 {
     struct ccl_qualifier *q;
@@ -220,7 +222,7 @@ void ccl_qual_add_set (CCL_bibset b, const char *name, int no, int *pairs,
     }
     else
     {
-        if (q->sub)
+        if (q->sub)  /* suspect.. */
             xfree (q->sub);
         attrp = &q->attr_list;
         while (*attrp)
@@ -233,8 +235,19 @@ void ccl_qual_add_set (CCL_bibset b, const char *name, int no, int *pairs,
         attr = (struct ccl_rpn_attr *)xmalloc (sizeof(*attr));
         ccl_assert (attr);
 	attr->set = *attsets++;
-        attr->type = *pairs++;
-        attr->value = *pairs++;
+        attr->type = *type_ar++;
+	if (*svalue_ar)
+	{
+	    attr->kind = CCL_RPN_ATTR_STRING;
+	    attr->value.str = *svalue_ar;
+	}
+	else
+	{
+	    attr->kind = CCL_RPN_ATTR_NUMERIC;
+	    attr->value.numeric = *value_ar;
+	}
+	svalue_ar++;
+	value_ar++;
         *attrp = attr;
         attrp = &attr->next;
     }
@@ -273,7 +286,9 @@ void ccl_qual_rm (CCL_bibset *b)
 	{
 	    attr1 = attr->next;
 	    if (attr->set)
-		xfree (attr->set);
+		xfree(attr->set);
+	    if (attr->kind == CCL_RPN_ATTR_STRING)
+		xfree(attr->value.str);
 	    xfree (attr);
 	}
         q1 = q->next;

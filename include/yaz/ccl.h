@@ -45,7 +45,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.13 2002-12-28 12:13:03 adam Exp $
+ * $Id: ccl.h,v 1.14 2003-06-23 10:22:21 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -111,7 +111,13 @@ struct ccl_rpn_attr {
     struct ccl_rpn_attr *next;
     char *set;
     int type;
-    int value;
+    int kind;
+#define CCL_RPN_ATTR_NUMERIC 1
+#define CCL_RPN_ATTR_STRING 2
+    union {
+	int numeric;
+	char *str;
+    } value;
 };
 
 #define CCL_RPN_AND 1
@@ -277,7 +283,8 @@ YAZ_EXPORT void ccl_qual_add (CCL_bibset b, const char *name, int no,
 			      int *attr);
 
 YAZ_EXPORT void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
-				  int *attr, char **attsets);
+				  int *type, int *value, char **svalue,
+				  char **attsets);
 
 YAZ_EXPORT void ccl_qual_add_special (CCL_bibset bibset,
                                       const char *n, const char *v);

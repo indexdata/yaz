@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+String value attributes for CCL parser.
+
 --- 2.0.3 2003/06/20
 
 Fix CCL directive @case handling so that it affects string match for

@@ -44,7 +44,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.13 2002-06-06 12:54:24 adam Exp $
+ * $Id: cclqfile.c,v 1.14 2003-06-23 10:22:21 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -70,7 +70,9 @@
 void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 {
     char qual_spec[128];
-    int pair[256];
+    int type_ar[128];
+    int value_ar[128];
+    char *svalue_ar[128];
     char *attsets[128];
     int pair_no = 0;
 
@@ -85,6 +87,7 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 
         if (!(split = strchr (qual_spec, '=')))
         {
+	    /* alias specification .. */
             if (pair_no == 0)
             {
                 ccl_qual_add_combi (bibset, qual_name, cp);
@@ -92,6 +95,7 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
             }
             break;
         }
+	/* [set,]type=value ... */
         cp += no_scan;
         
         *split++ = '\0';
@@ -99,11 +103,15 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 	setp = strchr (qual_spec, ',');
 	if (setp)
 	{
+	    /* set,type=value ... */
 	    *setp++ = '\0';
             qual_type = setp;
 	}
 	else
+	{
+	    /* type=value ... */
             qual_type = qual_spec;
+	}
         while (pair_no < 128)
         {
             int type, value;
@@ -111,7 +119,8 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
             qual_value = split;
             if ((split = strchr (qual_value, ',')))
                 *split++ = '\0';
-            value = atoi (qual_value);
+
+	    value = 0;
             switch (qual_type[0])
             {
             case 'u':
@@ -157,8 +166,30 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
             default:
                 type = atoi (qual_type);
             }
-            pair[pair_no*2] = type;
-            pair[pair_no*2+1] = value;
+
+            type_ar[pair_no] = type;
+
+	    if (value)
+	    {
+		value_ar[pair_no] = value;
+		svalue_ar[pair_no] = 0;
+	    }
+	    else if (*qual_value >= '0' && *qual_value <= '9')
+	    {
+		value_ar[pair_no] = atoi (qual_value);
+		svalue_ar[pair_no] = 0;
+	    }
+	    else
+	    {
+		size_t len;
+		if (split)
+		    len = split - qual_value;
+		else
+		    len = strlen(qual_value);
+		svalue_ar[pair_no] = xmalloc(len+1);
+		memcpy(svalue_ar[pair_no], qual_value, len);
+		svalue_ar[pair_no][len] = '\0';
+	    }
 	    if (setp)
 	    {
 	        attsets[pair_no] = (char*) xmalloc (strlen(qual_spec)+1);
@@ -171,7 +202,8 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
                 break;
         }
     }
-    ccl_qual_add_set (bibset, qual_name, pair_no, pair, attsets);
+    ccl_qual_add_set (bibset, qual_name, pair_no, type_ar, value_ar, svalue_ar,
+		      attsets);
 }
 
 void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)

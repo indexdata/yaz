@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.33 2003-02-14 18:49:22 adam Exp $
+ * $Id: cclfind.c,v 1.34 2003-06-23 10:22:21 adam Exp $
  *
  * Old Europagate log:
  *
@@ -127,7 +127,8 @@ static int qual_val_type (struct ccl_rpn_attr **qa, int type, int value,
     for (i = 0;  (q=qa[i]); i++)
         while (q)
         {
-            if (q->type == type && q->value == value)
+            if (q->type == type && q->kind == CCL_RPN_ATTR_NUMERIC &&
+		q->value.numeric == value)
             {
                 if (attset)
                     *attset = q->set;
@@ -203,6 +204,8 @@ void ccl_rpn_delete (struct ccl_rpn_node *rpn)
         for (attr = rpn->u.t.attr_list; attr; attr = attr1)
         {
             attr1 = attr->next;
+	    if (attr->kind == CCL_RPN_ATTR_STRING)
+		xfree(attr->value.str);
             if (attr->set)
                 xfree (attr->set);
             xfree (attr);
@@ -233,18 +236,11 @@ static int is_term_ok (int look, int *list)
 static struct ccl_rpn_node *search_terms (CCL_parser cclp,
                                           struct ccl_rpn_attr **qa);
 
-/*
- * add_attr: Add attribute (type/value) to RPN term node.
- * p:     RPN node of type term.
- * type:  Type of attribute
- * value: Value of attribute
- * set: Attribute set name
- */
-static void add_attr (struct ccl_rpn_node *p, const char *set,
-                      int type, int value)
+static struct ccl_rpn_attr *add_attr_node (struct ccl_rpn_node *p,
+					   const char *set, int type)
 {
     struct ccl_rpn_attr *n;
-
+    
     n = (struct ccl_rpn_attr *)xmalloc (sizeof(*n));
     ccl_assert (n);
     if (set)
@@ -255,10 +251,41 @@ static void add_attr (struct ccl_rpn_node *p, const char *set,
     else
         n->set = 0;
     n->type = type;
-    n->value = value;
     n->next = p->u.t.attr_list;
     p->u.t.attr_list = n;
+    
+    n->kind = CCL_RPN_ATTR_NUMERIC;
+    n->value.numeric = 0;
+    return n;
 }
+
+/*
+ * add_attr_numeric: Add attribute (type/value) to RPN term node.
+ * p:     RPN node of type term.
+ * type:  Type of attribute
+ * value: Value of attribute
+ * set: Attribute set name
+ */
+static void add_attr_numeric (struct ccl_rpn_node *p, const char *set,
+			      int type, int value)
+{
+    struct ccl_rpn_attr *n;
+
+    n = add_attr_node(p, set, type);
+    n->kind = CCL_RPN_ATTR_NUMERIC;
+    n->value.numeric = value;
+}
+
+static void add_attr_string (struct ccl_rpn_node *p, const char *set,
+			     int type, char *value)
+{
+    struct ccl_rpn_attr *n;
+
+    n = add_attr_node(p, set, type);
+    n->kind = CCL_RPN_ATTR_STRING;
+    n->value.str = xstrdup(value);
+}
+
 
 /*
  * search_term: Parse CCL search term. 
@@ -369,39 +396,48 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
             struct ccl_rpn_attr *attr;
             
             for (attr = qa[i]; attr; attr = attr->next)
-                if (attr->value > 0)
-                {   /* deal only with REAL attributes (positive) */
-                    switch (attr->type)
-                    {
-                    case CCL_BIB1_REL:
-                        if (relation_value != -1)
-                            continue;
-                        relation_value = attr->value;
-                        break;
-                    case CCL_BIB1_POS:
-                        if (position_value != -1)
-                            continue;
-                        position_value = attr->value;
-                        break;
-                    case CCL_BIB1_STR:
-                        if (structure_value != -1)
-                            continue;
-                        structure_value = attr->value;
-                        break;
-                    case CCL_BIB1_TRU:
-                        if (truncation_value != -1)
-                            continue;
-                        truncation_value = attr->value;
-                        left_trunc = right_trunc = mid_trunc = 0;
-                        break;
-                    case CCL_BIB1_COM:
-                        if (completeness_value != -1)
-                            continue;
-                        completeness_value = attr->value;
-                        break;
-                    }
-                    add_attr (p, attr->set, attr->type, attr->value);
-            }
+		switch(attr->kind)
+		{
+		case CCL_RPN_ATTR_STRING:
+		    add_attr_string(p, attr->set, attr->type,
+				    attr->value.str);
+		    break;
+		case CCL_RPN_ATTR_NUMERIC:
+		    if (attr->value.numeric > 0)
+		    {   /* deal only with REAL attributes (positive) */
+			switch (attr->type)
+			{
+			case CCL_BIB1_REL:
+			    if (relation_value != -1)
+				continue;
+			    relation_value = attr->value.numeric;
+			    break;
+			case CCL_BIB1_POS:
+			    if (position_value != -1)
+				continue;
+			    position_value = attr->value.numeric;
+			    break;
+			case CCL_BIB1_STR:
+			    if (structure_value != -1)
+				continue;
+			    structure_value = attr->value.numeric;
+			    break;
+			case CCL_BIB1_TRU:
+			    if (truncation_value != -1)
+				continue;
+			    truncation_value = attr->value.numeric;
+			    left_trunc = right_trunc = mid_trunc = 0;
+			    break;
+			case CCL_BIB1_COM:
+			    if (completeness_value != -1)
+				continue;
+			    completeness_value = attr->value.numeric;
+			    break;
+			}
+			add_attr_numeric(p, attr->set, attr->type,
+					 attr->value.numeric);
+		    }
+		}
         }
         /* len now holds the number of characters in the RPN term */
         /* no holds the number of CCL tokens (1 or more) */
@@ -411,9 +447,9 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         {   /* no structure attribute met. Apply either structure attribute 
                WORD or PHRASE depending on number of CCL tokens */
             if (no == 1 && no_spaces == 0)
-                add_attr (p, attset, CCL_BIB1_STR, 2);
+                add_attr_numeric (p, attset, CCL_BIB1_STR, 2);
             else
-                add_attr (p, attset, CCL_BIB1_STR, 1);
+                add_attr_numeric (p, attset, CCL_BIB1_STR, 1);
         }
         
         /* make the RPN token */
@@ -454,7 +490,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
                 ccl_rpn_delete (p);
                 return NULL;
             }
-            add_attr (p, attset, CCL_BIB1_TRU, 3);
+            add_attr_numeric (p, attset, CCL_BIB1_TRU, 3);
         }
         else if (right_trunc)
         {
@@ -465,7 +501,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
                 ccl_rpn_delete (p);
                 return NULL;
             }
-            add_attr (p, attset, CCL_BIB1_TRU, 1);
+            add_attr_numeric (p, attset, CCL_BIB1_TRU, 1);
         }
         else if (left_trunc)
         {
@@ -476,13 +512,13 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
                 ccl_rpn_delete (p);
                 return NULL;
             }
-            add_attr (p, attset, CCL_BIB1_TRU, 2);
+            add_attr_numeric (p, attset, CCL_BIB1_TRU, 2);
         }
         else
         {
             if (qual_val_type (qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_NONE,
                                &attset))
-                add_attr (p, attset, CCL_BIB1_TRU, 100);
+                add_attr_numeric (p, attset, CCL_BIB1_TRU, 100);
         }
         if (!multi)
             break;
@@ -580,14 +616,14 @@ static struct ccl_rpn_node *qualifiers2 (CCL_parser cclp,
                 }
                 p = mk_node (CCL_RPN_AND);
                 p->u.p[0] = p1;
-                add_attr (p1, attset, CCL_BIB1_REL, 4);
+                add_attr_numeric (p1, attset, CCL_BIB1_REL, 4);
                 p->u.p[1] = p2;
-                add_attr (p2, attset, CCL_BIB1_REL, 2);
+                add_attr_numeric (p2, attset, CCL_BIB1_REL, 2);
                 return p;
             }
             else                       /* = term -    */
             {
-                add_attr (p1, attset, CCL_BIB1_REL, 4);
+                add_attr_numeric (p1, attset, CCL_BIB1_REL, 4);
                 return p1;
             }
         }
@@ -597,7 +633,7 @@ static struct ccl_rpn_node *qualifiers2 (CCL_parser cclp,
             ADVANCE;
             if (!(p = search_term (cclp, ap)))
                 return NULL;
-            add_attr (p, attset, CCL_BIB1_REL, 2);
+            add_attr_numeric (p, attset, CCL_BIB1_REL, 2);
             return p;
         }
         else if (KIND == CCL_TOK_LP)
@@ -618,7 +654,7 @@ static struct ccl_rpn_node *qualifiers2 (CCL_parser cclp,
         {
             if (!(p = search_terms (cclp, ap)))
                 return NULL;
-            add_attr (p, attset, CCL_BIB1_REL, rel);
+            add_attr_numeric (p, attset, CCL_BIB1_REL, rel);
             return p;
         }
         cclp->error_code = CCL_ERR_TERM_EXPECTED;
