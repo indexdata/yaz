@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.74 2004-03-17 18:47:42 adam Exp $
+# $Id: makefile,v 1.75 2004-03-17 19:07:09 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -19,11 +19,11 @@ HAVE_TCL=1
 
 # iconv charcter conversion utility
 HAVE_ICONV=1
-ICONV_DIR = c:\iconv-1.8.win32
+ICONV_DIR = c:\iconv-1.9.1.win32
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.5.10.win32
+LIBXML2_DIR=c:\libxml2-2.6.7.win32
 
 # WIN32 binaries libxml2 & iconv from here:
 #  http://www.zlatkovic.com/projects/libxml/binaries.html
