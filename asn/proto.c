@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.18  1995-04-11 11:52:02  quinn
+ * Revision 1.19  1995-04-11 11:58:35  quinn
+ * Fixed bug.
+ *
+ * Revision 1.18  1995/04/11  11:52:02  quinn
  * Fixed possible buf in proto.c
  *
  * Revision 1.17  1995/04/10  10:22:22  quinn
@@ -589,7 +592,7 @@ int z_AttributeList(ODR o, Z_AttributeList **p, int opt)
     	&(*p)->num_attributes))
     	return 1;
     *p = 0;
-    return 0;
+    return opt && !o->error;
 }
 
 /*
