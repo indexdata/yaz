@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: zget.c,v 1.13 2003-01-06 08:20:29 adam Exp $
+ * $Id: zget.c,v 1.14 2003-02-23 21:10:07 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -334,6 +334,7 @@ Z_SortResponse *zget_SortResponse(ODR o)
     r->sortStatus = odr_intdup(o, Z_SortStatus_success);
     r->resultSetStatus = odr_intdup(o, Z_SortResultSetStatus_empty);
     r->diagnostics = 0;
+    r->resultCount = 0;
     r->otherInfo = 0;
     return r;
 }

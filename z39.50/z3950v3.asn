@@ -565,6 +565,7 @@ SortResponse  ::= SEQUENCE{
                   unchanged  (3),
               none    (4)} OPTIONAL,
   diagnostics        [5]             IMPLICIT SEQUENCE OF DiagRec OPTIONAL,
+  resultCount        [6]             IMPLICIT INTEGER OPTIONAL,
   otherInfo        OtherInformation OPTIONAL}
 
 -- begin auxiliary definitions for Sort

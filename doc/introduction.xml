@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.11 2003-02-23 14:25:34 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.12 2003-02-23 21:10:06 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -10,14 +10,10 @@
    Properties of &yaz;:
    <itemizedlist>
     <listitem><para>
-      Fast operation. The C based BER encoders/decoders as well
-      as the server component of &yaz; is very fast.
-     </para></listitem>
-    <listitem><para>
       Complete 
       <ulink url="http://www.loc.gov/z3950/agency/">Z39.50</ulink>
-      version 3 support. All newer extensions
-      including Z39.50-2000 have been incorporated.
+      version 3 support. Amendments and Z39.50-2002 revision is
+      supported.
      </para></listitem>
     <listitem><para>
       Supports 
@@ -57,6 +53,10 @@
     <listitem><para>
       Portable code. &yaz; compiles out-of-the box on most Unixes and
       on Windows using Microsoft Visual C++.
+     </para></listitem>
+    <listitem><para>
+      Fast operation. The C based BER encoders/decoders as well
+      as the server component of &yaz; is very fast.
      </para></listitem>
     <listitem><para>
       Liberal license that allows for commercial use of &yaz;.

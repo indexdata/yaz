@@ -2,25 +2,45 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.9.3 2003/02/23
 
-Fixed problem with C compiler include path in wrong order.
+* String Identifers for Schemas (Amendment 5).
+http://lcweb.loc.gov/z3950/agency/amend/am5.html
+Old definition for schema
+  Odr_oid *schema; /* OPT */
+New:
+  int which;
+  union {
+     Odr_oid *oid;
+     Z_InternationalString *uri;
+  #define Z_Schema_oid 1
+  #define Z_Schema_uri 2
+  } schema; /* OPT */
+
+* resultCount parameter to Sort Response (Amendment 1).
+http://lcweb.loc.gov/z3950/agency/amend/am1.html
 
 Support for SRW 1.0 over HTTP. This is an optional feature and
 requires libxml2 to operate. Enable SOAP by specifying --with-xml2
-for configure. 
+for configure.
+
+Generic frontend server supports HTTP/SOAP/SRW and Z39.50/BER
+on the same port.  SRW SearchRetrieveRequests are mapped
+to bend_init,bend_search,bend_fetch,bend_close. 
 
 Z39.50 Query Type-104 added - to facilitate CQL within Z39.50.
 
 CQL support. Source is directory 'cql'. CQL is supported in ZOOM
 (both SRW and Z39.50) and the YAZ client (Z39.50 only).
 
-ZOOM connections are SRW based if host/port is specified
-as http. e.g.  z = ZOOM_connection_new("http://myserver");
+ZOOM connections are SRW based if schem http is used for hostname
+in connect, e.g.  z = ZOOM_connection_new("http://myserver");
 ZOOM_query may be of type CQL, e.g. ZOOM_query_cql(q, "dc.title=x");
 
 CCL proximity operators !n, %n converts to PQF @prox 0 n 1 2 k 2
 and @prox 0 n 0 1 k 2 respectively, meaning: exlusion=false,
 distance=n, order=true/false, relation=le, prox unit=word. If
 n is omitted, distance 1 is used.
+
+Fixed problem with C compiler include path in wrong order.
 
 For TCP/IP COMSTACK, set recv buffer to an appropriate "large" value
 on Solaris. Patch from Ko van der Sloot.
@@ -235,7 +255,7 @@ New ZOOM function, ZOOM_connection_last_event, that returns type
 of last event (such as "receive data", "send data", "apdu received",
 etc.
 
-New ZOOM option, schema, that specifies shema OID for retrieval.
+New ZOOM option, schema, that specifies schema for retrieval.
 
 New CCL feature. Qualifiers can be aliases for one or more
 other qualifiers (if more than one is given, OR is used).
