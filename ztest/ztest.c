@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.60 2004-01-15 10:04:39 adam Exp $
+ * $Id: ztest.c,v 1.61 2004-01-27 12:15:12 adam Exp $
  */
 
 /*
@@ -34,12 +34,14 @@ int ztest_search (void *handle, bend_search_rr *rr)
         rr->errcode = 23;
         return 0;
     }
-    /* if database is stop, stop this process.. For debugging only.
+#if NMEM_DEBUG
+    /* if database is stop, stop this process.. For debugging only. */
     if (!yaz_matchstr (rr->basenames[0], "stop"))
     {
 	nmem_print_list_l(LOG_LOG);
         exit(0);
     }
+#endif
     /* Throw Database unavailable if other than Default */
     if (yaz_matchstr (rr->basenames[0], "Default"))
     {

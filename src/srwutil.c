@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.9 2004-01-09 19:54:05 adam Exp $
+ * $Id: srwutil.c,v 1.10 2004-01-27 12:15:12 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -131,6 +131,18 @@ void yaz_uri_val_int(const char *path, const char *name, ODR o, int **intp)
         *intp = odr_intdup(o, atoi(v));
 }
 
+void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d, 
+			   int code, const char *details)
+{
+    d->code = (char *) odr_malloc(o, 50);
+    sprintf(d->code, "info:srw/diagnostic/1/1/%d", code);
+    d->message = 0;
+    if (details)
+	d->details = odr_strdup(o, details);
+    else
+	d->details = 0;
+}
+
 void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
 			    int *num, int code, const char *addinfo)
 {
@@ -139,11 +151,8 @@ void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
     if (*num)
 	memcpy (d_new, *d, *num *sizeof(**d));
     *d = d_new;
-    (*d + *num)->code = odr_intdup(o, code);
-    if (addinfo)
-	(*d + *num)->details = odr_strdup(o, addinfo);
-    else
-	(*d + *num)->details = 0;
+
+    yaz_mk_std_diagnostic(o, *d + *num, code, addinfo);
     (*num)++;
 }
 
@@ -298,7 +307,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 		else if (!strcmp(n, "startRecord"))
 		    startRecord = v;
 		else
-		    yaz_add_srw_diagnostic(decode, diag, num_diag, 9, n);
+		    yaz_add_srw_diagnostic(decode, diag, num_diag, 8, n);
 	    }
 	}
 	if (!version)
@@ -536,8 +545,7 @@ static struct {
 {5, "Unsupported version"},
 {6, "Unsupported parameter value"},
 {7, "Mandatory parameter not supplied"},
-{8, "Unknown database"},
-{9, "Unknown parameter type"},
+{8, "Unsupported parameter"},
 /* Diagnostics Relating to CQL */
 {10, "Query syntax error"}, 
 {11, "Unsupported query type"}, 
@@ -694,7 +702,7 @@ static int srw_bib1_map[] = {
     108, 27,
     108, 45,
         
-    109, 9,
+    109, 2,
     110, 37,
     111, 1,
     112, 58,

@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* SRW/SRU 1.1 updates. Diagnostic code now a URI.
+
 Added option -p <file> to make Generic Frontend Server to write PID file.
 
 Added option -D to put Generic Frontend Server in background on its own.

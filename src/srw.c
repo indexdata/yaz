@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.18 2004-01-15 23:33:29 adam Exp $
+ * $Id: srw.c,v 1.19 2004-01-27 12:15:12 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -287,6 +287,7 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
 	{
             (*recs)[i].code = 0;
             (*recs)[i].details = 0;
+            (*recs)[i].message = 0;
 	} 
         for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next)
         {
@@ -296,13 +297,17 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
                 xmlNodePtr rptr;
                 (*recs)[i].code = 0;
                 (*recs)[i].details = 0;
+                (*recs)[i].message = 0;
                 for (rptr = ptr->children; rptr; rptr = rptr->next)
                 {
-                    if (match_xsd_integer(rptr, "code", o, 
-                                               &(*recs)[i].code))
+                    if (match_xsd_string(rptr, "code", o, 
+					 &(*recs)[i].code))
                         ;
                     else if (match_xsd_string(rptr, "details", o, 
                                               &(*recs)[i].details))
+                        ;
+                    else if (match_xsd_string(rptr, "message", o, 
+                                              &(*recs)[i].message))
                         ;
                 }
                 i++;
@@ -316,11 +321,16 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
 	    xmlNewNs(pptr, "http://www.loc.gov/zing/srw/diagnostics/", "diag");
         for (i = 0; i < *num; i++)
         {
+	    const char *std_diag = "info:srw/diagnostic/1/1/";
             xmlNodePtr rptr = xmlNewChild(pptr, ns_diag, "diagnostic", 0);
-            add_xsd_integer(rptr, "code", (*recs)[i].code);
-	    if ((*recs)[i].code)
+            add_xsd_string(rptr, "code", (*recs)[i].code);
+	    if ((*recs)[i].message)
+		add_xsd_string(rptr, "message", (*recs)[i].message);
+	    else if ((*recs)[i].code && 
+		     !strncmp((*recs)[i].code, std_diag, strlen(std_diag)))
 	    {
-		const char *message = yaz_diag_srw_str(*(*recs)[i].code);
+		int no = atoi((*recs)[i].code + strlen(std_diag));
+		const char *message = yaz_diag_srw_str(no);
 		if (message)
 		    add_xsd_string(rptr, "message", message);
 	    }

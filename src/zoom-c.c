@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.20 2004-01-22 11:20:54 adam Exp $
+ * $Id: zoom-c.c,v 1.21 2004-01-27 12:15:12 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -922,7 +922,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.20 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.21 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2949,8 +2949,20 @@ static void handle_srw_response(ZOOM_connection c,
     }
     if (res->num_diagnostics > 0)
     {
-        set_dset_error(c, *res->diagnostics[0].code, "SRW",
-                       res->diagnostics[0].details, 0);
+	const char *std_diag = "info:srw/diagnostic/1/1/";
+	const char *code = res->diagnostics[0].code;
+	const char *cp;
+	const char *category = code;
+	int code_int = 0;
+
+	if (code && (cp = strrchr(code, '/')))
+	    code_int = atoi(cp+1);
+	if (code && !strncmp(code, std_diag, strlen(std_diag)))
+	    category = "SRW";
+
+	if (category)
+	    set_dset_error(c, code_int, category,
+			   res->diagnostics[0].details, 0);
     }
     nmem = odr_extract_mem(c->odr_in);
     nmem_transfer(resultset->odr->mem, nmem);

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.14 2004-01-09 18:10:31 adam Exp $
+ * $Id: srw.h,v 1.15 2004-01-27 12:15:11 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -24,8 +24,9 @@ typedef struct {
 } Z_SRW_record;
 
 typedef struct {
-    int  *code;
+    char *code;
     char *details;
+    char *message;
 } Z_SRW_diagnostic;
     
 typedef struct {
@@ -146,9 +147,12 @@ YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 			      char **charset,
 			      Z_SRW_diagnostic **, int *num_diagnostic);
 
-void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
-			    int *num, int code, const char *addinfo);
+YAZ_EXPORT void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
+				       int *num, int code,
+				       const char *addinfo);
     
+YAZ_EXPORT void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d, 
+				      int code, const char *details);
 YAZ_END_CDECL
 
 #endif

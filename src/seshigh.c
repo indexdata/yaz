@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.18 2004-01-23 18:16:07 adam Exp $
+ * $Id: seshigh.c,v 1.19 2004-01-27 12:15:12 adam Exp $
  */
 
 /*
@@ -631,9 +631,8 @@ static void srw_bend_search(association *assoc, request *req,
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
 	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
-        srw_res->diagnostics[0].code = 
-            odr_intdup(assoc->encode, srw_error);
-        srw_res->diagnostics[0].details = 0;
+	yaz_mk_std_diagnostic(assoc->encode,
+			      srw_res->diagnostics, srw_error, 0);
         return;
     }
     
@@ -661,13 +660,11 @@ static void srw_bend_search(association *assoc, request *req,
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
 	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
-        srw_res->diagnostics[0].code = 
-            odr_intdup(assoc->encode, 
-                       yaz_diag_bib1_to_srw (rr.errcode));
-        srw_res->diagnostics[0].details = rr.errstring;
+	yaz_mk_std_diagnostic(assoc->encode, srw_res->diagnostics,
+			      yaz_diag_bib1_to_srw (rr.errcode),
+			      rr.errstring);
         yaz_log(LOG_DEBUG, "srw_bend_search returned SRW error %d",
                 *srw_res->diagnostics[0].code);
-                
     }
     else
     {
@@ -713,10 +710,11 @@ static void srw_bend_search(association *assoc, request *req,
                         srw_res->diagnostics = (Z_SRW_diagnostic *)
                             odr_malloc(assoc->encode, 
                                        sizeof(*srw_res->diagnostics));
-                        srw_res->diagnostics[0].code = 
-                            odr_intdup(assoc->encode, 
-                                       yaz_diag_bib1_to_srw (errcode));
-                        srw_res->diagnostics[0].details = rr.errstring;
+
+			yaz_mk_std_diagnostic(assoc->encode, 
+					      srw_res->diagnostics,
+					      yaz_diag_bib1_to_srw (errcode),
+					      rr.errstring);
                         break;
                     }
                     if (srw_res->records[j].recordData_buf)
@@ -1319,7 +1317,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.18 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.19 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
