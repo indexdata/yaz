@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.3 2003-12-18 16:50:18 mike Exp $
+/* $Id: cqltransform.c,v 1.4 2003-12-18 16:59:28 mike Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -345,7 +345,8 @@ void cql_transform_r(cql_transform_t ct,
             char n_full[64];
             sprintf (n_full, "%.20s.%.40s", n_prefix, n_suffix);
         
-            if (!strcmp(ns, "http://www.loc.gov/zing/cql/srw-indexes/v1.0/")
+            if ((!strcmp(ns, "http://www.loc.gov/zing/cql/context-sets/cql/v1.1/") ||
+		 !strcmp(ns, "http://www.loc.gov/zing/cql/srw-indexes/v1.0/"))
                 && !strcmp(n_suffix, "resultSet"))
             {
                 (*pr)("@set \"", client_data);
@@ -353,11 +354,11 @@ void cql_transform_r(cql_transform_t ct,
                 (*pr)("\" ", client_data);
                 return ;
             }
-	    if (!cql_pr_attr(ct, "index.", n_full, "srw.serverChoice",
+	    if (!cql_pr_attr(ct, "index.", n_full, "cql.serverChoice",
 			     pr, client_data, 16)) {
 		/* No index.foo; reset error and fall back to qualifier.foo */
 		if (ct->error == 16) ct->error = 0;
-		cql_pr_attr(ct, "qualifier.", n_full, "srw.serverChoice",
+		cql_pr_attr(ct, "qualifier.", n_full, "cql.serverChoice",
 			    pr, client_data, 16);
 	    }
         }
