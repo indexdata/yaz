@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
 ]>
-<!-- $Id: yaz-client-man.xml,v 1.3 2004-09-22 19:22:24 adam Exp $ -->
+<!-- $Id: yaz-client-man.xml,v 1.4 2004-12-09 09:27:51 adam Exp $ -->
 <refentry id="yaz-client">
  
  <refmeta>
@@ -38,9 +38,17 @@
    </para>
    <para>
     If the <replaceable>addr</replaceable> is specified, the client creates
-    a connection to the Z39.50/SRW target at the address.
+    a connection to the Z39.50/SRW target at the address given.
    </para>
-  </refsect1>
+  <para>
+   When <command>yaz-client</command> is invoked it attemps to read the
+   following files:
+   <literal>$HOME/.yazclientrc</literal> (home directory, Unix only) and
+   <literal>.yazclientrc</literal> (current directory - any platform)
+   For those files that are readable, the YAZ client executes commands
+   in those files. See COMMANDS section for description of commands.
+  </para>
+ </refsect1>
   <refsect1>
    <title>OPTIONS</title>
    <variablelist>
@@ -116,6 +124,12 @@
    <para>
     <filename>yaz-&lt;version&gt;/client/client.c</filename>
    </para>
+   <para>
+    <filename>.yazclientrc</filename>
+   </para>
+   <para>
+    <filename>$HOME/.yazclientrc</filename>
+   </para>
   </refsect1>
   <refsect1><title>SEE ALSO</title>
    <para>
@@ -134,7 +148,7 @@
     Section "Common Command Language" in the YAZ manual.
    </para>
    <para id="CQL">
-    Section "Common QUery Language" in the YAZ manual.
+    Section "Common Query Language" in the YAZ manual.
    </para>
   </refsect1>
 </refentry>
