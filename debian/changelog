@@ -1,3 +1,9 @@
+yaz (2.0.6-1) unstable; urgency=low
+
+  * Official 2.0.6
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu,  4 Dec 2003 14:17:02 +0100
+
 yaz (2.0.5-4) unstable; urgency=low
 
   * HTML Documentation uses CSS.

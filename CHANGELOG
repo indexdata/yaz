@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- (IN PROGRESS)
+--- 2.0.6 2003/12/04
 
 Frontend server now transfers memory from decoded packages to stream
 ODR for search.
@@ -72,7 +72,6 @@ The generic front-end server (server/seshigh.c) now supports returning
 Init diagnostics to the client in User-information-field, in
 accordance with Z35.90 Implementor Agreement 5 (Returning diagnostics
 in an InitResponse)
-
 
 --- 2.0.4 2003/09/04
 
