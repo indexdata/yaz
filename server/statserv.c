@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.83 2002-08-17 07:56:59 adam Exp $
+ * $Id: statserv.c,v 1.84 2002-09-06 19:52:57 adam Exp $
  */
 
 #include <stdio.h>
@@ -871,7 +871,7 @@ int statserv_main(int argc, char **argv,
     /* Now setup the service with the service controller */
     SetupService(argc, argv, &ArgDetails, SZAPPNAME,
 		 cb->service_name, /* internal service name */
-		 cb->service_name, /* displayed name of the service */
+		 cb->service_display_name, /* displayed name */
 		 SZDEPENDENCIES);
     return 0;
 }
