@@ -1,4 +1,4 @@
-<!-- $Id: future.xml,v 1.8 2003-02-21 12:06:05 adam Exp $ -->
+<!-- $Id: future.xml,v 1.9 2003-11-03 10:47:06 adam Exp $ -->
  <chapter id="future"><title>Future Directions</title>
   
   <para>
@@ -20,7 +20,7 @@
   <para>
    The SOAP implementation is incomplete. In the future we hope
    to add more features to it. Perhaps make a WSDL/XML Schema compiler.
-   The authors of libxml2 are already working on XML Schema / RelagNG
+   The authors of libxml2 are already working on XML Schema / RelaxNG
    compilers so this may not be too hard.
   </para>
 
