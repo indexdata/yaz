@@ -1,13 +1,13 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.9 1995-04-28 14:15:36 quinn Exp $
+# $Id: Makefile,v 1.10 1995-05-15 11:55:13 quinn Exp $
 
 # Define -DUSE_XTIMOSI to enable the xtimosi functionality. Remeber to
 # also modify the makefiles under yazlib/ and server/ (according the
 # comments found there). Uncomment RFC1006.
 
-DEFS=-DUSE_XTIMOSI
+DEFS=-DUSE_XTIMOSI -DDEBUG_MALLOC
 RFC1006=rfc1006
 
 #CC=

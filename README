@@ -1,3 +1,8 @@
+
+ * Copyright (C) 1994, Index Data.
+ * All rights reserved. See the file LICENSE for details.
+ * Sebastian Hammer, Adam Dickmeiss
+
 Compilation and installation
 
 The primary output of the source here is the libyaz.a library, which
@@ -50,6 +55,8 @@ directory.
 
 The directories:
 
+doc     - Documentation. Check this out if you'd like to use the code.
+
 util    - Various little utility functions. Logging, memory debugging,
 	primitive ISO2709 presentation for the client, etc.
 
@@ -65,8 +72,8 @@ yazlib  - This module primarily implements the transport transparency
 	stack (COMSTACK). The comstack implements a generic interface
 	for exchanging BER-encoded records over a network. It supports
 	the American mode of exchanging the records straight over
-	TCP/IP, and Peter Furniss' XTIMOSI package over RFC1006. Look
-	for documentation in the file comstack.man.
+	TCP/IP, and uses Peter Furniss' XTIMOSI package over RFC1006.
+	Look for documentation in the file comstack.man.
 
 server  - This is the implementation of the server frontend. It
 	It provides event-handling and server managament functions,
@@ -80,9 +87,9 @@ rfc1006 - Xtimosi requires an implementation of the OSI transport
 	typically use). This module is not neeeded if you don't use
 	xtimosi.
 
+include - The various header files.
+
 makelib - This is a simple utility that gathers the libraries from the
 	previous modules into libyaz.a.
 
-include - The various header files.
-
-../lib  - The libraries. Primarily libyaz.a.
+lib     - The libraries. Primarily libyaz.a.
