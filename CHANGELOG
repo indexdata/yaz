@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 ---
 
+Added options for max PDU size and session timeout to frontend-server.
+
 Added documentation of query-language parsers and other utilities.
 
 Added Attribute set to the bend_scanrequest API.
