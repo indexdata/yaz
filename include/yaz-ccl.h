@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: yaz-ccl.h,v $
- * Revision 1.6  1997-05-14 06:53:54  adam
+ * Revision 1.7  1997-06-23 10:30:45  adam
+ * Added ODR stream as parameter to ccl_rpn_query and ccl_scan_query.
+ *
+ * Revision 1.6  1997/05/14 06:53:54  adam
  * C++ support.
  *
  * Revision 1.5  1995/09/29 17:12:14  quinn
@@ -45,13 +48,14 @@
 #include <yconfig.h>
 #include <proto.h>
 #include <ccl.h>
+#include <odr.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-Z_RPNQuery *ccl_rpn_query (struct ccl_rpn_node *p);
-Z_AttributesPlusTerm *ccl_scan_query (struct ccl_rpn_node *p);
+Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p);
+Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p);
 
 #ifdef __cplusplus
 }
