@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.29  2000-01-12 14:36:07  adam
+ * Revision 1.30  2000-01-13 23:05:50  adam
+ * Fixed tagging for member requester-CHECKED-IN in ILL ASN.1 spec.
+ *
+ * Revision 1.29  2000/01/12 14:36:07  adam
  * Added printing stream (ODR) for backend functions.
  *
  * Revision 1.28  1999/12/16 23:36:19  adam
@@ -199,22 +202,63 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	    {
 		Z_External *r = (Z_External*) n->itemRequest;
 		ILL_ItemRequest *item_req = 0;
+		ILL_Request *ill_req = 0;
 		if (r->direct_reference)
 		{
 		    oident *ent = oid_getentbyoid(r->direct_reference);
 		    if (ent)
-			yaz_log(LOG_LOG, "ItemRequest %s", ent->desc);
+			yaz_log(LOG_LOG, "OID %s", ent->desc);
 		    if (ent && ent->value == VAL_ISO_ILL_1)
 		    {
+			yaz_log (LOG_LOG, "ItemRequest");
 			if (r->which == ODR_EXTERNAL_single)
 			{
 			    odr_setbuf(rr->decode,
 				       r->u.single_ASN1_type->buf,
 				       r->u.single_ASN1_type->len, 0);
 			    
-			    ill_ItemRequest (rr->decode, &item_req, 0, 0);
+			    if (!ill_ItemRequest (rr->decode, &item_req, 0, 0))
+			    {
+				yaz_log (LOG_LOG,
+                                    "Couldn't decode ItemRequest %s near %d",
+                                       odr_errmsg(odr_geterror(rr->decode)),
+                                       odr_offset(rr->decode));
+                                yaz_log(LOG_LOG, "PDU dump:");
+                                odr_dumpBER(log_file(),
+                                     r->u.single_ASN1_type->buf,
+                                     r->u.single_ASN1_type->len);
+                            }
 			    if (rr->print)
-				ill_ItemRequest (rr->print, &item_req, 0, 0);
+			    {
+				ill_ItemRequest (rr->print, &item_req, 0,
+                                    "ItemRequest");
+				odr_reset (rr->print);
+ 			    }
+			}
+			if (!item_req && r->which == ODR_EXTERNAL_single)
+			{
+			    yaz_log (LOG_LOG, "ILLRequest");
+			    odr_setbuf(rr->decode,
+				       r->u.single_ASN1_type->buf,
+				       r->u.single_ASN1_type->len, 0);
+			    
+			    if (!ill_Request (rr->decode, &ill_req, 0, 0))
+			    {
+				yaz_log (LOG_LOG,
+                                    "Couldn't decode ILLRequest %s near %d",
+                                       odr_errmsg(odr_geterror(rr->decode)),
+                                       odr_offset(rr->decode));
+                                yaz_log(LOG_LOG, "PDU dump:");
+                                odr_dumpBER(log_file(),
+                                     r->u.single_ASN1_type->buf,
+                                     r->u.single_ASN1_type->len);
+                            }
+			    if (rr->print)
+                            {
+				ill_Request (rr->print, &ill_req, 0,
+                                    "ILLRequest");
+				odr_reset (rr->print);
+			    }
 			}
 		    }
 		}

@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+For ILL, fixed tagging problem for member requester-CHECKED-IN in
+type Requester-Optional-Messages-Type.
+
 Added several OID's.
 
 Changed retrieval module so that we can load records with no abstract

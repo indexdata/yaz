@@ -904,7 +904,7 @@ Requester-Optional-Messages-Type ::= SEQUENCE {
 				desires 	(2),
 				neither	(3)
 				},
-	requester-CHECKED-IN	[2]	IMPLICIT ENUMERATED {
+	requester-CHECKED-IN	[3]	IMPLICIT ENUMERATED {
 				requires 	(1),
 				desires 	(2),
 				neither 	(3)
