@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.204 2003-07-18 22:41:25 mike Exp $
+ * $Id: client.c,v 1.205 2003-07-23 12:57:22 mike Exp $
  */
 
 #include <stdio.h>
@@ -590,9 +590,14 @@ int cmd_authentication(const char *arg)
     if (r == 1)
     {
         auth = &au;
-        au.which = Z_IdAuthentication_open;
-        au.u.open = user;
-	printf("Authentication set to Open (%s)\n", user);
+	if (!strcmp(user, "-")) {
+	    au.which = Z_IdAuthentication_anonymous;
+	    printf("Authentication set to Anonymous\n");
+	} else {
+	    au.which = Z_IdAuthentication_open;
+	    au.u.open = user;
+	    printf("Authentication set to Open (%s)\n", user);
+	}
     }
     if (r == 2)
     {
