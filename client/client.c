@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.55  1997-10-31 12:20:08  adam
+ * Revision 1.56  1997-11-05 09:18:31  adam
+ * The client handles records with no associated syntax.
+ *
+ * Revision 1.55  1997/10/31 12:20:08  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -531,7 +534,7 @@ static void display_record(Z_DatabaseRecord *p)
 	    r->which = type->what;
 	}
     }
-    if (ent->value == VAL_SOIF)
+    if (ent && ent->value == VAL_SOIF)
         printf("%.*s", r->u.octet_aligned->len, r->u.octet_aligned->buf);
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
     {
@@ -540,7 +543,7 @@ static void display_record(Z_DatabaseRecord *p)
         if (marcdump)
             fwrite (marc_buf, strlen (marc_buf), 1, marcdump);
     }
-    else if (ent->value == VAL_SUTRS)
+    else if (ent && ent->value == VAL_SUTRS)
     {
         if (r->which != Z_External_sutrs)
         {
@@ -549,7 +552,7 @@ static void display_record(Z_DatabaseRecord *p)
         }
         printf("%.*s", r->u.sutrs->len, r->u.sutrs->buf);
     }
-    else if (ent->value == VAL_GRS1)
+    else if (ent && ent->value == VAL_GRS1)
     {
         if (r->which != Z_External_grs1)
         {
