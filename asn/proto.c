@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.24  1995-05-22 13:58:18  quinn
+ * Revision 1.25  1995-05-25 11:00:08  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.24  1995/05/22  13:58:18  quinn
  * Fixed an ODR_NULLVAL.
  *
  * Revision 1.23  1995/05/22  11:30:18  quinn
@@ -127,10 +130,10 @@ int z_IdPass(ODR o, Z_IdPass **p, int opt)
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
     return
-    	odr_implicit(o, odr_visiblestring, &(*p)->groupId, ODR_CONTEXT, 0, 0) &&
-    	odr_implicit(o, odr_visiblestring, &(*p)->userId, ODR_CONTEXT, 1, 0) &&
+    	odr_implicit(o, odr_visiblestring, &(*p)->groupId, ODR_CONTEXT, 0, 1) &&
+    	odr_implicit(o, odr_visiblestring, &(*p)->userId, ODR_CONTEXT, 1, 1) &&
     	odr_implicit(o, odr_visiblestring, &(*p)->password, ODR_CONTEXT, 2,
-	    0) &&
+	    1) &&
     	odr_sequence_end(o);
 }
 
