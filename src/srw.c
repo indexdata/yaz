@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.3 2003-12-20 00:51:19 adam Exp $
+ * $Id: srw.c,v 1.4 2003-12-20 22:40:46 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -613,6 +613,9 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
             odr_malloc(o, sizeof(*sr->u.explain_response));
 	sr->u.explain_response->record.recordData_buf = 0;
 	sr->u.explain_response->record.recordData_len = 0;
+	sr->u.explain_response->record.recordSchema = 0;
+	sr->u.explain_response->record.recordPosition = 0;
+	sr->u.explain_response->record.recordPacking = Z_SRW_recordPacking_string;
     }
     return sr;
 }
