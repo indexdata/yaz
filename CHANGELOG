@@ -1,16 +1,25 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implemented the new structured date and time definition as approved
+by the ZIG. Added schemaId element to the specificTag in Espec-1
+(also approved at the last ZIG). Thanks to RVDM.
+
+Added some Object identifiers (RVDM).
+
+Changed the Update Extended Service (RVDM).
+
 Added command "refid" to client which specifies referenceId for
 the following requests.
 
-Implemented "extended" service handling for server. See ztest.c
+Implemented extended service handling for server. See ztest.c
 for an example as well as backend.h. New handlers are registerd
 in the Init handler.
 
 * Changed interface for sort in server.
 
 Added new members to statserv_options_block. It allows a server
-to read options from another source than just the command line.
+to read options from another source than just the command line. Thanks
+to Charles Woodfield.
 
 * Changed definition of Z_Triple in file prt-grs.h - member boolean
 renamed to zboolean. Some C++ compilers complained about the name.
