@@ -51,7 +51,7 @@ rm -fr ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc README LICENSE CHANGELOG TODO
+%doc README LICENSE NEWS TODO
 /usr/bin/yaz-client*
 /usr/bin/yaz-ztest*
 /usr/bin/zoomsh*
