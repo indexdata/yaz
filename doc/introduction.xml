@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.9 2003-02-21 00:24:26 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.10 2003-02-21 12:06:05 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -110,11 +110,15 @@
      <para>
       <xref linkend="asn"/> documents the most commonly used Z39.50
       C data structures offered by the &yaz; API. Client
-      developers using ZOOM you do not need reading this. 
-      For the remaining client developers (not using ZOOM),
-      reading this chapter is a must.
-      Z39.50 server implementors should read this, unless you're 
-      developing a simple server (or SRW only).
+      developers using ZOOM and non-Z39.50 implementors may skip this.
+     </para>
+    </listitem>
+
+    <listitem>
+     <para>
+      <xref linkend="soap"/> describes how SRW and SOAP is used 
+      in &yaz;. Only if you're developing SOAP/SRW applications
+      this section is a must.
      </para>
     </listitem>
 

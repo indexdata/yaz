@@ -1,4 +1,4 @@
-<!-- $Id: future.xml,v 1.7 2002-09-17 20:17:44 adam Exp $ -->
+<!-- $Id: future.xml,v 1.8 2003-02-21 12:06:05 adam Exp $ -->
  <chapter id="future"><title>Future Directions</title>
   
   <para>
@@ -10,13 +10,6 @@
   </para>
   
   <para>
-   The 'retrieval' module needs to be finalized and documented. We think
-   it can form a useful resource for people dealing with complex record
-   structures, but for now, you'll mostly have to chew through the code
-   yourself to make use of it. Not acceptable.
-  </para>
-  
-  <para>
    &yaz; is a BER toolkit and as such should support all protocols
    out there based on that. We'd like to see running ILL applications.
    It shouldn't be that hard. Another thing that would be interesting is
@@ -25,11 +18,25 @@
   </para>
   
   <para>
+   The SOAP implementation is incomplete. In the future we hope
+   to add more features to it. Perhaps make a WSDL/XML Schema compiler.
+   The authors of libxml2 are already working on XML Schema / RelagNG
+   compilers so this may not be too hard.
+  </para>
+
+  <para>
+   It would be neat to have a proper module mechanism for the Generic
+   Frontend Server so that backend would be dynamically 
+   loaded (as shared objects / DLLs).
+  </para>
+
+  <para>
    Other than that, &yaz; generally moves in the directions which appear to
    make the most people happy (including ourselves, as prime users of the
    software). If there's something you'd like to see in here, then drop
    us a note and let's see what we can come up with.
   </para>
+
  </chapter>
  
  <!-- Keep this comment at the end of the file

@@ -1,0 +1,190 @@
+<!-- $Id: soap.xml,v 1.1 2003-02-21 12:06:05 adam Exp $ -->
+<chapter id="soap"><title>SOAP and SRW</title>
+  <sect1 id="soap.introduction"><title>Introduction</title>
+    <para>
+      &yaz; uses a very simple implementation of SOAP that only,
+      currenly, supports what is sufficient to offer SRW functionality.
+      The implementation uses the 
+      <ulink url="http://www.xmlsoft.org/html/libxml-tree.html">tree
+        API</ulink> of libxml2 to encode and decode SOAP packages.
+    </para>
+    <para>
+      Like the Z39.50 ASN.1 module, the &yaz; SRW implementation uses
+      simple C structs to represent SOAP packages as well as
+      HTTP packages.
+    </para>
+  </sect1>
+  <sect1 id="soap.http"><title>HTTP</title>
+    <para>
+      &yaz; only offers HTTP as transport carrier for SOAP, but it is
+      relatively easy to change that.
+    </para>
+    <para>
+      The following definition of <literal>Z_GDU</literal> (Generic Data
+      Unit) allows for both HTTP and Z39.50 in one packet.
+    </para>
+    <synopsis>
+#include &lt;yaz/zgdu.h&gt;
+
+#define Z_GDU_Z3950         1
+#define Z_GDU_HTTP_Request  2
+#define Z_GDU_HTTP_Response 3
+typedef struct {
+  int which;
+  union {
+    Z_APDU *z3950;
+    Z_HTTP_Request *HTTP_Request;
+    Z_HTTP_Response *HTTP_Response;
+  } u;
+} Z_GDU ;
+    </synopsis>
+    <para>
+      The corresponding Z_GDU encoder/decoder is <function>z_GDU</function>.
+      The <literal>z3950</literal> is any of the known BER encoded Z39.50
+      APDUs.
+      <literal>HTTP_Request</literal> and <literal>HTTP_Response</literal>
+      is the HTTP Request and Response respectively.
+    </para>
+  </sect1>
+  <sect1 id="soap.xml"><title>SOAP Packages</title>
+    <para>
+      Every SOAP package in &yaz; is represented as follows:
+      <synopsis>
+#include &lt;yaz/soap.h&gt;
+
+typedef struct {
+    char *fault_code;
+    char *fault_string;
+    char *details;
+} Z_SOAP_Fault;
+
+typedef struct {
+    int no;
+    char *ns;
+    void *p;
+} Z_SOAP_Generic;
+
+#define Z_SOAP_fault 1
+#define Z_SOAP_generic 2
+#define Z_SOAP_error 3
+typedef struct {
+    int which;
+    union {
+        Z_SOAP_Fault   *fault;
+        Z_SOAP_Generic *generic;
+        Z_SOAP_Fault   *soap_error;
+    } u;
+    const char *ns;
+} Z_SOAP;
+      </synopsis>
+    </para>
+    <para>
+      The <literal>fault</literal> and <literal>soap_error</literal>
+      arms represent both a SOAP fault - struct
+      <literal>Z_SOAP_Fault</literal>. Any other generic
+        (valid) package is represented by <literal>Z_SOAP_Generic</literal>.
+    </para>
+    <para>
+      The <literal>ns</literal> as part of <literal>Z_SOAP</literal>
+      is the namespace for SOAP itself and reflects the SOAP
+      version. For version 1.1 it is
+      <literal>http://schemas.xmlsoap.org/soap/envelope/</literal>,
+      for version 1.2 it is
+      <literal>http://www.w3.org/2001/06/soap-envelope</literal>.
+    </para>
+    <synopsis>
+int z_soap_codec(ODR o, Z_SOAP **pp,
+                 char **content_buf, int *content_len,
+                 Z_SOAP_Handler *handlers);
+    </synopsis>
+    <para>
+      The <literal>content_buf</literal>  and <literal>content_len</literal>
+      is XML buffer and length of buffer respectively.
+    </para>
+    <para>
+      The <literal>handlers</literal> is a list of SOAP services codec
+      handlers - one handler for each service namespace. For SRW, the
+      namespace is http://www.loc.gov/zing/srw/v1.0/.
+    </para>
+    <para>
+      Each handler is define as follows:
+      <synopsis>
+typedef struct {
+    char *ns;
+    void *client_data;
+    Z_SOAP_fun f;
+} Z_SOAP_Handler;
+      </synopsis>
+      The <literal>ns</literal> is namespace of service associated with
+      handler <literal>f</literal>. <literal>client_data</literal>
+      is user-defined data which is passed to handler.
+    </para>
+    <para>
+      The prototype for a handler is:
+      <synopsis>
+int handler(ODR o, void * ptr, void **handler_data,
+            void *client_data, const char *ns);
+      </synopsis>
+    </para>
+  </sect1>
+  <sect1><title>SRW</title>
+    <para>
+      SRW is just one kind of SOAP handler as described in the previous
+      section.
+      <synopsis>
+#include &lt;yaz/soap.h&gt;
+
+typedef struct {
+    char *recordSchema;
+    char *recordData_buf;
+    int recordData_len;
+    int *recordPosition;
+} Z_SRW_record;
+
+typedef struct {
+    int  *code;
+    char *details;
+} Z_SRW_diagnostic;
+    
+typedef struct {
+    char *query;
+    char *pQuery;
+    void *xQuery;
+    char *sortKeys;
+    void *xSortKeys;
+    int *startRecord;
+    int  *maximumRecords;
+    char *recordSchema;
+    char *recordPacking;
+    char *database;
+} Z_SRW_searchRetrieveRequest;
+
+typedef struct {
+    int * numberOfRecords;
+    char * resultSetId;
+    int * resultSetIdleTime;
+    
+    Z_SRW_record *records;
+    int num_records;
+
+    Z_SRW_diagnostic *diagnostics;
+    int num_diagnostics;
+    int *nextRecordPosition;
+} Z_SRW_searchRetrieveResponse;
+
+#define Z_SRW_searchRetrieve_request  1
+#define Z_SRW_searchRetrieve_response 2
+
+typedef struct {
+    int which;
+    union {
+        Z_SRW_searchRetrieveRequest *request;
+        Z_SRW_searchRetrieveResponse *response;
+    } u;
+} Z_SRW_searchRetrieve;        
+      </synopsis>
+      [more to be written]
+    </para>
+  </sect1>
+</chapter>
+

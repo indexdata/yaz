@@ -1,11 +1,11 @@
-## $Id: Makefile.am,v 1.38 2003-02-21 00:24:26 adam Exp $
+## $Id: Makefile.am,v 1.39 2003-02-21 12:06:05 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
 XMLFILES=yaz.xml.in introduction.xml installation.xml indexdata.xml \
  asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml \
  future.xml client.xml zoom.xml credits.xml ztest-options.xml \
- yaz-client-commands.xml
+ yaz-client-commands.xml soap.xml
 
 HTMLFILES = \
  asn.external.html asn.html asn.oid.html asn.pdu.html asn.preparing.html \
@@ -18,7 +18,8 @@ HTMLFILES = \
  license.html license.other.html odr.debugging.html odr.html \
  odr.programming.html odr.use.html server.backendfunctions.html \
  server.backend.html server.frontend.html server.html server.invocation.html \
- server.main.html tools.html tools.nmem.html tools.oid.html yaz.html \
+ server.main.html soap.html soap.http.html soap.xml.html \
+ tools.html tools.nmem.html tools.oid.html yaz.html \
  zoom.events.html zoom.html zoom.options.html zoom.query.html \
  zoom.records.html zoom.resultsets.html zoom.scan.html
 
