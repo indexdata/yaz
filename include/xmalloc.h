@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmalloc.h,v $
- * Revision 1.5  1998-07-20 12:36:22  adam
+ * Revision 1.6  1999-07-13 13:24:53  adam
+ * Updated memory debugging memory allocatation routines.
+ *
+ * Revision 1.5  1998/07/20 12:36:22  adam
  * Minor changes.
  *
  * Revision 1.4  1997/10/31 12:20:08  adam
@@ -79,27 +82,24 @@
 
 #include <yconfig.h>
 
-#define TRACE_XMALLOC 0
-
-#ifndef TRACE_XMALLOC
-#define TRACE_XMALLOC 0
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-YAZ_EXPORT void *xrealloc_f (void *o, size_t size, char *file, int line);
-YAZ_EXPORT void *xmalloc_f (size_t size, char *file, int line);
-YAZ_EXPORT void *xcalloc_f (size_t nmemb, size_t size, char *file, int line);
-YAZ_EXPORT char *xstrdup_f (const char *, char *file, int line);
-YAZ_EXPORT void xfree_f (void *p, char *file, int line);
 
 #define xrealloc(o, x) xrealloc_f(o, x, __FILE__, __LINE__)
 #define xmalloc(x) xmalloc_f(x, __FILE__, __LINE__)
 #define xcalloc(x,y) xcalloc_f(x,y, __FILE__, __LINE__)
 #define xfree(x) xfree_f(x, __FILE__, __LINE__)
 #define xstrdup(s) xstrdup_f(s, __FILE__, __LINE__)
+#define xmalloc_trav(s) xmalloc_trav_f(s, __FILE__, __LINE__)
+    
+YAZ_EXPORT void *xrealloc_f (void *o, size_t size, const char *file, int line);
+YAZ_EXPORT void *xmalloc_f (size_t size, const char *file, int line);
+YAZ_EXPORT void *xcalloc_f (size_t nmemb, size_t size,
+			    const char *file, int line);
+YAZ_EXPORT char *xstrdup_f (const char *p, const char *file, int line);
+YAZ_EXPORT void xfree_f (void *p, const char *file, int line);
+YAZ_EXPORT void xmalloc_trav_f(const char *s, const char *file, int line);
 
 #ifdef __cplusplus
 }
