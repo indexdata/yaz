@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.156 2003-05-20 08:22:33 adam Exp $
+ * $Id: seshigh.c,v 1.157 2003-05-20 20:22:11 adam Exp $
  */
 
 /*
@@ -326,8 +326,10 @@ void ir_session(IOCHAN h, int event)
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
 	    if (!z_GDU(assoc->decode, &req->gdu_request, 0, 0))
 	    {
-		yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
+		yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [addinfo %s] "
+                        "[near byte %d] ",
 			odr_errmsg(odr_geterror(assoc->decode)),
+                        odr_getaddinfo(assoc->decode),
 			odr_offset(assoc->decode));
                 if (assoc->decode->error != OHTTP)
                 {
@@ -1381,8 +1383,9 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
     }
     if (!z_GDU(assoc->encode, &res, 0, 0))
     {
-    	yaz_log(LOG_WARN, "ODR error when encoding response: %s",
-	    odr_errmsg(odr_geterror(assoc->decode)));
+    	yaz_log(LOG_WARN, "ODR error when decoding PDU: %s [addinfo %s]",
+                odr_errmsg(odr_geterror(assoc->decode)),
+                odr_getaddinfo(assoc->decode));
 	return -1;
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,
