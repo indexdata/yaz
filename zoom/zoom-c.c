@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.30 2002-05-19 15:39:54 oleg Exp $
+ * $Id: zoom-c.c,v 1.31 2002-05-20 09:13:39 oleg Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1631,7 +1631,7 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
 		
 		if (p)
 		{
-			char *charset, *lang;
+			char *charset=NULL, *lang=NULL;
 			int selected;
 			
 			yaz_get_response_charneg(tmpmem, p, &charset, &lang, &selected);

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.153 2002-05-19 15:39:54 oleg Exp $
+ * $Id: client.c,v 1.154 2002-05-20 09:13:39 oleg Exp $
  */
 
 #include <stdio.h>
@@ -309,7 +309,7 @@ static int process_initResponse(Z_InitResponse *res)
     	
     	if (p) {
     	
-    		char *charset, *lang;
+    		char *charset=NULL, *lang=NULL;
     		int selected;
     		
     		yaz_get_response_charneg(session_mem, p, &charset, &lang, &selected);
