@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.46 2001-11-13 23:00:43 adam Exp $
+ * $Id: ztest.c,v 1.47 2002-01-17 21:04:24 adam Exp $
  */
 
 /*
@@ -30,6 +30,17 @@ int ztest_delete (void *handle, bend_delete_rr *rr);
 
 int ztest_search (void *handle, bend_search_rr *rr)
 {
+    if (rr->num_bases != 1)
+    {
+        rr->errcode = 23;
+        return 0;
+    }
+    if (strcmp (rr->basenames[0], "Default"))
+    {
+        rr->errcode = 109;
+        rr->errstring = rr->basenames[0];
+        return 0;
+    }
     rr->hits = rand() % 22;
     return 0;
 }
