@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.9  1995-12-13 15:32:47  quinn
+ * Revision 1.10  1995-12-14 11:09:43  quinn
+ * Work on Explain
+ *
+ * Revision 1.9  1995/12/13  15:32:47  quinn
  * Added sgml-output.
  *
  * Revision 1.8  1995/12/13  13:44:23  quinn
@@ -345,5 +348,6 @@ data1_node *data1_map_record(data1_node *n, data1_maptab *map, NMEM m);
 data1_marctab *data1_read_marctab(char *file);
 char *data1_nodetomarc(data1_marctab *p, data1_node *n, int selected, int *len);
 char *data1_nodetoidsgml(data1_node *n, int select, int *len);
+Z_ExplainRecord *data1_nodetoexplain(data1_node *n, int select, ODR o);
 
 #endif

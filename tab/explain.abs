@@ -30,7 +30,7 @@ elm (4,0)/(4,115)		usageRest				-
 elm (4,0)/(4,116)		paymentAddr				-
 elm (4,0)/(4,117)		hours					-
 elm (4,0)/(4,118)		dbCombinations				-
-elm (4,0)/(4,119)		address					-
+elm (4,0)/(4,119)		addresses				-
 elm (4,0)/(4,500)		commonAccessInfo			-
 elm (4,0)/(4,500)/(4,501)	queryTypesSupported			-
 elm (4,0)/(4,500)/(4,503)	diagnosticSets				-

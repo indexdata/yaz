@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.55  1995-11-08 17:41:37  quinn
+ * Revision 1.56  1995-12-14 11:09:57  quinn
+ * Work on Explain
+ *
+ * Revision 1.55  1995/11/08  17:41:37  quinn
  * Smallish.
  *
  * Revision 1.54  1995/11/08  15:11:29  quinn
@@ -576,6 +579,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     {
     	logf(LOG_WARN, "ODR error when encoding response: %s",
 	    odr_errlist[odr_geterror(assoc->decode)]);
+	odr_reset(assoc->encode);
 	return -1;
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,

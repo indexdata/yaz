@@ -30,6 +30,8 @@
 
 #include <yconfig.h>
 
+#define multipleDbSearch multipleDBsearch
+
 typedef struct Z_CommonInfo
 {
     char *dateAdded;           /* OPTIONAL */
@@ -335,7 +337,7 @@ typedef struct Z_TargetInfo
     Z_HumanString *recentNews;             /* OPTIONAL */
     Z_IconObject *icon;                     /* OPTIONAL */
     bool_t *namedResultSets;
-    bool_t *multipleDBsearch;
+    bool_t *multipleDbSearch;
     int *maxResultSets;                     /* OPTIONAL */
     int *maxResultSize;                     /* OPTIONAL */
     int *maxTerms;                          /* OPTIONAL */
