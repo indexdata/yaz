@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_tag.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: ber_tag.c,v 1.2 2004-04-14 12:58:27 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -55,7 +54,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
             return -1;
 #ifdef ODR_DEBUG
         fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", zclass, tag,
-                *constructed, o->stackp);
+                *constructed, o->op->stackp);
 #endif
         return 1;
         
@@ -84,7 +83,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
             fprintf(stderr,
                     "\n[class=%d,tag=%d,cons=%d,stackp=%d]",
                     odr_ber_tag->lclass, odr_ber_tag->ltag,
-                    odr_ber_tag->lcons, o->stackp);
+                    odr_ber_tag->lcons, o->op->stackp);
 #endif
         }
         if (zclass == odr_ber_tag->lclass && tag == odr_ber_tag->ltag)
