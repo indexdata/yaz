@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.3  1995-11-01 16:34:57  quinn
+ * Revision 1.4  1996-03-25 10:18:03  quinn
+ * Removed trailing whitespace from data elements
+ *
+ * Revision 1.3  1995/11/01  16:34:57  quinn
  * Making data1 look for tables in data1_tabpath
  *
  * Revision 1.2  1995/11/01  13:54:48  quinn
@@ -20,6 +23,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <oid.h>
 #include <log.h>
@@ -145,6 +149,8 @@ static char *get_data(data1_node *n, int *len)
     }
 
     *len = n->u.data.len;
+    while (*len && isspace(n->u.data.data[*len - 1]))
+	(*len)--;
     return n->u.data.data;
 }
 
