@@ -18,14 +18,17 @@
      <!ENTITY app-license SYSTEM "license.xml">
      <!ENTITY app-indexdata SYSTEM "indexdata.xml">
      <!ENTITY app-credits SYSTEM "credits.xml">
-     <!ENTITY ztest-options SYSTEM "ztest-options.xml">
+     <!ENTITY gfs-options SYSTEM "gfs-options.xml">
+     <!ENTITY gfs-synopsis SYSTEM "gfs-synopsis.xml">
+     <!ENTITY gfs-virtual SYSTEM "gfs-virtual.xml">
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
      <!ENTITY asn "Z39.50 ASN.1">
      <!ENTITY odr "<acronym>ODR</acronym>">
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
+     <!ENTITY gfs-synopsis-app "application">
 ]>
-<!-- $Id: yaz.xml.in,v 1.15 2005-01-15 19:47:09 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.16 2005-03-13 21:43:00 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User&apos;s Guide and Reference</title>

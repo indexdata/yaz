@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.23 2004-06-15 09:33:12 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.24 2005-03-13 21:43:00 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -726,31 +726,13 @@ typedef struct bend_scan_rr {
     The finished application has the following
     invocation syntax (by way of <function>statserv_main()</function>):
    </para>
-   
-   <cmdsynopsis>
-    <command>appname</command>
-    <arg choice="opt"><option>-install</option></arg>
-    <arg choice="opt"><option>-installa</option></arg>
-    <arg choice="opt"><option>-remove</option></arg>
-    <arg choice="opt"><option>-a <replaceable>file</replaceable></option></arg>
-    <arg choice="opt"><option>-v <replaceable>level</replaceable></option></arg>
-    <arg choice="opt"><option>-l <replaceable>file</replaceable></option></arg>
-    <arg choice="opt"><option>-u <replaceable>uid</replaceable></option></arg>
-    <arg choice="opt"><option>-c <replaceable>config</replaceable></option></arg>
-    <arg choice="opt"><option>-t <replaceable>minutes</replaceable></option></arg>
-    <sbr/>
-    <arg choice="opt"><option>-k <replaceable>kilobytes</replaceable></option></arg>
-    <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>
-    <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
-    <arg choice="opt"><option>-p <replaceable>pidfile</replaceable></option></arg>
-    <arg choice="opt"><option>-ziDST1</option></arg>
-    <arg choice="opt" rep="repeat">listener-spec</arg>
-   </cmdsynopsis>
+
+   &gfs-synopsis;
    
    <para>
     The options are:
 
-    &ztest-options;
+    &gfs-options;
 
    </para>
    
@@ -831,6 +813,9 @@ typedef struct bend_scan_rr {
      </screen>
     </para>
    </example>
+  </sect1>
+  <sect1 id="server.vhosts"><title>Virtual hosts</title>
+     &gfs-virtual;
   </sect1>
  </chapter>
  

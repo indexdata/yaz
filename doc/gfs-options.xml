@@ -1,5 +1,5 @@
 <!-- 
-   $Id: ztest-options.xml,v 1.5 2004-05-10 10:46:26 adam Exp $
+   $Id: gfs-options.xml,v 1.1 2005-03-13 21:43:00 adam Exp $
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->
@@ -63,6 +63,12 @@
     The argument to this option is transferred to member
     <literal>configname</literal>of the
     <literal>statserv_options_block</literal>.
+   </para></listitem></varlistentry>
+
+ <varlistentry><term><literal>-f </literal>
+   <replaceable>vconfig</replaceable></term>
+  <listitem><para>This specifies an XML file that describes
+    one or more YAZ frontend virtual servers.
    </para></listitem></varlistentry>
 
  <varlistentry><term><literal>-C </literal>

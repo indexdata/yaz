@@ -1,11 +1,11 @@
-## $Id: Makefile.am,v 1.58 2004-12-15 09:10:12 adam Exp $
+## $Id: Makefile.am,v 1.59 2005-03-13 21:43:00 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
 XMLFILES=yaz.xml.in introduction.xml installation.xml indexdata.xml \
  asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml \
- future.xml client.xml zoom.xml credits.xml ztest-options.xml \
- yaz-client-commands.xml soap.xml
+ future.xml client.xml zoom.xml credits.xml gfs-options.xml \
+ yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml
 
 HTMLFILES = \
  asn.external.html asn.html asn.oid.html asn.pdu.html asn.preparing.html \
@@ -19,7 +19,8 @@ HTMLFILES = \
  license.html license.other.html odr.debugging.html odr.html \
  odr.programming.html odr.use.html server.backendfunctions.html \
  server.backend.html server.frontend.html server.html server.invocation.html \
- server.main.html soap.html soap.http.html soap.xml.html soap.srw.html \
+ server.main.html server.vhosts.html \
+ soap.html soap.http.html soap.xml.html soap.srw.html \
  tools.html tools.marc.html tools.nmem.html tools.log.html tools.oid.html \
  yaz.html zoom.events.html zoom.html zoom.options.html zoom.query.html \
  zoom.records.html zoom.resultsets.html zoom.scan.html
@@ -43,7 +44,7 @@ EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
 	docbook2man $(srcdir)/yaz-client-man.xml
 
-yaz-ztest.8: yaz-ztest-man.xml ztest-options.xml
+yaz-ztest.8: yaz-ztest-man.xml gfs-options.xml gfs-synopsis.xml gfs-virtual.xml
 	docbook2man $(srcdir)/yaz-ztest-man.xml
 
 yaz-config.8: yaz-config-man.xml

@@ -1,7 +1,10 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
-     <!ENTITY ztest-options SYSTEM "ztest-options.xml">
+     <!ENTITY gfs-options SYSTEM "gfs-options.xml">
+     <!ENTITY gfs-virtual SYSTEM "gfs-virtual.xml">
+     <!ENTITY gfs-synopsis SYSTEM "gfs-synopsis.xml">
+     <!ENTITY gfs-synopsis-app "yaz-ztest">
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.5 2004-05-10 10:46:26 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.6 2005-03-13 21:43:00 adam Exp $ -->
 <refentry id="yaz-ztest">
  
  <refmeta>
@@ -15,26 +18,7 @@
  </refnamediv>
  
  <refsynopsisdiv>
-  <cmdsynopsis>
-   <command>yaz-ztest</command>
-   <arg choice="opt"><option>-install</option></arg>
-   <arg choice="opt"><option>-installa</option></arg>
-   <arg choice="opt"><option>-remove</option></arg>
-   <arg choice="opt"><option>-a <replaceable>file</replaceable></option></arg>
-   <arg choice="opt"><option>-v <replaceable>level</replaceable></option></arg>
-   <arg choice="opt"><option>-l <replaceable>file</replaceable></option></arg>
-   <arg choice="opt"><option>-u <replaceable>uid</replaceable></option></arg>
-   <arg choice="opt"><option>-c <replaceable>config</replaceable></option></arg>
-   <arg choice="opt"><option>-C <replaceable>fname</replaceable></option></arg>
-   <arg choice="opt"><option>-t <replaceable>minutes</replaceable></option></arg>
-   <arg choice="opt"><option>-k <replaceable>kilobytes</replaceable></option></arg>
-   <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>
-   <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
-   <arg choice="opt"><option>-p <replaceable>pidfile</replaceable></option></arg>
-   <arg choice="opt"><option>-ziDST1</option></arg>
-   <arg choice="opt" rep="repeat">listener-spec</arg>
-  </cmdsynopsis>
-
+  &gfs-synopsis;
  </refsynopsisdiv>
  <refsect1><title>DESCRIPTION</title>
   <para>
@@ -43,45 +27,48 @@
    The server acts as a real Z39.50 server but does not use a database.
    It returns a random hit count and returns a subset of a few built-in
    records.
-   </para>
-   <para>
-    The <replaceable>listener-spec</replaceable> consists of a transport
-    mode followed by a colon, followed by a listener address. The
-    transport mode is either <literal>tcp</literal>, <literal>unix</literal>,
-    or <literal>ssl</literal>.
-   </para>
-   <para>
-    For TCP and SSL, an address has the form:
-    <screen>
-     hostname | IP-number [ : portnumber ]
-    </screen>
-   </para>
-   <para>
-    For UNIX local socket the address is the filename of the local socket.
-   </para>
-  </refsect1>
-  <refsect1>
-   <title>OPTIONS</title>
-   &ztest-options;
-  </refsect1>
-  <refsect1><title>FILES</title>
-   <para>
-    <filename>yaz-&lt;version&gt;/ztest/yaz-ztest.c</filename>
-   </para>
-   <para>
-    <filename>yaz-&lt;version&gt;/include/yaz/backend.h</filename>
-   </para>
-  </refsect1>
-  <refsect1><title>SEE ALSO</title>
-   <para>
-    <citerefentry>
-     <refentrytitle>yaz</refentrytitle>
-     <manvolnum>7</manvolnum></citerefentry>
-   </para>
-   <para>
-    Section "Generic server" in the YAZ manual.
-   </para>
-  </refsect1>
+  </para>
+  <para>
+   The <replaceable>listener-spec</replaceable> consists of a transport
+   mode followed by a colon, followed by a listener address. The
+   transport mode is either <literal>tcp</literal>, <literal>unix</literal>,
+   or <literal>ssl</literal>.
+  </para>
+  <para>
+   For TCP and SSL, an address has the form:
+   <screen>
+    hostname | IP-number [ : portnumber ]
+   </screen>
+  </para>
+  <para>
+   For UNIX local socket the address is the filename of the local socket.
+  </para>
+ </refsect1>
+ <refsect1>
+  <title>OPTIONS</title>
+  &gfs-options;
+ </refsect1>
+ <refsect1><title>FILES</title>
+  <para>
+   <filename>yaz-&lt;version&gt;/ztest/yaz-ztest.c</filename>
+  </para>
+  <para>
+   <filename>yaz-&lt;version&gt;/include/yaz/backend.h</filename>
+  </para>
+ </refsect1>
+ <refsect1><title>VIRTUAL HOSTS</title>
+  &gfs-virtual;
+ </refsect1>
+ <refsect1><title>SEE ALSO</title>
+  <para>
+   <citerefentry>
+    <refentrytitle>yaz</refentrytitle>
+    <manvolnum>7</manvolnum></citerefentry>
+  </para>
+  <para>
+   Section "Generic server" in the YAZ manual.
+  </para>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file
