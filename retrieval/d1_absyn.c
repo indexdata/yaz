@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.29  2000-12-05 14:34:49  adam
+ * Revision 1.30  2000-12-05 19:07:24  adam
+ * Fixed problem with element level in reading of abstract syntax.
+ *
+ * Revision 1.29  2000/12/05 14:34:49  adam
  * Fixed bug with termlists (introduced by previous commit).
  *
  * Revision 1.28  2000/12/05 12:21:45  adam
@@ -472,7 +475,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     		ppl[level] = &cur_elements->elements;
             }
 	    p = path;
-	    for (i = 0;; i++)
+	    for (i = 1;; i++)
 	    {
 		char *e;
 
@@ -481,14 +484,14 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		else
 		    break;
 	    }
-	    if (i > level + 1)
+	    if (i > level+1)
 	    {
 		yaz_log(LOG_WARN, "%s:%d: Bad level increase", file, lineno);
 		fclose(f);
 		return 0;
 	    }
 	    level = i;
-	    new_element = *ppl[level] = (data1_element *)
+	    new_element = *ppl[level-1] = (data1_element *)
 		nmem_malloc(data1_nmem_get(dh), sizeof(*new_element));
 	    new_element->next = new_element->children = 0;
 	    new_element->tag = 0;
@@ -496,8 +499,8 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    new_element->sub_name = 0;
 	    
 	    tp = &new_element->termlists;
-	    ppl[level] = &new_element->next;
-	    ppl[level+1] = &new_element->children;
+	    ppl[level-1] = &new_element->next;
+	    ppl[level] = &new_element->children;
 	    
 	    /* consider subtree (if any) ... */
 	    if ((sub_p = strchr (p, ':')) && sub_p[1])
