@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed COMSTACK error that occurred on HPUX. Fix by Giannis Kosmas.
+
 Configure detects POSIX threads on OpenBSD.
 
 When sort flag 'i' was specified in yaz-client the caseSensitivy flag

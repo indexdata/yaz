@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: tcpip.c,v $
- * Revision 1.40  2001-08-23 09:02:46  adam
+ * Revision 1.41  2001-10-12 21:49:26  adam
+ * For accept/recv/send check for EAGAIN if it's differs from EWOULDBLOCK.
+ *
+ * Revision 1.40  2001/08/23 09:02:46  adam
  * WIN32 fixes: Socket not re-used for bind. yaz_log logs WIN32 error
  * message.
  *
@@ -653,7 +656,12 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #ifdef WIN32
 	    WSAGetLastError() == WSAEWOULDBLOCK
 #else
-	    errno == EWOULDBLOCK
+	    errno == EWOULDBLOCK 
+#ifdef EAGAIN
+#if EAGAIN != EWOULDBLOCK
+            || errno == EAGAIN
+#endif
+#endif
 #endif
 	    )
 	    h->cerrno = CSNODATA;
@@ -853,10 +861,13 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 	    else
 		return -1;
 #else
-	    if (errno == EWOULDBLOCK
-#ifdef EINPROGRESS
-		|| errno == EINPROGRESS
+	    if (errno == EWOULDBLOCK 
+#ifdef EAGAIN   
+#if EAGAIN != EWOULDBLOCK
+                || errno == EAGAIN
 #endif
+#endif
+		|| errno == EINPROGRESS
 		)
 	    {
 		h->io_pending = CS_WANT_READ;
@@ -1016,7 +1027,12 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 #ifdef WIN32
 		WSAGetLastError() == WSAEWOULDBLOCK
 #else
-		errno == EAGAIN
+	        errno == EWOULDBLOCK 
+#ifdef EAGAIN
+#if EAGAIN != EWOULDBLOCK
+             || errno == EAGAIN
+#endif
+#endif
 #endif
 		)
 	    {
