@@ -92,7 +92,7 @@ AC_DEFUN([YAZ_INIT],
 		else
 			yazsrcdir=$srcdir
 		fi
-		for i in ${yazsrcdir}/../yaz* ${yazsrcdir}/../yaz ../yaz* ../yaz; do
+		for i in ${yazsrcdir}/../../yaz *${yazsrcdir}/../yaz* ${yazsrcdir}/../yaz; do
 			if test -d $i; then
 				if test -r $i/yaz-config; then
 					yazconfig=$i/yaz-config
