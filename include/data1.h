@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.18  1996-10-07 15:29:16  quinn
+ * Revision 1.19  1996-10-11 11:57:16  quinn
+ * Smallish
+ *
+ * Revision 1.18  1996/10/07  15:29:16  quinn
  * Added SOIF support
  *
  * Revision 1.17  1996/07/06  19:58:32  quinn
@@ -371,7 +374,7 @@ data1_tag *data1_gettagbynum(data1_tagset *s, int type, int value);
 data1_tagset *data1_read_tagset(char *file);
 data1_element *data1_getelementbytagname(data1_absyn *abs,
     data1_element *parent, char *tagname);
-Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o);
+Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o, int *len);
 int data1_matchstr(char *s1, char *s2);
 data1_tag *data1_gettagbyname(data1_tagset *s, char *name);
 void data1_free_tree(data1_node *t);

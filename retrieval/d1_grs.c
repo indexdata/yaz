@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.6  1996-07-06 19:58:34  quinn
+ * Revision 1.7  1996-10-11 11:57:23  quinn
+ * Smallish
+ *
+ * Revision 1.6  1996/07/06  19:58:34  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.5  1996/06/03  09:46:42  quinn
@@ -35,7 +38,7 @@
 
 #define D1_VARIANTARRAY 20 /* fixed max length on sup'd variant-list. Lazy me */
 
-Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o);
+Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o, int *len);
 
 static Z_ElementMetaData *get_ElementMetaData(ODR o)
 {
@@ -137,7 +140,7 @@ static int traverse_triples(data1_node *n, int level, Z_ElementMetaData *m,
 }
 
 static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
-    ODR o)
+    ODR o, int *len)
 {
     Z_ElementData *res = odr_malloc(o, sizeof(*res));
     data1_node *p;
@@ -161,6 +164,7 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
 	    	res->which = Z_ElementData_numeric;
 		res->u.numeric = odr_malloc(o, sizeof(int));
 		*res->u.numeric = atoi(n->u.data.data);
+		*len += 4;
 		break;
 	    case DATA1I_text:
 	        toget = n->u.data.len;
@@ -170,12 +174,14 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
 		res->u.string = odr_malloc(o, toget+1);
 		memcpy(res->u.string, n->u.data.data, toget);
 		res->u.string[toget] = '\0';
+		*len += toget;
 		break;
 	    case DATA1I_oid:
 	        res->which = Z_ElementData_oid;
 		strncpy(str, n->u.data.data, n->u.data.len);
 		str[n->u.data.len] = '\0';
 		res->u.oid = odr_getoidbystr(o, str);
+		*len += n->u.data.len;
 		break;
 	    default:
 	    	logf(LOG_WARN, "Can't handle datatype.");
@@ -185,13 +191,14 @@ static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
     else
     {
 	res->which = Z_ElementData_subtree;
-	if (!(res->u.subtree = data1_nodetogr(n->parent, select, o)))
+	if (!(res->u.subtree = data1_nodetogr(n->parent, select, o, len)))
 	    return 0;
     }
     return res;
 }
 
-static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o)
+static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o,
+    int *len)
 {
     Z_TaggedElement *res = odr_malloc(o, sizeof(*res));
     data1_tag *tag = 0;
@@ -274,12 +281,13 @@ static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o)
 	res->content->which = Z_ElementData_noDataRequested;
 	res->content->u.noDataRequested = ODR_NULLVAL;
     }
-    else if (!(res->content = nodetoelementdata(data, select, leaf, o)))
+    else if (!(res->content = nodetoelementdata(data, select, leaf, o, len)))
 	return 0;
+    *len += 10;
     return res;
 }
 
-Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o)
+Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o, int *len)
 {
     Z_GenericRecord *res = odr_malloc(o, sizeof(*res));
     data1_node *c;
@@ -291,7 +299,7 @@ Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o)
 	if (c->which == DATA1N_tag && select && !c->u.tag.node_selected)
 	    continue;
 	if (!(res->elements[res->num_elements++] =
-	    nodetotaggedelement(c, select, o)))
+	    nodetotaggedelement(c, select, o, len)))
 	    return 0;
     }
     return res;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.5  1996-07-06 19:58:34  quinn
+ * Revision 1.6  1996-10-11 11:57:22  quinn
+ * Smallish
+ *
+ * Revision 1.5  1996/07/06  19:58:34  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.4  1996/06/07  11:04:32  quinn
@@ -196,8 +199,9 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
 		 * have we looked at enough children?
 		 */
 		if (!occur || (occur->which == Z_Occurrences_values &&
+		    (!occur->u.values->howMany ||
 		    counter - *occur->u.values->start >=
-		    *occur->u.values->howMany - 1))
+		    *occur->u.values->howMany - 1)))
 		    return hits;
 	    }
 	}

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.62  1996-07-06 19:58:35  quinn
+ * Revision 1.63  1996-10-11 11:57:26  quinn
+ * Smallish
+ *
+ * Revision 1.62  1996/07/06  19:58:35  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.61  1996/06/10  08:56:16  quinn
@@ -852,7 +855,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 				int *num, Z_RecordComposition *comp,
 				int *next, int *pres, oid_value format)
 {
-    int recno, total_length = 0, toget = *num;
+    int recno, total_length = 0, toget = *num, dumped_records = 0;
     static Z_Records records;
     static Z_NamePlusRecordList reclist;
     static Z_NamePlusRecord *list[MAX_RECORDS];
@@ -882,7 +885,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	 * allocation done by the backend - this should give us a reasonable
 	 * idea of the total size of the data so far.
 	 */
-	total_length = odr_total(a->encode);
+	total_length = odr_total(a->encode) - dumped_records;
 	if (reclist.num_records == MAX_RECORDS - 1)
 	{
 	    *pres = Z_PRES_PARTIAL_2;
@@ -931,6 +934,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		   	 surrogatediagrec(a->proto, fres->basename, 16, 0);
 		    reclist.num_records++;
 		    *next = fres->last_in_set ? 0 : recno + 1;
+		    dumped_records += this_length;
 		    continue;
 		}
 	    }
@@ -941,6 +945,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		    surrogatediagrec(a->proto, fres->basename, 17, 0);
 		reclist.num_records++;
 		*next = fres->last_in_set ? 0 : recno + 1;
+		dumped_records += this_length;
 		continue;
 	    }
 	}
