@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.29  1996-01-02 08:57:25  quinn
+ * Revision 1.30  1996-02-12 18:18:09  quinn
+ * Fidgeting.
+ *
+ * Revision 1.29  1996/01/02  08:57:25  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.28  1995/12/14  11:09:31  quinn
@@ -149,6 +152,8 @@ static Z_InitResponse *session = 0;        /* session parameters */
 static char last_scan[512] = "0";
 static char last_cmd[100] = "?";
 static oid_value attributeset = VAL_BIB1;
+static FILE *marcdump = 0;
+static char marcdump_file[512] = "marc.out";
 
 #ifdef RPN_QUERY
 #ifndef PREFIX_QUERY
@@ -403,7 +408,29 @@ static void display_record(Z_DatabaseRecord *p)
         }
     }
     if (r->which == Z_External_octet && p->u.octet_aligned->len)
+    {
+#if 0
+	if (marcdump)
+	    fwrite(p->u.octet_aligned->buf, p->u.octet_aligned->len, 1,
+		marcdump);
+#endif
+        static count = 0;
+        FILE *f;
+        char buf[256];
+
+        sprintf(buf, "marc.%d", count++);
+        if (!(f = fopen(buf, "w")))
+        {
+            perror(buf);
+            exit(1);
+
+        }
+        fwrite(p->u.octet_aligned->buf, p->u.octet_aligned->len, 1, f);
+        fclose(f);
+
+
         marc_display ((char*)p->u.octet_aligned->buf, stdout);
+    }
     else if (ent->value == VAL_SUTRS)
     {
         if (r->which != Z_External_sutrs)
@@ -1147,5 +1174,10 @@ int main(int argc, char **argv)
         cmd_open(argv[1]);
     else
         printf(C_PROMPT);
+    if (*marcdump_file && !(marcdump = fopen(marcdump_file, "a")))
+    {
+	perror(marcdump_file);
+	exit(1);
+    }
     return client();
 }

@@ -1,5 +1,7 @@
 name usmarc
 reference USmarc
+attset bib1.att
+tagset usmarc.tag
 
 marc usmarc.mar
 
