@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.50  1995-10-25 16:58:32  quinn
+ * Revision 1.51  1995-11-01 11:56:37  quinn
+ * Fixed bug in elementsetname-handling in piggybacked presents.
+ *
+ * Revision 1.50  1995/10/25  16:58:32  quinn
  * Simple.
  *
  * Revision 1.49  1995/10/16  13:51:53  quinn
@@ -1044,7 +1047,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     else
     {
     	static int toget;
-	Z_RecordComposition comp;
+	Z_RecordComposition comp, *compp = 0;
 	static int presst = 0;
 
 	resp.records = 0;
@@ -1056,6 +1059,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	{
 	    toget = bsrt->hits;
 	    comp.u.simple = req->smallSetElementSetNames;
+	    compp = &comp;
 	}
 	else if (bsrt->hits < *req->largeSetLowerBound)
 	{
@@ -1063,6 +1067,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    if (toget > bsrt->hits)
 		toget = bsrt->hits;
 	    comp.u.simple = req->mediumSetElementSetNames;
+	    compp = &comp;
 	}
 	else
 	    toget = 0;
@@ -1078,7 +1083,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    else
 	    	form = prefformat->value;
 	    resp.records = pack_records(assoc, req->resultSetName, 1,
-		&toget, &comp, &next, &presst, form);
+		&toget, compp, &next, &presst, form);
 	    if (!resp.records)
 		return 0;
 	    resp.numberOfRecordsReturned = &toget;
