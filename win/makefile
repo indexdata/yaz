@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.81 2004-08-18 09:01:13 adam Exp $
+# $Id: makefile,v 1.82 2004-08-18 09:43:10 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -44,7 +44,7 @@ NSIS="c:\program files\nsis\makensis.exe"
 nsis: 
 	nmake DEBUG=1 clean
 	nmake DEBUG=0 clean
-	nmake DEBUG=1
+	nmake DEBUG=1 dll
 	nmake DEBUG=0
 	$(NSIS) yaz.nsi
 
