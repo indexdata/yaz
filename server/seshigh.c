@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.106  2000-08-31 09:51:25  adam
+ * Revision 1.107  2000-08-31 10:20:12  adam
+ * Added member request_format and output_format for backend fetch method.
+ *
+ * Revision 1.106  2000/08/31 09:51:25  adam
  * Added record_syntax member for fetch method (raw OID).
  *
  * Revision 1.105  2000/07/06 10:38:47  adam
@@ -1187,8 +1190,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	freq.number = recno;
 	freq.comp = comp;
 	freq.request_format = format;
-	freq.record_syntax = oid;
-	freq.output_format = 0;
+	freq.request_format_raw = oid;
+	freq.output_format = format;
+	freq.output_format_raw = 0;
 	freq.stream = a->encode;
 	freq.print = a->print;
 	freq.surrogate_flag = 0;
@@ -1260,6 +1264,12 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    return 0;
 	strcpy(thisrec->databaseName, freq.basename);
 	thisrec->which = Z_NamePlusRecord_databaseRecord;
+
+	if (freq.output_format_raw)
+	{
+	    struct oident *ident = oid_getentbyoid(freq.output_format_raw);
+	    freq.output_format = ident->value;
+	}
 	thisrec->u.databaseRecord = z_ext_record(a->encode, freq.output_format,
 						 freq.record, freq.len);
 	if (!thisrec->u.databaseRecord)
@@ -1494,7 +1504,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	bprr->start = *req->resultSetStartPoint;
 	bprr->number = *req->numberOfRecordsRequested;
 	bprr->format = form;
-	bprr->record_syntax = req->preferredRecordSyntax;
 	bprr->comp = req->recordComposition;
 	bprr->referenceId = req->referenceId;
 	bprr->stream = assoc->encode;

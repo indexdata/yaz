@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.8  2000-08-31 09:51:25  adam
+ * Revision 1.9  2000-08-31 10:20:12  adam
+ * Added member request_format and output_format for backend fetch method.
+ *
+ * Revision 1.8  2000/08/31 09:51:25  adam
  * Added record_syntax member for fetch method (raw OID).
  *
  * Revision 1.7  2000/04/05 07:39:55  adam
@@ -129,7 +132,6 @@ typedef struct {
     int start;
     int number;                /* record number */
     oid_value format;          /* One of the CLASS_RECSYN members */
-    int *record_syntax;        /* same as above (raw OID) */
     Z_ReferenceId *referenceId;/* reference ID */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if required */
@@ -147,7 +149,7 @@ typedef struct bend_fetch_rr {
     int number;                /* record number */
     Z_ReferenceId *referenceId;/* reference ID */
     oid_value request_format;  /* One of the CLASS_RECSYN members */
-    int *record_syntax;        /* same as above (raw OID) */
+    int *request_format_raw;   /* same as above (raw OID) */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
     ODR print;                 /* printing stream */
@@ -157,6 +159,7 @@ typedef struct bend_fetch_rr {
     char *record;              /* record */
     int last_in_set;           /* is it?  */
     oid_value output_format;   /* format */
+    int *output_format_raw;    /* used instead of above if not-null */
     int errcode;               /* 0==success */
     char *errstring;           /* system error string or NULL */
     int surrogate_flag;        /* surrogate diagnostic */
