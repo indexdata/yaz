@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.9 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.10 2002-02-24 12:23:43 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -207,7 +207,7 @@ int p_query_attset (const char *arg);
                   | string
       -- Qualifiers is a list of strings separated by comma
 
-      Relation ::= '=' | '>=' | '<=' | '<>' | '>' | '<'
+      Relation ::= '=' | '>=' | '&lt;=' | '&lt;>' | '>' | '&lt;'
       -- Relational operators. This really doesn't follow the ISO8777
       -- standard.
 

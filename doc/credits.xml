@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.7 2002-02-18 12:57:03 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.8 2002-02-24 12:23:43 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
    <para>
    This appendix lists individuals that have contributed in the development
@@ -72,7 +72,7 @@
      Charles Woodfield
     </para></listitem>
    <listitem><para>
-     Tom Andr&eacute &Oslash;verland
+     Tom Andr&eacute; &Oslash;verland
     </para></listitem>
   </itemizedlist>
  </appendix>
