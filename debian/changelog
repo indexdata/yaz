@@ -1,3 +1,9 @@
+yaz (2.0.13-2) unstable; urgency=low
+
+  * API version 2.0.13.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 24 Feb 2004 08:46:37 +0100
+
 yaz (2.0.13-1) unstable; urgency=low
 
   * Upstream.
