@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Fix bad reference in UNIX comstack in function cs_addrstr.
+
 Fix for AIX compile.
 
 The generic front-end server (server/seshigh.c) now supports returning
