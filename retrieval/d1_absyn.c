@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.28  2000-12-05 12:21:45  adam
+ * Revision 1.29  2000-12-05 14:34:49  adam
+ * Fixed bug with termlists (introduced by previous commit).
+ *
+ * Revision 1.28  2000/12/05 12:21:45  adam
  * Added termlist source for data1 system.
  *
  * Revision 1.27  1999/12/21 14:16:19  ian
@@ -333,6 +336,66 @@ void fix_element_ref (data1_handle dh, data1_absyn *absyn, data1_element *e)
     }
 }
 
+
+static int parse_termlists (data1_handle dh, data1_termlist ***tpp,
+			    char *p, const char *file, int lineno,
+			    const char *element_name, data1_absyn *res)
+{
+    data1_termlist **tp = *tpp;
+    do
+    {
+	char attname[512], structure[512];
+	char *source;
+	int r;
+	
+	if (!(r = sscanf(p, "%511[^:,]:%511[^,]", attname,
+			 structure)))
+	{
+	    yaz_log(LOG_WARN,
+		    "%s:%d: Syntax error in termlistspec '%s'",
+		    file, lineno, p);
+	    return -1;
+/*
+  fclose(f);
+  return 0;
+*/
+	}
+	if (*attname == '!')
+	    strcpy(attname, element_name);
+	*tp = (data1_termlist *)
+	    nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
+	(*tp)->next = 0;
+	if (!((*tp)->att = data1_getattbyname(dh, res->attset,
+					      attname)))
+	{
+	    yaz_log(LOG_WARN,
+		    "%s:%d: Couldn't find att '%s' in attset",
+		    file, lineno, attname);
+	    return -1;
+/*
+	    fclose(f);
+	    return 0;
+*/
+	}
+	if (r == 2 && (source = strchr(structure, ':')))
+	    *source++ = '\0';   /* cut off structure .. */
+	else
+	    source = "data";    /* ok: default is leaf data */
+	(*tp)->source = (char *)
+	    nmem_strdup (data1_nmem_get (dh), source);
+	
+	if (r < 2) /* is the structure qualified? */
+	    (*tp)->structure = "w";
+	else 
+	    (*tp)->structure = (char *)
+		nmem_strdup (data1_nmem_get (dh), structure);
+	tp = &(*tp)->next;
+    }
+    while ((p = strchr(p, ',')) && *(++p));
+    *tpp = tp;
+    return 0;
+}
+
 data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 {
     data1_sub_elements *cur_elements = NULL;
@@ -487,55 +550,15 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    }
 	    /* parse termList definitions */
 	    p = termlists;
-	    if (*p == '-')
-		new_element->termlists = 0;
-	    else
+	    if (*p != '-')
 	    {
 		assert (res->attset);
-		do
+		
+		if (parse_termlists (dh, &tp, p, file, lineno, name, res))
 		{
-		    char attname[512], structure[512];
-		    char *source;
-		    int r;
-		    
-		    if (!(r = sscanf(p, "%511[^:,]:%511[^,]", attname,
-				     structure)))
-		    {
-			yaz_log(LOG_WARN,
-			     "%s:%d: Syntax error in termlistspec '%s'",
-			     file, lineno, p);
-			fclose(f);
-			return 0;
-		    }
-		    if (*attname == '!')
-			strcpy(attname, name);
-		    *tp = (data1_termlist *)
-			nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
-		    (*tp)->next = 0;
-		    if (!((*tp)->att = data1_getattbyname(dh, res->attset,
-							  attname)))
-		    {
-			yaz_log(LOG_WARN,
-			     "%s:%d: Couldn't find att '%s' in attset",
-			     file, lineno, attname);
-			fclose(f);
-			return 0;
-		    }
-		    if (r == 2 && (source = strchr(structure, ':')))
-			*source++ = '\0';   /* cut off structure .. */
-		    else
-			source = "data";    /* ok: default is leaf data */
-		    (*tp)->source = (char *)
-			nmem_strdup (data1_nmem_get (dh), source);
-
-		    if (r < 2) /* is the structure qualified? */
-			(*tp)->structure = "w";
-		    else 
-			(*tp)->structure = (char *)
-			    nmem_strdup (data1_nmem_get (dh), structure);
-		    tp = &(*tp)->next;
+		    fclose (f);
+		    return 0;
 		}
-		while ((p = strchr(p, ',')) && *(++p));
 	        *tp = all; /* append any ALL entries to the list */
 	    }
 	    new_element->name = nmem_strdup(data1_nmem_get (dh), name);
@@ -564,60 +587,24 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	}
 	else if (!strcmp(cmd, "all"))
 	{
-	    char *p;
 	    data1_termlist **tp = &all;
-	    
 	    if (all)
 	    {
 		yaz_log(LOG_WARN, "%s:%d: Too many 'all' directives - ignored",
 		     file, lineno);
 		continue;
 	    }
-
 	    if (argc != 2)
 	    {
 		yaz_log(LOG_WARN, "%s:%d: Bad # of args to 'all' directive",
 		     file, lineno);
 		continue;
 	    }
-	    p = argv[1];
-	    assert (res->attset);
-	    do
+	    if (parse_termlists (dh, &tp, argv[1], file, lineno, 0, res))
 	    {
-		char attname[512], structure[512];
-		int r;
-		
-		if (!(r = sscanf(p, "%511[^:,]:%511[^,]", attname,
-				 structure)))
-		{
-		    yaz_log(LOG_WARN, "%s:%d: Syntax error in termlistspec",
-			 file, lineno);
-		    fclose(f);
-		    return 0;
-		}
-		*tp = (data1_termlist *)
-		    nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
-		if (!((*tp)->att =
-		      data1_getattbyname (dh, res->attset, attname)))
-		{
-		    yaz_log(LOG_WARN, "%s:%d: Couldn't find att '%s' in attset",
-			 file, lineno, attname);
-		    fclose(f);
-		    return 0;
-		}
-		if (r < 2) /* is the structure qualified? */
-		    (*tp)->structure = "w";
-		else 
-		{
-		    (*tp)->structure =
-			(char *)nmem_malloc (data1_nmem_get (dh),
-					     strlen(structure)+1);
-		    strcpy ((*tp)->structure, structure);
-		}
-		(*tp)->next = 0;
-		tp = &(*tp)->next;
+		fclose (f);
+		return 0;
 	    }
-	    while ((p = strchr(p, ',')) && *(++p));
 	}
 	else if (!strcmp(cmd, "name"))
 	{
