@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.7  1995-12-13 13:44:32  quinn
+ * Revision 1.8  1995-12-15 16:20:41  quinn
+ * Added formatted text.
+ *
+ * Revision 1.7  1995/12/13  13:44:32  quinn
  * Modified Data1-system to use nmem
  *
  * Revision 1.6  1995/12/12  16:37:08  quinn
@@ -400,6 +403,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	res->u.data.what = DATA1I_text;
 	res->u.data.len = len;
 	res->u.data.data = data;
+	res->u.data.formatted_text = 0;
 	res->root = parent->root;
     }
     return res;
