@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.33 2000-10-02 12:31:43 adam Exp $
+dnl $Id: configure.in,v 1.34 2000-10-03 12:55:50 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -29,6 +29,9 @@ else
 	ILLLIB=""
 	ASN_MAKEFILES="asn/Makefile"
 	HFILE=prt-proto.h
+	if ! test -r include/yaz/prt-rsc.h ; then
+		cp asn/*.h include/yaz
+	fi
 fi
 AC_MSG_CHECKING(whether proto.h needs to be generated)
 yaz_include=${srcdir}/include/yaz

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: prt-proto.h,v 1.2 2000-02-28 11:20:06 adam Exp $
+ * $Id: prt-proto.h,v 1.1 2000-10-03 12:55:50 adam Exp $
  */
 
 #ifndef PRT_PROTO_H

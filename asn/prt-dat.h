@@ -8,7 +8,10 @@
  *  Databasix Information Systems B.V., Utrecht, The Netherlands.
  *
  * $Log: prt-dat.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.1  2000-10-03 12:55:50  adam
+ * Removed several auto-generated files from CVS.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.2  1999/04/20 09:56:48  adam
