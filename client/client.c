@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.164 2002-08-29 21:35:38 ja7 Exp $
+ * $Id: client.c,v 1.165 2002-08-30 09:06:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -2796,9 +2796,9 @@ int cmd_list_all(char* args) {
 		printf("Connected to         : %s\n",last_open_command);
 	} else {
 		if(last_open_command) 
-			printf("Not Connected to     : %s\n",last_open_command);
+			printf("Not connected to     : %s\n",last_open_command);
 		else 
-			printf("Not Connected        : \n");
+			printf("Not connected        : \n");
 
 	};
 	if(yazProxy) printf("using proxy          : %s\n",yazProxy);		
@@ -2806,14 +2806,14 @@ int cmd_list_all(char* args) {
 	printf("auto_reconnect       : %s\n",auto_reconnect?"on":"off");
 
 	if (!auth) {
-		printf("Authentication       : NONE\n");
+		printf("Authentication       : none\n");
 	} else {
 		switch(auth->which) {
 		case Z_IdAuthentication_idPass:
 			printf("Authentication       : IdPass\n"); 
-			printf("    Login            : %s\n",auth->u.idPass->userId?auth->u.idPass->userId:"");
-			printf("    LoginGroup       : %s\n",auth->u.idPass->groupId?auth->u.idPass->groupId:"");
-			printf("    PassWord         : %s\n",auth->u.idPass->password?auth->u.idPass->password:"");
+			printf("    Login User       : %s\n",auth->u.idPass->userId?auth->u.idPass->userId:"");
+			printf("    Login Group      : %s\n",auth->u.idPass->groupId?auth->u.idPass->groupId:"");
+			printf("    Password         : %s\n",auth->u.idPass->password?auth->u.idPass->password:"");
 			break;
 		case Z_IdAuthentication_open:
 			printf("Authentication       : psOpen\n");			
@@ -2832,20 +2832,20 @@ int cmd_list_all(char* args) {
 	
 	/* Query options */
 	printf("CCL file             : %s\n",ccl_fields);
-	printf("Qurry type           : %s\n",query_type_as_string(queryType));
+	printf("Query type           : %s\n",query_type_as_string(queryType));
 	
-	printf("ElementSet numbering : %s\n",setnumber==-1?"off":"on");
+	printf("Named Result Sets    : %s\n",setnumber==-1?"off":"on");
 
 	/* piggy back options */
 	printf("ssub/lslb/mspn       : %d/%d/%d\n",smallSetUpperBound,largeSetLowerBound,mediumSetPresentNumber);
 	
 	/* print present related options */
-	printf("format               : %s\n",yaz_z3950_oid_value_to_str(recordsyntax,CLASS_RECSYN));
-	printf("schema               : %s\n",yaz_z3950_oid_value_to_str(schema,CLASS_SCHEMA));
-	printf("elements             : %s\n",elementSetNames?elementSetNames->u.generic:"");
+	printf("Format               : %s\n",yaz_z3950_oid_value_to_str(recordsyntax,CLASS_RECSYN));
+	printf("Schema               : %s\n",yaz_z3950_oid_value_to_str(schema,CLASS_SCHEMA));
+	printf("Elements             : %s\n",elementSetNames?elementSetNames->u.generic:"");
 
 	/* loging options */
-	printf("Apdu log             : %s\n",apdu_file?"on":"off");
+	printf("APDU log             : %s\n",apdu_file?"on":"off");
 	printf("Record log           : %s\n",marcdump?"on":"off");
 	
 	/* other infos */
