@@ -1,20 +1,23 @@
-<!-- $Id: zoom.xml,v 1.3 2001-10-24 20:12:36 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.4 2001-10-24 21:24:38 quinn Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
-   &zoom; is an acronym for Z39.50 Object Oriented Model and is
-   an initiative started by Mike Taylor. The goal of &zoom; is to
+   &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
+   an initiative started by Mike Taylor (Mike is from the UK, which
+   explains the peculiar name of the model). The goal of &zoom; is to
    provide a common Z39.50 client API not bound to a particular
    programming language or toolkit.
   </para>
   <para>
-   The lack of a simple Z39.50 client API for &yaz; was more apparent
-   than ever. So, when the first ZOOM specification was available
-   an implementation for &yaz; was developed. For the first time, it is
-   now easier to develop clients than servers with &yaz;. This
-   chapter describes the ZOOM C binding. Before going futher
-   reconsider whether C is still the programming language of your
-   choice. There are other language bindings available and others
+   The lack of a simple Z39.50 client API for &yaz; has become more
+   and more apparent over time. So when the first ZOOM specification
+   became available,
+   an implementation for &yaz; was quickly developed. For the first time, it is
+   now as easy (or easier!) to develop clients than servers with &yaz;. This
+   chapter describes the ZOOM C binding. Before going futher, please
+   reconsider whether C is the right programming language for the job.
+   There are other language bindings available for &yaz;, and still
+   more
    are in active development. See the ZOOM website at
    <ulink url="http://zoom.z3950.org/">zoom.z3950.org</ulink> for
    more information.
@@ -29,7 +32,7 @@
 
   <para>
    The C language misses many features found in object oriented languages
-   such as C++, Java, etc. For example, you'll have to, manually,
+   such as C++, Java, etc. For example, you'll have to manually,
    destroy all objects you create, even though you may think of them as
    temporary. Most objects has a <literal>_create</literal> - and a
    <literal>_destroy</literal> variant.
@@ -56,19 +59,19 @@
     Connection objects are created with either function
     <function>Z3950_connection_new</function> or 
     <function>Z3950_connection_create</function>.
-    The former both creates and attempts to establishes a network
-    connection with the target. The latter doesn't establishes
-    a connection immediately, thus allowing you to set specify options
-    before establishing network connection using function
+    The former creates and automatically attempts to establish a network
+    connection with the target. The latter doesn't establish
+    a connection immediately, thus allowing you to specify options
+    before establishing network connection using the function
     <function>Z3950_connection_connect</function>. 
     If the portnumber, <literal>portnum</literal>, is zero, the
     <literal>host</literal> is consulted for a port specification.
     If no port is given, 210 is used. A colon denotes the beginning of
     a port number in the host string. If the host string includes a
-    slash that specifies a database for the connection.
+    slash, the following part specifies a database for the connection.
    </para>
    <para>
-    Connection objects should be destroyed using function
+    Connection objects should be destroyed using the function
     <function>Z3950_connection_destroy</function>.
    </para>
    <synopsis>
@@ -83,7 +86,8 @@
     for the connection.
     If <parameter>val</parameter> is non-<literal>NULL</literal> that
     holds the new value for option.
-    Otherwise, if <parameter>val</parameter> is <literal>NULL</literal>
+    Otherwise, if <parameter>val</parameter> is
+    <literal>NULL</literal>,
     the option is unchanged.
     The function returns the previous value of the option.
    </para>
@@ -117,7 +121,7 @@
       </entry><entry>none</entry></row>
      <row><entry>
        async</entry><entry>If true (1) the connection operates in 
-       asynchronous operatio which means that all calls are non-blocking
+       asynchronous operation which means that all calls are non-blocking
        except <function>Z3950_event</function>.
       </entry><entry>0</entry></row>
      <row><entry>
@@ -172,7 +176,7 @@
      function <function>Z3950_search_prefix</function>. More
      query types will be added later, such as
      <link linkend="CCL">CCL</link> to RPN-mapping, native CCL query,
-     etc. In addition to a search, a sort critieria may be set. Function
+     etc. In addition to a search, a sort criteria may be set. Function
      <function>Z3950_search_sortby</function> specifies a 
      sort criteria using the same string notation for sort as offered by
      the <link linkend="sortspec">YAZ client</link>.
@@ -212,7 +216,7 @@
                                 const char *type, int *len);
    </synopsis>
    <para>
-     Function <function>X3950_resultset_options</function> sets or
+     Function <function>Z3950_resultset_options</function> sets or
      modifies an option for a result set similar to 
     <function>Z3950_connection_option</function>.
    </para>
@@ -224,7 +228,7 @@
      Function <function>Z3950_resultset_get</function> is similar to
      <link linkend="zoom.record.get">
      <function>Z3950_record_get</function></link> but
-     instead of operating on a record object it operates on a record on
+     instead of operating on a record object, it operates on a record on
      a given offset within a result set.
    </para>
    <table frame="top"><title>ZOOM Result set Options</title>
@@ -299,7 +303,7 @@
      If no record could be obtained <literal>NULL</literal> is returned.
    </para>
    <para>
-     Function <function>Z39_resultset_records</function> retrieves
+     Function <function>Z3950_resultset_records</function> retrieves
      a number of records from a result set. Options <literal>start</literal>
      and <literal>count</literal> specifies the range of records to
      be returned. Upon completion <literal>recs[0], ..recs[*cnt]</literal>
@@ -323,8 +327,8 @@
   </sect1>
   <sect1 id="zoom.options"><title>Options</title>
    <para>
-     Most objects in &zoom; allows you to specify options to change
-     behaviour. From an implementation point of view a set of options
+     Most objects in &zoom; allow you to specify options to change
+     default behaviour. From an implementation point of view a set of options
      is just like an associate array / hash array, etc.
    </para>
    <synopsis>
@@ -352,7 +356,7 @@
   </sect1>
   <sect1 id="zoom.events"><title>Events</title>
    <para>
-     If you're developing non-blocking applications you have to deal 
+     If you're developing non-blocking applications, you have to deal 
      with events.
    </para>
    <synopsis>
@@ -365,10 +369,10 @@
      <literal>cs</literal> (<literal>cs[0] ... cs[no-1]</literal>).
      A pending event could be a sending a search, receiving a response,
      etc.
-     When an event has a occured for one of the connections this function
+     When an event has a occured for one of the connections, this function
      returns a positive integer <literal>n</literal> denoting that an event
      occurred for connection <literal>cs[n-1]</literal>.
-     When no events are pending for the connections a value of zero is
+     When no events are pending for the connections, a value of zero is
      returned.
      To make sure all outstanding requests are performed call this function
      repeatedly until zero is returned.

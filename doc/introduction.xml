@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.5 2001-10-24 20:12:36 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.6 2001-10-24 21:24:38 quinn Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
   
   <para>
@@ -13,18 +13,19 @@
    It is, by far, the easiest way to develop clients in C.
    Server implementers should consider the 
    <link linkend="server">generic frontend server</link>.
-   None of those high-level API's support the whole protocol, but
-   they support most facilities used in existing Z39.50
+   None of those high-level APIs support the whole protocol, but
+   they do include most facilities used in existing Z39.50
    applications.
   </para>
   <para>
-   If you're developing non-standard extensions to Z39.50 or you're
+   If you're using 'exotic' functionality (meaning anything not included in
+   the high-level APIs), developing non-standard extensions to Z39.50 or you're
    going to develop an ILL application you'll have to learn the lower
-   level API's of &yaz;.
+   level APIs of &yaz;.
   </para>
   <para>
-   The basic low level modules, which is independent of the role,
-   consists of three primary interfaces:
+   The basic low level modules, which are independent of the role (client or server),
+   consist of three primary interfaces:
    
    <itemizedlist>
     <listitem><para>&asn;, which provides a C representation of the Z39.50
