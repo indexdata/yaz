@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.17  1998-10-18 22:33:35  quinn
+ * Revision 1.18  1998-10-20 15:13:45  adam
+ * Minor fix regarding output for Item Order.
+ *
+ * Revision 1.17  1998/10/18 22:33:35  quinn
  * Added diagnostic dump of Item Order Eservice.
  *
  * Revision 1.16  1998/10/15 08:26:23  adam
@@ -117,18 +120,29 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     	logf(LOG_LOG, "packagename: %s", rr->esr->packageName);
     logf(LOG_LOG, "Waitaction: %d", *rr->esr->waitAction);
 
-    if (rr->esr->taskSpecificParameters &&
-   	 rr->esr->taskSpecificParameters->which == Z_External_itemOrder)
+    if (!rr->esr->taskSpecificParameters)
+    {
+        logf (LOG_WARN, "No task specific parameters");
+    }
+    else if (rr->esr->taskSpecificParameters->which != Z_External_itemOrder)
+    {
+        logf (LOG_WARN, "Not Item Order %d", rr->esr->taskSpecificParameters->which);
+    }
+    else
     {
     	Z_ItemOrder *it = rr->esr->taskSpecificParameters->u.itemOrder;
-	if (it->which != Z_ItemOrder_esRequest)
-	    logf(LOG_WARN, "Expected EsRequest");
-	else
+	switch (it->which)
+	{
+#ifdef ASN_COMPILED
+	case Z_IOItemOrder_esRequest:
+#else
+	case Z_ItemOrder_esRequest:
+#endif
 	{
 	    Z_IORequest *ir = it->u.esRequest;
 	    Z_IOOriginPartToKeep *k = ir->toKeep;
 	    Z_IOOriginPartNotToKeep *n = ir->notToKeep;
-
+	    
 	    if (k && k->contact)
 	    {
 	        if (k->contact->name)
@@ -142,14 +156,16 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	    {
 	        logf(LOG_LOG, "Billing info (not shown)");
 	    }
-
+	    
 	    if (n->resultSetItem)
 	    {
 	        logf(LOG_LOG, "resultsetItem");
 		logf(LOG_LOG, "setId: %s", n->resultSetItem->resultSetId);
 		logf(LOG_LOG, "item: %d", *n->resultSetItem->item);
 	    }
-
+	}
+	break;
+	default:
 	}
     }
     rr->errcode = 0;
