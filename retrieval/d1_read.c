@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.9  1996-01-17 14:52:47  adam
+ * Revision 1.10  1996-01-19 15:41:47  quinn
+ * Fixed uninitialized boolean.
+ *
+ * Revision 1.9  1996/01/17  14:52:47  adam
  * Changed prototype for reader function parsed to data1_read_record.
  *
  * Revision 1.8  1995/12/15  16:20:41  quinn
@@ -175,6 +178,7 @@ data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
     datn->parent = tagn;
     datn->root = root;
     datn->which = DATA1N_data;
+    datn->u.data.formatted_text = 0;
     tagn->next = at->child;
     tagn->parent = at;
     at->child = tagn;
