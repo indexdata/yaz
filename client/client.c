@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.69  1998-08-19 16:10:06  adam
+ * Revision 1.70  1998-09-22 09:40:37  adam
+ * Minor changes in sort spec.
+ *
+ * Revision 1.69  1998/08/19 16:10:06  adam
  * Changed som member names of DeleteResultSetRequest/Response.
  *
  * Revision 1.68  1998/07/20 12:37:06  adam
@@ -1514,12 +1517,12 @@ int send_sortrequest(char *arg, int newset)
 	    case 'a':
 	    case 'A':
 	    case '>':
-		*sks->sortRelation = Z_SortRelation_ascending;
+		*sks->sortRelation = Z_SortRelation_descending;
 		break;
 	    case 'd':
 	    case 'D':
 	    case '<':
-		*sks->sortRelation = Z_SortRelation_descending;
+		*sks->sortRelation = Z_SortRelation_ascending;
 		break;
 	    case 'i':
 	    case 'I':
