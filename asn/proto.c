@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.59  1999-04-21 11:46:00  adam
+ * Revision 1.60  1999-06-11 16:45:59  adam
+ * Fixed minor bug in ScanRequest encoder.
+ *
+ * Revision 1.59  1999/04/21 11:46:00  adam
  * Fixed bug in {en,de}coder for OtherInformation.
  *
  * Revision 1.58  1999/04/20 09:56:47  adam
@@ -1216,6 +1219,7 @@ int z_ScanRequest(ODR o, Z_ScanRequest **p, int opt, const char *name)
 		     ODR_CONTEXT, 6, 0) &&
 	odr_implicit(o, odr_integer, &(*p)->preferredPositionInResponse,
 		     ODR_CONTEXT, 7, 1) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1, "otherInfo") &&
 	odr_sequence_end(o);
 }
 
