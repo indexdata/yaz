@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.130 2001-11-13 23:00:42 adam Exp $
+ * $Id: client.c,v 1.131 2001-11-18 23:17:45 adam Exp $
  */
 
 #include <stdio.h>
@@ -50,7 +50,7 @@ static Z_IdAuthentication *auth = 0;    /* our current auth definition */
 char *databaseNames[128];
 int num_databaseNames = 0;
 static Z_External *record_last = 0;
-static int setnumber = 0;               /* current result set number */
+static int setnumber = -1;               /* current result set number */
 static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
@@ -227,7 +227,10 @@ static int process_initResponse(Z_InitResponse *res)
     if (ODR_MASK_GET(res->options, Z_Options_concurrentOperations))
         printf (" concurrentOperations");
     if (ODR_MASK_GET(res->options, Z_Options_namedResultSets))
+    {
         printf (" namedResultSets");
+        setnumber = 0;
+    }
     printf ("\n");
     fflush (stdout);
     return 0;
@@ -757,9 +760,10 @@ static int process_searchResponse(Z_SearchResponse *res)
         printf("Search was a success.\n");
     else
         printf("Search was a bloomin' failure.\n");
-    printf("Number of hits: %d, setno %d\n",
-        *res->resultCount, setnumber);
-    printf("records returned: %d\n",
+    printf("Number of hits: %d", *res->resultCount);
+    if (setnumber >= 0)
+        printf (", setno %d", setnumber);
+    printf("\nrecords returned: %d\n",
         *res->numberOfRecordsReturned);
     setno += *res->numberOfRecordsReturned;
     if (res->records)
@@ -1303,16 +1307,19 @@ static int cmd_status(char *arg)
 
 static int cmd_setnames(char *arg)
 {
-    if (setnumber < 0)
-    {
-        printf("Set numbering enabled.\n");
+    if (*arg == '1')         /* enable ? */
         setnumber = 0;
-    }
-    else
-    {
-        printf("Set numbering disabled.\n");
+    else if (*arg == '0')    /* disable ? */
         setnumber = -1;
-    }
+    else if (setnumber < 0)  /* no args, toggle .. */
+        setnumber = 0;
+    else
+        setnumber = -1;
+   
+    if (setnumber >= 0)
+        printf("Set numbering enabled.\n");
+    else
+        printf("Set numbering disabled.\n");
     return 1;
 }
 
