@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.7 2005-02-02 10:17:02 adam Exp $
+ * $Id: tsticonv.c,v 1.8 2005-02-02 23:27:05 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -149,12 +149,10 @@ static void tst_marc8_to_ucs4b()
 	"\x00\x00\x03\x08"
 	"\x00\x00\x00" "n"
     }, 
-#if 0
     { /* bug #260 */
 	"\xe5\xe8\x41",
 	12, "\x00\x00\x00\x41" "\x00\x00\x03\x04" "\x00\x00\x03\x08"
     }, 
-#endif
     {
 	0, 0, 0
     }
@@ -168,7 +166,7 @@ static void tst_marc8_to_ucs4b()
 	printf ("tsticonv 20 yaz_iconv_open failed\n");
 	exit(20);
     }
-    for (i = 6; ar[i].len; i++)
+    for (i = 0; ar[i].len; i++)
     {
         size_t r;
 	size_t expect_len = ar[i].len;
