@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.13  1997-09-01 08:54:13  adam
+ * Revision 1.14  1997-09-18 08:48:09  adam
+ * Fixed minor bug that caused log_init to ignore filename.
+ *
+ * Revision 1.13  1997/09/01 08:54:13  adam
  * New windows NT/95 port using MSV5.0. Made prefix query handling
  * thread safe. The function options ignores empty arguments when met.
  *
@@ -125,7 +128,9 @@ void log_init(int level, const char *prefix, const char *name)
     l_level = level;
     if (prefix && *prefix)
     	sprintf(l_prefix, "%.512s", prefix);
-    if (!name || !*name || l_file != stderr)
+    if (!name || !*name)
+        return;
+    if (l_file != stderr && l_file != 0)
 	return;
     if (!(l_file = fopen(name, "a")))
         return;
