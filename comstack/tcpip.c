@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.56 2003-03-11 11:05:19 adam Exp $
+ * $Id: tcpip.c,v 1.57 2003-05-13 14:21:13 adam Exp $
  */
 
 #include <stdio.h>
@@ -303,7 +303,7 @@ int tcpip_connect(COMSTACK h, void *address)
     int r;
 #ifdef __sun__
     int recbuflen;
-    socklen_t rbufsize = sizeof(recbuflen);
+    YAZ_SOCKLEN_T rbufsize = sizeof(recbuflen);
 #endif
     TRC(fprintf(stderr, "tcpip_connect\n"));
     h->io_pending = 0;
