@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.18  1997-05-14 06:53:58  adam
+ * Revision 1.19  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.18  1997/05/14 06:53:58  adam
  * C++ support.
  *
  * Revision 1.17  1996/10/23 12:31:24  adam
@@ -21,8 +25,6 @@
  *
  * Revision 1.13  1995/08/15  11:16:39  quinn
  * Fixed pretty-printers.
- * CV:e ----------------------------------------------------------------------
- * CV:e ----------------------------------------------------------------------
  *
  * Revision 1.12  1995/06/19  12:38:47  quinn
  * Added BER dumper.
@@ -71,7 +73,8 @@ void odr_setlenlen(ODR o, int len)
     o->lenlen = len;
 }
 
-int odr_constructed_begin(ODR o, void *p, int zclass, int tag)
+int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
+			  const char *name)
 {
     int res;
     int cons = 1;
@@ -119,7 +122,8 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag)
     }
     else if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "%s{\n", odr_indent(o));
+	odr_prname(o, name);
+    	fprintf(o->print, "{\n");
 	o->indent++;
     }
     else
@@ -211,7 +215,8 @@ int odr_constructed_end(ODR o)
 	    assert(o->indent > 0);
 	    o->stackp--;
 	    o->indent--;
-	    fprintf(o->print, "%s}\n", odr_indent(o));
+	    odr_prname(o, 0);
+	    fprintf(o->print, "}\n");
 	    return 1;
     	default:
 	    o->error = OOTHER;

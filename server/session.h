@@ -1,10 +1,14 @@
 /*
- * Copyright (C) 1995-1998, Index Data I/S 
+ * Copyright (C) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.18  1998-08-03 10:23:57  adam
+ * Revision 1.19  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.18  1998/08/03 10:23:57  adam
  * Fixed bug regarding Options for Sort.
  *
  * Revision 1.17  1998/07/20 12:38:43  adam

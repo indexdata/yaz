@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bit.c,v $
- * Revision 1.11  1998-02-11 11:53:34  adam
+ * Revision 1.12  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.11  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.10  1995/09/29 17:12:22  quinn
@@ -47,7 +51,7 @@
  * Top level bitstring string en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_bitstring(ODR o, Odr_bitmask **p, int opt)
+int odr_bitstring(ODR o, Odr_bitmask **p, int opt, const char *name)
 {
     int res, cons = 0;
 
@@ -64,8 +68,8 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt)
     	return opt;
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "%sBITSTRING(len=%d)\n", odr_indent(o),
-	    (*p)->top + 1);
+	odr_prname(o, name);
+    	fprintf(o->print, "BITSTRING(len=%d)\n",(*p)->top + 1);
     	return 1;
     }
     if (o->direction == ODR_DECODE)

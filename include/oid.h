@@ -23,108 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: oid.h,v $
- * Revision 1.31  1999-04-15 09:19:43  adam
- * Added COOKIE UserInfo OID.
- *
- * Revision 1.30  1999/04/09 12:16:11  adam
- * Added OtherInfo private OID proxy.
- *
- * Revision 1.29  1998/12/03 11:33:04  adam
- * Added OID's for XML.
- *
- * Revision 1.28  1998/10/13 16:01:52  adam
- * Implemented support for dynamic object identifiers.
- * Function oid_getvalbyname now accepts raw OID's as well as traditional
- * names.
- *
- * Revision 1.27  1998/05/18 13:06:58  adam
- * Changed the way attribute sets are handled by the retriaval module.
- * Extended Explain conversion / schema.
- * Modified server and client to work with ASN.1 compiled protocol handlers.
- *
- * Revision 1.26  1998/03/20 14:46:06  adam
- * Added UNIverse Resource Reports.
- *
- * Revision 1.25  1998/02/10 15:31:52  adam
- * Implemented date and time structure. Changed the Update Extended
- * Service.
- *
- * Revision 1.24  1997/09/29 13:18:59  adam
- * Added function, oid_ent_to_oid, to replace the function
- * oid_getoidbyent, which is not thread safe.
- *
- * Revision 1.23  1997/09/01 08:49:50  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.22  1997/08/19 08:45:13  quinn
- * Added Thesaurus
- *
- * Revision 1.21  1997/08/19 08:43:49  quinn
- * Housekeeping
- *
- * Revision 1.19  1997/07/28 12:34:42  adam
- * Added new OID entries (RVDM).
- *
- * Revision 1.18  1997/05/14 06:53:42  adam
- * C++ support.
- *
- * Revision 1.17  1997/05/02 08:39:27  quinn
- * Support for private OID table added. Thanks to Ronald van der Meer
- *
- * Revision 1.16  1997/04/30 08:52:08  quinn
- * Null
- *
- * Revision 1.15  1996/10/09  15:54:57  quinn
- * Added SearchInfoReport
- *
- * Revision 1.14  1996/10/07  15:29:17  quinn
- * Added SOIF support
- *
- * Revision 1.13  1996/02/20  17:57:53  adam
- * Added const to oid_getvalbyname.
- *
- * Revision 1.12  1996/02/20  12:52:37  quinn
- * Various
- *
- * Revision 1.11  1996/01/02  08:57:30  quinn
- * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
- *
- * Revision 1.10  1995/11/13  09:27:31  quinn
- * Fiddling with the variant stuff.
- *
- * Revision 1.9  1995/10/12  10:34:45  quinn
- * Added Espec-1.
- *
- * Revision 1.8  1995/10/10  16:27:08  quinn
- * *** empty log message ***
- *
- * Revision 1.7  1995/09/29  17:12:05  quinn
- * Smallish
- *
- * Revision 1.6  1995/09/27  15:02:48  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.5  1995/09/12  11:31:46  quinn
- * Added some oids.
- *
- * Revision 1.4  1995/06/27  13:20:32  quinn
- * Added SUTRS support
- *
- * Revision 1.3  1995/05/29  08:11:33  quinn
- * Moved oid from odr/asn to util.
- *
- * Revision 1.2  1995/05/16  08:50:35  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.1  1995/03/30  09:39:41  quinn
- * Moved .h files to include directory
- *
- * Revision 1.1  1995/03/27  08:32:13  quinn
- * Added OID database
- *
- *
+ * $Id: oid.h,v 1.32 1999-04-20 09:56:48 adam Exp $
  */
 
 #ifndef OID_H
@@ -256,7 +155,8 @@ typedef enum oid_value
 /* add new types here... */
 
 /* VAL_DYNAMIC must have highest value */
-    VAL_DYNAMIC
+    VAL_DYNAMIC,
+    VAL_MAX = VAL_DYNAMIC+30
 } oid_value;
 
 typedef struct oident
@@ -277,7 +177,8 @@ YAZ_EXPORT int oid_oidcmp(int *o1, int *o2);
 YAZ_EXPORT int oid_oidlen(int *o);
 YAZ_EXPORT oid_value oid_getvalbyname(const char *name);
 YAZ_EXPORT void oid_setprivateoids(oident *list);
-YAZ_EXPORT struct oident *oid_addent (int *oid, int proto, int oclass,
+YAZ_EXPORT struct oident *oid_addent (int *oid, enum oid_proto proto,
+				      enum oid_class oclass,
 				      const char *desc, int value);
 
 #ifdef __cplusplus

@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.19  1998-03-31 15:13:19  adam
+ * Revision 1.20  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.19  1998/03/31 15:13:19  adam
  * Development towards compiled ASN.1.
  *
  * Revision 1.18  1998/03/31 11:07:44  adam
@@ -108,53 +112,65 @@ Z_ext_typeent *z_ext_getentbyref(oid_value val)
     return 0;
 }
 
-int z_External(ODR o, Z_External **p, int opt)
+int z_External(ODR o, Z_External **p, int opt, const char *name)
 {
     oident *oid;
     Z_ext_typeent *type;
 
     static Odr_arm arm[] =
     {
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_single, (Odr_fun)odr_any},
-	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_External_octet, (Odr_fun)odr_octetstring},
-	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_External_arbitrary, (Odr_fun)odr_bitstring},
-
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_sutrs, (Odr_fun)z_SUTRS},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_single,
+	 (Odr_fun)odr_any, 0},
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_External_octet,
+	 (Odr_fun)odr_octetstring, 0},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_External_arbitrary,
+	 (Odr_fun)odr_bitstring, 0},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_sutrs,
+	 (Odr_fun)z_SUTRS, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_explainRecord,
-	    (Odr_fun)z_ExplainRecord},
+	 (Odr_fun)z_ExplainRecord, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_resourceReport1,
-	    (Odr_fun)z_ResourceReport1},
+	 (Odr_fun)z_ResourceReport1, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_resourceReport2,
-	    (Odr_fun)z_ResourceReport2},
+	 (Odr_fun)z_ResourceReport2, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_promptObject1,
-	    (Odr_fun)z_PromptObject1},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_grs1, (Odr_fun)z_GenericRecord},
+	 (Odr_fun)z_PromptObject1, 0},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_grs1,
+	 (Odr_fun)z_GenericRecord, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_extendedService,
-	    (Odr_fun)z_TaskPackage},
+	 (Odr_fun)z_TaskPackage, 0},
 #ifdef ASN_COMPILED
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, (Odr_fun)z_IOItemOrder},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder,
+	 (Odr_fun)z_IOItemOrder, 0},
 #else
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, (Odr_fun)z_ItemOrder},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder,
+	 (Odr_fun)z_ItemOrder, 0},
 #endif
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1, (Odr_fun)z_DiagnosticFormat},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_espec1, (Odr_fun)z_Espec1},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_summary, (Odr_fun)z_BriefBib},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_OPAC, (Odr_fun)z_OPACRecord},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1,
+	 (Odr_fun)z_DiagnosticFormat, 0},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_espec1,
+	 (Odr_fun)z_Espec1, 0},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_summary,
+	 (Odr_fun)z_BriefBib, 0},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_OPAC,
+	 (Odr_fun)z_OPACRecord, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_searchResult1,
-	    (Odr_fun)z_SearchInfoReport},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update, (Odr_fun)z_IUUpdate},
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_dateTime, (Odr_fun)z_DateTime},
+	 (Odr_fun)z_SearchInfoReport, 0},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update,
+	 (Odr_fun)z_IUUpdate, 0},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_dateTime,
+	 (Odr_fun)z_DateTime, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_universeReport,
-	 (Odr_fun)z_UniverseReport},
-	{-1, -1, -1, -1, 0}
+	 (Odr_fun)z_UniverseReport, 0},
+	{-1, -1, -1, -1, 0, 0}
     };
-
+    
     odr_implicit_settag(o, ODR_UNIVERSAL, ODR_EXTERNAL);
-    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    if (!odr_sequence_begin(o, p, sizeof(**p), name))
 	return opt && odr_ok(o);
-    if (!(odr_oid(o, &(*p)->direct_reference, 1) &&
-	odr_integer(o, &(*p)->indirect_reference, 1) &&
-	odr_graphicstring(o, &(*p)->descriptor, 1)))
+    if (!(odr_oid(o, &(*p)->direct_reference, 1, 0) &&
+	  odr_integer(o, &(*p)->indirect_reference, 1, 0) &&
+	  odr_graphicstring(o, &(*p)->descriptor, 1, 0)))
 	return 0;
     /*
      * Do we know this beast?
@@ -164,7 +180,7 @@ int z_External(ODR o, Z_External **p, int opt)
 	(type = z_ext_getentbyref(oid->value)))
     {
 	int zclass, tag, cons;
-
+	
 	/*
 	 * We know it. If it's represented as an ASN.1 type, bias the CHOICE.
 	 */
@@ -174,6 +190,7 @@ int z_External(ODR o, Z_External **p, int opt)
 	    odr_choice_bias(o, type->what);
     }
     return
-	odr_choice(o, arm, &(*p)->u, &(*p)->which) &&
+	odr_choice(o, arm, &(*p)->u, &(*p)->which, name) &&
 	odr_sequence_end(o);
 }
+

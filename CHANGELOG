@@ -1,5 +1,14 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Added 'name' parameter to ODR encoder/decoder routines to facilitate
+pretty ODR print. Updated whole Z39.50 encoder/decoder to reflect the
+change. The name parameter can be set to 0 in which no name is specified
+for the construction. The macros odr_implicit and odr_explicit sets name
+parameter to zero for the construction involved. New macros
+odr_implicit_tag and odr_explicit_tag are similar to the others,
+except that a name parameter is added. For programmers' that don't use
+ODR they probably only need to change the call to z_APDU and z_External.
+
 Added access control facility by interfacing the TCP wrapper library.
 YAZ automatically attempts to find the TCP wrapper Library (-lwrap) and
 tcpd.h on Unix systems. For the server, option -d<daemon> specifies the

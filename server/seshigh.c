@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.87  1999-03-31 11:18:25  adam
+ * Revision 1.88  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.87  1999/03/31 11:18:25  adam
  * Implemented odr_strdup. Added Reference ID to backend server API.
  *
  * Revision 1.86  1999/02/02 13:57:38  adam
@@ -536,7 +540,7 @@ void ir_session(IOCHAN h, int event)
 	    req = request_get(&assoc->incoming); /* get a new request structure */
 	    odr_reset(assoc->decode);
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
-	    if (!z_APDU(assoc->decode, &req->request, 0))
+	    if (!z_APDU(assoc->decode, &req->request, 0, 0))
 	    {
 		logf(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
 		    odr_errmsg(odr_geterror(assoc->decode)),
@@ -547,7 +551,7 @@ void ir_session(IOCHAN h, int event)
 		return;
 	    }
 	    req->request_mem = odr_extract_mem(assoc->decode);
-	    if (assoc->print && !z_APDU(assoc->print, &req->request, 0))
+	    if (assoc->print && !z_APDU(assoc->print, &req->request, 0, 0))
 	    {
 		logf(LOG_WARN, "ODR print error: %s", 
 		    odr_errmsg(odr_geterror(assoc->print)));
@@ -726,7 +730,7 @@ void backend_response(IOCHAN i, int event)
 static int process_response(association *assoc, request *req, Z_APDU *res)
 {
     odr_setbuf(assoc->encode, req->response, req->size_response, 1);
-    if (!z_APDU(assoc->encode, &res, 0))
+    if (!z_APDU(assoc->encode, &res, 0, 0))
     {
     	logf(LOG_WARN, "ODR error when encoding response: %s",
 	    odr_errmsg(odr_geterror(assoc->decode)));
@@ -736,7 +740,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     req->response = odr_getbuf(assoc->encode, &req->len_response,
 	&req->size_response);
     odr_setbuf(assoc->encode, 0, 0, 0); /* don'txfree if we abort later */
-    if (assoc->print && !z_APDU(assoc->print, &res, 0))
+    if (assoc->print && !z_APDU(assoc->print, &res, 0, 0))
     {
 	logf(LOG_WARN, "ODR print error: %s", 
 	    odr_errmsg(odr_geterror(assoc->print)));
@@ -931,16 +935,12 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 #if ASN_COMPILED
     rec->u.nonSurrogateDiagnostic = dr;
 #else
-#ifdef Z_95
     rec->u.nonSurrogateDiagnostic = drec;
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = dr;
-#else
-    rec->u.nonSurrogateDiagnostic = dr;
 #endif
-#endif
-    dr->diagnosticSetId = odr_oiddup (assoc->encode,
-                                      oid_ent_to_oid(&bib1, oid));
+    dr->diagnosticSetId =
+	odr_oiddup (assoc->encode, oid_ent_to_oid(&bib1, oid));
     dr->condition = err;
     set_addinfo (dr, addinfo);
     return rec;
@@ -953,12 +953,14 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
 					  int error, char *addinfo)
 {
     int oid[OID_SIZE];
-    Z_NamePlusRecord *rec = (Z_NamePlusRecord *)odr_malloc (assoc->encode, sizeof(*rec));
+    Z_NamePlusRecord *rec = (Z_NamePlusRecord *)
+	odr_malloc (assoc->encode, sizeof(*rec));
     int *err = (int *)odr_malloc (assoc->encode, sizeof(*err));
     oident bib1;
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)odr_malloc (assoc->encode, sizeof(*dr));
-
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
+	odr_malloc (assoc->encode, sizeof(*dr));
+    
     bib1.proto = assoc->proto;
     bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;

@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.15  1998-02-11 11:53:34  adam
+ * Revision 1.16  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.15  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.14  1997/05/14 06:53:57  adam
@@ -54,7 +58,8 @@
 
 #include <odr.h>
 
-int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
+int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
+	       const char *name)
 {
     int i, cl = -1, tg, cn, *which = (int *)whichp, bias = o->choice_bias;
 
@@ -63,6 +68,15 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
     if (o->direction != ODR_DECODE && !*(char**)p)
     	return 0;
     o->choice_bias = -1;
+
+    if (o->direction == ODR_PRINT)
+    {
+	if (name)
+	{
+	    odr_prname(o, name);
+	    fprintf (o->print, "choice\n");
+	}
+    }
     for (i = 0; arm[i].fun; i++)
     {
     	if (o->direction == ODR_DECODE)
@@ -93,18 +107,18 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 	    	if (arm[i].tagmode == ODR_IMPLICIT)
 	    	{
 		    odr_implicit_settag(o, cl, tg);
-	    	    return (*arm[i].fun)(o, (char **)p, 0);
+	    	    return (*arm[i].fun)(o, (char **)p, 0, arm[i].name);
 		}
 		/* explicit */
-		if (!odr_constructed_begin(o, p, cl, tg))
+		if (!odr_constructed_begin(o, p, cl, tg, 0))
 		    return 0;
-		return (*arm[i].fun)(o, (char **)p, 0) &&
+		return (*arm[i].fun)(o, (char **)p, 0, arm[i].name) &&
 		    odr_constructed_end(o);
 	    }
 	}
 	else  /* no tagging. Have to poll type */
 	{
-	    if ((*arm[i].fun)(o, (char **)p, 1) && *(char**)p)
+	    if ((*arm[i].fun)(o, (char **)p, 1, arm[i].name) && *(char**)p)
 	    	return 1;
 	}
     }

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.24  1998-10-28 15:10:09  adam
+ * Revision 1.25  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.24  1998/10/28 15:10:09  adam
  * Added --with-yc option to configure. For the data1_node in data1.h:
  * decreased size of localdata and removed member "line" which wasn't useful.
  *
@@ -289,7 +293,7 @@ data1_node *data1_read_node (data1_handle dh, const char **buf,
     {
 	char tag[64];
 	char args[256];
-	int i;
+	size_t i;
 	const char *t = (*buf) + 1;
 	data1_node **pp;
 	data1_element *elem = 0;

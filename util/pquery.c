@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.21  1998-10-13 16:03:37  adam
+ * Revision 1.22  1999-04-20 09:56:49  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.21  1998/10/13 16:03:37  adam
  * Better checking for invalid OID's in p_query_rpn.
  *
  * Revision 1.20  1998/03/31 15:13:20  adam
@@ -213,7 +217,6 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
             elements[i] =
                 (Z_AttributeElement*)odr_malloc (o,sizeof(**elements));
             elements[i]->attributeType = &attr_tmp[2*i];
-#ifdef Z_95
             if (attr_set[i] == VAL_NONE)
                 elements[i]->attributeSet = 0;
             else
@@ -230,9 +233,6 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
             }
 	    elements[i]->which = Z_AttributeValue_numeric;
 	    elements[i]->value.numeric = &attr_tmp[2*i+1];
-#else
-            elements[i]->attributeValue = &attr_tmp[2*i+1];
-#endif
         }
     }
 #ifdef ASN_COMPILED

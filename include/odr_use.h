@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,38 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: odr_use.h,v $
- * Revision 1.8  1997-09-01 08:49:49  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.7  1997/05/14 06:53:42  adam
- * C++ support.
- *
- * Revision 1.6  1995/09/29 17:12:04  quinn
- * Smallish
- *
- * Revision 1.5  1995/09/27  15:02:48  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.4  1995/08/10  08:54:34  quinn
- * Added Explain.
- *
- * Revision 1.3  1995/06/19  12:38:27  quinn
- * Reorganized include-files. Added small features.
- *
- * Revision 1.2  1995/05/16  08:50:34  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.1  1995/03/30  09:39:41  quinn
- * Moved .h files to include directory
- *
- * Revision 1.2  1995/02/09  15:51:50  quinn
- * Works better now.
- *
- * Revision 1.1  1995/02/07  17:53:00  quinn
- * A damn mess, but now things work, I think.
- *
+ * $Id: odr_use.h,v 1.9 1999-04-20 09:56:48 adam Exp $
  */
 
 #ifndef ODR_USE_H
@@ -79,15 +48,18 @@ typedef struct Odr_external
     {
 	Odr_any  *single_ASN1_type;
 	Odr_oct  *octet_aligned; 
-	Odr_bitmask *arbitrary;           /* we aren't really equipped for this*/
+	Odr_bitmask *arbitrary;      /* we aren't really equipped for this*/
     } u;
 } Odr_external;
 
-YAZ_EXPORT int odr_external(ODR o, Odr_external **p, int opt);
-
-YAZ_EXPORT int odr_visiblestring(ODR o, char **p, int opt);
-YAZ_EXPORT int odr_graphicstring(ODR o, char **p, int opt);
-YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt);
+YAZ_EXPORT int odr_external(ODR o, Odr_external **p, int opt,
+			    const char *name);
+YAZ_EXPORT int odr_visiblestring(ODR o, char **p, int opt,
+				 const char *name);
+YAZ_EXPORT int odr_graphicstring(ODR o, char **p, int opt,
+				 const char *name);
+YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt,
+				   const char *name);
 
 #ifdef __cplusplus
 }

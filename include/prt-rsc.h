@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-rsc.h,v $
- * Revision 1.6  1997-05-14 06:53:50  adam
+ * Revision 1.7  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.6  1997/05/14 06:53:50  adam
  * C++ support.
  *
  * Revision 1.5  1995/09/29 17:12:11  quinn
@@ -87,7 +91,7 @@ typedef struct Z_ResourceReport1
     char *message;
 } Z_ResourceReport1;
 
-int z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt);
+int z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt, const char *name);
 
 /* -------------------- Resource-2 -------------------- */
 
@@ -104,7 +108,7 @@ typedef struct Z_ResourceReport2
     char *message;                       /* OPTIONAL */
 } Z_ResourceReport2;
 
-int z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt);
+int z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt, const char *name);
 
 #ifdef __cplusplus
 }

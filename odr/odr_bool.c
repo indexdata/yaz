@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bool.c,v $
- * Revision 1.9  1998-02-11 11:53:34  adam
+ * Revision 1.10  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.9  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.8  1995/09/29 17:12:23  quinn
@@ -40,7 +44,7 @@
  * Top level boolean en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_bool(ODR o, int **p, int opt)
+int odr_bool(ODR o, int **p, int opt, const char *name)
 {
     int res, cons = 0;
 
@@ -57,7 +61,8 @@ int odr_bool(ODR o, int **p, int opt)
     	return opt;
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "%s%s\n", odr_indent(o), (**p ? "TRUE" : "FALSE"));
+	odr_prname(o, name);
+    	fprintf(o->print, "%s\n", (**p ? "TRUE" : "FALSE"));
     	return 1;
     }
     if (cons)

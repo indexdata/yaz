@@ -8,7 +8,11 @@
  *  Databasix Information Systems B.V., Utrecht, The Netherlands.
  *
  * $Log: prt-dat.h,v $
- * Revision 1.1  1998-02-10 15:31:52  adam
+ * Revision 1.2  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.1  1998/02/10 15:31:52  adam
  * Implemented date and time structure. Changed the Update Extended
  * Service.
  *
@@ -135,7 +139,7 @@ typedef struct Z_DateTime
     Z_Time *z3950Time;                      /* OPTIONAL */
 } Z_DateTime;
 
-YAZ_EXPORT int z_DateTime(ODR o, Z_DateTime **p, int opt);
+YAZ_EXPORT int z_DateTime(ODR o, Z_DateTime **p, int opt, const char *name);
 
 #ifdef __cplusplus
 }

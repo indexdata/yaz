@@ -54,7 +54,7 @@ typedef struct Z_TaskPackage
     Z_External *taskSpecificParameters;   
 } Z_TaskPackage;
 
-int z_TaskPackage(ODR o, Z_TaskPackage **p, int opt);
+int z_TaskPackage(ODR o, Z_TaskPackage **p, int opt, const char *name);
 
 /* ----------------------- ITEM ORDER ------------------------- */
 
@@ -147,7 +147,7 @@ typedef struct Z_ItemOrder
     } u;
 } Z_ItemOrder;
 
-int z_ItemOrder(ODR o, Z_ItemOrder **p, int opt);
+int z_ItemOrder(ODR o, Z_ItemOrder **p, int opt, const char *name);
 
 /* ----------------------- ITEM UPDATE ------------------------ */
 
@@ -259,7 +259,7 @@ typedef struct Z_IUUpdate
     } u;
 } Z_IUUpdate;
 
-YAZ_EXPORT int z_IUUpdate(ODR o, Z_IUUpdate **p, int opt);
+YAZ_EXPORT int z_IUUpdate(ODR o, Z_IUUpdate **p, int opt, const char *name);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.46  1998-10-20 13:55:44  quinn
+ * Revision 1.47  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.46  1998/10/20 13:55:44  quinn
  * Fixed Scan bug in asn and client
  *
  * Revision 1.45  1998/08/19 16:10:07  adam
@@ -212,17 +216,6 @@
 extern "C" {
 #endif
 
-/*
- * Because we didn't have time to put all of the extra v3 elements in here
- * before the first applications were written, we have to place them
- * in #ifdefs in places where they would break existing code. If you are
- * developing new stuff, we urge you to leave them in, even if you don't
- * intend to use any v3 features. When we are comfortable that the old
- * apps have been updated, we'll remove the #ifdefs.
- */
-
-#define Z_95
-
 /* ----------------- GLOBAL AUXILIARY DEFS ----------------*/
 
 struct Z_External;
@@ -352,10 +345,8 @@ typedef struct Z_InitRequest
     char *implementationId;                      /* OPTIONAL */
     char *implementationName;                    /* OPTIONAL */
     char *implementationVersion;                 /* OPTIONAL */
-    Z_External *userInformationField;          /* OPTIONAL */
-#ifdef Z_95
+    Z_External *userInformationField;            /* OPTIONAL */
     Z_OtherInformation *otherInfo;               /* OPTIONAL */
-#endif
 } Z_InitRequest;
 
 typedef struct Z_InitResponse
@@ -370,9 +361,7 @@ typedef struct Z_InitResponse
     char *implementationName;    /* OPTIONAL */
     char *implementationVersion; /* OPTIONAL */
     Z_External *userInformationField; /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;    /* OPTIONAL */
-#endif
 } Z_InitResponse;
 
 typedef struct Z_NSRAuthentication
@@ -382,9 +371,10 @@ typedef struct Z_NSRAuthentication
     char *account;
 } Z_NSRAuthentication;
 
-int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt);
+int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt,
+			const char *name);
 
-int z_StrAuthentication(ODR o, char **p, int opt);
+int z_StrAuthentication(ODR o, char **p, int opt, const char *name);
 
 /* ------------------ SEARCH SERVICE ----------------*/
 
@@ -424,11 +414,8 @@ typedef struct Z_ComplexAttribute
 
 typedef struct Z_AttributeElement
 {
-#ifdef Z_95
     Odr_oid *attributeSet;           /* OPTIONAL - v3 only */
-#endif
     int *attributeType;
-#ifdef Z_95
     int which;
 #define Z_AttributeValue_numeric 0
 #define Z_AttributeValue_complex 1
@@ -437,9 +424,6 @@ typedef struct Z_AttributeElement
     	int *numeric;
 	Z_ComplexAttribute *complex;
     } value;
-#else
-    int *attributeValue;
-#endif
 } Z_AttributeElement;
 
 typedef struct Z_Term 
@@ -594,17 +578,13 @@ typedef struct Z_SearchRequest
     Z_ElementSetNames *mediumSetElementSetNames;    /* OPTIONAL */
     Odr_oid *preferredRecordSyntax;  /* OPTIONAL */
     Z_Query *query;
-#ifdef Z_95
     Z_OtherInformation *additionalSearchInfo;       /* OPTIONAL */
     Z_OtherInformation *otherInfo;                  /* OPTIONAL */
-#endif
 } Z_SearchRequest;
 
 /* ------------------------ RECORD -------------------------- */
 
 typedef Z_External Z_DatabaseRecord;
-
-#ifdef Z_95
 
 typedef struct Z_DefaultDiagFormat
 {
@@ -629,17 +609,6 @@ typedef struct Z_DiagRec
 	Z_External *externallyDefined;
     } u;
 } Z_DiagRec;
-
-#else
-
-typedef struct Z_DiagRec
-{
-    Odr_oid *diagnosticSetId; /* This is opt'l to interwork with bad targets */
-    int *condition;
-    char *addinfo;
-} Z_DiagRec;
-
-#endif
 
 typedef struct Z_DiagRecs
 {
@@ -701,10 +670,8 @@ typedef struct Z_SearchResponse
 #define Z_PRES_PARTIAL_4    4
 #define Z_PRES_FAILURE      5
     Z_Records *records;                  /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *additionalSearchInfo;
     Z_OtherInformation *otherInfo;
-#endif
 } Z_SearchResponse;
 
 /* ------------------------- PRESENT SERVICE -----------------*/
@@ -767,20 +734,14 @@ typedef struct Z_PresentRequest
     Z_ResultSetId *resultSetId;
     int *resultSetStartPoint;
     int *numberOfRecordsRequested;
-#ifdef Z_95
     int num_ranges;
     Z_Range **additionalRanges;              /* OPTIONAL */
     Z_RecordComposition *recordComposition;  /* OPTIONAL */
-#else
-    Z_ElementSetNames *elementSetNames;  /* OPTIONAL */
-#endif
     Odr_oid *preferredRecordSyntax;  /* OPTIONAL */
-#ifdef Z_95
     int *maxSegmentCount;                 /* OPTIONAL */
     int *maxRecordSize;                   /* OPTIONAL */
     int *maxSegmentSize;                  /* OPTIONAL */
     Z_OtherInformation *otherInfo;        /* OPTIONAL */
-#endif
 } Z_PresentRequest;
 
 typedef struct Z_PresentResponse
@@ -790,9 +751,7 @@ typedef struct Z_PresentResponse
     int *nextResultSetPosition;
     int *presentStatus;
     Z_Records *records;
-#ifdef Z_95
     Z_OtherInformation *otherInfo;     /* OPTIONAL */
-#endif
 } Z_PresentResponse;
 
 /* ------------------ RESOURCE CONTROL ----------------*/
@@ -806,9 +765,7 @@ typedef struct Z_TriggerResourceControlRequest
 #define Z_TriggerResourceCtrl_cancel          3
     Odr_oid *prefResourceReportFormat;  /* OPTIONAL */
     bool_t *resultSetWanted;            /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;
-#endif
 } Z_TriggerResourceControlRequest;
 
 typedef struct Z_ResourceControlRequest
@@ -822,9 +779,7 @@ typedef struct Z_ResourceControlRequest
 #define Z_ResourceControlRequest_none      3
     bool_t *responseRequired;
     bool_t *triggeredRequestFlag;  /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;
-#endif
 } Z_ResourceControlRequest;
 
 typedef struct Z_ResourceControlResponse
@@ -832,9 +787,7 @@ typedef struct Z_ResourceControlResponse
     Z_ReferenceId *referenceId;    /* OPTIONAL */
     bool_t *continueFlag;
     bool_t *resultSetWanted;       /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;
-#endif
 } Z_ResourceControlResponse;
 
 
@@ -851,9 +804,7 @@ typedef struct Z_AccessControlRequest
     	Odr_oct *simpleForm;
 	Z_External *externallyDefined;
     } u;
-#ifdef Z_95
     Z_OtherInformation *otherInfo;           /* OPTIONAL */
-#endif
 } Z_AccessControlRequest;
 
 typedef struct Z_AccessControlResponse
@@ -868,9 +819,7 @@ typedef struct Z_AccessControlResponse
 	Z_External *externallyDefined;
     } u;
     Z_DiagRec *diagnostic;                   /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;           /* OPTIONAL */
-#endif
 } Z_AccessControlResponse;
 
 /* ------------------------ SCAN SERVICE -------------------- */
@@ -988,9 +937,7 @@ typedef struct Z_ScanRequest
     int *stepSize;                    /* OPTIONAL */
     int *numberOfTermsRequested;
     int *preferredPositionInResponse;   /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;
-#endif
 } Z_ScanRequest;
 
 typedef struct Z_ScanResponse
@@ -1009,9 +956,7 @@ typedef struct Z_ScanResponse
     int *positionOfTerm;              /* OPTIONAL */
     Z_ListEntries *entries;           /* OPTIONAL */
     Odr_oid *attributeSet;            /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;
-#endif
 } Z_ScanResponse; 
 
 
@@ -1043,9 +988,7 @@ typedef struct Z_DeleteResultSetRequest
 #define Z_DeleteRequest_all     1
     int num_resultSetList;
     Z_ResultSetId **resultSetList;      /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;
-#endif
 } Z_DeleteResultSetRequest;
 
 typedef struct Z_ListStatuses {
@@ -1061,9 +1004,7 @@ typedef struct Z_DeleteResultSetResponse
     int *numberNotDeleted;             /* OPTIONAL */
     Z_ListStatuses *bulkStatuses;      /* OPTIONAL */
     char *deleteMessage;               /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;
-#endif
 } Z_DeleteResultSetResponse;
 
 /* ------------------------ CLOSE SERVICE ------------------- */
@@ -1085,9 +1026,7 @@ typedef struct Z_Close
     char *diagnosticInformation;          /* OPTIONAL */
     Odr_oid *resourceReportFormat;        /* OPTIONAL */
     Z_External *resourceReport;         /* OPTIONAL */
-#ifdef Z_95
     Z_OtherInformation *otherInfo;        /* OPTIONAL */
-#endif
 } Z_Close;
 
 /* ------------------------ SEGMENTATION -------------------- */
@@ -1338,8 +1277,8 @@ typedef struct Z_APDU
     } u;
 } Z_APDU;
 
-YAZ_EXPORT int z_APDU(ODR o, Z_APDU **p, int opt);
-YAZ_EXPORT int z_SUTRS(ODR o, Odr_oct **p, int opt);
+YAZ_EXPORT int z_APDU(ODR o, Z_APDU **p, int opt, const char *name);
+YAZ_EXPORT int z_SUTRS(ODR o, Odr_oct **p, int opt, const char *name);
 
 YAZ_EXPORT Z_InitRequest *zget_InitRequest(ODR o);
 YAZ_EXPORT Z_InitResponse *zget_InitResponse(ODR o);
@@ -1355,24 +1294,34 @@ YAZ_EXPORT Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(O
 YAZ_EXPORT Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
 YAZ_EXPORT Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
 YAZ_EXPORT Z_Close *zget_Close(ODR o);
-YAZ_EXPORT int z_StringList(ODR o, Z_StringList **p, int opt);
-YAZ_EXPORT int z_InternationalString(ODR o, char **p, int opt);
-YAZ_EXPORT int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt);
-YAZ_EXPORT int z_ElementSetName(ODR o, char **p, int opt);
-YAZ_EXPORT int z_IntUnit(ODR o, Z_IntUnit **p, int opt);
-YAZ_EXPORT int z_Unit(ODR o, Z_Unit **p, int opt);
-YAZ_EXPORT int z_DatabaseName(ODR o, Z_DatabaseName **p, int opt);
-YAZ_EXPORT int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt);
-YAZ_EXPORT int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt);
-YAZ_EXPORT int z_Term(ODR o, Z_Term **p, int opt);
-YAZ_EXPORT int z_Specification(ODR o, Z_Specification **p, int opt);
-YAZ_EXPORT int z_Permissions(ODR o, Z_Permissions **p, int opt);
-YAZ_EXPORT int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
-YAZ_EXPORT int z_DiagRecs(ODR o, Z_DiagRecs **p, int opt);
-YAZ_EXPORT int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
-YAZ_EXPORT int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
+YAZ_EXPORT int z_StringList(ODR o, Z_StringList **p, int opt,
+			    const char *name);
+YAZ_EXPORT int z_InternationalString(ODR o, char **p, int opt,
+				     const char *name);
+YAZ_EXPORT int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt,
+				  const char *naem);
+YAZ_EXPORT int z_ElementSetName(ODR o, char **p, int opt, const char *name);
+YAZ_EXPORT int z_IntUnit(ODR o, Z_IntUnit **p, int opt, const char *name);
+YAZ_EXPORT int z_Unit(ODR o, Z_Unit **p, int opt, const char *name);
+YAZ_EXPORT int z_DatabaseName(ODR o, Z_DatabaseName **p, int opt,
+			      const char *name);
+YAZ_EXPORT int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt,
+				 const char *name);
+YAZ_EXPORT int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p,
+				      int opt, const char *name);
+YAZ_EXPORT int z_Term(ODR o, Z_Term **p, int opt, const char *name);
+YAZ_EXPORT int z_Specification(ODR o, Z_Specification **p, int opt,
+			       const char *name);
+YAZ_EXPORT int z_Permissions(ODR o, Z_Permissions **p, int opt,
+			     const char *name);
+YAZ_EXPORT int z_DiagRec(ODR o, Z_DiagRec **p, int opt, const char *name);
+YAZ_EXPORT int z_DiagRecs(ODR o, Z_DiagRecs **p, int opt, const char *name);
+YAZ_EXPORT int z_AttributeList(ODR o, Z_AttributeList **p, int opt,
+			       const char *name);
+YAZ_EXPORT int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt,
+				   const char *name);
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
-YAZ_EXPORT int z_Query(ODR o, Z_Query **p, int opt);
+YAZ_EXPORT int z_Query(ODR o, Z_Query **p, int opt, const char *name);
 
 #ifdef __cplusplus
 }

@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.13  1998-02-11 11:53:34  adam
+ * Revision 1.14  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.13  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.12  1995/09/29 17:12:25  quinn
@@ -53,7 +57,7 @@
  * Top level oid en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_oid(ODR o, Odr_oid **p, int opt)
+int odr_oid(ODR o, Odr_oid **p, int opt, const char *name)
 {
     int res, cons = 0;
 
@@ -77,7 +81,8 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
     {
     	int i;
 
-    	fprintf(o->print, "%sOID:", odr_indent(o));
+	odr_prname(o, name);
+    	fprintf(o->print, "OID:");
     	for (i = 0; (*p)[i] > -1; i++)
 	    fprintf(o->print, " %d", (*p)[i]);
 	fprintf(o->print, "\n");

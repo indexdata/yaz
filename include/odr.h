@@ -23,140 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: odr.h,v $
- * Revision 1.28  1999-03-31 11:18:25  adam
- * Implemented odr_strdup. Added Reference ID to backend server API.
- *
- * Revision 1.27  1999/01/08 11:23:17  adam
- * Added const modifier to some of the BER/ODR encoding routines.
- *
- * Revision 1.26  1998/03/20 17:29:20  adam
- * Include of odr_use.h in odr.h. Added prototype for odr_enum.
- *
- * Revision 1.25  1998/02/11 11:53:33  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.24  1997/11/24 11:33:56  adam
- * Using function odr_nullval() instead of global ODR_NULLVAL when
- * appropriate.
- *
- * Revision 1.23  1997/09/01 08:49:49  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.22  1997/07/21 12:44:30  adam
- * Moved definitions of nmem_block and nmem_control.
- *
- * Revision 1.21  1997/05/14 06:53:41  adam
- * C++ support.
- *
- * Revision 1.20  1997/04/30 08:52:08  quinn
- * Null
- *
- * Revision 1.19  1996/10/08  12:58:08  adam
- * New ODR function, odr_choice_enable_bias, to control behaviour of
- * odr_choice_bias.
- *
- * Revision 1.18  1996/07/26  13:38:14  quinn
- * Various smaller things. Gathered header-files.
- *
- * Revision 1.17  1995/11/08  17:41:27  quinn
- * Smallish.
- *
- * Revision 1.16  1995/11/01  13:54:36  quinn
- * Minor adjustments
- *
- * Revision 1.15  1995/10/18  16:12:36  quinn
- * Better diagnostics.
- *
- * Revision 1.14  1995/09/29  17:12:04  quinn
- * Smallish
- *
- * Revision 1.13  1995/09/29  17:01:49  quinn
- * More Windows work
- *
- * Revision 1.12  1995/09/27  15:02:48  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.11  1995/08/15  12:00:09  quinn
- * Updated External
- *
- * Revision 1.10  1995/08/10  08:54:33  quinn
- * Added Explain.
- *
- * Revision 1.9  1995/06/19  12:38:26  quinn
- * Reorganized include-files. Added small features.
- *
- * Revision 1.8  1995/06/16  13:16:04  quinn
- * Fixed Defaultdiagformat.
- *
- * Revision 1.7  1995/05/29  08:11:32  quinn
- * Moved oid from odr/asn to util.
- *
- * Revision 1.6  1995/05/22  14:47:00  quinn
- * ODR_NULLVAL --> void
- *
- * Revision 1.5  1995/05/22  11:31:24  quinn
- * Added PDUs
- *
- * Revision 1.4  1995/05/16  08:50:33  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.3  1995/05/15  11:55:54  quinn
- * Work on asynchronous activity.
- *
- * Revision 1.2  1995/04/18  08:14:37  quinn
- * Added dynamic memory allocation on encoding
- *
- * Revision 1.1  1995/03/30  09:39:41  quinn
- * Moved .h files to include directory
- *
- * Revision 1.15  1995/03/29  15:39:57  quinn
- * Fixed bugs in the bitmask operations
- *
- * Revision 1.14  1995/03/27  08:33:15  quinn
- * Added more OID utilities.
- *
- * Revision 1.13  1995/03/17  10:17:44  quinn
- * Added memory management.
- *
- * Revision 1.12  1995/03/14  10:27:38  quinn
- * Modified makefile to use common lib
- * Beginning to add memory management to odr
- *
- * Revision 1.11  1995/03/10  11:44:41  quinn
- * Fixed serious stack-bug in odr_cons_begin
- *
- * Revision 1.10  1995/03/08  12:12:16  quinn
- * Added better error checking.
- *
- * Revision 1.9  1995/03/07  10:10:00  quinn
- * Added some headers for Adam.
- *
- * Revision 1.8  1995/03/07  09:23:16  quinn
- * Installing top-level API and documentation.
- *
- * Revision 1.7  1995/02/10  15:55:29  quinn
- * Bug fixes, mostly.
- *
- * Revision 1.6  1995/02/09  15:51:47  quinn
- * Works better now.
- *
- * Revision 1.5  1995/02/07  17:52:59  quinn
- * A damn mess, but now things work, I think.
- *
- * Revision 1.4  1995/02/06  16:45:03  quinn
- * Small mods.
- *
- * Revision 1.3  1995/02/03  17:04:36  quinn
- * *** empty log message ***
- *
- * Revision 1.2  1995/02/02  20:38:50  quinn
- * Updates.
- *
- * Revision 1.1  1995/02/02  16:21:53  quinn
- * First kick.
- *
+ * $Id: odr.h,v 1.29 1999-04-20 09:56:48 adam Exp $
  */
 
 #ifndef ODR_H
@@ -304,7 +171,7 @@ typedef struct odr
     Odr_ber_tag odr_ber_tag;
 } *ODR;
 
-typedef int (*Odr_fun)(ODR, char **, int);
+typedef int (*Odr_fun)(ODR, char **, int, const char *);
 
 typedef struct odr_arm
 {
@@ -313,6 +180,7 @@ typedef struct odr_arm
     int tag;
     int which;
     Odr_fun fun;
+    char *name;
 } Odr_arm;
 
 /*
@@ -349,11 +217,19 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 #define ODR_MEM NMEM
 
 #define odr_implicit(o, t, p, cl, tg, opt)\
-        (odr_implicit_settag((o), cl, tg), t ((o), (p), opt) )
+        (odr_implicit_settag((o), cl, tg), t ((o), (p), (opt), 0) )
+
+#define odr_implicit_tag(o, t, p, cl, tg, opt, name)\
+        (odr_implicit_settag((o), cl, tg), t ((o), (p), (opt), name) )
 
 #define odr_explicit(o, t, p, cl, tg, opt)\
-        ((int) (odr_constructed_begin((o), (p), (cl), (tg)) ? \
-        t ((o), (p), (opt)) &&\
+        ((int) (odr_constructed_begin((o), (p), (cl), (tg), 0) ? \
+        t ((o), (p), (opt), 0) &&\
+        odr_constructed_end(o) : opt))
+
+#define odr_explicit_tag(o, t, p, cl, tg, opt, name)\
+        ((int) (odr_constructed_begin((o), (p), (cl), (tg), 0) ? \
+        t ((o), (p), (opt), name) &&\
         odr_constructed_end(o) : opt))
 
 #define ODR_MASK_ZERO(mask)\
@@ -415,12 +291,73 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 
 #define ODR_MAXNAME 256
 
+YAZ_EXPORT int ber_boolean(ODR o, int *val);
+YAZ_EXPORT int ber_tag(ODR o, void *p, int zclass, int tag,
+		       int *constructed, int opt);
+YAZ_EXPORT int ber_enctag(ODR o, int zclass, int tag, int constructed);
+YAZ_EXPORT int ber_dectag(const unsigned char *buf, int *zclass,
+			  int *tag, int *constructed);
+YAZ_EXPORT int odr_bool(ODR o, int **p, int opt, const char *name);
+YAZ_EXPORT int odr_integer(ODR o, int **p, int opt, const char *name);
+YAZ_EXPORT int odr_enum(ODR o, int **p, int opt, const char *name);
+YAZ_EXPORT int odr_implicit_settag(ODR o, int zclass, int tag);
+YAZ_EXPORT int ber_enclen(ODR o, int len, int lenlen, int exact);
+YAZ_EXPORT int ber_declen(const unsigned char *buf, int *len);
+YAZ_EXPORT void odr_prname(ODR o, const char *name);
+YAZ_EXPORT int ber_null(ODR o);
+YAZ_EXPORT int odr_null(ODR o, Odr_null **p, int opt, const char *name);
+YAZ_EXPORT int ber_integer(ODR o, int *val);
+YAZ_EXPORT int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
+				     const char *name);
+YAZ_EXPORT int odr_constructed_end(ODR o);
+YAZ_EXPORT int odr_sequence_begin(ODR o, void *p, int size, const char *name);
+YAZ_EXPORT int odr_set_begin(ODR o, void *p, int size, const char *name);
+YAZ_EXPORT int odr_sequence_end(ODR o);
+YAZ_EXPORT int odr_set_end(ODR o);
+YAZ_EXPORT int ber_octetstring(ODR o, Odr_oct *p, int cons);
+YAZ_EXPORT int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name);
+YAZ_EXPORT int odp_more_chunks(ODR o, const unsigned char *base, int len);
+YAZ_EXPORT int odr_constructed_more(ODR o);
+YAZ_EXPORT int odr_bitstring(ODR o, Odr_bitmask **p, int opt,
+			     const char *name);
+YAZ_EXPORT int ber_bitstring(ODR o, Odr_bitmask *p, int cons);
+YAZ_EXPORT int odr_generalstring(ODR o, char **p, int opt, const char *name);
+YAZ_EXPORT int ber_oidc(ODR o, Odr_oid *p);
+YAZ_EXPORT int odr_oid(ODR o, Odr_oid **p, int opt, const char *name);
+YAZ_EXPORT int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
+			  const char *name);
+YAZ_EXPORT int odr_cstring(ODR o, char **p, int opt, const char *name);
+YAZ_EXPORT int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num,
+			       const char *name);
+YAZ_EXPORT int odr_set_of(ODR o, Odr_fun type, void *p, int *num,
+			  const char *name);
+YAZ_EXPORT int odr_any(ODR o, Odr_any **p, int opt, const char *name);
+YAZ_EXPORT int ber_any(ODR o, Odr_any **p);
+YAZ_EXPORT int completeBER(const unsigned char *buf, int len);
+YAZ_EXPORT void odr_begin(ODR o);
+YAZ_EXPORT void odr_end(ODR o);
+YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
+YAZ_EXPORT Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o);
+YAZ_EXPORT int odr_grow_block(odr_ecblock *b, int min_bytes);
+YAZ_EXPORT int odr_write(ODR o, unsigned char *buf, int bytes);
+YAZ_EXPORT int odr_seek(ODR o, int whence, int offset);
+YAZ_EXPORT int odr_dumpBER(FILE *f, const char *buf, int len);
+YAZ_EXPORT void odr_choice_bias(ODR o, int what);
+YAZ_EXPORT void odr_choice_enable_bias(ODR o, int mode);
+YAZ_EXPORT int odr_total(ODR o);
+YAZ_EXPORT char *odr_errmsg(int n);
+YAZ_EXPORT Odr_oid *odr_getoidbystr(ODR o, char *str);
+YAZ_EXPORT Odr_oid *odr_getoidbystr_nmem(NMEM o, char *str);
+YAZ_EXPORT int odr_initmember(ODR o, void *p, int size);
+YAZ_EXPORT int odr_peektag(ODR o, int *zclass, int *tag, int *cons);
+YAZ_EXPORT void odr_setlenlen(ODR o, int len);
+
 #ifdef __cplusplus
 }
 #endif
 
 #include <odr_use.h>
-#include <prt.h>
+
 #include <xmalloc.h>
 
 #endif

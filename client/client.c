@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.80  1999-03-31 11:18:24  adam
+ * Revision 1.81  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.80  1999/03/31 11:18:24  adam
  * Implemented odr_strdup. Added Reference ID to backend server API.
  *
  * Revision 1.79  1999/03/23 14:14:25  adam
@@ -334,7 +338,7 @@ static void send_apdu(Z_APDU *a)
     char *buf;
     int len;
 
-    if (!z_APDU(out, &a, 0))
+    if (!z_APDU(out, &a, 0, 0))
     {
         odr_perror(out, "Encoding APDU");
         exit(1);
@@ -416,7 +420,7 @@ static int process_initResponse(Z_InitResponse *res)
     {
         printf("UserInformationfield:\n");
         if (!z_External(print, (Z_External**)&res-> userInformationField,
-            0))
+            0, 0))
         {
             odr_perror(print, "Printing userinfo\n");
             odr_reset(print);
@@ -646,7 +650,7 @@ static void display_record(Z_DatabaseRecord *p)
         printf("Record type: ");
         if (ent)
             printf("%s\n", ent->desc);
-        else if (!odr_oid(print, &r->direct_reference, 0))
+        else if (!odr_oid(print, &r->direct_reference, 0, 0))
         {
             odr_perror(print, "print oid");
             odr_reset(print);
@@ -665,7 +669,7 @@ static void display_record(Z_DatabaseRecord *p)
 	     */
 	    odr_setbuf(in, (char*)p->u.octet_aligned->buf,
 		p->u.octet_aligned->len, 0);
-	    if (!(*type->fun)(in, (char **)&rr, 0))
+	    if (!(*type->fun)(in, (char **)&rr, 0, 0))
 	    {
 		odr_perror(in, "Decoding constructed record.");
 		fprintf(stderr, "[Near %d]\n", odr_offset(in));
@@ -725,7 +729,7 @@ static void display_record(Z_DatabaseRecord *p)
     else 
     {
         printf("Unknown record representation.\n");
-        if (!z_External(print, &r, 0))
+        if (!z_External(print, &r, 0, 0))
         {
             odr_perror(print, "Printing external");
             odr_reset(print);
@@ -1974,7 +1978,7 @@ static int client(int wait)
                 }
                 odr_reset(in); /* release APDU from last round */
                 odr_setbuf(in, netbuffer, res, 0);
-                if (!z_APDU(in, &apdu, 0))
+                if (!z_APDU(in, &apdu, 0, 0))
                 {
                     odr_perror(in, "Decoding incoming APDU");
 		    fprintf(stderr, "[Near %d]\n", odr_offset(in));

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.12  1999-01-08 11:23:24  adam
+ * Revision 1.13  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.12  1999/01/08 11:23:24  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.11  1998/02/11 11:53:34  adam
@@ -65,7 +69,7 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    {
 	    	base = o->bp;
 	    	while (odp_more_chunks(o, base, len))
-		    if (!odr_octetstring(o, &p, 0))
+		    if (!odr_octetstring(o, &p, 0, 0))
 		    	return 0;
 		return 1;
 	    }

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_any.c,v $
- * Revision 1.7  1998-02-11 11:53:34  adam
+ * Revision 1.8  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.7  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.6  1995/09/29 17:12:22  quinn
@@ -35,13 +39,14 @@
  * does not work, and neither does the optional flag, unless the element
  * is the last in a sequence.
  */
-int odr_any(ODR o, Odr_any **p, int opt)
+int odr_any(ODR o, Odr_any **p, int opt, const char *name)
 {
     if (o->error)
     	return 0;
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "%sANY (len=%d)\n", odr_indent(o), (*p)->len);
+	odr_prname(o, name);
+    	fprintf(o->print, "ANY (len=%d)\n", (*p)->len);
     	return 1;
     }
     if (o->direction == ODR_DECODE)

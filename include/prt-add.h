@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-add.h,v $
- * Revision 1.3  1997-05-14 06:53:46  adam
+ * Revision 1.4  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.3  1997/05/14 06:53:46  adam
  * C++ support.
  *
  * Revision 1.2  1997/04/30 08:52:09  quinn
@@ -103,7 +107,8 @@ typedef struct Z_SearchInfoReport
     Z_SearchInfoReport_elem **elements;
 } Z_SearchInfoReport;
 
-int z_SearchInfoReport (ODR o, Z_SearchInfoReport **p, int opt);
+int z_SearchInfoReport (ODR o, Z_SearchInfoReport **p, int opt,
+			const char *name);
 
 #ifdef __cplusplus
 }

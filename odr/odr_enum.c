@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_enum.c,v $
- * Revision 1.2  1999-01-08 11:23:27  adam
+ * Revision 1.3  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.2  1999/01/08 11:23:27  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.1  1998/03/20 14:45:01  adam
@@ -18,7 +22,7 @@
  * Top level enum en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_enum(ODR o, int **p, int opt)
+int odr_enum(ODR o, int **p, int opt, const char *name)
 {
     int res, cons = 0;
 
@@ -35,7 +39,8 @@ int odr_enum(ODR o, int **p, int opt)
         return opt;
     if (o->direction == ODR_PRINT)
     {
-        fprintf(o->print, "%s%d\n", odr_indent(o), **p);
+	odr_prname(o, name);
+        fprintf(o->print, "%d\n", **p);
         return 1;
     }
     if (cons)

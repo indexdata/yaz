@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.23  1998-03-20 14:45:01  adam
+ * Revision 1.24  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.23  1998/03/20 14:45:01  adam
  * Implemented odr_enum and odr_set_of.
  *
  * Revision 1.22  1998/02/11 11:53:34  adam
@@ -80,7 +84,7 @@
 #include <odr.h>
 #include <assert.h>
 
-int odr_sequence_begin(ODR o, void *p, int size)
+int odr_sequence_begin(ODR o, void *p, int size, const char *name)
 {
     char **pp = (char**) p;
 
@@ -93,7 +97,7 @@ int odr_sequence_begin(ODR o, void *p, int size)
     }
     if (o->direction == ODR_DECODE)
     	*pp = 0;
-    if (odr_constructed_begin(o, p, o->t_class, o->t_tag))
+    if (odr_constructed_begin(o, p, o->t_class, o->t_tag, name))
     {
     	if (o->direction == ODR_DECODE && size)
 	    *pp = (char *)odr_malloc(o, size);
@@ -103,7 +107,7 @@ int odr_sequence_begin(ODR o, void *p, int size)
     	return 0;
 }
 
-int odr_set_begin(ODR o, void *p, int size)
+int odr_set_begin(ODR o, void *p, int size, const char *name)
 {
     char **pp = (char**) p;
 
@@ -116,7 +120,7 @@ int odr_set_begin(ODR o, void *p, int size)
     }
     if (o->direction == ODR_DECODE)
     	*pp = 0;
-    if (odr_constructed_begin(o, p, o->t_class, o->t_tag))
+    if (odr_constructed_begin(o, p, o->t_class, o->t_tag, name))
     {
     	if (o->direction == ODR_DECODE && size)
 	    *pp = (char *)odr_malloc(o, size);
@@ -170,7 +174,7 @@ static int odr_sequence_x (ODR o, Odr_fun type, void *p, int *num)
 		    }
 		    *pp = tmp;
 		}
-		if (!(*type)(o, (*pp) + *num, 0))
+		if (!(*type)(o, (*pp) + *num, 0, 0))
 		    return 0;
 		(*num)++;
 	    }
@@ -184,7 +188,7 @@ static int odr_sequence_x (ODR o, Odr_fun type, void *p, int *num)
 #ifdef ODR_DEBUG
 		fprintf(stderr, "[seqof: elem #%d]", i);
 #endif
-	    	if (!(*type)(o, *pp + i, 0))
+	    	if (!(*type)(o, *pp + i, 0, 0))
 		    return 0;
 	    }
 	    break;
@@ -195,9 +199,9 @@ static int odr_sequence_x (ODR o, Odr_fun type, void *p, int *num)
     return odr_sequence_end(o);
 }
 
-int odr_set_of(ODR o, Odr_fun type, void *p, int *num)
+int odr_set_of(ODR o, Odr_fun type, void *p, int *num, const char *name)
 {
-    if (!odr_set_begin(o, p, 0)) {
+    if (!odr_set_begin(o, p, 0, name)) {
 	if (o->direction == ODR_DECODE)
 	    *num = 0;
     	return 0;
@@ -205,9 +209,10 @@ int odr_set_of(ODR o, Odr_fun type, void *p, int *num)
     return odr_sequence_x (o, type, p, num);
 }
 
-int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
+int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num,
+		    const char *name)
 {
-    if (!odr_sequence_begin(o, p, 0)) {
+    if (!odr_sequence_begin(o, p, 0, name)) {
 	if (o->direction == ODR_DECODE)
 	    *num = 0;
     	return 0;

@@ -38,13 +38,16 @@ extern "C" {
 /* Module-H ResourceReport-Format-Universe-1 */
 
 typedef struct Z_UniverseReportHits Z_UniverseReportHits;
-int z_UniverseReportHits (ODR o, Z_UniverseReportHits **p, int opt);
+int z_UniverseReportHits (ODR o, Z_UniverseReportHits **p, int opt,
+			  const char *name);
 
 typedef struct Z_UniverseReportDuplicate Z_UniverseReportDuplicate;
-int z_UniverseReportDuplicate (ODR o, Z_UniverseReportDuplicate **p, int opt);
+int z_UniverseReportDuplicate (ODR o, Z_UniverseReportDuplicate **p, int opt,
+			       const char *name);
 
 typedef struct Z_UniverseReport Z_UniverseReport;
-int z_UniverseReport (ODR o, Z_UniverseReport **p, int opt);
+int z_UniverseReport (ODR o, Z_UniverseReport **p, int opt,
+		      const char *name);
 
 struct Z_UniverseReportHits {
 	Z_StringOrNumeric *database;

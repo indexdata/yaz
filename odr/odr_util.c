@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_util.c,v $
- * Revision 1.15  1999-01-08 11:23:29  adam
+ * Revision 1.16  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.15  1999/01/08 11:23:29  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.14  1998/10/13 15:58:36  adam
@@ -26,16 +30,12 @@
 #include <odr.h>
 #include <oid.h>
 
-char *odr_indent(ODR o)
+void odr_prname(ODR o, const char *name)
 {
-    static char buf[512];
-    int i = o->indent;
-
-    memset(buf, ' ', 512);
-    if (i >= 128)
-	i = 127;
-    buf[o->indent * 4] = 0;
-    return buf;
+    if (name)
+	fprintf (o->print, "%*s%s ", o->indent*4, "", name);
+    else
+	fprintf (o->print, "%*s", o->indent*4, "");
 }
 
 int odp_more_chunks(ODR o, const unsigned char *base, int len)

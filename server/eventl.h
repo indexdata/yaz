@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data I/S 
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.h,v $
- * Revision 1.10  1998-01-29 13:30:23  adam
+ * Revision 1.11  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.10  1998/01/29 13:30:23  adam
  * Better event handle system for NT/Unix.
  *
  * Revision 1.9  1997/09/01 09:31:48  adam

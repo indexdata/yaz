@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpdchk.c,v $
- * Revision 1.1  1999-04-16 14:45:55  adam
+ * Revision 1.2  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.1  1999/04/16 14:45:55  adam
  * Added interface for tcpd wrapper for access control.
  *
  */
@@ -40,7 +44,7 @@ int deny_severity = LOG_WARNING;
 
 int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 {
-    const char *daemon_name = cd;
+    const char *daemon_name = (const char *) cd;
 
     if (type == AF_INET)
     {
@@ -48,8 +52,8 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 	{
 #if HAVE_TCPD_H
 	    struct request_info request_info;
-#endif
 	    int i;
+#endif
 	    char *host_name = 0, *host_addr = 0;
 	    struct hostent *host;
 

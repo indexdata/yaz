@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-acc.h,v $
- * Revision 1.8  1997-09-01 08:49:51  adam
+ * Revision 1.9  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.8  1997/09/01 08:49:51  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -164,7 +168,8 @@ typedef struct Z_PromptObject1
     } u;
 } Z_PromptObject1;
 
-YAZ_EXPORT int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);
+YAZ_EXPORT int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt,
+			       const char *name);
 
 #ifdef __cplusplus
 }

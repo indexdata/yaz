@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.29  1999-04-16 14:45:55  adam
+ * Revision 1.30  1999-04-20 09:56:48  adam
+ * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
+ * Modified all encoders/decoders to reflect this change.
+ *
+ * Revision 1.29  1999/04/16 14:45:55  adam
  * Added interface for tcpd wrapper for access control.
  *
  * Revision 1.28  1999/03/31 11:11:14  adam
@@ -416,7 +420,6 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
     unsigned long one = 1;
 #endif
 
-    logf (LOG_LOG, "tcpip_bind");
     TRC(fprintf(stderr, "tcpip_bind\n"));
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*) 
 	&one, sizeof(one)) < 0)
@@ -439,7 +442,7 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
 }
 
 int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
-		 int (*check_ip)(void *cd, const char *a, int len, int type),
+		 int (*check_ip)(void *cd, const char *a, int len, int t),
 		 void *cd)
 {
     struct sockaddr_in addr;
@@ -464,7 +467,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
             h->cerrno = CSYSERR;
         return -1;
     }
-    if (addrlen && *addrlen >= sizeof(struct sockaddr_in))
+    if (addrlen && (size_t) (*addrlen) >= sizeof(struct sockaddr_in))
         memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_in));
     else if (addrlen)
         *addrlen = 0;
@@ -682,7 +685,7 @@ char *tcpip_addrstr(COMSTACK h)
     struct sockaddr_in addr;
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
     char *r, *buf = sp->buf;
-    int len;
+    size_t len;
     struct hostent *host;
     
     len = sizeof(addr);
