@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.9.3 2003/MM/DD
 
+Fixed problem with C compiler include path in wrong order.
+
 Support for SRW 1.0 over HTTP. This is an optional feature and
 requires libxml2 to operate. Enable SOAP by specifying --with-xml2
 for configure. 

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.27 2003-02-18 10:37:08 adam Exp $
+## $Id: Makefile.am,v 1.28 2003-02-20 15:05:40 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -30,9 +30,9 @@ libyazmalloc_la_SOURCES=
 libyazssl_la_LIBADD=tcpip.lo comstack.lo
 libyazssl_la_SOURCES=
 
-THREADED_FLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/server @CFLAGSTHREADS@
-
-XMALLOC_FLAGS = -DTRACE_XMALLOC=2 -I$(top_srcdir)/include
+AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/server
+THREADED_FLAGS = @CFLAGSTHREADS@
+XMALLOC_FLAGS = -DTRACE_XMALLOC=2 
 
 SSL_FLAGS= -I$(top_srcdir)/include $(SSL_DEFS) $(SSL_CFLAGS)
 
