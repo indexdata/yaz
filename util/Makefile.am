@@ -1,12 +1,14 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.24 2003-12-24 16:23:43 mike Exp $
+## $Id: Makefile.am,v 1.25 2004-03-10 17:18:08 adam Exp $
 
 TESTS = $(check_PROGRAMS)
 
 bin_SCRIPTS = yaz-asncomp yaz-config
 
 EXTRA_DIST = yaz-asncomp 
+
+DISTCLEANFILES = yaz-config
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
