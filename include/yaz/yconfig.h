@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: yconfig.h,v 1.5 2000-03-01 09:53:32 adam Exp $
+ * $Id: yconfig.h,v 1.6 2003-02-18 14:28:52 adam Exp $
  */
 
 #ifndef YCONFIG_H

@@ -1,9 +1,16 @@
 /*
- * Current software version.
+ * Copyright (c) 1995-2003, Index Data.
+ * See the file LICENSE for details.
  *
- * $Id: yaz-version.h,v 1.22 2003-02-10 08:58:40 adam Exp $
+ * $Id: yaz-version.h,v 1.23 2003-02-18 14:28:52 adam Exp $
+ */
+
+/*
+ * Current software version.
  */
 #ifndef YAZ_VERSION
+
+#include <yaz/yconfig.h>
 
 #define YAZ_VERSION "1.9.3"
 #define YAZ_VERSIONL 0x010903
@@ -17,6 +24,12 @@
 #define YAZ_OS "WIN32 Debug"
 #endif
 #endif
+
+YAZ_BEGIN_CDECL
+
+YAZ_EXPORT unsigned long yaz_version(char *version_str, char *sys_str);
+
+YAZ_END_CDECL
 
 #endif
 

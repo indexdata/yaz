@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.4 2003-02-17 22:35:48 adam Exp $
+ * $Id: soap.c,v 1.5 2003-02-18 14:28:53 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -165,7 +165,7 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
             else
             {
                 ret = z_soap_error(o, p, "SOAP-ENV:Client", 
-                                   "No handler for NS", 0);
+                                   "No handler for NS", ptr->ns->href);
             }
         }
         xmlFreeDoc(doc);
@@ -216,5 +216,29 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
         return 0;
     }
     return 0;
+}
+#else
+int z_soap_codec(ODR o, Z_SOAP **pp, 
+                 char **content_buf, int *content_len,
+                 Z_SOAP_Handler *handlers)
+{
+    const char *err_xml =
+        "<?xml version=\"1.0\"?>\n"
+        "<SOAP-ENV:Envelope"
+        " xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
+        "\t<SOAP-ENV:Body>\n"
+        "\t\t<SOAP-ENV:Fault>\n"
+        "\t\t\t<faultcode>SOAP-ENV:Server</faultcode>\n"
+        "\t\t\t<faultstring>HTTP error</faultstring>\n"
+        "\t\t\t<detail>SOAP not supported in this YAZ configuration</detail>\n"
+        "\t\t</SOAP-ENV:Fault>\n"
+        "\t</SOAP-ENV:Body>\n"
+        "</SOAP-ENV:Envelope>\n";
+    if (o->direction == ODR_ENCODE)
+    {
+        *content_buf = err_xml;
+        *content_len = strlen(err_xml);
+    }
+    return -1;
 }
 #endif

@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.15 2003-01-06 08:20:28 adam Exp $
+## $Id: Makefile.am,v 1.16 2003-02-18 14:28:52 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 
@@ -23,6 +23,7 @@ yaziconv_SOURCES = siconvtst.c
 marc8.c: charconv.sgm charconv.tcl
 	cd $(srcdir); ./charconv.tcl -p marc8 -s 50 charconv.sgm marc8.c
 
-libutil_la_SOURCES=options.c log.c marcdisp.c oid.c wrbuf.c nmemsdup.c \
-   xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c siconv.c marc8.c
+libutil_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
+   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
+   siconv.c marc8.c
 

@@ -3,13 +3,14 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: yaz-util.h,v 1.8 2003-01-06 08:20:27 adam Exp $
+ * $Id: yaz-util.h,v 1.9 2003-02-18 14:28:52 adam Exp $
  */
 
 #ifndef YAZ_UTIL_H
 #define YAZ_UTIL_H
 
 #include <yaz/yconfig.h>
+#include <yaz/yaz-version.h>
 #include <yaz/xmalloc.h>
 #include <yaz/log.h>
 #include <yaz/tpath.h>

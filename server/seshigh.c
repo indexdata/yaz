@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.140 2003-02-18 11:59:14 adam Exp $
+ * $Id: seshigh.c,v 1.141 2003-02-18 14:28:52 adam Exp $
  */
 
 /*
@@ -287,7 +287,7 @@ void ir_session(IOCHAN h, int event)
 	    /* We aren't speaking to this fellow */
 	    if (assoc->state == ASSOC_DEAD)
 	    {
-		yaz_log(LOG_LOG, "Closed connection after reject");
+		yaz_log(LOG_LOG, "Connection closed - end of session");
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);
@@ -695,7 +695,6 @@ static void process_http_request(association *assoc, request *req)
     }
     else if (!strcmp(hreq->method, "POST"))
     {
-#if HAVE_XML2
         const char *content_type = z_HTTP_header_lookup(hreq->headers,
                                                         "Content-Type");
         const char *soap_action = z_HTTP_header_lookup(hreq->headers,
@@ -763,7 +762,6 @@ static void process_http_request(association *assoc, request *req)
             hres->code = http_code;
             z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
         }
-#endif
         if (!p) /* still no response ? */
             p = z_get_HTTP_Response(o, 500);
     }
