@@ -2,6 +2,11 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX
 
+Added call to ccl_rpn_delete in client program.
+
+Added ODR argument to ccl_rpn_query and ccl_scan_query to provide
+release of RPN structure.
+
 Added support for C++, headers uses extern "C" for public definitions.
 With input from RVDM.
 
