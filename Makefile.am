@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.12 2001-11-20 09:25:45 adam Exp $
+## $Id: Makefile.am,v 1.13 2002-03-23 20:09:52 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -19,7 +19,10 @@ dist-hook:
 	mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
 	mkdir $(distdir)/debian
-	-cp $(srcdir)/debian/* $(distdir)/debian
+	cp $(srcdir)/debian/control $(distdir)/debian
+	cp $(srcdir)/debian/changelog $(distdir)/debian
+	cp $(srcdir)/debian/rules $(distdir)/debian
+	cp $(srcdir)/debian/postinst $(distdir)/debian
 
 rpm: $(PACKAGE)-$(VERSION).tar.gz
 	cp $(PACKAGE)-$(VERSION).tar.gz /usr/src/redhat/SOURCES

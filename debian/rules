@@ -136,15 +136,15 @@ endif
 	# Ugh Ugly hack
 	cat debian/postinst >> debian/yaz-runtime/DEBIAN/postinst
 
-	dh_md5sums -p yaz-runtime
 	dh_gencontrol -p yaz-runtime
+	dh_md5sums -p yaz-runtime
 
-	dh_md5sums -p yaz-devel
 	dh_gencontrol -p yaz-devel
+	dh_md5sums -p yaz-devel
 
 ifeq ($(YAZ_WITH_SSL),1)
-	dh_md5sums -p yaz-ssl
 	dh_gencontrol -p yaz-ssl
+	dh_md5sums -p yaz-ssl
 endif
 	# Go kill those CVS-dirs before build
 	-find debian/tmp -type d -name CVS | xargs rm -rf

@@ -33,7 +33,7 @@ Description: The YAZ Z39.50 toolkit (runtime files)
  and further information is available at http://www.indexdata.dk/
 
 Package: yaz-devel
-Depends: yaz-runtime, ${shlibs:Depends}
+Depends: yaz-runtime
 Section: devel
 Architecture: any
 Recommends: yaz-doc
