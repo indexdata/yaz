@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.51  1997-09-26 09:41:55  adam
+ * Revision 1.52  1997-09-29 07:20:31  adam
+ * Client code uses nmem_init.
+ *
+ * Revision 1.51  1997/09/26 09:41:55  adam
  * Updated client to handle multiple diagnostics.
  *
  * Revision 1.50  1997/09/17 12:10:29  adam
@@ -1166,7 +1169,7 @@ static void initialize(void)
 #if CCL2RPN
     FILE *inf;
 #endif
-
+    nmem_init();
     if (!(out = odr_createmem(ODR_ENCODE)) ||
         !(in = odr_createmem(ODR_DECODE)) ||
         !(print = odr_createmem(ODR_PRINT)))
