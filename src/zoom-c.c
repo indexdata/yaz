@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.7 2003-11-25 23:18:08 adam Exp $
+ * $Id: zoom-c.c,v 1.8 2003-11-26 16:22:35 mike Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -897,7 +897,8 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     const char *auth_groupId = ZOOM_options_get (c->options, "group");
     const char *auth_userId = ZOOM_options_get (c->options, "user");
     const char *auth_password = ZOOM_options_get (c->options, "pass");
-    
+    char *version;
+
     ODR_MASK_SET(ireq->options, Z_Options_search);
     ODR_MASK_SET(ireq->options, Z_Options_present);
     ODR_MASK_SET(ireq->options, Z_Options_scan);
@@ -908,40 +909,22 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_3);
-    
-    impid = ZOOM_options_get (c->options, "implementationId");
-    ireq->implementationId =
-	(char *) odr_malloc (c->odr_out, 15 + (impid ? strlen(impid) : 0));
-    strcpy (ireq->implementationId, "");
-    if (impid)
-    {
-	strcat (ireq->implementationId, impid);
-	strcat (ireq->implementationId, "/");
-    }					       
-    strcat (ireq->implementationId, "81"); /* Index's implementor ID */
-    
-    impname = ZOOM_options_get (c->options, "implementationName");
-    ireq->implementationName =
-	(char *) odr_malloc (c->odr_out, 15 + (impname ? strlen(impname) : 0));
-    strcpy (ireq->implementationName, "");
-    if (impname)
-    {
-	strcat (ireq->implementationName, impname);
-	strcat (ireq->implementationName, "/");
-    }					       
-    strcat (ireq->implementationName, "ZOOM-C/YAZ");
-    
-    impver = ZOOM_options_get (c->options, "implementationVersion");
-    ireq->implementationVersion =
-	(char *) odr_malloc (c->odr_out, strlen(YAZ_VERSION) + 2 +
-			     (impver ? strlen(impver) : 0));
-    strcpy (ireq->implementationVersion, "");
-    if (impver)
-    {
-	strcat (ireq->implementationVersion, impver);
-	strcat (ireq->implementationVersion, "/");
-    }					       
-    strcat (ireq->implementationVersion, YAZ_VERSION);
+
+    /* Index Data's Z39.50 Implementor Id is 81 */
+    ireq->implementationId = odr_prepend(c->odr_out,
+	ZOOM_options_get(c->options, "implementationId"),
+	odr_prepend(c->odr_out, "81", ireq->implementationId));
+
+    ireq->implementationName = odr_prepend(c->odr_out,
+	ZOOM_options_get(c->options, "implementationName"),
+	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
+
+    version = odr_strdup(c->odr_out, "$Revision: 1.8 $");
+    if (strlen(version) > 10)	/* check for unexpanded CVS strings */
+	version[strlen(version)-2] = '\0';
+    ireq->implementationVersion = odr_prepend(c->odr_out,
+	ZOOM_options_get(c->options, "implementationVersion"),
+	odr_prepend(c->odr_out, &version[10], ireq->implementationVersion));
 
     *ireq->maximumRecordSize =
 	ZOOM_options_get_int (c->options, "maximumRecordSize", 1024*1024);
