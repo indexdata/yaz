@@ -1,6 +1,6 @@
 # This is a simple profile based on the Dublin Core of metadata elements.
 #
-# $Id: meta.abs,v 1.5 1998-10-13 20:52:26 adam Exp $
+# $Id: meta.abs,v 1.6 1998-10-14 14:24:08 perhans Exp $
 
 name meta
 attset bib1.att
@@ -16,7 +16,7 @@ elm (2,1)		title			Title:w,Title:p
 elm (2,2)		creator			Author:w,Author:p
 elm (2,21)		subject			Subject-heading
 elm (2,17)		description		-
-elm (2,3)		publisher		Publisher
+elm (2,31)		publisher		Publisher
 elm (2,32)		contributor		-
 elm (2,4)		date			Date
 elm (2,22)		type			Content-type
