@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: proto.h,v 1.18 2005-01-15 19:47:09 adam Exp $
+ * $Id: proto.h,v 1.19 2005-01-27 09:06:51 adam Exp $
  */
 /**
  * \file proto.h
@@ -115,30 +115,44 @@ YAZ_EXPORT const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class);
 
 YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
 
+/** \brief Performs "pretty" display of GRS-1 record to WRBUF */
 YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);
 
+/** \brief Performs "pretty" display of OPAC record to WRBUF */
 YAZ_EXPORT void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags);
 
+/** \brief Encodes Z39.50 Init OPtions based on string mnemonics */
 YAZ_EXPORT int yaz_init_opt_encode(Z_Options *opt, const char *opt_str,
 				   int *error_pos);
+
+/** \brief Decodes Z39.50 Init Options - for printing */
 YAZ_EXPORT void yaz_init_opt_decode(Z_Options *opt,
 				    void (*pr)(const char *name,
 					       void *clientData),
 				    void *clientData);
+/** \brief Creates Default Diag Format Diagnostic */
 YAZ_EXPORT
 Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
 					    const char *addinfo);
 
+/** \brief Creates Surrogate Diagnostic Records */
 YAZ_EXPORT
 Z_NamePlusRecord *zget_surrogateDiagRec(ODR o, const char *dbname,
 					int error, const char *addinfo);
 
+/** \brief Creates Initialize Response diagnostics */
 YAZ_EXPORT
 Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo);
 
+/** \brief Creates Initialize Response diagnostics (Octet-aligned EXTERNAL) */
+YAZ_EXPORT
+Z_External *zget_init_diagnostics_octet(ODR odr, int error, const char *addinfo);
+
+/** \brief Creates Diagnostic record - Z_DiagRecs type */
 YAZ_EXPORT
 Z_DiagRecs *zget_DiagRecs(ODR o, int error, const char *addinfo);
 
+/** \brief Creates Diagnostic record - Z_DiagRecs type */
 YAZ_EXPORT
 Z_DiagRec *zget_DiagRec(ODR o, int error, const char *addinfo);
 
