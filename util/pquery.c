@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.4  1995-06-15 07:45:19  quinn
+ * Revision 1.5  1995-06-15 12:31:02  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.4  1995/06/15  07:45:19  quinn
  * Moving to v3.
  *
  * Revision 1.3  1995/06/14  11:06:35  adam
@@ -119,8 +122,9 @@ static Z_AttributesPlusTerm *rpn_term (ODR o, int num_attr, int *attr_list)
                 odr_malloc (o,sizeof(**zapt->attributeList));
             zapt->attributeList[i]->attributeType = &attr_tmp[2*i];
 #ifdef Z_95
+	    zapt->attributeList[i]->attributeSet = 0;
 	    zapt->attributeList[i]->which = Z_AttributeValue_numeric;
-	    zapt->attributeList[i]->value = &attr_tmp[2*i+1];
+	    zapt->attributeList[i]->value.numeric = &attr_tmp[2*i+1];
 #else
             zapt->attributeList[i]->attributeValue = &attr_tmp[2*i+1];
 #endif
