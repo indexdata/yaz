@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Use default namespace for SRW diagnostic elements.
+Update NS and use default NS for SRW diagnostic elements.
 
 --- 2.0.13 2004/02/23
 
