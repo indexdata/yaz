@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.23  2000-05-09 10:55:05  adam
+ * Revision 1.24  2000-05-11 14:37:55  adam
+ * Minor changes.
+ *
+ * Revision 1.23  2000/05/09 10:55:05  adam
  * Public nmem_print_list (for debugging).
  *
  * Revision 1.22  2000/05/03 22:00:00  adam
@@ -155,7 +158,7 @@ void nmem_print_list (void)
     yaz_log (LOG_DEBUG, "nmem print list");
     NMEM_ENTER;
     for (p = nmem_debug_list; p; p = p->next)
-	yaz_log (LOG_LOG, " %s:%d p=%p size=%d", p->file, p->line, p->p,
+	yaz_log (LOG_DEBUG, " %s:%d p=%p size=%d", p->file, p->line, p->p,
 		 nmem_total(p->p));
     NMEM_LEAVE;
 }
