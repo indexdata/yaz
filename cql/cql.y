@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.4 2003-04-11 15:53:39 adam Exp $
+/* $Id: cql.y,v 1.5 2003-06-04 09:44:05 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -244,6 +244,8 @@ int cql_parser_stream(CQL_parser cp,
     cp->getbyte = getbyte;
     cp->ungetbyte = ungetbyte;
     cp->client_data = client_data;
+    if (cp->top)
+        cql_node_destroy(cp->top);
     cql_parse(cp);
     if (cp->top)
         return 0;
