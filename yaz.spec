@@ -1,6 +1,6 @@
 Name: yaz
-Version: 1.7
-Release: 3
+Version: 1.8
+Release: 1
 Copyright: YAZ License
 Group: Development/Libraries
 Vendor: Index Data ApS <info@indexdata.dk>
