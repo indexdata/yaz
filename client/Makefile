@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.3 1995-05-22 15:30:13 adam Exp $
+# $Id: Makefile,v 1.4 1995-05-30 10:16:03 quinn Exp $
 
 LIBDIR=../lib
 
@@ -12,10 +12,8 @@ INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBINCLUDE=-L$(LIBDIR)
 #CFLAGS=-Wall -pedantic -g
 DEFS=$(INCLUDE) -DRPN_QUERY -DPREFIX_QUERY
-#LIB=$(LIBDIR)/libserver.a 
 LIBS=$(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
   $(LIBDIR)/libcomstack.a ../lib/ccl.a $(LIBMOSI) $(LIBDIR)/libutil.a
-#PO = 
 CPP=$(CC) -E
 PROG=client
 PROGO=client.o
@@ -27,11 +25,6 @@ $(PROG): $(LIB) $(PROGO)
 
 alll:
 
-$(LIB): $(PO)
-	rm -f $(LIB)
-	ar qc $(LIB) $(PO)
-	ranlib $(LIB)
-
 $(LIBDIR):
 	mkdir $(LIBDIR)
 
@@ -42,7 +35,7 @@ clean:
 	rm -f *.[oa] test core mon.out gmon.out errlist tst cli $(PROG)
 
 depend: depend2
-:
+
 depend1:
 	mv Makefile Makefile.tmp
 	sed '/^#Depend/q' <Makefile.tmp >Makefile

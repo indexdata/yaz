@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.23 1995-05-22 15:31:26 adam Exp $
+# $Id: Makefile,v 1.24 1995-05-30 10:16:09 quinn Exp $
 
 LIBDIR=../lib
 
@@ -42,7 +42,7 @@ clean:
 	rm -f *.[oa] test core mon.out gmon.out errlist tst cli $(PROG)
 
 depend: depend2
-:
+
 depend1:
 	mv Makefile Makefile.tmp
 	sed '/^#Depend/q' <Makefile.tmp >Makefile
