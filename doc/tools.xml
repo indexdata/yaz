@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.40 2004-11-17 13:03:07 heikki Exp $ -->
+<!-- $Id: tools.xml,v 1.41 2004-11-21 21:55:15 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1798,14 +1798,17 @@ typedef struct oident
 
   <sect1 id="tools.log"><title>Log</title>
   <para>
-   Yaz has evolved a fairly complex log system which should be useful both 
-   for debugging &yaz; itself, debugging applications that use yaz, and for
+   &yaz; has evolved a fairly complex log system which should be useful both 
+   for debugging &yaz; itself, debugging applications that use &yaz;, and for
    production use of those applications.  
   </para>
   <para>
-   The log functions are declared in <filename>log.h</filename> and 
-   implemented in <filename>log.c</filename>.  The key points of the interface
-   are:
+   The log functions are declared in header <filename>yaz/ylog.h</filename>
+    and implemented in <filename>src/log.c</filename>.
+    Due to name clash with syslog and some math utilities the logging
+    interface has been modified as of YAZ 2.0.29. The obsolete interface
+    is still available if the application includes
+    <filename>yaz/log.h</filename>. The key points of the interface are:
   </para>
   <screen>
    void yaz_log(int level, const char *fmt, ...)
@@ -1831,15 +1834,15 @@ typedef struct oident
   <para>
    The <literal>log level</literal> is a bit mask, that says on which level(s)
    the log entry should be made, and optionally set some behaviour of the
-   logging. In the most simple cases, it can be one of <literal>LOG_FATAL,
-   LOG_DEBUG, LOG_WARN, LOG_LOG</literal>. Those can be combined with bits
-   that modify the way the log entry is written:<literal>LOG_ERRNO, LOG_NOTIME,
-   LOG_FLUSH</literal>. Most of the rest of the bits are deprecated, and
-   should not be used.
+   logging. In the most simple cases, it can be one of <literal>YLOG_FATAL,
+     YLOG_DEBUG, YLOG_WARN, YLOG_LOG</literal>. Those can be combined with bits
+    that modify the way the log entry is written:<literal>YLOG_ERRNO,
+     YLOG_NOTIME, YLOG_FLUSH</literal>.
+    Most of the rest of the bits are deprecated, and should not be used.
   </para>
 
   <para>
-   Applications that use yaz, should not use the LOG_LOG for ordinary
+   Applications that use &yaz;, should not use the LOG_LOG for ordinary
    messages, but should make use of the dynamic loglevel system. This consists
    of two parts, defining the loglevel and checking it.
   </para>
@@ -1849,7 +1852,7 @@ typedef struct oident
    <function>yaz_log_mask_str</function> to define which log levels are to be
    logged. This string should be a comma-separated list of log level names,
    and can contain both hard-coded names and dynamic ones. The log level
-   calculation starts with <literal>LOG_DEFAULT_LEVEL</literal> and adds a bit
+   calculation starts with <literal>YLOG_DEFAULT_LEVEL</literal> and adds a bit
    for each word it meets, unless the word starts with a '-', in which case it 
    clears the bit. If the string <literal>'none'</literal> is found,
    all bits are cleared. Typically this string comes from the command-line,
@@ -1883,7 +1886,7 @@ typedef struct oident
 
   <para>
    The log entries start with a time stamp. This can be omitted by setting the
-   <literal>LOG_NOTIME</literal> bit in the loglevel. This way automatic tests
+   <literal>YLOG_NOTIME</literal> bit in the loglevel. This way automatic tests
    can be hoped to produce identical log files, that are easy to diff. The
    format of the time stamp can be set with
    <function>yaz_log_time_format</function>, which takes a format string just
@@ -1899,7 +1902,7 @@ typedef struct oident
   </para>
 
   <para>
-   The log level <literal>LOG_LOGLVL</literal>, enabled by the string
+   The log level <literal>YLOG_LOGLVL</literal>, enabled by the string
    <literal>loglevel</literal>, will log all the log-level affecting
    operations. This can come in handy if you need to know what other log
    levels would be useful. Grep the logfile for <literal>[loglevel]</literal>.
