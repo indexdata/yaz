@@ -1,3 +1,9 @@
+yaz (2.0.3-2) unstable; urgency=low
+
+  * String attributes for CCL parser.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 23 Jun 2003 12:23:12 +0200
+
 yaz (2.0.3-1) unstable; urgency=low
 
   * Upstream.
