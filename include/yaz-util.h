@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-util.h,v $
- * Revision 1.4  1997-09-01 08:49:54  adam
+ * Revision 1.5  1997-09-04 07:58:36  adam
+ * Added prototype for atoi_n.
+ *
+ * Revision 1.4  1997/09/01 08:49:54  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -30,6 +33,7 @@ extern "C" {
 #endif
 
 YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
+YAZ_EXPORT int atoi_n (const char *buf, int len);
 
 #ifdef __cplusplus
 }
