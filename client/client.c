@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.137 2002-01-28 09:25:38 adam Exp $
+ * $Id: client.c,v 1.138 2002-01-29 20:17:41 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -39,7 +39,11 @@
 #include <readline/history.h>
 #endif
 
+#include <sys/stat.h>
+
+
 #include "admin.h"
+#include "tabcomplete.h"
 
 #define C_PROMPT "Z> "
 
@@ -89,7 +93,17 @@ static CCL_bibset bibset;               /* CCL bibset handle */
 /* set this one to 1, to avoid decode of unknown MARCs  */
 #define AVOID_MARC_DECODE 1
 
+/* nice helper macro as extensive tabbing gives spaces at the en of the args lines */
+#define REMOVE_TAILING_BLANKS(a) {\
+  char* args_end=(a)+strlen(a)-1; \
+  while(isspace(*args_end)) {*args_end=0;--args_end;}; \
+  }
+
+
 void process_cmd_line(char* line);
+char ** readline_completer(char *text, int start, int end);
+char *command_generator(char *text, int state);
+
 
 ODR getODROutputStream()
 {
@@ -1983,12 +1997,22 @@ int cmd_proxy(char* arg) {
 
 int cmd_source(char* arg) 
 {
+
     /* first should open the file and read one line at a time.. */
     FILE* includeFile;
     char line[1024], *cp;
+
+    {
+      char* args_end=(arg)+strlen(arg)-1; 
+      while(isspace(*args_end)) 
+	{*args_end=0;
+	--args_end;}; 
+    }
+
+    REMOVE_TAILING_BLANKS(arg);
     
     if(strlen(arg)<1) {
-        fprintf(stderr,"Error in source command use a filename");
+        fprintf(stderr,"Error in source command use a filename\n");
         return -1;
     };
     
@@ -2022,9 +2046,202 @@ int cmd_source(char* arg)
 }
 
 int cmd_subshell(char* args) {
-    system(args);
+	if(strlen(args)) 
+		system(args);
+	else 
+		system(getenv("SHELL"));
+	
+    printf("\n");
     return 1;
 }
+
+
+
+int cmd_set_apdufile(char* arg) {
+	REMOVE_TAILING_BLANKS(arg);
+  
+	if(apdu_file && apdu_file != stderr) { /* don't close stdout*/
+		perror("unable to close apdu log file");      
+	};
+	apdu_file=NULL;
+  
+	if(strlen(arg)<1) {
+		return 1;
+	}
+  
+	if(!strcmp(arg,"-")) 
+		apdu_file=stderr;      
+	else 
+		apdu_file=fopen(arg, "a");
+  
+	if(!apdu_file) {
+		perror("unable to open apdu log file no apdu log loaded");
+	} else {
+		odr_setprint(print, apdu_file);	
+	};
+  
+	return 1;
+};
+
+
+int cmd_set_cclfields(char* arg) {  
+#if YAZ_MODULE_ccl
+	FILE *inf;
+
+	REMOVE_TAILING_BLANKS(arg);
+
+	bibset = ccl_qual_mk (); 
+	inf = fopen (arg, "r");
+	if (inf)
+		{
+			ccl_qual_file (bibset, inf);
+			fclose (inf);
+		}
+#else 
+	fprintf(stderr,"Not compiled with the yaz ccl module\n");
+#endif
+	
+	return 1;
+};
+
+int cmd_set_marcdump(char* arg) {
+	if(marcdump && marcdump != stderr) { /* don't close stdout*/
+		perror("unable to close apdu log file");      
+	};
+	marcdump=NULL;
+  
+	if(strlen(arg)<1) {
+		return 1;
+	}
+  
+	if(!strcmp(arg,"-")) 
+		marcdump=stderr;      
+	else 
+		marcdump=fopen(arg, "a");
+  
+	if(!marcdump) {
+		perror("unable to open apdu marcdump file no marcdump done\n");
+	};
+  
+	return 1;
+};
+
+int cmd_set_proxy(char* arg) {
+	if(yazProxy) free(yazProxy);
+	yazProxy=NULL;
+
+	if(strlen(arg) > 1) {
+		yazProxy=strdup(arg);
+	};  
+	return 1;
+};
+
+/* 
+   this command takes 3 arge {name class oid} 
+ */
+int cmd_register_oid(char* args) {
+  static struct {
+    char* className;
+    oid_class oclass;
+  } oid_classes[] = {
+    {"appctx",CLASS_APPCTX},
+    {"absyn",CLASS_ABSYN},
+    {"attset",CLASS_ATTSET},
+    {"transyn",CLASS_TRANSYN},
+    {"diagset",CLASS_DIAGSET},
+    {"recsyn",CLASS_RECSYN},
+    {"resform",CLASS_RESFORM},
+    {"accform",CLASS_ACCFORM},
+    {"extserv",CLASS_EXTSERV},
+    {"userinfo",CLASS_USERINFO},
+    {"elemspec",CLASS_ELEMSPEC},
+    {"varset",CLASS_VARSET},
+    {"schema",CLASS_SCHEMA},
+    {"tagset",CLASS_TAGSET},
+    {"general",CLASS_GENERAL},
+    {0,0}
+  };
+  char oname_str[101], oclass_str[101], oid_str[101];  
+  char* name;
+  int i;
+  oid_class oidclass = CLASS_GENERAL;
+  int val = 0, oid[OID_SIZE];
+  struct oident * new_oident=NULL;
+
+  if (sscanf (args, "%100[^ ] %100[^ ] %100s", oname_str,oclass_str, oid_str) < 1) {
+    printf("Error in regristrate command \n");
+    return 0;
+  };
+  
+  for (i = 0; oid_classes[i].className; i++) {
+    if (!strcmp(oid_classes[i].className, oclass_str))
+      {
+	oidclass=oid_classes[i].oclass;
+	break;
+      }
+  }
+  
+  if(!(oid_classes[i].className)) {
+    printf("Unknonwn oid class %s\n",oclass_str);
+    return 0;
+  };
+
+ 
+
+  i = 0;
+  name = oid_str;
+  val = 0;
+  
+  while (isdigit (*name))
+    {
+      val = val*10 + (*name - '0');
+      name++;
+      if (*name == '.')
+	{
+	  if (i < OID_SIZE-1)
+	    oid[i++] = val;
+	  val = 0;
+	  name++;
+	}
+    }
+  oid[i] = val;
+  oid[i+1] = -1;
+
+  new_oident=oid_addent (oid,PROTO_GENERAL,oidclass,oname_str,VAL_DYNAMIC);  
+  if(strcmp(new_oident->desc,oname_str)) {
+    fprintf(stderr,"oid is already named as %s, regristration faild\n",new_oident->desc);
+  };
+  return 1;  
+};
+
+int cmd_push_command(char* arg) {
+#if HAVE_READLINE_HISTORY_H
+  if(strlen(arg)>1) 
+    add_history(arg);
+#else 
+  fprintf(stderr,"Not compiled with the readline/history module\n");
+#endif
+  return 1;
+};
+
+void source_rcfile() {
+  /*  Look for a $HOME/.yazclientrc and source it if it exists */
+  struct stat statbuf;
+  char buffer[1000];
+  char* homedir=getenv("HOME");
+  if(!homedir) return;
+  
+  sprintf(buffer,"%s/.yazclientrc",homedir);
+  
+  if(stat(buffer,&statbuf)==0) {
+    cmd_source(buffer);
+  };
+  
+  if(stat(".yazclientrc",&statbuf)==0) {
+    cmd_source(".yazclientrc");
+  };
+};
+
 
 static void initialize(void)
 {
@@ -2038,6 +2255,8 @@ static void initialize(void)
         fprintf(stderr, "failed to allocate ODR streams\n");
         exit(1);
     }
+    oid_init();
+
     setvbuf(stdout, 0, _IONBF, 0);
     if (apdu_file)
         odr_setprint(print, apdu_file);
@@ -2052,6 +2271,12 @@ static void initialize(void)
     }
 #endif
     cmd_base("Default");
+
+#if HAVE_READLINE_READLINE_H
+    rl_attempted_completion_function = (CPPFunction*)readline_completer;
+#endif
+
+    source_rcfile();
 }
 
 
@@ -2170,57 +2395,65 @@ void  wait_and_handle_responce()
     }
 }
 
+
+static struct {
+  char *cmd;
+  int (*fun)(char *arg);
+  char *ad;
+  char *(*rl_completerfunction)(char *text, int state);
+  int complete_filenames;
+} cmd[] = {
+  {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]",NULL,0},
+  {"quit", cmd_quit, "",NULL,0},
+  {"find", cmd_find, "<query>",NULL,0},
+  {"delete", cmd_delete, "<setname>",NULL,0},
+  {"base", cmd_base, "<base-name>",NULL,0},
+  {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]",NULL,0},
+  {"scan", cmd_scan, "<term>",NULL,0},
+  {"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0},
+  {"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0},
+  {"authentication", cmd_authentication, "<acctstring>",NULL,0},
+  {"lslb", cmd_lslb, "<largeSetLowerBound>",NULL,0},
+  {"ssub", cmd_ssub, "<smallSetUpperBound>",NULL,0},
+  {"mspn", cmd_mspn, "<mediumSetPresentNumber>",NULL,0},
+  {"status", cmd_status, "",NULL,0},
+  {"setnames", cmd_setnames, "",NULL,0},
+  {"cancel", cmd_cancel, "",NULL,0},
+  {"format", cmd_format, "<recordsyntax>",complete_format,0},
+  {"schema", cmd_schema, "<schema>",complete_schema,0},
+  {"elements", cmd_elements, "<elementSetName>",NULL,0},
+  {"close", cmd_close, "",NULL,0},
+  {"attributeset", cmd_attributeset, "<attrset>",complete_attributeset,0},
+  {"querytype", cmd_querytype, "<type>",complete_querytype,0},
+  {"refid", cmd_refid, "<id>",NULL,0},
+  {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0},
+  {"update", cmd_update, "<item>",NULL,0},
+  {"packagename", cmd_packagename, "<packagename>",NULL,0},
+  {"proxy", cmd_proxy, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]",NULL,0},
+  {".", cmd_source, "<filename>",NULL,1},
+  {"!", cmd_subshell, "Subshell command",NULL,0},
+  {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,0},
+  {"set_marcdump", cmd_set_marcdump," <filename>",NULL,0},
+  {"set_cclfields", cmd_set_cclfields,"<filename>",NULL,1}, 
+  {"register_oid",cmd_register_oid,"<name> <class> <oid>",NULL,0},
+  {"push_command",cmd_push_command,"<command>",command_generator,0},
+  /* Server Admin Functions */
+  {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0},
+  {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0},
+  {"adm-create", cmd_adm_create, "",NULL,0},
+  {"adm-drop", cmd_adm_drop, "('database'|'index')<object-name>",NULL,0},
+  {"adm-import", cmd_adm_import, "<record-type> <dir> <pattern>",NULL,0},
+  {"adm-refresh", cmd_adm_refresh, "",NULL,0},
+  {"adm-commit", cmd_adm_commit, "",NULL,0},
+  {"adm-shutdown", cmd_adm_shutdown, "",NULL,0},
+  {"adm-startup", cmd_adm_startup, "",NULL,0},
+  {0,0,0,0,0}
+};
+
 void process_cmd_line(char* line)
-{
-    static struct {
-        char *cmd;
-        int (*fun)(char *arg);
-        char *ad;
-    } cmd[] = {
-        {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]"},
-        {"quit", cmd_quit, ""},
-        {"find", cmd_find, "<query>"},
-        {"delete", cmd_delete, "<setname>"},
-        {"base", cmd_base, "<base-name>"},
-        {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]"},
-        {"scan", cmd_scan, "<term>"},
-        {"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ..."},
-        {"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ..."},
-        {"authentication", cmd_authentication, "<acctstring>"},
-        {"lslb", cmd_lslb, "<largeSetLowerBound>"},
-        {"ssub", cmd_ssub, "<smallSetUpperBound>"},
-        {"mspn", cmd_mspn, "<mediumSetPresentNumber>"},
-        {"status", cmd_status, ""},
-        {"setnames", cmd_setnames, ""},
-        {"cancel", cmd_cancel, ""},
-        {"format", cmd_format, "<recordsyntax>"},
-        {"schema", cmd_schema, "<schema>"},
-        {"elements", cmd_elements, "<elementSetName>"},
-        {"close", cmd_close, ""},
-        {"attributeset", cmd_attributeset, "<attrset>"},
-        {"querytype", cmd_querytype, "<type>"},
-        {"refid", cmd_refid, "<id>"},
-        {"itemorder", cmd_itemorder, "ill|item <itemno>"},
-        {"update", cmd_update, "<item>"},
-	{"packagename", cmd_packagename, "<packagename>"},
-	{"proxy", cmd_proxy, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]"},
-	{".", cmd_source, "<filename>"},
-	{"!", cmd_subshell, "Subshell command"},
-        /* Server Admin Functions */
-        {"adm-reindex", cmd_adm_reindex, "<database-name>"},
-        {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>"},
-        {"adm-create", cmd_adm_create, ""},
-        {"adm-drop", cmd_adm_drop, "('database'|'index')<object-name>"},
-        {"adm-import", cmd_adm_import, "<record-type> <dir> <pattern>"},
-        {"adm-refresh", cmd_adm_refresh, ""},
-        {"adm-commit", cmd_adm_commit, ""},
-        {"adm-shutdown", cmd_adm_shutdown, ""},
-        {"adm-startup", cmd_adm_startup, ""},
-        {0,0}
-    };
+{  
     int i,res;
     char word[32], arg[1024];
-    
     
 #if HAVE_GETTIMEOFDAY
     gettimeofday (&tv_start, 0);
@@ -2234,6 +2467,23 @@ void process_cmd_line(char* line)
     else if (res == 1)
         *arg = 0;
     strcpy(last_cmd, word);
+    
+    /* removed tailing spaces from the arg command */
+    { 
+      char* p;
+      char* lastnonspace=NULL;
+      p = arg;
+      
+      for(;*p; ++p) {
+	if(!isspace(*p)) {
+	  lastnonspace = p;
+	};
+      };
+      if(lastnonspace) 
+	*(++lastnonspace) = 0;
+    };
+
+
     for (i = 0; cmd[i].cmd; i++)
         if (!strncmp(cmd[i].cmd, word, strlen(word)))
         {
@@ -2248,10 +2498,78 @@ void process_cmd_line(char* line)
             printf("   %s %s\n", cmd[i].cmd, cmd[i].ad);
         return;
     }
+
+    if(apdu_file) fflush(apdu_file);
+    
     if (res >= 2)
         wait_and_handle_responce();
+
+    if(apdu_file) fflush(apdu_file);
+    if(marcdump) fflush(marcdump);
 }
 
+
+char *command_generator(char *text, int state) 
+{
+	static idx; // index is the last used the last time command_generator was called
+	char *command;
+	if (state==0) {
+		idx = 0;
+	}
+	for( ; cmd[idx].cmd; ++idx) {
+		if (!strncmp(cmd[idx].cmd,text,strlen(text))) {
+			++idx;  /* skip this entry on the next run */
+			return strdup(cmd[idx-1].cmd);
+		};
+	}
+	return NULL;
+}
+
+
+/* 
+   This function only known how to complete on the first word
+*/
+char ** readline_completer(char *text, int start, int end) {
+#if HAVE_READLINE_READLINE_H
+
+	if(start == 0) {
+		char** res=completion_matches(text, (CPFunction*)command_generator); 
+		rl_attempted_completion_over = 1;
+		return res;
+	} else {
+		char arg[1024],word[32];
+		int i=0 ,res;
+		if ((res = sscanf(rl_line_buffer, "%31s %1023[^;]", word, arg)) <= 0) {     
+			rl_attempted_completion_over = 1;
+			return NULL;
+		};
+    
+		if(start != strlen(word) +1 ) {
+			rl_attempted_completion_over = 1;
+			return 0;
+		}
+		for (i = 0; cmd[i].cmd; i++) {
+			if (!strncmp(cmd[i].cmd, word, strlen(word))) {
+				break;
+			}
+		}
+    
+
+		if(!cmd[i].complete_filenames) 
+			rl_attempted_completion_over = 1;    
+		if(cmd[i].rl_completerfunction) {
+			char** res=completion_matches(text, (CPFunction*)cmd[i].rl_completerfunction);
+			rl_attempted_completion_over = 1;    
+			return res;
+		} else {
+			rl_attempted_completion_over = 1;
+			return 0;
+		};
+	};
+#else 
+	return 0;
+#endif 
+};
 
 
 static void client(void)
@@ -2270,7 +2588,7 @@ static void client(void)
         
         {
 #if HAVE_READLINE_READLINE_H
-            char* line_in;
+            char* line_in=NULL;
             line_in=readline(C_PROMPT);
             if (!line_in)
                 break;
@@ -2301,7 +2619,7 @@ int main(int argc, char **argv)
     char *auth_command = 0;
     char *arg;
     int ret;
-
+	
     while ((ret = options("k:c:a:m:v:p:u:", argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -2354,7 +2672,7 @@ int main(int argc, char **argv)
                      "[-k size] [<server-addr>]\n",
                      prog);
             exit (1);
-        }
+        }	   
     }
     initialize();
     if (auth_command)
@@ -2382,3 +2700,13 @@ int main(int argc, char **argv)
     client ();
     exit (0);
 }
+
+
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
