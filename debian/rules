@@ -119,6 +119,7 @@ binary-arch: build install
 	chmod 644 debian/libyaz/DEBIAN/shlibs
 	dh_shlibdeps -p libyaz $(LOCAL_LINK) 
 	cat debian/postinst >> debian/libyaz/DEBIAN/postinst
+	chmod +x debian/libyaz/DEBIAN/postinst
 
 	dh_gencontrol -p libyaz
 	dh_md5sums -p libyaz
