@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.15 2003-10-16 10:18:56 adam Exp $
+ * $Id: comstack.c,v 1.16 2003-10-20 18:21:45 adam Exp $
  */
 
 #include <string.h>
@@ -129,10 +129,6 @@ int cs_look (COMSTACK cs)
 
 int cs_complete_auto(const unsigned char *buf, int len)
 {
-    if (!len)
-    	return 0;
-    if (!buf[0] && !buf[1])
-    	return 0;
     if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
 		&& buf[1] >= 0x20 && buf[1] < 0x7f
 		&& buf[2] >= 0x20 && buf[2] < 0x7f)
@@ -142,6 +138,8 @@ int cs_complete_auto(const unsigned char *buf, int len)
 
         while (i <= len-4)
         {
+	    if (i > 8192)
+		return i;  /* do not allow more than 8K HTTP header */
             if (buf[i] == '\r' && buf[i+1] == '\n')
             {
                 i += 2;
@@ -153,7 +151,6 @@ int cs_complete_auto(const unsigned char *buf, int len)
                         {
                             int chunk_len = 0;
                             i += 2;
-
 #if 0
 /* debugging */
                             if (i <len-2)
@@ -208,7 +205,7 @@ int cs_complete_auto(const unsigned char *buf, int len)
                         }
                     }
                     else
-                    {
+                    {   /* not chunked ; inside body */
                         /* i += 2 seems not to work with GCC -O2 .. 
                            so i+2 is used instead .. */
                         if (len >= (i+2)+ content_len)
