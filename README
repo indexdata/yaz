@@ -4,7 +4,7 @@
  * Sebastian Hammer, Adam Dickmeiss
 
 Compilation and installation for YAZ 
-  $Id: README,v 1.20 1998-01-29 13:30:23 adam Exp $
+  $Id: README,v 1.21 1998-01-29 14:08:43 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -13,16 +13,17 @@ role of Z39.50/SR.
 Windows programmers: refer to the file windows.txt which describes
 how to compile the software using Microsoft Visual C++.
 
-Two test-programs of interest are generated when you type 'make' at
-the top level: ztest/ztest and client/client. Ztest is a dummy database
+Two test-programs of interest are generated when you type 'make' at the
+top level: ztest/ztest and client/client. Ztest is a dummy database
 server which returns canned responses to all queries. It's good for
 verifying that the protocol works ok, and ztest.c shows a minimalistic
 implementation of the 'backend' interface.
 
 Client is a linemode Z39.50 client. It supports a fair amount of the
-functionality of Z39.50v2/SR, but some things you need to enable or disable
-by recompilation. Its primary purpose is to excersise the package, and
-verify that the protocol works OK. It can be started by typing
+functionality of Z39.50v2/SR, but some things you need to enable or
+disable by recompilation. Its primary purpose is to excersise the
+package, and verify that the protocol works OK. It can be started
+by typing
 
 client tcp:<hostname>:<port>
 
@@ -30,14 +31,15 @@ at the UNIX prompt, to connect to a Z39.50 server, or
 
 client osi:[<tsel>'/']<hostname>:<port>
 
-to connect to an OSI SR target (this requires mOSI-support). To connect to
-the DANBIB test target, you might use:
+to connect to an OSI SR target (this requires mOSI-support). To connect
+to the DANBIB test target, you might use:
 
 client osi:0103/find2.denet.dk:4500
 
 Use '?' to get a list of the available commands.
 
-The current query language is a bit awkward, but functional:
+The current query language for the find command is a bit awkward, but
+functional:
 
 query     ::= ['@attrset' <attribute-set>] rpn
 rpn       ::= complex | simple | attr rpn
@@ -64,6 +66,18 @@ Andersen
 @and @attr 1=1 andersen @attr 1=4 @attr 4=2 duckling
 
 @attrset Bib-1 @and @attr GILS 2=2008 Washington @attr 1=21 weather
+
+The sort command takes a sequence of sort specifications. A sort
+specification holds a field (sort criteria) and is followed by flags.
+If the sort critieria includes = it is assumed that the sort SortKey
+is of type sortAttributes using Bib-1. The integer before the = is
+the attribute type and the integer following the = is the attribute
+value. If no = is in the SortKey it is treated as a sortfield-type
+of type InternationalString. Flags observed are s (sort case
+sensitive), i (sort case insensitive), < (ascending), > (descending).
+Eg.:
+   1=4   i>                  (use is title, insensitive, ascending).
+   Title s<                  (String Title, sensitive, descending).
 
 The directories:
 
