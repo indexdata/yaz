@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.7 2001-11-11 22:25:25 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.8 2001-11-13 23:00:42 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -94,7 +94,7 @@
     Otherwise, if <parameter>val</parameter> is
     <literal>NULL</literal>,
     the option is unchanged.
-    The function returns the previous value of the option.
+    The function returns the (new) value of the option.
    </para>
    <table frame="top"><title>ZOOM Connection Options</title>
     <tgroup cols="3">

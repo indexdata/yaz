@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.3 2001-09-24 21:51:56 adam Exp $
+ * $Id: sortspec.c,v 1.4 2001-11-13 23:00:43 adam Exp $
  */
 
 #include <stdio.h>
@@ -80,12 +80,8 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
         sks->sortRelation = odr_intdup (out, Z_SortRelation_ascending);
         sks->caseSensitivity = odr_intdup (out, Z_SortCase_caseSensitive);
 
-#ifdef ASN_COMPILED
         sks->which = Z_SortKeySpec_null;
         sks->u.null = odr_nullval ();
-#else
-        sks->missingValueAction = NULL;
-#endif
 	
         for (i = 0; sort_flags[i]; i++)
         {

@@ -3,7 +3,7 @@
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: xmalloc.c,v 1.14 2001-11-06 17:05:19 adam Exp $
+ * $Id: xmalloc.c,v 1.15 2001-11-13 23:00:43 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -17,7 +17,9 @@
 #include <yaz/log.h>
 #include <yaz/xmalloc.h>
 
-#define TRACE_XMALLOC 2
+#ifndef TRACE_XMALLOC
+#define TRACE_XMALLOC 1
+#endif
 
 #if TRACE_XMALLOC > 1
 

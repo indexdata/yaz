@@ -120,6 +120,7 @@ ifeq ($(BUILD_SSL),1)
 	dh_shlibdeps -p $(DEVEL_NAME) -- debian/$(DEVEL_NAME)/usr/bin/*
 	echo "libyaz 1 $(RUNTIME_NAME)" > debian/$(RUNTIME_NAME)/DEBIAN/shlibs
 	echo "libyazthread 1 $(RUNTIME_NAME)" >> debian/$(RUNTIME_NAME)/DEBIAN/shlibs
+	echo "libyazmalloc 1 $(RUNTIME_NAME)" >> debian/$(RUNTIME_NAME)/DEBIAN/shlibs
 	chmod 644 debian/$(RUNTIME_NAME)/DEBIAN/shlibs
 
 #	dh_shlibdeps -a -- debian/yaz-runtime-ssl/usr/lib/*.so debian/yaz-runtime-ssl/usr/bin/*

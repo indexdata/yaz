@@ -45,6 +45,10 @@ cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 /usr/lib/libyazthread.so
 /usr/lib/libyazthread.so.1
 /usr/lib/libyazthread.so.1.0.0
+/usr/lib/libyazmalloc.a
+/usr/lib/libyazmalloc.so
+/usr/lib/libyazmalloc.so.1
+/usr/lib/libyazmalloc.so.1.0.0
 /usr/include/yaz
 /usr/share/yaz/z39.50
 /usr/share/yaz/ill

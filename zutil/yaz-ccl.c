@@ -2,72 +2,7 @@
  * Copyright (c) 1996-2001, Index Data.
  * See the file LICENSE for details.
  *
- * $Log: yaz-ccl.c,v $
- * Revision 1.14  2001-09-24 21:51:56  adam
- * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
- * and yaz_z3950oid_to_str.
- *
- * Revision 1.13  2001/05/09 23:31:35  adam
- * String attribute values for PQF. Proper C-backslash escaping for PQF.
- *
- * Revision 1.12  2001/03/07 13:24:40  adam
- * Member and_not in Z_Operator is kept for backwards compatibility.
- * Added support for definition of CCL operators in field spec file.
- *
- * Revision 1.11  2001/02/21 13:46:54  adam
- * C++ fixes.
- *
- * Revision 1.10  2001/02/20 11:23:50  adam
- * Updated ccl_pquery to consider local attribute set too.
- *
- * Revision 1.9  2000/11/27 14:16:55  adam
- * Fixed bug in ccl_rpn_simple regarding resultSetId's.
- *
- * Revision 1.8  2000/11/16 13:03:13  adam
- * Function ccl_rpn_query sets attributeSet to Bib-1.
- *
- * Revision 1.7  2000/11/16 09:58:02  adam
- * Implemented local AttributeSet setting for CCL field maps.
- *
- * Revision 1.6  2000/02/02 15:13:23  adam
- * Minor change.
- *
- * Revision 1.5  2000/01/31 13:15:22  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.4  1999/12/20 15:20:13  adam
- * Implemented ccl_pquery to convert from CCL tree to prefix query.
- *
- * Revision 1.3  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.2  1999/06/16 12:00:08  adam
- * Added proximity.
- *
- * Revision 1.1  1999/06/08 10:12:43  adam
- * Moved file to be part of zutil (instead of util).
- *
- * Revision 1.13  1998/03/31 15:13:20  adam
- * Development towards compiled ASN.1.
- *
- * Revision 1.12  1998/02/11 11:53:36  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.11  1997/11/24 11:33:57  adam
- * Using function odr_nullval() instead of global ODR_NULLVAL when
- * appropriate.
- *
- * Revision 1.10  1997/09/29 08:58:25  adam
- * Fixed conversion of trees so that true copy is made.
- *
- * Revision 1.9  1997/06/23 10:31:25  adam
- * Added ODR argument to ccl_rpn_query and ccl_scan_query.
- *
- * Revision 1.8  1996/10/29 13:36:27  adam
- * Added header.
- *
+ * $Id: yaz-ccl.c,v 1.15 2001-11-13 23:00:43 adam Exp $
  */
 
 #include <stdio.h>
@@ -126,15 +61,10 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
 	    *elements[i]->value.numeric = attr->value;
         }
     }
-#ifdef ASN_COMPILED
     zapt->attributes = (Z_AttributeList *)
 	odr_malloc (o, sizeof(*zapt->attributes));
     zapt->attributes->num_attributes = num;
     zapt->attributes->attributes = elements;
-#else
-    zapt->num_attributes = num;
-    zapt->attributeList = elements;
-#endif    
     zapt->term = term;
     term->which = Z_Term_general;
     term->u.general = term_octet;
@@ -205,19 +135,11 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
 
 	zo->u.prox->relationType = (int *)
 	    odr_malloc (o, sizeof(*zo->u.prox->relationType));
-#ifdef ASN_COMPILED
 	*zo->u.prox->relationType = Z_ProximityOperator_Prox_lessThan;
 	zo->u.prox->which = Z_ProximityOperator_known;
 	zo->u.prox->u.known = 
 	    (Z_ProxUnit *) odr_malloc (o, sizeof(*zo->u.prox->u.known));
 	*zo->u.prox->u.known = Z_ProxUnit_word;
-#else
-	*zo->u.prox->relationType = Z_Prox_lessThan;
-	zo->u.prox->which = Z_ProxCode_known;
-	zo->u.prox->proximityUnitCode = (int*)
-	    odr_malloc (o, sizeof(*zo->u.prox->proximityUnitCode));
-	*zo->u.prox->proximityUnitCode = Z_ProxUnit_word;
-#endif
 	break;
     default:
 	return 0;

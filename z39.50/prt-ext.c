@@ -2,102 +2,7 @@
  * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  *
- * $Log: prt-ext.c,v $
- * Revision 1.1  2001-10-23 21:00:20  adam
- * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
- *
- * Revision 1.7  2001/09/24 21:51:56  adam
- * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
- * and yaz_z3950oid_to_str.
- *
- * Revision 1.6  2001/05/17 14:16:15  adam
- * Added EXTERNAL handling for item update0 (1.0).
- *
- * Revision 1.5  2001/03/25 21:55:13  adam
- * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
- *
- * Revision 1.4  2000/03/14 15:22:04  ian
- * Added Admin external to choice table.
- *
- * Revision 1.3  2000/03/14 13:52:32  ian
- * Added Admin Extended Service to External Choice
- *
- * Revision 1.2  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.1  1999/06/08 10:10:16  adam
- * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
- *
- * Revision 1.22  1999/05/26 15:24:26  adam
- * Fixed minor bugs regarding DB Update (introduced by previous commit).
- *
- * Revision 1.21  1999/05/26 14:47:12  adam
- * Implemented z_ext_record.
- *
- * Revision 1.20  1999/04/20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.19  1998/03/31 15:13:19  adam
- * Development towards compiled ASN.1.
- *
- * Revision 1.18  1998/03/31 11:07:44  adam
- * Furhter work on UNIverse resource report.
- * Added Extended Services handling in frontend server.
- *
- * Revision 1.17  1998/03/20 14:46:06  adam
- * Added UNIverse Resource Reports.
- *
- * Revision 1.16  1998/02/11 11:53:32  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.15  1998/02/10 15:31:46  adam
- * Implemented date and time structure. Changed the Update Extended
- * Service.
- *
- * Revision 1.14  1998/01/05 09:04:57  adam
- * Fixed bugs in encoders/decoders - Not operator (!) missing.
- *
- * Revision 1.13  1997/05/14 06:53:22  adam
- * C++ support.
- *
- * Revision 1.12  1997/04/30 08:52:02  quinn
- * Null
- *
- * Revision 1.11  1996/10/10  12:35:13  quinn
- * Added Update extended service.
- *
- * Revision 1.10  1996/10/09  15:54:55  quinn
- * Added SearchInfoReport
- *
- * Revision 1.9  1996/06/10  08:53:36  quinn
- * Added Summary,OPAC,ResourceReport
- *
- * Revision 1.8  1996/02/20  12:51:44  quinn
- * Completed SCAN. Fixed problems with EXTERNAL.
- *
- * Revision 1.7  1995/10/12  10:34:38  quinn
- * Added Espec-1.
- *
- * Revision 1.6  1995/09/29  17:11:55  quinn
- * Smallish
- *
- * Revision 1.5  1995/09/27  15:02:42  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.4  1995/08/29  11:17:16  quinn
- * *** empty log message ***
- *
- * Revision 1.3  1995/08/21  09:10:18  quinn
- * Smallish fixes to suppport new formats.
- *
- * Revision 1.2  1995/08/17  12:45:00  quinn
- * Fixed minor problems with GRS-1. Added support in c&s.
- *
- * Revision 1.1  1995/08/15  13:37:41  quinn
- * Improved EXTERNAL
- *
- *
+ * $Id: prt-ext.c,v 1.2 2001-11-13 23:00:43 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -116,11 +21,7 @@ static Z_ext_typeent type_table[] =
     {VAL_PROMPT1, Z_External_promptObject1, (Odr_fun)z_PromptObject1 },
     {VAL_GRS1, Z_External_grs1, (Odr_fun)z_GenericRecord},
     {VAL_EXTENDED, Z_External_extendedService, (Odr_fun)z_TaskPackage},
-#ifdef ASN_COMPILED
     {VAL_ITEMORDER, Z_External_itemOrder, (Odr_fun)z_IOItemOrder},
-#else
-    {VAL_ITEMORDER, Z_External_itemOrder, (Odr_fun)z_ItemOrder},
-#endif
     {VAL_DIAG1, Z_External_diag1, (Odr_fun)z_DiagnosticFormat},
     {VAL_ESPEC1, Z_External_espec1, (Odr_fun)z_Espec1},
     {VAL_SUMMARY, Z_External_summary, (Odr_fun)z_BriefBib},
@@ -128,10 +29,8 @@ static Z_ext_typeent type_table[] =
     {VAL_SEARCHRES1, Z_External_searchResult1, (Odr_fun)z_SearchInfoReport},
     {VAL_DBUPDATE, Z_External_update, (Odr_fun)z_IUUpdate},
     {VAL_DATETIME, Z_External_dateTime, (Odr_fun)z_DateTime},
-    {VAL_UNIVERSE_REPORT, Z_External_universeReport, (Odr_fun)z_UniverseReport},
-#ifdef ASN_COMPILED
+    {VAL_UNIVERSE_REPORT, Z_External_universeReport,(Odr_fun)z_UniverseReport},
     {VAL_ADMINSERVICE, Z_External_ESAdmin, (Odr_fun)z_Admin},
-#endif
     {VAL_NONE, 0, 0}
 };
 
@@ -172,13 +71,8 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	 (Odr_fun)z_GenericRecord, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_extendedService,
 	 (Odr_fun)z_TaskPackage, 0},
-#ifdef ASN_COMPILED
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder,
 	 (Odr_fun)z_IOItemOrder, 0},
-#else
-	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder,
-	 (Odr_fun)z_ItemOrder, 0},
-#endif
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1,
 	 (Odr_fun)z_DiagnosticFormat, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_espec1,
@@ -195,12 +89,11 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	 (Odr_fun)z_DateTime, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_universeReport,
 	 (Odr_fun)z_UniverseReport, 0},
-#ifdef ASN_COMPILED
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_ESAdmin,
 	 (Odr_fun)z_Admin, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update0,
 	 (Odr_fun)z_IU0Update, 0},
-#endif	{-1, -1, -1, -1, 0, 0}
+	{-1, -1, -1, -1, 0, 0}
     };
     
     odr_implicit_settag(o, ODR_UNIVERSAL, ODR_EXTERNAL);
@@ -247,6 +140,15 @@ Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
 
     if (len < 0) /* Structured data */
     {
+	
+	/*
+	 * We cheat on the pointers here. Obviously, the record field
+	 * of the backend-fetch structure should have been a union for
+	 * correctness, but we're stuck with this for backwards
+	 * compatibility.
+	 */
+	thisext->u.grs1 = (Z_GenericRecord*) buf;
+
 	switch (format)
 	{
 	case VAL_SUTRS:
@@ -270,14 +172,6 @@ Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
 	default:
 	    return 0;
 	}
-	
-	/*
-	 * We cheat on the pointers here. Obviously, the record field
-	 * of the backend-fetch structure should have been a union for
-	 * correctness, but we're stuck with this for backwards
-	 * compatibility.
-	 */
-	thisext->u.grs1 = (Z_GenericRecord*) buf;
     }
     else if (format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
     {

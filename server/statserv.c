@@ -3,10 +3,10 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * NT server based on threads by
+ * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.78 2001-10-24 12:24:43 adam Exp $
+ * $Id: statserv.c,v 1.79 2001-11-13 23:00:43 adam Exp $
  */
 
 #include <stdio.h>

@@ -1,9 +1,12 @@
 /*
  * NT Service interface Utility.
  *  Based on code written by
- *     Chas Woodfield, Fretwell Downing Datasystems.
+ *     Chas Woodfield, Fretwell Downing Informatics.
  * $Log: service.c,v $
- * Revision 1.4  2000-12-05 19:05:10  adam
+ * Revision 1.5  2001-11-13 23:00:42  adam
+ * Separate malloc debug library. Removal of ASN_COMPILED-#ifdefs.
+ *
+ * Revision 1.4  2000/12/05 19:05:10  adam
  * Service automatically starts in the directory from which it was installed.
  *
  * Revision 1.3  1999/06/10 11:45:30  adam

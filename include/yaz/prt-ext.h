@@ -98,14 +98,13 @@ struct Z_External
 	Z_DiagnosticFormat *diag1;
 	Z_Espec1 *espec1;
 	Z_BriefBib *summary;
+        Z_OPACRecord *opac;
 	Z_SearchInfoReport *searchResult1;
 	Z_IUUpdate *update;
 	Z_DateTime *dateTime;
         Z_UniverseReport *universeReport;
-#ifdef ASN_COMPILED
         Z_Admin *adminService;
 	Z_IU0Update *update0;
-#endif
     } u;
 };
 

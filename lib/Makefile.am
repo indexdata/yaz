@@ -1,10 +1,10 @@
-## $Id: Makefile.am,v 1.15 2001-10-23 21:00:19 adam Exp $
+## $Id: Makefile.am,v 1.16 2001-11-13 23:00:42 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
 endif
 
-lib_LTLIBRARIES = libyaz.la $(extra)
+lib_LTLIBRARIES = libyaz.la $(extra) libyazmalloc.la
 
 # If the line below is omitted the LINK variable is
 # not set in Makefile.in and it will NOT work ..
@@ -15,6 +15,8 @@ libyaz_la_SOURCES=
 
 libyazthread_la_SOURCES=nmem.c statserv.c eventl.c
 
+libyazmalloc_la_SOURCES=xmalloc.c
+
 $(srcdir)/nmem.c: $(top_srcdir)/util/nmem.c
 	cp $(top_srcdir)/util/nmem.c $(srcdir)
 
@@ -24,9 +26,12 @@ $(srcdir)/statserv.c: $(top_srcdir)/server/statserv.c
 $(srcdir)/eventl.c: $(top_srcdir)/server/eventl.c
 	cp $(top_srcdir)/server/eventl.c $(srcdir)
 
+$(srcdir)/xmalloc.c: $(top_srcdir)/util/xmalloc.c
+	cp $(top_srcdir)/util/xmalloc.c $(srcdir)
+
 LDFLAGS=-version-info 1:0:0
 
-INCLUDES =-I$(top_srcdir)/include -I$(top_srcdir)/server  @CFLAGSTHREADS@
+CFLAGS =-DTRACE_XMALLOC=2 -I$(top_srcdir)/include -I$(top_srcdir)/server @CFLAGSTHREADS@
 
 bin_SCRIPTS = yaz-config
 

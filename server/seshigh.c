@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.120 2001-10-05 14:43:22 adam Exp $
+ * $Id: seshigh.c,v 1.121 2001-11-13 23:00:42 adam Exp $
  */
 
 /*
@@ -741,13 +741,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
 static void set_addinfo (Z_DefaultDiagFormat *dr, char *addinfo, ODR odr)
 {
-#if ASN_COMPILED
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
     dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
-#else
-    dr->which = Z_DiagForm_v2AddInfo;
-    dr->addinfo = odr_strdup (odr, addinfo ? addinfo : "");
-#endif
 }
 
 /*
@@ -766,13 +761,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
     yaz_log(LOG_DEBUG, "Diagnostic: %d -- %s", error, addinfo ? addinfo :
 	"NULL");
     rec->which = Z_Records_NSD;
-#if ASN_COMPILED
     rec->u.nonSurrogateDiagnostic = dr;
-#else
-    rec->u.nonSurrogateDiagnostic = drec;
-    drec->which = Z_DiagRec_defaultFormat;
-    drec->u.defaultFormat = dr;
-#endif
     dr->diagnosticSetId =
 	yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
     dr->condition = err;
@@ -831,13 +820,8 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 	yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
     rec->condition = err;
 
-#ifdef ASN_COMPILED
     rec->which = Z_DefaultDiagFormat_v2Addinfo;
     rec->u.v2Addinfo = odr_strdup (assoc->encode, addinfo ? addinfo : "");
-#else
-    rec->which = Z_DiagForm_v2AddInfo;
-    rec->addinfo = odr_strdup (assoc->encode, addinfo ? addinfo : "");
-#endif
     return recs;
 }
 
@@ -1390,13 +1374,8 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
 
     yaz_log(LOG_LOG, "Got SortRequest.");
 
-#ifdef ASN_COMPILED
     bsrr->num_input_setnames = req->num_inputResultSetNames;
     bsrr->input_setnames = req->inputResultSetNames;
-#else
-    bsrr->num_input_setnames = req->inputResultSetNames->num_strings;
-    bsrr->input_setnames = req->inputResultSetNames->strings;
-#endif
     bsrr->referenceId = req->referenceId;
     bsrr->output_setname = req->sortedResultSetName;
     bsrr->sort_sequence = req->sortSequence;
@@ -1415,18 +1394,12 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     if (bsrr->errcode)
     {
 	Z_DiagRecs *dr = diagrecs (assoc, bsrr->errcode, bsrr->errstring);
-#ifdef ASN_COMPILED
 	res->diagnostics = dr->diagRecs;
 	res->num_diagnostics = dr->num_diagRecs;
-#else
-	res->diagnostics = dr;
-#endif
     }
     else
     {
-#ifdef ASN_COMPILED
 	res->num_diagnostics = 0;
-#endif
 	res->diagnostics = 0;
     }
     res->otherInfo = 0;

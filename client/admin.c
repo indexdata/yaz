@@ -1,37 +1,8 @@
 /*
- * $Log: admin.c,v $
- * Revision 1.10  2001-07-19 19:51:41  adam
- * Added typecasts to make C++ happy.
+ * Copyright (c) 1995-2001, Index Data
+ * See the file LICENSE for details.
  *
- * Revision 1.9  2001/02/21 13:46:53  adam
- * C++ fixes.
- *
- * Revision 1.8  2000/04/17 14:21:38  adam
- * WIN32 update.
- *
- * Revision 1.7  2000/04/05 07:39:54  adam
- * Added shared library support (libtool).
- *
- * Revision 1.6  2000/03/20 19:06:25  adam
- * Added Segment request for fronend server. Work on admin for client.
- *
- * Revision 1.5  2000/03/17 12:47:02  adam
- * Minor changes to admin client.
- *
- * Revision 1.4  2000/03/16 13:55:49  ian
- * Added commands for sending shutdown and startup admin requests via the admin ES.
- *
- * Revision 1.3  2000/03/14 15:23:17  ian
- * Removed unwanted ifdef and include of zes-admin.h
- *
- * Revision 1.2  2000/03/14 14:06:04  ian
- * Minor change to order of debugging output for send_apdu,
- * fixed encoding of admin request.
- *
- * Revision 1.1  2000/03/14 09:27:07  ian
- * Added code to enable sending of admin extended service requests
- *
- *
+ * $Id: admin.c,v 1.11 2001-11-13 23:00:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -60,7 +31,6 @@
 
 #include <yaz/pquery.h>
 
-#ifdef ASN_COMPILED
 
 /* Helper functions to get to various statics in the client */
 ODR getODROutputStream();
@@ -390,4 +360,3 @@ int cmd_adm_startup(char* arg)
     sendAdminES(Z_ESAdminOriginPartToKeep_start, NULL);
     return 2;
 }
-#endif

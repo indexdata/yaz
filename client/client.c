@@ -2,8 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.129 2001-10-29 09:17:19 adam Exp $
- *
+ * $Id: client.c,v 1.130 2001-11-13 23:00:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -563,7 +562,6 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
             ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
             printf("Missing or unknown diagset\n");
         printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
-#ifdef ASN_COMPILED
         switch (r->which)
         {
         case Z_DefaultDiagFormat_v2Addinfo:
@@ -573,12 +571,6 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
             printf (" -- v3 addinfo '%s'\n", r->u.v3Addinfo);
             break;
         }
-#else
-        if (r->addinfo && *r->addinfo)
-            printf(" -- '%s'\n", r->addinfo);
-        else
-            printf("\n");
-#endif
     }
 }
 
@@ -599,14 +591,10 @@ static void display_records(Z_Records *p)
 
     if (p->which == Z_Records_NSD)
     {
-#ifdef ASN_COMPILED
         Z_DiagRec dr, *dr_p = &dr;
         dr.which = Z_DiagRec_defaultFormat;
         dr.u.defaultFormat = p->u.nonSurrogateDiagnostic;
         display_diagrecs (&dr_p, 1);
-#else
-        display_diagrecs (&p->u.nonSurrogateDiagnostic, 1);
-#endif
     }
     else if (p->which == Z_Records_multipleNSD)
         display_diagrecs (p->u.multipleNonSurDiagnostics->diagRecs,
@@ -1104,11 +1092,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
 
     r->u.itemOrder = (Z_ItemOrder *) odr_malloc(out,sizeof(Z_ItemOrder));
     memset(r->u.itemOrder, 0, sizeof(Z_ItemOrder));
-#ifdef ASN_COMPILED
     r->u.itemOrder->which=Z_IOItemOrder_esRequest;
-#else
-    r->u.itemOrder->which=Z_ItemOrder_esRequest;
-#endif
 
     r->u.itemOrder->u.esRequest = (Z_IORequest *) 
         odr_malloc(out,sizeof(Z_IORequest));
@@ -1488,6 +1472,7 @@ static int cmd_show(char *arg)
 int cmd_quit(char *arg)
 {
     printf("See you later, alligator.\n");
+    xmalloc_trav ("");
     exit(0);
     return 0;
 }
@@ -1593,20 +1578,10 @@ int send_sortrequest(char *arg, int newset)
 
     req->referenceId = set_refid (out);
 
-#ifdef ASN_COMPILED
     req->num_inputResultSetNames = 1;
     req->inputResultSetNames = (Z_InternationalString **)
         odr_malloc (out, sizeof(*req->inputResultSetNames));
     req->inputResultSetNames[0] = odr_strdup (out, setstring);
-#else
-    req->inputResultSetNames =
-        (Z_StringList *)odr_malloc (out, sizeof(*req->inputResultSetNames));
-    req->inputResultSetNames->num_strings = 1;
-    req->inputResultSetNames->strings =
-        (char **)odr_malloc (out, sizeof(*req->inputResultSetNames->strings));
-    req->inputResultSetNames->strings[0] =
-        odr_strdup (out, setstring);
-#endif
 
     if (newset && setnumber >= 0)
         sprintf (setstring, "%d", ++setnumber);
@@ -1689,15 +1664,9 @@ void process_sortResponse(Z_SortResponse *res)
     }
     printf ("\n");
     print_refid (res->referenceId);
-#ifdef ASN_COMPILED
     if (res->diagnostics)
         display_diagrecs(res->diagnostics,
                          res->num_diagnostics);
-#else
-    if (res->diagnostics)
-        display_diagrecs(res->diagnostics->diagRecs,
-                         res->diagnostics->num_diagRecs);
-#endif
 }
 
 void process_deleteResultSetResponse (Z_DeleteResultSetResponse *res)
@@ -1974,7 +1943,6 @@ static int client(int wait)
         {"update", cmd_update, "<item>"},
 	{"packagename", cmd_packagename, "<packagename>"},
 	{"proxy", cmd_proxy, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]"},
-#ifdef ASN_COMPILED
         /* Server Admin Functions */
         {"adm-reindex", cmd_adm_reindex, "<database-name>"},
         {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>"},
@@ -1985,7 +1953,6 @@ static int client(int wait)
         {"adm-commit", cmd_adm_commit, ""},
         {"adm-shutdown", cmd_adm_shutdown, ""},
         {"adm-startup", cmd_adm_startup, ""},
-#endif
         {0,0}
     };
     char *netbuffer= 0;

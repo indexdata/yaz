@@ -1,60 +1,8 @@
 /*
- * Copyright (C) 1995-2000, Index Data
+ * Copyright (C) 1995-2001, Index Data
  * All rights reserved.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: logrpn.c,v $
- * Revision 1.4  2000-01-31 13:15:22  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.3  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.2  1999/08/27 09:40:33  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.1  1999/06/08 10:10:16  adam
- * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
- *
- * Revision 1.1  1998/11/16 16:02:35  adam
- * Added loggin utilies, log_rpn_query and log_scan_term. These used
- * to be part of Zebra.
- *
- *
- *
- * Old logs from zlogs.c:
- *
- * Revision 1.9  1998/10/13 20:36:02  adam
- * Changed "indent" format string in log messages.
- *
- * Revision 1.8  1998/04/02 14:35:29  adam
- * First version of Zebra that works with compiled ASN.1.
- *
- * Revision 1.7  1998/01/29 13:40:11  adam
- * Better logging for scan service.
- *
- * Revision 1.6  1997/09/29 09:06:41  adam
- * Removed static var to make this module thread safe.
- *
- * Revision 1.5  1997/04/30 08:56:07  quinn
- * null
- *
- * Revision 1.4  1996/10/08  09:41:25  quinn
- * Fixed diagnostic.
- *
- * Revision 1.3  1996/03/20  09:36:40  adam
- * Function dict_lookup_grep got extra parameter, init_pos, which marks
- * from which position in pattern approximate pattern matching should occur.
- * Approximate pattern matching is used in relevance=re-2.
- *
- * Revision 1.2  1996/01/03  16:22:11  quinn
- * operator->roperator
- *
- * Revision 1.1  1995/11/16  17:00:55  adam
- * Better logging of rpn query.
- *
+ * $Id: logrpn.c,v 1.5 2001-11-13 23:00:43 adam Exp $
  */
 #include <stdio.h>
 
@@ -245,21 +193,13 @@ static void zlog_attributes (Z_AttributesPlusTerm *t, int level,
 {
     int of, i;
     char str[80];
-#ifdef ASN_COMPILED
     int num_attributes = t->attributes->num_attributes;
-#else
-    int num_attributes = t->num_attributes;
-#endif
     
     for (of = 0; of < num_attributes; of++)
     {
 	const char *attset_name = "";
         Z_AttributeElement *element;
-#ifdef ASN_COMPILED
 	element = t->attributes->attributes[of];
-#else
-        element = t->attributeList[of];
-#endif
 	if (element->attributeSet)
 	{
 	    oident *attrset;

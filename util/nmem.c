@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.31  2001-10-24 12:24:43  adam
+ * Revision 1.32  2001-11-13 23:00:43  adam
+ * Separate malloc debug library. Removal of ASN_COMPILED-#ifdefs.
+ *
+ * Revision 1.31  2001/10/24 12:24:43  adam
  * WIN32 updates: ZOOM runs, nmem_init/nmem_exit called in DllMain.
  *
  * Revision 1.30  2001/10/05 13:55:17  adam
@@ -222,7 +225,11 @@ YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
 static nmem_block *freelist = NULL;        /* "global" freelists */
 static nmem_control *cfreelist = NULL;
 static int nmem_active_no = 0;
+#ifdef WIN32
 static int nmem_init_flag = 0;
+#else
+static int nmem_init_flag = 1;
+#endif
 
 #if NMEM_DEBUG
 struct nmem_debug_info {
@@ -492,6 +499,7 @@ void nmem_exit (void)
 {
     if (--nmem_init_flag == 0)
     {
+        yaz_log (LOG_LOG, "nmem_exit .............");
         oid_exit();
 	while (freelist)
 	{

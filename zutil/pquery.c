@@ -2,111 +2,7 @@
  * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  *
- * $Log: pquery.c,v $
- * Revision 1.10  2001-10-28 23:10:03  adam
- * Fix local attribute setting for pquery.
- *
- * Revision 1.9  2001/09/24 21:51:56  adam
- * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
- * and yaz_z3950oid_to_str.
- *
- * Revision 1.8  2001/07/19 19:14:53  adam
- * C++ compile.
- *
- * Revision 1.7  2001/05/09 23:31:35  adam
- * String attribute values for PQF. Proper C-backslash escaping for PQF.
- *
- * Revision 1.6  2001/03/07 13:24:40  adam
- * Member and_not in Z_Operator is kept for backwards compatibility.
- * Added support for definition of CCL operators in field spec file.
- *
- * Revision 1.5  2001/02/21 13:46:54  adam
- * C++ fixes.
- *
- * Revision 1.4  1999/12/21 16:25:20  adam
- * Fixed handling of default/inherited attributes.
- *
- * Revision 1.3  1999/12/20 15:20:13  adam
- * Implemented ccl_pquery to convert from CCL tree to prefix query.
- *
- * Revision 1.2  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.1  1999/06/08 10:10:16  adam
- * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
- *
- * Revision 1.22  1999/04/20 09:56:49  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.21  1998/10/13 16:03:37  adam
- * Better checking for invalid OID's in p_query_rpn.
- *
- * Revision 1.20  1998/03/31 15:13:20  adam
- * Development towards compiled ASN.1.
- *
- * Revision 1.19  1998/03/05 08:09:03  adam
- * Minor change to make C++ happy.
- *
- * Revision 1.18  1998/02/11 11:53:36  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.17  1997/11/24 11:33:57  adam
- * Using function odr_nullval() instead of global ODR_NULLVAL when
- * appropriate.
- *
- * Revision 1.16  1997/09/29 13:19:00  adam
- * Added function, oid_ent_to_oid, to replace the function
- * oid_getoidbyent, which is not thread safe.
- *
- * Revision 1.15  1997/09/29 07:13:43  adam
- * Changed type of a few variables to avoid warnings.
- *
- * Revision 1.14  1997/09/22 12:33:41  adam
- * Fixed bug introduced by previous commit.
- *
- * Revision 1.13  1997/09/17 12:10:42  adam
- * YAZ version 1.4.
- *
- * Revision 1.12  1997/09/01 08:54:13  adam
- * New windows NT/95 port using MSV5.0. Made prefix query handling
- * thread safe. The function options ignores empty arguments when met.
- *
- * Revision 1.11  1996/11/11 13:15:29  adam
- * Added proximity operator.
- *
- * Revision 1.10  1996/08/12 14:10:35  adam
- * New function p_query_attset to define default attribute set.
- *
- * Revision 1.9  1996/03/15  11:03:46  adam
- * Attribute set can be set globally for a query with the @attrset
- * operator. The @attr operator has an optional attribute-set specifier
- * that sets the attribute set locally.
- *
- * Revision 1.8  1996/01/02  11:46:56  quinn
- * Changed 'operator' to 'roperator' to avoid C++ conflict.
- *
- * Revision 1.7  1995/09/29  17:12:36  quinn
- * Smallish
- *
- * Revision 1.6  1995/09/27  15:03:03  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.5  1995/06/15  12:31:02  quinn
- * *** empty log message ***
- *
- * Revision 1.4  1995/06/15  07:45:19  quinn
- * Moving to v3.
- *
- * Revision 1.3  1995/06/14  11:06:35  adam
- * Bug fix: Attributes wasn't interpreted correctly!
- *
- * Revision 1.2  1995/05/26  08:56:11  adam
- * New function: p_query_scan.
- *
- * Revision 1.1  1995/05/22  15:31:49  adam
- * New function, p_query_rpn, to convert from prefix (ascii) to rpn (asn).
- *
+ * $Id: pquery.c,v 1.11 2001-11-13 23:00:43 adam Exp $
  */
 
 #include <stdio.h>
@@ -386,15 +282,10 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
         }
         num_attr = k;
     }
-#ifdef ASN_COMPILED
     zapt->attributes = (Z_AttributeList *)
 	odr_malloc (o, sizeof(*zapt->attributes));
     zapt->attributes->num_attributes = num_attr;
     zapt->attributes->attributes = elements;
-#else
-    zapt->num_attributes = num_attr;
-    zapt->attributeList = elements;
-#endif    
 
     zapt->term = term;
     term->which = Z_Term_general;
@@ -483,14 +374,9 @@ static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
 
     if (!lex (li))
         return NULL;
-#ifdef ASN_COMPILED
     p->which = Z_ProximityOperator_known;
     p->u.known = (int *)odr_malloc (o, sizeof(*p->u.known));
     *p->u.known = atoi (li->lex_buf);
-#else
-    p->proximityUnitCode = (int *)odr_malloc (o, sizeof(*p->proximityUnitCode));
-    *p->proximityUnitCode = atoi (li->lex_buf);
-#endif
     return p;
 }
 
