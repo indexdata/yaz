@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.52 2004-08-18 09:01:13 adam Exp $
+; $Id: yaz.nsi,v 1.53 2004-08-19 07:42:20 adam Exp $
 
 !define VERSION "2.0.23"
 
@@ -83,6 +83,7 @@ Section "YAZ Runtime" YAZ_Runtime
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
 Noservice:
 	SetOutPath $INSTDIR\bin
+	File c:\winnt\system32\msvcr71.dll
 	File ..\bin\iconv.dll
 	File ..\bin\zlib.dll
 	File ..\bin\libxml2.dll
@@ -105,9 +106,7 @@ Section "YAZ Development" YAZ_Development
 	SetOutPath $INSTDIR\include\yaz
 	File ..\include\yaz\*.h
 	SetOutPath $INSTDIR\lib
-	File ..\lib\*.lib
-	SetOutPath $INSTDIR\bin
-	File ..\bin\yazdebug.dll
+	File ..\lib\yaz.lib
 SectionEnd
 
 Section "YAZ Documentation" YAZ_Documentation

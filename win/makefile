@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.83 2004-08-18 10:47:48 adam Exp $
+# $Id: makefile,v 1.84 2004-08-19 07:42:20 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -41,11 +41,13 @@ all: dirs generate dll client ztest zoomsh utilprog iconv libxml2
 
 NSIS="c:\program files\nsis\makensis.exe"
 
-nsis: 
+dist: 
 	nmake DEBUG=1 clean
 	nmake DEBUG=0 clean
-	nmake DEBUG=1 dll
 	nmake DEBUG=0
+	$(NSIS) yaz.nsi
+
+nsis:
 	$(NSIS) yaz.nsi
 
 nsishelp:
