@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.4 2005-01-16 21:51:50 adam Exp $
+ * $Id: session.h,v 1.5 2005-02-01 14:46:47 adam Exp $
  */
 /**
  * \file session.h
@@ -15,12 +15,20 @@
 #include <yaz/odr.h>
 #include <yaz/oid.h>
 #include <yaz/proto.h>
+#include <yaz/backend.h>
 #include "eventl.h"
 
+struct gfs_server {
+    statserv_options_block cb;
+    char *host;
+    int port;
+    struct gfs_server *next;
+};
+
 typedef enum {
-   	REQUEST_IDLE,    /* the request is just sitting in the queue */
-	REQUEST_PENDING  /* operation pending (b'end processing or network I/O*/
-	/* this list will have more elements when acc/res control is added */
+    REQUEST_IDLE,    /* the request is just sitting in the queue */
+    REQUEST_PENDING  /* operation pending (b'end processing or network I/O*/
+    /* this list will have more elements when acc/res control is added */
 } request_state;
 
 typedef struct request
@@ -88,9 +96,11 @@ typedef struct association
     unsigned cs_accept_mask;
 
     struct bend_initrequest *init;
+    statserv_options_block *last_control;
 } association;
 
-association *create_association(IOCHAN channel, COMSTACK link);
+association *create_association(IOCHAN channel, COMSTACK link,
+				const char *apdufile);
 void destroy_association(association *h);
 void ir_session(IOCHAN h, int event);
 
@@ -104,5 +114,7 @@ request *request_get(request_q *q);
 void request_release(request *r);
 
 int statserv_must_terminate(void);
+
+int control_association(association *assoc, const char *host, int force);
 
 #endif

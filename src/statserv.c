@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.19 2005-01-16 21:51:50 adam Exp $
+ * $Id: statserv.c,v 1.20 2005-02-01 14:46:47 adam Exp $
  */
 
 /**
@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #ifdef WIN32
 #include <process.h>
 #include <winsock.h>
@@ -32,6 +33,11 @@
 #endif
 #if HAVE_PWD_H
 #include <pwd.h>
+#endif
+
+#if HAVE_XML2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 #endif
 
 #if YAZ_POSIX_THREADS
@@ -57,8 +63,18 @@
 
 static IOCHAN pListener = NULL;
 
+static struct gfs_server *gfs_server_list = 0;
+static NMEM gfs_nmem = 0;
+
 static char *me = "statserver"; /* log prefix */
 static char *programname="statserver"; /* full program name */
+#if YAZ_POSIX_THREADS
+static pthread_key_t current_control_tls;
+static int init_control_tls = 0;
+#else
+static statserv_options_block *current_control_block = 0;
+#endif
+
 /*
  * default behavior.
  */
@@ -97,7 +113,8 @@ statserv_options_block control_block = {
     0,                          /* SOAP handlers */
     "",                         /* PID fname */
     0,                          /* background daemon */
-    ""                          /* SSL certificate filename */
+    "",                         /* SSL certificate filename */
+    "",                         /* XML config filename */
 };
 
 static int max_sessions = 0;
@@ -117,6 +134,291 @@ static void get_logbits(int force)
     }
 }
 
+
+static int add_listener(char *where, int listen_id);
+
+#if HAVE_XML2
+static xmlDocPtr xml_config_doc = 0;
+#endif
+
+#if HAVE_XML2
+static xmlNodePtr xml_config_get_root()
+{
+    xmlNodePtr ptr = 0;
+    if (xml_config_doc)
+    {
+	ptr = xmlDocGetRootElement(xml_config_doc);
+	if (!ptr || ptr->type != XML_ELEMENT_NODE ||
+	    strcmp((const char *) ptr->name, "yazgfs"))
+	{
+	    yaz_log(YLOG_WARN, "Bad/missing root element for config %s",
+		    control_block.xml_config);
+	    return 0;
+	
+	}
+    }
+    return ptr;
+}
+#endif
+
+#if HAVE_XML2
+static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
+{
+    unsigned char *cp;
+    xmlNodePtr p;
+    int len = 1;  /* start with 1, because of trailing 0 */
+    char *str;
+    int first = 1; /* whitespace lead flag .. */
+    /* determine length */
+    for (p = ptr; p; p = p->next)
+    {
+	if (p->type == XML_TEXT_NODE)
+	    len += strlen(p->content);
+    }
+    /* now allocate for the string */
+    str = nmem_malloc(n, len);
+    *str = '\0'; /* so we can use strcat */
+    for (p = ptr; p; p = p->next)
+    {
+	if (p->type == XML_TEXT_NODE)
+	{
+	    cp = p->content;
+	    if (first)
+	    {
+		while(*cp && isspace(*cp))
+		    cp++;
+		if (*cp)
+		    first = 0;  /* reset if we got non-whitespace out */
+	    }
+	    strcat(str, cp); /* append */
+	}
+    }
+    /* remove trailing whitespace */
+    cp = strlen(str) + str;
+    while ((char*) cp != str && isspace(cp[-1]))
+	cp--;
+    *cp = '\0';
+    /* return resulting string */
+    return str;
+}
+#endif
+
+static struct gfs_server * gfs_server_new()
+{
+    struct gfs_server *n = nmem_malloc(gfs_nmem, sizeof(*n));
+    memcpy(&n->cb, &control_block, sizeof(control_block));
+    n->next = 0;
+    n->host = 0;
+    n->port = 0;
+    return n;
+}
+
+int control_association(association *assoc, const char *host, int force_open)
+{
+    char vhost[128], *cp;
+    if (host)
+    {
+	strncpy(vhost, host, 127);
+	vhost[127] = '\0';
+	cp = strchr(vhost, ':');
+	if (cp)
+	    *cp = '\0';
+	host = vhost;
+    }
+    if (control_block.xml_config[0])
+    {
+	struct gfs_server *gfs;
+	for (gfs = gfs_server_list; gfs; gfs = gfs->next)
+	{
+	    int port_match = 0;
+	    int host_match = 0;
+	    if ( !gfs->host || (host && gfs->host && !strcmp(host, gfs->host)))
+		host_match = 1;
+	    if (assoc->client_chan->port == gfs->port)
+		port_match= 1;
+	    if (port_match && host_match)
+	    {
+		if (force_open ||
+		    (assoc->last_control != &gfs->cb && assoc->backend))
+		{
+		    statserv_setcontrol(assoc->last_control);
+		    if (assoc->backend && assoc->init)
+			(assoc->last_control->bend_close)(assoc->backend);
+		    assoc->backend = 0;
+		    xfree(assoc->init);
+		    assoc->init = 0;
+		}
+		assoc->last_control = &gfs->cb;
+		statserv_setcontrol(&gfs->cb);
+		return 1;
+	    }
+	}
+	statserv_setcontrol(0);
+	assoc->last_control = 0;
+	return 0;
+    }
+    else
+    {
+	statserv_setcontrol(&control_block);
+	assoc->last_control = &control_block;
+	return 1;
+    }
+}
+
+static void xml_config_read()
+{
+    struct gfs_server **gfsp = &gfs_server_list;
+#if HAVE_XML2
+    xmlNodePtr ptr = xml_config_get_root();
+
+    if (!ptr)
+	return;
+    for (ptr = ptr->children; ptr; ptr = ptr->next)
+    {
+	if (ptr->type == XML_ELEMENT_NODE &&
+	    !strcmp((const char *) ptr->name, "server"))
+	{
+	    xmlNodePtr ptr_children = ptr->children;
+	    xmlNodePtr ptr;
+	    
+	    *gfsp = gfs_server_new();
+	    for (ptr = ptr_children; ptr; ptr = ptr->next)
+	    {
+		if (ptr->type == XML_ELEMENT_NODE &&
+		    !strcmp((const char *) ptr->name, "host"))
+		{
+		    (*gfsp)->host = nmem_dup_xml_content(gfs_nmem,
+							 ptr->children);
+		}
+		if (ptr->type == XML_ELEMENT_NODE &&
+		    !strcmp((const char *) ptr->name, "port"))
+		{
+		    (*gfsp)->port = atoi(nmem_dup_xml_content(gfs_nmem,
+							 ptr->children));
+		}
+		if (ptr->type == XML_ELEMENT_NODE &&
+		    !strcmp((const char *) ptr->name, "config"))
+		{
+		    strcpy((*gfsp)->cb.configname,
+			   nmem_dup_xml_content(gfs_nmem, ptr->children));
+		}
+	    }
+	    gfsp = &(*gfsp)->next;
+	}
+    }
+#endif
+    *gfsp = 0;
+}
+
+static void xml_config_open()
+{
+    gfs_nmem = nmem_create();
+#if HAVE_XML2
+    if (control_block.xml_config[0] == '\0')
+	return;
+
+    if (!xml_config_doc)
+    {
+	xml_config_doc = xmlParseFile(control_block.xml_config);
+	if (!xml_config_doc)
+	{
+	    yaz_log(YLOG_WARN, "Could not parse %s", control_block.xml_config);
+	    return ;
+	}
+    }
+    xml_config_read();
+
+#endif
+}
+
+static void xml_config_close()
+{
+#if HAVE_XML2
+    if (xml_config_doc)
+    {
+	xmlFreeDoc(xml_config_doc);
+	xml_config_doc = 0;
+    }
+#endif
+    gfs_server_list = 0;
+    nmem_destroy(gfs_nmem);
+}
+
+static void xml_config_add_listeners()
+{
+#define MAX_PORTS 200
+    struct gfs_server *gfs = gfs_server_list;
+    int i, ports[MAX_PORTS];
+    for (i = 0; i<MAX_PORTS; i++)
+	ports[i] = 0;
+
+    for (; gfs; gfs = gfs->next)
+    {
+	int port = gfs->port;
+	if (port)
+	{
+	    for (i = 0; i<MAX_PORTS && ports[i] != port; i++)
+		if (ports[i] == 0)
+		{
+		    ports[i] = port;
+		    break;
+		}
+	}
+    }
+    for (i = 0; i<MAX_PORTS && ports[i]; i++)
+    {
+	char where[80];
+	sprintf(where, "@:%d", ports[i]);
+	add_listener(where, ports[i]);
+    }
+}
+
+static void xml_config_bend_start()
+{
+    if (control_block.xml_config[0])
+    {
+	struct gfs_server *gfs = gfs_server_list;
+	for (; gfs; gfs = gfs->next)
+	{
+	    yaz_log(YLOG_DEBUG, "xml_config_bend_start config=%s",
+		    gfs->cb.configname);
+	    statserv_setcontrol(&gfs->cb);
+	    if (control_block.bend_start)
+		(control_block.bend_start)(&gfs->cb);
+	}
+    }
+    else
+    {
+	yaz_log(YLOG_DEBUG, "xml_config_bend_start default config");
+	statserv_setcontrol(&control_block);
+	if (control_block.bend_start)
+	    (*control_block.bend_start)(&control_block);
+    }
+
+}
+
+static void xml_config_bend_stop()
+{
+    if (control_block.xml_config[0])
+    {
+	struct gfs_server *gfs = gfs_server_list;
+	for (; gfs; gfs = gfs->next)
+	{
+	    yaz_log(YLOG_DEBUG, "xml_config_bend_stop config=%s",
+		    gfs->cb.configname);
+	    statserv_setcontrol(&gfs->cb);
+	    if (control_block.bend_stop)
+		(control_block.bend_stop)(&gfs->cb);
+	}
+    }
+    else
+    {
+	yaz_log(YLOG_DEBUG, "xml_config_bend_stop default config");
+	statserv_setcontrol(&control_block);
+	if (control_block.bend_stop)
+	    (*control_block.bend_stop)(&control_block);
+    }
+}
 
 /*
  * handle incoming connect requests.
@@ -179,7 +481,7 @@ void statserv_remove(IOCHAN pIOChannel)
         ThreadList *pNextThread;
         ThreadList *pPrevThread =NULL;
 
-        /* Step through alll the threads */
+        /* Step through all the threads */
         for (; pCurrentThread != NULL; pCurrentThread = pNextThread)
         {
             /* We only need to compare on the IO Channel */
@@ -267,7 +569,7 @@ void statserv_closedown()
         /* Now we can really do something */
         if (iHandles > 0)
         {
-            logf (log_server, "waiting for %d to die", iHandles);
+            yaz_log(log_server, "waiting for %d to die", iHandles);
             /* This will now wait, until all the threads close */
             WaitForMultipleObjects(iHandles, pThreadHandles, TRUE, INFINITE);
 
@@ -275,11 +577,11 @@ void statserv_closedown()
             free(pThreadHandles);
         }
 
-	if (control_block.bend_stop)
-	    (*control_block.bend_stop)(&control_block);
+	xml_config_bend_stop();
         /* No longer require the critical section, since all threads are dead */
         DeleteCriticalSection(&Thread_CritSect);
     }
+    xml_config_close();
 }
 
 void __cdecl event_loop_thread (IOCHAN iochan)
@@ -331,7 +633,8 @@ static void listener(IOCHAN h, int event)
 	}
 
 	yaz_log(YLOG_DEBUG, "Creating association");
-	if (!(newas = create_association(new_chan, new_line)))
+	if (!(newas = create_association(new_chan, new_line,
+					 control_block.apdu_file)))
 	{
 	    yaz_log(YLOG_FATAL, "Failed to create new assoc.");
             iochan_destroy(h);
@@ -393,12 +696,15 @@ void statserv_closedown()
 {
     IOCHAN p;
 
-    if (control_block.bend_stop)
-        (*control_block.bend_stop)(&control_block);
+    xml_config_bend_stop();
     for (p = pListener; p; p = p->next)
     {
         iochan_destroy(p);
     }
+    xml_config_close();
+#if YAZ_POSIX_THREADS
+    pthread_key_delete(current_control_tls);
+#endif
 }
 
 void sigterm(int sig)
@@ -436,6 +742,9 @@ static void listener(IOCHAN h, int event)
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
 	    return;
 	}
+
+	yaz_log(log_session, "Connect from %s", cs_addrstr(new_line));
+
 	no_sessions++;
 	if (control_block.dynamic)
 	{
@@ -468,6 +777,7 @@ static void listener(IOCHAN h, int event)
 		return;
 	    }
 	}
+
 	if (control_block.threads)
 	{
 #if YAZ_POSIX_THREADS
@@ -511,12 +821,13 @@ static void *new_session (void *vp)
     association *newas;
     IOCHAN new_chan;
     COMSTACK new_line = (COMSTACK) vp;
+    IOCHAN parent_chan = new_line->user;
 
     unsigned cs_get_mask, cs_accept_mask, mask =  
 	((new_line->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
 	((new_line->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
 
-    if (mask)    
+    if (mask)
     {
 	cs_accept_mask = mask;  /* accept didn't complete */
 	cs_get_mask = 0;
@@ -527,12 +838,14 @@ static void *new_session (void *vp)
 	cs_get_mask = mask = EVENT_INPUT;
     }
 
-    if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, mask)))
+    if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, mask,
+				   parent_chan->port)))
     {
 	yaz_log(YLOG_FATAL, "Failed to create iochan");
 	return 0;
     }
-    if (!(newas = create_association(new_chan, new_line)))
+    if (!(newas = create_association(new_chan, new_line,
+				     control_block.apdufile)))
     {
 	yaz_log(YLOG_FATAL, "Failed to create new assoc.");
 	return 0;
@@ -575,9 +888,11 @@ static void inetd_connection(int what)
 
     if ((line = cs_createbysocket(0, tcpip_type, 0, what)))
     {
-        if ((chan = iochan_create(cs_fileno(line), ir_session, EVENT_INPUT)))
+        if ((chan = iochan_create(cs_fileno(line), ir_session, EVENT_INPUT,
+				  0)))
         {
-            if ((assoc = create_association(chan, line)))
+            if ((assoc = create_association(chan, line,
+					    control_block.apdufile)))
             {
                 iochan_setdata(chan, assoc);
                 iochan_settimeout(chan, 60);
@@ -607,7 +922,7 @@ static void inetd_connection(int what)
 /*
  * Set up a listening endpoint, and give it to the event-handler.
  */
-static int add_listener(char *where, int what)
+static int add_listener(char *where, int listen_id)
 {
     COMSTACK l;
     void *ap;
@@ -621,8 +936,8 @@ static int add_listener(char *where, int what)
     else
 	mode = "static";
 
-    yaz_log(log_server, "Adding %s %s listener on %s", mode,
-	    what == PROTO_SR ? "SR" : "Z3950", where);
+    yaz_log(log_server, "Adding %s listener on %s id=%d", mode, where,
+	    listen_id);
 
     l = cs_create_host(where, 2, &ap);
     if (!l)
@@ -640,15 +955,16 @@ static int add_listener(char *where, int what)
 	return -1;
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
-   	 EVENT_EXCEPT)))
+   	 EVENT_EXCEPT, listen_id)))
     {
     	yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create IOCHAN-type");
 	cs_close (l);
 	return -1;
     }
-    iochan_setdata(lst, l);
+    iochan_setdata(lst, l); /* user-defined data for listener is COMSTACK */
+    l->user = lst;  /* user-defined data for COMSTACK is listener chan */
 
-    /* Ensure our listener chain is setup properly */
+    /* Add listener to chain */
     lst->next = pListener;
     pListener = lst;
     return 0; /* OK */
@@ -666,15 +982,24 @@ static void catchchld(int num)
 
 statserv_options_block *statserv_getcontrol(void)
 {
-    static statserv_options_block cb;
-
-    memcpy(&cb, &control_block, sizeof(cb));
-    return &cb;
+#if YAZ_POSIX_THREADS
+    if (init_control_tls)
+	return pthread_getspecific(current_control_tls);
+    else
+	return &control_block;
+#else
+    return current_control_block;
+#endif
 }
 
 void statserv_setcontrol(statserv_options_block *block)
 {
-    memcpy(&control_block, block, sizeof(*block));
+#if YAZ_POSIX_THREADS
+    if (init_control_tls)
+	pthread_setspecific(current_control_tls, block);
+#else
+    current_control_block = block;
+#endif
 }
 
 static void statserv_reset(void)
@@ -683,14 +1008,14 @@ static void statserv_reset(void)
 
 int statserv_start(int argc, char **argv)
 {
-    int ret = 0;
     char sep;
 #ifdef WIN32
     /* We need to initialize the thread list */
     ThreadList_Initialize();
 /* WIN32 */
 #endif
-    
+
+
 #ifdef WIN32
     sep = '\\';
 #else
@@ -703,18 +1028,23 @@ int statserv_start(int argc, char **argv)
     programname = argv[0];
 
     if (control_block.options_func(argc, argv))
-        return(1);
+        return 1;
+
+#if YAZ_POSIX_THREADS
+    init_control_tls = 1;
+    pthread_key_create(&current_control_tls, 0);
+#endif
     
-    if (control_block.bend_start)
-        (*control_block.bend_start)(&control_block);
+    xml_config_open();
+    
+    xml_config_bend_start();
+
 #ifdef WIN32
+    xml_config_add_listeners();
+
     yaz_log (log_server, "Starting server %s", me);
     if (!pListener && *control_block.default_listen)
-	add_listener(control_block.default_listen,
-		     control_block.default_proto);
-    
-    if (!pListener)
-	return 1;
+	add_listener(control_block.default_listen, 0);
 #else
 /* UNIX */
     if (control_block.inetd)
@@ -765,9 +1095,10 @@ int statserv_start(int argc, char **argv)
 	    open("/dev/null", O_RDWR);
 	    dup(0); dup(0);
 	}
+	xml_config_add_listeners();
+
 	if (!pListener && *control_block.default_listen)
-	    add_listener(control_block.default_listen,
-			 control_block.default_proto);
+	    add_listener(control_block.default_listen, 0);
 	
 	if (!pListener)
 	    return 1;
@@ -784,13 +1115,13 @@ int statserv_start(int argc, char **argv)
 	    fprintf(f, "%ld", (long) getpid());
 	    fclose(f);
 	}
-
+	
 	if (control_block.background)
 	    close(hand[1]);
 
-	yaz_log (log_server, "Starting server %s pid=%ld", programname,
-			(long) getpid());
-        
+
+	yaz_log (log_server, "Starting server %s pid=%ld", programname, 
+		 (long) getpid());
 #if 0
 	sigset_t sigs_to_block;
 	
@@ -821,18 +1152,16 @@ int statserv_start(int argc, char **argv)
     }
 /* UNIX */
 #endif
-    if ((pListener == NULL) && *control_block.default_listen)
-	add_listener(control_block.default_listen,
-		     control_block.default_proto);
-	
     if (pListener == NULL)
-	ret = 1;
-    else
-    {
-	yaz_log(YLOG_DEBUG, "Entering event loop.");
-        ret = event_loop(&pListener);
-    }
-    return ret;
+	return 1;
+    yaz_log(YLOG_DEBUG, "Entering event loop.");
+    return event_loop(&pListener);
+}
+
+static void option_copy(char *dst, const char *src)
+{
+    strncpy(dst, src ? src : "", 127);
+    dst[127] = '\0';
 }
 
 int check_options(int argc, char **argv)
@@ -844,13 +1173,13 @@ int check_options(int argc, char **argv)
     control_block.loglevel = yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL);
     yaz_log_init_level(control_block.loglevel);
 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:",
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:",
 			  argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
 	case 0:
-	    if (add_listener(arg, control_block.default_proto))
+	    if (add_listener(arg, 0))
                 return 1;  /* failed to create listener */
 	    break;
 	case '1':	 
@@ -880,27 +1209,28 @@ int check_options(int argc, char **argv)
 #endif
 	    break;
 	case 'l':
-	    strcpy(control_block.logfile, arg ? arg : "");
+	    option_copy(control_block.logfile, arg);
 	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
 	    break;
 	case 'v':
-	    control_block.loglevel = yaz_log_mask_str_x(arg,control_block.loglevel);
+	    control_block.loglevel =
+		yaz_log_mask_str_x(arg,control_block.loglevel);
 	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
 	    break;
 	case 'a':
-	    strcpy(control_block.apdufile, arg ? arg : "");
+	    option_copy(control_block.apdufile, arg);
 	    break;
 	case 'u':
-	    strcpy(control_block.setuid, arg ? arg : "");
+	    option_copy(control_block.setuid, arg);
 	    break;
 	case 'c':
-	    strcpy(control_block.configname, arg ? arg : "");
+	    option_copy(control_block.configname, arg);
 	    break;
 	case 'C':
-	    strcpy(control_block.cert_fname, arg ? arg : "");
+	    option_copy(control_block.cert_fname, arg);
 	    break;
 	case 'd':
-	    strcpy(control_block.daemon_name, arg ? arg : "");
+	    option_copy(control_block.daemon_name, arg);
 	    break;
 	case 't':
 	    if (!arg || !(r = atoi(arg)))
@@ -932,12 +1262,15 @@ int check_options(int argc, char **argv)
             max_sessions = atoi(arg);
             break;
 	case 'p':
-	    if (strlen(arg) >= sizeof(control_block.pid_fname))
-	    {
-		yaz_log(YLOG_FATAL, "pid fname too long");
-		exit(1);
-	    }
-	    strcpy(control_block.pid_fname, arg);
+	    option_copy(control_block.pid_fname, arg);
+	    break;
+	case 'f':
+#if HAVE_XML2
+	    option_copy(control_block.xml_config, arg);
+#else
+	    fprintf(stderr, "%s: Option -f unsupported since YAZ is compiled without Libxml2 support\n", me);
+	    exit(1);
+#endif
 	    break;
 	case 'D':
 	    control_block.background = 1;
@@ -973,12 +1306,8 @@ int statserv_main(int argc, char **argv,
 		  bend_initresult *(*bend_init)(bend_initrequest *r),
 		  void (*bend_close)(void *handle))
 {
-    statserv_options_block *cb = statserv_getcontrol();
-    
-    cb->bend_init = bend_init;
-    cb->bend_close = bend_close;
-
-    statserv_setcontrol(cb);
+    control_block.bend_init = bend_init;
+    control_block.bend_close = bend_close;
 
     /* Lets setup the Arg structure */
     ArgDetails.argc = argc;
@@ -1020,12 +1349,10 @@ int statserv_main(int argc, char **argv,
 		  void (*bend_close)(void *handle))
 {
     int ret;
-    statserv_options_block *cb = statserv_getcontrol();
-    
-    cb->bend_init = bend_init;
-    cb->bend_close = bend_close;
 
-    statserv_setcontrol(cb);
+    control_block.bend_init = bend_init;
+    control_block.bend_close = bend_close;
+
     ret = statserv_start (argc, argv);
     statserv_closedown ();
     statserv_reset();

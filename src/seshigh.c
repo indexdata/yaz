@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.46 2005-01-19 09:18:08 adam Exp $
+ * $Id: seshigh.c,v 1.47 2005-02-01 14:46:47 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -91,9 +91,6 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *process_segmentRequest (association *assoc, request *reqb);
 
-static FILE *apduf = 0; /* for use in static mode */
-static statserv_options_block *control_block = 0;
-
 static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd);
 
 /* dynamic logging levels */
@@ -107,10 +104,10 @@ static void get_logbits()
 { /* needs to be called after parsing cmd-line args that can set loglevels!*/
     if (!logbits_set)
     {
-        logbits_set=1;
-        log_session=yaz_log_module_level("session"); 
-        log_request=yaz_log_module_level("request"); 
-        log_requestdetail=yaz_log_module_level("requestdetail"); 
+        logbits_set = 1;
+        log_session = yaz_log_module_level("session"); 
+        log_request = yaz_log_module_level("request"); 
+        log_requestdetail = yaz_log_module_level("requestdetail"); 
     }
 }
 
@@ -128,18 +125,18 @@ static void wr_diag(WRBUF w, int error, const char *addinfo)
  *  link     : communications channel.
  * Returns: 0 or a new association handle.
  */
-association *create_association(IOCHAN channel, COMSTACK link)
+association *create_association(IOCHAN channel, COMSTACK link,
+				const char *apdufile)
 {
     association *anew;
 
     if (!logbits_set)
         get_logbits();
-    if (!control_block)
-        control_block = statserv_getcontrol();
     if (!(anew = (association *)xmalloc(sizeof(*anew))))
         return 0;
     anew->init = 0;
     anew->version = 0;
+    anew->last_control = 0;
     anew->client_chan = channel;
     anew->client_link = link;
     anew->cs_get_mask = 0;
@@ -148,44 +145,26 @@ association *create_association(IOCHAN channel, COMSTACK link)
     if (!(anew->decode = odr_createmem(ODR_DECODE)) ||
         !(anew->encode = odr_createmem(ODR_ENCODE)))
         return 0;
-    if (*control_block->apdufile)
+    if (apdufile && *apdufile)
     {
-        char filename[256];
         FILE *f;
 
-        strcpy(filename, control_block->apdufile);
         if (!(anew->print = odr_createmem(ODR_PRINT)))
             return 0;
-        if (*control_block->apdufile == '@')
+        if (*apdufile == '@')
         {
             odr_setprint(anew->print, yaz_log_file());
         }       
-        else if (*control_block->apdufile != '-')
+        else if (*apdufile != '-')
         {
-            strcpy(filename, control_block->apdufile);
-            if (!control_block->dynamic)
-            {
-                if (!apduf)
-                {
-                    if (!(apduf = fopen(filename, "w")))
-                    {
-                        yaz_log(YLOG_WARN|YLOG_ERRNO, "can't open apdu dump %s", filename);
-                        return 0;
-                    }
-                    setvbuf(apduf, 0, _IONBF, 0);
-                }
-                f = apduf;
-            }
-            else 
-            {
-                sprintf(filename + strlen(filename), ".%ld", (long)getpid());
-                if (!(f = fopen(filename, "w")))
-                {
-                    yaz_log(YLOG_WARN|YLOG_ERRNO, "%s", filename);
-                    return 0;
-                }
-                setvbuf(f, 0, _IONBF, 0);
-            }
+	    char filename[256];
+	    sprintf(filename, "%.200s.%ld", apdufile, (long)getpid());
+	    if (!(f = fopen(filename, "w")))
+	    {
+		yaz_log(YLOG_WARN|YLOG_ERRNO, "%s", filename);
+		return 0;
+	    }
+	    setvbuf(f, 0, _IONBF, 0);
             odr_setprint(anew->print, f);
         }
     }
@@ -226,7 +205,7 @@ void destroy_association(association *h)
     request_delq(&h->outgoing);
     xfree(h);
     xmalloc_trav("session closed");
-    if (control_block && control_block->one_shot)
+    if (cb && cb->one_shot)
     {
         exit (0);
     }
@@ -464,6 +443,7 @@ void ir_session(IOCHAN h, int event)
 
 static int process_z_request(association *assoc, request *req, char **msg);
 
+
 static void assoc_init_reset(association *assoc)
 {
     xfree (assoc->init);
@@ -493,37 +473,46 @@ static void assoc_init_reset(association *assoc)
     assoc->init->decode = assoc->decode;
     assoc->init->peer_name = 
         odr_strdup (assoc->encode, cs_addrstr(assoc->client_link));
+
+    yaz_log(log_requestdetail, "peer %s", assoc->init->peer_name);
+
+
 }
 
 static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num)
 {
-    const char *encoding = "UTF-8";
-    Z_External *ce;
-    bend_initresult *binitres;
     statserv_options_block *cb = statserv_getcontrol();
-    
-    assoc_init_reset(assoc);
+    if (!assoc->init)
+    {
+	const char *encoding = "UTF-8";
+	Z_External *ce;
+	bend_initresult *binitres;
 
-    assoc->maximumRecordSize = 3000000;
-    assoc->preferredMessageSize = 3000000;
+	yaz_log(YLOG_LOG, "srw_bend_init config=%s", cb->configname);
+	assoc_init_reset(assoc);
+	
+	assoc->maximumRecordSize = 3000000;
+	assoc->preferredMessageSize = 3000000;
 #if 1
-    ce = yaz_set_proposal_charneg(assoc->decode, &encoding, 1, 0, 0, 1);
-    assoc->init->charneg_request = ce->u.charNeg3;
+	ce = yaz_set_proposal_charneg(assoc->decode, &encoding, 1, 0, 0, 1);
+	assoc->init->charneg_request = ce->u.charNeg3;
 #endif
-    assoc->backend = 0;
-    if (!(binitres = (*cb->bend_init)(assoc->init)))
-    {
-        assoc->state = ASSOC_DEAD;
-	yaz_add_srw_diagnostic(assoc->encode, d, num, 3, 0);
-        return 0;
-    }
-    assoc->backend = binitres->handle;
-    if (binitres->errcode)
-    {
-        assoc->state = ASSOC_DEAD;
-	yaz_add_srw_diagnostic(assoc->encode, d, num, binitres->errcode,
-			       binitres->errstring);
-	return 0;
+	assoc->backend = 0;
+	if (!(binitres = (*cb->bend_init)(assoc->init)))
+	{
+	    assoc->state = ASSOC_DEAD;
+	    yaz_add_srw_diagnostic(assoc->encode, d, num, 3, 0);
+	    return 0;
+	}
+	assoc->backend = binitres->handle;
+	if (binitres->errcode)
+	{
+	    assoc->state = ASSOC_DEAD;
+	    yaz_add_srw_diagnostic(assoc->encode, d, num, binitres->errcode,
+				   binitres->errstring);
+	    return 0;
+	}
+	return 1;
     }
     return 1;
 }
@@ -644,8 +633,7 @@ static void srw_bend_search(association *assoc, request *req,
     
     *http_code = 200;
     yaz_log(log_requestdetail, "Got SRW SearchRetrieveRequest");
-    if (!assoc->init)
-        srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
+    srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
     if (srw_req->sort_type != Z_SRW_sort_type_none)
 	yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
 			       &srw_res->num_diagnostics, 80, 0);
@@ -839,8 +827,7 @@ static void srw_bend_explain(association *assoc, request *req,
 {
     yaz_log(log_requestdetail, "Got SRW ExplainRequest");
     *http_code = 404;
-    if (!assoc->init)
-        srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
+    srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
     if (assoc->init && assoc->init->bend_explain)
     {
         bend_explain_rr rr;
@@ -876,8 +863,7 @@ static void srw_bend_scan(association *assoc, request *req,
     yaz_log(log_requestdetail, "Got SRW ScanRequest");
 
     *http_code = 200;
-    if (!assoc->init)
-        srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
+    srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
     if (srw_res->num_diagnostics == 0 && assoc->init)
     {
 	struct scan_entry *save_entries;
@@ -1046,8 +1032,14 @@ static void process_http_request(association *assoc, request *req)
     char *stylesheet = 0;
     Z_SRW_diagnostic *diagnostic = 0;
     int num_diagnostic = 0;
+    const char *host = z_HTTP_header_lookup(hreq->headers, "Host");
 
-    if (!strcmp(hreq->path, "/test")) 
+    if (!control_association(assoc, host, 0))
+    {
+	p = z_get_HTTP_Response(o, 404);
+	r = 1;
+    }
+    if (r == 2 && !strcmp(hreq->path, "/test")) 
     {   
         p = z_get_HTTP_Response(o, 200);
         hres = p->u.HTTP_Response;
@@ -1236,8 +1228,6 @@ static int process_z_request(association *assoc, request *req, char **msg)
     switch (req->apdu_request->which)
     {
     case Z_APDU_initRequest:
-        iochan_settimeout(assoc->client_chan,
-                          statserv_getcontrol()->idle_timeout * 60);
         res = process_initRequest(assoc, req); break;
     case Z_APDU_searchRequest:
         res = process_searchRequest(assoc, req, &fd); break;
@@ -1317,7 +1307,7 @@ static int process_z_request(association *assoc, request *req, char **msg)
 
         yaz_log(YLOG_DEBUG, "   establishing handler for result");
         req->state = REQUEST_PENDING;
-        if (!(chan = iochan_create(fd, backend_response, EVENT_INPUT)))
+        if (!(chan = iochan_create(fd, backend_response, EVENT_INPUT, 0)))
             abort();
         iochan_setdata(chan, assoc);
         retval = 0;
@@ -1419,6 +1409,10 @@ static int process_z_response(association *assoc, request *req, Z_APDU *res)
     return process_gdu_response(assoc, req, gres);
 }
 
+static char *get_vhost(Z_OtherInformation *otherInfo)
+{
+    return yaz_oi_get_string_oidval(&otherInfo, VAL_PROXY, 1, 0);
+}
 
 /*
  * Handle init request.
@@ -1429,22 +1423,28 @@ static int process_z_response(association *assoc, request *req, Z_APDU *res)
  */
 static Z_APDU *process_initRequest(association *assoc, request *reqb)
 {
-    statserv_options_block *cb = statserv_getcontrol();
     Z_InitRequest *req = reqb->apdu_request->u.initRequest;
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_initResponse);
     Z_InitResponse *resp = apdu->u.initResponse;
     bend_initresult *binitres;
     char *version;
     char options[140];
+    statserv_options_block *cb = 0;  /* by default no control for backend */
 
+    if (control_association(assoc, get_vhost(req->otherInfo), 1))
+	cb = statserv_getcontrol();  /* got control block for backend */
+    
     yaz_log(log_requestdetail, "Got initRequest");
     if (req->implementationId)
-        yaz_log(log_requestdetail, "Id:        %s", req->implementationId);
+        yaz_log(log_requestdetail, "Id:        %s",
+		req->implementationId);
     if (req->implementationName)
-        yaz_log(log_requestdetail, "Name:      %s", req->implementationName);
+        yaz_log(log_requestdetail, "Name:      %s",
+		req->implementationName);
     if (req->implementationVersion)
-        yaz_log(log_requestdetail, "Version:   %s", req->implementationVersion);
-
+        yaz_log(log_requestdetail, "Version:   %s",
+		req->implementationVersion);
+    
     assoc_init_reset(assoc);
 
     assoc->init->auth = req->idAuthentication;
@@ -1460,27 +1460,44 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     }
     
     assoc->backend = 0;
-    if (!(binitres = (*cb->bend_init)(assoc->init)))
+    if (cb)
     {
-        yaz_log(YLOG_WARN, "Bad response from backend.");
-        return 0;
+	if (req->implementationVersion)
+	    yaz_log(log_requestdetail, "Config:    %s",
+		    cb->configname);
+    
+        iochan_settimeout(assoc->client_chan, cb->idle_timeout * 60);
+	
+	/* we have a backend control block, so call that init function */
+	if (!(binitres = (*cb->bend_init)(assoc->init)))
+	{
+	    yaz_log(YLOG_WARN, "Bad response from backend.");
+	    return 0;
+	}
+	assoc->backend = binitres->handle;
     }
-
-    assoc->backend = binitres->handle;
+    else
+    {
+	/* no backend. return error */
+	binitres = odr_malloc(assoc->encode, sizeof(*binitres));
+	binitres->errstring = 0;
+	binitres->errcode = 1;
+        iochan_settimeout(assoc->client_chan, 10);
+    }
     if ((assoc->init->bend_sort))
-        yaz_log (YLOG_DEBUG, "Sort handler installed");
+	yaz_log (YLOG_DEBUG, "Sort handler installed");
     if ((assoc->init->bend_search))
-        yaz_log (YLOG_DEBUG, "Search handler installed");
+	yaz_log (YLOG_DEBUG, "Search handler installed");
     if ((assoc->init->bend_present))
-        yaz_log (YLOG_DEBUG, "Present handler installed");   
+	yaz_log (YLOG_DEBUG, "Present handler installed");   
     if ((assoc->init->bend_esrequest))
-        yaz_log (YLOG_DEBUG, "ESRequest handler installed");   
+	yaz_log (YLOG_DEBUG, "ESRequest handler installed");   
     if ((assoc->init->bend_delete))
-        yaz_log (YLOG_DEBUG, "Delete handler installed");   
+	yaz_log (YLOG_DEBUG, "Delete handler installed");   
     if ((assoc->init->bend_scan))
-        yaz_log (YLOG_DEBUG, "Scan handler installed");   
+	yaz_log (YLOG_DEBUG, "Scan handler installed");   
     if ((assoc->init->bend_segment))
-        yaz_log (YLOG_DEBUG, "Segment handler installed");   
+	yaz_log (YLOG_DEBUG, "Segment handler installed");   
     
     resp->referenceId = req->referenceId;
     *options = '\0';
@@ -1567,8 +1584,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     yaz_log(log_requestdetail, "Negotiated to v%d: %s", assoc->version, options);
     assoc->maximumRecordSize = *req->maximumRecordSize;
-    if (assoc->maximumRecordSize > control_block->maxrecordsize)
-        assoc->maximumRecordSize = control_block->maxrecordsize;
+
+    if (cb && assoc->maximumRecordSize > cb->maxrecordsize)
+        assoc->maximumRecordSize = cb->maxrecordsize;
     assoc->preferredMessageSize = *req->preferredMessageSize;
     if (assoc->preferredMessageSize > assoc->maximumRecordSize)
         assoc->preferredMessageSize = assoc->maximumRecordSize;
@@ -1584,7 +1602,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.46 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.47 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2616,7 +2634,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
         resp->diagnostics = diagRecs->diagRecs;
         if (log_request)
         {
-            WRBUF wr=wrbuf_alloc();
+            WRBUF wr = wrbuf_alloc();
             wrbuf_diags(wr, resp->num_diagnostics, resp->diagnostics);
             yaz_log(log_request, "EsRequest %s", wrbuf_buf(wr) );
             wrbuf_free(wr, 1);

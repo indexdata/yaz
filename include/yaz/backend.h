@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.28 2005-01-15 19:47:09 adam Exp $
+ * $Id: backend.h,v 1.29 2005-02-01 14:46:47 adam Exp $
  */
 
 /** 
@@ -286,6 +286,7 @@ typedef struct statserv_options_block
     char pid_fname[128];            /* pid fname */
     int background;                 /* auto daemon */
     char cert_fname[128];           /* SSL certificate fname */
+    char xml_config[128];           /* XML config filename */
 } statserv_options_block;
 
 YAZ_EXPORT int statserv_main(

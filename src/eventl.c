@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.6 2005-01-17 12:53:04 adam Exp $
+ * $Id: eventl.c,v 1.7 2005-02-01 14:46:47 adam Exp $
  */
 
 /**
@@ -55,7 +55,7 @@
 static int log_level=0;
 static int log_level_initialized=0;
 
-IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
+IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int port)
 {
     IOCHAN new_iochan;
 
@@ -74,6 +74,7 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
     new_iochan->force_event = 0;
     new_iochan->last_event = new_iochan->max_idle = 0;
     new_iochan->next = NULL;
+    new_iochan->port = port;
     return new_iochan;
 }
 

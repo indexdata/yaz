@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.71 2005-01-15 19:47:16 adam Exp $
+ * $Id: ztest.c,v 1.72 2005-02-01 14:46:48 adam Exp $
  */
 
 /*
@@ -24,13 +24,13 @@ Z_GenericRecord *dummy_grs_record (int num, ODR o);
 char *dummy_marc_record (int num, ODR odr);
 char *dummy_xml_record (int num, ODR odr);
 
-int ztest_search (void *handle, bend_search_rr *rr);
-int ztest_sort (void *handle, bend_sort_rr *rr);
-int ztest_present (void *handle, bend_present_rr *rr);
-int ztest_esrequest (void *handle, bend_esrequest_rr *rr);
-int ztest_delete (void *handle, bend_delete_rr *rr);
+int ztest_search(void *handle, bend_search_rr *rr);
+int ztest_sort(void *handle, bend_sort_rr *rr);
+int ztest_present(void *handle, bend_present_rr *rr);
+int ztest_esrequest(void *handle, bend_esrequest_rr *rr);
+int ztest_delete(void *handle, bend_delete_rr *rr);
 
-int ztest_search (void *handle, bend_search_rr *rr)
+int ztest_search(void *handle, bend_search_rr *rr)
 {
     if (rr->num_bases != 1)
     {
@@ -677,11 +677,17 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_explain = ztest_explain;
     q->bend_srw_scan = ztest_scan;
 
+    yaz_log(YLOG_LOG, "ztest_init handle=%p control=%p",
+	    counter, statserv_getcontrol());
+
     return r;
 }
 
 void bend_close(void *handle)
 {
+    yaz_log(YLOG_LOG, "ztest_close handle=%p control=%p",
+	    handle, statserv_getcontrol());
+
     xfree (handle);              /* release our user-defined handle */
     return;
 }
