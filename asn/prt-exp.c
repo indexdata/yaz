@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.10  1998-05-18 13:06:52  adam
+ * Revision 1.11  1999-03-18 12:57:13  adam
+ * Fixed bug in TargetInfo encoder/decoder.
+ *
+ * Revision 1.10  1998/05/18 13:06:52  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -612,8 +615,9 @@ int z_TargetInfo(ODR o, Z_TargetInfo **p, int opt)
 	odr_implicit_settag(o, ODR_CONTEXT, 18) &&
 	(odr_sequence_of(o, (Odr_fun)z_NetworkAddress, &(*p)->addresses,
 	    &(*p)->num_addresses) || odr_ok(o)) &&
-	(odr_sequence_of(o, (Odr_fun)z_InternationalString, &(*p)->languages,
-	    &(*p)->num_languages) || odr_ok(o)) &&
+        odr_implicit_settag (o, ODR_CONTEXT, 101) &&
+        (odr_sequence_of(o, (Odr_fun) z_InternationalString, &(*p)->languages,
+         &(*p)->num_languages) || odr_ok(o)) &&
         odr_implicit(o, z_AccessInfo, &(*p)->commonAccessInfo, ODR_CONTEXT,
 	    19, 1) &&
         odr_sequence_end(o);
