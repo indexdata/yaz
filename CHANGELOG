@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed 
+
 Retrieval module enhancements. Tag sets may be typed in the reference
 to it. From the .abs-file the "tagset" directive takes a third optional
 integer type for the tag set referenced. From a .tag-file the "include"
