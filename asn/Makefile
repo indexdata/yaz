@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.14 1995-06-02 09:49:11 quinn Exp $
+# $Id: Makefile,v 1.15 1995-06-25 10:53:42 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -13,6 +13,7 @@ LIB=$(LIBDIR)/libasn.a
 LIBS=-lodr -lasn
 PO = proto.o diagbib1.o zget.o prt-rsc.o prt-acc.o
 CPP=$(CC) -E
+RANLIB=ranlib
 
 all: $(LIB)
 
@@ -24,7 +25,7 @@ alll:
 $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
-	ranlib $(LIB)
+	$(RANLIB) $(LIB)
 
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<

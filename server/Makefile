@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.25 1995-05-30 10:25:46 quinn Exp $
+# $Id: Makefile,v 1.26 1995-06-25 10:53:57 quinn Exp $
 
 LIBDIR=../lib
 
@@ -19,6 +19,7 @@ PO = eventl.o seshigh.o statserv.o requestq.o
 CPP=$(CC) -E
 PROG=ztest
 PROGO=ztest.o
+RANLIB=ranlib
 
 all: $(LIBDIR) $(LIB) $(PROG)
 
@@ -30,7 +31,7 @@ alll:
 $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
-	ranlib $(LIB)
+	$(RANLIB) $(LIB)
 
 $(LIBDIR):
 	mkdir $(LIBDIR)

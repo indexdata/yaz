@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.12 1995-05-30 10:25:47 quinn Exp $
+# $Id: Makefile,v 1.13 1995-06-25 10:53:59 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -13,6 +13,7 @@ LIB=$(LIBDIR)/libutil.a
 LIBS=
 PO = options.o log.o marcdisp.o yaz-ccl.o pquery.o oid.o # dmalloc.o
 CPP=$(CC) -E
+RANLIB=ranlib
 
 all: $(LIBDIR) $(LIB) marcdump
 
@@ -27,7 +28,7 @@ alll:
 $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
-	ranlib $(LIB)
+	$(RANLIB) $(LIB)
 
 $(LIBDIR):
 	mkdir $(LIBDIR)

@@ -2,7 +2,10 @@
 # Europagate, 1995
 #
 # $Log: Makefile,v $
-# Revision 1.3  1995-05-30 10:25:45  quinn
+# Revision 1.4  1995-06-25 10:53:43  quinn
+# Smallish adjustments.
+#
+# Revision 1.3  1995/05/30  10:25:45  quinn
 # Fixed dependency control
 #
 # Revision 1.2  1995/04/17  09:37:36  quinn
@@ -40,6 +43,7 @@ LIB=../lib/ccl.a
 PO=cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o
 CPP=$(CC) -E
 DEFS=$(INCLUDE)
+RANLIB=ranlib
 
 all: $(LIB)
 
@@ -49,7 +53,7 @@ $(TPROG1): $(TPROG1).o $(LIB)
 $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
-	ranlib $(LIB)
+	$(RANLIB) $(LIB)
 
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<

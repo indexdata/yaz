@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.21 1995-06-19 12:38:45 quinn Exp $
+# $Id: Makefile,v 1.22 1995-06-25 10:53:55 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -16,6 +16,7 @@ PO = odr_bool.o ber_bool.o ber_len.o ber_tag.o odr_util.o odr_null.o \
 	odr_oct.o ber_oct.o odr_bit.o ber_bit.o odr_oid.o ber_oid.o odr_use.o \
 	odr_choice.o odr_any.o ber_any.o odr.o odr_mem.o dumpber.o
 CPP=$(CC) -E
+RANLIB=ranlib
 
 all: $(LIBDIR) $(INCDIR) $(LIB)
 
@@ -27,7 +28,7 @@ alll:
 $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
-	ranlib $(LIB)
+	$(RANLIB) $(LIB)
 
 $(LIBDIR):
 	mkdir $(LIBDIR)
