@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.17 2004-10-15 00:18:59 adam Exp $
+ * $Id: srw.h,v 1.18 2005-01-08 01:20:18 adam Exp $
  */
 /**
  * \file srw.h
@@ -90,7 +90,12 @@ typedef struct {
 } Z_SRW_explainResponse;
     
 typedef struct {
-    char *scanClause;
+    int query_type;
+    union {
+        char *cql;
+        char *xcql;
+        char *pqf;
+    } scanClause;
     int *responsePosition;
     int *maximumTerms;
     char *stylesheet;

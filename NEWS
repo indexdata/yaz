@@ -1,6 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- IN PROGRESS
+Added support for SRW scan in yaz-client.
+
+* Changed Z_SRW_scanRequest to be able to carry both CCL and PQF.
 
 Fixed NMEM system to return aligned blocks on the smallest boundaries
 that are suitably aligned for all possible types on the particular

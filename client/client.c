@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.264 2005-01-02 20:31:39 adam Exp $
+ * $Id: client.c,v 1.265 2005-01-08 01:20:18 adam Exp $
  */
 
 #include <stdio.h>
@@ -1253,6 +1253,32 @@ static int send_srw(Z_SRW_PDU *sr)
 #endif
 
 #if HAVE_XML2
+static int send_SRW_scanRequest(const char *arg, int num, int pos)
+{
+    Z_SRW_PDU *sr = 0;
+    
+    /* regular request .. */
+    sr = yaz_srw_get(out, Z_SRW_scan_request);
+
+    switch(queryType)
+    {
+    case QueryType_CQL:
+	sr->u.scan_request->query_type = Z_SRW_query_type_cql;
+	sr->u.scan_request->scanClause.cql = odr_strdup(out, arg);
+	break;
+    case QueryType_Prefix:
+	sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
+	sr->u.scan_request->scanClause.pqf = odr_strdup(out, arg);
+	break;
+    default:
+	printf ("Only CQL and PQF supported in SRW\n");
+	return 0;
+    }
+    sr->u.scan_request->responsePosition = odr_intdup(out, pos);
+    sr->u.scan_request->maximumTerms = odr_intdup(out, num);
+    return send_srw(sr);
+}
+
 static int send_SRW_searchRequest(const char *arg)
 {
     Z_SRW_PDU *sr = 0;
@@ -2823,34 +2849,49 @@ int cmd_scanpos(const char *arg)
 
 int cmd_scan(const char *arg)
 {
-    if (only_z3950())
-	return 0;
-    if (!conn)
+    if (protocol == PROTO_HTTP)
     {
-        try_reconnect();
-        
-        if (!conn) {								
-            printf("Session not initialized yet\n");
+#if HAVE_XML2
+        if (!conn)
+            cmd_open(0);
+	if (!conn)
+	    return 0;
+        if (send_SRW_scanRequest(arg, 20, 0) < 0)
             return 0;
-        }
-    }
-    if (!ODR_MASK_GET(session->options, Z_Options_scan))
-    {
-        printf("Target doesn't support scan\n");
+	return 2;
+#else
         return 0;
-    }
-    if (*arg)
-    {
-        strcpy (last_scan_query, arg);
-        if (send_scanrequest(arg, scan_position, 20, 0) < 0)
-            return 0;
+#endif
     }
     else
     {
-        if (send_scanrequest(last_scan_query, 1, 20, last_scan_line) < 0)
-            return 0;
+	if (!conn)
+	{
+	    try_reconnect();
+	    
+	    if (!conn) {								
+		printf("Session not initialized yet\n");
+		return 0;
+	    }
+	}
+	if (!ODR_MASK_GET(session->options, Z_Options_scan))
+	{
+	    printf("Target doesn't support scan\n");
+	    return 0;
+	}
+	if (*arg)
+	{
+	    strcpy (last_scan_query, arg);
+	    if (send_scanrequest(arg, scan_position, 20, 0) < 0)
+		return 0;
+	}
+	else
+	{
+	    if (send_scanrequest(last_scan_query, 1, 20, last_scan_line) < 0)
+		return 0;
+	}
+	return 2;
     }
-    return 2;
 }
 
 int cmd_schema(const char *arg)
@@ -3476,6 +3517,40 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
 	handle_srw_record(res->records + i);
 }
 
+static void handle_srw_scan_term(Z_SRW_scanTerm *term)
+{
+    if (term->displayTerm)
+	printf ("%s: ", term->displayTerm);
+    if (term->value)
+	printf ("%s: ", term->value);
+    if (term->numberOfRecords)
+	printf ("%d", *term->numberOfRecords);
+    printf("\n");
+}
+
+static void handle_srw_scan_response(Z_SRW_scanResponse *res)
+{
+    int i;
+
+    printf ("Received SRW Scan Response\n");
+    
+    for (i = 0; i<res->num_diagnostics; i++)
+    {
+	if (res->diagnostics[i].uri)
+	    printf ("SRW diagnostic %s\n",
+		    res->diagnostics[i].uri);
+	else
+	    printf ("SRW diagnostic missing or could not be decoded\n");
+	if (res->diagnostics[i].message)
+            printf ("Message: %s\n", res->diagnostics[i].message);
+	if (res->diagnostics[i].details)
+            printf ("Details: %s\n", res->diagnostics[i].details);
+    }
+    if (res->terms)
+	for (i = 0; i<res->num_terms; i++)
+	    handle_srw_scan_term(res->terms + i);
+}
+
 static void http_response(Z_HTTP_Response *hres)
 {
     int ret = -1;
@@ -3503,6 +3578,8 @@ static void http_response(Z_HTTP_Response *hres)
                 handle_srw_response(sr->u.response);
             else if (sr->which == Z_SRW_explain_response)
                 handle_srw_explain_response(sr->u.explain_response);
+            else if (sr->which == Z_SRW_scan_response)
+                handle_srw_scan_response(sr->u.scan_response);
             else
                 ret = -1;
         }

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.28 2004-10-31 19:23:22 adam Exp $
+ * $Id: srw.c,v 1.29 2005-01-08 01:20:19 adam Exp $
  */
 /**
  * \file srw.c
@@ -605,11 +605,12 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             (*p)->which = Z_SRW_scan_request;
             req = (*p)->u.scan_request = (Z_SRW_scanRequest *)
 		odr_malloc(o, sizeof(*req));
-	    req->database = 0;
-	    req->scanClause = 0;
-	    req->stylesheet = 0;
+	    req->query_type = Z_SRW_query_type_cql;
+	    req->scanClause.cql = 0;
 	    req->responsePosition = 0;
 	    req->maximumTerms = 0;
+	    req->stylesheet = 0;
+	    req->database = 0;
 	    
 	    for (; ptr; ptr = ptr->next)
 	    {
@@ -617,7 +618,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 				     &(*p)->srw_version))
 		    ;
 		else if (match_xsd_string(ptr, "scanClause", o,
-				     &req->scanClause))
+				     &req->scanClause.cql))
 		    ;
 		else if (match_xsd_integer(ptr, "responsePosition", o,
 					   &req->responsePosition))
@@ -782,7 +783,15 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 	    xmlSetNs(ptr, ns_srw);
 
 	    add_xsd_string(ptr, "version", (*p)->srw_version);
-	    add_xsd_string(ptr, "scanClause", req->scanClause);
+	    switch(req->query_type)
+	    {
+	    case Z_SRW_query_type_cql:
+		add_xsd_string(ptr, "scanClause", req->scanClause.cql);
+		break;
+	    case Z_SRW_query_type_pqf:
+		add_xsd_string(ptr, "pScanClause", req->scanClause.pqf);
+		break;
+	    }
 	    add_xsd_integer(ptr, "responsePosition", req->responsePosition);
 	    add_xsd_integer(ptr, "maximumTerms", req->maximumTerms);
 	    add_xsd_string(ptr, "stylesheet", req->stylesheet);

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.19 2004-11-21 21:56:28 adam Exp $
+ * $Id: srwutil.c,v 1.20 2005-01-08 01:20:19 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -256,6 +256,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	char *sortKeys = 0;
 	char *stylesheet = 0;
 	char *scanClause = 0;
+	char *pScanClause = 0;
 	char *recordXPath = 0;
 	char *recordSchema = 0;
 	char *recordPacking = "xml";  /* xml packing is default for SRU */
@@ -306,6 +307,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 		    version = v;
 		else if (!strcmp(n, "scanClause"))
 		    scanClause = v;
+		else if (!strcmp(n, "x-ScanClause"))
+		    pScanClause = v;
 		else if (!strcmp(n, "maximumRecords"))
 		    maximumRecords = v;
 		else if (!strcmp(n, "startRecord"))
@@ -409,12 +412,21 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	{
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_scan_request);
 
-	    if (!scanClause)
+            if (scanClause)
+            {
+                sr->u.scan_request->query_type = Z_SRW_query_type_cql;
+		sr->u.scan_request->scanClause.cql = scanClause;
+            }
+            else if (pScanClause)
+            {
+                sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
+                sr->u.scan_request->scanClause.pqf = pScanClause;
+            }
+	    else
 		yaz_add_srw_diagnostic(decode, diag, num_diag, 7,
 				       "scanClause");
 	    sr->srw_version = version;
 	    *srw_pdu = sr;
-            sr->u.scan_request->scanClause = scanClause;
 	    sr->u.scan_request->database = db;
             sr->u.scan_request->stylesheet = stylesheet;
 
@@ -529,7 +541,8 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 	sr->u.scan_request->stylesheet = 0;
 	sr->u.scan_request->maximumTerms = 0;
 	sr->u.scan_request->responsePosition = 0;
-	sr->u.scan_request->scanClause = 0;
+	sr->u.scan_request->query_type = Z_SRW_query_type_cql;
+	sr->u.scan_request->scanClause.cql = 0;
         break;
     case Z_SRW_scan_response:
         sr->u.scan_response = (Z_SRW_scanResponse *)
