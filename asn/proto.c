@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.32  1995-06-19 12:37:28  quinn
+ * Revision 1.33  1995-06-19 13:39:56  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.32  1995/06/19  12:37:28  quinn
  * Fixed a bug in the compspec.
  *
  * Revision 1.31  1995/06/16  13:15:56  quinn
@@ -748,7 +751,7 @@ int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt)
     	{-1, -1, -1, Z_DiagForm_v2AddInfo, odr_visiblestring},
 	{-1, -1, -1, Z_DiagForm_v3AddInfo, z_InternationalString},
     	{ODR_IMPLICIT, ODR_CONTEXT, ODR_VISIBLESTRING, Z_DiagForm_v2AddInfo,
-	    odr_visiblestring}, /* to match some weird server.. */
+	    odr_visiblestring}, /* To cater to a bug in the CNIDR servers */
 	{-1, -1, -1, -1, 0}
     };
     if (!odr_sequence_begin(o, p, sizeof(**p)))
