@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 1.0 1995/XX/XX
+--- 1.0 1995/11/28
 
 The shift to v1.0 signals that we now consider the *core* functionality
 of YAZ reasonably stable (the core being more or less equivalent to
