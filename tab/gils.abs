@@ -95,3 +95,9 @@ elm (4,23)                  originalControlIdentifier     !
 elm (4,59)                  supplementalInformation       !
 
 elm (2,9)                   bodyOfDisplay		  Any
+
+#
+# Local tags - testing only
+#
+
+elm sampleText              bodyOfText			!
