@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.42 2002-06-05 21:11:00 adam Exp $
+# $Id: makefile,v 1.43 2002-07-25 13:45:30 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,15 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
+
+# iconv
+HAVE_ICONV=1
+ICONV_DIR = c:\libiconv-1.7.0.1
+
+# TCL
+TCL="C:\Tcl\bin\tclsh83.exe"
+HAVE_TCL=1
 
 default: all
 
@@ -105,13 +113,25 @@ zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
 ############### Compiler and linker options 
 ###########################################################
 
-
+!if $(HAVE_ICONV)
+ICONV_DEF= \
+  /D HAVE_ICONV_H=1 \
+  /I"$(ICONV_DIR)\include"
+ICONV_LIB= \
+  $(ICONV_DIR)\lib\iconv.lib
+!else
+ICONV_DEF= \
+  /D HAVE_ICONV_H=0
+ICONV_LIB=
+!endif
+  
 ### C and CPP compiler  (the same thing)
 # Note: $(CPP) has already been defined in the environment
 # (if you set things up right!)
 
 COMMON_C_OPTIONS=          \
   /nologo /W3 /GX /FD /c   \
+  $(ICONV_DEF)             \
   /D "_WINDOWS"            \
   /D "WIN32"               \
   /FR"$(OBJDIR)\\"         \
@@ -151,7 +171,7 @@ LINK=link.exe
 
 LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
            advapi32.lib uuid.lib \
-           wsock32.lib  advapi32.lib
+           wsock32.lib  advapi32.lib $(ICONV_LIB)
 
 COMMON_LNK_OPTIONS= /nologo \
                     /subsystem:windows \
@@ -167,10 +187,6 @@ CLIENT_LINK_OPTIONS = /subsystem:console
 ZOOMSH_LINK_OPTIONS = /subsystem:console
 SERVER_LINK_OPTIONS = -lib 
 ZTEST_LINK_OPTIONS = /subsystem:console  
-
-# TCL
-TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
-HAVE_TCL=1
 
 COMMON_TCL_OPTIONS= ..\util\yaz-comp -I$(INCLDIR) -i yaz
 
@@ -832,7 +848,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.42  2002-06-05 21:11:00  adam
+# Revision 1.43  2002-07-25 13:45:30  adam
+# iconv.dll
+#
+# Revision 1.42  2002/06/05 21:11:00  adam
 # NSIS bz2
 #
 # Revision 1.41  2002/06/04 08:29:53  adam
