@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.11 2004-01-05 09:34:42 adam Exp $
+ * $Id: srw.c,v 1.12 2004-01-05 14:05:56 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -279,7 +279,12 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
         if (!*num)
             return 1;
         *recs = odr_malloc(o, *num * sizeof(**recs));
-        for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next, i++)
+	for (i = 0; i < *num; i++)
+	{
+            (*recs)[i].code = 0;
+            (*recs)[i].details = 0;
+	} 
+        for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next)
         {
             if (ptr->type == XML_ELEMENT_NODE &&
                 !strcmp(ptr->name, "diagnostic"))
