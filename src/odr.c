@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.4 2004-08-13 08:58:59 adam Exp $
+ * $Id: odr.c,v 1.5 2004-08-24 08:44:10 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -221,6 +221,7 @@ void odr_destroy(ODR o)
 
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)
 {
+    odr_seterror(o, ONONE, 0);
     o->bp = (unsigned char *) buf;
 
     o->buf = (unsigned char *) buf;
