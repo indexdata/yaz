@@ -2,9 +2,19 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Add OID for the new ExtLite attribute set.
+
+Add OIDs for NACSIS-CATP, FINMARC2000 and MARC21-fin record-syntaxes,
+ as requested/supplid by Ere Maijala <ere@atp.fi>
+
+For generic frontend server, reverse the order of
+"toolkit-supplied / application-supplied" strings sent as implementationId,
+Name and Version.  Also, remove the spaces around the slash.  This brings
+the GFS in line with the behaviour of ZOOM-C on the client side.
+
 Add function ZOOM_scanset_display_term.
 
-For Scan yaz-client shows displayTerm if present.
+yaz-client shows scan displayTerm if present.
 
 Utility yaz-iconv is now installed by default along with the man page 
 yaz-iconv.1.
