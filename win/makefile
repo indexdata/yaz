@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.60 2003-06-11 18:37:10 adam Exp $
+# $Id: makefile,v 1.61 2003-07-15 08:26:26 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -361,6 +361,7 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\z3950oid.obj \
    $(OBJDIR)\charneg.obj \
    $(OBJDIR)\grs1disp.obj \
+   $(OBJDIR)\opacdisp.obj \
    $(OBJDIR)\zgdu.obj \
    $(OBJDIR)\soap.obj \
    $(OBJDIR)\srw.obj
@@ -930,7 +931,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.60  2003-06-11 18:37:10  adam
+# Revision 1.61  2003-07-15 08:26:26  adam
+# opacdisp.obj
+#
+# Revision 1.60  2003/06/11 18:37:10  adam
 # Dont use charconv_cjk.xml
 #
 # Revision 1.59  2003/06/03 09:11:13  adam
