@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.89 2003-01-13 14:32:06 adam Exp $
+ * $Id: statserv.c,v 1.90 2003-01-14 08:21:14 adam Exp $
  */
 
 #include <stdio.h>
@@ -715,7 +715,7 @@ int statserv_start(int argc, char **argv)
     if (control_block.bend_start)
         (*control_block.bend_start)(&control_block);
 #ifdef WIN32
-    logf (LOG_LOG, "Starting server %s", me);
+    yaz_log (LOG_LOG, "Starting server %s", me);
 #else
 /* UNIX */
     if (control_block.inetd)
