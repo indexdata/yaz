@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: marcdisp.c,v $
- * Revision 1.11  2000-02-29 13:44:55  adam
+ * Revision 1.12  2000-10-02 11:07:44  adam
+ * Added peer_name member for bend_init handler. Changed the YAZ
+ * client so that tcp: can be avoided in target spec.
+ *
+ * Revision 1.11  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.10  2000/02/05 10:47:19  adam
@@ -63,7 +67,14 @@ int marc_display_ex (const char *buf, FILE *outf, int debug)
         outf = stdout;
     record_length = atoi_n (buf, 5);
     if (record_length < 25)
+    {
+	if (debug)
+	{
+	   fprintf (outf, "Record length %d - aborting\n", record_length);
+
+	}
         return -1;
+    }
     if (isdigit(buf[10]))
         indicator_length = atoi_n (buf+10, 1);
     else

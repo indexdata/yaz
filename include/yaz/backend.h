@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.9  2000-08-31 10:20:12  adam
+ * Revision 1.10  2000-10-02 11:07:44  adam
+ * Added peer_name member for bend_init handler. Changed the YAZ
+ * client so that tcp: can be avoided in target spec.
+ *
+ * Revision 1.9  2000/08/31 10:20:12  adam
  * Added member request_format and output_format for backend fetch method.
  *
  * Revision 1.8  2000/08/31 09:51:25  adam
@@ -253,6 +257,7 @@ typedef struct bend_initrequest
     ODR stream;                /* encoding stream */
     ODR print;                 /* printing stream */
     Z_ReferenceId *referenceId;/* reference ID */
+    char *peer_name;           /* dns host of peer (client) */
     
     char *implementation_name;
     char *implementation_version;

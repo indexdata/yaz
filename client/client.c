@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.104  2000-09-04 08:58:15  adam
+ * Revision 1.105  2000-10-02 11:07:44  adam
+ * Added peer_name member for bend_init handler. Changed the YAZ
+ * client so that tcp: can be avoided in target spec.
+ *
+ * Revision 1.104  2000/09/04 08:58:15  adam
  * Added prefix yaz_ for most logging utility functions.
  *
  * Revision 1.103  2000/08/10 08:41:26  adam
@@ -560,7 +564,8 @@ static int cmd_base(char *arg)
 int cmd_open(char *arg)
 {
     void *add;
-    char type[100], addr[100], base[100];
+    char type_and_host[101], base[101];
+    char *host = 0;
     CS_TYPE t;
 
     if (conn)
@@ -576,37 +581,23 @@ int cmd_open(char *arg)
 	}
     }
     base[0] = '\0';
-    if (!*arg || sscanf(arg, "%[^:]:%[^/]/%s", type, addr, base) < 2)
-    {
-        fprintf(stderr, "Usage: open (osi|tcp) ':' [tsel '/']host[':'port]\n");
-        return 0;
-    }
+    if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
+	return 0;
+    if (strncmp (type_and_host, "tcp:", 4) == 0)
+	host = type_and_host + 4;
+    else
+	host = type_and_host;
     if (*base)
         cmd_base (base);
-    if (!strcmp(type, "tcp"))
-    {
-	t = tcpip_type;
-	protocol = PROTO_Z3950;
-    }
-    else
-#ifdef USE_XTIMOSI
-    if (!strcmp(type, "osi"))
-    {
-        t = mosi_type;
-        protocol = PROTO_SR;
-    }
-    else
-#endif
-    {
-	fprintf(stderr, "Bad type: %s\n", type);
-	return 0;
-    }
+    t = tcpip_type;
+    protocol = PROTO_Z3950;
+
     if (!(conn = cs_create(t, 1, protocol)))
     {
         perror("cs_create");
         return 0;
     }
-    if (!(add = cs_straddr(conn, addr)))
+    if (!(add = cs_straddr(conn, host)))
     {
 	perror(arg);
 	return 0;

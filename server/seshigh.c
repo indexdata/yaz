@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.108  2000-09-04 08:58:15  adam
+ * Revision 1.109  2000-10-02 11:07:44  adam
+ * Added peer_name member for bend_init handler. Changed the YAZ
+ * client so that tcp: can be avoided in target spec.
+ *
+ * Revision 1.108  2000/09/04 08:58:15  adam
  * Added prefix yaz_ for most logging utility functions.
  *
  * Revision 1.107  2000/08/31 10:20:12  adam
@@ -893,6 +897,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     assoc->init->bend_scan = NULL;
     assoc->init->bend_segment = NULL;
     assoc->init->bend_fetch = NULL;
+    
+    assoc->init->peer_name =
+	odr_strdup (assoc->decode, cs_addrstr(assoc->client_link));
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
     	yaz_log(LOG_WARN, "Bad response from backend.");

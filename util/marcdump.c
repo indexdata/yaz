@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.11  2000-07-04 08:53:22  adam
+ * Revision 1.12  2000-10-02 11:07:45  adam
+ * Added peer_name member for bend_init handler. Changed the YAZ
+ * client so that tcp: can be avoided in target spec.
+ *
+ * Revision 1.11  2000/07/04 08:53:22  adam
  * Fixed bug.
  *
  * Revision 1.10  2000/02/29 13:44:55  adam
@@ -69,12 +73,18 @@ int main (int argc, char **argv)
     char *prog = *argv;
     int count = 0;
     int no = 0;
+    FILE *cfile = 0;
 
-    while ((ret = options("v", argv, argc, &arg)) != -2)
+    while ((ret = options("vc:", argv, argc, &arg)) != -2)
     {
 	no++;
         switch (ret)
         {
+	case 'c':
+	    if (cfile)
+		fclose (cfile);
+	    cfile = fopen (arg, "w");
+	    break;
         case 0:
 	    inf = fopen (arg, "r");
 	    if (!inf)
@@ -109,10 +119,36 @@ int main (int argc, char **argv)
 			 prog, arg, strerror (errno));
 		exit (1);
 	    }
+	    if (cfile)
+	    {
+		fprintf (cfile, "char *marc_records[] = {\n");
+	    }
 	    for (p = buf; (ret = marc_display_ex (p, stdout, verbose)) > 0;)
 	    {
+		if (cfile)
+		{
+		    int i;
+		    if (p != buf)
+			fprintf (cfile, ",");
+		    fprintf (cfile, "{\n");
+		    for (i = 0; i<ret; i++)
+		    {
+			if ((i & 15) == 0)
+			    fprintf (cfile, "  \"");
+			fprintf (cfile, "\\x%02X", p[i] & 255);
+			
+			if (i < ret - 1 && (i & 15) == 15)
+			    fprintf (cfile, "\"\n");
+			
+		    }
+		    fprintf (cfile, "\"\n}");
+		}
 		p += ret;
 		count++;
+	    }
+	    if (cfile)
+	    {
+		fprintf (cfile, "};\n");
 	    }
 	    fclose (inf);
 	    xfree (buf);
@@ -121,10 +157,12 @@ int main (int argc, char **argv)
 	    verbose++;
             break;
         default:
-            fprintf (stderr, "Usage: %s [-v] file...\n", prog);
+            fprintf (stderr, "Usage: %s [-c cfile] [-v] file...\n", prog);
             exit (1);
         }
     }
+    if (cfile)
+	fclose (cfile);
     if (!no)
     {
 	fprintf (stderr, "Usage: %s [-v] file...\n", prog);
