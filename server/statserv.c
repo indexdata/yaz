@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.54  1999-04-16 14:45:55  adam
+ * Revision 1.55  1999-06-10 09:18:54  adam
+ * Modified so that pre_init is called when service/server is started.
+ *
+ * Revision 1.54  1999/04/16 14:45:55  adam
  * Added interface for tcpd wrapper for access control.
  *
  * Revision 1.53  1999/02/02 13:57:39  adam
@@ -800,13 +803,13 @@ int statserv_start(int argc, char **argv)
     if (control_block.options_func(argc, argv))
         return(1);
 
+    if (control_block.pre_init)
+        (*control_block.pre_init)(&control_block);
 #ifndef WIN32
     if (control_block.inetd)
 	inetd_connection(control_block.default_proto);
     else
     {
-	if (control_block.pre_init)
-	    (*control_block.pre_init)(&control_block);
 	if (control_block.dynamic)
 	    signal(SIGCHLD, catchchld);
     }
