@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.5 2003-02-23 14:26:57 adam Exp $
+ * $Id: srw.h,v 1.6 2003-03-20 21:15:00 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -12,6 +12,9 @@
 
 typedef struct {
     char *recordSchema;
+    int recordPacking;
+#define Z_SRW_recordPacking_string 0
+#define Z_SRW_recordPacking_XML 1
     char *recordData_buf;
     int recordData_len;
     int *recordPosition;

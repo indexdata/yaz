@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+recordPacking.
+
 SRU protocol support for frontend server.
 
 Fix compile bug for systems that have nl_langinfo but CODESET undefined.

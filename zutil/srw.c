@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.9 2003-03-18 13:34:37 adam Exp $
+ * $Id: srw.c,v 1.10 2003-03-20 21:15:00 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -10,6 +10,21 @@
 #if HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+
+static void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len)
+{
+    if (val)
+    {
+        xmlDocPtr doc = xmlParseMemory(val,len);
+        if (doc)
+        {
+            xmlNodePtr c = xmlNewChild(ptr, 0, elem, 0);
+            xmlNodePtr t = xmlDocGetRootElement(doc);
+            xmlAddChild(c, xmlCopyNode(t,1));
+            xmlFreeDoc(doc);
+        }
+    }
+}
 
 static void add_xsd_string_n(xmlNodePtr ptr, const char *elem, char *val,
                              int len)
@@ -141,6 +156,7 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
             {
                 xmlNodePtr rptr;
                 (*recs)[i].recordSchema = 0;
+                (*recs)[i].recordPacking = Z_SRW_recordPacking_string;
                 (*recs)[i].recordData_buf = 0;
                 (*recs)[i].recordData_len = 0;
                 (*recs)[i].recordPosition = 0;
@@ -167,8 +183,17 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
         {
             xmlNodePtr rptr = xmlNewChild(pptr, 0, "record", 0);
             add_xsd_string(rptr, "recordSchema", (*recs)[i].recordSchema);
-            add_xsd_string_n(rptr, "recordData", (*recs)[i].recordData_buf,
-                             (*recs)[i].recordData_len);
+            switch((*recs)[i].recordPacking)
+            {
+            case Z_SRW_recordPacking_string:
+                add_xsd_string_n(rptr, "recordData", (*recs)[i].recordData_buf,
+                                 (*recs)[i].recordData_len);
+                break;
+            case Z_SRW_recordPacking_XML:
+                add_XML_n(rptr, "recordXML", (*recs)[i].recordData_buf,
+                          (*recs)[i].recordData_len);
+                break;
+            }
             add_xsd_integer(rptr, "recordPosition", (*recs)[i].recordPosition);
         }
     }

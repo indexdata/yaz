@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.149 2003-03-18 13:34:36 adam Exp $
+ * $Id: seshigh.c,v 1.150 2003-03-20 21:15:00 adam Exp $
  */
 
 /*
@@ -669,14 +669,20 @@ static void srw_bend_search(association *assoc, request *req,
             if (start <= rr.hits)
             {
                 int j = 0;
+                int packing = Z_SRW_recordPacking_string;
                 if (start + number > rr.hits)
                     number = rr.hits - start + 1;
+                if (srw_req->recordPacking && 
+                    !strcmp(srw_req->recordPacking, "xml"))
+                    packing = Z_SRW_recordPacking_XML;
                 srw_res->records = (Z_SRW_record *)
                     odr_malloc(assoc->encode,
                                number * sizeof(*srw_res->records));
                 for (i = 0; i<number; i++)
                 {
                     int errcode;
+                    
+                    srw_res->records[j].recordPacking = packing;
                     srw_res->records[j].recordData_buf = 0;
                     yaz_log(LOG_DEBUG, "srw_bend_fetch %d", i+start);
                     errcode = srw_bend_fetch(assoc, i+start, srw_req,
@@ -827,6 +833,7 @@ static void process_http_request(association *assoc, request *req)
                 sr->u.request->sort.sortKeys = sortKeys;
             }
             sr->u.request->recordSchema = uri_val(p1, "recordSchema", o);
+            sr->u.request->recordPacking = uri_val(p1, "recordPacking", o);
             uri_val_int(p1, "maximumRecords", o, 
                         &sr->u.request->maximumRecords);
             uri_val_int(p1, "startRecord", o,
