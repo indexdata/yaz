@@ -1,4 +1,4 @@
-YAZ toolkit - $Id: README,v 1.42 2003-01-06 08:20:26 adam Exp $
+YAZ toolkit - $Id: README,v 1.43 2003-02-20 21:23:47 adam Exp $
 
 Copyright (C) 1995-2003, Index Data ApS.
 See the file LICENSE for details.
@@ -35,8 +35,8 @@ z39.50   codecs for the Z39.50 protocol. This module does the same job
          as the old 'asn' module except that the source files are
          auto-generated using an YAZ' ASN.1 Compiler (yaz-comp).
 
-zutil    This module implements a collection of Z39.50 utilities, such
-         as query parsing, etc.
+zutil    This module implements a collection of Z39.50 and SRW utilities,
+	 such as query parsing, etc.
 
 ill      Codecs for the ISO ILL protocol.
 
@@ -60,10 +60,6 @@ server   This is the implementation of the Z39.50 server frontend. It
 ccl      CCL parser.
 
 cql      CQL parser.
-
-srw      SRW support (based on gSOAP).
-
-srwapps  SRW applicaions, most notably a SRW-to-Z39.50 gateway.
 
 client   A demonstration client for testing the protocol. It's bug'n
          ugly. But, it supports many features.
