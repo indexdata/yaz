@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_any.c,v $
- * Revision 1.2  1995-03-08 12:12:18  quinn
+ * Revision 1.3  1995-03-17 10:17:46  quinn
+ * Added memory management.
+ *
+ * Revision 1.2  1995/03/08  12:12:18  quinn
  * Added better error checking.
  *
  * Revision 1.1  1995/02/09  15:51:47  quinn
@@ -30,7 +33,7 @@ int odr_any(ODR o, Odr_any **p, int opt)
     	return 1;
     }
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     if (ber_any(o, p))
     	return 1;
     *p = 0;

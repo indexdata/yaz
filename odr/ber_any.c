@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.6  1995-03-08 12:12:02  quinn
+ * Revision 1.7  1995-03-17 10:17:39  quinn
+ * Added memory management.
+ *
+ * Revision 1.6  1995/03/08  12:12:02  quinn
  * Added better error checking.
  *
  * Revision 1.5  1995/02/14  20:39:54  quinn
@@ -38,7 +41,7 @@ int ber_any(ODR o, Odr_any **p)
 	    	o->error = OPROTO;
 	    	return 0;
 	    }
-	    (*p)->buf = nalloc(o, res);
+	    (*p)->buf = odr_malloc(o, res);
 	    memcpy((*p)->buf, o->bp, res);
 	    (*p)->len = (*p)->size = res;
 	    o->bp += res;

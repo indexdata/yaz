@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bit.c,v $
- * Revision 1.6  1995-03-08 12:12:19  quinn
+ * Revision 1.7  1995-03-17 10:17:48  quinn
+ * Added memory management.
+ *
+ * Revision 1.6  1995/03/08  12:12:19  quinn
  * Added better error checking.
  *
  * Revision 1.5  1995/02/10  18:57:25  quinn
@@ -55,7 +58,7 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt)
     }
     if (o->direction == ODR_DECODE)
     {
-    	*p = nalloc(o, sizeof(Odr_bitmask));
+    	*p = odr_malloc(o, sizeof(Odr_bitmask));
     	memset((*p)->bits, 0, ODR_BITMASK_SIZE);
     	(*p)->top = -1;
     }

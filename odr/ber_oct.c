@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.5  1995-03-08 12:12:10  quinn
+ * Revision 1.6  1995-03-17 10:17:41  quinn
+ * Added memory management.
+ *
+ * Revision 1.5  1995/03/08  12:12:10  quinn
  * Added better error checking.
  *
  * Revision 1.4  1995/02/10  15:55:28  quinn
@@ -54,7 +57,7 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    }
 	    if (len + 1 > p->size - p->len)
 	    {
-	    	c = nalloc(o, p->size += len + 1);
+	    	c = odr_malloc(o, p->size += len + 1);
 	    	if (p->len)
 		    memcpy(c, p->buf, p->len);
 		p->buf = c;

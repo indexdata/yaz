@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.8  1995-03-15 11:18:05  quinn
+ * Revision 1.9  1995-03-17 10:17:57  quinn
+ * Added memory management.
+ *
+ * Revision 1.8  1995/03/15  11:18:05  quinn
  * Fixed serious bug in odr_cons
  *
  * Revision 1.7  1995/03/08  12:12:30  quinn
@@ -49,7 +52,7 @@ int odr_sequence_begin(ODR o, void *p, int size)
     if (odr_constructed_begin(o, p, o->t_class, o->t_tag))
     {
     	if (o->direction == ODR_DECODE && size)
-	    *pp = nalloc(o, size);
+	    *pp = odr_malloc(o, size);
 	if (o->direction == ODR_PRINT)
 	{
 	    fprintf(o->print, "%s{\n", odr_indent(o));
@@ -97,7 +100,7 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 		if (*num * sizeof(void*) >= size)
 		{
 		    /* double the buffer size */
-		    tmp = nalloc(o, sizeof(void*) * (size += size ? size :
+		    tmp = odr_malloc(o, sizeof(void*) * (size += size ? size :
 			128));
 		    if (*num)
 		    {

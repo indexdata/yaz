@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.7  1995-03-08 12:12:29  quinn
+ * Revision 1.8  1995-03-17 10:17:55  quinn
+ * Added memory management.
+ *
+ * Revision 1.7  1995/03/08  12:12:29  quinn
  * Added better error checking.
  *
  * Revision 1.6  1995/03/01  08:40:56  quinn
@@ -65,6 +68,6 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
     	return 1;
     }
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, ODR_OID_SIZE * sizeof(**p));
+    	*p = odr_malloc(o, ODR_OID_SIZE * sizeof(**p));
     return ber_oidc(o, *p);
 }

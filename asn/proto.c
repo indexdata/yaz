@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.10  1995-03-15 11:17:40  quinn
+ * Revision 1.11  1995-03-17 10:17:25  quinn
+ * Added memory management.
+ *
+ * Revision 1.10  1995/03/15  11:17:40  quinn
  * Fixed some return-checks from choice.. need better ay to handle those..
  *
  * Revision 1.9  1995/03/15  08:37:06  quinn
@@ -164,7 +167,7 @@ int z_DatabaseSpecificUnit(ODR o, Z_DatabaseSpecificUnit **p, int opt)
 int z_DatabaseSpecific(ODR o, Z_DatabaseSpecific **p, int opt)
 {
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
 
@@ -191,7 +194,7 @@ int z_ElementSetNames(ODR o, Z_ElementSetNames **p, int opt)
     	return opt;
 
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
 
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which) &&
     	odr_constructed_end(o))
@@ -243,7 +246,7 @@ int z_Operator(ODR o, Z_Operator **p, int opt)
     if (!odr_constructed_begin(o, p, ODR_CONTEXT, 46))
     	return opt;
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     else
     	(*p)->u.and = &dummy;
 
@@ -264,7 +267,7 @@ int z_Operand(ODR o, Z_Operand **p, int opt)
     };
 
     if (o->direction ==ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -296,7 +299,7 @@ int z_RPNStructure(ODR o, Z_RPNStructure **p, int opt)
     };
 
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -327,7 +330,7 @@ int z_Query(ODR o, Z_Query **p, int opt)
     };
 
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -410,7 +413,7 @@ int z_NamePlusRecord(ODR o, Z_NamePlusRecord **p, int opt)
 int z_NamePlusRecordList(ODR o, Z_NamePlusRecordList **p, int opt)
 {
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     if (odr_sequence_of(o, z_NamePlusRecord, &(*p)->records,
 	&(*p)->num_records))
     	return 1;
@@ -428,7 +431,7 @@ int z_Records(ODR o, Z_Records **p, int opt)
     };
 
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     else if (!*p)
     	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
@@ -527,7 +530,7 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
     };
 
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     if (!odr_choice(o, arm, &(*p)->u, &(*p)->which))
     {
     	if (o->direction == ODR_DECODE)

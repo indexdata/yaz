@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.7  1995-03-10 11:44:41  quinn
+ * Revision 1.8  1995-03-17 10:17:43  quinn
+ * Added memory management.
+ *
+ * Revision 1.7  1995/03/10  11:44:41  quinn
  * Fixed serious stack-bug in odr_cons_begin
  *
  * Revision 1.6  1995/03/08  12:12:15  quinn
@@ -72,6 +75,7 @@ ODR odr_createmem(int direction)
     r->print = stdout;
     r->buf = 0;
     r->buflen = 0;
+    r->mem = 0;
     odr_reset(r);
     return r;
 }
@@ -85,10 +89,13 @@ void odr_reset(ODR o)
     o->t_tag = -1;
     o->indent = 0;
     o->stackp = -1;
+    odr_release_mem(o->mem);
+    o->mem = 0;
 }
     
 void odr_destroy(ODR o)
 {
+    odr_release_mem(o->mem);
     free(o);
 }
 

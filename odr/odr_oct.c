@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.7  1995-03-08 12:12:27  quinn
+ * Revision 1.8  1995-03-17 10:17:54  quinn
+ * Added memory management.
+ *
+ * Revision 1.7  1995/03/08  12:12:27  quinn
  * Added better error checking.
  *
  * Revision 1.6  1995/02/10  18:57:26  quinn
@@ -55,7 +58,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
     }
     if (o->direction == ODR_DECODE)
     {
-    	*p = nalloc(o, sizeof(Odr_oct));
+    	*p = odr_malloc(o, sizeof(Odr_oct));
     	(*p)->size= 0;
     	(*p)->len = 0;
     	(*p)->buf = 0;
@@ -90,7 +93,7 @@ int odr_cstring(ODR o, char **p, int opt)
     	fprintf(o->print, "%s'%s'\n", odr_indent(o), *p);
     	return 1;
     }
-    t = nalloc(o, sizeof(Odr_oct));   /* wrapper for octstring */
+    t = odr_malloc(o, sizeof(Odr_oct));   /* wrapper for octstring */
     if (o->direction == ODR_ENCODE)
     {
     	t->buf = (unsigned char *) *p;

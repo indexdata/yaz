@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.3  1995-03-16 17:42:39  quinn
+ * Revision 1.4  1995-03-17 10:18:08  quinn
+ * Added memory management.
+ *
+ * Revision 1.3  1995/03/16  17:42:39  quinn
  * Little changes
  *
  * Revision 1.2  1995/03/16  13:29:01  quinn
@@ -91,6 +94,8 @@ void destroy_association(association *h)
     odr_destroy(h->decode);
     odr_destroy(h->encode);
     free(h->encode_buffer);
+    if (h->input_buffer)
+    	free(h->input_buffer);
     free(h);
 }
 
@@ -176,6 +181,7 @@ static int process_apdu(IOCHAN chan)
 	    fprintf(stderr, "Bad APDU\n");
 	    return -1;
     }
+    odr_reset(assoc->decode);
     return res;
 }
 
@@ -220,7 +226,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.3 $";
+    resp.implementationVersion = "$Revision: 1.4 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -228,6 +234,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);
+    odr_reset(assoc->encode);
     iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
     return 0;
 }
@@ -293,6 +300,7 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);
+    odr_reset(assoc->encode);
     iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
     return 0;
 }
@@ -322,6 +330,7 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);
+    odr_reset(assoc->encode);
     iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
     return 0;
 }

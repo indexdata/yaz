@@ -70,7 +70,7 @@ int f_A(ODR o, struct A **p, int opt)
     };
 
     if (o->direction == ODR_DECODE && !*p)
-    	*p = nalloc(o, sizeof(**p));
+    	*p = odr_malloc(o, sizeof(**p));
     res = odr_choice(o, arm, &(*p)->u, &(*p)->which);
     if (!res)
     {

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bool.c,v $
- * Revision 1.4  1995-03-08 12:12:20  quinn
+ * Revision 1.5  1995-03-17 10:17:49  quinn
+ * Added memory management.
+ *
+ * Revision 1.4  1995/03/08  12:12:20  quinn
  * Added better error checking.
  *
  * Revision 1.3  1995/02/10  18:57:25  quinn
@@ -48,6 +51,6 @@ int odr_bool(ODR o, int **p, int opt)
     if (cons)
     	return 0;
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, sizeof(int));
+    	*p = odr_malloc(o, sizeof(int));
     return ber_boolean(o, *p);
 }
