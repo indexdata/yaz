@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.4  1995-09-29 17:12:21  quinn
+ * Revision 1.5  1995-10-18 16:12:55  quinn
+ * Better diagnostics. Added special case in NULL to handle WAIS server.
+ *
+ * Revision 1.4  1995/09/29  17:12:21  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:57  quinn
@@ -22,7 +25,7 @@
 #include <odr.h>
 #include <stdio.h>
 
-static int do_dumpBER(FILE *f, char *buf, int len, int level)
+static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
 {
     int res, ll, class, tag, cons;
     char *b = buf;
@@ -38,7 +41,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level)
     	fprintf(stderr, "Unexpected end of buffer\n");
     	return 0;
     }
-    fprintf(stderr, "%*s", level * 4, "");
+    fprintf(stderr, "%5d: %*s", offset, level * 4, "");
     if (class == ODR_UNIVERSAL)
     {
     	static char *nl[] =
@@ -94,7 +97,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level)
     {
 	if (ll == -1 && *b == 0 && *(b + 1) == 0)
 	    break;
-	if (!(res = do_dumpBER(f, b, len, level + 1)))
+	if (!(res = do_dumpBER(f, b, len, level + 1, offset + (b - buf))))
 	{
 	    fprintf(stderr, "Dump of content element failed.\n");
 	    return 0;
@@ -116,5 +119,5 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level)
 
 int odr_dumpBER(FILE *f, char *buf, int len)
 {
-    return do_dumpBER(f, buf, len, 0);
+    return do_dumpBER(f, buf, len, 0, 0);
 }

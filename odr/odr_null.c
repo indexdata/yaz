@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_null.c,v $
- * Revision 1.8  1995-09-29 17:12:24  quinn
+ * Revision 1.9  1995-10-18 16:12:56  quinn
+ * Better diagnostics. Added special case in NULL to handle WAIS server.
+ *
+ * Revision 1.8  1995/09/29  17:12:24  quinn
  * Smallish
  *
  * Revision 1.7  1995/09/27  15:02:59  quinn
@@ -58,8 +61,12 @@ int odr_null(ODR o, Odr_null **p, int opt)
     }
     if (cons)
     {
+#ifdef ODR_STRICT_NULL
     	o->error = OPROTO;
     	return 0;
+#else
+	fprintf(stderr, "odr: Warning: Bad NULL\n");
+#endif
     }
     if (o->direction == ODR_DECODE)
     	*p = ODR_NULLVAL;
