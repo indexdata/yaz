@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.14 2004-03-01 17:33:03 adam Exp $
+ * $Id: srwutil.c,v 1.15 2004-03-24 10:14:24 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -552,7 +552,7 @@ static struct {
 {12, "Too many characters in query"}, 
 {13, "Invalid or unsupported use of parentheses"}, 
 {14, "Invalid or unsupported use of quotes"}, 
-{15, "Unsupported context context set"}, 
+{15, "Unsupported context set"}, 
 {16, "Unsupported index"}, 
 {17, "Unsupported combination of index and context set"}, 
 {18, "Unsupported combination of indexes"}, 
