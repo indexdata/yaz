@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.37 2004-10-01 19:34:09 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.38 2004-10-02 13:41:46 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1049,34 +1049,28 @@ struct cql_node *cql_parser_result(CQL_parser cp);
       <synopsis>
 #define CQL_NODE_ST 1
 #define CQL_NODE_BOOL 2
-#define CQL_NODE_MOD 3
 struct cql_node {
     int which;
     union {
         struct {
             char *index;
+	    char *index_uri;
             char *term;
             char *relation;
+	    char *relation_uri;
             struct cql_node *modifiers;
-            struct cql_node *prefixes;
         } st;
         struct {
             char *value;
             struct cql_node *left;
             struct cql_node *right;
             struct cql_node *modifiers;
-            struct cql_node *prefixes;
         } boolean;
-        struct {
-            char *name;
-            char *value;
-            struct cql_node *next;
-        } mod;
     } u;
 };
       </synopsis>
-      There are three kinds of nodes, search term (ST), boolean (BOOL),
-      and modifier (MOD).
+      There are two node types: search term (ST) and boolean (BOOL).
+      A modifier is treated as a search term too.
      </para>
      <para>
       The search term node has five members:
@@ -1086,6 +1080,10 @@ struct cql_node {
          <literal>index</literal>: index for search term.
          If an index is unspecified for a search term,
          <literal>index</literal> will be NULL.
+        </para>
+        <para>
+         <literal>index_uri</literal>: index URi for search term
+	 or NULL if none could be resolved for the index.
         </para>
        </listitem>
        <listitem>
@@ -1100,18 +1098,14 @@ struct cql_node {
        </listitem>
        <listitem>
         <para>
-         <literal>modifiers</literal>: relation modifiers for search
-         term. The <literal>modifiers</literal> is a simple linked
-         list (NULL for last entry). Each relation modifier node
-         is of type <literal>MOD</literal>.
+         <literal>relation_uri</literal>: relation URI for search term.
         </para>
        </listitem>
        <listitem>
         <para>
-         <literal>prefixes</literal>: index prefixes for search
-         term. The <literal>prefixes</literal> is a simple linked
-         list (NULL for last entry). Each prefix node
-         is of type <literal>MOD</literal>.
+         <literal>modifiers</literal>: relation modifiers for search
+         term. The <literal>modifiers</literal> list itself of cql_nodes
+	 each of type <literal>ST</literal>.
         </para>
        </listitem>
       </itemizedlist>
@@ -1131,37 +1125,6 @@ struct cql_node {
        <listitem>
         <para>
          <literal>modifiers</literal>: proximity arguments.
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         <literal>prefixes</literal>: index prefixes.
-         The <literal>prefixes</literal> is a simple linked
-         list (NULL for last entry). Each prefix node
-         is of type <literal>MOD</literal>.
-        </para>
-       </listitem>
-      </itemizedlist>
-     </para>
-
-     <para>
-      The modifier node is a "utility" node used for name-value pairs,
-      such as prefixes, proximity arguements, etc.
-      <itemizedlist>
-       <listitem>
-        <para>
-         <literal>name</literal> name of mod node.
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         <literal>value</literal> value of mod node.
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         <literal>next</literal>: pointer to next node which is
-         always a mod node (NULL for last entry).
         </para>
        </listitem>
       </itemizedlist>
