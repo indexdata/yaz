@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: zoom-c.c,v 1.2 2003-11-02 17:58:16 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1025,7 +1025,7 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
             memcpy (h, cp0, cp1 - cp0);
             h[cp1-cp0] = '\0';
             z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
-                              "host", h);
+                              "Host", h);
         }
     }
 
