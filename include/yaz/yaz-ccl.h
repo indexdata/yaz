@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: yaz-ccl.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  1999-12-20 15:20:13  adam
+ * Implemented ccl_pquery to convert from CCL tree to prefix query.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.8  1997/09/01 08:49:54  adam
@@ -56,6 +59,7 @@
 #include <yaz/proto.h>
 #include <yaz/ccl.h>
 #include <yaz/odr.h>
+#include <yaz/yaz-util.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,6 +67,7 @@ extern "C" {
 
 YAZ_EXPORT Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p);
 YAZ_EXPORT Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p);
+YAZ_EXPORT void ccl_pquery (WRBUF w, struct ccl_rpn_node *p);
 
 #ifdef __cplusplus
 }

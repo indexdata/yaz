@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1996-1998, Index Data.
+ * Copyright (c) 1996-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.3  1999-11-30 13:47:12  adam
+ * Revision 1.4  1999-12-20 15:20:13  adam
+ * Implemented ccl_pquery to convert from CCL tree to prefix query.
+ *
+ * Revision 1.3  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.2  1999/06/16 12:00:08  adam
@@ -231,4 +234,60 @@ Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p)
     if (p->kind != CCL_RPN_TERM)
         return NULL;
     return ccl_rpn_term (o, p);
+}
+
+static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
+{
+    switch (p->kind)
+    {
+    case CCL_RPN_AND:
+    	wrbuf_puts (w, "@and ");
+	break;
+    case CCL_RPN_OR:
+    	wrbuf_puts(w, "@or ");
+	break;
+    case CCL_RPN_NOT:
+    	wrbuf_puts(w, "@not ");
+	break;
+    case CCL_RPN_PROX:
+    	wrbuf_puts(w, "@prox 0 2 0 1 known 2 ");
+	break;
+    default:
+    	assert(0);
+    };
+    ccl_pquery(w, p->u.p[0]);
+    ccl_pquery(w, p->u.p[1]);
+}
+    	
+void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
+{
+    struct ccl_rpn_attr *att;
+
+    switch (p->kind)
+    {
+    case CCL_RPN_AND:
+    case CCL_RPN_OR:
+    case CCL_RPN_NOT:
+    case CCL_RPN_PROX:
+    	ccl_pquery_complex (w, p);
+	break;
+    case CCL_RPN_SET:
+	wrbuf_puts (w, "@set ");
+	wrbuf_puts (w, p->u.setname);
+	wrbuf_puts (w, " ");
+	break;
+    case CCL_RPN_TERM:
+    	for (att = p->u.t.attr_list; att; att = att->next)
+	{
+	    char tmpattr[128];
+	    sprintf(tmpattr, "@attr %d=%d ", att->type, att->value);
+	    wrbuf_puts (w, tmpattr);
+	}
+	wrbuf_puts (w, "{");
+	wrbuf_puts (w, p->u.t.term);
+	wrbuf_puts (w, "} ");
+	break;
+    default:
+    	assert (0);
+    };
 }

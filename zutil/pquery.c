@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.2  1999-11-30 13:47:12  adam
+ * Revision 1.3  1999-12-20 15:20:13  adam
+ * Implemented ccl_pquery to convert from CCL tree to prefix query.
+ *
+ * Revision 1.2  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.1  1999/06/08 10:10:16  adam
@@ -399,6 +402,7 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
 {
     Z_RPNStructure *sz;
     const char *cp;
+    int i, attrtype;
 
     sz = (Z_RPNStructure *)odr_malloc (o, sizeof(*sz));
     switch (li->query_look)
@@ -445,9 +449,19 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
             else
                 attr_set[num_attr] = VAL_NONE;
         }
-        attr_list[2*num_attr] = atoi (li->lex_buf);
-        attr_list[2*num_attr+1] = atoi (cp+1);
-        num_attr++;
+        attrtype = atoi (li->lex_buf);
+        for (i = 0; i < num_attr; i++)
+	    if (attrtype == attr_list[2*i])
+	    {
+		attr_list[2*i+1] = atoi (cp+1);
+		break;
+	    }
+	if (i == num_attr)
+	{
+	    attr_list[2*num_attr] = attrtype;
+	    attr_list[2*num_attr+1] = atoi (cp+1);
+	    num_attr++;
+	}
         lex (li);
         return
             rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
