@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.12 2005-01-15 19:47:14 adam Exp $
+ * $Id: marcdisp.c,v 1.13 2005-02-02 20:50:38 adam Exp $
  */
 
 /**
@@ -26,6 +26,8 @@ struct yaz_marc_t_ {
     int xml;
     int debug;
     yaz_iconv_t iconv_cd;
+    char subfield_str[8];
+    char endline_str[8];
 };
 
 yaz_marc_t yaz_marc_create(void)
@@ -35,7 +37,21 @@ yaz_marc_t yaz_marc_create(void)
     mt->debug = 0;
     mt->m_wr = wrbuf_alloc();
     mt->iconv_cd = 0;
+    strcpy(mt->subfield_str, " $");
+    strcpy(mt->endline_str, "\n");
     return mt;
+}
+
+void yaz_marc_subfield_str(yaz_marc_t mt, const char *s)
+{
+    strncpy(mt->subfield_str, s, sizeof(mt->subfield_str)-1);
+    mt->subfield_str[sizeof(mt->subfield_str)-1] = '\0';
+}
+
+void yaz_marc_endline_str(yaz_marc_t mt, const char *s)
+{
+    strncpy(mt->endline_str, s, sizeof(mt->endline_str)-1);
+    mt->endline_str[sizeof(mt->endline_str)-1] = '\0';
 }
 
 void yaz_marc_destroy(yaz_marc_t mt)
@@ -376,7 +392,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 		    i += identifier_length;
 		    break;
                 case YAZ_MARC_LINE: 
-                    wrbuf_puts (wr, " $"); 
+                    wrbuf_puts (wr, mt->subfield_str); 
 		    marc_cdata(mt, buf+i, identifier_length-1, wr);
 		    i = i+identifier_length-1;
                     wrbuf_putc (wr, ' ');
@@ -425,7 +441,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 		marc_cdata(mt, buf + i, 1, wr);
 	}
         if (mt->xml == YAZ_MARC_LINE)
-            wrbuf_putc (wr, '\n');
+            wrbuf_puts (wr, mt->endline_str);
 	if (i < end_offset)
 	    wrbuf_printf(wr, "  <!-- separator but not at end of field length=%d-->\n", data_length);
 	if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
@@ -437,15 +453,15 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             break;
         case YAZ_MARC_OAIMARC:
             if (identifier_flag)
-                wrbuf_puts (wr, "  </varfield>\n");
+                wrbuf_puts (wr, "</varfield>\n");
             else
-                wrbuf_puts (wr, "  </fixfield>\n");
+                wrbuf_puts (wr, "</fixfield>\n");
             break;
         case YAZ_MARC_MARCXML:
             if (identifier_flag)
-                wrbuf_puts (wr, "  </datafield>\n");
+                wrbuf_puts (wr, "</datafield>\n");
             else
-                wrbuf_puts (wr, "  </controlfield>\n");
+                wrbuf_puts (wr, "</controlfield>\n");
             break;
         }
     }

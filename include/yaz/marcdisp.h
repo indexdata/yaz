@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: marcdisp.h,v 1.11 2005-01-15 19:47:09 adam Exp $
+ * $Id: marcdisp.h,v 1.12 2005-02-02 20:50:38 adam Exp $
  */
 
 /**
@@ -81,6 +81,8 @@ YAZ_EXPORT int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
 YAZ_EXPORT int yaz_marc_decode(const char *buf, WRBUF wr,
                                int debug, int bsize, int xml);
 
+YAZ_EXPORT void yaz_marc_subfield_str(yaz_marc_t mt, const char *s);
+YAZ_EXPORT void yaz_marc_endline_str(yaz_marc_t mt, const char *s);
 
 /* like atoi except that it reads exactly len characters */
 YAZ_EXPORT int atoi_n (const char *buf, int len);
