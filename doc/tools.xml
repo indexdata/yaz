@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.16 2003-01-23 20:26:37 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.17 2003-01-27 21:30:59 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -707,7 +707,7 @@ struct cql_node {
       Conversion to PQF (and Z39.50 RPN) is tricky by the fact
       that the resulting RPN depends on the Z39.50 target
       capabilities (combinations of supported attributes). 
-      Furthermore, the CQL and SRW operates on index prefixes
+      In addition, the CQL and SRW operates on index prefixes
       (URI or strings), whereas the RPN uses Object Identifiers
       for attribute sets.
      </para>
@@ -721,7 +721,7 @@ cql_transform_t cql_transform_open_fname(const char *fname);
 void cql_transform_close(cql_transform_t ct);
       </synopsis>
       The first two functions create a tranformation handle from
-      either an already open FILE or from a filename.
+      either an already open FILE or from a filename respectively.
      </para>
      <para>
       The handle is destroyed by <function>cql_transform_close</function> 
@@ -762,7 +762,170 @@ int cql_transform_FILE(cql_transform_t ct,
       open <literal>FILE</literal>.
      </para>
     </sect3>
-    <sect3 id="toolq.cql.xcql"><title>CQL to XCQL conversion</title>
+    <sect3 id="tools.cql.map">
+     <title>Specification of CQL to RPN mapping</title>
+     <para>
+      The file supplied to functions 
+      <function>cql_transform_open_FILE</function>,
+      <function>cql_transform_open_fname</function> follows
+      a structure found in many Unix utilities.
+      It consists of mapping specifications - one per line.
+      Lines starting with <literal>#</literal> are ignored (comments).
+     </para>
+     <para>
+      Each line is of the form
+      <literallayout>
+       <replaceable>CQL pattern</replaceable><literal> = </literal> <replaceable> RPN equivalent</replaceable>
+      </literallayout>
+     </para>
+     <para>
+      An RPN pattern is a simple attribute list. Each attribute pair
+      takes the form:
+      <literallayout>
+       [<replaceable>set</replaceable>] <replaceable>type</replaceable><literal>=</literal><replaceable>value</replaceable>
+      </literallayout>
+      The attribute <replaceable>set</replaceable> is optional.
+      The <replaceable>type</replaceable> is the attribute type,
+      <replaceable>value</replaceable> the attribute value.
+     </para>
+     <para>
+      The following CQL patterns are recognized:
+      <variablelist>
+       <varlistentry><term>
+         <literal>qualifier.</literal><replaceable>set</replaceable><literal>.</literal><replaceable>name</replaceable>
+        </term>
+        <listitem>
+         <para>
+          This pattern is invoked when a CQL qualifier, such as 
+          dc.title is converted. <replaceable>set</replaceable>
+          and <replaceable>name</replaceable> is the index set and qualifier
+          name respectively.
+          Typically, the RPN specifies an equivalent use attribute.
+         </para>
+         <para>
+          For terms not bound by a qualifier the pattern
+          <literal>qualifier.srw.serverChoice</literal> is used.
+          Here, the prefix <literal>srw</literal> is defined as
+          <literal>http://www.loc.gov/zing/cql/srw-indexes/v1.0/</literal>.
+          If this pattern is not defined, the mapping will fail.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry><term>
+         <literal>relation.</literal><replaceable>relation</replaceable>
+        </term>
+        <listitem>
+         <para>
+          This pattern specifies how a CQL relation is mapped to RPN.
+          <replaceable>pattern</replaceable> is name of relation
+          operator. Since <literal>=</literal> is used as
+          separator between CQL pattern and RPN, CQL relations
+          including <literal>=</literal> cannot be
+          used directly. To avoid a conflict, the names
+          <literal>ge</literal>,
+          <literal>eq</literal>,
+          <literal>le</literal>,
+          must be used for CQL operators, greater-than-or-equal,
+          equal, less-than-or-equal respectively.
+          The RPN pattern is supposed to include a relation attribute.
+         </para>
+         <para>
+          For terms not bound by a relation, the pattern
+          <literal>relation.scr</literal> is used. If the pattern
+          is not defined, the mapping will fail.
+         </para>
+         <para>
+          The special pattern, <literal>relation.*</literal> is used
+          when no other relation pattern is matched.
+         </para>
+        </listitem>
+       </varlistentry>
+
+       <varlistentry><term>
+         <literal>relationModifier.</literal><replaceable>mod</replaceable>
+        </term>
+        <listitem>
+         <para>
+          This pattern specifies how a CQL relation modifier is mapped to RPN.
+          The RPN pattern is usually a relation attribute.
+         </para>
+        </listitem>
+       </varlistentry>
+
+       <varlistentry><term>
+         <literal>structure.</literal><replaceable>type</replaceable>
+        </term>
+        <listitem>
+         <para>
+          This pattern specifies how a CQL structure is mapped to RPN.
+          Note that this CQL pattern is somewhat to similar to
+          CQL pattern <literal>relation</literal>. 
+          The <replaceable>type</replaceable> is a CQL relation.
+         </para>
+         <para>
+          The pattern, <literal>structure.*</literal> is used
+          when no other structure pattern is matched.
+          Usually, the RPN equivalent specifies a structure attribute.
+         </para>
+        </listitem>
+       </varlistentry>
+
+       <varlistentry><term>
+         <literal>position.</literal><replaceable>type</replaceable>
+        </term>
+        <listitem>
+         <para>
+          This pattern specifies how the anchor (position) of
+          CQL is mapped to RPN.
+          The <replaceable>type</replaceable> is one
+          of <literal>first</literal>, <literal>any</literal>,
+          <literal>last</literal>, <literal>firstAndLast</literal>.
+         </para>
+         <para>
+          The pattern, <literal>position.*</literal> is used
+          when no other position pattern is matched.
+         </para>
+        </listitem>
+       </varlistentry>
+
+       <varlistentry><term>
+         <literal>set.</literal><replaceable>prefix</replaceable>
+        </term>
+        <listitem>
+         <para>
+          This specification defines a CQL index set for a given prefix.
+          The value on the right hand side is the URI for the set - 
+          <emphasis>not</emphasis> RPN. All prefixes used in
+          qualifier patterns must be defined this way.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+     </para>
+     <example><title>Small CQL to RPN mapping file</title>
+      <para>
+       This small file defines two index sets, three qualifiers and three
+       relations, a position pattern and a default structure.
+      </para>
+      <programlisting>
+       set.srw    = http://www.loc.gov/zing/cql/srw-indexes/v1.0/
+       set.dc     = http://www.loc.gov/zing/cql/dc-indexes/v1.0/
+
+       qualifier.srw.serverChoice = 1=1016
+       qualifier.dc.title         = 1=4
+       qualifier.dc.subject       = 1=21
+  
+       relation.<                 = 2=1
+       relation.eq                = 2=3
+       relation.scr               = 2=3
+
+       position.any               = 3=3 6=1
+
+       structure.*                = 4=1
+      </programlisting>
+     </example>
+    </sect3>
+    <sect3 id="tools.cql.xcql"><title>CQL to XCQL conversion</title>
      <para>
       Conversion from CQL to XCQL is trivial and does not
       require a mapping to be defined.
