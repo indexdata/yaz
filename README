@@ -4,7 +4,7 @@
  * Sebastian Hammer, Adam Dickmeiss
 
 Compilation and installation for YAZ 
-  $Id: README,v 1.25 1999-05-05 14:49:43 adam Exp $
+  $Id: README,v 1.26 1999-06-09 14:37:37 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -87,9 +87,10 @@ The directories:
 doc     - Documentation.
 
 util    - Various little utility functions. Logging, memory debugging,
-	primitive ISO 2709 presentation for the client, etc.
+	primitive ISO 2709 presentation for the client, etc. You'll
+	find the ASN.1 Compiler for YAZ here as well (yc.tcl).
 
-odr     - Open Data Representation. This module implements the BER
+odr	- Open Data Representation. This module implements the BER
 	encoding rules. Documentation is found in the files odr-use.man
 	and odr.txt.
 
@@ -99,6 +100,13 @@ asn     - This module implements the Z39.50/SR protocol. The best way
 	interface is still wholly described by the file proto.h
 	which defines structure and type definitions for each of the
 	types introduced in the protocol specification.
+
+z39.50 - This module implements the Z39.50 protocol. This module
+        does the same job as the 'asn' module except that the source
+        files are auto-generated using an YAZ' ASN.1 Compiler (YC).
+
+zutil  - This module implements a collection of Z39.50 utilities, such
+        as query parsing, EXTERNAL handling, etc.
 
 comstack- This module implements the transport transparency
 	stack (COMSTACK). The comstack implements a generic interface
