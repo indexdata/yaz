@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.73 2002-05-13 14:13:37 adam Exp $
+dnl $Id: configure.in,v 1.74 2002-05-22 11:19:34 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.7)
 dnl
@@ -95,7 +95,7 @@ fi
 AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
 dnl
 dnl ------ EXPAT
-expat=yes
+expat=no
 AC_ARG_WITH(expat,   [  --with-expat[=DIR]      EXPAT library in DIR],[expat=$withval])
 if test "$expat" != "no"; then
 	xLIBS="$LIBS";

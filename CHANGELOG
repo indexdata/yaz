@@ -1,13 +1,19 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.8.7 2002/05/22
 
---- 1.8.7 2002/MM/DD
+On Windows ZOOM functions are of type __stdcall rather than __cdecl, so
+that they can be used directly from Visual Basic. You must recompile
+your windows APP if you're using ZOOM.
+
+Character Set and Language Negotiation(3) for ZOOM API and YAZ client.
+Commands "lang" and "charset" sets language and character set respectively.
+Options "lang" and "charset" is interpreted by the ZOOM API. Note, these
+are not part of the official ZOOM spec) All is due to Oleg Kolobov. 
 
 Attributes from multiple CCL fields may be OR'ed rather than merged
 using directive "@field or". Fields are still merged by default -
 equivalent to "@field merge".
-
-XML reader for data1 (EXPAT).
 
 Fixed bug in ZOOM connect that occurred on OpenBSD (maybe others). Patch
 by Oleg Kolobov.
