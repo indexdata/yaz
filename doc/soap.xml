@@ -1,4 +1,4 @@
-<!-- $Id: soap.xml,v 1.2 2003-02-21 12:20:22 adam Exp $ -->
+<!-- $Id: soap.xml,v 1.3 2003-02-23 14:24:09 adam Exp $ -->
 <chapter id="soap"><title>SOAP and SRW</title>
   <sect1 id="soap.introduction"><title>Introduction</title>
     <para>
@@ -98,16 +98,34 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
                  Z_SOAP_Handler *handlers);
     </synopsis>
     <para>
-      The <literal>content_buf</literal>  and <literal>content_len</literal>
+      The <literal>content_buf</literal> and <literal>content_len</literal>
       is XML buffer and length of buffer respectively.
     </para>
     <para>
-      The <literal>handlers</literal> is a list of SOAP services codec
+      The <literal>handlers</literal> is a list of SOAP codec
       handlers - one handler for each service namespace. For SRW, the
-      namespace is <literal>http://www.loc.gov/zing/srw/v1.0/</literal>.
+      namespace would be <literal>http://www.loc.gov/zing/srw/v1.0/</literal>.
     </para>
     <para>
-      Each handler is define as follows:
+      When decoding, the <function>z_soap_codec</function>
+      inspects the XML content
+      and tries to match one of the services namespaces of the
+      supplied handlers. If there is a match a handler function
+      is invoked which decodes that particular SOAP package.
+      If successful, the returned <literal>Z_SOAP</literal> package will be
+      of type <literal>Z_SOAP_Generic</literal>.
+      Member <literal>no</literal> is
+      set the offset of handler that matched; <literal>ns</literal>
+      is set to namespace of matching handler; the void pointer
+      <literal>p</literal> is set to the C data structure assocatiated
+      with the handler.
+    </para>
+    <para>
+      When a NULL namespace is met (member <literal>ns</literal> bwlow),
+      that specifies end-of-list.
+    </para>
+    <para>
+      Each handler is defined as follows:
       <synopsis>
 typedef struct {
     char *ns;
@@ -120,45 +138,86 @@ typedef struct {
       is user-defined data which is passed to handler.
     </para>
     <para>
-      The prototype for a handler is:
+      The prototype for a SOAP service handler is:
       <synopsis>
 int handler(ODR o, void * ptr, void **handler_data,
             void *client_data, const char *ns);
       </synopsis>
+      The <parameter>o</parameter> specifies the mode (decode/encode)
+      as usual. The second argument, <parameter>ptr</parameter>,
+      is a libxml2 tree node pointer (<literal>xmlNodePtr</literal>)
+      and is a pointer to the <literal>Body</literal> element
+      of the SOAP package. The <parameter>handler_data</parameter>
+      is an opaque pointer to a C definitions associated with the
+      SOAP service. <parameter>client_data</parameter> is the pointer
+      which was set as part of the <literal>Z_SOAP_handler</literal>.
+      Finally, <parameter>ns</parameter> the service namespace.
     </para>
   </sect1>
   <sect1 id="soap.srw"><title>SRW</title>
     <para>
-      SRW is just one kind of SOAP handler as described in the previous
-      section.
+      SRW is just one implementation of a SOAP handler as described
+      in the previous section.
+      The encoder/decoder handler for SRW is defined as
+      follows:
       <synopsis>
-#include &lt;yaz/soap.h&gt;
+#include &lt;yaz/srw.h&gt;
 
+int yaz_srw_codec(ODR o, void * pptr,
+                  Z_SRW_GDU **handler_data,
+                  void *client_data, const char *ns);
+      </synopsis>
+      Here, <literal>Z_SRW_GDU</literal> is either
+      searchRetrieverequest or a searchRetrieveResponse. 
+    </para>
+    <note>
+      <para>
+        The xQuery and xSortKeys are not handled yet by
+        the SRW implementation of &yaz;. Explain is also missing.
+        Future versions of &yaz; will include these features.
+      </para>
+    </note>
+    <para>
+      The definition of searchRetrieveRequest is:
+      <synopsis>
 typedef struct {
-    char *recordSchema;
-    char *recordData_buf;
-    int recordData_len;
-    int *recordPosition;
-} Z_SRW_record;
 
-typedef struct {
-    int  *code;
-    char *details;
-} Z_SRW_diagnostic;
-    
-typedef struct {
-    char *query;
-    char *pQuery;
-    void *xQuery;
-    char *sortKeys;
-    void *xSortKeys;
-    int *startRecord;
+#define Z_SRW_query_type_cql  1
+#define Z_SRW_query_type_xcql 2
+#define Z_SRW_query_type_pqf  3
+    int query_type;
+    union {
+        char *cql;
+        char *xcql;
+        char *pqf;
+    } query;
+
+#define Z_SRW_sort_type_none 1
+#define Z_SRW_sort_type_sort 2
+#define Z_SRW_sort_type_xSort 3
+    int sort_type;
+    union {
+        char *none;
+        char *sortKeys;
+        char *xSortKeys;
+    } sort;
+    int  *startRecord;
     int  *maximumRecords;
     char *recordSchema;
     char *recordPacking;
     char *database;
 } Z_SRW_searchRetrieveRequest;
-
+      </synopsis>
+      Please observe that data of type xsd:string is represented
+      as a char pointer (<literal>char *</literal>). A null pointer
+      means that the element is absent.
+      Data of type xsd:integer is representd as a pointer to
+      an int (<literal>int *</literal>). Again, a null pointer
+      us used for absent elements.
+    </para>
+    <para>
+      The SearchRetrieveResponse has the following definition.
+      <synopsis>
 typedef struct {
     int * numberOfRecords;
     char * resultSetId;
@@ -171,19 +230,34 @@ typedef struct {
     int num_diagnostics;
     int *nextRecordPosition;
 } Z_SRW_searchRetrieveResponse;
-
-#define Z_SRW_searchRetrieve_request  1
-#define Z_SRW_searchRetrieve_response 2
-
-typedef struct {
-    int which;
-    union {
-        Z_SRW_searchRetrieveRequest *request;
-        Z_SRW_searchRetrieveResponse *response;
-    } u;
-} Z_SRW_searchRetrieve;        
       </synopsis>
-      [more to be written]
+      The <literal>num_records</literal> and <literal>num_diagnostics</literal>
+      is number of returned records and diagnostics respectively and also
+      correspond to the "size of" arrays <literal>records</literal>
+      and <literal>diagnostics</literal>.
+    </para>
+    <para>
+      A retrieval record is defined as follows:
+      <synopsis>
+typedef struct {
+    char *recordSchema;
+    char *recordData_buf;
+    int recordData_len;
+    int *recordPosition;
+} Z_SRW_record;
+      </synopsis>
+      The record data is defined as a buffer of some length so that
+      data can be of any type. SRW 1.0 currenly doesn't allow for this
+      (only XML), but future versions might do.
+    </para>
+    <para>
+      And, a diagnostic as:
+      <synopsis>
+typedef struct {
+    int  *code;
+    char *details;
+} Z_SRW_diagnostic;
+      </synopsis>
     </para>
   </sect1>
 </chapter>
