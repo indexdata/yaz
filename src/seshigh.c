@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.27 2004-09-10 11:28:58 adam Exp $
+ * $Id: seshigh.c,v 1.28 2004-09-30 11:13:42 adam Exp $
  */
 
 /*
@@ -510,9 +510,24 @@ static int srw_bend_fetch(association *assoc, int pos,
 
     rr.comp->u.complex->generic = (Z_Specification *) 
 	    odr_malloc(assoc->decode, sizeof(Z_Specification));
+
+    /* schema uri = recordSchema (or NULL if recordSchema is not given) */
     rr.comp->u.complex->generic->which = Z_Schema_uri;
     rr.comp->u.complex->generic->schema.uri = srw_req->recordSchema;
+
+    /* ESN = recordSchema if recordSchema is present */
     rr.comp->u.complex->generic->elementSpec = 0;
+    if (srw_req->recordSchema)
+    {
+	rr.comp->u.complex->generic->schema.uri = 
+
+	rr.comp->u.complex->generic->elementSpec = 
+	    odr_malloc(assoc->encode, sizeof(Z_ElementSpec));
+	rr.comp->u.complex->generic->elementSpec->which = 
+	    Z_ElementSpec_elementSetName;
+	rr.comp->u.complex->generic->elementSpec->u.elementSetName =
+	    srw_req->recordSchema;
+    }
     
     rr.stream = assoc->encode;
     rr.print = assoc->print;
@@ -1325,7 +1340,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.27 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.28 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

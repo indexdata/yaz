@@ -1,5 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.25 2004/09/30
+
+The YAZ GFS when converting SRW/SRU requests to Z39.50 structures
+now converts recordSchema to elementSetName as well as schema URI.
+
+Fixed bug in COMSTACK that prevented HTTP request packages from being
+decoded properly.
+
 --- 2.0.24 2004/09/29
 
 Added CCL facility r=r "range" which is similar to r=o "ordered" but
