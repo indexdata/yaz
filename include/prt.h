@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt.h,v $
- * Revision 1.23  1998-03-20 14:45:27  adam
+ * Revision 1.24  1998-03-20 17:29:20  adam
+ * Include of odr_use.h in odr.h. Added prototype for odr_enum.
+ *
+ * Revision 1.23  1998/03/20 14:45:27  adam
  * Implemented odr_set_of and odr_enum.
  *
  * Revision 1.22  1998/02/11 11:53:34  adam
@@ -32,6 +35,7 @@ YAZ_EXPORT int ber_enctag(ODR o, int zclass, int tag, int constructed);
 YAZ_EXPORT int ber_dectag(unsigned char *buf, int *zclass, int *tag, int *constructed);
 YAZ_EXPORT int odr_bool(ODR o, int **p, int opt);
 YAZ_EXPORT int odr_integer(ODR o, int **p, int opt);
+YAZ_EXPORT int odr_enum(ODR o, int **p, int opt);
 YAZ_EXPORT int odr_implicit_settag(ODR o, int zclass, int tag);
 YAZ_EXPORT int ber_enclen(ODR o, int len, int lenlen, int exact);
 YAZ_EXPORT int ber_declen(unsigned char *buf, int *len);

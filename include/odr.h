@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.25  1998-02-11 11:53:33  adam
+ * Revision 1.26  1998-03-20 17:29:20  adam
+ * Include of odr_use.h in odr.h. Added prototype for odr_enum.
+ *
+ * Revision 1.25  1998/02/11 11:53:33  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.24  1997/11/24 11:33:56  adam
@@ -409,6 +412,7 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 }
 #endif
 
+#include <odr_use.h>
 #include <prt.h>
 #include <xmalloc.h>
 
