@@ -1,10 +1,14 @@
-/* $Id: cql.h,v 1.8 2004-10-02 13:41:14 adam Exp $
+/* $Id: cql.h,v 1.9 2004-10-03 22:34:07 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
 This file is part of the YAZ toolkit.
 
 See the file LICENSE.
+*/
+
+/** \file cql.h
+    \brief Header with public definitions about CQL.
 */
 
 #ifndef CQL_H_INCLUDED
@@ -14,52 +18,42 @@ See the file LICENSE.
 
 YAZ_BEGIN_CDECL
 
+/** CQL parser handle */
 typedef struct cql_parser *CQL_parser;
 
 /**
- * cql_parser_create:
- *
- * creates a CQL parser.
- *
- * Returns CQL parser or NULL if parser could not be created.
+ * Creates a CQL parser.
+ * Returns CQL parser handle or NULL if parser could not be created.
  */
 YAZ_EXPORT 
 CQL_parser cql_parser_create(void);
 
 /**
- * cql_parser_destroy:
- * @cp:  A CQL parser
+ * Destroys a CQL parser.
  *
- * Destroy CQL parser. This function does nothing if
- * NULL pointer is received.
+ * This function does nothing if NULL if received.
  */
 YAZ_EXPORT 
 void cql_parser_destroy(CQL_parser cp);
 
 /**
- * cql_parser_string:
- * @cp:  A CQL parser.
- * @str:  A query string to be parsed.
+ * Parses a CQL string query.
  *
- * Parses a CQL query string.
- *
- * Returns 0 if parsing was succesful; non-zero (error code) if
- * unsuccesful.
+ * Returns 0 if on success; non-zero (error code) on failure.
  */
 YAZ_EXPORT 
 int cql_parser_string(CQL_parser cp, const char *str);
 
 /**
- * cql_parser_stream:
- * @cp:  A CQL parser.
- * @getbyte:  Handler to read one character (for parsing).
- * @ungetbyte: Handler to unread one byte (for parsing).
- * @client_data:  User data associated with getbyte/ungetbyte handlers.
+ * Parses a CQL query - streamed query.
  *
- * Parses a CQL query from a user defined stream.
+ * This function is similar to cql_parser_string but takes a
+ * functions to read each query character from a stream.
  *
- * Returns 0 if parsing was succesful; non-zero (error code) if
- * unsuccesful.
+ * The functions pointers getbytes, ungetbyte are similar to
+ * that known from stdios getc, ungetc.
+ *
+ * Returns 0 if on success; non-zero (error code) on failure.
  */
 YAZ_EXPORT 
 int cql_parser_stream(CQL_parser cp,
@@ -68,119 +62,225 @@ int cql_parser_stream(CQL_parser cp,
                       void *client_data);
 
 /**
- * cql_parser_stdio:
- * @cp:  A CQL parser.
- * @f: FILE handler in read mode.
+ * Parses a CQL query from a FILE handle.
  *
- * Parses a CQL query from a file.
+ * This function is similar to cql_parser_string but reads from 
+ * stdio FILE handle instead.
  *
- * Returns 0 if parsing was succesful; non-zero (error code) if
- * unsuccesful.
+ * Returns 0 if on success; non-zero (error code) on failure.
  */
 YAZ_EXPORT
 int cql_parser_stdio(CQL_parser cp, FILE *f);
 
+/**
+ * The node in a CQL parse tree. 
+ */
 #define CQL_NODE_ST 1
 #define CQL_NODE_BOOL 2
 struct cql_node {
+    /** node type */
     int which;
     union {
+	/** which == CQL_NODE_ST */
         struct {
+	    /** CQL index */
             char *index;
+	    /** CQL index URI or NULL if no URI */
 	    char *index_uri;
+	    /** Search term */
             char *term;
+	    /** relation */
             char *relation;
+	    /** relation URL or NULL if no relation URI) */
 	    char *relation_uri;
+	    /** relation modifiers */
             struct cql_node *modifiers;
         } st;
+	/** which == CQL_NODE_BOOL */
         struct {
+            /** operator name "and", "or", ... */
             char *value;
+	    /** left operand */
             struct cql_node *left;
+	    /** right operand */ 
             struct cql_node *right;
+	    /** modifiers (NULL for no list) */
             struct cql_node *modifiers;
         } boolean;
     } u;
 };
 
+/**
+ * Private structure that describes the CQL properties (profile)
+ */
 struct cql_properties;
 
+/**
+ * Structure used by cql_buf_write_handlre
+ */
 struct cql_buf_write_info {
     int max;
     int off;
     char *buf;
 };
 
+/**
+ * Handler for cql_buf_write_info *
+ */
 YAZ_EXPORT
 void cql_buf_write_handler (const char *b, void *client_data);
 
+/**
+ * Prints a CQL node and all sub nodes. Hence this function
+ * prints the parse tree which is as returned by cql_parser_result.
+ */
 YAZ_EXPORT
 void cql_node_print(struct cql_node *cn);
+
+/**
+ * This function creates a search clause node (st).
+ */
 YAZ_EXPORT
 struct cql_node *cql_node_mk_sc(const char *index,
                                 const char *relation,
                                 const char *term);
 
 
+/**
+ * This function applies a prefix+uri to "unresolved" index and relation
+ * URIs.
+ *
+ * "unresolved" URIs are those nodes where member index_uri / relation_uri
+ * is NULL.
+ */
 YAZ_EXPORT
 struct cql_node *cql_apply_prefix(struct cql_node *cn,
-				  const char *relation,
-				  const char *term);
+				  const char *prefix,
+				  const char *uri);
+
+/**
+ * This function creates a boolean node.
+ */
 YAZ_EXPORT
 struct cql_node *cql_node_mk_boolean(const char *op);
+
+/**
+ * Destroys a node and its children.
+ */
 YAZ_EXPORT
 void cql_node_destroy(struct cql_node *cn);
+
+/**
+ * Duplicate a node (returns a copy of supplied node) .
+ */
 YAZ_EXPORT
 struct cql_node *cql_node_dup (struct cql_node *cp);
+
+/**
+ * This function returns the parse tree of the most recently parsed
+ * CQL query.
+ *
+ * The function returns NULL if most recently parse failed.
+ */
 YAZ_EXPORT
 struct cql_node *cql_parser_result(CQL_parser cp);
 
+/**
+ * This function converts a CQL node tree to XCQL and writes the
+ * resulting XCQL to a user-defined output stream.
+ */
 YAZ_EXPORT
 void cql_to_xml(struct cql_node *cn, 
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data);
+/**
+ * This function converts a CQL node tree to XCQL and writes the
+ * resulting XCQL to a FILE handle (stdio) 
+ */
 YAZ_EXPORT
 void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
+
+/**
+ * This function converts a CQL node tree to XCQL and writes
+ * the resulting XCQL to a buffer 
+ */
 YAZ_EXPORT
 int cql_to_xml_buf(struct cql_node *cn, char *out, int max);
 
-YAZ_EXPORT
-struct cql_node *cql_node_mk_proxargs(const char *relation,
-                                      const char *distance,
-                                      const char *unit,
-                                      const char *ordering);
-
-
+/**
+ * Utility function that prints to a FILE.
+ */
 YAZ_EXPORT
 void cql_fputs(const char *buf, void *client_data);
 
+/**
+ * The CQL transform handle. The transform describes how to
+ * convert from CQL to PQF (Type-1 AKA RPN).
+ */
 typedef struct cql_transform_t_ *cql_transform_t;
 
+/**
+ * Creates a CQL transform handle. The transformation spec is read from
+ * a FILE handle (which is assumed opened in read mode).
+ */
 YAZ_EXPORT
 cql_transform_t cql_transform_open_FILE (FILE *f);
+
+/**
+ * Creates a CQL transform handle. The transformation spec is read from
+ * a file with the filename given.
+ */
 YAZ_EXPORT
 cql_transform_t cql_transform_open_fname(const char *fname);
+
+/**
+ * Destroys a CQL transform handle.
+ */
 YAZ_EXPORT
 void cql_transform_close(cql_transform_t ct);
 
+/**
+ * Performs a CQL transform to PQF given a CQL node tree and a CQL
+ * transformation handle. The result is written to a user-defined stream.
+ */
 YAZ_EXPORT
 void cql_transform_pr(cql_transform_t ct,
                       struct cql_node *cn,
                       void (*pr)(const char *buf, void *client_data),
                       void *client_data);
 
+/**
+ * Performs a CQL transform to PQF given a CQL node tree and a CQL
+ * transformation handle. The result is written to a file specified by
+ * FILE handle (which must be opened for writing).
+ */
 YAZ_EXPORT
 int cql_transform_FILE(cql_transform_t ct,
                        struct cql_node *cn, FILE *f);
 
+/**
+ * Performs a CQL transform to PQF given a CQL node tree and a CQL
+ * transformation handle. The result is written to a buffer. 
+ */
 YAZ_EXPORT
 int cql_transform_buf(cql_transform_t ct,
                       struct cql_node *cn, char *out, int max);
+/**
+ * Returns error code and additional information from last transformation.
+ * Performs a CQL transform given a CQL node tree and a CQL transformation.
+ */
 YAZ_EXPORT
 int cql_transform_error(cql_transform_t ct, const char **addinfo);
 
+/**
+ * Returns the CQL message corresponding to a given error code.
+ */
 YAZ_EXPORT
 const char *cql_strerror(int code);
 
+/**
+ * Returns the standard CQL context set URI.
+ */
 YAZ_EXPORT
 const char *cql_uri();
 

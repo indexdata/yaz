@@ -1,11 +1,18 @@
-/* $Id: cqlstring.c,v 1.1 2003-10-27 12:21:30 adam Exp $
-   Copyright (C) 2002-2003
+/* $Id: cqlstring.c,v 1.2 2004-10-03 22:34:07 adam Exp $
+   Copyright (C) 2002-2004
    Index Data Aps
 
 This file is part of the YAZ toolkit.
 
 See the file LICENSE for details.
 */
+
+/**
+ * \file cqlstring.c
+ * \brief Implements query stream reader that reads from a C string.
+ */
+
+
 #include <yaz/cql.h>
 
 struct cql_buf_info {

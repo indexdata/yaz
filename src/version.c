@@ -1,10 +1,19 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: version.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: version.c,v 1.2 2004-10-03 22:34:07 adam Exp $
  */
+
+/**
+ * \file version.c
+ * \brief Implements YAZ version utilities.
+ */
+
+/**
+ * \mainpage The YAZ Toolkit.
+ */
+ 
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif

@@ -42,10 +42,14 @@
  *
  */
 
+/** \file ccl.h
+    \brief Header with public definitions about CCL.
+*/
+
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.18 2004-09-29 20:37:50 adam Exp $
+ * $Id: ccl.h,v 1.19 2004-10-03 22:34:07 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -107,16 +111,22 @@ YAZ_BEGIN_CDECL
 #define CCL_ERR_TRUNC_NOT_BOTH   11
 #define CCL_ERR_TRUNC_NOT_RIGHT  12
     
-/* attribute pair (type, value) */
+/** attribute node (type, value) pair as used in RPN */
 struct ccl_rpn_attr {
+    /** next node */
     struct ccl_rpn_attr *next;
+    /** attribute set */
     char *set;
+    /** attribute type, Bib-1: 1=use, 2=relation, 3=position, .. */
     int type;
+    /** attribute value type (numeric or string) */
     int kind;
 #define CCL_RPN_ATTR_NUMERIC 1
 #define CCL_RPN_ATTR_STRING 2
     union {
+	/** numeric attribute value */
 	int numeric;
+	/** string attribute value */
 	char *str;
     } value;
 };
@@ -128,15 +138,19 @@ struct ccl_rpn_attr {
 #define CCL_RPN_SET 5
 #define CCL_RPN_PROX 6
 
-/* RPN tree structure */
+/** RPN tree structure node */
 struct ccl_rpn_node {
+    /** RPN tree node type */
     int kind;
     union {
+	/** Boolean including proximity 0=left, 2=right, 3=prox parms */
 	struct ccl_rpn_node *p[3];
+	/** Attributes + Term */
 	struct {
 	    char *term;
 	    struct ccl_rpn_attr *attr_list;
 	} t;
+	/** Result set */
 	char *setname;
     } u;
 };
@@ -202,7 +216,7 @@ typedef struct ccl_qualifiers *CCL_bibset;
 #define CCL_TOK_NOT   10
 #define CCL_TOK_SET   11
 
-/* CCL token */
+/** CCL token */
 struct ccl_token {
     char kind;
     size_t len;
@@ -211,7 +225,7 @@ struct ccl_token {
     struct ccl_token *prev;
 };
 
-/* CCL Qualifier */
+/** CCL Qualifier */
 struct ccl_qualifier {
     char *name;
     int no_sub;
@@ -220,130 +234,205 @@ struct ccl_qualifier {
     struct ccl_qualifier *next;
 };
 
+/** CCL parser structure */
 struct ccl_parser {
-/* current lookahead token */
+    /** current lookahead token */
     struct ccl_token *look_token;
     
-/* holds error code if error occur (and approx position of error) */
+    /** holds error code if error occur */
     int error_code;
+    /** if error occurs, this holds position (starting from 0). */
     const char *error_pos;
     
-/* current bibset */
+    /** current bibset */
     CCL_bibset bibset;
 
+    /** names of and operator */
     char *ccl_token_and;
+    /** names of or operator */
     char *ccl_token_or;
+    /** names of not operator */
     char *ccl_token_not;
+    /** names of set operator */
     char *ccl_token_set;
+    /** 1=CCL parser is case sensitive, 0=case insensitive */
     int ccl_case_sensitive;
 };
     
 typedef struct ccl_parser *CCL_parser;
     
-/* Generate tokens from command string - obeys all CCL opererators */
-YAZ_EXPORT struct ccl_token *ccl_parser_tokenize (CCL_parser cclp,
-				       const char *command);
-YAZ_EXPORT struct ccl_token *ccl_tokenize (const char *command);
+/**
+ * Splits CCL command string into individual tokens using
+ * a CCL parser.
+ */
+YAZ_EXPORT
+struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command);
+
+/**
+ * Splits CCL command string into tokens using temporary parser.
+ *
+ * Use ccl_parser_tokenize instead and provide a parser - it is
+ * more flexible and efficient.
+ */
+YAZ_EXPORT
+struct ccl_token *ccl_tokenize (const char *command);
     
-/* Generate tokens from command string - oebeys only simple tokens and 
-   quoted strings */
-YAZ_EXPORT struct ccl_token *ccl_token_simple (const char *command);
+/**
+ * Splits CCL command into tokens. This function is obsolete. Use
+ * ccl_parser_tokenize instead.
+ */
+YAZ_EXPORT
+struct ccl_token *ccl_token_simple (const char *command);
 
-/* Delete token list */
-YAZ_EXPORT void ccl_token_del (struct ccl_token *list);
+/** 
+ * Deletes token list
+ */
+YAZ_EXPORT
+void ccl_token_del (struct ccl_token *list);
 
-/* Add single token after node at */
-YAZ_EXPORT struct ccl_token *ccl_token_add (struct ccl_token *at);
+/**
+ * Add single token after a given onde.
+ */
+YAZ_EXPORT
+struct ccl_token *ccl_token_add (struct ccl_token *at);
 
-/* Parse CCL Find command - NULL-terminated string */
-YAZ_EXPORT struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset,
-                                   const char *str, int *error, int *pos);
+/**
+ * Parses a CCL Find command in a simple C string. Returns CCL parse
+ * tree node describing RPN if parsing is successful. If parsing is
+ * unsuccesful, NULL is returned and error and pos is set accordingly.
+ */
+YAZ_EXPORT
+struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset,
+				   const char *str, int *error, int *pos);
 
-/* Parse CCL Find command - Tokens read by ccl_tokenize */
-YAZ_EXPORT struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
+/**
+ * Parses CCL Find command from a list of CCL tokens. Otherwise similar to
+ * ccl_find_str.
+ */
+YAZ_EXPORT
+struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
                                int *error, const char **pos);
 
-/* Parse CCL Find command */
-YAZ_EXPORT struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list);
+/**
+ * Parses a CCL Find command from a list of CCL tokens and given a CCL
+ * parser. Otherwise similar to ccl_find_str.
+ */
+YAZ_EXPORT
+struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list);
 
-/* Set various OPs */
-YAZ_EXPORT void ccl_parser_set_op_and (CCL_parser p, const char *op);
-YAZ_EXPORT void ccl_parser_set_op_or (CCL_parser p, const char *op);
-YAZ_EXPORT void ccl_parser_set_op_not (CCL_parser p, const char *op);
-YAZ_EXPORT void ccl_parser_set_op_set (CCL_parser p, const char *op);
+/** Set names for AND operator in parser */
+YAZ_EXPORT
+void ccl_parser_set_op_and (CCL_parser p, const char *op);
 
-YAZ_EXPORT void ccl_parser_set_case (CCL_parser p, int case_sensitivity_flag);
+/** Set names for OR operator in parser */
+YAZ_EXPORT
+void ccl_parser_set_op_or (CCL_parser p, const char *op);
 
-/* Return english-readable error message */
-YAZ_EXPORT const char *ccl_err_msg (int ccl_errno);
+/** Set names for ANDNOT operator in parser */
+YAZ_EXPORT
+void ccl_parser_set_op_not (CCL_parser p, const char *op);
 
-/* Delete RPN tree returned by ccl_find */
-YAZ_EXPORT void ccl_rpn_delete (struct ccl_rpn_node *rpn);
+/** Set names for ResultSet in parser */
+YAZ_EXPORT
+void ccl_parser_set_op_set (CCL_parser p, const char *op);
 
-/* Dump RPN tree in readable format to fd_out */
-YAZ_EXPORT void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out);
+/** Set case sensitivity for parser */
+YAZ_EXPORT
+void ccl_parser_set_case (CCL_parser p, int case_sensitivity_flag);
 
-/* Add CCL qualifier */
-YAZ_EXPORT void ccl_qual_add (CCL_bibset b, const char *name, int no,
-			      int *attr);
+/** Return english-readable error message for CCL parser error number */
+YAZ_EXPORT
+const char *ccl_err_msg (int ccl_errno);
 
-YAZ_EXPORT void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
-				  int *type, int *value, char **svalue,
-				  char **attsets);
+/** Delete RPN tree returned by ccl_find */
+YAZ_EXPORT
+void ccl_rpn_delete (struct ccl_rpn_node *rpn);
 
-YAZ_EXPORT void ccl_qual_add_special (CCL_bibset bibset,
-                                      const char *n, const char *v);
+/** Dump RPN tree in readable format to fd_out */
+YAZ_EXPORT
+void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out);
 
-YAZ_EXPORT void ccl_qual_add_combi (CCL_bibset b, const char *n,
-                                    const char *names);
+/** Add qualifier and supply attribute pairs for it */
+YAZ_EXPORT
+void ccl_qual_add (CCL_bibset b, const char *name, int no, int *attr);
 
-/* Read CCL qualifier list spec from file inf */
-YAZ_EXPORT void ccl_qual_file (CCL_bibset bibset, FILE *inf);
+/** Add qualifier and supply attributes pairs+attribute set for it */
+YAZ_EXPORT
+void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
+		       int *type, int *value, char **svalue, char **attsets);
 
-/* Read CCL qualifier list spec from file inf */
-YAZ_EXPORT int ccl_qual_fname (CCL_bibset bibset, const char *fname);
+/** Add special qualifier */
+YAZ_EXPORT
+void ccl_qual_add_special (CCL_bibset bibset, const char *n, const char *v);
 
-/* Add CCL qualifier as buf spec (multiple lines). */
-YAZ_EXPORT void ccl_qual_buf(CCL_bibset bibset, const char *buf);
+/** Add combo qualifier */
+YAZ_EXPORT
+void ccl_qual_add_combi (CCL_bibset b, const char *n, const char *names);
 
-/* Add CCL qualifier as line spec. Note: line is _modified_ */
-YAZ_EXPORT void ccl_qual_line(CCL_bibset bibset, char *line);
+/** Read CCL qualifier list spec from file inf */
+YAZ_EXPORT
+void ccl_qual_file (CCL_bibset bibset, FILE *inf);
+
+/** Read CCL qualifier list spec from file inf */
+YAZ_EXPORT
+int ccl_qual_fname (CCL_bibset bibset, const char *fname);
+
+/** Add CCL qualifier as buf spec (multiple lines). */
+YAZ_EXPORT
+void ccl_qual_buf(CCL_bibset bibset, const char *buf);
+
+/** Add CCL qualifier as line spec. Note: line is _modified_ */
+YAZ_EXPORT
+void ccl_qual_line(CCL_bibset bibset, char *line);
 
 /* Add CCL qualifier by using qual_name + value pair */
-YAZ_EXPORT void ccl_qual_fitem (CCL_bibset bibset, const char *value,
-                                const char *qual_name);
+YAZ_EXPORT
+void ccl_qual_fitem (CCL_bibset bibset, const char *value,
+		     const char *qual_name);
 
-/* Make CCL qualifier set */
-YAZ_EXPORT CCL_bibset ccl_qual_mk (void);
+/** Make CCL qualifier set */
+YAZ_EXPORT
+CCL_bibset ccl_qual_mk (void);
 
-/* Delete CCL qualifier set */
-YAZ_EXPORT void ccl_qual_rm (CCL_bibset *b);
+/** Delete CCL qualifier set */
+YAZ_EXPORT
+void ccl_qual_rm (CCL_bibset *b);
 
-/* Char-to-upper function */
+/** Char-to-upper function */
 extern int (*ccl_toupper)(int c);
 
-/* String utilities */
-YAZ_EXPORT int ccl_stricmp (const char *s1, const char *s2);
-YAZ_EXPORT int ccl_memicmp (const char *s1, const char *s2, size_t n);
+/** CCL version of ccl_stricmp */
+YAZ_EXPORT
+int ccl_stricmp (const char *s1, const char *s2);
 
-/* Search for qualifier 'name' in set 'b'. */
-YAZ_EXPORT struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
-                                                 const char *name,
-                                                 size_t len,
-                                                 int seq);
+/** CCL version of ccl_memicmp */
+YAZ_EXPORT
+int ccl_memicmp (const char *s1, const char *s2, size_t n);
 
-/* Create CCL parser */
-YAZ_EXPORT CCL_parser ccl_parser_create (void);
+/** Search for qualifier 'name' in set 'b'. */
+YAZ_EXPORT
+struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp, const char *name,
+				      size_t len, int seq);
 
-/* Destroy CCL parser */
-YAZ_EXPORT void ccl_parser_destroy (CCL_parser p);
+/** Create CCL parser */
+YAZ_EXPORT
+CCL_parser ccl_parser_create (void);
 
-YAZ_EXPORT char *ccl_strdup (const char *str);
+/** Destroy CCL parser */
+YAZ_EXPORT
+void ccl_parser_destroy (CCL_parser p);
 
-YAZ_EXPORT const char *ccl_qual_search_special (CCL_bibset b,
+/** String dup utility (ala strdup) */
+YAZ_EXPORT
+char *ccl_strdup (const char *str);
+
+/** Search for special qualifier */
+YAZ_EXPORT
+const char *ccl_qual_search_special (CCL_bibset b,
 						const char *name);
-
-YAZ_EXPORT void ccl_pquery (WRBUF w, struct ccl_rpn_node *p);
+/** Pretty-print CCL RPN node tree to WRBUF */
+YAZ_EXPORT
+void ccl_pquery (WRBUF w, struct ccl_rpn_node *p);
 
 #ifndef ccl_assert
 #define ccl_assert(x) ;

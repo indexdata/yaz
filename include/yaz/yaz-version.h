@@ -2,11 +2,12 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: yaz-version.h,v 1.51 2004-10-01 13:05:09 adam Exp $
+ * $Id: yaz-version.h,v 1.52 2004-10-03 22:34:07 adam Exp $
  */
 
-/*
- * Current software version.
+/**
+ * \file yaz-version.h
+ * \brief Defines YAZ version.
  */
 #ifndef YAZ_VERSION
 

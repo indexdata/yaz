@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.10 2004-10-02 13:28:26 adam Exp $
+/* $Id: cqltransform.c,v 1.11 2004-10-03 22:34:07 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -6,6 +6,11 @@ This file is part of the YAZ toolkit.
 
 See the file LICENSE.
 */
+
+/**
+ * \file cqltransform.c
+ * \brief Implements CQL transform (CQL to RPN conversion).
+ */
 
 #include <stdlib.h>
 #include <string.h>

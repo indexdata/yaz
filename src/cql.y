@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.5 2004-10-02 13:28:26 adam Exp $
+/* $Id: cql.y,v 1.6 2004-10-03 22:34:07 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -9,6 +9,12 @@ See the file LICENSE.
  bison parser for CQL grammar.
 */
 %{
+/** 
+ * \file cql.c
+ * \brief Implements CQL parser.
+ *
+ * This is a YACC parser, but since it must be reentrant, Bison is required.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
