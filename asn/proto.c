@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.43  1996-02-10 12:22:49  quinn
+ * Revision 1.44  1996-02-20 12:51:41  quinn
+ * Completed SCAN. Fixed problems with EXTERNAL.
+ *
+ * Revision 1.43  1996/02/10  12:22:49  quinn
  * Work on SCAN
  *
  * Revision 1.42  1996/01/22  09:46:31  quinn
@@ -1038,6 +1041,65 @@ int z_AlternativeTerm(ODR o, Z_AlternativeTerm **p, int opt)
     return opt && !o->error;
 }
 
+#if 1
+
+int z_ByDatabase(ODR o, Z_ByDatabase **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        z_DatabaseName(o, &(*p)->db, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->num, ODR_CONTEXT, 1, 1) &&
+	z_OtherInformation(o, &(*p)->otherDbInfo, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_ByDatabaseList(ODR o, Z_ByDatabaseList **p, int opt)
+{
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (odr_sequence_of(o, z_ByDatabase, &(*p)->elements, &(*p)->num_elements))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_ScanOccurrences(ODR o, Z_ScanOccurrences **p, int opt)
+{
+    Odr_arm arm[] =
+    {
+	{ODR_EXPLICIT, ODR_CONTEXT, 2, Z_ScanOccurrences_global, odr_integer},
+	{ODR_EXPLICIT, ODR_CONTEXT, 3, Z_ScanOccurrences_byDatabase,
+	    z_ByDatabaseList},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (!odr_initmember(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        odr_explicit(o, z_AttributeList, &(*p)->attributes, ODR_CONTEXT,
+	    1, 1) &&
+	z_ScanOccurrences(o, &(*p)->occurrences, 1) &&
+	z_OtherInformation(o, &(*p)->otherOccurInfo, 1) &&
+	odr_sequence_end(o);
+}
+
+#else
+
+/*
+ * Incomplete definition of occurencebyattributes.
+ */
+
 int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
@@ -1048,6 +1110,8 @@ int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
 	odr_sequence_end(o);
 }
 
+#endif
+
 int z_TermInfo(ODR o, Z_TermInfo **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
@@ -1056,6 +1120,8 @@ int z_TermInfo(ODR o, Z_TermInfo **p, int opt)
     	(willow_scan ? 
     	    odr_implicit(o, z_Term, &(*p)->term, ODR_CONTEXT, 1, 0) :
 	    z_Term(o, &(*p)->term, 0)) &&
+	odr_implicit(o, z_InternationalString, &(*p)->displayTerm, ODR_CONTEXT,
+	    0, 1) &&
 	z_AttributeList(o, &(*p)->suggestedAttributes, 1) &&
 	odr_implicit(o, z_AlternativeTerm, &(*p)->alternativeTerm,
 	    ODR_CONTEXT, 4, 1) &&
@@ -1063,6 +1129,7 @@ int z_TermInfo(ODR o, Z_TermInfo **p, int opt)
 	    2, 1) &&
 	odr_implicit(o, z_OccurrenceByAttributes, &(*p)->byAttributes,
 	    ODR_CONTEXT, 3, 1) &&
+	z_OtherInformation(o, &(*p)->otherTermInfo, 1) &&
 	odr_sequence_end(o);
 }
 
