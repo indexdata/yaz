@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_oid.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: ber_oid.c,v 1.2 2004-02-11 23:49:28 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -25,32 +24,21 @@ int ber_oidc(ODR o, Odr_oid *p)
             odr_seterror(o, OPROTO, 18);
             return 0;
         }
-        if (len < 0)
+        if (len <= 0)
         {
             odr_seterror(o, OPROTO, 19);
             return 0;
         }
         o->bp += res;
-        if (len == 0)
-        {
-            *p = -1;
-            return 1;
-        }
         if (len > odr_max(o))
         {
             odr_seterror(o, OPROTO, 20);
             return 0;
         }
-        p[0] = *o->bp / 40;
-        if (p[0] > 2)
-            p[0] = 2;
-        p[1] = *o->bp - p[0] * 40;
-        o->bp++;
-        pos = 2;
-        len--;
-        while (len)
-        {
-            p[pos] = 0;
+        pos = 0;
+	while (len)
+	{
+            int id = 0;
             do
             {
                 if (!len)
@@ -58,13 +46,22 @@ int ber_oidc(ODR o, Odr_oid *p)
                     odr_seterror(o, OPROTO, 21);
                     return 0;
                 }
-                p[pos] <<= 7;
-                p[pos] |= *o->bp & 0X7F;
+                id <<= 7;
+                id |= *o->bp & 0X7F;
                 len--;
             }
             while (*(o->bp++) & 0X80);
-            pos++;
-        }
+            if (pos > 0)
+                p[pos++] = id;
+	    else
+            {
+                p[0] = id / 40;
+		if (p[0] > 2)
+                    p[0] = 2;
+		p[1] = id - p[0] * 40;
+		pos = 2;
+            }
+	}
         p[pos] = -1;
         return 1;
     case ODR_ENCODE:
@@ -73,15 +70,18 @@ int ber_oidc(ODR o, Odr_oid *p)
         lenp = odr_tell(o);
         if (odr_putc(o, 0) < 0)   /* dummy */
             return 0;
-        if (p[0] < 0 && p[1] <= 0)
+        if (p[0] < 0 || p[1] <= 0)
         {
             odr_seterror(o, ODATA, 23);
             return 0;
         }
         for (pos = 1; p[pos] >= 0; pos++)
         {
-            id = pos > 1 ? p[pos] : p[0] * 40 + p[1];
             n = 0;
+            if (pos == 1)
+                id = p[0]*40 + p[1];
+	    else 
+                id = p[pos];
             do
             {
                 octs[n++] = id & 0X7F;

@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed two bugs in OID codec - ber_oidc. Throw error when encoding/decoding
+bad truncated OID. Fix decoding of OID X.Y... when X=2 and Y>39.
+
 Fixed a bug in ASN.1 compiler that caused Type-1 Operator codec to fail.
 
 Make ZOOM error code for "invalid query".
