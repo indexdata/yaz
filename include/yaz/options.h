@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,42 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: options.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.6  1997/09/01 08:49:50  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.5  1997/05/14 06:53:43  adam
- * C++ support.
- *
- * Revision 1.4  1995/09/29 17:12:05  quinn
- * Smallish
- *
- * Revision 1.3  1995/09/27  15:02:48  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.2  1995/05/16  08:50:36  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.1  1995/03/30  09:39:42  quinn
- * Moved .h files to include directory
- *
- * Revision 1.1  1995/03/27  08:35:19  quinn
- * Created util library
- * Added memory debugging module. Imported options-manager
- *
- * Revision 1.2  1994/08/16  16:16:03  adam
- * bfile header created.
- *
- * Revision 1.1  1994/08/16  16:04:35  adam
- * Added header file options.h
- *
+ * $Id: options.h,v 1.3 2003-03-03 19:57:35 adam Exp $
  */
 
 #ifndef OPTIONS_H

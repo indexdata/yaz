@@ -1,4 +1,4 @@
-/* $Id: cqlutil.c,v 1.2 2003-02-14 18:49:23 adam Exp $
+/* $Id: cqlutil.c,v 1.3 2003-03-03 19:57:35 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -20,7 +20,7 @@ void cql_fputs(const char *buf, void *client_data)
 
 struct cql_node *cql_node_dup (struct cql_node *cp)
 {
-    struct cql_node *cn;
+    struct cql_node *cn = 0;
 
     if (!cp)
         return 0;

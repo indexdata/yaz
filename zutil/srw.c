@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.7 2003-02-23 14:26:58 adam Exp $
+ * $Id: srw.c,v 1.8 2003-03-03 19:57:37 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -45,13 +45,17 @@ static int match_element(xmlNodePtr ptr, const char *elem)
     return 0;
 }
 
+#define CHECK_TYPE 0
+
 static int match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
                               char **val, int *len)
 {
+#if CHECK_TYPE
     struct _xmlAttr *attr;
+#endif
     if (!match_element(ptr, elem))
         return 0;
-#if 0
+#if CHECK_TYPE
     for (attr = ptr->properties; attr; attr = attr->next)
         if (!strcmp(attr->name, "type") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -85,10 +89,12 @@ static int match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o,
                      
 static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o, int **val)
 {
+#if CHECK_TYPE
     struct _xmlAttr *attr;
+#endif
     if (!match_element(ptr, elem))
         return 0;
-#if 0
+#if CHECK_TYPE
     for (attr = ptr->properties; attr; attr = attr->next)
         if (!strcmp(attr->name, "type") &&
             attr->children && attr->children->type == XML_TEXT_NODE)

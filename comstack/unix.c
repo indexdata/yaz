@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.10 2003-02-21 12:08:58 adam Exp $
+ * $Id: unix.c,v 1.11 2003-03-03 19:57:35 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -22,6 +22,7 @@
 #include <yaz/comstack.h>
 #include <yaz/unix.h>
 #include <yaz/log.h>
+#include <yaz/nmem.h>
 
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int

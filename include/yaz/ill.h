@@ -1,25 +1,8 @@
 /*
- * Copyright (c) 1999-2001, Index Data
+ * Copyright (c) 1999-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Log: ill.h,v $
- * Revision 1.5  2001-02-20 11:25:32  adam
- * Added ill_get_APDU and ill_get_Cancel.
- *
- * Revision 1.4  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.3  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.2  2000/01/15 09:39:50  adam
- * Implemented ill_get_ILLRequest. More ILL testing for client.
- *
- * Revision 1.1  1999/12/16 23:36:19  adam
- * Implemented ILL protocol. Minor updates ASN.1 compiler.
- *
+ * $Id: ill.h,v 1.6 2003-03-03 19:57:35 adam Exp $
  */
 #ifndef ILL_H
 #define ILL_H

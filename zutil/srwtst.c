@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwtst.c,v 1.4 2003-02-23 14:26:58 adam Exp $
+ * $Id: srwtst.c,v 1.5 2003-03-03 19:57:37 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -53,6 +53,18 @@ int main(int argc, char **argv)
             if (sr->which == Z_SRW_searchRetrieve_request)
             { 
                 Z_SRW_searchRetrieveRequest *req = sr->u.request;
+                switch(req->query_type)
+                {
+                case Z_SRW_query_type_cql:
+                    fprintf(stderr, "CQL: %s\n", req->query.cql);
+                    break;
+                case Z_SRW_query_type_xcql:
+                    fprintf(stderr, "XCQL\n");
+                    break;
+                case Z_SRW_query_type_pqf:
+                    fprintf(stderr, "PQF: %s\n", req->query.pqf);
+                    break;
+                }
             }
             else if (sr->which == Z_SRW_searchRetrieve_response)
             {

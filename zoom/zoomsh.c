@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.17 2003-02-24 13:14:49 adam Exp $
+ * $Id: zoomsh.c,v 1.18 2003-03-03 19:57:36 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -19,6 +19,7 @@
 #include <yaz/xmalloc.h>
 
 #include <yaz/log.h>
+#include <yaz/nmem.h>
 #include <yaz/zoom.h>
 
 #define MAX_CON 100
@@ -326,7 +327,8 @@ static void cmd_scan (ZOOM_connection *c, ZOOM_resultset *r,
                 int  occ = 0;
                 size_t len = 0;
                 const char *term = ZOOM_scanset_term(s[i], p, &occ, &len);
-                printf ("%.*s %d\n", len, term, occ);
+                fwrite(term, 1, len, stdout);
+                printf (" %d\n", occ);
             }            
             ZOOM_scanset_destroy(s[i]);
         }

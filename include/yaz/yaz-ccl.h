@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2003, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,39 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: yaz-ccl.h,v $
- * Revision 1.4  2000-05-25 19:57:35  adam
- * Changed include of yaz-util.h to wrbuf.h.
- *
- * Revision 1.3  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.2  1999/12/20 15:20:13  adam
- * Implemented ccl_pquery to convert from CCL tree to prefix query.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.8  1997/09/01 08:49:54  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.7  1997/06/23 10:30:45  adam
- * Added ODR stream as parameter to ccl_rpn_query and ccl_scan_query.
- *
- * Revision 1.6  1997/05/14 06:53:54  adam
- * C++ support.
- *
- * Revision 1.5  1995/09/29 17:12:14  quinn
- * Smallish
- *
- * Revision 1.4  1995/09/27  15:02:54  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.3  1995/05/16  08:50:40  quinn
- * License, documentation, and memory fixes
- *
- *
+ * $Id: yaz-ccl.h,v 1.5 2003-03-03 19:57:35 adam Exp $
  */
 
 #ifndef YAZ_CCL_H
