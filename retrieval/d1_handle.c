@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_handle.c,v $
- * Revision 1.1  1997-09-17 12:28:24  adam
+ * Revision 1.2  1997-09-30 11:50:04  adam
+ * Added handler data1_get_map_buf that is used by data1_nodetomarc.
+ *
+ * Revision 1.1  1997/09/17 12:28:24  adam
  * Introduced new 'global' data1 handle.
  *
  */
@@ -18,9 +21,15 @@
 struct data1_handle_info {
     WRBUF wrbuf;
     char *tab_path;
+
     char *read_buf;
     int read_len;
+
     data1_absyn_cache absyn_cache;
+
+    char *map_buf;
+    int map_len;
+
     NMEM mem;
 };
 
@@ -33,6 +42,8 @@ data1_handle data1_create (void)
     p->wrbuf = wrbuf_alloc();
     p->read_buf = NULL;
     p->read_len = 0;
+    p->map_buf = NULL;
+    p->map_len = 0;
     p->absyn_cache = NULL;
     p->mem = nmem_create ();
     return p;
@@ -57,6 +68,8 @@ void data1_destroy (data1_handle dh)
 	xfree (dh->tab_path);
     if (dh->read_buf)
 	xfree (dh->read_buf);
+    if (dh->map_buf)
+        xfree (dh->map_buf);
     nmem_destroy (dh->mem);
     
     xfree (dh);
@@ -70,9 +83,16 @@ WRBUF data1_get_wrbuf (data1_handle dp)
 char **data1_get_read_buf (data1_handle dp, int **lenp)
 {
     *lenp = &dp->read_len;
+    logf (LOG_DEBUG, "data1_get_read_buf lenp=%u", **lenp);
     return &dp->read_buf;
 }
 
+char **data1_get_map_buf (data1_handle dp, int **lenp)
+{
+    *lenp = &dp->map_len;
+    logf (LOG_DEBUG, "data1_get_map_buf lenp=%u", **lenp);
+    return &dp->map_buf;
+}
 
 void data1_set_tabpath (data1_handle dp, const char *p)
 {

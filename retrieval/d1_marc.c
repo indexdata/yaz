@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.9  1997-09-24 13:35:45  adam
+ * Revision 1.10  1997-09-30 11:50:04  adam
+ * Added handler data1_get_map_buf that is used by data1_nodetomarc.
+ *
+ * Revision 1.9  1997/09/24 13:35:45  adam
  * Added two members to data1_marctab to ease reading of weird MARC records.
  *
  * Revision 1.8  1997/09/17 12:10:37  adam
@@ -222,6 +225,7 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
     char *op;
     data1_node *field, *subf;
 
+    logf (LOG_DEBUG, "nodetomarc");
     for (field = n->child; field; field = field->next)
     {
 	if (field->which != DATA1N_tag)
@@ -333,7 +337,7 @@ char *data1_nodetomarc(data1_handle dh, data1_marctab *p, data1_node *n,
 		       int selected, int *len)
 {
     int *size;
-    char **buf = data1_get_read_buf (dh, &size);
+    char **buf = data1_get_map_buf (dh, &size);
 
     *len = nodetomarc(p, n, selected, buf, size);
     return *buf;
