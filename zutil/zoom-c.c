@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.18 2003-02-14 18:49:24 adam Exp $
+ * $Id: zoom-c.c,v 1.19 2003-02-14 19:10:00 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -913,6 +913,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     return send_APDU (c, apdu);
 }
 
+#if HAVE_XSLT
 static zoom_ret send_srw (ZOOM_connection c, Z_SRW_searchRetrieve *sr)
 {
     Z_SOAP_Handler h[2] = {
@@ -953,7 +954,9 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_searchRetrieve *sr)
     odr_reset(c->odr_out);
     return do_write (c);
 }
+#endif
 
+#if HAVE_XSLT
 static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
     ZOOM_resultset resultset;
@@ -978,6 +981,12 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
  
     return send_srw(c, sr);
 }
+#else
+static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
+{
+    return zoom_complete;
+}
+#endif
 
 static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
 {
