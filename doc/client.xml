@@ -1,12 +1,11 @@
-<!-- $Id: client.xml,v 1.9 2002-01-28 09:25:08 adam Exp $ -->
+<!-- $Id: client.xml,v 1.10 2002-02-04 21:05:28 adam Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
     yaz-client is a line-mode Z39.50 client. It supports a fair amount
-    of the functionality of the Z39.50-1995 standard, but some things you
-    need to enable or disable by re-compilation.
-    Its primary purpose is to exercise the
-    package, and verify that the protocol works OK.
+    of the functionality of the Z39.50-1995 standard
+    Its primary purpose is to exercise the package, and verify that
+    the protocol works OK.
     For the same reason some commands offers more functionality than others.
     Commands that exercises common Z39.50 services such as search and present
     have more features than less common supported services, such as Extended
@@ -24,8 +23,8 @@
     in a UNIX shell / WIN32 console. The <replaceable>zurl</replaceable>,
     specifies a Z39.50 host and, if specified, the client first tries to
     establish connection with the Z39.50 target on the host.
-    Options are, as usual, are prefixed by <literal>-</literal> followed
-    by a particular letter.
+    Options are, as usual, are prefixed by
+    <literal>-</literal> followed by a particular letter.
     </simpara>
    <simpara>
     The following options are supported:
@@ -34,10 +33,10 @@
     <varlistentry><term>
       <literal>-m</literal> <replaceable>fname</replaceable>
      </term><listitem>
-      <simpara>ISO2709 records are appended to file
-       <replaceable>fname</replaceable>. All records as returned by a target(s)
-       in Search Responses and Present Responses are appended verbatim to 
-       the file.
+      <simpara>All retrieved transfer records are appended to file
+       <replaceable>fname</replaceable>. All records as returned by a
+       target(s) in Search Responses and Present Responses are appended
+       verbatim to the file.
       </simpara></listitem>
     </varlistentry>
     <varlistentry><term>
@@ -71,7 +70,6 @@
        <literal>none</literal>.
       </simpara></listitem>
     </varlistentry>
-
     <varlistentry><term>
       <literal>-p</literal> <replaceable>target</replaceable>
      </term><listitem>
@@ -81,7 +79,6 @@
        to inform the proxy about actual target.
       </simpara></listitem>
     </varlistentry>
-
     <varlistentry><term>
       <literal>-u</literal> <replaceable>authentication</replaceable>
      </term><listitem>
@@ -89,6 +86,15 @@
        <replaceable>user</replaceable>/<replaceable>password</replaceable>
        is used. This option does the same thing as the
        <literal>auth</literal> command.
+      </simpara></listitem>
+    </varlistentry>
+
+    <varlistentry><term>
+      <literal>-k</literal> <replaceable>kilobytes</replaceable>
+     </term><listitem>
+      <simpara>Specifies the maximum messages size in kilobytes.
+       The default maxium messages for the YAZ client is 1024
+       (1 MB).
       </simpara></listitem>
     </varlistentry>
 
@@ -125,7 +131,6 @@
     <varlistentry><term>
       <literal>open </literal><replaceable>zurl</replaceable>
      </term>
-     <term><literal>o</literal></term>
      <listitem>
       <para>Opens a connection to a server. The syntax for
        <replaceable>zurl</replaceable> is the same as described
@@ -143,7 +148,6 @@
     <varlistentry><term>
       <literal>quit</literal>
      </term>
-     <term><literal>q</literal></term>
      <listitem>
       <para>Ends YAZ client</para>
      </listitem>
@@ -424,7 +428,7 @@
      <listitem>
       <para>Executes list of commands from
        file <replaceable>filename</replaceable>, just like source on
-       some UNIX shells.
+       most UNIX shells.
       </para>
      </listitem>
     </varlistentry>
@@ -436,6 +440,83 @@
      <listitem>
       <para>Executes command <replaceable>args</replaceable> in subshell
        using the <literal>system</literal> call.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry><term>
+      <literal>push_commande</literal>
+      <replaceable>command</replaceable>
+     </term>
+     <listitem>
+      <para>The push_command takes another command as its argument.
+       That command is then added to the history information (so
+       you can retrieve it later). The command itself is not
+       executed. This command only works if you have GNU readline/history
+       enabled.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry><term>
+      <literal>set_apdufile</literal>
+      <replaceable>filename</replaceable>
+     </term>
+     <listitem>
+      <para>Sets that APDU should be logged to file
+       <replaceable>filename</replaceable>. This command does the
+       thing as option <literal>-a</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry><term>
+      <literal>set_marcdump</literal>
+      <replaceable>filename</replaceable>
+     </term>
+     <listitem>
+      <para>Specifies that all retrieved records should be appended ot
+       file <replaceable>filename</replaceable>. This command does the
+       thing as option <literal>-m</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry><term>
+      <literal>set_cclfields</literal>
+      <replaceable>filename</replaceable>
+     </term>
+     <listitem>
+      <para>Specifies that CCL fields should be read from file
+       file <replaceable>filename</replaceable>. This command does the
+       thing as option <literal>-c</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry><term>
+      <literal>register_oid</literal>
+      <replaceable>name</replaceable>
+      <replaceable>class</replaceable>
+      <replaceable>OID</replaceable>
+     </term>
+     <listitem>
+      <para>This command allows you to register your own object
+       identifier - so that instead of entering a long dot-notation
+       you can use a short name instead.
+       The <replaceable>name</replaceable> is your
+       name for the OID, <replaceable>class</replaceable> is the
+       class, and <replaceable>OID</replaceable> is the raw OID in
+       dot notation. Class is one <literal>appctx</literal>,
+       <literal>absyn</literal>, <literal>attet</literal>,
+       <literal>transyn</literal>, <literal>diagset</literal>,
+       <literal>recsyn</literal>, <literal>resform</literal>,
+       <literal>accform</literal>, <literal>extserv</literal>,
+       <literal>userinfo</literal>, <literal>elemspec</literal>,
+       <literal>varset</literal>, <literal>schema</literal>,
+       <literal>tagset</literal>, <literal>general</literal>.
+       If you're in doubt use the <literal>general</literal>
+        class.
       </para>
      </listitem>
     </varlistentry>
