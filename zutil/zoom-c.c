@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.6 2002-10-28 10:53:09 adam Exp $
+ * $Id: zoom-c.c,v 1.7 2002-11-15 10:38:37 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -2183,7 +2183,6 @@ static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
     }
     else
     {
-        // c->reconnect_ok = 0;
         c->mask = ZOOM_SELECT_READ|ZOOM_SELECT_EXCEPT;
         yaz_log (LOG_DEBUG, "do_write_ex 2 mask=%d", c->mask);
     }
