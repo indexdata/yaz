@@ -1,6 +1,19 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 2.0.30 2005/01/03 
+--- 2.0.30 2005/01/04 
+
+Fixed numerious warnings that was issued with newer versions of GCC.
+
+Fixed NMEM system to return aligned blocks on 8 byte boundaries rather
+than 4 bytes, since 4 may not be enough on some systems such as GCC 3.4.3
+on Solaris.
+
+Make YAZ Generic Frontend Server slightly faster.
+
+Enhance (and reduce) logging for Generic Frontend Server.
+
+Revert YAZ log system so that it flushes every write operation
+by default. (YAZ 2.0.26 and earlier verisons did that). Bug #240.
 
 Modified the YAZ logging system. The LOG level defines use YLOG_ prefix
 instead of LOG_, due to name clash with syslog(3). LOG_ are still
