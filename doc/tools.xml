@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.26 2003-06-20 10:18:05 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.27 2003-07-11 09:51:13 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1661,6 +1661,49 @@ typedef struct oident
     takes as argument a mnemonic OID name, and returns the
     <literal>/value</literal> field of the first entry in the database that 
     contains the given name in its <literal>desc</literal> field.
+   </para>
+
+   <para>
+    Three utility functions are provided for translating OIDs'
+    symbolic names (e.g. <literal>Usmarc</literal> into OID structures
+    (int arrays) and strings containing the OID in dotted notation
+    (e.g. <literal>1.2.840.10003.9.5.1</literal>).  They are:
+   </para>
+
+   <screen>
+    int *oid_name_to_oid(oid_class oclass, const char *name, int *oid);
+    char *oid_to_dotstring(const int *oid, char *oidbuf);
+    char *oid_name_to_dotstring(oid_class oclass, const char *name, char *oidbuf);
+   </screen>
+
+   <para>
+    <literal>oid_name_to_oid()</literal>
+     translates the specified symbolic <literal>name</literal>,
+     interpreted as being of class <literal>oclass</literal>.  (The
+     class must be specified as many symbolic names exist within
+     multiple classes - for example, <literal>Zthes</literal> is the
+     symbolic name of an attribute set, a schema and a tag-set.)  The
+     sequence of integers representing the OID is written into the
+     area <literal>oid</literal> provided by the caller; it is the
+     caller's responsibility to ensure that this area is large enough
+     to contain the translated OID.  As a convenience, the address of
+     the buffer (i.e. the value of <literal>oid</literal>) is
+     returned.
+   </para>
+   <para>
+    <literal>oid_to_dotstring()</literal>
+    Translates the int-array <literal>oid</literal> into a dotted
+    string which is written into the area <literal>oidbuf</literal>
+    supplied by the caller; it is the caller's responsibility to
+    ensure that this area is large enough.  The address of the buffer
+    is returned.
+   </para>
+   <para>
+    <literal>oid_name_to_dotstring()</literal>
+    combines the previous two functions to derive a dotted string
+    representing the OID specified by <literal>oclass</literal> and
+    <literal>name</literal>, writing it into the buffer passed as
+    <literal>oidbuf</literal> and returning its address.
    </para>
 
    <para>
