@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: pquery.c,v $
- * Revision 1.7  2001-05-09 23:31:35  adam
+ * Revision 1.8  2001-07-19 19:14:53  adam
+ * C++ compile.
+ *
+ * Revision 1.7  2001/05/09 23:31:35  adam
  * String attribute values for PQF. Proper C-backslash escaping for PQF.
  *
  * Revision 1.6  2001/03/07 13:24:40  adam
@@ -301,7 +304,7 @@ static int p_query_parse_attr(struct lex_info *li, ODR o,
     {
 	int len = li->lex_len - (cp - li->lex_buf);
 	attr_list[2*num_attr+1] = 0;
-	attr_clist[num_attr] = odr_malloc (o, len+1);
+	attr_clist[num_attr] = (char *) odr_malloc (o, len+1);
 	len = escape_string(attr_clist[num_attr], cp, len);
 	attr_clist[num_attr][len] = '\0';
     }
@@ -403,7 +406,7 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
     term->u.general = term_octet;
     term_octet->buf = (unsigned char *)odr_malloc (o, li->lex_len);
     term_octet->size = term_octet->len =
-	escape_string (term_octet->buf, li->lex_buf, li->lex_len);
+	escape_string ((char *) (term_octet->buf), li->lex_buf, li->lex_len);
     return zapt;
 }
 
