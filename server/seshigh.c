@@ -4,8 +4,8 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.97  1999-11-29 14:36:28  adam
- * Implementation_name and implementation_version copied verbatim.
+ * Revision 1.98  1999-11-29 15:12:27  adam
+ * Changed the way implementationName - and version is set.
  *
  * Revision 1.96  1999/11/04 14:58:44  adam
  * Added status elements for backend delete result set handler.
@@ -335,7 +335,6 @@
  *
  */
 
-#include <yconfig.h>
 #include <stdlib.h>
 #include <stdio.h>
 #ifdef WIN32
@@ -345,6 +344,7 @@
 #endif
 #include <assert.h>
 
+#include <yconfig.h>
 #include <xmalloc.h>
 #include <comstack.h>
 #include "eventl.h"
@@ -928,12 +928,28 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     resp->preferredMessageSize = &assoc->preferredMessageSize;
     resp->maximumRecordSize = &assoc->maximumRecordSize;
 
-    resp->implementationName = "Index Data/YAZ Generic Frontend Server";
+    resp->implementationName = "GFS";
 
     if (binitreq.implementation_name)
-	resp->implementationName = binitreq.implementation_name;
+    {
+	char *nv = (char *)
+	    odr_malloc (assoc->encode,
+			strlen(binitreq.implementation_name) + 10 + 
+			       strlen(resp->implementationName));
+	sprintf (nv, "%s / %s",
+		 resp->implementationName, binitreq.implementation_name);
+        resp->implementationName = nv;
+    }
     if (binitreq.implementation_version)
-        resp->implementationVersion = binitreq.implementation_version;
+    {
+	char *nv = (char *)
+	    odr_malloc (assoc->encode,
+			strlen(binitreq.implementation_version) + 10 + 
+			       strlen(resp->implementationVersion));
+	sprintf (nv, "YAZ %s / %s",
+		 resp->implementationVersion, binitreq.implementation_version);
+        resp->implementationVersion = nv;
+    }
 
     if (binitres->errcode)
     {
