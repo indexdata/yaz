@@ -26,7 +26,7 @@ elm (1,1)                   schemaIdentifier		-
 elm (1,10)                  rank 			-
 elm (1,12)                  url				-
 elm (1,14)                  localControlNumber		-
-elm (2,1)                   title			!:w,!:p
+elm (2,1)                   title			!:w,!:p,!:s
 elm (4,52)                  originator			author-name-corporate
 #
 # Additional structuring of originator non-standard.
@@ -142,5 +142,5 @@ elm (4,1)                   controlIdentifier		identifier-standard
 elm (4,23)                  originalControlIdentifier	!
 elm (4,19)                  recordSource		!
 elm (4,34)                  languageOfRecord		!
-elm (1,16)                  dateOfLastModification	date/time-last-modified
+elm (1,16)                  dateOfLastModification	date/time-last-modified:w,date/time-last-modified:s
 elm (4,24)                  recordReviewDate		!
