@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.65 2003-10-02 06:30:45 adam Exp $
+# $Id: makefile,v 1.66 2003-10-27 12:32:03 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -34,7 +34,7 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll client ztest zoomsh cqlprog iconv libxml2
+all: dirs generate dll client ztest zoomsh utilprog iconv libxml2
 
 NSIS="c:\program files\nsis\makensis-bz2.exe"
 
@@ -58,25 +58,12 @@ LIBDIR=$(ROOTDIR)\lib       # We produce .lib, .exp etc there
 BINDIR=$(ROOTDIR)\bin       # We produce exes and dlls there
 WINDIR=$(ROOTDIR)\win       # all these Win make things
 OBJDIR=$(WINDIR)\obj        # where we store intermediate files
-UNIXDIR=$(ROOTDIR)\unix     # corresponding unix things
-SRCDIR=$(ROOTDIR)           # for the case we move them under src
+SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
 
-ASNDIR=$(SRCDIR)\ASN
-COMSTACKDIR=$(SRCDIR)\COMSTACK
-ODRDIR=$(SRCDIR)\ODR
-UTILDIR=$(SRCDIR)\UTIL
-ZUTILDIR=$(SRCDIR)\ZUTIL
-RETDIR=$(SRCDIR)\RETRIEVAL
-Z3950DIR=$(SRCDIR)\Z39.50
-ILLDIR=$(SRCDIR)\ill
-CCLDIR=$(SRCDIR)\ccl
-ZOOMDIR=$(SRCDIR)\zoom
-CQLDIR=$(SRCDIR)\cql
-
-
-CLIENTDIR=$(SRCDIR)\CLIENT
-SERVERDIR=$(SRCDIR)\SERVER
-ZTESTDIR=$(SRCDIR)\ZTEST
+CLIENTDIR=$(ROOTDIR)\CLIENT
+ZTESTDIR=$(ROOTDIR)\ZTEST
+ZOOMDIR=$(ROOTDIR)\ZOOM
+UTILDIR=$(ROOTDIR)\UTIL
 
 TMPDIR=$(ROOTDIR)\win\tmp
 TMP=$(TMPDIR)
@@ -103,6 +90,7 @@ ZOOMTST8=$(BINDIR)\zoomtst8.exe
 
 CQL2PQF=$(BINDIR)\cql2pqf.exe
 CQL2XCQL=$(BINDIR)\cql2xcql.exe
+YAZ_MARCDUMP=$(BINDIR)\yaz-marcdump.exe
 
 # shortcut names defined here
 dll : $(DLL) 
@@ -112,7 +100,7 @@ ztest: $(ZTEST)
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8)
 
-cqlprog: $(CQL2PQF) $(CQL2XCQL)
+utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -167,7 +155,7 @@ COMMON_C_OPTIONS=          \
   /Fd"$(OBJDIR)\\" 
 
 COMMON_C_INCLUDES= \
-  /I"$(SRCDIR)\include"
+  /I"$(ROOTDIR)\include"
 
 DEBUG_C_OPTIONS=  \
   /D "_DEBUG"      \
@@ -213,12 +201,8 @@ RELEASE_LNK_OPTIONS=  /pdb:none
 
 DLL_LINK_OPTIONS= /dll  
 CLIENT_LINK_OPTIONS = /subsystem:console  
-ZOOMSH_LINK_OPTIONS = /subsystem:console
 SERVER_LINK_OPTIONS = -lib 
 ZTEST_LINK_OPTIONS = /subsystem:console  
-CQL2PQF_LINK_OPTIONS = /subsystem:console  
-CQL2XCQL_LINK_OPTIONS = /subsystem:console  
-
 
 COMMON_TCL_OPTIONS= ..\util\yaz-asncomp -I$(INCLDIR) -i yaz
 
@@ -237,7 +221,6 @@ RCOPT=  $(COMMON_RC_OPTIONS)  $(RELEASE_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
 TCLOPT= $(COMMON_TCL_OPTIONS)
 !endif
-
 
 
 ###########################################################
@@ -277,19 +260,21 @@ YAZ_CQL2PQF_OBJS = \
    $(OBJDIR)\cql2pqf.obj
 YAZ_CQL2XCQL_OBJS = \
    $(OBJDIR)\cql2xcql.obj
+YAZ_MARCDUMP_OBJS = \
+   $(OBJDIR)\marcdump.obj
 
 YAZ_SERVER_OBJS= \
-	"$(OBJDIR)\eventl.obj" \
-	"$(OBJDIR)\requestq.obj" \
-	"$(OBJDIR)\service.obj" \
-	"$(OBJDIR)\seshigh.obj" \
-	"$(OBJDIR)\statserv.obj" \
-	"$(OBJDIR)\tcpdchk.obj" 
+   "$(OBJDIR)\eventl.obj" \
+   "$(OBJDIR)\requestq.obj" \
+   "$(OBJDIR)\service.obj" \
+   "$(OBJDIR)\seshigh.obj" \
+   "$(OBJDIR)\statserv.obj" \
+   "$(OBJDIR)\tcpdchk.obj" 
 
 ZTEST_OBJS= \
-	"$(OBJDIR)\read-marc.obj" \
-	"$(OBJDIR)\read-grs.obj" \
-	"$(OBJDIR)\ztest.obj" 
+   "$(OBJDIR)\read-marc.obj" \
+   "$(OBJDIR)\read-grs.obj" \
+   "$(OBJDIR)\ztest.obj" 
 
 YAZ_CCL_OBJS= \
    $(OBJDIR)\cclerrms.obj \
@@ -427,18 +412,13 @@ YAZ_OBJS =\
 
 DLL_OBJS= $(YAZ_OBJS)
 
-ALL_OBJS= \
-	$(YAZ_OBJS) \
-	$(YAZ_CLIENT_OBJS) \
-	$(ZTEST_OBJS)
-
 ###########################################################
 ############### Generated C and H files
 #####
 ######################################################
 
-Z3950_C_DIR=$(Z3950DIR)   
-ILL_C_DIR=$(ILLDIR)
+Z3950_C_DIR=$(SRCDIR)   
+ILL_C_DIR=$(SRCDIR)
 #!!! Should be moved to OBJ, but that requires too much trickery
 
 # Files generated from datetime.asn
@@ -555,10 +535,6 @@ generated_files: \
 # Note: This defines where to look for the necessary
 # source files. Funny way of doing it, but it works.
 
-# DLL sources
-{$(SRCDIR)}.cpp{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $<
-
 # yaz client
 {$(CLIENTDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) $(COPT) $< /D"_CONSOLE"
@@ -572,102 +548,78 @@ generated_files: \
 	$(CPP) $(COPT) $< 
 
 # Various YAZ source directories
-{$(ASNDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
-
-{$(COMSTACKDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
-
-{$(ODRDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
-
-{$(UTILDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
-
-{$(ZUTILDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP)	$(COPT) $< 
-
-{$(RETDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $<
-
-{$(Z3950_C_DIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
-
-{$(ILL_C_DIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
-
-{$(CCLDIR)}.c{$(OBJDIR)}.obj:
+{$(SRCDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
 {$(ZOOMDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
-{$(CQLDIR)}.c{$(OBJDIR)}.obj:
+{$(UTILDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
 ############### ASN-generated files
 
 !if $(HAVE_TCL)
 
-$(Z3950V3_FILES): $(Z3950DIR)\z3950v3.asn
-	@cd $(Z3950DIR)
+$(Z3950V3_FILES): $(SRCDIR)\z3950v3.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl z3950v3.asn
 	@cd $(WINDIR)
 
-$(DATETIME_FILES): $(Z3950DIR)\datetime.asn
-	@cd $(Z3950DIR)
+$(DATETIME_FILES): $(SRCDIR)\datetime.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl datetime.asn
 	@cd $(WINDIR)
 
-$(UNIVRES_FILES): $(Z3950DIR)\univres.asn
-	@cd $(Z3950DIR)
+$(UNIVRES_FILES): $(SRCDIR)\univres.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl univres.asn
 	@cd $(WINDIR)
 
-$(ESUPDATE_FILES): $(Z3950DIR)\esupdate.asn
-	@cd $(Z3950DIR)
+$(ESUPDATE_FILES): $(SRCDIR)\esupdate.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl esupdate.asn
 	@cd $(WINDIR)
 
-$(ESADMIN_FILES): $(Z3950DIR)\esadmin.asn
-	@cd $(Z3950DIR)
+$(ESADMIN_FILES): $(SRCDIR)\esadmin.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl esadmin.asn
 	@cd $(WINDIR)
 
-$(CHARNEG_FILES): $(Z3950DIR)\charneg-3.asn
-	@cd $(Z3950DIR)
+$(CHARNEG_FILES): $(SRCDIR)\charneg-3.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl charneg-3.asn
 	@cd $(WINDIR)
 
-$(MTERM2_FILES): $(Z3950DIR)\mterm2.asn
-	@cd $(Z3950DIR)
+$(MTERM2_FILES): $(SRCDIR)\mterm2.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl mterm2.asn
 	@cd $(WINDIR)
 
-$(OCLCUI_FILES): $(Z3950DIR)\oclcui.asn
-	@cd $(Z3950DIR)
+$(OCLCUI_FILES): $(SRCDIR)\oclcui.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl oclcui.asn
 	@cd $(WINDIR)
 
-$(ILL_CORE_FILES): $(ILLDIR)\ill9702.asn
-	@cd $(ILLDIR)
+$(ILL_CORE_FILES): $(SRCDIR)\ill9702.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d ill.tcl ill9702.asn
 	@cd $(WINDIR)
 
-$(ITEM_REQ_FILES): $(ILLDIR)\item-req.asn
-	@cd $(ILLDIR)
+$(ITEM_REQ_FILES): $(SRCDIR)\item-req.asn
+	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d ill.tcl item-req.asn
 	@cd $(WINDIR)
 
-$(UTILDIR)\marc8.c: $(UTILDIR)\charconv.sgm
-	@cd $(UTILDIR)
+$(SRCDIR)\marc8.c: $(SRCDIR)\charconv.sgm
+	@cd $(SRCDIR)
 	$(TCL) charconv.tcl -p marc8 -s 50 charconv.sgm -o marc8.c
 
 !endif
 
 !if $(HAVE_BISON)
-$(CQLDIR)\cql.c: $(CQLDIR)\cql.y
-	@cd $(CQLDIR)
+$(SRCDIR)\cql.c: $(SRCDIR)\cql.y
+	@cd $(SRCDIR)
 	$(BISON) -y -p cql_ -o cql.c cql.y
 
 !endif
@@ -729,7 +681,7 @@ $(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS)
 	@echo Linking $(ZOOMSH)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMSH_OBJS)
@@ -742,7 +694,7 @@ $(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS)
 	@echo Linking $(ZOOMTST1)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST1_OBJS)
@@ -755,7 +707,7 @@ $(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS)
 	@echo Linking $(ZOOMTST2)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST2_OBJS)
@@ -768,7 +720,7 @@ $(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS)
 	@echo Linking $(ZOOMTST3)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST3_OBJS)
@@ -781,7 +733,7 @@ $(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS)
 	@echo Linking $(ZOOMTST4)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST4_OBJS)
@@ -794,7 +746,7 @@ $(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS)
 	@echo Linking $(ZOOMTST5)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST5_OBJS)
@@ -807,7 +759,7 @@ $(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS)
 	@echo Linking $(ZOOMTST6)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST6_OBJS)
@@ -820,7 +772,7 @@ $(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS)
 	@echo Linking $(ZOOMTST7)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST7_OBJS)
@@ -833,7 +785,7 @@ $(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS)
 	@echo Linking $(ZOOMTST8)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(ZOOMSH_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_ZOOMTST8_OBJS)
@@ -846,7 +798,7 @@ $(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS)
 	@echo Linking $(CQL2PQF)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(CQL2PQF_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_CQL2PQF_OBJS)
@@ -859,7 +811,7 @@ $(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS)
 	@echo Linking $(CQL2XCQL)
 	$(LINK) @<<
         $(LNKOPT) 
-		$(CQL2XCQL_LINK_OPTIONS)
+		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_CQL2XCQL_OBJS)
@@ -869,7 +821,7 @@ $(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS)
 <<
 
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
-	@echo Linking the ztest  $(ZTEST)
+	@echo Linking $(ZTEST)
 	$(LINK) @<<
         $(LNKOPT) 
 		$(ZTEST_LINK_OPTIONS)
@@ -882,6 +834,21 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 		/map:"$(LIBDIR)\yaz-ztest.map"
 		/out:$(ZTEST) 
 <<
+
+$(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(DLL)
+	@echo Linking $(YAZ_MARCDUMP)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(CLIENT_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		shell32.lib
+		$(IMPLIB)
+		$(YAZ_MARCDUMP_OBJS) 
+		/pdb:"$(LIBDIR)\yaz-marcdump.pdb"
+		/map:"$(LIBDIR)\yaz-marcdump.map"
+		/out:$(YAZ_MARCDUMP) 
+<<
+
 
 # note that this links a lib, so it uses completely different options.
 
@@ -900,8 +867,13 @@ clean:
 	-del $(OBJDIR)\*.OBJ
 
 realclean: clean
-	-del $(CQLDIR)\cql.c
-	-del $(Z3950_C_DIR)\z*.c
+	-del $(SRCDIR)\marc8.c
+	-del $(SRCDIR)\cql.c
+	-del $(SRCDIR)\z-*.c
+	-del $(SRCDIR)\ill-core.c
+	-del $(SRCDIR)\item-req.c
+	-del $(INCLDIR)\yaz\ill-core.h
+	-del $(INCLDIR)\yaz\item-req.h
 	-del $(INCLDIR)\yaz\z-accdes1.h
 	-del $(INCLDIR)\yaz\z-core.h
 	-del $(DATETIME_H_FILES)
@@ -932,225 +904,4 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 # makes sure we generate before compiling anything, as the
 # new proto.h refers to the generated files, and is included
 # in various places
-
-###########################################################
-############### Log
-###########################################################
-#
-# $Log: makefile,v $
-# Revision 1.65  2003-10-02 06:30:45  adam
-# Quote ICONV_DIR/LIBXML2_DIR as suggested by Michael Freidgeim
-#
-# Revision 1.64  2003/09/04 18:52:02  adam
-# Minor changes. Use libxml-2.5.10
-#
-# Revision 1.63  2003/07/25 11:11:19  adam
-# Change order of compilation to reflect Unix AM.
-#
-# Revision 1.62  2003/07/19 13:48:49  adam
-# makefile updated for oclcui.asn
-#
-# Revision 1.61  2003/07/15 08:26:26  adam
-# opacdisp.obj
-#
-# Revision 1.60  2003/06/11 18:37:10  adam
-# Dont use charconv_cjk.xml
-#
-# Revision 1.59  2003/06/03 09:11:13  adam
-# WIN32 updates
-#
-# Revision 1.58  2003/06/02 13:44:54  adam
-# Added cqlstrer to win makefile
-#
-# Revision 1.57  2003/05/27 21:12:23  adam
-# YAZ ASN.1 compiler renamed from yaz-comp to yaz-asncomp
-#
-# Revision 1.56  2003/05/23 10:41:26  adam
-# WIN32 updates
-#
-# Revision 1.55  2003/02/18 21:27:53  adam
-# CQL w/bison on WIN32
-#
-# Revision 1.54  2003/02/18 09:11:50  adam
-# Prepare for external utilties: iconv, libxml2 on WIN32
-#
-# Revision 1.53  2003/02/17 22:34:39  adam
-# WIN32 updates
-#
-# Revision 1.52  2002/12/16 14:06:34  adam
-# WIN32 updates for marc8.c
-#
-# Revision 1.51  2002/12/05 12:16:39  adam
-# yaz_strerror. WIN32 updates for mterm2.asn
-#
-# Revision 1.50  2002/10/24 12:14:01  heikki
-# Using a default path to find tcl
-#
-# Revision 1.49  2002/10/22 13:49:53  adam
-# data1 gone
-#
-# Revision 1.48  2002/10/22 10:32:46  adam
-# New source grs1disp.c
-#
-# Revision 1.47  2002/09/06 20:04:49  adam
-# debug=0
-#
-# Revision 1.46  2002/08/30 11:28:01  adam
-# Remove EXPAT reader
-#
-# Revision 1.45  2002/08/27 22:33:30  adam
-# siconv added
-#
-# Revision 1.44  2002/07/25 14:19:18  adam
-# EXPAT support on WIN32
-#
-# Revision 1.43  2002/07/25 13:45:30  adam
-# iconv.dll
-#
-# Revision 1.42  2002/06/05 21:11:00  adam
-# NSIS bz2
-#
-# Revision 1.41  2002/06/04 08:29:53  adam
-# ignore errors on del.
-#
-# Revision 1.40  2002/06/02 21:34:45  adam
-# Remove --enable-module option
-#
-# Revision 1.39  2002/05/31 08:48:06  adam
-# Changed SectionIns for NSIS v1.98
-#
-# Revision 1.38  2002/05/18 09:52:37  oleg
-# Added support of CharacterSetandLanguageNegotiation-3
-# modele (based on Z_PrivateCharacterSet_externallySpecified) at the client
-# side.
-#
-# Revision 1.37  2002/05/17 12:48:30  adam
-# Use __stdcall convention for ZOOM on WIN32
-#
-# Revision 1.36  2002/03/18 21:33:48  adam
-# MARC records embedded in C code for test server
-#
-# Revision 1.35  2002/03/16 10:26:57  adam
-# Added NSIS rules (nmake nsis).
-#
-# Revision 1.34  2002/02/12 15:59:12  adam
-# added z-charneg.obj
-#
-# Revision 1.33  2002/02/11 23:25:26  adam
-# Rustam's patch
-#
-# Revision 1.32  2002/01/30 22:02:03  adam
-# WIN32 updates for YAZ client.
-#
-# Revision 1.31  2001/12/30 22:21:11  adam
-# Scan for ZOOM.
-#
-# Revision 1.30  2001/10/28 23:28:26  adam
-# Enable CCL-to-RPN for YAZ client on WIN32.
-#
-# Revision 1.29  2001/10/25 12:46:07  adam
-# codecs not built as they should.
-#
-# Revision 1.28  2001/10/25 10:45:08  adam
-# Fixed make clean.
-#
-# Revision 1.27  2001/10/24 12:24:43  adam
-# WIN32 updates: ZOOM runs, nmem_init/nmem_exit called in DllMain.
-#
-# Revision 1.26  2001/09/27 12:09:18  adam
-# Function nmem_exit calls oid_exit (when reference is 0).
-#
-# Revision 1.25  2001/09/24 21:51:56  adam
-# New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
-# and yaz_z3950oid_to_str.
-#
-# Revision 1.24  2001/08/14 12:05:58  adam
-# Added sortspec.
-#
-# Revision 1.23  2001/05/18 11:42:03  adam
-# YAZ Build date for WIN32.
-#
-# Revision 1.22  2001/03/09 14:58:20  adam
-# Updated version resource.
-#
-# Revision 1.21  2001/02/28 16:56:33  adam
-# Added version info for WIN32.
-#
-# Revision 1.20  2000/12/01 17:56:41  adam
-# on WIN32 function statserv_closedown closes socket(s) to provoke close.
-#
-# Revision 1.19  2000/11/16 13:03:13  adam
-# Function ccl_rpn_query sets attributeSet to Bib-1.
-#
-# Revision 1.18  2000/11/01 14:47:00  adam
-# Added CCL support for WIN32.
-#
-# Revision 1.17  2000/10/06 12:01:12  adam
-# Updates regarding ASN-code generation (mostly).
-#
-# Revision 1.16  2000/05/05 13:48:15  adam
-# Minor changes.
-#
-# Revision 1.15  2000/04/17 14:21:38  adam
-# WIN32 update.
-#
-# Revision 1.14  2000/03/02 08:48:21  adam
-# Renamed ASN.1 compiler to yaz-comp (used to be yc.tcl).
-#
-# Revision 1.13  2000/02/28 11:13:03  adam
-# Removed odr_priv.obj.
-#
-# Revision 1.12  2000/01/06 11:27:16  adam
-# Updated for ILL.
-#
-# Revision 1.11  1999/12/21 14:16:20  ian
-# Changed retrieval module to allow data1 trees with no associated absyn.
-# Also added a simple interface for extracting values from data1 trees using
-# a string based tagpath.
-#
-# Revision 1.10  1999/12/08 13:10:48  adam
-# New version.
-#
-# Revision 1.9  1999/11/30 13:47:12  adam
-# Improved installation. Moved header files to include/yaz.
-#
-# Revision 1.8  1999/07/21 08:48:02  adam
-# Removed dmalloc.obj.
-#
-# Revision 1.7  1999/06/09 15:10:08  heikki
-# Cleaning up. Seems to work all right
-#
-# Revision 1.6  1999/06/09 13:33:32  heikki
-# Compiles and links both old and new type stuff all right
-#
-# Revision 1.5  1999/06/09 11:05:30  heikki
-# At least it can compile
-#
-# Revision 1.4  1999/06/09 09:41:09  heikki
-# More work on the ASN-generated files.
-#
-# Revision 1.3  1999/06/08 14:32:30  heikki
-# Proto.h works all right, removed linker warnings from server.lib
-#
-# Revision 1.2  1999/06/08 14:07:24  heikki
-# Renamed a pile of files
-# Tmpdir (to get around Ms leaving temp files around, and crashing
-# when too many with same number...)
-#
-# Revision 1.1  1999/06/08 12:15:41  heikki
-# Renamed to makefile (.nothing) (from .mak)
-# Working on the proto.h problems and alternative confiigurations
-#
-# Revision 1.5  1999/06/04 10:04:28  heikki
-# Cleaning up
-#
-# Revision 1.4  1999/06/02 13:23:29  heikki
-# Debug options for C compiler
-#
-# Revision 1.3  1999/05/19 08:26:22  heikki
-# Added comments
-#
-#
-
-
 
