@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.32  1997-12-09 16:18:16  adam
+ * Revision 1.33  1997-12-18 10:51:30  adam
+ * Implemented sub-trees feature for schemas - including forward
+ * references.
+ *
+ * Revision 1.32  1997/12/09 16:18:16  adam
  * Work on EXPLAIN schema. First implementation of sub-schema facility
  * in the *.abs files.
  *
@@ -318,6 +322,7 @@ typedef struct data1_element
     char *name;
     data1_tag *tag;
     data1_termlist *termlists;
+    char *sub_name;
     struct data1_element *children;
     struct data1_element *next;
 } data1_element;

@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implemented sub-tree feature for schemas. Sub-trees are
+referenced in *.abs-files. See explain.abs for an example
+of the use of this feature.
+
 Modified bib1.att; local attributes for ANY didn't include
 ANY itself (only affects use of the retrieval module).
 

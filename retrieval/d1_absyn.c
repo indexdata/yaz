@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.15  1997-12-09 16:18:16  adam
+ * Revision 1.16  1997-12-18 10:51:30  adam
+ * Implemented sub-trees feature for schemas - including forward
+ * references.
+ *
+ * Revision 1.15  1997/12/09 16:18:16  adam
  * Work on EXPLAIN schema. First implementation of sub-schema facility
  * in the *.abs files.
  *
@@ -160,6 +164,30 @@ data1_element *data1_getelementbyname (data1_handle dh, data1_absyn *absyn,
     return 0;
 }
 
+
+void fix_element_ref (data1_handle dh, data1_absyn *absyn, data1_element *e)
+{
+    for (; e; e = e->next)
+    {
+	if (!e->sub_name)
+	{
+	    if (e->children)
+		fix_element_ref (dh, absyn, e->children);
+	}
+	else
+	{
+	    data1_sub_elements *sub_e = absyn->sub_elements;
+	    while (sub_e && strcmp (e->sub_name, sub_e->name))
+		sub_e = sub_e->next;
+	    if (sub_e)
+		e->children = sub_e->elements;
+	    else
+		logf (LOG_WARN, "Unresolved reference to sub-elements %s",
+		      e->sub_name);
+	}
+    }
+}
+
 data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 {
     char line[512], *r, cmd[512], args[512];
@@ -213,7 +241,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	{
 	    data1_element *new_element;
 	    int i;
-	    char path[512], name[512], termlists[512], *p;
+	    char path[512], name[512], termlists[512], *p, *sub_p;
 	    int type, value;
 	    data1_termlist **tp;
 
@@ -253,29 +281,24 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		return 0;
 	    }
 	    level = i;
-	    if (*p == '$' && level > 0)
-	    {
-		data1_sub_elements *sub_e = res->sub_elements;
-
-		p++;
-		while (sub_e && strcmp (p, sub_e->name))
-		   sub_e = sub_e->next;
-		if (sub_e)
-		    *ppl[level] = sub_e->elements;
-		if (level)
-		    level--;
-		continue;
-            }
 	    new_element = *ppl[level] =
 		nmem_malloc(data1_nmem_get(dh), sizeof(*new_element));
 	    new_element->next = new_element->children = 0;
 	    new_element->tag = 0;
 	    new_element->termlists = 0;
+	    new_element->sub_name = 0;
 
 	    tp = &new_element->termlists;
 	    ppl[level] = &new_element->next;
 	    ppl[level+1] = &new_element->children;
-	    
+
+	    /* consider subtree (if any) ... */
+	    if ((sub_p = strchr (p, ':')) && sub_p[1])
+	    {
+		*sub_p++ = '\0';
+		new_element->sub_name =
+		    nmem_strdup (data1_nmem_get(dh), sub_p);		
+	    }
 	    /* well-defined tag */
 	    if (sscanf(p, "(%d,%d)", &type, &value) == 2)
 	    {
@@ -316,7 +339,6 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		fclose(f);
 		return 0;
 	    }
-
 	    /* parse termList definitions */
 	    p = termlists;
 	    if (*p == '-')
@@ -367,7 +389,6 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		while ((p = strchr(p, ',')) && *(++p));
 	        *tp = all; /* append any ALL entries to the list */
 	    }
-
 	    new_element->name = nmem_strdup(data1_nmem_get (dh), name);
 	}
  	else if (!strcmp(cmd, "section"))
@@ -591,13 +612,14 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	}
     }
     fclose(f);
-
-    cur_elements = res->sub_elements;
-    while (cur_elements && strcmp (cur_elements->name, "main"))
-	cur_elements = cur_elements->next;
-    if (cur_elements)
-        res->main_elements = cur_elements->elements;
-
+    
+    for (cur_elements = res->sub_elements; cur_elements;
+	 cur_elements = cur_elements->next)
+    {
+	if (!strcmp (cur_elements->name, "main"))
+	    res->main_elements = cur_elements->elements;
+	fix_element_ref (dh, res, cur_elements->elements);
+    }
     logf (LOG_DEBUG, "end data1_read_absyn file=%s", file);
     return res;
 }
