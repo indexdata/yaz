@@ -2,7 +2,7 @@
 <article>
 <title>Specifying and Using Application (Database) Profiles
 <author>Index Data, <tt/info@index.ping.dk/
-<date>$Revision: 1.3 $
+<date>$Revision: 1.4 $
 <abstract>
 YAZ includes a subsystem to manage complex database records, driven
 by a set of configuration tables that reflect a given profile.
@@ -581,7 +581,7 @@ source format may be GRS-1 ISO2709. On the server side, the source may
 be a structured ASCII file, augmented by a set of patterns that
 describe the structure of the document.
 
-What we think of as the native source format - the one that is
+The native source format - the one that is
 guaranteed to provide complete access to the facilities of the module,
 is an &dquot;SGML-like&dquot; syntax, based on an inferred DTD, which
 is in turn based on the profile information from the various files
@@ -591,6 +591,64 @@ Like SGML, an input record consists of tags and data. The tags are
 enclosed by brackets (&lt;...&gt;). As a general rule, each tag should
 be matched by a corresponding close tag, identified by the same tag
 name preceded by a slash (/).
+
+The first tag in the file represents the root of the record. It should
+contain the name of the application profile that the record belongs
+to. If the profile is not already known, the system will look for the
+profile description in the file <tt/profile.abs/, where <tt/profile/
+is the name of the given profile.
+
+The following is a typical beginning of a GILS record:
+
+<tscreen><verb>
+<gils>
+  <Title>
+    USGS server for Gopher. See available linkage to begin.
+    <Acronym>
+      USGS Gopher
+    &etago;Acronym>
+  &etago;Title>
+
+  ...
+
+&etago;gils>
+</verb></tscreen>
+
+<it>
+NOTE: The indentation of the elements shows above is applied solely
+to clarify the relationships between the elements. Any unnecessary
+whitespaces are ignored by the retrieval system.
+</it>
+
+The construction above describes the first element of a GILS record;
+the title. The title is structured into a &dquot;well-known&dquot;
+element, and an additional element with a local string tag,
+<bf/Acronym/. Since the
+tag <bf/Title/ appears in tagsetG, which is included by the GILS
+tagset, this is a well-known element. The tag <bf/Acronym/ appears
+nowhere in the tagsets for the GILS profile, so it is treated as a
+locally defined string tag by the system.
+
+<sect1>Types of Input Elements
+
+<p>
+Currently, X types of input elements are recognized:
+
+<itemize>
+<item>The root element, which associates the record with a given
+schema.
+
+<item>The normal tagged element, which corresponds either to a
+specific tag from the tag sets referenced by the schema, or to a
+locally defined string tag (implicitly).
+
+<item>An inclusion element, for inserting data from an external source
+(a file, typically) into the record.
+
+<item>An element data unit, which corresponds to normal data.
+
+<item>A variant-component.
+</itemize>
 
 <sect>License
 
