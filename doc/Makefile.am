@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.30 2002-05-02 10:35:44 adam Exp $
+## $Id: Makefile.am,v 1.31 2002-06-02 18:50:40 adam Exp $
 
-docdir=$(pkgdatadir)/doc
+docdir=$(datadir)/doc/@PACKAGE@
 
 XMLFILES=$(srcdir)/yaz.xml.in $(srcdir)/introduction.xml \
  $(srcdir)/installation.xml $(srcdir)/indexdata.xml $(srcdir)/asn.xml \
