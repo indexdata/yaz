@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.46  1996-04-10 11:39:42  quinn
+ * Revision 1.47  1996-05-29 15:47:50  quinn
+ * Fixed in bug DiagRecs decoder. Thanks to Linda Harris.
+ *
+ * Revision 1.46  1996/04/10  11:39:42  quinn
  * Fixed bug in UserInfo
  *
  * Revision 1.45  1996/02/23  10:00:25  quinn
@@ -873,7 +876,7 @@ int z_DiagRecs(ODR o, Z_DiagRecs **p, int opt)
     	&(*p)->num_diagRecs))
     	return 1;
     *p = 0;
-    return 0;
+    return opt && odr_ok(o);
 }
 
 int z_NamePlusRecord(ODR o, Z_NamePlusRecord **p, int opt)
