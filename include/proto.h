@@ -24,8 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.34  1996-06-10 08:55:36  quinn
- * Added Summary. Unfinished work
+ * Revision 1.35  1996-06-10 08:57:38  quinn
+ * Added OPAC, ResourceReport
+ *
+ * Revision 1.34  1996/06/10  08:55:36  quinn
+ * Added Summary.
  *
  * Revision 1.33  1996/02/23  10:00:51  quinn
  * SCAN Work
