@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.14  1996-02-20 17:58:28  adam
+ * Revision 1.15  1996-10-07 15:29:43  quinn
+ * Added SOIF support
+ *
+ * Revision 1.14  1996/02/20  17:58:28  adam
  * Added const to oid_getvalbyname.
  *
  * Revision 1.13  1996/02/20  16:37:33  quinn
@@ -121,6 +124,7 @@ static oident oids[] =
 #if 0
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_ID_SGML,   {5,1000,81,1,-1},"ID-SGML" },
 #endif
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_SOIF,      {5,1000,81,2,-1},"SOIF" },
     {PROTO_Z3950,   CLASS_RESFORM, VAL_RESOURCE1, {7,1,-1},    "Resource-1"  },
     {PROTO_Z3950,   CLASS_RESFORM, VAL_RESOURCE2, {7,2,-1},    "Resource-2"  },
     {PROTO_Z3950,   CLASS_ACCFORM, VAL_PROMPT1,   {8,1,-1},    "Prompt-1"    },

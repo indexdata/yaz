@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.29 1996-05-22 08:36:02 adam Exp $
+# $Id: Makefile,v 1.30 1996-10-07 15:29:38 quinn Exp $
 
 LIBDIR=../lib
 
@@ -17,7 +17,7 @@ $(LIBDIR)/libcomstack.a $(LIBMOSI) $(LIBDIR)/libutil.a $(ELIBS)
 PO = eventl.o seshigh.o statserv.o requestq.o
 CPP=$(CC) -E
 PROG=ztest
-PROGO=ztest.o read-grs.o
+PROGO=ztest.o read-grs.o dawson.o
 RANLIB=ranlib
 
 all: $(LIBDIR) $(LIB) $(PROG)

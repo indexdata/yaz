@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.35  1996-06-10 08:57:38  quinn
+ * Revision 1.36  1996-10-07 15:29:20  quinn
+ * Added SOIF support
+ *
+ * Revision 1.35  1996/06/10  08:57:38  quinn
  * Added OPAC, ResourceReport
  *
  * Revision 1.34  1996/06/10  08:55:36  quinn
@@ -1029,10 +1032,10 @@ typedef struct Z_DeleteResultSetResponse
     Z_ReferenceId *referenceId;        /* OPTIONAL */
     int *deleteOperationStatus;
     int num_statuses;
-    Z_ListStatus *deleteListStatuses;  /* OPTIONAL */
+    Z_ListStatus **deleteListStatuses; /* OPTIONAL */
     int *numberNotDeleted;             /* OPTIONAL */
     int num_bulkStatuses;
-    Z_ListStatus *bulkStatuses;        /* OPTIONAL */
+    Z_ListStatus **bulkStatuses;       /* OPTIONAL */
     char *deleteMessage;               /* OPTIONAL */
 #ifdef Z_95
     Z_OtherInformation *otherInfo;

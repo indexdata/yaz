@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.17  1996-07-06 19:58:32  quinn
+ * Revision 1.18  1996-10-07 15:29:16  quinn
+ * Added SOIF support
+ *
+ * Revision 1.17  1996/07/06  19:58:32  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.16  1996/06/10  08:55:34  quinn
@@ -391,5 +394,6 @@ char *data1_nodetomarc(data1_marctab *p, data1_node *n, int selected, int *len);
 char *data1_nodetoidsgml(data1_node *n, int select, int *len);
 Z_ExplainRecord *data1_nodetoexplain(data1_node *n, int select, ODR o);
 Z_BriefBib *data1_nodetosummary(data1_node *n, int select, ODR o);
+char *data1_nodetosoif(data1_node *n, int select, int *len);
 
 #endif

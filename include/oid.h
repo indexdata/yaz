@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.13  1996-02-20 17:57:53  adam
+ * Revision 1.14  1996-10-07 15:29:17  quinn
+ * Added SOIF support
+ *
+ * Revision 1.13  1996/02/20  17:57:53  adam
  * Added const to oid_getvalbyname.
  *
  * Revision 1.12  1996/02/20  12:52:37  quinn
@@ -154,7 +157,8 @@ typedef enum oid_value
     VAL_SETM,
     VAL_SETG,
     VAL_VAR1,
-    VAL_ESPEC1
+    VAL_ESPEC1,
+    VAL_SOIF
 } oid_value;
 
 typedef struct oident

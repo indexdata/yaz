@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 1996-06-10 08:56:00 quinn Exp $
+# $Id: Makefile,v 1.8 1996-10-07 15:29:32 quinn Exp $
 
 SHELL=/bin/sh
 RANLIB=ranlib
@@ -7,7 +7,8 @@ DEFS=$(INCLUDE)
 LIB=../lib/libret.a
 PO = d1_read.o d1_attset.o d1_tagset.o d1_absyn.o d1_grs.o \
 	d1_sutrs.o d1_varset.o d1_espec.o \
-	d1_doespec.o d1_map.o d1_marc.o d1_write.o d1_expout.o d1_sumout.o
+	d1_doespec.o d1_map.o d1_marc.o d1_write.o d1_expout.o d1_sumout.o \
+	d1_soif.o
 CPP=$(CC) -E
 
 all: $(LIB)
