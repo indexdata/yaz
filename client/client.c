@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.212 2003-11-02 17:59:28 adam Exp $
+ * $Id: client.c,v 1.213 2003-11-19 19:06:41 adam Exp $
  */
 
 #include <stdio.h>
@@ -2574,7 +2574,9 @@ int send_sortrequest(const char *arg, int newset)
 
 void display_term(Z_TermInfo *t)
 {
-    if (t->term->which == Z_Term_general)
+    if (t->displayTerm)
+        printf("%s", t->displayTerm);
+    else if (t->term->which == Z_Term_general)
     {
         printf("%.*s", t->term->u.general->len, t->term->u.general->buf);
         sprintf(last_scan_line, "%.*s", t->term->u.general->len,
