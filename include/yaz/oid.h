@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.16 2003-06-02 12:53:27 adam Exp $
+ * $Id: oid.h,v 1.17 2003-07-10 11:51:46 mike Exp $
  */
 
 #ifndef OID_H
@@ -245,6 +245,10 @@ YAZ_EXPORT void oid_trav (void (*func)(struct oident *oidinfo, void *vp),
 
 YAZ_EXPORT void oid_init(void);
 YAZ_EXPORT void oid_exit(void);
+YAZ_EXPORT int *oid_name_to_oid(oid_class oclass, const char *name, int *oid);
+YAZ_EXPORT char *oid_to_dotstring(const int *oid, char *oidbuf);
+YAZ_EXPORT char *oid_name_to_dotstring(oid_class oclass, const char *name,
+				       char *oidbuf);
 
 YAZ_END_CDECL
 

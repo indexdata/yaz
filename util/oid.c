@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.62 2003-06-02 12:53:28 adam Exp $
+ * $Id: oid.c,v 1.63 2003-07-10 11:52:37 mike Exp $
  */
 
 /*
@@ -572,3 +572,40 @@ void oid_trav (void (*func)(struct oident *oidinfo, void *vp), void *vp)
     for (ol = oident_table; ol; ol = ol->next)
         (*func)(&ol->oident, vp);
 }
+
+int *oid_name_to_oid(oid_class oclass, const char *name, int *oid) {
+    struct oident ent;
+
+    /* Translate syntax to oid_val */
+    oid_value value = oid_getvalbyname(name);
+
+    /* Build it into an oident */
+    ent.proto = PROTO_Z3950;
+    ent.oclass = oclass;
+    ent.value = value;
+
+    /* Translate to an array of int */
+    return oid_ent_to_oid(&ent, oid);
+}
+
+char *oid_to_dotstring(const int *oid, char *oidbuf) {
+    char tmpbuf[20];
+    int i;
+
+    oidbuf[0] = '\0';
+    for (i = 0; oid[i] != -1; i++) {
+	sprintf(tmpbuf, "%d", oid[i]);
+	if (i > 0) strcat(oidbuf, ".");
+	strcat(oidbuf, tmpbuf);
+    }
+
+    return oidbuf;
+}
+
+char *oid_name_to_dotstring(oid_class oclass, const char *name, char *oidbuf) {
+    int oid[OID_SIZE];
+
+    (void) oid_name_to_oid(oclass, name, oid);
+    return oid_to_dotstring(oid, oidbuf);
+}
+
