@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.30  1999-11-30 13:47:12  adam
+ * Revision 1.31  1999-12-21 14:16:20  ian
+ * Changed retrieval module to allow data1 trees with no associated absyn.
+ * Also added a simple interface for extracting values from data1 trees using
+ * a string based tagpath.
+ *
+ * Revision 1.30  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.29  1999/10/21 12:06:29  adam
@@ -371,9 +376,8 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    {
 		if (!(absyn = data1_get_absyn (dh, tag)))
 		{
-		    yaz_log(LOG_WARN, "Unable to acquire abstract syntax "
-			    "for '%s'", tag);
-		    return 0;
+		    yaz_log(LOG_WARN, "Unable to acquire abstract syntax " "for '%s'", tag); 
+                    /* It's now OK for a record not to have an absyn */
 		}
 		res = data1_mk_node (dh, m);
 		res->which = DATA1N_root;

@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.10 1999-12-08 13:10:48 adam Exp $
+# $Id: makefile,v 1.11 1999-12-21 14:16:20 ian Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -286,7 +286,8 @@ YAZ_RET_OBJS= \
    $(OBJDIR)\d1_sutrs.obj\
    $(OBJDIR)\d1_tagset.obj\
    $(OBJDIR)\d1_varset.obj\
-   $(OBJDIR)\d1_write.obj
+   $(OBJDIR)\d1_write.obj\
+   $(OBJDIR)\d1_if.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -611,7 +612,12 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.10  1999-12-08 13:10:48  adam
+# Revision 1.11  1999-12-21 14:16:20  ian
+# Changed retrieval module to allow data1 trees with no associated absyn.
+# Also added a simple interface for extracting values from data1 trees using
+# a string based tagpath.
+#
+# Revision 1.10  1999/12/08 13:10:48  adam
 # New version.
 #
 # Revision 1.9  1999/11/30 13:47:12  adam

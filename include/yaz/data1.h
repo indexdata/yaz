@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  1999-12-21 14:16:19  ian
+ * Changed retrieval module to allow data1 trees with no associated absyn.
+ * Also added a simple interface for extracting values from data1 trees using
+ * a string based tagpath.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.42  1999/10/21 12:06:28  adam
@@ -561,6 +566,11 @@ YAZ_EXPORT data1_node
 *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
                              data1_node *at, const char *tagname, NMEM m,
                              int first_flag, int local_allowed);
+
+YAZ_EXPORT char *data1_getNodeValue(data1_node* node, char* pTagPath);
+
+YAZ_EXPORT data1_node *data1_LookupNode(data1_node* node, char* pTagPath);
+
 #ifdef __cplusplus
 }
 #endif

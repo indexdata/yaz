@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.26  1999-11-30 13:47:12  adam
+ * Revision 1.27  1999-12-21 14:16:19  ian
+ * Changed retrieval module to allow data1 trees with no associated absyn.
+ * Also added a simple interface for extracting values from data1 trees using
+ * a string based tagpath.
+ *
+ * Revision 1.26  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.25  1999/10/21 12:06:29  adam
@@ -261,6 +266,10 @@ data1_element *data1_getelementbytagname (data1_handle dh, data1_absyn *abs,
 {
     data1_element *r;
 
+    /* It's now possible to have a data1 tree with no abstract syntax */
+    if ( !abs )
+        return 0;
+
     if (!parent)
         r = abs->main_elements;
     else
@@ -281,6 +290,11 @@ data1_element *data1_getelementbyname (data1_handle dh, data1_absyn *absyn,
 				       const char *name)
 {
     data1_element *r;
+
+    /* It's now possible to have a data1 tree with no abstract syntax */
+    if ( !absyn )
+        return 0;
+    
     assert (absyn->main_elements);
     for (r = absyn->main_elements; r; r = r->next)
 	if (!data1_matchstr(r->name, name))
@@ -291,6 +305,10 @@ data1_element *data1_getelementbyname (data1_handle dh, data1_absyn *absyn,
 
 void fix_element_ref (data1_handle dh, data1_absyn *absyn, data1_element *e)
 {
+    /* It's now possible to have a data1 tree with no abstract syntax */
+    if ( !absyn )
+        return;
+
     for (; e; e = e->next)
     {
 	if (!e->sub_name)

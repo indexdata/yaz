@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Changed retrieval module so that we can load records with no abstract
+syntax defined. Tagpaths in these records are fully composed of string tags.
+
 Implemented ISO ILL protocol. Refer to stuff in sub directory ill.
 
 --- 1.5 1999/12/10
