@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.23 2001-05-18 11:42:03 adam Exp $
+# $Id: makefile,v 1.24 2001-08-14 12:05:58 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -155,7 +155,7 @@ SERVER_LINK_OPTIONS = -lib
 ZTEST_LINK_OPTIONS = /subsystem:console  
 
 # TCL
-TCL="C:\Program Files\Tcl\bin\tclsh82.exe"
+TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
 
 COMMON_TCL_OPTIONS= ..\util\yaz-comp -I$(INCLDIR) -i yaz
@@ -279,7 +279,9 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\logrpn.obj \
    $(OBJDIR)\pquery.obj \
    $(OBJDIR)\yaz-ccl.obj \
-   $(OBJDIR)\otherinfo.obj
+   $(OBJDIR)\otherinfo.obj \
+   $(OBJDIR)\sortspec.obj
+
 
 YAZ_RET_OBJS= \
    $(OBJDIR)\d1_absyn.obj\
@@ -706,7 +708,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.23  2001-05-18 11:42:03  adam
+# Revision 1.24  2001-08-14 12:05:58  adam
+# Added sortspec.
+#
+# Revision 1.23  2001/05/18 11:42:03  adam
 # YAZ Build date for WIN32.
 #
 # Revision 1.22  2001/03/09 14:58:20  adam
