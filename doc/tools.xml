@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.29 2003-11-03 09:34:02 mike Exp $ -->
+<!-- $Id: tools.xml,v 1.30 2003-11-03 09:49:58 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -173,11 +173,15 @@
     <para>
      The @attr operator is followed by an attribute specification 
      (<literal>attr-spec</literal> above). The specification consists
-     of optional an attribute set, an attribute type-value pair and
-     a sub query. The attribute type-value pair is packed in one string:
-     an attribute type, a dash, followed by an attribute value. 
+     of an optional attribute set, an attribute type-value pair and
+     a sub-query. The attribute type-value pair is packed in one string:
+     an attribute type, an equals sign, and an attribute value, like this:
+     <literal>@attr 1=1003</literal>.
      The type is always an integer but the value may be either an
      integer or a string (if it doesn't start with a digit character).
+     A string attribute-value is encoded as a Type-1 ``complex''
+     attribute with the list of values containing the single string
+     specified, and including no semantic indicators.
     </para>
 
     <para>
