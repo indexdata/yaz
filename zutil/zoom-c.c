@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.22 2003-02-17 22:35:48 adam Exp $
+ * $Id: zoom-c.c,v 1.23 2003-02-18 09:12:14 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -109,13 +109,13 @@ static void set_dset_error (ZOOM_connection c, int error,
 static void set_HTTP_error (ZOOM_connection c, int error,
                             const char *addinfo, const char *addinfo2)
 {
-    return set_dset_error(c, error, "HTTP", addinfo, addinfo2);
+    set_dset_error(c, error, "HTTP", addinfo, addinfo2);
 }
 
 static void set_ZOOM_error (ZOOM_connection c, int error,
 		            const char *addinfo)
 {
-    return set_dset_error(c, error, "ZOOM", addinfo, 0);
+    set_dset_error(c, error, "ZOOM", addinfo, 0);
 }
 
 static void clear_error (ZOOM_connection c)
