@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.10  1995-03-29 15:40:16  quinn
+ * Revision 1.11  1995-03-30 12:18:17  quinn
+ * Fixed bug.
+ *
+ * Revision 1.10  1995/03/29  15:40:16  quinn
  * Ongoing work. Statserv is now dynamic by default
  *
  * Revision 1.9  1995/03/27  08:34:30  quinn
@@ -58,6 +61,7 @@
 #include <tcpip.h>
 #include <xmosi.h>
 #include <dmalloc.h>
+#include <log.h>
 
 static char *me = "";
 static int dynamic = 1;   /* fork on incoming connection */
@@ -254,10 +258,12 @@ int statserv_main(int argc, char **argv)
 {
     int ret, listeners = 0;
     char *arg;
-    int protocol = CS_Z3950;;
+    int protocol = CS_Z3950;
+    char *logfile = 0;
+    int loglevel = LOG_DEFAULT_LEVEL;
 
     me = argv[0];
-    while ((ret = options("szSl:", argv, argc, &arg)) != -2)
+    while ((ret = options("szSl:v:", argv, argc, &arg)) != -2)
     	switch (ret)
     	{
 	    case 0:
@@ -267,8 +273,16 @@ int statserv_main(int argc, char **argv)
 	    case 'z': protocol = CS_Z3950; break;
 	    case 's': protocol = CS_SR; break;
 	    case 'S': dynamic = 0; break;
+	    case 'l':
+	   	 logfile = arg;
+		 log_init(loglevel, me, logfile);
+		 break;
+	    case 'v':
+	   	 loglevel = log_mask_str(arg);
+	   	 log_init(loglevel, me, logfile);
+		 break;
 	    default:
-	    	fprintf(stderr, "Usage: %s [ -zsS <listener-addr> ... ]\n", me);
+	    	fprintf(stderr, "Usage: %s [ -v <loglevel> -l <logfile> -zsS <listener-addr> ... ]\n", me);
 	    	exit(1);
 	}
     if (dynamic)

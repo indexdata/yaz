@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.13  1995-03-30 09:09:24  quinn
+ * Revision 1.14  1995-03-30 12:18:17  quinn
+ * Fixed bug.
+ *
+ * Revision 1.13  1995/03/30  09:09:24  quinn
  * Added state-handle and some support for asynchronous activities.
  *
  * Revision 1.12  1995/03/29  15:40:16  quinn
@@ -250,7 +253,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.13 $";
+    resp.implementationVersion = "$Revision: 1.14 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -442,6 +445,7 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
     bend_searchresult *bsrt;
     oident *oent;
     int next = 0;
+    static int none = Z_RES_NONE;
 
     fprintf(stderr, "Got SearchRequest.\n");
     apdup = &apdu;
@@ -457,7 +461,15 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
     	if (!(oent = oid_getentbyoid(q->attributeSetId)) ||
 	    oent->class != CLASS_ATTSET ||
 	    oent->value != VAL_BIB1)
+	{
 	    resp.records = diagrec(assoc->proto, 121, 0);
+	    resp.resultCount = &nulint;
+	    resp.numberOfRecordsReturned = &nulint;
+	    resp.nextResultSetPosition = &nulint;
+	    resp.searchStatus = &none;
+	    resp.resultSetStatus = 0;
+	    resp.presentStatus = 0;
+	}
     }
     if (!resp.records)
     {
@@ -474,56 +486,58 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
 	if (!(bsrt = bend_search(assoc->backend, &bsrq, 0)))
 	    return -1;
 	else if (bsrt->errcode)
+	{
+
 	    resp.records = diagrec(assoc->proto, bsrt->errcode,
 		bsrt->errstring);
-	else
-	    resp.records = 0;
-
-	resp.resultCount = &bsrt->hits;
-
-	/* how many records does the user agent want, then? */
-	if (bsrt->hits <= *req->smallSetUpperBound)
-	{
-	    toget = bsrt->hits;
-	    setnames = req->smallSetElementSetNames;
-	}
-	else if (bsrt->hits < *req->largeSetLowerBound)
-	{
-	    toget = *req->mediumSetPresentNumber;
-	    setnames = req->mediumSetElementSetNames;
-	}
-	else
-	    toget = 0;
-
-	if (toget)
-	{
-	    resp.records = pack_records(assoc, req->resultSetName, 1, &toget,
-	    	setnames, &next, &presst);
-	    if (!resp.records)
-	    	return -1;
-	    resp.numberOfRecordsReturned = &toget;
-	    resp.nextResultSetPosition = &next;
-	    resp.searchStatus = &sr;
-	    resp.resultSetStatus = &sr;
-	    resp.presentStatus = &presst;
-	}
-	else
-	{
-	    resp.records = 0;
+	    resp.resultCount = &nulint;
 	    resp.numberOfRecordsReturned = &nulint;
 	    resp.nextResultSetPosition = &nulint;
-	    resp.searchStatus = &sr;
-	    resp.resultSetStatus = &sr;
+	    resp.searchStatus = &nulint;
+	    resp.resultSetStatus = &none;
 	    resp.presentStatus = 0;
 	}
-    }
-    else
-    {
-    	resp.resultCount = &nulint;
-	resp.numberOfRecordsReturned = &nulint;
-	resp.nextResultSetPosition = &nulint;
-	resp.searchStatus = &nulint;
-	resp.resultSetStatus = 0;
+	else
+	{
+	    resp.records = 0;
+
+	    resp.resultCount = &bsrt->hits;
+
+	    /* how many records does the user agent want, then? */
+	    if (bsrt->hits <= *req->smallSetUpperBound)
+	    {
+		toget = bsrt->hits;
+		setnames = req->smallSetElementSetNames;
+	    }
+	    else if (bsrt->hits < *req->largeSetLowerBound)
+	    {
+		toget = *req->mediumSetPresentNumber;
+		setnames = req->mediumSetElementSetNames;
+	    }
+	    else
+		toget = 0;
+
+	    if (toget && !resp.records)
+	    {
+		resp.records = pack_records(assoc, req->resultSetName, 1,
+		    &toget, setnames, &next, &presst);
+		if (!resp.records)
+		    return -1;
+		resp.numberOfRecordsReturned = &toget;
+		resp.nextResultSetPosition = &next;
+		resp.searchStatus = &sr;
+		resp.resultSetStatus = 0;
+		resp.presentStatus = &presst;
+	    }
+	    else
+	    {
+		resp.numberOfRecordsReturned = &nulint;
+		resp.nextResultSetPosition = &next;
+		resp.searchStatus = &sr;
+		resp.resultSetStatus = 0;
+		resp.presentStatus = 0;
+	    }
+	}
     }
 
     if (!z_APDU(assoc->encode, &apdup, 0))
