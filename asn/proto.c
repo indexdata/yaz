@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.3  1995-02-09 15:51:39  quinn
+ * Revision 1.4  1995-02-10 15:54:30  quinn
+ * Small adjustments.
+ *
+ * Revision 1.3  1995/02/09  15:51:39  quinn
  * Works better now.
  *
  * Revision 1.2  1995/02/06  21:26:07  quinn
@@ -376,7 +379,7 @@ int z_NamePlusRecordList(ODR o, Z_NamePlusRecordList **p, int opt)
 {
     if (o->direction == ODR_DECODE)
     	*p = nalloc(o, sizeof(**p));
-    if (odr_sequence_of(o, z_NamePlusRecordList, &(*p)->records,
+    if (odr_sequence_of(o, z_NamePlusRecord, &(*p)->records,
 	&(*p)->num_records))
     	return 1;
     *p = 0;
