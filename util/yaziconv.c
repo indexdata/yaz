@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconvtst.c,v 1.8 2003-01-06 08:20:28 adam Exp $
+ * $Id: yaziconv.c,v 1.1 2003-04-23 20:34:08 adam Exp $
  */
 
 #if HAVE_CONFIG_H
