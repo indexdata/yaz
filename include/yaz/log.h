@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.6 2002-06-18 21:30:39 adam Exp $
+ * $Id: log.h,v 1.7 2002-08-29 09:58:42 adam Exp $
  */
 
 #ifndef LOG_H
@@ -54,6 +54,7 @@ YAZ_EXPORT void yaz_log_init(int level, const char *prefix, const char *name);
 YAZ_EXPORT void yaz_log_init_file (const char *fname);
 YAZ_EXPORT void yaz_log_init_level (int level);
 YAZ_EXPORT void yaz_log_init_prefix (const char *prefix);
+YAZ_EXPORT void yaz_log_init_prefix2 (const char *prefix);
 
 YAZ_EXPORT void yaz_log(int level, const char *fmt, ...)
 #ifdef __GNUC__

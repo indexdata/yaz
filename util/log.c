@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.27 2002-06-18 21:30:39 adam Exp $
+ * $Id: log.c,v 1.28 2002-08-29 09:58:42 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -38,6 +38,7 @@ char *strerror(int n)
 static int l_level = LOG_DEFAULT_LEVEL;
 static FILE *l_file = NULL;
 static char l_prefix[512] = "";
+static char l_prefix2[512] = "";
 
 static struct {
     int mask;
@@ -90,6 +91,14 @@ void yaz_log_init_prefix (const char *prefix)
     	sprintf(l_prefix, "%.511s ", prefix);
     else
         *l_prefix = 0;
+}
+
+void yaz_log_init_prefix2 (const char *prefix)
+{
+    if (prefix && *prefix)
+    	sprintf(l_prefix2, "%.511s ", prefix);
+    else
+        *l_prefix2 = 0;
 }
 
 void yaz_log_init(int level, const char *prefix, const char *fname)
@@ -176,7 +185,8 @@ void yaz_log(int level, const char *fmt, ...)
     ti = time(0);
     tim = localtime(&ti);
     strftime(tbuf, 50, "%H:%M:%S-%d/%m", tim);
-    fprintf(l_file, "%s: %s%s %s\n", tbuf, l_prefix, flags, buf);
+    fprintf(l_file, "%s: %s%s %s%s\n", tbuf, l_prefix, flags,
+            l_prefix2, buf);
     fflush(l_file);
     if (end_hook_func)
 	(*end_hook_func)(o_level, buf, end_hook_info);
