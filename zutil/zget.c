@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: zget.c,v 1.14 2003-02-23 21:10:07 adam Exp $
+ * $Id: zget.c,v 1.15 2003-10-08 21:48:19 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -135,7 +135,7 @@ Z_PresentResponse *zget_PresentResponse(ODR o)
     r->referenceId = 0;
     r->numberOfRecordsReturned = odr_intdup(o, 0);
     r->nextResultSetPosition = odr_intdup(o, 0);
-    r->presentStatus = odr_intdup(o, Z_PRES_SUCCESS);
+    r->presentStatus = odr_intdup(o, Z_PresentStatus_success);
     r->records = 0;
     r->otherInfo = 0;
     return r;
