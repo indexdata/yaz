@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.27  1999-11-30 13:47:12  adam
+ * Revision 1.28  1999-12-16 23:36:19  adam
+ * Implemented ILL protocol. Minor updates ASN.1 compiler.
+ *
+ * Revision 1.27  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.26  1999/08/27 09:40:32  adam
@@ -103,6 +106,10 @@
 #include <yaz/backend.h>
 #include <yaz/log.h>
 
+#ifdef ASN_COMPILED
+#include <yaz/ill.h>
+#endif
+
 Z_GenericRecord *read_grs1(FILE *f, ODR o);
 
 int ztest_search (void *handle, bend_search_rr *rr);
@@ -185,6 +192,35 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		yaz_log(LOG_LOG, "setId: %s", n->resultSetItem->resultSetId);
 		yaz_log(LOG_LOG, "item: %d", *n->resultSetItem->item);
 	    }
+#ifdef ASN_COMPILED
+	    if (n->itemRequest)
+	    {
+		Z_External *r = (Z_External*) n->itemRequest;
+		ILL_ItemRequest *item_req = 0;
+		if (r->direct_reference)
+		{
+		    oident *ent = oid_getentbyoid(r->direct_reference);
+		    if (ent)
+			yaz_log(LOG_LOG, "ItemRequest %s", ent->desc);
+		    if (ent && ent->value == VAL_ISO_ILL_1)
+		    {
+			if (r->which == ODR_EXTERNAL_single)
+			{
+			    odr_setbuf(rr->decode,
+				       r->u.single_ASN1_type->buf,
+				       r->u.single_ASN1_type->len, 0);
+			    
+			    ill_ItemRequest (rr->decode, &item_req, 0, 0);
+			}
+		    }
+		}
+		if (item_req)
+		{
+		    yaz_log (LOG_LOG, "ILL protocol version = %d",
+			     *item_req->protocol_version_num);
+		}
+	    }
+#endif
 	}
 	break;
 	}
@@ -345,7 +381,7 @@ char *marc_read(FILE *inf, ODR odr)
 static char *dummy_database_record (int num, ODR odr)
 {
     FILE *inf = fopen ("dummy-records", "r");
-    char *buf;
+    char *buf = 0;
 
     if (!inf)
 	return NULL;

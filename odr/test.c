@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include <odr.h>
-#include <odr_use.h>
+#include <yaz/odr.h>
 
 #if 0
 

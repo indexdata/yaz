@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  1999-12-16 23:36:19  adam
+ * Implemented ILL protocol. Minor updates ASN.1 compiler.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.28  1999/11/04 14:58:44  adam
@@ -256,13 +259,13 @@ typedef struct bend_sort_rr
     char *errstring;
 } bend_sort_rr;
 
-/* extended services handler. Added in from DALI */
 typedef struct bend_esrequest_rr
 {
     int ItemNo;
     Z_ExtendedServicesRequest *esr;
     
     ODR stream;                /* encoding stream */
+    ODR decode;                /* decoding stream */
     Z_ReferenceId *referenceId;/* reference ID */
     bend_request request;
     bend_association association;

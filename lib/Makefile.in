@@ -1,15 +1,15 @@
-# Copyright (C) 1994-1998, Index Data 
+# Copyright (C) 1994-1999, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.3 1999-06-08 10:10:16 adam Exp $
+# $Id: Makefile.in,v 1.4 1999-12-16 23:36:19 adam Exp $
 
 SHELL=/bin/sh
 
 RANLIB=@RANLIB@
 
 MAKE=make
-YAZLIBS=libodr.a libasn.a libcomstack.a \
-	libserver.a libzutil.a libutil.a libret.a
+YAZLIBS=libodr.a libasn.a libcomstack.a libserver.a \
+	libzutil.a libutil.a libccl.a libret.a @ILLLIB@
 LIB=libyaz.a
 
 all: $(LIB)

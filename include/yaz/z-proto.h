@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: z-proto.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  1999-12-16 23:36:19  adam
+ * Implemented ILL protocol. Minor updates ASN.1 compiler.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.2  1999/06/09 10:52:11  adam
@@ -27,30 +30,30 @@
 #define ASN_COMPILED 1
 
 #include <yaz/yaz-version.h>
-#include <yaz/z-accdes1-p.h>
-#include <yaz/z-accform1-p.h>
-#include <yaz/z-acckrb1-p.h>
-#include <yaz/z-core-p.h>
-#include <yaz/z-diag1-p.h>
-#include <yaz/z-espec1-p.h>
-#include <yaz/z-estask-p.h>
-#include <yaz/z-exp-p.h>
-#include <yaz/z-grs-p.h>
-#include <yaz/z-opac-p.h>
-#include <yaz/z-rrf1-p.h>
-#include <yaz/z-rrf2-p.h>
-#include <yaz/z-sum-p.h>
-#include <yaz/z-sutrs-p.h>
-#include <yaz/z-uifr1-p.h>
-#include <yaz/zes-expi-p.h>
-#include <yaz/zes-exps-p.h>
-#include <yaz/zes-order-p.h>
-#include <yaz/zes-pquery-p.h>
-#include <yaz/zes-psched-p.h>
-#include <yaz/zes-pset-p.h>
-#include <yaz/zes-update-p.h>
-#include <yaz/z-date-p.h>
-#include <yaz/z-univ-p.h>
+#include <yaz/z-accdes1.h>
+#include <yaz/z-accform1.h>
+#include <yaz/z-acckrb1.h>
+#include <yaz/z-core.h>
+#include <yaz/z-diag1.h>
+#include <yaz/z-espec1.h>
+#include <yaz/z-estask.h>
+#include <yaz/z-exp.h>
+#include <yaz/z-grs.h>
+#include <yaz/z-opac.h>
+#include <yaz/z-rrf1.h>
+#include <yaz/z-rrf2.h>
+#include <yaz/z-sum.h>
+#include <yaz/z-sutrs.h>
+#include <yaz/z-uifr1.h>
+#include <yaz/zes-expi.h>
+#include <yaz/zes-exps.h>
+#include <yaz/zes-order.h>
+#include <yaz/zes-pquery.h>
+#include <yaz/zes-psched.h>
+#include <yaz/zes-pset.h>
+#include <yaz/zes-update.h>
+#include <yaz/z-date.h>
+#include <yaz/z-univ.h>
 
 #ifdef __cplusplus
 extern "C" {

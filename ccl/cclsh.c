@@ -45,7 +45,10 @@
  * Europagate 1995
  *
  * $Log: cclsh.c,v $
- * Revision 1.4  1999-03-31 11:15:37  adam
+ * Revision 1.5  1999-12-16 23:36:19  adam
+ * Implemented ILL protocol. Minor updates ASN.1 compiler.
+ *
+ * Revision 1.4  1999/03/31 11:15:37  adam
  * Fixed memory leaks in ccl_find_str and ccl_qual_rm.
  *
  * Revision 1.3  1997/04/30 08:52:07  quinn
@@ -95,7 +98,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <ccl.h>
+#include <yaz/ccl.h>
 
 static int debug = 0;
 static char *prog;

@@ -1,0 +1,52 @@
+# $Id: Makefile.in,v 1.1 1999-12-16 23:36:19 adam Exp $
+
+SHELL=/bin/sh
+
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+CDEFS=@DEFS@
+LIBS=@LIBS@
+
+INCLUDE=-I. -I../include
+DEFS=$(INCLUDE) $(CDEFS)
+LIBDIR=../lib
+LIBS=$(LIBDIR)/libodr.a $(LIBDIR)/libutil.a
+YCFLAGS=
+
+LIB=$(LIBDIR)/libill.a
+O=ill-tst.o
+PO=ill-core.o item-req.o ill-get.o
+
+all: $(LIB) 
+
+ill-tst: $(O) $(LIB)
+	$(CC) $(CFLAGS) $(O) -o yc-tst $(LIB) $(LIBS)
+
+
+$(LIB): $(PO)
+	rm -f $(LIB)
+	ar qc $(LIB) $(PO)
+	$(RANLIB) $(LIB)
+
+ill-core.c ../include/yaz/ill.h: ill.tcl ill9702.asn ../util/yc.tcl
+	../util/yc.tcl -d ill.tcl -i yaz -I ../include $(YCFLAGS) ill9702.asn
+
+item-req.c ../include/yaz/item-req.h: ill.tcl item-req.asn ../util/yc.tcl
+	../util/yc.tcl -d ill.tcl -i yaz -I ../include $(YCFLAGS) item-req.asn
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(DEFS) $<
+
+clean:
+	-rm -f *.o yc-tst core *.out
+
+realclean: clean
+	-rm -f ill-core.c item-req.c ../include/yaz/ill-core.h ../include/yaz/item-req.h
+
+depend: ill-core.c ../include/yaz/ill-core.h item-req.c ../include/yaz/item-req.h
+	sed '/^#Depend/q' <Makefile >Makefile.tmp
+	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
+	mv -f Makefile.tmp Makefile
+
+#Depend --- DOT NOT DELETE THIS LINE

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.99  1999-11-30 13:47:12  adam
+ * Revision 1.100  1999-12-16 23:36:19  adam
+ * Implemented ILL protocol. Minor updates ASN.1 compiler.
+ *
+ * Revision 1.99  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.98  1999/11/29 15:12:27  adam
@@ -1871,6 +1874,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 
     esrequest.esr = reqb->request->u.extendedServicesRequest;
     esrequest.stream = assoc->encode;
+    esrequest.decode = assoc->decode;
     esrequest.errcode = 0;
     esrequest.errstring = NULL;
     esrequest.request = reqb;

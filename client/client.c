@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.90  1999-11-30 13:47:11  adam
+ * Revision 1.91  1999-12-16 23:36:19  adam
+ * Implemented ILL protocol. Minor updates ASN.1 compiler.
+ *
+ * Revision 1.90  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.89  1999/11/04 14:58:44  adam
@@ -313,6 +316,10 @@
 #include <yaz/diagbib1.h>
 
 #include <yaz/pquery.h>
+
+#ifdef ASN_COMPILED
+#include <yaz/ill.h>
+#endif
 
 #if CCL2RPN
 #include <yaz/yaz-ccl.h>
@@ -1196,6 +1203,46 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
     }
 }
 
+#ifdef ASN_COMPILED
+static Z_External *create_external_itemRequest()
+{
+    ILL_ItemRequest *req = ill_get_ItemRequest(out);
+    Z_External *r = 0;
+
+    if (!ill_ItemRequest (out, &req, 0, 0))
+	return 0;
+    else
+    {
+	oident oid;
+	int itemRequest_size = 0;
+	char *itemRequest_buf = odr_getbuf (out, &itemRequest_size, 0);
+	
+	oid.proto = PROTO_GENERAL;
+	oid.oclass = CLASS_GENERAL;
+	oid.value = VAL_ISO_ILL_1;
+	
+	r = (Z_External *) odr_malloc (out, sizeof(*r));
+	r->direct_reference = odr_oiddup(out,oid_getoidbyent(&oid)); 
+	r->indirect_reference = 0;
+	r->descriptor = 0;
+	r->which = Z_External_single;
+	
+	r->u.single_ASN1_type = (Odr_oct *)
+	    odr_malloc (out, sizeof(*r->u.single_ASN1_type));
+	r->u.single_ASN1_type->buf = odr_malloc (out, itemRequest_size);
+	r->u.single_ASN1_type->len = itemRequest_size;
+	r->u.single_ASN1_type->size = itemRequest_size;
+	memcpy (r->u.single_ASN1_type->buf, itemRequest_buf, itemRequest_size);
+	printf ("len = %d\n", itemRequest_size);
+    }
+    return r;
+}
+#else
+static Z_External *create_external_itemRequest()
+{
+    return 0;
+}
+#endif
 static Z_External *CreateItemOrderExternal(int itemno)
 {
     Z_External *r = (Z_External *) odr_malloc(out, sizeof(Z_External));
@@ -1243,7 +1290,8 @@ static Z_External *CreateItemOrderExternal(int itemno)
 	(int *) odr_malloc(out, sizeof(int));
     *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
 
-    r->u.itemOrder->u.esRequest->notToKeep->itemRequest = NULL;
+    r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
+       create_external_itemRequest();
     return r;
 }
 

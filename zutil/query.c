@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: query.c,v $
- * Revision 1.2  1999-06-09 14:01:33  adam
+ * Revision 1.3  1999-12-16 23:36:19  adam
+ * Implemented ILL protocol. Minor updates ASN.1 compiler.
+ *
+ * Revision 1.2  1999/06/09 14:01:33  adam
  * Fixed for compiled ASN.1.
  *
  * Revision 1.1  1999/06/08 10:10:16  adam
@@ -26,8 +29,8 @@
 #include <ctype.h>
 #include <string.h>
 
-#include <odr.h>
-#include <proto.h>
+#include <yaz/odr.h>
+#include <yaz/proto.h>
 
 static Z_Complex *makecomplex(ODR o, char **buf);
 static Z_Operand *makesimple(ODR o, char **buf);

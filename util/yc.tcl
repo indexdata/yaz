@@ -8,7 +8,10 @@ exec tclsh "$0" "$@"
 # Sebastian Hammer, Adam Dickmeiss
 #
 # $Log: yc.tcl,v $
-# Revision 1.3  1999-11-30 13:47:12  adam
+# Revision 1.4  1999-12-16 23:36:19  adam
+# Implemented ILL protocol. Minor updates ASN.1 compiler.
+#
+# Revision 1.3  1999/11/30 13:47:12  adam
 # Improved installation. Moved header files to include/yaz.
 #
 # Revision 1.2  1999/06/09 09:43:11  adam
@@ -549,7 +552,7 @@ proc asnSequence {name tag implicit tagtype} {
         lappend l "\t\t!odr_sequence_begin (o, p, sizeof(**p), name))"
         lappend l "\t\treturn opt && odr_ok(o);"
     } else {
-        lappend l "\tif (!odr_constructed_begin (o, p, $tagtype, $tag, name)"
+        lappend l "\tif (!odr_constructed_begin (o, p, $tagtype, $tag, name))"
         lappend l "\t\treturn opt && odr_ok(o);"
         lappend l "\tif (o->direction == ODR_DECODE)"
         lappend l "\t\t*p = odr_malloc (o, sizeof(**p));"
@@ -918,9 +921,14 @@ proc asnImports {} {
                 set prefix $inf(prefix)
             }
             foreach n $nam {
-                set m [join [split $n -] _]
-                set inf(imports,$n) [list [lindex $prefix 0]$m \
-                                          [lindex $prefix 1]$m]
+		if {[info exists inf(map,$val,$n)]} {
+		    set v $inf(map,$val,$n)
+		} else {
+		    set v $n
+		}
+                set w [join [split $v -] _]
+                set inf(imports,$n) [list [lindex $prefix 0]$w \
+                                          [lindex $prefix 1]$w]
             }
             unset nam
             lex
@@ -1090,8 +1098,6 @@ proc asnModules {} {
 		lex
 		if {![string length $type]} return
 	    }
-
-
 	    if {[info exists inf(filename,$inf(module))]} {
 		set fname $inf(filename,$inf(module))
 	    } else {
@@ -1109,10 +1115,12 @@ proc asnModules {} {
 	    }
 	    set file(outh) [open $inf(h-path)/$inf(h-dir)$inf(h-file) w]
 
-	    if {![info exists inf(p-file)]} {
-		set inf(p-file) ${fname}-p.h
-	    }
-	    set file(outp) [open $inf(h-path)/$inf(h-dir)$inf(p-file) w]
+	    if {0} {
+	        if {![info exists inf(p-file)]} {
+		    set inf(p-file) ${fname}-p.h
+	        }
+	        set file(outp) [open $inf(h-path)/$inf(h-dir)$inf(p-file) w]
+            }
 
 	    set md [clock format [clock seconds]]
 	    
@@ -1124,26 +1132,29 @@ proc asnModules {} {
 	    puts $file(outh) "/* Module-H $inf(module) */"
 	    puts $file(outh) {}
 
-	    puts $file(outp) "/* YC ${yc_version}: $md */"
-	    puts $file(outp) "/* Module-P: $inf(module) */"
-	    puts $file(outp) {}
+	    if {[info exists file(outp)]} {
+	        puts $file(outp) "/* YC ${yc_version}: $md */"
+	        puts $file(outp) "/* Module-P: $inf(module) */"
+	        puts $file(outp) {}
+            }
 
-	    puts $file(outc) "\#include <$inf(h-dir)$inf(p-file)>"
-
+            if {[info exists inf(p-file)]} {
+	        puts $file(outc) "\#include <$inf(h-dir)$inf(p-file)>"
+            } else {
+	        puts $file(outc) "\#include <$inf(h-dir)$inf(h-file)>"
+            }
 	    puts $file(outh) "\#ifndef ${ppname}_H"
 	    puts $file(outh) "\#define ${ppname}_H"
 	    puts $file(outh) {}
 	    puts $file(outh) "\#include <$inf(h-dir)odr.h>"
-	    
-	    puts $file(outp) "\#ifndef ${ppname}_P_H"
-	    puts $file(outp) "\#define ${ppname}_P_H"
-	    puts $file(outp) {}
-	    puts $file(outp) "\#include <$inf(h-dir)$inf(h-file)>"
+	   
+            if {[info exists file(outp)]} { 
+	        puts $file(outp) "\#ifndef ${ppname}_P_H"
+	        puts $file(outp) "\#define ${ppname}_P_H"
+	        puts $file(outp) {}
+	        puts $file(outp) "\#include <$inf(h-dir)$inf(h-file)>"
 
-
-	    puts $file(outp) "\#ifdef __cplusplus"
-	    puts $file(outp) "extern \"C\" \{"
-	    puts $file(outp) "\#endif"
+            }
 	    
 	    asnTagDefault
 	    if {[string compare $type :]} {
@@ -1161,6 +1172,9 @@ proc asnModules {} {
 	    } else {
 		set f $file(outh)
 	    }
+	    puts $f "\#ifdef __cplusplus"
+	    puts $f "extern \"C\" \{"
+	    puts $f "\#endif"
 	    for {set i 1} {$i < $inf(nodef)} {incr i} {
 		puts $f $inf(var,$i)
 		if {[info exists inf(asn,$i)]} {
@@ -1176,9 +1190,9 @@ proc asnModules {} {
 		unset inf(var,$i)
 		puts $f {}
 	    }
-	    puts $file(outp) "\#ifdef __cplusplus"
-	    puts $file(outp) "\}"
-	    puts $file(outp) "\#endif"
+	    puts $f "\#ifdef __cplusplus"
+	    puts $f "\}"
+	    puts $f "\#endif"
 
 	    if {[info exists inf(body,$inf(module),h)]} {
 		puts $file(outh) $inf(body,$inf(module),h)
@@ -1187,16 +1201,20 @@ proc asnModules {} {
 		puts $file(outc) $inf(body,$inf(module),c)
 	    }
 	    if {[info exists inf(body,$inf(module),p)]} {
-		puts $file(outp) $inf(body,$inf(module),p)
+                if {[info exists file(outp)]} {
+		    puts $file(outp) $inf(body,$inf(module),p)
+                }
 	    }
 	    puts $file(outh) "\#endif"
-	    puts $file(outp) "\#endif"
+            if {[info exists file(outp)]} {
+	        puts $file(outp) "\#endif"
+            }
 	    foreach f [array names file] {
 		close $file($f)
 	    }
 	    unset inf(c-file)
 	    unset inf(h-file)
-	    unset inf(p-file)
+	    catch {unset inf(p-file)}
 	}
     }
 }
@@ -1258,6 +1276,18 @@ proc asnBasicOBJECT {} {
     global type val
     lex-name-move IDENTIFIER
     return {odr_oid {Odr_oid}}
+}
+
+proc asnBasicGeneralString {} {
+    return {odr_generalstring char}
+}
+
+proc asnBasicVisibleString {} {
+    return {odr_visiblestring char}
+}
+
+proc asnBasicGeneralizedTime {} {
+    return {odr_generalizedtime char}
 }
 
 proc asnBasicANY {} {

@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implemented ISO ILL protocol. Refer to stuff in sub directory ill.
+
 --- 1.5 1999/12/10
 
 On UNIX, the generated makefile now supports a proper 'make install'.

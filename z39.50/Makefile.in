@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.5 1999-12-08 13:10:48 adam Exp $
+# $Id: Makefile.in,v 1.6 1999-12-16 23:36:19 adam Exp $
 
 SHELL=/bin/sh
 
@@ -33,8 +33,6 @@ CF=z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
 
 all: $(LIB) 
 
-comp: $(CF) z-date.c z-univ.c zes-update.c
-
 yc-tst: $(O) $(LIB)
 	$(CC) $(CFLAGS) $(O) -o yc-tst $(LIB) $(LIBS)
 
@@ -44,16 +42,16 @@ $(LIB): $(PO)
 	ar qc $(LIB) $(PO)
 	$(RANLIB) $(LIB)
 
-$(CF) ../include/z-accdes1.h: z.tcl z3950v3.asn ../util/yc.tcl
+$(CF) ../include/yaz/z-accdes1.h: z.tcl z3950v3.asn ../util/yc.tcl
 	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) z3950v3.asn
 
-z-date.c ../include/z-date.h: z.tcl datetime.asn ../util/yc.tcl
+z-date.c ../include/yaz/z-date.h: z.tcl datetime.asn ../util/yc.tcl
 	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) datetime.asn
 
-z-univ.c ../include/z-univ.h: z.tcl univres.asn
+z-univ.c ../include/yaz/z-univ.h: z.tcl univres.asn
 	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) univres.asn
 
-zes-update.c ../include/zes-update.h: z.tcl esupdate.asn
+zes-update.c ../include/yaz/zes-update.h: z.tcl esupdate.asn
 	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) esupdate.asn
 
 .c.o:
@@ -65,7 +63,7 @@ clean:
 realclean: clean
 	-rm -f z-*.[co] zes-*.[co]
 
-depend: z-core.c z-date.c z-univ.c zes-update.c ../include/z-accdes1.h ../include/z-date.h ../include/z-univ.h ../include/zes-update.h
+depend: z-core.c z-date.c z-univ.c zes-update.c ../include/yaz/z-accdes1.h ../include/yaz/z-date.h ../include/yaz/z-univ.h ../include/yaz/zes-update.h
 	sed '/^#Depend/q' <Makefile >Makefile.tmp
 	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
 	mv -f Makefile.tmp Makefile

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <yaz/odr.h>
-#include <yaz/odr_use.h>
 #include <yaz/proto.h>
 
 int main()

@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1999, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.13 1999-11-30 13:47:10 adam Exp $
+# $Id: Makefile.in,v 1.14 1999-12-16 23:36:19 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #CDEFS=-DUSE_XTIMOSI
@@ -14,15 +14,11 @@ CDEFS=@DEFS@
 # Standard include path and original protocol encoders.
 INCLUDE=-I. -I../include
 
-# The Module below is either asn (the original de/en-coders)
-# or z39.50 (the compiled de/en-coders).
-MOD=@ASNMODULE@
-
 CC=@CC@
 CPP=@CPP@
 SHELL=/bin/sh
 MAKE=make
-SUBDIR=util odr $(MOD) zutil $(RFC1006) ccl comstack client server ztest retrieval lib
+SUBDIR=util odr @ASNMODULE@ @ILLMODULE@ zutil $(RFC1006) ccl comstack server retrieval lib client ztest
 # Add external libraries to the LIBS macro
 LIBS=@LIBS@
 

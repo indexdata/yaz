@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.38  1999-11-30 13:47:12  adam
+ * Revision 1.39  1999-12-16 23:36:19  adam
+ * Implemented ILL protocol. Minor updates ASN.1 compiler.
+ *
+ * Revision 1.38  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.37  1999/09/13 12:51:15  adam
@@ -176,6 +179,8 @@ static oident oids[] =
      "BER" },
     {PROTO_GENERAL, CLASS_TRANSYN, VAL_ISO2709,      {1,0,2709,1,1,-1},
      "ISO2709"},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_ISO_ILL_1,    {1,2,10161,2,1,-1},
+     "ISOILL-1"},
     /* Z39.50v3 definitions */
     {PROTO_Z3950,   CLASS_ABSYN,   VAL_APDU,         {2,1,-1},
      "Z-APDU"},    

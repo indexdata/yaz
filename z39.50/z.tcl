@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.1 1999-06-08 10:10:16 adam Exp $
+# $Id: z.tcl,v 1.2 1999-12-16 23:36:19 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -324,18 +324,6 @@ set filename($m) z-univ
 # ----------------------------------------------------------
 # "Constructed" types defined by means of C-types are declared here.
 # Each function returns the C-handler and the C-type.
-proc asnBasicGeneralString {} {
-    return {odr_generalstring char}
-}
-
-proc asnBasicVisibleString {} {
-    return {odr_visiblestring char}
-}
-
-proc asnBasicGeneralizedTime {} {
-    return {odr_generalizedtime char}
-}
-
 proc asnBasicEXTERNAL {} {
     return {z_External Z_External}
 }
