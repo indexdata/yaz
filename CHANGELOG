@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- XXX  XXXX/XX/XX
+
 --- 1.1  1996/2/20
 
 Repaired bug in frontend server when running multiple listening
