@@ -2,7 +2,7 @@
 <article>
 <title>Specifying and Using Application (Database) Profiles
 <author>Index Data, <tt/info@index.ping.dk/
-<date>$Revision: 1.2 $
+<date>$Revision: 1.3 $
 <abstract>
 YAZ includes a subsystem to manage complex database records, driven
 by a set of configuration tables that reflect a given profile.
@@ -10,7 +10,7 @@ Multiple database profiles can coexeist in the same server, or even
 the same database. The record management system is responsible for
 associating a given record with a specific profile, and processing it
 accordingly. This document describes the various file formats for data
-and configuration files which are understood by the module.
+and configuration files which are used by the module.
 </abstract>
 
 <toc>
@@ -571,6 +571,26 @@ format. The rules pertain mostly to the values of the constant-length
 header of the record.
 
 <it>NOTE: This will be described better.</it>
+
+<sect>The Input (Data) File Format
+
+<p>
+The retrieval module is designed to manage data derived from a
+variety of different input sources. When used on the client side, the
+source format may be GRS-1 ISO2709. On the server side, the source may
+be a structured ASCII file, augmented by a set of patterns that
+describe the structure of the document.
+
+What we think of as the native source format - the one that is
+guaranteed to provide complete access to the facilities of the module,
+is an &dquot;SGML-like&dquot; syntax, based on an inferred DTD, which
+is in turn based on the profile information from the various files
+mentioned in this document.
+
+Like SGML, an input record consists of tags and data. The tags are
+enclosed by brackets (&lt;...&gt;). As a general rule, each tag should
+be matched by a corresponding close tag, identified by the same tag
+name preceded by a slash (/).
 
 <sect>License
 
