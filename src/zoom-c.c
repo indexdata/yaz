@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.19 2004-01-16 10:04:54 adam Exp $
+ * $Id: zoom-c.c,v 1.20 2004-01-22 11:20:54 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -922,7 +922,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.19 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.20 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2453,7 +2453,8 @@ static Z_APDU *create_update_package(ZOOM_package p)
     int num_db;
     char **db = set_DatabaseNames(p->connection, p->options, &num_db);
     const char *action = ZOOM_options_get(p->options, "action");
-    const char *recordId = ZOOM_options_get(p->options, "recordId");
+    const char *recordIdOpaque = ZOOM_options_get(p->options, "recordIdOpaque");
+    const char *recordIdNumber = ZOOM_options_get(p->options, "recordIdNumber");
     const char *record_buf = ZOOM_options_get(p->options, "record");
     const char *syntax_str = ZOOM_options_get(p->options, "syntax");
     int syntax_oid = VAL_NONE;
@@ -2529,14 +2530,21 @@ static Z_APDU *create_update_package(ZOOM_package p)
 	notToKeep->elements[0] = (Z_IUSuppliedRecords_elem *)
 	    odr_malloc(p->odr_out, sizeof(**notToKeep->elements));
 	notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
-	if (recordId)
+	if (recordIdOpaque)
 	{
 	    notToKeep->elements[0]->u.opaque = (Odr_oct *)
 		odr_malloc (p->odr_out, sizeof(Odr_oct));
-	    notToKeep->elements[0]->u.opaque->size = strlen(recordId);
-	    notToKeep->elements[0]->u.opaque->len = strlen(recordId);
+	    notToKeep->elements[0]->u.opaque->size =
+		notToKeep->elements[0]->u.opaque->len = strlen(recordIdOpaque);
 	    notToKeep->elements[0]->u.opaque->buf =
-		odr_strdup(p->odr_out, recordId);
+		odr_strdup(p->odr_out, recordIdOpaque);
+	}
+	else if (recordIdNumber)
+	{
+	    notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_number;
+	    
+	    notToKeep->elements[0]->u.number =
+		odr_intdup(p->odr_out, atoi(recordIdNumber));
 	}
 	else
 	    notToKeep->elements[0]->u.opaque = 0;
