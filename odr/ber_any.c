@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: ber_any.c,v 1.24 2003-03-11 11:03:31 adam Exp $
+ * $Id: ber_any.c,v 1.25 2003-05-20 17:22:54 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -13,25 +13,25 @@
 int ber_any(ODR o, Odr_any **p)
 {
     int res;
-
+    
     switch (o->direction)
     {
-    	case ODR_DECODE:
-	    if ((res = completeBER(o->bp, odr_max(o))) <= 0)        /* FIX THIS */
-	    {
-                odr_seterror(o, OPROTO, 2);
-	    	return 0;
-	    }
-	    (*p)->buf = (unsigned char *)odr_malloc(o, res);
-	    memcpy((*p)->buf, o->bp, res);
-	    (*p)->len = (*p)->size = res;
-	    o->bp += res;
-	    return 1;
-    	case ODR_ENCODE:
-	    if (odr_write(o, (*p)->buf, (*p)->len) < 0)
-	    	return 0;
-	    return 1;
-    	default: odr_seterror(o, OOTHER, 3); return 0;
+    case ODR_DECODE:
+        if ((res = completeBER(o->bp, odr_max(o))) <= 0)        /* FIX THIS */
+        {
+            odr_seterror(o, OPROTO, 2);
+            return 0;
+        }
+        (*p)->buf = (unsigned char *)odr_malloc(o, res);
+        memcpy((*p)->buf, o->bp, res);
+        (*p)->len = (*p)->size = res;
+        o->bp += res;
+        return 1;
+    case ODR_ENCODE:
+        if (odr_write(o, (*p)->buf, (*p)->len) < 0)
+            return 0;
+        return 1;
+    default: odr_seterror(o, OOTHER, 3); return 0;
     }
 }
 
