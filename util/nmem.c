@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.15  1999-02-11 09:10:26  adam
+ * Revision 1.16  1999-03-31 11:18:25  adam
+ * Implemented odr_strdup. Added Reference ID to backend server API.
+ *
+ * Revision 1.15  1999/02/11 09:10:26  adam
  * Function nmem_init only mandatory on Windows.
  *
  * Revision 1.14  1999/02/02 13:57:40  adam
@@ -181,7 +184,10 @@ void *nmem_malloc(NMEM n, int size)
                      n, size);
 #endif
     if (!n)
+    {
+        abort ();
 	return xmalloc(size);
+    }
 #ifdef WIN32
     assert (nmem_init_flag);
 #endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: read-grs.c,v $
- * Revision 1.2  1998-02-11 11:53:36  adam
+ * Revision 1.3  1999-03-31 11:18:25  adam
+ * Implemented odr_strdup. Added Reference ID to backend server API.
+ *
+ * Revision 1.2  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.1  1997/09/01 08:55:53  adam
@@ -71,15 +74,16 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	if (!r)
 	{
 	    r = (Z_GenericRecord *)odr_malloc(o, sizeof(*r));
-	    r->elements = (Z_TaggedElement **)odr_malloc(o, sizeof(Z_TaggedElement*) *
-		GRS_MAX_FIELDS);
+	    r->elements = (Z_TaggedElement **)
+                odr_malloc(o, sizeof(Z_TaggedElement*) * GRS_MAX_FIELDS);
 	    r->num_elements = 0;
 	}
-	r->elements[r->num_elements] = t = (Z_TaggedElement *)odr_malloc(o,
-	    sizeof(Z_TaggedElement));
+	r->elements[r->num_elements] = t = (Z_TaggedElement *)
+            odr_malloc(o, sizeof(Z_TaggedElement));
 	t->tagType = (int *)odr_malloc(o, sizeof(int));
 	*t->tagType = type;
-	t->tagValue = (Z_StringOrNumeric *)odr_malloc(o, sizeof(Z_StringOrNumeric));
+	t->tagValue = (Z_StringOrNumeric *)
+            odr_malloc(o, sizeof(Z_StringOrNumeric));
 	if ((ivalue = atoi(value)))
 	{
 	    t->tagValue->which = Z_StringOrNumeric_numeric;
@@ -105,8 +109,7 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	{
 	    c->which = Z_ElementData_string;
 	    buf[strlen(buf)-1] = '\0';
-	    c->u.string = (char *)odr_malloc(o, strlen(buf)+1);
-	    strcpy(c->u.string, buf);
+	    c->u.string = odr_strdup(o, buf);
 	}
 	r->num_elements++;
     }

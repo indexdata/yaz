@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.86  1999-02-02 13:57:38  adam
+ * Revision 1.87  1999-03-31 11:18:25  adam
+ * Implemented odr_strdup. Added Reference ID to backend server API.
+ *
+ * Revision 1.86  1999/02/02 13:57:38  adam
  * Uses preprocessor define WIN32 instead of WINDOWS to build code
  * for Microsoft WIN32.
  *
@@ -782,6 +785,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     binitreq.stream = assoc->encode;
     binitreq.configname = "default-config";
     binitreq.auth = req->idAuthentication;
+    binitreq.referenceId = req->referenceId;
     binitreq.bend_sort = NULL;
     binitreq.bend_search = NULL;
     binitreq.bend_present = NULL;
@@ -1015,7 +1019,8 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 
 static Z_Records *pack_records(association *a, char *setname, int start,
 				int *num, Z_RecordComposition *comp,
-				int *next, int *pres, oid_value format)
+				int *next, int *pres, oid_value format,
+				Z_ReferenceId *referenceId)
 {
     int oid[OID_SIZE];
     int recno, total_length = 0, toget = *num, dumped_records = 0;
@@ -1058,6 +1063,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	freq.format = format;
 	freq.stream = a->encode;
 	freq.surrogate_flag = 0;
+	freq.referenceId = referenceId;
 	if (!(fres = bend_fetch(a->backend, &freq, 0)))
 	{
 	    *pres = Z_PRES_FAILURE;
@@ -1121,21 +1127,22 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    }
 	}
 
-	if (!(thisrec = (Z_NamePlusRecord *)odr_malloc(a->encode, sizeof(*thisrec))))
+	if (!(thisrec = (Z_NamePlusRecord *)
+	      odr_malloc(a->encode, sizeof(*thisrec))))
 	    return 0;
 	if (!(thisrec->databaseName = (char *)odr_malloc(a->encode,
 	    strlen(fres->basename) + 1)))
 	    return 0;
 	strcpy(thisrec->databaseName, fres->basename);
 	thisrec->which = Z_NamePlusRecord_databaseRecord;
-	if (!(thisrec->u.databaseRecord = thisext = (Z_External *)odr_malloc(a->encode,
-	    sizeof(Z_DatabaseRecord))))
+	if (!(thisrec->u.databaseRecord = thisext = (Z_External *)
+	      odr_malloc(a->encode, sizeof(Z_DatabaseRecord))))
 	    return 0;
 	recform.proto = a->proto;
 	recform.oclass = CLASS_RECSYN;
 	recform.value = fres->format;
-	thisext->direct_reference = odr_oiddup(a->encode,
-	                                       oid_ent_to_oid(&recform, oid));
+	thisext->direct_reference =
+	    odr_oiddup(a->encode, oid_ent_to_oid(&recform, oid));
 	thisext->indirect_reference = 0;
 	thisext->descriptor = 0;
 	if (fres->len < 0) /* Structured data */
@@ -1185,8 +1192,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    if (!(thisext->u.octet_aligned = (Odr_oct *)odr_malloc(a->encode,
 		sizeof(Odr_oct))))
 		return 0;
-	    if (!(thisext->u.octet_aligned->buf = (unsigned char *)odr_malloc(a->encode,
-		fres->len)))
+	    if (!(thisext->u.octet_aligned->buf = (unsigned char *)
+		  odr_malloc(a->encode, fres->len)))
 		return 0;
 	    memcpy(thisext->u.octet_aligned->buf, fres->record, fres->len);
 	    thisext->u.octet_aligned->len = thisext->u.octet_aligned->size =
@@ -1208,11 +1215,11 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	(bend_search_rr *)nmem_malloc (reqb->request_mem, sizeof(*bsrr));
     
     logf(LOG_LOG, "Got SearchRequest.");
-    save_referenceId (reqb, req->referenceId);
-    /* store ref id in request */
     bsrr->fd = fd;
     bsrr->request = reqb;
     bsrr->association = assoc;
+    bsrr->referenceId = req->referenceId;
+    save_referenceId (reqb, bsrr->referenceId);
 
     logf (LOG_LOG, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)
@@ -1253,9 +1260,10 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrq.num_bases = req->num_databaseNames;
 	bsrq.basenames = req->databaseNames;
 	bsrq.query = req->query;
+        bsrq.referenceId = req->referenceId;
 	bsrq.stream = assoc->encode;
 	bsrq.decode = assoc->decode;
-	if (!(bsrt = bend_search(assoc->backend, &bsrq, fd)))
+	if (!(bsrt = bend_search (assoc->backend, &bsrq, fd)))
 	    return 0;
 	bsrr->hits = bsrt->hits;
 	bsrr->errcode = bsrt->errcode;
@@ -1278,7 +1286,8 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 {
     Z_SearchRequest *req = reqb->request->u.searchRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
-    Z_SearchResponse *resp = (Z_SearchResponse *)odr_malloc (assoc->encode, sizeof(*resp));
+    Z_SearchResponse *resp = (Z_SearchResponse *)
+	odr_malloc (assoc->encode, sizeof(*resp));
     int *nulint = (int *)odr_malloc (assoc->encode, sizeof(*nulint));
     bool_t *sr = (bool_t *)odr_malloc (assoc->encode, sizeof(*sr));
     int *next = (int *)odr_malloc (assoc->encode, sizeof(*next));
@@ -1351,7 +1360,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    else
 	    	form = prefformat->value;
 	    resp->records = pack_records(assoc, req->resultSetName, 1,
-		toget, compp, next, presst, form);
+		toget, compp, next, presst, form, req->referenceId);
 	    if (!resp->records)
 		return 0;
 	    resp->numberOfRecordsReturned = toget;
@@ -1410,19 +1419,22 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	form = prefformat->value;
     if (assoc->bend_present)
     {
-	bend_present_rr *bprr = (bend_present_rr *)nmem_malloc (reqb->request_mem, sizeof(*bprr));
+	bend_present_rr *bprr = (bend_present_rr *)
+	    nmem_malloc (reqb->request_mem, sizeof(*bprr));
 	bprr->setname = req->resultSetId;
 	bprr->start = *req->resultSetStartPoint;
 	bprr->number = *req->numberOfRecordsRequested;
 	bprr->format = form;
 	bprr->comp = req->recordComposition;
+	bprr->referenceId = req->referenceId;
 	bprr->stream = assoc->encode;
 	bprr->request = reqb;
 	bprr->association = assoc;
 	bprr->errcode = 0;
 	bprr->errstring = NULL;
-	((int (*)(void *, bend_present_rr *))(*assoc->bend_present))(assoc->backend, bprr);
-
+	((int (*)(void *, bend_present_rr *))(*assoc->bend_present))(
+	    assoc->backend, bprr);
+	
 	if (!bprr->request)
 	    return 0;
     }
@@ -1442,7 +1454,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     
     resp->records =
 	pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
-		     num, req->recordComposition, next, presst, form);
+		     num, req->recordComposition, next, presst, form,
+                     req->referenceId);
     if (!resp->records)
 	return 0;
     resp->numberOfRecordsReturned = num;
@@ -1460,11 +1473,14 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 {
     Z_ScanRequest *req = reqb->request->u.scanRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
-    Z_ScanResponse *res = (Z_ScanResponse *)odr_malloc (assoc->encode, sizeof(*res));
-    int *scanStatus = (int *)odr_malloc (assoc->encode, sizeof(*scanStatus));
-    int *numberOfEntriesReturned =
-         (int *)odr_malloc (assoc->encode, sizeof(*numberOfEntriesReturned));
-    Z_ListEntries *ents = (Z_ListEntries *)odr_malloc (assoc->encode, sizeof(*ents));
+    Z_ScanResponse *res = (Z_ScanResponse *)
+	odr_malloc (assoc->encode, sizeof(*res));
+    int *scanStatus = (int *)
+	odr_malloc (assoc->encode, sizeof(*scanStatus));
+    int *numberOfEntriesReturned = (int *)
+	odr_malloc (assoc->encode, sizeof(*numberOfEntriesReturned));
+    Z_ListEntries *ents = (Z_ListEntries *)
+	odr_malloc (assoc->encode, sizeof(*ents));
     Z_DiagRecs *diagrecs_p = NULL;
     oident *attent;
     bend_scanrequest srq;
@@ -1508,6 +1524,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	srq.basenames = req->databaseNames;
 	srq.num_entries = *req->numberOfTermsRequested;
 	srq.term = req->termListAndStartPoint;
+	srq.referenceId = req->referenceId;
 	srq.stream = assoc->encode;
 	if (!(attset = oid_getentbyoid(req->attributeSet)) ||
 	    attset->oclass != CLASS_RECSYN)
@@ -1590,8 +1607,10 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     int *fd)
 {
     Z_SortRequest *req = reqb->request->u.sortRequest;
-    Z_SortResponse *res = (Z_SortResponse *)odr_malloc (assoc->encode, sizeof(*res));
-    bend_sort_rr *bsrr = (bend_sort_rr *)odr_malloc (assoc->encode, sizeof(*bsrr));
+    Z_SortResponse *res = (Z_SortResponse *)
+	odr_malloc (assoc->encode, sizeof(*res));
+    bend_sort_rr *bsrr = (bend_sort_rr *)
+	odr_malloc (assoc->encode, sizeof(*bsrr));
 
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
 
@@ -1604,6 +1623,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     bsrr->num_input_setnames = req->inputResultSetNames->num_strings;
     bsrr->input_setnames = req->inputResultSetNames->strings;
 #endif
+    bsrr->referenceId = req->referenceId;
     bsrr->output_setname = req->sortedResultSetName;
     bsrr->sort_sequence = req->sortSequence;
     bsrr->stream = assoc->encode;
@@ -1611,11 +1631,13 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     bsrr->sort_status = Z_SortStatus_failure;
     bsrr->errcode = 0;
     bsrr->errstring = 0;
-
-    ((int (*)(void *, bend_sort_rr *))(*assoc->bend_sort))(assoc->backend, bsrr);
-
-    res->referenceId = req->referenceId;
-    res->sortStatus = (int *)odr_malloc (assoc->encode, sizeof(*res->sortStatus));
+    
+    ((int (*)(void *, bend_sort_rr *))(*assoc->bend_sort))(assoc->backend,
+							   bsrr);
+    
+    res->referenceId = bsrr->referenceId;
+    res->sortStatus = (int *)
+	odr_malloc (assoc->encode, sizeof(*res->sortStatus));
     *res->sortStatus = bsrr->sort_status;
     res->resultSetStatus = 0;
     if (bsrr->errcode)
@@ -1658,6 +1680,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     bdrr->setnames = req->resultSetList;
     bdrr->stream = assoc->encode;
     bdrr->function = *req->deleteFunction;
+    bdrr->referenceId = req->referenceId;
 
     ((int (*)(void *, bend_delete_rr *))
      (*assoc->bend_delete))(assoc->backend, bdrr);
@@ -1701,8 +1724,8 @@ static void process_close(association *assoc, request *reqb)
 	req->diagnosticInformation : "NULL");
     if (assoc->version < 3) /* to make do_force respond with close */
     	assoc->version = 3;
-    do_close_req(assoc, Z_Close_finished, "Association terminated by client",
-		 reqb);
+    do_close_req(assoc, Z_Close_finished,
+		 "Association terminated by client", reqb);
 }
 
 void save_referenceId (request *reqb, Z_ReferenceId *refid)
@@ -1766,7 +1789,6 @@ void *bend_request_getdata(bend_request r)
     return r->clientData;
 }
 
-/* Chas: Added in from DALI */
 static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 {
     bend_esrequest_rr esrequest;
@@ -1784,9 +1806,10 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     esrequest.errstring = NULL;
     esrequest.request = reqb;
     esrequest.association = assoc;
+    esrequest.referenceId = req->referenceId;
     
-    ((int (*)(void *, bend_esrequest_rr *))(*assoc->bend_esrequest))(assoc->backend,
-								   &esrequest);
+    ((int (*)(void *, bend_esrequest_rr *))(*assoc->bend_esrequest))
+	(assoc->backend, &esrequest);
     
     /* If the response is being delayed, return NULL */
     if (esrequest.request == NULL)
@@ -1812,5 +1835,3 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 
     return apdu;
 }
-
-/* Chas: End of addition from DALI */

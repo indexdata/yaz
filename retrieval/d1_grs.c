@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.14  1998-03-16 12:21:15  adam
+ * Revision 1.15  1999-03-31 11:18:25  adam
+ * Implemented odr_strdup. Added Reference ID to backend server API.
+ *
+ * Revision 1.14  1998/03/16 12:21:15  adam
  * Fixed problem with tag names that weren't set to the right value
  * when wildcards were used.
  *
@@ -117,9 +120,8 @@ static Z_Variant *make_variant(data1_node *n, int num, ODR o)
 	{
 	    case DATA1K_string:
 		t->which = Z_Triple_internationalString;
-		t->value.internationalString = (char *)odr_malloc(o,
-		    strlen(p->u.variant.value)+1);
-		strcpy(t->value.internationalString, p->u.variant.value);
+		t->value.internationalString =
+                    odr_strdup(o, p->u.variant.value);
 		break;
 	    default:
 		logf(LOG_WARN, "Unable to handle value for variant %s",
@@ -277,8 +279,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 	else
 	    tagstr = "?";                /* no tag at all! */
 	res->tagValue->which = Z_StringOrNumeric_string;
-	res->tagValue->u.string = (char *)odr_malloc(o, strlen(tagstr)+1);
-	strcpy(res->tagValue->u.string, tagstr);
+	res->tagValue->u.string = odr_strdup(o, tagstr);
     }
     res->tagOccurrence = 0;
     res->appliedVariant = 0;

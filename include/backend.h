@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.23  1998-10-13 16:12:23  adam
+ * Revision 1.24  1999-03-31 11:18:24  adam
+ * Implemented odr_strdup. Added Reference ID to backend server API.
+ *
+ * Revision 1.23  1998/10/13 16:12:23  adam
  * Added support for Surrogate Diagnostics for Scan Term entries.
  *
  * Revision 1.22  1998/09/02 12:41:51  adam
@@ -72,6 +75,7 @@ typedef struct
     int replace_set;           /* replace set, if it already exists */
     int num_bases;             /* number of databases in list */
     char **basenames;          /* databases to search */
+    Z_ReferenceId *referenceId;/* reference ID */
     Z_Query *query;            /* query structure */
     ODR stream;                /* encoding stream */
     ODR decode;                /* decoding stream */
@@ -91,6 +95,7 @@ typedef struct {
     int replace_set;           /* replace set, if it already exists */
     int num_bases;             /* number of databases in list */
     char **basenames;          /* databases to search */
+    Z_ReferenceId *referenceId;/* reference ID */
     Z_Query *query;            /* query structure */
     ODR stream;                /* encode stream */
     ODR decode;                /* decode stream */
@@ -109,6 +114,7 @@ typedef struct {
     int start;
     int number;                /* record number */
     oid_value format;          /* One of the CLASS_RECSYN members */
+    Z_ReferenceId *referenceId;/* reference ID */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if required */
     bend_request request;
@@ -127,6 +133,7 @@ typedef struct
 {
     char *setname;             /* set name */
     int number;                /* record number */
+    Z_ReferenceId *referenceId;/* reference ID */
     oid_value format;          /* One of the CLASS_RECSYN members */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
@@ -153,6 +160,7 @@ typedef struct
     int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
     oid_value attributeset;
+    Z_ReferenceId *referenceId; /* reference ID */
     Z_AttributesPlusTerm *term;
     int term_position;  /* desired index of term in result list */
     int num_entries;    /* number of entries requested */
@@ -167,7 +175,7 @@ struct scan_entry {
 };
 
 typedef enum {
-    BEND_SCAN_SUCCESS,   /* ok */
+    BEND_SCAN_SUCCESS,  /* ok */
     BEND_SCAN_PARTIAL   /* not all entries could be found */
 } bend_scan_status;
 
@@ -190,6 +198,7 @@ typedef struct bend_delete_rr {
     int function;
     int num_setnames;
     char **setnames;
+    Z_ReferenceId *referenceId;
     int delete_status;
     ODR stream;
 } bend_delete_rr;
@@ -205,6 +214,7 @@ typedef struct bend_sort_rr
     char *output_setname;
     Z_SortKeySpecList *sort_sequence;
     ODR stream;
+    Z_ReferenceId *referenceId;/* reference ID */
 
     int sort_status;
     int errcode;
@@ -216,7 +226,9 @@ typedef struct bend_esrequest_rr
 {
     int ItemNo;
     Z_ExtendedServicesRequest *esr;
+    
     ODR stream;                /* encoding stream */
+    Z_ReferenceId *referenceId;/* reference ID */
     bend_request request;
     bend_association association;
     int errcode;               /* 0==success */
@@ -228,6 +240,7 @@ typedef struct bend_initrequest
     char *configname;
     Z_IdAuthentication *auth;
     ODR stream;                /* encoding stream */
+    Z_ReferenceId *referenceId;/* reference ID */
     
     int (*bend_sort) (void *handle, bend_sort_rr *rr);
     int (*bend_search) (void *handle, bend_search_rr *rr);

@@ -1,6 +1,14 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Fixed bug in Explain for Category TargetInfo.
+Fixed memory leak in ccl_find_str and ccl_qual_rm. Thanks to Hans van
+den Dool <H.M.vdnDool@kub.nl>.
+
+Added reference ID parameter to most functions in server API - refer
+to backend.h. Thanks to Hans van den Dool <H.M.vdnDool@kub.nl>.
+
+Changed name of ccl library to libccl.a (was ccl.a).
+
+Fixed bug in decoder for Explain (Category TargetInfo).
 
 Added support for GNU readline in client. Thanks to Jacob Poulsen
 <ja7@dbc.dk>. GNU configure attempts to detect if readline is available.

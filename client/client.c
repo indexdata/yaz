@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.79  1999-03-23 14:14:25  adam
+ * Revision 1.80  1999-03-31 11:18:24  adam
+ * Implemented odr_strdup. Added Reference ID to backend server API.
+ *
+ * Revision 1.79  1999/03/23 14:14:25  adam
  * Yet another fix.
  *
  * Revision 1.78  1999/03/18 12:57:18  adam
@@ -1458,7 +1461,8 @@ int send_sortrequest(char *arg, int newset)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_sortRequest);
     Z_SortRequest *req = apdu->u.sortRequest;
-    Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)odr_malloc (out, sizeof(*sksl));
+    Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
+        odr_malloc (out, sizeof(*sksl));
     char setstring[32];
     char sort_string[32], sort_flags[32];
     int off;
@@ -1476,9 +1480,7 @@ int send_sortrequest(char *arg, int newset)
     req->num_inputResultSetNames = 1;
     req->inputResultSetNames = (Z_InternationalString **)
 	odr_malloc (out, sizeof(*req->inputResultSetNames));
-    req->inputResultSetNames[0] = (char *)
-	odr_malloc (out, strlen(setstring)+1);
-    strcpy (req->inputResultSetNames[0], setstring);
+    req->inputResultSetNames[0] = odr_strdup (out, setstring);
 #else
     req->inputResultSetNames =
 	(Z_StringList *)odr_malloc (out, sizeof(*req->inputResultSetNames));
@@ -1486,15 +1488,13 @@ int send_sortrequest(char *arg, int newset)
     req->inputResultSetNames->strings =
 	(char **)odr_malloc (out, sizeof(*req->inputResultSetNames->strings));
     req->inputResultSetNames->strings[0] =
-	(char *)odr_malloc (out, strlen(setstring)+1);
-    strcpy (req->inputResultSetNames->strings[0], setstring);
+	odr_strdup (out, setstring);
 #endif
 
     if (newset && setnumber >= 0)
 	sprintf (setstring, "%d", ++setnumber);
 
-    req->sortedResultSetName = (char *)odr_malloc (out, strlen(setstring)+1);
-    strcpy (req->sortedResultSetName, setstring);
+    req->sortedResultSetName = odr_strdup (out, setstring);
 
     req->sortSequence = sksl;
     sksl->num_specs = 0;
@@ -1541,8 +1541,7 @@ int send_sortrequest(char *arg, int newset)
 	else
 	{
 	    sk->which = Z_SortKey_sortField;
-	    sk->u.sortField = (char *)odr_malloc (out, strlen(sort_string)+1);
-	    strcpy (sk->u.sortField, sort_string);
+	    sk->u.sortField = odr_strdup (out, sort_string);
 	}
 	sks->sortRelation = (int *)odr_malloc (out, sizeof(*sks->sortRelation));
 	*sks->sortRelation = Z_SortRelation_ascending;

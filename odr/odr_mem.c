@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.14  1998-07-20 12:38:15  adam
+ * Revision 1.15  1999-03-31 11:18:25  adam
+ * Implemented odr_strdup. Added Reference ID to backend server API.
+ *
+ * Revision 1.14  1998/07/20 12:38:15  adam
  * More LOG_DEBUG-diagnostics.
  *
  * Revision 1.13  1998/02/11 11:53:34  adam
@@ -72,6 +75,11 @@ void *odr_malloc(ODR o, int size)
     if (o && !o->mem)
 	o->mem = nmem_create();
     return nmem_malloc(o ? o->mem : 0, size);
+}
+
+char *odr_strdup(ODR o, const char *str)
+{
+    return nmem_strdup(o->mem, str);
 }
 
 int odr_total(ODR o)

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.27  1999-01-08 11:23:17  adam
+ * Revision 1.28  1999-03-31 11:18:25  adam
+ * Implemented odr_strdup. Added Reference ID to backend server API.
+ *
+ * Revision 1.27  1999/01/08 11:23:17  adam
  * Added const modifier to some of the BER/ODR encoding routines.
  *
  * Revision 1.26  1998/03/20 17:29:20  adam
@@ -339,6 +342,7 @@ YAZ_EXPORT void odr_destroy(ODR o);
 YAZ_EXPORT void odr_setbuf(ODR o, char *buf, int len, int can_grow);
 YAZ_EXPORT char *odr_getbuf(ODR o, int *len, int *size);
 YAZ_EXPORT void *odr_malloc(ODR o, int size);
+YAZ_EXPORT char *odr_strdup(ODR o, const char *str);
 YAZ_EXPORT NMEM odr_extract_mem(ODR o);
 YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_release_mem(m) nmem_destroy(m)
