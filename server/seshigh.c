@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.105  2000-07-06 10:38:47  adam
+ * Revision 1.106  2000-08-31 09:51:25  adam
+ * Added record_syntax member for fetch method (raw OID).
+ *
+ * Revision 1.105  2000/07/06 10:38:47  adam
  * Enhanced option --enable-tcpd.
  *
  * Revision 1.104  2000/04/05 07:39:55  adam
@@ -1138,9 +1141,10 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 }
 
 static Z_Records *pack_records(association *a, char *setname, int start,
-				int *num, Z_RecordComposition *comp,
-				int *next, int *pres, oid_value format,
-				Z_ReferenceId *referenceId)
+			       int *num, Z_RecordComposition *comp,
+			       int *next, int *pres, oid_value format,
+			       Z_ReferenceId *referenceId,
+			       int *oid)
 {
     int recno, total_length = 0, toget = *num, dumped_records = 0;
     Z_Records *records =
@@ -1183,6 +1187,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	freq.number = recno;
 	freq.comp = comp;
 	freq.request_format = format;
+	freq.record_syntax = oid;
 	freq.output_format = 0;
 	freq.stream = a->encode;
 	freq.print = a->print;
@@ -1423,7 +1428,8 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    else
 	    	form = prefformat->value;
 	    resp->records = pack_records(assoc, req->resultSetName, 1,
-		toget, compp, next, presst, form, req->referenceId);
+		toget, compp, next, presst, form, req->referenceId,
+					 req->preferredRecordSyntax);
 	    if (!resp->records)
 		return 0;
 	    resp->numberOfRecordsReturned = toget;
@@ -1462,7 +1468,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
  * speed - which is normally more true for search than for present.
  */
 static Z_APDU *process_presentRequest(association *assoc, request *reqb,
-    int *fd)
+				      int *fd)
 {
     Z_PresentRequest *req = reqb->request->u.presentRequest;
     oident *prefformat;
@@ -1488,6 +1494,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	bprr->start = *req->resultSetStartPoint;
 	bprr->number = *req->numberOfRecordsRequested;
 	bprr->format = form;
+	bprr->record_syntax = req->preferredRecordSyntax;
 	bprr->comp = req->recordComposition;
 	bprr->referenceId = req->referenceId;
 	bprr->stream = assoc->encode;
@@ -1518,7 +1525,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     resp->records =
 	pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
 		     num, req->recordComposition, next, presst, form,
-                     req->referenceId);
+                     req->referenceId, req->preferredRecordSyntax);
     if (!resp->records)
 	return 0;
     resp->numberOfRecordsReturned = num;

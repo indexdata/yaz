@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.7  2000-04-05 07:39:55  adam
+ * Revision 1.8  2000-08-31 09:51:25  adam
+ * Added record_syntax member for fetch method (raw OID).
+ *
+ * Revision 1.7  2000/04/05 07:39:55  adam
  * Added shared library support (libtool).
  *
  * Revision 1.6  2000/03/20 19:06:25  adam
@@ -126,6 +129,7 @@ typedef struct {
     int start;
     int number;                /* record number */
     oid_value format;          /* One of the CLASS_RECSYN members */
+    int *record_syntax;        /* same as above (raw OID) */
     Z_ReferenceId *referenceId;/* reference ID */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if required */
@@ -143,6 +147,7 @@ typedef struct bend_fetch_rr {
     int number;                /* record number */
     Z_ReferenceId *referenceId;/* reference ID */
     oid_value request_format;  /* One of the CLASS_RECSYN members */
+    int *record_syntax;        /* same as above (raw OID) */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
     ODR print;                 /* printing stream */

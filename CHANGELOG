@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added record_syntax OID for fetch interface for backend API.
+
 Config file yaz-config now accepts options so that it returns specific
 compile settings, etc. Thanks to Morten Bøgeskov <morten@bogeskov.dk>
 
