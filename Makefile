@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.12 1995-05-22 11:29:19 quinn Exp $
+# $Id: Makefile,v 1.13 1995-05-22 14:02:23 quinn Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 DEFS=-DUSE_XTIMOSI
@@ -22,6 +22,7 @@ dep depend:
 
 clean:
 	for i in $(SUBDIR); do (cd $$i; $(MAKE) clean); done
+	-rm lib/*.a
 
 cleanup:
 	rm -f `find $(SUBDIR) -name "*.[oa]" -print`
