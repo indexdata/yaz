@@ -11,7 +11,8 @@ Bug fix: some MARC8 sequences were not converted.
 New ZOOM option "step" which specifies number of records to be
 retrieved in one chunk. Used in conjunction with "start" and "count".
 
-SRW support for yaz-client.
+SRW support for yaz-client. Use scheme http: to use it, e.g.
+ http://host:port/db
 
 yaz-client no longer does (un)intelligent character set conversions
 by default. Can be enabled with charset and marc_charset commands.

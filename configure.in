@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.112 2003-04-28 21:02:15 adam Exp $
+dnl $Id: configure.in,v 1.113 2003-05-26 20:09:01 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.2)
 AM_MAINTAINER_MODE
@@ -98,7 +98,7 @@ if test "$checkBoth" = "1"; then
 fi
 AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
 dnl
-dnl ------ Open SSL
+dnl ------ OpenSSL
 openssl=no
 AC_ARG_WITH(openssl, [  --with-openssl[=PREFIX] OpenSSL library in PREFIX], [openssl=$withval])
 AC_SUBST(SSL_CFLAGS)
@@ -202,29 +202,49 @@ if test "$ac_cv_func_poll" = "yes"; then
         AC_CHECK_HEADERS(sys/poll.h)
 fi
 dnl ------ socklen_t
+dnl We check for socklen_t by making prototypes with the
+dnl various types. First socklen_t, then size_t, finally int.
+dnl If the prototype succeeds, we're probably safe.
+dnl That works if accept is not preprocessor defined (such sa AIX)
 AC_MSG_CHECKING([for socklen_t])
 AC_CACHE_VAL(ac_cv_check_socklen_t,[ac_cv_check_socklen_t=''
 	AC_TRY_COMPILE([
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#ifdef __cplusplus
-	extern "C" {
-	#endif
-	extern int accept(int, struct sockaddr *, socklen_t *);
-	#ifdef __cplusplus
-	}
-	#endif
+#include <sys/types.h>
+#include <sys/socket.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+#define try 1
+#ifdef AIX
+#if AIX >= 51
+#define try 0
+#endif
+#endif
+#if try
+extern int accept(int, struct sockaddr *, socklen_t *);
+#endif
+#ifdef __cplusplus
+}
+#endif
 	],,[ac_cv_check_socklen_t=socklen_t],[
 		AC_TRY_COMPILE([
-		#include <sys/types.h>
-		#include <sys/socket.h>
-		#ifdef __cplusplus
-		extern "C" {
-		#endif
-		extern int accept(int, struct sockaddr *, size_t t *);
-		#ifdef __cplusplus
-		}
-		#endif
+#include <sys/types.h>
+#include <sys/socket.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+#define try 1
+#ifdef AIX
+#if AIX >= 42
+#define try 0
+#endif
+#endif
+#if try
+extern int accept(int, struct sockaddr *, size_t t *);
+#endif
+#ifdef __cplusplus
+}
+#endif
 		],,[ac_cv_check_socklen_t=size_t],[ac_cv_check_socklen_t=int])
 	])
 ])
