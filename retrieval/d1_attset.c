@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.3  1995-12-13 17:14:26  quinn
+ * Revision 1.4  1996-02-21 15:23:36  quinn
+ * Reversed fclose and return;
+ *
+ * Revision 1.3  1995/12/13  17:14:26  quinn
  * *** empty log message ***
  *
  * Revision 1.2  1995/11/01  16:34:55  quinn
@@ -78,8 +81,8 @@ data1_attset *data1_read_attset(char *file)
 	}
 	if (!r)
 	{
-	    return res;
 	    fclose(f);
+	    return res;
 	}
 	if (sscanf(r, "%s %[^\n]", cmd, args) < 2)
 	    *args = '\0';
