@@ -1,4 +1,4 @@
-YAZ TODO $Id: TODO,v 1.9 2003-03-11 21:19:16 adam Exp $
+YAZ TODO $Id: TODO,v 1.10 2003-04-18 17:14:46 adam Exp $
 
 SRU support in Generic Frontend Server.
 
@@ -9,7 +9,7 @@ Complete ODR print.
 Versions to be put automatically in
    configure.in
    include/yaz/yaz-version.h
-   debian/rules
+   debian/changelog
    CHANGELOG
    win/yaz.rc (4 places)
    win/yaz.nsi
