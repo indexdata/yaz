@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.50  1996-07-26 13:36:15  quinn
+ * Revision 1.51  1996-07-26 14:07:21  quinn
+ * Small
+ *
+ * Revision 1.50  1996/07/26  13:36:15  quinn
  * Various smallish
  *
  * Revision 1.49  1996/07/06  19:58:28  quinn
@@ -280,7 +283,7 @@ int z_Unit(ODR o, Z_Unit **p, int opt)
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
     return
-    	odr_explicit(o, odr_visiblestring, &(*p)->unitSystem, ODR_CONTEXT,
+    	odr_explicit(o, z_InternationalString, &(*p)->unitSystem, ODR_CONTEXT,
 	    1, 1) &&
 	odr_explicit(o, z_StringOrNumeric, &(*p)->unitType, ODR_CONTEXT,
 	    2, 1) &&
