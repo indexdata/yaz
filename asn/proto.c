@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.12  1995-03-20 09:45:09  quinn
+ * Revision 1.13  1995-03-20 11:26:52  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.12  1995/03/20  09:45:09  quinn
  * Working towards v3
  *
  * Revision 1.11  1995/03/17  10:17:25  quinn
@@ -383,9 +386,9 @@ int z_SearchRequest(ODR o, Z_SearchRequest **p, int opt)
 	odr_implicit_settag(o, ODR_CONTEXT, 18) &&
 	odr_sequence_of(o, z_DatabaseName, &pp->databaseNames,
 	    &pp->num_databaseNames) &&
-	odr_implicit(o, z_ElementSetNames, &pp->smallSetElementSetNames,
+	odr_explicit(o, z_ElementSetNames, &pp->smallSetElementSetNames,
 	    ODR_CONTEXT, 100, 1) &&
-	odr_implicit(o, z_ElementSetNames, &pp->mediumSetElementSetNames,
+	odr_explicit(o, z_ElementSetNames, &pp->mediumSetElementSetNames,
 	    ODR_CONTEXT, 101, 1) &&
 	z_PreferredRecordSyntax(o, &pp->preferredRecordSyntax, 1) &&
 	odr_explicit(o, z_Query, &pp->query, ODR_CONTEXT, 21, 0) &&
