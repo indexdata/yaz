@@ -44,7 +44,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.12 2001-11-27 22:38:50 adam Exp $
+ * $Id: cclqfile.c,v 1.13 2002-06-06 12:54:24 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -161,7 +161,7 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
             pair[pair_no*2+1] = value;
 	    if (setp)
 	    {
-	        attsets[pair_no] = (char*) malloc (strlen(qual_spec)+1);
+	        attsets[pair_no] = (char*) xmalloc (strlen(qual_spec)+1);
 	        strcpy (attsets[pair_no], qual_spec);
 	    }
 	    else

@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.30 2002-05-17 08:46:01 adam Exp $
+ * $Id: cclfind.c,v 1.31 2002-06-06 12:54:24 adam Exp $
  *
  * Old Europagate log:
  *
@@ -160,7 +160,7 @@ static void strxcat (char *n, const char *src, int len)
  */
 static char *copy_token_name (struct ccl_token *tp)
 {
-    char *str = (char *)malloc (tp->len + 1);
+    char *str = (char *)xmalloc (tp->len + 1);
     ccl_assert (str);
     memcpy (str, tp->name, tp->len);
     str[tp->len] = '\0';
@@ -175,7 +175,7 @@ static char *copy_token_name (struct ccl_token *tp)
 static struct ccl_rpn_node *mk_node (int kind)
 {
     struct ccl_rpn_node *p;
-    p = (struct ccl_rpn_node *)malloc (sizeof(*p));
+    p = (struct ccl_rpn_node *)xmalloc (sizeof(*p));
     ccl_assert (p);
     p->kind = kind;
     return p;
@@ -199,24 +199,24 @@ void ccl_rpn_delete (struct ccl_rpn_node *rpn)
         ccl_rpn_delete (rpn->u.p[1]);
         break;
     case CCL_RPN_TERM:
-        free (rpn->u.t.term);
+        xfree (rpn->u.t.term);
         for (attr = rpn->u.t.attr_list; attr; attr = attr1)
         {
             attr1 = attr->next;
             if (attr->set)
-                free (attr->set);
-            free (attr);
+                xfree (attr->set);
+            xfree (attr);
         }
         break;
     case CCL_RPN_SET:
-        free (rpn->u.setname);
+        xfree (rpn->u.setname);
         break;
     case CCL_RPN_PROX:
         ccl_rpn_delete (rpn->u.p[0]);
         ccl_rpn_delete (rpn->u.p[1]);
         break;
     }
-    free (rpn);
+    xfree (rpn);
 }
 
 static struct ccl_rpn_node *find_spec (CCL_parser cclp,
@@ -245,11 +245,11 @@ static void add_attr (struct ccl_rpn_node *p, const char *set,
 {
     struct ccl_rpn_attr *n;
 
-    n = (struct ccl_rpn_attr *)malloc (sizeof(*n));
+    n = (struct ccl_rpn_attr *)xmalloc (sizeof(*n));
     ccl_assert (n);
     if (set)
     {
-        n->set = (char*) malloc (strlen(set)+1);
+        n->set = (char*) xmalloc (strlen(set)+1);
         strcpy (n->set, set);
     }
     else
@@ -417,7 +417,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         }
         
         /* make the RPN token */
-        p->u.t.term = (char *)malloc (len);
+        p->u.t.term = (char *)xmalloc (len);
         ccl_assert (p->u.t.term);
         p->u.t.term[0] = '\0';
         for (i = 0; i<no; i++)
@@ -658,7 +658,7 @@ static struct ccl_rpn_node *qualifiers1 (CCL_parser cclp, struct ccl_token *la,
     if (qa)
         for (i=0; qa[i]; i++)
             no++;
-    ap = (struct ccl_rpn_attr **)malloc ((no ? (no+1) : 2) * sizeof(*ap));
+    ap = (struct ccl_rpn_attr **)xmalloc ((no ? (no+1) : 2) * sizeof(*ap));
     ccl_assert (ap);
 
     field_str = ccl_qual_search_special(cclp->bibset, "field");
@@ -687,7 +687,7 @@ static struct ccl_rpn_node *qualifiers1 (CCL_parser cclp, struct ccl_token *la,
                 if (!node_sub)
                 {
                     ccl_rpn_delete (node);
-                    free (ap);
+                    xfree (ap);
                     return 0;
                 }
                 if (node)
@@ -705,7 +705,7 @@ static struct ccl_rpn_node *qualifiers1 (CCL_parser cclp, struct ccl_token *la,
             {
                 cclp->look_token = lookahead;
                 cclp->error_code = CCL_ERR_UNKNOWN_QUAL;
-                free (ap);
+                xfree (ap);
                 return NULL;
             }
             lookahead = lookahead->next;
@@ -734,7 +734,7 @@ static struct ccl_rpn_node *qualifiers1 (CCL_parser cclp, struct ccl_token *la,
                 {
                     cclp->look_token = lookahead;
                     cclp->error_code = CCL_ERR_UNKNOWN_QUAL;
-                    free (ap);
+                    xfree (ap);
                     return NULL;
                 }
                 lookahead = lookahead->next;
@@ -773,7 +773,7 @@ static struct ccl_rpn_node *qualifiers1 (CCL_parser cclp, struct ccl_token *la,
             seq++;
         }
     }
-    free (ap);
+    xfree (ap);
     return node;
 }
 

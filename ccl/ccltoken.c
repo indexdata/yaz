@@ -44,7 +44,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.18 2001-11-27 22:38:50 adam Exp $
+ * $Id: ccltoken.c,v 1.19 2002-06-06 12:54:24 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -149,13 +149,13 @@ struct ccl_token *ccl_token_simple (const char *command)
 	}
 	if (!first)
 	{
-	    first = last = (struct ccl_token *)malloc (sizeof (*first));
+	    first = last = (struct ccl_token *)xmalloc (sizeof (*first));
 	    ccl_assert (first);
 	    last->prev = NULL;
 	}
 	else
 	{
-	    last->next = (struct ccl_token *)malloc (sizeof(*first));
+	    last->next = (struct ccl_token *)xmalloc (sizeof(*first));
 	    ccl_assert (last->next);
 	    last->next->prev = last;
 	    last = last->next;
@@ -213,13 +213,13 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 	}
 	if (!first)
 	{
-	    first = last = (struct ccl_token *)malloc (sizeof (*first));
+	    first = last = (struct ccl_token *)xmalloc (sizeof (*first));
 	    ccl_assert (first);
 	    last->prev = NULL;
 	}
 	else
 	{
-	    last->next = (struct ccl_token *)malloc (sizeof(*first));
+	    last->next = (struct ccl_token *)xmalloc (sizeof(*first));
 	    ccl_assert (last->next);
 	    last->next->prev = last;
 	    last = last->next;
@@ -337,7 +337,7 @@ void ccl_token_del (struct ccl_token *list)
     while (list) 
     {
         list1 = list->next;
-        free (list);
+        xfree (list);
         list = list1;
     }
 }
@@ -345,14 +345,14 @@ void ccl_token_del (struct ccl_token *list)
 char *ccl_strdup (const char *str)
 {
     int len = strlen(str);
-    char *p = (char*) malloc (len+1);
+    char *p = (char*) xmalloc (len+1);
     strcpy (p, str);
     return p;
 }
 
 CCL_parser ccl_parser_create (void)
 {
-    CCL_parser p = (CCL_parser)malloc (sizeof(*p));
+    CCL_parser p = (CCL_parser)xmalloc (sizeof(*p));
     if (!p)
 	return p;
     p->look_token = NULL;
@@ -373,11 +373,11 @@ void ccl_parser_destroy (CCL_parser p)
 {
     if (!p)
 	return;
-    free (p->ccl_token_and);
-    free (p->ccl_token_or);
-    free (p->ccl_token_not);
-    free (p->ccl_token_set);
-    free (p);
+    xfree (p->ccl_token_and);
+    xfree (p->ccl_token_or);
+    xfree (p->ccl_token_not);
+    xfree (p->ccl_token_set);
+    xfree (p);
 }
 
 void ccl_parser_set_op_and (CCL_parser p, const char *op)
@@ -385,7 +385,7 @@ void ccl_parser_set_op_and (CCL_parser p, const char *op)
     if (p && op)
     {
 	if (p->ccl_token_and)
-	    free (p->ccl_token_and);
+	    xfree (p->ccl_token_and);
 	p->ccl_token_and = ccl_strdup (op);
     }
 }
@@ -395,7 +395,7 @@ void ccl_parser_set_op_or (CCL_parser p, const char *op)
     if (p && op)
     {
 	if (p->ccl_token_or)
-	    free (p->ccl_token_or);
+	    xfree (p->ccl_token_or);
 	p->ccl_token_or = ccl_strdup (op);
     }
 }
@@ -404,7 +404,7 @@ void ccl_parser_set_op_not (CCL_parser p, const char *op)
     if (p && op)
     {
 	if (p->ccl_token_not)
-	    free (p->ccl_token_not);
+	    xfree (p->ccl_token_not);
 	p->ccl_token_not = ccl_strdup (op);
     }
 }
@@ -413,7 +413,7 @@ void ccl_parser_set_op_set (CCL_parser p, const char *op)
     if (p && op)
     {
 	if (p->ccl_token_set)
-	    free (p->ccl_token_set);
+	    xfree (p->ccl_token_set);
 	p->ccl_token_set = ccl_strdup (op);
     }
 }
