@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.8  1998-02-11 11:53:35  adam
+ * Revision 1.9  1998-03-05 08:07:58  adam
+ * Make data1 to EXPLAIN ignore local tags in root.
+ *
+ * Revision 1.8  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.7  1997/12/09 16:18:16  adam
@@ -683,27 +686,22 @@ Z_ExplainRecord *data1_nodetoexplain (data1_handle dh, data1_node *n,
 	logf(LOG_WARN, "Attempt to convert a non-Explain record");
 	return 0;
     }
-    n = n->child;
-    if (!n || n->next)
+    for (n = n->child; n; n = n->next)
     {
-	logf(LOG_WARN, "Explain record should have one exactly one child");
-	return 0;
+	switch (is_numeric_tag (&eh, n))
+	{
+	case 1:
+	    res->which = Z_Explain_targetInfo;
+	    if (!(res->u.targetInfo = f_targetInfo(&eh, n)))
+		return 0;
+	    return res;
+	case 2:
+	    res->which = Z_Explain_databaseInfo;
+	    if (!(res->u.databaseInfo = f_databaseInfo(&eh, n)))
+		return 0;
+	    return res;
+	}
     }
-    switch (is_numeric_tag (&eh, n))
-    {
-    case 1:
-	res->which = Z_Explain_targetInfo;
-	if (!(res->u.targetInfo = f_targetInfo(&eh, n)))
-	    return 0;
-	break;
-    case 2:
-	res->which = Z_Explain_databaseInfo;
-	if (!(res->u.databaseInfo = f_databaseInfo(&eh, n)))
-	    return 0;
-	break;
-    default:
-	logf(LOG_WARN, "Unknown explain category");
-	return 0;
-    }
-    return res;
+    logf(LOG_WARN, "No category in Explain record");
+    return 0;
 }
