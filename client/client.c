@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.141 2002-02-01 23:59:49 adam Exp $
+ * $Id: client.c,v 1.142 2002-02-12 21:12:39 adam Exp $
  */
 
 #include <stdio.h>
@@ -264,6 +264,16 @@ static int process_initResponse(Z_InitResponse *res)
         printf (" namedResultSets");
         setnumber = 0;
     }
+    if (ODR_MASK_GET(res->options, Z_Options_encapsulation))
+        printf (" encapsulation");
+    if (ODR_MASK_GET(res->options, Z_Options_resultCount))
+        printf (" resultCount");
+    if (ODR_MASK_GET(res->options, Z_Options_negotiationModel))
+        printf (" negotiationModel");
+    if (ODR_MASK_GET(res->options, Z_Options_duplicateDetection))
+        printf (" duplicateDetection");
+    if (ODR_MASK_GET(res->options, Z_Options_queryType104))
+        printf (" queryType104");
     printf ("\n");
     fflush (stdout);
     return 0;
