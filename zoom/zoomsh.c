@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.5 2001-11-16 09:52:39 adam Exp $
+ * $Id: zoomsh.c,v 1.6 2001-11-16 10:18:20 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -332,6 +332,7 @@ void shell(Z3950_connection *c, Z3950_resultset *r, Z3950_options options)
     while (1)
     {
         char buf[1000];
+	char *cp;
 	const char *bp = buf;
 #if HAVE_READLINE_READLINE_H
 	char* line_in;
@@ -353,6 +354,8 @@ void shell(Z3950_connection *c, Z3950_resultset *r, Z3950_options options)
 	if (!fgets (buf, 999, stdin))
 	    break;
 #endif 
+	if ((cp = strchr(buf, '\n')))
+	    *cp = '\0';
 	if (!cmd_parse (c, r, options, &bp))
 	    break;
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.9 2001-11-16 09:52:39 adam Exp $
+ * $Id: zoom-c.c,v 1.10 2001-11-16 10:18:20 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -770,7 +770,7 @@ static void response_diag (Z3950_connection c, Z_DiagRec *p)
     c->error = *r->condition;
 }
 
-Z3950_record Z3950_record_dup (const Z3950_record srec)
+Z3950_record Z3950_record_dup (Z3950_record srec)
 {
     char *buf;
     int size;
