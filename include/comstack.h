@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.5  1995-05-29 08:11:31  quinn
+ * Revision 1.6  1995-05-30 10:54:51  quinn
+ * Added some backwards compatibility to the comstack (CS_SR->PROTO_SR)
+ *
+ * Revision 1.5  1995/05/29  08:11:31  quinn
  * Moved oid from odr/asn to util.
  *
  * Revision 1.4  1995/05/16  08:50:29  quinn
@@ -158,5 +161,9 @@ const char *cs_strerror(COMSTACK h);
 #define CSWRONGBUF 4
 
 extern char *cs_errlist[];
+
+/* backwards compatibility */
+#define CS_SR     PROTO_SR
+#define CS_Z3950  PROTO_Z3950
 
 #endif
