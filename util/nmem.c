@@ -3,113 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: nmem.c,v $
- * Revision 1.33  2001-11-15 21:44:48  adam
- * Removed log ..
- *
- * Revision 1.32  2001/11/13 23:00:43  adam
- * Separate malloc debug library. Removal of ASN_COMPILED-#ifdefs.
- *
- * Revision 1.31  2001/10/24 12:24:43  adam
- * WIN32 updates: ZOOM runs, nmem_init/nmem_exit called in DllMain.
- *
- * Revision 1.30  2001/10/05 13:55:17  adam
- * Added defines YAZ_GNU_THREADS, YAZ_POSIX_THREADS in code and yaz-config
- *
- * Revision 1.29  2001/10/04 00:37:58  adam
- * Fixes for GNU threads (not working yet).
- *
- * Revision 1.28  2001/10/03 23:55:18  adam
- * GNU threads support.
- *
- * Revision 1.27  2001/09/27 12:09:18  adam
- * Function nmem_exit calls oid_exit (when reference is 0).
- *
- * Revision 1.26  2001/07/19 19:51:42  adam
- * Added typecasts to make C++ happy.
- *
- * Revision 1.25  2001/06/26 14:11:27  adam
- * Added MUTEX functions for NMEM module (used by OID utility).
- *
- * Revision 1.24  2000/05/11 14:37:55  adam
- * Minor changes.
- *
- * Revision 1.23  2000/05/09 10:55:05  adam
- * Public nmem_print_list (for debugging).
- *
- * Revision 1.22  2000/05/03 22:00:00  adam
- * Reference counter (if multiple modules are init/freeing nmem).
- *
- * Revision 1.21  2000/02/29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.20  2000/01/06 14:59:13  adam
- * Added oid_init/oid_exit. Changed oid_exit.
- *
- * Revision 1.19  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.18  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.17  1999/07/13 13:28:25  adam
- * Better debugging for NMEM routines.
- *
- * Revision 1.16  1999/03/31 11:18:25  adam
- * Implemented odr_strdup. Added Reference ID to backend server API.
- *
- * Revision 1.15  1999/02/11 09:10:26  adam
- * Function nmem_init only mandatory on Windows.
- *
- * Revision 1.14  1999/02/02 13:57:40  adam
- * Uses preprocessor define WIN32 instead of WINDOWS to build code
- * for Microsoft WIN32.
- *
- * Revision 1.13  1998/10/19 15:24:21  adam
- * New nmem utility, nmem_transfer, that transfer blocks from one
- * NMEM to another.
- *
- * Revision 1.12  1998/10/13 16:00:18  adam
- * Implemented nmem_critical_{enter,leave}.
- *
- * Revision 1.11  1998/08/21 14:13:36  adam
- * Added GNU Configure script to build Makefiles.
- *
- * Revision 1.10  1998/07/20 12:35:57  adam
- * Added more memory diagnostics (when NMEM_DEBUG is 1).
- *
- * Revision 1.9  1998/07/07 15:49:01  adam
- * Reduced chunk size.
- *
- * Revision 1.8  1998/07/03 14:21:27  adam
- * Added critical sections for pthreads-library. Thanks to Ian Ibbotson,
- * Fretwell Downing Informatics.
- *
- * Revision 1.7  1998/02/11 11:53:36  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.6  1997/10/31 12:20:09  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
- *
- * Revision 1.5  1997/10/06 09:09:52  adam
- * Function mmem_exit releases memory used by the freelists.
- *
- * Revision 1.4  1997/09/29 07:12:50  adam
- * NMEM thread safe. NMEM must be initialized before use (sigh) -
- * routine nmem_init/nmem_exit implemented.
- *
- * Revision 1.3  1997/07/21 12:47:38  adam
- * Moved definition of nmem_control and nmem_block.
- *
- * Revision 1.2  1995/12/13 13:44:37  quinn
- * Modified Data1-system to use nmem
- *
- * Revision 1.1  1995/11/13  09:27:52  quinn
- * Fiddling with the variant stuff.
- *
- *
+ * $Id: nmem.c,v 1.34 2001-11-18 21:05:13 adam Exp $
  */
 
 /*
@@ -228,11 +122,7 @@ YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
 static nmem_block *freelist = NULL;        /* "global" freelists */
 static nmem_control *cfreelist = NULL;
 static int nmem_active_no = 0;
-#ifdef WIN32
 static int nmem_init_flag = 0;
-#else
-static int nmem_init_flag = 1;
-#endif
 
 #if NMEM_DEBUG
 struct nmem_debug_info {
