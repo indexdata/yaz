@@ -2,13 +2,19 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.171 2002-09-24 08:05:41 adam Exp $
+ * $Id: client.c,v 1.172 2002-10-04 19:05:36 adam Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
+
+#ifdef WIN32
+#include <io.h>
+#define S_ISREG(x) (x & _S_IFREG)
+#define S_ISDIR(x) (x & _S_IFDIR)
+#endif
 
 #include <yaz/yaz-util.h>
 
