@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt.h,v $
- * Revision 1.22  1998-02-11 11:53:34  adam
+ * Revision 1.23  1998-03-20 14:45:27  adam
+ * Implemented odr_set_of and odr_enum.
+ *
+ * Revision 1.22  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.21  1997/10/31 12:20:08  adam
@@ -30,10 +33,6 @@ YAZ_EXPORT int ber_dectag(unsigned char *buf, int *zclass, int *tag, int *constr
 YAZ_EXPORT int odr_bool(ODR o, int **p, int opt);
 YAZ_EXPORT int odr_integer(ODR o, int **p, int opt);
 YAZ_EXPORT int odr_implicit_settag(ODR o, int zclass, int tag);
-#if 0
-YAZ_EXPORT int odr_implicit(ODR o, int (*type)(ODR o, void *p, int opt), void *p,
-    int zclass, int tag, int opt);
-#endif
 YAZ_EXPORT int ber_enclen(ODR o, int len, int lenlen, int exact);
 YAZ_EXPORT int ber_declen(unsigned char *buf, int *len);
 YAZ_EXPORT char *odr_indent(ODR o);
@@ -43,7 +42,9 @@ YAZ_EXPORT int ber_integer(ODR o, int *val);
 YAZ_EXPORT int odr_constructed_begin(ODR o, void *p, int zclass, int tag);
 YAZ_EXPORT int odr_constructed_end(ODR o);
 YAZ_EXPORT int odr_sequence_begin(ODR o, void *p, int size);
+YAZ_EXPORT int odr_set_begin(ODR o, void *p, int size);
 YAZ_EXPORT int odr_sequence_end(ODR o);
+YAZ_EXPORT int odr_set_end(ODR o);
 YAZ_EXPORT int ber_octetstring(ODR o, Odr_oct *p, int cons);
 YAZ_EXPORT int odr_octetstring(ODR o, Odr_oct **p, int opt);
 YAZ_EXPORT int odp_more_chunks(ODR o, unsigned char *base, int len);
@@ -56,6 +57,7 @@ YAZ_EXPORT int odr_oid(ODR o, Odr_oid **p, int opt);
 YAZ_EXPORT int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp);
 YAZ_EXPORT int odr_cstring(ODR o, char **p, int opt);
 YAZ_EXPORT int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num);
+YAZ_EXPORT int odr_set_of(ODR o, Odr_fun type, void *p, int *num);
 YAZ_EXPORT int odr_any(ODR o, Odr_any **p, int opt);
 YAZ_EXPORT int ber_any(ODR o, Odr_any **p);
 YAZ_EXPORT int completeBER(unsigned char *buf, int len);
