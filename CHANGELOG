@@ -1,8 +1,18 @@
---- 1.?????????
+Possible compatibility problems with earlier versions marked with '*'.
+
+--- 1.0b2 1995/06/27
 Fixed handling of SUTRS records in the demonstration client.
 
-Cosmetic changes to the documentation. It shouldn't be strictly necessary
-for you to print it all over again.
+* Added format field to the bend_fetchrequest and bend_fetchresponce
+structures of the backend API (frontend server). When the record is
+returned, the value of the format field is mapped to an OID. The
+value VAL_SUTRS will also cause a slightly different ASN.1 packaging
+of the record. The special value VAL_NONE in the bend_request means
+that no specific format was requested by the client. Documentation
+updated accordingly. Test server (ztest) will return a fixed dummy
+SUTRS record if your client requests SUTRS.
+
+Documentation updated accordingly.
 
 --- 1.0b 1995/06/19
 First public release.
