@@ -1,7 +1,7 @@
-# Copyright (C) 1995-1998, Index Data I/S 
+# Copyright (C) 1995-1999, Index Data
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.5 1999-03-31 11:18:24 adam Exp $
+# $Id: Makefile.in,v 1.6 1999-04-16 14:45:55 adam Exp $
 
 SHELL=/bin/sh
 
@@ -33,7 +33,7 @@ alll:
 	$(CC) -c $(DEFS) $(CFLAGS) $<
 
 clean:
-	rm -f *.[oa] test core mon.out gmon.out errlist tst cli $(PROG)
+	rm -f *.[oa] test core mon.out gmon.out errlist $(PROG)
 
 depend:
 	sed '/^#Depend/q' <Makefile >Makefile.tmp

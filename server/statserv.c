@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.53  1999-02-02 13:57:39  adam
+ * Revision 1.54  1999-04-16 14:45:55  adam
+ * Added interface for tcpd wrapper for access control.
+ *
+ * Revision 1.53  1999/02/02 13:57:39  adam
  * Uses preprocessor define WIN32 instead of WINDOWS to build code
  * for Microsoft WIN32.
  *
@@ -187,7 +190,6 @@
  *
  */
 
-#include <yconfig.h>
 #include <stdio.h>
 #include <string.h>
 #ifdef WIN32
@@ -203,9 +205,9 @@
 #include <signal.h>
 #include <errno.h>
 
-#include <options.h>
 #include <comstack.h>
 #include <tcpip.h>
+#include <options.h>
 #ifdef USE_XTIMOSI
 #include <xmosi.h>
 #endif
@@ -234,6 +236,8 @@ statserv_options_block control_block = {
     "",                         /* set user id */
     NULL,                       /* pre init handler */
     check_options,              /* Default routine, for checking the run-time arguments */
+    check_ip_tcpd,
+    "",
     0                           /* default value for inet deamon */
 
 #ifdef WIN32
@@ -509,19 +513,6 @@ void statserv_closedown()
         iochan_destroy(p);
 }
 
-static int check_ip(void *cd, const char *addr, int len, int type)
-{
-    const unsigned char *ip = (const unsigned char *) addr;
-    int i;
-    char str[64];
-
-    sprintf (str, "%u", *ip);
-    for (i = 1; i<4; i++)
-	sprintf (str + strlen(str), ".%u", ip[i]);
-    logf (LOG_DEBUG, "ip %s", str);
-    return 0;
-}
-
 static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
@@ -589,7 +580,8 @@ static void listener(IOCHAN h, int event)
 		return;
 	    }
 	}
-	if ((res = cs_listen_check(line, 0, 0, check_ip, 0)) < 0)
+	if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
+				   control_block.daemon_name)) < 0)
 	{
 	    logf(LOG_WARN, "cs_listen failed");
 	    return;
@@ -855,7 +847,7 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    while ((ret = options("a:iszSl:v:u:c:w:t:k:", argv, argc, &arg)) != -2)
+    while ((ret = options("a:iszSl:v:u:c:w:t:k:d:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -888,6 +880,9 @@ int check_options(int argc, char **argv)
 	case 'c':
 	    strcpy(control_block.configname, arg ? arg : "");
 	    break;
+	case 'd':
+	    strcpy(control_block.daemon_name, arg ? arg : "");
+	    break;
 	case 't':
 	    if (!arg || !(r = atoi(arg)))
 	    {
@@ -899,7 +894,7 @@ int check_options(int argc, char **argv)
 	case  'k':
 	    if (!arg || !(r = atoi(arg)))
 	    {
-		fprintf(stderr, "%s: Specify positive timeout for -t.\n", me);
+		fprintf(stderr, "%s: Specify positive size for -k.\n", me);
 		return(1);
 	    }
 	    control_block.maxrecordsize = r * 1024;
@@ -917,7 +912,7 @@ int check_options(int argc, char **argv)
 	default:
 	    fprintf(stderr, "Usage: %s [ -i -a <pdufile> -v <loglevel>"
 		    " -l <logfile> -u <user> -c <config> -t <minutes>"
-		    " -k <kilobytes>"
+		    " -k <kilobytes> -d <daemon>"
                         " -zsS <listener-addr> -w <directory> ... ]\n", me);
 	    return(1);
         }

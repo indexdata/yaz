@@ -1,7 +1,7 @@
-# Copyright (C) 1995-1998, Index Data 
+# Copyright (C) 1995-1999, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.5 1998-10-28 15:09:59 adam Exp $
+# $Id: Makefile.in,v 1.6 1999-04-16 14:45:55 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #CDEFS=-DUSE_XTIMOSI
@@ -60,7 +60,7 @@ oclean:
 	for i in $(SUBDIR); do (cd $$i; rm -f *.o); done
 	mv lib/libyaz.a .; rm -f lib/*.a; mv libyaz.a lib
 	cd client; strip client
-	cd server; strip ztest
+	cd ztest; strip ztest
 
 cleanup:
 	rm -f `find $(SUBDIR) -name "*.[oa]" -print`
@@ -85,7 +85,7 @@ install.bin:
 	@echo "Installing client -> $(BINDIR)"; \
 	cp client/client $(BINDIR)/client; chmod 755 $(BINDIR)/client
 	@echo "Installing ztest -> $(BINDIR)"; \
-	cp server/ztest $(BINDIR)/ztest; chmod 755 $(BINDIR)/ztest
+	cp ztest/ztest $(BINDIR)/ztest; chmod 755 $(BINDIR)/ztest
 
 install.lib:
 	@if [ ! -d $(LIBDIR) ]; then \

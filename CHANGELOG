@@ -1,5 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added access control facility by interfacing the TCP wrapper library.
+YAZ automatically attempts to find the TCP wrapper Library (-lwrap) and
+tcpd.h on Unix systems. For the server, option -d<daemon> specifies the
+name of the daemon and enables the access control as specified in
+hosts.allow/hosts.deny. Refer to man pages tcpd(8) and hosts_access(5).
+
 Fixed memory leak in ccl_find_str and ccl_qual_rm. Thanks to Hans van
 den Dool <H.M.vdnDool@kub.nl>.
 

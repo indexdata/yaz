@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.28  1999-03-31 11:11:14  adam
+ * Revision 1.29  1999-04-16 14:45:55  adam
+ * Added interface for tcpd wrapper for access control.
+ *
+ * Revision 1.28  1999/03/31 11:11:14  adam
  * Function getprotobyname only called once. Minor change in tcpip_get
  * to handle multi-threaded conditions.
  *
@@ -169,6 +172,7 @@
 
 #include <comstack.h>
 #include <tcpip.h>
+#include <log.h>
 
 /* Chas added the following, so we get the definition of completeBER */
 #include <odr.h>
@@ -412,6 +416,7 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
     unsigned long one = 1;
 #endif
 
+    logf (LOG_LOG, "tcpip_bind");
     TRC(fprintf(stderr, "tcpip_bind\n"));
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*) 
 	&one, sizeof(one)) < 0)
@@ -432,19 +437,6 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
     h->state = CS_IDLE;
     return 0;
 }
-
-#if 0
-void tcpip_get_ip(COMSTACK h, char *ip_buf)
-{
-    struct tcpip_state *sp = (tcpip_state *)h->cprivate;
-    const char *ip_addr = (const char *) (&sp->addr->sin_addr.s_addr);
-    int i;
-
-    for (i = 0; i<4; i++)
-	TRC (fprintf (stderr, "%u ", ip_addr[i]));
-    TRC (fprintf (stderr, "\n"));
-}
-#endif
 
 int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 		 int (*check_ip)(void *cd, const char *a, int len, int type),
@@ -476,14 +468,14 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_in));
     else if (addrlen)
         *addrlen = 0;
-    if (check_ip && (*check_ip)(cd, (const char *) &addr.sin_addr,
-        sizeof(addr.sin_addr), AF_INET))
+    if (check_ip && (*check_ip)(cd, (const char *) &addr,
+        sizeof(addr), AF_INET))
     {
 	h->cerrno = CSDENY;
 #ifdef WIN32
-        closesocket(h->iofile);
+        closesocket(h->newfd);
 #else
-        close(h->iofile);
+        close(h->newfd);
 #endif
 	return -1;
     }

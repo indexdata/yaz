@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.14  1999-02-02 13:57:32  adam
+ * Revision 1.15  1999-04-16 14:45:55  adam
+ * Added interface for tcpd wrapper for access control.
+ *
+ * Revision 1.14  1999/02/02 13:57:32  adam
  * Uses preprocessor define WIN32 instead of WINDOWS to build code
  * for Microsoft WIN32.
  *
@@ -81,6 +84,7 @@
 #define STATSERVER_H
 
 #include <yconfig.h>
+#include <odr.h>
 #include <oid.h>
 
 #ifdef __cplusplus
@@ -101,6 +105,8 @@ typedef struct statserv_options_block
     char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
     void (*pre_init)(struct statserv_options_block *p);
     int (*options_func)(int argc, char **argv);
+    int (*check_ip)(void *cd, const char *addr, int len, int type);
+    char daemon_name[128];
     int inetd;                    /* Do we use the inet deamon or not */
     
 #ifdef WIN32
@@ -118,6 +124,8 @@ int statserv_start(int argc, char **argv);
 void statserv_closedown(void);
 statserv_options_block *statserv_getcontrol(void);
 void statserv_setcontrol(statserv_options_block *block);
+
+int check_ip_tcpd(void *cd, const char *addr, int len, int type);
 
 #ifdef __cplusplus
 }
