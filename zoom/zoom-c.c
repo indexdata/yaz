@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.42 2002-08-25 06:48:18 adam Exp $
+ * $Id: zoom-c.c,v 1.43 2002-09-03 18:10:13 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1036,7 +1036,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
     if (!strcmp (type, "database"))
     {
     	if (len)
-            *len = strlen(npr->databaseName);
+            *len = (npr->databaseName ? strlen(npr->databaseName) : 0);
 	return npr->databaseName;
     }
     else if (!strcmp (type, "syntax"))
