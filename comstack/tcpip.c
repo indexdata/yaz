@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: tcpip.c,v $
- * Revision 1.39  2001-07-19 19:49:40  adam
+ * Revision 1.40  2001-08-23 09:02:46  adam
+ * WIN32 fixes: Socket not re-used for bind. yaz_log logs WIN32 error
+ * message.
+ *
+ * Revision 1.39  2001/07/19 19:49:40  adam
  * Fixed bug in tcpip_set_blocking.
  *
  * Revision 1.38  2001/03/21 12:43:36  adam
@@ -603,13 +607,15 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
 #else
     TRC (fprintf (stderr, "tcpip_bind\n"));
 #endif
+#ifndef WIN32
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*) 
 	&one, sizeof(one)) < 0)
     {
         h->cerrno = CSYSERR;
         return -1;
     }
-    if (bind(h->iofile, addr, sizeof(struct sockaddr_in)) < 0)
+#endif
+    if (bind(h->iofile, addr, sizeof(struct sockaddr_in)))
     {
         h->cerrno = CSYSERR;
         return -1;

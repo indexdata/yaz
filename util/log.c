@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.24  2000-09-04 08:58:15  adam
+ * Revision 1.25  2001-08-23 09:02:46  adam
+ * WIN32 fixes: Socket not re-used for bind. yaz_log logs WIN32 error
+ * message.
+ *
+ * Revision 1.24  2000/09/04 08:58:15  adam
  * Added prefix yaz_ for most logging utility functions.
  *
  * Revision 1.23  2000/03/14 09:06:11  adam
@@ -110,6 +114,10 @@
 
 #if HAVE_CONFIG_H
 #include <config.h>
+#endif
+
+#ifdef WIN32
+#include <windows.h>
 #endif
 
 #include <stdio.h>
@@ -241,7 +249,26 @@ void yaz_log(int level, const char *fmt, ...)
     vsprintf(buf, fmt, ap);
 #endif
     if (o_level & LOG_ERRNO)
-    	sprintf(buf + strlen(buf), " [%s]", strerror(errno));
+    {
+#ifdef WIN32
+	DWORD err = GetLastError();
+	if (err)
+	{
+	    strcat(buf, " [");
+	    FormatMessage(
+		FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL,
+		err,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+		(LPTSTR) buf + strlen(buf),
+		2048,
+		NULL);
+	    strcat(buf, "]");
+	}
+#else
+        sprintf(buf + strlen(buf), " [%s]", strerror(errno));
+#endif
+    }
     if (start_hook_func)
         (*start_hook_func)(o_level, buf, start_hook_info);
     ti = time(0);
