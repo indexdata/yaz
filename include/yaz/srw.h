@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.6 2003-03-20 21:15:00 adam Exp $
+ * $Id: srw.h,v 1.7 2003-03-23 20:27:16 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -66,14 +66,28 @@ typedef struct {
     int *nextRecordPosition;
 } Z_SRW_searchRetrieveResponse;
 
+typedef struct {
+    int dummy;
+} Z_SRW_explainRequest;
+
+typedef struct {
+    int explainPacking;
+    char *explainData_buf;
+    int explainData_len;
+} Z_SRW_explainResponse;
+    
 #define Z_SRW_searchRetrieve_request  1
 #define Z_SRW_searchRetrieve_response 2
+#define Z_SRW_explain_request 3
+#define Z_SRW_explain_response 4
 
 typedef struct {
     int which;
     union {
         Z_SRW_searchRetrieveRequest *request;
         Z_SRW_searchRetrieveResponse *response;
+        Z_SRW_explainRequest *explain_request;
+        Z_SRW_explainResponse *explain_response;
     } u;
 } Z_SRW_PDU;
 
