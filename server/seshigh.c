@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.162 2003-10-20 18:20:55 adam Exp $
+ * $Id: seshigh.c,v 1.163 2003-10-20 20:48:37 adam Exp $
  */
 
 /*
@@ -213,6 +213,7 @@ static void do_close_req(association *a, int reason, char *message,
     }
     else
     {
+	request_release(req);
 	yaz_log(LOG_DEBUG, "v2 client. No Close PDU");
 	iochan_setevent(a->client_chan, EVENT_TIMEOUT); /* force imm close */
     }
@@ -222,7 +223,6 @@ static void do_close_req(association *a, int reason, char *message,
 static void do_close(association *a, int reason, char *message)
 {
     request *req = request_get(&a->outgoing);
-    request_release(req);
     do_close_req (a, reason, message, req);
 }
 
@@ -1390,6 +1390,7 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
     	yaz_log(LOG_WARN, "ODR error when decoding PDU: %s [element %s]",
                 odr_errmsg(odr_geterror(assoc->decode)),
                 odr_getelement(assoc->decode));
+	request_release(req);
 	return -1;
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,
