@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 1.9.3 2003/02/20
+--- 1.9.3 2003/02/23
 
 Fixed problem with C compiler include path in wrong order.
 

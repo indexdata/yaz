@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.182 2003-02-17 21:23:31 adam Exp $
+ * $Id: client.c,v 1.183 2003-02-23 20:40:17 adam Exp $
  */
 
 #include <stdio.h>
@@ -428,11 +428,11 @@ static int cmd_base(char *arg)
 
 void cmd_open_remember_last_open_command(char* arg, char* new_open_command)
 {
-	if(last_open_command != arg) 
-	{
-		if(last_open_command) xfree(last_open_command);
-		last_open_command = xstrdup(new_open_command);
-	}
+    if(last_open_command != arg) 
+    {
+        if(last_open_command) xfree(last_open_command);
+        last_open_command = xstrdup(new_open_command);
+    }
 }
 
 int cmd_open(char *arg)
@@ -457,7 +457,7 @@ int cmd_open(char *arg)
     {
         base[0] = '\0';
         conn = cs_create_host(arg, 1, &add);
-		cmd_open_remember_last_open_command(arg,arg);
+	cmd_open_remember_last_open_command(arg,arg);
     }
     else
     {
@@ -465,7 +465,7 @@ int cmd_open(char *arg)
         if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
             return 0;
 		
-		cmd_open_remember_last_open_command(arg,type_and_host);
+	cmd_open_remember_last_open_command(arg,type_and_host);
         if (yazProxy) 
             conn = cs_create_host(yazProxy, 1, &add);
         else 
@@ -503,19 +503,18 @@ int cmd_open(char *arg)
 
 void try_reconnect() 
 {
-
-	char* open_command;
+    char* open_command;
 	
-	if(!( auto_reconnect && last_open_command) ) return ;
+    if(!( auto_reconnect && last_open_command) ) return ;
 
-	open_command = (char *) xmalloc (strlen(last_open_command)+6);
-	strcpy (open_command, "open ");
+    open_command = (char *) xmalloc (strlen(last_open_command)+6);
+    strcpy (open_command, "open ");
 	
-	strcat (open_command, last_open_command);
+    strcat (open_command, last_open_command);
 
-	process_cmd_line(open_command);
+    process_cmd_line(open_command);
 	
-	xfree(open_command);				
+    xfree(open_command);				
 }
 
 int cmd_authentication(char *arg)
