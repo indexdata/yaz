@@ -61,7 +61,7 @@ ProjDir=.
 TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
-PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy
+PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
@@ -97,7 +97,7 @@ ProjDir=.
 TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
-PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy
+PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib
 # End Special Build Tool
 
 !ENDIF 
