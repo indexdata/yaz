@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.183 2003-02-23 20:40:17 adam Exp $
+ * $Id: client.c,v 1.184 2003-02-25 18:35:48 adam Exp $
  */
 
 #include <stdio.h>
@@ -3321,7 +3321,9 @@ int main(int argc, char **argv)
         fprintf (stderr, "setlocale failed\n");
 #endif
 #if HAVE_LANGINFO_H
+#ifdef CODESET
     codeset = nl_langinfo(CODESET);
+#endif
 #endif
 
     while ((ret = options("k:c:a:m:v:p:u:t:", argv, argc, &arg)) != -2)

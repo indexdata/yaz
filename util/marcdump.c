@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.21 2003-02-12 22:02:33 adam Exp $
+ * $Id: marcdump.c,v 1.22 2003-02-25 18:35:49 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -58,7 +58,9 @@ int main (int argc, char **argv)
     setlocale(LC_CTYPE, "");
 #endif
 #if HAVE_LANGINFO_H
+#ifdef CODESET
     to = nl_langinfo(CODESET);
+#endif
 #endif
 
     while ((r = options("vc:xOXf:t:", argv, argc, &arg)) != -2)
