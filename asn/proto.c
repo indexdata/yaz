@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.20  1995-05-15 11:55:25  quinn
+ * Revision 1.21  1995-05-16 08:50:24  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.20  1995/05/15  11:55:25  quinn
  * Smallish.
  *
  * Revision 1.19  1995/04/11  11:58:35  quinn
@@ -100,7 +103,7 @@ int z_UserInformationField(ODR o, Z_UserInformationField **p, int opt)
 int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	odr_visiblestring(o, &(*p)->user, 0) &&
     	odr_visiblestring(o, &(*p)->password, 0) &&
@@ -111,7 +114,7 @@ int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
 int z_IdPass(ODR o, Z_IdPass **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	odr_implicit(o, odr_visiblestring, &(*p)->groupId, ODR_CONTEXT, 0, 0) &&
     	odr_implicit(o, odr_visiblestring, &(*p)->userId, ODR_CONTEXT, 1, 0) &&
@@ -395,7 +398,7 @@ int z_Operator(ODR o, Z_Operator **p, int opt)
     	odr_constructed_end(o))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 int z_Operand(ODR o, Z_Operand **p, int opt)
@@ -414,7 +417,7 @@ int z_Operand(ODR o, Z_Operand **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 int z_RPNStructure(ODR o, Z_RPNStructure **p, int opt);
@@ -422,7 +425,7 @@ int z_RPNStructure(ODR o, Z_RPNStructure **p, int opt);
 int z_Complex(ODR o, Z_Complex **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	z_RPNStructure(o, &(*p)->s1, 0) &&
     	z_RPNStructure(o, &(*p)->s2, 0) &&
@@ -446,13 +449,13 @@ int z_RPNStructure(ODR o, Z_RPNStructure **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 int z_RPNQuery(ODR o, Z_RPNQuery **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	odr_oid(o, &(*p)->attributeSetId, 0) &&
     	z_RPNStructure(o, &(*p)->RPNStructure, 0) &&
@@ -477,7 +480,7 @@ int z_Query(ODR o, Z_Query **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 int z_SearchRequest(ODR o, Z_SearchRequest **p, int opt)
@@ -485,7 +488,7 @@ int z_SearchRequest(ODR o, Z_SearchRequest **p, int opt)
     Z_SearchRequest *pp;
 
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     pp = *p;
     return
     	z_ReferenceId(o, &pp->referenceId, 1) &&
@@ -520,7 +523,7 @@ int z_DatabaseRecord(ODR o, Z_DatabaseRecord **p, int opt)
 int z_DiagRec(ODR o, Z_DiagRec **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	odr_oid(o, &(*p)->diagnosticSetId, 1) &&       /* SHOULD NOT BE OPT */
     	odr_integer(o, &(*p)->condition, 0) &&
@@ -541,7 +544,7 @@ int z_NamePlusRecord(ODR o, Z_NamePlusRecord **p, int opt)
     };
 
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	odr_implicit(o, z_DatabaseName, &(*p)->databaseName, ODR_CONTEXT,
 	    0, 1) &&
@@ -578,7 +581,7 @@ int z_Records(ODR o, Z_Records **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 /* ------------------------ SCAN SERVICE -------------------- */
@@ -595,7 +598,7 @@ int z_AttributeList(ODR o, Z_AttributeList **p, int opt)
     	&(*p)->num_attributes))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 /*
@@ -611,7 +614,7 @@ int z_WillowAttributesPlusTerm(ODR o, Z_AttributesPlusTerm **p, int opt)
     if (!odr_constructed_begin(o, p, ODR_CONTEXT, 4))
     {
     	o->t_class = -1;
-    	return opt;
+    	return opt && odr_ok(o);
     }
     if (!odr_constructed_begin(o, p, ODR_CONTEXT, 1))
     	return 0;
@@ -641,7 +644,7 @@ int z_AlternativeTerm(ODR o, Z_AlternativeTerm **p, int opt)
     else if (!*p)
     {
     	o->t_class = -1;
-    	return opt;
+    	return opt && odr_ok(o);
     }
 
     if (odr_sequence_of(o, z_AttributesPlusTerm, &(*p)->terms,
@@ -654,7 +657,7 @@ int z_AlternativeTerm(ODR o, Z_AlternativeTerm **p, int opt)
 int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	odr_explicit(o, z_AttributeList, &(*p)->attributes, ODR_CONTEXT, 1, 1)&&
 	odr_explicit(o, odr_integer, &(*p)->global, ODR_CONTEXT, 2, 1) &&
@@ -664,7 +667,7 @@ int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
 int z_TermInfo(ODR o, Z_TermInfo **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	(willow_scan ? 
     	    odr_implicit(o, z_Term, &(*p)->term, ODR_CONTEXT, 1, 0) :
@@ -695,7 +698,7 @@ int z_Entry(ODR o, Z_Entry **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 int z_Entries(ODR o, Z_Entries **p, int opt)
@@ -742,13 +745,13 @@ int z_ListEntries(ODR o, Z_ListEntries **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 int z_ScanRequest(ODR o, Z_ScanRequest **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     willow_scan = 0;
     return
     	z_ReferenceId(o, &(*p)->referenceId, 1) &&
@@ -770,7 +773,7 @@ int z_ScanRequest(ODR o, Z_ScanRequest **p, int opt)
 int z_ScanResponse(ODR o, Z_ScanResponse **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	z_ReferenceId(o, &(*p)->referenceId, 1) &&
 	odr_implicit(o, odr_integer, &(*p)->stepSize, ODR_CONTEXT, 3, 1) &&
@@ -805,7 +808,7 @@ int z_SearchResponse(ODR o, Z_SearchResponse **p, int opt)
     Z_SearchResponse *pp;
 
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     pp = *p;
     return
     	z_ReferenceId(o, &pp->referenceId, 1) &&
@@ -826,7 +829,7 @@ int z_PresentRequest(ODR o, Z_PresentRequest **p, int opt)
     Z_PresentRequest *pp;
 
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     pp = *p;
     return
     	z_ReferenceId(o, &pp->referenceId, 1) &&
@@ -845,7 +848,7 @@ int z_PresentResponse(ODR o, Z_PresentResponse **p, int opt)
     Z_PresentResponse *pp;
 
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     pp = *p;
     return
     	z_ReferenceId(o, &pp->referenceId, 1) &&
@@ -889,7 +892,7 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
     {
     	if (o->direction == ODR_DECODE)
 	    *p = 0;
-	return opt && !o->error;
+	return opt && odr_ok(o);
     }
     return 1;
 }

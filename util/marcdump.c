@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.2  1995-05-15 11:56:56  quinn
+ * Revision 1.3  1995-05-16 08:51:12  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.2  1995/05/15  11:56:56  quinn
  * Debuggng & adjustments.
  *
  * Revision 1.1  1995/04/10  10:28:47  quinn

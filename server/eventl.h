@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data I/S 
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.h,v $
- * Revision 1.5  1995-05-15 11:56:37  quinn
+ * Revision 1.6  1995-05-16 08:51:02  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.5  1995/05/15  11:56:37  quinn
  * Asynchronous facilities. Restructuring of seshigh code.
  *
  * Revision 1.4  1995/03/27  08:34:23  quinn

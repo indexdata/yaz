@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dmalloc.c,v $
- * Revision 1.4  1995-05-15 13:25:13  quinn
+ * Revision 1.5  1995-05-16 08:51:10  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.4  1995/05/15  13:25:13  quinn
  * Fixed memory bug.
  *
  * Revision 1.3  1995/05/15  11:56:55  quinn

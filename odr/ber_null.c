@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_null.c,v $
- * Revision 1.4  1995-04-18 08:15:16  quinn
+ * Revision 1.5  1995-05-16 08:50:46  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.4  1995/04/18  08:15:16  quinn
  * Added dynamic memory allocation on encoding (whew). Code is now somewhat
  * neater. We'll make the same change for decoding one day.
  *

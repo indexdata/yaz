@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 1995, Index Data.
+ * See the file LICENSE for details.
+ * Sebastian Hammer, Adam Dickmeiss
+ *
+ * $Log: ber_len.c,v $
+ * Revision 1.4  1995-05-16 08:50:45  quinn
+ * License, documentation, and memory fixes
+ *
+ *
+ */
+
 #include <stdio.h>
 #include <odr.h>
 

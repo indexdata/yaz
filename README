@@ -1,21 +1,15 @@
 
- * Copyright (C) 1994, Index Data.
- * All rights reserved. See the file LICENSE for details.
+ * Copyright (C) 1995, Index Data.
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
 
 Compilation and installation
 
-The primary output of the source here is the libyaz.a library, which
-contains support functions for implementing the server or client role
-of Z39.50/SR. Currently, the library is placed in a directory 'lib'
-which is one level *above* the distribution directory (yaz). This was
-initially done because the library is often used along with several
-other packages, and it was useful to gather the different libraries in
-a common place. If you don't like it, changing the 'LIBDIR' macro in
-the toplevel makefile should be sufficient. Obscurely, the header
-files are located in the include-directory *under* the yaz/ directory.
+The primary output of the source here is the lib/libyaz.a library,
+which contains support functions for implementing the server or client
+role of Z39.50/SR.
 
-The toplevel makefile also contains directions on how to enable Peter
+The toplevel makefile contains directions on how to enable Peter
 Furniss' XTIMOSI package. The package can be downloaded from
 ftp://pluto.ulcc.ac.uk/ulcc/thinosi/... (or something close to that).
 If you place the xtimosi directory on the same level as the yaz
@@ -55,18 +49,21 @@ directory.
 
 The directories:
 
-doc     - Documentation. Check this out if you'd like to use the code.
+doc     - Documentation.
 
 util    - Various little utility functions. Logging, memory debugging,
-	primitive ISO2709 presentation for the client, etc.
+	primitive ISO 2709 presentation for the client, etc.
 
 odr     - Open Data Representation. This module implements the BER
-	encoding rules. Documentation is found in the files odr.man
+	encoding rules. Documentation is found in the files odr-use.man
 	and odr.txt.
 
 asn     - This module implements the Z39.50/SR protocol. The best way
 	to find out how it works is to look in the sample
-	client/server code in server/seshigh.c or yazlib/tst.c.
+	client/server code in server/seshigh.c or yazlib/tst.c. The
+	interface is still wholly described by the file proto.h
+	which defines structure and type definitions for each of the
+	types introduced in the protocol specification.
 
 yazlib  - This module primarily implements the transport transparency
 	stack (COMSTACK). The comstack implements a generic interface
@@ -75,17 +72,17 @@ yazlib  - This module primarily implements the transport transparency
 	TCP/IP, and uses Peter Furniss' XTIMOSI package over RFC1006.
 	Look for documentation in the file comstack.man.
 
-server  - This is the implementation of the server frontend. It
-	It provides event-handling and server managament functions,
-	and calls the backend primitives (best documentation of these
-	is in the file include/backend.h).
-
 rfc1006 - Xtimosi requires an implementation of the OSI transport
 	with an XTI-based API. Some systems (HP and DEC, notably)
 	provide this. For others, we provide an implementation of the
 	RFC1006 protocol (which is what ISODE-based implementations
 	typically use). This module is not neeeded if you don't use
 	xtimosi.
+
+server  - This is the implementation of the server frontend. It
+	provides event-handling and server managament functions,
+	and calls the backend primitives (best documentation of these
+	is in the file include/backend.h). See server.txt.
 
 include - The various header files.
 

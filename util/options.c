@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: options.c,v $
- * Revision 1.1  1995-03-27 08:35:18  quinn
+ * Revision 1.2  1995-05-16 08:51:13  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.1  1995/03/27  08:35:18  quinn
  * Created util library
  * Added memory debugging module. Imported options-manager
  *

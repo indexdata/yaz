@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (C) 1995, Index Data I/S 
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.6  1995-05-15 11:56:41  quinn
+ * Revision 1.7  1995-05-16 08:51:08  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.6  1995/05/15  11:56:41  quinn
  * Asynchronous facilities. Restructuring of seshigh code.
  *
  * Revision 1.5  1995/04/20  15:13:01  quinn

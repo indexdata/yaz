@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.23  1995-05-15 13:25:10  quinn
+ * Revision 1.24  1995-05-16 08:51:04  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.23  1995/05/15  13:25:10  quinn
  * Fixed memory bug.
  *
  * Revision 1.22  1995/05/15  11:56:39  quinn
@@ -119,6 +122,7 @@
 #include <oid.h>
 #include <log.h>
 #include <statserv.h>
+#include "../version.h"
 
 #include <backend.h>
 
@@ -161,6 +165,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
     	char filename[256];
 	FILE *f;
 
+	strcpy(filename, control_block->apdufile);
 	if (!(new->print = odr_createmem(ODR_PRINT)))
 	    return 0;
 	if (*control_block->apdufile != '-')
@@ -434,7 +439,14 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,
 	&req->size_response);
+    odr_setbuf(assoc->encode, 0, 0, 0); /* don't free if we have to quit */
     odr_reset(assoc->encode);
+    if (assoc->print && !z_APDU(assoc->print, &res, 0))
+    {
+	logf(LOG_WARN, "ODR print error: %s", 
+	    odr_errlist[odr_geterror(assoc->print)]);
+	odr_reset(assoc->print);
+    }
     /* change this when we make the backend reentrant */
     assert(req == request_head(&assoc->incoming));
     req->state = REQUEST_IDLE;
@@ -512,7 +524,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.23 $";
+    resp.implementationVersion = YAZ_VERSION;
     resp.userInformationField = 0;
     return &apdu;
 }

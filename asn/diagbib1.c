@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.1  1995-03-15 13:46:09  adam
+ * Revision 1.2  1995-05-16 08:50:21  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.1  1995/03/15  13:46:09  adam
  * New function diagbib1_str.
  *
  */

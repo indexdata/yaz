@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.17  1995-05-15 11:56:42  quinn
+ * Revision 1.18  1995-05-16 08:51:09  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.17  1995/05/15  11:56:42  quinn
  * Asynchronous facilities. Restructuring of seshigh code.
  *
  * Revision 1.16  1995/04/10  10:23:40  quinn
@@ -316,6 +319,9 @@ int statserv_main(int argc, char **argv)
 
     me = argv[0];
     while ((ret = options("a:szSl:v:", argv, argc, &arg)) != -2)
+    {
+    	if (!arg)
+	    arg = "";
     	switch (ret)
     	{
 	    case 0:
@@ -336,9 +342,10 @@ int statserv_main(int argc, char **argv)
 	    case 'a':
 	    	strcpy(control_block.apdufile, arg); break;
 	    default:
-	    	fprintf(stderr, "Usage: %s [ -v <loglevel> -l <logfile> -zsS <listener-addr> ... ]\n", me);
+	    	fprintf(stderr, "Usage: %s [ -a <apdufile> -v <loglevel> -l <logfile> -zsS <listener-addr> ... ]\n", me);
 	    	exit(1);
 	}
+    }
     if (control_block.dynamic)
     	signal(SIGCHLD, catchchld);
     if (!listeners && *control_block.default_listen)

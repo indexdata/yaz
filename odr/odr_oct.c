@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data I/S 
- * All rights reserved.
+ * Copyright (c) 1995, Index Data
+ * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.8  1995-03-17 10:17:54  quinn
+ * Revision 1.9  1995-05-16 08:50:56  quinn
+ * License, documentation, and memory fixes
+ *
+ * Revision 1.8  1995/03/17  10:17:54  quinn
  * Added memory management.
  *
  * Revision 1.7  1995/03/08  12:12:27  quinn
