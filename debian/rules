@@ -28,7 +28,7 @@ else
 SSL_FLAGS=
 endif
 
-YAZ_VERSION=1.8.9
+YAZ_VERSION=1.9
 YAZSRCDIR?=$(shell pwd)
 # If this is not IndexData's release, then it is a cvs-checkout. Go cheat!
 #   YAZ_VERSION:=$(YAZ_VERSION)-$(shell date -r$(YAZSRCDIR)/CVS +"CVS%Y%m%d")
