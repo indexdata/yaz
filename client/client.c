@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.136 2002-01-23 22:40:36 adam Exp $
+ * $Id: client.c,v 1.137 2002-01-28 09:25:38 adam Exp $
  */
 
 #include <stdio.h>
@@ -340,7 +340,9 @@ int cmd_open(char *arg)
 int cmd_authentication(char *arg)
 {
     static Z_IdAuthentication au;
-    static char open[256];
+    static char user[40], group[40], pass[40];
+    static Z_IdPass idPass;
+    int r;
 
     if (!*arg)
     {
@@ -348,10 +350,27 @@ int cmd_authentication(char *arg)
         auth = 0;
         return 1;
     }
-    auth = &au;
-    au.which = Z_IdAuthentication_open;
-    au.u.open = open;
-    strcpy(open, arg);
+    r = sscanf (arg, "%39s %39s %39s", user, group, pass);
+    if (r == 0)
+    {
+        printf("Auth field set to null\n");
+        auth = 0;
+    }
+    if (r == 1)
+    {
+        auth = &au;
+        au.which = Z_IdAuthentication_open;
+        au.u.open = user;
+    }
+    if (r == 3)
+    {
+        auth = &au;
+        au.which = Z_IdAuthentication_idPass;
+        au.u.idPass = &idPass;
+        idPass.groupId = group;
+        idPass.userId = user;
+        idPass.password = pass;
+    }
     return 1;
 }
 
@@ -2290,7 +2309,7 @@ int main(int argc, char **argv)
         case 0:
             if (!open_command)
             {
-                open_command = xmalloc (strlen(arg)+6);
+                open_command = (char *) xmalloc (strlen(arg)+6);
                 strcpy (open_command, "open ");
                 strcat (open_command, arg);
             }
@@ -2321,7 +2340,7 @@ int main(int argc, char **argv)
         case 'u':
             if (!auth_command)
             {
-                auth_command = xmalloc (strlen(arg)+6);
+                auth_command = (char *) xmalloc (strlen(arg)+6);
                 strcpy (auth_command, "auth ");
                 strcat (auth_command, arg);
             }
@@ -2332,7 +2351,7 @@ int main(int argc, char **argv)
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
                      "[-c cclfields]\n      [-p <proxy-addr>] [-u <auth>] "
-                     "[<server-addr>]\n",
+                     "[-k size] [<server-addr>]\n",
                      prog);
             exit (1);
         }
