@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.4  1995-06-27 13:20:32  quinn
+ * Revision 1.5  1995-09-12 11:31:46  quinn
+ * Added some oids.
+ *
+ * Revision 1.4  1995/06/27  13:20:32  quinn
  * Added SUTRS support
  *
  * Revision 1.3  1995/05/29  08:11:33  quinn
@@ -119,7 +122,9 @@ typedef struct oident
 	VAL_DBUPDATE,
 	VAL_EXPORTSPEC,
 	VAL_EXPORTINV,
-	VAL_NONE
+	VAL_NONE,
+	VAL_SETM,
+	VAL_SETG
     } value;
     int oidsuffix[20];
     char *desc;
@@ -135,5 +140,6 @@ void oid_oidcpy(int *t, int *s);
 void oid_oidcat(int *t, int *s);
 int oid_oidcmp(int *o1, int *o2);
 int oid_oidlen(int *o);
+oid_value oid_getvalbyname(char *name);
 
 #endif
