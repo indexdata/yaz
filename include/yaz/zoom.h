@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2000-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.24 2004-10-15 00:18:59 adam Exp $
+ * $Id: zoom.h,v 1.25 2005-01-15 19:47:10 adam Exp $
  */
 /**
  * \file zoom.h

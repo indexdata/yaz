@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2005, Index Data.
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-version.h,v 1.58 2005-01-11 12:13:18 adam Exp $
+ * $Id: yaz-version.h,v 1.59 2005-01-15 19:47:10 adam Exp $
  */
 
 /**

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2003, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstwrbuf.c,v 1.1 2003-10-27 12:21:38 adam Exp $
+ * $Id: tstwrbuf.c,v 1.2 2005-01-15 19:47:15 adam Exp $
  */
 
 #include <stdio.h>

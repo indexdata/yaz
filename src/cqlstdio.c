@@ -1,5 +1,5 @@
-/* $Id: cqlstdio.c,v 1.2 2004-10-03 22:34:07 adam Exp $
-   Copyright (C) 2002-2004
+/* $Id: cqlstdio.c,v 1.3 2005-01-15 19:47:11 adam Exp $
+   Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
 This file is part of the YAZ toolkit.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2004, Index Data.
+ * Copyright (C) 1995-2005, Index Data ApS
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.17 2004-10-15 00:18:59 adam Exp $
+ * $Id: odr.h,v 1.18 2005-01-15 19:47:09 adam Exp $
  */
 
 /**

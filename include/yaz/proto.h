@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1998-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: proto.h,v 1.17 2004-12-20 23:35:42 adam Exp $
+ * $Id: proto.h,v 1.18 2005-01-15 19:47:09 adam Exp $
  */
 /**
  * \file proto.h

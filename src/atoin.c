@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1997-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: atoin.c,v 1.5 2004-12-16 08:59:56 adam Exp $
+ * $Id: atoin.c,v 1.6 2005-01-15 19:47:10 adam Exp $
  */
 
 /** 

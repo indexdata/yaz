@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data.
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.9 2004-10-15 00:19:00 adam Exp $
+ * $Id: soap.c,v 1.10 2005-01-15 19:47:14 adam Exp $
  */
 /**
  * \file soap.c

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.10 2004-12-13 14:21:55 heikki Exp $
+ * $Id: odr.c,v 1.11 2005-01-15 19:47:14 adam Exp $
  *
  */
 

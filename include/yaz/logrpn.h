@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1997-2004, Index Data.
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: logrpn.h,v 1.6 2004-11-16 17:08:11 heikki Exp $
+ * $Id: logrpn.h,v 1.7 2005-01-15 19:47:09 adam Exp $
  */
 
 /**

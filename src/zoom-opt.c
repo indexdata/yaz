@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2000-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-opt.c,v 1.2 2004-10-15 00:19:02 adam Exp $
+ * $Id: zoom-opt.c,v 1.3 2005-01-15 19:47:15 adam Exp $
  */
 /**
  * \file zoom-opt.c

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.25 2004-08-07 08:18:20 adam Exp $
+ * $Id: marcdump.c,v 1.26 2005-01-15 19:47:15 adam Exp $
  */
 
 #if HAVE_CONFIG_H

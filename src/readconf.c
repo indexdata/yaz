@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1994-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: readconf.c,v 1.4 2004-12-13 14:21:55 heikki Exp $
+ * $Id: readconf.c,v 1.5 2005-01-15 19:47:14 adam Exp $
  */
 
 /**

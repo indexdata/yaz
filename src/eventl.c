@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.4 2004-12-13 14:21:55 heikki Exp $
+ * $Id: eventl.c,v 1.5 2005-01-15 19:47:13 adam Exp $
  */
 
 /**

@@ -1,8 +1,8 @@
 /* 
- * Copyright (c) 2003, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: bertorture.c,v 1.1 2003-03-11 11:06:35 adam Exp $
+ * $Id: bertorture.c,v 1.2 2005-01-15 19:47:08 adam Exp $
  */
 
 #include <signal.h>

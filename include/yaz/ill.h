@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1999-2003, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ill.h,v 1.6 2003-03-03 19:57:35 adam Exp $
+ * $Id: ill.h,v 1.7 2005-01-15 19:47:09 adam Exp $
  */
 #ifndef ILL_H
 #define ILL_H

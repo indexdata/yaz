@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.9 2004-12-20 23:38:39 adam Exp $
+ * $Id: logrpn.c,v 1.10 2005-01-15 19:47:13 adam Exp $
  */
 
 /**

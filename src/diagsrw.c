@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data.
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: diagsrw.c,v 1.1 2004-11-21 21:56:28 adam Exp $
+ * $Id: diagsrw.c,v 1.2 2005-01-15 19:47:13 adam Exp $
  */
 /**
  * \file diagsrw.c

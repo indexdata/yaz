@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1997-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.7 2004-10-15 00:19:00 adam Exp $
+ * $Id: siconv.c,v 1.8 2005-01-15 19:47:14 adam Exp $
  */
 /**
  * \file siconv.c

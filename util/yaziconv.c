@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1997-2003, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaziconv.c,v 1.1 2003-04-23 20:34:08 adam Exp $
+ * $Id: yaziconv.c,v 1.2 2005-01-15 19:47:15 adam Exp $
  */
 
 #if HAVE_CONFIG_H

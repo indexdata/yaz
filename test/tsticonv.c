@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.4 2004-11-16 22:51:52 adam Exp $
+ * $Id: tsticonv.c,v 1.5 2005-01-15 19:47:15 adam Exp $
  */
 
 #if HAVE_CONFIG_H

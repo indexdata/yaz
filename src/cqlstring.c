@@ -1,5 +1,5 @@
-/* $Id: cqlstring.c,v 1.3 2004-10-15 00:19:00 adam Exp $
-   Copyright (C) 2002-2004
+/* $Id: cqlstring.c,v 1.4 2005-01-15 19:47:11 adam Exp $
+   Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
 This file is part of the YAZ toolkit.

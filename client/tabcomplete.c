@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.9 2003-01-06 08:20:26 adam Exp $
+ * $Id: tabcomplete.c,v 1.10 2005-01-15 19:47:08 adam Exp $
  */
 
 #include <string.h>

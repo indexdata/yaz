@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2005, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.43 2005-01-11 12:07:55 adam Exp $
+ * $Id: seshigh.c,v 1.44 2005-01-15 19:47:14 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1577,7 +1577,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.43 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.44 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

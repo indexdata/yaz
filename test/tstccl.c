@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.4 2004-09-29 20:37:51 adam Exp $
+ * $Id: tstccl.c,v 1.5 2005-01-15 19:47:15 adam Exp $
  */
 
 /* CCL test */

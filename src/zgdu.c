@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data.
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.11 2004-10-15 00:19:01 adam Exp $
+ * $Id: zgdu.c,v 1.12 2005-01-15 19:47:14 adam Exp $
  */
 
 /**

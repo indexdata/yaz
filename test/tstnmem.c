@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstnmem.c,v 1.3 2005-01-05 10:29:42 adam Exp $
+ * $Id: tstnmem.c,v 1.4 2005-01-15 19:47:15 adam Exp $
  */
 
 #if HAVE_CONFIG_H

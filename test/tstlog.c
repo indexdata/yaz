@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2004, Index Data
+ * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.3 2004-12-13 14:21:58 heikki Exp $
+ * $Id: tstlog.c,v 1.4 2005-01-15 19:47:15 adam Exp $
  *
  */
 #include <stdio.h>
