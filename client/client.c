@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.14  1995-06-19 12:37:41  quinn
+ * Revision 1.15  1995-06-22 09:28:03  quinn
+ * Fixed bug in SUTRS processing.
+ *
+ * Revision 1.14  1995/06/19  12:37:41  quinn
  * Added BER dumper.
  *
  * Revision 1.13  1995/06/16  10:29:11  quinn
@@ -283,6 +286,13 @@ void display_record(Z_DatabaseRecord *p)
     {
     	Odr_oct *rc;
 
+	if (r->which != ODR_EXTERNAL_single)
+	{
+	    printf("Expecting single ASN.1 type for SUTRS.\n");
+	    return;
+	}
+	odr_setbuf(in, (char*)r->u.single_ASN1_type->buf,
+	    r->u.single_ASN1_type->len, 0);
 	if (!z_SUTRS(in, &rc, 0))
 	{
 	    odr_perror(in, "decoding SUTRS");
