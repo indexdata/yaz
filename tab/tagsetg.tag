@@ -1,5 +1,5 @@
 # TagSet-G Tags
-# $Id: tagsetg.tag,v 1.3 1998-02-10 17:25:21 adam Exp $
+# $Id: tagsetg.tag,v 1.4 1998-11-05 10:24:53 quinn Exp $
 name tagsetg
 reference TagsetG
 type 2
@@ -25,7 +25,7 @@ tag	18	time					intunit
 tag	19	documentcontent				octetstring
 tag	20	language				string
 tag	21	subject					string
-tag	22	recourceType				string
+tag	22	resourceType				string
 tag	23	city					string
 tag	24	stateOrProvince				string
 tag	25	zipOrPostalCode				string
