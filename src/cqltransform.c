@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+/* $Id: cqltransform.c,v 1.2 2003-12-18 16:42:52 mike Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -353,8 +353,13 @@ void cql_transform_r(cql_transform_t ct,
                 (*pr)("\" ", client_data);
                 return ;
             }
-            cql_pr_attr(ct, "qualifier.", n_full, "srw.serverChoice",
-                        pr, client_data, 16);
+	    if (!cql_pr_attr(ct, "index.", n_full, "srw.serverChoice",
+			     pr, client_data, 16)) {
+		/* No index.foo; reset error and fall back to qualifier.foo */
+		if (ct->error == 16) ct->error = 0;
+		cql_pr_attr(ct, "qualifier.", n_full, "srw.serverChoice",
+			    pr, client_data, 16);
+	    }
         }
 
         if (cn->u.st.relation && !strcmp(cn->u.st.relation, "="))
