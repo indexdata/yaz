@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.2 1999-06-08 14:07:24 heikki Exp $
+# $Id: makefile,v 1.3 1999-06-08 14:32:30 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -58,7 +58,7 @@ SERVERDIR=$(SRCDIR)\SERVER
 ZTESTDIR=$(SRCDIR)\ZTEST
 
 TMPDIR=$(ROOTDIR)\win\tmp
-TMP=$(TMP)
+TMP=$(TMPDIR)
 
 ###########################################################
 ############### Targets - what to make
@@ -66,10 +66,10 @@ TMP=$(TMP)
 
 
 DLL=$(BINDIR)\Yaz.dll
-IMPLIB=$(BINDIR)\Yaz.lib
+IMPLIB=$(LIBDIR)\Yaz.lib
 
 CLIENT=$(BINDIR)\client.exe
-SERVER=$(BINDIR)\server.lib
+SERVER=$(LIBDIR)\server.lib
 ZTEST=$(BINDIR)\ztest.exe
 PROTOH=$(INCLDIR)\proto.h
 
@@ -312,6 +312,20 @@ YAZ_OBJS= \
 DLL_OBJS= $(YAZ_OBJS)
 
 
+##########################################################
+############## proto.h
+##########################################################
+
+!if $(NEW_Z3950)
+$(PROTOH):
+	copy $(INCLDIR)\z-proto.h $(INCLDIR)\proto.h
+!else
+$(PROTOH):
+	copy $(INCLDIR)\prt-proto.h $(INCLDIR)\proto.h
+!endif
+
+
+
 ###########################################################
 ############### Compiling 
 ###########################################################
@@ -327,7 +341,6 @@ DLL_OBJS= $(YAZ_OBJS)
 
 # Yaz client
 {$(CLIENTDIR)}.c{$(OBJDIR)}.obj:
-	echo MAKING IN CLIENT !!!!!
 	@$(CPP) @<<  
 	$(COPT) $< 
 	/D"_CONSOLE"
@@ -432,11 +445,12 @@ $(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS)
 	@echo Linking the server  $(SERVER)
 	$(LINK) $(SERVER_LINK_OPTIONS) @<<
 		/nologo
-		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_SERVER_OBJS) 
 		/out:$(SERVER) 
 <<
+
+# 		$(LINK_LIBS) 
 
 # note that this links a lib, so it uses completely different options.
 
@@ -481,7 +495,10 @@ foo: $(OBJDIR)\ztest.obj
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.2  1999-06-08 14:07:24  heikki
+# Revision 1.3  1999-06-08 14:32:30  heikki
+# Proto.h works all right, removed linker warnings from server.lib
+#
+# Revision 1.2  1999/06/08 14:07:24  heikki
 # Renamed a pile of files
 # Tmpdir (to get around Ms leaving temp files around, and crashing
 # when too many with same number...)
