@@ -5,6 +5,7 @@
 
   <xsl:variable name="use.id.as.filename">1</xsl:variable>
   <xsl:variable name="html.ext">.tkl</xsl:variable>
+  <xsl:variable name="navig.showtitles">0</xsl:variable>
   <xsl:param name="chunker.output.omit-xml-declaration" select="'yes'"/> 
 
 <xsl:template name="chunk-element-content">
