@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.48 2002-01-17 23:22:40 adam Exp $
+ * $Id: ztest.c,v 1.49 2002-01-21 12:54:06 adam Exp $
  */
 
 /*
@@ -133,12 +133,6 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                     "Couldn't decode ItemRequest %s near %d",
                                        odr_errmsg(odr_geterror(rr->decode)),
                                        odr_offset(rr->decode));
-#if 0
-                                yaz_log(LOG_LOG, "PDU dump:");
-                                odr_dumpBER(yaz_log_file(),
-                                     r->u.single_ASN1_type->buf,
-                                     r->u.single_ASN1_type->len);
-#endif
                             }
 			    else
 			        yaz_log(LOG_LOG, "Decode ItemRequest OK");
@@ -334,10 +328,29 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		targetPart->updateStatus = odr_intdup (rr->stream, 1);
 		targetPart->num_globalDiagnostics = 0;
 		targetPart->globalDiagnostics = (Z_DiagRec **) odr_nullval();
-		targetPart->num_taskPackageRecords = 0;
-		targetPart->taskPackageRecords =
-                    (Z_IUTaskPackageRecordStructure **) odr_nullval();
-	    }
+		targetPart->num_taskPackageRecords = 1;
+		targetPart->taskPackageRecords = 
+                    (Z_IUTaskPackageRecordStructure **)
+                    odr_malloc (rr->stream,
+                                sizeof(Z_IUTaskPackageRecordStructure *));
+		targetPart->taskPackageRecords[0] =
+                    (Z_IUTaskPackageRecordStructure *)
+                    odr_malloc (rr->stream,
+                                sizeof(Z_IUTaskPackageRecordStructure));
+                
+		targetPart->taskPackageRecords[0]->which =
+                    Z_IUTaskPackageRecordStructure_record;
+		targetPart->taskPackageRecords[0]->u.record = 
+                    z_ext_record (rr->stream, VAL_SUTRS, "test", 4);
+		targetPart->taskPackageRecords[0]->correlationInfo = 0; 
+		targetPart->taskPackageRecords[0]->recordStatus =
+                    odr_intdup (rr->stream,
+                                Z_IUTaskPackageRecordStructure_success);  
+		targetPart->taskPackageRecords[0]->num_supplementalDiagnostics
+                    = 0;
+
+		targetPart->taskPackageRecords[0]->supplementalDiagnostics = 0;
+            }
 	    if (notToKeep)
 	    {
 		int i;

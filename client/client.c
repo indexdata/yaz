@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.134 2002-01-11 20:17:03 adam Exp $
+ * $Id: client.c,v 1.135 2002-01-21 12:54:06 adam Exp $
  */
 
 #include <stdio.h>
@@ -120,11 +120,23 @@ void send_apdu(Z_APDU *a)
     odr_reset(out); /* release the APDU structure  */
 }
 
+static void print_stringn(const unsigned char *buf, size_t len)
+{
+   size_t i;
+   for (i = 0; i<len; i++)
+       if ((buf[i] <= 126 && buf[i] >= 32) || strchr ("\n\r\t\f", buf[i]))
+           fputc (buf[i], stdout);
+       else
+           printf ("\\X%02X", buf[i]);
+}
+
 static void print_refid (Z_ReferenceId *id)
 {
     if (id)
     {
-        printf ("ReferenceId: '%.*s'\n", id->len, id->buf);
+        printf ("Reference Id: ");
+        print_stringn (id->buf, id->len);
+        printf ("\n");
     }
 }
 
@@ -428,22 +440,18 @@ static void display_grs1(Z_GenericRecord *r, int level)
     }
 }
 
+
 static void print_record(const unsigned char *buf, size_t len)
 {
-   size_t i;
-   for (i = 0; i<len; i++)
-       if ((buf[i] <= 126 && buf[i] >= 32) || strchr ("\n\r\t\f", buf[i]))
-           fputc (buf[i], stdout);
-       else
-           printf ("\\X%02X", buf[i]);
-   /* add newline if not already added ... */
-   if (i <= 0 || buf[i-1] != '\n')
+    size_t i = len;
+    print_stringn (buf, len);
+    /* add newline if not already added ... */
+    if (i <= 0 || buf[i-1] != '\n')
        fputc ('\n', stdout);
 }
 
-static void display_record(Z_DatabaseRecord *p)
+static void display_record(Z_External *r)
 {
-    Z_External *r = (Z_External*) p;
     oident *ent = oid_getentbyoid(r->direct_reference);
 
     record_last = r;
@@ -472,15 +480,15 @@ static void display_record(Z_DatabaseRecord *p)
             /*
              * Call the given decoder to process the record.
              */
-            odr_setbuf(in, (char*)p->u.octet_aligned->buf,
-                p->u.octet_aligned->len, 0);
+            odr_setbuf(in, (char*)r->u.octet_aligned->buf,
+                r->u.octet_aligned->len, 0);
             if (!(*type->fun)(in, (char **)&rr, 0, 0))
             {
                 odr_perror(in, "Decoding constructed record.");
                 fprintf(stderr, "[Near %d]\n", odr_offset(in));
                 fprintf(stderr, "Packet dump:\n---------\n");
-                odr_dumpBER(stderr, (char*)p->u.octet_aligned->buf,
-                    p->u.octet_aligned->len);
+                odr_dumpBER(stderr, (char*)r->u.octet_aligned->buf,
+                    r->u.octet_aligned->len);
                 fprintf(stderr, "---------\n");
                 exit(1);
             }
@@ -495,13 +503,13 @@ static void display_record(Z_DatabaseRecord *p)
     if (ent && ent->value == VAL_SOIF)
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
-    else if (r->which == Z_External_octet && p->u.octet_aligned->len)
+    else if (r->which == Z_External_octet && r->u.octet_aligned->len)
     {
-        const char *octet_buf = (char*)p->u.octet_aligned->buf;
+        const char *octet_buf = (char*)r->u.octet_aligned->buf;
         if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML ||
             ent->value == VAL_HTML)
             print_record((const unsigned char *) octet_buf,
-                         p->u.octet_aligned->len);
+                         r->u.octet_aligned->len);
         else
         {
             if ( 
@@ -514,21 +522,21 @@ static void display_record(Z_DatabaseRecord *p)
 		)
 	    {
                 if (marc_display_exl (octet_buf, NULL, 0 /* debug */,
-                                      p->u.octet_aligned->len) <= 0)
+                                      r->u.octet_aligned->len) <= 0)
                 {
                     printf ("bad MARC. Dumping as it is:\n");
                     print_record((const unsigned char*) octet_buf,
-                                 p->u.octet_aligned->len);
+                                 r->u.octet_aligned->len);
                 }
             }
             else
             {
                 print_record((const unsigned char*) octet_buf,
-                             p->u.octet_aligned->len);
+                             r->u.octet_aligned->len);
             }
         }
         if (marcdump)
-            fwrite (octet_buf, 1, p->u.octet_aligned->len, marcdump);
+            fwrite (octet_buf, 1, r->u.octet_aligned->len, marcdump);
     }
     else if (ent && ent->value == VAL_SUTRS)
     {
@@ -949,7 +957,7 @@ static int process_resourceControlRequest (Z_ResourceControlRequest *req)
 
 void process_ESResponse(Z_ExtendedServicesResponse *res)
 {
-    printf("process_ESResponse status=");
+    printf("Status: ");
     switch (*res->operationStatus)
     {
     case Z_ExtendedServicesResponse_done:
@@ -962,19 +970,59 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
         printf ("failure\n");
         display_diagrecs(res->diagnostics, res->num_diagnostics);
         break;
+    default:
+        printf ("unknown\n");
     }
     if ( (*res->operationStatus != Z_ExtendedServicesResponse_failure) &&
         (res->num_diagnostics != 0) ) {
         display_diagrecs(res->diagnostics, res->num_diagnostics);
     }
+    print_refid (res->referenceId);
+    if (res->taskPackage && 
+        res->taskPackage->which == Z_External_extendedService)
+    {
+        Z_TaskPackage *taskPackage = res->taskPackage->u.extendedService;
+        Odr_oct *id = taskPackage->targetReference;
+        Z_External *ext = taskPackage->taskSpecificParameters;
+        
+        if (id)
+        {
+            printf ("Target Reference: ");
+            print_stringn (id->buf, id->len);
+            printf ("\n");
+        }
+        if (ext->which == Z_External_update)
+        {
+            Z_IUUpdateTaskPackage *utp = ext->u.update->u.taskPackage;
+            if (utp && utp->targetPart)
+            {
+                Z_IUTargetPart *targetPart = utp->targetPart;
+                int i;
 
+                for (i = 0; i<targetPart->num_taskPackageRecords;  i++)
+                {
+
+                    Z_IUTaskPackageRecordStructure *tpr =
+                        targetPart->taskPackageRecords[i];
+                    printf ("task package record %d\n", i+1);
+                    if (tpr->which == Z_IUTaskPackageRecordStructure_record)
+                    {
+                        display_record (tpr->u.record);
+                    }
+                    else
+                    {
+                        printf ("other type\n");
+                    }
+                }
+            }
+        }
+    }
 }
 
 #if YAZ_MODULE_ill
 
 const char *get_ill_element (void *clientData, const char *element)
 {
-    printf ("%s\n", element);
     return 0;
 }
 
