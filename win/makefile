@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.64 2003-09-04 18:52:02 adam Exp $
+# $Id: makefile,v 1.65 2003-10-02 06:30:45 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -123,11 +123,11 @@ ICONV_DEF= \
   /D HAVE_ICONV_H=1 \
   /I"$(ICONV_DIR)\include"
 ICONV_LIB= \
-  $(ICONV_DIR)\lib\iconv.lib
+  "$(ICONV_DIR)\lib\iconv.lib"
 iconv: $(BINDIR)\iconv.dll
 
 $(BINDIR)\iconv.dll:
-  copy $(ICONV_DIR)\lib\iconv.dll $(BINDIR)
+  copy "$(ICONV_DIR)\lib\iconv.dll" $(BINDIR)
 !else
 ICONV_DEF= \
   /D HAVE_ICONV_H=0
@@ -137,12 +137,12 @@ iconv:
 !endif
 
 !if $(HAVE_LIBXML2)
-LIBXML2_LIB=$(LIBXML2_DIR)\lib\libxml2.lib
+LIBXML2_LIB="$(LIBXML2_DIR)\lib\libxml2.lib"
 LIBXML2_DEF=/D HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
 libxml2: $(BINDIR)\libxml2.dll
 
 $(BINDIR)\libxml2.dll:
-  copy $(LIBXML2_DIR)\lib\libxml2.dll $(BINDIR)
+  copy "$(LIBXML2_DIR)\lib\libxml2.dll" $(BINDIR)
 !else
 LIBXML2_LIB=
 LIBXML2_DEF=/D HAVE_XML2=0
@@ -938,7 +938,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.64  2003-09-04 18:52:02  adam
+# Revision 1.65  2003-10-02 06:30:45  adam
+# Quote ICONV_DIR/LIBXML2_DIR as suggested by Michael Freidgeim
+#
+# Revision 1.64  2003/09/04 18:52:02  adam
 # Minor changes. Use libxml-2.5.10
 #
 # Revision 1.63  2003/07/25 11:11:19  adam
