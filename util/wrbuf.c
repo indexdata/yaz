@@ -1,9 +1,8 @@
 /*
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: wrbuf.c,v 1.12 2003-01-06 08:20:28 adam Exp $
+ * $Id: wrbuf.c,v 1.13 2003-07-14 12:58:18 adam Exp $
  */
 
 /*
@@ -77,6 +76,37 @@ int wrbuf_puts(WRBUF b, const char *buf)
 {
     wrbuf_write(b, buf, strlen(buf)+1);  /* '\0'-terminate as well */
     (b->pos)--;                          /* don't include '\0' in count */
+    return 0;
+}
+
+int wrbuf_xmlputs(WRBUF b, const char *cp)
+{
+    while (*cp)
+    {
+	switch(*cp)
+	{
+	case '<':
+	    wrbuf_puts(b, "&lt;");
+	    break;
+	case '>':
+	    wrbuf_puts(b, "&gt;");
+	    break;
+	case '&':
+	    wrbuf_puts(b, "&amp;");
+	    break;
+	case '"':
+	    wrbuf_puts(b, "&quot;");
+	    break;
+	case '\'':
+	    wrbuf_puts(b, "&apos;");
+	    break;
+	default:
+	    wrbuf_putc(b, *cp);
+	}
+	cp++;
+    }
+    wrbuf_putc(b, 0);
+    (b->pos)--;
     return 0;
 }
 
