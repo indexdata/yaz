@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.16  1995-03-30 10:26:43  quinn
+ * Revision 1.17  1995-04-10 10:22:22  quinn
+ * Added SCAN.
+ *
+ * Revision 1.16  1995/03/30  10:26:43  quinn
  * Added Term structure
  *
  * Revision 1.15  1995/03/30  09:08:39  quinn
@@ -569,6 +572,208 @@ int z_Records(ODR o, Z_Records **p, int opt)
     return opt && !o->error;
 }
 
+/* ------------------------ SCAN SERVICE -------------------- */
+
+int z_AttributeList(ODR o, Z_AttributeList **p, int opt)
+{
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
+
+    odr_implicit_settag(o, ODR_CONTEXT, 44);
+    if (odr_sequence_of(o, z_AttributeElement, &(*p)->attributes,
+    	&(*p)->num_attributes))
+    	return 1;
+    *p = 0;
+    return 0;
+}
+
+/*
+ * This is a temporary hack. We don't know just *what* old version of the
+ * protocol willow uses, so we'll just patiently wait for them to update
+ */
+static int willow_scan = 0;
+
+int z_WillowAttributesPlusTerm(ODR o, Z_AttributesPlusTerm **p, int opt)
+{
+    if (!*p && o->direction != ODR_DECODE)
+    	return opt;
+    if (!odr_constructed_begin(o, p, ODR_CONTEXT, 4))
+    {
+    	o->t_class = -1;
+    	return opt;
+    }
+    if (!odr_constructed_begin(o, p, ODR_CONTEXT, 1))
+    	return 0;
+    if (!odr_constructed_begin(o, p, ODR_UNIVERSAL, ODR_SEQUENCE))
+    	return 0;
+    if (!odr_implicit_settag(o, ODR_CONTEXT, 44))
+    	return 0;
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+    if (!odr_sequence_of(o, z_AttributeElement, &(*p)->attributeList,
+	&(*p)->num_attributes))
+	return 0;
+    if (!odr_sequence_end(o) || !odr_sequence_end(o))
+    	return 0;
+    if (!z_Term(o, &(*p)->term, 0))
+    	return 0;
+    if (!odr_constructed_end(o))
+    	return 0;
+    willow_scan = 1;
+    return 1;
+}
+
+int z_AlternativeTerm(ODR o, Z_AlternativeTerm **p, int opt)
+{
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    {
+    	o->t_class = -1;
+    	return opt;
+    }
+
+    if (odr_sequence_of(o, z_AttributesPlusTerm, &(*p)->terms,
+    	&(*p)->num_terms))
+    	return 1;
+    *p = 0;
+    return 0;
+}
+
+int z_OccurrenceByAttributes(ODR o, Z_OccurrenceByAttributes **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	odr_explicit(o, z_AttributeList, &(*p)->attributes, ODR_CONTEXT, 1, 1)&&
+	odr_explicit(o, odr_integer, &(*p)->global, ODR_CONTEXT, 2, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_TermInfo(ODR o, Z_TermInfo **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	(willow_scan ? 
+    	    odr_implicit(o, z_Term, &(*p)->term, ODR_CONTEXT, 1, 0) :
+	    z_Term(o, &(*p)->term, 0)) &&
+	z_AttributeList(o, &(*p)->suggestedAttributes, 1) &&
+	odr_implicit(o, z_AlternativeTerm, &(*p)->alternativeTerm,
+	    ODR_CONTEXT, 4, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->globalOccurrences, ODR_CONTEXT,
+	    2, 1) &&
+	odr_implicit(o, z_OccurrenceByAttributes, &(*p)->byAttributes,
+	    ODR_CONTEXT, 3, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_Entry(ODR o, Z_Entry **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Entry_termInfo, z_TermInfo},
+	{ODR_EXPLICIT, ODR_CONTEXT, 2, Z_Entry_surrogateDiagnostic,
+	    z_DiagRec},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+    	return 1;
+    *p = 0;
+    return opt && !o->error;
+}
+
+int z_Entries(ODR o, Z_Entries **p, int opt)
+{
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
+
+    if (odr_sequence_of(o, z_Entry, &(*p)->entries,
+    	&(*p)->num_entries))
+    	return 1;
+    *p = 0;
+    return 0;
+}
+
+int z_DiagRecs(ODR o, Z_DiagRecs **p, int opt)
+{
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
+
+    if (odr_sequence_of(o, z_DiagRec, &(*p)->diagRecs,
+    	&(*p)->num_diagRecs))
+    	return 1;
+    *p = 0;
+    return 0;
+}
+
+int z_ListEntries(ODR o, Z_ListEntries **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ListEntries_entries, z_Entries},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ListEntries_nonSurrogateDiagnostics,
+	    z_DiagRecs},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+    	return 1;
+    *p = 0;
+    return opt && !o->error;
+}
+
+int z_ScanRequest(ODR o, Z_ScanRequest **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    willow_scan = 0;
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 3) &&
+	odr_sequence_of(o, z_DatabaseName, &(*p)->databaseNames,
+	    &(*p)->num_databaseNames) &&
+	odr_oid(o, &(*p)->attributeSet, 1) &&
+	(z_AttributesPlusTerm(o, &(*p)->termListAndStartPoint, 1) ?
+	    ((*p)->termListAndStartPoint ? 1 : 
+	z_WillowAttributesPlusTerm(o, &(*p)->termListAndStartPoint, 0)) : 0) &&
+	odr_implicit(o, odr_integer, &(*p)->stepSize, ODR_CONTEXT, 5, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->numberOfTermsRequested,
+	    ODR_CONTEXT, 6, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->preferredPositionInResponse,
+	    ODR_CONTEXT, 7, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_ScanResponse(ODR o, Z_ScanResponse **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->stepSize, ODR_CONTEXT, 3, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->scanStatus, ODR_CONTEXT, 4, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->numberOfEntriesReturned,
+	    ODR_CONTEXT, 5, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->positionOfTerm, ODR_CONTEXT, 6, 1)&&
+	odr_explicit(o, z_ListEntries, &(*p)->entries, ODR_CONTEXT, 7, 1) &&
+	odr_implicit(o, odr_oid, &(*p)->attributeSet, ODR_CONTEXT, 8, 1) &&
+	odr_sequence_end(o);
+}
+
 /* ------------------------ SEARCHRESPONSE ----------------*/
 
 int z_NumberOfRecordsReturned(ODR o, int **p, int opt)
@@ -654,6 +859,8 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
     	{ODR_IMPLICIT, ODR_CONTEXT, 23, Z_APDU_searchResponse, z_SearchResponse},
     	{ODR_IMPLICIT, ODR_CONTEXT, 24, Z_APDU_presentRequest, z_PresentRequest},
     	{ODR_IMPLICIT, ODR_CONTEXT, 25, Z_APDU_presentResponse, z_PresentResponse},
+	{ODR_IMPLICIT, ODR_CONTEXT, 35, Z_APDU_scanRequest, z_ScanRequest},
+	{ODR_IMPLICIT, ODR_CONTEXT, 36, Z_APDU_scanResponse, z_ScanResponse},
 
     	{-1, -1, -1, -1, 0}
     };
