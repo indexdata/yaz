@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed problem with GNU readline detection on Redhat 7.0.
+
 Added step-size for Scan backend handler.
 
 Fixed bug that made the frontend server crash when no attribute
