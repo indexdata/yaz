@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.11  1995-03-28 09:16:21  quinn
+ * Revision 1.12  1995-03-29 15:40:16  quinn
+ * Ongoing work. Statserv is now dynamic by default
+ *
+ * Revision 1.11  1995/03/28  09:16:21  quinn
  * Added record packing to the search request
  *
  * Revision 1.10  1995/03/27  08:34:24  quinn
@@ -189,6 +192,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     association *assoc = iochan_getdata(client);
     bend_initrequest binitreq;
     bend_initresult *binitres;
+    Odr_bitmask options, protocolVersion;
 
     fprintf(stderr, "Got initRequest.\n");
     if (req->implementationId)
@@ -209,8 +213,22 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     apdu.which = Z_APDU_initResponse;
     apdu.u.initResponse = &resp;
     resp.referenceId = req->referenceId;
-    resp.options = req->options; /* should check these */
-    resp.protocolVersion = req->protocolVersion;
+    ODR_MASK_ZERO(&options);
+    if (ODR_MASK_GET(req->options, Z_Options_search))
+    	ODR_MASK_SET(&options, Z_Options_search);
+    if (ODR_MASK_GET(req->options, Z_Options_present))
+    	ODR_MASK_SET(&options, Z_Options_present);
+    if (ODR_MASK_GET(req->options, Z_Options_delSet))
+    	ODR_MASK_SET(&options, Z_Options_delSet);
+    if (ODR_MASK_GET(req->options, Z_Options_namedResultSets))
+    	ODR_MASK_SET(&options, Z_Options_namedResultSets);
+    resp.options = &options;
+    ODR_MASK_ZERO(&protocolVersion);
+    if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
+    	ODR_MASK_SET(&protocolVersion, Z_ProtocolVersion_1);
+    if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_2))
+    	ODR_MASK_SET(&protocolVersion, Z_ProtocolVersion_2);
+    resp.protocolVersion = &protocolVersion;
     assoc->maximumRecordSize = *req->maximumRecordSize;
     /*
      * This is not so hot. The big todo for ODR is dynamic memory allocation
@@ -226,7 +244,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.11 $";
+    resp.implementationVersion = "$Revision: 1.12 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {

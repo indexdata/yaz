@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.9  1995-03-27 08:34:30  quinn
+ * Revision 1.10  1995-03-29 15:40:16  quinn
+ * Ongoing work. Statserv is now dynamic by default
+ *
+ * Revision 1.9  1995/03/27  08:34:30  quinn
  * Added dynamic server functionality.
  * Released bindings to session.c (is now redundant)
  *
@@ -57,7 +60,7 @@
 #include <dmalloc.h>
 
 static char *me = "";
-static int dynamic = 0;   /* fork on incoming connection */
+static int dynamic = 1;   /* fork on incoming connection */
 
 #define DEFAULT_LISTENER "tcp:localhost:9999"
 
@@ -189,7 +192,8 @@ static void add_listener(char *where, int what)
     void *ap;
     IOCHAN lst;
 
-    fprintf(stderr, "Adding %s listener on %s\n",
+    fprintf(stderr, "Adding %s %s listener on %s\n",
+        dynamic ? "dynamic" : "static",
     	what == PROTO_SR ? "SR" : "Z3950", where);
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
     {
@@ -253,7 +257,7 @@ int statserv_main(int argc, char **argv)
     int protocol = CS_Z3950;;
 
     me = argv[0];
-    while ((ret = options("szdl:", argv, argc, &arg)) != -2)
+    while ((ret = options("szSl:", argv, argc, &arg)) != -2)
     	switch (ret)
     	{
 	    case 0:
@@ -262,9 +266,9 @@ int statserv_main(int argc, char **argv)
 		break;
 	    case 'z': protocol = CS_Z3950; break;
 	    case 's': protocol = CS_SR; break;
-	    case 'd': dynamic = 1; break;
+	    case 'S': dynamic = 0; break;
 	    default:
-	    	fprintf(stderr, "Usage: %s [ -zsd <listener-addr> ... ]\n", me);
+	    	fprintf(stderr, "Usage: %s [ -zsS <listener-addr> ... ]\n", me);
 	    	exit(1);
 	}
     if (dynamic)
