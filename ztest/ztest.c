@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.42  2001-04-06 12:26:46  adam
+ * Revision 1.43  2001-06-28 09:27:25  adam
+ * Number of Extended Services Requests logged.
+ *
+ * Revision 1.42  2001/04/06 12:26:46  adam
  * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
  *
  * Revision 1.41  2001/04/05 13:08:48  adam
@@ -173,10 +176,18 @@ int ztest_present (void *handle, bend_present_rr *rr)
 
 int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 {
-    yaz_log(LOG_LOG, "function: %d", *rr->esr->function);
+    int *counter = handle;  /* user-defined handle - created in bend_init */
+
+    yaz_log(LOG_LOG, "ESRequest no %d", *counter);
+
+    (*counter)++;
+
     if (rr->esr->packageName)
     	yaz_log(LOG_LOG, "packagename: %s", rr->esr->packageName);
     yaz_log(LOG_LOG, "Waitaction: %d", *rr->esr->waitAction);
+
+
+    yaz_log(LOG_LOG, "function: %d", *rr->esr->function);
 
     if (!rr->esr->taskSpecificParameters)
     {
@@ -705,11 +716,12 @@ int ztest_scan(void *handle, bend_scan_rr *q)
 bend_initresult *bend_init(bend_initrequest *q)
 {
     bend_initresult *r = (bend_initresult *) odr_malloc (q->stream, sizeof(*r));
-    static char *dummy = "Hej fister";
+    int *counter = (int *) xmalloc (sizeof(int));
 
+    *counter = 0;
     r->errcode = 0;
     r->errstring = 0;
-    r->handle = dummy;
+    r->handle = counter;         /* user handle, in this case a simple int */
     q->bend_sort = ztest_sort;              /* register sort handler */
     q->bend_search = ztest_search;          /* register search handler */
     q->bend_present = ztest_present;        /* register present handle */
@@ -722,6 +734,7 @@ bend_initresult *bend_init(bend_initrequest *q)
 
 void bend_close(void *handle)
 {
+    xfree (handle);              /* release our user-defined handle */
     return;
 }
 
