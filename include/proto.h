@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.12  1995-06-05 10:53:13  quinn
+ * Revision 1.13  1995-06-07 14:36:47  quinn
+ * Added CLOSE
+ *
+ * Revision 1.12  1995/06/05  10:53:13  quinn
  * Smallish.
  *
  * Revision 1.11  1995/06/02  09:49:47  quinn
@@ -766,6 +769,30 @@ typedef struct Z_DeleteResultSetResponse
 #endif
 } Z_DeleteResultSetResponse;
 
+/* ------------------------ CLOSE SERVICE ------------------- */
+
+typedef struct Z_Close
+{
+    Z_ReferenceId *referenceId;         /* OPTIONAL */
+    int *closeReason;
+#define Z_Close_finished           0
+#define Z_Close_shutdown           1
+#define Z_Close_systemProblem      2
+#define Z_Close_costLimit          3
+#define Z_Close_resources          4
+#define Z_Close_securityViolation  5
+#define Z_Close_protocolError      6
+#define Z_Close_lackOfActivity     7
+#define Z_Close_peerAbort          8
+#define Z_Close_unspecified        9
+    char *diagnosticInformation;          /* OPTIONAL */
+    Odr_oid *resourceReportFormat;        /* OPTIONAL */
+    Odr_external *resourceReport;         /* OPTIONAL */
+#ifdef Z_OTHERINFO
+    Z_OtherInformation *otherInfo;        /* OPTIONAL */
+#endif
+} Z_Close;
+
 /* ------------------------ APDU ---------------------------- */
 
 typedef struct Z_APDU
@@ -784,7 +811,8 @@ typedef struct Z_APDU
 	Z_APDU_resourceControlResponse,
 	Z_APDU_triggerResourceControlRequest,
 	Z_APDU_scanRequest,
-	Z_APDU_scanResponse
+	Z_APDU_scanResponse,
+	Z_APDU_close
     } which;
     union
     {
@@ -801,6 +829,7 @@ typedef struct Z_APDU
 	Z_TriggerResourceControlRequest *triggerResourceControlRequest;
 	Z_ScanRequest *scanRequest;
 	Z_ScanResponse *scanResponse;
+	Z_Close *close;
     } u;
 } Z_APDU;
 
@@ -819,6 +848,7 @@ Z_ScanResponse *zget_ScanResponse(ODR o);
 Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
 Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
 Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
+Z_Close *zet_Close(ODR o);
 Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 
 #include <prt-rsc.h>

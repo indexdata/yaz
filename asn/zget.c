@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.3  1995-06-05 10:52:06  quinn
+ * Revision 1.4  1995-06-07 14:36:25  quinn
+ * Added CLOSE
+ *
+ * Revision 1.3  1995/06/05  10:52:06  quinn
  * Fixed some negligences.
  *
  * Revision 1.2  1995/05/30  10:15:49  quinn
@@ -249,6 +252,19 @@ Z_AccessControlResponse *zget_AccessControlResponse(ODR o)
     r->which = Z_AccessResponse_simpleForm;
     r->u.simpleForm = 0;
     r->diagnostic = 0;
+    return r;
+}
+
+Z_Close *zet_Close(ODR o)
+{
+    Z_Close *r = odr_malloc(o, sizeof(*r));
+
+    r->referenceId = 0;
+    r->closeReason = odr_malloc(o, sizeof(int));
+    *r->closeReason = Z_Close_finished;
+    r->diagnosticInformation = 0;
+    r->resourceReportFormat = 0;
+    r->resourceReport = 0;
     return r;
 }
 

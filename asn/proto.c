@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.26  1995-06-02 09:49:13  quinn
+ * Revision 1.27  1995-06-07 14:36:22  quinn
+ * Added CLOSE
+ *
+ * Revision 1.26  1995/06/02  09:49:13  quinn
  * Adding access control
  *
  * Revision 1.25  1995/05/25  11:00:08  quinn
@@ -1113,6 +1116,27 @@ int z_DeleteResultSetResponse(ODR o, Z_DeleteResultSetResponse **p, int opt)
 	odr_sequence_end(o);
 }
 
+/* ------------------------ CLOSE SERVICE ---------------- */
+
+int z_Close(ODR o, Z_Close **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->closeReason, ODR_CONTEXT, 211, 0) &&
+	odr_implicit(o, odr_visiblestring, &(*p)->diagnosticInformation,
+	    ODR_CONTEXT, 3, 1) &&
+	odr_implicit(o, odr_oid, &(*p)->resourceReportFormat, ODR_CONTEXT,
+	    4, 1) &&
+	odr_implicit(o, odr_external, &(*p)->resourceReport, ODR_CONTEXT,
+	    5, 1) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
+	odr_sequence_end(o);
+}
+
 /* ------------------------ APDU ------------------------- */
 
 int z_APDU(ODR o, Z_APDU **p, int opt)
@@ -1140,6 +1164,7 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
 	    z_TriggerResourceControlRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 35, Z_APDU_scanRequest, z_ScanRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 36, Z_APDU_scanResponse, z_ScanResponse},
+	{ODR_IMPLICIT, ODR_CONTEXT, 48, Z_APDU_close, z_Close},
 
     	{-1, -1, -1, -1, 0}
     };
