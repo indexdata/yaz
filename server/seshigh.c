@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.42  1995-08-15 11:16:50  quinn
+ * Revision 1.43  1995-08-15 12:00:31  quinn
+ * Updated External
+ *
+ * Revision 1.42  1995/08/15  11:16:50  quinn
  * CV:e ----------------------------------------------------------------------
  * CV:e ----------------------------------------------------------------------
  *
@@ -823,8 +826,16 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    oid_getoidbyent(&recform));
 	thisext->indirect_reference = 0;
 	thisext->descriptor = 0;
-	if (fres->format == VAL_SUTRS) /* SUTRS ios a single-ASN.1-type */
+	if (fres->format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
 	{
+	    Odr_oct *sutrs = odr_malloc(a->encode, sizeof(*sutrs));
+
+	    thisext->which = Z_External_SUTRS;
+	    thisext->u.sutrs = sutrs;
+	    sutrs->buf = odr_malloc(a->encode, fres->len);
+	    sutrs->len = sutrs->size = fres->len;
+	    memcpy(sutrs->buf, fres->record, fres->len);
+#if 0
 	    Odr_oct sutrs_asn;
 	    Odr_oct *sp = &sutrs_asn;
 	    Odr_any *single = odr_malloc(a->encode, sizeof(*single));
@@ -856,10 +867,11 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    odr_setbuf(a->encode, remember, s_remember, 1);
 	    logf(LOG_DEBUG, "   Format is SUTRS. len %d, encoded len %d",
 	    	fres->len, single->len);
+#endif
 	}
 	else /* octet-aligned record. Easy as pie */
 	{
-	    thisext->which = ODR_EXTERNAL_octet;
+	    thisext->which = Z_External_octet;
 	    if (!(thisext->u.octet_aligned = odr_malloc(a->encode,
 		sizeof(Odr_oct))))
 		return 0;
@@ -990,6 +1002,8 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	}
 	else
 	{
+	    if (*resp.resultCount)
+	    	next = 1;
 	    resp.numberOfRecordsReturned = &nulint;
 	    resp.nextResultSetPosition = &next;
 	    resp.searchStatus = &sr;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.35  1995-08-10 08:53:59  quinn
+ * Revision 1.36  1995-08-15 11:59:39  quinn
+ * Updated External
+ *
+ * Revision 1.35  1995/08/10  08:53:59  quinn
  * Added Explain
  *
  * Revision 1.34  1995/06/19  17:01:48  quinn
@@ -149,9 +152,9 @@ int z_ElementSetName(ODR o, char **p, int opt)
     return odr_implicit(o, odr_visiblestring, p, ODR_CONTEXT, 103, opt);
 }
 
-int z_UserInformationField(ODR o, Odr_external **p, int opt)
+int z_UserInformationField(ODR o, Z_External **p, int opt)
 {
-    return odr_explicit(o, odr_external, (Odr_external **)p, ODR_CONTEXT,
+    return odr_explicit(o, z_External, (Z_External **)p, ODR_CONTEXT,
     	11, opt);
 }
 
@@ -179,7 +182,7 @@ int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt)
 	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_OtherInfo_binaryInfo,
 	    odr_octetstring},
 	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_OtherInfo_externallyDefinedInfo,
-	    odr_external},
+	    z_External},
 	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_OtherInfo_oid, odr_oid},
 	{-1, -1, -1, -1, 0}
     };
@@ -293,7 +296,7 @@ int z_IdAuthentication(ODR o, Z_IdAuthentication **p, int opt)
 	{-1, -1, -1, Z_IdAuthentication_open, z_StrAuthentication},
 	{-1, -1, -1, Z_IdAuthentication_idPass, z_IdPass},
 	{-1, -1, -1, Z_IdAuthentication_anonymous, odr_null},
-	{-1, -1, -1, Z_IdAuthentication_other, odr_external},
+	{-1, -1, -1, Z_IdAuthentication_other, z_External},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -397,7 +400,7 @@ int z_ResourceControlRequest(ODR o, Z_ResourceControlRequest **p, int opt)
     return
     	z_ReferenceId(o, &(*p)->referenceId, 1) &&
 	odr_implicit(o, odr_bool, &(*p)->suspendedFlag, ODR_CONTEXT, 39, 1)&&
-	odr_explicit(o, odr_external, &(*p)->resourceReport, ODR_CONTEXT,
+	odr_explicit(o, z_External, &(*p)->resourceReport, ODR_CONTEXT,
 	    40, 1) &&
 	odr_implicit(o, odr_integer, &(*p)->partialResultsAvailable,
 	    ODR_CONTEXT, 41, 1) &&
@@ -531,7 +534,7 @@ int z_Term(ODR o, Z_Term **p, int opt)
 	    odr_visiblestring},
 	{ODR_IMPLICIT, ODR_CONTEXT, 217, Z_Term_oid, odr_oid},
 	{ODR_IMPLICIT, ODR_CONTEXT, 218, Z_Term_dateTime, odr_cstring},
-	{ODR_IMPLICIT, ODR_CONTEXT, 219, Z_Term_external, odr_external},
+	{ODR_IMPLICIT, ODR_CONTEXT, 219, Z_Term_external, z_External},
 	/* add intUnit here */
 	{ODR_IMPLICIT, ODR_CONTEXT, 221, Z_Term_null, odr_null},
     	{-1, -1, -1, -1, 0}
@@ -744,7 +747,7 @@ int z_SearchRequest(ODR o, Z_SearchRequest **p, int opt)
 
 int z_DatabaseRecord(ODR o, Z_DatabaseRecord **p, int opt)
 {
-    return odr_external(o, (Odr_external **) p, opt);
+    return z_External(o, (Z_External **) p, opt);
 }
 
 #ifdef Z_95
@@ -779,7 +782,7 @@ int z_DiagRec(ODR o, Z_DiagRec **p, int opt)
     static Odr_arm arm[] = 
     {
     	{-1, -1, -1, Z_DiagRec_defaultFormat, z_DefaultDiagFormat},
-    	{-1, -1, -1, Z_DiagRec_externallyDefined, odr_external},
+    	{-1, -1, -1, Z_DiagRec_externallyDefined, z_External},
     	{-1, -1, -1, -1, 0}
     };
 
@@ -895,7 +898,7 @@ int z_AccessControlRequest(ODR o, Z_AccessControlRequest **p, int opt)
 	{ODR_IMPLICIT, ODR_CONTEXT, 37, Z_AccessRequest_simpleForm,
 	    odr_octetstring},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_AccessRequest_externallyDefined,
-	    odr_external},
+	    z_External},
     	{-1, -1, -1, -1, 0}
     };
     if (!odr_sequence_begin(o, p, sizeof(**p)))
@@ -916,7 +919,7 @@ int z_AccessControlResponse(ODR o, Z_AccessControlResponse **p, int opt)
 	{ODR_IMPLICIT, ODR_CONTEXT, 38, Z_AccessResponse_simpleForm,
 	    odr_octetstring},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_AccessResponse_externallyDefined,
-	    odr_external},
+	    z_External},
     	{-1, -1, -1, -1, 0}
     };
     if (!odr_sequence_begin(o, p, sizeof(**p)))
@@ -1174,7 +1177,7 @@ int z_ElementSpec(ODR o, Z_ElementSpec **p, int opt)
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ElementSpec_elementSetName,
 	    odr_visiblestring},
 	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ElementSpec_externalSpec,
-	    odr_external},
+	    z_External},
 	{-1, -1, -1, -1, 0}
     };
 
@@ -1404,7 +1407,7 @@ int z_Close(ODR o, Z_Close **p, int opt)
 	    ODR_CONTEXT, 3, 1) &&
 	odr_implicit(o, odr_oid, &(*p)->resourceReportFormat, ODR_CONTEXT,
 	    4, 1) &&
-	odr_implicit(o, odr_external, &(*p)->resourceReport, ODR_CONTEXT,
+	odr_implicit(o, z_External, &(*p)->resourceReport, ODR_CONTEXT,
 	    5, 1) &&
 #ifdef Z_95
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.10  1995-08-10 08:54:33  quinn
+ * Revision 1.11  1995-08-15 12:00:09  quinn
+ * Updated External
+ *
+ * Revision 1.10  1995/08/10  08:54:33  quinn
  * Added Explain.
  *
  * Revision 1.9  1995/06/19  12:38:26  quinn
@@ -219,6 +222,8 @@ typedef struct odr
 
     int t_class;         /* implicit tagging (-1==default tag) */
     int t_tag;
+
+    int choice_bias;     /* force choice */
 
     FILE *print;         /* output file for direction print */
     int indent;          /* current indent level for printing */

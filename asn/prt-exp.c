@@ -4,14 +4,16 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.1  1995-08-10 08:54:02  quinn
+ * Revision 1.2  1995-08-15 11:59:43  quinn
+ * Updated External
+ *
+ * Revision 1.1  1995/08/10  08:54:02  quinn
  * Added Explain
  *
  *
  */
 
 #include <proto.h>
-#include <prt-exp.h>
 
 int z_LanguageCode(ODR o, char **p, int opt);
 int z_CommonInfo(ODR o, Z_CommonInfo **p, int opt);
@@ -923,7 +925,7 @@ int z_ExtendedServicesInfo(ODR o, Z_ExtendedServicesInfo **p, int opt)
         odr_implicit(o, odr_bool, &(*p)->retentionSupported, ODR_CONTEXT, 8, 0) &&
         odr_implicit(o, odr_integer, &(*p)->waitAction, ODR_CONTEXT, 9, 0) &&
         odr_implicit(o, z_HumanString, &(*p)->description, ODR_CONTEXT, 10, 1) &&
-        odr_implicit(o, odr_external, &(*p)->specificExplain, ODR_CONTEXT, 11, 1) &&
+        odr_implicit(o, z_External, &(*p)->specificExplain, ODR_CONTEXT, 11, 1) &&
         odr_implicit(o, z_InternationalString, &(*p)->esASN, ODR_CONTEXT, 12, 1) &&
         odr_sequence_end(o);
 }
@@ -1150,7 +1152,7 @@ int z_ProcessingInformation(ODR o, Z_ProcessingInformation **p, int opt)
 	    3, 0) &&
         odr_implicit(o, odr_oid, &(*p)->oid, ODR_CONTEXT, 4, 0) &&
         odr_implicit(o, z_HumanString, &(*p)->description, ODR_CONTEXT, 5, 1) &&
-        odr_implicit(o, odr_external, &(*p)->instructions, ODR_CONTEXT, 6, 1) &&
+        odr_implicit(o, z_External, &(*p)->instructions, ODR_CONTEXT, 6, 1) &&
         odr_sequence_end(o);
 }
 

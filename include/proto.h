@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.20  1995-08-10 08:54:35  quinn
+ * Revision 1.21  1995-08-15 12:00:11  quinn
+ * Updated External
+ *
+ * Revision 1.20  1995/08/10  08:54:35  quinn
  * Added Explain.
  *
  * Revision 1.19  1995/06/19  12:38:28  quinn
@@ -138,6 +141,9 @@
 
 /* ----------------- GLOBAL AUXILIARY DEFS ----------------*/
 
+struct Z_External;
+typedef struct Z_External Z_External;
+
 typedef Odr_oct Z_ReferenceId;
 typedef char Z_DatabaseName;
 typedef char Z_ResultSetId;
@@ -163,7 +169,7 @@ typedef struct Z_OtherInformationUnit
     {
     	char *characterInfo; 
 	Odr_oct *binaryInfo;
-	Odr_external *externallyDefinedInfo;
+	Z_External *externallyDefinedInfo;
 	Odr_oid *oid;
     } information;
 } Z_OtherInformationUnit;
@@ -227,7 +233,7 @@ typedef struct Z_IdAuthentication
     	char *open;
     	Z_IdPass *idPass;
     	Odr_null *anonymous;
-    	Odr_external *other;
+    	Z_External *other;
     } u;
 } Z_IdAuthentication;
 
@@ -262,7 +268,7 @@ typedef struct Z_InitRequest
     char *implementationId;                      /* OPTIONAL */
     char *implementationName;                    /* OPTIONAL */
     char *implementationVersion;                 /* OPTIONAL */
-    Odr_external *userInformationField;          /* OPTIONAL */
+    Z_External *userInformationField;          /* OPTIONAL */
 #ifdef Z_95
     Z_OtherInformation *otherInfo;               /* OPTIONAL */
 #endif
@@ -279,7 +285,7 @@ typedef struct Z_InitResponse
     char *implementationId;      /* OPTIONAL */
     char *implementationName;    /* OPTIONAL */
     char *implementationVersion; /* OPTIONAL */
-    Odr_external *userInformationField; /* OPTIONAL */
+    Z_External *userInformationField; /* OPTIONAL */
 #ifdef Z_95
     Z_OtherInformation *otherInfo;    /* OPTIONAL */
 #endif
@@ -374,7 +380,7 @@ typedef struct Z_Term
     	char *characterString;
     	Odr_oid *oid;
     	char *dateTime;
-    	Odr_external *external;
+    	Z_External *external;
     	/* Z_IntUnit *integerAndUnit; */
     	Odr_null *null;
     } u;
@@ -527,7 +533,7 @@ typedef struct Z_SearchRequest
 
 /* ------------------------ RECORD -------------------------- */
 
-typedef Odr_external Z_DatabaseRecord;
+typedef Z_External Z_DatabaseRecord;
 
 #ifdef Z_95
 
@@ -555,7 +561,7 @@ typedef struct Z_DiagRec
     union
     {
     	Z_DefaultDiagFormat *defaultFormat;
-	Odr_external *externallyDefined;
+	Z_External *externallyDefined;
     } u;
 } Z_DiagRec;
 
@@ -653,7 +659,7 @@ typedef struct Z_ElementSpec
     union
     {
     	char *elementSetName;
-	Odr_external *externalSpec;
+	Z_External *externalSpec;
     } u;
 } Z_ElementSpec;
 
@@ -753,7 +759,7 @@ typedef struct Z_ResourceControlRequest
 {
     Z_ReferenceId *referenceId;    /* OPTIONAL */
     bool_t *suspendedFlag;         /* OPTIONAL */
-    Odr_external *resourceReport; /* OPTIONAL */
+    Z_External *resourceReport; /* OPTIONAL */
     int *partialResultsAvailable;  /* OPTIONAL */
 #define Z_ResourceControlRequest_subset    1
 #define Z_ResourceControlRequest_interim   2
@@ -789,7 +795,7 @@ typedef struct Z_AccessControlRequest
     union
     {
     	Odr_oct *simpleForm;
-	Odr_external *externallyDefined;
+	Z_External *externallyDefined;
     } u;
 #ifdef Z_95
     Z_OtherInformation *otherInfo;           /* OPTIONAL */
@@ -807,7 +813,7 @@ typedef struct Z_AccessControlResponse
     union
     {
     	Odr_oct *simpleForm;
-	Odr_external *externallyDefined;
+	Z_External *externallyDefined;
     } u;
     Z_DiagRec *diagnostic;                   /* OPTIONAL */
 #ifdef Z_95
@@ -994,7 +1000,7 @@ typedef struct Z_Close
 #define Z_Close_unspecified        9
     char *diagnosticInformation;          /* OPTIONAL */
     Odr_oid *resourceReportFormat;        /* OPTIONAL */
-    Odr_external *resourceReport;         /* OPTIONAL */
+    Z_External *resourceReport;         /* OPTIONAL */
 #ifdef Z_95
     Z_OtherInformation *otherInfo;        /* OPTIONAL */
 #endif
@@ -1085,5 +1091,7 @@ Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 
 #include <prt-rsc.h>
 #include <prt-acc.h>
+#include <prt-exp.h>
+#include <prt-ext.h>
 
 #endif

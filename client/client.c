@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.15  1995-06-22 09:28:03  quinn
+ * Revision 1.16  1995-08-15 12:00:04  quinn
+ * Updated External
+ *
+ * Revision 1.15  1995/06/22  09:28:03  quinn
  * Fixed bug in SUTRS processing.
  *
  * Revision 1.14  1995/06/19  12:37:41  quinn
@@ -166,7 +169,7 @@ static int process_initResponse(Z_InitResponse *res)
     if (res->userInformationField)
     {
 	printf("UserInformationfield:\n");
-	if (!odr_external(print, (Odr_external**)&res-> userInformationField,
+	if (!z_External(print, (Z_External**)&res-> userInformationField,
 	    0))
 	{
 	    odr_perror(print, "Printing userinfo\n");
@@ -266,7 +269,7 @@ int cmd_authentication(char *arg)
 
 void display_record(Z_DatabaseRecord *p)
 {
-    Odr_external *r = (Odr_external*) p;
+    Z_External *r = (Odr_external*) p;
     oident *ent = oid_getentbyoid(r->direct_reference);
 
     if (r->direct_reference)
@@ -284,27 +287,17 @@ void display_record(Z_DatabaseRecord *p)
 	marc_display ((char*)p->u.octet_aligned->buf, stdout);
     else if (ent->value == VAL_SUTRS)
     {
-    	Odr_oct *rc;
-
-	if (r->which != ODR_EXTERNAL_single)
+	if (r->which != Z_External_SUTRS)
 	{
-	    printf("Expecting single ASN.1 type for SUTRS.\n");
+	    printf("Expecting single SUTRS type for SUTRS.\n");
 	    return;
 	}
-	odr_setbuf(in, (char*)r->u.single_ASN1_type->buf,
-	    r->u.single_ASN1_type->len, 0);
-	if (!z_SUTRS(in, &rc, 0))
-	{
-	    odr_perror(in, "decoding SUTRS");
-	    odr_reset(in);
-	}
-	else
-	    printf("%.*s", rc->len, rc->buf);
+	printf("%.*s", r->u.sutrs->len, r->u.sutrs->buf);
     }
     else 
     {
     	printf("Unknown record representation.\n");
-    	if (!odr_external(print, &r, 0))
+    	if (!z_External(print, &r, 0))
     	{
 	    odr_perror(print, "Printing external");
 	    odr_reset(print);

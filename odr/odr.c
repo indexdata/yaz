@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.14  1995-06-19 12:38:46  quinn
+ * Revision 1.15  1995-08-15 12:00:22  quinn
+ * Updated External
+ *
+ * Revision 1.14  1995/06/19  12:38:46  quinn
  * Added BER dumper.
  *
  * Revision 1.13  1995/05/22  11:32:02  quinn
@@ -119,6 +122,7 @@ void odr_reset(ODR o)
     o->stackp = -1;
     odr_release_mem(o->mem);
     o->mem = 0;
+    o->choice_bias = -1;
 }
     
 void odr_destroy(ODR o)

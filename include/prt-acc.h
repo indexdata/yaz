@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-acc.h,v $
- * Revision 1.1  1995-06-02 09:49:49  quinn
+ * Revision 1.2  1995-08-15 12:00:13  quinn
+ * Updated External
+ *
+ * Revision 1.1  1995/06/02  09:49:49  quinn
  * Add access control
  *
  *
@@ -93,7 +96,7 @@ typedef struct Z_ChallengeUnit1
 #define Z_ChalDataType_alphaNumeric  4
 #define Z_ChalDataType_urlUrn        5
 #define Z_ChalDataType_boolean       6
-    Odr_external *diagnostic;        /* OPTIONAL */
+    Z_External *diagnostic;        /* OPTIONAL */
 } Z_ChallengeUnit1;
 
 typedef struct Z_Challenge1

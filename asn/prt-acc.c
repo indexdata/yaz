@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-acc.c,v $
- * Revision 1.2  1995-06-05 10:52:05  quinn
+ * Revision 1.3  1995-08-15 11:59:41  quinn
+ * Updated External
+ *
+ * Revision 1.2  1995/06/05  10:52:05  quinn
  * Fixed some negligences.
  *
  * Revision 1.1  1995/06/02  09:49:15  quinn
@@ -96,6 +99,7 @@ int z_ChallengeUnit1(ODR o, Z_ChallengeUnit1 **p, int opt)
 	    &(*p)->num_values) || odr_ok(o)) &&
 	odr_implicit(o, odr_null, &(*p)->shouldSave, ODR_CONTEXT, 7, 1) &&
 	odr_implicit(o, odr_integer, &(*p)->dataType, ODR_CONTEXT, 8, 1) &&
+	odr_implicit(o, z_External, &(*p)->diagnostic, ODR_CONTEXT, 9, 1) &&
 	odr_sequence_end(o);
 }
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.8  1995-06-19 17:01:51  quinn
+ * Revision 1.9  1995-08-15 12:00:23  quinn
+ * Updated External
+ *
+ * Revision 1.8  1995/06/19  17:01:51  quinn
  * This should bring us in sync with the version distributed as 1.0b
  *
  * Revision 1.7  1995/06/19  13:06:50  quinn
@@ -34,16 +37,21 @@
 
 int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 {
-    int i, cl = -1, tg, cn, *which = whichp;
+    int i, cl = -1, tg, cn, *which = whichp, bias = o->choice_bias;
 
     if (o->error)
     	return 0;
     if (o->direction != ODR_DECODE && !*(char**)p)
     	return 0;
+    o->choice_bias = -1;
     for (i = 0; arm[i].fun; i++)
     {
     	if (o->direction == ODR_DECODE)
+	{
+	    if (bias >= 0 && bias != arm[i].which)
+		continue;
     	    *which = arm[i].which;
+	}
 	else if (*which != arm[i].which)
 	    continue;
 
@@ -84,4 +92,9 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
     *which = -1;
     *(char*)p = 0;
     return 0;
+}
+
+void odr_choice_bias(ODR o, int what)
+{
+    o->choice_bias = what;
 }
