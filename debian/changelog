@@ -1,8 +1,14 @@
+yaz (2.0.3-4) unstable; urgency=low
+
+  * More ZOOM logging.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 22 Jul 2003 15:04:04 +0200
+
 yaz (2.0.3-3) unstable; urgency=low
 
   * Fix CCL->RPN code for attribute strings.
 
- -- Adam Dickmeiss <adam@gamma.indexdata.dk>  Mon, 23 Jun 2003 14:41:49 +0200
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 23 Jun 2003 14:41:49 +0200
 
 yaz (2.0.3-2) unstable; urgency=low
 

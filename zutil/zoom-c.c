@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.39 2003-07-14 12:59:23 adam Exp $
+ * $Id: zoom-c.c,v 1.40 2003-07-29 15:09:19 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -870,6 +870,7 @@ static zoom_ret send_APDU (ZOOM_connection c, Z_APDU *a)
     assert (a);
     if (encode_APDU(c, a, c->odr_out))
 	return zoom_complete;
+    yaz_log(LOG_DEBUG, "send APDU type=%d", a->which);
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
     event = ZOOM_Event_create (ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event (c, event);
@@ -2505,7 +2506,7 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
     Z_InitResponse *initrs;
     
     c->mask = 0;
-    yaz_log (LOG_DEBUG, "handle_apdu type=%d", apdu->which);
+    yaz_log (LOG_DEBUG, "recv APDU type=%d", apdu->which);
     switch(apdu->which)
     {
     case Z_APDU_initResponse:
@@ -2748,15 +2749,16 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 
 static int do_read (ZOOM_connection c)
 {
-    int r;
+    int r, more;
     ZOOM_Event event;
     
     event = ZOOM_Event_create (ZOOM_EVENT_RECV_DATA);
     ZOOM_connection_put_event (c, event);
     
-    yaz_log (LOG_DEBUG, "do_read len=%d", c->len_in);
 
     r = cs_get (c->cs, &c->buf_in, &c->len_in);
+    more = cs_more(c->cs);
+    yaz_log (LOG_DEBUG, "do_read len=%d more=%d", r, more);
     if (r == 1)
 	return 0;
     if (r <= 0)
