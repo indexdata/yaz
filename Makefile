@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.19 1995-06-25 10:53:37 quinn Exp $
+# $Id: Makefile,v 1.20 1995-06-27 12:44:42 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 ODEFS=-DUSE_XTIMOSI
@@ -18,7 +18,7 @@ CONTROL=RANLIB="ranlib"
 
 all:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) $(CONTROL)\
-	CFLAGS="$(CFLAGS) $(DEFS)" LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\
+	CFLAGS="$(CFLAGS) $(CDEFS)" LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\
 	then cd ..; else exit 1; fi; done
 
 dep depend:
