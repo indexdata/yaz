@@ -40,7 +40,6 @@ LOCAL_LINK=-ldebian/yaz-runtime/usr/lib:debian/yaz-ssl/usr/lib
 $(YAZSRCDIR)/configure: $(YAZSRCDIR)/configure.in
 	cd $(YAZSRCDIR); sh buildconf.sh
 
-configure: stamp-configure
 stamp-configure: $(YAZSRCDIR)/configure
 	dh_testdir
 
@@ -133,7 +132,6 @@ ifeq ($(YAZ_WITH_SSL),1)
 	dh_shlibdeps -p yaz-ssl $(LOCAL_LINK)
 	cat debian/postinst >> debian/yaz-ssl/DEBIAN/postinst
 endif
-	# Ugh Ugly hack
 	cat debian/postinst >> debian/yaz-runtime/DEBIAN/postinst
 
 	dh_gencontrol -p yaz-runtime
