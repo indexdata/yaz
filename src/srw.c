@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.13 2004-01-05 14:46:52 adam Exp $
+ * $Id: srw.c,v 1.14 2004-01-06 11:21:04 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -113,12 +113,14 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
     if (!match_element(ptr, elem))
         return 0;
     ptr = ptr->children;
+    while (ptr && ptr->type != XML_TEXT_NODE && ptr->type != XML_COMMENT_NODE)
+	ptr = ptr->next;
     if (!ptr)
         return 0;
     buf = xmlBufferCreate();
-
+    
     xmlNodeDump(buf, ptr->doc, ptr, 0, 0);
-
+    
     *val = odr_malloc(o, buf->use+1);
     memcpy (*val, buf->content, buf->use);
     (*val)[buf->use] = '\0';
@@ -130,7 +132,6 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
 
     return 1;
 }
-
                      
 static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o, int **val)
 {
@@ -182,9 +183,9 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
 		;
 	    else if (match_xsd_string(ptr, "recordPacking", o, &spack))
 	    {
-		if (pack && !strcmp(spack, "xml"))
+		if (spack && !strcmp(spack, "xml"))
 		    pack = Z_SRW_recordPacking_XML;
-		if (pack && !strcmp(spack, "string"))
+		if (spack && !strcmp(spack, "string"))
 		    pack = Z_SRW_recordPacking_string;
 	    }
 	    else if (match_xsd_integer(ptr, "recordPosition", o, 
@@ -243,11 +244,14 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
         if (!*num)
             return 1;
         *recs = odr_malloc(o, *num * sizeof(**recs));
-        for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next, i++)
+        for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next)
         {
             if (ptr->type == XML_ELEMENT_NODE &&
                 !strcmp(ptr->name, "record"))
+	    {
 		yaz_srw_record(o, ptr, (*recs)+i, client_data, ns);
+		i++;
+	    }
         }
     }
     else if (o->direction == ODR_ENCODE)
