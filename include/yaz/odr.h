@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.13 2003-10-16 10:37:06 adam Exp $
+ * $Id: odr.h,v 1.14 2003-11-26 16:24:04 mike Exp $
  */
 
 #ifndef ODR_H
@@ -297,6 +297,7 @@ YAZ_EXPORT int odr_initmember(ODR o, void *p, int size);
 YAZ_EXPORT int odr_peektag(ODR o, int *zclass, int *tag, int *cons);
 YAZ_EXPORT void odr_setlenlen(ODR o, int len);
 YAZ_EXPORT int odr_missing(ODR o, int opt, const char *name);
+YAZ_EXPORT char *odr_prepend(ODR o, const char *prefix, const char *old);
 
 typedef struct Odr_external
 {

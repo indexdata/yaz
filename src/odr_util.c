@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_util.c,v 1.1 2003-10-27 12:21:34 adam Exp $
+ * $Id: odr_util.c,v 1.2 2003-11-26 16:23:42 mike Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -91,4 +91,30 @@ int odr_missing(ODR o, int opt, const char *name)
         odr_setelement(o, name);
     }
     return opt;
+}
+
+/*
+ * Reallocate the buffer `old', using the ODR memory pool `o' to be
+ * big enough to hold its existing value (if any) plus `prefix' (if
+ * any) and a separator character.  Copy `prefix', a forward slash and
+ * the old value into the new area and return its address.  Can be
+ * used as follows:
+ *	initRequest->implementationName = odr_prepend(o,
+ *		initRequest->implementationName, "ZOOM-C");
+ */
+char *odr_prepend(ODR o, const char *prefix, const char *old)
+{
+    int plen = (prefix == 0) ? 0 : strlen(prefix);
+    int olen = (old == 0) ? 0 : strlen(old);
+    char *res = (char*) odr_malloc (o, olen + plen + 2);
+
+    *res = '\0';
+    if (prefix != 0)
+	strcpy (res, prefix);
+    if (prefix != 0 && old != 0)
+	strcat (res, "/");
+    if (old !=0)
+	strcat (res, old);
+
+    return res;
 }
