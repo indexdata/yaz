@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.9 2005-01-04 01:25:20 adam Exp $
+ * $Id: nmem.c,v 1.10 2005-01-04 21:27:54 mike Exp $
  */
 
 /**
@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <stddef.h>
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/log.h>
@@ -40,7 +41,21 @@
 #endif
 
 #define NMEM_CHUNK (4*1024)
-#define NMEM_ALIGN (sizeof(long)*2)
+
+struct align {
+    char x;
+    union {
+	char c;
+	short s;
+	int i;
+	long l;
+	long long ll;
+	float f;
+	double d;
+    } u;
+};
+
+#define NMEM_ALIGN (offsetof(struct align, u))
 
 static int log_level=0;
 static int log_level_initialized=0;
