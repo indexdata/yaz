@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.31 2001-12-30 22:21:11 adam Exp $
+# $Id: makefile,v 1.32 2002-01-30 22:02:03 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -199,6 +199,7 @@ TCLOPT= $(COMMON_TCL_OPTIONS)
 
 YAZ_CLIENT_OBJS= \
    $(OBJDIR)\client.obj \
+   $(OBJDIR)\tabcomplete.obj \
    $(OBJDIR)\admin.obj
 
 YAZ_ZOOMSH_OBJS = \
@@ -819,7 +820,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.31  2001-12-30 22:21:11  adam
+# Revision 1.32  2002-01-30 22:02:03  adam
+# WIN32 updates for YAZ client.
+#
+# Revision 1.31  2001/12/30 22:21:11  adam
 # Scan for ZOOM.
 #
 # Revision 1.30  2001/10/28 23:28:26  adam

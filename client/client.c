@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.139 2002-01-30 14:51:45 adam Exp $
+ * $Id: client.c,v 1.140 2002-01-30 22:02:03 adam Exp $
  */
 
 #include <stdio.h>
@@ -2512,7 +2512,6 @@ void process_cmd_line(char* line)
 char *command_generator(const char *text, int state) 
 {
     static idx; // index is the last used the last time command_generator was called
-    char *command;
     if (state==0) {
         idx = 0;
     }

@@ -2,11 +2,12 @@
  * Copyright (c) 2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.2 2002-01-30 14:51:45 adam Exp $
+ * $Id: tabcomplete.c,v 1.3 2002-01-30 22:02:03 adam Exp $
  */
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <yaz/oid.h>
 #include "tabcomplete.h"
