@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.11 2003-03-03 19:57:35 adam Exp $
+ * $Id: unix.c,v 1.12 2003-05-14 13:49:02 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -292,6 +292,7 @@ static int unix_bind(COMSTACK h, void *address, int mode)
 	h->cerrno = CSYSERR;
 	return -1;
     }
+    chmod(path, 0777);
     if (mode == CS_SERVER && listen(h->iofile, 3) < 0)
     {
 	h->cerrno = CSYSERR;
