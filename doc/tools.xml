@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.13 2002-09-03 10:46:06 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.14 2002-10-09 23:07:12 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -20,7 +20,7 @@
     that may be of use to you.
    </para>
 
-   <sect2><title id="PQF">Prefix Query Format</title>
+   <sect2 id="PQF"><title>Prefix Query Format</title>
 
     <para>
      Since RPN or reverse polish notation is really just a fancy way of
@@ -221,7 +221,7 @@
     </screen>
 
    </sect2>
-   <sect2><title id="CCL">Common Command Language</title>
+   <sect2 id="CCL"><title>Common Command Language</title>
 
     <para>
      Not all users enjoy typing in prefix query structures and numerical
