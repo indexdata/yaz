@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.39 1998-05-20 13:51:46 adam Exp $
+# $Id: Makefile,v 1.40 1998-06-02 10:23:07 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
@@ -31,7 +31,7 @@ MAKE=make
 SUBDIR=$(MOD) util odr $(RFC1006) ccl comstack retrieval client server ztest makelib
 # Add external libraries to the ELIBS macro
 ELIBS=
-# For Solaris add use:
+# For Solaris use:
 #ELIBS=-lnsl -lsocket
 
 CONTROL=RANLIB="ranlib" ELIBS="$(ELIBS)"
