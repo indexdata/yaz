@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.138 2002-01-29 20:17:41 ja7 Exp $
+ * $Id: client.c,v 1.139 2002-01-30 14:51:45 adam Exp $
  */
 
 #include <stdio.h>
@@ -102,7 +102,7 @@ static CCL_bibset bibset;               /* CCL bibset handle */
 
 void process_cmd_line(char* line);
 char ** readline_completer(char *text, int start, int end);
-char *command_generator(char *text, int state);
+char *command_generator(const char *text, int state);
 
 
 ODR getODROutputStream()
@@ -323,22 +323,22 @@ int cmd_open(char *arg)
         return 0;
 
     if(yazProxy) 
-	conn = cs_create_host(yazProxy, 1, &add);
+    conn = cs_create_host(yazProxy, 1, &add);
     else 
-	conn = cs_create_host(type_and_host, 1, &add);
-	
+    conn = cs_create_host(type_and_host, 1, &add);
+    
     if (!conn)
     {
-	printf ("Couldn't create comstack\n");
-	return 0;
+    printf ("Couldn't create comstack\n");
+    return 0;
     }
     printf("Connecting...");
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
     {
-	printf ("error = %s\n", cs_strerror(conn));
-	if (conn->cerrno == CSYSERR)
-	    perror("system");
+    printf ("error = %s\n", cs_strerror(conn));
+    if (conn->cerrno == CSYSERR)
+        perror("system");
         cs_close(conn);
         conn = 0;
         return 0;
@@ -560,10 +560,10 @@ static void display_record(Z_External *r)
                 /* primitive check for a marc OID 5.1-29 */
                 ent->oidsuffix[0] == 5 && ent->oidsuffix[1] < 30 
 #else
-		1
+        1
 #endif
-		)
-	    {
+        )
+        {
                 if (marc_display_exl (octet_buf, NULL, 0 /* debug */,
                                       r->u.octet_aligned->len) <= 0)
                 {
@@ -1116,7 +1116,7 @@ static Z_External *create_external_itemRequest()
         r->u.single_ASN1_type = (Odr_oct *)
             odr_malloc (out, sizeof(*r->u.single_ASN1_type));
         r->u.single_ASN1_type->buf = (unsigned char *)
-	    odr_malloc (out, item_request_size);
+        odr_malloc (out, item_request_size);
         r->u.single_ASN1_type->len = item_request_size;
         r->u.single_ASN1_type->size = item_request_size;
         memcpy (r->u.single_ASN1_type->buf, item_request_buf,
@@ -1175,7 +1175,7 @@ static Z_External *create_external_ILL_APDU(int which)
         r->u.single_ASN1_type = (Odr_oct *)
             odr_malloc (out, sizeof(*r->u.single_ASN1_type));
         r->u.single_ASN1_type->buf = (unsigned char *)
-	    odr_malloc (out, ill_request_size);
+        odr_malloc (out, ill_request_size);
         r->u.single_ASN1_type->len = ill_request_size;
         r->u.single_ASN1_type->size = ill_request_size;
         memcpy (r->u.single_ASN1_type->buf, ill_request_buf, ill_request_size);
@@ -1244,12 +1244,12 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
     }
     else if (!strcmp(type, "xml") || !strcmp(type, "3"))
     {
-	const char *xml_buf =
-		"<itemorder>\n"
-		"  <type>request</type>\n"
-		"  <libraryNo>000200</libraryNo>\n"
-		"  <borrowerTicketNo> 1212 </borrowerTicketNo>\n"
-		"</itemorder>";
+    const char *xml_buf =
+        "<itemorder>\n"
+        "  <type>request</type>\n"
+        "  <libraryNo>000200</libraryNo>\n"
+        "  <borrowerTicketNo> 1212 </borrowerTicketNo>\n"
+        "</itemorder>";
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest =
             z_ext_record (out, VAL_TEXT_XML, xml_buf, strlen(xml_buf));
     }
@@ -1973,7 +1973,8 @@ int cmd_close(char *arg)
     return 2;
 }
 
-int cmd_packagename(char* arg) {
+int cmd_packagename(char* arg)
+{
     xfree (esPackageName);
     esPackageName = NULL;
     if (*arg)
@@ -1982,9 +1983,10 @@ int cmd_packagename(char* arg) {
         strcpy (esPackageName, arg);
     }
     return 1;
-};
+}
 
-int cmd_proxy(char* arg) {
+int cmd_proxy(char* arg)
+{
     xfree (yazProxy);
     yazProxy = NULL;
     if (*arg)
@@ -1993,20 +1995,19 @@ int cmd_proxy(char* arg) {
         strcpy (yazProxy, arg);
     } 
     return 1;
-};
+}
 
 int cmd_source(char* arg) 
 {
-
     /* first should open the file and read one line at a time.. */
     FILE* includeFile;
     char line[1024], *cp;
 
     {
-      char* args_end=(arg)+strlen(arg)-1; 
-      while(isspace(*args_end)) 
-	{*args_end=0;
-	--args_end;}; 
+        char* args_end=(arg)+strlen(arg)-1; 
+        while(isspace(*args_end)) 
+        {*args_end=0;
+        --args_end;}; 
     }
 
     REMOVE_TAILING_BLANKS(arg);
@@ -2014,15 +2015,14 @@ int cmd_source(char* arg)
     if(strlen(arg)<1) {
         fprintf(stderr,"Error in source command use a filename\n");
         return -1;
-    };
+    }
     
     includeFile = fopen (arg, "r");
     
     if(!includeFile) {
         fprintf(stderr,"Unable to open file %s for reading\n",arg);
         return -1;
-    };
-    
+    }
     
     while(!feof(includeFile)) {
         memset(line,0,sizeof(line));
@@ -2035,8 +2035,7 @@ int cmd_source(char* arg)
             *cp = '\0';
         
         process_cmd_line(line);
-    };  
-    
+    }
     
     if(fclose(includeFile)<0) {
         perror("unable to close include file");
@@ -2045,202 +2044,203 @@ int cmd_source(char* arg)
     return 1;
 }
 
-int cmd_subshell(char* args) {
-	if(strlen(args)) 
-		system(args);
-	else 
-		system(getenv("SHELL"));
-	
+int cmd_subshell(char* args)
+{
+    if(strlen(args)) 
+        system(args);
+    else 
+        system(getenv("SHELL"));
+    
     printf("\n");
     return 1;
 }
 
+int cmd_set_apdufile(char* arg)
+{
+    REMOVE_TAILING_BLANKS(arg);
+  
+    if(apdu_file && apdu_file != stderr) { /* don't close stdout*/
+        perror("unable to close apdu log file");      
+    };
+    apdu_file=NULL;
+  
+    if(strlen(arg)<1) {
+        return 1;
+    }
+  
+    if(!strcmp(arg,"-")) 
+        apdu_file=stderr;      
+    else 
+        apdu_file=fopen(arg, "a");
+  
+    if(!apdu_file) {
+        perror("unable to open apdu log file no apdu log loaded");
+    } else {
+        odr_setprint(print, apdu_file); 
+    }
+  
+    return 1;
+}
 
-
-int cmd_set_apdufile(char* arg) {
-	REMOVE_TAILING_BLANKS(arg);
-  
-	if(apdu_file && apdu_file != stderr) { /* don't close stdout*/
-		perror("unable to close apdu log file");      
-	};
-	apdu_file=NULL;
-  
-	if(strlen(arg)<1) {
-		return 1;
-	}
-  
-	if(!strcmp(arg,"-")) 
-		apdu_file=stderr;      
-	else 
-		apdu_file=fopen(arg, "a");
-  
-	if(!apdu_file) {
-		perror("unable to open apdu log file no apdu log loaded");
-	} else {
-		odr_setprint(print, apdu_file);	
-	};
-  
-	return 1;
-};
-
-
-int cmd_set_cclfields(char* arg) {  
+int cmd_set_cclfields(char* arg)
+{  
 #if YAZ_MODULE_ccl
-	FILE *inf;
+    FILE *inf;
 
-	REMOVE_TAILING_BLANKS(arg);
+    REMOVE_TAILING_BLANKS(arg);
 
-	bibset = ccl_qual_mk (); 
-	inf = fopen (arg, "r");
-	if (inf)
-		{
-			ccl_qual_file (bibset, inf);
-			fclose (inf);
-		}
+    bibset = ccl_qual_mk (); 
+    inf = fopen (arg, "r");
+    if (inf)
+    {
+        ccl_qual_file (bibset, inf);
+        fclose (inf);
+    }
 #else 
-	fprintf(stderr,"Not compiled with the yaz ccl module\n");
+    fprintf(stderr,"Not compiled with the yaz ccl module\n");
 #endif
-	
-	return 1;
-};
+    
+    return 1;
+}
 
-int cmd_set_marcdump(char* arg) {
-	if(marcdump && marcdump != stderr) { /* don't close stdout*/
-		perror("unable to close apdu log file");      
-	};
-	marcdump=NULL;
+int cmd_set_marcdump(char* arg)
+{
+    if(marcdump && marcdump != stderr) { /* don't close stdout*/
+        perror("unable to close apdu log file");      
+    };
+    marcdump=NULL;
+    
+    if(strlen(arg)<1) {
+        return 1;
+    }
   
-	if(strlen(arg)<1) {
-		return 1;
-	}
+    if(!strcmp(arg,"-")) 
+        marcdump=stderr;      
+    else 
+        marcdump=fopen(arg, "a");
   
-	if(!strcmp(arg,"-")) 
-		marcdump=stderr;      
-	else 
-		marcdump=fopen(arg, "a");
+    if(!marcdump) {
+        perror("unable to open apdu marcdump file no marcdump done\n");
+    }
   
-	if(!marcdump) {
-		perror("unable to open apdu marcdump file no marcdump done\n");
-	};
-  
-	return 1;
-};
+    return 1;
+}
 
 int cmd_set_proxy(char* arg) {
-	if(yazProxy) free(yazProxy);
-	yazProxy=NULL;
+    if(yazProxy) free(yazProxy);
+    yazProxy=NULL;
 
-	if(strlen(arg) > 1) {
-		yazProxy=strdup(arg);
-	};  
-	return 1;
-};
+    if(strlen(arg) > 1) {
+        yazProxy=strdup(arg);
+    }
+    return 1;
+}
 
 /* 
    this command takes 3 arge {name class oid} 
  */
 int cmd_register_oid(char* args) {
-  static struct {
-    char* className;
-    oid_class oclass;
-  } oid_classes[] = {
-    {"appctx",CLASS_APPCTX},
-    {"absyn",CLASS_ABSYN},
-    {"attset",CLASS_ATTSET},
-    {"transyn",CLASS_TRANSYN},
-    {"diagset",CLASS_DIAGSET},
-    {"recsyn",CLASS_RECSYN},
-    {"resform",CLASS_RESFORM},
-    {"accform",CLASS_ACCFORM},
-    {"extserv",CLASS_EXTSERV},
-    {"userinfo",CLASS_USERINFO},
-    {"elemspec",CLASS_ELEMSPEC},
-    {"varset",CLASS_VARSET},
-    {"schema",CLASS_SCHEMA},
-    {"tagset",CLASS_TAGSET},
-    {"general",CLASS_GENERAL},
-    {0,0}
-  };
-  char oname_str[101], oclass_str[101], oid_str[101];  
-  char* name;
-  int i;
-  oid_class oidclass = CLASS_GENERAL;
-  int val = 0, oid[OID_SIZE];
-  struct oident * new_oident=NULL;
-
-  if (sscanf (args, "%100[^ ] %100[^ ] %100s", oname_str,oclass_str, oid_str) < 1) {
-    printf("Error in regristrate command \n");
-    return 0;
-  };
-  
-  for (i = 0; oid_classes[i].className; i++) {
-    if (!strcmp(oid_classes[i].className, oclass_str))
-      {
-	oidclass=oid_classes[i].oclass;
-	break;
-      }
-  }
-  
-  if(!(oid_classes[i].className)) {
-    printf("Unknonwn oid class %s\n",oclass_str);
-    return 0;
-  };
-
- 
-
-  i = 0;
-  name = oid_str;
-  val = 0;
-  
-  while (isdigit (*name))
-    {
-      val = val*10 + (*name - '0');
-      name++;
-      if (*name == '.')
-	{
-	  if (i < OID_SIZE-1)
-	    oid[i++] = val;
-	  val = 0;
-	  name++;
-	}
+    static struct {
+        char* className;
+        oid_class oclass;
+    } oid_classes[] = {
+        {"appctx",CLASS_APPCTX},
+        {"absyn",CLASS_ABSYN},
+        {"attset",CLASS_ATTSET},
+        {"transyn",CLASS_TRANSYN},
+        {"diagset",CLASS_DIAGSET},
+        {"recsyn",CLASS_RECSYN},
+        {"resform",CLASS_RESFORM},
+        {"accform",CLASS_ACCFORM},
+        {"extserv",CLASS_EXTSERV},
+        {"userinfo",CLASS_USERINFO},
+        {"elemspec",CLASS_ELEMSPEC},
+        {"varset",CLASS_VARSET},
+        {"schema",CLASS_SCHEMA},
+        {"tagset",CLASS_TAGSET},
+        {"general",CLASS_GENERAL},
+        {0,0}
+    };
+    char oname_str[101], oclass_str[101], oid_str[101];  
+    char* name;
+    int i;
+    oid_class oidclass = CLASS_GENERAL;
+    int val = 0, oid[OID_SIZE];
+    struct oident * new_oident=NULL;
+    
+    if (sscanf (args, "%100[^ ] %100[^ ] %100s",
+                oname_str,oclass_str, oid_str) < 1) {
+        printf("Error in regristrate command \n");
+        return 0;
     }
-  oid[i] = val;
-  oid[i+1] = -1;
+    
+    for (i = 0; oid_classes[i].className; i++) {
+        if (!strcmp(oid_classes[i].className, oclass_str))
+        {
+            oidclass=oid_classes[i].oclass;
+            break;
+        }
+    }
+    
+    if(!(oid_classes[i].className)) {
+        printf("Unknonwn oid class %s\n",oclass_str);
+        return 0;
+    }
 
-  new_oident=oid_addent (oid,PROTO_GENERAL,oidclass,oname_str,VAL_DYNAMIC);  
-  if(strcmp(new_oident->desc,oname_str)) {
-    fprintf(stderr,"oid is already named as %s, regristration faild\n",new_oident->desc);
-  };
-  return 1;  
-};
+    i = 0;
+    name = oid_str;
+    val = 0;
+    
+    while (isdigit (*name))
+    {
+        val = val*10 + (*name - '0');
+        name++;
+        if (*name == '.')
+        {
+            if (i < OID_SIZE-1)
+                oid[i++] = val;
+            val = 0;
+            name++;
+        }
+    }
+    oid[i] = val;
+    oid[i+1] = -1;
+    
+    new_oident=oid_addent (oid,PROTO_GENERAL,oidclass,oname_str,VAL_DYNAMIC);  
+    if(strcmp(new_oident->desc,oname_str)) {
+        fprintf(stderr,"oid is already named as %s, regristration faild\n",
+                new_oident->desc);
+    }
+    return 1;  
+}
 
 int cmd_push_command(char* arg) {
 #if HAVE_READLINE_HISTORY_H
-  if(strlen(arg)>1) 
-    add_history(arg);
+    if(strlen(arg)>1) 
+        add_history(arg);
 #else 
-  fprintf(stderr,"Not compiled with the readline/history module\n");
+    fprintf(stderr,"Not compiled with the readline/history module\n");
 #endif
-  return 1;
-};
+    return 1;
+}
 
 void source_rcfile() {
-  /*  Look for a $HOME/.yazclientrc and source it if it exists */
-  struct stat statbuf;
-  char buffer[1000];
-  char* homedir=getenv("HOME");
-  if(!homedir) return;
-  
-  sprintf(buffer,"%s/.yazclientrc",homedir);
-  
-  if(stat(buffer,&statbuf)==0) {
-    cmd_source(buffer);
-  };
-  
-  if(stat(".yazclientrc",&statbuf)==0) {
-    cmd_source(".yazclientrc");
-  };
-};
+    /*  Look for a $HOME/.yazclientrc and source it if it exists */
+    struct stat statbuf;
+    char buffer[1000];
+    char* homedir=getenv("HOME");
+    if(!homedir) return;
+    
+    sprintf(buffer,"%s/.yazclientrc",homedir);
+    
+    if(stat(buffer,&statbuf)==0) {
+        cmd_source(buffer);
+    }
+    
+    if(stat(".yazclientrc",&statbuf)==0) {
+        cmd_source(".yazclientrc");
+    }
+}
 
 
 static void initialize(void)
@@ -2397,57 +2397,57 @@ void  wait_and_handle_responce()
 
 
 static struct {
-  char *cmd;
-  int (*fun)(char *arg);
-  char *ad;
-  char *(*rl_completerfunction)(char *text, int state);
-  int complete_filenames;
+    char *cmd;
+    int (*fun)(char *arg);
+    char *ad;
+    char *(*rl_completerfunction)(const char *text, int state);
+    int complete_filenames;
 } cmd[] = {
-  {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]",NULL,0},
-  {"quit", cmd_quit, "",NULL,0},
-  {"find", cmd_find, "<query>",NULL,0},
-  {"delete", cmd_delete, "<setname>",NULL,0},
-  {"base", cmd_base, "<base-name>",NULL,0},
-  {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]",NULL,0},
-  {"scan", cmd_scan, "<term>",NULL,0},
-  {"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0},
-  {"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0},
-  {"authentication", cmd_authentication, "<acctstring>",NULL,0},
-  {"lslb", cmd_lslb, "<largeSetLowerBound>",NULL,0},
-  {"ssub", cmd_ssub, "<smallSetUpperBound>",NULL,0},
-  {"mspn", cmd_mspn, "<mediumSetPresentNumber>",NULL,0},
-  {"status", cmd_status, "",NULL,0},
-  {"setnames", cmd_setnames, "",NULL,0},
-  {"cancel", cmd_cancel, "",NULL,0},
-  {"format", cmd_format, "<recordsyntax>",complete_format,0},
-  {"schema", cmd_schema, "<schema>",complete_schema,0},
-  {"elements", cmd_elements, "<elementSetName>",NULL,0},
-  {"close", cmd_close, "",NULL,0},
-  {"attributeset", cmd_attributeset, "<attrset>",complete_attributeset,0},
-  {"querytype", cmd_querytype, "<type>",complete_querytype,0},
-  {"refid", cmd_refid, "<id>",NULL,0},
-  {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0},
-  {"update", cmd_update, "<item>",NULL,0},
-  {"packagename", cmd_packagename, "<packagename>",NULL,0},
-  {"proxy", cmd_proxy, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]",NULL,0},
-  {".", cmd_source, "<filename>",NULL,1},
-  {"!", cmd_subshell, "Subshell command",NULL,0},
-  {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,0},
-  {"set_marcdump", cmd_set_marcdump," <filename>",NULL,0},
-  {"set_cclfields", cmd_set_cclfields,"<filename>",NULL,1}, 
-  {"register_oid",cmd_register_oid,"<name> <class> <oid>",NULL,0},
-  {"push_command",cmd_push_command,"<command>",command_generator,0},
-  /* Server Admin Functions */
-  {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0},
-  {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0},
-  {"adm-create", cmd_adm_create, "",NULL,0},
-  {"adm-drop", cmd_adm_drop, "('database'|'index')<object-name>",NULL,0},
-  {"adm-import", cmd_adm_import, "<record-type> <dir> <pattern>",NULL,0},
-  {"adm-refresh", cmd_adm_refresh, "",NULL,0},
-  {"adm-commit", cmd_adm_commit, "",NULL,0},
-  {"adm-shutdown", cmd_adm_shutdown, "",NULL,0},
-  {"adm-startup", cmd_adm_startup, "",NULL,0},
-  {0,0,0,0,0}
+    {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]",NULL,0},
+    {"quit", cmd_quit, "",NULL,0},
+    {"find", cmd_find, "<query>",NULL,0},
+    {"delete", cmd_delete, "<setname>",NULL,0},
+    {"base", cmd_base, "<base-name>",NULL,0},
+    {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]",NULL,0},
+    {"scan", cmd_scan, "<term>",NULL,0},
+    {"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0},
+    {"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0},
+    {"authentication", cmd_authentication, "<acctstring>",NULL,0},
+    {"lslb", cmd_lslb, "<largeSetLowerBound>",NULL,0},
+    {"ssub", cmd_ssub, "<smallSetUpperBound>",NULL,0},
+    {"mspn", cmd_mspn, "<mediumSetPresentNumber>",NULL,0},
+    {"status", cmd_status, "",NULL,0},
+    {"setnames", cmd_setnames, "",NULL,0},
+    {"cancel", cmd_cancel, "",NULL,0},
+    {"format", cmd_format, "<recordsyntax>",complete_format,0},
+    {"schema", cmd_schema, "<schema>",complete_schema,0},
+    {"elements", cmd_elements, "<elementSetName>",NULL,0},
+    {"close", cmd_close, "",NULL,0},
+    {"attributeset", cmd_attributeset, "<attrset>",complete_attributeset,0},
+    {"querytype", cmd_querytype, "<type>",complete_querytype,0},
+    {"refid", cmd_refid, "<id>",NULL,0},
+    {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0},
+    {"update", cmd_update, "<item>",NULL,0},
+    {"packagename", cmd_packagename, "<packagename>",NULL,0},
+    {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0},
+    {".", cmd_source, "<filename>",NULL,1},
+    {"!", cmd_subshell, "Subshell command",NULL,0},
+    {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,0},
+    {"set_marcdump", cmd_set_marcdump," <filename>",NULL,0},
+    {"set_cclfields", cmd_set_cclfields,"<filename>",NULL,1}, 
+    {"register_oid",cmd_register_oid,"<name> <class> <oid>",NULL,0},
+    {"push_command",cmd_push_command,"<command>",command_generator,0},
+    /* Server Admin Functions */
+    {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0},
+    {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0},
+    {"adm-create", cmd_adm_create, "",NULL,0},
+    {"adm-drop", cmd_adm_drop, "('database'|'index')<object-name>",NULL,0},
+    {"adm-import", cmd_adm_import, "<record-type> <dir> <pattern>",NULL,0},
+    {"adm-refresh", cmd_adm_refresh, "",NULL,0},
+    {"adm-commit", cmd_adm_commit, "",NULL,0},
+    {"adm-shutdown", cmd_adm_shutdown, "",NULL,0},
+    {"adm-startup", cmd_adm_startup, "",NULL,0},
+    {0,0,0,0,0}
 };
 
 void process_cmd_line(char* line)
@@ -2470,19 +2470,19 @@ void process_cmd_line(char* line)
     
     /* removed tailing spaces from the arg command */
     { 
-      char* p;
-      char* lastnonspace=NULL;
-      p = arg;
-      
-      for(;*p; ++p) {
-	if(!isspace(*p)) {
-	  lastnonspace = p;
-	};
-      };
-      if(lastnonspace) 
-	*(++lastnonspace) = 0;
+        char* p;
+        char* lastnonspace=NULL;
+        p = arg;
+        
+        for(;*p; ++p) {
+            if(!isspace(*p)) {
+                lastnonspace = p;
+            };
+        };
+        if(lastnonspace) 
+            *(++lastnonspace) = 0;
     };
-
+    
 
     for (i = 0; cmd[i].cmd; i++)
         if (!strncmp(cmd[i].cmd, word, strlen(word)))
@@ -2509,20 +2509,20 @@ void process_cmd_line(char* line)
 }
 
 
-char *command_generator(char *text, int state) 
+char *command_generator(const char *text, int state) 
 {
-	static idx; // index is the last used the last time command_generator was called
-	char *command;
-	if (state==0) {
-		idx = 0;
-	}
-	for( ; cmd[idx].cmd; ++idx) {
-		if (!strncmp(cmd[idx].cmd,text,strlen(text))) {
-			++idx;  /* skip this entry on the next run */
-			return strdup(cmd[idx-1].cmd);
-		};
-	}
-	return NULL;
+    static idx; // index is the last used the last time command_generator was called
+    char *command;
+    if (state==0) {
+        idx = 0;
+    }
+    for( ; cmd[idx].cmd; ++idx) {
+        if (!strncmp(cmd[idx].cmd,text,strlen(text))) {
+            ++idx;  /* skip this entry on the next run */
+            return strdup(cmd[idx-1].cmd);
+        };
+    }
+    return NULL;
 }
 
 
@@ -2532,42 +2532,56 @@ char *command_generator(char *text, int state)
 char ** readline_completer(char *text, int start, int end) {
 #if HAVE_READLINE_READLINE_H
 
-	if(start == 0) {
-		char** res=completion_matches(text, (CPFunction*)command_generator); 
-		rl_attempted_completion_over = 1;
-		return res;
-	} else {
-		char arg[1024],word[32];
-		int i=0 ,res;
-		if ((res = sscanf(rl_line_buffer, "%31s %1023[^;]", word, arg)) <= 0) {     
-			rl_attempted_completion_over = 1;
-			return NULL;
-		};
+    if(start == 0) {
+#ifdef RL_READLINE_VERSION
+        char** res=rl_completion_matches(text,
+                                      command_generator); 
+#else
+        char** res=completion_matches(text,
+                                      (CPFunction*)command_generator); 
+#endif
+        rl_attempted_completion_over = 1;
+        return res;
+    } else {
+        char arg[1024],word[32];
+        int i=0 ,res;
+        if ((res = sscanf(rl_line_buffer, "%31s %1023[^;]", word, arg)) <= 0) {     
+            rl_attempted_completion_over = 1;
+            return NULL;
+        };
     
-		if(start != strlen(word) +1 ) {
-			rl_attempted_completion_over = 1;
-			return 0;
-		}
-		for (i = 0; cmd[i].cmd; i++) {
-			if (!strncmp(cmd[i].cmd, word, strlen(word))) {
-				break;
-			}
-		}
+        if(start != strlen(word) +1 ) {
+            rl_attempted_completion_over = 1;
+            return 0;
+        }
+        for (i = 0; cmd[i].cmd; i++) {
+            if (!strncmp(cmd[i].cmd, word, strlen(word))) {
+                break;
+            }
+        }
     
 
-		if(!cmd[i].complete_filenames) 
-			rl_attempted_completion_over = 1;    
-		if(cmd[i].rl_completerfunction) {
-			char** res=completion_matches(text, (CPFunction*)cmd[i].rl_completerfunction);
-			rl_attempted_completion_over = 1;    
-			return res;
-		} else {
-			rl_attempted_completion_over = 1;
-			return 0;
-		};
-	};
+        if(!cmd[i].complete_filenames) 
+            rl_attempted_completion_over = 1;    
+        if(cmd[i].rl_completerfunction) {
+#ifdef RL_READLINE_VERSION
+            char** res=
+                rl_completion_matches(text,
+                                   cmd[i].rl_completerfunction);
+#else
+            char** res=
+                completion_matches(text,
+                                   (CPFunction*)cmd[i].rl_completerfunction);
+#endif
+            rl_attempted_completion_over = 1;    
+            return res;
+        } else {
+            rl_attempted_completion_over = 1;
+            return 0;
+        };
+    };
 #else 
-	return 0;
+    return 0;
 #endif 
 };
 
@@ -2607,8 +2621,8 @@ static void client(void)
             if ((end_p = strchr (line, '\n')))
                 *end_p = '\0';
 #endif 
-	    process_cmd_line(line);
-	}
+        process_cmd_line(line);
+    }
     }
 }
 
@@ -2619,7 +2633,7 @@ int main(int argc, char **argv)
     char *auth_command = 0;
     char *arg;
     int ret;
-	
+    
     while ((ret = options("k:c:a:m:v:p:u:", argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -2642,19 +2656,19 @@ int main(int argc, char **argv)
                 exit (1);
             }
             break;
-	case 'c':
-	    strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
-	    ccl_fields[sizeof(ccl_fields)-1] = '\0';
-	    break;
+    case 'c':
+        strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
+        ccl_fields[sizeof(ccl_fields)-1] = '\0';
+        break;
         case 'a':
             if (!strcmp(arg, "-"))
                 apdu_file=stderr;
             else
                 apdu_file=fopen(arg, "a");
             break;
-	case 'p':
-	    yazProxy=strdup(arg);
-	    break;
+    case 'p':
+        yazProxy=strdup(arg);
+        break;
         case 'u':
             if (!auth_command)
             {
@@ -2672,7 +2686,7 @@ int main(int argc, char **argv)
                      "[-k size] [<server-addr>]\n",
                      prog);
             exit (1);
-        }	   
+        }      
     }
     initialize();
     if (auth_command)

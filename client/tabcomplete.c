@@ -1,8 +1,15 @@
-#include "tabcomplete.h"
+/*
+ * Copyright (c) 2002, Index Data
+ * See the file LICENSE for details.
+ *
+ * $Id: tabcomplete.c,v 1.2 2002-01-30 14:51:45 adam Exp $
+ */
+
 #include <string.h>
-#include <yaz/oid.h>
 #include <stdio.h>
 
+#include <yaz/oid.h>
+#include "tabcomplete.h"
 
 /* *****************************************************************************
  *
@@ -10,7 +17,8 @@
  * 
  * *****************************************************************************/
 
-char* complete_from_list(char* completions[], char *text, int state) {
+char* complete_from_list(char* completions[], const char *text, int state)
+{
 	static idx;
 	if(state==0) {
 		idx = 0;
@@ -22,7 +30,7 @@ char* complete_from_list(char* completions[], char *text, int state) {
 		};
 	};
 	return NULL;
-};
+}
 
 
 /* *****************************************************************************
@@ -44,7 +52,8 @@ typedef struct {
   owned data 
 */
 
-void oid_loader(struct oident* oid, void* data_) {
+void oid_loader(struct oident* oid, void* data_)
+{
 	oid_callback_t* data=(oid_callback_t*) data_;
 	
 	//fprintf(stderr,"ja7: called with %d: %s\n",oid->oclass,oid->desc);	
@@ -69,7 +78,7 @@ char** build_list_for_oclass(oid_class oclass) {
 	
 	data.values[data.index]=0;
 	return data.values;	   
-};
+}
 
 /* *****************************************************************************
  * 
@@ -77,30 +86,34 @@ char** build_list_for_oclass(oid_class oclass) {
  * 
  * *****************************************************************************/
 
-char* complete_querytype(char *text, int state) {
-  char* querytypes[] = {"ccl2rpn","prefix","cclrpn","ccl",0};
-  return complete_from_list(querytypes,text,state);  
-};
+char* complete_querytype(const char *text, int state)
+{
+    char* querytypes[] = {"ccl2rpn","prefix","cclrpn","ccl",0};
+    return complete_from_list(querytypes,text,state);  
+}
 
 
-char* complete_format(char* text, int state) {
+char* complete_format(const char* text, int state)
+{
 	char** list=build_list_for_oclass(CLASS_RECSYN);
 	char* res=complete_from_list(list,text,state);  
 	
 	free(list);	
 	return res;
-};
+}
 
-char* complete_schema(char* text, int state) {
+char* complete_schema(const char* text, int state)
+{
 	char** list=build_list_for_oclass(CLASS_SCHEMA);
 	char* res=complete_from_list(list,text,state);  
 	
 	free(list);	
 	return res;
-};
+}
 
 
-char* complete_attributeset(char* text, int state) {
+char* complete_attributeset(const char* text, int state)
+{
 	char** list=build_list_for_oclass(CLASS_ATTSET);
 	char* res=complete_from_list(list,text,state);  
 	
