@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.33  1996-02-10 12:23:49  quinn
+ * Revision 1.34  1996-02-21 13:12:07  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.33  1996/02/10  12:23:49  quinn
  * Enable inetd operations fro TCP/IP stack
  *
  * Revision 1.32  1996/01/19  15:41:52  quinn
@@ -184,9 +187,19 @@ static void listener(IOCHAN h, int event)
 	    else if (res == 0) /* child */
 	    {
 	    	char nbuf[100];
+		IOCHAN pp;
 
 		close(hand[0]);
 		child = 1;
+		for (pp = iochan_getchan(); pp; pp = iochan_getnext(pp))
+		{
+		    if (pp != h)
+		    {
+			COMSTACK l = iochan_getdata(pp);
+			cs_close(l);
+			iochan_destroy(pp);
+		    }
+		}
 		sprintf(nbuf, "%s(%d)", me, getpid());
 		log_init(control_block.loglevel, nbuf, 0);
 	    }
