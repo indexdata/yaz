@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.5 2002-06-17 14:57:34 ja7 Exp $
+ * $Id: tabcomplete.c,v 1.6 2002-07-12 13:42:20 adam Exp $
  */
 
 #include <string.h>
@@ -29,7 +29,13 @@ char* complete_from_list(char* completions[], const char *text, int state)
 		idx = 0;
 	}
 	for(; completions[idx]; ++ idx) {
-		if(!strncasecmp(completions[idx],text,strlen(text))) {
+		if(!
+#ifdef WIN32
+		    _strnicmp
+#else
+		    strncasecmp
+#endif		    
+		    (completions[idx],text,strlen(text))) {
 			++idx; /* skip this entry on the next run */ 
 			return (char*)strdup(completions[idx-1]);
 		};
