@@ -1,4 +1,4 @@
-<!-- $Header: /home/cvsroot/yaz/doc/asn.xml,v 1.2 2001-07-19 12:46:57 adam Exp $ -->
+<!-- $Header: /home/cvsroot/yaz/doc/asn.xml,v 1.3 2001-07-19 16:53:02 adam Exp $ -->
 <chapter><title>The ASN Module</title>
 <sect1><title>Introduction</title>
 <para>
@@ -336,8 +336,7 @@ We include, for reference, a listing of the fields of each top-level
 PDU, as well as their default settings.
 </para>
 
-
-<table frame="top"><title>Default settings for Z39.50 PDU's</title>
+<table frame="top"><title>Default settings for PDU Initialize Request</title>
 <tgroup cols="3">
 <colspec colname="field"></colspec>
 <colspec colname="type"></colspec>
@@ -350,9 +349,6 @@ PDU, as well as their default settings.
 </row>
 </thead>
 <tbody>
-<row>
-<entry namest="field" nameend="field">Z_InitRequest</entry>
-</row>
 
 <row><entry>
 referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
@@ -402,44 +398,141 @@ otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
 </tgroup>
 </table>
 
-<screen>
-Z_InitResponse
---------------
-Field                        Type                Default value
+<table frame="top"><title>Default settings for PDU Initialize Response</title>
+<tgroup cols="3">
+<colspec colname="field"></colspec>
+<colspec colname="type"></colspec>
+<colspec colname="value"></colspec>
+<thead>
+<row>
+<entry>Field</entry>
+<entry>Type</entry>
+<entry>Default Value</entry>
+</row>
+</thead>
+<tbody>
 
-referenceId                  Z_ReferenceId       NULL
-protocolVersion              Odr_bitmask         Empty bitmask
-options                      Odr_bitmask         Empty bitmask
-preferredMessageSize         int                 30*1024
-maximumRecordSize            int                 30*1024
-result                       bool_t              TRUE
-implementationId             char*               "YAZ (id=81)"
-implementationName           char*               "Index Data/YAZ"
-implementationVersion        char*               YAZ_VERSION
-userInformationField         Z_UserInformat..    NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
+<row><entry>
+referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
+</entry></row>
 
-<screen>
-Z_SearchRequest
----------------
-Field                        Type                Default value
+<row><entry>
+protocolVersion</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
+</entry></row>
 
-referenceId                  Z_ReferenceId       NULL
-smallSetUpperBound           int                 0
-largeSetLowerBound           int                 1
-mediumSetPresentNumber       int                 0
-replaceIndicator             bool_t              TRUE
-resultSetName                char*               "default"
-num_databaseNames            int                 0
-databaseNames                char**              NULL
-smallSetElementSetNames      Z_ElementSetNames   NULL
-mediumSetElementSetNames     Z_ElementSetNames   NULL
-preferredRecordSyntax        Odr_oid             NULL
-query                        Z_Query             NULL
-additionalSearchInfo         Z_OtherInformation  NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
+<row><entry>
+options</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
+</entry></row>
+
+<row><entry>
+preferredMessageSize</entry><entry>int</entry><entry>30*1024
+</entry></row>
+
+<row><entry>
+maximumRecordSize</entry><entry>int</entry><entry>30*1024
+</entry></row>
+
+<row><entry>
+result</entry><entry>bool_t</entry><entry>TRUE
+</entry></row>
+
+<row><entry>
+implementationId</entry><entry>char*</entry><entry>"YAZ (id=81)"
+</entry></row>
+
+<row><entry>
+implementationName</entry><entry>char*</entry><entry>"Index Data/YAZ"
+</entry></row>
+
+<row><entry>
+implementationVersion</entry><entry>char*</entry><entry>YAZ_VERSION
+</entry></row>
+
+<row><entry>
+userInformationField</entry><entry>Z_UserInformation</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
+</entry></row>
+
+</tbody>
+</tgroup>
+</table>
+
+<table frame="top"><title>Default settings for PDU Search Request</title>
+<tgroup cols="3">
+<colspec colname="field"></colspec>
+<colspec colname="type"></colspec>
+<colspec colname="value"></colspec>
+<thead>
+<row>
+<entry>Field</entry>
+<entry>Type</entry>
+<entry>Default Value</entry>
+</row>
+</thead>
+<tbody>
+
+<row><entry>
+referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+smallSetUpperBound</entry><entry>int</entry><entry>0
+</entry></row>
+
+<row><entry>
+largeSetLowerBound</entry><entry>int</entry><entry>1
+</entry></row>
+
+<row><entry>
+mediumSetPresentNumber</entry><entry>int</entry><entry>0
+</entry></row>
+
+<row><entry>
+replaceIndicator</entry><entry>bool_t</entry><entry>TRUE
+</entry></row>
+
+<row><entry>
+resultSetName</entry><entry>char *</entry><entry>"default"
+</entry></row>
+
+<row><entry>
+num_databaseNames</entry><entry>int</entry><entry>0
+</entry></row>
+
+<row><entry>
+databaseNames</entry><entry>char **</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+smallSetElementSetNames</entry><entry>Z_ElementSetNames</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+mediumSetElementSetNames</entry><entry>Z_ElementSetNames</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+preferredRecordSyntax</entry><entry>Odr_oid</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+query</entry><entry>Z_Query</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+additionalSearchInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
+</entry></row>
+
+</tbody>
+</tgroup>
+</table>
 
 <screen>
 Z_SearchResponse
