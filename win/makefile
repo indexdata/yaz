@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.85 2004-08-19 07:48:00 adam Exp $
+# $Id: makefile,v 1.86 2004-10-10 21:48:18 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -172,7 +172,6 @@ COMMON_C_OPTIONS=          \
   $(LIBXML2_DEF)           \
   /D "_WINDOWS"            \
   /D "WIN32"               \
-  /D "HAVE_WCHAR_H=1"      \
   /FR"$(OBJDIR)\\"         \
   /Fo"$(OBJDIR)\\"         \
   /Fd"$(OBJDIR)\\" 
