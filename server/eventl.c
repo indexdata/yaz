@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.6  1995-03-27 08:34:21  quinn
+ * Revision 1.7  1995-03-27 15:02:01  quinn
+ * Added some includes for better portability
+ *
+ * Revision 1.6  1995/03/27  08:34:21  quinn
  * Added dynamic server functionality.
  * Released bindings to session.c (is now redundant)
  *
@@ -30,6 +33,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 
 #include <eventl.h>
 

@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.13 1995-03-27 08:34:20 quinn Exp $
+# $Id: Makefile,v 1.14 1995-03-27 15:02:00 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../asn -I../odr -I../yazlib -I../../egate/include\
@@ -39,7 +39,7 @@ $(LIBDIR):
 	$(CC) -c $(DEFS) $(CFLAGS) $<
 
 clean:
-	rm -f *.[oa] test core mon.out gmon.out errlist tst cli
+	rm -f *.[oa] test core mon.out gmon.out errlist tst cli $(PROG)
 
 depend: depend2
 :
