@@ -39,7 +39,7 @@ Development libraries and includes for the libyaz package.
 %build
 
 CFLAGS="$RPM_OPT_FLAGS" \
- ./configure --prefix=/usr --enable-shared --enable-tcpd --with-openssl
+ ./configure --prefix=/usr --enable-shared --enable-tcpd --with-xml2 --with-openssl
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
