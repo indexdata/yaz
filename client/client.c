@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.7  1995-06-02 09:50:09  quinn
+ * Revision 1.8  1995-06-05 10:52:22  quinn
+ * Added SCAN.
+ *
+ * Revision 1.7  1995/06/02  09:50:09  quinn
  * Smallish.
  *
  * Revision 1.6  1995/05/31  08:29:21  quinn
@@ -37,6 +40,9 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <assert.h>
+#ifdef _AIX
+#include <sys/select.h>
+#endif
 
 #include <comstack.h>
 #include <tcpip.h>
@@ -70,6 +76,8 @@ static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
 static int setno = 1;                   /* current set offset */
 static int protocol = PROTO_Z3950;      /* current app protocol */
+static ODR_MEM session_mem;                /* memory handle for init-response */
+static Z_InitResponse *session = 0;        /* session parameters */
 #ifdef RPN_QUERY
 #ifndef PREFIX_QUERY
 static CCL_bibset bibset;               /* CCL bibset handle */
@@ -104,6 +112,9 @@ static void send_initRequest()
 
     ODR_MASK_SET(req->options, Z_Options_search);
     ODR_MASK_SET(req->options, Z_Options_present);
+    ODR_MASK_SET(req->options, Z_Options_namedResultSets);
+    ODR_MASK_SET(req->options, Z_Options_triggerResourceCtrl);
+    ODR_MASK_SET(req->options, Z_Options_scan);
 
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
@@ -116,6 +127,10 @@ static void send_initRequest()
 
 static int process_initResponse(Z_InitResponse *res)
 {
+    /* save parameters for later use */
+    session_mem = odr_extract_mem(in);
+    session = res;
+
     if (!*res->result)
 	printf("Connection rejected by target.\n");
     else
@@ -523,6 +538,115 @@ int cmd_quit(char *arg)
     exit(0);
 }
 
+int cmd_cancel(char *arg)
+{
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
+    Z_TriggerResourceControlRequest *req =
+	apdu->u.triggerResourceControlRequest;
+    bool_t false = 0;
+    
+    if (!session)
+    {
+    	printf("Session not initialized yet\n");
+	return 0;
+    }
+    if (!ODR_MASK_GET(session->options, Z_Options_triggerResourceCtrl))
+    {
+    	printf("Target doesn't support cancel (trigger resource ctrl)\n");
+	return 0;
+    }
+    *req->requestedAction = Z_TriggerResourceCtrl_cancel;
+    req->resultSetWanted = &false;
+
+    send_apdu(apdu);
+    printf("Sent cancel request\n");
+    return 2;
+}
+
+int send_scanrequest(char *string, int pp, int num)
+{
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
+    Z_ScanRequest *req = apdu->u.scanRequest;
+    char *db = database;
+    oident attset;
+    Z_AttributesPlusTerm sp;
+    Z_Term term;
+    Odr_oct trm;
+
+    req->num_databaseNames = 1;
+    req->databaseNames = &db;
+    attset.proto = protocol;
+    attset.class = CLASS_ATTSET;
+    attset.value = VAL_BIB1;
+    req->attributeSet = oid_getoidbyent(&attset);
+    req->termListAndStartPoint = &sp;
+    sp.num_attributes = 0;
+    sp.attributeList = ODR_NULLVAL;
+    sp.term = &term;
+    term.which = Z_Term_general;
+    term.u.general = &trm;
+    trm.buf = (unsigned char*) string;
+    trm.len = trm.size = strlen(string);
+    req->numberOfTermsRequested = &num;
+    req->preferredPositionInResponse = &pp;
+    send_apdu(apdu);
+    return 2;
+}
+
+void display_term(Z_TermInfo *t)
+{
+    if (t->term->which == Z_Term_general)
+    	printf("%.*s (%d)\n", t->term->u.general->len, t->term->u.general->buf,
+	    t->globalOccurrences ? *t->globalOccurrences : -1);
+    else
+    	printf("Term type not general.\n");
+}
+
+void process_scanResponse(Z_ScanResponse *res)
+{
+    int i;
+
+    printf("SCAN: %d entries, position=%d\n", *res->numberOfEntriesReturned,
+    	*res->positionOfTerm);
+    if (*res->scanStatus != Z_Scan_success)
+    	printf("Scan returned code %d\n", *res->scanStatus);
+    if (!res->entries)
+    	return;
+    if (res->entries->which == Z_ListEntries_entries)
+    {
+    	Z_Entries *ent = res->entries->u.entries;
+
+	for (i = 0; i < ent->num_entries; i++)
+	    if (ent->entries[i]->which == Z_Entry_termInfo)
+	    {
+	    	printf("%c ", i + 1 == *res->positionOfTerm ? '*' : ' ');
+	    	display_term(ent->entries[i]->u.termInfo);
+	    }
+	    else
+	    	display_diagrec(ent->entries[i]->u.surrogateDiagnostic);
+    }
+    else
+    	display_diagrec(res->entries->u.nonSurrogateDiagnostics->diagRecs[0]);
+}
+
+int cmd_scan(char *arg)
+{
+    if (!session)
+    {
+    	printf("Session not initialized yet\n");
+	return 0;
+    }
+    if (!ODR_MASK_GET(session->options, Z_Options_scan))
+    {
+    	printf("Target doesn't support scan\n");
+	return 0;
+    }
+    if (*arg)
+    	if (send_scanrequest(arg, 5, 19) < 0)
+	    return 0;
+    return 2;
+}
+
 static void initialize(void)
 {
 #ifdef RPN_QUERY
@@ -565,12 +689,14 @@ static int client(void)
     	{"find", cmd_find, "<CCL-QUERY>"},
     	{"base", cmd_base, "<BASE-NAME>"},
     	{"show", cmd_show, "<REC#>['+'<#RECS>]"},
+	{"scan", cmd_scan, "<TERM>"},
     	{"authentication", cmd_authentication, "<ACCTSTRING>"},
 	{"lslb", cmd_lslb, "<largeSetLowerBound>"},
 	{"ssub", cmd_ssub, "<smallSetUpperBound>"},
 	{"mspn", cmd_mspn, "<mediumSetPresentNumber>"},
 	{"status", cmd_status, ""},
 	{"setnames", cmd_setnames, ""},
+	{"cancel", cmd_cancel, ""},
     	{0,0}
     };
     char *netbuffer= 0;
@@ -660,6 +786,9 @@ static int client(void)
 			break;
 		    case Z_APDU_searchResponse:
 		    	process_searchResponse(apdu->u.searchResponse);
+			break;
+		    case Z_APDU_scanResponse:
+		    	process_scanResponse(apdu->u.scanResponse);
 			break;
 		    case Z_APDU_presentResponse:
 		    	printf("Received presentResponse.\n");
