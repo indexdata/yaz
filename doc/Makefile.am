@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.47 2003-05-27 21:12:22 adam Exp $
+## $Id: Makefile.am,v 1.48 2003-10-02 19:47:41 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -38,11 +38,9 @@ EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 	$(doc_DATA) Doxyfile
 
 yaz-client.1: $(srcdir)/yaz-client.sgml $(srcdir)/yaz-client-commands.xml
-	if test ! -f yaz-client-commands.xml ; then ln -s $(srcdir)/yaz-client-commands.xml .; fi
 	docbook2man $(srcdir)/yaz-client.sgml
 
 yaz-ztest.8: yaz-ztest.sgml ztest-options.xml
-	if test ! -f ztest-options.xml ; then ln -s $(srcdir)/ztest-options .; fi
 	docbook2man $(srcdir)/yaz-ztest.sgml
 
 yaz-config.8: yaz-config.sgml
@@ -71,6 +69,7 @@ yaz.php: $(XMLFILES)
 
 yaz.pdf: $(XMLFILES) $(srcdir)/id.png
 	if test ! -f id.png ; then ln -s $(srcdir)/id.png .; fi
+	if test ! -f apilayer.png ; then ln -s $(srcdir)/apilayer.png .; fi
 	jade -E14 -D $(srcdir) -d yazprint.dsl -t tex $(srcdir)/xml.dcl yaz.xml
 	pdfjadetex yaz.tex
 	pdfjadetex yaz.tex
