@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.10 2002-05-21 08:36:03 adam Exp $
+ * $Id: zoomtst7.c,v 1.11 2002-07-31 14:06:09 adam Exp $
  *
  * API test..
  */
@@ -138,9 +138,6 @@ int main(int argc, char **argv)
 	    for (j = 0; j < 10; j++)
 	    {
 		ZOOM_resultset_records (r[j], 0, 0, 1);
-		if (block > 0)
-		    while (ZOOM_event (1, &z))
-			;
 	    }
 	    for (j = 0; j < 10; j++)
 		ZOOM_resultset_destroy (r[j]);
