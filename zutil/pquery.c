@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.15 2002-05-07 11:01:14 adam Exp $
+ * $Id: pquery.c,v 1.16 2002-07-25 12:48:39 adam Exp $
  */
 
 #include <stdio.h>
@@ -297,11 +297,35 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
     zapt->attributes->attributes = elements;
 
     zapt->term = term;
-    term->which = Z_Term_general;
-    term->u.general = term_octet;
-    term_octet->buf = (unsigned char *)odr_malloc (o, li->lex_len);
+
+    term_octet->buf = (unsigned char *)odr_malloc (o, 1 + li->lex_len);
     term_octet->size = term_octet->len =
-	escape_string ((char *) (term_octet->buf), li->lex_buf, li->lex_len);
+        escape_string ((char *) (term_octet->buf), li->lex_buf, li->lex_len);
+    term_octet->buf[term_octet->size] = 0;  /* null terminate */
+    
+    switch (li->term_type)
+    {
+    case Z_Term_general:
+        term->which = Z_Term_general;
+        term->u.general = term_octet;
+        break;
+    case Z_Term_characterString:
+        term->which = Z_Term_characterString;
+        term->u.characterString = term_octet->buf;  /* null terminated above */
+        break;
+    case Z_Term_numeric:
+        term->which = Z_Term_numeric;
+        term->u.numeric = odr_intdup (o, atoi(term_octet->buf));
+        break;
+    case Z_Term_null:
+        term->which = Z_Term_null;
+        term->u.null = odr_nullval();
+        break;
+    default:
+        term->which = Z_Term_null;
+        term->u.null = odr_nullval();
+        break;
+    }
     return zapt;
 }
 
@@ -435,6 +459,25 @@ static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
     return zc;
 }
 
+static void rpn_term_type (struct lex_info *li, ODR o)
+{
+    if (!li->query_look)
+        return ;
+    if (compare_term (li, "general", 0))
+        li->term_type = Z_Term_general;
+    else if (compare_term (li, "numeric", 0))
+        li->term_type = Z_Term_numeric;
+    else if (compare_term (li, "string", 0))
+        li->term_type = Z_Term_characterString;
+    else if (compare_term (li, "oid", 0))
+        li->term_type = Z_Term_oid;
+    else if (compare_term (li, "datetime", 0))
+        li->term_type = Z_Term_dateTime;
+    else if (compare_term (li, "null", 0))
+        li->term_type = Z_Term_null;
+    lex (li);
+}
+                           
 static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
                                       oid_proto proto, 
                                       int num_attr, int max_attr, 
@@ -481,21 +524,7 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
 			   attr_clist,  attr_set);
     case 'y':
 	lex (li);
-	if (!li->query_look)
-	    return NULL;
-	if (compare_term (li, "general", 0))
-	    li->term_type = Z_Term_general;
-	else if (compare_term (li, "numeric", 0))
-	    li->term_type = Z_Term_numeric;
-	else if (compare_term (li, "string", 0))
-	    li->term_type = Z_Term_characterString;
-	else if (compare_term (li, "oid", 0))
-	    li->term_type = Z_Term_oid;
-	else if (compare_term (li, "datetime", 0))
-	    li->term_type = Z_Term_dateTime;
-	else if (compare_term (li, "null", 0))
-	    li->term_type = Z_Term_null;
-	lex (li);
+        rpn_term_type (li, o);
         return
             rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
 			   attr_clist, attr_set);
@@ -582,18 +611,28 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
 
     *attributeSetP = yaz_oidval_to_z3950oid (o, CLASS_ATTSET, topSet);
 
-    while (li->query_look == 'l')
+    while (1)
     {
-        lex (li);
-        if (!li->query_look)
-            return 0;
-        if (num_attr >= max_attr)
-            return 0;
-        if (!p_query_parse_attr(li, o, num_attr, attr_list,
-                                attr_clist, attr_set))
-            return 0;
-        num_attr++;
-        lex (li);
+        if (li->query_look == 'l')
+        {
+            lex (li);
+            if (!li->query_look)
+                return 0;
+            if (num_attr >= max_attr)
+                return 0;
+            if (!p_query_parse_attr(li, o, num_attr, attr_list,
+                                    attr_clist, attr_set))
+                return 0;
+            num_attr++;
+            lex (li);
+        }
+        else if (li->query_look == 'y')
+        {
+            lex (li);
+            rpn_term_type (li, o);
+        }
+        else
+            break;
     }
     if (!li->query_look)
         return NULL;
