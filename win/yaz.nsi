@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.61 2005-02-08 14:19:22 adam Exp $
+; $Id: yaz.nsi,v 1.62 2005-02-08 14:58:19 adam Exp $
 
 !define VERSION "2.0.34"
 
@@ -85,7 +85,7 @@ Noservice:
 	SetOutPath $INSTDIR\bin
 	File c:\winnt\system32\msvcr71.dll
 	File ..\bin\iconv.dll
-	File ..\bin\zlib.dll
+	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
 	File ..\bin\yaz.dll
 	File ..\bin\*.exe
