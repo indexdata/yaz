@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.33 2003-04-29 21:20:34 adam Exp $
+ * $Id: zoom-c.c,v 1.34 2003-05-14 20:58:07 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -68,7 +68,10 @@ static ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c)
 {
     ZOOM_Event event = c->m_queue_front;
     if (!event)
+    {
+        c->last_event = ZOOM_EVENT_NONE;
 	return 0;
+    }
     assert (c->m_queue_back);
     c->m_queue_front = event->prev;
     if (c->m_queue_front)
