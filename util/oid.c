@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.21  1997-08-19 08:46:05  quinn
+ * Revision 1.22  1997-08-29 13:34:58  quinn
+ * Added thesaurus oids
+ *
+ * Revision 1.21  1997/08/19 08:46:05  quinn
  * Added Thesaurus OID
  *
  * Revision 1.20  1997/07/28 12:34:43  adam
@@ -190,6 +193,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_GILS,      {14,4,-1},   "GILS-tagset" },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_COLLECT1,  {14,5,-1},   "Collections-tagset"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_CIMI1,     {14,6,-1},   "CIMI-tagset" },
+    {PROTO_Z3950,   CLASS_TAGSET,  VAL_THESAURUS, {14,1000,81,1,-1}, "thesaurus-tagset"},
 
     /* SR definitions. Note that some of them aren't defined by the
         standard (yet), but are borrowed from Z3950v3 */
@@ -262,6 +266,7 @@ static oident oids[] =
     {PROTO_SR,      CLASS_SCHEMA,  VAL_COLLECT1,  {13,3,-1},   "Collections-schema" },
     {PROTO_SR,      CLASS_SCHEMA,  VAL_GEO,       {13,4,-1},   "Geo-schema" },
     {PROTO_SR,      CLASS_SCHEMA,  VAL_CIMI1,     {13,5,-1},   "CIMI-schema" },
+    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_THESAURUS, {13,1000,81,1,-1}, "thesaurus-schema"},
 
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
