@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.31  1996-01-22 09:46:45  quinn
+ * Revision 1.32  1996-02-20 12:52:39  quinn
+ * Various
+ *
+ * Revision 1.31  1996/01/22  09:46:45  quinn
  * Added Sort PDU. Moved StringList to main protocol file.
  *
  * Revision 1.30  1996/01/10  15:21:32  quinn
@@ -835,6 +838,47 @@ typedef struct Z_AlternativeTerm
     Z_AttributesPlusTerm **terms;
 } Z_AlternativeTerm;
 
+#if 1
+
+typedef struct Z_ByDatabase
+{
+    char *db;
+    int *num;                           /* OPTIONAL */
+    Z_OtherInformation *otherDbInfo;    /* OPTIONAL */
+} Z_ByDatabase;
+
+typedef struct Z_ByDatabaseList
+{
+    int num_elements;
+    Z_ByDatabase **elements;
+} Z_ByDatabaseList;
+
+typedef struct Z_ScanOccurrences
+{
+    int which;
+#define Z_ScanOccurrences_global         0
+#define Z_ScanOccurrences_byDatabase     1
+    union
+    {
+	int *global;
+	Z_ByDatabaseList *byDatabase;
+    } u;
+
+} Z_ScanOccurrences;
+
+typedef struct Z_OccurrenceByAttributes
+{
+    Z_AttributeList *attributes;
+    Z_ScanOccurrences *occurrences;         /* OPTIONAL */
+    Z_OtherInformation *otherOccurInfo;      /* OPTIONAL */
+} Z_OccurrenceByAttributes;
+
+#else
+
+/*
+ * Old, incomplete definition of OccurrenceByAttributes.
+ */
+
 typedef struct Z_OccurrenceByAttributes
 {
     Z_AttributeList *attributes;
@@ -852,13 +896,17 @@ typedef struct Z_OccurrenceByAttributes
 #endif
 } Z_OccurrenceByAttributes;
 
+#endif
+
 typedef struct Z_TermInfo
 {
     Z_Term *term;
+    char *displayTerm;                     /* OPTIONAL */
     Z_AttributeList *suggestedAttributes;  /* OPTIONAL */
     Z_AlternativeTerm *alternativeTerm;    /* OPTIONAL */
     int *globalOccurrences;                /* OPTIONAL */
     Z_OccurrenceByAttributes *byAttributes; /* OPTIONAL */
+    Z_OtherInformation *otherTermInfo;      /* OPTIONAL */
 } Z_TermInfo;
 
 typedef struct Z_Entry

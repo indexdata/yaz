@@ -34,6 +34,18 @@
 
 #include <yconfig.h>
 
+/*
+ * Used to keep track of known External definitions (a loose approach
+ * to DEFINED_BY).
+ */
+
+typedef struct Z_ext_typeent
+{
+    oid_value dref;    /* the direct-reference OID value. */
+    int what;          /* discriminator value for the external CHOICE */
+    Odr_fun fun;       /* decoder function */
+} Z_ext_typeent;
+
 struct Z_External
 {
     Odr_oid *direct_reference;
@@ -77,5 +89,6 @@ struct Z_External
 };
 
 int z_External(ODR o, Z_External **p, int opt);
+Z_ext_typeent *z_ext_getentbyref(oid_value val);
 
 #endif

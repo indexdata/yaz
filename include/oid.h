@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.11  1996-01-02 08:57:30  quinn
+ * Revision 1.12  1996-02-20 12:52:37  quinn
+ * Various
+ *
+ * Revision 1.11  1996/01/02  08:57:30  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.10  1995/11/13  09:27:31  quinn
@@ -74,7 +77,8 @@ typedef enum oid_proto
 {
     PROTO_Z3950,
     PROTO_SR,
-    PROTO_GENERAL
+    PROTO_GENERAL,
+    PROTO_WAIS
 } oid_proto;
 
 typedef enum oid_class

@@ -2,7 +2,27 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX  XXXX/XX/XX
 
-Front-end can now start from the inetd in TCP mode. Doc updated.
+z_External() now won't break if a known, ASN.1 value comes encapsulated
+in an octet-string. The value will pass through unmodified in an Odr_oct.
+
+Added a bit of code to the demo client to decode & display
+ASN.1-structured records represented in the octet-aligned branch of
+the EXTERNAL CHOICE. Thanks to CAS for prodding us to finally do this.
+
+Added z_ext_getentbyref() to the ASN module. Doc updated.
+
+* Completed the SCAN definition in the ASN module. This may break SCAN
+code based on older YAZ-versions at compile-time. The fix is easy -
+look in proto.h.
+
+* Added 'displayTerm' and OtherInformation to the TermInfo structure
+under the SCAN definition. Remember to initialize this, server-people.
+
+Comstack allows insertion of established socket (primarily for
+inetd-operation of servers). Doc updated.
+
+Front-end server can now start from the inetd in TCP mode. Doc
+updated.
 
 --- 1.0pl4 1996/1/24
 

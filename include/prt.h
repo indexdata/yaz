@@ -51,5 +51,6 @@ int odr_total(ODR o);
 char *odr_errmsg(int n);
 Odr_oid *odr_getoidbystr(ODR o, char *str);
 int odr_initmember(ODR o, void *p, int size);
+int odr_peektag(ODR o, int *class, int *tag, int *cons);
 
 #endif
