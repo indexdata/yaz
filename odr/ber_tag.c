@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.3  1995-02-09 15:51:46  quinn
+ * Revision 1.4  1995-02-10 15:55:28  quinn
+ * Bug fixes, mostly.
+ *
+ * Revision 1.3  1995/02/09  15:51:46  quinn
  * Works better now.
  *
  * Revision 1.2  1995/02/07  17:52:59  quinn
@@ -51,6 +54,8 @@ int ber_tag(ODR o, const void *p, int class, int tag, int *constructed)
 #endif
 	    return 1;
     	case ODR_DECODE:
+	    if (o->stackp > -1 && !odr_constructed_more(o))
+	    	return 0;
 	    if (lclass < 0)
 	    {
 	    	if ((br = ber_dectag(o->bp, &lclass, &ltag, &lcons)) <= 0)

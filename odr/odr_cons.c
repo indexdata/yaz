@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.3  1995-02-09 15:51:48  quinn
+ * Revision 1.4  1995-02-10 15:55:29  quinn
+ * Bug fixes, mostly.
+ *
+ * Revision 1.3  1995/02/09  15:51:48  quinn
  * Works better now.
  *
  * Revision 1.2  1995/02/07  17:52:59  quinn
@@ -53,6 +56,16 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
 
     o->stack[o->stackp].base = o->bp;
     return 1;
+}
+
+int odr_constructed_more(ODR o)
+{
+    if (o->stackp < 0)
+    	return 0;
+    if (o->stack[o->stackp].len >= 0)
+    	return o->bp - o->stack[o->stackp].base < o->stack[o->stackp].len;
+    else
+    	return (!(*o->bp == 0 && *(o->bp + 1) == 0));
 }
 
 int odr_constructed_end(ODR o)

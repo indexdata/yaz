@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.3  1995-02-09 15:51:49  quinn
+ * Revision 1.4  1995-02-10 15:55:29  quinn
+ * Bug fixes, mostly.
+ *
+ * Revision 1.3  1995/02/09  15:51:49  quinn
  * Works better now.
  *
  * Revision 1.2  1995/02/07  14:13:46  quinn
@@ -45,10 +48,15 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
     }
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "%sOID\n", odr_indent(o));
+    	int i;
+
+    	fprintf(o->print, "%sOID:", odr_indent(o));
+    	for (i = 0; (*p)[i] > -1; i++)
+	    fprintf(o->print, " %d", (*p)[i]);
+	fprintf(o->print, "\n");
     	return 1;
     }
     if (o->direction == ODR_DECODE)
-    	*p = nalloc(o, ODR_OID_SIZE);
+    	*p = nalloc(o, ODR_OID_SIZE * sizeof(**p));
     return ber_oid(o, *p);
 }

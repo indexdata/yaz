@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.1  1995-02-09 15:51:45  quinn
+ * Revision 1.2  1995-02-10 15:55:28  quinn
+ * Bug fixes, mostly.
+ *
+ * Revision 1.1  1995/02/09  15:51:45  quinn
  * Works better now.
  *
  */
@@ -18,7 +21,7 @@ int ber_any(ODR o, Odr_any **p)
     switch (o->direction)
     {
     	case ODR_DECODE:
-	    if ((res = completeBER(o->bp, o->left)) <= 0)
+	    if ((res = completeBER(o->bp, 1000)) <= 0)        /* FIX THIS */
 	    	return 0;
 	    (*p)->buf = nalloc(o, res);
 	    memcpy((*p)->buf, o->bp, res);
@@ -60,7 +63,7 @@ int completeBER(unsigned char *buf, int len)
     b += res;
     len -= res;
     if (ll >= 0)
-    	return (len >= ll ? len + (b-buf) : -1);
+    	return (len >= ll ? ll + (b-buf) : -1);
     if (!cons)
     	return -1;    
     while (1)

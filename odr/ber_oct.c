@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.3  1995-02-03 17:04:34  quinn
+ * Revision 1.4  1995-02-10 15:55:28  quinn
+ * Bug fixes, mostly.
+ *
+ * Revision 1.3  1995/02/03  17:04:34  quinn
  * *** empty log message ***
  *
  * Revision 1.2  1995/02/02  20:38:50  quinn
@@ -40,16 +43,15 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 	    /* primitive octetstring */
 	    if (len < 0)
 	    	return 0;
-	    if (len == 0)
-	    	return 1;
-	    if (len > p->size - p->len)
+	    if (len + 1 > p->size - p->len)
 	    {
 	    	c = nalloc(o, p->size += len + 1);
 	    	if (p->len)
 		    memcpy(c, p->buf, p->len);
 		p->buf = c;
 	    }
-	    memcpy(p->buf + p->len, o->bp, len);
+	    if (len)
+		memcpy(p->buf + p->len, o->bp, len);
 	    p->len += len;
 	    o->bp += len;
 	    o->left -= len;
