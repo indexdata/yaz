@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.1  1995-03-07 09:23:15  quinn
+ * Revision 1.2  1995-03-07 10:19:05  quinn
+ * Addded some method functions to the ODR type.
+ *
+ * Revision 1.1  1995/03/07  09:23:15  quinn
  * Installing top-level API and documentation.
  *
  *
@@ -29,6 +32,11 @@ char *odr_errlist[] =
 void odr_perror(ODR o, char *message)
 {
     fprintf(stderr, "%s: %s\n", message, odr_errlist[o->error]);
+}
+
+int odr_errno(ODR o)
+{
+    return o->error;
 }
 
 void odr_setprint(ODR o, FILE *file)
@@ -65,3 +73,15 @@ void odr_destroy(ODR o)
 {
     free(o);
 }
+
+void odr_setbuf(ODR o, char *buf, int len)
+{
+    o->buf = o->bp = (unsigned char *) buf;
+    o->buflen = o->left = len;
+}
+
+char *odr_getbuf(ODR o, int *len)
+{
+    *len = o->bp - o->buf;
+    return (char *) o->buf;
+}    
