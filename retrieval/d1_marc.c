@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_marc.c,v 1.22 2002-08-17 07:56:59 adam Exp $
+ * $Id: d1_marc.c,v 1.23 2002-08-19 21:09:10 adam Exp $
  */
 
 
@@ -228,11 +228,15 @@ static int nodetomarc(data1_handle dh,
 	}
 	if (selected && !field->u.tag.node_selected)
 	    continue;
+
+	subf = field->child;
+        if (!subf)
+            continue;
+
         len += 4 + p->length_data_entry + p->length_starting
             + p->length_implementation;
         base_address += 3 + p->length_data_entry + p->length_starting
             + p->length_implementation;
-	subf = field->child;
 
 	if (subf->which == DATA1N_data)
             is00X = 1;
@@ -289,6 +293,8 @@ static int nodetomarc(data1_handle dh,
 	    continue;
 
 	subf = field->child;
+        if (!subf)
+            continue;
 
         if (subf->which == DATA1N_data)
             is00X = 1;

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.47 2002-07-29 20:04:08 adam Exp $
+ * $Id: d1_read.c,v 1.48 2002-08-19 21:09:10 adam Exp $
  */
 
 #include <assert.h>
@@ -39,9 +39,19 @@ data1_node *data1_get_root_tag (data1_handle dh, data1_node *n)
  */
 data1_node *get_parent_tag (data1_handle dh, data1_node *n)
 {
-    for (; n && n->which != DATA1N_root; n = n->parent)
-	if (n->which == DATA1N_tag)
-	    return n;
+    if (data1_is_xmlmode(dh))
+    {
+        for (; n && n->which != DATA1N_root; n = n->parent)
+            if (n->which == DATA1N_tag && n->parent &&
+                n->parent->which != DATA1N_root)
+                return n;
+    }
+    else
+    {
+        for (; n && n->which != DATA1N_root; n = n->parent)
+            if (n->which == DATA1N_tag)
+                return n;
+    }
     return 0;
 }
 
@@ -185,16 +195,24 @@ data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem,
 {
     data1_node *partag = get_parent_tag(dh, at);
     data1_node *res = data1_mk_node2 (dh, nmem, DATA1N_tag, at);
-    data1_element *e = NULL;
     data1_xattr **p;
+    data1_element *e = 0;
     
     res->u.tag.tag = data1_insert_string_n (dh, res, nmem, tag, len);
     
-    if (partag)
-	e = partag->u.tag.element;
-    res->u.tag.element =
-	data1_getelementbytagname (dh, at->root->u.root.absyn,
-				   e, res->u.tag.tag);
+    if (!partag)  /* top tag? */
+        e  = data1_getelementbytagname (dh, at->root->u.root.absyn,
+                                        0 /* index as local */,
+                                        res->u.tag.tag);
+    else
+    {
+        /* only set element for known tags */
+        e = partag->u.tag.element;
+        if (e)
+            e = data1_getelementbytagname (dh, at->root->u.root.absyn,
+                                           e, res->u.tag.tag);
+    }
+    res->u.tag.element = e;
     p = &res->u.tag.attributes;
     while (attr && *attr)
     {
@@ -338,9 +356,14 @@ static data1_node *data1_add_insert_taggeddata(data1_handle dh,
     data1_node *datn = 0;
     data1_node *tagn = 0;
 
-    if (partag)
+    if (!partag)
+        e = data1_getelementbytagname (dh, root->u.root.absyn, 0, tagname);
+    else 
+    {
 	e = partag->u.tag.element;
-    e = data1_getelementbytagname (dh, root->u.root.absyn, e, tagname);
+        if (e)
+            e = data1_getelementbytagname (dh, root->u.root.absyn, e, tagname);
+    }
     if (local_allowed || e)
     {
         tagn = data1_mk_node2 (dh, m, DATA1N_tag, at);
@@ -884,7 +907,8 @@ static void data1_iconv_s (data1_handle dh, NMEM m, data1_node *n,
                 data1_xattr *p;
                 for (p = n->u.tag.attributes; p; p = p->next)
                 {
-                    if (conv_item(m, t, wrbuf, p->value, strlen(p->value))
+                    if (p->value &&
+                        conv_item(m, t, wrbuf, p->value, strlen(p->value))
                         == 0)
                     {
                         wrbuf_puts (wrbuf, "");

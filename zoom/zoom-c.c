@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.38 2002-07-29 19:51:34 adam Exp $
+ * $Id: zoom-c.c,v 1.39 2002-08-19 21:09:10 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -2302,6 +2302,7 @@ ZOOM_connection_last_event(ZOOM_connection cs)
 ZOOM_API(int)
 ZOOM_event (int no, ZOOM_connection *cs)
 {
+    int timeout = 5000;
 #if HAVE_SYS_POLL_H
     struct pollfd pollfds[1024];
     ZOOM_connection poll_cs[1024];
@@ -2338,18 +2339,17 @@ ZOOM_event (int no, ZOOM_connection *cs)
 #if HAVE_SYS_POLL_H
 
 #else
-    tv.tv_sec = 25;
-    tv.tv_usec = 0;
-    
     FD_ZERO (&input);
     FD_ZERO (&output);
     FD_ZERO (&except);
 #endif
+    yaz_log (LOG_LOG, "select begin");
     nfds = 0;
     for (i = 0; i<no; i++)
     {
 	ZOOM_connection c = cs[i];
 	int fd, mask;
+        int this_timeout;
 	
 	if (!c)
 	    continue;
@@ -2361,6 +2361,11 @@ ZOOM_event (int no, ZOOM_connection *cs)
 	if (max_fd < fd)
 	    max_fd = fd;
 
+        this_timeout = ZOOM_options_get_int (c->options, "timeout", -1);
+        if (this_timeout != -1 && this_timeout < timeout)
+            timeout = this_timeout;
+        yaz_log (LOG_LOG, "time_timeout = %d, p=%p, timeout=%d", this_timeout, 
+                 c, timeout);
 #if HAVE_SYS_POLL_H
         if (mask)
         {
@@ -2396,10 +2401,15 @@ ZOOM_event (int no, ZOOM_connection *cs)
 	}
 #endif
     }
+    if (timeout >= 5000)
+        timeout = 30;
+
     if (!nfds)
         return 0;
+    yaz_log (LOG_LOG, "select with timeout %d", timeout);
+
 #if HAVE_SYS_POLL_H
-    r = poll (pollfds, nfds, 25000);
+    r = poll (pollfds, nfds, timeout * 1000);
     for (i = 0; i<nfds; i++)
     {
         ZOOM_connection c = poll_cs[i];
@@ -2425,6 +2435,8 @@ ZOOM_event (int no, ZOOM_connection *cs)
         }
     }
 #else
+    tv.tv_sec = timeout;
+    tv.tv_usec = 0;
     yaz_log (LOG_DEBUG, "select start");
     r = select (max_fd+1, &input, &output, &except, &tv);
     yaz_log (LOG_DEBUG, "select stop, returned r=%d", r);
