@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.19  1999-04-20 09:56:48  adam
+ * Revision 1.20  1999-10-11 10:01:24  adam
+ * Implemented bend_sort_rr handler for frontend server.
+ *
+ * Revision 1.19  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -149,6 +152,7 @@ typedef struct association
     int (*bend_present) ();
     int (*bend_esrequest) ();
     int (*bend_delete) ();
+    int (*bend_scan) ();
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);

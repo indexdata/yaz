@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.26  1999-06-17 10:54:44  adam
+ * Revision 1.27  1999-10-11 10:01:24  adam
+ * Implemented bend_sort_rr handler for frontend server.
+ *
+ * Revision 1.26  1999/06/17 10:54:44  adam
  * Added facility to specify implementation version - and name
  * for server.
  *
@@ -196,6 +199,23 @@ typedef struct bend_scanresult
     char *errstring;
 } bend_scanresult;
 
+typedef struct bend_scan_rr {
+    int num_bases;      /* number of elements in databaselist */
+    char **basenames;   /* databases to search */
+    oid_value attributeset;
+    Z_ReferenceId *referenceId; /* reference ID */
+    Z_AttributesPlusTerm *term;
+    ODR stream;         /* encoding stream - memory source if required */
+
+    int term_position;  /* desired index of term in result list/returned */
+    int num_entries;    /* number of entries requested/returned */
+
+    struct scan_entry *entries;
+    bend_scan_status status;
+    int errcode;
+    char *errstring;
+} bend_scan_rr;
+
 YAZ_EXPORT bend_scanresult *bend_scan(void *handle, bend_scanrequest *r,
                                       int *fd);
 YAZ_EXPORT bend_scanresult *bend_scanresponse(void *handle);
@@ -256,6 +276,7 @@ typedef struct bend_initrequest
     int (*bend_present) (void *handle, bend_present_rr *rr);
     int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
     int (*bend_delete)(void *handle, bend_delete_rr *rr);
+    int (*bend_scan)(void *handle, bend_scan_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult
