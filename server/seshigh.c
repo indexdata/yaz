@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.144 2003-02-20 15:15:04 adam Exp $
+ * $Id: seshigh.c,v 1.145 2003-02-21 12:08:59 adam Exp $
  */
 
 /*
@@ -39,6 +39,7 @@
 #include <unistd.h>
 #endif
 #include <assert.h>
+#include <ctype.h>
 
 #include <yaz/yconfig.h>
 #include <yaz/xmalloc.h>
@@ -524,7 +525,6 @@ static void srw_bend_search(association *assoc, request *req,
                             Z_SRW_searchRetrieveRequest *srw_req,
                             Z_SRW_searchRetrieveResponse *srw_res)
 {
-    char *base = "Default";
     int srw_error = 0;
     bend_search_rr rr;
     Z_External *ext;

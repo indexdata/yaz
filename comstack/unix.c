@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.9 2003-01-06 08:20:27 adam Exp $
+ * $Id: unix.c,v 1.10 2003-02-21 12:08:58 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -22,9 +22,6 @@
 #include <yaz/comstack.h>
 #include <yaz/unix.h>
 #include <yaz/log.h>
-
-/* Chas added the following, so we get the definition of completeBER */
-#include <yaz/odr.h>
 
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int
@@ -140,7 +137,7 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
     if (protocol == PROTO_WAIS)
 	state->complete = completeWAIS;
     else
-	state->complete = completeBER;
+	state->complete = cs_complete_auto;
 
     p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new UNIX comstack\n"));

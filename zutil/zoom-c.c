@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.26 2003-02-20 15:11:38 adam Exp $
+ * $Id: zoom-c.c,v 1.27 2003-02-21 12:08:59 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -550,7 +550,7 @@ ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     r->next = c->resultsets;
     c->resultsets = r;
 
-    if (c->host_port && c->proto == PROTO_SRW)
+    if (c->host_port && c->proto == PROTO_HTTP)
     {
         if (!c->cs)
         {
@@ -645,7 +645,7 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
     if (!c)
 	return;
 
-    if (c->host_port && c->proto == PROTO_SRW)
+    if (c->host_port && c->proto == PROTO_HTTP)
     {
         if (!c->cs)
         {
@@ -717,7 +717,7 @@ static zoom_ret do_connect (ZOOM_connection c)
     {
 #if HAVE_XML2
         const char *path;
-        c->proto = PROTO_SRW;
+        c->proto = PROTO_HTTP;
         effective_host = c->host_port + 5;
         if (*effective_host == '/')
             effective_host++;
@@ -2221,13 +2221,13 @@ static int ZOOM_connection_exec_task (ZOOM_connection c)
         switch (task->which)
         {
         case ZOOM_TASK_SEARCH:
-            if (c->proto == PROTO_SRW)
+            if (c->proto == PROTO_HTTP)
                 ret = ZOOM_connection_srw_send_search(c);
             else
                 ret = ZOOM_connection_send_search(c);
             break;
         case ZOOM_TASK_RETRIEVE:
-            if (c->proto == PROTO_SRW)
+            if (c->proto == PROTO_HTTP)
                 ret = ZOOM_connection_srw_send_search(c);
             else
                 ret = send_present (c);

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.54 2003-02-20 15:10:24 adam Exp $
+ * $Id: tcpip.c,v 1.55 2003-02-21 12:08:57 adam Exp $
  */
 
 #include <stdio.h>
@@ -10,8 +10,8 @@
 #include <stdlib.h>
 
 #ifdef WIN32
-#include <unistd.h>
 #else
+#include <unistd.h>
 #endif
 
 #include <errno.h>
@@ -25,14 +25,12 @@
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 #include <yaz/log.h>
+#include <yaz/nmem.h>
 
 #ifdef WIN32
 #else
 #include <netinet/tcp.h>
 #endif
-
-/* Chas added the following, so we get the definition of completeBER */
-#include <yaz/odr.h>
 
 static int tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);
@@ -184,7 +182,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
     if (protocol == PROTO_WAIS)
 	state->complete = completeWAIS;
     else
-	state->complete = completeBER;
+	state->complete = cs_complete_auto;
 
     p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new TCPIP comstack\n"));

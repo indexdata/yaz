@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: eventl.c,v 1.38 2003-02-20 15:13:28 adam Exp $
+ * $Id: eventl.c,v 1.39 2003-02-21 12:08:59 adam Exp $
  */
 
 #include <stdio.h>
@@ -97,7 +97,7 @@ int event_loop(IOCHAN *iochans)
                     to.tv_sec = w;
             }
 	}
-        yaz_log(LOG_DEBUG, "select start %d", to.tv_sec);
+        yaz_log(LOG_DEBUG, "select start %ld", (long) to.tv_sec);
 	res = YAZ_EV_SELECT(max + 1, &in, &out, &except, &to);
         yaz_log(LOG_DEBUG, "select end");
 	if (res < 0)

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.14 2003-02-14 18:49:23 adam Exp $
+ * $Id: oid.h,v 1.15 2003-02-21 12:08:58 adam Exp $
  */
 
 #ifndef OID_H
@@ -42,7 +42,7 @@ typedef enum oid_proto
     PROTO_SR,
     PROTO_GENERAL,
     PROTO_WAIS,
-    PROTO_SRW,
+    PROTO_HTTP,
 } oid_proto;
 
 typedef enum oid_class

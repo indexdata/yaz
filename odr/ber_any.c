@@ -2,12 +2,11 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: ber_any.c,v 1.22 2003-02-14 18:49:23 adam Exp $
+ * $Id: ber_any.c,v 1.23 2003-02-21 12:08:58 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <ctype.h>
 
 #include "odr-priv.h"
 
@@ -49,47 +48,6 @@ int completeBER(const unsigned char *buf, int len)
     	return 0;
     if (!buf[0] && !buf[1])
     	return 0;
-    if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
-		&& buf[1] >= 0x20 && buf[1] < 0x7f
-		&& buf[2] >= 0x20 && buf[2] < 0x7f)
-    {
-        /* deal with HTTP request/response */
-	int i = 2, content_len = 0;
-
-        while (i <= len-4)
-        {
-            if (buf[i] == '\r' && buf[i+1] == '\n')
-            {
-                i += 2;
-                if (buf[i] == '\r' && buf[i+1] == '\n')
-                {
-                    /* i += 2 seems not to work with GCC -O2 .. 
-                       so i+2 is used instead .. */
-                    if (len >= (i+2)+ content_len)
-                        return (i+2)+ content_len;
-                    break;
-                }
-                if (i < len-18)
-                {
-                    if (!memcmp(buf+i, "Content-Length:", 15))
-                    {
-                        i+= 15;
-                        if (buf[i] == ' ')
-                            i++;
-                        content_len = 0;
-                        while (i <= len-4 && isdigit(buf[i]))
-                            content_len = content_len*10 + (buf[i++] - '0');
-                        if (content_len < 0) /* prevent negative offsets */
-                            content_len = 0;
-                    }
-                }
-            }
-            else
-                i++;
-        }
-        return 0;
-    }
-    /* BER from now on .. */
     if ((res = ber_dectag(b, &zclass, &tag, &cons)) <= 0)
     	return 0;
     if (res > len)

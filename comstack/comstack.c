@@ -2,13 +2,16 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.11 2003-02-14 18:49:23 adam Exp $
+ * $Id: comstack.c,v 1.12 2003-02-21 12:08:57 adam Exp $
  */
 
 #include <string.h>
+#include <ctype.h>
+
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 #include <yaz/unix.h>
+#include <yaz/odr.h>
 
 static const char *cs_errlist[] =
 {
@@ -35,6 +38,7 @@ const char *cs_strerror(COMSTACK h)
 
 COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
 {
+    enum oid_proto proto = PROTO_Z3950;
     const char *host = 0;
     COMSTACK cs;
     CS_TYPE t;
@@ -62,13 +66,33 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
 	return 0;
 #endif
     }
+    else if (strncmp(type_and_host, "http:", 5) == 0)
+    {
+	t = tcpip_type;
+        host = type_and_host + 5;
+        if (host[0] == '/' && host[1] == '/')
+            host = host + 2;
+        proto = PROTO_HTTP;
+    }
+    else if (strncmp(type_and_host, "https:", 6) == 0)
+    {
+#if HAVE_OPENSSL_SSL_H
+	t = ssl_type;
+        host = type_and_host + 6;
+        if (host[0] == '/' && host[1] == '/')
+            host = host + 2;
+#else
+	return 0;
+#endif
+        proto = PROTO_HTTP;
+    }
     else
     {
 	t = tcpip_type;
 	host = type_and_host;
-
+        
     }
-    cs = cs_create (t, blocking, PROTO_Z3950);
+    cs = cs_create (t, blocking, proto);
     if (!cs)
 	return 0;
 
@@ -83,4 +107,53 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
 int cs_look (COMSTACK cs)
 {
     return cs->event;
+}
+
+int cs_complete_auto(const unsigned char *buf, int len)
+{
+    if (!len)
+    	return 0;
+    if (!buf[0] && !buf[1])
+    	return 0;
+    if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
+		&& buf[1] >= 0x20 && buf[1] < 0x7f
+		&& buf[2] >= 0x20 && buf[2] < 0x7f)
+    {
+        /* deal with HTTP request/response */
+	int i = 2, content_len = 0;
+
+        while (i <= len-4)
+        {
+            if (buf[i] == '\r' && buf[i+1] == '\n')
+            {
+                i += 2;
+                if (buf[i] == '\r' && buf[i+1] == '\n')
+                {
+                    /* i += 2 seems not to work with GCC -O2 .. 
+                       so i+2 is used instead .. */
+                    if (len >= (i+2)+ content_len)
+                        return (i+2)+ content_len;
+                    break;
+                }
+                if (i < len-18)
+                {
+                    if (!memcmp(buf+i, "Content-Length:", 15))
+                    {
+                        i+= 15;
+                        if (buf[i] == ' ')
+                            i++;
+                        content_len = 0;
+                        while (i <= len-4 && isdigit(buf[i]))
+                            content_len = content_len*10 + (buf[i++] - '0');
+                        if (content_len < 0) /* prevent negative offsets */
+                            content_len = 0;
+                    }
+                }
+            }
+            else
+                i++;
+        }
+        return 0;
+    }
+    return completeBER(buf, len);
 }
