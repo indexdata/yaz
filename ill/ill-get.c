@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: ill-get.c,v $
- * Revision 1.3  2000-01-31 13:15:21  adam
+ * Revision 1.4  2000-02-04 11:01:15  adam
+ * Added more elements.
+ *
+ * Revision 1.3  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -90,6 +93,47 @@ ILL_String *ill_get_ILL_String (struct ill_get_ctl *gc, const char *name,
     return r;
 }
 
+
+ILL_ISO_Date *ill_get_ILL_ISO_Date (struct ill_get_ctl *gc, const char *name,
+				    const char *sub, const char *val)
+{
+    char element[128];
+    const char *v;
+
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    v = (gc->f)(gc->clientData, element);
+    if (!v)
+	v = val;
+    if (!v)
+	return 0;
+    return odr_strdup (gc->odr, v);
+}
+
+ILL_ISO_Time *ill_get_ILL_ISO_Time (struct ill_get_ctl *gc, const char *name,
+				    const char *sub, const char *val)
+{
+    char element[128];
+    const char *v;
+
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    v = (gc->f)(gc->clientData, element);
+    if (!v)
+	v = val;
+    if (!v)
+	return 0;
+    return odr_strdup (gc->odr, v);
+}
+
 ILL_Person_Or_Institution_Symbol *ill_get_Person_Or_Insitution_Symbol (
     struct ill_get_ctl *gc, const char *name, const char *sub)
 {
@@ -153,12 +197,10 @@ ILL_System_Id *ill_get_System_Id(struct ill_get_ctl *gc,
 	strcat (element, sub);
     }
     p = (ILL_System_Id *) odr_malloc (o, sizeof(*p));
-    p->person_or_institution_symbol =
-	ill_get_Person_Or_Insitution_Symbol (gc, element,
-					     "person-or-institution-symbol");
-    p->name_of_person_or_institution =
-	ill_get_Name_Of_Person_Or_Institution (gc, element,
-					       "name-of-person-or-institution");
+    p->person_or_institution_symbol = ill_get_Person_Or_Insitution_Symbol (
+	gc, element, "person-or-institution-symbol");
+    p->name_of_person_or_institution = ill_get_Name_Of_Person_Or_Institution (
+	gc, element, "name-of-person-or-institution");
     return p;
 }
 
@@ -201,8 +243,29 @@ ILL_Service_Date_this *ill_get_Service_Date_this (
 	strcat (element, ",");
 	strcat (element, sub);
     }
-    r->date = odr_strdup (o, "14012000");
-    r->time = 0;
+    r->date = ill_get_ILL_ISO_Date (gc, element, "date", "20000101");
+    r->time = ill_get_ILL_ISO_Time (gc, element, "time", 0);
+    return r;
+}
+
+ILL_Service_Date_original *ill_get_Service_Date_original (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    ODR o = gc->odr;
+    ILL_Service_Date_original *r =
+	(ILL_Service_Date_original *) odr_malloc (o, sizeof(*r));
+    char element[128];
+    
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    r->date = ill_get_ILL_ISO_Date (gc, element, "date", 0);
+    r->time = ill_get_ILL_ISO_Time (gc, element, "time", 0);
+    if (!r->date && !r->time)
+	return 0;
     return r;
 }
 
@@ -220,9 +283,10 @@ ILL_Service_Date_Time *ill_get_Service_Date_Time (
 	strcat (element, ",");
 	strcat (element, sub);
     }    
-    r->date_time_of_this_service = ill_get_Service_Date_this (gc, element, 
-							      "this");
-    r->date_time_of_original_service = 0;
+    r->date_time_of_this_service = ill_get_Service_Date_this (
+	gc, element, "this");
+    r->date_time_of_original_service = ill_get_Service_Date_original (
+	gc, element, "original");
     return r;
 }
 
@@ -303,6 +367,120 @@ ILL_ItemRequest *ill_get_ItemRequest (
     return 0;
 }
 
+
+ILL_Client_Id *ill_get_Client_Id (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    char element[128];
+    ODR o = gc->odr;
+    ILL_Client_Id *r = (ILL_Client_Id *) odr_malloc(o, sizeof(*r));
+
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    r->client_name = ill_get_ILL_String (gc, element, "client-name");
+    r->client_status = ill_get_ILL_String (gc, element, "client-status");
+    r->client_identifier = ill_get_ILL_String (gc, element,
+					       "client-identifier");
+    return r;
+}
+
+ILL_Postal_Address *ill_get_Postal_Address (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    ODR o = gc->odr;
+    ILL_Postal_Address *r =
+	(ILL_Postal_Address *) odr_malloc(o, sizeof(*r));
+    char element[128];
+
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    r->name_of_person_or_institution = 
+	ill_get_Name_Of_Person_Or_Institution (
+	    gc, element, "name-of-person-or-institution");
+    r->extended_postal_delivery_address =
+	ill_get_ILL_String (
+	    gc, element, "extended-postal-delivery-address");
+    r->street_and_number =
+	ill_get_ILL_String (gc, element, "street-and-number");
+    r->city = ill_get_ILL_String (gc, element, "city");
+    r->region = ill_get_ILL_String (gc, element, "region");
+    r->country = ill_get_ILL_String (gc, element, "country");
+    r->postal_code = ill_get_ILL_String (gc, element, "postal-code");
+    return r;
+}
+
+ILL_System_Address *ill_get_System_Address (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    ODR o = gc->odr;
+    ILL_System_Address *r =
+	(ILL_System_Address *) odr_malloc(o, sizeof(*r));
+    char element[128];
+    
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    r->telecom_service_identifier =
+	ill_get_ILL_String (gc, element, "telecom-service-identifier");
+    r->telecom_service_address =
+	ill_get_ILL_String (gc, element, "telecom-service-addreess");
+    return r;
+}
+
+ILL_Delivery_Address *ill_get_Delivery_Address (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    ODR o = gc->odr;
+    ILL_Delivery_Address *r =
+	(ILL_Delivery_Address *) odr_malloc(o, sizeof(*r));
+    char element[128];
+    
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    r->postal_address =
+	ill_get_Postal_Address (gc, element, "postal-address");
+    r->electronic_address =
+	ill_get_System_Address (gc, element, "electronic-address");
+    return r;
+}
+
+ILL_Search_Type *ill_get_Search_Type (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    ODR o = gc->odr;
+    ILL_Search_Type *r = (ILL_Search_Type *) odr_malloc(o, sizeof(*r));
+    char element[128];
+    
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    r->level_of_service = ill_get_ILL_String (gc, element, "level-of-service");
+    r->need_before_date = ill_get_ILL_ISO_Date (gc, element,
+						"need-before-date", 0);
+    r->expiry_date = ill_get_ILL_ISO_Date (gc, element, "expiry-date", 0);
+    r->expiry_flag = ill_get_enumerated (gc, element, "expiry-flag", 3);
+					 
+    return r;
+}
+
 ILL_Request *ill_get_ILLRequest (
     struct ill_get_ctl *gc, const char *name, const char *sub)
 {
@@ -327,9 +505,13 @@ ILL_Request *ill_get_ILLRequest (
     r->responder_id = ill_get_System_Id (gc, element, "responder-id");
     r->transaction_type =
 	ill_get_enumerated(gc, element, "transaction-type", 1);
-    r->delivery_address = 0;     /* TODO */
-    r->delivery_service = 0;     /* TODO */
-    r->billing_address = 0;      /* TODO */
+
+    r->delivery_address =
+	ill_get_Delivery_Address (gc, element, "delivery-address");
+    r->delivery_service = 0; /* TODO */
+    /* ill_get_Delivery_Service (gc, element, "delivery-service"); */
+    r->billing_address =
+	ill_get_Delivery_Address (gc, element, "billing-address");
 
     r->num_iLL_service_type = 1;
     r->iLL_service_type = (ILL_Service_Type **)
@@ -346,10 +528,11 @@ ILL_Request *ill_get_ILLRequest (
     r->num_supply_medium_info_type = 0;
     r->supply_medium_info_type = 0;
 
-    r->place_on_hold =
-	ill_get_enumerated (gc, element, "place-on-hold", 
-			    ILL_Place_On_Hold_Type_according_to_responder_policy);
-    r->client_id = 0;             /* TODO */
+    r->place_on_hold = ill_get_enumerated (
+	gc, element, "place-on-hold", 
+	ILL_Place_On_Hold_Type_according_to_responder_policy);
+    r->client_id = ill_get_Client_Id (gc, element, "client-id");
+			   
     r->item_id = ill_get_Item_Id (gc, element, "item-id");
     r->supplemental_item_description = 0;
     r->cost_info_type = 0;
