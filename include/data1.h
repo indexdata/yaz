@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.14  1996-05-09 07:27:11  quinn
+ * Revision 1.15  1996-06-03 09:46:03  quinn
+ * Added OID type.
+ *
+ * Revision 1.14  1996/05/09  07:27:11  quinn
  * Multiple local values supported.
  *
  * Revision 1.13  1996/02/20  16:32:48  quinn
@@ -314,7 +317,8 @@ typedef struct data1_node
 		DATA1I_inctxt,      /* text inclusion */
 		DATA1I_incbin,      /* binary data inclusion */
 		DATA1I_text,        /* text data */
-		DATA1I_num          /* numerical data */
+		DATA1I_num,         /* numerical data */
+		DATA1I_oid          /* object identifier */
 	    } what;
 	    int formatted_text;     /* newlines are significant */
 	    int len;
