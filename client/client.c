@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.45  1997-05-14 06:53:29  adam
+ * Revision 1.46  1997-06-23 10:30:18  adam
+ * Added call to ccl_rpn_delete in search. Added ODR stream "out"
+ * as parameter to ccl_rpn_query to release RPN query.
+ *
+ * Revision 1.45  1997/05/14 06:53:29  adam
  * C++ support.
  *
  * Revision 1.44  1997/05/05 11:20:35  adam
@@ -678,12 +682,13 @@ static int send_searchRequest(char *arg)
 #if CCL2RPN
     case QueryType_CCL2RPN:
         query.which = Z_Query_type_1;
-        assert((RPNquery = ccl_rpn_query(rpn)));
+        assert((RPNquery = ccl_rpn_query(out, rpn)));
         bib1.proto = protocol;
         bib1.oclass = CLASS_ATTSET;
         bib1.value = VAL_BIB1;
         RPNquery->attributeSetId = oid_getoidbyent(&bib1);
         query.u.type_1 = RPNquery;
+        ccl_rpn_delete (rpn);
         break;
 #endif
     default:
