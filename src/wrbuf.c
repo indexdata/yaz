@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.4 2004-03-20 07:02:23 adam Exp $
+ * $Id: wrbuf.c,v 1.5 2004-10-01 11:44:46 adam Exp $
  */
 
 /*
@@ -89,6 +89,13 @@ int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size)
 {
     while (--size >= 0)
     {
+	/* only TAB,CR,LF of ASCII CTRL are allowed in XML 1.0! */
+	if (*cp >= 0 && *cp <= 31)
+	    if (*cp != 9 && *cp != 10 && *cp != 13)
+	    {
+		cp++;  /* we silently ignore (delete) these.. */
+		continue;
+	    }
 	switch(*cp)
 	{
 	case '<':
