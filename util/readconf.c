@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: readconf.c,v $
- * Revision 1.2  1996-05-29 10:05:01  quinn
+ * Revision 1.3  1996-05-29 15:48:48  quinn
+ * Added \n to the isspace rule.
+ *
+ * Revision 1.2  1996/05/29  10:05:01  quinn
  * Changed space criteria to support 8-bit characters
  *
  * Revision 1.1  1995/11/01  13:55:06  quinn
@@ -24,7 +27,7 @@
 
 #include <log.h>
 
-#define l_isspace(c) ((c) == '\t' || (c) == ' ')
+#define l_isspace(c) ((c) == '\t' || (c) == ' ' || (c) == '\n')
 
 int readconf_line(FILE *f, char *line, int len, char *argv[], int num)
 {
