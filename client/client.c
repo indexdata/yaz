@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.271 2005-01-19 08:26:44 adam Exp $
+ * $Id: client.c,v 1.272 2005-01-27 09:05:09 adam Exp $
  */
 
 #include <stdio.h>
@@ -386,14 +386,18 @@ static int process_initResponse(Z_InitResponse *res)
 	    render_initUserInfo(uif->u.userInfo1);
 	} else {
 	    printf("UserInformationfield:\n");
-	    if (!z_External(print, (Z_External**)&uif, 0, 0)) {
+	    if (!z_External(print, (Z_External**)&uif, 0, 0))
+	    {
 		odr_perror(print, "Printing userinfo\n");
 		odr_reset(print);
 	    }
 	    if (uif->which == Z_External_octet) {
 		printf("Guessing visiblestring:\n");
-		printf("'%s'\n", uif->u. octet_aligned->buf);
-	    } else if (uif->which == Z_External_single) {
+		printf("'%.*s'\n", uif->u.octet_aligned->len,
+		       uif->u.octet_aligned->buf);
+	    }
+	    else if (uif->which == Z_External_single) 
+	    {
 		Odr_any *sat = uif->u.single_ASN1_type;
 		oident *oid = oid_getentbyoid(uif->direct_reference);
 		if (oid->value == VAL_OCLCUI) {
@@ -411,7 +415,8 @@ static int process_initResponse(Z_InitResponse *res)
 		else
 		{
 		    /* Peek at any private Init-diagnostic APDUs */
-		    printf("### NAUGHTY: External is '%.*s'\n", sat->len, sat->buf);
+		    printf("### NAUGHTY: External is '%.*s'\n",
+			   sat->len, sat->buf);
 		}
 	    }
 	    odr_reset (print);
@@ -465,11 +470,20 @@ static void render_initUserInfo(Z_OtherInformation *ui1) {
 	Z_OtherInformationUnit *unit = ui1->list[i];
 	printf("  %d: otherInfo unit contains ", i+1);
 	if (unit->which == Z_OtherInfo_externallyDefinedInfo &&
+	    unit->information.externallyDefinedInfo &&
 	    unit->information.externallyDefinedInfo->which ==
 	    Z_External_diag1) {
 	    render_diag(unit->information.externallyDefinedInfo->u.diag1);
-	} else {
-	    printf("unsupported otherInfo unit type %d\n", unit->which);
+	} 
+	else if (unit->which != Z_OtherInfo_externallyDefinedInfo)
+	{
+	    printf("unsupported otherInfo unit->which = %d\n", unit->which);
+	}
+	else 
+	{
+	    printf("unsupported otherInfo unit external %d\n",
+		   unit->information.externallyDefinedInfo ? 
+		   unit->information.externallyDefinedInfo->which : -2);
 	}
     }
 }
