@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.58 2003-05-20 20:33:29 adam Exp $
+ * $Id: tcpip.c,v 1.59 2003-10-08 21:47:15 adam Exp $
  */
 
 #include <stdio.h>
@@ -134,19 +134,19 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
                                          xmalloc(sizeof(tcpip_state)))))
 	return 0;
 
+    if (!((p->blocking = blocking)&1))
+    {
 #ifdef WIN32
-    if (!(p->blocking = blocking) && ioctlsocket(s, FIONBIO, &tru) < 0)
-        return 0;
+        if (ioctlsocket(s, FIONBIO, &tru) < 0)
+            return 0;
 #else
-    if (!(p->blocking = blocking))
-    {   
         if (fcntl(s, F_SETFL, O_NONBLOCK) < 0)
             return 0;
 #ifndef MSG_NOSIGNAL
         signal (SIGPIPE, SIG_IGN);
 #endif
-    }
 #endif
+    }
 
     p->io_pending = 0;
     p->iofile = s;
@@ -606,11 +606,11 @@ COMSTACK tcpip_accept(COMSTACK h)
 	    }
 	    return 0;
 	}
-	if (!cnew->blocking && 
+	if (!(cnew->blocking&1) && 
 #ifdef WIN32
 	    (ioctlsocket(cnew->iofile, FIONBIO, &tru) < 0)
 #else
-	    (!cnew->blocking && fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
+	    (fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
 #endif
 	    )
 	{
@@ -1043,7 +1043,7 @@ char *tcpip_addrstr(COMSTACK h)
 {
     struct sockaddr_in addr;
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
-    char *r, *buf = sp->buf;
+    char *r = 0, *buf = sp->buf;
     YAZ_SOCKLEN_T len;
     struct hostent *host;
     
@@ -1053,10 +1053,12 @@ char *tcpip_addrstr(COMSTACK h)
 	h->cerrno = CSYSERR;
 	return 0;
     }
-    if ((host = gethostbyaddr((char*)&addr.sin_addr, sizeof(addr.sin_addr),
+    if (!(h->blocking&2)) {
+        if ((host = gethostbyaddr((char*)&addr.sin_addr, sizeof(addr.sin_addr),
 			      AF_INET)))
-	r = (char*) host->h_name;
-    else
+	    r = (char*) host->h_name;
+    }
+    if (!r)
 	r = inet_ntoa(addr.sin_addr);
     if (h->protocol == PROTO_HTTP)
         sprintf(buf, "http:%s", r);
@@ -1086,7 +1088,7 @@ int static tcpip_set_blocking(COMSTACK p, int blocking)
 	return 0;
 #else
     flag = fcntl(p->iofile, F_GETFL, 0);
-    if(!blocking)
+    if(!(blocking&1))
 	flag = flag & ~O_NONBLOCK;
     else
         flag = flag | O_NONBLOCK;

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.13 2003-09-16 20:48:28 adam Exp $
+ * $Id: unix.c,v 1.14 2003-10-08 21:47:15 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -39,7 +39,6 @@ static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
 		int (*check_ip)(void *cd, const char *a, int len, int type),
 		void *cd);
 static int unix_set_blocking(COMSTACK p, int blocking);
-
 
 static COMSTACK unix_accept(COMSTACK h);
 static char *unix_addrstr(COMSTACK h);
@@ -100,7 +99,7 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
 					xmalloc(sizeof(unix_state)))))
 	return 0;
 
-    if (!(p->blocking = blocking))
+    if (!((p->blocking = blocking)&1))
     {
 	if (fcntl(s, F_SETFL, O_NONBLOCK) < 0)
 	    return 0;
@@ -369,8 +368,8 @@ static COMSTACK unix_accept(COMSTACK h)
 	    }
 	    return 0;
 	}
-	if (!cnew->blocking &&
-	    (!cnew->blocking && fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
+	if (!(cnew->blocking&1) && 
+            (fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
 	    )
 	{
 	    h->cerrno = CSYSERR;
