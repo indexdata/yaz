@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.86 2002-09-11 21:19:06 adam Exp $
+dnl $Id: configure.in,v 1.87 2002-09-11 21:25:56 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.1)
 dnl
@@ -172,12 +172,12 @@ AC_TRY_COMPILE([
        ac_cv_check_socklen_t=no)])
 AC_MSG_RESULT($ac_cv_check_socklen_t)
 if test "$ac_cv_check_socklen_t" = "yes"; then
-       AC_DEFINE(HAVE_SOCKLEN_T)
-fi
-AC_MSG_CHECKING(whether net size is of type size_t)
-AC_CACHE_VAL(ac_cv_check_getpeername_accepts_size_t,
-[ac_cv_check_getpeername_accepts_size_t=''
-AC_TRY_COMPILE([
+	AC_DEFINE(HAVE_SOCKLEN_T)
+else
+	AC_MSG_CHECKING(whether net size is of type size_t)
+	AC_CACHE_VAL(ac_cv_check_getpeername_accepts_size_t,
+	[ac_cv_check_getpeername_accepts_size_t=''
+	AC_TRY_COMPILE([
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -186,9 +186,10 @@ AC_TRY_COMPILE([
 	[getpeername(0, (struct sockaddr *)NULL, (size_t *)0);],
 	ac_cv_check_getpeername_accepts_size_t=yes,
 	ac_cv_check_getpeername_accepts_size_t=no)])
-AC_MSG_RESULT($ac_cv_check_getpeername_accepts_size_t)
-if test "$ac_cv_check_getpeername_accepts_size_t" = yes; then
-	AC_DEFINE(GETPEERNAME_ACCEPTS_SIZE_T_FOR_THIRD_ARGUMENT)
+	AC_MSG_RESULT($ac_cv_check_getpeername_accepts_size_t)
+	if test "$ac_cv_check_getpeername_accepts_size_t" = yes; then
+		AC_DEFINE(GETPEERNAME_ACCEPTS_SIZE_T_FOR_THIRD_ARGUMENT)
+	fi
 fi
 dnl
 dnl ------ tcpd

@@ -1,10 +1,8 @@
-## $Id: Makefile.am,v 1.6 2002-07-25 12:51:08 adam Exp $
+## $Id: Makefile.am,v 1.7 2002-09-11 21:25:57 adam Exp $
 
 noinst_LTLIBRARIES = libodr.la
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
-
-LIBS =
 
 libodr_la_SOURCES = odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
         odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \

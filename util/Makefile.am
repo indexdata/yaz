@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2001, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.12 2002-08-27 14:02:13 adam Exp $
+## $Id: Makefile.am,v 1.13 2002-09-11 21:25:57 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 
@@ -9,8 +9,6 @@ noinst_LTLIBRARIES = libutil.la
 bin_SCRIPTS = yaz-comp
 
 EXTRA_DIST = yaz-comp cvs-date.tcl
-
-LIBS =
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
 

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.8 2002-04-15 09:44:44 adam Exp $
+## $Id: Makefile.am,v 1.9 2002-09-11 21:25:57 adam Exp $
 
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
@@ -7,8 +7,6 @@ tabdata_DATA=ill9702.asn item-req.asn ill.tcl
 EXTRA_DIST=$(tabdata_DATA)
 
 noinst_LTLIBRARIES=libill.la
-
-LIBS =
 
 libill_la_SOURCES=ill-core.c item-req.c ill-get.c
 
