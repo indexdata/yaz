@@ -93,6 +93,7 @@ typedef struct bend_scanrequest
 {
     int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
+    oid_value attributeset;
     Z_AttributesPlusTerm *term;
     int term_position;  /* desired index of term in result list */
     int num_entries;    /* number of entries requested */
