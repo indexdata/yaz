@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
  * $Log: marcdisp.c,v $
- * Revision 1.12  2000-10-02 11:07:44  adam
+ * Revision 1.13  2001-10-15 19:36:48  adam
+ * New function marc_display_wrbuf.
+ *
+ * Revision 1.12  2000/10/02 11:07:44  adam
  * Added peer_name member for bend_init handler. Changed the YAZ
  * client so that tcp: can be avoided in target spec.
  *
@@ -50,9 +53,10 @@
 #include <string.h>
 #include <ctype.h>
 #include <yaz/marcdisp.h>
+#include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 
-int marc_display_ex (const char *buf, FILE *outf, int debug)
+int marc_display_wrbuf (const char *buf, WRBUF wr, int debug)
 {
     int entry_p;
     int record_length;
@@ -63,15 +67,15 @@ int marc_display_ex (const char *buf, FILE *outf, int debug)
     int length_starting;
     int length_implementation;
 
-    if (!outf)
-        outf = stdout;
     record_length = atoi_n (buf, 5);
     if (record_length < 25)
     {
 	if (debug)
 	{
-	   fprintf (outf, "Record length %d - aborting\n", record_length);
-
+	    char str[40];
+	    
+	    sprintf (str, "Record length %d - aborting\n", record_length);
+	    wrbuf_puts (wr, str);
 	}
         return -1;
     }
@@ -91,13 +95,21 @@ int marc_display_ex (const char *buf, FILE *outf, int debug)
 
     if (debug)
     {
-	fprintf (outf, "Record length         %5d\n", record_length);
-	fprintf (outf, "Indicator length      %5d\n", indicator_length);
-	fprintf (outf, "Identifier length     %5d\n", identifier_length);
-	fprintf (outf, "Base address          %5d\n", base_address);
-	fprintf (outf, "Length data entry     %5d\n", length_data_entry);
-	fprintf (outf, "Length starting       %5d\n", length_starting);
-	fprintf (outf, "Length implementation %5d\n", length_implementation);
+	char str[40];
+	sprintf (str, "Record length         %5d\n", record_length);
+	wrbuf_puts (wr, str);
+	sprintf (str, "Indicator length      %5d\n", indicator_length);
+	wrbuf_puts (wr, str);
+	sprintf (str, "Identifier length     %5d\n", identifier_length);
+	wrbuf_puts (wr, str);
+	sprintf (str, "Base address          %5d\n", base_address);
+	wrbuf_puts (wr, str);
+	sprintf (str, "Length data entry     %5d\n", length_data_entry);
+	wrbuf_puts (wr, str);
+	sprintf (str, "Length starting       %5d\n", length_starting);
+	wrbuf_puts (wr, str);
+	sprintf (str, "Length implementation %5d\n", length_implementation);
+	wrbuf_puts (wr, str);
     }
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
     {
@@ -118,8 +130,9 @@ int marc_display_ex (const char *buf, FILE *outf, int debug)
 	entry_p += 3;
         tag[3] = '\0';
 	if (debug)
-	    fprintf (outf, "Tag: ");
-	fprintf (outf, "%s ", tag);
+	    wrbuf_puts (wr, "Tag: ");
+	wrbuf_puts (wr, tag);
+	wrbuf_puts (wr, " ");
 	data_length = atoi_n (buf+entry_p, length_data_entry);
 	entry_p += length_data_entry;
 	data_offset = atoi_n (buf+entry_p, length_starting);
@@ -127,36 +140,57 @@ int marc_display_ex (const char *buf, FILE *outf, int debug)
 	i = data_offset + base_address;
 	end_offset = i+data_length-1;
 	if (debug)
-	    fprintf (outf, " Ind: ");
+	    wrbuf_puts (wr, " Ind: ");
         if (memcmp (tag, "00", 2) && indicator_length)
 	{
-            for (j = 0; j<indicator_length; j++)
-		fprintf (outf, "%c", buf[i++]);
+            for (j = 0; j<indicator_length; j++, i++)
+		wrbuf_putc (wr, buf[i]);
 	}
 	if (debug)
-	    fprintf (outf, " Fields: ");
+	    wrbuf_puts (wr, " Fields: ");
 	while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
 	{
             if (memcmp (tag, "00", 2) && identifier_length)
 	    {
 	        i++;
-	        fprintf (outf, " $"); 
-                for (j = 1; j<identifier_length; j++)
-                    fprintf (outf, "%c", buf[i++]);
-		fprintf (outf, " ");
+		wrbuf_puts (wr, " $"); 
+                for (j = 1; j<identifier_length; j++, i++)
+		    wrbuf_putc (wr, buf[i]);
+		wrbuf_putc (wr, ' ');
 	        while (buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
 	               buf[i] != ISO2709_FS && i < end_offset)
-	            fprintf (outf, "%c", buf[i++]);
+		{
+		    wrbuf_putc (wr, buf[i]);
+		    i++;
+		}
 	    }
 	    else
-	        fprintf (outf, "%c", buf[i++]);
+	    {
+		wrbuf_putc (wr, buf[i]);
+		i++;
+	    }
 	}
-	fprintf (outf, "\n");
+	wrbuf_putc (wr, '\n');
 	if (i < end_offset)
-	    fprintf (outf, "-- separator but not at end of field\n");
+	    wrbuf_puts (wr, "-- separator but not at end of field\n");
 	if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
-	    fprintf (outf, "-- no separator at end of field\n");
+	    wrbuf_puts (wr, "-- no separator at end of field\n");
     }
+    wrbuf_puts (wr, "");
+    return record_length;
+}
+
+int marc_display_ex (const char *buf, FILE *outf, int debug)
+{
+    int record_length;
+
+    WRBUF wrbuf = wrbuf_alloc ();
+    record_length = marc_display_wrbuf (buf, wrbuf, debug);
+    if (!outf)
+	outf = stdout;
+    if (record_length > 0)
+	fwrite (wrbuf_buf(wrbuf), 1, wrbuf_len(wrbuf), outf);
+    wrbuf_free (wrbuf, 1);
     return record_length;
 }
 

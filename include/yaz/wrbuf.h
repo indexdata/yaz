@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: wrbuf.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
+ * Revision 1.3  2001-10-15 19:36:48  adam
+ * New function marc_display_wrbuf.
+ *
+ * Revision 1.2  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -73,6 +76,8 @@ YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
 #define wrbuf_putc(b, c) \
     (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
     (b)->buf[(b)->pos++] = (c), 0)
+
+YAZ_EXPORT int marc_display_wrbuf (const char *buf, WRBUF wr, int debug);
 
 YAZ_END_CDECL
 
