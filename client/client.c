@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.173 2002-10-22 10:05:36 adam Exp $
+ * $Id: client.c,v 1.174 2002-11-08 12:23:38 adam Exp $
  */
 
 #include <stdio.h>
@@ -619,7 +619,7 @@ static void display_record(Z_External *r)
     if (ent && ent->value == VAL_SOIF)
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
-    else if (r->which == Z_External_octet && r->u.octet_aligned->len)
+    else if (r->which == Z_External_octet)
     {
         const char *octet_buf = (char*)r->u.octet_aligned->buf;
         if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML ||
