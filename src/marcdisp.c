@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.5 2004-03-16 13:15:58 adam Exp $
+ * $Id: marcdisp.c,v 1.6 2004-08-07 08:07:00 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -134,7 +134,13 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                 wr,
                 "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                 "  <leader>");
-	    marc_cdata(mt, buf, 24, wr);
+#if 1
+	    marc_cdata(mt, buf, 9, wr);
+	    marc_cdata(mt, "a", 1, wr);  /* set leader to signal unicode */
+	    marc_cdata(mt, buf+10, 14, wr);
+#else
+	    marc_cdata(mt, buf, 24, wr); /* leave header as is .. */
+#endif
             wrbuf_printf(wr, "</leader>\n");
             break;
         }

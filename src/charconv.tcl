@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.6 2004-03-20 07:16:25 adam Exp $
+# $Id: charconv.tcl,v 1.7 2004-08-07 08:06:57 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -18,10 +18,12 @@ proc preamble_trie {ofilehandle} {
     puts $f "
         struct yaz_iconv_trie_flat {
             char from\[6\];
+            unsigned combining : 1;
             $totype to;
         };
         struct yaz_iconv_trie_dir {
-            short ptr;
+            short ptr : 15;
+            unsigned combining : 1;
             $totype to;
         };
         
@@ -32,7 +34,7 @@ proc preamble_trie {ofilehandle} {
     "
     puts $f {
         static unsigned long lookup(struct yaz_iconv_trie **ptrs, int ptr, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read)
+                                    size_t inbytesleft, size_t *no_read, int *combining)
         {
             struct yaz_iconv_trie *t = (ptr >= 0) ? ptrs[ptr] : 0;
             if (!t || inbytesleft < 1)
@@ -41,7 +43,7 @@ proc preamble_trie {ofilehandle} {
             {
                 size_t ch = inp[0] & 0xff;
                 unsigned long code =
-                lookup(ptrs, t->dir[ch].ptr, inp+1, inbytesleft-1, no_read);
+                lookup(ptrs, t->dir[ch].ptr, inp+1, inbytesleft-1, no_read, combining);
                 if (code)
                 {
                     (*no_read)++;
@@ -50,6 +52,7 @@ proc preamble_trie {ofilehandle} {
                 if (t->dir[ch].to)
                 {
                     code = t->dir[ch].to;
+		    *combining = t->dir[ch].combining;
                     *no_read = 1;
                     return code;
                 }
@@ -65,6 +68,7 @@ proc preamble_trie {ofilehandle} {
                         if (memcmp(flat->from, inp, len) == 0)
                         {
                             *no_read = len;
+			    *combining = flat->combining;
                             return flat->to;
                         }
                     }
@@ -90,7 +94,7 @@ proc reset_trie {} {
     set trie(prefix) {}
 }
 
-proc ins_trie {from to} {
+proc ins_trie {from to combining} {
     global trie
     if {![info exists trie(no)]} {
         set trie(no) 1
@@ -101,7 +105,7 @@ proc ins_trie {from to} {
 	set trie(max) $to
     }
     incr trie(size)
-    ins_trie_r [split $from] $to 0
+    ins_trie_r [split $from] $to $combining 0
 }
 
 proc split_trie {this} {
@@ -110,6 +114,7 @@ proc split_trie {this} {
     foreach e $trie($this,content) {
         set from [lindex $e 0]
         set to [lindex $e 1]
+	set combining [lindex $e 2]
         
         set ch [lindex $from 0]
         set rest [lrange $from 1 end]
@@ -119,27 +124,28 @@ proc split_trie {this} {
                 set trie($this,ptr,$ch) $trie(no)
                 incr trie(no)
             }
-            ins_trie_r $rest $to $trie($this,ptr,$ch)
+            ins_trie_r $rest $to $combining $trie($this,ptr,$ch)
         } else {
             set trie($this,to,$ch) $to
+            set trie($this,combining,$ch) $combining
         }
     }
     set trie($this,content) missing
 }
 
-proc ins_trie_r {from to this} {
+proc ins_trie_r {from to combining this} {
     global trie
 
     if {![info exist trie($this,type)]} {
         set trie($this,type) f
     }
     if {$trie($this,type) == "f"} {
-        lappend trie($this,content) [list $from $to]
+        lappend trie($this,content) [list $from $to $combining]
         
         # split ?
         if {[llength $trie($this,content)] > $trie(split)} {
             split_trie $this
-            return [ins_trie_r $from $to $this]
+            return [ins_trie_r $from $to $combining $this]
         }
     } else {
         set ch [lindex $from 0]
@@ -150,9 +156,10 @@ proc ins_trie_r {from to this} {
                 set trie($this,ptr,$ch) $trie(no)
                 incr trie(no)
             }
-            ins_trie_r $rest $to $trie($this,ptr,$ch)
+            ins_trie_r $rest $to $combining $trie($this,ptr,$ch)
         } else {
             set trie($this,to,$ch) $to
+            set trie($this,combining,$ch) $combining
         }
     }
 }
@@ -174,7 +181,7 @@ proc dump_trie {ofilehandle} {
                 foreach d [lindex $m 0] {
                     puts -nonewline $f "\\x$d"
                 }
-                puts -nonewline $f "\", 0x[lindex $m 1]"
+                puts -nonewline $f "\", [lindex $m 2], 0x[lindex $m 1]"
                 puts $f "\},"
             }
             puts $f "  \{\"\", 0\}"
@@ -193,6 +200,11 @@ proc dump_trie {ofilehandle} {
                     set null 0
                 } else {
                     puts -nonewline $f "-1, "
+                }
+                if {[info exist trie($this,combining,$ch)]} {
+                    puts -nonewline $f "$trie($this,combining,$ch), "
+                } else {
+                    puts -nonewline $f "0, "
                 }
                 if {[info exist trie($this,to,$ch)]} {
                     puts -nonewline $f "0x$trie($this,to,$ch)\}"
@@ -224,11 +236,11 @@ proc dump_trie {ofilehandle} {
     puts $f ""
 
     puts $f "unsigned long yaz_$trie(prefix)_conv
-            (unsigned char *inp, size_t inbytesleft, size_t *no_read)
+            (unsigned char *inp, size_t inbytesleft, size_t *no_read, int *combining)
         {
             unsigned long code;
             
-            code = lookup($trie(prefix)ptrs, 0, inp, inbytesleft, no_read);
+            code = lookup($trie(prefix)ptrs, 0, inp, inbytesleft, no_read, combining);
             if (!code)
             {
                 *no_read = 1;
@@ -247,6 +259,7 @@ proc readfile {fname ofilehandle prefix omits} {
     set lineno 0
     set f [open $fname r]
     set tablenumber x
+    set combining 0
     while {1} {
         incr lineno
         set cnt [gets $f line]
@@ -259,11 +272,12 @@ proc readfile {fname ofilehandle prefix omits} {
 	} elseif {[regexp {</entitymap>} $line s]} {
 	    dump_trie $ofilehandle
 	} elseif {[regexp {<character hex="([^\"]*)".*<unientity>([0-9A-Fa-f]*)</unientity>} $line s hex ucs]} {
-	    ins_trie $hex $ucs
+	    ins_trie $hex $ucs $combining
 	    unset hex
 	} elseif {[regexp {<codeTable number="([0-9]+)"} $line s tablenumber]} {
 	    reset_trie
 	    set trie(prefix) "${prefix}_$tablenumber"
+	    set combining 0
 	} elseif {[regexp {</codeTable>} $line s]} {
 	    if {[lsearch $omits $tablenumber] == -1} {
 		dump_trie $ofilehandle
@@ -274,13 +288,16 @@ proc readfile {fname ofilehandle prefix omits} {
 		    lappend hex [string range $marc $i [expr $i+1]]
 		}
 		# puts "ins_trie $hex $ucs"
-		ins_trie $hex $ucs
+		ins_trie $hex $ucs $combining
 		unset hex
 	    }
 	    set marc {}
 	    set uni {}
+	    set combining 0
 	} elseif {[regexp {<marc>([0-9A-Fa-f]*)</marc>} $line s marc]} {
 	    incr marc_lines
+	} elseif {[regexp {<isCombining>true</isCombining>} $line s]} {
+	    set combining 1
 	} elseif {[regexp {<ucs>([0-9A-Fa-f]*)</ucs>} $line s ucs]} {
 	    incr ucs_lines
 	}
