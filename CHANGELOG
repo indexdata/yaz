@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 2.0.17 2004/03/16 Debian only
+--- 2.0.17 2004/03/17
 
 Fix encoding of xsd:string to use text instead of CDATA.
 
