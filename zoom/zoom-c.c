@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.43 2002-09-03 18:10:13 adam Exp $
+ * $Id: zoom-c.c,v 1.44 2002-09-13 08:57:03 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -639,7 +639,7 @@ static void otherInfo_attach (ZOOM_connection c, Z_APDU *a, ODR out)
     {
         size_t len;
 	Z_OtherInformation **oi;
-        char buf[20];
+        char buf[80];
         const char *val;
         const char *cp;
         int oidval;
