@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.2  1999-11-30 13:47:12  adam
+ * Revision 1.3  2000-03-14 13:52:32  ian
+ * Added Admin Extended Service to External Choice
+ *
+ * Revision 1.2  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.1  1999/06/08 10:10:16  adam
@@ -174,6 +177,10 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 	 (Odr_fun)z_DateTime, 0},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_universeReport,
 	 (Odr_fun)z_UniverseReport, 0},
+#ifdef ASN_COMPILED
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_ESAdmin,
+	 (Odr_fun)z_Admin, 0},
+#endif
 	{-1, -1, -1, -1, 0, 0}
     };
     
