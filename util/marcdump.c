@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.12  2000-10-02 11:07:45  adam
+ * Revision 1.13  2001-02-10 01:21:59  adam
+ * Dumper only keeps one record at a time in memory.
+ *
+ * Revision 1.12  2000/10/02 11:07:45  adam
  * Added peer_name member for bend_init handler. Changed the YAZ
  * client so that tcp: can be avoided in target spec.
  *
@@ -52,6 +55,7 @@
 #include <string.h>
 #include <errno.h>
 #include <yaz/marcdisp.h>
+#include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
 #include <yaz/options.h>
 
@@ -64,21 +68,20 @@
  
 int main (int argc, char **argv)
 {
-    int ret;
+    int r;
     char *arg;
     int verbose = 0;
     FILE *inf;
-    long file_size;
-    char *buf, *p;
+    char buf[100001];
     char *prog = *argv;
-    int count = 0;
     int no = 0;
     FILE *cfile = 0;
 
-    while ((ret = options("vc:", argv, argc, &arg)) != -2)
+    while ((r = options("vc:", argv, argc, &arg)) != -2)
     {
+	int count;
 	no++;
-        switch (ret)
+        switch (r)
         {
 	case 'c':
 	    if (cfile)
@@ -87,71 +90,55 @@ int main (int argc, char **argv)
 	    break;
         case 0:
 	    inf = fopen (arg, "r");
+	    count = 0;
 	    if (!inf)
 	    {
 		fprintf (stderr, "%s: cannot open %s:%s\n",
 			 prog, arg, strerror (errno));
 		exit (1);
 	    }
-	    if (fseek (inf, 0L, SEEK_END))
-	    {
-		fprintf (stderr, "%s: cannot seek in %s:%s\n",
-			 prog, arg, strerror (errno));
-		exit (1);
-	    }
-	    file_size = ftell (inf);    
-	    if (fseek (inf, 0L, SEEK_SET))
-	    {
-		fprintf (stderr, "%s: cannot seek in %s:%s\n",
-			 prog, arg, strerror (errno));
-		exit (1);
-	    }
-	    buf = (char *)xmalloc (file_size);
-	    if (!buf)
-	    {
-		fprintf (stderr, "%s: cannot xmalloc: %s\n",
-			 prog, strerror (errno));
-		exit (1);
-	    }
-	    if ((long) fread (buf, 1, file_size, inf) != file_size)
-	    {
-		fprintf (stderr, "%s: cannot read %s: %s\n",
-			 prog, arg, strerror (errno));
-		exit (1);
-	    }
 	    if (cfile)
-	    {
 		fprintf (cfile, "char *marc_records[] = {\n");
-	    }
-	    for (p = buf; (ret = marc_display_ex (p, stdout, verbose)) > 0;)
+	    while (1)
 	    {
+		int len;
+		
+		r = fread (buf, 1, 5, inf);
+		if (r < 5)
+		    break;
+		len = atoi_n(buf, 5);
+		if (len < 25 || len > 100000)
+		    break;
+		len = len - 5;
+		r = fread (buf + 5, 1, len, inf);
+		if (r < len)
+		    break;
+		r = marc_display_ex (buf, stdout, verbose);
+		if (r <= 0)
+		    break;
 		if (cfile)
 		{
+		    char *p = buf;
 		    int i;
-		    if (p != buf)
+		    if (count)
 			fprintf (cfile, ",");
 		    fprintf (cfile, "{\n");
-		    for (i = 0; i<ret; i++)
+		    for (i = 0; i < r; i++)
 		    {
 			if ((i & 15) == 0)
 			    fprintf (cfile, "  \"");
 			fprintf (cfile, "\\x%02X", p[i] & 255);
 			
-			if (i < ret - 1 && (i & 15) == 15)
+			if (i < r - 1 && (i & 15) == 15)
 			    fprintf (cfile, "\"\n");
 			
-		    }
+			}
 		    fprintf (cfile, "\"\n}");
 		}
-		p += ret;
 		count++;
 	    }
 	    if (cfile)
-	    {
 		fprintf (cfile, "};\n");
-	    }
-	    fclose (inf);
-	    xfree (buf);
             break;
         case 'v':
 	    verbose++;
