@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: oid.c,v $
- * Revision 1.42  2000-02-29 13:44:55  adam
+ * Revision 1.43  2000-03-14 09:21:08  ian
+ * Added Admin Extended Service OID
+ *
+ * Revision 1.42  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.41  2000/01/10 15:16:53  adam
@@ -363,7 +366,8 @@ static oident oids[] =
      "exp. spec."},
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV,    {9,7,-1},
      "exp. inv."},
-
+    {PROTO_Z3950,   CLASS_EXTSERV, VAL_ADMINSERVICE, {9,81,1,-1},
+     "Admin"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_SEARCHRES1,   {10,1,-1},
      "searchResult-1"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_CHARLANG,     {10,2,-1},
