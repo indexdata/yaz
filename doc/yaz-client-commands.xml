@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.5 2004-09-22 19:22:08 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.6 2004-12-09 09:30:00 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -156,6 +156,16 @@
    </para>
   </listitem>
  </varlistentry>
+
+ <varlistentry><term>
+   <literal>list_all</literal>
+  </term>
+  <listitem>
+   <para>This command displays status and values for many settings.
+   </para>
+  </listitem>
+ </varlistentry>
+ 
  <varlistentry><term>
    <literal>lslb</literal> <replaceable>n</replaceable>
   </term>
@@ -370,6 +380,19 @@
  </varlistentry>
 
  <varlistentry><term>
+   <literal>set_auto_reconnect</literal>
+   <replaceable>flag</replaceable>
+  </term>
+  <listitem>
+   <para>Specifies whether YAZ client automatically reconnect if
+    target closes connection (Z39.50 only).
+    <replaceable>flag</replaceable> must be either
+    <literal>on</literal> or <literal>off</literal>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
    <literal>set_marcdump</literal>
    <replaceable>filename</replaceable>
   </term>
@@ -396,7 +419,8 @@
  <varlistentry><term>
    <literal>charset</literal>
    <replaceable>negotiationcharset</replaceable>
-   [<replaceable>outputcharset</replaceable>]
+   [<replaceable>displaycharset</replaceable>]
+   [[<replaceable>marccharset</replaceable>]]
   </term>
   <listitem>
    <para>Specifies character set (encoding) for Z39.50
@@ -409,7 +433,7 @@
     specifies <emphasis>no</emphasis> character set to be negotiated.
    </para>
    <para>
-    If <replaceable>outputcharset</replaceable> is given, it specifies name
+    If <replaceable>displaycharset</replaceable> is given, it specifies name
     of the character set of the output (on the terminal on which
     YAZ client is running). To disable conversion of characters
     to the output encoding, the special name <literal>-</literal> (dash)
@@ -417,6 +441,11 @@
     If the special name <literal>auto</literal> is given, YAZ client will
     convert strings to the encoding of the
     terminal as returned by <function>nl_langinfo</function> call.
+   </para>
+   <para>
+    If <replaceable>marcharset</replaceable> is given, it specifies name
+    of the character set of retrieved MARC records from server. See
+    also <literal>marcharset</literal> command.
    </para>
    <note>
     <para>
@@ -427,10 +456,35 @@
    </note>
    <note>
     <para>
-     MARC records are not covered by Z39.50 character set negotiation.
-     See <literal>marccharset</literal>.
+     MARC records are not covered by Z39.50 character set negotiation,
+     so that's why there is a separate character that must be known
+     in order to do meaningful converson(s).
     </para>
    </note>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>negcharset</literal>
+   <replaceable>charset</replaceable>
+  </term>
+  <listitem>
+   <para>Specifies character set for negotiation (Z39.50). The
+    argument is the same as second argument for command
+    <literal>charset</literal>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>displaycharset</literal>
+   <replaceable>charset</replaceable>
+  </term>
+  <listitem>
+   <para>Specifies character set for output (display). The
+    argument is the same as second argument for
+    command <literal>charset</literal>.
+   </para>
   </listitem>
  </varlistentry>
 
@@ -444,13 +498,14 @@
     for your display. See <literal>charset</literal> command.
     If <literal>auto</literal> is given, YAZ will assume
     that MARC21/USMARC is using MARC8/UTF8 and ISO-8859-1
-    for all other MARC variants.
+    for all other MARC variants. The charset argument is the
+    same as third argument for <literal>charset</literal> command.
    </para>
   </listitem>
  </varlistentry>
 
  <varlistentry><term>
-   <literal>set_cclfields</literal>
+   <literal>set_cclfile</literal>
    <replaceable>filename</replaceable>
   </term>
   <listitem>
@@ -462,7 +517,7 @@
  </varlistentry>
 
  <varlistentry><term>
-   <literal>set_cqlfields</literal>
+   <literal>set_cqlfile</literal>
    <replaceable>filename</replaceable>
   </term>
   <listitem>
@@ -496,6 +551,76 @@
     <literal>tagset</literal>, <literal>general</literal>.
     If you're in doubt use the <literal>general</literal>
     class.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>register_tab</literal>
+   <replaceable>command</replaceable>
+   <replaceable>string</replaceable>
+  </term>
+  <listitem>
+   <para>This command registers a TAB completion string for
+    the command given.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>sleep</literal>
+   <replaceable>seconds</replaceable>
+  </term>
+  <listitem>
+   <para>This command makes YAZ client sleep (be idle) for
+    the number of seconds given.
+   </para>
+  </listitem>
+ </varlistentry>
+ 
+ <varlistentry><term>
+   <literal>zversion</literal>
+   <replaceable>ver</replaceable>
+  </term>
+  <listitem>
+   <para>This command sets Z39.50 version for negotiation. 
+    Should be used before <literal>open</literal>.
+    By default, 3 (version 3) is used.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>options</literal>
+   <replaceable>op1 op2..</replaceable>
+  </term>
+  <listitem>
+   <para>This command sets Z39.50 options for negotiation. 
+    Should be used before <literal>open</literal>.
+   </para>
+   <para>
+    The following options are supported:
+    <literal>search</literal>,  
+    <literal>present</literal>,  
+    <literal>delSet</literal>,  
+    <literal>resourceReport</literal>,  
+    <literal>triggerResourceCtrl</literal>,  
+    <literal>resourceCtrl</literal>,  
+    <literal>accessCtrl</literal>,  
+    <literal>scan</literal>,  
+    <literal>sort</literal>,  
+    <literal>extendedServices</literal>,  
+    <literal>level_1Segmentation</literal>,  
+    <literal>level_2Segmentation</literal>,  
+    <literal>concurrentOperations</literal>,  
+    <literal>namedResultSets</literal>,  
+    <literal>encapsulation</literal>,  
+    <literal>resultCount</literal>,  
+    <literal>negotiationModel</literal>,  
+    <literal>duplicationDetection</literal>,  
+    <literal>queryType104</literal>,  
+    <literal>pQESCorrection</literal>,  
+    <literal>stringSchema</literal>.
    </para>
   </listitem>
  </varlistentry>
