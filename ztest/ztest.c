@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.52 2002-03-18 21:33:48 adam Exp $
+ * $Id: ztest.c,v 1.53 2002-07-31 14:06:29 adam Exp $
  */
 
 /*
@@ -16,9 +16,7 @@
 #include <yaz/backend.h>
 #include <yaz/log.h>
 
-#if YAZ_MODULE_ill
 #include <yaz/ill.h>
-#endif
 
 Z_GenericRecord *dummy_grs_record (int num, ODR o);
 char *dummy_marc_record (int num, ODR odr);
@@ -99,7 +97,6 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		yaz_log(LOG_LOG, "setId: %s", n->resultSetItem->resultSetId);
 		yaz_log(LOG_LOG, "item: %d", *n->resultSetItem->item);
 	    }
-#if YAZ_MODULE_ill
 	    if (n->itemRequest)
 	    {
 		Z_External *r = (Z_External*) n->itemRequest;
@@ -177,7 +174,6 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 			     *item_req->protocol_version_num);
 		}
 	    }
-#endif
             if (k)
             {
 
