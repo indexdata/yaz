@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.11  1995-03-30 12:18:17  quinn
+ * Revision 1.12  1995-03-30 13:29:02  quinn
+ * Smallish
+ *
+ * Revision 1.11  1995/03/30  12:18:17  quinn
  * Fixed bug.
  *
  * Revision 1.10  1995/03/29  15:40:16  quinn
@@ -214,6 +217,7 @@ static void add_listener(char *where, int what)
 	}
 	type = tcpip_type;
     }
+#ifdef USE_XTIMOSI
     else if (!strcmp(mode, "osi"))
     {
     	if (!(ap = mosi_strtoaddr(addr)))
@@ -223,6 +227,7 @@ static void add_listener(char *where, int what)
 	}
 	type = mosi_type;
     }
+#endif
     else
     {
     	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");
