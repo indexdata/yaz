@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.9 2001-11-18 21:14:22 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.10 2002-03-25 11:37:34 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -127,7 +127,7 @@
      <varlistentry><term><literal>--with-openssl</literal></term>
       <listitem><para>&yaz; will be linked with the OpenSSL libraries and
         an SSL COMSTACK will be provided. Note that SSL support is still
-        exterimental.
+        experimental.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>--enable-shared</literal></term>
