@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.10 2003-11-03 10:45:05 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.11 2003-11-19 21:17:26 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -13,8 +13,8 @@
    <para>
     If you are only interested in writing a Z39.50 implementation based on
     the PDUs that are already provided with &yaz;, you only need to concern
-    yourself with the section on managing ODR streams (section
-    <link linkend="odr-use">Using ODR</link>). Only if you need to
+    yourself with the section on managing ODR streams
+    (<xref linkend="odr.use"/>). Only if you need to
     implement ASN.1 beyond that which has been provided, should you
     worry about the second half of the documentation
     (section <link linkend="odr-prog">Programming with ODR</link>).
@@ -37,7 +37,7 @@
    </para>
 
   </sect1>
-  <sect1 id="odr.use"><title id="odr-use">Using ODR</title>
+  <sect1 id="odr.use"><title>Using ODR</title>
 
    <sect2><title>ODR Streams</title>
 

@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.32 2003-11-03 10:54:01 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.33 2003-11-19 21:17:26 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1757,7 +1757,7 @@ typedef struct oident
     release the associated memory again. For the structures describing the
     Z39.50 PDUs and related structures, it is convenient to use the
     memory-management system of the &odr; subsystem (see
-    <link linkend="odr-use">Using ODR</link>). However, in some circumstances
+    <xref linkend="odr.use"/>). However, in some circumstances
     where you might otherwise benefit from using a simple nibble memory
     management system, it may be impractical to use
     <function>odr_malloc()</function> and <function>odr_reset()</function>.

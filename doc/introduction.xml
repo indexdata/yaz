@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.15 2003-11-03 10:54:49 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.16 2003-11-19 21:17:26 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -136,7 +136,7 @@
      <para>
       <xref linkend="odr"/> goes through the details of the
       ODR module which is the work horse that encodes and decodes
-      BER packages. Implementors using ZOOM only do <emphasis>not</emphasis>
+      BER packages. Implementors using ZOOM only, do <emphasis>not</emphasis>
       need reading this.
       Most other Z39.50 implementors only need to read the first two
       sections (<xref linkend="odr.introduction"/> and
@@ -268,8 +268,8 @@
     <para>
      If you are using the premade definitions of the &asn; module, and you
      are not adding new protocol of your own, the only parts of &odr; that you
-     need to worry about are documented in section 
-     <link linkend="odr-use">Using ODR</link>.
+     need to worry about are documented in
+     <xref linkend="odr.use"/>.
     </para>
    </note>
    

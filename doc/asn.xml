@@ -1,4 +1,4 @@
-<!-- $Id: asn.xml,v 1.12 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: asn.xml,v 1.13 2003-11-19 21:17:26 adam Exp $ -->
  <chapter id="asn"><title>The Z39.50 ASN.1 Module</title>
   <sect1 id="asn.introduction"><title>Introduction</title>
    <para>
@@ -54,8 +54,8 @@
     structure before freeing the structure itself.
    </para>
    <para>
-    You can use the <function>odr_malloc()</function> function (see section 
-    <link linkend="odr-use">Using ODR</link> for details). When you use
+    You can use the <function>odr_malloc()</function> function (see
+    <xref linkend="odr.use"/> for details). When you use
     <function>odr_malloc()</function>, you can release all of the
     allocated data in a single operation, independent of any pointers and
     relations between the data. <function>odr_malloc()</function> is based on a
@@ -308,8 +308,8 @@ typedef struct Z_ext_typeent
     <literal>z_ext_gettypebyref</literal> to look for the provided
     direct-reference.
     If the return value is different from NULL, you can use the provided
-    function to decode the BER string (see section <link linkend="odr-use">
-     Using ODR</link>).
+    function to decode the BER string (see <xref linkend="odr.use"/>
+    ).
    </para>
    
    <para>
