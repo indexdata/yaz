@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.1 2003-04-23 20:34:08 adam Exp $
+ * $Id: tsticonv.c,v 1.2 2003-05-06 10:07:33 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -15,6 +15,7 @@
 
 #include <yaz/yaz-util.h>
 
+/* some test strings in ISO-8859-1 format */
 const char *buf[] = {
 	"ax" ,
 	"\330",
