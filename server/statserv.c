@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.31  1995-11-17 11:09:39  adam
+ * Revision 1.32  1996-01-19 15:41:52  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.31  1995/11/17  11:09:39  adam
  * Added new option '-c' to specify configuration name in control block.
  *
  * Revision 1.30  1995/11/01  13:54:59  quinn
@@ -234,7 +237,7 @@ static void listener(IOCHAN h, int event)
 	if (control_block.dynamic)
 	{
 	    IOCHAN pp;
-	    /* close our half of the listener sockets */
+	    /* close our half of the listener socket */
 	    for (pp = iochan_getchan(); pp; pp = iochan_getnext(pp))
 	    {
 		COMSTACK l = iochan_getdata(pp);
