@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.82 2004-08-18 09:43:10 adam Exp $
+# $Id: makefile,v 1.83 2004-08-18 10:47:48 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -111,9 +111,9 @@ CQL2XCQL=$(BINDIR)\cql2xcql.exe
 YAZ_MARCDUMP=$(BINDIR)\yaz-marcdump.exe
 
 # shortcut names defined here
-dll : $(DLL) 
-client: $(CLIENT)
-ztest: $(ZTEST)
+dll: dirs generate $(DLL) 
+client: dirs generate $(CLIENT)
+ztest: dirs generate $(ZTEST)
 
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8)
