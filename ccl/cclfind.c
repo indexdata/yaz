@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.19  2000-11-16 09:58:02  adam
+ * Revision 1.20  2000-11-16 13:03:12  adam
+ * Function ccl_rpn_query sets attributeSet to Bib-1.
+ *
+ * Revision 1.19  2000/11/16 09:58:02  adam
  * Implemented local AttributeSet setting for CCL field maps.
  *
  * Revision 1.18  2000/10/17 19:50:28  adam
@@ -351,7 +354,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         int truncation_value = -1;
         int completeness_value = -1;
         int len = 0;
-        int max = 200;
+        size_t max = 200;
         if (and_list || or_list)
             max = 1;
 

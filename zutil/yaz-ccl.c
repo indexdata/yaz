@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.7  2000-11-16 09:58:02  adam
+ * Revision 1.8  2000-11-16 13:03:13  adam
+ * Function ccl_rpn_query sets attributeSet to Bib-1.
+ *
+ * Revision 1.7  2000/11/16 09:58:02  adam
  * Implemented local AttributeSet setting for CCL field maps.
  *
  * Revision 1.6  2000/02/02 15:13:23  adam
@@ -239,9 +242,14 @@ static Z_RPNStructure *ccl_rpn_structure (ODR o, struct ccl_rpn_node *p)
 Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p)
 {
     Z_RPNQuery *zq;
+    oident bib1;
+    int oid[OID_SIZE];
+    bib1.proto = PROTO_Z3950;
+    bib1.oclass = CLASS_ATTSET;
+    bib1.value = VAL_BIB1;
 
     zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
-    zq->attributeSetId = NULL;
+    zq->attributeSetId = odr_oiddup (o, oid_ent_to_oid (&bib1, oid));
     zq->RPNStructure = ccl_rpn_structure (o, p);
     return zq;
 }

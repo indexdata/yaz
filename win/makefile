@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.18 2000-11-01 14:47:00 adam Exp $
+# $Id: makefile,v 1.19 2000-11-16 13:03:13 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -153,7 +153,7 @@ SERVER_LINK_OPTIONS = -lib
 ZTEST_LINK_OPTIONS = /subsystem:console  
 
 # TCL
-TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
+TCL="C:\Program Files\Tcl\bin\tclsh82.exe"
 HAVE_TCL=1
 
 COMMON_TCL_OPTIONS= ..\util\yaz-comp -I$(INCLDIR) -i yaz
@@ -493,35 +493,35 @@ generated_files: \
 
 # Server
 {$(SERVERDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $< 
 
 # Various YAZ source directories
 {$(ASNDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $< 
 
 {$(COMSTACKDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $< 
 
 {$(ODRDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $< 
 
 {$(UTILDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $< 
 
 {$(ZUTILDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP)	$(COPT) $< 
+	$(CPP)	$(COPT) $< 
 
 {$(RETDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $<
+	$(CPP) $(COPT) $<
 
 {$(Z3950_C_DIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $< 
 
 {$(ILL_C_DIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $< 
 
 {$(CCLDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $< 
 
 ############### ASN-generated files
 
@@ -675,7 +675,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.18  2000-11-01 14:47:00  adam
+# Revision 1.19  2000-11-16 13:03:13  adam
+# Function ccl_rpn_query sets attributeSet to Bib-1.
+#
+# Revision 1.18  2000/11/01 14:47:00  adam
 # Added CCL support for WIN32.
 #
 # Revision 1.17  2000/10/06 12:01:12  adam
