@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.36  2001-02-21 13:46:53  adam
+ * Revision 1.37  2001-02-28 09:00:06  adam
+ * Fixed problem with stack overflow for very nested records.
+ *
+ * Revision 1.36  2001/02/21 13:46:53  adam
  * C++ fixes.
  *
  * Revision 1.35  2000/12/05 14:44:25  adam
@@ -596,7 +599,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		parent->child = res;
 	    d1_stack[level] = res;
 	    d1_stack[level+1] = 0;
-	    if (!null_tag)
+	    if (level < 250 && !null_tag)
 		++level;
 	}
 	else /* != '<'... this is a body of text */
