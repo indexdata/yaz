@@ -55,12 +55,10 @@ typedef struct Z_HumanString
 
 typedef struct Z_IconObjectUnit
 {
-    enum
-    {
-    	Z_IconObject_ianaType,
-	Z_IconObject_z3950type,
-	Z_IconObject_otherType
-    } which;
+    int which;
+#define Z_IconObject_ianaType 0
+#define Z_IconObject_z3950type 1
+#define Z_IconObject_otherType 2
     char *bodyType;
     Odr_oct *content;
 } Z_IconObjectUnit;
@@ -102,12 +100,10 @@ typedef struct Z_NetworkAddressOther
 
 typedef struct Z_NetworkAddress
 {
-    enum
-    {
-    	Z_NetworkAddress_iA,
-	Z_NetworkAddress_oPA,
-	Z_NetworkAddress_other
-    } which;
+    int which;
+#define Z_NetworkAddress_iA 0
+#define Z_NetworkAddress_oPA 1
+#define Z_NetworkAddress_other 2
     union
     {
     	Z_NetworkAddressIA *internetAddress;
@@ -146,11 +142,9 @@ typedef struct Z_ProxSupportPrivate
 
 typedef struct Z_ProxSupportUnit
 {
-    enum
-    {
-    	Z_ProxSupportUnit_known,
-	Z_ProxSupportUnit_private
-    } which;
+    int which;
+#define Z_ProxSupportUnit_known 0
+#define Z_ProxSupportUnit_private 1
     union
     {
     	int known;
@@ -183,15 +177,13 @@ typedef struct Z_Iso8777Capabilities
 
 typedef struct Z_QueryTypeDetails
 {
-    enum
-    {
-    	Z_QueryTypeDetails_private,
-    	Z_QueryTypeDetails_rpn,
-    	Z_QueryTypeDetails_iso8777,
-    	Z_QueryTypeDetails_z3958,
-    	Z_QueryTypeDetails_erpn,
-    	Z_QueryTypeDetails_rankedList
-    } which;
+    int which;
+#define Z_QueryTypeDetails_private 0
+#define Z_QueryTypeDetails_rpn 1
+#define Z_QueryTypeDetails_iso8777 2
+#define Z_QueryTypeDetails_z3958 3
+#define Z_QueryTypeDetails_erpn 4
+#define Z_QueryTypeDetails_rankedList 5
     union
     {
 	Z_PrivateCapabilities *private;
@@ -288,11 +280,9 @@ typedef struct Z_AttributeOccurrence
     Odr_oid *attributeSet;         /* OPTIONAL */
     int *attributeType;
     Odr_null *mustBeSupplied;               /* OPTIONAL */
-    enum
-    {
-    	Z_AttributeOcc_anyOrNone,
-	Z_AttributeOcc_specific
-    } which;
+    int which;
+#define Z_AttributeOcc_anyOrNone 0
+#define Z_AttributeOcc_specific 1
     union
     {
 	Odr_null *anyOrNone;
@@ -387,11 +377,9 @@ typedef struct Z_DatabaseInfo
     Z_DatabaseList *subDbs;                 /* OPTIONAL */
     Z_HumanString *disclaimers;             /* OPTIONAL */
     Z_HumanString *news;                    /* OPTIONAL */
-    enum
-    {
-    	Z_Exp_RecordCount_actualNumber,
-	Z_Exp_RecordCount_approxNumber
-    } recordCount_which;
+    int recordCount_which;
+#define Z_Exp_RecordCount_actualNumber 0
+#define Z_Exp_RecordCount_approxNumber 1
     int *recordCount;                       /* OPTIONAL */
     Z_HumanString *defaultOrder;            /* OPTIONAL */
     int *avRecordSize;                      /* OPTIONAL */
@@ -450,11 +438,9 @@ typedef struct Z_ElementInfoList
 
 struct Z_ElementDataType
 {
-    enum
-    {
-    	Z_ElementDataType_primitive,
-	Z_ElementDataType_structured
-    } which;
+    int which;
+#define Z_ElementDataType_primitive 0
+#define Z_ElementDataType_structured 1
     union
     {
     	int *primitive;
@@ -774,12 +760,10 @@ typedef struct Z_RetrievalRecordDetails
 
 typedef struct Z_SortKeyDetailsSortType
 {
-    enum
-    {
-    	Z_SortKeyDetailsSortType_character,
-    	Z_SortKeyDetailsSortType_numeric,
-    	Z_SortKeyDetailsSortType_structured
-    } which;
+    int which;
+#define Z_SortKeyDetailsSortType_character 0
+#define Z_SortKeyDetailsSortType_numeric 1
+#define Z_SortKeyDetailsSortType_structured 2
     union
     {
 	Odr_null *character;
@@ -840,15 +824,13 @@ typedef struct Z_ProcessingInformation
 
 typedef struct Z_ValueDescription
 {
-    enum
-    {
-    	Z_ValueDescription_integer,
-    	Z_ValueDescription_string,
-    	Z_ValueDescription_octets,
-    	Z_ValueDescription_oid,
-    	Z_ValueDescription_unit,
-    	Z_ValueDescription_valueAndUnit
-    } which;
+    int which;
+#define Z_ValueDescription_integer 0
+#define Z_ValueDescription_string 1
+#define Z_ValueDescription_octets 2
+#define Z_ValueDescription_oid 3
+#define Z_ValueDescription_unit 4
+#define Z_ValueDescription_valueAndUnit 5
     union
     {
 	int *integer;
@@ -874,11 +856,9 @@ typedef struct Z_ValueSetEnumerated
 
 typedef struct Z_ValueSet
 {
-    enum
-    {
-    	Z_ValueSet_range,
-	Z_ValueSet_enumerated
-    } which;
+    int which;
+#define Z_ValueSet_range 0
+#define Z_ValueSet_enumerated 1
     union
     {
 	Z_ValueRange *range;
@@ -975,26 +955,24 @@ typedef struct Z_CategoryList
 
 typedef struct Z_ExplainRecord
 {
-    enum
-    {
-    	Z_Explain_targetInfo,
-	Z_Explain_databaseInfo,
-	Z_Explain_schemaInfo,
-	Z_Explain_tagSetInfo,
-	Z_Explain_recordSyntaxInfo,
-	Z_Explain_attributeSetInfo,
-	Z_Explain_termListInfo,
-	Z_Explain_extendedServicesInfo,
-	Z_Explain_attributeDetails,
-	Z_Explain_termListDetails,
-	Z_Explain_elementSetDetails,
-	Z_Explain_retrievalRecordDetails,
-	Z_Explain_sortDetails,
-	Z_Explain_processing,
-	Z_Explain_variants,
-	Z_Explain_units,
-	Z_Explain_categoryList
-    } which;
+    int which;
+#define Z_Explain_targetInfo 0
+#define Z_Explain_databaseInfo 1
+#define Z_Explain_schemaInfo 2
+#define Z_Explain_tagSetInfo 3
+#define Z_Explain_recordSyntaxInfo 4
+#define Z_Explain_attributeSetInfo 5
+#define Z_Explain_termListInfo 6
+#define Z_Explain_extendedServicesInfo 7
+#define Z_Explain_attributeDetails 8
+#define Z_Explain_termListDetails 9
+#define Z_Explain_elementSetDetails 10
+#define Z_Explain_retrievalRecordDetails 11
+#define Z_Explain_sortDetails 12
+#define Z_Explain_processing 13
+#define Z_Explain_variants 14
+#define Z_Explain_units 15
+#define Z_Explain_categoryList 16
     union
     {
     	Z_TargetInfo *targetInfo;

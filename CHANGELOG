@@ -1,5 +1,14 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- XXXXXX XXXX/XX/XX
+
+Various changes to retrieval module.
+
+Changed the union discriminators of the protocol files from enums to
+ints paired with #defines.
+
+Improved Explain decoders/encoders.
+
 --- 1.0pl2 1995/12/6
 
 Memory bug in log module fixed.

@@ -96,17 +96,15 @@ typedef struct Z_DiagTerm
 
 typedef struct Z_Proximity
 {
-    enum
-    {
-	Z_Proximity_resultSets,
-	Z_Proximity_badSet,
-	Z_Proximity_relation,
-	Z_Proximity_unit,
-	Z_Proximity_distance,
-	Z_Proximity_attributes,
-	Z_Proximity_ordered,
-	Z_Proximity_exclusion
-    } which;
+    int which;
+#define Z_Proximity_resultSets 0
+#define Z_Proximity_badSet 1
+#define Z_Proximity_relation 2
+#define Z_Proximity_unit 3
+#define Z_Proximity_distance 4
+#define Z_Proximity_attributes 5
+#define Z_Proximity_ordered 6
+#define Z_Proximity_exclusion 7
     union
     {
 	Odr_null *resultSets;
@@ -128,16 +126,14 @@ typedef struct Z_AttrListList
 
 typedef struct Z_Scan
 {
-    enum
-    {
-	Z_ScanD_nonZeroStepSize,
-	Z_ScanD_specifiedStepSize,
-	Z_ScanD_termList1,
-	Z_ScanD_termList2,
-	Z_ScanD_posInResponse,
-	Z_ScanD_resources,
-	Z_ScanD_endOfList
-    } which;
+    int which;
+#define Z_ScanD_nonZeroStepSize 0
+#define Z_ScanD_specifiedStepSize 1
+#define Z_ScanD_termList1 2
+#define Z_ScanD_termList2 3
+#define Z_ScanD_posInResponse 4
+#define Z_ScanD_resources 5
+#define Z_ScanD_endOfList 6
     union
     {
 	Odr_null *nonZeroStepSize;
@@ -162,21 +158,19 @@ typedef struct Z_StringList
 
 typedef struct Z_Sort
 {
-    enum
-    {
-	Z_SortD_sequence,
-	Z_SortD_noRsName,
-	Z_SortD_tooMany,
-	Z_SortD_incompatible,
-	Z_SortD_generic,
-	Z_SortD_dbSpecific,
-	Z_SortD_sortElement,
-	Z_SortD_key,
-	Z_SortD_action,
-	Z_SortD_illegal,
-	Z_SortD_inputTooLarge,
-	Z_SortD_aggregateTooLarge
-    } which;
+    int which;
+#define Z_SortD_sequence 0
+#define Z_SortD_noRsName 1
+#define Z_SortD_tooMany 2
+#define Z_SortD_incompatible 3
+#define Z_SortD_generic 4
+#define Z_SortD_dbSpecific 5
+#define Z_SortD_sortElement 6
+#define Z_SortD_key 7
+#define Z_SortD_action 8
+#define Z_SortD_illegal 9
+#define Z_SortD_inputTooLarge 10
+#define Z_SortD_aggregateTooLarge 11
     union
     {
 	Odr_null *sequence;
@@ -204,10 +198,8 @@ typedef struct Z_Sort
 
 typedef struct Z_Segmentation
 {
-    enum
-    {
-	Z_SegmentationD_segments
-    } which;
+    int which;
+#define Z_SegmentationD_segments 0
     union
     {
 	Odr_null *segments;
@@ -216,12 +208,10 @@ typedef struct Z_Segmentation
 
 typedef struct Z_ExtServices
 {
-    enum
-    {
-	Z_ExtServicesD_req,
-	Z_ExtServicesD_permission,
-	Z_ExtServicesD_immediate
-    } which;
+    int which;
+#define Z_ExtServicesD_req 0
+#define Z_ExtServicesD_permission 1
+#define Z_ExtServicesD_immediate 2
     union
     {
 	int *req;
@@ -247,16 +237,14 @@ typedef struct Z_OidList
 
 typedef struct Z_AccessCtrl
 {
-    enum
-    {
-	Z_AccessCtrlD_noUser,
-	Z_AccessCtrlD_refused,
-	Z_AccessCtrlD_simple,
-	Z_AccessCtrlD_oid,
-	Z_AccessCtrlD_alternative,
-	Z_AccessCtrlD_pwdInv,
-	Z_AccessCtrlD_pwdExp
-    } which;
+    int which;
+#define Z_AccessCtrlD_noUser 0
+#define Z_AccessCtrlD_refused 1
+#define Z_AccessCtrlD_simple 2
+#define Z_AccessCtrlD_oid 3
+#define Z_AccessCtrlD_alternative 4
+#define Z_AccessCtrlD_pwdInv 5
+#define Z_AccessCtrlD_pwdExp 6
     union
     {
 	Odr_null *noUser;
@@ -278,23 +266,21 @@ typedef struct Z_RecordSyntax
 
 typedef struct Z_DiagFormat
 {
-    enum
-    {
-	Z_DiagFormat_tooMany,
-	Z_DiagFormat_badSpec,
-	Z_DiagFormat_dbUnavail,
-	Z_DiagFormat_unSupOp,
-	Z_DiagFormat_attribute,
-	Z_DiagFormat_attCombo,
-	Z_DiagFormat_term,
-	Z_DiagFormat_proximity,
-	Z_DiagFormat_scan,
-	Z_DiagFormat_sort,
-	Z_DiagFormat_segmentation,
-	Z_DiagFormat_extServices,
-	Z_DiagFormat_accessCtrl,
-	Z_DiagFormat_recordSyntax
-    } which;
+    int which;
+#define Z_DiagFormat_tooMany 0
+#define Z_DiagFormat_badSpec 1
+#define Z_DiagFormat_dbUnavail 2
+#define Z_DiagFormat_unSupOp 3
+#define Z_DiagFormat_attribute 4
+#define Z_DiagFormat_attCombo 5
+#define Z_DiagFormat_term 6
+#define Z_DiagFormat_proximity 7
+#define Z_DiagFormat_scan 8
+#define Z_DiagFormat_sort 9
+#define Z_DiagFormat_segmentation 10
+#define Z_DiagFormat_extServices 11
+#define Z_DiagFormat_accessCtrl 12
+#define Z_DiagFormat_recordSyntax 13
     union
     {
 	Z_TooMany *tooMany;
@@ -320,11 +306,9 @@ typedef struct Z_DiagFormat
 
 typedef struct Z_Diagnostic
 {
-    enum
-    {
-	Z_Diagnostic_defaultDiagRec,
-	Z_Diagnostic_explicitDiagnostic
-    } which;
+    int which;
+#define Z_Diagnostic_defaultDiagRec 0
+#define Z_Diagnostic_explicitDiagnostic 1
     union 
     {
 	Z_DefaultDiagFormat *defaultDiagRec;

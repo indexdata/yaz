@@ -38,12 +38,10 @@ typedef struct Z_OccurValues
 
 typedef struct Z_Occurrences
 {
-    enum
-    {
-	Z_Occurrences_all,
-	Z_Occurrences_last,
-	Z_Occurrences_values
-    } which;
+    int which;
+#define Z_Occurrences_all 0
+#define Z_Occurrences_last 1
+#define Z_Occurrences_values 2
     union
     {
 	Odr_null *all;
@@ -61,12 +59,10 @@ typedef struct Z_SpecificTag
 
 typedef struct Z_ETagUnit
 {
-    enum
-    {
-	Z_ETagUnit_specificTag,
-	Z_ETagUnit_wildThing,
-	Z_ETagUnit_wildPath
-    } which;
+    int which;
+#define Z_ETagUnit_specificTag 0
+#define Z_ETagUnit_wildThing 1
+#define Z_ETagUnit_wildPath 2
     union
     {
 	Z_SpecificTag *specificTag;
@@ -101,11 +97,9 @@ typedef struct Z_CompoSpecs
 
 typedef struct Z_CompositeElement
 {
-    enum
-    {
-	Z_CompoElement_primitives,
-	Z_CompoElement_specs
-    } which;
+    int which;
+#define Z_CompoElement_primitives 0
+#define Z_CompoElement_specs 1
     union
     {
 	Z_CompoPrimitives *primitives;
@@ -117,11 +111,9 @@ typedef struct Z_CompositeElement
 
 typedef struct Z_ElementRequest
 {
-    enum
-    {
-	Z_ERequest_simpleElement,
-	Z_ERequest_compositeElement
-    } which;
+    int which;
+#define Z_ERequest_simpleElement 0
+#define Z_ERequest_compositeElement 1
     union
     {
 	Z_SimpleElement *simpleElement;

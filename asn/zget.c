@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.9  1995-09-29 17:11:55  quinn
+ * Revision 1.10  1996-01-02 08:57:23  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.9  1995/09/29  17:11:55  quinn
  * Smallish
  *
  * Revision 1.8  1995/09/27  15:02:43  quinn
@@ -354,7 +357,7 @@ Z_Close *zget_Close(ODR o)
     return r;
 }
 
-Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which)
+Z_APDU *zget_APDU(ODR o, int which)
 {
     Z_APDU *r = odr_malloc(o, sizeof(*r));
     

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.28  1995-12-14 11:09:31  quinn
+ * Revision 1.29  1996-01-02 08:57:25  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.28  1995/12/14  11:09:31  quinn
  * Added Explain record syntax to the format command.
  *
  * Revision 1.27  1995/12/12  16:37:02  quinn
@@ -145,6 +148,8 @@ static ODR_MEM session_mem;                /* memory handle for init-response */
 static Z_InitResponse *session = 0;        /* session parameters */
 static char last_scan[512] = "0";
 static char last_cmd[100] = "?";
+static oid_value attributeset = VAL_BIB1;
+
 #ifdef RPN_QUERY
 #ifndef PREFIX_QUERY
 static CCL_bibset bibset;               /* CCL bibset handle */
@@ -448,7 +453,7 @@ static void display_diagrec(Z_DiagRec *p)
         r = p->u.defaultFormat;
 #endif
     if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
-        ent->class != CLASS_DIAGSET || ent->value != VAL_BIB1)
+        ent->oclass != CLASS_DIAGSET || ent->value != VAL_BIB1)
         printf("Missing or unknown diagset\n");
     printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
     if (r->addinfo && *r->addinfo)
@@ -538,7 +543,7 @@ static int send_searchRequest(char *arg)
         oident prefsyn;
 
         prefsyn.proto = protocol;
-        prefsyn.class = CLASS_RECSYN;
+        prefsyn.oclass = CLASS_RECSYN;
         prefsyn.value = recordsyntax;
         req->preferredRecordSyntax = odr_oiddup(out, oid_getoidbyent(&prefsyn));
         req->smallSetElementSetNames =
@@ -563,7 +568,7 @@ static int send_searchRequest(char *arg)
     }
 #endif
     bib1.proto = protocol;
-    bib1.class = CLASS_ATTSET;
+    bib1.oclass = CLASS_ATTSET;
     bib1.value = VAL_BIB1;
     RPNquery->attributeSetId = oid_getoidbyent(&bib1);
     query.u.type_1 = RPNquery;
@@ -696,7 +701,7 @@ static int send_presentRequest(char *arg)
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
     prefsyn.proto = protocol;
-    prefsyn.class = CLASS_RECSYN;
+    prefsyn.oclass = CLASS_RECSYN;
     prefsyn.value = recordsyntax;
     req->preferredRecordSyntax = oid_getoidbyent(&prefsyn);
     if (elementSetNames)
@@ -790,7 +795,7 @@ int send_scanrequest(char *string, int pp, int num)
     req->num_databaseNames = 1;
     req->databaseNames = &db;
     attset.proto = protocol;
-    attset.class = CLASS_ATTSET;
+    attset.oclass = CLASS_ATTSET;
     attset.value = VAL_BIB1;
     req->attributeSet = oid_getoidbyent(&attset);
     req->termListAndStartPoint = p_query_scan(out, string);
@@ -924,6 +929,26 @@ int cmd_elements(char *arg)
     return 1;
 }
 
+int cmd_attributeset(char *arg)
+{
+    char what[100];
+    oid_value v;
+
+    if (!arg || !*arg)
+    {
+	printf("Usage: attributeset <setname>\n");
+	return 0;
+    }
+    sscanf(arg, "%s", what);
+    if ((v = oid_getvalbyname(what)) == VAL_NONE)
+    {
+	printf("Unknown attribute set name\n");
+	return 0;
+    }
+    attributeset = v;
+    return 1;
+}
+
 int cmd_close(char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
@@ -989,6 +1014,7 @@ static int client(void)
         {"format", cmd_format, "<recordsyntax>"},
         {"elements", cmd_elements, "<elementSetName>"},
         {"close", cmd_close, ""},
+	{"attributeset", cmd_attributeset, "<attrset>"},
         {0,0}
     };
     char *netbuffer= 0;

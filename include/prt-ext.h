@@ -39,25 +39,22 @@ struct Z_External
     Odr_oid *direct_reference;
     int *indirect_reference;
     char *descriptor;
-    enum
-    {
-	/* Generic types */
-	Z_External_single = 0,
-	Z_External_octet,
-	Z_External_arbitrary,
-
-	/* Specific types */
-	Z_External_sutrs,
-	Z_External_explainRecord,
-	Z_External_resourceReport1,
-	Z_External_resourceReport2,
-	Z_External_promptObject1,
-	Z_External_grs1,
-	Z_External_extendedService,
-	Z_External_itemOrder,
-	Z_External_diag1,
-	Z_External_espec1
-    } which;
+    int which;
+/* Generic types */
+#define Z_External_single 0
+#define Z_External_octet 1
+#define Z_External_arbitrary 2
+/* Specific types */
+#define Z_External_sutrs 3
+#define Z_External_explainRecord 4
+#define Z_External_resourceReport1 5
+#define Z_External_resourceReport2 6
+#define Z_External_promptObject1 7
+#define Z_External_grs1 8
+#define Z_External_extendedService 9
+#define Z_External_itemOrder 10
+#define Z_External_diag1 11
+#define Z_External_espec1 12
     union
     {
 	/* Generic types */

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.56  1995-12-14 11:09:57  quinn
+ * Revision 1.57  1996-01-02 08:57:47  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.56  1995/12/14  11:09:57  quinn
  * Work on Explain
  *
  * Revision 1.55  1995/11/08  17:41:37  quinn
@@ -732,7 +735,7 @@ static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
 #endif
 
     bib1.proto = proto;
-    bib1.class = CLASS_DIAGSET;
+    bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
 
     logf(LOG_DEBUG, "Diagnostic: %d -- %s", error, addinfo ? addinfo :
@@ -770,7 +773,7 @@ static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
 #endif
 
     bib1.proto = proto;
-    bib1.class = CLASS_DIAGSET;
+    bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
 
     logf(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
@@ -808,7 +811,7 @@ static Z_DiagRecs *diagrecs(oid_proto proto, int error, char *addinfo)
 
     logf(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo);
     bib1.proto = proto;
-    bib1.class = CLASS_DIAGSET;
+    bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
 
     err = error;
@@ -935,7 +938,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    sizeof(Z_DatabaseRecord))))
 	    return 0;
 	recform.proto = a->proto;
-	recform.class = CLASS_RECSYN;
+	recform.oclass = CLASS_RECSYN;
 	recform.value = fres->format;
 	thisext->direct_reference = odr_oiddup(a->encode,
 	    oid_getoidbyent(&recform));
@@ -1092,7 +1095,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    oid_value form;
 
 	    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)) ||
-	    	prefformat->class != CLASS_RECSYN)
+	    	prefformat->oclass != CLASS_RECSYN)
 		form = VAL_NONE;
 	    else
 	    	form = prefformat->value;
@@ -1155,7 +1158,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 #endif
 
     if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)) ||
-	prefformat->class != CLASS_RECSYN)
+	prefformat->oclass != CLASS_RECSYN)
 	form = VAL_NONE;
     else
 	form = prefformat->value;
@@ -1206,7 +1209,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 #endif
 
     if (req->attributeSet && (!(attent = oid_getentbyoid(req->attributeSet)) ||
-    	attent->class != CLASS_ATTSET || attent->value != VAL_BIB1))
+    	attent->oclass != CLASS_ATTSET || attent->value != VAL_BIB1))
 	ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto, 121, 0);
     else if (req->stepSize && *req->stepSize > 0)
     	ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto, 205, 0);

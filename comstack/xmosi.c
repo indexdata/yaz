@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.8  1995-11-01 13:54:29  quinn
+ * Revision 1.9  1996-01-02 08:57:28  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.8  1995/11/01  13:54:29  quinn
  * Minor adjustments
  *
  * Revision 1.7  1995/10/30  12:41:17  quinn
@@ -141,7 +144,7 @@ static int addopt(struct netbuf *optbuf, unsigned long level, unsigned long
     char *str;
 
     ent.proto = proto;
-    ent.class = class;
+    ent.oclass = class;
     ent.value = value;
     if (!(oid = oid_getoidbyent(&ent)))
     	return -1;

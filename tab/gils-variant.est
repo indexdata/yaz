@@ -1,11 +1,13 @@
 #
 # This is the WAIS VARIANT element set description.
+# The empty variant parameters to the simpleelement statements simply
+# override the default.
 #
 
 defaultvariantrequest (9,1,@) (6,5,@)  # No data; variant list.
 
-simpleelement (1,10)
-simpleelement (1,12)
+simpleelement (1,10) variant
+simpleelement (1,12) variant
 simpleelement (2,1) variant
 simpleelement (2,6)
 simpleelement (1,14) variant

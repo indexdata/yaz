@@ -35,22 +35,20 @@ typedef struct Z_GenericRecord Z_GenericRecord;
 
 typedef struct Z_ElementData
 {
-    enum
-    {
-	Z_ElementData_octets,
-	Z_ElementData_numeric,
-	Z_ElementData_date,
-	Z_ElementData_ext,
-	Z_ElementData_string,
-	Z_ElementData_trueOrFalse,
-	Z_ElementData_oid,
-	Z_ElementData_intUnit,
-	Z_ElementData_elementNotThere,
-	Z_ElementData_elementEmpty,
-	Z_ElementData_noDataRequested,
-	Z_ElementData_diagnostic,
-	Z_ElementData_subtree
-    } which;
+    int which;
+#define Z_ElementData_octets 0
+#define Z_ElementData_numeric 1
+#define Z_ElementData_date 2
+#define Z_ElementData_ext 3
+#define Z_ElementData_string 4
+#define Z_ElementData_trueOrFalse 5
+#define Z_ElementData_oid 6
+#define Z_ElementData_intUnit 7
+#define Z_ElementData_elementNotThere 8
+#define Z_ElementData_elementEmpty 9
+#define Z_ElementData_noDataRequested 10
+#define Z_ElementData_diagnostic 11
+#define Z_ElementData_subtree 12
     union
     {
 	Odr_oct *octets;                      
@@ -98,17 +96,15 @@ typedef struct Z_Triple
     Odr_oid *variantSetId;                  /* OPTIONAL */
     int *class;
     int *type;
-    enum
-    {
-	Z_Triple_integer,
-	Z_Triple_internationalString,
-	Z_Triple_octetString,
-	Z_Triple_oid,
-	Z_Triple_boolean,
-	Z_Triple_null,
-	Z_Triple_unit,
-	Z_Triple_valueAndUnit
-    } which;
+    int which;
+#define Z_Triple_integer 0
+#define Z_Triple_internationalString 1
+#define Z_Triple_octetString 2
+#define Z_Triple_oid 3
+#define Z_Triple_boolean 4
+#define Z_Triple_null 5
+#define Z_Triple_unit 6
+#define Z_Triple_valueAndUnit 7
     union
     {
 	int *integer;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.11  1995-12-13 16:03:35  quinn
+ * Revision 1.12  1996-01-02 08:57:53  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.11  1995/12/13  16:03:35  quinn
  * *** empty log message ***
  *
  * Revision 1.10  1995/11/28  09:30:44  quinn
@@ -278,7 +281,7 @@ int *oid_getoidbyent(struct oident *ent)
 
     for (p = oids; *p->oidsuffix >= 0; p++)
         if (ent->proto == p->proto &&
-            ent->class == p->class &&
+            ent->oclass == p->oclass &&
             ent->value == p->value)
         {
             if (ent->proto == PROTO_Z3950)

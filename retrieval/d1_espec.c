@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.4  1995-12-05 11:16:10  quinn
+ * Revision 1.5  1996-01-02 08:57:44  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.4  1995/12/05  11:16:10  quinn
  * Fixed malloc of 0.
  *
  * Revision 1.3  1995/11/13  09:27:34  quinn
@@ -39,7 +42,7 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
     int i;
 
     var1.proto = PROTO_Z3950;
-    var1.class = CLASS_VARSET;
+    var1.oclass = CLASS_VARSET;
     var1.value = VAL_VAR1;
     r->globalVariantSetId = odr_oiddup(o, oid_getoidbyent(&var1));
 

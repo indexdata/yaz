@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.10  1995-11-13 09:27:31  quinn
+ * Revision 1.11  1996-01-02 08:57:30  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.10  1995/11/13  09:27:31  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.9  1995/10/12  10:34:45  quinn
@@ -66,93 +69,95 @@
 #include <yconfig.h>
 
 #define OID_SIZE 100
+    
+typedef enum oid_proto
+{
+    PROTO_Z3950,
+    PROTO_SR,
+    PROTO_GENERAL
+} oid_proto;
+
+typedef enum oid_class
+{
+    CLASS_APPCTX,
+    CLASS_ABSYN,
+    CLASS_ATTSET,
+    CLASS_TRANSYN,
+    CLASS_DIAGSET,
+    CLASS_RECSYN,
+    CLASS_RESFORM,
+    CLASS_ACCFORM,
+    CLASS_EXTSERV,
+    CLASS_USERINFO,
+    CLASS_ELEMSPEC,
+    CLASS_VARSET,
+    CLASS_SCHEMA,
+    CLASS_TAGSET
+} oid_class;
+
+typedef enum oid_value
+{
+    VAL_APDU,
+    VAL_BER,
+    VAL_BASIC_CTX,
+    VAL_BIB1,
+    VAL_EXP1,
+    VAL_EXT1,
+    VAL_CCL1,
+    VAL_GILS,
+    VAL_WAIS,
+    VAL_STAS,
+    VAL_DIAG1,
+    VAL_ISO2709,
+    VAL_UNIMARC,
+    VAL_INTERMARC,
+    VAL_CCF,
+    VAL_USMARC,
+    VAL_UKMARC,
+    VAL_NORMARC,
+    VAL_LIBRISMARC,
+    VAL_DANMARC,
+    VAL_FINMARC,
+    VAL_MAB,
+    VAL_CANMARC,
+    VAL_SBN,
+    VAL_PICAMARC,
+    VAL_AUSMARC,
+    VAL_IBERMARC,
+    VAL_EXPLAIN,
+    VAL_SUTRS,
+    VAL_OPAC,
+    VAL_SUMMARY,
+    VAL_GRS0,
+    VAL_GRS1,
+    VAL_EXTENDED,
+    VAL_RESOURCE1,
+    VAL_RESOURCE2,
+    VAL_PROMPT1,
+    VAL_DES1,
+    VAL_KRB1,
+    VAL_PRESSET,
+    VAL_PQUERY,
+    VAL_PCQUERY,
+    VAL_ITEMORDER,
+    VAL_DBUPDATE,
+    VAL_EXPORTSPEC,
+    VAL_EXPORTINV,
+    VAL_NONE,
+    VAL_SETM,
+    VAL_SETG,
+    VAL_VAR1,
+    VAL_ESPEC1
+} oid_value;
 
 typedef struct oident
 {
-    enum oid_proto
-    {
-    	PROTO_Z3950,
-	PROTO_SR,
-	PROTO_GENERAL
-    } proto;
-    enum oid_class
-    {
-    	CLASS_APPCTX,
-	CLASS_ABSYN,
-	CLASS_ATTSET,
-	CLASS_TRANSYN,
-	CLASS_DIAGSET,
-	CLASS_RECSYN,
-	CLASS_RESFORM,
-	CLASS_ACCFORM,
-	CLASS_EXTSERV,
-	CLASS_USERINFO,
-	CLASS_ELEMSPEC,
-	CLASS_VARSET,
-	CLASS_SCHEMA,
-	CLASS_TAGSET
-    } class;
-    enum oid_value
-    {
-    	VAL_APDU,
-	VAL_BER,
-	VAL_BASIC_CTX,
-	VAL_BIB1,
-	VAL_EXP1,
-	VAL_EXT1,
-	VAL_CCL1,
-	VAL_GILS,
-	VAL_WAIS,
-	VAL_STAS,
-	VAL_DIAG1,
-	VAL_ISO2709,
-	VAL_UNIMARC,
-	VAL_INTERMARC,
-	VAL_CCF,
-	VAL_USMARC,
-	VAL_UKMARC,
-	VAL_NORMARC,
-	VAL_LIBRISMARC,
-	VAL_DANMARC,
-	VAL_FINMARC,
-	VAL_MAB,
-	VAL_CANMARC,
-	VAL_SBN,
-	VAL_PICAMARC,
-	VAL_AUSMARC,
-	VAL_IBERMARC,
-	VAL_EXPLAIN,
-	VAL_SUTRS,
-	VAL_OPAC,
-	VAL_SUMMARY,
-	VAL_GRS0,
-	VAL_GRS1,
-	VAL_EXTENDED,
-	VAL_RESOURCE1,
-	VAL_RESOURCE2,
-	VAL_PROMPT1,
-	VAL_DES1,
-	VAL_KRB1,
-	VAL_PRESSET,
-	VAL_PQUERY,
-	VAL_PCQUERY,
-	VAL_ITEMORDER,
-	VAL_DBUPDATE,
-	VAL_EXPORTSPEC,
-	VAL_EXPORTINV,
-	VAL_NONE,
-	VAL_SETM,
-	VAL_SETG,
-	VAL_VAR1,
-	VAL_ESPEC1
-    } value;
+    oid_proto proto;
+    oid_class oclass;
+    oid_value value;
     int oidsuffix[20];
     char *desc;
 } oident;
-
-typedef enum oid_proto oid_proto;
-typedef enum oid_class oid_class;
-typedef enum oid_value oid_value;
 
 int *oid_getoidbyent(struct oident *ent);
 struct oident *oid_getentbyoid(int *o);

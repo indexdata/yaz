@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-acc.h,v $
- * Revision 1.5  1995-09-29 17:12:09  quinn
+ * Revision 1.6  1996-01-02 08:57:35  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.5  1995/09/29  17:12:09  quinn
  * Smallish
  *
  * Revision 1.4  1995/09/27  15:02:49  quinn
@@ -65,11 +68,9 @@ typedef struct Z_EnumeratedPrompt1
 
 typedef struct Z_PromptId1
 {
-    enum
-    {
-    	Z_PromptId1_enumeratedPrompt,
-	Z_PromptId1_nonEnumeratedPrompt
-    } which;
+    int which;
+#define Z_PromptId1_enumeratedPrompt 0
+#define Z_PromptId1_nonEnumeratedPrompt 1
     union
     {
     	Z_EnumeratedPrompt1 *enumeratedPrompt;
@@ -79,11 +80,9 @@ typedef struct Z_PromptId1
 
 typedef struct Z_PromptInfo1
 {
-    enum
-    {
-    	Z_Challenge1_character,
-	Z_Challenge1_encrypted
-    } which;
+    int which;
+#define Z_Challenge1_character 0
+#define Z_Challenge1_encrypted 1
     union
     {
     	char *character;
@@ -120,14 +119,12 @@ typedef struct Z_Challenge1
 typedef struct Z_ResponseUnit1
 {
     Z_PromptId1 *promptId;
-    enum
-    {
-    	Z_Response1_string,
-	Z_Response1_accept,
-	Z_Response1_acknowledge,
-	Z_Response1_diagnostic,
-	Z_Response1_encrypted
-    } which;
+    int which;
+#define Z_Response1_string 0
+#define Z_Response1_accept 1
+#define Z_Response1_acknowledge 2
+#define Z_Response1_diagnostic 3
+#define Z_Response1_encrypted 4
     union
     {
     	char *string;
@@ -146,11 +143,9 @@ typedef struct Z_Response1
 
 typedef struct Z_PromptObject1
 {
-    enum
-    {
-    	Z_PromptObject1_challenge,
-	Z_PromptObject1_response
-    } which;
+    int which;
+#define Z_PromptObject1_challenge 0
+#define Z_PromptObject1_response 1
     union
     {
     	Z_Challenge1 *challenge;

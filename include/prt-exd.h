@@ -94,16 +94,14 @@ typedef struct Z_IOCreditCardInfo
 
 typedef struct Z_IOBilling
 {
-    enum
-    {
-	Z_IOBilling_billInvoice,
-	Z_IOBilling_prepay,
-	Z_IOBilling_depositAccount,
-	Z_IOBilling_creditCard,
-	Z_IOBilling_cardInfoPreviouslySupplied,
-	Z_IOBilling_privateKnown,
-	Z_IOBilling_privateNotKnown
-    } which;
+    int which;
+#define Z_IOBilling_billInvoice 0
+#define Z_IOBilling_prepay 1
+#define Z_IOBilling_depositAccount 2
+#define Z_IOBilling_creditCard 3
+#define Z_IOBilling_cardInfoPreviouslySupplied 4
+#define Z_IOBilling_privateKnown 5
+#define Z_IOBilling_privateNotKnown 6
     union
     {
 	Odr_null *noinfo;
@@ -135,11 +133,9 @@ typedef struct Z_IOTaskPackage
 
 typedef struct Z_ItemOrder
 {
-    enum
-    {
-	Z_ItemOrder_esRequest,
-	Z_ItemOrder_taskPackage
-    } which;
+    int which;
+#define Z_ItemOrder_esRequest 0
+#define Z_ItemOrder_taskPackage 1
     union
     {
 	Z_IORequest *esRequest;

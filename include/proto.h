@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.27  1995-10-12 10:34:46  quinn
+ * Revision 1.28  1996-01-02 08:57:32  quinn
+ * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
+ *
+ * Revision 1.27  1995/10/12  10:34:46  quinn
  * Added Espec-1.
  *
  * Revision 1.26  1995/09/29  17:12:08  quinn
@@ -177,13 +180,11 @@ typedef struct Z_InfoCategory
 typedef struct Z_OtherInformationUnit
 {
     Z_InfoCategory *category;        /* OPTIONAL */
-    enum
-    {
-    	Z_OtherInfo_characterInfo,
-	Z_OtherInfo_binaryInfo,
-	Z_OtherInfo_externallyDefinedInfo,
-	Z_OtherInfo_oid
-    } which;
+    int which;
+#define Z_OtherInfo_characterInfo 0
+#define Z_OtherInfo_binaryInfo 1
+#define Z_OtherInfo_externallyDefinedInfo 2
+#define Z_OtherInfo_oid 3
     union
     {
     	char *characterInfo; 
@@ -201,11 +202,9 @@ typedef struct Z_OtherInformation
 
 typedef struct Z_StringOrNumeric
 {
-    enum
-    {
-    	Z_StringOrNumeric_string,
-	Z_StringOrNumeric_numeric
-    } which;
+    int which;
+#define Z_StringOrNumeric_string 0
+#define Z_StringOrNumeric_numeric 1
     union
     {
     	char *string;
@@ -240,13 +239,11 @@ typedef struct
 
 typedef struct Z_IdAuthentication
 {
-    enum
-    {
-    	Z_IdAuthentication_open,
-	Z_IdAuthentication_idPass,
-	Z_IdAuthentication_anonymous,
-	Z_IdAuthentication_other
-    } which;
+    int which;
+#define Z_IdAuthentication_open 0
+#define Z_IdAuthentication_idPass 1
+#define Z_IdAuthentication_anonymous 2
+#define Z_IdAuthentication_other 3
     union
     {
     	char *open;
@@ -364,11 +361,9 @@ typedef struct Z_AttributeElement
 #endif
     int *attributeType;
 #ifdef Z_95
-    enum
-    {
-    	Z_AttributeValue_numeric,
-	Z_AttributeValue_complex
-    } which;
+    int which;
+#define Z_AttributeValue_numeric 0
+#define Z_AttributeValue_complex 1
     union
     {
     	int *numeric;
@@ -381,17 +376,15 @@ typedef struct Z_AttributeElement
 
 typedef struct Z_Term 
 {
-    enum
-    {
-	Z_Term_general,
-	Z_Term_numeric,
-	Z_Term_characterString,
-	Z_Term_oid,
-	Z_Term_dateTime,
-	Z_Term_external,
-	Z_Term_integerAndUnit,
-	Z_Term_null
-    } which;
+    int which;
+#define Z_Term_general 0
+#define Z_Term_numeric 1
+#define Z_Term_characterString 2
+#define Z_Term_oid 3
+#define Z_Term_dateTime 4
+#define Z_Term_external 5
+#define Z_Term_integerAndUnit 6
+#define Z_Term_null 7
     union
     {
     	Odr_oct *general; /* this is required for v2 */
@@ -431,11 +424,9 @@ typedef struct Z_ProximityOperator
 #define Z_Prox_greaterThanOrEqual 4
 #define Z_Prox_greaterThan        5
 #define Z_Prox_notEqual           6
-    enum
-    {
-	Z_ProxCode_known,
-	Z_ProxCode_private
-    } which;
+    int which;
+#define Z_ProxCode_known 0
+#define Z_ProxCode_private 1
     int *proximityUnitCode;
 #define Z_ProxUnit_character       1
 #define Z_ProxUnit_word            2
@@ -452,13 +443,11 @@ typedef struct Z_ProximityOperator
 
 typedef struct Z_Operator
 {
-    enum
-    {
-	Z_Operator_and,
-	Z_Operator_or,
-	Z_Operator_and_not,
-	Z_Operator_prox
-    } which;
+    int which;
+#define Z_Operator_and 0
+#define Z_Operator_or 1
+#define Z_Operator_and_not 2
+#define Z_Operator_prox 3
     union
     {
     	Odr_null *and;          /* these guys are nulls. */
@@ -470,12 +459,10 @@ typedef struct Z_Operator
 
 typedef struct Z_Operand
 {
-    enum
-    {
-	Z_Operand_APT,
-	Z_Operand_resultSetId,
-	Z_Operand_resultAttr             /* v3 only */
-    } which;
+    int which;
+#define Z_Operand_APT 0
+#define Z_Operand_resultSetId 1
+#define Z_Operand_resultAttr             /* v3 only */ 2
     union
     {
     	Z_AttributesPlusTerm *attributesPlusTerm;
@@ -493,11 +480,9 @@ typedef struct Z_Complex
 
 typedef struct Z_RPNStructure
 {
-    enum
-    {
-	Z_RPNStructure_simple,
-	Z_RPNStructure_complex
-    } which;
+    int which;
+#define Z_RPNStructure_simple 0
+#define Z_RPNStructure_complex 1
     union
     {
     	Z_Operand *simple;
@@ -515,13 +500,10 @@ typedef struct Z_RPNQuery
 
 typedef struct Z_Query
 {
-    enum
-    {
-	Z_Query_type_1 = 1,
-	Z_Query_type_2,
-	Z_Query_type_101
-    }
-    which;
+    int which;
+#define Z_Query_type_1 1
+#define Z_Query_type_2 2
+#define Z_Query_type_101 3
     union
     {
     	Z_RPNQuery *type_1;
@@ -562,21 +544,17 @@ typedef struct Z_DefaultDiagFormat
     int *condition;
     /* until the whole character set issue becomes more definite,
      * you can probably ignore this on input. */
-    enum  
-    {
-    	Z_DiagForm_v2AddInfo,
-	Z_DiagForm_v3AddInfo
-    } which;
+    int which;
+#define Z_DiagForm_v2AddInfo 0
+#define Z_DiagForm_v3AddInfo 1
     char *addinfo;
 } Z_DefaultDiagFormat;
 
 typedef struct Z_DiagRec
 {
-    enum
-    {	
-    	Z_DiagRec_defaultFormat,
-	Z_DiagRec_externallyDefined
-    } which;
+    int which;
+#define Z_DiagRec_defaultFormat 0
+#define Z_DiagRec_externallyDefined 1
     union
     {
     	Z_DefaultDiagFormat *defaultFormat;
@@ -604,12 +582,9 @@ typedef struct Z_DiagRecs
 typedef struct Z_NamePlusRecord
 {
     char *databaseName;      /* OPTIONAL */
-    enum
-    {
-	Z_NamePlusRecord_databaseRecord,
-	Z_NamePlusRecord_surrogateDiagnostic
-    }
-    which;
+    int which;
+#define Z_NamePlusRecord_databaseRecord 0
+#define Z_NamePlusRecord_surrogateDiagnostic 1
     union
     {
     	Z_DatabaseRecord *databaseRecord;
@@ -625,12 +600,10 @@ typedef struct Z_NamePlusRecordList
 
 typedef struct Z_Records
 {
-    enum
-    {
-	Z_Records_DBOSD,
-	Z_Records_NSD,
-	Z_Records_multipleNSD
-    } which;
+    int which;
+#define Z_Records_DBOSD 0
+#define Z_Records_NSD 1
+#define Z_Records_multipleNSD 2
     union
     {
     	Z_NamePlusRecordList *databaseOrSurDiagnostics;
@@ -670,11 +643,9 @@ typedef struct Z_SearchResponse
 
 typedef struct Z_ElementSpec
 {
-    enum
-    {
-    	Z_ElementSpec_elementSetName,
-	Z_ElementSpec_externalSpec
-    } which;
+    int which;
+#define Z_ElementSpec_elementSetName 0
+#define Z_ElementSpec_externalSpec 1
     union
     {
     	char *elementSetName;
@@ -706,11 +677,9 @@ typedef struct Z_CompSpec
 
 typedef struct Z_RecordComposition
 {
-    enum
-    {
-    	Z_RecordComp_simple,
-	Z_RecordComp_complex
-    } which;
+    int which;
+#define Z_RecordComp_simple 0
+#define Z_RecordComp_complex 1
     union
     {
     	Z_ElementSetNames *simple;
@@ -806,11 +775,9 @@ typedef struct Z_ResourceControlResponse
 typedef struct Z_AccessControlRequest
 {
     Z_ReferenceId *referenceId;           /* OPTIONAL */
-    enum
-    {
-    	Z_AccessRequest_simpleForm,
-	Z_AccessRequest_externallyDefined
-    } which;
+    int which;
+#define Z_AccessRequest_simpleForm 0
+#define Z_AccessRequest_externallyDefined 1
     union
     {
     	Odr_oct *simpleForm;
@@ -824,11 +791,9 @@ typedef struct Z_AccessControlRequest
 typedef struct Z_AccessControlResponse
 {
     Z_ReferenceId *referenceId;              /* OPTIONAL */
-    enum
-    {
-    	Z_AccessResponse_simpleForm,
-	Z_AccessResponse_externallyDefined
-    } which;
+    int which;
+#define Z_AccessResponse_simpleForm 0
+#define Z_AccessResponse_externallyDefined 1
     union
     {
     	Odr_oct *simpleForm;
@@ -858,11 +823,9 @@ typedef struct Z_OccurrenceByAttributes
 {
     Z_AttributeList *attributes;
 #if 0
-    enum
-    {
-    	Z_OByAtt_global,
-	Z_ObyAtt_byDatabase
-    } which;
+    int which;
+#define Z_OByAtt_global 0
+#define Z_ObyAtt_byDatabase 1
     union
     {
 #endif
@@ -884,11 +847,9 @@ typedef struct Z_TermInfo
 
 typedef struct Z_Entry
 {
-    enum
-    {
-    	Z_Entry_termInfo,
-	Z_Entry_surrogateDiagnostic
-    } which;
+    int which;
+#define Z_Entry_termInfo 0
+#define Z_Entry_surrogateDiagnostic 1
     union
     {
     	Z_TermInfo *termInfo;
@@ -904,11 +865,9 @@ typedef struct Z_Entries
 
 typedef struct Z_ListEntries
 {
-    enum
-    {
-    	Z_ListEntries_entries,
-	Z_ListEntries_nonSurrogateDiagnostics
-    } which;
+    int which;
+#define Z_ListEntries_entries 0
+#define Z_ListEntries_nonSurrogateDiagnostics 1
     union
     {
     	Z_Entries *entries;
@@ -1090,26 +1049,24 @@ typedef struct Z_ExtendedServicesResponse
 
 typedef struct Z_APDU
 {    
-    enum Z_APDU_which
-    {
-	Z_APDU_initRequest,
-	Z_APDU_initResponse,
-	Z_APDU_searchRequest,
-	Z_APDU_searchResponse,
-	Z_APDU_presentRequest,
-	Z_APDU_presentResponse,
-	Z_APDU_deleteResultSetRequest,
-	Z_APDU_deleteResultSetResponse,
-	Z_APDU_resourceControlRequest,
-	Z_APDU_resourceControlResponse,
-	Z_APDU_triggerResourceControlRequest,
-	Z_APDU_scanRequest,
-	Z_APDU_scanResponse,
-	Z_APDU_segmentRequest,
-	Z_APDU_extendedServicesRequest,
-	Z_APDU_extendedServicesResponse,
-	Z_APDU_close
-    } which;
+    int which;
+#define Z_APDU_initRequest 0
+#define Z_APDU_initResponse 1
+#define Z_APDU_searchRequest 2
+#define Z_APDU_searchResponse 3
+#define Z_APDU_presentRequest 4
+#define Z_APDU_presentResponse 5
+#define Z_APDU_deleteResultSetRequest 6
+#define Z_APDU_deleteResultSetResponse 7
+#define Z_APDU_resourceControlRequest 8
+#define Z_APDU_resourceControlResponse 9
+#define Z_APDU_triggerResourceControlRequest 10
+#define Z_APDU_scanRequest 11
+#define Z_APDU_scanResponse 12
+#define Z_APDU_segmentRequest 13
+#define Z_APDU_extendedServicesRequest 14
+#define Z_APDU_extendedServicesResponse 15
+#define Z_APDU_close 16
     union
     {
 	Z_InitRequest  *initRequest;
@@ -1163,7 +1120,7 @@ int z_Permissions(ODR o, Z_Permissions **p, int opt);
 int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
 int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
 int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
-Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
+Z_APDU *zget_APDU(ODR o, int which);
 
 #include <prt-rsc.h>
 #include <prt-acc.h>

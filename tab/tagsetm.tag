@@ -17,7 +17,7 @@ tag	12	url			string
 tag	13	record			structured
 tag	14	local-control-number	string
 tag	15	creation-date		generalizedtime
-tag	16	dateOfLastModification	generalizedtime
+tag	16	dateOfLastModification/lastModified generalizedtime
 tag	17	dateOfLastReview	generalizedtime
 tag	18	score			int
 tag	19	wellKnown		string
