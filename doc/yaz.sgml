@@ -2,7 +2,7 @@
 <article>
 <title>YAZ User's Guide and Reference
 <author><htmlurl url="http://www.indexdata.dk/" name="Index Data">, <tt><htmlurl url="mailto:info@indexdata.dk" name="info@indexdata.dk"></>
-<date>$Revision: 1.4 $
+<date>$Revision: 1.5 $
 <abstract>
 This document is the programmer's guide and reference to the YAZ
 package. YAZ is a compact toolkit that provides access to the
@@ -176,9 +176,9 @@ only needed if you run <tt>make install</tt> later to perform a
 "system" installation. The prefix is <tt>/usr/local</tt> if not
 specified.
 
-<tag><tt>-</tt><tt>-enable-yc </tt></tag> YAZ will be built using
+<tag><tt>-</tt><tt>-enable-comp </tt></tag> YAZ will be built using
 the ASN.1 compiler for YAZ (default). If you wish to use the
-old decoders (in sub directory asn) use <tt>--disable-yc</tt> instead.
+old decoders (in sub directory asn) use <tt>--disable-comp</tt> instead.
 
 <tag><tt>-</tt><tt>-enable-threads</tt></tag> YAZ will be built using
 POSIX threads. Specifically, <tt>_REENTRANT</tt> will be defined

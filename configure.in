@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.21 2000-03-01 11:15:31 adam Exp $
+dnl $Id: configure.in,v 1.22 2000-03-02 08:48:20 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.6)
 dnl
@@ -19,12 +19,12 @@ else
 	DOCMODULE="doc"
 fi
 dnl 
-dnl ----- YC: The Yaz Compiler
+dnl ----- yaz-comp: The Yaz Compiler
 AC_SUBST(ASNMODULE)
 AC_SUBST(ILLMODULE)
 AC_SUBST(ILLLIB)
-AC_ARG_ENABLE(yc,[  --disable-yc            use old encoders, i.e. disable YAZ ASN.1 Compiler], , enable_yc=yes)
-if test "$enable_yc" = "yes"; then
+AC_ARG_ENABLE(comp,[  --disable-comp          use old encoders, i.e. disable the YAZ ASN.1 Compiler], , enable_comp=yes)
+if test "$enable_comp" = "yes"; then
 	ASNMODULE="z39.50"
 	ILLMODULE="ill"
 	ILLLIB=../ill/libill.a

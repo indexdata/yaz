@@ -2,12 +2,15 @@
 # the next line restarts using tclsh \
 exec tclsh "$0" "$@"
 #
-# YC: ASN.1 Compiler for YAZ
+# yaz-comp: ASN.1 Compiler for YAZ
 # (c) Index Data 1996-2000
 # See the file LICENSE for details.
 #
-# $Log: yc.tcl,v $
-# Revision 1.6  2000-02-10 13:44:02  adam
+# $Log: yaz-comp,v $
+# Revision 1.1  2000-03-02 08:48:20  adam
+# Renamed ASN.1 compiler to yaz-comp (used to be yc.tcl).
+#
+# Revision 1.6  2000/02/10 13:44:02  adam
 # Tcl command clock not used if unavailable (Tcl7.4 and earlier).
 #
 # Revision 1.5  2000/01/15 09:18:42  adam
@@ -52,7 +55,7 @@ exec tclsh "$0" "$@"
 #
 #
 
-set yc_version 0.2
+set yc_version 0.3
 
 # Syntax for the ASN.1 supported:
 # file   -> file module
@@ -1127,19 +1130,18 @@ proc asnModules {} {
 	        set file(outp) [open $inf(h-path)/$inf(h-dir)$inf(p-file) w]
             }
 
-	    set md ""
-	    catch {set md [clock format [clock seconds]]}
-	    
-	    puts $file(outc) "/* YC ${yc_version} $md */"
+	    set greeting {Generated automatically by the YAZ ASN.1 Compiler}
+
+	    puts $file(outc) "/* ${greeting} ${yc_version} */"
 	    puts $file(outc) "/* Module-C: $inf(module) */"
 	    puts $file(outc) {}
 
-	    puts $file(outh) "/* YC ${yc_version}: $md */"
+	    puts $file(outh) "/* ${greeting} ${yc_version} */"
 	    puts $file(outh) "/* Module-H $inf(module) */"
 	    puts $file(outh) {}
 
 	    if {[info exists file(outp)]} {
-	        puts $file(outp) "/* YC ${yc_version}: $md */"
+	        puts $file(outp) "/* ${greeting} ${yc_version} */"
 	        puts $file(outp) "/* Module-P: $inf(module) */"
 	        puts $file(outp) {}
             }

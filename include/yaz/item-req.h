@@ -1,4 +1,4 @@
-/* YC 0.2: Wed Mar 01 14:47:01 CET 2000 */
+/* Generated automatically by the YAZ ASN.1 Compiler 0.3 */
 /* Module-H Z39.50-extendedService-ItemOrder-ItemRequest-1 */
 
 #ifndef item_req_H

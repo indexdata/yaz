@@ -35,6 +35,7 @@ make prefix=$RPM_BUILD_ROOT/usr install
 /usr/bin/yaz-client
 /usr/bin/yaz-ztest
 /usr/bin/yaz-config
+/usr/bin/yaz-comp
 /usr/lib/libyaz.a
 /usr/include/yaz
 /usr/share/yaz/doc

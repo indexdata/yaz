@@ -316,17 +316,17 @@ z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
  zes-pset.c zes-update0.c \
- ../include/yaz/z-accdes1.h: z.tcl z3950v3.asn ../util/yc.tcl
-	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) z3950v3.asn
+ ../include/yaz/z-accdes1.h: z.tcl z3950v3.asn ../util/yaz-comp
+	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) z3950v3.asn
 
-z-date.c ../include/yaz/z-date.h: z.tcl datetime.asn ../util/yc.tcl
-	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) datetime.asn
+z-date.c ../include/yaz/z-date.h: z.tcl datetime.asn ../util/yaz-comp
+	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) datetime.asn
 
-z-univ.c ../include/yaz/z-univ.h: z.tcl univres.asn
-	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) univres.asn
+z-univ.c ../include/yaz/z-univ.h: z.tcl univres.asn ../util/yaz-comp
+	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) univres.asn
 
-zes-update.c ../include/yaz/zes-update.h: z.tcl esupdate.asn
-	../util/yc.tcl -d z.tcl -i yaz -I ../include $(YCFLAGS) esupdate.asn
+zes-update.c ../include/yaz/zes-update.h: z.tcl esupdate.asn ../util/yaz-comp
+	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esupdate.asn
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

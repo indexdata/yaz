@@ -1,12 +1,20 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-For ILL, fixed tagging problem for member requester-CHECKED-IN in
-type Requester-Optional-Messages-Type.
+Added configure option --enable-comp/disable-comp to control use
+of YAZ ASN.1 compiler. Use --disable-comp to use the old *coders
+located in sub directory asn.
+
+YAZ ASN.1 compiler renamed to yaz-comp in sub directory. It's installed
+in ${exec_prefix}/bin along with the other programs yaz-client and
+yaz-ztest.
+
+GNU automake used to maintain makefiles.
 
 Added several OID's.
 
 Changed retrieval module so that we can load records with no abstract
-syntax defined. Tagpaths in these records are fully composed of string tags.
+syntax defined. Tagpaths in these records are fully composed of string
+tags.
 
 Implemented ISO ILL protocol. Refer to stuff in sub directory ill.
 

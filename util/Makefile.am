@@ -1,9 +1,10 @@
 ## Copyright (C) 1994-2000, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.3 2000-02-29 13:44:55 adam Exp $
+## $Id: Makefile.am,v 1.4 2000-03-02 08:48:20 adam Exp $
 
 noinst_LIBRARIES = libutil.a
-EXTRA_DIST=yc.tcl 
+
+bin_SCRIPTS=yaz-comp
 
 INCLUDES=-I../include
 

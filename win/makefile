@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.13 2000-02-28 11:13:03 adam Exp $
+# $Id: makefile,v 1.14 2000-03-02 08:48:21 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -155,7 +155,7 @@ ZTEST_LINK_OPTIONS = /subsystem:console
 # TCL
 TCL="C:\Program Files\Tcl\bin\tclsh82.exe"
 
-COMMON_TCL_OPTIONS= ..\util\yc.tcl -I$(INCLDIR) -i yaz
+COMMON_TCL_OPTIONS= ..\util\yaz-comp -I$(INCLDIR) -i yaz
 
 # Final opt variables
 !if $(DEBUG)
@@ -655,7 +655,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.13  2000-02-28 11:13:03  adam
+# Revision 1.14  2000-03-02 08:48:21  adam
+# Renamed ASN.1 compiler to yaz-comp (used to be yc.tcl).
+#
+# Revision 1.13  2000/02/28 11:13:03  adam
 # Removed odr_priv.obj.
 #
 # Revision 1.12  2000/01/06 11:27:16  adam

@@ -1,4 +1,4 @@
-/* YC 0.2 Wed Mar 01 14:46:59 CET 2000 */
+/* Generated automatically by the YAZ ASN.1 Compiler 0.3 */
 /* Module-C: ISO-10161-ILL-1 */
 
 #include <yaz/ill-core.h>

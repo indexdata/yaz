@@ -1,4 +1,4 @@
-/* YC 0.2: Wed Mar 01 10:28:10 CET 2000 */
+/* Generated automatically by the YAZ ASN.1 Compiler 0.3 */
 /* Module-H Z39-50-APDU-1995 */
 
 #ifndef z_core_H

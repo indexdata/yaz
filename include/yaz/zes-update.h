@@ -1,4 +1,4 @@
-/* YC 0.2: Tue Feb 29 15:20:49 CET 2000 */
+/* Generated automatically by the YAZ ASN.1 Compiler 0.3 */
 /* Module-H ESFormat-Update */
 
 #ifndef zes_update_H

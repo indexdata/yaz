@@ -1,4 +1,4 @@
-/* YC 0.2: Wed Mar 01 10:28:11 CET 2000 */
+/* Generated automatically by the YAZ ASN.1 Compiler 0.3 */
 /* Module-H RecordSyntax-explain */
 
 #ifndef z_exp_H

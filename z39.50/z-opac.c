@@ -1,4 +1,4 @@
-/* YC 0.2 Tue Feb 29 16:45:06 CET 2000 */
+/* Generated automatically by the YAZ ASN.1 Compiler 0.3 */
 /* Module-C: RecordSyntax-opac */
 
 #include <yaz/z-opac.h>
