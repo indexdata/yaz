@@ -69,10 +69,10 @@ elm (4,97)                  subjectTermsUncontrolled    uncontrolled-term
 elm (4,97)/(4,22)           uncontrolledTerm		uncontrolled-term
 elm (4,71)                  spatialDomain		!
 elm (4,71)/(4,91)           boundingCoordinates		!
-elm (4,71)/(4,91)/(4,9)     westBoundingCoordinate      !
-elm (4,71)/(4,91)/(4,10)    eastBoundingCoordinate	!
-elm (4,71)/(4,91)/(4,11)    northBoundingCoordinate	!
-elm (4,71)/(4,91)/(4,12)    southBoundingCoordinate	!
+elm (4,71)/(4,91)/(4,9)     westBoundingCoordinate      !:n
+elm (4,71)/(4,91)/(4,10)    eastBoundingCoordinate	!:n
+elm (4,71)/(4,91)/(4,11)    northBoundingCoordinate	!:n
+elm (4,71)/(4,91)/(4,12)    southBoundingCoordinate	!:n
 elm (4,71)/(4,92)           place			!
 elm (4,71)/(4,92)/(4,14)    placeKeywordThesaurus	-
 elm (4,71)/(4,92)/(4,13)    placeKeyword		place
@@ -108,7 +108,7 @@ elm (4,70)/(4,93)/(4,102)/(4,15)  beginningDate        available-time-structured
 elm (4,70)/(4,93)/(4,102)/(4,36)  endingDate           available-time-structured
 elm (4,70)/(4,99)           availableLinkage		!
 elm (4,70)/(4,99)/(4,18)    linkageType			!
-elm (4,70)/(4,99)/(4,17)    linkage		       available-linkage,linkage
+elm (4,70)/(4,99)/(4,17)    linkage		       available-linkage:u,linkage:u
 elm (4,57)                  sourcesOfData		!
 elm (4,58)                  methodology			!
 elm (4,53)                  accessConstraints		!
@@ -135,8 +135,8 @@ elm (4,98)                  crossReference		!
 elm (4,98)/(2,1)            crossReferenceTitle		!
 elm (4,98)/(4,35)           crossReferenceRelationship	!
 elm (4,98)/(4,100)          crossReferenceLinkage	!
-elm (4,98)/(4,100)/(4,18)    linkageType			-
-elm (4,98)/(4,100)/(4,17)    linkage			cross-reference-linkage
+elm (4,98)/(4,100)/(4,18)    linkageType		-
+elm (4,98)/(4,100)/(4,17)    linkage			cross-reference-linkage:u
 elm (4,31)                  scheduleNumber		!
 elm (4,1)                   controlIdentifier		identifier-standard
 elm (4,23)                  originalControlIdentifier	!

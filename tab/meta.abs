@@ -17,8 +17,8 @@ elm (1,12)		url			-
 elm (1,14)		localControlNumber	Local-number
 elm (1,16)		dateOfLastModification	Date/time-last-modified
 elm (4,1)		subject			Subject-heading
-elm (2,1)		title			Title
-elm (2,2)		author			Author
+elm (2,1)		title			Title:w,Title:p
+elm (2,2)		author			Author:w,Author:p
 elm (2,3)		publisher		Publisher
 elm (4,2)		otherAgent		-
 elm (2,4)		date			Date

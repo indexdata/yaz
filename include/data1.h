@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.28  1997-10-06 09:37:53  adam
+ * Revision 1.29  1997-10-27 13:54:18  adam
+ * Changed structure field in data1 node to be simple string which
+ * is "unknown" to the retrieval system itself.
+ *
+ * Revision 1.28  1997/10/06 09:37:53  adam
  * Added prototype for data1_get_map_buf.
  *
  * Revision 1.27  1997/09/24 13:35:44  adam
@@ -195,12 +199,6 @@ typedef enum data1_datatype
     DATA1K_null
 } data1_datatype;
 
-typedef enum data1_structure
-{
-    DATA1S_word,
-    DATA1S_phrase
-} data1_structure;
-
 typedef struct data1_marctab
 {
     char *name;
@@ -294,7 +292,7 @@ typedef struct data1_tagset
 typedef struct data1_termlist
 {
     data1_att *att;
-    data1_structure structure;
+    char *structure;
     struct data1_termlist *next;
 } data1_termlist;
 
@@ -331,13 +329,13 @@ typedef struct data1_absyn
 
 typedef struct data1_node
 {
-        /* the root of a record (containing global data) */
+    /* the root of a record (containing global data) */
 #define DATA1N_root 1 
-        /* a tag */
+    /* a tag */
 #define DATA1N_tag  2       
-        /* some data under a leaf tag or variant */
+    /* some data under a leaf tag or variant */
 #define DATA1N_data 3
-        /* variant specification (a triple, actually) */
+    /* variant specification (a triple, actually) */
 #define DATA1N_variant 4
     int which;
 
@@ -375,8 +373,6 @@ typedef struct data1_node
 	    int formatted_text;     /* newlines are significant */
 	    int len;
 	    char *data;      /* filename or data */
-#define DATA1_LOCALDATA 40
-	    char lbuf[DATA1_LOCALDATA]; /* small buffer for local data */
 	} data;
 
 	struct
@@ -392,6 +388,7 @@ typedef struct data1_node
     } u;
 
     void (*destroy)(struct data1_node *n);
+#define DATA1_LOCALDATA 40
     char lbuf[DATA1_LOCALDATA]; /* small buffer for local data */
     int line;
     int num_children;
@@ -471,6 +468,7 @@ YAZ_EXPORT char **data1_get_read_buf (data1_handle dp, int **lenp);
 YAZ_EXPORT char **data1_get_map_buf (data1_handle dp, int **lenp);
 YAZ_EXPORT data1_absyn_cache *data1_absyn_cache_get (data1_handle dh);
 YAZ_EXPORT NMEM data1_nmem_get (data1_handle dh);
+YAZ_EXPORT void data1_pr_tree (data1_handle dh, data1_node *n, FILE *out);
 
 #ifdef __cplusplus
 }

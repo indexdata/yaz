@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.12  1997-09-17 12:10:34  adam
+ * Revision 1.13  1997-10-27 13:54:18  adam
+ * Changed structure field in data1 node to be simple string which
+ * is "unknown" to the retrieval system itself.
+ *
+ * Revision 1.12  1997/09/17 12:10:34  adam
  * YAZ version 1.4.
  *
  * Revision 1.11  1997/09/05 09:50:55  adam
@@ -317,12 +321,13 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 			return 0;
 		    }
 		    if (r < 2) /* is the structure qualified? */
-			(*tp)->structure = DATA1S_word;
-		    else if (!data1_matchstr(structure, "w"))
-			(*tp)->structure = DATA1S_word;
-		    else if (!data1_matchstr(structure, "p"))
-			(*tp)->structure = DATA1S_phrase;
-
+			(*tp)->structure = "w";
+		    else 
+		    {
+			(*tp)->structure = nmem_malloc (data1_nmem_get (dh),
+							strlen(structure)+1);
+			strcpy ((*tp)->structure, structure);
+		    }
 		    tp = &(*tp)->next;
 		}
 		while ((p = strchr(p, ',')) && *(++p));
@@ -373,12 +378,13 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		    return 0;
 		}
 		if (r < 2) /* is the structure qualified? */
-		    (*tp)->structure = DATA1S_word;
-		else if (!data1_matchstr(structure, "w"))
-		    (*tp)->structure = DATA1S_word;
-		else if (!data1_matchstr(structure, "p"))
-		    (*tp)->structure = DATA1S_phrase;
-		
+		    (*tp)->structure = "w";
+		else 
+		{
+		    (*tp)->structure = nmem_malloc (data1_nmem_get (dh),
+						    strlen(structure)+1);
+		    strcpy ((*tp)->structure, structure);
+		}
 		(*tp)->next = 0;
 		tp = &(*tp)->next;
 	    }
