@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Configure detects POSIX threads on OpenBSD.
+
 When sort flag 'i' was specified in yaz-client the caseSensitivy flag
 was set to a wrong value.  Thanks to Robert Sanderson for reporting this.
 
