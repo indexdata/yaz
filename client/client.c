@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.2  1995-05-22 14:56:40  quinn
+ * Revision 1.3  1995-05-22 15:06:53  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.2  1995/05/22  14:56:40  quinn
  * *** empty log message ***
  *
  * Revision 1.1  1995/05/22  11:30:31  quinn
@@ -435,7 +438,7 @@ static int cmd_setnames(char *arg)
     	printf("Set numbering disabled.\n");
 	setnumber = -1;
     }
-    return 2;
+    return 1;
 }
 
 /* PRESENT SERVICE ----------------------------- */
