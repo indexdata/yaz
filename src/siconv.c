@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.8 2005-01-15 19:47:14 adam Exp $
+ * $Id: siconv.c,v 1.9 2005-02-01 21:06:37 adam Exp $
  */
 /**
  * \file siconv.c
@@ -62,6 +62,8 @@ struct yaz_iconv_struct {
     int marc8_esc_mode;
     int marc8_comb_x;
     int marc8_comb_no_read;
+    size_t no_read_x;
+    unsigned unget_x;
 #if HAVE_ICONV_H
     iconv_t iconv_cd;
 #endif
@@ -562,8 +564,8 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
     return cd;
 }
 
-size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
-                  char **outbuf, size_t *outbytesleft)
+size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
+                 char **outbuf, size_t *outbytesleft)
 {
     char *inbuf0;
     size_t r = 0;
@@ -618,6 +620,8 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             *inbuf += no_read;
         }
         cd->init_flag = 0;
+	cd->unget_x = 0;
+	cd->no_read_x = 0;
     }
     while (1)
     {
@@ -629,19 +633,33 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             r = *inbuf - inbuf0;
             break;
         }
-        
-        x = (cd->read_handle)(cd, (unsigned char *) *inbuf, *inbytesleft,
-                              &no_read);
-        if (no_read == 0)
-        {
-            r = (size_t)(-1);
-            break;
-        }
+	if (!cd->unget_x)
+	{
+	    x = (cd->read_handle)(cd, (unsigned char *) *inbuf, *inbytesleft,
+				  &no_read);
+	    if (no_read == 0)
+	    {
+		r = (size_t)(-1);
+		break;
+	    }
+	}
+	else
+	{
+	    x = cd->unget_x;
+	    no_read = cd->no_read_x;
+	}
 	if (x)
 	{
 	    r = (cd->write_handle)(cd, x, outbuf, outbytesleft);
 	    if (r)
+	    {
+		/* unable to write it. save it because read_handle cannot
+		   rewind .. */
+		cd->unget_x = x;
+		cd->no_read_x = no_read;
 		break;
+	    }
+	    cd->unget_x = 0;
 	}
         *inbytesleft -= no_read;
         (*inbuf) += no_read;
