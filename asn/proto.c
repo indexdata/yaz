@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.25  1995-05-25 11:00:08  quinn
+ * Revision 1.26  1995-06-02 09:49:13  quinn
+ * Adding access control
+ *
+ * Revision 1.25  1995/05/25  11:00:08  quinn
  * *** empty log message ***
  *
  * Revision 1.24  1995/05/22  13:58:18  quinn
@@ -108,6 +111,97 @@ int z_UserInformationField(ODR o, Z_UserInformationField **p, int opt)
 {
     return odr_explicit(o, odr_external, (Odr_external **)p, ODR_CONTEXT,
     	11, opt);
+}
+
+int z_InfoCategory(ODR o, Z_InfoCategory **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_implicit(o, odr_oid, &(*p)->categoryTypeId, ODR_CONTEXT, 1, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->categoryValue, ODR_CONTEXT, 2, 0) &&
+	odr_sequence_end(o);
+}
+
+int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+    	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_OtherInfo_characterInfo,
+	    odr_visiblestring},
+	{ODR_IMPLICIT, ODR_CONTEXT, 3, Z_OtherInfo_binaryInfo,
+	    odr_octetstring},
+	{ODR_IMPLICIT, ODR_CONTEXT, 4, Z_OtherInfo_externallyDefinedInfo,
+	    odr_external},
+	{ODR_IMPLICIT, ODR_CONTEXT, 5, Z_OtherInfo_oid, odr_oid},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_implicit(o, z_InfoCategory, &(*p)->category, ODR_CONTEXT, 1, 1) &&
+	odr_choice(o, arm, &(*p)->which, &(*p)->information) &&
+	odr_sequence_end(o);
+}
+    
+int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt)
+{
+    if (o->direction == ODR_ENCODE)
+    	*p = odr_malloc(o, sizeof(**p));
+
+    odr_implicit_settag(o, ODR_CONTEXT, 201);
+    if (odr_sequence_of(o, z_OtherInformationUnit, &(*p)->list,
+	&(*p)->num_elements))
+	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_StringOrNumeric_string,
+	    odr_visiblestring},
+	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_StringOrNumeric_numeric,
+	    odr_integer},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+    	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+/*
+ * check tagging!!
+ */
+int z_Unit(ODR o, Z_Unit **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_implicit(o, odr_visiblestring, &(*p)->unitSystem, ODR_CONTEXT,
+	    1, 1) &&
+	odr_explicit(o, z_StringOrNumeric, &(*p)->unitType, ODR_CONTEXT,
+	    2, 1) &&
+	odr_explicit(o, z_StringOrNumeric, &(*p)->unit, ODR_CONTEXT, 3, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->scaleFactor, ODR_CONTEXT, 4, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_IntUnit(ODR o, Z_IntUnit **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_implicit(o, odr_integer, &(*p)->value, ODR_CONTEXT, 1, 0) &&
+	odr_implicit(o, z_Unit, &(*p)->unitUsed, ODR_CONTEXT, 2, 0) &&
+	odr_sequence_end(o);
 }
 
 /* ---------------------- INITIALIZE SERVICE ------------------- */
