@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.3 2003-11-26 22:47:42 mike Exp $
+ * $Id: seshigh.c,v 1.4 2003-12-04 11:48:06 adam Exp $
  */
 
 /*
@@ -1589,7 +1589,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.3 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.4 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1926,6 +1926,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrr->basenames = req->databaseNames;
 	bsrr->query = req->query;
 	bsrr->stream = assoc->encode;
+	nmem_transfer(bsrr->stream->mem, reqb->request_mem);
 	bsrr->decode = assoc->decode;
 	bsrr->print = assoc->print;
 	bsrr->errcode = 0;
