@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.h,v $
- * Revision 1.8  1995-06-19 12:39:09  quinn
+ * Revision 1.9  1997-09-01 09:31:48  adam
+ * Removed definition statserv_remove from statserv.h to eventl.h.
+ *
+ * Revision 1.8  1995/06/19 12:39:09  quinn
  * Fixed bug in timeout code. Added BER dumper.
  *
  * Revision 1.7  1995/06/16  10:31:34  quinn
@@ -33,6 +36,8 @@
 
 #ifndef EVENTL_H
 #define EVENTL_H
+
+#include <time.h>
 
 struct iochan;
 
@@ -75,6 +80,11 @@ int force_event;
 
 IOCHAN iochan_getchan(void);
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags);
-int event_loop();
+#ifdef WINDOWS
+int __stdcall event_loop(IOCHAN iochans);
+#else
+int event_loop(IOCHAN dummylistener);
+#endif
 
+void statserv_remove (IOCHAN pIOChannel);
 #endif
