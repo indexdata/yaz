@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.16 2004-11-03 14:25:06 heikki Exp $
+ * $Id: log.h,v 1.17 2004-11-03 22:33:17 adam Exp $
  */
 
 /**
@@ -67,16 +67,16 @@ YAZ_BEGIN_CDECL
 YAZ_EXPORT void yaz_log_init(int level, const char *prefix, const char *name);
 
 /** yaz_log_init_file sets the file name used for yaz_log */
-YAZ_EXPORT void yaz_log_init_file (const char *fname);
+YAZ_EXPORT void yaz_log_init_file(const char *fname);
 
 /** yaz_log_init_level sets the logging level. Use an OR of the bits above */
-YAZ_EXPORT void yaz_log_init_level (int level);
+YAZ_EXPORT void yaz_log_init_level(int level);
 
 /** yaz_log_init_prefix sets the log prefix */
-YAZ_EXPORT void yaz_log_init_prefix (const char *prefix);
+YAZ_EXPORT void yaz_log_init_prefix(const char *prefix);
 
 /** yaz_log_init_prefix2 sets an optional second prefix */
-YAZ_EXPORT void yaz_log_init_prefix2 (const char *prefix);
+YAZ_EXPORT void yaz_log_init_prefix2(const char *prefix);
 
 /** 
  * yaz_log_time_format sets the format of the timestamp. See man 3 strftime 
@@ -108,10 +108,10 @@ YAZ_EXPORT void yaz_log(int level, const char *fmt, ...)
  * is specified, which clears the list. If a name matches the name of a
  * LOG_BIT above, that one is set. Otherwise a new value is picked, and given
  * to that name, to be found with yaz_log_module_level */
-YAZ_EXPORT int yaz_log_mask_str (const char *str);
+YAZ_EXPORT int yaz_log_mask_str(const char *str);
 
 /** yaz_log_mask_str_x is like yaz_log_mask_str, but with a given start value*/
-YAZ_EXPORT int yaz_log_mask_str_x (const char *str, int level);
+YAZ_EXPORT int yaz_log_mask_str_x(const char *str, int level);
 
 /** 
  * yaz_log_module_level returns a log level mask corresponding to the module
@@ -124,9 +124,9 @@ YAZ_EXPORT int yaz_log_module_level(const char *name);
 /** yaz_log_file returns the file handle for yaz_log. */
 YAZ_EXPORT FILE *yaz_log_file(void);
 
-YAZ_EXPORT void log_event_start (void (*func)(int level, const char *msg, void *info),
+YAZ_EXPORT void log_event_start(void (*func)(int level, const char *msg, void *info),
 	void *info);
-YAZ_EXPORT void log_event_end (void (*func)(int level, const char *msg, void *info),
+YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg, void *info),
 	void *info);
 
 YAZ_EXPORT void yaz_log_reopen(void);

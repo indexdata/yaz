@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.4 2004-10-15 00:19:00 adam Exp $
+ * $Id: nmem.c,v 1.5 2004-11-03 22:33:17 adam Exp $
  */
 
 /**
@@ -361,7 +361,7 @@ void nmem_destroy(NMEM n)
 void nmem_transfer (NMEM dst, NMEM src)
 {
     nmem_block *t;
-    while ((t=src->blocks))
+    while ((t = src->blocks))
     {
 	src->blocks = t->next;
 	t->next = dst->blocks;
@@ -484,8 +484,8 @@ void yaz_strerror(char *buf, int max)
 #endif
 /* UNIX */
 #endif
-    if ((cp=strrchr(buf, '\n')))
+    if ((cp = strrchr(buf, '\n')))
 	*cp = '\0';
-    if ((cp=strrchr(buf, '\r')))
+    if ((cp = strrchr(buf, '\r')))
 	*cp = '\0';
 }

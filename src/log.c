@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.10 2004-11-03 17:52:53 heikki Exp $
+ * $Id: log.c,v 1.11 2004-11-03 22:33:17 adam Exp $
  */
 
 /**
@@ -37,8 +37,8 @@
 #include <yaz/log.h>
 #include <yaz/nmem.h>
 
-static NMEM_MUTEX log_mutex=0;
-static int mutex_init_flag=0; /* not yet initialized */
+static NMEM_MUTEX log_mutex = 0;
+static int mutex_init_flag = 0; /* not yet initialized */
 
 #define HAS_STRERROR 1
 
@@ -47,8 +47,8 @@ static int mutex_init_flag=0; /* not yet initialized */
 #else
 char *strerror(int n)
 {
-        extern char *sys_errlist[];
-        return sys_errlist[n];
+    extern char *sys_errlist[];
+    return sys_errlist[n];
 }
 
 #endif
@@ -61,15 +61,15 @@ static char l_prefix[512] = "";
 static char l_prefix2[512] = "";
 static char l_fname[512] = "";
 
-static char l_old_default_format[]="%H:%M:%S-%d/%m";
-static char l_new_default_format[]="%Y%m%d-%H%M%S";
+static char l_old_default_format[] = "%H:%M:%S-%d/%m";
+static char l_new_default_format[] = "%Y%m%d-%H%M%S";
 #define TIMEFORMAT_LEN 50
-static char l_custom_format[TIMEFORMAT_LEN]="";
-static char *l_actual_format=l_old_default_format;
+static char l_custom_format[TIMEFORMAT_LEN] = "";
+static char *l_actual_format = l_old_default_format;
 
 /** l_max_size tells when to rotate the log. Default to 1 GB */
-static const int l_def_max_size=1024*1024*1024;
-static int l_max_size=1024*1024*1024;
+static const int l_def_max_size = 1024*1024*1024;
+static int l_max_size = 1024*1024*1024;
 
 #define MAX_MASK_NAMES 35   /* 32 bits plus a few combo names */
 static struct {
@@ -93,14 +93,14 @@ static struct {
     { 0, NULL }
     /* the rest will be filled in if the user defines dynamic modules*/
 };  
-static unsigned int next_log_bit=LOG_LAST_BIT<<1; /* first dynamic bit */
+static unsigned int next_log_bit = LOG_LAST_BIT<<1; /* first dynamic bit */
 
 static void init_mutex()
 {
     if (mutex_init_flag)
         return;
     nmem_mutex_create (&log_mutex);
-    mutex_init_flag=1;
+    mutex_init_flag = 1;
 }
 
 
@@ -133,7 +133,7 @@ void yaz_log_reopen(void)
     if (!l_file)
         l_file = stderr;
     if (!*l_fname)
-	new_file=stderr;
+	new_file = stderr;
     else if (!(new_file = fopen(l_fname, "a")))
         return;
     if (l_file != stderr)
@@ -152,12 +152,12 @@ static void rotate_log()
         return; /* can't rotate that */
     if (!*l_fname)
         return; /* hmm, no name, can't rotate */
-    strncpy(newname, l_fname, 510);
-    newname[510]='\0'; /* make sure it is terminated */
+    strncpy(newname, l_fname, 509);
+    newname[509] = '\0'; /* make sure it is terminated */
     strcat(newname,".1");
 #ifdef WIN32
     fclose(l_file);
-    l_file=stderr;
+    l_file = stderr;
 #endif
     rename(l_fname, newname);
     yaz_log_reopen();
@@ -203,9 +203,9 @@ void yaz_log_init(int level, const char *prefix, const char *fname)
 void yaz_log_init_max_size(int mx)
 {
     if (mx <0)
-        l_max_size=l_def_max_size;
+        l_max_size = l_def_max_size;
     else
-        l_max_size=mx;
+        l_max_size = mx;
 }
 
 static void (*start_hook_func)(int, const char *, void *) = NULL;
@@ -232,7 +232,7 @@ void yaz_log(int level, const char *fmt, ...)
     int i;
     time_t ti;
     struct tm *tim;
-    char tbuf[TIMEFORMAT_LEN]="";
+    char tbuf[TIMEFORMAT_LEN] = "";
     int o_level = level;
     int flen; 
 
@@ -246,7 +246,7 @@ void yaz_log(int level, const char *fmt, ...)
     if ((l_file != stderr) && (l_max_size>0))
     {
         nmem_mutex_enter (log_mutex);
-        flen=ftell(l_file);
+        flen = ftell(l_file);
         if (flen>l_max_size) 
             rotate_log();
         nmem_mutex_leave (log_mutex);
@@ -285,10 +285,10 @@ void yaz_log(int level, const char *fmt, ...)
     ti = time(0);
     tim = localtime(&ti);
     if (l_level & LOG_NOTIME)
-      tbuf[0]='\0';
+	tbuf[0] = '\0';
     else
-      strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tim);
-    tbuf[TIMEFORMAT_LEN-1]='\0';
+	strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tim);
+    tbuf[TIMEFORMAT_LEN-1] = '\0';
     fprintf(l_file, "%s %s%s %s%s\n", tbuf, l_prefix, flags,
             l_prefix2, buf);
     if (l_level & (LOG_FLUSH|LOG_DEBUG) )
@@ -311,7 +311,7 @@ void yaz_log_time_format(const char *fmt)
     }
     /* else use custom format */
     strncpy(l_custom_format, fmt, TIMEFORMAT_LEN-1);
-    l_custom_format[TIMEFORMAT_LEN-1]='\0';
+    l_custom_format[TIMEFORMAT_LEN-1] = '\0';
     l_actual_format = l_custom_format;
 }
 
@@ -321,15 +321,15 @@ static char *clean_name(const char *name, int len, char *namebuf, int buflen)
     char *p;
     char *start;
     if (buflen <len)
-        len=buflen; 
+        len = buflen; 
     strncpy(namebuf, name, len);
-    namebuf[len]='\0';
-    start=namebuf;
-    p=namebuf;
-    while ((p=index(start,'/')))
-        start=p+1;
-    if ((p=rindex(start,'.')))
-        *p='\0';
+    namebuf[len] = '\0';
+    start = namebuf;
+    p = namebuf;
+    while ((p = index(start,'/')))
+        start = p+1;
+    if ((p = rindex(start,'.')))
+        *p = '\0';
     /*logf(LOG_LOG,"cleaned '%.*s' to '%s' ", len,name, start); */ 
     return start;
 
@@ -338,18 +338,18 @@ static char *clean_name(const char *name, int len, char *namebuf, int buflen)
 static int define_module_bit(const char *name)
 {
     int i;
-    for (i=0;mask_names[i].name;i++)
+    for (i = 0; mask_names[i].name; i++)
         ;
     if ( (i>=MAX_MASK_NAMES) || (next_log_bit >= 1<<31 ))
     {
         yaz_log(LOG_WARN,"No more log bits left, not logging '%s'", name);
         return 0;
     }
-    mask_names[i].mask= next_log_bit;
-    next_log_bit= next_log_bit<<1;
-    mask_names[i].name=xstrdup(name);
-    mask_names[i+1].name=NULL;
-    mask_names[i+1].mask=0;
+    mask_names[i].mask = next_log_bit;
+    next_log_bit = next_log_bit<<1;
+    mask_names[i].name = xstrdup(name);
+    mask_names[i+1].name = NULL;
+    mask_names[i+1].mask = 0;
     return mask_names[i].mask;
 }
 
@@ -357,8 +357,8 @@ int yaz_log_module_level(const char *name)
 {
     int i;
     char clean[255];
-    char *n=clean_name(name, strlen(name), clean, sizeof(clean));
-    for (i=0;mask_names[i].name;i++)
+    char *n = clean_name(name, strlen(name), clean, sizeof(clean));
+    for (i = 0; mask_names[i].name; i++)
         if (0==strcmp(n,mask_names[i].name))
             return mask_names[i].mask;
     return 0;
@@ -374,22 +374,22 @@ int yaz_log_mask_str_x (const char *str, int level)
     const char *p;
     int i;
     int found;
-    char clean[255]="";
-    char *n=clean;
+    char clean[255] = "";
+    char *n = clean;
 
     while (*str)
     {
-        found=0;
+        found = 0;
         for (p = str; *p && *p != ','; p++)
             ;
         if (*str == '-' || isdigit(*str))
         {
             level = atoi (str);
-            found=1;
+            found = 1;
         }
         else 
         {
-            n=clean_name(str, p-str, clean, sizeof(clean));
+            n = clean_name(str, p-str, clean, sizeof(clean));
             for (i = 0; mask_names[i].name; i++)
                 /*if (strlen (mask_names[i].name) == (size_t) (p-str) &&
                     memcmp (mask_names[i].name, str, p-str) == 0)*/
@@ -399,7 +399,7 @@ int yaz_log_mask_str_x (const char *str, int level)
                         level |= mask_names[i].mask;
                     else
                         level = 0;
-                    found=1;
+                    found = 1;
                 }
         }
         if (!found)
