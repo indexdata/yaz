@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.55 2002-04-12 14:40:21 adam Exp $
+ * $Id: oid.c,v 1.56 2002-08-26 09:25:56 adam Exp $
  */
 
 /*
@@ -474,7 +474,7 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
 	    int i;
 
 	    sprintf (desc_str, "%d", *oid);
-	    for (i = 1; oid[i] >= 0; i++)
+	    for (i = 1; i < 12 && oid[i] >= 0; i++)
 		sprintf (desc_str+strlen(desc_str), ".%d", oid[i]);
 	    desc = desc_str;
 	}
