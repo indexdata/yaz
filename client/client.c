@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.31  1996-02-20 12:51:54  quinn
+ * Revision 1.32  1996-03-15 11:05:33  adam
+ * The user can set the preferred query type (prefix, ccl, ..) with the
+ * querytype command.
+ *
+ * Revision 1.31  1996/02/20  12:51:54  quinn
  * Fixed problems with EXTERNAL.
  *
  * Revision 1.30  1996/02/12  18:18:09  quinn
@@ -127,12 +131,10 @@
 #include <marcdisp.h>
 #include <diagbib1.h>
 
-#ifdef RPN_QUERY
-#ifdef PREFIX_QUERY
 #include <pquery.h>
-#else
+
+#if CCL2RPN
 #include <yaz-ccl.h>
-#endif
 #endif
 
 #define C_PROMPT "Z> "
@@ -150,18 +152,24 @@ static int setno = 1;                   /* current set offset */
 static int protocol = PROTO_Z3950;      /* current app protocol */
 static int recordsyntax = VAL_USMARC;
 static int sent_close = 0;
-static ODR_MEM session_mem;                /* memory handle for init-response */
-static Z_InitResponse *session = 0;        /* session parameters */
+static ODR_MEM session_mem;             /* memory handle for init-response */
+static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan[512] = "0";
 static char last_cmd[100] = "?";
 static oid_value attributeset = VAL_BIB1;
 static FILE *marcdump = 0;
 static char marcdump_file[512] = "marc.out";
 
-#ifdef RPN_QUERY
-#ifndef PREFIX_QUERY
+typedef enum {
+    QueryType_Prefix,
+    QueryType_CCL,
+    QueryType_CCL2RPN
+} QueryType;
+
+static QueryType queryType = QueryType_Prefix;
+
+#if CCL2RPN
 static CCL_bibset bibset;               /* CCL bibset handle */
-#endif
 #endif
 
 static void send_apdu(Z_APDU *a)
@@ -535,29 +543,25 @@ static int send_searchRequest(char *arg)
     Z_SearchRequest *req = apdu->u.searchRequest;
     char *databaseNames = database;
     Z_Query query;
-#ifdef RPN_QUERY
-#ifndef PREFIX_QUERY
+#if CCL2RPN
     struct ccl_rpn_node *rpn;
     int error, pos;
-#endif
+    oident bib1;
 #endif
     char setstring[100];
-#ifdef RPN_QUERY
     Z_RPNQuery *RPNquery;
-    oident bib1;
-#else
     Odr_oct ccl_query;
-#endif
 
-#ifdef RPN_QUERY
-#ifndef PREFIX_QUERY
-    rpn = ccl_find_str(bibset, arg, &error, &pos);
-    if (error)
+#if CCL2RPN
+    if (queryType == QueryType_CCL2RPN)
     {
-        printf("CCL ERROR: %s\n", ccl_err_msg(error));
-        return 0;
+        rpn = ccl_find_str(bibset, arg, &error, &pos);
+        if (error)
+        {
+            printf("CCL ERROR: %s\n", ccl_err_msg(error));
+            return 0;
+        }
     }
-#endif
 #endif
 
     if (!strcmp(arg, "@big")) /* strictly for troublemaking */
@@ -588,7 +592,8 @@ static int send_searchRequest(char *arg)
         prefsyn.proto = protocol;
         prefsyn.oclass = CLASS_RECSYN;
         prefsyn.value = recordsyntax;
-        req->preferredRecordSyntax = odr_oiddup(out, oid_getoidbyent(&prefsyn));
+        req->preferredRecordSyntax =
+            odr_oiddup(out, oid_getoidbyent(&prefsyn));
         req->smallSetElementSetNames =
             req->mediumSetElementSetNames = elementSetNames;
     }
@@ -597,31 +602,39 @@ static int send_searchRequest(char *arg)
 
     req->query = &query;
 
-#ifdef RPN_QUERY
-    query.which = Z_Query_type_1;
-
-#ifndef PREFIX_QUERY
-    assert((RPNquery = ccl_rpn_query(rpn)));
-#else
-    RPNquery = p_query_rpn (out, arg);
-    if (!RPNquery)
+    switch (queryType)
     {
-        printf("Prefix query error\n");
+    case QueryType_Prefix:
+        query.which = Z_Query_type_1;
+        RPNquery = p_query_rpn (out, protocol, arg);
+        if (!RPNquery)
+        {
+            printf("Prefix query error\n");
+            return 0;
+        }
+        query.u.type_1 = RPNquery;
+        break;
+    case QueryType_CCL:
+        query.which = Z_Query_type_2;
+        query.u.type_2 = &ccl_query;
+        ccl_query.buf = (unsigned char*) arg;
+        ccl_query.len = strlen(arg);
+        break;
+#if CCL2RPN
+    case QueryType_CCL2RPN:
+        query.which = Z_Query_type_1;
+        assert((RPNquery = ccl_rpn_query(rpn)));
+        bib1.proto = protocol;
+        bib1.oclass = CLASS_ATTSET;
+        bib1.value = VAL_BIB1;
+        RPNquery->attributeSetId = oid_getoidbyent(&bib1);
+        query.u.type_1 = RPNquery;
+        break;
+#endif
+    default:
+        printf ("Unsupported query type\n");
         return 0;
     }
-#endif
-    bib1.proto = protocol;
-    bib1.oclass = CLASS_ATTSET;
-    bib1.value = VAL_BIB1;
-    RPNquery->attributeSetId = oid_getoidbyent(&bib1);
-    query.u.type_1 = RPNquery;
-#else
-    query.which = Z_Query_type_2;
-    query.u.type_2 = &ccl_query;
-    ccl_query.buf = (unsigned char*) arg;
-    ccl_query.len = strlen(arg);
-#endif
-
     send_apdu(apdu);
     setno = 1;
     printf("Sent searchRequest.\n");
@@ -833,15 +846,11 @@ int send_scanrequest(char *string, int pp, int num)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
     char *db = database;
-    oident attset;
 
     req->num_databaseNames = 1;
     req->databaseNames = &db;
-    attset.proto = protocol;
-    attset.oclass = CLASS_ATTSET;
-    attset.value = VAL_BIB1;
-    req->attributeSet = oid_getoidbyent(&attset);
-    req->termListAndStartPoint = p_query_scan(out, string);
+    req->termListAndStartPoint = p_query_scan(out, protocol,
+                                              &req->attributeSet, string);
     req->numberOfTermsRequested = &num;
     req->preferredPositionInResponse = &pp;
     send_apdu(apdu);
@@ -992,6 +1001,29 @@ int cmd_attributeset(char *arg)
     return 1;
 }
 
+int cmd_querytype (char *arg)
+{
+    if (!strcmp (arg, "ccl"))
+        queryType = QueryType_CCL;
+    else if (!strcmp (arg, "prefix"))
+        queryType = QueryType_Prefix;
+#if CCL2RPN
+    else if (!strcmp (arg, "ccl2rpn") || !strcmp (arg, "cclrpn"))
+        queryType = QueryType_CCL2RPN;
+#endif
+    else
+    {
+        printf ("Querytype must be one of:\n");
+        printf (" prefix         - Prefix query\n");
+        printf (" ccl            - CCL query\n");
+#if CCL2RPN
+        printf (" ccl2rpn        - CCL query converted to RPN\n");
+#endif
+        return 0;
+    }
+    return 1;
+}
+
 int cmd_close(char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
@@ -1006,10 +1038,8 @@ int cmd_close(char *arg)
 
 static void initialize(void)
 {
-#ifdef RPN_QUERY
-#ifndef PREFIX_QUERY
+#if CCL2RPN
     FILE *inf;
-#endif
 #endif
 
     if (!(out = odr_createmem(ODR_ENCODE)) ||
@@ -1021,8 +1051,7 @@ static void initialize(void)
     }
     setvbuf(stdout, 0, _IONBF, 0);
 
-#ifdef RPN_QUERY
-#ifndef PREFIX_QUERY
+#if CCL2RPN
     bibset = ccl_qual_mk (); 
     inf = fopen ("default.bib", "r");
     if (inf)
@@ -1030,7 +1059,6 @@ static void initialize(void)
         ccl_qual_file (bibset, inf);
         fclose (inf);
     }
-#endif
 #endif
 }
 
@@ -1041,13 +1069,13 @@ static int client(void)
         int (*fun)(char *arg);
         char *ad;
     } cmd[] = {
-        {"open", cmd_open, "('tcp'|'osi')':'[<TSEL>'/']<HOST>[':'<PORT>]"},
+        {"open", cmd_open, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]"},
         {"quit", cmd_quit, ""},
-        {"find", cmd_find, "<CCL-QUERY>"},
-        {"base", cmd_base, "<BASE-NAME>"},
-        {"show", cmd_show, "<REC#>['+'<#RECS>]"},
-        {"scan", cmd_scan, "<TERM>"},
-        {"authentication", cmd_authentication, "<ACCTSTRING>"},
+        {"find", cmd_find, "<query>"},
+        {"base", cmd_base, "<base-name>"},
+        {"show", cmd_show, "<rec#>['+'<#recs>]"},
+        {"scan", cmd_scan, "<term>"},
+        {"authentication", cmd_authentication, "<acctstring>"},
         {"lslb", cmd_lslb, "<largeSetLowerBound>"},
         {"ssub", cmd_ssub, "<smallSetUpperBound>"},
         {"mspn", cmd_mspn, "<mediumSetPresentNumber>"},
@@ -1058,6 +1086,7 @@ static int client(void)
         {"elements", cmd_elements, "<elementSetName>"},
         {"close", cmd_close, ""},
 	{"attributeset", cmd_attributeset, "<attrset>"},
+        {"querytype", cmd_querytype, "<type>"},
         {0,0}
     };
     char *netbuffer= 0;
