@@ -1,20 +1,36 @@
-Summary: Z39.50 Library
+Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
-Release: 1
-Requires: libxml2
+Release: 2
+Requires: libxml2 openssl
 Copyright: YAZ License
-Group: Development/Libraries
+Group: Other
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: libxml2 libxml2-devel tcp_wrappers
+BuildRequires: libxml2 libxml2-devel tcp_wrappers openssl-devel readline-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.dk/yaz/
 
 %description
-YAZ is a C library for developing client - and server applications
-using the ANSI/NISO Z39.50 protocol for Information Retrieval. 
+This package contains both a test-server and clients (normal & ssl)
+for the ANSI/NISO Z39.50 protocol for Information Retrieval.
+
+%package -n lib%{name}
+Summary: Z39.50 Library
+Group: Libraries
+Requires: libxml2 openssl readline
+
+%description -n lib%{name}
+YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
+Retrieval.
+
+%package -n lib%{name}-devel
+Summary: Z39.50 Library - development package
+Group: Development/Libraries
+
+%description -n lib%{name}-devel
+Development libraries and includes for the libyaz package.
 
 %prep
 %setup
@@ -22,7 +38,7 @@ using the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %build
 
 CFLAGS="$RPM_OPT_FLAGS" \
- ./configure --prefix=/usr --enable-shared --enable-tcpd
+ ./configure --prefix=/usr --enable-shared --enable-tcpd --with-openssl
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
@@ -35,13 +51,27 @@ rm -fr ${RPM_BUILD_ROOT}
 %files
 %defattr(-,root,root)
 %doc README LICENSE CHANGELOG TODO
-/usr/bin/*
-/usr/lib/*.a
-/usr/lib/*.so
+/usr/bin/yaz-client*
+/usr/bin/yaz-ztest*
+/usr/bin/zoomsh*
+/usr/share/man/man1/yaz-client-ssl.*
+/usr/share/man/man1/yaz-client.*
+/usr/share/man/man1/zoomsh.*
+/usr/share/man/man8/yaz-ztest-ssl.*
+/usr/share/man/man8/yaz-ztest.*
+
+%files -n lib%{name}
 /usr/lib/*.so.*
-/usr/include/yaz
+/usr/share/doc/yaz
 /usr/share/yaz/z39.50
 /usr/share/yaz/ill
-/usr/share/doc/yaz
+/usr/share/man/man7/yaz.*
+
+%files -n lib%{name}-devel
+/usr/bin/yaz-config
+/usr/bin/yaz-comp
+/usr/include/yaz
+/usr/lib/*.so
+/usr/lib/*.a
 /usr/share/aclocal/yaz.m4
-/usr/share/man/*/*
+/usr/share/man/man1/yaz-config.*
