@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.36 2003-11-25 09:55:20 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.37 2004-01-16 10:04:54 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -130,7 +130,7 @@
         group</entry><entry>Authentication group name
        </entry><entry>none</entry></row>
       <row><entry>
-        pass</entry><entry>Authentication password
+        password</entry><entry>Authentication password.
        </entry><entry>none</entry></row>
       <row><entry>
         host</entry><entry>Target host. This setting is "read-only".

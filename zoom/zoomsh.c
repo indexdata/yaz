@@ -1,8 +1,11 @@
 /*
- * $Id: zoomsh.c,v 1.25 2004-01-12 12:10:44 adam Exp $
+ * Copyright (c) 2002-2004, Index Data.
+ * See the file LICENSE for details.
  *
- * ZOOM-C Shell
+ * $Id: zoomsh.c,v 1.26 2004-01-16 10:04:55 adam Exp $
  */
+
+/* ZOOM-C Shell */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -391,7 +394,7 @@ static void cmd_help (ZOOM_connection *c, ZOOM_resultset *r,
     printf (" piggyback\n");
     printf (" group\n");
     printf (" user\n");
-    printf (" pass\n");
+    printf (" password\n");
     printf (" implementationName\n");
     printf (" charset\n");
     printf (" lang\n");

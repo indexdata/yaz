@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Make ZOOM C recognize option "password". If unset, "pass" is used
+(for backwards compatibility).
+
 Fixed a bug in Generic Frontend Server that could make it crash if a
 client sets characterSetNegotation bit, but didn't pass negotiation stuff
 in InitRequest.

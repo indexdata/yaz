@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.18 2004-01-12 12:10:17 adam Exp $
+ * $Id: zoom-c.c,v 1.19 2004-01-16 10:04:54 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -895,9 +895,13 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         odr_malloc(c->odr_out, sizeof(*auth));
     const char *auth_groupId = ZOOM_options_get (c->options, "group");
     const char *auth_userId = ZOOM_options_get (c->options, "user");
-    const char *auth_password = ZOOM_options_get (c->options, "pass");
+    const char *auth_password = ZOOM_options_get (c->options, "password");
     char *version;
 
+    /* support the pass for backwards compatibility */
+    if (!auth_password)
+	auth_password = ZOOM_options_get (c->options, "pass");
+	
     ODR_MASK_SET(ireq->options, Z_Options_search);
     ODR_MASK_SET(ireq->options, Z_Options_present);
     ODR_MASK_SET(ireq->options, Z_Options_scan);
@@ -918,7 +922,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.18 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.19 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
