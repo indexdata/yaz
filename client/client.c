@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.169 2002-09-17 11:07:30 adam Exp $
+ * $Id: client.c,v 1.170 2002-09-17 21:19:38 adam Exp $
  */
 
 #include <stdio.h>
@@ -49,7 +49,7 @@ static Z_IdAuthentication *auth = 0;    /* our current auth definition */
 char *databaseNames[128];
 int num_databaseNames = 0;
 static Z_External *record_last = 0;
-static int setnumber = -1;               /* current result set number */
+static int setnumber = -1;              /* current result set number */
 static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
@@ -59,7 +59,7 @@ static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 static enum oid_value recordsyntax = VAL_USMARC;
 static enum oid_value schema = VAL_NONE;
 static int sent_close = 0;
-static NMEM session_mem = NULL;      /* memory handle for init-response */
+static NMEM session_mem = NULL;         /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
@@ -357,16 +357,16 @@ static int process_initResponse(Z_InitResponse *res)
     		yaz_get_charneg_record(res->otherInfo);
     	
     	if (p) {
-    	
-    		char *charset=NULL, *lang=NULL;
-    		int selected;
-    		
-    		yaz_get_response_charneg(session_mem, p, &charset, &lang,
+            
+            char *charset=NULL, *lang=NULL;
+            int selected;
+            
+            yaz_get_response_charneg(session_mem, p, &charset, &lang,
                                      &selected);
-    		
-    		printf("Accepted character set : %s\n", charset);
-    		printf("Accepted code language : %s\n", lang ? lang : "none");
-    		printf("Accepted records in ...: %d\n", selected );
+            
+            printf("Accepted character set : %s\n", charset);
+            printf("Accepted code language : %s\n", lang ? lang : "none");
+            printf("Accepted records in ...: %d\n", selected );
     	}
     }
     fflush (stdout);
@@ -695,7 +695,7 @@ static void display_record(Z_External *r)
                             r->u.octet_aligned->len);
                 fprintf(stderr, "---------\n");
                 
-				/* note just ignores the error ant print the bytes form the octet_aligned laiter */
+		/* note just ignores the error ant print the bytes form the octet_aligned later */
             } else {
                 /*
                  * Note: we throw away the original, BER-encoded record here.
@@ -1536,11 +1536,64 @@ static int cmd_update(char *arg)
     Z_IUOriginPartToKeep *toKeep;
     Z_IUSuppliedRecords *notToKeep;
     oident update_oid;
-    printf ("Update request\n");
-    fflush(stdout);
-    
-    if (!record_last)
+    char action[20], recid[20], fname[80];
+    int action_no;
+    Z_External *record_this = 0;
+
+    *action = 0;
+    *recid = 0;
+    *fname = 0;
+    sscanf (arg, "%19s %19s %79s", action, recid, fname);
+
+    if (!strcmp (action, "insert"))
+        action_no = Z_IUOriginPartToKeep_recordInsert;
+    else if (!strcmp (action, "replace"))
+        action_no = Z_IUOriginPartToKeep_recordReplace;
+    else if (!strcmp (action, "delete"))
+        action_no = Z_IUOriginPartToKeep_recordDelete;
+    else if (!strcmp (action, "update"))
+        action_no = Z_IUOriginPartToKeep_specialUpdate;
+    else 
+    {
+        printf ("Bad action: %s\n", action);
+        printf ("Possible values: insert, replace, delete, update\n");
         return 0;
+    }
+
+    if (*fname)
+    {
+        FILE *inf;
+        struct stat status;
+        stat (fname, &status);
+        if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))
+        {
+            size_t len = status.st_size;
+            char *buf = xmalloc (len);
+
+            fread (buf, 1, len, inf);
+
+            fclose (inf);
+            
+            record_this = z_ext_record (out, VAL_TEXT_XML, buf, len);
+            
+            xfree (buf);
+        }
+        else
+        {
+            printf ("File %s doesn't exist\n", fname);
+            return 0;
+        }
+    }
+    else
+    {
+        if (!record_last)
+        {
+            printf ("No last record (update ignored)\n");
+            return 0;
+        }
+        record_this = record_last;
+    }
+
     update_oid.proto = PROTO_Z3950;
     update_oid.oclass = CLASS_EXTSERV;
     update_oid.value = VAL_DBUPDATE;
@@ -1567,7 +1620,7 @@ static int cmd_update(char *arg)
     toKeep->elementSetName = 0;
     toKeep->actionQualifier = 0;
     toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
-    *toKeep->action = Z_IUOriginPartToKeep_recordInsert;
+    *toKeep->action = action_no;
 
     notToKeep = r->u.update->u.esRequest->notToKeep = (Z_IUSuppliedRecords *)
         odr_malloc(out, sizeof(*r->u.update->u.esRequest->notToKeep));
@@ -1576,10 +1629,19 @@ static int cmd_update(char *arg)
         odr_malloc(out, sizeof(*notToKeep->elements));
     notToKeep->elements[0] = (Z_IUSuppliedRecords_elem *)
         odr_malloc(out, sizeof(**notToKeep->elements));
-    notToKeep->elements[0]->u.number = 0;
+    notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
+    if (*recid)
+    {
+        notToKeep->elements[0]->u.opaque = odr_malloc (out, sizeof(Odr_oct));
+        notToKeep->elements[0]->u.opaque->buf = recid;
+        notToKeep->elements[0]->u.opaque->size = strlen(recid);
+        notToKeep->elements[0]->u.opaque->len = strlen(recid);
+    }
+    else
+        notToKeep->elements[0]->u.opaque = 0;
     notToKeep->elements[0]->supplementalId = 0;
     notToKeep->elements[0]->correlationInfo = 0;
-    notToKeep->elements[0]->record = record_last;
+    notToKeep->elements[0]->record = record_this;
     
     send_apdu(apdu);
 
@@ -2942,7 +3004,7 @@ static struct {
     {"querytype", cmd_querytype, "<type>",complete_querytype,0,NULL},
     {"refid", cmd_refid, "<id>",NULL,0,NULL},
     {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0,NULL},
-    {"update", cmd_update, "<item>",NULL,0,NULL},
+    {"update", cmd_update, "<action> <recid> [<file>]",NULL,0,NULL},
     {"packagename", cmd_packagename, "<packagename>",NULL,0,NULL},
     {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0,NULL},
     {"charset", cmd_charset, "<charset_name>",NULL,0,NULL},
@@ -3038,8 +3100,7 @@ int cmd_register_tab(char* arg) {
         return 1;
     }
     
-    
-    
+        
     if(!cmd[i].local_tabcompletes) {
         cmd[i].local_tabcompletes = calloc(1,sizeof(char**));
     }
@@ -3051,7 +3112,8 @@ int cmd_register_tab(char* arg) {
         num_of_tabs++;
     }
     
-    cmd[i].local_tabcompletes=realloc(cmd[i].local_tabcompletes,(num_of_tabs+2)*sizeof(char**));
+    cmd[i].local_tabcompletes = 
+        realloc(cmd[i].local_tabcompletes,(num_of_tabs+2)*sizeof(char**));
     tabslist=cmd[i].local_tabcompletes;
     tabslist[num_of_tabs]=strdup(tabargument);
     tabslist[num_of_tabs+1]=NULL;
