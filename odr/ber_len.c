@@ -1,35 +1,16 @@
 /*
- * Copyright (C) 1995-2000, Index Data.
+ * Copyright (C) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: ber_len.c,v $
- * Revision 1.9  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.8  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.7  1999/01/08 11:23:23  adam
- * Added const modifier to some of the BER/ODR encoding routines.
- *
- * Revision 1.6  1995/09/29 17:12:17  quinn
- * Smallish
- *
- * Revision 1.5  1995/09/27  15:02:55  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.4  1995/05/16  08:50:45  quinn
- * License, documentation, and memory fixes
- *
- *
+ * $Id: ber_len.c,v 1.10 2002-07-25 12:51:08 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include <stdio.h>
-#include <yaz/odr.h>
+#include "odr-priv.h"
 
 /*
  * Encode BER length octets. If exact, lenlen is the exact desired

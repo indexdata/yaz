@@ -1,53 +1,16 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: dumpber.c,v $
- * Revision 1.12  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.11  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.10  1999/01/08 11:23:26  adam
- * Added const modifier to some of the BER/ODR encoding routines.
- *
- * Revision 1.9  1998/01/14 09:53:26  quinn
- * Added a bit more info to dump.
- *
- * Revision 1.8  1997/05/14 06:53:57  adam
- * C++ support.
- *
- * Revision 1.7  1996/03/08 14:38:41  quinn
- * Fixed output.
- *
- * Revision 1.6  1996/01/19  15:41:34  quinn
- * dumpber was ignoring the file argument.
- *
- * Revision 1.5  1995/10/18  16:12:55  quinn
- * Better diagnostics. Added special case in NULL to handle WAIS server.
- *
- * Revision 1.4  1995/09/29  17:12:21  quinn
- * Smallish
- *
- * Revision 1.3  1995/09/27  15:02:57  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.2  1995/06/27  13:20:51  quinn
- * Fixed sign-clash. Non-fatal warning
- *
- * Revision 1.1  1995/06/19  12:38:45  quinn
- * Added BER dumper.
- *
- *
+ * $Id: dumpber.c,v 1.13 2002-07-25 12:51:08 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include <stdio.h>
-#include <yaz/odr.h>
+#include "odr-priv.h"
 
 static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
 {

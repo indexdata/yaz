@@ -1,76 +1,15 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Log: odr_mem.c,v $
- * Revision 1.19  2001-03-25 21:55:12  adam
- * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
- *
- * Revision 1.18  2000/02/29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.17  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.16  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.15  1999/03/31 11:18:25  adam
- * Implemented odr_strdup. Added Reference ID to backend server API.
- *
- * Revision 1.14  1998/07/20 12:38:15  adam
- * More LOG_DEBUG-diagnostics.
- *
- * Revision 1.13  1998/02/11 11:53:34  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.12  1995/11/08 17:41:33  quinn
- * Smallish.
- *
- * Revision 1.11  1995/11/01  13:54:43  quinn
- * Minor adjustments
- *
- * Revision 1.10  1995/10/25  16:58:19  quinn
- * Stupid bug in odr_malloc
- *
- * Revision 1.9  1995/10/13  16:08:08  quinn
- * Added OID utility
- *
- * Revision 1.8  1995/09/29  17:12:24  quinn
- * Smallish
- *
- * Revision 1.7  1995/09/27  15:02:59  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.6  1995/08/21  09:10:41  quinn
- * Smallish fixes to suppport new formats.
- *
- * Revision 1.5  1995/05/16  08:50:55  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.4  1995/05/15  11:56:09  quinn
- * More work on memory management.
- *
- * Revision 1.3  1995/04/18  08:15:21  quinn
- * Added dynamic memory allocation on encoding (whew). Code is now somewhat
- * neater. We'll make the same change for decoding one day.
- *
- * Revision 1.2  1995/03/17  10:17:52  quinn
- * Added memory management.
- *
- * Revision 1.1  1995/03/14  10:27:40  quinn
- * Modified makefile to use common lib
- * Beginning to add memory management to odr
- *
+ * $Id: odr_mem.c,v 1.20 2002-07-25 12:51:08 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include <stdlib.h>
-#include <yaz/odr.h>
+#include "odr-priv.h"
 #include <yaz/xmalloc.h>
 
 /* ------------------------ NIBBLE MEMORY ---------------------- */

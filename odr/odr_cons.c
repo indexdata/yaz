@@ -1,84 +1,15 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Log: odr_cons.c,v $
- * Revision 1.22  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.21  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.20  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.19  1999/04/20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.18  1997/05/14 06:53:58  adam
- * C++ support.
- *
- * Revision 1.17  1996/10/23 12:31:24  adam
- * Added 'static' modifier to dummy variable in odr_constructed_begin.
- *
- * Revision 1.16  1996/07/26  13:38:20  quinn
- * Various smaller things. Gathered header-files.
- *
- * Revision 1.15  1995/09/29  17:12:23  quinn
- * Smallish
- *
- * Revision 1.14  1995/09/27  15:02:58  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.13  1995/08/15  11:16:39  quinn
- * Fixed pretty-printers.
- *
- * Revision 1.12  1995/06/19  12:38:47  quinn
- * Added BER dumper.
- *
- * Revision 1.11  1995/05/16  08:50:53  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.10  1995/04/18  08:15:21  quinn
- * Added dynamic memory allocation on encoding (whew). Code is now somewhat
- * neater. We'll make the same change for decoding one day.
- *
- * Revision 1.9  1995/03/28  09:15:49  quinn
- * Fixed bug in the printing mode
- *
- * Revision 1.8  1995/03/15  11:18:04  quinn
- * Fixed serious bug in odr_cons
- *
- * Revision 1.7  1995/03/10  11:44:41  quinn
- * Fixed serious stack-bug in odr_cons_begin
- *
- * Revision 1.6  1995/03/08  12:12:23  quinn
- * Added better error checking.
- *
- * Revision 1.5  1995/02/10  18:57:25  quinn
- * More in the way of error-checking.
- *
- * Revision 1.4  1995/02/10  15:55:29  quinn
- * Bug fixes, mostly.
- *
- * Revision 1.3  1995/02/09  15:51:48  quinn
- * Works better now.
- *
- * Revision 1.2  1995/02/07  17:52:59  quinn
- * A damn mess, but now things work, I think.
- *
- * Revision 1.1  1995/02/02  16:21:53  quinn
- * First kick.
+ * $Id: odr_cons.c,v 1.23 2002-07-25 12:51:08 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <yaz/odr.h>
+#include "odr-priv.h"
 
 void odr_setlenlen(ODR o, int len)
 {
@@ -105,30 +36,30 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
     if (!res || !cons)
     	return 0;
 
-    if (o->stackp == ODR_MAX_STACK - 1)
+    if (o->op->stackp == ODR_MAX_STACK - 1)
     {
     	o->error = OSTACK;
     	return 0;
     }
-    o->stack[++(o->stackp)].lenb = o->bp;
-    o->stack[o->stackp].len_offset = odr_tell(o);
+    o->op->stack[++(o->op->stackp)].lenb = o->bp;
+    o->op->stack[o->op->stackp].len_offset = odr_tell(o);
 #ifdef ODR_DEBUG
-    fprintf(stderr, "[cons_begin(%d)]", o->stackp);
+    fprintf(stderr, "[cons_begin(%d)]", o->op->stackp);
 #endif
     if (o->direction == ODR_ENCODE)
     {
 	static unsigned char dummy[sizeof(int)+1];
 
-	o->stack[o->stackp].lenlen = lenlen;
+	o->op->stack[o->op->stackp].lenlen = lenlen;
 
 	if (odr_write(o, dummy, lenlen) < 0) /* dummy */
 	    return 0;
     }
     else if (o->direction == ODR_DECODE)
     {
-    	if ((res = ber_declen(o->bp, &o->stack[o->stackp].len)) < 0)
+    	if ((res = ber_declen(o->bp, &o->op->stack[o->op->stackp].len)) < 0)
 	    return 0;
-	o->stack[o->stackp].lenlen = res;
+	o->op->stack[o->op->stackp].lenlen = res;
 	o->bp += res;
     }
     else if (o->direction == ODR_PRINT)
@@ -142,8 +73,8 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
     	o->error = OOTHER;
 	return 0;
     }
-    o->stack[o->stackp].base = o->bp;
-    o->stack[o->stackp].base_offset = odr_tell(o);
+    o->op->stack[o->op->stackp].base = o->bp;
+    o->op->stack[o->op->stackp].base_offset = odr_tell(o);
     return 1;
 }
 
@@ -151,10 +82,10 @@ int odr_constructed_more(ODR o)
 {
     if (o->error)
     	return 0;
-    if (o->stackp < 0)
+    if (o->op->stackp < 0)
     	return 0;
-    if (o->stack[o->stackp].len >= 0)
-    	return o->bp - o->stack[o->stackp].base < o->stack[o->stackp].len;
+    if (o->op->stack[o->op->stackp].len >= 0)
+    	return o->bp - o->op->stack[o->op->stackp].base < o->op->stack[o->op->stackp].len;
     else
     	return (!(*o->bp == 0 && *(o->bp + 1) == 0));
 }
@@ -166,69 +97,69 @@ int odr_constructed_end(ODR o)
 
     if (o->error)
     	return 0;
-    if (o->stackp < 0)
+    if (o->op->stackp < 0)
     {
     	o->error = OOTHER;
     	return 0;
     }
     switch (o->direction)
     {
-    	case ODR_DECODE:
-	    if (o->stack[o->stackp].len < 0)
-	    {
-	    	if (*o->bp++ == 0 && *(o->bp++) == 0)
-	    	{
-		    o->stackp--;
+    case ODR_DECODE:
+        if (o->op->stack[o->op->stackp].len < 0)
+        {
+            if (*o->bp++ == 0 && *(o->bp++) == 0)
+            {
+		    o->op->stackp--;
 		    return 1;
-		}
-		else
-		{
-		    o->error = OOTHER;
-		    return 0;
-		}
-	    }
-	    else if (o->bp - o->stack[o->stackp].base !=
-		o->stack[o->stackp].len)
-	    {
-	    	o->error = OCONLEN;
-	    	return 0;
-	    }
-	    o->stackp--;
-	    return 1;
-    	case ODR_ENCODE:
-	    pos = odr_tell(o);
-	    odr_seek(o, ODR_S_SET, o->stack[o->stackp].len_offset);
-	    if ((res = ber_enclen(o, pos - o->stack[o->stackp].base_offset,
-		o->stack[o->stackp].lenlen, 1)) < 0)
-	    {
-		o->error = OLENOV;
-		return 0;
-	    }
-	    odr_seek(o, ODR_S_END, 0);
-	    if (res == 0)   /* indefinite encoding */
-	    {
+            }
+            else
+            {
+                o->error = OOTHER;
+                return 0;
+            }
+        }
+        else if (o->bp - o->op->stack[o->op->stackp].base !=
+                 o->op->stack[o->op->stackp].len)
+        {
+            o->error = OCONLEN;
+            return 0;
+        }
+        o->op->stackp--;
+        return 1;
+    case ODR_ENCODE:
+        pos = odr_tell(o);
+        odr_seek(o, ODR_S_SET, o->op->stack[o->op->stackp].len_offset);
+        if ((res = ber_enclen(o, pos - o->op->stack[o->op->stackp].base_offset,
+                              o->op->stack[o->op->stackp].lenlen, 1)) < 0)
+        {
+            o->error = OLENOV;
+            return 0;
+        }
+        odr_seek(o, ODR_S_END, 0);
+        if (res == 0)   /* indefinite encoding */
+        {
 #ifdef ODR_DEBUG
-		fprintf(stderr, "[cons_end(%d): indefinite]", o->stackp);
+            fprintf(stderr, "[cons_end(%d): indefinite]", o->op->stackp);
 #endif
-		if (odr_putc(o, 0) < 0 || odr_putc(o, 0) < 0)
-		    return 0;
-	    }
+            if (odr_putc(o, 0) < 0 || odr_putc(o, 0) < 0)
+                return 0;
+        }
 #ifdef ODR_DEBUG
-	    else
-	    {
-	    	fprintf(stderr, "[cons_end(%d): definite]", o->stackp);
-	    }
+        else
+        {
+            fprintf(stderr, "[cons_end(%d): definite]", o->op->stackp);
+        }
 #endif
-	    o->stackp--;
-	    return 1;
-    	case ODR_PRINT:
-	    o->stackp--;
-	    o->indent--;
-	    odr_prname(o, 0);
-	    fprintf(o->print, "}\n");
-	    return 1;
-    	default:
-	    o->error = OOTHER;
-	    return 0;
+        o->op->stackp--;
+        return 1;
+    case ODR_PRINT:
+        o->op->stackp--;
+        o->indent--;
+        odr_prname(o, 0);
+        fprintf(o->print, "}\n");
+        return 1;
+    default:
+        o->error = OOTHER;
+        return 0;
     }
 }

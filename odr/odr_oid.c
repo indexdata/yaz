@@ -1,65 +1,15 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: odr_oid.c,v $
- * Revision 1.16  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.15  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.14  1999/04/20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.13  1998/02/11 11:53:34  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.12  1995/09/29 17:12:25  quinn
- * Smallish
- *
- * Revision 1.11  1995/09/27  15:03:00  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.10  1995/05/29  08:11:44  quinn
- * Moved oid from odr/asn to util.
- *
- * Revision 1.9  1995/05/16  08:50:57  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.8  1995/03/17  10:17:55  quinn
- * Added memory management.
- *
- * Revision 1.7  1995/03/08  12:12:29  quinn
- * Added better error checking.
- *
- * Revision 1.6  1995/03/01  08:40:56  quinn
- * Smallish changes.
- *
- * Revision 1.5  1995/02/10  18:57:26  quinn
- * More in the way of error-checking.
- *
- * Revision 1.4  1995/02/10  15:55:29  quinn
- * Bug fixes, mostly.
- *
- * Revision 1.3  1995/02/09  15:51:49  quinn
- * Works better now.
- *
- * Revision 1.2  1995/02/07  14:13:46  quinn
- * Bug fixes.
- *
- * Revision 1.1  1995/02/03  17:04:38  quinn
- * Initial revision
- *
- *
+ * $Id: odr_oid.c,v 1.17 2002-07-25 12:51:08 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <yaz/odr.h>
+#include "odr-priv.h"
 #include <yaz/oid.h>
 
 /*

@@ -1,31 +1,15 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: odr_enum.c,v $
- * Revision 1.5  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.4  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.3  1999/04/20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.2  1999/01/08 11:23:27  adam
- * Added const modifier to some of the BER/ODR encoding routines.
- *
- * Revision 1.1  1998/03/20 14:45:01  adam
- * Implemented odr_enum and odr_set_of.
- *
+ * $Id: odr_enum.c,v 1.6 2002-07-25 12:51:08 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <yaz/odr.h>
+#include "odr-priv.h"
 
 /*
  * Top level enum en/decoder.

@@ -1,64 +1,16 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: odr_oct.c,v $
- * Revision 1.16  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.15  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.14  1999/10/19 12:35:55  adam
- * Better dump of OCTET STRING.
- *
- * Revision 1.13  1999/04/20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.12  1998/02/11 11:53:34  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.11  1995/09/29 17:12:25  quinn
- * Smallish
- *
- * Revision 1.10  1995/09/27  15:02:59  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.9  1995/05/16  08:50:56  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.8  1995/03/17  10:17:54  quinn
- * Added memory management.
- *
- * Revision 1.7  1995/03/08  12:12:27  quinn
- * Added better error checking.
- *
- * Revision 1.6  1995/02/10  18:57:26  quinn
- * More in the way of error-checking.
- *
- * Revision 1.5  1995/02/09  15:51:49  quinn
- * Works better now.
- *
- * Revision 1.4  1995/02/07  14:13:46  quinn
- * Bug fixes.
- *
- * Revision 1.3  1995/02/03  17:04:38  quinn
- * *** empty log message ***
- *
- * Revision 1.2  1995/02/02  20:38:51  quinn
- * Updates.
- *
- * Revision 1.1  1995/02/02  16:21:54  quinn
- * First kick.
- *
+ * $Id: odr_oct.c,v 1.17 2002-07-25 12:51:08 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <yaz/odr.h>
+#include <yaz/log.h>
+#include "odr-priv.h"
 
 /*
  * Top level octet string en/decoder.
@@ -134,7 +86,7 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
     	fprintf(o->print, "'%s'\n", *p);
     	return 1;
     }
-    t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct));   /* wrapper for octstring */
+    t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)); /* wrapper for octstring */
     if (o->direction == ODR_ENCODE)
     {
     	t->buf = (unsigned char *) *p;
@@ -152,6 +104,105 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
     {
 	*p = (char *) t->buf;
 	*(*p + t->len) = '\0';  /* ber_octs reserves space for this */
+    }
+    return 1;
+}
+
+/*
+ * iconv interface to octetstring.
+ */
+int odr_iconv_string(ODR o, char **p, int opt, const char *name)
+{
+    int cons = 0, res;
+    Odr_oct *t;
+
+    if (o->error)
+    	return 0;
+    if (o->t_class < 0)
+    {
+    	o->t_class = ODR_UNIVERSAL;
+    	o->t_tag = ODR_OCTETSTRING;
+    }
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt)) < 0)
+    	return 0;
+    if (!res)
+    	return opt;
+    if (o->direction == ODR_PRINT)
+    {
+    	odr_prname(o, name);
+    	fprintf(o->print, "'%s'\n", *p);
+    	return 1;
+    }
+    t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)); /* wrapper for octstring */
+    if (o->direction == ODR_ENCODE)
+    {
+        t->buf = 0;
+#if HAVE_ICONV_H
+        if (o->op->iconv_handle != (iconv_t)(-1))
+        {
+            size_t inleft = strlen(*p);
+            char *inbuf = *p;
+            size_t outleft = 4 * inleft + 2;
+            char *outbuf = odr_malloc (o, outleft);
+            size_t ret;
+            
+            t->buf = outbuf;
+            
+            ret = iconv (o->op->iconv_handle, &inbuf, &inleft,
+                         &outbuf, &outleft);
+            if (ret == (size_t)(-1))
+            {
+                o->error = ODATA;
+                return 0;
+            }
+            t->size = t->len = outbuf - (char*) t->buf;
+        }
+#endif
+        if (!t->buf)
+        {
+            t->buf = (unsigned char *) *p;
+            t->size = t->len = strlen(*p);
+        }
+    }
+    else
+    {
+	t->size= 0;
+	t->len = 0;
+	t->buf = 0;
+    }
+    if (!ber_octetstring(o, t, cons))
+    	return 0;
+    if (o->direction == ODR_DECODE)
+    {
+        *p = 0;
+#if HAVE_ICONV_H
+        if (o->op->iconv_handle != (iconv_t)(-1))
+        {
+            size_t inleft = t->len;
+            char *inbuf = t->buf;
+            size_t outleft = 4 * inleft + 2;
+            char *outbuf = odr_malloc (o, outleft);
+            size_t ret;
+
+            *p = outbuf;
+            
+            ret = iconv (o->op->iconv_handle, &inbuf, &inleft,
+                         &outbuf, &outleft);
+            if (ret == (size_t)(-1))
+            {
+                o->error = ODATA;
+                return 0;
+            }
+            inleft = outbuf - (char*) *p;
+            
+            (*p)[inleft] = '\0';    /* null terminate it */
+        }
+#endif
+        if (!*p)
+        {
+            *p = (char *) t->buf;
+            *(*p + t->len) = '\0';  /* ber_octs reserves space for this */
+        }
     }
     return 1;
 }

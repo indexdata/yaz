@@ -1,87 +1,16 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: ber_tag.c,v $
- * Revision 1.22  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.21  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.20  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.19  1999/01/08 11:23:25  adam
- * Added const modifier to some of the BER/ODR encoding routines.
- *
- * Revision 1.18  1998/02/11 11:53:34  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.17  1997/09/30 09:33:10  adam
- * Minor changes - removed indentation of ifdef.
- *
- * Revision 1.16  1997/09/17 12:10:33  adam
- * YAZ version 1.4.
- *
- * Revision 1.15  1997/09/01 08:51:06  adam
- * New windows NT/95 port using MSV5.0. Had to avoid a few static
- * variables used in function ber_tag. These are now part of the
- * ODR structure.
- *
- * Revision 1.14  1997/05/14 06:53:56  adam
- * C++ support.
- *
- * Revision 1.13  1995/09/29 17:12:21  quinn
- * Smallish
- *
- * Revision 1.12  1995/09/27  15:02:57  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.11  1995/05/16  08:50:48  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.10  1995/04/18  08:15:18  quinn
- * Added dynamic memory allocation on encoding (whew). Code is now somewhat
- * neater. We'll make the same change for decoding one day.
- *
- * Revision 1.9  1995/03/15  08:37:18  quinn
- * Fixed protocol bugs.
- *
- * Revision 1.8  1995/03/10  11:44:40  quinn
- * Fixed serious stack-bug in odr_cons_begin
- *
- * Revision 1.7  1995/03/08  12:12:13  quinn
- * Added better error checking.
- *
- * Revision 1.6  1995/02/14  11:54:33  quinn
- * Adjustments.
- *
- * Revision 1.5  1995/02/10  18:57:24  quinn
- * More in the way of error-checking.
- *
- * Revision 1.4  1995/02/10  15:55:28  quinn
- * Bug fixes, mostly.
- *
- * Revision 1.3  1995/02/09  15:51:46  quinn
- * Works better now.
- *
- * Revision 1.2  1995/02/07  17:52:59  quinn
- * A damn mess, but now things work, I think.
- *
- * Revision 1.1  1995/02/02  16:21:53  quinn
- * First kick.
- *
+ * $Id: ber_tag.c,v 1.23 2002-07-25 12:51:08 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include <stdio.h>
-#include <yaz/odr.h>
+#include "odr-priv.h"
 
 /* ber_tag
  * On encoding:
@@ -95,14 +24,14 @@
  */
 int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
 {
-    Odr_ber_tag *odr_ber_tag = &o->odr_ber_tag;
+    struct Odr_ber_tag *odr_ber_tag = &o->op->odr_ber_tag;
     int rd;
     char **pp = (char **)p;
 
     if (o->direction == ODR_DECODE)
     	*pp = 0;
     o->t_class = -1;
-    if (o->stackp < 0)
+    if (o->op->stackp < 0)
     {
     	odr_seek(o, ODR_S_SET, 0);
         o->top = 0;
@@ -111,63 +40,63 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
     }
     switch (o->direction)
     {
-    	case ODR_ENCODE:
-	        if (!*pp)
-	        {
-	    	    if (!opt)
-		        o->error = OREQUIRED;
-	    	    return 0;
-	        }
-	        if ((rd = ber_enctag(o, zclass, tag, *constructed)) < 0)
-    		    return -1;
-#ifdef ODR_DEBUG
-    	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", zclass, tag,
-	            	*constructed, o->stackp);
-#endif
-	        return 1;
-
-    	case ODR_DECODE:
-	        if (o->stackp > -1 && !odr_constructed_more(o))
-            {
-	    	    if (!opt)
-		            o->error = OREQUIRED;
-	    	    return 0;
-	        }
-	        if (odr_ber_tag->lclass < 0)
-	        {
-	    	    if ((odr_ber_tag->br = ber_dectag(o->bp, &odr_ber_tag->lclass,
-                                     &odr_ber_tag->ltag, &odr_ber_tag->lcons)) <= 0)
-                {
-                    o->error = OPROTO;
-		            return 0;
-                }
-#ifdef ODR_DEBUG
-		    fprintf(stderr,
-			    "\n[class=%d,tag=%d,cons=%d,stackp=%d]",
-			    odr_ber_tag->lclass, odr_ber_tag->ltag,
-			    odr_ber_tag->lcons, o->stackp);
-#endif
-	        }
-	        if (zclass == odr_ber_tag->lclass && tag == odr_ber_tag->ltag)
-	        {
-	    	    o->bp += odr_ber_tag->br;
-	    	    *constructed = odr_ber_tag->lcons;
-	    	    odr_ber_tag->lclass = -1;
-	    	    return 1;
-	        }
-	        else
-	        {
-	    	    if (!opt)
-		            o->error = OREQUIRED;
-	    	    return 0;
-	        }
-    	case ODR_PRINT:
-		    if (!*pp && !opt)
-		        o->error = OREQUIRED;
-		    return *pp != 0;
-    	default:
-            o->error = OOTHER;
+    case ODR_ENCODE:
+        if (!*pp)
+        {
+            if (!opt)
+                o->error = OREQUIRED;
             return 0;
+        }
+        if ((rd = ber_enctag(o, zclass, tag, *constructed)) < 0)
+            return -1;
+#ifdef ODR_DEBUG
+        fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", zclass, tag,
+                *constructed, o->stackp);
+#endif
+        return 1;
+        
+    case ODR_DECODE:
+        if (o->op->stackp > -1 && !odr_constructed_more(o))
+        {
+            if (!opt)
+                o->error = OREQUIRED;
+            return 0;
+        }
+        if (odr_ber_tag->lclass < 0)
+        {
+            if ((odr_ber_tag->br = ber_dectag(o->bp, &odr_ber_tag->lclass,
+                                              &odr_ber_tag->ltag, &odr_ber_tag->lcons)) <= 0)
+            {
+                o->error = OPROTO;
+                return 0;
+            }
+#ifdef ODR_DEBUG
+            fprintf(stderr,
+                    "\n[class=%d,tag=%d,cons=%d,stackp=%d]",
+                    odr_ber_tag->lclass, odr_ber_tag->ltag,
+                    odr_ber_tag->lcons, o->stackp);
+#endif
+        }
+        if (zclass == odr_ber_tag->lclass && tag == odr_ber_tag->ltag)
+        {
+            o->bp += odr_ber_tag->br;
+            *constructed = odr_ber_tag->lcons;
+            odr_ber_tag->lclass = -1;
+            return 1;
+        }
+        else
+        {
+            if (!opt)
+                o->error = OREQUIRED;
+            return 0;
+        }
+    case ODR_PRINT:
+        if (!*pp && !opt)
+            o->error = OREQUIRED;
+        return *pp != 0;
+    default:
+        o->error = OOTHER;
+        return 0;
     }
 }
 

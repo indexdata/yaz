@@ -1,102 +1,16 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: odr_seq.c,v $
- * Revision 1.27  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.26  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.25  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.24  1999/04/20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.23  1998/03/20 14:45:01  adam
- * Implemented odr_enum and odr_set_of.
- *
- * Revision 1.22  1998/02/11 11:53:34  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.21  1997/11/24 11:33:56  adam
- * Using function odr_nullval() instead of global ODR_NULLVAL when
- * appropriate.
- *
- * Revision 1.20  1997/09/29 07:17:31  adam
- * Added typecast to avoid warnings on MSVC.
- *
- * Revision 1.19  1997/06/23 10:31:11  adam
- * Added RVDM's SEQUENCE OF patch again!
- *
- * Revision 1.18  1997/05/14 06:53:58  adam
- * C++ support.
- *
- * Revision 1.17  1997/05/05 11:21:09  adam
- * In handling of SEQUENCE OF: Counter set to zero when SEQUENCE
- * OF isn't there at all.
- *
- * Revision 1.16  1995/09/29 17:12:26  quinn
- * Smallish
- *
- * Revision 1.15  1995/09/27  15:03:00  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.14  1995/08/15  11:16:39  quinn
- * Fixed pretty-printers.
- *
- * Revision 1.13  1995/05/22  14:56:57  quinn
- * Fixed problem in decoding empty sequence.
- *
- * Revision 1.12  1995/05/18  13:06:32  quinn
- * Smallish.
- *
- * Revision 1.11  1995/05/17  08:41:54  quinn
- * Small, hopefully insignificant change.
- *
- * Revision 1.10  1995/05/16  08:50:59  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.9  1995/03/17  10:17:57  quinn
- * Added memory management.
- *
- * Revision 1.8  1995/03/15  11:18:05  quinn
- * Fixed serious bug in odr_cons
- *
- * Revision 1.7  1995/03/08  12:12:30  quinn
- * Added better error checking.
- *
- * Revision 1.6  1995/02/10  15:55:29  quinn
- * Bug fixes, mostly.
- *
- * Revision 1.5  1995/02/09  15:51:49  quinn
- * Works better now.
- *
- * Revision 1.4  1995/02/07  17:53:00  quinn
- * A damn mess, but now things work, I think.
- *
- * Revision 1.3  1995/02/07  14:13:46  quinn
- * Bug fixes.
- *
- * Revision 1.2  1995/02/06  16:45:03  quinn
- * Small mods.
- *
- * Revision 1.1  1995/02/02  16:21:54  quinn
- * First kick.
- *
+ * $Id: odr_seq.c,v 1.28 2002-07-25 12:51:08 adam Exp $
  */
 
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <yaz/odr.h>
+#include "odr-priv.h"
 
 int odr_sequence_begin(ODR o, void *p, int size, const char *name)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.5 2001-09-24 21:51:55 adam Exp $
+ * $Id: odr.h,v 1.6 2002-07-25 12:51:08 adam Exp $
  */
 
 #ifndef ODR_H
@@ -121,13 +121,6 @@ typedef struct odr_constack
 #define ODR_S_CUR     1
 #define ODR_S_END     2
 
-typedef struct {      /* used to be statics in ber_tag... */
-    int lclass;
-    int ltag;
-    int br;
-    int lcons;
-} Odr_ber_tag;
-
 typedef struct odr
 {
     int direction;       /* the direction of this stream */
@@ -155,12 +148,7 @@ typedef struct odr
 
     NMEM mem;            /* memory handle for decoding (primarily) */
 
-    /* stack for constructed types */
-#define ODR_MAX_STACK 50
-    int stackp;          /* top of stack (-1 == initial state) */
-    odr_constack stack[ODR_MAX_STACK];
-
-    Odr_ber_tag odr_ber_tag;
+    struct Odr_private *op;
 } *ODR;
 
 typedef int (*Odr_fun)(ODR, char **, int, const char *);
@@ -239,42 +227,6 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 #define ODR_MASK_GET(mask, num)  ( ((num) >> 3 <= (mask)->top) ? \
     ((mask)->bits[(num) >> 3] & (0X80 >> ((num) & 0X07)) ? 1 : 0) : 0)
 
-/* Private macro.
- * write a single character at the current position - grow buffer if
- * necessary.
- * (no, we're not usually this anal about our macros, but this baby is
- *  next to unreadable without some indentation  :)
- */
-#define odr_putc(o, c) \
-( \
-    ( \
-        (o)->pos < (o)->size ? \
-        ( \
-            (o)->buf[(o)->pos++] = (c), \
-            0 \
-        ) : \
-        ( \
-            odr_grow_block((o), 1) == 0 ? \
-            ( \
-                (o)->buf[(o)->pos++] = (c), \
-                0 \
-            ) : \
-            ( \
-                (o)->error = OSPACE, \
-                -1 \
-            ) \
-        ) \
-    ) == 0 ? \
-    ( \
-        (o)->pos > (o)->top ? \
-        ( \
-            (o)->top = (o)->pos, \
-            0 \
-        ) : \
-        0 \
-    ) : \
-        -1 \
-) \
 
 #define odr_tell(o) ((o)->pos)
 #define odr_offset(o) ((o)->bp - (o)->buf)
@@ -320,6 +272,7 @@ YAZ_EXPORT int odr_oid(ODR o, Odr_oid **p, int opt, const char *name);
 YAZ_EXPORT int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
 			  const char *name);
 YAZ_EXPORT int odr_cstring(ODR o, char **p, int opt, const char *name);
+YAZ_EXPORT int odr_iconv_string(ODR o, char **p, int opt, const char *name);
 YAZ_EXPORT int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num,
 			       const char *name);
 YAZ_EXPORT int odr_set_of(ODR o, Odr_fun type, void *p, int *num,
@@ -371,6 +324,9 @@ YAZ_EXPORT int odr_graphicstring(ODR o, char **p, int opt,
 				 const char *name);
 YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt,
 				   const char *name);
+
+YAZ_EXPORT int odr_set_charset(ODR o, const char *to, const char *from);
+
 YAZ_END_CDECL
 
 #include <yaz/xmalloc.h>
