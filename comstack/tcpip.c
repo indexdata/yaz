@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.55 2003-02-21 12:08:57 adam Exp $
+ * $Id: tcpip.c,v 1.56 2003-03-11 11:05:19 adam Exp $
  */
 
 #include <stdio.h>
@@ -225,11 +225,12 @@ COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
 }
 #endif
 
-int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add)
+int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
+                       int default_port)
 {
     struct hostent *hp;
     char *p, buf[512];
-    short int port = 210;
+    short int port = default_port;
     unsigned tmpadd;
 
     if (!tcpip_init ())
@@ -261,8 +262,12 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add)
 void *tcpip_straddr(COMSTACK h, const char *str)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
+    int port = 210;
 
-    if (!tcpip_strtoaddr_ex (str, &sp->addr))
+    if (h->protocol == PROTO_HTTP)
+        port = 80;
+
+    if (!tcpip_strtoaddr_ex (str, &sp->addr, port))
 	return 0;
     return &sp->addr;
 }
@@ -271,7 +276,7 @@ struct sockaddr_in *tcpip_strtoaddr(const char *str)
 {
     static struct sockaddr_in add;
     
-    if (!tcpip_strtoaddr_ex (str, &add))
+    if (!tcpip_strtoaddr_ex (str, &add, 210))
 	return 0;
     return &add;
 }
@@ -1053,10 +1058,18 @@ char *tcpip_addrstr(COMSTACK h)
 	r = (char*) host->h_name;
     else
 	r = inet_ntoa(addr.sin_addr);
-    sprintf(buf, "tcp:%s", r);
+    if (h->protocol == PROTO_HTTP)
+        sprintf(buf, "http:%s", r);
+    else
+        sprintf(buf, "tcp:%s", r);
 #if HAVE_OPENSSL_SSL_H
     if (sp->ctx)
-	sprintf(buf, "ssl:%s", r);
+    {
+        if (h->protocol == PROTO_HTTP)
+            sprintf(buf, "https:%s", r);
+        else
+            sprintf(buf, "ssl:%s", r);
+    }
 #endif
     return buf;
 }

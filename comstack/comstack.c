@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.12 2003-02-21 12:08:57 adam Exp $
+ * $Id: comstack.c,v 1.13 2003-03-11 11:05:19 adam Exp $
  */
 
 #include <string.h>
@@ -34,6 +34,24 @@ const char *cs_errmsg(int n)
 const char *cs_strerror(COMSTACK h)
 {
     return cs_errmsg(h->cerrno);
+}
+
+void cs_get_host_args(const char *type_and_host, const char **args)
+{
+    
+    *args = "";
+    if (*type_and_host && strncmp(type_and_host, "unix:", 5))
+    {
+        const char *cp;
+        cp = strstr(type_and_host, "://");
+        if (cp)
+            cp = cp+3;
+        else
+            cp = type_and_host;
+        cp = strchr(cp, '/');
+        if (cp)
+            *args = cp+1;
+    }
 }
 
 COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)

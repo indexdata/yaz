@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.9 2003-03-03 19:57:35 adam Exp $
+ * $Id: comstack.h,v 1.10 2003-03-11 11:05:19 adam Exp $
  */
 
 #ifndef COMSTACK_H
@@ -147,6 +147,7 @@ YAZ_EXPORT const char *cs_strerror(COMSTACK h);
 YAZ_EXPORT const char *cs_errmsg(int n);
 YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host, 
                                    int blocking, void **vp);
+YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
 YAZ_EXPORT int cs_complete_auto(const unsigned char *buf, int len);
                                           
 /*
