@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: yaz-util.h,v 1.5 2002-10-04 19:06:36 adam Exp $
+ * $Id: yaz-util.h,v 1.6 2002-12-10 10:59:28 adam Exp $
  */
 
 #ifndef YAZ_UTIL_H
@@ -34,6 +34,8 @@ YAZ_EXPORT size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
 YAZ_EXPORT int yaz_iconv_error (yaz_iconv_t cd);
 
 YAZ_EXPORT int yaz_iconv_close (yaz_iconv_t cd);
+
+YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
 
 YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
 

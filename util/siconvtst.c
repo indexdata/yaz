@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconvtst.c,v 1.5 2002-12-10 10:23:21 adam Exp $
+ * $Id: siconvtst.c,v 1.6 2002-12-10 10:59:28 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -111,13 +111,14 @@ void convert (FILE *inf, yaz_iconv_t cd)
 int main (int argc, char **argv)
 {
     int ret;
+    int verbose = 0;
     char *from = 0;
     char *to = 0;
     char *arg;
     yaz_iconv_t cd;
     FILE *inf = stdin;
 
-    while ((ret = options ("f:t:", argv, argc, &arg)) != -2)
+    while ((ret = options ("vf:t:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -135,9 +136,12 @@ int main (int argc, char **argv)
         case 't':
             to = arg;
             break;
+        case 'v':
+            verbose++;
+            break;
         default:
             fprintf (stderr, "yaziconv: Usage\n"
-                     "siconv -f encoding -t encoding [file]\n");
+                     "siconv -f encoding -t encoding [-v] [file]\n");
             exit(1);
         }
     }
@@ -157,7 +161,14 @@ int main (int argc, char **argv)
         fprintf (stderr, "yaziconv: unsupported encoding\n");
         exit (5);
     }
-
+    else
+    {
+        if (verbose)
+        {
+            fprintf (stderr, "yaziconv: using %s\n",
+                     yaz_iconv_isbuiltin(cd) ? "YAZ" : "iconv");
+        }
+    }
     convert (inf, cd);
     yaz_iconv_close (cd);
     return 0;

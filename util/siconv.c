@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.6 2002-09-25 12:37:08 adam Exp $
+ * $Id: siconv.c,v 1.7 2002-12-10 10:59:28 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -309,6 +309,11 @@ static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
     return 0;
 }
 
+int yaz_iconv_isbuiltin(yaz_iconv_t cd)
+{
+    return cd->read_handle && cd->write_handle;
+}
+
 yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
 {
     yaz_iconv_t cd = (yaz_iconv_t) xmalloc (sizeof(*cd));
@@ -318,27 +323,33 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
     cd->init_handle = 0;
     cd->my_errno = YAZ_ICONV_UNKNOWN;
 
-    if (!yaz_matchstr(fromcode, "UTF8"))
+    /* a useful hack: if fromcode has leading @,
+       the library not use YAZ's own conversions .. */
+    if (fromcode[0] == '@')
+        fromcode++;
+    else
     {
-        cd->read_handle = yaz_read_UTF8;
-        cd->init_handle = yaz_init_UTF8;
+        if (!yaz_matchstr(fromcode, "UTF8"))
+        {
+            cd->read_handle = yaz_read_UTF8;
+            cd->init_handle = yaz_init_UTF8;
+        }
+        else if (!yaz_matchstr(fromcode, "ISO88591"))
+            cd->read_handle = yaz_read_ISO8859_1;
+        else if (!yaz_matchstr(fromcode, "UCS4"))
+            cd->read_handle = yaz_read_UCS4;
+        else if (!yaz_matchstr(fromcode, "UCS4LE"))
+            cd->read_handle = yaz_read_UCS4LE;
+        
+        if (!yaz_matchstr(tocode, "UTF8"))
+            cd->write_handle = yaz_write_UTF8;
+        else if (!yaz_matchstr(tocode, "ISO88591"))
+            cd->write_handle = yaz_write_ISO8859_1;
+        else if (!yaz_matchstr (tocode, "UCS4"))
+            cd->write_handle = yaz_write_UCS4;
+        else if (!yaz_matchstr(tocode, "UCS4LE"))
+            cd->write_handle = yaz_write_UCS4LE;
     }
-    else if (!yaz_matchstr(fromcode, "ISO88591"))
-        cd->read_handle = yaz_read_ISO8859_1;
-    else if (!yaz_matchstr(fromcode, "UCS4"))
-        cd->read_handle = yaz_read_UCS4;
-    else if (!yaz_matchstr(fromcode, "UCS4LE"))
-        cd->read_handle = yaz_read_UCS4LE;
-    
-    if (!yaz_matchstr(tocode, "UTF8"))
-        cd->write_handle = yaz_write_UTF8;
-    else if (!yaz_matchstr(tocode, "ISO88591"))
-        cd->write_handle = yaz_write_ISO8859_1;
-    else if (!yaz_matchstr (tocode, "UCS4"))
-        cd->write_handle = yaz_write_UCS4;
-    else if (!yaz_matchstr(tocode, "UCS4LE"))
-        cd->write_handle = yaz_write_UCS4LE;
-
 #if HAVE_ICONV_H
     cd->iconv_cd = 0;
     if (!cd->read_handle || !cd->write_handle)
