@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.270 2005-01-17 13:08:53 adam Exp $
+ * $Id: client.c,v 1.271 2005-01-19 08:26:44 adam Exp $
  */
 
 #include <stdio.h>
@@ -10,6 +10,9 @@
 #include <assert.h>
 #include <time.h>
 #include <ctype.h>
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif
@@ -36,6 +39,7 @@
 #endif
 
 #ifdef WIN32
+#include <sys/stat.h>
 #include <io.h>
 #include <windows.h>
 #define S_ISREG(x) (x & _S_IFREG)
