@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.15 2004-01-07 21:02:42 adam Exp $
+ * $Id: seshigh.c,v 1.16 2004-01-09 18:10:31 adam Exp $
  */
 
 /*
@@ -564,12 +564,8 @@ static void srw_bend_search(association *assoc, request *req,
         {
             srw_error = 3;  /* assume Authentication error */
 
-            srw_res->num_diagnostics = 1;
-            srw_res->diagnostics = (Z_SRW_diagnostic *)
-                odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
-            srw_res->diagnostics[0].code = 
-                odr_intdup(assoc->encode, srw_error);
-            srw_res->diagnostics[0].details = 0;
+	    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+				   &srw_res->num_diagnostics, 1, 0);
             return;
         }
     }
@@ -787,10 +783,13 @@ static void process_http_request(association *assoc, request *req)
     Z_HTTP_Response *hres;
     int keepalive = 1;
     char *stylesheet = 0;
+    Z_SRW_diagnostic *diagnostic = 0;
+    int num_diagnostic = 0;
 
     r = yaz_srw_decode(hreq, &sr, &soap_package, assoc->decode, &charset);
     if (r == 2)  /* not taken */
-	r = yaz_sru_decode(hreq, &sr, &soap_package, assoc->decode, &charset);
+	r = yaz_sru_decode(hreq, &sr, &soap_package, assoc->decode, &charset,
+			   &diagnostic, &num_diagnostic);
     if (r == 0)  /* decode SRW/SRU OK .. */
     {
 	int http_code = 200;
@@ -800,8 +799,16 @@ static void process_http_request(association *assoc, request *req)
 		yaz_srw_get(assoc->encode, Z_SRW_searchRetrieve_response);
 
 	    stylesheet = sr->u.request->stylesheet;
-	    srw_bend_search(assoc, req, sr->u.request, res->u.response, 
-			    &http_code);
+	    if (num_diagnostic)
+	    {
+		res->u.response->diagnostics = diagnostic;
+		res->u.response->num_diagnostics = num_diagnostic;
+	    }
+	    else
+	    {
+		srw_bend_search(assoc, req, sr->u.request, res->u.response, 
+				&http_code);
+	    }
 	    if (http_code == 200)
 		soap_package->u.generic->p = res;
 	}
@@ -809,8 +816,29 @@ static void process_http_request(association *assoc, request *req)
 	{
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_explain_response);
 	    stylesheet = sr->u.explain_request->stylesheet;
-            srw_bend_explain(assoc, req, sr->u.explain_request,
+	    if (num_diagnostic)
+	    {	
+		res->u.explain_response->diagnostics = diagnostic;
+		res->u.explain_response->num_diagnostics = num_diagnostic;
+	    }
+	    srw_bend_explain(assoc, req, sr->u.explain_request,
 			     res->u.explain_response, &http_code);
+	    if (http_code == 200)
+		soap_package->u.generic->p = res;
+	}
+	else if (sr->which == Z_SRW_scan_request)
+	{
+            Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_scan_response);
+	    stylesheet = sr->u.scan_request->stylesheet;
+	    if (num_diagnostic)
+	    {	
+		res->u.scan_response->diagnostics = diagnostic;
+		res->u.scan_response->num_diagnostics = num_diagnostic;
+	    }
+	    yaz_add_srw_diagnostic(o, 
+				   &res->u.scan_response->diagnostics,
+				   &res->u.scan_response->num_diagnostics,
+				   4, "scan");
 	    if (http_code == 200)
 		soap_package->u.generic->p = res;
 	}
@@ -1274,7 +1302,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.15 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.16 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
