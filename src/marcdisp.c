@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.14 2005-02-02 23:07:56 adam Exp $
+ * $Id: marcdisp.c,v 1.15 2005-02-02 23:25:08 adam Exp $
  */
 
 /**
@@ -293,16 +293,23 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 		    entry_p0, data_length, data_offset);
 	}
         
-        if (indicator_length < 4 && indicator_length > 0)
+        if (memcmp (tag, "00", 2))
+            identifier_flag = 1;  /* if not 00X assume subfields */
+        else if (indicator_length < 4 && indicator_length > 0)
         {
+	    /* Danmarc 00X have subfields */
 	    if (buf[i + indicator_length] == ISO2709_IDFS)
 		identifier_flag = 1;
 	    else if (buf[i + indicator_length + 1] == ISO2709_IDFS)
 		identifier_flag = 2;
         }
-        else if (memcmp (tag, "00", 2))
-            identifier_flag = 1;
-        
+
+	if (mt->debug)
+	{
+	    wrbuf_printf(wr, "<!-- identifier_flag = %d -->\n",
+			 identifier_flag);
+	} 
+       
         switch(mt->xml)
         {
         case YAZ_MARC_LINE:
