@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.3  2000-01-04 17:46:17  ian
+ * Revision 1.4  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.3  2000/01/04 17:46:17  ian
  * Added function to count occurences of a tag spec in a data1 tree.
  *
  * Revision 1.2  1999/12/21 14:16:19  ian
@@ -240,9 +243,8 @@
 
 #define d1_isspace(c) strchr(" \r\n\t\f", c)
 #define d1_isdigit(c) ((c) <= '9' && (c) >= '0')
-#ifdef __cplusplus
-extern "C" {
-#endif
+
+YAZ_BEGIN_CDECL
 
 #define data1_matchstr(s1, s2) yaz_matchstr(s1, s2)
 
@@ -574,8 +576,6 @@ YAZ_EXPORT char *data1_getNodeValue(data1_node* node, char* pTagPath);
 YAZ_EXPORT data1_node *data1_LookupNode(data1_node* node, char* pTagPath);
 YAZ_EXPORT int data1_CountOccurences(data1_node* node, char* pTagPath);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

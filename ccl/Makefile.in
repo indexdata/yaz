@@ -1,100 +1,331 @@
-# Makefile for Email gateway CCL
-# Europagate, 1995
-#
-# $Log: Makefile.in,v $
-# Revision 1.5  1999-06-09 09:43:31  adam
-# Header files moved to include (used to be z39.50).
-#
-# Revision 1.4  1999/03/31 11:15:37  adam
-# Fixed memory leaks in ccl_find_str and ccl_qual_rm.
-#
-# Revision 1.3  1998/10/28 15:10:03  adam
-# Added --with-yc option to configure. For the data1_node in data1.h:
-# decreased size of localdata and removed member "line" which wasn't useful.
-#
-# Revision 1.2  1998/08/25 16:19:39  adam
-# Minor changes to Makefile(s).
-#
-# Revision 1.1  1998/08/21 14:13:26  adam
-# Added GNU Configure script to build Makefiles.
-#
-# Revision 1.8  1997/09/17 12:10:28  adam
-# YAZ version 1.4.
-#
-# Revision 1.7  1997/04/30 08:52:05  quinn
-# Null
-#
-# Revision 1.6  1996/10/11  15:00:24  adam
-# CCL parser from Europagate Email gateway 1.0.
-#
-# Revision 1.12  1996/05/22  08:37:13  adam
-# Removed CFLAGS definition.
-#
-# Revision 1.11  1995/11/10 10:19:10  adam
-# cclsh now build on 'make all'.
-#
-# Revision 1.10  1995/05/11  14:03:56  adam
-# Changes in the reading of qualifier(s). New function: ccl_qual_fitem.
-# New variable ccl_case_sensitive, which controls whether reserved
-# words and field names are case sensitive or not.
-#
-# Revision 1.9  1995/04/17  09:31:34  adam
-# Improved handling of qualifiers. Aliases or reserved words.
-#
-# Revision 1.8  1995/04/10  10:22:35  quinn
-# Added ccl directory.
-#
-# Revision 1.7  1995/03/27  12:49:03  adam
-# Removed CFLAGS def.
-#
-# Revision 1.6  1995/02/23  08:31:58  adam
-# Changed header.
-#
-# Revision 1.4  1995/02/22  08:50:28  adam
-# Definition of CPP changed.
-#
-# Revision 1.3  1995/02/14  10:25:55  adam
-# The constructions 'qualifier rel term ...' implemented.
-#
-# Revision 1.2  1995/02/13  15:15:06  adam
-# Added handling of qualifiers. Not finished yet.
-#
-# Revision 1.1  1995/02/13  12:35:20  adam
-# First version of CCL. Qualifiers aren't handled yet.
-#
-SHELL=/bin/sh
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-CC=@CC@
-CPP=@CPP@
-RANLIB=@RANLIB@
-CDEFS=@DEFS@
-LIBS=@LIBS@
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-INCLUDE=-I../include
-PROG=cclsh
-LIB=../lib/libccl.a
-PO=cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o cclqfile.o cclstr.o
-DEFS=$(INCLUDE) $(CDEFS)
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
 
-all: $(LIB)
 
-$(PROG): $(PROG).o $(LIB)
-	$(CC) $(CFLAGS) -o $(PROG) $(PROG).o $(LIB) $(LIBS)
+SHELL = @SHELL@
 
-$(LIB): $(PO)
-	rm -f $(LIB)
-	ar qc $(LIB) $(PO)
-	$(RANLIB) $(LIB)
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
 
-.c.o:
-	$(CC) -c $(DEFS) $(CFLAGS) $<
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
 
-clean:
-	rm -f *.log *.[oa] $(PROG) core mon.out gmon.out errlist *~
+DESTDIR =
 
-depend:
-	sed '/^#Depend/q' <Makefile >Makefile.tmp
-	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
-	mv -f Makefile.tmp Makefile
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
 
-#Depend --- DOT NOT DELETE THIS LINE
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+ASNMODULE = @ASNMODULE@
+CC = @CC@
+CPP = @CPP@
+ILLLIB = @ILLLIB@
+ILLMODULE = @ILLMODULE@
+MAKEINFO = @MAKEINFO@
+PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
+SUBDIRS_VAR = @SUBDIRS_VAR@
+VERSION = @VERSION@
+
+noinst_LIBRARIES = libccl.a
+
+noinst_PROGRAMS = cclsh
+
+INCLUDES = -I../include
+
+libccl_a_SOURCES = cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c   cclqfile.c cclstr.c
+
+cclsh_SOURCES = cclsh.c
+cclsh_LDADD = libccl.a
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = ../include/yaz/config.h
+CONFIG_CLEAN_FILES = 
+LIBRARIES =  $(noinst_LIBRARIES)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I../include/yaz
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+libccl_a_LIBADD = 
+libccl_a_OBJECTS =  cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o \
+cclqfile.o cclstr.o
+AR = ar
+PROGRAMS =  $(noinst_PROGRAMS)
+
+cclsh_OBJECTS =  cclsh.o
+cclsh_DEPENDENCIES =  libccl.a
+cclsh_LDFLAGS = 
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  README Makefile.am Makefile.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = gtar
+GZIP_ENV = --best
+DEP_FILES =  .deps/cclerrms.P .deps/cclfind.P .deps/cclptree.P \
+.deps/cclqfile.P .deps/cclqual.P .deps/cclsh.P .deps/cclstr.P \
+.deps/ccltoken.P
+SOURCES = $(libccl_a_SOURCES) $(cclsh_SOURCES)
+OBJECTS = $(libccl_a_OBJECTS) $(cclsh_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu ccl/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+mostlyclean-noinstLIBRARIES:
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+
+distclean-noinstLIBRARIES:
+
+maintainer-clean-noinstLIBRARIES:
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+libccl.a: $(libccl_a_OBJECTS) $(libccl_a_DEPENDENCIES)
+	-rm -f libccl.a
+	$(AR) cru libccl.a $(libccl_a_OBJECTS) $(libccl_a_LIBADD)
+	$(RANLIB) libccl.a
+
+mostlyclean-noinstPROGRAMS:
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+
+distclean-noinstPROGRAMS:
+
+maintainer-clean-noinstPROGRAMS:
+
+cclsh: $(cclsh_OBJECTS) $(cclsh_DEPENDENCIES)
+	@rm -f cclsh
+	$(LINK) $(cclsh_LDFLAGS) $(cclsh_OBJECTS) $(cclsh_LDADD) $(LIBS)
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = ccl
+
+distdir: $(DISTFILES)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(top_distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu ccl/Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+
+
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
+		mostlyclean-noinstPROGRAMS mostlyclean-tags \
+		mostlyclean-depend mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-noinstLIBRARIES clean-compile clean-noinstPROGRAMS \
+		clean-tags clean-depend clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-noinstLIBRARIES distclean-compile \
+		distclean-noinstPROGRAMS distclean-tags \
+		distclean-depend distclean-generic clean-am
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
+		maintainer-clean-compile \
+		maintainer-clean-noinstPROGRAMS maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile mostlyclean-noinstPROGRAMS \
+distclean-noinstPROGRAMS clean-noinstPROGRAMS \
+maintainer-clean-noinstPROGRAMS tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir mostlyclean-depend \
+distclean-depend clean-depend maintainer-clean-depend info-am info \
+dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

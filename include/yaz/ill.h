@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: ill.h,v $
- * Revision 1.3  2000-01-31 13:15:21  adam
+ * Revision 1.4  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.3  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -21,9 +24,7 @@
 #include <yaz/ill-core.h>
 #include <yaz/item-req.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 struct ill_get_ctl {
     ODR odr;
@@ -37,8 +38,6 @@ YAZ_EXPORT ILL_ItemRequest *ill_get_ItemRequest (
 YAZ_EXPORT ILL_Request *ill_get_ILLRequest (
     struct ill_get_ctl *gs, const char *name, const char *sub);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

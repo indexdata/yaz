@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: marcdisp.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.8  1997/09/24 13:35:45  adam
@@ -59,9 +62,7 @@
 
 #include <yaz/yconfig.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 YAZ_EXPORT int marc_display (const char *buf, FILE *outf);
 YAZ_EXPORT int marc_display_ex (const char *buf, FILE *outf, int debug);
@@ -70,8 +71,6 @@ YAZ_EXPORT int marc_display_ex (const char *buf, FILE *outf, int debug);
 #define ISO2709_FS 036
 #define ISO2709_IDFS 037
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

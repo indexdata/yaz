@@ -1,8 +1,10 @@
 dnl YAZ Toolkit
-dnl (c) Index Data 1994-1999
+dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.15 2000-02-25 11:40:09 adam Exp $
+dnl $Id: configure.in,v 1.16 2000-02-28 11:20:05 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
+AM_INIT_AUTOMAKE(yaz, 1.6)
+AM_CONFIG_HEADER(include/yaz/config.h)
 dnl
 dnl ------ Checking programs
 AC_PROG_CC
@@ -10,10 +12,6 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 dnl 
-dnl ----- Build root
-AC_SUBST(build_root)
-AC_ARG_WITH(build-root, [  --with-buildroot        RPM Build root],[build_root=$withval],[build_root=""])
-dnl
 dnl ----- YC: The Yaz Compiler
 AC_SUBST(ASNMODULE)
 AC_SUBST(ILLMODULE)
@@ -22,12 +20,14 @@ AC_ARG_ENABLE(yc,[  --enable-yc             compile using YAZ' ASN.1 Compiler], 
 if test "$enable_yc" = "yes"; then
 	ASNMODULE="z39.50"
 	ILLMODULE="ill"
-	ILLLIB=libill.a
+	ILLLIB=../ill/libill.a
+	ASN_MAKEFILES="z39.50/Makefile ill/Makefile"
 	cp -f include/yaz/z-proto.h include/yaz/proto.h
 else
 	ILLMODULE=""
 	ASNMODULE=asn
 	ILLLIB=""
+	ASN_MAKEFILES="asn/Makefile"
 	cp -f include/yaz/prt-proto.h include/yaz/proto.h
 fi
 dnl
@@ -92,5 +92,9 @@ if test "$enable_threads" = "yes"; then
 	AC_DEFINE(_REENTRANT)
 fi
 dnl
+SUBDIRS_VAR="util odr $ASNMODULE $ILLMODULE zutil comstack ccl tab retrieval server include lib client ztest"
+AC_SUBST(SUBDIRS_VAR)
+dnl
 dnl ------ Makefiles
-AC_OUTPUT(Makefile util/Makefile odr/Makefile z39.50/Makefile asn/Makefile zutil/Makefile comstack/Makefile client/Makefile server/Makefile ztest/Makefile retrieval/Makefile ccl/Makefile lib/Makefile rfc1006/Makefile ill/Makefile)
+dnl
+AC_OUTPUT(Makefile util/Makefile odr/Makefile z39.50/Makefile asn/Makefile ill/Makefile zutil/Makefile comstack/Makefile ccl/Makefile tab/Makefile retrieval/Makefile server/Makefile include/Makefile include/yaz/Makefile lib/Makefile client/Makefile ztest/Makefile doc/Makefile)

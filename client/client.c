@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.94  2000-01-31 13:15:21  adam
+ * Revision 1.95  2000-02-28 11:20:05  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.94  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -756,19 +759,21 @@ static void display_record(Z_DatabaseRecord *p)
 	}
     }
     if (ent && ent->value == VAL_SOIF)
-        print_record(r->u.octet_aligned->buf, r->u.octet_aligned->len);
+        print_record((const unsigned char *) r->u.octet_aligned->buf, r->u.octet_aligned->len);
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
     {
         const char *octet_buf = (char*)p->u.octet_aligned->buf;
 	if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML ||
             ent->value == VAL_HTML)
-            print_record(octet_buf, p->u.octet_aligned->len);
+            print_record((const unsigned char *) octet_buf,
+                         p->u.octet_aligned->len);
 	else
         {
             if (marc_display (octet_buf, NULL) <= 0)
             {
                 printf ("ISO2709 decoding failed, dumping record as is:\n");
-                print_record(octet_buf, p->u.octet_aligned->len);
+                print_record((const unsigned char*) octet_buf,
+                              p->u.octet_aligned->len);
             }
         }
         if (marcdump)

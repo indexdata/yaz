@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1998-1999, Index Data
+ * Copyright (c) 1998-2000, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: z-proto.h,v $
- * Revision 1.2  1999-12-16 23:36:19  adam
+ * Revision 1.3  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.2  1999/12/16 23:36:19  adam
  * Implemented ILL protocol. Minor updates ASN.1 compiler.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -55,9 +58,7 @@
 #include <yaz/z-date.h>
 #include <yaz/z-univ.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 #define Z_PRES_SUCCESS   Z_PresentStatus_success
 #define Z_PRES_PARTIAL_1 Z_PresentStatus_partial_1
@@ -115,9 +116,7 @@ typedef struct Z_IOItemOrder Z_ItemOrder;
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
 YAZ_EXPORT Z_Close *zget_Close (ODR o);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #include <yaz/prt-ext.h>
 

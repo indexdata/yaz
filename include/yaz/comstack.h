@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,129 +23,45 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: comstack.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.22  1998/06/22 11:32:37  adam
- * Added 'conditional cs_listen' feature.
- *
- * Revision 1.21  1998/05/20 09:52:39  adam
- * Removed 'dead' definition.
- *
- * Revision 1.20  1998/05/18 13:06:55  adam
- * Changed the way attribute sets are handled by the retriaval module.
- * Extended Explain conversion / schema.
- * Modified server and client to work with ASN.1 compiled protocol handlers.
- *
- * Revision 1.19  1997/09/29 07:16:14  adam
- * Array cs_errlist no longer global.
- *
- * Revision 1.18  1997/09/17 12:10:31  adam
- * YAZ version 1.4.
- *
- * Revision 1.17  1997/09/01 08:49:47  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.16  1997/05/14 06:53:37  adam
- * C++ support.
- *
- * Revision 1.15  1996/07/06 19:58:32  quinn
- * System headerfiles gathered in yconfig
- *
- * Revision 1.14  1996/02/10  12:23:41  quinn
- * Enable inetd operations fro TCP/IP stack
- *
- * Revision 1.13  1995/11/01  13:54:33  quinn
- * Minor adjustments
- *
- * Revision 1.12  1995/10/30  12:41:27  quinn
- * Added hostname lookup for server.
- *
- * Revision 1.11  1995/09/29  17:12:01  quinn
- * Smallish
- *
- * Revision 1.10  1995/09/29  17:01:48  quinn
- * More Windows work
- *
- * Revision 1.9  1995/09/28  10:12:36  quinn
- * Windows-support changes
- *
- * Revision 1.8  1995/09/27  15:02:46  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.7  1995/06/19  12:38:24  quinn
- * Reorganized include-files. Added small features.
- *
- * Revision 1.6  1995/05/30  10:54:51  quinn
- * Added some backwards compatibility to the comstack (CS_SR->PROTO_SR)
- *
- * Revision 1.5  1995/05/29  08:11:31  quinn
- * Moved oid from odr/asn to util.
- *
- * Revision 1.4  1995/05/16  08:50:29  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.3  1995/04/20  15:12:44  quinn
- * Cosmetic
- *
- * Revision 1.2  1995/04/17  11:28:17  quinn
- * Smallish
- *
- * Revision 1.1  1995/03/30  09:39:40  quinn
- * Moved .h files to include directory
- *
- * Revision 1.11  1995/03/27  08:36:05  quinn
- * Some work on nonblocking operation in xmosi.c and rfct.c.
- * Added protocol parameter to cs_create()
- *
- * Revision 1.10  1995/03/20  09:47:12  quinn
- * Added server-side support to xmosi.c
- * Fixed possible problems in rfct
- * Other little mods
- *
- * Revision 1.9  1995/03/15  15:36:27  quinn
- * Mods to support nonblocking I/O
- *
- * Revision 1.8  1995/03/14  17:00:07  quinn
- * Bug-fixes - added tracing info to tcpip.c
- *
- * Revision 1.7  1995/03/14  10:28:35  quinn
- * Adding server-side support to tcpip.c and fixing bugs in nonblocking I/O
- *
- * Revision 1.6  1995/03/07  16:29:45  quinn
- * Various fixes.
- *
- * Revision 1.5  1995/03/07  10:39:31  quinn
- * Added cs_fileno
- *
- * Revision 1.4  1995/03/06  16:49:29  adam
- * COMSTACK type inspection possible with cs_type.
- *
- * Revision 1.3  1995/02/14  11:54:48  quinn
- * Beginning to add full CCL.
- *
- * Revision 1.2  1995/02/10  18:58:10  quinn
- * Fixed tcpip_get (formerly tcpip_read).
- * Turned tst (cli) into a proper, event-driven thing.
- *
- * Revision 1.1  1995/02/09  15:51:51  quinn
- * Works better now.
- *
+ * $Id: comstack.h,v 1.2 2000-02-28 11:20:06 adam Exp $
  */
 
 #ifndef COMSTACK_H
 #define COMSTACK_H
 
-#define YNETINCLUDE
 #include <yaz/yconfig.h>
+
+#ifndef _VMS_
+
+# ifdef WIN32
+
+#  include <winsock.h>
+
+# else /* #ifdef WIN32 */
+#  include <sys/types.h>
+#  include <sys/time.h>
+#  include <sys/wait.h>
+
+#  include <netinet/in.h>
+#  include <sys/socket.h>
+#  include <netdb.h>
+#  include <arpa/inet.h>
+
+#  ifdef _AIX
+#   include <sys/select.h>
+#  endif
+
+#  ifndef O_BINARY
+#   define O_BINARY 0
+#  endif
+
+# endif
+#endif /* ifndef _VMS_ */
+
 #include <yaz/oid.h>
 #include <yaz/xmalloc.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 #define COMSTACK_DEFAULT_TIMEOUT -1  /* not used yet */
 
@@ -234,8 +150,6 @@ YAZ_EXPORT const char *cs_errmsg(int n);
 #define CS_SR     PROTO_SR
 #define CS_Z3950  PROTO_Z3950
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

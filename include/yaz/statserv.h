@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.17  1999/07/06 12:17:15  adam
@@ -98,9 +101,7 @@
 #include <yaz/odr.h>
 #include <yaz/oid.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
     
 typedef struct statserv_options_block
 {
@@ -140,8 +141,6 @@ void statserv_setcontrol(statserv_options_block *block);
 
 int check_ip_tcpd(void *cd, const char *addr, int len, int type);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

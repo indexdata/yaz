@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmalloc.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.6  1999/07/13 13:24:53  adam
@@ -85,9 +88,7 @@
 
 #include <yaz/yconfig.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 #define xrealloc(o, x) xrealloc_f(o, x, __FILE__, __LINE__)
 #define xmalloc(x) xmalloc_f(x, __FILE__, __LINE__)
@@ -104,8 +105,6 @@ YAZ_EXPORT char *xstrdup_f (const char *p, const char *file, int line);
 YAZ_EXPORT void xfree_f (void *p, const char *file, int line);
 YAZ_EXPORT void xmalloc_trav_f(const char *s, const char *file, int line);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

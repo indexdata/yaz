@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.3  2000-01-12 14:36:07  adam
+ * Revision 1.4  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.3  2000/01/12 14:36:07  adam
  * Added printing stream (ODR) for backend functions.
  *
  * Revision 1.2  1999/12/16 23:36:19  adam
@@ -84,9 +87,7 @@
 #include <yaz/proto.h>
 #include <yaz/statserv.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
     
 typedef struct request *bend_request;
 typedef struct association *bend_association;
@@ -324,8 +325,6 @@ YAZ_EXPORT int bend_backend_respond (bend_association a, bend_request req);
 YAZ_EXPORT void bend_request_setdata(bend_request r, void *p);
 YAZ_EXPORT void *bend_request_getdata(bend_request r);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.15  1999/08/27 09:40:32  adam
@@ -94,9 +97,7 @@
 #include <yaz/yconfig.h>
 #include <yaz/xmalloc.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 #define LOG_FATAL 0x0001
 #define LOG_DEBUG 0x0002
@@ -130,8 +131,6 @@ YAZ_EXPORT void log_event_start (void (*func)(int level, const char *msg, void *
 YAZ_EXPORT void log_event_end (void (*func)(int level, const char *msg, void *info),
 	void *info);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

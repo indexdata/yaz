@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.4 2000-01-10 15:16:53 adam Exp $
+ * $Id: oid.h,v 1.5 2000-02-28 11:20:06 adam Exp $
  */
 
 #ifndef OID_H
@@ -31,9 +31,7 @@
 
 #include <yaz/yconfig.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 #define OID_SIZE 20
     
@@ -199,8 +197,6 @@ YAZ_EXPORT struct oident *oid_addent (int *oid, enum oid_proto proto,
 YAZ_EXPORT void oid_init(void);
 YAZ_EXPORT void oid_exit(void);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

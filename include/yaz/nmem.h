@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.10  1998/10/19 15:24:20  adam
@@ -54,9 +57,7 @@
 #define NMEM_DEBUG 0
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 typedef struct nmem_block
 {
@@ -102,8 +103,7 @@ YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 
 YAZ_EXPORT void nmem_init (void);
 YAZ_EXPORT void nmem_exit (void);
-#ifdef __cplusplus
-}
-#endif
+
+YAZ_END_CDECL
 
 #endif

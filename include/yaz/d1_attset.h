@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -30,9 +30,7 @@
 
 #include <yaz/oid.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 /*
  * This structure describes a attset, perhaps made up by inclusion
@@ -86,8 +84,6 @@ YAZ_EXPORT data1_attset *data1_read_attset(data1_handle dh, const char *file);
 
 YAZ_EXPORT data1_attset *data1_empty_attset(data1_handle dh);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpdchk.c,v $
- * Revision 1.4  1999-11-30 13:47:12  adam
+ * Revision 1.5  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.4  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.3  1999/08/27 09:40:32  adam
@@ -22,9 +25,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <yaz/yconfig.h>
+#include <yaz/comstack.h>
+
 #if HAVE_TCPD_H
 #include <syslog.h>
 #include <tcpd.h>
+
 
 int allow_severity = LOG_INFO;
 int deny_severity = LOG_WARNING;
@@ -38,13 +45,6 @@ int deny_severity = LOG_WARNING;
 
 #endif
 
-#ifdef WIN32
-#include <winsock.h>
-#else
-#include <unistd.h>
-#endif
-
-#include <yaz/comstack.h>
 #include <yaz/statserv.h>
 #include <yaz/log.h>
 

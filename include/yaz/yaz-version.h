@@ -2,7 +2,10 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.1  1999-11-30 13:47:11  adam
+ * Revision 1.2  2000-02-28 11:20:06  adam
+ * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
+ *
+ * Revision 1.1  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.18  1998/06/26 11:17:23  quinn
@@ -81,7 +84,7 @@
  * Introduced version control
  *
  */
-
 #ifndef YAZ_VERSION
-#define YAZ_VERSION "1.5"
+#define YAZ_VERSION "1.6"
 #endif
+

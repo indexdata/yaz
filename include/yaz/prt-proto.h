@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: prt-proto.h,v 1.1 1999-11-30 13:47:11 adam Exp $
+ * $Id: prt-proto.h,v 1.2 2000-02-28 11:20:06 adam Exp $
  */
 
 #ifndef PRT_PROTO_H
@@ -34,9 +34,7 @@
 #include <yaz/oid.h>
 #include <yaz/yaz-version.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 /* ----------------- GLOBAL AUXILIARY DEFS ----------------*/
 
@@ -1147,9 +1145,7 @@ YAZ_EXPORT int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt,
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
 YAZ_EXPORT int z_Query(ODR o, Z_Query **p, int opt, const char *name);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #include <yaz/prt-rsc.h>
 #include <yaz/prt-acc.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995,1996 Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -28,9 +28,7 @@
 #ifndef D1_MAP_H
 #define D1_MAP_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 typedef struct data1_maptag
 {
@@ -64,8 +62,6 @@ typedef struct data1_maptab
     struct data1_maptab *next;
 } data1_maptab;
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

@@ -5,9 +5,7 @@
 #include <stdio.h>
 #include <yaz/yconfig.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
     
 YAZ_EXPORT int readconf(char *name, void *rprivate,
                         int (*fun)(char *name, void *rprivate,
@@ -16,8 +14,6 @@ YAZ_EXPORT int readconf(char *name, void *rprivate,
 YAZ_EXPORT int readconf_line(FILE *f, int *lineno,
 			     char *line, int len, char *argv[], int num);
     
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

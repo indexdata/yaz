@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.2 2000-01-31 13:15:21 adam Exp $
+ * $Id: odr.h,v 1.3 2000-02-28 11:20:06 adam Exp $
  */
 
 #ifndef ODR_H
@@ -35,9 +35,7 @@
 #include <yaz/yconfig.h>
 #include <yaz/nmem.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+YAZ_BEGIN_CDECL
 
 #ifndef bool_t
 #define bool_t int
@@ -371,9 +369,7 @@ YAZ_EXPORT int odr_graphicstring(ODR o, char **p, int opt,
 				 const char *name);
 YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt,
 				   const char *name);
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #include <yaz/xmalloc.h>
 
