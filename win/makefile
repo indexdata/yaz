@@ -1,10 +1,9 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.84 2004-08-19 07:42:20 adam Exp $
+# $Id: makefile,v 1.85 2004-08-19 07:48:00 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
-#
 
 ###########################################################
 ############### Parameters 
@@ -88,8 +87,8 @@ TMP=$(TMPDIR)
 ###########################################################
 
 !if $(DEBUG)
-DLL=$(BINDIR)\yazdebug.dll
-IMPLIB=$(LIBDIR)\yazdebug.lib
+DLL=$(BINDIR)\yazd.dll
+IMPLIB=$(LIBDIR)\yazd.lib
 !else
 DLL=$(BINDIR)\yaz.dll
 IMPLIB=$(LIBDIR)\yaz.lib

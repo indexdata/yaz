@@ -3,7 +3,7 @@ Possible compatibility problems with earlier versions marked with '*'.
 Added CCL utility ccl_qual_line which adds CCL qualifier line consisting
 of name and value - ignoring empty lines and comments.
 
-On Windows, the debug DLL/import lib is now named yazdebug.{dll,lib}.
+On Windows, the debug DLL/import lib is now named yazd.{dll,lib}.
 
 Added odr_get_element_path which returns current element path for an
 ODR handle. This utility is useful in error handling or user-defined
