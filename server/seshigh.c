@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.19  1995-04-18 08:15:34  quinn
+ * Revision 1.20  1995-04-20 15:13:00  quinn
+ * Cosmetic
+ *
+ * Revision 1.19  1995/04/18  08:15:34  quinn
  * Added dynamic memory allocation on encoding (whew). Code is now somewhat
  * neater. We'll make the same change for decoding one day.
  *
@@ -79,7 +82,7 @@
 
 #include <backend.h>
 
-#define MAXRECORDSIZE 1024*1024
+#define MAXRECORDSIZE 1024*1024*5 /* should be configurable, of course */
 
 static int process_apdu(IOCHAN chan);
 static int process_initRequest(IOCHAN client, Z_InitRequest *req);
@@ -92,6 +95,12 @@ extern char *apdufile;
 
 static FILE *apduf = 0; /* for use in static mode */
 
+/*
+ * Create a new association-handle.
+ *  channel  : iochannel for the current line.
+ *  link     : communications channel.
+ * Returns: 0 or a new association handle.
+ */
 association *create_association(IOCHAN channel, COMSTACK link)
 {
     association *new;
@@ -141,7 +150,6 @@ association *create_association(IOCHAN channel, COMSTACK link)
     }
     else
     	new->print = 0;
-    new->state = ASSOC_UNINIT;
     new->input_buffer = 0;
     new->input_buffer_len = 0;
     new->backend = 0;
@@ -152,6 +160,9 @@ association *create_association(IOCHAN channel, COMSTACK link)
     return new;
 }
 
+/*
+ * Free association and release resources.
+ */
 void destroy_association(association *h)
 {
     odr_destroy(h->decode);
@@ -166,7 +177,10 @@ void destroy_association(association *h)
 }
 
 /*
- * process events on the association
+ * process events on the association. Called when the event loop detects an
+ * event.
+ *  h : the I/O channel that has an outstanding event.
+ *  event : the current outstanding event.
  */
 void ir_session(IOCHAN h, int event)
 {
@@ -225,6 +239,9 @@ void ir_session(IOCHAN h, int event)
     }
 }
 
+/*
+ * Process the current outstanding APDU.
+ */
 static int process_apdu(IOCHAN chan)
 {
     Z_APDU *apdu;
@@ -314,10 +331,6 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     	ODR_MASK_SET(&protocolVersion, Z_ProtocolVersion_2);
     resp.protocolVersion = &protocolVersion;
     assoc->maximumRecordSize = *req->maximumRecordSize;
-    /*
-     * This is not so hot. The big todo for ODR is dynamic memory allocation
-     * on encoding.
-     */
     if (assoc->maximumRecordSize > MAXRECORDSIZE)
     	assoc->maximumRecordSize = MAXRECORDSIZE;
     assoc->preferredMessageSize = *req->preferredMessageSize;
@@ -328,7 +341,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.19 $";
+    resp.implementationVersion = "$Revision: 1.20 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {

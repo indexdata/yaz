@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.h,v $
- * Revision 1.2  1995-04-17 11:28:17  quinn
+ * Revision 1.3  1995-04-20 15:12:44  quinn
+ * Cosmetic
+ *
+ * Revision 1.2  1995/04/17  11:28:17  quinn
  * Smallish
  *
  * Revision 1.1  1995/03/30  09:39:40  quinn
@@ -58,7 +61,6 @@
 
 struct comstack;
 typedef struct comstack *COMSTACK;
-
 typedef COMSTACK (*CS_TYPE)(int blocking, int protocol);
 
 struct comstack

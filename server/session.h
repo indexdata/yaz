@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.4  1995-04-10 10:23:39  quinn
+ * Revision 1.5  1995-04-20 15:13:01  quinn
+ * Cosmetic
+ *
+ * Revision 1.4  1995/04/10  10:23:39  quinn
  * Some work to add scan and other things.
  *
  * Revision 1.3  1995/03/30  09:09:27  quinn
@@ -27,27 +30,25 @@
 #include <odr.h>
 #include <oid.h>
 
+/*
+ * association state.
+ */
 typedef struct association
 {
-    /* comms-related handles */
-    IOCHAN client_chan;
-    COMSTACK client_link;
-    ODR decode;
-    ODR encode;
-    ODR print;
-    char *encode_buffer;
-    int encoded_len;
-    char *input_buffer;
-    int input_buffer_len;
-    int input_apdu_len;
-    int state;
-    oid_proto proto;
-    void *backend;
-#define ASSOC_UNINIT       0
-#define ASSOC_IDLE         1
+    IOCHAN client_chan;           /* event-loop control */
+    COMSTACK client_link;         /* communication handle */
+    ODR decode;                   /* decoding stream */
+    ODR encode;                   /* encoding stream */
+    ODR print;                    /* printing stream (for -a) */
+    char *encode_buffer;          /* temporary holding of encoded data */
+    int encoded_len;              /* length of encoded data */
+    char *input_buffer;           /* input buffer (allocated by comstack) */
+    int input_buffer_len;         /* length (size) of buffer */
+    int input_apdu_len;           /* length of current incoming APDU */
+    oid_proto proto;              /* protocol (PROTO_Z3950/PROTO_SR) */
+    void *backend;                /* backend handle */
 
-    /* session parameters */
-    int preferredMessageSize;
+    int preferredMessageSize;     /* session parameters */
     int maximumRecordSize;
 } association;
 
