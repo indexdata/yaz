@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.47  1996-05-29 15:47:50  quinn
+ * Revision 1.48  1996-06-10 08:53:33  quinn
+ * Added Summary,OPAC,ResourceReport
+ *
+ * Revision 1.47  1996/05/29  15:47:50  quinn
  * Fixed in bug DiagRecs decoder. Thanks to Linda Harris.
  *
  * Revision 1.46  1996/04/10  11:39:42  quinn
@@ -271,7 +274,7 @@ int z_Unit(ODR o, Z_Unit **p, int opt)
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
     return
-    	odr_implicit(o, odr_visiblestring, &(*p)->unitSystem, ODR_CONTEXT,
+    	odr_explicit(o, odr_visiblestring, &(*p)->unitSystem, ODR_CONTEXT,
 	    1, 1) &&
 	odr_explicit(o, z_StringOrNumeric, &(*p)->unitType, ODR_CONTEXT,
 	    2, 1) &&
@@ -1733,6 +1736,35 @@ int z_SortRequest(ODR o, Z_SortRequest **p, int opt)
 	odr_sequence_end(o);
 }
 
+/* ---------------------- Resource Report ---------------- */
+
+int z_ResourceReportRequest(ODR o, Z_ResourceReportRequest **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, z_ReferenceId, &(*p)->opId, ODR_CONTEXT, 210, 1) &&
+	odr_implicit(o, odr_oid, &(*p)->prefResourceReportFormat, ODR_CONTEXT,
+	    49, 1) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_ResourceReportResponse(ODR o, Z_ResourceReportResponse **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+	return opt && odr_ok(o);
+    return
+        z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->resourceReportStatus,
+	    ODR_CONTEXT, 50, 0) &&
+	odr_implicit(o, z_External, &(*p)->resourceReport, ODR_CONTEXT,
+	    51, 1) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+	odr_sequence_end(o);
+}
+
 /* ------------------------ APDU ------------------------- */
 
 int z_APDU(ODR o, Z_APDU **p, int opt)
@@ -1762,6 +1794,10 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
 	    z_ResourceControlResponse},
     	{ODR_IMPLICIT, ODR_CONTEXT, 32, Z_APDU_triggerResourceControlRequest,
 	    z_TriggerResourceControlRequest},
+	{ODR_IMPLICIT, ODR_CONTEXT, 33, Z_APDU_resourceReportRequest,
+	    z_ResourceReportRequest},
+	{ODR_IMPLICIT, ODR_CONTEXT, 34, Z_APDU_resourceReportResponse,
+	    z_ResourceReportResponse},
 	{ODR_IMPLICIT, ODR_CONTEXT, 35, Z_APDU_scanRequest, z_ScanRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 36, Z_APDU_scanResponse, z_ScanResponse},
 	{ODR_IMPLICIT, ODR_CONTEXT, 43, Z_APDU_sortRequest, z_SortRequest},
