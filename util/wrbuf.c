@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: wrbuf.c,v $
- * Revision 1.5  1999-08-27 09:40:32  adam
+ * Revision 1.6  1999-10-28 11:36:40  adam
+ * wrbuf_write allows zero buffer length.
+ *
+ * Revision 1.5  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.4  1998/02/11 11:53:36  adam
@@ -74,6 +77,8 @@ int wrbuf_grow(WRBUF b, int minsize)
 
 int wrbuf_write(WRBUF b, const char *buf, int size)
 {
+    if (size <= 0)
+        return 0;
     if (b->pos + size >= b->size)
 	wrbuf_grow(b, size);
     memcpy(b->buf + b->pos, buf, size);
