@@ -1,13 +1,15 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.2 2004-03-10 16:34:30 adam Exp $
+## $Id: Makefile.am,v 1.3 2004-10-01 11:43:43 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl
-check_SCRIPTS = tstcql.sh
+check_SCRIPTS = tstcql.sh tstmarc.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 
-EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample $(check_SCRIPTS)
+EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample \
+ $(check_SCRIPTS) \
+ marc1 marc1.xml marc2 marc2.xml marc3 marc3.xml
 
 YAZCOMP = $(top_srcdir)/util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
@@ -23,22 +25,17 @@ dist-hook:
 tstodrcodec.c tstodrcodec.h: tstodr.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) tstodr.asn
 
-# Tests..
-tsticonv_LDADD = ../src/libyaz.la
+LDADD = ../src/libyaz.la
+
 tsticonv_SOURCES = tsticonv.c
 
-tstnmem_LDADD = ../src/libyaz.la
 tstnmem_SOURCES = tstnmem.c
 
-tstmatchstr_LDADD = ../src/libyaz.la
 tstmatchstr_SOURCES = tstmatchstr.c
 
-tstwrbuf_LDADD = ../src/libyaz.la
 tstwrbuf_SOURCES = tstwrbuf.c
 
-tstodr_LDADD = ../src/libyaz.la
 tstodr_SOURCES = tstodrcodec.c tstodrcodec.h tstodr.c
 
-tstccl_LDADD = ../src/libyaz.la
 tstccl_SOURCES = tstccl.c
 
