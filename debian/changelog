@@ -1,3 +1,9 @@
+yaz (1.9.2-2) unstable; urgency=low
+
+  * Fix element set for piggyback in ZOOM.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Fri, 24 Jan 2003 12:58:18 +0100
+
 yaz (1.9.2-1) unstable; urgency=low
 
   * Upstream release.
