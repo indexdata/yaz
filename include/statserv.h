@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.3  1995-05-16 08:50:38  quinn
+ * Revision 1.4  1995-06-15 07:45:08  quinn
+ * Moving to v3.
+ *
+ * Revision 1.3  1995/05/16  08:50:38  quinn
  * License, documentation, and memory fixes
  *
  *
@@ -46,6 +49,7 @@ typedef struct statserv_options_block
     int idle_timeout;             /* how many minutes to wait before closing */
     int maxrecordsize;            /* maximum value for negotiation */
     char configname[ODR_MAXNAME+1];    /* given to the backend in bend_init */
+    char setuid[ODR_MAXNAME+1];       /* setuid to this user after binding */
 } statserv_options_block;
 
 int statserv_main(int argc, char **argv);

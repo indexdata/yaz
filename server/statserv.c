@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.21  1995-06-06 08:15:40  quinn
+ * Revision 1.22  1995-06-15 07:45:17  quinn
+ * Moving to v3.
+ *
+ * Revision 1.21  1995/06/06  08:15:40  quinn
  * Cosmetic.
  *
  * Revision 1.20  1995/05/29  08:12:09  quinn
@@ -82,6 +85,8 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <pwd.h>
 
 #include <options.h>
 #include <eventl.h>
@@ -109,7 +114,8 @@ static statserv_options_block control_block = {
     PROTO_Z3950,                /* application protocol */
     60,                         /* idle timeout (minutes) */
     1024*1024*4,                /* maximum PDU size (approx.) to allow */
-    "default-config"            /* configuration name to pass to backend */
+    "default-config",           /* configuration name to pass to backend */
+    ""                          /* set user id */
 };
 
 #define DEFAULT_LISTENER "tcp:localhost:9999"
@@ -328,7 +334,7 @@ int statserv_main(int argc, char **argv)
     int protocol = control_block.default_proto;
 
     me = argv[0];
-    while ((ret = options("a:szSl:v:", argv, argc, &arg)) != -2)
+    while ((ret = options("a:szSl:v:u:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -349,8 +355,10 @@ int statserv_main(int argc, char **argv)
 		break;
 	    case 'a':
 	    	strcpy(control_block.apdufile, arg ? arg : ""); break;
+	    case 'u':
+	    	strcpy(control_block.setuid, arg ? arg : ""); break;
 	    default:
-	    	fprintf(stderr, "Usage: %s [ -a <apdufile> -v <loglevel> -l <logfile> -zsS <listener-addr> ... ]\n", me);
+	    	fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel> -l <logfile> -u <user> -zsS <listener-addr> ... ]\n", me);
 	    	exit(1);
 	}
     }
@@ -358,6 +366,21 @@ int statserv_main(int argc, char **argv)
     	signal(SIGCHLD, catchchld);
     if (!listeners && *control_block.default_listen)
 	add_listener(control_block.default_listen, protocol);
+    if (*control_block.setuid)
+    {
+    	struct passwd *pw;
+	
+	if (!(pw = getpwnam(control_block.setuid)))
+	{
+	    logf(LOG_FATAL|LOG_ERRNO, "%s", control_block.setuid);
+	    exit(1);
+	}
+	if (setuid(pw->pw_uid) < 0)
+	{
+	    logf(LOG_FATAL|LOG_ERRNO, "setuid");
+	    exit(1);
+	}
+    }
     logf(LOG_LOG, "Entering event loop.");
 	    
     return event_loop();

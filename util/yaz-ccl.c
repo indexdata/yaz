@@ -38,8 +38,14 @@ static Z_AttributesPlusTerm *ccl_rpn_term (struct ccl_rpn_node *p)
             assert (zapt->attributeList[i]);
             zapt->attributeList[i]->attributeType =
                 &attr->type;
+#ifdef Z_95
+	    zapt->attributeList[i]->attributeSet = 0;
+	    zapt->attributeList[i]->which = Z_AttributeValue_numeric;
+	    zapt->attributeList[i]->value.numeric = &attr->value;
+#else
             zapt->attributeList[i]->attributeValue =
                 &attr->value;
+#endif
         }
     }
     else

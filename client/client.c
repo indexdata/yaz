@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.11  1995-06-14 15:26:40  quinn
+ * Revision 1.12  1995-06-15 07:44:57  quinn
+ * Moving to v3.
+ *
+ * Revision 1.11  1995/06/14  15:26:40  quinn
  * *** empty log message ***
  *
  * Revision 1.10  1995/06/06  14:56:58  quinn
@@ -296,13 +299,27 @@ void display_record(Z_DatabaseRecord *p)
 static void display_diagrec(Z_DiagRec *p)
 {
     oident *ent;
+#ifdef Z_95
+    Z_DefaultDiagFormat *r;
+#else
+    Z_DiagRec *r = p;
+#endif
 
     printf("Diagnostic message from database.\n");
-    if (!(ent = oid_getentbyoid(p->diagnosticSetId)) ||
+#ifdef Z_95
+    if (p->which != Z_DiagRec_defaultFormat)
+    {
+    	printf("Diagnostic record not in default format.\n");
+	return;
+    }
+    else
+    	r = p->u.defaultFormat;
+#endif
+    if (!(ent = oid_getentbyoid(r->diagnosticSetId)) ||
     	ent->class != CLASS_DIAGSET || ent->value != VAL_BIB1)
     	printf("Missing or unknown diagset\n");
-    printf("Error condition: %d", *p->condition);
-    printf(" -- %s\n", p->addinfo ? p->addinfo : "");
+    printf("Error condition: %d", *r->condition);
+    printf(" -- %s\n", r->addinfo ? r->addinfo : "");
 }
 
 static void display_nameplusrecord(Z_NamePlusRecord *p)
@@ -646,11 +663,11 @@ int cmd_scan(char *arg)
     }
     if (*arg)
     {
-    	if (send_scanrequest(arg, 5, 19) < 0)
+    	if (send_scanrequest(arg, 5, 20) < 0)
 	    return 0;
     }
     else
-    	if (send_scanrequest(last_scan, 1, 19) < 0)
+    	if (send_scanrequest(last_scan, 1, 20) < 0)
 	    return 0;
     return 2;
 }

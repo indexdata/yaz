@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.5  1995-05-31 08:29:35  quinn
+ * Revision 1.6  1995-06-15 07:45:11  quinn
+ * Moving to v3.
+ *
+ * Revision 1.5  1995/05/31  08:29:35  quinn
  * Nothing significant.
  *
  * Revision 1.4  1995/05/18  13:02:07  quinn
@@ -75,11 +78,11 @@
 
 /*
  * Simple implementation of XTI/TP0/RFC1006/Sockets.
- * Note: This is neither complete nor robust. It just has to tick us over
- * until mr. Furniss finishes his own implementation.
+ * Note: There is still some work to do in here, but basically it works.
  *
  * TODO: Asynchronous mode needs a lot of little adjustments to various
- * return values and error codes, etc.
+ * return values and error codes, etc. Formally, we should probably hold
+ * this up against the protocol state tables, and see if it's correct.
  *
  * Check if addressing info is returned correctly by all calls.
  */
@@ -605,7 +608,7 @@ int t_snd(int fd, char *buf, unsigned nbytes, int flags)
     return nbytes;
 }
 
-int _t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
+int t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
 {
     struct rfct_control *cnt = control[fd];
     struct tpdu_data_header dhead;
@@ -719,6 +722,8 @@ int _t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
     return got;
 }
 
+#if 0
+
 int t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
 {
     int res;
@@ -735,6 +740,8 @@ int t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
     while (*flags & T_MORE && nbytes > 0);
     return total;
 }
+
+#endif
 
 int t_close(int fd)
 {

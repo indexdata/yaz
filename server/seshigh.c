@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.34  1995-06-14 15:26:46  quinn
+ * Revision 1.35  1995-06-15 07:45:14  quinn
+ * Moving to v3.
+ *
+ * Revision 1.34  1995/06/14  15:26:46  quinn
  * *** empty log message ***
  *
  * Revision 1.33  1995/06/06  14:57:05  quinn
@@ -581,8 +584,13 @@ static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
 {
     static Z_Records rec;
     oident bib1;
-    static Z_DiagRec dr;
     static int err;
+#ifdef Z_95
+    static Z_DiagRec drec;
+    static Z_DefaultDiagFormat dr;
+#else
+    static Z_DiagRec dr;
+#endif
 
     bib1.proto = proto;
     bib1.class = CLASS_DIAGSET;
@@ -592,7 +600,13 @@ static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
 	"NULL");
     err = error;
     rec.which = Z_Records_NSD;
+#ifdef Z_95
+    rec.u.nonSurrogateDiagnostic = &drec;
+    drec.which = Z_DiagRec_defaultFormat;
+    drec.u.defaultFormat = &dr;
+#else
     rec.u.nonSurrogateDiagnostic = &dr;
+#endif
     dr.diagnosticSetId = oid_getoidbyent(&bib1);
     dr.condition = &err;
     dr.addinfo = addinfo ? addinfo : "";
@@ -606,9 +620,14 @@ static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
 					    int error, char *addinfo)
 {
     static Z_NamePlusRecord rec;
-    static Z_DiagRec dr;
     static int err;
     oident bib1;
+#ifdef Z_95
+    static Z_DiagRec drec;
+    static Z_DefaultDiagFormat dr;
+#else
+    static Z_DiagRec dr;
+#endif
 
     bib1.proto = proto;
     bib1.class = CLASS_DIAGSET;
@@ -618,7 +637,13 @@ static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
     err = error;
     rec.databaseName = dbname;
     rec.which = Z_NamePlusRecord_surrogateDiagnostic;
+#ifdef Z_95
+    rec.u.surrogateDiagnostic = &drec;
+    drec.which = Z_DiagRec_defaultFormat;
+    drec.u.defaultFormat = &dr;
+#else
     rec.u.surrogateDiagnostic = &dr;
+#endif
     dr.diagnosticSetId = oid_getoidbyent(&bib1);
     dr.condition = &err;
     dr.addinfo = addinfo ? addinfo : "";
@@ -631,9 +656,14 @@ static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
 static Z_DiagRecs *diagrecs(oid_proto proto, int error, char *addinfo)
 {
     static Z_DiagRecs recs;
-    static Z_DiagRec *recp[1], rec;
     static int err;
     oident bib1;
+#ifdef Z_95
+    static Z_DiagRec *recp[1], drec;
+    static Z_DefaultDiagFormat rec;
+#else
+    static Z_DiagRec *recp[1], rec;
+#endif
 
     logf(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo);
     bib1.proto = proto;
@@ -643,7 +673,13 @@ static Z_DiagRecs *diagrecs(oid_proto proto, int error, char *addinfo)
     err = error;
     recs.num_diagRecs = 1;
     recs.diagRecs = recp;
+#ifdef Z_95
+    recp[0] = &drec;
+    drec.which = Z_DiagRec_defaultFormat;
+    drec.u.defaultFormat = &rec;
+#else
     recp[0] = &rec;
+#endif
     rec.diagnosticSetId = oid_getoidbyent(&bib1);
     rec.condition = &err;
     rec.addinfo = addinfo ? addinfo : "";
@@ -815,6 +851,10 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     apdu.which = Z_APDU_searchResponse;
     apdu.u.searchResponse = &resp;
     resp.referenceId = req->referenceId;
+#ifdef Z_95
+    resp.additionalSearchInfo = 0;
+    resp.otherInfo = 0;
+#endif
     *fd = -1;
     if (!bsrt && !(bsrt = bend_searchresponse(assoc->backend)))
     {
@@ -908,10 +948,13 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     apdu.which = Z_APDU_presentResponse;
     apdu.u.presentResponse = &resp;
     resp.referenceId = req->referenceId;
+#ifdef Z_95
+    resp.otherInfo = 0;
+#endif
 
     num = *req->numberOfRecordsRequested;
     resp.records = pack_records(assoc, req->resultSetId,
-	*req->resultSetStartPoint, &num, req->elementSetNames, &next, &presst);
+	*req->resultSetStartPoint, &num, 0, &next, &presst);
     if (!resp.records)
     	return 0;
     resp.numberOfRecordsReturned = &num;
@@ -950,6 +993,9 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     res.entries = &ents;
     ents.which = Z_ListEntries_nonSurrogateDiagnostics;
     res.attributeSet = 0;
+#ifdef Z_95
+    res.otherInfo = 0;
+#endif
 
     if (req->attributeSet && (!(attent = oid_getentbyoid(req->attributeSet)) ||
     	attent->class != CLASS_ATTSET || attent->value != VAL_BIB1))

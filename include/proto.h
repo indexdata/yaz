@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.15  1995-06-14 15:26:43  quinn
+ * Revision 1.16  1995-06-15 07:45:06  quinn
+ * Moving to v3.
+ *
+ * Revision 1.15  1995/06/14  15:26:43  quinn
  * *** empty log message ***
  *
  * Revision 1.14  1995/06/07  14:42:34  quinn
@@ -119,7 +122,7 @@
  * apps have been updated, we'll remove the #ifdefs.
  */
 
-#define Z_V3
+#define Z_95
 
 /* ----------------- GLOBAL AUXILIARY DEFS ----------------*/
 
@@ -331,13 +334,11 @@ typedef struct Z_AttributeElement
     {
     	int *numeric;
 	Z_ComplexAttribute *complex;
-    } u;
+    } value;
 #else
     int *attributeValue;
 #endif
 } Z_AttributeElement;
-
-#ifdef Z_V3
 
 typedef struct Z_Term 
 {
@@ -365,17 +366,11 @@ typedef struct Z_Term
     } u;
 } Z_Term;
 
-#endif
-
 typedef struct Z_AttributesPlusTerm
 {
     int num_attributes;
     Z_AttributeElement **attributeList;
-#ifdef Z_V3
     Z_Term *term;
-#else
-    Odr_oct *term;
-#endif
 } Z_AttributesPlusTerm;
 
 typedef struct Z_ResultSetPlusAttributes
@@ -730,6 +725,9 @@ typedef struct Z_TriggerResourceControlRequest
 #define Z_TriggerResourceCtrl_cancel          3
     Odr_oid *prefResourceReportFormat;  /* OPTIONAL */
     bool_t *resultSetWanted;            /* OPTIONAL */
+#ifdef Z_95
+    Z_OtherInformation *otherInfo;
+#endif
 } Z_TriggerResourceControlRequest;
 
 typedef struct Z_ResourceControlRequest
@@ -743,6 +741,9 @@ typedef struct Z_ResourceControlRequest
 #define Z_ResourceControlRequest_none      3
     bool_t *responseRequired;
     bool_t *triggeredRequestFlag;  /* OPTIONAL */
+#ifdef Z_95
+    Z_OtherInformation *otherInfo;
+#endif
 } Z_ResourceControlRequest;
 
 typedef struct Z_ResourceControlResponse
@@ -750,6 +751,9 @@ typedef struct Z_ResourceControlResponse
     Z_ReferenceId *referenceId;    /* OPTIONAL */
     bool_t *continueFlag;
     bool_t *resultSetWanted;       /* OPTIONAL */
+#ifdef Z_95
+    Z_OtherInformation *otherInfo;
+#endif
 } Z_ResourceControlResponse;
 
 
@@ -768,7 +772,7 @@ typedef struct Z_AccessControlRequest
     	Odr_oct *simpleForm;
 	Odr_external *externallyDefined;
     } u;
-#ifdef Z_OTHERINFO
+#ifdef Z_95
     Z_OtherInformation *otherInfo;           /* OPTIONAL */
 #endif
 } Z_AccessControlRequest;
@@ -787,7 +791,7 @@ typedef struct Z_AccessControlResponse
 	Odr_external *externallyDefined;
     } u;
     Z_DiagRec *diagnostic;                   /* OPTIONAL */
-#ifdef Z_OTHERINFO
+#ifdef Z_95
     Z_OtherInformation *otherInfo;           /* OPTIONAL */
 #endif
 } Z_AccessControlResponse;
@@ -884,6 +888,9 @@ typedef struct Z_ScanRequest
     int *stepSize;                    /* OPTIONAL */
     int *numberOfTermsRequested;
     int *preferredPositionInResponse;   /* OPTIONAL */
+#ifdef Z_95
+    Z_OtherInformation *otherInfo;
+#endif
 } Z_ScanRequest;
 
 typedef struct Z_ScanResponse
@@ -902,6 +909,9 @@ typedef struct Z_ScanResponse
     int *positionOfTerm;              /* OPTIONAL */
     Z_ListEntries *entries;           /* OPTIONAL */
     Odr_oid *attributeSet;            /* OPTIONAL */
+#ifdef Z_95
+    Z_OtherInformation *otherInfo;
+#endif
 } Z_ScanResponse; 
 
 
@@ -933,7 +943,7 @@ typedef struct Z_DeleteResultSetRequest
 #define Z_DeleteRequest_all     1
     int num_ids;
     Z_ResultSetId **resultSetList;      /* OPTIONAL */
-#ifdef Z_OTHERINFO
+#ifdef Z_95
     Z_OtherInformation *otherInfo;
 #endif
 } Z_DeleteResultSetRequest;
@@ -948,7 +958,7 @@ typedef struct Z_DeleteResultSetResponse
     int num_bulkStatuses;
     Z_ListStatus *bulkStatuses;        /* OPTIONAL */
     char *deleteMessage;               /* OPTIONAL */
-#ifdef Z_OTHERINFO
+#ifdef Z_95
     Z_OtherInformation *otherInfo;
 #endif
 } Z_DeleteResultSetResponse;
@@ -972,7 +982,7 @@ typedef struct Z_Close
     char *diagnosticInformation;          /* OPTIONAL */
     Odr_oid *resourceReportFormat;        /* OPTIONAL */
     Odr_external *resourceReport;         /* OPTIONAL */
-#ifdef Z_OTHERINFO
+#ifdef Z_95
     Z_OtherInformation *otherInfo;        /* OPTIONAL */
 #endif
 } Z_Close;
@@ -981,9 +991,10 @@ typedef struct Z_Close
 
 typedef struct Z_Segment
 {
-    Z_ReferenceId *referenceid;   /* OPTIONAL */
+    Z_ReferenceId *referenceId;   /* OPTIONAL */
     int *numberOfRecordsReturned;
-    Z_NamePlusRecord *segmentRecords;
+    int num_segmentRecords;
+    Z_NamePlusRecord **segmentRecords;
     Z_OtherInformation *otherInfo;  /* OPTIONAL */
 } Z_Segment;
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.6  1995-06-14 15:26:37  quinn
+ * Revision 1.7  1995-06-15 07:44:52  quinn
+ * Moving to v3.
+ *
+ * Revision 1.6  1995/06/14  15:26:37  quinn
  * *** empty log message ***
  *
  * Revision 1.5  1995/06/07  14:42:30  quinn
@@ -45,6 +48,9 @@ Z_InitRequest *zget_InitRequest(ODR o)
     r->implementationName = "Index Data/YAZ";
     r->implementationVersion = YAZ_VERSION;
     r->userInformationField = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -67,6 +73,9 @@ Z_InitResponse *zget_InitResponse(ODR o)
     r->implementationName = "Index Data/YAZ";
     r->implementationVersion = YAZ_VERSION;
     r->userInformationField = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -90,6 +99,10 @@ Z_SearchRequest *zget_SearchRequest(ODR o)
     r->mediumSetElementSetNames = 0;
     r->preferredRecordSyntax = 0;
     r->query = 0;
+#ifdef Z_95
+    r->additionalSearchInfo = 0;
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -109,6 +122,10 @@ Z_SearchResponse *zget_SearchResponse(ODR o)
     r->resultSetStatus = 0;
     r->presentStatus = 0;
     r->records = 0;
+#ifdef Z_95
+    r->additionalSearchInfo = 0;
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -122,8 +139,20 @@ Z_PresentRequest *zget_PresentRequest(ODR o)
     *r->resultSetStartPoint = 1;
     r->numberOfRecordsRequested = odr_malloc(o, sizeof(int));
     *r->numberOfRecordsRequested = 10;
+#ifdef Z_95
+    r->num_ranges = 0;
+    r->additionalRanges = 0;
+    r->recordComposition = 0;
+#else
     r->elementSetNames = 0;
+#endif
     r->preferredRecordSyntax = 0;
+#ifdef Z_95
+    r->maxSegmentCount = 0;
+    r->maxRecordSize = 0;
+    r->maxSegmentSize = 0;
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -139,6 +168,9 @@ Z_PresentResponse *zget_PresentResponse(ODR o)
     r->presentStatus = odr_malloc(o, sizeof(int));
     *r->presentStatus = Z_PRES_SUCCESS;
     r->records = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -151,6 +183,9 @@ Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
     *r->deleteFunction = Z_DeleteRequest_list;
     r->num_ids = 0;
     r->resultSetList = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -167,6 +202,9 @@ Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
     r->num_bulkStatuses = 0;
     r->bulkStatuses = 0;
     r->deleteMessage = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -183,6 +221,9 @@ Z_ScanRequest *zget_ScanRequest(ODR o)
     r->numberOfTermsRequested = odr_malloc(o, sizeof(int));
     *r->numberOfTermsRequested = 20;
     r->preferredPositionInResponse = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -199,6 +240,9 @@ Z_ScanResponse *zget_ScanResponse(ODR o)
     r->positionOfTerm =0;
     r->entries = 0;
     r->attributeSet = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -211,6 +255,9 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
     *r->requestedAction = Z_TriggerResourceCtrl_resourceReport;
     r->prefResourceReportFormat = 0;
     r->resultSetWanted = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -225,6 +272,9 @@ Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
     r->responseRequired = odr_malloc(o, sizeof(bool_t));
     *r->responseRequired = 0;
     r->triggeredRequestFlag = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -236,6 +286,9 @@ Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
     r->continueFlag = odr_malloc(o, sizeof(bool_t));
     *r->continueFlag = 1;
     r->resultSetWanted = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -246,6 +299,9 @@ Z_AccessControlRequest *zget_AccessControlRequest(ODR o)
     r->referenceId = 0;
     r->which = Z_AccessRequest_simpleForm;
     r->u.simpleForm = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -257,6 +313,22 @@ Z_AccessControlResponse *zget_AccessControlResponse(ODR o)
     r->which = Z_AccessResponse_simpleForm;
     r->u.simpleForm = 0;
     r->diagnostic = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
+    return r;
+}
+
+Z_Segment *zget_Segment(ODR o)
+{
+    Z_Segment *r = odr_malloc(o, sizeof(*r));
+
+    r->referenceId = 0;
+    r->numberOfRecordsReturned = odr_malloc(o, sizeof(int));
+    *r->numberOfRecordsReturned = 0;
+    r->num_segmentRecords = 0;
+    r->segmentRecords = 0;
+    r->otherInfo = 0;
     return r;
 }
 
@@ -270,6 +342,9 @@ Z_Close *zget_Close(ODR o)
     r->diagnosticInformation = 0;
     r->resourceReportFormat = 0;
     r->resourceReport = 0;
+#ifdef Z_95
+    r->otherInfo = 0;
+#endif
     return r;
 }
 
@@ -308,6 +383,9 @@ Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which)
 	    break;
 	case Z_APDU_resourceControlResponse:
 	    r->u.resourceControlResponse = zget_ResourceControlResponse(o);
+	    break;
+	case Z_APDU_segmentRequest:
+	    r->u.segmentRequest = zget_Segment(o);
 	    break;
 	case Z_APDU_close:
 	    r->u.close = zget_Close(o);
