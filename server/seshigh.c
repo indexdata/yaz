@@ -4,8 +4,8 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.51  1995-11-01 11:56:37  quinn
- * Fixed bug in elementsetname-handling in piggybacked presents.
+ * Revision 1.52  1995-11-01 12:19:13  quinn
+ * Second attempt to fix same bug.
  *
  * Revision 1.50  1995/10/25  16:58:32  quinn
  * Simple.
@@ -1058,16 +1058,16 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	if (bsrt->hits <= *req->smallSetUpperBound)
 	{
 	    toget = bsrt->hits;
-	    comp.u.simple = req->smallSetElementSetNames;
-	    compp = &comp;
+	    if ((comp.u.simple = req->smallSetElementSetNames))
+	        compp = &comp;
 	}
 	else if (bsrt->hits < *req->largeSetLowerBound)
 	{
 	    toget = *req->mediumSetPresentNumber;
 	    if (toget > bsrt->hits)
 		toget = bsrt->hits;
-	    comp.u.simple = req->mediumSetElementSetNames;
-	    compp = &comp;
+	    if ((comp.u.simple = req->mediumSetElementSetNames))
+	        compp = &comp;
 	}
 	else
 	    toget = 0;
