@@ -2,7 +2,14 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.1  1995-06-14 12:34:55  quinn
+ * Revision 1.2  1995-06-19 13:39:16  quinn
+ * 1.0 beta
+ * All of basic 1995 should be in place at this point. Some little features
+ * added to make the server more useful. BER dumper for bad protocol debugging.
+ * Etc. First major release. All following releases should come with
+ * a changelog.
+ *
+ * Revision 1.1  1995/06/14  12:34:55  quinn
  * Moved version.h to include/
  *
  * Revision 1.4  1995/06/07  14:43:57  quinn
@@ -23,5 +30,5 @@
  */
 
 #ifndef YAZ_VERSION
-#define YAZ_VERSION "0.21 beta"
+#define YAZ_VERSION "1.0 beta"
 #endif
