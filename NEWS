@@ -1,8 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Added odr_get_element_path which current element path for an ODR stream.
-This utility may be useful in error handling or user-defined ODR_PRINT
-stream.
+Added odr_get_element_path which returns current element path for an
+ODR handle. This utility is useful in error handling or user-defined
+ODR_PRINT stream.
 
 Added ODR_PRINT utility odr_set_stream which is is a more generic
 alternative to odr_setprint. odr_set_stream takes a stream handle, pointer
