@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX
 
+Added definitions to the OID database (util/oid.c) (RVDM).
+
 Added new BIB-1 diagnostic messages to the handler diagbib1_str.
 
 Added call to ccl_rpn_delete in client program.

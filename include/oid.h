@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.18  1997-05-14 06:53:42  adam
+ * Revision 1.19  1997-07-28 12:34:42  adam
+ * Added new OID entries (RVDM).
+ *
+ * Revision 1.18  1997/05/14 06:53:42  adam
  * C++ support.
  *
  * Revision 1.17  1997/05/02 08:39:27  quinn
@@ -133,6 +136,9 @@ typedef enum oid_value
     VAL_GILS,
     VAL_WAIS,
     VAL_STAS,
+    VAL_COLLECT1,
+    VAL_CIMI1,
+    VAL_GEO,
     VAL_DIAG1,
     VAL_ISO2709,
     VAL_UNIMARC,
@@ -150,6 +156,8 @@ typedef enum oid_value
     VAL_PICAMARC,
     VAL_AUSMARC,
     VAL_IBERMARC,
+    VAL_CATMARC,
+    VAL_MALMARC,
     VAL_EXPLAIN,
     VAL_SUTRS,
     VAL_OPAC,
@@ -157,6 +165,7 @@ typedef enum oid_value
     VAL_GRS0,
     VAL_GRS1,
     VAL_EXTENDED,
+    VAL_FRAGMENT,
     VAL_RESOURCE1,
     VAL_RESOURCE2,
     VAL_PROMPT1,
