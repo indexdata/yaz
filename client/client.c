@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.144 2002-02-20 14:41:19 adam Exp $
+ * $Id: client.c,v 1.145 2002-02-24 12:24:40 adam Exp $
  */
 
 #include <stdio.h>
@@ -2072,7 +2072,7 @@ int cmd_set_apdufile(char* arg)
   
     if(apdu_file && apdu_file != stderr) { /* don't close stdout*/
         perror("unable to close apdu log file");      
-    };
+    }
     apdu_file=NULL;
   
     if(strlen(arg)<1) {
@@ -2118,7 +2118,7 @@ int cmd_set_marcdump(char* arg)
 {
     if(marcdump && marcdump != stderr) { /* don't close stdout*/
         perror("unable to close apdu log file");      
-    };
+    }
     marcdump=NULL;
     
     if(strlen(arg)<1) {
@@ -2521,7 +2521,7 @@ void process_cmd_line(char* line)
 
 char *command_generator(const char *text, int state) 
 {
-    static idx; // index is the last used the last time command_generator was called
+    static int idx; 
     if (state==0) {
         idx = 0;
     }
@@ -2529,7 +2529,7 @@ char *command_generator(const char *text, int state)
         if (!strncmp(cmd[idx].cmd,text,strlen(text))) {
             ++idx;  /* skip this entry on the next run */
             return strdup(cmd[idx-1].cmd);
-        };
+        }
     }
     return NULL;
 }
@@ -2557,7 +2557,7 @@ char ** readline_completer(char *text, int start, int end) {
         if ((res = sscanf(rl_line_buffer, "%31s %1023[^;]", word, arg)) <= 0) {     
             rl_attempted_completion_over = 1;
             return NULL;
-        };
+        }
     
         if(start != strlen(word) +1 ) {
             rl_attempted_completion_over = 1;
@@ -2587,12 +2587,12 @@ char ** readline_completer(char *text, int start, int end) {
         } else {
             rl_attempted_completion_over = 1;
             return 0;
-        };
-    };
+        }
+    }
 #else 
     return 0;
 #endif 
-};
+}
 
 
 static void client(void)

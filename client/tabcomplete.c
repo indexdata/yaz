@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.3 2002-01-30 22:02:03 adam Exp $
+ * $Id: tabcomplete.c,v 1.4 2002-02-24 12:24:40 adam Exp $
  */
 
 #include <string.h>
@@ -20,7 +20,7 @@
 
 char* complete_from_list(char* completions[], const char *text, int state)
 {
-	static idx;
+	static int idx;
 	if(state==0) {
 		idx = 0;
 	}
@@ -57,7 +57,7 @@ void oid_loader(struct oident* oid, void* data_)
 {
 	oid_callback_t* data=(oid_callback_t*) data_;
 	
-	//fprintf(stderr,"ja7: called with %d: %s\n",oid->oclass,oid->desc);	
+	
 	if((oid->oclass == CLASS_GENERAL) || (oid->oclass == data->oclass)) {
 		if(data->index==data->max) {
 			data->values=(char**)realloc(data->values,((data->max+1)*2)*sizeof(char*));
@@ -66,7 +66,7 @@ void oid_loader(struct oident* oid, void* data_)
 		data->values[data->index]=oid->desc;
 		++data->index;		
 	}
-};
+}
 
 char** build_list_for_oclass(oid_class oclass) {	
 	oid_callback_t data;	
@@ -120,7 +120,7 @@ char* complete_attributeset(const char* text, int state)
 	
 	free(list);	
 	return res;
-};
+}
 
 /*
  * Local variables:
