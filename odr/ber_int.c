@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.4  1995-03-08 12:12:07  quinn
+ * Revision 1.5  1995-03-27 15:01:44  quinn
+ * Added include of sys/types to further portability
+ *
+ * Revision 1.4  1995/03/08  12:12:07  quinn
  * Added better error checking.
  *
  * Revision 1.3  1995/02/09  15:51:46  quinn
@@ -19,7 +22,8 @@
  */
 
 #include <odr.h>
-#include <netinet/in.h>
+#include <sys/types.h>
+#include <netinet/in.h>  /* for htons... */
 #include <string.h>
 
 static int ber_encinteger(unsigned char *buf, int val, int maxlen);
