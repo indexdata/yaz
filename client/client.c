@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.188 2003-04-29 21:13:08 adam Exp $
+ * $Id: client.c,v 1.189 2003-04-29 21:20:33 adam Exp $
  */
 
 #include <stdio.h>
@@ -443,17 +443,6 @@ void cmd_open_remember_last_open_command(const char* arg, char* new_open_command
     }
 }
 
-int cmd_open(const char *arg)
-{
-    static char cur_host[200];
-    if (arg)
-    {
-        strncpy (cur_host, arg, sizeof(cur_host)-1);
-        cur_host[sizeof(cur_host)-1] = 0;
-    }
-    return session_connect(cur_host);
-}
-
 int session_connect(const char *arg)
 {
     void *add;
@@ -521,6 +510,17 @@ int session_connect(const char *arg)
         return 2;
     }
     return 0;
+}
+
+int cmd_open(const char *arg)
+{
+    static char cur_host[200];
+    if (arg)
+    {
+        strncpy (cur_host, arg, sizeof(cur_host)-1);
+        cur_host[sizeof(cur_host)-1] = 0;
+    }
+    return session_connect(cur_host);
 }
 
 void try_reconnect() 
@@ -1930,7 +1930,6 @@ static int send_presentRequest(const char *arg)
     oident prefsyn;
     int nos = 1;
     int oid[OID_SIZE];
-    char *p;
     char setstring[100];
 
     req->referenceId = set_refid (out);

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.154 2003-04-24 13:30:32 adam Exp $
+ * $Id: seshigh.c,v 1.155 2003-04-29 21:20:33 adam Exp $
  */
 
 /*
@@ -818,18 +818,18 @@ static void process_http_request(association *assoc, request *req)
 
     if (!strcmp(hreq->method, "GET"))
     {
-        char *charset = 0;
-        int ret = -1;
-        Z_SOAP *soap_package = 0;
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
-        static Z_SOAP_Handler soap_handlers[2] = {
 #if HAVE_XML2
+        int ret = -1;
+        char *charset = 0;
+        Z_SOAP *soap_package = 0;
+        static Z_SOAP_Handler soap_handlers[2] = {
             {"http://www.loc.gov/zing/srw/v1.0/", 0,
              (Z_SOAP_fun) yaz_srw_codec},
-#endif
             {0, 0, 0}
         };
+#endif
         
         if (*p0 == '/')
             p0++;
