@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.87  1999-08-27 09:40:32  adam
+ * Revision 1.88  1999-10-11 10:00:29  adam
+ * Modified printing of records.
+ *
+ * Revision 1.87  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.86  1999/07/06 12:13:35  adam
@@ -663,6 +666,19 @@ static void display_grs1(Z_GenericRecord *r, int level)
     }
 }
 
+static void print_record(const unsigned char *buf, size_t len)
+{
+   size_t i;
+   for (i = 0; i<len; i++)
+       if ((buf[i] <= 126 && buf[i] >= 32) || strchr ("\n\r\t\f", buf[i]))
+           fputc (buf[i], stdout);
+       else
+           printf ("\\X%02X", buf[i]);
+   /* add newline if not already added ... */
+   if (i <= 0 || buf[i-1] != '\n')
+       fputc ('\n', stdout);
+}
+
 static void display_record(Z_DatabaseRecord *p)
 {
     Z_External *r = (Z_External*) p;
@@ -715,21 +731,13 @@ static void display_record(Z_DatabaseRecord *p)
 	}
     }
     if (ent && ent->value == VAL_SOIF)
-        printf("%.*s", r->u.octet_aligned->len, r->u.octet_aligned->buf);
+        print_record(r->u.octet_aligned->buf, r->u.octet_aligned->len);
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
     {
         const char *octet_buf = (char*)p->u.octet_aligned->buf;
 	if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML ||
             ent->value == VAL_HTML)
-	{
-            int i;
-            for (i = 0; i<p->u.octet_aligned->len; i++)
-                if (octet_buf[i] > 126 || octet_buf[i] < 7)
-                    printf ("<%02X>", octet_buf[i]);
-                else
-                    fputc (octet_buf[i], stdout);
-	    printf ("\n");
-        }
+            print_record(octet_buf, p->u.octet_aligned->len);
 	else
             marc_display (octet_buf, NULL);
         if (marcdump)
@@ -742,7 +750,7 @@ static void display_record(Z_DatabaseRecord *p)
             printf("Expecting single SUTRS type for SUTRS.\n");
             return;
         }
-        printf("%.*s", r->u.sutrs->len, r->u.sutrs->buf);
+        print_record(r->u.sutrs->buf, r->u.sutrs->len);
     }
     else if (ent && ent->value == VAL_GRS1)
     {
