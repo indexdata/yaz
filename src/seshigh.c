@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.39 2004-12-20 23:38:03 adam Exp $
+ * $Id: seshigh.c,v 1.40 2004-12-21 00:31:03 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -641,7 +641,7 @@ static void srw_bend_search(association *assoc, request *req,
 
             yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
                                    &srw_res->num_diagnostics, 1, 0);
-            yaz_log(log_request,"Search SRW: backend init failed");
+            yaz_log(log_request, "Search SRW: backend init failed");
             return;
         }
     }
@@ -710,9 +710,9 @@ static void srw_bend_search(association *assoc, request *req,
         {
             WRBUF wr = wrbuf_alloc();
             wrbuf_printf(wr, "Search: %s: %s ", querytype, querystr);
-            wrbuf_printf(wr," ERROR %d ", srw_error);
-            yaz_log(log_request, "Search %s", wrbuf_buf(wr) );
-            wrbuf_free(wr,1);
+            wrbuf_printf(wr, " ERROR %d ", srw_error);
+            yaz_log(log_request, "%s", wrbuf_buf(wr) );
+            wrbuf_free(wr, 1);
         }
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
@@ -737,20 +737,19 @@ static void srw_bend_search(association *assoc, request *req,
     (assoc->init->bend_search)(assoc->backend, &rr);
     if (rr.errcode)
     {
-        yaz_log(log_request, "bend_search returned Bib-1 code %d", rr.errcode);
+        yaz_log(log_request, "bend_search returned Bib-1 diagnostic %d",
+		rr.errcode);
         if (rr.errcode == 109) /* database unavailable */
         {
             *http_code = 404;
             return;
         }
+	srw_error = yaz_diag_bib1_to_srw (rr.errcode);
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
             odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
         yaz_mk_std_diagnostic(assoc->encode, srw_res->diagnostics,
-                              yaz_diag_bib1_to_srw (rr.errcode),
-                              rr.errstring);
-        yaz_log(log_request, "srw_bend_search returned SRW error %s",
-                srw_res->diagnostics[0].uri);
+			      srw_error, rr.errstring);
     }
     else
     {
@@ -820,17 +819,17 @@ static void srw_bend_search(association *assoc, request *req,
     if (log_request)
     {
         WRBUF wr=wrbuf_alloc();
-        wrbuf_printf(wr,"SRW: %s", querystr);
+        wrbuf_printf(wr,"Search %s: %s", querytype, querystr);
         if (srw_error)
-            wrbuf_printf(wr," ERROR %d ", srw_error);
+            wrbuf_printf(wr, " ERROR %d", srw_error);
         else
         {
-            wrbuf_printf(wr," OK:%d hits ", rr.hits);
+            wrbuf_printf(wr, " OK:%d hits", rr.hits);
             if (srw_res->num_records)
-                wrbuf_printf(wr," Returned %d records", srw_res->num_records);
+                wrbuf_printf(wr, " %d records returned", srw_res->num_records);
         }
-        yaz_log(log_request, "Search %s", wrbuf_buf(wr) );
-        wrbuf_free(wr,1);
+        yaz_log(log_request, "%s", wrbuf_buf(wr) );
+        wrbuf_free(wr, 1);
     }
 }
 
@@ -1430,7 +1429,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.39 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.40 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1824,9 +1823,9 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    wr_diag(wr, bsrt->errcode, bsrt->errstring);
         else
         {
-            wrbuf_printf(wr," OK:%d hits ", bsrt->hits);
+            wrbuf_printf(wr," OK:%d hits", bsrt->hits);
             if (returnedrecs)
-                wrbuf_printf(wr," %d records returned", returnedrecs);
+                wrbuf_printf(wr, " %d records returned", returnedrecs);
         }
         yaz_log(log_request, "Search %s %s", req->resultSetName,
 		wrbuf_buf(wr));
