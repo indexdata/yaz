@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.7 2003-03-18 13:34:37 adam Exp $
+ * $Id: soap.c,v 1.8 2003-03-25 09:55:12 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -28,13 +28,6 @@ int z_soap_error(ODR o, Z_SOAP *p,
     else
         p->u.soap_error->details = 0;
     return -1;
-}
-
-int z_soap_codec(ODR o, Z_SOAP **pp, 
-                 char **content_buf, int *content_len,
-                 Z_SOAP_Handler *handlers)
-{
-	return z_soap_codec_enc(o, pp, content_buf, content_len, handlers, 0);
 }
 
 int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
@@ -236,11 +229,11 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
     return 0;
 }
 #else
-int z_soap_codec(ODR o, Z_SOAP **pp, 
-                 char **content_buf, int *content_len,
-                 Z_SOAP_Handler *handlers)
+int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
+                     char **content_buf, int *content_len,
+                     Z_SOAP_Handler *handlers, const char *encoding)
 {
-    const char *err_xml =
+    static char *err_xml =
         "<?xml version=\"1.0\"?>\n"
         "<SOAP-ENV:Envelope"
         " xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
@@ -260,3 +253,10 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
     return -1;
 }
 #endif
+int z_soap_codec(ODR o, Z_SOAP **pp, 
+                 char **content_buf, int *content_len,
+                 Z_SOAP_Handler *handlers)
+{
+	return z_soap_codec_enc(o, pp, content_buf, content_len, handlers, 0);
+}
+

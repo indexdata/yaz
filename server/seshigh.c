@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.151 2003-03-24 22:26:50 adam Exp $
+ * $Id: seshigh.c,v 1.152 2003-03-25 09:55:11 adam Exp $
  */
 
 /*
@@ -840,6 +840,7 @@ static void process_http_request(association *assoc, request *req)
             memcpy (db, p0, p1 - p0);
             db[p1 - p0] = '\0';
         }
+#if HAVE_XML2
         if (p1 && *p1 == '?' && p1[1])
         {
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
@@ -943,6 +944,7 @@ static void process_http_request(association *assoc, request *req)
                 }
             }
         }
+#endif
 #ifdef DOCDIR
 	if (strlen(hreq->path) >= 5 && strlen(hreq->path) < 80 &&
 			 !memcmp(hreq->path, "/doc/", 5))
