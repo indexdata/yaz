@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fix CQL lex buffer overflow.
+
 recordPacking.
 
 SRU protocol support for frontend server.

@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.3 2003-02-14 18:49:23 adam Exp $
+/* $Id: cql.y,v 1.4 2003-04-11 15:53:39 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -13,14 +13,15 @@ See the file LICENSE.
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <yaz/nmem.h>
 #include <yaz/cql.h>
     
     typedef struct {
         struct cql_node *rel;
         struct cql_node *cql;
-        char buf[80];
+        char *buf;
         size_t len;
-        size_t max;
+        size_t size;
     } token;        
 
     struct cql_parser {
@@ -30,6 +31,7 @@ See the file LICENSE.
         int last_error;
         int last_pos;
         struct cql_node *top;
+        NMEM nmem;
     };
 
 #define YYSTYPE token
@@ -252,12 +254,20 @@ CQL_parser cql_parser_create(void)
 {
     CQL_parser cp = (CQL_parser) malloc (sizeof(*cp));
 
+    cp->top = 0;
+    cp->getbyte = 0;
+    cp->ungetbyte = 0;
+    cp->client_data = 0;
+    cp->last_error = 0;
+    cp->last_pos = 0;
+    cp->nmem = nmem_create();
     return cp;
 }
 
 void cql_parser_destroy(CQL_parser cp)
 {
     cql_node_destroy(cp->top);
+    nmem_destroy(cp->nmem);
     free (cp);
 }
 

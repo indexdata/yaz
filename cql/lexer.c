@@ -1,4 +1,4 @@
-/* $Id: lexer.c,v 1.1 2003-01-06 08:20:27 adam Exp $
+/* $Id: lexer.c,v 1.2 2003-04-11 15:53:39 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -6,6 +6,20 @@ This file is part of the YAZ toolkit.
 
 See the file LICENSE.
 */
+
+static void putb(YYSTYPE *lval, CQL_parser cp, int c)
+{
+    if (lval->len >= lval->size)
+    {
+        char *nb = nmem_malloc(cp->nmem, (lval->size = lval->len * 2 + 20));
+        memcpy (nb, lval->buf, lval->len);
+        lval->buf = nb;
+    }
+    if (c)
+        lval->buf[lval->len++] = c;
+    lval->buf[lval->len] = '\0';
+}
+
 /*
  * bison lexer for CQL.
  */
@@ -24,17 +38,18 @@ int yylex(YYSTYPE *lval, void *vp)
     } while (isspace(c));
     lval->rel = 0;
     lval->len = 0;
+    lval->size = 10;
+    lval->buf = nmem_malloc(cp->nmem, lval->size);
     if (strchr("()=></", c))
     {
         int c1;
-        lval->buf[lval->len++] = c;
+        putb(lval, cp, c);
         if (c == '>')
         {
             c1 = cp->getbyte(cp->client_data);
             if (c1 == '=')
             {
-                lval->buf[lval->len++] = c1;
-                lval->buf[lval->len] = 0;
+                putb(lval, cp, c1);
                 return GE;
             }
             else
@@ -45,20 +60,17 @@ int yylex(YYSTYPE *lval, void *vp)
             c1 = cp->getbyte(cp->client_data);
             if (c1 == '=')
             {
-                lval->buf[lval->len++] = c1;
-                lval->buf[lval->len] = 0;
+                putb(lval, cp, c1);
                 return LE;
             }
             else if (c1 == '>')
             {
-                lval->buf[lval->len++] = c1;
-                lval->buf[lval->len] = 0;
+                putb(lval, cp, c1);
                 return NE;
             }
             else
                 cp->ungetbyte(c1, cp->client_data);
         }
-        lval->buf[lval->len] = 0;
         return c;
     }
     if (c == '"')
@@ -67,21 +79,20 @@ int yylex(YYSTYPE *lval, void *vp)
         {
             if (c == '\\')
                 c = cp->getbyte(cp->client_data);
-            lval->buf[lval->len++] = c;
+            putb(lval, cp, c);
         }
-        lval->buf[lval->len] = 0;
+        putb(lval, cp, 0);
     }
     else
     {
-        lval->buf[lval->len++] = c;
+        putb(lval, cp, c);
         while ((c = cp->getbyte(cp->client_data)) != 0 &&
                !strchr(" \n()=<>/", c))
         {
             if (c == '\\')
                 c = cp->getbyte(cp->client_data);
-            lval->buf[lval->len++] = c;
+            putb(lval, cp, c);
         }
-        lval->buf[lval->len] = 0;
 #if YYDEBUG
         printf ("got %s\n", lval->buf);
 #endif
