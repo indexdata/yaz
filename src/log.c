@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.19 2004-12-30 00:11:00 adam Exp $
+ * $Id: log.c,v 1.20 2005-01-07 10:28:28 heikki Exp $
  */
 
 /**
@@ -136,7 +136,13 @@ void yaz_log_reopen(void)
     if (!*l_fname)
 	new_file = stderr;
     else if (!(new_file = fopen(l_fname, "a")))
+    {
+        new_file=l_file;
+        l_file=stderr;  /* just to be sure we don't rotate logs and recurse */
+        yaz_log(YLOG_WARN|YLOG_ERRNO,"Could not open log file '%s'",l_fname);
+        l_file=new_file; /* restore to old value, probably stderr as well */
         return;
+    }
     if (l_file != stderr)
     {
         fclose (l_file);
