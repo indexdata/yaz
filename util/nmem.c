@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.11  1998-08-21 14:13:36  adam
+ * Revision 1.12  1998-10-13 16:00:18  adam
+ * Implemented nmem_critical_{enter,leave}.
+ *
+ * Revision 1.11  1998/08/21 14:13:36  adam
  * Added GNU Configure script to build Makefiles.
  *
  * Revision 1.10  1998/07/20 12:35:57  adam
@@ -232,6 +235,16 @@ void nmem_destroy(NMEM n)
     logf (LOG_DEBUG, "%s:%d: nmem_destroy %d p=%p", file, line,
                      nmem_active_no, n);
 #endif
+}
+
+void nmem_critical_enter (void)
+{
+    NMEM_ENTER;
+}
+
+void nmem_critical_leave (void)
+{
+    NMEM_LEAVE;
 }
 
 void nmem_init (void)
