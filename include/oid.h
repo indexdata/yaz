@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.30  1999-04-09 12:16:11  adam
+ * Revision 1.31  1999-04-15 09:19:43  adam
+ * Added COOKIE UserInfo OID.
+ *
+ * Revision 1.30  1999/04/09 12:16:11  adam
  * Added OtherInfo private OID proxy.
  *
  * Revision 1.29  1998/12/03 11:33:04  adam
@@ -249,6 +252,7 @@ typedef enum oid_value
     VAL_APPLICATION_XML,
     VAL_UNIVERSE_REPORT,
     VAL_PROXY,
+    VAL_COOKIE,
 /* add new types here... */
 
 /* VAL_DYNAMIC must have highest value */

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.33  1999-04-09 12:16:11  adam
+ * Revision 1.34  1999-04-15 09:19:43  adam
+ * Added COOKIE UserInfo OID.
+ *
+ * Revision 1.33  1999/04/09 12:16:11  adam
  * Added OtherInfo private OID proxy.
  *
  * Revision 1.32  1999/02/18 10:30:46  quinn
@@ -248,6 +251,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH2,{10,5,-1},   "MultipleSearchTerms-2"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_DATETIME,  {10,6,-1},   "DateTime"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_PROXY,     {10,1000,81,1,-1}, "Proxy" },
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_PROXY,     {10,1000,81,2,-1}, "Cookie" },
 
     {PROTO_Z3950,   CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
 
