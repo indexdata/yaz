@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Renamed states for COMSTACKs to avoid confusion with events.
+
 Implemented cs_look and proper cs_rcvconnect.
 
 Fixed COMSTACK error that occurred on HPUX. Fix by Giannis Kosmas.

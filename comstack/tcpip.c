@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: tcpip.c,v $
- * Revision 1.42  2001-10-22 13:57:24  adam
+ * Revision 1.43  2001-10-22 16:00:04  adam
+ * Renamed states for COMSTACKs to avoid confusion with events.
+ *
+ * Revision 1.42  2001/10/22 13:57:24  adam
  * Implemented cs_rcvconnect and cs_look as described in the documentation.
  *
  * Revision 1.41  2001/10/12 21:49:26  adam
@@ -357,7 +360,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
     p->f_straddr = tcpip_straddr;
     p->f_set_blocking = tcpip_set_blocking;
 
-    p->state = new_socket ? CS_UNBND : CS_IDLE; /* state of line */
+    p->state = new_socket ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
     p->cerrno = 0;
     p->stackerr = 0;
@@ -490,7 +493,7 @@ int tcpip_connect(COMSTACK h, void *address)
 
     TRC(fprintf(stderr, "tcpip_connect\n"));
     h->io_pending = 0;
-    if (h->state == CS_UNBND)
+    if (h->state == CS_ST_UNBND)
     {
 	r = connect(h->iofile, (struct sockaddr *) add, sizeof(*add));
 	if (r < 0)
@@ -499,7 +502,7 @@ int tcpip_connect(COMSTACK h, void *address)
 	    if (WSAGetLastError() == WSAEWOULDBLOCK)
 	    {
 		h->event = CS_CONNECT;
-		h->state = CS_CONNECTING;
+		h->state = CS_ST_CONNECTING;
 		h->io_pending = CS_WANT_WRITE;
 		return 1;
 	    }
@@ -507,7 +510,7 @@ int tcpip_connect(COMSTACK h, void *address)
 	    if (errno == EINPROGRESS)
 	    {
 		h->event = CS_CONNECT;
-		h->state = CS_CONNECTING;
+		h->state = CS_ST_CONNECTING;
 		h->io_pending = CS_WANT_WRITE|CS_WANT_READ;
 		return 1;
 	    }
@@ -516,9 +519,9 @@ int tcpip_connect(COMSTACK h, void *address)
 	    return -1;
 	}
 	h->event = CS_CONNECT;
-	h->state = CS_CONNECTING;
+	h->state = CS_ST_CONNECTING;
     }
-    if (h->state != CS_CONNECTING)
+    if (h->state != CS_ST_CONNECTING)
     {
         h->cerrno = CSOUTSTATE;
 	return -1;
@@ -555,7 +558,7 @@ int tcpip_connect(COMSTACK h, void *address)
     }
 #endif
     h->event = CS_DATA;
-    h->state = CS_DATAXFER;
+    h->state = CS_ST_DATAXFER;
     return 0;
 }
 
@@ -586,15 +589,16 @@ int tcpip_rcvconnect(COMSTACK cs)
 	{
 	    if (FD_ISSET(cs->iofile, &output))
 	    {
-		cs->state = CS_DATA;
+		cs->event = CS_DATA;
 		return 0;   /* write OK, we're OK */
 	    }
 	    else
 		return -1;  /* an error, for sure */
 	}
-	return 0;  /* timeout - incomplete */
+	else if (r == 0)
+	    return 0;  /* timeout - incomplete */
     }
-    return -1;    /* wrong state */
+    return -1;    /* wrong state or bad select */
 }
 
 #define CERTF "ztest.pem"
@@ -664,7 +668,7 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
         h->cerrno = CSYSERR;
         return -1;
     }
-    h->state = CS_IDLE;
+    h->state = CS_ST_IDLE;
     h->event = CS_LISTEN;
     return 0;
 }
@@ -681,7 +685,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #endif
 
     TRC(fprintf(stderr, "tcpip_listen pid=%d\n", getpid()));
-    if (h->state != CS_IDLE)
+    if (h->state != CS_ST_IDLE)
     {
         h->cerrno = CSOUTSTATE;
         return -1;
@@ -722,7 +726,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 	h->newfd = -1;
 	return -1;
     }
-    h->state = CS_INCON;
+    h->state = CS_ST_INCON;
     return 0;
 }
 
@@ -735,7 +739,7 @@ COMSTACK tcpip_accept(COMSTACK h)
 #endif
 
     TRC(fprintf(stderr, "tcpip_accept\n"));
-    if (h->state == CS_INCON)
+    if (h->state == CS_ST_INCON)
     {
 	if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
 	{
@@ -793,8 +797,8 @@ COMSTACK tcpip_accept(COMSTACK h)
 	state->altsize = state->altlen = 0;
 	state->towrite = state->written = -1;
 	state->complete = st->complete;
-	cnew->state = CS_ACCEPT;
-	h->state = CS_IDLE;
+	cnew->state = CS_ST_ACCEPT;
+	h->state = CS_ST_IDLE;
 	
 #if HAVE_OPENSSL_SSL_H
 	state->ctx = st->ctx;
@@ -808,7 +812,7 @@ COMSTACK tcpip_accept(COMSTACK h)
 #endif
 	h = cnew;
     }
-    if (h->state == CS_ACCEPT)
+    if (h->state == CS_ST_ACCEPT)
     {
 #if HAVE_OPENSSL_SSL_H
 	tcpip_state *state = (tcpip_state *)h->cprivate;
@@ -843,7 +847,7 @@ COMSTACK tcpip_accept(COMSTACK h)
         return 0;
     }
     h->io_pending = 0;
-    h->state = CS_DATAXFER;
+    h->state = CS_ST_DATAXFER;
     h->event = CS_DATA;
     return h;
 }

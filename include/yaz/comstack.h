@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.6 2001-10-22 13:57:24 adam Exp $
+ * $Id: comstack.h,v 1.7 2001-10-22 16:00:04 adam Exp $
  */
 
 #ifndef COMSTACK_H
@@ -79,19 +79,19 @@ struct comstack
     void *cprivate;/* state info for lower stack */
     int more;      /* connection has extra data in buffer */
     int state;     /* current state */
-#define CS_UNBND      0
-#define CS_IDLE       1
-#define CS_INCON      2
-#define CS_OUTCON     3
-#define CS_DATAXFER   4
-#define CS_ACCEPT     5
-#define CS_CONNECT    6
+#define CS_ST_UNBND      0
+#define CS_ST_IDLE       1
+#define CS_ST_INCON      2
+#define CS_ST_OUTCON     3
+#define CS_ST_DATAXFER   4
+#define CS_ST_ACCEPT     5
+#define CS_ST_CONNECTING 6
     int newfd;     /* storing new descriptor between listen and accept */
     int blocking;  /* is this link (supposed to be) blocking? */
     unsigned io_pending; /* flag to signal read / write op is incomplete */
     int event;     /* current event */
 #define CS_NONE       0
-#define CS_CONNECTING 1
+#define CS_CONNECT    1
 #define CS_DISCON     2
 #define CS_LISTEN     3
 #define CS_DATA       4
