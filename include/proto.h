@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.43  1998-03-31 11:07:45  adam
+ * Revision 1.44  1998-05-18 10:14:08  adam
+ * Minor change - removed 'dead' definitions.
+ *
+ * Revision 1.43  1998/03/31 11:07:45  adam
  * Furhter work on UNIverse resource report.
  * Added Extended Services handling in frontend server.
  *
@@ -878,8 +881,6 @@ typedef struct Z_AlternativeTerm
     Z_AttributesPlusTerm **terms;
 } Z_AlternativeTerm;
 
-#if 1
-
 typedef struct Z_ByDatabase
 {
     char *db;
@@ -918,31 +919,6 @@ typedef struct Z_OccurrenceByAttributes
     int num_elements;
     Z_OccurrenceByAttributesElem **elements;
 } Z_OccurrenceByAttributes;
-
-#else
-
-/*
- * Old, incomplete definition of OccurrenceByAttributes.
- */
-
-typedef struct Z_OccurrenceByAttributes
-{
-    Z_AttributeList *attributes;
-#if 0
-    int which;
-#define Z_OByAtt_global 0
-#define Z_ObyAtt_byDatabase 1
-    union
-    {
-#endif
-    	int *global;
-#if 0
-	/* Z_ByDatabase *byDatabase; */
-    } u;
-#endif
-} Z_OccurrenceByAttributes;
-
-#endif
 
 typedef struct Z_TermInfo
 {
