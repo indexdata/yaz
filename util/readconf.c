@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: readconf.c,v $
- * Revision 1.1  1995-11-01 13:55:06  quinn
+ * Revision 1.2  1996-05-29 10:05:01  quinn
+ * Changed space criteria to support 8-bit characters
+ *
+ * Revision 1.1  1995/11/01  13:55:06  quinn
  * Minor adjustments
  *
  * Revision 1.2  1995/10/30  13:54:27  quinn
@@ -20,6 +23,8 @@
 #include <ctype.h>
 
 #include <log.h>
+
+#define l_isspace(c) ((c) == '\t' || (c) == ' ')
 
 int readconf_line(FILE *f, char *line, int len, char *argv[], int num)
 {
@@ -41,12 +46,12 @@ int readconf_line(FILE *f, char *line, int len, char *argv[], int num)
 	if (*p == '#')  /* trailing comment */
 	    break;
 	argv[argc] = p;
-	while (*p && !isspace(*p))
+	while (*p && !l_isspace(*p))
 	    p++;
 	if (*p)
 	{
 	    *(p++) = '\0';
-	    while (*p && isspace(*p))
+	    while (*p && l_isspace(*p))
 		p++;
 	}
     }
