@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.2  1995-05-26 08:56:11  adam
+ * Revision 1.3  1995-06-14 11:06:35  adam
+ * Bug fix: Attributes wasn't interpreted correctly!
+ *
+ * Revision 1.2  1995/05/26  08:56:11  adam
  * New function: p_query_scan.
  *
  * Revision 1.1  1995/05/22  15:31:49  adam
@@ -100,14 +103,19 @@ static Z_AttributesPlusTerm *rpn_term (ODR o, int num_attr, int *attr_list)
     if (num_attr)
     {
         int i;
+        int *attr_tmp;
+
         zapt->attributeList = odr_malloc (o, num_attr * 
                                           sizeof(*zapt->attributeList));
+
+        attr_tmp = odr_malloc (o, num_attr * 2 * sizeof(int));
+        memcpy (attr_tmp, attr_list, num_attr * 2 * sizeof(int));
         for (i = 0; i < num_attr; i++)
         {
             zapt->attributeList[i] =
                 odr_malloc (o,sizeof(**zapt->attributeList));
-            zapt->attributeList[i]->attributeType = &attr_list[2*i];
-            zapt->attributeList[i]->attributeValue = &attr_list[2*i+1];
+            zapt->attributeList[i]->attributeType = &attr_tmp[2*i];
+            zapt->attributeList[i]->attributeValue = &attr_tmp[2*i+1];
         }
     }
     else
