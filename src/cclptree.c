@@ -41,10 +41,19 @@
  * USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+
+/** 
+ * \file cclptree.c
+ * \brief Implements CCL parse tree printing
+ *
+ * This source file implements functions to parse and print
+ * a CCL node tree (as a result of parsing).
+ */
+
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.2 2003-12-18 13:08:48 adam Exp $
+ * $Id: cclptree.c,v 1.3 2004-10-15 00:18:59 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -265,7 +274,7 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
 
 /*
  * Local variables:
- * tab-width: 4
+ * tab-width: 8
  * c-basic-offset: 4
  * End:
  */

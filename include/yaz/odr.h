@@ -23,7 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.16 2004-08-13 07:30:06 adam Exp $
+ * $Id: odr.h,v 1.17 2004-10-15 00:18:59 adam Exp $
+ */
+
+/**
+ * \file odr.h
+ * \brief Header for ODR (Open Data Representation)
  */
 
 #ifndef ODR_H

@@ -1,6 +1,12 @@
 /*
- * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.4 2004-02-23 09:26:11 adam Exp $
+ * Copyright (c) 2000-2004, Index Data
+ * See the file LICENSE for details.
+ *
+ * $Id: zoom-p.h,v 1.5 2004-10-15 00:19:02 adam Exp $
+ */
+/**
+ * \file zoom-p.h
+ * \brief Internal header for ZOOM implementation
  */
 
 #include <yaz/proto.h>

@@ -2,9 +2,15 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.7 2004-10-02 13:28:26 adam Exp $
+ * $Id: odr.c,v 1.8 2004-10-15 00:19:00 adam Exp $
  *
  */
+
+/**
+ * \file odr.c
+ * \brief Implements fundamental ODR functionality
+ */
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif

@@ -41,10 +41,22 @@
  * USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+
+/** 
+ * \file cclfind.c
+ * \brief Implements parsing of a CCL FIND query.
+ *
+ * This source file implements parsing of a CCL Query (ISO8777).
+ * The parser uses predictive parsing, but it does several tokens
+ * of lookahead in the handling of relational operations.. So
+ * it's not really pure.
+ */
+
+
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.5 2004-10-10 21:43:21 adam Exp $
+ * $Id: cclfind.c,v 1.6 2004-10-15 00:18:59 adam Exp $
  *
  * Old Europagate log:
  *
@@ -109,7 +121,7 @@
 /* move one token forward */
 #define ADVANCE cclp->look_token = cclp->look_token->next
 
-/* 
+/**
  * qual_val_type: test for existance of attribute type/value pair.
  * qa:     Attribute array
  * type:   Type of attribute to search for
@@ -139,7 +151,7 @@ static int qual_val_type (struct ccl_rpn_attr **qa, int type, int value,
     return 0;
 }
 
-/*
+/**
  * strxcat: concatenate strings.
  * n:      Null-terminated Destination string 
  * src:    Source string to be appended (not null-terminated)
@@ -154,7 +166,7 @@ static void strxcat (char *n, const char *src, int len)
     *n = '\0';
 }
 
-/*
+/**
  * copy_token_name: Return copy of CCL token name
  * tp:      Pointer to token info.
  * return:  malloc(3) allocated copy of token name.
@@ -168,7 +180,7 @@ static char *copy_token_name (struct ccl_token *tp)
     return str;
 }
 
-/*
+/**
  * mk_node: Create RPN node.
  * kind:   Type of node.
  * return: pointer to allocated node.
@@ -182,7 +194,7 @@ static struct ccl_rpn_node *mk_node (int kind)
     return p;
 }
 
-/*
+/**
  * ccl_rpn_delete: Delete RPN tree.
  * rpn:   Pointer to tree.
  */
@@ -260,7 +272,7 @@ static struct ccl_rpn_attr *add_attr_node (struct ccl_rpn_node *p,
     return n;
 }
 
-/*
+/**
  * add_attr_numeric: Add attribute (type/value) to RPN term node.
  * p:     RPN node of type term.
  * type:  Type of attribute
@@ -288,7 +300,7 @@ static void add_attr_string (struct ccl_rpn_node *p, const char *set,
 }
 
 
-/*
+/**
  * search_term: Parse CCL search term. 
  * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
@@ -740,7 +752,7 @@ struct ccl_rpn_node *qualifiers2 (CCL_parser cclp, struct ccl_rpn_attr **ap)
     return p;
 }
 
-/*
+/**
  * qualifiers1: Parse CCL qualifiers and search terms. 
  * cclp:   CCL Parser
  * la:     Token pointer to RELATION token.
@@ -892,7 +904,7 @@ static struct ccl_rpn_node *qualifiers1 (CCL_parser cclp, struct ccl_token *la,
 }
 
 
-/*
+/**
  * search_terms: Parse CCL search terms - including proximity.
  * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
@@ -954,7 +966,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
     return p1;
 }
 
-/*
+/**
  * search_elements: Parse CCL search elements
  * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
@@ -1048,7 +1060,7 @@ static struct ccl_rpn_node *search_elements (CCL_parser cclp,
     }
 }
 
-/*
+/**
  * find_spec: Parse CCL find specification
  * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
@@ -1135,7 +1147,7 @@ struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list)
     return p;
 }
 
-/*
+/**
  * ccl_find: Parse CCL find - token representation
  * bibset:  Bibset to be used for the parsing
  * list:    List of tokens
@@ -1161,7 +1173,7 @@ struct ccl_rpn_node *ccl_find (CCL_bibset bibset, struct ccl_token *list,
     return p;
 }
 
-/*
+/**
  * ccl_find_str: Parse CCL find - string representation
  * bibset:  Bibset to be used for the parsing
  * str:     String to be parsed

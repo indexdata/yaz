@@ -2,7 +2,11 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.17 2004-10-09 08:49:55 adam Exp $
+ * $Id: srwutil.c,v 1.18 2004-10-15 00:19:01 adam Exp $
+ */
+/**
+ * \file srwutil.c
+ * \brief Implements SRW/SRU utilities.
  */
 
 #include <yaz/srw.h>

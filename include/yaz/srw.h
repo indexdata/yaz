@@ -2,7 +2,11 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.16 2004-02-14 15:58:42 adam Exp $
+ * $Id: srw.h,v 1.17 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file srw.h
+ * \brief Header for SRW/SRU
  */
 
 #ifndef YAZ_SRW_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: marcdisp.h,v 1.9 2003-12-11 00:37:21 adam Exp $
+ * $Id: marcdisp.h,v 1.10 2004-10-15 00:18:59 adam Exp $
+ */
+
+/**
+ * \file marcdisp.h
+ * \brief Header for MARC display - and conversion utilities
  */
 
 #ifndef MARCDISP_H

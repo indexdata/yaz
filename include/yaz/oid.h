@@ -23,9 +23,17 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.21 2003-11-19 13:47:20 mike Exp $
+ * $Id: oid.h,v 1.22 2004-10-15 00:18:59 adam Exp $
  */
 
+/**
+ * \file oid.h
+ * \brief Header for OID database
+ *
+ * More or less protocol-transparent OID database.
+ * We could (and should?) extend this so that the user app can add new
+ * entries to the list at initialization.
+ */
 #ifndef OID_H
 #define OID_H
 

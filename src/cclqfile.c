@@ -41,10 +41,14 @@
  * USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/** 
+ * \file cclqfile.c
+ * \brief Implements parsing of CCL qualifier specs in files
+ */
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.5 2004-10-02 13:28:26 adam Exp $
+ * $Id: cclqfile.c,v 1.6 2004-10-15 00:19:00 adam Exp $
  *
  * Old Europagate Log:
  *

@@ -2,7 +2,11 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_oct.c,v 1.5 2004-10-02 13:28:26 adam Exp $
+ * $Id: odr_oct.c,v 1.6 2004-10-15 00:19:00 adam Exp $
+ */
+/**
+ * \file odr_oct.c
+ * \brief Implements ODR OCTET codec
  */
 #if HAVE_CONFIG_H
 #include <config.h>

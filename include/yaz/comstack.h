@@ -23,7 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.16 2004-05-10 10:47:04 adam Exp $
+ * $Id: comstack.h,v 1.17 2004-10-15 00:18:59 adam Exp $
+ */
+
+/** 
+ * \file comstack.h
+ * \brief Header for COMSTACK
  */
 
 #ifndef COMSTACK_H

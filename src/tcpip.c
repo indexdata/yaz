@@ -2,7 +2,11 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.10 2004-09-21 14:59:01 adam Exp $
+ * $Id: tcpip.c,v 1.11 2004-10-15 00:19:01 adam Exp $
+ */
+/**
+ * \file tcpip.c
+ * \brief Implements TCP/IP + SSL COMSTACK.
  */
 
 #include <stdio.h>

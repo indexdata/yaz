@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_seq.c,v 1.1 2003-10-27 12:21:34 adam Exp $
+ * $Id: odr_seq.c,v 1.2 2004-10-15 00:19:00 adam Exp $
  */
-
+/**
+ * \file odr_seq.c
+ * \brief Implements ODR SEQUENCE codec
+ */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif

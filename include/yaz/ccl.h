@@ -43,13 +43,13 @@
  */
 
 /** \file ccl.h
-    \brief Header with public definitions about CCL.
+    \brief Header with public definitions for CCL.
 */
 
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.19 2004-10-03 22:34:07 adam Exp $
+ * $Id: ccl.h,v 1.20 2004-10-15 00:18:59 adam Exp $
  *
  * Old Europagate Log:
  *

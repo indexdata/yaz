@@ -41,10 +41,14 @@
  * USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/** 
+ * \file cclstr.c
+ * \brief Implements CCL string compare utilities
+ */
 /* CCL string compare utilities
  * Europagate, 1995
  *
- * $Id: cclstr.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: cclstr.c,v 1.2 2004-10-15 00:19:00 adam Exp $
  *
  * Old Europagate Log:
  *

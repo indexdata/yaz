@@ -2,7 +2,11 @@
  * Copyright (c) 2003-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: opacdisp.c,v 1.2 2004-03-10 21:09:01 adam Exp $
+ * $Id: opacdisp.c,v 1.3 2004-10-15 00:19:00 adam Exp $
+ */
+/**
+ * \file opacdisp.c
+ * \brief Implements OPAC record display
  */
 
 #include <stdio.h>

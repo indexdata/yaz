@@ -1,6 +1,12 @@
 /*
- * Public header for ZOOM C.
- * $Id: zoom.h,v 1.23 2004-04-28 22:44:59 adam Exp $
+ * Copyright (c) 2000-2004, Index Data
+ * See the file LICENSE for details.
+ *
+ * $Id: zoom.h,v 1.24 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file zoom.h
+ * \brief Header for ZOOM
  */
 
 #include <stdlib.h>

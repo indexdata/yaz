@@ -2,7 +2,14 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.8 2004-10-02 13:28:26 adam Exp $
+ * $Id: soap.c,v 1.9 2004-10-15 00:19:00 adam Exp $
+ */
+/**
+ * \file soap.c
+ * \brief Implements SOAP
+ *
+ * This implements encoding and decoding of SOAP packages using
+ * Libxml2.
  */
 
 #include <yaz/soap.h>

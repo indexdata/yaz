@@ -1,8 +1,13 @@
 /*
- * Copyright (c) 1997-2003, Index Data.
+ * Copyright (c) 1997-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: logrpn.h,v 1.4 2003-03-03 19:57:35 adam Exp $
+ * $Id: logrpn.h,v 1.5 2004-10-15 00:18:59 adam Exp $
+ */
+
+/**
+ * \file logrpn.h
+ * \brief Header for Z39.50 Query Printing
  */
 
 #ifndef LOG_RPN_H

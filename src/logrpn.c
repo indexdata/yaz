@@ -1,9 +1,15 @@
 /*
- * Copyright (C) 1995-2003, Index Data
+ * Copyright (C) 1995-2004, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.2 2004-09-13 09:23:33 adam Exp $
+ * $Id: logrpn.c,v 1.3 2004-10-15 00:19:00 adam Exp $
  */
+
+/**
+ * \file logrpn.c
+ * \brief Implements Z39.50 Query Printing
+ */
+
 #include <stdio.h>
 
 #include <yaz/log.h>

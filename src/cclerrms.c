@@ -41,10 +41,20 @@
  * USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+
+/** 
+ * \file cclerrms.c
+ * \brief Implements CCL error code to error string map.
+ *
+ * This source file implements mapping between CCL error code and
+ * their string equivalents.
+ */
+
+
 /*
  * Europagate, 1995
  *
- * $Id: cclerrms.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: cclerrms.c,v 1.2 2004-10-15 00:18:59 adam Exp $
  *
  * Old Europagate Log:
  *

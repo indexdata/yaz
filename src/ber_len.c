@@ -1,10 +1,18 @@
 /*
- * Copyright (C) 1995-2003, Index Data.
+ * Copyright (C) 1995-2004, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_len.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: ber_len.c,v 1.2 2004-10-15 00:18:59 adam Exp $
  */
+
+/** 
+ * \file ber_len.c
+ * \brief Implements BER length octet encoding and decoding
+ *
+ * This source file implements BER encoding and decoding of
+ * the length octets.
+ */
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -12,7 +20,8 @@
 #include <stdio.h>
 #include "odr-priv.h"
 
-/*
+/**
+ * ber_enclen:
  * Encode BER length octets. If exact, lenlen is the exact desired
  * encoding size, else, lenlen is the max available space. Len < 0 =
  * Indefinite encoding.
@@ -78,7 +87,8 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
     return odr_tell(o) - lenpos;
 }
 
-/*
+/**
+ * ber_declen:
  * Decode BER length octets. Returns 
  *  > 0  : number of bytes read 
  *   -1  : not enough room to read bytes within max bytes

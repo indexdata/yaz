@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: statserv.h,v 1.6 2003-03-03 19:57:35 adam Exp $
+ * $Id: statserv.h,v 1.7 2004-10-15 00:18:59 adam Exp $
+ */
+
+/**
+ * \file statserv.h
+ * \brief Header for GFS (Obsolete. Use yaz/backend.h)
  */
 
 #ifndef STATSERVER_H

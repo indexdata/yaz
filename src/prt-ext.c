@@ -2,7 +2,12 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.2 2004-09-03 18:55:19 adam Exp $
+ * $Id: prt-ext.c,v 1.3 2004-10-15 00:19:00 adam Exp $
+ */
+
+/**
+ * \file prt-ext.c
+ * \brief Implements handling of various Z39.50 Externals
  */
 
 #include <yaz/proto.h>

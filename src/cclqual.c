@@ -41,10 +41,14 @@
  * USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/** 
+ * \file cclqual.c
+ * \brief Implements CCL qualifier utilities
+ */
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: cclqual.c,v 1.2 2004-10-15 00:19:00 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -84,14 +88,14 @@
 
 #include <yaz/ccl.h>
 
-/* Definition of CCL_bibset pointer */
+/** Definition of CCL_bibset pointer */
 struct ccl_qualifiers {
     struct ccl_qualifier *list;
     struct ccl_qualifier_special *special;
 };
 
 
-/* CCL Qualifier special */
+/** CCL Qualifier special */
 struct ccl_qualifier_special {
     char *name;
     char *value;
@@ -184,7 +188,7 @@ void ccl_qual_add_combi (CCL_bibset b, const char *n, const char *names)
     }
 }
 
-/*
+/**
  * ccl_qual_add: Add qualifier to Bibset. If qualifier already
  *               exists, then attributes are appendend to old
  *               definition.
@@ -254,7 +258,7 @@ void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
     *attrp = NULL;
 }
 
-/*
+/**
  * ccl_qual_mk: Make new (empty) bibset.
  * return:   empty bibset.
  */
@@ -267,7 +271,7 @@ CCL_bibset ccl_qual_mk (void)
     return b;
 }
 
-/*
+/**
  * ccl_qual_rm: Delete bibset.
  * b:        pointer to bibset
  */
@@ -308,7 +312,7 @@ void ccl_qual_rm (CCL_bibset *b)
     *b = NULL;
 }
 
-/*
+/**
  * ccl_qual_search: Search for qualifier in bibset.
  * b:      Bibset
  * name:   Name of qualifier to search for (need no null-termination)

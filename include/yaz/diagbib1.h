@@ -23,7 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: diagbib1.h,v 1.3 2003-03-03 19:57:35 adam Exp $
+ * $Id: diagbib1.h,v 1.4 2004-10-15 00:18:59 adam Exp $
+ */
+
+/**
+ * \file diagbib1.h
+ * \brief Declares diagbib1_str
  */
 
 #ifndef DIAGBIB1_H

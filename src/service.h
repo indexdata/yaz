@@ -2,17 +2,11 @@
  * NT Service interface Utility.
  *  Based on code written by
  *     Chas Woodfield, Fretwell Downing Datasystems.
- * $Log: service.h,v $
- * Revision 1.1  2003-10-27 12:21:35  adam
- * Source restructure. yaz-marcdump part of installation
- *
- * Revision 1.1  1997/11/07 13:31:52  adam
- * Added NT Service name part of statserv_options_block. Moved NT
- * service utility to server library.
- *
- * Revision 1.2  1997/09/04 13:50:30  adam
- * Bug fix in ztest.
- *
+ * $Id: service.h,v 1.2 2004-10-15 00:19:00 adam Exp $
+ */
+/**
+ * \file service.h
+ * \brief Header for NT service handling.
  */
 
 #ifndef SERVICE_INCLUDED

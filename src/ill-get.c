@@ -1,40 +1,13 @@
 /*
- * Copyright (c) 1999-2001, Index Data.
+ * Copyright (c) 1999-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Log: ill-get.c,v $
- * Revision 1.1  2003-10-27 12:21:30  adam
- * Source restructure. yaz-marcdump part of installation
- *
- * Revision 1.9  2001/03/25 21:55:12  adam
- * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
- *
- * Revision 1.8  2001/02/21 13:46:53  adam
- * C++ fixes.
- *
- * Revision 1.7  2001/02/20 11:25:32  adam
- * Added ill_get_APDU and ill_get_Cancel.
- *
- * Revision 1.6  2000/08/10 08:41:26  adam
- * Fixes for ILL.
- *
- * Revision 1.5  2000/02/24 08:52:01  adam
- * Bug fix.
- *
- * Revision 1.4  2000/02/04 11:01:15  adam
- * Added more elements.
- *
- * Revision 1.3  2000/01/31 13:15:21  adam
- * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
- * that some characters are not surrounded by spaces in resulting term.
- * ILL-code updates.
- *
- * Revision 1.2  2000/01/15 09:38:51  adam
- * Implemented ill_get_ILLRequest. Added some type mappings for ILL protocol.
- *
- * Revision 1.1  1999/12/16 23:36:19  adam
- * Implemented ILL protocol. Minor updates ASN.1 compiler.
- *
+ * $Id: ill-get.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ */
+
+/**
+ * \file ill-get.c
+ * \brief Implements ILL package creator utilities
  */
 
 #include <yaz/ill.h>

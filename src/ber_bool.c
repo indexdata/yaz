@@ -1,9 +1,16 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_bool.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: ber_bool.c,v 1.2 2004-10-15 00:18:59 adam Exp $
+ */
+
+/** 
+ * \file ber_bool.c
+ * \brief Implements BER BOOLEAN encoding and decoding
+ *
+ * This source file implements BER encoding and decoding of
+ * the BOOLEAN type.
  */
 
 #if HAVE_CONFIG_H

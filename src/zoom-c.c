@@ -2,10 +2,13 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.30 2004-10-02 13:28:26 adam Exp $
- *
- * ZOOM layer for C, connections, result sets, queries.
+ * $Id: zoom-c.c,v 1.31 2004-10-15 00:19:01 adam Exp $
  */
+/**
+ * \file zoom-c.c
+ * \brief Implements ZOOM C interface.
+ */
+
 #include <assert.h>
 #include <string.h>
 #include "zoom-p.h"
@@ -1001,7 +1004,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.30 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.31 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,

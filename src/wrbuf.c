@@ -2,11 +2,12 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.5 2004-10-01 11:44:46 adam Exp $
+ * $Id: wrbuf.c,v 1.6 2004-10-15 00:19:01 adam Exp $
  */
 
-/*
- * Growing buffer for writing various stuff.
+/**
+ * \file wrbuf.c
+ * \brief Implements WRBUF (growing buffer)
  */
 
 #if HAVE_CONFIG_H

@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.6 2004-10-03 22:34:07 adam Exp $
+/* $Id: cql.y,v 1.7 2004-10-15 00:19:00 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -14,6 +14,7 @@ See the file LICENSE.
  * \brief Implements CQL parser.
  *
  * This is a YACC parser, but since it must be reentrant, Bison is required.
+ * The original source file is cql.y.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,12 +23,18 @@ See the file LICENSE.
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/cql.h>
-    
+
+    /** Node in the LALR parse tree. */
     typedef struct {
+	/** Inhereted attribute: relation */
         struct cql_node *rel;
+	/** Synthesized attribute: CQL node */
         struct cql_node *cql;
+	/** string buffer with token */
         char *buf;
+	/** length of token */
         size_t len;
+	/** size of buffer (len <= size) */
         size_t size;
     } token;        
 
@@ -185,8 +192,10 @@ int yyerror(char *s)
     return 0;
 }
 
-/*
- * bison lexer for CQL.
+/**
+ * putb is a utility that puts one character to the string
+ * in current lexical token. This routine deallocates as
+ * necessary using NMEM.
  */
 
 static void putb(YYSTYPE *lval, CQL_parser cp, int c)
@@ -204,6 +213,10 @@ static void putb(YYSTYPE *lval, CQL_parser cp, int c)
 }
 
 
+/**
+ * yylex returns next token for Bison to be read. In this
+ * case one of the CQL terminals are returned.
+ */
 int yylex(YYSTYPE *lval, void *vp)
 {
     CQL_parser cp = (CQL_parser) vp;

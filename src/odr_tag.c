@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_tag.c,v 1.1 2003-10-27 12:21:34 adam Exp $
+ * $Id: odr_tag.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ */
+/**
+ * \file odr_tag.c
+ * \brief Implements ODR IMPLICIT tagging codec
  */
 #if HAVE_CONFIG_H
 #include <config.h>

@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1998-2003, Index Data
+ * Copyright (c) 1998-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: zgdu.h,v 1.2 2003-12-04 11:46:36 adam Exp $
+ * $Id: zgdu.h,v 1.3 2004-10-15 00:18:59 adam Exp $
  */
+
+/**
+ * \file zgdu.h
+ * \brief Header for the Z_GDU (HTTP or Z39.50 package)
+ */
+
 #ifndef Z_GDU_H
 #define Z_GDU_H
 

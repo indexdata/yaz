@@ -2,7 +2,12 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: initopt.c,v 1.2 2004-01-15 10:16:27 adam Exp $
+ * $Id: initopt.c,v 1.3 2004-10-15 00:19:00 adam Exp $
+ */
+
+/**
+ * \file initopt.c
+ * \brief Implements Z39.50 Init Options Utility
  */
 
 #if HAVE_CONFIG_H

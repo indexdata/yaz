@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,11 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-iconv.h,v 1.4 2003-05-06 11:51:23 adam Exp $
+ * $Id: yaz-iconv.h,v 1.5 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file yaz-iconv.h
+ * \brief Header for YAZ iconv interface
  */
 
 #ifndef YAZ_ICONV_H

@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_choice.c,v 1.2 2004-08-11 12:15:38 adam Exp $
+ * $Id: odr_choice.c,v 1.3 2004-10-15 00:19:00 adam Exp $
  */
+
+/**
+ * \file odr_choice.c
+ * \brief Implements ODR CHOICE codec
+ */
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif

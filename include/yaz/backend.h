@@ -23,7 +23,15 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.25 2004-04-30 19:10:35 adam Exp $
+ * $Id: backend.h,v 1.26 2004-10-15 00:18:59 adam Exp $
+ */
+
+/** 
+ * \file backend.h
+ * \brief Header for GFS
+ *
+ * This header includes all public definitions for the
+ * Generic Frontend Server (GFS).
  */
 
 #ifndef BACKEND_H

@@ -2,50 +2,13 @@
  * NT Service interface Utility.
  *  Based on code written by
  *     Chas Woodfield, Fretwell Downing Informatics.
- * $Log: service.c,v $
- * Revision 1.1  2003-10-27 12:21:35  adam
- * Source restructure. yaz-marcdump part of installation
- *
- * Revision 1.5  2001/11/13 23:00:42  adam
- * Separate malloc debug library. Removal of ASN_COMPILED-#ifdefs.
- *
- * Revision 1.4  2000/12/05 19:05:10  adam
- * Service automatically starts in the directory from which it was installed.
- *
- * Revision 1.3  1999/06/10 11:45:30  adam
- * Added bend_start, bend_stop handlers and removed pre_init.
- * Handlers bend_start/bend_stop are called when service/daemon is
- * started/stopped.
- *
- * Revision 1.2  1999/02/02 13:57:36  adam
- * Uses preprocessor define WIN32 instead of WINDOWS to build code
- * for Microsoft WIN32.
- *
- * Revision 1.1  1997/11/07 13:31:52  adam
- * Added NT Service name part of statserv_options_block. Moved NT
- * service utility to server library.
- *
- * Revision 1.6  1997/09/18 08:49:14  adam
- * Option -runnormal no needed to run server in standalone mode.
- *
- * Revision 1.5  1997/09/17 12:10:43  adam
- * YAZ version 1.4.
- *
- * Revision 1.4  1997/09/09 10:10:20  adam
- * Another MSV5.0 port. Changed projects to include proper
- * library/include paths.
- * Server starts server in test-mode when no options are given.
- *
- * Revision 1.3  1997/09/04 13:50:30  adam
- * Bug fix in ztest.
- *
+ * $Id: service.c,v 1.2 2004-10-15 00:19:00 adam Exp $
  */
 
-/************************************************************/
-/* Note this file is shared by all processes                */
-/* Should really put it somewhere other than here           */
-/* For some strange reason it won't work when part of a lib */
-/************************************************************/
+/**
+ * \file service.c
+ * \brief Implements NT service handling for GFS.
+ */
 
 #ifdef WIN32
 

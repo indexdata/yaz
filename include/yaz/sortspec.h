@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,9 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: sortspec.h,v 1.1 2001-08-08 19:35:06 adam Exp $
+ * $Id: sortspec.h,v 1.2 2004-10-15 00:18:59 adam Exp $
  */
-
+/**
+ * \file sortspec.h
+ * \brief Header for SortSpec parsing.
+ */
 #ifndef SORTSPEC_H
 #define SORTSPEC_H
 

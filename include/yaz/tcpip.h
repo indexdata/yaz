@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,11 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: tcpip.h,v 1.4 2003-03-03 19:57:35 adam Exp $
+ * $Id: tcpip.h,v 1.5 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file tcpip.h
+ * \brief Header for TCP/IP + SSL COMSTACK.
  */
 
 #ifndef TCPIP_H

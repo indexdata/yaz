@@ -2,7 +2,12 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.10 2004-08-11 12:15:38 adam Exp $
+ * $Id: zgdu.c,v 1.11 2004-10-15 00:19:01 adam Exp $
+ */
+
+/**
+ * \file zgdu.c
+ * \brief Implements HTTP and Z39.50 encoding and decoding.
  */
 
 #include <ctype.h>

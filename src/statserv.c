@@ -5,7 +5,12 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.8 2004-05-10 10:47:04 adam Exp $
+ * $Id: statserv.c,v 1.9 2004-10-15 00:19:01 adam Exp $
+ */
+
+/**
+ * \file statserv.c
+ * \brief Implements GFS logic
  */
 
 #include <stdio.h>

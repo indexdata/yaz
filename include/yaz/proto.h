@@ -2,7 +2,11 @@
  * Copyright (c) 1998-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: proto.h,v 1.15 2004-05-10 07:52:07 adam Exp $
+ * $Id: proto.h,v 1.16 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file proto.h
+ * \brief Header for Z39.50 Protocol
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H

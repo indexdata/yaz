@@ -41,10 +41,14 @@
  * USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/** 
+ * \file ccltoken.c
+ * \brief Implements CCL lexical analyzer (scanner)
+ */
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.4 2004-10-02 13:28:26 adam Exp $
+ * $Id: ccltoken.c,v 1.5 2004-10-15 00:19:00 adam Exp $
  *
  * Old Europagate Log:
  *

@@ -2,7 +2,11 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.h,v 1.7 2004-01-07 21:02:42 adam Exp $
+ * $Id: soap.h,v 1.8 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file soap.h
+ * \brief Header for SOAP
  */
 
 #ifndef YAZ_SOAP_H

@@ -1,14 +1,12 @@
 /*
- * Copyright (C) 1994-2003, Index Data.
+ * Copyright (C) 1994-2004, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: requestq.c,v 1.1 2003-10-27 12:21:35 adam Exp $
- *
+ * $Id: requestq.c,v 1.2 2004-10-15 00:19:00 adam Exp $
  */
-
-/*
- * Simple queue management.
+/**
+ * \file requestq.c
+ * \brief Implements Simple queue management for GFS.
  *
  * We also use the request-freelist to store encoding buffers, rather than
  * freeing and xmalloc'ing them on each cycle.

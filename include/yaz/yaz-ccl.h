@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,11 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-ccl.h,v 1.6 2003-06-24 23:03:04 adam Exp $
+ * $Id: yaz-ccl.h,v 1.7 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file yaz-ccl.h
+ * \brief Header for CCL node tree to RPN converson utilities.
  */
 
 #ifndef YAZ_CCL_H

@@ -2,9 +2,15 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_cons.c,v 1.3 2004-08-13 07:30:06 adam Exp $
+ * $Id: odr_cons.c,v 1.4 2004-10-15 00:19:00 adam Exp $
  *
  */
+
+/**
+ * \file odr_cons.c
+ * \brief Implements ODR constructed codec.
+ */
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif

@@ -2,7 +2,15 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: ber_tag.c,v 1.2 2004-04-14 12:58:27 adam Exp $
+ * $Id: ber_tag.c,v 1.3 2004-10-15 00:18:59 adam Exp $
+ */
+
+/** 
+ * \file ber_tag.c
+ * \brief Implements BER tags encoding and decoding
+ *
+ * This source file implements BER encoding and decoding of
+ * the tags.
  */
 #if HAVE_CONFIG_H
 #include <config.h>

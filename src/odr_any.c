@@ -1,17 +1,22 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_any.c,v 1.2 2004-08-11 12:15:38 adam Exp $
+ * $Id: odr_any.c,v 1.3 2004-10-15 00:19:00 adam Exp $
  */
+
+/**
+ * \file odr_any.c
+ * \brief Implements ODR ANY codec
+ */
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include "odr-priv.h"
 
-/*
+/**
  * This is a catch-all type. It stuffs a random ostring (assumed to be properly
  * encoded) into the stream, or reads a full data element. Implicit tagging
  * does not work, and neither does the optional flag, unless the element

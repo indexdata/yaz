@@ -2,7 +2,12 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.12 2004-09-30 10:00:17 adam Exp $
+ * $Id: comstack.c,v 1.13 2004-10-15 00:19:00 adam Exp $
+ */
+
+/** 
+ * \file comstack.c
+ * \brief Implements Generic COMSTACK functions
  */
 
 #include <string.h>

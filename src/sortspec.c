@@ -1,8 +1,12 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.2 2004-05-10 07:48:56 adam Exp $
+ * $Id: sortspec.c,v 1.3 2004-10-15 00:19:00 adam Exp $
+ */
+/**
+ * \file sortspec.c
+ * \brief Implements SortSpec parsing.
  */
 
 #include <stdio.h>

@@ -2,7 +2,11 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.26 2004-10-02 13:28:26 adam Exp $
+ * $Id: srw.c,v 1.27 2004-10-15 00:19:00 adam Exp $
+ */
+/**
+ * \file srw.c
+ * \brief Implements SRW/SRU package encoding and decoding
  */
 
 #include <yaz/srw.h>

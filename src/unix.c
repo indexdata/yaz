@@ -2,9 +2,14 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.5 2004-09-21 14:59:01 adam Exp $
+ * $Id: unix.c,v 1.6 2004-10-15 00:19:01 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
+/**
+ * \file unix.c
+ * \brief Implements UNIX domain socket COMSTACK
+ */
+
 #ifndef WIN32
 
 #include <stdio.h>

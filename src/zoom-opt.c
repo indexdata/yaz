@@ -1,7 +1,12 @@
 /*
- * $Id: zoom-opt.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * Copyright (c) 2000-2004, Index Data
+ * See the file LICENSE for details.
  *
- * ZOOM layer for C, options handling
+ * $Id: zoom-opt.c,v 1.2 2004-10-15 00:19:02 adam Exp $
+ */
+/**
+ * \file zoom-opt.c
+ * \brief Implements ZOOM options handling
  */
 #include <assert.h>
 #include "zoom-p.h"

@@ -1,9 +1,15 @@
 /*
- * Copyright (c) 1997-2003, Index Data.
+ * Copyright (c) 1997-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: nmemsdup.c,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: nmemsdup.c,v 1.2 2004-10-15 00:19:00 adam Exp $
  */
+
+/**
+ * \file nmemsdup.c
+ * \brief Implements NMEM dup utilities
+ */
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif

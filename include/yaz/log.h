@@ -23,7 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.12 2003-10-09 15:51:36 adam Exp $
+ * $Id: log.h,v 1.13 2004-10-15 00:18:59 adam Exp $
+ */
+
+/**
+ * \file log.h
+ * \brief Header for logging utility
  */
 
 #ifndef LOG_H

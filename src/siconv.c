@@ -2,10 +2,17 @@
  * Copyright (c) 1997-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.6 2004-08-07 08:18:19 adam Exp $
+ * $Id: siconv.c,v 1.7 2004-10-15 00:19:00 adam Exp $
  */
-
-/* mini iconv and wrapper for system iconv library (if present) */
+/**
+ * \file siconv.c
+ * \brief Implements simple ICONV
+ *
+ * This implements an interface similar to that of iconv and
+ * is used by YAZ to interface with iconv (if present).
+ * For systems where iconv is not present, this layer
+ * provides a few important conversion: UTF-8, MARC-8, Latin-1.
+ */
 
 #if HAVE_CONFIG_H
 #include <config.h>

@@ -2,7 +2,11 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.5 2004-05-10 07:48:56 adam Exp $
+ * $Id: zget.c,v 1.6 2004-10-15 00:19:01 adam Exp $
+ */
+/**
+ * \file zget.c
+ * \brief Implements Z39.50 package creator utilities
  */
 
 #include <yaz/proto.h>

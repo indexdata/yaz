@@ -23,8 +23,11 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: wrbuf.h,v 1.12 2004-03-20 07:02:22 adam Exp $
- *
+ * $Id: wrbuf.h,v 1.13 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file wrbuf.h
+ * \brief Header for WRBUF (growing buffer)
  */
 
 #ifndef WRBUF_H

@@ -1,8 +1,12 @@
 /*
- * Copyright (c) 1996-2003, Index Data.
+ * Copyright (c) 1996-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: yaz-ccl.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: yaz-ccl.c,v 1.2 2004-10-15 00:19:01 adam Exp $
+ */
+/**
+ * \file yaz-ccl.c
+ * \brief Implements CCL node tree to RPN converson.
  */
 
 #include <stdio.h>

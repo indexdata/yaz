@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,11 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: xmalloc.h,v 1.3 2003-02-18 14:28:52 adam Exp $
+ * $Id: xmalloc.h,v 1.4 2004-10-15 00:18:59 adam Exp $
+ */
+/**
+ * \file xmalloc.h
+ * \brief Header for malloc interface.
  */
 
 #ifndef XMALLOC_H

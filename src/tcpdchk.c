@@ -1,28 +1,12 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: tcpdchk.c,v $
- * Revision 1.1  2003-10-27 12:21:35  adam
- * Source restructure. yaz-marcdump part of installation
- *
- * Revision 1.5  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.4  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.3  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.2  1999/04/20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.1  1999/04/16 14:45:55  adam
- * Added interface for tcpd wrapper for access control.
- *
+ * $Id: tcpdchk.c,v 1.2 2004-10-15 00:19:01 adam Exp $
+ */
+/**
+ * \file tcpdchk.c
+ * \brief Implements TCP WRAPPER check.
  */
 
 #include <stdio.h>

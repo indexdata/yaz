@@ -1,11 +1,13 @@
 /*
- * Copyright (C) 1995-2003, Index Data
+ * Copyright (C) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: session.h,v 1.1 2003-10-27 12:21:35 adam Exp $
+ * $Id: session.h,v 1.2 2004-10-15 00:19:00 adam Exp $
  */
-
+/**
+ * \file session.h
+ * \brief Internal Header for GFS.
+ */
 #ifndef SESSION_H
 #define SESSION_H
 

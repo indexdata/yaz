@@ -2,7 +2,15 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: ber_oid.c,v 1.3 2004-02-16 17:57:05 adam Exp $
+ * $Id: ber_oid.c,v 1.4 2004-10-15 00:18:59 adam Exp $
+ */
+
+/** 
+ * \file ber_oid.c
+ * \brief Implements BER OID encoding and decoding
+ *
+ * This source file implements BER encoding and decoding of
+ * the OID type.
  */
 #if HAVE_CONFIG_H
 #include <config.h>

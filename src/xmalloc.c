@@ -1,9 +1,12 @@
 /*
- * Copyright (C) 1994-2003, Index Data
+ * Copyright (C) 1994-2004, Index Data
  * All rights reserved.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: xmalloc.c,v 1.1 2003-10-27 12:21:36 adam Exp $
+ * $Id: xmalloc.c,v 1.2 2004-10-15 00:19:01 adam Exp $
+ */
+/**
+ * \file xmalloc.c
+ * \brief Implements malloc interface.
  */
 
 #if HAVE_CONFIG_H

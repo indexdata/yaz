@@ -1,11 +1,13 @@
 /*
  * Copyright (c) 1999-2003, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: otherinfo.c,v 1.1 2003-10-27 12:21:34 adam Exp $
+ * $Id: otherinfo.c,v 1.2 2004-10-15 00:19:00 adam Exp $
  */
-
+/**
+ * \file otherinfo.c
+ * \brief Implements Z39.50 OtherInfo utilities
+ */
 #include <stdio.h>
 #include <string.h>
 

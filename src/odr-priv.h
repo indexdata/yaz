@@ -23,7 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr-priv.h,v 1.3 2004-08-13 07:30:06 adam Exp $
+ * $Id: odr-priv.h,v 1.4 2004-10-15 00:19:00 adam Exp $
+ */
+
+/**
+ * \file odr-priv.h
+ * \brief Internal ODR definitions
  */
 
 #ifndef ODR_PRIV_H

@@ -1,4 +1,4 @@
-/* $Id: cqlstring.c,v 1.2 2004-10-03 22:34:07 adam Exp $
+/* $Id: cqlstring.c,v 1.3 2004-10-15 00:19:00 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -12,7 +12,6 @@ See the file LICENSE for details.
  * \brief Implements query stream reader that reads from a C string.
  */
 
-
 #include <yaz/cql.h>
 
 struct cql_buf_info {
@@ -20,7 +19,7 @@ struct cql_buf_info {
     int off;
 };
 
-int getbuf(void *vp)
+static int getbuf(void *vp)
 {
     struct cql_buf_info *bi = (struct cql_buf_info *) vp;
     if (bi->str[bi->off] == 0)
@@ -28,7 +27,7 @@ int getbuf(void *vp)
     return bi->str[bi->off++];
 }
 
-void ungetbuf(int b, void *vp)
+static void ungetbuf(int b, void *vp)
 {
     struct cql_buf_info *bi = (struct cql_buf_info *) vp;
     if (b)

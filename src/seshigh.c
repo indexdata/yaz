@@ -2,10 +2,12 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.32 2004-10-09 08:21:38 adam Exp $
+ * $Id: seshigh.c,v 1.33 2004-10-15 00:19:00 adam Exp $
  */
-
-/*
+/**
+ * \file seshigh.c
+ * \brief Implements GFS session logic.
+ *
  * Frontend server logic.
  *
  * This code receives incoming APDUs, and handles client requests by means
@@ -1371,7 +1373,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.32 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.33 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

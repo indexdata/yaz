@@ -1,9 +1,16 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_null.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: ber_null.c,v 1.2 2004-10-15 00:18:59 adam Exp $
+ */
+
+/** 
+ * \file ber_null.c
+ * \brief Implements ber_null
+ *
+ * This source file implements BER encoding and decoding of
+ * the NULL type.
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -11,8 +18,8 @@
 
 #include "odr-priv.h"
 
-/*
- * BER-en/decoder for NULL type.
+/** 
+ * ber_null: BER-en/decoder for NULL type.
  */
 int ber_null(ODR o)
 {
@@ -40,7 +47,10 @@ int ber_null(ODR o)
         fprintf(stderr, "[NULL]\n");
 #endif
         return 1;
-    case ODR_PRINT: return 1;
-    default: odr_seterror(o, OOTHER, 13); return 0;
+    case ODR_PRINT:
+	return 1;
+    default:
+	odr_seterror(o, OOTHER, 13);
+	return 0;
     }
 }

@@ -1,11 +1,14 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.3 2003-11-19 22:24:57 adam Exp $
+ * $Id: oid.c,v 1.4 2004-10-15 00:19:00 adam Exp $
  */
 
-/*
+/**
+ * \file oid.c
+ * \brief Implements OID database
+ *
  * More or less protocol-transparent OID database.
  * We could (and should?) extend this so that the user app can add new
  * entries to the list at initialization.

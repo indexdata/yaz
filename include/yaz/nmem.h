@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,9 +23,16 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: nmem.h,v 1.12 2004-01-15 10:16:26 adam Exp $
+ * $Id: nmem.h,v 1.13 2004-10-15 00:18:59 adam Exp $
  */
 
+/**
+ * \file nmem.h
+ * \brief Header for Nibble Memory functions
+ *
+ * This is a simple and fairly wasteful little module for nibble memory
+ * allocation. Evemtually we'll put in something better.
+ */
 #ifndef NMEM_H
 #define NMEM_H
 #include <yaz/yconfig.h>

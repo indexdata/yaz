@@ -1,8 +1,13 @@
 /*
- * Copyright (c) 2002, Index Data.
+ * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: grs1disp.c,v 1.1 2003-10-27 12:21:30 adam Exp $
+ * $Id: grs1disp.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ */
+
+/**
+ * \file grs1disp.c
+ * \brief Implements display of GRS-1 records
  */
 
 #include <stdio.h>
