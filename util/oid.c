@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.18  1997-04-30 08:52:12  quinn
+ * Revision 1.19  1997-05-02 08:39:41  quinn
+ * Support for private OID table added. Thanks to Ronald van der Meer
+ *
+ * Revision 1.18  1997/04/30 08:52:12  quinn
  * Null
  *
  * Revision 1.17  1996/10/10  12:35:23  quinn
@@ -87,6 +90,8 @@
 
 static int z3950_prefix[] = { 1, 2, 840, 10003, -1 };
 static int sr_prefix[]    = { 1, 0, 10163, -1 };
+
+static oident *extoids = NULL;
 
 /*
  * OID database
@@ -282,15 +287,19 @@ struct oident *oid_getentbyoid(int *o)
     /* determine protocol type */
     if (!o)
         return 0;
-    if ((prelen = match_prefix(o, z3950_prefix)))
+    if ((prelen = match_prefix(o, z3950_prefix)) != 0)
         proto = PROTO_Z3950;
-    else if ((prelen = match_prefix(o, sr_prefix)))
+    else if ((prelen = match_prefix(o, sr_prefix)) != 0)
         proto = PROTO_SR;
     else
         proto = PROTO_GENERAL;
     for (p = oids; *p->oidsuffix >= 0; p++)
         if (p->proto == proto && !oid_oidcmp(o + prelen, p->oidsuffix))
             return p;
+    if (extoids != NULL)
+        for (p = extoids; *p->oidsuffix >= 0; p++)
+            if (p->proto == proto && !oid_oidcmp(o + prelen, p->oidsuffix))
+                return p;
     return 0;
 }
 
@@ -316,6 +325,21 @@ int *oid_getoidbyent(struct oident *ent)
             oid_oidcat(ret, p->oidsuffix);
             return ret;
         }
+    if (extoids != NULL)
+        for (p = extoids; *p->oidsuffix >= 0; p++)
+           if (ent->proto == p->proto &&
+                ent->oclass == p->oclass &&
+                ent->value == p->value)
+            {
+                if (ent->proto == PROTO_Z3950)
+                    oid_oidcpy(ret, z3950_prefix);
+                else if (ent->proto == PROTO_SR)
+                    oid_oidcpy(ret, sr_prefix);
+                else
+                    ret[0] = -1;
+                oid_oidcat(ret, p->oidsuffix);
+                return ret;
+            }
     return 0;
 }
 
@@ -326,5 +350,14 @@ oid_value oid_getvalbyname(const char *name)
     for (p = oids; *p->oidsuffix >= 0; p++)
         if (!yaz_matchstr(p->desc, name))
             return p->value;
+    if (extoids != NULL)
+        for (p = extoids; *p->oidsuffix >= 0; p++)
+            if (!yaz_matchstr(p->desc, name))
+                return p->value;
     return VAL_NONE;
+}
+
+void oid_setprivateoids(oident *list)
+{
+    extoids = list;
 }

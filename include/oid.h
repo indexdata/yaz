@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.16  1997-04-30 08:52:08  quinn
+ * Revision 1.17  1997-05-02 08:39:27  quinn
+ * Support for private OID table added. Thanks to Ronald van der Meer
+ *
+ * Revision 1.16  1997/04/30 08:52:08  quinn
  * Null
  *
  * Revision 1.15  1996/10/09  15:54:57  quinn
@@ -184,5 +187,6 @@ void oid_oidcat(int *t, int *s);
 int oid_oidcmp(int *o1, int *o2);
 int oid_oidlen(int *o);
 oid_value oid_getvalbyname(const char *name);
+void oid_setprivateoids(oident *list);
 
 #endif
