@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.20  1995-05-29 08:12:09  quinn
+ * Revision 1.21  1995-06-06 08:15:40  quinn
+ * Cosmetic.
+ *
+ * Revision 1.20  1995/05/29  08:12:09  quinn
  * Moved oid to util
  *
  * Revision 1.19  1995/05/16  09:37:27  quinn
@@ -300,7 +303,8 @@ static void add_listener(char *where, int what)
 
 static void catchchld(int num)
 {
-    while (waitpid(-1, 0, WNOHANG) > 0);
+    while (waitpid(-1, 0, WNOHANG) > 0)
+	;
     signal(SIGCHLD, catchchld);
 }
 

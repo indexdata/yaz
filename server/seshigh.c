@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.30  1995-06-05 10:53:32  quinn
+ * Revision 1.31  1995-06-06 08:15:37  quinn
+ * Cosmetic.
+ *
+ * Revision 1.30  1995/06/05  10:53:32  quinn
  * Added a better SCAN.
  *
  * Revision 1.29  1995/06/01  11:25:03  quinn
@@ -293,6 +296,7 @@ void ir_session(IOCHAN h, int event)
 		iochan_setevent(h, EVENT_INPUT);
 	    	
 	    /* we got a complete PDU. Let's decode it */
+	    logf(LOG_DEBUG, "Got PDU, %d bytes", res);
 	    req = request_get(); /* get a new request structure */
 	    odr_reset(assoc->decode);
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
@@ -340,6 +344,7 @@ void ir_session(IOCHAN h, int event)
 		iochan_destroy(h);
 		break;
 	    case 0: /* all sent - release the request structure */
+	    	logf(LOG_DEBUG, "Wrote PDU, %d bytes", req->len_response);
 		odr_release_mem(req->request_mem);
 		request_deq(&assoc->outgoing);
 		request_release(req);
@@ -951,6 +956,10 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	srq.term = req->termListAndStartPoint;
 	srq.term_position = req->preferredPositionInResponse ?
 	    *req->preferredPositionInResponse : 1;
+	if (req->termListAndStartPoint->term->which == Z_Term_general)
+	    logf(LOG_DEBUG, "  term: %.*s",
+	    	req->termListAndStartPoint->term->u.general->len,
+		req->termListAndStartPoint->term->u.general->buf);
 	if (!(srs = bend_scan(assoc->backend, &srq, 0)))
 	    ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto, 2, 0);
 	else if (srs->errcode)

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.8  1995-06-05 10:52:22  quinn
+ * Revision 1.9  1995-06-06 08:15:19  quinn
+ * Cosmetic.
+ *
+ * Revision 1.8  1995/06/05  10:52:22  quinn
  * Added SCAN.
  *
  * Revision 1.7  1995/06/02  09:50:09  quinn
@@ -78,6 +81,8 @@ static int setno = 1;                   /* current set offset */
 static int protocol = PROTO_Z3950;      /* current app protocol */
 static ODR_MEM session_mem;                /* memory handle for init-response */
 static Z_InitResponse *session = 0;        /* session parameters */
+static char last_scan[512] = "0";
+static char last_cmd[100] = "?";
 #ifdef RPN_QUERY
 #ifndef PREFIX_QUERY
 static CCL_bibset bibset;               /* CCL bibset handle */
@@ -127,7 +132,7 @@ static void send_initRequest()
 
 static int process_initResponse(Z_InitResponse *res)
 {
-    /* save parameters for later use */
+    /* save session parameters for later use */
     session_mem = odr_extract_mem(in);
     session = res;
 
@@ -569,9 +574,6 @@ int send_scanrequest(char *string, int pp, int num)
     Z_ScanRequest *req = apdu->u.scanRequest;
     char *db = database;
     oident attset;
-    Z_AttributesPlusTerm sp;
-    Z_Term term;
-    Odr_oct trm;
 
     req->num_databaseNames = 1;
     req->databaseNames = &db;
@@ -579,14 +581,7 @@ int send_scanrequest(char *string, int pp, int num)
     attset.class = CLASS_ATTSET;
     attset.value = VAL_BIB1;
     req->attributeSet = oid_getoidbyent(&attset);
-    req->termListAndStartPoint = &sp;
-    sp.num_attributes = 0;
-    sp.attributeList = ODR_NULLVAL;
-    sp.term = &term;
-    term.which = Z_Term_general;
-    term.u.general = &trm;
-    trm.buf = (unsigned char*) string;
-    trm.len = trm.size = strlen(string);
+    req->termListAndStartPoint = p_query_scan(out, string);
     req->numberOfTermsRequested = &num;
     req->preferredPositionInResponse = &pp;
     send_apdu(apdu);
@@ -596,8 +591,12 @@ int send_scanrequest(char *string, int pp, int num)
 void display_term(Z_TermInfo *t)
 {
     if (t->term->which == Z_Term_general)
+    {
     	printf("%.*s (%d)\n", t->term->u.general->len, t->term->u.general->buf,
 	    t->globalOccurrences ? *t->globalOccurrences : -1);
+	sprintf(last_scan, "%.*s", t->term->u.general->len,
+	    t->term->u.general->buf);
+    }
     else
     	printf("Term type not general.\n");
 }
@@ -642,7 +641,12 @@ int cmd_scan(char *arg)
 	return 0;
     }
     if (*arg)
+    {
     	if (send_scanrequest(arg, 5, 19) < 0)
+	    return 0;
+    }
+    else
+    	if (send_scanrequest(last_scan, 1, 19) < 0)
 	    return 0;
     return 2;
 }
@@ -728,11 +732,12 @@ static int client(void)
 		break;
 	    if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
 	    {
-	    	printf(C_PROMPT);
-		continue;
+		strcpy(word, last_cmd);
+		*arg = '\0';
 	    }
-	    if (res == 1)
+	    else if (res == 1)
 		*arg = 0;
+	    strcpy(last_cmd, word);
 	    for (i = 0; cmd[i].cmd; i++)
 		if (!strncmp(cmd[i].cmd, word, strlen(word)))
 		{
