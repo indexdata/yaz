@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.69  2000-12-01 17:56:41  adam
+ * Revision 1.70  2001-02-01 08:52:26  adam
+ * Fixed bug regarding inetd mode.
+ *
+ * Revision 1.69  2000/12/01 17:56:41  adam
  * on WIN32 function statserv_closedown closes socket(s) to provoke close.
  *
  * Revision 1.68  2000/11/29 14:22:47  adam
@@ -782,6 +785,7 @@ static void inetd_connection(int what)
                 iochan_settimeout(chan, control_block.idle_timeout * 60);
                 addr = cs_addrstr(line);
                 yaz_log(LOG_LOG, "Inetd association from %s", addr ? addr : "[UNKNOWN]");
+		assoc->cs_get_mask = EVENT_INPUT;
             }
             else
             {
