@@ -1,4 +1,4 @@
-# $Id: bib1,v 1.7 2001-03-20 11:22:58 adam Exp $
+# $Id: bib1,v 1.8 2001-03-22 21:23:30 adam Exp $
 # CCL qualifiers and their mappings
 #
 # Each line takes the form:
@@ -27,7 +27,7 @@
 #    n       Set truncation explicitly to "none" if no ? is given.
 
 # This rule is for CCL tokens where no fields are specified
-term s=pw   t=l,r s=al
+term u=1016 t=l,r s=pw,al
 # Common short-hand access points.
 au   u=1    s=pw t=l,r		# author
 ti   u=4    s=pw t=l,r          # title

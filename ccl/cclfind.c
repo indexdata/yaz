@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.23  2001-03-20 11:22:58  adam
+ * Revision 1.24  2001-03-22 21:23:30  adam
+ * Directive s=pw sets structure to phrase if term includes blank(s).
+ *
+ * Revision 1.23  2001/03/20 11:22:58  adam
  * CCL Truncation character may be defined.
  *
  * Revision 1.22  2001/03/07 13:24:40  adam
@@ -361,6 +364,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
     {
         struct ccl_rpn_node *p;
         size_t no, i;
+        int no_spaces = 0;
         int left_trunc = 0;
         int right_trunc = 0;
         int mid_trunc = 0;
@@ -380,8 +384,9 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         for (no = 0; no < max && is_term_ok(lookahead->kind, term_list); no++)
         {
             for (i = 0; i<lookahead->len; i++)
-                if (truncation_value == -1 && strchr(truncation_aliases,
-						     lookahead->name[i]))
+                if (lookahead->name[i] == ' ')
+		    no_spaces++;
+		else if (strchr(truncation_aliases, lookahead->name[i]))
                 {
                     if (no == 0 && i == 0 && lookahead->len >= 1)
                         left_trunc = 1;
@@ -469,7 +474,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
             qual_val_type (qa, CCL_BIB1_STR, CCL_BIB1_STR_WP, &attset))
         {   /* no structure attribute met. Apply either structure attribute 
                WORD or PHRASE depending on number of CCL tokens */
-            if (no == 1)
+            if (no == 1 && no_spaces == 0)
                 add_attr (p, attset, CCL_BIB1_STR, 2);
             else
                 add_attr (p, attset, CCL_BIB1_STR, 1);
