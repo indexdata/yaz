@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.h,v $
- * Revision 1.9  1997-09-01 09:31:48  adam
+ * Revision 1.10  1998-01-29 13:30:23  adam
+ * Better event handle system for NT/Unix.
+ *
+ * Revision 1.9  1997/09/01 09:31:48  adam
  * Removed definition statserv_remove from statserv.h to eventl.h.
  *
  * Revision 1.8  1995/06/19 12:39:09  quinn
@@ -78,13 +81,7 @@ int force_event;
 #define iochan_getnext(i) ((i)->next)
 #define iochan_settimeout(i, t) ((i)->max_idle = (t), (i)->last_event = time(0))
 
-IOCHAN iochan_getchan(void);
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags);
-#ifdef WINDOWS
-int __stdcall event_loop(IOCHAN iochans);
-#else
-int event_loop(IOCHAN dummylistener);
-#endif
-
+int event_loop(IOCHAN *iochans);
 void statserv_remove (IOCHAN pIOChannel);
 #endif

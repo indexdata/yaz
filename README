@@ -4,7 +4,7 @@
  * Sebastian Hammer, Adam Dickmeiss
 
 Compilation and installation for YAZ 
-  $Id: README,v 1.19 1998-01-07 12:59:27 adam Exp $
+  $Id: README,v 1.20 1998-01-29 13:30:23 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -119,4 +119,7 @@ To get more information or assistance, send mail to yaz-help@indexdata.dk.
 
 We maintain a mailing-list for the purpose of announcing new versions of
 the software, bug-reports, discussion etc. You can sign up by sending
-mail to yaz-request@indexdata.dk.
+mail to yaz-request@indexdata.dk and include the following command
+command in your email:
+    subscribe yaz-l
+

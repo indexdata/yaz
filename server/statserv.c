@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystem.
  *
  * $Log: statserv.c,v $
- * Revision 1.44  1997-11-07 13:31:52  adam
+ * Revision 1.45  1998-01-29 13:30:23  adam
+ * Better event handle system for NT/Unix.
+ *
+ * Revision 1.44  1997/11/07 13:31:52  adam
  * Added NT Service name part of statserv_options_block. Moved NT
  * service utility to server library.
  *
@@ -170,17 +173,17 @@
 #include <errno.h>
 
 #include <options.h>
-#include "eventl.h"
-#include "session.h"
 #include <comstack.h>
 #include <tcpip.h>
 #ifdef USE_XTIMOSI
 #include <xmosi.h>
 #endif
 #include <log.h>
+#include "eventl.h"
+#include "session.h"
 #include <statserv.h>
 
-static IOCHAN pListener;
+static IOCHAN pListener = NULL;
 
 static char *me = "statserver";
 /*
@@ -211,12 +214,12 @@ static statserv_options_block control_block = {
 
 typedef struct _ThreadList ThreadList;
 
-typedef struct _ThreadList
+struct _ThreadList
 {
     HANDLE hThread;
     IOCHAN pIOChannel;
     ThreadList *pNext;
-} ThreadList;
+};
 
 static ThreadList *pFirstThread;
 static CRITICAL_SECTION Thread_CritSect;
@@ -359,6 +362,11 @@ void statserv_closedown()
     }
 }
 
+int __stdcall event_loop_thread (IOCHAN iochan)
+{
+    return event_loop (&iochan);
+}
+
 static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
@@ -418,11 +426,12 @@ static void listener(IOCHAN h, int event)
 #endif
     /* Now what we need todo is create a new thread with this iochan as
        the parameter */
-    /* if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop, new_chan,
-           0, &ThreadId) == NULL) */
+    /* if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop_thread,
+			new_chan, 0, &ThreadId) == NULL) */
     /* Somehow, somewhere we need to store this thread id, otherwise we won't be
        able to close cleanly */
-        NewHandle = (HANDLE)_beginthreadex(NULL, 0, event_loop, new_chan, 0, &ThreadId);
+        NewHandle = (HANDLE)_beginthreadex(NULL, 0, event_loop_thread,
+					    new_chan, 0, &ThreadId);
         if (NewHandle == (HANDLE)-1)
 	{
 
@@ -453,9 +462,9 @@ void statserv_remove(IOCHAN pIOChannel)
 
 void statserv_closedown()
 {
-    /* We don't need todoanything here - or do we */
-    if (pListener != NULL)
-        iochan_destroy(pListener);
+    IOCHAN p;
+    for (p = pListener; p; p = p->next)
+        iochan_destroy(p);
 }
 
 static void listener(IOCHAN h, int event)
@@ -491,7 +500,7 @@ static void listener(IOCHAN h, int event)
 
 		close(hand[0]);
 		child = 1;
-		for (pp = iochan_getchan(); pp; pp = iochan_getnext(pp))
+		for (pp = pListener; pp; pp = iochan_getnext(pp))
 		{
 		    if (pp != h)
 		    {
@@ -554,7 +563,7 @@ static void listener(IOCHAN h, int event)
 	{
 	    IOCHAN pp;
 	    /* close our half of the listener socket */
-	    for (pp = iochan_getchan(); pp; pp = iochan_getnext(pp))
+	    for (pp = pListener; pp; pp = iochan_getnext(pp))
 	    {
 		COMSTACK l = iochan_getdata(pp);
 		cs_close(l);
@@ -574,6 +583,8 @@ static void listener(IOCHAN h, int event)
             iochan_destroy(h);
             return;
 	}
+        new_chan->next = pListener;
+        pListener = new_chan;
 	if (!(newas = create_association(new_chan, new_line)))
 	{
 	    logf(LOG_FATAL, "Failed to create new assoc.");
@@ -714,7 +725,6 @@ void statserv_setcontrol(statserv_options_block *block)
     memcpy(&control_block, block, sizeof(*block));
 }
 
-
 int statserv_start(int argc, char **argv)
 {
     int ret, listeners = 0, inetd = 0, r;
@@ -798,7 +808,7 @@ int statserv_start(int argc, char **argv)
     }
 
     if ((pListener == NULL) && *control_block.default_listen)
-	    add_listener(control_block.default_listen, protocol);
+	add_listener(control_block.default_listen, protocol);
 
 #ifndef WINDOWS
     if (inetd)
@@ -832,7 +842,7 @@ int statserv_start(int argc, char **argv)
     if (pListener == NULL)
 	ret = 1;
     else
-        ret = event_loop(pListener);
+        ret = event_loop(&pListener);
     nmem_exit ();
     return ret;
 }

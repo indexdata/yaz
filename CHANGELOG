@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added sort facility in client and backend server interface.
+
 Fixed problem with dependencies in Makefile(s).
 
 Fixed bugs for encoders/decoders of extended services and 
@@ -29,8 +31,8 @@ Made NT service interface part of the server library. The
 function statserv_main uses the NT service when required and
 calls the statserv_start / statserv_close routines.
 
-Routine zget_SearchRequest fills resultSetName member with "default"
-instead of "Default".
+Routine zget_SearchRequest and zget_PresentRequest fills
+resultSetName/Id member with "default" instead of "Default".
 
 Fixed memory leak in server. Request queue member wasn't freed.
 

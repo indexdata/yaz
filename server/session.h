@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1995, Index Data I/S 
+ * Copyright (C) 1995-1998, Index Data I/S 
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.12  1997-09-01 08:53:01  adam
+ * Revision 1.13  1998-01-29 13:30:23  adam
+ * Better event handle system for NT/Unix.
+ *
+ * Revision 1.12  1997/09/01 08:53:01  adam
  * New windows NT/95 port using MSV5.0. The test server 'ztest' was
  * moved a separate directory. MSV5.0 project server.dsp created.
  * As an option, the server can now operate as an NT service.
@@ -115,6 +118,8 @@ typedef struct association
     int preferredMessageSize;
     int maximumRecordSize;
     int version;                  /* highest version-bit set (2 or 3) */
+
+    int (*bend_sort) ();
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);

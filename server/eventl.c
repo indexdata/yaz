@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.24  1997-09-04 14:19:13  adam
+ * Revision 1.25  1998-01-29 13:30:23  adam
+ * Better event handle system for NT/Unix.
+ *
+ * Revision 1.24  1997/09/04 14:19:13  adam
  * Added credits.
  *
  * Revision 1.23  1997/09/01 08:52:59  adam
@@ -93,23 +96,12 @@
 #include <errno.h>
 #include <string.h>
 
-#include "eventl.h"
-#include "log.h"
-#include "comstack.h"
-#include "session.h"
-#include "statserv.h"
+#include <log.h>
+#include <comstack.h>
 #include <xmalloc.h>
-
-#ifndef WINDOWS
-
-static IOCHAN iochans = 0;
-
-IOCHAN iochan_getchan(void)
-{
-    return iochans;
-}
-
-#endif /* WINDOWS */
+#include "eventl.h"
+#include "session.h"
+#include <statserv.h>
 
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
 {
@@ -123,127 +115,116 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
     new_iochan->fun = cb;
     new_iochan->force_event = 0;
     new_iochan->last_event = new_iochan->max_idle = 0;
-
-#ifdef WINDOWS
-    /* For windows we don't have a linklist of iochans */
     new_iochan->next = NULL;
-#else /* WINDOWS */
-    new_iochan->next = iochans;
-    iochans = new_iochan;
-#endif  /* WINDOWS */
-
     return new_iochan;
 }
 
-/* Event loop now takes an iochan as a parameter */
-#ifdef WINDOWS
-int __stdcall event_loop(IOCHAN iochans)
-#else
-int event_loop(IOCHAN dummylistener)
-#endif
+int event_loop(IOCHAN *iochans)
 {
     do /* loop as long as there are active associations to process */
     {
     	IOCHAN p, nextp;
-	    fd_set in, out, except;
-	    int res, max;
-	    static struct timeval nullto = {0, 0}, to;
-	    struct timeval *timeout;
+	fd_set in, out, except;
+	int res, max;
+	static struct timeval nullto = {0, 0}, to;
+	struct timeval *timeout;
 
-	    FD_ZERO(&in);
-	    FD_ZERO(&out);
-	    FD_ZERO(&except);
-	    timeout = &to; /* hang on select */
-	    to.tv_sec = 5*60;
-	    to.tv_usec = 0;
-	    max = 0;
-    	for (p = iochans; p; p = p->next)
+	FD_ZERO(&in);
+	FD_ZERO(&out);
+	FD_ZERO(&except);
+	timeout = &to; /* hang on select */
+	to.tv_sec = 5*60;
+	to.tv_usec = 0;
+	max = 0;
+    	for (p = *iochans; p; p = p->next)
     	{
-	        if (p->force_event)
-	    	    timeout = &nullto;        /* polling select */
-	        if (p->flags & EVENT_INPUT)
-	    	    FD_SET(p->fd, &in);
-	        if (p->flags & EVENT_OUTPUT)
-	    	    FD_SET(p->fd, &out);
-	        if (p->flags & EVENT_EXCEPT)
-	    	    FD_SET(p->fd, &except);
-	        if (p->fd > max)
-	    	    max = p->fd;
-	    }
-	    if ((res = select(max + 1, &in, &out, &except, timeout)) < 0)
-	    {
-	        if (errno == EINTR)
-    		    continue;
+	    if (p->force_event)
+		timeout = &nullto;        /* polling select */
+	    if (p->flags & EVENT_INPUT)
+		FD_SET(p->fd, &in);
+	    if (p->flags & EVENT_OUTPUT)
+	        FD_SET(p->fd, &out);
+	    if (p->flags & EVENT_EXCEPT)
+	        FD_SET(p->fd, &except);
+	    if (p->fd > max)
+	        max = p->fd;
+	}
+	if ((res = select(max + 1, &in, &out, &except, timeout)) < 0)
+	{
+	    if (errno == EINTR)
+    		continue;
             else
             {
                 /* Destroy the first member in the chain, and try again */
-                association *assoc = iochan_getdata(iochans);
+                association *assoc = iochan_getdata(*iochans);
                 COMSTACK conn = assoc->client_link;
 
                 cs_close(conn);
-	            destroy_association(assoc);
-	            iochan_destroy(iochans);
-                logf(LOG_DEBUG, "error while selecting, destroying iochan %p", iochans);
+	        destroy_association(assoc);
+	        iochan_destroy(*iochans);
+                logf(LOG_DEBUG, "error while selecting, destroying iochan %p",
+			*iochans);
             }
-	    }
-    	for (p = iochans; p; p = p->next)
+	}
+    	for (p = *iochans; p; p = p->next)
     	{
-	        int force_event = p->force_event;
-	        time_t now = time(0);
+	    int force_event = p->force_event;
+	    time_t now = time(0);
 
-	        p->force_event = 0;
-	        if (!p->destroyed && (FD_ISSET(p->fd, &in) || force_event == EVENT_INPUT))
-	        {
-    		    p->last_event = now;
-	    	    (*p->fun)(p, EVENT_INPUT);
-	        }
-	        if (!p->destroyed && (FD_ISSET(p->fd, &out) ||
-		        force_event == EVENT_OUTPUT))
-	        {
-	    	    p->last_event = now;
-	    	    (*p->fun)(p, EVENT_OUTPUT);
-	        }
-	        if (!p->destroyed && (FD_ISSET(p->fd, &except) ||
-	    	    force_event == EVENT_EXCEPT))
-	        {
-		        p->last_event = now;
-	    	    (*p->fun)(p, EVENT_EXCEPT);
-	        }
-	        if (!p->destroyed && ((p->max_idle && now - p->last_event >
-	    	    p->max_idle) || force_event == EVENT_TIMEOUT))
-	        {
-	    	    p->last_event = now;
-	    	    (*p->fun)(p, EVENT_TIMEOUT);
-	        }
-	    }
-	    for (p = iochans; p; p = nextp)
+	    p->force_event = 0;
+	    if (!p->destroyed && (FD_ISSET(p->fd, &in) ||
+		force_event == EVENT_INPUT))
 	    {
-	        nextp = p->next;
+    		p->last_event = now;
+		(*p->fun)(p, EVENT_INPUT);
+	    }
+	    if (!p->destroyed && (FD_ISSET(p->fd, &out) ||
+	        force_event == EVENT_OUTPUT))
+	    {
+	  	p->last_event = now;
+	    	(*p->fun)(p, EVENT_OUTPUT);
+	    }
+	    if (!p->destroyed && (FD_ISSET(p->fd, &except) ||
+	        force_event == EVENT_EXCEPT))
+	    {
+		p->last_event = now;
+	    	(*p->fun)(p, EVENT_EXCEPT);
+	    }
+	    if (!p->destroyed && ((p->max_idle && now - p->last_event >
+	        p->max_idle) || force_event == EVENT_TIMEOUT))
+	    {
+	        p->last_event = now;
+	        (*p->fun)(p, EVENT_TIMEOUT);
+	    }
+	}
+	for (p = *iochans; p; p = nextp)
+	{
+	    nextp = p->next;
 
-	        if (p->destroyed)
-	        {
-	    	    IOCHAN tmp = p, pr;
+	    if (p->destroyed)
+	    {
+		IOCHAN tmp = p, pr;
 
                 /* We need to inform the threadlist that this channel has been destroyed */
                 statserv_remove(p);
 
-	    	    /* Now reset the pointers */
-                if (p == iochans)
-		            iochans = p->next;
-		        else
-		        {
-		            for (pr = iochans; pr; pr = pr->next)
-		    	        if (pr->next == p)
-    			            break;
-		            assert(pr); /* grave error if it weren't there */
-		            pr->next = p->next;
-		        }
-		        if (nextp == p)
-		            nextp = p->next;
-		        xfree(tmp);
-	        }
+	    	/* Now reset the pointers */
+                if (p == *iochans)
+		    *iochans = p->next;
+		else
+		{
+		    for (pr = *iochans; pr; pr = pr->next)
+		        if (pr->next == p)
+    		            break;
+		    assert(pr); /* grave error if it weren't there */
+		    pr->next = p->next;
+		}
+		if (nextp == p)
+		    nextp = p->next;
+		xfree(tmp);
 	    }
+	}
     }
-    while (iochans);
+    while (*iochans);
     return 0;
 }
