@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.5 2004-08-24 08:44:10 adam Exp $
+ * $Id: odr.c,v 1.6 2004-10-01 13:16:18 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -116,7 +116,7 @@ void odr_FILE_write(ODR o, void *handle, int type,
 	    fputs(" ..... ", (FILE*) handle);
 		i = len - 1000;
 	}
-	if (strchr("\r\n\f\t", c) || c >= ' ' && c <= 126)
+	if (strchr("\r\n\f\t", c) || (c >= ' ' && c <= 126))
 	    putc(c, (FILE*) handle);
 	else
 	{
