@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.8 2004-10-15 00:19:00 adam Exp $
+ * $Id: marcdisp.c,v 1.9 2004-11-25 09:43:10 adam Exp $
  */
 
 /**
@@ -247,7 +247,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	int end_offset;
 	int i, j;
 	char tag[4];
-        int identifier_flag = 1;
+        int identifier_flag = 0;
 
         memcpy (tag, buf+entry_p, 3);
 	entry_p += 3;
@@ -261,11 +261,13 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         
         if (indicator_length < 4 && indicator_length > 0)
         {
-            if (buf[i + indicator_length] != ISO2709_IDFS)
-                identifier_flag = 0;
+	    if (buf[i + indicator_length] == ISO2709_IDFS)
+		identifier_flag = 1;
+	    else if (buf[i + indicator_length + 1] == ISO2709_IDFS)
+		identifier_flag = 2;
         }
-        else if (!memcmp (tag, "00", 2))
-            identifier_flag = 0;
+        else if (memcmp (tag, "00", 2))
+            identifier_flag = 1;
         
         switch(mt->xml)
         {
@@ -299,6 +301,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         
         if (identifier_flag)
 	{
+	    i += identifier_flag-1;
             for (j = 0; j<indicator_length; j++, i++)
             {
                 switch(mt->xml)
