@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
 ]>
-<!-- $Id: yaz-client.sgml,v 1.1 2002-09-16 14:16:31 adam Exp $ -->
+<!-- $Id: yaz-client.sgml,v 1.2 2002-09-17 20:17:44 adam Exp $ -->
 <refentry id="yaz-client">
  
  <refmeta>
@@ -101,7 +101,12 @@
    </para>
   </refsect1>
   <refsect1><title>SEE ALSO</title>
-   <para>yaz(7)</para>
+   <para>
+    <citerefentry>
+     <refentrytitle>yaz</refentrytitle>
+     <manvolnum>1</manvolnum>
+    </citerefentry>
+   </para>
    <para>
     Section "The YAZ Client" in the YAZ manual.
    </para>

@@ -1,4 +1,4 @@
-<!-- $Id: future.xml,v 1.6 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: future.xml,v 1.7 2002-09-17 20:17:44 adam Exp $ -->
  <chapter id="future"><title>Future Directions</title>
   
   <para>
@@ -19,13 +19,13 @@
   <para>
    &yaz; is a BER toolkit and as such should support all protocols
    out there based on that. We'd like to see running ILL applications.
-   It shouldn't be that hard. Another thing that would be intersting is
+   It shouldn't be that hard. Another thing that would be interesting is
    LDAP. Maybe a generic framework for doing IR using both LDAP and
    Z39.50 transparently.
   </para>
   
   <para>
-   Other than that, YAZ generally moves in the directions which appear to
+   Other than that, &yaz; generally moves in the directions which appear to
    make the most people happy (including ourselves, as prime users of the
    software). If there's something you'd like to see in here, then drop
    us a note and let's see what we can come up with.

@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.14 2002-09-16 14:16:31 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.15 2002-09-17 20:17:44 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -692,8 +692,8 @@ typedef struct bend_scan_rr {
     <sbr/>
     <arg choice="opt"><option>-k <replaceable>kilobytes</replaceable></option></arg>
     <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>
-    <arg choice="opt"><option>-ziST1</option></arg>
     <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
+    <arg choice="opt"><option>-ziST1</option></arg>
     <arg choice="opt" rep="repeat">listener-spec</arg>
    </cmdsynopsis>
    
@@ -726,23 +726,22 @@ typedef struct bend_scan_rr {
    <para>
     For UNIX, the address is the filename of socket.
    </para>
-   
-   <para>
-    Examples
-   </para>
-
-   <screen>
-    tcp:dranet.dra.com
-
-    ssl:ssl.enterprise.com:3000
-
-    unix:/tmp/yaz
-   </screen>
 
    <para>
     For TCP/IP and SSL, the special hostname &quot;@&quot; is mapped to
     the address <literal>INADDR_ANY</literal>, which causes the
     server to listen on any local interface. 
+   </para>
+   
+   <para>
+    Examples:
+   <screen>
+    tcp:@:210
+
+    ssl:@:3000
+
+    unix:/tmp/yaz
+   </screen>
    </para>
 
   </sect1>

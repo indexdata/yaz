@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.33 2002-09-16 18:45:13 adam Exp $
+## $Id: Makefile.am,v 1.34 2002-09-17 20:17:44 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -38,10 +38,10 @@ EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(DOCFILES) $(MANFILES) $(REFFILES)
 doc_DATA = $(DOCFILES)
 man_MANS = $(MANFILES)
 
-yaz-client.1: yaz-client.sgml
+yaz-client.1: yaz-client.sgml yaz-client-commands.xml
 	cd $(srcdir); docbook2man yaz-client.sgml
 
-yaz-ztest.8: yaz-ztest.sgml
+yaz-ztest.8: yaz-ztest.sgml ztest-options.xml
 	cd $(srcdir); docbook2man yaz-ztest.sgml
 
 yaz-config.1: yaz-config.sgml

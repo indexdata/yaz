@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY zoomsh-commands SYSTEM "zoomsh-commands.xml">
 ]>
-<!-- $Id: zoomsh.sgml,v 1.1 2002-09-16 18:45:13 adam Exp $ -->
+<!-- $Id: zoomsh.sgml,v 1.2 2002-09-17 20:17:44 adam Exp $ -->
 <refentry id="zoomsh">
  
  <refmeta>
@@ -126,7 +126,16 @@ ZOOM>quit
    
   </refsect1>
   <refsect1><title>SEE ALSO</title>
-   <para>yaz(7), <command>yaz-ztest(8)</command></para>
+   <para>
+    <citerefentry>
+     <refentrytitle>yaz</refentrytitle>
+     <manvolnum>7</manvolnum>
+    </citerefentry>,
+    <citerefentry>
+     <refentrytitle>yaz-ztest</refentrytitle>
+     <manvolnum>8</manvolnum>
+    </citerefentry>,
+   </para>
    <para>
     Section "Building clients with ZOOM" in the YAZ manual.
    </para>

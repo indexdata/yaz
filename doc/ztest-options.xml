@@ -1,5 +1,5 @@
 <!-- 
-   $Id: ztest-options.xml,v 1.1 2002-09-16 14:16:31 adam Exp $
+   $Id: ztest-options.xml,v 1.2 2002-09-17 20:17:44 adam Exp $
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->
@@ -59,7 +59,7 @@
  <varlistentry><term><literal>-c </literal>
    <replaceable>config</replaceable></term>
   <listitem><para>A user option that serves as a specifier for some
-    sort of configuration, e.g. a filename.
+    sort of configuration, usually a filename.
     The argument to this option is transferred to member
     <literal>configname</literal>of the
     <literal>statserv_options_block</literal>.
@@ -119,6 +119,23 @@
    <replaceable>size</replaceable></term>
   <listitem><para>
     Maximum record size/message size, in kilobytes.
+   </para></listitem>
+ </varlistentry>
+
+ <varlistentry><term><literal>-d </literal>
+   <replaceable>daemon</replaceable></term>
+  <listitem><para>
+    Set name of daemon to be used in hosts access file.
+    See
+    <citerefentry>
+     <refentrytitle>hosts_access</refentrytitle>
+     <manvolnum>5</manvolnum>
+    </citerefentry>
+    and 
+    <citerefentry>
+     <refentrytitle>tcpd</refentrytitle>
+     <manvolnum>8</manvolnum>
+    </citerefentry>.
    </para></listitem>
  </varlistentry>
  

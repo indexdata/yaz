@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.12 2002-08-17 07:55:51 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.13 2002-09-17 20:17:44 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -35,7 +35,7 @@
       <itemizedlist>
        <listitem><para>Apple Macintosh (using the Codewarrior programming
          environment and the GUSI socket libraries)</para></listitem>
-       <listitem><para>MS Windows 95/98/NT/W2K (Win32)</para></listitem>
+       <listitem><para>MS Windows 95/98/NT/2K/XP (Win32)</para></listitem>
        <listitem><para>IBM AS/400</para></listitem>
       </itemizedlist></listitem>
     </itemizedlist>
@@ -119,6 +119,16 @@
          TCP wrapper library</ulink>. It allows you to allow/deny
         clients depending on IP number. The TCP wrapper library is
         often used in Linux/BSD distributions.
+        See
+        <citerefentry>
+         <refentrytitle>hosts_access</refentrytitle>
+         <manvolnum>5</manvolnum>
+        </citerefentry>
+        and 
+        <citerefentry>
+         <refentrytitle>tcpd</refentrytitle>
+         <manvolnum>8</manvolnum>
+        </citerefentry>.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>--enable-threads</literal></term>
@@ -155,7 +165,6 @@
     <screen>
      make
     </screen>
-    
    </para>
    
    <para>

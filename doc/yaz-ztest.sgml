@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY ztest-options SYSTEM "ztest-options.xml">
 ]>
-<!-- $Id: yaz-ztest.sgml,v 1.1 2002-09-16 14:16:31 adam Exp $ -->
+<!-- $Id: yaz-ztest.sgml,v 1.2 2002-09-17 20:17:44 adam Exp $ -->
 <refentry id="yaz-ztest">
  
  <refmeta>
@@ -25,8 +25,8 @@
    <arg choice="opt"><option>-t <replaceable>minutes</replaceable></option></arg>
    <arg choice="opt"><option>-k <replaceable>kilobytes</replaceable></option></arg>
    <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>
-   <arg choice="opt"><option>-ziST1</option></arg>
    <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
+   <arg choice="opt"><option>-ziST1</option></arg>
    <arg choice="opt" rep="repeat">listener-spec</arg>
   </cmdsynopsis>
 
@@ -40,7 +40,7 @@
    <para>
     <command>yaz-ztest</command> is a Z39.50 test server. 
     The server acts as a real Z39.50 server but does not use a database.
-    It returns a random hit count and returns a subset of a few build-in
+    It returns a random hit count and returns a subset of a few built-in
     records.
    </para>
    <para>
@@ -51,7 +51,7 @@
     The <replaceable>listener-spec</replaceable> consists of a transport
     mode followed by a colon, followed by a listener address. The
     transport mode is either <literal>tcp</literal>, <literal>unix</literal>,
-    or <literal>ssl</literal>.
+    or <literal>ssl</literal> (<command>yaz-ztest-ssl</command> only).
    </para>
    <para>
     For TCP and SSL, an address has the form:
@@ -77,7 +77,9 @@
   </refsect1>
   <refsect1><title>SEE ALSO</title>
    <para>
-    yaz(7)
+    <citerefentry>
+     <refentrytitle>yaz</refentrytitle>
+     <manvolnum>1</manvolnum></citerefentry>
    </para>
    <para>
     Section "Generic server" in the YAZ manual.
