@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.3  1999-12-20 15:20:13  adam
+ * Revision 1.4  1999-12-21 16:25:20  adam
+ * Fixed handling of default/inherited attributes.
+ *
+ * Revision 1.3  1999/12/20 15:20:13  adam
  * Implemented ccl_pquery to convert from CCL tree to prefix query.
  *
  * Revision 1.2  1999/11/30 13:47:12  adam
@@ -212,7 +215,7 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
         elements = (Z_AttributeElement**)odr_nullval();
     else
     {
-        int i;
+        int i, k = 0;
         int *attr_tmp;
 
         elements = (Z_AttributeElement**)
@@ -220,13 +223,19 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
 
         attr_tmp = (int *)odr_malloc (o, num_attr * 2 * sizeof(int));
         memcpy (attr_tmp, attr_list, num_attr * 2 * sizeof(int));
-        for (i = 0; i < num_attr; i++)
+        for (i = num_attr; --i >= 0; )
         {
-            elements[i] =
+            int j;
+            for (j = i+1; j<num_attr; j++)
+                if (attr_tmp[2*j] == attr_tmp[2*i])
+                    break;
+            if (j < num_attr)
+                continue;
+            elements[k] =
                 (Z_AttributeElement*)odr_malloc (o,sizeof(**elements));
-            elements[i]->attributeType = &attr_tmp[2*i];
+            elements[k]->attributeType = &attr_tmp[2*i];
             if (attr_set[i] == VAL_NONE)
-                elements[i]->attributeSet = 0;
+                elements[k]->attributeSet = 0;
             else
             {
                 oident attrid;
@@ -236,12 +245,14 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
                 attrid.oclass = CLASS_ATTSET;
                 attrid.value = attr_set[i];
                    
-                elements[i]->attributeSet =
+                elements[k]->attributeSet =
 		    odr_oiddup (o, oid_ent_to_oid (&attrid, oid));
             }
-	    elements[i]->which = Z_AttributeValue_numeric;
-	    elements[i]->value.numeric = &attr_tmp[2*i+1];
+	    elements[k]->which = Z_AttributeValue_numeric;
+	    elements[k]->value.numeric = &attr_tmp[2*i+1];
+            k++;
         }
+        num_attr = k;
     }
 #ifdef ASN_COMPILED
     zapt->attributes = (Z_AttributeList *)
@@ -402,7 +413,6 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
 {
     Z_RPNStructure *sz;
     const char *cp;
-    int i, attrtype;
 
     sz = (Z_RPNStructure *)odr_malloc (o, sizeof(*sz));
     switch (li->query_look)
@@ -449,19 +459,9 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
             else
                 attr_set[num_attr] = VAL_NONE;
         }
-        attrtype = atoi (li->lex_buf);
-        for (i = 0; i < num_attr; i++)
-	    if (attrtype == attr_list[2*i])
-	    {
-		attr_list[2*i+1] = atoi (cp+1);
-		break;
-	    }
-	if (i == num_attr)
-	{
-	    attr_list[2*num_attr] = attrtype;
-	    attr_list[2*num_attr+1] = atoi (cp+1);
-	    num_attr++;
-	}
+	attr_list[2*num_attr] = atoi(li->lex_buf); 
+	attr_list[2*num_attr+1] = atoi (cp+1);
+	num_attr++;
         lex (li);
         return
             rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
