@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 1996, Index Data.
+ * See the file LICENSE for details.
+ * Sebastian Hammer, Adam Dickmeiss
+ *
+ * $Log: yaz-ccl.c,v $
+ * Revision 1.8  1996-10-29 13:36:27  adam
+ * Added header.
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

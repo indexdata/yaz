@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-util.c,v $
- * Revision 1.2  1996-02-20 17:58:42  adam
+ * Revision 1.3  1996-10-29 13:36:28  adam
+ * Added header.
+ *
+ * Revision 1.2  1996/02/20 17:58:42  adam
  * Added const to yaz_matchstr.
  *
  * Revision 1.1  1996/02/20  16:33:06  quinn
@@ -17,7 +20,7 @@
  */
 
 #include <ctype.h>
-
+#include <yaz-util.h>
 /*
  * Match strings, independently of case and occurences of '-'.
  * fairly inefficient - will be replaced with an indexing scheme for

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tpath.c,v $
- * Revision 1.1  1995-11-01 16:35:00  quinn
+ * Revision 1.2  1996-10-29 13:36:26  adam
+ * Added header.
+ *
+ * Revision 1.1  1995/11/01 16:35:00  quinn
  * Making data1 look for tables in data1_tabpath
  *
  *
@@ -12,8 +15,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <tpath.h>
 
-FILE *yaz_path_fopen(char *path, char *name, char *mode)
+FILE *yaz_path_fopen(const char *path, const char *name, const char *mode)
 {
     char spath[512] = "";
 
