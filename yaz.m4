@@ -1,4 +1,4 @@
-## $Id: yaz.m4,v 1.8 2004-05-21 12:27:38 adam Exp $
+## $Id: yaz.m4,v 1.9 2004-09-09 09:40:04 adam Exp $
 ## 
 # Use this m4 function for autoconf if you use YAZ in your own
 # configure script.
@@ -7,7 +7,7 @@ dnl ----- Setup Docbook documentation for YAZ
 AC_DEFUN([YAZ_DOC],
 [
 AC_SUBST(DTD_DIR)	
-AC_ARG_WITH(dtd, [  --with-dtd[=DIR]        use docbookx.dtd in DIR],
+AC_ARG_WITH(docbook-dtd, [  --with-docbook-dtd[=DIR]  use docbookx.dtd in DIR],
 [
 	if test -f "$withval/docbookx.dtd"; then
 		DTD_DIR=$withva	l
@@ -32,7 +32,7 @@ AC_ARG_WITH(dtd, [  --with-dtd[=DIR]        use docbookx.dtd in DIR],
 	fi
 ])
 AC_SUBST(DSSSL_DIR)
-AC_ARG_WITH(dsssl,[  --with-dsssl[=DIR]      use Docbook DSSSL in DIR/{html,print}/docbook.dsl],
+AC_ARG_WITH(docbook-dsssl,[  --with-docbook-dsssl[=DIR] use Docbook DSSSL in DIR/{html,print}/docbook.dsl],
 [
 	if test -f "$withval/html/docbook.dsl"; then
 		DSSSL_DIR=$withval
@@ -55,7 +55,7 @@ AC_ARG_WITH(dsssl,[  --with-dsssl[=DIR]      use Docbook DSSSL in DIR/{html,prin
 	fi
 ])
 AC_SUBST(XSL_DIR)
-AC_ARG_WITH(xsl,[  --with-xsl[=DIR]        use Docbook XSL in DIR/{htmlhelp,xhtml}],
+AC_ARG_WITH(docbook-xsl,[  --with-docbook-xsl[=DIR]  use Docbook XSL in DIR/{htmlhelp,xhtml}],
 [
 	if test -f "$withval/htmlhelp/htmlhelp.xsl"; then
 		XSL_DIR=$withval
@@ -85,7 +85,7 @@ AC_DEFUN([YAZ_INIT],
 	AC_SUBST(YAZVERSION)
 	yazconfig=NONE
 	yazpath=NONE
-	AC_ARG_WITH(yazconfig, [  --with-yazconfig=DIR    yaz-config in DIR (example /home/yaz-1.7)], [yazpath=$withval])
+	AC_ARG_WITH(yaz-config, [  --with-yaz-config=DIR   use yaz-config in DIR (example /home/yaz-1.7)], [yazpath=$withval])
 	if test "x$yazpath" != "xNONE"; then
 		yazconfig=$yazpath/yaz-config
 	else
