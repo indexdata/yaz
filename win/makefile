@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.80 2004-08-13 08:40:19 adam Exp $
+# $Id: makefile,v 1.81 2004-08-18 09:01:13 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -39,9 +39,13 @@ default: all
 
 all: dirs generate dll client ztest zoomsh utilprog iconv libxml2
 
-NSIS="c:\program files\nsis\makensis-bz2.exe"
+NSIS="c:\program files\nsis\makensis.exe"
 
-nsis: all
+nsis: 
+	nmake DEBUG=1 clean
+	nmake DEBUG=0 clean
+	nmake DEBUG=1
+	nmake DEBUG=0
 	$(NSIS) yaz.nsi
 
 nsishelp:
@@ -60,8 +64,14 @@ INCLDIR=$(ROOTDIR)\include  # our includes
 LIBDIR=$(ROOTDIR)\lib       # We produce .lib, .exp etc there
 BINDIR=$(ROOTDIR)\bin       # We produce exes and dlls there
 WINDIR=$(ROOTDIR)\win       # all these Win make things
-OBJDIR=$(WINDIR)\obj        # where we store intermediate files
 SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
+
+# where we store intermediate files
+!if $(DEBUG)
+OBJDIR=$(WINDIR)\dobj
+!else
+OBJDIR=$(WINDIR)\obj
+!endif
 
 CLIENTDIR=$(ROOTDIR)\CLIENT
 ZTESTDIR=$(ROOTDIR)\ZTEST
@@ -75,8 +85,13 @@ TMP=$(TMPDIR)
 ############### Targets - what to make
 ###########################################################
 
+!if $(DEBUG)
+DLL=$(BINDIR)\yazdebug.dll
+IMPLIB=$(LIBDIR)\yazdebug.lib
+!else
 DLL=$(BINDIR)\yaz.dll
 IMPLIB=$(LIBDIR)\yaz.lib
+!endif
 
 CLIENT=$(BINDIR)\yaz-client.exe
 ZOOMSH=$(BINDIR)\zoomsh.exe
@@ -668,7 +683,7 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 		$(DLL_OBJS)
 		$(YAZ_RES)
 		/out:$(DLL) 
-		/implib:"$(LIBDIR)\yaz.lib"
+		/implib:"$(IMPLIB)"
 		/map:"$(LIBDIR)\yaz.map"  
 <<
 

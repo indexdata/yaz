@@ -1,8 +1,10 @@
-; $Id: yaz.nsi,v 1.51 2004-08-11 09:05:56 adam Exp $
+; $Id: yaz.nsi,v 1.52 2004-08-18 09:01:13 adam Exp $
 
 !define VERSION "2.0.23"
 
 !include "MUI.nsh"
+
+SetCompressor bzip2
 
 Name "YAZ"
 Caption "Index Data YAZ ${VERSION} Setup"
@@ -81,8 +83,11 @@ Section "YAZ Runtime" YAZ_Runtime
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
 Noservice:
 	SetOutPath $INSTDIR\bin
+	File ..\bin\iconv.dll
+	File ..\bin\zlib.dll
+	File ..\bin\libxml2.dll
+	File ..\bin\yaz.dll
 	File ..\bin\*.exe
-	File ..\bin\*.dll
 	SetOutPath $SMPROGRAMS\YAZ
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
                  "$INSTDIR\bin\yaz-client.exe"
@@ -101,6 +106,8 @@ Section "YAZ Development" YAZ_Development
 	File ..\include\yaz\*.h
 	SetOutPath $INSTDIR\lib
 	File ..\lib\*.lib
+	SetOutPath $INSTDIR\bin
+	File ..\bin\yazdebug.dll
 SectionEnd
 
 Section "YAZ Documentation" YAZ_Documentation
