@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.8 2004-03-15 21:39:06 adam Exp $
+## $Id: Makefile.am,v 1.9 2004-03-15 23:14:59 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -39,7 +39,7 @@ marc8.c: charconv.sgm charconv.tcl
 
 # MARC8 conversion is generated from charconv.sgm
 marc8_cjk.c: charconv_cjk.xml charconv.tcl
-	cd $(srcdir); ./charconv.tcl -p marc8_cjk -s 50 charconv_cjk.xml -o marc8_cjk.c
+	cd $(srcdir); ./charconv.tcl -p marc8_cjk -s 100 charconv_cjk.xml -o marc8_cjk.c
 
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
