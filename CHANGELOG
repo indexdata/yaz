@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+CCL Parser fix: ignore token comma when dealing with and-lists.
+
 Documentation updates for COMSTACK.
 
 * ZOOM changes. Query object renamed from Z3950_search to Z3950_query.
