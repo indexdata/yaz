@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst5.c,v 1.7 2001-12-30 22:21:11 adam Exp $
+ * $Id: zoomtst5.c,v 1.8 2002-02-20 14:40:42 adam Exp $
  *
  * Asynchronous multi-target client doing search, sort and present
  */
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 			    (db ? db : "unknown"));
 		    if (rec)
 			fwrite (str, 1, len, stdout);
-		    putchar ('\n');
+		    printf ("\n");
 		}
 	    }
 	}

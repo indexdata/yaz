@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.7 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoomsh.c,v 1.8 2002-02-20 14:40:42 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -129,7 +129,7 @@ static void display_records (ZOOM_connection c,
 	    printf ("%d %s %s\n", pos+1, (db ? db : "unknown"), syntax);
 	    if (render)
 		fwrite (render, 1, len, stdout);
-	    putchar ('\n');
+	    printf ("\n");
 	}
     }
 }

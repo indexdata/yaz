@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.8 2001-12-30 22:21:11 adam Exp $
+ * $Id: zoomtst7.c,v 1.9 2002-02-20 14:40:42 adam Exp $
  *
  * API test..
  */
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 		
 		ZOOM_query_destroy (s);
 
-		putchar ('.');
+		printf (".");
 		if (block > 0)
 		    while (ZOOM_event (1, &z))
 			;
@@ -126,12 +126,11 @@ int main(int argc, char **argv)
 		
 		r[j] = ZOOM_connection_search_pqf (z, query);
 
-		putchar ('.');
+		printf (".");
 		if (block > 0)
 		    while (ZOOM_event (1, &z))
 			;
 	    }
-
 
 	    ZOOM_connection_destroy (z);
 	    

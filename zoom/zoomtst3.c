@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst3.c,v 1.5 2001-12-30 22:21:11 adam Exp $
+ * $Id: zoomtst3.c,v 1.6 2002-02-20 14:40:42 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 		    printf ("%d\n", pos+1);
 		    if (rec)
 			fwrite (rec, 1, len, stdout);
-		    putchar ('\n');
+		    printf ("\n");
 		}
 	    }
 	}

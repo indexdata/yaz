@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst6.c,v 1.8 2001-11-28 23:00:19 adam Exp $
+ * $Id: zoomtst6.c,v 1.9 2002-02-20 14:40:42 adam Exp $
  *
  * Asynchronous multi-target client doing two searches
  */
@@ -31,7 +31,7 @@ static void display_records (const char *tname, ZOOM_resultset r)
                 printf ("%d %s\n", pos+1, (db ? db : "unknown"));
                 if (render)
                     fwrite (render, 1, len, stdout);
-                putchar ('\n');
+                printf ("\n");
             }
         }
     }
