@@ -1,5 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+For ZOOM connection, the options targetImplementation{Id,Name,Version}
+are set when Init Response is received.
+
+New function ZOOM_connection_error_x similar to ZOOM_connection_error
+but returns diagnostic set as well.
+
 New function yaz_strerror which is a portable wrapper for
 strerror/strerror_r/GetLastMessage.
 

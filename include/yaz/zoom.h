@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.14 2002-11-30 22:30:51 mike Exp $
+ * $Id: zoom.h,v 1.15 2002-12-09 23:32:29 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -65,6 +65,10 @@ ZOOM_connection_option_set (ZOOM_connection c, const char *key,
 ZOOM_API(int)
 ZOOM_connection_error (ZOOM_connection c, const char **cp,
 			    const char **addinfo);
+
+ZOOM_API(int)
+ZOOM_connection_error_x (ZOOM_connection c, const char **cp,
+                         const char **addinfo, const char **diagset);
 
 /* returns error code */
 ZOOM_API(int)

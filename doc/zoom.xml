@@ -1,6 +1,5 @@
-<!-- $Id: zoom.xml,v 1.20 2002-09-25 20:32:53 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.21 2002-12-09 23:32:29 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
-  
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
    an initiative started by Mike Taylor (Mike is from the UK, which
@@ -22,14 +21,14 @@
    <ulink url="http://zoom.z3950.org/">ZOOM web-site</ulink> for
    more information.
   </para>
-
+  
   <para>
    In order to fully understand this chapter you should read and
    try the example programs <literal>zoomtst1.c</literal>,
    <literal>zoomtst2.c</literal>, .. in the <literal>zoom</literal>
    directory.
   </para>
-
+  
   <para>
    The C language misses features found in object oriented languages
    such as C++, Java, etc. For example, you'll have to manually,
@@ -50,15 +49,15 @@
    <para>The Connection object is a session with a target.
    </para>
    <synopsis>
-   #include &lt;yaz/zoom.h>
+    #include &lt;yaz/zoom.h>
     
-   ZOOM_connection ZOOM_connection_new (const char *host, int portnum);
+    ZOOM_connection ZOOM_connection_new (const char *host, int portnum);
     
-   ZOOM_connection ZOOM_connection_create (ZOOM_options options);
-
-   void ZOOM_connection_connect(ZOOM_connection c, const char *host,
+    ZOOM_connection ZOOM_connection_create (ZOOM_options options);
+    
+    void ZOOM_connection_connect(ZOOM_connection c, const char *host,
                                  int portnum);
-   void ZOOM_connection_destroy (ZOOM_connection c);
+    void ZOOM_connection_destroy (ZOOM_connection c);
    </synopsis>
    <para>
     Connection objects are created with either function
@@ -91,7 +90,7 @@
     The <function>ZOOM_connection_option_set</function> allows you to
     set an option given by <parameter>key</parameter> to the value
     <parameter>value</parameter> for the connection.
-     Function <function>ZOOM_connection_option_get</function> returns
+    Function <function>ZOOM_connection_option_get</function> returns
     the value for an option given by <parameter>key</parameter>.
    </para>
    <table frame="top"><title>ZOOM Connection Options</title>
@@ -118,7 +117,7 @@
        </entry><entry>none</entry></row>
       <row><entry>
         pass</entry><entry>Authentication password
-      </entry><entry>none</entry></row>
+       </entry><entry>none</entry></row>
       <row><entry>
         host</entry><entry>Target host. This setting is "read-only".
         It's automatically set internally when connecting to a target.
@@ -144,6 +143,16 @@
       <row><entry>
         charset</entry><entry> Character set for negotiation.
        </entry><entry>none</entry></row>
+      <row><entry>
+        targetImplementationId</entry><entry> Implementation ID of target.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        targetImplementationName</entry><entry> Implementation Name of target.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        targetImplementationVersion</entry><entry> Implementation Version
+        of target.
+       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
    </table>
@@ -155,15 +164,20 @@
    </para>
    <synopsis>
      int ZOOM_connection_error (ZOOM_connection c, const char **cp,
-                                 const char **addinfo);
+                                const char **addinfo);
+     int ZOOM_connection_error_x (ZOOM_connection c, const char **cp,
+                                  const char **addinfo, const char **dset);
    </synopsis>
    <para>
-    Use <function>ZOOM_connection_error</function> to check for
+    Function <function>ZOOM_connection_error</function> checks for
     errors for the last operation(s) performed. The function returns
     zero if no errors occurred; non-zero otherwise indicating the error.
     Pointers <parameter>cp</parameter> and <parameter>addinfo</parameter>
     holds messages for the error and additional-info if passed as
-    non-<literal>NULL</literal>.
+    non-<literal>NULL</literal>. Function
+    <function>ZOOM_connection_error_x</function> is an extended version
+    of <function>ZOOM_connection_error</function> that is capable of
+    returning name of diagnostic set in <parameter>dset</parameter>.
    </para>
    <sect2><title>Protocol behavior</title>
     <para>

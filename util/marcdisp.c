@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.24 2002-12-03 10:03:27 adam Exp $
+ * $Id: marcdisp.c,v 1.25 2002-12-09 23:32:29 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -93,9 +93,8 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         case YAZ_MARC_MARCXML:
             wrbuf_printf(
                 wr,
-                "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
-                "  <record>\n"
-                "    <leader>%.24s</leader>\n", buf);
+                "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+                "  <leader>%.24s</leader>\n", buf);
             break;
         }
     }
@@ -176,9 +175,9 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
             break;
         case YAZ_MARC_MARCXML:
             if (identifier_flag)
-                wrbuf_printf (wr, "    <datafield tag=\"%s\"", tag);
+                wrbuf_printf (wr, "  <datafield tag=\"%s\"", tag);
             else
-                wrbuf_printf (wr, "    <controlfield tag=\"%s\"", tag);
+                wrbuf_printf (wr, "  <controlfield tag=\"%s\"", tag);
         }
         
         if (identifier_flag)
@@ -240,7 +239,7 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
                     wrbuf_puts (wr, "\">");
                     break;
                 case YAZ_MARC_MARCXML:
-                    wrbuf_puts (wr, "      <subfield code=\"");
+                    wrbuf_puts (wr, "    <subfield code=\"");
                     for (j = 1; j<identifier_length; j++, i++)
                         wrbuf_putc (wr, buf[i]);
                     wrbuf_puts (wr, "\">");
@@ -294,9 +293,9 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
             break;
         case YAZ_MARC_MARCXML:
             if (identifier_flag)
-                wrbuf_puts (wr, "    </datafield>\n");
+                wrbuf_puts (wr, "  </datafield>\n");
             else
-                wrbuf_puts (wr, "    </controlfield>\n");
+                wrbuf_puts (wr, "  </controlfield>\n");
             break;
         }
     }
@@ -312,7 +311,7 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         wrbuf_puts (wr, "</oai_marc>\n");
         break;
     case YAZ_MARC_MARCXML:
-        wrbuf_puts (wr, "  </record>\n</collection>\n");
+        wrbuf_puts (wr, "</record>\n");
         break;
     }
     return record_length;

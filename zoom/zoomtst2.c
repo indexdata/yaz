@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst2.c,v 1.4 2002-09-24 08:00:32 adam Exp $
+ * $Id: zoomtst2.c,v 1.5 2002-12-09 23:32:29 adam Exp $
  *
  * Asynchronous single-target client performing search (no retrieval)
  */
@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     ZOOM_connection z;
     ZOOM_resultset r;
     int error;
-    const char *errmsg, *addinfo;
+    const char *errmsg, *addinfo, *diagset;
 
     if (argc < 3)
     {
@@ -41,9 +41,10 @@ int main(int argc, char **argv)
 	;
 
     /* see if any error occurred */
-    if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
+    if ((error = ZOOM_connection_error_x(z, &errmsg, &addinfo, &diagset)))
     {
-	fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
+	fprintf (stderr, "Error: %s: %s (%d) %s\n", diagset, errmsg, error,
+			 addinfo);
 	exit (2);
     }
     else /* OK print hit count */

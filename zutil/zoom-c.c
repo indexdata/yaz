@@ -1,5 +1,8 @@
 /*
- * $Id: zoom-c.c,v 1.9 2002-12-03 10:03:27 adam Exp $
+ * Copyright (c) 2000-2002, Index Data
+ * See the file LICENSE for details.
+ *
+ * $Id: zoom-c.c,v 1.10 2002-12-09 23:32:29 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -77,6 +80,14 @@ static ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c)
     return event;
 }
 
+static void set_bib1_error (ZOOM_connection c, int error)
+{
+    xfree (c->addinfo);
+    c->addinfo = 0;
+    c->error = error;
+    c->diagset = "Bib-1";
+}
+
 static void clear_error (ZOOM_connection c)
 {
 
@@ -90,9 +101,7 @@ static void clear_error (ZOOM_connection c)
     case ZOOM_ERROR_INTERNAL:
         break;
     default:
-        c->error = ZOOM_ERROR_NONE;
-        xfree (c->addinfo);
-        c->addinfo = 0;
+        set_bib1_error(c, ZOOM_ERROR_NONE);
     }
 }
 
@@ -169,8 +178,8 @@ ZOOM_connection_create (ZOOM_options options)
     c->mask = 0;
     c->reconnect_ok = 0;
     c->state = STATE_IDLE;
-    c->error = ZOOM_ERROR_NONE;
     c->addinfo = 0;
+    set_bib1_error(c, ZOOM_ERROR_NONE);
     c->buf_in = 0;
     c->len_in = 0;
     c->buf_out = 0;
@@ -324,7 +333,7 @@ ZOOM_connection_connect(ZOOM_connection c,
 
     c->async = ZOOM_options_get_bool (c->options, "async", 0);
  
-    c->error = ZOOM_ERROR_NONE;
+    set_bib1_error(c, ZOOM_ERROR_NONE);
 
     task = ZOOM_connection_add_task (c, ZOOM_TASK_CONNECT);
 
@@ -627,7 +636,7 @@ static zoom_ret do_connect (ZOOM_connection c)
 	}
     }
     c->state = STATE_IDLE;
-    c->error = ZOOM_ERROR_CONNECT;
+    set_bib1_error(c, ZOOM_ERROR_CONNECT);
     return zoom_complete;
 }
 
@@ -706,7 +715,7 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 	    odr_destroy(odr_pr);
 	}
         yaz_log (LOG_DEBUG, "encoding failed");
-	c->error = ZOOM_ERROR_ENCODE;
+        set_bib1_error(c, ZOOM_ERROR_ENCODE);
 	odr_reset(out);
 	return -1;
     }
@@ -962,6 +971,7 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
 
 static void response_diag (ZOOM_connection c, Z_DiagRec *p)
 {
+    int oclass;
     Z_DefaultDiagFormat *r;
     char *addinfo = 0;
     
@@ -969,10 +979,12 @@ static void response_diag (ZOOM_connection c, Z_DiagRec *p)
     c->addinfo = 0;
     if (p->which != Z_DiagRec_defaultFormat)
     {
-	c->error = ZOOM_ERROR_DECODE;
+        set_bib1_error(c, ZOOM_ERROR_DECODE);
 	return;
     }
     r = p->u.defaultFormat;
+    c->diagset = yaz_z3950oid_to_str(r->diagnosticSetId, &oclass);
+
     switch (r->which)
     {
     case Z_DefaultDiagFormat_v2Addinfo:
@@ -1308,7 +1320,7 @@ static void handle_records (ZOOM_connection c, Z_Records *sr,
 	if (sr->u.multipleNonSurDiagnostics->num_diagRecs >= 1)
 	    response_diag(c, sr->u.multipleNonSurDiagnostics->diagRecs[0]);
 	else
-	    c->error = ZOOM_ERROR_DECODE;
+            set_bib1_error(c, ZOOM_ERROR_DECODE);
     }
     else 
     {
@@ -1339,7 +1351,7 @@ static void handle_records (ZOOM_connection c, Z_Records *sr,
 	else if (present_phase)
 	{
 	    /* present response and we didn't get any records! */
-	    c->error = ZOOM_ERROR_DECODE;
+            set_bib1_error(c, ZOOM_ERROR_DECODE);
 	}
     }
 }
@@ -2011,9 +2023,18 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
     {
     case Z_APDU_initResponse:
 	initrs = apdu->u.initResponse;
+        ZOOM_connection_option_set(c, "targetImplementationId",
+                                   initrs->implementationId ?
+                                   initrs->implementationId : "");
+        ZOOM_connection_option_set(c, "targetImplementationName",
+                                   initrs->implementationName ?
+                                   initrs->implementationName : "");
+        ZOOM_connection_option_set(c, "targetImplementationVersion",
+                                   initrs->implementationVersion ?
+                                   initrs->implementationVersion : "");
 	if (!*initrs->result)
 	{
-	    c->error = ZOOM_ERROR_INIT;
+            set_bib1_error(c, ZOOM_ERROR_INIT);
 	}
 	else
 	{
@@ -2091,12 +2112,12 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
         }
         else
         {
-            c->error = ZOOM_ERROR_CONNECTION_LOST;
+            set_bib1_error(c, ZOOM_ERROR_CONNECTION_LOST);
             do_close(c);
         }
         break;
     default:
-        c->error = ZOOM_ERROR_DECODE;
+        set_bib1_error(c, ZOOM_ERROR_DECODE);
         do_close(c);
     }
 }
@@ -2140,7 +2161,7 @@ static int do_read (ZOOM_connection c)
         ZOOM_connection_put_event (c, event);
 	if (!z_APDU (c->odr_in, &apdu, 0, 0))
 	{
-	    c->error = ZOOM_ERROR_DECODE;
+            set_bib1_error(c, ZOOM_ERROR_DECODE);
 	    do_close (c);
 	}
 	else
@@ -2171,9 +2192,9 @@ static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
             return zoom_complete;
         }
 	if (c->state == STATE_CONNECTING)
-	    c->error = ZOOM_ERROR_CONNECT;
+	    set_bib1_error(c, ZOOM_ERROR_CONNECT);
 	else
-	    c->error = ZOOM_ERROR_CONNECTION_LOST;
+            set_bib1_error(c, ZOOM_ERROR_CONNECTION_LOST);
 	do_close (c);
 	return zoom_complete;
     }
@@ -2278,8 +2299,8 @@ ZOOM_diag_str (int error)
 }
 
 ZOOM_API(int)
-ZOOM_connection_error (ZOOM_connection c, const char **cp,
-			    const char **addinfo)
+ZOOM_connection_error_x (ZOOM_connection c, const char **cp,
+                         const char **addinfo, const char **diagset)
 {
     int error = c->error;
     if (cp)
@@ -2287,13 +2308,17 @@ ZOOM_connection_error (ZOOM_connection c, const char **cp,
 	*cp = ZOOM_diag_str(error);
     }
     if (addinfo)
-    {
-	if (c->addinfo)
-	    *addinfo = c->addinfo;
-	else
-	    *addinfo = "";
-    }
+        *addinfo = c->addinfo ? c->addinfo : "";
+    if (diagset)
+        *diagset = c->diagset ? c->diagset : "";
     return c->error;
+}
+
+ZOOM_API(int)
+ZOOM_connection_error (ZOOM_connection c, const char **cp,
+                       const char **addinfo)
+{
+    return ZOOM_connection_error_x(c, cp, addinfo, 0);
 }
 
 static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
@@ -2306,7 +2331,7 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
     if (r == CS_NONE)
     {
         event = ZOOM_Event_create (ZOOM_EVENT_CONNECT);
-	c->error = ZOOM_ERROR_CONNECT;
+	set_bib1_error(c, ZOOM_ERROR_CONNECT);
 	do_close (c);
         ZOOM_connection_put_event (c, event);
     }
@@ -2334,7 +2359,7 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
         }
         else
         {
-            c->error = ZOOM_ERROR_CONNECT;
+            set_bib1_error(c, ZOOM_ERROR_CONNECT);
             do_close (c);
             ZOOM_connection_put_event (c, event);
         }
@@ -2483,7 +2508,7 @@ ZOOM_event (int no, ZOOM_connection *cs)
         {
             ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_TIMEOUT);
 	    /* timeout and this connection was waiting */
-	    c->error = ZOOM_ERROR_TIMEOUT;
+	    set_bib1_error(c, ZOOM_ERROR_TIMEOUT);
             do_close (c);
             ZOOM_connection_put_event(c, event);
         }
@@ -2519,7 +2544,7 @@ ZOOM_event (int no, ZOOM_connection *cs)
 	{
             ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_TIMEOUT);
 	    /* timeout and this connection was waiting */
-	    c->error = ZOOM_ERROR_TIMEOUT;
+	    set_bib1_error(c, ZOOM_ERROR_TIMEOUT);
             do_close (c);
             yaz_log (LOG_DEBUG, "timeout");
             ZOOM_connection_put_event(c, event);
