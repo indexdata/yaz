@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.8  1995-11-01 13:54:27  quinn
+ * Revision 1.9  1996-02-10 12:23:11  quinn
+ * Enablie inetd operations fro TCP/IP stack
+ *
+ * Revision 1.8  1995/11/01  13:54:27  quinn
  * Minor adjustments
  *
  * Revision 1.7  1995/10/30  12:41:16  quinn
@@ -139,11 +142,14 @@ typedef struct tcpip_state
     int towrite;  /* to verify against user input */
 } tcpip_state;
 
-COMSTACK tcpip_type(int blocking, int protocol)
+/*
+ * s >= 0: socket has already been established for us.
+ */
+COMSTACK tcpip_type(int s, int blocking, int protocol)
 {
     COMSTACK p;
     tcpip_state *state;
-    int s;
+    int new_socket;
 #ifdef WINDOWS
     unsigned long tru = 1;
 #else
@@ -163,24 +169,32 @@ COMSTACK tcpip_type(int blocking, int protocol)
         initialized = 1;
     }
 
+    if (s < 0)
+    {
 #ifndef WINDOWS
-    if (!(proto = getprotobyname("tcp")))
-        return 0;
-    if ((s = socket(AF_INET, SOCK_STREAM, proto->p_proto)) < 0)
+	if (!(proto = getprotobyname("tcp")))
+	    return 0;
+	if ((s = socket(AF_INET, SOCK_STREAM, proto->p_proto)) < 0)
 #else
-    if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 #endif
-        return 0;
+	    return 0;
+	new_socket = 1;
+    }
+    else
+	new_socket = 0;
     if (!(p = xmalloc(sizeof(struct comstack))))
-        return 0;
+	return 0;
     if (!(state = p->private = xmalloc(sizeof(tcpip_state))))
-        return 0;
+	return 0;
+
 #ifdef WINDOWS
     if (!(p->blocking = blocking) && ioctlsocket(s, FIONBIO, &tru) < 0)
 #else
     if (!(p->blocking = blocking) && fcntl(s, F_SETFL, O_NONBLOCK) < 0)
 #endif
-        return 0;
+	return 0;
+
     p->iofile = s;
     p->type = tcpip_type;
     p->protocol = protocol;
@@ -196,7 +210,7 @@ COMSTACK tcpip_type(int blocking, int protocol)
     p->f_accept = tcpip_accept;
     p->f_addrstr = tcpip_addrstr;
 
-    p->state = CS_UNBND;
+    p->state = new_socket ? CS_UNBND : CS_IDLE; /* state of line */
     p->event = CS_NONE;
     p->cerrno = 0;
     p->stackerr = 0;

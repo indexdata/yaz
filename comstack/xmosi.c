@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.9  1996-01-02 08:57:28  quinn
+ * Revision 1.10  1996-02-10 12:23:13  quinn
+ * Enablie inetd operations fro TCP/IP stack
+ *
+ * Revision 1.9  1996/01/02  08:57:28  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.8  1995/11/01  13:54:29  quinn
@@ -154,11 +157,14 @@ static int addopt(struct netbuf *optbuf, unsigned long level, unsigned long
     return 0;
 }
 
-COMSTACK mosi_type(int blocking, int protocol)
+COMSTACK mosi_type(int s, int blocking, int protocol)
 {
     COMSTACK r;
     mosi_state *state;
     int flags = O_RDWR;
+
+    if (s >= 0)
+	return 0;
 
     if (!(r = xmalloc(sizeof(*r))))
     	return 0;
