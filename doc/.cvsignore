@@ -5,3 +5,7 @@ yazhtml.dsl
 yazphp.dsl
 yazprint.dsl
 *.html
+yaz.tex
+manpage.links
+manpage.refs
+*.[178]
