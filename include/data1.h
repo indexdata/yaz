@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.27  1997-09-24 13:35:44  adam
+ * Revision 1.28  1997-10-06 09:37:53  adam
+ * Added prototype for data1_get_map_buf.
+ *
+ * Revision 1.27  1997/09/24 13:35:44  adam
  * Added two members to data1_marctab to ease reading of weird MARC records.
  *
  * Revision 1.26  1997/09/17 12:10:32  adam
@@ -465,6 +468,7 @@ YAZ_EXPORT const char *data1_get_tabpath(data1_handle dh);
 
 YAZ_EXPORT WRBUF data1_get_wrbuf (data1_handle dp);
 YAZ_EXPORT char **data1_get_read_buf (data1_handle dp, int **lenp);
+YAZ_EXPORT char **data1_get_map_buf (data1_handle dp, int **lenp);
 YAZ_EXPORT data1_absyn_cache *data1_absyn_cache_get (data1_handle dh);
 YAZ_EXPORT NMEM data1_nmem_get (data1_handle dh);
 
