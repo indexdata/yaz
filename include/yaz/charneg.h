@@ -1,5 +1,5 @@
 /*
- * $Id: charneg.h,v 1.2 2002-05-19 15:39:54 oleg Exp $
+ * $Id: charneg.h,v 1.3 2002-07-25 12:50:16 adam Exp $
  */
 #ifndef CHARNEG_H
 #define CHARNEG_H
@@ -43,8 +43,10 @@ YAZ_EXPORT Z_External *yaz_set_response_charneg(ODR odr,
 
 
 YAZ_EXPORT void yaz_get_proposal_charneg(NMEM mem,
-	Z_CharSetandLanguageNegotiation *p, char **charsets, int *num_charsets,
-		char **langs, int *num_langs, int *selected);
+	Z_CharSetandLanguageNegotiation *p,
+                                         char ***charsets, int *num_charsets,
+                                         char ***langs, int *num_langs,
+                                         int *selected);
 
 
 YAZ_END_CDECL
