@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.2 2003-02-14 18:49:23 adam Exp $
+/* $Id: cql.h,v 1.3 2003-02-18 21:27:53 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -10,6 +10,7 @@ See the file LICENSE.
 #ifndef CQL_H_INCLUDED
 #define CQL_H_INCLUDED
 #include <stdio.h>
+#include <yaz/yconfig.h>
 
 typedef struct cql_parser *CQL_parser;
 
@@ -20,6 +21,7 @@ typedef struct cql_parser *CQL_parser;
  *
  * Returns CQL parser or NULL if parser could not be created.
  */
+YAZ_EXPORT 
 CQL_parser cql_parser_create(void);
 
 /**
@@ -29,6 +31,7 @@ CQL_parser cql_parser_create(void);
  * Destroy CQL parser. This function does nothing if
  * NULL pointer is received.
  */
+YAZ_EXPORT 
 void cql_parser_destroy(CQL_parser cp);
 
 /**
@@ -41,6 +44,7 @@ void cql_parser_destroy(CQL_parser cp);
  * Returns 0 if parsing was succesful; non-zero (error code) if
  * unsuccesful.
  */
+YAZ_EXPORT 
 int cql_parser_string(CQL_parser cp, const char *str);
 
 /**
@@ -55,6 +59,7 @@ int cql_parser_string(CQL_parser cp, const char *str);
  * Returns 0 if parsing was succesful; non-zero (error code) if
  * unsuccesful.
  */
+YAZ_EXPORT 
 int cql_parser_stream(CQL_parser cp,
                       int (*getbyte)(void *client_data),
                       void (*ungetbyte)(int b, void *client_data),
@@ -70,6 +75,7 @@ int cql_parser_stream(CQL_parser cp,
  * Returns 0 if parsing was succesful; non-zero (error code) if
  * unsuccesful.
  */
+YAZ_EXPORT
 int cql_parser_stdio(CQL_parser cp, FILE *f);
 
 #define CQL_NODE_ST 1
@@ -108,52 +114,74 @@ struct cql_buf_write_info {
     char *buf;
 };
 
+YAZ_EXPORT
 void cql_buf_write_handler (const char *b, void *client_data);
 
+YAZ_EXPORT
 void cql_node_print(struct cql_node *cn);
+YAZ_EXPORT
 struct cql_node *cql_node_mk_sc(const char *index,
                                 const char *relation,
                                 const char *term);
+YAZ_EXPORT
 struct cql_node *cql_node_mk_boolean(const char *op);
+YAZ_EXPORT
 void cql_node_destroy(struct cql_node *cn);
-struct cql_node *cql_node_prefix(struct cql_node *n, const char *prefix,
+YAZ_EXPORT
+struct cql_node *cql_node_prefix(struct cql_node *n, 
+                                 const char *prefix,
                                  const char *uri);
+YAZ_EXPORT
 struct cql_node *cql_node_mk_mod(const char *name,
                                  const char *value);
 
+YAZ_EXPORT
 struct cql_node *cql_node_dup (struct cql_node *cp);
+YAZ_EXPORT
 struct cql_node *cql_parser_result(CQL_parser cp);
 
+YAZ_EXPORT
 void cql_to_xml(struct cql_node *cn, 
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data);
+YAZ_EXPORT
 void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
+YAZ_EXPORT
 int cql_to_xml_buf(struct cql_node *cn, char *out, int max);
 
+YAZ_EXPORT
 struct cql_node *cql_node_mk_proxargs(const char *relation,
                                       const char *distance,
                                       const char *unit,
                                       const char *ordering);
 
 
+YAZ_EXPORT
 void cql_fputs(const char *buf, void *client_data);
 
 typedef struct cql_transform_t_ *cql_transform_t;
 
+YAZ_EXPORT
 cql_transform_t cql_transform_open_FILE (FILE *f);
+YAZ_EXPORT
 cql_transform_t cql_transform_open_fname(const char *fname);
+YAZ_EXPORT
 void cql_transform_close(cql_transform_t ct);
 
+YAZ_EXPORT
 void cql_transform_pr(cql_transform_t ct,
                       struct cql_node *cn,
                       void (*pr)(const char *buf, void *client_data),
                       void *client_data);
 
+YAZ_EXPORT
 int cql_transform_FILE(cql_transform_t ct,
                        struct cql_node *cn, FILE *f);
 
+YAZ_EXPORT
 int cql_transform_buf(cql_transform_t ct,
                       struct cql_node *cn, char *out, int max);
+YAZ_EXPORT
 int cql_transform_error(cql_transform_t ct, const char **addinfo);
 
 /*

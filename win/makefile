@@ -1,24 +1,10 @@
-# makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.54 2003-02-18 09:11:50 adam Exp $
+# Copyright (C) 1994-2003, Index Data
+# All rights reserved.
+# $Id: makefile,v 1.55 2003-02-18 21:27:53 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
 #
-# Log at the end of the file
-#
-# Missing
-# - Move MS-C's whatnots into win direcotry
-# - The TCL script produces C and H files in the same dir as the 
-#   ASN files. H's are copied to INCL, C's are left there.
-#   They should be produced into OBJ...
-#  
-# Envoronment problems
-# - You need to have the proper path and environment for VC set
-#   up. There is a bat file VCVARS32.BAT that sets most of it up
-#   for you. You can find this somewhere near DevStudio\VC\BIN
-# - RegSvr32 must also be along the path, often in WINDOWS\SYSTEM
-# - TCL has to be available too, if compiling for NEW_Z3950
-# - You may have to edit the path to tcl below
 
 ###########################################################
 ############### Parameters 
@@ -42,9 +28,13 @@ LIBXML2_DIR=c:\libxml2-2.5.3.win32
 # WIN32 binaries libxml2 & iconv from here:
 #  http://www.zlatkovic.com/projects/libxml/binaries.html
 
+# bison
+HAVE_BISON=1
+BISON=bison
+
 default: all
 
-all: dirs generate dll client ztest zoomsh iconv libxml2
+all: dirs generate dll client ztest zoomsh cqlprog iconv libxml2
 
 NSIS="c:\program files\nsis\makensis-bz2.exe"
 
@@ -81,6 +71,8 @@ Z3950DIR=$(SRCDIR)\Z39.50
 ILLDIR=$(SRCDIR)\ill
 CCLDIR=$(SRCDIR)\ccl
 ZOOMDIR=$(SRCDIR)\zoom
+CQLDIR=$(SRCDIR)\cql
+
 
 CLIENTDIR=$(SRCDIR)\CLIENT
 SERVERDIR=$(SRCDIR)\SERVER
@@ -109,6 +101,9 @@ ZOOMTST6=$(BINDIR)\zoomtst6.exe
 ZOOMTST7=$(BINDIR)\zoomtst7.exe
 ZOOMTST8=$(BINDIR)\zoomtst8.exe
 
+CQL2PQF=$(BINDIR)\cql2pqf.exe
+CQL2XCQL=$(BINDIR)\cql2xcql.exe
+
 # shortcut names defined here
 dll : $(DLL) 
 client: $(CLIENT)
@@ -116,6 +111,8 @@ ztest: $(ZTEST)
 
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8)
+
+cqlprog: $(CQL2PQF) $(CQL2XCQL)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -219,6 +216,9 @@ CLIENT_LINK_OPTIONS = /subsystem:console
 ZOOMSH_LINK_OPTIONS = /subsystem:console
 SERVER_LINK_OPTIONS = -lib 
 ZTEST_LINK_OPTIONS = /subsystem:console  
+CQL2PQF_LINK_OPTIONS = /subsystem:console  
+CQL2XCQL_LINK_OPTIONS = /subsystem:console  
+
 
 COMMON_TCL_OPTIONS= ..\util\yaz-comp -I$(INCLDIR) -i yaz
 
@@ -272,6 +272,11 @@ YAZ_ZOOMTST7_OBJS = \
    $(OBJDIR)\zoomtst7.obj
 YAZ_ZOOMTST8_OBJS = \
    $(OBJDIR)\zoomtst8.obj
+
+YAZ_CQL2PQF_OBJS = \
+   $(OBJDIR)\cql2pqf.obj
+YAZ_CQL2XCQL_OBJS = \
+   $(OBJDIR)\cql2xcql.obj
 
 YAZ_SERVER_OBJS= \
 	"$(OBJDIR)\eventl.obj" \
@@ -399,6 +404,14 @@ YAZ_ZOOM_OBJS = \
    $(OBJDIR)\zoom-c.obj \
    $(OBJDIR)\zoom-opt.obj
 
+YAZ_CQL_OBJS = \
+   $(OBJDIR)\cql.obj \
+   $(OBJDIR)\cqlstdio.obj \
+   $(OBJDIR)\cqlstring.obj \
+   $(OBJDIR)\cqltransform.obj \
+   $(OBJDIR)\cqlutil.obj \
+   $(OBJDIR)\xcqlutil.obj
+
 COMMON_YAZ_OBJS= \
    $(YAZ_UTIL_OBJS) \
    $(YAZ_ODR_OBJS) \
@@ -406,7 +419,8 @@ COMMON_YAZ_OBJS= \
    $(YAZ_ZUTIL_OBJS) \
    $(YAZ_CCL_OBJS) \
    $(YAZ_SERVER_OBJS) \
-   $(YAZ_ZOOM_OBJS)
+   $(YAZ_ZOOM_OBJS) \
+   $(YAZ_CQL_OBJS)
 
 YAZ_OBJS= \
 	$(Z3950_OBJS) \
@@ -583,6 +597,9 @@ generated_files: \
 {$(ZOOMDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
+{$(CQLDIR)}.c{$(OBJDIR)}.obj:
+	$(CPP) $(COPT) $< 
+
 ############### ASN-generated files
 
 !if $(HAVE_TCL)
@@ -638,6 +655,12 @@ $(UTILDIR)\marc8.c: $(UTILDIR)\charconv.sgm
 
 !endif
 
+!if $(HAVE_BISON)
+$(CQLDIR)\cql.c: $(CQLDIR)\cql.y
+	@cd $(CQLDIR)
+	$(BISON) -y -p cql_ -o cql.c cql.y
+
+!endif
 
 ###########################################################
 ############### Resources
@@ -809,6 +832,32 @@ $(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS)
 		/out:$(ZOOMTST8)
 <<
 
+$(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS) 
+	@echo Linking $(CQL2PQF)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(CQL2PQF_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_CQL2PQF_OBJS)
+		/pdb:"$(LIBDIR)\cql2pqf.pdb"
+		/map:"$(LIBDIR)\cql2pqf.map"
+		/out:$(CQL2PQF)
+<<
+
+$(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS) 
+	@echo Linking $(CQL2XCQL)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(CQL2XCQL_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_CQL2XCQL_OBJS)
+		/pdb:"$(LIBDIR)\cql2xcql.pdb"
+		/map:"$(LIBDIR)\cql2xcql.map"
+		/out:$(CQL2XCQL)
+<<
+
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 	@echo Linking the ztest  $(ZTEST)
 	$(LINK) @<<
@@ -824,7 +873,6 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 		/out:$(ZTEST) 
 <<
 
-
 # note that this links a lib, so it uses completely different options.
 
 ###########################################################
@@ -837,13 +885,12 @@ clean:
 	-del $(BINDIR)\*.exe
 	-del $(BINDIR)\*.dll
 	-del $(TMPDIR)\*.
-
 	-del $(LIBDIR)\*.MAP
-
 	-del $(LIBDIR)\*.LIB
 	-del $(OBJDIR)\*.OBJ
 
 realclean: clean
+	-del $(CQLDIR)\cql.c
 	-del $(Z3950_C_DIR)\z*.c
 	-del $(INCLDIR)\yaz\z-accdes1.h
 	-del $(INCLDIR)\yaz\z-core.h
@@ -881,7 +928,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.54  2003-02-18 09:11:50  adam
+# Revision 1.55  2003-02-18 21:27:53  adam
+# CQL w/bison on WIN32
+#
+# Revision 1.54  2003/02/18 09:11:50  adam
 # Prepare for external utilties: iconv, libxml2 on WIN32
 #
 # Revision 1.53  2003/02/17 22:34:39  adam

@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.17 2003-02-10 08:59:14 adam Exp $
+; $Id: yaz.nsi,v 1.18 2003-02-18 21:27:53 adam Exp $
 
 !define VERSION "1.9.3"
 
@@ -108,6 +108,9 @@ Section "YAZ Source"
 	File ..\ill\*.c
 	File ..\ill\*.asn
 	File ..\ill\*.tcl
+	SetOutPath $INSTDIR\cql
+	File ..\cql\*.c
+	File ..\cql\*.y
 	SetOutPath $INSTDIR\zutil
 	File ..\zutil\*.c
 	File ..\zutil\*.h

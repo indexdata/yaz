@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.93 2003-02-17 21:23:31 adam Exp $
+ * $Id: statserv.c,v 1.94 2003-02-18 21:27:53 adam Exp $
  */
 
 #include <stdio.h>
@@ -598,7 +598,7 @@ static void inetd_connection(int what)
             if ((assoc = create_association(chan, line)))
             {
                 iochan_setdata(chan, assoc);
-                iochan_settimeout(chan, control_block.idle_timeout * 60);
+                iochan_settimeout(chan, 60);
                 addr = cs_addrstr(line);
                 yaz_log(LOG_LOG, "Inetd association from %s",
                         addr ? addr : "[UNKNOWN]");
