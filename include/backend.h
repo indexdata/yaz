@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.27  1999-10-11 10:01:24  adam
+ * Revision 1.28  1999-11-04 14:58:44  adam
+ * Added status elements for backend delete result set handler.
+ * Updated delete result result set command for client.
+ *
+ * Revision 1.27  1999/10/11 10:01:24  adam
  * Implemented bend_sort_rr handler for frontend server.
  *
  * Revision 1.26  1999/06/17 10:54:44  adam
@@ -226,7 +230,8 @@ typedef struct bend_delete_rr {
     int num_setnames;
     char **setnames;
     Z_ReferenceId *referenceId;
-    int delete_status;
+    int delete_status;      /* status for the whole operation */
+    int *statuses;          /* status each set - indexed as setnames */
     ODR stream;
 } bend_delete_rr;
 

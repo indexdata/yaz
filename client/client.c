@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.88  1999-10-11 10:00:29  adam
+ * Revision 1.89  1999-11-04 14:58:44  adam
+ * Added status elements for backend delete result set handler.
+ * Updated delete result result set command for client.
+ *
+ * Revision 1.88  1999/10/11 10:00:29  adam
  * Modified printing of records.
  *
  * Revision 1.87  1999/08/27 09:40:32  adam
@@ -852,18 +856,35 @@ static void display_records(Z_Records *p)
 
 static int send_deleteResultSetRequest(char *arg)
 {
+    char names[8][32];
+    int i;
+
     Z_APDU *apdu = zget_APDU(out, Z_APDU_deleteResultSetRequest);
     Z_DeleteResultSetRequest *req = apdu->u.deleteResultSetRequest;
 
     req->referenceId = set_refid (out);
 
-    req->num_resultSetList = 1;
-    req->resultSetList = (char **)
-	odr_malloc (out, sizeof(*req->resultSetList));
-    *req->resultSetList = arg;
+    req->num_resultSetList =
+	sscanf (arg, "%30s %30s %30s %30s %30s %30s %30s %30s",
+		names[0], names[1], names[2], names[3],
+		names[4], names[5], names[6], names[7]);
+
     req->deleteFunction = (int *)
 	odr_malloc (out, sizeof(*req->deleteFunction));
-    *req->deleteFunction = Z_DeleteRequest_list;
+    if (req->num_resultSetList > 0)
+    {
+	*req->deleteFunction = Z_DeleteRequest_list;
+	req->resultSetList = (char **)
+	    odr_malloc (out, sizeof(*req->resultSetList)*
+			req->num_resultSetList);
+	for (i = 0; i<req->num_resultSetList; i++)
+	    req->resultSetList[i] = names[i];
+    }
+    else
+    {
+	*req->deleteFunction = Z_DeleteRequest_all;
+	req->resultSetList = 0;
+    }
     
     send_apdu(apdu);
     printf("Sent deleteResultSetRequest.\n");
@@ -1337,11 +1358,6 @@ static int cmd_find(char *arg)
 
 static int cmd_delete(char *arg)
 {
-    if (!*arg)
-    {
-        printf("Delete what?\n");
-        return 0;
-    }
     if (!conn)
     {
         printf("Not connected yet\n");
@@ -1807,6 +1823,21 @@ void process_sortResponse(Z_SortResponse *res)
 #endif
 }
 
+void process_deleteResultSetResponse (Z_DeleteResultSetResponse *res)
+{
+    printf("Got deleteResultSetResponse status=%d\n",
+	   *res->deleteOperationStatus);
+    if (res->deleteListStatuses)
+    {
+	int i;
+	for (i = 0; i < res->deleteListStatuses->num; i++)
+	{
+	    printf ("%s status=%d\n", res->deleteListStatuses->elements[i]->id,
+		    *res->deleteListStatuses->elements[i]->status);
+	}
+    }
+}
+
 int cmd_sort_generic(char *arg, int newset)
 {
     if (!conn)
@@ -2192,9 +2223,8 @@ static int client(int wait)
 			(apdu->u.resourceControlRequest);
 		    break;
 		case Z_APDU_deleteResultSetResponse:
-		    printf("Got deleteResultSetResponse status=%d\n",
-			   *apdu->u.deleteResultSetResponse->
-			   deleteOperationStatus);
+		    process_deleteResultSetResponse(apdu->u.
+						    deleteResultSetResponse);
 		    break;
 		default:
 		    printf("Received unknown APDU type (%d).\n", 

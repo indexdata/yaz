@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.95  1999-10-11 10:01:24  adam
+ * Revision 1.96  1999-11-04 14:58:44  adam
+ * Added status elements for backend delete result set handler.
+ * Updated delete result result set command for client.
+ *
+ * Revision 1.95  1999/10/11 10:01:24  adam
  * Implemented bend_sort_rr handler for frontend server.
  *
  * Revision 1.94  1999/08/27 09:40:32  adam
@@ -1706,7 +1710,15 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     bdrr->stream = assoc->encode;
     bdrr->function = *req->deleteFunction;
     bdrr->referenceId = req->referenceId;
-
+    bdrr->statuses = 0;
+    if (bdrr->num_setnames > 0)
+    {
+	int i;
+	bdrr->statuses = odr_malloc(assoc->encode, sizeof(*bdrr->statuses) *
+				    bdrr->num_setnames);
+	for (i = 0; i < bdrr->num_setnames; i++)
+	    bdrr->statuses[i] = 0;
+    }
     ((int (*)(void *, bend_delete_rr *))
      (*assoc->bend_delete))(assoc->backend, bdrr);
     
@@ -1717,6 +1729,27 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     *res->deleteOperationStatus = bdrr->delete_status;
 
     res->deleteListStatuses = 0;
+    if (bdrr->num_setnames > 0)
+    {
+	int i;
+	res->deleteListStatuses = odr_malloc(assoc->encode,
+					     sizeof(*res->deleteListStatuses));
+	res->deleteListStatuses->num = bdrr->num_setnames;
+	res->deleteListStatuses->elements =
+	    odr_malloc (assoc->encode,
+			sizeof(*res->deleteListStatuses->elements) *
+			bdrr->num_setnames);
+	for (i = 0; i<bdrr->num_setnames; i++)
+	{
+	    res->deleteListStatuses->elements[i] =
+		odr_malloc (assoc->encode,
+			    sizeof(**res->deleteListStatuses->elements));
+	    res->deleteListStatuses->elements[i]->status = bdrr->statuses+i;
+	    res->deleteListStatuses->elements[i]->id =
+		odr_strdup (assoc->encode, bdrr->setnames[i]);
+	    
+	}
+    }
     res->numberNotDeleted = 0;
     res->bulkStatuses = 0;
     res->deleteMessage = 0;
