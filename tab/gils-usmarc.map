@@ -5,6 +5,7 @@
 targetname usmarc
 targetref USmarc
 
+map rank			/(3,999)/(3,r)
 map localControlNumber		/(3,001)/(3,@)
 map dateLastModified		/(3,005)/(3,@)
 map ControlIdentifier		/(3,035)/(3,a)
