@@ -3,15 +3,15 @@
 
 /* System includes */
 
-#ifdef _VMS_
+#ifndef _VMS_
 
-#elif WINDOWS
+#ifdef WINDOWS
 
 #ifdef YNETINCLUDE
 #include <winsock.h>
 #endif
 
-#else
+#else /* #ifdef WINDOWS */
 /*
  * Standard Unix headers
  */
@@ -32,6 +32,7 @@
 #endif
 
 #endif
+#endif /* ifndef _VMS_ */
 
 #include <xmalloc.h>
 
