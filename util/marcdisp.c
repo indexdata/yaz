@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.19 2002-03-18 18:11:45 adam Exp $
+ * $Id: marcdisp.c,v 1.20 2002-10-02 15:51:52 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -192,7 +192,12 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 	        while (buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
 	               buf[i] != ISO2709_FS && i < end_offset)
 		{
-		    wrbuf_putc (wr, buf[i]);
+                    if (xml && buf[i] == '<')
+                        wrbuf_puts(wr, "&lt;");
+                    else if (xml && buf[i] == '&')
+                        wrbuf_puts(wr, "&amp;");
+                    else
+                        wrbuf_putc (wr, buf[i]);
 		    i++;
 		}
                 if (xml)
@@ -200,7 +205,12 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 	    }
 	    else
 	    {
-		wrbuf_putc (wr, buf[i]);
+                if (xml && buf[i] == '<')
+                    wrbuf_puts(wr, "&lt;");
+                else if (xml && buf[i] == '&')
+                    wrbuf_puts(wr, "&amp;");
+                else
+                    wrbuf_putc (wr, buf[i]);
 		i++;
 	    }
 	}
