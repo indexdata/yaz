@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.8 2003-12-30 00:12:50 adam Exp $
+ * $Id: srw.c,v 1.9 2003-12-30 00:16:24 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -223,6 +223,7 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
 	}
 	add_xsd_integer(ptr, "recordPosition", rec->recordPosition);
     }
+    return 0;
 }
 
 static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
@@ -344,6 +345,7 @@ static int yaz_srw_term(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm *term,
 	add_xsd_integer(ptr, "value", term->numberOfRecords);
 	add_xsd_string(ptr, "displayTerm", term->displayTerm);
     }
+    return 0;
 }
 
 static int yaz_srw_terms(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm **terms,
