@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.7 2003-12-29 14:54:33 adam Exp $
+ * $Id: srw.c,v 1.8 2003-12-30 00:12:50 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -787,6 +787,7 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
         sr->u.request->maximumRecords = 0;
         sr->u.request->recordSchema = 0;
         sr->u.request->recordPacking = 0;
+        sr->u.request->recordXPath = 0;
 	sr->u.request->database = 0;
 	sr->u.request->resultSetTTL = 0;
 	sr->u.request->stylesheet = 0;
