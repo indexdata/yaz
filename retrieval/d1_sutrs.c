@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_sutrs.c,v 1.7 2002-05-03 13:48:27 adam Exp $
+ * $Id: d1_sutrs.c,v 1.8 2002-10-08 22:18:23 adam Exp $
  *
  */
 
@@ -55,7 +55,8 @@ static int nodetobuf(data1_node *n, int select, WRBUF b, int indent, int col)
 	    int l = c->u.data.len;
 	    int first = 0;
 
-	    if (c->u.data.what == DATA1I_text && c->u.data.formatted_text)
+	    if ((c->u.data.what == DATA1I_text ||
+	     	c->u.data.what == DATA1I_xmltext) && c->u.data.formatted_text)
 	    {
 		wrbuf_putc(b, '\n');
 		wrbuf_write(b, c->u.data.data, c->u.data.len);
@@ -63,7 +64,8 @@ static int nodetobuf(data1_node *n, int select, WRBUF b, int indent, int col)
 		wrbuf_write(b, line, strlen(line));
 		col = indent * NTOBUF_INDENT;
 	    }
-	    else if (c->u.data.what == DATA1I_text)
+	    else if (c->u.data.what == DATA1I_text ||
+		     c->u.data.what == DATA1I_xmltext)
 	    {
 		while (l)
 		{

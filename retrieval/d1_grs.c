@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_grs.c,v 1.25 2002-08-23 14:27:18 adam Exp $
+ * $Id: d1_grs.c,v 1.26 2002-10-08 22:18:22 adam Exp $
  *
  */
 
@@ -180,6 +180,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
             *len += 4;
             break;
         case DATA1I_text:
+        case DATA1I_xmltext:
             res->which = Z_ElementData_string;
             res->u.string = (char *)odr_malloc(o, toget+1);
             if (toget)
@@ -212,11 +213,12 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 
 static int is_empty_data (data1_node *n)
 {
-    if (n && n->which == DATA1N_data && n->u.data.what == DATA1I_text)
+    if (n && n->which == DATA1N_data && (n->u.data.what == DATA1I_text
+			    	|| n->u.data.what == DATA1I_xmltext))
     {
         int i = n->u.data.len;
         
-        while (i > 0 && n->u.data.data[i-1] == '\n')
+        while (i > 0 && strchr("\n ", n->u.data.data[i-1]))
             i--;
         if (i == 0)
             return 1;
