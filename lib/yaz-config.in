@@ -54,7 +54,7 @@ while test $# -gt 0; do
     --tabs)
       echo_tabs=yes
       ;;
-    *)
+    -*)
       echo_help=yes
       ;;
   esac
