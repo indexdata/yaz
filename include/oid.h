@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.25  1998-02-10 15:31:52  adam
+ * Revision 1.26  1998-03-20 14:46:06  adam
+ * Added UNIverse Resource Reports.
+ *
+ * Revision 1.25  1998/02/10 15:31:52  adam
  * Implemented date and time structure. Changed the Update Extended
  * Service.
  *
@@ -221,7 +224,8 @@ typedef enum oid_value
     VAL_SGML,
     VAL_TIFFB,
     VAL_WAV,
-    VAL_UPDATEES
+    VAL_UPDATEES,
+    VAL_UNIVERSE_REPORT
 } oid_value;
 
 typedef struct oident

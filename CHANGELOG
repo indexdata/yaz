@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added EXTERNAL: UNIverse Resource Report.
+
+Implemened odr_enum and odr_set_of functions to handle ASN.1 types
+ENUMERATED and SET OF.
+
 * Added 'const' to some of the char pointer arguments for the
 functions, data1_read_node, data1_getelementbytagname,
 data1_insert_taggeddata, data1_getesetbyname, data1_getelementbyname,

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.41  1998-02-10 15:31:52  adam
+ * Revision 1.42  1998-03-20 14:46:06  adam
+ * Added UNIverse Resource Reports.
+ *
+ * Revision 1.41  1998/02/10 15:31:52  adam
  * Implemented date and time structure. Changed the Update Extended
  * Service.
  *
@@ -1387,5 +1390,6 @@ YAZ_EXPORT int z_Query(ODR o, Z_Query **p, int opt);
 
 #include <prt-ext.h>
 #include <prt-dat.h>
+#include <prt-univ.h>
 
 #endif

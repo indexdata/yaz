@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.16  1998-02-11 11:53:32  adam
+ * Revision 1.17  1998-03-20 14:46:06  adam
+ * Added UNIverse Resource Reports.
+ *
+ * Revision 1.16  1998/02/11 11:53:32  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.15  1998/02/10 15:31:46  adam
@@ -125,6 +128,8 @@ int z_External(ODR o, Z_External **p, int opt)
 	    (Odr_fun)z_SearchInfoReport},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update, (Odr_fun)z_IUUpdate},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_dateTime, (Odr_fun)z_DateTime},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_universeReport,
+	 (Odr_fun)z_UniverseReport},
 	{-1, -1, -1, -1, 0}
     };
 

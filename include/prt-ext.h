@@ -77,6 +77,7 @@ struct Z_External
 #define Z_External_searchResult1 15
 #define Z_External_update 16
 #define Z_External_dateTime 17
+#define Z_External_universeReport 18
     union
     {
 	/* Generic types */

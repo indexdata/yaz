@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.25  1998-02-10 15:32:03  adam
+ * Revision 1.26  1998-03-20 14:46:06  adam
+ * Added UNIverse Resource Reports.
+ *
+ * Revision 1.25  1998/02/10 15:32:03  adam
  * Added new Object Identifiers.
  *
  * Revision 1.24  1997/09/29 13:19:00  adam
@@ -190,6 +193,7 @@ static oident oids[] =
 
     {PROTO_Z3950,   CLASS_RESFORM, VAL_RESOURCE1, {7,1,-1},    "Resource-1"  },
     {PROTO_Z3950,   CLASS_RESFORM, VAL_RESOURCE2, {7,2,-1},    "Resource-2"  },
+    {PROTO_Z3950,   CLASS_RESFORM, VAL_UNIVERSE_REPORT,  {7,1000,81,1,-1}, "UNIverse-Resource-Report"},
 
     {PROTO_Z3950,   CLASS_ACCFORM, VAL_PROMPT1,   {8,1,-1},    "Prompt-1"    },
     {PROTO_Z3950,   CLASS_ACCFORM, VAL_DES1,      {8,2,-1},    "Des-1"       },
@@ -228,6 +232,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_COLLECT1,  {14,5,-1},   "Collections-tagset"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_CIMI1,     {14,6,-1},   "CIMI-tagset" },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_THESAURUS, {14,1000,81,1,-1}, "thesaurus-tagset"},
+    
 
     /* SR definitions. Note that some of them aren't defined by the
         standard (yet), but are borrowed from Z3950v3 */

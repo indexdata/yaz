@@ -8,11 +8,11 @@ marc usmarc.mar
 esetname B usmarc-b.est
 esetname F @
 
-elm 245			title		-
+elm 245			titles		-
 elm 245/?		title		!:w
 elm 245/?/a		title		!:w,!:p
 
-elm 100			author		-
+elm 100			authors		-
 elm 100/?		author		!:w
 elm 100/?/a		author		!:w,!:p
 
