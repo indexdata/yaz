@@ -1,0 +1,8 @@
+.deps
+.libs
+Makefile
+Makefile.in
+yaz-config
+yaz-config.in
+*.lo
+*.la

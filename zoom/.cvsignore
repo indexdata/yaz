@@ -1,0 +1,15 @@
+.deps
+.libs
+Makefile
+Makefile.in
+libzoom.la
+zoomsh
+zoomtst1
+zoomtst2
+zoomtst3
+zoomtst4
+zoomtst5
+zoomtst6
+zoomtst7
+zoomtst8
+*.lo

@@ -1,0 +1,8 @@
+.deps
+.libs
+Makefile
+Makefile.in
+ill-core.c
+item-req.c
+libill.la
+*.lo

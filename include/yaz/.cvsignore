@@ -1,0 +1,6 @@
+Makefile
+Makefile.in
+ill-core.h
+item-req.h
+z-*.h
+zes-*.h

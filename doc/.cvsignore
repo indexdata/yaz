@@ -1,0 +1,6 @@
+Makefile
+Makefile.in
+yaz.xml
+yazhtml.dsl
+yazphp.dsl
+yazprint.dsl
