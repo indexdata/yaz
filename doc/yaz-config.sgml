@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-config.sgml,v 1.1 2002-09-16 14:16:31 adam Exp $ -->
+<!-- $Id: yaz-config.sgml,v 1.2 2002-10-08 09:07:29 adam Exp $ -->
 <refentry id="yaz-config">
  <refmeta>
   <refentrytitle>yaz-config</refentrytitle>
@@ -8,7 +8,7 @@
  
  <refnamediv>
   <refname>yaz-config</refname>
-  <refpurpose>Script to get information about YAZ.
+  <refpurpose>Script to get information about YAZ.</refpurpose>
  </refnamediv>
  
  <refsynopsisdiv>
