@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.8  1999-08-27 09:40:32  adam
+ * Revision 1.9  1999-09-10 08:58:32  adam
+ * Set TRACE_XMALLOC to 1.
+ *
+ * Revision 1.8  1999/08/27 09:40:32  adam
  * Renamed logf function to yaz_log. Removed VC++ project files.
  *
  * Revision 1.7  1999/07/13 13:24:53  adam
@@ -57,7 +60,7 @@
 #include <log.h>
 #include <xmalloc.h>
 
-#define TRACE_XMALLOC 2
+#define TRACE_XMALLOC 1
 
 #if TRACE_XMALLOC > 1
 
