@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.38 2003-05-22 13:15:08 heikki Exp $
+ * $Id: log.c,v 1.39 2003-10-09 15:51:36 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -40,6 +40,7 @@ static int l_level = LOG_DEFAULT_LEVEL;
 static FILE *l_file = NULL;
 static char l_prefix[512] = "";
 static char l_prefix2[512] = "";
+static char l_fname[512] = "";
 
 static struct {
     int mask;
@@ -70,12 +71,25 @@ FILE *yaz_log_file(void)
 
 void yaz_log_init_file (const char *fname)
 {
+    if (fname)
+    {
+	strncpy(l_fname, fname, sizeof(l_fname)-1);
+	l_fname[sizeof(l_fname)-1] = '\0';
+    }
+    else
+	l_fname[0] = '\0';
+    yaz_log_reopen();
+}
+
+void yaz_log_reopen(void)
+{
     FILE *new_file;
     if (!l_file)
         l_file = stderr;
-    if (!fname || !*fname)
+
+    if (!*l_fname)
 	new_file=stderr;
-    else if (!(new_file = fopen(fname, "a")))
+    else if (!(new_file = fopen(l_fname, "a")))
         return;
     if (l_file != stderr)
     {

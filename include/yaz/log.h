@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.11 2003-05-22 15:41:58 heikki Exp $
+ * $Id: log.h,v 1.12 2003-10-09 15:51:36 adam Exp $
  */
 
 #ifndef LOG_H
@@ -73,6 +73,7 @@ YAZ_EXPORT void log_event_start (void (*func)(int level, const char *msg, void *
 YAZ_EXPORT void log_event_end (void (*func)(int level, const char *msg, void *info),
 	void *info);
 
+YAZ_EXPORT void yaz_log_reopen(void);
 YAZ_END_CDECL
 
 #endif

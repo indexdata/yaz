@@ -1,7 +1,7 @@
 Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
-Release: 2
+Release: 1
 Requires: libxml2 openssl readline libyaz = %{version}
 Copyright: YAZ License
 Group: Other
