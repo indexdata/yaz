@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.3 2000-02-28 11:20:06 adam Exp $
+ * $Id: odr.h,v 1.4 2001-03-25 21:55:12 adam Exp $
  */
 
 #ifndef ODR_H
@@ -203,6 +203,7 @@ YAZ_EXPORT void odr_setbuf(ODR o, char *buf, int len, int can_grow);
 YAZ_EXPORT char *odr_getbuf(ODR o, int *len, int *size);
 YAZ_EXPORT void *odr_malloc(ODR o, int size);
 YAZ_EXPORT char *odr_strdup(ODR o, const char *str);
+YAZ_EXPORT int *odr_intdup(ODR o, int v);
 YAZ_EXPORT NMEM odr_extract_mem(ODR o);
 YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_release_mem(m) nmem_destroy(m)

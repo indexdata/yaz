@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.71  2001-03-21 12:43:36  adam
+ * Revision 1.72  2001-03-25 21:55:13  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.71  2001/03/21 12:43:36  adam
  * Implemented cs_create_host. Better error reporting for SSL comstack.
  *
  * Revision 1.70  2001/02/01 08:52:26  adam
@@ -816,6 +819,17 @@ static void add_listener(char *where, int what)
     COMSTACK l;
     void *ap;
     IOCHAN lst = NULL;
+    const char *mode;
+
+    if (control_block.dynamic)
+	mode = "dynamic";
+    else if (control_block.threads)
+	mode = "threaded";
+    else
+	mode = "static";
+
+    yaz_log(LOG_LOG, "Adding %s %s listener on %s", mode,
+	    what == PROTO_SR ? "SR" : "Z3950", where);
 
     l = cs_create_host(where, 0, &ap);
     if (!l)

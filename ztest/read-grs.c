@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: read-grs.c,v $
- * Revision 1.5  1999-11-30 13:47:12  adam
+ * Revision 1.6  2001-03-25 21:55:13  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.5  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.4  1999/08/27 09:40:32  adam
@@ -86,15 +88,13 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	}
 	r->elements[r->num_elements] = t = (Z_TaggedElement *)
             odr_malloc(o, sizeof(Z_TaggedElement));
-	t->tagType = (int *)odr_malloc(o, sizeof(int));
-	*t->tagType = type;
+	t->tagType = odr_intdup(o, type);
 	t->tagValue = (Z_StringOrNumeric *)
             odr_malloc(o, sizeof(Z_StringOrNumeric));
 	if ((ivalue = atoi(value)))
 	{
 	    t->tagValue->which = Z_StringOrNumeric_numeric;
-	    t->tagValue->u.numeric = (int *)odr_malloc(o, sizeof(int));
-	    *t->tagValue->u.numeric = ivalue;
+	    t->tagValue->u.numeric = odr_intdup(o, ivalue);
 	}
 	else
 	{

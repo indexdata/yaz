@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.114  2001-02-21 13:46:53  adam
+ * Revision 1.115  2001-03-25 21:55:12  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.114  2001/02/21 13:46:53  adam
  * C++ fixes.
  *
  * Revision 1.113  2001/01/30 21:34:17  adam
@@ -662,8 +665,8 @@ void ir_session(IOCHAN h, int event)
 	    if (!z_APDU(assoc->decode, &req->request, 0, 0))
 	    {
 		yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
-		    odr_errmsg(odr_geterror(assoc->decode)),
-		    odr_offset(assoc->decode));
+			odr_errmsg(odr_geterror(assoc->decode)),
+			odr_offset(assoc->decode));
 		yaz_log(LOG_LOG, "PDU dump:");
 		odr_dumpBER(yaz_log_file(), assoc->input_buffer, res);
 		do_close(assoc, Z_Close_protocolError, "Malformed package");
@@ -883,22 +886,22 @@ void backend_response(IOCHAN i, int event)
 static int process_response(association *assoc, request *req, Z_APDU *res)
 {
     odr_setbuf(assoc->encode, req->response, req->size_response, 1);
-    if (!z_APDU(assoc->encode, &res, 0, 0))
-    {
-    	yaz_log(LOG_WARN, "ODR error when encoding response: %s",
-	    odr_errmsg(odr_geterror(assoc->decode)));
-	odr_reset(assoc->encode);
-	return -1;
-    }
-    req->response = odr_getbuf(assoc->encode, &req->len_response,
-	&req->size_response);
-    odr_setbuf(assoc->encode, 0, 0, 0); /* don'txfree if we abort later */
+
     if (assoc->print && !z_APDU(assoc->print, &res, 0, 0))
     {
 	yaz_log(LOG_WARN, "ODR print error: %s", 
 	    odr_errmsg(odr_geterror(assoc->print)));
 	odr_reset(assoc->print);
     }
+    if (!z_APDU(assoc->encode, &res, 0, 0))
+    {
+    	yaz_log(LOG_WARN, "ODR error when encoding response: %s",
+	    odr_errmsg(odr_geterror(assoc->decode)));
+	return -1;
+    }
+    req->response = odr_getbuf(assoc->encode, &req->len_response,
+	&req->size_response);
+    odr_setbuf(assoc->encode, 0, 0, 0); /* don'txfree if we abort later */
     odr_reset(assoc->encode);
     req->state = REQUEST_IDLE;
     request_enq(&assoc->outgoing, req);
@@ -1117,8 +1120,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
     Z_Records *rec = (Z_Records *)
 	odr_malloc (assoc->encode, sizeof(*rec));
     oident bib1;
-    int *err = (int *)
-	odr_malloc (assoc->encode, sizeof(*err));
+    int *err = odr_intdup(assoc->encode, error);
     Z_DiagRec *drec = (Z_DiagRec *)
 	odr_malloc (assoc->encode, sizeof(*drec));
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
@@ -1130,7 +1132,6 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 
     yaz_log(LOG_DEBUG, "Diagnostic: %d -- %s", error, addinfo ? addinfo :
 	"NULL");
-    *err = error;
     rec->which = Z_Records_NSD;
 #if ASN_COMPILED
     rec->u.nonSurrogateDiagnostic = dr;
@@ -1155,7 +1156,7 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
     int oid[OID_SIZE];
     Z_NamePlusRecord *rec = (Z_NamePlusRecord *)
 	odr_malloc (assoc->encode, sizeof(*rec));
-    int *err = (int *)odr_malloc (assoc->encode, sizeof(*err));
+    int *err = odr_intdup(assoc->encode, error);
     oident bib1;
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
@@ -1166,7 +1167,6 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
     bib1.value = VAL_BIB1;
 
     yaz_log(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
-    *err = error;
     rec->databaseName = dbname;
     rec->which = Z_NamePlusRecord_surrogateDiagnostic;
     rec->u.surrogateDiagnostic = drec;
@@ -1187,7 +1187,7 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 {
     int oid[OID_SIZE];
     Z_DiagRecs *recs = (Z_DiagRecs *)odr_malloc (assoc->encode, sizeof(*recs));
-    int *err = (int *)odr_malloc (assoc->encode, sizeof(*err));
+    int *err = odr_intdup(assoc->encode, error);
     oident bib1;
     Z_DiagRec **recp = (Z_DiagRec **)odr_malloc (assoc->encode, sizeof(*recp));
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
@@ -1198,7 +1198,6 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
 
-    *err = error;
     recs->num_diagRecs = 1;
     recs->diagRecs = recp;
     recp[0] = drec;
@@ -1442,15 +1441,10 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
     Z_SearchResponse *resp = (Z_SearchResponse *)
 	odr_malloc (assoc->encode, sizeof(*resp));
-    int *nulint = (int *)odr_malloc (assoc->encode, sizeof(*nulint));
-    bool_t *sr = (bool_t *)odr_malloc (assoc->encode, sizeof(*sr));
-    int *next = (int *)odr_malloc (assoc->encode, sizeof(*next));
-    int *none = (int *)odr_malloc (assoc->encode, sizeof(*none));
-
-    *nulint = 0;
-    *sr = 1;
-    *next = 0;
-    *none = Z_RES_NONE;
+    int *nulint = odr_intdup (assoc->encode, 0);
+    bool_t *sr = odr_intdup(assoc->encode, 1);
+    int *next = odr_intdup(assoc->encode, 0);
+    int *none = odr_intdup(assoc->encode, Z_RES_NONE);
 
     apdu->which = Z_APDU_searchResponse;
     apdu->u.searchResponse = resp;
@@ -1475,12 +1469,10 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     }
     else
     {
-    	int *toget = (int *)odr_malloc (assoc->encode, sizeof(*toget));
-        int *presst = (int *)odr_malloc (assoc->encode, sizeof(*presst));
+    	int *toget = odr_intdup(assoc->encode, 0);
+        int *presst = odr_intdup(assoc->encode, 0);
 	Z_RecordComposition comp, *compp = 0;
 
-        *toget = 0;
-        *presst = 0;
 	resp->records = 0;
 	resp->resultCount = &bsrt->hits;
 
@@ -1595,12 +1587,9 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     }
     apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
     resp = (Z_PresentResponse *)odr_malloc (assoc->encode, sizeof(*resp));
-    presst = (int *)odr_malloc (assoc->encode, sizeof(*presst));
-    next = (int *)odr_malloc (assoc->encode, sizeof(*next));
-    num = (int *)odr_malloc (assoc->encode, sizeof(*num));
-    *presst = 0;
-    *next = 0;
-    *num = *req->numberOfRecordsRequested;
+    presst = odr_intdup(assoc->encode, 0);
+    next = odr_intdup(assoc->encode, 0);
+    num = odr_intdup(assoc->encode, *req->numberOfRecordsRequested);
     
     apdu->which = Z_APDU_presentResponse;
     apdu->u.presentResponse = resp;
@@ -1630,10 +1619,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
     Z_ScanResponse *res = (Z_ScanResponse *)
 	odr_malloc (assoc->encode, sizeof(*res));
-    int *scanStatus = (int *)
-	odr_malloc (assoc->encode, sizeof(*scanStatus));
-    int *numberOfEntriesReturned = (int *)
-	odr_malloc (assoc->encode, sizeof(*numberOfEntriesReturned));
+    int *scanStatus = odr_intdup(assoc->encode, Z_Scan_failure);
+    int *numberOfEntriesReturned = odr_intdup(assoc->encode, 0);
     Z_ListEntries *ents = (Z_ListEntries *)
 	odr_malloc (assoc->encode, sizeof(*ents));
     Z_DiagRecs *diagrecs_p = NULL;
@@ -1641,14 +1628,12 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     oident *attset;
 
     yaz_log(LOG_LOG, "Got ScanRequest");
-    *scanStatus = Z_Scan_failure;
-    *numberOfEntriesReturned = 0;
 
     apdu->which = Z_APDU_scanResponse;
     apdu->u.scanResponse = res;
     res->referenceId = req->referenceId;
-    res->stepSize = (int*) odr_malloc (assoc->encode, sizeof(*res->stepSize));
-    *res->stepSize = 0;
+    res->stepSize = odr_intdup(assoc->encode, 0);
+
     if (req->stepSize)
 	*res->stepSize = *req->stepSize;
     res->scanStatus = scanStatus;
@@ -1796,9 +1781,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     (*assoc->init->bend_sort)(assoc->backend, bsrr);
     
     res->referenceId = bsrr->referenceId;
-    res->sortStatus = (int *)
-	odr_malloc (assoc->encode, sizeof(*res->sortStatus));
-    *res->sortStatus = bsrr->sort_status;
+    res->sortStatus = odr_intdup(assoc->encode, bsrr->sort_status);
     res->resultSetStatus = 0;
     if (bsrr->errcode)
     {
@@ -1856,9 +1839,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     
     res->referenceId = req->referenceId;
 
-    res->deleteOperationStatus = (int *)
-	odr_malloc (assoc->encode, sizeof(*res->deleteOperationStatus));
-    *res->deleteOperationStatus = bdrr->delete_status;
+    res->deleteOperationStatus = odr_intdup(assoc->encode,bdrr->delete_status);
 
     res->deleteListStatuses = 0;
     if (bdrr->num_setnames > 0)
@@ -2020,6 +2001,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     esrequest.errstring = NULL;
     esrequest.request = reqb;
     esrequest.association = assoc;
+    esrequest.taskPackage = 0;
     esrequest.referenceId = req->referenceId;
     
     (*assoc->init->bend_esrequest)(assoc->backend, &esrequest);
@@ -2054,7 +2036,10 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 	resp->diagnostics = diagRecs->diagRecs;
     }
     /* Do something with the members of bend_extendedservice */
-
+    if (esrequest.taskPackage)
+	resp->taskPackage = z_ext_record (assoc->encode, VAL_EXTENDED,
+					 (const char *)  esrequest.taskPackage,
+					  -1);
     yaz_log(LOG_DEBUG,"Send the result apdu");
     return apdu;
 }

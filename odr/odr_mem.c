@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
  * $Log: odr_mem.c,v $
- * Revision 1.18  2000-02-29 13:44:55  adam
+ * Revision 1.19  2001-03-25 21:55:12  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.18  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.17  2000/01/31 13:15:21  adam
@@ -93,6 +96,11 @@ void *odr_malloc(ODR o, int size)
 char *odr_strdup(ODR o, const char *str)
 {
     return nmem_strdup(o->mem, str);
+}
+
+int *odr_intdup(ODR o, int v)
+{
+    return nmem_intdup(o->mem, v);
 }
 
 int odr_total(ODR o)

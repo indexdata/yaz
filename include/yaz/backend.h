@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.11  2001-01-30 21:34:17  adam
+ * Revision 1.12  2001-03-25 21:55:12  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.11  2001/01/30 21:34:17  adam
  * Added step-size for Scan backend interface.
  *
  * Revision 1.10  2000/10/02 11:07:44  adam
@@ -244,6 +247,7 @@ typedef struct bend_esrequest_rr
     bend_association association;
     int errcode;               /* 0==success, -1==accepted, >0 = failure */
     char *errstring;           /* system error string or NULL */
+    Z_TaskPackage *taskPackage;
 } bend_esrequest_rr;
 
 typedef struct bend_segment_rr {

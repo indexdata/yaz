@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.4  2000-05-09 11:48:58  adam
+ * Revision 1.5  2001-03-25 21:55:12  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.4  2000/05/09 11:48:58  adam
  * Fix (bug introduced by previous commit).
  *
  * Revision 1.3  2000/05/09 10:55:05  adam
@@ -85,6 +88,7 @@ typedef struct nmem_control *NMEM;
 YAZ_EXPORT void nmem_reset(NMEM n);
 YAZ_EXPORT int nmem_total(NMEM n);
 YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
+YAZ_EXPORT int *nmem_intdup (NMEM mem, int v);
 YAZ_EXPORT void nmem_transfer (NMEM dst, NMEM src);
 
 YAZ_EXPORT void nmem_critical_enter (void);

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.116  2001-03-21 12:43:36  adam
+ * Revision 1.117  2001-03-25 21:55:12  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.116  2001/03/21 12:43:36  adam
  * Implemented cs_create_host. Better error reporting for SSL comstack.
  *
  * Revision 1.115  2001/03/13 18:10:58  adam
@@ -631,7 +634,6 @@ int cmd_open(char *arg)
 {
     void *add;
     char type_and_host[101], base[101];
-    char *host = 0;
     CS_TYPE t;
 
     if (conn)

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: ill-get.c,v $
- * Revision 1.8  2001-02-21 13:46:53  adam
+ * Revision 1.9  2001-03-25 21:55:12  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.8  2001/02/21 13:46:53  adam
  * C++ fixes.
  *
  * Revision 1.7  2001/02/20 11:25:32  adam
@@ -63,7 +66,6 @@ int *ill_get_int (struct ill_get_ctl *gc, const char *name,
     ODR o = gc->odr;
     char element[128];
     const char *v;
-    int *r = (int *) odr_malloc (o, sizeof(*r));
     
     strcpy(element, name);
     if (sub)
@@ -74,8 +76,7 @@ int *ill_get_int (struct ill_get_ctl *gc, const char *name,
     v = (gc->f)(gc->clientData, element);
     if (v)
 	val = atoi(v);
-    *r = val;
-    return r;
+    return odr_intdup(o, val);
 }
 
 int *ill_get_enumerated (struct ill_get_ctl *gc, const char *name,

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.5  2001-03-13 18:11:38  adam
+ * Revision 1.6  2001-03-25 21:55:13  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.5  2001/03/13 18:11:38  adam
  * Altered zget_ExtendedServicesRequest - sets waitAction to waitIfPossible.
  *
  * Revision 1.4  2001/02/21 13:46:54  adam
@@ -87,10 +90,8 @@ Z_InitRequest *zget_InitRequest(ODR o)
     ODR_MASK_ZERO(r->options);
     r->protocolVersion = (Odr_bitmask *)odr_malloc(o, sizeof(*r->protocolVersion));
     ODR_MASK_ZERO(r->protocolVersion);
-    r->preferredMessageSize = (int *)odr_malloc(o, sizeof(int));
-    *r->preferredMessageSize = 30*1024;
-    r->maximumRecordSize = (int *)odr_malloc(o, sizeof(int));
-    *r->maximumRecordSize = 30*1024;
+    r->preferredMessageSize = odr_intdup(o, 30*1024);
+    r->maximumRecordSize = odr_intdup(o, 30*1024);
     r->idAuthentication = 0;
     r->implementationId = "YAZ (id=81)";
     r->implementationName = "Index Data/YAZ";
@@ -109,12 +110,9 @@ Z_InitResponse *zget_InitResponse(ODR o)
     ODR_MASK_ZERO(r->options);
     r->protocolVersion = (Odr_bitmask *)odr_malloc(o, sizeof(*r->protocolVersion));
     ODR_MASK_ZERO(r->protocolVersion);
-    r->preferredMessageSize = (int *)odr_malloc(o, sizeof(int));
-    *r->preferredMessageSize = 30*1024;
-    r->maximumRecordSize = (int *)odr_malloc(o, sizeof(int));
-    *r->maximumRecordSize = 30*1024;
-    r->result = (int *)odr_malloc(o, sizeof(bool_t));
-    *r->result = 1;
+    r->preferredMessageSize = odr_intdup(o, 30*1024);
+    r->maximumRecordSize = odr_intdup(o, 30*1024);
+    r->result = odr_intdup(o, 1);
     r->implementationId = "YAZ (id=81)";
     r->implementationName = "Index Data/YAZ";
     r->implementationVersion = YAZ_VERSION;
@@ -128,14 +126,10 @@ Z_SearchRequest *zget_SearchRequest(ODR o)
     Z_SearchRequest *r = (Z_SearchRequest *)odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->smallSetUpperBound = (int *)odr_malloc(o, sizeof(int));
-    *r->smallSetUpperBound = 0;
-    r->largeSetLowerBound = (int *)odr_malloc(o, sizeof(int));
-    *r->largeSetLowerBound = 1;
-    r->mediumSetPresentNumber = (int *)odr_malloc(o, sizeof(int));
-    *r->mediumSetPresentNumber = 0;
-    r->replaceIndicator = (int *)odr_malloc(o, sizeof(bool_t));
-    *r->replaceIndicator = 1;
+    r->smallSetUpperBound = odr_intdup(o, 0);
+    r->largeSetLowerBound = odr_intdup(o, 1);
+    r->mediumSetPresentNumber = odr_intdup(o, 0);
+    r->replaceIndicator = odr_intdup(o, 1);
     r->resultSetName = "default";
     r->num_databaseNames = 0;
     r->databaseNames = 0;
@@ -153,14 +147,10 @@ Z_SearchResponse *zget_SearchResponse(ODR o)
     Z_SearchResponse *r = (Z_SearchResponse *)odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->resultCount = (int *)odr_malloc(o, sizeof(int));
-    *r->resultCount = 0;
-    r->numberOfRecordsReturned = (int *)odr_malloc(o, sizeof(int));
-    *r->numberOfRecordsReturned = 0;
-    r->nextResultSetPosition = (int *)odr_malloc(o, sizeof(int));
-    *r->nextResultSetPosition = 0;
-    r->searchStatus = (int *)odr_malloc(o, sizeof(bool_t));
-    *r->searchStatus = 1;
+    r->resultCount = odr_intdup(o, 0);
+    r->numberOfRecordsReturned = odr_intdup(o, 0);
+    r->nextResultSetPosition = odr_intdup(o, 0);
+    r->searchStatus = odr_intdup(o, 1);
     r->resultSetStatus = 0;
     r->presentStatus = 0;
     r->records = 0;
@@ -175,10 +165,8 @@ Z_PresentRequest *zget_PresentRequest(ODR o)
 
     r->referenceId = 0;
     r->resultSetId = "default";
-    r->resultSetStartPoint = (int *)odr_malloc(o, sizeof(int));
-    *r->resultSetStartPoint = 1;
-    r->numberOfRecordsRequested = (int *)odr_malloc(o, sizeof(int));
-    *r->numberOfRecordsRequested = 10;
+    r->resultSetStartPoint = odr_intdup(o, 1);
+    r->numberOfRecordsRequested = odr_intdup(o, 10);
     r->num_ranges = 0;
     r->additionalRanges = 0;
     r->recordComposition = 0;
@@ -195,12 +183,9 @@ Z_PresentResponse *zget_PresentResponse(ODR o)
     Z_PresentResponse *r = (Z_PresentResponse *)odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->numberOfRecordsReturned = (int *)odr_malloc(o, sizeof(int));
-    *r->numberOfRecordsReturned = 0;
-    r->nextResultSetPosition = (int *)odr_malloc(o, sizeof(int));
-    *r->nextResultSetPosition = 0;
-    r->presentStatus = (int *)odr_malloc(o, sizeof(int));
-    *r->presentStatus = Z_PRES_SUCCESS;
+    r->numberOfRecordsReturned = odr_intdup(o, 0);
+    r->nextResultSetPosition = odr_intdup(o, 0);
+    r->presentStatus = odr_intdup(o, Z_PRES_SUCCESS);
     r->records = 0;
     r->otherInfo = 0;
     return r;
@@ -212,8 +197,7 @@ Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->deleteFunction = (int *)odr_malloc(o, sizeof(int));
-    *r->deleteFunction = Z_DeleteRequest_list;
+    r->deleteFunction = odr_intdup(o, Z_DeleteRequest_list);
     r->num_resultSetList = 0;
     r->resultSetList = 0;
     r->otherInfo = 0;
@@ -226,8 +210,7 @@ Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
 	odr_malloc(o, sizeof(*r));
     
     r->referenceId = 0;
-    r->deleteOperationStatus = (int *)odr_malloc(o, sizeof(int));
-    *r->deleteOperationStatus = Z_DeleteStatus_success;
+    r->deleteOperationStatus = odr_intdup(o, Z_DeleteStatus_success);
     r->deleteListStatuses = 0;
     r->numberNotDeleted = 0;
     r->bulkStatuses = 0;
@@ -246,8 +229,7 @@ Z_ScanRequest *zget_ScanRequest(ODR o)
     r->attributeSet = 0;
     r->termListAndStartPoint = 0;
     r->stepSize = 0;
-    r->numberOfTermsRequested = (int *)odr_malloc(o, sizeof(int));
-    *r->numberOfTermsRequested = 20;
+    r->numberOfTermsRequested = odr_intdup(o, 20);
     r->preferredPositionInResponse = 0;
     r->otherInfo = 0;
     return r;
@@ -259,10 +241,8 @@ Z_ScanResponse *zget_ScanResponse(ODR o)
     
     r->referenceId = 0;
     r->stepSize = 0;
-    r->scanStatus = (int *)odr_malloc(o, sizeof(int));
-    *r->scanStatus = Z_Scan_success;
-    r->numberOfEntriesReturned = (int *)odr_malloc(o, sizeof(int));
-    *r->numberOfEntriesReturned = 0;
+    r->scanStatus = odr_intdup(o, Z_Scan_success);
+    r->numberOfEntriesReturned = odr_intdup(o, 0);
     r->positionOfTerm =0;
     r->entries = 0;
     r->attributeSet = 0;
@@ -276,8 +256,7 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
 	odr_malloc(o, sizeof(*r));
     
     r->referenceId = 0;
-    r->requestedAction = (int *)odr_malloc(o, sizeof(int));
-    *r->requestedAction = Z_TriggerResourceCtrl_resourceReport;
+    r->requestedAction = odr_intdup(o, Z_TriggerResourceCtrl_resourceReport);
     r->prefResourceReportFormat = 0;
     r->resultSetWanted = 0;
     r->otherInfo = 0;
@@ -293,8 +272,7 @@ Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
     r->suspendedFlag = 0;
     r->resourceReport = 0;
     r->partialResultsAvailable = 0;
-    r->responseRequired = (int *)odr_malloc(o, sizeof(bool_t));
-    *r->responseRequired = 0;
+    r->responseRequired = odr_intdup(o, 0);
     r->triggeredRequestFlag = 0;
     r->otherInfo = 0;
     return r;
@@ -306,8 +284,7 @@ Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->continueFlag = (int *)odr_malloc(o, sizeof(bool_t));
-    *r->continueFlag = 1;
+    r->continueFlag = odr_intdup(o, 1);
     r->resultSetWanted = 0;
     r->otherInfo = 0;
     return r;
@@ -343,8 +320,7 @@ Z_Segment *zget_Segment(ODR o)
     Z_Segment *r = (Z_Segment *)odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->numberOfRecordsReturned = (int *)odr_malloc(o, sizeof(int));
-    *r->numberOfRecordsReturned = 0;
+    r->numberOfRecordsReturned = odr_intdup(o, 0);
     r->num_segmentRecords = 0;
     r->segmentRecords = (Z_NamePlusRecord **) odr_nullval();
     r->otherInfo = 0;
@@ -356,8 +332,7 @@ Z_Close *zget_Close(ODR o)
     Z_Close *r = (Z_Close *)odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->closeReason = (int *)odr_malloc(o, sizeof(int));
-    *r->closeReason = Z_Close_finished;
+    r->closeReason = odr_intdup(o, Z_Close_finished);
     r->diagnosticInformation = 0;
     r->resourceReportFormat = 0;
     r->resourceReport = 0;
@@ -383,8 +358,7 @@ Z_ResourceReportResponse *zget_ResourceReportResponse(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->resourceReportStatus = (int *)odr_malloc(o, sizeof(int));
-    *r->resourceReportStatus = Z_ResourceReportStatus_success;
+    r->resourceReportStatus = odr_intdup(o, Z_ResourceReportStatus_success);
     r->resourceReport = 0;
     r->otherInfo = 0;
     return r;
@@ -407,10 +381,8 @@ Z_SortResponse *zget_SortResponse(ODR o)
     Z_SortResponse *r = (Z_SortResponse *)odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->sortStatus = (int *)odr_malloc(o, sizeof(int));
-    *r->sortStatus = Z_SortStatus_success;
-    r->resultSetStatus = (int *)odr_malloc(o, sizeof(int));
-    *r->resultSetStatus = Z_SortResultSetStatus_empty;
+    r->sortStatus = odr_intdup(o, Z_SortStatus_success);
+    r->resultSetStatus = odr_intdup(o, Z_SortResultSetStatus_empty);
     r->diagnostics = 0;
     r->otherInfo = 0;
     return r;
@@ -422,8 +394,7 @@ Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->function = (int *)odr_malloc(o, sizeof(int));
-    *r->function = Z_ExtendedServicesRequest_create;
+    r->function = odr_intdup(o, Z_ExtendedServicesRequest_create);
     r->packageType = 0;
     r->packageName = 0;
     r->userId = 0;
@@ -431,8 +402,7 @@ Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
     r->permissions = 0;
     r->description = 0;
     r->taskSpecificParameters = 0;
-    r->waitAction = (int *)odr_malloc(o, sizeof(int));
-    *r->waitAction = Z_ExtendedServicesRequest_waitIfPossible;
+    r->waitAction = odr_intdup(o, Z_ExtendedServicesRequest_waitIfPossible);
     r->elements = 0;
     r->otherInfo = 0;
     return r;
@@ -444,8 +414,7 @@ Z_ExtendedServicesResponse *zget_ExtendedServicesResponse(ODR o)
 	odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->operationStatus = (int *)odr_malloc(o, sizeof(int));
-    *r->operationStatus = Z_ExtendedServicesResponse_done;
+    r->operationStatus = odr_intdup(o, Z_ExtendedServicesResponse_done);
     r->num_diagnostics = 0;
     r->diagnostics = 0;
     r->taskPackage = 0;

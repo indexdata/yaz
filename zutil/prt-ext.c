@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.4  2000-03-14 15:22:04  ian
+ * Revision 1.5  2001-03-25 21:55:13  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.4  2000/03/14 15:22:04  ian
  * Added Admin external to choice table.
  *
  * Revision 1.3  2000/03/14 13:52:32  ian
@@ -254,6 +256,9 @@ Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
 	    break;
 	case VAL_OPAC:
 	    thisext->which = Z_External_OPAC;
+	    break;
+	case VAL_EXTENDED:
+	    thisext->which = Z_External_extendedService;
 	    break;
 	default:
 	    return 0;

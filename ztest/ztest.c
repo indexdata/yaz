@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.39  2001-03-12 14:40:57  adam
+ * Revision 1.40  2001-03-25 21:55:13  adam
+ * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
+ *
+ * Revision 1.39  2001/03/12 14:40:57  adam
  * Minor change of print of item update info.
  *
  * Revision 1.38  2001/02/21 13:46:54  adam
@@ -335,6 +338,60 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		}
 		if (!strcmp(toKeep->databaseName, "accept"))
 		    rr->errcode = -1;
+	    }
+	    if (toKeep)
+	    {
+		Z_External *ext = odr_malloc (rr->stream, sizeof(*ext));
+		Z_IUOriginPartToKeep *keep =
+		    odr_malloc (rr->stream, sizeof(*keep));
+		Z_IUTargetPart *targetPart =
+		    odr_malloc (rr->stream, sizeof(*targetPart));
+		rr->taskPackage = odr_malloc (rr->stream, sizeof(*rr->taskPackage));
+		rr->taskPackage->packageType =
+		    odr_oiddup (rr->stream, rr->esr->packageType);
+		rr->taskPackage->packageName = 0;
+		rr->taskPackage->userId = 0;
+		rr->taskPackage->retentionTime = 0;
+		rr->taskPackage->permissions = 0;
+		rr->taskPackage->description = 0;
+		rr->taskPackage->targetReference = (Odr_oct *)
+		    odr_malloc (rr->stream, sizeof(Odr_oct));
+		rr->taskPackage->targetReference->buf =
+		    odr_strdup (rr->stream, "123");
+		rr->taskPackage->targetReference->len =
+		    rr->taskPackage->targetReference->size =
+		    strlen(rr->taskPackage->targetReference->buf);
+		rr->taskPackage->creationDateTime = 0;
+		rr->taskPackage->taskStatus = odr_intdup(rr->stream, 0);
+		rr->taskPackage->packageDiagnostics = 0;
+		rr->taskPackage->taskSpecificParameters = ext;
+
+		ext->direct_reference =
+		    odr_oiddup (rr->stream, rr->esr->packageType);
+		ext->indirect_reference = 0;
+		ext->descriptor = 0;
+		ext->which = Z_External_update;
+		ext->u.update = (Z_IUUpdate *)
+		    odr_malloc (rr->stream, sizeof(*ext->u.update));
+		ext->u.update->which = Z_IUUpdate_taskPackage;
+		ext->u.update->u.taskPackage =  (Z_IUUpdateTaskPackage *)
+		    odr_malloc (rr->stream, sizeof(Z_IUUpdateTaskPackage));
+		ext->u.update->u.taskPackage->originPart = keep;
+		ext->u.update->u.taskPackage->targetPart = targetPart;
+
+		keep->action = odr_malloc (rr->stream, sizeof(int));
+		*keep->action = *toKeep->action;
+		keep->databaseName =
+		    odr_strdup (rr->stream, toKeep->databaseName);
+		keep->schema = 0;
+		keep->elementSetName = 0;
+		keep->actionQualifier = 0;
+
+		targetPart->updateStatus = odr_intdup (rr->stream, 1);
+		targetPart->num_globalDiagnostics = 0;
+		targetPart->globalDiagnostics = odr_nullval();
+		targetPart->num_taskPackageRecords = 0;
+		targetPart->taskPackageRecords = odr_nullval();
 	    }
 	    if (notToKeep)
 	    {
