@@ -1,54 +1,9 @@
 /*
- * Copyright (c) 1998-2001, Index Data
+ * Copyright (c) 1998-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: proto.h,v $
- * Revision 1.3  2002-08-29 19:36:09  ja7
- * Added
- * YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
- * Used for gettting ui friendly names for oid_value's
- *
- * Revision 1.2  2002/02/11 23:25:26  adam
- * Rustam's patch
- *
- * Revision 1.1  2001/10/23 21:00:19  adam
- * Old Z39.50 codecs gone. Added ZOOM. WRBUF MARC display util.
- *
- * Revision 1.7  2001/09/24 21:51:55  adam
- * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
- * and yaz_z3950oid_to_str.
- *
- * Revision 1.6  2001/09/19 10:19:07  adam
- * Z_SortCase_caseInsensitive was set to wrong value.
- *
- * Revision 1.5  2001/05/17 14:16:15  adam
- * Added EXTERNAL handling for item update0 (1.0).
- *
- * Revision 1.4  2000/03/14 09:19:49  ian
- * Added admin extended service encoders & decoders.
- *
- * Revision 1.3  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.2  1999/12/16 23:36:19  adam
- * Implemented ILL protocol. Minor updates ASN.1 compiler.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.2  1999/06/09 10:52:11  adam
- * Added YAZ_EXPORT.
- *
- * Revision 1.1  1999/06/08 13:11:55  adam
- * Fixed problem with proto.h.
- *
- * Revision 1.2  1999/04/20 10:37:04  adam
- * Updated for ODR - added name parameter.
- *
- * Revision 1.1  1998/03/31 16:04:05  adam
- * First version of proto.h which is almost compatible with the old one.
- *
+ * $Id: proto.h,v 1.4 2002-10-22 10:05:36 adam Exp $
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H
@@ -85,6 +40,7 @@
 #include <yaz/zes-update0.h>
 #include <yaz/z-charneg.h>
 #include <yaz/oid.h>
+#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
 
@@ -150,6 +106,8 @@ YAZ_EXPORT Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class,
 YAZ_EXPORT const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class);
 
 YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
+
+YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);
 
 YAZ_END_CDECL
 

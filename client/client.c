@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.172 2002-10-04 19:05:36 adam Exp $
+ * $Id: client.c,v 1.173 2002-10-22 10:05:36 adam Exp $
  */
 
 #include <stdio.h>
@@ -553,105 +553,6 @@ int cmd_authentication(char *arg)
 /* SEARCH SERVICE ------------------------------ */
 static void display_record(Z_External *r);
 
-static void display_variant(Z_Variant *v, int level)
-{
-    int i;
-
-    for (i = 0; i < v->num_triples; i++)
-    {
-        printf("%*sclass=%d,type=%d", level * 4, "", *v->triples[i]->zclass,
-            *v->triples[i]->type);
-        if (v->triples[i]->which == Z_Triple_internationalString)
-            printf(",value=%s\n", v->triples[i]->value.internationalString);
-        else
-            printf("\n");
-    }
-}
-
-static void display_grs1(Z_GenericRecord *r, int level)
-{
-    int i;
-
-    if (!r)
-    {
-        return;
-    }
-    for (i = 0; i < r->num_elements; i++)
-    {
-        Z_TaggedElement *t;
-
-        printf("%*s", level * 4, "");
-        t = r->elements[i];
-        printf("(");
-        if (t->tagType)
-            printf("%d,", *t->tagType);
-        else
-            printf("?,");
-        if (t->tagValue->which == Z_StringOrNumeric_numeric)
-            printf("%d) ", *t->tagValue->u.numeric);
-        else
-            printf("%s) ", t->tagValue->u.string);
-        if (t->content->which == Z_ElementData_subtree)
-        {
-            if (!t->content->u.subtree)
-                printf (" (no subtree)\n");
-            else
-            {
-                printf("\n");
-                display_grs1(t->content->u.subtree, level+1);
-            }
-        }
-        else if (t->content->which == Z_ElementData_string)
-            printf("%s\n", t->content->u.string);
-        else if (t->content->which == Z_ElementData_numeric)
-            printf("%d\n", *t->content->u.numeric);
-        else if (t->content->which == Z_ElementData_oid)
-        {
-            int *ip = t->content->u.oid;
-            oident *oent;
-            
-            if ((oent = oid_getentbyoid(t->content->u.oid)))
-                printf("OID: %s\n", oent->desc);
-            else
-            {
-                printf("{");
-                while (ip && *ip >= 0)
-                    printf(" %d", *(ip++));
-                printf(" }\n");
-            }
-        }
-        else if (t->content->which == Z_ElementData_noDataRequested)
-            printf("[No data requested]\n");
-        else if (t->content->which == Z_ElementData_elementEmpty)
-            printf("[Element empty]\n");
-        else if (t->content->which == Z_ElementData_elementNotThere)
-            printf("[Element not there]\n");
-        else if (t->content->which == Z_ElementData_date)
-            printf("Date: %s\n", t->content->u.date);
-        else if (t->content->which == Z_ElementData_ext)
-        {
-            printf ("External\n");
-            display_record (t->content->u.ext);
-        } 
-        else
-            printf("? type = %d\n",t->content->which);
-        if (t->appliedVariant)
-            display_variant(t->appliedVariant, level+1);
-        if (t->metaData && t->metaData->supportedVariants)
-        {
-            int c;
-
-            printf("%*s---- variant list\n", (level+1)*4, "");
-            for (c = 0; c < t->metaData->num_supportedVariants; c++)
-            {
-                printf("%*svariant #%d\n", (level+1)*4, "", c);
-                display_variant(t->metaData->supportedVariants[c], level + 2);
-            }
-        }
-    }
-}
-
-
 static void print_record(const unsigned char *buf, size_t len)
 {
     size_t i = len;
@@ -774,12 +675,16 @@ static void display_record(Z_External *r)
     }
     else if (ent && ent->value == VAL_GRS1)
     {
+        WRBUF w;
         if (r->which != Z_External_grs1)
         {
             printf("Expecting single GRS type for GRS.\n");
             return;
         }
-        display_grs1(r->u.grs1, 0);
+        w = wrbuf_alloc();
+        yaz_display_grs1(w, r->u.grs1, 0);
+        puts (wrbuf_buf(w));
+        wrbuf_free(w, 1);
     }
     else 
     {

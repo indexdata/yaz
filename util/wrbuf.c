@@ -1,37 +1,9 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: wrbuf.c,v $
- * Revision 1.9  2000-02-29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.8  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.7  1999/11/03 09:05:56  adam
- * Implemented wrbuf_puts.
- *
- * Revision 1.6  1999/10/28 11:36:40  adam
- * wrbuf_write allows zero buffer length.
- *
- * Revision 1.5  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.4  1998/02/11 11:53:36  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.3  1997/05/01 15:08:15  adam
- * Added log_mask_str_x routine.
- *
- * Revision 1.2  1995/11/01 13:55:06  quinn
- * Minor adjustments
- *
- * Revision 1.1  1995/10/06  08:51:25  quinn
- * Added Write-buffer.
- *
- *
+ * $Id: wrbuf.c,v 1.10 2002-10-22 10:05:36 adam Exp $
  */
 
 /*
@@ -44,6 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include <yaz/wrbuf.h>
 
@@ -105,3 +78,25 @@ int wrbuf_puts(WRBUF b, const char *buf)
     (b->pos)--;                          /* don't include '\0' in count */
     return 0;
 }
+
+void wrbuf_printf(WRBUF b, const char *fmt, ...)
+{
+    va_list ap;
+    char buf[4096];
+
+    va_start(ap, fmt);
+#ifdef WIN32
+    _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
+#else
+/* !WIN32 */
+#if HAVE_VSNPRINTF
+    vsnprintf(buf, sizeof(buf)-1, fmt, ap);
+#else
+    vsprintf(buf, fmt, ap);
+#endif
+#endif
+    wrbuf_puts (b, buf);
+
+    va_end(ap);
+}
+

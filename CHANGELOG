@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Add GRS-1 render for ZOOM using same format as yaz-client.
+
 --- 1.9.1 2002/10/05
 
 Added man pages: yaz-client(1), yaz-ztest(8), yaz(7), zoomsh(1).

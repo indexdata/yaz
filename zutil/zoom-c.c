@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.4 2002-10-04 11:23:50 adam Exp $
+ * $Id: zoom-c.c,v 1.5 2002-10-22 10:05:36 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1108,8 +1108,13 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         }
         else if (r->which == Z_External_grs1)
         {
-            if (len) *len = 5;
-            return "GRS-1";
+            if (!rec->wrbuf_marc)
+                rec->wrbuf_marc = wrbuf_alloc();
+            wrbuf_rewind (rec->wrbuf_marc);
+            yaz_display_grs1(rec->wrbuf_marc, r->u.grs1, 0);
+            if (len) 
+                *len = wrbuf_len(rec->wrbuf_marc);
+            return wrbuf_buf(rec->wrbuf_marc);
         }
 	return 0;
     }
