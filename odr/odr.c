@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.35 2002-07-25 12:51:08 adam Exp $
+ * $Id: odr.c,v 1.36 2002-08-28 07:53:51 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -60,17 +60,13 @@ void odr_setprint(ODR o, FILE *file)
 
 int odr_set_charset(ODR o, const char *to, const char *from)
 {
-#if HAVE_ICONV_H
-    if (o->op->iconv_handle != (iconv_t)(-1))
-        iconv_close (o->op->iconv_handle);
+    if (o->op->iconv_handle)
+        yaz_iconv_close (o->op->iconv_handle);
 
     o->op->iconv_handle = iconv_open (to, from);
-    if (o->op->iconv_handle == (iconv_t)(-1))
+    if (o->op->iconv_handle == 0)
         return -1;
     return 0;
-#else
-    return -1;
-#endif
 }
 
 #include <yaz/log.h>
@@ -90,9 +86,7 @@ ODR odr_createmem(int direction)
     r->enable_bias = 1;
     r->op = xmalloc (sizeof(*r->op));
     r->op->odr_ber_tag.lclass = -1;
-#if HAVE_ICONV_H
-    r->op->iconv_handle = (iconv_t)(-1);
-#endif
+    r->op->iconv_handle = 0;
     odr_reset(r);
     yaz_log (LOG_DEBUG, "odr_createmem dir=%d o=%p", direction, r);
     return r;
@@ -111,10 +105,8 @@ void odr_reset(ODR o)
     nmem_reset(o->mem);
     o->choice_bias = -1;
     o->lenlen = 1;
-#if HAVE_ICONV_H
-    if (o->op->iconv_handle != (iconv_t)(-1))
-        iconv(o->op->iconv_handle, 0, 0, 0, 0);
-#endif
+    if (o->op->iconv_handle != 0)
+        yaz_iconv(o->op->iconv_handle, 0, 0, 0, 0);
     yaz_log (LOG_DEBUG, "odr_reset o=%p", o);
 }
     
@@ -125,10 +117,8 @@ void odr_destroy(ODR o)
        xfree(o->buf);
     if (o->print && o->print != stderr)
         fclose(o->print);
-#if HAVE_ICONV_H
-    if (o->op->iconv_handle != (iconv_t)(-1))
-        iconv_close (o->op->iconv_handle);
-#endif
+    if (o->op->iconv_handle != 0)
+        yaz_iconv_close (o->op->iconv_handle);
     xfree(o->op);
     xfree(o);
     yaz_log (LOG_DEBUG, "odr_destroy o=%p", o);

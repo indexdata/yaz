@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oct.c,v 1.17 2002-07-25 12:51:08 adam Exp $
+ * $Id: odr_oct.c,v 1.18 2002-08-28 07:53:51 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -137,8 +137,8 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
     if (o->direction == ODR_ENCODE)
     {
         t->buf = 0;
-#if HAVE_ICONV_H
-        if (o->op->iconv_handle != (iconv_t)(-1))
+
+        if (o->op->iconv_handle != 0)
         {
             size_t inleft = strlen(*p);
             char *inbuf = *p;
@@ -148,8 +148,8 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             
             t->buf = outbuf;
             
-            ret = iconv (o->op->iconv_handle, &inbuf, &inleft,
-                         &outbuf, &outleft);
+            ret = yaz_iconv (o->op->iconv_handle, &inbuf, &inleft,
+                             &outbuf, &outleft);
             if (ret == (size_t)(-1))
             {
                 o->error = ODATA;
@@ -157,7 +157,6 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             }
             t->size = t->len = outbuf - (char*) t->buf;
         }
-#endif
         if (!t->buf)
         {
             t->buf = (unsigned char *) *p;
@@ -175,8 +174,8 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
     if (o->direction == ODR_DECODE)
     {
         *p = 0;
-#if HAVE_ICONV_H
-        if (o->op->iconv_handle != (iconv_t)(-1))
+
+        if (o->op->iconv_handle != 0)
         {
             size_t inleft = t->len;
             char *inbuf = t->buf;
@@ -186,8 +185,8 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
 
             *p = outbuf;
             
-            ret = iconv (o->op->iconv_handle, &inbuf, &inleft,
-                         &outbuf, &outleft);
+            ret = yaz_iconv (o->op->iconv_handle, &inbuf, &inleft,
+                             &outbuf, &outleft);
             if (ret == (size_t)(-1))
             {
                 o->error = ODATA;
@@ -197,7 +196,6 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             
             (*p)[inleft] = '\0';    /* null terminate it */
         }
-#endif
         if (!*p)
         {
             *p = (char *) t->buf;

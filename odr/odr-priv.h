@@ -23,18 +23,15 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr-priv.h,v 1.1 2002-07-25 13:20:20 adam Exp $
+ * $Id: odr-priv.h,v 1.2 2002-08-28 07:53:51 adam Exp $
  */
 
 #ifndef ODR_PRIV_H
 
 #define ODR_PRIV_H
 
-#if HAVE_ICONV_H
-#include <iconv.h>
-#endif
-
 #include <yaz/odr.h>
+#include <yaz/yaz-util.h>
 
 struct Odr_ber_tag {      /* used to be statics in ber_tag... */
     int lclass;
@@ -50,9 +47,7 @@ struct Odr_private {
     odr_constack stack[ODR_MAX_STACK];
 
     struct Odr_ber_tag odr_ber_tag;
-#if HAVE_ICONV_H
-    iconv_t iconv_handle;
-#endif
+    yaz_iconv_t iconv_handle;
 };
 
 /* Private macro.
