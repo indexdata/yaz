@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.2 2001-10-24 12:24:43 adam Exp $
+ * $Id: zoom-c.c,v 1.3 2001-11-06 17:05:19 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -144,9 +144,9 @@ void Z3950_connection_connect(Z3950_connection c,
     }
 }
 
-Z3950_search Z3950_search_create(void)
+Z3950_query Z3950_query_create(void)
 {
-    Z3950_search s = xmalloc (sizeof(*s));
+    Z3950_query s = xmalloc (sizeof(*s));
 
     s->refcount = 1;
     s->query = 0;
@@ -161,13 +161,13 @@ const char *Z3950_connection_host (Z3950_connection c)
     return c->host_port;
 }
 
-void Z3950_search_destroy(Z3950_search s)
+void Z3950_query_destroy(Z3950_query s)
 {
     if (!s)
 	return;
 
     (s->refcount)--;
-    yaz_log (LOG_DEBUG, "Z3950_search_destroy count=%d", s->refcount);
+    yaz_log (LOG_DEBUG, "Z3950_query_destroy count=%d", s->refcount);
     if (s->refcount == 0)
     {
 	odr_destroy (s->odr);
@@ -175,7 +175,7 @@ void Z3950_search_destroy(Z3950_search s)
     }
 }
 
-int Z3950_search_prefix(Z3950_search s, const char *str)
+int Z3950_query_prefix(Z3950_query s, const char *str)
 {
     s->query = odr_malloc (s->odr, sizeof(*s->query));
     s->query->which = Z_Query_type_1;
@@ -185,7 +185,7 @@ int Z3950_search_prefix(Z3950_search s, const char *str)
     return 0;
 }
 
-int Z3950_search_sortby(Z3950_search s, const char *criteria)
+int Z3950_query_sortby(Z3950_query s, const char *criteria)
 {
     s->sort_spec = yaz_sort_spec (s->odr, criteria);
     if (!s->sort_spec)
@@ -285,16 +285,16 @@ Z3950_resultset Z3950_resultset_create ()
 Z3950_resultset Z3950_connection_search_pqf(Z3950_connection c, const char *q)
 {
     Z3950_resultset r;
-    Z3950_search s = Z3950_search_create();
+    Z3950_query s = Z3950_query_create();
 
-    Z3950_search_prefix (s, q);
+    Z3950_query_prefix (s, q);
 
     r = Z3950_connection_search (c, s);
-    Z3950_search_destroy (s);
+    Z3950_query_destroy (s);
     return r;
 }
 
-Z3950_resultset Z3950_connection_search(Z3950_connection c, Z3950_search q)
+Z3950_resultset Z3950_connection_search(Z3950_connection c, Z3950_query q)
 {
     Z3950_resultset r = Z3950_resultset_create ();
     Z3950_task task;
@@ -350,7 +350,7 @@ void Z3950_resultset_destroy(Z3950_resultset r)
 		rp = &(*rp)->next;
 	    }
 	}
-	Z3950_search_destroy (r->search);
+	Z3950_query_destroy (r->search);
 	Z3950_options_destroy (r->options);
 	odr_destroy (r->odr);
 	xfree (r);
@@ -395,22 +395,19 @@ static void Z3950_resultset_retrieve (Z3950_resultset r,
 }
 
 void Z3950_resultset_records (Z3950_resultset r, Z3950_record *recs,
-			      size_t *cnt)
+			      size_t start, size_t count)
 {
     int force_present = 0;
-    int start, count;
 
     if (!r)
 	return ;
-    start = Z3950_options_get_int (r->options, "start", 0);
-    count = Z3950_options_get_int (r->options, "count", 0);
-    if (cnt && recs)
+    if (count && recs)
         force_present = 1;
     Z3950_resultset_retrieve (r, force_present, start, count);
     if (force_present)
     {
         size_t i;
-        for (i = 0; i< *cnt; i++)
+        for (i = 0; i< count; i++)
             recs[i] = Z3950_resultset_record_immediate (r, i+start);
     }
 }
@@ -731,7 +728,7 @@ Z3950_record Z3950_record_dup (Z3950_record srec)
     return nrec;
 }
 
-Z3950_record Z3950_resultset_record_immediate (Z3950_resultset s, int pos)
+Z3950_record Z3950_resultset_record_immediate (Z3950_resultset s,size_t pos)
 {
     Z3950_record rec = record_cache_lookup (s, pos, 0);
     if (!rec)
@@ -739,7 +736,7 @@ Z3950_record Z3950_resultset_record_immediate (Z3950_resultset s, int pos)
     return Z3950_record_dup (rec);
 }
 
-Z3950_record Z3950_resultset_record (Z3950_resultset r, int pos)
+Z3950_record Z3950_resultset_record (Z3950_resultset r, size_t pos)
 {
     Z3950_resultset_retrieve (r, 1, pos, 1);
     return Z3950_resultset_record_immediate (r, pos);
@@ -755,7 +752,7 @@ void Z3950_record_destroy (Z3950_record rec)
     xfree (rec);
 }
 
-void *Z3950_record_get (Z3950_record rec, const char *type, int *len)
+void *Z3950_record_get (Z3950_record rec, const char *type, size_t *len)
 {
     Z_NamePlusRecord *npr;
     if (!rec)
@@ -826,8 +823,8 @@ void *Z3950_record_get (Z3950_record rec, const char *type, int *len)
     return 0;
 }
 
-void *Z3950_resultset_get (Z3950_resultset s, int pos, const char *type,
-			   int *len)
+void *Z3950_resultset_get (Z3950_resultset s, size_t pos, const char *type,
+			   size_t *len)
 {
     Z3950_record rec = record_cache_lookup (s, pos, 0);
     return Z3950_record_get (rec, type, len);

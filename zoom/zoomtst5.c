@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst5.c,v 1.2 2001-10-24 12:24:43 adam Exp $
+ * $Id: zoomtst5.c,v 1.3 2001-11-06 17:05:19 adam Exp $
  *
  * Asynchronous multi-target client doing search, sort and present
  */
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     int no = argc-3;
     Z3950_connection z[500]; /* allow at most 500 connections */
     Z3950_resultset r[500];  /* and result sets .. */
-    Z3950_search s;
+    Z3950_query q;
     Z3950_options o;
 
     o = Z3950_options_create ();
@@ -48,13 +48,13 @@ int main(int argc, char **argv)
     Z3950_options_set (o, "elementSetName", "B");
 
     /* create query */
-    s = Z3950_search_create ();
-    if (Z3950_search_prefix (s, argv[argc-2]))
+    q = Z3950_query_create ();
+    if (Z3950_query_prefix (q, argv[argc-2]))
     {
 	printf ("bad PQF: %s\n", argv[argc-2]);
 	exit (1);
     }
-    if (Z3950_search_sortby (s, argv[argc-1]))
+    if (Z3950_query_sortby (q, argv[argc-1]))
     {
 	printf ("bad sort spec: %s\n", argv[argc-1]);
 	exit (1);
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     {
     	z[i] = Z3950_connection_create (o);
     	Z3950_connection_connect (z[i], argv[i+1], 0);
-        r[i] = Z3950_connection_search (z[i], s);
+        r[i] = Z3950_connection_search (z[i], q);
     }
 
     /* network I/O */
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
     }
 
     /* destroy stuff and exit */
-    Z3950_search_destroy (s);
+    Z3950_query_destroy (q);
     for (i = 0; i<no; i++)
     {
         Z3950_resultset_destroy (r[i]);

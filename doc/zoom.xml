@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.5 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.6 2001-11-06 17:05:19 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -154,30 +154,29 @@
     non-<literal>NULL</literal>.
    </para>
   </sect1>
-  <sect1 id="zoom.search"><title>Search objects</title>
+  <sect1 id="zoom.query"><title>Queries</title>
    <para>
-    Search objects defines how result sets are obtained. They
-    act like queries.
+    Query objects represents queries.
    </para>
    <synopsis>
-     Z3950_search Z3950_search_create(void);
+     Z3950_query Z3950_query_create(void);
 
-     void Z3950_search_destroy(Z3950_search s);
+     void Z3950_query_destroy(Z3950_query q);
 
-     int Z3950_search_prefix(Z3950_search s, const char *str);
+     int Z3950_query_prefix(Z3950_query q, const char *str);
 
-     int Z3950_search_sortby(Z3950_search s, const char *criteria);
+     int Z3950_query_sortby(Z3950_query q, const char *criteria);
    </synopsis>
    <para>
-    Create search objects using <function>Z3950_search_create</function>
-    and destroy them by calling <function>Z3950_search_destroy</function>.
+    Create query objects using <function>Z3950_query_create</function>
+    and destroy them by calling <function>Z3950_query_destroy</function>.
     RPN-queries can be specified in <link linkend="PQF">PQF</link>
     notation by using the
-    function <function>Z3950_search_prefix</function>. More
+    function <function>Z3950_query_prefix</function>. More
     query types will be added later, such as
     <link linkend="CCL">CCL</link> to RPN-mapping, native CCL query,
     etc. In addition to a search, a sort criteria may be set. Function
-    <function>Z3950_search_sortby</function> specifies a 
+    <function>Z3950_query_sortby</function> specifies a 
     sort criteria using the same string notation for sort as offered by
     the <link linkend="sortspec">YAZ client</link>.
    </para>
@@ -189,7 +188,7 @@
    </para>
    <synopsis>
      Z3950_resultset Z3950_connection_search(Z3950_connection,
-                                             Z3950_search q);
+                                             Z3950_query q);
 
      Z3950_resultset Z3950_connection_search_pqf(Z3950_connection c,
                                                  const char *q);
@@ -198,11 +197,12 @@
    </synopsis>
    <para>
     Function <function>Z3950_connection_search</function> creates
-     a result set given a connection - and search object.
+     a result set given a connection and query.
     Destroy a result set by calling
     <function>Z3950_resultset_destroy</function>.
-    Simple clients using PQF only may use function
-    <function>Z3950_connection_search_pqf</function> instead.
+    Simple clients may using PQF only may use function
+    <function>Z3950_connection_search_pqf</function> in which case
+    creating query objects is not necessary.
    </para>
    <synopsis>
      const char *Z3950_resultset_option (Z3950_resultset r,
@@ -211,8 +211,8 @@
 
      int Z3950_resultset_size (Z3950_resultset r);
 
-     void *Z3950_resultset_get (Z3950_resultset s, int pos,
-                                const char *type, int *len);
+     void *Z3950_resultset_get (Z3950_resultset s, size_t pos,
+                                const char *type, size_t *len);
    </synopsis>
    <para>
     Function <function>Z3950_resultset_options</function> sets or
@@ -248,10 +248,9 @@
         used in searches; false (0) if not.
        </entry><entry>1</entry></row>
       <row><entry>
-        start</entry><entry>Offset of first record we wish to
-        retrieve from the target. Note first record has offset 0
-        unlike the protocol specifications where first record has position
-        1.
+        start</entry><entry>Offset of first record to be 
+        retrieved from target. First record has offset 0 unlike the
+        protocol specifications where first record has position 1.
        </entry><entry>0</entry></row>
       <row><entry>
         count</entry><entry>Number of records to be retrieved.
@@ -264,6 +263,28 @@
       <row><entry>
         preferredRecordSyntax</entry><entry>Preferred Syntax, such as
         <literal>USMARC</literal>, <literal>SUTRS</literal>, etc.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        smallSetUpperBound</entry><entry>If hits is less than or equal to this
+        value, then target will return all records using small element set name
+       </entry><entry>0</entry></row>
+      <row><entry>
+        largeSetLowerBound</entry><entry>If hits is greator than this value, the target
+        will return no records.
+       </entry><entry>1</entry></row>
+      <row><entry>
+        mediumSetPresentNumber</entry><entry>This value represents
+        the number of records to be returned as part of a search when when
+        hits is less than or equal to large set lower bound and if hits
+        is greator than small set upper bound.
+       </entry><entry>0</entry></row>
+      <row><entry>
+        smallSetElementSetName</entry><entry>
+        The element set name to be used for small result sets.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        mediumSetElementSetName</entry><entry>
+        The element set name to be for medium-sized result sets.
        </entry><entry>none</entry></row>
       <row><entry>
         databaseName</entry><entry>One or more database names
@@ -281,11 +302,11 @@
    <synopsis>
      void Z3950_resultset_records (Z3950_resultset r,
                                    Z3950_record *recs,
-			           size_t *cnt);
-     Z3950_record Z3950_resultset_record (Z3950_resultset s, int pos);
+			           size_t start, size_t count);
+     Z3950_record Z3950_resultset_record (Z3950_resultset s, size_t pos);
 
      void *Z3950_record_get (Z3950_record rec, const char *type,
-                             int *len);
+                             size_t *len);
 
      void Z3950_record_destroy (Z3950_record rec);
    </synopsis>
@@ -303,14 +324,14 @@
    </para>
    <para>
     Function <function>Z3950_resultset_records</function> retrieves
-    a number of records from a result set. Options <literal>start</literal>
+    a number of records from a result set. Parameter <literal>start</literal>
     and <literal>count</literal> specifies the range of records to
-    be returned. Upon completion <literal>recs[0], ..recs[*cnt]</literal>
-    holds record objects for the records. These array of records
+    be returned. Upon completion array <literal>recs[0], ..recs[count-1]</literal>
+    holds record objects for the records. The array of records
      <literal>recs</literal> should be allocate prior to calling 
-    <function>Z3950_resultset_records</function>. Note that for
+    <function>Z3950_resultset_records</function>. Note that for those
     records that couldn't be retrieved from the target
-    <literal>recs[ ..]</literal> is <literal>NULL</literal>.
+    <literal>recs[ ..]</literal> is set to <literal>NULL</literal>.
    </para>
    <para id="zoom.record.get">
     In order to extract information about a single record,
@@ -326,9 +347,9 @@
   </sect1>
   <sect1 id="zoom.options"><title>Options</title>
    <para>
-    Most objects in &zoom; allow you to specify options to change
-    default behaviour. From an implementation point of view a set of options
-    is just like an associate array / hash array, etc.
+    Most &zoom; objects provide a way to specify options to default behaviour.
+    From an implementation point of view a set of options is just like
+    an associate array / hash array, etc.
    </para>
    <synopsis>
      Z3950_options Z3950_options_create (void);

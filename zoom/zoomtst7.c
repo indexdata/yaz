@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.2 2001-10-24 12:24:43 adam Exp $
+ * $Id: zoomtst7.c,v 1.3 2001-11-06 17:05:19 adam Exp $
  *
  * API test..
  */
@@ -51,11 +51,11 @@ int main(int argc, char **argv)
 		Z3950_record recs[2];
 		size_t recs_count = 2;
 		char query[40];
-		Z3950_search s = Z3950_search_create ();
+		Z3950_query s = Z3950_query_create ();
 		
 		sprintf (query, "i%dr%d", i, j);
 		
-		if (Z3950_search_prefix (s, query))
+		if (Z3950_query_prefix (s, query))
 		{
 		    printf ("bad PQF: %s\n", query);
 		    exit (2);
@@ -65,13 +65,10 @@ int main(int argc, char **argv)
 		
 		r[j] = Z3950_connection_search (z, s); /* non-piggy */
 		
-		Z3950_options_set (o, "count", "2");
-		Z3950_resultset_records (r[j], 0, 0);  /* first two */
+		Z3950_resultset_records (r[j], recs, 0, 2);  /* first two */
 		
-		Z3950_options_set (o, "start", "1");
-		Z3950_options_set (o, "count", "2");
-		Z3950_resultset_records (r[j], recs, &recs_count);  /* third */
-		Z3950_resultset_records (r[j], 0, 0);  /* ignored */
+		Z3950_resultset_records (r[j], recs, 1, 2);  /* third */
+		Z3950_resultset_records (r[j], recs, 0, 0);  /* ignored */
 
 		if (Z3950_resultset_size (r[j]) > 2)
 		{
@@ -84,7 +81,7 @@ int main(int argc, char **argv)
 		Z3950_record_destroy (recs[0]);
 		Z3950_record_destroy (recs[1]);
 		
-		Z3950_search_destroy (s);
+		Z3950_query_destroy (s);
 
 		putchar ('.');
 		if (block > 0)
@@ -101,7 +98,7 @@ int main(int argc, char **argv)
 	
 	for (i = 0; i<1; i++)
 	{
-	    Z3950_search s = Z3950_search_create ();
+	    Z3950_query q = Z3950_query_create ();
 	    char host[40];
 
 	    printf ("session %2d", i+10);
@@ -126,17 +123,16 @@ int main(int argc, char **argv)
 	    }
 	    Z3950_connection_destroy (z);
 	    
-	    Z3950_options_set (o, "count", "1");
 	    for (j = 0; j < 10; j++)
 	    {
-		Z3950_resultset_records (r[j], 0, 0);
+		Z3950_resultset_records (r[j], 0, 0, 1);
 		if (block > 0)
 		    while (Z3950_event (1, &z))
 			;
 	    }
 	    for (j = 0; j < 10; j++)
 		Z3950_resultset_destroy (r[j]);
-	    Z3950_search_destroy (s);
+	    Z3950_query_destroy (q);
 	    printf ("10 searches, 10 ignored presents done\n");
 	}
     }

@@ -1,69 +1,9 @@
 /*
- * Copyright (C) 1994-2000, Index Data
+ * Copyright (C) 1994-2001, Index Data
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: xmalloc.c,v $
- * Revision 1.13  2001-09-30 20:10:28  adam
- * TRACE_MALLOC=1.
- *
- * Revision 1.12  2001/09/24 21:51:56  adam
- * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
- * and yaz_z3950oid_to_str.
- *
- * Revision 1.11  2000/02/29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.10  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.9  1999/09/10 08:58:32  adam
- * Set TRACE_XMALLOC to 1.
- *
- * Revision 1.8  1999/08/27 09:40:32  adam
- * Renamed logf function to yaz_log. Removed VC++ project files.
- *
- * Revision 1.7  1999/07/13 13:24:53  adam
- * Updated memory debugging memory allocatation routines.
- *
- * Revision 1.6  1998/02/11 11:53:36  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.5  1997/10/31 12:20:09  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
- *
- * Revision 1.4  1996/07/03 13:21:36  adam
- * Function xfree_f checks for NULL pointer.
- *
- * Revision 1.3  1995/12/05  15:08:44  adam
- * Fixed verbose of xrealloc.
- *
- * Revision 1.2  1995/12/05  11:08:37  adam
- * More verbose malloc routines.
- *
- * Revision 1.1  1995/11/01  11:56:53  quinn
- * Added Xmalloc.
- *
- * Revision 1.6  1995/10/16  14:03:11  quinn
- * Changes to support element set names and espec1
- *
- * Revision 1.5  1995/09/04  12:34:06  adam
- * Various cleanup. YAZ util used instead.
- *
- * Revision 1.4  1994/10/05  10:16:16  quinn
- * Added xrealloc. Fixed bug in log.
- *
- * Revision 1.3  1994/09/26  16:31:37  adam
- * Added xcalloc_f.
- *
- * Revision 1.2  1994/08/18  08:23:26  adam
- * Res.c now use handles. xmalloc defines xstrdup.
- *
- * Revision 1.1  1994/08/17  13:37:54  adam
- * xmalloc.c added to util.
- *
+ * $Id: xmalloc.c,v 1.14 2001-11-06 17:05:19 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -77,7 +17,7 @@
 #include <yaz/log.h>
 #include <yaz/xmalloc.h>
 
-#define TRACE_XMALLOC 1
+#define TRACE_XMALLOC 2
 
 #if TRACE_XMALLOC > 1
 

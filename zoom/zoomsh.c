@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.2 2001-10-24 12:24:43 adam Exp $
+ * $Id: zoomsh.c,v 1.3 2001-11-06 17:05:19 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -146,7 +146,7 @@ static void cmd_show (Z3950_connection *c, Z3950_resultset *r,
 	Z3950_options_set (options, "count", count_str);
 
     for (i = 0; i<MAX_CON; i++)
-	Z3950_resultset_records (r[i], 0, 0);
+	Z3950_resultset_records (r[i], 0, atoi(start_str), atoi(count_str));
     while (Z3950_event (MAX_CON, c))
 	;
 
@@ -175,11 +175,11 @@ static void cmd_search (Z3950_connection *c, Z3950_resultset *r,
 			Z3950_options options,
 			const char **args)
 {
-    Z3950_search s;
+    Z3950_query s;
     int i;
     
-    s = Z3950_search_create ();
-    if (Z3950_search_prefix (s, *args))
+    s = Z3950_query_create ();
+    if (Z3950_query_prefix (s, *args))
     {
 	fprintf (stderr, "Bad PQF: %s\n", *args);
 	return;
@@ -221,7 +221,7 @@ static void cmd_search (Z3950_connection *c, Z3950_resultset *r,
 	    display_records (c[i], r[i], start, count);
 	}
     }
-    Z3950_search_destroy (s);
+    Z3950_query_destroy (s);
 }
 
 static void cmd_help (Z3950_connection *c, Z3950_resultset *r,

@@ -1,13 +1,13 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.2 2001-10-24 12:24:43 adam Exp $
+ * $Id: zoom-p.h,v 1.3 2001-11-06 17:05:19 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
 
-struct Z3950_search_p {
+struct Z3950_query_p {
     Z_Query *query;
     Z_SortKeySpecList *sort_spec;
     int refcount;
@@ -65,7 +65,7 @@ typedef struct Z3950_record_cache_p *Z3950_record_cache;
 struct Z3950_resultset_p {
     Z_Query *r_query;
     Z_SortKeySpecList *r_sort_spec;
-    Z3950_search search;
+    Z3950_query search;
     int refcount;
     int size;
     int start;
