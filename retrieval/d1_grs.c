@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.13  1998-02-11 11:53:35  adam
+ * Revision 1.14  1998-03-16 12:21:15  adam
+ * Fixed problem with tag names that weren't set to the right value
+ * when wildcards were used.
+ *
+ * Revision 1.13  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.12  1997/11/24 11:33:56  adam
@@ -266,11 +270,12 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
     {
 	char *tagstr;
 
-	if (tag) /* well-known tag */
-	    tagstr = tag->value.string;
-	else /* tag local to this file */
-	    tagstr = n->u.tag.tag;
-
+	if (n->which == DATA1N_tag)      
+	    tagstr = n->u.tag.tag;       /* tag at node */
+	else if (tag)                    
+	    tagstr = tag->value.string;  /* no take from well-known */
+	else
+	    tagstr = "?";                /* no tag at all! */
 	res->tagValue->which = Z_StringOrNumeric_string;
 	res->tagValue->u.string = (char *)odr_malloc(o, strlen(tagstr)+1);
 	strcpy(res->tagValue->u.string, tagstr);
