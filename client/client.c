@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.185 2003-03-11 11:07:47 adam Exp $
+ * $Id: client.c,v 1.186 2003-03-19 09:45:55 adam Exp $
  */
 
 #include <stdio.h>
@@ -457,6 +457,9 @@ int cmd_open(const char *arg)
         }
     }   
     cs_get_host_args(arg, &basep);
+
+    strncpy(type_and_host, arg, sizeof(type_and_host)-1);
+    type_and_host[sizeof(type_and_host)-1] = '\0';
 
     cmd_open_remember_last_open_command(arg,type_and_host);
 
