@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.27  1999-12-21 14:16:19  ian
+ * Revision 1.28  2000-12-05 12:21:45  adam
+ * Added termlist source for data1 system.
+ *
+ * Revision 1.27  1999/12/21 14:16:19  ian
  * Changed retrieval module to allow data1 trees with no associated absyn.
  * Also added a simple interface for extracting values from data1 trees using
  * a string based tagpath.
@@ -492,6 +495,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		do
 		{
 		    char attname[512], structure[512];
+		    char *source;
 		    int r;
 		    
 		    if (!(r = sscanf(p, "%511[^:,]:%511[^,]", attname,
@@ -517,15 +521,18 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 			fclose(f);
 			return 0;
 		    }
+		    if (r == 2 && (source = strchr(structure, ':')))
+			*source++ = '\0';   /* cut off structure .. */
+		    else
+			source = "data";    /* ok: default is leaf data */
+		    (*tp)->source = (char *)
+			nmem_strdup (data1_nmem_get (dh), source);
+
 		    if (r < 2) /* is the structure qualified? */
 			(*tp)->structure = "w";
 		    else 
-		    {
 			(*tp)->structure = (char *)
-			    nmem_malloc (data1_nmem_get (dh),
-					 strlen(structure)+1);
-			strcpy ((*tp)->structure, structure);
-		    }
+			    nmem_strdup (data1_nmem_get (dh), structure);
 		    tp = &(*tp)->next;
 		}
 		while ((p = strchr(p, ',')) && *(++p));

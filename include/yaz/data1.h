@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.5  2000-11-29 14:22:47  adam
+ * Revision 1.6  2000-12-05 12:21:45  adam
+ * Added termlist source for data1 system.
+ *
+ * Revision 1.5  2000/11/29 14:22:47  adam
  * Implemented XML/SGML attributes for data1 so that d1_read reads them
  * and d1_write generates proper attributes for XML/SGML records. Added
  * register locking for threaded version.
@@ -377,6 +380,7 @@ typedef struct data1_termlist
 {
     data1_att *att;
     char *structure;
+    char *source;
     struct data1_termlist *next;
 } data1_termlist;
 
