@@ -2,9 +2,10 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.3 2005-01-15 19:47:15 adam Exp $
+ * $Id: tstodr.c,v 1.4 2005-02-01 17:23:36 adam Exp $
  *
  */
+#include <stdlib.h>
 #include <stdio.h>
 #include <yaz/odr.h>
 #include "tstodrcodec.h"

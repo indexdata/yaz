@@ -2,9 +2,10 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstwrbuf.c,v 1.2 2005-01-15 19:47:15 adam Exp $
+ * $Id: tstwrbuf.c,v 1.3 2005-02-01 17:23:36 adam Exp $
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #include <yaz/wrbuf.h>
