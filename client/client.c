@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.114  2001-02-21 13:46:53  adam
+ * Revision 1.115  2001-03-13 18:10:58  adam
+ * Added option -c to set CCL config file.
+ *
+ * Revision 1.114  2001/02/21 13:46:53  adam
  * C++ fixes.
  *
  * Revision 1.113  2001/02/21 09:41:15  adam
@@ -429,6 +432,7 @@ static NMEM session_mem = NULL;      /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
+static char ccl_fields[512] = "default.bib";
 char* esPackageName = 0;
 
 static char last_cmd[100] = "?";
@@ -1524,7 +1528,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
 
 static int send_itemorder(const char *type, int itemno)
 {
-    Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     oident ItemOrderRequest;
 
@@ -2374,7 +2378,7 @@ static void initialize(void)
 
 #if CCL2RPN
     bibset = ccl_qual_mk (); 
-    inf = fopen ("default.bib", "r");
+    inf = fopen (ccl_fields, "r");
     if (inf)
     {
         ccl_qual_file (bibset, inf);
@@ -2624,7 +2628,7 @@ int main(int argc, char **argv)
     int ret;
     int opened = 0;
 
-    while ((ret = options("a:m:v:", argv, argc, &arg)) != -2)
+    while ((ret = options("c:a:m:v:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -2643,6 +2647,10 @@ int main(int argc, char **argv)
                 exit (1);
             }
             break;
+	case 'c':
+	    strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
+	    ccl_fields[sizeof(ccl_fields)-1] = '\0';
+	    break;
         case 'a':
             if (!strcmp(arg, "-"))
                 apdu_file=stderr;
@@ -2654,7 +2662,7 @@ int main(int argc, char **argv)
             break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
-                             "[<server-addr>]\n",
+                             "[-c cclfields] [<server-addr>]\n",
                      prog);
             exit (1);
         }
