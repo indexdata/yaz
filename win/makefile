@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.6 1999-06-09 13:33:32 heikki Exp $
+# $Id: makefile,v 1.7 1999-06-09 15:10:08 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -25,7 +25,7 @@
 
 DEBUG=0   # 0 for release, 1 for debug
 
-NEW_Z3950=1  # 0= use old asn files
+NEW_Z3950=0  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
 
 
@@ -33,6 +33,7 @@ default: all
 
 all: dirs proto_h dll client server ztest 
 
+generate: generated_files
 
 ###########################################################
 ############### Directories
@@ -127,12 +128,6 @@ RELEASE_C_OPTIONS=  \
 # /Zi  = Program database for debuggers
 # /ZI  = Pgm database with special "edit&continue" stuff - not available in C5
 
-### The RC compiler (resource files)
-RSC=rc.exe
-COMMON_RC_OPTIONS= /l 0x406 /i"$(ROOTDIR)" 
-DEBUG_RC_OPTIONS=/d "_DEBUG"
-RELEASE_RC_OPTIONS=/d "NDEBUG"
-
 
 ### Linker options
 LINK=link.exe
@@ -161,8 +156,6 @@ TCL="C:\Program Files\Tcl\bin\tclsh80.exe"
 
 COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl -I$(INCLDIR)
 
-#-I../include
-
 
 # Final opt variables
 !if $(DEBUG)
@@ -185,20 +178,6 @@ TCLOPT= $(COMMON_TCL_OPTIONS)
 ###########################################################
 ###############  Source and object modules
 ###########################################################
-
-# The resource files
-#RCFILE=$(SRCDIR)\compmak.rc
-# Horrible Hack: The resfile contains just one line, pointing
-# to the component.tlb file (which is created by the idl compiler)
-# Devstudio wants that file to live in YazX3950, this makefile in
-# win/obj. So we need to RC files!
-
-#RESFILE=$(OBJDIR)\component.res
-
-# The def file
-#DEF_FILE= $(ROOTDIR)\component.def 
-
-### !!! Delete the stuff above !!!
 
 # Note: Ordinary source files are not specified here at 
 # all, make finds them in suitable dirs. The object modules
@@ -292,9 +271,6 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\yaz-ccl.obj \
    $(OBJDIR)\otherinfo.obj
 
-#   $(OBJDIR)\query.obj \
-
-
 YAZ_RET_OBJS= \
    $(OBJDIR)\d1_absyn.obj\
    $(OBJDIR)\d1_attset.obj\
@@ -313,7 +289,6 @@ YAZ_RET_OBJS= \
    $(OBJDIR)\d1_tagset.obj\
    $(OBJDIR)\d1_varset.obj\
    $(OBJDIR)\d1_write.obj
-
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -361,6 +336,11 @@ YAZ_OBJS= \
 
 DLL_OBJS= $(YAZ_OBJS)
 
+ALL_OBJS= \
+	$(YAZ_OBJS) \
+	$(YAZ_CLIENT_OBJS) \
+	$(YAZ_SERVER_OBJS) \
+	$(ZTEST_OBJS)
 
 
 ##########################################################
@@ -380,7 +360,8 @@ $(PROTOH): makefile $(INCLDIR)\prt-proto.h
 ############### Generated C and H files
 ###########################################################
 
-Z3950_C_DIR=$(Z3950DIR)   #!!! Should be moved to OBJ
+Z3950_C_DIR=$(Z3950DIR)   
+#!!! Should be moved to OBJ, but that requires too much trickery
 
 # Files generated from datetime.asn
 DATETIME_H_FILES = $(INCLDIR)\z-date.h
@@ -440,6 +421,10 @@ GENERATED_H_FILES= \
    $(UNIVRES_H_FILES)  \
    $(DATETIME_H_FILES)
 
+generated_files: \
+	$(GENERATED_H_FILES) \
+	$(GENERATED_C_FILES) \
+	$(PROTOH)
 
 ###########################################################
 ############### Compiling 
@@ -450,101 +435,68 @@ GENERATED_H_FILES= \
 
 # DLL sources
 {$(SRCDIR)}.cpp{$(OBJDIR)}.obj:
-	@$(CPP) @<<
-	$(COPT) $<
-<<
+	@$(CPP) $(COPT) $<
 
 # Yaz client
 {$(CLIENTDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-	/D"_CONSOLE"
-<<
+	@$(CPP) $(COPT) $< 	/D"_CONSOLE"
 
 # Ztest
 {$(ZTESTDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-      /D"_CONSOLE"
-	/D"_MBCS"
-<<
-
+	@$(CPP) $(COPT) $< /D"_CONSOLE"	/D"_MBCS"
 
 # Server
 {$(SERVERDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-<<
+	@$(CPP) $(COPT) $< 
 
 # Various YAZ source directories
 {$(ASNDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-<<
+	@$(CPP) $(COPT) $< 
 
 {$(COMSTACKDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-<<
+	@$(CPP) $(COPT) $< 
 
 {$(ODRDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-<<
+	@$(CPP) $(COPT) $< 
 
 {$(UTILDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-<<
+	@$(CPP) $(COPT) $< 
 
 {$(ZUTILDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-<<
+	@$(CPP)	$(COPT) $< 
 
 {$(RETDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-<<
-
+	@$(CPP) $(COPT) $<
 
 {$(Z3950_C_DIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) @<<  
-	$(COPT) $< 
-<<
+	@$(CPP) $(COPT) $< 
 
-### Resource file
-#$(RESFILE): $(RCFILE) $(IDLGENERATED)
-#	$(RSC) $(RCOPT) /fo"$(RESFILE)" $(RCFILE) 
 
 ############### ASN-generated files
-
 
 $(Z3950V3_FILES): $(Z3950DIR)\z3950v3.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) z3950v3.asn
+	@cd $(WINDIR)
 
 $(DATETIME_FILES): $(Z3950DIR)\datetime.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) datetime.asn
+	@cd $(WINDIR)
 
 $(UNIVRES_FILES): $(Z3950DIR)\univres.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) univres.asn
+	@cd $(WINDIR)
 
 $(ESUPDATE_FILES): $(Z3950DIR)\esupdate.asn
 	@cd $(Z3950DIR)
-	dir esupdate.asn | find "-"
-	dir $(ESUPDATE_C_FILES) | find "-"
-	dir $(ESUPDATE_H_FILES) | find "-"
 	$(TCL) $(TCLOPT) esupdate.asn
-
+	@cd $(WINDIR)
 
 ###########################################################
 ############### Linking
 ###########################################################
-
-###$(DLL) $(IMPLIB): "$(BINDIR)" $(Z3950_OBJS)
 
 $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) 
 	@echo Linking the dll  $(DLL)
@@ -559,19 +511,10 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS)
 		/map:"$(LIBDIR)/yaz.map"  
 <<
 
-#foo: 
-#	rem $(Z3950_OBJS)
-#	pause
-#	rem $(DLL_OBJS)
-
-#foo: $(ESUPDATE_FILES)
-#	dir $(INCLDIR)\zes-update.*
-#	dir $(Z3950DIR)\zes-update.*
-
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) 
 	@echo Linking the client  $(CLIENT)
 	$(LINK) @<<
-            $(LNKOPT) 
+        $(LNKOPT) 
 		$(CLIENT_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
@@ -582,7 +525,7 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS)
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
 	@echo Linking the ztest  $(ZTEST)
 	$(LINK) @<<
-            $(LNKOPT) 
+        $(LNKOPT) 
 		$(ZTEST_LINK_OPTIONS)
 		$(LINK_LIBS) 
 		shell32.lib 
@@ -601,8 +544,6 @@ $(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS)
 		$(YAZ_SERVER_OBJS) 
 		/out:$(SERVER) 
 <<
-
-# 		$(LINK_LIBS) 
 
 # note that this links a lib, so it uses completely different options.
 
@@ -623,7 +564,19 @@ clean:
 	del $(ZTEST)
 	del $(TMPDIR)\*.
 	del $(PROTOH)
+
+realclean: clean
 	del $(Z3950_C_DIR)\*.c
+	del $(Z3950_C_DIR)\*.h
+	del $(INCLDIR)\z-accdes1.h
+	del $(INCLDIR)\z-core.h
+	del $(DATETIME_H_FILES)
+	del $(UNIVRES_H_FILES)
+	del $(ESUPDATE_H_FILES)
+
+# Because DOS del will only accept one file name to delete,
+# the _H_ files work only on sets that have just one file.
+# Z3950_H_FILES had to be spelled out. One more point for MS!
 
 ########### check directories and create if needed
 dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR)
@@ -636,17 +589,28 @@ $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
 ############### Explicit dependencies
 ###########################################################
 
-$(DLL_OBJS): makefile $(PROTOH)
+$(ALL_OBJS): makefile $(PROTOH)
+
+# force recompilation of everything, if makefile changed
 
 $(Z3950_OBJS): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 
+!if $(NEW_Z3950)
+$(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
+!endif
+# makes sure we generate before compiling anything, as the
+# new proto.h refers to the generated files, and is included
+# in various places
 
 ###########################################################
 ############### Log
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.6  1999-06-09 13:33:32  heikki
+# Revision 1.7  1999-06-09 15:10:08  heikki
+# Cleaning up. Seems to work all right
+#
+# Revision 1.6  1999/06/09 13:33:32  heikki
 # Compiles and links both old and new type stuff all right
 #
 # Revision 1.5  1999/06/09 11:05:30  heikki
