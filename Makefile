@@ -1,7 +1,7 @@
-# Copyright (C) 1994, Index Data I/S 
+# Copyright (C) 1995-1997, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.31 1996-11-08 11:03:02 adam Exp $
+# $Id: Makefile,v 1.32 1997-02-24 10:37:26 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
