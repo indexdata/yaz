@@ -1,17 +1,20 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.3 1995-03-07 16:29:33 quinn Exp $
+# $Id: Makefile,v 1.4 1995-03-14 10:27:12 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../odr
+LIBDIR=../../lib
+LIBINCLUDE=-L$(LIBDIR)
 #CFLAGS=-g -Wall -pedantic -ansi
 DEFS=$(INCLUDE)
-LIB=asn.a
+LIB=$(LIBDIR)/libasn.a
+LIBS=-lodr -lasn
 PO = proto.o
 CPP=cc -E
 
-all: $(LIB)
+all: $(LIBDIR) $(LIB)
 
 test: test.o $(LIB) ../odr/odr.a
 	$(CC) $(CFLAGS) $(INCLUDE) -o test test.o $(LIB) ../odr/odr.a
@@ -22,6 +25,9 @@ $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
 	ranlib $(LIB)
+
+$(LIBDIR):
+	mkdir $(LIBDIR)
 
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<
