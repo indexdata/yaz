@@ -1,5 +1,5 @@
-/* $Id: cql2xcql.c,v 1.2 2004-03-10 16:34:31 adam Exp $
-   Copyright (C) 2002-2003
+/* $Id: cql2xcql.c,v 1.3 2004-03-11 09:34:42 adam Exp $
+   Copyright (C) 2002-2004
    Index Data Aps
 
 This file is part of the YAZ toolkit.
