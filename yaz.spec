@@ -2,7 +2,7 @@ Summary: YAZ - A Z39.50 Library
 Name: yaz
 Version: 1.5
 Release: 1
-Copyright: GPL
+Copyright: BSD
 Group: Development/Libraries
 Vendor: Index Data ApS <info@indexdata.dk>
 Url: http://www.indexdata.dk/yaz/
