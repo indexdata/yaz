@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
 ]>
-<!-- $Id: yaz-client-man.xml,v 1.2 2004-04-28 22:44:59 adam Exp $ -->
+<!-- $Id: yaz-client-man.xml,v 1.3 2004-09-22 19:22:24 adam Exp $ -->
 <refentry id="yaz-client">
  
  <refmeta>
@@ -47,8 +47,7 @@
     <varlistentry>
      <term>-m <replaceable>filename</replaceable></term>
      <listitem><para>
-       If specified, retrieved MARC (ISO2709) records will
-       be appended to the file given.
+       If specified, retrieved records will be appended to the file given.
       </para></listitem>
     </varlistentry>
     <varlistentry>
