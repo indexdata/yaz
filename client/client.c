@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.241 2004-04-28 22:44:58 adam Exp $
+ * $Id: client.c,v 1.242 2004-05-03 09:00:29 adam Exp $
  */
 
 #include <stdio.h>
@@ -1264,7 +1264,6 @@ static int send_searchRequest(const char *arg)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
     Z_Query query;
-    int oid[OID_SIZE];
     struct ccl_rpn_node *rpn = NULL;
     int error, pos;
     char setstring[100];
@@ -1333,13 +1332,9 @@ static int send_searchRequest(const char *arg)
     if (smallSetUpperBound > 0 || (largeSetLowerBound > 1 &&
         mediumSetPresentNumber > 0))
     {
-        oident prefsyn;
-
-        prefsyn.proto = protocol;
-        prefsyn.oclass = CLASS_RECSYN;
-        prefsyn.value = recordsyntax;
         req->preferredRecordSyntax =
-            odr_oiddup(out, oid_ent_to_oid(&prefsyn, oid));
+            yaz_oidval_to_z3950oid(out, CLASS_RECSYN, recordsyntax);
+
         req->smallSetElementSetNames =
             req->mediumSetElementSetNames = elementSetNames;
     }
@@ -1963,8 +1958,6 @@ static int cmd_update_common(const char *arg, int version)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *r;
-    int oid[OID_SIZE];
-    oident update_oid;
     char action[20], recid[20], fname[80];
     int action_no;
     Z_External *record_this = 0;
@@ -2025,21 +2018,17 @@ static int cmd_update_common(const char *arg, int version)
         record_this = record_last;
     }
 
-    update_oid.proto = PROTO_Z3950;
-    update_oid.oclass = CLASS_EXTSERV;
-    if (version == 0)
-	update_oid.value = VAL_DBUPDATE0;
-    else
-	update_oid.value = VAL_DBUPDATE;
-    oid_ent_to_oid (&update_oid, oid);
-    req->packageType = odr_oiddup(out,oid);
+    req->packageType =
+	yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
+			       version == 0 ? VAL_DBUPDATE0 : VAL_DBUPDATE);
+
     req->packageName = esPackageName;
     
     req->referenceId = set_refid (out);
 
     r = req->taskSpecificParameters = (Z_External *)
         odr_malloc (out, sizeof(*r));
-    r->direct_reference = odr_oiddup(out,oid);
+    r->direct_reference = req->packageType;
     r->indirect_reference = 0;
     r->descriptor = 0;
     if (version == 0)
@@ -2343,9 +2332,7 @@ static int send_presentRequest(const char *arg)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
     Z_RecordComposition compo;
-    oident prefsyn;
     int nos = 1;
-    int oid[OID_SIZE];
     char setstring[100];
 
     req->referenceId = set_refid (out);
@@ -2356,20 +2343,12 @@ static int send_presentRequest(const char *arg)
 
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
-    prefsyn.proto = protocol;
-    prefsyn.oclass = CLASS_RECSYN;
-    prefsyn.value = recordsyntax;
+
     req->preferredRecordSyntax =
-        odr_oiddup (out, oid_ent_to_oid(&prefsyn, oid));
+        yaz_oidval_to_z3950oid(out, CLASS_RECSYN, recordsyntax);
 
     if (record_schema)
     {
-        oident prefschema;
-
-        prefschema.proto = protocol;
-        prefschema.oclass = CLASS_SCHEMA;
-        prefschema.value = oid_getvalbyname(record_schema);
-
         req->recordComposition = &compo;
         compo.which = Z_RecordComp_complex;
         compo.u.complex = (Z_CompSpec *)
@@ -2381,14 +2360,15 @@ static int send_presentRequest(const char *arg)
         compo.u.complex->generic = (Z_Specification *)
             odr_malloc(out, sizeof(*compo.u.complex->generic));
         compo.u.complex->generic->which = Z_Schema_oid;
-        compo.u.complex->generic->schema.oid = (Odr_oid *)
-            odr_oiddup(out, oid_ent_to_oid(&prefschema, oid));
+
+        compo.u.complex->generic->schema.oid =
+	    yaz_str_to_z3950oid(out, CLASS_SCHEMA, record_schema);
+
         if (!compo.u.complex->generic->schema.oid)
         {
             /* OID wasn't a schema! Try record syntax instead. */
-            prefschema.oclass = CLASS_RECSYN;
             compo.u.complex->generic->schema.oid = (Odr_oid *)
-                odr_oiddup(out, oid_ent_to_oid(&prefschema, oid));
+		yaz_str_to_z3950oid(out, CLASS_RECSYN, record_schema);
         }
         if (!elementSetNames)
             compo.u.complex->generic->elementSpec = 0;
@@ -2552,13 +2532,11 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
-    int oid[OID_SIZE];
     
     if (only_z3950())
 	return 0;
     if (queryType == QueryType_CCL2RPN)
     {
-        oident bib1;
         int error, pos;
         struct ccl_rpn_node *rpn;
 
@@ -2568,10 +2546,8 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
             return -1;
         }
-        bib1.proto = PROTO_Z3950;
-        bib1.oclass = CLASS_ATTSET;
-        bib1.value = VAL_BIB1;
-        req->attributeSet = oid_ent_to_oid (&bib1, oid);
+        req->attributeSet =
+	    yaz_oidval_to_z3950oid(out, CLASS_ATTSET, VAL_BIB1);
         if (!(req->termListAndStartPoint = ccl_scan_query (out, rpn)))
         {
             printf("Couldn't convert CCL to Scan term\n");
@@ -2900,10 +2876,7 @@ int cmd_refid (const char *arg)
     xfree (refid);
     refid = NULL;
     if (*arg)
-    {
-        refid = (char *) xmalloc (strlen(arg)+1);
-        strcpy (refid, arg);
-    }
+        refid = xstrdup (arg);
     return 1;
 }
 
@@ -3013,10 +2986,7 @@ int cmd_lang(const char* arg)
     xfree (yazLang);
     yazLang = NULL;
     if (*arg)
-    {
-        yazLang = (char *) xmalloc (strlen(arg)+1);
-        strcpy (yazLang, arg);
-    } 
+        yazLang = xstrdup(arg);
     return 1;
 }
 
@@ -3208,7 +3178,7 @@ int cmd_register_oid(const char* args) {
     
     if (sscanf (args, "%100[^ ] %100[^ ] %100s",
                 oname_str,oclass_str, oid_str) < 1) {
-        printf("Error in regristrate command \n");
+        printf("Error in register command \n");
         return 0;
     }
     
@@ -3221,7 +3191,7 @@ int cmd_register_oid(const char* args) {
     }
     
     if(!(oid_classes[i].className)) {
-        printf("Unknonwn oid class %s\n",oclass_str);
+        printf("Unknown oid class %s\n",oclass_str);
         return 0;
     }
     
@@ -3244,9 +3214,11 @@ int cmd_register_oid(const char* args) {
     oid[i] = val;
     oid[i+1] = -1;
     
-    new_oident=oid_addent (oid,PROTO_GENERAL,oidclass,oname_str,VAL_DYNAMIC);  
-    if(strcmp(new_oident->desc,oname_str)) {
-        fprintf(stderr,"oid is already named as %s, regristration faild\n",
+    new_oident = oid_addent (oid, PROTO_GENERAL, oidclass, oname_str,
+			     VAL_DYNAMIC);  
+    if(strcmp(new_oident->desc,oname_str))
+    {
+        fprintf(stderr,"oid is already named as %s, registration failed\n",
                 new_oident->desc);
     }
     return 1;  
@@ -3631,19 +3603,21 @@ int cmd_cclparse(const char* arg)
 
 int cmd_set_otherinfo(const char* args)
 {
-    char oid[101], otherinfoString[101];
+    char oidstr[101], otherinfoString[101];
     int otherinfoNo;
     int sscan_res;
     int oidval;
     
-    sscan_res = sscanf (args, "%d %100[^ ] %100s", &otherinfoNo, oid, otherinfoString);
-    if(sscan_res==1) {
+    sscan_res = sscanf (args, "%d %100[^ ] %100s", &otherinfoNo, oidstr, otherinfoString);
+    if (sscan_res==1) {
         /* reset this otherinfo */
         if(otherinfoNo>=maxOtherInfosSupported) {
-            printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
+            printf("Error otherinfo index to large (%d>%d)\n",
+		   otherinfoNo,maxOtherInfosSupported);
         }
         extraOtherInfos[otherinfoNo].oidval = -1;
-        if(extraOtherInfos[otherinfoNo].value) free(extraOtherInfos[otherinfoNo].value);	 		
+        if (extraOtherInfos[otherinfoNo].value)
+	    free(extraOtherInfos[otherinfoNo].value);	 		
         return 0;
     }
     if (sscan_res<3) {
@@ -3651,13 +3625,14 @@ int cmd_set_otherinfo(const char* args)
         return 0;
     }
     
-    if(otherinfoNo>=maxOtherInfosSupported) {
-        printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
+    if (otherinfoNo>=maxOtherInfosSupported) {
+        printf("Error otherinfo index to large (%d>%d)\n",
+	       otherinfoNo,maxOtherInfosSupported);
     }
     
-    oidval = oid_getvalbyname (oid);
-    if(oidval == -1 ) {
-        printf("Error in set_otherinfo command unknown oid %s \n",oid);
+    oidval = oid_getvalbyname (oidstr);
+    if (oidval == -1 ) {
+        printf("Error in set_otherinfo command unknown oid %s \n",oidstr);
         return 0;
     }
     extraOtherInfos[otherinfoNo].oidval = oidval;
