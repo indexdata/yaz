@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.38 2002-05-18 09:52:37 oleg Exp $
+# $Id: makefile,v 1.39 2002-05-31 08:48:06 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
 
 default: all
 
@@ -835,7 +835,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.38  2002-05-18 09:52:37  oleg
+# Revision 1.39  2002-05-31 08:48:06  adam
+# Changed SectionIns for NSIS v1.98
+#
+# Revision 1.38  2002/05/18 09:52:37  oleg
 # Added support of CharacterSetandLanguageNegotiation-3
 # modele (based on Z_PrivateCharacterSet_externallySpecified) at the client
 # side.

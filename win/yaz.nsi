@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.6 2002-03-25 15:12:25 adam Exp $
+; $Id: yaz.nsi,v 1.7 2002-05-31 08:48:06 adam Exp $
 
 !define VERSION "1.8.7"
 
@@ -53,7 +53,7 @@ Section "" ; (default section)
 SectionEnd ; end of default section
 
 Section "YAZ Runtime"
-	SectionIn 12
+	SectionIn 1 2
 	IfFileExists "$INSTDIR\bin\yaz-ztest.exe" 0 Noservice
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
 Noservice:
@@ -73,7 +73,7 @@ Noservice:
 SectionEnd
 
 Section "YAZ Development"
-	SectionIn 12
+	SectionIn 1 2
 	SetOutPath $INSTDIR\include\yaz
 	File ..\include\yaz\*.h
 	SetOutPath $INSTDIR\lib
@@ -81,7 +81,7 @@ Section "YAZ Development"
 SectionEnd
 
 Section "YAZ Documentation"
-	SectionIn 12
+	SectionIn 1 2
 	SetOutPath $INSTDIR
 	File /r ..\doc
 	SetOutPath $SMPROGRAMS\YAZ
