@@ -6,7 +6,10 @@
  * d1_if.c : A simple interface for extracting strings from data1_node tree structures
  *
  * $Log: d1_if.c,v $
- * Revision 1.2  2000-01-04 17:46:17  ian
+ * Revision 1.3  2000-01-06 11:27:02  adam
+ * Minor fix so that this source compiles using Visual C++.
+ *
+ * Revision 1.2  2000/01/04 17:46:17  ian
  * Added function to count occurences of a tag spec in a data1 tree.
  *
  * Revision 1.1  1999/12/21 14:16:19  ian
@@ -104,6 +107,7 @@ char *data1_getNodeValue(data1_node* node, char* pTagPath)
 }
 
 
+#define MAX_TAG_SIZE 50
 /* 
  * data1_LookupNode : Try and find a node as specified by a tagpath
  */
@@ -122,7 +126,7 @@ data1_node *data1_LookupNode(data1_node* node, char* pTagPath)
     char* pCurrCharInPath = pTagPath;
 
     /* Work buffer */
-    char Buffer[iMaxTagSize];
+    char Buffer[MAX_TAG_SIZE];
 
     /* The tag type of this node */
     int iTagType = 0;
@@ -131,7 +135,7 @@ data1_node *data1_LookupNode(data1_node* node, char* pTagPath)
     int iTagValue = 0;
 
     /* for string tags, the tag value */
-    char StringTagVal[iMaxTagSize];
+    char StringTagVal[MAX_TAG_SIZE];
 
     /* Which occurence of that tag under this node */
     int iOccurences=0;
