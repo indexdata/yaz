@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed bug in Explain for Category TargetInfo.
+
 Added support for GNU readline in client. Thanks to Jacob Poulsen
 <ja7@dbc.dk>. GNU configure attempts to detect if readline is available.
 
