@@ -38,8 +38,8 @@ cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 /usr/bin/yaz-comp
 /usr/lib/libyaz.a
 /usr/lib/libyaz.so
-/usr/lib/libyaz.so.0
-/usr/lib/libyaz.so.0.0.0
+/usr/lib/libyaz.so.1
+/usr/lib/libyaz.so.1.0.0
 /usr/include/yaz
 /usr/share/yaz/doc
 /usr/share/aclocal/yaz.m4
