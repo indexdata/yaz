@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.53  1996-10-09 15:54:55  quinn
+ * Revision 1.54  1996-11-11 13:14:46  adam
+ * Fixed tagging bug in z_ProximityOperator.
+ *
+ * Revision 1.53  1996/10/09 15:54:55  quinn
  * Added SearchInfoReport
  *
  * Revision 1.52  1996/10/08  12:56:57  adam
@@ -645,7 +648,7 @@ int z_ProximityOperator(ODR o, Z_ProximityOperator **p, int opt)
     static Odr_arm arm[] =
     {
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ProxCode_known, odr_integer},
-    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ProxCode_private, odr_integer},
+    	{ODR_IMPLICIT, ODR_CONTEXT, 2, Z_ProxCode_private, odr_integer},
     	{-1, -1, -1, -1, 0}
     };
 
