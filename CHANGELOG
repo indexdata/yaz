@@ -4,7 +4,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 Function Z3950_resultset_record(s) returns references to records
 "owned" by resultset. To become owner use Z3950_record_dup.
 
-Function z_ext_record handles Extended Services.
+Function z_ext_record handles Extended Services. Thanks to
+Irina Dijour.
 
 --- 1.8.2 2001/11/12
 
