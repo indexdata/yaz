@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.16  1997-10-06 08:55:07  adam
+ * Revision 1.17  1997-12-09 16:11:02  adam
+ * Assume strerror is defined on Unixes as well. It's standard ANSI.
+ *
+ * Revision 1.16  1997/10/06 08:55:07  adam
  * Changed log_init so that previous (if any) is closed.
  *
  * Revision 1.15  1997/09/29 07:13:13  adam
@@ -93,6 +96,19 @@
 #include <time.h>
 #include <log.h>
 
+#define HAS_STRERROR 1
+
+#if HAS_STRERROR
+
+#else
+char *strerror(int n)
+{
+        extern char *sys_errlist[];
+        return sys_errlist[n];
+}
+
+#endif
+
 static int l_level = LOG_DEFAULT_LEVEL;
 static FILE *l_file = NULL;
 static char l_prefix[512] = "log";
@@ -111,18 +127,6 @@ static struct {
     { 0,         "none" },
     { 0, NULL }
 };  
-
-
-#ifndef strerror
-#ifndef WINDOWS
-char *strerror(int n)
-{
-        extern char *sys_errlist[];
-        return sys_errlist[n];
-}
-
-#endif
-#endif
 
 FILE *log_file(void)
 {
