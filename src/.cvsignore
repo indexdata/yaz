@@ -1,0 +1,13 @@
+Makefile.in
+Makefile
+.deps
+.libs
+*.o
+*.lo
+*.la
+zes-*.c
+z-*.c
+item-req.c
+ill-core.c
+marc8.c
+cql.c

@@ -1,4 +1,4 @@
-YAZ toolkit - $Id: README,v 1.43 2003-02-20 21:23:47 adam Exp $
+YAZ toolkit - $Id: README,v 1.44 2003-10-27 12:21:21 adam Exp $
 
 Copyright (C) 1995-2003, Index Data ApS.
 See the file LICENSE for details.
@@ -24,52 +24,18 @@ File organisation:
 
 doc      Documentation.
 
-util     Various little utility functions. Logging, memory debugging,
-	 primitive ISO 2709 presentation for the yaz-client, etc. You'll
-	 find the ASN.1 Compiler for YAZ here as well (yaz-comp).
+src      Source for the YAZ library.
 
-odr      Open Data Representation. This module implements the BER
- 	 encoding rules.
-
-z39.50   codecs for the Z39.50 protocol. This module does the same job
-         as the old 'asn' module except that the source files are
-         auto-generated using an YAZ' ASN.1 Compiler (yaz-comp).
-
-zutil    This module implements a collection of Z39.50 and SRW utilities,
-	 such as query parsing, etc.
-
-ill      Codecs for the ISO ILL protocol.
-
-comstack This module implements the transport transparency
-	 stack (COMSTACK). The comstack implements a generic interface
-	 for exchanging BER-encoded records over a network. It supports
-	 the 'American' mode of exchanging the records straight over
-	 TCP/IP, and uses Peter Furniss' XTIMOSI package over RFC1006.
-	 Look for documentation in the file comstack.man.
-
-zoom     An implementation of Mike Taylors Z39.50 Object Oriented
-         Model : ZOOM. If you'd like to build Z39.50 client applications
-         in C this may be good start. You'll find example programs in 
-         this directory too.
-
-server   This is the implementation of the Z39.50 server frontend. It
-	 provides event-handling and server managament functions,
-	 and calls the backend primitives (best documentation of these
-	 is in the file include/yaz/backend.h).
-
-ccl      CCL parser.
-
-cql      CQL parser.
+util     Utility programs, ASN.1 compiler, MARC dump utility, and others.
 
 client   A demonstration client for testing the protocol. It's bug'n
          ugly. But, it supports many features.
 
 ztest    A demonstration server that implements a backend.
 
-include/yaz The various header files.
+etc      Various configuration files.
 
-lib      The libraries. Primarily libyaz.la. The makefile gathers the
-         libraries from previous modules into libyaz.la.
+include/yaz The various header files.
 
 To get more information or assistance, send mail to yaz-help@indexdata.dk.
 Even better, sign on to the YAZ mailing list here:

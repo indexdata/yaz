@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.17 2003-02-18 10:37:08 adam Exp $
+# $Id: yaz-config.in,v 1.18 2003-10-27 12:21:21 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -100,16 +100,16 @@ fi
 
 if test "$yaz_echo_source" = "yes"; then
     YAZBIN=${yaz_build_root}/bin
-    YAZLIB="-L${yaz_build_root}/lib/.libs $lyaz $yazextralibs"
-    YAZLALIB="${yaz_build_root}/lib/libyaz.la $yazextralibs"
+    YAZLIB="-L${yaz_build_root}/src/.libs $lyaz $yazextralibs"
+    YAZLALIB="${yaz_build_root}/src/libyaz.la $yazextralibs"
     if test "$lib_ssl" = "yes" -a -n "$SSL_LIBS@"; then
-        YAZLALIB="${yaz_build_root}/lib/libyazssl.la"
+        YAZLALIB="${yaz_build_root}/src/libyazssl.la"
     fi
     if test "$lib_thread" = "yes" -a -n "@CFLAGSTHREADS@"; then
-        YAZLALIB="${yaz_build_root}/lib/libyazthread.la $YAZLALIB"
+        YAZLALIB="${yaz_build_root}/src/libyazthread.la $YAZLALIB"
     fi
     if test "$lib_malloc" = "yes"; then
-        YAZLALIB="${yaz_build_root}/lib/libyazmalloc.la $YAZLALIB"
+        YAZLALIB="${yaz_build_root}/src/libyazmalloc.la $YAZLALIB"
     fi
     YAZINC="-I${yaz_src_root}/include"
     YAZCOMP=${yaz_src_root}/util/yaz-comp

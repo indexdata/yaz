@@ -2,6 +2,18 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Major restructure of YAZ source. All source in libyaz is in src directory.
+Programs in client (yaz-client), ztest (yaz-ztest), zoom (zoom programs),
+util (utility programs such as ASN.1 compiler, yaz-marcdump). 
+
+Added man page for utility yaz-marcdump (used to be called marcdump).
+yaz-marcdump is installed by 'make install'.
+
+Fixed a memory leak in Generic Frontend Server that occurred when decoding
+of incoming package failed.
+
+Fixed a potential DOS attack vulnerability in COMSTACK/ODR.
+
 Change prototype of odr_perror: add const to message string.
 
 New function yaz_log_reopen which reopens log file (for log rotate, etc.)
@@ -14,7 +26,7 @@ assuming that blocking=1 or 0 is used.
 
 Fix bad reference in UNIX comstack in function cs_addrstr.
 
-Fix for AIX compile.
+Fix for compilation on AIX.
 
 The generic front-end server (server/seshigh.c) now supports returning
 Init diagnostics to the client in User-information-field, in

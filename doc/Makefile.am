@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.48 2003-10-02 19:47:41 adam Exp $
+## $Id: Makefile.am,v 1.49 2003-10-27 12:21:24 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -24,9 +24,11 @@ HTMLFILES = \
  zoom.records.html zoom.resultsets.html zoom.scan.html
 
 MANFILES=yaz-client.1 yaz-client-ssl.1 yaz-ztest.8 \
-	yaz-ztest-ssl.8 yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1
-REFFILES=yaz-client.sgml yaz-ztest.sgml yaz-config.sgml \
-	yaz-man.sgml zoomsh.sgml yaz-asncomp.sgml
+	yaz-ztest-ssl.8 yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
+	yaz-marcdump.1
+REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
+	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
+	yaz-marcdump-man.xml
 
 SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
 	apilayer.obj
@@ -37,20 +39,20 @@ man_MANS = $(MANFILES)
 EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 	$(doc_DATA) Doxyfile
 
-yaz-client.1: $(srcdir)/yaz-client.sgml $(srcdir)/yaz-client-commands.xml
-	docbook2man $(srcdir)/yaz-client.sgml
+yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
+	docbook2man $(srcdir)/yaz-client-man.xml
 
-yaz-ztest.8: yaz-ztest.sgml ztest-options.xml
-	docbook2man $(srcdir)/yaz-ztest.sgml
+yaz-ztest.8: yaz-ztest-man.xml ztest-options.xml
+	docbook2man $(srcdir)/yaz-ztest-man.xml
 
-yaz-config.8: yaz-config.sgml
-	docbook2man $(srcdir)/yaz-config.sgml
+yaz-config.8: yaz-config-man.xml
+	docbook2man $(srcdir)/yaz-config-man.xml
 
-yaz.7: yaz-man.sgml
-	docbook2man $(srcdir)/yaz-man.sgml
+yaz.7: yaz-man.xml
+	docbook2man $(srcdir)/yaz-man.xml
 
-zoomsh.1: zoomsh.sgml
-	docbook2man $(srcdir)/zoomsh.sgml
+zoomsh.1: zoomsh-man.xml
+	docbook2man $(srcdir)/zoomsh-man.xml
 
 yaz-ztest-ssl.8: 
 	ln -s yaz-ztest.8 yaz-ztest-ssl.8
@@ -58,8 +60,11 @@ yaz-ztest-ssl.8:
 yaz-client-ssl.1:
 	ln -s yaz-client.1 yaz-client-ssl.1
 
-yaz-asncomp.1: yaz-asncomp.sgml
-	docbook2man $(srcdir)/yaz-asncomp.sgml
+yaz-asncomp.1: yaz-asncomp-man.xml
+	docbook2man $(srcdir)/yaz-asncomp-man.xml
+
+yaz-marcdump.1: yaz-marcdump-man.xml
+	docbook2man $(srcdir)/yaz-marcdump-man.xml
 
 $(HTMLFILES): $(XMLFILES)  
 	jade -E14 -D $(srcdir) -d yazhtml.dsl -t sgml $(srcdir)/xml.dcl yaz.xml

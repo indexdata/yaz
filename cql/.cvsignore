@@ -1,9 +1,0 @@
-.deps
-.libs
-Makefile
-Makefile.in
-*.lo
-*.la
-cql.c
-cql2pqf
-cql2xcql

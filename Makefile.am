@@ -1,10 +1,10 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.22 2003-05-06 12:07:33 adam Exp $
+## $Id: Makefile.am,v 1.23 2003-10-27 12:21:21 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
-SUBDIRS = util odr comstack z39.50 ill zutil ccl cql server include lib client ztest zoom doc etc
+SUBDIRS = src include test util client ztest zoom doc etc
 
 aclocaldir=$(datadir)/aclocal
 

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.14 2003-02-18 10:37:08 adam Exp $
+## $Id: Makefile.am,v 1.15 2003-10-27 12:21:45 adam Exp $
 
 if ISSSL
 sslbin=yaz-ztest-ssl
@@ -12,13 +12,13 @@ yaz_ztest_ssl_SOURCES=$(yaz_ztest_SOURCES)
 EXTRA_DIST=dummy-records dummy-words dummy-grs
 
 if ISTHR
-extra=../lib/libyazthread.la
+extra=../src/libyazthread.la
 endif
 
-yaz_ztest_LDADD=$(extra) ../lib/libyaz.la \
+yaz_ztest_LDADD=$(extra) ../src/libyaz.la \
  $(LIBTHREAD)
 
-yaz_ztest_ssl_LDADD=$(extra) ../lib/libyazssl.la ../lib/libyaz.la \
+yaz_ztest_ssl_LDADD=$(extra) ../src/libyazssl.la ../src/libyaz.la \
  $(SSL_LIBS) $(LIBTHREAD)
 
 AM_CFLAGS=@CFLAGSTHREADS@
