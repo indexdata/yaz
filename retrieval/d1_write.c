@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_write.c,v 1.16 2002-07-29 20:04:08 adam Exp $
+ * $Id: d1_write.c,v 1.17 2002-08-23 14:25:07 adam Exp $
  */
 
 #include <string.h>
@@ -42,17 +42,18 @@ static void wrbuf_write_cdata(WRBUF b, const char *msg, int len)
         case '"':
             wrbuf_puts (b, "&quot;");
             break;
+        case '\'':
+            wrbuf_puts (b, "&apos;");
+            break;
         case '>':
             wrbuf_puts (b, "&gt;");
             break;
         case '<':
             wrbuf_puts (b, "&lt;");
             break;
-#if 0
         case '&':
             wrbuf_puts (b, "&amp;");
             break;
-#endif
         default:
             wrbuf_putc(b, msg[i]);
         }
