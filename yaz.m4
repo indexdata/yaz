@@ -1,4 +1,4 @@
-## $Id: yaz.m4,v 1.3 2001-03-26 14:42:37 adam Exp $
+## $Id: yaz.m4,v 1.4 2002-11-27 00:53:02 adam Exp $
 ## 
 # Use this m4 funciton for autoconf if you use YAZ in your own
 # configure script.
@@ -21,7 +21,7 @@ AC_DEFUN([YAZ_INIT],
 		else
 			yazsrcdir=$srcdir
 		fi
-		for i in ${yazsrcdir}/../yaz* ${yazsrcdir}/../yaz; do
+		for i in ${yazsrcdir}/../yaz* ${yazsrcdir}/../yaz ../yaz* ../yaz; do
 			if test -d $i; then
 				if test -r $i/yaz-config; then
 					yazconfig=$i/yaz-config
