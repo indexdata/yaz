@@ -1,15 +1,15 @@
-; $Id: yaz.nsi,v 1.2 2002-03-15 19:44:16 adam Exp $
+; $Id: yaz.nsi,v 1.3 2002-03-16 12:48:47 adam Exp $
 
 !define VERSION "1.8.6"
 
 Name "YAZ"
-Caption "Index Data YAZ Setup"
+Caption "Index Data YAZ ${VERSION} Setup"
 OutFile "yaz_${VERSION}.exe"
 
 LicenseText "You must read the following license before installing:"
 LicenseData license.txt
 
-ComponentText "This will install the YAZ Toolkit v${VERSION} on your computer:"
+ComponentText "This will install the YAZ Toolkit on your computer:"
 InstType "Full (w/ Source)"
 InstType "Lite (w/o Source)"
 
@@ -30,7 +30,7 @@ Section "" ; (default section)
 	SetOutPath "$INSTDIR"
 	; add files / whatever that need to be installed here.
 	WriteRegStr HKLM "SOFTWARE\Index Data\YAZ" "" "$INSTDIR"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YAZ" "DisplayName" "YAZ (remove only)"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YAZ" "DisplayName" "YAZ ${VERSION} (remove only)"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YAZ" "UninstallString" '"$INSTDIR\uninst.exe"'
 	; write out uninstaller
 	WriteUninstaller "$INSTDIR\uninst.exe"
@@ -55,8 +55,13 @@ Section "yaz core (required)"
                  "$INSTDIR"
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
                  "$INSTDIR\bin\yaz-client.exe"
- 	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Server.lnk" \
-                 "$INSTDIR\bin\yaz-ztest.exe" -w"$INSTDIR\ztest"
+	SetOutPath $SMPROGRAMS\YAZ\Server
+ 	CreateShortCut "$SMPROGRAMS\YAZ\Server\Server on console on port 9999.lnk" \
+                 "$INSTDIR\bin\yaz-ztest.exe" '-w"$INSTDIR\ztest"'
+  	CreateShortCut "$SMPROGRAMS\YAZ\Server\Install Z39.50 service on port 210.lnk" \
+                  "$INSTDIR\bin\yaz-ztest.exe" '-installa tcp:@:210'
+ 	CreateShortCut "$SMPROGRAMS\YAZ\Server\Remove Z39.50 service.lnk" \
+                 "$INSTDIR\bin\yaz-ztest.exe" '-remove'
 	WriteINIStr "$SMPROGRAMS\YAZ\YAZ Home page.url" \
               "InternetShortcut" "URL" "http://www.indexdata.dk/yaz/"
 SectionEnd
@@ -120,7 +125,7 @@ Section "yaz source"
 SectionEnd
 
 ; begin uninstall settings/section
-UninstallText "This will uninstall YAZ from your system"
+UninstallText "This will uninstall YAZ ${VERSION} from your system"
 
 Section Uninstall
 ; add delete commands to delete whatever files/registry keys/etc you installed here.
@@ -128,9 +133,7 @@ Section Uninstall
 	DeleteRegKey HKLM "SOFTWARE\Index Data\YAZ"
 	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\YAZ"
 	RMDir /r "$INSTDIR"
-  	Delete $SMPROGRAMS\YAZ\*.lnk
-  	Delete $SMPROGRAMS\YAZ\*.url
-	RMDir $SMPROGRAMS\YAZ
+	RMDir /r $SMPROGRAMS\YAZ
 SectionEnd ; end of uninstall section
 
 ; eof
