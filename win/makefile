@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.90 2005-01-16 22:12:02 adam Exp $
+# $Id: makefile,v 1.91 2005-01-16 23:20:55 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -173,6 +173,7 @@ COMMON_C_OPTIONS=          \
   /D "_WINDOWS"            \
   /D "WIN32"               \
   /DHAVE_SYS_STAT_H=1      \
+  /DHAVE_SYS_TYPES_H=1     \
   /FR"$(OBJDIR)\\"         \
   /Fo"$(OBJDIR)\\"         \
   /Fd"$(OBJDIR)\\" 
