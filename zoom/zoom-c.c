@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.35 2002-07-03 13:36:55 adam Exp $
+ * $Id: zoom-c.c,v 1.36 2002-07-11 10:39:05 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -634,6 +634,39 @@ int z3950_connection_mask(ZOOM_connection c)
     return 0;
 }
 
+static void otherInfo_attach (ZOOM_connection c, Z_APDU *a, ODR out)
+{
+    int i;
+    for (i = 0; i<200; i++)
+    {
+        size_t len;
+	Z_OtherInformation **oi;
+        char buf[20];
+        const char *val;
+        const char *cp;
+        int oidval;
+
+        sprintf (buf, "otherInfo%d", i);
+        val = ZOOM_options_get (c->options, buf);
+        if (!val)
+            break;
+        cp = strchr (val, ':');
+        if (!cp)
+            continue;
+        len = cp - val;
+        if (len >= sizeof(buf))
+            len = sizeof(buf)-1;
+        memcpy (buf, val, len);
+        buf[len] = '\0';
+        oidval = oid_getvalbyname (buf);
+        if (oidval == VAL_NONE)
+            continue;
+        
+	yaz_oi_APDU(a, &oi);
+	yaz_oi_set_string_oidval(oi, out, oidval, 1, cp+1);
+    }
+}
+
 static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 {
     assert (a);
@@ -649,6 +682,7 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 	yaz_oi_APDU(a, &oi);
 	yaz_oi_set_string_oidval(oi, out, VAL_CLIENT_IP, 1, c->client_IP);
     }
+    otherInfo_attach (c, a, out);
     if (!z_APDU(out, &a, 0, 0))
     {
 	FILE *outf = fopen("/tmp/apdu.txt", "a");
@@ -775,13 +809,14 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     	
     	if ((oi_unit = yaz_oi_update(oi, c->odr_out, NULL, 0, 0)))
     	{
-    		ODR_MASK_SET(ireq->options, Z_Options_negotiationModel);
-    		
-    		oi_unit->which = Z_OtherInfo_externallyDefinedInfo;
-    		oi_unit->information.externallyDefinedInfo =
-    			yaz_set_proposal_charneg(c->odr_out,
-    				(const char **)&c->charset, (c->charset) ? 1:0,
-    				(const char **)&c->lang, (c->lang) ? 1:0, 1);
+            ODR_MASK_SET(ireq->options, Z_Options_negotiationModel);
+            
+            oi_unit->which = Z_OtherInfo_externallyDefinedInfo;
+            oi_unit->information.externallyDefinedInfo =
+                yaz_set_proposal_charneg
+                (c->odr_out,
+                 (const char **)&c->charset, (c->charset) ? 1:0,
+                 (const char **)&c->lang, (c->lang) ? 1:0, 1);
     	}
     }
     assert (apdu);
