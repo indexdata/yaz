@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.40 2001-02-21 09:03:34 adam Exp $
+dnl $Id: configure.in,v 1.41 2001-03-20 15:58:23 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -140,15 +140,17 @@ fi
 AM_CONDITIONAL(ISTHR, test $HAVETHREADS = "1")
 dnl ------ Using this for "in-source" yaz-config
 AC_SUBST(YAZ_SRC_ROOT)
-YAZ_SRC_ROOT=`pwd`
+AC_SUBST(YAZ_BUILD_ROOT)
+YAZ_SRC_ROOT=`cd ${srcdir}; pwd`
+YAZ_BUILD_ROOT=`pwd`
+dnl
+if test -f ${srcdir}/lib/yaz-config.in; then
+	rm ${srcdir}/lib/yaz-config.in
+fi
+sed s%yaz_echo_source=yes%yaz_echo_source=no%g < ${srcdir}/yaz-config.in >${srcdir}/lib/yaz-config.in
 dnl
 SUBDIRS_VAR="util odr $ASNMODULE $ILLMODULE zutil comstack ccl tab retrieval server include lib client ztest"
 AC_SUBST(SUBDIRS_VAR)
-if test -f lib/yaz-config.in; then
-	rm lib/yaz-config.in
-fi
-sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config.in >lib/yaz-config.in
-dnl
 dnl ------ Makefiles
 dnl
 AC_OUTPUT([
