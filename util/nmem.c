@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.21  2000-02-29 13:44:55  adam
+ * Revision 1.22  2000-05-03 22:00:00  adam
+ * Reference counter (if multiple modules are init/freeing nmem).
+ *
+ * Revision 1.21  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.20  2000/01/06 14:59:13  adam
@@ -370,33 +373,37 @@ void nmem_critical_leave (void)
 
 void nmem_init (void)
 {
-    nmem_init_flag = 1;
+    if (++nmem_init_flag == 1)
+    {
 #ifdef WIN32
-    InitializeCriticalSection(&critical_section);
+	InitializeCriticalSection(&critical_section);
 #endif
-    nmem_active_no = 0;
-    freelist = NULL;
-    cfreelist = NULL;
+	nmem_active_no = 0;
+	freelist = NULL;
+	cfreelist = NULL;
+    }
 }
 
 void nmem_exit (void)
 {
-    while (freelist)
+    if (--nmem_init_flag == 0)
     {
-	struct nmem_block *fl = freelist;
-	freelist = freelist->next;
-	xfree (fl->buf);
-	xfree (fl);
-    }
-    while (cfreelist)
-    {
-	struct nmem_control *cfl = cfreelist;
-	cfreelist = cfreelist->next;
-	xfree (cfl);
-    }
-    nmem_init_flag = 0;
+	while (freelist)
+	{
+	    struct nmem_block *fl = freelist;
+	    freelist = freelist->next;
+	    xfree (fl->buf);
+	    xfree (fl);
+	}
+	while (cfreelist)
+	{
+	    struct nmem_control *cfl = cfreelist;
+	    cfreelist = cfreelist->next;
+	    xfree (cfl);
+	}
 #ifdef WIN32
-    DeleteCriticalSection(&critical_section);
+	DeleteCriticalSection(&critical_section);
 #endif
+    }
 }
 
