@@ -62,7 +62,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
- $(OutDir)\$(TargetName).dll $(ProjDir)\..\bin
+  $(OutDir)\$(TargetName).dll $(ProjDir)\..\bin
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
@@ -99,7 +99,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
- $(OutDir)\$(TargetName).dll $(ProjDir)\..\bin
+  $(OutDir)\$(TargetName).dll $(ProjDir)\..\bin
 # End Special Build Tool
 
 !ENDIF 
@@ -266,6 +266,10 @@ SOURCE=.\odr\dumpber.c
 # Begin Source File
 
 SOURCE=.\util\log.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\util\logrpn.c
 # End Source File
 # Begin Source File
 
