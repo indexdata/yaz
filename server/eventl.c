@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: eventl.c,v 1.37 2003-02-18 11:59:14 adam Exp $
+ * $Id: eventl.c,v 1.38 2003-02-20 15:13:28 adam Exp $
  */
 
 #include <stdio.h>
@@ -69,7 +69,7 @@ int event_loop(IOCHAN *iochans)
 	FD_ZERO(&out);
 	FD_ZERO(&except);
 	to.tv_sec = 3600;
-	to.tv_usec = 1;
+	to.tv_usec = 0;
 	max = 0;
     	for (p = *iochans; p; p = p->next)
     	{
