@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: oid.c,v $
- * Revision 1.47  2001-09-24 21:51:55  adam
+ * Revision 1.48  2001-09-27 12:09:18  adam
+ * Function nmem_exit calls oid_exit (when reference is 0).
+ *
+ * Revision 1.47  2001/09/24 21:51:55  adam
  * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
  * and yaz_z3950oid_to_str.
  *
@@ -612,10 +615,13 @@ void oid_init (void)
 
 void oid_exit (void)
 {
-    oid_init_flag = 0;
-    nmem_mutex_destroy (&oid_mutex);
-    nmem_destroy (oid_nmem);
-    oid_nmem = 0;
+    if (oid_init_flag)
+    {
+        oid_init_flag = 0;
+        nmem_mutex_destroy (&oid_mutex);
+        nmem_destroy (oid_nmem);
+        oid_nmem = 0;
+    }
 }
 
 static struct oident *oid_getentbyoid_x(int *o)

@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.25 2001-09-24 21:51:56 adam Exp $
+# $Id: makefile,v 1.26 2001-09-27 12:09:18 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
 
 NEW_Z3950=1  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
@@ -709,7 +709,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.25  2001-09-24 21:51:56  adam
+# Revision 1.26  2001-09-27 12:09:18  adam
+# Function nmem_exit calls oid_exit (when reference is 0).
+#
+# Revision 1.25  2001/09/24 21:51:56  adam
 # New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
 # and yaz_z3950oid_to_str.
 #

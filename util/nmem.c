@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.26  2001-07-19 19:51:42  adam
+ * Revision 1.27  2001-09-27 12:09:18  adam
+ * Function nmem_exit calls oid_exit (when reference is 0).
+ *
+ * Revision 1.26  2001/07/19 19:51:42  adam
  * Added typecasts to make C++ happy.
  *
  * Revision 1.25  2001/06/26 14:11:27  adam
@@ -104,6 +107,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/log.h>
+#include <yaz/oid.h>
 #ifdef WIN32
 #include <windows.h>
 #elif _REENTRANT
@@ -465,6 +469,7 @@ void nmem_exit (void)
 {
     if (--nmem_init_flag == 0)
     {
+        oid_exit();
 	while (freelist)
 	{
 	    struct nmem_block *fl = freelist;
