@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.5  1995-05-29 08:10:47  quinn
+ * Revision 1.6  1995-05-31 08:29:21  quinn
+ * Nothing significant.
+ *
+ * Revision 1.5  1995/05/29  08:10:47  quinn
  * Moved oid.c to util.
  *
  * Revision 1.4  1995/05/22  15:30:13  adam
@@ -39,7 +42,6 @@
 #endif
 
 #include <proto.h>
-#include <oid.h>
 
 #include <marcdisp.h>
 
@@ -100,9 +102,8 @@ static void send_initRequest()
     ODR_MASK_SET(req->options, Z_Options_search);
     ODR_MASK_SET(req->options, Z_Options_present);
 
-    ODR_MASK_SET(req->protocolVersion, 0);
-    ODR_MASK_SET(req->protocolVersion, 1);
-    ODR_MASK_SET(req->protocolVersion, 2);
+    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
+    ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
 
     req->idAuthentication = auth;
 

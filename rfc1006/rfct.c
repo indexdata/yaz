@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.4  1995-05-18 13:02:07  quinn
+ * Revision 1.5  1995-05-31 08:29:35  quinn
+ * Nothing significant.
+ *
+ * Revision 1.4  1995/05/18  13:02:07  quinn
  * Smallish.
  *
  * Revision 1.3  1995/05/16  09:37:18  quinn
@@ -252,7 +255,7 @@ int t_open(char *name, int oflag, struct t_info *info)
     	cnt->oci[i] = -1;
 
     /*
-     * RFC1006 sets a higher than standard default max TPDU size, but the
+     * RFC1006 sets a higher than standard (TP) default max TPDU size, but the
      * Isode seems to like to negotiate it down. We'll keep it here to be
      * safe. Note that there's no harm in jumping it up. If it's higher
      * than 2048, t_connect won't try to negotiate.
