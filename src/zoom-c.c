@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.27 2004-04-28 22:44:59 adam Exp $
+ * $Id: zoom-c.c,v 1.28 2004-04-30 12:43:32 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -807,7 +807,8 @@ static zoom_ret do_connect (ZOOM_connection c)
 
     yaz_log (LOG_DEBUG, "do_connect host=%s", effective_host);
 
-    assert (!c->cs);
+    if (c->cs)
+	cs_close(c->cs);
     c->cs = cs_create_host (effective_host, 0, &add);
 
     if (c->cs && c->cs->protocol == PROTO_HTTP)
@@ -1000,7 +1001,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.27 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.28 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
