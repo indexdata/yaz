@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.24  1998-06-29 07:59:17  adam
+ * Revision 1.25  1998-07-07 15:49:23  adam
+ * Added braces to avoid warning.
+ *
+ * Revision 1.24  1998/06/29 07:59:17  adam
  * Minor fix.
  *
  * Revision 1.23  1998/06/23 15:37:50  adam
@@ -560,6 +563,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
                 return -1;
         if ((res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0)) < 0)
+	{
 #ifdef WINDOWS
             if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
@@ -572,6 +576,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 break;
             else
                 return -1;
+	}
         if (!res)
             return 0;
         hasread += res;

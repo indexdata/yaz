@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.9  1998-02-11 11:53:33  adam
+ * Revision 1.10  1998-07-07 15:49:40  adam
+ * Added braces to avoid warning.
+ *
+ * Revision 1.9  1998/02/11 11:53:33  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.8  1997/09/29 08:56:38  adam
@@ -211,6 +214,7 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
 	return NULL;
     for (q = cclp->bibset->list; q; q = q->next)
         if (strlen(q->name) == len)
+        {
             if (cclp->ccl_case_sensitive)
             {
                 if (!memcmp (name, q->name, len))
@@ -221,6 +225,7 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
                 if (!ccl_memicmp (name, q->name, len))
                     return q->attr_list;
             }
+        }
     return NULL;
 }
 

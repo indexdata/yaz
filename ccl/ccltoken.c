@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.9  1998-02-11 11:53:33  adam
+ * Revision 1.10  1998-07-07 15:49:41  adam
+ * Added braces to avoid warning.
+ *
+ * Revision 1.9  1998/02/11 11:53:33  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.8  1997/09/29 08:56:38  adam
@@ -121,6 +124,7 @@ static int token_cmp (CCL_parser cclp, const char *kw, struct ccl_token *token)
     while ((cp2 = strchr (cp1, ' ')))
     {
         if (token->len == (size_t) (cp2-cp1))
+        {
             if (cclp->ccl_case_sensitive)
             {
                 if (!memcmp (cp1, token->name, token->len))
@@ -131,6 +135,7 @@ static int token_cmp (CCL_parser cclp, const char *kw, struct ccl_token *token)
                 if (!ccl_memicmp (cp1, token->name, token->len))
                     return 1;
             }
+        }
 	cp1 = cp2+1;
     }
     if (cclp->ccl_case_sensitive)
