@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.11  1997-11-06 11:36:44  adam
+ * Revision 1.12  1999-04-23 13:34:33  adam
+ * Fixed bug in match_triple. Thanks to Franck Falcoz <franck@dtv.dk>.
+ *
+ * Revision 1.11  1997/11/06 11:36:44  adam
  * Implemented variant match on simple elements -data1 tree and Espec-1.
  *
  * Revision 1.10  1997/10/02 12:10:24  quinn
@@ -129,7 +132,8 @@ static void match_triple (data1_handle dh, Z_Variant *vreq,
 {
     data1_node **c;
 
-    n = n->child;
+    if (!(n = n->child))
+        return;
     if (n->which != DATA1N_variant)
 	return;
     c = &n->child;
