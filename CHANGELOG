@@ -2,7 +2,18 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.5 2002/XX/XX
 
+Function ZOOM_record_get now returns const char pointer rather than
+void pointer. It saves a lot of type casts.
+
+For YAZ client, command "auth" now allows you to set authentication
+in IdPass style. It is enabled when three tokens are given - order
+is user, group and password.
+
 Fix memory leaks in MARC record handling for ZOOM.
+
+New option for YAZ client, -k <kilobytes> that sets
+maximum record size. Similar to -k option for generic frontend
+server and yaz-ztest.
 
 More fixes for scan. Non-zero stepSize handled. OID's fixes.
 
@@ -19,8 +30,8 @@ specified. Patch provided by Morten Bøgeskov.
 
 New option for YAZ client, -u <auth>, that sets authentication.
 
-ZOOM fix: error information only cleared for Bib-diagnostics (not
-fatal errors, like connection failed, etc).
+ZOOM fix: error information was sometimes "missing", since error
+was cleared/reset too when it shouldn't.
 
 ZOOM_record_get returns ISO2709 buffer when "raw" is given.
 

@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.10 2002-01-03 12:18:37 adam Exp $
+ * $Id: zoom.h,v 1.11 2002-01-28 09:27:48 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -132,7 +132,7 @@ ZOOM_record ZOOM_resultset_record_immediate (ZOOM_resultset s, size_t pos);
 
 /* get record information, in a form given by type */
 ZOOM_EXPORT
-void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len);
+const char *ZOOM_record_get (ZOOM_record rec, const char *type, int *len);
 
 /* destroy record */
 ZOOM_EXPORT
@@ -165,7 +165,7 @@ ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c, const char *startterm);
 
 ZOOM_EXPORT
 const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
-                               int *occ, size_t *len);
+                               int *occ, int *len);
 
 ZOOM_EXPORT
 size_t ZOOM_scanset_size(ZOOM_scanset scan);

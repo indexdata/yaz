@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-opt.c,v 1.3 2002-01-03 12:18:38 adam Exp $
+ * $Id: zoom-opt.c,v 1.4 2002-01-28 09:27:48 adam Exp $
  *
  * ZOOM layer for C, options handling
  */
@@ -16,7 +16,7 @@ ZOOM_options ZOOM_options_create (void)
 
 ZOOM_options ZOOM_options_create_with_parent (ZOOM_options parent)
 {
-    ZOOM_options opt = xmalloc (sizeof(*opt));
+    ZOOM_options opt = (ZOOM_options) xmalloc (sizeof(*opt));
 
     opt->refcount = 1;
     opt->callback_func = 0;
@@ -85,7 +85,7 @@ void ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
 	}
 	e = &(*e)->next;
     }
-    *e = xmalloc (sizeof(**e));
+    *e = (struct ZOOM_options_entry *) xmalloc (sizeof(**e));
     (*e)->name = xstrdup (name);
     (*e)->value = xstrdup (value);
     (*e)->next = 0;

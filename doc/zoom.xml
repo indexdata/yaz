@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.16 2002-01-03 12:18:37 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.17 2002-01-28 09:27:48 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -404,8 +404,8 @@
                                   size_t start, size_t count);
      ZOOM_record ZOOM_resultset_record (ZOOM_resultset s, size_t pos);
 
-     void *ZOOM_record_get (ZOOM_record rec, const char *type,
-                            size_t *len);
+     const char *ZOOM_record_get (ZOOM_record rec, const char *type,
+                                  size_t *len);
 
      ZOOM_record ZOOM_record_clone (ZOOM_record rec);
 
@@ -452,27 +452,32 @@
     <variablelist>
      <varlistentry><term><literal>database</literal></term>
       <listitem><para>Database of record is returned
-        as a C null-terminated string. Return type <literal>char *</literal>. 
+        as a C null-terminated string. Return type
+        <literal>const char *</literal>. 
        </para></listitem>
       </varlistentry>
      <varlistentry><term><literal>syntax</literal></term>
       <listitem><para>The transfer syntax (OID) of the record is returned
-        as a C null-terminated string. Return type <literal>char *</literal>. 
+        as a C null-terminated string. Return type is
+        <literal>const char *</literal>. 
        </para></listitem>
       </varlistentry>
      <varlistentry><term><literal>render</literal></term>
       <listitem><para>The record is returned in a display friendly
         format. Upon completion buffer is returned
-        (type <literal>char *</literal>) and length is stored in
+        (type <literal>const char *</literal>) and length is stored in
         <literal>*len</literal>.
        </para></listitem>
       </varlistentry>
      <varlistentry><term><literal>raw</literal></term>
       <listitem><para>The record is returned in the internal
-        YAZ specific format. The raw data is returned as type 
+        YAZ specific format. For GRS-1, Explain, and others, t
+        he raw data is returned as type 
         <literal>Z_External *</literal> which is just the type for
         the member <literal>retrievalRecord</literal> in
         type <literal>NamePlusRecord</literal>.
+        For SUTRS and octet aligned record (including all MARCs) the
+        octet buffer is returned and the length of the buffer.
        </para></listitem>
       </varlistentry>
     </variablelist>

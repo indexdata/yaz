@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.22 2002-01-24 19:33:09 adam Exp $
+ * $Id: zoom-c.c,v 1.23 2002-01-28 09:27:48 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -18,7 +18,7 @@
 
 static ZOOM_Event ZOOM_Event_create (int kind)
 {
-    ZOOM_Event event = xmalloc (sizeof(*event));
+    ZOOM_Event event = (ZOOM_Event) xmalloc (sizeof(*event));
     event->kind = kind;
     event->next = 0;
     event->prev = 0;
@@ -89,7 +89,7 @@ ZOOM_task ZOOM_connection_add_task (ZOOM_connection c, int which)
     ZOOM_task *taskp = &c->tasks;
     while (*taskp)
 	taskp = &(*taskp)->next;
-    *taskp = xmalloc (sizeof(**taskp));
+    *taskp = (ZOOM_task) xmalloc (sizeof(**taskp));
     (*taskp)->running = 0;
     (*taskp)->which = which;
     (*taskp)->next = 0;
@@ -136,7 +136,7 @@ static ZOOM_record record_cache_lookup (ZOOM_resultset r,
 
 ZOOM_connection ZOOM_connection_create (ZOOM_options options)
 {
-    ZOOM_connection c = xmalloc (sizeof(*c));
+    ZOOM_connection c = (ZOOM_connection) xmalloc (sizeof(*c));
 
     c->cs = 0;
     c->mask = 0;
@@ -197,7 +197,8 @@ static char **set_DatabaseNames (ZOOM_connection con, ZOOM_options options,
     }
     else
 	cp = "Default";
-    databaseNames = odr_malloc (con->odr_out, no * sizeof(*databaseNames));
+    databaseNames = (char**)
+        odr_malloc (con->odr_out, no * sizeof(*databaseNames));
     no = 0;
     while (*cp)
     {
@@ -211,7 +212,7 @@ static char **set_DatabaseNames (ZOOM_connection con, ZOOM_options options,
 	}
 	/* cp ptr to first char of db name, c is char
 	   following db name */
-	databaseNames[no] = odr_malloc (con->odr_out, 1+c-cp);
+	databaseNames[no] = (char*) odr_malloc (con->odr_out, 1+c-cp);
 	memcpy (databaseNames[no], cp, c-cp);
 	databaseNames[no++][c-cp] = '\0';
 	cp = c;
@@ -269,7 +270,7 @@ void ZOOM_connection_connect(ZOOM_connection c,
 
 ZOOM_query ZOOM_query_create(void)
 {
-    ZOOM_query s = xmalloc (sizeof(*s));
+    ZOOM_query s = (ZOOM_query) xmalloc (sizeof(*s));
 
     s->refcount = 1;
     s->query = 0;
@@ -295,7 +296,7 @@ void ZOOM_query_destroy(ZOOM_query s)
 
 int ZOOM_query_prefix(ZOOM_query s, const char *str)
 {
-    s->query = odr_malloc (s->odr, sizeof(*s->query));
+    s->query = (Z_Query *) odr_malloc (s->odr, sizeof(*s->query));
     s->query->which = Z_Query_type_1;
     s->query->u.type_1 =  p_query_rpn(s->odr, PROTO_Z3950, str);
     if (!s->query->u.type_1)
@@ -340,7 +341,7 @@ void ZOOM_resultset_addref (ZOOM_resultset r)
 }
 ZOOM_resultset ZOOM_resultset_create ()
 {
-    ZOOM_resultset r = xmalloc (sizeof(*r));
+    ZOOM_resultset r = (ZOOM_resultset) xmalloc (sizeof(*r));
 
     r->refcount = 1;
     r->size = 0;
@@ -599,7 +600,8 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     const char *impname;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_initRequest);
     Z_InitRequest *ireq = apdu->u.initRequest;
-    Z_IdAuthentication *auth = odr_malloc(c->odr_out, sizeof(*auth));
+    Z_IdAuthentication *auth = (Z_IdAuthentication *)
+        odr_malloc(c->odr_out, sizeof(*auth));
     const char *auth_groupId = ZOOM_options_get (c->options, "group");
     const char *auth_userId = ZOOM_options_get (c->options, "user");
     const char *auth_password = ZOOM_options_get (c->options, "pass");
@@ -617,7 +619,7 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     
     impname = ZOOM_options_get (c->options, "implementationName");
     ireq->implementationName =
-	odr_malloc (c->odr_out, 15 + (impname ? strlen(impname) : 0));
+	(char *) odr_malloc (c->odr_out, 15 + (impname ? strlen(impname) : 0));
     strcpy (ireq->implementationName, "");
     if (impname)
     {
@@ -633,26 +635,29 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     
     if (auth_groupId || auth_password)
     {
-	Z_IdPass *pass = odr_malloc(c->odr_out, sizeof(*pass));
+	Z_IdPass *pass = (Z_IdPass *) odr_malloc(c->odr_out, sizeof(*pass));
 	int i = 0;
 	pass->groupId = 0;
 	if (auth_groupId && *auth_groupId)
 	{
-	    pass->groupId = odr_malloc(c->odr_out, strlen(auth_groupId)+1);
+	    pass->groupId = (char *)
+                odr_malloc(c->odr_out, strlen(auth_groupId)+1);
 	    strcpy(pass->groupId, auth_groupId);
 	    i++;
 	}
 	pass->userId = 0;
 	if (auth_userId && *auth_userId)
 	{
-	    pass->userId = odr_malloc(c->odr_out, strlen(auth_userId)+1);
+	    pass->userId = (char *)
+                odr_malloc(c->odr_out, strlen(auth_userId)+1);
 	    strcpy(pass->userId, auth_userId);
 	    i++;
 	}
 	pass->password = 0;
 	if (auth_password && *auth_password)
 	{
-	    pass->password = odr_malloc(c->odr_out, strlen(auth_password)+1);
+	    pass->password = (char *)
+                odr_malloc(c->odr_out, strlen(auth_password)+1);
 	    strcpy(pass->password, auth_password);
 	    i++;
 	}
@@ -666,7 +671,8 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     else if (auth_userId)
     {
 	auth->which = Z_IdAuthentication_open;
-	auth->u.open = odr_malloc(c->odr_out, strlen(auth_userId)+1);
+	auth->u.open = (char *)
+            odr_malloc(c->odr_out, strlen(auth_userId)+1);
 	strcpy(auth->u.open, auth_userId);
 	ireq->idAuthentication = auth;
     }
@@ -751,7 +757,8 @@ static int ZOOM_connection_send_search (ZOOM_connection c)
     }
     if (smallSetElementSetName && *smallSetElementSetName)
     {
-	Z_ElementSetNames *esn = odr_malloc (c->odr_out, sizeof(*esn));
+	Z_ElementSetNames *esn = (Z_ElementSetNames *)
+            odr_malloc (c->odr_out, sizeof(*esn));
 	
 	esn->which = Z_ElementSetNames_generic;
 	esn->u.generic = odr_strdup (c->odr_out, smallSetElementSetName);
@@ -759,7 +766,8 @@ static int ZOOM_connection_send_search (ZOOM_connection c)
     }
     if (mediumSetElementSetName && *mediumSetElementSetName)
     {
-	Z_ElementSetNames *esn = odr_malloc (c->odr_out, sizeof(*esn));
+	Z_ElementSetNames *esn = (Z_ElementSetNames *)
+            odr_malloc (c->odr_out, sizeof(*esn));
 	
 	esn->which = Z_ElementSetNames_generic;
 	esn->u.generic = odr_strdup (c->odr_out, mediumSetElementSetName);
@@ -840,7 +848,7 @@ ZOOM_record ZOOM_record_clone (ZOOM_record srec)
 	return 0;
     buf = odr_getbuf (odr_enc, &size, 0);
     
-    nrec = xmalloc (sizeof(*nrec));
+    nrec = (ZOOM_record) xmalloc (sizeof(*nrec));
     nrec->odr = odr_createmem(ODR_DECODE);
     nrec->wrbuf_marc = 0;
     odr_setbuf (nrec->odr, buf, size, 0);
@@ -871,7 +879,7 @@ void ZOOM_record_destroy (ZOOM_record rec)
     xfree (rec);
 }
 
-void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len)
+const char *ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 {
     Z_NamePlusRecord *npr;
     if (!rec)
@@ -904,7 +912,7 @@ void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len)
 	    if (r->which == Z_External_sutrs)
 	    {
 		*len = r->u.sutrs->len;
-		return r->u.sutrs->buf;
+		return (const char *) r->u.sutrs->buf;
 	    }
 	    else if (r->which == Z_External_octet)
 	    {
@@ -921,8 +929,9 @@ void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len)
 		    if (!rec->wrbuf_marc)
 			rec->wrbuf_marc = wrbuf_alloc();
                     wrbuf_rewind (rec->wrbuf_marc);
-		    if (marc_display_wrbuf (r->u.octet_aligned->buf,
-					rec->wrbuf_marc, 0,
+		    if (marc_display_wrbuf ((const char *)
+                                            r->u.octet_aligned->buf,
+                                            rec->wrbuf_marc, 0,
 					    r->u.octet_aligned->len) > 0)
 		    {
 			*len = wrbuf_len(rec->wrbuf_marc);
@@ -930,7 +939,7 @@ void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len)
 		    }
 		}
 		*len = r->u.octet_aligned->len;
-		return r->u.octet_aligned->buf;
+		return (const char *) r->u.octet_aligned->buf;
 	    }
 	    else if (r->which == Z_External_grs1)
 	    {
@@ -949,17 +958,17 @@ void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len)
 	    if (r->which == Z_External_sutrs)
 	    {
 		*len = r->u.sutrs->len;
-		return r->u.sutrs->buf;
+		return (const char *) r->u.sutrs->buf;
 	    }
 	    else if (r->which == Z_External_octet)
 	    {
 		*len = r->u.octet_aligned->len;
-		return r->u.octet_aligned->buf;
+		return (const char *) r->u.octet_aligned->buf;
 	    }
 	    else /* grs-1, explain, ... */
 	    {
 		*len = -1;
-                return (Z_External *) npr->u.databaseRecord;
+                return (const char *) npr->u.databaseRecord;
 	    }
 	}
 	return 0;
@@ -989,7 +998,7 @@ static void record_cache_add (ZOOM_resultset r,
 	    }
 	}
     }
-    rc = odr_malloc (r->odr, sizeof(*rc));
+    rc = (ZOOM_record_cache) odr_malloc (r->odr, sizeof(*rc));
     rc->rec.npr = npr; 
     rc->rec.odr = 0;
     rc->rec.wrbuf_marc = 0;
@@ -1234,7 +1243,8 @@ static int send_present (ZOOM_connection c)
 
     if (schema && *schema)
     {
-	Z_RecordComposition *compo = odr_malloc (c->odr_out, sizeof(*compo));
+	Z_RecordComposition *compo = (Z_RecordComposition *)
+            odr_malloc (c->odr_out, sizeof(*compo));
 
         req->recordComposition = compo;
         compo->which = Z_RecordComp_complex;
@@ -1275,8 +1285,10 @@ static int send_present (ZOOM_connection c)
     }
     else if (element && *element)
     {
-	Z_ElementSetNames *esn = odr_malloc (c->odr_out, sizeof(*esn));
-	Z_RecordComposition *compo = odr_malloc (c->odr_out, sizeof(*compo));
+	Z_ElementSetNames *esn = (Z_ElementSetNames *)
+            odr_malloc (c->odr_out, sizeof(*esn));
+	Z_RecordComposition *compo = (Z_RecordComposition *)
+            odr_malloc (c->odr_out, sizeof(*compo));
 	
 	esn->which = Z_ElementSetNames_generic;
 	esn->u.generic = odr_strdup (c->odr_out, element);
@@ -1291,7 +1303,7 @@ static int send_present (ZOOM_connection c)
 
 ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c, const char *start)
 {
-    ZOOM_scanset scan = xmalloc (sizeof(*scan));
+    ZOOM_scanset scan = (ZOOM_scanset) xmalloc (sizeof(*scan));
 
     scan->connection = c;
     scan->odr = odr_createmem (ODR_DECODE);
@@ -1370,7 +1382,7 @@ size_t ZOOM_scanset_size (ZOOM_scanset scan)
 }
 
 const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
-                               int *occ, size_t *len)
+                               int *occ, int *len)
 {
     const char *term = 0;
     size_t noent = ZOOM_scanset_size (scan);
@@ -1386,7 +1398,7 @@ const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
         
         if (t->term->which == Z_Term_general)
         {
-            term = t->term->u.general->buf;
+            term = (const char *) t->term->u.general->buf;
             *len = t->term->u.general->len;
         }
         *occ = t->globalOccurrences ? *t->globalOccurrences : 0;
