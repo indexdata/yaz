@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.58  1998-01-07 13:51:45  adam
+ * Revision 1.59  1998-01-29 13:17:56  adam
+ * Added sort.
+ *
+ * Revision 1.58  1998/01/07 13:51:45  adam
  * Minor change.
  *
  * Revision 1.57  1998/01/07 12:58:22  adam
@@ -281,6 +284,7 @@ static void send_initRequest()
     ODR_MASK_SET(req->options, Z_Options_namedResultSets);
     ODR_MASK_SET(req->options, Z_Options_triggerResourceCtrl);
     ODR_MASK_SET(req->options, Z_Options_scan);
+    ODR_MASK_SET(req->options, Z_Options_sort);
 
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
@@ -866,14 +870,16 @@ static int send_presentRequest(char *arg)
     }
     if (*arg)
         setno = atoi(arg);
-
-    if (setnumber >= 0)
+    if (p && (p=strchr(p+1, '+')))
+    {
+        strcpy (setstring, p+1);
+        req->resultSetId = setstring;
+    }
+    else if (setnumber >= 0)
     {
         sprintf(setstring, "%d", setnumber);
         req->resultSetId = setstring;
     }
-
-
 #if 0
     if (1)
     {
@@ -985,6 +991,122 @@ int send_scanrequest(char *string, int pp, int num)
     return 2;
 }
 
+int send_sortrequest(char *arg, int newset)
+{
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_sortRequest);
+    Z_SortRequest *req = apdu->u.sortRequest;
+    Z_SortKeySpecList *sksl = odr_malloc (out, sizeof(*sksl));
+    char setstring[32];
+    char sort_string[32], sort_flags[32];
+    int off;
+    int oid[OID_SIZE];
+    oident bib1;
+
+    if (setnumber >= 0)
+	sprintf (setstring, "%d", setnumber);
+    else
+	sprintf (setstring, "default");
+
+    req->inputResultSetNames =
+	odr_malloc (out, sizeof(*req->inputResultSetNames));
+    req->inputResultSetNames->num_strings = 1;
+    req->inputResultSetNames->strings =
+	odr_malloc (out, sizeof(*req->inputResultSetNames->strings));
+    req->inputResultSetNames->strings[0] =
+	odr_malloc (out, strlen(setstring)+1);
+    strcpy (req->inputResultSetNames->strings[0], setstring);
+
+    if (newset && setnumber >= 0)
+	sprintf (setstring, "%d", ++setnumber);
+
+    req->sortedResultSetName = odr_malloc (out, strlen(setstring)+1);
+    strcpy (req->sortedResultSetName, setstring);
+
+    req->sortSequence = sksl;
+    sksl->num_specs = 0;
+    sksl->specs = odr_malloc (out, sizeof(sksl->specs) * 20);
+    
+    bib1.proto = protocol;
+    bib1.oclass = CLASS_ATTSET;
+    bib1.value = VAL_BIB1;
+    while ((sscanf (arg, "%31s %31s%n", sort_string, sort_flags, &off)) == 2)
+    {
+	int i;
+	char *sort_string_sep;
+	Z_SortKeySpec *sks = odr_malloc (out, sizeof(*sks));
+	Z_SortKey *sk = odr_malloc (out, sizeof(*sk));
+
+	arg += off;
+	sksl->specs[sksl->num_specs++] = sks;
+	sks->sortElement = odr_malloc (out, sizeof(*sks->sortElement));
+	sks->sortElement->which = Z_SortElement_generic;
+	sks->sortElement->u.generic = sk;
+	
+	if ((sort_string_sep = strchr (sort_string, '=')))
+	{
+	    Z_AttributeElement *el = odr_malloc (out, sizeof(*el));
+	    sk->which = Z_SortKey_sortAttributes;
+	    sk->u.sortAttributes =
+		odr_malloc (out, sizeof(*sk->u.sortAttributes));
+	    sk->u.sortAttributes->id = oid_ent_to_oid(&bib1, oid);
+	    sk->u.sortAttributes->list =
+		odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
+	    sk->u.sortAttributes->list->num_attributes = 1;
+	    sk->u.sortAttributes->list->attributes =
+		odr_malloc (out,
+			    sizeof(*sk->u.sortAttributes->list->attributes));
+	    sk->u.sortAttributes->list->attributes[0] = el;
+	    el->attributeSet = 0;
+	    el->attributeType = odr_malloc (out, sizeof(*el->attributeType));
+	    *el->attributeType = atoi (sort_string);
+	    el->which = Z_AttributeValue_numeric;
+	    el->value.numeric = odr_malloc (out, sizeof(*el->value.numeric));
+	    *el->value.numeric = atoi (sort_string_sep + 1);
+	}
+	else
+	{
+	    sk->which = Z_SortKey_sortField;
+	    sk->u.sortField = odr_malloc (out, strlen(sort_string)+1);
+	    strcpy (sk->u.sortField, sort_string);
+	}
+	sks->sortRelation = odr_malloc (out, sizeof(*sks->sortRelation));
+	*sks->sortRelation = Z_SortRelation_ascending;
+	sks->caseSensitivity = odr_malloc (out, sizeof(*sks->caseSensitivity));
+	*sks->caseSensitivity = Z_SortCase_caseSensitive;
+
+	sks->missingValueAction = NULL;
+
+	for (i = 0; sort_flags[i]; i++)
+	{
+	    switch (sort_flags[i])
+	    {
+	    case 'a':
+	    case 'A':
+	    case '>':
+		*sks->sortRelation = Z_SortRelation_ascending;
+		break;
+	    case 'd':
+	    case 'D':
+	    case '<':
+		*sks->sortRelation = Z_SortRelation_descending;
+		break;
+	    case 'i':
+	    case 'I':
+		*sks->caseSensitivity = Z_SortCase_caseInsensitive;
+		break;
+	    case 'S':
+	    case 's':
+		*sks->caseSensitivity = Z_SortCase_caseSensitive;
+		break;
+	    }
+	}
+    }
+    if (!sksl->num_specs)
+	return 0;
+    send_apdu(apdu);
+    return 2;
+}
+
 void display_term(Z_TermInfo *t)
 {
     if (t->term->which == Z_Term_general)
@@ -1024,6 +1146,57 @@ void process_scanResponse(Z_ScanResponse *res)
     else
         display_diagrecs(&res->entries->
 			 u.nonSurrogateDiagnostics->diagRecs[0], 1);
+}
+
+void process_sortResponse(Z_SortResponse *res)
+{
+    printf("Sort: status=");
+    switch (*res->sortStatus)
+    {
+    case Z_SortStatus_success:
+	printf ("success"); break;
+    case Z_SortStatus_partial_1:
+	printf ("partial"); break;
+    case Z_SortStatus_failure:
+	printf ("failure"); break;
+    default:
+	printf ("unknown (%d)", *res->sortStatus);
+    }
+    printf ("\n");
+    if (res->diagnostics)
+        display_diagrecs(res->diagnostics->diagRecs,
+			 res->diagnostics->num_diagRecs);
+}
+
+int cmd_sort_generic(char *arg, int newset)
+{
+    if (!session)
+    {
+        printf("Session not initialized yet\n");
+        return 0;
+    }
+    if (!ODR_MASK_GET(session->options, Z_Options_sort))
+    {
+        printf("Target doesn't support sort\n");
+        return 0;
+    }
+    if (*arg)
+    {
+        if (send_sortrequest(arg, newset) < 0)
+            return 0;
+	return 2;
+    }
+    return 0;
+}
+
+int cmd_sort(char *arg)
+{
+    return cmd_sort_generic (arg, 0);
+}
+
+int cmd_sort_newset (char *arg)
+{
+    return cmd_sort_generic (arg, 1);
 }
 
 int cmd_scan(char *arg)
@@ -1172,8 +1345,10 @@ static int client(int wait)
         {"quit", cmd_quit, ""},
         {"find", cmd_find, "<query>"},
         {"base", cmd_base, "<base-name>"},
-        {"show", cmd_show, "<rec#>['+'<#recs>]"},
+        {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]"},
         {"scan", cmd_scan, "<term>"},
+	{"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ..."},
+	{"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ..."},
         {"authentication", cmd_authentication, "<acctstring>"},
         {"lslb", cmd_lslb, "<largeSetLowerBound>"},
         {"ssub", cmd_ssub, "<smallSetUpperBound>"},
@@ -1200,7 +1375,7 @@ static int client(int wait)
         fd_set input;
 #endif
         char line[1024], word[1024], arg[1024];
-
+	
 #ifdef USE_SELECT
         FD_ZERO(&input);
         FD_SET(0, &input);
@@ -1217,13 +1392,13 @@ static int client(int wait)
 #else
 	if (!wait)
 #endif
-        {
+	    {
             /* quick & dirty way to get a command line. */
-	    char *end_p;
-            if (!fgets(line, 1023, stdin))
-                break;
-	    if ((end_p = strchr (line, '\n')))
-		*end_p = '\0';
+		char *end_p;
+		if (!fgets(line, 1023, stdin))
+		    break;
+		if ((end_p = strchr (line, '\n')))
+		    *end_p = '\0';
             if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
             {
                 strcpy(word, last_cmd);
@@ -1289,32 +1464,34 @@ static int client(int wait)
 #endif
                 switch(apdu->which)
                 {
-                    case Z_APDU_initResponse:
-                        process_initResponse(apdu->u.initResponse);
-                        break;
-                    case Z_APDU_searchResponse:
-                        process_searchResponse(apdu->u.searchResponse);
-                        break;
-                    case Z_APDU_scanResponse:
-                        process_scanResponse(apdu->u.scanResponse);
-                        break;
-                    case Z_APDU_presentResponse:
-                        printf("Received presentResponse.\n");
-                        setno +=
-                            *apdu->u.presentResponse->numberOfRecordsReturned;
-                        if (apdu->u.presentResponse->records)
-                            display_records(apdu->u.presentResponse->records);
-                        else
-                            printf("No records.\n");
-                        break;
-                    case Z_APDU_close:
-                        printf("Target has closed the association.\n");
-                        process_close(apdu->u.close);
-                        break;
-                    default:
-                        printf("Received unknown APDU type (%d).\n", 
-                            apdu->which);
-                        exit(1);
+		case Z_APDU_initResponse:
+		    process_initResponse(apdu->u.initResponse);
+		    break;
+		case Z_APDU_searchResponse:
+		    process_searchResponse(apdu->u.searchResponse);
+		    break;
+		case Z_APDU_scanResponse:
+		    process_scanResponse(apdu->u.scanResponse);
+		    break;
+		case Z_APDU_presentResponse:
+		    setno +=
+			*apdu->u.presentResponse->numberOfRecordsReturned;
+		    if (apdu->u.presentResponse->records)
+			display_records(apdu->u.presentResponse->records);
+		    else
+			printf("No records.\n");
+		    break;
+		case Z_APDU_sortResponse:
+		    process_sortResponse(apdu->u.sortResponse);
+		    break;
+		case Z_APDU_close:
+		    printf("Target has closed the association.\n");
+		    process_close(apdu->u.close);
+		    break;
+		default:
+		    printf("Received unknown APDU type (%d).\n", 
+			   apdu->which);
+		    exit(1);
                 }
                 printf(C_PROMPT);
                 fflush(stdout);
