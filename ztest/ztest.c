@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.64 2004-05-10 10:46:42 adam Exp $
+ * $Id: ztest.c,v 1.65 2004-09-30 21:54:22 adam Exp $
  */
 
 /*
@@ -489,12 +489,20 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         fread (r->record, size, 1, f);
         fclose (f);
     }
-    else if (r->request_format == VAL_TEXT_XML &&
-             (cp = dummy_xml_record (r->number, r->stream)))
+    else if (r->request_format == VAL_TEXT_XML)
     {
-        r->len = strlen(cp);
-        r->record = cp;
-        r->output_format = VAL_TEXT_XML;
+	if ((cp = dummy_xml_record (r->number, r->stream)))
+	{
+	    r->len = strlen(cp);
+	    r->record = cp;
+	    r->output_format = VAL_TEXT_XML;
+	}
+	else 
+	{
+	    r->errcode = 14;
+	    r->surrogate_flag = 1;
+	    return 0;
+	}
     }
     else if ((cp = dummy_marc_record(r->number, r->stream)))
     {
