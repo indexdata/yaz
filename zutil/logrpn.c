@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2001, Index Data
+ * Copyright (C) 1995-2003, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.10 2003-02-12 15:06:44 adam Exp $
+ * $Id: logrpn.c,v 1.11 2003-02-27 19:56:00 adam Exp $
  */
 #include <stdio.h>
 
@@ -142,6 +142,9 @@ static void attrStr (int type, int value, enum oid_value ast, char *str)
                 break;
             case 103:
                 sprintf (str, "truncation=re-2");
+                break;
+            case 104:
+                sprintf (str, "truncation=CCL");
                 break;
             default:
                 sprintf (str, "truncation");
