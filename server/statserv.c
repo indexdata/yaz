@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.13  1995-03-30 16:08:39  quinn
+ * Revision 1.14  1995-03-31 09:18:58  quinn
+ * Added logging.
+ *
+ * Revision 1.13  1995/03/30  16:08:39  quinn
  * Little mods.
  *
  * Revision 1.12  1995/03/30  13:29:02  quinn
@@ -98,12 +101,12 @@ static void listener(IOCHAN h, int event)
 
 	    if (pipe(hand) < 0)
 	    {
-		perror("pipe");
+		logf(LOG_FATAL|LOG_ERRNO, "pipe");
 		exit(1);
 	    }
 	    if ((res = fork()) < 0)
 	    {
-		perror("fork");
+		logf(LOG_FATAL|LOG_ERRNO, "fork");
 		exit(1);
 	    }
 	    else if (res == 0) /* child */
@@ -122,20 +125,20 @@ static void listener(IOCHAN h, int event)
 		    
 		    if ((res = read(hand[0], dummy, 1)) < 0 && errno != EINTR)
 		    {
-			perror("handshake read");
+			logf(LOG_FATAL|LOG_ERRNO, "handshake read");
 			exit(1);
 		    }
 		    else if (res >= 0)
 		    	break;
 		}
-		fprintf(stderr, "P: Child has taken the call\n");
+		logf(LOG_DEBUG, "P: Child has taken the call");
 		close(hand[0]);
 		return;
 	    }
 	}
 	if ((res = cs_listen(line, 0, 0)) < 0)
 	{
-	    fprintf(stderr, "cs_listen failed.\n");
+	    logf(LOG_FATAL, "cs_listen failed.");
 	    return;
 	}
 	else if (res == 1)
@@ -151,7 +154,7 @@ static void listener(IOCHAN h, int event)
 
 	if (!(new_line = cs_accept(line)))
 	{
-	    fprintf(stderr, "Accept failed.\n");
+	    logf(LOG_FATAL, "Accept failed.");
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
 	    return;
 	}
@@ -166,9 +169,8 @@ static void listener(IOCHAN h, int event)
 		iochan_destroy(pp);
 	    }
 	    /* release dad */
-	    fprintf(stderr, "Releasing parent\n");
+	    logf(LOG_DEBUG, "Releasing parent");
 	    close(hand[1]);
-	    fprintf(stderr, "New fd is %d\n", cs_fileno(new_line));
 	}
 	else
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
@@ -176,19 +178,19 @@ static void listener(IOCHAN h, int event)
 	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
 	    EVENT_INPUT)))
 	{
-	    fprintf(stderr, "Failed to create iochan\n");
+	    logf(LOG_FATAL, "Failed to create iochan");
 	    exit(1);
 	}
 	if (!(newas = create_association(new_chan, new_line)))
 	{
-	    fprintf(stderr, "Failed to create new assoc.\n");
+	    logf(LOG_FATAL, "Failed to create new assoc.");
 	    exit(1);
 	}
 	iochan_setdata(new_chan, newas);
     }
     else
     {
-    	fprintf(stderr, "Bad event on listener.\n");
+    	logf(LOG_FATAL, "Bad event on listener.");
     	exit(1);
     }
 }
@@ -204,7 +206,7 @@ static void add_listener(char *where, int what)
     void *ap;
     IOCHAN lst;
 
-    fprintf(stderr, "Adding %s %s listener on %s\n",
+    logf(LOG_LOG, "Adding %s %s listener on %s",
         dynamic ? "dynamic" : "static",
     	what == PROTO_SR ? "SR" : "Z3950", where);
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
@@ -246,13 +248,13 @@ static void add_listener(char *where, int what)
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
     	fprintf(stderr, "Failed to bind.\n");
-    	perror(where);
+    	logf(LOG_FATAL|LOG_ERRNO, where);
     	exit(1);
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
    	 EVENT_EXCEPT)))
     {
-    	fprintf(stderr, "Failed to create IOCHAN-type\n");
+    	logf(LOG_FATAL, "Failed to create IOCHAN-type\n");
     	exit(1);
     }
     iochan_setdata(lst, l);
@@ -299,5 +301,6 @@ int statserv_main(int argc, char **argv)
     	signal(SIGCHLD, catchchld);
     if (!listeners)
 	add_listener(DEFAULT_LISTENER, protocol);
+    logf(LOG_LOG, "Entering event loop.");
     return event_loop();
 }

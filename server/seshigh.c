@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.15  1995-03-30 14:03:23  quinn
+ * Revision 1.16  1995-03-31 09:18:55  quinn
+ * Added logging.
+ *
+ * Revision 1.15  1995/03/30  14:03:23  quinn
  * Added RFC1006 as separate library
  *
  * Revision 1.14  1995/03/30  12:18:17  quinn
@@ -60,10 +63,10 @@
 #include <session.h>
 #include <proto.h>
 #include <oid.h>
+#include <iso2709.h>
+#include <log.h>
 
 #include <backend.h>
-
-#include <iso2709.h>
 
 #define ENCODE_BUFFER_SIZE 10000
 
@@ -122,7 +125,7 @@ void ir_session(IOCHAN h, int event)
 	switch (res)
 	{
 	    case 0: case -1: /* connection closed by peer */
-	    	fprintf(stderr, "Closed connection\n");
+	    	logf(LOG_LOG, "Connection closed by client");
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);
@@ -133,7 +136,6 @@ void ir_session(IOCHAN h, int event)
 		assoc->input_apdu_len = res;
 		if (process_apdu(h) < 0)
 		{
-		    fprintf(stderr, "Operation failed\n");
 		    cs_close(conn);
 		    destroy_association(assoc);
 		    iochan_destroy(h);
@@ -147,7 +149,7 @@ void ir_session(IOCHAN h, int event)
     	switch (res = cs_put(conn, assoc->encode_buffer, assoc->encoded_len))
 	{
 	    case -1:
-	    	fprintf(stderr, "Closed connection\n");
+	    	logf(LOG_LOG, "Connection closed by client");
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);
@@ -160,7 +162,7 @@ void ir_session(IOCHAN h, int event)
     }
     else if (event == EVENT_EXCEPT)
     {
-	fprintf(stderr, "Exception on line\n");
+	logf(LOG_LOG, "Exception on line");
 	cs_close(conn);
 	destroy_association(assoc);
 	iochan_destroy(h);
@@ -176,7 +178,8 @@ static int process_apdu(IOCHAN chan)
     odr_setbuf(assoc->decode, assoc->input_buffer, assoc->input_apdu_len);
     if (!z_APDU(assoc->decode, &apdu, 0))
     {
-    	odr_perror(assoc->decode, "Incoming APDU");
+    	logf(LOG_WARN, "ODR error: %s",
+	    odr_errlist[odr_geterror(assoc->decode)]);
 	return -1;
     }
     switch (apdu->which)
@@ -188,7 +191,7 @@ static int process_apdu(IOCHAN chan)
 	case Z_APDU_presentRequest:
 	    res = process_presentRequest(chan, apdu->u.presentRequest); break;
 	default:
-	    fprintf(stderr, "Bad APDU\n");
+	    logf(LOG_WARN, "Bad APDU");
 	    return -1;
     }
     odr_reset(assoc->decode); /* release incopming APDU */
@@ -206,18 +209,18 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     bend_initresult *binitres;
     Odr_bitmask options, protocolVersion;
 
-    fprintf(stderr, "Got initRequest.\n");
+    logf(LOG_LOG, "Got initRequest");
     if (req->implementationId)
-    	fprintf(stderr, "Id:        %s\n", req->implementationId);
+    	logf(LOG_LOG, "Id:        %s", req->implementationId);
     if (req->implementationName)
-    	fprintf(stderr, "Name:      %s\n", req->implementationName);
+    	logf(LOG_LOG, "Name:      %s", req->implementationName);
     if (req->implementationVersion)
-    	fprintf(stderr, "Version:   %s\n", req->implementationVersion);
+    	logf(LOG_LOG, "Version:   %s", req->implementationVersion);
 
     binitreq.configname = "default-config";
     if (!(binitres = bend_init(&binitreq)) || binitres->errcode)
     {
-    	fprintf(stderr, "Bad response from backend\n");
+    	logf(LOG_WARN, "Bad response from backend");
     	return -1;
     }
 
@@ -257,11 +260,12 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.15 $";
+    resp.implementationVersion = "$Revision: 1.16 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
-    	odr_perror(assoc->encode, "Encode initres");
+	logf(LOG_FATAL, "ODR error encoding initres: %s",
+	    odr_errlist[odr_geterror(assoc->encode)]);
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);
@@ -281,7 +285,7 @@ static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
     bib1.class = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
 
-    fprintf(stderr, "Diagnostic: %d -- %s\n", error, addinfo ? addinfo :
+    logf(LOG_DEBUG, "Diagnostic: %d -- %s", error, addinfo ? addinfo :
 	"NULL");
     err = error;
     rec.which = Z_Records_NSD;
@@ -304,7 +308,7 @@ static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
     bib1.class = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
 
-    fprintf(stderr, "SurrogateDiagnotic: %d -- %s\n", error, addinfo);
+    logf(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
     err = error;
     rec.databaseName = dbname;
     rec.which = Z_NamePlusRecord_surrogateDiagnostic;
@@ -342,8 +346,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     if (!(oid = odr_oiddup(a->encode, oid_getoidbyent(&recform))))
     	return 0;
 
-    fprintf(stderr, "Request to pack %d+%d\n", start, toget);
-    fprintf(stderr, "pms=%d, mrs=%d\n", a->preferredMessageSize,
+    logf(LOG_DEBUG, "Request to pack %d+%d", start, toget);
+    logf(LOG_DEBUG, "pms=%d, mrs=%d", a->preferredMessageSize,
     	a->maximumRecordSize);
     for (recno = start; reclist.num_records < toget; recno++)
     {
@@ -371,25 +375,24 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    *pres = Z_PRES_FAILURE;
 	    return diagrec(a->proto, fres->errcode, fres->errstring);
 	}
-	fprintf(stderr, "  Got record, len=%d, total=%d\n",
+	logf(LOG_DEBUG, "  Got record, len=%d, total=%d",
 	    fres->len, total_length);
 	if (fres->len + total_length > a->preferredMessageSize)
 	{
-	    fprintf(stderr, "  In drop-zone\n");
 	    /* record is small enough, really */
 	    if (fres->len <= a->preferredMessageSize)
 	    {
-	    	fprintf(stderr, "  Dropped last normal-sized record\n");
+	    	logf(LOG_DEBUG, "  Dropped last normal-sized record");
 		*pres = Z_PRES_PARTIAL_2;
 		break;
 	    }
 	    /* record can only be fetched by itself */
 	    if (fres->len < a->maximumRecordSize)
 	    {
-	    	fprintf(stderr, "  Record > prefmsgsz\n");
+	    	logf(LOG_DEBUG, "  Record > prefmsgsz");
 	    	if (toget > 1)
 		{
-		    fprintf(stderr, "  Dropped it\n");
+		    logf(LOG_DEBUG, "  Dropped it");
 		    reclist.records[reclist.num_records] =
 		   	 surrogatediagrec(a->proto, fres->basename, 16, 0);
 		    reclist.num_records++;
@@ -399,7 +402,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    }
 	    else /* too big entirely */
 	    {
-	    	fprintf(stderr, "Record > maxrcdsz\n");
+	    	logf(LOG_DEBUG, "Record > maxrcdsz");
 		reclist.records[reclist.num_records] =
 		    surrogatediagrec(a->proto, fres->basename, 17, 0);
 		reclist.num_records++;
@@ -451,7 +454,7 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
     int next = 0;
     static int none = Z_RES_NONE;
 
-    fprintf(stderr, "Got SearchRequest.\n");
+    logf(LOG_LOG, "Got SearchRequest.");
     apdup = &apdu;
     apdu.which = Z_APDU_searchResponse;
     apdu.u.searchResponse = &resp;
@@ -546,7 +549,8 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
 
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
-    	odr_perror(assoc->encode, "Encode searchres");
+	logf(LOG_FATAL, "ODR error encoding searchres: %s",
+	    odr_errlist[odr_geterror(assoc->encode)]);
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);
@@ -562,7 +566,7 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
     association *assoc = iochan_getdata(client);
     int presst, next, num;
 
-    fprintf(stderr, "Got PresentRequest.\n");
+    logf(LOG_LOG, "Got PresentRequest.");
     apdup = &apdu;
     apdu.which = Z_APDU_presentResponse;
     apdu.u.presentResponse = &resp;
@@ -579,7 +583,8 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
 
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
-    	odr_perror(assoc->encode, "Encode presentres");
+	logf(LOG_FATAL, "ODR error encoding initres: %s",
+	    odr_errlist[odr_geterror(assoc->encode)]);
 	return -1;
     }
     odr_getbuf(assoc->encode, &assoc->encoded_len);
