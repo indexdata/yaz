@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.7 2000-10-02 13:58:50 adam Exp $
+ * $Id: oid.h,v 1.8 2001-10-29 09:16:27 adam Exp $
  */
 
 #ifndef OID_H
@@ -71,101 +71,127 @@ typedef enum oid_value
     VAL_BER,
     VAL_BASIC_CTX,
     VAL_BIB1,
+
     VAL_EXP1,
     VAL_EXT1,
     VAL_CCL1,
     VAL_GILS,
-    VAL_WAIS,
+    VAL_WAIS, 
+/* 10 */
     VAL_STAS,
     VAL_COLLECT1,
     VAL_CIMI1,
     VAL_GEO,
     VAL_DIAG1,
+
     VAL_ISO2709,
     VAL_UNIMARC,
     VAL_INTERMARC,
     VAL_CCF,
     VAL_USMARC,
+/* 20 */
     VAL_UKMARC,
     VAL_NORMARC,
     VAL_LIBRISMARC,
     VAL_DANMARC,
     VAL_FINMARC,
+
     VAL_MAB,
     VAL_CANMARC,
     VAL_SBN,
     VAL_PICAMARC,
     VAL_AUSMARC,
+/* 30 */
     VAL_IBERMARC,
     VAL_CATMARC,
     VAL_MALMARC,
     VAL_EXPLAIN,
     VAL_SUTRS,
+
     VAL_OPAC,
     VAL_SUMMARY,
     VAL_GRS0,
     VAL_GRS1,
     VAL_EXTENDED,
+/* 40 */
     VAL_FRAGMENT,
     VAL_RESOURCE1,
     VAL_RESOURCE2,
     VAL_PROMPT1,
     VAL_DES1,
+
     VAL_KRB1,
     VAL_PRESSET,
     VAL_PQUERY,
     VAL_PCQUERY,
     VAL_ITEMORDER,
+
+/* 50 */
     VAL_DBUPDATE0,
     VAL_DBUPDATE,
     VAL_EXPORTSPEC,
     VAL_EXPORTINV,
     VAL_NONE,
+
     VAL_SETM,
     VAL_SETG,
     VAL_VAR1,
     VAL_ESPEC1,
     VAL_SOIF,
+
+/* 60 */
     VAL_SEARCHRES1,
     VAL_THESAURUS,
     VAL_CHARLANG,
     VAL_USERINFO1,
     VAL_MULTISRCH1,
+
     VAL_MULTISRCH2,
     VAL_DATETIME,
     VAL_SQLRS,
     VAL_PDF,
     VAL_POSTSCRIPT,
+
+/* 70 */
     VAL_HTML,
     VAL_TIFF,
     VAL_GIF,
     VAL_JPEG,
     VAL_PNG,
+
     VAL_MPEG,
     VAL_SGML,
     VAL_TIFFB,
     VAL_WAV,
     VAL_UPDATEES,
+
+/* 80 */
     VAL_TEXT_XML,
     VAL_APPLICATION_XML,
     VAL_UNIVERSE_REPORT,
     VAL_PROXY,
     VAL_COOKIE,
+
     VAL_CLIENT_IP,
     VAL_ISO_ILL_1,
     VAL_ZBIG,
     VAL_UTIL,
     VAL_XD1,
+
+/* 90 */
     VAL_ZTHES,
     VAL_FIN1,
     VAL_DAN1,
     VAL_DIAG_ES,
     VAL_DIAG_GENERAL,
+
     VAL_JPMARC,
     VAL_SWEMARC,
     VAL_SIGLEMARC,
     VAL_ISDSMARC,
     VAL_RUSMARC,
+
+/* 100 */
     VAL_ADMINSERVICE,
     VAL_HOLDINGS,
     VAL_HUNMARC,
