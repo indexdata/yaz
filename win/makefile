@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.40 2002-06-02 21:34:45 adam Exp $
+# $Id: makefile,v 1.41 2002-06-04 08:29:53 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -376,9 +376,9 @@ COMMON_YAZ_OBJS= \
    $(YAZ_ZOOM_OBJS)
 
 YAZ_OBJS= \
-	$(COMMON_YAZ_OBJS) \
 	$(Z3950_OBJS) \
-	$(ILL_OBJS) 
+	$(ILL_OBJS) \
+	$(COMMON_YAZ_OBJS)
 
 DLL_OBJS= $(YAZ_OBJS)
 
@@ -785,14 +785,14 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 
 ############## clean
 clean:
-	del $(BINDIR)\*.exe
-	del $(BINDIR)\*.dll
-	del $(TMPDIR)\*.
+	-del $(BINDIR)\*.exe
+	-del $(BINDIR)\*.dll
+	-del $(TMPDIR)\*.
 
-	del $(LIBDIR)\*.MAP
+	-del $(LIBDIR)\*.MAP
 
-	del $(LIBDIR)\*.LIB
-	del $(OBJDIR)\*.OBJ
+	-del $(LIBDIR)\*.LIB
+	-del $(OBJDIR)\*.OBJ
 
 realclean: clean
 	del $(Z3950_C_DIR)\*.c
@@ -833,7 +833,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.40  2002-06-02 21:34:45  adam
+# Revision 1.41  2002-06-04 08:29:53  adam
+# ignore errors on del.
+#
+# Revision 1.40  2002/06/02 21:34:45  adam
 # Remove --enable-module option
 #
 # Revision 1.39  2002/05/31 08:48:06  adam
