@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.20 2001-10-24 20:33:29 adam Exp $
+## $Id: Makefile.am,v 1.21 2001-10-28 23:44:59 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -28,7 +28,7 @@ EXTRA_DIST = $(DOCFILES)
 
 doc_DATA = $(DOCFILES)
 
-$(srcdir)/yaz.html: $(XMLFILES) $(srcdir)/yazhtml.dsl
+$(HTMLFILES): $(XMLFILES) $(srcdir)/yazhtml.dsl
 	cd $(srcdir); jade -E14 -d yazhtml.dsl -t sgml xml.dcl yaz.xml
 
 $(srcdir)/yaz.php: $(XMLFILES) $(srcdir)/yazphp.dsl
