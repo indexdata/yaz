@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.19 2003-02-12 15:06:42 adam Exp $
+## $Id: Makefile.am,v 1.20 2003-02-20 21:09:22 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -15,7 +15,6 @@ EXTRA_DIST=$(SPEC_FILE) README LICENSE CHANGELOG TODO windows.txt \
 	yaz-config.in yaz.m4
 
 dist-hook:
-	cd doc; make
 	mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
 	mkdir $(distdir)/debian
