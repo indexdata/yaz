@@ -47,7 +47,6 @@ int zs__searchRetrieveRequest(struct soap * soap,
 }
 
 void yaz_srw_serve (struct soap *soap,
-                    void *userinfo,
                     int (*sr_h)(void *userinfo,
                                 struct soap * soap,
                                 xsd__string  *query,
@@ -67,8 +66,9 @@ void yaz_srw_serve (struct soap *soap,
 
     info.sr_h = sr_h;
     info.e_h = e_h;
-    info.userinfo = userinfo;
+    info.userinfo = soap->user;
     soap->user = &info;
     soap->namespaces = srw_namespaces;
     soap_serve(soap);
 }
+

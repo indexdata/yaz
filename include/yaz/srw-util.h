@@ -1,4 +1,4 @@
-/* $Id: srw-util.h,v 1.1 2003-01-06 08:20:27 adam Exp $
+/* $Id: srw-util.h,v 1.2 2003-01-20 13:04:50 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -29,7 +29,6 @@ char *xslt_map_result_schema(xslt_map_result res);
 const char *yaz_srw_diag_str (int code);
 
 void yaz_srw_serve (struct soap *soap,
-                    void *userinfo,
                     int (*sr_h)(void *userinfo,
                                 struct soap * soap,
                                 xsd__string  *query,

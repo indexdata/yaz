@@ -1,4 +1,4 @@
-/* $Id: srw-gateway.c,v 1.1 2003-01-06 08:20:28 adam Exp $
+/* $Id: srw-gateway.c,v 1.2 2003-01-20 13:04:50 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -293,6 +293,15 @@ static void target_leave (struct target *l)
     myunlock(&target_mutex);
 }
 
+#if USE_THREADS
+static void *p_serve (void *p)
+{
+    struct soap *soap = p;
+    yaz_srw_serve(soap, searchRetrieve, explain);
+}
+#endif
+
+
 static void standalone(struct soap *soap, const char *host, int port,
                        int max_thr, struct srw_prop *properties)
 {
@@ -365,13 +374,12 @@ static void standalone(struct soap *soap, const char *host, int port,
             soap_thr[i]->user = properties;
 #if USE_THREADS
             if (max_thr <= 1)
-                yaz_srw_serve(soap_thr[i], properties,
+                yaz_srw_serve(soap_thr[i],
                               searchRetrieve, explain);  /* static mode .. */
             else
-                pthread_create(&tid[i], 0, (void*(*)(void*))soap_serve,
-                               soap_thr[i]);
+                pthread_create(&tid[i], 0, p_serve, soap_thr[i]);
 #else
-            yaz_srw_serve(soap_thr[i], properties,
+            yaz_srw_serve(soap_thr[i],
                           searchRetrieve, explain);  /* static mode .. */
 #endif
         }
@@ -419,7 +427,7 @@ int fetchone(struct soap *soap, struct srw_prop *properties,
     {
         return 65;
     }
-    if (!strcmp(schema, "MARC21"))
+    if (!strcmp(schema, "MARC21") || !strcmp(schema, "http://www.loc.gov/marcxml/"))
     {
         *rec_data = soap_malloc (soap, xml_len+1);
         memcpy (*rec_data, xml_rec, xml_len);
@@ -819,7 +827,7 @@ int main(int argc, char **argv)
             yaz_log_init_file(arg);
             break;
         case 'V':
-            puts ("Version: $Id: srw-gateway.c,v 1.1 2003-01-06 08:20:28 adam Exp $"
+            puts ("Version: $Id: srw-gateway.c,v 1.2 2003-01-20 13:04:50 adam Exp $"
 #if SRW_DEBUG
             " DEBUG"
 #endif
@@ -876,7 +884,7 @@ int main(int argc, char **argv)
         soap_init(&soap);
         soap.user = &properties;
 
-        yaz_srw_serve(&soap, &properties, searchRetrieve, explain);
+        yaz_srw_serve(&soap, searchRetrieve, explain);
 
         soap_end(&soap);
         yaz_log (LOG_LOG, "CGI end");
