@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.8  1996-01-02 11:46:56  quinn
+ * Revision 1.9  1996-03-15 11:03:46  adam
+ * Attribute set can be set globally for a query with the @attrset
+ * operator. The @attr operator has an optional attribute-set specifier
+ * that sets the attribute set locally.
+ *
+ * Revision 1.8  1996/01/02  11:46:56  quinn
  * Changed 'operator' to 'roperator' to avoid C++ conflict.
  *
  * Revision 1.7  1995/09/29  17:12:36  quinn
@@ -47,8 +52,20 @@ static char *left_sep = "{\"";
 static char *right_sep = "}\"";
 static int escape_char = '@';
 
-static Z_RPNStructure *rpn_structure (ODR o, int num_attr, int max_attr, 
-                                      int *attr_list);
+static Z_RPNStructure *rpn_structure (ODR o, oid_proto, 
+                                      int num_attr, int max_attr, 
+                                      int *attr_list, oid_value *attr_set);
+
+static int query_oid_getvalbyname (void)
+{
+    char buf[32];
+
+    if (query_lex_len > 31)
+        return VAL_NONE;
+    memcpy (buf, query_lex_buf, query_lex_len);
+    buf[query_lex_len] = '\0';
+    return oid_getvalbyname (buf);
+}
 
 static int query_token (const char **qptr, const char **lex_buf, int *lex_len)
 {
@@ -94,6 +111,8 @@ static int query_token (const char **qptr, const char **lex_buf, int *lex_len)
             return 'l';
         if (*lex_len == 4 && !memcmp (*lex_buf+1, "set", 3))
             return 's';
+        if (*lex_len == 8 && !memcmp (*lex_buf+1, "attrset", 7))
+            return 'r';
     }
     return 't';
 }
@@ -104,7 +123,9 @@ static int lex (void)
         query_token (&query_buf, &query_lex_buf, &query_lex_len);
 }
 
-static Z_AttributesPlusTerm *rpn_term (ODR o, int num_attr, int *attr_list)
+static Z_AttributesPlusTerm *rpn_term (ODR o, oid_proto proto, 
+                                       int num_attr, int *attr_list,
+                                       oid_value *attr_set)
 {
     Z_AttributesPlusTerm *zapt;
     Odr_oct *term_octet;
@@ -131,7 +152,19 @@ static Z_AttributesPlusTerm *rpn_term (ODR o, int num_attr, int *attr_list)
                 odr_malloc (o,sizeof(**zapt->attributeList));
             zapt->attributeList[i]->attributeType = &attr_tmp[2*i];
 #ifdef Z_95
-	    zapt->attributeList[i]->attributeSet = 0;
+            if (attr_set[i] == VAL_NONE)
+                zapt->attributeList[i]->attributeSet = 0;
+            else
+            {
+                oident attrid;
+
+                attrid.proto = PROTO_Z3950;
+                attrid.oclass = CLASS_ATTSET;
+                attrid.value = attr_set[i];
+                   
+                zapt->attributeList[i]->attributeSet = 
+                    odr_oiddup (o, oid_getoidbyent (&attrid));
+            }
 	    zapt->attributeList[i]->which = Z_AttributeValue_numeric;
 	    zapt->attributeList[i]->value.numeric = &attr_tmp[2*i+1];
 #else
@@ -150,7 +183,9 @@ static Z_AttributesPlusTerm *rpn_term (ODR o, int num_attr, int *attr_list)
     return zapt;
 }
 
-static Z_Operand *rpn_simple (ODR o, int num_attr, int *attr_list)
+static Z_Operand *rpn_simple (ODR o, oid_proto proto,
+                              int num_attr, int *attr_list,
+                              oid_value *attr_set)
 {
     Z_Operand *zo;
 
@@ -159,7 +194,8 @@ static Z_Operand *rpn_simple (ODR o, int num_attr, int *attr_list)
     {
     case 't':
         zo->which = Z_Operand_APT;
-        if (!(zo->u.attributesPlusTerm = rpn_term (o, num_attr, attr_list)))
+        if (!(zo->u.attributesPlusTerm =
+              rpn_term (o, proto, num_attr, attr_list, attr_set)))
             return NULL;
         lex ();
         break;
@@ -179,8 +215,9 @@ static Z_Operand *rpn_simple (ODR o, int num_attr, int *attr_list)
     return zo;
 }
 
-static Z_Complex *rpn_complex (ODR o, int num_attr, int max_attr, 
-                               int *attr_list)
+static Z_Complex *rpn_complex (ODR o, oid_proto proto,
+                               int num_attr, int max_attr, 
+                               int *attr_list, oid_value *attr_set)
 {
     Z_Complex *zc;
     Z_Operator *zo;
@@ -206,15 +243,18 @@ static Z_Complex *rpn_complex (ODR o, int num_attr, int max_attr,
         return NULL;
     }
     lex ();
-    if (!(zc->s1 = rpn_structure (o, num_attr, max_attr, attr_list)))
+    if (!(zc->s1 =
+          rpn_structure (o, proto, num_attr, max_attr, attr_list, attr_set)))
         return NULL;
-    if (!(zc->s2 = rpn_structure (o, num_attr, max_attr, attr_list)))
+    if (!(zc->s2 =
+          rpn_structure (o, proto, num_attr, max_attr, attr_list, attr_set)))
         return NULL;
     return zc;
 }
 
-static Z_RPNStructure *rpn_structure (ODR o, int num_attr, int max_attr, 
-                                      int *attr_list)
+static Z_RPNStructure *rpn_structure (ODR o, oid_proto proto, 
+                                      int num_attr, int max_attr, 
+                                      int *attr_list, oid_value *attr_set)
 {
     Z_RPNStructure *sz;
     const char *cp;
@@ -226,71 +266,146 @@ static Z_RPNStructure *rpn_structure (ODR o, int num_attr, int max_attr,
     case 'o':
     case 'n':
         sz->which = Z_RPNStructure_complex;
-        if (!(sz->u.complex = rpn_complex (o, num_attr, max_attr, attr_list)))
+        if (!(sz->u.complex =
+              rpn_complex (o, proto, num_attr, max_attr, attr_list, attr_set)))
             return NULL;
         break;
     case 't':
     case 's':
         sz->which = Z_RPNStructure_simple;
-        if (!(sz->u.simple = rpn_simple (o, num_attr, attr_list)))
+        if (!(sz->u.simple =
+              rpn_simple (o, proto, num_attr, attr_list, attr_set)))
             return NULL;
         break;
     case 'l':
         lex ();
         if (!query_look)
             return NULL;
-        if (!(cp = strchr (query_lex_buf, '=')))
-            return NULL;
         if (num_attr >= max_attr)
             return NULL;
+        if (!(cp = strchr (query_lex_buf, '=')) ||
+            (cp-query_lex_buf) > query_lex_len)
+        {
+            attr_set[num_attr] = query_oid_getvalbyname ();
+            lex ();
+
+            if (!(cp = strchr (query_lex_buf, '=')))
+                return NULL;
+        }
+        else 
+        {
+            if (num_attr > 0)
+                attr_set[num_attr] = attr_set[num_attr-1];
+            else
+                attr_set[num_attr] = VAL_NONE;
+        }
         attr_list[2*num_attr] = atoi (query_lex_buf);
         attr_list[2*num_attr+1] = atoi (cp+1);
         num_attr++;
         lex ();
-        return rpn_structure (o, num_attr, max_attr, attr_list);
+        return
+            rpn_structure (o, proto, num_attr, max_attr, attr_list, attr_set);
     case 0:                /* operator/operand expected! */
         return NULL;
     }
     return sz;
 }
 
-Z_RPNQuery *p_query_rpn (ODR o, const char *qbuf)
+Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf)
 {
     Z_RPNQuery *zq;
     int attr_array[1024];
+    oid_value attr_set[512];
+    oid_value topSet = VAL_NONE;
+    oident oset;
 
     query_buf = qbuf;
     zq = odr_malloc (o, sizeof(*zq));
-    zq->attributeSetId = NULL;
     lex ();
-    if (!(zq->RPNStructure = rpn_structure (o, 0, 512, attr_array)))
+    if (query_look == 'r')
+    {
+        lex ();
+        topSet = query_oid_getvalbyname ();
+        if (topSet == VAL_NONE)
+            return NULL;
+
+        lex ();
+    }
+    if (topSet == VAL_NONE)
+        topSet = VAL_BIB1;
+    oset.proto = proto;
+    oset.oclass = CLASS_ATTSET;
+    oset.value = topSet;
+
+    zq->attributeSetId = odr_oiddup (o, oid_getoidbyent (&oset));
+
+    if (!(zq->RPNStructure = rpn_structure (o, proto, 0, 512,
+                                            attr_array, attr_set)))
         return NULL;
     return zq;
 }
 
-Z_AttributesPlusTerm *p_query_scan (ODR o, const char *qbuf)
+Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
+                                    Odr_oid **attributeSetP,
+                                    const char *qbuf)
 {
     int attr_list[1024];
+    oid_value attr_set[512];
     int num_attr = 0;
     int max_attr = 512;
     const char *cp;
+    oid_value topSet = VAL_NONE;
+    oident oset;
 
     query_buf = qbuf;
-    while (lex() == 'l')
+
+    lex ();
+    if (query_look == 'r')
+    {
+        lex ();
+        topSet = query_oid_getvalbyname ();
+
+        lex ();
+    }
+    if (topSet == VAL_NONE)
+        topSet = VAL_BIB1;
+    oset.proto = proto;
+    oset.oclass = CLASS_ATTSET;
+    oset.value = topSet;
+
+    *attributeSetP = odr_oiddup (o, oid_getoidbyent (&oset));
+
+    while (query_look == 'l')
     {
         lex ();
         if (!query_look)
             return NULL;
-        if (!(cp = strchr (query_lex_buf, '=')))
-            return NULL;
         if (num_attr >= max_attr)
             return NULL;
+
+        if (!(cp = strchr (query_lex_buf, '=')) ||
+            (cp-query_lex_buf) > query_lex_len)
+        {
+            attr_set[num_attr] = query_oid_getvalbyname ();
+            lex ();
+
+            if (!(cp = strchr (query_lex_buf, '=')))
+                return NULL;
+        }
+        else
+        {
+            if (num_attr > 0)
+                attr_set[num_attr] = attr_set[num_attr-1];
+            else
+                attr_set[num_attr] = VAL_NONE;
+        }
         attr_list[2*num_attr] = atoi (query_lex_buf);
         attr_list[2*num_attr+1] = atoi (cp+1);
         num_attr++;
+        lex ();
     }
     if (!query_look)
         return NULL;
-    return rpn_term (o, num_attr, attr_list);
+    return rpn_term (o, proto, num_attr, attr_list, attr_set);
 }
 
