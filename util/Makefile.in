@@ -88,6 +88,12 @@ LIBS =
 
 INCLUDES = -I$(srcdir)/../include
 
+noinst_PROGRAMS = marcdump
+
+marcdump_LDADD = libutil.la 
+
+marcdump_SOURCES = marcdump.c
+
 libutil_la_SOURCES = options.c log.c marcdisp.c oid.c wrbuf.c nmemsdup.c    xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c 
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -103,6 +109,11 @@ libutil_la_LIBADD =
 libutil_la_OBJECTS =  options.lo log.lo marcdisp.lo oid.lo wrbuf.lo \
 nmemsdup.lo xmalloc.lo readconf.lo tpath.lo nmem.lo matchstr.lo \
 atoin.lo
+PROGRAMS =  $(noinst_PROGRAMS)
+
+marcdump_OBJECTS =  marcdump.o
+marcdump_DEPENDENCIES =  libutil.la
+marcdump_LDFLAGS = 
 SCRIPTS =  $(bin_SCRIPTS)
 
 CFLAGS = @CFLAGS@
@@ -117,11 +128,12 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DEP_FILES =  .deps/atoin.P .deps/log.P .deps/marcdisp.P .deps/matchstr.P \
-.deps/nmem.P .deps/nmemsdup.P .deps/oid.P .deps/options.P \
-.deps/readconf.P .deps/tpath.P .deps/wrbuf.P .deps/xmalloc.P
-SOURCES = $(libutil_la_SOURCES)
-OBJECTS = $(libutil_la_OBJECTS)
+DEP_FILES =  .deps/atoin.P .deps/log.P .deps/marcdisp.P .deps/marcdump.P \
+.deps/matchstr.P .deps/nmem.P .deps/nmemsdup.P .deps/oid.P \
+.deps/options.P .deps/readconf.P .deps/tpath.P .deps/wrbuf.P \
+.deps/xmalloc.P
+SOURCES = $(libutil_la_SOURCES) $(marcdump_SOURCES)
+OBJECTS = $(libutil_la_OBJECTS) $(marcdump_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -177,6 +189,19 @@ maintainer-clean-libtool:
 
 libutil.la: $(libutil_la_OBJECTS) $(libutil_la_DEPENDENCIES)
 	$(LINK)  $(libutil_la_LDFLAGS) $(libutil_la_OBJECTS) $(libutil_la_LIBADD) $(LIBS)
+
+mostlyclean-noinstPROGRAMS:
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+
+distclean-noinstPROGRAMS:
+
+maintainer-clean-noinstPROGRAMS:
+
+marcdump: $(marcdump_OBJECTS) $(marcdump_DEPENDENCIES)
+	@rm -f marcdump
+	$(LINK) $(marcdump_LDFLAGS) $(marcdump_OBJECTS) $(marcdump_LDADD) $(LIBS)
 
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
@@ -297,7 +322,7 @@ install-am: all-am
 install: install-am
 uninstall-am: uninstall-binSCRIPTS
 uninstall: uninstall-am
-all-am: Makefile $(LTLIBRARIES) $(SCRIPTS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
@@ -315,27 +340,30 @@ distclean-generic:
 
 maintainer-clean-generic:
 mostlyclean-am:  mostlyclean-noinstLTLIBRARIES mostlyclean-compile \
-		mostlyclean-libtool mostlyclean-tags mostlyclean-depend \
-		mostlyclean-generic
+		mostlyclean-libtool mostlyclean-noinstPROGRAMS \
+		mostlyclean-tags mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
 clean-am:  clean-noinstLTLIBRARIES clean-compile clean-libtool \
-		clean-tags clean-depend clean-generic mostlyclean-am
+		clean-noinstPROGRAMS clean-tags clean-depend \
+		clean-generic mostlyclean-am
 
 clean: clean-am
 
 distclean-am:  distclean-noinstLTLIBRARIES distclean-compile \
-		distclean-libtool distclean-tags distclean-depend \
-		distclean-generic clean-am
+		distclean-libtool distclean-noinstPROGRAMS \
+		distclean-tags distclean-depend distclean-generic \
+		clean-am
 	-rm -f libtool
 
 distclean: distclean-am
 
 maintainer-clean-am:  maintainer-clean-noinstLTLIBRARIES \
 		maintainer-clean-compile maintainer-clean-libtool \
-		maintainer-clean-tags maintainer-clean-depend \
-		maintainer-clean-generic distclean-am
+		maintainer-clean-noinstPROGRAMS maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
@@ -345,11 +373,13 @@ maintainer-clean: maintainer-clean-am
 clean-noinstLTLIBRARIES maintainer-clean-noinstLTLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile mostlyclean-libtool distclean-libtool \
-clean-libtool maintainer-clean-libtool uninstall-binSCRIPTS \
-install-binSCRIPTS tags mostlyclean-tags distclean-tags clean-tags \
-maintainer-clean-tags distdir mostlyclean-depend distclean-depend \
-clean-depend maintainer-clean-depend info-am info dvi-am dvi check \
-check-am installcheck-am installcheck install-exec-am install-exec \
+clean-libtool maintainer-clean-libtool mostlyclean-noinstPROGRAMS \
+distclean-noinstPROGRAMS clean-noinstPROGRAMS \
+maintainer-clean-noinstPROGRAMS uninstall-binSCRIPTS install-binSCRIPTS \
+tags mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
+distdir mostlyclean-depend distclean-depend clean-depend \
+maintainer-clean-depend info-am info dvi-am dvi check check-am \
+installcheck-am installcheck install-exec-am install-exec \
 install-data-am install-data install-am install uninstall-am uninstall \
 all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.101  2000-04-05 07:39:54  adam
+ * Revision 1.102  2000-05-18 11:57:04  adam
+ * Client display time elapsed.
+ *
+ * Revision 1.101  2000/04/05 07:39:54  adam
  * Added shared library support (libtool).
  *
  * Revision 1.100  2000/03/20 19:29:59  adam
@@ -2295,6 +2298,10 @@ static int client(int wait)
     int netbufferlen = 0;
     int i;
     Z_APDU *apdu;
+#if HAVE_GETTIMEOFDAY
+    struct timeval tv_start, tv_end;
+    gettimeofday (&tv_start, 0);
+#endif
 
     while (1)
     {
@@ -2341,6 +2348,10 @@ static int client(int wait)
 	    if ((end_p = strchr (line, '\n')))
 	        *end_p = '\0';
 #endif 
+#if HAVE_GETTIMEOFDAY
+	    gettimeofday (&tv_start, 0);
+#endif
+
             if ((res = sscanf(line, "%s %[^;]", word, arg)) <= 0)
             {
                 strcpy(word, last_cmd);
@@ -2455,6 +2466,15 @@ static int client(int wait)
                 }
             }
             while (conn && cs_more(conn));
+#if HAVE_GETTIMEOFDAY
+	    gettimeofday (&tv_end, 0);
+	    if (1)
+	    {
+		printf ("Elapsed: %.6f\n", (double) tv_end.tv_usec /
+                                                1e6 + tv_end.tv_sec -
+		   ((double) tv_start.tv_usec / 1e6 + tv_start.tv_sec));
+	    }
+#endif
         }
     }
     return 0;
@@ -2496,7 +2516,7 @@ int main(int argc, char **argv)
 	    log_init (log_mask_str(arg), "", NULL);
 	    break;
         default:
-            fprintf (stderr, "Usage: %s [-m <marclog>] [ -m <apdulog>] "
+            fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
                              "[<server-addr>]\n",
                      prog);
             exit (1);

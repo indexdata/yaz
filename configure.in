@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.27 2000-05-02 19:32:15 adam Exp $
+dnl $Id: configure.in,v 1.28 2000-05-18 11:57:04 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -64,7 +64,7 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
 	AC_CHECK_HEADERS(readline/readline.h readline/history.h)
 fi
 dnl ------ snprintf
-AC_CHECK_FUNCS(vsnprintf)
+AC_CHECK_FUNCS(vsnprintf gettimeofday)
 dnl
 dnl ------ tcpd
 AC_ARG_ENABLE(tcpd,[  --enable-tcpd           enable TCP wrapper for server if available])
