@@ -82,6 +82,9 @@ tag 514		costInfo					structured
 tag 515		variantSets					structured
 tag 516		elementSetNames					structured
 tag 517		unitSystems					structured
+tag 518         privateCapabilities				structured
+tag 519		RpnCapabilities					structured
+tag 520		Iso8777Capabilities				structured
 
 tag 600		commonInfo					structured
 tag 601		dateAdded					generalizedtime

@@ -33,7 +33,7 @@ elm (4,0)/(4,112)		contactInfo				-
 elm (4,0)/(4,113)		description				-
 elm (4,0)/(4,114)		nicknames				-
 elm (4,0)/(4,114)/(4,102)	nickname				-
-elm (4,0)/(4,115)		usageRest				-
+elm (4,0)/(4,115)		usageRestrictions			-
 elm (4,0)/(4,116)		paymentAddr				-
 elm (4,0)/(4,117)		hours					-
 elm (4,0)/(4,118)		dbCombinations				-
@@ -41,6 +41,9 @@ elm (4,0)/(4,119)		addresses				-
 
 elm (4,0)/(4,500)		commonAccessInfo			-
 elm (4,0)/(4,500)/(4,501)	queryTypesSupported			-
+elm (4,0)/(4,500)/(4,501)/(4,518)	privateCapabilities		-
+elm (4,0)/(4,500)/(4,501)/(4,519)	RpnCapabilities			-
+elm (4,0)/(4,500)/(4,501)/(4,520)	Iso8777Capabilities		-
 elm (4,0)/(4,500)/(4,503)	diagnosticSets				-
 elm (4,0)/(4,500)/(4,503)/(4,1000)	diagnosticSet			-
 elm (4,0)/(4,500)/(4,505)	attributeSetIds				-
@@ -60,9 +63,8 @@ elm (4,0)/(4,500)/(4,516)/(4,1001)	elementSetName			-
 elm (4,0)/(4,500)/(4,517)	unitSystems				-
 elm (4,0)/(4,500)/(4,517)/(4,1001)	unitSystem			-
 
-elm (4,1)			databaseInfo				-
+elm (4,1)			databaseInfo		ExplainCategory
 elm (4,1)/(4,600)		databaseCommonInfo			-
-elm (4,1)/(4,600)		targetCommonInfo			-
 elm (4,1)/(4,600)/(4,601)	dateAdded				!
 elm (4,1)/(4,600)/(4,602)	dateChanged				!
 elm (4,1)/(4,600)/(4,603)	expiry			DateExpired
@@ -101,11 +103,14 @@ elm (4,1)/(4,224)		supplierContactInfo			-
 elm (4,1)/(4,225)		submissionContactInfo			-
 elm (4,1)/(4,500)		databaseAccessInfo			-
 elm (4,1)/(4,500)/(4,501)	queryTypesSupported			-
+elm (4,1)/(4,500)/(4,501)/(4,518)	privateCapabilities		-
+elm (4,1)/(4,500)/(4,501)/(4,519)	RpnCapabilities			-
+elm (4,1)/(4,500)/(4,501)/(4,520)	Iso8777Capabilities		-
 elm (4,1)/(4,500)/(4,503)	diagnosticSets				-
 elm (4,1)/(4,500)/(4,503)/(4,1000)	diagnosticSet			-
 elm (4,1)/(4,500)/(4,505)	attributeSetIds				-
 elm (4,1)/(4,500)/(4,505)/(4,1000)	attributeSetId			-
-elm (4,1)/(4,500)/(4,1000)	schemas					-
+elm (4,1)/(4,500)/(4,507)	schemas					-
 elm (4,1)/(4,500)/(4,507)/(4,1000)	schema				-
 elm (4,1)/(4,500)/(4,509)	recordSyntaxes				-
 elm (4,1)/(4,500)/(4,509/(4,1000)	recordSyntax			-
@@ -115,7 +120,7 @@ elm (4,1)/(4,500)/(4,513)	restrictedAccess			-
 elm (4,1)/(4,500)/(4,514)	costInfo				-
 elm (4,1)/(4,500)/(4,515)	variantSets				-
 elm (4,1)/(4,500)/(4,515)/(4,1000)	variantSets			-
-elm (4,1)/(4,500)/(4,1001)	elementSetNames				-
+elm (4,1)/(4,500)/(4,516)	elementSetNames				-
 elm (4,1)/(4,500)/(4,516)/(4,1001)	elementSetName			-
-elm (4,1)/(4,500)/(4,1001)	unitSystems				-
+elm (4,1)/(4,500)/(4,517)	unitSystems				-
 elm (4,1)/(4,500)/(4,517)/(4,1001)	unitSystem			-

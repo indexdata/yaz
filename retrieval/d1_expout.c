@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.4  1997-11-18 09:51:08  adam
+ * Revision 1.5  1997-11-19 10:30:06  adam
+ * More explain work.
+ *
+ * Revision 1.4  1997/11/18 09:51:08  adam
  * Removed element num_children from data1_node. Minor changes in
  * data1 to Explain.
  *
@@ -28,92 +31,108 @@
 #include <proto.h>
 #include <data1.h>
 
-static int *f_integer(data1_handle dh, data1_node *c, ODR o)
+typedef struct {
+    data1_handle dh;
+    ODR o;
+    int select;
+} ExpHandle;
+
+static int is_numeric_tag (ExpHandle *eh, data1_node *c)
 {
-    int *r;
-    char intbuf[64];
-
-    if (!c->child || c->child->which != DATA1N_data ||
-	c->child->u.data.len > 63)
-	return 0;
-    r = odr_malloc(o, sizeof(*r));
-    sprintf(intbuf, "%.*s", 63, c->child->u.data.data);
-    *r = atoi(intbuf);
-    return r;
-}
-
-static char *f_string(data1_handle dh, data1_node *c, ODR o)
-{
-    char *r;
-
-    if (!c->child || c->child->which != DATA1N_data)
-	return 0;
-    r = odr_malloc(o, c->child->u.data.len+1);
-    memcpy(r, c->child->u.data.data, c->child->u.data.len);
-    r[c->child->u.data.len] = '\0';
-    return r;
-}
-
-static bool_t *f_bool(data1_handle dh, data1_node *c, ODR o)
-{
-    bool_t *tf;
-    char intbuf[64];
-
-    if (!c->child || c->child->which != DATA1N_data ||
-	c->child->u.data.len > 63)
-	return 0;
-    tf = odr_malloc (o, sizeof(*tf));
-    sprintf(intbuf, "%.*s", 63, c->child->u.data.data);
-    *tf = atoi(intbuf);
-    return 0;
-}
-
-static Z_IntUnit *f_intunit(data1_handle dh, data1_node *c, ODR o)
-{
-    return 0;
-}
-
-static int numeric_tag (data1_handle dh, data1_node *c, ODR o, int select)
-{
-    if (c->which != DATA1N_tag)
+    if (!c || c->which != DATA1N_tag)
 	return 0;
     if (!c->u.tag.element)
     {
-	logf(LOG_WARN, "Malformed tag (no element)");
+	logf(LOG_WARN, "Tag %s is local", c->u.tag.tag);
 	return 0;
     }
     if (c->u.tag.element->tag->which != DATA1T_numeric)
     {
-	logf(LOG_WARN, "Malformed tag (must be numeric)");
+	logf(LOG_WARN, "Tag %s is not numeric", c->u.tag.tag);
 	return 0;
     }
+    if (eh->select && !c->u.tag.node_selected)
+	return 0;
+    return 1;
+}
+
+static int is_data_tag (ExpHandle *eh, data1_node *c)
+{
+    if (!c || c->which != DATA1N_data)
+	return 0;
     if (select && !c->u.tag.node_selected)
 	return 0;
     return 1;
 }
 
-static Z_HumanString *f_humstring(data1_handle dh, data1_node *c, ODR o)
+static int *f_integer(ExpHandle *eh, data1_node *c)
+{
+    int *r;
+    char intbuf[64];
+
+    c = c->child;
+    if (!is_data_tag (eh, c) || c->u.data.len > 63)
+	return 0;
+    r = odr_malloc(eh->o, sizeof(*r));
+    sprintf(intbuf, "%.*s", 63, c->u.data.data);
+    *r = atoi(intbuf);
+    return r;
+}
+
+static char *f_string(ExpHandle *eh, data1_node *c)
+{
+    char *r;
+
+    c = c->child;
+    if (!is_data_tag (eh, c))
+	return 0;
+    r = odr_malloc(eh->o, c->u.data.len+1);
+    memcpy(r, c->u.data.data, c->u.data.len);
+    r[c->u.data.len] = '\0';
+    return r;
+}
+
+static bool_t *f_bool(ExpHandle *eh, data1_node *c)
+{
+    bool_t *tf;
+    char intbuf[64];
+
+    c = c->child;
+    if (!is_data_tag (eh, c) || c->u.data.len > 63)
+	return 0;
+    tf = odr_malloc (eh->o, sizeof(*tf));
+    sprintf(intbuf, "%.*s", 63, c->u.data.data);
+    *tf = atoi(intbuf);
+    return tf;
+}
+
+static Z_IntUnit *f_intunit(ExpHandle *eh, data1_node *c)
+{
+    return 0;
+}
+
+static Z_HumanString *f_humstring(ExpHandle *eh, data1_node *c)
 {
     Z_HumanString *r;
     Z_HumanStringUnit *u;
 
-    if (!c->child || c->child->which != DATA1N_data)
+    c = c->child;
+    if (!is_data_tag (eh, c))
 	return 0;
-    r = odr_malloc(o, sizeof(*r));
+    r = odr_malloc(eh->o, sizeof(*r));
     r->num_strings = 1;
-    r->strings = odr_malloc(o, sizeof(Z_HumanStringUnit*));
-    r->strings[0] = u = odr_malloc(o, sizeof(*u));
+    r->strings = odr_malloc(eh->o, sizeof(Z_HumanStringUnit*));
+    r->strings[0] = u = odr_malloc(eh->o, sizeof(*u));
     u->language = 0;
-    u->text = odr_malloc(o, c->child->u.data.len+1);
-    memcpy(u->text, c->child->u.data.data, c->child->u.data.len);
-    u->text[c->child->u.data.len] = '\0';
+    u->text = odr_malloc(eh->o, c->u.data.len+1);
+    memcpy(u->text, c->u.data.data, c->u.data.len);
+    u->text[c->u.data.len] = '\0';
     return r;
 }
 
-static Z_CommonInfo *f_commonInfo(data1_handle dh, data1_node *n,
-				  int select, ODR o)
+static Z_CommonInfo *f_commonInfo(ExpHandle *eh, data1_node *n)
 {
-    Z_CommonInfo *res = odr_malloc(o, sizeof(*res));
+    Z_CommonInfo *res = odr_malloc(eh->o, sizeof(*res));
     data1_node *c;
 
     res->dateAdded = 0;
@@ -124,19 +143,14 @@ static Z_CommonInfo *f_commonInfo(data1_handle dh, data1_node *n,
 
     for (c = n->child; c; c = c->next)
     {
-	if (c->which != DATA1N_tag || !c->u.tag.element)
-	{
-	    logf(LOG_WARN, "Malformed explain record");
-	    return 0;
-	}
-	if (select && !c->u.tag.node_selected)
+	if (!is_numeric_tag (eh, c))
 	    continue;
 	switch (c->u.tag.element->tag->value.numeric)
 	{
-	    case 601: res->dateAdded = f_string(dh, c, o); break;
-	    case 602: res->dateChanged = f_string(dh, c, o); break;
-	    case 603: res->expiry = f_string(dh, c, o); break;
-	    case 604: res->humanStringLanguage = f_string(dh, c, o); break;
+	    case 601: res->dateAdded = f_string(eh, c); break;
+	    case 602: res->dateChanged = f_string(eh, c); break;
+	    case 603: res->expiry = f_string(eh, c); break;
+	    case 604: res->humanStringLanguage = f_string(eh, c); break;
 	    /* otherInfo? */
 	    default:
 	        logf(LOG_WARN, "Bad child in commonInfo");
@@ -146,10 +160,9 @@ static Z_CommonInfo *f_commonInfo(data1_handle dh, data1_node *n,
     return res;
 }
 
-static Z_AccessInfo *f_accessInfo(data1_handle dh, data1_node *n,
-				  int select, ODR o)
+static Z_AccessInfo *f_accessInfo(ExpHandle *eh, data1_node *n)
 {
-    Z_AccessInfo *res = odr_malloc(o, sizeof(*res));
+    Z_AccessInfo *res = odr_malloc(eh->o, sizeof(*res));
     data1_node *c;
 
     res->num_queryTypesSupported = 0;
@@ -180,20 +193,21 @@ static Z_AccessInfo *f_accessInfo(data1_handle dh, data1_node *n,
 	    logf(LOG_WARN, "Malformed explain record");
 	    return 0;
 	}
-	if (select && !c->u.tag.node_selected)
+	if (eh->select && !c->u.tag.node_selected)
 	    continue;
 	/* switch-statement here */
     }
     return res;
 }
 
-static int *f_recordCount(data1_handle dh, data1_node *c, ODR o, void *which)
+static int *f_recordCount(ExpHandle *eh, data1_node *c, int *which)
 {
-    int *r= odr_malloc(o, sizeof(*r));
+    int *r= odr_malloc(eh->o, sizeof(*r));
     int *wp = which;
     char intbuf[64];
 
-    if (!c->child || c->child->which != DATA1N_tag || !c->child->u.tag.element)
+    c = c->child;
+    if (!is_numeric_tag (eh, c))
 	return 0;
     if (c->u.tag.element->tag->value.numeric == 210)
 	*wp = Z_Exp_RecordCount_actualNumber;
@@ -201,7 +215,6 @@ static int *f_recordCount(data1_handle dh, data1_node *c, ODR o, void *which)
 	*wp = Z_Exp_RecordCount_approxNumber;
     else
 	return 0;
-    c = c->child;
     if (!c->child || c->child->which != DATA1N_data)
 	return 0;
     sprintf(intbuf, "%.*s", 63, c->child->u.data.data);
@@ -209,17 +222,16 @@ static int *f_recordCount(data1_handle dh, data1_node *c, ODR o, void *which)
     return r;
 }
 
-static Z_ContactInfo *f_contactInfo(data1_handle dh, data1_node *n, ODR o)
+static Z_ContactInfo *f_contactInfo(ExpHandle *eh, data1_node *n)
 {
     return 0;
 }
 
-static Z_TargetInfo *f_targetInfo(data1_handle dh, data1_node *n,
-				  int select, ODR o)
+static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
 {
-    Z_TargetInfo *res = odr_malloc(o, sizeof(*res));
+    Z_TargetInfo *res = odr_malloc(eh->o, sizeof(*res));
     data1_node *c;
-    bool_t *fl = odr_malloc(o,sizeof(*fl));
+    bool_t *fl = odr_malloc(eh->o,sizeof(*fl));
 
     *fl = 0;
     res->commonInfo = 0;
@@ -248,31 +260,30 @@ static Z_TargetInfo *f_targetInfo(data1_handle dh, data1_node *n,
 
     for (c = n->child; c; c = c->next)
     {
-	if (!numeric_tag (dh, c, o, select))
+	if (!is_numeric_tag (eh, c))
 	    continue;
 	switch (c->u.tag.element->tag->value.numeric)
 	{
-	    case 600: res->commonInfo = f_commonInfo(dh, c, select, o);break;
-	    case 102: res->name = f_string(dh, c, o); break;
-	    case 103: res->recentNews = f_humstring(dh, c, o); break;
+	    case 600: res->commonInfo = f_commonInfo(eh, c); break;
+	    case 102: res->name = f_string(eh, c); break;
+	    case 103: res->recentNews = f_humstring(eh, c); break;
 	    case 104: break; /* icon */
-	    case 105: res->namedResultSets = f_bool(dh, c, o); break;
-	    case 106: res->multipleDbSearch = f_bool(dh, c, o); break;
-	    case 107: res->maxResultSets = f_integer(dh, c, o); break;
-	    case 108: res->maxResultSize = f_integer(dh, c, o); break;
-	    case 109: res->maxTerms = f_integer(dh, c, o); break;
-	    case 110: res->timeoutInterval = f_intunit(dh, c, o); break;
-	    case 111: res->welcomeMessage = f_humstring(dh, c, o); break;
-	    case 112: res->contactInfo = f_contactInfo(dh, c, o); break;
-	    case 113: res->description = f_humstring(dh, c, o); break;
+	    case 105: res->namedResultSets = f_bool(eh, c); break;
+	    case 106: res->multipleDbSearch = f_bool(eh, c); break;
+	    case 107: res->maxResultSets = f_integer(eh, c); break;
+	    case 108: res->maxResultSize = f_integer(eh, c); break;
+	    case 109: res->maxTerms = f_integer(eh, c); break;
+	    case 110: res->timeoutInterval = f_intunit(eh, c); break;
+	    case 111: res->welcomeMessage = f_humstring(eh, c); break;
+	    case 112: res->contactInfo = f_contactInfo(eh, c); break;
+	    case 113: res->description = f_humstring(eh, c); break;
 	    case 114: break; /* nicknames */
-	    case 115: res->usageRest = f_humstring(dh, c, o); break;
-	    case 116: res->paymentAddr = f_humstring(dh, c, o); break;
-	    case 117: res->hours = f_humstring(dh, c, o); break;
+	    case 115: res->usageRest = f_humstring(eh, c); break;
+	    case 116: res->paymentAddr = f_humstring(eh, c); break;
+	    case 117: res->hours = f_humstring(eh, c); break;
 	    case 118: break; /* dbcombinations */
 	    case 119: break; /* addresses */
-	    case 500: res->commonAccessInfo = f_accessInfo(dh, c,
-							   select, o); break;
+	    case 500: res->commonAccessInfo = f_accessInfo(eh, c); break;
 	    default:
 	        logf(LOG_WARN, "Unknown target-info element");
 	}
@@ -284,13 +295,12 @@ static Z_TargetInfo *f_targetInfo(data1_handle dh, data1_node *n,
     return res;
 }
 
-static Z_DatabaseInfo *f_databaseInfo(data1_handle dh, data1_node *n,
-				      int select, ODR o)
+static Z_DatabaseInfo *f_databaseInfo(ExpHandle *eh, data1_node *n)
 {
-    Z_DatabaseInfo *res = odr_malloc(o, sizeof(*res));
+    Z_DatabaseInfo *res = odr_malloc(eh->o, sizeof(*res));
     data1_node *c;
-    bool_t *fl = odr_malloc(o,sizeof(*fl));
-    bool_t *tr = odr_malloc(o,sizeof(*tr));
+    bool_t *fl = odr_malloc(eh->o,sizeof(*fl));
+    bool_t *tr = odr_malloc(eh->o,sizeof(*tr));
 
     *fl = 0;
     *tr = 1;
@@ -329,41 +339,41 @@ static Z_DatabaseInfo *f_databaseInfo(data1_handle dh, data1_node *n,
     
     for (c = n->child; c; c = c->next)
     {
-	if (!numeric_tag (dh, c, o, select))
+	if (!is_numeric_tag (eh, c))
 	    continue;
 	switch (c->u.tag.element->tag->value.numeric)
 	{
-	case 600: res->commonInfo = f_commonInfo(dh, c, select, o); break;
-	case 102: res->name = f_string(dh, c, o); break;
+	case 600: res->commonInfo = f_commonInfo(eh, c); break;
+	case 102: res->name = f_string(eh, c); break;
 	case 226: res->explainDatabase = ODR_NULLVAL; break;
 	case 114: res->num_nicknames = 0; res->nicknames = 0; break; /* fix */
 	case 104: res->icon = 0; break;      /* fix */
-	case 201: res->userFee = f_bool(dh, c, o); break;
-	case 202: res->available = f_bool(dh, c, o); break;
-	case 203: res->titleString = f_humstring(dh, c, o); break;
+	case 201: res->userFee = f_bool(eh, c); break;
+	case 202: res->available = f_bool(eh, c); break;
+	case 203: res->titleString = f_humstring(eh, c); break;
 	case 227: res->num_keywords = 0; res->keywords = 0; break; /* fix */
-	case 113: res->description = f_humstring(dh, c, o); break;
+	case 113: res->description = f_humstring(eh, c); break;
 	case 205: res->associatedDbs = 0; break; /* fix */
 	case 206: res->subDbs = 0; break; /* fix */
-	case 207: res->disclaimers = f_humstring(dh, c, o); break;
-	case 103: res->news = f_humstring(dh, c, o); break;
+	case 207: res->disclaimers = f_humstring(eh, c); break;
+	case 103: res->news = f_humstring(eh, c); break;
 	case 209: res->recordCount =
-		      f_recordCount(dh, c, o, &res->recordCount_which); break;
-	case 212: res->defaultOrder = f_humstring(dh, c, o); break;
-	case 213: res->avRecordSize = f_integer(dh, c, o); break;
-	case 214: res->maxRecordSize = f_integer(dh, c, o); break;
-	case 215: res->hours = f_humstring(dh, c, o); break;
-	case 216: res->bestTime = f_humstring(dh, c, o); break;
-	case 217: res->lastUpdate = f_string(dh, c, o); break;
-	case 218: res->updateInterval = f_intunit(dh, c, o); break;
-	case 219: res->coverage = f_humstring(dh, c, o); break;
-	case 220: res->proprietary = f_bool(dh, c, o); break;
-	case 221: res->copyrightText = f_humstring(dh, c, o); break;
-	case 222: res->copyrightNotice = f_humstring(dh, c, o); break;
-	case 223: res->producerContactInfo = f_contactInfo(dh, c, o); break;
-	case 224: res->supplierContactInfo = f_contactInfo(dh, c, o); break;
-	case 225: res->submissionContactInfo = f_contactInfo(dh, c, o); break;
-	case 500: res->accessInfo = f_accessInfo(dh, c, select, o); break;
+		      f_recordCount(eh, c, &res->recordCount_which); break;
+	case 212: res->defaultOrder = f_humstring(eh, c); break;
+	case 213: res->avRecordSize = f_integer(eh, c); break;
+	case 214: res->maxRecordSize = f_integer(eh, c); break;
+	case 215: res->hours = f_humstring(eh, c); break;
+	case 216: res->bestTime = f_humstring(eh, c); break;
+	case 217: res->lastUpdate = f_string(eh, c); break;
+	case 218: res->updateInterval = f_intunit(eh, c); break;
+	case 219: res->coverage = f_humstring(eh, c); break;
+	case 220: res->proprietary = f_bool(eh, c); break;
+	case 221: res->copyrightText = f_humstring(eh, c); break;
+	case 222: res->copyrightNotice = f_humstring(eh, c); break;
+	case 223: res->producerContactInfo = f_contactInfo(eh, c); break;
+	case 224: res->supplierContactInfo = f_contactInfo(eh, c); break;
+	case 225: res->submissionContactInfo = f_contactInfo(eh, c); break;
+	case 500: res->accessInfo = f_accessInfo(eh, c); break;
 	default:
 	    logf(LOG_WARN, "Unknown element in databaseInfo");
 	}
@@ -378,7 +388,12 @@ static Z_DatabaseInfo *f_databaseInfo(data1_handle dh, data1_node *n,
 Z_ExplainRecord *data1_nodetoexplain (data1_handle dh, data1_node *n,
 				      int select, ODR o)
 {
+    ExpHandle eh;
     Z_ExplainRecord *res = odr_malloc(o, sizeof(*res));
+
+    eh.dh = dh;
+    eh.select = select;
+    eh.o = o;
 
     assert(n->which == DATA1N_root);
     if (strcmp(n->u.root.type, "explain"))
@@ -392,23 +407,23 @@ Z_ExplainRecord *data1_nodetoexplain (data1_handle dh, data1_node *n,
 	logf(LOG_WARN, "Explain record should have one exactly one child");
 	return 0;
     }
-    if (!numeric_tag (dh, n, o, select))
+    if (!is_numeric_tag (&eh, n))
 	return 0;
     switch (n->u.tag.element->tag->value.numeric)
     {
-	case 0:
-	    res->which = Z_Explain_targetInfo;
-	    if (!(res->u.targetInfo = f_targetInfo(dh, n, select, o)))
-		return 0;
-	    break;
-	case 1:
-	    res->which = Z_Explain_databaseInfo;
-	    if (!(res->u.databaseInfo = f_databaseInfo(dh, n, select, o)))
-		return 0;
-	    break;
-	default:
-	    logf(LOG_WARN, "Unknown explain category");
+    case 0:
+	res->which = Z_Explain_targetInfo;
+	if (!(res->u.targetInfo = f_targetInfo(&eh, n)))
 	    return 0;
+	break;
+    case 1:
+	res->which = Z_Explain_databaseInfo;
+	if (!(res->u.databaseInfo = f_databaseInfo(&eh, n)))
+	    return 0;
+	break;
+    default:
+	logf(LOG_WARN, "Unknown explain category");
+	return 0;
     }
     return res;
 }
