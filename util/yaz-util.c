@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-util.c,v $
- * Revision 1.5  1997-07-21 12:48:11  adam
+ * Revision 1.6  1997-09-04 07:54:34  adam
+ * Right hande side operand of yaz_matchstr may include a ? in
+ * which case it returns "match ok".
+ *
+ * Revision 1.5  1997/07/21 12:48:11  adam
  * Removed windows DLL stubs.
  *
  * Revision 1.4  1997/05/01 15:07:55  adam
@@ -39,6 +43,8 @@ int yaz_matchstr(const char *s1, const char *s2)
     {
 	char c1, c2;
 
+        if (*s2 == '?')
+            return 0;
 	if (*s1 == '-')
 	    s1++;
 	if (*s2 == '-')
