@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.19  1995-12-05 11:17:30  quinn
+ * Revision 1.20  1996-02-21 12:52:55  quinn
+ * Test
+ *
+ * Revision 1.19  1995/12/05  11:17:30  quinn
  * Moved some paranthesises around. Sigh.
  *
  * Revision 1.18  1995/11/13  09:27:41  quinn
@@ -146,7 +149,8 @@ int event_loop()
 	    time_t now = time(0);
 
 	    p->force_event = 0;
-	    if (FD_ISSET(p->fd, &in) || force_event == EVENT_INPUT)
+	    if (!p->destroyed && FD_ISSET(p->fd, &in) || force_event ==
+		EVENT_INPUT)
 	    {
 		p->last_event = now;
 	    	(*p->fun)(p, EVENT_INPUT);
