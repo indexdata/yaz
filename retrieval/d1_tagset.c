@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.10  1998-10-15 08:29:17  adam
+ * Revision 1.11  1998-10-19 14:16:36  adam
+ * Fixed data1_gettagbyname. Bug introduced by previous revision.
+ *
+ * Revision 1.10  1998/10/15 08:29:17  adam
  * Tag set type may be specified in reference to it using "tagset"
  * directive in .abs-files and "include" directive in .tag-files.
  *
@@ -115,7 +118,7 @@ data1_tag *data1_gettagbyname (data1_handle dh, data1_tagset *s,
     for (; s; s = s->next)
     {
 	/* scan local set */
-	for (r = s->children->tags; r; r = r->next)
+	for (r = s->tags; r; r = r->next)
 	{
 	    data1_name *np;
 
