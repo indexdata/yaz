@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.96  2000-03-14 09:27:07  ian
+ * Revision 1.97  2000-03-14 14:06:04  ian
+ * Minor change to order of debugging output for send_apdu,
+ * fixed encoding of admin request.
+ *
+ * Revision 1.96  2000/03/14 09:27:07  ian
  * Added code to enable sending of admin extended service requests
  *
  * Revision 1.95  2000/02/28 11:20:05  adam
@@ -398,15 +402,15 @@ void send_apdu(Z_APDU *a)
     char *buf;
     int len;
 
-    if (!z_APDU(out, &a, 0, 0))
-    {
-        odr_perror(out, "Encoding APDU");
-        exit(1);
-    }
     if (apdu_file)
     {
         z_APDU(print, &a, 0, 0);
         odr_reset(print);
+    }
+    if (!z_APDU(out, &a, 0, 0))
+    {
+        odr_perror(out, "Encoding APDU");
+        exit(1);
     }
     buf = odr_getbuf(out, &len, 0);
     /* printf ("sending APDU of size %d\n", len); */

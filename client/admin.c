@@ -1,6 +1,10 @@
 /*
  * $Log: admin.c,v $
- * Revision 1.1  2000-03-14 09:27:07  ian
+ * Revision 1.2  2000-03-14 14:06:04  ian
+ * Minor change to order of debugging output for send_apdu,
+ * fixed encoding of admin request.
+ *
+ * Revision 1.1  2000/03/14 09:27:07  ian
  * Added code to enable sending of admin extended service requests
  *
  *
@@ -49,6 +53,7 @@ int sendAdminES(int type, char* dbname)
     printf ("Admin request\n");
     fflush(stdout);
 
+    /* Set up the OID for the external */
     update_oid.proto = PROTO_Z3950;
     update_oid.oclass = CLASS_EXTSERV;
     update_oid.value = VAL_ADMINSERVICE;
@@ -57,8 +62,8 @@ int sendAdminES(int type, char* dbname)
     req->packageType = odr_oiddup(out,oid);
     req->packageName = "1.Extendedserveq";
 
-    r = req->taskSpecificParameters = (Z_External *)
-	odr_malloc (out, sizeof(*r));
+    /* Allocate the external */
+    r = req->taskSpecificParameters = (Z_External *) odr_malloc (out, sizeof(*r));
     r->direct_reference = odr_oiddup(out,oid);
     r->indirect_reference = 0;
     r->descriptor = 0;
@@ -74,39 +79,41 @@ int sendAdminES(int type, char* dbname)
     {
         case 1:
             toKeep->which=Z_ESAdminOriginPartToKeep_reIndex;
-	    toKeep->u.reIndex=NULL;
+	    toKeep->u.reIndex=odr_nullval();
 	    break;
 	case 2:
             toKeep->which=Z_ESAdminOriginPartToKeep_truncate;
-	    toKeep->u.truncate=NULL;
+	    toKeep->u.truncate=odr_nullval();
 	    break;
 	case 3:
             toKeep->which=Z_ESAdminOriginPartToKeep_delete;
-	    toKeep->u.delete=NULL;
+	    toKeep->u.delete=odr_nullval();
 	    break;
 	case 4:
             toKeep->which=Z_ESAdminOriginPartToKeep_create;
-	    toKeep->u.create=NULL;
+	    toKeep->u.create=odr_nullval();
 	    break;
         case 5:
             toKeep->which=Z_ESAdminOriginPartToKeep_import;
-	    toKeep->u.import=NULL;
+	    toKeep->u.import=odr_nullval();
 	    break;
         case 6:
             toKeep->which=Z_ESAdminOriginPartToKeep_refresh;
-	    toKeep->u.refresh=NULL;
+	    toKeep->u.refresh=odr_nullval();
 	    break;
         case 7:
             toKeep->which=Z_ESAdminOriginPartToKeep_commit;
-	    toKeep->u.commit=NULL;
+	    toKeep->u.commit=odr_nullval();
 	    break;
     }
+
+    toKeep->databaseName = dbname;
 
 
     notToKeep = r->u.adminService->u.esRequest->notToKeep = (Z_ESAdminOriginPartNotToKeep *)
 	odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->notToKeep));
     notToKeep->which=Z_ESAdminOriginPartNotToKeep_recordsWillFollow;
-    notToKeep->u.recordsWillFollow=NULL;
+    notToKeep->u.recordsWillFollow=odr_nullval();
     
     send_apdu(apdu);
 
