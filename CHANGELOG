@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 2.0.9 NOT YET RELEASED
 
+Fixed calculation of package size for structured records in Generic
+Frontend Server. Reported and fixed by Irina Dijour.
+
 Fixed namespace for SRW/SRU diagnostics.
 
 Fixed SEGV in yaz-client that occured for HTTP connection errors.
