@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.33  1997-12-18 10:51:30  adam
+ * Revision 1.34  1998-02-27 14:08:04  adam
+ * Added const to some char pointer arguments.
+ * Reworked data1_read_node so that it doesn't create a tree with
+ * pointers to original "SGML"-buffer.
+ *
+ * Revision 1.33  1997/12/18 10:51:30  adam
  * Implemented sub-trees feature for schemas - including forward
  * references.
  *
@@ -420,7 +425,7 @@ typedef struct data1_node
 YAZ_EXPORT data1_handle data1_create (void);
 YAZ_EXPORT void data1_destroy(data1_handle dh);
 YAZ_EXPORT data1_node *get_parent_tag(data1_handle dh, data1_node *n);
-YAZ_EXPORT data1_node *data1_read_node(data1_handle dh, char **buf,
+YAZ_EXPORT data1_node *data1_read_node(data1_handle dh, const char **buf,
 				       data1_node *parent,
 				       int *line, data1_absyn *absyn, NMEM m);
 YAZ_EXPORT data1_node *data1_read_record(data1_handle dh, 
@@ -433,7 +438,7 @@ YAZ_EXPORT data1_tagset *data1_read_tagset(data1_handle dh, char *file);
 YAZ_EXPORT data1_element *data1_getelementbytagname(data1_handle dh, 
 						    data1_absyn *abs,
 						    data1_element *parent,
-						    char *tagname);
+						    const char *tagname);
 YAZ_EXPORT Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
 					   int select, ODR o,
 					   int *len);
@@ -445,7 +450,10 @@ YAZ_EXPORT char *data1_nodetobuf(data1_handle dh, data1_node *n,
 YAZ_EXPORT data1_node *data1_insert_taggeddata(data1_handle dh,
 					       data1_node *root,
 					       data1_node *at,
-					       char *tagname, NMEM m);
+					       const char *tagname, NMEM m);
+YAZ_EXPORT data1_node *data1_add_taggeddata(data1_handle dh, data1_node *root,
+					    data1_node *at,
+					    const char *tagname, NMEM m);
 YAZ_EXPORT data1_datatype data1_maptype(data1_handle dh, char *t);
 YAZ_EXPORT data1_varset *data1_read_varset(data1_handle dh, const char *file);
 YAZ_EXPORT data1_vartype *data1_getvartypebyct(data1_handle dh,
@@ -454,12 +462,13 @@ YAZ_EXPORT data1_vartype *data1_getvartypebyct(data1_handle dh,
 YAZ_EXPORT Z_Espec1 *data1_read_espec1(data1_handle dh, const char *file);
 YAZ_EXPORT int data1_doespec1(data1_handle dh, data1_node *n, Z_Espec1 *e);
 YAZ_EXPORT data1_esetname *data1_getesetbyname(data1_handle dh, 
-					       data1_absyn *a, char *name);
+					       data1_absyn *a,
+					       const char *name);
 YAZ_EXPORT data1_element *data1_getelementbyname(data1_handle dh,
 						 data1_absyn *absyn,
-						 char *name);
+						 const char *name);
 YAZ_EXPORT data1_node *data1_mk_node(data1_handle dh, NMEM m);
-YAZ_EXPORT data1_absyn *data1_get_absyn(data1_handle dh, char *name);
+YAZ_EXPORT data1_absyn *data1_get_absyn(data1_handle dh, const char *name);
 YAZ_EXPORT data1_maptab *data1_read_maptab(data1_handle dh, const char *file);
 YAZ_EXPORT data1_node *data1_map_record(data1_handle dh, data1_node *n,
 					data1_maptab *map, NMEM m);
@@ -486,7 +495,10 @@ YAZ_EXPORT char **data1_get_map_buf (data1_handle dp, int **lenp);
 YAZ_EXPORT data1_absyn_cache *data1_absyn_cache_get (data1_handle dh);
 YAZ_EXPORT NMEM data1_nmem_get (data1_handle dh);
 YAZ_EXPORT void data1_pr_tree (data1_handle dh, data1_node *n, FILE *out);
-
+YAZ_EXPORT char *data1_insert_string (data1_handle dh, data1_node *res,
+				      NMEM m, const char *str);
+YAZ_EXPORT data1_node *data1_read_sgml (data1_handle dh, NMEM m,
+					const char *buf);
 #ifdef __cplusplus
 }
 #endif

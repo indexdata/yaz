@@ -1,5 +1,19 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Added 'const' to some of the char pointer arguments for the
+functions, data1_read_node, data1_getelementbytagname,
+data1_insert_taggeddata, data1_getesetbyname, data1_getelementbyname,
+data1_get_absyn.
+
+Fixed bug in data1_insert_taggeddata - the last_child member of
+parent wasn't initialised.
+
+* Changed data1_read_record and data1_read_node so that the supplied
+"SGML"-buffer is read-only. In particular the resulting data1 - tree
+doesn't refer to any parts of the "SGML"-buffer.
+
+Fixed bug in server library (Windows version of statserv_remove).
+
 * Changed code so that it compiles as C++. The type definition
 of Odr_fun which is a member of Odr_arm was changed. The result is,
 that an explicit typecast is needed for the fun pointer when

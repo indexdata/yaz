@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.17  1998-02-11 11:53:34  adam
+ * Revision 1.18  1998-02-27 14:08:04  adam
+ * Added const to some char pointer arguments.
+ * Reworked data1_read_node so that it doesn't create a tree with
+ * pointers to original "SGML"-buffer.
+ *
+ * Revision 1.17  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.16  1997/12/18 10:51:30  adam
@@ -114,7 +119,7 @@ data1_absyn *data1_absyn_add (data1_handle dh, const char *name)
     return p->absyn;
 }
 
-data1_absyn *data1_get_absyn (data1_handle dh, char *name)
+data1_absyn *data1_get_absyn (data1_handle dh, const char *name)
 {
     data1_absyn *absyn;
 
@@ -124,7 +129,7 @@ data1_absyn *data1_get_absyn (data1_handle dh, char *name)
 }
 
 data1_esetname *data1_getesetbyname(data1_handle dh, data1_absyn *a,
-				    char *name)
+				    const char *name)
 {
     data1_esetname *r;
 
@@ -136,7 +141,7 @@ data1_esetname *data1_getesetbyname(data1_handle dh, data1_absyn *a,
 
 data1_element *data1_getelementbytagname (data1_handle dh, data1_absyn *abs,
 					  data1_element *parent,
-					  char *tagname)
+					  const char *tagname)
 {
     data1_element *r;
 
@@ -157,7 +162,7 @@ data1_element *data1_getelementbytagname (data1_handle dh, data1_absyn *abs,
 }
 
 data1_element *data1_getelementbyname (data1_handle dh, data1_absyn *absyn,
-				       char *name)
+				       const char *name)
 {
     data1_element *r;
     assert (absyn->main_elements);

@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.20  1998-02-11 11:53:35  adam
+ * Revision 1.21  1998-02-27 14:08:05  adam
+ * Added const to some char pointer arguments.
+ * Reworked data1_read_node so that it doesn't create a tree with
+ * pointers to original "SGML"-buffer.
+ *
+ * Revision 1.20  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.19  1997/12/09 16:17:09  adam
@@ -167,7 +172,7 @@ char *data1_insert_string (data1_handle dh, data1_node *res,
 {
     int len = strlen(str);
 
-    if (len > DATA1_LOCALDATA-1)
+    if (len >= DATA1_LOCALDATA)
         return nmem_strdup (m, str);
     else
     {
@@ -176,6 +181,65 @@ char *data1_insert_string (data1_handle dh, data1_node *res,
     }
 }
 
+
+data1_node *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
+					data1_node *at,
+					const char *tagname, NMEM m,
+					int first_flag)
+{
+    data1_node *partag = get_parent_tag (dh, at);
+    data1_node *tagn = data1_mk_node (dh, m);
+    data1_element *e = NULL;
+    data1_node *datn;
+
+    tagn->which = DATA1N_tag;
+    tagn->line = -1;
+    tagn->u.tag.tag = data1_insert_string (dh, tagn, m, tagname);
+    tagn->u.tag.node_selected = 0;
+    tagn->u.tag.make_variantlist = 0;
+    tagn->u.tag.no_data_requested = 0;
+    tagn->u.tag.get_bytes = -1;
+
+    if (partag)
+	e = partag->u.tag.element;
+    tagn->u.tag.element =
+	data1_getelementbytagname (dh, root->u.root.absyn, e, tagname);
+    tagn->last_child = tagn->child = datn = data1_mk_node (dh, m);
+    datn->parent = tagn;
+    datn->root = root;
+    datn->which = DATA1N_data;
+    datn->u.data.formatted_text = 0;
+    tagn->parent = at;
+
+    if (first_flag)
+    {
+	tagn->next = at->child;
+	if (!tagn->next)
+	    at->last_child = tagn;
+	at->child = tagn;
+    }
+    else
+    {
+	if (!at->child)
+	    at->child = tagn;
+	else
+	{
+	    assert (at->last_child);
+	    at->last_child->next = tagn;
+	}
+	at->last_child = tagn;
+    }
+    return datn;
+}
+
+data1_node *data1_add_taggeddata(data1_handle dh, data1_node *root,
+				 data1_node *at,
+				 const char *tagname, NMEM m)
+{
+    return data1_add_insert_taggeddata (dh, root, at, tagname, m, 0);
+}
+
+
 /*
  * Insert a tagged node into the record root as first child of the node at
  * which should be root or tag itself). Returns pointer to the data node,
@@ -183,37 +247,16 @@ char *data1_insert_string (data1_handle dh, data1_node *res,
  */
 data1_node *data1_insert_taggeddata(data1_handle dh, data1_node *root,
 				    data1_node *at,
-				    char *tagname, NMEM m)
+				    const char *tagname, NMEM m)
 {
-    data1_node *tagn = data1_mk_node (dh, m);
-    data1_node *datn;
-
-    tagn->which = DATA1N_tag;
-    tagn->line = -1;
-    tagn->u.tag.tag = 0;
-    tagn->u.tag.node_selected = 0;
-    tagn->u.tag.make_variantlist = 0;
-    tagn->u.tag.no_data_requested = 0;
-    tagn->u.tag.get_bytes = -1;
-    if (!(tagn->u.tag.element =
-          data1_getelementbytagname (dh, root->u.root.absyn, 0, tagname)))
-	return 0;
-    tagn->child = datn = data1_mk_node (dh, m);
-    datn->parent = tagn;
-    datn->root = root;
-    datn->which = DATA1N_data;
-    datn->u.data.formatted_text = 0;
-    tagn->next = at->child;
-    tagn->parent = at;
-    at->child = tagn;
-    return datn;
+    return data1_add_insert_taggeddata (dh, root, at, tagname, m, 1);
 }
 
 /*
  * Ugh. Sometimes functions just grow and grow on you. This one reads a
  * 'node' and its children.
  */
-data1_node *data1_read_node (data1_handle dh, char **buf,
+data1_node *data1_read_node (data1_handle dh, const char **buf,
 			     data1_node *parent, int *line,
 			     data1_absyn *absyn, NMEM m)
 {
@@ -233,7 +276,7 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 	char tag[64];
 	char args[256];
 	int i;
-	char *t = (*buf) + 1;
+	const char *t = (*buf) + 1;
 	data1_node **pp;
 	data1_element *elem = 0;
 	
@@ -369,39 +412,53 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
     }
     else /* != '<'... this is a body of text */
     {
-	int len = 0;
-	char *data = *buf, *pp = *buf;
+	const char *src;
+	char *dst;
+	int len, prev_char = 0;
 
-        if (!parent)      /* abort if abstract syntax is undefined */
-            return 0;
+	if (!parent)
+	    return 0;
 
-	/* Determine length and remove newlines/extra blanks */
-	while (**buf && **buf != '<')
-	{
-	    if (**buf == '\n')
-		(*line)++;
-	    if (isspace(**buf))
-	    {
-		*(pp++) = ' ';
-		(*buf)++;
-		while (isspace(**buf))
-		    (*buf)++;
-	    }
-	    else
-		*(pp++) = *((*buf)++);
-	    len++;
-	}
-	while (isspace(data[len-1]))
-	    len--;
 	res = data1_mk_node(dh, m);
 	res->parent = parent;
 	res->which = DATA1N_data;
 	res->u.data.what = DATA1I_text;
-	assert (len >= 0);
-	res->u.data.len = len;
-	res->u.data.data = data;
 	res->u.data.formatted_text = 0;
 	res->root = parent->root;
+
+	/* determine length of "data" */
+	src = strchr (*buf, '<');
+	if (src)
+	    len = src - *buf;
+	else
+	    len = strlen (*buf);
+
+	/* use local buffer of nmem if too large */
+	if (len >= DATA1_LOCALDATA)
+	    res->u.data.data = nmem_malloc (m, len);
+	else
+	    res->u.data.data = res->lbuf;
+
+	/* read "data" and transfer while removing white space */
+	dst = res->u.data.data;
+	for (src = *buf; --len >= 0; src++)
+	{
+	    if (*src == '\n')
+		(*line)++;
+	    if (isspace (*src))
+		prev_char = ' ';
+	    else
+	    {
+		if (prev_char)
+		{
+		    *dst++ = prev_char;
+		    prev_char = 0;
+		}
+		*dst++ = *src;
+	    }
+	}
+	*buf = src;
+	res->u.data.len = dst - res->u.data.data;
     }
     return res;
 }
@@ -415,7 +472,7 @@ data1_node *data1_read_record(data1_handle dh,
 {
     int *size;
     char **buf = data1_get_read_buf (dh, &size);
-    char *bp;
+    const char *bp;
     int rd = 0, res;
     int line = 0;
     
@@ -438,4 +495,11 @@ data1_node *data1_read_record(data1_handle dh,
 	}
 	rd += res;
     }
+}
+
+data1_node *data1_read_sgml (data1_handle dh, NMEM m, const char *buf)
+{
+    const char *bp = buf;
+    int line = 0;
+    return data1_read_node (dh, &bp, 0, &line, 0, m);
 }
