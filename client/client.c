@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.261 2004-12-13 14:21:54 heikki Exp $
+ * $Id: client.c,v 1.262 2004-12-21 20:25:39 adam Exp $
  */
 
 #include <stdio.h>
@@ -104,6 +104,8 @@ static char *esPackageName = 0;
 static char *yazProxy = 0;
 static int kilobytes = 1024;
 static char *negotiationCharset = 0;
+static char negotiationCharsetRecords = 1;
+static int  negotiationCharsetVersion = 3;
 static char *outputCharset = 0;
 static char *marcCharset = 0;
 static char* yazLang = 0;
@@ -327,7 +329,8 @@ static void send_initRequest(const char* type_and_host)
 		    out,
 		    (const char**)&negotiationCharset, 
 		    negotiationCharset ? 1 : 0,
-		    (const char**)&yazLang, yazLang ? 1 : 0, 1);
+		    (const char**)&yazLang, yazLang ? 1 : 0, 
+		    negotiationCharsetRecords);
     	}
     }
     
@@ -3034,18 +3037,24 @@ int cmd_negcharset(const char *arg)
     char l1[30];
 
     *l1 = 0;
-    if (sscanf(arg, "%29s", l1) < 1)
+    if (sscanf(arg, "%29s %d %d", l1, &negotiationCharsetRecords,
+	       &negotiationCharsetVersion) < 1)
     {
     	printf("Current negotiation character set is `%s'\n", 
-               negotiationCharset ? negotiationCharset: "none");
-    	return 1;
+               negotiationCharset ? negotiationCharset: "none");  
+	printf("Records in charset %s\n", negotiationCharsetRecords ? 
+	       "yes" : "no");
+	printf("Charneg version %d\n", negotiationCharsetVersion);
     }
-    xfree (negotiationCharset);
-    negotiationCharset = NULL;
-    if (*l1 && strcmp(l1, "-") && strcmp(l1, "none"))
+    else
     {
-        negotiationCharset = xstrdup(l1);
-        printf ("Character set negotiation : %s\n", negotiationCharset);
+	xfree (negotiationCharset);
+	negotiationCharset = NULL;
+	if (*l1 && strcmp(l1, "-") && strcmp(l1, "none"))
+	{
+	    negotiationCharset = xstrdup(l1);
+	    printf ("Character set negotiation : %s\n", negotiationCharset);
+	}
     }
     return 1;
 }
