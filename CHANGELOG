@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.15 2004/03/01
+
+Another fix for decoding of XML packed records.
+
 --- 2.0.14 2004/02/25
 
 Fixes for Chunked encoding. White space not ignored after length spec.

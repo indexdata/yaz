@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.233 2004-02-19 23:39:13 adam Exp $
+ * $Id: client.c,v 1.234 2004-03-01 17:33:02 adam Exp $
  */
 
 #include <stdio.h>
@@ -1215,6 +1215,8 @@ static int send_SRW_searchRequest(const char *arg)
 
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
+    if (recordsyntax == VAL_TEXT_XML)
+        sr->u.explain_request->recordPacking = "xml";
     return send_srw(sr);
 }
 #endif
@@ -2153,6 +2155,8 @@ static int cmd_explain(const char *arg)
 	
 	/* save this for later .. when fetching individual records */
 	sr = yaz_srw_get(out, Z_SRW_explain_request);
+	if (recordsyntax == VAL_TEXT_XML)
+            sr->u.explain_request->recordPacking = "xml";
 	send_srw(sr);
 	return 2;
     }
@@ -2389,6 +2393,8 @@ static int send_SRW_presentRequest(const char *arg)
     sr->u.request->maximumRecords = odr_intdup(out, nos);
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
+    if (recordsyntax == VAL_TEXT_XML)
+        sr->u.request->recordPacking = "xml";
     return send_srw(sr);
 }
 #endif

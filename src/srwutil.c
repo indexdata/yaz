@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.13 2004-02-26 14:46:01 adam Exp $
+ * $Id: srwutil.c,v 1.14 2004-03-01 17:33:03 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -254,7 +254,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 	char *scanClause = 0;
 	char *recordXPath = 0;
 	char *recordSchema = 0;
-	char *recordPacking = "xml";
+	char *recordPacking = "xml";  /* xml packing is default for SRU */
 	char *maximumRecords = 0;
 	char *startRecord = 0;
 	char **uri_name;

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.23 2004-02-23 12:57:19 adam Exp $
+ * $Id: srw.c,v 1.24 2004-03-01 17:33:03 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -113,7 +113,7 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
     if (!match_element(ptr, elem))
         return 0;
     ptr = ptr->children;
-    while (ptr && ptr->type != XML_TEXT_NODE && ptr->type != XML_COMMENT_NODE)
+    while (ptr && (ptr->type == XML_TEXT_NODE || ptr->type == XML_COMMENT_NODE))
 	ptr = ptr->next;
     if (!ptr)
         return 0;
