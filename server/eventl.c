@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: eventl.c,v 1.33 2002-11-26 13:15:42 adam Exp $
+ * $Id: eventl.c,v 1.34 2002-11-26 16:56:21 adam Exp $
  */
 
 #include <stdio.h>
@@ -62,8 +62,6 @@ int event_loop(IOCHAN *iochans)
 
         if (statserv_must_terminate())
         {
-            fprintf (stderr, "must terminate 1\n");
-
             for (p = *iochans; p; p = p->next)
                 p->force_event = EVENT_TIMEOUT;
         }
