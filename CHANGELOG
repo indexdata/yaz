@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 1.8.6 2002/MM/DD
+--- 1.8.6 2002/03/25
 
 Added PQF feature: '@attr type=value' may be written as '@type=value'.
 
