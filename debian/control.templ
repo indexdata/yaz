@@ -1,0 +1,50 @@
+Source: yaz
+Standards-Version: ${Source-Version}
+Maintainer: Morten Garkier Hendriksen <mgh@dbc.dk>
+Priority: extra
+
+Package: yaz-doc
+Section: devel
+Architecture: any
+Description: The YAZ Z39.50 toolkit (documentation)
+ The YAZ-toolkit is a C-toolkit for building
+ origins and/or targets using the Z39.50 protocol for
+ information retrieval.
+ .
+ YAZ supports a substantial subset of the Z39.50 standard
+ and features a SSL protocol layer as an option.
+ .
+ YAZ is made by the danish software company Index Data
+ and further information is available at http://www.indexdata.dk/
+
+Package: @YAZ_RUNTIME@
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: The YAZ Z39.50 toolkit (runtime files)
+ The YAZ-toolkit is a C-toolkit for building
+ origins and/or targets using the Z39.50 protocol for
+ information retrieval.
+ .
+ YAZ supports a substantial subset of the Z39.50 standard
+ and features a SSL protocol layer as an option.
+ .
+ YAZ is made by the danish software company Index Data
+ and further information is available at http://www.indexdata.dk/
+
+Package: @YAZ_DEVEL@
+Depends: @YAZ_RUNTIME@, ${shlibs:Depends}
+Section: devel
+Architecture: any
+Recommends: yaz-doc
+Description: The YAZ Z39.50 toolkit (development files)
+ The YAZ-toolkit is a C-toolkit for building
+ origins and/or targets using the Z39.50 protocol for
+ information retrieval.
+ .
+ YAZ supports a substantial subset of the Z39.50 standard
+ and features a SSL protocol layer as an option.
+ .
+ YAZ is made by the danish software company Index Data
+ and further information is available at http://www.indexdata.dk/
+

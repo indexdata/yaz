@@ -1,14 +1,12 @@
-yaz (1.7-1) experimental; urgency=low
-  * Build in sub directory build instead of root directory.
- 
- -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 06 Jun 2001 22:33:00 +0200
+yaz (1.7-CVS20010507) unstable; urgency=low
 
-yaz (1.7) experimental; urgency=low
-  * Initial version.
+  * New upstream
 
- -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 28 May 2001 14:42:18 +0200
+ -- Morten Garkier Hendriksen <mgh@dbc.dk>  Mon,  7 May 2001 15:41:54 +0200
 
-Local variables:
-mode: debian-changelog
-End:
+yaz (1.7-1) unstable; urgency=low
+
+  * First debian package
+
+ -- Morten Garkier Hendriksen <mgh@dbc.dk>  Sat, 27 Jan 2001 19:09:57 +0100
 
