@@ -2,6 +2,11 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 ---
 
+[frontend-server] NextResultSetPosition was sometimes set incorrectly when
+surrogate diagnostics were generated.
+
+Fixed bug in the DiagRecs decoder
+
 Added options for max PDU size and session timeout to frontend-server.
 
 Added documentation of query-language parsers and other utilities.
@@ -10,7 +15,7 @@ Added Attribute set to the bend_scanrequest API.
 
 [retrieval] Allow multiple local values for attribute.
 
-[retrieval} Allow multiple attributes per element in .abs files. index type.
+[retrieval] Allow multiple attributes per element in .abs files. index type.
 
 --- 1.1pl2  1996/4/10
 
