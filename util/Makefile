@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.17 1995-11-08 17:41:43 quinn Exp $
+# $Id: Makefile,v 1.18 1996-02-20 16:33:06 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -12,7 +12,7 @@ DEFS=$(INCLUDE)
 LIB=$(LIBDIR)/libutil.a
 LIBS=
 PO = options.o log.o marcdisp.o yaz-ccl.o pquery.o oid.o wrbuf.o \
-	xmalloc.o readconf.o tpath.o nmem.o # dmalloc.o 
+	xmalloc.o readconf.o tpath.o nmem.o yaz-util.o # dmalloc.o 
 CPP=$(CC) -E
 RANLIB=ranlib
 
