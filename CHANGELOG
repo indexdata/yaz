@@ -9,7 +9,7 @@ WIN32 installer - using the excellent NSIS software from nullsoft.
 Fixed CCL parsing of "field = - <number>".
 
 Added function yaz_marc_decode that decodes MARC for line mode
-display or XML.
+display or XML (similar to that used by JZKit).
 
 Fixed BER decoding of OPTIONAL CHOICE. The bug didn't affect the
 Z39.50. But ISO/ILL was, however.
