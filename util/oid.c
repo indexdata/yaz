@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.31  1998-12-03 11:33:05  adam
+ * Revision 1.32  1999-02-18 10:30:46  quinn
+ * Changed ES: Update OID
+ *
+ * Revision 1.31  1998/12/03 11:33:05  adam
  * Added OID's for XML.
  *
  * Revision 1.30  1998/10/18 07:48:56  adam
@@ -231,7 +234,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_PQUERY,    {9,2,-1},    "Pers. query" },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_PCQUERY,   {9,3,-1},    "Per'd query" },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_ITEMORDER, {9,4,-1},    "Item order"  },
-    {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,-1},    "DB. Update"  },
+    {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,1,1,-1},    "DB. Update"  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
 
