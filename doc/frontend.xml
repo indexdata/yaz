@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.10 2001-11-27 22:12:24 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.11 2002-03-05 12:45:48 mike Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
 
@@ -342,6 +342,7 @@ typedef struct bend_initrequest
     Z_ReferenceId *referenceId;/* reference ID */
     char *peer_name;           /* dns host of peer (client) */
 
+    char *implementation_id;
     char *implementation_name;
     char *implementation_version;
     int (*bend_sort) (void *handle, bend_sort_rr *rr);
@@ -394,8 +395,9 @@ typedef struct bend_initresult
 
     <para>
      The members <literal>peer_name</literal>,
+     <literal>implementation_id</literal>,
      <literal>implementation_name</literal> and
-     <literal>implementation_version</literal> holds DNS of client, name
+     <literal>implementation_version</literal> holds DNS of client, ID of implementor, name
      of client (Z39.50) implementation - and version.
     </para>
 

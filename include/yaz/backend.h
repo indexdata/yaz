@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.12  2001-03-25 21:55:12  adam
+ * Revision 1.13  2002-03-05 12:45:49  mike
+ * Add trivial support for implementation_id specified by backend.
+ *
+ * Revision 1.12  2001/03/25 21:55:12  adam
  * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
  *
  * Revision 1.11  2001/01/30 21:34:17  adam
@@ -267,6 +270,7 @@ typedef struct bend_initrequest
     Z_ReferenceId *referenceId;/* reference ID */
     char *peer_name;           /* dns host of peer (client) */
     
+    char *implementation_id;
     char *implementation_name;
     char *implementation_version;
     int (*bend_sort) (void *handle, bend_sort_rr *rr);

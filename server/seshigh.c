@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.126 2002-01-23 22:40:36 adam Exp $
+ * $Id: seshigh.c,v 1.127 2002-03-05 12:45:49 mike Exp $
  */
 
 /*
@@ -591,6 +591,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     assoc->init->auth = req->idAuthentication;
     assoc->init->referenceId = req->referenceId;
     assoc->init->implementation_version = 0;
+    assoc->init->implementation_id = 0;
     assoc->init->implementation_name = 0;
     assoc->init->bend_sort = NULL;
     assoc->init->bend_search = NULL;
@@ -703,6 +704,16 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     resp->implementationName = "GFS/YAZ";
 
+    if (assoc->init->implementation_id)
+    {
+	char *nv = (char *)
+	    odr_malloc (assoc->encode,
+			strlen(assoc->init->implementation_id) + 10 + 
+			       strlen(resp->implementationId));
+	sprintf (nv, "%s / %s",
+		 resp->implementationId, assoc->init->implementation_id);
+        resp->implementationId = nv;
+    }
     if (assoc->init->implementation_name)
     {
 	char *nv = (char *)
