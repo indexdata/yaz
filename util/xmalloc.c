@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.2  1995-12-05 11:08:37  adam
+ * Revision 1.3  1995-12-05 15:08:44  adam
+ * Fixed verbose of xrealloc.
+ *
+ * Revision 1.2  1995/12/05  11:08:37  adam
  * More verbose malloc routines.
  *
  * Revision 1.1  1995/11/01  11:56:53  quinn
@@ -40,20 +43,16 @@
 
 void *xrealloc_f (void *o, size_t size, char *file, int line)
 {
-    void *p;
+    void *p = realloc (o, size);
 
 #ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xrealloc(s=%d) %p", file, line, size, p);
+    fprintf(stderr, "%s:%d: xrealloc(s=%d) %p -> %p\n", file, line, size, o, p);
 #endif
-    p = realloc (o, size);
     if (!p)
     {
     	logf (LOG_FATAL|LOG_ERRNO, "Out of memory, realloc (%d bytes)", size);
     	exit(1);
     }
-#ifdef TRACE_XMALLOC
-    fprintf(stderr, " -> %p\n", p);
-#endif
     return p;
 }
 
