@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.239 2004-04-28 12:10:51 adam Exp $
+ * $Id: client.c,v 1.240 2004-04-28 13:25:57 adam Exp $
  */
 
 #include <stdio.h>
@@ -17,6 +17,7 @@
 #endif
 
 #if HAVE_OPENSSL_SSL_H
+#include <openssl/bio.h>
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
@@ -602,22 +603,22 @@ int session_connect(const char *arg)
     {
 	X509 *server_cert = SSL_get_peer_certificate (ssl);
 	char *str;
+
 	if (server_cert)
 	{
-	    printf ("Server certificate:\n");
-	    
-	    str = X509_NAME_oneline (X509_get_subject_name (server_cert),0,0);
-	    if (str)
-	    {
-		printf ("\t subject: %s\n", str);
-		free (str);
-	    }
-	    str = X509_NAME_oneline (X509_get_issuer_name  (server_cert),0,0);
-	    if (str)
-	    {
-		printf ("\t issuer: %s\n", str);
-		free (str);
-	    }
+	    char *pem_buf;
+	    int pem_len;
+	    BIO *bio = BIO_new(BIO_s_mem());
+
+	    /* get PEM buffer in memory */
+	    PEM_write_bio_X509(bio, server_cert);
+	    pem_len = BIO_get_mem_data(bio, &pem_buf);
+	    fwrite(pem_buf, pem_len, 1, stdout);
+	
+	    /* print all info on screen .. */
+	    X509_print_fp(stdout, server_cert);
+	    BIO_free(bio);
+
 	    X509_free (server_cert);
 	}
     }
