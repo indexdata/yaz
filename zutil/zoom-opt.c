@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-opt.c,v 1.7 2002-06-04 08:33:49 adam Exp $
+ * $Id: zoom-opt.c,v 1.1 2002-09-16 18:45:14 adam Exp $
  *
  * ZOOM layer for C, options handling
  */

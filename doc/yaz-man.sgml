@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-man.sgml,v 1.1 2002-09-16 14:16:31 adam Exp $ -->
+<!-- $Id: yaz-man.sgml,v 1.2 2002-09-16 18:45:13 adam Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -64,7 +64,8 @@
  <refsect1><title>SEE ALSO</title>
   <para><command>yaz-client(1)</command>, 
    <command>yaz-ztest(8)</command>, 
-   <command>yaz-config(1)</command>
+   <command>yaz-config(1)</command>,
+   <command>zoomsh(1)</command>
   </para>
   <para>YAZ manual (
    <filename><replaceable>prefix</replaceable>/share/yaz/doc</filename>)

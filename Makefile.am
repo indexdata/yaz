@@ -1,10 +1,10 @@
-## $Id: Makefile.am,v 1.14 2002-06-02 21:34:45 adam Exp $
+## $Id: Makefile.am,v 1.15 2002-09-16 18:45:13 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
-DIST_SUBDIRS=util odr z39.50 ill zutil comstack ccl tab retrieval server lib zoom include client ztest doc
+DIST_SUBDIRS=util odr z39.50 ill zutil comstack ccl tab retrieval server lib include client ztest zoom doc
 
-SUBDIRS = util odr comstack z39.50 ill zutil ccl zoom tab retrieval server include lib client ztest
+SUBDIRS = util odr comstack z39.50 ill zutil ccl tab retrieval server include lib client ztest zoom
 
 aclocaldir=$(datadir)/aclocal
 

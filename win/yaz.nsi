@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.12 2002-09-10 18:43:03 adam Exp $
+; $Id: yaz.nsi,v 1.13 2002-09-16 18:45:14 adam Exp $
 
 !define VERSION "1.9.1"
 
@@ -107,11 +107,11 @@ Section "YAZ Source"
 	File ..\ill\*.asn
 	SetOutPath $INSTDIR\zutil
 	File ..\zutil\*.c
+	File ..\zutil\*.h
 	SetOutPath $INSTDIR\ccl
 	File ..\ccl\*.c
 	SetOutPath $INSTDIR\zoom
 	File ..\zoom\*.c
-	File ..\zoom\*.h
 	SetOutPath $INSTDIR\comstack
 	File ..\comstack\*.c
 	SetOutPath $INSTDIR\server

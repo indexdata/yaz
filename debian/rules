@@ -84,7 +84,7 @@ stamp-install: stamp-build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	dh_installdocs -p yaz-doc doc/
+	dh_installdocs -p yaz-doc doc/*.html doc/*.pdf
 	dh_installchangelogs -p yaz-doc
 	dh_link -p yaz-doc
 	dh_strip -p yaz-doc
@@ -118,8 +118,8 @@ endif
 
 	dh_installdeb -p yaz-runtime
 	dh_installdeb -p yaz-devel
-	dh_installman -p yaz-runtime doc/yaz-client.1 doc/yaz-ztest.8 doc/yaz-config.1 doc/yaz.7
-	dh_undocumented -p yaz-runtime yaz-comp.1 zoomsh.1
+	dh_installman -p yaz-runtime doc/yaz-client.1 doc/yaz-ztest.8 doc/yaz-config.1 doc/yaz.7 doc/zoomsh.1
+	dh_undocumented -p yaz-runtime yaz-comp.1
 	echo "libyaz 1 yaz-runtime" > debian/yaz-runtime/DEBIAN/shlibs
 	echo "libyazthread 1 yaz-runtime" >> debian/yaz-runtime/DEBIAN/shlibs
 	echo "libyazmalloc 1 yaz-runtime" >> debian/yaz-runtime/DEBIAN/shlibs

@@ -1,24 +1,20 @@
-## $Id: Makefile.am,v 1.4 2002-06-02 21:27:17 adam Exp $
+## $Id: Makefile.am,v 1.5 2002-09-16 18:45:14 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
-noinst_LTLIBRARIES = libzoom.la
-libzoom_la_SOURCES = zoom-opt.c zoom-c.c zoom-p.h
-
-zoomlibs = libzoom.la ../comstack/libcomstack.la ../z39.50/libz39.50.la ../ill/libill.la ../zutil/libzutil.la  ../odr/libodr.la ../util/libutil.la $(READLINE_LIBS)
-
-zoomsh_LDADD = $(zoomlibs)
-zoomtst1_LDADD = $(zoomlibs)
-zoomtst2_LDADD = $(zoomlibs)
-zoomtst3_LDADD = $(zoomlibs)
-zoomtst4_LDADD = $(zoomlibs)
-zoomtst5_LDADD = $(zoomlibs)
-zoomtst6_LDADD = $(zoomlibs)
-zoomtst7_LDADD = $(zoomlibs)
-zoomtst8_LDADD = $(zoomlibs)
 
 noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8
 bin_PROGRAMS = zoomsh
+
+zoomtst1_LDADD = ../lib/libyaz.la
+zoomtst2_LDADD = ../lib/libyaz.la
+zoomtst3_LDADD = ../lib/libyaz.la
+zoomtst4_LDADD = ../lib/libyaz.la
+zoomtst5_LDADD = ../lib/libyaz.la
+zoomtst6_LDADD = ../lib/libyaz.la
+zoomtst7_LDADD = ../lib/libyaz.la
+zoomtst8_LDADD = ../lib/libyaz.la
+zoomsh_LDADD = ../lib/libyaz.la $(READLINE_LIBS)
 
 zoomtst1_SOURCES = zoomtst1.c
 zoomtst2_SOURCES = zoomtst2.c

@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.12 2002-08-20 08:19:40 adam Exp $
+ * $Id: zoom-p.h,v 1.1 2002-09-16 18:45:14 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>

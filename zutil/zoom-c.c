@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.44 2002-09-13 08:57:03 adam Exp $
+ * $Id: zoom-c.c,v 1.1 2002-09-16 18:45:14 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
