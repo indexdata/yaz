@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.50 2003-11-16 22:56:53 adam Exp $
+## $Id: Makefile.am,v 1.51 2003-11-18 20:34:34 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -25,10 +25,10 @@ HTMLFILES = \
 
 MANFILES=yaz-client.1 yaz-client-ssl.1 yaz-ztest.8 \
 	yaz-ztest-ssl.8 yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
-	yaz-marcdump.1
+	yaz-marcdump.1 yaz-iconv.1
 REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
-	yaz-marcdump-man.xml
+	yaz-marcdump-man.xml yaz-iconv-man.xml
 
 SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
 	apilayer.obj yaz.css
@@ -65,6 +65,9 @@ yaz-asncomp.1: yaz-asncomp-man.xml
 
 yaz-marcdump.1: yaz-marcdump-man.xml
 	docbook2man $(srcdir)/yaz-marcdump-man.xml
+
+yaz-iconv.1: yaz-iconv-man.xml
+	docbook2man $(srcdir)/yaz-iconv-man.xml
 
 $(HTMLFILES): $(XMLFILES)  
 	jade -E14 -D $(srcdir) -d yazhtml.dsl -t sgml $(srcdir)/xml.dcl yaz.xml

@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-marcdump-man.xml,v 1.1 2003-10-27 12:21:24 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.2 2003-11-18 20:34:34 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>
@@ -114,6 +114,8 @@
  <refsect1><title>FILES</title>
   <para>
    <filename><replaceable>prefix</replaceable>/bin/yaz-marcdump</filename>
+  </para>
+  <para>
    <filename><replaceable>prefix</replaceable>/include/yaz/marcdisp.h</filename>
   </para>
   </refsect1>
