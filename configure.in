@@ -1,10 +1,10 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.16 2000-02-28 11:20:05 adam Exp $
+dnl $Id: configure.in,v 1.17 2000-02-29 13:44:55 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.6)
-AM_CONFIG_HEADER(include/yaz/config.h)
+dnl AM_CONFIG_HEADER(include/config.h)
 dnl
 dnl ------ Checking programs
 AC_PROG_CC

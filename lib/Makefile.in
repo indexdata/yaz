@@ -83,12 +83,11 @@ YAZLIBS = ../odr/libodr.a ../@ASNMODULE@/libasn.a ../comstack/libcomstack.a  ../
 LIBDIR = $(exec_prefix)/lib
 INCDIR = $(prefix)/include
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = ../include/yaz/config.h
 CONFIG_CLEAN_FILES = 
 LIBRARIES =  $(lib_LIBRARIES)
 
 
-DEFS = @DEFS@ -I. -I$(srcdir) -I../include/yaz
+DEFS = @DEFS@ -I. -I$(srcdir) 
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@

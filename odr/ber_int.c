@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.17  2000-02-28 11:20:06  adam
+ * Revision 1.18  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.17  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.16  2000/01/31 13:15:21  adam
@@ -59,16 +62,19 @@
  * First kick.
  *
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <string.h>
-
-#include <yaz/odr.h>
 
 #ifdef WIN32
 #include <winsock.h>
 #else
 #include <arpa/inet.h>
 #endif
+
+#include <yaz/odr.h>
 
 static int ber_encinteger(ODR o, int val);
 static int ber_decinteger(const unsigned char *buf, int *val);

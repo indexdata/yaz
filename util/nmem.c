@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.20  2000-01-06 14:59:13  adam
+ * Revision 1.21  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.20  2000/01/06 14:59:13  adam
  * Added oid_init/oid_exit. Changed oid_exit.
  *
  * Revision 1.19  1999/11/30 13:47:12  adam
@@ -77,6 +80,9 @@
  * This is a simple and fairly wasteful little module for nibble memory
  * allocation. Evemtually we'll put in something better.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <string.h>

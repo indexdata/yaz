@@ -75,12 +75,11 @@ libasn_a_SOURCES = proto.c prt-rsc.c prt-acc.c prt-exp.c prt-grs.c prt-exd.c 	pr
 
 INCLUDES = -I../include
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = ../include/yaz/config.h
 CONFIG_CLEAN_FILES = 
 LIBRARIES =  $(noinst_LIBRARIES)
 
 
-DEFS = @DEFS@ -I. -I$(srcdir) -I../include/yaz
+DEFS = @DEFS@ -I. -I$(srcdir) 
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@

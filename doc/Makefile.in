@@ -72,8 +72,10 @@ docdir = $(pkgdatadir)/doc
 
 doc_DATA =   yaz.sgml yaz.txt yaz.ps profile.txt profiles.ps yaz.html  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html  yaz-6.html yaz-7.html yaz-8.htlm yaz-9.html
 
+
+EXTRA_DIST =   yaz.sgml yaz.txt yaz.ps profile.txt profiles.ps yaz.html  yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html  yaz-6.html yaz-7.html yaz-8.htlm yaz-9.html
+
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = ../include/yaz/config.h
 CONFIG_CLEAN_FILES = 
 DATA =  $(doc_DATA)
 
@@ -197,11 +199,6 @@ uninstall-am uninstall all-redirect all-am all installdirs \
 mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
-
-#EXTRA_DIST = \
-# yaz.sgml yaz.txt yaz.ps profile.txt profiles.ps yaz.html \
-# yaz-1.html yaz-2.html yaz-3.html yaz-4.html yaz-5.html \
-# yaz-6.html yaz-7.html yaz-8.htlm yaz-9.html
 
 yaz.txt: yaz.sgml
 	sgml2txt -f yaz.sgml

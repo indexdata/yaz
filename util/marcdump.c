@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.9  1999-11-30 13:47:12  adam
+ * Revision 1.10  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.9  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.8  1999/05/26 07:49:35  adam
@@ -32,6 +35,10 @@
  * Added copy of CCL and MARC display
  *
  */
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -71,16 +71,16 @@ VERSION = @VERSION@
 noinst_LIBRARIES = libutil.a
 EXTRA_DIST = yc.tcl 
 
-INCLUDES = -I../include 
+INCLUDES = -I../include
+
 libutil_a_SOURCES = options.c log.c marcdisp.c oid.c wrbuf.c nmemsdup.c    xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c 
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = ../include/yaz/config.h
 CONFIG_CLEAN_FILES = 
 LIBRARIES =  $(noinst_LIBRARIES)
 
 
-DEFS = @DEFS@ -I. -I$(srcdir) -I../include/yaz
+DEFS = @DEFS@ -I. -I$(srcdir) 
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@

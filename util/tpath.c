@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tpath.c,v $
- * Revision 1.3  1999-11-30 13:47:12  adam
+ * Revision 1.4  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.3  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.2  1996/10/29 13:36:26  adam
@@ -15,6 +18,9 @@
  *
  *
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <string.h>

@@ -79,12 +79,11 @@ libccl_a_SOURCES = cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c   cclqfi
 cclsh_SOURCES = cclsh.c
 cclsh_LDADD = libccl.a
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = ../include/yaz/config.h
 CONFIG_CLEAN_FILES = 
 LIBRARIES =  $(noinst_LIBRARIES)
 
 
-DEFS = @DEFS@ -I. -I$(srcdir) -I../include/yaz
+DEFS = @DEFS@ -I. -I$(srcdir) 
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@

@@ -21,12 +21,12 @@ Retrieval.
 %build
 
 CFLAGS="$RPM_OPT_FLAGS" \
- ./configure --prefix=$RPM_BUILD_ROOT/usr --enable-yc --enable-tcpd
+ ./configure --prefix=/usr --enable-yc --enable-tcpd
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
 rm -fr $RPM_BUILD_ROOT
-make install
+make prefix=$RPM_BUILD_ROOT/usr install
 
 %files
 %defattr(-,root,root)

@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: oid.c,v $
- * Revision 1.41  2000-01-10 15:16:53  adam
+ * Revision 1.42  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.41  2000/01/10 15:16:53  adam
  * Added several OID's.
  *
  * Revision 1.40  2000/01/06 14:59:13  adam
@@ -155,6 +158,9 @@
  * We could (and should?) extend this so that the user app can add new
  * entries to the list at initialization.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>

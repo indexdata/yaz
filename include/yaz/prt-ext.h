@@ -35,9 +35,8 @@
 #include <yaz/yconfig.h>
 #include <yaz/oid.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
+YAZ_BEGIN_CDECL
 
 /*
  * Used to keep track of known External definitions (a loose approach
@@ -104,13 +103,12 @@ struct Z_External
     } u;
 };
 
+
 YAZ_EXPORT int z_External(ODR o, Z_External **p, int opt, const char *name);
 YAZ_EXPORT Z_ext_typeent *z_ext_getentbyref(oid_value val);
 YAZ_EXPORT Z_External *z_ext_record(ODR o, int format, const char *buf,
 				    int len);
 
-#ifdef __cplusplus
-}
-#endif
+YAZ_END_CDECL
 
 #endif

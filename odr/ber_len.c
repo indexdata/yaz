@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1995-1999, Index Data.
+ * Copyright (C) 1995-2000, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_len.c,v $
- * Revision 1.8  1999-11-30 13:47:11  adam
+ * Revision 1.9  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.8  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.7  1999/01/08 11:23:23  adam
@@ -21,6 +24,9 @@
  *
  *
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <yaz/odr.h>

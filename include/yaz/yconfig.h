@@ -1,10 +1,6 @@
 #ifndef YCONFIG_H
 #define YCONFIG_H
 
-#if HAVE_CONFIG_H
-#include <yaz/config.h>
-#endif
-
 #ifndef YAZ_EXPORT
 # ifdef WIN32
 #  define YAZ_EXPORT __declspec(dllexport)

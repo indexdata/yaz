@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: odr_mem.c,v $
- * Revision 1.17  2000-01-31 13:15:21  adam
+ * Revision 1.18  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.17  2000/01/31 13:15:21  adam
  * Removed uses of assert(3). Cleanup of ODR. CCL parser update so
  * that some characters are not surrounded by spaces in resulting term.
  * ILL-code updates.
@@ -59,6 +62,9 @@
  * Beginning to add memory management to odr
  *
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <yaz/odr.h>

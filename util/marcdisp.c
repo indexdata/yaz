@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: marcdisp.c,v $
- * Revision 1.10  2000-02-05 10:47:19  adam
+ * Revision 1.11  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.10  2000/02/05 10:47:19  adam
  * Identifier-length and indicator-lenght no longer set to 2 (forced).
  *
  * Revision 1.9  1999/12/21 16:24:48  adam
@@ -34,6 +37,10 @@
  * Added copy of CCL and MARC display
  *
  */
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <string.h>

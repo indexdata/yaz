@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_any.c,v $
- * Revision 1.9  1999-11-30 13:47:11  adam
+ * Revision 1.10  2000-02-29 13:44:55  adam
+ * Check for config.h (currently not generated).
+ *
+ * Revision 1.9  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.8  1999/04/20 09:56:48  adam
@@ -33,6 +36,9 @@
  * Works better now.
  *
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <yaz/odr.h>
 

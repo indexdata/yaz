@@ -1,6 +1,8 @@
 ## Copyright (C) 1995-2000, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.2 2000-02-28 11:44:39 adam Exp $
+## $Id: Makefile.am,v 1.3 2000-02-29 13:44:55 adam Exp $
+
+AUTOMAKE_OPTIONS=no-dependencies
 
 bin_PROGRAMS=yaz-client
 
