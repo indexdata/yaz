@@ -1,0 +1,55 @@
+name gils
+reference GILS-attset
+include bib1.att
+ordinal 2
+
+att 2001		distributorName
+att 2002		indexTermsControlled
+att 2003		purpose
+att 2004		accessConstraints
+att 2005		useConstraints
+att 2006		distributorOrganization
+att 2007		distributorStreetAddress
+att 2008		distributorCity
+att 2008		distributorState
+att 2010		distributorZipCode
+att 2011		distributorCountry
+att 2012		distributorNetworkAddress
+att 2013		distributorHoursOfService
+att 2014		distributorTelephone
+att 2015		distributorFax
+att 2016		availableResourceDescription
+att 2017		availableOrderProcess
+att 2018		availableTechnicalPrerequisites
+att 2019		availableTimePeriodStructured
+att 2020		availableTimePeriodTextual
+att 2021		availableLinkage
+att 2022		availableLinkageType
+att 2023		contactName			
+att 2024		contactOrganization
+att 2025		contactStreetAddress
+att 2026		contactCity
+att 2027		contactState
+att 2028		contactZipCode
+att 2029		contactCountry
+att 2030		contactNetworkAddress
+att 2031		contactHoursOfService
+att 2032		contactTelephone
+att 2033		contactFax
+att 2034		agencyProgram
+att 2035		sourcesOfData
+att 2036		thesaurus
+att 2037		methodology
+att 2038		westernMost
+att 2039		easternMost
+att 2040		northernMost
+att 2041		southernMost
+att 2042		geographicKeywordName
+att 2043		geographicKeywordType
+att 2044		timePeriodStructured
+att 2045		timePeriodTextual
+att 2046		crossReferenceTitle
+att 2047		crossReferenceLinkage
+att 2048		crossReferenceType
+att 2049		originalControlIdentifier
+att 2050		supplementalInformation

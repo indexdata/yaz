@@ -1,0 +1,106 @@
+#
+# This is the abstract syntax (and most of the top-level profile info)
+# for GILS.
+#
+
+name gils
+reference GILS-schema
+attset gils.att
+tagset gils.tag
+varset var1.var
+
+maptab gils-usmarc.map
+maptab gils-summary.map
+
+# Element set names
+
+esetname VARIANT gils-variant.est  # for WAIS-compliance
+esetname B gils-b.est
+esetname G gils-g.est
+esetname W gils-b.est   # We don't really do bodyOfDisplay yet.
+esetname F @
+
+all Any
+
+elm (1,1)		    schemaIdentifier              -
+elm (1,10)                  rank                          -
+elm (1,12)                  url                           -
+elm (1,14)                  localControlNumber            Local-number
+elm (1,16)                  dateOfLastModification       Date/time-last-modified
+elm (2,1)                   Title                         !:p,!:w
+elm (4,1)                   controlIdentifier             Identifier-standard
+elm (2,6)                   abstract                      Abstract
+elm (4,51)                  purpose                       !
+elm (4,52)                  originator                    -     ???
+elm (4,53)                  accessConstraints             !
+elm (4,54)                  useConstraints                !
+elm (4,70)                  availability                  -
+elm (4,70)/(4,90)           distributor                   -
+elm (4,70)/(4,90)/(2,7)     distributorName               !
+elm (4,70)/(4,90)/(2,10)    distributorOrganization       !
+elm (4,70)/(4,90)/(4,2)     distributorStreetAddress      !
+elm (4,70)/(4,90)/(4,3)     distributorCity               !
+elm (4,70)/(4,90)/(4,4)     distributorState              !
+elm (4,70)/(4,90)/(4,5)     distributorZipCode            !
+elm (4,70)/(4,90)/(2,16)    distributorCountry            !
+elm (4,70)/(4,90)/(2,12)    distributorNetworkAddress     !
+elm (4,70)/(4,90)/(4,6)     distributorHoursOfService     !
+elm (4,70)/(4,90)/(2,14)    distributorPhoneNumber        distributorTelephone
+elm (4,70)/(4,90)/(2,15)    distributorFaxNumber          distributorFax
+elm (4,70)/(4,7)            resourceDescription     availableResourceDescription
+elm (4,70)/(4,55)           orderProcess            availableOrderProcess
+elm (4,70)/(4,8)            technicalPrerequisite   availableTechnicalPrerequisites
+elm (4,70)/(4,93)           availableTimePeriod           -
+elm (4,70)/(4,93)/(4,15)    availableTimePeriodStructured   availableTimePeriodStructured
+elm (4,70)/(4,93)/(4,16)    availableTimePeriodTextual      availableTimePeriodTextual
+elm (4,70)/(4,17)           linkage                availableLinkage
+elm (4,70)/(4,18)           linkageType            availableLinkageType
+elm (4,94)                  pointOfContact                -
+elm (4,94)/(2,7)            contactName                   !
+elm (4,94)/(2,10)           contactOrganization           !:p,!:w
+elm (4,94)/(4,2)            contactStreetAddress          !
+elm (4,94)/(4,3)            contactCity                   !
+elm (4,94)/(4,4)            contactState                  !
+elm (4,94)/(4,5)            contactZipCode                !
+elm (4,94)/(2,16)           contactCountry                !
+elm (4,94)/(2,12)           contactNetworkAddress         !
+elm (4,94)/(4,6)            contactHoursOfService         !
+elm (4,94)/(2,14)           contactPhoneNumber            contactTelephone
+elm (4,94)/(2,15)           contactFaxNumber              contactFax
+elm (4,19)                  recordSource                  Record-source
+elm (4,56)                  agencyProgram                 !
+elm (4,57)                  sourcesOfData                 !
+elm (4,95)                  controlledVocabulary          -
+elm (4,95)/(4,96)           indexTermsControlled          -
+elm (4,95)/(4,96)/(4,20)    controlledTerm                indexTermsControlled
+elm (4,95)/(4,21)           thesaurus                     !
+elm (4,97)                  localSubjectIndex             -
+elm (4,97)/(4,22)           localSubjectTerm              local-subject-index:p,local-subject-index:w
+elm (4,58)                  methodology                   !
+elm (4,71)                  spatialReference              -
+elm (4,71)/(4,91)           boundingRectangle             -
+elm (4,71)/(4,91)/(4,9)     westernMost                   !
+elm (4,71)/(4,91)/(4,10)    easternMost                   !
+elm (4,71)/(4,91)/(4,11)    northernMost                  !
+elm (4,71)/(4,91)/(4,12)    southernMost                  !
+elm (4,71)/(4,92)           geographicName                -
+elm (4,71)/(4,92)/(4,13)    geographicKeywordName         !
+elm (4,71)/(4,92)/(4,14)    geographicKeywordType         !
+elm (4,93)                  timePeriod                    -
+elm (4,93)/(4,15)           timePeriodStructured          !
+elm (4,93)/(4,16)           timePeriodTextual             !
+elm (4,98)                  crossReference                -
+#elm (4,98)/(4,50)           crossReferenceTitle           !
+elm (4,98)/(2,1)           crossReferenceTitle           !
+elm (4,98)/(4,17)           crossReferenceLinkage         !
+elm (4,98)/(4,18)           crossReferenceType            !
+elm (4,23)                  originalControlIdentifier     !
+elm (4,59)                  supplementalInformation       !
+
+elm (2,9)                   bodyOfDisplay		  Any
+
+#
+# Local tags - testing only
+#
+
+elm sampleText              bodyOfText			!
