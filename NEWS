@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed bug in CCL parser where truncation char was not removed when
+truncation=both was in effect.
+
 Added odr_set_stream which is is a more generic to odr_setprint.
 odr_set_stream takes a stream handle, pointer to puts function and
 pointer to close function. The close function - if non-NULL - will be

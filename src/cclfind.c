@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.2 2004-08-11 09:02:48 adam Exp $
+ * $Id: cclfind.c,v 1.3 2004-08-11 20:13:36 adam Exp $
  *
  * Old Europagate log:
  *
@@ -451,7 +451,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
             else
                 add_attr_numeric (p, attset, CCL_BIB1_STR, 1);
         }
-        
+
         /* make the RPN token */
         p->u.t.term = (char *)xmalloc (len);
         ccl_assert (p->u.t.term);
@@ -466,7 +466,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
                 src_len--;
                 src_str++;
             }
-            else if (i == no-1 && right_trunc)
+            if (i == no-1 && right_trunc)
                 src_len--;
             if (src_len)
             {
