@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.16  1995-09-29 17:12:26  quinn
+ * Revision 1.17  1997-05-05 11:21:09  adam
+ * In handling of SEQUENCE OF: Counter set to zero when SEQUENCE
+ * OF isn't there at all.
+ *
+ * Revision 1.16  1995/09/29 17:12:26  quinn
  * Smallish
  *
  * Revision 1.15  1995/09/27  15:03:00  quinn
@@ -98,8 +102,12 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
     char **tmp = 0;
     int size = 0, i;
 
-    if (!odr_sequence_begin(o, p, 0))
+    if (!odr_sequence_begin(o, p, 0)) {
+	if (o->direction == ODR_DECODE) {
+            *num = 0;
+	}
     	return 0;
+    }
 
     switch (o->direction)
     {
