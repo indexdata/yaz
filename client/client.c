@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.86  1999-07-06 12:13:35  adam
+ * Revision 1.87  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.86  1999/07/06 12:13:35  adam
  * Added "schema" command.
  *
  * Revision 1.85  1999/06/16 11:55:24  adam
@@ -1921,7 +1924,7 @@ int cmd_querytype (char *arg)
 {
     if (!strcmp (arg, "ccl"))
         queryType = QueryType_CCL;
-    else if (!strcmp (arg, "prefix"))
+    else if (!strcmp (arg, "prefix") || !strcmp(arg, "rpn"))
         queryType = QueryType_Prefix;
 #if CCL2RPN
     else if (!strcmp (arg, "ccl2rpn") || !strcmp (arg, "cclrpn"))

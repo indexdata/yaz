@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_varset.c,v $
- * Revision 1.8  1998-10-13 16:09:54  adam
+ * Revision 1.9  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.8  1998/10/13 16:09:54  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -57,11 +60,11 @@ data1_vartype *data1_getvartypebyct (data1_handle dh, data1_varset *set,
 	    for (t = c->types; t; t = t->next)
 		if (!data1_matchstr(t->name, type))
 		    return t;
-	    logf(LOG_WARN, "Unknown variant type %s in class %s",
-		 type, zclass);
+	    yaz_log(LOG_WARN, "Unknown variant type %s in class %s",
+		    type, zclass);
 	    return 0;
 	}
-    logf(LOG_WARN, "Unknown variant class %s", zclass);
+    yaz_log(LOG_WARN, "Unknown variant class %s", zclass);
     return 0;
 }
 
@@ -82,7 +85,7 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
-	logf(LOG_WARN|LOG_ERRNO, "%s", file);
+	yaz_log(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
     while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
@@ -92,8 +95,8 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 	    
 	    if (argc != 3)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # or args to class",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # or args to class",
+			file, lineno);
 		continue;
 	    }
 	    *classp = r = zclass = (data1_varclass *)
@@ -112,13 +115,14 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 
 	    if (!typep)
 	    {
-		logf(LOG_WARN, "%s:%d: Directive class must precede type",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Directive class must precede type",
+			file, lineno);
 		continue;
 	    }
 	    if (argc != 4)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # or args to type", file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # or args to type",
+			file, lineno);
 		continue;
 	    }
 	    *typep = r = (data1_vartype *)nmem_malloc(mem, sizeof(*r));
@@ -127,8 +131,8 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 	    r->type = atoi(argv[1]);
 	    if (!(r->datatype = data1_maptype (dh, argv[3])))
 	    {
-		logf(LOG_WARN, "%s:%d: Unknown datatype '%s'",
-		     file, lineno, argv[3]);
+		yaz_log(LOG_WARN, "%s:%d: Unknown datatype '%s'",
+			file, lineno, argv[3]);
 		fclose(f);
 		return 0;
 	    }
@@ -139,8 +143,8 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # args for name",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # args for name",
+			file, lineno);
 		continue;
 	    }
 	    res->name = nmem_strdup(mem, argv[1]);
@@ -149,20 +153,20 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # args for reference",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # args for reference",
+			file, lineno);
 		continue;
 	    }
 	    if ((res->reference = oid_getvalbyname(argv[1])) == VAL_NONE)
 	    {
-		logf(LOG_WARN, "%s:%d: Unknown reference '%s'",
-		     file, lineno, argv[1]);
+		yaz_log(LOG_WARN, "%s:%d: Unknown reference '%s'",
+			file, lineno, argv[1]);
 		continue;
 	    }
 	}
 	else 
-	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
-		 file, lineno, argv[0]);
+	    yaz_log(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		    file, lineno, argv[0]);
     
     fclose(f);
     return res;

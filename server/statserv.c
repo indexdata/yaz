@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.57  1999-07-06 12:17:15  adam
+ * Revision 1.58  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.57  1999/07/06 12:17:15  adam
  * Added option -1 that runs server once (for profiling purposes).
  *
  * Revision 1.56  1999/06/10 11:45:30  adam
@@ -438,12 +441,12 @@ static void listener(IOCHAN h, int event)
     {
         if ((res = cs_listen(line, 0, 0)) < 0)
         {
-	    logf(LOG_FATAL, "cs_listen failed");
+	    yaz_log(LOG_FATAL, "cs_listen failed");
     	    return;
         }
         else if (res == 1)
             return;
-        logf(LOG_DEBUG, "listen ok");
+        yaz_log(LOG_DEBUG, "listen ok");
         iochan_setevent(h, EVENT_OUTPUT);
         iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
     }
@@ -456,34 +459,34 @@ static void listener(IOCHAN h, int event)
 
 	if (!(new_line = cs_accept(line)))
 	{
-	    logf(LOG_FATAL, "Accept failed.");
+	    yaz_log(LOG_FATAL, "Accept failed.");
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
 	    return;
 	}
-	logf(LOG_DEBUG, "Accept ok");
+	yaz_log(LOG_DEBUG, "Accept ok");
 
 	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
 				       EVENT_INPUT)))
 	{
-	    logf(LOG_FATAL, "Failed to create iochan");
+	    yaz_log(LOG_FATAL, "Failed to create iochan");
             iochan_destroy(h);
             return;
 	}
 
-	logf(LOG_DEBUG, "Creating association");
+	yaz_log(LOG_DEBUG, "Creating association");
 	if (!(newas = create_association(new_chan, new_line)))
 	{
-	    logf(LOG_FATAL, "Failed to create new assoc.");
+	    yaz_log(LOG_FATAL, "Failed to create new assoc.");
             iochan_destroy(h);
             return;
 	}
-	logf(LOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
+	yaz_log(LOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
 #ifndef WIN32
-	logf(LOG_DEBUG, "Determining client address");
+	yaz_log(LOG_DEBUG, "Determining client address");
 	a = cs_addrstr(new_line);
-	logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+	yaz_log(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
 #endif
 	/* Now what we need todo is create a new thread with this iochan as
 	   the parameter */
@@ -496,19 +499,19 @@ static void listener(IOCHAN h, int event)
         if (NewHandle == (HANDLE)-1)
 	{
 	    
-	    logf(LOG_FATAL|LOG_ERRNO, "Failed to create new thread.");
+	    yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to create new thread.");
             iochan_destroy(h);
             return;
 	}
         /* We successfully created the thread, so add it to the list */
         statserv_add(NewHandle, new_chan);
 
-        logf(LOG_DEBUG, "Created new thread, iochan %p", new_chan);
+        yaz_log(LOG_DEBUG, "Created new thread, iochan %p", new_chan);
         iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
     }
     else
     {
-    	logf(LOG_FATAL, "Bad event on listener.");
+    	yaz_log(LOG_FATAL, "Bad event on listener.");
         iochan_destroy(h);
         return;
     }
@@ -544,13 +547,13 @@ static void listener(IOCHAN h, int event)
 
 	    if (pipe(hand) < 0)
 	    {
-		logf(LOG_FATAL|LOG_ERRNO, "pipe");
+		yaz_log(LOG_FATAL|LOG_ERRNO, "pipe");
                 iochan_destroy(h);
                 return;
 	    }
 	    if ((res = fork()) < 0)
 	    {
-		logf(LOG_FATAL|LOG_ERRNO, "fork");
+		yaz_log(LOG_FATAL|LOG_ERRNO, "fork");
                 iochan_destroy(h);
                 return;
 	    }
@@ -584,13 +587,13 @@ static void listener(IOCHAN h, int event)
 		    
 		    if ((res = read(hand[0], dummy, 1)) < 0 && errno != EINTR)
 		    {
-			logf(LOG_FATAL|LOG_ERRNO, "handshake read");
+			yaz_log(LOG_FATAL|LOG_ERRNO, "handshake read");
                         return;
 		    }
 		    else if (res >= 0)
 		    	break;
 		}
-		logf(LOG_DEBUG, "P: Child has taken the call");
+		yaz_log(LOG_DEBUG, "P: Child has taken the call");
 		close(hand[0]);
 		return;
 	    }
@@ -598,12 +601,12 @@ static void listener(IOCHAN h, int event)
 	if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
 				   control_block.daemon_name)) < 0)
 	{
-	    logf(LOG_WARN, "cs_listen failed");
+	    yaz_log(LOG_WARN, "cs_listen failed");
 	    return;
 	}
 	else if (res == 1)
 	    return;
-	logf(LOG_DEBUG, "listen ok");
+	yaz_log(LOG_DEBUG, "listen ok");
 	iochan_setevent(h, EVENT_OUTPUT);
 	iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
     }
@@ -616,11 +619,11 @@ static void listener(IOCHAN h, int event)
 
 	if (!(new_line = cs_accept(line)))
 	{
-	    logf(LOG_FATAL, "Accept failed.");
+	    yaz_log(LOG_FATAL, "Accept failed.");
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
 	    return;
 	}
-	logf(LOG_DEBUG, "accept ok");
+	yaz_log(LOG_DEBUG, "accept ok");
 	if (control_block.dynamic)
 	{
 	    IOCHAN pp;
@@ -632,7 +635,7 @@ static void listener(IOCHAN h, int event)
 		iochan_destroy(pp);
 	    }
 	    /* release dad */
-	    logf(LOG_DEBUG, "Releasing parent");
+	    yaz_log(LOG_DEBUG, "Releasing parent");
 	    close(hand[1]);
 	}
 	else
@@ -641,7 +644,7 @@ static void listener(IOCHAN h, int event)
 	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
 	    EVENT_INPUT)))
 	{
-	    logf(LOG_FATAL, "Failed to create iochan");
+	    yaz_log(LOG_FATAL, "Failed to create iochan");
             iochan_destroy(h);
             return;
 	}
@@ -649,18 +652,18 @@ static void listener(IOCHAN h, int event)
         pListener = new_chan;
 	if (!(newas = create_association(new_chan, new_line)))
 	{
-	    logf(LOG_FATAL, "Failed to create new assoc.");
+	    yaz_log(LOG_FATAL, "Failed to create new assoc.");
             iochan_destroy(h);
             return;
 	}
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
 	a = cs_addrstr(new_line);
-	logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+	yaz_log(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
     }
     else
     {
-    	logf(LOG_FATAL, "Bad event on listener.");
+    	yaz_log(LOG_FATAL, "Bad event on listener.");
         iochan_destroy(h);
         return;
     }
@@ -684,23 +687,23 @@ static void inetd_connection(int what)
                 iochan_setdata(chan, assoc);
                 iochan_settimeout(chan, control_block.idle_timeout * 60);
                 addr = cs_addrstr(line);
-                logf(LOG_LOG, "Inetd association from %s", addr ? addr : "[UNKNOWN]");
+                yaz_log(LOG_LOG, "Inetd association from %s", addr ? addr : "[UNKNOWN]");
             }
             else
             {
-	        logf(LOG_FATAL, "Failed to create association structure");
+	        yaz_log(LOG_FATAL, "Failed to create association structure");
             }
             chan->next = pListener;
             pListener = chan;
         }
         else
         {
-            logf(LOG_FATAL, "Failed to create iochan");
+            yaz_log(LOG_FATAL, "Failed to create iochan");
         }
     }
     else
     {
-	logf(LOG_ERRNO|LOG_FATAL, "Failed to create comstack on socket 0");
+	yaz_log(LOG_ERRNO|LOG_FATAL, "Failed to create comstack on socket 0");
     }
 }
 
@@ -717,7 +720,7 @@ static void add_listener(char *where, int what)
 
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
     {
-	logf (LOG_WARN, "%s: Address format: ('tcp'|'osi')':'<address>", me);
+	yaz_log (LOG_WARN, "%s: Address format: ('tcp'|'osi')':'<address>", me);
 	return;
     }
     if (!strcmp(mode, "tcp"))
@@ -727,21 +730,21 @@ static void add_listener(char *where, int what)
 #ifdef USE_XTIMOSI
 	type = mosi_type;
 #else
-	logf (LOG_WARN, "OSI Transport not allowed by configuration.");
+	yaz_log (LOG_WARN, "OSI Transport not allowed by configuration.");
 	return;
 #endif
     }
     else
     {
-    	logf (LOG_WARN, "You must specify either 'osi:' or 'tcp:'");
+    	yaz_log (LOG_WARN, "You must specify either 'osi:' or 'tcp:'");
 	return;
     }
-    logf(LOG_LOG, "Adding %s %s listener on %s",
+    yaz_log(LOG_LOG, "Adding %s %s listener on %s",
         control_block.dynamic ? "dynamic" : "static",
     	what == PROTO_SR ? "SR" : "Z3950", where);
     if (!(l = cs_create(type, 0, what)))
     {
-    	logf(LOG_FATAL|LOG_ERRNO, "Failed to create listener");
+    	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to create listener");
 	return;
     }
     ap = cs_straddr (l, addr);
@@ -753,14 +756,14 @@ static void add_listener(char *where, int what)
     }
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
-    	logf(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s", where);
+    	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s", where);
 	cs_close (l);
 	return;
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
    	 EVENT_EXCEPT)))
     {
-    	logf(LOG_FATAL|LOG_ERRNO, "Failed to create IOCHAN-type");
+    	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to create IOCHAN-type");
 	cs_close (l);
 	return;
     }
@@ -831,12 +834,12 @@ int statserv_start(int argc, char **argv)
 	
 	if (!(pw = getpwnam(control_block.setuid)))
 	{
-	    logf(LOG_FATAL, "%s: Unknown user", control_block.setuid);
+	    yaz_log(LOG_FATAL, "%s: Unknown user", control_block.setuid);
 	    return(1);
 	}
 	if (setuid(pw->pw_uid) < 0)
 	{
-	    logf(LOG_FATAL|LOG_ERRNO, "setuid");
+	    yaz_log(LOG_FATAL|LOG_ERRNO, "setuid");
 	    exit(1);
 	}
     }
@@ -850,7 +853,7 @@ int statserv_start(int argc, char **argv)
 	ret = 1;
     else
     {
-	logf(LOG_LOG, "Entering event loop.");
+	yaz_log(LOG_LOG, "Entering event loop.");
         ret = event_loop(&pListener);
     }
     nmem_exit ();

@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1995-1998, Index Data
+ * Copyright (C) 1995-1999, Index Data
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: logrpn.c,v $
- * Revision 1.1  1999-06-08 10:10:16  adam
+ * Revision 1.2  1999-08-27 09:40:33  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.1  1999/06/08 10:10:16  adam
  * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
  *
  * Revision 1.1  1998/11/16 16:02:35  adam
@@ -261,26 +264,26 @@ static void zlog_attributes (Z_AttributesPlusTerm *t, int level,
         case Z_AttributeValue_numeric:
 	    attrStr (*element->attributeType,
 		     *element->value.numeric, ast, str);
-            logf (LOG_LOG, "%*.0s%s %s", level, "", attset_name, str);
+            yaz_log (LOG_LOG, "%*.0s%s %s", level, "", attset_name, str);
             break;
         case Z_AttributeValue_complex:
-            logf (LOG_LOG, "%*.0s%s attributeType=%d complex",
+            yaz_log (LOG_LOG, "%*.0s%s attributeType=%d complex",
 		  level, "", attset_name, *element->attributeType);
             for (i = 0; i<element->value.complex->num_list; i++)
             {
                 if (element->value.complex->list[i]->which ==
                     Z_StringOrNumeric_string)
-                    logf (LOG_LOG, "%*.0s  string: '%s'", level, "",
-                          element->value.complex->list[i]->u.string);
+                    yaz_log (LOG_LOG, "%*.0s  string: '%s'", level, "",
+			     element->value.complex->list[i]->u.string);
                 else if (element->value.complex->list[i]->which ==
                          Z_StringOrNumeric_numeric)
-                    logf (LOG_LOG, "%*.0s  numeric: '%d'", level, "",
-                          *element->value.complex->list[i]->u.numeric);
+                    yaz_log (LOG_LOG, "%*.0s  numeric: '%d'", level, "",
+			     *element->value.complex->list[i]->u.numeric);
             }
             break;
         default:
-            logf (LOG_LOG, "%.*s%s attribute unknown",
-		  level, "", attset_name);
+            yaz_log (LOG_LOG, "%.*s%s attribute unknown",
+		     level, "", attset_name);
         }
     }
 }
@@ -292,16 +295,16 @@ static void zlog_structure (Z_RPNStructure *zs, int level, enum oid_value ast)
         switch (zs->u.complex->roperator->which)
         {
         case Z_Operator_and:
-            logf (LOG_LOG, "%*.0s and", level, "");
+            yaz_log (LOG_LOG, "%*.0s and", level, "");
             break;
         case Z_Operator_or:
-            logf (LOG_LOG, "%*.0s or", level, "");
+            yaz_log (LOG_LOG, "%*.0s or", level, "");
             break;
         case Z_Operator_and_not:
-            logf (LOG_LOG, "%*.0s and-not", level, "");
+            yaz_log (LOG_LOG, "%*.0s and-not", level, "");
             break;
         default:
-            logf (LOG_LOG, "%*.0s unknown complex", level, "");
+            yaz_log (LOG_LOG, "%*.0s unknown complex", level, "");
             return;
         }
         zlog_structure (zs->u.complex->s1, level+2, ast);
@@ -315,25 +318,26 @@ static void zlog_structure (Z_RPNStructure *zs, int level, enum oid_value ast)
 
             if (zapt->term->which == Z_Term_general) 
             {
-                logf (LOG_LOG, "%*.0s term '%.*s' (general)", level, "",
-                      zapt->term->u.general->len, zapt->term->u.general->buf);
+                yaz_log (LOG_LOG, "%*.0s term '%.*s' (general)", level, "",
+			 zapt->term->u.general->len,
+			 zapt->term->u.general->buf);
             }
             else
             {
-                logf (LOG_LOG, "%*.0s term (not general)", level, "");
+                yaz_log (LOG_LOG, "%*.0s term (not general)", level, "");
             }
             zlog_attributes (zapt, level+2, ast);
         }
         else if (zs->u.simple->which == Z_Operand_resultSetId)
         {
-            logf (LOG_LOG, "%*.0s set '%s'", level, "",
-                  zs->u.simple->u.resultSetId);
+            yaz_log (LOG_LOG, "%*.0s set '%s'", level, "",
+		     zs->u.simple->u.resultSetId);
         }
         else
-            logf (LOG_LOG, "%*.0s unknown simple structure", level, "");
+            yaz_log (LOG_LOG, "%*.0s unknown simple structure", level, "");
     }
     else
-        logf (LOG_LOG, "%*.0s unknown structure", level, "");
+        yaz_log (LOG_LOG, "%*.0s unknown structure", level, "");
 }
 
 void log_rpn_query (Z_RPNQuery *rpn)
@@ -345,12 +349,12 @@ void log_rpn_query (Z_RPNQuery *rpn)
     if (attrset)
     {
         ast = attrset->value;
-	logf (LOG_LOG, "RPN query. Type: %s", attrset->desc);
+	yaz_log (LOG_LOG, "RPN query. Type: %s", attrset->desc);
     } 
     else
     {
 	ast = VAL_NONE;
-	logf (LOG_LOG, "RPN query. Unknown type");
+	yaz_log (LOG_LOG, "RPN query. Unknown type");
     }
     zlog_structure (rpn->RPNStructure, 0, ast);
 }
@@ -360,10 +364,10 @@ void log_scan_term (Z_AttributesPlusTerm *zapt, oid_value ast)
     int level = 0;
     if (zapt->term->which == Z_Term_general) 
     {
-	logf (LOG_LOG, "%*.0s term '%.*s' (general)", level, "",
-	      zapt->term->u.general->len, zapt->term->u.general->buf);
+	yaz_log (LOG_LOG, "%*.0s term '%.*s' (general)", level, "",
+		 zapt->term->u.general->len, zapt->term->u.general->buf);
     }
     else
-	logf (LOG_LOG, "%*.0s term (not general)", level, "");
+	yaz_log (LOG_LOG, "%*.0s term (not general)", level, "");
     zlog_attributes (zapt, level+2, ast);
 }

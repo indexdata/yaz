@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.11  1998-10-14 13:31:56  adam
+ * Revision 1.12  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.11  1998/10/14 13:31:56  adam
  * Bug fix. Bug introduced by previous commit.
  *
  * Revision 1.10  1998/10/13 16:09:48  adam
@@ -119,7 +122,7 @@ data1_attset *data1_read_attset(data1_handle dh, const char *file)
 	    
 	    if (argc < 3)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # of args to att", file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args to att", file, lineno);
 		continue;
 	    }
 	    num = atoi (argv[1]);
@@ -158,7 +161,7 @@ data1_attset *data1_read_attset(data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # of args to name", file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args to name", file, lineno);
 		continue;
 	    }
 	}
@@ -168,23 +171,23 @@ data1_attset *data1_read_attset(data1_handle dh, const char *file)
 
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # of args to reference",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args to reference",
+			file, lineno);
 		continue;
 	    }
 	    name = argv[1];
 	    if ((res->reference = oid_getvalbyname(name)) == VAL_NONE)
 	    {
-		logf(LOG_WARN, "%s:%d: Unknown reference oid '%s'",
-		     file, lineno, name);
+		yaz_log(LOG_WARN, "%s:%d: Unknown reference oid '%s'",
+			file, lineno, name);
 		fclose(f);
 		return 0;
 	    }
 	}
 	else if (!strcmp(cmd, "ordinal"))
 	{
-	    logf (LOG_WARN, "%s:%d: Directive ordinal ignored",
-		  file, lineno);
+	    yaz_log (LOG_WARN, "%s:%d: Directive ordinal ignored",
+		     file, lineno);
 	}
 	else if (!strcmp(cmd, "include"))
 	{
@@ -193,16 +196,16 @@ data1_attset *data1_read_attset(data1_handle dh, const char *file)
 
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # of args to include",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args to include",
+			file, lineno);
 		continue;
 	    }
 	    name = argv[1];
 
 	    if (!(attset = data1_get_attset (dh, name)))
 	    {
-		logf(LOG_WARN, "%s:%d: Include of attset %s failed",
-		     file, lineno, name);
+		yaz_log(LOG_WARN, "%s:%d: Include of attset %s failed",
+			file, lineno, name);
 		continue;
 		
 	    }
@@ -214,8 +217,8 @@ data1_attset *data1_read_attset(data1_handle dh, const char *file)
 	}
 	else
 	{
-	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
-		 file, lineno, cmd);
+	    yaz_log(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		    file, lineno, cmd);
 	}
     }
     fclose(f);

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: wrbuf.h,v $
- * Revision 1.6  1997-10-31 12:20:08  adam
+ * Revision 1.7  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.6  1997/10/31 12:20:08  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -54,7 +57,7 @@ YAZ_EXPORT WRBUF wrbuf_alloc(void);
 YAZ_EXPORT void wrbuf_free(WRBUF b, int free_buf);
 YAZ_EXPORT void wrbuf_rewind(WRBUF b);
 YAZ_EXPORT int wrbuf_grow(WRBUF b, int minsize);
-YAZ_EXPORT int wrbuf_write(WRBUF b, char *buf, int size);
+YAZ_EXPORT int wrbuf_write(WRBUF b, const char *buf, int size);
 
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)

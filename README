@@ -4,14 +4,14 @@
  * Sebastian Hammer, Adam Dickmeiss
 
 Compilation and installation for YAZ 
-  $Id: README,v 1.26 1999-06-09 14:37:37 adam Exp $
+  $Id: README,v 1.27 1999-08-27 09:40:31 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
 role of Z39.50/SR.
 
-Windows programmers: refer to the file windows.txt which describes
-how to compile the software using Microsoft Visual C++.
+Windows programmers: refer to the file windows.txt which describes how
+to build the software using Microsoft Visual C++.
 
 On Unix, GNU configure is used to configure YAZ and generate Makefiles.
 Type "./configure", then "make" to build YAZ.
@@ -19,56 +19,49 @@ Type "./configure", then "make" to build YAZ.
 Two test-programs of interest are generated when you type 'make' at the
 top level: ztest/ztest and client/client. Ztest is a dummy database
 server which returns canned responses to all queries. It's good for
-verifying that the protocol works ok, and ztest.c shows a minimalistic
-implementation of the 'backend' interface.
+verifying that the protocol works ok, and ztest.c shows an
+implementation of a 'backend' interface.
 
 Client is a linemode Z39.50 client. It supports a fair amount of the
 functionality of Z39.50v2/SR, but some things you need to enable or
 disable by recompilation. Its primary purpose is to excersise the
-package, and verify that the protocol works OK. It can be started
-by typing
+package, and verify that the protocol works OK. It can be started by
+typing
 
-client tcp:<hostname>:<port>
+  client tcp:<hostname>:<port>[/<database>]
 
-at the UNIX prompt, to connect to a Z39.50 server, or
-
-client osi:[<tsel>'/']<hostname>:<port>
-
-to connect to an OSI SR target (this requires mOSI-support). To connect
-to the DANBIB test target, you might use:
-
-client osi:0103/find2.denet.dk:4500
+at the UNIX prompt, to connect to a Z39.50 server.
 
 Use '?' to get a list of the available commands.
 
 The current query language for the find command is a bit awkward, but
 functional:
 
-query     ::= ['@attrset' <attribute-set>] rpn
-rpn       ::= complex | simple | attr rpn
-complex   ::= operator rpn rpn
-operator  ::= '@and' | '@or' | '@not' | '@prox' proximity
-simple    ::= term | set.
-term      ::= <word> | '"' <term> ... '"'.
-set       ::= '@set' <setname>.
-attr      ::= '@attr' [<attribute-set>] <number> '=' <number>.
-proximity ::= exclusion distance ordered relation which unit
-exclusion ::= '1' | '0' | 'void'
-distance  ::= <number>
-ordered   ::= '1' | '0'
-relation  ::= <number>
-which     ::= 'known' | 'private'
-unit      ::= <number>
+ query     ::= ['@attrset' <attribute-set>] rpn
+ rpn       ::= complex | simple | attr rpn
+ complex   ::= operator rpn rpn
+ operator  ::= '@and' | '@or' | '@not' | '@prox' proximity
+ simple    ::= term | set.
+ term      ::= <word> | '"' <term> ... '"'.
+ set       ::= '@set' <setname>.
+ attr      ::= '@attr' [<attribute-set>] <number> '=' <number>.
+ proximity ::= exclusion distance ordered relation which unit
+ exclusion ::= '1' | '0' | 'void'
+ distance  ::= <number>
+ ordered   ::= '1' | '0'
+ relation  ::= <number>
+ which     ::= 'known' | 'private'
+ unit      ::= <number>
 
 Eg.:
 
-Andersen
+ Andersen
 
-"Hans Andersen"
+ "Hans Andersen"
 
-@and @attr 1=1 andersen @attr 1=4 @attr 4=2 duckling
+ @and @attr 1=1 andersen @attr 1=4 @attr 4=2 duckling
 
-@attrset Bib-1 @and @attr GILS 2=2008 Washington @attr 1=21 weather
+ @attrset Bib-1 @and @attr GILS 2=2008 Washington @attr 1=21 weather
 
 The sort command takes a sequence of sort specifications. A sort
 specification holds a field (sort criteria) and is followed by flags.
@@ -101,14 +94,14 @@ asn     - This module implements the Z39.50/SR protocol. The best way
 	which defines structure and type definitions for each of the
 	types introduced in the protocol specification.
 
-z39.50 - This module implements the Z39.50 protocol. This module
+z39.50  - This module implements the Z39.50 protocol. This module
         does the same job as the 'asn' module except that the source
         files are auto-generated using an YAZ' ASN.1 Compiler (YC).
 
-zutil  - This module implements a collection of Z39.50 utilities, such
+zutil   - This module implements a collection of Z39.50 utilities, such
         as query parsing, EXTERNAL handling, etc.
 
-comstack- This module implements the transport transparency
+comstack - This module implements the transport transparency
 	stack (COMSTACK). The comstack implements a generic interface
 	for exchanging BER-encoded records over a network. It supports
 	the 'American' mode of exchanging the records straight over
@@ -120,7 +113,7 @@ rfc1006 - Xtimosi requires an implementation of the OSI transport
 	notably) provide this. For others, we provide an
 	implementation of the RFC1006 protocol (which is what
 	ISODE-based implementations often use). This module is not
-	neeeded if you don't use xtimosi, and it's not included in the
+	needed if you don't use xtimosi, and it's not included in the
 	libyaz.a library.
 
 server  - This is the implementation of the server frontend. It

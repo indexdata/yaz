@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.15  1998-10-13 16:09:49  adam
+ * Revision 1.16  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.15  1998/10/13 16:09:49  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -98,8 +101,8 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem,
 
 	if (sscanf(argv[i], "(%d,%d,%[^)])", &zclass, &type, value) < 3)
 	{
-	    logf(LOG_WARN, "%s:%d: Syntax error in variant component '%s'",
-		 file, lineno, argv[i]);
+	    yaz_log(LOG_WARN, "%s:%d: Syntax error in variant component '%s'",
+		    file, lineno, argv[i]);
 	    return 0;
 	}
 	t = r->triples[i] = (Z_Triple *)nmem_malloc(nmem, sizeof(Z_Triple));
@@ -166,8 +169,8 @@ static Z_Occurrences *read_occurrences(char *occ, NMEM nmem,
     
 	if (!isdigit(*occ))
 	{
-	    logf(LOG_WARN, "%s:%d: Bad occurrences-spec %s",
-		 file, lineno, occ);
+	    yaz_log(LOG_WARN, "%s:%d: Bad occurrences-spec %s",
+		    file, lineno, occ);
 	    return 0;
 	}
 	op->which = Z_Occurrences_values;
@@ -261,7 +264,7 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
     
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
-	logf(LOG_WARN|LOG_ERRNO, "%s", file);
+	yaz_log(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
     
@@ -280,8 +283,8 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	    
 	    if (!nnames)
 	    {
-		logf(LOG_WARN, "%s:%d: Empty elementsetnames directive",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Empty elementsetnames directive",
+			file, lineno);
 		continue;
 	    }
 	    
@@ -299,15 +302,15 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # of args for %s",
-		     file, lineno, argv[0]);
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args for %s",
+			file, lineno, argv[0]);
 		continue;
 	    }
 	    if (!(res->defaultVariantSetId =
 		  odr_getoidbystr_nmem(nmem, argv[1])))
 	    {
-		logf(LOG_WARN, "%s:%d: Bad defaultvariantsetid",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad defaultvariantsetid",
+			file, lineno);
 		continue;
 	    }
 	}
@@ -315,8 +318,8 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # of args for %s",
-		     file, lineno, argv[0]);
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args for %s",
+			file, lineno, argv[0]);
 		continue;
 	    }
 	    res->defaultTagType = (int *)nmem_malloc(nmem, sizeof(int));
@@ -327,8 +330,8 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	    if (!(res->defaultVariantRequest =
 		  read_variant(argc-1, argv+1, nmem, file, lineno)))
 	    {
-		logf(LOG_WARN, "%s:%d: Bad defaultvariantrequest",
-		     file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad defaultvariantrequest",
+			file, lineno);
 		continue;
 	    }
 	}
@@ -354,8 +357,8 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	    }
 	    if (argc < 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # of args for %s",
-		     file, lineno, argv[0]);
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args for %s",
+			file, lineno, argv[0]);
 		continue;
 	    }
 	    
@@ -391,8 +394,8 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 		    read_variant(argc-3, argv+3, nmem, file, lineno);
 	}
 	else
-	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
-		 file, lineno, argv[0]);
+	    yaz_log(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		    file, lineno, argv[0]);
     fclose (f);
     return res;
 }

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1999, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.18  1998-10-28 10:27:00  adam
+ * Revision 1.19  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.18  1998/10/28 10:27:00  adam
  * New functions log_init_file, log_init_level, log_init_prefix.
  *
  * Revision 1.17  1997/12/09 16:11:02  adam
@@ -190,7 +193,7 @@ void log_event_end (void (*func)(int, const char *, void *), void *info)
     end_hook_info = info;
 }
 
-void logf(int level, const char *fmt, ...)
+void yaz_log(int level, const char *fmt, ...)
 {
     va_list ap;
     char buf[4096], flags[1024];

@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: wrbuf.c,v $
- * Revision 1.4  1998-02-11 11:53:36  adam
+ * Revision 1.5  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.4  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.3  1997/05/01 15:08:15  adam
@@ -69,7 +72,7 @@ int wrbuf_grow(WRBUF b, int minsize)
     return 0;
 }
 
-int wrbuf_write(WRBUF b, char *buf, int size)
+int wrbuf_write(WRBUF b, const char *buf, int size)
 {
     if (b->pos + size >= b->size)
 	wrbuf_grow(b, size);

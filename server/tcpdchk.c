@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpdchk.c,v $
- * Revision 1.2  1999-04-20 09:56:48  adam
+ * Revision 1.3  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.2  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -77,12 +80,12 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 	    i = hosts_access(&request_info);
 	    if (!i)
 	    {
-		logf (LOG_DEBUG, "access denied from %s",
-		      host_name ? host_name : host_addr);
+		yaz_log (LOG_DEBUG, "access denied from %s",
+			 host_name ? host_name : host_addr);
 		return 1;
 	    }
-	    logf (LOG_DEBUG, "access granted from %s",
-		  host_name ? host_name : host_addr);
+	    yaz_log (LOG_DEBUG, "access granted from %s",
+		     host_name ? host_name : host_addr);
 #endif
 	}
     }

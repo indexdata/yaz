@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_handle.c,v $
- * Revision 1.4  1998-05-18 13:07:05  adam
+ * Revision 1.5  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.4  1998/05/18 13:07:05  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -98,14 +101,14 @@ WRBUF data1_get_wrbuf (data1_handle dp)
 char **data1_get_read_buf (data1_handle dp, int **lenp)
 {
     *lenp = &dp->read_len;
-    logf (LOG_DEBUG, "data1_get_read_buf lenp=%u", **lenp);
+    yaz_log (LOG_DEBUG, "data1_get_read_buf lenp=%u", **lenp);
     return &dp->read_buf;
 }
 
 char **data1_get_map_buf (data1_handle dp, int **lenp)
 {
     *lenp = &dp->map_len;
-    logf (LOG_DEBUG, "data1_get_map_buf lenp=%u", **lenp);
+    yaz_log (LOG_DEBUG, "data1_get_map_buf lenp=%u", **lenp);
     return &dp->map_buf;
 }
 

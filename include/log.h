@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.14  1998-10-28 10:26:59  adam
+ * Revision 1.15  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.14  1998/10/28 10:26:59  adam
  * New functions log_init_file, log_init_level, log_init_prefix.
  *
  * Revision 1.13  1998/10/13 16:11:11  adam
@@ -103,12 +106,14 @@ extern "C" {
 
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 
+#define logf yaz_log
+
 YAZ_EXPORT void log_init(int level, const char *prefix, const char *name);
 YAZ_EXPORT void log_init_file (const char *fname);
 YAZ_EXPORT void log_init_level (int level);
 YAZ_EXPORT void log_init_prefix (const char *prefix);
 
-YAZ_EXPORT void logf(int level, const char *fmt, ...)
+YAZ_EXPORT void yaz_log(int level, const char *fmt, ...)
 #ifdef __GNUC__
 	__attribute__ ((format (printf, 2, 3)))
 #endif

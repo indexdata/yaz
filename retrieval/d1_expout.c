@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.15  1998-09-28 12:44:40  adam
+ * Revision 1.16  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.15  1998/09/28 12:44:40  adam
  * Fixed bug in f_integer.
  *
  * Revision 1.14  1998/06/08 14:26:41  adam
@@ -81,12 +84,12 @@ static int is_numeric_tag (ExpHandle *eh, data1_node *c)
 	return 0;
     if (!c->u.tag.element)
     {
-	logf(LOG_WARN, "Tag %s is local", c->u.tag.tag);
+	yaz_log(LOG_WARN, "Tag %s is local", c->u.tag.tag);
 	return 0;
     }
     if (c->u.tag.element->tag->which != DATA1T_numeric)
     {
-	logf(LOG_WARN, "Tag %s is not numeric", c->u.tag.tag);
+	yaz_log(LOG_WARN, "Tag %s is not numeric", c->u.tag.tag);
 	return 0;
     }
     if (eh->select && !c->u.tag.node_selected)
@@ -1415,7 +1418,7 @@ Z_ExplainRecord *data1_nodetoexplain (data1_handle dh, data1_node *n,
     assert(n->which == DATA1N_root);
     if (strcmp(n->u.root.type, "explain"))
     {
-	logf(LOG_WARN, "Attempt to convert a non-Explain record");
+	yaz_log(LOG_WARN, "Attempt to convert a non-Explain record");
 	return 0;
     }
     for (n = n->child; n; n = n->next)
@@ -1449,6 +1452,6 @@ Z_ExplainRecord *data1_nodetoexplain (data1_handle dh, data1_node *n,
 	    return res;
 	}
     }
-    logf(LOG_WARN, "No category in Explain record");
+    yaz_log(LOG_WARN, "No category in Explain record");
     return 0;
 }

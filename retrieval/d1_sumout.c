@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_sumout.c,v $
- * Revision 1.3  1998-02-11 11:53:35  adam
+ * Revision 1.4  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.3  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.2  1997/09/17 12:10:38  adam
@@ -59,7 +62,7 @@ Z_BriefBib *data1_nodetosummary (data1_handle dh, data1_node *n,
     assert(n->which == DATA1N_root);
     if (strcmp(n->u.root.type, "summary"))
     {
-	logf(LOG_WARN, "Attempt to convert a non-summary record");
+	yaz_log(LOG_WARN, "Attempt to convert a non-summary record");
 	return 0;
     }
 
@@ -83,7 +86,7 @@ Z_BriefBib *data1_nodetosummary (data1_handle dh, data1_node *n,
     {
 	if (c->which != DATA1N_tag || !c->u.tag.element)
 	{
-	    logf(LOG_WARN, "Malformed element in Summary record");
+	    yaz_log(LOG_WARN, "Malformed element in Summary record");
 	    return 0;
 	}
 	if (select && !c->u.tag.node_selected)
@@ -105,7 +108,7 @@ Z_BriefBib *data1_nodetosummary (data1_handle dh, data1_node *n,
 	    case 16: res->abstract = f_string(c, o); break;
 	    case 17: abort(); /* TODO */
 	    default:
-	        logf(LOG_WARN, "Unknown element in Summary record.");
+	        yaz_log(LOG_WARN, "Unknown element in Summary record.");
 	}
     }
     return res;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.17  1999-07-13 13:28:25  adam
+ * Revision 1.18  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.17  1999/07/13 13:28:25  adam
  * Better debugging for NMEM routines.
  *
  * Revision 1.16  1999/03/31 11:18:25  adam
@@ -122,7 +125,7 @@ static void free_block(nmem_block *p)
     p->next = freelist;
     freelist = p;
 #if NMEM_DEBUG
-    logf (LOG_DEBUG, "nmem free_block p=%p", p);
+    yaz_log (LOG_DEBUG, "nmem free_block p=%p", p);
 #endif
 }
 
@@ -131,10 +134,10 @@ void nmem_print_list (void)
 {
     struct nmem_debug *p;
 
-    logf (LOG_DEBUG, "nmem print list");
+    yaz_log (LOG_DEBUG, "nmem print list");
     NMEM_ENTER;
     for (p = nmem_debug_list; p; p = p->next)
-	logf (LOG_DEBUG, " %s:%d p=%p", p->file, p->line, p->p);
+	yaz_log (LOG_DEBUG, " %s:%d p=%p", p->file, p->line, p->p);
     NMEM_LEAVE;
 }
 #endif
@@ -146,7 +149,7 @@ static nmem_block *get_block(int size)
     nmem_block *r, *l;
 
 #if NMEM_DEBUG
-    logf (LOG_DEBUG, "nmem get_block size=%d", size);
+    yaz_log (LOG_DEBUG, "nmem get_block size=%d", size);
 #endif
     for (r = freelist, l = 0; r; l = r, r = r->next)
     	if (r->size >= size)
@@ -154,7 +157,7 @@ static nmem_block *get_block(int size)
     if (r)
     {
 #if NMEM_DEBUG
-	logf (LOG_DEBUG, "nmem get_block found free block p=%p", r);
+	yaz_log (LOG_DEBUG, "nmem get_block found free block p=%p", r);
 #endif
     	if (l)
 	    l->next = r->next;
@@ -168,7 +171,7 @@ static nmem_block *get_block(int size)
 	if (get < size)
 	    get = size;
 #if NMEM_DEBUG
-	logf (LOG_DEBUG, "nmem get_block alloc new block size=%d", get);
+	yaz_log (LOG_DEBUG, "nmem get_block alloc new block size=%d", get);
 #endif
 	r = (nmem_block *)xmalloc(sizeof(*r));
 	r->buf = (char *)xmalloc(r->size = get);
@@ -182,7 +185,7 @@ void nmem_reset(NMEM n)
     nmem_block *t;
 
 #if NMEM_DEBUG
-    logf (LOG_DEBUG, "nmem_reset p=%p", n);
+    yaz_log (LOG_DEBUG, "nmem_reset p=%p", n);
 #endif
     if (!n)
 	return;
@@ -207,7 +210,7 @@ void *nmem_malloc(NMEM n, int size)
     char *r;
 
 #if NMEM_DEBUG
-    logf (LOG_DEBUG, "%s:%d: nmem_malloc p=%p size=%d", file, line,
+    yaz_log (LOG_DEBUG, "%s:%d: nmem_malloc p=%p size=%d", file, line,
                      n, size);
 #endif
     if (!n)
@@ -260,7 +263,7 @@ NMEM nmem_create(void)
     NMEM_LEAVE;
 
 #if NMEM_DEBUG
-    logf (LOG_DEBUG, "%s:%d: nmem_create %d p=%p", file, line,
+    yaz_log (LOG_DEBUG, "%s:%d: nmem_create %d p=%p", file, line,
                      nmem_active_no, r);
 #endif
     r->blocks = 0;
@@ -271,7 +274,7 @@ NMEM nmem_create(void)
     for (debug_p = nmem_debug_list; debug_p; debug_p = debug_p->next)
 	if (debug_p->p == r)
 	{
-	    logf (LOG_FATAL, "multi used block in nmem");
+	    yaz_log (LOG_FATAL, "multi used block in nmem");
 	    abort ();
 	}
     debug_p = xmalloc (sizeof(*debug_p));
@@ -301,7 +304,7 @@ void nmem_destroy(NMEM n)
 	return;
     
 #if NMEM_DEBUG
-    logf (LOG_DEBUG, "%s:%d: nmem_destroy %d p=%p", file, line,
+    yaz_log (LOG_DEBUG, "%s:%d: nmem_destroy %d p=%p", file, line,
                      nmem_active_no-1, n);
     NMEM_ENTER;
     for (debug_p = &nmem_debug_list; *debug_p; debug_p = &(*debug_p)->next)
@@ -317,8 +320,8 @@ void nmem_destroy(NMEM n)
     nmem_print_list();
     if (!ok)
     {
-	logf (LOG_WARN, "%s:%d destroying unallocated nmem block p=%p",
-	      file, line, n);
+	yaz_log (LOG_WARN, "%s:%d destroying unallocated nmem block p=%p",
+		 file, line, n);
 	return;
     }
 #endif

@@ -1,46 +1,57 @@
-
 YAZ Compilation guidelines for winNT/95.
-  $Id: windows.txt,v 1.1 1998-01-07 12:59:27 adam Exp $
+  $Id: windows.txt,v 1.2 1999-08-27 09:40:31 adam Exp $
 
-This distribution of YAZ was compiled with Visual C++ 5.0.
-The workspace file, yaz.dsw, is located in the top-level directory.
+This distribution of YAZ includes makefiles that works with Visual
+C++ version 5 and 6. The makefile is located in sub directory 'win'.
 
-It includes 4 sub-projects:
-   yaz.dsp 
-         Builds yaz.dll. This DLL includes the source in all
-         sub directories except for 'server', 'client' and
-         'ztest'. To export public functions the header files
-         includes the modifier YAZ_EXPORT which is defined in
-         yconfig.h. The value of this modifier,
-          __declspec(dllexport), probably only works with VC.
+If you wish to make modifications to the make process you should
+edit makefile before proceeding. For example, a DEBUG version of YAZ
+can be build by modifying the line 'DEBUG=0' to 'DEBUG=1' in the
+makefile.
 
-   client/client.dsp   
-         Builds client.exe as a console application. It links
-         with the import library yaz.lib. This application 
-         searches for yaz.dll during runtime.
+Run nmake in that directory (in a Command prompt for example). Eg:
+    >CD \YAZ\WIN
+    >NMAKE
 
-   server/server.dsp
-         Builds the library, server.lib, which includes the
-         source from 'server'. Unlike the UNIX version, the
-         server library is multi-threaded.
+Make sure that the environment variables PATH, LIB and INCLUDE are
+set properly. They *should* be set by the Visual C++ installation.
+Programs cl.exe, link.exe and others must be found in the PATH. The
+standard includes files, standard libraries must be found in INCLUDE
+and LIB respectively.
 
-   ztest/ztest.dsp
-         Builds ztest.exe as a console application. It links
+The following components are build by the nmake process:
+
+yaz.dll - This DLL is made of the source in all sub directories except
+         for 'server', 'client' and 'ztest'. To export public functions
+         the header files contain the modifier YAZ_EXPORT which is
+         defined in yconfig.h. The value of this modifier,
+         __declspec(dllexport), is probably specific to Visual C++. 
+
+server.lib - The server library, which includes the source from
+         'server'.  Unlike the UNIX version, the server library is
+         multi-threaded.
+
+client.exe - A Z39.50 client console application. It links with the
+         import library yaz.lib. This application searches for yaz.dll
+         during runtime.
+
+ztest.exe - The Z39.50 test server as a console application. It links
          with the import library yaz.lib and the regular library
-         server.lib. When running ztest make sure it is able to
-         find the record test files dummy-records, dummy-grs,
-         and dummy-words in the current directory. 
+         server.lib. When running ztest make sure it is able to find
+         the record test files dummy-records, dummy-grs, and dummy-words
+         in the current directory. 
 
          As an option ztest may be installed as an NT service
-         (not Windows 95). Use 'ztest -install <otherargs>' to
-         install it and 'ztest -remove <otherargs>' to remove it
-         again. Since NT runs the service program in some weird
-         directory, such as \winnt\system32, it's probably a good
-         idea to use the option '-w' to change to some other
-         directory. For example
+         (not Windows 95). Use 'ztest -install <otherargs>' to install
+         it and 'ztest -remove <otherargs>' to remove it again. Since
+         NT runs the service program in some weird directory, such as
+         \winnt\system32, it's probably a good idea to use the option
+         '-w' to change to some other directory. For example
 
             ztest -install -w d:\proj\yaz\ztest -l ztest.out tcp:@:210
 
-         which specifies both working directory and a log file, so
-         you can see what's going on.
+         which specifies both working directory (d:\proj\yaz\ztest) 
+         and a log file (ztest.out). The server is started on port 210.
 
+After successful compilation all executables and DLL's are located
+in sub YAZ\BIN. Libraries are located in YAZ\LIB.

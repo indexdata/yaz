@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.27  1999-02-02 13:57:34  adam
+ * Revision 1.28  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.27  1999/02/02 13:57:34  adam
  * Uses preprocessor define WIN32 instead of WINDOWS to build code
  * for Microsoft WIN32.
  *
@@ -169,7 +172,7 @@ int event_loop(IOCHAN *iochans)
                 cs_close(conn);
 	        destroy_association(assoc);
 	        iochan_destroy(*iochans);
-                logf(LOG_DEBUG, "error while selecting, destroying iochan %p",
+                yaz_log(LOG_DEBUG, "error select, destroying iochan %p",
 			*iochans);
             }
 	}

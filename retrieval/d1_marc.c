@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.13  1998-10-13 16:09:52  adam
+ * Revision 1.14  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.13  1998/10/13 16:09:52  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -77,7 +80,7 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
     
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
-	logf(LOG_WARN|LOG_ERRNO, "%s", file);
+	yaz_log(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
 
@@ -102,8 +105,8 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d:Missing arg for %s", file, lineno,
-		     *argv);
+		yaz_log(LOG_WARN, "%s:%d:Missing arg for %s", file, lineno,
+			*argv);
 		continue;
 	    }
 	    res->name = nmem_strdup(mem, argv[1]);
@@ -112,14 +115,14 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
-		     *argv);
+		yaz_log(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+			*argv);
 		continue;
 	    }
 	    if ((res->reference = oid_getvalbyname(argv[1])) == VAL_NONE)
 	    {
-		logf(LOG_WARN, "%s:%d: Unknown tagset reference '%s'",
-		     file, lineno, argv[1]);
+		yaz_log(LOG_WARN, "%s:%d: Unknown tagset reference '%s'",
+			file, lineno, argv[1]);
 		continue;
 	    }
 	}
@@ -127,8 +130,8 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
-		     *argv);
+		yaz_log(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+			*argv);
 		continue;
 	    }
 	    res->length_data_entry = atoi(argv[1]);
@@ -137,8 +140,8 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
-		     *argv);
+		yaz_log(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+			*argv);
 		continue;
 	    }
 	    res->length_starting = atoi(argv[1]);
@@ -147,8 +150,8 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
-		     *argv);
+		yaz_log(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+			*argv);
 		continue;
 	    }
 	    res->length_implementation = atoi(argv[1]);
@@ -157,8 +160,8 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
-		     *argv);
+		yaz_log(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+			*argv);
 		continue;
 	    }
 	    strncpy(res->future_use, argv[1], 2);
@@ -167,8 +170,8 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
-		     *argv);
+		yaz_log(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+			*argv);
 		continue;
 	    }
 	    res->force_indicator_length = atoi(argv[1]);
@@ -177,15 +180,15 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
-		     *argv);
+		yaz_log(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+			*argv);
 		continue;
 	    }
 	    res->force_identifier_length = atoi(argv[1]);
 	}
 	else
-	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'", file, lineno,
-		 *argv);
+	    yaz_log(LOG_WARN, "%s:%d: Unknown directive '%s'", file, lineno,
+		    *argv);
 
     fclose(f);
     return res;
@@ -251,12 +254,12 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
     char *op;
     data1_node *field, *subf;
 
-    logf (LOG_DEBUG, "nodetomarc");
+    yaz_log (LOG_DEBUG, "nodetomarc");
     for (field = n->child; field; field = field->next)
     {
 	if (field->which != DATA1N_tag)
 	{
-	    logf(LOG_WARN, "Malformed field composition for marc output.");
+	    yaz_log(LOG_WARN, "Malformed field composition for marc output.");
 	    return -1;
 	}
 	if (selected && !field->u.tag.node_selected)
@@ -277,7 +280,7 @@ static int nodetomarc(data1_marctab *p, data1_node *n, int selected,
         {
 	    if (subf->which != DATA1N_tag)
 	    {
-		logf(LOG_WARN,
+		yaz_log(LOG_WARN,
 		    "Malformed subfield composition for marc output.");
 		return -1;
 	    }

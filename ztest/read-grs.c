@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: read-grs.c,v $
- * Revision 1.3  1999-03-31 11:18:25  adam
+ * Revision 1.4  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.3  1999/03/31 11:18:25  adam
  * Implemented odr_strdup. Added Reference ID to backend server API.
  *
  * Revision 1.2  1998/02/11 11:53:36  adam
@@ -59,7 +62,7 @@ Z_GenericRecord *read_grs1(FILE *f, ODR o)
 	    return r;
 	if (sscanf(buf, "(%d,%[^)])", &type, value) != 2)
 	{
-	    logf(LOG_WARN, "Bad data in '%s'", buf);
+	    yaz_log(LOG_WARN, "Bad data in '%s'", buf);
 	    return 0;
 	}
 	if (!type && *value == '0')

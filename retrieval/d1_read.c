@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.26  1999-07-13 13:23:48  adam
+ * Revision 1.27  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.26  1999/07/13 13:23:48  adam
  * Non-recursive version of data1_read_node. data1_read_nodex reads
  * stream of bytes (instead of buffer in memory).
  *
@@ -319,7 +322,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    args[i] = '\0';
 	    if (c != '>')
 	    {
-		logf(LOG_WARN, "d1: %d: Malformed tag", line);
+		yaz_log(LOG_WARN, "d1: %d: Malformed tag", line);
 		return 0;
 	    }
 	    else
@@ -347,8 +350,8 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		    }
 		    if (i != level)
 		    {
-			logf (LOG_WARN, "%d: no begin tag for %s",
-			      line, tag);
+			yaz_log (LOG_WARN, "%d: no begin tag for %s",
+				 line, tag);
 			break;
 		    }
 		}
@@ -360,8 +363,8 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    {
 		if (!(absyn = data1_get_absyn (dh, tag)))
 		{
-		    logf(LOG_WARN, "Unable to acquire abstract syntax "
-			 "for '%s'", tag);
+		    yaz_log(LOG_WARN, "Unable to acquire abstract syntax "
+			    "for '%s'", tag);
 		    return 0;
 		}
 		res = data1_mk_node (dh, m);
@@ -378,7 +381,7 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		
 		if (sscanf(args, "%s %s %n", tclass, type, &val_offset) != 2)
 		{
-		    logf(LOG_WARN, "Malformed variant triple at '%s'", tag);
+		    yaz_log(LOG_WARN, "Malformed variant triple at '%s'", tag);
 		    continue;
 		}
 		if (!(tp =

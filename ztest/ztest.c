@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.25  1999-06-01 14:29:12  adam
+ * Revision 1.26  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.25  1999/06/01 14:29:12  adam
  * Work on Extended Services.
  *
  * Revision 1.24  1999/05/27 13:07:54  adam
@@ -135,19 +138,19 @@ int ztest_present (void *handle, bend_present_rr *rr)
 
 int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 {
-    logf(LOG_LOG, "function: %d", *rr->esr->function);
+    yaz_log(LOG_LOG, "function: %d", *rr->esr->function);
     if (rr->esr->packageName)
-    	logf(LOG_LOG, "packagename: %s", rr->esr->packageName);
-    logf(LOG_LOG, "Waitaction: %d", *rr->esr->waitAction);
+    	yaz_log(LOG_LOG, "packagename: %s", rr->esr->packageName);
+    yaz_log(LOG_LOG, "Waitaction: %d", *rr->esr->waitAction);
 
     if (!rr->esr->taskSpecificParameters)
     {
-        logf (LOG_WARN, "No task specific parameters");
+        yaz_log (LOG_WARN, "No task specific parameters");
     }
     else if (rr->esr->taskSpecificParameters->which == Z_External_itemOrder)
     {
     	Z_ItemOrder *it = rr->esr->taskSpecificParameters->u.itemOrder;
-	logf (LOG_LOG, "Received ItemOrder");
+	yaz_log (LOG_LOG, "Received ItemOrder");
 	switch (it->which)
 	{
 #ifdef ASN_COMPILED
@@ -163,22 +166,22 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	    if (k && k->contact)
 	    {
 	        if (k->contact->name)
-		    logf(LOG_LOG, "contact name %s", k->contact->name);
+		    yaz_log(LOG_LOG, "contact name %s", k->contact->name);
 		if (k->contact->phone)
-		    logf(LOG_LOG, "contact phone %s", k->contact->phone);
+		    yaz_log(LOG_LOG, "contact phone %s", k->contact->phone);
 		if (k->contact->email)
-		    logf(LOG_LOG, "contact email %s", k->contact->email);
+		    yaz_log(LOG_LOG, "contact email %s", k->contact->email);
 	    }
 	    if (k->addlBilling)
 	    {
-	        logf(LOG_LOG, "Billing info (not shown)");
+	        yaz_log(LOG_LOG, "Billing info (not shown)");
 	    }
 	    
 	    if (n->resultSetItem)
 	    {
-	        logf(LOG_LOG, "resultsetItem");
-		logf(LOG_LOG, "setId: %s", n->resultSetItem->resultSetId);
-		logf(LOG_LOG, "item: %d", *n->resultSetItem->item);
+	        yaz_log(LOG_LOG, "resultsetItem");
+		yaz_log(LOG_LOG, "setId: %s", n->resultSetItem->resultSetId);
+		yaz_log(LOG_LOG, "item: %d", *n->resultSetItem->item);
 	    }
 	}
 	break;
@@ -187,40 +190,40 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     else if (rr->esr->taskSpecificParameters->which == Z_External_update)
     {
     	Z_IUUpdate *up = rr->esr->taskSpecificParameters->u.update;
-	logf (LOG_LOG, "Received DB Update");
+	yaz_log (LOG_LOG, "Received DB Update");
 	if (up->which == Z_IUUpdate_esRequest)
 	{
 	    Z_IUUpdateEsRequest *esRequest = up->u.esRequest;
 	    Z_IUOriginPartToKeep *toKeep = esRequest->toKeep;
 	    Z_IUSuppliedRecords *notToKeep = esRequest->notToKeep;
 	    
-	    logf (LOG_LOG, "action");
+	    yaz_log (LOG_LOG, "action");
 	    if (toKeep->action)
 	    {
 		switch (*toKeep->action)
 		{
 		case Z_IUOriginPartToKeep_recordInsert:
-		    logf (LOG_LOG, " recordInsert");
+		    yaz_log (LOG_LOG, " recordInsert");
 		    break;
 		case Z_IUOriginPartToKeep_recordReplace:
-		    logf (LOG_LOG, " recordUpdate");
+		    yaz_log (LOG_LOG, " recordUpdate");
 		    break;
 		case Z_IUOriginPartToKeep_recordDelete:
-		    logf (LOG_LOG, " recordDelete");
+		    yaz_log (LOG_LOG, " recordDelete");
 		    break;
 		case Z_IUOriginPartToKeep_elementUpdate:
-		    logf (LOG_LOG, " elementUpdate");
+		    yaz_log (LOG_LOG, " elementUpdate");
 		    break;
 		case Z_IUOriginPartToKeep_specialUpdate:
-		    logf (LOG_LOG, " specialUpdate");
+		    yaz_log (LOG_LOG, " specialUpdate");
 		    break;
 		default:
-		    logf (LOG_LOG, " unknown (%d)", *toKeep->action);
+		    yaz_log (LOG_LOG, " unknown (%d)", *toKeep->action);
 		}
 	    }
 	    if (toKeep->databaseName)
 	    {
-		logf (LOG_LOG, "database: %s", toKeep->databaseName);
+		yaz_log (LOG_LOG, "database: %s", toKeep->databaseName);
 		if (!strcmp(toKeep->databaseName, "fault"))
 		{
 		    rr->errcode = 109;
@@ -241,30 +244,30 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 			struct oident *oident;
 			oident = oid_getentbyoid(rec->direct_reference);
 			if (oident)
-			    logf (LOG_LOG, "record %d type %s", i,
-				  oident->desc);
+			    yaz_log (LOG_LOG, "record %d type %s", i,
+				     oident->desc);
 		    }
 		    switch (rec->which)
 		    {
 		    case Z_External_sutrs:
 			if (rec->u.octet_aligned->len > 170)
-			    logf (LOG_LOG, "%d bytes:\n%.168s ...",
-				  rec->u.sutrs->len,
-				  rec->u.sutrs->buf);
+			    yaz_log (LOG_LOG, "%d bytes:\n%.168s ...",
+				     rec->u.sutrs->len,
+				     rec->u.sutrs->buf);
 			else
-			    logf (LOG_LOG, "%d bytes:\n%s",
-				  rec->u.sutrs->len,
-				  rec->u.sutrs->buf);
+			    yaz_log (LOG_LOG, "%d bytes:\n%s",
+				     rec->u.sutrs->len,
+				     rec->u.sutrs->buf);
                         break;
 		    case Z_External_octet        :
 			if (rec->u.octet_aligned->len > 170)
-			    logf (LOG_LOG, "%d bytes:\n%.168s ...",
-				  rec->u.octet_aligned->len,
-				  rec->u.octet_aligned->buf);
+			    yaz_log (LOG_LOG, "%d bytes:\n%.168s ...",
+				     rec->u.octet_aligned->len,
+				     rec->u.octet_aligned->buf);
 			else
-			    logf (LOG_LOG, "%d bytes\n%s",
-				  rec->u.octet_aligned->len,
-				  rec->u.octet_aligned->buf);
+			    yaz_log (LOG_LOG, "%d bytes\n%s",
+				     rec->u.octet_aligned->len,
+				     rec->u.octet_aligned->buf);
 		    }
 		}
 	    }
@@ -272,8 +275,8 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     }
     else
     {
-        logf (LOG_WARN, "Unknown Extended Service(%d)",
-	      rr->esr->taskSpecificParameters->which);
+        yaz_log (LOG_WARN, "Unknown Extended Service(%d)",
+		 rr->esr->taskSpecificParameters->which);
 	
     }
     return 0;

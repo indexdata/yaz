@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.14  1998-10-13 16:09:50  adam
+ * Revision 1.15  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.14  1998/10/13 16:09:50  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -83,7 +86,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
-	logf(LOG_WARN|LOG_ERRNO, "%s", file);
+	yaz_log(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
 
@@ -98,15 +101,15 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # args for targetref",
-		    file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # args for targetref",
+			file, lineno);
 		continue;
 	    }
 	    if ((res->target_absyn_ref = oid_getvalbyname(argv[1]))
 		== VAL_NONE)
 	    {
-		logf(LOG_WARN, "%s:%d: Unknown reference '%s'",
-		     file, lineno, argv[1]);
+		yaz_log(LOG_WARN, "%s:%d: Unknown reference '%s'",
+			file, lineno, argv[1]);
 		continue;
 	    }
 	}
@@ -114,8 +117,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # args for targetname",
-		    file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # args for targetname",
+			file, lineno);
 		continue;
 	    }
 	    res->target_absyn_name =
@@ -128,7 +131,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # args for name", file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # args for name", file, lineno);
 		continue;
 	    }
 	    res->name = (char *)nmem_malloc(mem, strlen(argv[1])+1);
@@ -141,8 +144,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 
 	    if (argc < 3)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # of args for map",
-		    file, lineno);
+		yaz_log(LOG_WARN, "%s:%d: Bad # of args for map",
+			file, lineno);
 		continue;
 	    }
 	    *mapp = (data1_mapunit *)nmem_malloc(mem, sizeof(**mapp));
@@ -168,8 +171,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		if ((np = sscanf(path, "(%d,%[^)]):%[^/]", &type, valstr,
 		    parm)) < 2)
 		{
-		    logf(LOG_WARN, "%s:%d: Syntax error in map directive: %s",
-		        file, lineno, argv[2]);
+		    yaz_log(LOG_WARN, "%s:%d: Syntax error in map "
+			    "directive: %s", file, lineno, argv[2]);
 		    fclose(f);
 		    return 0;
 		}
@@ -197,8 +200,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 	    mapp = &(*mapp)->next;
 	}
 	else 
-	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
-		 file, lineno, argv[0]);
+	    yaz_log(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		    file, lineno, argv[0]);
 
     fclose(f);
     return res;
@@ -343,8 +346,8 @@ data1_node *data1_map_record (data1_handle dh, data1_node *n,
     res->u.root.type = map->target_absyn_name;
     if (!(res->u.root.absyn = data1_get_absyn(dh, map->target_absyn_name)))
     {
-	logf(LOG_WARN, "%s: Failed to load target absyn '%s'",
-	    map->name, map->target_absyn_name);
+	yaz_log(LOG_WARN, "%s: Failed to load target absyn '%s'",
+		map->name, map->target_absyn_name);
     }
     res->parent = 0;
     res->root = res;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.12  1999-04-23 13:34:33  adam
+ * Revision 1.13  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.12  1999/04/23 13:34:33  adam
  * Fixed bug in match_triple. Thanks to Franck Falcoz <franck@dtv.dk>.
  *
  * Revision 1.11  1997/11/06 11:36:44  adam
@@ -219,7 +222,7 @@ static int match_children_here (data1_handle dh, data1_node *n,
 	counter++;
 	if (occur && occur->which == Z_Occurrences_last)
 	{
-	    logf(LOG_WARN, "Can't do occurrences=last (yet)");
+	    yaz_log(LOG_WARN, "Can't do occurrences=last (yet)");
 	    return 0;
 	}
 	if (!occur || occur->which == Z_Occurrences_all ||

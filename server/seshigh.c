@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.93  1999-07-06 12:17:15  adam
+ * Revision 1.94  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.93  1999/07/06 12:17:15  adam
  * Added option -1 that runs server once (for profiling purposes).
  *
  * Revision 1.92  1999/06/17 10:54:45  adam
@@ -404,7 +407,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
 		{
 		    if (!(apduf = fopen(filename, "w")))
 		    {
-			logf(LOG_WARN|LOG_ERRNO, "%s", filename);
+			yaz_log(LOG_WARN|LOG_ERRNO, "%s", filename);
 			return 0;
 		    }
 		    setvbuf(apduf, 0, _IONBF, 0);
@@ -416,7 +419,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
 		sprintf(filename + strlen(filename), ".%d", getpid());
 		if (!(f = fopen(filename, "w")))
 		{
-		    logf(LOG_WARN|LOG_ERRNO, "%s", filename);
+		    yaz_log(LOG_WARN|LOG_ERRNO, "%s", filename);
 		    return 0;
 		}
 		setvbuf(f, 0, _IONBF, 0);
@@ -469,7 +472,7 @@ static void do_close_req(association *a, int reason, char *message,
     while (request_deq(&a->outgoing));
     if (a->version >= 3)
     {
-	logf(LOG_LOG, "Sending Close PDU, reason=%d, message=%s",
+	yaz_log(LOG_LOG, "Sending Close PDU, reason=%d, message=%s",
 	    reason, message ? message : "none");
 	apdu.which = Z_APDU_close;
 	apdu.u.close = cls;
@@ -480,7 +483,7 @@ static void do_close_req(association *a, int reason, char *message,
     }
     else
     {
-	logf(LOG_DEBUG, "v2 client. No Close PDU");
+	yaz_log(LOG_DEBUG, "v2 client. No Close PDU");
 	iochan_setevent(a->client_chan, EVENT_TIMEOUT); /* force imm close */
     }
     a->state = ASSOC_DEAD;
@@ -512,14 +515,14 @@ void ir_session(IOCHAN h, int event)
     {
 	if (assoc->state != ASSOC_UP)
 	{
-	    logf(LOG_LOG, "Final timeout - closing connection.");
+	    yaz_log(LOG_LOG, "Final timeout - closing connection.");
 	    cs_close(conn);
 	    destroy_association(assoc);
 	    iochan_destroy(h);
 	}
 	else
 	{
-	    logf(LOG_LOG, "Session idle too long. Sending close.");
+	    yaz_log(LOG_LOG, "Session idle too long. Sending close.");
 	    do_close(assoc, Z_Close_lackOfActivity, 0);
 	}
 	return;
@@ -528,12 +531,12 @@ void ir_session(IOCHAN h, int event)
     {
     	if (event & EVENT_INPUT)
 	{
-	    logf(LOG_DEBUG, "ir_session (input)");
+	    yaz_log(LOG_DEBUG, "ir_session (input)");
 	    assert(assoc && conn);
 	    /* We aren't speaking to this fellow */
 	    if (assoc->state == ASSOC_DEAD)
 	    {
-		logf(LOG_LOG, "Closed connection after reject");
+		yaz_log(LOG_LOG, "Closed connection after reject");
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);
@@ -542,7 +545,7 @@ void ir_session(IOCHAN h, int event)
 	    if ((res = cs_get(conn, &assoc->input_buffer,
 		&assoc->input_buffer_len)) <= 0)
 	    {
-		logf(LOG_LOG, "Connection closed by client");
+		yaz_log(LOG_LOG, "Connection closed by client");
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);
@@ -554,16 +557,16 @@ void ir_session(IOCHAN h, int event)
 		iochan_setevent(h, EVENT_INPUT);
 	    	
 	    /* we got a complete PDU. Let's decode it */
-	    logf(LOG_DEBUG, "Got PDU, %d bytes", res);
+	    yaz_log(LOG_DEBUG, "Got PDU, %d bytes", res);
 	    req = request_get(&assoc->incoming); /* get a new request structure */
 	    odr_reset(assoc->decode);
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
 	    if (!z_APDU(assoc->decode, &req->request, 0, 0))
 	    {
-		logf(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
+		yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [near byte %d] ",
 		    odr_errmsg(odr_geterror(assoc->decode)),
 		    odr_offset(assoc->decode));
-		logf(LOG_LOG, "PDU dump:");
+		yaz_log(LOG_LOG, "PDU dump:");
 		odr_dumpBER(log_file(), assoc->input_buffer, res);
 		do_close(assoc, Z_Close_protocolError, "Malformed package");
 		return;
@@ -571,7 +574,7 @@ void ir_session(IOCHAN h, int event)
 	    req->request_mem = odr_extract_mem(assoc->decode);
 	    if (assoc->print && !z_APDU(assoc->print, &req->request, 0, 0))
 	    {
-		logf(LOG_WARN, "ODR print error: %s", 
+		yaz_log(LOG_WARN, "ODR print error: %s", 
 		    odr_errmsg(odr_geterror(assoc->print)));
 		odr_reset(assoc->print);
 	    }
@@ -592,18 +595,18 @@ void ir_session(IOCHAN h, int event)
     {
     	request *req = request_head(&assoc->outgoing);
 
-	logf(LOG_DEBUG, "ir_session (output)");
+	yaz_log(LOG_DEBUG, "ir_session (output)");
 	req->state = REQUEST_PENDING;
     	switch (res = cs_put(conn, req->response, req->len_response))
 	{
 	    case -1:
-	    	logf(LOG_LOG, "Connection closed by client");
+	    	yaz_log(LOG_LOG, "Connection closed by client");
 		cs_close(conn);
 		destroy_association(assoc);
 		iochan_destroy(h);
 		break;
 	    case 0: /* all sent - release the request structure */
-	    	logf(LOG_DEBUG, "Wrote PDU, %d bytes", req->len_response);
+	    	yaz_log(LOG_DEBUG, "Wrote PDU, %d bytes", req->len_response);
 		nmem_destroy(req->request_mem);
 		request_deq(&assoc->outgoing);
 		request_release(req);
@@ -615,7 +618,7 @@ void ir_session(IOCHAN h, int event)
     }
     if (event & EVENT_EXCEPT)
     {
-	logf(LOG_DEBUG, "ir_session (exception)");
+	yaz_log(LOG_DEBUG, "ir_session (exception)");
 	cs_close(conn);
 	destroy_association(assoc);
 	iochan_destroy(h);
@@ -647,7 +650,7 @@ static int process_request(association *assoc, request *req)
 		res = process_ESRequest(assoc, req, &fd);
 	    else
 	    {
-		logf(LOG_WARN, "Cannot handle EXTENDED SERVICES APDU");
+		yaz_log(LOG_WARN, "Cannot handle EXTENDED SERVICES APDU");
 		return -1;
 	    }
 	    break;
@@ -656,7 +659,7 @@ static int process_request(association *assoc, request *req)
 		res = process_sortRequest(assoc, req, &fd);
 	    else
 	    {
-		logf(LOG_WARN, "Cannot handle SORT APDU");
+		yaz_log(LOG_WARN, "Cannot handle SORT APDU");
 		return -1;
 	    }
 	    break;
@@ -667,22 +670,22 @@ static int process_request(association *assoc, request *req)
 		res = process_deleteRequest(assoc, req, &fd);
 	    else
 	    {
-		logf (LOG_WARN, "Cannot handle Delete APDU");
+		yaz_log (LOG_WARN, "Cannot handle Delete APDU");
 		return -1;
 	    }
 	    break;
 	default:
-	    logf(LOG_WARN, "Bad APDU received");
+	    yaz_log(LOG_WARN, "Bad APDU received");
 	    return -1;
     }
     if (res)
     {
-    	logf(LOG_DEBUG, "  result immediately available");
+    	yaz_log(LOG_DEBUG, "  result immediately available");
     	retval = process_response(assoc, req, res);
     }
     else if (fd < 0)
     {
-    	logf(LOG_DEBUG, "  result unavailble");
+    	yaz_log(LOG_DEBUG, "  result unavailble");
 	retval = 0;
     }
     else /* no result yet - one will be provided later */
@@ -691,7 +694,7 @@ static int process_request(association *assoc, request *req)
 
 	/* Set up an I/O handler for the fd supplied by the backend */
 
-	logf(LOG_DEBUG, "   establishing handler for result");
+	yaz_log(LOG_DEBUG, "   establishing handler for result");
 	req->state = REQUEST_PENDING;
 	if (!(chan = iochan_create(fd, backend_response, EVENT_INPUT)))
 	    abort();
@@ -711,7 +714,7 @@ void backend_response(IOCHAN i, int event)
     Z_APDU *res;
     int fd;
 
-    logf(LOG_DEBUG, "backend_response");
+    yaz_log(LOG_DEBUG, "backend_response");
     assert(assoc && req && req->state != REQUEST_IDLE);
     /* determine what it is we're waiting for */
     switch (req->request->which)
@@ -725,19 +728,19 @@ void backend_response(IOCHAN i, int event)
 	    res = response_scanRequest(assoc, req, 0, &fd); break;
 #endif
 	default:
-	    logf(LOG_WARN, "Serious programmer's lapse or bug");
+	    yaz_log(LOG_WARN, "Serious programmer's lapse or bug");
 	    abort();
     }
     if ((res && process_response(assoc, req, res) < 0) || fd < 0)
     {
-	logf(LOG_LOG, "Fatal error when talking to backend");
+	yaz_log(LOG_LOG, "Fatal error when talking to backend");
 	do_close(assoc, Z_Close_systemProblem, 0);
 	iochan_destroy(i);
 	return;
     }
     else if (!res) /* no result yet - try again later */
     {
-    	logf(LOG_DEBUG, "   no result yet");
+    	yaz_log(LOG_DEBUG, "   no result yet");
     	iochan_setfd(i, fd); /* in case fd has changed */
     }
 }
@@ -750,7 +753,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     odr_setbuf(assoc->encode, req->response, req->size_response, 1);
     if (!z_APDU(assoc->encode, &res, 0, 0))
     {
-    	logf(LOG_WARN, "ODR error when encoding response: %s",
+    	yaz_log(LOG_WARN, "ODR error when encoding response: %s",
 	    odr_errmsg(odr_geterror(assoc->decode)));
 	odr_reset(assoc->encode);
 	return -1;
@@ -760,7 +763,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     odr_setbuf(assoc->encode, 0, 0, 0); /* don'txfree if we abort later */
     if (assoc->print && !z_APDU(assoc->print, &res, 0, 0))
     {
-	logf(LOG_WARN, "ODR print error: %s", 
+	yaz_log(LOG_WARN, "ODR print error: %s", 
 	    odr_errmsg(odr_geterror(assoc->print)));
 	odr_reset(assoc->print);
     }
@@ -773,7 +776,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
 #if 1
     if (request_head(&assoc->incoming))
     {
-	logf (LOG_DEBUG, "more work to be done");
+	yaz_log (LOG_DEBUG, "more work to be done");
     	iochan_setevent(assoc->client_chan, EVENT_WORK);
     }
 #endif
@@ -796,13 +799,13 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     bend_initresult *binitres;
     char options[100];
 
-    logf(LOG_LOG, "Got initRequest");
+    yaz_log(LOG_LOG, "Got initRequest");
     if (req->implementationId)
-    	logf(LOG_LOG, "Id:        %s", req->implementationId);
+    	yaz_log(LOG_LOG, "Id:        %s", req->implementationId);
     if (req->implementationName)
-    	logf(LOG_LOG, "Name:      %s", req->implementationName);
+    	yaz_log(LOG_LOG, "Name:      %s", req->implementationName);
     if (req->implementationVersion)
-    	logf(LOG_LOG, "Version:   %s", req->implementationVersion);
+    	yaz_log(LOG_LOG, "Version:   %s", req->implementationVersion);
 
     binitreq.stream = assoc->encode;
     binitreq.configname = "default-config";
@@ -817,21 +820,21 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     binitreq.bend_delete = NULL;
     if (!(binitres = bend_init(&binitreq)))
     {
-    	logf(LOG_WARN, "Bad response from backend.");
+    	yaz_log(LOG_WARN, "Bad response from backend.");
     	return 0;
     }
 
     assoc->backend = binitres->handle;
     if ((assoc->bend_sort = (int (*)())binitreq.bend_sort))
-	logf (LOG_DEBUG, "Sort handler installed");
+	yaz_log (LOG_DEBUG, "Sort handler installed");
     if ((assoc->bend_search = (int (*)())binitreq.bend_search))
-	logf (LOG_DEBUG, "Search handler installed");
+	yaz_log (LOG_DEBUG, "Search handler installed");
     if ((assoc->bend_present = (int (*)())binitreq.bend_present))
-	logf (LOG_DEBUG, "Present handler installed");   
+	yaz_log (LOG_DEBUG, "Present handler installed");   
     if ((assoc->bend_esrequest = (int (*)())binitreq.bend_esrequest))
-	logf (LOG_DEBUG, "ESRequest handler installed");   
+	yaz_log (LOG_DEBUG, "ESRequest handler installed");   
     if ((assoc->bend_delete = (int (*)())binitreq.bend_delete))
-	logf (LOG_DEBUG, "Delete handler installed");   
+	yaz_log (LOG_DEBUG, "Delete handler installed");   
     
     resp->referenceId = req->referenceId;
     *options = '\0';
@@ -892,7 +895,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_3);
 	assoc->version = 3;
     }
-    logf(LOG_LOG, "Negotiated to v%d: %s", assoc->version, options);
+    yaz_log(LOG_LOG, "Negotiated to v%d: %s", assoc->version, options);
     assoc->maximumRecordSize = *req->maximumRecordSize;
     if (assoc->maximumRecordSize > control_block->maxrecordsize)
     	assoc->maximumRecordSize = control_block->maxrecordsize;
@@ -927,7 +930,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     if (binitres->errcode)
     {
-    	logf(LOG_LOG, "Connection rejected by backend.");
+    	yaz_log(LOG_LOG, "Connection rejected by backend.");
     	*resp->result = 0;
 	assoc->state = ASSOC_DEAD;
     }
@@ -971,7 +974,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
     bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
 
-    logf(LOG_DEBUG, "Diagnostic: %d -- %s", error, addinfo ? addinfo :
+    yaz_log(LOG_DEBUG, "Diagnostic: %d -- %s", error, addinfo ? addinfo :
 	"NULL");
     *err = error;
     rec->which = Z_Records_NSD;
@@ -1008,7 +1011,7 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
     bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
 
-    logf(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
+    yaz_log(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
     *err = error;
     rec->databaseName = dbname;
     rec->which = Z_NamePlusRecord_surrogateDiagnostic;
@@ -1036,7 +1039,7 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
     Z_DefaultDiagFormat *rec = (Z_DefaultDiagFormat *)odr_malloc (assoc->encode, sizeof(*rec));
 
-    logf(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo ? addinfo : "");
+    yaz_log(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo ? addinfo : "");
     bib1.proto = assoc->proto;
     bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
@@ -1083,8 +1086,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     *num = 0;
     *next = 0;
 
-    logf(LOG_LOG, "Request to pack %d+%d", start, toget);
-    logf(LOG_DEBUG, "pms=%d, mrs=%d", a->preferredMessageSize,
+    yaz_log(LOG_LOG, "Request to pack %d+%d", start, toget);
+    yaz_log(LOG_DEBUG, "pms=%d, mrs=%d", a->preferredMessageSize,
     	a->maximumRecordSize);
     for (recno = start; reclist->num_records < toget; recno++)
     {
@@ -1130,24 +1133,24 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    this_length = fres->len;
 	else
 	    this_length = odr_total(a->encode) - total_length;
-	logf(LOG_DEBUG, "  fetched record, len=%d, total=%d",
+	yaz_log(LOG_DEBUG, "  fetched record, len=%d, total=%d",
 	    this_length, total_length);
 	if (this_length + total_length > a->preferredMessageSize)
 	{
 	    /* record is small enough, really */
 	    if (this_length <= a->preferredMessageSize)
 	    {
-	    	logf(LOG_DEBUG, "  Dropped last normal-sized record");
+	    	yaz_log(LOG_DEBUG, "  Dropped last normal-sized record");
 		*pres = Z_PRES_PARTIAL_2;
 		break;
 	    }
 	    /* record can only be fetched by itself */
 	    if (this_length < a->maximumRecordSize)
 	    {
-	    	logf(LOG_DEBUG, "  Record > prefmsgsz");
+	    	yaz_log(LOG_DEBUG, "  Record > prefmsgsz");
 	    	if (toget > 1)
 		{
-		    logf(LOG_DEBUG, "  Dropped it");
+		    yaz_log(LOG_DEBUG, "  Dropped it");
 		    reclist->records[reclist->num_records] =
 		   	 surrogatediagrec(a, fres->basename, 16, 0);
 		    reclist->num_records++;
@@ -1158,7 +1161,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    }
 	    else /* too big entirely */
 	    {
-	    	logf(LOG_DEBUG, "Record > maxrcdsz");
+	    	yaz_log(LOG_DEBUG, "Record > maxrcdsz");
 		reclist->records[reclist->num_records] =
 		    surrogatediagrec(a, fres->basename, 17, 0);
 		reclist->num_records++;
@@ -1195,19 +1198,19 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     bend_search_rr *bsrr = 
 	(bend_search_rr *)nmem_malloc (reqb->request_mem, sizeof(*bsrr));
     
-    logf(LOG_LOG, "Got SearchRequest.");
+    yaz_log(LOG_LOG, "Got SearchRequest.");
     bsrr->fd = fd;
     bsrr->request = reqb;
     bsrr->association = assoc;
     bsrr->referenceId = req->referenceId;
     save_referenceId (reqb, bsrr->referenceId);
 
-    logf (LOG_LOG, "ResultSet '%s'", req->resultSetName);
+    yaz_log (LOG_LOG, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)
     {
 	int i;
 	for (i = 0; i < req->num_databaseNames; i++)
-	    logf (LOG_LOG, "Database '%s'", req->databaseNames[i]);
+	    yaz_log (LOG_LOG, "Database '%s'", req->databaseNames[i]);
     }
     switch (req->query->which)
     {
@@ -1287,7 +1290,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     *fd = -1;
     if (!bsrt && !bend_searchresponse(assoc->backend, bsrt))
     {
-    	logf(LOG_FATAL, "Bad result from backend");
+    	yaz_log(LOG_FATAL, "Bad result from backend");
     	return 0;
     }
     else if (bsrt->errcode)
@@ -1391,7 +1394,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     int *next;
     int *num;
 
-    logf(LOG_LOG, "Got PresentRequest.");
+    yaz_log(LOG_LOG, "Got PresentRequest.");
 
     if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)) ||
 	prefformat->oclass != CLASS_RECSYN)
@@ -1468,7 +1471,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     bend_scanresult *srs;
     oident *attset;
 
-    logf(LOG_LOG, "Got ScanRequest");
+    yaz_log(LOG_LOG, "Got ScanRequest");
     *scanStatus = Z_Scan_failure;
     *numberOfEntriesReturned = 0;
 
@@ -1499,7 +1502,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	{
 	    int i;
 	    for (i = 0; i < req->num_databaseNames; i++)
-		logf (LOG_LOG, "Database '%s'", req->databaseNames[i]);
+		yaz_log (LOG_LOG, "Database '%s'", req->databaseNames[i]);
 	}
 	srq.num_bases = req->num_databaseNames;
 	srq.basenames = req->databaseNames;
@@ -1560,7 +1563,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 			odr_malloc(assoc->encode, o->len = o->size =
 				   strlen(srs->entries[i].term));
 		    memcpy(o->buf, srs->entries[i].term, o->len);
-		    logf(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
+		    yaz_log(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
 			 srs->entries[i].term, srs->entries[i].occurrences);
 		}
 		else
@@ -1595,7 +1598,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
 
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
 
-    logf(LOG_LOG, "Got SortRequest.");
+    yaz_log(LOG_LOG, "Got SortRequest.");
 
 #ifdef ASN_COMPILED
     bsrr->num_input_setnames = req->num_inputResultSetNames;
@@ -1655,7 +1658,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
 	odr_malloc (assoc->encode, sizeof(*bdrr));
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
 
-    logf(LOG_LOG, "Got DeleteRequest.");
+    yaz_log(LOG_LOG, "Got DeleteRequest.");
 
     bdrr->num_setnames = req->num_resultSetList;
     bdrr->setnames = req->resultSetList;
@@ -1700,7 +1703,7 @@ static void process_close(association *assoc, request *reqb)
 	"unspecified"
     };
 
-    logf(LOG_LOG, "Got Close, reason %s, message %s",
+    yaz_log(LOG_LOG, "Got Close, reason %s, message %s",
 	reasons[*req->closeReason], req->diagnosticInformation ?
 	req->diagnosticInformation : "NULL");
     if (assoc->version < 3) /* to make do_force respond with close */
@@ -1779,7 +1782,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 
     Z_ExtendedServicesResponse *resp = apdu->u.extendedServicesResponse;
 
-    logf(LOG_DEBUG,"inside Process esRequest");
+    yaz_log(LOG_DEBUG,"inside Process esRequest");
 
     esrequest.esr = reqb->request->u.extendedServicesRequest;
     esrequest.stream = assoc->encode;
@@ -1801,13 +1804,13 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     if (esrequest.errcode == -1)
     {
         /* Backend service indicates request will be processed */
-        logf(LOG_DEBUG,"Request could be processed...Accepted !");
+        yaz_log(LOG_DEBUG,"Request could be processed...Accepted !");
         *resp->operationStatus = Z_ExtendedServicesResponse_accepted;
     }
     else if (esrequest.errcode == 0)
     {
         /* Backend service indicates request will be processed */
-        logf(LOG_DEBUG,"Request could be processed...Done !");
+        yaz_log(LOG_DEBUG,"Request could be processed...Done !");
         *resp->operationStatus = Z_ExtendedServicesResponse_done;
     }
     else
@@ -1816,13 +1819,13 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 					 esrequest.errstring);
 
         /* Backend indicates error, request will not be processed */
-        logf(LOG_DEBUG,"Request could not be processed...failure !");
+        yaz_log(LOG_DEBUG,"Request could not be processed...failure !");
         *resp->operationStatus = Z_ExtendedServicesResponse_failure;
 	resp->num_diagnostics = diagRecs->num_diagRecs;
 	resp->diagnostics = diagRecs->diagRecs;
     }
     /* Do something with the members of bend_extendedservice */
 
-    logf(LOG_DEBUG,"Send the result apdu");
+    yaz_log(LOG_DEBUG,"Send the result apdu");
     return apdu;
 }

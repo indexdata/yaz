@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.15  1999-03-31 11:18:25  adam
+ * Revision 1.16  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.15  1999/03/31 11:18:25  adam
  * Implemented odr_strdup. Added Reference ID to backend server API.
  *
  * Revision 1.14  1998/03/16 12:21:15  adam
@@ -124,8 +127,8 @@ static Z_Variant *make_variant(data1_node *n, int num, ODR o)
                     odr_strdup(o, p->u.variant.value);
 		break;
 	    default:
-		logf(LOG_WARN, "Unable to handle value for variant %s",
-		    p->u.variant.type->name);
+		yaz_log(LOG_WARN, "Unable to handle value for variant %s",
+			p->u.variant.type->name);
 		return 0;
 	}
     }
@@ -148,8 +151,8 @@ static int traverse_triples(data1_node *n, int level, Z_ElementMetaData *m,
 		    D1_VARIANTARRAY);
 	    else if (m->num_supportedVariants >= D1_VARIANTARRAY)
 	    {
-		logf(LOG_WARN, "Too many variants (D1_VARIANTARRAY==%d)",
-		    D1_VARIANTARRAY);
+		yaz_log(LOG_WARN, "Too many variants (D1_VARIANTARRAY==%d)",
+			D1_VARIANTARRAY);
 		return -1;
 	    }
 
@@ -209,7 +212,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 		*len += n->u.data.len;
 		break;
 	    default:
-	    	logf(LOG_WARN, "Can't handle datatype.");
+	    	yaz_log(LOG_WARN, "Can't handle datatype.");
 		return 0;
 	}
     }
@@ -247,7 +250,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 	if (!(tag = data1_gettagbyname (dh, n->root->u.root.absyn->tagset,
 					"wellKnown")))
 	{
-	    logf(LOG_WARN, "Unable to locate tag for 'wellKnown'");
+	    yaz_log(LOG_WARN, "Unable to locate tag for 'wellKnown'");
 	    return 0;
 	}
 	data = n;
@@ -255,7 +258,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
     }
     else
     {
-	logf(LOG_WARN, "Bad data.");
+	yaz_log(LOG_WARN, "Bad data.");
 	return 0;
     }
 

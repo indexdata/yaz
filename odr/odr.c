@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.29  1999-04-27 08:34:10  adam
+ * Revision 1.30  1999-08-27 09:40:32  adam
+ * Renamed logf function to yaz_log. Removed VC++ project files.
+ *
+ * Revision 1.29  1999/04/27 08:34:10  adam
  * Modified odr_destroy so that file is not closed when file is 0.
  *
  * Revision 1.28  1998/07/20 12:38:13  adam
@@ -169,7 +172,7 @@ ODR odr_createmem(int direction)
     r->enable_bias = 1;
     r->odr_ber_tag.lclass = -1;
     odr_reset(r);
-    logf (LOG_DEBUG, "odr_createmem dir=%d o=%p", direction, r);
+    yaz_log (LOG_DEBUG, "odr_createmem dir=%d o=%p", direction, r);
     return r;
 }
 
@@ -187,7 +190,7 @@ void odr_reset(ODR o)
     nmem_reset(o->mem);
     o->choice_bias = -1;
     o->lenlen = 1;
-    logf (LOG_DEBUG, "odr_reset o=%p", o);
+    yaz_log (LOG_DEBUG, "odr_reset o=%p", o);
 }
     
 void odr_destroy(ODR o)
@@ -198,7 +201,7 @@ void odr_destroy(ODR o)
     if (o->print && o->print != stderr)
         fclose(o->print);
     xfree(o);
-    logf (LOG_DEBUG, "odr_destroy o=%p", o);
+    yaz_log (LOG_DEBUG, "odr_destroy o=%p", o);
 }
 
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)
