@@ -1,11 +1,15 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- XXXXXX XXXX/XX/XX
+--- 1.0pl4 1996/1/24
 
 Added Sort PDU.
 
 Fixed small problem in SUTRS-filter. A newline was sometimes inserted before
 the rank and record number.
+
+Adjustments to the frontend server.
+
+Fixed diagnostic BER dumper. It ignored the file argument.
 
 --- 1.0pl3 1996/1/2
 

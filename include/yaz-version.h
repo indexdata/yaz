@@ -2,7 +2,10 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.8  1996-01-02 11:46:50  quinn
+ * Revision 1.9  1996-01-24 16:01:24  quinn
+ * pl4
+ *
+ * Revision 1.8  1996/01/02  11:46:50  quinn
  * Changed 'operator' to 'roperator' to avoid C++ conflict.
  * Moved to pl3
  *
@@ -50,5 +53,5 @@
  */
 
 #ifndef YAZ_VERSION
-#define YAZ_VERSION "1.0 patchLevel 3"
+#define YAZ_VERSION "1.0 patchLevel 4"
 #endif
