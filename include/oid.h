@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.27  1998-05-18 13:06:58  adam
+ * Revision 1.28  1998-10-13 16:01:52  adam
+ * Implemented support for dynamic object identifiers.
+ * Function oid_getvalbyname now accepts raw OID's as well as traditional
+ * names.
+ *
+ * Revision 1.27  1998/05/18 13:06:58  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -149,7 +154,8 @@ typedef enum oid_class
     CLASS_ELEMSPEC,
     CLASS_VARSET,
     CLASS_SCHEMA,
-    CLASS_TAGSET
+    CLASS_TAGSET,
+    CLASS_GENERAL
 } oid_class;
 
 typedef enum oid_value
@@ -233,7 +239,11 @@ typedef enum oid_value
     VAL_TIFFB,
     VAL_WAV,
     VAL_UPDATEES,
-    VAL_UNIVERSE_REPORT
+    VAL_UNIVERSE_REPORT,
+/* add new types here... */
+
+/* VAL_DYNAMIC must have highest value */
+    VAL_DYNAMIC
 } oid_value;
 
 typedef struct oident
@@ -241,7 +251,7 @@ typedef struct oident
     oid_proto proto;
     oid_class oclass;
     oid_value value;
-    int oidsuffix[20];
+    int oidsuffix[OID_SIZE];
     char *desc;
 } oident;
 
@@ -254,6 +264,8 @@ YAZ_EXPORT int oid_oidcmp(int *o1, int *o2);
 YAZ_EXPORT int oid_oidlen(int *o);
 YAZ_EXPORT oid_value oid_getvalbyname(const char *name);
 YAZ_EXPORT void oid_setprivateoids(oident *list);
+YAZ_EXPORT struct oident *oid_addent (int *oid, int proto, int oclass,
+				      const char *desc, int value);
 
 #ifdef __cplusplus
 }

@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.27  1998-05-18 10:10:02  adam
+ * Revision 1.28  1998-10-13 16:01:53  adam
+ * Implemented support for dynamic object identifiers.
+ * Function oid_getvalbyname now accepts raw OID's as well as traditional
+ * names.
+ *
+ * Revision 1.27  1998/05/18 10:10:02  adam
  * Added Explain-schema and Explain-tagset to OID database.
  *
  * Revision 1.26  1998/03/20 14:46:06  adam
@@ -113,13 +118,21 @@
  */
 
 #include <stdlib.h>
+#include <ctype.h>
+
 #include <oid.h>
 #include <yaz-util.h>
 
 static int z3950_prefix[] = { 1, 2, 840, 10003, -1 };
 static int sr_prefix[]    = { 1, 0, 10163, -1 };
 
-static oident *extoids = NULL;
+struct oident_list {
+    struct oident oident;
+    struct oident_list *next;
+};
+
+static struct oident_list *oident_table = NULL;
+static int oid_value_dynamic = VAL_DYNAMIC;
 
 /*
  * OID database
@@ -200,7 +213,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_ACCFORM, VAL_PROMPT1,   {8,1,-1},    "Prompt-1"    },
     {PROTO_Z3950,   CLASS_ACCFORM, VAL_DES1,      {8,2,-1},    "Des-1"       },
     {PROTO_Z3950,   CLASS_ACCFORM, VAL_KRB1,      {8,3,-1},    "Krb-1"       },
-
+    
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_PRESSET,   {9,1,-1},    "Pers. set"   },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_PQUERY,    {9,2,-1},    "Pers. query" },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_PCQUERY,   {9,3,-1},    "Per'd query" },
@@ -209,12 +222,12 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
 
-    {PROTO_Z3950,   CLASS_USERINFO,VAL_SEARCHRES1,{10,1,-1},  "searchResult-1"},
-    {PROTO_Z3950,   CLASS_USERINFO,VAL_CHARLANG,  {10,2,-1},  "CharSetandLanguageNegotiation"},
-    {PROTO_Z3950,   CLASS_USERINFO,VAL_USERINFO1, {10,3,-1},  "UserInfo-1"},
-    {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH1,{10,4,-1},  "MultipleSearchTerms-1"},
-    {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH2,{10,5,-1},  "MultipleSearchTerms-2"},
-    {PROTO_Z3950,   CLASS_USERINFO,VAL_DATETIME,  {10,6,-1},  "DateTime"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_SEARCHRES1,{10,1,-1},   "searchResult-1"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_CHARLANG,  {10,2,-1},   "CharSetandLanguageNegotiation"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_USERINFO1, {10,3,-1},   "UserInfo-1"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH1,{10,4,-1},   "MultipleSearchTerms-1"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_MULTISRCH2,{10,5,-1},   "MultipleSearchTerms-2"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_DATETIME,  {10,6,-1},   "DateTime"},
 
     {PROTO_Z3950,   CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
 
@@ -259,7 +272,7 @@ static oident oids[] =
 
     {PROTO_SR,      CLASS_RECSYN,  VAL_UNIMARC,   {5,1,-1},    "Unimarc"     },
     {PROTO_SR,      CLASS_RECSYN,  VAL_INTERMARC, {5,2,-1},    "Intermarc"   },
-    {PROTO_SR,      CLASS_RECSYN,  VAL_CCF,       {5,3,-1},     "CCF"        },
+    {PROTO_SR,      CLASS_RECSYN,  VAL_CCF,       {5,3,-1},    "CCF"        },
     {PROTO_SR,      CLASS_RECSYN,  VAL_USMARC,    {5,10,-1},   "USmarc"      },
     {PROTO_SR,      CLASS_RECSYN,  VAL_UKMARC,    {5,11,-1},   "UKmarc"      },
     {PROTO_SR,      CLASS_RECSYN,  VAL_NORMARC,   {5,12,-1},   "Normarc"     },
@@ -370,12 +383,34 @@ static int match_prefix(int *look, int *prefix)
     return 0;
 }
 
-struct oident *oid_getentbyoid(int *o)
+void oid_transfer (struct oident *oident)
+{
+    while (*oident->oidsuffix >= 0)
+    {
+	oid_addent (oident->oidsuffix, oident->proto,
+		    oident->oclass,
+		    oident->desc, oident->value);
+	oident++;
+    }
+}
+
+static void oid_init (void)
+{
+    static int checked = 0;
+    
+    if (checked)
+	return;
+    oid_transfer (oids);
+    checked = 1;
+}
+
+
+static struct oident *oid_getentbyoid_x(int *o)
 {
     enum oid_proto proto;
     int prelen;
-    oident *p;
-
+    struct oident_list *ol;
+    
     /* determine protocol type */
     if (!o)
         return 0;
@@ -385,55 +420,47 @@ struct oident *oid_getentbyoid(int *o)
         proto = PROTO_SR;
     else
         proto = PROTO_GENERAL;
-    for (p = oids; *p->oidsuffix >= 0; p++)
+    for (ol = oident_table; ol; ol = ol->next)
+    {
+	struct oident *p = &ol->oident;
         if (p->proto == proto && !oid_oidcmp(o + prelen, p->oidsuffix))
             return p;
-    if (extoids != NULL)
-        for (p = extoids; *p->oidsuffix >= 0; p++)
-            if (p->proto == proto && !oid_oidcmp(o + prelen, p->oidsuffix))
-                return p;
+	if (p->proto == PROTO_GENERAL && !oid_oidcmp (o, p->oidsuffix))
+	    return p;
+    }
     return 0;
 }
-
 
 /*
  * To query, fill out proto, class, and value of the ent parameter.
  */
 int *oid_ent_to_oid(struct oident *ent, int *ret)
 {
-    struct oident *p;
-
-    for (p = oids; *p->oidsuffix >= 0; p++)
-        if (ent->proto == p->proto &&
-            ent->oclass == p->oclass &&
-            ent->value == p->value)
-        {
-            if (ent->proto == PROTO_Z3950)
-                oid_oidcpy(ret, z3950_prefix);
-            else if (ent->proto == PROTO_SR)
-                oid_oidcpy(ret, sr_prefix);
-            else
-                ret[0] = -1;
-            oid_oidcat(ret, p->oidsuffix);
-            return ret;
-        }
-    if (extoids != NULL)
-        for (p = extoids; *p->oidsuffix >= 0; p++)
-           if (ent->proto == p->proto &&
-                ent->oclass == p->oclass &&
-                ent->value == p->value)
-            {
-                if (ent->proto == PROTO_Z3950)
-                    oid_oidcpy(ret, z3950_prefix);
-                else if (ent->proto == PROTO_SR)
-                    oid_oidcpy(ret, sr_prefix);
-                else
-                    ret[0] = -1;
-                oid_oidcat(ret, p->oidsuffix);
-                return ret;
-            }
+    struct oident_list *ol;
+    
+    oid_init ();
+    for (ol = oident_table; ol; ol = ol->next)
+    {
+	struct oident *p = &ol->oident;
+	if ((ent->proto == p->proto || p->proto == PROTO_GENERAL) &&
+	    (ent->oclass == p->oclass || p->oclass == CLASS_GENERAL) &&
+	    ent->value == p->value)
+	{
+	    if (p->proto == PROTO_Z3950)
+		oid_oidcpy(ret, z3950_prefix);
+	    else if (p->proto == PROTO_SR)
+		oid_oidcpy(ret, sr_prefix);
+	    else
+		ret[0] = -1;
+	    oid_oidcat(ret, p->oidsuffix);
+	    ent->desc = p->desc;
+	    return ret;
+	}
+    }
+    ret[0] = -1;
     return 0;
 }
+
 /*
  * To query, fill out proto, class, and value of the ent parameter.
  */
@@ -444,21 +471,96 @@ int *oid_getoidbyent(struct oident *ent)
     return oid_ent_to_oid (ent, ret);
 }
 
+struct oident *oid_addent (int *oid, int proto, int oclass,
+			   const char *desc, int value)
+{
+    struct oident *oident;
+
+    nmem_critical_enter ();
+    oident = oid_getentbyoid_x (oid);
+    if (!oident)
+    {
+	char desc_str[200];
+	struct oident_list *oident_list;
+	oident_list = (struct oident_list *) malloc (sizeof(*oident_list));
+	oident = &oident_list->oident;
+	oident->proto = proto;
+	oident->oclass = oclass;
+
+	if (!desc)
+	{
+	    int i;
+
+	    sprintf (desc_str, "%d", *oid);
+	    for (i = 1; oid[i] >= 0; i++)
+		sprintf (desc_str+strlen(desc_str), ".%d", oid[i]);
+	    desc = desc_str;
+	}
+	oident->desc = (char *) malloc (strlen(desc)+1);
+	strcpy (oident->desc, desc);
+	if (value == VAL_DYNAMIC)
+	    oident->value = ++oid_value_dynamic;
+	else
+	    oident->value = value;
+	oid_oidcpy (oident->oidsuffix, oid);
+	oident_list->next = oident_table;
+	oident_table = oident_list;
+    }
+    nmem_critical_leave ();
+    return oident;
+}
+
+struct oident *oid_getentbyoid(int *oid)
+{
+    struct oident *oident;
+    oid_init ();
+    oident = oid_getentbyoid_x (oid);
+    if (!oident)
+	oident = oid_addent (oid, PROTO_GENERAL, CLASS_GENERAL,
+			     NULL, VAL_DYNAMIC);
+    return oident;
+}
+
+static oid_value oid_getval_raw(const char *name)
+{
+    int val = 0, i = 0, oid[OID_SIZE];
+    struct oident *oident;
+    
+    while (isdigit (*name))
+    {
+        val = val*10 + (*name - '0');
+        name++;
+        if (*name == '.')
+        {
+            if (i < OID_SIZE-1)
+                oid[i++] = val;
+	    val = 0;
+            name++;
+        }
+    }
+    oid[i] = val;
+    oid[i+1] = -1;
+    oident = oid_addent (oid, PROTO_GENERAL, CLASS_GENERAL, NULL,
+			 VAL_DYNAMIC);
+    return oident->value;
+}
+
 oid_value oid_getvalbyname(const char *name)
 {
-    struct oident *p;
+    struct oident_list *ol;
 
-    for (p = oids; *p->oidsuffix >= 0; p++)
-        if (!yaz_matchstr(p->desc, name))
-            return p->value;
-    if (extoids != NULL)
-        for (p = extoids; *p->oidsuffix >= 0; p++)
-            if (!yaz_matchstr(p->desc, name))
-                return p->value;
+    oid_init ();
+    if (isdigit (*name))
+        return oid_getval_raw (name);
+    for (ol = oident_table; ol; ol = ol->next)
+	if (!yaz_matchstr(ol->oident.desc, name))
+	{
+	    return ol->oident.value;
+	}
     return VAL_NONE;
 }
 
 void oid_setprivateoids(oident *list)
 {
-    extoids = list;
+    oid_transfer (list);
 }
