@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.39 2000-11-29 14:22:47 adam Exp $
+dnl $Id: configure.in,v 1.40 2001-02-21 09:03:34 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -66,11 +66,12 @@ if test "$openssl" = "yes"; then
 	fi
 fi
 dnl ------ GNU Readline
+READLINE_SHARED_LIBADD=""
+AC_CHECK_LIB(ncurses, tgetent, [READLINE_SHARED_LIBADD="-lncurses"],
+	AC_CHECK_LIB(termcap, tgetent, [READLINE_SHARED_LIBADD="-ltermcap"])
+)
 READLINE_LIBS=""
-AC_CHECK_LIB(readline, readline, [READLINE_LIBS="$READLINE_LIBS -lreadline"])
-if test "$ac_cv_lib_readline_readline" = "no"; then
-	AC_CHECK_LIB(readline, readline, [READLINE_LIBS="$READLINE_LIBS -lreadline -ltermcap"])
-fi
+AC_CHECK_LIB(readline, readline, [READLINE_LIBS="$READLINE_LIBS -lreadline $READLINE_SHARED_LIBADD"],,$READLINE_SHARED_LIBADD)
 AC_CHECK_LIB(history, add_history, [READLINE_LIBS="$READLINE_LIBS -lhistory"])
 if test "$ac_cv_lib_readline_readline" = "yes"; then
 	AC_CHECK_HEADERS(readline/readline.h readline/history.h)
