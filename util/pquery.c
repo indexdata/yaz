@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.14  1997-09-22 12:33:41  adam
+ * Revision 1.15  1997-09-29 07:13:43  adam
+ * Changed type of a few variables to avoid warnings.
+ *
+ * Revision 1.14  1997/09/22 12:33:41  adam
  * Fixed bug introduced by previous commit.
  *
  * Revision 1.13  1997/09/17 12:10:42  adam
@@ -65,7 +68,7 @@ static oid_value p_query_dfset = VAL_NONE;
 struct lex_info {
     const char *query_buf;
     const char *lex_buf;
-    int lex_len;
+    size_t lex_len;
     int query_look;
     char *left_sep;
     char *right_sep;
@@ -88,7 +91,7 @@ static int query_oid_getvalbyname (struct lex_info *li)
     return oid_getvalbyname (buf);
 }
 
-static int compare_term (struct lex_info *li, const char *src, int off)
+static int compare_term (struct lex_info *li, const char *src, size_t off)
 {
     size_t len=strlen(src);
 
@@ -382,7 +385,7 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
         if (num_attr >= max_attr)
             return NULL;
         if (!(cp = strchr (li->lex_buf, '=')) ||
-            (cp-li->lex_buf) > li->lex_len)
+            (size_t) (cp-li->lex_buf) > li->lex_len)
         {
             attr_set[num_attr] = query_oid_getvalbyname (li);
             lex (li);
@@ -519,7 +522,7 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
             return NULL;
 
         if (!(cp = strchr (li->lex_buf, '=')) ||
-            (cp-li->lex_buf) > li->lex_len)
+            (size_t) (cp-li->lex_buf) > li->lex_len)
         {
             attr_set[num_attr] = query_oid_getvalbyname (li);
             lex (li);
