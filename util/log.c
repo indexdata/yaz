@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.12  1997-05-01 15:08:14  adam
+ * Revision 1.13  1997-09-01 08:54:13  adam
+ * New windows NT/95 port using MSV5.0. Made prefix query handling
+ * thread safe. The function options ignores empty arguments when met.
+ *
+ * Revision 1.12  1997/05/01 15:08:14  adam
  * Added log_mask_str_x routine.
  *
  * Revision 1.11  1996/02/05 12:24:32  adam
@@ -81,7 +85,7 @@
 #include <log.h>
 
 static int l_level = LOG_DEFAULT_LEVEL;
-static FILE *l_file = stderr;
+static FILE *l_file = NULL;
 static char l_prefix[512] = "log";
 
 static struct {
@@ -99,14 +103,16 @@ static struct {
     { 0, NULL }
 };  
 
-#ifndef strerror
 
+#ifndef strerror
+#ifndef WINDOWS
 char *strerror(int n)
 {
         extern char *sys_errlist[];
         return sys_errlist[n];
 }
 
+#endif
 #endif
 
 FILE *log_file(void)
@@ -155,6 +161,8 @@ void logf(int level, const char *fmt, ...)
 
     if (!(level & l_level))
     	return;
+    if (!l_file)
+        l_file = stderr;
     *flags = '\0';
     for (i = 0; level && mask_names[i].name; i++)
     	if (mask_names[i].mask & level)
@@ -196,7 +204,7 @@ int log_mask_str_x (const char *str, int level)
             level = atoi (str);
         else
             for (i = 0; mask_names[i].name; i++)
-                if (strlen (mask_names[i].name) == p-str &&
+                if (strlen (mask_names[i].name) == (size_t) (p-str) &&
                     memcmp (mask_names[i].name, str, p-str) == 0)
                 {
                     if (mask_names[i].mask)

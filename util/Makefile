@@ -1,7 +1,7 @@
-# Copyright (C) 1994-1996, Index Data I/S 
+# Copyright (C) 1994-1997, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.21 1996-08-12 14:10:34 adam Exp $
+# $Id: Makefile,v 1.22 1997-09-01 08:54:12 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.

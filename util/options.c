@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: options.c,v $
- * Revision 1.5  1995-12-06 13:00:19  adam
+ * Revision 1.6  1997-09-01 08:54:13  adam
+ * New windows NT/95 port using MSV5.0. Made prefix query handling
+ * thread safe. The function options ignores empty arguments when met.
+ *
+ * Revision 1.5  1995/12/06 13:00:19  adam
  * Minus alone not treated as an option.
  *
  * Revision 1.4  1995/09/29  17:12:35  quinn
@@ -42,6 +46,12 @@ int options (const char *desc, char **argv, int argc, char **arg)
         return -2;
     if (arg_off == 0)
     {
+        while (argv[arg_no][0] == '\0')
+        {
+            arg_no++;
+            if (arg_no >= argc)
+                return -2;
+        }
         if (argv[arg_no][0] != '-' || argv[arg_no][1] == '\0')
         {
             *arg = argv[arg_no++];

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.11  1996-11-11 13:15:29  adam
+ * Revision 1.12  1997-09-01 08:54:13  adam
+ * New windows NT/95 port using MSV5.0. Made prefix query handling
+ * thread safe. The function options ignores empty arguments when met.
+ *
+ * Revision 1.11  1996/11/11 13:15:29  adam
  * Added proximity operator.
  *
  * Revision 1.10  1996/08/12 14:10:35  adam
@@ -52,47 +56,50 @@
 
 static oid_value p_query_dfset = VAL_NONE;
 
-static const char *query_buf;
-static const char *query_lex_buf;
-static int query_lex_len;
-static int query_look = 0;
-static char *left_sep = "{\"";
-static char *right_sep = "}\"";
-static int escape_char = '@';
+struct lex_info {
+    const char *query_buf;
+    const char *lex_buf;
+    int lex_len;
+    int query_look;
+    char *left_sep;
+    char *right_sep;
+    int escape_char;
+};
 
-static Z_RPNStructure *rpn_structure (ODR o, oid_proto, 
+static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o, oid_proto, 
                                       int num_attr, int max_attr, 
                                       int *attr_list, oid_value *attr_set);
 
-static int query_oid_getvalbyname (void)
+static int query_oid_getvalbyname (struct lex_info *li)
 {
     char buf[32];
 
-    if (query_lex_len > 31)
+    if (li->lex_len > 31)
         return VAL_NONE;
-    memcpy (buf, query_lex_buf, query_lex_len);
-    buf[query_lex_len] = '\0';
+    memcpy (buf, li->lex_buf, li->lex_len);
+    buf[li->lex_len] = '\0';
     return oid_getvalbyname (buf);
 }
 
-static int query_token (const char **qptr, const char **lex_buf, int *lex_len)
+static int query_token (struct lex_info *li)
 {
     const char *sep_match;
+    const char **qptr = &li->query_buf;
 
     while (**qptr == ' ')
         (*qptr)++;
     if (**qptr == '\0')
         return 0;
-    *lex_len = 0;
-    if ((sep_match = strchr (left_sep, **qptr)))
+    li->lex_len = 0;
+    if ((sep_match = strchr (li->left_sep, **qptr)))
     {
-        int sep_index = sep_match - left_sep;
+        int sep_index = sep_match - li->left_sep;
         
         ++(*qptr);
-        *lex_buf = *qptr;
-        while (**qptr && **qptr != right_sep[sep_index])
+        li->lex_buf = *qptr;
+        while (**qptr && **qptr != li->right_sep[sep_index])
         {
-            ++(*lex_len);
+            ++(li->lex_len);
             ++(*qptr);
         }
         if (**qptr)
@@ -100,40 +107,40 @@ static int query_token (const char **qptr, const char **lex_buf, int *lex_len)
     }
     else
     {
-        *lex_buf = *qptr;
+        li->lex_buf = *qptr;
         while (**qptr && **qptr != ' ')
         {
-            ++(*lex_len);
+            ++(li->lex_len);
             ++(*qptr);
         }
     }
-    if (*lex_len >= 1 && (*lex_buf)[0] == escape_char)
+    if (li->lex_len >= 1 && li->lex_buf[0] == li->escape_char)
     {
-        if (*lex_len == 4 && !memcmp (*lex_buf+1, "and", 3))
+        if (li->lex_len == 4 && !memcmp (li->lex_buf+1, "and", 3))
             return 'a';
-        if (*lex_len == 3 && !memcmp (*lex_buf+1, "or", 2))
+        if (li->lex_len == 3 && !memcmp (li->lex_buf+1, "or", 2))
             return 'o';
-        if (*lex_len == 4 && !memcmp (*lex_buf+1, "not", 3))
+        if (li->lex_len == 4 && !memcmp (li->lex_buf+1, "not", 3))
             return 'n';
-        if (*lex_len == 5 && !memcmp (*lex_buf+1, "attr", 4))
+        if (li->lex_len == 5 && !memcmp (li->lex_buf+1, "attr", 4))
             return 'l';
-        if (*lex_len == 4 && !memcmp (*lex_buf+1, "set", 3))
+        if (li->lex_len == 4 && !memcmp (li->lex_buf+1, "set", 3))
             return 's';
-        if (*lex_len == 8 && !memcmp (*lex_buf+1, "attrset", 7))
+        if (li->lex_len == 8 && !memcmp (li->lex_buf+1, "attrset", 7))
             return 'r';
-        if (*lex_len == 5 && !memcmp (*lex_buf+1, "prox", 4))
+        if (li->lex_len == 5 && !memcmp (li->lex_buf+1, "prox", 4))
             return 'p';
     }
     return 't';
 }
 
-static int lex (void)
+static int lex (struct lex_info *li)
 {
-    return query_look = 
-        query_token (&query_buf, &query_lex_buf, &query_lex_len);
+    return li->query_look = query_token (li);
 }
 
-static Z_AttributesPlusTerm *rpn_term (ODR o, oid_proto proto, 
+static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
+                                       oid_proto proto, 
                                        int num_attr, int *attr_list,
                                        oid_value *attr_set)
 {
@@ -187,37 +194,37 @@ static Z_AttributesPlusTerm *rpn_term (ODR o, oid_proto proto,
     zapt->term = term;
     term->which = Z_Term_general;
     term->u.general = term_octet;
-    term_octet->buf = odr_malloc (o, query_lex_len);
-    term_octet->size = term_octet->len = query_lex_len;
-    memcpy (term_octet->buf, query_lex_buf, query_lex_len);
+    term_octet->buf = odr_malloc (o, li->lex_len);
+    term_octet->size = term_octet->len = li->lex_len;
+    memcpy (term_octet->buf, li->lex_buf, li->lex_len);
     return zapt;
 }
 
-static Z_Operand *rpn_simple (ODR o, oid_proto proto,
+static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
                               int num_attr, int *attr_list,
                               oid_value *attr_set)
 {
     Z_Operand *zo;
 
     zo = odr_malloc (o, sizeof(*zo));
-    switch (query_look)
+    switch (li->query_look)
     {
     case 't':
         zo->which = Z_Operand_APT;
         if (!(zo->u.attributesPlusTerm =
-              rpn_term (o, proto, num_attr, attr_list, attr_set)))
+              rpn_term (li, o, proto, num_attr, attr_list, attr_set)))
             return NULL;
-        lex ();
+        lex (li);
         break;
     case 's':
-        lex ();
-        if (!query_look)
+        lex (li);
+        if (!li->query_look)
             return NULL;
         zo->which = Z_Operand_resultSetId;
-        zo->u.resultSetId = odr_malloc (o, query_lex_len+1);
-        memcpy (zo->u.resultSetId, query_lex_buf, query_lex_len);
-        zo->u.resultSetId[query_lex_len] = '\0';
-        lex ();
+        zo->u.resultSetId = odr_malloc (o, li->lex_len+1);
+        memcpy (zo->u.resultSetId, li->lex_buf, li->lex_len);
+        zo->u.resultSetId[li->lex_len] = '\0';
+        lex (li);
         break;
     default:
         return NULL;
@@ -225,18 +232,18 @@ static Z_Operand *rpn_simple (ODR o, oid_proto proto,
     return zo;
 }
 
-static Z_ProximityOperator *rpn_proximity (ODR o)
+static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
 {
     Z_ProximityOperator *p = odr_malloc (o, sizeof(*p));
 
-    if (!lex ())
+    if (!lex (li))
         return NULL;
-    if (*query_lex_buf == '1')
+    if (*li->lex_buf == '1')
     {
         p->exclusion = odr_malloc (o, sizeof(*p->exclusion));
         *p->exclusion = 1;
     } 
-    else if (*query_lex_buf == '0')
+    else if (*li->lex_buf == '0')
     {
         p->exclusion = odr_malloc (o, sizeof(*p->exclusion));
         *p->exclusion = 0;
@@ -244,39 +251,39 @@ static Z_ProximityOperator *rpn_proximity (ODR o)
     else
         p->exclusion = NULL;
 
-    if (!lex ())
+    if (!lex (li))
         return NULL;
     p->distance = odr_malloc (o, sizeof(*p->distance));
-    *p->distance = atoi (query_lex_buf);
+    *p->distance = atoi (li->lex_buf);
 
-    if (!lex ())
+    if (!lex (li))
         return NULL;
     p->ordered = odr_malloc (o, sizeof(*p->ordered));
-    *p->ordered = atoi (query_lex_buf);
+    *p->ordered = atoi (li->lex_buf);
     
-    if (!lex ())
+    if (!lex (li))
         return NULL;
     p->relationType = odr_malloc (o, sizeof(*p->relationType));
-    *p->relationType = atoi (query_lex_buf);
+    *p->relationType = atoi (li->lex_buf);
 
-    if (!lex ())
+    if (!lex (li))
         return NULL;
-    if (*query_lex_buf == 'k')
+    if (*li->lex_buf == 'k')
         p->which = 0;
-    else if (*query_lex_buf == 'p')
+    else if (*li->lex_buf == 'p')
         p->which = 1;
     else
-        p->which = atoi (query_lex_buf);
+        p->which = atoi (li->lex_buf);
 
-    if (!lex ())
+    if (!lex (li))
         return NULL;
     p->proximityUnitCode = odr_malloc (o, sizeof(*p->proximityUnitCode));
-    *p->proximityUnitCode = atoi (query_lex_buf);
+    *p->proximityUnitCode = atoi (li->lex_buf);
 
     return p;
 }
 
-static Z_Complex *rpn_complex (ODR o, oid_proto proto,
+static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
                                int num_attr, int max_attr, 
                                int *attr_list, oid_value *attr_set)
 {
@@ -286,7 +293,7 @@ static Z_Complex *rpn_complex (ODR o, oid_proto proto,
     zc = odr_malloc (o, sizeof(*zc));
     zo = odr_malloc (o, sizeof(*zo));
     zc->roperator = zo;
-    switch (query_look)
+    switch (li->query_look)
     {
     case 'a':
         zo->which = Z_Operator_and;
@@ -302,24 +309,27 @@ static Z_Complex *rpn_complex (ODR o, oid_proto proto,
         break;
     case 'p':
         zo->which = Z_Operator_prox;
-        zo->u.prox = rpn_proximity (o);
+        zo->u.prox = rpn_proximity (li, o);
         if (!zo->u.prox)
             return NULL;
         break;
     default:
         return NULL;
     }
-    lex ();
+    lex (li);
     if (!(zc->s1 =
-          rpn_structure (o, proto, num_attr, max_attr, attr_list, attr_set)))
+          rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
+                         attr_set)))
         return NULL;
     if (!(zc->s2 =
-          rpn_structure (o, proto, num_attr, max_attr, attr_list, attr_set)))
+          rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
+                         attr_set)))
         return NULL;
     return zc;
 }
 
-static Z_RPNStructure *rpn_structure (ODR o, oid_proto proto, 
+static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
+                                      oid_proto proto, 
                                       int num_attr, int max_attr, 
                                       int *attr_list, oid_value *attr_set)
 {
@@ -327,7 +337,7 @@ static Z_RPNStructure *rpn_structure (ODR o, oid_proto proto,
     const char *cp;
 
     sz = odr_malloc (o, sizeof(*sz));
-    switch (query_look)
+    switch (li->query_look)
     {
     case 'a':
     case 'o':
@@ -335,29 +345,31 @@ static Z_RPNStructure *rpn_structure (ODR o, oid_proto proto,
     case 'p':
         sz->which = Z_RPNStructure_complex;
         if (!(sz->u.complex =
-              rpn_complex (o, proto, num_attr, max_attr, attr_list, attr_set)))
+              rpn_complex (li, o, proto, num_attr, max_attr, attr_list,
+                           attr_set)))
             return NULL;
         break;
     case 't':
     case 's':
         sz->which = Z_RPNStructure_simple;
         if (!(sz->u.simple =
-              rpn_simple (o, proto, num_attr, attr_list, attr_set)))
+              rpn_simple (li, o, proto, num_attr, attr_list,
+                          attr_set)))
             return NULL;
         break;
     case 'l':
-        lex ();
-        if (!query_look)
+        lex (li);
+        if (!li->query_look)
             return NULL;
         if (num_attr >= max_attr)
             return NULL;
-        if (!(cp = strchr (query_lex_buf, '=')) ||
-            (cp-query_lex_buf) > query_lex_len)
+        if (!(cp = strchr (li->lex_buf, '=')) ||
+            (cp-li->lex_buf) > li->lex_len)
         {
-            attr_set[num_attr] = query_oid_getvalbyname ();
-            lex ();
+            attr_set[num_attr] = query_oid_getvalbyname (li);
+            lex (li);
 
-            if (!(cp = strchr (query_lex_buf, '=')))
+            if (!(cp = strchr (li->lex_buf, '=')))
                 return NULL;
         }
         else 
@@ -367,19 +379,21 @@ static Z_RPNStructure *rpn_structure (ODR o, oid_proto proto,
             else
                 attr_set[num_attr] = VAL_NONE;
         }
-        attr_list[2*num_attr] = atoi (query_lex_buf);
+        attr_list[2*num_attr] = atoi (li->lex_buf);
         attr_list[2*num_attr+1] = atoi (cp+1);
         num_attr++;
-        lex ();
+        lex (li);
         return
-            rpn_structure (o, proto, num_attr, max_attr, attr_list, attr_set);
+            rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
+                           attr_set);
     case 0:                /* operator/operand expected! */
         return NULL;
     }
     return sz;
 }
 
-Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf)
+Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
+                            const char *qbuf)
 {
     Z_RPNQuery *zq;
     int attr_array[1024];
@@ -387,17 +401,16 @@ Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf)
     oid_value topSet = VAL_NONE;
     oident oset;
 
-    query_buf = qbuf;
     zq = odr_malloc (o, sizeof(*zq));
-    lex ();
-    if (query_look == 'r')
+    lex (li);
+    if (li->query_look == 'r')
     {
-        lex ();
-        topSet = query_oid_getvalbyname ();
+        lex (li);
+        topSet = query_oid_getvalbyname (li);
         if (topSet == VAL_NONE)
             return NULL;
 
-        lex ();
+        lex (li);
     }
     if (topSet == VAL_NONE)
         topSet = p_query_dfset;
@@ -409,15 +422,28 @@ Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf)
 
     zq->attributeSetId = odr_oiddup (o, oid_getoidbyent (&oset));
 
-    if (!(zq->RPNStructure = rpn_structure (o, proto, 0, 512,
+    if (!(zq->RPNStructure = rpn_structure (li, o, proto, 0, 512,
                                             attr_array, attr_set)))
         return NULL;
     return zq;
 }
 
-Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
-                                    Odr_oid **attributeSetP,
-                                    const char *qbuf)
+Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto,
+                         const char *qbuf)
+{
+    struct lex_info li;
+    
+    li.left_sep = "{\"";
+    li.right_sep = "}\"";
+    li.escape_char = '@';
+    li.query_buf = qbuf;
+    return p_query_rpn_mk (o, &li, proto, qbuf);
+}
+
+Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
+                                       ODR o, oid_proto proto,
+                                       Odr_oid **attributeSetP,
+                                       const char *qbuf)
 {
     int attr_list[1024];
     oid_value attr_set[512];
@@ -427,15 +453,13 @@ Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
     oid_value topSet = VAL_NONE;
     oident oset;
 
-    query_buf = qbuf;
-
-    lex ();
-    if (query_look == 'r')
+    lex (li);
+    if (li->query_look == 'r')
     {
-        lex ();
-        topSet = query_oid_getvalbyname ();
+        lex (li);
+        topSet = query_oid_getvalbyname (li);
 
-        lex ();
+        lex (li);
     }
     if (topSet == VAL_NONE)
         topSet = p_query_dfset;
@@ -447,21 +471,21 @@ Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
 
     *attributeSetP = odr_oiddup (o, oid_getoidbyent (&oset));
 
-    while (query_look == 'l')
+    while (li->query_look == 'l')
     {
-        lex ();
-        if (!query_look)
+        lex (li);
+        if (!li->query_look)
             return NULL;
         if (num_attr >= max_attr)
             return NULL;
 
-        if (!(cp = strchr (query_lex_buf, '=')) ||
-            (cp-query_lex_buf) > query_lex_len)
+        if (!(cp = strchr (li->lex_buf, '=')) ||
+            (cp-li->lex_buf) > li->lex_len)
         {
-            attr_set[num_attr] = query_oid_getvalbyname ();
-            lex ();
+            attr_set[num_attr] = query_oid_getvalbyname (li);
+            lex (li);
 
-            if (!(cp = strchr (query_lex_buf, '=')))
+            if (!(cp = strchr (li->lex_buf, '=')))
                 return NULL;
         }
         else
@@ -471,14 +495,28 @@ Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
             else
                 attr_set[num_attr] = VAL_NONE;
         }
-        attr_list[2*num_attr] = atoi (query_lex_buf);
+        attr_list[2*num_attr] = atoi (li->lex_buf);
         attr_list[2*num_attr+1] = atoi (cp+1);
         num_attr++;
-        lex ();
+        lex (li);
     }
-    if (!query_look)
+    if (!li->query_look)
         return NULL;
-    return rpn_term (o, proto, num_attr, attr_list, attr_set);
+    return rpn_term (li, o, proto, num_attr, attr_list, attr_set);
+}
+
+Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
+                                    Odr_oid **attributeSetP,
+                                    const char *qbuf)
+{
+    struct lex_info li;
+
+    li.left_sep = "{\"";
+    li.right_sep = "}\"";
+    li.escape_char = '@';
+    li.query_buf = qbuf;
+
+    return p_query_scan_mk (&li, o, proto, attributeSetP, qbuf);
 }
 
 int p_query_attset (const char *arg)
