@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.143 2003-02-19 15:22:11 adam Exp $
+ * $Id: seshigh.c,v 1.144 2003-02-20 15:15:04 adam Exp $
  */
 
 /*
@@ -319,7 +319,7 @@ void ir_session(IOCHAN h, int event)
 			    assoc->input_buffer[0] & 0xff,
 			    assoc->input_buffer[1] & 0xff,
 			    assoc->input_buffer[2] & 0xff);
-	    req = request_get(&assoc->incoming); /* get a new request structure */
+	    req = request_get(&assoc->incoming); /* get a new request */
 	    odr_reset(assoc->decode);
 	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
 	    if (!z_GDU(assoc->decode, &req->gdu_request, 0, 0))
@@ -414,11 +414,9 @@ void ir_session(IOCHAN h, int event)
 
 static int process_z_request(association *assoc, request *req, char **msg);
 
-static int srw_bend_init(association *assoc)
+static void assoc_init_reset(association *assoc)
 {
-    bend_initresult *binitres;
-    statserv_options_block *cb = statserv_getcontrol();
-    
+    xfree (assoc->init);
     assoc->init = (bend_initrequest *) xmalloc (sizeof(*assoc->init));
 
     assoc->init->stream = assoc->encode;
@@ -439,9 +437,20 @@ static int srw_bend_init(association *assoc)
     assoc->init->charneg_request = NULL;
     assoc->init->charneg_response = NULL;
     assoc->init->decode = assoc->decode;
+    assoc->init->peer_name = 
+        odr_strdup (assoc->encode, cs_addrstr(assoc->client_link));
+}
 
-    assoc->init->peer_name =
-	odr_strdup (assoc->encode, cs_addrstr(assoc->client_link));
+static int srw_bend_init(association *assoc)
+{
+    bend_initresult *binitres;
+    statserv_options_block *cb = statserv_getcontrol();
+    
+    assoc_init_reset(assoc);
+
+    assoc->maximumRecordSize = 3000000;
+    assoc->preferredMessageSize = 3000000;
+
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
     	yaz_log(LOG_WARN, "Bad response from backend.");
@@ -521,7 +530,6 @@ static void srw_bend_search(association *assoc, request *req,
     Z_External *ext;
     
     yaz_log(LOG_LOG, "Got SRW SearchRetrieveRequest");
-
     if (!assoc->init)
         srw_bend_init(assoc);
 
@@ -1084,39 +1092,13 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
  */
 static int process_z_response(association *assoc, request *req, Z_APDU *res)
 {
-    odr_setbuf(assoc->encode, req->response, req->size_response, 1);
+    Z_GDU *gres = (Z_GDU *) odr_malloc(assoc->encode, sizeof(*res));
+    gres->which = Z_GDU_Z3950;
+    gres->u.z3950 = res;
 
-    if (assoc->print && !z_APDU(assoc->print, &res, 0, 0))
-    {
-	yaz_log(LOG_WARN, "ODR print error: %s", 
-	    odr_errmsg(odr_geterror(assoc->print)));
-	odr_reset(assoc->print);
-    }
-    if (!z_APDU(assoc->encode, &res, 0, 0))
-    {
-    	yaz_log(LOG_WARN, "ODR error when encoding response: %s",
-	    odr_errmsg(odr_geterror(assoc->decode)));
-	return -1;
-    }
-    req->response = odr_getbuf(assoc->encode, &req->len_response,
-	&req->size_response);
-    odr_setbuf(assoc->encode, 0, 0, 0); /* don'txfree if we abort later */
-    odr_reset(assoc->encode);
-    req->state = REQUEST_IDLE;
-    request_enq(&assoc->outgoing, req);
-    /* turn the work over to the ir_session handler */
-    iochan_setflag(assoc->client_chan, EVENT_OUTPUT);
-    assoc->cs_put_mask = EVENT_OUTPUT;
-    /* Is there more work to be done? give that to the input handler too */
-#if 1
-    if (request_head(&assoc->incoming))
-    {
-	yaz_log (LOG_DEBUG, "more work to be done");
-    	iochan_setevent(assoc->client_chan, EVENT_WORK);
-    }
-#endif
-    return 0;
+    return process_gdu_response(assoc, req, gres);
 }
+
 
 /*
  * Handle init request.
@@ -1135,9 +1117,6 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     char options[140];
 
-    xfree (assoc->init);
-    assoc->init = (bend_initrequest *) xmalloc (sizeof(*assoc->init));
-
     yaz_log(LOG_LOG, "Got initRequest");
     if (req->implementationId)
     	yaz_log(LOG_LOG, "Id:        %s", req->implementationId);
@@ -1146,24 +1125,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     if (req->implementationVersion)
     	yaz_log(LOG_LOG, "Version:   %s", req->implementationVersion);
 
-    assoc->init->stream = assoc->encode;
-    assoc->init->print = assoc->print;
+    assoc_init_reset(assoc);
+
     assoc->init->auth = req->idAuthentication;
     assoc->init->referenceId = req->referenceId;
-    assoc->init->implementation_version = 0;
-    assoc->init->implementation_id = 0;
-    assoc->init->implementation_name = 0;
-    assoc->init->bend_sort = NULL;
-    assoc->init->bend_search = NULL;
-    assoc->init->bend_present = NULL;
-    assoc->init->bend_esrequest = NULL;
-    assoc->init->bend_delete = NULL;
-    assoc->init->bend_scan = NULL;
-    assoc->init->bend_segment = NULL;
-    assoc->init->bend_fetch = NULL;
-    assoc->init->charneg_request = NULL;
-    assoc->init->charneg_response = NULL;
-    assoc->init->decode = assoc->decode;
 
     if (ODR_MASK_GET(req->options, Z_Options_negotiationModel))
     {
@@ -1173,8 +1138,6 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
             assoc->init->charneg_request = negotiation;
     }
     
-    assoc->init->peer_name =
-	odr_strdup (assoc->encode, cs_addrstr(assoc->client_link));
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
     	yaz_log(LOG_WARN, "Bad response from backend.");
@@ -1285,11 +1248,6 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     assoc->preferredMessageSize = *req->preferredMessageSize;
     if (assoc->preferredMessageSize > assoc->maximumRecordSize)
     	assoc->preferredMessageSize = assoc->maximumRecordSize;
-
-#if 0
-    assoc->maximumRecordSize = 3000000;
-    assoc->preferredMessageSize = 3000000;
-#endif
 
     resp->preferredMessageSize = &assoc->preferredMessageSize;
     resp->maximumRecordSize = &assoc->maximumRecordSize;

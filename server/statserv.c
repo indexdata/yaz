@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.94 2003-02-18 21:27:53 adam Exp $
+ * $Id: statserv.c,v 1.95 2003-02-20 15:15:04 adam Exp $
  */
 
 #include <stdio.h>
@@ -370,6 +370,7 @@ void sigterm(int sig)
 
 static void *new_session (void *vp);
 static int no_sessions = 0;
+static int max_sessions = 0;
 
 /* UNIX listener */
 static void listener(IOCHAN h, int event)
@@ -566,9 +567,15 @@ static void *new_session (void *vp)
 
     iochan_setdata(new_chan, newas);
     iochan_settimeout(new_chan, 60);
+#if 1
     a = cs_addrstr(new_line);
+#else
+    a = 0;
+#endif
     yaz_log(LOG_LOG, "Starting session %d from %s",
         no_sessions, a ? a : "[Unknown]");
+    if (max_sessions && no_sessions == max_sessions)
+        control_block.one_shot = 1;
     if (control_block.threads)
     {
 	event_loop(&new_chan);
@@ -692,31 +699,8 @@ void statserv_setcontrol(statserv_options_block *block)
     memcpy(&control_block, block, sizeof(*block));
 }
 
-void statserv_add_soap_handler(int (*h)(struct bend_soap_rr *rr),
-                               const char *ns)
-{
-    struct bend_soap_handler *sh = (struct bend_soap_handler *)
-	    xmalloc(sizeof(*sh));
-
-    sh->handler = h;
-    sh->ns = xstrdup(ns);
-    sh->next = control_block.soap_handlers;
-    control_block.soap_handlers = sh;
-    yaz_log(LOG_LOG, "soap handler added");
-}
-
 static void statserv_reset(void)
 {
-    struct bend_soap_handler *sh = control_block.soap_handlers;
-
-    control_block.soap_handlers = 0;
-    while (sh)
-    {
-        struct bend_soap_handler *sh_next = sh->next;
-        xfree (sh->ns);
-        xfree (sh);
-        sh = sh_next;
-    }
 }
 
 int statserv_start(int argc, char **argv)
@@ -802,7 +786,7 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:", argv, argc, &arg)) != -2)
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:D:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -882,6 +866,9 @@ int check_options(int argc, char **argv)
 		return 1;
 	    }
 	    break;
+        case 'D':
+            max_sessions = atoi(arg);
+            break;
 	default:
 	    fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
 		    " -l <logfile> -u <user> -c <config> -t <minutes>"
