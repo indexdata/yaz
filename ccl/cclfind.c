@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.25  2001-10-03 23:54:41  adam
+ * Revision 1.26  2001-11-12 11:24:45  adam
+ * Ignore comma when dealing with and-lists.
+ *
+ * Revision 1.25  2001/10/03 23:54:41  adam
  * Fixes for numeric ranges (date=1980-1990).
  *
  * Revision 1.24  2001/03/22 21:23:30  adam
@@ -382,7 +385,14 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
         size_t max = 200;
         if (and_list || or_list || !multi)
             max = 1;
-
+	
+	/* ignore commas when dealing with and-lists .. */
+        if (and_list && lookahead && lookahead->kind == CCL_TOK_COMMA)
+        {
+	    lookahead = lookahead->next;
+            ADVANCE;
+	    continue;
+        }
         /* go through each TERM token. If no truncation attribute is yet
            met, then look for left/right truncation markers (?) and
            set left_trunc/right_trunc/mid_trunc accordingly */
@@ -407,6 +417,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
 
         if (len == 0)
             break;      /* no more terms . stop . */
+
 
         if (p_top)
         {
