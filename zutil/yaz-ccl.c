@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1996-2000, Index Data.
+ * Copyright (c) 1996-2001, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.9  2000-11-27 14:16:55  adam
+ * Revision 1.10  2001-02-20 11:23:50  adam
+ * Updated ccl_pquery to consider local attribute set too.
+ *
+ * Revision 1.9  2000/11/27 14:16:55  adam
  * Fixed bug in ccl_rpn_simple regarding resultSetId's.
  *
  * Revision 1.8  2000/11/16 13:03:13  adam
@@ -308,7 +311,13 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
     	for (att = p->u.t.attr_list; att; att = att->next)
 	{
 	    char tmpattr[128];
-	    sprintf(tmpattr, "@attr %d=%d ", att->type, att->value);
+	    wrbuf_puts (w, "@attr ");
+	    if (att->set)
+	    {
+		wrbuf_puts (w, att->set);
+		wrbuf_puts (w, " ");
+	    }
+	    sprintf(tmpattr, "%d=%d ", att->type, att->value);
 	    wrbuf_puts (w, tmpattr);
 	}
 	wrbuf_puts (w, "{");
