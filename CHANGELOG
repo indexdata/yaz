@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* function zget_ExtendedServicesRequest sets waitAction to
+  waitIfPossible (was wait).
+
 Added cs_set_blocking to set change blocking mode of a COMSTACK. Thanks
 to Matthew Carey.
 

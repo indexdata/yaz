@@ -3,7 +3,7 @@ Copyright (C) 1995-2001, Index Data ApS.
 See the file LICENSE for details.
 
 Compilation and installation instructions for YAZ 
-  $Id: README,v 1.33 2001-02-21 09:19:44 adam Exp $
+  $Id: README,v 1.34 2001-03-13 18:11:38 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -90,16 +90,9 @@ odr	- Open Data Representation. This module implements the BER
 	encoding rules. Documentation is found in the files odr-use.man
 	and odr.txt.
 
-asn     - This module implements the Z39.50/SR protocol. The best way
-	to find out how it works is to look in the sample
-	client/server code in server/seshigh.c. The interface is still
-        wholly described by the file proto.h which defines structure
-        and type definitions for each of the types introduced in the
-        protocol specification.
-
 z39.50  - This module implements the Z39.50 protocol. This module
-        does the same job as the 'asn' module except that the source
-        files are auto-generated using an YAZ' ASN.1 Compiler (YC).
+        does the same job as the old 'asn' module except that the source
+        files are auto-generated using an YAZ' ASN.1 Compiler (yaz-comp).
 
 zutil   - This module implements a collection of Z39.50 utilities, such
         as query parsing, EXTERNAL handling, etc.
@@ -135,6 +128,10 @@ include/yaz - The various header files.
 
 lib     - The libraries. Primarily libyaz.a. The makefile gathers the
           libraries from previous modules into libyaz.a.
+
+asn     - Obsolete - replaced by the codecs in directory z39.50.
+        This module implements the Z39.50 protocol and is only provided
+        for backwareds compatibility. 
 
 To get more information or assistance, send mail to yaz-help@indexdata.dk.
 

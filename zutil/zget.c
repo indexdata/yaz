@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.4  2001-02-21 13:46:54  adam
+ * Revision 1.5  2001-03-13 18:11:38  adam
+ * Altered zget_ExtendedServicesRequest - sets waitAction to waitIfPossible.
+ *
+ * Revision 1.4  2001/02/21 13:46:54  adam
  * C++ fixes.
  *
  * Revision 1.3  2000/03/20 19:06:25  adam
@@ -429,7 +432,7 @@ Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
     r->description = 0;
     r->taskSpecificParameters = 0;
     r->waitAction = (int *)odr_malloc(o, sizeof(int));
-    *r->waitAction = Z_ExtendedServicesRequest_wait;
+    *r->waitAction = Z_ExtendedServicesRequest_waitIfPossible;
     r->elements = 0;
     r->otherInfo = 0;
     return r;
