@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.73 2005-02-09 12:41:45 adam Exp $
+ * $Id: ztest.c,v 1.74 2005-03-03 23:16:20 adam Exp $
  */
 
 /*
@@ -674,7 +674,9 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_delete = ztest_delete;
     q->bend_fetch = ztest_fetch;
     q->bend_scan = ztest_scan;
+#if 0
     q->bend_explain = ztest_explain;
+#endif
     q->bend_srw_scan = ztest_scan;
 
     return r;

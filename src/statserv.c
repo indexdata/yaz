@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.23 2005-03-01 20:37:01 adam Exp $
+ * $Id: statserv.c,v 1.24 2005-03-03 23:16:20 adam Exp $
  */
 
 /**
@@ -212,6 +212,7 @@ static struct gfs_server * gfs_server_new()
     n->host = 0;
     n->listen_ref = 0;
     n->cql_transform = 0;
+    n->server_node_ptr = 0;
     return n;
 }
 
@@ -265,6 +266,7 @@ int control_association(association *assoc, const char *host, int force_open)
 		    assoc->init = 0;
 		}
 		assoc->cql_transform = gfs->cql_transform;
+		assoc->server_node_ptr = gfs->server_node_ptr;
 		assoc->last_control = &gfs->cb;
 		statserv_setcontrol(&gfs->cb);
 		return 1;
@@ -273,6 +275,7 @@ int control_association(association *assoc, const char *host, int force_open)
 	statserv_setcontrol(0);
 	assoc->last_control = 0;
 	assoc->cql_transform = 0;
+	assoc->server_node_ptr = 0;
 	return 0;
     }
     else
@@ -280,6 +283,7 @@ int control_association(association *assoc, const char *host, int force_open)
 	statserv_setcontrol(&control_block);
 	assoc->last_control = &control_block;
 	assoc->cql_transform = 0;
+	assoc->server_node_ptr = 0;
 	return 1;
     }
 }
@@ -319,7 +323,7 @@ static void xml_config_read()
 	}
 	else if (!strcmp((const char *) ptr->name, "server"))
 	{
-	    xmlNodePtr ptr_children = ptr->children;
+	    xmlNodePtr ptr_server = ptr;
 	    xmlNodePtr ptr;
 	    const char *listenref = 0;
 
@@ -328,6 +332,7 @@ static void xml_config_read()
 		    && attr->children && attr->children->type == XML_TEXT_NODE)
 		    listenref = nmem_dup_xml_content(gfs_nmem, attr->children);
 	    *gfsp = gfs_server_new();
+	    (*gfsp)->server_node_ptr = ptr_server;
 	    if (listenref)
 	    {
 		int id_no;
@@ -342,7 +347,7 @@ static void xml_config_read()
 		    yaz_log(YLOG_WARN, "Non-existent listenref '%s' in server "
 			    "config element", listenref);
 	    }
-	    for (ptr = ptr_children; ptr; ptr = ptr->next)
+	    for (ptr = ptr_server->children; ptr; ptr = ptr->next)
 	    {
 		if (ptr->type != XML_ELEMENT_NODE)
 		    continue;
@@ -356,7 +361,7 @@ static void xml_config_read()
 		    strcpy((*gfsp)->cb.configname,
 			   nmem_dup_xml_content(gfs_nmem, ptr->children));
 		}
-		if (!strcmp((const char *) ptr->name, "pqf2cql"))
+		if (!strcmp((const char *) ptr->name, "cql2rpn"))
 		{
 		    (*gfsp)->cql_transform = cql_transform_open_fname(
 			nmem_dup_xml_content(gfs_nmem, ptr->children)

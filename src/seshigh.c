@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.48 2005-03-01 20:37:01 adam Exp $
+ * $Id: seshigh.c,v 1.49 2005-03-03 23:16:20 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -48,6 +48,11 @@
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
+#if HAVE_XML2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 #endif
 
 #include <yaz/yconfig.h>
@@ -178,6 +183,7 @@ association *create_association(IOCHAN channel, COMSTACK link,
     request_initq(&anew->outgoing);
     anew->proto = cs_getproto(link);
     anew->cql_transform = 0;
+    anew->server_node_ptr = 0;
     return anew;
 }
 
@@ -908,6 +914,39 @@ static void srw_bend_search(association *assoc, request *req,
     }
 }
 
+static char *srw_bend_explain_default(void *handle, bend_explain_rr *rr)
+{
+    xmlNodePtr ptr = rr->server_node_ptr;
+    if (!ptr)
+	return 0;
+    for (ptr = ptr->children; ptr; ptr = ptr->next)
+    {
+	if (ptr->type != XML_ELEMENT_NODE)
+	    continue;
+	if (!strcmp((const char *) ptr->name, "explain"))
+	{
+	    int len;
+	    ptr = xmlCopyNode(ptr, 1);
+
+	    xmlDocPtr doc = xmlNewDoc((const xmlChar *) "1.0");
+        
+	    xmlDocSetRootElement(doc, ptr);
+	    
+	    xmlChar *buf_out;
+	    xmlDocDumpMemory(doc, &buf_out, &len);
+	    char *content = (char*) odr_malloc(rr->stream, 1+len);
+	    memcpy(content, buf_out, len);
+	    content[len] = '\0';
+	    
+	    xmlFree(buf_out);
+	    xmlFreeDoc(doc);
+	    rr->explain_buf = content;
+	    return 0;
+	}
+    }
+    return 0;
+}
+
 static void srw_bend_explain(association *assoc, request *req,
                              Z_SRW_explainRequest *srw_req,
                              Z_SRW_explainResponse *srw_res,
@@ -916,30 +955,35 @@ static void srw_bend_explain(association *assoc, request *req,
     yaz_log(log_requestdetail, "Got SRW ExplainRequest");
     *http_code = 404;
     srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
-    if (assoc->init && assoc->init->bend_explain)
+    if (assoc->init)
     {
-        bend_explain_rr rr;
+	bend_explain_rr rr;
+	
+	rr.stream = assoc->encode;
+	rr.decode = assoc->decode;
+	rr.print = assoc->print;
+	rr.explain_buf = 0;
+	rr.database = srw_req->database;
+	rr.server_node_ptr = assoc->server_node_ptr;
+	rr.schema = "http://explain.z3950.org/dtd/2.0/";
+	if (assoc->init->bend_explain)
+	    (*assoc->init->bend_explain)(assoc->backend, &rr);
+	else
+	    srw_bend_explain_default(assoc->backend, &rr);
 
-        rr.stream = assoc->encode;
-        rr.decode = assoc->decode;
-        rr.print = assoc->print;
-        rr.explain_buf = 0;
-        rr.database = srw_req->database;
-        rr.schema = "http://explain.z3950.org/dtd/2.0/";
-        (*assoc->init->bend_explain)(assoc->backend, &rr);
-        if (rr.explain_buf)
-        {
-            int packing = Z_SRW_recordPacking_string;
-            if (srw_req->recordPacking && 
-                !strcmp(srw_req->recordPacking, "xml"))
-                packing = Z_SRW_recordPacking_XML;
-            srw_res->record.recordSchema = rr.schema;
-            srw_res->record.recordPacking = packing;
-            srw_res->record.recordData_buf = rr.explain_buf;
-            srw_res->record.recordData_len = strlen(rr.explain_buf);
-            srw_res->record.recordPosition = 0;
-            *http_code = 200;
-        }
+	if (rr.explain_buf)
+	{
+	    int packing = Z_SRW_recordPacking_string;
+	    if (srw_req->recordPacking && 
+		!strcmp(srw_req->recordPacking, "xml"))
+		packing = Z_SRW_recordPacking_XML;
+	    srw_res->record.recordSchema = rr.schema;
+	    srw_res->record.recordPacking = packing;
+	    srw_res->record.recordData_buf = rr.explain_buf;
+	    srw_res->record.recordData_len = strlen(rr.explain_buf);
+	    srw_res->record.recordPosition = 0;
+	    *http_code = 200;
+	}
     }
 }
 
@@ -1712,7 +1756,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.48 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.49 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
