@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.40 2003-02-21 12:20:22 adam Exp $
+## $Id: Makefile.am,v 1.41 2003-02-23 14:25:34 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -28,9 +28,10 @@ MANFILES=yaz-client.1 yaz-client-ssl.1 yaz-ztest.8 \
 REFFILES=yaz-client.sgml yaz-ztest.sgml yaz-config.sgml \
 	yaz-man.sgml zoomsh.sgml
 
-SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps
+SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
+	apilayer.obj
 
-doc_DATA = $(HTMLFILES) yaz.pdf id.png
+doc_DATA = $(HTMLFILES) yaz.pdf id.png apilayer.png
 
 EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(MANFILES) $(REFFILES) $(doc_DATA)
 
@@ -74,4 +75,8 @@ yaz.pdf: $(XMLFILES) $(srcdir)/id.png
 
 index.tkl: $(XMLFILES) tkl.xsl
 	xsltproc tkl.xsl yaz.xml
+
+apilayer.png: 
+	tgif -print -xbm apilayer.obj
+	xbmtopbm <apilayer.xbm|pnmtopng >apilayer.png
 

@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.10 2003-02-21 12:06:05 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.11 2003-02-23 14:25:34 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -161,12 +161,13 @@
     toolkit offers several different levels of access to the
     <ulink url="http://www.loc.gov/z3950/agency/">ISO23950/Z39.50</ulink>,
     <ulink url="http://www.nlc-bnc.ca/iso/ill/">ILL</ulink> and
-    SRW protocols.
+    <ulink url="http://www.loc.gov/z3950/agency/zing/srw/">SRW</ulink>
+    protocols.
     The level that you need to use depends on your requirements, and
     the role (server or client) that you want to implement.
     If you're developing a client application you should consider the
     <link linkend="zoom">ZOOM</link> API.
-   It is, by far, the easiest way to develop clients in C.
+    It is, by far, the easiest way to develop clients in C.
     Server implementers should consider the 
     <link linkend="server">generic frontend server</link>.
     None of those high-level APIs support the whole protocol, but
@@ -179,22 +180,54 @@
     you're going to develop an ILL application you'll have to learn the lower
     level APIs of &yaz;.
    </para>
-  <para>
-    The basic low level modules, which are independent of the role
-    (client or server), consist of three primary interfaces:
-    
+
+   
+   <para>
+    The YAZ toolkit modules is shown in figure <xref linkend="yaz.layer"/>.
+   </para>
+   <figure id="yaz.layer">
+    <title>YAZ layers</title>
+    <mediaobject>
+     <imageobject>
+      <imagedata fileref="apilayer.png" format="PNG"/>
+     </imageobject>
+     <imageobject>
+      <imagedata fileref="apilayer.eps" format="EPS"/>
+     </imageobject>
+    </mediaobject>
+   </figure>
+   <para>
+    There are four layers.
     <itemizedlist>
-     <listitem><para>&asn;, which provides a C representation of the Z39.50
-       protocol packages (PDUs).
-      </para></listitem>
-     <listitem><para>&odr;, which encodes and decodes the packages according
-       to the BER specification.
-      </para></listitem>
-     <listitem><para>&comstack;, which exchanges the encoded packages with
-       a peer process over a network.
-      </para></listitem>
+     <listitem>
+      <para>A client or server application (or both).
+       This layer includes ZOOM and the generic frontend server.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       The second layer provides a C represenation of the 
+       protocol units (packages) for Z39.50 ASN.1, ILL ASN.1,
+       SRW SOAP.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       The third layer encodes and decodes protocol data units to
+       simple packages (buffer with certain length). The &odr; module
+       encodes and decodes BER whereas the HTTP modules encodes and
+       decodes HTTP ruquests/responses.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       The lowest layer is &comstack; which exchanges the encoded packages
+       with a peer process over a network.
+      </para>
+     </listitem>
     </itemizedlist>
-    
+   </para>
+   <para>
     The &asn; module represents the ASN.1 definition of
     the Z39.50 protocol. It establishes a set of type and
     structure definitions, with one structure for each of the top-level
@@ -248,7 +281,7 @@
     create a connection endpoint, you need to specify what transport to
     use (TCP/IP, SSL or UNIX sockets).
     For the remainder of the connection's lifetime, you don't have
-   to worry about the underlying transport protocol at all - the &comstack;
+    to worry about the underlying transport protocol at all - the &comstack;
     will ensure that the correct mechanism is used.
    </para>
    <para>
@@ -259,7 +292,7 @@
    </para>
    <para>
     The reason that the &yaz; service-level API is a conglomerate of the
-   APIs from three different submodules is twofold. First, we wanted to allow
+    APIs from three different submodules is twofold. First, we wanted to allow
     the user a choice of different options for each major task. For instance,
     if you don't like the protocol API provided by &odr;/&asn;, you
     can use SNACC or BERUtils instead, and still have the benefits of the
