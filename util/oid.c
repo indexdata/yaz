@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.12  1996-01-02 08:57:53  quinn
+ * Revision 1.13  1996-02-20 16:37:33  quinn
+ * Using yaz_matchstr in oid_getvalbyname
+ *
+ * Revision 1.12  1996/01/02  08:57:53  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.11  1995/12/13  16:03:35  quinn
@@ -65,6 +68,7 @@
  */
 
 #include <oid.h>
+#include <yaz-util.h>
 
 static int z3950_prefix[] = { 1, 2, 840, 10003, -1 };
 static int sr_prefix[]    = { 1, 0, 10163, -1 };
@@ -301,7 +305,7 @@ oid_value oid_getvalbyname(char *name)
     struct oident *p;
 
     for (p = oids; *p->oidsuffix >= 0; p++)
-        if (!strcmp(p->desc, name))
+        if (!yaz_matchstr(p->desc, name))
             return p->value;
     return VAL_NONE;
 }
