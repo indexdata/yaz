@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- XXXXXXXXXXXXX
+--- 1.3 1996/10/11
 
 Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
 
@@ -18,7 +18,7 @@ Added Update extended service.
 
 Added SearchResult-1 additional info structure.
 
-Added CCL optional CCL (ISO8777) interpreter as separate module. Available
+Added optional CCL (ISO8777) interpreter as separate module. Available
 in linemode client.
 
 --- 1.2 1996/6/10 (1st anniversary release)
