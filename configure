@@ -875,7 +875,7 @@ fi
 if test -L z39.50; then
 	rm z39.50
 fi
-if test ! -d $YCDIR; then
+if test ! -d "$YCDIR"; then
 	echo "configure: warning: YC directory ${YCDIR} doesn't exist" 1>&2
 fi
 if test "$YCDIR" = ""; then

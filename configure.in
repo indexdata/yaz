@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-1998
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.3 1998-10-28 15:10:01 adam Exp $
+dnl $Id: configure.in,v 1.4 1998-11-09 13:23:09 adam Exp $
 AC_INIT(include/yaz-version.h)
 dnl
 dnl ------ Checking programs
@@ -20,7 +20,7 @@ fi
 if test -L z39.50; then
 	rm z39.50
 fi
-if test ! -d $YCDIR; then
+if test ! -d "$YCDIR"; then
 	AC_MSG_WARN(YC directory ${YCDIR} doesn't exist)
 fi
 if test "$YCDIR" = ""; then
