@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.12 2002-09-24 08:00:50 adam Exp $
+ * $Id: zoomtst7.c,v 1.13 2005-02-03 09:09:55 adam Exp $
  *
  * API test..
  */
@@ -176,10 +176,6 @@ int main(int argc, char **argv)
 
     }
     ZOOM_options_destroy (o);
-    yaz_log_init_level(LOG_ALL|LOG_MALLOC);
-    xmalloc_trav("1");
-    nmem_exit();
-    xmalloc_trav("2");
     exit (0);
 }
 
