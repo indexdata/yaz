@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.163 2003-10-20 20:48:37 adam Exp $
+ * $Id: seshigh.c,v 1.164 2003-10-21 09:48:23 adam Exp $
  */
 
 /*
@@ -169,6 +169,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
 void destroy_association(association *h)
 {
     statserv_options_block *cb = statserv_getcontrol();
+    request *req;
 
     xfree(h->init);
     odr_destroy(h->decode);
@@ -179,8 +180,10 @@ void destroy_association(association *h)
     xfree(h->input_buffer);
     if (h->backend)
     	(*cb->bend_close)(h->backend);
-    while (request_deq(&h->incoming));
-    while (request_deq(&h->outgoing));
+    while ((req = request_deq(&h->incoming)))
+	request_release(req);
+    while ((req = request_deq(&h->outgoing)))
+	request_release(req);
     request_delq(&h->incoming);
     request_delq(&h->outgoing);
     xfree(h);
@@ -1387,7 +1390,7 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
     }
     if (!z_GDU(assoc->encode, &res, 0, 0))
     {
-    	yaz_log(LOG_WARN, "ODR error when decoding PDU: %s [element %s]",
+    	yaz_log(LOG_WARN, "ODR error when encoding PDU: %s [element %s]",
                 odr_errmsg(odr_geterror(assoc->decode)),
                 odr_getelement(assoc->decode));
 	request_release(req);
