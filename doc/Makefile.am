@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.52 2004-04-22 13:12:49 adam Exp $
+## $Id: Makefile.am,v 1.53 2004-04-22 18:44:40 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -89,4 +89,20 @@ index.tkl: $(XMLFILES) tkl.xsl
 apilayer.png: 
 	tgif -print -xbm apilayer.obj
 	xbmtopbm <apilayer.xbm|pnmtopng >apilayer.png
+
+dist-hook:
+	for f in $(srcdir)/*.html; do \
+		found=0; \
+		b=`basename $$f`; \
+		for h in $(HTMLFILES); do \
+			if test "$$h" = "$$b"; then \
+				found=1; \
+			fi \
+		done; \
+		if test "$$found" = "0"; then \
+			echo "$$h not found in HTMLFILES"; \
+			exit 1; \
+		fi \
+	done
+
 
