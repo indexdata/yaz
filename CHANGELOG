@@ -1,25 +1,35 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
----
+--- 1.2 1996/6/x (1st anniversary release)
 
-[frontend-server] NextResultSetPosition was sometimes set incorrectly when
-surrogate diagnostics were generated.
+Added Summary record syntax. Lightly tested.
 
-Fixed bug in the DiagRecs decoder
+Added OPAC record syntax. Untested.
+
+Added ResourceReport service encoders/decoders. Untested.
+
+Fixed bug in z_Unit - wrong tagging on unitSystem.
+
+Fixed bug in the DiagRecs decoder.
 
 Added options for max PDU size and session timeout to frontend-server.
 
-Added documentation of query-language parsers and other utilities.
+Added documentation of query-language parsers and other supporting utilities.
 
-Added Attribute set to the bend_scanrequest API.
+[frontend-server] Added Attribute set to the bend_scanrequest API.
+
+[frontend-server] NextResultSetPosition was sometimes set incorrectly when
+surrogate diagnostics were generated.
 
 [retrieval] Allow multiple local values for attribute.
 
 [retrieval] Allow multiple attributes per element in .abs files. index type.
 
+[retrieval] Added Summary tagset, abstract syntax, and d1-node/ASN filter.
+
 --- 1.1pl2  1996/4/10
 
-Minor changes, mostly specific to Zebra
+Minor changes, mostly specific to Zebra's requirements (retrieval)
 
 --- 1.1  1996/2/20
 
