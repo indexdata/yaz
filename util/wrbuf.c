@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: wrbuf.c,v 1.10 2002-10-22 10:05:36 adam Exp $
+ * $Id: wrbuf.c,v 1.11 2002-10-22 14:40:21 adam Exp $
  */
 
 /*
@@ -14,6 +14,7 @@
 #include <config.h>
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
