@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.5  1997-11-07 13:31:58  adam
+ * Revision 1.6  1998-01-29 13:16:02  adam
+ * Added dummy sort in test server.
+ *
+ * Revision 1.5  1997/11/07 13:31:58  adam
  * Added NT Service name part of statserv_options_block. Moved NT
  * service utility to server library.
  *
@@ -39,6 +42,14 @@
 
 Z_GenericRecord *read_grs1(FILE *f, ODR o);
 
+int bend_sort (void *handle, bend_sortrequest *req, bend_sortresult *res)
+{
+    res->errcode = 1;
+    res->errstring = "Sort not implemented";
+    res->sort_status = Z_SortStatus_failure;
+    return 0;
+}
+
 bend_initresult *bend_init(bend_initrequest *q)
 {
     bend_initresult *r = odr_malloc (q->stream, sizeof(*r));
@@ -47,6 +58,7 @@ bend_initresult *bend_init(bend_initrequest *q)
     r->errcode = 0;
     r->errstring = 0;
     r->handle = dummy;
+    q->bend_sort = bend_sort;    /* register sort handler */
     return r;
 }
 
