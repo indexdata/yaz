@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_int.c,v 1.3 2005-01-15 19:47:11 adam Exp $
+ * $Id: ber_int.c,v 1.4 2005-01-16 21:51:50 adam Exp $
  */
 
 /** 
@@ -19,10 +19,13 @@
 
 #include <string.h>
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 #ifdef WIN32
 #include <winsock.h>
 #else
-#include <sys/types.h>
 #include <netinet/in.h>
 #endif
 
@@ -37,20 +40,22 @@ int ber_integer(ODR o, int *val)
 
     switch (o->direction)
     {
-        case ODR_DECODE:
-            if ((res = ber_decinteger(o->bp, val, odr_max(o))) <= 0)
-            {
-                odr_seterror(o, OPROTO, 50);
-                return 0;
-            }
-            o->bp += res;
-            return 1;
-        case ODR_ENCODE:
-            if ((res = ber_encinteger(o, *val)) < 0)
-                return 0;
-            return 1;
-        case ODR_PRINT: return 1;
-        default: odr_seterror(o, OOTHER, 51);  return 0;
+    case ODR_DECODE:
+	if ((res = ber_decinteger(o->bp, val, odr_max(o))) <= 0)
+	{
+	    odr_seterror(o, OPROTO, 50);
+	    return 0;
+	}
+	o->bp += res;
+	return 1;
+    case ODR_ENCODE:
+	if ((res = ber_encinteger(o, *val)) < 0)
+	    return 0;
+	return 1;
+    case ODR_PRINT:
+	return 1;
+    default:
+	odr_seterror(o, OOTHER, 51);  return 0;
     }
 }
 

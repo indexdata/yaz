@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.18 2005-01-15 19:47:08 adam Exp $
+ * $Id: admin.c,v 1.19 2005-01-16 21:51:49 adam Exp $
  */
 
 #include <stdio.h>
@@ -10,9 +10,13 @@
 #include <time.h>
 #include <assert.h>
 
-#if HAVE_FNMATCH_H
+#if HAVE_DIRENT_H
 #include <dirent.h>
+#endif
+#if HAVE_FNMATCH_H
 #include <fnmatch.h>
+#endif
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 

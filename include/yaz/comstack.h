@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.18 2005-01-15 19:47:09 adam Exp $
+ * $Id: comstack.h,v 1.19 2005-01-16 21:51:49 adam Exp $
  */
 
 /** 
@@ -35,34 +35,6 @@
 #define COMSTACK_H
 
 #include <yaz/yconfig.h>
-
-#ifndef _VMS_
-
-# ifdef WIN32
-
-#  include <winsock.h>
-
-# else /* #ifdef WIN32 */
-#  include <sys/types.h>
-#  include <sys/time.h>
-#  include <sys/wait.h>
-
-#  include <netinet/in.h>
-#  include <sys/socket.h>
-#  include <netdb.h>
-#  include <arpa/inet.h>
-
-#  ifdef _AIX
-#   include <sys/select.h>
-#  endif
-
-#  ifndef O_BINARY
-#   define O_BINARY 0
-#  endif
-
-# endif
-#endif /* ifndef _VMS_ */
-
 #include <yaz/oid.h>
 #include <yaz/xmalloc.h>
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.8 2005-01-15 19:47:14 adam Exp $
+ * $Id: unix.c,v 1.9 2005-01-16 21:51:50 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -15,20 +15,31 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <errno.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 
 #include <grp.h>
+#if HAVE_PWD_H
 #include <pwd.h>
+#endif
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#if HAVE_SYS_UN_H
 #include <sys/un.h>
+#endif
 
-#include <yaz/comstack.h>
 #include <yaz/unix.h>
 #include <yaz/nmem.h>
 
@@ -699,4 +710,4 @@ static int unix_set_blocking(COMSTACK p, int blocking)
     p->blocking = blocking;
     return 1;
 }
-#endif
+#endif /* WIN32 */

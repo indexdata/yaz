@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.13 2005-01-15 19:47:14 adam Exp $
+ * $Id: tcpip.c,v 1.14 2005-01-16 21:51:50 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -12,15 +12,38 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#ifdef WIN32
-#else
-#include <unistd.h>
-#endif
-
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef WIN32
+#include <winsock.h>
+#else
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <netinet/tcp.h>
+#endif
+
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
 #if HAVE_OPENSSL_SSL_H
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -29,11 +52,6 @@
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 #include <yaz/nmem.h>
-
-#ifdef WIN32
-#else
-#include <netinet/tcp.h>
-#endif
 
 static int tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);

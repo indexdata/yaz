@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpdchk.c,v 1.5 2005-01-15 19:47:14 adam Exp $
+ * $Id: tcpdchk.c,v 1.6 2005-01-16 21:51:50 adam Exp $
  */
 /**
  * \file tcpdchk.c
@@ -11,6 +11,13 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#ifdef WIN32
+#include <winsock.h>
+#else
+#include <netdb.h>
+#include <arpa/inet.h>
+#endif
 
 #include <yaz/yconfig.h>
 #include <yaz/comstack.h>
@@ -21,7 +28,6 @@
 #if HAVE_TCPD_H
 #include <syslog.h>
 #include <tcpd.h>
-
 
 int allow_severity = LOG_INFO;  /* not YLOG !! */
 int deny_severity = LOG_WARNING;

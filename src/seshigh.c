@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.44 2005-01-15 19:47:14 adam Exp $
+ * $Id: seshigh.c,v 1.45 2005-01-16 21:51:50 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -30,18 +30,25 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
+#include <ctype.h>
+
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
 #ifdef WIN32
 #include <io.h>
 #define S_ISREG(x) (x & _S_IFREG)
 #include <process.h>
-#include <sys/stat.h>
-#else
-#include <sys/stat.h>
+#endif
+
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <assert.h>
-#include <ctype.h>
 
 #include <yaz/yconfig.h>
 #include <yaz/xmalloc.h>
@@ -1577,7 +1584,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.44 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.45 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

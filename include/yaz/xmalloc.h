@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: xmalloc.h,v 1.5 2005-01-15 19:47:10 adam Exp $
+ * $Id: xmalloc.h,v 1.6 2005-01-16 21:51:49 adam Exp $
  */
 /**
  * \file xmalloc.h
@@ -33,8 +33,7 @@
 #ifndef XMALLOC_H
 #define XMALLOC_H
 
-#include <sys/types.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 #include <yaz/yconfig.h>
 

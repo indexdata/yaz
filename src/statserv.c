@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.18 2005-01-15 19:47:14 adam Exp $
+ * $Id: statserv.c,v 1.19 2005-01-16 21:51:50 adam Exp $
  */
 
 /**
@@ -20,8 +20,17 @@
 #include <winsock.h>
 #include <direct.h>
 #include "service.h"
-#else
+#endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_PWD_H
 #include <pwd.h>
 #endif
 
@@ -93,18 +102,18 @@ statserv_options_block control_block = {
 
 static int max_sessions = 0;
 
-static int logbits_set=0;
-static int log_session=0;
-static int log_server=0;
+static int logbits_set = 0;
+static int log_session = 0;
+static int log_server = 0;
 
 /** get_logbits sets global loglevel bits */
 static void get_logbits(int force)
 { /* needs to be called after parsing cmd-line args that can set loglevels!*/
     if (force || !logbits_set)
     {
-        logbits_set=1;
-        log_session=yaz_log_module_level("session");
-        log_server=yaz_log_module_level("server");
+        logbits_set = 1;
+        log_session = yaz_log_module_level("session");
+        log_server = yaz_log_module_level("server");
     }
 }
 
@@ -683,15 +692,15 @@ int statserv_start(int argc, char **argv)
 #endif
     
 #ifdef WIN32
-    sep='\\';
+    sep = '\\';
 #else
-    sep='/';
+    sep = '/';
 #endif
     if ((me = strrchr (argv[0], sep)))
 	me++; /* get the basename */
     else
 	me = argv[0];
-    programname=argv[0];
+    programname = argv[0];
 
     if (control_block.options_func(argc, argv))
         return(1);
