@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.18 2001-10-24 20:25:07 adam Exp $
+## $Id: Makefile.am,v 1.19 2001-10-24 20:27:00 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -13,12 +13,13 @@ HTMLFILES = asn.external.html asn.html asn.oid.html asn.pdu.html \
  client.searching.html comstack.addresses.html comstack.client.html \
  comstack.common.html comstack.diagnostics.html comstack.html \
  comstack.introduction.html comstack.server.html comstack.summary.html \
- future.html indexdata.html installation.html installation.win32.html \
- introduction.html license.html license.other.html odr.debugging.html \
+ future.html indexdata.html installation.html installation.unix.html
+ installation.win32.html introduction.html \
+ license.html license.other.html odr.debugging.html \
  odr.html odr.programming.html odr.use.html server.backend.html \
  server.backendfunctions.html server.frontend.html server.html \
  server.invocation.html server.main.html tools.html tools.nmem.html \
- tools.oid.html unix.html yaz.html zoom.events.html zoom.html \
+ tools.oid.html yaz.html zoom.events.html zoom.html \
  zoom.options.html zoom.records.html zoom.resultsets.html zoom.search.html
 
 DOCFILES=$(XMLFILES) $(HTMLFILES) yaz.pdf
