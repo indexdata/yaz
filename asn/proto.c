@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.33  1995-06-19 13:39:56  quinn
+ * Revision 1.34  1995-06-19 17:01:48  quinn
+ * This should bring us in sync with the version distributed as 1.0b
+ *
+ * Revision 1.33  1995/06/19  13:39:56  quinn
  * *** empty log message ***
  *
  * Revision 1.32  1995/06/19  12:37:28  quinn
@@ -461,7 +464,7 @@ int z_ElementSetNames(ODR o, Z_ElementSetNames **p, int opt)
 
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
-    else
+    else if (!*p)
     	return opt && odr_ok(o);
 
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.7  1995-06-19 13:06:50  quinn
+ * Revision 1.8  1995-06-19 17:01:51  quinn
+ * This should bring us in sync with the version distributed as 1.0b
+ *
+ * Revision 1.7  1995/06/19  13:06:50  quinn
  * Fixed simple bug in the code to handle untagged choice elements.
  *
  * Revision 1.6  1995/05/16  08:50:53  quinn
@@ -74,7 +77,7 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 	}
 	else  /* no tagging. Have to poll type */
 	{
-	    if ((*arm[i].fun)(o, p, 1) && *(char*)p)
+	    if ((*arm[i].fun)(o, p, 1) && *(char**)p)
 	    	return 1;
 	}
     }
