@@ -70,6 +70,7 @@ struct Z_External
 #define Z_External_summary 13
 #define Z_External_OPAC 14
 #define Z_External_searchResult1 15
+#define Z_External_update 16
     union
     {
 	/* Generic types */
@@ -90,6 +91,7 @@ struct Z_External
 	Z_Espec1 *espec1;
 	Z_BriefBib *summary;
 	Z_SearchInfoReport *searchResult1;
+	Z_IUUpdate *update;
     } u;
 };
 

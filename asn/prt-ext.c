@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.10  1996-10-09 15:54:55  quinn
+ * Revision 1.11  1996-10-10 12:35:13  quinn
+ * Added Update extended service.
+ *
+ * Revision 1.10  1996/10/09  15:54:55  quinn
  * Added SearchInfoReport
  *
  * Revision 1.9  1996/06/10  08:53:36  quinn
@@ -59,6 +62,7 @@ static Z_ext_typeent type_table[] =
     {VAL_SUMMARY, Z_External_summary, z_BriefBib},
     {VAL_OPAC, Z_External_OPAC, z_OPACRecord},
     {VAL_SEARCHRES1, Z_External_searchResult1, z_SearchInfoReport},
+    {VAL_DBUPDATE, Z_External_update, z_IUUpdate},
     {VAL_NONE, 0, 0}
 };
 
@@ -102,6 +106,7 @@ int z_External(ODR o, Z_External **p, int opt)
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_OPAC, z_OPACRecord},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_searchResult1,
 	    z_SearchInfoReport},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_update},
 	{-1, -1, -1, -1, 0}
     };
 

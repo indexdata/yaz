@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.16  1996-10-09 15:55:02  quinn
+ * Revision 1.17  1996-10-10 12:35:23  quinn
+ * Added Update extended service.
+ *
+ * Revision 1.16  1996/10/09  15:55:02  quinn
  * Added SearchInfoReport
  *
  * Revision 1.15  1996/10/07  15:29:43  quinn
@@ -141,7 +144,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
 
-    {PROTO_Z3950,   CLASS_USERINFO,VAL_SEARCHRES1 {10,1,-1},  "searchResult-1"},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_SEARCHRES1,{10,1,-1},  "searchResult-1"},
 
     {PROTO_Z3950,   CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
     {PROTO_Z3950,   CLASS_VARSET,  VAL_VAR1,      {12,1,-1},   "Variant-1"   },

@@ -145,4 +145,113 @@ typedef struct Z_ItemOrder
 
 int z_ItemOrder(ODR o, Z_ItemOrder **p, int opt);
 
+/* ----------------------- ITEM UPDATE ------------------------ */
+
+typedef struct Z_IUSuppliedRecordsId
+{
+    int which;
+#define Z_IUSuppliedRecordsId_timeStamp 1
+#define Z_IUSuppliedRecordsId_versionNumber 2
+#define Z_IUSuppliedRecordsId_previousVersion 3
+    union {
+        char *timeStamp;
+        char *versionNumber;
+        Odr_external *previousVersion;
+    } u;
+} Z_IUSuppliedRecordsId;
+
+typedef struct Z_IUCorrelationInfo
+{
+    char *note; /* OPTIONAL */
+    int *id; /* OPTIONAL */
+} Z_IUCorrelationInfo;
+
+typedef struct Z_IUSuppliedRecords_elem
+{
+    int which;
+#define Z_IUSuppliedRecords_number 1
+#define Z_IUSuppliedRecords_string 2
+#define Z_IUSuppliedRecords_opaque 3
+    union {
+        int *number;
+        char *string;
+        Odr_oct *opaque;
+    } u; /* OPTIONAL */
+    Z_IUSuppliedRecordsId *supplementalId; /* OPTIONAL */
+    Z_IUCorrelationInfo *correlationInfo;    /* OPTIONAL */
+    Odr_external *record;
+} Z_IUSuppliedRecords_elem;
+
+typedef struct Z_IUSuppliedRecords
+{
+    int num;
+    Z_IUSuppliedRecords_elem **elements;
+} Z_IUSuppliedRecords;
+
+typedef struct Z_IUOriginPartToKeep
+{
+    int *action;
+#define Z_IUOriginPartToKeep_recordInsert 1
+#define Z_IUOriginPartToKeep_recordReplace 2
+#define Z_IUOriginPartToKeep_recordDelete 3
+#define Z_IUOriginPartToKeep_elementUpdate 4
+    char *databaseName;
+    Odr_oid *schema; /* OPTIONAL */
+    char *elementSetName; /* OPTIONAL */
+} Z_IUOriginPartToKeep;
+
+typedef struct Z_IUTaskPackageRecordStructure
+{
+    int which;
+#define Z_IUTaskPackageRecordStructure_record 1
+#define Z_IUTaskPackageRecordStructure_diagnostic 2
+    union {
+        Odr_external *record;
+        Z_DiagRec *diagnostic;
+    } u; /* OPTIONAL */
+    Z_IUCorrelationInfo *correlationInfo; /* OPTIONAL */
+    int *recordStatus;
+#define Z_IUTaskPackageRecordStructureS_success 1
+#define Z_IUTaskPackageRecordStructureS_queued 2
+#define Z_IUTaskPackageRecordStructureS_inProcess 3
+#define Z_IUTaskPackageRecordStructureS_failure 4
+} Z_IUTaskPackageRecordStructure;
+
+typedef struct Z_IUTargetPart
+{
+    int *updateStatus;
+#define Z_IUTargetPart_success 1
+#define Z_IUTargetPart_partial 2
+#define Z_IUTargetPart_failure 3
+    int num_globalDiagnostics;
+    Z_DiagRec **globalDiagnostics; /* OPTIONAL */
+    int num_taskPackageRecords;
+    Z_IUTaskPackageRecordStructure **taskPackageRecords;
+} Z_IUTargetPart;
+
+typedef struct Z_IUUpdateEsRequest
+{
+    Z_IUOriginPartToKeep *toKeep;
+    Z_IUSuppliedRecords *notToKeep;
+} Z_IUUpdateEsRequest;
+
+typedef struct Z_IUUpdateTaskPackage
+{
+    Z_IUOriginPartToKeep *originPart;
+    Z_IUTargetPart *targetPart;
+} Z_IUUpdateTaskPackage;
+
+typedef struct Z_IUUpdate
+{
+    int which;
+#define Z_IUUpdate_esRequest 1
+#define Z_IUUpdate_taskPackage 2
+    union {
+        Z_IUUpdateEsRequest *esRequest;
+        Z_IUUpdateTaskPackage *taskPackage;
+    } u;
+} Z_IUUpdate;
+
+int z_IUUpdate(ODR o, Z_IUUpdate **p, int opt);
+
 #endif
