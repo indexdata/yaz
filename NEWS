@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 2.0.27 2004/11/09 
+--- 2.0.28 2004/11/09 
 
 Added yaz_log_time_format which specifies log format using
 strftime(3).
