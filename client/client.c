@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.257 2004-12-02 13:55:35 ja7 Exp $
+ * $Id: client.c,v 1.258 2004-12-02 14:04:17 adam Exp $
  */
 
 #include <stdio.h>
@@ -3096,12 +3096,16 @@ int cmd_source(const char* arg, int echo )
     return 1;
 }
 
-int cmd_source_echo(const char* arg) { 
-    cmd_source( arg, 1);
+int cmd_source_echo(const char* arg)
+{ 
+    cmd_source(arg, 1);
+    return 1;
 }
 
-int cmd_source_noecho(const char* arg) {
-    cmd_source( arg, 0 );
+int cmd_source_noecho(const char* arg)
+{
+    cmd_source(arg, 0);
+    return 1;
 }
 
 
