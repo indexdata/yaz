@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.246 2004-08-11 11:44:30 adam Exp $
+ * $Id: client.c,v 1.247 2004-08-13 11:36:48 adam Exp $
  */
 
 #include <stdio.h>
@@ -3212,7 +3212,7 @@ int cmd_register_oid(const char* args) {
     name = oid_str;
     val = 0;
     
-    while (isdigit (*name))
+    while (isdigit (*(unsigned char *) name))
     {
         val = val*10 + (*name - '0');
         name++;
@@ -3972,11 +3972,11 @@ void process_cmd_line(char* line)
     
     /* removed tailing spaces from the arg command */
     { 
-        unsigned char* p = arg;
+        char* p = arg;
         char* lastnonspace=NULL;
         
         for(;*p; ++p) {
-            if(!isspace(*p)) {
+            if(!isspace(*(unsigned char *) p)) {
                 lastnonspace = p;
             }
         }
