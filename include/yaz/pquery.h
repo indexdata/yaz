@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,39 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: pquery.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.8  1997/09/01 08:49:50  adam
- * New windows NT/95 port using MSV5.0. To export DLL functions the
- * YAZ_EXPORT modifier was added. Defined in yconfig.h.
- *
- * Revision 1.7  1997/05/14 06:53:43  adam
- * C++ support.
- *
- * Revision 1.6  1996/08/12 14:09:24  adam
- * Default prefix query attribute set defined by using p_query_attset.
- *
- * Revision 1.5  1996/03/15  11:01:46  adam
- * Extra argument to p_query_rpn: protocol.
- * Extra arguments to p_query_scan: protocol and attributeSet.
- *
- * Revision 1.4  1995/09/29  17:12:05  quinn
- * Smallish
- *
- * Revision 1.3  1995/09/27  15:02:49  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.2  1995/05/26  08:56:05  adam
- * New function: p_query_scan.
- *
- * Revision 1.1  1995/05/22  15:31:05  adam
- * New function, p_query_rpn, to convert from prefix (ascii) to rpn (asn).
- *
+ * $Id: pquery.h,v 1.3 2002-09-02 13:59:07 adam Exp $
  */
 
 #ifndef PQUERY_H
@@ -66,11 +34,45 @@
 
 YAZ_BEGIN_CDECL
 
+typedef struct yaz_pqf_parser *YAZ_PQF_Parser;
+
 YAZ_EXPORT Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
 
 YAZ_EXPORT Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
            Odr_oid **attributeSetP, const char *qbuf);
 YAZ_EXPORT int p_query_attset (const char *arg);
+
+YAZ_EXPORT YAZ_PQF_Parser yaz_pqf_create (void);
+YAZ_EXPORT Z_RPNQuery *yaz_pqf_parse (YAZ_PQF_Parser p, ODR o,
+                                      const char *qbuf);
+YAZ_EXPORT Z_AttributesPlusTerm *yaz_pqf_scan (YAZ_PQF_Parser p, ODR o,
+                                               Odr_oid **attributeSetId,
+                                               const char *qbuf);
+YAZ_EXPORT void yaz_pqf_destroy (YAZ_PQF_Parser p);
+
+YAZ_EXPORT int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off);
+
+
+/* no error */
+#define YAZ_PQF_ERROR_NONE     0
+
+/* extra token (end of query expected) */
+#define YAZ_PQF_ERROR_EXTRA    1
+
+/* missing token (at least one token expected) */
+#define YAZ_PQF_ERROR_MISSING  2
+
+/* bad attribute set (for @attr and @attrset) */
+#define YAZ_PQF_ERROR_ATTSET   3
+
+/* too many items (limit reached - too many attributes, etc) */
+#define YAZ_PQF_ERROR_TOOMANY  4
+
+/* bad format of attribute (missing =) */
+#define YAZ_PQF_ERROR_BADATTR  5
+
+/* internal failure */
+#define YAZ_PQF_ERROR_INTERNAL 6
 
 YAZ_END_CDECL
 

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.165 2002-08-30 09:06:42 adam Exp $
+ * $Id: client.c,v 1.166 2002-09-02 13:59:07 adam Exp $
  */
 
 #include <stdio.h>
@@ -898,6 +898,7 @@ static int send_searchRequest(char *arg)
     char setstring[100];
     Z_RPNQuery *RPNquery;
     Odr_oct ccl_query;
+    YAZ_PQF_Parser pqf_parser;
 
     if (queryType == QueryType_CCL2RPN)
     {
@@ -951,12 +952,20 @@ static int send_searchRequest(char *arg)
     {
     case QueryType_Prefix:
         query.which = Z_Query_type_1;
-        RPNquery = p_query_rpn (out, protocol, arg);
+        pqf_parser = yaz_pqf_create ();
+        RPNquery = yaz_pqf_parse (pqf_parser, out, arg);
         if (!RPNquery)
         {
-            printf("Prefix query error\n");
+            const char *pqf_msg;
+            size_t off;
+            int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
+            printf("%*s^\n", off+4, "");
+            printf("Prefix query error: %s (code %d)\n", pqf_msg, code);
+            
+            yaz_pqf_destroy (pqf_parser);
             return 0;
         }
+        yaz_pqf_destroy (pqf_parser);
         query.u.type_1 = RPNquery;
         break;
     case QueryType_CCL:
@@ -1852,7 +1861,6 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
-    int use_rpn = 1;
     int oid[OID_SIZE];
     
     if (queryType == QueryType_CCL2RPN)
@@ -1867,7 +1875,6 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
             return -1;
         }
-        use_rpn = 0;
         bib1.proto = PROTO_Z3950;
         bib1.oclass = CLASS_ATTSET;
         bib1.value = VAL_BIB1;
@@ -1879,11 +1886,22 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
         }
         ccl_rpn_delete (rpn);
     }
-    if (use_rpn && !(req->termListAndStartPoint =
-                     p_query_scan(out, protocol, &req->attributeSet, query)))
+    else
     {
-        printf("Prefix query error\n");
-        return -1;
+        YAZ_PQF_Parser pqf_parser = yaz_pqf_create ();
+
+        if (!(req->termListAndStartPoint =
+              yaz_pqf_scan(pqf_parser, out, &req->attributeSet, query)))
+        {
+            const char *pqf_msg;
+            size_t off;
+            int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
+            printf("%*s^\n", off+7, "");
+            printf("Prefix query error: %s (code %d)\n", pqf_msg, code);
+            yaz_pqf_destroy (pqf_parser);
+            return -1;
+        }
+        yaz_pqf_destroy (pqf_parser);
     }
     if (term && *term)
     {

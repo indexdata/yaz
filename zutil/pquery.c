@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.16 2002-07-25 12:48:39 adam Exp $
+ * $Id: pquery.c,v 1.17 2002-09-02 13:59:07 adam Exp $
  */
 
 #include <stdio.h>
@@ -16,8 +16,9 @@
 
 static oid_value p_query_dfset = VAL_NONE;
 
-struct lex_info {
+struct yaz_pqf_parser {
     const char *query_buf;
+    const char *query_ptr;
     const char *lex_buf;
     size_t lex_len;
     int query_look;
@@ -25,14 +26,16 @@ struct lex_info {
     char *right_sep;
     int escape_char;
     int term_type;
+    int error;
 };
 
-static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o, oid_proto, 
+static Z_RPNStructure *rpn_structure (struct yaz_pqf_parser *li, ODR o,
+                                      oid_proto, 
                                       int num_attr, int max_attr, 
                                       int *attr_list, char **attr_clist,
 				      oid_value *attr_set);
 
-static enum oid_value query_oid_getvalbyname (struct lex_info *li)
+static enum oid_value query_oid_getvalbyname (struct yaz_pqf_parser *li)
 {
     enum oid_value value;
     char buf[32];
@@ -45,20 +48,21 @@ static enum oid_value query_oid_getvalbyname (struct lex_info *li)
     return value;
 }
 
-static int compare_term (struct lex_info *li, const char *src, size_t off)
+static int compare_term (struct yaz_pqf_parser *li, const char *src,
+                         size_t off)
 {
     size_t len=strlen(src);
-
+    
     if (li->lex_len == len+off && !memcmp (li->lex_buf+off, src, len-off))
 	return 1;
     return 0;
 }
 
-static int query_token (struct lex_info *li)
+static int query_token (struct yaz_pqf_parser *li)
 {
     int sep_char = ' ';
     const char *sep_match;
-    const char **qptr = &li->query_buf;
+    const char **qptr = &li->query_ptr;
 
     while (**qptr == ' ')
         (*qptr)++;
@@ -113,7 +117,7 @@ static int query_token (struct lex_info *li)
     return 't';
 }
 
-static int lex (struct lex_info *li)
+static int lex (struct yaz_pqf_parser *li)
 {
     return li->query_look = query_token (li);
 }
@@ -181,7 +185,7 @@ static int escape_string(char *out_buf, const char *in, int len)
     return out - out_buf;
 }
 
-static int p_query_parse_attr(struct lex_info *li, ODR o,
+static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
 			      int num_attr, int *attr_list,
 			      char **attr_clist, oid_value *attr_set)
 {
@@ -191,11 +195,20 @@ static int p_query_parse_attr(struct lex_info *li, ODR o,
     {
 	attr_set[num_attr] = query_oid_getvalbyname (li);
 	if (attr_set[num_attr] == VAL_NONE)
+        {
+            li->error = YAZ_PQF_ERROR_ATTSET;
 	    return 0;
-	lex (li);
-	
+        }
+	if (!lex (li))
+        {
+            li->error = YAZ_PQF_ERROR_MISSING;
+            return 0;
+        }
 	if (!(cp = strchr (li->lex_buf, '=')))
+        {
+            li->error = YAZ_PQF_ERROR_BADATTR;
 	    return 0;
+        }
     }
     else 
     {
@@ -222,7 +235,7 @@ static int p_query_parse_attr(struct lex_info *li, ODR o,
     return 1;
 }
 
-static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
+static Z_AttributesPlusTerm *rpn_term (struct yaz_pqf_parser *li, ODR o,
                                        oid_proto proto, 
                                        int num_attr, int *attr_list,
 				       char **attr_clist, oid_value *attr_set)
@@ -329,7 +342,7 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
     return zapt;
 }
 
-static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
+static Z_Operand *rpn_simple (struct yaz_pqf_parser *li, ODR o, oid_proto proto,
                               int num_attr, int *attr_list, char **attr_clist,
                               oid_value *attr_set)
 {
@@ -349,7 +362,10 @@ static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
     case 's':
         lex (li);
         if (!li->query_look)
+        {
+            li->error = YAZ_PQF_ERROR_MISSING;
             return 0;
+        }
         zo->which = Z_Operand_resultSetId;
         zo->u.resultSetId = (char *)odr_malloc (o, li->lex_len+1);
         memcpy (zo->u.resultSetId, li->lex_buf, li->lex_len);
@@ -357,17 +373,23 @@ static Z_Operand *rpn_simple (struct lex_info *li, ODR o, oid_proto proto,
         lex (li);
         break;
     default:
+        /* we're only called if one of the above types are seens so
+           this shouldn't happen */
+        li->error = YAZ_PQF_ERROR_INTERNAL;
         return 0;
     }
     return zo;
 }
 
-static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
+static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
 {
     Z_ProximityOperator *p = (Z_ProximityOperator *)odr_malloc (o, sizeof(*p));
 
     if (!lex (li))
+    {
+        li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
+    }
     if (*li->lex_buf == '1')
     {
         p->exclusion = (int *)odr_malloc (o, sizeof(*p->exclusion));
@@ -382,22 +404,34 @@ static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
         p->exclusion = NULL;
 
     if (!lex (li))
+    {
+        li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
+    }
     p->distance = (int *)odr_malloc (o, sizeof(*p->distance));
     *p->distance = atoi (li->lex_buf);
 
     if (!lex (li))
+    {
+        li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
+    }
     p->ordered = (int *)odr_malloc (o, sizeof(*p->ordered));
     *p->ordered = atoi (li->lex_buf);
     
     if (!lex (li))
+    {
+        li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
+    }
     p->relationType = (int *)odr_malloc (o, sizeof(*p->relationType));
     *p->relationType = atoi (li->lex_buf);
 
     if (!lex (li))
+    {
+        li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
+    }
     if (*li->lex_buf == 'k')
         p->which = 0;
     else if (*li->lex_buf == 'p')
@@ -406,14 +440,17 @@ static Z_ProximityOperator *rpn_proximity (struct lex_info *li, ODR o)
         p->which = atoi (li->lex_buf);
 
     if (!lex (li))
+    {
+        li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
+    }
     p->which = Z_ProximityOperator_known;
     p->u.known = (int *)odr_malloc (o, sizeof(*p->u.known));
     *p->u.known = atoi (li->lex_buf);
     return p;
 }
 
-static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
+static Z_Complex *rpn_complex (struct yaz_pqf_parser *li, ODR o, oid_proto proto,
                                int num_attr, int max_attr, 
                                int *attr_list, char **attr_clist,
 			       oid_value *attr_set)
@@ -445,6 +482,9 @@ static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
             return NULL;
         break;
     default:
+        /* we're only called if one of the above types are seens so
+           this shouldn't happen */
+        li->error = YAZ_PQF_ERROR_INTERNAL;
         return NULL;
     }
     lex (li);
@@ -459,7 +499,7 @@ static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
     return zc;
 }
 
-static void rpn_term_type (struct lex_info *li, ODR o)
+static void rpn_term_type (struct yaz_pqf_parser *li, ODR o)
 {
     if (!li->query_look)
         return ;
@@ -478,7 +518,7 @@ static void rpn_term_type (struct lex_info *li, ODR o)
     lex (li);
 }
                            
-static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
+static Z_RPNStructure *rpn_structure (struct yaz_pqf_parser *li, ODR o,
                                       oid_proto proto, 
                                       int num_attr, int max_attr, 
                                       int *attr_list,
@@ -511,9 +551,15 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
     case 'l':
         lex (li);
         if (!li->query_look)
-            return NULL;
+        {
+            li->error = YAZ_PQF_ERROR_MISSING;
+            return 0;
+        }
         if (num_attr >= max_attr)
-            return NULL;
+        {
+            li->error = YAZ_PQF_ERROR_TOOMANY;
+            return 0;
+        }
 	if (!p_query_parse_attr(li, o, num_attr, attr_list,
                                 attr_clist, attr_set))
             return 0;
@@ -529,12 +575,13 @@ static Z_RPNStructure *rpn_structure (struct lex_info *li, ODR o,
             rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
 			   attr_clist, attr_set);
     case 0:                /* operator/operand expected! */
-        return NULL;
+        li->error = YAZ_PQF_ERROR_MISSING;
+        return 0;
     }
     return sz;
 }
 
-Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
+Z_RPNQuery *p_query_rpn_mk (ODR o, struct yaz_pqf_parser *li, oid_proto proto,
                             const char *qbuf)
 {
     Z_RPNQuery *zq;
@@ -550,7 +597,10 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
         lex (li);
         topSet = query_oid_getvalbyname (li);
         if (topSet == VAL_NONE)
+        {
+            li->error = YAZ_PQF_ERROR_ATTSET;
             return NULL;
+        }
 
         lex (li);
     }
@@ -562,29 +612,39 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
     zq->attributeSetId = yaz_oidval_to_z3950oid(o, CLASS_ATTSET, topSet);
 
     if (!zq->attributeSetId)
+    {
+        li->error = YAZ_PQF_ERROR_ATTSET;
 	return 0;
+    }
 
     if (!(zq->RPNStructure = rpn_structure (li, o, proto, 0, 512,
                                             attr_array, attr_clist, attr_set)))
-        return NULL;
+        return 0;
+    if (li->query_look)
+    {
+        li->error = YAZ_PQF_ERROR_EXTRA;
+        return 0;
+    }
     return zq;
 }
 
 Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto,
                          const char *qbuf)
 {
-    struct lex_info li;
-    
+    struct yaz_pqf_parser li;
+
+    li.error = 0;
     li.left_sep = "{\"";
     li.right_sep = "}\"";
     li.escape_char = '@';
     li.term_type = Z_Term_general;
-    li.query_buf = qbuf;
+    li.query_buf = li.query_ptr = qbuf;
+    li.lex_buf = 0;
     return p_query_rpn_mk (o, &li, proto, qbuf);
 }
 
 
-Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
+Z_AttributesPlusTerm *p_query_scan_mk (struct yaz_pqf_parser *li,
                                        ODR o, oid_proto proto,
                                        Odr_oid **attributeSetP,
                                        const char *qbuf)
@@ -595,6 +655,7 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
     int num_attr = 0;
     int max_attr = 512;
     oid_value topSet = VAL_NONE;
+    Z_AttributesPlusTerm *apt;
 
     lex (li);
     if (li->query_look == 'r')
@@ -617,9 +678,15 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
         {
             lex (li);
             if (!li->query_look)
+            {
+                li->error = YAZ_PQF_ERROR_MISSING;
                 return 0;
+            }
             if (num_attr >= max_attr)
+            {
+                li->error = YAZ_PQF_ERROR_TOOMANY;
                 return 0;
+            }
             if (!p_query_parse_attr(li, o, num_attr, attr_list,
                                     attr_clist, attr_set))
                 return 0;
@@ -635,21 +702,35 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
             break;
     }
     if (!li->query_look)
-        return NULL;
-    return rpn_term (li, o, proto, num_attr, attr_list, attr_clist, attr_set);
+    {
+        li->error = YAZ_PQF_ERROR_MISSING;
+        return 0;
+    }
+    apt = rpn_term (li, o, proto, num_attr, attr_list, attr_clist, attr_set);
+
+    lex (li);
+
+    if (li->query_look != 0)
+    {
+        li->error = YAZ_PQF_ERROR_EXTRA;
+        return 0;
+    }
+    return apt;
 }
 
 Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
                                     Odr_oid **attributeSetP,
                                     const char *qbuf)
 {
-    struct lex_info li;
+    struct yaz_pqf_parser li;
 
+    li.error = 0;
     li.left_sep = "{\"";
     li.right_sep = "}\"";
     li.escape_char = '@';
     li.term_type = Z_Term_general;
-    li.query_buf = qbuf;
+    li.query_buf = li.query_ptr = qbuf;
+    li.lex_buf = 0;
 
     return p_query_scan_mk (&li, o, proto, attributeSetP, qbuf);
 }
@@ -660,3 +741,65 @@ int p_query_attset (const char *arg)
     return (p_query_dfset == VAL_NONE) ? -1 : 0;
 }
 
+YAZ_PQF_Parser yaz_pqf_create (void)
+{
+    YAZ_PQF_Parser p = xmalloc (sizeof(*p));
+
+    p->error = 0;
+    p->left_sep = "{\"";
+    p->right_sep = "}\"";
+    p->escape_char = '@';
+    p->term_type = Z_Term_general;
+
+    return p;
+}
+
+void yaz_pqf_destroy (YAZ_PQF_Parser p)
+{
+    xfree (p);
+}
+
+Z_RPNQuery *yaz_pqf_parse (YAZ_PQF_Parser p, ODR o, const char *qbuf)
+{
+    if (!p)
+        return 0;
+    p->query_buf = p->query_ptr = qbuf;
+    p->lex_buf = 0;
+    return p_query_rpn_mk (o, p, PROTO_Z3950, qbuf);
+}
+
+Z_AttributesPlusTerm *yaz_pqf_scan (YAZ_PQF_Parser p, ODR o,
+                                    Odr_oid **attributeSetP,
+                                    const char *qbuf)
+{
+    if (!p)
+        return 0;
+    p->query_buf = p->query_ptr = qbuf;
+    p->lex_buf = 0;
+    return p_query_scan_mk (p, o, PROTO_Z3950, attributeSetP, qbuf);
+}
+
+int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off)
+{
+    switch (p->error)
+    {
+    case YAZ_PQF_ERROR_NONE:
+        *msg = "no error"; break;
+    case YAZ_PQF_ERROR_EXTRA:
+        *msg = "extra token"; break;
+    case YAZ_PQF_ERROR_MISSING:
+        *msg = "missing token"; break;
+    case YAZ_PQF_ERROR_ATTSET:
+        *msg = "unknown attribute set"; break;
+    case YAZ_PQF_ERROR_TOOMANY:
+        *msg = "too many attributes"; break;
+    case YAZ_PQF_ERROR_BADATTR:
+        *msg = "bad attribute specification"; break;
+    case YAZ_PQF_ERROR_INTERNAL:
+        *msg = "internal error"; break;
+    default:
+        *msg = "unknown error"; break;
+    }
+    *off = p->query_ptr - p->query_buf;
+    return p->error;
+}
