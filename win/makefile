@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.57 2003-05-27 21:12:23 adam Exp $
+# $Id: makefile,v 1.58 2003-06-02 13:44:54 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -411,6 +411,7 @@ YAZ_CQL_OBJS = \
    $(OBJDIR)\cqlstring.obj \
    $(OBJDIR)\cqltransform.obj \
    $(OBJDIR)\cqlutil.obj \
+   $(OBJDIR)\cqlstrer.obj \
    $(OBJDIR)\xcqlutil.obj
 
 COMMON_YAZ_OBJS= \
@@ -929,7 +930,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.57  2003-05-27 21:12:23  adam
+# Revision 1.58  2003-06-02 13:44:54  adam
+# Added cqlstrer to win makefile
+#
+# Revision 1.57  2003/05/27 21:12:23  adam
 # YAZ ASN.1 compiler renamed from yaz-comp to yaz-asncomp
 #
 # Revision 1.56  2003/05/23 10:41:26  adam
