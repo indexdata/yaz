@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.26 2002-12-16 13:13:53 adam Exp $
+ * $Id: marcdisp.c,v 1.27 2002-12-17 13:32:04 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -17,9 +17,7 @@
 #include <yaz/yaz-util.h>
 
 struct yaz_marc_t_ {
-    WRBUF wr;
-    WRBUF own_wr;
-    WRBUF user_wr;
+    WRBUF m_wr;
     int xml;
     int debug;
 };
@@ -29,9 +27,7 @@ yaz_marc_t yaz_marc_create(void)
     yaz_marc_t mt = xmalloc(sizeof(*mt));
     mt->xml = YAZ_MARC_LINE;
     mt->debug = 0;
-    mt->wr = 0;
-    mt->own_wr = wrbuf_alloc();
-    mt->user_wr = 0;
+    mt->m_wr = wrbuf_alloc();
     return mt;
 }
 
@@ -39,11 +35,11 @@ void yaz_marc_destroy(yaz_marc_t mt)
 {
     if (!mt)
         return ;
-    wrbuf_free (mt->own_wr, 1);
+    wrbuf_free (mt->m_wr, 1);
     xfree (mt);
 }
 
-static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len)
+static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
 {
     size_t i;
     for (i = 0; i<len; i++)
@@ -52,20 +48,20 @@ static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len)
         {
             switch (buf[i]) {
             case '<':
-                wrbuf_puts(mt->wr, "&lt;");
+                wrbuf_puts(wr, "&lt;");
                 break;
             case '>':
-                wrbuf_puts(mt->wr, "&gt;");
+                wrbuf_puts(wr, "&gt;");
                 break;
             case '&':
-                wrbuf_puts(mt->wr, "&amp;");
+                wrbuf_puts(wr, "&amp;");
                 break;
             default:
-                wrbuf_putc(mt->wr, buf[i]);
+                wrbuf_putc(wr, buf[i]);
             }
         }
         else
-            wrbuf_putc(mt->wr, buf[i]);
+            wrbuf_putc(wr, buf[i]);
     }
 }
 
@@ -98,7 +94,7 @@ static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len)
 }
 #endif
 
-static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
+int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 {
     int entry_p;
     int record_length;
@@ -109,10 +105,7 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
     int length_starting;
     int length_implementation;
 
-    if (!mt->wr)
-        mt->wr = mt->own_wr;
-
-    wrbuf_rewind(mt->wr);
+    wrbuf_rewind(wr);
 
     record_length = atoi_n (buf, 5);
     if (record_length < 25)
@@ -122,7 +115,7 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
 	    char str[40];
 	    
 	    sprintf (str, "Record length %d - aborting\n", record_length);
-	    wrbuf_puts (mt->wr, str);
+	    wrbuf_puts (wr, str);
 	}
         return -1;
     }
@@ -150,21 +143,21 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
         switch(mt->xml)
         {
         case YAZ_MARC_SIMPLEXML:
-            wrbuf_puts (mt->wr, "<iso2709\n");
+            wrbuf_puts (wr, "<iso2709\n");
             sprintf (str, " RecordStatus=\"%c\"\n", buf[5]);
-            wrbuf_puts (mt->wr, str);
+            wrbuf_puts (wr, str);
             sprintf (str, " TypeOfRecord=\"%c\"\n", buf[6]);
-            wrbuf_puts (mt->wr, str);
+            wrbuf_puts (wr, str);
             for (i = 1; i<=19; i++)
             {
                 sprintf (str, " ImplDefined%d=\"%c\"\n", i, buf[6+i]);
-                wrbuf_puts (mt->wr, str);
+                wrbuf_puts (wr, str);
             }
-            wrbuf_puts (mt->wr, ">\n");
+            wrbuf_puts (wr, ">\n");
             break;
         case YAZ_MARC_OAIMARC:
             wrbuf_puts(
-                mt->wr,
+                wr,
                 "<oai_marc xmlns=\"http://www.openarchives.org/OIA/oai_marc\""
                 "\n"
                 " xmlns:xsi=\"http://www.w3.org/2000/10/XMLSchema-instance\""
@@ -175,11 +168,11 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
             
             sprintf (str, " status=\"%c\" type=\"%c\" catForm=\"%c\">\n",
                      buf[5], buf[6], buf[7]);
-            wrbuf_puts (mt->wr, str);
+            wrbuf_puts (wr, str);
             break;
         case YAZ_MARC_MARCXML:
             wrbuf_printf(
-                mt->wr,
+                wr,
                 "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                 "  <leader>%.24s</leader>\n", buf);
             break;
@@ -190,23 +183,23 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
 	char str[40];
 
         if (mt->xml)
-            wrbuf_puts (mt->wr, "<!--\n");
+            wrbuf_puts (wr, "<!--\n");
 	sprintf (str, "Record length         %5d\n", record_length);
-	wrbuf_puts (mt->wr, str);
+	wrbuf_puts (wr, str);
 	sprintf (str, "Indicator length      %5d\n", indicator_length);
-	wrbuf_puts (mt->wr, str);
+	wrbuf_puts (wr, str);
 	sprintf (str, "Identifier length     %5d\n", identifier_length);
-	wrbuf_puts (mt->wr, str);
+	wrbuf_puts (wr, str);
 	sprintf (str, "Base address          %5d\n", base_address);
-	wrbuf_puts (mt->wr, str);
+	wrbuf_puts (wr, str);
 	sprintf (str, "Length data entry     %5d\n", length_data_entry);
-	wrbuf_puts (mt->wr, str);
+	wrbuf_puts (wr, str);
 	sprintf (str, "Length starting       %5d\n", length_starting);
-	wrbuf_puts (mt->wr, str);
+	wrbuf_puts (wr, str);
 	sprintf (str, "Length implementation %5d\n", length_implementation);
-	wrbuf_puts (mt->wr, str);
+	wrbuf_puts (wr, str);
         if (mt->xml)
-            wrbuf_puts (mt->wr, "-->\n");
+            wrbuf_puts (wr, "-->\n");
     }
 
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
@@ -247,24 +240,24 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
         {
         case YAZ_MARC_LINE:
             if (mt->debug)
-                wrbuf_puts (mt->wr, "Tag: ");
-            wrbuf_puts (mt->wr, tag);
-            wrbuf_puts (mt->wr, " ");
+                wrbuf_puts (wr, "Tag: ");
+            wrbuf_puts (wr, tag);
+            wrbuf_puts (wr, " ");
             break;
         case YAZ_MARC_SIMPLEXML:
-            wrbuf_printf (mt->wr, "<field tag=\"%s\"", tag);
+            wrbuf_printf (wr, "<field tag=\"%s\"", tag);
             break;
         case YAZ_MARC_OAIMARC:
             if (identifier_flag)
-                wrbuf_printf (mt->wr, "  <varfield id=\"%s\"", tag);
+                wrbuf_printf (wr, "  <varfield id=\"%s\"", tag);
             else
-                wrbuf_printf (mt->wr, "  <fixfield id=\"%s\"", tag);
+                wrbuf_printf (wr, "  <fixfield id=\"%s\"", tag);
             break;
         case YAZ_MARC_MARCXML:
             if (identifier_flag)
-                wrbuf_printf (mt->wr, "  <datafield tag=\"%s\"", tag);
+                wrbuf_printf (wr, "  <datafield tag=\"%s\"", tag);
             else
-                wrbuf_printf (mt->wr, "  <controlfield tag=\"%s\"", tag);
+                wrbuf_printf (wr, "  <controlfield tag=\"%s\"", tag);
         }
         
         if (identifier_flag)
@@ -275,30 +268,30 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
                 {
                 case YAZ_MARC_LINE:
                     if (mt->debug)
-                        wrbuf_puts (mt->wr, " Ind: ");
-                    wrbuf_putc (mt->wr, buf[i]);
+                        wrbuf_puts (wr, " Ind: ");
+                    wrbuf_putc (wr, buf[i]);
                     break;
                 case YAZ_MARC_SIMPLEXML:
-                    wrbuf_printf (mt->wr, " Indicator%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf (wr, " Indicator%d=\"%c\"", j+1, buf[i]);
                     break;
                 case YAZ_MARC_OAIMARC:
-                    wrbuf_printf (mt->wr, " i%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf (wr, " i%d=\"%c\"", j+1, buf[i]);
                     break;
                 case YAZ_MARC_MARCXML:
-                    wrbuf_printf (mt->wr, " ind%d=\"%c\"", j+1, buf[i]);
+                    wrbuf_printf (wr, " ind%d=\"%c\"", j+1, buf[i]);
                 }
             }
 	}
         if (mt->xml)
         {
-            wrbuf_puts (mt->wr, ">");
+            wrbuf_puts (wr, ">");
             if (identifier_flag)
-                wrbuf_puts (mt->wr, "\n");
+                wrbuf_puts (wr, "\n");
         }
         else
         {
             if (mt->debug && !mt->xml)
-                wrbuf_puts (mt->wr, " Fields: ");
+                wrbuf_puts (wr, " Fields: ");
         }
         if (identifier_flag)
         {
@@ -309,38 +302,38 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
                 switch(mt->xml)
                 {
                 case YAZ_MARC_LINE: 
-                    wrbuf_puts (mt->wr, " $"); 
+                    wrbuf_puts (wr, " $"); 
                     for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (mt->wr, buf[i]);
-                    wrbuf_putc (mt->wr, ' ');
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_putc (wr, ' ');
                     break;
                 case YAZ_MARC_SIMPLEXML:
-                    wrbuf_puts (mt->wr, "  <subfield code=\"");
+                    wrbuf_puts (wr, "  <subfield code=\"");
                     for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (mt->wr, buf[i]);
-                    wrbuf_puts (mt->wr, "\">");
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_puts (wr, "\">");
                     break;
                 case YAZ_MARC_OAIMARC:
-                    wrbuf_puts (mt->wr, "    <subfield label=\"");
+                    wrbuf_puts (wr, "    <subfield label=\"");
                     for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (mt->wr, buf[i]);
-                    wrbuf_puts (mt->wr, "\">");
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_puts (wr, "\">");
                     break;
                 case YAZ_MARC_MARCXML:
-                    wrbuf_puts (mt->wr, "    <subfield code=\"");
+                    wrbuf_puts (wr, "    <subfield code=\"");
                     for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (mt->wr, buf[i]);
-                    wrbuf_puts (mt->wr, "\">");
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_puts (wr, "\">");
                     break;
                 }
                 i0 = i;
                 while (buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
                        buf[i] != ISO2709_FS && i < end_offset)
                     i++;
-                marc_cdata(mt, buf + i0, i - i0);
+                marc_cdata(mt, buf + i0, i - i0, wr);
                 
                 if (mt->xml)
-                    wrbuf_puts (mt->wr, "</subfield>\n");
+                    wrbuf_puts (wr, "</subfield>\n");
             }
         }
         else
@@ -348,46 +341,46 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
             int i0 = i;
             while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
                 i++;
-            marc_cdata(mt, buf + i0, i - i0);
+            marc_cdata(mt, buf + i0, i - i0, wr);
 	}
         if (!mt->xml)
-            wrbuf_putc (mt->wr, '\n');
+            wrbuf_putc (wr, '\n');
 	if (i < end_offset)
-	    wrbuf_puts (mt->wr, "  <!-- separator but not at end of field -->\n");
+	    wrbuf_puts (wr, "  <!-- separator but not at end of field -->\n");
 	if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
-	    wrbuf_puts (mt->wr, "  <!-- no separator at end of field -->\n");
+	    wrbuf_puts (wr, "  <!-- no separator at end of field -->\n");
         switch(mt->xml)
         {
         case YAZ_MARC_SIMPLEXML:
-            wrbuf_puts (mt->wr, "</field>\n");
+            wrbuf_puts (wr, "</field>\n");
             break;
         case YAZ_MARC_OAIMARC:
             if (identifier_flag)
-                wrbuf_puts (mt->wr, "  </varfield>\n");
+                wrbuf_puts (wr, "  </varfield>\n");
             else
-                wrbuf_puts (mt->wr, "  </fixfield>\n");
+                wrbuf_puts (wr, "  </fixfield>\n");
             break;
         case YAZ_MARC_MARCXML:
             if (identifier_flag)
-                wrbuf_puts (mt->wr, "  </datafield>\n");
+                wrbuf_puts (wr, "  </datafield>\n");
             else
-                wrbuf_puts (mt->wr, "  </controlfield>\n");
+                wrbuf_puts (wr, "  </controlfield>\n");
             break;
         }
     }
     switch (mt->xml)
     {
     case YAZ_MARC_LINE:
-        wrbuf_puts (mt->wr, "");
+        wrbuf_puts (wr, "");
         break;
     case YAZ_MARC_SIMPLEXML:
-        wrbuf_puts (mt->wr, "</iso2709>\n");
+        wrbuf_puts (wr, "</iso2709>\n");
         break;
     case YAZ_MARC_OAIMARC:
-        wrbuf_puts (mt->wr, "</oai_marc>\n");
+        wrbuf_puts (wr, "</oai_marc>\n");
         break;
     case YAZ_MARC_MARCXML:
-        wrbuf_puts (mt->wr, "</record>\n");
+        wrbuf_puts (wr, "</record>\n");
         break;
     }
     return record_length;
@@ -396,24 +389,16 @@ static int yaz_marc_decode_int (yaz_marc_t mt, const char *buf, int bsize)
 int yaz_marc_decode_buf (yaz_marc_t mt, const char *buf, int bsize,
                          char **result, int *rsize)
 {
-    int r = yaz_marc_decode_int(mt, buf, bsize);
+    int r = yaz_marc_decode_wrbuf(mt, buf, bsize, mt->m_wr);
     if (r > 0)
     {
         if (result)
-            *result = wrbuf_buf(mt->wr);
+            *result = wrbuf_buf(mt->m_wr);
         if (rsize)
-            *rsize = wrbuf_len(mt->wr);
+            *rsize = wrbuf_len(mt->m_wr);
     }
     return r;
 }
-
-int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf,
-                           int bsize, WRBUF wrbuf)
-{
-    mt->user_wr = wrbuf;
-    return yaz_marc_decode_int (mt, buf, bsize);
-}
-
 
 void yaz_marc_xml(yaz_marc_t mt, int xmlmode)
 {
@@ -434,9 +419,8 @@ int yaz_marc_decode(const char *buf, WRBUF wr, int debug, int bsize, int xml)
     int r;
 
     mt->debug = debug;
-    mt->user_wr = wr;
     mt->xml = xml;
-    r = yaz_marc_decode_int(mt, buf, bsize);
+    r = yaz_marc_decode_wrbuf(mt, buf, bsize, wr);
     yaz_marc_destroy(mt);
     return r;
 }
@@ -454,11 +438,11 @@ int marc_display_exl (const char *buf, FILE *outf, int debug, int bsize)
     int r;
 
     mt->debug = debug;
-    r = yaz_marc_decode_int (mt, buf, bsize);
+    r = yaz_marc_decode_wrbuf (mt, buf, bsize, mt->m_wr);
     if (!outf)
 	outf = stdout;
     if (r > 0)
-	fwrite (wrbuf_buf(mt->wr), 1, wrbuf_len(mt->wr), outf);
+	fwrite (wrbuf_buf(mt->m_wr), 1, wrbuf_len(mt->m_wr), outf);
     yaz_marc_destroy(mt);
     return r;
 }

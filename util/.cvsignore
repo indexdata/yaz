@@ -6,3 +6,4 @@ libutil.la
 marcdump
 yaziconv
 *.lo
+marc8.c
