@@ -24,7 +24,16 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.36  1998-05-18 13:06:57  adam
+ * Revision 1.37  1998-10-13 16:09:46  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.36  1998/05/18 13:06:57  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -444,6 +453,7 @@ YAZ_EXPORT data1_node *data1_read_record(data1_handle dh,
 YAZ_EXPORT data1_absyn *data1_read_absyn(data1_handle dh, const char *file);
 YAZ_EXPORT data1_tag *data1_gettagbynum(data1_handle dh, data1_tagset *s,
 					int type, int value);
+YAZ_EXPORT data1_tagset *data1_empty_tagset (data1_handle dh);
 YAZ_EXPORT data1_tagset *data1_read_tagset(data1_handle dh, char *file);
 YAZ_EXPORT data1_element *data1_getelementbytagname(data1_handle dh, 
 						    data1_absyn *abs,

@@ -4,7 +4,16 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.13  1998-02-11 11:53:35  adam
+ * Revision 1.14  1998-10-13 16:09:50  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.13  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.12  1997/11/18 09:51:09  adam
@@ -66,6 +75,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
     NMEM mem = data1_nmem_get (dh);
     data1_maptab *res = (data1_maptab *)nmem_malloc(mem, sizeof(*res));
     FILE *f;
+    int lineno = 0;
     int argc;
     char *argv[50], line[512];
     data1_mapunit **mapp;
@@ -78,23 +88,25 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
     }
 
     res->name = 0;
-    res->target_absyn_ref = ODR_NONE;
+    res->target_absyn_ref = VAL_NONE;
     res->map = 0;
     mapp = &res->map;
     res->next = 0;
 
-    while ((argc = readconf_line(f, line, 512, argv, 50)))
+    while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
 	if (!strcmp(argv[0], "targetref"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: one argument required for targetref",
-		    file);
+		logf(LOG_WARN, "%s:%d: Bad # args for targetref",
+		    file, lineno);
 		continue;
 	    }
-	    if ((res->target_absyn_ref = oid_getvalbyname(argv[1])) == ODR_NONE)
+	    if ((res->target_absyn_ref = oid_getvalbyname(argv[1]))
+		== VAL_NONE)
 	    {
-		logf(LOG_WARN, "%s: Unknown reference '%s'", file, argv[1]);
+		logf(LOG_WARN, "%s:%d: Unknown reference '%s'",
+		     file, lineno, argv[1]);
 		continue;
 	    }
 	}
@@ -102,11 +114,12 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: one argument required for targetref",
-		    file);
+		logf(LOG_WARN, "%s:%d: Bad # args for targetname",
+		    file, lineno);
 		continue;
 	    }
-	    res->target_absyn_name = (char *)nmem_malloc(mem, strlen(argv[1])+1);
+	    res->target_absyn_name =
+		(char *)nmem_malloc(mem, strlen(argv[1])+1);
 	    strcpy(res->target_absyn_name, argv[1]);
 	}
 	else if (!yaz_matchstr(argv[0], "localnumeric"))
@@ -115,8 +128,7 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: one argument required for name",
-		    file);
+		logf(LOG_WARN, "%s:%d: Bad # args for name", file, lineno);
 		continue;
 	    }
 	    res->name = (char *)nmem_malloc(mem, strlen(argv[1])+1);
@@ -129,8 +141,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 
 	    if (argc < 3)
 	    {
-		logf(LOG_WARN, "%s: At least 2 arguments required for map",
-		    file);
+		logf(LOG_WARN, "%s:%d: Bad # of args for map",
+		    file, lineno);
 		continue;
 	    }
 	    *mapp = (data1_mapunit *)nmem_malloc(mem, sizeof(**mapp));
@@ -139,7 +151,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		(*mapp)->no_data = 1;
 	    else
 		(*mapp)->no_data = 0;
-	    (*mapp)->source_element_name = (char *)nmem_malloc(mem, strlen(argv[1])+1);
+	    (*mapp)->source_element_name =
+		(char *)nmem_malloc(mem, strlen(argv[1])+1);
 	    strcpy((*mapp)->source_element_name, argv[1]);
 	    mtp = &(*mapp)->target_path;
 	    if (*path == '/')
@@ -155,8 +168,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		if ((np = sscanf(path, "(%d,%[^)]):%[^/]", &type, valstr,
 		    parm)) < 2)
 		{
-		    logf(LOG_WARN, "%s: Syntax error in map directive: %s",
-		        file, argv[2]);
+		    logf(LOG_WARN, "%s:%d: Syntax error in map directive: %s",
+		        file, lineno, argv[2]);
 		    fclose(f);
 		    return 0;
 		}
@@ -175,7 +188,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 		else
 		{
 		    (*mtp)->which = D1_MAPTAG_string;
-		    (*mtp)->value.string = (char *)nmem_malloc(mem, strlen(valstr)+1);
+		    (*mtp)->value.string =
+			(char *)nmem_malloc(mem, strlen(valstr)+1);
 		    strcpy((*mtp)->value.string, valstr);
 		}
 		mtp = &(*mtp)->next;
@@ -183,7 +197,8 @@ data1_maptab *data1_read_maptab (data1_handle dh, const char *file)
 	    mapp = &(*mapp)->next;
 	}
 	else 
-	    logf(LOG_WARN, "%s: Unknown directive '%s'", argv[0]);
+	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		 file, lineno, argv[0]);
 
     fclose(f);
     return res;

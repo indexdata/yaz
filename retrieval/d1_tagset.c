@@ -1,10 +1,19 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.8  1998-05-18 13:07:07  adam
+ * Revision 1.9  1998-10-13 16:09:53  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.8  1998/05/18 13:07:07  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -39,8 +48,6 @@
 #include <string.h>
 
 #include <log.h>
-#include <tpath.h>
-
 #include <data1.h>
 
 /*
@@ -118,59 +125,57 @@ data1_tag *data1_gettagbyname (data1_handle dh, data1_tagset *s, char *name)
     return 0;
 }
 
+data1_tagset *data1_empty_tagset (data1_handle dh)
+{
+    data1_tagset *res =
+	(data1_tagset *) nmem_malloc(data1_nmem_get (dh), sizeof(*res));
+    res->name = 0;
+    res->reference = VAL_NONE;
+    res->type = 0;
+    res->tags = 0;
+    res->children = 0;
+    res->next = 0;
+    return res;
+}
+
 data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 {
     NMEM mem = data1_nmem_get (dh);
-    char line[512], *r, cmd[512], args[512];
     data1_tagset *res = 0, **childp;
     data1_tag **tagp;
     FILE *f;
+    int lineno = 0;
+    int argc;
+    char *argv[50], line[512];
 
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
-
-    res = (data1_tagset *)nmem_malloc(mem, sizeof(*res));
-    res->name = 0;
-    res->type = 0;
-    res->tags = 0;
-    res->children = 0;
-    res->next = 0;
+    res = data1_empty_tagset (dh);
     childp = &res->children;
     tagp = &res->tags;
 
-    for (;;)
+    while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
     {
-	while ((r = fgets(line, 512, f)))
-	{
-	    while (*r && isspace(*r))
-		r++;
-	    if (*r && *r != '#')
-		break;
-	}
-	if (!r)
-	{
-	    fclose(f);
-	    return res;
-	}
-	if (sscanf(r, "%s %[^\n]", cmd, args) < 2)
-	    *args = '\0';
+	char *cmd = *argv;
 	if (!strcmp(cmd, "tag"))
 	{
 	    int value;
-	    char names[512], type[512], *nm;
+	    char *names, *type, *nm;
 	    data1_tag *rr;
 	    data1_name **npp;
 
-	    if (sscanf(args, "%d %s %s", &value, names, type) < 3)
+	    if (argc != 4)
 	    {
-		logf(LOG_WARN, "Bad number of parms in '%s' in %s",
-		    args, file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # args to tag", file, lineno);
+		continue;
 	    }
+	    value = atoi(argv[1]);
+	    names = argv[2];
+	    type = argv[3];
+
 	    rr = *tagp = (data1_tag *)nmem_malloc(mem, sizeof(*rr));
 	    rr->tagset = res;
 	    rr->next = 0;
@@ -182,7 +187,8 @@ data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 
 	    if (!(rr->kind = data1_maptype(dh, type)))
 	    {
-		logf(LOG_WARN, "Unknown datatype %s in %s", type, file);
+		logf(LOG_WARN, "%s:%d: Unknown datatype %s",
+		     file, lineno, type);
 		fclose(f);
 		return 0;
 	    }
@@ -207,65 +213,64 @@ data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 	}
 	else if (!strcmp(cmd, "name"))
 	{
-	    char name[512];
-
-	    if (!sscanf(args, "%s", name))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s malformed name directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # args to name", file, lineno);
+		continue;
 	    }
-	    res->name = nmem_strdup(mem, args);
+	    res->name = nmem_strdup(mem, argv[1]);
 	}
 	else if (!strcmp(cmd, "reference"))
 	{
-	    char name[512];
-
-	    if (!sscanf(args, "%s", name))
+	    char *name;
+	    
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s malformed reference directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # args to reference", file, lineno);
+		continue;
 	    }
+	    name = argv[1];
 	    if ((res->reference = oid_getvalbyname(name)) == VAL_NONE)
 	    {
-		logf(LOG_WARN, "Unknown tagset ref '%s' in %s", name, file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Unknown tagset ref '%s'",
+		     file, lineno, name);
+		continue;
 	    }
 	}
 	else if (!strcmp(cmd, "type"))
 	{
-	    if (!sscanf(args, "%d", &res->type))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s malformed type directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # args to type", file, lineno);
+		continue;
 	    }
+	    res->type = atoi(argv[1]);
 	}
 	else if (!strcmp(cmd, "include"))
 	{
-	    char name[512];
+	    char *name;
 
-	    if (!sscanf(args, "%s", name))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s malformed reference directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # args to include",
+		     file, lineno);
+		continue;
 	    }
+	    name = argv[1];
 	    if (!(*childp = data1_read_tagset (dh, name)))
 	    {
-		logf(LOG_WARN, "Inclusion failed in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Inclusion failed for tagset %s",
+		     file, lineno, name);
+		continue;
 	    }
 	    childp = &(*childp)->next;
 	}
 	else
 	{
-	    logf(LOG_WARN, "Unknown directive '%s' in %s", cmd, file);
-	    fclose(f);
-	    return 0;
+	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		 file, lineno, cmd);
 	}
     }
+    fclose(f);
+    return res;
 }

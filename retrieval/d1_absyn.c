@@ -4,7 +4,16 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.21  1998-06-09 13:55:07  adam
+ * Revision 1.22  1998-10-13 16:09:47  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.21  1998/06/09 13:55:07  adam
  * Minor changes.
  *
  * Revision 1.20  1998/05/18 13:07:02  adam
@@ -78,7 +87,6 @@
  * Revision 1.1  1995/11/01  11:56:06  quinn
  * Added Retrieval (data management) functions en masse.
  *
- *
  */
 
 #include <ctype.h>
@@ -89,8 +97,6 @@
 
 #include <oid.h>
 #include <log.h>
-#include <tpath.h>
-
 #include <data1.h>
 
 #define D1_MAX_NESTING  128
@@ -202,7 +208,7 @@ data1_attset *data1_attset_add (data1_handle dh, const char *name)
 	    *cp = '\0';
     }
     if (!attset)
-	logf (LOG_WARN|LOG_ERRNO, "couldn't load attribute set %s", name);
+	logf (LOG_WARN|LOG_ERRNO, "Couldn't load attribute set %s", name);
     else
     {
 	data1_attset_cache p = (data1_attset_cache)
@@ -296,7 +302,6 @@ void fix_element_ref (data1_handle dh, data1_absyn *absyn, data1_element *e)
 
 data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 {
-    char line[512], *r, cmd[512], args[512];
     data1_sub_elements *cur_elements = NULL;
     data1_absyn *res = 0;
     FILE *f;
@@ -305,19 +310,28 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     data1_maptab **maptabp;
     data1_marctab **marcp;
     data1_termlist *all = 0;
+    data1_attset_child **attset_childp;
+    data1_tagset **tagset_childp;
     int level = 0;
+    int lineno = 0;
+    int argc;
+    char *argv[50], line[512];
 
     if (!(f = yaz_path_fopen(data1_get_tabpath (dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "Couldn't open %s", file);
 	return 0;
     }
-
-    res = (data1_absyn *)nmem_malloc(data1_nmem_get(dh), sizeof(*res));
+    
+    res = (data1_absyn *) nmem_malloc(data1_nmem_get(dh), sizeof(*res));
     res->name = 0;
     res->reference = VAL_NONE;
     res->tagset = 0;
-    res->attset = 0;
+    tagset_childp = &res->tagset;
+
+    res->attset = data1_empty_attset (dh);
+    attset_childp =  &res->attset->children;
+
     res->varset = 0;
     res->esetnames = 0;
     esetpp = &res->esetnames;
@@ -329,46 +343,38 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     res->sub_elements = NULL;
     res->main_elements = NULL;
 
-    for (;;)
+    while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
     {
-	while ((r = fgets(line, 512, f)))
-	{
-	    while (*r && isspace(*r))
-		r++;
-	    if (*r && *r != '#')
-		break;
-	}
-	if (!r)
-            break;
-	if (sscanf(r, "%s %[^\n]", cmd, args) < 2)
-	    *args = '\0';
+	char *cmd = *argv;
 	if (!strcmp(cmd, "elm"))
 	{
 	    data1_element *new_element;
 	    int i;
-	    char path[512], name[512], termlists[512], *p, *sub_p;
+	    char *p, *sub_p, *path, *name, *termlists;
 	    int type, value;
 	    data1_termlist **tp;
 
+	    if (argc < 4)
+	    {
+		logf(LOG_WARN, "%s:%d: Bad # of args to elm", file, lineno);
+		continue;
+	    }
+	    path = argv[1];
+	    name = argv[2];
+	    termlists = argv[3];
+
 	    if (!cur_elements)
 	    {
-                cur_elements = (data1_sub_elements *)nmem_malloc(data1_nmem_get(dh),
-				    	   sizeof(*cur_elements));
+                cur_elements = (data1_sub_elements *)
+		    nmem_malloc(data1_nmem_get(dh), sizeof(*cur_elements));
 	        cur_elements->next = res->sub_elements;
 		cur_elements->elements = NULL;
 		cur_elements->name = "main";
 		res->sub_elements = cur_elements;
-
+		
 		level = 0;
     		ppl[level] = &cur_elements->elements;
             }
-	    if (sscanf(args, "%511s %511s %511s", path, name, termlists) < 3)
-	    {
-		logf(LOG_WARN, "Bad # of args to elm in %s: '%s'", 
-		    file, args);
-		fclose(f);
-		return 0;
-	    }
 	    p = path;
 	    for (i = 0;; i++)
 	    {
@@ -381,22 +387,22 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    }
 	    if (i > level + 1)
 	    {
-		logf(LOG_WARN, "Bad level inc in %s in '%s'", file, args);
+		logf(LOG_WARN, "%s:%d: Bad level increase", file, lineno);
 		fclose(f);
 		return 0;
 	    }
 	    level = i;
-	    new_element = *ppl[level] =
-		(data1_element *)nmem_malloc(data1_nmem_get(dh), sizeof(*new_element));
+	    new_element = *ppl[level] = (data1_element *)
+		nmem_malloc(data1_nmem_get(dh), sizeof(*new_element));
 	    new_element->next = new_element->children = 0;
 	    new_element->tag = 0;
 	    new_element->termlists = 0;
 	    new_element->sub_name = 0;
-
+	    
 	    tp = &new_element->termlists;
 	    ppl[level] = &new_element->next;
 	    ppl[level+1] = &new_element->children;
-
+	    
 	    /* consider subtree (if any) ... */
 	    if ((sub_p = strchr (p, ':')) && sub_p[1])
 	    {
@@ -409,15 +415,15 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    {
 		if (!res->tagset)
 		{
-		    logf(LOG_WARN, "No tagset loaded in %s", file);
+		    logf(LOG_WARN, "%s:%d: No tagset loaded", file, lineno);
 		    fclose(f);
 		    return 0;
 		}
 		if (!(new_element->tag = data1_gettagbynum (dh, res->tagset,
 							    type, value)))
 		{
-		    logf(LOG_WARN, "Couldn't find tag %s in tagset in %s",
-			p, file);
+		    logf(LOG_WARN, "%s:%d: Couldn't find tag %s in tagset",
+			 file, lineno, p);
 		    fclose(f);
 		    return 0;
 		}
@@ -426,12 +432,14 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    else if (*p)
 	    {
 		data1_tag *nt =
-		    new_element->tag = (data1_tag *)nmem_malloc(data1_nmem_get (dh),
-						   sizeof(*new_element->tag));
+		    new_element->tag = (data1_tag *)
+		    nmem_malloc(data1_nmem_get (dh),
+				sizeof(*new_element->tag));
 		nt->which = DATA1T_string;
 		nt->value.string = nmem_strdup(data1_nmem_get (dh), p);
-		nt->names = (data1_name *)nmem_malloc(data1_nmem_get(dh), 
-					sizeof(*new_element->tag->names));
+		nt->names = (data1_name *)
+		    nmem_malloc(data1_nmem_get(dh), 
+				sizeof(*new_element->tag->names));
 		nt->names->name = nt->value.string;
 		nt->names->next = 0;
 		nt->kind = DATA1K_string;
@@ -440,7 +448,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    }
 	    else
 	    {
-		logf(LOG_WARN, "Bad element is %s", file);
+		logf(LOG_WARN, "%s:%d: Bad element", file, lineno);
 		fclose(f);
 		return 0;
 	    }
@@ -450,34 +458,32 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		new_element->termlists = 0;
 	    else
 	    {
-		if (!res->attset)
-		{
-		    logf(LOG_WARN, "No attset loaded in %s", file);
-		    fclose(f);
-		    return 0;
-		}
+		assert (res->attset);
 		do
 		{
 		    char attname[512], structure[512];
 		    int r;
-
+		    
 		    if (!(r = sscanf(p, "%511[^:,]:%511[^,]", attname,
-			structure)))
+				     structure)))
 		    {
-			logf(LOG_WARN, "Syntax error in termlistspec in %s",
-			    file);
+			logf(LOG_WARN,
+			     "%s:%d: Syntax error in termlistspec '%s'",
+			     file, lineno, p);
 			fclose(f);
 			return 0;
 		    }
 		    if (*attname == '!')
 			strcpy(attname, name);
-		    *tp = (data1_termlist *)nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
+		    *tp = (data1_termlist *)
+			nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
 		    (*tp)->next = 0;
 		    if (!((*tp)->att = data1_getattbyname(dh, res->attset,
 							  attname)))
 		    {
-			logf(LOG_WARN, "Couldn't find att '%s' in attset",
-			     attname);
+			logf(LOG_WARN,
+			     "%s:%d: Couldn't find att '%s' in attset",
+			     file, lineno, attname);
 			fclose(f);
 			return 0;
 		    }
@@ -485,8 +491,9 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 			(*tp)->structure = "w";
 		    else 
 		    {
-			(*tp)->structure = (char *)nmem_malloc (data1_nmem_get (dh),
-							strlen(structure)+1);
+			(*tp)->structure = (char *)
+			    nmem_malloc (data1_nmem_get (dh),
+					 strlen(structure)+1);
 			strcpy ((*tp)->structure, structure);
 		    }
 		    tp = &(*tp)->next;
@@ -498,20 +505,23 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	}
  	else if (!strcmp(cmd, "section"))
 	{
-	    char name[512];
-	    if (sscanf(args, "%511s", name) < 1)
+	    char *name;
+	    
+	    if (argc < 2)
 	    {
-		logf(LOG_WARN, "Bad # of args to sub in %s: '%s'",
-                                file, args);
+		logf(LOG_WARN, "%s:%d: Bad # of args to section",
+		     file, lineno);
 		continue;
 	    }
-            cur_elements = (data1_sub_elements *)nmem_malloc(data1_nmem_get(dh),
-				    	   sizeof(*cur_elements));
+	    name = argv[1];
+	    
+            cur_elements = (data1_sub_elements *)
+		nmem_malloc(data1_nmem_get(dh), sizeof(*cur_elements));
 	    cur_elements->next = res->sub_elements;
 	    cur_elements->elements = NULL;
 	    cur_elements->name = nmem_strdup (data1_nmem_get(dh), name);
 	    res->sub_elements = cur_elements;
-
+	    
 	    level = 0;
     	    ppl[level] = &cur_elements->elements;
 	}
@@ -519,40 +529,42 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	{
 	    char *p;
 	    data1_termlist **tp = &all;
-
+	    
 	    if (all)
 	    {
-		logf(LOG_WARN, "Too many ALL declarations in %s - ignored",
-		    file);
+		logf(LOG_WARN, "%s:%d: Too many 'all' directives - ignored",
+		     file, lineno);
 		continue;
 	    }
 
-	    p = args;
-	    if (!res->attset)
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "No attset loaded in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to 'all' directive",
+		     file, lineno);
+		continue;
 	    }
+	    p = argv[1];
+	    assert (res->attset);
 	    do
 	    {
 		char attname[512], structure[512];
 		int r;
-
+		
 		if (!(r = sscanf(p, "%511[^:,]:%511[^,]", attname,
-		    structure)))
+				 structure)))
 		{
-		    logf(LOG_WARN, "Syntax error in termlistspec in %s",
-			file);
+		    logf(LOG_WARN, "%s:%d: Syntax error in termlistspec",
+			 file, lineno);
 		    fclose(f);
 		    return 0;
 		}
-		*tp = (data1_termlist *)nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
-		if (!((*tp)->att = data1_getattbyname (dh, res->attset,
-						       attname)))
+		*tp = (data1_termlist *)
+		    nmem_malloc(data1_nmem_get(dh), sizeof(**tp));
+		if (!((*tp)->att =
+		      data1_getattbyname (dh, res->attset, attname)))
 		{
-		    logf(LOG_WARN, "Couldn't find att '%s' in attset",
-			 attname);
+		    logf(LOG_WARN, "%s:%d: Couldn't find att '%s' in attset",
+			 file, lineno, attname);
 		    fclose(f);
 		    return 0;
 		}
@@ -560,8 +572,9 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		    (*tp)->structure = "w";
 		else 
 		{
-		    (*tp)->structure = (char *)nmem_malloc (data1_nmem_get (dh),
-						    strlen(structure)+1);
+		    (*tp)->structure =
+			(char *)nmem_malloc (data1_nmem_get (dh),
+					     strlen(structure)+1);
 		    strcpy ((*tp)->structure, structure);
 		}
 		(*tp)->next = 0;
@@ -571,149 +584,161 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	}
 	else if (!strcmp(cmd, "name"))
 	{
-	    char name[512];
-
-	    if (!sscanf(args, "%511s", name))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "Malformed name directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to name directive",
+		     file, lineno);
+		continue;
 	    }
-	    res->name = nmem_strdup(data1_nmem_get(dh), name);
+	    res->name = nmem_strdup(data1_nmem_get(dh), argv[1]);
 	}
 	else if (!strcmp(cmd, "reference"))
 	{
-	    char name[512];
-
-	    if (!sscanf(args, "%s", name))
+	    char *name;
+	    
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "Malformed reference in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to reference",
+		     file, lineno);
+		continue;
 	    }
+	    name = argv[1];
 	    if ((res->reference = oid_getvalbyname(name)) == VAL_NONE)
 	    {
-		logf(LOG_WARN, "Unknown tagset ref '%s' in %s", name, file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Unknown tagset ref '%s'", 
+		     file, lineno, name);
+		continue;
 	    }
 	}
 	else if (!strcmp(cmd, "attset"))
 	{
-	    char name[512];
-
-	    if (!sscanf(args, "%s", name))
+	    char *name;
+	    data1_attset *attset;
+	    
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "Malformed attset directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to attset",
+		     file, lineno);
+		continue;
 	    }
-	    if (!(res->attset = data1_get_attset (dh, name)))
+	    name = argv[1];
+	    if (!(attset = data1_get_attset (dh, name)))
 	    {
-		logf(LOG_WARN, "Attset failed in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Couldn't find attset  %s",
+		     file, lineno, name);
+		continue;
 	    }
+	    *attset_childp = (data1_attset_child *)
+		nmem_malloc (data1_nmem_get(dh), sizeof(**attset_childp));
+	    (*attset_childp)->child = attset;
+	    (*attset_childp)->next = 0;
+	    attset_childp = &(*attset_childp)->next;
 	}
 	else if (!strcmp(cmd, "tagset"))
 	{
-	    char name[512];
-
-	    if (!sscanf(args, "%s", name))
+	    char *name;
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "Malformed tagset directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to tagset",
+		     file, lineno);
+		continue;
 	    }
-	    if (!(res->tagset = data1_read_tagset (dh, name)))
+	    name = argv[1];
+	    if (!(*tagset_childp = data1_read_tagset (dh, name)))
 	    {
-		logf(LOG_WARN, "Tagset failed in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Couldn't load tagset %s",
+		     file, lineno, name);
+		continue;
 	    }
+	    tagset_childp = &(*tagset_childp)->next;
 	}
 	else if (!strcmp(cmd, "varset"))
 	{
-	    char name[512];
+	    char *name;
 
-	    if (!sscanf(args, "%s", name))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "Malformed varset directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args in varset",
+		     file, lineno);
+		continue;
 	    }
+	    name = argv[1];
 	    if (!(res->varset = data1_read_varset (dh, name)))
 	    {
-		logf(LOG_WARN, "Varset failed in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Couldn't load Varset %s",
+		     file, lineno, name);
+		continue;
 	    }
 	}
 	else if (!strcmp(cmd, "esetname"))
 	{
-	    char name[512], fname[512];
+	    char *name, *fname;
 
-	    if (sscanf(args, "%s %s", name, fname) != 2)
+	    if (argc != 3)
 	    {
-		logf(LOG_WARN, "Two arg's required for esetname in %s",
-                     file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args in esetname",
+		     file, lineno);
+		continue;
 	    }
-	    *esetpp = (data1_esetname *)nmem_malloc(data1_nmem_get(dh), sizeof(**esetpp));
+	    name = argv[1];
+	    fname = argv[2];
+	    
+	    *esetpp = (data1_esetname *)
+		nmem_malloc(data1_nmem_get(dh), sizeof(**esetpp));
 	    (*esetpp)->name = nmem_strdup(data1_nmem_get(dh), name);
 	    (*esetpp)->next = 0;
 	    if (*fname == '@')
 		(*esetpp)->spec = 0;
 	    else if (!((*esetpp)->spec = data1_read_espec1 (dh, fname)))
 	    {
-		logf(LOG_WARN, "%s: Espec-1 read failed", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Espec-1 read failed for %s",
+		     file, lineno, fname);
+		continue;
 	    }
 	    esetpp = &(*esetpp)->next;
 	}
 	else if (!strcmp(cmd, "maptab"))
 	{
-	    char name[512];
-
-	    if (sscanf(args, "%s", name) != 1)
+	    char *name;
+	    
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "One argument for maptab directive in %s",
-                     file);
+		logf(LOG_WARN, "%s:%d: Bad # of args for maptab",
+                     file, lineno);
 		continue;
 	    }
+	    name = argv[1];
 	    if (!(*maptabp = data1_read_maptab (dh, name)))
 	    {
-		logf(LOG_WARN, "Failed to read maptab %s in %s",
-                     name, file);
+		logf(LOG_WARN, "%s:%d: Couldn't load maptab %s",
+                     file, lineno, name);
 		continue;
 	    }
 	    maptabp = &(*maptabp)->next;
 	}
 	else if (!strcmp(cmd, "marc"))
 	{
-	    char name[512];
-
-	    if (sscanf(args, "%s", name) != 1)
+	    char *name;
+	    
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "One argument for marc directive in %s",
-		    file);
+		logf(LOG_WARN, "%s:%d: Bad # or args for marc",
+		     file, lineno);
 		continue;
 	    }
+	    name = argv[1];
 	    if (!(*marcp = data1_read_marctab (dh, name)))
 	    {
-		logf(LOG_WARN, "%Failed to read marctab %s in %s",
-                     name, file);
+		logf(LOG_WARN, "%s:%d: Couldn't read marctab %s",
+                     file, lineno, name);
 		continue;
 	    }
 	    marcp = &(*marcp)->next;
 	}
 	else
 	{
-	    logf(LOG_WARN, "Unknown directive '%s' in %s", cmd, file);
-	    fclose(f);
-	    return 0;
+	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'", file, lineno, cmd);
+	    continue;
 	}
     }
     fclose(f);
@@ -725,6 +750,6 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    res->main_elements = cur_elements->elements;
 	fix_element_ref (dh, res, cur_elements->elements);
     }
-    logf (LOG_DEBUG, "end data1_read_absyn file=%s", file);
+    logf (LOG_DEBUG, "%s: data1_read_absyn end", file);
     return res;
 }

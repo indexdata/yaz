@@ -1,10 +1,19 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.14  1998-02-11 11:53:35  adam
+ * Revision 1.15  1998-10-13 16:09:49  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.14  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.13  1997/11/24 11:33:56  adam
@@ -61,11 +70,10 @@
 #include <odr.h>
 #include <proto.h>
 #include <log.h>
-#include <readconf.h>
-#include <tpath.h>
 #include <data1.h>
 
-static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
+static Z_Variant *read_variant(int argc, char **argv, NMEM nmem,
+			       const char *file, int lineno)
 {
     Z_Variant *r = (Z_Variant *)nmem_malloc(nmem, sizeof(*r));
     oident var1;
@@ -90,8 +98,8 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
 
 	if (sscanf(argv[i], "(%d,%d,%[^)])", &zclass, &type, value) < 3)
 	{
-	    logf(LOG_WARN, "Syntax error in variant component '%s'",
-	    	argv[i]);
+	    logf(LOG_WARN, "%s:%d: Syntax error in variant component '%s'",
+		 file, lineno, argv[i]);
 	    return 0;
 	}
 	t = r->triples[i] = (Z_Triple *)nmem_malloc(nmem, sizeof(Z_Triple));
@@ -112,28 +120,32 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
 	else if (isdigit(*value))
 	{
 	    t->which = Z_Triple_integer;
-	    t->value.integer = (int *)nmem_malloc(nmem, sizeof(*t->value.integer));
+	    t->value.integer = (int *)
+		nmem_malloc(nmem, sizeof(*t->value.integer));
 	    *t->value.integer = atoi(value);
 	}
 	else
 	{
 	    t->which = Z_Triple_internationalString;
-	    t->value.internationalString = (char *)nmem_malloc(nmem, strlen(value)+1);
+	    t->value.internationalString = (char *)
+		nmem_malloc(nmem, strlen(value)+1);
 	    strcpy(t->value.internationalString, value);
 	}
     }
     return r;
 }
 
-static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
+static Z_Occurrences *read_occurrences(char *occ, NMEM nmem,
+				       const char *file, int lineno)
 {
     Z_Occurrences *op = (Z_Occurrences *)nmem_malloc(nmem, sizeof(*op));
     char *p;
-
+    
     if (!occ)
     {
 	op->which = Z_Occurrences_values;
-	op->u.values = (Z_OccurValues *)nmem_malloc(nmem, sizeof(Z_OccurValues));
+	op->u.values = (Z_OccurValues *)
+	    nmem_malloc(nmem, sizeof(Z_OccurValues));
 	op->u.values->start = (int *)nmem_malloc(nmem, sizeof(int));
 	*op->u.values->start = 1;
 	op->u.values->howMany = 0;
@@ -151,10 +163,11 @@ static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
     else
     {
 	Z_OccurValues *ov = (Z_OccurValues *)nmem_malloc(nmem, sizeof(*ov));
-
+    
 	if (!isdigit(*occ))
 	{
-	    logf(LOG_WARN, "Bad occurrences-spec in %s", occ);
+	    logf(LOG_WARN, "%s:%d: Bad occurrences-spec %s",
+		 file, lineno, occ);
 	    return 0;
 	}
 	op->which = Z_Occurrences_values;
@@ -173,13 +186,14 @@ static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
 }
 
 
-static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem)
+static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem,
+				const char *file, int lineno)
 {
     Z_ETagUnit *u = (Z_ETagUnit *)nmem_malloc(nmem, sizeof(*u));
     int terms;
     int type;
     char value[512], occ[512];
-
+    
     if (*buf == '*')
     {
 	u->which = Z_ETagUnit_wildPath;
@@ -189,18 +203,18 @@ static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem)
     {
 	u->which = Z_ETagUnit_wildThing;
 	if (buf[1] == ':')
-	    u->u.wildThing = read_occurrences(buf+2, nmem);
+	    u->u.wildThing = read_occurrences(buf+2, nmem, file, lineno);
 	else
-	    u->u.wildThing = read_occurrences(0, nmem);
+	    u->u.wildThing = read_occurrences(0, nmem, file, lineno);
     }
     else if ((terms = sscanf(buf, "(%d,%[^)]):%[a-z0-9+]", &type, value,
-	occ)) >= 2)
+			     occ)) >= 2)
     {
 	int numval;
 	Z_SpecificTag *t;
 	char *valp = value;
 	int force_string = 0;
-
+	
 	if (*valp == '\'')
 	{
 	    valp++;
@@ -210,7 +224,8 @@ static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem)
 	u->u.specificTag = t = (Z_SpecificTag *)nmem_malloc(nmem, sizeof(*t));
 	t->tagType = (int *)nmem_malloc(nmem, sizeof(*t->tagType));
 	*t->tagType = type;
-	t->tagValue = (Z_StringOrNumeric *)nmem_malloc(nmem, sizeof(*t->tagValue));
+	t->tagValue = (Z_StringOrNumeric *)
+	    nmem_malloc(nmem, sizeof(*t->tagValue));
 	if (!force_string && (numval = atoi(valp)))
 	{
 	    t->tagValue->which = Z_StringOrNumeric_numeric;
@@ -224,7 +239,7 @@ static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem)
 	    strcpy(t->tagValue->u.string, valp);
 	}
 	if (terms > 2) /* an occurrences-spec exists */
-	    t->occurrences = read_occurrences(occ, nmem);
+	    t->occurrences = read_occurrences(occ, nmem, file, lineno);
 	else
 	    t->occurrences = 0;
     }
@@ -239,16 +254,17 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 {
     FILE *f;
     NMEM nmem = data1_nmem_get (dh);
+    int lineno = 0;
     int argc, size_esn = 0;
     char *argv[50], line[512];
     Z_Espec1 *res = (Z_Espec1 *)nmem_malloc(nmem, sizeof(*res));
-
+    
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
-
+    
     res->num_elementSetNames = 0;
     res->elementSetNames = 0;
     res->defaultVariantSetId = 0;
@@ -256,34 +272,42 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
     res->defaultTagType = 0;
     res->num_elements = 0;
     res->elements = 0;
-
-    while ((argc = readconf_line(f, line, 512, argv, 50)))
+    
+    while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
 	if (!strcmp(argv[0], "elementsetnames"))
 	{
 	    int nnames = argc-1, i;
-
+	    
 	    if (!nnames)
 	    {
-		logf(LOG_WARN, "%s: Empty elementsetnames directive",
-		    file);
+		logf(LOG_WARN, "%s:%d: Empty elementsetnames directive",
+		     file, lineno);
 		continue;
 	    }
-
-	    res->elementSetNames = (char **)nmem_malloc(nmem, sizeof(char**)*nnames);
+	    
+	    res->elementSetNames =
+		(char **)nmem_malloc(nmem, sizeof(char**)*nnames);
 	    for (i = 0; i < nnames; i++)
 	    {
-		res->elementSetNames[i] = (char *)nmem_malloc(nmem,
-                                                      strlen(argv[i+1])+1);
+		res->elementSetNames[i] = (char *)
+		    nmem_malloc(nmem, strlen(argv[i+1])+1);
 		strcpy(res->elementSetNames[i], argv[i+1]);
 	    }
 	    res->num_elementSetNames = nnames;
 	}
 	else if (!strcmp(argv[0], "defaultvariantsetid"))
 	{
-	    if (argc != 2 || !(res->defaultVariantSetId =
-		odr_getoidbystr_nmem(nmem, argv[1])))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad defaultvariantsetid directive", file);
+		logf(LOG_WARN, "%s:%d: Bad # of args for %s",
+		     file, lineno, argv[0]);
+		continue;
+	    }
+	    if (!(res->defaultVariantSetId =
+		  odr_getoidbystr_nmem(nmem, argv[1])))
+	    {
+		logf(LOG_WARN, "%s:%d: Bad defaultvariantsetid",
+		     file, lineno);
 		continue;
 	    }
 	}
@@ -291,7 +315,8 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad defaulttagtype directive", file);
+		logf(LOG_WARN, "%s:%d: Bad # of args for %s",
+		     file, lineno, argv[0]);
 		continue;
 	    }
 	    res->defaultTagType = (int *)nmem_malloc(nmem, sizeof(int));
@@ -299,10 +324,11 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	}
 	else if (!strcmp(argv[0], "defaultvariantrequest"))
 	{
-	    if (!(res->defaultVariantRequest = read_variant(argc-1,
-                                                            argv+1, nmem)))
+	    if (!(res->defaultVariantRequest =
+		  read_variant(argc-1, argv+1, nmem, file, lineno)))
 	    {
-		logf(LOG_WARN, "%s: Bad defaultvariantrequest", file);
+		logf(LOG_WARN, "%s:%d: Bad defaultvariantrequest",
+		     file, lineno);
 		continue;
 	    }
 	}
@@ -316,24 +342,28 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	    int num, i = 0;
 	    
 	    if (!res->elements)
-		res->elements = (Z_ElementRequest **)nmem_malloc(nmem, size_esn = 24*sizeof(er));
+		res->elements = (Z_ElementRequest **)
+		    nmem_malloc(nmem, size_esn = 24*sizeof(er));
 	    else if (res->num_elements >= (int) (size_esn/sizeof(er)))
 	    {
 		Z_ElementRequest **oe = res->elements;
 		size_esn *= 2;
-		res->elements = (Z_ElementRequest **)nmem_malloc (nmem, size_esn*sizeof(er));
+		res->elements = (Z_ElementRequest **)
+		    nmem_malloc (nmem, size_esn*sizeof(er));
 		memcpy (res->elements, oe, size_esn/2);
 	    }
 	    if (argc < 2)
 	    {
-		logf(LOG_WARN, "%s: Empty simpleelement directive", file);
+		logf(LOG_WARN, "%s:%d: Bad # of args for %s",
+		     file, lineno, argv[0]);
 		continue;
 	    }
 	    
 	    res->elements[res->num_elements++] = er =
 		(Z_ElementRequest *)nmem_malloc(nmem, sizeof(*er));
 	    er->which = Z_ERequest_simpleElement;
-	    er->u.simpleElement = se = (Z_SimpleElement *)nmem_malloc(nmem, sizeof(*se));
+	    er->u.simpleElement = se = (Z_SimpleElement *)
+		nmem_malloc(nmem, sizeof(*se));
 	    se->variantRequest = 0;
 	    se->path = tp = (Z_ETagPath *)nmem_malloc(nmem, sizeof(*tp));
 	    tp->num_tags = 0;
@@ -342,7 +372,8 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 	     */
 	    for (num = 1, ep = path; (ep = strchr(ep, '/')); num++, ep++)
 		;
-	    tp->tags = (Z_ETagUnit **)nmem_malloc(nmem, sizeof(Z_ETagUnit*)*num);
+	    tp->tags = (Z_ETagUnit **)
+		nmem_malloc(nmem, sizeof(Z_ETagUnit*)*num);
 	    
 	    for ((ep = strchr(path, '/')) ; path ;
 		 (void)((path = ep) && (ep = strchr(path, '/'))))
@@ -351,18 +382,17 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 		    ep++;
 		
 		assert(i<num);
-		tp->tags[tp->num_tags++] = read_tagunit(path, nmem);
+		tp->tags[tp->num_tags++] =
+		    read_tagunit(path, nmem, file, lineno);
 	    }
 	    
 	    if (argc > 2 && !strcmp(argv[2], "variant"))
-		se->variantRequest= read_variant(argc-3, argv+3, nmem);
+		se->variantRequest=
+		    read_variant(argc-3, argv+3, nmem, file, lineno);
 	}
 	else
-	{
-	    logf(LOG_WARN, "%s: Unknown directive %s", file, argv[0]);
-	    fclose(f);
-	    return 0;
-	}
+	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		 file, lineno, argv[0]);
     fclose (f);
     return res;
 }

@@ -1,10 +1,19 @@
 /*
- * Copyright (C) 1994-1997, Index Data I/S 
+ * Copyright (C) 1994-1998, Index Data
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: readconf.c,v $
- * Revision 1.5  1997-09-04 07:53:02  adam
+ * Revision 1.6  1998-10-13 16:09:55  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.5  1997/09/04 07:53:02  adam
  * Added include readconf.h.
  *
  * Revision 1.4  1997/05/14 06:54:07  adam
@@ -36,21 +45,23 @@
 
 #define l_isspace(c) ((c) == '\t' || (c) == ' ' || (c) == '\n')
 
-int readconf_line(FILE *f, char *line, int len, char *argv[], int num)
+int readconf_line(FILE *f, int *lineno, char *line, int len,
+		  char *argv[], int num)
 {
     char *p;
     int argc;
-
+    
     while ((p = fgets(line, len, f)))
     {
-	while (*p && isspace(*p))
+	(*lineno)++;
+	while (*p && l_isspace(*p))
 	    p++;
 	if (*p && *p != '#')
 	    break;
     }
     if (!p)
 	return 0;
-
+    
     for (argc = 0; *p ; argc++)
     {
 	if (*p == '#')  /* trailing comment */
@@ -72,12 +83,13 @@ int readconf_line(FILE *f, char *line, int len, char *argv[], int num)
  * Read lines of a configuration file.
  */
 int readconf(char *name, void *rprivate,
-    int (*fun)(char *name, void *rprivate, int argc, char *argv[]))
+	     int (*fun)(char *name, void *rprivate, int argc, char *argv[]))
 {
     FILE *f;
     char line[512], *m_argv[50];
     int m_argc;
-
+    int lineno = 0;
+    
     if (!(f = fopen(name, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "readconf: %s", name);
@@ -86,8 +98,8 @@ int readconf(char *name, void *rprivate,
     for (;;)
     {
 	int res;
-
-	if (!(m_argc = readconf_line(f, line, 512, m_argv, 50)))
+	
+	if (!(m_argc = readconf_line(f, &lineno, line, 512, m_argv, 50)))
 	{
 	    fclose(f);
 	    return 0;

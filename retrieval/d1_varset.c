@@ -1,10 +1,19 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_varset.c,v $
- * Revision 1.7  1998-02-11 11:53:35  adam
+ * Revision 1.8  1998-10-13 16:09:54  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.7  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.6  1997/09/17 12:10:39  adam
@@ -31,11 +40,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <readconf.h>
 #include <oid.h>
 #include <log.h>
 
-#include <tpath.h>
 #include <data1.h>
 
 data1_vartype *data1_getvartypebyct (data1_handle dh, data1_varset *set,
@@ -50,7 +57,8 @@ data1_vartype *data1_getvartypebyct (data1_handle dh, data1_varset *set,
 	    for (t = c->types; t; t = t->next)
 		if (!data1_matchstr(t->name, type))
 		    return t;
-	    logf(LOG_WARN, "Unknown variant type %s in class %s", type, zclass);
+	    logf(LOG_WARN, "Unknown variant type %s in class %s",
+		 type, zclass);
 	    return 0;
 	}
     logf(LOG_WARN, "Unknown variant class %s", zclass);
@@ -64,6 +72,7 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
     data1_varclass **classp = &res->classes, *zclass = 0;
     data1_vartype **typep = 0;
     FILE *f;
+    int lineno = 0;
     int argc;
     char *argv[50],line[512];
 
@@ -76,18 +85,19 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
 	return 0;
     }
-    while ((argc = readconf_line(f, line, 512, argv, 50)))
+    while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
 	if (!strcmp(argv[0], "class"))
 	{
 	    data1_varclass *r;
-
+	    
 	    if (argc != 3)
 	    {
-		logf(LOG_FATAL, "%s: malformed class directive", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # or args to class",
+		     file, lineno);
+		continue;
 	    }
-	    *classp = r = zclass = (data1_varclass *)nmem_malloc(mem, sizeof(*r));
+	    *classp = r = zclass = (data1_varclass *)
+		nmem_malloc(mem, sizeof(*r));
 	    r->set = res;
 	    r->zclass = atoi(argv[1]);
 	    r->name = nmem_strdup(mem, argv[2]);
@@ -102,15 +112,14 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 
 	    if (!typep)
 	    {
-		logf(LOG_WARN, "%s: class directive must precede type", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Directive class must precede type",
+		     file, lineno);
+		continue;
 	    }
 	    if (argc != 4)
 	    {
-		logf(LOG_WARN, "%s: Malformed type directive", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # or args to type", file, lineno);
+		continue;
 	    }
 	    *typep = r = (data1_vartype *)nmem_malloc(mem, sizeof(*r));
 	    r->name = nmem_strdup(mem, argv[2]);
@@ -118,7 +127,8 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 	    r->type = atoi(argv[1]);
 	    if (!(r->datatype = data1_maptype (dh, argv[3])))
 	    {
-		logf(LOG_WARN, "%s: Unknown datatype '%s'", file, argv[3]);
+		logf(LOG_WARN, "%s:%d: Unknown datatype '%s'",
+		     file, lineno, argv[3]);
 		fclose(f);
 		return 0;
 	    }
@@ -129,9 +139,9 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s name: Expected 1 argument", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # args for name",
+		     file, lineno);
+		continue;
 	    }
 	    res->name = nmem_strdup(mem, argv[1]);
 	}
@@ -139,21 +149,21 @@ data1_varset *data1_read_varset (data1_handle dh, const char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: reference: Expected 1 argument", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # args for reference",
+		     file, lineno);
+		continue;
 	    }
 	    if ((res->reference = oid_getvalbyname(argv[1])) == VAL_NONE)
 	    {
-		logf(LOG_WARN, "Unknown reference '%s' in %s", argv[1], file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Unknown reference '%s'",
+		     file, lineno, argv[1]);
+		continue;
 	    }
 	}
 	else 
-	    logf(LOG_WARN, "varset: Unknown directive '%s' in %s", argv[0],
-		file);
-
+	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		 file, lineno, argv[0]);
+    
     fclose(f);
     return res;
 }

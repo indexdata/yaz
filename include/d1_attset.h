@@ -75,7 +75,7 @@ struct data1_attset
     oid_value reference;   /* external ID of attset */
     data1_att *atts;          /* attributes */
     data1_attset_child *children;  /* included attset */
-    data1_attset *next;       /* sibling */
+    data1_attset *next;       /* next in cache */
 };
 
 typedef struct data1_handle_info *data1_handle;
@@ -83,6 +83,8 @@ typedef struct data1_handle_info *data1_handle;
 YAZ_EXPORT data1_att *data1_getattbyname(data1_handle dh, data1_attset *s,
 					 char *name);
 YAZ_EXPORT data1_attset *data1_read_attset(data1_handle dh, const char *file);
+
+YAZ_EXPORT data1_attset *data1_empty_attset(data1_handle dh);
 
 #ifdef __cplusplus
 }

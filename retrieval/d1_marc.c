@@ -4,7 +4,16 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.12  1998-02-23 10:57:09  adam
+ * Revision 1.13  1998-10-13 16:09:52  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.12  1998/02/23 10:57:09  adam
  * Take care of integer data nodes as well in conversion.
  *
  * Revision 1.11  1998/02/11 11:53:35  adam
@@ -63,6 +72,7 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
     NMEM mem = data1_nmem_get (dh);
     data1_marctab *res = (data1_marctab *)nmem_malloc(mem, sizeof(*res));
     char line[512], *argv[50];
+    int lineno = 0;
     int argc;
     
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
@@ -86,87 +96,96 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
     res->force_indicator_length = -1;
     res->force_identifier_length = -1;
     strcpy(res->user_systems, "z  ");
-
-    while ((argc = readconf_line(f, line, 512, argv, 50)))
-	if (!strcmp(argv[0], "name"))
+    
+    while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
+	if (!strcmp(*argv, "name"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad name directive");
+		logf(LOG_WARN, "%s:%d:Missing arg for %s", file, lineno,
+		     *argv);
 		continue;
 	    }
 	    res->name = nmem_strdup(mem, argv[1]);
 	}
-	else if (!strcmp(argv[0], "reference"))
+	else if (!strcmp(*argv, "reference"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad name directive");
+		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+		     *argv);
 		continue;
 	    }
 	    if ((res->reference = oid_getvalbyname(argv[1])) == VAL_NONE)
 	    {
-		logf(LOG_WARN, "%s: Unknown tagset ref '%s' in %s", file,
-		    argv[1]);
+		logf(LOG_WARN, "%s:%d: Unknown tagset reference '%s'",
+		     file, lineno, argv[1]);
 		continue;
 	    }
 	}
-	else if (!strcmp(argv[0], "length-data-entry"))
+	else if (!strcmp(*argv, "length-data-entry"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad data-length-entry");
+		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+		     *argv);
 		continue;
 	    }
 	    res->length_data_entry = atoi(argv[1]);
 	}
-	else if (!strcmp(argv[0], "length-starting"))
+	else if (!strcmp(*argv, "length-starting"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad length-starting");
+		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+		     *argv);
 		continue;
 	    }
 	    res->length_starting = atoi(argv[1]);
 	}
-	else if (!strcmp(argv[0], "length-implementation"))
+	else if (!strcmp(*argv, "length-implementation"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad length-implentation");
+		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+		     *argv);
 		continue;
 	    }
 	    res->length_implementation = atoi(argv[1]);
 	}
-	else if (!strcmp(argv[0], "future-use"))
+	else if (!strcmp(*argv, "future-use"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad future-use");
+		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+		     *argv);
 		continue;
 	    }
 	    strncpy(res->future_use, argv[1], 2);
 	}
-	else if (!strcmp(argv[0], "force-indicator-length"))
+	else if (!strcmp(*argv, "force-indicator-length"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad future-use");
+		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+		     *argv);
 		continue;
 	    }
 	    res->force_indicator_length = atoi(argv[1]);
 	}
-	else if (!strcmp(argv[0], "force-identifier-length"))
+	else if (!strcmp(*argv, "force-identifier-length"))
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s: Bad future-use");
+		logf(LOG_WARN, "%s:%d: Missing arg for %s", file, lineno,
+		     *argv);
 		continue;
 	    }
 	    res->force_identifier_length = atoi(argv[1]);
 	}
 	else
-	    logf(LOG_WARN, "%s: Bad directive '%s'", file, argv[0]);
+	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'", file, lineno,
+		 *argv);
 
     fclose(f);
     return res;

@@ -4,7 +4,16 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.9  1998-05-18 13:07:03  adam
+ * Revision 1.10  1998-10-13 16:09:48  adam
+ * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
+ * Added support for multiple attribute set references and tagset references
+ * from an abstract syntax file.
+ * Fixed many bad logs-calls in routines that read the various
+ * specifications regarding data1 (*.abs,*.att,...) and made the messages
+ * consistent whenever possible.
+ * Added extra 'lineno' argument to function readconf_line.
+ *
+ * Revision 1.9  1998/05/18 13:07:03  adam
  * Changed the way attribute sets are handled by the retriaval module.
  * Extended Explain conversion / schema.
  * Modified server and client to work with ASN.1 compiled protocol handlers.
@@ -44,7 +53,6 @@
 #include <log.h>
 #include <d1_attset.h>
 #include <data1.h>
-#include <tpath.h>
 
 data1_att *data1_getattbyname(data1_handle dh, data1_attset *s, char *name)
 {
@@ -65,68 +73,70 @@ data1_att *data1_getattbyname(data1_handle dh, data1_attset *s, char *name)
     return 0;
 }
 
+data1_attset *data1_empty_attset(data1_handle dh)
+{
+    NMEM mem = data1_nmem_get (dh);
+    data1_attset *res = (data1_attset*) nmem_malloc(mem,sizeof(*res));
+
+    res->name = 0;
+    res->reference = VAL_NONE;
+    res->atts = 0;
+    res->children = 0;
+    res->next = 0;
+    return res;
+}
+
 data1_attset *data1_read_attset(data1_handle dh, const char *file)
 {
-    char line[512], *r, cmd[512], args[512];
     data1_attset *res = 0;
     data1_attset_child **childp;
     data1_att **attp;
     FILE *f;
     NMEM mem = data1_nmem_get (dh);
+    int lineno = 0;
+    int argc;
+    char *argv[50], line[512];
 
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
 	return NULL;
-    res = (data1_attset *)nmem_malloc(mem, sizeof(*res));
-    res->name = 0;
-    res->reference = VAL_NONE;
-    res->atts = 0;
-    res->children = 0;
+    res = data1_empty_attset (dh);
+
     childp = &res->children;
     attp = &res->atts;
 
-    for (;;)
+    while ((argc = readconf_line(f, &lineno, line, 512, argv, 50)))
     {
-	while ((r = fgets(line, 512, f)))
-	{
-	    while (*r && isspace(*r))
-		r++;
-	    if (*r && *r != '#')
-		break;
-	}
-	if (!r)
-	{
-	    fclose(f);
-	    return res;
-	}
-	if (sscanf(r, "%s %[^\n]", cmd, args) < 2)
-	    *args = '\0';
+	char *cmd = argv[0];
 	if (!strcmp(cmd, "att"))
 	{
-	    int num, rr;
-	    char name[512], localstr[512];
+	    int num;
+	    char *name;
 	    data1_att *t;
 	    data1_local_attribute *locals;
-
-	    if ((rr = sscanf(args, "%511d %s %511s", &num, name, localstr)) < 2)
+	    
+	    if (argc < 3)
 	    {
-		logf(LOG_WARN, "Not enough arguments to att in '%s' in %s",
-		    args, file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to att", file, lineno);
+		continue;
 	    }
-	    if (rr < 3) /* no local attributes given */
+	    num = atoi (argv[1]);
+	    name = argv[2];
+	    
+	    if (argc == 3) /* no local attributes given */
 	    {
-		locals = (data1_local_attribute *)nmem_malloc(mem, sizeof(*locals));
+		locals = (data1_local_attribute *)
+		    nmem_malloc(mem, sizeof(*locals));
 		locals->local = num;
 		locals->next = 0;
 	    }
 	    else /* parse the string "local{,local}" */
 	    {
-		char *p = localstr;
+		char *p = argv[4];
 		data1_local_attribute **ap = &locals;
 		do
 		{
-		    *ap = (data1_local_attribute *)nmem_malloc(mem, sizeof(**ap));
+		    *ap = (data1_local_attribute *)
+			nmem_malloc(mem, sizeof(**ap));
 		    (*ap)->local = atoi(p);
 		    (*ap)->next = 0;
 		    ap = &(*ap)->next;
@@ -143,68 +153,68 @@ data1_attset *data1_read_attset(data1_handle dh, const char *file)
 	}
 	else if (!strcmp(cmd, "name"))
 	{
-	    char name[512];
-
-	    if (!sscanf(args, "%s", name))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s malformed name directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to name", file, lineno);
+		continue;
 	    }
 	}
 	else if (!strcmp(cmd, "reference"))
 	{
-	    char name[512];
+	    char *name;
 
-	    if (!sscanf(args, "%s", name))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s malformed reference directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to reference",
+		     file, lineno);
+		continue;
 	    }
+	    name = argv[1];
 	    if ((res->reference = oid_getvalbyname(name)) == VAL_NONE)
 	    {
-		logf(LOG_WARN, "Unknown attset name '%s' in %s", name, file);
+		logf(LOG_WARN, "%s:%d: Unknown reference oid '%s'",
+		     file, lineno, name);
 		fclose(f);
 		return 0;
 	    }
 	}
 	else if (!strcmp(cmd, "ordinal"))
 	{
-	    int dummy;
-	    if (!sscanf(args, "%d", &dummy))
-	    {
-		logf(LOG_WARN, "%s malformed ordinal directive in %s", file);
-		fclose(f);
-		return 0;
-	    }
+	    logf (LOG_WARN, "%s:%d: Directive ordinal ignored",
+		  file, lineno);
 	}
 	else if (!strcmp(cmd, "include"))
 	{
-	    char name[512];
+	    char *name;
+	    data1_attset *attset;
 
-	    if (!sscanf(args, "%s", name))
+	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s malformed reference directive in %s", file);
-		fclose(f);
-		return 0;
+		logf(LOG_WARN, "%s:%d: Bad # of args to include",
+		     file, lineno);
+		continue;
+	    }
+	    name = argv[1];
+
+	    if (!(attset = data1_get_attset (dh, name)))
+	    {
+		logf(LOG_WARN, "%s:%d: Include of attset %s failed",
+		     file, lineno, name);
+		continue;
+		
 	    }
 	    *childp = (data1_attset_child *)
 		nmem_malloc (mem, sizeof(**childp));
-	    if (!((*childp)->child = data1_get_attset (dh, name)))
-	    {
-		logf(LOG_WARN, "Inclusion failed in %s", file);
-		fclose(f);
-		return 0;
-	    }
+	    (*childp)->child = attset;
 	    (*childp)->next = 0;
 	    childp = &(*childp)->next;
 	}
 	else
 	{
-	    logf(LOG_WARN, "Unknown directive '%s' in %s", cmd, file);
-	    fclose(f);
-	    return 0;
+	    logf(LOG_WARN, "%s:%d: Unknown directive '%s'",
+		 file, lineno, cmd);
 	}
     }
+    fclose(f);
+    return res;
 }
