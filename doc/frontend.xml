@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.20 2003-11-25 19:46:18 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.21 2004-01-17 01:20:12 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -742,7 +742,8 @@ typedef struct bend_scan_rr {
     <arg choice="opt"><option>-k <replaceable>kilobytes</replaceable></option></arg>
     <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>
     <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
-    <arg choice="opt"><option>-ziST1</option></arg>
+    <arg choice="opt"><option>-p <replaceable>pidfile</replaceable></option></arg>
+    <arg choice="opt"><option>-ziDST1</option></arg>
     <arg choice="opt" rep="repeat">listener-spec</arg>
    </cmdsynopsis>
    

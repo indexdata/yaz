@@ -1,5 +1,5 @@
 <!-- 
-   $Id: ztest-options.xml,v 1.3 2003-11-25 19:46:18 adam Exp $
+   $Id: ztest-options.xml,v 1.4 2004-01-17 01:20:12 adam Exp $
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->
@@ -90,10 +90,25 @@
     daemon (see <literal>-i</literal>).
    </para></listitem></varlistentry>
 
+ <varlistentry><term><literal>-p </literal>
+   <replaceable>pidfile</replaceable></term>
+  <listitem><para>
+    Specifies that the server should write its Process ID to
+    file given by <replaceable>pidfile</replaceable>. 
+    A typical location would be <filename>/var/run/yaz-ztest.pid</filename>.
+   </para></listitem></varlistentry>
+
  <varlistentry><term><literal>-i</literal></term>
   <listitem><para>
     Use this to make the the server run from the
     <application>inetd</application> server (UNIX only).
+   </para></listitem></varlistentry>
+ 
+ <varlistentry><term><literal>-D</literal></term>
+  <listitem><para>
+    Use this to make the server put itself in the background and
+    run as a daemon. If neither <literal>-i</literal> nor 
+    <literal>-D</literal> is given, the server starts in the foreground.
    </para></listitem></varlistentry>
  
  <varlistentry><term><literal>-install</literal></term>

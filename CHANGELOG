@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added option -p <file> to make Generic Frontend Server to write PID file.
+
+Added option -D to put Generic Frontend Server in background on its own.
+
 Make ZOOM C recognize option "password". If unset, "pass" is used
 (for backwards compatibility).
 

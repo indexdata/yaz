@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.3 2004-01-15 10:05:56 adam Exp $
+ * $Id: statserv.c,v 1.4 2004-01-17 01:20:13 adam Exp $
  */
 
 #include <stdio.h>
@@ -77,7 +77,9 @@ statserv_options_block control_block = {
     "",                         /* NT Service Dependencies */
     "Z39.50 Server",            /* NT Service Display Name */
 #endif /* WIN32 */
-    0                           /* SOAP handlers */
+    0,                          /* SOAP handlers */
+    "",                         /* PID fname */
+    0                           /* background daemon */
 };
 
 static int max_sessions = 0;
@@ -706,7 +708,7 @@ static void statserv_reset(void)
 
 int statserv_start(int argc, char **argv)
 {
-    int ret;
+    int ret = 0;
 
 #ifdef WIN32
     /* We need to initialize the thread list */
@@ -729,12 +731,38 @@ int statserv_start(int argc, char **argv)
         (*control_block.bend_start)(&control_block);
 #ifdef WIN32
     yaz_log (LOG_LOG, "Starting server %s", me);
+    if (!pListener && *control_block.default_listen)
+	add_listener(control_block.default_listen,
+		     control_block.default_proto);
+    
+    if (!pListener)
+	return 1;
 #else
 /* UNIX */
     if (control_block.inetd)
 	inetd_connection(control_block.default_proto);
     else
     {
+	if (!pListener && *control_block.default_listen)
+	    add_listener(control_block.default_listen,
+			 control_block.default_proto);
+	
+	if (!pListener)
+	    return 1;
+
+	if (*control_block.pid_fname)
+	{
+	    FILE *f = fopen(control_block.pid_fname, "w");
+	    if (!f)
+	    {
+		yaz_log(LOG_FATAL|LOG_ERRNO, "Couldn't create %s", 
+			control_block.pid_fname);
+		exit(0);
+	    }
+	    fprintf(f, "%ld", (long) getpid());
+	    fclose(f);
+	}
+
 	yaz_log (LOG_LOG, "Starting server %s pid=%d", me, getpid());
 #if 0
 	sigset_t sigs_to_block;
@@ -764,10 +792,29 @@ int statserv_start(int argc, char **argv)
 	    exit(1);
 	}
     }
+    if (!control_block.inetd && control_block.background)
+    {
+	switch (fork())
+	{
+        case 0: 
+	    break;
+        case -1:
+	    return 1;
+        default: 
+	    _exit(0);
+	}
+	
+	if (setsid() < 0)
+	    return 1;
+	
+	close(0);
+	close(1);
+	close(2);
+        open("/dev/null",O_RDWR);
+        dup(0); dup(0);
+    }
 /* UNIX */
 #endif
-    
-    
     if ((pListener == NULL) && *control_block.default_listen)
 	add_listener(control_block.default_listen,
 		     control_block.default_proto);
@@ -787,7 +834,7 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:D:", argv, argc, &arg)) != -2)
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:D", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -867,14 +914,25 @@ int check_options(int argc, char **argv)
 		return 1;
 	    }
 	    break;
-        case 'D':
+        case 'A':
             max_sessions = atoi(arg);
             break;
+	case 'p':
+	    if (strlen(arg) >= sizeof(control_block.pid_fname))
+	    {
+		yaz_log(LOG_FATAL, "pid fname too long");
+		exit(1);
+	    }
+	    strcpy(control_block.pid_fname, arg);
+	    break;
+	case 'D':
+	    control_block.background = 1;
+	    break;
 	default:
 	    fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
 		    " -l <logfile> -u <user> -c <config> -t <minutes>"
-		    " -k <kilobytes> -d <daemon>"
-                        " -ziST1 -w <directory> <listener-addr>... ]\n", me);
+		    " -k <kilobytes> -d <daemon> -p <pidfile>"
+                        " -ziDST1 -w <directory> <listener-addr>... ]\n", me);
 	    return 1;
         }
     }

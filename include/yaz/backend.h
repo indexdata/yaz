@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.22 2003-12-29 14:54:33 adam Exp $
+ * $Id: backend.h,v 1.23 2004-01-17 01:20:12 adam Exp $
  */
 
 #ifndef BACKEND_H
@@ -272,6 +272,8 @@ typedef struct statserv_options_block
     char service_display_name[128]; /* The service display name */
 #endif /* WIN32 */
     struct bend_soap_handler *soap_handlers;
+    char pid_fname[128];            /* pid fname */
+    int background;                 /* auto daemon */
 } statserv_options_block;
 
 YAZ_EXPORT int statserv_main(
