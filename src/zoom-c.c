@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.35 2005-01-15 19:47:15 adam Exp $
+ * $Id: zoom-c.c,v 1.36 2005-01-16 21:40:51 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -28,8 +28,8 @@
 #include <sys/poll.h>
 #endif
 
-static int log_level=0;
-static int log_level_initialized=0;
+static int log_level = 0;
+static int log_level_initialized = 0;
 
 typedef enum {
     zoom_pending,
@@ -99,8 +99,8 @@ static void set_dset_error (ZOOM_connection c, int error,
     char *cp;
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("zoom");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("zoom");
+        log_level_initialized = 1;
     }
 
     xfree (c->addinfo);
@@ -238,8 +238,8 @@ ZOOM_connection_create (ZOOM_options options)
 
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("zoom");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("zoom");
+        log_level_initialized = 1;
     }
 
     c->proto = PROTO_Z3950;
@@ -356,8 +356,8 @@ ZOOM_connection_connect(ZOOM_connection c,
 
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("zoom");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("zoom");
+        log_level_initialized = 1;
     }
 
     if (c->cs)
@@ -542,8 +542,8 @@ ZOOM_resultset ZOOM_resultset_create ()
 
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("zoom");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("zoom");
+        log_level_initialized = 1;
     }
 
     yaz_log (log_level, "ZOOM_resultset_create r = %p", r);
@@ -831,8 +831,8 @@ static zoom_ret do_connect (ZOOM_connection c)
     const char *effective_host;
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("zoom");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("zoom");
+        log_level_initialized = 1;
     }
 
 
@@ -1037,7 +1037,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.35 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.36 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2463,7 +2463,7 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
     Z_ItemOrder *req = (Z_ItemOrder *) odr_malloc (p->odr_out, sizeof(*req));
     const char *str;
     
-    req->which=Z_IOItemOrder_esRequest;
+    req->which = Z_IOItemOrder_esRequest;
     req->u.esRequest = (Z_IORequest *) 
         odr_malloc(p->odr_out,sizeof(Z_IORequest));
 
@@ -2549,17 +2549,17 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
 	toKeep = r->u.adminService->u.esRequest->toKeep =
 	    (Z_ESAdminOriginPartToKeep *) 
 	    odr_malloc(p->odr_out, sizeof(*r->u.adminService->u.esRequest->toKeep));
-	toKeep->which=type;
+	toKeep->which = type;
 	toKeep->databaseName = odr_strdup(p->odr_out, first_db);
-	toKeep->u.create=odr_nullval();
+	toKeep->u.create = odr_nullval();
 	apdu->u.extendedServicesRequest->taskSpecificParameters = r;
 	
 	r->u.adminService->u.esRequest->notToKeep = notToKeep =
 	    (Z_ESAdminOriginPartNotToKeep *)
 	    odr_malloc(p->odr_out,
 		       sizeof(*r->u.adminService->u.esRequest->notToKeep));
-	notToKeep->which=Z_ESAdminOriginPartNotToKeep_recordsWillFollow;
-	notToKeep->u.recordsWillFollow=odr_nullval();
+	notToKeep->which = Z_ESAdminOriginPartNotToKeep_recordsWillFollow;
+	notToKeep->u.recordsWillFollow = odr_nullval();
 	if (toKeepP)
 	    *toKeepP = toKeep;
 	if (notToKeepP)
@@ -2964,7 +2964,7 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
             
             if (p)
             {
-                char *charset=NULL, *lang=NULL;
+                char *charset = NULL, *lang = NULL;
                 int sel;
                 
                 yaz_get_response_charneg(tmpmem, p, &charset, &lang, &sel);
@@ -3242,7 +3242,7 @@ static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
     ZOOM_connection_put_event (c, event);
 
     yaz_log (log_level, "do_write_ex len=%d", len_out);
-    if ((r=cs_put (c->cs, buf_out, len_out)) < 0)
+    if ((r = cs_put(c->cs, buf_out, len_out)) < 0)
     {
         if (c->reconnect_ok)
         {
