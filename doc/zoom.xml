@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.6 2001-11-06 17:05:19 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.7 2001-11-11 22:25:25 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -39,6 +39,11 @@
    All objects are in fact pointers to internal stuff, but you don't see
    that because of typedefs. All destroy methods should gracefully ignore a
    <literal>NULL</literal> pointer.
+  </para>
+  <para>
+   In each of the sections below you'll find a sub section called
+   protocol behavior, that descries how the API maps to the Z39.50
+   protocol.
   </para>
   <sect1 id="zoom.connections"><title>Connections</title>
    
@@ -122,7 +127,8 @@
       <row><entry>
         async</entry><entry>If true (1) the connection operates in 
         asynchronous operation which means that all calls are non-blocking
-        except <function>Z3950_event</function>.
+        except
+        <link linkend="zoom.events"><function>Z3950_event</function></link>.
        </entry><entry>0</entry></row>
       <row><entry>
         maximumRecordSize</entry><entry> Maximum size of single record.
@@ -153,6 +159,44 @@
     holds messages for the error and additional-info if passed as
     non-<literal>NULL</literal>.
    </para>
+   <sect2><title>Protocol behavior</title>
+    <para>
+     The calls <function>Z3950_connection_new</function> and
+     <function>Z3950_connection_connect</function> establises a TCP/IP
+      connection and sends an Initialize Request to the target if
+      possible. In addition, the calls waits for an Initialize Response
+      from the target and the result is inspected (OK or rejected).
+    </para>
+    <para>
+     If <literal>proxy</literal> is set then the client will establish
+     a TCP/IP connection with the peer as specified by the
+     <literal>proxy</literal> host and the hostname as part of the
+     connect calls will be set as part of the Initialize Request.
+     The proxy server will then "forward" the PDU's transparently
+     to the target behind the proxy.
+    </para>
+    <para>
+     For the authentication parameters, if option <literal>user</literal>
+     is set and both options <literal>group</literal> and
+     <literal>pass</literal> are unset, then Open style
+     authentication is used (Version 2/3) in which case the username
+     is usually followed by a slash, then by a password.
+     If either <literal>group</literal>
+     or <literal>pass</literal> is set then idPass authentication
+     (Version 3 only) is used. If none of the options are set, no
+     authentication parameters are set as part of the Initialize Request
+     (obviously).
+    </para>
+    <para>
+     When option <literal>async</literal> is 1, it really means that
+     all network operations are postponed (and queued) until the
+     function <literal>Z3950_event</literal> is invoked. When doing so
+     it doesn't make sense to check for errors after
+     <literal>Z3950_connection_new</literal> is called since that
+     operation "connecting - and init" is still incomplete and the
+     API cannot tell the outcome (yet).
+    </para>
+    </sect2>
   </sect1>
   <sect1 id="zoom.query"><title>Queries</title>
    <para>
@@ -180,6 +224,13 @@
     sort criteria using the same string notation for sort as offered by
     the <link linkend="sortspec">YAZ client</link>.
    </para>
+   <sect2><title>Protocol behavior</title>
+    <para>
+     The query object is just an interface for the member Query
+     in the SearchRequest. The sortby-function is an interface to the
+     sortSequence member of the SortRequest.
+    </para>
+   </sect2>
   </sect1>
   <sect1 id="zoom.resultsets"><title>Result sets</title>
    <para>
@@ -269,8 +320,8 @@
         value, then target will return all records using small element set name
        </entry><entry>0</entry></row>
       <row><entry>
-        largeSetLowerBound</entry><entry>If hits is greator than this value, the target
-        will return no records.
+        largeSetLowerBound</entry><entry>If hits is greator than this
+        value, the target will return no records.
        </entry><entry>1</entry></row>
       <row><entry>
         mediumSetPresentNumber</entry><entry>This value represents
@@ -293,6 +344,57 @@
      </tbody>
     </tgroup>
    </table>
+   <sect2>
+    <title>Protocol behavior</title>
+    <para>
+     The creation of a result set involves at least a SearchRequest
+     - SearchResponse protocol handshake. Following that, if a sort
+     critieria was specified as part of the query, a sortRequest -
+     SortResponse handshake takes place. Note that it is necessary to
+     perform sorting before any retrieval takes place, so no records will
+     be returned from the target as part of the SearchResponse because these
+     would be unsorted. Hence, piggyback is disabled when sort critieria
+     is set. Following Search - and a Possible sort, Retrieval takes
+     place - as one or more Present Requests - Present Response being
+     transferred.
+     </para>
+    <para>
+     The API allows for two different modes for retrieval. A high level
+     mode which is somewhat more powerful and a low level one.
+     The low level is "enabled" when the settings
+     <literal>smallSetUpperBound</literal>,
+     <literal>mediumSetPresentNumber</literal> and
+     <literal>largeSetLowerBound</literal> are set. The low level mode
+     thus allows you to precisely set how records are returned as part
+     of a search response as offered by the Z39.50 protocol.
+     Since the client may be retrieving records as part of the
+     search response, this mode doesn't work well if sorting is used.
+     </para>
+    <para>
+     The high-level mode allows you to fetch a range of records from
+     the result set with a given start offset. When you use this mode
+     the client will automatically use piggyback if that is possible
+     with the target and perform one or more present requests as needed.
+     Even if the target returns fewer records as part of a present response
+     because of a record size limit, etc. the client will repeat sending
+     present requests. As an example, if option <literal>start</literal>
+     is 0 (default) and <literal>count</literal> is 4, and
+     <literal>piggyback</literal> is 1 (default) and no sorting critieria
+     is specified, then the client will attempt to retrieve the 4
+     records as part the search response (using piggyback). On the other
+     hand, if either <literal>start</literal> is positive or if
+     a sorting criteria is set, or if <literal>piggyback</literal>
+     is 0, then the client will not perform piggyback but send Present
+     Requests instead.
+    </para>
+    <para>
+     If either of the options <literal>mediumSetElementSetName</literal> and
+     <literal>smallSetElementSetName</literal> are unset, the value
+     of option <literal>elementSetName</literal> is used for piggyback
+     searches. This means that for the high-level mode you only have
+     to specify one elementSetName option rather than three.
+     </para>
+   </sect2>
   </sect1>
   <sect1 id="zoom.records"><title>Records</title>
    <para>
@@ -326,7 +428,8 @@
     Function <function>Z3950_resultset_records</function> retrieves
     a number of records from a result set. Parameter <literal>start</literal>
     and <literal>count</literal> specifies the range of records to
-    be returned. Upon completion array <literal>recs[0], ..recs[count-1]</literal>
+    be returned. Upon completion array
+    <literal>recs[0], ..recs[count-1]</literal>
     holds record objects for the records. The array of records
      <literal>recs</literal> should be allocate prior to calling 
     <function>Z3950_resultset_records</function>. Note that for those
@@ -340,14 +443,47 @@
     nature (type) of the pointer depends on the <function>type</function>
     given. In addition for certain types, the length
     <literal>len</literal> passed will be set to the size in bytes of
-    the returned information. The types <literal>database</literal>,
-    <literal>syntax</literal> and <literal>render</literal> are
-    supported. More will be added later.
+    the returned information.
+    <variablelist>
+     <varlistentry><term><literal>database</literal></term>
+      <listitem><para>The database that holds the record is returned
+        as a C string. Return type <literal>char *</literal>. 
+       </para></listitem>
+      </varlistentry>
+     <varlistentry><term><literal>syntax</literal></term>
+      <listitem><para>The transfer syntax (OID) of the record is returned
+        as a C string. Return type <literal>char *</literal>. 
+       </para></listitem>
+      </varlistentry>
+     <varlistentry><term><literal>render</literal></term>
+      <listitem><para>The record is returned in a display friendly
+        format. Upon completion buffer is returned
+        (type <literal>char *</literal>) and length is stored in
+        <literal>*len</literal>.
+       </para></listitem>
+      </varlistentry>
+     <varlistentry><term><literal>raw</literal></term>
+      <listitem><para>The record is returned in the internal
+        YAZ specific format. The raw data is returned as type 
+        <literal>Z_External *</literal> is just the type for
+        the member <literal>retrievalRecord</literal> in
+        type <literal>NamePlusRecord</literal>.
+       </para></listitem>
+      </varlistentry>
+    </variablelist>
    </para>
+   <sect2><title>Protocol behavior</title>
+    <para>
+     The functions <function>Z3950_resultset_record</function> and
+     <function>Z3950_resultset_records</function> inspects the client-side
+     record cache. If the records(s) were not found, i.e. not yet retrieved
+     from, they are fetched using Present Requests.
+    </para>
+   </sect2>
   </sect1>
   <sect1 id="zoom.options"><title>Options</title>
    <para>
-    Most &zoom; objects provide a way to specify options to default behaviour.
+    Most &zoom; objects provide a way to specify options to default behavior.
     From an implementation point of view a set of options is just like
     an associate array / hash array, etc.
    </para>
@@ -394,7 +530,7 @@
     occurred for connection <literal>cs[n-1]</literal>.
     When no events are pending for the connections, a value of zero is
     returned.
-    To make sure all outstanding requests are performed call this function
+    To ensure that all outstanding requests are performed call this function
     repeatedly until zero is returned.
    </para>
   </sect1>

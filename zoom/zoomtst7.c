@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.3 2001-11-06 17:05:19 adam Exp $
+ * $Id: zoomtst7.c,v 1.4 2001-11-11 22:25:25 adam Exp $
  *
  * API test..
  */
@@ -21,6 +21,15 @@ int main(int argc, char **argv)
     Z3950_options o;
 
     o = Z3950_options_create ();
+
+    z = Z3950_connection_new ("localhost", 9999);
+    if (Z3950_connection_error (z, 0, 0))
+    {
+        printf ("error - couldn't connect?\n");
+        exit (1);
+    }
+        
+    Z3950_connection_destroy (z);
 
     for (block = 0; block < 3; block++)
     {

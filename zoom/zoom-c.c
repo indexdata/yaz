@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.3 2001-11-06 17:05:19 adam Exp $
+ * $Id: zoom-c.c,v 1.4 2001-11-11 22:25:25 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -11,6 +11,12 @@
 #include <yaz/diagbib1.h>
 
 #include "zoom-p.h"
+
+#define USE_POLL 0
+
+#if USE_POLL
+#include <sys/poll.h>
+#endif
 
 static Z3950_record record_cache_lookup (Z3950_resultset r,
 					 int pos,
@@ -434,7 +440,8 @@ static void do_connect (Z3950_connection c)
 	if (ret >= 0)
 	{
 	    c->state = STATE_CONNECTING; 
-	    c->mask = Z3950_SELECT_READ | Z3950_SELECT_WRITE | Z3950_SELECT_EXCEPT;
+	    c->mask = Z3950_SELECT_READ | Z3950_SELECT_WRITE | 
+                Z3950_SELECT_EXCEPT;
 	    return;
 	}
     }
@@ -820,6 +827,15 @@ void *Z3950_record_get (Z3950_record rec, const char *type, size_t *len)
 	}
 	return 0;
     }
+    else if (!strcmp (type, "raw"))
+    {
+	if (npr->which == Z_NamePlusRecord_databaseRecord)
+	{
+            *len = -1;
+	    return (Z_External *) npr->u.databaseRecord;
+	}
+	return 0;
+    }
     return 0;
 }
 
@@ -1192,12 +1208,12 @@ static int do_write_ex (Z3950_connection c, char *buf_out, int len_out)
     else if (r == 1)
     {
 	c->state = STATE_ESTABLISHED;
-	c->mask = Z3950_SELECT_READ|Z3950_SELECT_WRITE;
+	c->mask = Z3950_SELECT_READ|Z3950_SELECT_WRITE|Z3950_SELECT_EXCEPT;
     }
     else
     {
 	c->state = STATE_ESTABLISHED;
-	c->mask = Z3950_SELECT_READ;
+	c->mask = Z3950_SELECT_READ|Z3950_SELECT_EXCEPT;
     }
     return 0;
 }
@@ -1293,7 +1309,7 @@ int Z3950_connection_do_io(Z3950_connection c, int mask)
 {
 #if 0
     int r = cs_look(c->cs);
-    yaz_log (LOG_DEBUG, "Z3950_connection_do_io c=%p mask=%d cs_look=%d",
+    yaz_log (LOG_LOG, "Z3950_connection_do_io c=%p mask=%d cs_look=%d",
 	     c, mask, r);
     
     if (r == CS_NONE)
@@ -1303,7 +1319,7 @@ int Z3950_connection_do_io(Z3950_connection c, int mask)
     }
     else if (r == CS_CONNECT)
     {
-	yaz_log (LOG_DEBUG, "calling rcvconnect");
+	yaz_log (LOG_LOG, "calling rcvconnect");
 	if (cs_rcvconnect (c->cs) < 0)
 	{
 	    c->error = Z3950_ERROR_CONNECT;
@@ -1350,9 +1366,14 @@ int Z3950_connection_do_io(Z3950_connection c, int mask)
 
 int Z3950_event (int no, Z3950_connection *cs)
 {
+#if USE_POLL
+    struct pollfd pollfds[1024];
+    Z3950_connection poll_cs[1024];
+#else
     struct timeval tv;
     fd_set input, output, except;
-    int i, r;
+#endif
+    int i, r, nfds;
     int max_fd = 0;
 
     for (i = 0; i<no; i++)
@@ -1365,13 +1386,17 @@ int Z3950_event (int no, Z3950_connection *cs)
 	}
     }
 
+#if USE_POLL
+
+#else
     tv.tv_sec = 15;
     tv.tv_usec = 0;
     
     FD_ZERO (&input);
     FD_ZERO (&output);
     FD_ZERO (&except);
-    r = 0;
+#endif
+    nfds = 0;
     for (i = 0; i<no; i++)
     {
 	Z3950_connection c = cs[i];
@@ -1386,23 +1411,43 @@ int Z3950_event (int no, Z3950_connection *cs)
 	    continue;
 	if (max_fd < fd)
 	    max_fd = fd;
+
+#if USE_POLL
+        if (mask)
+        {
+            short poll_events = 0;
+
+            if (mask & Z3950_SELECT_READ)
+                poll_events += POLLIN;
+            if (mask & Z3950_SELECT_WRITE)
+                poll_events += POLLOUT;
+            if (mask & Z3950_SELECT_EXCEPT)
+                poll_events += POLLERR;
+            pollfds[nfds].fd = fd;
+            pollfds[nfds].events = poll_events;
+            pollfds[nfds].revents = 0;
+            poll_cs[nfds] = c;
+            nfds++;
+        }
+#else
 	if (mask & Z3950_SELECT_READ)
 	{
 	    FD_SET (fd, &input);
-	    r++;
+	    nfds++;
 	}
 	if (mask & Z3950_SELECT_WRITE)
 	{
 	    FD_SET (fd, &output);
-	    r++;
+	    nfds++;
 	}
 	if (mask & Z3950_SELECT_EXCEPT)
 	{
 	    FD_SET (fd, &except);
-	    r++;
+	    nfds++;
 	}
+#endif
     }
-    if (!r)
+    if (!nfds)
     {
 	for (i = 0; i<no; i++)
 	{
@@ -1423,10 +1468,36 @@ int Z3950_event (int no, Z3950_connection *cs)
 	yaz_log (LOG_DEBUG, "no more events");
 	return 0;
     }
+#if USE_POLL
+    yaz_log (LOG_LOG, "poll start");
+    r = poll (pollfds, nfds, 15000);
+    yaz_log (LOG_LOG, "poll stop, returned r=%d", r);
+    for (i = 0; i<nfds; i++)
+    {
+        Z3950_connection c = poll_cs[i];
+        if (r && c->mask)
+        {
+            int mask = 0;
+            if (pollfds[i].revents & POLLIN)
+                mask += Z3950_SELECT_READ;
+            if (pollfds[i].revents & POLLOUT)
+                mask += Z3950_SELECT_WRITE;
+            if (pollfds[i].revents & POLLERR)
+                mask += Z3950_SELECT_EXCEPT;
+            if (mask)
+                Z3950_connection_do_io(c, mask);
+        }
+        else if (r == 0 && c->mask)
+        {
+	    /* timeout and this connection was waiting */
+	    c->error = Z3950_ERROR_TIMEOUT;
+	    c->event_pending = 1;
+        }
+    }
+#else
     yaz_log (LOG_DEBUG, "select start");
     r = select (max_fd+1, &input, &output, &except, &tv);
     yaz_log (LOG_DEBUG, "select stop, returned r=%d", r);
-
     for (i = 0; i<no; i++)
     {
 	Z3950_connection c = cs[i];
@@ -1455,6 +1526,8 @@ int Z3950_event (int no, Z3950_connection *cs)
 	    c->event_pending = 1;
 	}
     }
+#endif
+
     for (i = 0; i<no; i++)
     {
 	Z3950_connection c = cs[i];
