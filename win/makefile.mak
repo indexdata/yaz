@@ -1,18 +1,14 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile.mak,v 1.4 1999-06-02 13:23:29 heikki Exp $
+# $Id: makefile.mak,v 1.5 1999-06-04 10:04:28 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
 #
-# History
-#  18-05-99 HL Stole this from YazX, cleaning up
-#  02-06-99 HL Ztest's bsc file missing, could not debug. Fixing.
+# Log at the end of the file
 #
 # Missing
 # - Move MS-C's whatnots into win direcotry
-# - Log and ID 
 # - rename to makefile (.nothing)
-# - same to yazx...
 #  
 # Envoronment problems
 # - You need to have the proper path and environment for VC set
@@ -24,15 +20,11 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=1   # 0 for release, 1 for debug
+DEBUG=0   # 0 for release, 1 for debug
 
 default: all
 
-!if $(DEBUG)
-all: dirs dll client server ztest bsc
-!else
 all: dirs dll client server ztest 
-!endif
 
 
 ###########################################################
@@ -67,12 +59,10 @@ ZTESTDIR=$(SRCDIR)\ZTEST
 
 DLL=$(BINDIR)\Yaz.dll
 IMPLIB=$(BINDIR)\Yaz.lib
-YAZ_BSCFILE=$(LIBDIR)\Yaz.bsc
 
 CLIENT=$(BINDIR)\client.exe
 SERVER=$(BINDIR)\server.lib
 ZTEST=$(BINDIR)\ztest.exe
-ZTEST_BSCFILE=$(LIBDIR)\ztest.bsc
 
 # shortcut names defined here
 dll : $(DLL) 
@@ -97,23 +87,32 @@ COMMON_C_OPTIONS=          \
   /Fo"$(OBJDIR)\\"         \
   /Fd"$(OBJDIR)\\" 
 
-#  /Fp"$(OBJDIR)\YazX3950.pch" \
-#  /D "_WIN32_DCOM" \
-
 COMMON_C_INCLUDES= \
   /I"$(SRCDIR)\include"
 
-#  /I"$(ROOTDIR)" \
-#  /I"$(OBJDIR)" 
-
 DEBUG_C_OPTIONS=  \
   /D "_DEBUG"      \
-  /MD  /Od /YX /Zi
- 
+  /MDd  /Od /YX /Zi /Gm
+
 RELEASE_C_OPTIONS=  \
   /D "NDEBUG"        \
-  /MDd /O2 /Gm /ZI 
+  /MD /O2
 
+# /W3  = warning level
+# /GX  = Enable exception handling
+# /FD  = Generate file dependencies (what ever they are)
+# /c   = compile without linking
+# /FR  = Generate browse info (.sbr file that gets combined into .bsc)
+# /Fo  = object file name (or at least path)
+# /Fd  = debug database name (or path)
+# /MD  = Runtime library: Multithread DLL
+# /MDd = Runtime library: Multithread DLL (debug)
+# /Od  = Disable optimising (debug)
+# /O2  = Optimize for speed
+# /YX  = Automatic use of precomipled headers
+# /Gm  = Minimal rebuild (some cpp class stuff)
+# /Zi  = Program database for debuggers
+# /ZI  = Pgm database with special "edit&continue" stuff - not available in C5
 
 ### The RC compiler (resource files)
 RSC=rc.exe
@@ -130,14 +129,6 @@ LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   winspool.lib \
            oleaut32.lib uuid.lib     odbc32.lib  odbccp32.lib \
            wsock32.lib  advapi32.lib
 
-
-
-#odbccp32.lib yaz.lib /nologo /subsystem:console /incremental:no /pdb:".\Debug/client.pdb" /debug /machine:I386 /out:".\Debug/client.exe" /libpath:"..\debug" 
-#kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib 
-#ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib yaz.lib server.lib 
-#ZT: /nologo /subsystem:console /incremental:no /pdb:"Debug/ztest.pdb" /debug /machine:I386 /out:"Debug/ztest.exe" /pdbtype:sept /libpath:"..\debug" /libpath:"..\server\debug" 
-
-
 COMMON_LNK_OPTIONS= /nologo \
                     /subsystem:windows \
                     /machine:i386 \
@@ -152,16 +143,6 @@ CLIENT_LINK_OPTIONS = /subsystem:console
 SERVER_LINK_OPTIONS = -lib 
 ZTEST_LINK_OPTIONS = /subsystem:console  
 
-#shell32.lib 
-
-### BSC compiler options
-
-BSCMAKE=bscmake.exe
-
-
-COMMON_BSC_OPTIONS= /nologo /n
-DEBUG_BSC_OPTIONS=
-RELEASE_BSC_OPTIONS=
 
 # Final opt variables
 !if $(DEBUG)
@@ -169,14 +150,12 @@ COPT=   $(COMMON_C_OPTIONS)   $(DEBUG_C_OPTIONS)     $(COMMON_C_INCLUDES)
 MTLOPT= $(COMMON_MTL_OPTIONS) $(DEBUG_MTL_OPTIONS)
 RCOPT=  $(COMMON_RC_OPTIONS)  $(DEBUG_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(DEBUG_LNK_OPTIONS)   $(LNK_LIBS)
-BSCOPT= $(COMMON_BSC_OPTIONS) $(DEBUG_BSC_OPTIONS)
 
 !else
 COPT=   $(COMMON_C_OPTIONS)   $(RELEASE_C_OPTIONS)   $(COMMON_C_INCLUDES) 
 MTLOPT= $(COMMON_MTL_OPTIONS) $(RELEASE_MTL_OPTIONS)
 RCOPT=  $(COMMON_RC_OPTIONS)  $(RELEASE_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
-BSCOPT= $(COMMON_BSC_OPTIONS) $(RELEASE_BSC_OPTIONS)
 !endif
 
 
@@ -437,21 +416,7 @@ $(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS)
 <<
 # note that this links a lib, so it uses completely different options.
 
-#	regsvr32 /s /c "$(DLL)" 
-#		/def:$(DEF_FILE)
 
-
-## Linking the debug info database (or what ever this is...)
-$(YAZ_BSCFILE): $(DLL_OBJS) $(DLL)
-	$(BSCMAKE) $(BSCOPT) /o $(YAZ_BSCFILE) $(OBJDIR)\*.sbr
-
-$(ZTEST_BSCFILE): $(DLL_OBJS) $(ZTEST_OBJS) $(ZTEST)
-	$(BSCMAKE) $(BSCOPT) /o $(ZTEST_BSCFILE) $(OBJDIR)\*.sbr
-
-#	@echo OPT=$(LNKOPT)
-#	@echo LIB=$(LINKLIBS)
-#	@echo OBJ=$(DLL_OBJS)
-#	@echo DEF=$(DEF_FILE)
 
 ###########################################################
 ############### Special operations
@@ -460,8 +425,12 @@ $(ZTEST_BSCFILE): $(DLL_OBJS) $(ZTEST_OBJS) $(ZTEST)
 
 ############## clean
 clean:
-	deltree /y "$(OBJDIR)/*.*"
-
+	del $(OBJDIR)\*.obj
+	del $(OBJDIR)\*.sbr
+	del $(DLL) 
+	del $(CLIENT)
+	del $(SERVER)
+	del $(ZTEST)
 
 ########### check directories and create if needed
 dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR)
@@ -469,9 +438,6 @@ dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR)
 $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) :
  	if not exist "$@/$(NUL)" mkdir "$@"
 
-### test target while debugging makefile...
-foo:  $(RESFILE)
-	echo Ok
 
 ###########################################################
 ############### Explicit dependencies
@@ -484,7 +450,10 @@ $(OBJDIR)/client.obj: $(IDLGENERATED)
 ###########################################################
 #
 # $Log: makefile.mak,v $
-# Revision 1.4  1999-06-02 13:23:29  heikki
+# Revision 1.5  1999-06-04 10:04:28  heikki
+# Cleaning up
+#
+# Revision 1.4  1999/06/02 13:23:29  heikki
 # Debug options for C compiler
 #
 # Revision 1.3  1999/05/19 08:26:22  heikki
