@@ -2,7 +2,10 @@
 # Europagate, 1995
 #
 # $Log: Makefile.in,v $
-# Revision 1.1  1998-08-21 14:13:26  adam
+# Revision 1.2  1998-08-25 16:19:39  adam
+# Minor changes to Makefile(s).
+#
+# Revision 1.1  1998/08/21 14:13:26  adam
 # Added GNU Configure script to build Makefiles.
 #
 # Revision 1.8  1997/09/17 12:10:28  adam
@@ -55,7 +58,7 @@ CC=@CC@
 CPP=@CPP@
 RANLIB=@RANLIB@
 CDEFS=@DEFS@ @ODEFS@
-ELIBS=@LIBS@
+LIBS=@LIBS@
 
 INCLUDE=-I../include
 PROG=cclsh
@@ -66,7 +69,7 @@ DEFS=$(INCLUDE) $(CDEFS)
 all: $(LIB)
 
 $(PROG): $(PROG).o $(LIB)
-	$(CC) $(CFLAGS) -o $(PROG) $(PROG).o $(LIB)
+	$(CC) $(CFLAGS) -o $(PROG) $(PROG).o $(LIB) $(LIBS)
 
 $(LIB): $(PO)
 	rm -f $(LIB)

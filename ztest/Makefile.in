@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1998-08-21 14:13:38 adam Exp $
+# $Id: Makefile.in,v 1.2 1998-08-25 16:19:46 adam Exp $
 
 SHELL=/bin/sh
 
@@ -9,7 +9,7 @@ CC=@CC@
 CPP=@CPP@
 RANLIB=@RANLIB@
 CDEFS=@DEFS@ @ODEFS@
-ELIBS=@LIBS@
+LIBS=@LIBS@
 
 LIBDIR=../lib
 
@@ -19,7 +19,7 @@ SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libserver.a 
-LIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
+YAZLIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
 $(LIBDIR)/libcomstack.a $(LIBMOSI) $(LIBDIR)/libutil.a
 PROG=ztest
 PROGO=ztest.o read-grs.o
@@ -28,7 +28,7 @@ RANLIB=ranlib
 all: $(PROG)
 
 $(PROG): $(LIB) $(PROGO) $(LIBS)
-	$(CC) $(CFLAGS) -o $(PROG) $(PROGO) $(LIBS) $(ELIBS)
+	$(CC) $(CFLAGS) -o $(PROG) $(PROGO) $(YAZLIBS) $(LIBS)
 
 alll:
 

@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1998-08-21 14:13:25 adam Exp $
+# $Id: Makefile.in,v 1.2 1998-08-25 16:19:38 adam Exp $
 
 SHELL=/bin/sh
 
@@ -9,7 +9,7 @@ CC=@CC@
 CPP=@CPP@
 RANLIB=@RANLIB@
 CDEFS=@DEFS@ @ODEFS@
-ELIBS=@LIBS@
+LIBS=@LIBS@
 
 INCLUDE=-I../include -I.
 LIBDIR=../lib
@@ -21,9 +21,6 @@ PO = proto.o diagbib1.o zget.o prt-rsc.o prt-acc.o prt-exp.o prt-ext.o \
 	prt-grs.o prt-exd.o prt-dia.o prt-esp.o prt-arc.o prt-add.o \
 	prt-dat.o prt-univ.o
 all: $(LIB)
-
-test: test.o $(LIB) ../odr/odr.a
-	$(CC) $(CFLAGS) $(INCLUDE) -o test test.o $(LIB) ../odr/odr.a $(ELIBS)
 
 alll:
 

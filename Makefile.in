@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1998, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1998-08-21 14:13:23 adam Exp $
+# $Id: Makefile.in,v 1.2 1998-08-25 16:19:37 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
@@ -30,8 +30,8 @@ CPP=@CPP@
 SHELL=/bin/sh
 MAKE=make
 SUBDIR=$(MOD) util odr $(RFC1006) ccl comstack retrieval client server ztest makelib
-# Add external libraries to the ELIBS macro
-ELIBS=@LIBS@
+# Add external libraries to the LIBS macro
+LIBS=@LIBS@
 
 RANLIB=@RANLIB@
 
@@ -49,7 +49,7 @@ YAZDIR=$(prefix)/lib/yaz
 
 all:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) CC="$(CC)" \
-		RANLIB="$(RANLIB)" ELIBS="$(ELIBS)" \
+		RANLIB="$(RANLIB)" LIBS="$(LIBS)" \
 		INCLUDE="$(INCLUDE)" CFLAGS="$(CFLAGS)" \
 		CDEFS="$(CDEFS)" \
 		LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)";\

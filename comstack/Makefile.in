@@ -1,14 +1,14 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1998-08-21 14:13:28 adam Exp $
+# $Id: Makefile.in,v 1.2 1998-08-25 16:19:41 adam Exp $
 SHELL=/bin/sh
 
 CC=@CC@
 CPP=@CPP@
 RANLIB=@RANLIB@
 CDEFS=@DEFS@ @ODEFS@
-ELIBS=@LIBS@
+LIBS=@LIBS@
 
 LIBDIR=../lib
 
@@ -21,8 +21,6 @@ LIBINCLUDE=-L$(LIBDIR) -L../../xtimosi/src
 DEFS=$(INCLUDE) $(CDEFS)
 # -DTRACE_TCPIP
 LIB= $(LIBDIR)/libcomstack.a 
-LIBS=$(LIBDIR)/libasn.a $(LIBDIR)/libodr.a $(LIBDIR)/libcomstack.a \
-	 ../lib/ccl.a $(LIBDIR)/libutil.a $(LIBMOSI)
 PO = comstack.o tcpip.o waislen.o $(XMOSI)
 
 all: $(LIB)

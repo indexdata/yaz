@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1998-08-21 14:13:29 adam Exp $
+# $Id: Makefile.in,v 1.2 1998-08-25 16:19:42 adam Exp $
 
 SHELL=/bin/sh
 
@@ -9,7 +9,7 @@ RANLIB=@RANLIB@
 
 MAKE=make
 LIBDIR=../lib
-LIBS=$(LIBDIR)/libodr.a $(LIBDIR)/libasn.a $(LIBDIR)/libcomstack.a \
+YAZLIBS=$(LIBDIR)/libodr.a $(LIBDIR)/libasn.a $(LIBDIR)/libcomstack.a \
 	$(LIBDIR)/libserver.a $(LIBDIR)/libutil.a $(LIBDIR)/libret.a
 LIB=$(LIBDIR)/libyaz.a
 
@@ -17,7 +17,7 @@ all: $(LIB)
 
 $(LIB): $(LIBS)
 	rm -f $(LIB)
-	for i in $(LIBS); do echo $$i; ar x $$i; rm -f __*; done
+	for i in $(YAZLIBS); do echo $$i; ar x $$i; rm -f __*; done
 	ar qc $(LIB) *.o
 	rm -f *.o
 	$(RANLIB) $(LIB)
