@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.3  1995-12-05 15:08:44  adam
+ * Revision 1.4  1996-07-03 13:21:36  adam
+ * Function xfree_f checks for NULL pointer.
+ *
+ * Revision 1.3  1995/12/05  15:08:44  adam
  * Fixed verbose of xrealloc.
  *
  * Revision 1.2  1995/12/05  11:08:37  adam
@@ -98,6 +101,8 @@ char *xstrdup_f (const char *s, char *file, int line)
 
 void xfree_f(void *p, char *file, int line)
 {
+    if (!p)
+        return ;
 #ifdef TRACE_XMALLOC
     if (p)
         fprintf(stderr, "%s:%d: xfree %p\n", file, line, p);
