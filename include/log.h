@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.7  1996-02-05 12:24:26  adam
+ * Revision 1.8  1996-05-01 12:45:00  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.7  1996/02/05  12:24:26  adam
  * Implemented log_event_{start,end}-functions.
  *
  * Revision 1.6  1995/10/10  16:27:06  quinn
@@ -70,6 +73,7 @@
 #define LOG_WARN  0x0004
 #define LOG_LOG   0x0008
 #define LOG_ERRNO 0x0010     /* append strerror to message */
+#define LOG_FILE  0x0020
 
 #define LOG_ALL   0xffff
 
