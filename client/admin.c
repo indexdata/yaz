@@ -1,6 +1,9 @@
 /*
  * $Log: admin.c,v $
- * Revision 1.2  2000-03-14 14:06:04  ian
+ * Revision 1.3  2000-03-14 15:23:17  ian
+ * Removed unwanted ifdef and include of zes-admin.h
+ *
+ * Revision 1.2  2000/03/14 14:06:04  ian
  * Minor change to order of debugging output for send_apdu,
  * fixed encoding of admin request.
  *
@@ -26,11 +29,6 @@
 #include <yaz/diagbib1.h>
 
 #include <yaz/pquery.h>
-
-#ifdef ASN_COMPILED
-/* #include <yaz/esadmin.h> */
-#endif
-
 
 /* Helper functions to get to various statics in the client */
 ODR getODROutputStream();
