@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.7  1998-02-11 11:53:36  adam
+ * Revision 1.8  1998-07-03 14:21:27  adam
+ * Added critical sections for pthreads-library. Thanks to Ian Ibbotson,
+ * Fretwell Downing Informatics.
+ *
+ * Revision 1.7  1998/02/11 11:53:36  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.6  1997/10/31 12:20:09  adam
@@ -41,6 +45,8 @@
 #include <log.h>
 #ifdef WINDOWS
 #include <windows.h>
+#elif _REENTRANT
+#include <pthread.h>
 #endif
 
 #define NMEM_CHUNK (10*1024)
@@ -49,6 +55,10 @@
 static CRITICAL_SECTION critical_section;
 #define NMEM_ENTER EnterCriticalSection(&critical_section)
 #define NMEM_LEAVE LeaveCriticalSection(&critical_section)
+#elif _REENTRANT
+static pthread_mutex_t nmem_mutex;
+#define NMEM_ENTER pthread_mutex_lock(&nmem_mutex);
+#define NMEM_LEAVE pthread_mutex_unlock(&nmem_mutex);
 #else
 #define NMEM_ENTER
 #define NMEM_LEAVE
