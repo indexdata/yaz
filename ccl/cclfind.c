@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.16  2000-03-14 09:06:11  adam
+ * Revision 1.17  2000-05-01 09:36:50  adam
+ * Range operator only treated in ordered ranges so that minus (-) can be
+ * used for, say, the and-not operator.
+ *
+ * Revision 1.16  2000/03/14 09:06:11  adam
  * Added POSIX threads support for frontend server.
  *
  * Revision 1.15  2000/02/24 23:49:13  adam
@@ -579,7 +583,8 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
 
         ADVANCE;                      /* skip relation */
         if (KIND == CCL_TOK_TERM &&
-	    cclp->look_token->next->kind == CCL_TOK_MINUS)
+            cclp->look_token->next->len == 1 &&
+            cclp->look_token->next->name[0] == '-')
         {
             struct ccl_rpn_node *p1;
             if (!(p1 = search_term (cclp, ap)))
@@ -613,7 +618,8 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
                 return p1;
             }
         }
-        else if (KIND == CCL_TOK_MINUS)   /* = - term  ? */
+        else if (cclp->look_token->len == 1 &&
+                 cclp->look_token->name[0] == '"')   /* = - term  ? */
         {
             ADVANCE;
             if (!(p = search_term (cclp, ap)))
@@ -671,8 +677,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
 					  struct ccl_rpn_attr **qa)
 {
     static int list[] = {
-        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ,
-        CCL_TOK_REL, CCL_TOK_MINUS, -1};
+        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ, CCL_TOK_REL, -1};
     struct ccl_rpn_node *p1, *p2, *pn;
     p1 = search_term_x (cclp, qa, list);
     if (!p1)

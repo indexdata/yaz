@@ -45,7 +45,11 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.14  2000-03-14 09:06:11  adam
+ * Revision 1.15  2000-05-01 09:36:50  adam
+ * Range operator only treated in ordered ranges so that minus (-) can be
+ * used for, say, the and-not operator.
+ *
+ * Revision 1.14  2000/03/14 09:06:11  adam
  * Added POSIX threads support for frontend server.
  *
  * Revision 1.13  2000/02/08 10:39:53  adam
@@ -288,9 +292,6 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 		last->kind = CCL_TOK_EQ;
 	    else
 		last->kind = CCL_TOK_REL;
-	    break;
-	case '-':
-	    last->kind = CCL_TOK_MINUS;
 	    break;
 	case '\"':
 	    last->kind = CCL_TOK_TERM;
