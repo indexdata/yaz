@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.11  1997-09-01 08:49:48  adam
+ * Revision 1.12  1997-09-04 07:59:02  adam
+ * Added include of xmalloc.h.
+ *
+ * Revision 1.11  1997/09/01 08:49:48  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -76,6 +79,7 @@
 #define LOG_H
 
 #include <yconfig.h>
+#include <xmalloc.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
