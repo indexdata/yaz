@@ -1,12 +1,12 @@
-<!-- $Id: credits.xml,v 1.11 2002-11-29 11:53:55 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.12 2003-06-04 13:25:37 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
-   <para>
+  <para>
    This appendix lists individuals that have contributed in the development
    of &yaz;. Some have contributed with code, while others have provided bug
    fixes or suggestions. If we're missing somebody, of if you, for
    whatever reason, don't like to be listed here, let us know.
   </para>
-
+  
   <itemizedlist>
    <listitem><para>
      Dimitrios Andreadis
@@ -57,6 +57,9 @@
      Kang-Jin Lee
     </para></listitem>
    <listitem><para>
+     Pieter Van Lierop
+    </para></listitem>
+   <listitem><para>
      Stefan Lohrum
     </para></listitem>
    <listitem><para>
@@ -64,6 +67,9 @@
     </para></listitem>
    <listitem><para>
      Thomas W. Place
+    </para></listitem>
+   <listitem><para>
+     Peter Popovics
     </para></listitem>
    <listitem><para>
      Jacob Chr. Poulsen
