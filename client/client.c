@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2005, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.266 2005-01-09 21:52:48 adam Exp $
+ * $Id: client.c,v 1.267 2005-01-11 12:07:55 adam Exp $
  */
 
 #include <stdio.h>
@@ -1253,11 +1253,11 @@ static int send_srw(Z_SRW_PDU *sr)
 #endif
 
 #if HAVE_XML2
-static int send_SRW_scanRequest(const char *arg, int num, int pos)
+static int send_SRW_scanRequest(const char *arg, int pos, int num)
 {
     Z_SRW_PDU *sr = 0;
     
-    /* regular request .. */
+    /* regular requestse .. */
     sr = yaz_srw_get(out, Z_SRW_scan_request);
 
     switch(queryType)
@@ -2856,8 +2856,16 @@ int cmd_scan(const char *arg)
             cmd_open(0);
 	if (!conn)
 	    return 0;
-        if (send_SRW_scanRequest(arg, 20, 0) < 0)
-            return 0;
+	if (*arg)
+	{
+	    if (send_SRW_scanRequest(arg, scan_position, 20) < 0)
+		return 0;
+	}
+	else
+	{
+	    if (send_SRW_scanRequest(last_scan_line, 1, 20) < 0)
+		return 0;
+	}
 	return 2;
 #else
         return 0;
@@ -3531,6 +3539,8 @@ static void handle_srw_scan_term(Z_SRW_scanTerm *term)
 	printf(" %s", term->whereInList);
     if (term->value && term->displayTerm)
 	printf(" %s", term->value);
+
+    strcpy(last_scan_line, term->value);
     printf("\n");
 }
 

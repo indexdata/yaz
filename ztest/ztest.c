@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.69 2005-01-11 10:44:07 adam Exp $
+ * $Id: ztest.c,v 1.70 2005-01-11 12:08:02 adam Exp $
  */
 
 /*
@@ -552,28 +552,38 @@ int ztest_scan(void *handle, bend_scan_rr *q)
 	perror("dummy-words");
 	exit(1);
     }
-    if (q->term->term->which != Z_Term_general)
-    {
-    	q->errcode = 229; /* unsupported term type */
-	return 0;
-    }
-    if (*q->step_size != 0)
-    {
-	q->errcode = 205; /*Only zero step size supported for Scan */
-	return 0;
-    }
-    if (q->term->term->u.general->len >= 80)
-    {
-    	q->errcode = 11; /* term too long */
-	return 0;
-    }
     if (q->num_entries > 200)
     {
     	q->errcode = 31;
 	return 0;
     }
-    memcpy(term, q->term->term->u.general->buf, q->term->term->u.general->len);
-    term[q->term->term->u.general->len] = '\0';
+    if (q->term)
+    {
+	int len;
+	if (q->term->term->which != Z_Term_general)
+	{
+	    q->errcode = 229; /* unsupported term type */
+	    return 0;
+	}
+	if (*q->step_size != 0)
+	{
+	    q->errcode = 205; /*Only zero step size supported for Scan */
+	    return 0;
+	}
+	len = q->term->term->u.general->len;
+	if (len >= sizeof(term))
+	    len = sizeof(term)-1;
+	memcpy(term, q->term->term->u.general->buf, len);
+	term[len] = '\0';
+    }
+    else if (q->scanClause)
+    {
+	strncpy(term, q->scanClause, sizeof(term)-1);
+	term[sizeof(term)-1] = '\0';
+    }
+    else
+	strcpy(term, "0");
+
     for (p = term; *p; p++)
     	if (islower(*(unsigned char *) p))
 	    *p = toupper(*p);
@@ -665,6 +675,7 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_fetch = ztest_fetch;
     q->bend_scan = ztest_scan;
     q->bend_explain = ztest_explain;
+    q->bend_srw_scan = ztest_scan;
 
     return r;
 }

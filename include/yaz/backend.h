@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2004, Index Data.
+ * Copyright (c) 1995-2005, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.26 2004-10-15 00:18:59 adam Exp $
+ * $Id: backend.h,v 1.27 2005-01-11 12:07:55 adam Exp $
  */
 
 /** 
@@ -138,6 +138,7 @@ typedef struct bend_scan_rr {
     bend_scan_status status;
     int errcode;
     char *errstring;
+    char *scanClause;   /* CQL scan clause */
 } bend_scan_rr;
 
 /* delete handler */
@@ -227,6 +228,7 @@ typedef struct bend_initrequest
     Z_CharSetandLanguageNegotiation *charneg_request;
     Z_External *charneg_response;
     int (*bend_explain)(void *handle, bend_explain_rr *rr);
+    int (*bend_srw_scan)(void *handle, bend_scan_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult

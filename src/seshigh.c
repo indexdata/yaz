@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2004, Index Data
+ * Copyright (c) 1995-2005, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.42 2004-12-30 00:25:33 adam Exp $
+ * $Id: seshigh.c,v 1.43 2005-01-11 12:07:55 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -90,10 +90,10 @@ static statserv_options_block *control_block = 0;
 static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd);
 
 /* dynamic logging levels */
-static int logbits_set=0;
-static int log_session=0; 
-static int log_request=0; /* one-line logs for requests */
-static int log_requestdetail=0;  /* more detailed stuff */
+static int logbits_set = 0;
+static int log_session = 0; 
+static int log_request = 0; /* one-line logs for requests */
+static int log_requestdetail = 0;  /* more detailed stuff */
 
 /** get_logbits sets global loglevel bits */
 static void get_logbits()
@@ -478,6 +478,7 @@ static void assoc_init_reset(association *assoc)
     assoc->init->bend_segment = NULL;
     assoc->init->bend_fetch = NULL;
     assoc->init->bend_explain = NULL;
+    assoc->init->bend_srw_scan = NULL;
 
     assoc->init->charneg_request = NULL;
     assoc->init->charneg_response = NULL;
@@ -487,7 +488,7 @@ static void assoc_init_reset(association *assoc)
         odr_strdup (assoc->encode, cs_addrstr(assoc->client_link));
 }
 
-static int srw_bend_init(association *assoc)
+static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num)
 {
     const char *encoding = "UTF-8";
     Z_External *ce;
@@ -505,10 +506,18 @@ static int srw_bend_init(association *assoc)
     assoc->backend = 0;
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
-        yaz_log(YLOG_WARN, "Bad response from backend.");
+        assoc->state = ASSOC_DEAD;
+	yaz_add_srw_diagnostic(assoc->encode, d, num, 3, 0);
         return 0;
     }
     assoc->backend = binitres->handle;
+    if (binitres->errcode)
+    {
+        assoc->state = ASSOC_DEAD;
+	yaz_add_srw_diagnostic(assoc->encode, d, num, binitres->errcode,
+			       binitres->errstring);
+	return 0;
+    }
     return 1;
 }
 
@@ -624,211 +633,194 @@ static void srw_bend_search(association *assoc, request *req,
                             int *http_code)
 {
     int srw_error = 0;
-    bend_search_rr rr;
     Z_External *ext;
-    const char *querystr = 0;
-    const char *querytype = 0;
     
     *http_code = 200;
     yaz_log(log_requestdetail, "Got SRW SearchRetrieveRequest");
-    yaz_log(YLOG_DEBUG, "srw_bend_search");
     if (!assoc->init)
+        srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
+    if (srw_req->sort_type != Z_SRW_sort_type_none)
+	yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+			       &srw_res->num_diagnostics, 80, 0);
+    else if (srw_res->num_diagnostics == 0 && assoc->init)
     {
-        yaz_log(YLOG_DEBUG, "srw_bend_init");
-        if (!srw_bend_init(assoc))
-        {
-            srw_error = 3;  /* assume Authentication error */
+	bend_search_rr rr;
+	rr.setname = "default";
+	rr.replace_set = 1;
+	rr.num_bases = 1;
+	rr.basenames = &srw_req->database;
+	rr.referenceId = 0;
+	
+	rr.query = (Z_Query *) odr_malloc (assoc->decode, sizeof(*rr.query));
+	
+	if (srw_req->query_type == Z_SRW_query_type_cql)
+	{
+	    ext = (Z_External *) odr_malloc(assoc->decode, sizeof(*ext));
+	    ext->direct_reference = odr_getoidbystr(assoc->decode, 
+						    "1.2.840.10003.16.2");
+	    ext->indirect_reference = 0;
+	    ext->descriptor = 0;
+	    ext->which = Z_External_CQL;
+	    ext->u.cql = srw_req->query.cql;
+	    
+	    rr.query->which = Z_Query_type_104;
+	    rr.query->u.type_104 =  ext;
+	}
+	else if (srw_req->query_type == Z_SRW_query_type_pqf)
+	{
+	    Z_RPNQuery *RPNquery;
+	    YAZ_PQF_Parser pqf_parser;
+	    
+	    pqf_parser = yaz_pqf_create ();
+	    
+	    RPNquery = yaz_pqf_parse (pqf_parser, assoc->decode,
+				      srw_req->query.pqf);
+	    if (!RPNquery)
+	    {
+		const char *pqf_msg;
+		size_t off;
+		int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
+		yaz_log(log_requestdetail, "Parse error %d %s near offset %d",
+			code, pqf_msg, off);
+		srw_error = 10;
+	    }
+	    
+	    rr.query->which = Z_Query_type_1;
+	    rr.query->u.type_1 =  RPNquery;
+	    
+	    yaz_pqf_destroy (pqf_parser);
+	}
+	else
+	{
+	    rr.query->u.type_1 = 0;
+	    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+				   &srw_res->num_diagnostics, 11, 0);
+	}
+	if (rr.query->u.type_1)
+	{
+	    rr.stream = assoc->encode;
+	    rr.decode = assoc->decode;
+	    rr.print = assoc->print;
+	    rr.request = req;
+	    rr.association = assoc;
+	    rr.fd = 0;
+	    rr.hits = 0;
+	    rr.errcode = 0;
+	    rr.errstring = 0;
+	    rr.search_info = 0;
+	    yaz_log_zquery_level(log_requestdetail,rr.query);
+	    
+	    (assoc->init->bend_search)(assoc->backend, &rr);
+	    if (rr.errcode)
+	    {
+		if (rr.errcode == 109) /* database unavailable */
+		{
+		    *http_code = 404;
+		}
+		else
+		{
+		    srw_error = yaz_diag_bib1_to_srw (rr.errcode);
+		    yaz_add_srw_diagnostic(assoc->encode,
+					   &srw_res->diagnostics,
+					   &srw_res->num_diagnostics,
+					   srw_error, rr.errstring);
+		}
+	    }
+	    else
+	    {
+		int number = srw_req->maximumRecords ? *srw_req->maximumRecords : 0;
+		int start = srw_req->startRecord ? *srw_req->startRecord : 1;
+		
+		yaz_log(log_requestdetail, "Request to pack %d+%d out of %d",
+			start, number, rr.hits);
+		
+		srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
+		if (number > 0)
+		{
+		    int i;
+		    
+		    if (start > rr.hits)
+		    {
+			yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+					       &srw_res->num_diagnostics,
+					       61, 0);
+		    }
+		    else
+		    {
+			int j = 0;
+			int packing = Z_SRW_recordPacking_string;
+			if (start + number > rr.hits)
+			    number = rr.hits - start + 1;
+			if (srw_req->recordPacking && 
+			    !strcmp(srw_req->recordPacking, "xml"))
+			    packing = Z_SRW_recordPacking_XML;
+			srw_res->records = (Z_SRW_record *)
+			    odr_malloc(assoc->encode,
+				       number * sizeof(*srw_res->records));
+			for (i = 0; i<number; i++)
+			{
+			int errcode;
+			
+			srw_res->records[j].recordPacking = packing;
+			srw_res->records[j].recordData_buf = 0;
+			yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
+			errcode = srw_bend_fetch(assoc, i+start, srw_req,
+						 srw_res->records + j);
+			if (errcode)
+			{
+			    yaz_add_srw_diagnostic(assoc->encode,
+						   &srw_res->diagnostics,
+						   &srw_res->num_diagnostics,
+						   yaz_diag_bib1_to_srw (errcode),
+						   rr.errstring);
 
-            yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                   &srw_res->num_diagnostics, 1, 0);
-            yaz_log(log_request, "Search SRW: backend init failed");
-            return;
-        }
-    }
-    
-    rr.setname = "default";
-    rr.replace_set = 1;
-    rr.num_bases = 1;
-    rr.basenames = &srw_req->database;
-    rr.referenceId = 0;
-
-    rr.query = (Z_Query *) odr_malloc (assoc->decode, sizeof(*rr.query));
-
-    if (srw_req->query_type == Z_SRW_query_type_cql)
-    {
-        ext = (Z_External *) odr_malloc(assoc->decode, sizeof(*ext));
-        ext->direct_reference = odr_getoidbystr(assoc->decode, 
-                                                "1.2.840.10003.16.2");
-        ext->indirect_reference = 0;
-        ext->descriptor = 0;
-        ext->which = Z_External_CQL;
-        ext->u.cql = srw_req->query.cql;
-        querystr = srw_req->query.cql;
-	querytype = "CQL";
-
-        rr.query->which = Z_Query_type_104;
-        rr.query->u.type_104 =  ext;
-    }
-    else if (srw_req->query_type == Z_SRW_query_type_pqf)
-    {
-        Z_RPNQuery *RPNquery;
-        YAZ_PQF_Parser pqf_parser;
-
-        pqf_parser = yaz_pqf_create ();
-
-        querystr = srw_req->query.pqf;
-	querytype = "PQF";
-        RPNquery = yaz_pqf_parse (pqf_parser, assoc->decode,
-                                  srw_req->query.pqf);
-        if (!RPNquery)
-        {
-            const char *pqf_msg;
-            size_t off;
-            int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
-            yaz_log(log_requestdetail, "Parse error %d %s near offset %d",
-                    code, pqf_msg, off);
-            srw_error = 10;
-        }
-
-        rr.query->which = Z_Query_type_1;
-        rr.query->u.type_1 =  RPNquery;
-
-        yaz_pqf_destroy (pqf_parser);
-    }
-    else
-        srw_error = 11;
-
-    if (!srw_error && srw_req->sort_type != Z_SRW_sort_type_none)
-        srw_error = 80;
-
-    if (!srw_error && !assoc->init->bend_search)
-        srw_error = 1;
-
-    if (srw_error)
-    {
-        if (log_request)
-        {
-            WRBUF wr = wrbuf_alloc();
-            wrbuf_printf(wr, "Search: %s: %s ", querytype, querystr);
-            wrbuf_printf(wr, " ERROR %d ", srw_error);
-            yaz_log(log_request, "%s", wrbuf_buf(wr) );
-            wrbuf_free(wr, 1);
-        }
-        srw_res->num_diagnostics = 1;
-        srw_res->diagnostics = (Z_SRW_diagnostic *)
-            odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
-        yaz_mk_std_diagnostic(assoc->encode,
-                              srw_res->diagnostics, srw_error, 0);
-        return;
-    }
-    
-    rr.stream = assoc->encode;
-    rr.decode = assoc->decode;
-    rr.print = assoc->print;
-    rr.request = req;
-    rr.association = assoc;
-    rr.fd = 0;
-    rr.hits = 0;
-    rr.errcode = 0;
-    rr.errstring = 0;
-    rr.search_info = 0;
-    yaz_log_zquery_level(log_requestdetail,rr.query);
-
-    (assoc->init->bend_search)(assoc->backend, &rr);
-    if (rr.errcode)
-    {
-        yaz_log(log_request, "bend_search returned Bib-1 diagnostic %d",
-		rr.errcode);
-        if (rr.errcode == 109) /* database unavailable */
-        {
-            *http_code = 404;
-            return;
-        }
-	srw_error = yaz_diag_bib1_to_srw (rr.errcode);
-        srw_res->num_diagnostics = 1;
-        srw_res->diagnostics = (Z_SRW_diagnostic *)
-            odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
-        yaz_mk_std_diagnostic(assoc->encode, srw_res->diagnostics,
-			      srw_error, rr.errstring);
-    }
-    else
-    {
-        int number = srw_req->maximumRecords ? *srw_req->maximumRecords : 0;
-        int start = srw_req->startRecord ? *srw_req->startRecord : 1;
-
-        yaz_log(log_requestdetail, "Request to pack %d+%d out of %d",
-                start, number, rr.hits);
-
-        srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
-        if (number > 0)
-        {
-            int i;
-
-            if (start > rr.hits)
-            {
-                srw_res->num_diagnostics = 1;
-                srw_res->diagnostics = (Z_SRW_diagnostic *)
-                    odr_malloc(assoc->encode, 
-                               sizeof(*srw_res->diagnostics));
-                yaz_mk_std_diagnostic(assoc->encode,  srw_res->diagnostics,
-                                      61, 0);
-            }
-            else
-            {
-                int j = 0;
-                int packing = Z_SRW_recordPacking_string;
-                if (start + number > rr.hits)
-                    number = rr.hits - start + 1;
-                if (srw_req->recordPacking && 
-                    !strcmp(srw_req->recordPacking, "xml"))
-                    packing = Z_SRW_recordPacking_XML;
-                srw_res->records = (Z_SRW_record *)
-                    odr_malloc(assoc->encode,
-                               number * sizeof(*srw_res->records));
-                for (i = 0; i<number; i++)
-                {
-                    int errcode;
-                    
-                    srw_res->records[j].recordPacking = packing;
-                    srw_res->records[j].recordData_buf = 0;
-                    yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
-                    errcode = srw_bend_fetch(assoc, i+start, srw_req,
-                                             srw_res->records + j);
-                    if (errcode)
-                    {
-                        srw_res->num_diagnostics = 1;
-                        srw_res->diagnostics = (Z_SRW_diagnostic *)
-                            odr_malloc(assoc->encode, 
-                                       sizeof(*srw_res->diagnostics));
-
-                        yaz_mk_std_diagnostic(assoc->encode, 
-                                              srw_res->diagnostics,
-                                              yaz_diag_bib1_to_srw (errcode),
-                                              rr.errstring);
-                        break;
-                    }
-                    if (srw_res->records[j].recordData_buf)
-                        j++;
-                }
-                srw_res->num_records = j;
-                if (!j)
-                    srw_res->records = 0;
-            }
-        }
+			    break;
+			}
+			if (srw_res->records[j].recordData_buf)
+			    j++;
+			}
+			srw_res->num_records = j;
+			if (!j)
+			    srw_res->records = 0;
+		    }
+		}
+	    }
+	}
     }
     if (log_request)
     {
-        WRBUF wr=wrbuf_alloc();
-        wrbuf_printf(wr,"Search %s: %s", querytype, querystr);
-        if (srw_error)
-            wrbuf_printf(wr, " ERROR %d", srw_error);
-        else
-        {
-            wrbuf_printf(wr, " OK:%d hits", rr.hits);
-            if (srw_res->num_records)
-                wrbuf_printf(wr, " %d records returned", srw_res->num_records);
-        }
-        yaz_log(log_request, "%s", wrbuf_buf(wr) );
+	const char *querystr = "?";
+	const char *querytype = "?";
+        WRBUF wr = wrbuf_alloc();
+
+	switch (srw_req->query_type)
+	{
+	case Z_SRW_query_type_cql:
+	    querytype = "CQL";
+	    querystr = srw_req->query.cql;
+	    break;
+	case Z_SRW_query_type_pqf:
+	    querytype = "PQF";
+	    querystr = srw_req->query.pqf;
+	    break;
+	}
+        wrbuf_printf(wr, "SRWSearch ");
+        if (srw_res->num_diagnostics)
+            wrbuf_printf(wr, "ERROR %s", srw_res->diagnostics[0].uri);
+	else if (*http_code != 200)
+	    wrbuf_printf(wr, "ERROR info:http/%d", *http_code);
+        else if (srw_res->numberOfRecords)
+	{
+            wrbuf_printf(wr, "OK %d",
+			 (srw_res->numberOfRecords ?
+			  *srw_res->numberOfRecords : 0));
+	}
+	wrbuf_printf(wr, " %s %d+%d", 
+		     (srw_res->resultSetId ?
+		      srw_res->resultSetId : "-"),
+		     (srw_req->startRecord ? *srw_req->startRecord : 1), 
+		     srw_res->num_records);
+        yaz_log(log_request, "%s %s: %s", wrbuf_buf(wr), querytype, querystr);
         wrbuf_free(wr, 1);
     }
 }
@@ -841,13 +833,7 @@ static void srw_bend_explain(association *assoc, request *req,
     yaz_log(log_requestdetail, "Got SRW ExplainRequest");
     *http_code = 404;
     if (!assoc->init)
-    {
-        yaz_log(YLOG_DEBUG, "srw_bend_init");
-        if (!srw_bend_init(assoc))
-        {
-            return;
-        }
-    }
+        srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
     if (assoc->init && assoc->init->bend_explain)
     {
         bend_explain_rr rr;
@@ -874,6 +860,170 @@ static void srw_bend_explain(association *assoc, request *req,
         }
     }
 }
+
+static void srw_bend_scan(association *assoc, request *req,
+			  Z_SRW_scanRequest *srw_req,
+			  Z_SRW_scanResponse *srw_res,
+			  int *http_code)
+{
+    yaz_log(log_requestdetail, "Got SRW ScanRequest");
+
+    *http_code = 200;
+    if (!assoc->init)
+        srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
+    if (srw_res->num_diagnostics == 0 && assoc->init)
+    {
+	struct scan_entry *save_entries;
+
+	bend_scan_rr *bsrr = (bend_scan_rr *)
+	    odr_malloc (assoc->encode, sizeof(*bsrr));
+	bsrr->num_bases = 1;
+	bsrr->basenames = &srw_req->database;
+
+	bsrr->num_entries = srw_req->maximumTerms ?
+	    *srw_req->maximumTerms : 10;
+	bsrr->term_position = srw_req->responsePosition ?
+	    *srw_req->responsePosition : 1;
+
+	bsrr->errcode = 0;
+	bsrr->errstring = 0;
+	bsrr->referenceId = 0;
+	bsrr->stream = assoc->encode;
+	bsrr->print = assoc->print;
+	bsrr->step_size = odr_intdup(assoc->decode, 0);
+	bsrr->entries = 0;
+
+	if (bsrr->num_entries > 0) 
+	{
+	    int i;
+	    bsrr->entries = odr_malloc(assoc->decode, sizeof(*bsrr->entries) *
+				       bsrr->num_entries);
+	    for (i = 0; i<bsrr->num_entries; i++)
+	    {
+		bsrr->entries[i].term = 0;
+		bsrr->entries[i].occurrences = 0;
+		bsrr->entries[i].errcode = 0;
+		bsrr->entries[i].errstring = 0;
+		bsrr->entries[i].display_term = 0;
+	    }
+	}
+	save_entries = bsrr->entries;  /* save it so we can compare later */
+
+	if (srw_req->query_type == Z_SRW_query_type_pqf &&
+	    assoc->init->bend_scan)
+	{
+	    Odr_oid *scan_attributeSet = 0;
+	    oident *attset;
+	    YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
+	    
+	    bsrr->term = yaz_pqf_scan(pqf_parser, assoc->decode,
+				      &scan_attributeSet, 
+				      srw_req->scanClause.pqf); 
+	    if (scan_attributeSet &&
+		(attset = oid_getentbyoid(scan_attributeSet)) &&
+		(attset->oclass == CLASS_ATTSET ||
+		 attset->oclass == CLASS_GENERAL))
+		bsrr->attributeset = attset->value;
+	    else
+		bsrr->attributeset = VAL_NONE;
+	    yaz_pqf_destroy(pqf_parser);
+	    bsrr->scanClause = 0;
+	    ((int (*)(void *, bend_scan_rr *))
+	     (*assoc->init->bend_scan))(assoc->backend, bsrr);
+	}
+	else if (srw_req->query_type == Z_SRW_query_type_cql
+		 && assoc->init->bend_srw_scan)
+	{
+	    bsrr->term = 0;
+	    bsrr->attributeset = VAL_NONE;
+	    bsrr->scanClause = srw_req->scanClause.cql;
+	    ((int (*)(void *, bend_scan_rr *))
+	     (*assoc->init->bend_srw_scan))(assoc->backend, bsrr);
+	}
+	else
+	{
+	    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+				   &srw_res->num_diagnostics, 4, "scan");
+	}
+	if (bsrr->errcode)
+	{
+	    int srw_error;
+	    if (bsrr->errcode == 109) /* database unavailable */
+	    {
+		*http_code = 404;
+		return;
+	    }
+	    srw_error = yaz_diag_bib1_to_srw (bsrr->errcode);
+
+	    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+				   &srw_res->num_diagnostics,
+				   srw_error, bsrr->errstring);
+	}
+	else if (srw_res->num_diagnostics == 0 && bsrr->num_entries)
+	{
+	    int i;
+	    srw_res->terms = (Z_SRW_scanTerm*)
+		odr_malloc(assoc->encode, sizeof(*srw_res->terms) *
+			   bsrr->num_entries);
+
+	    srw_res->num_terms =  bsrr->num_entries;
+	    for (i = 0; i<bsrr->num_entries; i++)
+	    {
+		Z_SRW_scanTerm *t = srw_res->terms + i;
+		t->value = odr_strdup(assoc->encode, bsrr->entries[i].term);
+		t->numberOfRecords =
+		    odr_intdup(assoc->encode, bsrr->entries[i].occurrences);
+		t->displayTerm = 0;
+                if (save_entries == bsrr->entries && 
+		    bsrr->entries[i].display_term)
+                {
+                    /* the entries was _not_ set by the handler. So it's
+                       safe to test for new member display_term. It is
+                       NULL'ed by us.
+                    */
+                    t->displayTerm = odr_strdup(assoc->encode, 
+						bsrr->entries[i].display_term);
+                }
+		t->whereInList = 0;
+	    }
+	}
+    }
+    if (log_request)
+    {
+        WRBUF wr = wrbuf_alloc();
+	const char *querytype = 0;
+	const char *querystr = 0;
+
+	switch(srw_req->query_type)
+	{
+	case Z_SRW_query_type_pqf:
+	    querytype = "PQF";
+	    querystr = srw_req->scanClause.pqf;
+	    break;
+	case Z_SRW_query_type_cql:
+	    querytype = "CQL";
+	    querystr = srw_req->scanClause.cql;
+	    break;
+	default:
+	    querytype = "Unknown";
+	    querystr = "";
+	}
+        wrbuf_printf(wr, "SRWScan %d+%d",
+		     (srw_req->responsePosition ? 
+		      *srw_req->responsePosition : 1),
+		     (srw_req->maximumTerms ?
+		      *srw_req->maximumTerms : 1));
+        if (srw_res->num_diagnostics)
+            wrbuf_printf(wr, " ERROR %s", srw_res->diagnostics[0].uri);
+        else
+            wrbuf_printf(wr, " OK -");
+        wrbuf_printf(wr, " %s: %s", querytype, querystr);
+        yaz_log(log_request, "%s", wrbuf_buf(wr) );
+        wrbuf_free(wr, 1);
+    }
+
+}
+
 
 static void process_http_request(association *assoc, request *req)
 {
@@ -954,16 +1104,14 @@ static void process_http_request(association *assoc, request *req)
                 res->u.scan_response->diagnostics = diagnostic;
                 res->u.scan_response->num_diagnostics = num_diagnostic;
             }
-            yaz_add_srw_diagnostic(o, 
-                                   &res->u.scan_response->diagnostics,
-                                   &res->u.scan_response->num_diagnostics,
-                                   4, "scan");
+	    srw_bend_scan(assoc, req, sr->u.scan_request,
+			      res->u.scan_response, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }
         else
         {
-            yaz_log(log_request, "generate soap error"); 
+            yaz_log(log_request, "SOAP ERROR"); 
                /* FIXME - what error, what query */
             http_code = 500;
             z_soap_error(assoc->encode, soap_package,
@@ -1429,7 +1577,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.42 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.43 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1439,29 +1587,30 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     if (binitres->errcode)
     {
-	WRBUF wr = wrbuf_alloc();
-        *resp->result = 0;
         assoc->state = ASSOC_DEAD;
         resp->userInformationField =
 	    init_diagnostics(assoc->encode, binitres->errcode,
 			     binitres->errstring);
-	wr_diag(wr, binitres->errcode, binitres->errstring);
-        yaz_log(log_request, "Init from '%s' (%s) (ver %s) %s",
-		req->implementationName ? req->implementationName :"??",
-		req->implementationId ? req->implementationId :"?", 
-		req->implementationVersion ? req->implementationVersion: "?",
-		wrbuf_buf(wr));
+        *resp->result = 0;
+    }
+    if (log_request)
+    {
+	WRBUF wr = wrbuf_alloc();
+	wrbuf_printf(wr, "Init ");
+	if (binitres->errcode)
+	    wrbuf_printf(wr, "ERROR %d", binitres->errcode);
+	else
+	    wrbuf_printf(wr, "OK -");
+	wrbuf_printf(wr, " ID:%s Name:%s Version:%s",
+		     (req->implementationId ? req->implementationId :"-"), 
+		     (req->implementationName ?
+		      req->implementationName : "-"),
+		     (req->implementationVersion ?
+		      req->implementationVersion : "-")
+	    );
+	yaz_log(log_request, "%s", wrbuf_buf(wr));
 	wrbuf_free(wr, 1);
     }
-    else
-    {
-        assoc->state = ASSOC_UP;
-        yaz_log(log_request, "Init from '%s' (%s) (ver %s) OK",
-		req->implementationName ? req->implementationName :"??",
-		req->implementationId ? req->implementationId :"?", 
-		req->implementationVersion ? req->implementationVersion: "?");
-    }
-
     return apdu;
 }
 
@@ -1817,19 +1966,17 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
     if (log_request)
     {
-        WRBUF wr=wrbuf_alloc();
-        wrbuf_put_zquery(wr, req->query);
+        WRBUF wr = wrbuf_alloc();
         if (bsrt->errcode)
-	    wr_diag(wr, bsrt->errcode, bsrt->errstring);
-        else
-        {
-            wrbuf_printf(wr," OK:%d hits", bsrt->hits);
-            if (returnedrecs)
-                wrbuf_printf(wr, " %d records returned", returnedrecs);
-        }
-        yaz_log(log_request, "Search %s %s", req->resultSetName,
-		wrbuf_buf(wr));
-        wrbuf_free(wr,1);
+	    wrbuf_printf(wr, "ERROR %d", bsrt->errcode);
+	else
+	    wrbuf_printf(wr, "OK %d", bsrt->hits);
+	wrbuf_printf(wr, " %s 1+%d ",
+		     req->resultSetName, returnedrecs);
+        wrbuf_put_zquery(wr, req->query);
+	
+        yaz_log(log_request, "Search %s", wrbuf_buf(wr));
+        wrbuf_free(wr, 1);
     }
     return apdu;
 }
@@ -1921,16 +2068,18 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     if (log_request)
     {
         WRBUF wr = wrbuf_alloc();
-        wrbuf_printf(wr, "Present %s %d+%d ",
+        wrbuf_printf(wr, "Present ");
+
+        if (*resp->presentStatus == Z_PresentStatus_failure)
+	    wrbuf_printf(wr, "ERROR %d", errcode);
+        else if (*resp->presentStatus == Z_PresentStatus_success)
+            wrbuf_printf(wr, "OK -");
+        else
+            wrbuf_printf(wr, "Partial %d", *resp->presentStatus);
+
+        wrbuf_printf(wr, " %s %d+%d ",
                 req->resultSetId, *req->resultSetStartPoint,
                 *req->numberOfRecordsRequested);
-        if (*resp->presentStatus == Z_PresentStatus_failure)
-	    wr_diag(wr, errcode, errstring);
-        else if (*resp->presentStatus == Z_PresentStatus_success)
-            wrbuf_printf(wr,"OK %d records returned ", *num);
-        else
-            wrbuf_printf(wr,"Partial (%d) OK %d records returned ", 
-                    *resp->presentStatus, *num);
         yaz_log(log_request, "%s", wrbuf_buf(wr) );
         wrbuf_free(wr, 1);
     }
@@ -2002,10 +2151,12 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     bsrr->print = assoc->print;
     bsrr->step_size = res->stepSize;
     bsrr->entries = 0;
-    /* Note that version 2.0 of YAZ and older did not set entries .. 
-       We do now. And when we do it's easier to extend the scan entry 
-       We know that if the scan handler did set entries, it will
-       not know of new member display_term.
+    /* For YAZ 2.0 and earlier it was the backend handler that
+       initialized entries (member display_term did not exist)
+       YAZ 2.0 and later sets 'entries'  and initialize all members
+       including 'display_term'. If YAZ 2.0 or later sees that
+       entries was modified - we assume that it is an old handler and
+       that 'display_term' is _not_ set.
     */
     if (bsrr->num_entries > 0) 
     {
@@ -2071,7 +2222,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
                 if (save_entries == bsrr->entries && 
                     bsrr->entries[i].display_term)
                 {
-                    /* the entries was NOT set by the handler. So it's
+                    /* the entries was _not_ set by the handler. So it's
                        safe to test for new member display_term. It is
                        NULL'ed by us.
                     */
@@ -2113,23 +2264,21 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     }
     if (log_request)
     {
-        WRBUF wr=wrbuf_alloc();
-        wrbuf_printf(wr, "Scan  %d@%d ",
-            *req->preferredPositionInResponse, 
-            *req->numberOfTermsRequested);
-        if (*res->stepSize)
-            wrbuf_printf(wr, "(step %d) ",*res->stepSize);
-        wrbuf_scan_term(wr, req->termListAndStartPoint, 
-            bsrr->attributeset);
-        
+        WRBUF wr = wrbuf_alloc();
         if (*res->scanStatus == Z_Scan_success)
-        {
-            wrbuf_printf(wr," OK");
-        }
-        else 
-            wrbuf_printf(wr," Error");
-        yaz_log(log_request, "%s", wrbuf_buf(wr) );
-        wrbuf_free(wr,1);
+            wrbuf_printf(wr, "OK ");
+        else
+	    wr_diag(wr, bsrr->errcode, bsrr->errstring);
+
+        wrbuf_printf(wr, "%d+%d %d ",
+		     *req->preferredPositionInResponse, 
+		     *req->numberOfTermsRequested,
+		     (res->stepSize ? *res->stepSize : 0));
+        wrbuf_scan_term(wr, req->termListAndStartPoint, 
+			bsrr->attributeset);
+	
+        yaz_log(log_request, "Scan %s", wrbuf_buf(wr) );
+        wrbuf_free(wr, 1);
     }
     return apdu;
 }
@@ -2190,23 +2339,23 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     apdu->u.sortResponse = res;
     if (log_request)
     {
-        WRBUF wr=wrbuf_alloc();
-        wrbuf_printf(wr, "Sort (");
-        for (i=0;i<req->num_inputResultSetNames;i++)
+        WRBUF wr = wrbuf_alloc();
+        wrbuf_printf(wr, "Sort ");
+	if (bsrr->errcode)
+	    wrbuf_printf(wr, " ERROR %d", bsrr->errcode);
+	else
+	    wrbuf_printf(wr,  "OK -");
+	wrbuf_printf(wr, " (");
+        for (i = 0; i<req->num_inputResultSetNames; i++)
         {
             if (i)
-                wrbuf_printf(wr,",");
+                wrbuf_printf(wr, ",");
             wrbuf_printf(wr, req->inputResultSetNames[i]);
         }
-        wrbuf_printf(wr,")->%s ",req->sortedResultSetName);
+        wrbuf_printf(wr, ")->%s ",req->sortedResultSetName);
 
-        /* FIXME - dump also the sort sequence */
-        if (bsrr->errcode)
-            wrbuf_diags(wr, res->num_diagnostics, res->diagnostics);
-        else
-            wrbuf_printf(wr," OK");
         yaz_log(log_request, "%s", wrbuf_buf(wr) );
-        wrbuf_free(wr,1);
+        wrbuf_free(wr, 1);
     }
     return apdu;
 }
@@ -2281,16 +2430,16 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     apdu->u.deleteResultSetResponse = res;
     if (log_request)
     {
-        WRBUF wr=wrbuf_alloc();
+        WRBUF wr = wrbuf_alloc();
         wrbuf_printf(wr, "Delete ");
-        for (i = 0; i<req->num_resultSetList; i++)
-            wrbuf_printf(wr, " '%s' ", req->resultSetList[i]);
         if (bdrr->delete_status)
-            wrbuf_printf(wr," ERROR %d", bdrr->delete_status);
+            wrbuf_printf(wr, "ERROR %d", bdrr->delete_status);
         else
-            wrbuf_printf(wr,"OK");
+            wrbuf_printf(wr, "OK -");
+        for (i = 0; i<req->num_resultSetList; i++)
+            wrbuf_printf(wr, " %s ", req->resultSetList[i]);
         yaz_log(log_request, "%s", wrbuf_buf(wr) );
-        wrbuf_free(wr,1);
+        wrbuf_free(wr, 1);
     }
     return apdu;
 }
@@ -2461,7 +2610,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
             WRBUF wr=wrbuf_alloc();
             wrbuf_diags(wr, resp->num_diagnostics, resp->diagnostics);
             yaz_log(log_request, "EsRequest %s", wrbuf_buf(wr) );
-            wrbuf_free(wr,1);
+            wrbuf_free(wr, 1);
         }
 
     }
