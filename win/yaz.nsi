@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.26 2003-10-27 13:35:24 adam Exp $
+; $Id: yaz.nsi,v 1.27 2003-10-27 13:43:43 adam Exp $
 
 !define VERSION "2.0.5"
 
@@ -87,13 +87,13 @@ SectionEnd
 Section "YAZ Documentation"
 	SectionIn 1 2
 	SetOutPath $INSTDIR\doc
-	File doc\*.html
-	File doc\*.png
-	File doc\*.pdf
-	File doc\*.xml
-	File doc\*.in
-	File doc\*.dsl
-	File doc\*.xsl
+	File ..\doc\*.html
+	File ..\doc\*.png
+	File ..\doc\*.pdf
+	File ..\doc\*.xml
+	File ..\doc\*.in
+	File ..\doc\*.dsl
+	File ..\doc\*.xsl
 	SetOutPath $SMPROGRAMS\YAZ
 	CreateShortCut "$SMPROGRAMS\YAZ\HTML Documentation.lnk" \
                  "$INSTDIR\doc\yaz.html"
