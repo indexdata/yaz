@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.8 2001-10-29 09:16:27 adam Exp $
+ * $Id: oid.h,v 1.9 2002-01-29 13:47:33 adam Exp $
  */
 
 #ifndef OID_H
@@ -223,6 +223,10 @@ YAZ_EXPORT void oid_setprivateoids(oident *list);
 YAZ_EXPORT struct oident *oid_addent (int *oid, enum oid_proto proto,
 				      enum oid_class oclass,
 				      const char *desc, int value);
+
+YAZ_EXPORT void oid_trav (void (*func)(struct oident *oidinfo, void *vp),
+                          void *vp);
+
 YAZ_EXPORT void oid_init(void);
 YAZ_EXPORT void oid_exit(void);
 

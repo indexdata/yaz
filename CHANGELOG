@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.5 2002/XX/XX
 
+New call oid_trav, that visits all registered OIDs via callback.
+
 Function ZOOM_record_get now returns const char pointer rather than
 void pointer. It saves a lot of type casts.
 

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.51 2002-01-26 20:50:59 adam Exp $
+ * $Id: oid.c,v 1.52 2002-01-29 13:47:33 adam Exp $
  */
 
 /*
@@ -537,4 +537,13 @@ oid_value oid_getvalbyname(const char *name)
 void oid_setprivateoids(oident *list)
 {
     oid_transfer (list);
+}
+
+void oid_trav (void (*func)(struct oident *oidinfo, void *vp), void *vp)
+{
+    struct oident_list *ol;
+
+    oid_init ();
+    for (ol = oident_table; ol; ol = ol->next)
+        (*func)(&ol->oident, vp);
 }
