@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.27 2005-03-08 11:48:09 adam Exp $
+ * $Id: statserv.c,v 1.28 2005-03-08 13:59:08 adam Exp $
  */
 
 /**
@@ -440,8 +440,8 @@ static void xml_config_open()
 	xml_config_doc = xmlParseFile(control_block.xml_config);
 	if (!xml_config_doc)
 	{
-	    yaz_log(YLOG_WARN, "Could not parse %s", control_block.xml_config);
-	    return ;
+	    yaz_log(YLOG_FATAL, "Could not parse %s", control_block.xml_config);
+	    exit(1);
 	}
     }
     xml_config_read();
