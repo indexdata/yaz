@@ -2,7 +2,7 @@ yaz (1.9.1-3) unstable; urgency=low
 
   * don't let grs.sgml interpret &-entities.
 
- -- Adam Dickmeiss <adam@indexdata.dk>  Tue,  9 Oct 2002 22:38:03 +0100
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed,  9 Oct 2002 22:38:03 +0100
 
 yaz (1.9.1-2) unstable; urgency=low
 
