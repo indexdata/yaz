@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.4  1995-09-27 15:02:45  quinn
+ * Revision 1.5  1995-09-28 10:24:32  quinn
+ * Windows changes
+ *
+ * Revision 1.4  1995/09/27  15:02:45  quinn
  * Modified function heads & prototypes.
  *
  * Revision 1.3  1995/06/16  10:30:38  quinn
@@ -333,7 +336,7 @@ int mosi_bind(COMSTACK h, void *address, int mode)
 
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) < 0)
     {
-    	h->errno = CSYSERR;
+    	h->cerrno = CSYSERR;
 	return -1;
     }
     if (mode == CS_SERVER)
@@ -374,7 +377,7 @@ COMSTACK mosi_accept(COMSTACK h)
 
     if (h->state != CS_INCON)
     {
-    	h->errno = CSOUTSTATE;
+    	h->cerrno = CSOUTSTATE;
 	return 0;
     }
     if (!(new = malloc(sizeof(*new))))
