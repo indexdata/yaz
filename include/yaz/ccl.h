@@ -45,7 +45,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.16 2004-08-18 10:03:01 adam Exp $
+ * $Id: ccl.h,v 1.17 2004-09-22 12:17:24 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -298,6 +298,9 @@ YAZ_EXPORT void ccl_qual_file (CCL_bibset bibset, FILE *inf);
 
 /* Read CCL qualifier list spec from file inf */
 YAZ_EXPORT int ccl_qual_fname (CCL_bibset bibset, const char *fname);
+
+/* Add CCL qualifier as buf spec (multiple lines). */
+YAZ_EXPORT void ccl_qual_buf(CCL_bibset bibset, const char *buf);
 
 /* Add CCL qualifier as line spec. Note: line is _modified_ */
 YAZ_EXPORT void ccl_qual_line(CCL_bibset bibset, char *line);
