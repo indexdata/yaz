@@ -1,11 +1,15 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  * See the file LICENSE for details.
  *
- * d1_if.c : A simple interface for extracting strings from data1_node tree structures
+ * d1_if.c : A simple interface for extracting strings from data1_node
+ *           tree structures
  *
  * $Log: d1_if.c,v $
- * Revision 1.4  2000-01-06 14:30:56  adam
+ * Revision 1.5  2000-02-10 13:42:43  adam
+ * Removed C++ comment.
+ *
+ * Revision 1.4  2000/01/06 14:30:56  adam
  * Minor change - to prevent warnings.
  *
  * Revision 1.3  2000/01/06 11:27:02  adam
@@ -215,12 +219,14 @@ data1_node *data1_LookupNode(data1_node* node, char* pTagPath)
                 {
                     if ( iOccurences )
                     {
-                        // Everything matched, but not yet found the right occurence of the given tag
+                        /* Everything matched, but not yet found the
+                           right occurence of the given tag */
                         iOccurences--;
                     }
                     else
                     {
-                        /* We have matched a string tag... Is there more to process? */
+                        /* We have matched a string tag... Is there more to
+                           process? */
                         matched_node = current_child;
                     }
                 }
