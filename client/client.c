@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.151 2002-05-03 13:48:27 adam Exp $
+ * $Id: client.c,v 1.152 2002-05-18 09:52:37 oleg Exp $
  */
 
 #include <stdio.h>
@@ -20,6 +20,7 @@
 #include <yaz/marcdisp.h>
 #include <yaz/diagbib1.h>
 #include <yaz/otherinfo.h>
+#include <yaz/charneg.h>
 
 #include <yaz/pquery.h>
 #include <yaz/sortspec.h>
@@ -72,6 +73,8 @@ static char ccl_fields[512] = "default.bib";
 static char* esPackageName = 0;
 static char* yazProxy = 0;
 static int kilobytes = 1024;
+static char* yazCharset = 0;
+static char* yazLang = 0;
 
 static char last_cmd[32] = "?";
 static FILE *marcdump = 0;
@@ -203,6 +206,23 @@ static void send_initRequest(const char* type_and_host)
     if (yazProxy) 
         yaz_oi_set_string_oidval(&req->otherInfo, out, VAL_PROXY,
         1, type_and_host);
+    
+    if (yazCharset || yazLang) {
+    	Z_OtherInformation **p;
+    	Z_OtherInformationUnit *p0;
+    	
+    	yaz_oi_APDU(apdu, &p);
+    	
+    	if (p0=yaz_oi_update(p, out, NULL, 0, 0)) {
+    		ODR_MASK_SET(req->options, Z_Options_negotiationModel);
+    		
+    		p0->which = Z_OtherInfo_externallyDefinedInfo;
+    		p0->information.externallyDefinedInfo =
+    			yaz_set_charset_and_lang(out, CLASS_NEGOT, VAL_CHARNEG3,
+    				(const char**)&yazCharset, (yazCharset)?1:0,
+    				(const char**)&yazLang, (yazLang)?1:0);
+    	}
+    }
     
     send_apdu(apdu);
     printf("Sent initrequest.\n");
@@ -2056,12 +2076,48 @@ int cmd_packagename(char* arg)
 
 int cmd_proxy(char* arg)
 {
+    if (*arg == '\0') {
+    	printf("Current proxy is `%s'\n", (yazCharset)?yazProxy:NULL);
+    	return 1;
+    }
     xfree (yazProxy);
     yazProxy = NULL;
     if (*arg)
     {
         yazProxy = (char *) xmalloc (strlen(arg)+1);
         strcpy (yazProxy, arg);
+    } 
+    return 1;
+}
+
+int cmd_charset(char* arg)
+{
+    if (*arg == '\0') {
+    	printf("Current character set is `%s'\n", (yazCharset)?yazCharset:NULL);
+    	return 1;
+    }
+    xfree (yazCharset);
+    yazCharset = NULL;
+    if (*arg)
+    {
+        yazCharset = (char *) xmalloc (strlen(arg)+1);
+        strcpy (yazCharset, arg);
+    } 
+    return 1;
+}
+
+int cmd_lang(char* arg)
+{
+    if (*arg == '\0') {
+    	printf("Current language is `%s'\n", (yazLang)?yazLang:NULL);
+    	return 1;
+    }
+    xfree (yazLang);
+    yazLang = NULL;
+    if (*arg)
+    {
+        yazLang = (char *) xmalloc (strlen(arg)+1);
+        strcpy (yazLang, arg);
     } 
     return 1;
 }
@@ -2501,6 +2557,8 @@ static struct {
     {"update", cmd_update, "<item>",NULL,0},
     {"packagename", cmd_packagename, "<packagename>",NULL,0},
     {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0},
+    {"charset", cmd_charset, "<charset_name>",NULL,0},
+    {"lang", cmd_lang, "<language_code>",NULL,0},
     {".", cmd_source, "<filename>",NULL,1},
     {"!", cmd_subshell, "Subshell command",NULL,0},
     {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,0},

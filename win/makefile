@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.37 2002-05-17 12:48:30 adam Exp $
+# $Id: makefile,v 1.38 2002-05-18 09:52:37 oleg Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -304,7 +304,8 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\yaz-ccl.obj \
    $(OBJDIR)\otherinfo.obj \
    $(OBJDIR)\sortspec.obj \
-   $(OBJDIR)\z3950oid.obj
+   $(OBJDIR)\z3950oid.obj \
+   $(OBJDIR)\charneg.obj
 
 
 YAZ_RET_OBJS= \
@@ -834,7 +835,12 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.37  2002-05-17 12:48:30  adam
+# Revision 1.38  2002-05-18 09:52:37  oleg
+# Added support of CharacterSetandLanguageNegotiation-3
+# modele (based on Z_PrivateCharacterSet_externallySpecified) at the client
+# side.
+#
+# Revision 1.37  2002/05/17 12:48:30  adam
 # Use __stdcall convention for ZOOM on WIN32
 #
 # Revision 1.36  2002/03/18 21:33:48  adam

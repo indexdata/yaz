@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.9 2002-05-17 12:48:30 adam Exp $
+ * $Id: zoom-p.h,v 1.10 2002-05-18 09:52:37 oleg Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
@@ -39,6 +39,8 @@ struct ZOOM_connection_p {
     char *buf_out;
     int len_out;
     char *proxy;
+    char *charset;
+    char *lang;
     char *cookie_out;
     char *cookie_in;
     int async;

@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.28 2002-05-17 12:48:30 adam Exp $
+ * $Id: zoom-c.c,v 1.29 2002-05-18 09:52:37 oleg Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -9,6 +9,7 @@
 #include <yaz/log.h>
 #include <yaz/pquery.h>
 #include <yaz/diagbib1.h>
+#include <yaz/charneg.h>
 
 #include "zoom-p.h"
 
@@ -156,6 +157,8 @@ ZOOM_connection_create (ZOOM_options options)
 
     c->host_port = 0;
     c->proxy = 0;
+    
+    c->charset = c->lang = 0;
 
     c->cookie_out = 0;
     c->cookie_in = 0;
@@ -248,6 +251,18 @@ ZOOM_connection_connect(ZOOM_connection c,
 	c->proxy = xstrdup (val);
     else
 	c->proxy = 0;
+
+    val = ZOOM_options_get (c->options, "charset");
+    if (val && *val)
+	c->charset = xstrdup (val);
+    else
+	c->charset = 0;
+
+    val = ZOOM_options_get (c->options, "lang");
+    if (val && *val)
+	c->lang = xstrdup (val);
+    else
+	c->lang = 0;
 
     if (portnum)
     {
@@ -342,6 +357,8 @@ ZOOM_connection_destroy(ZOOM_connection c)
     ZOOM_connection_remove_tasks (c);
     xfree (c->host_port);
     xfree (c->proxy);
+    xfree (c->charset);
+    xfree (c->lang);
     xfree (c->cookie_out);
     xfree (c->cookie_in);
     xfree (c);
@@ -705,6 +722,25 @@ static int ZOOM_connection_send_init (ZOOM_connection c)
     if (c->proxy)
 	yaz_oi_set_string_oidval(&ireq->otherInfo, c->odr_out,
 				 VAL_PROXY, 1, c->host_port);
+    if (c->charset||c->lang)
+    {
+    	Z_OtherInformation **oi;
+    	Z_OtherInformationUnit *oi_unit;
+    	
+    	yaz_oi_APDU(apdu, &oi);
+    	
+    	if (oi_unit = yaz_oi_update(oi, c->odr_out, NULL, 0, 0))
+    	{
+    		ODR_MASK_SET(ireq->options, Z_Options_negotiationModel);
+    		
+    		oi_unit->which = Z_OtherInfo_externallyDefinedInfo;
+    		oi_unit->information.externallyDefinedInfo =
+    			yaz_set_charset_and_lang(c->odr_out,
+    				CLASS_NEGOT, VAL_CHARNEG3,
+    				(const char **)&c->charset, (c->charset) ? 1:0,
+    				(const char **)&c->lang, (c->lang) ? 1:0);
+    	}
+    }
     assert (apdu);
     send_APDU (c, apdu);
     
@@ -914,8 +950,9 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 {
     Z_NamePlusRecord *npr;
     
-    *len = 0; /* if return 0 */
-    
+    if (len)
+    	*len = 0; /* default return */
+    	
     if (!rec)
 	return 0;
     npr = rec->npr;
@@ -923,7 +960,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 	return 0;
     if (!strcmp (type, "database"))
     {
-    	*len = strlen(npr->databaseName)+1;
+    	if (len) *len = strlen(npr->databaseName)+1;
 	return npr->databaseName;
     }
     else if (!strcmp (type, "syntax"))
@@ -934,7 +971,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 	    oident *ent = oid_getentbyoid(r->direct_reference);
 	    if (ent)
 	    {
-	    	*len = strlen(ent->desc)+1;
+	    	if (len) *len = strlen(ent->desc)+1;
 		return ent->desc;
 	    }
 	}
@@ -948,7 +985,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         
         if (r->which == Z_External_sutrs)
         {
-            *len = r->u.sutrs->len;
+            if (len) *len = r->u.sutrs->len;
             return (const char *) r->u.sutrs->buf;
         }
         else if (r->which == Z_External_octet)
@@ -972,16 +1009,16 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
                                      r->u.octet_aligned->len,
                                      0) > 0)
                 {
-                    *len = wrbuf_len(rec->wrbuf_marc);
+                    if (len) *len = wrbuf_len(rec->wrbuf_marc);
                     return wrbuf_buf(rec->wrbuf_marc);
                 }
             }
-            *len = r->u.octet_aligned->len;
+            if (len) *len = r->u.octet_aligned->len;
             return (const char *) r->u.octet_aligned->buf;
         }
         else if (r->which == Z_External_grs1)
         {
-            *len = 5;
+            if (len) *len = 5;
             return "GRS-1";
         }
 	return 0;
@@ -994,7 +1031,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         
         if (r->which == Z_External_sutrs)
         {
-            *len = r->u.sutrs->len;
+            if (len) *len = r->u.sutrs->len;
             return (const char *) r->u.sutrs->buf;
         }
         else if (r->which == Z_External_octet)
@@ -1018,16 +1055,16 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
                                      r->u.octet_aligned->len,
                                      1) > 0)
                 {
-                    *len = wrbuf_len(rec->wrbuf_marc);
+                    if (len) *len = wrbuf_len(rec->wrbuf_marc);
                     return wrbuf_buf(rec->wrbuf_marc);
                 }
             }
-            *len = r->u.octet_aligned->len;
+            if (len) *len = r->u.octet_aligned->len;
             return (const char *) r->u.octet_aligned->buf;
         }
         else if (r->which == Z_External_grs1)
         {
-            *len = 5;
+            if (len) *len = 5;
             return "GRS-1";
         }
 	return 0;
@@ -1040,17 +1077,17 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 	    
 	    if (r->which == Z_External_sutrs)
 	    {
-		*len = r->u.sutrs->len;
+		if (len) *len = r->u.sutrs->len;
 		return (const char *) r->u.sutrs->buf;
 	    }
 	    else if (r->which == Z_External_octet)
 	    {
-		*len = r->u.octet_aligned->len;
+		if (len) *len = r->u.octet_aligned->len;
 		return (const char *) r->u.octet_aligned->buf;
 	    }
 	    else /* grs-1, explain, ... */
 	    {
-		*len = -1;
+		if (len) *len = -1;
                 return (const char *) npr->u.databaseRecord;
 	    }
 	}

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.8 2002-02-20 14:40:42 adam Exp $
+ * $Id: zoomsh.c,v 1.9 2002-05-18 09:52:37 oleg Exp $
  *
  * ZOOM-C Shell
  */
@@ -252,6 +252,8 @@ static void cmd_help (ZOOM_connection *c, ZOOM_resultset *r,
     printf (" user\n");
     printf (" pass\n");
     printf (" implementationName\n");
+    printf (" charset\n");
+    printf (" lang\n");
 }
 
 static void cmd_connect (ZOOM_connection *c, ZOOM_resultset *r,
