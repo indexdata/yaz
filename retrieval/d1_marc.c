@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.5  1997-09-04 13:48:04  adam
+ * Revision 1.6  1997-09-04 13:51:58  adam
+ * Added data1 to marc conversion with indicators.
+ *
+ * Revision 1.5  1997/09/04 13:48:04  adam
  * Added data1 to marc conversion.
  *
  * Revision 1.4  1996/03/25 10:18:03  quinn
