@@ -2,18 +2,25 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.268 2005-01-15 19:47:08 adam Exp $
+ * $Id: client.c,v 1.269 2005-01-16 22:12:39 adam Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
+#include <ctype.h>
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif
-
 #if HAVE_LANGINFO_H
 #include <langinfo.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
 #endif
 
 #if HAVE_OPENSSL_SSL_H
@@ -25,15 +32,11 @@
 #include <openssl/err.h>
 #endif
 
-#include <time.h>
-#include <ctype.h>
-
 #ifdef WIN32
 #include <io.h>
+#include <windows.h>
 #define S_ISREG(x) (x & _S_IFREG)
 #define S_ISDIR(x) (x & _S_IFDIR)
-#else
-#include <unistd.h>
 #endif
 
 #include <yaz/yaz-util.h>
@@ -62,7 +65,6 @@
 #include <readline/history.h>
 #endif
 
-#include <sys/stat.h>
 
 #include "admin.h"
 #include "tabcomplete.h"

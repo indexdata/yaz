@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ill-get.c,v 1.3 2005-01-15 19:47:13 adam Exp $
+ * $Id: ill-get.c,v 1.4 2005-01-16 22:12:39 adam Exp $
  */
 
 /**
@@ -10,6 +10,7 @@
  * \brief Implements ILL package creator utilities
  */
 
+#include <stdlib.h>
 #include <yaz/ill.h>
 
 bool_t *ill_get_bool (struct ill_get_ctl *gc, const char *name,
