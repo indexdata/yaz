@@ -1,29 +1,22 @@
 # Copyright (C) 1995-1998, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.4 1998-09-28 12:44:47 adam Exp $
+# $Id: Makefile.in,v 1.5 1998-10-28 15:09:59 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
-#ODEFS=-DUSE_XTIMOSI
+#CDEFS=-DUSE_XTIMOSI
 #RFC1006=rfc1006
 #LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
 #XMOSI=xmosi.o
 
-CDEFS=@DEFS@ @ODEFS@
+CDEFS=@DEFS@
 
 # Standard include path and original protocol encoders.
-INCLUDE=-I. -I../include
-MOD=asn
+INCLUDE=-I. -I../z39.50 -I../include
 
-# Uncomment the two lines below if you want to try the ASN.1 compiler
-# (yc) for YAZ. Download yc separately and untar it along with YAZ:
-#  gunzip -c yaz.tar.gz | tar xvf -
-#  gunzip -c yc.tar.gz | tar xvf -
-#  cd yaz
-#  ln -s ../yc/z39.50 
-# You must run 'make depend' before 'make'.
-#INCLUDE=-I../z39.50 -I. -I../include
-#MOD=z39.50
+# The Module below is either asn (the original de/en-coders)
+# or z39.50 (the compiled de/en-coders).
+MOD=@ASNMODULE@
 
 CC=@CC@
 CPP=@CPP@

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.23  1998-03-12 11:28:45  adam
+ * Revision 1.24  1998-10-28 15:10:09  adam
+ * Added --with-yc option to configure. For the data1_node in data1.h:
+ * decreased size of localdata and removed member "line" which wasn't useful.
+ *
+ * Revision 1.23  1998/03/12 11:28:45  adam
  * Fix: didn't set root member of tagged node in function.
  * data1_add_insert_taggeddata.
  *
@@ -201,7 +205,6 @@ data1_node *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
     data1_node *datn;
 
     tagn->which = DATA1N_tag;
-    tagn->line = -1;
     tagn->u.tag.tag = data1_insert_string (dh, tagn, m, tagname);
     tagn->u.tag.node_selected = 0;
     tagn->u.tag.make_variantlist = 0;

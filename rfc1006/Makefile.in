@@ -1,14 +1,14 @@
 # Copyright (C) 1994-1998, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1998-08-21 14:13:33 adam Exp $
+# $Id: Makefile.in,v 1.2 1998-10-28 15:10:10 adam Exp $
 
 SHELL=/bin/sh
 
 CC=@CC@
 CPP=@CPP@
 RANLIB=@RANLIB@
-CDEFS=@ODEFS@ @ODEFS@
+CDEFS=@DEFS@
 
 INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBDIR=../lib

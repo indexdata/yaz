@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.38  1998-10-15 08:29:15  adam
+ * Revision 1.39  1998-10-28 15:10:06  adam
+ * Added --with-yc option to configure. For the data1_node in data1.h:
+ * decreased size of localdata and removed member "line" which wasn't useful.
+ *
+ * Revision 1.38  1998/10/15 08:29:15  adam
  * Tag set type may be specified in reference to it using "tagset"
  * directive in .abs-files and "include" directive in .tag-files.
  *
@@ -438,9 +442,8 @@ typedef struct data1_node
     } u;
 
     void (*destroy)(struct data1_node *n);
-#define DATA1_LOCALDATA 40
+#define DATA1_LOCALDATA 20
     char lbuf[DATA1_LOCALDATA]; /* small buffer for local data */
-    int line;
     struct data1_node *next;
     struct data1_node *child;
     struct data1_node *last_child;

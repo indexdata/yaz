@@ -1,14 +1,14 @@
-# $Id: Makefile.in,v 1.1 1998-08-21 14:13:31 adam Exp $
+# $Id: Makefile.in,v 1.2 1998-10-28 15:10:08 adam Exp $
 
 SHELL=/bin/sh
 
 CC=@CC@
 CPP=@CPP@
 RANLIB=@RANLIB@
-CDEFS=@DEFS@ @ODEFS@
+CDEFS=@DEFS@
 ELIBS=@LIBS@
 
-INCLUDE=-I../include -I.
+INCLUDE=-I../z39.50 -I../include -I.
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=../lib/libret.a
 PO = d1_handle.o d1_read.o d1_attset.o d1_tagset.o d1_absyn.o d1_grs.o \
