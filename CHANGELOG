@@ -1,6 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Fixed 
+Fixed bug in client.c which caused a crash when a scanResponse didn't
+contain positionOfTerm.
+
+* Fixed inconsistency in the ScanResponse/ListEntries protocol. This
+* will cause an error in a client if a non-YAZ target sends both a
+* list of Scan entries and non-surrogate diagnostics.
 
 Retrieval module enhancements. Tag sets may be typed in the reference
 to it. From the .abs-file the "tagset" directive takes a third optional
