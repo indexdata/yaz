@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dmalloc.c,v $
- * Revision 1.2  1995-04-10 10:23:50  quinn
+ * Revision 1.3  1995-05-15 11:56:55  quinn
+ * Debuggng & adjustments.
+ *
+ * Revision 1.2  1995/04/10  10:23:50  quinn
  * Fixes.
  *
  * Revision 1.1  1995/03/27  08:35:17  quinn
@@ -18,9 +21,9 @@
 #include <stdio.h>
 #include <string.h>
 
-static const unsigned long head = 0xaabbccdd;
-static const unsigned long tail = 0x11223344;
-static const unsigned long freed = 0xffeeffee;
+static const unsigned char head[] = {44, 33, 22, 11};
+static const unsigned char tail[] = {11, 22, 33, 44};
+static const unsigned char freed[] = {99, 99, 99, 99};
 
 void *d_malloc(char *file, int line, int nbytes)
 {
@@ -45,7 +48,7 @@ void d_free(char *file, int line, char *ptr)
 
     if (memcmp(&head, ptr - 2 * sizeof(long), sizeof(long)))
     	abort();
-    memcpy(ptr, &freed, sizeof(long));
+    memcpy(ptr - 2 * sizeof(long), &freed, sizeof(long));
     memcpy(&len, ptr - sizeof(long), sizeof(long));
     if (memcmp(ptr + len, &tail, sizeof(long)))
     	abort();
@@ -66,7 +69,7 @@ void *d_realloc(char *file, int line, char *ptr, int nbytes)
     memcpy(&len, ptr - sizeof(long), sizeof(long));
     if (memcmp(ptr + len, &tail, sizeof(long)))
     	abort();
-    if (!(r = realloc(ptr, nbytes + 3 * sizeof(long))))
+    if (!(r = realloc(ptr - 2 * sizeof(long), nbytes + 3 * sizeof(long))))
     	return 0;
     fprintf(stderr, "---d_realloc, '%s':%d, %d->%d, %p->%p\n",
     	file, line, len, nbytes, p, r + 2 * sizeof(long));

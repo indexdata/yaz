@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.1  1995-04-10 10:28:47  quinn
+ * Revision 1.2  1995-05-15 11:56:56  quinn
+ * Debuggng & adjustments.
+ *
+ * Revision 1.1  1995/04/10  10:28:47  quinn
  * Added copy of CCL and MARC display
  *
  */
@@ -13,6 +16,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <marcdisp.h>
+#include <dmalloc.h>
 
 #ifndef SEEK_SET
 #define SEEK_SET 0

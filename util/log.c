@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.3  1995-04-10 10:23:51  quinn
+ * Revision 1.4  1995-05-15 11:56:55  quinn
+ * Debuggng & adjustments.
+ *
+ * Revision 1.3  1995/04/10  10:23:51  quinn
  * Fixes.
  *
  * Revision 1.2  1995/03/31  10:16:55  quinn
@@ -88,7 +91,7 @@ void log_init(int level, const char *prefix, const char *name)
 	return;
     if (!(l_file = fopen(name, "a")))
         return;
-    setbuffer(l_file, 0, 0);
+    setvbuf(l_file, 0, _IONBF, 0);
 }
 
 void logf(int level, const char *fmt, ...)
