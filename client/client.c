@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.256 2004-11-18 15:18:10 heikki Exp $
+ * $Id: client.c,v 1.257 2004-12-02 13:55:35 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -3055,7 +3055,7 @@ int cmd_lang(const char* arg)
     return 1;
 }
 
-int cmd_source(const char* arg) 
+int cmd_source(const char* arg, int echo ) 
 {
     /* first should open the file and read one line at a time.. */
     FILE* includeFile;
@@ -3082,7 +3082,10 @@ int cmd_source(const char* arg)
         
         if ((cp = strrchr (line, '\n')))
             *cp = '\0';
-        
+	
+	if( echo ) {
+	    printf( "processing line: %s\n",line );
+	};
         process_cmd_line(line);
     }
     
@@ -3092,6 +3095,15 @@ int cmd_source(const char* arg)
     }
     return 1;
 }
+
+int cmd_source_echo(const char* arg) { 
+    cmd_source( arg, 1);
+}
+
+int cmd_source_noecho(const char* arg) {
+    cmd_source( arg, 0 );
+}
+
 
 int cmd_subshell(const char* args)
 {
@@ -3306,17 +3318,19 @@ void source_rcfile()
     struct stat statbuf;
     char buffer[1000];
     char* homedir=getenv("HOME");
-    
-    if(!homedir) return;
-    
-    sprintf(buffer,"%s/.yazclientrc",homedir);
-    
-    if(stat(buffer,&statbuf)==0) {
-        cmd_source(buffer);
-    }
+
+    if( homedir ) {
+	
+	sprintf(buffer,"%s/.yazclientrc",homedir);
+
+	if(stat(buffer,&statbuf)==0) {
+	    cmd_source(buffer, 0 );
+	}
+	
+    };
     
     if(stat(".yazclientrc",&statbuf)==0) {
-        cmd_source(".yazclientrc");
+        cmd_source(".yazclientrc", 0 );
     }
 }
 
@@ -3903,7 +3917,7 @@ static struct {
     {"charset", cmd_charset, "<nego_charset> <output_charset>",NULL,0,NULL},
     {"marccharset", cmd_marccharset, "<charset_name>",NULL,0,NULL},
     {"lang", cmd_lang, "<language_code>",NULL,0,NULL},
-    {".", cmd_source, "<filename>",NULL,1,NULL},
+    {".", cmd_source_echo, "<filename>",NULL,1,NULL},
     {"!", cmd_subshell, "Subshell command",NULL,1,NULL},
     {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,1,NULL},
     {"set_berfile", cmd_set_berfile, "<filename>",NULL,1,NULL},
