@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.74  1998-03-31 15:13:20  adam
+ * Revision 1.75  1998-05-18 10:13:07  adam
+ * Fixed call to es_request handler - extra argument was passed.
+ *
+ * Revision 1.74  1998/03/31 15:13:20  adam
  * Development towards compiled ASN.1.
  *
  * Revision 1.73  1998/03/31 11:07:45  adam
@@ -679,13 +682,13 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     req->response = odr_getbuf(assoc->encode, &req->len_response,
 	&req->size_response);
     odr_setbuf(assoc->encode, 0, 0, 0); /* don'txfree if we abort later */
-    odr_reset(assoc->encode);
     if (assoc->print && !z_APDU(assoc->print, &res, 0))
     {
 	logf(LOG_WARN, "ODR print error: %s", 
 	    odr_errmsg(odr_geterror(assoc->print)));
 	odr_reset(assoc->print);
     }
+    odr_reset(assoc->encode);
     req->state = REQUEST_IDLE;
     request_enq(&assoc->outgoing, req);
     /* turn the work over to the ir_session handler */
@@ -1654,11 +1657,12 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     esrequest.stream = assoc->encode;
     esrequest.errcode = 0;
     esrequest.errstring = NULL;
-	esrequest.request = reqb;
-	esrequest.association = assoc;
-
-    (*assoc->bend_esrequest)(assoc->backend, &esrequest, fd);
-
+    esrequest.request = reqb;
+    esrequest.association = assoc;
+    
+    ((int (*)(void *, bend_esrequest_rr *))(*assoc->bend_esrequest))(assoc->backend,
+								   &esrequest);
+    
     /* If the response is being delayed, return NULL */
     if (esrequest.request == NULL)
         return(NULL);
