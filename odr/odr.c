@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.27  1998-02-11 11:53:34  adam
+ * Revision 1.28  1998-07-20 12:38:13  adam
+ * More LOG_DEBUG-diagnostics.
+ *
+ * Revision 1.27  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.26  1997/11/24 11:33:56  adam
@@ -150,8 +153,6 @@ ODR odr_createmem(int direction)
 {
     ODR r;
 
-
-    logf (LOG_DEBUG, "odr_createmem dir=%d", direction);
     if (!(r = (ODR)xmalloc(sizeof(*r))))
         return 0;
     r->direction = direction;
@@ -165,6 +166,7 @@ ODR odr_createmem(int direction)
     r->enable_bias = 1;
     r->odr_ber_tag.lclass = -1;
     odr_reset(r);
+    logf (LOG_DEBUG, "odr_createmem dir=%d o=%p", direction, r);
     return r;
 }
 
@@ -182,6 +184,7 @@ void odr_reset(ODR o)
     nmem_reset(o->mem);
     o->choice_bias = -1;
     o->lenlen = 1;
+    logf (LOG_DEBUG, "odr_reset o=%p", o);
 }
     
 void odr_destroy(ODR o)
@@ -192,6 +195,7 @@ void odr_destroy(ODR o)
     if (o->print != stderr)
         fclose(o->print);
     xfree(o);
+    logf (LOG_DEBUG, "odr_destroy o=%p", o);
 }
 
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)

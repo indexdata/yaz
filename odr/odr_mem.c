@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_mem.c,v $
- * Revision 1.13  1998-02-11 11:53:34  adam
+ * Revision 1.14  1998-07-20 12:38:15  adam
+ * More LOG_DEBUG-diagnostics.
+ *
+ * Revision 1.13  1998/02/11 11:53:34  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.12  1995/11/08 17:41:33  quinn
