@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_cons.c,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: odr_cons.c,v 1.2 2004-08-11 12:15:38 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -79,7 +79,7 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
     else if (o->direction == ODR_PRINT)
     {
 	odr_prname(o, name);
-    	fprintf(o->print, "{\n");
+    	odr_printf(o, "{\n");
 	o->indent++;
     }
     else
@@ -171,7 +171,7 @@ int odr_constructed_end(ODR o)
         o->op->stackp--;
         o->indent--;
         odr_prname(o, 0);
-        fprintf(o->print, "}\n");
+        odr_printf(o, "}\n");
         return 1;
     default:
         odr_seterror(o, OOTHER, 38);

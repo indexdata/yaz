@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added odr_set_stream which is is a more generic to odr_setprint.
+odr_set_stream takes a stream handle, pointer to puts function and
+pointer to close function. The close function - if non-NULL - will be
+called during odr_destroy.
+
 --- 2.0.23 2004/08/11
 
 Fix buffer overrun in CQL parser when dealing with proximity (%).

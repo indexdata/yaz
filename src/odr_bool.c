@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_bool.c,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: odr_bool.c,v 1.2 2004-08-11 12:15:38 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -34,7 +34,7 @@ int odr_bool(ODR o, int **p, int opt, const char *name)
     if (o->direction == ODR_PRINT)
     {
 	odr_prname(o, name);
-    	fprintf(o->print, "%s\n", (**p ? "TRUE" : "FALSE"));
+    	odr_printf(o, "%s\n", (**p ? "TRUE" : "FALSE"));
     	return 1;
     }
     if (cons)

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: odr.c,v 1.2 2004-08-11 12:15:38 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include <yaz/xmalloc.h>
 #include "odr-priv.h"
@@ -89,9 +90,30 @@ void odr_setelement(ODR o, const char *element)
     }
 }
 
+void odr_FILE_puts(void *handle, const char *strz)
+{
+    fputs(strz, (FILE*) handle);
+}
+
+void odr_FILE_close(void *handle)
+{
+    FILE *f = (FILE *) handle;
+    if (f && f != stderr && f != stdout)
+	fclose(f);
+}
+
 void odr_setprint(ODR o, FILE *file)
 {
-    o->print = file;
+    odr_set_stream(o, file, odr_FILE_puts, odr_FILE_close);
+}
+
+void odr_set_stream(ODR o, void *handle,
+		    void (*stream_puts)(void *handle, const char *strz),
+		    void (*stream_close)(void *handle))
+{
+    o->print = handle;
+    o->op->stream_puts = stream_puts;
+    o->op->stream_close = stream_close;
 }
 
 int odr_set_charset(ODR o, const char *to, const char *from)
@@ -112,23 +134,23 @@ int odr_set_charset(ODR o, const char *to, const char *from)
 
 ODR odr_createmem(int direction)
 {
-    ODR r;
+    ODR o;
 
-    if (!(r = (ODR)xmalloc(sizeof(*r))))
+    if (!(o = (ODR)xmalloc(sizeof(*o))))
         return 0;
-    r->direction = direction;
-    r->print = stderr;
-    r->buf = 0;
-    r->size = r->pos = r->top = 0;
-    r->can_grow = 1;
-    r->mem = nmem_create();
-    r->enable_bias = 1;
-    r->op = (struct Odr_private *) xmalloc (sizeof(*r->op));
-    r->op->odr_ber_tag.lclass = -1;
-    r->op->iconv_handle = 0;
-    odr_reset(r);
-    yaz_log (LOG_DEBUG, "odr_createmem dir=%d o=%p", direction, r);
-    return r;
+    o->direction = direction;
+    o->buf = 0;
+    o->size = o->pos = o->top = 0;
+    o->can_grow = 1;
+    o->mem = nmem_create();
+    o->enable_bias = 1;
+    o->op = (struct Odr_private *) xmalloc (sizeof(*o->op));
+    o->op->odr_ber_tag.lclass = -1;
+    o->op->iconv_handle = 0;
+    odr_setprint(o, stderr);
+    odr_reset(o);
+    yaz_log (LOG_DEBUG, "odr_createmem dir=%d o=%p", direction, o);
+    return o;
 }
 
 void odr_reset(ODR o)
@@ -154,8 +176,8 @@ void odr_destroy(ODR o)
     nmem_destroy(o->mem);
     if (o->buf && o->can_grow)
        xfree(o->buf);
-    if (o->print && o->print != stderr)
-        fclose(o->print);
+    if (o->op->stream_close)
+	o->op->stream_close(o->print);
     if (o->op->iconv_handle != 0)
         yaz_iconv_close (o->op->iconv_handle);
     xfree(o->op);
@@ -181,3 +203,21 @@ char *odr_getbuf(ODR o, int *len, int *size)
     return (char*) o->buf;
 }
 
+void odr_printf(ODR o, const char *fmt, ...)
+{
+    va_list ap;
+    char buf[4096];
+
+    va_start(ap, fmt);
+#ifdef WIN32
+    _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
+#else
+#if HAVE_VSNPRINTF
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+#else
+    vsprintf(buf, fmt, ap);
+#endif
+#endif
+    o->op->stream_puts(o->print, buf);
+    va_end(ap);
+}

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.14 2003-11-26 16:24:04 mike Exp $
+ * $Id: odr.h,v 1.15 2004-08-11 12:15:38 adam Exp $
  */
 
 #ifndef ODR_H
@@ -143,7 +143,7 @@ typedef struct odr
     int choice_bias;     /* force choice */
     int lenlen;          /* force length-of-lenght (odr_setlen()) */
 
-    FILE *print;         /* output file for direction print */
+    FILE *print;         /* output file handler for direction print */
     int indent;          /* current indent level for printing */
 
     NMEM mem;            /* memory handle for decoding (primarily) */
@@ -326,6 +326,13 @@ YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt,
 				   const char *name);
 
 YAZ_EXPORT int odr_set_charset(ODR o, const char *to, const char *from);
+
+YAZ_EXPORT void odr_set_stream(ODR o,  void *handle,
+			       void (*stream_puts)(void *handle,
+						   const char *strz),
+			       void (*stream_close)(void *handle));
+
+YAZ_EXPORT void odr_printf(ODR o, const char *fmt, ...);
 
 YAZ_END_CDECL
 

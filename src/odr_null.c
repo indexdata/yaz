@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_null.c,v 1.2 2004-03-09 20:49:04 adam Exp $
+ * $Id: odr_null.c,v 1.3 2004-08-11 12:15:38 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -32,7 +32,7 @@ int odr_null(ODR o, Odr_null **p, int opt, const char *name)
     if (o->direction == ODR_PRINT)
     {
 	odr_prname(o, name);
-    	fprintf(o->print, "NULL\n");
+    	odr_printf(o, "NULL\n");
     	return 1;
     }
     if (cons)

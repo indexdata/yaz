@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oid.c,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: odr_oid.c,v 1.2 2004-08-11 12:15:38 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -41,10 +41,10 @@ int odr_oid(ODR o, Odr_oid **p, int opt, const char *name)
     	int i;
 
 	odr_prname(o, name);
-    	fprintf(o->print, "OID:");
+    	odr_printf(o, "OID:");
     	for (i = 0; (*p)[i] > -1; i++)
-	    fprintf(o->print, " %d", (*p)[i]);
-	fprintf(o->print, "\n");
+	    odr_printf(o, " %d", (*p)[i]);
+	odr_printf(o, "\n");
     	return 1;
     }
     if (o->direction == ODR_DECODE)

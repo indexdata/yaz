@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr-priv.h,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: odr-priv.h,v 1.2 2004-08-11 12:15:38 adam Exp $
  */
 
 #ifndef ODR_PRIV_H
@@ -53,6 +53,8 @@ struct Odr_private {
     yaz_iconv_t iconv_handle;
     int error_id;
     char element[80];
+    void (*stream_puts)(void *handle, const char *strz);
+    void (*stream_close)(void *handle);
 };
 
 /* Private macro.

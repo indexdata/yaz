@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.9 2004-02-25 12:59:56 adam Exp $
+ * $Id: zgdu.c,v 1.10 2004-08-11 12:15:38 adam Exp $
  */
 
 #include <ctype.h>
@@ -380,9 +380,9 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                           (*p)->u.HTTP_Response->content_len);
             if (o->direction == ODR_PRINT)
             {
-                fprintf(o->print, "-- HTTP response:\n%.*s\n", o->top - top0,
-                        o->buf + top0);
-                fprintf(o->print, "-- \n");
+                odr_printf(o, "-- HTTP response:\n%.*s\n", o->top - top0,
+			   o->buf + top0);
+                odr_printf(o, "-- \n");
             }
             break;
         case Z_GDU_HTTP_Request:
@@ -418,9 +418,9 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                           (*p)->u.HTTP_Request->content_len);
             if (o->direction == ODR_PRINT)
             {
-                fprintf(o->print, "-- HTTP request:\n%.*s\n", o->top - top0,
+                odr_printf(o, "-- HTTP request:\n%.*s\n", o->top - top0,
                         o->buf + top0);
-                fprintf(o->print, "-- \n");
+                odr_printf(o, "-- \n");
             }
             break;
         case Z_GDU_Z3950:

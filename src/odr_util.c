@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_util.c,v 1.3 2004-01-05 14:46:52 adam Exp $
+ * $Id: odr_util.c,v 1.4 2004-08-11 12:15:38 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -17,9 +17,9 @@
 void odr_prname(ODR o, const char *name)
 {
     if (name)
-	fprintf (o->print, "%*s%s ", o->indent*4, "", name);
+	odr_printf(o, "%*s%s ", o->indent*4, "", name);
     else
-	fprintf (o->print, "%*s", o->indent*4, "");
+	odr_printf(o, "%*s", o->indent*4, "");
 }
 
 int odp_more_chunks(ODR o, const unsigned char *base, int len)

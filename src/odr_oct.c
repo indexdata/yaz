@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oct.c,v 1.1 2003-10-27 12:21:33 adam Exp $
+ * $Id: odr_oct.c,v 1.2 2004-08-11 12:15:38 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -35,17 +35,17 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
     {
         int i;
 	odr_prname(o, name);
-    	fprintf(o->print, "OCTETSTRING(len=%d)", (*p)->len);
+    	odr_printf(o, "OCTETSTRING(len=%d)", (*p)->len);
         for (i = 0; i<(*p)->len; i++)
         {
 	    if (i < 5 || i > ((*p)->len - 4))
             {
-                fprintf (o->print, " %02X", (*p)->buf[i]);
+                odr_printf(o, " %02X", (*p)->buf[i]);
             }
             else if (i == 5)
-                fprintf (o->print, " .. ");
+                odr_printf(o, " .. ");
         }
-        fprintf(o->print, "\n");
+        odr_printf(o, "\n");
     	return 1;
     }
     if (o->direction == ODR_DECODE)
@@ -83,7 +83,7 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
     if (o->direction == ODR_PRINT)
     {
     	odr_prname(o, name);
-    	fprintf(o->print, "'%s'\n", *p);
+    	odr_printf(o, "'%s'\n", *p);
     	return 1;
     }
     t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)); /* wrapper for octstring */
@@ -130,7 +130,7 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
     if (o->direction == ODR_PRINT)
     {
     	odr_prname(o, name);
-    	fprintf(o->print, "'%s'\n", *p);
+    	odr_printf(o, "'%s'\n", *p);
     	return 1;
     }
     t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)); /* wrapper for octstring */
