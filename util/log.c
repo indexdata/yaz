@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.9  1995-09-29 17:12:34  quinn
+ * Revision 1.10  1995-12-06 09:51:27  quinn
+ * Fixed the log-prefix buffer - it was too small and the setup code lacked
+ * a bounds-check.
+ *
+ * Revision 1.9  1995/09/29  17:12:34  quinn
  * Smallish
  *
  * Revision 1.8  1995/09/27  15:03:02  quinn
@@ -71,7 +75,7 @@
 
 static int l_level = LOG_DEFAULT_LEVEL;
 static FILE *l_file = stderr;
-static char l_prefix[30] = "log";
+static char l_prefix[512] = "log";
 
 static struct {
     int mask;
@@ -107,7 +111,7 @@ void log_init(int level, const char *prefix, const char *name)
 {
     l_level = level;
     if (prefix && *prefix)
-    	strcpy(l_prefix, prefix);
+    	sprintf(l_prefix, "%.512s", prefix);
     if (!name || !*name || l_file != stderr)
 	return;
     if (!(l_file = fopen(name, "a")))
