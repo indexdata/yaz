@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.17  1996-10-10 12:35:23  quinn
+ * Revision 1.18  1997-04-30 08:52:12  quinn
+ * Null
+ *
+ * Revision 1.17  1996/10/10  12:35:23  quinn
  * Added Update extended service.
  *
  * Revision 1.16  1996/10/09  15:55:02  quinn

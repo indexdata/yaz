@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_soif.c,v $
- * Revision 1.1  1996-10-08 10:43:20  quinn
+ * Revision 1.2  1997-04-30 08:52:11  quinn
+ * Null
+ *
+ * Revision 1.1  1996/10/08  10:43:20  quinn
  * Added SOIF syntax.
  *
  *

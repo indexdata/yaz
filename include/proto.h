@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.37  1996-10-09 15:54:58  quinn
+ * Revision 1.38  1997-04-30 08:52:09  quinn
+ * Null
+ *
+ * Revision 1.37  1996/10/09  15:54:58  quinn
  * Added SearchInfoReport
  *
  * Revision 1.36  1996/10/07  15:29:20  quinn

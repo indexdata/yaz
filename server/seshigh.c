@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.63  1996-10-11 11:57:26  quinn
+ * Revision 1.64  1997-04-30 08:52:11  quinn
+ * Null
+ *
+ * Revision 1.63  1996/10/11  11:57:26  quinn
  * Smallish
  *
  * Revision 1.62  1996/07/06  19:58:35  quinn

@@ -45,7 +45,10 @@
  * Europagate 1995
  *
  * $Log: cclsh.c,v $
- * Revision 1.2  1996-10-11 15:00:25  adam
+ * Revision 1.3  1997-04-30 08:52:07  quinn
+ * Null
+ *
+ * Revision 1.2  1996/10/11  15:00:25  adam
  * CCL parser from Europagate Email gateway 1.0.
  *
  * Revision 1.11  1995/05/16  09:39:27  adam

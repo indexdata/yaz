@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.11  1996-10-10 12:35:13  quinn
+ * Revision 1.12  1997-04-30 08:52:02  quinn
+ * Null
+ *
+ * Revision 1.11  1996/10/10  12:35:13  quinn
  * Added Update extended service.
  *
  * Revision 1.10  1996/10/09  15:54:55  quinn

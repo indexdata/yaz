@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.12  1996-10-08 12:58:17  adam
+ * Revision 1.13  1997-04-30 08:52:10  quinn
+ * Null
+ *
+ * Revision 1.12  1996/10/08  12:58:17  adam
  * New ODR function, odr_choice_enable_bias, to control behaviour of
  * odr_choice_bias.
  *

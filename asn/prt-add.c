@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-add.c,v $
- * Revision 1.1  1996-10-10 11:52:18  quinn
+ * Revision 1.2  1997-04-30 08:52:02  quinn
+ * Null
+ *
+ * Revision 1.1  1996/10/10  11:52:18  quinn
  * Added SearchResult additionalInfo
  *
  *

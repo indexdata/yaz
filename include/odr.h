@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.19  1996-10-08 12:58:08  adam
+ * Revision 1.20  1997-04-30 08:52:08  quinn
+ * Null
+ *
+ * Revision 1.19  1996/10/08  12:58:08  adam
  * New ODR function, odr_choice_enable_bias, to control behaviour of
  * odr_choice_bias.
  *

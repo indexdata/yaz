@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.4  1996-10-11 15:02:26  adam
+ * Revision 1.5  1997-04-30 08:52:08  quinn
+ * Null
+ *
+ * Revision 1.4  1996/10/11  15:02:26  adam
  * CCL parser from Europagate Email gateway 1.0.
  *
  * Revision 1.10  1996/01/08  08:41:22  adam

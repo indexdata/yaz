@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.15  1996-10-09 15:54:57  quinn
+ * Revision 1.16  1997-04-30 08:52:08  quinn
+ * Null
+ *
+ * Revision 1.15  1996/10/09  15:54:57  quinn
  * Added SearchInfoReport
  *
  * Revision 1.14  1996/10/07  15:29:17  quinn

@@ -2,7 +2,10 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.13  1996-10-11 15:06:55  quinn
+ * Revision 1.14  1997-04-30 08:52:09  quinn
+ * Null
+ *
+ * Revision 1.13  1996/10/11  15:06:55  quinn
  * Version 1.3
  *
  * Revision 1.12  1996/06/10  08:57:50  quinn

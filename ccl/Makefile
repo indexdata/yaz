@@ -2,7 +2,10 @@
 # Europagate, 1995
 #
 # $Log: Makefile,v $
-# Revision 1.6  1996-10-11 15:00:24  adam
+# Revision 1.7  1997-04-30 08:52:05  quinn
+# Null
+#
+# Revision 1.6  1996/10/11  15:00:24  adam
 # CCL parser from Europagate Email gateway 1.0.
 #
 # Revision 1.12  1996/05/22  08:37:13  adam

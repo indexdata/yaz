@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.5  1996-10-11 15:00:26  adam
+ * Revision 1.6  1997-04-30 08:52:07  quinn
+ * Null
+ *
+ * Revision 1.5  1996/10/11  15:00:26  adam
  * CCL parser from Europagate Email gateway 1.0.
  *
  * Revision 1.10  1995/07/11  12:28:31  adam

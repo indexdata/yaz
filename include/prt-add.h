@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-add.h,v $
- * Revision 1.1  1996-10-10 11:51:58  quinn
+ * Revision 1.2  1997-04-30 08:52:09  quinn
+ * Null
+ *
+ * Revision 1.1  1996/10/10  11:51:58  quinn
  * Added SerchResult additional info
  *
  *
