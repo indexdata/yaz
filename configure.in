@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.100 2003-01-06 08:20:26 adam Exp $
+dnl $Id: configure.in,v 1.101 2003-01-13 14:33:03 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.2)
 dnl
@@ -349,15 +349,17 @@ if test "x$xsltdir" = "xNONE"; then
 		fi
 	done
 fi
-AC_MSG_CHECKING(for XSLT)
-if test -x $xsltdir/bin/xslt-config; then
-	XSLT_LIB=`$xsltdir/bin/xslt-config --libs`
-	XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
-	XSLT_VER=`$xsltdir/bin/xslt-config --version`
-	AC_MSG_RESULT($XSLT_VER)
-	AC_DEFINE(HAVE_XSLT)
-else
-	AC_MSG_RESULT(Not found)
+if test "$usesrw" = "1"; then
+	AC_MSG_CHECKING(for XSLT)
+	if test -x $xsltdir/bin/xslt-config; then
+		XSLT_LIB=`$xsltdir/bin/xslt-config --libs`
+		XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
+		XSLT_VER=`$xsltdir/bin/xslt-config --version`
+		AC_MSG_RESULT($XSLT_VER)
+		AC_DEFINE(HAVE_XSLT)
+	else
+		AC_MSG_RESULT(Not found)
+	fi
 fi
 dnl
 dnl ------ Memory debugging
