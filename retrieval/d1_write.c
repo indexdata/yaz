@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_write.c,v 1.13 2002-07-03 10:04:04 adam Exp $
+ * $Id: d1_write.c,v 1.14 2002-07-05 12:42:52 adam Exp $
  */
 
 #include <string.h>
@@ -12,6 +12,8 @@
 #include <yaz/wrbuf.h>
 
 #define IDSGML_MARGIN 75
+
+#define PRETTY_FORMAT 0
 
 static int wordlen(char *b, int max)
 {
@@ -34,9 +36,12 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
         if (c->which == DATA1N_preprocess)
         {
             data1_xattr *p;
-            
-            sprintf (line, "%*s<?", col, "");
+           
+#if PRETTY_FORMAT
+            sprintf (line, "%*s", col, "");
             wrbuf_puts (b, line);
+#endif
+	    wrbuf_puts (b, "<?");
             wrbuf_puts (b, c->u.preprocess.target);
             for (p = c->u.preprocess.attributes; p; p = p->next)
             {
@@ -67,8 +72,11 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	    {
 		data1_xattr *p;
 
-		sprintf (line, "%*s<", col, "");
+#if PRETTY_FORMAT
+		sprintf (line, "%*s", col, "");
 		wrbuf_puts (b, line);
+#endif
+		wrbuf_puts (b, "<");	
 		wrbuf_puts (b, tag);
 		for (p = c->u.tag.attributes; p; p = p->next)
 		{
@@ -79,11 +87,22 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 		    wrbuf_puts (b, p->value);
 		    wrbuf_putc (b, '"');
 		}
-		wrbuf_puts(b, ">\n");
+		wrbuf_puts(b, ">");
+#if PRETTY_FORMAT
+		wrbuf_puts(b, "\n");
+#endif
 		if (nodetoidsgml(c, select, b, (col > 40) ? 40 : col+2) < 0)
 		    return -1;
-		sprintf (line, "%*s</%s>\n", col, "", tag);
-		wrbuf_write(b, line, strlen(line));
+#if PRETTY_FORMAT
+		sprintf (line, "%*s", col);
+		wrbuf_puts(b, line);
+#endif
+		wrbuf_puts(b, "</");
+		wrbuf_puts(b, tag);
+		wrbuf_puts(b, ">");
+#if PRETTY_FORMAT
+		wrbuf_puts (b, "\n");
+#endif
 	    }
 	}
 	else if (c->which == DATA1N_data || c->which == DATA1N_comment)
@@ -93,11 +112,13 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	    int first = 1;
 	    int lcol = col;
 
+#if PRETTY_FORMAT
             if (!c->u.data.formatted_text)
             {
                 sprintf(line, "%*s", col, "");
                 wrbuf_write(b, line, strlen(line));
             }
+#endif
             if (c->which == DATA1N_comment)
             {
                 wrbuf_write (b, "<!--", 4);
@@ -105,6 +126,7 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	    switch (c->u.data.what)
 	    {
 	    case DATA1I_text:
+#if PRETTY_FORMAT
                 if (c->u.data.formatted_text)
                 {
                     wrbuf_write (b, p, l);
@@ -144,18 +166,28 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
                     }
                     wrbuf_write(b, "\n", 1);
                 }
+#else
+                wrbuf_write (b, p, l);
+#endif
 		break;
 	    case DATA1I_num:
 		wrbuf_write(b, c->u.data.data, c->u.data.len);
-                wrbuf_write(b, "\n", 1);
+#if PRETTY_FORMAT
+                wrbuf_puts(b, "\n");
+#endif
 		break;
 	    case DATA1I_oid:
 		wrbuf_write(b, c->u.data.data, c->u.data.len);
-                wrbuf_write(b, "\n", 1);
+#if PRETTY_FORMAT
+                wrbuf_puts(b, "\n");
+#endif
 	    }
             if (c->which == DATA1N_comment)
             {
-                wrbuf_write (b, "-->\n", 4);
+                wrbuf_puts(b, "-->");
+#if PRETTY_FORMAT
+                wrbuf_puts(b, "\n");
+#endif
             }
 	}
     }

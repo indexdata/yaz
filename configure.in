@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.76 2002-06-02 21:34:45 adam Exp $
+dnl $Id: configure.in,v 1.77 2002-07-05 12:42:52 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.8dev)
 dnl
@@ -73,8 +73,9 @@ if test "$checkBoth" = "1"; then
 fi
 AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
 dnl
+dnl
 dnl ------ EXPAT
-expat=no
+expat=yes
 AC_ARG_WITH(expat,   [  --with-expat[=DIR]      EXPAT library in DIR],[expat=$withval])
 if test "$expat" != "no"; then
 	xLIBS="$LIBS";
@@ -197,7 +198,7 @@ if test "$enable_tcpd" != ""; then
 fi
 dnl
 dnl ------ Headers
-AC_CHECK_HEADERS(fnmatch.h)
+AC_CHECK_HEADERS(fnmatch.h iconv.h)
 AC_STDC_HEADERS
 if test "$ac_cv_header_stdc" = "no"; then
 	AC_MSG_WARN(Your system doesn't seem to support ANSI C)

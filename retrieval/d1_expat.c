@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: d1_expat.c,v 1.3 2002-07-03 10:04:04 adam Exp $
+ * $Id: d1_expat.c,v 1.4 2002-07-05 12:42:52 adam Exp $
  */
 
 #if HAVE_EXPAT_H
@@ -46,6 +46,11 @@ static void cb_end (void *user, const char *el)
 static void cb_chardata (void *user, const char *s, int len)
 {
     struct user_info *ui = (struct user_info*) user;
+#if 1
+    yaz_log (LOG_DEBUG, "cb_chardata %.*s", len, s);
+    ui->d1_stack[ui->level] = data1_mk_text_n (ui->dh, ui->nmem, s, len,
+                                                   ui->d1_stack[ui->level -1]);
+#else
     int i;
 
     for (i = 0; i<len; i++)
@@ -56,6 +61,7 @@ static void cb_chardata (void *user, const char *s, int len)
         ui->d1_stack[ui->level] = data1_mk_text_n (ui->dh, ui->nmem, s, len,
                                                    ui->d1_stack[ui->level -1]);
     }
+#endif
 }
 
 static void cb_decl (void *user, const char *version, const char*encoding,
