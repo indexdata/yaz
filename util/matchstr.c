@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: matchstr.c,v $
- * Revision 1.1  1999-06-08 10:10:16  adam
+ * Revision 1.2  1999-10-15 11:35:41  adam
+ * Character '.' matches any single character.
+ *
+ * Revision 1.1  1999/06/08 10:10:16  adam
  * New sub directory zutil. Moved YAZ Compiler to be part of YAZ tree.
  *
  * Revision 1.7  1997/09/30 11:47:47  adam
@@ -49,24 +52,26 @@ int yaz_matchstr(const char *s1, const char *s2)
 {
     while (*s1 && *s2)
     {
-	char c1, c2;
+	char c1 = *s1;
+	char c2 = *s2;
 
-        if (*s2 == '?')
+        if (c2 == '?')
             return 0;
-	if (*s1 == '-')
+	if (c1 == '-')
 	    s1++;
-	if (*s2 == '-')
+	if (c2 == '-')
 	    s2++;
-	if (!*s1 || !*s2)
+	if (!c1 || !c2)
 	    break;
-	c1 = *s1;
-	c2 = *s2;
-	if (isupper(c1))
-	    c1 = tolower(c1);
-	if (isupper(c2))
-	    c2 = tolower(c2);
-	if (c1 != c2)
-	    break;
+        if (c2 != '.')
+        {
+	    if (isupper(c1))
+	        c1 = tolower(c1);
+	    if (isupper(c2))
+	        c2 = tolower(c2);
+	    if (c1 != c2)
+	        break;
+        }
 	s1++;
 	s2++;
     }
