@@ -12,4 +12,4 @@ of this software to organisations that are not partners in EUROPAGATE.
 If you need to distribute copies of YAZ to organisations which are not
 partners in EUROPAGATE, you should remove this module, and, if
 necessary, modify yazlib/tst.c to work wihout it. The test program is
-not essential to the general working of YAS.
+not essential to the general working of YAZ.

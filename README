@@ -1,7 +1,7 @@
 Compilation and installation
 
 The primary output of the source here is the libyaz.a library, which
-contain support functions for implementing the server or client role
+contains support functions for implementing the server or client role
 of Z39.50/SR. Currently, the library is placed in a directory 'lib'
 which is one level *above* the distribution directory (yaz). This was
 initially done because the library is often used along with several
