@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.28 2004-09-30 11:13:42 adam Exp $
+ * $Id: seshigh.c,v 1.29 2004-09-30 11:15:52 adam Exp $
  */
 
 /*
@@ -519,10 +519,8 @@ static int srw_bend_fetch(association *assoc, int pos,
     rr.comp->u.complex->generic->elementSpec = 0;
     if (srw_req->recordSchema)
     {
-	rr.comp->u.complex->generic->schema.uri = 
-
 	rr.comp->u.complex->generic->elementSpec = 
-	    odr_malloc(assoc->encode, sizeof(Z_ElementSpec));
+	    (Z_ElementSpec *) odr_malloc(assoc->encode, sizeof(Z_ElementSpec));
 	rr.comp->u.complex->generic->elementSpec->which = 
 	    Z_ElementSpec_elementSetName;
 	rr.comp->u.complex->generic->elementSpec->u.elementSetName =
@@ -1340,7 +1338,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.28 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.29 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
