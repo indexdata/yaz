@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: wrbuf.c,v $
- * Revision 1.6  1999-10-28 11:36:40  adam
+ * Revision 1.7  1999-11-03 09:05:56  adam
+ * Implemented wrbuf_puts.
+ *
+ * Revision 1.6  1999/10/28 11:36:40  adam
  * wrbuf_write allows zero buffer length.
  *
  * Revision 1.5  1999/08/27 09:40:32  adam
@@ -83,5 +86,12 @@ int wrbuf_write(WRBUF b, const char *buf, int size)
 	wrbuf_grow(b, size);
     memcpy(b->buf + b->pos, buf, size);
     b->pos += size;
+    return 0;
+}
+
+int wrbuf_puts(WRBUF b, const char *buf)
+{
+    wrbuf_write(b, buf, strlen(buf)+1);  /* '\0'-terminate as well */
+    (b->pos)--;                          /* don't include '\0' in count */
     return 0;
 }
