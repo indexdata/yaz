@@ -1,4 +1,4 @@
-## $Id: yaz.m4,v 1.9 2004-09-09 09:40:04 adam Exp $
+## $Id: yaz.m4,v 1.10 2004-09-09 09:54:37 adam Exp $
 ## 
 # Use this m4 function for autoconf if you use YAZ in your own
 # configure script.
@@ -10,7 +10,7 @@ AC_SUBST(DTD_DIR)
 AC_ARG_WITH(docbook-dtd, [  --with-docbook-dtd[=DIR]  use docbookx.dtd in DIR],
 [
 	if test -f "$withval/docbookx.dtd"; then
-		DTD_DIR=$withva	l
+		DTD_DIR=$withval
 	fi
 ],[
 	AC_MSG_CHECKING(for docbookx.dtd)
