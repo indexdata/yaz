@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oid.c,v $
- * Revision 1.4  1995-03-08 12:12:11  quinn
+ * Revision 1.5  1995-03-20 12:18:22  quinn
+ * Fixed bug in ber_oid
+ *
+ * Revision 1.4  1995/03/08  12:12:11  quinn
  * Added better error checking.
  *
  * Revision 1.3  1995/03/01  08:40:56  quinn
@@ -86,10 +89,9 @@ int ber_oidc(ODR o, Odr_oid *p)
 	    	o->error = ODATA;
             	return 0;
 	    }
-	    p[1] = p[0] * 40 + p[1];
 	    for (pos = 1; p[pos] >= 0; pos++)
 	    {
-	    	id = p[pos];
+	    	id = pos > 1 ? p[pos] : p[0] * 40 + p[1];
 	    	n = 0;
 	    	do
 	    	{
