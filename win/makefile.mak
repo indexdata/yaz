@@ -1,11 +1,12 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile.mak,v 1.3 1999-05-19 08:26:22 heikki Exp $
+# $Id: makefile.mak,v 1.4 1999-06-02 13:23:29 heikki Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
 #
 # History
 #  18-05-99 HL Stole this from YazX, cleaning up
+#  02-06-99 HL Ztest's bsc file missing, could not debug. Fixing.
 #
 # Missing
 # - Move MS-C's whatnots into win direcotry
@@ -26,8 +27,12 @@
 DEBUG=1   # 0 for release, 1 for debug
 
 default: all
-all: dirs dll client server ztest
 
+!if $(DEBUG)
+all: dirs dll client server ztest bsc
+!else
+all: dirs dll client server ztest 
+!endif
 
 
 ###########################################################
@@ -62,17 +67,19 @@ ZTESTDIR=$(SRCDIR)\ZTEST
 
 DLL=$(BINDIR)\Yaz.dll
 IMPLIB=$(BINDIR)\Yaz.lib
-BSCFILE=$(LIBDIR)\Yaz.bsc
+YAZ_BSCFILE=$(LIBDIR)\Yaz.bsc
 
 CLIENT=$(BINDIR)\client.exe
 SERVER=$(BINDIR)\server.lib
 ZTEST=$(BINDIR)\ztest.exe
+ZTEST_BSCFILE=$(LIBDIR)\ztest.bsc
 
 # shortcut names defined here
-dll : $(DLL)  $(BSCFILE)
+dll : $(DLL) 
 client: $(CLIENT)
 server: $(SERVER)
 ztest: $(ZTEST)
+bsc: $(YAZ_BSCFILE) $(ZTEST_BSCFILE)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -101,7 +108,7 @@ COMMON_C_INCLUDES= \
 
 DEBUG_C_OPTIONS=  \
   /D "_DEBUG"      \
-  /MD  /Od /YX  
+  /MD  /Od /YX /Zi
  
 RELEASE_C_OPTIONS=  \
   /D "NDEBUG"        \
@@ -152,7 +159,7 @@ ZTEST_LINK_OPTIONS = /subsystem:console
 BSCMAKE=bscmake.exe
 
 
-COMMON_BSC_OPTIONS= /nologo /o "$(BSCFILE)" /n
+COMMON_BSC_OPTIONS= /nologo /n
 DEBUG_BSC_OPTIONS=
 RELEASE_BSC_OPTIONS=
 
@@ -435,9 +442,11 @@ $(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS)
 
 
 ## Linking the debug info database (or what ever this is...)
-$(BSCFILE): $(DLL_OBJS)
-	$(BSCMAKE) $(BSCOPT) $(OBJDIR)\*.sbr
+$(YAZ_BSCFILE): $(DLL_OBJS) $(DLL)
+	$(BSCMAKE) $(BSCOPT) /o $(YAZ_BSCFILE) $(OBJDIR)\*.sbr
 
+$(ZTEST_BSCFILE): $(DLL_OBJS) $(ZTEST_OBJS) $(ZTEST)
+	$(BSCMAKE) $(BSCOPT) /o $(ZTEST_BSCFILE) $(OBJDIR)\*.sbr
 
 #	@echo OPT=$(LNKOPT)
 #	@echo LIB=$(LINKLIBS)
@@ -475,7 +484,10 @@ $(OBJDIR)/client.obj: $(IDLGENERATED)
 ###########################################################
 #
 # $Log: makefile.mak,v $
-# Revision 1.3  1999-05-19 08:26:22  heikki
+# Revision 1.4  1999-06-02 13:23:29  heikki
+# Debug options for C compiler
+#
+# Revision 1.3  1999/05/19 08:26:22  heikki
 # Added comments
 #
 #
