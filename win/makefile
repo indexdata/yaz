@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.12 2000-01-06 11:27:16 adam Exp $
+# $Id: makefile,v 1.13 2000-02-28 11:13:03 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -241,7 +241,6 @@ YAZ_ODR_OBJS= \
    $(OBJDIR)\odr_null.obj \
    $(OBJDIR)\odr_oct.obj \
    $(OBJDIR)\odr_oid.obj \
-   $(OBJDIR)\odr_priv.obj \
    $(OBJDIR)\odr_seq.obj \
    $(OBJDIR)\odr_tag.obj \
    $(OBJDIR)\odr_use.obj \
@@ -656,7 +655,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.12  2000-01-06 11:27:16  adam
+# Revision 1.13  2000-02-28 11:13:03  adam
+# Removed odr_priv.obj.
+#
+# Revision 1.12  2000/01/06 11:27:16  adam
 # Updated for ILL.
 #
 # Revision 1.11  1999/12/21 14:16:20  ian
