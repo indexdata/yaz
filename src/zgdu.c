@@ -1,15 +1,21 @@
 /*
- * Copyright (c) 2002-2003, Index Data.
+ * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.6 2004-02-19 23:21:44 adam Exp $
+ * $Id: zgdu.c,v 1.7 2004-02-23 10:14:06 adam Exp $
  */
 
+#include <ctype.h>
 #include <yaz/odr.h>
 #include <yaz/yaz-version.h>
 #include <yaz/yaz-iconv.h>
 #include <yaz/zgdu.h>
 
+#ifdef WIN32
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
+ 
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
 {
