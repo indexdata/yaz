@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.190 2003-04-29 21:53:54 adam Exp $
+ * $Id: client.c,v 1.191 2003-04-30 14:04:45 adam Exp $
  */
 
 #include <stdio.h>
@@ -494,6 +494,7 @@ int session_connect(const char *arg)
         return 0;
     }
 #endif
+    protocol = conn->protocol;
     if (conn->protocol == PROTO_HTTP)
         set_base("");
     else
@@ -516,7 +517,7 @@ int session_connect(const char *arg)
     printf("OK.\n");
     if (basep && *basep)
         set_base (basep);
-    if (conn->protocol == PROTO_Z3950)
+    if (protocol == PROTO_Z3950)
     {
         send_initRequest(type_and_host);
         return 2;
@@ -998,6 +999,8 @@ static int send_SRW_searchRequest(const char *arg)
         srw_sr_odr_out = odr_createmem(ODR_ENCODE);
     }
     odr_reset(srw_sr_odr_out);
+
+    setno = 1;
 
     /* save this for later .. when fetching individual records */
     srw_sr = sr = yaz_srw_get(srw_sr_odr_out, Z_SRW_searchRetrieve_request);
@@ -1665,7 +1668,7 @@ static int send_itemorder(const char *type, int itemno)
 
 static int only_z3950()
 {
-    if (conn && conn->protocol == PROTO_HTTP)
+    if (protocol == PROTO_HTTP)
     {
 	printf ("Not supported by SRW\n");
 	return 1;
@@ -1820,18 +1823,11 @@ static int cmd_find(const char *arg)
         printf("Find what?\n");
         return 0;
     }
-    if (!conn)
-    {
-        try_reconnect(); 
-        
-        if (!conn) {					
-            printf("Not connected yet\n");
-            return 0;
-        }
-    }
-    if (conn->protocol == PROTO_HTTP)
+    if (protocol == PROTO_HTTP)
     {
 #if HAVE_XML2
+        if (!conn)
+            cmd_open(0);
         if (!send_SRW_searchRequest(arg))
             return 0;
 #else
@@ -1840,6 +1836,15 @@ static int cmd_find(const char *arg)
     }
     else
     {
+        if (!conn)
+        {
+            try_reconnect(); 
+            
+            if (!conn) {					
+                printf("Not connected yet\n");
+                return 0;
+            }
+        }
         if (!send_searchRequest(arg))
             return 0;
     }
@@ -2043,13 +2048,6 @@ static void close_session (void)
         nmem_destroy (session_mem);
         session_mem = NULL;
     }
-    if (srw_sr)
-    {
-        odr_destroy(srw_sr_odr_out);
-        srw_sr_odr_out = 0;
-        srw_sr = 0;
-    }
-    assert (srw_sr_odr_out == 0);
     sent_close = 0;
     odr_reset(out);
     odr_reset(in);
@@ -2090,14 +2088,11 @@ void process_close(Z_Close *req)
 
 static int cmd_show(const char *arg)
 {
-    if (!conn)
-    {
-        printf("Not connected yet\n");
-        return 0;
-    }
-    if (conn->protocol == PROTO_HTTP)
+    if (protocol == PROTO_HTTP)
     {
 #if HAVE_XML2
+        if (!conn)
+            cmd_open(0);
         if (!send_SRW_presentRequest(arg))
             return 0;
 #else
@@ -2106,6 +2101,11 @@ static int cmd_show(const char *arg)
     }
     else
     {
+        if (!conn)
+        {
+            printf("Not connected yet\n");
+            return 0;
+        }
         if (!send_presentRequest(arg))
             return 0;
     }
@@ -2913,7 +2913,7 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
             setno = *rec->recordPosition + 1;
         }
         if (rec->recordSchema)
-            printf (" scheam=%d", *rec->recordSchema);
+            printf (" schema=%s", rec->recordSchema);
         printf ("\n");
         if (rec->recordData_buf && rec->recordData_len)
         {
@@ -3002,7 +3002,7 @@ void wait_and_handle_response()
     while(conn)
     {
         res = cs_get(conn, &netbuffer, &netbufferlen);
-        if (reconnect_ok && res <= 0 && conn->protocol == PROTO_HTTP)
+        if (reconnect_ok && res <= 0 && protocol == PROTO_HTTP)
         {
             cs_close(conn);
             conn = 0;
