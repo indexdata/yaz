@@ -12,7 +12,7 @@
 
 # Copyright (C) 1995-2000, Index Data 
 # All rights reserved.
-# $Id: Makefile.in,v 1.15 2000-02-28 11:20:05 adam Exp $
+# $Id: Makefile.in,v 1.17 2000-02-28 11:29:05 adam Exp $
 
 
 SHELL = @SHELL@
@@ -81,13 +81,6 @@ SUBDIRS = @SUBDIRS_VAR@
 noinst_SCRIPTS = yaz-config
 SPEC_FILE = $(PACKAGE).spec
 EXTRA_DIST = $(SPEC_FILE) README LICENSE CHANGELOG TODO windows.txt
-
-BINDIR = $(exec_prefix)/bin
-#  Public libraries and header files
-LIBDIR = $(exec_prefix)/lib
-INCDIR = $(prefix)/include
-#  Misc tables, etc.
-YAZTAB = $(pkgdatadir)/tab
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ./include/yaz/config.h

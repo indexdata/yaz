@@ -1887,10 +1887,6 @@ fi
 EOF
 
 fi
-YAZBIN_INSTALL="${bindir}"
-YAZTAB_INSTALL="${datadir}/tab"
-YAZLIB_INSTALL="-L${libdir} -lyaz $LIBS"
-YAZINC_INSTALL="-I${includedir}/yaz"
 SUBDIRS_VAR="util odr $ASNMODULE $ILLMODULE zutil comstack ccl tab retrieval server include lib client ztest"
 
 trap '' 1 2 15
