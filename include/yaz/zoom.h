@@ -1,8 +1,9 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.20 2004-02-11 13:37:16 adam Exp $
+ * $Id: zoom.h,v 1.21 2004-02-16 11:22:34 adam Exp $
  */
 
+#include <stdlib.h>
 #include <yaz/yconfig.h>
 
 #define ZOOM_BEGIN_CDECL YAZ_BEGIN_CDECL
