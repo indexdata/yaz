@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.46 2002-02-19 20:02:40 adam Exp $
+ * $Id: tcpip.c,v 1.47 2002-06-12 19:42:38 adam Exp $
  */
 
 #include <stdio.h>
@@ -679,6 +679,9 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 #endif
 #endif
 		|| errno == EINPROGRESS
+#ifdef __sun__
+		|| errno == ENOENT /* Sun's sometimes set errno to this */
+#endif
 		)
 	    {
 		h->io_pending = CS_WANT_READ;

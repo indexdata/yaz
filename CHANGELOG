@@ -2,6 +2,9 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.8 2002/MM/DD
 
+Solaris recv sometimes returns errno == ENOENT. It is treated as
+EINPROGRESS. COMSTACK patch by Ko van der Sloot.
+
 New COMSTACK of type UNIX Socket. Use "unix:/path" as address for
 both client and server. Code by Morten Bøgeskov.
 

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.34 2001-11-18 21:05:13 adam Exp $
+ * $Id: nmem.c,v 1.35 2002-06-12 19:42:38 adam Exp $
  */
 
 /*
@@ -231,8 +231,8 @@ void *nmem_malloc(NMEM n, int size)
 #endif
     if (!n)
     {
+        yaz_log (LOG_FATAL, "calling nmem_malloc with an null pointer");
         abort ();
-	return xmalloc(size);
     }
 #ifdef WIN32
     assert (nmem_init_flag);
