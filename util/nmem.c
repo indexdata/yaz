@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.2  1995-12-13 13:44:37  quinn
+ * Revision 1.3  1997-07-21 12:47:38  adam
+ * Moved definition of nmem_control and nmem_block.
+ *
+ * Revision 1.2  1995/12/13 13:44:37  quinn
  * Modified Data1-system to use nmem
  *
  * Revision 1.1  1995/11/13  09:27:52  quinn
@@ -22,21 +25,6 @@
 #include <nmem.h>
 
 #define NMEM_CHUNK (10*1024)
-
-typedef struct nmem_block
-{
-    char *buf;              /* memory allocated in this block */
-    int size;               /* size of buf */
-    int top;                /* top of buffer */
-    struct nmem_block *next;
-} nmem_block;
-
-typedef struct nmem_control
-{
-    int total;
-    nmem_block *blocks;
-    struct nmem_control *next;
-} nmem_control;
 
 static nmem_block *freelist = 0;           /* global freelists */
 static nmem_control *cfreelist = 0;
