@@ -52,7 +52,7 @@ calling this.
 Added NT Services interface for the the Z39.50 (statserv) Server. 
 Refer to the ztest.c source on the usage.
 
-Windows 95/NT port using MSV5.0. Project files are included in the
+Windows 95/NT port using MSVC5.0. Project files are included in the
 distribution.
 
 * Defined new 'global' handle for the retrieval (data1) system. The

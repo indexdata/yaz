@@ -1,7 +1,7 @@
-# Copyright (C) 1995-1997, Index Data I/S 
+# Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.3 1997-09-22 12:33:41 adam Exp $
+# $Id: Makefile,v 1.4 1998-01-07 12:59:27 adam Exp $
 
 LIBDIR=../lib
 
@@ -13,7 +13,7 @@ LIBINCLUDE=-L$(LIBDIR)
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libserver.a 
 LIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
-$(LIBDIR)/libcomstack.a $(LIBMOSI) $(LIBDIR)/libutil.a $(ELIBS)
+$(LIBDIR)/libcomstack.a $(LIBMOSI) $(LIBDIR)/libutil.a
 CPP=$(CC) -E
 PROG=ztest
 PROGO=ztest.o read-grs.o
@@ -22,7 +22,7 @@ RANLIB=ranlib
 all: $(PROG)
 
 $(PROG): $(LIB) $(PROGO) $(LIBS)
-	$(CC) $(CFLAGS) $(LIBINCLUDE) -o $(PROG) $(PROGO) $(LIBS)
+	$(CC) $(CFLAGS) $(LIBINCLUDE) -o $(PROG) $(PROGO) $(LIBS) $(ELIBS)
 
 alll:
 

@@ -1,0 +1,46 @@
+
+YAZ Compilation guidelines for winNT/95.
+  $Id: windows.txt,v 1.1 1998-01-07 12:59:27 adam Exp $
+
+This distribution of YAZ was compiled with Visual C++ 5.0.
+The workspace file, yaz.dsw, is located in the top-level directory.
+
+It includes 4 sub-projects:
+   yaz.dsp 
+         Builds yaz.dll. This DLL includes the source in all
+         sub directories except for 'server', 'client' and
+         'ztest'. To export public functions the header files
+         includes the modifier YAZ_EXPORT which is defined in
+         yconfig.h. The value of this modifier,
+          __declspec(dllexport), probably only works with VC.
+
+   client/client.dsp   
+         Builds client.exe as a console application. It links
+         with the import library yaz.lib. This application 
+         searches for yaz.dll during runtime.
+
+   server/server.dsp
+         Builds the library, server.lib, which includes the
+         source from 'server'. Unlike the UNIX version, the
+         server library is multi-threaded.
+
+   ztest/ztest.dsp
+         Builds ztest.exe as a console application. It links
+         with the import library yaz.lib and the regular library
+         server.lib. When running ztest make sure it is able to
+         find the record test files dummy-records, dummy-grs,
+         and dummy-words in the current directory. 
+
+         As an option ztest may be installed as an NT service
+         (not Windows 95). Use 'ztest -install <otherargs>' to
+         install it and 'ztest -remove <otherargs>' to remove it
+         again. Since NT runs the service program in some weird
+         directory, such as \winnt\system32, it's probably a good
+         idea to use the option '-w' to change to some other
+         directory. For example
+
+            ztest -install -w d:\proj\yaz\ztest -l ztest.out tcp:@:210
+
+         which specifies both working directory and a log file, so
+         you can see what's going on.
+

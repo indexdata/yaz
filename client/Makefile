@@ -1,7 +1,7 @@
-# Copyright (C) 1994, Index Data I/S 
+# Copyright (C) 1995-1998, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.13 1997-09-22 12:33:41 adam Exp $
+# $Id: Makefile,v 1.14 1998-01-07 12:59:27 adam Exp $
 
 LIBDIR=../lib
 
@@ -12,7 +12,7 @@ INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBINCLUDE=-L$(LIBDIR)
 DEFS=$(INCLUDE) $(CDEFS) -DCCL2RPN=1
 LIBS=$(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
-  $(LIBDIR)/libcomstack.a ../lib/ccl.a $(LIBMOSI) $(LIBDIR)/libutil.a $(ELIBS)
+  $(LIBDIR)/libcomstack.a ../lib/ccl.a $(LIBMOSI) $(LIBDIR)/libutil.a
 CPP=$(CC) -E
 PROG=client
 PROGO=client.o
@@ -20,10 +20,7 @@ PROGO=client.o
 all: $(PROG)
 
 $(PROG): $(LIB) $(PROGO) $(LIBS)
-	$(CC) $(CFLAGS) $(LIBINCLUDE) -o $(PROG) $(PROGO) $(LIBS)
-
-qparser: qparser.o
-	$(CC) $(CFLAGS) $(LIBINCLUDE) -o qparser qparser.o $(LIBS)
+	$(CC) $(CFLAGS) $(LIBINCLUDE) -o $(PROG) $(PROGO) $(LIBS) $(ELIBS)
 
 alll:
 
