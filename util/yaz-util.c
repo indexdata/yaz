@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-util.c,v $
- * Revision 1.6  1997-09-04 07:54:34  adam
+ * Revision 1.7  1997-09-30 11:47:47  adam
+ * Added function 'cause checkergcc doesn't include assert handler.
+ *
+ * Revision 1.6  1997/09/04 07:54:34  adam
  * Right hande side operand of yaz_matchstr may include a ? in
  * which case it returns "match ok".
  *
@@ -28,9 +31,11 @@
  *
  *
  */
-
+#include <stdio.h>
+#include <assert.h>
 #include <ctype.h>
 #include <yaz-util.h>
+
 /*
  * Match strings, independently of case and occurences of '-'.
  * fairly inefficient - will be replaced with an indexing scheme for
@@ -64,3 +69,15 @@ int yaz_matchstr(const char *s1, const char *s2)
     }
     return *s1 || *s2;
 }
+
+#ifdef __GNUC__
+#ifdef __CHECKER__
+void __assert_fail (const char *assertion, const char *file, 
+                    unsigned int line, const char *function)
+{
+    fprintf (stderr, "%s in file %s line %d func %s\n",
+             assertion, file, line, function);
+    abort ();
+}
+#endif
+#endif
