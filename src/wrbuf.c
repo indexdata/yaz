@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.2 2003-12-11 00:37:22 adam Exp $
+ * $Id: wrbuf.c,v 1.3 2004-03-15 21:39:06 adam Exp $
  */
 
 /*
@@ -82,7 +82,12 @@ int wrbuf_puts(WRBUF b, const char *buf)
 
 int wrbuf_xmlputs(WRBUF b, const char *cp)
 {
-    while (*cp)
+    return wrbuf_write_cdata(b, cp, strlen(cp));
+}
+
+int wrbuf_write_cdata(WRBUF b, const char *cp, int size)
+{
+    while (--size >= 0)
     {
 	switch(*cp)
 	{
@@ -132,7 +137,8 @@ void wrbuf_printf(WRBUF b, const char *fmt, ...)
     va_end(ap);
 }
 
-int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
+static int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
+			       int size, int cdata)
 {
     if (cd)
     {
@@ -151,10 +157,29 @@ int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
 		if (e != YAZ_ICONV_E2BIG)
 		    break;
 	    }
-	    wrbuf_write(b, outbuf, outp - outbuf);
+	    if (cdata)
+		wrbuf_write_cdata(b, outbuf, outp - outbuf);
+	    else
+		wrbuf_write(b, outbuf, outp - outbuf);
 	}
     }
     else
-	wrbuf_write(b, buf, size);
+    {
+	if (cdata)
+	    wrbuf_write_cdata(b, buf, size);
+	else
+	    wrbuf_write(b, buf, size);
+    }
     return wrbuf_len(b);
 }
+
+int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
+{
+    return wrbuf_iconv_write_x(b, cd, buf, size, 0);
+}
+
+int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
+{
+    return wrbuf_iconv_write_x(b, cd, buf, size, 1);
+}
+

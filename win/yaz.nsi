@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.38 2004-03-01 17:33:03 adam Exp $
+; $Id: yaz.nsi,v 1.39 2004-03-15 21:39:07 adam Exp $
 
 !define VERSION "2.0.15"
 
@@ -113,7 +113,8 @@ Section "YAZ Source"
 	File ..\src\*.y
 	File ..\src\*.tcl
 	File ..\src\*.asn
-	File ..\src\*.sgm
+	File ..\src\charconv.sgm
+	File ..\src\charconv_cjk.xml
 	SetOutPath $INSTDIR\zoom
 	File ..\zoom\*.c
 	SetOutPath $INSTDIR\ztest

@@ -1,5 +1,5 @@
-/* $Id: cqltransform.c,v 1.7 2004-03-10 16:34:29 adam Exp $
-   Copyright (C) 2002-2003
+/* $Id: cqltransform.c,v 1.8 2004-03-15 21:39:06 adam Exp $
+   Copyright (C) 2002-2004
    Index Data Aps
 
 This file is part of the YAZ toolkit.
@@ -10,6 +10,7 @@ See the file LICENSE.
 #include <stdlib.h>
 #include <string.h>
 #include <yaz/cql.h>
+#include <yaz/xmalloc.h>
 
 struct cql_prop_entry {
     char *pattern;
@@ -26,7 +27,7 @@ struct cql_transform_t_ {
 cql_transform_t cql_transform_open_FILE(FILE *f)
 {
     char line[1024];
-    cql_transform_t ct = (cql_transform_t) malloc (sizeof(*ct));
+    cql_transform_t ct = (cql_transform_t) xmalloc (sizeof(*ct));
     struct cql_prop_entry **pp = &ct->entry;
 
     ct->error = 0;
@@ -56,12 +57,12 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
         if (cp_value_end != cp_value_start &&
             strchr(" \t\r\n", cp_value_end[-1]))
             cp_value_end--;
-        *pp = (struct cql_prop_entry *) malloc (sizeof(**pp));
-        (*pp)->pattern = (char *) malloc (cp_pattern_end - line + 1);
+        *pp = (struct cql_prop_entry *) xmalloc (sizeof(**pp));
+        (*pp)->pattern = (char *) xmalloc (cp_pattern_end - line + 1);
         memcpy ((*pp)->pattern, line, cp_pattern_end - line);
         (*pp)->pattern[cp_pattern_end-line] = 0;
 
-        (*pp)->value = (char *) malloc (cp_value_end - cp_value_start + 1);
+        (*pp)->value = (char *) xmalloc (cp_value_end - cp_value_start + 1);
         if (cp_value_start != cp_value_end)
             memcpy ((*pp)->value, cp_value_start, cp_value_end-cp_value_start);
         (*pp)->value[cp_value_end - cp_value_start] = 0;
@@ -80,14 +81,14 @@ void cql_transform_close(cql_transform_t ct)
     while (pe)
     {
         struct cql_prop_entry *pe_next = pe->next;
-        free (pe->pattern);
-        free (pe->value);
-        free (pe);
+        xfree (pe->pattern);
+        xfree (pe->value);
+        xfree (pe);
         pe = pe_next;
     }
     if (ct->addinfo)
-        free (ct->addinfo);
-    free (ct);
+        xfree (ct->addinfo);
+    xfree (ct);
 }
 
 cql_transform_t cql_transform_open_fname(const char *fname)
@@ -102,15 +103,23 @@ cql_transform_t cql_transform_open_fname(const char *fname)
 }
 
 static const char *cql_lookup_property(cql_transform_t ct,
-                                       const char *pat1, const char *pat2)
+                                       const char *pat1, const char *pat2,
+				       const char *pat3)
 {
-    char pattern[80];
+    char pattern[120];
     struct cql_prop_entry *e;
 
-    if (pat2)
-        sprintf (pattern, "%.39s%.39s", pat1, pat2);
-    else
+    if (pat1 && pat2 && pat3)
+        sprintf (pattern, "%.39s.%.39s.%.39s", pat1, pat2, pat3);
+    else if (pat1 && pat2)
+        sprintf (pattern, "%.39s.%.39s", pat1, pat2);
+    else if (pat1 && pat3)
+        sprintf (pattern, "%.39s.%.39s", pat1, pat3);
+    else if (pat1)
         sprintf (pattern, "%.39s", pat1);
+    else
+	return 0;
+    
     for (e = ct->entry; e; e = e->next)
     {
         if (!strcmp(e->pattern, pattern))
@@ -119,33 +128,37 @@ static const char *cql_lookup_property(cql_transform_t ct,
     return 0;
 }
 
-static const char *cql_lookup_value(cql_transform_t ct,
-                                    const char *prefix,
-                                    const char *value)
+int cql_pr_attr_uri(cql_transform_t ct, const char *category,
+		   const char *uri, const char *val, const char *default_val,
+		   void (*pr)(const char *buf, void *client_data),
+		   void *client_data,
+		   int errcode)
 {
-    struct cql_prop_entry *e;
-    int len = strlen(prefix);
-
-    for (e = ct->entry; e; e = e->next)
+    const char *res = 0;
+    const char *eval = val ? val : default_val;
+    const char *prefix = 0;
+    
+    if (uri)
     {
-        if (!memcmp(e->pattern, prefix, len) && !strcmp(e->value, value))
-            return e->pattern + len;
+	struct cql_prop_entry *e;
+	
+	for (e = ct->entry; e; e = e->next)
+	    if (!memcmp(e->pattern, "set.", 4) && e->value &&
+		!strcmp(e->value, uri))
+	    {
+		prefix = e->pattern+4;
+		break;
+	    }
+	/* must have a prefix now - if not it's an error */
     }
-    return 0;
-}
 
-
-int cql_pr_attr(cql_transform_t ct, const char *category,
-                const char *val,
-                const char *default_val,
-                void (*pr)(const char *buf, void *client_data),
-                void *client_data,
-                int errcode)
-{
-    const char *res;
-    res = cql_lookup_property(ct, category, val ? val : default_val);
-    if (!res)
-        res = cql_lookup_property(ct, category, "*");
+    if (!uri || prefix)
+    {
+	if (!res)
+	    res = cql_lookup_property(ct, category, prefix, eval);
+	if (!res)
+	    res = cql_lookup_property(ct, category, prefix, "*");
+    }
     if (res)
     {
         char buf[64];
@@ -173,11 +186,21 @@ int cql_pr_attr(cql_transform_t ct, const char *category,
     {
         ct->error = errcode;
 	if (val)
-	    ct->addinfo = strdup(val);
+	    ct->addinfo = xstrdup(val);
 	else
 	    ct->addinfo = 0;
     }
     return 0;
+}
+
+int cql_pr_attr(cql_transform_t ct, const char *category,
+		const char *val, const char *default_val,
+		void (*pr)(const char *buf, void *client_data),
+		void *client_data,
+		int errcode)
+{
+    return cql_pr_attr_uri(ct, category, 0 /* uri */,
+			   val, default_val, pr, client_data, errcode);
 }
 
 
@@ -211,27 +234,27 @@ void emit_term(cql_transform_t ct,
     {
         if (length > 1 && term[0] == '^' && term[length-1] == '^')
         {
-            cql_pr_attr(ct, "position.", "firstAndLast", 0,
+            cql_pr_attr(ct, "position", "firstAndLast", 0,
                         pr, client_data, 32);
             term++;
             length -= 2;
         }
         else if (term[0] == '^')
         {
-            cql_pr_attr(ct, "position.", "first", 0,
+            cql_pr_attr(ct, "position", "first", 0,
                         pr, client_data, 32);
             term++;
 	    length--;
         }
         else if (term[length-1] == '^')
         {
-            cql_pr_attr(ct, "position.", "last", 0,
+            cql_pr_attr(ct, "position", "last", 0,
                         pr, client_data, 32);
             length--;
         }
         else
         {
-            cql_pr_attr(ct, "position.", "any", 0,
+            cql_pr_attr(ct, "position", "any", 0,
                         pr, client_data, 32);
         }
     }
@@ -246,21 +269,21 @@ void emit_term(cql_transform_t ct,
 	 */
         if (length > 1 && term[0] == '*' && term[length-1] == '*' &&
 	    wcchar(term+1, length-2) == 0 &&
-            cql_pr_attr(ct, "truncation.", "both", 0,
+            cql_pr_attr(ct, "truncation", "both", 0,
 			pr, client_data, 0)) {
 	    term++;
 	    length -= 2;
         }
         else if (term[0] == '*' &&
 		 wcchar(term+1, length-1) == 0 &&
-		 cql_pr_attr(ct, "truncation.", "left", 0,
+		 cql_pr_attr(ct, "truncation", "left", 0,
 			     pr, client_data, 0)) {
 	    term++;
 	    length--;
         }
         else if (term[length-1] == '*' &&
 		 wcchar(term, length-1) == 0 &&
-		 cql_pr_attr(ct, "truncation.", "right", 0,
+		 cql_pr_attr(ct, "truncation", "right", 0,
 			     pr, client_data, 0)) {
 	    length--;
         }
@@ -277,9 +300,9 @@ void emit_term(cql_transform_t ct,
 	     */
 	    int i;
 	    char *mem;
-            cql_pr_attr(ct, "truncation.", "z3958", 0,
+            cql_pr_attr(ct, "truncation", "z3958", 0,
                         pr, client_data, 28);
-	    mem = malloc(length+1);
+	    mem = xmalloc(length+1);
             for (i = 0; i < length; i++) {
 		if (term[i] == '*')      mem[i] = '?';
 		else if (term[i] == '?') mem[i] = '#';
@@ -297,7 +320,7 @@ void emit_term(cql_transform_t ct,
 	     * to differentiate between this case and the previous
 	     * one.
 	     */
-            cql_pr_attr(ct, "truncation.", "none", 0,
+            cql_pr_attr(ct, "truncation", "none", 0,
                         pr, client_data, 30);
         }
     }
@@ -346,139 +369,63 @@ void emit_wordlist(cql_transform_t ct,
         emit_term(ct, last_term, last_length, pr, client_data);
 }
 
-
-static const char *cql_get_ns(cql_transform_t ct,
-                              struct cql_node *cn,
-                              struct cql_node **prefix_ar, int prefix_level,
-                              const char **n_prefix,
-                              const char **n_suffix)
-{
-    int i;
-    const char *ns = 0;
-    char prefix[32];
-    const char *cp = cn->u.st.index;
-    const char *cp_dot = strchr(cp, '.');
-
-    /* strz current prefix (empty if not given) */
-    if (cp_dot && cp_dot-cp < sizeof(prefix))
-    {
-        memcpy (prefix, cp, cp_dot - cp);
-        prefix[cp_dot - cp] = 0;
-    }
-    else
-        *prefix = 0;
-
-    /* 2. lookup in prefix_ar. and return NS */
-    for (i = prefix_level; !ns && --i >= 0; )
-    {
-        struct cql_node *cn_prefix = prefix_ar[i];
-        for (; cn_prefix; cn_prefix = cn_prefix->u.st.modifiers)
-        {
-            if (*prefix && cn_prefix->u.st.index &&
-                !strcmp(prefix, cn_prefix->u.st.index))
-            {
-                ns = cn_prefix->u.st.term;
-                break;
-            }
-            else if (!*prefix && !cn_prefix->u.st.index)
-            {
-                ns = cn_prefix->u.st.term;
-                break;
-            }
-        }
-    }
-    if (!ns)
-    {
-        if (!ct->error)
-        {
-            ct->error = 15;
-            ct->addinfo = strdup(prefix);
-        }
-        return 0;
-    }
-    /* 3. lookup in set.NS for new prefix */
-    *n_prefix = cql_lookup_value(ct, "set.", ns);
-    if (!*n_prefix)
-    {
-        if (!ct->error)
-        {
-            ct->error = 15;
-            ct->addinfo = strdup(ns);
-        }
-        return 0;
-    }
-    /* 4. lookup index.prefix. */
-    
-    cp = cn->u.st.index;
-    cp_dot = strchr(cp, '.');
-    
-    *n_suffix = cp_dot ? cp_dot+1 : cp;
-    return ns;
-}
-
 void cql_transform_r(cql_transform_t ct,
                      struct cql_node *cn,
                      void (*pr)(const char *buf, void *client_data),
-                     void *client_data,
-                     struct cql_node **prefix_ar, int prefix_level)
+                     void *client_data)
 {
-    const char *ns, *n_prefix, *n_suffix;
+    const char *ns;
 
     if (!cn)
         return;
     switch (cn->which)
     {
     case CQL_NODE_ST:
-        if (cn->u.st.prefixes && prefix_level < 20)
-            prefix_ar[prefix_level++] = cn->u.st.prefixes;
-        ns = cql_get_ns(ct, cn, prefix_ar, prefix_level, &n_prefix, &n_suffix);
+	ns = cn->u.st.index_uri;
         if (ns)
         {
-            char n_full[64];
-            sprintf (n_full, "%.20s.%.40s", n_prefix, n_suffix);
-        
-            if ((!strcmp(ns, "http://www.loc.gov/zing/cql/context-sets/cql/v1.1/") ||
-		 !strcmp(ns, "http://www.loc.gov/zing/cql/srw-indexes/v1.0/"))
-                && !strcmp(n_suffix, "resultSet"))
+            if (!strcmp(ns, cql_uri())
+		&& cn->u.st.index && !strcmp(cn->u.st.index, "resultSet"))
             {
                 (*pr)("@set \"", client_data);
                 (*pr)(cn->u.st.term, client_data);
                 (*pr)("\" ", client_data);
                 return ;
             }
-	    /* ### It would be nice if this could fall back to whichever 
-	       of cql.serverChoice and srw.serverChoice is defined */
-	    if (!cql_pr_attr(ct, "index.", n_full, "cql.serverChoice",
-			     pr, client_data, 16)) {
-		/* No index.foo; reset error and fall back to qualifier.foo */
-		if (ct->error == 16) ct->error = 0;
-		cql_pr_attr(ct, "qualifier.", n_full, "cql.serverChoice",
+	    cql_pr_attr_uri(ct, "index", ns,
+			    cn->u.st.index, "serverChoice",
 			    pr, client_data, 16);
-	    }
         }
-
+	else
+	{
+	    if (!ct->error)
+	    {
+		ct->error = 15;
+		ct->addinfo = 0;
+	    }
+	}
         if (cn->u.st.relation && !strcmp(cn->u.st.relation, "="))
-            cql_pr_attr(ct, "relation.", "eq", "scr",
+            cql_pr_attr(ct, "relation", "eq", "scr",
                         pr, client_data, 19);
         else if (cn->u.st.relation && !strcmp(cn->u.st.relation, "<="))
-            cql_pr_attr(ct, "relation.", "le", "scr",
+            cql_pr_attr(ct, "relation", "le", "scr",
                         pr, client_data, 19);
         else if (cn->u.st.relation && !strcmp(cn->u.st.relation, ">="))
-            cql_pr_attr(ct, "relation.", "ge", "scr",
+            cql_pr_attr(ct, "relation", "ge", "scr",
                         pr, client_data, 19);
         else
-            cql_pr_attr(ct, "relation.", cn->u.st.relation, "eq",
+            cql_pr_attr(ct, "relation", cn->u.st.relation, "eq",
                         pr, client_data, 19);
         if (cn->u.st.modifiers)
         {
             struct cql_node *mod = cn->u.st.modifiers;
             for (; mod; mod = mod->u.st.modifiers)
             {
-                cql_pr_attr(ct, "relationModifier.", mod->u.st.term, 0,
+                cql_pr_attr(ct, "relationModifier", mod->u.st.term, 0,
                             pr, client_data, 20);
             }
         }
-        cql_pr_attr(ct, "structure.", cn->u.st.relation, 0,
+        cql_pr_attr(ct, "structure", cn->u.st.relation, 0,
                     pr, client_data, 24);
         if (cn->u.st.relation && !strcmp(cn->u.st.relation, "all"))
         {
@@ -495,16 +442,12 @@ void cql_transform_r(cql_transform_t ct,
         }
         break;
     case CQL_NODE_BOOL:
-        if (cn->u.boolean.prefixes && prefix_level < 20)
-            prefix_ar[prefix_level++] = cn->u.boolean.prefixes;
         (*pr)("@", client_data);
         (*pr)(cn->u.boolean.value, client_data);
         (*pr)(" ", client_data);
 
-        cql_transform_r(ct, cn->u.boolean.left, pr, client_data,
-                        prefix_ar, prefix_level);
-        cql_transform_r(ct, cn->u.boolean.right, pr, client_data,
-                        prefix_ar, prefix_level);
+        cql_transform_r(ct, cn->u.boolean.left, pr, client_data);
+        cql_transform_r(ct, cn->u.boolean.right, pr, client_data);
     }
 }
 
@@ -513,31 +456,21 @@ int cql_transform(cql_transform_t ct,
                   void (*pr)(const char *buf, void *client_data),
                   void *client_data)
 {
-    struct cql_node *prefix_ar[20], **pp;
     struct cql_prop_entry *e;
 
     ct->error = 0;
     if (ct->addinfo)
-        free (ct->addinfo);
+        xfree (ct->addinfo);
     ct->addinfo = 0;
 
-    prefix_ar[0] = 0;
-    pp = &prefix_ar[0];
     for (e = ct->entry; e ; e = e->next)
     {
         if (!memcmp(e->pattern, "set.", 4))
-        {
-            *pp = cql_node_mk_sc(e->pattern+4, "=", e->value);
-            pp = &(*pp)->u.st.modifiers;
-        }
+	    cql_apply_prefix(cn, e->pattern+4, e->value);
         else if (!strcmp(e->pattern, "set"))
-        {
-            *pp = cql_node_mk_sc(e->value, 0, 0);
-            pp = &(*pp)->u.st.modifiers;
-        }
+	    cql_apply_prefix(cn, 0, e->value);
     }
-    cql_transform_r (ct, cn, pr, client_data, prefix_ar, 1);
-    cql_node_destroy(prefix_ar[0]);
+    cql_transform_r (ct, cn, pr, client_data);
     return ct->error;
 }
 

@@ -1,20 +1,15 @@
 <triple>
-  <prefixes>
-    <prefix>
-      <name>foo</name>
-      <identifier>info:srw/cql-context-set/1/dc-v1.1</identifier>
-    </prefix>
-    <prefix>
-      <name>ccg</name>
-      <identifier>http://srw.cheshire3.org/contextSets/ccg/1.1/</identifier>
-    </prefix>
-  </prefixes>
   <boolean>
     <value>and</value>
   </boolean>
   <leftOperand>
     <searchClause>
-      <index>foo.title</index>
+      <prefixes>
+        <prefix>
+          <identifier>info:srw/cql-context-set/1/dc-v1.1</identifier>
+        </prefix>
+      </prefixes>
+      <index>title</index>
       <relation>
         <value>=</value>
       </relation>
@@ -23,7 +18,12 @@
   </leftOperand>
   <rightOperand>
     <searchClause>
-      <index>ccg.force</index>
+      <prefixes>
+        <prefix>
+          <identifier>http://srw.cheshire3.org/contextSets/ccg/1.1/</identifier>
+        </prefix>
+      </prefixes>
+      <index>force</index>
       <relation>
         <value>=</value>
       </relation>

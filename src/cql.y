@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.2 2004-03-10 16:34:29 adam Exp $
+/* $Id: cql.y,v 1.3 2004-03-15 21:39:06 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -13,6 +13,7 @@ See the file LICENSE.
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/cql.h>
     
@@ -91,7 +92,7 @@ searchClause:
 |
   searchTerm {
       struct cql_node *st = cql_node_dup ($0.rel);
-      st->u.st.term = strdup($1.buf);
+      st->u.st.term = xstrdup($1.buf);
       $$.cql = st;
   }
 | 
@@ -105,12 +106,12 @@ searchClause:
 | '>' searchTerm '=' searchTerm {
       $$.rel = $0.rel;
   } cqlQuery {
-    $$.cql = cql_node_prefix($6.cql, $2.buf, $4.buf);
+    $$.cql = cql_apply_prefix($6.cql, $2.buf, $4.buf);
   }
 | '>' searchTerm {
       $$.rel = $0.rel;
   } cqlQuery {
-    $$.cql = cql_node_prefix($4.cql, 0, $2.buf);
+    $$.cql = cql_apply_prefix($4.cql, 0, $2.buf);
    }
 ;
 
@@ -304,7 +305,7 @@ int cql_parser_stream(CQL_parser cp,
 
 CQL_parser cql_parser_create(void)
 {
-    CQL_parser cp = (CQL_parser) malloc (sizeof(*cp));
+    CQL_parser cp = (CQL_parser) xmalloc (sizeof(*cp));
 
     cp->top = 0;
     cp->getbyte = 0;
@@ -320,7 +321,7 @@ void cql_parser_destroy(CQL_parser cp)
 {
     cql_node_destroy(cp->top);
     nmem_destroy(cp->nmem);
-    free (cp);
+    xfree (cp);
 }
 
 struct cql_node *cql_parser_result(CQL_parser cp)

@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.7 2004-03-10 16:34:29 adam Exp $
+## $Id: Makefile.am,v 1.8 2004-03-15 21:39:06 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -37,9 +37,13 @@ THREADED_FLAGS = @CFLAGSTHREADS@
 marc8.c: charconv.sgm charconv.tcl
 	cd $(srcdir); ./charconv.tcl -p marc8 -s 50 charconv.sgm -o marc8.c
 
+# MARC8 conversion is generated from charconv.sgm
+marc8_cjk.c: charconv_cjk.xml charconv.tcl
+	cd $(srcdir); ./charconv.tcl -p marc8_cjk -s 50 charconv_cjk.xml -o marc8_cjk.c
+
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
-  siconv.c marc8.c \
+  siconv.c marc8.c marc8_cjk.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
   odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
   odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \

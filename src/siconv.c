@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1997-2003, Index Data
+ * Copyright (c) 1997-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.2 2004-03-11 10:09:11 oleg Exp $
+ * $Id: siconv.c,v 1.3 2004-03-15 21:39:06 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -27,6 +27,9 @@
 unsigned long yaz_marc8_conv (unsigned char *inp, size_t inbytesleft,
                               size_t *no_read);
     
+unsigned long yaz_marc8_cjk_conv (unsigned char *inp, size_t inbytesleft,
+				  size_t *no_read);
+    
 struct yaz_iconv_struct {
     int my_errno;
     int init_flag;
@@ -36,6 +39,7 @@ struct yaz_iconv_struct {
                                  size_t inbytesleft, size_t *no_read);
     size_t (*write_handle)(yaz_iconv_t cd, unsigned long x,
                            char **outbuf, size_t *outbytesleft);
+    int marc8_esc_mode;
 #if HAVE_ICONV_H
     iconv_t iconv_cd;
 #endif
@@ -216,7 +220,78 @@ static unsigned long yaz_read_wchar_t (yaz_iconv_t cd, unsigned char *inp,
 static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
                                      size_t inbytesleft, size_t *no_read)
 {
-    return yaz_marc8_conv(inp, inbytesleft, no_read);
+    *no_read = 0;
+    while(inbytesleft >= 1 && inp[0] == 27)
+    {
+	size_t inbytesleft0 = inbytesleft;
+	inp++;
+	inbytesleft--;
+	if (inbytesleft <= 1)
+	{
+	    *no_read = 0;
+	    cd->my_errno = YAZ_ICONV_EINVAL;
+	    return 0;
+	}
+	if (*inp == '(' || *inp == ',') /* GO, one bytes */
+	{
+	    inbytesleft--;
+	    inp++;
+	}
+	else if (*inp == '$') /* G0, multi byte */
+	{
+	    inbytesleft--;
+	    inp++;
+	    if (inp[0] == ',')
+	    {
+		inbytesleft--;
+		inp++;
+	    }
+	}
+	if (inbytesleft <= 0)
+	{
+	    *no_read = 0;
+	    cd->my_errno = YAZ_ICONV_EINVAL;
+	    return 0;
+	}
+	if (*inp == '!')
+	{
+	    if (inbytesleft <= 1)
+	    {
+		*no_read = 0;
+		cd->my_errno = YAZ_ICONV_EINVAL;
+		return 0;
+	    }
+	    inbytesleft--;
+	    inp++;
+	}
+	cd->marc8_esc_mode = *inp++;
+	inbytesleft--;
+	(*no_read) += inbytesleft0 - inbytesleft;
+    }
+    if (inbytesleft <= 0)
+	return 0;
+    else
+    {
+	unsigned long x;
+	size_t no_read_sub = 0;
+
+	switch(cd->marc8_esc_mode)
+	{
+	case 'B':
+	case 'E':
+	    x = yaz_marc8_conv(inp, inbytesleft, &no_read_sub);
+	    *no_read += no_read_sub;
+	    return x;
+	case '1':
+	    x = yaz_marc8_cjk_conv(inp, inbytesleft, &no_read_sub);
+	    *no_read += no_read_sub;
+	    return x;
+	default:
+	    *no_read = 0;
+	    cd->my_errno = YAZ_ICONV_EILSEQ;
+	    return 0;
+	}
+    }
 }
 
 static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
@@ -379,6 +454,7 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
     cd->read_handle = 0;
     cd->init_handle = 0;
     cd->my_errno = YAZ_ICONV_UNKNOWN;
+    cd->marc8_esc_mode = 'B';
 
     /* a useful hack: if fromcode has leading @,
        the library not use YAZ's own conversions .. */
@@ -514,9 +590,12 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             r = (size_t)(-1);
             break;
         }
-        r = (cd->write_handle)(cd, x, outbuf, outbytesleft);
-        if (r)
-            break;
+	if (x)
+	{
+	    r = (cd->write_handle)(cd, x, outbuf, outbytesleft);
+	    if (r)
+		break;
+	}
         *inbytesleft -= no_read;
         (*inbuf) += no_read;
     }

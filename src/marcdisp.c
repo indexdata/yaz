@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.3 2003-12-17 12:28:07 adam Exp $
+ * $Id: marcdisp.c,v 1.4 2004-03-15 21:39:06 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -45,54 +45,11 @@ static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
 {
     size_t i;
     if (mt->xml == YAZ_MARC_ISO2709)
-    {
 	wrbuf_iconv_write(wr, mt->iconv_cd, buf, len);
-    }
     else if (mt->xml == YAZ_MARC_LINE)
-    {
 	wrbuf_iconv_write(wr, mt->iconv_cd, buf, len);
-    }
     else
-    {
-	int j = 0;
-	for (i = 0; i<len; i++)
-	{
-	    switch (buf[i]) {
-	    case '<':
-		if (i > j)
-		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
-		wrbuf_puts(wr, "&lt;");
-		j=i+1;
-		break;
-	    case '>':
-		if (i > j)
-		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
-		wrbuf_puts(wr, "&gt;");
-		j=i+1;
-		break;
-	    case '&':
-		if (i > j)
-		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
-		wrbuf_puts(wr, "&amp;");
-		j=i+1;
-                break;
-	    case '"':
-		if (i > j)
-		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
-		wrbuf_puts(wr, "&quot;");
-		j=i+1;
-		break;
-	    case '\'':
-		if (i > j)
-		    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
-		wrbuf_puts(wr, "&apos;");
-		j=i+1;
-		break;
-            }
-	}
-	if (i > j)
-	    wrbuf_iconv_write(wr, mt->iconv_cd, buf+j, i-j);
-    }
+	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, buf, len);
 }
 
 int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
@@ -177,7 +134,9 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             wrbuf_printf(
                 wr,
                 "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
-                "  <leader>%.24s</leader>\n", buf);
+                "  <leader>");
+	    marc_cdata(mt, buf, 24, wr);
+            wrbuf_printf(wr, "</leader>\n");
             break;
         }
     }

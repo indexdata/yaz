@@ -1,4 +1,4 @@
-/* $Id: xcqlutil.c,v 1.2 2004-03-10 16:34:29 adam Exp $
+/* $Id: xcqlutil.c,v 1.3 2004-03-15 21:39:06 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -54,28 +54,33 @@ static void prefixes(struct cql_node *cn,
                      void (*pr)(const char *buf, void *client_data),
                      void *client_data, int level)
 {
-    if (cn)
+    int head = 0;
+    if (cn->u.st.index_uri)
     {
         pr_n("<prefixes>\n", pr, client_data, level);
-        for (; cn; cn = cn->u.st.modifiers)
-        {
-            pr_n("<prefix>\n", pr, client_data, level+2);
-            if (cn->u.st.index)
-            {
-                pr_n("<name>", pr, client_data, level+4);
-                pr_cdata(cn->u.st.index, pr, client_data);
-                pr_n("</name>\n", pr, client_data, 0);
-            }
-            if (cn->u.st.term)
-            {
-                pr_n("<identifier>", pr, client_data, level+4);
-                pr_cdata(cn->u.st.term, pr, client_data);
-                pr_n("</identifier>\n", pr, client_data, 0);
-            }
-            pr_n("</prefix>\n", pr, client_data, level+2);
-        }
-        pr_n("</prefixes>\n", pr, client_data, level);
+	head = 1;
+
+	pr_n("<prefix>\n", pr, client_data, level+2);
+	pr_n("<identifier>", pr, client_data, level+4);
+	pr_cdata(cn->u.st.index_uri, pr, client_data);
+	pr_n("</identifier>\n", pr, client_data, 0);
+	pr_n("</prefix>\n", pr, client_data, level+2);
     }
+    if (cn->u.st.relation_uri && cn->u.st.relation)
+    {
+	if (!head)
+	    pr_n("<prefixes>\n", pr, client_data, level);
+	pr_n("<prefix>\n", pr, client_data, level+2);
+	pr_n("<name>", pr, client_data, level+4);
+	pr_cdata("rel", pr, client_data);
+	pr_n("</name>\n", pr, client_data, 0);
+	pr_n("<identifier>", pr, client_data, level+4);
+	pr_cdata(cn->u.st.relation_uri, pr, client_data);
+	pr_n("</identifier>\n", pr, client_data, 0);
+	pr_n("</prefix>\n", pr, client_data, level+2);
+    }
+    if (head)
+        pr_n("</prefixes>\n", pr, client_data, level);
 }
                      
 static void cql_to_xml_mod(struct cql_node *m,
@@ -119,7 +124,7 @@ static void cql_to_xml_r(struct cql_node *cn,
     {
     case CQL_NODE_ST:
         pr_n("<searchClause>\n", pr, client_data, level);
-        prefixes(cn->u.st.prefixes, pr, client_data, level+2);
+        prefixes(cn, pr, client_data, level+2);
         if (cn->u.st.index)
         {
             pr_n("<index>", pr, client_data, level+2);
@@ -130,9 +135,17 @@ static void cql_to_xml_r(struct cql_node *cn,
         {
             pr_n("<relation>\n", pr, client_data, level+2);
             pr_n("<value>", pr, client_data, level+4);
+	    if (cn->u.st.relation_uri)
+		pr_cdata("rel.", pr, client_data);
             pr_cdata(cn->u.st.relation, pr, client_data);
             pr_n("</value>\n", pr, client_data, 0);
 
+	    if (cn->u.st.relation_uri)
+	    {
+		pr_n("<identifier>", pr, client_data, level+4);
+		pr_cdata(cn->u.st.relation_uri, pr, client_data);
+		pr_n("</identifier>\n", pr, client_data, 0);
+	    }
 	    cql_to_xml_mod(cn->u.st.modifiers,
 			   pr, client_data, level+4);
 
@@ -148,7 +161,6 @@ static void cql_to_xml_r(struct cql_node *cn,
         break;
     case CQL_NODE_BOOL:
         pr_n("<triple>\n", pr, client_data, level);
-        prefixes(cn->u.st.prefixes, pr, client_data, level+2);
         if (cn->u.boolean.value)
         {
             pr_n("<boolean>\n", pr, client_data, level+2);

@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.6 2004-03-10 16:34:29 adam Exp $
+/* $Id: cql.h,v 1.7 2004-03-15 21:39:06 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -88,17 +88,17 @@ struct cql_node {
     union {
         struct {
             char *index;
+	    char *index_uri;
             char *term;
             char *relation;
+	    char *relation_uri;
             struct cql_node *modifiers;
-            struct cql_node *prefixes;
         } st;
         struct {
             char *value;
             struct cql_node *left;
             struct cql_node *right;
             struct cql_node *modifiers;
-            struct cql_node *prefixes;
         } boolean;
     } u;
 };
@@ -120,14 +120,16 @@ YAZ_EXPORT
 struct cql_node *cql_node_mk_sc(const char *index,
                                 const char *relation,
                                 const char *term);
+
+
+YAZ_EXPORT
+struct cql_node *cql_apply_prefix(struct cql_node *cn,
+				  const char *relation,
+				  const char *term);
 YAZ_EXPORT
 struct cql_node *cql_node_mk_boolean(const char *op);
 YAZ_EXPORT
 void cql_node_destroy(struct cql_node *cn);
-YAZ_EXPORT
-struct cql_node *cql_node_prefix(struct cql_node *n, 
-                                 const char *prefix,
-                                 const char *uri);
 YAZ_EXPORT
 struct cql_node *cql_node_dup (struct cql_node *cp);
 YAZ_EXPORT
@@ -179,6 +181,9 @@ int cql_transform_error(cql_transform_t ct, const char **addinfo);
 
 YAZ_EXPORT
 const char *cql_strerror(int code);
+
+YAZ_EXPORT
+const char *cql_uri();
 
 YAZ_END_CDECL
 
