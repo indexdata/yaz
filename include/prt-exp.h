@@ -209,7 +209,7 @@ typedef struct Z_AccessRestrictionsUnit
 #define Z_AccessRestrictions_present             2
 #define Z_AccessRestrictions_specific_elements   3
 #define Z_AccessRestrictions_extended_services   4
-#define Z_AccessRestrictions_by database         5
+#define Z_AccessRestrictions_by_database         5
     Z_HumanString *accessText;              /* OPTIONAL */
     int num_accessChallenges;
     Odr_oid **accessChallenges;             /* OPTIONAL */
