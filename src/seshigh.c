@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.1 2003-10-27 12:21:35 adam Exp $
+ * $Id: seshigh.c,v 1.2 2003-11-17 21:32:58 mike Exp $
  */
 
 /*
@@ -1589,8 +1589,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 	    odr_malloc (assoc->encode,
 			strlen(assoc->init->implementation_id) + 10 + 
 			       strlen(resp->implementationId));
-	sprintf (nv, "%s / %s",
-		 resp->implementationId, assoc->init->implementation_id);
+	sprintf (nv, "%s/%s",
+		 assoc->init->implementation_id,
+		 resp->implementationId);
         resp->implementationId = nv;
     }
     if (assoc->init->implementation_name)
@@ -1599,8 +1600,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 	    odr_malloc (assoc->encode,
 			strlen(assoc->init->implementation_name) + 10 + 
 			       strlen(resp->implementationName));
-	sprintf (nv, "%s / %s",
-		 resp->implementationName, assoc->init->implementation_name);
+	sprintf (nv, "%s/%s",
+		 assoc->init->implementation_name,
+		 resp->implementationName);
         resp->implementationName = nv;
     }
     if (assoc->init->implementation_version)
@@ -1609,9 +1611,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 	    odr_malloc (assoc->encode,
 			strlen(assoc->init->implementation_version) + 10 + 
 			       strlen(resp->implementationVersion));
-	sprintf (nv, "YAZ %s / %s",
-		 resp->implementationVersion,
-		 assoc->init->implementation_version);
+	sprintf (nv, "%s/YAZ %s",
+		 assoc->init->implementation_version,
+		 resp->implementationVersion);
         resp->implementationVersion = nv;
     }
 
