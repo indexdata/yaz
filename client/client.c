@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.17  1995-08-17 12:45:02  quinn
+ * Revision 1.18  1995-08-28 12:21:27  quinn
+ * Client can now ask for simple element set names.
+ *
+ * Revision 1.17  1995/08/17  12:45:02  quinn
  * Fixed minor problems with GRS-1. Added support in c&s.
  *
  * Revision 1.16  1995/08/15  12:00:04  quinn
@@ -99,6 +102,7 @@ static int setnumber = 0;               /* current result set number */
 static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
+static Z_ElementSetNames *elementSetNames = 0; 
 static int setno = 1;                   /* current set offset */
 static int protocol = PROTO_Z3950;      /* current app protocol */
 static int recordsyntax = VAL_USMARC;
@@ -463,6 +467,8 @@ static int send_searchRequest(char *arg)
 	prefsyn.class = CLASS_RECSYN;
 	prefsyn.value = recordsyntax;
 	req->preferredRecordSyntax = odr_oiddup(out, oid_getoidbyent(&prefsyn));
+	req->smallSetElementSetNames =
+	    req->mediumSetElementSetNames = elementSetNames;
     }
     req->num_databaseNames = 1;
     req->databaseNames = &databaseNames;
@@ -594,6 +600,7 @@ static int send_presentRequest(char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
+    Z_RecordComposition compo;
     oident prefsyn;
     int nos = 1;
     char *p;
@@ -618,6 +625,12 @@ static int send_presentRequest(char *arg)
     prefsyn.class = CLASS_RECSYN;
     prefsyn.value = recordsyntax;
     req->preferredRecordSyntax = oid_getoidbyent(&prefsyn);
+    if (elementSetNames)
+    {
+    	req->recordComposition = &compo;
+	compo.which = Z_RecordComp_simple;
+	compo.u.simple = elementSetNames;
+    }
     send_apdu(apdu);
     printf("Sent presentRequest (%d+%d).\n", setno, nos);
     return 2;
@@ -782,6 +795,23 @@ int cmd_format(char *arg)
     }
 }
 
+int cmd_elements(char *arg)
+{
+    static Z_ElementSetNames esn;
+    static char what[100];
+
+    if (!arg || !*arg)
+    {
+    	printf("Usage: elements <esn>\n");
+	return 0;
+    }
+    strcpy(what, arg);
+    esn.which = Z_ElementSetNames_generic;
+    esn.u.generic = what;
+    elementSetNames = &esn;
+    return 1;
+}
+
 static void initialize(void)
 {
 #ifdef RPN_QUERY
@@ -833,6 +863,7 @@ static int client(void)
 	{"setnames", cmd_setnames, ""},
 	{"cancel", cmd_cancel, ""},
 	{"format", cmd_format, "<recordsyntax>"},
+	{"elements", cmd_elements, "<elementSetName>"},
     	{0,0}
     };
     char *netbuffer= 0;
