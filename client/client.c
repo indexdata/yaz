@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.251 2004-09-22 13:08:31 adam Exp $
+ * $Id: client.c,v 1.252 2004-09-22 13:21:37 adam Exp $
  */
 
 #include <stdio.h>
@@ -116,6 +116,7 @@ static int auto_reconnect = 0;
 static Odr_bitmask z3950_options;
 static int z3950_version = 3;
 static int scan_stepSize = 0;
+static int scan_position = 1;
 static char cur_host[200];
 
 typedef enum {
@@ -2801,9 +2802,17 @@ int cmd_sort_newset (const char *arg)
     return cmd_sort_generic (arg, 1);
 }
 
-int cmd_stepsize(const char *arg)
+int cmd_scanstep(const char *arg)
 {
     scan_stepSize = atoi(arg);
+    return 0;
+}
+
+int cmd_scanpos(const char *arg)
+{
+    int r = sscanf(arg, "%d", &scan_position);
+    if (r == 0)
+        scan_position = 1;
     return 0;
 }
 
@@ -2828,7 +2837,7 @@ int cmd_scan(const char *arg)
     if (*arg)
     {
         strcpy (last_scan_query, arg);
-        if (send_scanrequest(arg, 1, 20, 0) < 0)
+        if (send_scanrequest(arg, scan_position, 20, 0) < 0)
             return 0;
     }
     else
@@ -3851,8 +3860,9 @@ static struct {
     {"delete", cmd_delete, "<setname>",NULL,0,NULL},
     {"base", cmd_base, "<base-name>",NULL,0,NULL},
     {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]",NULL,0,NULL},
-    {"stepsize", cmd_stepsize, "<size>",NULL,0,NULL},
     {"scan", cmd_scan, "<term>",NULL,0,NULL},
+    {"scanstep", cmd_scanstep, "<size>",NULL,0,NULL},
+    {"scanpos", cmd_scanpos, "<size>",NULL,0,NULL},
     {"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0,NULL},
     {"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0,NULL},
     {"authentication", cmd_authentication, "<acctstring>",NULL,0,NULL},
