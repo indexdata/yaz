@@ -62,7 +62,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
-      $(OutDir)\$(TargetName).dll $(ProjDir)\lib
+       $(OutDir)\$(TargetName).dll $(ProjDir)\lib
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
@@ -99,7 +99,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
-      $(OutDir)\$(TargetName).dll $(ProjDir)\lib
+       $(OutDir)\$(TargetName).dll $(ProjDir)\lib
 # End Special Build Tool
 
 !ENDIF 
@@ -370,6 +370,10 @@ SOURCE=".\asn\prt-add.c"
 # Begin Source File
 
 SOURCE=".\asn\prt-arc.c"
+# End Source File
+# Begin Source File
+
+SOURCE=".\asn\prt-dat.c"
 # End Source File
 # Begin Source File
 
