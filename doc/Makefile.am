@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.57 2004-11-23 14:11:03 heikki Exp $
+## $Id: Makefile.am,v 1.58 2004-12-15 09:10:12 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -77,9 +77,9 @@ yaz.pdf: $(XMLFILES) $(srcdir)/id.png
 	if test ! -f id.png ; then ln -s $(srcdir)/id.png .; fi
 	if test ! -f apilayer.png ; then ln -s $(srcdir)/apilayer.png .; fi
 	jade -E14 -D $(srcdir) -d yazprint.dsl -t tex $(srcdir)/xml.dcl yaz.xml
-	pdfjadetex yaz.tex
-	pdfjadetex yaz.tex
-	pdfjadetex yaz.tex
+	pdfjadetex yaz.tex >/dev/null
+	pdfjadetex yaz.tex >/dev/null
+	pdfjadetex yaz.tex >/dev/null
 
 index.tkl: $(XMLFILES) tkl.xsl
 	xsltproc tkl.xsl yaz.xml
