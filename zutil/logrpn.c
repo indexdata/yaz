@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2001, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.5 2001-11-13 23:00:43 adam Exp $
+ * $Id: logrpn.c,v 1.6 2002-01-22 10:54:46 adam Exp $
  */
 #include <stdio.h>
 
@@ -250,6 +250,9 @@ static void zlog_structure (Z_RPNStructure *zs, int level, enum oid_value ast)
         case Z_Operator_and_not:
             yaz_log (LOG_LOG, "%*.0s and-not", level, "");
             break;
+	case Z_Operator_prox:
+            yaz_log (LOG_LOG, "%*.0s proximity", level, "");
+	    break;
         default:
             yaz_log (LOG_LOG, "%*.0s unknown complex", level, "");
             return;

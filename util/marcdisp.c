@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: marcdisp.c,v $
- * Revision 1.15  2001-10-29 09:17:19  adam
+ * Revision 1.16  2002-01-22 10:54:46  adam
+ * MARC decode fix. Attribute set fix for scan in server. Prox logging.
+ *
+ * Revision 1.15  2001/10/29 09:17:19  adam
  * New function marc_display_exl - used by YAZ client. Server returns
  * bad record on position 98 (for testing).
  *
@@ -98,7 +101,7 @@ int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
 	identifier_length = atoi_n (buf+11, 1);
     else
         identifier_length = 2;
-    base_address = atoi_n (buf+12, 4);
+    base_address = atoi_n (buf+12, 5);
 
     length_data_entry = atoi_n (buf+20, 1);
     length_starting = atoi_n (buf+21, 1);

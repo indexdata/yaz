@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.123 2002-01-17 21:03:36 adam Exp $
+ * $Id: seshigh.c,v 1.124 2002-01-22 10:54:46 adam Exp $
  */
 
 /*
@@ -1273,7 +1273,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	bsrr->print = assoc->print;
 	bsrr->step_size = res->stepSize;
 	if (!(attset = oid_getentbyoid(req->attributeSet)) ||
-	    attset->oclass != CLASS_RECSYN)
+	    attset->oclass != CLASS_ATTSET)
 	    bsrr->attributeset = VAL_NONE;
 	else
 	    bsrr->attributeset = attset->value;
