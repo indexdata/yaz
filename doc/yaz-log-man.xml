@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-log-man.xml,v 1.1 2004-11-23 14:11:03 heikki Exp $ -->
+<!-- $Id: yaz-log-man.xml,v 1.2 2004-12-13 20:17:41 adam Exp $ -->
 <refentry id="yaz-log">
  <refmeta>
   <refentrytitle>yaz-log</refentrytitle>
@@ -211,7 +211,7 @@
 
  <refsect1><title>FILES</title>
   <para>
-   <filename><replaceable>prefix</replaceable>/include/yaz/ylog.h</filename>
+   <filename><replaceable>prefix</replaceable>/include/yaz/log.h</filename>
    <filename><replaceable>prefix</replaceable>/src/log.c</filename>
   </para>
  </refsect1>

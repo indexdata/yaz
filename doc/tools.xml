@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.42 2004-11-23 14:11:03 heikki Exp $ -->
+<!-- $Id: tools.xml,v 1.43 2004-12-13 20:17:41 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1803,12 +1803,12 @@ typedef struct oident
    production use of those applications.  
   </para>
   <para>
-   The log functions are declared in header <filename>yaz/ylog.h</filename>
+   The log functions are declared in header <filename>yaz/log.h</filename>
     and implemented in <filename>src/log.c</filename>.
     Due to name clash with syslog and some math utilities the logging
     interface has been modified as of YAZ 2.0.29. The obsolete interface
-    is still available if the application includes
-    <filename>yaz/log.h</filename>. The key points of the interface are:
+    is still available if in header file <filename>yaz/log.h</filename>.
+    The key points of the interface are:
   </para>
   <screen>
    void yaz_log(int level, const char *fmt, ...)

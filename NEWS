@@ -1,10 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
 Modified the YAZ logging system. The LOG level defines use YLOG_ prefix
-instead of LOG_, due to name clash with syslog(3). The new header for
-YAZ log is <yaz/ylog.h>. The old definitions are kept in <yaz/log.h>
-with all old definitions with values kept - so all applications should
-compile as usual. See "Log" chapter in YAZ manual.
+instead of LOG_, due to name clash with syslog(3). LOG_ are still
+present. New applications should define YAZ_USE_NEW_LOG=1 - this
+will effectively disable old definitions.
 
 --- 2.0.28 2004/11/09 
 
