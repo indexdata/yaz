@@ -26,7 +26,7 @@
 DEBUG=1   # 0 for release, 1 for debug
 
 default: all
-all: dirs dll client
+all: dirs dll client server ztest
 
 
 
@@ -45,13 +45,15 @@ OBJDIR=$(WINDIR)\obj        # where we store intermediate files
 UNIXDIR=$(ROOTDIR)\unix     # corresponding unix things
 SRCDIR=$(ROOTDIR)           # for the case we move them under src
 
-YAZASNDIR=$(SRCDIR)\ASN
-YAZCOMSTACKDIR=$(SRCDIR)\COMSTACK
-YAZODRDIR=$(SRCDIR)\ODR
-YAZUTILDIR=$(SRCDIR)\UTIL
-YAZRETDIR=$(SRCDIR)\RETRIEVAL
+ASNDIR=$(SRCDIR)\ASN
+COMSTACKDIR=$(SRCDIR)\COMSTACK
+ODRDIR=$(SRCDIR)\ODR
+UTILDIR=$(SRCDIR)\UTIL
+RETDIR=$(SRCDIR)\RETRIEVAL
 
-YAZCLIENTDIR=$(SRCDIR)\CLIENT
+CLIENTDIR=$(SRCDIR)\CLIENT
+SERVERDIR=$(SRCDIR)\SERVER
+ZTESTDIR=$(SRCDIR)\ZTEST
 
 ###########################################################
 ############### Targets - what to make
@@ -63,10 +65,14 @@ IMPLIB=$(BINDIR)\Yaz.lib
 BSCFILE=$(LIBDIR)\Yaz.bsc
 
 CLIENT=$(BINDIR)\client.exe
+SERVER=$(BINDIR)\server.lib
+ZTEST=$(BINDIR)\ztest.exe
 
 # shortcut names defined here
 dll : $(DLL)  $(BSCFILE)
 client: $(CLIENT)
+server: $(SERVER)
+ztest: $(ZTEST)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -112,27 +118,34 @@ RELEASE_RC_OPTIONS=/d "NDEBUG"
 ### Linker options
 LINK=link.exe
 
-DLL_LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   winspool.lib \
+LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   winspool.lib \
            comdlg32.lib advapi32.lib shell32.lib ole32.lib    \
            oleaut32.lib uuid.lib     odbc32.lib  odbccp32.lib \
-           wsock32.lib 
+           wsock32.lib  advapi32.lib
+
 
 
 #odbccp32.lib yaz.lib /nologo /subsystem:console /incremental:no /pdb:".\Debug/client.pdb" /debug /machine:I386 /out:".\Debug/client.exe" /libpath:"..\debug" 
+#kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib 
+#ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib yaz.lib server.lib 
+#ZT: /nologo /subsystem:console /incremental:no /pdb:"Debug/ztest.pdb" /debug /machine:I386 /out:"Debug/ztest.exe" /pdbtype:sept /libpath:"..\debug" /libpath:"..\server\debug" 
+
 
 COMMON_LNK_OPTIONS= /nologo \
                     /subsystem:windows \
-                    /incremental:no \
-                    /machine:i386 
-					
-DEBUG_LNK_OPTIONS= /debug \
-                   /incremental:no 
+                    /machine:i386 \
+			  /incremental:no
+
+DEBUG_LNK_OPTIONS= /debug 
 
 RELEASE_LNK_OPTIONS=  /pdb:none
 
-DLL_LINK_OPTIONS= /dll
-CLIENT_LINK_OPTIONS = /subsystem:console
+DLL_LINK_OPTIONS= /dll  
+CLIENT_LINK_OPTIONS = /subsystem:console  
+SERVER_LINK_OPTIONS = -lib 
+ZTEST_LINK_OPTIONS = /subsystem:console  
 
+#shell32.lib 
 
 ### BSC compiler options
 
@@ -187,6 +200,19 @@ RESFILE=$(OBJDIR)\component.res
 
 YAZ_CLIENT_OBJS= \
    $(OBJDIR)\client.obj
+
+YAZ_SERVER_OBJS= \
+	"$(OBJDIR)\eventl.obj" \
+	"$(OBJDIR)\requestq.obj" \
+	"$(OBJDIR)\service.obj" \
+	"$(OBJDIR)\seshigh.obj" \
+	"$(OBJDIR)\statserv.obj" \
+	"$(OBJDIR)\tcpdchk.obj" 
+
+ZTEST_OBJS= \
+	"$(OBJDIR)\read-grs.obj" \
+	"$(OBJDIR)\ztest.obj" 
+	
 
 YAZ_ASN_OBJS= \
    $(OBJDIR)\diagbib1.obj \
@@ -301,35 +327,49 @@ DLL_OBJS= $(YAZ_OBJS)
 <<
 
 # Yaz client
-{$(YAZCLIENTDIR)}.c{$(OBJDIR)}.obj:
+{$(CLIENTDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) @<<  
       /D"_CONSOLE"
 	$(COPT) $< 
 <<
 
+# Ztest
+{$(ZTESTDIR)}.c{$(OBJDIR)}.obj:
+	@$(CPP) @<<  
+      /D"_CONSOLE"
+	/D"_MBCS"
+	$(COPT) $< 
+<<
+
+
+# Server
+{$(SERVERDIR)}.c{$(OBJDIR)}.obj:
+	@$(CPP) @<<  
+	$(COPT) $< 
+<<
 
 # Various YAZ source directories
-{$(YAZASNDIR)}.c{$(OBJDIR)}.obj:
+{$(ASNDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) @<<  
 	$(COPT) $< 
 <<
 
-{$(YAZCOMSTACKDIR)}.c{$(OBJDIR)}.obj:
+{$(COMSTACKDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) @<<  
 	$(COPT) $< 
 <<
 
-{$(YAZODRDIR)}.c{$(OBJDIR)}.obj:
+{$(ODRDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) @<<  
 	$(COPT) $< 
 <<
 
-{$(YAZUTILDIR)}.c{$(OBJDIR)}.obj:
+{$(UTILDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) @<<  
 	$(COPT) $< 
 <<
 
-{$(YAZRETDIR)}.c{$(OBJDIR)}.obj:
+{$(RETDIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) @<<  
 	$(COPT) $< 
 <<
@@ -348,7 +388,7 @@ $(RESFILE): $(RCFILE) $(IDLGENERATED)
 $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) 
 	$(LINK) @<<
             $(LNKOPT) 
-		$(DLL_LINK_LIBS) 
+		$(LINK_LIBS) 
 		$(DLL_LINK_OPTIONS)
 		$(DLL_OBJS) 
 		/out:$(DLL) 
@@ -357,7 +397,7 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS)
             /map:"$(LIBDIR)/yaz.map"  
 <<
 
-$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) 
+$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(IMPLIB)
 	$(LINK) @<<
             $(LNKOPT) 
 		$(CLIENT_LINK_OPTIONS)
@@ -367,7 +407,28 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS)
 		/out:$(CLIENT) 
 <<
 
+$(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
+	$(LINK) @<<
+            $(LNKOPT) 
+		$(ZTEST_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		shell32.lib 
+		$(IMPLIB)
+		$(SERVER)
+		$(ZTEST_OBJS) 
+		/out:$(ZTEST) 
+<<
 
+
+$(SERVER) : "$(BINDIR)" $(YAZ_SERVER_OBJS) 
+	$(LINK) $(SERVER_LINK_OPTIONS) @<<
+		/nologo
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_SERVER_OBJS) 
+		/out:$(SERVER) 
+<<
+# note that this links a lib, so it uses completely different options.
 
 #	regsvr32 /s /c "$(DLL)" 
 #		/def:$(DEF_FILE)
