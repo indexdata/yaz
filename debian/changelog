@@ -1,3 +1,9 @@
+yaz (2.0.24-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 29 Sep 2004 22:41:47 +0200
+
 yaz (2.0.23-3) unstable; urgency=low
 
   * Added ccl_qual_buf.

@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.24 2004/09/29
+
 Added CCL facility r=r "range" which is similar to r=o "ordered" but
 does not require white-space before and after the dash in a range, e.g.
 x=-1990 is equivalent to x <= 1990 iff r=r, but equivalent to x= -1980
