@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.30 2005/01/03 
+
 Modified the YAZ logging system. The LOG level defines use YLOG_ prefix
 instead of LOG_, due to name clash with syslog(3). LOG_ are still
 present. New applications should define YAZ_USE_NEW_LOG=1 - this
