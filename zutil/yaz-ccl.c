@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.8  2000-11-16 13:03:13  adam
+ * Revision 1.9  2000-11-27 14:16:55  adam
+ * Fixed bug in ccl_rpn_simple regarding resultSetId's.
+ *
+ * Revision 1.8  2000/11/16 13:03:13  adam
  * Function ccl_rpn_query sets attributeSet to Bib-1.
  *
  * Revision 1.7  2000/11/16 09:58:02  adam
@@ -145,7 +148,7 @@ static Z_Operand *ccl_rpn_simple (ODR o, struct ccl_rpn_node *p)
         break;
     case CCL_RPN_SET:
         zo->which = Z_Operand_resultSetId;
-        zo->u.resultSetId = p->u.setname;
+        zo->u.resultSetId = odr_strdup (o, p->u.setname);
         break;
     default:
 	return 0;
