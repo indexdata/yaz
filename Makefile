@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.30 1996-10-07 15:28:56 quinn Exp $
+# $Id: Makefile,v 1.31 1996-11-08 11:03:02 adam Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 #ODEFS=-DUSE_XTIMOSI
@@ -38,6 +38,12 @@ dep depend:
 clean:
 	for i in $(SUBDIR); do (cd $$i; $(MAKE) clean); done
 	-rm lib/*.a
+
+oclean:
+	for i in $(SUBDIR); do (cd $$i; rm -f *.o); done
+	mv lib/libyaz.a .; rm -f lib/*.a; mv libyaz.a lib
+	cd client; strip client
+	cd server; strip ztest
 
 cleanup:
 	rm -f `find $(SUBDIR) -name "*.[oa]" -print`

@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+In test client command "base" accepts multiple databases.
+
+Fixed bug in cs_close stack that caused trouble with WINSOCK.
+
 --- 1.3 1996/10/11
 
 Fixed tagging bug in ResourceReportResponse PDU encoder/decode.
