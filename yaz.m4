@@ -1,4 +1,4 @@
-## $Id: yaz.m4,v 1.4 2002-11-27 00:53:02 adam Exp $
+## $Id: yaz.m4,v 1.5 2004-02-05 11:54:09 adam Exp $
 ## 
 # Use this m4 funciton for autoconf if you use YAZ in your own
 # configure script.
@@ -44,10 +44,22 @@ AC_DEFUN([YAZ_INIT],
 			YAZINC=`$yazconfig --cflags $1`
 			YAZVERSION=`$yazconfig --version`
 		fi
-		AC_MSG_RESULT($yazconfig)
+		AC_MSG_RESULT([$yazconfig])
 	else
 		AC_MSG_RESULT(Not found)
 		YAZVERSION=NONE
 	fi
-])
-	
+	if test "X$YAZVERSION" != "XNONE"; then
+		AC_MSG_CHECKING([for YAZ version])
+		AC_MSG_RESULT([$YAZVERSION])
+		if test "$2"; then
+			have_yaz_version=`echo "$YAZVERSION" | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`
+			req_yaz_version=`echo "$2" | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`
+			if test "$have_yaz_version" -lt "$req_yaz_version"; then
+				AC_MSG_ERROR([$YAZVERSION. Requires $2 or later])
+			fi
+		else
+			AC_MSG_RESULT([$YAZVERSION])
+		fi
+	fi
+]) 
