@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2003, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.58 2003-06-02 13:44:54 adam Exp $
+# $Id: makefile,v 1.59 2003-06-03 09:11:13 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -653,7 +653,7 @@ $(ITEM_REQ_FILES): $(ILLDIR)\item-req.asn
 
 $(UTILDIR)\marc8.c: $(UTILDIR)\charconv.sgm
 	@cd $(UTILDIR)
-	$(TCL) charconv.tcl -p marc8 -s 50 charconv.sgm marc8.c
+	$(TCL) charconv.tcl -p marc8 -s 50 charconv.sgm charconv_cjk.xml -o marc8.c
 
 !endif
 
@@ -930,7 +930,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.58  2003-06-02 13:44:54  adam
+# Revision 1.59  2003-06-03 09:11:13  adam
+# WIN32 updates
+#
+# Revision 1.58  2003/06/02 13:44:54  adam
 # Added cqlstrer to win makefile
 #
 # Revision 1.57  2003/05/27 21:12:23  adam
