@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.1 2003-10-27 12:21:35 adam Exp $
+ * $Id: siconv.c,v 1.2 2004-03-11 10:09:11 oleg Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -307,9 +307,9 @@ static size_t yaz_write_UCS4 (yaz_iconv_t cd, unsigned long x,
     unsigned char *outp = (unsigned char *) *outbuf;
     if (*outbytesleft >= 4)
     {
-        *outp++ = (unsigned char) (x<<24);
-        *outp++ = (unsigned char) (x<<16);
-        *outp++ = (unsigned char) (x<<8);
+        *outp++ = (unsigned char) (x>>24);
+        *outp++ = (unsigned char) (x>>16);
+        *outp++ = (unsigned char) (x>>8);
         *outp++ = (unsigned char) x;
         (*outbytesleft) -= 4;
     }
@@ -329,9 +329,9 @@ static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
     if (*outbytesleft >= 4)
     {
         *outp++ = (unsigned char) x;
-        *outp++ = (unsigned char) (x<<8);
-        *outp++ = (unsigned char) (x<<16);
-        *outp++ = (unsigned char) (x<<24);
+        *outp++ = (unsigned char) (x>>8);
+        *outp++ = (unsigned char) (x>>16);
+        *outp++ = (unsigned char) (x>>24);
         (*outbytesleft) -= 4;
     }
     else
