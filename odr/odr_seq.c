@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.4  1995-02-07 17:53:00  quinn
+ * Revision 1.5  1995-02-09 15:51:49  quinn
+ * Works better now.
+ *
+ * Revision 1.4  1995/02/07  17:53:00  quinn
  * A damn mess, but now things work, I think.
  *
  * Revision 1.3  1995/02/07  14:13:46  quinn
@@ -19,6 +22,7 @@
  */
 
 #include <odr.h>
+#include <assert.h>
 
 int odr_sequence_begin(ODR o, void *p, int size)
 {
@@ -30,10 +34,17 @@ int odr_sequence_begin(ODR o, void *p, int size)
     	o->t_tag = ODR_SEQUENCE;
     }
 
+    if (o->direction == ODR_DECODE)
+    	*pp = 0;
     if (odr_constructed_begin(o, p, o->t_class, o->t_tag))
     {
     	if (o->direction == ODR_DECODE && size)
 	    *pp = nalloc(o, size);
+	if (o->direction == ODR_PRINT)
+	{
+	    fprintf(o->print, "%s{\n", odr_indent(o));
+	    o->indent++;
+	}
     	return 1;
     }
     else
@@ -42,6 +53,12 @@ int odr_sequence_begin(ODR o, void *p, int size)
 
 int odr_sequence_end(ODR o)
 {
+    if (o->direction == ODR_PRINT)
+    {
+    	assert(o->indent > 0);
+    	o->indent--;
+    	fprintf(o->print, "%s}\n", odr_indent(o));
+    }
     return odr_constructed_end(o);    
 }
 
@@ -59,7 +76,7 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 {
     char ***pp = (char***) p;  /* for dereferencing */
     char **tmp;
-    char *dummy;
+    char *dummy = "Nothing";
     int size = 0, i;
 
     if (!odr_sequence_begin(o, &dummy, 0))
@@ -92,12 +109,11 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 		(*num)++;
 	    }
 	    break;
-    	case ODR_ENCODE:
+    	case ODR_ENCODE: case ODR_PRINT:
 	    for (i = 0; i < *num; i++)
 	    	if (!(*type)(o, *pp + i, 0))
 		    return 0;
 	    break;
-    	case ODR_PRINT: return 1;
     	default: return 0;
     }
     return odr_sequence_end(o);

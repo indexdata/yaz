@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bool.c,v $
- * Revision 1.1  1995-02-02 16:21:51  quinn
+ * Revision 1.2  1995-02-09 15:51:45  quinn
+ * Works better now.
+ *
+ * Revision 1.1  1995/02/02  16:21:51  quinn
  * First kick.
  *
  */
@@ -26,7 +29,9 @@ int ber_boolean(ODR o, int *val)
 	    o->bp++;
 	    o->left--;
 	    *(o->bp++) = (unsigned char) *val;
+#ifdef ODR_DEBUG
 	    fprintf(stderr, "[val=%d]\n", *val);
+#endif
 	    o->left--;
 	    return 1;
 	case ODR_DECODE:
@@ -39,7 +44,9 @@ int ber_boolean(ODR o, int *val)
 	    *val = *b;
 	    o->bp++;
 	    o->left--;
+#ifdef ODR_DEBUG
 	    fprintf(stderr, "[val=%d]\n", *val);
+#endif
 	    return 1;
 	case ODR_PRINT:
 	    return 1;

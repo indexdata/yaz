@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.2  1995-02-07 17:52:58  quinn
+ * Revision 1.3  1995-02-09 15:51:46  quinn
+ * Works better now.
+ *
+ * Revision 1.2  1995/02/07  17:52:58  quinn
  * A damn mess, but now things work, I think.
  *
  * Revision 1.1  1995/02/02  16:21:52  quinn
@@ -66,7 +69,9 @@ int ber_encinteger(unsigned char *buf, int val, int maxlen)
     b += len;
     if (ber_enclen(lenpos, len, 1, 1) != 1)
     	return -1;
+#ifdef ODR_DEBUG
     fprintf(stderr, "[val=%d]", val);
+#endif
     return b - buf;
 }
 
@@ -95,6 +100,8 @@ int ber_decinteger(unsigned char *buf, int *val)
     *val = ntohl(tmp.i);
 
     b += len;
+#ifdef ODR_DEBUG
     fprintf(stderr, "[val=%d]", *val);
+#endif
     return b - buf;
 }

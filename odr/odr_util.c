@@ -2,7 +2,15 @@
 #include <stdlib.h>
 
 void *nalloc(ODR o, int size) { return malloc(size); }
-char *odr_indent(ODR o) {return "";}
+
+char *odr_indent(ODR o)
+{
+    static char buf[512];
+
+    memset(buf, ' ', 512);
+    buf[o->indent * 4] = 0;
+    return buf;
+}
 
 int odp_more_chunks(ODR o, unsigned char *base, int len)
 {

@@ -118,10 +118,13 @@ int main()
     o.buf = buf;
     o.bp=o.buf;
     o.left = o.buflen = 1024;
-    o.direction = ODR_ENCODE;
+    o.direction = ODR_PRINT;
+    o.print = stdout;
     o.t_class = -1;
 
     odr_oid(&o, &oidp1, 0);
+
+    exit(0);
 
     o.direction = ODR_DECODE;
     o.bp = o.buf;

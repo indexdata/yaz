@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_int.c,v $
- * Revision 1.2  1995-02-07 14:13:45  quinn
+ * Revision 1.3  1995-02-09 15:51:48  quinn
+ * Works better now.
+ *
+ * Revision 1.2  1995/02/07  14:13:45  quinn
  * Bug fixes.
  *
  * Revision 1.1  1995/02/02  16:21:53  quinn
@@ -27,6 +30,8 @@ int odr_integer(ODR o, int **p, int opt)
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_INTEGER;
     }
+    if (o->direction == ODR_DECODE)
+    	*p =0;
     if ((res = ber_tag(o, *p, o->t_class, o->t_tag, &cons)) < 0)
     {
     	*p = 0;
@@ -39,7 +44,7 @@ int odr_integer(ODR o, int **p, int opt)
     }
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "%d\n", **p);
+    	fprintf(o->print, "%s%d\n", odr_indent(o), **p);
     	return 1;
     }
     if (cons)

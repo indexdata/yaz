@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.2  1995-02-07 17:52:59  quinn
+ * Revision 1.3  1995-02-09 15:51:46  quinn
+ * Works better now.
+ *
+ * Revision 1.2  1995/02/07  17:52:59  quinn
  * A damn mess, but now things work, I think.
  *
  * Revision 1.1  1995/02/02  16:21:53  quinn
@@ -30,6 +33,8 @@ int ber_tag(ODR o, const void *p, int class, int tag, int *constructed)
     int rd;
 
     o->t_class = -1;
+    if (o->buf == o->bp)   /* This is insurance. It shouldn't be necessary */
+    	lclass = -1;
     switch (o->direction)
     {
     	case ODR_ENCODE:
@@ -40,16 +45,20 @@ int ber_tag(ODR o, const void *p, int class, int tag, int *constructed)
 		return -1;
 	    o->bp += rd;
 	    o->left -= rd;
+#ifdef ODR_DEBUG
 	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d]", class, tag,
 		*constructed);
+#endif
 	    return 1;
     	case ODR_DECODE:
 	    if (lclass < 0)
 	    {
 	    	if ((br = ber_dectag(o->bp, &lclass, &ltag, &lcons)) <= 0)
 		    return -1;
+#ifdef ODR_DEBUG
 		fprintf(stderr, "\n[class=%d,tag=%d,cons=%d]", lclass, ltag,
 		    lcons);
+#endif
 	    }
 	    if (class == lclass && tag == ltag)
 	    {

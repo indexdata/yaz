@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.4  1995-02-07 14:13:46  quinn
+ * Revision 1.5  1995-02-09 15:51:49  quinn
+ * Works better now.
+ *
+ * Revision 1.4  1995/02/07  14:13:46  quinn
  * Bug fixes.
  *
  * Revision 1.3  1995/02/03  17:04:38  quinn
@@ -33,6 +36,8 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OCTETSTRING;
     }
+    if (o->direction == ODR_DECODE)
+    	*p = 0;
     if ((res = ber_tag(o, *p, o->t_class, o->t_tag, &cons)) < 0)
     {
     	*p = 0;
@@ -45,7 +50,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
     }
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "OCTETSTRING(len=%d)\n", (*p)->len);
+    	fprintf(o->print, "%sOCTETSTRING(len=%d)\n", odr_indent(o), (*p)->len);
     	return 1;
     }
     if (o->direction == ODR_DECODE)
@@ -55,7 +60,10 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
     	(*p)->len = 0;
     	(*p)->buf = 0;
     }
-    return ber_octetstring(o, *p, cons);
+    if (ber_octetstring(o, *p, cons))
+    	return 1;
+    *p = 0;
+    return 0;
 }
 
 /*
@@ -71,6 +79,8 @@ int odr_cstring(ODR o, char **p, int opt)
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OCTETSTRING;
     }
+    if (o->direction == ODR_DECODE)
+    	*p = 0;
     if ((res = ber_tag(o, *p, o->t_class, o->t_tag, &cons)) < 0)
     	return 0;
     if (!res)
@@ -80,7 +90,7 @@ int odr_cstring(ODR o, char **p, int opt)
     }
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "'%s'\n", *p);
+    	fprintf(o->print, "%s'%s'\n", odr_indent(o), *p);
     	return 1;
     }
     t = nalloc(o, sizeof(Odr_oct));   /* wrapper for octstring */

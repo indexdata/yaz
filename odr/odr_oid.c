@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.2  1995-02-07 14:13:46  quinn
+ * Revision 1.3  1995-02-09 15:51:49  quinn
+ * Works better now.
+ *
+ * Revision 1.2  1995/02/07  14:13:46  quinn
  * Bug fixes.
  *
  * Revision 1.1  1995/02/03  17:04:38  quinn
@@ -28,6 +31,8 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OID;
     }
+    if (o->direction == ODR_DECODE)
+    	*p =0;
     if ((res = ber_tag(o, *p, o->t_class, o->t_tag, &cons)) < 0)
     {
     	*p = 0;
@@ -40,7 +45,7 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
     }
     if (o->direction == ODR_PRINT)
     {
-    	fprintf(o->print, "OID\n");
+    	fprintf(o->print, "%sOID\n", odr_indent(o));
     	return 1;
     }
     if (o->direction == ODR_DECODE)

@@ -15,11 +15,15 @@ int ber_enclen(unsigned char *buf, int len, int lenlen, int exact)
     unsigned char octs[sizeof(int)];
     int n = 0;
 
+#ifdef ODR_DEBUG
     fprintf(stderr, "[len=%d]", len);
+#endif
     if (len < 0)      /* Indefinite */
     {
 	*b = 0X80;
+#ifdef ODR_DEBUG
 	fprintf(stderr, "[indefinite]");
+#endif
 	return 0;
     }
     if (len <= 127 && (lenlen == 1 || !exact)) /* definite short form */
@@ -65,13 +69,17 @@ int ber_declen(unsigned char *buf, int *len)
     if (*b == 0X80)     /* Indefinite */
     {
     	*len = -1;
+#ifdef ODR_DEBUG
 	fprintf(stderr, "[len=%d]", *len);
+#endif
     	return 1;
     }
     if (!(*b & 0X80))   /* Definite short form */
     {
     	*len = (int) *b;
+#ifdef ODR_DEBUG
 	fprintf(stderr, "[len=%d]", *len);
+#endif
     	return 1;
     }
     if (*b == 0XFF)     /* reserved value */
@@ -85,6 +93,8 @@ int ber_declen(unsigned char *buf, int *len)
     	*len <<= 8;
     	*len |= *(b++);
     }
+#ifdef ODR_DEBUG
     fprintf(stderr, "[len=%d]", *len);
+#endif
     return (b - buf);
 }
