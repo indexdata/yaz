@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.22  1995-05-15 11:56:39  quinn
+ * Revision 1.23  1995-05-15 13:25:10  quinn
+ * Fixed memory bug.
+ *
+ * Revision 1.22  1995/05/15  11:56:39  quinn
  * Asynchronous facilities. Restructuring of seshigh code.
  *
  * Revision 1.21  1995/05/02  08:53:19  quinn
@@ -261,8 +264,7 @@ void ir_session(IOCHAN h, int event)
 	    /* we got a complete PDU. Let's decode it */
 	    req = request_get(); /* get a new request structure */
 	    odr_reset(assoc->decode);
-	    odr_setbuf(assoc->decode, assoc->input_buffer,
-		assoc->input_apdu_len, 0);
+	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
 	    if (!z_APDU(assoc->decode, &req->request, 0))
 	    {
 		logf(LOG_WARN, "ODR error: %s",
@@ -510,7 +512,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.22 $";
+    resp.implementationVersion = "$Revision: 1.23 $";
     resp.userInformationField = 0;
     return &apdu;
 }

@@ -1,12 +1,11 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.21 1995-05-15 11:56:36 quinn Exp $
+# $Id: Makefile,v 1.22 1995-05-15 13:25:10 quinn Exp $
 
 LIBDIR=../lib
 
-# Uncomment this when you want to use XTIMOSI
-LIBMOSI=../../xtimosi/src/libmosi.a $(LIBDIR)/librfc.a
+#LIBMOSI=../../xtimosi/src/libmosi.a $(LIBDIR)/librfc.a
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src -I../../alex/include

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dmalloc.c,v $
- * Revision 1.3  1995-05-15 11:56:55  quinn
+ * Revision 1.4  1995-05-15 13:25:13  quinn
+ * Fixed memory bug.
+ *
+ * Revision 1.3  1995/05/15  11:56:55  quinn
  * Debuggng & adjustments.
  *
  * Revision 1.2  1995/04/10  10:23:50  quinn
@@ -75,11 +78,6 @@ void *d_realloc(char *file, int line, char *ptr, int nbytes)
     	file, line, len, nbytes, p, r + 2 * sizeof(long));
     memcpy(r, &head, sizeof(long));
     memcpy(r + sizeof(long), &nlen, sizeof(long));
-    if (r != ptr - 2 * sizeof(long))
-    {
-    	memcpy(r + 2 * sizeof(long), ptr, len);
-	memcpy(ptr - 2 * sizeof(long), &freed, sizeof(long));
-    }
     r += 2 * sizeof(long);
     memcpy(r + nbytes, &tail, sizeof(long));
     return r;
