@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.33 2002-06-02 21:27:17 adam Exp $
+ * $Id: zoom-c.c,v 1.34 2002-07-01 12:59:12 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -268,9 +268,11 @@ ZOOM_connection_connect(ZOOM_connection c,
 
     if (c->cs)
     {
+        yaz_log (LOG_DEBUG, "reconnect");
         c->reconnect_ok = 1;
         return;
     }
+    yaz_log(LOG_DEBUG, "connect");
     xfree (c->proxy);
     val = ZOOM_options_get (c->options, "proxy");
     if (val && *val)
@@ -1893,8 +1895,8 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
 {
     Z_InitResponse *initrs;
     
-    yaz_log (LOG_DEBUG, "hande_apdu type=%d", apdu->which);
     c->mask = 0;
+    yaz_log (LOG_DEBUG, "hande_apdu type=%d", apdu->which);
     switch(apdu->which)
     {
     case Z_APDU_initResponse:
@@ -1965,6 +1967,22 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
         es_response (c, apdu->u.extendedServicesResponse);
         ZOOM_connection_remove_task (c);
         break;
+    case Z_APDU_close:
+        if (c->reconnect_ok)
+        {
+            do_close(c);
+            c->tasks->running = 0;
+            ZOOM_connection_insert_task (c, ZOOM_TASK_CONNECT);
+        }
+        else
+        {
+            c->error = ZOOM_ERROR_CONNECTION_LOST;
+            do_close(c);
+        }
+        break;
+    default:
+        c->error = ZOOM_ERROR_DECODE;
+        do_close(c);
     }
 }
 
@@ -2001,7 +2019,6 @@ static int do_read (ZOOM_connection c)
     else
     {
         ZOOM_Event event;
-        c->reconnect_ok = 0;
 	odr_reset (c->odr_in);
 	odr_setbuf (c->odr_in, c->buf_in, r, 0);
         event = ZOOM_Event_create (ZOOM_EVENT_RECV_APDU);
@@ -2012,9 +2029,8 @@ static int do_read (ZOOM_connection c)
 	    do_close (c);
 	}
 	else
-	{
 	    handle_apdu (c, apdu);
-	}
+        c->reconnect_ok = 0;
     }
     return 1;
 }
