@@ -1,139 +1,139 @@
-<!-- $Header: /home/cvsroot/yaz/doc/asn.xml,v 1.3 2001-07-19 16:53:02 adam Exp $ -->
-<chapter><title>The ASN Module</title>
-<sect1><title>Introduction</title>
-<para>
-The &asn; module provides you with a set of C struct definitions for the
-various PDUs of the protocol, as well as for the complex types
-appearing within the PDUs. For the primitive data types, the C
-representation often takes the form of an ordinary C language type,
-such as <literal>int</literal>. For ASN.1 constructs that have no direct
-representation in C, such as general octet strings and bit strings,
-the &odr; module (see section <link linkend="odr">The ODR Module</link>)
-provides auxiliary definitions.
-</para>
-</sect1>
-<sect1><title>Preparing PDUs</title>
+<!-- $Id: asn.xml,v 1.4 2001-07-19 23:29:40 adam Exp $ -->
+ <chapter><title>The ASN Module</title>
+  <sect1><title>Introduction</title>
+   <para>
+    The &asn; module provides you with a set of C struct definitions for the
+    various PDUs of the protocol, as well as for the complex types
+    appearing within the PDUs. For the primitive data types, the C
+    representation often takes the form of an ordinary C language type,
+    such as <literal>int</literal>. For ASN.1 constructs that have no direct
+    representation in C, such as general octet strings and bit strings,
+    the &odr; module (see section <link linkend="odr">The ODR Module</link>)
+    provides auxiliary definitions.
+   </para>
+  </sect1>
+  <sect1><title>Preparing PDUs</title>
 
-<para>
-A structure representing a complex ASN.1 type doesn't in itself contain the
-members of that type. Instead, the structure contains
-<emphasis>pointers</emphasis> to the members of the type.
-This is necessary, in part, to allow a mechanism for specifying which
-of the optional structure (SEQUENCE) members are present, and which
-are not. It follows that you will need to somehow provide space for
-the individual members of the structure, and set the pointers to
-refer to the members.
-</para>
-<para>
-The conversion routines don't care how you allocate and maintain your
-C structures - they just follow the pointers that you provide.
-Depending on the complexity of your application, and your personal
-taste, there are at least three different approaches that you may take
-when you allocate the structures.
-</para>
+   <para>
+    A structure representing a complex ASN.1 type doesn't in itself contain the
+    members of that type. Instead, the structure contains
+    <emphasis>pointers</emphasis> to the members of the type.
+    This is necessary, in part, to allow a mechanism for specifying which
+    of the optional structure (SEQUENCE) members are present, and which
+    are not. It follows that you will need to somehow provide space for
+    the individual members of the structure, and set the pointers to
+    refer to the members.
+   </para>
+   <para>
+    The conversion routines don't care how you allocate and maintain your
+    C structures - they just follow the pointers that you provide.
+    Depending on the complexity of your application, and your personal
+    taste, there are at least three different approaches that you may take
+    when you allocate the structures.
+   </para>
 
-<para>
-You can use static or automatic local variables in the function that
-prepares the PDU. This is a simple approach, and it provides the most
-efficient form of memory management. While it works well for flat
-PDUs like the InitReqest, it will generally not be sufficient for say,
-the generation of an arbitrarily complex RPN query structure.
-</para>
-<para>
-You can individually create the structure and its members using the
-<function>malloc(2)</function> function. If you want to ensure that
-the data is freed when it is no longer needed, you will have to
-define a function that individually releases each member of a
-structure before freeing the structure itself.
-</para>
-<para>
-You can use the <function>odr_malloc()</function> function (see section 
-<link linkend="odr-use">Using ODR</link> for details). When you use
-<function>odr_malloc()</function>, you can release all of the
-allocated data in a single operation, independent of any pointers and
-relations between the data. <function>odr_malloc()</function> is based on a
-&quot;nibble-memory&quot;
-scheme, in which large portions of memory are allocated, and then
-gradually handed out with each call to <function>odr_malloc()</function>.
-The next time you call <function>odr_reset()</function>, all of the
-memory allocated since the last call is recycled for future use (actually,
-it is placed on a free-list).
-</para>
-<para>
-You can combine all of the methods described here. This will often be
-the most practical approach. For instance, you might use
-<function>odr_malloc()</function> to allocate an entire structure and
-some of its elements, while you leave other elements pointing to global
-or per-session default variables.
-</para>
+   <para>
+    You can use static or automatic local variables in the function that
+    prepares the PDU. This is a simple approach, and it provides the most
+    efficient form of memory management. While it works well for flat
+    PDUs like the InitReqest, it will generally not be sufficient for say,
+    the generation of an arbitrarily complex RPN query structure.
+   </para>
+   <para>
+    You can individually create the structure and its members using the
+    <function>malloc(2)</function> function. If you want to ensure that
+    the data is freed when it is no longer needed, you will have to
+    define a function that individually releases each member of a
+    structure before freeing the structure itself.
+   </para>
+   <para>
+    You can use the <function>odr_malloc()</function> function (see section 
+    <link linkend="odr-use">Using ODR</link> for details). When you use
+    <function>odr_malloc()</function>, you can release all of the
+    allocated data in a single operation, independent of any pointers and
+    relations between the data. <function>odr_malloc()</function> is based on a
+    &quot;nibble-memory&quot;
+    scheme, in which large portions of memory are allocated, and then
+    gradually handed out with each call to <function>odr_malloc()</function>.
+    The next time you call <function>odr_reset()</function>, all of the
+    memory allocated since the last call is recycled for future use (actually,
+    it is placed on a free-list).
+   </para>
+   <para>
+    You can combine all of the methods described here. This will often be
+    the most practical approach. For instance, you might use
+    <function>odr_malloc()</function> to allocate an entire structure and
+    some of its elements, while you leave other elements pointing to global
+    or per-session default variables.
+   </para>
 
-<para>
-The &asn; module provides an important aid in creating new PDUs. For
-each of the PDU types (say, <function>Z_InitRequest</function>), a
-function is provided that allocates and initializes an instance of
-that PDU type for you. In the case of the InitRequest, the function is
-simply named <function>zget_InitRequest()</function>, and it sets up
-reasonable default value for all of the mandatory members. The optional
-members are generally initialized to null pointers. This last aspect
-is very important: it ensures that if the PDU definitions are
-extended after you finish your implementation (to accommodate
-new versions of the protocol, say), you won't get into trouble with
-uninitialized pointers in your structures. The functions use
-<function>odr_malloc()</function> to
-allocate the PDUs and its members, so you can free everything again with a
-single call to <function>odr_reset()</function>. We strongly recommend
-that you use the <literal>zget_*</literal>
-functions whenever you are preparing a PDU (in a C++ API, the
-<literal>zget_</literal>
-functions would probably be promoted to constructors for the
-individual types).
-</para>
-<para>
-The prototype for the individual PDU types generally look like this:
-</para>
-<synopsis>
-  Z_&lt;type> *zget_&lt;type>(ODR o);
-</synopsis>
+   <para>
+    The &asn; module provides an important aid in creating new PDUs. For
+    each of the PDU types (say, <function>Z_InitRequest</function>), a
+    function is provided that allocates and initializes an instance of
+    that PDU type for you. In the case of the InitRequest, the function is
+    simply named <function>zget_InitRequest()</function>, and it sets up
+    reasonable default value for all of the mandatory members. The optional
+    members are generally initialized to null pointers. This last aspect
+    is very important: it ensures that if the PDU definitions are
+    extended after you finish your implementation (to accommodate
+    new versions of the protocol, say), you won't get into trouble with
+    uninitialized pointers in your structures. The functions use
+    <function>odr_malloc()</function> to
+    allocate the PDUs and its members, so you can free everything again with a
+    single call to <function>odr_reset()</function>. We strongly recommend
+    that you use the <literal>zget_*</literal>
+    functions whenever you are preparing a PDU (in a C++ API, the
+    <literal>zget_</literal>
+    functions would probably be promoted to constructors for the
+    individual types).
+   </para>
+   <para>
+    The prototype for the individual PDU types generally look like this:
+   </para>
+   <synopsis>
+    Z_&lt;type> *zget_&lt;type>(ODR o);
+   </synopsis>
 
-<para>
-eg.:
-</para>
+   <para>
+    eg.:
+   </para>
 
-<synopsis>
-  Z_InitRequest *zget_InitRequest(ODR o);
-</synopsis>
+   <synopsis>
+    Z_InitRequest *zget_InitRequest(ODR o);
+   </synopsis>
 
-<para>
-The &odr; handle should generally be your encoding stream, but it needn't be.
-</para>
-<para>
-As well as the individual PDU functions, a function <function>
-zget_APDU()</function> is
-provided, which allocates a toplevel Z-APDU of the type requested:
-</para>
+   <para>
+    The &odr; handle should generally be your encoding stream, but it needn't be.
+   </para>
+   <para>
+    As well as the individual PDU functions, a function <function>
+     zget_APDU()</function> is
+    provided, which allocates a toplevel Z-APDU of the type requested:
+   </para>
 
-<synopsis>
-  Z_APDU *zget_APDU(ODR o, int which);
-</synopsis>
+   <synopsis>
+    Z_APDU *zget_APDU(ODR o, int which);
+   </synopsis>
 
-<para>
-The <varname>which</varname> parameter is (of course) the discriminator
-belonging to the <varname>Z_APDU</varname> <literal>CHOICE</literal> type.
-All of the interface described here is provided by the &asn; module, and
-you access it through the <filename>proto.h</filename> header file.
+   <para>
+    The <varname>which</varname> parameter is (of course) the discriminator
+    belonging to the <varname>Z_APDU</varname> <literal>CHOICE</literal> type.
+    All of the interface described here is provided by the &asn; module, and
+    you access it through the <filename>proto.h</filename> header file.
 
-</para>
-</sect1>
-<sect1><title id="oid">Object Identifiers</title>
-<para>
-When you refer to object identifiers in your application, you need to
-be aware that SR and Z39.50 use two different set of OIDs to refer to
-the same objects. To handle this easily, &yaz; provides a utility module
-to &asn; which provides an internal representation of the OIDs used in
-both protocols. Each oid is described by a structure:
-</para>
+   </para>
+  </sect1>
+  <sect1><title id="oid">Object Identifiers</title>
+   <para>
+    When you refer to object identifiers in your application, you need to
+    be aware that SR and Z39.50 use two different set of OIDs to refer to
+    the same objects. To handle this easily, &yaz; provides a utility module
+    to &asn; which provides an internal representation of the OIDs used in
+    both protocols. Each oid is described by a structure:
+   </para>
 
-<screen>
+   <screen>
 typedef struct oident
 {
     enum oid_proto proto;
@@ -142,63 +142,63 @@ typedef struct oident
     int oidsuffix[OID_SIZE];
     char *desc;
 } oident;
-</screen>
+   </screen>
 
-<para>
-The <literal>proto</literal> field can be set to either
-<literal>PROTO_SR</literal> or <literal>PROTO_Z3950</literal>.
-The <literal>class</literal> might be, say,
-<literal>CLASS_RECSYN</literal>, and the <literal>value</literal> might be
-<literal>VAL_USMARC</literal> for the USMARC record format. Functions
-</para>
+   <para>
+    The <literal>proto</literal> field can be set to either
+    <literal>PROTO_SR</literal> or <literal>PROTO_Z3950</literal>.
+    The <literal>class</literal> might be, say,
+    <literal>CLASS_RECSYN</literal>, and the <literal>value</literal> might be
+    <literal>VAL_USMARC</literal> for the USMARC record format. Functions
+   </para>
 
-<screen>
+   <screen>
 int *oid_ent_to_oid(struct oident *ent, int *dst);
 struct oident *oid_getentbyoid(int *o);
-</screen>
+   </screen>
 
-<para>
-are provided to map between object identifiers and database entries.
-If you store a member of the <literal>oid_proto</literal> type in
-your association state information, it's a simple matter, at runtime,
-to generate the correct OID when you need it. For decoding, you can
-simply ignore the proto field, or if you're strict, you can verify
-that your peer is using the OID family from the correct protocol.
-The <literal>desc</literal> field is a short, human-readable name
-for the PDU, useful mainly for diagnostic output.
-</para>
+   <para>
+    are provided to map between object identifiers and database entries.
+    If you store a member of the <literal>oid_proto</literal> type in
+    your association state information, it's a simple matter, at runtime,
+    to generate the correct OID when you need it. For decoding, you can
+    simply ignore the proto field, or if you're strict, you can verify
+    that your peer is using the OID family from the correct protocol.
+    The <literal>desc</literal> field is a short, human-readable name
+    for the PDU, useful mainly for diagnostic output.
+   </para>
 
-<note>
-<para>
-The old function <function>oid_getoidbyent</function> still exists but is
-not thread safe. Use <function>oid_ent_to_oid</function> instead
-and pass an array of size <literal>OID_SIZE</literal>.
-</para>
-</note>
+   <note>
+    <para>
+     The old function <function>oid_getoidbyent</function> still exists but is
+     not thread safe. Use <function>oid_ent_to_oid</function> instead
+     and pass an array of size <literal>OID_SIZE</literal>.
+    </para>
+   </note>
 
-<note>
-<para>
-Plans are underway to merge the two protocols into a single
-definition, with one set of object identifiers. When this happens, the
-oid module will no longer be required to support protocol
-independence, but it should still be useful as a simple OID database.
-</para>
-</note>
+   <note>
+    <para>
+     Plans are underway to merge the two protocols into a single
+     definition, with one set of object identifiers. When this happens, the
+     oid module will no longer be required to support protocol
+     independence, but it should still be useful as a simple OID database.
+    </para>
+   </note>
 
-</sect1>
-<sect1><title>EXTERNAL Data</title>
+  </sect1>
+  <sect1><title>EXTERNAL Data</title>
 
-<para>
-In order to achieve extensibility and adaptability to different
-application domains, the new version of the protocol defines many
-structures outside of the main ASN.1 specification, referencing them
-through ASN.1 EXTERNAL constructs. To simplify the construction and access
-to the externally referenced data, the &asn; module defines a
-specialized version of the EXTERNAL construct, called
-<literal>Z_External</literal>.It is defined thus:
-</para>
+   <para>
+    In order to achieve extensibility and adaptability to different
+    application domains, the new version of the protocol defines many
+    structures outside of the main ASN.1 specification, referencing them
+    through ASN.1 EXTERNAL constructs. To simplify the construction and access
+    to the externally referenced data, the &asn; module defines a
+    specialized version of the EXTERNAL construct, called
+    <literal>Z_External</literal>.It is defined thus:
+   </para>
 
-<screen>
+   <screen>
 typedef struct Z_External
 {
     Odr_oid *direct_reference;
@@ -206,527 +206,544 @@ typedef struct Z_External
     char *descriptor;
     enum
     {
-	/* Generic types */
-	Z_External_single = 0,
-	Z_External_octet,
-	Z_External_arbitrary,
+        /* Generic types */
+        Z_External_single = 0,
+        Z_External_octet,
+        Z_External_arbitrary,
 
-	/* Specific types */
-	Z_External_SUTRS,
-	Z_External_explainRecord,
-	Z_External_resourceReport1,
-	Z_External_resourceReport2
+        /* Specific types */
+        Z_External_SUTRS,
+        Z_External_explainRecord,
+        Z_External_resourceReport1,
+        Z_External_resourceReport2
 
-	...
+    ...
 
     } which;
     union
     {
-	/* Generic types */
-	Odr_any *single_ASN1_type;
-	Odr_oct *octet_aligned;
-	Odr_bitmask *arbitrary;
+        /* Generic types */
+        Odr_any *single_ASN1_type;
+        Odr_oct *octet_aligned;
+        Odr_bitmask *arbitrary;
 
-	/* Specific types */
-	Z_SUTRS *sutrs;
-	Z_ExplainRecord *explainRecord;
-	Z_ResourceReport1 *resourceReport1;
-	Z_ResourceReport2 *resourceReport2;
+        /* Specific types */
+        Z_SUTRS *sutrs;
+        Z_ExplainRecord *explainRecord;
+        Z_ResourceReport1 *resourceReport1;
+        Z_ResourceReport2 *resourceReport2;
 
-	...
+        ...
 
     } u;
 } Z_External;
-</screen>
+   </screen>
 
-<para>
-When decoding, the &asn; module will attempt to determine which
-syntax describes the data by looking at the reference fields
-(currently only the direct-reference). For ASN.1 structured data, you
-need only consult the <literal>which</literal> field to determine the type of
-data. You can the access  the data directly through the union. When
-constructing data for encoding, you set the union pointer to point to
-the data, and set the <literal>which</literal> field accordingly.
-Remember also to set the direct (or indirect) reference to the correct
-OID for the data type.
-For non-ASN.1 data such as MARC records, use the
-<literal>octet_aligned</literal> arm of the union.
-</para>
+   <para>
+    When decoding, the &asn; module will attempt to determine which
+    syntax describes the data by looking at the reference fields
+    (currently only the direct-reference). For ASN.1 structured data, you
+    need only consult the <literal>which</literal> field to determine the
+    type of data. You can the access  the data directly through the union.
+    When constructing data for encoding, you set the union pointer to point
+    to the data, and set the <literal>which</literal> field accordingly.
+    Remember also to set the direct (or indirect) reference to the correct
+    OID for the data type.
+    For non-ASN.1 data such as MARC records, use the
+    <literal>octet_aligned</literal> arm of the union.
+   </para>
 
-<para>
-Some servers return ASN.1 structured data values (eg. database
-records) as BER-encoded records placed in the <literal>octet-aligned</literal>
-branch of the EXTERNAL CHOICE. The ASN-module will <emphasis>not</emphasis>
-automatically decode these records. To help you decode the records in
-the application, the function
-</para>
+   <para>
+    Some servers return ASN.1 structured data values (eg. database
+    records) as BER-encoded records placed in the
+    <literal>octet-aligned</literal> branch of the EXTERNAL CHOICE.
+    The ASN-module will <emphasis>not</emphasis> automatically decode
+    these records. To help you decode the records in the application, the
+    function
+   </para>
 
-<screen>
-Z_ext_typeent *z_ext_gettypebyref(oid_value ref);
-</screen>
+   <screen>
+    Z_ext_typeent *z_ext_gettypebyref(oid_value ref);
+   </screen>
 
-<para>
-Can be used to retrieve information about the known, external data
-types. The function return a pointer to a static area, or NULL, if no
-match for the given direct reference is found. The
-<literal>Z_ext_typeent</literal>
-is defined as:
-</para>
+   <para>
+    Can be used to retrieve information about the known, external data
+    types. The function return a pointer to a static area, or NULL, if no
+    match for the given direct reference is found. The
+    <literal>Z_ext_typeent</literal>
+    is defined as:
+   </para>
 
-<screen>
+   <screen>
 typedef struct Z_ext_typeent
 {
     oid_value dref;    /* the direct-reference OID value. */
     int what;          /* discriminator value for the external CHOICE */
     Odr_fun fun;       /* decoder function */
 } Z_ext_typeent;
-</screen>
-
-<para>
-The <literal>what</literal> member contains the <literal>Z_External</literal>
-union discriminator value for the given type: For the SUTRS record
-syntax, the value would be <literal>Z_External_sutrs</literal>.
-The <literal>fun</literal> member contains a pointer to the
-function which encodes/decodes the given type. Again, for the SUTRS
-record syntax, the value of <literal>fun</literal> would be
-<literal>z_SUTRS</literal> (a function pointer).
-</para>
-
-<para>
-If you receive an EXTERNAL which contains an octet-string value that
-you suspect of being an ASN.1-structured data value, you can use
-<literal>z_ext_gettypebyref</literal> to look for the provided
-direct-reference.
-If the return value is different from NULL, you can use the provided
-function to decode the BER string (see section <link linkend="odr-use">
-Using ODR</link>).
-</para>
-
-<para>
-If you want to <emphasis>send</emphasis> EXTERNALs containing
-ASN.1-structured values in the occtet-aligned branch of the CHOICE, this
-is possible too. However, on the encoding phase, it requires a somewhat
-involved juggling around of the various buffers involved.
-</para>
-<para>
-If you need to add new, externally defined data types, you must update
-the struct above, in the source file <filename>prt-ext.h</filename>, as
-well as the encoder/decoder in the file <filename>prt-ext.c</filename>.
-When changing the latter, remember to update both the <literal>arm</literal>
-arrary and the list <literal>type_table</literal>, which drives the CHOICE
-biasing that is necessary to tell the different, structured types apart
-on decoding.
-</para>
-
-<note>
-<para>
-Eventually, the EXTERNAL processing will most likely
-automatically insert the correct OIDs or indirect-refs. First,
-however, we need to determine how application-context management
-(specifically the presentation-context-list) should fit into the
-various modules.
-</para>
-</note>
-
-</sect1>
-<sect1><title>PDU Contents Table</title>
-
-<para>
-We include, for reference, a listing of the fields of each top-level
-PDU, as well as their default settings.
-</para>
-
-<table frame="top"><title>Default settings for PDU Initialize Request</title>
-<tgroup cols="3">
-<colspec colname="field"></colspec>
-<colspec colname="type"></colspec>
-<colspec colname="value"></colspec>
-<thead>
-<row>
-<entry>Field</entry>
-<entry>Type</entry>
-<entry>Default Value</entry>
-</row>
-</thead>
-<tbody>
-
-<row><entry>
-referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-protocolVersion</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
-</entry></row>
-
-<row><entry>
-options</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
-</entry></row>
-
-<row><entry>
-preferredMessageSize</entry><entry>int</entry><entry>30*1024
-</entry></row>
-
-<row><entry>
-maximumRecordSize</entry><entry>int</entry><entry>30*1024
-</entry></row>
-
-<row><entry>
-idAuthentication</entry><entry>Z_IdAuthentication</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-implementationId</entry><entry>char*</entry><entry>"YAZ (id=81)"
-</entry></row>
-
-<row><entry>
-implementationName</entry><entry>char*</entry><entry>"Index Data/YAZ"
-</entry></row>
-
-<row><entry>
-implementationVersion</entry><entry>char*</entry><entry>YAZ_VERSION
-</entry></row>
-
-<row><entry>
-userInformationField</entry><entry>Z_UserInformation</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
-</entry></row>
-
-</tbody>
-</tgroup>
-</table>
-
-<table frame="top"><title>Default settings for PDU Initialize Response</title>
-<tgroup cols="3">
-<colspec colname="field"></colspec>
-<colspec colname="type"></colspec>
-<colspec colname="value"></colspec>
-<thead>
-<row>
-<entry>Field</entry>
-<entry>Type</entry>
-<entry>Default Value</entry>
-</row>
-</thead>
-<tbody>
-
-<row><entry>
-referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-protocolVersion</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
-</entry></row>
-
-<row><entry>
-options</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
-</entry></row>
-
-<row><entry>
-preferredMessageSize</entry><entry>int</entry><entry>30*1024
-</entry></row>
-
-<row><entry>
-maximumRecordSize</entry><entry>int</entry><entry>30*1024
-</entry></row>
-
-<row><entry>
-result</entry><entry>bool_t</entry><entry>TRUE
-</entry></row>
-
-<row><entry>
-implementationId</entry><entry>char*</entry><entry>"YAZ (id=81)"
-</entry></row>
-
-<row><entry>
-implementationName</entry><entry>char*</entry><entry>"Index Data/YAZ"
-</entry></row>
-
-<row><entry>
-implementationVersion</entry><entry>char*</entry><entry>YAZ_VERSION
-</entry></row>
-
-<row><entry>
-userInformationField</entry><entry>Z_UserInformation</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
-</entry></row>
-
-</tbody>
-</tgroup>
-</table>
-
-<table frame="top"><title>Default settings for PDU Search Request</title>
-<tgroup cols="3">
-<colspec colname="field"></colspec>
-<colspec colname="type"></colspec>
-<colspec colname="value"></colspec>
-<thead>
-<row>
-<entry>Field</entry>
-<entry>Type</entry>
-<entry>Default Value</entry>
-</row>
-</thead>
-<tbody>
-
-<row><entry>
-referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-smallSetUpperBound</entry><entry>int</entry><entry>0
-</entry></row>
-
-<row><entry>
-largeSetLowerBound</entry><entry>int</entry><entry>1
-</entry></row>
-
-<row><entry>
-mediumSetPresentNumber</entry><entry>int</entry><entry>0
-</entry></row>
-
-<row><entry>
-replaceIndicator</entry><entry>bool_t</entry><entry>TRUE
-</entry></row>
-
-<row><entry>
-resultSetName</entry><entry>char *</entry><entry>"default"
-</entry></row>
-
-<row><entry>
-num_databaseNames</entry><entry>int</entry><entry>0
-</entry></row>
-
-<row><entry>
-databaseNames</entry><entry>char **</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-smallSetElementSetNames</entry><entry>Z_ElementSetNames</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-mediumSetElementSetNames</entry><entry>Z_ElementSetNames</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-preferredRecordSyntax</entry><entry>Odr_oid</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-query</entry><entry>Z_Query</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-additionalSearchInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
-</entry></row>
-
-<row><entry>
-otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
-</entry></row>
-
-</tbody>
-</tgroup>
-</table>
-
-<screen>
-Z_SearchResponse
-----------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-resultCount                  int                 0
-numberOfRecordsReturned      int                 0
-nextResultSetPosition        int                 0
-searchStatus                 bool_t              TRUE
-resultSetStatus              int                 NULL
-presentStatus                int                 NULL
-records                      Z_Records           NULL
-additionalSearchInfo         Z_OtherInformation  NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_PresentRequest
-----------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-resultSetId                  char*               "default"
-resultSetStartPoint          int                 1
-numberOfRecordsRequested     int                 10
-num_ranges                   int                 0
-additionalRanges             Z_Range             NULL
-recordComposition            Z_RecordComposition NULL
-preferredRecordSyntax        Odr_oid             NULL
-maxSegmentCount              int                 NULL
-maxRecordSize                int                 NULL
-maxSegmentSize               int                 NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_PresentResponse
------------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-numberOfRecordsReturned      int                 0
-nextResultSetPosition        int                 0
-presentStatus                int                 Z_PRES_SUCCESS
-records                      Z_Records           NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_DeleteResultSetRequest
-------------------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-deleteFunction               int                 Z_DeleteRequest_list
-num_ids                      int                 0
-resultSetList                char**              NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_DeleteResultSetResponse
--------------------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-deleteOperationStatus        int                 Z_DeleteStatus_success
-num_statuses                 int                 0
-deleteListStatuses           Z_ListStatus**      NULL
-numberNotDeleted             int                 NULL
-num_bulkStatuses             int                 0
-bulkStatuses                 Z_ListStatus        NULL
-deleteMessage                char*               NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_ScanRequest
--------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-num_databaseNames            int                 0
-databaseNames                char**              NULL
-attributeSet                 Odr_oid             NULL
-termListAndStartPoint        Z_AttributesPlus... NULL
-stepSize                     int                 NULL
-numberOfTermsRequested       int                 20
-preferredPositionInResponse  int                 NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_ScanResponse
---------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-stepSize                     int                 NULL
-scanStatus                   int                 Z_Scan_success
-numberOfEntriesReturned      int                 0
-positionOfTerm               int                 NULL
-entries                      Z_ListEntris        NULL
-attributeSet                 Odr_oid             NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_TriggerResourceControlRequest
--------------------------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-requestedAction              int                 Z_TriggerResourceCtrl_resou..
-prefResourceReportFormat     Odr_oid             NULL
-resultSetWanted              bool_t              NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_ResourceControlRequest
-------------------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-suspendedFlag                bool_t              NULL
-resourceReport               Z_External          NULL
-partialResultsAvailable      int                 NULL
-responseRequired             bool_t              FALSE
-triggeredRequestFlag         bool_t              NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_ResourceControlResponse
--------------------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-continueFlag                 bool_t              TRUE
-resultSetWanted              bool_t              NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_AccessControlRequest
-----------------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-which                        enum                Z_AccessRequest_simpleForm;
-u                            union               NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_AccessControlResponse
------------------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-which                        enum                Z_AccessResponse_simpleForm
-u                            union               NULL
-diagnostic                   Z_DiagRec           NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_Segment
----------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-numberOfRecordsReturned      int                 value=0
-num_segmentRecords           int                 0
-segmentRecords               Z_NamePlusRecord    NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
-
-<screen>
-Z_Close
--------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-closeReason                  int                 Z_Close_finished
-diagnosticInformation        char*               NULL
-resourceReportFormat         Odr_oid             NULL
-resourceFormat               Z_External          NULL
-otherInfo                    Z_OtherInformation  NULL
-
-</screen>
-
-</sect1>
-</chapter>
+   </screen>
+
+   <para>
+    The <literal>what</literal> member contains the
+    <literal>Z_External</literal> union discriminator value for the
+    given type: For the SUTRS record syntax, the value would be
+    <literal>Z_External_sutrs</literal>.
+    The <literal>fun</literal> member contains a pointer to the
+    function which encodes/decodes the given type. Again, for the SUTRS
+    record syntax, the value of <literal>fun</literal> would be
+    <literal>z_SUTRS</literal> (a function pointer).
+   </para>
+
+   <para>
+    If you receive an EXTERNAL which contains an octet-string value that
+    you suspect of being an ASN.1-structured data value, you can use
+    <literal>z_ext_gettypebyref</literal> to look for the provided
+    direct-reference.
+    If the return value is different from NULL, you can use the provided
+    function to decode the BER string (see section <link linkend="odr-use">
+     Using ODR</link>).
+   </para>
+
+   <para>
+    If you want to <emphasis>send</emphasis> EXTERNALs containing
+    ASN.1-structured values in the occtet-aligned branch of the CHOICE, this
+    is possible too. However, on the encoding phase, it requires a somewhat
+    involved juggling around of the various buffers involved.
+   </para>
+   <para>
+    If you need to add new, externally defined data types, you must update
+    the struct above, in the source file <filename>prt-ext.h</filename>, as
+    well as the encoder/decoder in the file <filename>prt-ext.c</filename>.
+    When changing the latter, remember to update both the <literal>arm</literal>
+    arrary and the list <literal>type_table</literal>, which drives the CHOICE
+    biasing that is necessary to tell the different, structured types apart
+    on decoding.
+   </para>
+
+   <note>
+    <para>
+     Eventually, the EXTERNAL processing will most likely
+     automatically insert the correct OIDs or indirect-refs. First,
+     however, we need to determine how application-context management
+     (specifically the presentation-context-list) should fit into the
+     various modules.
+    </para>
+   </note>
+
+  </sect1>
+  <sect1><title>PDU Contents Table</title>
+
+   <para>
+    We include, for reference, a listing of the fields of each top-level
+    PDU, as well as their default settings.
+   </para>
+
+   <table frame="top"><title>Default settings for PDU Initialize Request</title>
+    <tgroup cols="3">
+     <colspec colname="field"></colspec>
+     <colspec colname="type"></colspec>
+     <colspec colname="value"></colspec>
+     <thead>
+      <row>
+       <entry>Field</entry>
+       <entry>Type</entry>
+       <entry>Default Value</entry>
+      </row>
+     </thead>
+     <tbody>
+
+      <row><entry>
+	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	protocolVersion</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
+       </entry></row>
+
+      <row><entry>
+	options</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
+       </entry></row>
+
+      <row><entry>
+	preferredMessageSize</entry><entry>int</entry><entry>30*1024
+       </entry></row>
+
+      <row><entry>
+	maximumRecordSize</entry><entry>int</entry><entry>30*1024
+       </entry></row>
+
+      <row><entry>
+	idAuthentication</entry><entry>Z_IdAuthentication</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	implementationId</entry><entry>char*</entry><entry>"YAZ (id=81)"
+       </entry></row>
+
+      <row><entry>
+	implementationName</entry><entry>char*</entry><entry>"Index Data/YAZ"
+       </entry></row>
+
+      <row><entry>
+	implementationVersion</entry><entry>char*</entry><entry>YAZ_VERSION
+       </entry></row>
+
+      <row><entry>
+	userInformationField</entry><entry>Z_UserInformation</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
+       </entry></row>
+
+     </tbody>
+    </tgroup>
+   </table>
+
+   <table frame="top"><title>Default settings for PDU Initialize Response</title>
+    <tgroup cols="3">
+     <colspec colname="field"></colspec>
+     <colspec colname="type"></colspec>
+     <colspec colname="value"></colspec>
+     <thead>
+      <row>
+       <entry>Field</entry>
+       <entry>Type</entry>
+       <entry>Default Value</entry>
+      </row>
+     </thead>
+     <tbody>
+
+      <row><entry>
+	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	protocolVersion</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
+       </entry></row>
+
+      <row><entry>
+	options</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
+       </entry></row>
+
+      <row><entry>
+	preferredMessageSize</entry><entry>int</entry><entry>30*1024
+       </entry></row>
+
+      <row><entry>
+	maximumRecordSize</entry><entry>int</entry><entry>30*1024
+       </entry></row>
+
+      <row><entry>
+	result</entry><entry>bool_t</entry><entry>TRUE
+       </entry></row>
+
+      <row><entry>
+	implementationId</entry><entry>char*</entry><entry>"YAZ (id=81)"
+       </entry></row>
+
+      <row><entry>
+	implementationName</entry><entry>char*</entry><entry>"Index Data/YAZ"
+       </entry></row>
+
+      <row><entry>
+	implementationVersion</entry><entry>char*</entry><entry>YAZ_VERSION
+       </entry></row>
+
+      <row><entry>
+	userInformationField</entry><entry>Z_UserInformation</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
+       </entry></row>
+
+     </tbody>
+    </tgroup>
+   </table>
+
+   <table frame="top"><title>Default settings for PDU Search Request</title>
+    <tgroup cols="3">
+     <colspec colname="field"></colspec>
+     <colspec colname="type"></colspec>
+     <colspec colname="value"></colspec>
+     <thead>
+      <row>
+       <entry>Field</entry>
+       <entry>Type</entry>
+       <entry>Default Value</entry>
+      </row>
+     </thead>
+     <tbody>
+
+      <row><entry>
+	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	smallSetUpperBound</entry><entry>int</entry><entry>0
+       </entry></row>
+
+      <row><entry>
+	largeSetLowerBound</entry><entry>int</entry><entry>1
+       </entry></row>
+
+      <row><entry>
+	mediumSetPresentNumber</entry><entry>int</entry><entry>0
+       </entry></row>
+
+      <row><entry>
+	replaceIndicator</entry><entry>bool_t</entry><entry>TRUE
+       </entry></row>
+
+      <row><entry>
+	resultSetName</entry><entry>char *</entry><entry>"default"
+       </entry></row>
+
+      <row><entry>
+	num_databaseNames</entry><entry>int</entry><entry>0
+       </entry></row>
+
+      <row><entry>
+	databaseNames</entry><entry>char **</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	smallSetElementSetNames</entry><entry>Z_ElementSetNames</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	mediumSetElementSetNames</entry><entry>Z_ElementSetNames</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	preferredRecordSyntax</entry><entry>Odr_oid</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	query</entry><entry>Z_Query</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	additionalSearchInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
+       </entry></row>
+
+      <row><entry>
+	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
+       </entry></row>
+
+     </tbody>
+    </tgroup>
+   </table>
+
+   <screen>
+    Z_SearchResponse
+    ----------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    resultCount                  int                 0
+    numberOfRecordsReturned      int                 0
+    nextResultSetPosition        int                 0
+    searchStatus                 bool_t              TRUE
+    resultSetStatus              int                 NULL
+    presentStatus                int                 NULL
+    records                      Z_Records           NULL
+    additionalSearchInfo         Z_OtherInformation  NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_PresentRequest
+    ----------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    resultSetId                  char*               "default"
+    resultSetStartPoint          int                 1
+    numberOfRecordsRequested     int                 10
+    num_ranges                   int                 0
+    additionalRanges             Z_Range             NULL
+    recordComposition            Z_RecordComposition NULL
+    preferredRecordSyntax        Odr_oid             NULL
+    maxSegmentCount              int                 NULL
+    maxRecordSize                int                 NULL
+    maxSegmentSize               int                 NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_PresentResponse
+    -----------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    numberOfRecordsReturned      int                 0
+    nextResultSetPosition        int                 0
+    presentStatus                int                 Z_PRES_SUCCESS
+    records                      Z_Records           NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_DeleteResultSetRequest
+    ------------------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    deleteFunction               int                 Z_DeleteRequest_list
+    num_ids                      int                 0
+    resultSetList                char**              NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_DeleteResultSetResponse
+    -------------------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    deleteOperationStatus        int                 Z_DeleteStatus_success
+    num_statuses                 int                 0
+    deleteListStatuses           Z_ListStatus**      NULL
+    numberNotDeleted             int                 NULL
+    num_bulkStatuses             int                 0
+    bulkStatuses                 Z_ListStatus        NULL
+    deleteMessage                char*               NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_ScanRequest
+    -------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    num_databaseNames            int                 0
+    databaseNames                char**              NULL
+    attributeSet                 Odr_oid             NULL
+    termListAndStartPoint        Z_AttributesPlus... NULL
+    stepSize                     int                 NULL
+    numberOfTermsRequested       int                 20
+    preferredPositionInResponse  int                 NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_ScanResponse
+    --------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    stepSize                     int                 NULL
+    scanStatus                   int                 Z_Scan_success
+    numberOfEntriesReturned      int                 0
+    positionOfTerm               int                 NULL
+    entries                      Z_ListEntris        NULL
+    attributeSet                 Odr_oid             NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_TriggerResourceControlRequest
+    -------------------------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    requestedAction              int                 Z_TriggerResourceCtrl_resou..
+    prefResourceReportFormat     Odr_oid             NULL
+    resultSetWanted              bool_t              NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_ResourceControlRequest
+    ------------------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    suspendedFlag                bool_t              NULL
+    resourceReport               Z_External          NULL
+    partialResultsAvailable      int                 NULL
+    responseRequired             bool_t              FALSE
+    triggeredRequestFlag         bool_t              NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_ResourceControlResponse
+    -------------------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    continueFlag                 bool_t              TRUE
+    resultSetWanted              bool_t              NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_AccessControlRequest
+    ----------------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    which                        enum                Z_AccessRequest_simpleForm;
+    u                            union               NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_AccessControlResponse
+    -----------------------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    which                        enum                Z_AccessResponse_simpleForm
+    u                            union               NULL
+    diagnostic                   Z_DiagRec           NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_Segment
+    ---------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    numberOfRecordsReturned      int                 value=0
+    num_segmentRecords           int                 0
+    segmentRecords               Z_NamePlusRecord    NULL
+    otherInfo                    Z_OtherInformation  NULL
+   </screen>
+
+   <screen>
+    Z_Close
+    -------
+    Field                        Type                Default value
+
+    referenceId                  Z_ReferenceId       NULL
+    closeReason                  int                 Z_Close_finished
+    diagnosticInformation        char*               NULL
+    resourceReportFormat         Odr_oid             NULL
+    resourceFormat               Z_External          NULL
+    otherInfo                    Z_OtherInformation  NULL
+
+   </screen>
+
+  </sect1>
+ </chapter>
+
+ <!-- Keep this comment at the end of the file
+ Local variables:
+ mode: sgml
+ sgml-omittag:t
+ sgml-shorttag:t
+ sgml-minimize-attributes:nil
+ sgml-always-quote-attributes:t
+ sgml-indent-step:1
+ sgml-indent-data:t
+ sgml-parent-document: "yaz.xml"
+ sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-namecase-general:t
+ End:
+ -->

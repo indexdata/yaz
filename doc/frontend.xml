@@ -1,314 +1,320 @@
-<!-- $Header: /home/cvsroot/yaz/doc/frontend.xml,v 1.2 2001-07-19 12:46:57 adam Exp $ -->
-<chapter><title id="server">Making an IR Server for Your Database</title>
+<!-- $Id: frontend.xml,v 1.3 2001-07-19 23:29:40 adam Exp $ -->
+ <chapter><title id="server">Making an IR Server for Your Database</title>
 
-<sect1><title>Introduction</title>
+  <sect1><title>Introduction</title>
 
-<para>
-If you aren't into documentation, a good way to learn how the
-backend interface works is to look at the <filename>backend.h</filename>
-file. Then, look at the small dummy-server in
-<filename>ztest/ztest.c</filename>. Finally, you can have a look at
-the <filename>seshigh.c</filename> file, which is where most of the
-logic of the frontend server is located. The <filename>backend.h</filename>
-file also makes a good reference, once you've chewed your way through
-the prose of this file.
-</para>
+   <para>
+    If you aren't into documentation, a good way to learn how the
+    backend interface works is to look at the <filename>backend.h</filename>
+    file. Then, look at the small dummy-server in
+    <filename>ztest/ztest.c</filename>. Finally, you can have a look at
+    the <filename>seshigh.c</filename> file, which is where most of the
+    logic of the frontend server is located. The <filename>backend.h</filename>
+    file also makes a good reference, once you've chewed your way through
+    the prose of this file.
+   </para>
 
-<para>
-If you have a database system that you would like to make available by
-means of Z39.50, &yaz; basically offers your two options. You
-can use the APIs provided by the &asn;, &odr;, and &comstack;
-modules to
-create and decode PDUs, and exchange them with a client.
-Using this low-level interface gives you access to all fields and
-options of the protocol, and you can construct your server as close
-to your existing database as you like.
-It is also a fairly involved process, requiring
-you to set up an event-handling mechanism, protocol state machine,
-etc. To simplify server implementation, we have implemented a compact
-and simple, but reasonably full-functioned server-frontend that will
-handle most of the protocol mechanics, while leaving you to
-concentrate on your database interface.
-</para>
+   <para>
+    If you have a database system that you would like to make available by
+    means of Z39.50, &yaz; basically offers your two options. You
+    can use the APIs provided by the &asn;, &odr;, and &comstack;
+    modules to
+    create and decode PDUs, and exchange them with a client.
+    Using this low-level interface gives you access to all fields and
+    options of the protocol, and you can construct your server as close
+    to your existing database as you like.
+    It is also a fairly involved process, requiring
+    you to set up an event-handling mechanism, protocol state machine,
+    etc. To simplify server implementation, we have implemented a compact
+    and simple, but reasonably full-functioned server-frontend that will
+    handle most of the protocol mechanics, while leaving you to
+    concentrate on your database interface.
+   </para>
 
-<note>
-<para>
-The backend interface was designed in anticipation of a specific
-integration task, while still attempting to achieve some degree of
-generality. We realise fully that there are points where the
-interface can be improved significantly. If you have specific
-functions or parameters that you think could be useful, send us a
-mail (or better, sign on to the mailing list referred to in the
-toplevel README file). We will try to fit good suggestions into future
-releases, to the extent that it can be done without requiring
-too many structural changes in existing applications.
-</para>
-</note>
-</sect1>
+   <note>
+    <para>
+     The backend interface was designed in anticipation of a specific
+     integration task, while still attempting to achieve some degree of
+     generality. We realise fully that there are points where the
+     interface can be improved significantly. If you have specific
+     functions or parameters that you think could be useful, send us a
+     mail (or better, sign on to the mailing list referred to in the
+     toplevel README file). We will try to fit good suggestions into future
+     releases, to the extent that it can be done without requiring
+     too many structural changes in existing applications.
+    </para>
+   </note>
+  </sect1>
 
-<sect1><title>The Database Frontend</title>
+  <sect1><title>The Database Frontend</title>
 
-<para>
-We refer to this software as a generic database frontend. Your
-database system is the <emphasis>backend database</emphasis>, and the
-interface between the two is called the <emphasis>backend API</emphasis>.
-The backend API consists of a small number of function handlers and
-structure definitions. You are required to provide the
-<function>main()</function> routine for the server (which can be
-quite simple), as well as a set of handlers to match each of the prototypes.
-The interface functions that you write can use any mechanism you like
-to communicate with your database system: You might link the whole
-thing together with your database application and access it by
-function calls; you might use IPC to talk to a database server
-somewhere; or you might link with third-party software that handles
-the communication for you (like a commercial database client library).
-At any rate, the handlers will perform the tasks of:
-</para>
+   <para>
+    We refer to this software as a generic database frontend. Your
+    database system is the <emphasis>backend database</emphasis>, and the
+    interface between the two is called the <emphasis>backend API</emphasis>.
+    The backend API consists of a small number of function handlers and
+    structure definitions. You are required to provide the
+    <function>main()</function> routine for the server (which can be
+    quite simple), as well as a set of handlers to match each of the prototypes.
+    The interface functions that you write can use any mechanism you like
+    to communicate with your database system: You might link the whole
+    thing together with your database application and access it by
+    function calls; you might use IPC to talk to a database server
+    somewhere; or you might link with third-party software that handles
+    the communication for you (like a commercial database client library).
+    At any rate, the handlers will perform the tasks of:
+   </para>
 
-<itemizedlist>
+   <itemizedlist>
 
-<listitem><para>
-Initialization.
-</para></listitem>
+    <listitem><para>
+      Initialization.
+     </para></listitem>
 
-<listitem><para>
-Searching.
-</para></listitem>
+    <listitem><para>
+      Searching.
+     </para></listitem>
 
-<listitem><para>
-Fetching records.
-</para></listitem>
+    <listitem><para>
+      Fetching records.
+     </para></listitem>
 
-<listitem><para>
-Scanning the database index (optional - if you wish to implement SCAN).
-</para></listitem>
+    <listitem><para>
+      Scanning the database index (optional - if you wish to implement SCAN).
+     </para></listitem>
 
-<listitem><para>
-Extended Services (optional).
-</para></listitem>
+    <listitem><para>
+      Extended Services (optional).
+     </para></listitem>
 
-<listitem><para>
-Result-Set Delete (optional).
-</para></listitem>
+    <listitem><para>
+      Result-Set Delete (optional).
+     </para></listitem>
 
-<listitem><para>
-Result-Set Sort (optional).
-</para></listitem>
+    <listitem><para>
+      Result-Set Sort (optional).
+     </para></listitem>
 
-</itemizedlist>
+   </itemizedlist>
 
-<para>
-(more functions will be added in time to support as much of
-Z39.50-1995 as possible).
-</para>
+   <para>
+    (more functions will be added in time to support as much of
+    Z39.50-1995 as possible).
+   </para>
 
-</sect1>
-<sect1><title>The Backend API</title>
+  </sect1>
+  <sect1><title>The Backend API</title>
 
-<para>
-The headers files that you need to use the interface are in the
-<filename>include/yaz</filename> directory. They are called
-<filename>statserv.h</filename> and <filename>backend.h</filename>. They
-will include other files from the <filename>include/yaz</filename>
-directory, so you'll probably want to use the -I option of your
-compiler to tell it where to find the files. When you run
-<literal>make</literal> in the toplevel &yaz; directory,
-everything you need to create your server is put the
-<filename>lib/libyaz.a</filename> library.
-</para>
-</sect1>
+   <para>
+    The headers files that you need to use the interface are in the
+    <filename>include/yaz</filename> directory. They are called
+    <filename>statserv.h</filename> and <filename>backend.h</filename>. They
+    will include other files from the <filename>include/yaz</filename>
+    directory, so you'll probably want to use the -I option of your
+    compiler to tell it where to find the files. When you run
+    <literal>make</literal> in the toplevel &yaz; directory,
+    everything you need to create your server is put the
+    <filename>lib/libyaz.a</filename> library.
+   </para>
+  </sect1>
 
-<sect1><title>Your main() Routine</title>
+  <sect1><title>Your main() Routine</title>
 
-<para>
-As mentioned, your <function>main()</function> routine can be quite brief.
-If you want to initialize global parameters, or read global configuration
-tables, this is the place to do it. At the end of the routine, you should
-call the function
-</para>
+   <para>
+    As mentioned, your <function>main()</function> routine can be quite brief.
+    If you want to initialize global parameters, or read global configuration
+    tables, this is the place to do it. At the end of the routine, you should
+    call the function
+   </para>
 
-<synopsis>
-int statserv_main(int argc, char **argv,
-          bend_initresult *(*bend_init)(bend_initrequest *r),
-          void (*bend_close)(void *handle));
-</synopsis>
+   <synopsis>
+    int statserv_main(int argc, char **argv,
+    bend_initresult *(*bend_init)(bend_initrequest *r),
+    void (*bend_close)(void *handle));
+   </synopsis>
 
-<para>
-The third and fourth arguments are pointers to handlers. Handler
-<function>bend_init</function> is called whenever the server receives
-an Initialize Request, so it serves as a Z39.50 session initializer. The
-<function>bend_close</function> handler is called when the session is
-closed.
-</para>
+   <para>
+    The third and fourth arguments are pointers to handlers. Handler
+    <function>bend_init</function> is called whenever the server receives
+    an Initialize Request, so it serves as a Z39.50 session initializer. The
+    <function>bend_close</function> handler is called when the session is
+    closed.
+   </para>
 
-<para>
-<function>statserv_main</function> will establish listening sockets
-according to the parameters given. When connection requests are received,
-the event handler will typically <function>fork()</function> and
-create a sub-process to handle a new connection.
-Alternatively the server may be setup to create threads for each connection.
-If you do use global variables and forking, you should be aware, then,
-that these cannot be shared between associations, unless you explicitly
-disable forking by command line parameters. 
-</para>
+   <para>
+    <function>statserv_main</function> will establish listening sockets
+    according to the parameters given. When connection requests are received,
+    the event handler will typically <function>fork()</function> and
+    create a sub-process to handle a new connection.
+    Alternatively the server may be setup to create threads for each connection.
+    If you do use global variables and forking, you should be aware, then,
+    that these cannot be shared between associations, unless you explicitly
+    disable forking by command line parameters. 
+   </para>
 
-<para>
-The server provides a mechanism for controlling some of its behavior
-without using command-line options. The function
-</para>
+   <para>
+    The server provides a mechanism for controlling some of its behavior
+    without using command-line options. The function
+   </para>
 
-<synopsis>
-statserv_options_block *statserv_getcontrol(void);
-</synopsis>
+   <synopsis>
+    statserv_options_block *statserv_getcontrol(void);
+   </synopsis>
 
-<para>
-Will return a pointer to a <literal>struct statserv_options_block</literal>
-describing the current default settings of the server. The structure
-contains these elements:
+   <para>
+    Will return a pointer to a <literal>struct statserv_options_block</literal>
+    describing the current default settings of the server. The structure
+    contains these elements:
 
-<variablelist>
-<varlistentry><term>int dynamic</term><listitem><para>
-A boolean value, which determines whether the server
-will fork on each incoming request (TRUE), or not (FALSE). Default is
-TRUE. This flag is only read by UNIX-based servers (WIN32 based servers
-doesn't fork).
-</para></listitem></varlistentry>
+    <variablelist>
+     <varlistentry><term>int dynamic</term><listitem><para>
+	A boolean value, which determines whether the server
+	will fork on each incoming request (TRUE), or not (FALSE). Default is
+	TRUE. This flag is only read by UNIX-based servers (WIN32 based servers
+	doesn't fork).
+       </para></listitem></varlistentry>
 
-<varlistentry><term>int threads</term><listitem><para>
-A boolean value, which determines whether the server
-will create a thread on each incoming request (TRUE), or not (FALSE).
-Default is FALSE. This flag is only read by UNIX-based servers that offer
-POSIX Threads support. WIN32-based servers always operate in threaded mode.
-</para></listitem></varlistentry>
+     <varlistentry><term>int threads</term><listitem><para>
+	A boolean value, which determines whether the server
+	will create a thread on each incoming request (TRUE), or not (FALSE).
+	Default is FALSE. This flag is only read by UNIX-based servers that offer
+	POSIX Threads support. WIN32-based servers always operate in threaded mode.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>int inetd</term><listitem><para>
-A boolean value, which determines whether the server
-will operates under a UNIX INET daemon (inetd). Default is FALSE.
-</para></listitem></varlistentry>
+     <varlistentry><term>int inetd</term><listitem><para>
+	A boolean value, which determines whether the server
+	will operates under a UNIX INET daemon (inetd). Default is FALSE.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>int loglevel</term><listitem><para>
-Set this by ORing the constants defined in
-<filename>include/yaz/yaz-log.h</filename>.
-</para></listitem></varlistentry>
+     <varlistentry><term>int loglevel</term><listitem><para>
+	Set this by ORing the constants defined in
+	<filename>include/yaz/yaz-log.h</filename>.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>char logfile&lsqb;ODR_MAXNAME+1&rsqb;</term>
-<listitem><para>File for diagnostic output (&quot;&quot;: stderr).
-</para></listitem></varlistentry>
-<varlistentry><term>char apdufile&lsqb;ODR_MAXNAME+1&rsqb;</term>
-<listitem><para>
-Name of file for logging incoming and outgoing APDUs (&quot;&quot;: don't
-log APDUs, &quot;-&quot;: <literal>stderr</literal>).
-</para></listitem></varlistentry>
+     <varlistentry><term>char logfile&lsqb;ODR_MAXNAME+1&rsqb;</term>
+      <listitem><para>File for diagnostic output (&quot;&quot;: stderr).
+       </para></listitem></varlistentry>
+     <varlistentry><term>char apdufile&lsqb;ODR_MAXNAME+1&rsqb;</term>
+      <listitem><para>
+	Name of file for logging incoming and outgoing APDUs (&quot;&quot;: don't
+	log APDUs, &quot;-&quot;: <literal>stderr</literal>).
+       </para></listitem></varlistentry>
 
-<varlistentry><term>char default_listen&lsqb;1024&rsqb;</term>
-<listitem><para>Same form as the command-line specification of
-listener address. &quot;&quot;: no default listener address.
-Default is to listen at &quot;tcp:@:9999&quot;. You can only
-specify one default listener address in this fashion.
-</para></listitem></varlistentry>
+     <varlistentry><term>char default_listen&lsqb;1024&rsqb;</term>
+      <listitem><para>Same form as the command-line specification of
+	listener address. &quot;&quot;: no default listener address.
+	Default is to listen at &quot;tcp:@:9999&quot;. You can only
+	specify one default listener address in this fashion.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>enum oid_proto default_proto;</term>
-<listitem><para>Either <literal>PROTO_SR</literal> or
-<literal>PROTO_Z3950</literal>. Default is <literal>PROTO_Z39_50</literal>.
-</para></listitem></varlistentry>
-<varlistentry><term>int idle_timeout;</term>
-<listitem><para>Maximum session idletime, in minutes. Zero indicates
-no (infinite) timeout. Default is 120 minutes.
-</para></listitem></varlistentry>
+     <varlistentry><term>enum oid_proto default_proto;</term>
+      <listitem><para>Either <literal>PROTO_SR</literal> or
+	<literal>PROTO_Z3950</literal>. Default is <literal>PROTO_Z39_50</literal>.
+       </para></listitem></varlistentry>
+     <varlistentry><term>int idle_timeout;</term>
+      <listitem><para>Maximum session idletime, in minutes. Zero indicates
+	no (infinite) timeout. Default is 120 minutes.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>int maxrecordsize;</term>
-<listitem><para>Maximum permissible record (message) size. Default
-is 1Mb. This amount of memory will only be allocated if a client requests a
-very large amount of records in one operation (or a big record). Set it
-to a lower number
-if you are worried about resource consumption on your host system.
-</para></listitem></varlistentry>
+     <varlistentry><term>int maxrecordsize;</term>
+      <listitem><para>Maximum permissible record (message) size. Default
+	is 1Mb. This amount of memory will only be allocated if a client requests a
+	very large amount of records in one operation (or a big record). Set it
+	to a lower number
+	if you are worried about resource consumption on your host system.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>char configname&lsqb;ODR_MAXNAME+1&rsqb;</term>
-<listitem><para>Passed to the backend when a new connection is received.
-</para></listitem></varlistentry>
+     <varlistentry><term>char configname&lsqb;ODR_MAXNAME+1&rsqb;</term>
+      <listitem><para>Passed to the backend when a new connection is received.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>char setuid&lsqb;ODR_MAXNAME+1&rsqb;</term>
-<listitem><para>Set user id to the user specified, after binding
-the listener addresses.
-</para></listitem></varlistentry>
+     <varlistentry><term>char setuid&lsqb;ODR_MAXNAME+1&rsqb;</term>
+      <listitem><para>Set user id to the user specified, after binding
+	the listener addresses.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>void (*bend_start)(struct statserv_options_block *p)</term>
-<listitem><para>Pointer to function which is called after the command line
-options have been parsed - but before the server starts listening. For
-forked UNIX servers this handler is called in the mother process; for
-threaded servers this handler is called in the main thread. The default
-value of this pointer is NULL in which case it isn't invoked by the frontend
-server. When the server operates as an NT service this handler is called
-whenever the service is started. 
-</para></listitem></varlistentry>
+     <varlistentry>
+      <term>void (*bend_start)(struct statserv_options_block *p)</term>
+      <listitem><para>Pointer to function which is called after the
+	command line options have been parsed - but before the server
+	starts listening.
+	For forked UNIX servers this handler is called in the mother
+	process; for threaded servers this handler is called in the
+	main thread.
+	The default value of this pointer is NULL in which case it
+	isn't invoked by the frontend server.
+	When the server operates as an NT service this handler is called
+	whenever the service is started. 
+       </para></listitem></varlistentry>
 
-<varlistentry><term>void (*bend_stop)(struct statserv_options_block *p)</term>
-<listitem><para>Pointer to function which is called whenver the server
-has stopped listening for incoming connections. This function pointer
-has a default value of NULL in which case it isn't called.
-When the server operates as an NT service this handler is called
-whenever the service is stopped.
-</para></listitem></varlistentry>
+     <varlistentry>
+      <term>void (*bend_stop)(struct statserv_options_block *p)</term>
+      <listitem><para>Pointer to function which is called whenver the server
+	has stopped listening for incoming connections. This function pointer
+	has a default value of NULL in which case it isn't called.
+	When the server operates as an NT service this handler is called
+	whenever the service is stopped.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>void *handle</term>
-<listitem><para>User defined pointer (default value NULL).
-This is a per-server handle that can be used to specify "user-data".
-Do not confuse this with the session-handle as returned by bend_init.
-</para></listitem></varlistentry>
+     <varlistentry><term>void *handle</term>
+      <listitem><para>User defined pointer (default value NULL).
+	This is a per-server handle that can be used to specify "user-data".
+	Do not confuse this with the session-handle as returned by bend_init.
+       </para></listitem></varlistentry>
 
-</variablelist>
-</para>
+    </variablelist>
+   </para>
 
-<para>
-The pointer returned by <literal>statserv_getcontrol</literal> points to
-a static area. You are allowed to change the contents of the structure,
-but the changes will not take effect before you call
-</para>
+   <para>
+    The pointer returned by <literal>statserv_getcontrol</literal> points to
+    a static area. You are allowed to change the contents of the structure,
+    but the changes will not take effect before you call
+   </para>
 
-<synopsis>
-void statserv_setcontrol(statserv_options_block *block);
-</synopsis>
+   <synopsis>
+    void statserv_setcontrol(statserv_options_block *block);
+   </synopsis>
 
-<note>
-<para>
-that you should generally update this structure before calling
-<function>statserv_main()</function>.
-</para>
-</note>
-</sect1>
+   <note>
+    <para>
+     that you should generally update this structure before calling
+     <function>statserv_main()</function>.
+    </para>
+   </note>
+  </sect1>
 
-<sect1><title>The Backend Functions</title>
+  <sect1><title>The Backend Functions</title>
 
-<para>
-For each service of the protocol, the backend interface declares one or
-two functions. You are required to provide implementations of the
-functions representing the services that you wish to implement.
-</para>
+   <para>
+    For each service of the protocol, the backend interface declares one or
+    two functions. You are required to provide implementations of the
+    functions representing the services that you wish to implement.
+   </para>
 
-<sect2><title>Init</title>
+   <sect2><title>Init</title>
 
-<synopsis>
-bend_initresult (*bend_init)(bend_initrequest *r);
-</synopsis>
+    <synopsis>
+     bend_initresult (*bend_init)(bend_initrequest *r);
+    </synopsis>
 
-<para>
-This handler is called once for each new connection request, after
-a new process/thread has been created, and an Initialize Request has been
-received from the client. The pointer to the <function>bend_init</function>
-handler is passed in the call to <function>statserv_start</function>.
-</para>
-<para>
-Unlike previous versions of YAZ, the <function>bend_init</function> also
-serves as a handler that defines the Z39.50 services that the backend
-wish to support. Pointers to <emphasis>all</emphasis> service handlers,
-including search - and fetch must be specified here in this handler.
-</para>
-<para>
-The request  - and result structures are defined as
-</para>
+    <para>
+     This handler is called once for each new connection request, after
+     a new process/thread has been created, and an Initialize Request has
+     been received from the client. The pointer to the
+     <function>bend_init</function> handler is passed in the call to
+     <function>statserv_start</function>.
+    </para>
+    <para>
+     Unlike previous versions of YAZ, the <function>bend_init</function> also
+     serves as a handler that defines the Z39.50 services that the backend
+     wish to support. Pointers to <emphasis>all</emphasis> service handlers,
+     including search - and fetch must be specified here in this handler.
+    </para>
+    <para>
+     The request  - and result structures are defined as
+    </para>
 
-<synopsis>
+    <synopsis>
 typedef struct bend_initrequest
 {
     Z_IdAuthentication *auth;
@@ -335,63 +341,63 @@ typedef struct bend_initresult
     char *errstring;   /* system error string or NULL */
     void *handle;      /* private handle to the backend module */
 } bend_initresult;
-</synopsis>
+    </synopsis>
 
-<para>
-In general, the server frontend expects that the
-<literal>bend_*result</literal> pointer that you return is valid at
-least until the next call to a <literal>bend_* function</literal>.
-This applies to all of the functions described herein. The parameter
-structure passed to you in the call belongs to the server frontend, and
-you should not make assumptions about its contents after the current
-function call has completed. In other words, if you want to retain any
-of the contents of a request structure, you should copy them.
-</para>
+    <para>
+     In general, the server frontend expects that the
+     <literal>bend_*result</literal> pointer that you return is valid at
+     least until the next call to a <literal>bend_* function</literal>.
+     This applies to all of the functions described herein. The parameter
+     structure passed to you in the call belongs to the server frontend, and
+     you should not make assumptions about its contents after the current
+     function call has completed. In other words, if you want to retain any
+     of the contents of a request structure, you should copy them.
+    </para>
 
-<para>
-The <literal>errcode</literal> should be zero if the initialization of
-the backend went well. Any other value will be interpreted as an error.
-The <literal>errstring</literal> isn't used in the current version, but one
-optin would be to stick it in the initResponse as a VisibleString.
-The <literal>handle</literal> is the most important parameter. It should
-be set to some value that uniquely identifies the current session to
-the backend implementation. It is used by the frontend server in any
-future calls to a backend function.
-The typical use is to set it to point to a dynamically allocated state
-structure that is private to your backend module.
-</para>
+    <para>
+     The <literal>errcode</literal> should be zero if the initialization of
+     the backend went well. Any other value will be interpreted as an error.
+     The <literal>errstring</literal> isn't used in the current version, but
+     one option would be to stick it in the initResponse as a VisibleString.
+     The <literal>handle</literal> is the most important parameter. It should
+     be set to some value that uniquely identifies the current session to
+     the backend implementation. It is used by the frontend server in any
+     future calls to a backend function.
+     The typical use is to set it to point to a dynamically allocated state
+     structure that is private to your backend module.
+    </para>
 
-<para>
-The <literal>auth</literal> member holds the authentication information
-part of the Z39.50 Initialize Request. Interpret this if your serves
-requires authentication. 
-</para>
+    <para>
+     The <literal>auth</literal> member holds the authentication information
+     part of the Z39.50 Initialize Request. Interpret this if your serves
+     requires authentication. 
+    </para>
 
-<para>
-The members <literal>peer_name</literal>,
-<literal>implementation_name</literal> and
-<literal>implementation_version</literal> holds DNS of client, name
-of client (Z39.50) implementation - and version.
-</para>
+    <para>
+     The members <literal>peer_name</literal>,
+     <literal>implementation_name</literal> and
+     <literal>implementation_version</literal> holds DNS of client, name
+     of client (Z39.50) implementation - and version.
+    </para>
 
-<para>
-The <literal>bend_</literal> - members are set to NULL when
-<function>bend_init</function> is called. Modify the pointers by setting them
-to point to backend functions.
-</para>
+    <para>
+     The <literal>bend_</literal> - members are set to NULL when
+     <function>bend_init</function> is called. Modify the pointers by
+     setting them to point to backend functions.
+    </para>
 
-</sect2>
+   </sect2>
 
-<sect2><title>Search and retrieve</title>
+   <sect2><title>Search and retrieve</title>
 
-<para>We now describe the handlers that are required to support search -
-and retrieve. You must support two functions - one for seearch - and one
-for fetch (retrieval of one record). If desirable you can provide a
-third handler which is called when a present request is received which
-allows you to optimize retrieval of multiple-records.
-</para>
+    <para>We now describe the handlers that are required to support search -
+     and retrieve. You must support two functions - one for seearch - and one
+     for fetch (retrieval of one record). If desirable you can provide a
+     third handler which is called when a present request is received which
+     allows you to optimize retrieval of multiple-records.
+    </para>
 
-<synopsis>
+    <synopsis>
 int (*bend_search) (void *handle, bend_search_rr *rr);
 
 typedef struct {
@@ -413,43 +419,43 @@ typedef struct {
     char *errstring;           /* system error string or NULL */
 } bend_search_rr;
 
-</synopsis>
+    </synopsis>
 
-<para>
-The <function>bend_search</function> handler is a fairly close
-approximation of a protocol Search Request - and Response PDUs
-The <literal>setname</literal> is the resultSetName from the protocol.
-You are required to establish a mapping between the set name and whatever
-your backend database likes to use.
-Similarly, the <literal>replace_set</literal> is a boolean value
-corresponding to the resultSetIndicator field in the protocol.
-<literal>num_bases/basenames</literal> is a length of/array of character
-pointers to the database names provided by the client.
-The <literal>query</literal> is the full query structure as defined in the
-protocol ASN.1 specification.
-It can be either of the possible query types, and it's up to you to
-determine if you can handle the provided query type.
-Rather than reproduce the C interface here, we'll refer you to the
-structure definitions in the file
-<filename>include/yaz/z-core.h</filename>. If you want to look at the
-attributeSetId OID of the RPN query, you can either match it against
-your own internal tables, or you can use the
-<literal>oid_getentbyoid</literal> function provided by &yaz;.
-</para>
+    <para>
+     The <function>bend_search</function> handler is a fairly close
+     approximation of a protocol Search Request - and Response PDUs
+     The <literal>setname</literal> is the resultSetName from the protocol.
+     You are required to establish a mapping between the set name and whatever
+     your backend database likes to use.
+     Similarly, the <literal>replace_set</literal> is a boolean value
+     corresponding to the resultSetIndicator field in the protocol.
+     <literal>num_bases/basenames</literal> is a length of/array of character
+     pointers to the database names provided by the client.
+     The <literal>query</literal> is the full query structure as defined in the
+     protocol ASN.1 specification.
+     It can be either of the possible query types, and it's up to you to
+     determine if you can handle the provided query type.
+     Rather than reproduce the C interface here, we'll refer you to the
+     structure definitions in the file
+     <filename>include/yaz/z-core.h</filename>. If you want to look at the
+     attributeSetId OID of the RPN query, you can either match it against
+     your own internal tables, or you can use the
+     <literal>oid_getentbyoid</literal> function provided by &yaz;.
+    </para>
 
-<para>
-The structure contains a number of hits, and an
-<literal>errcode/errstring</literal> pair. If an error occurs
-during the search, or if you're unhappy with the request, you should
-set the errcode to a value from the BIB-1 diagnostic set. The value
-will then be returned to the user in a nonsurrogate diagnostic record
-in the response. The <literal>errstring</literal>, if provided, will
-go in the addinfo field. Look at the protocol definition for the
-defined error codes, and the suggested uses of the addinfo field.
-</para>
+    <para>
+     The structure contains a number of hits, and an
+     <literal>errcode/errstring</literal> pair. If an error occurs
+     during the search, or if you're unhappy with the request, you should
+     set the errcode to a value from the BIB-1 diagnostic set. The value
+     will then be returned to the user in a nonsurrogate diagnostic record
+     in the response. The <literal>errstring</literal>, if provided, will
+     go in the addinfo field. Look at the protocol definition for the
+     defined error codes, and the suggested uses of the addinfo field.
+    </para>
 
 
-<synopsis>
+    <synopsis>
 int (*bend_fetch) (void *handle, bend_fetch_rr *rr);
 
 typedef struct bend_fetch_rr {
@@ -472,67 +478,71 @@ typedef struct bend_fetch_rr {
     char *errstring;           /* system error string or NULL */
     int surrogate_flag;        /* surrogate diagnostic */
 } bend_fetch_rr;
-</synopsis>
+    </synopsis>
 
-<para>
-The frontend server calls the <function>bend_fetch</function> handler when
-it needs database records to fulfill a Search Request or a Present Request.
-The <literal>setname</literal> is simply the name of the result set
-that holds the reference to the desired record.
-The <literal>number</literal> is the offset into the set (with 1
-being the first record in the set). The <literal>format</literal> field
-is the record format requested by the client (See section
-<link linkend="oid">Object Identifiers</link>). The value
-<literal>VAL_NONE</literal> indicates that the client did not
-request a specific format. The <literal>stream</literal> argument
-is an &odr; stream which should be used for
-allocating space for structured data records. The stream will be reset when
-all records have been assembled, and the response package has been transmitted.
-For unstructured data, the backend is responsible for maintaining a static
-or dynamic buffer for the record between calls.
-</para>
+    <para>
+     The frontend server calls the <function>bend_fetch</function> handler
+     when it needs database records to fulfill a Search Request or a Present
+     Request.
+     The <literal>setname</literal> is simply the name of the result set
+     that holds the reference to the desired record.
+     The <literal>number</literal> is the offset into the set (with 1
+     being the first record in the set). The <literal>format</literal> field
+     is the record format requested by the client (See section
+     <link linkend="oid">Object Identifiers</link>). The value
+     <literal>VAL_NONE</literal> indicates that the client did not
+     request a specific format. The <literal>stream</literal> argument
+     is an &odr; stream which should be used for
+     allocating space for structured data records.
+     The stream will be reset when all records have been assembled, and
+     the response package has been transmitted.
+     For unstructured data, the backend is responsible for maintaining a static
+     or dynamic buffer for the record between calls.
+    </para>
 
-<para>
-In the structure, the <literal>basename</literal> is the name of the
-database that holds the
-record. <literal>len</literal> is the length of the record returned, in
-bytes, and <literal>record</literal> is a pointer to the record.
-<literal>Last_in_set</literal> should be nonzero only if the record
-returned is the last one in the given result set. <literal>errcode</literal>
-and <literal>errstring</literal>, if given, will be
-interpreted as a global error pertaining to the set, and will be returned
-in a non-surrogate-diagnostic. If you wish to return the error as a
-surrogate-diagnostic (local error) you can do this by setting
-<literal>surrogate_flag</literal> to 1 also.
-</para>
+    <para>
+     In the structure, the <literal>basename</literal> is the name of the
+     database that holds the
+     record. <literal>len</literal> is the length of the record returned, in
+     bytes, and <literal>record</literal> is a pointer to the record.
+     <literal>Last_in_set</literal> should be nonzero only if the record
+     returned is the last one in the given result set.
+     <literal>errcode</literal> and <literal>errstring</literal>, if
+     given, will be interpreted as a global error pertaining to the
+     set, and will be returned in a non-surrogate-diagnostic.
+     If you wish to return the error as a surrogate-diagnostic
+     (local error) you can do this by setting
+     <literal>surrogate_flag</literal> to 1 also.
+    </para>
 
-<para>
-If the <literal>len</literal> field has the value -1, then
-<literal>record</literal> is assumed to point to a constructed data
-type. The <literal>format</literal> field will be used to determine
-which encoder should be used to serialize the data.
-</para>
+    <para>
+     If the <literal>len</literal> field has the value -1, then
+     <literal>record</literal> is assumed to point to a constructed data
+     type. The <literal>format</literal> field will be used to determine
+     which encoder should be used to serialize the data.
+    </para>
 
-<note>
-<para>
-If your backend generates structured records, it should use
-<function>odr_malloc()</function> on the provided stream for allocating
-data: This allows the frontend server to keep track of the record sizes.
-</para>
-</note>
+    <note>
+     <para>
+      If your backend generates structured records, it should use
+      <function>odr_malloc()</function> on the provided stream for allocating
+      data: This allows the frontend server to keep track of the record sizes.
+     </para>
+    </note>
 
-<para>
-The <literal>format</literal> field is mapped to an object identifier
-in the direct reference of the resulting EXTERNAL representation of the record.
-</para>
+    <para>
+     The <literal>format</literal> field is mapped to an object identifier
+     in the direct reference of the resulting EXTERNAL representation
+     of the record.
+    </para>
 
-<note>
-<para>
-The current version of &yaz; only supports the direct reference mode.
-</para>
-</note>
+    <note>
+     <para>
+      The current version of &yaz; only supports the direct reference mode.
+     </para>
+    </note>
 
-<synopsis>
+    <synopsis>
 int (*bend_present) (void *handle, bend_present_rr *rr);
 
 typedef struct {
@@ -551,33 +561,33 @@ typedef struct {
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
 } bend_present_rr;
-</synopsis>
+    </synopsis>
 
-<para>
-The <function>bend_present</function> handler is called when
-the server receives a Present Request. The <literal>setname</literal>,
-<literal>start</literal> and <literal>number</literal> is the
-name of the result set - start position - and number of records to
-be retrieved respectively. <literal>format</literal> and
-<literal>comp</literal> is the preferred transfer syntax and element
-specifications of the present request.
-</para>
-<para>
-Note that this is handler serves as a supplement for
-<function>bend_fetch</function> and need not to be defined in order to
-support search - and retrieve. 
-</para>
+    <para>
+     The <function>bend_present</function> handler is called when
+     the server receives a Present Request. The <literal>setname</literal>,
+     <literal>start</literal> and <literal>number</literal> is the
+     name of the result set - start position - and number of records to
+     be retrieved respectively. <literal>format</literal> and
+     <literal>comp</literal> is the preferred transfer syntax and element
+     specifications of the present request.
+    </para>
+    <para>
+     Note that this is handler serves as a supplement for
+     <function>bend_fetch</function> and need not to be defined in order to
+     support search - and retrieve. 
+    </para>
 
-</sect2>
+   </sect2>
 
-<sect2><title>Delete</title>
+   <sect2><title>Delete</title>
 
-<para>
-For backends that supports delete of a result set only one handler
-must be defined.
-</para>
+    <para>
+     For backends that supports delete of a result set only one handler
+     must be defined.
+    </para>
 
-<synopsis>
+    <synopsis>
 int (*bend_delete)(void *handle, bend_delete_rr *rr);
 
 typedef struct bend_delete_rr {
@@ -590,28 +600,28 @@ typedef struct bend_delete_rr {
     ODR stream;
     ODR print; 
 } bend_delete_rr;
-</synopsis>
+    </synopsis>
 
-<note>
-<para>
-The delete set function definition is rather primitive, mostly because we
-have had no practical need for it as of yet. If someone wants
-to provide a full delete service, we'd be happy to add the
-extra parameters that are required. Are there clients out there
-that will actually delete sets they no longer need?
-</para>
-</note>
+    <note>
+     <para>
+      The delete set function definition is rather primitive, mostly because we
+      have had no practical need for it as of yet. If someone wants
+      to provide a full delete service, we'd be happy to add the
+      extra parameters that are required. Are there clients out there
+      that will actually delete sets they no longer need?
+     </para>
+    </note>
 
-</sect2>
+   </sect2>
 
-<sect2><title>scan</title>
+   <sect2><title>scan</title>
 
-<para>
-For servers that wish to offer the scan service one handler
-must be defined.
-</para>
+    <para>
+     For servers that wish to offer the scan service one handler
+     must be defined.
+    </para>
 
-<synopsis>
+    <synopsis>
 int (*bend_delete)(void *handle, bend_delete_rr *rr);
 
 typedef enum {
@@ -637,172 +647,188 @@ typedef struct bend_scan_rr {
     int errcode;
     char *errstring;
 } bend_scan_rr;
-</synopsis>
-</sect2>
-</sect1>
+    </synopsis>
+   </sect2>
+  </sect1>
 
-<sect1><title>Application Invocation</title>
+  <sect1><title>Application Invocation</title>
 
-<para>
-The finished application has the following
-invocation syntax (by way of <function>statserv_main()</function>):
-</para>
+   <para>
+    The finished application has the following
+    invocation syntax (by way of <function>statserv_main()</function>):
+   </para>
 
-<synopsis>
-<replaceable>appname</replaceable> &lsqb;-szSiTu -a <replaceable>apdufile</replaceable> -l <replaceable>logfile</replaceable> -v <replaceable>loglevel</replaceable> -c <replaceable>config</replaceable>&rsqb;
-&lsqb;listener ...&rsqb;
-</synopsis>
+   <synopsis>
+    <replaceable>appname</replaceable> &lsqb;-szSiTu -a <replaceable>apdufile</replaceable> -l <replaceable>logfile</replaceable> -v <replaceable>loglevel</replaceable> -c <replaceable>config</replaceable>&rsqb;
+    &lsqb;listener ...&rsqb;
+   </synopsis>
 
-<para>
-The options are
+   <para>
+    The options are
 
-<variablelist>
+    <variablelist>
 
-<varlistentry><term>-a <replaceable>file</replaceable></term>
- <listitem><para>
-Specify a file for dumping PDUs (for diagnostic purposes).
-The special name &quot;-&quot; sends output to <literal>stderr</literal>.
-</para></listitem></varlistentry>
+     <varlistentry><term>-a <replaceable>file</replaceable></term>
+      <listitem><para>
+	Specify a file for dumping PDUs (for diagnostic purposes).
+	The special name &quot;-&quot; sends output to
+	<literal>stderr</literal>.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-S</term>
- <listitem><para>
-Don't fork or make threads on connection requests. This is good for
-debugging, but not recommended for real operation: Although the server is
-asynchronous and non-blocking, it can be nice to keep a software
-malfunction (okay then, a crash) from affecting all current users.
-</para></listitem></varlistentry>
+     <varlistentry><term>-S</term>
+      <listitem><para>
+	Don't fork or make threads on connection requests. This is good for
+	debugging, but not recommended for real operation: Although the
+	server is asynchronous and non-blocking, it can be nice to keep
+	a software malfunction (okay then, a crash) from affecting all
+	current users.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-T</term>
-<listitem><para>
-Operate the server in threaded mode. The server creates a thread
-for each connection rather than a fork a process. Only available
-on UNIX systems that offers POSIX threads.
-</para></listitem></varlistentry>
+     <varlistentry><term>-T</term>
+      <listitem><para>
+	Operate the server in threaded mode. The server creates a thread
+	for each connection rather than a fork a process. Only available
+	on UNIX systems that offers POSIX threads.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-s</term>
-<listitem><para>
-Use the SR protocol (obsolete).
-</para></listitem></varlistentry>
+     <varlistentry><term>-s</term>
+      <listitem><para>
+	Use the SR protocol (obsolete).
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-z</term>
-<listitem><para>
-Use the Z39.50 protocol (default). These two options complement
-each other. You can use both multiple times on the same command
-line, between listener-specifications (see below). This way, you
-can set up the server to listen for connections in both protocols
-concurrently, on different local ports.
-</para></listitem></varlistentry>
+     <varlistentry><term>-z</term>
+      <listitem><para>
+	Use the Z39.50 protocol (default). These two options complement
+	each other. You can use both multiple times on the same command
+	line, between listener-specifications (see below). This way, you
+	can set up the server to listen for connections in both protocols
+	concurrently, on different local ports.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-l <replaceable>file</replaceable></term>
-<listitem><para>The logfile.
-</para></listitem></varlistentry>
+     <varlistentry><term>-l <replaceable>file</replaceable></term>
+      <listitem><para>The logfile.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-c <replaceable>config</replaceable></term>
-<listitem><para>A user option that serves as a specifier for some
-sort of configuration, e.g. a filename.
-The argument to this option is transferred to member
-<literal>configname</literal>of the <literal>statserv_options_block</literal>.
-</para></listitem></varlistentry>
+     <varlistentry><term>-c <replaceable>config</replaceable></term>
+      <listitem><para>A user option that serves as a specifier for some
+	sort of configuration, e.g. a filename.
+	The argument to this option is transferred to member
+	<literal>configname</literal>of the
+	<literal>statserv_options_block</literal>.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-v <replaceable>level</replaceable></term>
-<listitem><para>
-The log level. Use a comma-separated list of members of the set
-{fatal,debug,warn,log,all,none}.
-</para></listitem></varlistentry>
+     <varlistentry><term>-v <replaceable>level</replaceable></term>
+      <listitem><para>
+	The log level. Use a comma-separated list of members of the set
+	{fatal,debug,warn,log,all,none}.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-u <replaceable>userid</replaceable></term>
-<listitem><para>
-Set user ID. Sets the real UID of the server process to that of the
-given user. It's useful if you aren't comfortable with having the
-server run as root, but you need to start it as such to bind a
-privileged port.
-</para></listitem></varlistentry>
+     <varlistentry><term>-u <replaceable>userid</replaceable></term>
+      <listitem><para>
+	Set user ID. Sets the real UID of the server process to that of the
+	given user. It's useful if you aren't comfortable with having the
+	server run as root, but you need to start it as such to bind a
+	privileged port.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-w <replaceable>dir</replaceable></term>
-<listitem><para>
-Working directory.
-</para></listitem></varlistentry>
+     <varlistentry><term>-w <replaceable>dir</replaceable></term>
+      <listitem><para>
+	Working directory.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-i</term>
-<listitem><para>
-Use this when running from the <application>inetd</application> server.
-</para></listitem></varlistentry>
+     <varlistentry><term>-i</term>
+      <listitem><para>
+	Use this when running from the <application>inetd</application> server.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-t <replaceable>minutes</replaceable></term>
-<listitem><para>
-Idle session timeout, in minutes.
-</para></listitem></varlistentry>
+     <varlistentry><term>-t <replaceable>minutes</replaceable></term>
+      <listitem><para>
+	Idle session timeout, in minutes.
+       </para></listitem></varlistentry>
 
-<varlistentry><term>-k <replaceable>size</replaceable></term>
-<listitem><para>
-Maximum record size/message size, in kilobytes.
-</para></listitem></varlistentry>
+     <varlistentry><term>-k <replaceable>size</replaceable></term>
+      <listitem><para>
+	Maximum record size/message size, in kilobytes.
+       </para></listitem></varlistentry>
 
+    </variablelist>
+   </para>
 
-</variablelist>
-</para>
+   <para>
+    A listener specification consists of a transport mode followed by a
+    colon (:) followed by a listener address. The transport mode is
+    either <literal>osi</literal> or <literal>tcp</literal>.
+   </para>
 
-<para>
-A listener specification consists of a transport mode followed by a
-colon (:) followed by a listener address. The transport mode is
-either <literal>osi</literal> or <literal>tcp</literal>.
-</para>
+   <para>
+    For TCP, an address has the form
+   </para>
 
-<para>
-For TCP, an address has the form
-</para>
+   <synopsis>
+    hostname | IP-number &lsqb;: portnumber&rsqb;
+   </synopsis>
 
-<synopsis>
-  hostname | IP-number &lsqb;: portnumber&rsqb;
-</synopsis>
+   <para>
+    The port number defaults to 210 (standard Z39.50 port).
+   </para>
 
-<para>
-The port number defaults to 210 (standard Z39.50 port).
-</para>
+   <para>
+    For osi, the address form is
+   </para>
 
-<para>
-For osi, the address form is
-</para>
+   <synopsis>
+    &lsqb;t-selector /&rsqb; hostname | IP-number &lsqb;: portnumber&rsqb;
+   </synopsis>
 
-<synopsis>
-  &lsqb;t-selector /&rsqb; hostname | IP-number &lsqb;: portnumber&rsqb;
-</synopsis>
+   <para>
+    The transport selector is given as a string of hex digits (with an even
+    number of digits). The default port number is 102 (RFC1006 port).
+   </para>
 
-<para>
-The transport selector is given as a string of hex digits (with an even
-number of digits). The default port number is 102 (RFC1006 port).
-</para>
+   <para>
+    Examples
+   </para>
 
-<para>
-Examples
-</para>
+   <screen>
+    tcp:dranet.dra.com
 
-<screen>
-  tcp:dranet.dra.com
+    osi:0402/dbserver.osiworld.com:3000
+   </screen>
 
-  osi:0402/dbserver.osiworld.com:3000
-</screen>
+   <para>
+    In both cases, the special hostname &quot;@&quot; is mapped to
+    the address INADDR_ANY, which causes the server to listen on any local
+    interface. To start the server listening on the registered ports for
+    Z39.50 and SR over OSI/RFC1006, and to drop root privileges once the
+    ports are bound, execute the server like this (from a root shell):
+   </para>
 
-<para>
-In both cases, the special hostname &quot;@&quot; is mapped to
-the address INADDR_ANY, which causes the server to listen on any local
-interface. To start the server listening on the registered ports for
-Z39.50 and SR over OSI/RFC1006, and to drop root privileges once the
-ports are bound, execute the server like this (from a root shell):
-</para>
+   <screen>
+    my-server -u daemon tcp:@ -s osi:@
+   </screen>
 
-<screen>
-  my-server -u daemon tcp:@ -s osi:@
-</screen>
+   <para>
+    You can replace <literal>daemon</literal> with another user, eg. your
+    own account, or a dedicated IR server account.
+    <literal>my-server</literal> should be the name of your
+    server application. You can test the procedure with the
+    <application>yaz-ztest</application> application.
+   </para>
 
-<para>
-You can replace <literal>daemon</literal> with another user, eg. your
-own account, or a dedicated IR server account.
-<literal>my-server</literal> should be the name of your
-server application. You can test the procedure with the
-<application>yaz-ztest</application> application.
-</para>
+  </sect1>
+ </chapter>
 
-</sect1>
-</chapter>
-
+ <!-- Keep this comment at the end of the file
+ Local variables:
+ mode: sgml
+ sgml-omittag:t
+ sgml-shorttag:t
+ sgml-minimize-attributes:nil
+ sgml-always-quote-attributes:t
+ sgml-indent-step:1
+ sgml-indent-data:t
+ sgml-parent-document: "yaz.xml"
+ sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-namecase-general:t
+ End:
+ -->

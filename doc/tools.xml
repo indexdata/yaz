@@ -1,421 +1,432 @@
-<!-- $Header: /home/cvsroot/yaz/doc/tools.xml,v 1.1 2001-01-04 13:36:25 adam Exp $ -->
-<chapter><title>Supporting Tools</title>
+<!-- $Id: tools.xml,v 1.2 2001-07-19 23:29:40 adam Exp $ -->
+ <chapter><title>Supporting Tools</title>
 
-<para>
-In support of the service API - primarily the ASN module, which
-provides the programmatic interface to the Z39.50 APDUs, YAZ contains
-a collection of tools that support the development of applications.
-</para>
+  <para>
+   In support of the service API - primarily the ASN module, which
+   provides the programmatic interface to the Z39.50 APDUs, YAZ contains
+   a collection of tools that support the development of applications.
+  </para>
 
-<sect1><title>Query Syntax Parsers</title>
+  <sect1><title>Query Syntax Parsers</title>
 
-<para>
-Since the type-1 (RPN) query structure has no direct, useful string
-representation, every origin application needs to provide some form of
-mapping from a local query notation or representation to a
-<token>Z_RPNQuery</token> structure. Some programmers will prefer to
-construct the query manually, perhaps using <function>odr_malloc()</function>
-to simplify memory management. The &yaz; distribution includes two separate,
-query-generating tools that may be of use to you.
-</para>
+   <para>
+    Since the type-1 (RPN) query structure has no direct, useful string
+    representation, every origin application needs to provide some form of
+    mapping from a local query notation or representation to a
+    <token>Z_RPNQuery</token> structure. Some programmers will prefer to
+    construct the query manually, perhaps using
+    <function>odr_malloc()</function> to simplify memory management.
+    The &yaz; distribution includes two separate, query-generating tools
+    that may be of use to you.
+   </para>
 
-<sect2><title id="PQF">Prefix Query Format</title>
+   <sect2><title id="PQF">Prefix Query Format</title>
 
-<para>
-Since RPN or reverse polish notation is really just a fancy way of
-describing a suffix notation format (operator follows operands), it
-would seem that the confusion is total when we now introduce a prefix
-notation for RPN. The reason is one of simple laziness - it's somewhat
-simpler to interpret a prefix format, and this utility was designed
-for maximum simplicity, to provide a baseline representation for use
-in simple test applications and scripting environments (like Tcl). The
-demonstration client included with YAZ uses the PQF.
-</para>
-<para>
-The PQF is defined by the pquery module in the YAZ library. The
-<filename>pquery.h</filename> file provides the declaration of the functions
-</para>
-<screen>
+    <para>
+     Since RPN or reverse polish notation is really just a fancy way of
+     describing a suffix notation format (operator follows operands), it
+     would seem that the confusion is total when we now introduce a prefix
+     notation for RPN. The reason is one of simple laziness - it's somewhat
+     simpler to interpret a prefix format, and this utility was designed
+     for maximum simplicity, to provide a baseline representation for use
+     in simple test applications and scripting environments (like Tcl). The
+     demonstration client included with YAZ uses the PQF.
+    </para>
+    <para>
+     The PQF is defined by the pquery module in the YAZ library. The
+     <filename>pquery.h</filename> file provides the declaration of the
+     functions
+    </para>
+    <screen>
 Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
 
 Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
-      Odr_oid **attributeSetP, const char *qbuf);
+          Odr_oid **attributeSetP, const char *qbuf);
 
 int p_query_attset (const char *arg);
-</screen>
-<para>
-The function <function>p_query_rpn()</function> takes as arguments an
-&odr; stream (see section <link linkend="odr">The ODR Module</link>)
-to provide a memory source (the structure created is released on
-the next call to <function>odr_reset()</function> on the stream), a
-protocol identifier (one of the constants <token>PROTO_Z3950</token> and
-<token>PROTO_SR</token>), an attribute set
-reference, and finally a null-terminated string holding the query
-string.
-</para>
-<para>
-If the parse went well, <function>p_query_rpn()</function> returns a
-pointer to a <literal>Z_RPNQuery</literal> structure which can be
-placed directly into a <literal>Z_SearchRequest</literal>.
-</para>
-<para>
+    </screen>
+    <para>
+     The function <function>p_query_rpn()</function> takes as arguments an
+      &odr; stream (see section <link linkend="odr">The ODR Module</link>)
+     to provide a memory source (the structure created is released on
+     the next call to <function>odr_reset()</function> on the stream), a
+     protocol identifier (one of the constants <token>PROTO_Z3950</token> and
+     <token>PROTO_SR</token>), an attribute set
+     reference, and finally a null-terminated string holding the query
+     string.
+    </para>
+    <para>
+     If the parse went well, <function>p_query_rpn()</function> returns a
+     pointer to a <literal>Z_RPNQuery</literal> structure which can be
+     placed directly into a <literal>Z_SearchRequest</literal>.
+    </para>
+    <para>
 
-The <literal>p_query_attset</literal> specifies which attribute set to use if
-the query doesn't specify one by the <literal>@attrset</literal> operator.
-The <literal>p_query_attset</literal> returns 0 if the argument is a
-valid attribute set specifier; otherwise the function returns -1.
-</para>
+     The <literal>p_query_attset</literal> specifies which attribute set
+     to use if the query doesn't specify one by the
+     <literal>@attrset</literal> operator.
+     The <literal>p_query_attset</literal> returns 0 if the argument is a
+     valid attribute set specifier; otherwise the function returns -1.
+    </para>
 
-<para>
-The grammar of the PQF is as follows:
-</para>
+    <para>
+     The grammar of the PQF is as follows:
+    </para>
 
-<screen>
-Query ::= &lsqb; AttSet &rsqb; QueryStruct.
+    <screen>
+     Query ::= &lsqb; AttSet &rsqb; QueryStruct.
 
-AttSet ::= string.
+     AttSet ::= string.
 
-QueryStruct ::= { Attribute } Simple | Complex.
+     QueryStruct ::= { Attribute } Simple | Complex.
 
-Attribute ::= '@attr' AttributeType '=' AttributeValue.
+     Attribute ::= '@attr' AttributeType '=' AttributeValue.
 
-AttributeType ::= integer.
+     AttributeType ::= integer.
 
-AttributeValue ::= integer.
+     AttributeValue ::= integer.
 
-Complex ::= Operator QueryStruct QueryStruct.
+     Complex ::= Operator QueryStruct QueryStruct.
 
-Operator ::= '@and' | '@or' | '@not' | '@prox' Proximity.
+     Operator ::= '@and' | '@or' | '@not' | '@prox' Proximity.
 
-Simple ::= ResultSet | Term.
+     Simple ::= ResultSet | Term.
 
-ResultSet ::= '@set' string.
+     ResultSet ::= '@set' string.
 
-Term ::= string | '"' string '"'.
+     Term ::= string | '"' string '"'.
 
-Proximity ::= Exclusion Distance Ordered Relation WhichCode UnitCode.
+     Proximity ::= Exclusion Distance Ordered Relation WhichCode UnitCode.
 
-Exclusion ::= '1' | '0' | 'void'.
+     Exclusion ::= '1' | '0' | 'void'.
 
-Distance ::= integer.
+     Distance ::= integer.
 
-Ordered ::= '1' | '0'.
+     Ordered ::= '1' | '0'.
 
-Relation ::= integer.
+     Relation ::= integer.
 
-WhichCode ::= 'known' | 'private' | integer.
+     WhichCode ::= 'known' | 'private' | integer.
 
-UnitCode ::= integer.
-</screen>
+     UnitCode ::= integer.
+    </screen>
 
-<para>
-You will note that the syntax above is a fairly faithful
-representation of RPN, except for the Attibute, which has been
-moved a step away from the term, allowing you to associate one or more
-attributes with an entire query structure. The parser will
-automatically apply the given attributes to each term as required.
-</para>
+    <para>
+     You will note that the syntax above is a fairly faithful
+     representation of RPN, except for the Attibute, which has been
+     moved a step away from the term, allowing you to associate one or more
+     attributes with an entire query structure. The parser will
+     automatically apply the given attributes to each term as required.
+    </para>
 
-<para>
-The following are all examples of valid queries in the PQF.
-</para>
+    <para>
+     The following are all examples of valid queries in the PQF.
+    </para>
 
-<screen>
-dylan
+    <screen>
+     dylan
 
-"bob dylan"
+     "bob dylan"
 
-@or "dylan" "zimmerman"
+     @or "dylan" "zimmerman"
 
-@set Result-1
+     @set Result-1
 
-@or @and bob dylan @set Result-1
+     @or @and bob dylan @set Result-1
 
-@attr 4=1 @and @attr 1=1 "bob dylan" @attr 1=4 "slow train coming"
+     @attr 4=1 @and @attr 1=1 "bob dylan" @attr 1=4 "slow train coming"
 
-@attr 4=1 @attr 1=4 "self portrait"
+     @attr 4=1 @attr 1=4 "self portrait"
 
-@prox 0 3 1 2 k 2 dylan zimmerman
-</screen>
+     @prox 0 3 1 2 k 2 dylan zimmerman
+    </screen>
 
-</sect2>
-<sect2><title id="CCL">Common Command Language</title>
+   </sect2>
+   <sect2><title id="CCL">Common Command Language</title>
 
-<para>
-Not all users enjoy typing in prefix query structures and numerical
-attribute values, even in a minimalistic test client. In the library
-world, the more intuitive Common Command Language (or ISO 8777) has
-enjoyed some popularity - especially before the widespread
-availability of graphical interfaces. It is still useful in
-applications where you for some reason or other need to provide a
-symbolic language for expressing boolean query structures.
-</para>
-
-<para>
-The EUROPAGATE research project working under the Libraries programme
-of the European Commission's DG XIII has, amongst other useful tools,
-implemented a general-purpose CCL parser which produces an output
-structure that can be trivially converted to the internal RPN
-representation of YAZ (The <literal>Z_RPNQuery</literal> structure).
-Since the CCL utility - along with the rest of the software
-produced by EUROPAGATE - is made freely available on a liberal license, it
-is included as a supplement to YAZ.
-</para>
-
-<sect3><title>CCL Syntax</title>
-
-<para>
-The CCL parser obeys the following grammar for the FIND argument.
-The syntax is annotated by in the lines prefixed by
-<literal>&dash;&dash;</literal>.
-</para>
-
-<screen>
-CCL-Find ::= CCL-Find Op Elements
-           | Elements.
-
-Op ::= "and" | "or" | "not"
--- The above means that Elements are separated by boolean operators.
-
-Elements ::= '(' CCL-Find ')'
-           | Set
-           | Terms
-           | Qualifiers Relation Terms
-           | Qualifiers Relation '(' CCL-Find ')'
-           | Qualifiers '=' string '-' string
--- Elements is either a recursive definition, a result set reference, a
--- list of terms, qualifiers followed by terms, qualifiers followed
--- by a recursive definition or qualifiers in a range (lower - upper).
-
-Set ::= 'set' = string
--- Reference to a result set
-
-Terms ::= Terms Prox Term
-        | Term
--- Proximity of terms.
-
-Term ::= Term string
-       | string
--- This basically means that a term may include a blank
-
-Qualifiers ::= Qualifiers ',' string
-             | string
--- Qualifiers is a list of strings separated by comma
-
-Relation ::= '=' | '>=' | '<=' | '<>' | '>' | '<'
--- Relational operators. This really doesn't follow the ISO8777
--- standard.
-
-Prox ::= '%' | '!'
--- Proximity operator
-
-</screen>
-
-<para>
-The following queries are all valid:
-</para>
-
-<screen>
-dylan
-
-"bob dylan"
-
-dylan or zimmerman
-
-set=1
-
-(dylan and bob) or set=1
-
-</screen>
-<para>
-Assuming that the qualifiers <literal>ti</literal>, <literal>au</literal>
-and <literal>date</literal> are defined we may use:
-</para>
-
-<screen>
-ti=self portrait
-
-au=(bob dylan and slow train coming)
-
-date>1980 and (ti=((self portrait)))
-
-</screen>
-
-</sect3>
-<sect3><title>CCL Qualifiers</title>
-
-<para>
-Qualifiers are used to direct the search to a particular searchable
-index, such as title (ti) and author indexes (au). The CCL standard
-itself doesn't specify a particular set of qualifiers, but it does
-suggest a few short-hand notations. You can customize the CCL parser
-to support a particular set of qualifiers to relect the current target
-profile. Traditionally, a qualifier would map to a particular
-use-attribute within the BIB-1 attribute set. However, you could also
-define qualifiers that would set, for example, the
-structure-attribute.
-</para>
-
-<para>
-Consider a scenario where the target support ranked searches in the
-title-index. In this case, the user could specify
-</para>
-
-<screen>>
-ti,ranked=knuth computer
-</screen>
-<para>
-and the <literal>ranked</literal> would map to structure=free-form-text
-(4=105) and the <literal>ti</literal> would map to title (1=4).
-</para>
-
-<para>
-A "profile" with a set predefined CCL qualifiers can be read from a
-file. The YAZ client reads its CCL qualifiers from a file named
-<filename>default.bib</filename>. Each line in the file has the form:
-</para>
-
-<para>
-<replaceable>qualifier-name</replaceable>  
-   <replaceable>type</replaceable>=<replaceable>val</replaceable> <replaceable>type</replaceable>=<replaceable>val</replaceable> ...
-</para>
-
-<para>
-where <replaceable>qualifier-name</replaceable> is the name of the
-qualifier to be used (eg. <literal>ti</literal>),
-<replaceable>type</replaceable> is a BIB-1 category type and
-<replaceable>val</replaceable> is the corresponding BIB-1 attribute value.
-The <replaceable>type</replaceable> can be either numeric or it may be
-either <literal>u</literal> (use), <literal>r</literal> (relation),
-<literal>p</literal> (position), <literal>s</literal> (structure),
-<literal>t</literal> (truncation) or <literal>c</literal> (completeness).
-The <replaceable>qualifier-name</replaceable> <literal>term</literal> has a
-special meaning. The types and values for this definition is used when
-<emphasis>no</emphasis> qualifiers are present.
-</para>
-
-<para>
-Consider the following definition:
-</para>
-
-<screen>
-ti       u=4 s=1
-au       u=1 s=1
-term     s=105
-</screen>
-<para>
-Two qualifiers are defined, <literal>ti</literal> and <literal>au</literal>.
-They both set the structure-attribute to phrase (1). <literal>ti</literal>
-sets the use-attribute to 4. <literal>au</literal> sets the use-attribute
-to 1. When no qualifiers are used in the query the structure-attribute is
-set to free-form-text (105).
-</para>
-
-</sect3>
-<sect3><title>CCL API</title>
-<para>
-All public definitions can be found in the header file
-<filename>ccl.h</filename>. A profile identifier is of type
-<literal>CCL_bibset</literal>. A profile must be created with the call to
-the function <function>ccl_qual_mk</function> which returns a profile
-handle of type <literal>CCL_bibset</literal>.
-</para>
-
-<para>
-To read a file containing qualifier definitions the function
-<function>ccl_qual_file</function> may be convenient. This function takes
-an already opened <literal>FILE</literal> handle pointer as argument
-along with a <literal>CCL_bibset</literal> handle.
-</para>
-
-<para>
-To parse a simple string with a FIND query use the function
-</para>
-<screen>
-  struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
-                                     int *error, int *pos);
-</screen>
-<para>
-which takes the CCL profile (<literal>bibset</literal>) and query
-(<literal>str</literal>) as input. Upon successful completion the RPN
-tree is returned. If an error eccur, such as a syntax error, the integer
-pointed to by <literal>error</literal> holds the error code and
-<literal>pos</literal> holds the offset inside query string in which
-the parsing failed.
-</para>
-
-<para>
-An english representation of the error may be obtained by calling
-the <literal>ccl_err_msg</literal> function. The error codes are listed in
-<filename>ccl.h</filename>.
-</para>
-
-<para>
-To convert the CCL RPN tree (type <literal>struct ccl_rpn_node *</literal>)
-to the Z_RPNQuery of YAZ the function <function>ccl_rpn_query</function>
-must be used. This function which is part of YAZ is implemented in
-<filename>yaz-ccl.c</filename>.
-After calling this function the CCL RPN tree is probably no longer
-needed. The <literal>ccl_rpn_delete</literal> destroys the CCL RPN tree.
-</para>
-
-<para>
-A CCL profile may be destroyed by calling the <function>ccl_qual_rm</function>
-function.
-</para>
-
-<para>
-The token names for the CCL operators may be changed by setting the
-globals (all type <literal>char *</literal>)
-<literal>ccl_token_and</literal>, <literal>ccl_token_or</literal>,
-<literal>ccl_token_not</literal> and <literal>ccl_token_set</literal>.
-An operator may have aliases, i.e. there may be more than one name for
-the operator. To do this, separate each alias with a space character.
-</para>
-</sect3>
-</sect2>
-</sect1>
-<sect1><title>Object Identifiers</title>
-
-<para>
-The basic YAZ representation of an OID is an array of integers,
-terminated with the value -1. The &odr; module provides two
-utility-functions to create and copy this type of data elements:
-</para>
-
-<screen>
-  Odr_oid *odr_getoidbystr(ODR o, char *str);
-</screen>
-
-<para>
-Creates an OID based on a string-based representation using dots (.)
-to separate elements in the OID.
-</para>
-
-<screen>
-Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
-</screen>
-
-<para>
-Creates a copy of the OID referenced by the <emphasis>o</emphasis> parameter.
-Both functions take an &odr; stream as parameter. This stream is used to
-allocate memory for the data elements, which is released on a
-subsequent call to <function>odr_reset()</function> on that stream.
-</para>
-
-<para>
-The OID module provides a higher-level representation of the
-family of object identifers which describe the Z39.50 protocol and its
-related objects. The definition of the module interface is given in
-the <filename>oid.h</filename> file.
-</para>
-
-<para>
-The interface is mainly based on the <literal>oident</literal> structure. The
-definition of this structure looks like this:
-</para>
-
-<screen>
+    <para>
+     Not all users enjoy typing in prefix query structures and numerical
+     attribute values, even in a minimalistic test client. In the library
+     world, the more intuitive Common Command Language (or ISO 8777) has
+     enjoyed some popularity - especially before the widespread
+     availability of graphical interfaces. It is still useful in
+     applications where you for some reason or other need to provide a
+     symbolic language for expressing boolean query structures.
+    </para>
+
+    <para>
+     The EUROPAGATE research project working under the Libraries programme
+     of the European Commission's DG XIII has, amongst other useful tools,
+     implemented a general-purpose CCL parser which produces an output
+     structure that can be trivially converted to the internal RPN
+     representation of YAZ (The <literal>Z_RPNQuery</literal> structure).
+     Since the CCL utility - along with the rest of the software
+     produced by EUROPAGATE - is made freely available on a liberal license, it
+     is included as a supplement to YAZ.
+    </para>
+
+    <sect3><title>CCL Syntax</title>
+
+     <para>
+      The CCL parser obeys the following grammar for the FIND argument.
+      The syntax is annotated by in the lines prefixed by
+      <literal>&dash;&dash;</literal>.
+     </para>
+
+     <screen>
+      CCL-Find ::= CCL-Find Op Elements
+                | Elements.
+
+      Op ::= "and" | "or" | "not"
+      -- The above means that Elements are separated by boolean operators.
+
+      Elements ::= '(' CCL-Find ')'
+                | Set
+                | Terms
+                | Qualifiers Relation Terms
+                | Qualifiers Relation '(' CCL-Find ')'
+                | Qualifiers '=' string '-' string
+      -- Elements is either a recursive definition, a result set reference, a
+      -- list of terms, qualifiers followed by terms, qualifiers followed
+      -- by a recursive definition or qualifiers in a range (lower - upper).
+
+      Set ::= 'set' = string
+      -- Reference to a result set
+
+      Terms ::= Terms Prox Term
+             | Term
+      -- Proximity of terms.
+
+      Term ::= Term string
+            | string
+      -- This basically means that a term may include a blank
+
+      Qualifiers ::= Qualifiers ',' string
+                  | string
+      -- Qualifiers is a list of strings separated by comma
+
+      Relation ::= '=' | '>=' | '<=' | '<>' | '>' | '<'
+      -- Relational operators. This really doesn't follow the ISO8777
+      -- standard.
+
+      Prox ::= '%' | '!'
+      -- Proximity operator
+
+     </screen>
+
+     <para>
+      The following queries are all valid:
+     </para>
+
+     <screen>
+      dylan
+
+      "bob dylan"
+
+      dylan or zimmerman
+
+      set=1
+
+      (dylan and bob) or set=1
+
+     </screen>
+     <para>
+      Assuming that the qualifiers <literal>ti</literal>, <literal>au</literal>
+      and <literal>date</literal> are defined we may use:
+     </para>
+
+     <screen>
+      ti=self portrait
+
+      au=(bob dylan and slow train coming)
+
+      date>1980 and (ti=((self portrait)))
+
+     </screen>
+
+    </sect3>
+    <sect3><title>CCL Qualifiers</title>
+
+     <para>
+      Qualifiers are used to direct the search to a particular searchable
+      index, such as title (ti) and author indexes (au). The CCL standard
+      itself doesn't specify a particular set of qualifiers, but it does
+      suggest a few short-hand notations. You can customize the CCL parser
+      to support a particular set of qualifiers to relect the current target
+      profile. Traditionally, a qualifier would map to a particular
+      use-attribute within the BIB-1 attribute set. However, you could also
+      define qualifiers that would set, for example, the
+      structure-attribute.
+     </para>
+
+     <para>
+      Consider a scenario where the target support ranked searches in the
+      title-index. In this case, the user could specify
+     </para>
+
+     <screen>>
+      ti,ranked=knuth computer
+     </screen>
+     <para>
+      and the <literal>ranked</literal> would map to structure=free-form-text
+      (4=105) and the <literal>ti</literal> would map to title (1=4).
+     </para>
+
+     <para>
+      A "profile" with a set predefined CCL qualifiers can be read from a
+      file. The YAZ client reads its CCL qualifiers from a file named
+      <filename>default.bib</filename>. Each line in the file has the form:
+     </para>
+
+     <para>
+      <replaceable>qualifier-name</replaceable>  
+      <replaceable>type</replaceable>=<replaceable>val</replaceable>
+      <replaceable>type</replaceable>=<replaceable>val</replaceable> ...
+     </para>
+
+     <para>
+      where <replaceable>qualifier-name</replaceable> is the name of the
+      qualifier to be used (eg. <literal>ti</literal>),
+      <replaceable>type</replaceable> is a BIB-1 category type and
+      <replaceable>val</replaceable> is the corresponding BIB-1 attribute
+      value.
+      The <replaceable>type</replaceable> can be either numeric or it may be
+      either <literal>u</literal> (use), <literal>r</literal> (relation),
+      <literal>p</literal> (position), <literal>s</literal> (structure),
+      <literal>t</literal> (truncation) or <literal>c</literal> (completeness).
+      The <replaceable>qualifier-name</replaceable> <literal>term</literal>
+      has a special meaning.
+      The types and values for this definition is used when
+      <emphasis>no</emphasis> qualifiers are present.
+     </para>
+
+     <para>
+      Consider the following definition:
+     </para>
+
+     <screen>
+      ti       u=4 s=1
+      au       u=1 s=1
+      term     s=105
+     </screen>
+     <para>
+      Two qualifiers are defined, <literal>ti</literal> and
+      <literal>au</literal>.
+      They both set the structure-attribute to phrase (1).
+      <literal>ti</literal>
+      sets the use-attribute to 4. <literal>au</literal> sets the
+      use-attribute to 1.
+      When no qualifiers are used in the query the structure-attribute is
+      set to free-form-text (105).
+     </para>
+
+    </sect3>
+    <sect3><title>CCL API</title>
+     <para>
+      All public definitions can be found in the header file
+      <filename>ccl.h</filename>. A profile identifier is of type
+      <literal>CCL_bibset</literal>. A profile must be created with the call
+      to the function <function>ccl_qual_mk</function> which returns a profile
+      handle of type <literal>CCL_bibset</literal>.
+     </para>
+
+     <para>
+      To read a file containing qualifier definitions the function
+      <function>ccl_qual_file</function> may be convenient. This function
+      takes an already opened <literal>FILE</literal> handle pointer as
+      argument along with a <literal>CCL_bibset</literal> handle.
+     </para>
+
+     <para>
+      To parse a simple string with a FIND query use the function
+     </para>
+     <screen>
+      struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
+      int *error, int *pos);
+     </screen>
+     <para>
+      which takes the CCL profile (<literal>bibset</literal>) and query
+      (<literal>str</literal>) as input. Upon successful completion the RPN
+      tree is returned. If an error eccur, such as a syntax error, the integer
+      pointed to by <literal>error</literal> holds the error code and
+      <literal>pos</literal> holds the offset inside query string in which
+      the parsing failed.
+     </para>
+
+     <para>
+      An english representation of the error may be obtained by calling
+      the <literal>ccl_err_msg</literal> function. The error codes are
+      listed in <filename>ccl.h</filename>.
+     </para>
+
+     <para>
+      To convert the CCL RPN tree (type
+      <literal>struct ccl_rpn_node *</literal>)
+      to the Z_RPNQuery of YAZ the function <function>ccl_rpn_query</function>
+      must be used. This function which is part of YAZ is implemented in
+      <filename>yaz-ccl.c</filename>.
+      After calling this function the CCL RPN tree is probably no longer
+      needed. The <literal>ccl_rpn_delete</literal> destroys the CCL RPN tree.
+     </para>
+
+     <para>
+      A CCL profile may be destroyed by calling the
+      <function>ccl_qual_rm</function> function.
+     </para>
+
+     <para>
+      The token names for the CCL operators may be changed by setting the
+      globals (all type <literal>char *</literal>)
+      <literal>ccl_token_and</literal>, <literal>ccl_token_or</literal>,
+      <literal>ccl_token_not</literal> and <literal>ccl_token_set</literal>.
+      An operator may have aliases, i.e. there may be more than one name for
+      the operator. To do this, separate each alias with a space character.
+     </para>
+    </sect3>
+   </sect2>
+  </sect1>
+  <sect1><title>Object Identifiers</title>
+
+   <para>
+    The basic YAZ representation of an OID is an array of integers,
+    terminated with the value -1. The &odr; module provides two
+    utility-functions to create and copy this type of data elements:
+   </para>
+
+   <screen>
+    Odr_oid *odr_getoidbystr(ODR o, char *str);
+   </screen>
+
+   <para>
+    Creates an OID based on a string-based representation using dots (.)
+    to separate elements in the OID.
+   </para>
+
+   <screen>
+    Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
+   </screen>
+
+   <para>
+    Creates a copy of the OID referenced by the <emphasis>o</emphasis>
+    parameter.
+    Both functions take an &odr; stream as parameter. This stream is used to
+    allocate memory for the data elements, which is released on a
+    subsequent call to <function>odr_reset()</function> on that stream.
+   </para>
+
+   <para>
+    The OID module provides a higher-level representation of the
+    family of object identifers which describe the Z39.50 protocol and its
+    related objects. The definition of the module interface is given in
+    the <filename>oid.h</filename> file.
+   </para>
+
+   <para>
+    The interface is mainly based on the <literal>oident</literal> structure.
+    The definition of this structure looks like this:
+   </para>
+
+   <screen>
 typedef struct oident
 {
     oid_proto proto;
@@ -424,252 +435,269 @@ typedef struct oident
     int oidsuffix[OID_SIZE];
     char *desc;
 } oident;
-</screen>
+   </screen>
 
-<para>
-The proto field takes one of the values
-</para>
+   <para>
+    The proto field takes one of the values
+   </para>
 
-<screen>
-PROTO_Z3950
-PROTO_SR
-</screen>
+   <screen>
+    PROTO_Z3950
+    PROTO_SR
+   </screen>
 
-<para>
-If you don't care about talking to SR-based implementations (few
-exist, and they may become fewer still if and when the ISO SR and ANSI
-Z39.50 documents are merged into a single standard), you can ignore
-this field on incoming packages, and always set it to PROTO_Z3950
-for outgoing packages.
-</para>
-<para>
+   <para>
+    If you don't care about talking to SR-based implementations (few
+    exist, and they may become fewer still if and when the ISO SR and ANSI
+    Z39.50 documents are merged into a single standard), you can ignore
+    this field on incoming packages, and always set it to PROTO_Z3950
+    for outgoing packages.
+   </para>
+   <para>
 
-The oclass field takes one of the values
-</para>
+    The oclass field takes one of the values
+   </para>
 
-<screen>
-CLASS_APPCTX
-CLASS_ABSYN
-CLASS_ATTSET
-CLASS_TRANSYN
-CLASS_DIAGSET
-CLASS_RECSYN
-CLASS_RESFORM
-CLASS_ACCFORM
-CLASS_EXTSERV
-CLASS_USERINFO
-CLASS_ELEMSPEC
-CLASS_VARSET
-CLASS_SCHEMA
-CLASS_TAGSET
-CLASS_GENERAL
-</screen>
+   <screen>
+    CLASS_APPCTX
+    CLASS_ABSYN
+    CLASS_ATTSET
+    CLASS_TRANSYN
+    CLASS_DIAGSET
+    CLASS_RECSYN
+    CLASS_RESFORM
+    CLASS_ACCFORM
+    CLASS_EXTSERV
+    CLASS_USERINFO
+    CLASS_ELEMSPEC
+    CLASS_VARSET
+    CLASS_SCHEMA
+    CLASS_TAGSET
+    CLASS_GENERAL
+   </screen>
 
-<para>
-corresponding to the OID classes defined by the Z39.50 standard.
+   <para>
+    corresponding to the OID classes defined by the Z39.50 standard.
 
-Finally, the value field takes one of the values
-</para>
+    Finally, the value field takes one of the values
+   </para>
 
-<screen>
-VAL_APDU
-VAL_BER
-VAL_BASIC_CTX
-VAL_BIB1
-VAL_EXP1
-VAL_EXT1
-VAL_CCL1
-VAL_GILS
-VAL_WAIS
-VAL_STAS
-VAL_DIAG1
-VAL_ISO2709
-VAL_UNIMARC
-VAL_INTERMARC
-VAL_CCF
-VAL_USMARC
-VAL_UKMARC
-VAL_NORMARC
-VAL_LIBRISMARC
-VAL_DANMARC
-VAL_FINMARC
-VAL_MAB
-VAL_CANMARC
-VAL_SBN
-VAL_PICAMARC
-VAL_AUSMARC
-VAL_IBERMARC
-VAL_EXPLAIN
-VAL_SUTRS
-VAL_OPAC
-VAL_SUMMARY
-VAL_GRS0
-VAL_GRS1
-VAL_EXTENDED
-VAL_RESOURCE1
-VAL_RESOURCE2
-VAL_PROMPT1
-VAL_DES1
-VAL_KRB1
-VAL_PRESSET
-VAL_PQUERY
-VAL_PCQUERY
-VAL_ITEMORDER
-VAL_DBUPDATE
-VAL_EXPORTSPEC
-VAL_EXPORTINV
-VAL_NONE
-VAL_SETM
-VAL_SETG
-VAL_VAR1
-VAL_ESPEC1
-</screen>
+   <screen>
+    VAL_APDU
+    VAL_BER
+    VAL_BASIC_CTX
+    VAL_BIB1
+    VAL_EXP1
+    VAL_EXT1
+    VAL_CCL1
+    VAL_GILS
+    VAL_WAIS
+    VAL_STAS
+    VAL_DIAG1
+    VAL_ISO2709
+    VAL_UNIMARC
+    VAL_INTERMARC
+    VAL_CCF
+    VAL_USMARC
+    VAL_UKMARC
+    VAL_NORMARC
+    VAL_LIBRISMARC
+    VAL_DANMARC
+    VAL_FINMARC
+    VAL_MAB
+    VAL_CANMARC
+    VAL_SBN
+    VAL_PICAMARC
+    VAL_AUSMARC
+    VAL_IBERMARC
+    VAL_EXPLAIN
+    VAL_SUTRS
+    VAL_OPAC
+    VAL_SUMMARY
+    VAL_GRS0
+    VAL_GRS1
+    VAL_EXTENDED
+    VAL_RESOURCE1
+    VAL_RESOURCE2
+    VAL_PROMPT1
+    VAL_DES1
+    VAL_KRB1
+    VAL_PRESSET
+    VAL_PQUERY
+    VAL_PCQUERY
+    VAL_ITEMORDER
+    VAL_DBUPDATE
+    VAL_EXPORTSPEC
+    VAL_EXPORTINV
+    VAL_NONE
+    VAL_SETM
+    VAL_SETG
+    VAL_VAR1
+    VAL_ESPEC1
+   </screen>
 
-<para>
-again, corresponding to the specific OIDs defined by the standard.
-</para>
+   <para>
+    again, corresponding to the specific OIDs defined by the standard.
+   </para>
 
-<para>
-The desc field contains a brief, mnemonic name for the OID in question.
-</para>
+   <para>
+    The desc field contains a brief, mnemonic name for the OID in question.
+   </para>
 
-<para>
-The function
-</para>
+   <para>
+    The function
+   </para>
 
-<screen>
-  struct oident *oid_getentbyoid(int *o);
-</screen>
+   <screen>
+    struct oident *oid_getentbyoid(int *o);
+   </screen>
 
-<para>
-takes as argument an OID, and returns a pointer to a static area
-containing an <literal>oident</literal> structure. You typically use
-this function when you receive a PDU containing an OID, and you wish
-to branch out depending on the specific OID value.
-</para>
+   <para>
+    takes as argument an OID, and returns a pointer to a static area
+    containing an <literal>oident</literal> structure. You typically use
+    this function when you receive a PDU containing an OID, and you wish
+    to branch out depending on the specific OID value.
+   </para>
 
-<para>
-The function
-</para>
+   <para>
+    The function
+   </para>
 
-<screen>
-  int *oid_ent_to_oid(struct oident *ent, int *dst);
-</screen>
+   <screen>
+    int *oid_ent_to_oid(struct oident *ent, int *dst);
+   </screen>
 
-<para>
-Takes as argument an <literal>oident</literal> structure - in which
-the <literal>proto</literal>, <literal>oclass</literal>/, and
-<literal>value</literal> fields are assumed to be set correctly -
-and returns a pointer to a the buffer as given by <literal>dst</literal>
-containing the base
-representation of the corresponding OID. The function returns
-NULL and the array dst is unchanged if a mapping couldn't place.
-The array <literal>dst</literal> should be at least of size
-<literal>OID_SIZE</literal>.
-</para>
-<para>
+   <para>
+    Takes as argument an <literal>oident</literal> structure - in which
+    the <literal>proto</literal>, <literal>oclass</literal>/, and
+    <literal>value</literal> fields are assumed to be set correctly -
+    and returns a pointer to a the buffer as given by <literal>dst</literal>
+    containing the base
+    representation of the corresponding OID. The function returns
+    NULL and the array dst is unchanged if a mapping couldn't place.
+    The array <literal>dst</literal> should be at least of size
+    <literal>OID_SIZE</literal>.
+   </para>
+   <para>
 
-The <function>oid_ent_to_oid()</function> function can be used whenever
-you need to prepare a PDU containing one or more OIDs. The separation of
-the <literal>protocol</literal> element from the remainer of the
-OID-description makes it simple to write applications that can
-communicate with either Z39.50 or OSI SR-based applications.
-</para>
+    The <function>oid_ent_to_oid()</function> function can be used whenever
+    you need to prepare a PDU containing one or more OIDs. The separation of
+    the <literal>protocol</literal> element from the remainer of the
+    OID-description makes it simple to write applications that can
+    communicate with either Z39.50 or OSI SR-based applications.
+   </para>
 
-<para>
-The function
-</para>
+   <para>
+    The function
+   </para>
 
-<screen><
-  oid_value oid_getvalbyname(const char *name);
-</screen>
+   <screen><
+    oid_value oid_getvalbyname(const char *name);
+   </screen>
 
-<para>
-takes as argument a mnemonic OID name, and returns the
-<literal>/value</literal> field of the first entry in the database that 
-contains the given name in its <literal>desc</literal> field.
-</para>
+   <para>
+    takes as argument a mnemonic OID name, and returns the
+    <literal>/value</literal> field of the first entry in the database that 
+    contains the given name in its <literal>desc</literal> field.
+   </para>
 
-<para>
-Finally, the module provides the following utility functions, whose
-meaning should be obvious:
-</para>
+   <para>
+    Finally, the module provides the following utility functions, whose
+    meaning should be obvious:
+   </para>
 
-<screen>
-  void oid_oidcpy(int *t, int *s);
-  void oid_oidcat(int *t, int *s);
-  int oid_oidcmp(int *o1, int *o2);
-  int oid_oidlen(int *o);
-</screen>
+   <screen>
+    void oid_oidcpy(int *t, int *s);
+    void oid_oidcat(int *t, int *s);
+    int oid_oidcmp(int *o1, int *o2);
+    int oid_oidlen(int *o);
+   </screen>
 
-<note>
-<para>
-The OID module has been criticized - and perhaps rightly so
-- for needlessly abstracting the
-representation of OIDs. Other toolkits use a simple
-string-representation of OIDs with good results. In practice, we have
-found the interface comfortable and quick to work with, and it is a
-simple matter (for what it's worth) to create applications compatible with
-both ISO SR and Z39.50. Finally, the use of the <literal>/oident</literal>
-database is by no means mandatory. You can easily create your
-own system for representing OIDs, as long as it is compatible with the
-low-level integer-array representation of the ODR module.
-</para>
-</note>
+   <note>
+    <para>
+     The OID module has been criticized - and perhaps rightly so
+     - for needlessly abstracting the
+     representation of OIDs. Other toolkits use a simple
+     string-representation of OIDs with good results. In practice, we have
+     found the interface comfortable and quick to work with, and it is a
+     simple matter (for what it's worth) to create applications compatible
+     with both ISO SR and Z39.50. Finally, the use of the
+     <literal>/oident</literal> database is by no means mandatory.
+     You can easily create your own system for representing OIDs, as long
+     as it is compatible with the low-level integer-array representation
+     of the ODR module.
+    </para>
+   </note>
 
-</sect1>
+  </sect1>
 
-<sect1><title>Nibble Memory</title>
+  <sect1><title>Nibble Memory</title>
 
-<para>
-Sometimes when you need to allocate and construct a large,
-interconnected complex of structures, it can be a bit of a pain to
-release the associated memory again. For the structures describing the
-Z39.50 PDUs and related structures, it is convenient to use the
-memory-management system of the &odr; subsystem (see
-<link linkend="odr-use">Using ODR</link>). However, in some circumstances
-where you might otherwise benefit from using a simple nibble memory
-management system, it may be impractical to use
-<function>odr_malloc()</function> and <function>odr_reset()</function>.
-For this purpose, the memory manager which also supports the &odr; streams
-is made available in the NMEM module. The external interface to this module is given in the <filename>nmem.h</filename> file.
-</para>
+   <para>
+    Sometimes when you need to allocate and construct a large,
+    interconnected complex of structures, it can be a bit of a pain to
+    release the associated memory again. For the structures describing the
+    Z39.50 PDUs and related structures, it is convenient to use the
+    memory-management system of the &odr; subsystem (see
+    <link linkend="odr-use">Using ODR</link>). However, in some circumstances
+    where you might otherwise benefit from using a simple nibble memory
+    management system, it may be impractical to use
+    <function>odr_malloc()</function> and <function>odr_reset()</function>.
+    For this purpose, the memory manager which also supports the &odr;
+    streams is made available in the NMEM module. The external interface
+    to this module is given in the <filename>nmem.h</filename> file.
+   </para>
 
-<para>
-The following prototypes are given:
-</para>
+   <para>
+    The following prototypes are given:
+   </para>
 
-<screen>
-NMEM nmem_create(void);
-void nmem_destroy(NMEM n);
-void *nmem_malloc(NMEM n, int size);
-void nmem_reset(NMEM n);
-int nmem_total(NMEM n);
-void nmem_init(void);
-</screen>
+   <screen>
+    NMEM nmem_create(void);
+    void nmem_destroy(NMEM n);
+    void *nmem_malloc(NMEM n, int size);
+    void nmem_reset(NMEM n);
+    int nmem_total(NMEM n);
+    void nmem_init(void);
+   </screen>
 
-<para>
-The <function>nmem_create()</function> function returns a pointer to a
-memory control handle, which can be released again by
-<function>nmem_destroy()</function> when no longer needed.
-The function <function>nmem_malloc()</function> allocates a block of
-memory of the requested size. A call to <function>nmem_reset()</function> or
-<function>nmem_destroy()</function> will release all memory allocated on
-the handle since it was created (or since the last call to
-<function>nmem_reset()</function>. The function
-<function>nmem_total()</function> returns the number of bytes currently
-allocated on the handle.
-</para>
+   <para>
+    The <function>nmem_create()</function> function returns a pointer to a
+    memory control handle, which can be released again by
+    <function>nmem_destroy()</function> when no longer needed.
+    The function <function>nmem_malloc()</function> allocates a block of
+    memory of the requested size. A call to <function>nmem_reset()</function>
+    or <function>nmem_destroy()</function> will release all memory allocated
+    on the handle since it was created (or since the last call to
+    <function>nmem_reset()</function>. The function
+    <function>nmem_total()</function> returns the number of bytes currently
+    allocated on the handle.
+   </para>
 
-<note>
-<para>
-The nibble memory pool is shared amonst threads. POSIX
-mutex'es and WIN32 Critical sections are introduced to keep the
-module thread safe. On WIN32 function <function>nmem_init()</function>
-initialises the Critical Section handle and should be called once before any
-other nmem function is used.
-</para>
-</note>
+   <note>
+    <para>
+     The nibble memory pool is shared amonst threads. POSIX
+     mutex'es and WIN32 Critical sections are introduced to keep the
+     module thread safe. On WIN32 function <function>nmem_init()</function>
+     initialises the Critical Section handle and should be called once
+     before any other nmem function is used.
+    </para>
+   </note>
 
-</sect1>
-</chapter>
+  </sect1>
+ </chapter>
+
+ <!-- Keep this comment at the end of the file
+ Local variables:
+ mode: sgml
+ sgml-omittag:t
+ sgml-shorttag:t
+ sgml-minimize-attributes:nil
+ sgml-always-quote-attributes:t
+ sgml-indent-step:1
+ sgml-indent-data:t
+ sgml-parent-document: "yaz.xml"
+ sgml-local-catalogs: "../../docbook/docbook.cat"
+ sgml-namecase-general:t
+ End:
+ -->
