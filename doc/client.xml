@@ -1,4 +1,4 @@
-<!-- $Id: client.xml,v 1.7 2001-11-27 22:12:24 adam Exp $ -->
+<!-- $Id: client.xml,v 1.8 2002-01-11 20:16:47 adam Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
@@ -71,6 +71,27 @@
        <literal>none</literal>.
       </simpara></listitem>
     </varlistentry>
+
+    <varlistentry><term>
+      <literal>-p</literal> <replaceable>target</replaceable>
+     </term><listitem>
+      <simpara>Specifies proxy address. When set YAZ client will
+       connect to a proxy on the address and port given. 
+       The actual target will be specifed as part of the InitRequest
+       to inform the proxy about actual target.
+      </simpara></listitem>
+    </varlistentry>
+
+    <varlistentry><term>
+      <literal>-u</literal> <replaceable>authentication</replaceable>
+     </term><listitem>
+      <simpara>Specifies authentication. Usually the form
+       <replaceable>user</replaceable>/<replaceable>password</replaceable>
+       is used. This option does the same thing as the
+       <literal>auth</literal> command.
+      </simpara></listitem>
+    </varlistentry>
+
    </variablelist>
    <para>
     In order to connect to Index Data's test Z39.50 server on
@@ -114,7 +135,8 @@
        Syntax:
       </para>
       <para>
-       [<literal>(tcp|ssl)':'</literal>]<replaceable>host</replaceable>[:<replaceable>port</replaceable>][/<replaceable>base&gt</replaceable>]
+       [<literal>(tcp|ssl)':'</literal>]<replaceable>host</replaceable>
+       [:<replaceable>port</replaceable>][/<replaceable>base&gt</replaceable>]
       </para>
      </listitem>
     </varlistentry>
@@ -153,7 +175,8 @@
      </listitem>
     </varlistentry>
     <varlistentry><term>
-      <literal>show </literal> [<replaceable>start</replaceable>[+<replaceable>number</replaceable>]]
+      <literal>show </literal>
+      [<replaceable>start</replaceable>[+<replaceable>number</replaceable>]]
       </term>
      <term><literal>s</literal></term>
      <listitem>
