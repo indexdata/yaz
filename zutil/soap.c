@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.5 2003-02-18 14:28:53 adam Exp $
+ * $Id: soap.c,v 1.6 2003-03-11 11:09:17 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -33,6 +33,14 @@ int z_soap_error(ODR o, Z_SOAP *p,
 int z_soap_codec(ODR o, Z_SOAP **pp, 
                  char **content_buf, int *content_len,
                  Z_SOAP_Handler *handlers)
+{
+	return z_soap_codec_enc(o, pp, content_buf, content_len, handlers, 0);
+}
+
+int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
+                 char **content_buf, int *content_len,
+                 Z_SOAP_Handler *handlers,
+		 const char *encoding)
 {
     if (o->direction == ODR_DECODE)
     {
@@ -207,7 +215,10 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
             if (ret)
                 return ret;
         }
-        xmlDocDumpMemory(doc, &buf_out, &len_out);
+	if (encoding)
+            xmlDocDumpMemoryEnc(doc, &buf_out, &len_out, encoding);
+	else
+            xmlDocDumpMemory(doc, &buf_out, &len_out);
         *content_buf = (char *) odr_malloc(o, len_out);
         *content_len = len_out;
         memcpy(*content_buf, buf_out, len_out);

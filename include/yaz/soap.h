@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.h,v 1.2 2003-02-14 18:49:23 adam Exp $
+ * $Id: soap.h,v 1.3 2003-03-11 11:09:17 adam Exp $
  */
 
 #ifndef YAZ_SOAP_H
@@ -46,5 +46,8 @@ typedef struct {
 YAZ_EXPORT int z_soap_codec(ODR o, Z_SOAP **pp, 
                             char **content_buf, int *content_len,
                             Z_SOAP_Handler *handlers);
+YAZ_EXPORT int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
+                            char **content_buf, int *content_len,
+                            Z_SOAP_Handler *handlers, const char *encoding);
 
 #endif

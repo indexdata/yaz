@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.18 2003-03-02 15:34:51 adam Exp $
+## $Id: Makefile.am,v 1.19 2003-03-11 11:09:17 adam Exp $
 noinst_LTLIBRARIES = libzutil.la
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
@@ -10,4 +10,4 @@ libzutil_la_SOURCES = zget.c yaz-ccl.c diagbib1.c logrpn.c \
 srwtst_LDADD = ../odr/libodr.la libzutil.la ../util/libutil.la
 srwtst_SOURCES = srwtst.c
 
-noinst_PROGRAMS = srwtst
+EXTRA_PROGRAMS = srwtst

@@ -1,9 +1,9 @@
-## $Id: Makefile.am,v 1.10 2003-02-18 10:37:08 adam Exp $
+## $Id: Makefile.am,v 1.11 2003-03-11 11:09:17 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
 
-noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8
+EXTRA_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8
 bin_PROGRAMS = zoomsh
 
 LDADD = ../lib/libyazmalloc.la ../lib/libyaz.la $(READLINE_LIBS)

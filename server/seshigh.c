@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.147 2003-02-23 20:39:31 adam Exp $
+ * $Id: seshigh.c,v 1.148 2003-03-11 11:09:17 adam Exp $
  */
 
 /*
@@ -100,6 +100,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
     if (!(anew = (association *)xmalloc(sizeof(*anew))))
     	return 0;
     anew->init = 0;
+    anew->version = 0;
     anew->client_chan = channel;
     anew->client_link = link;
     anew->cs_get_mask = 0;
@@ -444,6 +445,8 @@ static void assoc_init_reset(association *assoc)
 
 static int srw_bend_init(association *assoc)
 {
+    const char *encoding = "UTF-8";
+    Z_External *ce;
     bend_initresult *binitres;
     statserv_options_block *cb = statserv_getcontrol();
     
@@ -451,7 +454,10 @@ static int srw_bend_init(association *assoc)
 
     assoc->maximumRecordSize = 3000000;
     assoc->preferredMessageSize = 3000000;
-
+#if 1
+    ce = yaz_set_proposal_charneg(assoc->decode, &encoding, 1, 0, 0, 1);
+    assoc->init->charneg_request = ce->u.charNeg3;
+#endif
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
     	yaz_log(LOG_WARN, "Bad response from backend.");
@@ -791,6 +797,8 @@ static void process_http_request(association *assoc, request *req)
             Z_SOAP *soap_package = 0;
             int ret = -1;
             int http_code = 500;
+            const char *charset_p = 0;
+            char *charset = 0;
 
             static Z_SOAP_Handler soap_handlers[2] = {
 #if HAVE_XML2
@@ -799,6 +807,18 @@ static void process_http_request(association *assoc, request *req)
 #endif
                 {0, 0, 0}
             };
+            if ((charset_p = strstr(content_type, "; charset=")))
+            {
+                int i = 0;
+                charset_p += 10;
+                while (i < 20 && charset_p[i] &&
+                       !strchr("; \n\r", charset_p[i]))
+                    i++;
+                charset = odr_malloc(assoc->encode, i+1);
+                memcpy(charset, charset_p, i);
+                charset[i] = '\0';
+                yaz_log(LOG_LOG, "SOAP encoding %s", charset);
+            }
             ret = z_soap_codec(assoc->decode, &soap_package, 
                                &hreq->content_buf, &hreq->content_len,
                                soap_handlers);
@@ -844,11 +864,19 @@ static void process_http_request(association *assoc, request *req)
 #endif
             p = z_get_HTTP_Response(o, 200);
             hres = p->u.HTTP_Response;
-            ret = z_soap_codec(assoc->encode, &soap_package,
-                               &hres->content_buf, &hres->content_len,
-                               soap_handlers);
+            ret = z_soap_codec_enc(assoc->encode, &soap_package,
+                                   &hres->content_buf, &hres->content_len,
+                                   soap_handlers, charset);
             hres->code = http_code;
-            z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
+            if (!charset)
+                z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
+            else
+            {
+                char ctype[60];
+                strcpy(ctype, "text/xml; charset=");
+                strcat(ctype, charset);
+                z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+            }
         }
         if (!p) /* still no response ? */
             p = z_get_HTTP_Response(o, 500);

@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.28 2003-02-23 14:26:58 adam Exp $
+ * $Id: zoom-c.c,v 1.29 2003-03-11 11:09:17 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -712,29 +712,23 @@ static zoom_ret do_connect (ZOOM_connection c)
     yaz_log (LOG_DEBUG, "do_connect host=%s", effective_host);
 
     assert (!c->cs);
+    c->cs = cs_create_host (effective_host, 0, &add);
 
-    if (memcmp(c->host_port, "http:", 5) == 0)
+    if (c->cs && c->cs->protocol == PROTO_HTTP)
     {
 #if HAVE_XML2
-        const char *path;
+        const char *path = 0;
+
         c->proto = PROTO_HTTP;
-        effective_host = c->host_port + 5;
-        if (*effective_host == '/')
-            effective_host++;
-        if (*effective_host == '/')
-            effective_host++;
-        if (!(path = strchr(effective_host, '/')))
-            path = "/";
+        cs_get_host_args(c->host_port, &path);
         xfree(c->path);
         c->path = xstrdup(path);
 #else
-        c->state = STATE_IDLE;
         set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, "SRW");
+        do_close(c);
         return zoom_complete;
 #endif
     }
-    c->cs = cs_create_host (effective_host, 0, &add);
-    
     if (c->cs)
     {
         int ret = cs_connect (c->cs, add);
@@ -981,6 +975,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 #if HAVE_XML2
 static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
 {
+    char ctype[50];
     Z_SOAP_Handler h[2] = {
         {"http://www.loc.gov/zing/srw/v1.0/", 0, (Z_SOAP_fun) yaz_srw_codec},
         {0, 0, 0}
@@ -993,8 +988,15 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
 
     gdu = z_get_HTTP_Request(c->odr_out);
     gdu->u.HTTP_Request->path = c->path;
+
+    strcpy(ctype, "text/xml");
+    if (c->charset && strlen(c->charset) < 20)
+    {
+        strcat(ctype, "; charset=");
+        strcat(ctype, c->charset);
+    }
     z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
-                      "Content-Type", "text/xml");
+                      "Content-Type", ctype);
     z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
                       "SOAPAction", "\"\"");
     p->which = Z_SOAP_generic;
@@ -1004,9 +1006,10 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
     p->u.generic->p = sr;
     p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
 
-    ret = z_soap_codec(o, &p,
-                       &gdu->u.HTTP_Request->content_buf,
-                       &gdu->u.HTTP_Request->content_len, h);
+    ret = z_soap_codec_enc(o, &p,
+                           &gdu->u.HTTP_Request->content_buf,
+                           &gdu->u.HTTP_Request->content_len, h,
+                           c->charset);
 
     if (!z_GDU(c->odr_out, &gdu, 0, 0))
         return zoom_complete;
