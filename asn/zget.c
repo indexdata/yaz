@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.2  1995-05-30 10:15:49  quinn
+ * Revision 1.3  1995-06-05 10:52:06  quinn
+ * Fixed some negligences.
+ *
+ * Revision 1.2  1995/05/30  10:15:49  quinn
  * Added our implementor's ID
  *
  * Revision 1.1  1995/05/22  11:30:20  quinn
@@ -50,8 +53,10 @@ Z_InitResponse *zget_InitResponse(ODR o)
     *r->preferredMessageSize = 30*1024;
     r->maximumRecordSize = odr_malloc(o, sizeof(int));
     *r->maximumRecordSize = 30*1024;
-    r->implementationId = "YAZ";
-    r->implementationName = "Index Data YAZ Z39.50/SR implementation";
+    r->result = odr_malloc(o, sizeof(bool_t));
+    *r->result = 1;
+    r->implementationId = "YAZ (id=81)";
+    r->implementationName = "Index Data/YAZ";
     r->implementationVersion = YAZ_VERSION;
     r->userInformationField = 0;
     return r;

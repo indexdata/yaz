@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-acc.c,v $
- * Revision 1.1  1995-06-02 09:49:15  quinn
+ * Revision 1.2  1995-06-05 10:52:05  quinn
+ * Fixed some negligences.
+ *
+ * Revision 1.1  1995/06/02  09:49:15  quinn
  * Adding access control
  *
  *
@@ -48,6 +51,8 @@ int z_PromptId1(ODR o, Z_PromptId1 **p, int opt)
 
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
@@ -67,6 +72,8 @@ int z_PromptInfo1(ODR o, Z_PromptInfo1 **p, int opt)
 
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
@@ -96,6 +103,8 @@ int z_Challenge1(ODR o, Z_Challenge1 **p, int opt)
 {
     if (o->direction == ODR_ENCODE)
     	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
     if (odr_sequence_of(o, z_ChallengeUnit1, &(*p)->list,
 	&(*p)->num_challenges))
 	return 1;
@@ -131,6 +140,8 @@ int z_Response1(ODR o, Z_Response1 **p, int opt)
 {
     if (o->direction == ODR_ENCODE)
     	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
     if (odr_sequence_of(o, z_ResponseUnit1, &(*p)->list,
 	&(*p)->num_responses))
 	return 1;
@@ -149,6 +160,8 @@ int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt)
 
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
+    else if (!*p)
+    	return opt;
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
