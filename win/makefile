@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.79 2004-08-07 08:18:20 adam Exp $
+# $Id: makefile,v 1.80 2004-08-13 08:40:19 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -855,6 +855,7 @@ $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(DLL)
 clean:
 	-del $(BINDIR)\*.exe
 	-del $(BINDIR)\*.dll
+	-del $(BINDIR)\*.pdb
 	-del $(TMPDIR)\*.
 	-del $(LIBDIR)\*.MAP
 	-del $(LIBDIR)\*.LIB
