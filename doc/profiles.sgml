@@ -2,7 +2,7 @@
 <article>
 <title>Specifying and Using Application (Database) Profiles
 <author>Index Data, <tt/info@index.ping.dk/
-<date>$Revision: 1.4 $
+<date>$Revision: 1.5 $
 <abstract>
 YAZ includes a subsystem to manage complex database records, driven
 by a set of configuration tables that reflect a given profile.
@@ -25,8 +25,8 @@ may change as the module matures.
 
 <item>The exact workings of the subsystem may depend on the
 application in which it is used. This document focuses on the use of
-the module in the <bf/ZServer/ system which is distributed by Index
-Data as a companion to <bf/YAZ/.
+the module in the <bf/Zebra/ information server which is distributed by Index
+Data as an independent package.
 </itemize>
 
 <sect>Introduction
@@ -115,7 +115,7 @@ Depending on the database profile that is being used, it is likely
 that the data won't look like this when it's transmitted from the
 server to the client, however. Typically, the client will prefer to
 receive the data in a more rigid syntax, such as USMARC or GRS-1. To
-save transmissiontime and avoid ambiguities of language, the
+save transmission time and avoid ambiguities of language, the
 individual tags or field names, above, might be translated into
 numbers which are known by both the client and the server (by
 referring to a tag set).
@@ -124,6 +124,13 @@ The retrieval module supports various types of conversions that might
 be carried out by the server based on requests from the client. To do
 this, it needs a set of configuration files to describe the
 application profile that the given record adheres to.
+
+<it>
+CAUTION: Because the tables described below serve the dual purpose of
+representing an external application profile and an internal database
+profile, the terminology and structuring used will sometimes be
+somewhat different from the one suggested in the the Z39.50-1995.
+</it>
 
 <sect1>The Abstract Syntax
 
@@ -147,7 +154,7 @@ mapping the tags to their numerical representation, if they are
 known.
 
 <item>The variant set which is used in the profile. This provides a
-vocabulary for specifying the <it/types/ of data that appear inside
+vocabulary for specifying the <it/forms/ of data that appear inside
 the records.
 
 <item>Element set names, which are a shorthand way for the client to
@@ -423,7 +430,7 @@ class to the variant set.
 
 <tag>type <it/integer type-name datatype/</tag> (repeatable) Addes a
 new type to the current class (the one introduced by the most recent
-<bf/class/ directive. The type names belong to the same name space as
+<bf/class/ directive). The type names belong to the same name space as
 the one used in the tag set definition file.
 </descrip>
 
@@ -493,11 +500,14 @@ parenthesis, possibly followed by a colon (:) followed by an
 occurrences-specification (see below). The tag-value can be a number
 or a string. If the first character is an apostrophe ('), this forces
 the value to be interpreted as a string, even if it appears to be numerical.
+
 <item>A WildThing, represented as a question mark (?), possibly
 followed by a colon (:) followed by an occurrences specification (see
 below).
+
 <item>A WildPath, represented as an asterisk (*). Note that the last
-element of the path should not be a wildPath.
+element of the path should not be a wildPath (wildpaths don't work in
+this version).
 </itemize>
 
 The occurrences-specification can be either the string <tt/all/, the
@@ -528,7 +538,7 @@ simpleelement (4,52)
 <sect1>The Schema Mapping (.map) Files
 
 <p>
-Sometimes, the client might want wish to receive a database record in
+Sometimes, the client might want to receive a database record in
 a schema that differs from the native schema of the record. For
 instance, a client might only know how to process WAIS records, while
 the database record is represented in a more specific schema, such as
@@ -538,7 +548,7 @@ record into fields consistent with the given MARC specification, prior
 to actually converting the data to the ISO2709). This use of the
 object identifier for USMARC as a schema identifier represents an
 overloading of the OID which might not be entirely proper. However,
-it represents the dual role of schema identifier/record syntax which
+it represents the dual role of schema and record syntax which
 is assumed by the MARC family in Z39.50.
 
 <it>
@@ -581,7 +591,7 @@ source format may be GRS-1 ISO2709. On the server side, the source may
 be a structured ASCII file, augmented by a set of patterns that
 describe the structure of the document.
 
-The native source format - the one that is
+What we think of as the native source format - the one that is
 guaranteed to provide complete access to the facilities of the module,
 is an &dquot;SGML-like&dquot; syntax, based on an inferred DTD, which
 is in turn based on the profile information from the various files
@@ -592,68 +602,14 @@ enclosed by brackets (&lt;...&gt;). As a general rule, each tag should
 be matched by a corresponding close tag, identified by the same tag
 name preceded by a slash (/).
 
-The first tag in the file represents the root of the record. It should
-contain the name of the application profile that the record belongs
-to. If the profile is not already known, the system will look for the
-profile description in the file <tt/profile.abs/, where <tt/profile/
-is the name of the given profile.
-
-The following is a typical beginning of a GILS record:
-
-<tscreen><verb>
-<gils>
-  <Title>
-    USGS server for Gopher. See available linkage to begin.
-    <Acronym>
-      USGS Gopher
-    &etago;Acronym>
-  &etago;Title>
-
-  ...
-
-&etago;gils>
-</verb></tscreen>
-
-<it>
-NOTE: The indentation of the elements shows above is applied solely
-to clarify the relationships between the elements. Any unnecessary
-whitespaces are ignored by the retrieval system.
-</it>
-
-The construction above describes the first element of a GILS record;
-the title. The title is structured into a &dquot;well-known&dquot;
-element, and an additional element with a local string tag,
-<bf/Acronym/. Since the
-tag <bf/Title/ appears in tagsetG, which is included by the GILS
-tagset, this is a well-known element. The tag <bf/Acronym/ appears
-nowhere in the tagsets for the GILS profile, so it is treated as a
-locally defined string tag by the system.
-
-<sect1>Types of Input Elements
-
-<p>
-Currently, X types of input elements are recognized:
-
-<itemize>
-<item>The root element, which associates the record with a given
-schema.
-
-<item>The normal tagged element, which corresponds either to a
-specific tag from the tag sets referenced by the schema, or to a
-locally defined string tag (implicitly).
-
-<item>An inclusion element, for inserting data from an external source
-(a file, typically) into the record.
-
-<item>An element data unit, which corresponds to normal data.
-
-<item>A variant-component.
-</itemize>
-
 <sect>License
 
 <p>
 Copyright &copy; 1995, Index Data.
+
+This is the Index Data &dquot;P&dquot; license - it applies exclusively to
+the record management module of the YAZ system, and to this
+document.
 
 Permission to use, copy, modify, distribute, and sell this software and
 its documentation, in whole or in part, for any purpose, is hereby granted,
