@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.13 2004-12-13 14:21:55 heikki Exp $
+ * $Id: statserv.c,v 1.14 2004-12-22 23:47:11 adam Exp $
  */
 
 /**
@@ -404,23 +404,32 @@ static int no_sessions = 0;
 static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
-    static int hand[2];
-    static int child = 0;
     int res;
 
     if (event == EVENT_INPUT)
     {
-	if (control_block.dynamic && !child) 
+	COMSTACK new_line;
+	if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
+				   control_block.daemon_name)) < 0)
 	{
-	    int res;
-
-            ++no_sessions;
-	    if (pipe(hand) < 0)
-	    {
-		yaz_log(YLOG_FATAL|YLOG_ERRNO, "pipe");
-                iochan_destroy(h);
-                return;
-	    }
+	    yaz_log(YLOG_WARN|YLOG_ERRNO, "cs_listen failed");
+	    return;
+	}
+	else if (res == 1)
+	{
+	    yaz_log(YLOG_WARN, "cs_listen incomplete");
+	    return;
+	}
+    	new_line = cs_accept(line);
+	if (!new_line)
+	{
+	    yaz_log(YLOG_FATAL, "Accept failed.");
+	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+	    return;
+	}
+	no_sessions++;
+	if (control_block.dynamic)
+	{
 	    if ((res = fork()) < 0)
 	    {
 		yaz_log(YLOG_FATAL|YLOG_ERRNO, "fork");
@@ -432,16 +441,11 @@ static void listener(IOCHAN h, int event)
 	    	char nbuf[100];
 		IOCHAN pp;
 
-		close(hand[0]);
-		child = 1;
 		for (pp = pListener; pp; pp = iochan_getnext(pp))
 		{
-		    if (pp != h)
-		    {
-			COMSTACK l = (COMSTACK)iochan_getdata(pp);
-			cs_close(l);
-			iochan_destroy(pp);
-		    }
+		    COMSTACK l = (COMSTACK)iochan_getdata(pp);
+		    cs_close(l);
+		    iochan_destroy(pp);
 		}
 		sprintf(nbuf, "%s(%d)", me, no_sessions);
 		yaz_log_init(control_block.loglevel, nbuf, 0);
@@ -451,82 +455,18 @@ static void listener(IOCHAN h, int event)
 	    }
 	    else /* parent */
 	    {
-		close(hand[1]);
-		/* wait for child to take the call */
-		for (;;)
-		{
-		    char dummy[1];
-		    int res;
-		    
-		    if ((res = read(hand[0], dummy, 1)) < 0 &&
-				     yaz_errno() != EINTR)
-		    {
-			yaz_log(YLOG_FATAL|YLOG_ERRNO, "handshake read");
-                        return;
-		    }
-		    else if (res >= 0)
-		    	break;
-		}
-		yaz_log(YLOG_DEBUG, "P: Child has taken the call");
-		close(hand[0]);
+		cs_close(new_line);
 		return;
 	    }
 	}
-	if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
-				   control_block.daemon_name)) < 0)
-	{
-	    yaz_log(YLOG_WARN|YLOG_ERRNO, "cs_listen failed");
-	    return;
-	}
-	else if (res == 1)
-	    return;
-	yaz_log(YLOG_DEBUG, "listen ok");
-	iochan_setevent(h, EVENT_OUTPUT);
-	iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
-    }
-    /* in dynamic mode, only the child ever comes down here */
-    else if (event == EVENT_OUTPUT)
-    {
-    	COMSTACK new_line = cs_accept(line);
-
-	if (!new_line)
-	{
-	    yaz_log(YLOG_FATAL, "Accept failed.");
-	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
-	    return;
-	}
-	yaz_log(YLOG_DEBUG, "accept ok");
-	if (control_block.dynamic)
-	{
-	    IOCHAN pp;
-	    /* close our half of the listener socket */
-	    for (pp = pListener; pp; pp = iochan_getnext(pp))
-	    {
-		COMSTACK l = (COMSTACK)iochan_getdata(pp);
-		cs_close(l);
-		iochan_destroy(pp);
-	    }
-	    /* release dad */
-	    yaz_log(YLOG_DEBUG, "Releasing parent");
-	    close(hand[1]);
-	}
-	else
-	{
-	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
-	    ++no_sessions;
-	}
-#if YAZ_POSIX_THREADS
 	if (control_block.threads)
 	{
+#if YAZ_POSIX_THREADS
 	    pthread_t child_thread;
 	    pthread_create (&child_thread, 0, new_session, new_line);
 	    pthread_detach (child_thread);
-	}
-	else
 	    new_session(new_line);
 #elif YAZ_GNU_THREADS
-	if (control_block.threads)
-	{
 	    pth_attr_t attr;
 	    pth_t child_thread;
 
@@ -538,12 +478,12 @@ static void listener(IOCHAN h, int event)
 	    child_thread = pth_spawn (attr, new_session, new_line);
             yaz_log (YLOG_DEBUG, "pth_spawn finish");
             pth_attr_destroy (attr);
+#else
+	    new_session(new_line);
+#endif
 	}
 	else
 	    new_session(new_line);
-#else
-	new_session(new_line);
-#endif
     }
     else if (event == EVENT_TIMEOUT)
     {
@@ -599,9 +539,9 @@ static void *new_session (void *vp)
 #else
     a = 0;
 #endif
-    yaz_log(log_session, "Starting session from %s (pid=%d)",
-        a ? a : "[Unknown]", getpid());
-    if (max_sessions && no_sessions == max_sessions)
+    yaz_log(log_session, "Starting session %d from %s (pid=%d)",
+	    no_sessions, a ? a : "[Unknown]", getpid());
+    if (max_sessions && no_sessions >= max_sessions)
         control_block.one_shot = 1;
     if (control_block.threads)
     {
