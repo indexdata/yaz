@@ -45,7 +45,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.11 2001-11-27 22:38:50 adam Exp $
+ * $Id: ccl.h,v 1.12 2002-06-06 13:02:01 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -87,6 +87,7 @@
 
 #include <yaz/yconfig.h>
 #include <stdio.h>
+#include <yaz/xmalloc.h>
 
 YAZ_BEGIN_CDECL
     
