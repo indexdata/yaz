@@ -1,12 +1,16 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Fixed bug in CCL parser where truncation char was not removed when
-truncation=both was in effect.
+Added odr_get_element_path which current element path for an ODR stream.
+This utility may be useful in error handling or user-defined ODR_PRINT
+stream.
 
-Added odr_set_stream which is is a more generic to odr_setprint.
-odr_set_stream takes a stream handle, pointer to puts function and
-pointer to close function. The close function - if non-NULL - will be
-called during odr_destroy.
+Added ODR_PRINT utility odr_set_stream which is is a more generic
+alternative to odr_setprint. odr_set_stream takes a stream handle, pointer
+to a write function and pointer to close function. The close function - if
+non-NULL - will be called during odr_destroy.
+
+Fixed bug in CCL parser where truncation char was not removed from
+right side when truncation=both was in effect.
 
 Fixed CQL parser to use unsigned chars (occurred on MS .NET).
 

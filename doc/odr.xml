@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.13 2004-08-11 12:47:35 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.14 2004-08-13 07:30:06 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -369,16 +369,42 @@ void do_nothing_useful(int value)
      another file), by using the more generic mechanism:
      <synopsis>
       void odr_set_stream(ODR o, void *handle,
-                         void (*stream_puts)(void *handle, const char *strz),
+                         void (*stream_write)(ODR o, void *handle, int type,
+                                              const char *buf, int len),
                          void (*stream_close)(void *handle));
      </synopsis>
      Here the user provides an opaque handle and two handlers,
-     <replaceable>stream_puts</replaceable> for printing,
+     <replaceable>stream_write</replaceable> for writing,
      and <replaceable>stream_close</replaceable> which is supposed
      to close/free resources associated with handle. 
      The <replaceable>stream_close</replaceable> handler is optional and
      if NULL for the function is provided, it will not be invoked.
+     The <replaceable>stream_write</replaceable> takes the ODR handle
+     as parameter, the user defined handle, a type 
+     <literal>ODR_OCTETSTRING</literal>, <literal>ODR_VISIBLESTRING</literal>
+     which indicates the type of contents is being written.
     </para>
+    <para>
+     Another utility useful for diagnostics (error handling) or as
+     part of the printing facilities is:
+     <synopsis>
+      const char **odr_get_element_path(ODR o);
+     </synopsis>
+     which returns a list of current elements that ODR deals with at the 
+     moment. For the returned array, say <literal>ar</literal>, 
+     <literal>ar[0]</literal> is the top level element,
+     <literal>ar[n]</literal> is the last. The last element has the
+     property that <literal>ar[n+1] == NULL</literal>.
+    </para>
+    <example>
+     <title>Element Path for record</title>
+     <para>
+      For a database record part of a PresentResponse the
+      array returned by <function>odr_get_element</function>
+      is <literal>presentResponse</literal>, <literal>databaseOrSurDiagnostics</literal>, <literal>?</literal>, <literal>record</literal>, <literal>?</literal>, <literal>databaseRecord</literal> . The question mark appears due to 
+      unnamed constructions.
+     </para>
+     </example>
    </sect2>
    <sect2><title>Diagnostics</title>
 

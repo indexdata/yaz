@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.2 2004-08-11 12:15:38 adam Exp $
+ * $Id: odr.c,v 1.3 2004-08-13 07:30:06 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -69,9 +69,14 @@ int odr_geterrorx(ODR o, int *x)
     return o->error;
 }
 
-char *odr_getelement(ODR o)
+const char *odr_getelement(ODR o)
 {
     return o->op->element;
+}
+
+const char **odr_get_element_path(ODR o)
+{
+    return o->op->stack_names;
 }
 
 void odr_seterror(ODR o, int error, int id)
@@ -90,9 +95,36 @@ void odr_setelement(ODR o, const char *element)
     }
 }
 
-void odr_FILE_puts(void *handle, const char *strz)
+void odr_FILE_write(ODR o, void *handle, int type,
+		    const char *buf, int len)
 {
-    fputs(strz, (FILE*) handle);
+    int i;
+#if 0
+    if (type  == ODR_OCTETSTRING)
+    {
+	const char **stack_names = odr_get_element_path(o);
+	for (i = 0; stack_names[i]; i++)
+	    fprintf((FILE*) handle, "[%s]", stack_names[i]);
+	fputs("\n", (FILE*) handle);
+    }
+#endif
+    for (i = 0; i<len; i++)
+    {
+	if (i == 2000 && len > 3100)
+	{
+	    fputs(" ..... ", (FILE*) handle);
+		i = len - 1000;
+	}
+	unsigned c = ((const unsigned char *) buf)[i];
+	if (strchr("\r\n\f\t", c) || c >= ' ' && c <= 126)
+	    putc(c, (FILE*) handle);
+	else
+	{
+	    char x[5];
+	    sprintf(x, "\\X%02X", c);
+	    fputs(x, (FILE*) handle);
+	}
+    }
 }
 
 void odr_FILE_close(void *handle)
@@ -104,15 +136,17 @@ void odr_FILE_close(void *handle)
 
 void odr_setprint(ODR o, FILE *file)
 {
-    odr_set_stream(o, file, odr_FILE_puts, odr_FILE_close);
+    odr_set_stream(o, file, odr_FILE_write, odr_FILE_close);
 }
 
 void odr_set_stream(ODR o, void *handle,
-		    void (*stream_puts)(void *handle, const char *strz),
+		    void (*stream_write)(ODR o, 
+					 void *handle, int type,
+					 const char *buf, int len),
 		    void (*stream_close)(void *handle))
 {
     o->print = handle;
-    o->op->stream_puts = stream_puts;
+    o->op->stream_write = stream_write;
     o->op->stream_close = stream_close;
 }
 
@@ -218,6 +252,6 @@ void odr_printf(ODR o, const char *fmt, ...)
     vsprintf(buf, fmt, ap);
 #endif
 #endif
-    o->op->stream_puts(o->print, buf);
+    o->op->stream_write(o, o->print, ODR_VISIBLESTRING, buf, strlen(buf));
     va_end(ap);
 }

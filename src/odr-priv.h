@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr-priv.h,v 1.2 2004-08-11 12:15:38 adam Exp $
+ * $Id: odr-priv.h,v 1.3 2004-08-13 07:30:06 adam Exp $
  */
 
 #ifndef ODR_PRIV_H
@@ -43,17 +43,30 @@ struct Odr_ber_tag {      /* used to be statics in ber_tag... */
 #define odr_max(o) ((o)->size - ((o)->bp - (o)->buf))
 #define odr_offset(o) ((o)->bp - (o)->buf)
 
+typedef struct odr_constack
+{
+    const unsigned char *base;   /* starting point of data */
+    int base_offset;
+    int len;                     /* length of data, if known, else -1
+                                        (decoding only) */
+    const unsigned char *lenb;   /* where to encode length */
+    int len_offset;
+    int lenlen;                  /* length of length-field */
+} odr_constack;
+
 struct Odr_private {
     /* stack for constructed types */
 #define ODR_MAX_STACK 50
     int stackp;          /* top of stack (-1 == initial state) */
     odr_constack stack[ODR_MAX_STACK];
+    const char *stack_names[1 + ODR_MAX_STACK];
 
     struct Odr_ber_tag odr_ber_tag;
     yaz_iconv_t iconv_handle;
     int error_id;
     char element[80];
-    void (*stream_puts)(void *handle, const char *strz);
+    void (*stream_write)(ODR o, void *handle, int type,
+			 const char *buf, int len);
     void (*stream_close)(void *handle);
 };
 

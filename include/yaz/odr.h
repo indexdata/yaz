@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2003, Index Data.
+ * Copyright (c) 1995-2004, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.15 2004-08-11 12:15:38 adam Exp $
+ * $Id: odr.h,v 1.16 2004-08-13 07:30:06 adam Exp $
  */
 
 #ifndef ODR_H
@@ -106,17 +106,6 @@ typedef struct odr_bitmask
 
 typedef int Odr_oid;   /* terminate by -1 */
 
-typedef struct odr_constack
-{
-    const unsigned char *base;   /* starting point of data */
-    int base_offset;
-    int len;                     /* length of data, if known, else -1
-                                        (decoding only) */
-    const unsigned char *lenb;   /* where to encode length */
-    int len_offset;
-    int lenlen;                  /* length of length-field */
-} odr_constack;
-
 #define ODR_S_SET     0
 #define ODR_S_CUR     1
 #define ODR_S_END     2
@@ -186,7 +175,7 @@ YAZ_EXPORT int odr_geterror(ODR o);
 YAZ_EXPORT int odr_geterrorx(ODR o, int *x);
 YAZ_EXPORT void odr_seterror(ODR o, int errorno, int errorid);
 YAZ_EXPORT void odr_setelement(ODR o, const char *addinfo);
-YAZ_EXPORT char *odr_getelement(ODR o);
+YAZ_EXPORT const char *odr_getelement(ODR o);
 YAZ_EXPORT void odr_perror(ODR o, const char *message);
 YAZ_EXPORT void odr_setprint(ODR o, FILE *file);
 YAZ_EXPORT ODR odr_createmem(int direction);
@@ -328,11 +317,16 @@ YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt,
 YAZ_EXPORT int odr_set_charset(ODR o, const char *to, const char *from);
 
 YAZ_EXPORT void odr_set_stream(ODR o,  void *handle,
-			       void (*stream_puts)(void *handle,
-						   const char *strz),
+			       void (*stream_write)(ODR o, 
+						    void *handle,
+						    int type,
+						    const char *buf,
+						    int len),
 			       void (*stream_close)(void *handle));
 
 YAZ_EXPORT void odr_printf(ODR o, const char *fmt, ...);
+
+YAZ_EXPORT const char **odr_get_element_path(ODR o);
 
 YAZ_END_CDECL
 

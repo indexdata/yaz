@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_cons.c,v 1.2 2004-08-11 12:15:38 adam Exp $
+ * $Id: odr_cons.c,v 1.3 2004-08-13 07:30:06 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -43,6 +43,8 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
     }
     o->op->stack[++(o->op->stackp)].lenb = o->bp;
     o->op->stack[o->op->stackp].len_offset = odr_tell(o);
+    o->op->stack_names[o->op->stackp] = name ? name : "?";
+    o->op->stack_names[o->op->stackp + 1] = 0;
 #ifdef ODR_DEBUG
     fprintf(stderr, "[cons_begin(%d)]", o->op->stackp);
 #endif
@@ -54,6 +56,7 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
 
 	if (odr_write(o, dummy, lenlen) < 0)  /* dummy */
         {
+	    o->op->stack_names[o->op->stackp] = 0;
             --(o->op->stackp);
 	    return 0;
         }
@@ -64,6 +67,7 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
                               odr_max(o))) < 0)
         {
             odr_seterror(o, OOTHER, 31);
+	    o->op->stack_names[o->op->stackp] = 0;
             --(o->op->stackp);
 	    return 0;
         }
@@ -72,6 +76,7 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
         if (o->op->stack[o->op->stackp].len > odr_max(o))
         {
             odr_seterror(o, OOTHER, 32);
+	    o->op->stack_names[o->op->stackp] = 0;
             --(o->op->stackp);
 	    return 0;
         }
@@ -85,6 +90,7 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
     else
     {
         odr_seterror(o, OOTHER, 33);
+	o->op->stack_names[o->op->stackp] = 0;
         --(o->op->stackp);
 	return 0;
     }
@@ -117,6 +123,7 @@ int odr_constructed_end(ODR o)
         odr_seterror(o, OOTHER, 34);
     	return 0;
     }
+    o->op->stack_names[o->op->stackp] = 0;
     switch (o->direction)
     {
     case ODR_DECODE:

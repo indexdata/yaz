@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oct.c,v 1.2 2004-08-11 12:15:38 adam Exp $
+ * $Id: odr_oct.c,v 1.3 2004-08-13 07:30:06 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -35,16 +34,10 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
     {
         int i;
 	odr_prname(o, name);
-    	odr_printf(o, "OCTETSTRING(len=%d)", (*p)->len);
-        for (i = 0; i<(*p)->len; i++)
-        {
-	    if (i < 5 || i > ((*p)->len - 4))
-            {
-                odr_printf(o, " %02X", (*p)->buf[i]);
-            }
-            else if (i == 5)
-                odr_printf(o, " .. ");
-        }
+    	odr_printf(o, "OCTETSTRING(len=%d) ", (*p)->len);
+
+	o->op->stream_write(o, o->print, ODR_OCTETSTRING,
+			    (*p)->buf, (*p)->len);
         odr_printf(o, "\n");
     	return 1;
     }
