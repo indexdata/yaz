@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-1998, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.26  1998-03-20 14:46:06  adam
+ * Revision 1.27  1998-05-18 10:10:02  adam
+ * Added Explain-schema and Explain-tagset to OID database.
+ *
+ * Revision 1.26  1998/03/20 14:46:06  adam
  * Added UNIverse Resource Reports.
  *
  * Revision 1.25  1998/02/10 15:32:03  adam
@@ -142,7 +145,6 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_CIMI1,     {3,8,-1},    "CIMI-attset"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_GEO,       {3,9,-1},    "Geo-attset"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS, {3,1000,81,1,-1},"Thesaurus-attset"},
-
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_BIB1,      {4,1,-1},    "Bib-1"       },
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_DIAG1,     {4,2,-1},    "Diag-1"      },
 
@@ -224,7 +226,8 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_GEO,       {13,4,-1},   "Geo-schema" },
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_CIMI1,     {13,5,-1},   "CIMI-schema" },
     {PROTO_Z3950,   CLASS_SCHEMA,  VAL_UPDATEES,  {13,6,-1},   "Update ES" },
-
+    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_THESAURUS, {13,1000,81,1,-1}, "thesaurus-schema"},
+    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_EXPLAIN,   {13,1000,81,2,-1}, "Explain-schema"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_STAS,      {14,3,-1},   "STAS-tagset" },
@@ -232,6 +235,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_COLLECT1,  {14,5,-1},   "Collections-tagset"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_CIMI1,     {14,6,-1},   "CIMI-tagset" },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_THESAURUS, {14,1000,81,1,-1}, "thesaurus-tagset"},
+    {PROTO_Z3950,   CLASS_TAGSET,  VAL_EXPLAIN,   {14,1000,81,2,-1}, "Explain-tagset"},
     
 
     /* SR definitions. Note that some of them aren't defined by the
@@ -305,7 +309,6 @@ static oident oids[] =
     {PROTO_SR,      CLASS_SCHEMA,  VAL_COLLECT1,  {13,3,-1},   "Collections-schema" },
     {PROTO_SR,      CLASS_SCHEMA,  VAL_GEO,       {13,4,-1},   "Geo-schema" },
     {PROTO_SR,      CLASS_SCHEMA,  VAL_CIMI1,     {13,5,-1},   "CIMI-schema" },
-    {PROTO_Z3950,   CLASS_SCHEMA,  VAL_THESAURUS, {13,1000,81,1,-1}, "thesaurus-schema"},
 
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
@@ -315,7 +318,7 @@ static oident oids[] =
     {PROTO_SR,      CLASS_TAGSET,  VAL_COLLECT1,  {14,5,-1},   "Collections-tagset"},
     {PROTO_SR,      CLASS_TAGSET,  VAL_CIMI1,     {14,6,-1},   "CIMI-tagset" },
 
-    {0,             0,             0,             {-1},        0          }
+    {PROTO_NOP,     CLASS_NOP,     VAL_NOP,       {-1},        0          }
 };
 
 /* OID utilities */

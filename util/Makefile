@@ -1,7 +1,7 @@
 # Copyright (C) 1994-1997, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.26 1997-10-31 12:20:09 adam Exp $
+# $Id: Makefile,v 1.27 1998-05-18 10:10:01 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -29,9 +29,6 @@ $(LIB): $(PO)
 	rm -f $(LIB)
 	ar qc $(LIB) $(PO)
 	$(RANLIB) $(LIB)
-
-$(LIBDIR):
-	mkdir $(LIBDIR)
 
 .c.o:
 	$(CC) -c $(DEFS) $(CFLAGS) $<
