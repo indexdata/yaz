@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.15 2000-04-17 14:21:38 adam Exp $
+# $Id: makefile,v 1.16 2000-05-05 13:48:15 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
 
 NEW_Z3950=1  # 0= use old asn files
              # 1= generate files from *.asn (needs tcl)
@@ -555,9 +555,9 @@ $(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS)
 		$(DLL_LINK_OPTIONS)
 		$(DLL_OBJS) 
 		/out:$(DLL) 
-		/implib:"$(LIBDIR)/yaz.lib"
-		/pdb:"$(LIBDIR)/yaz.pdb" 
-		/map:"$(LIBDIR)/yaz.map"  
+		/implib:"$(LIBDIR)\yaz.lib"
+		/pdb:"$(LIBDIR)\yaz.pdb" 
+		/map:"$(LIBDIR)\yaz.map"  
 <<
 
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) 
@@ -568,10 +568,8 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_CLIENT_OBJS)
-
-		/pdb:"$(LIBDIR)/yaz-client.pdb"
-
-		/map:"$(LIBDIR)/yaz-client.map"
+		/pdb:"$(LIBDIR)\yaz-client.pdb"
+		/map:"$(LIBDIR)\yaz-client.map"
 		/out:$(CLIENT)
 <<
 
@@ -584,12 +582,9 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 		shell32.lib
 		$(IMPLIB)
 		$(ZTEST_OBJS) 
-
-		/implib:"$(LIBDIR)/yaz-ztest.lib"
-
-		/pdb:"$(LIBDIR)/yaz-ztest.pdb"
-
-		/map:"$(LIBDIR)/yaz-ztest.map"
+		/implib:"$(LIBDIR)\yaz-ztest.lib"
+		/pdb:"$(LIBDIR)\yaz-ztest.pdb"
+		/map:"$(LIBDIR)\yaz-ztest.map"
 		/out:$(ZTEST) 
 <<
 
@@ -659,7 +654,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.15  2000-04-17 14:21:38  adam
+# Revision 1.16  2000-05-05 13:48:15  adam
+# Minor changes.
+#
+# Revision 1.15  2000/04/17 14:21:38  adam
 # WIN32 update.
 #
 # Revision 1.14  2000/03/02 08:48:21  adam
