@@ -1,5 +1,5 @@
 # Makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.11 1999-12-21 14:16:20 ian Exp $
+# $Id: makefile,v 1.12 2000-01-06 11:27:16 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -57,6 +57,7 @@ UTILDIR=$(SRCDIR)\UTIL
 ZUTILDIR=$(SRCDIR)\ZUTIL
 RETDIR=$(SRCDIR)\RETRIEVAL
 Z3950DIR=$(SRCDIR)\Z39.50
+ILLDIR=$(SRCDIR)\ill
 
 CLIENTDIR=$(SRCDIR)\CLIENT
 SERVERDIR=$(SRCDIR)\SERVER
@@ -152,9 +153,9 @@ SERVER_LINK_OPTIONS = -lib
 ZTEST_LINK_OPTIONS = /subsystem:console  
 
 # TCL
-TCL="C:\Program Files\Tcl\bin\tclsh80.exe"
+TCL="C:\Program Files\Tcl\bin\tclsh82.exe"
 
-COMMON_TCL_OPTIONS= ..\util\yc.tcl -d z.tcl -I$(INCLDIR) -i yaz
+COMMON_TCL_OPTIONS= ..\util\yc.tcl -I$(INCLDIR) -i yaz
 
 # Final opt variables
 !if $(DEBUG)
@@ -316,6 +317,11 @@ Z3950_OBJS= \
    $(OBJDIR)\zes-pset.obj \
    $(OBJDIR)\zes-update0.obj 
 
+ILL_OBJS= \
+   $(OBJDIR)\ill-get.obj\
+   $(OBJDIR)\ill-core.obj\
+   $(OBJDIR)\item-req.obj
+
 COMMON_YAZ_OBJS= \
    $(YAZ_COMSTACK_OBJS) \
    $(YAZ_ODR_OBJS) \
@@ -326,6 +332,7 @@ COMMON_YAZ_OBJS= \
 !if $(NEW_Z3950)
 YAZ_OBJS= \
 	$(COMMON_YAZ_OBJS) \
+	$(ILL_OBJS) \
 	$(Z3950_OBJS)
 !else
 YAZ_OBJS= \
@@ -360,6 +367,7 @@ $(PROTOH): makefile $(INCLDIR)\yaz\prt-proto.h
 ###########################################################
 
 Z3950_C_DIR=$(Z3950DIR)   
+ILL_C_DIR=$(ILLDIR)
 #!!! Should be moved to OBJ, but that requires too much trickery
 
 # Files generated from datetime.asn
@@ -403,10 +411,24 @@ Z3950V3_C_FILES= \
    $(Z3950_C_DIR)\zes-pset.c \
    $(Z3950_C_DIR)\zes-update0.c 
 
+ILL_CORE_H_FILES= \
+   $(INCLDIR)\yaz\ill-core.h
+
+ILL_CORE_C_FILES= \
+   $(ILL_C_DIR)\ill-core.c
+
+ITEM_REQ_H_FILES= \
+   $(INCLDIR)\yaz\item-req.h
+
+ITEM_REQ_C_FILES= \
+   $(ILL_C_DIR)\item-req.c
+
 DATETIME_FILES = $(DATETIME_H_FILES) $(DATETIME_C_FILES)
 UNIVRES_FILES = $(UNIVRES_H_FILES) $(UNIVRES_C_FILES)
 ESUPDATE_FILES = $(ESUPDATE_H_FILES) $(ESUPDATE_C_FILES)
 Z3950V3_FILES= $(Z3950V3_C_FILES) $(Z3950V3_H_FILES)
+ILL_CORE_FILES= $(ILL_CORE_C_FILES) $(ILL_CORE_H_FILES)
+ITEM_REQ_FILES= $(ITEM_REQ_C_FILES) $(ITEM_REQ_H_FILES)
 
 GENERATED_C_FILES= \
    $(Z3950V3_C_FILES)  \
@@ -470,27 +492,39 @@ generated_files: \
 {$(Z3950_C_DIR)}.c{$(OBJDIR)}.obj:
 	@$(CPP) $(COPT) $< 
 
+{$(ILL_C_DIR)}.c{$(OBJDIR)}.obj:
+	@$(CPP) $(COPT) $< 
 
 ############### ASN-generated files
 
 $(Z3950V3_FILES): $(Z3950DIR)\z3950v3.asn
 	@cd $(Z3950DIR)
-	$(TCL) $(TCLOPT) z3950v3.asn
+	$(TCL) $(TCLOPT) -d z.tcl z3950v3.asn
 	@cd $(WINDIR)
 
 $(DATETIME_FILES): $(Z3950DIR)\datetime.asn
 	@cd $(Z3950DIR)
-	$(TCL) $(TCLOPT) datetime.asn
+	$(TCL) $(TCLOPT) -d z.tcl datetime.asn
 	@cd $(WINDIR)
 
 $(UNIVRES_FILES): $(Z3950DIR)\univres.asn
 	@cd $(Z3950DIR)
-	$(TCL) $(TCLOPT) univres.asn
+	$(TCL) $(TCLOPT) -d z.tcl univres.asn
 	@cd $(WINDIR)
 
 $(ESUPDATE_FILES): $(Z3950DIR)\esupdate.asn
 	@cd $(Z3950DIR)
-	$(TCL) $(TCLOPT) esupdate.asn
+	$(TCL) $(TCLOPT) -d z.tcl esupdate.asn
+	@cd $(WINDIR)
+
+$(ILL_CORE_FILES): $(ILLDIR)\ill9702.asn
+	@cd $(ILLDIR)
+	$(TCL) $(TCLOPT) -d ill.tcl ill9702.asn
+	@cd $(WINDIR)
+
+$(ITEM_REQ_FILES): $(ILLDIR)\item-req.asn
+	@cd $(ILLDIR)
+	$(TCL) $(TCLOPT) -d ill.tcl item-req.asn
 	@cd $(WINDIR)
 
 ###########################################################
@@ -518,7 +552,9 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS)
 		$(LINK_LIBS) 
 		$(IMPLIB)
 		$(YAZ_CLIENT_OBJS)
+
 		/pdb:"$(LIBDIR)/yaz-client.pdb"
+
 		/map:"$(LIBDIR)/yaz-client.map"
 		/out:$(CLIENT)
 <<
@@ -533,8 +569,11 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(SERVER) $(DLL)
 		$(IMPLIB)
 		$(SERVER)
 		$(ZTEST_OBJS) 
+
 		/implib:"$(LIBDIR)/yaz-ztest.lib"
+
 		/pdb:"$(LIBDIR)/yaz-ztest.pdb"
+
 		/map:"$(LIBDIR)/yaz-ztest.map"
 		/out:$(ZTEST) 
 <<
@@ -565,9 +604,12 @@ clean:
 	del $(SERVER)
 	del $(ZTEST)
 	del $(TMPDIR)\*.
+
 	del $(LIBDIR)\*.MAP
+
 	del $(LIBDIR)\*.LIB
 	del $(OBJDIR)\*.OBJ
+
 	del $(PROTOH)
 
 realclean: clean
@@ -600,6 +642,8 @@ $(ALL_OBJS): makefile $(PROTOH)
 
 $(Z3950_OBJS): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 
+$(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
+
 !if $(NEW_Z3950)
 $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 !endif
@@ -612,7 +656,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.11  1999-12-21 14:16:20  ian
+# Revision 1.12  2000-01-06 11:27:16  adam
+# Updated for ILL.
+#
+# Revision 1.11  1999/12/21 14:16:20  ian
 # Changed retrieval module to allow data1 trees with no associated absyn.
 # Also added a simple interface for extracting values from data1 trees using
 # a string based tagpath.
