@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.13 2003-03-11 11:05:19 adam Exp $
+ * $Id: comstack.c,v 1.14 2003-04-24 13:04:45 adam Exp $
  */
 
 #include <string.h>
@@ -138,7 +138,7 @@ int cs_complete_auto(const unsigned char *buf, int len)
 		&& buf[2] >= 0x20 && buf[2] < 0x7f)
     {
         /* deal with HTTP request/response */
-	int i = 2, content_len = 0;
+	int i = 2, content_len = 0, chunked = 0;
 
         while (i <= len-4)
         {
@@ -147,26 +147,99 @@ int cs_complete_auto(const unsigned char *buf, int len)
                 i += 2;
                 if (buf[i] == '\r' && buf[i+1] == '\n')
                 {
-                    /* i += 2 seems not to work with GCC -O2 .. 
-                       so i+2 is used instead .. */
-                    if (len >= (i+2)+ content_len)
-                        return (i+2)+ content_len;
+                    if (chunked)
+                    { 
+                        while(1)
+                        {
+                            int chunk_len = 0;
+                            i += 2;
+
+#if 0
+/* debugging */
+                            if (i <len-2)
+                            {
+                                printf ("\n>>>");
+                                for (j = i; j <= i+4; j++)
+                                    printf ("%c", buf[j]);
+                                printf ("<<<\n");
+                            }
+#endif
+                            while (1)
+                                if (i >= len-2) {
+#if 0
+/* debugging */                                    
+                                    printf ("XXXXXXXX not there yet 1\n");
+                                    printf ("i=%d len=%d\n", i, len);
+#endif
+                                    return 0;
+                                } else if (isdigit(buf[i]))
+                                    chunk_len = chunk_len * 16 + 
+                                        (buf[i++] - '0');
+                                else if (isupper(buf[i]))
+                                    chunk_len = chunk_len * 16 + 
+                                        (buf[i++] - ('A'-10));
+                                else if (islower(buf[i]))
+                                    chunk_len = chunk_len * 16 + 
+                                        (buf[i++] - ('a'-10));
+                                else
+                                    break;
+                            if (buf[i] != '\r' || buf[i+1] != '\n' ||
+                                chunk_len < 0)
+                                return i+2;    /* bad. stop now */
+                            if (chunk_len == 0)
+                            {
+                                /* consider trailing headers .. */
+                                while(i <= len-4)
+                                {
+                                    if (buf[i] == '\r' &&  buf[i+1] == '\n' &&
+                                        buf[i+2] == '\r' && buf[i+3] == '\n')
+                                        if (len >= i+4)
+                                            return i+4;
+                                    i++;
+                                }
+#if 0
+/* debugging */
+                                printf ("XXXXXXXXX not there yet 2\n");
+                                printf ("i=%d len=%d\n", i, len);
+#endif
+                                return 0;
+                            }
+                            i += chunk_len+2;
+                        }
+                    }
+                    else
+                    {
+                        /* i += 2 seems not to work with GCC -O2 .. 
+                           so i+2 is used instead .. */
+                        if (len >= (i+2)+ content_len)
+                            return (i+2)+ content_len;
+                    }
                     break;
                 }
-                if (i < len-18)
+                else if (i < len - 21 &&
+                         !memcmp(buf+i, "Transfer-Encoding: ", 18))
                 {
-                    if (!memcmp(buf+i, "Content-Length:", 15))
-                    {
-                        i+= 15;
-                        if (buf[i] == ' ')
-                            i++;
-                        content_len = 0;
-                        while (i <= len-4 && isdigit(buf[i]))
-                            content_len = content_len*10 + (buf[i++] - '0');
-                        if (content_len < 0) /* prevent negative offsets */
-                            content_len = 0;
-                    }
+                    i+=18;
+                    if (buf[i] == ' ')
+                        i++;
+                    if (i < len - 8)
+                        if (!memcmp(buf+i, "chunked", 7))
+                            chunked = 1;
                 }
+                else if (i < len - 18 &&
+                         !memcmp(buf+i, "Content-Length: ", 15))
+                {
+                    i+= 15;
+                    if (buf[i] == ' ')
+                        i++;
+                    content_len = 0;
+                    while (i <= len-4 && isdigit(buf[i]))
+                        content_len = content_len*10 + (buf[i++] - '0');
+                    if (content_len < 0) /* prevent negative offsets */
+                        content_len = 0;
+                }
+                else
+                    i++;
             }
             else
                 i++;
