@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_expout.c,v $
- * Revision 1.10  1998-03-31 15:13:20  adam
+ * Revision 1.11  1998-04-02 08:27:37  adam
+ * Minor change in definition of Z_TargetInfo. Furhter work on Explain
+ * schema - added AttributeDetails.
+ *
+ * Revision 1.10  1998/03/31 15:13:20  adam
  * Development towards compiled ASN.1.
  *
  * Revision 1.9  1998/03/05 08:07:58  adam
@@ -460,7 +464,7 @@ static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
     res->recentNews = 0;
     res->icon = 0;
     res->namedResultSets = 0;
-    res->multipleDbSearch = 0;
+    res->multipleDBsearch = 0;
     res->maxResultSets = 0;
     res->maxResultSize = 0;
     res->maxTerms = 0;
@@ -492,7 +496,7 @@ static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
 	case 103: res->recentNews = f_humstring(eh, c); break;
 	case 104: res->icon = NULL; break; /* fix */
 	case 105: res->namedResultSets = f_bool(eh, c); break;
-	case 106: res->multipleDbSearch = f_bool(eh, c); break;
+	case 106: res->multipleDBsearch = f_bool(eh, c); break;
 	case 107: res->maxResultSets = f_integer(eh, c); break;
 	case 108: res->maxResultSize = f_integer(eh, c); break;
 	case 109: res->maxTerms = f_integer(eh, c); break;
@@ -547,8 +551,8 @@ static Z_TargetInfo *f_targetInfo(ExpHandle *eh, data1_node *n)
     }
     if (!res->namedResultSets)
 	res->namedResultSets = eh->false_value;
-    if (!res->multipleDbSearch)
-	res->multipleDbSearch = eh->false_value;
+    if (!res->multipleDBsearch)
+	res->multipleDBsearch = eh->false_value;
     return res;
 }
 

@@ -109,6 +109,8 @@ tag 558		proximityUnitVal				numeric
 tag 559		proximityUnitPrivate				structured
 tag 560		proximityUnitDescription			string
 
+# CommonInfo
+
 tag 600		commonInfo					structured
 tag 601		dateAdded					generalizedtime
 tag 602		dateChanged					generalizedtime
@@ -116,8 +118,36 @@ tag 603		expiry						generalizedtime
 tag 604		languageCode					string
 tag 605 	databaseList					structured
 
+# AttributeDetails, AttributeSetDetails
+
+tag 700		attributesBySet					structured
+tag 701		attributeSetDetails				structured
+tag 702		attributesByType				structured
+tag 703		attributeTypeDetails				structured
+tag 704		attributeType					numeric
+tag 705		defaultIfOmitted				structured
+tag 706		defaultValue					structured
+tag 707		defaultDescription				structured
+tag 708		attributeValues					structured
+tag 709		attributeValue					structured
+tag 710		value						structured
+tag 711		description					string
+tag 712		subAttributes					structured
+tag 713		subAttribute					structured
+tag 714		superAttributes					structured
+tag 715		superAttribute					structured
+tag 716		attributeCombinations				structured
+tag 717		legalAttributeCombinations			structured
+tag 718		attributeCombination				structured
+tag 719		attributeOccurrence				structured
+tag 720		mustBeSupplied					bool
+tag 721		anyOrNone					bool
+tag 722		specific					structured
+
 #
 # General tags for list members, etc.
 #
 tag 1000	oid						oid
 tag 1001	string						string
+tag 1002	numeric						numeric
+

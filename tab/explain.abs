@@ -2,7 +2,7 @@
 # explain data. On request, records are mapped to the proper Explain ASN.1
 # before transmission.
 #
-# $Id: explain.abs,v 1.10 1998-02-10 11:00:59 adam Exp $
+# $Id: explain.abs,v 1.11 1998-04-02 08:27:37 adam Exp $
 #
 
 name explain
@@ -54,7 +54,44 @@ elm (4,602)				dateChanged			!
 elm (4,603)				expiry		DateExpired
 elm (4,604)				languageCode	HumanStringLanguage
 
+section stringOrNumeric
+elm (4,1001)			string					-
+elm (4,1002)			numeric					-
+
+section attributeSetDetails
+elm (4,1000)			attributeSet				-
+elm (4,702)			attributesByType			-
+elm (4,702)/(4,703)		attributeTypeDetails			-
+elm (4,702)/(4,703)/(4,704)	attributeType				-
+elm (4,702)/(4,703)/(4,705)	defaultIfOmitted			-
+elm (4,702)/(4,703)/(4,705)/(4,706):stringOrNumeric	defaultValue	-
+elm (4,702)/(4,703)/(4,705)/(4,707)	defaultDescription		-
+elm (4,702)/(4,703)/(4,708)	attributeValues				-
+elm (4,702)/(4,703)/(4,708)/(4,709)	attributeValue			-
+elm (4,702)/(4,703)/(4,708)/(4,709)/(4,710):stringOrNumeric	value	-
+elm (4,702)/(4,703)/(4,708)/(4,709)/(4,711)	description		-
+elm (4,702)/(4,703)/(4,708)/(4,709)/(4,712)	subAttributes		-
+elm (4,702)/(4,703)/(4,708)/(4,709)/(4,712)/(4,713):stringOrNumeric subAttribute	-
+elm (4,702)/(4,703)/(4,708)/(4,709)/(4,714)	superAttributes		-
+elm (4,702)/(4,703)/(4,708)/(4,709)/(4,714)/(4,715):stringOrNumeric superAttributes	-
+
+section attributeCombinations
+elm (4,1000)			attributeSet				-
+elm (4,717)			legalCombinations			-
+elm (4,717)/(4,718)		legalCombination			-
+elm (4,717)/(4,718)/(4,719)	attributeOccurrence			-
+elm (4,717)/(4,718)/(4,719)/(4,1000)	attributeSetId			-
+elm (4,717)/(4,718)/(4,719)/(4,704)	attributeType			-
+elm (4,717)/(4,718)/(4,719)/(4,704)	attributeType			-
+elm (4,717)/(4,718)/(4,719)/(4,720)	mustBeSupplied			-
+elm (4,717)/(4,718)/(4,719)/(4,708)	attributeValues			-
+elm (4,717)/(4,718)/(4,719)/(4,708)/(4,721)	anyOrNone		-
+elm (4,717)/(4,718)/(4,719)/(4,708)/(4,722):stringOrNumeric specific	-
+
 section main
+#
+# TargetInfo
+# 
 elm (4,1)			targetInfo		ExplainCategory
 elm (4,1)/(4,600):commonInfo	targetCommonInfo			-
 elm (4,1)/(4,102)		targetName		TargetName
@@ -79,7 +116,9 @@ elm (4,1)/(4,118)/(4,605)	databaseList				-
 elm (4,1)/(4,118)/(4,605)/(4,102)	databaseName			-
 elm (4,1)/(4,119)		addresses				-
 elm (4,1)/(4,500):accessInfo	commonAccessInfo			-
-
+#
+# DatabaseInfo
+#
 elm (4,2)			databaseInfo		ExplainCategory
 elm (4,2)/(4,600):commonInfo	databaseCommonInfo			-
 elm (4,2)/(4,102)		databaseName		DatabaseName
@@ -119,3 +158,12 @@ elm (4,2)/(4,223)		producerContactInfo			-
 elm (4,2)/(4,224)		supplierContactInfo			-
 elm (4,2)/(4,225)		submissionContactInfo			-
 elm (4,2)/(4,500):accessInfo	databaseAccessInfo			-
+#
+# AttributeDetails
+#
+elm (4,9)			attributeDetails	ExplainCategory
+elm (4,9)/(4,600):commonInfo	attributeDetailsCommonInfo		-
+elm (4,9)/(4,102)		databaseName		DatabaseName
+elm (4,9)/(4,700)		attributesBySet				-
+elm (4,9)/(4,700)/(4,701):attributeSetDetails attributeSetDetails	-
+elm (4,9)/(4,716):attributeCombinations attributeCombinations		-
