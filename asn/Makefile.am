@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.4 2000-10-03 12:55:50 adam Exp $
+## $Id: Makefile.am,v 1.5 2001-03-21 15:02:39 adam Exp $
 
 noinst_LTLIBRARIES=libasn.la
 
@@ -11,4 +11,4 @@ pkginclude_HEADERS = \
 	prt-acc.h prt-add.h prt-arc.h prt-dat.h prt-dia.h prt-esp.h prt-exd.h \
 	prt-exp.h prt-ext.h prt-grs.h prt-proto.h prt-rsc.h prt-univ.h
 
-INCLUDES=-I$(srcdir)/../include
+INCLUDES=-I$(top_srcdir)/include

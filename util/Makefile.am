@@ -1,6 +1,6 @@
-## Copyright (C) 1994-2000, Index Data
+## Copyright (C) 1994-2001, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.8 2000-11-23 10:58:33 adam Exp $
+## $Id: Makefile.am,v 1.9 2001-03-21 15:02:39 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 
@@ -12,9 +12,9 @@ EXTRA_DIST = yaz-comp
 
 LIBS =
 
-INCLUDES =-I$(srcdir)/../include
+INCLUDES =-I$(top_srcdir)/include
 
-libyazthread_la_INCLUDES=-I$(srcdir)/../include
+libyazthread_la_INCLUDES=-I$(top_srcdir)/include
 
 noinst_PROGRAMS = marcdump
 

@@ -1,6 +1,6 @@
-## $Id: Makefile.am,v 1.4 2000-04-05 07:39:55 adam Exp $
+## $Id: Makefile.am,v 1.5 2001-03-21 15:02:39 adam Exp $
 
-INCLUDES=-I$(srcdir)/../include
+INCLUDES=-I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = libasn.la
 
@@ -8,28 +8,61 @@ EXTRA_DIST=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl esadmin.asn
 
 LIBS =
 
+YAZCOMP = $(top_srcdir)/util/yaz-comp
+
 libasn_la_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c \
  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
  zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c
 
-z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
- z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c \
- z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c \
- zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
- zes-pset.c zes-update0.c \
- ../include/yaz/z-accdes1.h: z.tcl z3950v3.asn ../util/yaz-comp
-	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) z3950v3.asn
+# Rules for Z39.50 V3
+$(srcdir)/z-accdes1.c \
+$(srcdir)/z-accform1.c \
+$(srcdir)/z-acckrb1.c \
+$(srcdir)/z-core.c \
+$(srcdir)/z-diag1.c \
+$(srcdir)/z-espec1.c \
+$(srcdir)/z-estask.c \
+$(srcdir)/z-exp.c \
+$(srcdir)/z-grs.c \
+$(srcdir)/z-opac.c \
+$(srcdir)/z-uifr1.c \
+$(srcdir)/z-rrf1.c \
+$(srcdir)/z-rrf2.c \
+$(srcdir)/z-sum.c \
+$(srcdir)/z-sutrs.c \
+$(srcdir)/zes-expi.c \
+$(srcdir)/zes-exps.c \
+$(srcdir)/zes-order.c \
+$(srcdir)/zes-pquery.c \
+$(srcdir)/zes-psched.c \
+$(srcdir)/zes-pset.c \
+$(srcdir)/zes-update0.c \
+$(top_srcdir)/include/z-accdes1.h \
+$(top_srcdir)/include/z-core.h: \
+$(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
+	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) z3950v3.asn
 
-z-date.c ../include/yaz/z-date.h: z.tcl datetime.asn ../util/yaz-comp
-	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) datetime.asn
+# Date extension
+$(srcdir)/z-date.c \
+$(top_srcdir)/include/yaz/z-date.h: $(srcdir)/z.tcl $(srcdir)/datetime.asn $(YAZCOMP)
+	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I../include $(YCFLAGS) datetime.asn
 
-z-univ.c ../include/yaz/z-univ.h: z.tcl univres.asn ../util/yaz-comp
-	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) univres.asn
+# UNIverse extension
+$(srcdir)/z-univ.c \
+$(top_srcdir)/include/yaz/z-univ.h: \
+$(srcdir)/z.tcl $(srcdir)/univres.asn $(YAZCOMP)
+	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) univres.asn
 
-zes-update.c ../include/yaz/zes-update.h: z.tcl esupdate.asn ../util/yaz-comp
-	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esupdate.asn
+# New Update extended service
+$(srcdir)/zes-update.c \
+$(top_srcdir)/include/yaz/zes-update.h: \
+$(srcdir)/z.tcl $(srcdir)/esupdate.asn $(YAZCOMP)
+	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esupdate.asn
 
-zes-admin.c ../include/yaz/zes-admin.h: z.tcl esadmin.asn ../util/yaz-comp
-	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esadmin.asn
+# Admin extended service
+$(srcdir)/zes-admin.c \
+$(top_srcdir)/include/yaz/zes-admin.h: \
+$(srcdir)/z.tcl $(srcdir)/esadmin.asn $(YAZCOMP)
+	cd $(srcdir); ../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esadmin.asn
