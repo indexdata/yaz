@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.101  2000-01-12 14:36:07  adam
+ * Revision 1.102  2000-03-15 12:59:49  adam
+ * Added handle member to statserv_control.
+ *
+ * Revision 1.101  2000/01/12 14:36:07  adam
  * Added printing stream (ODR) for backend functions.
  *
  * Revision 1.100  1999/12/16 23:36:19  adam
@@ -837,7 +840,6 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     binitreq.stream = assoc->encode;
     binitreq.print = assoc->print;
-    binitreq.configname = "default-config";
     binitreq.auth = req->idAuthentication;
     binitreq.referenceId = req->referenceId;
     binitreq.implementation_version = 0;

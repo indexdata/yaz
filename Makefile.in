@@ -331,7 +331,7 @@ installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
-yaz-config:
+yaz-config: Makefile
 	@echo "#!/bin/sh" >yaz-config
 	@echo "# YAZ settings for developers" >>yaz-config
 	@echo "YAZBIN=\"`pwd`/bin\"" >>yaz-config

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.4  2000-02-28 11:20:06  adam
+ * Revision 1.5  2000-03-15 12:59:49  adam
+ * Added handle member to statserv_control.
+ *
+ * Revision 1.4  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.3  2000/01/12 14:36:07  adam
@@ -288,7 +291,6 @@ typedef struct bend_esrequest_rr
 
 typedef struct bend_initrequest
 {
-    char *configname;
     Z_IdAuthentication *auth;
     ODR stream;                /* encoding stream */
     ODR print;                 /* printing stream */

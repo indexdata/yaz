@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.3  2000-03-14 09:06:11  adam
+ * Revision 1.4  2000-03-15 12:59:49  adam
+ * Added handle member to statserv_control.
+ *
+ * Revision 1.3  2000/03/14 09:06:11  adam
  * Added POSIX threads support for frontend server.
  *
  * Revision 1.2  2000/02/28 11:20:06  adam
@@ -126,7 +129,8 @@ typedef struct statserv_options_block
     int (*check_ip)(void *cd, const char *addr, int len, int type);
     char daemon_name[128];
     int inetd;                    /* Do we use the inet deamon or not */
-    
+
+    void *handle;                 /* Handle */
 #ifdef WIN32
     /* We only have these members for the windows version */
     /* They seemed a bit large to have them there in general */

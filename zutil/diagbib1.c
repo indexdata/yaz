@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.2  1999-11-30 13:47:12  adam
+ * Revision 1.3  2000-03-15 12:59:49  adam
+ * Added handle member to statserv_control.
+ *
+ * Revision 1.2  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.1  1999/06/08 10:10:16  adam

@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.60  2000-03-14 09:06:11  adam
+ * Revision 1.61  2000-03-15 12:59:49  adam
+ * Added handle member to statserv_control.
+ *
+ * Revision 1.60  2000/03/14 09:06:11  adam
  * Added POSIX threads support for frontend server.
  *
  * Revision 1.59  1999/11/30 13:47:12  adam
@@ -264,7 +267,8 @@ statserv_options_block control_block = {
     check_options,              /* Default routine, for checking the run-time arguments */
     check_ip_tcpd,
     "",
-    0                           /* default value for inet deamon */
+    0,                          /* default value for inet deamon */
+    0,                          /* handle (for service, etc) */
 
 #ifdef WIN32
     ,"Z39.50 Server",           /* NT Service Name */
@@ -927,6 +931,7 @@ int check_options(int argc, char **argv)
 	    control_block.threads = 1;
 #else
 	    fprintf(stderr, "%s: Threaded mode not available.\n", me);
+	    return 1;
 #endif
 	    break;
 	case 'l':
@@ -972,7 +977,7 @@ int check_options(int argc, char **argv)
 	    if (chdir(arg))
 	    {
 		perror(arg);		
-		return(1);
+		return 1;
 	    }
 	    break;
 	default:
@@ -980,7 +985,7 @@ int check_options(int argc, char **argv)
 		    " -l <logfile> -u <user> -c <config> -t <minutes>"
 		    " -k <kilobytes> -d <daemon>"
                         " -zsiST -w <directory> <listender-addr>... ]\n", me);
-	    return(1);
+	    return 1;
         }
     }
     return 0;
