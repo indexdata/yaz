@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.200 2003-06-11 18:36:57 adam Exp $
+ * $Id: client.c,v 1.201 2003-06-19 21:10:03 adam Exp $
  */
 
 #include <stdio.h>
@@ -2831,17 +2831,6 @@ int cmd_set_marcdump(const char* arg)
     return 1;
 }
 
-int cmd_set_proxy(const char* arg)
-{
-    if(yazProxy) free(yazProxy);
-    yazProxy=NULL;
-    
-    if(strlen(arg) > 1) {
-        yazProxy=strdup(arg);
-    }
-    return 1;
-}
-
 /* 
    this command takes 3 arge {name class oid} 
 */
@@ -3156,8 +3145,9 @@ void wait_and_handle_response()
             fprintf(f, "---------\n");
             if (apdu_file)
                 z_GDU(print, &gdu, 0, 0);
-            close_session ();
-            break;
+            if (conn && cs_more(conn))
+                continue;
+	    break;
         }
         if (ber_file)
             odr_dumpBER(ber_file, netbuffer, res);
