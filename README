@@ -2,11 +2,10 @@
 Copyright (C) 1995-2001, Index Data ApS.
 See the file LICENSE for details.
 
-Compilation and installation instructions for YAZ 
-  $Id: README,v 1.36 2001-10-23 21:00:19 adam Exp $
+$Id: README,v 1.37 2001-10-25 12:28:07 adam Exp $
 
-The primary output of the source here is the lib/libyaz.a library,
-which contains support functions for implementing the server or client
+The primary output of the source here is the YAZ library, which
+contains support functions for implementing the server or client
 role of Z39.50.
 
 Windows programmers: refer to the file windows.txt which describes how
@@ -19,118 +18,57 @@ Note: If you are using the CVS snapshot of YAZ you must have autoconf,
 automake and libtool installed. Before running configure, create
 support files by running buildconf.sh in the top-level directory of YAZ.  
 
-Two test-programs of interest are generated when you type 'make' at the
-top level: ztest/yaz-ztest and client/yaz-client. Ztest is a dummy
-database server which returns canned responses to all queries. It's good
-for verifying that the protocol works ok, and ztest.c shows an
-implementation of a 'backend' interface.
+In any case refer to the documentation in sub directory doc or read
+it online at http://www.indexdata.dk/yaz/
 
-yaz-client is a linemode Z39.50 client. It supports a fair amount of the
-functionality of Z39.50V3, but some things you need to enable or
-disable by recompilation. Its primary purpose is to excersise the
-package, and verify that the protocol works OK. It can be started by
-typing
+File organisation:
 
-  yaz-client <hostname>[:<port>[/<database>]]
+doc      Documentation.
 
-at the UNIX prompt, to connect to a Z39.50 server.
+util     Various little utility functions. Logging, memory debugging,
+	 primitive ISO 2709 presentation for the yaz-client, etc. You'll
+	 find the ASN.1 Compiler for YAZ here as well (yaz-comp).
 
-Use '?' to get a list of the available commands.
+odr      Open Data Representation. This module implements the BER
+ 	 encoding rules.
 
-The current query language for the find command is a bit awkward, but
-functional:
+z39.50   codecs for the Z39.50 protocol. This module does the same job
+         as the old 'asn' module except that the source files are
+         auto-generated using an YAZ' ASN.1 Compiler (yaz-comp).
 
- query     ::= ['@attrset' <attribute-set>] rpn
- rpn       ::= complex | simple | attr rpn
- complex   ::= operator rpn rpn
- operator  ::= '@and' | '@or' | '@not' | '@prox' proximity
- simple    ::= term | set.
- term      ::= <word> | '"' <term> ... '"'.
- set       ::= '@set' <setname>.
- attr      ::= '@attr' [<attribute-set>] <number> '=' <number>.
- proximity ::= exclusion distance ordered relation which unit
- exclusion ::= '1' | '0' | 'void'
- distance  ::= <number>
- ordered   ::= '1' | '0'
- relation  ::= <number>
- which     ::= 'known' | 'private'
- unit      ::= <number>
+zutil    This module implements a collection of Z39.50 utilities, such
+         as query parsing, etc.
 
-Eg.:
+ill      codesc for the ISO ILL protocol.
 
- Andersen
+comstack This module implements the transport transparency
+	 stack (COMSTACK). The comstack implements a generic interface
+	 for exchanging BER-encoded records over a network. It supports
+	 the 'American' mode of exchanging the records straight over
+	 TCP/IP, and uses Peter Furniss' XTIMOSI package over RFC1006.
+	 Look for documentation in the file comstack.man.
 
- "Hans Andersen"
+zoom     An implementation of Mike Taylors Z39.50 Object Oriented
+         Model : ZOOM. If you'd like to build Z39.50 client applications
+         in C this may be good start. You'll find example programs in 
+         this directory too.
 
- @and @attr 1=1 andersen @attr 1=4 @attr 4=2 duckling
+server   This is the implementation of the server frontend. It
+	 provides event-handling and server managament functions,
+	 and calls the backend primitives (best documentation of these
+	 is in the file include/yaz/backend.h).
 
- @attrset Bib-1 @and @attr GILS 2=2008 Washington @attr 1=21 weather
+client   A demonstration client for testing the protocol. It's bug'n
+         ugly. But, it supports many features.
 
-The sort command takes a sequence of sort specifications. A sort
-specification holds a field (sort criteria) and is followed by flags.
-If the sort critieria includes = it is assumed that the sort SortKey
-is of type sortAttributes using Bib-1. The integer before the = is
-the attribute type and the integer following the = is the attribute
-value. If no = is in the SortKey it is treated as a sortfield-type
-of type InternationalString. Flags observed are s (sort case
-sensitive), i (sort case insensitive), < (ascending), > (descending).
-Eg.:
-   1=4   i<                  (use is title, insensitive, ascending).
-   Title s>                  (String Title, sensitive, descending).
+ztest    A demonstration server that implements a backend.
 
-The directories:
+include/yaz The various header files.
 
-doc     - Documentation.
-
-util    - Various little utility functions. Logging, memory debugging,
-	primitive ISO 2709 presentation for the yaz-client, etc. You'll
-	find the ASN.1 Compiler for YAZ here as well (yc.tcl).
-
-odr	- Open Data Representation. This module implements the BER
-	encoding rules. Documentation is found in the files odr-use.man
-	and odr.txt.
-
-z39.50  - CODECS for the Z39.50 protocol. This module does the same job
-        as the old 'asn' module except that the source files are
-        auto-generated using an YAZ' ASN.1 Compiler (yaz-comp).
-
-zutil   - This module implements a collection of Z39.50 utilities, such
-        as query parsing, etc.
-
-ill     - This module implements the ISO ILL protocol.
-
-comstack - This module implements the transport transparency
-	stack (COMSTACK). The comstack implements a generic interface
-	for exchanging BER-encoded records over a network. It supports
-	the 'American' mode of exchanging the records straight over
-	TCP/IP, and uses Peter Furniss' XTIMOSI package over RFC1006.
-	Look for documentation in the file comstack.man.
-
-zoom    - An implementation of Mike Taylors Z39.50 Object Oriented
-        Model : ZOOM. If you'd like to build Z39.50 client applications
-        in C this may be good start. You'll find example programs in 
-        this directory too.
-
-server  - This is the implementation of the server frontend. It
-	provides event-handling and server managament functions,
-	and calls the backend primitives (best documentation of these
-	is in the file include/yaz/backend.h).
-
-client  - A demonstration client for testing the protocol. It's bug'n
-        ugly. But, it supports many features.
-
-ztest   - A demonstration server that implements a backend.
-
-include/yaz - The various header files.
-
-lib     - The libraries. Primarily libyaz.a. The makefile gathers the
-          libraries from previous modules into libyaz.a.
+lib      The libraries. Primarily libyaz.la. The makefile gathers the
+         libraries from previous modules into libyaz.la.
 
 To get more information or assistance, send mail to yaz-help@indexdata.dk.
-
-We maintain a mailing-list for the purpose of announcing new versions of
-the software, bug-reports, discussion etc. You can sign up by sending
-mail to yaz-request@indexdata.dk and include the following command
-command in your email:
-    subscribe yaz-l
+Even better, sign on to the YAZ mailing list here:
+http://www.indexdata.dk/mailman/listinfo/yazlist
 
