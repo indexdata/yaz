@@ -28,15 +28,17 @@
 #ifndef D1_MAP_H
 #define D1_MAP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct data1_maptag
 {
     int new_field;
     int type;
-    enum 
-    {
-	D1_MAPTAG_numeric,
-	D1_MAPTAG_string
-    } which;
+#define D1_MAPTAG_numeric 1
+#define D1_MAPTAG_string 2
+    int which;
     union
     {
 	int numeric;
@@ -61,5 +63,9 @@ typedef struct data1_maptab
     data1_mapunit *map;
     struct data1_maptab *next;
 } data1_maptab;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

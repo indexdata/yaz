@@ -30,6 +30,10 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define multipleDbSearch multipleDBsearch
 
 typedef struct Z_CommonInfo
@@ -148,7 +152,7 @@ typedef struct Z_ProxSupportUnit
     union
     {
     	int *known;
-	Z_ProxSupportPrivate *private;
+	Z_ProxSupportPrivate *zprivate;
     } u;
 } Z_ProxSupportUnit;
 
@@ -186,7 +190,7 @@ typedef struct Z_QueryTypeDetails
 #define Z_QueryTypeDetails_rankedList 5
     union
     {
-	Z_PrivateCapabilities *private;
+	Z_PrivateCapabilities *zprivate;
 	Z_RpnCapabilities *rpn;
 	Z_Iso8777Capabilities *iso8777;
 	Z_HumanString *z3958;
@@ -996,5 +1000,9 @@ typedef struct Z_ExplainRecord
 } Z_ExplainRecord;
 
 int z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-add.h,v $
- * Revision 1.2  1997-04-30 08:52:09  quinn
+ * Revision 1.3  1997-05-14 06:53:46  adam
+ * C++ support.
+ *
+ * Revision 1.2  1997/04/30 08:52:09  quinn
  * Null
  *
  * Revision 1.1  1996/10/10  11:51:58  quinn
@@ -35,6 +38,10 @@
 
 #ifndef PRT_ADD_H
 #define PRT_ADD_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct Z_QueryExpressionTerm
 {
@@ -97,5 +104,9 @@ typedef struct Z_SearchInfoReport
 } Z_SearchInfoReport;
 
 int z_SearchInfoReport (ODR o, Z_SearchInfoReport **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -30,6 +30,10 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct Z_OccurValues
 {
     int *start;
@@ -133,5 +137,9 @@ typedef struct Z_Espec1
 } Z_Espec1;
 
 int z_Espec1(ODR o, Z_Espec1 **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

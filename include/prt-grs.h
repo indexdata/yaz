@@ -30,6 +30,10 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct Z_GenericRecord;
 typedef struct Z_GenericRecord Z_GenericRecord;
 
@@ -94,7 +98,7 @@ typedef struct Z_HitVector
 typedef struct Z_Triple
 {
     Odr_oid *variantSetId;                  /* OPTIONAL */
-    int *class;
+    int *zclass;
     int *type;
     int which;
 #define Z_Triple_integer 0
@@ -172,5 +176,9 @@ struct Z_GenericRecord
 
 int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
 int z_Variant(ODR o, Z_Variant **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.7  1997-04-30 08:52:11  quinn
+ * Revision 1.8  1997-05-14 06:54:02  adam
+ * C++ support.
+ *
+ * Revision 1.7  1997/04/30 08:52:11  quinn
  * Null
  *
  * Revision 1.6  1996/10/11  11:57:22  quinn
@@ -48,7 +51,7 @@ static int match_children_wildpath(data1_node *n, Z_Espec1 *e, int i,
  * triple with an unknown set.
  */
 static Z_Triple *find_triple(Z_Variant *var, oid_value universalset,
-    oid_value set, int class, int type)
+    oid_value set, int zclass, int type)
 {
     int i;
     oident *defaultsetent = oid_getentbyoid(var->globalVariantSetId);
@@ -62,7 +65,7 @@ static Z_Triple *find_triple(Z_Variant *var, oid_value universalset,
 	oid_value curset = cursetent ? cursetent->value : defaultset;
 
 	if (set == curset &&
-	    *var->triples[i]->class == class &&
+	    *var->triples[i]->zclass == zclass &&
 	    *var->triples[i]->type == type)
 	    return var->triples[i];
     }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.13  1997-04-30 08:52:10  quinn
+ * Revision 1.14  1997-05-14 06:53:57  adam
+ * C++ support.
+ *
+ * Revision 1.13  1997/04/30 08:52:10  quinn
  * Null
  *
  * Revision 1.12  1996/10/08  12:58:17  adam
@@ -79,10 +82,10 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 	    }
 	    else if (o->direction != ODR_DECODE)
 	    {
-	    	cl = arm[i].class;
+	    	cl = arm[i].zclass;
 	    	tg = arm[i].tag;
 	    }
-	    if (tg == arm[i].tag && cl == arm[i].class)
+	    if (tg == arm[i].tag && cl == arm[i].zclass)
 	    {
 	    	if (arm[i].tagmode == ODR_IMPLICIT)
 	    	{

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.6  1996-07-06 19:58:34  quinn
+ * Revision 1.7  1997-05-14 06:54:02  adam
+ * C++ support.
+ *
+ * Revision 1.6  1996/07/06 19:58:34  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.5  1996/01/02  08:57:44  quinn
@@ -56,11 +59,11 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
     r->num_triples = argc;
     for (i = 0; i < argc; i++)
     {
-	int class, type;
+	int zclass, type;
 	char value[512];
 	Z_Triple *t;
 
-	if (sscanf(argv[i], "(%d,%d,%[^)])", &class, &type, value) < 3)
+	if (sscanf(argv[i], "(%d,%d,%[^)])", &zclass, &type, value) < 3)
 	{
 	    logf(LOG_WARN, "Syntax error in variant component '%s'",
 	    	argv[i]);
@@ -68,8 +71,8 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
 	}
 	t = r->triples[i] = odr_malloc(o, sizeof(Z_Triple));
 	t->variantSetId = 0;
-	t->class = odr_malloc(o, sizeof(int));
-	*t->class = class;
+	t->zclass = odr_malloc(o, sizeof(int));
+	*t->zclass = zclass;
 	t->type = odr_malloc(o, sizeof(int));
 	*t->type = type;
 	/*

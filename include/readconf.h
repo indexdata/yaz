@@ -4,9 +4,17 @@
 
 #include <stdio.h>
 
-int readconf(char *name, void *private,
-    int (*fun)(char *name, void *private, int argc, char *argv[]));
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int readconf(char *name, void *rprivate,
+int (*fun)(char *name, void *rprivate, int argc, char *argv[]));
 
 int readconf_line(FILE *f, char *line, int len, char *argv[], int num);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

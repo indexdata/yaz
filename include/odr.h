@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.20  1997-04-30 08:52:08  quinn
+ * Revision 1.21  1997-05-14 06:53:41  adam
+ * C++ support.
+ *
+ * Revision 1.20  1997/04/30 08:52:08  quinn
  * Null
  *
  * Revision 1.19  1996/10/08  12:58:08  adam
@@ -141,6 +144,10 @@
 
 #include <nmem.h>
 #include <yconfig.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef bool_t
 #define bool_t int
@@ -274,7 +281,7 @@ typedef int (*Odr_fun)();
 typedef struct odr_arm
 {
     int tagmode;
-    int class;
+    int zclass;
     int tag;
     int which;
     Odr_fun fun;
@@ -377,6 +384,10 @@ NMEM odr_extract_mem(ODR o);
 #define odr_setmem(o, v) ((o)->mem = (v))
 
 #define ODR_MAXNAME 256
+
+#ifdef __cplusplus
+}
+#endif
 
 #include <prt.h>
 #include <xmalloc.h>

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.12  1997-04-30 08:52:02  quinn
+ * Revision 1.13  1997-05-14 06:53:22  adam
+ * C++ support.
+ *
+ * Revision 1.12  1997/04/30 08:52:02  quinn
  * Null
  *
  * Revision 1.11  1996/10/10  12:35:13  quinn
@@ -127,14 +130,14 @@ int z_External(ODR o, Z_External **p, int opt)
 	(oid = oid_getentbyoid((*p)->direct_reference)) &&
 	(type = z_ext_getentbyref(oid->value)))
     {
-	int class, tag, cons;
+	int zclass, tag, cons;
 
 	/*
 	 * We know it. If it's represented as an ASN.1 type, bias the CHOICE.
 	 */
-	if (!odr_peektag(o, &class, &tag, &cons))
+	if (!odr_peektag(o, &zclass, &tag, &cons))
 	    return opt && odr_ok(o);
-	if (class == ODR_CONTEXT && tag == 0 && cons == 1)
+	if (zclass == ODR_CONTEXT && tag == 0 && cons == 1)
 	    odr_choice_bias(o, type->what);
     }
     return

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: options.h,v $
- * Revision 1.4  1995-09-29 17:12:05  quinn
+ * Revision 1.5  1997-05-14 06:53:43  adam
+ * C++ support.
+ *
+ * Revision 1.4  1995/09/29 17:12:05  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:48  quinn
@@ -51,6 +54,16 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 #include <yconfig.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int options (const char *desc, char **argv, int argc, char **arg);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 	

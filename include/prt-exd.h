@@ -30,6 +30,10 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct Z_TaskPackage
 {
     Odr_oid *packageType;                 
@@ -253,5 +257,9 @@ typedef struct Z_IUUpdate
 } Z_IUUpdate;
 
 int z_IUUpdate(ODR o, Z_IUUpdate **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

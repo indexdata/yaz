@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-rsc.h,v $
- * Revision 1.5  1995-09-29 17:12:11  quinn
+ * Revision 1.6  1997-05-14 06:53:50  adam
+ * C++ support.
+ *
+ * Revision 1.5  1995/09/29 17:12:11  quinn
  * Smallish
  *
  * Revision 1.4  1995/09/27  15:02:52  quinn
@@ -46,6 +49,10 @@
 #define PRT_RSC_H
 
 #include <yconfig.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* -------------------- Resource-1 -------------------- */
 
@@ -98,5 +105,9 @@ typedef struct Z_ResourceReport2
 } Z_ResourceReport2;
 
 int z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.7  1996-03-08 14:38:41  quinn
+ * Revision 1.8  1997-05-14 06:53:57  adam
+ * C++ support.
+ *
+ * Revision 1.7  1996/03/08 14:38:41  quinn
  * Fixed output.
  *
  * Revision 1.6  1996/01/19  15:41:34  quinn
@@ -33,14 +36,14 @@
 
 static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
 {
-    int res, ll, class, tag, cons;
+    int res, ll, zclass, tag, cons;
     char *b = buf;
     
     if (!len)
     	return 0;
     if (!buf[0] && !buf[1])
     	return 0;
-    if ((res = ber_dectag((unsigned char*)b, &class, &tag, &cons)) <= 0)
+    if ((res = ber_dectag((unsigned char*)b, &zclass, &tag, &cons)) <= 0)
     	return 0;
     if (res > len)
     {
@@ -48,7 +51,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
     	return 0;
     }
     fprintf(f, "%5d: %*s", offset, level * 4, "");
-    if (class == ODR_UNIVERSAL)
+    if (zclass == ODR_UNIVERSAL)
     {
     	static char *nl[] =
 	{
@@ -65,10 +68,10 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
 	else
 	    fprintf(f, "[UNIV %d]", tag);
     }
-    else if (class == ODR_CONTEXT)
+    else if (zclass == ODR_CONTEXT)
 	fprintf(f, "[%d]", tag);
     else
-	fprintf(f, "[%d:%d]", class, tag);
+	fprintf(f, "[%d:%d]", zclass, tag);
     b += res;
     len -= res;
     if ((res = ber_declen((unsigned char*)b, &ll)) <= 0)

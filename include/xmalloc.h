@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmalloc.h,v $
- * Revision 1.1  1995-11-01 11:55:41  quinn
+ * Revision 1.2  1997-05-14 06:53:53  adam
+ * C++ support.
+ *
+ * Revision 1.1  1995/11/01 11:55:41  quinn
  * Added xmalloc.c
  *
  * Revision 1.8  1995/10/16  14:03:07  quinn
@@ -62,6 +65,10 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void *xrealloc_f (void *o, size_t size, char *file, int line);
 void *xmalloc_f (size_t size, char *file, int line);
 void *xcalloc_f (size_t nmemb, size_t size, char *file, int line);
@@ -73,5 +80,9 @@ void xfree_f (void *p, char *file, int line);
 #define xcalloc(x,y) xcalloc_f(x,y, __FILE__, __LINE__)
 #define xfree(x) xfree_f(x, __FILE__, __LINE__)
 #define xstrdup(s) xstrdup_f(s, __FILE__, __LINE__)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

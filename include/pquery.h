@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: pquery.h,v $
- * Revision 1.6  1996-08-12 14:09:24  adam
+ * Revision 1.7  1997-05-14 06:53:43  adam
+ * C++ support.
+ *
+ * Revision 1.6  1996/08/12 14:09:24  adam
  * Default prefix query attribute set defined by using p_query_attset.
  *
  * Revision 1.5  1996/03/15  11:01:46  adam
@@ -51,9 +54,18 @@
 #include <yconfig.h>
 #include <proto.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
 
 Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
                                     Odr_oid **attributeSetP, const char *qbuf);
 int p_query_attset (const char *arg);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

@@ -25,4 +25,17 @@
  *
  */
 
+#ifndef TPATH_H
+#define TPATH_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 FILE *yaz_path_fopen(const char *path, const char *name, const char *mode);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

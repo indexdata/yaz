@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: tcpip.h,v $
- * Revision 1.7  1996-07-06 19:58:32  quinn
+ * Revision 1.8  1997-05-14 06:53:52  adam
+ * C++ support.
+ *
+ * Revision 1.7  1996/07/06 19:58:32  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.6  1996/02/10  12:23:42  quinn
@@ -63,8 +66,16 @@
 #define YNETINCLUDE
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct sockaddr_in *tcpip_strtoaddr(const char *str);
 
 COMSTACK tcpip_type(int s, int blocking, int protocol);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.13  1996-10-29 13:35:38  adam
+ * Revision 1.14  1997-05-14 06:54:04  adam
+ * C++ support.
+ *
+ * Revision 1.13  1996/10/29 13:35:38  adam
  * Implemented data1_set_tabpath and data1_get_tabpath.
  *
  * Revision 1.12  1996/10/11 10:35:38  adam
@@ -302,18 +305,18 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	}
 	else if (!strncmp(tag, "var", 3))
 	{
-	    char class[DATA1_MAX_SYMBOL], type[DATA1_MAX_SYMBOL];
+	    char tclass[DATA1_MAX_SYMBOL], type[DATA1_MAX_SYMBOL];
 	    data1_vartype *tp;
 	    int val_offset;
 	    data1_node *p;
 
-	    if (sscanf(args, "%s %s %n", class, type, &val_offset) != 2)
+	    if (sscanf(args, "%s %s %n", tclass, type, &val_offset) != 2)
 	    {
 		logf(LOG_WARN, "Malformed variant triple at '%s'", tag);
 		return 0;
 	    }
 	    if (!(tp = data1_getvartypebyct(parent->root->u.root.absyn->varset,
-		class, type)))
+		tclass, type)))
 		return 0;
 	    
 	    /*

@@ -30,6 +30,10 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct wrbuf
 {
     char *buf;
@@ -49,5 +53,9 @@ int wrbuf_write(WRBUF b, char *buf, int size);
 #define wrbuf_putc(b, c) \
     (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
     (b)->buf[(b)->pos++] = (c), 0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

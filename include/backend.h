@@ -32,6 +32,10 @@
 #include <proto.h>
 #include <statserv.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct bend_initrequest
 {
     char *configname;
@@ -135,5 +139,9 @@ bend_deleteresult *bend_delete(void *handle, bend_deleterequest *r, int *fd);
 bend_deleteresult *bend_deleteresponse(void *handle);
 
 void bend_close(void *handle);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

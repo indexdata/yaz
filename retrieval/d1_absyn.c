@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.9  1997-02-19 14:46:15  adam
+ * Revision 1.10  1997-05-14 06:54:01  adam
+ * C++ support.
+ *
+ * Revision 1.9  1997/02/19 14:46:15  adam
  * The "all" specifier only affects elements that are indexed (and not
  * all elements).
  *
@@ -174,7 +177,7 @@ data1_absyn *data1_read_absyn(char *file)
 	    *args = '\0';
 	if (!strcmp(cmd, "elm"))
 	{
-	    data1_element *new;
+	    data1_element *new_element;
 	    int i;
 	    char path[512], name[512], termlists[512], *p;
 	    int type, value;
@@ -204,15 +207,15 @@ data1_absyn *data1_read_absyn(char *file)
 		return 0;
 	    }
 	    level = i;
-	    if (!(new = cur[level] = *ppl[level] = xmalloc(sizeof(*new))))
+	    if (!(new_element = cur[level] = *ppl[level] = xmalloc(sizeof(*new_element))))
 		abort;
-	    new->next = new->children = 0;
-	    new->tag = 0;
-	    new->termlists = 0;
-	    new->parent = level ? cur[level - 1] : 0;
-	    tp = &new->termlists;
-	    ppl[level] = &new->next;
-	    ppl[level+1] = &new->children;
+	    new_element->next = new_element->children = 0;
+	    new_element->tag = 0;
+	    new_element->termlists = 0;
+	    new_element->parent = level ? cur[level - 1] : 0;
+	    tp = &new_element->termlists;
+	    ppl[level] = &new_element->next;
+	    ppl[level+1] = &new_element->children;
 
 	    /* well-defined tag */
 	    if (sscanf(p, "(%d,%d)", &type, &value) == 2)
@@ -223,7 +226,7 @@ data1_absyn *data1_read_absyn(char *file)
 		    fclose(f);
 		    return 0;
 		}
-		if (!(new->tag = data1_gettagbynum(res->tagset, type, value)))
+		if (!(new_element->tag = data1_gettagbynum(res->tagset, type, value)))
 		{
 		    logf(LOG_WARN, "Couldn't find tag %s in tagset in %s",
 			p, file);
@@ -234,10 +237,10 @@ data1_absyn *data1_read_absyn(char *file)
 	    /* private tag */
 	    else if (*p)
 	    {
-		data1_tag *nt = new->tag = xmalloc(sizeof(*new->tag));
+		data1_tag *nt = new_element->tag = xmalloc(sizeof(*new_element->tag));
 		nt->which = DATA1T_string;
 		nt->value.string = xstrdup(p);
-		nt->names = xmalloc(sizeof(*new->tag->names));
+		nt->names = xmalloc(sizeof(*new_element->tag->names));
 		nt->names->name = nt->value.string;
 		nt->names->next = 0;
 		nt->kind = DATA1K_string;
@@ -254,7 +257,7 @@ data1_absyn *data1_read_absyn(char *file)
 	    /* parse termList definitions */
 	    p = termlists;
 	    if (*p == '-')
-		new->termlists = 0;
+		new_element->termlists = 0;
 	    else
 	    {
 		if (!res->attset)
@@ -301,7 +304,7 @@ data1_absyn *data1_read_absyn(char *file)
 	        *tp = all; /* append any ALL entries to the list */
 	    }
 
-	    new->name = xstrdup(name);
+	    new_element->name = xstrdup(name);
 	}
 	else if (!strcmp(cmd, "all"))
 	{

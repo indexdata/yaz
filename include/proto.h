@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.38  1997-04-30 08:52:09  quinn
+ * Revision 1.39  1997-05-14 06:53:44  adam
+ * C++ support.
+ *
+ * Revision 1.38  1997/04/30 08:52:09  quinn
  * Null
  *
  * Revision 1.37  1996/10/09  15:54:58  quinn
@@ -180,6 +183,10 @@
 #include <oid.h>
 #include <odr_use.h>
 #include <yaz-version.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * Because we didn't have time to put all of the extra v3 elements in here
@@ -1354,6 +1361,10 @@ int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
 int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
 Z_APDU *zget_APDU(ODR o, int which);
 int z_Query(ODR o, Z_Query **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #include <prt-rsc.h>
 #include <prt-acc.h>

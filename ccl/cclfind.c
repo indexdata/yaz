@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.6  1997-04-30 08:52:06  quinn
+ * Revision 1.7  1997-05-14 06:53:26  adam
+ * C++ support.
+ *
+ * Revision 1.6  1997/04/30 08:52:06  quinn
  * Null
  *
  * Revision 1.5  1996/10/11  15:00:24  adam
@@ -181,7 +184,7 @@ static char *copy_token_name (struct ccl_token *tp)
  * kind:   Type of node.
  * return: pointer to allocated node.
  */
-static struct ccl_rpn_node *mk_node (enum rpn_node_kind kind)
+static struct ccl_rpn_node *mk_node (int kind)
 {
     struct ccl_rpn_node *p;
     p = malloc (sizeof(*p));

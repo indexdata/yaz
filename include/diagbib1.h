@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: diagbib1.h,v $
- * Revision 1.4  1995-09-29 17:12:02  quinn
+ * Revision 1.5  1997-05-14 06:53:39  adam
+ * C++ support.
+ *
+ * Revision 1.4  1995/09/29 17:12:02  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:47  quinn
@@ -41,6 +44,19 @@
  *
  */
 
+#ifndef DIAGBIB1_H
+#define DIAGBIB1_H
+
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 const char *diagbib1_str (int code);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: yaz-ccl.h,v $
- * Revision 1.5  1995-09-29 17:12:14  quinn
+ * Revision 1.6  1997-05-14 06:53:54  adam
+ * C++ support.
+ *
+ * Revision 1.5  1995/09/29 17:12:14  quinn
  * Smallish
  *
  * Revision 1.4  1995/09/27  15:02:54  quinn
@@ -43,7 +46,15 @@
 #include <proto.h>
 #include <ccl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 Z_RPNQuery *ccl_rpn_query (struct ccl_rpn_node *p);
 Z_AttributesPlusTerm *ccl_scan_query (struct ccl_rpn_node *p);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

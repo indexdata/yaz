@@ -28,6 +28,10 @@
 #ifndef PRT_ARC_H
 #define PRT_ARC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ------------------- Summary Record --------------------- */
 
 typedef struct Z_FormatSpec
@@ -125,5 +129,9 @@ typedef struct Z_OPACRecord
 
 int z_BriefBib(ODR o, Z_BriefBib **p, int opt);
 int z_OPACRecord(ODR o, Z_OPACRecord **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.9  1997-05-01 15:06:42  adam
+ * Revision 1.10  1997-05-14 06:53:40  adam
+ * C++ support.
+ *
+ * Revision 1.9  1997/05/01 15:06:42  adam
  * Added log_mask_str_x routine.
  *
  * Revision 1.8  1996/05/01 12:45:00  quinn
@@ -71,6 +74,10 @@
 #include <yconfig.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define LOG_FATAL 0x0001
 #define LOG_DEBUG 0x0002
 #define LOG_WARN  0x0004
@@ -92,5 +99,9 @@ void log_event_start (void (*func)(int level, const char *msg, void *info),
 	void *info);
 void log_event_end (void (*func)(int level, const char *msg, void *info),
 	void *info);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmosi.h,v $
- * Revision 1.5  1996-02-10 12:23:43  quinn
+ * Revision 1.6  1997-05-14 06:53:53  adam
+ * C++ support.
+ *
+ * Revision 1.5  1996/02/10 12:23:43  quinn
  * Enable inetd operations fro TCP/IP stack
  *
  * Revision 1.4  1995/09/29  17:12:13  quinn
@@ -61,8 +64,16 @@
 #include <xtiUser.h>
 #include <mosi.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct netbuf *mosi_strtoaddr(const char *str);
 
 COMSTACK mosi_type(int s, int blocking, int protocol);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

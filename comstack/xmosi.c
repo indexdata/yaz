@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.14  1996-07-26 12:34:07  quinn
+ * Revision 1.15  1997-05-14 06:53:34  adam
+ * C++ support.
+ *
+ * Revision 1.14  1996/07/26 12:34:07  quinn
  * Porting.
  *
  * Revision 1.13  1996/07/06  19:58:30  quinn
@@ -186,7 +189,7 @@ COMSTACK mosi_type(int s, int blocking, int protocol)
 
     if (!(r = xmalloc(sizeof(*r))))
     	return 0;
-    if (!(state = r->private = xmalloc(sizeof(*state))))
+    if (!(state = r->cprivate = xmalloc(sizeof(*state))))
     	return 0;
 
     state->call = 0;
@@ -391,7 +394,7 @@ int mosi_bind(COMSTACK h, void *address, int mode)
 int mosi_listen(COMSTACK h, char *addp, int *addrlen)
 {
     int res;
-    mosi_state *st = h->private;
+    mosi_state *st = h->cprivate;
 
     if (!(st->call = (struct t_call*) t_alloc(h->iofile, T_CALL_STR,
    	 T_ALL)))
@@ -410,7 +413,7 @@ COMSTACK mosi_accept(COMSTACK h)
 {
     COMSTACK new;
     void *local;
-    struct mosi_state *st = h->private, *ns;
+    struct mosi_state *st = h->cprivate, *ns;
     int flags = O_RDWR;
 
     if (h->state != CS_INCON)
@@ -421,7 +424,7 @@ COMSTACK mosi_accept(COMSTACK h)
     if (!(new = xmalloc(sizeof(*new))))
     	return 0;
     *new = *h;
-    if (!(new->private = ns = xmalloc(sizeof(*ns))))
+    if (!(new->cprivate = ns = xmalloc(sizeof(*ns))))
     	return 0;
     *ns = *st;
     if (!h->blocking)
@@ -446,7 +449,7 @@ COMSTACK mosi_accept(COMSTACK h)
 int mosi_get(COMSTACK h, char **buf, int *bufsize)
 {
     int flags = 0, res;
-    mosi_state *ct = h->private;
+    mosi_state *ct = h->cprivate;
     int got;
 
     do
@@ -479,7 +482,7 @@ int mosi_get(COMSTACK h, char **buf, int *bufsize)
 
 int mosi_put(COMSTACK h, char *buf, int size)
 {
-    mosi_state *ct = h->private;
+    mosi_state *ct = h->cprivate;
     int res = u_snd(h->iofile, buf + ct->haswrit, size - ct->haswrit, 0);
 
     if (res == size - ct->haswrit)
@@ -499,7 +502,7 @@ int mosi_put(COMSTACK h, char *buf, int size)
 
 int mosi_close(COMSTACK h)
 {
-    xfree(h->private);
+    xfree(h->cprivate);
     if (h->iofile >= 0)
 	u_close(h->iofile);
    xfree(h);

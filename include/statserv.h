@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.7  1995-09-29 17:12:12  quinn
+ * Revision 1.8  1997-05-14 06:53:51  adam
+ * C++ support.
+ *
+ * Revision 1.7  1995/09/29 17:12:12  quinn
  * Smallish
  *
  * Revision 1.6  1995/09/27  15:02:53  quinn
@@ -48,6 +51,10 @@
 #include <yconfig.h>
 #include <oid.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct statserv_options_block
 {
     int dynamic;                  /* fork on incoming requests */
@@ -65,5 +72,9 @@ typedef struct statserv_options_block
 int statserv_main(int argc, char **argv);
 statserv_options_block *statserv_getcontrol(void);
 void statserv_setcontrol(statserv_options_block *block);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

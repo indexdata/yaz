@@ -34,6 +34,10 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Used to keep track of known External definitions (a loose approach
  * to DEFINED_BY).
@@ -97,5 +101,9 @@ struct Z_External
 
 int z_External(ODR o, Z_External **p, int opt);
 Z_ext_typeent *z_ext_getentbyref(oid_value val);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

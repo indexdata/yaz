@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-grs.c,v $
- * Revision 1.5  1995-10-18 16:12:20  quinn
+ * Revision 1.6  1997-05-14 06:53:23  adam
+ * C++ support.
+ *
+ * Revision 1.5  1995/10/18 16:12:20  quinn
  * Added a couple of special cases to handle the WAIS server.
  *
  * Revision 1.4  1995/09/29  17:11:55  quinn
@@ -197,7 +200,7 @@ int z_Triple(ODR o, Z_Triple **p, int opt)
 	return opt && odr_ok(o);
     return
     	odr_implicit(o, odr_oid, &(*p)->variantSetId, ODR_CONTEXT, 0, 1) &&
-	odr_implicit(o, odr_integer, &(*p)->class, ODR_CONTEXT, 1, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->zclass, ODR_CONTEXT, 1, 0) &&
 	odr_implicit(o, odr_integer, &(*p)->type, ODR_CONTEXT, 2, 0) &&
 	odr_constructed_begin(o, &(*p)->value, ODR_CONTEXT, 3) &&
 	odr_choice(o, arm, &(*p)->value, &(*p)->which) &&

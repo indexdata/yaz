@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_cons.c,v $
- * Revision 1.17  1996-10-23 12:31:24  adam
+ * Revision 1.18  1997-05-14 06:53:58  adam
+ * C++ support.
+ *
+ * Revision 1.17  1996/10/23 12:31:24  adam
  * Added 'static' modifier to dummy variable in odr_constructed_begin.
  *
  * Revision 1.16  1996/07/26  13:38:20  quinn
@@ -68,7 +71,7 @@ void odr_setlenlen(ODR o, int len)
     o->lenlen = len;
 }
 
-int odr_constructed_begin(ODR o, void *p, int class, int tag)
+int odr_constructed_begin(ODR o, void *p, int zclass, int tag)
 {
     int res;
     int cons = 1;
@@ -79,7 +82,7 @@ int odr_constructed_begin(ODR o, void *p, int class, int tag)
     o->lenlen = 1; /* reset lenlen */
     if (o->t_class < 0)
     {
-	o->t_class = class;
+	o->t_class = zclass;
 	o->t_tag = tag;
     }
     if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, 1)) < 0)

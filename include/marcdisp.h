@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: marcdisp.h,v $
- * Revision 1.4  1995-09-29 17:12:03  quinn
+ * Revision 1.5  1997-05-14 06:53:40  adam
+ * C++ support.
+ *
+ * Revision 1.4  1995/09/29 17:12:03  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:47  quinn
@@ -38,6 +41,19 @@
  *
  */
 
+#ifndef MARCDISP_H
+#define MARCDISP_H
+
 #include <yconfig.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int marc_display (const char *buf, FILE *outf);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif

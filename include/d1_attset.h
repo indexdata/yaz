@@ -30,6 +30,10 @@
 
 #include <oid.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * This structure describes a attset, perhaps made up by inclusion
  * (supersetting) of other attribute sets. When indexing and searching,
@@ -68,4 +72,9 @@ typedef struct data1_attset
 
 data1_att *data1_getattbyname(data1_attset *s, char *name);
 data1_attset *data1_read_attset(char *file);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

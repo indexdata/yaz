@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_tag.c,v $
- * Revision 1.7  1996-02-20 12:52:54  quinn
+ * Revision 1.8  1997-05-14 06:53:59  adam
+ * C++ support.
+ *
+ * Revision 1.7  1996/02/20 12:52:54  quinn
  * Added odr_peektag
  *
  * Revision 1.6  1995/12/14  16:28:26  quinn
@@ -29,7 +32,7 @@
 
 #include <odr.h>
 
-int odr_peektag(ODR o, int *class, int *tag, int *cons)
+int odr_peektag(ODR o, int *zclass, int *tag, int *cons)
 {
     if (o->direction != ODR_DECODE)
     {
@@ -38,7 +41,7 @@ int odr_peektag(ODR o, int *class, int *tag, int *cons)
     }
     if (o->stackp > -1 && !odr_constructed_more(o))
 	return 0;
-    if (ber_dectag(o->bp, class, tag, cons) <= 0)
+    if (ber_dectag(o->bp, zclass, tag, cons) <= 0)
     {
 	o->error = OREQUIRED;
 	return 0;
@@ -46,13 +49,13 @@ int odr_peektag(ODR o, int *class, int *tag, int *cons)
     return 1;
 }
 
-int odr_implicit_settag(ODR o, int class, int tag)
+int odr_implicit_settag(ODR o, int zclass, int tag)
 {
     if (o->error)
     	return 0;
     if (o->t_class < 0)
     {
-	o->t_class = class;
+	o->t_class = zclass;
 	o->t_tag = tag;
     }
     return 1;

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: dmalloc.h,v $
- * Revision 1.5  1995-10-16 13:51:43  quinn
+ * Revision 1.6  1997-05-14 06:53:39  adam
+ * C++ support.
+ *
+ * Revision 1.5  1995/10/16 13:51:43  quinn
  * Changes to provide Especs to the backend.
  *
  * Revision 1.4  1995/09/29  17:12:02  quinn
@@ -49,6 +52,10 @@
 #ifndef DMALLOC_H
 #define DMALLOC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef DEBUG_MALLOC
 
 #ifdef malloc
@@ -68,6 +75,10 @@ void *d_malloc(char *file, int line, int nbytes);
 void d_free(char *file, int line, char *ptr);
 void *d_realloc(char *file, int line, char *ptr, int nbytes);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

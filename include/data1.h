@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.20  1996-10-29 13:34:39  adam
+ * Revision 1.21  1997-05-14 06:53:38  adam
+ * C++ support.
+ *
+ * Revision 1.20  1996/10/29 13:34:39  adam
  * New functions to get/set data1_tabpath.
  *
  * Revision 1.19  1996/10/11 11:57:16  quinn
@@ -138,6 +141,10 @@
 #include <d1_attset.h>
 #include <d1_map.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define data1_matchstr(s1, s2) yaz_matchstr(s1, s2)
 
 extern char *data1_tabpath; /* global path for tables */
@@ -203,7 +210,7 @@ typedef struct data1_esetname
 typedef struct data1_vartype
 {
     char *name;
-    struct data1_varclass *class;
+    struct data1_varclass *zclass;
     int type;
     data1_datatype datatype;
     struct data1_vartype *next;
@@ -213,7 +220,7 @@ typedef struct data1_varclass
 {
     char *name;
     struct data1_varset *set;
-    int class;
+    int zclass;
     data1_vartype *types;
     struct data1_varclass *next;
 } data1_varclass;
@@ -234,11 +241,9 @@ struct data1_tagset;
 typedef struct data1_tag
 {
     data1_name *names;
-    enum
-    {
-	DATA1T_numeric,
-	DATA1T_string
-    } which;
+#define DATA1T_numeric 1
+#define DATA1T_string 2
+    int which;
     union
     {
 	int numeric;
@@ -300,14 +305,17 @@ typedef struct data1_absyn
 
 typedef struct data1_node
 {
-    enum 
-    {
-	DATA1N_root,        /* the root of a record (containing global data) */
-	DATA1N_tag,         /* a tag */
-	DATA1N_data,        /* some data under a leaf tag or variant */
-	DATA1N_variant,     /* variant specification (a triple, actually) */
-	DATA1N_indicator    /* ISO2709 indicator */
-    } which;
+        /* the root of a record (containing global data) */
+#define DATA1N_root 1 
+        /* a tag */
+#define DATA1N_tag  2       
+        /* some data under a leaf tag or variant */
+#define DATA1N_data 3
+        /* variant specification (a triple, actually) */
+#define DATA1N_variant 4
+        /* ISO2709 indicator */
+#define DATA1N_indicator 5   
+    int which;
 
     union
     {
@@ -329,14 +337,17 @@ typedef struct data1_node
 
 	struct
 	{
-	    enum
-	    {
-		DATA1I_inctxt,      /* text inclusion */
-		DATA1I_incbin,      /* binary data inclusion */
-		DATA1I_text,        /* text data */
-		DATA1I_num,         /* numerical data */
-		DATA1I_oid          /* object identifier */
-	    } what;
+        /* text inclusion */
+#define DATA1I_inctxt 1
+        /* binary data inclusion */
+#define DATA1I_incbin 2
+        /* text data */
+#define DATA1I_text 3 
+        /* numerical data */
+#define DATA1I_num 4
+        /* object identifier */
+#define DATA1I_oid 5         
+            int what;
 	    int formatted_text;     /* newlines are significant */
 	    int len;
 	    char *data;      /* filename or data */
@@ -386,7 +397,7 @@ data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
     char *tagname, NMEM m);
 data1_datatype data1_maptype(char *t);
 data1_varset *data1_read_varset(char *file);
-data1_vartype *data1_getvartypebyct(data1_varset *set, char *class, char *type);
+data1_vartype *data1_getvartypebyct(data1_varset *set, char *zclass, char *type);
 Z_Espec1 *data1_read_espec1(char *file, ODR o);
 int data1_doespec1(data1_node *n, Z_Espec1 *e);
 data1_esetname *data1_getesetbyname(data1_absyn *a, char *name);
@@ -403,5 +414,9 @@ Z_BriefBib *data1_nodetosummary(data1_node *n, int select, ODR o);
 char *data1_nodetosoif(data1_node *n, int select, int *len);
 void data1_set_tabpath(const char *path);
 const char *data1_get_tabpath(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

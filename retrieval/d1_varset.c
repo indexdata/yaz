@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_varset.c,v $
- * Revision 1.3  1995-11-01 16:34:58  quinn
+ * Revision 1.4  1997-05-14 06:54:04  adam
+ * C++ support.
+ *
+ * Revision 1.3  1995/11/01 16:34:58  quinn
  * Making data1 look for tables in data1_tabpath
  *
  * Revision 1.2  1995/11/01  13:54:50  quinn
@@ -26,28 +29,28 @@
 #include <tpath.h>
 #include <data1.h>
 
-data1_vartype *data1_getvartypebyct(data1_varset *set, char *class, char *type)
+data1_vartype *data1_getvartypebyct(data1_varset *set, char *zclass, char *type)
 {
     data1_varclass *c;
     data1_vartype *t;
 
     for (c = set->classes; c; c = c->next)
-	if (!data1_matchstr(c->name, class))
+	if (!data1_matchstr(c->name, zclass))
 	{
 	    for (t = c->types; t; t = t->next)
 		if (!data1_matchstr(t->name, type))
 		    return t;
-	    logf(LOG_WARN, "Unknown variant type %s in class %s", type, class);
+	    logf(LOG_WARN, "Unknown variant type %s in class %s", type, zclass);
 	    return 0;
 	}
-    logf(LOG_WARN, "Unknown variant class %s", class);
+    logf(LOG_WARN, "Unknown variant class %s", zclass);
     return 0;
 }
 
 data1_varset *data1_read_varset(char *file)
 {
     data1_varset *res = xmalloc(sizeof(*res));
-    data1_varclass **classp = &res->classes, *class = 0;
+    data1_varclass **classp = &res->classes, *zclass = 0;
     data1_vartype **typep = 0;
     FILE *f;
     int argc;
@@ -73,9 +76,9 @@ data1_varset *data1_read_varset(char *file)
 		fclose(f);
 		return 0;
 	    }
-	    *classp = r = class = xmalloc(sizeof(*r));
+	    *classp = r = zclass = xmalloc(sizeof(*r));
 	    r->set = res;
-	    r->class = atoi(argv[1]);
+	    r->zclass = atoi(argv[1]);
 	    r->name = xmalloc(strlen(argv[2])+1);
 	    strcpy(r->name, argv[2]);
 	    r->types = 0;
@@ -102,7 +105,7 @@ data1_varset *data1_read_varset(char *file)
 	    *typep = r = xmalloc(sizeof(*r));
 	    r->name = xmalloc(strlen(argv[2])+1);
 	    strcpy(r->name, argv[2]);
-	    r->class = class;
+	    r->zclass = zclass;
 	    r->type = atoi(argv[1]);
 	    if (!(r->datatype = data1_maptype(argv[3])))
 	    {

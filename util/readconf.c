@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: readconf.c,v $
- * Revision 1.3  1996-05-29 15:48:48  quinn
+ * Revision 1.4  1997-05-14 06:54:07  adam
+ * C++ support.
+ *
+ * Revision 1.3  1996/05/29 15:48:48  quinn
  * Added \n to the isspace rule.
  *
  * Revision 1.2  1996/05/29  10:05:01  quinn
@@ -64,8 +67,8 @@ int readconf_line(FILE *f, char *line, int len, char *argv[], int num)
 /*
  * Read lines of a configuration file.
  */
-int readconf(char *name, void *private,
-    int (*fun)(char *name, void *private, int argc, char *argv[]))
+int readconf(char *name, void *rprivate,
+    int (*fun)(char *name, void *rprivate, int argc, char *argv[]))
 {
     FILE *f;
     char line[512], *m_argv[50];
@@ -86,7 +89,7 @@ int readconf(char *name, void *private,
 	    return 0;
 	}
 
-	if ((res = (*fun)(name, private, m_argc, m_argv)))
+	if ((res = (*fun)(name, rprivate, m_argc, m_argv)))
 	{
 	    fclose(f);
 	    return res;

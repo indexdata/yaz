@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.15  1996-07-06 19:58:32  quinn
+ * Revision 1.16  1997-05-14 06:53:37  adam
+ * C++ support.
+ *
+ * Revision 1.15  1996/07/06 19:58:32  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.14  1996/02/10  12:23:41  quinn
@@ -116,6 +119,10 @@
 #include <oid.h>
 #include <xmalloc.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define COMSTACK_DEFAULT_TIMEOUT -1  /* not used yet */
 
 struct comstack;
@@ -129,7 +136,7 @@ struct comstack
     char *stackerr;/* current lower-layer error string, or null if none */
     int iofile;    /* UNIX file descriptor for iochannel */
     int timeout;   /* how long to wait for trailing blocks (ignored for now) */
-    void *private; /* state info for lower stack */
+    void *cprivate;/* state info for lower stack */
     int more;      /* connection has extra data in buffer */
     int state;     /* current state */
 #define CS_UNBND      0
@@ -199,5 +206,9 @@ extern char *cs_errlist[];
 /* backwards compatibility */
 #define CS_SR     PROTO_SR
 #define CS_Z3950  PROTO_Z3950
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

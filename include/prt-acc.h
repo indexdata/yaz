@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-acc.h,v $
- * Revision 1.6  1996-01-02 08:57:35  quinn
+ * Revision 1.7  1997-05-14 06:53:46  adam
+ * C++ support.
+ *
+ * Revision 1.6  1996/01/02 08:57:35  quinn
  * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
  *
  * Revision 1.5  1995/09/29  17:12:09  quinn
@@ -47,6 +50,10 @@
 
 #ifndef PRT_ACC_H
 #define PRT_ACC_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct Z_Encryption1
 {
@@ -154,5 +161,9 @@ typedef struct Z_PromptObject1
 } Z_PromptObject1;
 
 int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

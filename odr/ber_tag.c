@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.13  1995-09-29 17:12:21  quinn
+ * Revision 1.14  1997-05-14 06:53:56  adam
+ * C++ support.
+ *
+ * Revision 1.13  1995/09/29 17:12:21  quinn
  * Smallish
  *
  * Revision 1.12  1995/09/27  15:02:57  quinn
@@ -54,12 +57,12 @@
  *	if  p: write tag. return 1 (success) or -1 (error).
  *	if !p: return 0.
  * On decoding:
- *      if tag && class match up, advance pointer and return 1. set cons.
+ *      if tag && zclass match up, advance pointer and return 1. set cons.
  *      else leave pointer unchanged. Return 0.
  *
  * Should perhaps be odr_tag?
 */
-int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
+int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
 {
     static int lclass = -1, ltag, br, lcons; /* save t&c rather than
 						decoding twice */
@@ -85,10 +88,10 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 		    o->error = OREQUIRED;
 	    	return 0;
 	    }
-	    if ((rd = ber_enctag(o, class, tag, *constructed)) < 0)
+	    if ((rd = ber_enctag(o, zclass, tag, *constructed)) < 0)
 		return -1;
 #ifdef ODR_DEBUG
-	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", class, tag,
+	    fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", zclass, tag,
 		*constructed, o->stackp);
 #endif
 	    return 1;
@@ -111,7 +114,7 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 		    lcons, o->stackp);
 #endif
 	    }
-	    if (class == lclass && tag == ltag)
+	    if (zclass == lclass && tag == ltag)
 	    {
 	    	o->bp += br;
 	    	o->left -= br;
@@ -134,15 +137,15 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 }
 
 /* ber_enctag
- * BER-encode a class/tag/constructed package (identifier octets). Return
+ * BER-encode a zclass/tag/constructed package (identifier octets). Return
  * number of bytes encoded, or -1 if out of bounds.
  */
-int ber_enctag(ODR o, int class, int tag, int constructed)
+int ber_enctag(ODR o, int zclass, int tag, int constructed)
 {
     int cons = (constructed ? 1 : 0), n = 0;
     unsigned char octs[sizeof(int)], b;
 
-    b = (class << 6) & 0XC0;
+    b = (zclass << 6) & 0XC0;
     b |= (cons << 5) & 0X20;
     if (tag <= 30)
     {
@@ -177,11 +180,11 @@ int ber_enctag(ODR o, int class, int tag, int constructed)
 /* ber_dectag
  * Decode BER identifier octets. Return number of bytes read or -1 for error.
  */
-int ber_dectag(unsigned char *buf, int *class, int *tag, int *constructed)
+int ber_dectag(unsigned char *buf, int *zclass, int *tag, int *constructed)
 {
     unsigned char *b = buf;
 
-    *class = *b >> 6;
+    *zclass = *b >> 6;
     *constructed = (*b >> 5) & 0X01;
     if ((*tag = *b & 0x1F) <= 30)
     	return 1;

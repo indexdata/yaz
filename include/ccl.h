@@ -46,7 +46,10 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.5  1997-04-30 08:52:08  quinn
+ * Revision 1.6  1997-05-14 06:53:37  adam
+ * C++ support.
+ *
+ * Revision 1.5  1997/04/30 08:52:08  quinn
  * Null
  *
  * Revision 1.4  1996/10/11  15:02:26  adam
@@ -88,6 +91,10 @@
 #ifndef CCL_H
 #define CCL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* CCL error numbers */
 #define CCL_ERR_OK                0
 #define CCL_ERR_TERM_EXPECTED     1
@@ -110,14 +117,16 @@ struct ccl_rpn_attr {
     int value;
 };
 
+#define CCL_RPN_AND 1
+#define CCL_RPN_OR 2
+#define CCL_RPN_NOT 3
+#define CCL_RPN_TERM 4
+#define CCL_RPN_SET 5
+#define CCL_RPN_PROX 6
+
 /* RPN tree structure */
 struct ccl_rpn_node {
-    enum rpn_node_kind {
-        CCL_RPN_AND, CCL_RPN_OR, CCL_RPN_NOT,
-        CCL_RPN_TERM,
-        CCL_RPN_SET,
-        CCL_RPN_PROX
-    } kind;
+    int kind;
     union {
 	struct ccl_rpn_node *p[2];
 	struct {
@@ -263,5 +272,10 @@ int ccl_memicmp (const char *s1, const char *s2, size_t n);
 
 /* Search for qualifier 'name' in set 'b'. */
 struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name, int len);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.12  1995-09-29 17:12:15  quinn
+ * Revision 1.13  1997-05-14 06:53:56  adam
+ * C++ support.
+ *
+ * Revision 1.12  1995/09/29 17:12:15  quinn
  * Smallish
  *
  * Revision 1.11  1995/09/27  15:02:54  quinn
@@ -76,14 +79,14 @@ int ber_any(ODR o, Odr_any **p)
  */
 int completeBER(unsigned char *buf, int len)
 {
-    int res, ll, class, tag, cons;
+    int res, ll, zclass, tag, cons;
     unsigned char *b = buf;
     
     if (!len)
     	return 0;
     if (!buf[0] && !buf[1])
     	return 0;
-    if ((res = ber_dectag(b, &class, &tag, &cons)) <= 0)
+    if ((res = ber_dectag(b, &zclass, &tag, &cons)) <= 0)
     	return 0;
     if (res > len)
     	return 0;

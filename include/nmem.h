@@ -29,6 +29,10 @@
 #ifndef NMEM_H
 #define NMEM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct nmem_control *NMEM;
 
 void nmem_reset(NMEM n);
@@ -36,5 +40,9 @@ void *nmem_malloc(NMEM n, int size);
 int nmem_total(NMEM n);
 NMEM nmem_create(void);
 void nmem_destroy(NMEM n);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

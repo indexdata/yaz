@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.14  1997-05-01 15:06:32  adam
+ * Revision 1.15  1997-05-14 06:53:33  adam
+ * C++ support.
+ *
+ * Revision 1.14  1997/05/01 15:06:32  adam
  * Moved WINSOCK init. code to tcpip_init routine.
  *
  * Revision 1.13  1996/11/01 08:45:18  adam
@@ -213,7 +216,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol)
 	new_socket = 0;
     if (!(p = xmalloc(sizeof(struct comstack))))
 	return 0;
-    if (!(state = p->private = xmalloc(sizeof(tcpip_state))))
+    if (!(state = p->cprivate = xmalloc(sizeof(tcpip_state))))
 	return 0;
 
 #ifdef WINDOWS
@@ -289,7 +292,7 @@ struct sockaddr_in *tcpip_strtoaddr(const char *str)
 
 int tcpip_more(COMSTACK h)
 {
-    tcpip_state *sp = h->private;
+    tcpip_state *sp = h->cprivate;
 
     return sp->altlen && (*sp->complete)((unsigned char *) sp->altbuf,
 	sp->altlen);
@@ -387,8 +390,8 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen)
 
 COMSTACK tcpip_accept(COMSTACK h)
 {
-    COMSTACK new;
-    tcpip_state *state, *st = h->private;
+    COMSTACK cnew;
+    tcpip_state *state, *st = h->cprivate;
 #ifdef WINDOWS
     unsigned long tru = 1;
 #endif
@@ -399,31 +402,31 @@ COMSTACK tcpip_accept(COMSTACK h)
         h->cerrno = CSOUTSTATE;
         return 0;
     }
-    if (!(new = xmalloc(sizeof(*new))))
+    if (!(cnew = xmalloc(sizeof(*cnew))))
     {
         h->cerrno = CSYSERR;
         return 0;
     }
-    memcpy(new, h, sizeof(*h));
-    new->iofile = h->newfd;
-    if (!(state = new->private = xmalloc(sizeof(tcpip_state))))
+    memcpy(cnew, h, sizeof(*h));
+    cnew->iofile = h->newfd;
+    if (!(state = cnew->cprivate = xmalloc(sizeof(tcpip_state))))
     {
         h->cerrno = CSYSERR;
         return 0;
     }
 #ifdef WINDOWS
-    if (!new->blocking && ioctlsocket(new->iofile, FIONBIO, &tru) < 0)
+    if (!cnew->blocking && ioctlsocket(new->iofile, FIONBIO, &tru) < 0)
 #else
-    if (!new->blocking && fcntl(new->iofile, F_SETFL, O_NONBLOCK) < 0)
+    if (!cnew->blocking && fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
 #endif
         return 0;
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
     state->complete = st->complete;
-    new->state = CS_DATAXFER;
+    cnew->state = CS_DATAXFER;
     h->state = CS_IDLE;
-    return new;
+    return cnew;
 }
 
 #define CS_TCPIP_BUFCHUNK 4096
@@ -434,7 +437,7 @@ COMSTACK tcpip_accept(COMSTACK h)
  */
 int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 {
-    tcpip_state *sp = h->private;
+    tcpip_state *sp = h->cprivate;
     char *tmpc;
     int tmpi, berlen, rest, req, tomove;
     int hasread = 0, res;
@@ -510,7 +513,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 int tcpip_put(COMSTACK h, char *buf, int size)
 {
     int res;
-    struct tcpip_state *state = h->private;
+    struct tcpip_state *state = h->cprivate;
 
     TRC(fprintf(stderr, "tcpip_put: size=%d\n", size));
     if (state->towrite < 0)
@@ -551,7 +554,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 
 int tcpip_close(COMSTACK h)
 {
-    tcpip_state *sp = h->private;
+    tcpip_state *sp = h->cprivate;
 
     TRC(fprintf(stderr, "tcpip_close\n"));
 #ifdef WINDOWS

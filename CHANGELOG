@@ -2,14 +2,16 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX
 
+Added support for C++, headers uses extern "C" for public definitions.
+With input from RVDM.
+
 In handling of SEQUENCE OF: Counter set to zero when SEQUENCE OF is absent.
-    Thanks to Ronald van der Meer (RVDM).
+Thanks to Ronald van der Meer (RVDM).
 
 Added initializers (zget_ routines) for a number of PDUs. Thanks to RVDM.
-    Ronald van der Meer.
 
 Added support for private extensions to the OID database
-    (oid_setprivateoids()). Thanks to RVDM.
+(oid_setprivateoids()). Thanks to RVDM.
     
 Added optional, physical ANY (key replication)
 

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr_use.h,v $
- * Revision 1.6  1995-09-29 17:12:04  quinn
+ * Revision 1.7  1997-05-14 06:53:42  adam
+ * C++ support.
+ *
+ * Revision 1.6  1995/09/29 17:12:04  quinn
  * Smallish
  *
  * Revision 1.5  1995/09/27  15:02:48  quinn
@@ -55,6 +58,10 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct Odr_external
 {
     Odr_oid *direct_reference;       /* OPTIONAL */
@@ -77,5 +84,9 @@ int odr_external(ODR o, Odr_external **p, int opt);
 int odr_visiblestring(ODR o, char **p, int opt);
 int odr_graphicstring(ODR o, char **p, int opt);
 int odr_generalizedtime(ODR o, char **p, int opt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

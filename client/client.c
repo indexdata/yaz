@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.44  1997-05-05 11:20:35  adam
+ * Revision 1.45  1997-05-14 06:53:29  adam
+ * C++ support.
+ *
+ * Revision 1.44  1997/05/05 11:20:35  adam
  * Client uses "options" utility and marc dump filename may be specified
  * as an option (-m <file>).
  *
@@ -370,7 +373,7 @@ static void display_variant(Z_Variant *v, int level)
 
     for (i = 0; i < v->num_triples; i++)
     {
-	printf("%*sclass=%d,type=%d", level * 4, "", *v->triples[i]->class,
+	printf("%*sclass=%d,type=%d", level * 4, "", *v->triples[i]->zclass,
 	    *v->triples[i]->type);
 	if (v->triples[i]->which == Z_Triple_internationalString)
 	    printf(",value=%s\n", v->triples[i]->value.internationalString);
@@ -900,7 +903,7 @@ int cmd_cancel(char *arg)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
     Z_TriggerResourceControlRequest *req =
         apdu->u.triggerResourceControlRequest;
-    bool_t false = 0;
+    bool_t rfalse = 0;
     
     if (!session)
     {
@@ -913,7 +916,7 @@ int cmd_cancel(char *arg)
         return 0;
     }
     *req->requestedAction = Z_TriggerResourceCtrl_cancel;
-    req->resultSetWanted = &false;
+    req->resultSetWanted = &rfalse;
 
     send_apdu(apdu);
     printf("Sent cancel request\n");

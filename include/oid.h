@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.17  1997-05-02 08:39:27  quinn
+ * Revision 1.18  1997-05-14 06:53:42  adam
+ * C++ support.
+ *
+ * Revision 1.17  1997/05/02 08:39:27  quinn
  * Support for private OID table added. Thanks to Ronald van der Meer
  *
  * Revision 1.16  1997/04/30 08:52:08  quinn
@@ -85,6 +88,10 @@
 #define OID_H
 
 #include <yconfig.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define OID_SIZE 100
     
@@ -188,5 +195,9 @@ int oid_oidcmp(int *o1, int *o2);
 int oid_oidlen(int *o);
 oid_value oid_getvalbyname(const char *name);
 void oid_setprivateoids(oident *list);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

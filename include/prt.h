@@ -3,16 +3,20 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int ber_boolean(ODR o, int *val);
-int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt);
-int ber_enctag(ODR o, int class, int tag, int constructed);
-int ber_dectag(unsigned char *buf, int *class, int *tag, int *constructed);
+int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt);
+int ber_enctag(ODR o, int zclass, int tag, int constructed);
+int ber_dectag(unsigned char *buf, int *zclass, int *tag, int *constructed);
 int odr_bool(ODR o, int **p, int opt);
 int odr_integer(ODR o, int **p, int opt);
-int odr_implicit_settag(ODR o, int class, int tag);
+int odr_implicit_settag(ODR o, int zclass, int tag);
 #if 0
 int odr_implicit(ODR o, int (*type)(ODR o, void *p, int opt), void *p,
-    int class, int tag, int opt);
+    int zclass, int tag, int opt);
 #endif
 int ber_enclen(ODR o, int len, int lenlen, int exact);
 int ber_declen(unsigned char *buf, int *len);
@@ -20,7 +24,7 @@ char *odr_indent(ODR o);
 int ber_null(ODR o);
 int odr_null(ODR o, Odr_null **p, int opt);
 int ber_integer(ODR o, int *val);
-int odr_constructed_begin(ODR o, void *p, int class, int tag);
+int odr_constructed_begin(ODR o, void *p, int zclass, int tag);
 int odr_constructed_end(ODR o);
 int odr_sequence_begin(ODR o, void *p, int size);
 int odr_sequence_end(ODR o);
@@ -52,7 +56,11 @@ int odr_total(ODR o);
 char *odr_errmsg(int n);
 Odr_oid *odr_getoidbystr(ODR o, char *str);
 int odr_initmember(ODR o, void *p, int size);
-int odr_peektag(ODR o, int *class, int *tag, int *cons);
+int odr_peektag(ODR o, int *zclass, int *tag, int *cons);
 void odr_setlenlen(ODR o, int len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

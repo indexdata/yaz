@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.8  1996-12-05 13:17:49  quinn
+ * Revision 1.9  1997-05-14 06:54:03  adam
+ * C++ support.
+ *
+ * Revision 1.8  1996/12/05 13:17:49  quinn
  * Fixed GRS-1 null-ref
  *
  * Revision 1.7  1996/10/11  11:57:23  quinn
@@ -89,8 +92,8 @@ static Z_Variant *make_variant(data1_node *n, int num, ODR o)
 	assert(p->which == DATA1N_variant);
 	t = v->triples[num] = odr_malloc(o, sizeof(*t));
 	t->variantSetId = 0;
-	t->class = odr_malloc(o, sizeof(int));
-	*t->class = p->u.variant.type->class->class;
+	t->zclass = odr_malloc(o, sizeof(int));
+	*t->zclass = p->u.variant.type->zclass->zclass;
 	t->type = odr_malloc(o, sizeof(int));
 	*t->type = p->u.variant.type->type;
 
