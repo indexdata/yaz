@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.7 2002-11-15 10:38:37 adam Exp $
+ * $Id: zoom-c.c,v 1.8 2002-11-30 22:30:51 mike Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -2244,6 +2244,34 @@ ZOOM_connection_addinfo (ZOOM_connection c)
     return addinfo;
 }
 
+ZOOM_API(const char *)
+ZOOM_diag_str (int error)
+{
+    switch (error)
+    {
+    case ZOOM_ERROR_NONE:
+	return "No error";
+    case ZOOM_ERROR_CONNECT:
+	return "Connect failed";
+    case ZOOM_ERROR_MEMORY:
+	return "Out of memory";
+    case ZOOM_ERROR_ENCODE:
+	return "Encoding failed";
+    case ZOOM_ERROR_DECODE:
+	return "Decoding failed";
+    case ZOOM_ERROR_CONNECTION_LOST:
+	return "Connection lost";
+    case ZOOM_ERROR_INIT:
+	return "Init rejected";
+    case ZOOM_ERROR_INTERNAL:
+	return "Internal failure";
+    case ZOOM_ERROR_TIMEOUT:
+	return "Timeout";
+    default:
+	return diagbib1_str (error);
+    }
+}
+
 ZOOM_API(int)
 ZOOM_connection_error (ZOOM_connection c, const char **cp,
 			    const char **addinfo)
@@ -2251,29 +2279,7 @@ ZOOM_connection_error (ZOOM_connection c, const char **cp,
     int error = c->error;
     if (cp)
     {
-	switch (error)
-	{
-	case ZOOM_ERROR_NONE:
-	    *cp = "No error"; break;
-	case ZOOM_ERROR_CONNECT:
-	    *cp = "Connect failed"; break;
-	case ZOOM_ERROR_MEMORY:
-	    *cp = "Out of memory"; break;
-	case ZOOM_ERROR_ENCODE:
-	    *cp = "Encoding failed"; break;
-	case ZOOM_ERROR_DECODE:
-	    *cp = "Decoding failed"; break;
-	case ZOOM_ERROR_CONNECTION_LOST:
-	    *cp = "Connection lost"; break;
-	case ZOOM_ERROR_INIT:
-	    *cp = "Init rejected"; break;
-	case ZOOM_ERROR_INTERNAL:
-	    *cp = "Internal failure"; break;
-	case ZOOM_ERROR_TIMEOUT:
-	    *cp = "Timeout"; break;
-	default:
-	    *cp = diagbib1_str (error);
-	}
+	*cp = ZOOM_diag_str(error);
     }
     if (addinfo)
     {

@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.13 2002-06-02 21:27:17 adam Exp $
+ * $Id: zoom.h,v 1.14 2002-11-30 22:30:51 mike Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -75,6 +75,9 @@ ZOOM_connection_errmsg (ZOOM_connection c);
 /* returns additional info */
 ZOOM_API(const char *)
 ZOOM_connection_addinfo (ZOOM_connection c);
+/* translates error code into human-readable string */
+ZOOM_API(const char *)
+ZOOM_diag_str (int error);
 
 #define ZOOM_ERROR_NONE 0
 #define ZOOM_ERROR_CONNECT 10000
