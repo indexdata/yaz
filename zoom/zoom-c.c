@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.40 2002-08-20 08:19:40 adam Exp $
+ * $Id: zoom-c.c,v 1.41 2002-08-24 09:28:30 oleg Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -142,6 +142,12 @@ void ZOOM_connection_remove_task (ZOOM_connection c)
 	    assert (0);
 	}
 	xfree (task);
+	/* 
+	Fix me!!! May be it is not right place for reset of the ODR stream,
+	but if happens to read records from cache we will be get memory leaks
+	without it (see send_present()).
+	*/
+	odr_reset(c->odr_out);
     }
 }
 
