@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.62  1998-02-11 11:53:33  adam
+ * Revision 1.63  1998-03-05 08:05:10  adam
+ * Added a few casts to make C++ happy.
+ *
+ * Revision 1.62  1998/02/11 11:53:33  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.61  1998/02/10 11:03:06  adam
@@ -296,9 +299,9 @@ static Z_ReferenceId *set_refid (ODR out)
     Z_ReferenceId *id;
     if (!refid)
 	return 0;
-    id = odr_malloc (out, sizeof(*id));
+    id = (Z_ReferenceId *) odr_malloc (out, sizeof(*id));
     id->size = id->len = strlen(refid);
-    id->buf = odr_malloc (out, id->len);
+    id->buf = (unsigned char *) odr_malloc (out, id->len);
     memcpy (id->buf, refid, id->len);
     return id;
 }   
@@ -1355,7 +1358,7 @@ int cmd_refid (char *arg)
     refid = NULL;
     if (*arg)
     {
-	refid = xmalloc (strlen(arg)+1);
+	refid = (char *) xmalloc (strlen(arg)+1);
 	strcpy (refid, arg);
     }
     return 1;
