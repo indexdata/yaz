@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.273 2005-02-02 17:11:05 adam Exp $
+ * $Id: client.c,v 1.274 2005-02-25 17:03:41 adam Exp $
  */
 
 #include <stdio.h>
@@ -771,8 +771,6 @@ static void print_record(const unsigned char *buf, size_t len)
     /* add newline if not already added ... */
     if (i <= 0 || buf[i-1] != '\n')
         printf ("\n");
-    if (marc_file)
-	fwrite (buf, 1, len, marc_file);
 }
 
 static void display_record(Z_External *r)
@@ -828,8 +826,12 @@ static void display_record(Z_External *r)
         }
     }
     if (ent && ent->value == VAL_SOIF)
+    {
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
+        if (marc_file)
+            fwrite (r->u.octet_aligned->buf, 1, r->u.octet_aligned->len, marc_file);
+    }
     else if (r->which == Z_External_octet)
     {
         const char *octet_buf = (char*)r->u.octet_aligned->buf;
@@ -947,6 +949,8 @@ static void display_record(Z_External *r)
             return;
         }
         print_record(r->u.sutrs->buf, r->u.sutrs->len);
+        if (marc_file)
+            fwrite (r->u.sutrs->buf, 1, r->u.sutrs->len, marc_file);
     }
     else if (ent && ent->value == VAL_GRS1)
     {
@@ -961,8 +965,7 @@ static void display_record(Z_External *r)
         puts (wrbuf_buf(w));
         wrbuf_free(w, 1);
     }
-    else if ( /* OPAC display not complete yet .. */
-	     ent && ent->value == VAL_OPAC)
+    else if (ent && ent->value == VAL_OPAC)
     {
 	int i;
 	if (r->u.opac->bibliographicRecord)
