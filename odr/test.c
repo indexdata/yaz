@@ -49,6 +49,38 @@ int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 	odr_sequence_end(o);
 }
 
+struct A
+{
+    int which;
+    union
+    {
+    	int *b;   /* integer */
+    	char *c;  /* visstring */
+    } u;
+};
+
+int f_A(ODR o, struct A **p, int opt)
+{
+    int res;
+    Odr_arm arm[] =
+    {
+    	{ -1, -1, -1, 0, (Odr_fun) odr_integer },
+    	{ ODR_IMPLICIT, ODR_CONTEXT, 200, 1, (Odr_fun) odr_visiblestring },
+    	{ -1, -1, -1, -1, 0 }
+    };
+
+    if (o->direction == ODR_DECODE && !*p)
+    	*p = nalloc(o, sizeof(**p));
+    res = odr_choice(o, arm, &(*p)->u, &(*p)->which);
+    if (!res)
+    {
+    	*p = 0;
+    	return opt;
+    }
+    return 1;
+}
+
+#if 0
 int main()
 {
     int i;
@@ -96,3 +128,32 @@ int main()
 
     odr_oid(&o, &oidp2, 0);
 }    
+#endif
+
+int main()
+{
+    struct A ch, *chp1, *chp2;
+    int b = 9999;
+    char *c = "Nu tester vi en satans forpulet CHOICE!";
+    struct odr o;
+    unsigned char buf[4096];
+    
+    ch.u.c = c;	
+    ch.which = 1;
+    chp1 = &ch;
+
+    o.buf = buf;
+    o.bp=o.buf;
+    o.left = o.buflen = 1024;
+    o.direction = ODR_ENCODE;
+    o.t_class = -1;
+
+    f_A(&o, &chp1, 0);
+
+    o.direction = ODR_DECODE;
+    o.bp = o.buf;
+
+    f_A(&o, &chp2, 0);
+
+    return 0;
+}
