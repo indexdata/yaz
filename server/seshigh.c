@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.10  1995-03-27 08:34:24  quinn
+ * Revision 1.11  1995-03-28 09:16:21  quinn
+ * Added record packing to the search request
+ *
+ * Revision 1.10  1995/03/27  08:34:24  quinn
  * Added dynamic server functionality.
  * Released bindings to session.c (is now redundant)
  *
@@ -222,8 +225,8 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.maximumRecordSize = &assoc->maximumRecordSize;
     resp.result = &result;
     resp.implementationId = "YAZ";
-    resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.10 $";
+    resp.implementationName = "Index Data/YAZ Generic Frontend Server";
+    resp.implementationVersion = "$Revision: 1.11 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -411,10 +414,10 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
     association *assoc = iochan_getdata(client);
     int nulint = 0;
     bool_t sr = 1;
-    int nrp;
     bend_searchrequest bsrq;
     bend_searchresult *bsrt;
     oident *oent;
+    int next = 0;
 
     fprintf(stderr, "Got SearchRequest.\n");
     apdup = &apdu;
@@ -434,6 +437,10 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
     }
     if (!resp.records)
     {
+    	int toget;
+	Z_ElementSetNames *setnames;
+	int presst = 0;
+
 	bsrq.setname = req->resultSetName;
 	bsrq.replace_set = *req->replaceIndicator;
 	bsrq.num_bases = req->num_databaseNames;
@@ -443,17 +450,48 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
 	if (!(bsrt = bend_search(&bsrq)))
 	    return -1;
 	else if (bsrt->errcode)
-	    resp.records = diagrec(assoc->proto, bsrt->errcode, bsrt->errstring);
+	    resp.records = diagrec(assoc->proto, bsrt->errcode,
+		bsrt->errstring);
 	else
 	    resp.records = 0;
 
 	resp.resultCount = &bsrt->hits;
-	resp.numberOfRecordsReturned = &nulint;
-	nrp = bsrt->hits ? 1 : 0;
-	resp.nextResultSetPosition = &nrp;
-	resp.searchStatus = &sr;
-	resp.resultSetStatus = &sr;
-	resp.presentStatus = 0;
+
+	/* how many records does the user agent want, then? */
+	if (bsrt->hits <= *req->smallSetUpperBound)
+	{
+	    toget = bsrt->hits;
+	    setnames = req->smallSetElementSetNames;
+	}
+	else if (bsrt->hits < *req->largeSetLowerBound)
+	{
+	    toget = *req->mediumSetPresentNumber;
+	    setnames = req->mediumSetElementSetNames;
+	}
+	else
+	    toget = 0;
+
+	if (toget)
+	{
+	    resp.records = pack_records(assoc, req->resultSetName, 1, &toget,
+	    	setnames, &next, &presst);
+	    if (!resp.records)
+	    	return -1;
+	    resp.numberOfRecordsReturned = &toget;
+	    resp.nextResultSetPosition = &next;
+	    resp.searchStatus = &sr;
+	    resp.resultSetStatus = &sr;
+	    resp.presentStatus = &presst;
+	}
+	else
+	{
+	    resp.records = 0;
+	    resp.numberOfRecordsReturned = &nulint;
+	    resp.nextResultSetPosition = &nulint;
+	    resp.searchStatus = &sr;
+	    resp.resultSetStatus = &sr;
+	    resp.presentStatus = 0;
+	}
     }
     else
     {
