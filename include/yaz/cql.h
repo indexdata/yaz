@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.4 2003-05-27 09:46:26 mike Exp $
+/* $Id: cql.h,v 1.5 2003-12-16 14:36:28 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -11,6 +11,8 @@ See the file LICENSE.
 #define CQL_H_INCLUDED
 #include <stdio.h>
 #include <yaz/yconfig.h>
+
+YAZ_BEGIN_CDECL
 
 typedef struct cql_parser *CQL_parser;
 
@@ -186,6 +188,8 @@ int cql_transform_error(cql_transform_t ct, const char **addinfo);
 
 YAZ_EXPORT
 const char *cql_strerror(int code);
+
+YAZ_END_CDECL
 
 #endif
 /* CQL_H_INCLUDED */

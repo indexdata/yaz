@@ -4,7 +4,7 @@ MARC conversion can now generate ISO2709 output in another
 character set. yaz-marcdump uses this facility if you invoke it
 with option -O.
 
-Added missing C decl macros for include/yaz/{soap.h,srw.h}, so that
+Added missing C decl macros for include/yaz/{soap.h,srw.h,cql.h}, so that
 functions from there can be used from C++.
 
 --- 2.0.6 2003/12/04
