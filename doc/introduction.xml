@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.14 2003-04-28 21:02:16 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.15 2003-11-03 10:54:49 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -136,10 +136,11 @@
      <para>
       <xref linkend="odr"/> goes through the details of the
       ODR module which is the work horse that encodes and decodes
-      BER packages. Implementors using ZOOM only do not need reading this.
+      BER packages. Implementors using ZOOM only do <emphasis>not</emphasis>
+      need reading this.
       Most other Z39.50 implementors only need to read the first two
-      sections <link linkend="odr.introduction">Introduction</link>,
-      <link linkend="odr.use">Using ODR</link>.
+      sections (<xref linkend="odr.introduction"/> and
+      <xref linkend="odr.use"/>).
      </para>
     </listitem>
 
