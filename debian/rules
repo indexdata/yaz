@@ -84,7 +84,7 @@ binary-arch: build install
 	dh_testroot
 	cp LICENSE debian/copyright
 	dh_installdocs -A README
-	dh_installchangelogs CHANGELOG
+	dh_installchangelogs 
 	dh_installexamples
 	mv debian/tmp/usr/share/doc/yaz debian/tmp/usr/share/doc/yaz-doc
 	dh_install 

@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.19 2004/03/30
+
+Rename CHANGELOG to NEWS to follow GNU style packing.
+
 Fix bug with missing initialization of member in init_diagnostics.
 This bug affects threaded version of GFS server.
 

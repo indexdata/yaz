@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.26 2004-03-29 15:09:14 adam Exp $
+## $Id: Makefile.am,v 1.27 2004-03-29 20:11:13 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -11,7 +11,7 @@ aclocaldir=$(datadir)/aclocal
 aclocal_DATA = yaz.m4
 
 SPEC_FILE=$(PACKAGE).spec
-EXTRA_DIST=$(SPEC_FILE) README LICENSE CHANGELOG TODO windows.txt \
+EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS TODO windows.txt \
 	yaz-config.in yaz.m4
 
 dist-hook:

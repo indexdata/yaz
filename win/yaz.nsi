@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.43 2004-03-20 07:02:23 adam Exp $
+; $Id: yaz.nsi,v 1.44 2004-03-29 20:11:13 adam Exp $
 
 !define VERSION "2.0.18"
 
@@ -44,6 +44,7 @@ Section "" ; (default section)
 	SetOutPath $INSTDIR
 	File LICENSE.txt
 	File ..\README
+	File ..\NEWS
 	SetOutPath $INSTDIR
 	SetOutPath $INSTDIR\ztest
 	File ..\ztest\dummy-records
