@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.224 2004-01-12 12:11:57 adam Exp $
+ * $Id: client.c,v 1.225 2004-01-13 11:19:24 adam Exp $
  */
 
 #include <stdio.h>
@@ -326,6 +326,11 @@ static void send_initRequest(const char* type_and_host)
 static void render_initUserInfo(Z_OtherInformation *ui1);
 static void render_diag(Z_DiagnosticFormat *diag);
 
+static void pr_opt(const char *opt)
+{
+    printf (" %s", opt);
+}
+
 static int process_initResponse(Z_InitResponse *res)
 {
     int ver = 0;
@@ -370,46 +375,11 @@ static int process_initResponse(Z_InitResponse *res)
 	}
     }
     printf ("Options:");
-    if (ODR_MASK_GET(res->options, Z_Options_search))
-        printf (" search");
-    if (ODR_MASK_GET(res->options, Z_Options_present))
-        printf (" present");
-    if (ODR_MASK_GET(res->options, Z_Options_delSet))
-        printf (" delSet");
-    if (ODR_MASK_GET(res->options, Z_Options_resourceReport))
-        printf (" resourceReport");
-    if (ODR_MASK_GET(res->options, Z_Options_resourceCtrl))
-        printf (" resourceCtrl");
-    if (ODR_MASK_GET(res->options, Z_Options_accessCtrl))
-        printf (" accessCtrl");
-    if (ODR_MASK_GET(res->options, Z_Options_scan))
-        printf (" scan");
-    if (ODR_MASK_GET(res->options, Z_Options_sort))
-        printf (" sort");
-    if (ODR_MASK_GET(res->options, Z_Options_extendedServices))
-        printf (" extendedServices");
-    if (ODR_MASK_GET(res->options, Z_Options_level_1Segmentation))
-        printf (" level1Segmentation");
-    if (ODR_MASK_GET(res->options, Z_Options_level_2Segmentation))
-        printf (" level2Segmentation");
-    if (ODR_MASK_GET(res->options, Z_Options_concurrentOperations))
-        printf (" concurrentOperations");
-    if (ODR_MASK_GET(res->options, Z_Options_namedResultSets))
-    {
-        printf (" namedResultSets");
-        setnumber = 0;
-    }
-    if (ODR_MASK_GET(res->options, Z_Options_encapsulation))
-        printf (" encapsulation");
-    if (ODR_MASK_GET(res->options, Z_Options_resultCount))
-        printf (" resultCount");
-    if (ODR_MASK_GET(res->options, Z_Options_negotiationModel))
-        printf (" negotiationModel");
-    if (ODR_MASK_GET(res->options, Z_Options_duplicateDetection))
-        printf (" duplicateDetection");
-    if (ODR_MASK_GET(res->options, Z_Options_queryType104))
-        printf (" queryType104");
+    yaz_init_opt_decode(res->options, pr_opt);
     printf ("\n");
+
+    if (ODR_MASK_GET(res->options, Z_Options_namedResultSets))
+        setnumber = 0;
     
     if (ODR_MASK_GET(res->options, Z_Options_negotiationModel)) {
     
