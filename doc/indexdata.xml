@@ -1,4 +1,4 @@
-<!-- $Id: indexdata.xml,v 1.6 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: indexdata.xml,v 1.7 2003-11-03 14:05:54 adam Exp $ -->
  <appendix id="indexdata"><title>About Index Data</title>
 
   <para>
@@ -18,8 +18,8 @@
   </para>
   <para>
    <address>
-    Index Data Aps
-    <street>K&oslash;bmagergade 43</street>
+    Index Data ApS
+    <street>K&oslash;bmagergade 43 2.</street>
     <postcode>1150 Copenhagen K</postcode>
     <country>Denmark</country>
     Phone <phone>+45 3341 0100</phone>
