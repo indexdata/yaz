@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1996, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.37  1996-07-06 19:58:29  quinn
+ * Revision 1.38  1996-08-12 14:09:11  adam
+ * Default prefix query attribute set defined by using p_query_attset.
+ *
+ * Revision 1.37  1996/07/06  19:58:29  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.36  1996/06/10  08:53:47  quinn
@@ -165,7 +168,6 @@ static ODR_MEM session_mem;             /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan[512] = "0";
 static char last_cmd[100] = "?";
-static oid_value attributeset = VAL_BIB1;
 static FILE *marcdump = 0;
 static char marcdump_file[512] = "marc.out";
 
@@ -650,7 +652,7 @@ static int send_searchRequest(char *arg)
         assert((RPNquery = ccl_rpn_query(rpn)));
         bib1.proto = protocol;
         bib1.oclass = CLASS_ATTSET;
-        bib1.value = attributeset;
+        bib1.value = VAL_BIB1;
         RPNquery->attributeSetId = oid_getoidbyent(&bib1);
         query.u.type_1 = RPNquery;
         break;
@@ -1007,7 +1009,7 @@ int cmd_format(char *arg)
     }
     else
     {
-        printf("Specify one of {sutrs,usmarc,danmarc,grs1}.\n");
+        printf("Specify one of {sutrs,usmarc,danmarc,grs1,summary,explain}.\n");
         return 0;
     }
 }
@@ -1032,7 +1034,6 @@ int cmd_elements(char *arg)
 int cmd_attributeset(char *arg)
 {
     char what[100];
-    oid_value v;
 
     if (!arg || !*arg)
     {
@@ -1040,12 +1041,11 @@ int cmd_attributeset(char *arg)
 	return 0;
     }
     sscanf(arg, "%s", what);
-    if ((v = oid_getvalbyname(what)) == VAL_NONE)
+    if (p_query_attset (what))
     {
 	printf("Unknown attribute set name\n");
 	return 0;
     }
-    attributeset = v;
     return 1;
 }
 

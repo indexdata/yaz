@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1996, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: pquery.h,v $
- * Revision 1.5  1996-03-15 11:01:46  adam
+ * Revision 1.6  1996-08-12 14:09:24  adam
+ * Default prefix query attribute set defined by using p_query_attset.
+ *
+ * Revision 1.5  1996/03/15  11:01:46  adam
  * Extra argument to p_query_rpn: protocol.
  * Extra arguments to p_query_scan: protocol and attributeSet.
  *
@@ -52,4 +55,5 @@ Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
 
 Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
                                     Odr_oid **attributeSetP, const char *qbuf);
+int p_query_attset (const char *arg);
 #endif
