@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.176 2002-12-16 13:13:53 adam Exp $
+ * $Id: client.c,v 1.177 2002-12-16 13:30:41 adam Exp $
  */
 
 #include <stdio.h>
@@ -693,7 +693,6 @@ static void display_record(Z_External *r)
                         
                         while (inbytesleft)
                         {
-                            int i;
                             size_t outbytesleft = sizeof(outbuf);
                             char *outp = outbuf;
                             size_t r = yaz_iconv (cd, (char**) &inp,
