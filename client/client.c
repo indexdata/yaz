@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.92  1999-12-21 16:24:48  adam
+ * Revision 1.93  2000-01-15 09:39:50  adam
+ * Implemented ill_get_ILLRequest. More ILL testing for client.
+ *
+ * Revision 1.92  1999/12/21 16:24:48  adam
  * More robust ISO2709 handling (in case of real bad formats).
  *
  * Revision 1.91  1999/12/16 23:36:19  adam
@@ -1252,7 +1255,50 @@ static Z_External *create_external_itemRequest()
     return 0;
 }
 #endif
-static Z_External *CreateItemOrderExternal(int itemno)
+
+#ifdef ASN_COMPILED
+static Z_External *create_external_ILLRequest()
+{
+    ILL_Request *req = ill_get_ILLRequest(out);
+    Z_External *r = 0;
+
+    if (!ill_Request (out, &req, 0, 0))
+	return 0;
+    else
+    {
+	oident oid;
+	int ill_request_size = 0;
+	char *ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
+	
+	oid.proto = PROTO_GENERAL;
+	oid.oclass = CLASS_GENERAL;
+	oid.value = VAL_ISO_ILL_1;
+	
+	r = (Z_External *) odr_malloc (out, sizeof(*r));
+	r->direct_reference = odr_oiddup(out,oid_getoidbyent(&oid)); 
+	r->indirect_reference = 0;
+	r->descriptor = 0;
+	r->which = Z_External_single;
+	
+	r->u.single_ASN1_type = (Odr_oct *)
+	    odr_malloc (out, sizeof(*r->u.single_ASN1_type));
+	r->u.single_ASN1_type->buf = odr_malloc (out, ill_request_size);
+	r->u.single_ASN1_type->len = ill_request_size;
+	r->u.single_ASN1_type->size = ill_request_size;
+	memcpy (r->u.single_ASN1_type->buf, ill_request_buf, ill_request_size);
+	printf ("len = %d\n", ill_request_size);
+    }
+    return r;
+}
+#else
+static Z_External *create_external_ILLRequest()
+{
+    return 0;
+}
+#endif
+
+
+static Z_External *create_ItemOrderExternal(const char *type, int itemno)
 {
     Z_External *r = (Z_External *) odr_malloc(out, sizeof(Z_External));
     oident ItemOrderRequest;
@@ -1299,34 +1345,35 @@ static Z_External *CreateItemOrderExternal(int itemno)
 	(int *) odr_malloc(out, sizeof(int));
     *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
 
-    r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
-       create_external_itemRequest();
+    switch (*type)
+    {
+    case '2':
+	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
+	    create_external_itemRequest();
+	break;
+    case '1':
+	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
+	    create_external_ILLRequest();
+	break;
+    default:
+	r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
+    }
     return r;
 }
 
-/* II : Added to do DALI Item Order Extended services request */
-static int send_itemorder(char *arg)
+static int send_itemorder(const char *type, int itemno)
 {
-    int itemno = -1;
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     oident ItemOrderRequest;
 
-    if (*arg)
-        itemno = atoi(arg);
-
-    /* Set up item order request */
-
-    /* Package type, Using protocol ILL ( But that's not in the oid.h file yet */
-    /* create an object of class Extended Service, value Item Order            */
     ItemOrderRequest.proto = PROTO_Z3950;
     ItemOrderRequest.oclass = CLASS_EXTSERV;
     ItemOrderRequest.value = VAL_ITEMORDER;
     req->packageType = odr_oiddup(out,oid_getoidbyent(&ItemOrderRequest));
     req->packageName = "1.Extendedserveq";
 
-    /* ** taskSpecificParameters ** */
-    req->taskSpecificParameters = CreateItemOrderExternal(itemno);
+    req->taskSpecificParameters = create_ItemOrderExternal(type, itemno);
 
     send_apdu(apdu);
     return 0;
@@ -1392,10 +1439,15 @@ static int cmd_update(char *arg)
 /* II : Added to do DALI Item Order Extended services request */
 static int cmd_itemorder(char *arg)
 {
+    char type[12];
+    int itemno;
     printf("Item order request\n");
     fflush(stdout);
 
-    send_itemorder(arg);
+    if (sscanf (arg, "%10s %d", type, &itemno) != 2)
+	return 0;
+
+    send_itemorder(type, itemno);
     return(2);
 }
 
@@ -2129,7 +2181,7 @@ static int client(int wait)
 	{"attributeset", cmd_attributeset, "<attrset>"},
         {"querytype", cmd_querytype, "<type>"},
 	{"refid", cmd_refid, "<id>"},
-	{"itemorder", cmd_itemorder, "<item>"},
+	{"itemorder", cmd_itemorder, "1|2 <item>"},
 	{"update", cmd_update, "<item>"},
         {0,0}
     };
