@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.16  1995-11-01 13:54:56  quinn
+ * Revision 1.17  1995-11-07 12:37:44  quinn
+ * Added support for forcing TIMEOUT event.
+ *
+ * Revision 1.16  1995/11/01  13:54:56  quinn
  * Minor adjustments
  *
  * Revision 1.15  1995/09/15  14:44:15  quinn
@@ -154,8 +157,8 @@ int event_loop()
 		p->last_event = now;
 	    	(*p->fun)(p, EVENT_EXCEPT);
 	    }
-	    if (!p->destroyed && p->max_idle && now - p->last_event >
-	    	p->max_idle)
+	    if (!p->destroyed && (p->max_idle && now - p->last_event >
+	    	p->max_idle) || force_event == EVENT_TIMEOUT)
 	    {
 	    	p->last_event = now;
 	    	(*p->fun)(p, EVENT_TIMEOUT);
