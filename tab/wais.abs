@@ -18,3 +18,7 @@ elm (2,7)		Name			!:p,!:w
 elm (1,16)		Date			!
 elm (1,18)		Score			-
 elm (1,14)		RecordId		Local-number
+
+# Tags below this point are unofficial.
+
+elm Body		BodyOfText		!
