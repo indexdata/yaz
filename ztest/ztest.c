@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.19  1998-10-20 15:16:22  adam
+ * Revision 1.20  1998-12-14 14:48:05  adam
+ * Fixed memory leak - happened when fetching MARC records.
+ *
+ * Revision 1.19  1998/10/20 15:16:22  adam
  * Minor change to prevent warning.
  *
  * Revision 1.18  1998/10/20 15:13:45  adam
@@ -77,7 +80,6 @@
 #include <assert.h>
 
 #include <backend.h>
-#include <xmalloc.h>
 #include <proto.h>
 #include <log.h>
 
@@ -209,7 +211,7 @@ static int atoin (const char *buf, int n)
     return val;
 }
 
-char *marc_read(FILE *inf)
+char *marc_read(FILE *inf, ODR odr)
 {
     char length_str[5];
     size_t size;
@@ -220,7 +222,7 @@ char *marc_read(FILE *inf)
     size = atoin (length_str, 5);
     if (size <= 6)
         return NULL;
-    if (!(buf = (char*) xmalloc (size+1)))
+    if (!(buf = (char*) odr_malloc (odr, size+1)))
         return NULL;
     if (fread (buf+5, 1, size-5, inf) != (size-5))
     {
@@ -232,27 +234,25 @@ char *marc_read(FILE *inf)
     return buf;
 }
 
-static char *dummy_database_record (int num)
+static char *dummy_database_record (int num, ODR odr)
 {
     FILE *inf = fopen ("dummy-records", "r");
-    char *buf = 0;
+    char *buf;
 
     if (!inf)
 	return NULL;
     while (--num >= 0)
     {
-	if (buf)
-	   xfree(buf);
 	if (num == 98)
 	{
-	    buf = (char*) xmalloc(2101);
+	    buf = (char*) odr_malloc(odr, 2101);
 	    assert(buf);
 	    memset(buf, 'A', 2100);
 	    buf[2100] = '\0';
 	    break;
 	}
 	else
-	    buf = marc_read (inf);
+	    buf = marc_read (inf, odr);
 	if (!num || !buf)
 	    break;
     }
@@ -309,7 +309,7 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *fd)
 	    return r;
 	}
     }
-    else if ((cp = dummy_database_record(q->number)))
+    else if ((cp = dummy_database_record(q->number, q->stream)))
     {
 	r->len = strlen(cp);
 	r->record = (char *) odr_malloc (q->stream, 1+r->len);
