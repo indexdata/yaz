@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.6 2003-12-21 11:33:29 adam Exp $
+ * $Id: seshigh.c,v 1.7 2003-12-25 15:25:08 adam Exp $
  */
 
 /*
@@ -1539,7 +1539,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.6 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.7 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1780,9 +1780,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	if (freq.len >= 0)
 	    this_length = freq.len;
 	else
-	    this_length = odr_total(a->encode) - total_length;
-	yaz_log(LOG_DEBUG, "  fetched record, len=%d, total=%d",
-	    this_length, total_length);
+	    this_length = odr_total(a->encode) - total_length - dumped_records;
+	yaz_log(LOG_DEBUG, "  fetched record, len=%d, total=%d dumped=%d",
+	    this_length, total_length, dumped_records);
 	if (this_length + total_length > a->preferredMessageSize)
 	{
 	    /* record is small enough, really */
