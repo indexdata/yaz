@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2001, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.9 2001-03-21 15:02:39 adam Exp $
+## $Id: Makefile.am,v 1.10 2001-05-16 07:37:39 adam Exp $
 
 noinst_LTLIBRARIES = libutil.la
 
@@ -8,7 +8,7 @@ noinst_LTLIBRARIES = libutil.la
 
 bin_SCRIPTS = yaz-comp
 
-EXTRA_DIST = yaz-comp
+EXTRA_DIST = yaz-comp cvs-date.tcl
 
 LIBS =
 

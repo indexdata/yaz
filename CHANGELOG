@@ -1,5 +1,12 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Minor adjustments to pquery parser (PQF). Token characters may be
+escaped by using backslash (C-style).
+
+PQF parser allows string attribute values to be specified. For @attr,
+non-numeric characters after the equal-sign are treated as strings
+(e.g. @attr 9=title).
+
 CCL trunction character may be defined (@truncation in file)
 
 * function zget_ExtendedServicesRequest sets waitAction to

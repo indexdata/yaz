@@ -2,7 +2,12 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.3  2000-04-05 07:39:55  adam
+ * Revision 1.4  2001-05-16 07:37:39  adam
+ * Added script cvs-date.tcl that determines last CVS change for YAZ by
+ * using output of 'cvs log'. The script generates include/yaz/yaz-date.h
+ * which defines YAZ_DATE - format YYYYMMDD.
+ *
+ * Revision 1.3  2000/04/05 07:39:55  adam
  * Added shared library support (libtool).
  *
  * Revision 1.2  2000/02/28 11:20:06  adam
@@ -89,5 +94,8 @@
  */
 #ifndef YAZ_VERSION
 #define YAZ_VERSION "1.7"
+#ifndef WIN32
+#include <yaz/yaz-date.h>
+#endif
 #endif
 

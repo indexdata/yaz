@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.44 2001-04-06 12:26:46 adam Exp $
+dnl $Id: configure.in,v 1.45 2001-05-16 07:37:39 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -31,7 +31,6 @@ fi
 EXTRAMODULE="$EXTRAMODULE ill ccl"
 ])
 EXTRALIB=""
-echo $EXTRAMODULE
 for module in $EXTRAMODULE; do
 	EXTRALIB="$EXTRALIB ../$module/lib${module}.la"
 	if test $module = "z39.50"; then
