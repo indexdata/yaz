@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.5 2003-02-17 14:35:42 adam Exp $
+ * $Id: zoom-p.h,v 1.6 2003-02-20 15:11:58 adam Exp $
  */
 
 #if HAVE_XSLT
@@ -19,6 +19,7 @@ struct ZOOM_query_p {
     Z_SortKeySpecList *sort_spec;
     int refcount;
     ODR odr;
+    char *query_string;
 };
 
 #define STATE_IDLE 0
@@ -81,9 +82,8 @@ struct ZOOM_options_p {
 typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
 
 struct ZOOM_resultset_p {
-    Z_Query *z_query;
     Z_SortKeySpecList *r_sort_spec;
-    ZOOM_query search;
+    ZOOM_query query;
     int refcount;
     int size;
     int start;

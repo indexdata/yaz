@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.25 2003-02-19 15:22:11 adam Exp $
+ * $Id: zoom-c.c,v 1.26 2003-02-20 15:11:38 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -388,6 +388,7 @@ ZOOM_query_create(void)
     s->z_query = 0;
     s->sort_spec = 0;
     s->odr = odr_createmem (ODR_ENCODE);
+    s->query_string = 0;
 
     return s;
 }
@@ -410,6 +411,7 @@ ZOOM_query_destroy(ZOOM_query s)
 ZOOM_API(int)
 ZOOM_query_prefix(ZOOM_query s, const char *str)
 {
+    s->query_string = odr_strdup(s->odr, str);
     s->z_query = (Z_Query *) odr_malloc (s->odr, sizeof(*s->z_query));
     s->z_query->which = Z_Query_type_1;
     s->z_query->u.type_1 =  p_query_rpn(s->odr, PROTO_Z3950, str);
@@ -423,16 +425,19 @@ ZOOM_query_cql(ZOOM_query s, const char *str)
 {
     Z_External *ext;
 
+    s->query_string = odr_strdup(s->odr, str);
+
     ext = (Z_External *) odr_malloc(s->odr, sizeof(*ext));
     ext->direct_reference = odr_getoidbystr(s->odr, "1.2.840.10003.16.2");
     ext->indirect_reference = 0;
     ext->descriptor = 0;
     ext->which = Z_External_CQL;
-    ext->u.cql = odr_strdup(s->odr, str);
+    ext->u.cql = s->query_string;
     
     s->z_query = (Z_Query *) odr_malloc (s->odr, sizeof(*s->z_query));
     s->z_query->which = Z_Query_type_104;
     s->z_query->u.type_104 =  ext;
+
     return 0;
 }
 
@@ -499,8 +504,7 @@ ZOOM_resultset ZOOM_resultset_create ()
     r->count = 0;
     r->record_cache = 0;
     r->r_sort_spec = 0;
-    r->z_query = 0;
-    r->search = 0;
+    r->query = 0;
     r->connection = 0;
     r->next = 0;
     return r;
@@ -527,8 +531,7 @@ ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     const char *cp;
 
     r->r_sort_spec = q->sort_spec;
-    r->z_query = q->z_query;
-    r->search = q;
+    r->query = q;
 
     r->options = ZOOM_options_create_with_parent(c->options);
 
@@ -605,7 +608,7 @@ ZOOM_resultset_destroy(ZOOM_resultset r)
 		rp = &(*rp)->next;
 	    }
 	}
-	ZOOM_query_destroy (r->search);
+	ZOOM_query_destroy (r->query);
 	ZOOM_options_destroy (r->options);
 	odr_destroy (r->odr);
         xfree (r->setname);
@@ -1056,18 +1059,19 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         if (i == resultset->count)
             return zoom_complete;
     }
-    assert(resultset->z_query);
+    assert(resultset->query);
         
     sr = yaz_srw_get(c->odr_out, Z_SRW_searchRetrieve_request);
 
-    if (resultset->z_query->which == Z_Query_type_104
-        && resultset->z_query->u.type_104->which == Z_External_CQL)
-        sr->u.request->query = resultset->z_query->u.type_104->u.cql;
-    else if (resultset->z_query->which == Z_Query_type_1 &&
-             resultset->z_query->u.type_1)
+    if (resultset->query->z_query->which == Z_Query_type_104
+        && resultset->query->z_query->u.type_104->which == Z_External_CQL)
     {
-        set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
-        return zoom_complete;
+        sr->u.request->query = resultset->query->z_query->u.type_104->u.cql;
+    }
+    else if (resultset->query->z_query->which == Z_Query_type_1 &&
+             resultset->query->z_query->u.type_1)
+    {
+        sr->u.request->pQuery = resultset->query->query_string;
     }
     else
     {
@@ -1118,10 +1122,10 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
 	mediumSetElementSetName = elementSetName;
 
     assert (r);
-    assert (r->z_query);
+    assert (r->query);
 
     /* prepare query for the search request */
-    search_req->query = r->z_query;
+    search_req->query = r->query->z_query;
 
     search_req->databaseNames =
 	set_DatabaseNames (c, r->options, &search_req->num_databaseNames);
