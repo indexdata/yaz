@@ -16,12 +16,12 @@
      <!ENTITY chap-future SYSTEM "future.xml">
      <!ENTITY app-license SYSTEM "license.xml">
      <!ENTITY app-indexdata SYSTEM "indexdata.xml">
-     <!ENTITY asn "<acronym>ASN</acronym>">
+     <!ENTITY asn "Z39.50 ASN.1">
      <!ENTITY odr "<acronym>ODR</acronym>">
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml,v 1.9 2001-10-24 20:12:36 adam Exp $ -->
+<!-- $Id: yaz.xml,v 1.10 2001-10-25 11:55:56 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
@@ -39,9 +39,9 @@
   </copyright>
   <abstract><simpara>
     This document is the programmer's guide and reference to the &yaz;
-    package. &yaz; is a compact toolkit that provides access to the
-    Z39.50 protocol, as well as a set of higher-level tools for
-    implementing the server and client roles, respectively.
+    package version 1.8. &yaz; is a compact toolkit that provides
+    access to the Z39.50 protocol, as well as a set of higher-level
+    tools for implementing the server and client roles, respectively.
     The documentation can be used on its own, or as a reference when
     looking at the example applications provided with the package.
    </simpara></abstract>

@@ -1,5 +1,5 @@
-<!-- $Id: asn.xml,v 1.10 2001-10-24 20:12:36 adam Exp $ -->
- <chapter id="asn"><title>The ASN.1 Module</title>
+<!-- $Id: asn.xml,v 1.11 2001-10-25 11:55:56 adam Exp $ -->
+ <chapter id="asn"><title>The Z39.50 ASN.1 Module</title>
   <sect1 id="asn.introduction"><title>Introduction</title>
    <para>
     The &asn; module provides you with a set of C struct definitions for the
@@ -10,6 +10,13 @@
     representation in C, such as general octet strings and bit strings,
     the &odr; module (see section <link linkend="odr">The ODR Module</link>)
     provides auxiliary definitions.
+   </para>
+   <para>
+    The &asn; module is located in sub directory <filename>z39.50</filename>.
+    There you'll find C files that implements encoders and decoders for the
+    Z39.50 types. You'll also find the protocol definitions:
+    <filename>z3950v3.asn</filename>, <filename>esupdate.asn</filename>, 
+    and others.
    </para>
   </sect1>
   <sect1 id="asn.preparing"><title>Preparing PDUs</title>
