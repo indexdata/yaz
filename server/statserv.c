@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.75  2001-10-04 00:37:58  adam
+ * Revision 1.76  2001-10-05 13:55:17  adam
+ * Added defines YAZ_GNU_THREADS, YAZ_POSIX_THREADS in code and yaz-config
+ *
+ * Revision 1.75  2001/10/04 00:37:58  adam
  * Fixes for GNU threads (not working yet).
  *
  * Revision 1.74  2001/10/03 23:55:18  adam
@@ -265,18 +268,16 @@
 #include <direct.h>
 #include "service.h"
 #else
-
-#ifdef _REENTRANT
-#if HAVE_PTHREAD_H
-#include <pthread.h>
-#elif HAVE_PTH_H
-#include <pth.h>
-#endif
-#endif
-
 #include <unistd.h>
 #include <pwd.h>
 #endif
+
+#if YAZ_POSIX_THREADS
+#include <pthread.h>
+#elif YAZ_GNU_THREADS
+#include <pth.h>
+#endif
+
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
@@ -718,8 +719,7 @@ static void listener(IOCHAN h, int event)
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
 	    ++no_sessions;
 	}
-#ifdef _REENTRANT
-#if HAVE_PTHREAD_H
+#if YAZ_POSIX_THREADS
 	if (control_block.threads)
 	{
 	    pthread_t child_thread;
@@ -728,7 +728,7 @@ static void listener(IOCHAN h, int event)
 	}
 	else
 	    new_session(new_line);
-#elif HAVE_PTH_H
+#elif YAZ_GNU_THREADS
 	if (control_block.threads)
 	{
 	    pth_attr_t attr;
@@ -738,16 +738,13 @@ static void listener(IOCHAN h, int event)
             pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
             pth_attr_set (attr, PTH_ATTR_STACK_SIZE, 32*1024);
             pth_attr_set (attr, PTH_ATTR_NAME, "session");
-            yaz_log (LOG_LOG, "pth_spawn");
+            yaz_log (LOG_LOG, "pth_spawn begin");
 	    child_thread = pth_spawn (attr, new_session, new_line);
-#if 0
+            yaz_log (LOG_LOG, "pth_spawn finish");
             pth_attr_destroy (attr);
-#endif
 	}
 	else
 	    new_session(new_line);
-#endif
-
 #else
 	new_session(new_line);
 #endif
@@ -1022,7 +1019,10 @@ int check_options(int argc, char **argv)
 	    control_block.dynamic = 0;
 	    break;
 	case 'T':
-#if _REENTRANT
+#if YAZ_POSIX_THREADS
+	    control_block.dynamic = 0;
+	    control_block.threads = 1;
+#elif YAZ_GNU_THREADS
 	    control_block.dynamic = 0;
 	    control_block.threads = 1;
 #else

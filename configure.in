@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.47 2001-10-04 00:37:58 adam Exp $
+dnl $Id: configure.in,v 1.48 2001-10-05 13:55:17 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -123,7 +123,9 @@ if test "$ac_cv_header_stdc" = "no"; then
 fi
 dnl
 AC_SUBST(LIBTHREAD)
+AC_SUBST(CFLAGSTHREADS)
 HAVETHREADS=0
+CFLAGSTHREADS=""
 LIBTHREAD=""
 dnl
 AC_ARG_ENABLE(pth, [  --enable-pth            enable GNU threads],[enable_pth=$enableval],[enable_pth=no])
@@ -135,6 +137,7 @@ if test "$enable_pth" = "yes"; then
         	AC_CHECK_HEADERS(pth.h)
 		if test "$ac_cv_header_pth_h" = "yes"; then
 			LIBTHREAD="-lpth"
+			CFLAGSTHREADS="-DYAZ_GNU_THREADS=1"
 			HAVETHREADS=1
 		fi
 	fi	
@@ -156,7 +159,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 	if test "$thread_ok" = "yes"; then
 		LIBTHREAD=-lpthread
 		AC_MSG_RESULT(yes)
-		AC_CHECK_HEADERS(pthread.h)
+		CFLAGSTHREADS="-DYAZ_POSIX_THREADS=1 -D_REENTRANT"
 		HAVETHREADS=1
 	else
 		AC_MSG_RESULT(no)

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.29  2001-10-04 00:37:58  adam
+ * Revision 1.30  2001-10-05 13:55:17  adam
+ * Added defines YAZ_GNU_THREADS, YAZ_POSIX_THREADS in code and yaz-config
+ *
+ * Revision 1.29  2001/10/04 00:37:58  adam
  * Fixes for GNU threads (not working yet).
  *
  * Revision 1.28  2001/10/03 23:55:18  adam
@@ -119,13 +122,12 @@
 #include <windows.h>
 #endif
 
-#ifdef _REENTRANT
-#if HAVE_PTHREAD_H
+#if YAZ_POSIX_THREADS
 #include <pthread.h>
-#elif HAVE_PTH_H
-#include <pth.h>
 #endif
 
+#if YAZ_GNU_THREADS
+#include <pth.h>
 #endif
 
 #define NMEM_CHUNK (4*1024)
@@ -134,40 +136,30 @@
 static CRITICAL_SECTION critical_section;
 #define NMEM_ENTER EnterCriticalSection(&critical_section)
 #define NMEM_LEAVE LeaveCriticalSection(&critical_section)
-#endif
-
-#ifdef _REENTRANT
-#if HAVE_PTHREAD_H
+struct nmem_mutex {
+    CRITICAL_SECTION m_handle;
+};
+#elif YAZ_POSIX_THREADS
 static pthread_mutex_t nmem_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define NMEM_ENTER pthread_mutex_lock(&nmem_mutex);
 #define NMEM_LEAVE pthread_mutex_unlock(&nmem_mutex);
-#elif HAVE_PTH_H
-static pth_mutex_t nmem_mutex;
+struct nmem_mutex {
+    pthread_mutex_t m_handle;
+};
+#elif YAZ_GNU_THREADS
+static pth_mutex_t nmem_mutex = PTH_MUTEX_INIT;
 #define NMEM_ENTER pth_mutex_acquire(&nmem_mutex, 0, 0)
 #define NMEM_LEAVE pth_mutex_release(&nmem_mutex)
-#else
-#error x
-#endif
+struct nmem_mutex {
+    pth_mutex_t m_handle;
+};
 #else
 #define NMEM_ENTER
 #define NMEM_LEAVE
-#endif
-
 struct nmem_mutex {
-#ifdef WIN32
-    CRITICAL_SECTION m_handle;
-#elif _REENTRANT
-
-#if HAVE_PTHREAD_H
-    pthread_mutex_t m_handle;
-#elif HAVE_PTH_H
-    pth_mutex_t m_handle;
-#endif
-
-#else
-    int m_handle;
-#endif
+    int dummy;
 };
+#endif
 
 YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
 {
@@ -177,8 +169,10 @@ YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
 	*p = (NMEM_MUTEX) malloc (sizeof(**p));
 #ifdef WIN32
 	InitializeCriticalSection(&(*p)->m_handle);
-#elif _REENTRANT
+#elif YAZ_POSIX_THREADS
 	pthread_mutex_init (&(*p)->m_handle, 0);
+#elif YAZ_GNU_THREADS
+        pth_mutex_init (&(*p)->m_handle);
 #endif
     }
     NMEM_LEAVE;
@@ -190,7 +184,7 @@ YAZ_EXPORT void nmem_mutex_enter(NMEM_MUTEX p)
     {
 #ifdef WIN32
 	EnterCriticalSection(&p->m_handle);
-#elif _REENTRANT
+#elif YAZ_POSIX_THREADS
 	pthread_mutex_lock(&p->m_handle);
 #endif
     }
@@ -202,7 +196,7 @@ YAZ_EXPORT void nmem_mutex_leave(NMEM_MUTEX p)
     {
 #ifdef WIN32
 	LeaveCriticalSection(&p->m_handle);
-#elif _REENTRANT
+#elif YAZ_POSIX_THREADS
 	pthread_mutex_unlock(&p->m_handle);
 #endif
     }
@@ -481,14 +475,9 @@ void nmem_init (void)
     {
 #ifdef WIN32
 	InitializeCriticalSection(&critical_section);
-#endif
-
-#ifdef _REENTRANT
-#if HAVE_PTH_H
+#elif YAZ_GNU_THREADS
 	yaz_log (LOG_LOG, "pth_init");
         pth_init ();
-        pth_mutex_init (&nmem_mutex);
-#endif
 #endif
 	nmem_active_no = 0;
 	freelist = NULL;

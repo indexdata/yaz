@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.29  1999-11-30 13:47:12  adam
+ * Revision 1.30  2001-10-05 13:55:17  adam
+ * Added defines YAZ_GNU_THREADS, YAZ_POSIX_THREADS in code and yaz-config
+ *
+ * Revision 1.29  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.28  1999/08/27 09:40:32  adam
@@ -116,6 +119,15 @@
 #include "session.h"
 #include <yaz/statserv.h>
 
+#if YAZ_GNU_THREADS
+#include <pth.h>
+#define YAZ_EV_SELECT pth_select
+#endif
+
+#ifndef YAZ_EV_SELECT
+#define YAZ_EV_SELECT select
+#endif
+
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
 {
     IOCHAN new_iochan;
@@ -162,7 +174,8 @@ int event_loop(IOCHAN *iochans)
 	    if (p->fd > max)
 	        max = p->fd;
 	}
-	if ((res = select(max + 1, &in, &out, &except, timeout)) < 0)
+	res = YAZ_EV_SELECT(max + 1, &in, &out, &except, timeout);
+	if (res < 0)
 	{
 	    if (errno == EINTR)
     		continue;
