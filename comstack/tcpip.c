@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: tcpip.c,v $
- * Revision 1.41  2001-10-12 21:49:26  adam
+ * Revision 1.42  2001-10-22 13:57:24  adam
+ * Implemented cs_rcvconnect and cs_look as described in the documentation.
+ *
+ * Revision 1.41  2001/10/12 21:49:26  adam
  * For accept/recv/send check for EAGAIN if it's differs from EWOULDBLOCK.
  *
  * Revision 1.40  2001/08/23 09:02:46  adam
@@ -495,6 +498,7 @@ int tcpip_connect(COMSTACK h, void *address)
 #ifdef WIN32
 	    if (WSAGetLastError() == WSAEWOULDBLOCK)
 	    {
+		h->event = CS_CONNECT;
 		h->state = CS_CONNECTING;
 		h->io_pending = CS_WANT_WRITE;
 		return 1;
@@ -502,6 +506,7 @@ int tcpip_connect(COMSTACK h, void *address)
 #else
 	    if (errno == EINPROGRESS)
 	    {
+		h->event = CS_CONNECT;
 		h->state = CS_CONNECTING;
 		h->io_pending = CS_WANT_WRITE|CS_WANT_READ;
 		return 1;
@@ -510,6 +515,7 @@ int tcpip_connect(COMSTACK h, void *address)
 	    h->cerrno = CSYSERR;
 	    return -1;
 	}
+	h->event = CS_CONNECT;
 	h->state = CS_CONNECTING;
     }
     if (h->state != CS_CONNECTING)
@@ -548,6 +554,7 @@ int tcpip_connect(COMSTACK h, void *address)
 	}
     }
 #endif
+    h->event = CS_DATA;
     h->state = CS_DATAXFER;
     return 0;
 }
@@ -555,10 +562,39 @@ int tcpip_connect(COMSTACK h, void *address)
 /*
  * nop
  */
-int tcpip_rcvconnect(COMSTACK h)
+int tcpip_rcvconnect(COMSTACK cs)
 {
     TRC(fprintf(stderr, "tcpip_rcvconnect\n"));
-    return 0;
+
+    if (cs->event == CS_CONNECT)
+    {
+	int fd = cs->iofile;
+	fd_set input, output;
+	struct timeval tv;
+	int r;
+	
+	tv.tv_sec = 0;
+	tv.tv_usec = 1;
+	
+	FD_ZERO(&input);
+	FD_ZERO(&output);
+	FD_SET (fd, &input);
+	FD_SET (fd, &output);
+	
+	r = select (fd+1, &input, &output, 0, &tv);
+	if (r > 0)
+	{
+	    if (FD_ISSET(cs->iofile, &output))
+	    {
+		cs->state = CS_DATA;
+		return 0;   /* write OK, we're OK */
+	    }
+	    else
+		return -1;  /* an error, for sure */
+	}
+	return 0;  /* timeout - incomplete */
+    }
+    return -1;    /* wrong state */
 }
 
 #define CERTF "ztest.pem"
@@ -629,6 +665,7 @@ int tcpip_bind(COMSTACK h, void *address, int mode)
         return -1;
     }
     h->state = CS_IDLE;
+    h->event = CS_LISTEN;
     return 0;
 }
 
@@ -807,6 +844,7 @@ COMSTACK tcpip_accept(COMSTACK h)
     }
     h->io_pending = 0;
     h->state = CS_DATAXFER;
+    h->event = CS_DATA;
     return h;
 }
 
@@ -1008,6 +1046,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 
     TRC(fprintf(stderr, "tcpip_put: size=%d\n", size));
     h->io_pending = 0;
+    h->event = CS_DATA;
     if (state->towrite < 0)
     {
         state->towrite = size;
@@ -1020,8 +1059,15 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     }
     while (state->towrite > state->written)
     {
-	if ((res = send(h->iofile, buf + state->written, size -
-			state->written, 0)) < 0)
+	if ((res =
+	     send(h->iofile, buf + state->written, size -
+		  state->written, 
+#ifdef MSG_NOSIGNAL
+		  MSG_NOSIGNAL
+#else
+		  0
+#endif
+		 )) < 0)
 	{
 	    if (
 #ifdef WIN32
@@ -1066,6 +1112,7 @@ int ssl_put(COMSTACK h, char *buf, int size)
 
     TRC(fprintf(stderr, "ssl_put: size=%d\n", size));
     h->io_pending = 0;
+    h->event = CS_DATA;
     if (state->towrite < 0)
     {
         state->towrite = size;

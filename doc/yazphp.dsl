@@ -1,9 +1,9 @@
 <!DOCTYPE style-sheet PUBLIC "-//James Clark//DTD DSSSL Style Sheet//EN" [
-<!ENTITY docbook.dsl SYSTEM "../../docbook-dsssl/html/docbook.dsl"
+<!ENTITY docbook.dsl SYSTEM "/usr/share/sgml/docbook/stylesheet/dsssl/modular/html/docbook.dsl"
   CDATA DSSSL>
 ]>
 <!--
-  $Id: yazphp.dsl,v 1.3 2001-08-14 11:50:07 adam Exp $
+  $Id: yazphp.dsl,v 1.4 2001-10-22 13:57:24 adam Exp $
 -->
 <style-sheet>
 <style-specification use="docbook">

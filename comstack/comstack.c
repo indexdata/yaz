@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: comstack.c,v $
- * Revision 1.8  2001-07-19 19:49:02  adam
+ * Revision 1.9  2001-10-22 13:57:24  adam
+ * Implemented cs_rcvconnect and cs_look as described in the documentation.
+ *
+ * Revision 1.8  2001/07/19 19:49:02  adam
  * Added include of string.h.
  *
  * Revision 1.7  2001/03/21 12:43:36  adam
@@ -99,4 +102,9 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
 	return 0;
     }    
     return cs;
+}
+
+int cs_look (COMSTACK cs)
+{
+    return cs->event;
 }
