@@ -1,3 +1,4 @@
+# $Id: gils-b.est,v 1.5 1996-06-05 08:53:50 adam Exp $
 simpleelement (1,1)
 simpleelement (1,10)
 simpleelement (1,12)
@@ -6,3 +7,4 @@ simpleelement (1,14)
 simpleelement (1,16)
 simpleelement (4,1)
 simpleelement (4,52)
+simpleelement (4,70)/(4,17)
