@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.4 2003-06-22 11:47:18 adam Exp $
+ * $Id: tsticonv.c,v 1.5 2003-06-22 11:48:33 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -70,13 +70,12 @@ static void marc8_tst()
     yaz_iconv_close(cd);
 }
 
-static dconvert(int mandatory, const char *tmpcode)
+static void dconvert(int mandatory, const char *tmpcode)
 {
     int i;
     yaz_iconv_t cd;
     for (i = 0; buf[i]; i++)
     {
-        int j;
         size_t r;
 	char *inbuf = (char*) buf[i];
 	size_t inbytesleft = strlen(inbuf);
