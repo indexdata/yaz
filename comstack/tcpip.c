@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.20  1998-05-18 10:10:40  adam
+ * Revision 1.21  1998-05-20 09:55:32  adam
+ * Function tcpip_get treats EINPROGRESS error in the same way as
+ * EWOULDBLOCK. EINPROGRESS shouldn't be returned - but it is on
+ * Solaris in some cases.
+ *
+ * Revision 1.20  1998/05/18 10:10:40  adam
  * Minor change to avoid C++ warning.
  *
  * Revision 1.19  1998/02/11 11:53:33  adam
@@ -519,7 +524,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 #ifdef WINDOWS
             if (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
+#ifdef EINPROGRESS
+	    if (errno == EINPROGRESS || errno == EWOULDBLOCK)
+#else
             if (errno == EWOULDBLOCK)
+#endif
 #endif
                 break;
             else
