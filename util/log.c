@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.33 2003-01-06 08:20:28 adam Exp $
+ * $Id: log.c,v 1.34 2003-02-07 14:39:00 heikki Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -70,8 +70,8 @@ void yaz_log_init_file (const char *fname)
     if (!l_file)
         l_file = stderr;
     if (!fname || !*fname)
-        return;
-    if (!(new_file = fopen(fname, "a")))
+	new_file=stderr;
+    else if (!(new_file = fopen(fname, "a")))
         return;
     if (l_file != stderr)
     {
@@ -106,7 +106,8 @@ void yaz_log_init(int level, const char *prefix, const char *fname)
 {
     yaz_log_init_level (level);
     yaz_log_init_prefix (prefix);
-    yaz_log_init_file (fname);
+    if (fname && *fname)
+        yaz_log_init_file (fname);
 }
 
 static void (*start_hook_func)(int, const char *, void *) = NULL;
