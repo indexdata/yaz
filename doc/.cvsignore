@@ -6,6 +6,10 @@ yazphp.dsl
 yazprint.dsl
 *.html
 yaz.tex
+yaz.aux
+yaz.log
+yaz.out
+yaz.pdf
 manpage.links
 manpage.refs
 *.[178]
