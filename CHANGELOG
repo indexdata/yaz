@@ -1,12 +1,16 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- XXXXXX XXXX/XX/X
+
+Memory bug in log module fixed.
+
 --- 1.0pl1 1995/12/5
+
+Occasional malloc() of 0 bytes fixed in d1_espec.c.
 
 Bug in Explain DatabaseInfo module fixed.
 
-Some '\r' snuck into one or two of the config tables. Curse on Windows.
-
-Occasional malloc() of 0 bytes fixed in d1_espec.c.
+Some '\r' snuck into one or two of the ret'l config tables. A curse on Windows.
 
 --- 1.0 1995/11/28
 
