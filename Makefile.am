@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2003, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.21 2003-05-06 11:37:18 adam Exp $
+## $Id: Makefile.am,v 1.22 2003-05-06 12:07:33 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -22,13 +22,6 @@ dist-hook:
 	cp $(srcdir)/debian/changelog $(distdir)/debian
 	cp $(srcdir)/debian/rules $(distdir)/debian
 	cp $(srcdir)/debian/postinst $(distdir)/debian
-	if test -f $(srcdir)/depcomp; then \
-		if test -f $(distdir)/depcomp; then \
-			echo "depcomp OK";\
-		else \
-			cp $(srcdir)/depcomp $(distdir)/depcomp;\
-		fi \
-	fi
 
 rpm: $(PACKAGE)-$(VERSION).tar.gz
 	cp $(PACKAGE)-$(VERSION).tar.gz /usr/src/redhat/SOURCES
