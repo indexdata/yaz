@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.196 2003-05-22 17:01:33 mike Exp $
+ * $Id: client.c,v 1.197 2003-05-22 23:55:19 mike Exp $
  */
 
 #include <stdio.h>
@@ -87,7 +87,8 @@ static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
 static char ccl_fields[512] = "default.bib";
-static char cql_fields[512] = "pqf.properties";
+/* ### How can I set this path to use wherever YAZ is installed? */
+static char cql_fields[512] = "/usr/local/share/yaz/etc/pqf.properties";
 static char *esPackageName = 0;
 static char *yazProxy = 0;
 static int kilobytes = 1024;
@@ -1047,7 +1048,6 @@ static int send_searchRequest(const char *arg)
     Z_External *ext;
     QueryType myQueryType = queryType;
     char pqfbuf[512];
-    char *addinfo;
 
     if (myQueryType == QueryType_CCL2RPN)
     {
@@ -1059,8 +1059,14 @@ static int send_searchRequest(const char *arg)
         }
     } else if (myQueryType == QueryType_CQL2RPN) {
 	/* ### All this code should be wrapped in a utility function */
-	CQL_parser parser = cql_parser_create();
+	CQL_parser parser;
 	struct cql_node *node;
+	const char *addinfo;
+	if (cqltrans == 0) {
+            printf("Can't use CQL: no translation file.  Try set_cqlfile\n");
+	    return 0;
+	}
+	parser = cql_parser_create();
 	if ((error = cql_parser_string(parser, arg)) != 0) {
 	    /* ### must do better with the reporting here */
             printf("CQL ERROR %d: presumably a syntax error?\n", error);
@@ -2772,7 +2778,9 @@ int cmd_set_cqlfile(const char* arg)
         perror("unable to open CQL file");
 	return 0;
     }
-    cql_transform_close(cqltrans);
+    if (cqltrans != 0)
+	cql_transform_close(cqltrans);
+
     cqltrans = newcqltrans;
     strcpy(cql_fields, arg);
     return 0;
@@ -2965,10 +2973,8 @@ static void initialize(void)
         fclose (inf);
     }
 
-    if ((cqltrans = cql_transform_open_fname(cql_fields)) == 0) {
-	/* ### There should be a better way to make an empty set! */
-	cqltrans = cql_transform_open_fname("/dev/null");
-    }
+    cqltrans = cql_transform_open_fname(cql_fields);
+    /* If this fails, no problem: we detect cqltrans == 0 later */
 
 #if HAVE_READLINE_READLINE_H
     rl_attempted_completion_function = (CPPFunction*)readline_completer;
