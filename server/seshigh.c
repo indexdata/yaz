@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.9  1995-03-22 15:01:26  quinn
+ * Revision 1.10  1995-03-27 08:34:24  quinn
+ * Added dynamic server functionality.
+ * Released bindings to session.c (is now redundant)
+ *
+ * Revision 1.9  1995/03/22  15:01:26  quinn
  * Adjusting record packing.
  *
  * Revision 1.8  1995/03/22  10:13:21  quinn
@@ -40,6 +44,7 @@
 #include <eventl.h>
 #include <session.h>
 #include <proto.h>
+#include <oid.h>
 
 #include <backend.h>
 
@@ -69,6 +74,10 @@ association *create_association(IOCHAN channel, COMSTACK link)
     new->state = ASSOC_UNINIT;
     new->input_buffer = 0;
     new->input_buffer_len = 0;
+    if (cs_getproto(link) == CS_Z3950)
+	new->proto = PROTO_Z3950;
+    else
+	new->proto = PROTO_SR;
     return new;
 }
 
@@ -214,7 +223,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.9 $";
+    resp.implementationVersion = "$Revision: 1.10 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -227,38 +236,46 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     return 0;
 }
 
-static Z_Records *diagrec(int error, char *addinfo)
+static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
 {
     static Z_Records rec;
-    static Odr_oid bib1[] = { 1, 2, 3, 4, 5, -1 };
+    oident bib1;
     static Z_DiagRec dr;
     static int err;
+
+    bib1.proto = proto;
+    bib1.class = CLASS_DIAGSET;
+    bib1.value = VAL_BIB1;
 
     fprintf(stderr, "Diagnostic: %d -- %s\n", error, addinfo ? addinfo :
 	"NULL");
     err = error;
     rec.which = Z_Records_NSD;
     rec.u.nonSurrogateDiagnostic = &dr;
-    dr.diagnosticSetId = bib1;
+    dr.diagnosticSetId = oid_getoidbyent(&bib1);
     dr.condition = &err;
     dr.addinfo = addinfo ? addinfo : "";
     return &rec;
 }
 
-static Z_NamePlusRecord *surrogatediagrec(char *dbname, int error,
-					    char *addinfo)
+static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
+					    int error, char *addinfo)
 {
     static Z_NamePlusRecord rec;
     static Z_DiagRec dr;
-    static Odr_oid bib1[] = { 1, 2, 3, 4, 5, -1 };
     static int err;
+    oident bib1;
+
+    bib1.proto = proto;
+    bib1.class = CLASS_DIAGSET;
+    bib1.value = VAL_BIB1;
 
     fprintf(stderr, "SurrogateDiagnotic: %d -- %s\n", error, addinfo);
     err = error;
     rec.databaseName = dbname;
     rec.which = Z_NamePlusRecord_surrogateDiagnostic;
     rec.u.surrogateDiagnostic = &dr;
-    dr.diagnosticSetId = bib1;
+    dr.diagnosticSetId = oid_getoidbyent(&bib1);
     dr.condition = &err;
     dr.addinfo = addinfo ? addinfo : "";
     return &rec;
@@ -274,6 +291,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     static Z_Records records;
     static Z_NamePlusRecordList reclist;
     static Z_NamePlusRecord *list[MAX_RECORDS];
+    oident recform;
+    Odr_oid *oid;
 
     records.which = Z_Records_DBOSD;
     records.u.databaseOrSurDiagnostics = &reclist;
@@ -282,6 +301,12 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     *pres = Z_PRES_SUCCESS;
     *num = 0;
     *next = 0;
+
+    recform.proto = a->proto;
+    recform.class = CLASS_RECSYN;
+    recform.value = VAL_USMARC;
+    if (!(oid = odr_oiddup(a->encode, oid_getoidbyent(&recform))))
+    	return 0;
 
     fprintf(stderr, "Request to pack %d+%d\n", start, toget);
     fprintf(stderr, "pms=%d, mrs=%d\n", a->preferredMessageSize,
@@ -303,14 +328,14 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	if (!(fres = bend_fetch(&freq)))
 	{
 	    *pres = Z_PRES_FAILURE;
-	    return diagrec(2, "Backend interface problem");
+	    return diagrec(a->proto, 2, "Backend interface problem");
 	}
 	/* backend should be able to signal whether error is system-wide
 	   or only pertaining to current record */
 	if (fres->errcode)
 	{
 	    *pres = Z_PRES_FAILURE;
-	    return diagrec(fres->errcode, fres->errstring);
+	    return diagrec(a->proto, fres->errcode, fres->errstring);
 	}
 	fprintf(stderr, "  Got record, len=%d, total=%d\n",
 	    fres->len, total_length);
@@ -332,7 +357,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		{
 		    fprintf(stderr, "  Dropped it\n");
 		    reclist.records[reclist.num_records] =
-		   	 surrogatediagrec(fres->basename, 16, 0);
+		   	 surrogatediagrec(a->proto, fres->basename, 16, 0);
 		    reclist.num_records++;
 		    *pres = Z_PRES_PARTIAL_2;
 		    break;
@@ -342,8 +367,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    {
 	    	fprintf(stderr, "Record > maxrcdsz\n");
 		reclist.records[reclist.num_records] =
-		    surrogatediagrec(fres->basename,
-		    17, 0);
+		    surrogatediagrec(a->proto, fres->basename, 17, 0);
 		reclist.num_records++;
 		*pres = Z_PRES_PARTIAL_2;
 		break;
@@ -359,7 +383,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	if (!(thisrec->u.databaseRecord = thisext =  odr_malloc(a->encode,
 	    sizeof(Z_DatabaseRecord))))
 	    return 0;
-	thisext->direct_reference = 0; /* should be OID for current MARC */
+	thisext->direct_reference = oid; /* should be OID for current MARC */
 	thisext->indirect_reference = 0;
 	thisext->descriptor = 0;
 	thisext->which = ODR_EXTERNAL_octet;
@@ -390,6 +414,7 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
     int nrp;
     bend_searchrequest bsrq;
     bend_searchresult *bsrt;
+    oident *oent;
 
     fprintf(stderr, "Got SearchRequest.\n");
     apdup = &apdu;
@@ -397,26 +422,47 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
     apdu.u.searchResponse = &resp;
     resp.referenceId = req->referenceId;
 
-    bsrq.setname = req->resultSetName;
-    bsrq.replace_set = *req->replaceIndicator;
-    bsrq.num_bases = req->num_databaseNames;
-    bsrq.basenames = req->databaseNames;
-    bsrq.query = req->query;
+    resp.records = 0;
+    if (req->query->which == Z_Query_type_1)
+    {
+    	Z_RPNQuery *q = req->query->u.type_1;
 
-    if (!(bsrt = bend_search(&bsrq)))
-    	return -1;
-    else if (bsrt->errcode)
-	resp.records = diagrec(bsrt->errcode, bsrt->errstring);
+    	if (!(oent = oid_getentbyoid(q->attributeSetId)) ||
+	    oent->class != CLASS_ATTSET ||
+	    oent->value != VAL_BIB1)
+	    resp.records = diagrec(assoc->proto, 121, 0);
+    }
+    if (!resp.records)
+    {
+	bsrq.setname = req->resultSetName;
+	bsrq.replace_set = *req->replaceIndicator;
+	bsrq.num_bases = req->num_databaseNames;
+	bsrq.basenames = req->databaseNames;
+	bsrq.query = req->query;
+
+	if (!(bsrt = bend_search(&bsrq)))
+	    return -1;
+	else if (bsrt->errcode)
+	    resp.records = diagrec(assoc->proto, bsrt->errcode, bsrt->errstring);
+	else
+	    resp.records = 0;
+
+	resp.resultCount = &bsrt->hits;
+	resp.numberOfRecordsReturned = &nulint;
+	nrp = bsrt->hits ? 1 : 0;
+	resp.nextResultSetPosition = &nrp;
+	resp.searchStatus = &sr;
+	resp.resultSetStatus = &sr;
+	resp.presentStatus = 0;
+    }
     else
-    	resp.records = 0;
-
-    resp.resultCount = &bsrt->hits;
-    resp.numberOfRecordsReturned = &nulint;
-    nrp = bsrt->hits ? 1 : 0;
-    resp.nextResultSetPosition = &nrp;
-    resp.searchStatus = &sr;
-    resp.resultSetStatus = &sr;
-    resp.presentStatus = 0;
+    {
+    	resp.resultCount = &nulint;
+	resp.numberOfRecordsReturned = &nulint;
+	resp.nextResultSetPosition = &nulint;
+	resp.searchStatus = &nulint;
+	resp.resultSetStatus = 0;
+    }
 
     if (!z_APDU(assoc->encode, &apdup, 0))
     {

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.5  1995-03-15 08:37:41  quinn
+ * Revision 1.6  1995-03-27 08:34:21  quinn
+ * Added dynamic server functionality.
+ * Released bindings to session.c (is now redundant)
+ *
+ * Revision 1.5  1995/03/15  08:37:41  quinn
  * Now we're pretty much set for nonblocking I/O.
  *
  * Revision 1.4  1995/03/14  16:59:48  quinn
@@ -29,7 +33,14 @@
 
 #include <eventl.h>
 
-IOCHAN iochans = 0;
+#include <dmalloc.h>
+
+static IOCHAN iochans = 0;
+
+IOCHAN iochan_getchan(void)
+{
+    return iochans;
+}
 
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
 {
@@ -81,12 +92,11 @@ int event_loop()
 		continue;
 	    return 1;
 	}
-    	for (p = iochans; p; p = nextp)
+    	for (p = iochans; p; p = p->next)
     	{
 	    int force_event = p->force_event;
 
 	    p->force_event = 0;
-	    nextp = p->next;
 	    if (FD_ISSET(p->fd, &in) || force_event == EVENT_INPUT)
 	    	(*p->fun)(p, EVENT_INPUT);
 	    if (!p->destroyed && (FD_ISSET(p->fd, &out) ||
@@ -95,6 +105,11 @@ int event_loop()
 	    if (!p->destroyed && (FD_ISSET(p->fd, &except) ||
 	    	force_event == EVENT_EXCEPT))
 	    	(*p->fun)(p, EVENT_EXCEPT);
+	}
+	for (p = iochans; p; p = nextp)
+	{
+	    nextp = p->next;
+
 	    if (p->destroyed)
 	    {
 	    	IOCHAN tmp = p, pr;

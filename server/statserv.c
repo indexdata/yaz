@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.8  1995-03-20 09:46:26  quinn
+ * Revision 1.9  1995-03-27 08:34:30  quinn
+ * Added dynamic server functionality.
+ * Released bindings to session.c (is now redundant)
+ *
+ * Revision 1.8  1995/03/20  09:46:26  quinn
  * Added osi support.
  *
  * Revision 1.7  1995/03/16  13:29:04  quinn
@@ -37,6 +41,11 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <errno.h>
 
 #include <options.h>
 #include <eventl.h>
@@ -45,44 +54,110 @@
 #include <comstack.h>
 #include <tcpip.h>
 #include <xmosi.h>
-
-#include <unistd.h>
-#include <fcntl.h>
+#include <dmalloc.h>
 
 static char *me = "";
+static int dynamic = 0;   /* fork on incoming connection */
 
 #define DEFAULT_LISTENER "tcp:localhost:9999"
 
 /*
  * handle incoming connect requests.
+ * The dynamic mode is a bit tricky mostly because we want to avoid
+ * doing all of the listening and accepting in the parent - it's
+ * safer that way.
  */
-void listener(IOCHAN h, int event)
+static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
     association *newas;
+    static int hand[2];
+    static int child = 0;
+    int res;
 
     if (event == EVENT_INPUT)
     {
-	if (cs_listen(line, 0, 0) < 0)
+	if (dynamic && !child) 
 	{
-	    if (cs_errno(line) == CSNODATA)
+	    int res;
+
+	    if (pipe(hand) < 0)
+	    {
+		perror("pipe");
+		exit(1);
+	    }
+	    if ((res = fork()) < 0)
+	    {
+		perror("fork");
+		exit(1);
+	    }
+	    else if (res == 0) /* child */
+	    {
+		close(hand[0]);
+		child = 1;
+	    }
+	    else /* parent */
+	    {
+		close(hand[1]);
+		/* wait for child to take the call */
+		for (;;)
+		{
+		    char dummy[1];
+		    int res;
+		    
+		    if ((res = read(hand[0], dummy, 1)) < 0 && errno != EINTR)
+		    {
+			perror("handshake read");
+			exit(1);
+		    }
+		    else if (res >= 0)
+		    	break;
+		}
+		fprintf(stderr, "P: Child has taken the call\n");
+		close(hand[0]);
 		return;
-	    fprintf(stderr, "cs_listen failed.\n");
-	    exit(1);
+	    }
 	}
+	if ((res = cs_listen(line, 0, 0)) < 0)
+	{
+	    fprintf(stderr, "cs_listen failed.\n");
+	    return;
+	}
+	else if (res == 1)
+	    return;
 	iochan_setevent(h, EVENT_OUTPUT);
 	iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
     }
+    /* in dynamic mode, only the child ever comes down here */
     else if (event == EVENT_OUTPUT)
     {
     	COMSTACK new_line;
     	IOCHAN new_chan;
 
-    	if (!(new_line = cs_accept(line)))
-    	{
+	if (!(new_line = cs_accept(line)))
+	{
 	    fprintf(stderr, "Accept failed.\n");
-	    exit(1);
+	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+	    return;
 	}
+	if (dynamic)
+	{
+	    IOCHAN pp;
+	    /* close our half of the listener sockets */
+	    for (pp = iochan_getchan(); pp; pp = iochan_getnext(pp))
+	    {
+		COMSTACK l = iochan_getdata(pp);
+		cs_close(l);
+		iochan_destroy(pp);
+	    }
+	    /* release dad */
+	    fprintf(stderr, "Releasing parent\n");
+	    close(hand[1]);
+	    fprintf(stderr, "New fd is %d\n", cs_fileno(new_line));
+	}
+	else
+	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+
 	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
 	    EVENT_INPUT)))
 	{
@@ -95,7 +170,6 @@ void listener(IOCHAN h, int event)
 	    exit(1);
 	}
 	iochan_setdata(new_chan, newas);
-    	iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset for listen */
     }
     else
     {
@@ -107,7 +181,7 @@ void listener(IOCHAN h, int event)
 /*
  * Set up a listening endpoint, and give it to the event-handler.
  */
-void add_listener(char *where)
+static void add_listener(char *where, int what)
 {
     COMSTACK l;
     CS_TYPE type;
@@ -115,7 +189,8 @@ void add_listener(char *where)
     void *ap;
     IOCHAN lst;
 
-    fprintf(stderr, "Adding listener on %s\n", where);
+    fprintf(stderr, "Adding %s listener on %s\n",
+    	what == PROTO_SR ? "SR" : "Z3950", where);
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
     {
     	fprintf(stderr, "%s: Address format: ('tcp'|'osi')':'<address>.\n",
@@ -145,7 +220,7 @@ void add_listener(char *where)
     	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");
     	exit(1);
     }
-    if (!(l = cs_create(type, 0)))
+    if (!(l = cs_create(type, 0, what)))
     {
     	fprintf(stderr, "Failed to create listener\n");
     	exit(1);
@@ -165,22 +240,36 @@ void add_listener(char *where)
     iochan_setdata(lst, l);
 }
 
+static void catchchld(int num)
+{
+    while (waitpid(-1, 0, WNOHANG) > 0);
+    signal(SIGCHLD, catchchld);
+}
+
 int statserv_main(int argc, char **argv)
 {
     int ret, listeners = 0;
     char *arg;
+    int protocol = CS_Z3950;;
 
     me = argv[0];
-    while ((ret = options("l:", argv, argc, &arg)) != -2)
+    while ((ret = options("szdl:", argv, argc, &arg)) != -2)
     	switch (ret)
     	{
-	    case 0: me = arg; break;
-	    case 'l': add_listener(arg); listeners++; break;
+	    case 0:
+		add_listener(arg, protocol);
+		listeners++;
+		break;
+	    case 'z': protocol = CS_Z3950; break;
+	    case 's': protocol = CS_SR; break;
+	    case 'd': dynamic = 1; break;
 	    default:
-	    	fprintf(stderr, "Usage: %s [-l <listener-addr>]\n", me);
+	    	fprintf(stderr, "Usage: %s [ -zsd <listener-addr> ... ]\n", me);
 	    	exit(1);
 	}
+    if (dynamic)
+    	signal(SIGCHLD, catchchld);
     if (!listeners)
-	add_listener(DEFAULT_LISTENER);
+	add_listener(DEFAULT_LISTENER, protocol);
     return event_loop();
 }

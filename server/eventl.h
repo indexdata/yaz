@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.h,v $
- * Revision 1.3  1995-03-15 08:37:42  quinn
+ * Revision 1.4  1995-03-27 08:34:23  quinn
+ * Added dynamic server functionality.
+ * Released bindings to session.c (is now redundant)
+ *
+ * Revision 1.3  1995/03/15  08:37:42  quinn
  * Now we're pretty much set for nonblocking I/O.
  *
  * Revision 1.2  1995/03/14  10:28:00  quinn
@@ -49,7 +53,9 @@ int force_event;
 #define iochan_getfun(i) ((i)->fun)
 #define iochan_setfun(i, d) ((i)->fun = d)
 #define iochan_setevent(i, e) ((i)->force_event = (e))
+#define iochan_getnext(i) ((i)->next)
 
+IOCHAN iochan_getchan(void);
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags);
 int event_loop();
 

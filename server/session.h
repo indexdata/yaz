@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.1  1995-03-14 10:28:02  quinn
+ * Revision 1.2  1995-03-27 08:34:29  quinn
+ * Added dynamic server functionality.
+ * Released bindings to session.c (is now redundant)
+ *
+ * Revision 1.1  1995/03/14  10:28:02  quinn
  * More work on demo server.
  *
  *
@@ -15,6 +19,7 @@
 
 #include <comstack.h>
 #include <odr.h>
+#include <oid.h>
 
 typedef struct association
 {
@@ -29,6 +34,7 @@ typedef struct association
     int input_buffer_len;
     int input_apdu_len;
     int state;
+    oid_proto proto;
 #define ASSOC_UNINIT       0
 #define ASSOC_IDLE         1
 
@@ -38,6 +44,7 @@ typedef struct association
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);
+void destroy_association(association *h);
 void ir_session(IOCHAN h, int event);
 
 #endif
