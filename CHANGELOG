@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- 1.8.5 2002/XX/XX
+--- 1.8.5 2002/02/03
 
 New YAZ client features: Command completion and new commands:
 push_command, set_apdufile, set_marcdump, set_cclfields, register_oid.
