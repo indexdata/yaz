@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.34 2005/03/14 
+
 Added support for virtual hosts and multiple backend servers for
 the YAZ frontend server. The configution is XML based and
 support specificition of CQL to RPN mappings and explain information.
