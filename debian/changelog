@@ -1,3 +1,9 @@
+yaz (2.0.3-3) unstable; urgency=low
+
+  * Fix CCL->RPN code for attribute strings.
+
+ -- Adam Dickmeiss <adam@gamma.indexdata.dk>  Mon, 23 Jun 2003 14:38:01 +0200
+
 yaz (2.0.3-2) unstable; urgency=low
 
   * String attributes for CCL parser.
