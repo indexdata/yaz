@@ -1,10 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-New ZOOM setting, recordCharset, wich value "from[,to]"
+New ZOOM setting, recordCharset, with value "from[,to]"
 where from is the character set of a record as received
 by the target. The character set "to" is desired charset
 of output record as returned by ZOOM_record_get. If
-"to" is omitted UTF-8 is assumed.
+"to" is omitted, UTF-8 is assumed.
 
 YAZ ASN.1 compiler renamed from yaz-comp to yaz-asncomp
 

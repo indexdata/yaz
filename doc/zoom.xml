@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.27 2003-05-20 08:22:33 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.28 2003-05-30 10:31:29 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -402,6 +402,17 @@
         setname</entry><entry>Name of Result Set (Result Set ID).
         If this option isn't set, the ZOOM module will automatically
         allocate a result set name.
+       </entry><entry>default</entry></row>
+      <row><entry>
+        recordCharset</entry><entry>Specification of character set
+	conversion of records. This is a pure client side operation
+	- unrelated to Z39.50 character set negotiation. The value
+	is a string of the form
+	<literal>"</literal><replaceable>from</replaceable>[,<replaceable>to</replaceable><literal>]"</literal>
+	where <literal>from</literal> is character set encoding
+	of record as returned by the target. The <literal>to</literal>
+	is encoding of the output record (as returned by ZOOM_record_get).
+	If <literal>from</literal> is omitted, UTF-8 is assumed.
        </entry><entry>default</entry></row>
      </tbody>
     </tgroup>
