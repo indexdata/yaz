@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.1 2003-10-27 12:21:34 adam Exp $
+ * $Id: oid.c,v 1.2 2003-11-19 13:47:05 mike Exp $
  */
 
 /*
@@ -98,6 +98,8 @@ static oident standard_oids[] =
      "Thesaurus-attset"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_IDXPATH,      {3,1000,81,2,-1},
      "IDXPATH"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_EXTLITE,      {3,1000,81,3,-1},
+     "EXTLITE"},
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_BIB1,         {4,1,-1},
      "Bib-1"},
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_DIAG1,        {4,2,-1},
@@ -152,6 +154,12 @@ static oident standard_oids[] =
      "RUSmarc"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_HUNMARC,      {5,29,-1},
      "Hunmarc"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_NACSISCATP,   {5,30,-1},
+     "NACSIS-CATP"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_FINMARC2000,  {5,31,-1},
+     "FINMARC2000"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_MARC21FIN,    {5,32,-1},
+     "MARC21-fin"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_EXPLAIN,      {5,100,-1},
      "Explain"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_SUTRS,        {5,101,-1},
