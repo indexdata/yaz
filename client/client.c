@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.6  1995-05-31 08:29:21  quinn
+ * Revision 1.7  1995-06-02 09:50:09  quinn
+ * Smallish.
+ *
+ * Revision 1.6  1995/05/31  08:29:21  quinn
  * Nothing significant.
  *
  * Revision 1.5  1995/05/29  08:10:47  quinn
@@ -199,7 +202,7 @@ int cmd_open(char *arg)
     	conn = 0;
     	return 0;
     }
-    printf("Ok!\n");
+    printf("Ok.\n");
     send_initRequest();
     return 2;
 }
