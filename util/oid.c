@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.6  1995-09-29 17:12:35  quinn
+ * Revision 1.7  1995-10-10 16:27:12  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.6  1995/09/29  17:12:35  quinn
  * Smallish
  *
  * Revision 1.5  1995/09/29  17:01:51  quinn
@@ -105,6 +108,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,-1},    "DB. Update"  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
+    {PROTO_Z3950,   CLASS_VARSET,  VAL_VAR1,      {12,1,-1},   "Variant-1"   },
 
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },
@@ -158,6 +162,7 @@ static oident oids[] =
     {PROTO_SR,      CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,-1},    "DB. Update"  },
     {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
+    {PROTO_SR,      CLASS_VARSET,  VAL_VAR1,      {12,1,-1},   "Variant-1"   },
 
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETG,      {14,2,-1},   "TagsetG"     },

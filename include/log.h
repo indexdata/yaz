@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.5  1995-09-29 17:12:03  quinn
+ * Revision 1.6  1995-10-10 16:27:06  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.5  1995/09/29  17:12:03  quinn
  * Smallish
  *
  * Revision 1.4  1995/09/27  15:02:47  quinn
@@ -57,6 +60,7 @@
 #define LOG_H
 
 #include <yconfig.h>
+#include <stdio.h>
 
 #define LOG_FATAL 0x0001
 #define LOG_DEBUG 0x0002

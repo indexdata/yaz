@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.7  1995-09-29 17:12:05  quinn
+ * Revision 1.8  1995-10-10 16:27:08  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.7  1995/09/29  17:12:05  quinn
  * Smallish
  *
  * Revision 1.6  1995/09/27  15:02:48  quinn
@@ -132,7 +135,8 @@ typedef struct oident
 	VAL_EXPORTINV,
 	VAL_NONE,
 	VAL_SETM,
-	VAL_SETG
+	VAL_SETG,
+	VAL_VAR1
     } value;
     int oidsuffix[20];
     char *desc;
