@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.3 2000-04-05 07:39:55 adam Exp $
+## $Id: Makefile.am,v 1.4 2000-04-06 12:32:56 adam Exp $
 
 lib_LTLIBRARIES = libyaz.la
 
@@ -7,8 +7,6 @@ bin_SCRIPTS = yaz-config
 # If the line below is omitted the LINK variable is
 # not set in Makefile.in and it will NOT work ..
 EXTRA_libyaz_la_SOURCES=x.c
-
-LIBS =
 
 # No real sources
 libyaz_la_SOURCES=
