@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.8.2 2001/11/12
+
 CCL Parser fix: ignore token comma when dealing with and-lists.
 
 Documentation updates for COMSTACK.
