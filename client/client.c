@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.39  1996-08-27 10:43:22  quinn
+ * Revision 1.40  1996-08-29 14:19:34  quinn
+ * Fixed conflict (CVS)
+ *
+ * Revision 1.39  1996/08/27  10:43:22  quinn
  * Made select() optional
  *
  * Revision 1.38  1996/08/12  14:09:11  adam
@@ -992,6 +995,12 @@ int cmd_format(char *arg)
         recordsyntax = VAL_DANMARC;
         return 1;
     }
+    else if (!strcmp(arg, "ukmarc"))
+    {
+        printf("Preferred format is UKMARC\n");
+        recordsyntax = VAL_UKMARC;
+        return 1;
+    }
     else if (!strcmp(arg, "grs1"))
     {
         printf("Preferred format is GRS1\n");
@@ -1012,7 +1021,7 @@ int cmd_format(char *arg)
     }
     else
     {
-        printf("Specify one of {sutrs,usmarc,danmarc,grs1,summary,explain}.\n");
+        printf("Specify one of {sutrs,usmarc,danmarc,ukmarc,grs1,summary,explain}.\n");
         return 0;
     }
 }
