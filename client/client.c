@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.76  1999-03-11 11:12:07  adam
+ * Revision 1.77  1999-03-11 15:26:51  adam
+ * Fixed bug (introduced by previous commit).
+ *
+ * Revision 1.76  1999/03/11 11:12:07  adam
  * Added GNU readline support. HTML display in client.
  *
  * Revision 1.75  1999/02/01 15:37:32  adam
@@ -1904,7 +1907,7 @@ static int client(int wait)
 	    char* line_in;
 	    line_in=readline(C_PROMPT);
 #if HAVE_READLINE_HISTORY_H
-	    if (*line_in)
+	    if (line && *line_in)
 		add_history(line_in);
 #endif
 	    strcpy(line,line_in);

@@ -1,8 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
 Added support for GNU readline in client. Thanks to Jacob Poulsen
-<ja7@groucho.dbc.bib.dk>. GNU configure attempts to detect if readline
-is available.
+<ja7@dbc.dk>. GNU configure attempts to detect if readline is available.
 
 * CHANGED DEFINITION OF ES: UPDATE (INCLUDING THE OID) to reflect the
 new definition from the ZIG. NOTE THIS IF YOU HAVE AN UPDATE
