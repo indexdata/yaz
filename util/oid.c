@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.40  2000-01-06 14:59:13  adam
+ * Revision 1.41  2000-01-10 15:16:53  adam
+ * Added several OID's.
+ *
+ * Revision 1.40  2000/01/06 14:59:13  adam
  * Added oid_init/oid_exit. Changed oid_exit.
  *
  * Revision 1.39  1999/12/16 23:36:19  adam
@@ -208,12 +210,30 @@ static oident oids[] =
      "CIMI-attset"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_GEO,          {3,9,-1},
      "Geo-attset"},
+
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_ZBIG,         {3,10,-1},
+     "ZBIG"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_UTIL,         {3,11,-1},
+     "Util"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_XD1,          {3,12,-1},
+     "XD-1"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_ZTHES,        {3,13,-1},
+     "Zthes"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_FIN1,         {3,14,-1},
+     "Fin-1"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_DAN1,         {3,15,-1},
+     "Dan-1"},
+
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS,    {3,1000,81,1,-1},
      "Thesaurus-attset"},
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_BIB1,         {4,1,-1},
      "Bib-1"},
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_DIAG1,        {4,2,-1},
      "Diag-1"},
+    {PROTO_Z3950,   CLASS_DIAGSET, VAL_DIAG_ES,      {4,3,-1},
+     "Diag-ES"},
+    {PROTO_Z3950,   CLASS_DIAGSET, VAL_DIAG_GENERAL, {4,3,-1},
+     "Diag-General"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_UNIMARC,      {5,1,-1},
      "Unimarc"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_INTERMARC,    {5,2,-1},
@@ -248,6 +268,16 @@ static oident oids[] =
      "Carmarc"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_MALMARC,      {5,23,-1},
      "Malmarc"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_JPMARC,       {5,24,-1},
+     "JPmarc"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_SWEMARC,      {5,25,-1},
+     "SWEmarc"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_SIGLEMARC,    {5,26,-1},
+     "SIGLEmarc"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_ISDSMARC,     {5,27,-1},
+     "ISDSmarc"},
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_RUSMARC,      {5,28,-1},
+     "RUSmarc"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_EXPLAIN,      {5,100,-1},
      "Explain"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_SUTRS,        {5,101,-1},
@@ -290,10 +320,6 @@ static oident oids[] =
 
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_SQLRS,        {5,111,-1},
      "SQL-RS"},
-#if 0
-    {PROTO_Z3950,   CLASS_RECSYN,  VAL_ID_SGML,      {5,1000,81,1,-1},
-     "ID-SGML" },
-#endif
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_SOIF,         {5,1000,81,2,-1},
      "SOIF" },
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_TEXT_XML,     {5,109,10,-1},

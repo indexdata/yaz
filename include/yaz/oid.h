@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.3 2000-01-06 14:59:13 adam Exp $
+ * $Id: oid.h,v 1.4 2000-01-10 15:16:53 adam Exp $
  */
 
 #ifndef OID_H
@@ -155,6 +155,19 @@ typedef enum oid_value
     VAL_COOKIE,
     VAL_CLIENT_IP,
     VAL_ISO_ILL_1,
+    VAL_ZBIG,
+    VAL_UTIL,
+    VAL_XD1,
+    VAL_ZTHES,
+    VAL_FIN1,
+    VAL_DAN1,
+    VAL_DIAG_ES,
+    VAL_DIAG_GENERAL,
+    VAL_JPMARC,
+    VAL_SWEMARC,
+    VAL_SIGLEMARC,
+    VAL_ISDSMARC,
+    VAL_RUSMARC,
 /* add new types here... */
 
 /* VAL_DYNAMIC must have highest value */
