@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.23 2004-03-20 12:54:18 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.24 2004-05-01 23:45:43 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -94,7 +94,7 @@
 
     <para>
      The XML C library <ulink url="http://www.xmlsoft.org/">libxml2</ulink>
-     is required if &yaz; is to support SRW (and SOAP).
+     is required if &yaz; is to support SRW and SRU.
      This library is very portable and should compile out-of-the
      box on virtually all Unix platforms. It is available in binary
      forms for Linux and others.
@@ -512,11 +512,17 @@
        <listitem>
         <para>
          If <literal>HAVE_LIBXML2</literal> is set to 1, YAZ is compiled
-         with SRW (and SOAP) support. In this configuration, set 
+         with SRW and SRU support. In this configuration, set 
          <literal>LIBXML2_DIR</literal> to the 
          <ulink url="http://www.xmlsoft.org/">libxml2</ulink> source directory
 	 and
 	 <literal>ZLIB_DIR</literal> to the zlib directory.
+        </para>
+
+        <para>
+         Windows versions of libxml2, zlib and iconv can be found
+	 <ulink url="http://www.zlatkovic.com/libxml.en.html">
+	  Igor Zlatkovi&#x0107;' site</ulink>.
         </para>
 
 	<note>
@@ -524,12 +530,6 @@
 	  YAZ is not using ZLIB. But libxml2 is.
 	 </para>
 	</note>
-
-        <para>
-         Windows versions of libxml2, zlib and iconv can be found
-	 <ulink url="http://www.zlatkovic.com/libxml.en.html">
-          here</ulink>.
-        </para>
        </listitem>
       </varlistentry>
 
