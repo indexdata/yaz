@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-                    "/usr/share/sgml/docbook/dtd/xml/4.0/docbookx.dtd" [
+                    "/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd" [
 
      <!ENTITY oslash "&#x00F8;"> <!-- CIRCLED DIVISION SLASH -->
      <!ENTITY yaz "YAZ">
@@ -22,7 +22,7 @@
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml,v 1.18 2002-02-11 23:25:26 adam Exp $ -->
+<!-- $Id: yaz.xml,v 1.19 2002-03-06 01:21:59 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
