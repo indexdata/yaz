@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.7 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.8 2002-09-03 09:50:34 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -132,7 +132,7 @@
     <para>
      The memory subsystem of &odr; is fairly efficient at allocating and
      releasing little bits of memory. Rather than managing the individual,
-     small bits of space, the system maintains a freelist of larger chunks
+     small bits of space, the system maintains a free-list of larger chunks
      of memory, which are handed out in small bits. This scheme is
      generally known as a <emphasis>nibble memory</emphasis> system.
      It is very useful for maintaining short-lived constructions such
@@ -679,7 +679,7 @@ int ODR_MASK_GET(Odr_bitmask *b, int bitno);
      </synopsis>
 
      <para>
-      The functions are modelled after the manipulation functions that
+      The functions are modeled after the manipulation functions that
       accompany the <literal>fd_set</literal> type used by the
       <function>select(2)</function> call.
       <literal>ODR_MASK_ZERO</literal> should always be called first on a
