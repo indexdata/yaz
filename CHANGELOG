@@ -2,6 +2,16 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX
 
+New windows 95/NT port using MSV5.0.
+
+Moved test server to 'ztest' directory - generic server code still
+in 'server' directory.
+
+Made prefix query handling thread safe.
+
+Added new function modifier YAZ_EXPORT to 'export' public DLL
+functions when using windows (see include/yconfig.h).
+
 Added definitions to the OID database (util/oid.c) (RVDM).
 
 Added new BIB-1 diagnostic messages to the handler diagbib1_str.
