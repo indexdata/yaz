@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.6 2001-11-15 08:58:29 adam Exp $
+ * $Id: zoom-c.c,v 1.7 2001-11-15 13:16:02 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1276,26 +1276,27 @@ static int do_write(Z3950_connection c)
     return do_write_ex (c, c->buf_out, c->len_out);
 }
 
-const char *Z3950_connection_option (Z3950_connection c, const char *key,
-				     const char *val)
+
+const char *Z3950_connection_option_get (Z3950_connection c, const char *key)
 {
-    if (val)
-    {
-	Z3950_options_set (c->options, key, val);
-        return val;
-    }
     return Z3950_options_get (c->options, key);
 }
 
-const char *Z3950_resultset_option (Z3950_resultset r, const char *key,
-				    const char *val)
+void Z3950_connection_option_set (Z3950_connection c, const char *key,
+                                  const char *val)
 {
-    if (val)
-    {
-	Z3950_options_set (r->options, key, val);
-        return val;
-    }
+    Z3950_options_set (c->options, key, val);
+}
+
+const char *Z3950_resultset_option_get (Z3950_resultset r, const char *key)
+{
     return Z3950_options_get (r->options, key);
+}
+
+void Z3950_resultset_option_set (Z3950_resultset r, const char *key,
+                                  const char *val)
+{
+    Z3950_options_set (r->options, key, val);
 }
 
 

@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.4 2001-11-15 08:58:29 adam Exp $
+ * $Id: zoom.h,v 1.5 2001-11-15 13:16:02 adam Exp $
  */
 
 /* 1. Renamed type Z3950_search to Z3950_query and the functions
@@ -49,10 +49,13 @@ void Z3950_connection_connect(Z3950_connection c, const char *host,
 ZOOM_EXPORT
 void Z3950_connection_destroy (Z3950_connection c);
 
-/* set option for connection */
+/* get/set option for connection */
 ZOOM_EXPORT
-const char *Z3950_connection_option (Z3950_connection c, const char *key,
-				     const char *val);
+const char *Z3950_connection_option_get (Z3950_connection c, const char *key);
+
+ZOOM_EXPORT
+void Z3950_connection_option_set (Z3950_connection c, const char *key,
+                                  const char *val);
 /* return host for connection */
 ZOOM_EXPORT
 const char *Z3950_connection_host (Z3950_connection c);
@@ -100,8 +103,10 @@ void Z3950_resultset_destroy(Z3950_resultset r);
 
 /* result set option */
 ZOOM_EXPORT
-const char *Z3950_resultset_option (Z3950_resultset r, const char *key,
-				    const char *val);
+const char *Z3950_resultset_option_get (Z3950_resultset r, const char *key);
+ZOOM_EXPORT
+void Z3950_resultset_option_set (Z3950_resultset r, const char *key, const char *val);
+
 /* return size of result set (alias hit count AKA result count) */
 ZOOM_EXPORT
 size_t Z3950_resultset_size (Z3950_resultset r);

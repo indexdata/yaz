@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst2.c,v 1.1 2001-10-23 21:00:20 adam Exp $
+ * $Id: zoomtst2.c,v 1.2 2001-11-15 13:16:02 adam Exp $
  *
  * Asynchronous single-target client performing search (no retrieval)
  */
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     z = Z3950_connection_create(0);
 
     /* option: set async operation */
-    Z3950_connection_option (z, "async", "1");
+    Z3950_connection_option_set (z, "async", "1");
 
     /* connect to target and initialize */
     Z3950_connection_connect (z, argv[1], 0);
