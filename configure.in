@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.92 2002-09-24 08:05:41 adam Exp $
+dnl $Id: configure.in,v 1.93 2002-09-25 08:11:33 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.1)
 dnl
@@ -23,7 +23,7 @@ AC_ARG_WITH(dtd, [  --with-dtd[=DIR]        Use docbookx.dtd in DIR],
 ],[
    AC_MSG_CHECKING(for docbookx.dtd)
    for d in /usr/share/sgml/docbook/dtd/xml/4.1.2 \
-         /usr/share/sgml/docbook/xml-dtd-4.1.2 \
+         /usr/share/sgml/docbook/xml-dtd-4.1.2* \
          /usr/share/sgml/docbook/xml-dtd-4.1 \
          /usr/share/sgml/docbook/dtd/xml/4.0 \
 	    /usr/lib/sgml/dtd/docbook-xml 
@@ -47,8 +47,7 @@ AC_ARG_WITH(dsssl,[  --with-dsssl[=DIR]      Use DSSSL in DIR/{html,print}/docbo
 ],[
    AC_MSG_CHECKING(for docbook.dsl)
    for d in /usr/share/sgml/docbook/stylesheet/dsssl/modular \
-            /usr/share/sgml/docbook/dsssl-stylesheets-1.64 \
-            /usr/share/sgml/docbook/dsssl-stylesheets-1.59 \
+            /usr/share/sgml/docbook/dsssl-stylesheets-1.* \
             /usr/lib/sgml/stylesheet/dsssl/docbook/nwalsh 
    do
      if test -f $d/html/docbook.dsl; then
