@@ -5,7 +5,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.48  1997-09-01 08:48:44  adam
+ * Revision 1.49  1997-09-04 13:45:17  adam
+ * Added UNImarc to list of available syntaxes.
+ *
+ * Revision 1.48  1997/09/01 08:48:44  adam
  * New windows NT/95 port using MSV5.0. Only a few changes made
  * to avoid warnings. Sub project created: client.dsp.
  *
@@ -1046,6 +1049,12 @@ int cmd_format(char *arg)
         recordsyntax = VAL_UKMARC;
         return 1;
     }
+    else if (!strcmp(arg, "unimarc"))
+    {
+        printf("Preferred format is UNIMARC\n");
+        recordsyntax = VAL_UNIMARC;
+        return 1;
+    }
     else if (!strcmp(arg, "grs1"))
     {
         printf("Preferred format is GRS1\n");
@@ -1072,7 +1081,7 @@ int cmd_format(char *arg)
     }
     else
     {
-        printf("Specify one of {sutrs,usmarc,danmarc,ukmarc,grs1,summary,explain}.\n");
+        printf("Specify one of {sutrs,usmarc,danmarc,ukmarc,unimarc,grs1,summary,explain}.\n");
         return 0;
     }
 }
