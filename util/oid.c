@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.54 2002-04-01 12:27:15 adam Exp $
+ * $Id: oid.c,v 1.55 2002-04-12 14:40:21 adam Exp $
  */
 
 /*
@@ -88,8 +88,10 @@ static oident standard_oids[] =
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_HOLDINGS,     {3,16,-1},
      "Holdings"},
 
-    {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS,    {3,1000,81,1,-1},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_THESAURUS,    {3,1000,81,1,-1},     
      "Thesaurus-attset"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_IDXPATH,      {3,1000,81,2,-1},
+     "IDXPATH"},
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_BIB1,         {4,1,-1},
      "Bib-1"},
     {PROTO_Z3950,   CLASS_DIAGSET, VAL_DIAG1,        {4,2,-1},
