@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.5 2001-11-13 22:57:03 adam Exp $
+ * $Id: zoomtst7.c,v 1.6 2001-11-15 08:58:29 adam Exp $
  *
  * API test..
  */
@@ -58,7 +58,6 @@ int main(int argc, char **argv)
 	    for (j = 0; j < 10; j++)
 	    {
 		Z3950_record recs[2];
-		size_t recs_count = 2;
 		char query[40];
 		Z3950_query s = Z3950_query_create ();
 		
@@ -75,8 +74,6 @@ int main(int argc, char **argv)
 		r[j] = Z3950_connection_search (z, s); /* non-piggy */
 		
 		Z3950_resultset_records (r[j], recs, 0, 2);  /* first two */
-		Z3950_record_destroy (recs[0]);
-		Z3950_record_destroy (recs[1]);
 		
 		Z3950_resultset_records (r[j], recs, 1, 2);  /* third */
 
@@ -90,8 +87,6 @@ int main(int argc, char **argv)
 			exit (1);
 		    }
 		}
-		Z3950_record_destroy (recs[0]);
-		Z3950_record_destroy (recs[1]);
 		
 		Z3950_query_destroy (s);
 
@@ -149,6 +144,9 @@ int main(int argc, char **argv)
 	}
     }
     Z3950_options_destroy (o);
+    xmalloc_trav("");
+    nmem_exit();
+    xmalloc_trav("");
     exit (0);
 }
 

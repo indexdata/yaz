@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.8 2001-11-13 23:00:42 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.9 2001-11-15 08:58:28 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -10,16 +10,16 @@
   </para>
   <para>
    The lack of a simple Z39.50 client API for &yaz; has become more
-   and more apparent over time. So when the first ZOOM specification
+   and more apparent over time. So when the first &zoom; specification
    became available,
    an implementation for &yaz; was quickly developed. For the first time, it is
    now as easy (or easier!) to develop clients than servers with &yaz;. This
-   chapter describes the ZOOM C binding. Before going futher, please
+   chapter describes the &zoom; C binding. Before going futher, please
    reconsider whether C is the right programming language for the job.
    There are other language bindings available for &yaz;, and still
    more
-   are in active development. See the ZOOM website at
-   <ulink url="http://zoom.z3950.org/">zoom.z3950.org</ulink> for
+   are in active development. See the
+   <ulink url="http://zoom.z3950.org/">ZOOM website</ulink> for
    more information.
   </para>
 
@@ -260,10 +260,7 @@
                                          const char *key,
                                          const char *val);
 
-     int Z3950_resultset_size (Z3950_resultset r);
-
-     void *Z3950_resultset_get (Z3950_resultset s, size_t pos,
-                                const char *type, size_t *len);
+     size_t Z3950_resultset_size (Z3950_resultset r);
    </synopsis>
    <para>
     Function <function>Z3950_resultset_options</function> sets or
@@ -273,13 +270,6 @@
    <para>
     The number of hits also called result-count is returned by
     function <function>Z3950_resultset_size</function>.
-   </para>
-   <para>
-    Function <function>Z3950_resultset_get</function> is similar to
-    <link linkend="zoom.record.get">
-     <function>Z3950_record_get</function></link> but
-    instead of operating on a record object, it operates on a record on
-    a given offset within a result set.
    </para>
    <table frame="top"><title>ZOOM Result set Options</title>
     <tgroup cols="3">
@@ -410,16 +400,24 @@
      void *Z3950_record_get (Z3950_record rec, const char *type,
                              size_t *len);
 
+     Z3950_record Z3950_record_dup (Z3950_record rec);
+
      void Z3950_record_destroy (Z3950_record rec);
    </synopsis>
    <para>
-    Records are created by functions 
+    References to temporary records are returned by functions 
     <function>Z3950_resultset_records</function> or
-    <function>Z3950_resultset_record</function>
-    and destroyed by <function>Z3950_record_destroy</function>.
+    <function>Z3950_resultset_record</function>.
+    </para>
+   <para>
+    If a persistent pointer to a record is desired
+    <function>Z3950_record_dup</function> should be used.
+    It returns a record reference that at any
+    later stage should be destroyed by
+    <function>Z3950_record_destroy</function>.
    </para>
    <para>
-    A single record is created and returned by function
+    A single record is returned by function
     <function>Z3950_resultset_record</function> that takes a 
     position as argument. First record has position zero.
     If no record could be obtained <literal>NULL</literal> is returned.
@@ -446,13 +444,13 @@
     the returned information.
     <variablelist>
      <varlistentry><term><literal>database</literal></term>
-      <listitem><para>The database that holds the record is returned
-        as a C string. Return type <literal>char *</literal>. 
+      <listitem><para>Database of record is returned
+        as a C null-terminated string. Return type <literal>char *</literal>. 
        </para></listitem>
       </varlistentry>
      <varlistentry><term><literal>syntax</literal></term>
       <listitem><para>The transfer syntax (OID) of the record is returned
-        as a C string. Return type <literal>char *</literal>. 
+        as a C null-terminated string. Return type <literal>char *</literal>. 
        </para></listitem>
       </varlistentry>
      <varlistentry><term><literal>render</literal></term>

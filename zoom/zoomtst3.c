@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst3.c,v 1.2 2001-10-24 12:24:43 adam Exp $
+ * $Id: zoomtst3.c,v 1.3 2001-11-15 08:58:29 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -75,7 +75,8 @@ int main(int argc, char **argv)
 	    {
 		int len; /* length of buffer rec */
 		const char *rec =
-		    Z3950_resultset_get (r[i], pos, "render", &len);
+		    Z3950_record_get (
+                        Z3950_resultset_record (r[i], pos), "render", &len);
 		/* if rec is non-null, we got a record for display */
 		if (rec)
 		{

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.3 2001-11-06 17:05:19 adam Exp $
+ * $Id: zoomsh.c,v 1.4 2001-11-15 08:58:29 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -117,16 +117,17 @@ static void display_records (Z3950_connection c,
     for (i = 0; i<count; i++)
     {
 	int pos = i + start;
-	const char *db = Z3950_resultset_get (r, pos, "database", 0);
+        Z3950_record rec = Z3950_resultset_record (r, pos);
+	const char *db = Z3950_record_get (rec, "database", 0);
 	int len;
-	const char *rec = Z3950_resultset_get (r, pos, "render", &len);
-	const char *syntax = Z3950_resultset_get (r, pos, "syntax", 0);
+	const char *render = Z3950_record_get (rec, "render", &len);
+	const char *syntax = Z3950_record_get (rec, "syntax", 0);
 	/* if rec is non-null, we got a record for display */
 	if (rec)
 	{
 	    printf ("%d %s %s\n", pos+1, (db ? db : "unknown"), syntax);
-	    if (rec)
-		fwrite (rec, 1, len, stdout);
+	    if (render)
+		fwrite (render, 1, len, stdout);
 	    putchar ('\n');
 	}
     }

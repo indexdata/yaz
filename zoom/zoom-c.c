@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.5 2001-11-13 22:57:03 adam Exp $
+ * $Id: zoom-c.c,v 1.6 2001-11-15 08:58:29 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -417,7 +417,7 @@ void Z3950_resultset_destroy(Z3950_resultset r)
     }
 }
 
-int Z3950_resultset_size (Z3950_resultset r)
+size_t Z3950_resultset_size (Z3950_resultset r)
 {
     return r->size;
 }
@@ -767,7 +767,7 @@ static void response_diag (Z3950_connection c, Z_DiagRec *p)
     c->error = *r->condition;
 }
 
-Z3950_record Z3950_record_dup (Z3950_record srec)
+Z3950_record Z3950_record_dup (const Z3950_record srec)
 {
     char *buf;
     int size;
@@ -791,10 +791,7 @@ Z3950_record Z3950_record_dup (Z3950_record srec)
 
 Z3950_record Z3950_resultset_record_immediate (Z3950_resultset s,size_t pos)
 {
-    Z3950_record rec = record_cache_lookup (s, pos, 0);
-    if (!rec)
-	return 0;
-    return Z3950_record_dup (rec);
+    return record_cache_lookup (s, pos, 0);
 }
 
 Z3950_record Z3950_resultset_record (Z3950_resultset r, size_t pos)
@@ -891,13 +888,6 @@ void *Z3950_record_get (Z3950_record rec, const char *type, size_t *len)
 	return 0;
     }
     return 0;
-}
-
-void *Z3950_resultset_get (Z3950_resultset s, size_t pos, const char *type,
-			   size_t *len)
-{
-    Z3950_record rec = record_cache_lookup (s, pos, 0);
-    return Z3950_record_get (rec, type, len);
 }
 
 static void record_cache_add (Z3950_resultset r,

@@ -1,5 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* ZOOO. Added Z3950_record_dup. Removed Z3950_resultset_get.
+Function Z3950_resultset_record(s) returns references to records
+"owned" by resultset. To become owner use Z3950_record_dup.
+
+Function z_ext_record handles Extended Services.
+
 --- 1.8.2 2001/11/12
 
 CCL Parser fix: ignore token comma when dealing with and-lists.

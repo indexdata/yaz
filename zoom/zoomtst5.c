@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst5.c,v 1.3 2001-11-06 17:05:19 adam Exp $
+ * $Id: zoomtst5.c,v 1.4 2001-11-15 08:58:29 adam Exp $
  *
  * Asynchronous multi-target client doing search, sort and present
  */
@@ -108,7 +108,6 @@ int main(int argc, char **argv)
 			fwrite (str, 1, len, stdout);
 		    putchar ('\n');
 		}
-		Z3950_record_destroy (rec);
 	    }
 	}
     }
@@ -121,4 +120,5 @@ int main(int argc, char **argv)
         Z3950_connection_destroy (z[i]);
     }
     Z3950_options_destroy(o);
+    exit(0);
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst6.c,v 1.3 2001-11-06 17:05:19 adam Exp $
+ * $Id: zoomtst6.c,v 1.4 2001-11-15 08:58:29 adam Exp $
  *
  * Asynchronous multi-target client doing two searches
  */
@@ -18,16 +18,18 @@ static void display_records (const char *tname, Z3950_resultset r)
     /* go through all records at target */
     for (pos = 0; pos < 20; pos++)
     {
+        Z3950_record rec = Z3950_resultset_record (r, pos);
+
 	/* get database for record and record itself at pos */
-	const char *db = Z3950_resultset_get (r, pos, "database", 0);
+	const char *db = Z3950_record_get (rec, "database", 0);
 	int len;
-	const char *rec = Z3950_resultset_get (r, pos, "render", &len);
+	const char *render = Z3950_record_get (rec, "render", &len);
 	/* if rec is non-null, we got a record for display */
 	if (rec)
 	{
 	    printf ("%d %s\n", pos+1, (db ? db : "unknown"));
-	    if (rec)
-		fwrite (rec, 1, len, stdout);
+	    if (render)
+		fwrite (render, 1, len, stdout);
 	    putchar ('\n');
 	}
     }

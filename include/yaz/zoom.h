@@ -1,12 +1,14 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.3 2001-11-06 17:05:19 adam Exp $
+ * $Id: zoom.h,v 1.4 2001-11-15 08:58:29 adam Exp $
  */
 
-/* 1. Modification
-      Renamed type Z3950_search to Z3950_query and the functions
+/* 1. Renamed type Z3950_search to Z3950_query and the functions
       that manipulate it..
       Changed positions/sizes to be of type size_t rather than int.
+   2. Deleted Z3950_resultset_get. Added Z3950_record_dup. Record
+      reference(s) returned by Z350_resultset_records and
+      Z3950_resultset_record are "owned" by result set.
 */
 #include <yaz/yconfig.h>
 
@@ -100,14 +102,10 @@ void Z3950_resultset_destroy(Z3950_resultset r);
 ZOOM_EXPORT
 const char *Z3950_resultset_option (Z3950_resultset r, const char *key,
 				    const char *val);
-/* return size of result set (hit count, AKA resultCount) */
+/* return size of result set (alias hit count AKA result count) */
 ZOOM_EXPORT
-int Z3950_resultset_size (Z3950_resultset r);
+size_t Z3950_resultset_size (Z3950_resultset r);
 
-/* return record at pos (starting from ), render given spec in type */
-ZOOM_EXPORT
-void *Z3950_resultset_get (Z3950_resultset s, size_t pos, const char *type,
-			   size_t *len);
 /* retrieve records */
 ZOOM_EXPORT
 void Z3950_resultset_records (Z3950_resultset r, Z3950_record *recs,
@@ -124,13 +122,17 @@ Z3950_record Z3950_resultset_record_immediate (Z3950_resultset s, size_t pos);
 /* ----------------------------------------------------------- */
 /* records */
 
-/* Get record information, in a form given by type */
+/* get record information, in a form given by type */
 ZOOM_EXPORT
 void *Z3950_record_get (Z3950_record rec, const char *type, size_t *len);
 
-/* Destroy record */
+/* destroy record */
 ZOOM_EXPORT
 void Z3950_record_destroy (Z3950_record rec);
+
+/* return copy of record */
+ZOOM_EXPORT
+Z3950_record Z3950_record_dup (Z3950_record srec);
 
 /* ----------------------------------------------------------- */
 /* searches */
@@ -147,7 +149,6 @@ int Z3950_query_prefix(Z3950_query s, const char *str);
 /* specify sort criteria for search */
 ZOOM_EXPORT
 int Z3950_query_sortby(Z3950_query s, const char *criteria);
-
 
 /* ----------------------------------------------------------- */
 /* options */
