@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.27  1995-05-29 08:12:06  quinn
+ * Revision 1.28  1995-06-01 11:21:01  quinn
+ * Attempting to fix a bug in pack-records. replaced break with continue
+ * for large records, according to standard.
+ *
+ * Revision 1.27  1995/05/29  08:12:06  quinn
  * Moved oid to util
  *
  * Revision 1.26  1995/05/18  13:02:12  quinn
@@ -714,8 +718,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		    reclist.records[reclist.num_records] =
 		   	 surrogatediagrec(a->proto, fres->basename, 16, 0);
 		    reclist.num_records++;
-		    *pres = Z_PRES_PARTIAL_2;
-		    break;
+		    total_length += 10; /* totally arbitrary */
+		    continue;
 		}
 	    }
 	    else /* too big entirely */
@@ -724,8 +728,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		reclist.records[reclist.num_records] =
 		    surrogatediagrec(a->proto, fres->basename, 17, 0);
 		reclist.num_records++;
-		*pres = Z_PRES_PARTIAL_2;
-		break;
+		total_length += 10; /* totally arbitrary */
+		continue;
 	    }
 	}
 	if (!(thisrec = odr_malloc(a->encode, sizeof(*thisrec))))
@@ -753,9 +757,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	reclist.records[reclist.num_records] = thisrec;
 	reclist.num_records++;
 	total_length += fres->len;
-	(*num)++;
 	*next = fres->last_in_set ? 0 : recno + 1;
     }
+    *num = reclist.num_records;
     return &records;
 }
 
