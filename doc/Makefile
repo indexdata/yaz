@@ -1,19 +1,16 @@
-SGMLF=sgml-format
-SGMLR=sgml-roff
-SGMLT=sgml-tex
-
 all: yaz.ps yaz.txt profiles.txt profiles.ps
 
 yaz.txt: yaz.sgml
-	$(SGMLF) -Tnroff yaz.sgml | $(SGMLR) | sed -e 's/	/        /g' > yaz.txt
+	sgml2txt yaz.sgml
 
 profiles.txt: profiles.sgml
-	$(SGMLF) -Tnroff profiles.sgml | $(SGMLR) | sed -e 's/	/        /g' > profiles.txt
+	sgml2txt profiles.sgml
 
 yaz.ps: yaz.sgml
-	$(SGMLF) yaz.sgml | $(SGMLT) -x
-	mv out.ps yaz.ps
+	sgml2ps yaz.sgml
 
 profiles.ps: profiles.sgml
-	$(SGMLF) profiles.sgml | $(SGMLT) -x
-	mv out.ps profiles.ps
+	sgml2ps	profiles.sgml
+
+yaz.html: yaz.sgml
+	sgml2html yaz.sgml
