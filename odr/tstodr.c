@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.4 2003-05-20 20:21:34 adam Exp $
+ * $Id: tstodr.c,v 1.5 2003-05-26 13:47:23 adam Exp $
  *
  */
 #include <stdio.h>
@@ -68,13 +68,13 @@ void tst_MySequence2(ODR encode, ODR decode)
         exit(9);
     if (odr_geterror(encode) != OREQUIRED)
         exit(10);
-    if (strcmp(odr_getaddinfo(encode), "first"))
+    if (strcmp(odr_getelement(encode), "first"))
         exit(11);
     odr_reset(encode);
 
     if (odr_geterror(encode) != ONONE)
         exit(12);
-    if (strcmp(odr_getaddinfo(encode), ""))
+    if (strcmp(odr_getelement(encode), ""))
         exit(13);
 }
 
