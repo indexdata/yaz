@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.32  2001-11-13 23:00:43  adam
+ * Revision 1.33  2001-11-15 21:44:48  adam
+ * Removed log ..
+ *
+ * Revision 1.32  2001/11/13 23:00:43  adam
  * Separate malloc debug library. Removal of ASN_COMPILED-#ifdefs.
  *
  * Revision 1.31  2001/10/24 12:24:43  adam
@@ -499,7 +502,6 @@ void nmem_exit (void)
 {
     if (--nmem_init_flag == 0)
     {
-        yaz_log (LOG_LOG, "nmem_exit .............");
         oid_exit();
 	while (freelist)
 	{
