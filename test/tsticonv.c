@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.6 2005-02-01 21:07:19 adam Exp $
+ * $Id: tsticonv.c,v 1.7 2005-02-02 10:17:02 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -136,7 +136,8 @@ static void tst_marc8_to_ucs4b()
     }, {
 	"\x61\xC2",     /* a, phonorecord mark */
 	8, "\x00\x00\x00\x61"  "\x00\x00\x21\x17"
-    }, {
+    },
+    {  /* bug #258 */
 	"el" "\xe8" "am\xe8" "an", /* elaman where a is a" */
 	32,
 	"\x00\x00\x00" "e"
@@ -147,7 +148,14 @@ static void tst_marc8_to_ucs4b()
 	"\x00\x00\x00" "a"
 	"\x00\x00\x03\x08"
 	"\x00\x00\x00" "n"
-    }, {
+    }, 
+#if 0
+    { /* bug #260 */
+	"\xe5\xe8\x41",
+	12, "\x00\x00\x00\x41" "\x00\x00\x03\x04" "\x00\x00\x03\x08"
+    }, 
+#endif
+    {
 	0, 0, 0
     }
     };
