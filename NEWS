@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fix --disable-tcpd to really disable tcpd. Patch by Robin H. Johnson.
+
 --- 2.0.19 2004/03/30
 
 Rename CHANGELOG to NEWS to follow GNU style packing.
