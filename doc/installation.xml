@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.22 2004-03-19 21:12:13 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.23 2004-03-20 12:54:18 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -521,7 +521,7 @@
 
 	<note>
 	 <para>
-	  Note that YAZ is not using ZLIB. But libxml2 is.
+	  YAZ is not using ZLIB. But libxml2 is.
 	 </para>
 	</note>
 
