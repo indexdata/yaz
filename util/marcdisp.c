@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.20 2002-10-02 15:51:52 adam Exp $
+ * $Id: marcdisp.c,v 1.21 2002-10-04 10:19:58 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -58,19 +58,42 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 
     if (xml)
     {
-        char str[40];
+        char str[80];
         int i;
-        wrbuf_puts (wr, "<iso2709\n");
-        sprintf (str, " RecordStatus=\"%c\"\n", buf[5]);
-        wrbuf_puts (wr, str);
-        sprintf (str, " TypeOfRecord=\"%c\"\n", buf[6]);
-        wrbuf_puts (wr, str);
-        for (i = 1; i<=19; i++)
+        if (xml > 1)
         {
-            sprintf (str, " ImplDefined%d=\"%c\"\n", i, buf[6+i]);
+            wrbuf_puts(
+                wr,
+                "<sequence xmlns=\"http://www.dlib.vt.edu/projects/OAi/marcxml/container\"\n"
+                
+                "  xmlns:xsi=\"http://www.w3.org/2000/10/XMLSchema-instance\"\n"
+                "    xsi:schemaLocation=\"http://www.openarchives.org/OAI/oai_marc\n"
+                "    http://www.openarchives.org/OAI/oai_marc.xsd\n"
+                "    http://www.dlib.vt.edu/projects/OAi/marcxml/container\n"
+                "    http://www.dlib.vt.edu/projects/OAi/marcxml/container.xsd\"\n"
+                );
+            wrbuf_puts(
+                wr,
+                "<oai_marc xmlns=\"http://www.openarchives.org/OIA/oai_marc\"" );
+            
+            sprintf (str, "status=\"%c\" type=\"%c\" catForm=\"%c\">\n",
+                     buf[5], buf[6], buf[7]);
             wrbuf_puts (wr, str);
         }
-        wrbuf_puts (wr, ">\n");
+        else
+        {
+            wrbuf_puts (wr, "<iso2709\n");
+            sprintf (str, " RecordStatus=\"%c\"\n", buf[5]);
+            wrbuf_puts (wr, str);
+            sprintf (str, " TypeOfRecord=\"%c\"\n", buf[6]);
+            wrbuf_puts (wr, str);
+            for (i = 1; i<=19; i++)
+            {
+                sprintf (str, " ImplDefined%d=\"%c\"\n", i, buf[6+i]);
+                wrbuf_puts (wr, str);
+            }
+            wrbuf_puts (wr, ">\n");
+        }
     }
     if (debug)
     {
@@ -115,19 +138,6 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         memcpy (tag, buf+entry_p, 3);
 	entry_p += 3;
         tag[3] = '\0';
-        if (xml)
-        {
-            wrbuf_puts (wr, "<field tag=\"");
-            wrbuf_puts (wr, tag);
-            wrbuf_puts (wr, "\"");
-        }
-        else
-        {
-            if (debug)
-                wrbuf_puts (wr, "Tag: ");
-            wrbuf_puts (wr, tag);
-            wrbuf_puts (wr, " ");
-        }
 	data_length = atoi_n (buf+entry_p, length_data_entry);
 	entry_p += length_data_entry;
 	data_offset = atoi_n (buf+entry_p, length_starting);
@@ -142,6 +152,33 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         }
         else if (!memcmp (tag, "00", 2))
             identifier_flag = 0;
+
+
+        if (xml)
+        {
+            if (xml > 1)
+            {
+                if (identifier_flag)
+                    wrbuf_puts (wr, "<varfield id=\"");
+                else
+                    wrbuf_puts (wr, "<fixfield id=\"");
+                wrbuf_puts (wr, tag);
+                wrbuf_puts (wr, "\"");
+            }
+            else
+            {
+                wrbuf_puts (wr, "<field tag=\"");
+                wrbuf_puts (wr, tag);
+                wrbuf_puts (wr, "\"");
+            }
+        }
+        else
+        {
+            if (debug)
+                wrbuf_puts (wr, "Tag: ");
+            wrbuf_puts (wr, tag);
+            wrbuf_puts (wr, " ");
+        }
         
         if (identifier_flag)
 	{
@@ -152,7 +189,10 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
                 if (xml)
                 {
                     char nostr[30];
-                    sprintf (nostr, " Indicator%d=\"%c\"", j+1, buf[i]);
+                    if (xml > 1)
+                        sprintf (nostr, " i%d=\"%c\"", j+1, buf[i]);
+                    else
+                        sprintf (nostr, " Indicator%d=\"%c\"", j+1, buf[i]);
                     wrbuf_puts (wr, nostr);
                 }
                 else
@@ -177,7 +217,10 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 	        i++;
                 if (xml)
                 {
-                    wrbuf_puts (wr, "  <subfield code=\"");
+                    if (xml > 1)
+                        wrbuf_puts (wr, "  <subfield label=\"");
+                    else
+                        wrbuf_puts (wr, "  <subfield code=\"");
                     for (j = 1; j<identifier_length; j++, i++)
                         wrbuf_putc (wr, buf[i]);
                     wrbuf_puts (wr, "\">");
@@ -209,6 +252,8 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
                     wrbuf_puts(wr, "&lt;");
                 else if (xml && buf[i] == '&')
                     wrbuf_puts(wr, "&amp;");
+                else if (xml && buf[i] == '"')
+                    wrbuf_puts(wr, "&quot;");
                 else
                     wrbuf_putc (wr, buf[i]);
 		i++;
@@ -221,7 +266,17 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 	if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
 	    wrbuf_puts (wr, "  <!-- no separator at end of field -->\n");
         if (xml)
-            wrbuf_puts (wr, "</field>\n");
+        {
+            if (xml > 1)
+            {
+                if (identifier_flag)
+                    wrbuf_puts (wr, "</varfield>\n");
+                else
+                    wrbuf_puts (wr, "</fixfield>\n");
+            }
+            else
+                wrbuf_puts (wr, "</field>\n");
+        }
     }
     if (xml)
         wrbuf_puts (wr, "</iso2709>\n");

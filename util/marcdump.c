@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.16 2002-03-18 21:33:48 adam Exp $
+ * $Id: marcdump.c,v 1.17 2002-10-04 10:19:58 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -29,7 +29,7 @@
 
 static void usage(const char *prog)
 {
-    fprintf (stderr, "Usage: %s [-c cfile] [-x] [-v] file...\n", prog);
+    fprintf (stderr, "Usage: %s [-c cfile] [-x] [-O] [-v] file...\n", prog);
 } 
 
 int main (int argc, char **argv)
@@ -44,7 +44,7 @@ int main (int argc, char **argv)
     int xml = 0;
     FILE *cfile = 0;
 
-    while ((r = options("vc:x", argv, argc, &arg)) != -2)
+    while ((r = options("vc:xO", argv, argc, &arg)) != -2)
     {
 	int count;
 	no++;
@@ -57,6 +57,9 @@ int main (int argc, char **argv)
 	    break;
         case 'x':
             xml = 1;
+            break;
+        case 'O':
+            xml = 2;
             break;
         case 0:
 	    inf = fopen (arg, "r");
