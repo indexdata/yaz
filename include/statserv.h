@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.9  1997-09-01 08:49:53  adam
+ * Revision 1.10  1997-09-01 09:31:26  adam
+ * Removed definition statserv_remove to eventl.h. (A hack really).
+ *
+ * Revision 1.9  1997/09/01 08:49:53  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -54,7 +57,6 @@
 
 #include <yconfig.h>
 #include <oid.h>
-#include "eventl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,7 +80,6 @@ int statserv_main(int argc, char **argv);
 void statserv_closedown(void);
 statserv_options_block *statserv_getcontrol(void);
 void statserv_setcontrol(statserv_options_block *block);
-void statserv_remove(IOCHAN pIOChannel);
 
 #ifdef __cplusplus
 }
