@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.14 2001-11-30 08:24:06 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.15 2002-01-02 10:30:25 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -31,7 +31,7 @@
   </para>
 
   <para>
-   The C language misses many features found in object oriented languages
+   The C language misses features found in object oriented languages
    such as C++, Java, etc. For example, you'll have to manually,
    destroy all objects you create, even though you may think of them as
    temporary. Most objects has a <literal>_create</literal> - and a
@@ -526,6 +526,43 @@
                                         void *handle);
    </synopsis>
   </sect1>
+  <sect1 id="zoom.scan"><title>Scsn</title>
+   <para>
+    This section describes an interface for Scan. Scan is not an
+    official part of the ZOOM model yet. The result of a scan operation
+    is the <literal>ZOOM_scanset</literal> which is a set of terms
+    returned by a target.
+   </para>
+   <synopsis>
+    ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c,
+                                       const char *startterm);
+
+    size_t ZOOM_scanset_size(ZOOM_scanset scan);
+
+    const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
+                                   int *occ, size_t *len);
+
+
+    void ZOOM_scanset_destroy (ZOOM_scanset scan);
+    </synopsis>
+   <para>
+    The scan set is created by function
+    <function>ZOOM_connection_scan</function> which performs a scan
+    operation on the connection and start term given.
+    If the operation was successful, the size of the scan set can be
+    retrived by a call to <function>ZOOM_scanset_size</function>.
+    Like result sets, the items are numbered 0,..size-1.
+    To obtain information about a particular scan term, call function
+    <function>ZOOM_scanset_term</function>. This function takes
+    a scan set offset <literal>pos</literal> and returns a pointer
+    to an actual term or <literal>NULL</literal> if non-present.
+    If present, the <literal>occ</literal> and <literal>len</literal> 
+    are set to the number of occurrences and the length
+    of the actual term respectively.
+    A scan set may be freed by a call to function
+    <function>ZOOM_scanset_destroy</function>.
+    </para>
+   </sect1>
   <sect1 id="zoom.events"><title>Events</title>
    <para>
     If you're developing non-blocking applications, you have to deal 

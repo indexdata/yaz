@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.15 2001-12-30 22:21:11 adam Exp $
+ * $Id: zoom-c.c,v 1.16 2002-01-02 10:30:25 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1325,7 +1325,8 @@ size_t ZOOM_scanset_size (ZOOM_scanset scan)
     return scan->scan_response->entries->num_entries;
 }
 
-const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t i, int *occ, size_t *len)
+const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
+                               int *occ, size_t *len)
 {
     const char *term = 0;
     size_t noent = ZOOM_scanset_size (scan);
@@ -1333,11 +1334,11 @@ const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t i, int *occ, size_t *le
     
     *len = 0;
     *occ = 0;
-    if (i >= noent)
+    if (pos >= noent)
         return 0;
-    if (res->entries->entries[i]->which == Z_Entry_termInfo)
+    if (res->entries->entries[pos]->which == Z_Entry_termInfo)
     {
-        Z_TermInfo *t = res->entries->entries[i]->u.termInfo;
+        Z_TermInfo *t = res->entries->entries[pos]->u.termInfo;
         
         if (t->term->which == Z_Term_general)
         {

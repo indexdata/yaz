@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.8 2001-12-30 22:21:11 adam Exp $
+ * $Id: zoom.h,v 1.9 2002-01-02 10:30:25 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -164,7 +164,8 @@ ZOOM_EXPORT
 ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c, const char *startterm);
 
 ZOOM_EXPORT
-const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t no, int *occ, size_t *len);
+const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
+                               int *occ, size_t *len);
 
 ZOOM_EXPORT
 size_t ZOOM_scanset_size(ZOOM_scanset scan);
