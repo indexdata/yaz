@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.21 2004-01-17 01:20:12 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.22 2004-03-19 21:12:13 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -546,10 +546,10 @@ typedef struct bend_fetch_rr {
      that holds the reference to the desired record.
      The <literal>number</literal> is the offset into the set (with 1
      being the first record in the set). The <literal>format</literal> field
-     is the record format requested by the client (See section
-     <link linkend="oid">Object Identifiers</link>). The value
-     <literal>VAL_NONE</literal> indicates that the client did not
-     request a specific format. The <literal>stream</literal> argument
+     is the record format requested by the client (See
+     <xref linkend="asn.oid"/>).
+     The value <literal>VAL_NONE</literal> indicates that the client did
+     not request a specific format. The <literal>stream</literal> argument
      is an &odr; stream which should be used for
      allocating space for structured data records.
      The stream will be reset when all records have been assembled, and

@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.11 2003-11-19 21:17:26 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.12 2004-03-19 21:12:13 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -17,15 +17,15 @@
     (<xref linkend="odr.use"/>). Only if you need to
     implement ASN.1 beyond that which has been provided, should you
     worry about the second half of the documentation
-    (section <link linkend="odr-prog">Programming with ODR</link>).
+    (<xref linkend="odr.programming"/>).
     If you use one of the higher-level interfaces, you can skip this
     section entirely.
    </para>
 
    <para>
     This is important, so we'll repeat it for emphasis: <emphasis>You do
-    not need to read section <link linkend="odr-prog">Programming with
-    ODR</link> to implement Z39.50 with &yaz;.</emphasis>
+     not need to read <xref linkend="odr.programming"/>
+     to implement Z39.50 with &yaz;.</emphasis>
    </para>
 
    <para>
@@ -478,7 +478,7 @@ void do_nothing_useful(int value)
    </sect2>
   </sect1>
 
-  <sect1 id="odr.programming"><title id="odr-prog">Programming with ODR</title>
+  <sect1 id="odr.programming"><title>Programming with ODR</title>
 
    <para>
     The API of &odr; is designed to reflect the structure of ASN.1, rather
@@ -704,14 +704,14 @@ int odr_oid(ODR o, Odr_oid **p, int optional, const char *name);
       The C OID representation is simply an array of integers, terminated by
       the value -1 (the <literal>Odr_oid</literal> type is synonymous with
       the <literal>int</literal> type).
-      We suggest that you use the OID database module (see section
-      <link linkend="oid">Object Identifiers</link>) to handle object identifiers
+      We suggest that you use the OID database module (see
+      <xref linkend="asn.oid"/>) to handle object identifiers
       in your application.
      </para>
 
     </sect3>
    </sect2>
-   <sect2><title id="tag-prim">Tagging Primitive Types</title>
+   <sect2 id="tag.prim"><title>Tagging Primitive Types</title>
 
     <para>
      The simplest way of tagging a type is to use the
@@ -853,9 +853,8 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
 
     <note>
      <para>
-      See section <link linkend="tag-prim">Tagging Primitive types</link>
-      for information on how to tag the primitive types, as well as types
-      that are already defined.
+      See <xref linkend="tag.prim"/> for information on how to tag
+      the primitive types, as well as types that are already defined.
      </para>
     </note>
 

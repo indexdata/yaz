@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.21 2003-12-16 14:51:45 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.22 2004-03-19 21:12:13 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -491,7 +491,7 @@
          (<filename>cql.y</filename>).
         </para>
         <para>
-         GNU Bison for Windows is part of 
+         A Windows version of GNU Bison is part of 
          <ulink url="http://unxutils.sourceforge.net/">unxutils</ulink>.
         </para></listitem>
       </varlistentry>
@@ -514,12 +514,20 @@
          If <literal>HAVE_LIBXML2</literal> is set to 1, YAZ is compiled
          with SRW (and SOAP) support. In this configuration, set 
          <literal>LIBXML2_DIR</literal> to the 
-         <ulink url="http://www.xmlsoft.org/">libxml2</ulink> source directory.
+         <ulink url="http://www.xmlsoft.org/">libxml2</ulink> source directory
+	 and
+	 <literal>ZLIB_DIR</literal> to the zlib directory.
         </para>
 
+	<note>
+	 <para>
+	  Note that YAZ is not using ZLIB. But libxml2 is.
+	 </para>
+	</note>
+
         <para>
-         Windows versions of libxml2 and iconv can be found
-         <ulink url="http://www.zlatkovic.com/projects/libxml/binaries.html">
+         Windows versions of libxml2, zlib and iconv can be found
+	 <ulink url="http://www.zlatkovic.com/libxml.en.html">
           here</ulink>.
         </para>
        </listitem>
