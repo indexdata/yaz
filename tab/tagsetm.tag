@@ -2,7 +2,7 @@ name tagsetm
 reference TagsetM
 type 1
 
-tag	1	scemaIdentifier		oid
+tag	1	schemaIdentifier	oid
 tag	2	elementsOrdered		bool
 tag	3	elementOrdering		int
 tag	4	defaultTagType		int
