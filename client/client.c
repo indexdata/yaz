@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.53  1997-09-29 13:18:59  adam
+ * Revision 1.54  1997-10-27 13:52:46  adam
+ * Header yaz-util includes all YAZ utility header files.
+ *
+ * Revision 1.53  1997/09/29 13:18:59  adam
  * Added function, oid_ent_to_oid, to replace the function
  * oid_getoidbyent, which is not thread safe.
  *
@@ -176,11 +179,12 @@
  * to illustrate the use of the YAZ service-level API.
  */
 
-#include <yconfig.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+
+#include <yaz-util.h>
 
 #include <comstack.h>
 #include <tcpip.h>
@@ -191,7 +195,6 @@
 #include <proto.h>
 #include <marcdisp.h>
 #include <diagbib1.h>
-#include <options.h>
 
 #include <pquery.h>
 
@@ -492,7 +495,6 @@ static void display_record(Z_DatabaseRecord *p)
             odr_reset(print);
         }
     }
-
     /* Check if this is a known, ASN.1 type tucked away in an octet string */
     if (ent && r->which == Z_External_octet)
     {
