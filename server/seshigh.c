@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.25  1995-05-17 08:42:26  quinn
+ * Revision 1.26  1995-05-18 13:02:12  quinn
+ * Smallish.
+ *
+ * Revision 1.25  1995/05/17  08:42:26  quinn
  * Transfer auth info to backend. Allow backend to reject init gracefully.
  *
  * Revision 1.24  1995/05/16  08:51:04  quinn
@@ -451,7 +454,7 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,
 	&req->size_response);
-    odr_setbuf(assoc->encode, 0, 0, 0); /* don't free if we have to quit */
+    odr_setbuf(assoc->encode, 0, 0, 0); /* don't free if we abort later */
     odr_reset(assoc->encode);
     if (assoc->print && !z_APDU(assoc->print, &res, 0))
     {
@@ -466,12 +469,18 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
     request_enq(&assoc->outgoing, req);
     /* turn the work over to the ir_session handler */
     iochan_setflag(assoc->client_chan, EVENT_OUTPUT);
-    /* Is there more work to be done? */
+    /* Is there more work to be done? give that to the input handler too */
     if (request_head(&assoc->incoming))
     	iochan_setevent(assoc->client_chan, EVENT_WORK);
     return 0;
 }
 
+/*
+ * Handle init request.
+ * At the moment, we don't check the protocol version or the options
+ * anywhere else in the code - we just don't do anything that would
+ * break a naive client.
+ */
 static Z_APDU *process_initRequest(association *assoc, request *reqb)
 {
     Z_InitRequest *req = reqb->request->u.initRequest;
@@ -548,6 +557,13 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     return &apdu;
 }
 
+/*
+ * These functions should be merged.
+ */
+
+/*
+ * nonsurrogate diagnostic record.
+ */
 static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
 {
     static Z_Records rec;
@@ -570,6 +586,9 @@ static Z_Records *diagrec(oid_proto proto, int error, char *addinfo)
     return &rec;
 }
 
+/*
+ * surrogate diagnostic.
+ */
 static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
 					    int error, char *addinfo)
 {
@@ -593,6 +612,9 @@ static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
     return &rec;
 }
 
+/*
+ * multiple nonsurrogate diagnostics.
+ */
 static Z_DiagRecs *diagrecs(oid_proto proto, int error, char *addinfo)
 {
     static Z_DiagRecs recs;

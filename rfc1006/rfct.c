@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.3  1995-05-16 09:37:18  quinn
+ * Revision 1.4  1995-05-18 13:02:07  quinn
+ * Smallish.
+ *
+ * Revision 1.3  1995/05/16  09:37:18  quinn
  * Fixed bug
  *
  * Revision 1.2  1995/05/02  08:53:09  quinn
@@ -777,6 +780,12 @@ static int t_look_wait(int fd, int wait)
     	return T_LISTEN; /* the only possible type of event */
     if ((res = read_n(fd, (char*) &head, 6)) < 0)
     	return -1;
+    if (res == 0)
+    {
+    	TRC(fprintf(stderr, "Network disconnect\n"));
+    	return cnt->event = T_DISCONNECT;
+    }
+    TRC(fprintf(stderr, "t_look got %d bytes\n", res));
     if (head.version != RFC_VERSION)
     {
     	TRC(fprintf(stderr, "Got bad RFC1006 version in t_look: %d.\n",

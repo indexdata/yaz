@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.11  1995-05-17 08:41:54  quinn
+ * Revision 1.12  1995-05-18 13:06:32  quinn
+ * Smallish.
+ *
+ * Revision 1.11  1995/05/17  08:41:54  quinn
  * Small, hopefully insignificant change.
  *
  * Revision 1.10  1995/05/16  08:50:59  quinn
@@ -90,7 +93,6 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 {
     char ***pp = (char***) p;  /* for dereferencing */
     char **tmp;
-    char *dummy = "Nothing";
     int size = 0, i;
 
     if (!odr_sequence_begin(o, p, 0))
