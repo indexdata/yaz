@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.193 2003-05-19 20:44:33 adam Exp $
+ * $Id: client.c,v 1.194 2003-05-20 19:55:29 adam Exp $
  */
 
 #include <stdio.h>
@@ -183,7 +183,7 @@ void add_otherInfos(Z_APDU *a)
     }   
 }
 
-void send_apdu(Z_APDU *a)
+int send_apdu(Z_APDU *a)
 {
     char *buf;
     int len;
@@ -199,7 +199,7 @@ void send_apdu(Z_APDU *a)
     {
         odr_perror(out, "Encoding APDU");
         close_session();
-        return;
+        return 0;
     }
     buf = odr_getbuf(out, &len, 0);
     if (ber_file)
@@ -209,10 +209,11 @@ void send_apdu(Z_APDU *a)
     {
         fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
         close_session();
-        return;
+        return 0;
     }
     do_hex_dump(buf,len);
     odr_reset(out); /* release the APDU structure  */
+    return 1;
 }
 
 static void print_stringn(const unsigned char *buf, size_t len)
@@ -297,8 +298,8 @@ static void send_initRequest(const char* type_and_host)
     	}
     }
     
-    send_apdu(apdu);
-    printf("Sent initrequest.\n");
+    if (send_apdu(apdu))
+        printf("Sent initrequest.\n");
 }
 
 static int process_initResponse(Z_InitResponse *res)
@@ -1138,9 +1139,9 @@ static int send_searchRequest(const char *arg)
         printf ("Unsupported query type\n");
         return 0;
     }
-    send_apdu(apdu);
+    if (send_apdu(apdu))
+        printf("Sent searchRequest.\n");
     setno = 1;
-    printf("Sent searchRequest.\n");
     return 2;
 }
 

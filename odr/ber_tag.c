@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_tag.c,v 1.25 2003-03-11 11:03:31 adam Exp $
+ * $Id: ber_tag.c,v 1.26 2003-05-20 19:55:29 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -22,7 +22,8 @@
  *
  * Should perhaps be odr_tag?
  */
-int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
+int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
+            const char *name)
 {
     struct Odr_ber_tag *odr_ber_tag = &o->op->odr_ber_tag;
     int rd;
@@ -44,7 +45,10 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
         if (!*pp)
         {
             if (!opt)
+            {
                 odr_seterror(o, OREQUIRED, 24);
+                odr_setaddinfo (o, name);
+            }
             return 0;
         }
         if ((rd = ber_enctag(o, zclass, tag, *constructed)) < 0)
@@ -59,7 +63,10 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
         if (o->op->stackp > -1 && !odr_constructed_more(o))
         {
             if (!opt)
+            {
                 odr_seterror(o, OREQUIRED, 25);
+                odr_setaddinfo(o, name);
+            }
             return 0;
         }
         if (odr_ber_tag->lclass < 0)
@@ -70,6 +77,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
                             odr_max(o))) <= 0)
             {
                 odr_seterror(o, OPROTO, 26);
+                odr_setaddinfo(o, name);
                 return 0;
             }
 #ifdef ODR_DEBUG
@@ -89,15 +97,22 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt)
         else
         {
             if (!opt)
+            {
                 odr_seterror(o, OREQUIRED, 27);
+                odr_setaddinfo(o, name);
+            }
             return 0;
         }
     case ODR_PRINT:
         if (!*pp && !opt)
+        {
             odr_seterror(o,OREQUIRED, 28);
+            odr_setaddinfo(o, name);
+        }
         return *pp != 0;
     default:
         odr_seterror(o, OOTHER, 29);
+        odr_setaddinfo(o, name);
         return 0;
     }
 }

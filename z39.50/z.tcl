@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.10 2003-02-17 21:23:31 adam Exp $
+# $Id: z.tcl,v 1.11 2003-05-20 19:55:30 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -208,8 +208,8 @@ set filename($m) z-sutrs
 set body($m,c) {
 int z_SUTRS (ODR o, Odr_oct **p, int opt, const char *name)
 {
-    return odr_implicit(o, odr_octetstring, p, ODR_UNIVERSAL,
-        ODR_GENERALSTRING, opt);
+    return odr_implicit_tag(o, odr_octetstring, p, ODR_UNIVERSAL,
+        ODR_GENERALSTRING, opt, name);
 }
 }
 

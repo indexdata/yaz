@@ -6,7 +6,7 @@ exec tclsh "$0" "$@"
 # (c) Index Data 1996-2003
 # See the file LICENSE for details.
 #
-# $Id: yaz-comp,v 1.5 2003-05-06 10:06:43 adam Exp $
+# $Id: yaz-comp,v 1.6 2003-05-20 19:55:30 adam Exp $
 #
 
 set yc_version 0.3
@@ -510,14 +510,14 @@ proc asnSequence {name tag implicit tagtype} {
     set nchoice 0
     if {![string length $tag]} {
         lappend l "\tif (!odr_sequence_begin (o, p, sizeof(**p), name))"
-        lappend l "\t\treturn opt && odr_ok (o);"
+        lappend l "\t\treturn odr_missing(o, opt, name) && odr_ok (o);"
     } elseif {$implicit} {
         lappend l "\tif (!odr_implicit_settag (o, $tagtype, $tag) ||"
         lappend l "\t\t!odr_sequence_begin (o, p, sizeof(**p), name))"
-        lappend l "\t\treturn opt && odr_ok(o);"
+        lappend l "\t\treturn odr_missing(o, opt, name);"
     } else {
         lappend l "\tif (!odr_constructed_begin (o, p, $tagtype, $tag, name))"
-        lappend l "\t\treturn opt && odr_ok(o);"
+        lappend l "\t\treturn odr_missing(o, opt, name);"
         lappend l "\tif (o->direction == ODR_DECODE)"
         lappend l "\t\t*p = ($inf(vprefix)$name *) odr_malloc (o, sizeof(**p));"
 
@@ -709,7 +709,7 @@ proc asnOf {name tag implicit tagtype isset} {
     lappend j "\tint [lindex $numName 0];"
 
     lappend l "\tif (!odr_initmember (o, p, sizeof(**p)))"
-    lappend l "\t\treturn opt && odr_ok(o);"
+    lappend l "\t\treturn odr_missing(o, opt, name);"
     if {[string length $tag]} {
         if {$implicit} {
             lappend l "\todr_implicit_settag (o, $tagtype, $tag);"
@@ -736,7 +736,7 @@ proc asnOf {name tag implicit tagtype isset} {
     lappend j "\}"
     lappend l "\t\treturn 1;"
     lappend l "\t*p = 0;"
-    lappend l "\treturn opt && odr_ok(o);"
+    lappend l "\treturn odr_missing(o, opt, name);"
     return [list [join $l \n] [join $j \n]]
 }
 
@@ -832,26 +832,26 @@ proc asnChoice {name tag implicit tagtype} {
     lappend l "\t\};"
     if {![string length $tag]} {
 	lappend l "\tif (!odr_initmember(o, p, sizeof(**p)))"
-	lappend l "\t\treturn opt && odr_ok(o);"
+	lappend l "\t\treturn odr_missing(o, opt, name);"
 	lappend l "\tif (odr_choice(o, arm, &(*p)->[lindex $uName 1], &(*p)->[lindex $uName 0], name))"
     } elseif {$implicit} {
 	lappend l "\tif (!odr_initmember(o, p, sizeof(**p)))"
-	lappend l "\t\treturn opt && odr_ok(o);"
+	lappend l "\t\treturn odr_missing(o, opt, name);"
 	lappend l "\todr_implicit_settag(o, $tagtype, $tag);"
 	lappend l "\tif (odr_choice(o, arm, &(*p)->[lindex $uName 1], &(*p)->[lindex $uName 0], name))"
     } else {
 	lappend l "\tif (!*p && o->direction != ODR_DECODE)"
 	lappend l "\t\treturn opt;"
 	lappend l "\tif (!odr_constructed_begin(o, p, $tagtype, $tag, 0))"
-	lappend l "\t\treturn opt && odr_ok(o);"
+	lappend l "\t\treturn odr_missing(o, opt, name);"
 	lappend l "\tif (!odr_initmember(o, p, sizeof(**p)))"
-	lappend l "\t\treturn opt && odr_ok(o);"
+	lappend l "\t\treturn odr_missing(o, opt, name);"
 	lappend l "\tif (odr_choice(o, arm, &(*p)->[lindex $uName 1], &(*p)->[lindex $uName 0], name) &&"
 	lappend l "\t\todr_constructed_end(o))"
     }
     lappend l "\t\treturn 1;"
     lappend l "\t*p = 0;"
-    lappend l "\treturn opt && odr_ok(o);"
+    lappend l "\treturn odr_missing(o, opt, name);"
     return [list [join $l \n] [join $j \n]]
 }
 

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_use.c,v 1.13 2003-01-06 08:20:28 adam Exp $
+ * $Id: odr_use.c,v 1.14 2003-05-20 19:55:30 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -27,7 +27,7 @@ int odr_external(ODR o, Odr_external **p, int opt, const char *name)
 
     odr_implicit_settag(o, ODR_UNIVERSAL, ODR_EXTERNAL);
     if (!odr_sequence_begin(o, p, sizeof(Odr_external), name))
-    	return opt;
+    	return odr_missing(o, opt, name);
     pp = *p;
     return
     	odr_oid(o, &pp->direct_reference, 1, "direct") &&

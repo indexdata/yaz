@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: admin.h,v 1.6 2003-03-11 11:07:47 adam Exp $
+ * $Id: admin.h,v 1.7 2003-05-20 19:55:29 adam Exp $
  */
 
 int cmd_adm_reindex(const char* arg);
@@ -15,7 +15,7 @@ int cmd_adm_commit(const char* arg);
 int cmd_adm_shutdown(const char* arg);
 int cmd_adm_startup(const char* arg);
 
-void send_apdu(Z_APDU *a);
+int send_apdu(Z_APDU *a);
 /*
  * Local variables:
  * tab-width: 8

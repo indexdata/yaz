@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr-priv.h,v 1.4 2003-03-11 11:03:31 adam Exp $
+ * $Id: odr-priv.h,v 1.5 2003-05-20 19:55:29 adam Exp $
  */
 
 #ifndef ODR_PRIV_H
@@ -52,6 +52,7 @@ struct Odr_private {
     struct Odr_ber_tag odr_ber_tag;
     yaz_iconv_t iconv_handle;
     int error_id;
+    char addinfo[80];
 };
 
 /* Private macro.

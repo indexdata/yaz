@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.8 2002-09-03 09:50:34 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.9 2003-05-20 19:55:29 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -744,8 +744,8 @@ int myInt(ODR o, int **p, int optional, const char *name)
     <para>
      The function <function>myInt()</function> can then be used like any of
      the primitive functions provided by &odr;. Note that the behavior of
-     <function>odr_explicit()</function>
-     and <function>odr_implicit()</function> macros
+     <function>odr_explicit_tag()</function>
+     and <function>odr_implicit_tag()</function> macros
      act exactly the same as the functions they are applied to - they
      respond to error conditions, etc, in the same manner - they
      simply have three extra parameters. The class parameter may
@@ -826,7 +826,8 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
      Note the 1 in the call to <function>odr_bool()</function>, to mark
      that the sequence member is optional.
      If either of the member types had been tagged, the macros
-     <function>odr_implicit()</function> or <function>odr_explicit()</function>
+     <function>odr_implicit_tag()</function> or
+     <function>odr_explicit_tag()</function>
      could have been used.
      The new function can be used exactly like the standard functions provided
      with &odr;. It will encode, decode or pretty-print a data value of the
@@ -874,7 +875,7 @@ int odr_implicit_settag(ODR o, int class, int tag);
 
      <para>
       which overrides the tag of the type immediately following it. The
-      macro <function>odr_implicit()</function> works by calling
+      macro <function>odr_implicit_tag()</function> works by calling
       <function>odr_implicit_settag()</function> immediately
       before calling the function pointer argument.
       Your type function could look like this:
@@ -964,7 +965,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
       interface) is less than the time that would be required to develop a
       better interface. Nevertheless, it is far from satisfying, and it's a
       point that will be worked on in the future. One option for you would
-      be to simply apply the <function>odr_explicit()</function> macro to
+      be to simply apply the <function>odr_explicit_tag()</function> macro to
       the first function, and not
       have to worry about <function>odr_constructed_*</function> yourself.
       Incidentally, as you might have guessed, the

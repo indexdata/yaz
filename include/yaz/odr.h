@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.10 2003-03-18 13:34:35 adam Exp $
+ * $Id: odr.h,v 1.11 2003-05-20 19:55:29 adam Exp $
  */
 
 #ifndef ODR_H
@@ -185,6 +185,8 @@ extern char *odr_errlist[];
 YAZ_EXPORT int odr_geterror(ODR o);
 YAZ_EXPORT int odr_geterrorx(ODR o, int *x);
 YAZ_EXPORT void odr_seterror(ODR o, int errorno, int errorid);
+YAZ_EXPORT void odr_setaddinfo(ODR o, const char *addinfo);
+YAZ_EXPORT char *odr_getaddinfo(ODR o);
 YAZ_EXPORT void odr_perror(ODR o, char *message);
 YAZ_EXPORT void odr_setprint(ODR o, FILE *file);
 YAZ_EXPORT ODR odr_createmem(int direction);
@@ -201,21 +203,13 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_release_mem(m) nmem_destroy(m)
 #define ODR_MEM NMEM
 
-#define odr_implicit(o, t, p, cl, tg, opt)\
-        (odr_implicit_settag((o), cl, tg), t ((o), (p), (opt), 0) )
-
 #define odr_implicit_tag(o, t, p, cl, tg, opt, name)\
         (odr_implicit_settag((o), cl, tg), t ((o), (p), (opt), name) )
-
-#define odr_explicit(o, t, p, cl, tg, opt)\
-        ((int) (odr_constructed_begin((o), (p), (cl), (tg), 0) ? \
-        t ((o), (p), (opt), 0) &&\
-        odr_constructed_end(o) : opt))
 
 #define odr_explicit_tag(o, t, p, cl, tg, opt, name)\
         ((int) (odr_constructed_begin((o), (p), (cl), (tg), 0) ? \
         t ((o), (p), (opt), name) &&\
-        odr_constructed_end(o) : opt))
+        odr_constructed_end(o) : odr_missing((o), opt, name)))
 
 #define ODR_MASK_ZERO(mask)\
     ((void) (memset((mask)->bits, 0, ODR_BITMASK_SIZE),\
@@ -242,7 +236,7 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 
 YAZ_EXPORT int ber_boolean(ODR o, int *val);
 YAZ_EXPORT int ber_tag(ODR o, void *p, int zclass, int tag,
-		       int *constructed, int opt);
+		       int *constructed, int opt, const char *name);
 YAZ_EXPORT int ber_enctag(ODR o, int zclass, int tag, int constructed);
 YAZ_EXPORT int ber_dectag(const unsigned char *buf, int *zclass,
 			  int *tag, int *constructed, int max);
@@ -302,6 +296,7 @@ YAZ_EXPORT Odr_oid *odr_getoidbystr_nmem(NMEM o, const char *str);
 YAZ_EXPORT int odr_initmember(ODR o, void *p, int size);
 YAZ_EXPORT int odr_peektag(ODR o, int *zclass, int *tag, int *cons);
 YAZ_EXPORT void odr_setlenlen(ODR o, int len);
+YAZ_EXPORT int odr_missing(ODR o, int opt, const char *name);
 
 typedef struct Odr_external
 {

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.42 2003-05-19 14:37:38 adam Exp $
+ * $Id: odr.c,v 1.43 2003-05-20 19:55:29 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -36,7 +36,7 @@ char *odr_errlist[] =
     "Stack overflow",
     "Length of constructed type different from sum of members",
     "Overflow writing definite length of constructed type",
-    "HTTP Bad Request"
+    "Bad HTTP Request"
 };
 
 char *odr_errmsg(int n)
@@ -46,7 +46,8 @@ char *odr_errmsg(int n)
 
 void odr_perror(ODR o, char *message)
 {
-    fprintf(stderr, "%s: %s\n", message, odr_errlist[o->error]);
+    fprintf(stderr, "%s: %s: %s\n", message, odr_errlist[o->error],
+            odr_getaddinfo(o));
 }
 
 int odr_geterror(ODR o)
@@ -61,10 +62,25 @@ int odr_geterrorx(ODR o, int *x)
     return o->error;
 }
 
+char *odr_getaddinfo(ODR o)
+{
+    return o->op->addinfo;
+}
+
 void odr_seterror(ODR o, int error, int id)
 {
     o->error = error;
     o->op->error_id = id;
+    o->op->addinfo[0] = '\0';
+}
+
+void odr_setaddinfo(ODR o, const char *addinfo)
+{
+    if (addinfo)
+    {
+        strncpy(o->op->addinfo, addinfo, sizeof(o->op->addinfo)-1);
+        o->op->addinfo[sizeof(o->op->addinfo)-1] = '\0';
+    }
 }
 
 void odr_setprint(ODR o, FILE *file)

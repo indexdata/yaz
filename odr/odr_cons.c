@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr_cons.c,v 1.25 2003-03-11 11:03:31 adam Exp $
+ * $Id: odr_cons.c,v 1.26 2003-05-20 19:55:30 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -31,7 +31,7 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
 	o->t_class = zclass;
 	o->t_tag = tag;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, 1)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, 1, name)) < 0)
     	return 0;
     if (!res || !cons)
     	return 0;

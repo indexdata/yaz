@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oct.c,v 1.21 2003-03-11 11:03:31 adam Exp $
+ * $Id: odr_oct.c,v 1.22 2003-05-20 19:55:30 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -27,10 +27,10 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OCTETSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt, name)) < 0)
     	return 0;
     if (!res)
-    	return opt;
+    	return odr_missing(o, opt, name);
     if (o->direction == ODR_PRINT)
     {
         int i;
@@ -76,10 +76,10 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OCTETSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt, name)) < 0)
     	return 0;
     if (!res)
-    	return opt;
+    	return odr_missing(o, opt, name);
     if (o->direction == ODR_PRINT)
     {
     	odr_prname(o, name);
@@ -123,10 +123,10 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
     	o->t_class = ODR_UNIVERSAL;
     	o->t_tag = ODR_OCTETSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt)) < 0)
+    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt, name)) < 0)
     	return 0;
     if (!res)
-    	return opt;
+    	return odr_missing(o, opt, name);
     if (o->direction == ODR_PRINT)
     {
     	odr_prname(o, name);
