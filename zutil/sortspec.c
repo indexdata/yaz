@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.1 2001-08-08 19:35:06 adam Exp $
+ * $Id: sortspec.c,v 1.2 2001-08-10 12:50:40 adam Exp $
  */
 
 #include <stdio.h>
@@ -95,13 +95,13 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
         {
             switch (sort_flags[i])
             {
-            case 'a':
-            case 'A':
+            case 'd':
+            case 'D':
             case '>':
                 *sks->sortRelation = Z_SortRelation_descending;
                 break;
-            case 'd':
-            case 'D':
+            case 'a':
+            case 'A':
             case '<':
                 *sks->sortRelation = Z_SortRelation_ascending;
                 break;
