@@ -1,12 +1,15 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  *
  * NT Service interface by
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.35  2000-11-23 10:58:33  adam
+ * Revision 1.36  2001-01-30 21:34:18  adam
+ * Added step-size for Scan backend interface.
+ *
+ * Revision 1.35  2000/11/23 10:58:33  adam
  * SSL comstack support. Separate POSIX thread support library.
  *
  * Revision 1.34  2000/09/04 08:58:15  adam
@@ -548,6 +551,11 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     if (q->term->term->which != Z_Term_general)
     {
     	q->errcode = 229; /* unsupported term type */
+	return 0;
+    }
+    if (*q->step_size != 0)
+    {
+	q->errcode = 205; /*Only zero step size supported for Scan */
 	return 0;
     }
     if (q->term->term->u.general->len >= 80)

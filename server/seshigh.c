@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.112  2001-01-29 09:38:22  adam
+ * Revision 1.113  2001-01-30 21:34:17  adam
+ * Added step-size for Scan backend interface.
+ *
+ * Revision 1.112  2001/01/29 09:38:22  adam
  * Fixed bug that made the frontend server crash when no attribute set
  * was specified for scan.
  *
@@ -1614,34 +1617,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     return apdu;
 }
 
-#if 0
-static int bend_default_scan (void *handle, bend_scan_rr *rr)
-{
-    bend_scanrequest srq;
-    bend_scanresult *srs;
-
-    srq.num_bases = rr->num_bases;
-    srq.basenames = rr->basenames;
-    srq.attributeset = rr->attributeset;
-    srq.referenceId = rr->referenceId;
-    srq.term = rr->term;
-    srq.term_position = rr->term_position;
-    srq.num_entries = rr->num_entries;
-    srq.stream = rr->stream;
-    srq.print = rr->print;
-    
-    srs = bend_scan(handle, &srq, 0);
-
-    rr->term_position = srs->term_position;
-    rr->num_entries = srs->num_entries;
-    rr->entries = srs->entries;
-    rr->status = srs->status;
-    rr->errcode = srs->errcode;
-    rr->errstring = srs->errstring;
-    return 0;
-}
-#endif
-
 /*
  * Scan was implemented rather in a hurry, and with support for only the basic
  * elements of the service in the backend API. Suggestions are welcome.
@@ -1669,7 +1644,10 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     apdu->which = Z_APDU_scanResponse;
     apdu->u.scanResponse = res;
     res->referenceId = req->referenceId;
-    res->stepSize = 0;
+    res->stepSize = (int*) odr_malloc (assoc->encode, sizeof(*res->stepSize));
+    *res->stepSize = 0;
+    if (req->stepSize)
+	*res->stepSize = *req->stepSize;
     res->scanStatus = scanStatus;
     res->numberOfEntriesReturned = numberOfEntriesReturned;
     res->positionOfTerm = 0;
@@ -1704,6 +1682,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	bsrr->referenceId = req->referenceId;
 	bsrr->stream = assoc->encode;
 	bsrr->print = assoc->print;
+	bsrr->step_size = res->stepSize;
 	if (!(attset = oid_getentbyoid(req->attributeSet)) ||
 	    attset->oclass != CLASS_RECSYN)
 	    bsrr->attributeset = VAL_NONE;

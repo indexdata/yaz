@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.10  2000-10-02 11:07:44  adam
+ * Revision 1.11  2001-01-30 21:34:17  adam
+ * Added step-size for Scan backend interface.
+ *
+ * Revision 1.10  2000/10/02 11:07:44  adam
  * Added peer_name member for bend_init handler. Changed the YAZ
  * client so that tcp: can be avoided in target spec.
  *
@@ -190,6 +193,7 @@ typedef struct bend_scan_rr {
     ODR stream;         /* encoding stream - memory source if required */
     ODR print;          /* printing stream */
 
+    int *step_size;     /* step size */
     int term_position;  /* desired index of term in result list/returned */
     int num_entries;    /* number of entries requested/returned */
 
