@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdisp.c,v $
- * Revision 1.5  1997-05-01 15:08:15  adam
+ * Revision 1.6  1997-09-04 07:52:27  adam
+ * Moved atoi_n function to separate source file.
+ *
+ * Revision 1.5  1997/05/01 15:08:15  adam
  * Added log_mask_str_x routine.
  *
  * Revision 1.4  1995/09/29 17:12:34  quinn
@@ -25,23 +28,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <marcdisp.h>
-
-#define ISO2709_RS 035
-#define ISO2709_FS 036
-#define ISO2709_IDFS 037
-
-int atoi_n (const char *buf, int len)
-{
-    int val = 0;
-
-    while (--len >= 0)
-    {
-        if (isdigit (*buf))
-            val = val*10 + (*buf - '0');
-	buf++;
-    }
-    return val;
-}
+#include <yaz-util.h>
 
 int marc_display (const char *buf, FILE *outf)
 {
