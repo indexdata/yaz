@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.81 2002-05-07 11:01:59 adam Exp $
+ * $Id: statserv.c,v 1.82 2002-05-17 12:48:29 adam Exp $
  */
 
 #include <stdio.h>
@@ -243,7 +243,7 @@ void statserv_closedown()
     }
 }
 
-void event_loop_thread (IOCHAN iochan)
+void __cdecl event_loop_thread (IOCHAN iochan)
 {
     event_loop (&iochan);
 }

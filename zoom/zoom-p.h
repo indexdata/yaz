@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.8 2001-12-30 22:21:11 adam Exp $
+ * $Id: zoom-p.h,v 1.9 2002-05-17 12:48:30 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
@@ -137,4 +137,4 @@ struct ZOOM_Event_p {
     ZOOM_Event prev;
 };
 
-
+void ZOOM_options_addref (ZOOM_options opt);

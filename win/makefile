@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.36 2002-03-18 21:33:48 adam Exp $
+# $Id: makefile,v 1.37 2002-05-17 12:48:30 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -27,7 +27,7 @@ DEBUG=0   # 0 for release, 1 for debug
 
 default: all
 
-all: dirs yaz_date_h generate dll client ztest zoomsh
+all: dirs generate dll client ztest zoomsh
 
 NSIS="c:\program files\nsis\makensis.exe"
 
@@ -83,7 +83,6 @@ IMPLIB=$(LIBDIR)\Yaz.lib
 CLIENT=$(BINDIR)\yaz-client.exe
 ZOOMSH=$(BINDIR)\zoomsh.exe
 ZTEST=$(BINDIR)\yaz-ztest.exe
-YAZ_DATE_H=$(INCLDIR)\yaz\yaz-date.h
 
 ZOOMTST1=$(BINDIR)\zoomtst1.exe
 ZOOMTST2=$(BINDIR)\zoomtst2.exe
@@ -101,8 +100,6 @@ ztest: $(ZTEST)
 
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8)
-
-yaz_date_h: $(YAZ_DATE_H)
 
 ###########################################################
 ############### Compiler and linker options 
@@ -551,11 +548,6 @@ generated_files: \
 
 !if $(HAVE_TCL)
 
-$(YAZ_DATE_H):
-	@cd ..
-	$(TCL) util\cvs-date.tcl include\yaz\yaz-date.h
-	@cd win
-
 $(Z3950V3_FILES): $(Z3950DIR)\z3950v3.asn
 	@cd $(Z3950DIR)
 	$(TCL) $(TCLOPT) -d z.tcl z3950v3.asn
@@ -842,7 +834,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.36  2002-03-18 21:33:48  adam
+# Revision 1.37  2002-05-17 12:48:30  adam
+# Use __stdcall convention for ZOOM on WIN32
+#
+# Revision 1.36  2002/03/18 21:33:48  adam
 # MARC records embedded in C code for test server
 #
 # Revision 1.35  2002/03/16 10:26:57  adam

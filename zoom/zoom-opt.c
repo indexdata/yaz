@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-opt.c,v 1.4 2002-01-28 09:27:48 adam Exp $
+ * $Id: zoom-opt.c,v 1.5 2002-05-17 12:48:30 adam Exp $
  *
  * ZOOM layer for C, options handling
  */
@@ -9,12 +9,14 @@
 
 #include "zoom-p.h"
 
-ZOOM_options ZOOM_options_create (void)
+ZOOM_API(ZOOM_options)
+ZOOM_options_create (void)
 {
     return ZOOM_options_create_with_parent (0);
 }
 
-ZOOM_options ZOOM_options_create_with_parent (ZOOM_options parent)
+ZOOM_API(ZOOM_options)
+ZOOM_options_create_with_parent (ZOOM_options parent)
 {
     ZOOM_options opt = (ZOOM_options) xmalloc (sizeof(*opt));
 
@@ -33,7 +35,8 @@ void ZOOM_options_addref (ZOOM_options opt)
     (opt->refcount)++;
 }
 
-ZOOM_options_callback ZOOM_options_set_callback (
+ZOOM_API(ZOOM_options_callback)
+ZOOM_options_set_callback (
     ZOOM_options opt,
     ZOOM_options_callback callback_func,
     void *callback_handle)
@@ -47,7 +50,8 @@ ZOOM_options_callback ZOOM_options_set_callback (
     return callback_old;
 }
 
-void ZOOM_options_destroy (ZOOM_options opt)
+ZOOM_API(void)
+ZOOM_options_destroy (ZOOM_options opt)
 {
     if (!opt)
 	return;
@@ -70,7 +74,8 @@ void ZOOM_options_destroy (ZOOM_options opt)
     }
 }
 
-void ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
+ZOOM_API(void)
+ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
 {
     struct ZOOM_options_entry **e;
 
@@ -91,7 +96,8 @@ void ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
     (*e)->next = 0;
 }
 
-const char *ZOOM_options_get (ZOOM_options opt, const char *name)
+ZOOM_API(const char *)
+ZOOM_options_get (ZOOM_options opt, const char *name)
 {
     const char *v = 0;
     if (!opt)
@@ -113,7 +119,8 @@ const char *ZOOM_options_get (ZOOM_options opt, const char *name)
     return v;
 }
 
-int ZOOM_options_get_bool (ZOOM_options opt, const char *name, int defa)
+ZOOM_API(int)
+ZOOM_options_get_bool (ZOOM_options opt, const char *name, int defa)
 {
     const char *v = ZOOM_options_get (opt, name);
 
@@ -124,7 +131,8 @@ int ZOOM_options_get_bool (ZOOM_options opt, const char *name, int defa)
     return 0;
 }
 
-int ZOOM_options_get_int (ZOOM_options opt, const char *name, int defa)
+ZOOM_API(int)
+ZOOM_options_get_int (ZOOM_options opt, const char *name, int defa)
 {
     const char *v = ZOOM_options_get (opt, name);
 
@@ -133,7 +141,8 @@ int ZOOM_options_get_int (ZOOM_options opt, const char *name, int defa)
     return atoi(v);
 }
 
-void ZOOM_options_set_int(ZOOM_options opt, const char *name, int value)
+ZOOM_API(void)
+ZOOM_options_set_int(ZOOM_options opt, const char *name, int value)
 {
     char s[40];
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.27 2002-05-14 13:42:26 oleg Exp $
+ * $Id: zoom-c.c,v 1.28 2002-05-17 12:48:30 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -136,7 +136,8 @@ static ZOOM_record record_cache_lookup (ZOOM_resultset r,
 					 int pos,
 					 const char *elementSetName);
 
-ZOOM_connection ZOOM_connection_create (ZOOM_options options)
+ZOOM_API(ZOOM_connection)
+ZOOM_connection_create (ZOOM_options options)
 {
     ZOOM_connection c = (ZOOM_connection) xmalloc (sizeof(*c));
 
@@ -226,7 +227,8 @@ static char **set_DatabaseNames (ZOOM_connection con, ZOOM_options options,
     return databaseNames;
 }
 
-ZOOM_connection ZOOM_connection_new (const char *host, int portnum)
+ZOOM_API(ZOOM_connection)
+ZOOM_connection_new (const char *host, int portnum)
 {
     ZOOM_connection c = ZOOM_connection_create (0);
 
@@ -234,8 +236,9 @@ ZOOM_connection ZOOM_connection_new (const char *host, int portnum)
     return c;
 }
 
-void ZOOM_connection_connect(ZOOM_connection c,
-			      const char *host, int portnum)
+ZOOM_API(void)
+ZOOM_connection_connect(ZOOM_connection c,
+  		                const char *host, int portnum)
 {
     const char *val;
     ZOOM_task task;
@@ -270,7 +273,8 @@ void ZOOM_connection_connect(ZOOM_connection c,
     }
 }
 
-ZOOM_query ZOOM_query_create(void)
+ZOOM_API(ZOOM_query)
+ZOOM_query_create(void)
 {
     ZOOM_query s = (ZOOM_query) xmalloc (sizeof(*s));
 
@@ -282,7 +286,8 @@ ZOOM_query ZOOM_query_create(void)
     return s;
 }
 
-void ZOOM_query_destroy(ZOOM_query s)
+ZOOM_API(void)
+ZOOM_query_destroy(ZOOM_query s)
 {
     if (!s)
 	return;
@@ -296,7 +301,8 @@ void ZOOM_query_destroy(ZOOM_query s)
     }
 }
 
-int ZOOM_query_prefix(ZOOM_query s, const char *str)
+ZOOM_API(int)
+ZOOM_query_prefix(ZOOM_query s, const char *str)
 {
     s->query = (Z_Query *) odr_malloc (s->odr, sizeof(*s->query));
     s->query->which = Z_Query_type_1;
@@ -306,7 +312,8 @@ int ZOOM_query_prefix(ZOOM_query s, const char *str)
     return 0;
 }
 
-int ZOOM_query_sortby(ZOOM_query s, const char *criteria)
+ZOOM_API(int)
+ZOOM_query_sortby(ZOOM_query s, const char *criteria)
 {
     s->sort_spec = yaz_sort_spec (s->odr, criteria);
     if (!s->sort_spec)
@@ -316,7 +323,8 @@ int ZOOM_query_sortby(ZOOM_query s, const char *criteria)
 
 static int do_write(ZOOM_connection c);
 
-void ZOOM_connection_destroy(ZOOM_connection c)
+ZOOM_API(void)
+ZOOM_connection_destroy(ZOOM_connection c)
 {
     ZOOM_resultset r;
     if (!c)
@@ -364,7 +372,8 @@ ZOOM_resultset ZOOM_resultset_create ()
     return r;
 }
 
-ZOOM_resultset ZOOM_connection_search_pqf(ZOOM_connection c, const char *q)
+ZOOM_API(ZOOM_resultset)
+ZOOM_connection_search_pqf(ZOOM_connection c, const char *q)
 {
     ZOOM_resultset r;
     ZOOM_query s = ZOOM_query_create();
@@ -376,7 +385,8 @@ ZOOM_resultset ZOOM_connection_search_pqf(ZOOM_connection c, const char *q)
     return r;
 }
 
-ZOOM_resultset ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
+ZOOM_API(ZOOM_resultset)
+ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 {
     ZOOM_resultset r = ZOOM_resultset_create ();
     ZOOM_task task;
@@ -414,7 +424,8 @@ ZOOM_resultset ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     return r;
 }
 
-void ZOOM_resultset_destroy(ZOOM_resultset r)
+ZOOM_API(void)
+ZOOM_resultset_destroy(ZOOM_resultset r)
 {
     if (!r)
         return;
@@ -450,7 +461,8 @@ void ZOOM_resultset_destroy(ZOOM_resultset r)
     }
 }
 
-size_t ZOOM_resultset_size (ZOOM_resultset r)
+ZOOM_API(size_t)
+ZOOM_resultset_size (ZOOM_resultset r)
 {
     return r->size;
 }
@@ -487,8 +499,9 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
 	    ;
 }
 
-void ZOOM_resultset_records (ZOOM_resultset r, ZOOM_record *recs,
-			      size_t start, size_t count)
+ZOOM_API(void)
+ZOOM_resultset_records (ZOOM_resultset r, ZOOM_record *recs,
+  		                size_t start, size_t count)
 {
     int force_present = 0;
 
@@ -849,7 +862,8 @@ static void response_diag (ZOOM_connection c, Z_DiagRec *p)
     c->error = *r->condition;
 }
 
-ZOOM_record ZOOM_record_clone (ZOOM_record srec)
+ZOOM_API(ZOOM_record)
+ZOOM_record_clone (ZOOM_record srec)
 {
     char *buf;
     int size;
@@ -871,18 +885,21 @@ ZOOM_record ZOOM_record_clone (ZOOM_record srec)
     return nrec;
 }
 
-ZOOM_record ZOOM_resultset_record_immediate (ZOOM_resultset s,size_t pos)
+ZOOM_API(ZOOM_record)
+ZOOM_resultset_record_immediate (ZOOM_resultset s,size_t pos)
 {
     return record_cache_lookup (s, pos, 0);
 }
 
-ZOOM_record ZOOM_resultset_record (ZOOM_resultset r, size_t pos)
+ZOOM_API(ZOOM_record)
+ZOOM_resultset_record (ZOOM_resultset r, size_t pos)
 {
     ZOOM_resultset_retrieve (r, 1, pos, 1);
     return ZOOM_resultset_record_immediate (r, pos);
 }
 
-void ZOOM_record_destroy (ZOOM_record rec)
+ZOOM_API(void)
+ZOOM_record_destroy (ZOOM_record rec)
 {
     if (!rec)
 	return;
@@ -892,7 +909,8 @@ void ZOOM_record_destroy (ZOOM_record rec)
     xfree (rec);
 }
 
-const char *ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
+ZOOM_API(const char *)
+ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
 {
     Z_NamePlusRecord *npr;
     
@@ -1366,7 +1384,8 @@ static int send_present (ZOOM_connection c)
     return 1;
 }
 
-ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c, const char *start)
+ZOOM_API(ZOOM_scanset)
+ZOOM_connection_scan (ZOOM_connection c, const char *start)
 {
     ZOOM_scanset scan = (ZOOM_scanset) xmalloc (sizeof(*scan));
 
@@ -1393,7 +1412,8 @@ ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c, const char *start)
     return scan;
 }
 
-void ZOOM_scanset_destroy (ZOOM_scanset scan)
+ZOOM_API(void)
+ZOOM_scanset_destroy (ZOOM_scanset scan)
 {
     if (!scan)
         return;
@@ -1407,7 +1427,7 @@ void ZOOM_scanset_destroy (ZOOM_scanset scan)
     }
 }
 
-int send_scan (ZOOM_connection c)
+static int send_scan (ZOOM_connection c)
 {
     ZOOM_scanset scan;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_scanRequest);
@@ -1439,14 +1459,16 @@ int send_scan (ZOOM_connection c)
     return 1;
 }
 
-size_t ZOOM_scanset_size (ZOOM_scanset scan)
+ZOOM_API(size_t)
+ZOOM_scanset_size (ZOOM_scanset scan)
 {
     if (!scan || !scan->scan_response || !scan->scan_response->entries)
         return 0;
     return scan->scan_response->entries->num_entries;
 }
 
-const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
+ZOOM_API(const char *)
+ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
                                int *occ, int *len)
 {
     const char *term = 0;
@@ -1471,12 +1493,14 @@ const char *ZOOM_scanset_term (ZOOM_scanset scan, size_t pos,
     return term;
 }
 
-const char *ZOOM_scanset_option_get (ZOOM_scanset scan, const char *key)
+ZOOM_API(const char *)
+ZOOM_scanset_option_get (ZOOM_scanset scan, const char *key)
 {
     return ZOOM_options_get (scan->options, key);
 }
 
-void ZOOM_scanset_option_set (ZOOM_scanset scan, const char *key,
+ZOOM_API(void)
+ZOOM_scanset_option_set (ZOOM_scanset scan, const char *key,
                               const char *val)
 {
     ZOOM_options_set (scan->options, key, val);
@@ -1662,49 +1686,57 @@ static int do_write(ZOOM_connection c)
 }
 
 
-const char *ZOOM_connection_option_get (ZOOM_connection c, const char *key)
+ZOOM_API(const char *)
+ZOOM_connection_option_get (ZOOM_connection c, const char *key)
 {
     return ZOOM_options_get (c->options, key);
 }
 
-void ZOOM_connection_option_set (ZOOM_connection c, const char *key,
+ZOOM_API(void)
+ZOOM_connection_option_set (ZOOM_connection c, const char *key,
                                   const char *val)
 {
     ZOOM_options_set (c->options, key, val);
 }
 
-const char *ZOOM_resultset_option_get (ZOOM_resultset r, const char *key)
+ZOOM_API(const char *)
+ZOOM_resultset_option_get (ZOOM_resultset r, const char *key)
 {
     return ZOOM_options_get (r->options, key);
 }
 
-void ZOOM_resultset_option_set (ZOOM_resultset r, const char *key,
+ZOOM_API(void)
+ZOOM_resultset_option_set (ZOOM_resultset r, const char *key,
                                   const char *val)
 {
     ZOOM_options_set (r->options, key, val);
 }
 
 
-int ZOOM_connection_errcode (ZOOM_connection c)
+ZOOM_API(int)
+ZOOM_connection_errcode (ZOOM_connection c)
 {
     return ZOOM_connection_error (c, 0, 0);
 }
 
-const char *ZOOM_connection_errmsg (ZOOM_connection c)
+ZOOM_API(const char *)
+ZOOM_connection_errmsg (ZOOM_connection c)
 {
     const char *msg;
     ZOOM_connection_error (c, &msg, 0);
     return msg;
 }
 
-const char *ZOOM_connection_addinfo (ZOOM_connection c)
+ZOOM_API(const char *)
+ZOOM_connection_addinfo (ZOOM_connection c)
 {
     const char *addinfo;
     ZOOM_connection_error (c, 0, &addinfo);
     return addinfo;
 }
 
-int ZOOM_connection_error (ZOOM_connection c, const char **cp,
+ZOOM_API(int)
+ZOOM_connection_error (ZOOM_connection c, const char **cp,
 			    const char **addinfo)
 {
     int error = c->error;
@@ -1744,7 +1776,7 @@ int ZOOM_connection_error (ZOOM_connection c, const char **cp,
     return c->error;
 }
 
-int ZOOM_connection_do_io(ZOOM_connection c, int mask)
+static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
 {
     ZOOM_Event event = 0;
     int r = cs_look(c->cs);
@@ -1797,14 +1829,16 @@ int ZOOM_connection_do_io(ZOOM_connection c, int mask)
     return 1;
 }
 
-int ZOOM_connection_last_event(ZOOM_connection cs)
+ZOOM_API(int)
+ZOOM_connection_last_event(ZOOM_connection cs)
 {
     if (!cs)
         return ZOOM_EVENT_NONE;
     return cs->last_event;
 }
 
-int ZOOM_event (int no, ZOOM_connection *cs)
+ZOOM_API(int)
+ZOOM_event (int no, ZOOM_connection *cs)
 {
 #if HAVE_SYS_POLL_H
     struct pollfd pollfds[1024];
