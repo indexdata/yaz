@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.9  1995-05-16 08:50:57  quinn
+ * Revision 1.10  1995-05-29 08:11:44  quinn
+ * Moved oid from odr/asn to util.
+ *
+ * Revision 1.9  1995/05/16  08:50:57  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.8  1995/03/17  10:17:55  quinn
@@ -35,6 +38,7 @@
  */
 
 #include <odr.h>
+#include <oid.h>
 
 /*
  * Top level oid en/decoder.
@@ -71,6 +75,6 @@ int odr_oid(ODR o, Odr_oid **p, int opt)
     	return 1;
     }
     if (o->direction == ODR_DECODE)
-    	*p = odr_malloc(o, ODR_OID_SIZE * sizeof(**p));
+    	*p = odr_malloc(o, OID_SIZE * sizeof(**p));
     return ber_oidc(o, *p);
 }

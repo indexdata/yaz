@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.4  1995-05-16 08:50:29  quinn
+ * Revision 1.5  1995-05-29 08:11:31  quinn
+ * Moved oid from odr/asn to util.
+ *
+ * Revision 1.4  1995/05/16  08:50:29  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.3  1995/04/20  15:12:44  quinn
@@ -78,6 +81,7 @@
 #ifndef COMSTACK_H
 #define COMSTACK_H
 
+#include <oid.h>
 #include <dmalloc.h>
 
 #define COMSTACK_DEFAULT_TIMEOUT -1
@@ -109,9 +113,7 @@ struct comstack
 #define CS_DISCON     2
 #define CS_LISTEN     3
 #define CS_DATA       4
-    int protocol;  /* what application protocol are we talking? */
-#define CS_Z3950      0
-#define CS_SR         1
+    enum oid_proto protocol;  /* what application protocol are we talking? */
     int (*f_look)(COMSTACK handle);
     int (*f_put)(COMSTACK handle, char *buf, int size);
     int (*f_get)(COMSTACK handle, char **buf, int *bufsize);

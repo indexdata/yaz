@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.6  1995-05-22 14:47:00  quinn
+ * Revision 1.7  1995-05-29 08:11:32  quinn
+ * Moved oid from odr/asn to util.
+ *
+ * Revision 1.6  1995/05/22  14:47:00  quinn
  * ODR_NULLVAL --> void
  *
  * Revision 1.5  1995/05/22  11:31:24  quinn
@@ -161,7 +164,6 @@ typedef struct odr_bitmask
     int top;
 } Odr_bitmask;
 
-#define ODR_OID_SIZE 100
 typedef int Odr_oid;   /* terminate by -1 */
 
 typedef struct odr_constack

@@ -29,6 +29,7 @@
 #define BACKEND_H
 
 #include <proto.h>
+#include <statserv.h>
 
 typedef struct bend_initrequest
 {

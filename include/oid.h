@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.2  1995-05-16 08:50:35  quinn
+ * Revision 1.3  1995-05-29 08:11:33  quinn
+ * Moved oid from odr/asn to util.
+ *
+ * Revision 1.2  1995/05/16  08:50:35  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/03/30  09:39:41  quinn
@@ -39,7 +42,7 @@
 #ifndef OID_H
 #define OID_H
 
-#include <odr.h>
+#define OID_SIZE 100
 
 typedef struct oident
 {
@@ -114,7 +117,7 @@ typedef struct oident
 	VAL_EXPORTSPEC,
 	VAL_EXPORTINV
     } value;
-    Odr_oid oidsuffix[20];
+    int oidsuffix[20];
     char *desc;
 } oident;
 
@@ -122,7 +125,11 @@ typedef enum oid_proto oid_proto;
 typedef enum oid_class oid_class;
 typedef enum oid_value oid_value;
 
-Odr_oid *oid_getoidbyent(struct oident *ent);
-struct oident *oid_getentbyoid(Odr_oid *o);
+int *oid_getoidbyent(struct oident *ent);
+struct oident *oid_getentbyoid(int *o);
+void oid_oidcpy(int *t, int *s);
+void oid_oidcat(int *t, int *s);
+int oid_oidcmp(int *o1, int *o2);
+int oid_oidlen(int *o);
 
 #endif

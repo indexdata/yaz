@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.9  1995-05-22 11:31:25  quinn
+ * Revision 1.10  1995-05-29 08:11:34  quinn
+ * Moved oid from odr/asn to util.
+ *
+ * Revision 1.9  1995/05/22  11:31:25  quinn
  * Added PDUs
  *
  * Revision 1.8  1995/05/17  08:41:35  quinn
@@ -88,6 +91,7 @@
 #define PROTO_H
 
 #include <odr.h>
+#include <oid.h>
 #include <odr_use.h>
 
 /* ----------------- GLOBAL AUXILIARY DEFS ----------------*/
