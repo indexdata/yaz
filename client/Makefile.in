@@ -70,7 +70,7 @@ VERSION = @VERSION@
 
 bin_PROGRAMS = yaz-client
 
-yaz_client_SOURCES = client.c
+yaz_client_SOURCES = client.c admin.c
 
 LDADD = ../lib/libyaz.a
 
@@ -84,7 +84,7 @@ DEFS = @DEFS@ -I. -I$(srcdir)
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-yaz_client_OBJECTS =  client.o
+yaz_client_OBJECTS =  client.o admin.o
 yaz_client_LDADD = $(LDADD)
 yaz_client_DEPENDENCIES =  ../lib/libyaz.a
 yaz_client_LDFLAGS = 
@@ -99,7 +99,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DEP_FILES =  .deps/client.P
+DEP_FILES =  .deps/admin.P .deps/client.P
 SOURCES = $(yaz_client_SOURCES)
 OBJECTS = $(yaz_client_OBJECTS)
 
@@ -201,7 +201,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \

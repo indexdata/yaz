@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.95  2000-02-28 11:20:05  adam
+ * Revision 1.96  2000-03-14 09:27:07  ian
+ * Added code to enable sending of admin extended service requests
+ *
+ * Revision 1.95  2000/02/28 11:20:05  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.94  2000/01/31 13:15:21  adam
@@ -345,6 +348,8 @@
 #include <readline/history.h>
 #endif
 
+#include "admin.h"
+
 #define C_PROMPT "Z> "
 
 static ODR out, in, print;              /* encoding and decoding streams */
@@ -383,7 +388,12 @@ static QueryType queryType = QueryType_Prefix;
 static CCL_bibset bibset;               /* CCL bibset handle */
 #endif
 
-static void send_apdu(Z_APDU *a)
+ODR getODROutputStream()
+{
+    return out;
+}
+
+void send_apdu(Z_APDU *a)
 {
     char *buf;
     int len;
@@ -2251,6 +2261,14 @@ static int client(int wait)
 	{"refid", cmd_refid, "<id>"},
 	{"itemorder", cmd_itemorder, "1|2 <item>"},
 	{"update", cmd_update, "<item>"},
+	/* Server Admin Functions */
+	{"adm-reindex", cmd_adm_reindex, "<database-name>"},
+	{"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>"},
+	{"adm-create", cmd_adm_create, "<database-name>"},
+	{"adm-delete", cmd_adm_delete, "('database'|'index')<object-name>"},
+	{"adm-import", cmd_adm_import, "<database-name> <record-type> <source-file-name>"},
+	{"adm-refresh", cmd_adm_refresh, "<database-name>"},
+	{"adm-commit", cmd_adm_commit, ""},
         {0,0}
     };
     char *netbuffer= 0;
