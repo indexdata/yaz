@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.23 2003-05-22 16:57:28 mike Exp $ -->
+<!-- $Id: tools.xml,v 1.24 2003-05-27 09:52:38 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -718,7 +718,7 @@ int cql_parser_string(CQL_parser cp, const char *str);
       A CQL query is parsed by the <function>cql_parser_string</function>
       which takes a query <parameter>str</parameter>.
       If the query was valid (no syntax errors), then zero is returned;
-      otherwise a non-zero error code is returned.
+      otherwise -1 is returned to indicate a syntax error.
      </para>
      <para>
       <synopsis>
@@ -742,7 +742,7 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
     
     <sect3 id="tools.cql.tree"><title>CQL tree</title>
      <para>
-      The the query string is validl, the CQL parser
+      The the query string is valid, the CQL parser
       generates a tree representing the structure of the
       CQL query.
      </para>
@@ -936,6 +936,13 @@ int cql_transform_error(cql_transform_t ct, char **addinfop);
       example, if the error code is 15 (``Illegal or unsupported index
       set''), the additional information is the name of the requested
       index set that was not recognised.
+     </para>
+     <para>
+      The SRW error-codes may be translated into brief human-readable
+      error messages using
+      <synopsis>
+const char *cql_strerror(int code);
+      </synopsis>
      </para>
      <para>
       If you wish to be able to produce a PQF result in a different
