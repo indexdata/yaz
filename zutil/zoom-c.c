@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.31 2003-04-23 20:38:19 adam Exp $
+ * $Id: zoom-c.c,v 1.32 2003-04-28 11:04:52 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -172,6 +172,7 @@ void ZOOM_connection_remove_task (ZOOM_connection c)
 	switch (task->which)
 	{
 	case ZOOM_TASK_SEARCH:
+
 	    ZOOM_resultset_destroy (task->u.search.resultset);
 	    break;
 	case ZOOM_TASK_RETRIEVE:
@@ -1307,8 +1308,14 @@ ZOOM_resultset_record_immediate (ZOOM_resultset s,size_t pos)
 ZOOM_API(ZOOM_record)
 ZOOM_resultset_record (ZOOM_resultset r, size_t pos)
 {
-    ZOOM_resultset_retrieve (r, 1, pos, 1);
-    return ZOOM_resultset_record_immediate (r, pos);
+    ZOOM_record rec = ZOOM_resultset_record_immediate(r, pos);
+
+    if (!rec)
+    {
+        ZOOM_resultset_retrieve (r, 1, pos, 1);
+        rec = ZOOM_resultset_record_immediate (r, pos);
+    }
+    return rec;
 }
 
 ZOOM_API(void)
@@ -1526,6 +1533,9 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr,
     const char *syntax = 
         ZOOM_resultset_option_get (r, "preferredRecordSyntax");
     
+    ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
+    ZOOM_connection_put_event(r->connection, event);
+
     for (rc = r->record_cache; rc; rc = rc->next)
     {
 	if (pos == rc->pos)
@@ -1665,11 +1675,15 @@ static void handle_present_response (ZOOM_connection c, Z_PresentResponse *pr)
 static void handle_search_response (ZOOM_connection c, Z_SearchResponse *sr)
 {
     ZOOM_resultset resultset;
-
+    ZOOM_Event event;
+    
     yaz_log (LOG_DEBUG, "got search response");
-
+    
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
 	return ;
+    
+    event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+    ZOOM_connection_put_event(c, event);
 
     resultset = c->tasks->u.search.resultset;
 
@@ -2449,6 +2463,7 @@ static void handle_srw_response(ZOOM_connection c,
     ZOOM_resultset resultset = 0;
     int i;
     NMEM nmem;
+    ZOOM_Event event;
 
     if (!c->tasks)
         return;
@@ -2459,6 +2474,9 @@ static void handle_srw_response(ZOOM_connection c,
         resultset = c->tasks->u.retrieve.resultset;
     else
 	return ;
+
+    event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+    ZOOM_connection_put_event(c, event);
 
     resultset->size = 0;
 

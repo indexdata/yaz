@@ -1,6 +1,6 @@
 /*
  * Public header for ZOOM C.
- * $Id: zoom.h,v 1.17 2003-02-17 14:35:42 adam Exp $
+ * $Id: zoom.h,v 1.18 2003-04-28 11:04:52 adam Exp $
  */
 
 #include <yaz/yconfig.h>
@@ -106,6 +106,8 @@ ZOOM_connection_last_event(ZOOM_connection cs);
 #define ZOOM_EVENT_UNKNOWN 5
 #define ZOOM_EVENT_SEND_APDU 6
 #define ZOOM_EVENT_RECV_APDU 7
+#define ZOOM_EVENT_RECV_RECORD 8
+#define ZOOM_EVENT_RECV_SEARCH 9
 
 /* ----------------------------------------------------------- */
 /* result sets */

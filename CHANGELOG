@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+New ZOOM events ZOOM_EVENT_RECV_{RECORD,SEARCH} for receiving a record
+and search result respectively.
+
 --- 2.0.1 2003/04/25
 
 Redhat package is now several packages: libyaz (runtime libraries),
