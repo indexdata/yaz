@@ -6,7 +6,7 @@ exec tclsh "$0" "$@"
 # (c) Index Data 1996-2003
 # See the file LICENSE for details.
 #
-# $Id: yaz-comp,v 1.4 2003-04-14 17:02:12 adam Exp $
+# $Id: yaz-comp,v 1.5 2003-05-06 10:06:43 adam Exp $
 #
 
 set yc_version 0.3
@@ -1110,7 +1110,7 @@ proc asnModules {} {
 	    puts $file(outh) "\#ifndef ${ppname}_H"
 	    puts $file(outh) "\#define ${ppname}_H"
 	    puts $file(outh) {}
-	    puts $file(outh) "\#include <$inf(h-dir)odr.h>"
+	    puts $file(outh) "\#include <yaz/odr.h>"
 	   
             if {[info exists file(outp)]} { 
 	        puts $file(outp) "\#ifndef ${ppname}_P_H"
