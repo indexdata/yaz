@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.178 2003-01-06 08:20:26 adam Exp $
+ * $Id: client.c,v 1.179 2003-01-27 21:31:35 adam Exp $
  */
 
 #include <stdio.h>
@@ -2181,17 +2181,19 @@ int cmd_schema(char *arg)
 
 int cmd_format(char *arg)
 {
+    oid_value nsyntax;
     if (!arg || !*arg)
     {
         printf("Usage: format <recordsyntax>\n");
         return 0;
     }
-    recordsyntax = oid_getvalbyname (arg);
-    if (recordsyntax == VAL_NONE)
+    nsyntax = oid_getvalbyname (arg);
+    if (strcmp(arg, "none") && nsyntax == VAL_NONE)
     {
         printf ("unknown record syntax\n");
         return 0;
     }
+    recordsyntax = nsyntax;
     return 1;
 }
 
