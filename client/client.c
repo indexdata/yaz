@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.70  1998-09-22 09:40:37  adam
+ * Revision 1.71  1998-10-20 13:21:43  adam
+ * Fixed scan response handler.
+ *
+ * Revision 1.70  1998/09/22 09:40:37  adam
  * Minor changes in sort spec.
  *
  * Revision 1.69  1998/08/19 16:10:06  adam
@@ -1166,7 +1169,7 @@ static int cmd_itemorder(char *arg)
     fflush(stdout);
 
     send_itemorder(arg);
-    return(1);
+    return(2);
 }
 
 static int cmd_find(char *arg)
@@ -1584,13 +1587,16 @@ void process_scanResponse(Z_ScanResponse *res)
     }
 #endif
     for (i = 0; i < num_entries; i++)
+    {
+        int pos_term = res->positionOfTerm ? *res->positionOfTerm : -1;
 	if (entries[i]->which == Z_Entry_termInfo)
 	{
-	    printf("%c ", i + 1 == *res->positionOfTerm ? '*' : ' ');
+	    printf("%c ", i + 1 == pos_term ? '*' : ' ');
 	    display_term(entries[i]->u.termInfo);
 	}
 	else
 	    display_diagrecs(&entries[i]->u.surrogateDiagnostic, 1);
+    }
 #ifdef ASN_COMPILED
     if (res->entries->nonsurrogateDiagnostics)
 	display_diagrecs (res->entries->nonsurrogateDiagnostics,
