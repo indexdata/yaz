@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.2 2003-11-19 13:47:05 mike Exp $
+ * $Id: oid.c,v 1.3 2003-11-19 22:24:57 adam Exp $
  */
 
 /*
@@ -114,6 +114,9 @@ static oident standard_oids[] =
      "Intermarc"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_CCF,          {5,3,-1},
      "CCF"},
+    /* MARC21 is just an alias for the original USmarc */
+    {PROTO_Z3950,   CLASS_RECSYN,  VAL_USMARC,       {5,10,-1},
+     "MARC21"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_USMARC,       {5,10,-1},
      "USmarc"},
     {PROTO_Z3950,   CLASS_RECSYN,  VAL_UKMARC,       {5,11,-1},
