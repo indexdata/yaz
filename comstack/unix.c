@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.2 2002-06-18 21:30:38 adam Exp $
+ * $Id: unix.c,v 1.3 2002-07-03 13:36:55 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -143,11 +143,15 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
 
 int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
 {
+    char *cp;
     if (!unix_init ())
 	return 0;
     TRC(fprintf(stderr, "unix_strtoaddress: %s\n", str ? str : "NULL"));
     add->sun_family = AF_UNIX;
     strncpy(add->sun_path, str, sizeof(add->sun_path));
+    cp = strchr (add->sun_path, ':');
+    if (cp)
+	*cp = '\0';
     return 1;
 }
 

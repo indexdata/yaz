@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.34 2002-07-01 12:59:12 adam Exp $
+ * $Id: zoom-c.c,v 1.35 2002-07-03 13:36:55 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -208,10 +208,13 @@ static char **set_DatabaseNames (ZOOM_connection con, ZOOM_options options,
     
     if (!cp || !*cp)
     {
-	cp = strchr (con->host_port, '/');
+        if (strncmp (con->host_port, "unix:", 5) == 0)
+	    cp = strchr (con->host_port+5, ':');
+	else
+	    cp = strchr (con->host_port, '/');
 	if (cp)
 	    cp++;
-	}
+    }
     if (cp)
     {
 	c = cp;
