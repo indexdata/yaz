@@ -1,4 +1,4 @@
-<!-- $Id: client.xml,v 1.11 2002-02-24 12:23:43 adam Exp $ -->
+<!-- $Id: client.xml,v 1.12 2002-05-30 20:57:38 adam Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
@@ -75,7 +75,7 @@
      </term><listitem>
       <simpara>Specifies proxy address. When set YAZ client will
        connect to a proxy on the address and port given. 
-       The actual target will be specifed as part of the InitRequest
+       The actual target will be specified as part of the InitRequest
        to inform the proxy about actual target.
       </simpara></listitem>
     </varlistentry>
@@ -93,7 +93,7 @@
       <literal>-k</literal> <replaceable>kilobytes</replaceable>
      </term><listitem>
       <simpara>Specifies the maximum messages size in kilobytes.
-       The default maxium messages for the YAZ client is 1024
+       The default maximum messages for the YAZ client is 1024
        (1 MB).
       </simpara></listitem>
     </varlistentry>
