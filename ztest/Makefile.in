@@ -1,7 +1,7 @@
 # Copyright (C) 1995-1999, Index Data
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.6 1999-06-08 10:10:16 adam Exp $
+# $Id: Makefile.in,v 1.7 1999-06-09 09:43:31 adam Exp $
 
 SHELL=/bin/sh
 
@@ -16,7 +16,7 @@ LIBDIR=../lib
 #LIBMOSI=../../xtimosi/src/libmosi.a $(LIBDIR)/librfc.a
 
 SHELL=/bin/sh
-INCLUDE=-I../z39.50 -I../include -I. -I../../xtimosi/src
+INCLUDE=-I../include -I. -I../../xtimosi/src
 DEFS=$(INCLUDE) $(CDEFS)
 LIB=$(LIBDIR)/libserver.a 
 YAZLIBS=$(LIBDIR)/libserver.a $(LIBDIR)/libzutil.a $(LIBDIR)/libasn.a \

@@ -1,7 +1,7 @@
 # Copyright (C) 1994-1999, Index Data
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.2 1999-06-08 13:11:55 adam Exp $
+# $Id: Makefile.in,v 1.3 1999-06-09 09:43:31 adam Exp $
 
 SHELL=/bin/sh
 
@@ -11,7 +11,7 @@ RANLIB=@RANLIB@
 CDEFS=@DEFS@
 LIBS=@LIBS@
 
-INCLUDE=-I../z39.50 -I../include -I.
+INCLUDE=-I../include -I.
 LIBDIR=../lib
 
 DEFS=$(INCLUDE) $(CDEFS)

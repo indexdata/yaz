@@ -2,7 +2,10 @@
 # Europagate, 1995
 #
 # $Log: Makefile.in,v $
-# Revision 1.4  1999-03-31 11:15:37  adam
+# Revision 1.5  1999-06-09 09:43:31  adam
+# Header files moved to include (used to be z39.50).
+#
+# Revision 1.4  1999/03/31 11:15:37  adam
 # Fixed memory leaks in ccl_find_str and ccl_qual_rm.
 #
 # Revision 1.3  1998/10/28 15:10:03  adam
@@ -67,7 +70,7 @@ RANLIB=@RANLIB@
 CDEFS=@DEFS@
 LIBS=@LIBS@
 
-INCLUDE=-I../z39.50 -I../include
+INCLUDE=-I../include
 PROG=cclsh
 LIB=../lib/libccl.a
 PO=cclfind.o ccltoken.o cclerrms.o cclqual.o cclptree.o cclqfile.o cclstr.o
