@@ -26,7 +26,6 @@ make CFLAGS="$RPM_OPT_FLAGS"
 %install
 rm -fr $RPM_BUILD_ROOT
 make prefix=$RPM_BUILD_ROOT/usr install
-cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 
 %files
 %defattr(-,root,root)
