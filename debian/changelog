@@ -1,3 +1,8 @@
+yaz (1.7-1) experimental; urgency=low
+  * Build in sub directory build instead of root directory.
+ 
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 06 Jun 2001 22:33:00 +0200
+
 yaz (1.7) experimental; urgency=low
   * Initial version.
 

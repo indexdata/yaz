@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.116  2001-05-16 07:21:36  adam
+ * Revision 1.117  2001-06-13 20:47:40  adam
+ * When error is returned from present handler, non-surrogate diagnostic
+ * is returned in present response (and fetch handler is no longer called).
+ *
+ * Revision 1.116  2001/05/16 07:21:36  adam
  * Accept any OID for record syntax.
  *
  * Revision 1.115  2001/03/25 21:55:12  adam
@@ -1555,7 +1559,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     oid_value form;
     Z_APDU *apdu;
     Z_PresentResponse *resp;
-    int *presst;
     int *next;
     int *num;
 
@@ -1565,6 +1568,9 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	form = VAL_NONE;
     else
 	form = prefformat->value;
+    resp = (Z_PresentResponse *)odr_malloc (assoc->encode, sizeof(*resp));
+    resp->records = 0;
+    resp->presentStatus = odr_intdup(assoc->encode, 0);
     if (assoc->init->bend_present)
     {
 	bend_present_rr *bprr = (bend_present_rr *)
@@ -1585,26 +1591,32 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	
 	if (!bprr->request)
 	    return 0;
+	if (bprr->errcode)
+	{
+	    resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
+	    *resp->presentStatus = Z_PRES_FAILURE;
+	}
     }
     apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
-    resp = (Z_PresentResponse *)odr_malloc (assoc->encode, sizeof(*resp));
-    presst = odr_intdup(assoc->encode, 0);
     next = odr_intdup(assoc->encode, 0);
-    num = odr_intdup(assoc->encode, *req->numberOfRecordsRequested);
+    num = odr_intdup(assoc->encode, 0);
     
     apdu->which = Z_APDU_presentResponse;
     apdu->u.presentResponse = resp;
     resp->referenceId = req->referenceId;
     resp->otherInfo = 0;
     
-    resp->records =
-	pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
-		     num, req->recordComposition, next, presst, form,
-                     req->referenceId, req->preferredRecordSyntax);
+    if (!resp->records)
+    {
+	*num = *req->numberOfRecordsRequested;
+	resp->records =
+	    pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
+		     num, req->recordComposition, next, resp->presentStatus,
+			 form, req->referenceId, req->preferredRecordSyntax);
+    }
     if (!resp->records)
 	return 0;
     resp->numberOfRecordsReturned = num;
-    resp->presentStatus = presst;
     resp->nextResultSetPosition = next;
     
     return apdu;

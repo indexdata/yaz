@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+When error is returned from present handler, non-surrogate diagnostic
+is returned in present response (and fetch handler is no longer called).
+
 * Minor adjustments to pquery parser (PQF). Token characters may be
 escaped by using backslash (C-style).
 
