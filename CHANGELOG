@@ -2,10 +2,18 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX
 
-Added NT Services interface for Z39.50 Server. 
+* Added nmem_init and nmem_exit to initialize and release
+NMEM resources. Function nmem_init should be called once in the
+initial thread before NMEM/ODR is used. statserv.c and client.c
+have been changed accordingly. The change was necessary to make
+NMEM thread safe. The NMEM memory pool is shared amongst threads
+in a process.
 
-Windows 95/NT port using MSV5.0. Project files are included in
-the distribution.
+Added NT Services interface for the the Z39.50 (statserv) Server. 
+Refer to the ztest.c source on the usage.
+
+Windows 95/NT port using MSV5.0. Project files are included in the
+distribution.
 
 * Defined new 'global' handle for the retrieval (data1) system. The
 new handled, data1_handle, describes the state of the data1 system.
@@ -29,7 +37,7 @@ This function is thread safe.
 Moved test server to 'ztest' directory - generic server code still
 in 'server' directory.
 
-Made prefix query handling thread safe.
+Made prefix query (pquery.c) utility thread safe.
 
 Added new function modifier YAZ_EXPORT to 'export' public DLL
 functions when using windows (see include/yconfig.h).
