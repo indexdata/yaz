@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.20 2000-12-01 17:56:41 adam Exp $
+# $Id: makefile,v 1.21 2001-02-28 16:56:33 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -364,10 +364,10 @@ ALL_OBJS= \
 ##########################################################
 
 !if $(NEW_Z3950)
-$(PROTOH): makefile $(INCLDIR)\yaz\z-proto.h
+$(PROTOH): $(INCLDIR)\yaz\z-proto.h
 	type $(INCLDIR)\yaz\z-proto.h > $(PROTOH)
 !else	
-$(PROTOH): makefile $(INCLDIR)\yaz\prt-proto.h 
+$(PROTOH): $(INCLDIR)\yaz\prt-proto.h 
 	copy $(ASNDIR)\*.h $(INCLDIR)\yaz
 	type $(INCLDIR)\yaz\prt-proto.h > $(PROTOH)
 !endif
@@ -563,17 +563,41 @@ $(ITEM_REQ_FILES): $(ILLDIR)\item-req.asn
 
 !endif
 
+
+###########################################################
+############### Resources
+###########################################################
+
+### The RC compiler (resource files)
+RSC=rc.exe
+COMMON_RC_OPTIONS= /l 0x406 /i"$(ROOTDIR)" 
+DEBUG_RC_OPTIONS=/d "_DEBUG"
+RELEASE_RC_OPTIONS=/d "NDEBUG"
+
+YAZ_RES=$(OBJDIR)\yaz.res
+YAZ_RC=$(WINDIR)\yaz.rc
+
+!if $(DEBUG)
+RSOPT=/d_DEBUG
+!else
+RSOPT=/d_NDEBUG
+!endif
+
+$(YAZ_RES): $(YAZ_RC)
+	$(RSC) $(RSOPT) /fo"$(YAZ_RES)" $(YAZ_RC) 
+
 ###########################################################
 ############### Linking
 ###########################################################
 
-$(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) 
+$(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 	@echo Linking the dll  $(DLL)
 	$(LINK) @<<
 		$(LNKOPT) 
 		$(LINK_LIBS) 
 		$(DLL_LINK_OPTIONS)
-		$(DLL_OBJS) 
+		$(DLL_OBJS)
+		$(YAZ_RES)
 		/out:$(DLL) 
 		/implib:"$(LIBDIR)\yaz.lib"
 		/pdb:"$(LIBDIR)\yaz.pdb" 
@@ -674,7 +698,10 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.20  2000-12-01 17:56:41  adam
+# Revision 1.21  2001-02-28 16:56:33  adam
+# Added version info for WIN32.
+#
+# Revision 1.20  2000/12/01 17:56:41  adam
 # on WIN32 function statserv_closedown closes socket(s) to provoke close.
 #
 # Revision 1.19  2000/11/16 13:03:13  adam
