@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.53 2002-02-11 23:25:26 adam Exp $
+ * $Id: oid.c,v 1.54 2002-04-01 12:27:15 adam Exp $
  */
 
 /*
@@ -45,7 +45,7 @@ static oident standard_oids[] =
      "BER" },
     {PROTO_GENERAL, CLASS_TRANSYN, VAL_ISO2709,      {1,0,2709,1,1,-1},
      "ISO2709"},
-    {PROTO_GENERAL, CLASS_GENERAL, VAL_ISO_ILL_1,    {1,2,10161,2,1,-1},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_ISO_ILL_1,    {1,0,10161,2,1,-1},
      "ISOILL-1"},
     /* Z39.50v3 definitions */
     {PROTO_Z3950,   CLASS_ABSYN,   VAL_APDU,         {2,1,-1},

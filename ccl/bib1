@@ -1,4 +1,4 @@
-# $Id: bib1,v 1.9 2001-11-27 22:38:50 adam Exp $
+# $Id: bib1,v 1.10 2002-04-01 12:27:15 adam Exp $
 # CCL qualifiers and their mappings
 #
 # Each line takes the form:
@@ -30,6 +30,7 @@
 term u=1016 t=l,r s=pw,al
 # Common short-hand access points.
 au   u=1    s=pw t=l,r		# author
+sp   u=1    s=pw t=l,r		# author
 ti   u=4    s=pw t=l,r          # title
 isbn u=7
 issn u=8
