@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.33 2005-01-15 19:47:14 adam Exp $
+ * $Id: srw.c,v 1.34 2005-02-04 20:27:19 adam Exp $
  */
 /**
  * \file srw.c
@@ -325,7 +325,7 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
     {
         int i;
 	xmlNsPtr ns_diag =
-	    xmlNewNs(pptr, "info:srw/schema/1/diagnostic-v1.1", 0);
+	    xmlNewNs(pptr, "http://www.loc.gov/zing/srw/diagnostic/", 0);
         for (i = 0; i < *num; i++)
         {
 	    const char *std_diag = "info:srw/diagnostic/1/";
