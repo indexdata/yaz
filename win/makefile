@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.45 2002-08-27 22:33:30 adam Exp $
+# $Id: makefile,v 1.46 2002-08-30 11:28:01 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -24,10 +24,6 @@
 ###########################################################
 
 DEBUG=1   # 0 for release, 1 for debug
-
-# expat
-HAVE_EXPAT=0
-EXPAT_DIR= c:\Expat-1.95.4
 
 # iconv
 HAVE_ICONV=0
@@ -129,19 +125,6 @@ ICONV_DEF= \
 ICONV_LIB=
 !endif
 
-!if $(HAVE_EXPAT)
-EXPAT_DEF= \
-  /D HAVE_EXPAT_H=1 \
-  /I"$(EXPAT_DIR)\source\lib"
-EXPAT_LIB= \
-  "$(EXPAT_DIR)\libs\libexpat.lib"
-!else
-EXPAT_DEF= \
-  /D HAVE_EXPAT_H=0
-EXPAT_LIB=
-!endif
-  
-  
 ### C and CPP compiler  (the same thing)
 # Note: $(CPP) has already been defined in the environment
 # (if you set things up right!)
@@ -149,7 +132,6 @@ EXPAT_LIB=
 COMMON_C_OPTIONS=          \
   /nologo /W3 /GX /FD /c   \
   $(ICONV_DEF)             \
-  $(EXPAT_DEF)             \
   /D "_WINDOWS"            \
   /D "WIN32"               \
   /FR"$(OBJDIR)\\"         \
@@ -190,7 +172,7 @@ LINK=link.exe
 LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
            advapi32.lib uuid.lib \
            wsock32.lib  advapi32.lib \
-           $(ICONV_LIB) $(EXPAT_LIB)
+           $(ICONV_LIB)
 
 COMMON_LNK_OPTIONS= /nologo \
                     /subsystem:windows \
@@ -361,9 +343,7 @@ YAZ_RET_OBJS= \
    $(OBJDIR)\d1_tagset.obj\
    $(OBJDIR)\d1_varset.obj\
    $(OBJDIR)\d1_write.obj\
-   $(OBJDIR)\d1_if.obj\
-   $(OBJDIR)\d1_expat.obj
-
+   $(OBJDIR)\d1_if.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -871,7 +851,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.45  2002-08-27 22:33:30  adam
+# Revision 1.46  2002-08-30 11:28:01  adam
+# Remove EXPAT reader
+#
+# Revision 1.45  2002/08/27 22:33:30  adam
 # siconv added
 #
 # Revision 1.44  2002/07/25 14:19:18  adam
