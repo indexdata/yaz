@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+ZOOM fix: error information only cleared for Bib-diagnostics (not
+fatal errors, like connection failed, etc).
+
 ZOOM_record_get returns ISO2709 buffer when "raw" is given.
 
 --- 1.8.4 2002/01/04

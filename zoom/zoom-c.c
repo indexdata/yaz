@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.19 2002-01-09 11:03:41 adam Exp $
+ * $Id: zoom-c.c,v 1.20 2002-01-09 12:44:31 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -69,9 +69,21 @@ static ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c)
 
 static void clear_error (ZOOM_connection c)
 {
-    c->error = ZOOM_ERROR_NONE;
-    xfree (c->addinfo);
-    c->addinfo = 0;
+
+    switch (c->error)
+    {
+    case ZOOM_ERROR_CONNECT:
+    case ZOOM_ERROR_MEMORY:
+    case ZOOM_ERROR_DECODE:
+    case ZOOM_ERROR_CONNECTION_LOST:
+    case ZOOM_ERROR_INIT:
+    case ZOOM_ERROR_INTERNAL:
+        break;
+    default:
+        c->error = ZOOM_ERROR_NONE;
+        xfree (c->addinfo);
+        c->addinfo = 0;
+    }
 }
 
 ZOOM_task ZOOM_connection_add_task (ZOOM_connection c, int which)
@@ -245,7 +257,9 @@ void ZOOM_connection_connect(ZOOM_connection c,
     ZOOM_options_set(c->options, "host", c->host_port);
 
     c->async = ZOOM_options_get_bool (c->options, "async", 0);
-    
+ 
+    c->error = ZOOM_ERROR_NONE;
+
     task = ZOOM_connection_add_task (c, ZOOM_TASK_CONNECT);
 
     if (!c->async)
