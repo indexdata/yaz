@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.12  1998-10-13 16:00:18  adam
+ * Revision 1.13  1998-10-19 15:24:21  adam
+ * New nmem utility, nmem_transfer, that transfer blocks from one
+ * NMEM to another.
+ *
+ * Revision 1.12  1998/10/13 16:00:18  adam
  * Implemented nmem_critical_{enter,leave}.
  *
  * Revision 1.11  1998/08/21 14:13:36  adam
@@ -150,8 +154,8 @@ void nmem_reset(NMEM n)
 	n->blocks = n->blocks->next;
 	free_block(t);
     }
-    NMEM_LEAVE;
     n->total = 0;
+    NMEM_LEAVE;
 }
 
 #if NMEM_DEBUG
@@ -235,6 +239,19 @@ void nmem_destroy(NMEM n)
     logf (LOG_DEBUG, "%s:%d: nmem_destroy %d p=%p", file, line,
                      nmem_active_no, n);
 #endif
+}
+
+void nmem_transfer (NMEM dst, NMEM src)
+{
+    nmem_block *t;
+    while ((t=src->blocks))
+    {
+	src->blocks = t->next;
+	t->next = dst->blocks;
+	dst->blocks = t;
+    }
+    dst->total += src->total;
+    src->total = 0;
 }
 
 void nmem_critical_enter (void)

@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.9  1998-10-13 16:00:17  adam
+ * Revision 1.10  1998-10-19 15:24:20  adam
+ * New nmem utility, nmem_transfer, that transfer blocks from one
+ * NMEM to another.
+ *
+ * Revision 1.9  1998/10/13 16:00:17  adam
  * Implemented nmem_critical_{enter,leave}.
  *
  * Revision 1.8  1998/07/20 12:35:59  adam
@@ -71,6 +75,7 @@ typedef struct nmem_control *NMEM;
 YAZ_EXPORT void nmem_reset(NMEM n);
 YAZ_EXPORT int nmem_total(NMEM n);
 YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
+YAZ_EXPORT void nmem_transfer (NMEM dst, NMEM src);
 
 YAZ_EXPORT void nmem_critical_enter (void);
 YAZ_EXPORT void nmem_critical_leave (void);
