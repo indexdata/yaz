@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.5  1995-12-05 11:15:50  quinn
+ * Revision 1.6  1995-12-14 11:09:09  quinn
+ * Fixed bug in tagging.
+ *
+ * Revision 1.5  1995/12/05  11:15:50  quinn
  * Work.
  *
  * Revision 1.4  1995/09/29  17:11:54  quinn
@@ -137,7 +140,10 @@ int z_HumanString(ODR o, Z_HumanString **p, int opt)
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
     else if (!*p)
+    {
+	o->t_class = -1;
     	return opt && odr_ok(o);
+    }
     if (odr_sequence_of(o, z_HumanStringUnit, &(*p)->strings,
 	&(*p)->num_strings))
 	return 1;
@@ -173,7 +179,10 @@ int z_IconObject(ODR o, Z_IconObject **p, int opt)
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
     else if (!*p)
+    {
+	o->t_class = -1;
     	return opt;
+    }
     if (odr_sequence_of(o, z_IconObjectUnit, &(*p)->iconUnits,
     	&(*p)->num_iconUnits))
 	return 1;
