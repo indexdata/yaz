@@ -37,7 +37,7 @@ Description: The YAZ Z39.50 toolkit (documentation)
  This packages includes documentation for YAZ in HTML and PDF.
 
 Package: libyaz-dev
-Depends: libyaz (= ${Source-Version}), libxml2-dev, libwrap0-dev
+Depends: libyaz (= ${Source-Version}), libxml2-dev, libwrap0-dev, libssl-dev
 Replaces: yaz-devel
 Conflicts: yaz-devel
 Section: devel
