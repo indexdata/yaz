@@ -1,13 +1,19 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- XXXXXX XXXX/XX/XX
+--- 1.0pl3 1996/1/2
 
 Various changes to retrieval module.
 
 Changed the union discriminators of the protocol files from enums to
 ints paired with #defines.
 
-Improved Explain decoders/encoders.
+*Changed oident.class to oident.oclass to avoid a reserved word in C++
+ compilers.
+
+*Changed operator in the RPN structure to 'roperator', again to avoid a
+ conflict with C++.
+
+Fixed problems in Explain decoders/encoders.
 
 --- 1.0pl2 1995/12/6
 
