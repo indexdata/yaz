@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.9  1995-03-15 08:37:06  quinn
+ * Revision 1.10  1995-03-15 11:17:40  quinn
+ * Fixed some return-checks from choice.. need better ay to handle those..
+ *
+ * Revision 1.9  1995/03/15  08:37:06  quinn
  * Fixed protocol bugs.
  *
  * Revision 1.8  1995/03/14  16:59:24  quinn
@@ -248,7 +251,7 @@ int z_Operator(ODR o, Z_Operator **p, int opt)
     	odr_constructed_end(o))
     	return 1;
     *p = 0;
-    return opt;
+    return opt && !o->error;
 }
 
 int z_Operand(ODR o, Z_Operand **p, int opt)
@@ -267,7 +270,7 @@ int z_Operand(ODR o, Z_Operand **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt;
+    return opt && !o->error;
 }
 
 int z_RPNStructure(ODR o, Z_RPNStructure **p, int opt);
@@ -299,7 +302,7 @@ int z_RPNStructure(ODR o, Z_RPNStructure **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt;
+    return opt && !o->error;
 }
 
 int z_RPNQuery(ODR o, Z_RPNQuery **p, int opt)
@@ -330,7 +333,7 @@ int z_Query(ODR o, Z_Query **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt;
+    return opt && !o->error;
 }
 
 int z_SearchRequest(ODR o, Z_SearchRequest **p, int opt)
@@ -431,7 +434,7 @@ int z_Records(ODR o, Z_Records **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt;
+    return opt && !o->error;
 }
 
 /* ------------------------ SEARCHRESPONSE ----------------*/
@@ -529,7 +532,7 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
     {
     	if (o->direction == ODR_DECODE)
 	    *p = 0;
-	return opt;
+	return opt && !o->error;
     }
     return 1;
 }
