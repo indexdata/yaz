@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- XXXX 1995/XX/XX
+
+Fixed bug in the frontend-server. The numberOfRecordsReturned field was
+handled incorrectly when records were requested in the searchResponse.
+
 --- 1.0b2 1995/06/27
 Fairly quick maintenance release to add SUTRS support.
 
