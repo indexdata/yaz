@@ -12,10 +12,6 @@
 #endif
 
 #else /* #ifdef WINDOWS */
-/*
- * Standard Unix headers
- */
-
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -29,6 +25,10 @@
 
 #ifdef _AIX
 #include <sys/select.h>
+#endif
+
+#ifndef O_BINARY
+#define O_BINARY 0
 #endif
 
 #endif
