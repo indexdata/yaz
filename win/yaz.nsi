@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.4 2002-03-16 17:37:40 adam Exp $
+; $Id: yaz.nsi,v 1.5 2002-03-25 11:37:10 adam Exp $
 
 !define VERSION "1.8.6"
 
@@ -39,6 +39,8 @@ Section "" ; (default section)
                  "$INSTDIR"
 	WriteINIStr "$SMPROGRAMS\YAZ\YAZ Home page.url" \
               "InternetShortcut" "URL" "http://www.indexdata.dk/yaz/"
+	CreateShortCut "$SMPROGRAMS\YAZ\Uninstall YAZ.lnk" \
+		"$INSTDIR\uninst.exe"
 	SetOutPath $INSTDIR
 	File LICENSE.txt
 	File ..\README
@@ -52,6 +54,9 @@ SectionEnd ; end of default section
 
 Section "YAZ Runtime"
 	SectionIn 12
+	IfFileExists "$INSTDIR\bin\yaz-ztest.exe" 0 Noservice
+	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
+Noservice:
 	SetOutPath $INSTDIR\bin
 	File ..\bin\*.exe
 	File ..\bin\*.dll
@@ -133,8 +138,12 @@ Section Uninstall
 	Delete "$INSTDIR\uninst.exe"
 	DeleteRegKey HKLM "SOFTWARE\Index Data\YAZ"
 	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\YAZ"
-	RMDir /r "$INSTDIR"
+	ExecWait '"$INSTDIR\bin\yaz-ztest" -remove'
 	RMDir /r $SMPROGRAMS\YAZ
-SectionEnd ; end of uninstall section
-
+	RMDir /r $INSTDIR
+        IfFileExists $INSTDIR 0 Removed 
+		MessageBox MB_OK|MB_ICONEXCLAMATION \
+                 "Note: $INSTDIR could not be removed."
+Removed:
+SectionEnd
 ; eof
