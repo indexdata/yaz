@@ -46,8 +46,8 @@ int main()
     apt.num_attributes=0;
     apt.attributeList = 0;
     apt.term = &term;
-    term.buf = "BARFOO";
-    term.len = term.size = strlen(term.buf);
+    term.buf = (unsigned char*) "BARFOO";
+    term.len = term.size = strlen((char*)term.buf);
 
     o.buf = buf;
     o.bp=o.buf;

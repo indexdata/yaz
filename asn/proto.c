@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.6  1995-03-01 14:46:03  quinn
+ * Revision 1.7  1995-03-07 16:29:33  quinn
+ * Added authentication stuff.
+ *
+ * Revision 1.6  1995/03/01  14:46:03  quinn
  * Fixed protocol bug in 8777query.
  *
  * Revision 1.5  1995/02/14  11:54:22  quinn
@@ -71,7 +74,7 @@ int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 	    5, 0) &&
 	odr_implicit(o, odr_integer, &pp->maximumRecordSize, ODR_CONTEXT,
 	    6, 0) &&
-	odr_implicit(o, odr_visiblestring, &pp->idAuthentication, ODR_CONTEXT,
+	odr_explicit(o, odr_any, &pp->idAuthentication, ODR_CONTEXT,
 	    7, 1) &&
 	odr_implicit(o, odr_visiblestring, &pp->implementationId, ODR_CONTEXT,
 	    110, 1) &&
@@ -108,6 +111,22 @@ int z_InitResponse(ODR o, Z_InitResponse **p, int opt)
 	    ODR_CONTEXT, 112, 1) &&
 	z_UserInformationField(o, &pp->userInformationField, 1) &&
 	odr_sequence_end(o);
+}
+
+int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt;
+    return
+    	odr_visiblestring(o, &(*p)->user, 0) &&
+    	odr_visiblestring(o, &(*p)->password, 0) &&
+    	odr_visiblestring(o, &(*p)->account, 0) &&
+    	odr_sequence_end(o);
+}
+
+int z_StrAuthentication(ODR o, char **p, int opt)
+{
+    return odr_visiblestring(o, p, opt);
 }
 
 /* ------------------------ SEARCH SERVICE ----------------------- */
