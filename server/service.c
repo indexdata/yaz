@@ -3,7 +3,10 @@
  *  Based on code written by
  *     Chas Woodfield, Fretwell Downing Datasystems.
  * $Log: service.c,v $
- * Revision 1.3  1999-06-10 11:45:30  adam
+ * Revision 1.4  2000-12-05 19:05:10  adam
+ * Service automatically starts in the directory from which it was installed.
+ *
+ * Revision 1.3  1999/06/10 11:45:30  adam
  * Added bend_start, bend_stop handlers and removed pre_init.
  * Handlers bend_start/bend_stop are called when service/daemon is
  * started/stopped.
@@ -43,6 +46,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <tchar.h>
+#include <direct.h>
 
 #include "service.h"
 
@@ -231,7 +235,7 @@ void CmdInstallService(int argc, char *argv[], BOOL bAutoStart)
         SC_HANDLE   schService;
         SC_HANDLE   schSCManager;
 
-        TCHAR szPath[1024];
+        TCHAR szPath[2048];
 
         if (GetModuleFileName(NULL, szPath, 512) == 0)
         {
@@ -240,8 +244,15 @@ void CmdInstallService(int argc, char *argv[], BOOL bAutoStart)
         else
         {
             int i;
+            char cwdstr[_MAX_PATH];
 
-            strcat (szPath, TEXT(" -runservice"));
+            if (!_getcwd(cwdstr, sizeof(cwdstr)))
+                strcpy (cwdstr, ".");
+
+            strcat (szPath, TEXT(" -runservice \""));
+            strcat (szPath, cwdstr);
+            strcat (szPath, "\"");
+
             for (i = 1; i < argc; i++)
             {
                 /* We will add the given command line arguments to the command */
@@ -413,7 +424,9 @@ BOOL CheckServiceArguments(int argc, char *argv[])
         else if (stricmp ("-runservice", argv[i]) == 0)
         {
             /* We can carry on, if we reached here */
+            chdir(argv[i+1]);
             argv[i] = "";
+            argv[i+1] = "";
             return(TRUE);
         }
     }
