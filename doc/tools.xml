@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.36 2004-07-26 12:16:56 mike Exp $ -->
+<!-- $Id: tools.xml,v 1.37 2004-10-01 19:34:09 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -575,7 +575,7 @@
 	  <row>
 	   <entry><literal>u=</literal><replaceable>value</replaceable></entry>
 	   <entry>
-	    Use attribute. Common use attributes are
+	    Use attribute (1). Common use attributes are
 	    1 Personal-name, 4 Title, 7 ISBN, 8 ISSN, 30 Date,
 	    62 Subject, 1003 Author), 1016 Any. Specify value
 	    as an integer.
@@ -585,7 +585,7 @@
 	  <row>
 	   <entry><literal>r=</literal><replaceable>value</replaceable></entry>
 	   <entry>
-	    Relation attribute. Common values are
+	    Relation attribute (2). Common values are
 	    1 &lt;, 2 &lt;=, 3 =, 4 &gt;=, 5 &gt;, 6 &lt;&gt;,
 	    100 phonetic, 101 stem, 102 relevance, 103 always matches.
 	   </entry>
@@ -594,7 +594,7 @@
 	  <row>
 	   <entry><literal>p=</literal><replaceable>value</replaceable></entry>
 	   <entry>
-	    Position attribute. Values: 1 first in field, 2
+	    Position attribute (3). Values: 1 first in field, 2
 	    first in any subfield, 3 any position in field.
 	   </entry>
 	  </row>
@@ -602,7 +602,7 @@
 	  <row>
 	   <entry><literal>s=</literal><replaceable>value</replaceable></entry>
 	   <entry>
-	    Structure attribute. Values: 1 phrase, 2 word,
+	    Structure attribute (4). Values: 1 phrase, 2 word,
 	    3 key, 4 year, 5 date, 6 word list, 100 date (un),
 	    101 name (norm), 102 name (un), 103 structure, 104 urx,
 	    105 free-form-text, 106 document-text, 107 local-number,
@@ -613,7 +613,7 @@
 	  <row>
 	   <entry><literal>t=</literal><replaceable>value</replaceable></entry>
 	   <entry>
-	    Truncation attribute. Values: 1 right, 2 left,
+	    Truncation attribute (5). Values: 1 right, 2 left,
 	    3 left&amp; right, 100 none, 101 process #, 102 regular-1,
 	    103 regular-2, 104 CCL.
 	   </entry>
@@ -622,7 +622,7 @@
 	  <row>
 	   <entry><literal>c=</literal><replaceable>value</replaceable></entry>
 	   <entry>
-	    Completeness attribute. Values: 1 incomplete subfield,
+	    Completeness attribute (6). Values: 1 incomplete subfield,
 	    2 complete subfield, 3 complete field.
 	   </entry>
 	  </row>
@@ -673,8 +673,27 @@
 	  </row>
 	  
 	  <row><entry><literal>r=o</literal></entry><entry>
-	    Allows operators greather-than, less-than, ... equals and
-	    sets relation attribute accordingly (relation ordered).
+	    Allows ranges and the operators greather-than, less-than, ...
+	    equals.
+	    This sets Bib-1 relation attribute accordingly (relation
+	    ordered). A query construct is only treated as a range if
+	    dash is used and that is surrounded by white-space. So
+	    <literal>-1980</literal> is treated as term 
+	    <literal>"-1980"</literal> not <literal>&lt;= 1980</literal>.
+	    If <literal>- 1980</literal> is used, however, that is
+	    treated as a range.
+	   </entry>
+	  </row>
+	  
+	  <row><entry><literal>r=r</literal></entry><entry>
+	    Similar to <literal>r=o</literal> but assumes that terms
+	    are non-negative (not prefixed with <literal>-</literal>).
+	    Thus, a dash will always be treated as a range.
+	    The construct <literal>1980-1990</literal> is
+	    treated as a range with <literal>r=r</literal> but as a
+	    single term <literal>"1980-1990"</literal> with
+	    <literal>r=o</literal>. The special attribute
+	    <literal>r=r</literal> is available in YAZ 2.0.24 or later.
 	   </entry>
 	  </row>
 	  
@@ -722,11 +741,6 @@
 	date     u=30 r=o
       </screen>
        <para>
-	Four qualifiers are defined - <literal>ti</literal>, 
-	<literal>au</literal>, <literal>ranked</literal> and
-	<literal>date</literal>.
-       </para>
-       <para>
 	<literal>ti</literal> and <literal>au</literal> both set 
 	structure attribute to phrase (s=1).
 	<literal>ti</literal>
@@ -749,9 +763,9 @@
        <para>
 	Query
 	<screen>
-	 year > 1980
+	 date > 1980
 	</screen>
-	is a valid query, while
+	is a valid query. But
 	<screen>
 	 ti > 1980
 	</screen>
