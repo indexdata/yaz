@@ -14,7 +14,18 @@ tag 2		databaseInfo					structured
 tag 3		schemaInfo					structured
 tag 4		tagSetInfo					structured
 tag 5		recordSyntaxInfo				structured
-# ....
+tag 6           attributeSetInfo				structured
+tag 7		termListInfo					structured
+tag 8		extendedServicesInfo				structured
+tag 9		attributeDetails				structured
+tag 10		termListDetails					structured
+tag 11		elementSetDetails				structured
+tag 12		retrievalRecordDetails				structured
+tag 13		sortDetails					structured
+tag 14		processing					structured
+tag 15		variants					structured
+tag 16		units						structured
+tag 100		categoryList					structured
 
 #
 # TargetInfo
