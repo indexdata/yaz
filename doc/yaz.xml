@@ -16,12 +16,13 @@
      <!ENTITY chap-future SYSTEM "future.xml">
      <!ENTITY app-license SYSTEM "license.xml">
      <!ENTITY app-indexdata SYSTEM "indexdata.xml">
+     <!ENTITY app-credits SYSTEM "credits.xml">
      <!ENTITY asn "Z39.50 ASN.1">
      <!ENTITY odr "<acronym>ODR</acronym>">
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml,v 1.11 2001-10-26 20:13:44 adam Exp $ -->
+<!-- $Id: yaz.xml,v 1.12 2001-11-01 14:30:44 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
@@ -59,6 +60,7 @@
  &chap-future;
  &app-license;
  &app-indexdata;
+ &app-credits;
 </book>
 
 <!-- Keep this comment at the end of the file

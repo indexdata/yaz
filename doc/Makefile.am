@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.25 2001-10-29 14:51:14 adam Exp $
+## $Id: Makefile.am,v 1.26 2001-11-01 14:30:44 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -6,14 +6,15 @@ XMLFILES=$(srcdir)/yaz.xml $(srcdir)/introduction.xml \
  $(srcdir)/installation.xml $(srcdir)/indexdata.xml $(srcdir)/asn.xml \
  $(srcdir)/tools.xml $(srcdir)/odr.xml $(srcdir)/comstack.xml \
  $(srcdir)/frontend.xml $(srcdir)/license.xml $(srcdir)/future.xml  \
- $(srcdir)/client.xml $(srcdir)/zoom.xml
+ $(srcdir)/client.xml $(srcdir)/zoom.xml $(srcdir)/credits.xml
 
 HTMLFILES = asn.external.html asn.html asn.oid.html asn.pdu.html \
  asn.preparing.html client.commands.html client.html client.invoking.html \
  client.searching.html comstack.addresses.html comstack.client.html \
  comstack.common.html comstack.diagnostics.html comstack.html \
  comstack.introduction.html comstack.server.html comstack.summary.html \
- future.html indexdata.html installation.html installation.unix.html \
+ credits.html future.html indexdata.html installation.html \
+ installation.unix.html \
  installation.win32.html introduction.html \
  license.html license.other.html odr.debugging.html \
  odr.html odr.programming.html odr.use.html server.backend.html \
@@ -24,7 +25,9 @@ HTMLFILES = asn.external.html asn.html asn.oid.html asn.pdu.html \
 
 DOCFILES=$(HTMLFILES) yaz.pdf
 
-EXTRA_DIST = $(XMLFILES) $(DOCFILES) yazhtml.dsl yazphp.dsl yazprint.dsl xml.dcl
+SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl xml.dcl
+
+EXTRA_DIST = $(XMLFILES) $(DOCFILES) $(SUPPORTFILES)
 
 doc_DATA = $(DOCFILES)
 
