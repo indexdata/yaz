@@ -45,7 +45,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.14 2003-06-23 10:22:21 adam Exp $
+ * $Id: ccl.h,v 1.15 2003-06-24 23:03:04 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -88,6 +88,7 @@
 #include <yaz/yconfig.h>
 #include <stdio.h>
 #include <yaz/xmalloc.h>
+#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
     
@@ -331,6 +332,8 @@ YAZ_EXPORT char *ccl_strdup (const char *str);
 
 YAZ_EXPORT const char *ccl_qual_search_special (CCL_bibset b,
 						const char *name);
+
+YAZ_EXPORT void ccl_pquery (WRBUF w, struct ccl_rpn_node *p);
 
 #ifndef ccl_assert
 #define ccl_assert(x) ;

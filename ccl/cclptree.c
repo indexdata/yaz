@@ -44,7 +44,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.13 2003-06-23 10:22:21 adam Exp $
+ * $Id: cclptree.c,v 1.14 2003-06-24 23:03:04 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -165,6 +165,104 @@ void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
 	ccl_pr_tree_as_qrpn(rpn,fd_out,0);
 }
 
+
+static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
+{
+    switch (p->kind)
+    {
+    case CCL_RPN_AND:
+    	wrbuf_puts(w, "@and ");
+		break;
+    case CCL_RPN_OR:
+    	wrbuf_puts(w, "@or ");
+		break;
+    case CCL_RPN_NOT:
+    	wrbuf_puts(w, "@not ");
+		break;
+    case CCL_RPN_PROX:
+        if (p->u.p[2] && p->u.p[2]->kind == CCL_RPN_TERM)
+        {
+            const char *cp = p->u.p[2]->u.t.term;
+            /* exlusion distance ordered relation which-code unit-code */
+            if (*cp == '!')
+            {   
+                /* word order specified */
+                if (isdigit(cp[1]))
+                    wrbuf_printf(w, "@prox 0 %s 1 2 k 2 ", cp+1);
+                else
+                    wrbuf_printf(w, "@prox 0 1 1 2 k 2 ");
+            } 
+            else if (*cp == '%')
+            {
+                /* word order not specified */
+                if (isdigit(cp[1]))
+                    wrbuf_printf(w, "@prox 0 %s 0 2 k 2 ", cp+1);
+                else
+                    wrbuf_printf(w, "@prox 0 1 0 2 k 2 ");
+            }
+        }
+        else
+            wrbuf_puts(w, "@prox 0 2 0 1 k 2 ");
+		break;
+    default:
+		wrbuf_puts(w, "@ bad op (unknown) ");
+    }
+    ccl_pquery(w, p->u.p[0]);
+    ccl_pquery(w, p->u.p[1]);
+}
+
+void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
+{
+    struct ccl_rpn_attr *att;
+    const char *cp;
+	
+    switch (p->kind)
+    {
+    case CCL_RPN_AND:
+    case CCL_RPN_OR:
+    case CCL_RPN_NOT:
+    case CCL_RPN_PROX:
+    	ccl_pquery_complex (w, p);
+		break;
+    case CCL_RPN_SET:
+		wrbuf_puts (w, "@set ");
+		wrbuf_puts (w, p->u.setname);
+		wrbuf_puts (w, " ");
+		break;
+    case CCL_RPN_TERM:
+    	for (att = p->u.t.attr_list; att; att = att->next)
+		{
+			char tmpattr[128];
+			wrbuf_puts (w, "@attr ");
+			if (att->set)
+			{
+				wrbuf_puts (w, att->set);
+				wrbuf_puts (w, " ");
+			}
+			switch(att->kind)
+			{
+			case CCL_RPN_ATTR_NUMERIC:
+				sprintf(tmpattr, "%d=%d ", att->type, att->value.numeric);
+				wrbuf_puts (w, tmpattr);
+				break;
+			case CCL_RPN_ATTR_STRING:
+				sprintf(tmpattr, "%d=", att->type);
+				wrbuf_puts (w, tmpattr);
+				wrbuf_puts(w, att->value.str);
+				wrbuf_puts (w, " ");
+				break;
+			}
+		}
+		for (cp = p->u.t.term; *cp; cp++)
+		{
+			if (*cp == ' ' || *cp == '\\')
+				wrbuf_putc (w, '\\');
+			wrbuf_putc (w, *cp);
+		}
+		wrbuf_puts (w, " ");
+		break;
+    }
+}
 
 /*
  * Local variables:

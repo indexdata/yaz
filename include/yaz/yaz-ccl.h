@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-ccl.h,v 1.5 2003-03-03 19:57:35 adam Exp $
+ * $Id: yaz-ccl.h,v 1.6 2003-06-24 23:03:04 adam Exp $
  */
 
 #ifndef YAZ_CCL_H
@@ -33,14 +33,11 @@
 #include <yaz/proto.h>
 #include <yaz/ccl.h>
 #include <yaz/odr.h>
-#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
 
 YAZ_EXPORT Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p);
 YAZ_EXPORT Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p);
-YAZ_EXPORT void ccl_pquery (WRBUF w, struct ccl_rpn_node *p);
-
 YAZ_END_CDECL
 
 #endif
