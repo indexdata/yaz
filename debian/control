@@ -4,7 +4,7 @@ Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
 
 Package: yaz-doc
-Section: devel
+Section: doc
 Architecture: any
 Description: The YAZ Z39.50 toolkit (documentation)
  The YAZ-toolkit is a C-toolkit for building
