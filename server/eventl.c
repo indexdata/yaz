@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.4  1995-03-14 16:59:48  quinn
+ * Revision 1.5  1995-03-15 08:37:41  quinn
+ * Now we're pretty much set for nonblocking I/O.
+ *
+ * Revision 1.4  1995/03/14  16:59:48  quinn
  * Bug-fixes
  *
  * Revision 1.3  1995/03/14  11:30:14  quinn
@@ -78,8 +81,6 @@ int event_loop()
 		continue;
 	    return 1;
 	}
-	if (!res)
-	    continue;
     	for (p = iochans; p; p = nextp)
     	{
 	    int force_event = p->force_event;
@@ -88,7 +89,7 @@ int event_loop()
 	    nextp = p->next;
 	    if (FD_ISSET(p->fd, &in) || force_event == EVENT_INPUT)
 	    	(*p->fun)(p, EVENT_INPUT);
-	    if (!p->destroyed && (FD_ISSET(p->fd, &in) ||
+	    if (!p->destroyed && (FD_ISSET(p->fd, &out) ||
 	   	 force_event == EVENT_OUTPUT))
 	    	(*p->fun)(p, EVENT_OUTPUT);
 	    if (!p->destroyed && (FD_ISSET(p->fd, &except) ||

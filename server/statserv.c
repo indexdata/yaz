@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.4  1995-03-14 16:59:48  quinn
+ * Revision 1.5  1995-03-15 08:37:45  quinn
+ * Now we're pretty much set for nonblocking I/O.
+ *
+ * Revision 1.4  1995/03/14  16:59:48  quinn
  * Bug-fixes
  *
  * Revision 1.3  1995/03/14  11:30:15  quinn
@@ -54,7 +57,8 @@ void listener(IOCHAN h, int event)
 	    fprintf(stderr, "cs_listen failed.\n");
 	    exit(1);
 	}
-	iochan_setflags(h, EVENT_OUTPUT); /* set us up for accepting */
+	iochan_setevent(h, EVENT_OUTPUT);
+	iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
     }
     else if (event == EVENT_OUTPUT)
     {
@@ -78,7 +82,7 @@ void listener(IOCHAN h, int event)
 	    exit(1);
 	}
 	iochan_setdata(new_chan, newas);
-    	iochan_setflags(h, EVENT_INPUT); /* reset for listening */
+    	iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset for listen */
     }
     else
     {
@@ -141,7 +145,8 @@ void add_listener(char *where)
     	perror(where);
     	exit(1);
     }
-    if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT)))
+    if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
+   	 EVENT_EXCEPT)))
     {
     	fprintf(stderr, "Failed to create IOCHAN-type\n");
     	exit(1);

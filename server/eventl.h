@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.h,v $
- * Revision 1.2  1995-03-14 10:28:00  quinn
+ * Revision 1.3  1995-03-15 08:37:42  quinn
+ * Now we're pretty much set for nonblocking I/O.
+ *
+ * Revision 1.2  1995/03/14  10:28:00  quinn
  * More work on demo server.
  *
  * Revision 1.1  1995/03/10  18:22:45  quinn
@@ -41,6 +44,8 @@ int force_event;
 #define iochan_setdata(i, d) ((i)->data = d)
 #define iochan_getflags(i) ((i)->flags)
 #define iochan_setflags(i, d) ((i)->flags = d)
+#define iochan_setflag(i, d) ((i)->flags |= d)
+#define iochan_getflag(i, d) ((i)->flags & d ? 1 : 0)
 #define iochan_getfun(i) ((i)->fun)
 #define iochan_setfun(i, d) ((i)->fun = d)
 #define iochan_setevent(i, e) ((i)->force_event = (e))

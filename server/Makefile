@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.5 1995-03-15 08:27:15 adam Exp $
+# $Id: Makefile,v 1.6 1995-03-15 08:37:40 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../asn -I../odr -I../yazlib -I../../egate/include\
@@ -19,7 +19,7 @@ PROGO=statserv.o session.o
 
 all: $(LIBDIR) $(LIB) $(PROG)
 
-$(PROG): $(LIB) $(PROGO)
+$(PROG): $(LIB) $(PROGO) pwrite.o
 	$(CC) $(CFLAGS) $(LIBINCLUDE) -o $(PROG) $(PROGO) $(LIBS)
 
 alll:
