@@ -7,7 +7,12 @@
  *   Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: statserv.c,v $
- * Revision 1.55  1999-06-10 09:18:54  adam
+ * Revision 1.56  1999-06-10 11:45:30  adam
+ * Added bend_start, bend_stop handlers and removed pre_init.
+ * Handlers bend_start/bend_stop are called when service/daemon is
+ * started/stopped.
+ *
+ * Revision 1.55  1999/06/10 09:18:54  adam
  * Modified so that pre_init is called when service/server is started.
  *
  * Revision 1.54  1999/04/16 14:45:55  adam
@@ -237,7 +242,8 @@ statserv_options_block control_block = {
     1024*1024,                  /* maximum PDU size (approx.) to allow */
     "default-config",           /* configuration name to pass to backend */
     "",                         /* set user id */
-    NULL,                       /* pre init handler */
+    0,                          /* bend_start handler */
+    0,                          /* bend_stop handler */
     check_options,              /* Default routine, for checking the run-time arguments */
     check_ip_tcpd,
     "",
@@ -405,6 +411,8 @@ void statserv_closedown()
             free(pThreadHandles);
         }
 
+	if (control_block.bend_stop)
+	    (*control_block.bend_stop)(&control_block);
         /* No longer require the critical section, since all threads are dead */
         DeleteCriticalSection(&Thread_CritSect);
     }
@@ -803,8 +811,8 @@ int statserv_start(int argc, char **argv)
     if (control_block.options_func(argc, argv))
         return(1);
 
-    if (control_block.pre_init)
-        (*control_block.pre_init)(&control_block);
+    if (control_block.bend_start)
+        (*control_block.bend_start)(&control_block);
 #ifndef WIN32
     if (control_block.inetd)
 	inetd_connection(control_block.default_proto);

@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.15  1999-04-16 14:45:55  adam
+ * Revision 1.16  1999-06-10 11:45:30  adam
+ * Added bend_start, bend_stop handlers and removed pre_init.
+ * Handlers bend_start/bend_stop are called when service/daemon is
+ * started/stopped.
+ *
+ * Revision 1.15  1999/04/16 14:45:55  adam
  * Added interface for tcpd wrapper for access control.
  *
  * Revision 1.14  1999/02/02 13:57:32  adam
@@ -103,7 +108,8 @@ typedef struct statserv_options_block
     int maxrecordsize;            /* maximum value for negotiation */
     char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */
     char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
-    void (*pre_init)(struct statserv_options_block *p);
+    void (*bend_start)(struct statserv_options_block *p);
+    void (*bend_stop)(struct statserv_options_block *p);
     int (*options_func)(int argc, char **argv);
     int (*check_ip)(void *cd, const char *addr, int len, int type);
     char daemon_name[128];

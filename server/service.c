@@ -3,7 +3,12 @@
  *  Based on code written by
  *     Chas Woodfield, Fretwell Downing Datasystems.
  * $Log: service.c,v $
- * Revision 1.2  1999-02-02 13:57:36  adam
+ * Revision 1.3  1999-06-10 11:45:30  adam
+ * Added bend_start, bend_stop handlers and removed pre_init.
+ * Handlers bend_start/bend_stop are called when service/daemon is
+ * started/stopped.
+ *
+ * Revision 1.2  1999/02/02 13:57:36  adam
  * Uses preprocessor define WIN32 instead of WINDOWS to build code
  * for Microsoft WIN32.
  *
@@ -438,8 +443,7 @@ BOOL SetupService(int argc, char *argv[], void *pHandle, LPTSTR pAppName, LPTSTR
         else
         {
             /* Set the console control handler for exiting the program */
-/*            SetConsoleCtrlHandler((PHANDLER_ROUTINE)EventHandlerRoutine, TRUE);
-*/
+            SetConsoleCtrlHandler((PHANDLER_ROUTINE)EventHandlerRoutine, TRUE);
 
             /* Now do the main work */
             ServiceMain(argc, argv);
@@ -469,7 +473,7 @@ BOOL EventHandlerRoutine(DWORD dwCtrlType)
         case CTRL_SHUTDOWN_EVENT: /* A signal that the system sends to all console processes when the system */
             /* We are basically shutting down, so call Service_Delete */
             Service_Delete();
-            return(TRUE);
+            return(FALSE);
             break;
 
         default:
