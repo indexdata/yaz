@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.160 2003-07-16 21:02:06 adam Exp $
+ * $Id: seshigh.c,v 1.161 2003-09-09 16:03:46 mike Exp $
  */
 
 /*
@@ -66,6 +66,7 @@ void backend_response(IOCHAN i, int event);
 static int process_gdu_response(association *assoc, request *req, Z_GDU *res);
 static int process_z_response(association *assoc, request *req, Z_APDU *res);
 static Z_APDU *process_initRequest(association *assoc, request *reqb);
+static Z_External *init_diagnostics(ODR odr, int errcode, char *errstring);
 static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *response_searchRequest(association *assoc, request *reqb,
@@ -1612,6 +1613,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	yaz_log(LOG_LOG, "Connection rejected by backend.");
     	*resp->result = 0;
 	assoc->state = ASSOC_DEAD;
+	resp->userInformationField = init_diagnostics(assoc->encode,
+						      binitres->errcode,
+						      binitres->errstring);
     }
     else
 	assoc->state = ASSOC_UP;
@@ -1619,13 +1623,79 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 }
 
 /*
- * These functions should be merged.
+ * Diagnostic in default format, to be returned as either a surrogate
+ * or non-surrogate diagnostic in the context of an open session, or
+ * as User-information when an Init is refused.
  */
-
-static void set_addinfo (Z_DefaultDiagFormat *dr, char *addinfo, ODR odr)
+static Z_DefaultDiagFormat *justdiag(ODR odr, int error, char *addinfo)
 {
+    int *err = odr_intdup(odr, error);
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
+	odr_malloc (odr, sizeof(*dr));
+
+    yaz_log(LOG_LOG, "[%d] %s%s%s", error, diagbib1_str(error),
+        addinfo ? " -- " : "", addinfo ? addinfo : "");
+
+    dr->diagnosticSetId =
+	yaz_oidval_to_z3950oid (odr, CLASS_DIAGSET, VAL_BIB1);
+    dr->condition = err;
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
     dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
+    return dr;
+}
+
+/*
+ * Set the specified `errcode' and `errstring' into a UserInfo-1
+ * external to be returned to the client in accordance with Z35.90
+ * Implementor Agreement 5 (Returning diagnostics in an InitResponse):
+ *	http://lcweb.loc.gov/z3950/agency/agree/initdiag.html
+ */
+static Z_External *init_diagnostics(ODR odr, int error, char *addinfo)
+{
+    Z_External *x, *x2;
+    oident oid;
+    Z_OtherInformation *u;
+    Z_OtherInformationUnit *l;
+    Z_DiagnosticFormat *d;
+    Z_DiagnosticFormat_s *e;
+
+    x = (Z_External*) odr_malloc(odr, sizeof *x);
+    x->descriptor = 0;
+    x->indirect_reference = 0;	
+    oid.proto = PROTO_Z3950;
+    oid.oclass = CLASS_USERINFO;
+    oid.value = VAL_USERINFO1;
+    x->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+    x->which = Z_External_userInfo1;
+
+    u = odr_malloc(odr, sizeof *u);
+    x->u.userInfo1 = u;
+    u->num_elements = 1;
+    u->list = (Z_OtherInformationUnit**) odr_malloc(odr, sizeof *u->list);
+    u->list[0] = (Z_OtherInformationUnit*) odr_malloc(odr, sizeof *u->list[0]);
+    l = u->list[0];
+    l->category = 0;
+    l->which = Z_OtherInfo_externallyDefinedInfo;
+
+    x2 = (Z_External*) odr_malloc(odr, sizeof *x);
+    l->information.externallyDefinedInfo = x2;
+    x2->descriptor = 0;
+    x2->indirect_reference = 0;
+    oid.oclass = CLASS_DIAGSET;
+    oid.value = VAL_DIAG1;
+    x2->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+    x2->which = Z_External_diag1;
+
+    d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
+    x2->u.diag1 = d;
+    d->num = 1;
+    d->elements = (Z_DiagnosticFormat_s**) odr_malloc (odr, sizeof *d->elements);
+    d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc (odr, sizeof *d->elements[0]);
+    e = d->elements[0];
+
+    e->which = Z_DiagnosticFormat_s_defaultDiagRec;
+    e->u.defaultDiagRec = justdiag(odr, error, addinfo);
+    return x;
 }
 
 /*
@@ -1635,20 +1705,8 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 {
     Z_Records *rec = (Z_Records *)
 	odr_malloc (assoc->encode, sizeof(*rec));
-    int *err = odr_intdup(assoc->encode, error);
-    Z_DiagRec *drec = (Z_DiagRec *)
-	odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
-	odr_malloc (assoc->encode, sizeof(*dr));
-
-    yaz_log(LOG_LOG, "[%d] %s %s%s", error, diagbib1_str(error),
-        addinfo ? " -- " : "", addinfo ? addinfo : "");
     rec->which = Z_Records_NSD;
-    rec->u.nonSurrogateDiagnostic = dr;
-    dr->diagnosticSetId =
-	yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
-    dr->condition = err;
-    set_addinfo (dr, addinfo, assoc->encode);
+    rec->u.nonSurrogateDiagnostic = justdiag(assoc->encode, error, addinfo);
     return rec;
 }
 
@@ -1660,21 +1718,14 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
 {
     Z_NamePlusRecord *rec = (Z_NamePlusRecord *)
 	odr_malloc (assoc->encode, sizeof(*rec));
-    int *err = odr_intdup(assoc->encode, error);
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
-	odr_malloc (assoc->encode, sizeof(*dr));
     
     yaz_log(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
     rec->databaseName = dbname;
     rec->which = Z_NamePlusRecord_surrogateDiagnostic;
     rec->u.surrogateDiagnostic = drec;
     drec->which = Z_DiagRec_defaultFormat;
-    drec->u.defaultFormat = dr;
-    dr->diagnosticSetId =
-	yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
-    dr->condition = err;
-    set_addinfo (dr, addinfo, assoc->encode);
+    drec->u.defaultFormat = justdiag(assoc->encode, error, addinfo);
 
     return rec;
 }
