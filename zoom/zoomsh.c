@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.18 2003-03-03 19:57:36 adam Exp $
+ * $Id: zoomsh.c,v 1.19 2003-04-23 20:39:25 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -30,24 +30,41 @@ static int next_token (const char **cpp, const char **t_start)
     const char *cp = *cpp;
     while (*cp == ' ')
 	cp++;
-    *t_start = cp;
-    while (*cp && *cp != ' ' && *cp != '\r' && *cp != '\n')
+    if (*cp == '"')
     {
-	cp++;
-	len++;
+        cp++;
+        *t_start = cp;
+        while (*cp && *cp != '"')
+        {
+            cp++;
+            len++;
+        }
+        if (*cp)
+            cp++;
+    }
+    else
+    {
+        *t_start = cp;
+        while (*cp && *cp != ' ' && *cp != '\r' && *cp != '\n')
+        {
+            cp++;
+            len++;
+        }
+        if (len == 0)
+            len = -1;
     }
     *cpp = cp;
-    return len;
+    return len;  /* return -1 if no token was read .. */
 }
 
 static int next_token_copy (const char **cpp, char *buf_out, int buf_max)
 {
     const char *start;
     int len = next_token (cpp, &start);
-    if (!len)
+    if (len < 0)
     {
 	*buf_out = 0;
-	return 0;
+	return len;
     }
     if (len >= buf_max)
 	len = buf_max-1;
@@ -72,12 +89,12 @@ static void cmd_set (ZOOM_connection *c, ZOOM_resultset *r,
 {
     char key[40], val[80];
 
-    if (!next_token_copy (args, key, sizeof(key)))
+    if (next_token_copy (args, key, sizeof(key)) < 0)
     {
 	printf ("missing argument for set\n");
 	return ;
     }
-    if (!next_token_copy (args, val, sizeof(val)))
+    if (next_token_copy (args, val, sizeof(val)) < 0)
 	ZOOM_options_set(options, key, 0);
     else
 	ZOOM_options_set(options, key, val);
@@ -88,7 +105,7 @@ static void cmd_get (ZOOM_connection *c, ZOOM_resultset *r,
 		     const char **args)
 {
     char key[40];
-    if (!next_token_copy (args, key, sizeof(key)))
+    if (next_token_copy (args, key, sizeof(key)) < 0)
     {
 	printf ("missing argument for get\n");
     }
@@ -156,10 +173,10 @@ static void cmd_show (ZOOM_connection *c, ZOOM_resultset *r,
     int i;
     char start_str[10], count_str[10];
 
-    if (next_token_copy (args, start_str, sizeof(start_str)))
+    if (next_token_copy (args, start_str, sizeof(start_str)) >= 0)
 	ZOOM_options_set (options, "start", start_str);
 
-    if (next_token_copy (args, count_str, sizeof(count_str)))
+    if (next_token_copy (args, count_str, sizeof(count_str)) >= 0)
 	ZOOM_options_set (options, "count", count_str);
 
     for (i = 0; i<MAX_CON; i++)
@@ -375,7 +392,7 @@ static void cmd_connect (ZOOM_connection *c, ZOOM_resultset *r,
     const char *errmsg, *addinfo, *dset;
     char host[60];
     int j, i;
-    if (!next_token_copy (args, host, sizeof(host)))
+    if (next_token_copy (args, host, sizeof(host)) < 0)
     {
 	printf ("missing host after connect\n");
 	return ;
@@ -418,7 +435,7 @@ static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
     const char *cmd_str;
 
     cmd_len = next_token (buf, &cmd_str);
-    if (!cmd_len)
+    if (cmd_len < 0)
 	return 1;
     if (is_command ("quit", cmd_str, cmd_len))
 	return 0;
