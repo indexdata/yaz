@@ -1,4 +1,4 @@
-/* $Id: benchmark.c,v 1.5 2004-05-19 05:32:47 oleg Exp $
+/* $Id: benchmark.c,v 1.6 2004-06-15 09:58:13 adam Exp $
  * Copyright (C) 2003-2004 Index Data Aps
  *
  * This file is part of the YAZ toolkit.
@@ -39,9 +39,7 @@ struct options {
 
 
 static int test(char *host, int port);
-#ifndef HAVE_DPRINTF
-static void dprintf(int level, char *fmt, ...);
-#endif
+static void db_printf(int level, char *fmt, ...);
 
 int main(int argc, char **argv)
 {
@@ -85,12 +83,12 @@ int main(int argc, char **argv)
     port = atoi(argv[optind+1]);
 
     for (i = 0; i < options.nconnect; i++) {
-	dprintf(2, "iteration %d of %d", i+1, options.nconnect);
+	db_printf(2, "iteration %d of %d", i+1, options.nconnect);
 	ok = test(host, port);
 	if (ok) nok++;
     }
 
-    dprintf(1, "passed %d of %d tests", nok, options.nconnect);
+    db_printf(1, "passed %d of %d tests", nok, options.nconnect);
     if (nok < options.nconnect)
 	printf("Failed %d of %d tests\n",
 	       options.nconnect-nok, options.nconnect);
@@ -116,8 +114,7 @@ static int test(char *host, int port)
     return 1;
 }
 
-#ifndef HAVE_DPRINTF
-static void dprintf(int level, char *fmt, ...)
+static void db_printf(int level, char *fmt, ...)
 {
     va_list ap;
 
@@ -130,4 +127,3 @@ static void dprintf(int level, char *fmt, ...)
     fputc('\n', stderr);
     va_end(ap);
 }
-#endif
