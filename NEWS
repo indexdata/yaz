@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Bug fix: in YAZ GFS schema was not returned in explainResponse.
+
 --- 2.0.25 2004/09/30
 
 The YAZ GFS when converting SRW/SRU requests to Z39.50 structures

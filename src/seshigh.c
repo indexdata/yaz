@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.29 2004-09-30 11:15:52 adam Exp $
+ * $Id: seshigh.c,v 1.30 2004-09-30 18:40:13 adam Exp $
  */
 
 /*
@@ -774,7 +774,7 @@ static void srw_bend_explain(association *assoc, request *req,
 	    if (srw_req->recordPacking && 
 		!strcmp(srw_req->recordPacking, "xml"))
 		packing = Z_SRW_recordPacking_XML;
-	    srw_res->record.recordSchema = 0;
+	    srw_res->record.recordSchema = rr.schema;
 	    srw_res->record.recordPacking = packing;
             srw_res->record.recordData_buf = rr.explain_buf;
             srw_res->record.recordData_len = strlen(rr.explain_buf);
@@ -1338,7 +1338,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.29 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.30 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
