@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.21  1995-05-16 08:50:24  quinn
+ * Revision 1.22  1995-05-17 08:40:56  quinn
+ * Added delete. Fixed some sequence_begins. Smallish.
+ *
+ * Revision 1.21  1995/05/16  08:50:24  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.20  1995/05/15  11:55:25  quinn
@@ -145,7 +148,7 @@ int z_IdAuthentication(ODR o, Z_IdAuthentication **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
@@ -153,7 +156,7 @@ int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
     Z_InitRequest *pp;
 
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     pp = *p;
     return
     	z_ReferenceId(o, &pp->referenceId, 1) &&
@@ -173,6 +176,9 @@ int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 	odr_implicit(o, odr_visiblestring, &pp->implementationVersion,
 	    ODR_CONTEXT, 112, 1) &&
 	z_UserInformationField(o, &pp->userInformationField, 1) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
 	odr_sequence_end(o);
 }
 
@@ -181,7 +187,7 @@ int z_InitResponse(ODR o, Z_InitResponse **p, int opt)
     Z_InitResponse *pp;
 
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     pp = *p;
     return
     	z_ReferenceId(o, &pp->referenceId, 1) &&
@@ -200,6 +206,9 @@ int z_InitResponse(ODR o, Z_InitResponse **p, int opt)
 	odr_implicit(o, odr_visiblestring, &pp->implementationVersion,
 	    ODR_CONTEXT, 112, 1) &&
 	z_UserInformationField(o, &pp->userInformationField, 1) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
 	odr_sequence_end(o);
 }
 
@@ -209,7 +218,7 @@ int z_TriggerResourceControlRequest(ODR o, Z_TriggerResourceControlRequest **p,
 				    int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	z_ReferenceId(o, &(*p)->referenceId, 1) &&
 	odr_implicit(o, odr_integer, &(*p)->requestedAction, ODR_CONTEXT,
@@ -218,13 +227,16 @@ int z_TriggerResourceControlRequest(ODR o, Z_TriggerResourceControlRequest **p,
 	    ODR_CONTEXT, 47, 1) &&
 	odr_implicit(o, odr_bool, &(*p)->resultSetWanted, ODR_CONTEXT,
 	    48, 1) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
 	odr_sequence_end(o);
 }
 
 int z_ResourceControlRequest(ODR o, Z_ResourceControlRequest **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	z_ReferenceId(o, &(*p)->referenceId, 1) &&
 	odr_implicit(o, odr_bool, &(*p)->suspendedFlag, ODR_CONTEXT, 39, 1)&&
@@ -236,18 +248,24 @@ int z_ResourceControlRequest(ODR o, Z_ResourceControlRequest **p, int opt)
 	    42, 0) &&
 	odr_implicit(o, odr_bool, &(*p)->triggeredRequestFlag,
 	    ODR_CONTEXT, 43, 1) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
 	odr_sequence_end(o);
 }
 
 int z_ResourceControlResponse(ODR o, Z_ResourceControlResponse **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	z_ReferenceId(o, &(*p)->referenceId, 1) &&
 	odr_implicit(o, odr_bool, &(*p)->continueFlag, ODR_CONTEXT, 44, 0) &&
 	odr_implicit(o, odr_bool, &(*p)->resultSetWanted, ODR_CONTEXT,
 	    45, 1) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
 	odr_sequence_end(o);
 }
 
@@ -267,7 +285,7 @@ int z_PreferredRecordSyntax(ODR o, Z_PreferredRecordSyntax **p, int opt)
 int z_DatabaseSpecificUnit(ODR o, Z_DatabaseSpecificUnit **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	z_DatabaseName(o, &(*p)->databaseName, 0) &&
     	z_ElementSetName(o, &(*p)->elementSetName, 0) &&
@@ -301,7 +319,7 @@ int z_ElementSetNames(ODR o, Z_ElementSetNames **p, int opt)
     };
 
     if (!odr_constructed_begin(o, p, ODR_CONTEXT, 19))
-    	return opt;
+    	return opt && odr_ok(o);
 
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
@@ -318,7 +336,7 @@ int z_ElementSetNames(ODR o, Z_ElementSetNames **p, int opt)
 int z_AttributeElement(ODR o, Z_AttributeElement **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	odr_implicit(o, odr_integer, &(*p)->attributeType, ODR_CONTEXT,
 	    120, 0) &&
@@ -352,7 +370,7 @@ int z_Term(ODR o, Z_Term **p, int opt)
     if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
     	return 1;
     *p = 0;
-    return opt && !o->error;
+    return opt && odr_ok(o);
 }
 
 #endif
@@ -361,16 +379,12 @@ int z_AttributesPlusTerm(ODR o, Z_AttributesPlusTerm **p, int opt)
 {
     if (!(odr_implicit_settag(o, ODR_CONTEXT, 102) &&
     	odr_sequence_begin(o, p, sizeof(**p))))
-    	return opt;
+    	return opt && odr_ok(o);
     return
     	odr_implicit_settag(o, ODR_CONTEXT, 44) &&
     	odr_sequence_of(o, z_AttributeElement, &(*p)->attributeList,
 	    &(*p)->num_attributes) &&
-#ifdef Z_V3
 	z_Term(o, &(*p)->term, 0) &&
-#else
-	odr_implicit(o, odr_octetstring, &(*p)->term, ODR_CONTEXT, 45, 0) &&
-#endif
 	odr_sequence_end(o);
 }
 
@@ -388,7 +402,7 @@ int z_Operator(ODR o, Z_Operator **p, int opt)
     if (!*p && o->direction != ODR_DECODE)
     	return opt;
     if (!odr_constructed_begin(o, p, ODR_CONTEXT, 46))
-    	return opt;
+    	return opt && odr_ok(o);
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
     else
@@ -508,8 +522,14 @@ int z_SearchRequest(ODR o, Z_SearchRequest **p, int opt)
 	    ODR_CONTEXT, 100, 1) &&
 	odr_explicit(o, z_ElementSetNames, &pp->mediumSetElementSetNames,
 	    ODR_CONTEXT, 101, 1) &&
-	z_PreferredRecordSyntax(o, &pp->preferredRecordSyntax, 1) &&
+	odr_implicit(o, z_PreferredRecordSyntax, &pp->preferredRecordSyntax,
+	    ODR_CONTEXT, 104, 1) &&
 	odr_explicit(o, z_Query, &pp->query, ODR_CONTEXT, 21, 0) &&
+#ifdef Z_OTHERINFO
+	odr_implicit(o, z_OtherInformation, &(*p)->additionalSearchInfo,
+	    ODR_CONTEXT, 203, 1) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
 	odr_sequence_end(o);
 }
 
@@ -819,6 +839,11 @@ int z_SearchResponse(ODR o, Z_SearchResponse **p, int opt)
     	odr_implicit(o, odr_integer, &pp->resultSetStatus, ODR_CONTEXT, 26, 1) &&
     	z_PresentStatus(o, &pp->presentStatus, 1) &&
     	z_Records(o, &pp->records, 1) &&
+#ifdef Z_OTHERINFO
+	odr_implicit(o, z_OtherInformation, &(*p)->additionalSearchInfo,
+	    ODR_CONTEXT, 203, 1) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
 	odr_sequence_end(o);
 }
 
@@ -859,6 +884,63 @@ int z_PresentResponse(ODR o, Z_PresentResponse **p, int opt)
     	odr_sequence_end(o);
 }
 
+/* ----------------------DELETE -------------------------- */
+
+int z_DeleteSetStatus(ODR o, int **p, int opt)
+{
+    return odr_implicit(o, odr_integer, p, ODR_CONTEXT, 33, opt);
+}
+
+int z_ListStatus(ODR o, Z_ListStatus **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	z_ResultSetId(o, &(*p)->id, 0) &&
+	z_DeleteSetStatus(o, &(*p)->status, 0) &&
+	odr_sequence_end(o);
+}
+
+int z_DeleteResultSetRequest(ODR o, Z_DeleteResultSetRequest **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->deleteFunction, ODR_CONTEXT, 32,
+	    0) &&
+	(odr_sequence_of(o, z_ListStatus, &(*p)->resultSetList,
+	    &(*p)->num_ids) || odr_ok(o)) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
+	odr_sequence_end(o);
+}
+
+int z_DeleteResultSetResponse(ODR o, Z_DeleteResultSetResponse **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, z_DeleteSetStatus, &(*p)->deleteOperationStatus,
+	    ODR_CONTEXT, 0, 1) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 1) &&
+	(odr_sequence_of(o, z_ListStatus, &(*p)->deleteListStatuses,
+	    &(*p)->num_statuses) || odr_ok(o)) &&
+	odr_implicit(o, odr_integer, &(*p)->numberNotDeleted, ODR_CONTEXT,
+	    34, 1) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 35) &&
+	(odr_sequence_of(o, z_ListStatus, &(*p)->bulkStatuses,
+	    &(*p)->num_bulkStatuses) || odr_ok(o)) &&
+	odr_implicit(o, odr_visiblestring, &(*p)->deleteMessage, ODR_CONTEXT,
+	    36, 1) &&
+#ifdef Z_OTHERINFO
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
+	odr_sequence_end(o);
+}
+
 /* ------------------------ APDU ------------------------- */
 
 int z_APDU(ODR o, Z_APDU **p, int opt)
@@ -874,6 +956,10 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
 	    z_PresentRequest},
     	{ODR_IMPLICIT, ODR_CONTEXT, 25, Z_APDU_presentResponse,
 	    z_PresentResponse},
+	{ODR_IMPLICIT, ODR_CONTEXT, 26, Z_APDU_deleteResultSetRequest,
+	    z_DeleteResultSetRequest},
+	{ODR_IMPLICIT, ODR_CONTEXT, 27, Z_APDU_deleteResultSetResponse,
+	    z_DeleteResultSetResponse},
     	{ODR_IMPLICIT, ODR_CONTEXT, 30, Z_APDU_resourceControlRequest,
 	    z_ResourceControlRequest},
     	{ODR_IMPLICIT, ODR_CONTEXT, 31, Z_APDU_resourceControlResponse,
