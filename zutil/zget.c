@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: zget.c,v 1.11 2002-02-11 23:25:27 adam Exp $
+ * $Id: zget.c,v 1.12 2002-04-25 08:34:08 adam Exp $
  */
 
 #include <yaz/proto.h>
@@ -482,6 +482,7 @@ Z_APDU *zget_APDU(ODR o, int which)
         break;
     case Z_APDU_extendedServicesResponse:
         r->u.extendedServicesResponse = zget_ExtendedServicesResponse(o);
+	break;
     case Z_APDU_duplicateDetectionRequest:
         r->u.duplicateDetectionRequest = zget_DuplicateDetectionRequest(o);
         break;
