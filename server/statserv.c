@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.92 2003-02-14 18:49:24 adam Exp $
+ * $Id: statserv.c,v 1.93 2003-02-17 21:23:31 adam Exp $
  */
 
 #include <stdio.h>
@@ -58,7 +58,7 @@ statserv_options_block control_block = {
     "",                         /* diagnostic output to stderr */
     "tcp:@:9999",               /* default listener port */
     PROTO_Z3950,                /* default application protocol */
-    60,                         /* idle timeout (minutes) */
+    15,                         /* idle timeout (minutes) */
     1024*1024,                  /* maximum PDU size (approx.) to allow */
     "default-config",           /* configuration name to pass to backend */
     "",                         /* set user id */
@@ -305,7 +305,7 @@ static void listener(IOCHAN h, int event)
 
 	yaz_log(LOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
 	iochan_setdata(new_chan, newas);
-	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
+	iochan_settimeout(new_chan, 60);
 
 	/* Now what we need todo is create a new thread with this iochan as
 	   the parameter */
@@ -565,7 +565,7 @@ static void *new_session (void *vp)
     newas->cs_get_mask = cs_get_mask;
 
     iochan_setdata(new_chan, newas);
-    iochan_settimeout(new_chan, control_block.idle_timeout * 60);
+    iochan_settimeout(new_chan, 60);
     a = cs_addrstr(new_line);
     yaz_log(LOG_LOG, "Starting session %d from %s",
         no_sessions, a ? a : "[Unknown]");

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.181 2003-02-14 18:49:23 adam Exp $
+ * $Id: client.c,v 1.182 2003-02-17 21:23:31 adam Exp $
  */
 
 #include <stdio.h>
@@ -1788,14 +1788,14 @@ static int send_presentRequest(char *arg)
 
         compo.u.complex->generic = (Z_Specification *)
             odr_malloc(out, sizeof(*compo.u.complex->generic));
-        compo.u.complex->generic->which = Z_Specification_oid;
-        compo.u.complex->generic->u.oid = (Odr_oid *)
+        compo.u.complex->generic->which = Z_Schema_oid;
+        compo.u.complex->generic->schema.oid = (Odr_oid *)
             odr_oiddup(out, oid_ent_to_oid(&prefschema, oid));
-        if (!compo.u.complex->generic->u.oid)
+        if (!compo.u.complex->generic->schema.oid)
         {
             /* OID wasn't a schema! Try record syntax instead. */
             prefschema.oclass = CLASS_RECSYN;
-            compo.u.complex->generic->u.oid = (Odr_oid *)
+            compo.u.complex->generic->schema.oid = (Odr_oid *)
                 odr_oiddup(out, oid_ent_to_oid(&prefschema, oid));
         }
         if (!elementSetNames)

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.14 2003-02-17 14:35:42 adam Exp $
+ * $Id: zoomsh.c,v 1.15 2003-02-17 21:23:31 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -18,6 +18,7 @@
 
 #include <yaz/xmalloc.h>
 
+#include <yaz/log.h>
 #include <yaz/zoom.h>
 
 #define MAX_CON 100
@@ -227,6 +228,13 @@ static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
     }
 }
 
+static void cmd_debug (ZOOM_connection *c, ZOOM_resultset *r,
+                       ZOOM_options options,
+                       const char **args)
+{
+    yaz_log_init_level(LOG_ALL);
+}
+
 static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
 			ZOOM_options options,
 			const char **args)
@@ -393,6 +401,8 @@ static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
 	cmd_help(c, r, options, buf);
     else if (is_command ("ext", cmd_str, cmd_len))
 	cmd_ext(c, r, options, buf);
+    else if (is_command ("debug", cmd_str, cmd_len))
+	cmd_debug(c, r, options, buf);
     else
 	printf ("unknown command %.*s\n", cmd_len, cmd_str);
     return 2;
@@ -440,9 +450,7 @@ int main (int argc, char **argv)
     ZOOM_connection z39_con[MAX_CON];
     ZOOM_resultset  z39_res[MAX_CON];
 
-#if 0
-    yaz_log_init_level(65535);
-#endif
+    nmem_init();
     for (i = 0; i<MAX_CON; i++)
     {
 	z39_con[i] = 0;
@@ -469,5 +477,6 @@ int main (int argc, char **argv)
 	ZOOM_connection_destroy(z39_con[i]);
 	ZOOM_resultset_destroy(z39_res[i]);
     }
+    nmem_exit();
     exit (0);
 }

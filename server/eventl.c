@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: eventl.c,v 1.35 2003-02-12 15:06:43 adam Exp $
+ * $Id: eventl.c,v 1.36 2003-02-17 21:23:31 adam Exp $
  */
 
 #include <stdio.h>
@@ -57,8 +57,8 @@ int event_loop(IOCHAN *iochans)
     	IOCHAN p, nextp;
 	fd_set in, out, except;
 	int res, max;
-	static struct timeval nullto = {0, 0}, to;
-	struct timeval *timeout;
+	static struct timeval to;
+        time_t now = time(0);
 
         if (statserv_must_terminate())
         {
@@ -68,16 +68,16 @@ int event_loop(IOCHAN *iochans)
 	FD_ZERO(&in);
 	FD_ZERO(&out);
 	FD_ZERO(&except);
-	timeout = &to; /* hang on select */
-	to.tv_sec = 5*60;
-	to.tv_usec = 0;
+	to.tv_sec = 3600;
+	to.tv_usec = 1;
 	max = 0;
     	for (p = *iochans; p; p = p->next)
     	{
+            time_t w, ftime;
             yaz_log(LOG_LOG, "fd=%d flags=%d force_event=%d",
                     p->fd, p->flags, p->force_event);
 	    if (p->force_event)
-		timeout = &nullto;        /* polling select */
+                to.tv_sec = 0;          /* polling select */
 	    if (p->flags & EVENT_INPUT)
 		FD_SET(p->fd, &in);
 	    if (p->flags & EVENT_OUTPUT)
@@ -86,9 +86,19 @@ int event_loop(IOCHAN *iochans)
 	        FD_SET(p->fd, &except);
 	    if (p->fd > max)
 	        max = p->fd;
+            if (p->max_idle && p->last_event)
+            {
+                ftime = p->last_event + p->max_idle;
+                if (ftime < now)
+                    w = p->max_idle;
+                else
+                    w = ftime - now;
+                if (w < to.tv_sec)
+                    to.tv_sec = w;
+            }
 	}
-        yaz_log(LOG_LOG, "select start");
-	res = YAZ_EV_SELECT(max + 1, &in, &out, &except, timeout);
+        yaz_log(LOG_LOG, "select start %d", to.tv_sec);
+	res = YAZ_EV_SELECT(max + 1, &in, &out, &except, &to);
         yaz_log(LOG_LOG, "select end");
 	if (res < 0)
 	{
@@ -114,10 +124,10 @@ int event_loop(IOCHAN *iochans)
 			*iochans);
             }
 	}
+        now = time(0);
     	for (p = *iochans; p; p = p->next)
     	{
 	    int force_event = p->force_event;
-	    time_t now = time(0);
 
 	    p->force_event = 0;
 	    if (!p->destroyed && (FD_ISSET(p->fd, &in) ||
@@ -138,7 +148,7 @@ int event_loop(IOCHAN *iochans)
 		p->last_event = now;
 	    	(*p->fun)(p, EVENT_EXCEPT);
 	    }
-	    if (!p->destroyed && ((p->max_idle && now - p->last_event >
+	    if (!p->destroyed && ((p->max_idle && now - p->last_event >=
 	        p->max_idle) || force_event == EVENT_TIMEOUT))
 	    {
 	        p->last_event = now;

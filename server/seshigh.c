@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.136 2003-02-17 14:35:42 adam Exp $
+ * $Id: seshigh.c,v 1.137 2003-02-17 21:23:31 adam Exp $
  */
 
 /*
@@ -181,7 +181,9 @@ void destroy_association(association *h)
     xfree(h);
     xmalloc_trav("session closed");
     if (control_block && control_block->one_shot)
+    {
 	exit (0);
+    }
 }
 
 static void do_close_req(association *a, int reason, char *message,
@@ -202,7 +204,7 @@ static void do_close_req(association *a, int reason, char *message,
 	*cls->closeReason = reason;
 	cls->diagnosticInformation = message;
 	process_z_response(a, req, &apdu);
-	iochan_settimeout(a->client_chan, 60);
+	iochan_settimeout(a->client_chan, 20);
     }
     else
     {
@@ -383,14 +385,12 @@ void ir_session(IOCHAN h, int event)
 	    {   /* restore mask for cs_get operation ... */
 		iochan_clearflag(h, EVENT_OUTPUT|EVENT_INPUT);
 		iochan_setflag(h, assoc->cs_get_mask);
-                yaz_log(LOG_LOG, "queue empty mask=%d", assoc->cs_get_mask);
                 if (assoc->state == ASSOC_DEAD)
                     iochan_setevent(assoc->client_chan, EVENT_TIMEOUT);
 	    }
             else
             {
                 assoc->cs_put_mask = EVENT_OUTPUT;
-                yaz_log(LOG_LOG, "queue not empty");
             }
 	    break;
 	default:
@@ -478,8 +478,8 @@ static void srw_bend_fetch(association *assoc, int pos,
 
     rr.comp->u.complex->generic = (Z_Specification *) 
 	    odr_malloc(assoc->decode, sizeof(Z_Specification));
-    rr.comp->u.complex->generic->which = Z_Specification_uri;
-    rr.comp->u.complex->generic->u.uri = srw_req->recordSchema;
+    rr.comp->u.complex->generic->which = Z_Schema_uri;
+    rr.comp->u.complex->generic->schema.uri = srw_req->recordSchema;
     rr.comp->u.complex->generic->elementSpec = 0;
     
     rr.stream = assoc->encode;
@@ -797,6 +797,16 @@ static void process_http_request(association *assoc, request *req)
     }
     else
     {
+        int t;
+        const char *alive = z_HTTP_header_lookup(hreq->headers, "Keep-Alive");
+
+        if (alive && isdigit(*alive))
+            t = atoi(alive);
+        else
+            t = 30;
+        if (t < 0 || t > 3600)
+            t = 3600;
+        iochan_settimeout(assoc->client_chan,t);
         z_HTTP_header_add(o, &hres->headers, "Connection", "Keep-Alive");
     }
     process_gdu_response(assoc, req, p);
@@ -838,6 +848,8 @@ static int process_z_request(association *assoc, request *req, char **msg)
     switch (req->apdu_request->which)
     {
     case Z_APDU_initRequest:
+        iochan_settimeout(assoc->client_chan,
+                          statserv_getcontrol()->idle_timeout * 60);
 	res = process_initRequest(assoc, req); break;
     case Z_APDU_searchRequest:
 	res = process_searchRequest(assoc, req, &fd); break;

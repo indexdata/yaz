@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.9 2002-12-05 12:07:00 adam Exp $
+# $Id: z.tcl,v 1.10 2003-02-17 21:23:31 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -134,6 +134,7 @@ set unionmap($m,OtherInformationUnit,information) {which information OtherInfo}
 set unionmap($m,OtherInformation) {num_elements list}
 set unionmap($m,Specification,elementSpec) {}
 set map($m,Specification_0) ElementSpec
+set unionmap($m,Specification,schema) {which schema Schema}
 
 # ----
 set m DiagnosticFormatDiag1

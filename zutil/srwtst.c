@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwtst.c,v 1.1 2003-02-14 18:49:24 adam Exp $
+ * $Id: srwtst.c,v 1.2 2003-02-17 21:23:31 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -24,6 +24,7 @@ int main(int argc, char **argv)
     ODR decode, encode;
     int debug = 0;
 
+    nmem_init();
     if (argc == 2 && !strcmp(argv[1], "debug"))
         debug = 1;
     no = fread(buf, 1, sizeof(buf), stdin);
@@ -80,6 +81,9 @@ int main(int argc, char **argv)
         fprintf(stderr, "No output!\n");
         exit(1);
     }
+    odr_destroy(decode);
+    odr_destroy(encode);
+    nmem_exit();
     exit(0);
 }
 #else

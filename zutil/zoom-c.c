@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.20 2003-02-17 14:35:42 adam Exp $
+ * $Id: zoom-c.c,v 1.21 2003-02-17 21:23:32 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -347,7 +347,6 @@ ZOOM_connection_connect(ZOOM_connection c,
 	c->lang = 0;
 
     xfree (c->host_port);
-    xfree (c->path);
     if (portnum)
     {
 	char hostn[128];
@@ -466,6 +465,7 @@ ZOOM_connection_destroy(ZOOM_connection c)
     ZOOM_options_destroy (c->options);
     ZOOM_connection_remove_tasks (c);
     xfree (c->host_port);
+    xfree (c->path);
     xfree (c->proxy);
     xfree (c->charset);
     xfree (c->lang);
@@ -641,6 +641,20 @@ static void ZOOM_resultset_retrieve (ZOOM_resultset r,
     c = r->connection;
     if (!c)
 	return;
+
+    if (c->host_port && c->proto == PROTO_SRW)
+    {
+        if (!c->cs)
+        {
+            yaz_log(LOG_DEBUG, "NO COMSTACK");
+            ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
+        }
+        else
+        {
+            yaz_log(LOG_DEBUG, "PREPARE FOR RECONNECT");
+            c->reconnect_ok = 1;
+        }
+    }
     task = ZOOM_connection_add_task (c, ZOOM_TASK_RETRIEVE);
     task->u.retrieve.resultset = r;
     task->u.retrieve.start = start;
@@ -840,7 +854,6 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 static zoom_ret send_APDU (ZOOM_connection c, Z_APDU *a)
 {
     ZOOM_Event event;
-    yaz_log(LOG_LOG, "sending Z39.50 APDU");
     assert (a);
     if (encode_APDU(c, a, c->odr_out))
 	return zoom_complete;
@@ -1016,7 +1029,11 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 	return zoom_complete;
     assert (c->tasks);
     if (c->tasks->which == ZOOM_TASK_SEARCH)
+    {
         resultset = c->tasks->u.search.resultset;
+        resultset->setname = xstrdup ("default");
+        ZOOM_options_set (resultset->options, "setname", resultset->setname);
+    }
     else if(c->tasks->which == ZOOM_TASK_RETRIEVE)
     {
         resultset = c->tasks->u.retrieve.resultset;
@@ -1060,8 +1077,6 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     sr->u.request->maximumRecords = odr_intdup (c->odr_out, resultset->count);
     sr->u.request->recordSchema = resultset->schema;
 
-    resultset->setname = xstrdup ("default");
-    ZOOM_options_set (resultset->options, "setname", resultset->setname);
  
     return send_srw(c, sr);
 }
@@ -1757,15 +1772,15 @@ static zoom_ret send_present (ZOOM_connection c)
         compo->u.complex->generic = (Z_Specification *)
             odr_malloc(c->odr_out, sizeof(*compo->u.complex->generic));
 
-        compo->u.complex->generic->which = Z_Specification_oid;
-        compo->u.complex->generic->u.oid = (Odr_oid *)
+        compo->u.complex->generic->which = Z_Schema_oid;
+        compo->u.complex->generic->schema.oid = (Odr_oid *)
             yaz_str_to_z3950oid (c->odr_out, CLASS_SCHEMA, resultset->schema);
 
-        if (!compo->u.complex->generic->u.oid)
+        if (!compo->u.complex->generic->schema.oid)
         {
             /* OID wasn't a schema! Try record syntax instead. */
 
-            compo->u.complex->generic->u.oid = (Odr_oid *)
+            compo->u.complex->generic->schema.oid = (Odr_oid *)
                 yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, resultset->schema);
         }
         if (elementSetName && *elementSetName)
@@ -2587,7 +2602,7 @@ static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
             yaz_log (LOG_DEBUG, "reconnect write");
             c->tasks->running = 0;
             ZOOM_connection_insert_task (c, ZOOM_TASK_CONNECT);
-            return zoom_complete;
+            return zoom_pending;
         }
 	if (c->state == STATE_CONNECTING)
 	    set_ZOOM_error(c, ZOOM_ERROR_CONNECT, 0);

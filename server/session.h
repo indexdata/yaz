@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: session.h,v 1.28 2003-02-12 15:06:43 adam Exp $
+ * $Id: session.h,v 1.29 2003-02-17 21:23:31 adam Exp $
  */
 
 #ifndef SESSION_H
@@ -87,15 +87,6 @@ typedef struct association
     unsigned cs_accept_mask;
 
     struct bend_initrequest *init;
-#if 0
-    int (*bend_sort) ();
-    int (*bend_search) ();
-    int (*bend_present) ();
-    int (*bend_esrequest) ();
-    int (*bend_delete) ();
-    int (*bend_scan) ();
-    int (*bend_segment) ();
-#endif
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);
