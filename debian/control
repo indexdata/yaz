@@ -34,7 +34,7 @@ Package: yaz-devel
 Depends: yaz-runtime
 Section: devel
 Architecture: any
-Recommends: yaz-doc
+Recommends: yaz-doc, libxml2-dev
 Description: The YAZ Z39.50 toolkit (development files)
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
