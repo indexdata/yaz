@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst3.c,v 1.6 2002-02-20 14:40:42 adam Exp $
+ * $Id: zoomtst3.c,v 1.7 2002-06-02 21:25:50 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -15,6 +15,7 @@
 int main(int argc, char **argv)
 {
     int i;
+    int same_target = 0;
     int no = argc-2;
     ZOOM_connection z[500]; /* allow at most 500 connections */
     ZOOM_resultset r[500];  /* and result sets .. */
@@ -26,6 +27,12 @@ int main(int argc, char **argv)
 		 *argv);
 	exit (1);
     }
+    if (argc == 4 && isdigit(argv[1][0]) && !strchr(argv[1],'.'))
+    {
+	no = atoi(argv[1]);
+	same_target = 1;
+    }
+
     if (no > 500)
         no = 500;
 
@@ -46,7 +53,10 @@ int main(int argc, char **argv)
     	z[i] = ZOOM_connection_create (o);
 
 	/* connect and init */
-    	ZOOM_connection_connect (z[i], argv[1+i], 0);
+	if (same_target)
+    	    ZOOM_connection_connect (z[i], argv[2], 0);
+	else
+    	    ZOOM_connection_connect (z[i], argv[1+i], 0);
     }
     /* search all */
     for (i = 0; i<no; i++)
@@ -64,15 +74,16 @@ int main(int argc, char **argv)
     {
 	int error;
 	const char *errmsg, *addinfo;
+	const char *tname = (same_target ? argv[2] : argv[1+i]);
 	/* display errors if any */
 	if ((error = ZOOM_connection_error(z[i], &errmsg, &addinfo)))
-	    fprintf (stderr, "%s error: %s (%d) %s\n", argv[i+1], errmsg,
+	    fprintf (stderr, "%s error: %s (%d) %s\n", tname, errmsg,
 		     error, addinfo);
 	else
 	{
 	    /* OK, no major errors. Look at the result count */
 	    int pos;
-	    printf ("%s: %d hits\n", argv[i+1], ZOOM_resultset_size(r[i]));
+	    printf ("%s: %d hits\n", tname, ZOOM_resultset_size(r[i]));
 	    /* go through all records at target */
 	    for (pos = 0; pos < 10; pos++)
 	    {
