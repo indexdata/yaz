@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-iconv.h,v 1.5 2004-10-15 00:18:59 adam Exp $
+ * $Id: yaz-iconv.h,v 1.6 2004-12-14 10:52:13 adam Exp $
  */
 /**
  * \file yaz-iconv.h
@@ -33,6 +33,7 @@
 #ifndef YAZ_ICONV_H
 #define YAZ_ICONV_H
 
+#include <stddef.h>
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
