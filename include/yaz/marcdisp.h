@@ -23,13 +23,14 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: marcdisp.h,v 1.5 2002-02-28 13:21:16 adam Exp $
+ * $Id: marcdisp.h,v 1.6 2002-12-03 10:03:27 adam Exp $
  */
 
 #ifndef MARCDISP_H
 #define MARCDISP_H
 
 #include <yaz/yconfig.h>
+#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
 
@@ -38,6 +39,17 @@ YAZ_EXPORT int marc_display_ex (const char *buf, FILE *outf, int debug);
 YAZ_EXPORT int marc_display_exl (const char *buf, FILE *outf, int debug,
                                  int length);
 YAZ_EXPORT int atoi_n (const char *buf, int len);
+
+YAZ_EXPORT int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
+				   int bsize);
+
+YAZ_EXPORT int yaz_marc_decode (const char *buf, WRBUF wr, int debug,
+                                int bsize, int xml);
+
+#define YAZ_MARC_LINE    0
+#define YAZ_MARC_XML     1
+#define YAZ_MARC_OAIMARC 2
+#define YAZ_MARC_MARCXML 3
 
 #define ISO2709_RS 035
 #define ISO2709_FS 036

@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.8 2002-11-30 22:30:51 mike Exp $
+ * $Id: zoom-c.c,v 1.9 2002-12-03 10:03:27 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -8,6 +8,7 @@
 #include <yaz/otherinfo.h>
 #include <yaz/log.h>
 #include <yaz/pquery.h>
+#include <yaz/marcdisp.h>
 #include <yaz/diagbib1.h>
 #include <yaz/charneg.h>
 #include <yaz/ill.h>
@@ -1119,8 +1120,8 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         }
 	return 0;
     }
-    else if (!strcmp (type, "xml") && 
-             npr->which == Z_NamePlusRecord_databaseRecord)
+    else if (npr->which == Z_NamePlusRecord_databaseRecord &&
+             (!strcmp (type, "xml") || !strcmp(type, "MarcXML")))
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
         oident *ent = oid_getentbyoid(r->direct_reference);
@@ -1132,6 +1133,10 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
         }
         else if (r->which == Z_External_octet)
         {
+            int marc_decode_type = YAZ_MARC_OAIMARC;
+
+            if (!strcmp(type, "MarcXML"))
+                marc_decode_type = YAZ_MARC_MARCXML;
             switch (ent->value)
             {
             case VAL_SOIF:
@@ -1149,7 +1154,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
                                      r->u.octet_aligned->buf,
                                      rec->wrbuf_marc, 0,
                                      r->u.octet_aligned->len,
-                                     2) > 0)
+                                     marc_decode_type) > 0)
                 {
                     if (len) *len = wrbuf_len(rec->wrbuf_marc);
                     return wrbuf_buf(rec->wrbuf_marc);

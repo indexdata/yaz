@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: wrbuf.h,v 1.6 2002-10-22 10:05:36 adam Exp $
+ * $Id: wrbuf.h,v 1.7 2002-12-03 10:03:27 adam Exp $
  *
  */
 
@@ -55,12 +55,6 @@ YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...);
 #define wrbuf_putc(b, c) \
     (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
     (b)->buf[(b)->pos++] = (c), 0)
-
-YAZ_EXPORT int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
-				   int bsize);
-
-YAZ_EXPORT int yaz_marc_decode (const char *buf, WRBUF wr, int debug,
-                                int bsize, int xml);
 
 YAZ_END_CDECL
 

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: marcdump.c,v 1.17 2002-10-04 10:19:58 adam Exp $
+ * $Id: marcdump.c,v 1.18 2002-12-03 10:03:27 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <yaz/wrbuf.h>
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
@@ -29,7 +28,8 @@
 
 static void usage(const char *prog)
 {
-    fprintf (stderr, "Usage: %s [-c cfile] [-x] [-O] [-v] file...\n", prog);
+    fprintf (stderr, "Usage: %s [-c cfile] [-x] [-O] [-X] [-v] file...\n",
+             prog);
 } 
 
 int main (int argc, char **argv)
@@ -44,7 +44,7 @@ int main (int argc, char **argv)
     int xml = 0;
     FILE *cfile = 0;
 
-    while ((r = options("vc:xO", argv, argc, &arg)) != -2)
+    while ((r = options("vc:xOX", argv, argc, &arg)) != -2)
     {
 	int count;
 	no++;
@@ -56,10 +56,13 @@ int main (int argc, char **argv)
 	    cfile = fopen (arg, "w");
 	    break;
         case 'x':
-            xml = 1;
+            xml = YAZ_MARC_XML;
             break;
         case 'O':
-            xml = 2;
+            xml = YAZ_MARC_OAIMARC;
+            break;
+        case 'X':
+            xml = YAZ_MARC_MARCXML;
             break;
         case 0:
 	    inf = fopen (arg, "r");

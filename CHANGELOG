@@ -1,5 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+ZOOM_record_get supports type "xml" in which case OAI MARC is
+returned for MARC. If type is "MarcXML" , MARC XML is returned.
+
+yaz_marc_decode supports MARC XML as well. The xml parameter
+specifies type. See include/marcdisp.h
+
 Fix creation of lib/yaz-config so it works if srcdir != objdir. Patch
 from Kang-Jin Lee.
 

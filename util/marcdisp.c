@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.23 2002-10-04 19:11:17 adam Exp $
+ * $Id: marcdisp.c,v 1.24 2002-12-03 10:03:27 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -60,8 +60,22 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
     {
         char str[80];
         int i;
-        if (xml > 1)
+        switch(xml)
         {
+        case YAZ_MARC_XML:
+            wrbuf_puts (wr, "<iso2709\n");
+            sprintf (str, " RecordStatus=\"%c\"\n", buf[5]);
+            wrbuf_puts (wr, str);
+            sprintf (str, " TypeOfRecord=\"%c\"\n", buf[6]);
+            wrbuf_puts (wr, str);
+            for (i = 1; i<=19; i++)
+            {
+                sprintf (str, " ImplDefined%d=\"%c\"\n", i, buf[6+i]);
+                wrbuf_puts (wr, str);
+            }
+            wrbuf_puts (wr, ">\n");
+            break;
+        case YAZ_MARC_OAIMARC:
             wrbuf_puts(
                 wr,
                 "<oai_marc xmlns=\"http://www.openarchives.org/OIA/oai_marc\""
@@ -75,20 +89,14 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
             sprintf (str, " status=\"%c\" type=\"%c\" catForm=\"%c\">\n",
                      buf[5], buf[6], buf[7]);
             wrbuf_puts (wr, str);
-        }
-        else
-        {
-            wrbuf_puts (wr, "<iso2709\n");
-            sprintf (str, " RecordStatus=\"%c\"\n", buf[5]);
-            wrbuf_puts (wr, str);
-            sprintf (str, " TypeOfRecord=\"%c\"\n", buf[6]);
-            wrbuf_puts (wr, str);
-            for (i = 1; i<=19; i++)
-            {
-                sprintf (str, " ImplDefined%d=\"%c\"\n", i, buf[6+i]);
-                wrbuf_puts (wr, str);
-            }
-            wrbuf_puts (wr, ">\n");
+            break;
+        case YAZ_MARC_MARCXML:
+            wrbuf_printf(
+                wr,
+                "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+                "  <record>\n"
+                "    <leader>%.24s</leader>\n", buf);
+            break;
         }
     }
     if (debug)
@@ -148,51 +156,51 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         }
         else if (!memcmp (tag, "00", 2))
             identifier_flag = 0;
-
-
-        if (xml)
+        
+        switch(xml)
         {
-            if (xml > 1)
-            {
-                if (identifier_flag)
-                    wrbuf_puts (wr, "<varfield id=\"");
-                else
-                    wrbuf_puts (wr, "<fixfield id=\"");
-                wrbuf_puts (wr, tag);
-                wrbuf_puts (wr, "\"");
-            }
-            else
-            {
-                wrbuf_puts (wr, "<field tag=\"");
-                wrbuf_puts (wr, tag);
-                wrbuf_puts (wr, "\"");
-            }
-        }
-        else
-        {
+        case YAZ_MARC_LINE:
             if (debug)
                 wrbuf_puts (wr, "Tag: ");
             wrbuf_puts (wr, tag);
             wrbuf_puts (wr, " ");
+            break;
+        case YAZ_MARC_XML:
+            wrbuf_printf (wr, "<field tag=\"%s\"", tag);
+            break;
+        case YAZ_MARC_OAIMARC:
+            if (identifier_flag)
+                wrbuf_printf (wr, "  <varfield id=\"%s\"", tag);
+            else
+                wrbuf_printf (wr, "  <fixfield id=\"%s\"", tag);
+            break;
+        case YAZ_MARC_MARCXML:
+            if (identifier_flag)
+                wrbuf_printf (wr, "    <datafield tag=\"%s\"", tag);
+            else
+                wrbuf_printf (wr, "    <controlfield tag=\"%s\"", tag);
         }
         
         if (identifier_flag)
 	{
-            if (debug && !xml)
-                wrbuf_puts (wr, " Ind: ");
             for (j = 0; j<indicator_length; j++, i++)
             {
-                if (xml)
+                switch(xml)
                 {
-                    char nostr[30];
-                    if (xml > 1)
-                        sprintf (nostr, " i%d=\"%c\"", j+1, buf[i]);
-                    else
-                        sprintf (nostr, " Indicator%d=\"%c\"", j+1, buf[i]);
-                    wrbuf_puts (wr, nostr);
-                }
-                else
+                case YAZ_MARC_LINE:
+                    if (debug)
+                        wrbuf_puts (wr, " Ind: ");
                     wrbuf_putc (wr, buf[i]);
+                    break;
+                case YAZ_MARC_XML:
+                    wrbuf_printf (wr, " Indicator%d=\"%c\"", j+1, buf[i]);
+                    break;
+                case YAZ_MARC_OAIMARC:
+                    wrbuf_printf (wr, " i%d=\"%c\"", j+1, buf[i]);
+                    break;
+                case YAZ_MARC_MARCXML:
+                    wrbuf_printf (wr, " ind%d=\"%c\"", j+1, buf[i]);
+                }
             }
 	}
         if (xml)
@@ -211,22 +219,32 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
             if (identifier_flag)
 	    {
 	        i++;
-                if (xml)
+                switch(xml)
                 {
-                    if (xml > 1)
-                        wrbuf_puts (wr, "  <subfield label=\"");
-                    else
-                        wrbuf_puts (wr, "  <subfield code=\"");
-                    for (j = 1; j<identifier_length; j++, i++)
-                        wrbuf_putc (wr, buf[i]);
-                    wrbuf_puts (wr, "\">");
-                }
-                else
-                {
+                case YAZ_MARC_LINE: 
                     wrbuf_puts (wr, " $"); 
                     for (j = 1; j<identifier_length; j++, i++)
                         wrbuf_putc (wr, buf[i]);
                     wrbuf_putc (wr, ' ');
+                    break;
+                case YAZ_MARC_XML:
+                        wrbuf_puts (wr, "  <subfield code=\"");
+                    for (j = 1; j<identifier_length; j++, i++)
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_puts (wr, "\">");
+                    break;
+                case YAZ_MARC_OAIMARC:
+                    wrbuf_puts (wr, "    <subfield label=\"");
+                    for (j = 1; j<identifier_length; j++, i++)
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_puts (wr, "\">");
+                    break;
+                case YAZ_MARC_MARCXML:
+                    wrbuf_puts (wr, "      <subfield code=\"");
+                    for (j = 1; j<identifier_length; j++, i++)
+                        wrbuf_putc (wr, buf[i]);
+                    wrbuf_puts (wr, "\">");
+                    break;
                 }
 	        while (buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
 	               buf[i] != ISO2709_FS && i < end_offset)
@@ -261,27 +279,42 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
 	    wrbuf_puts (wr, "  <!-- separator but not at end of field -->\n");
 	if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
 	    wrbuf_puts (wr, "  <!-- no separator at end of field -->\n");
-        if (xml)
+        switch(xml)
         {
-            if (xml > 1)
-            {
-                if (identifier_flag)
-                    wrbuf_puts (wr, "</varfield>\n");
-                else
-                    wrbuf_puts (wr, "</fixfield>\n");
-            }
+        case YAZ_MARC_LINE: 
+            break;
+        case YAZ_MARC_XML:
+            wrbuf_puts (wr, "</field>\n");
+            break;
+        case YAZ_MARC_OAIMARC:
+            if (identifier_flag)
+                wrbuf_puts (wr, "  </varfield>\n");
             else
-                wrbuf_puts (wr, "</field>\n");
+                wrbuf_puts (wr, "  </fixfield>\n");
+            break;
+        case YAZ_MARC_MARCXML:
+            if (identifier_flag)
+                wrbuf_puts (wr, "    </datafield>\n");
+            else
+                wrbuf_puts (wr, "    </controlfield>\n");
+            break;
         }
     }
-    if (xml)
+    switch(xml)
     {
-        if (xml > 1)
-            wrbuf_puts (wr, "</oai_marc>\n");
-        else
-            wrbuf_puts (wr, "</iso2709>\n");
+    case YAZ_MARC_LINE:
+        wrbuf_puts (wr, "");
+        break;
+    case YAZ_MARC_XML:
+        wrbuf_puts (wr, "</iso2709>\n");
+        break;
+    case YAZ_MARC_OAIMARC:
+        wrbuf_puts (wr, "</oai_marc>\n");
+        break;
+    case YAZ_MARC_MARCXML:
+        wrbuf_puts (wr, "  </record>\n</collection>\n");
+        break;
     }
-    wrbuf_puts (wr, "");
     return record_length;
 }
 
