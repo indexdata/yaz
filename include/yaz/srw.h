@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.15 2004-01-27 12:15:11 adam Exp $
+ * $Id: srw.h,v 1.16 2004-02-14 15:58:42 adam Exp $
  */
 
 #ifndef YAZ_SRW_H
@@ -24,7 +24,7 @@ typedef struct {
 } Z_SRW_record;
 
 typedef struct {
-    char *code;
+    char *uri;
     char *details;
     char *message;
 } Z_SRW_diagnostic;

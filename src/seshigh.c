@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.19 2004-01-27 12:15:12 adam Exp $
+ * $Id: seshigh.c,v 1.20 2004-02-14 15:58:42 adam Exp $
  */
 
 /*
@@ -663,8 +663,8 @@ static void srw_bend_search(association *assoc, request *req,
 	yaz_mk_std_diagnostic(assoc->encode, srw_res->diagnostics,
 			      yaz_diag_bib1_to_srw (rr.errcode),
 			      rr.errstring);
-        yaz_log(LOG_DEBUG, "srw_bend_search returned SRW error %d",
-                *srw_res->diagnostics[0].code);
+        yaz_log(LOG_DEBUG, "srw_bend_search returned SRW error %s",
+                srw_res->diagnostics[0].uri);
     }
     else
     {
@@ -1317,7 +1317,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.19 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.20 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

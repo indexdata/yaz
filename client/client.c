@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.229 2004-02-14 15:44:15 adam Exp $
+ * $Id: client.c,v 1.230 2004-02-14 15:58:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -1208,6 +1208,9 @@ static int send_SRW_searchRequest(const char *arg)
     sr = yaz_srw_get(out, Z_SRW_searchRetrieve_request);
     sr->u.request->query_type = Z_SRW_query_type_cql;
     sr->u.request->query.cql = odr_strdup(out, arg);
+
+    sr->u.request->maximumRecords = odr_intdup(out, 0);
+
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
     return send_srw(sr);
@@ -3312,8 +3315,11 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
     
     for (i = 0; i<res->num_diagnostics; i++)
     {
-        printf ("SRW diagnostic %s\n",
-                res->diagnostics[i].code);
+	if (res->diagnostics[i].uri)
+	    printf ("SRW diagnostic %s\n",
+		    res->diagnostics[i].uri);
+	else
+	    printf ("SRW diagnostic missing or could not be decoded\n");
 	if (res->diagnostics[i].message)
             printf ("Message: %s\n", res->diagnostics[i].message);
 	if (res->diagnostics[i].details)

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.20 2004-01-27 21:22:44 adam Exp $
+ * $Id: srw.c,v 1.21 2004-02-14 15:58:42 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -285,7 +285,7 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
         *recs = odr_malloc(o, *num * sizeof(**recs));
 	for (i = 0; i < *num; i++)
 	{
-            (*recs)[i].code = 0;
+            (*recs)[i].uri = 0;
             (*recs)[i].details = 0;
             (*recs)[i].message = 0;
 	} 
@@ -295,13 +295,13 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
                 !strcmp(ptr->name, "diagnostic"))
             {
                 xmlNodePtr rptr;
-                (*recs)[i].code = 0;
+                (*recs)[i].uri = 0;
                 (*recs)[i].details = 0;
                 (*recs)[i].message = 0;
                 for (rptr = ptr->children; rptr; rptr = rptr->next)
                 {
-                    if (match_xsd_string(rptr, "code", o, 
-					 &(*recs)[i].code))
+                    if (match_xsd_string(rptr, "uri", o, 
+					 &(*recs)[i].uri))
                         ;
                     else if (match_xsd_string(rptr, "details", o, 
                                               &(*recs)[i].details))
@@ -323,13 +323,13 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
         {
 	    const char *std_diag = "info:srw/diagnostic/1/";
             xmlNodePtr rptr = xmlNewChild(pptr, ns_diag, "diagnostic", 0);
-            add_xsd_string(rptr, "code", (*recs)[i].code);
+            add_xsd_string(rptr, "uri", (*recs)[i].uri);
 	    if ((*recs)[i].message)
 		add_xsd_string(rptr, "message", (*recs)[i].message);
-	    else if ((*recs)[i].code && 
-		     !strncmp((*recs)[i].code, std_diag, strlen(std_diag)))
+	    else if ((*recs)[i].uri && 
+		     !strncmp((*recs)[i].uri, std_diag, strlen(std_diag)))
 	    {
-		int no = atoi((*recs)[i].code + strlen(std_diag));
+		int no = atoi((*recs)[i].uri + strlen(std_diag));
 		const char *message = yaz_diag_srw_str(no);
 		if (message)
 		    add_xsd_string(rptr, "message", message);

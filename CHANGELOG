@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* SRW/SRU 1.1 updates: updated diagnostic in srw.h to use uri instead
+of code.
+
 Added init command for yaz-client which sends "extra" init request.
 
 Fixed two bugs in OID codec - ber_oidc. Throw error when encoding/decoding

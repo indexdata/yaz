@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.23 2004-02-11 13:37:17 adam Exp $
+ * $Id: zoom-c.c,v 1.24 2004-02-14 15:58:42 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -935,7 +935,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.23 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.24 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2967,14 +2967,14 @@ static void handle_srw_response(ZOOM_connection c,
     }
     if (res->num_diagnostics > 0)
     {
-	const char *code = res->diagnostics[0].code;
-	if (code)
+	const char *uri = res->diagnostics[0].uri;
+	if (uri)
 	{
-	    int code_int = 0;	
+	    int code = 0;	
 	    const char *cp;
-	    if ((cp = strrchr(code, '/')))
-		code_int = atoi(cp+1);
-	    set_dset_error(c, code_int, code,
+	    if ((cp = strrchr(uri, '/')))
+		code = atoi(cp+1);
+	    set_dset_error(c, code, uri,
 			   res->diagnostics[0].details, 0);
 	}
     }
