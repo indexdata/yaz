@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.9  1997-09-17 12:10:35  adam
+ * Revision 1.10  1997-10-02 12:10:24  quinn
+ * Attempt to fix bug in especs
+ *
+ * Revision 1.9  1997/09/17 12:10:35  adam
  * YAZ version 1.4.
  *
  * Revision 1.8  1997/05/14 06:54:02  adam
@@ -80,7 +83,17 @@ static void mark_subtree(data1_node *n, int make_variantlist, int no_data,
 {
     data1_node *c;
 
+#if 1
+    if (n->which == DATA1N_tag)
+#else
     if (n->which == DATA1N_tag && (!n->child || n->child->which != DATA1N_tag))
+    /*
+     * This seems to cause multi-level elements to fall out when only a
+     * top-level elementRequest has been given... Problem is, I can't figure
+     * out what it was supposed to ACHIEVE.... delete when code has been
+     * verified.
+     */
+#endif
     {
 	n->u.tag.node_selected = 1;
 	n->u.tag.make_variantlist = make_variantlist;
