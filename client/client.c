@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.156 2002-06-02 21:34:45 adam Exp $
+ * $Id: client.c,v 1.157 2002-06-04 11:36:10 adam Exp $
  */
 
 #include <stdio.h>
@@ -364,16 +364,24 @@ int cmd_open(char *arg)
             session_mem = NULL;
         }
     }
-    t = tcpip_type;
-    base[0] = '\0';
-    if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
-        return 0;
-    
-    if(yazProxy) 
-        conn = cs_create_host(yazProxy, 1, &add);
-    else 
-        conn = cs_create_host(type_and_host, 1, &add);
-    
+	if (strncmp (arg, "unix:", 5) == 0)
+	{
+        base[0] = '\0';
+        conn = cs_create_host(arg, 1, &add);
+	}
+	else
+	{
+		t = tcpip_type;
+		base[0] = '\0';
+		if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
+			return 0;
+		
+		if(yazProxy) 
+			conn = cs_create_host(yazProxy, 1, &add);
+		else 
+			conn = cs_create_host(type_and_host, 1, &add);
+		
+    }
     if (!conn)
     {
         printf ("Couldn't create comstack\n");

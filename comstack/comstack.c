@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: comstack.c,v $
- * Revision 1.9  2001-10-22 13:57:24  adam
+ * Revision 1.10  2002-06-04 11:36:10  adam
+ * New COMSTACK: UNIX socket
+ *
+ * Revision 1.9  2001/10/22 13:57:24  adam
  * Implemented cs_rcvconnect and cs_look as described in the documentation.
  *
  * Revision 1.8  2001/07/19 19:49:02  adam
@@ -42,6 +45,7 @@
 #include <string.h>
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
+#include <yaz/unix.h>
 
 static const char *cs_errlist[] =
 {
@@ -82,6 +86,15 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
 #if HAVE_OPENSSL_SSL_H
 	t = ssl_type;
         host = type_and_host + 4;
+#else
+	return 0;
+#endif
+    }
+    else if (strncmp (type_and_host, "unix:", 5) == 0)
+    {
+#ifndef WIN32
+	t = unix_type;
+        host = type_and_host + 5;
 #else
 	return 0;
 #endif
