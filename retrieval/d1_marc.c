@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.17  2002-04-04 20:49:46  adam
+ * Revision 1.18  2002-05-27 12:34:24  adam
+ * Fixed is_indicator
+ *
+ * Revision 1.17  2002/04/04 20:49:46  adam
  * New functions yaz_is_abspath, yaz_path_fopen_base
  *
  * Revision 1.16  1999/11/30 13:47:12  adam
@@ -243,10 +246,10 @@ static int is_indicator (data1_marctab *p, data1_node *subf)
 {
 #if 1
     if (p->indicator_length != 2 ||
-	(subf->which == DATA1N_tag && strlen(subf->u.tag.tag) == 2))
+	(subf && subf->which == DATA1N_tag && strlen(subf->u.tag.tag) == 2))
 	return 1;
 #else
-    if (subf->which == DATA1N_tag && subf->child->which == DATA1N_tag)
+    if (subf && subf->which == DATA1N_tag && subf->child->which == DATA1N_tag)
 	return 1;
 #endif
     return 0;
