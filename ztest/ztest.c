@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.38  2001-02-21 13:46:54  adam
+ * Revision 1.39  2001-03-12 14:40:57  adam
+ * Minor change of print of item update info.
+ *
+ * Revision 1.38  2001/02/21 13:46:54  adam
  * C++ fixes.
  *
  * Revision 1.37  2001/02/20 11:25:32  adam
@@ -307,7 +310,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		    yaz_log (LOG_LOG, " recordInsert");
 		    break;
 		case Z_IUOriginPartToKeep_recordReplace:
-		    yaz_log (LOG_LOG, " recordUpdate");
+		    yaz_log (LOG_LOG, " recordReplace");
 		    break;
 		case Z_IUOriginPartToKeep_recordDelete:
 		    yaz_log (LOG_LOG, " recordDelete");
