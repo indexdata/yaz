@@ -1,49 +1,9 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: marcdump.c,v $
- * Revision 1.13  2001-02-10 01:21:59  adam
- * Dumper only keeps one record at a time in memory.
- *
- * Revision 1.12  2000/10/02 11:07:45  adam
- * Added peer_name member for bend_init handler. Changed the YAZ
- * client so that tcp: can be avoided in target spec.
- *
- * Revision 1.11  2000/07/04 08:53:22  adam
- * Fixed bug.
- *
- * Revision 1.10  2000/02/29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.9  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.8  1999/05/26 07:49:35  adam
- * C++ compilation.
- *
- * Revision 1.7  1998/02/11 11:53:36  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.6  1997/12/12 06:32:33  adam
- * Added include of string.h.
- *
- * Revision 1.5  1997/09/24 13:29:40  adam
- * Added verbose option -v to marcdump utility.
- *
- * Revision 1.4  1995/11/01 13:55:05  quinn
- * Minor adjustments
- *
- * Revision 1.3  1995/05/16  08:51:12  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.2  1995/05/15  11:56:56  quinn
- * Debuggng & adjustments.
- *
- * Revision 1.1  1995/04/10  10:28:47  quinn
- * Added copy of CCL and MARC display
- *
+ * $Id: marcdump.c,v 1.14 2002-02-28 14:28:40 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -54,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <yaz/wrbuf.h>
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
@@ -75,9 +36,10 @@ int main (int argc, char **argv)
     char buf[100001];
     char *prog = *argv;
     int no = 0;
+    int xml = 0;
     FILE *cfile = 0;
 
-    while ((r = options("vc:", argv, argc, &arg)) != -2)
+    while ((r = options("vc:x", argv, argc, &arg)) != -2)
     {
 	int count;
 	no++;
@@ -88,6 +50,9 @@ int main (int argc, char **argv)
 		fclose (cfile);
 	    cfile = fopen (arg, "w");
 	    break;
+        case 'x':
+            xml = 1;
+            break;
         case 0:
 	    inf = fopen (arg, "r");
 	    count = 0;
@@ -101,6 +66,8 @@ int main (int argc, char **argv)
 		fprintf (cfile, "char *marc_records[] = {\n");
 	    while (1)
 	    {
+                WRBUF wr = wrbuf_alloc();
+
 		int len;
 		
 		r = fread (buf, 1, 5, inf);
@@ -113,9 +80,10 @@ int main (int argc, char **argv)
 		r = fread (buf + 5, 1, len, inf);
 		if (r < len)
 		    break;
-		r = marc_display_ex (buf, stdout, verbose);
+                r = yaz_marc_decode (buf, wr, verbose, -1, xml);
 		if (r <= 0)
 		    break;
+                fwrite (wrbuf_buf(wr), wrbuf_len(wr), 1, stdout);
 		if (cfile)
 		{
 		    char *p = buf;
