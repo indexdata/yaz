@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.21  1997-05-14 06:53:41  adam
+ * Revision 1.22  1997-07-21 12:44:30  adam
+ * Moved definitions of nmem_block and nmem_control.
+ *
+ * Revision 1.21  1997/05/14 06:53:41  adam
  * C++ support.
  *
  * Revision 1.20  1997/04/30 08:52:08  quinn
@@ -228,9 +231,6 @@ typedef struct odr_constack
     int len_offset;
     int lenlen;                  /* length of length-field */
 } odr_constack;
-
-struct odr_memblock; /* defined in odr_mem.c */
-typedef struct odr_memblock *ODR_MEM;
 
 #define ODR_S_SET     0
 #define ODR_S_CUR     1

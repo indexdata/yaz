@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -32,6 +32,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct nmem_block
+{
+    char *buf;              /* memory allocated in this block */
+    int size;               /* size of buf */
+    int top;                /* top of buffer */
+    struct nmem_block *next;
+} nmem_block;
+
+typedef struct nmem_control
+{
+    int total;
+    nmem_block *blocks;
+    struct nmem_control *next;
+} nmem_control;
 
 typedef struct nmem_control *NMEM;
 
