@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.149 2004-08-11 09:05:56 adam Exp $
+dnl $Id: configure.in,v 1.150 2004-09-09 09:53:08 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.0.23)
 AM_MAINTAINER_MODE
@@ -34,7 +34,7 @@ AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
 dnl
 dnl ------ OpenSSL
 openssl=no
-AC_ARG_WITH(openssl, [  --with-openssl[=PREFIX] OpenSSL library in PREFIX], [openssl=$withval])
+AC_ARG_WITH(openssl, [  --with-openssl[=PREFIX]   OpenSSL library in PREFIX], [openssl=$withval])
 USE_SSL=0
 SSL_CFLAGS=""
 SSL_LIBPATH=""
@@ -120,7 +120,7 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
         LIBS=$xLIBS
 fi
 dnl ------ iconv
-AC_ARG_WITH(iconv, [  --with-iconv[=PREFIX]   iconv library in PREFIX])
+AC_ARG_WITH(iconv, [  --with-iconv[=PREFIX]     iconv library in PREFIX])
 if test "$with_iconv" != "no"; then
         AC_MSG_CHECKING(for iconv)
 	oldLIBS="$LIBS"
@@ -310,7 +310,7 @@ dnl ----- libXML2
 AC_SUBST(XML2_LIBS)
 AC_SUBST(XML2_CFLAGS)
 xml2dir=yes
-AC_ARG_WITH(xml2, [  --with-xml2[=PREFIX]    use libxml2 in PREFIX],[xml2dir=$withval])
+AC_ARG_WITH(xml2, [  --with-xml2[=PREFIX]      use libxml2 in PREFIX],[xml2dir=$withval])
 if test "$xml2dir" = "yes"; then
 	for d in /usr /usr/local; do
 		if test -x $d/bin/xml2-config; then
