@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.123  2001-06-11 12:54:47  heikki
+ * Revision 1.124  2001-07-04 20:13:51  ja7
+ * Added new commend "proxy" for ysing a yaz-proxy to connect to the target
+ * Added new command line option -p for setting the proxy host
+ *
+ * Revision 1.123  2001/06/11 12:54:47  heikki
  * Displayng diags in EsResponse, even if they should not be there...
  *
  * Revision 1.122  2001/05/16 07:27:29  adam
@@ -466,6 +470,7 @@ static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
 static char ccl_fields[512] = "default.bib";
 static char* esPackageName = 0;
+static char* yazProxy = 0;
 
 static char last_cmd[100] = "?";
 static FILE *marcdump = 0;
@@ -535,7 +540,7 @@ static Z_ReferenceId *set_refid (ODR out)
 
 /* INIT SERVICE ------------------------------- */
 
-static void send_initRequest()
+static void send_initRequest(const char* type_and_host)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
@@ -560,6 +565,10 @@ static void send_initRequest()
 
     req->referenceId = set_refid (out);
 
+
+    yaz_oi_set_string_oidval(&req->otherInfo, out, VAL_PROXY, 1, type_and_host);
+
+    
     send_apdu(apdu);
     printf("Sent initrequest.\n");
 }
@@ -681,7 +690,15 @@ int cmd_open(char *arg)
     if (sscanf (arg, "%100[^/]/%100s", type_and_host, base) < 1)
         return 0;
 
-    conn = cs_create_host(type_and_host, 1, &add);
+    if(yazProxy) 
+    {
+      conn = cs_create_host(yazProxy, 1, &add);
+    } 
+    else 
+    { 
+      conn = cs_create_host(type_and_host, 1, &add);
+    };
+	
     if (!conn)
     {
 	printf ("Couldn't create comstack\n");
@@ -699,7 +716,8 @@ int cmd_open(char *arg)
         return 0;
     }
     printf("Ok.\n");
-    send_initRequest();
+
+    send_initRequest(type_and_host);
     if (*base)
         cmd_base (base);
     return 2;
@@ -2384,6 +2402,17 @@ int cmd_packagename(char* arg) {
     return 1;
 };
 
+int cmd_proxy(char* arg) {
+    xfree (yazProxy);
+    yazProxy = NULL;
+    if (*arg)
+    {
+        yazProxy = (char *) xmalloc (strlen(arg)+1);
+        strcpy (yazProxy, arg);
+    } 
+    return 1;
+};
+
 static void initialize(void)
 {
 #if YAZ_MODULE_ccl
@@ -2446,6 +2475,7 @@ static int client(int wait)
         {"itemorder", cmd_itemorder, "ill|item <itemno>"},
         {"update", cmd_update, "<item>"},
 	{"packagename", cmd_packagename, "<packagename>"},
+	{"proxy", cmd_proxy, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]"},
 #ifdef ASN_COMPILED
         /* Server Admin Functions */
         {"adm-reindex", cmd_adm_reindex, "<database-name>"},
@@ -2653,7 +2683,7 @@ int main(int argc, char **argv)
     int ret;
     int opened = 0;
 
-    while ((ret = options("c:a:m:v:", argv, argc, &arg)) != -2)
+    while ((ret = options("c:a:m:v:p:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -2691,12 +2721,15 @@ int main(int argc, char **argv)
             else
                 apdu_file=fopen(arg, "a");
             break;
+	case 'p':
+	  yazProxy=strdup(arg);
+	  break;
         case 'v':
             yaz_log_init (yaz_log_mask_str(arg), "", NULL);
             break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
-                             "[-c cclfields] [<server-addr>]\n",
+                             "[-c cclfields] [-p <proxy-addr>] [<server-addr>]\n",
                      prog);
             exit (1);
         }
