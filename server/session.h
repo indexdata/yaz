@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.13  1998-01-29 13:30:23  adam
+ * Revision 1.14  1998-02-10 11:03:57  adam
+ * Added support for extended handlers in backend server interface.
+ *
+ * Revision 1.13  1998/01/29 13:30:23  adam
  * Better event handle system for NT/Unix.
  *
  * Revision 1.12  1997/09/01 08:53:01  adam
@@ -76,6 +79,7 @@ typedef struct request
     int len_response;      /* length of encoded data */
     char *response;        /* encoded data waiting for transmission */
 
+    void *clientData;
     struct request *next;
     struct request_q *q; 
 } request;
@@ -120,6 +124,8 @@ typedef struct association
     int version;                  /* highest version-bit set (2 or 3) */
 
     int (*bend_sort) ();
+    int (*bend_search) ();
+    int (*bend_present) ();
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link);

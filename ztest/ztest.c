@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.6  1998-01-29 13:16:02  adam
+ * Revision 1.7  1998-02-10 11:03:57  adam
+ * Added support for extended handlers in backend server interface.
+ *
+ * Revision 1.6  1998/01/29 13:16:02  adam
  * Added dummy sort in test server.
  *
  * Revision 1.5  1997/11/07 13:31:58  adam
@@ -39,16 +42,13 @@
 #include <backend.h>
 #include <xmalloc.h>
 #include <proto.h>
+#include <log.h>
 
 Z_GenericRecord *read_grs1(FILE *f, ODR o);
 
-int bend_sort (void *handle, bend_sortrequest *req, bend_sortresult *res)
-{
-    res->errcode = 1;
-    res->errstring = "Sort not implemented";
-    res->sort_status = Z_SortStatus_failure;
-    return 0;
-}
+int ztest_search (void *handle, bend_search_rr *rr);
+int ztest_sort (void *handle, bend_sort_rr *rr);
+int ztest_present (void *handle, bend_present_rr *rr);
 
 bend_initresult *bend_init(bend_initrequest *q)
 {
@@ -58,19 +58,35 @@ bend_initresult *bend_init(bend_initrequest *q)
     r->errcode = 0;
     r->errstring = 0;
     r->handle = dummy;
-    q->bend_sort = bend_sort;    /* register sort handler */
+    q->bend_sort = ztest_sort;       /* register sort handler */
+    q->bend_search = ztest_search;   /* register search handler */
+    q->bend_present = ztest_present; /* register present handle */
     return r;
 }
 
+int ztest_search (void *handle, bend_search_rr *rr)
+{
+    rr->hits = rand() % 22;
+    return 0;
+}
+
+int ztest_present (void *handle, bend_present_rr *rr)
+{
+    return 0;
+}
+
+/* Obsolete bend_search, never called because handler is registered */
 bend_searchresult *bend_search(void *handle, bend_searchrequest *q, int *fd)
 {
-    bend_searchresult *r = odr_malloc (q->stream, sizeof(*r));
+    return 0;
+}
 
-    r->errcode = 0;
-    r->errstring = 0;
-    r->hits = rand() % 22;
-
-    return r;
+/* Our sort handler really doesn't sort... */
+int ztest_sort (void *handle, bend_sort_rr *rr)
+{
+    rr->errcode = 0;
+    rr->sort_status = Z_SortStatus_success;
+    return 0;
 }
 
 static int atoin (const char *buf, int n)
@@ -241,6 +257,7 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
     char term[80], *p;
     int i, pos;
 
+    r->errcode = 0;
     r->errstring = 0;
     r->entries = list;
     r->status = BEND_SCAN_SUCCESS;
@@ -270,7 +287,7 @@ bend_scanresult *bend_scan(void *handle, bend_scanrequest *q, int *num)
     	if (islower(*p))
 	    *p = toupper(*p);
 
-    fseek(f, 0, 0);
+    fseek(f, 0, SEEK_SET);
     r->num_entries = 0;
     for (i = 0, pos = 0; fscanf(f, " %79[^:]:%d", entries[pos], &hits[pos]) == 2;
 	i++, pos < 199 ? pos++ : (pos = 0))

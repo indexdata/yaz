@@ -1,5 +1,23 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added command "refid" to client which specifies referenceId for
+the following requests.
+
+Implemented "extended" service handling for server. See ztest.c
+for an example as well as backend.h. New handlers are registerd
+in the Init handler.
+
+* Changed interface for sort in server.
+
+Added new members to statserv_options_block. It allows a server
+to read options from another source than just the command line.
+
+* Changed definition of Z_Triple in file prt-grs.h - member boolean
+renamed to zboolean. Some C++ compilers complained about the name.
+
+Minor changes to gils.abs. Added index 's' (sort) on title
+and date/time-last-modified.
+
 --- 1.4pl2 1998/1/30
 
 Fixed bug in server library regarding inetd mode (-i). This bug

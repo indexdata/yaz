@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994, Index Data.
+ * Copyright (C) 1994-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: requestq.c,v $
- * Revision 1.4  1997-10-27 13:55:03  adam
+ * Revision 1.5  1998-02-10 11:03:56  adam
+ * Added support for extended handlers in backend server interface.
+ *
+ * Revision 1.4  1997/10/27 13:55:03  adam
  * Fixed memory leak: member response wasn't freed when queue
  * was destroyed.
  *
@@ -95,9 +98,11 @@ request *request_get(request_q *q)
     }
     r->q = q;
     r->len_refid = 0;
+    r->refid = 0;
     r->request = 0;
     r->request_mem = 0;
     r->len_response = 0;
+    r->clientData = 0;
     r->state = REQUEST_IDLE;
     r->next = 0;
     return r;
@@ -109,3 +114,4 @@ void request_release(request *r)
     r->next = q->list;
     q->list = r;
 }
+

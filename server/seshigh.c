@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.70  1998-01-29 13:15:35  adam
+ * Revision 1.71  1998-02-10 11:03:57  adam
+ * Added support for extended handlers in backend server interface.
+ *
+ * Revision 1.70  1998/01/29 13:15:35  adam
  * Implemented sort for the backend interface.
  *
  * Revision 1.69  1997/09/30 11:48:12  adam
@@ -269,19 +272,20 @@
 
 #include <backend.h>
 
-static int process_request(association *assoc);
+static int process_request(association *assoc, request *req);
 void backend_response(IOCHAN i, int event);
 static int process_response(association *assoc, request *req, Z_APDU *res);
 static Z_APDU *process_initRequest(association *assoc, request *reqb);
 static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *response_searchRequest(association *assoc, request *reqb,
-    bend_searchresult *bsrt, int *fd);
+    bend_search_rr *bsrr, int *fd);
 static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd);
 static Z_APDU *process_sortRequest(association *assoc, request *reqb, int *fd);
 static void process_close(association *assoc, request *reqb);
+void save_referenceId (request *reqb, Z_ReferenceId *refid);
 
 static FILE *apduf = 0; /* for use in static mode */
 static statserv_options_block *control_block = 0;
@@ -294,16 +298,16 @@ static statserv_options_block *control_block = 0;
  */
 association *create_association(IOCHAN channel, COMSTACK link)
 {
-    association *new;
+    association *anew;
 
     if (!control_block)
     	control_block = statserv_getcontrol();
-    if (!(new = xmalloc(sizeof(*new))))
+    if (!(anew = xmalloc(sizeof(*anew))))
     	return 0;
-    new->client_chan = channel;
-    new->client_link = link;
-    if (!(new->decode = odr_createmem(ODR_DECODE)) ||
-    	!(new->encode = odr_createmem(ODR_ENCODE)))
+    anew->client_chan = channel;
+    anew->client_link = link;
+    if (!(anew->decode = odr_createmem(ODR_DECODE)) ||
+    	!(anew->encode = odr_createmem(ODR_ENCODE)))
 	return 0;
     if (*control_block->apdufile)
     {
@@ -311,7 +315,7 @@ association *create_association(IOCHAN channel, COMSTACK link)
 	FILE *f;
 
 	strcpy(filename, control_block->apdufile);
-	if (!(new->print = odr_createmem(ODR_PRINT)))
+	if (!(anew->print = odr_createmem(ODR_PRINT)))
 	    return 0;
 	if (*control_block->apdufile != '-')
 	{
@@ -339,19 +343,19 @@ association *create_association(IOCHAN channel, COMSTACK link)
 		}
 		setvbuf(f, 0, _IONBF, 0);
 	    }
-	    odr_setprint(new->print, f);
+	    odr_setprint(anew->print, f);
     	}
     }
     else
-    	new->print = 0;
-    new->input_buffer = 0;
-    new->input_buffer_len = 0;
-    new->backend = 0;
-    new->state = ASSOC_NEW;
-    request_initq(&new->incoming);
-    request_initq(&new->outgoing);
-    new->proto = cs_getproto(link);
-    return new;
+    	anew->print = 0;
+    anew->input_buffer = 0;
+    anew->input_buffer_len = 0;
+    anew->backend = 0;
+    anew->state = ASSOC_NEW;
+    request_initq(&anew->incoming);
+    request_initq(&anew->outgoing);
+    anew->proto = cs_getproto(link);
+    return anew;
 }
 
 /*
@@ -492,8 +496,11 @@ void ir_session(IOCHAN h, int event)
 	/* can we do something yet? */
 	req = request_head(&assoc->incoming);
 	if (req->state == REQUEST_IDLE)
-	    if (process_request(assoc) < 0)
+	{
+	    request_deq(&assoc->incoming);
+	    if (process_request(assoc, req) < 0)
 		do_close(assoc, Z_Close_systemProblem, "Unknown error");
+	}
     }
     if (event & EVENT_OUTPUT)
     {
@@ -532,13 +539,12 @@ void ir_session(IOCHAN h, int event)
 /*
  * Initiate request processing.
  */
-static int process_request(association *assoc)
+static int process_request(association *assoc, request *req)
 {
-    request *req = request_head(&assoc->incoming);
     int fd = -1;
     Z_APDU *res;
+    int retval;
 
-    logf(LOG_DEBUG, "process_request");
     assert(req && req->state == REQUEST_IDLE);
     switch (req->request->which)
     {
@@ -568,12 +574,12 @@ static int process_request(association *assoc)
     if (res)
     {
     	logf(LOG_DEBUG, "  result immediately available");
-    	return process_response(assoc, req, res);
+    	retval = process_response(assoc, req, res);
     }
     else if (fd < 0)
     {
-    	logf(LOG_WARN, "   bad result");
-    	return -1;
+    	logf(LOG_DEBUG, "  result unavailble");
+	retval = 0;
     }
     else /* no result yet - one will be provided later */
     {
@@ -586,8 +592,9 @@ static int process_request(association *assoc)
 	if (!(chan = iochan_create(fd, backend_response, EVENT_INPUT)))
 	    abort();
 	iochan_setdata(chan, assoc);
-	return 0;
+	retval = 0;
     }
+    return retval;
 }
 
 /*
@@ -654,18 +661,18 @@ static int process_response(association *assoc, request *req, Z_APDU *res)
 	    odr_errmsg(odr_geterror(assoc->print)));
 	odr_reset(assoc->print);
     }
-    /* change this when we make the backend reentrant */
-    if (req == request_head(&assoc->incoming))
-    {
-	req->state = REQUEST_IDLE;
-	request_deq(&assoc->incoming);
-    }
+    req->state = REQUEST_IDLE;
     request_enq(&assoc->outgoing, req);
     /* turn the work over to the ir_session handler */
     iochan_setflag(assoc->client_chan, EVENT_OUTPUT);
     /* Is there more work to be done? give that to the input handler too */
+#if 1
     if (request_head(&assoc->incoming))
+    {
+	logf (LOG_DEBUG, "more work to be done");
     	iochan_setevent(assoc->client_chan, EVENT_WORK);
+    }
+#endif
     return 0;
 }
 
@@ -697,6 +704,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     binitreq.configname = "default-config";
     binitreq.auth = req->idAuthentication;
     binitreq.bend_sort = NULL;
+    binitreq.bend_search = NULL;
+    binitreq.bend_present = NULL;
     if (!(binitres = bend_init(&binitreq)))
     {
     	logf(LOG_WARN, "Bad response from backend.");
@@ -706,6 +715,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     assoc->backend = binitres->handle;
     if ((assoc->bend_sort = binitreq.bend_sort))
 	logf (LOG_DEBUG, "Sort handler installed");
+    if ((assoc->bend_search = binitreq.bend_search))
+	logf (LOG_DEBUG, "Search handler installed");
+    if ((assoc->bend_present = binitreq.bend_present))
+	logf (LOG_DEBUG, "Present handler installed");
     resp->referenceId = req->referenceId;
     *options = '\0';
     /* let's tell the client what we can do */
@@ -1056,24 +1069,51 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     int *fd)
 {
     Z_SearchRequest *req = reqb->request->u.searchRequest;
-    bend_searchrequest bsrq;
-    bend_searchresult *bsrt;
+    bend_search_rr *bsrr = nmem_malloc (reqb->request_mem, sizeof(*bsrr));
 
     logf(LOG_LOG, "Got SearchRequest.");
 
-    bsrq.setname = req->resultSetName;
-    bsrq.replace_set = *req->replaceIndicator;
-    bsrq.num_bases = req->num_databaseNames;
-    bsrq.basenames = req->databaseNames;
-    bsrq.query = req->query;
-    bsrq.stream = assoc->encode;
+    save_referenceId (reqb, req->referenceId);
+    /* store ref id in request */
+    bsrr->fd = fd;
+    bsrr->request = reqb;
+    bsrr->association = assoc;
+    if (assoc->bend_search)
+    {
+	bsrr->setname = req->resultSetName;
+	bsrr->replace_set = *req->replaceIndicator;
+	bsrr->num_bases = req->num_databaseNames;
+	bsrr->basenames = req->databaseNames;
+	bsrr->query = req->query;
+	bsrr->stream = assoc->encode;
+	bsrr->errcode = 0;
+	bsrr->hits = 0;
+	bsrr->errstring = NULL;
+	(*assoc->bend_search)(assoc->backend, bsrr);
+	if (!bsrr->request)
+	    return 0;
+    }
+    else
+    {
+	bend_searchrequest bsrq;
+	bend_searchresult *bsrt;
 
-    if (!(bsrt = bend_search(assoc->backend, &bsrq, fd)))
-	return 0;
-    return response_searchRequest(assoc, reqb, bsrt, fd);
+	bsrq.setname = req->resultSetName;
+	bsrq.replace_set = *req->replaceIndicator;
+	bsrq.num_bases = req->num_databaseNames;
+	bsrq.basenames = req->databaseNames;
+	bsrq.query = req->query;
+	bsrq.stream = assoc->encode;
+	if (!(bsrt = bend_search(assoc->backend, &bsrq, fd)))
+	    return 0;
+	bsrr->hits = bsrt->hits;
+	bsrr->errcode = bsrt->errcode;
+	bsrr->errstring = bsrt->errstring;
+    }
+    return response_searchRequest(assoc, reqb, bsrr, fd);
 }
 
-bend_searchresult *bend_searchresponse(void *handle) {return 0;}
+int bend_searchresponse(void *handle, bend_search_rr *bsrr) {return 0;}
 
 /*
  * Prepare a searchresponse based on the backend results. We probably want
@@ -1083,7 +1123,7 @@ bend_searchresult *bend_searchresponse(void *handle) {return 0;}
  * event, and we'll have to get the response for ourselves.
  */
 static Z_APDU *response_searchRequest(association *assoc, request *reqb,
-    bend_searchresult *bsrt, int *fd)
+    bend_search_rr *bsrt, int *fd)
 {
     Z_SearchRequest *req = reqb->request->u.searchRequest;
     Z_APDU *apdu = odr_malloc (assoc->encode, sizeof(*apdu));
@@ -1104,7 +1144,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     resp->additionalSearchInfo = 0;
     resp->otherInfo = 0;
     *fd = -1;
-    if (!bsrt && !(bsrt = bend_searchresponse(assoc->backend)))
+    if (!bsrt && !bend_searchresponse(assoc->backend, bsrt))
     {
     	logf(LOG_FATAL, "Bad result from backend");
     	return 0;
@@ -1202,39 +1242,62 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     int *fd)
 {
     Z_PresentRequest *req = reqb->request->u.presentRequest;
-    Z_APDU *apdu = odr_malloc (assoc->encode, sizeof(*apdu));
-    Z_PresentResponse *resp = odr_malloc (assoc->encode, sizeof(*resp));
-    int *presst = odr_malloc (assoc->encode, sizeof(*presst));
-    int *next = odr_malloc (assoc->encode, sizeof(*next));
-    int *num = odr_malloc (assoc->encode, sizeof(*num));
     oident *prefformat;
     oid_value form;
+    Z_APDU *apdu;
+    Z_PresentResponse *resp;
+    int *presst;
+    int *next;
+    int *num;
 
     logf(LOG_LOG, "Got PresentRequest.");
-    *presst = 0;
-    *next = 0;
-    *num = 0;
-
-    apdu->which = Z_APDU_presentResponse;
-    apdu->u.presentResponse = resp;
-    resp->referenceId = req->referenceId;
-    resp->otherInfo = 0;
 
     if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)) ||
 	prefformat->oclass != CLASS_RECSYN)
 	form = VAL_NONE;
     else
 	form = prefformat->value;
+    if (assoc->bend_present)
+    {
+	bend_present_rr *bprr = nmem_malloc (reqb->request_mem, sizeof(*bprr));
+	bprr->setname = req->resultSetId;
+	bprr->start = *req->resultSetStartPoint;
+	bprr->number = *req->numberOfRecordsRequested;
+	bprr->format = form;
+	bprr->comp = req->recordComposition;
+	bprr->stream = assoc->encode;
+	bprr->request = reqb;
+	bprr->association = assoc;
+	bprr->errcode = 0;
+	bprr->errstring = NULL;
+	(*assoc->bend_present)(assoc->backend, bprr);
+
+	if (!bprr->request)
+	    return 0;
+    }
+    apdu = odr_malloc (assoc->encode, sizeof(*apdu));
+    resp = odr_malloc (assoc->encode, sizeof(*resp));
+    presst = odr_malloc (assoc->encode, sizeof(*presst));
+    next = odr_malloc (assoc->encode, sizeof(*next));
+    num = odr_malloc (assoc->encode, sizeof(*num));
+    *presst = 0;
+    *next = 0;
     *num = *req->numberOfRecordsRequested;
-    resp->records = pack_records(assoc, req->resultSetId,
-	*req->resultSetStartPoint, num, req->recordComposition, next,
-	presst, form);
+    
+    apdu->which = Z_APDU_presentResponse;
+    apdu->u.presentResponse = resp;
+    resp->referenceId = req->referenceId;
+    resp->otherInfo = 0;
+    
+    resp->records =
+	pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
+		     num, req->recordComposition, next, presst, form);
     if (!resp->records)
-    	return 0;
+	return 0;
     resp->numberOfRecordsReturned = num;
     resp->presentStatus = presst;
     resp->nextResultSetPosition = next;
-
+    
     return apdu;
 }
 
@@ -1353,31 +1416,32 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
 {
     Z_SortRequest *req = reqb->request->u.sortRequest;
     Z_SortResponse *res = odr_malloc (assoc->encode, sizeof(*res));
-    bend_sortrequest bsrq;
-    bend_sortresult *bsrt;
+    bend_sort_rr *bsrr = odr_malloc (assoc->encode, sizeof(*bsrr));
+
     Z_APDU *apdu = odr_malloc (assoc->encode, sizeof(*apdu));
 
     logf(LOG_LOG, "Got SortRequest.");
 
-    bsrq.num_input_setnames = req->inputResultSetNames->num_strings;
-    bsrq.input_setnames = req->inputResultSetNames->strings;
-    bsrq.output_setname = req->sortedResultSetName;
-    bsrq.sort_sequence = req->sortSequence;
-    bsrq.stream = assoc->encode;
+    bsrr->num_input_setnames = req->inputResultSetNames->num_strings;
+    bsrr->input_setnames = req->inputResultSetNames->strings;
+    bsrr->output_setname = req->sortedResultSetName;
+    bsrr->sort_sequence = req->sortSequence;
+    bsrr->stream = assoc->encode;
 
-    bsrt = odr_malloc (assoc->encode, sizeof(*bsrt));
-    bsrt->sort_status = Z_SortStatus_failure;
-    bsrt->errcode = 0;
-    bsrt->errstring = 0;
+    bsrr->sort_status = Z_SortStatus_failure;
+    bsrr->errcode = 0;
+    bsrr->errstring = 0;
 
-    (*assoc->bend_sort)(assoc->backend, &bsrq, bsrt);
+    (*assoc->bend_sort)(assoc->backend, bsrr);
 
     res->referenceId = req->referenceId;
     res->sortStatus = odr_malloc (assoc->encode, sizeof(*res->sortStatus));
-    *res->sortStatus = bsrt->sort_status;
+    *res->sortStatus = bsrr->sort_status;
     res->resultSetStatus = 0;
-    if (bsrt->errcode)
-	res->diagnostics = diagrecs(assoc, bsrt->errcode, bsrt->errstring);
+    if (bsrr->errcode)
+	res->diagnostics = diagrecs(assoc, bsrr->errcode, bsrr->errstring);
+    else
+	res->diagnostics = 0;
     res->otherInfo = 0;
 
     apdu->which = Z_APDU_sortResponse;
@@ -1408,4 +1472,65 @@ static void process_close(association *assoc, request *reqb)
     if (assoc->version < 3) /* to make do_force respond with close */
     	assoc->version = 3;
     do_close(assoc, Z_Close_finished, "Association terminated by client");
+}
+
+void save_referenceId (request *reqb, Z_ReferenceId *refid)
+{
+    if (refid)
+    {
+	reqb->len_refid = refid->len;
+	reqb->refid = nmem_malloc (reqb->request_mem, refid->len);
+	memcpy (reqb->refid, refid->buf, refid->len);
+    }
+    else
+    {
+	reqb->len_refid = 0;
+	reqb->refid = NULL;
+    }
+}
+
+void bend_request_send (bend_association a, bend_request req, Z_APDU *res)
+{
+    process_response (a, req, res);
+}
+
+bend_request bend_request_mk (bend_association a)
+{
+    request *nreq = request_get (&a->outgoing);
+    nreq->request_mem = nmem_create ();
+    return nreq;
+}
+
+Z_ReferenceId *bend_request_getid (ODR odr, bend_request req)
+{
+    Z_ReferenceId *id;
+    if (!req->refid)
+	return 0;
+    id = odr_malloc (odr, sizeof(*odr));
+    id->buf = odr_malloc (odr, req->len_refid);
+    id->len = id->size = req->len_refid;
+    memcpy (id->buf, req->refid, req->len_refid);
+    return id;
+}
+
+void bend_request_destroy (bend_request *req)
+{
+    nmem_destroy((*req)->request_mem);
+    request_release(*req);
+    *req = NULL;
+}
+
+int bend_backend_respond (bend_association a, bend_request req)
+{
+    return process_request (a, req);
+}
+
+void bend_request_setdata(bend_request r, void *p)
+{
+    r->clientData = p;
+}
+
+void *bend_request_getdata(bend_request r)
+{
+    return r->clientData;
 }

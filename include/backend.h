@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.17  1998-01-29 13:15:35  adam
+ * Revision 1.18  1998-02-10 11:03:56  adam
+ * Added support for extended handlers in backend server interface.
+ *
+ * Revision 1.17  1998/01/29 13:15:35  adam
  * Implemented sort for the backend interface.
  *
  * Revision 1.16  1997/09/17 12:10:31  adam
@@ -42,9 +45,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+typedef struct request *bend_request;
+typedef struct association *bend_association;
 
-
-typedef struct bend_searchrequest
+/* old search request input */ 
+typedef struct 
 {
     char *setname;             /* name to give to this set */
     int replace_set;           /* replace set, if it already exists */
@@ -54,18 +60,52 @@ typedef struct bend_searchrequest
     ODR stream;                /* encoding stream */
 } bend_searchrequest;
 
-typedef struct bend_searchresult
+/* old search request output */
+typedef struct
 {
     int hits;                  /* number of hits */
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
 } bend_searchresult;
 
+/* extended search handler (rr = request response) */
+typedef struct {
+    char *setname;             /* name to give to this set */
+    int replace_set;           /* replace set, if it already exists */
+    int num_bases;             /* number of databases in list */
+    char **basenames;          /* databases to search */
+    Z_Query *query;            /* query structure */
+    ODR stream;                /* encode stream */
+
+    bend_request request;
+    bend_association association;
+    int *fd;
+    int hits;                  /* number of hits */
+    int errcode;               /* 0==OK */
+    char *errstring;           /* system error string or NULL */
+} bend_search_rr;
+
+/* extended present handler. Does not replace bend_fetch. */
+typedef struct {
+    char *setname;             /* set name */
+    int start;
+    int number;                /* record number */
+    oid_value format;          /* One of the CLASS_RECSYN members */
+    Z_RecordComposition *comp; /* Formatting instructions */
+    ODR stream;                /* encoding stream - memory source if required */
+    bend_request request;
+    bend_association association;
+
+    int hits;                  /* number of hits */
+    int errcode;               /* 0==OK */
+    char *errstring;           /* system error string or NULL */
+} bend_present_rr;
+
 YAZ_EXPORT bend_searchresult *bend_search(void *handle, bend_searchrequest *r,
                                           int *fd);
-YAZ_EXPORT bend_searchresult *bend_searchresponse(void *handle);
+YAZ_EXPORT int bend_searchresponse(void *handle, bend_search_rr *bsrr);
 
-typedef struct bend_fetchrequest
+typedef struct
 {
     char *setname;             /* set name */
     int number;                /* record number */
@@ -74,7 +114,7 @@ typedef struct bend_fetchrequest
     ODR stream;                /* encoding stream - memory source if required */
 } bend_fetchrequest;
 
-typedef struct bend_fetchresult
+typedef struct
 {
     char *basename;            /* name of database that provided record */
     int len;                   /* length of record or -1 if structured */
@@ -89,7 +129,7 @@ YAZ_EXPORT bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r,
                                         int *fd);
 YAZ_EXPORT bend_fetchresult *bend_fetchresponse(void *handle);
 
-typedef struct bend_scanrequest
+typedef struct
 {
     int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
@@ -141,21 +181,19 @@ YAZ_EXPORT bend_deleteresult *bend_deleteresponse(void *handle);
 
 YAZ_EXPORT void bend_close(void *handle);
 
-typedef struct bend_sortrequest 
+/* sort handler */
+typedef struct bend_sort_rr
 {
     int num_input_setnames;
     char **input_setnames;
     char *output_setname;
     Z_SortKeySpecList *sort_sequence;
     ODR stream;
-} bend_sortrequest;
 
-typedef struct bend_sortresult
-{
     int sort_status;
     int errcode;
     char *errstring;
-} bend_sortresult;
+} bend_sort_rr;
 
 typedef struct bend_initrequest
 {
@@ -163,8 +201,9 @@ typedef struct bend_initrequest
     Z_IdAuthentication *auth;
     ODR stream;                /* encoding stream */
     
-    int (*bend_sort) (void *handle, bend_sortrequest *req,
-		      bend_sortresult *res);
+    int (*bend_sort) (void *handle, bend_sort_rr *rr);
+    int (*bend_search) (void *handle, bend_search_rr *rr);
+    int (*bend_present) (void *handle, bend_present_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult
@@ -174,7 +213,19 @@ typedef struct bend_initresult
     void *handle;              /* private handle to the backend module */
 } bend_initresult;
 
-YAZ_EXPORT bend_initresult MDF *bend_init(bend_initrequest *r);   
+YAZ_EXPORT bend_initresult *bend_init(bend_initrequest *r);
+
+YAZ_EXPORT void bend_request_send (bend_association a, bend_request req,
+				   Z_APDU *res);
+
+YAZ_EXPORT bend_request bend_request_mk (bend_association a);
+
+YAZ_EXPORT void bend_request_destroy (bend_request *req);
+
+YAZ_EXPORT Z_ReferenceId *bend_request_getid (ODR odr, bend_request req);
+YAZ_EXPORT int bend_backend_respond (bend_association a, bend_request req);
+YAZ_EXPORT void bend_request_setdata(bend_request r, void *p);
+YAZ_EXPORT void *bend_request_getdata(bend_request r);
 
 #ifdef __cplusplus
 }
