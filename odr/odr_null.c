@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_null.c,v $
- * Revision 1.6  1995-05-22 11:32:03  quinn
+ * Revision 1.7  1995-09-27 15:02:59  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.6  1995/05/22  11:32:03  quinn
  * Fixing Interface to odr_null.
  *
  * Revision 1.5  1995/05/16  08:50:56  quinn
@@ -30,7 +33,7 @@
  * Top level null en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_null(ODR o, Odr_null **p, int opt)
+int MDF odr_null(ODR o, Odr_null **p, int opt)
 {
     int res, cons = 0;
 

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.24  1995-08-29 11:17:43  quinn
+ * Revision 1.25  1995-09-27 15:02:49  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.24  1995/08/29  11:17:43  quinn
  * *** empty log message ***
  *
  * Revision 1.23  1995/08/21  09:10:36  quinn
@@ -132,6 +135,7 @@
 #ifndef PROTO_H
 #define PROTO_H
 
+#include <yconfig.h>
 #include <odr.h>
 #include <oid.h>
 #include <odr_use.h>
@@ -307,9 +311,9 @@ typedef struct Z_NSRAuthentication
     char *account;
 } Z_NSRAuthentication;
 
-int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt);
+int MDF z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt);
 
-int z_StrAuthentication(ODR o, char **p, int opt);
+int MDF z_StrAuthentication(ODR o, char **p, int opt);
 
 /* ------------------ SEARCH SERVICE ----------------*/
 
@@ -1122,38 +1126,38 @@ typedef struct Z_APDU
     } u;
 } Z_APDU;
 
-int z_APDU(ODR o, Z_APDU **p, int opt);
-int z_SUTRS(ODR o, Odr_oct **p, int opt);
+int MDF z_APDU(ODR o, Z_APDU **p, int opt);
+int MDF z_SUTRS(ODR o, Odr_oct **p, int opt);
 
-Z_InitRequest *zget_InitRequest(ODR o);
-Z_InitResponse *zget_InitResponse(ODR o);
-Z_SearchRequest *zget_SearchRequest(ODR o);
-Z_SearchResponse *zget_SearchResponse(ODR o);
-Z_PresentRequest *zget_PresentRequest(ODR o);
-Z_PresentResponse *zget_PresentResponse(ODR o);
-Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o);
-Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o);
-Z_ScanRequest *zget_ScanRequest(ODR o);
-Z_ScanResponse *zget_ScanResponse(ODR o);
-Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
-Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
-Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
-Z_Close *zget_Close(ODR o);
-int z_InternationalString(ODR o, char **p, int opt);
-int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt);
-int z_ElementSetName(ODR o, char **p, int opt);
-int z_IntUnit(ODR o, Z_IntUnit **p, int opt);
-int z_Unit(ODR o, Z_Unit **p, int opt);
-int z_DatabaseName(ODR o, Z_DatabaseName **p, int opt);
-int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt);
-int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt);
-int z_Term(ODR o, Z_Term **p, int opt);
-int z_Specification(ODR o, Z_Specification **p, int opt);
-int z_Permissions(ODR o, Z_Permissions **p, int opt);
-int z_DiagRec(ODR o, Z_DiagRec **p, int opt);
-int z_AttributeList(ODR o, Z_AttributeList **p, int opt);
-int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
-Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
+Z_InitRequest MDF *zget_InitRequest(ODR o);
+Z_InitResponse MDF *zget_InitResponse(ODR o);
+Z_SearchRequest MDF *zget_SearchRequest(ODR o);
+Z_SearchResponse MDF *zget_SearchResponse(ODR o);
+Z_PresentRequest MDF *zget_PresentRequest(ODR o);
+Z_PresentResponse MDF *zget_PresentResponse(ODR o);
+Z_DeleteResultSetRequest MDF *zget_DeleteResultSetRequest(ODR o);
+Z_DeleteResultSetResponse MDF *zget_DeleteResultSetResponse(ODR o);
+Z_ScanRequest MDF *zget_ScanRequest(ODR o);
+Z_ScanResponse MDF *zget_ScanResponse(ODR o);
+Z_TriggerResourceControlRequest MDF *zget_TriggerResourceControlRequest(ODR o);
+Z_ResourceControlRequest MDF *zget_ResourceControlRequest(ODR o);
+Z_ResourceControlResponse MDF *zget_ResourceControlResponse(ODR o);
+Z_Close MDF *zget_Close(ODR o);
+int MDF z_InternationalString(ODR o, char **p, int opt);
+int MDF z_OtherInformation(ODR o, Z_OtherInformation **p, int opt);
+int MDF z_ElementSetName(ODR o, char **p, int opt);
+int MDF z_IntUnit(ODR o, Z_IntUnit **p, int opt);
+int MDF z_Unit(ODR o, Z_Unit **p, int opt);
+int MDF z_DatabaseName(ODR o, Z_DatabaseName **p, int opt);
+int MDF z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt);
+int MDF z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt);
+int MDF z_Term(ODR o, Z_Term **p, int opt);
+int MDF z_Specification(ODR o, Z_Specification **p, int opt);
+int MDF z_Permissions(ODR o, Z_Permissions **p, int opt);
+int MDF z_DiagRec(ODR o, Z_DiagRec **p, int opt);
+int MDF z_AttributeList(ODR o, Z_AttributeList **p, int opt);
+int MDF z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt);
+Z_APDU MDF *zget_APDU(ODR o, enum Z_APDU_which which);
 
 #include <prt-rsc.h>
 #include <prt-acc.h>

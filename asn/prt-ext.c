@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.4  1995-08-29 11:17:16  quinn
+ * Revision 1.5  1995-09-27 15:02:42  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.4  1995/08/29  11:17:16  quinn
  * *** empty log message ***
  *
  * Revision 1.3  1995/08/21  09:10:18  quinn
@@ -21,9 +24,9 @@
 
 #include <proto.h>
 
-int z_External(ODR o, Z_External **p, int opt)
+int MDF z_External(ODR o, Z_External **p, int opt)
 {
-    oident *oid;
+   oident *oid;
 
     static Odr_arm arm[] =
     {

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: yaz-ccl.h,v $
- * Revision 1.3  1995-05-16 08:50:40  quinn
+ * Revision 1.4  1995-09-27 15:02:54  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.3  1995/05/16  08:50:40  quinn
  * License, documentation, and memory fixes
  *
  *
@@ -33,10 +36,11 @@
 #ifndef YAZ_CCL_H
 #define YAZ_CCL_H
 
+#include <yconfig.h>
 #include <proto.h>
 #include <ccl.h>
 
-Z_RPNQuery *ccl_rpn_query (struct ccl_rpn_node *p);
-Z_AttributesPlusTerm *ccl_scan_query (struct ccl_rpn_node *p);
+Z_RPNQuery MDF *ccl_rpn_query (struct ccl_rpn_node *p);
+Z_AttributesPlusTerm MDF *ccl_scan_query (struct ccl_rpn_node *p);
 
 #endif

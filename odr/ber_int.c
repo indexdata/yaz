@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_int.c,v $
- * Revision 1.7  1995-05-16 08:50:44  quinn
+ * Revision 1.8  1995-09-27 15:02:55  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.7  1995/05/16  08:50:44  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.6  1995/04/18  08:15:14  quinn
@@ -36,7 +39,7 @@
 static int ber_encinteger(ODR o, int val);
 static int ber_decinteger(unsigned char *buf, int *val);
 
-int ber_integer(ODR o, int *val)
+int MDF ber_integer(ODR o, int *val)
 {
     int res;
 

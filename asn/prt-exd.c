@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exd.c,v $
- * Revision 1.1  1995-08-21 09:16:32  quinn
+ * Revision 1.2  1995-09-27 15:02:41  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.1  1995/08/21  09:16:32  quinn
  * Added Extended services + Item Order
  *
  *
@@ -12,7 +15,7 @@
 
 #include <proto.h>
 
-int z_TaskPackage(ODR o, Z_TaskPackage **p, int opt)
+int MDF z_TaskPackage(ODR o, Z_TaskPackage **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
         return opt && odr_ok(o);
@@ -172,7 +175,7 @@ int z_IOTaskPackage(ODR o, Z_IOTaskPackage **p, int opt)
 	odr_sequence_end(o);
 }
 
-int z_ItemOrder(ODR o, Z_ItemOrder **p, int opt)
+int MDF z_ItemOrder(ODR o, Z_ItemOrder **p, int opt)
 {
     static Odr_arm arm[] =
     {

@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: cclptree.c,v $
- * Revision 1.1  1995-04-10 10:28:20  quinn
+ * Revision 1.2  1995-09-27 15:02:44  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.1  1995/04/10  10:28:20  quinn
  * Added copy of CCL.
  *
  * Revision 1.5  1995/02/23  08:31:59  adam
@@ -28,7 +31,7 @@
 
 #include <ccl.h>
 
-void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
+void MDF ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
 {
 
     switch (rpn->kind)

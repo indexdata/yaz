@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.2  1995-05-16 08:50:21  quinn
+ * Revision 1.3  1995-09-27 15:02:39  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/05/16  08:50:21  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/03/15  13:46:09  adam
@@ -91,7 +94,7 @@ struct {
 { 0, NULL} 
 };
 
-const char *diagbib1_str (int code)
+const char MDF *diagbib1_str (int code)
 {
     int i;
     for (i=0; msg_tab[i].msg; i++)

@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: cclerrms.c,v $
- * Revision 1.1  1995-04-10 10:28:18  quinn
+ * Revision 1.2  1995-09-27 15:02:43  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.1  1995/04/10  10:28:18  quinn
  * Added copy of CCL.
  *
  * Revision 1.6  1995/02/23  08:31:59  adam
@@ -22,6 +25,8 @@
  *
  */
 
+#include <yconfig.h>
+
 char *err_msg_array[] = {
     "Ok",
     "Search word expected",
@@ -38,7 +43,7 @@ char *err_msg_array[] = {
     "Right truncation not supported"
 };
 
-const char *ccl_err_msg (int ccl_errno)
+const char MDF *ccl_err_msg (int ccl_errno)
 {
     return err_msg_array[ccl_errno];
 }

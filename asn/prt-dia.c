@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-dia.c,v $
- * Revision 1.1  1995-08-29 11:19:31  quinn
+ * Revision 1.2  1995-09-27 15:02:41  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.1  1995/08/29  11:19:31  quinn
  * Added Diagnostic Format
  *
  *
@@ -350,7 +353,7 @@ int z_DiagnosticUnit(ODR o, Z_DiagnosticUnit **p, int opt)
 	odr_sequence_end(o);
 }
 
-int z_DiagnosticFormat(ODR o, Z_DiagnosticFormat **p, int opt)
+int MDF z_DiagnosticFormat(ODR o, Z_DiagnosticFormat **p, int opt)
 {
     if (o->direction == ODR_DECODE)
 	*p = odr_malloc(o, sizeof(**p));

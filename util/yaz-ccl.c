@@ -141,7 +141,7 @@ static Z_RPNStructure *ccl_rpn_structure (struct ccl_rpn_node *p)
     return zs;
 }
 
-Z_RPNQuery *ccl_rpn_query (struct ccl_rpn_node *p)
+Z_RPNQuery MDF *ccl_rpn_query (struct ccl_rpn_node *p)
 {
     Z_RPNQuery *zq;
 
@@ -152,7 +152,7 @@ Z_RPNQuery *ccl_rpn_query (struct ccl_rpn_node *p)
     return zq;
 }
 
-Z_AttributesPlusTerm *ccl_scan_query (struct ccl_rpn_node *p)
+Z_AttributesPlusTerm MDF *ccl_scan_query (struct ccl_rpn_node *p)
 {
     if (p->kind != CCL_RPN_TERM)
         return NULL;

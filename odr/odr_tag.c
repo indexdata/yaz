@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_tag.c,v $
- * Revision 1.3  1995-05-16 08:51:00  quinn
+ * Revision 1.4  1995-09-27 15:03:00  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.3  1995/05/16  08:51:00  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.2  1995/03/08  12:12:31  quinn
@@ -17,7 +20,7 @@
 
 #include <odr.h>
 
-int odr_implicit_settag(ODR o, int class, int tag)
+int MDF odr_implicit_settag(ODR o, int class, int tag)
 {
     if (o->error)
     	return 0;

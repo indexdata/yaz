@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.7  1995-06-19 12:40:18  quinn
+ * Revision 1.8  1995-09-27 15:03:02  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.7  1995/06/19  12:40:18  quinn
  * Added log_file()
  *
  * Revision 1.6  1995/06/15  15:45:03  quinn
@@ -92,12 +95,12 @@ char *strerror(int n)
 
 #endif
 
-FILE *log_file(void)
+FILE MDF *log_file(void)
 {
     return l_file;
 }
 
-void log_init(int level, const char *prefix, const char *name)
+void MDF log_init(int level, const char *prefix, const char *name)
 {
     l_level = level;
     if (prefix && *prefix)
@@ -109,7 +112,7 @@ void log_init(int level, const char *prefix, const char *name)
     setvbuf(l_file, 0, _IONBF, 0);
 }
 
-void logf(int level, const char *fmt, ...)
+void MDF logf(int level, const char *fmt, ...)
 {
     va_list ap;
     char buf[4096], flags[1024];
@@ -141,7 +144,7 @@ void logf(int level, const char *fmt, ...)
     fflush(l_file);
 }
 
-int log_mask_str (const char *str)
+int MDF log_mask_str (const char *str)
 {
     const char *p;
     int i, level = LOG_DEFAULT_LEVEL;

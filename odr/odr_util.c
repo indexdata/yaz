@@ -2,7 +2,7 @@
 #include <odr.h>
 #include <oid.h>
 
-char *odr_indent(ODR o)
+char MDF *odr_indent(ODR o)
 {
     static char buf[512];
     int i = o->indent;
@@ -14,7 +14,7 @@ char *odr_indent(ODR o)
     return buf;
 }
 
-int odp_more_chunks(ODR o, unsigned char *base, int len)
+int MDF odp_more_chunks(ODR o, unsigned char *base, int len)
 {
     if (!len)
     	return 0;
@@ -33,7 +33,7 @@ int odp_more_chunks(ODR o, unsigned char *base, int len)
         return o->bp - base < len;
 }
 
-Odr_oid *odr_oiddup(ODR odr, Odr_oid *o)
+Odr_oid MDF *odr_oiddup(ODR odr, Odr_oid *o)
 {
     Odr_oid *r;
 

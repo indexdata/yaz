@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.3  1995-06-19 12:38:25  quinn
+ * Revision 1.4  1995-09-27 15:02:47  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.3  1995/06/19  12:38:25  quinn
  * Reorganized include-files. Added small features.
  *
  * Revision 1.2  1995/05/16  08:50:31  quinn
@@ -50,6 +53,8 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include <yconfig.h>
+
 #define LOG_FATAL 0x0001
 #define LOG_DEBUG 0x0002
 #define LOG_WARN  0x0004
@@ -60,9 +65,9 @@
 
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 
-void log_init(int level, const char *prefix, const char *name);
-void logf(int level, const char *fmt, ...);
-int log_mask_str (const char *str);
-FILE *log_file(void);
+void MDF log_init(int level, const char *prefix, const char *name);
+void MDF logf(int level, const char *fmt, ...);
+int MDF log_mask_str (const char *str);
+FILE MDF *log_file(void);
 
 #endif

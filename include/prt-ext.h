@@ -29,6 +29,11 @@
  * Biased-choice External for Z39.50.
  */
 
+#ifndef PRT_EXT_H
+#define PRT_EXT_H
+
+#include <yconfig.h>
+
 struct Z_External
 {
     Odr_oid *direct_reference;
@@ -72,4 +77,6 @@ struct Z_External
     } u;
 };
 
-int z_External(ODR o, Z_External **p, int opt);
+int MDF z_External(ODR o, Z_External **p, int opt);
+
+#endif

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.5  1995-09-12 11:31:46  quinn
+ * Revision 1.6  1995-09-27 15:02:48  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.5  1995/09/12  11:31:46  quinn
  * Added some oids.
  *
  * Revision 1.4  1995/06/27  13:20:32  quinn
@@ -47,6 +50,8 @@
 
 #ifndef OID_H
 #define OID_H
+
+#include <yconfig.h>
 
 #define OID_SIZE 100
 
@@ -134,12 +139,12 @@ typedef enum oid_proto oid_proto;
 typedef enum oid_class oid_class;
 typedef enum oid_value oid_value;
 
-int *oid_getoidbyent(struct oident *ent);
-struct oident *oid_getentbyoid(int *o);
-void oid_oidcpy(int *t, int *s);
-void oid_oidcat(int *t, int *s);
-int oid_oidcmp(int *o1, int *o2);
-int oid_oidlen(int *o);
-oid_value oid_getvalbyname(char *name);
+int MDF *oid_getoidbyent(struct oident *ent);
+struct oident MDF *oid_getentbyoid(int *o);
+void MDF oid_oidcpy(int *t, int *s);
+void MDF oid_oidcat(int *t, int *s);
+int MDF oid_oidcmp(int *o1, int *o2);
+int MDF oid_oidlen(int *o);
+oid_value MDF oid_getvalbyname(char *name);
 
 #endif

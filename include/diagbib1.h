@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: diagbib1.h,v $
- * Revision 1.2  1995-05-16 08:50:30  quinn
+ * Revision 1.3  1995-09-27 15:02:47  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/05/16  08:50:30  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/03/30  09:39:40  quinn
@@ -35,4 +38,6 @@
  *
  */
 
-const char *diagbib1_str (int code);
+#include <yconfig.h>
+
+const char MDF *diagbib1_str (int code);

@@ -25,6 +25,11 @@
  *
  */
 
+#ifndef PRT_EXD_H
+#define PRT_EXD_H
+
+#include <yconfig.h>
+
 typedef struct Z_TaskPackage
 {
     Odr_oid *packageType;                 
@@ -45,7 +50,7 @@ typedef struct Z_TaskPackage
     Z_External *taskSpecificParameters;   
 } Z_TaskPackage;
 
-int z_TaskPackage(ODR o, Z_TaskPackage **p, int opt);
+int MDF z_TaskPackage(ODR o, Z_TaskPackage **p, int opt);
 
 /* ----------------------- ITEM ORDER ------------------------- */
 
@@ -142,4 +147,6 @@ typedef struct Z_ItemOrder
     } u;
 } Z_ItemOrder;
 
-int z_ItemOrder(ODR o, Z_ItemOrder **p, int opt);
+int MDF z_ItemOrder(ODR o, Z_ItemOrder **p, int opt);
+
+#endif

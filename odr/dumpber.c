@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.2  1995-06-27 13:20:51  quinn
+ * Revision 1.3  1995-09-27 15:02:57  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/06/27  13:20:51  quinn
  * Fixed sign-clash. Non-fatal warning
  *
  * Revision 1.1  1995/06/19  12:38:45  quinn
@@ -108,7 +111,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level)
     return b - buf;
 }
 
-int odr_dumpBER(FILE *f, char *buf, int len)
+int MDF odr_dumpBER(FILE *f, char *buf, int len)
 {
     return do_dumpBER(f, buf, len, 0);
 }

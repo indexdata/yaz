@@ -25,6 +25,11 @@
  *
  */
 
+#ifndef PRT_GRS_H
+#define PRT_GRS_H
+
+#include <yconfig.h>
+
 struct Z_GenericRecord;
 typedef struct Z_GenericRecord Z_GenericRecord;
 
@@ -169,4 +174,6 @@ struct Z_GenericRecord
     Z_TaggedElement **elements;
 };
 
-int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
+int MDF z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
+
+#endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.14  1995-08-15 11:16:39  quinn
+ * Revision 1.15  1995-09-27 15:03:00  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.14  1995/08/15  11:16:39  quinn
  * Fixed pretty-printers.
  * CV:e ----------------------------------------------------------------------
  * CV:e ----------------------------------------------------------------------
@@ -53,7 +56,7 @@
 #include <odr.h>
 #include <assert.h>
 
-int odr_sequence_begin(ODR o, void *p, int size)
+int MDF odr_sequence_begin(ODR o, void *p, int size)
 {
     char **pp = (char**) p;
 
@@ -76,7 +79,7 @@ int odr_sequence_begin(ODR o, void *p, int size)
     	return 0;
 }
 
-int odr_sequence_end(ODR o)
+int MDF odr_sequence_end(ODR o)
 {
     return odr_constructed_end(o);    
 }
@@ -86,7 +89,7 @@ int odr_sequence_more(ODR o)
     return odr_constructed_more(o);
 }
 
-int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
+int MDF odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
 {
     char ***pp = (char***) p;  /* for dereferencing */
     char **tmp = 0;

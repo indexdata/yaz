@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.2  1995-06-15 12:30:06  quinn
+ * Revision 1.3  1995-09-27 15:02:45  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/06/15  12:30:06  quinn
  * Added @ as hostname alias for INADDR ANY.
  *
  * Revision 1.1  1995/06/14  09:58:20  quinn
@@ -115,7 +118,7 @@ typedef struct tcpip_state
     int towrite;  /* to verify against user input */
 } tcpip_state;
 
-COMSTACK tcpip_type(int blocking, int protocol)
+COMSTACK MDF tcpip_type(int blocking, int protocol)
 {
     COMSTACK p;
     struct protoent *proto;
@@ -162,7 +165,7 @@ COMSTACK tcpip_type(int blocking, int protocol)
     return p;
 }
 
-struct sockaddr_in *tcpip_strtoaddr(const char *str)
+struct sockaddr_in MDF *tcpip_strtoaddr(const char *str)
 {
     static struct sockaddr_in add;
     struct hostent *hp;

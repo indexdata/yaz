@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_use.c,v $
- * Revision 1.5  1995-08-10 08:54:47  quinn
+ * Revision 1.6  1995-09-27 15:03:00  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.5  1995/08/10  08:54:47  quinn
  * Added Explain.
  *
  * Revision 1.4  1995/06/16  13:16:12  quinn
@@ -24,7 +27,7 @@
 #include <odr.h>
 #include <odr_use.h>
 
-int odr_external(ODR o, Odr_external **p, int opt)
+int MDF odr_external(ODR o, Odr_external **p, int opt)
 {
     Odr_external *pp;
     static Odr_arm arm[] =
@@ -47,7 +50,7 @@ int odr_external(ODR o, Odr_external **p, int opt)
 	odr_sequence_end(o);
 }
 
-int odr_visiblestring(ODR o, char **p, int opt)
+int MDF odr_visiblestring(ODR o, char **p, int opt)
 {
     return odr_implicit(o, odr_cstring, p, ODR_UNIVERSAL, ODR_VISIBLESTRING,
     	opt);
@@ -57,19 +60,19 @@ int odr_visiblestring(ODR o, char **p, int opt)
  * a char may not be sufficient to hold a general string, but we'll deal
  * with that once we start looking more closely at UniCode & co.
  */
-int odr_generalstring(ODR o, char **p, int opt)
+int MDF odr_generalstring(ODR o, char **p, int opt)
 {
     return odr_implicit(o, odr_cstring, p, ODR_UNIVERSAL, ODR_GENERALSTRING,
     	opt);
 }    
 
-int odr_graphicstring(ODR o, char **p, int opt)
+int MDF odr_graphicstring(ODR o, char **p, int opt)
 {
     return odr_implicit(o, odr_cstring, p, ODR_UNIVERSAL, ODR_GRAPHICSTRING,
     	opt);
 }    
 
-int odr_generalizedtime(ODR o, char **p, int opt)
+int MDF odr_generalizedtime(ODR o, char **p, int opt)
 {
     return odr_implicit(o, odr_cstring, p, ODR_UNIVERSAL, ODR_GENERALIZEDTIME,
     	opt);

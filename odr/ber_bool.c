@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bool.c,v $
- * Revision 1.6  1995-05-16 08:50:43  quinn
+ * Revision 1.7  1995-09-27 15:02:55  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.6  1995/05/16  08:50:43  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.5  1995/04/18  08:15:14  quinn
@@ -29,7 +32,7 @@
 #include <odr.h>
 
 
-int ber_boolean(ODR o, int *val)
+int MDF ber_boolean(ODR o, int *val)
 {
     int res, len;
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-acc.c,v $
- * Revision 1.3  1995-08-15 11:59:41  quinn
+ * Revision 1.4  1995-09-27 15:02:41  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.3  1995/08/15  11:59:41  quinn
  * Updated External
  *
  * Revision 1.2  1995/06/05  10:52:05  quinn
@@ -153,7 +156,7 @@ int z_Response1(ODR o, Z_Response1 **p, int opt)
     return opt && odr_ok(o);
 }
 
-int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt)
+int MDF z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt)
 {
     static Odr_arm arm[] =
     {

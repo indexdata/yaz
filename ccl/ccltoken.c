@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: ccltoken.c,v $
- * Revision 1.1  1995-04-10 10:28:22  quinn
+ * Revision 1.2  1995-09-27 15:02:44  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.1  1995/04/10  10:28:22  quinn
  * Added copy of CCL.
  *
  * Revision 1.5  1995/02/23  08:32:00  adam
@@ -44,7 +47,7 @@ const char *ccl_token_or = "or";
 const char *ccl_token_not = "not";
 const char *ccl_token_set = "set";
 
-struct ccl_token *ccl_tokenize (const char *command)
+struct ccl_token MDF *ccl_tokenize (const char *command)
 {
     const char *cp = command;
     struct ccl_token *first = NULL;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.9  1995-08-15 12:00:23  quinn
+ * Revision 1.10  1995-09-27 15:02:58  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.9  1995/08/15  12:00:23  quinn
  * Updated External
  *
  * Revision 1.8  1995/06/19  17:01:51  quinn
@@ -35,7 +38,7 @@
 
 #include <odr.h>
 
-int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
+int MDF odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 {
     int i, cl = -1, tg, cn, *which = whichp, bias = o->choice_bias;
 
@@ -94,7 +97,7 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
     return 0;
 }
 
-void odr_choice_bias(ODR o, int what)
+void MDF odr_choice_bias(ODR o, int what)
 {
     o->choice_bias = what;
 }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.37  1995-08-21 09:10:15  quinn
+ * Revision 1.38  1995-09-27 15:02:40  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.37  1995/08/21  09:10:15  quinn
  * Smallish fixes to suppport new formats.
  *
  * Revision 1.36  1995/08/15  11:59:39  quinn
@@ -127,7 +130,7 @@
  * We'll use a general octetstring here, since string operations are
  * clumsy on long strings.
  */
-int z_SUTRS(ODR o, Odr_oct **p, int opt)
+int MDF z_SUTRS(ODR o, Odr_oct **p, int opt)
 {
     return odr_implicit(o, odr_octetstring, p, ODR_UNIVERSAL,
 	ODR_GENERALSTRING, opt);
@@ -138,7 +141,7 @@ int z_ReferenceId(ODR o, Z_ReferenceId **p, int opt)
     return odr_implicit(o, odr_octetstring, (Odr_oct**) p, ODR_CONTEXT, 2, opt);
 }
 
-int z_DatabaseName(ODR o, Z_DatabaseName **p, int opt)
+int MDF z_DatabaseName(ODR o, Z_DatabaseName **p, int opt)
 {
     return odr_implicit(o, odr_visiblestring, (char **) p, ODR_CONTEXT, 105,
 	opt);
@@ -150,7 +153,7 @@ int z_ResultSetId(ODR o, char **p, int opt)
 	opt);
 }
 
-int z_ElementSetName(ODR o, char **p, int opt)
+int MDF z_ElementSetName(ODR o, char **p, int opt)
 {
     return odr_implicit(o, odr_visiblestring, p, ODR_CONTEXT, 103, opt);
 }
@@ -161,7 +164,7 @@ int z_UserInformationField(ODR o, Z_External **p, int opt)
     	11, opt);
 }
 
-int z_InternationalString(ODR o, char **p, int opt)
+int MDF z_InternationalString(ODR o, char **p, int opt)
 {
     return odr_generalstring(o, p, opt);
 }
@@ -176,7 +179,7 @@ int z_InfoCategory(ODR o, Z_InfoCategory **p, int opt)
 	odr_sequence_end(o);
 }
 
-int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt)
+int MDF z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt)
 {
     static Odr_arm arm[] =
     {
@@ -198,7 +201,7 @@ int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt)
 	odr_sequence_end(o);
 }
     
-int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt)
+int MDF z_OtherInformation(ODR o, Z_OtherInformation **p, int opt)
 {
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
@@ -212,7 +215,7 @@ int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt)
     return opt && odr_ok(o);
 }
 
-int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt)
+int MDF z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt)
 {
     static Odr_arm arm[] =
     {
@@ -236,7 +239,7 @@ int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt)
 /*
  * check tagging!!
  */
-int z_Unit(ODR o, Z_Unit **p, int opt)
+int MDF z_Unit(ODR o, Z_Unit **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
@@ -250,7 +253,7 @@ int z_Unit(ODR o, Z_Unit **p, int opt)
 	odr_sequence_end(o);
 }
 
-int z_IntUnit(ODR o, Z_IntUnit **p, int opt)
+int MDF z_IntUnit(ODR o, Z_IntUnit **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
@@ -263,7 +266,7 @@ int z_IntUnit(ODR o, Z_IntUnit **p, int opt)
 /* ---------------------- INITIALIZE SERVICE ------------------- */
 
 #if 0
-int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
+int MDF z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
@@ -287,7 +290,7 @@ int z_IdPass(ODR o, Z_IdPass **p, int opt)
     	odr_sequence_end(o);
 }
 
-int z_StrAuthentication(ODR o, char **p, int opt)
+int MDF z_StrAuthentication(ODR o, char **p, int opt)
 {
     return odr_visiblestring(o, p, opt);
 }
@@ -527,7 +530,7 @@ int z_AttributeElement(ODR o, Z_AttributeElement **p, int opt)
     	odr_sequence_end(o);
 }
 
-int z_Term(ODR o, Z_Term **p, int opt)
+int MDF z_Term(ODR o, Z_Term **p, int opt)
 {
     static Odr_arm arm[] =
     {
@@ -755,7 +758,7 @@ int z_DatabaseRecord(ODR o, Z_DatabaseRecord **p, int opt)
 
 #ifdef Z_95
 
-int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt)
+int MDF z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt)
 {
     static Odr_arm arm[] =
     {
@@ -780,7 +783,7 @@ int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt)
     	odr_sequence_end(o);
 }
 
-int z_DiagRec(ODR o, Z_DiagRec **p, int opt)
+int MDF z_DiagRec(ODR o, Z_DiagRec **p, int opt)
 {
     static Odr_arm arm[] = 
     {
@@ -939,7 +942,7 @@ int z_AccessControlResponse(ODR o, Z_AccessControlResponse **p, int opt)
 
 /* ------------------------ SCAN SERVICE -------------------- */
 
-int z_AttributeList(ODR o, Z_AttributeList **p, int opt)
+int MDF z_AttributeList(ODR o, Z_AttributeList **p, int opt)
 {
     if (o->direction == ODR_DECODE)
     	*p = odr_malloc(o, sizeof(**p));
@@ -1195,7 +1198,7 @@ int z_ElementSpec(ODR o, Z_ElementSpec **p, int opt)
     return opt && odr_ok(o);
 }
 
-int z_Specification(ODR o, Z_Specification **p, int opt)
+int MDF z_Specification(ODR o, Z_Specification **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
@@ -1420,7 +1423,7 @@ int z_Close(ODR o, Z_Close **p, int opt)
 
 /* ------------------------ APDU ------------------------- */
 
-int z_Permissions(ODR o, Z_Permissions **p, int opt)
+int MDF z_Permissions(ODR o, Z_Permissions **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
         return opt && odr_ok(o);
@@ -1470,7 +1473,7 @@ int z_ExtendedServicesResponse(ODR o, Z_ExtendedServicesResponse **p, int opt)
 
 /* ------------------------ APDU ------------------------- */
 
-int z_APDU(ODR o, Z_APDU **p, int opt)
+int MDF z_APDU(ODR o, Z_APDU **p, int opt)
 {
     static Odr_arm arm[] =
     {

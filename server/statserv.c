@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.26  1995-08-29 14:44:51  quinn
+ * Revision 1.27  1995-09-27 15:03:02  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.26  1995/08/29  14:44:51  quinn
  * Reset timeouts.
  *
  * Revision 1.25  1995/08/29  11:18:02  quinn
@@ -331,7 +334,7 @@ static void catchchld(int num)
     signal(SIGCHLD, catchchld);
 }
 
-statserv_options_block *statserv_getcontrol(void)
+statserv_options_block MDF *statserv_getcontrol(void)
 {
     static statserv_options_block cb;
 
@@ -339,12 +342,12 @@ statserv_options_block *statserv_getcontrol(void)
     return &cb;
 }
 
-void statserv_setcontrol(statserv_options_block *block)
+void MDF statserv_setcontrol(statserv_options_block *block)
 {
     memcpy(&control_block, block, sizeof(*block));
 }
 
-int statserv_main(int argc, char **argv)
+int MDF statserv_main(int argc, char **argv)
 {
     int ret, listeners = 0;
     char *arg;

@@ -2,7 +2,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.1  1995-04-10 10:28:19  quinn
+ * Revision 1.2  1995-09-27 15:02:44  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.1  1995/04/10  10:28:19  quinn
  * Added copy of CCL.
  *
  * Revision 1.12  1995/03/20  15:27:43  adam
@@ -106,7 +109,7 @@ static struct ccl_rpn_node *mk_node (enum rpn_node_kind kind)
     return p;
 }
 
-void ccl_rpn_delete (struct ccl_rpn_node *rpn)
+void MDF ccl_rpn_delete (struct ccl_rpn_node *rpn)
 {
     struct ccl_rpn_attr *attr, *attr1;
     if (!rpn)
@@ -551,7 +554,7 @@ static struct ccl_rpn_node *find_spec (struct ccl_rpn_attr **qa)
     return p1;
 }
 
-struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
+struct ccl_rpn_node MDF *ccl_find (CCL_bibset abibset, struct ccl_token *list,
                                int *error, const char **pos)
 {
     struct ccl_rpn_node *p;
@@ -576,7 +579,7 @@ struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
     return p;
 }
 
-struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
+struct ccl_rpn_node MDF *ccl_find_str (CCL_bibset bibset, const char *str,
                                    int *error, int *pos)
 {
     struct ccl_token *list;

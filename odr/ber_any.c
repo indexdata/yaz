@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_any.c,v $
- * Revision 1.10  1995-05-16 08:50:42  quinn
+ * Revision 1.11  1995-09-27 15:02:54  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.10  1995/05/16  08:50:42  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.9  1995/04/18  08:15:12  quinn
@@ -39,7 +42,7 @@
 
 #include <odr.h>
 
-int ber_any(ODR o, Odr_any **p)
+int MDF ber_any(ODR o, Odr_any **p)
 {
     int res;
 
@@ -68,7 +71,7 @@ int ber_any(ODR o, Odr_any **p)
 /*
  * Return length of BER-package or 0.
  */
-int completeBER(unsigned char *buf, int len)
+int MDF completeBER(unsigned char *buf, int len)
 {
     int res, ll, class, tag, cons;
     unsigned char *b = buf;

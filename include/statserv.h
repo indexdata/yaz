@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.5  1995-06-19 12:38:31  quinn
+ * Revision 1.6  1995-09-27 15:02:53  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.5  1995/06/19  12:38:31  quinn
  * Reorganized include-files. Added small features.
  *
  * Revision 1.4  1995/06/15  07:45:08  quinn
@@ -39,6 +42,7 @@
 #ifndef STATSERVER_H
 #define STATSERVER_H
 
+#include <yconfig.h>
 #include <oid.h>
 
 typedef struct statserv_options_block
@@ -55,8 +59,8 @@ typedef struct statserv_options_block
     char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
 } statserv_options_block;
 
-int statserv_main(int argc, char **argv);
-statserv_options_block *statserv_getcontrol(void);
-void statserv_setcontrol(statserv_options_block *block);
+int MDF statserv_main(int argc, char **argv);
+statserv_options_block MDF *statserv_getcontrol(void);
+void MDF statserv_setcontrol(statserv_options_block *block);
 
 #endif

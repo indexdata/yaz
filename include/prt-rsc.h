@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-rsc.h,v $
- * Revision 1.3  1995-08-17 12:45:17  quinn
+ * Revision 1.4  1995-09-27 15:02:52  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.3  1995/08/17  12:45:17  quinn
  * Fixed minor problems with GRS-1. Added support in c&s.
  *
  * Revision 1.2  1995/06/02  09:49:50  quinn
@@ -38,6 +41,8 @@
 
 #ifndef PRT_RSC_H
 #define PRT_RSC_H
+
+#include <yconfig.h>
 
 /* -------------------- Resource-1 -------------------- */
 
@@ -72,7 +77,7 @@ typedef struct Z_ResourceReport1
     char *message;
 } Z_ResourceReport1;
 
-int z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt);
+int MDF z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt);
 
 /* -------------------- Resource-2 -------------------- */
 
@@ -89,6 +94,6 @@ typedef struct Z_ResourceReport2
     char *message;                       /* OPTIONAL */
 } Z_ResourceReport2;
 
-int z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt);
+int MDF z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt);
 
 #endif

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oid.c,v $
- * Revision 1.7  1995-05-16 08:50:47  quinn
+ * Revision 1.8  1995-09-27 15:02:56  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.7  1995/05/16  08:50:47  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.6  1995/04/18  08:15:18  quinn
@@ -30,7 +33,7 @@
 
 #include <odr.h>
 
-int ber_oidc(ODR o, Odr_oid *p)
+int MDF ber_oidc(ODR o, Odr_oid *p)
 {
     int len, lenp, end;
     int pos, n, res, id;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.9  1995-05-16 08:50:56  quinn
+ * Revision 1.10  1995-09-27 15:02:59  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.9  1995/05/16  08:50:56  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.8  1995/03/17  10:17:54  quinn
@@ -39,7 +42,7 @@
  * Top level octet string en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_octetstring(ODR o, Odr_oct **p, int opt)
+int MDF odr_octetstring(ODR o, Odr_oct **p, int opt)
 {
     int res, cons = 0;
 
@@ -75,7 +78,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt)
 /*
  * Friendlier interface to octetstring.
  */
-int odr_cstring(ODR o, char **p, int opt)
+int MDF odr_cstring(ODR o, char **p, int opt)
 {
     int cons = 0, res;
     Odr_oct *t;

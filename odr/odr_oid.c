@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oid.c,v $
- * Revision 1.10  1995-05-29 08:11:44  quinn
+ * Revision 1.11  1995-09-27 15:03:00  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.10  1995/05/29  08:11:44  quinn
  * Moved oid from odr/asn to util.
  *
  * Revision 1.9  1995/05/16  08:50:57  quinn
@@ -44,7 +47,7 @@
  * Top level oid en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_oid(ODR o, Odr_oid **p, int opt)
+int MDF odr_oid(ODR o, Odr_oid **p, int opt)
 {
     int res, cons = 0;
 

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: prt-acc.h,v $
- * Revision 1.3  1995-08-17 12:45:16  quinn
+ * Revision 1.4  1995-09-27 15:02:49  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.3  1995/08/17  12:45:16  quinn
  * Fixed minor problems with GRS-1. Added support in c&s.
  *
  * Revision 1.2  1995/08/15  12:00:13  quinn
@@ -35,6 +38,9 @@
  *
  *
  */
+
+#ifndef PRT_ACC_H
+#define PRT_ACC_H
 
 typedef struct Z_Encryption1
 {
@@ -149,4 +155,6 @@ typedef struct Z_PromptObject1
     } u;
 } Z_PromptObject1;
 
-int z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);
+int MDF z_PromptObject1(ODR o, Z_PromptObject1 **p, int opt);
+
+#endif

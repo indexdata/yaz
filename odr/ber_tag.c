@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_tag.c,v $
- * Revision 1.11  1995-05-16 08:50:48  quinn
+ * Revision 1.12  1995-09-27 15:02:57  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.11  1995/05/16  08:50:48  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.10  1995/04/18  08:15:18  quinn
@@ -53,7 +56,7 @@
  *
  * Should perhaps be odr_tag?
 */
-int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
+int MDF ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
 {
     static int lclass = -1, ltag, br, lcons; /* save t&c rather than
 						decoding twice */
@@ -131,7 +134,7 @@ int ber_tag(ODR o, void *p, int class, int tag, int *constructed, int opt)
  * BER-encode a class/tag/constructed package (identifier octets). Return
  * number of bytes encoded, or -1 if out of bounds.
  */
-int ber_enctag(ODR o, int class, int tag, int constructed)
+int MDF ber_enctag(ODR o, int class, int tag, int constructed)
 {
     int cons = (constructed ? 1 : 0), n = 0;
     unsigned char octs[sizeof(int)], b;
@@ -171,7 +174,7 @@ int ber_enctag(ODR o, int class, int tag, int constructed)
 /* ber_dectag
  * Decode BER identifier octets. Return number of bytes read or -1 for error.
  */
-int ber_dectag(unsigned char *buf, int *class, int *tag, int *constructed)
+int MDF ber_dectag(unsigned char *buf, int *class, int *tag, int *constructed)
 {
     unsigned char *b = buf;
 

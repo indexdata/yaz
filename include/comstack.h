@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.7  1995-06-19 12:38:24  quinn
+ * Revision 1.8  1995-09-27 15:02:46  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.7  1995/06/19  12:38:24  quinn
  * Reorganized include-files. Added small features.
  *
  * Revision 1.6  1995/05/30  10:54:51  quinn
@@ -87,6 +90,7 @@
 #ifndef COMSTACK_H
 #define COMSTACK_H
 
+#include <yconfig.h>
 #include <oid.h>
 #include <dmalloc.h>
 
@@ -151,7 +155,7 @@ struct comstack
 #define cs_errno(handle) ((handle)->errno)
 #define cs_getproto(handle) ((handle)->protocol)
 
-const char *cs_strerror(COMSTACK h);
+const char MDF *cs_strerror(COMSTACK h);
 
 /*
  * error management.

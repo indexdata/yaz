@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: dmalloc.h,v $
- * Revision 1.2  1995-05-16 08:50:30  quinn
+ * Revision 1.3  1995-09-27 15:02:47  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/05/16  08:50:30  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/03/30  09:39:40  quinn
@@ -42,6 +45,8 @@
 
 #ifdef DEBUG_MALLOC
 
+#include <yconfig.h>
+
 #ifdef malloc
 #undef malloc
 #endif
@@ -55,9 +60,9 @@
 #define free(p) d_free(__FILE__, __LINE__, (p))
 #define realloc(p, n) d_realloc(__FILE__, __LINE__, (p), (n))
 
-void *d_malloc(char *file, int line, int nbytes);
-void d_free(char *file, int line, char *ptr);
-void *d_realloc(char *file, int line, char *ptr, int nbytes);
+void MDF *d_malloc(char *file, int line, int nbytes);
+void MDF d_free(char *file, int line, char *ptr);
+void MDF *d_realloc(char *file, int line, char *ptr, int nbytes);
 
 #endif
 

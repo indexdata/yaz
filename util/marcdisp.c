@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdisp.c,v $
- * Revision 1.2  1995-05-16 08:51:12  quinn
+ * Revision 1.3  1995-09-27 15:03:03  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/05/16  08:51:12  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/04/10  10:28:46  quinn
@@ -34,7 +37,7 @@ int atoi_n (const char *buf, int len)
     return val;
 }
 
-int marc_display (const char *buf, FILE *outf)
+int MDF marc_display (const char *buf, FILE *outf)
 {
     int entry_p;
     int record_length;

@@ -25,6 +25,11 @@
  *
  */
 
+#ifndef PRT_DIA_H
+#define PRT_DIA_H
+
+#include <yconfig.h>
+
 typedef struct Z_TooMany
 {
     int *tooManyWhat;
@@ -339,4 +344,6 @@ typedef struct Z_DiagnosticFormat
     Z_DiagnosticUnit **diagnostics;
 } Z_DiagnosticFormat;
 
-int z_DiagnosticFormat(ODR o, Z_DiagnosticFormat **p, int opt);
+int MDF z_DiagnosticFormat(ODR o, Z_DiagnosticFormat **p, int opt);
+
+#endif

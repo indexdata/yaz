@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-exp.c,v $
- * Revision 1.2  1995-08-15 11:59:43  quinn
+ * Revision 1.3  1995-09-27 15:02:42  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/08/15  11:59:43  quinn
  * Updated External
  *
  * Revision 1.1  1995/08/10  08:54:02  quinn
@@ -92,7 +95,7 @@ int z_UnitType(ODR o, Z_UnitType **p, int opt);
 int z_Units(ODR o, Z_Units **p, int opt);
 int z_CategoryList(ODR o, Z_CategoryList **p, int opt);
 int z_CategoryInfo(ODR o, Z_CategoryInfo **p, int opt);
-int z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
+int MDF z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
 
 int z_LanguageCode(ODR o, char **p, int opt)
 {
@@ -1342,7 +1345,7 @@ int z_CategoryInfo(ODR o, Z_CategoryInfo **p, int opt)
         odr_sequence_end(o);
 }
 
-int z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt)
+int MDF z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt)
 {
     static Odr_arm arm[] =
     {

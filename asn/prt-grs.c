@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-grs.c,v $
- * Revision 1.2  1995-08-28 10:58:58  quinn
+ * Revision 1.3  1995-09-27 15:02:43  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/08/28  10:58:58  quinn
  * Added extra choice-entry to data to catch visiblestring.
  *
  * Revision 1.1  1995/08/17  12:47:09  quinn
@@ -15,7 +18,6 @@
 
 #include <proto.h>
 
-int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
 int z_TaggedElement(ODR o, Z_TaggedElement **p, int opt);
 int z_ElementData(ODR o, Z_ElementData **p, int opt);
 int z_ElementMetaData(ODR o, Z_ElementMetaData **p, int opt);
@@ -27,7 +29,7 @@ int z_HitVector(ODR o, Z_HitVector **p, int opt);
 int z_Triple(ODR o, Z_Triple **p, int opt);
 int z_Variant(ODR o, Z_Variant **p, int opt);
 
-int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt)
+int MDF z_GenericRecord(ODR o, Z_GenericRecord **p, int opt)
 {
     if (o->direction == ODR_DECODE)
 	*p = odr_malloc(o, sizeof(**p));

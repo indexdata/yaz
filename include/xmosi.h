@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmosi.h,v $
- * Revision 1.2  1995-05-16 08:50:39  quinn
+ * Revision 1.3  1995-09-27 15:02:53  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.2  1995/05/16  08:50:39  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.1  1995/03/30  09:39:43  quinn
@@ -45,14 +48,15 @@
 #ifndef XMOSI_H
 #define XMOSI_H
 
+#include <yconfig.h>
 #include <stdio.h>
 #include <xti.h>
 #include <xti92.h>
 #include <xtiUser.h>
 #include <mosi.h>
 
-struct netbuf *mosi_strtoaddr(const char *str);
+struct netbuf MDF *mosi_strtoaddr(const char *str);
 
-COMSTACK mosi_type(int blocking, int protocol);
+COMSTACK MDF mosi_type(int blocking, int protocol);
 
 #endif

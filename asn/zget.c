@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.7  1995-06-15 07:44:52  quinn
+ * Revision 1.8  1995-09-27 15:02:43  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.7  1995/06/15  07:44:52  quinn
  * Moving to v3.
  *
  * Revision 1.6  1995/06/14  15:26:37  quinn
@@ -30,7 +33,7 @@
 
 #include <proto.h>
 
-Z_InitRequest *zget_InitRequest(ODR o)
+Z_InitRequest MDF *zget_InitRequest(ODR o)
 {
     Z_InitRequest *r = odr_malloc(o, sizeof(*r));
 
@@ -54,7 +57,7 @@ Z_InitRequest *zget_InitRequest(ODR o)
     return r;
 }
 
-Z_InitResponse *zget_InitResponse(ODR o)
+Z_InitResponse MDF *zget_InitResponse(ODR o)
 {
     Z_InitResponse *r = odr_malloc(o, sizeof(*r));
 
@@ -79,7 +82,7 @@ Z_InitResponse *zget_InitResponse(ODR o)
     return r;
 }
 
-Z_SearchRequest *zget_SearchRequest(ODR o)
+Z_SearchRequest MDF *zget_SearchRequest(ODR o)
 {
     Z_SearchRequest *r = odr_malloc(o, sizeof(*r));
 
@@ -106,7 +109,7 @@ Z_SearchRequest *zget_SearchRequest(ODR o)
     return r;
 }
 
-Z_SearchResponse *zget_SearchResponse(ODR o)
+Z_SearchResponse MDF *zget_SearchResponse(ODR o)
 {
     Z_SearchResponse *r = odr_malloc(o, sizeof(*r));
 
@@ -129,7 +132,7 @@ Z_SearchResponse *zget_SearchResponse(ODR o)
     return r;
 }
 
-Z_PresentRequest *zget_PresentRequest(ODR o)
+Z_PresentRequest MDF *zget_PresentRequest(ODR o)
 {
     Z_PresentRequest *r = odr_malloc(o, sizeof(*r));
 
@@ -156,7 +159,7 @@ Z_PresentRequest *zget_PresentRequest(ODR o)
     return r;
 }
 
-Z_PresentResponse *zget_PresentResponse(ODR o)
+Z_PresentResponse MDF *zget_PresentResponse(ODR o)
 {
     Z_PresentResponse *r = odr_malloc(o, sizeof(*r));
 
@@ -174,7 +177,7 @@ Z_PresentResponse *zget_PresentResponse(ODR o)
     return r;
 }
 
-Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
+Z_DeleteResultSetRequest MDF *zget_DeleteResultSetRequest(ODR o)
 {
     Z_DeleteResultSetRequest *r = odr_malloc(o, sizeof(*r));
 
@@ -189,7 +192,7 @@ Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
     return r;
 }
 
-Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
+Z_DeleteResultSetResponse MDF *zget_DeleteResultSetResponse(ODR o)
 {
     Z_DeleteResultSetResponse *r = odr_malloc(o, sizeof(*r));
 
@@ -208,7 +211,7 @@ Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
     return r;
 }
 
-Z_ScanRequest *zget_ScanRequest(ODR o)
+Z_ScanRequest MDF *zget_ScanRequest(ODR o)
 {
     Z_ScanRequest *r = odr_malloc(o, sizeof(*r));
 
@@ -227,7 +230,7 @@ Z_ScanRequest *zget_ScanRequest(ODR o)
     return r;
 }
 
-Z_ScanResponse *zget_ScanResponse(ODR o)
+Z_ScanResponse MDF *zget_ScanResponse(ODR o)
 {
     Z_ScanResponse *r = odr_malloc(o, sizeof(*r));
 
@@ -246,7 +249,7 @@ Z_ScanResponse *zget_ScanResponse(ODR o)
     return r;
 }
 
-Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
+Z_TriggerResourceControlRequest MDF *zget_TriggerResourceControlRequest(ODR o)
 {
     Z_TriggerResourceControlRequest *r = odr_malloc(o, sizeof(*r));
 
@@ -261,7 +264,7 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
     return r;
 }
 
-Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
+Z_ResourceControlRequest MDF *zget_ResourceControlRequest(ODR o)
 {
     Z_ResourceControlRequest *r = odr_malloc(o, sizeof(*r));
 
@@ -278,7 +281,7 @@ Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
     return r;
 }
 
-Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
+Z_ResourceControlResponse MDF *zget_ResourceControlResponse(ODR o)
 {
     Z_ResourceControlResponse *r = odr_malloc(o, sizeof(*r));
 
@@ -332,7 +335,7 @@ Z_Segment *zget_Segment(ODR o)
     return r;
 }
 
-Z_Close *zget_Close(ODR o)
+Z_Close MDF *zget_Close(ODR o)
 {
     Z_Close *r = odr_malloc(o, sizeof(*r));
 
@@ -348,7 +351,7 @@ Z_Close *zget_Close(ODR o)
     return r;
 }
 
-Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which)
+Z_APDU MDF *zget_APDU(ODR o, enum Z_APDU_which which)
 {
     Z_APDU *r = odr_malloc(o, sizeof(*r));
     

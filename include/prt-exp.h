@@ -25,6 +25,10 @@
  *
  */
 
+#ifndef PRT_EXP_H
+#define PRT_EXP_H
+
+#include <yconfig.h>
 
 typedef struct Z_CommonInfo
 {
@@ -1011,4 +1015,6 @@ typedef struct Z_ExplainRecord
     } u;
 } Z_ExplainRecord;
 
-int z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
+int MDF z_ExplainRecord(ODR o, Z_ExplainRecord **p, int opt);
+
+#endif

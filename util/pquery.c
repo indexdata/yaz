@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.5  1995-06-15 12:31:02  quinn
+ * Revision 1.6  1995-09-27 15:03:03  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.5  1995/06/15  12:31:02  quinn
  * *** empty log message ***
  *
  * Revision 1.4  1995/06/15  07:45:19  quinn
@@ -245,7 +248,7 @@ static Z_RPNStructure *rpn_structure (ODR o, int num_attr, int max_attr,
     return sz;
 }
 
-Z_RPNQuery *p_query_rpn (ODR o, const char *qbuf)
+Z_RPNQuery MDF *p_query_rpn (ODR o, const char *qbuf)
 {
     Z_RPNQuery *zq;
     int attr_array[1024];
@@ -259,7 +262,7 @@ Z_RPNQuery *p_query_rpn (ODR o, const char *qbuf)
     return zq;
 }
 
-Z_AttributesPlusTerm *p_query_scan (ODR o, const char *qbuf)
+Z_AttributesPlusTerm MDF *p_query_scan (ODR o, const char *qbuf)
 {
     int attr_list[1024];
     int num_attr = 0;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bool.c,v $
- * Revision 1.6  1995-05-16 08:50:52  quinn
+ * Revision 1.7  1995-09-27 15:02:58  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.6  1995/05/16  08:50:52  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.5  1995/03/17  10:17:49  quinn
@@ -31,7 +34,7 @@
  * Top level boolean en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_bool(ODR o, int **p, int opt)
+int MDF odr_bool(ODR o, int **p, int opt)
 {
     int res, cons = 0;
 

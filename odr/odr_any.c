@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_any.c,v $
- * Revision 1.4  1995-05-16 08:50:50  quinn
+ * Revision 1.5  1995-09-27 15:02:58  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.4  1995/05/16  08:50:50  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.3  1995/03/17  10:17:46  quinn
@@ -26,7 +29,7 @@
  * does not work, and neither does the optional flag, unless the element
  * is the last in a sequence.
  */
-int odr_any(ODR o, Odr_any **p, int opt)
+int MDF odr_any(ODR o, Odr_any **p, int opt)
 {
     if (o->error)
     	return 0;

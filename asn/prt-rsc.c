@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-rsc.c,v $
- * Revision 1.3  1995-06-02 09:49:15  quinn
+ * Revision 1.4  1995-09-27 15:02:43  quinn
+ * Modified function heads & prototypes.
+ *
+ * Revision 1.3  1995/06/02  09:49:15  quinn
  * Adding access control
  *
  * Revision 1.2  1995/06/01  14:34:53  quinn
@@ -31,7 +34,7 @@ int z_Estimate1(ODR o, Z_Estimate1 **p, int opt)
 	odr_sequence_end(o);
 }
 
-int z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt)
+int MDF z_ResourceReport1(ODR o, Z_ResourceReport1 **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
@@ -58,7 +61,7 @@ int z_Estimate2(ODR o, Z_Estimate2 **p, int opt)
 	odr_sequence_end(o);
 }
 
-int z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt)
+int MDF z_ResourceReport2(ODR o, Z_ResourceReport2 **p, int opt)
 {
 if (!odr_sequence_begin(o, p, sizeof(**p)))
     return opt && odr_ok(o);
