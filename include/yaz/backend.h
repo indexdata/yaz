@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.13  2002-03-05 12:45:49  mike
+ * Revision 1.14  2002-03-20 14:36:00  adam
+ * Additional Search Info for GFS
+ *
+ * Revision 1.13  2002/03/05 12:45:49  mike
  * Add trivial support for implementation_id specified by backend.
  *
  * Revision 1.12  2001/03/25 21:55:12  adam
@@ -137,6 +140,7 @@ typedef struct {
     int hits;                  /* number of hits */
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
+    Z_OtherInformation *search_info; /* additional search info */
 } bend_search_rr;
 
 /* extended present handler. Does not replace bend_fetch. */

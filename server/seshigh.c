@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.127 2002-03-05 12:45:49 mike Exp $
+ * $Id: seshigh.c,v 1.128 2002-03-20 14:36:00 adam Exp $
  */
 
 /*
@@ -1023,6 +1023,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrr->errcode = 0;
 	bsrr->hits = 0;
 	bsrr->errstring = NULL;
+        bsrr->search_info = NULL;
 	(assoc->init->bend_search)(assoc->backend, bsrr);
 	if (!bsrr->request)
 	    return 0;
@@ -1133,6 +1134,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 	    resp->presentStatus = 0;
 	}
     }
+    resp->additionalSearchInfo = bsrt->search_info;
     return apdu;
 }
 

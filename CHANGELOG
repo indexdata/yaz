@@ -2,6 +2,10 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.6 2002/MM/DD
 
+Client displays USR.1:SearchResult-1 (hits per term).
+
+Additional Search Info for search in Generic Frontend Server.
+
 Fixed CCL parsing of "field=s".
 
 WIN32 installer - using the excellent NSIS software from nullsoft.
