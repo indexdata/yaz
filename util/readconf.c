@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 1994-1998, Index Data
+ * Copyright (C) 1994-1999, Index Data
  * All rights reserved.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: readconf.c,v $
- * Revision 1.6  1998-10-13 16:09:55  adam
+ * Revision 1.7  1999-06-30 09:10:32  adam
+ * Fixed reading of MS-DOS files.
+ *
+ * Revision 1.6  1998/10/13 16:09:55  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -43,7 +46,7 @@
 #include <log.h>
 #include <readconf.h>
 
-#define l_isspace(c) ((c) == '\t' || (c) == ' ' || (c) == '\n')
+#define l_isspace(c) ((c) == '\t' || (c) == ' ' || (c) == '\n' || (c) == '\r')
 
 int readconf_line(FILE *f, int *lineno, char *line, int len,
 		  char *argv[], int num)
