@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.44 2002-07-25 14:19:18 adam Exp $
+# $Id: makefile,v 1.45 2002-08-27 22:33:30 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -26,15 +26,15 @@
 DEBUG=1   # 0 for release, 1 for debug
 
 # expat
-HAVE_EXPAT=1
+HAVE_EXPAT=0
 EXPAT_DIR= c:\Expat-1.95.4
 
 # iconv
-HAVE_ICONV=1
+HAVE_ICONV=0
 ICONV_DIR = c:\libiconv-1.7.0.1
 
 # TCL
-TCL="C:\Tcl\bin\tclsh83.exe"
+TCL="C:\program files\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
 
 default: all
@@ -327,7 +327,9 @@ YAZ_UTIL_OBJS= \
    $(OBJDIR)\tpath.obj \
    $(OBJDIR)\wrbuf.obj \
    $(OBJDIR)\xmalloc.obj \
-   $(OBJDIR)\matchstr.obj 
+   $(OBJDIR)\matchstr.obj \
+   $(OBJDIR)\siconv.obj
+
 
 YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\diagbib1.obj \
@@ -869,7 +871,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.44  2002-07-25 14:19:18  adam
+# Revision 1.45  2002-08-27 22:33:30  adam
+# siconv added
+#
+# Revision 1.44  2002/07/25 14:19:18  adam
 # EXPAT support on WIN32
 #
 # Revision 1.43  2002/07/25 13:45:30  adam
