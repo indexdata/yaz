@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.19 2005-03-06 21:27:09 adam Exp $
+ * $Id: marcdisp.c,v 1.20 2005-03-07 06:07:33 adam Exp $
  */
 
 /**
@@ -265,7 +265,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     if (base_address != entry_p+1)
     {
 	if (produce_warnings)
-	    wrbuf_printf (wr,"  <!-- Base address not at end of directory, "
+	    wrbuf_printf (wr,"<!-- Base address not at end of directory, "
 			  "base %d, end %d -->\n", base_address, entry_p+1);
     }
     if (mt->xml == YAZ_MARC_ISO2709)
@@ -524,9 +524,9 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         if (mt->xml == YAZ_MARC_LINE)
             wrbuf_puts (wr, mt->endline_str);
 	if (i < end_offset)
-	    wrbuf_printf(wr, "  <!-- separator but not at end of field length=%d-->\n", data_length);
+	    wrbuf_printf(wr, "<!-- separator but not at end of field length=%d-->\n", data_length);
 	if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
-	    wrbuf_printf(wr, "  <!-- no separator at end of field length=%d-->\n", data_length);
+	    wrbuf_printf(wr, "<!-- no separator at end of field length=%d-->\n", data_length);
         switch(mt->xml)
         {
         case YAZ_MARC_SIMPLEXML:
