@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.70 2002-04-15 11:19:32 adam Exp $
+dnl $Id: configure.in,v 1.71 2002-04-15 12:03:39 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.8.7)
 dnl
@@ -137,7 +137,10 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
 	AC_CHECK_HEADERS(readline/readline.h readline/history.h)
         OLDLIBS=$LIBS
         LIBS="$LIBS $READLINE_LIBS"
-        AC_TRY_LINK([#include <readline/readline.h>],[
+        AC_TRY_LINK([
+	#include <stdio.h>
+	#include <readline/readline.h>
+	],[
         static void f()
         {
                 rl_attempted_completion_over = 0;
