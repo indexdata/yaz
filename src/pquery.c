@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ * $Id: pquery.c,v 1.3 2004-11-17 00:17:17 adam Exp $
  */
 /**
  * \file pquery.c
@@ -400,15 +400,9 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
     if (*li->lex_buf == '1')
-    {
-        p->exclusion = (int *)odr_malloc (o, sizeof(*p->exclusion));
-        *p->exclusion = 1;
-    } 
+        p->exclusion = odr_intdup (o, 1);
     else if (*li->lex_buf == '0')
-    {
-        p->exclusion = (int *)odr_malloc (o, sizeof(*p->exclusion));
-        *p->exclusion = 0;
-    }
+        p->exclusion = odr_intdup (o, 0);
     else
         p->exclusion = NULL;
 
@@ -417,24 +411,21 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
     }
-    p->distance = (int *)odr_malloc (o, sizeof(*p->distance));
-    *p->distance = atoi (li->lex_buf);
+    p->distance = odr_intdup (o, atoi(li->lex_buf));
 
     if (!lex (li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
     }
-    p->ordered = (int *)odr_malloc (o, sizeof(*p->ordered));
-    *p->ordered = atoi (li->lex_buf);
+    p->ordered = odr_intdup (o, atoi (li->lex_buf));
     
     if (!lex (li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
     }
-    p->relationType = (int *)odr_malloc (o, sizeof(*p->relationType));
-    *p->relationType = atoi (li->lex_buf);
+    p->relationType = odr_intdup (o, atoi (li->lex_buf));
 
     if (!lex (li))
     {
@@ -442,9 +433,9 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
     if (*li->lex_buf == 'k')
-        p->which = 0;
+        p->which = Z_ProximityOperator_known;
     else if (*li->lex_buf == 'p')
-        p->which = 1;
+        p->which = Z_ProximityOperator_private;
     else
         p->which = atoi (li->lex_buf);
 
@@ -453,9 +444,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
     }
-    p->which = Z_ProximityOperator_known;
-    p->u.known = (int *)odr_malloc (o, sizeof(*p->u.known));
-    *p->u.known = atoi (li->lex_buf);
+    p->u.known = odr_intdup (o, atoi(li->lex_buf));
     return p;
 }
 
@@ -643,8 +632,7 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct yaz_pqf_parser *li, oid_proto proto,
     return zq;
 }
 
-Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto,
-                         const char *qbuf)
+Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf)
 {
     struct yaz_pqf_parser li;
 
