@@ -2,7 +2,7 @@ UserInfoFormat-oclcUserInformation
 {Z39-50-userInfoFormat OCLCUserInformation (7)} DEFINITIONS ::=
 BEGIN
 
--- $Id: oclcui.asn,v 1.2 2003-07-18 22:36:39 mike Exp $
+-- $Id: oclcui.asn,v 1.3 2003-08-25 19:53:33 mike Exp $
 --
 -- This format is returned from the server at
 --	fsz3950test.oclc.org:210
@@ -14,12 +14,15 @@ BEGIN
 -- as an Init diagnostic from fsz3950test.oclc.org:210.  Adam further
 -- removed the SEQUENCE structure, changed failReason to a BOOLEAN and
 -- deleted diagnosticSetId altogether, to make the ASN.1 conform to
--- what's actually returned on the wire.
+-- what's actually returned on the wire.  Finally, I removed the
+-- OPTIONAL on failReason on the advice of OCLC's Keith Neibarger
+-- <neibarge@oclc.org> (although he'd also advised me, wrongly, that I
+-- could remove the OPTIONAL on dblist).
 
 OCLC-UserInformation ::= SEQUENCE {
     motd        [1] IMPLICIT VisibleString,
     dblist      SEQUENCE OF DBName OPTIONAL,
-    failReason  [3] IMPLICIT BOOLEAN OPTIONAL,
+    failReason  [3] IMPLICIT BOOLEAN,
     code        [1] IMPLICIT INTEGER OPTIONAL,
     text        [2] IMPLICIT VisibleString OPTIONAL
 }
