@@ -1,17 +1,24 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Backend interface change. Individual Scan terms returned from
-bend_scan may also be tagged as Surrogate Diagnostics. Refer
-to struct scan_entry in include/backend.h.
+Retrieval module enhancements. Tag sets may be typed in the reference
+to it. From the .abs-file the "tagset" directive takes a third optional
+integer type for the tag set referenced. From a .tag-file the "include"
+directive takes a third optional type as well. The old "type" directive
+in the tag set itself is still recognized but acts as the default type
+for the tag set.
 
-Retrieval module enhancements. Multiple tag sets and attribute sets
-may be specified in abstract syntax specs. Revised the error/warning
+Backend interface change. Individual Scan terms returned from bend_scan
+may also be tagged as Surrogate Diagnostics. Refer to struct scan_entry
+in include/backend.h.
+
+Retrieval module enhancements. Multiple tag sets and attribute sets may
+be specified in abstract syntax specs. Revised the error/warning for
 logging messages reported by the retrieval module when reading the
 various spec files.
 
 Object Identifier system (oid_..) changed. The API is backwards
-compatible but the oid-routines now allocates new OID's
-when needed. Raw OID's may be specified in oid_getvalbyname.
+compatible but the oid-routines now allocates new OID's when needed.
+Raw OID's may be specified in oid_getvalbyname.
 
 YAZ now uses GNU configure to generate Makefile(s).
 

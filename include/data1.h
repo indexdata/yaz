@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.37  1998-10-13 16:09:46  adam
+ * Revision 1.38  1998-10-15 08:29:15  adam
+ * Tag set type may be specified in reference to it using "tagset"
+ * directive in .abs-files and "include" directive in .tag-files.
+ *
+ * Revision 1.37  1998/10/13 16:09:46  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -228,7 +232,8 @@ typedef struct data1_attset_cache_info *data1_attset_cache;
 
 typedef enum data1_datatype
 {
-    DATA1K_structured = 1,
+    DATA1K_unknown,
+    DATA1K_structured,
     DATA1K_string,
     DATA1K_numeric,
     DATA1K_bool,
@@ -320,15 +325,17 @@ typedef struct data1_tag
     struct data1_tag *next;
 } data1_tag;
 
-typedef struct data1_tagset
+typedef struct data1_tagset data1_tagset;
+
+struct data1_tagset
 {
+    int type;                        /* type of tagset in current context */
     char *name;                      /* symbolic name */
     oid_value reference;
-    int type;                        /* type of tagset in current context */
     data1_tag *tags;                 /* tags defined by this set */
-    struct data1_tagset *children;   /* included tagsets */
-    struct data1_tagset *next;       /* sibling */
-} data1_tagset;
+    data1_tagset *children;          /* children */
+    data1_tagset *next;              /* sibling */
+};
 
 typedef struct data1_termlist
 {
@@ -451,10 +458,13 @@ YAZ_EXPORT data1_node *data1_read_record(data1_handle dh,
 					 int (*rf)(void *, char *, size_t),
 					 void *fh, NMEM m);
 YAZ_EXPORT data1_absyn *data1_read_absyn(data1_handle dh, const char *file);
-YAZ_EXPORT data1_tag *data1_gettagbynum(data1_handle dh, data1_tagset *s,
+YAZ_EXPORT data1_tag *data1_gettagbynum(data1_handle dh,
+					data1_tagset *s,
 					int type, int value);
 YAZ_EXPORT data1_tagset *data1_empty_tagset (data1_handle dh);
-YAZ_EXPORT data1_tagset *data1_read_tagset(data1_handle dh, char *file);
+YAZ_EXPORT data1_tagset *data1_read_tagset(data1_handle dh, 
+					   const char *file,
+					   int type);
 YAZ_EXPORT data1_element *data1_getelementbytagname(data1_handle dh, 
 						    data1_absyn *abs,
 						    data1_element *parent,
@@ -463,7 +473,7 @@ YAZ_EXPORT Z_GenericRecord *data1_nodetogr(data1_handle dh, data1_node *n,
 					   int select, ODR o,
 					   int *len);
 YAZ_EXPORT data1_tag *data1_gettagbyname(data1_handle dh, data1_tagset *s,
-					 char *name);
+					 const char *name);
 YAZ_EXPORT void data1_free_tree(data1_handle dh, data1_node *t);
 YAZ_EXPORT char *data1_nodetobuf(data1_handle dh, data1_node *n,
 				 int select, int *len);

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_tagset.c,v $
- * Revision 1.9  1998-10-13 16:09:53  adam
+ * Revision 1.10  1998-10-15 08:29:17  adam
+ * Tag set type may be specified in reference to it using "tagset"
+ * directive in .abs-files and "include" directive in .tag-files.
+ *
+ * Revision 1.9  1998/10/13 16:09:53  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -80,14 +84,14 @@ data1_datatype data1_maptype (data1_handle dh, char *t)
     for (i = 0; types[i].tname; i++)
 	if (!data1_matchstr(types[i].tname, t))
 	    return types[i].type;
-    return 0;
+    return DATA1K_unknown;
 }
 
 data1_tag *data1_gettagbynum (data1_handle dh, data1_tagset *s,
 			      int type, int value)
 {
     data1_tag *r;
-
+    
     for (; s; s = s->next)
     {
 	/* scan local set */
@@ -96,21 +100,22 @@ data1_tag *data1_gettagbynum (data1_handle dh, data1_tagset *s,
 		if (r->which == DATA1T_numeric && r->value.numeric == value)
 		    return r;
 	/* scan included sets */
-	if (s->children && (r = data1_gettagbynum (dh, s->children,
-						   type, value)))
+	if (s->children &&
+	    (r = data1_gettagbynum (dh, s->children, type, value)))
 	    return r;
     }
     return 0;
 }
 
-data1_tag *data1_gettagbyname (data1_handle dh, data1_tagset *s, char *name)
+data1_tag *data1_gettagbyname (data1_handle dh, data1_tagset *s,
+			       const char *name)
 {
     data1_tag *r;
 
     for (; s; s = s->next)
     {
 	/* scan local set */
-	for (r = s->tags; r; r = r->next)
+	for (r = s->children->tags; r; r = r->next)
 	{
 	    data1_name *np;
 
@@ -131,17 +136,18 @@ data1_tagset *data1_empty_tagset (data1_handle dh)
 	(data1_tagset *) nmem_malloc(data1_nmem_get (dh), sizeof(*res));
     res->name = 0;
     res->reference = VAL_NONE;
-    res->type = 0;
     res->tags = 0;
+    res->type = 0;
     res->children = 0;
     res->next = 0;
     return res;
 }
 
-data1_tagset *data1_read_tagset (data1_handle dh, char *file)
+data1_tagset *data1_read_tagset (data1_handle dh, const char *file, int type)
 {
     NMEM mem = data1_nmem_get (dh);
-    data1_tagset *res = 0, **childp;
+    data1_tagset *res = 0;
+    data1_tagset **childp;
     data1_tag **tagp;
     FILE *f;
     int lineno = 0;
@@ -154,6 +160,7 @@ data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 	return 0;
     }
     res = data1_empty_tagset (dh);
+    res->type = type;
     childp = &res->children;
     tagp = &res->tags;
 
@@ -241,23 +248,28 @@ data1_tagset *data1_read_tagset (data1_handle dh, char *file)
 	{
 	    if (argc != 2)
 	    {
-		logf(LOG_WARN, "%s:%d: Bad # args to type", file, lineno);
+		logf (LOG_WARN, "%s:%d: Bad # args to type", file, lineno);
 		continue;
 	    }
-	    res->type = atoi(argv[1]);
+	    if (!res->type)
+		res->type = atoi(argv[1]);
 	}
 	else if (!strcmp(cmd, "include"))
 	{
 	    char *name;
+	    int type = 0;
 
-	    if (argc != 2)
+	    if (argc < 2)
 	    {
 		logf(LOG_WARN, "%s:%d: Bad # args to include",
 		     file, lineno);
 		continue;
 	    }
 	    name = argv[1];
-	    if (!(*childp = data1_read_tagset (dh, name)))
+	    if (argc == 3)
+		type = atoi(argv[2]);
+	    *childp = data1_read_tagset (dh, name, type);
+	    if (!(*childp))
 	    {
 		logf(LOG_WARN, "%s:%d: Inclusion failed for tagset %s",
 		     file, lineno, name);

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.22  1998-10-13 16:09:47  adam
+ * Revision 1.23  1998-10-15 08:29:16  adam
+ * Tag set type may be specified in reference to it using "tagset"
+ * directive in .abs-files and "include" directive in .tag-files.
+ *
+ * Revision 1.22  1998/10/13 16:09:47  adam
  * Added support for arbitrary OID's for tagsets, schemas and attribute sets.
  * Added support for multiple attribute set references and tagset references
  * from an abstract syntax file.
@@ -637,14 +641,18 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	else if (!strcmp(cmd, "tagset"))
 	{
 	    char *name;
-	    if (argc != 2)
+	    int type = 0;
+	    if (argc < 2)
 	    {
 		logf(LOG_WARN, "%s:%d: Bad # of args to tagset",
 		     file, lineno);
 		continue;
 	    }
 	    name = argv[1];
-	    if (!(*tagset_childp = data1_read_tagset (dh, name)))
+	    if (argc == 3)
+		type = atoi(argv[2]);
+	    *tagset_childp = data1_read_tagset (dh, name, type);
+	    if (!(*tagset_childp))
 	    {
 		logf(LOG_WARN, "%s:%d: Couldn't load tagset %s",
 		     file, lineno, name);
