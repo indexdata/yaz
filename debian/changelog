@@ -1,3 +1,9 @@
+yaz (1.9.1-5) unstable; urgency=low
+
+  * GRS-1 render for ZOOM. data1 moved to zebra.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu, 24 Oct 2002  9:54:29 +0100
+
 yaz (1.9.1-4) unstable; urgency=low
 
   * fix interpretation of dash in CCL queries (and-lists).
