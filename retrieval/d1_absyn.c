@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.4  1996-05-01 12:45:28  quinn
+ * Revision 1.5  1996-05-09 07:27:43  quinn
+ * Multiple local attributes values supported.
+ *
+ * Revision 1.4  1996/05/01  12:45:28  quinn
  * Support use of local tag names in abs file.
  *
  * Revision 1.3  1995/11/01  16:34:55  quinn
@@ -158,10 +161,11 @@ data1_absyn *data1_read_absyn(char *file)
 	{
 	    data1_element *new;
 	    int i;
-	    char path[512], name[512], att[512], *p;
+	    char path[512], name[512], termlists[512], *p;
 	    int type, value;
+	    data1_termlist **tp;
 
-	    if (sscanf(args, "%s %s %s", path, name, att) < 3)
+	    if (sscanf(args, "%s %s %s", path, name, termlists) < 3)
 	    {
 		logf(LOG_WARN, "Bad # of args to elm in %s: '%s'", 
 		    file, args);
@@ -189,7 +193,8 @@ data1_absyn *data1_read_absyn(char *file)
 		abort;
 	    new->next = new->children = 0;
 	    new->tag = 0;
-	    new->att = 0;
+	    new->termlists = 0;
+	    tp = &new->termlists;
 	    ppl[level] = &new->next;
 	    ppl[level+1] = &new->children;
 
@@ -228,10 +233,10 @@ data1_absyn *data1_read_absyn(char *file)
 		return 0;
 	    }
 
-	    if (*att == '!')
-		strcpy(att, name);
-	    if (*att == '-')
-		new->att = 0;
+	    /* parse termList definitions */
+	    p = termlists;
+	    if (*p == '-')
+		new->termlists = 0;
 	    else
 	    {
 		if (!res->attset)
@@ -240,16 +245,44 @@ data1_absyn *data1_read_absyn(char *file)
 		    fclose(f);
 		    return 0;
 		}
-		if (!(new->att = data1_getattbyname(res->attset, att)))
+		do
 		{
-		    logf(LOG_WARN, "Couldn't find att '%s' in attset", att);
-		    fclose(f);
-		    return 0;
+		    char attname[512], structure[512];
+		    int r;
+
+		    if (!(r = sscanf(p, "%511[^:,]:%511[^,]", attname,
+			structure)))
+		    {
+			logf(LOG_WARN, "Syntax error in termlistspec in %s",
+			    file);
+			fclose(f);
+			return 0;
+		    }
+		    if (*attname == '!')
+			strcpy(attname, name);
+		    *tp = xmalloc(sizeof(**tp));
+		    if (!((*tp)->att = data1_getattbyname(res->attset,
+			attname)))
+		    {
+			logf(LOG_WARN, "Couldn't find att '%s' in attset",
+			    attname);
+			fclose(f);
+			return 0;
+		    }
+		    if (r < 2) /* is the structure qualified? */
+			(*tp)->structure = DATA1S_word;
+		    else if (!data1_matchstr(structure, "w"))
+			(*tp)->structure = DATA1S_word;
+		    else if (!data1_matchstr(structure, "p"))
+			(*tp)->structure = DATA1S_phrase;
+
+		    (*tp)->next = 0;
+		    tp = &(*tp)->next;
 		}
+		while ((p = strchr(p, ',')) && *(++p));
 	    }
-	    if (!(new->name = xmalloc(strlen(name)+1)))
-		abort();
-	    strcpy(new->name, name);
+
+	    new->name = xstrdup(name);
 	}
 	else if (!strcmp(cmd, "name"))
 	{

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_attset.c,v $
- * Revision 1.4  1996-02-21 15:23:36  quinn
+ * Revision 1.5  1996-05-09 07:27:43  quinn
+ * Multiple local attributes values supported.
+ *
+ * Revision 1.4  1996/02/21  15:23:36  quinn
  * Reversed fclose and return;
  *
  * Revision 1.3  1995/12/13  17:14:26  quinn
@@ -88,19 +91,37 @@ data1_attset *data1_read_attset(char *file)
 	    *args = '\0';
 	if (!strcmp(cmd, "att"))
 	{
-	    int num, local, rr;
-	    char name[512];
+	    int num, rr;
+	    char name[512], localstr[512];
 	    data1_att *t;
+	    data1_local_attribute *locals;
 
-	    if ((rr = sscanf(args, "%d %s %d", &num, name, &local)) < 2)
+	    if ((rr = sscanf(args, "%511d %s %511s", &num, name, localstr)) < 2)
 	    {
 		logf(LOG_WARN, "Not enough arguments to att in '%s' in %s",
 		    args, file);
 		fclose(f);
 		return 0;
 	    }
-	    if (rr < 3)
-		local = num;
+	    if (rr < 3) /* no local attributes given */
+	    {
+		locals = xmalloc(sizeof(*locals));
+		locals->local = num;
+		locals->next = 0;
+	    }
+	    else /* parse the string "local{,local}" */
+	    {
+		char *p = localstr;
+		data1_local_attribute **ap = &locals;
+		do
+		{
+		    *ap = xmalloc(sizeof(**ap));
+		    (*ap)->local = atoi(p);
+		    (*ap)->next = 0;
+		    ap = &(*ap)->next;
+		}
+		while ((p = strchr(p, ',')) && *(++p));
+	    }
 	    if (!(t = *attp = xmalloc(sizeof(*t))))
 		abort();
 	    t->parent = res;
@@ -108,7 +129,7 @@ data1_attset *data1_read_attset(char *file)
 		abort();
 	    strcpy(t->name, name);
 	    t->value = num;
-	    t->local = local;
+	    t->locals = locals;
 	    t->next = 0;
 	    attp = &t->next;
 	}
