@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_null.c,v $
- * Revision 1.9  1995-10-18 16:12:56  quinn
+ * Revision 1.10  1997-11-24 11:33:56  adam
+ * Using function odr_nullval() instead of global ODR_NULLVAL when
+ * appropriate.
+ *
+ * Revision 1.9  1995/10/18 16:12:56  quinn
  * Better diagnostics. Added special case in NULL to handle WAIS server.
  *
  * Revision 1.8  1995/09/29  17:12:24  quinn
@@ -69,6 +73,6 @@ int odr_null(ODR o, Odr_null **p, int opt)
 #endif
     }
     if (o->direction == ODR_DECODE)
-    	*p = ODR_NULLVAL;
+    	*p = odr_nullval();
     return ber_null(o);
 }

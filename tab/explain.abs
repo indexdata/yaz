@@ -37,6 +37,8 @@ elm (4,0)/(4,115)		usageRestrictions			-
 elm (4,0)/(4,116)		paymentAddr				-
 elm (4,0)/(4,117)		hours					-
 elm (4,0)/(4,118)		dbCombinations				-
+elm (4,0)/(4,118)/(4,605)	databaseList				-
+elm (4,0)/(4,118)/(4,605)/(4,102)	databaseName			-
 elm (4,0)/(4,119)		addresses				-
 
 elm (4,0)/(4,500)		commonAccessInfo			-
@@ -81,7 +83,11 @@ elm (4,1)/(4,227)		keywords				-
 elm (4,1)/(4,227)/(4,1000)	keyword					-
 elm (4,1)/(4,113)		description				-
 elm (4,1)/(4,205)		associatedDbs				-
+elm (4,1)/(4,205)/(4,605)	databaseList				-
+elm (4,1)/(4,205)/(4,605)/(4,102)	databaseName			-
 elm (4,1)/(4,206)		subDbs					-
+elm (4,1)/(4,206)/(4,605)	databaseList				-
+elm (4,1)/(4,206)/(4,605)/(4,102)	databaseName			-
 elm (4,1)/(4,207)		disclaimers				-
 elm (4,1)/(4,103)		recentNews				-
 elm (4,1)/(4,209)		recordCount				-

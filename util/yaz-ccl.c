@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.10  1997-09-29 08:58:25  adam
+ * Revision 1.11  1997-11-24 11:33:57  adam
+ * Using function odr_nullval() instead of global ODR_NULLVAL when
+ * appropriate.
+ *
+ * Revision 1.10  1997/09/29 08:58:25  adam
  * Fixed conversion of trees so that true copy is made.
  *
  * Revision 1.9  1997/06/23 10:31:25  adam
@@ -65,7 +69,7 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
         }
     }
     else
-        zapt->attributeList = ODR_NULLVAL;
+        zapt->attributeList = odr_nullval();
     
     zapt->term = term;
     term->which = Z_Term_general;
@@ -114,15 +118,15 @@ static Z_Complex *ccl_rpn_complex (ODR o, struct ccl_rpn_node *p)
     {
     case CCL_RPN_AND:
         zo->which = Z_Operator_and;
-        zo->u.and = ODR_NULLVAL;
+        zo->u.and = odr_nullval();
         break;
     case CCL_RPN_OR:
         zo->which = Z_Operator_or;
-        zo->u.and = ODR_NULLVAL;
+        zo->u.and = odr_nullval();
         break;
     case CCL_RPN_NOT:
         zo->which = Z_Operator_and_not;
-        zo->u.and = ODR_NULLVAL;
+        zo->u.and = odr_nullval();
         break;
     default:
         assert (0);

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.25  1997-10-31 12:20:08  adam
+ * Revision 1.26  1997-11-24 11:33:56  adam
+ * Using function odr_nullval() instead of global ODR_NULLVAL when
+ * appropriate.
+ *
+ * Revision 1.25  1997/10/31 12:20:08  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -95,6 +99,11 @@
 #include <odr.h>
 
 Odr_null *ODR_NULLVAL = "NULL";  /* the presence of a null value */
+
+Odr_null *odr_nullval (void)
+{
+    return ODR_NULLVAL;
+}
 
 char *odr_errlist[] =
 {

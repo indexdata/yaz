@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_seq.c,v $
- * Revision 1.20  1997-09-29 07:17:31  adam
+ * Revision 1.21  1997-11-24 11:33:56  adam
+ * Using function odr_nullval() instead of global ODR_NULLVAL when
+ * appropriate.
+ *
+ * Revision 1.20  1997/09/29 07:17:31  adam
  * Added typecast to avoid warnings on MSVC.
  *
  * Revision 1.19  1997/06/23 10:31:11  adam
@@ -121,7 +125,7 @@ int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num)
     {
     	case ODR_DECODE:
 	    *num = 0;
-	    *pp = ODR_NULLVAL;
+	    *pp = odr_nullval();
 	    while (odr_sequence_more(o))
 	    {
 		/* outgrown array? */

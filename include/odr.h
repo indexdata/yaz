@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.23  1997-09-01 08:49:49  adam
+ * Revision 1.24  1997-11-24 11:33:56  adam
+ * Using function odr_nullval() instead of global ODR_NULLVAL when
+ * appropriate.
+ *
+ * Revision 1.23  1997/09/01 08:49:49  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -327,6 +331,7 @@ YAZ_EXPORT void odr_setbuf(ODR o, char *buf, int len, int can_grow);
 YAZ_EXPORT char *odr_getbuf(ODR o, int *len, int *size);
 YAZ_EXPORT void *odr_malloc(ODR o, int size);
 YAZ_EXPORT NMEM odr_extract_mem(ODR o);
+YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_release_mem(m) nmem_destroy(m)
 #define ODR_MEM NMEM
 

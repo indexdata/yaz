@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.16  1997-09-29 13:19:00  adam
+ * Revision 1.17  1997-11-24 11:33:57  adam
+ * Using function odr_nullval() instead of global ODR_NULLVAL when
+ * appropriate.
+ *
+ * Revision 1.16  1997/09/29 13:19:00  adam
  * Added function, oid_ent_to_oid, to replace the function
  * oid_getoidbyent, which is not thread safe.
  *
@@ -216,7 +220,7 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
         }
     }
     else
-        zapt->attributeList = ODR_NULLVAL;
+        zapt->attributeList = odr_nullval();
     zapt->term = term;
     term->which = Z_Term_general;
     term->u.general = term_octet;
@@ -323,15 +327,15 @@ static Z_Complex *rpn_complex (struct lex_info *li, ODR o, oid_proto proto,
     {
     case 'a':
         zo->which = Z_Operator_and;
-        zo->u.and = ODR_NULLVAL;
+        zo->u.and = odr_nullval();
         break;
     case 'o':
         zo->which = Z_Operator_or;
-        zo->u.and = ODR_NULLVAL;
+        zo->u.and = odr_nullval();
         break;
     case 'n':
         zo->which = Z_Operator_and_not;
-        zo->u.and = ODR_NULLVAL;
+        zo->u.and = odr_nullval();
         break;
     case 'p':
         zo->which = Z_Operator_prox;

@@ -91,6 +91,7 @@ tag 601		dateAdded					generalizedtime
 tag 602		dateChanged					generalizedtime
 tag 603		expiry						generalizedtime
 tag 604		languageCode					string
+tag 605 	databaseList					structured
 
 #
 # General tags for list members, etc.

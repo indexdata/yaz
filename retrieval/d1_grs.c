@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.11  1997-11-18 09:51:09  adam
+ * Revision 1.12  1997-11-24 11:33:56  adam
+ * Using function odr_nullval() instead of global ODR_NULLVAL when
+ * appropriate.
+ *
+ * Revision 1.11  1997/11/18 09:51:09  adam
  * Removed element num_children from data1_node. Minor changes in
  * data1 to Explain.
  *
@@ -159,7 +163,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
     if (!n)
     {
 	res->which = Z_ElementData_elementNotThere;
-	res->u.elementNotThere = ODR_NULLVAL;
+	res->u.elementNotThere = odr_nullval();
     }
     else if (n->which == DATA1N_data && (leaf || n->next == NULL))
     {
@@ -292,7 +296,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
     {
 	res->content = odr_malloc(o, sizeof(*res->content));
 	res->content->which = Z_ElementData_noDataRequested;
-	res->content->u.noDataRequested = ODR_NULLVAL;
+	res->content->u.noDataRequested = odr_nullval();
     }
     else if (!(res->content = nodetoelementdata (dh, data, select, leaf,
 						 o, len)))

@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implemented function odr_nullval() that returns the value of
+ODR_NULLVAL.
+
 * Removed member num_children from data1_node (in data1.h).
 
 Made NT service interface part of the server library. The

@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.12  1997-10-31 12:20:09  adam
+ * Revision 1.13  1997-11-24 11:33:56  adam
+ * Using function odr_nullval() instead of global ODR_NULLVAL when
+ * appropriate.
+ *
+ * Revision 1.12  1997/10/31 12:20:09  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -100,7 +104,7 @@ static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
 	if (*value == '@')
 	{
 	    t->which = Z_Triple_null;
-	    t->value.null = ODR_NULLVAL;
+	    t->value.null = odr_nullval();
 	}
 	else if (isdigit(*value))
 	{
@@ -134,12 +138,12 @@ static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
     else if (!strcmp(occ, "all"))
     {
 	op->which = Z_Occurrences_all;
-	op->u.all = ODR_NULLVAL;
+	op->u.all = odr_nullval();
     }
     else if (!strcmp(occ, "last"))
     {
 	op->which = Z_Occurrences_last;
-	op->u.all = ODR_NULLVAL;
+	op->u.all = odr_nullval();
     }
     else
     {
@@ -176,7 +180,7 @@ static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem)
     if (*buf == '*')
     {
 	u->which = Z_ETagUnit_wildPath;
-	u->u.wildPath = ODR_NULLVAL;
+	u->u.wildPath = odr_nullval();
     }
     else if (*buf == '?')
     {
