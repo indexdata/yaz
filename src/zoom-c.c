@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.12 2003-12-20 00:51:19 adam Exp $
+ * $Id: zoom-c.c,v 1.13 2003-12-20 00:52:08 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -918,7 +918,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.12 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.13 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2955,7 +2955,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         Z_SOAP *soap_package = 0;
         ODR o = odr_createmem(ODR_DECODE);
         Z_SOAP_Handler soap_handlers[2] = {
-            {"http://www.loc.gov/zing/srw/v1.0/", 0,
+            {"http://www.loc.gov/zing/srw/", 0,
              (Z_SOAP_fun) yaz_srw_codec},
             {0, 0, 0}
         };
