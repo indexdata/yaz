@@ -1,3 +1,9 @@
+yaz (1.9.1-2) unstable; urgency=low
+
+  * official release.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Fri,  4 Oct 2002 20:25:51 +0100
+
 yaz (1.9.1-1) unstable; urgency=low
 
   * New upstream version
