@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.h,v $
- * Revision 1.2  1995-03-30 10:26:48  quinn
+ * Revision 1.3  1995-03-30 12:18:09  quinn
+ * Added info.
+ *
+ * Revision 1.2  1995/03/30  10:26:48  quinn
  * Added Term structure
  *
  * Revision 1.1  1995/03/30  09:39:42  quinn
@@ -409,6 +412,9 @@ typedef struct Z_SearchResponse
     int *nextResultSetPosition;
     bool_t *searchStatus;
     int *resultSetStatus;              /* OPTIONAL */
+#define Z_RES_SUBSET        1
+#define Z_RES_INTERIM       2
+#define Z_RES_NONE          3
     int *presentStatus;                /* OPTIONAL */
 #define Z_PRES_SUCCESS      0
 #define Z_PRES_PARTIAL_1    1
