@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.234 2004-03-01 17:33:02 adam Exp $
+ * $Id: client.c,v 1.235 2004-03-10 19:42:45 adam Exp $
  */
 
 #include <stdio.h>
@@ -916,6 +916,8 @@ static void display_record(Z_External *r)
 		    printf ("shelvingLocation: %s\n", data->shelvingLocation);
 		if (data->callNumber)
 		    printf ("callNumber: %s\n", data->callNumber);
+		if (data->shelvingData)
+		    printf ("shelvingData: %s\n", data->shelvingData);
 		if (data->copyNumber)
 		    printf ("copyNumber: %s\n", data->copyNumber);
 		if (data->publicNote)
