@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.128 2002-03-20 14:36:00 adam Exp $
+ * $Id: seshigh.c,v 1.129 2002-04-18 13:18:47 adam Exp $
  */
 
 /*
@@ -1567,15 +1567,15 @@ void *bend_request_getdata(bend_request r)
 
 static Z_APDU *process_segmentRequest (association *assoc, request *reqb)
 {
-    bend_segment_rr request;
+    bend_segment_rr req;
 
-    request.segment = reqb->apdu_request->u.segmentRequest;
-    request.stream = assoc->encode;
-    request.decode = assoc->decode;
-    request.print = assoc->print;
-    request.association = assoc;
+    req.segment = reqb->apdu_request->u.segmentRequest;
+    req.stream = assoc->encode;
+    req.decode = assoc->decode;
+    req.print = assoc->print;
+    req.association = assoc;
     
-    (*assoc->init->bend_segment)(assoc->backend, &request);
+    (*assoc->init->bend_segment)(assoc->backend, &req);
 
     return 0;
 }
