@@ -33,6 +33,24 @@ client osi:0103/find2.denet.dk:4500
 
 Use '?' to get a list of the available commands.
 
+The current query language is a bit awkward, but functional:
+
+query::= complex | simple | attr query.
+complex ::= operator query query.
+operator ::= '@and' | '@or' | '@not'.
+simple ::= term | set.
+term ::= <word> | '"' <term> .. '"'.
+set ::= '@set' <setname>.
+attr ::= '@attr' <number> '=' <number>.
+
+Eg.:
+
+Andersen
+
+"Hans Andersen"
+
+@and @attr 1=1 andersen @attr 1=4 @attr 4=2 duckling
+
 The directories:
 
 doc     - Documentation.
@@ -51,7 +69,7 @@ asn     - This module implements the Z39.50/SR protocol. The best way
 	which defines structure and type definitions for each of the
 	types introduced in the protocol specification.
 
-yazlib  - This module implements the transport transparency
+comstack- This module implements the transport transparency
 	stack (COMSTACK). The comstack implements a generic interface
 	for exchanging BER-encoded records over a network. It supports
 	the 'American' mode of exchanging the records straight over

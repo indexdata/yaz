@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.12  1995-06-15 07:44:57  quinn
+ * Revision 1.13  1995-06-16 10:29:11  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.12  1995/06/15  07:44:57  quinn
  * Moving to v3.
  *
  * Revision 1.11  1995/06/14  15:26:40  quinn
@@ -63,7 +66,6 @@
 #endif
 
 #include <proto.h>
-
 #include <marcdisp.h>
 
 #ifdef RPN_QUERY
@@ -271,18 +273,9 @@ void display_record(Z_DatabaseRecord *p)
 	    odr_reset(print);
 	}
     }
-#if 1
     if (r->which == ODR_EXTERNAL_octet && p->u.octet_aligned->len)
     {
-#if 1
 	marc_display ((char*)p->u.octet_aligned->buf, stdout);
-#else
-	FILE *ofi = fopen("dump", "a");
-	assert(ofi);
-	fwrite(p->u.octet_aligned->buf, 1, p->u.octet_aligned->len, ofi);
-	fclose(ofi);
-	printf("dumped record\n");
-#endif
     }
     else
     {
@@ -293,7 +286,6 @@ void display_record(Z_DatabaseRecord *p)
 	    odr_reset(print);
 	}
     }
-#endif
 }
 
 static void display_diagrec(Z_DiagRec *p)
