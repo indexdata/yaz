@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: tcpip.c,v $
- * Revision 1.38  2001-03-21 12:43:36  adam
+ * Revision 1.39  2001-07-19 19:49:40  adam
+ * Fixed bug in tcpip_set_blocking.
+ *
+ * Revision 1.38  2001/03/21 12:43:36  adam
  * Implemented cs_create_host. Better error reporting for SSL comstack.
  *
  * Revision 1.37  2001/03/08 20:18:55  adam
@@ -1152,9 +1155,8 @@ int static tcpip_set_blocking(COMSTACK p, int blocking)
     
     if (p->blocking == blocking)
 	return 1;
-    if(blocking)
 #ifdef WIN32
-        flag = blocking;
+    flag = 1;
     if (ioctlsocket(p->iofile, FIONBIO, &flag) < 0)
 	return 0;
 #else
