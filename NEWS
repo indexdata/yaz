@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+* Added whereInList member to SRW Scan Term.
+
 Added support for SRW scan in yaz-client.
 
 * Changed Z_SRW_scanRequest to be able to carry both CCL and PQF.

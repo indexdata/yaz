@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data.
+ * Copyright (c) 2002-2005, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.29 2005-01-08 01:20:19 adam Exp $
+ * $Id: srw.c,v 1.30 2005-01-09 21:52:49 adam Exp $
  */
 /**
  * \file srw.c
@@ -353,6 +353,7 @@ static int yaz_srw_term(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm *term,
 	term->value = 0;
 	term->numberOfRecords = 0;
 	term->displayTerm = 0;
+	term->whereInList = 0;
 	for (ptr = pptr->children; ptr; ptr = ptr->next)
 	{
 	    if (match_xsd_string(ptr, "value", o,  &term->value))
@@ -363,6 +364,9 @@ static int yaz_srw_term(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm *term,
 	    else if (match_xsd_string(ptr, "displayTerm", o, 
 				      &term->displayTerm))
 		;
+	    else if (match_xsd_string(ptr, "whereInList", o, 
+				      &term->whereInList))
+		;
 	}
     }
     else if (o->direction == ODR_ENCODE)
@@ -371,6 +375,7 @@ static int yaz_srw_term(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm *term,
 	add_xsd_string(ptr, "value", term->value);
 	add_xsd_integer(ptr, "value", term->numberOfRecords);
 	add_xsd_string(ptr, "displayTerm", term->displayTerm);
+	add_xsd_string(ptr, "whereInList", term->whereInList);
     }
     return 0;
 }

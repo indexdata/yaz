@@ -1,8 +1,8 @@
 /* 
- * Copyright (c) 1995-2004, Index Data
+ * Copyright (c) 1995-2005, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.265 2005-01-08 01:20:18 adam Exp $
+ * $Id: client.c,v 1.266 2005-01-09 21:52:48 adam Exp $
  */
 
 #include <stdio.h>
@@ -3520,11 +3520,17 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
 static void handle_srw_scan_term(Z_SRW_scanTerm *term)
 {
     if (term->displayTerm)
-	printf ("%s: ", term->displayTerm);
-    if (term->value)
-	printf ("%s: ", term->value);
+	printf("%s:", term->displayTerm);
+    else if (term->value)
+	printf("%s:", term->value);
+    else
+	printf("No value:");
     if (term->numberOfRecords)
-	printf ("%d", *term->numberOfRecords);
+	printf(" %d", *term->numberOfRecords);
+    if (term->whereInList)
+	printf(" %s", term->whereInList);
+    if (term->value && term->displayTerm)
+	printf(" %s", term->value);
     printf("\n");
 }
 

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2004, Index Data.
+ * Copyright (c) 2002-2005, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.18 2005-01-08 01:20:18 adam Exp $
+ * $Id: srw.h,v 1.19 2005-01-09 21:52:48 adam Exp $
  */
 /**
  * \file srw.h
@@ -106,6 +106,7 @@ typedef struct {
     char *value;
     int *numberOfRecords;
     char *displayTerm;
+    char *whereInList;
 } Z_SRW_scanTerm;
 
 typedef struct {
