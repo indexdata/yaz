@@ -40,6 +40,11 @@ Init diagnostics to the client in User-information-field, in
 accordance with Z35.90 Implementor Agreement 5 (Returning diagnostics
 in an InitResponse)
 
+ZOOM-C supports "implementationId" and "implementationVersion" options
+to go along with "implementationName".  These allow the user code to
+specify identification strings to be sent to servers.
+
+
 --- 2.0.4 2003/09/04
 
 Allow any CQL relation (not just all,any,exact,scr).
