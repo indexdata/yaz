@@ -2,9 +2,11 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.6 2002/MM/DD
 
-WIN32 installer using the excellent NSIS software from nullsoft.
+Fixed CCL parsing of "field=s".
 
-Fix bug in CCL parser when form "field = - <number>" was used.
+WIN32 installer - using the excellent NSIS software from nullsoft.
+
+Fixed CCL parsing of "field = - <number>".
 
 Added function yaz_marc_decode that decodes MARC for line mode
 display or XML.

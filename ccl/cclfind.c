@@ -44,7 +44,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.28 2002-03-13 11:47:23 adam Exp $
+ * $Id: cclfind.c,v 1.29 2002-03-18 18:14:34 adam Exp $
  *
  * Old Europagate log:
  *
@@ -726,7 +726,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
                                           struct ccl_rpn_attr **qa)
 {
     static int list[] = {
-        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ, CCL_TOK_REL, -1};
+        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ, CCL_TOK_REL, CCL_TOK_SET, -1};
     struct ccl_rpn_node *p1, *p2, *pn;
     p1 = search_term_x (cclp, qa, list, 1);
     if (!p1)
