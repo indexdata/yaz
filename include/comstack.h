@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: comstack.h,v $
- * Revision 1.18  1997-09-17 12:10:31  adam
+ * Revision 1.19  1997-09-29 07:16:14  adam
+ * Array cs_errlist no longer global.
+ *
+ * Revision 1.18  1997/09/17 12:10:31  adam
  * YAZ version 1.4.
  *
  * Revision 1.17  1997/09/01 08:49:47  adam
@@ -209,8 +212,6 @@ YAZ_EXPORT const char *cs_errmsg(int n);
 #define CSOUTSTATE 2
 #define CSNODATA   3
 #define CSWRONGBUF 4
-
-extern const char *cs_errlist[];
 
 /* backwards compatibility */
 #define CS_SR     PROTO_SR

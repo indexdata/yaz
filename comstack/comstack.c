@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.c,v $
- * Revision 1.3  1997-09-01 08:49:14  adam
+ * Revision 1.4  1997-09-29 07:16:14  adam
+ * Array cs_errlist no longer global.
+ *
+ * Revision 1.3  1997/09/01 08:49:14  adam
  * New windows NT/95 port using MSV5.0. Minor changes only.
  *
  * Revision 1.2  1995/09/29 17:01:48  quinn
@@ -24,7 +27,7 @@
 
 #include <comstack.h>
 
-const char *cs_errlist[] =
+static const char *cs_errlist[] =
 {
     "No error or unspecified error",
     "System (lower-layer) error",
