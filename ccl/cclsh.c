@@ -1,0 +1,122 @@
+/* CCL shell.
+ * Europagate 1995
+ *
+ * $Log: cclsh.c,v $
+ * Revision 1.1  1995-04-10 10:28:21  quinn
+ * Added copy of CCL.
+ *
+ * Revision 1.9  1995/02/23  08:32:00  adam
+ * Changed header.
+ *
+ * Revision 1.7  1995/02/15  17:42:16  adam
+ * Minor changes of the api of this module. FILE* argument added
+ * to ccl_pr_tree.
+ *
+ * Revision 1.6  1995/02/14  19:55:13  adam
+ * Header files ccl.h/cclp.h are gone! They have been merged an
+ * moved to ../include/ccl.h.
+ * Node kind(s) in ccl_rpn_node have changed names.
+ *
+ * Revision 1.5  1995/02/14  16:20:57  adam
+ * Qualifiers are read from a file now.
+ *
+ * Revision 1.4  1995/02/14  14:12:42  adam
+ * Ranges for ordered qualfiers implemented (e.g. pd=1980-1990).
+ *
+ * Revision 1.3  1995/02/14  10:25:57  adam
+ * The constructions 'qualifier rel term ...' implemented.
+ *
+ * Revision 1.2  1995/02/13  15:15:07  adam
+ * Added handling of qualifiers. Not finished yet.
+ *
+ * Revision 1.1  1995/02/13  12:35:21  adam
+ * First version of CCL. Qualifiers aren't handled yet.
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include <ccl.h>
+
+static int debug = 0;
+static char *prog;
+
+int main (int argc, char **argv)
+{
+    CCL_bibset bibset;
+    FILE *bib_inf;
+    char *bib_fname;
+
+    prog = *argv;
+    bibset = ccl_qual_mk ();    
+    while (--argc > 0)
+    {
+        if (**++argv == '-')
+        {
+            switch (argv[0][1])
+            {
+            case 'd':
+                debug = 1;
+                break;
+            case 'b':
+                if (argv[0][2])
+                    bib_fname = argv[0]+2;
+                else if (argc > 0)
+                {
+                    --argc;
+                    bib_fname = *++argv;
+                }
+                else
+                {
+                    fprintf (stderr, "%s: missing bib filename\n", prog);
+                    exit (1);
+                }
+                bib_inf = fopen (bib_fname, "r");
+                if (!bib_inf)
+                {
+                    fprintf (stderr, "%s: cannot open %s\n", prog,
+                             bib_fname);
+                    exit (1);
+                }
+                ccl_qual_file (bibset, bib_inf);
+                fclose (bib_inf);
+                break;
+            default:
+                fprintf (stderr, "%s: unknown option '%s'\n",
+                    prog, *argv);
+                exit (1);
+            }
+        }
+        else
+        {
+            fprintf (stderr, "%s: no filenames, please\n", prog);
+            exit (1);
+        }
+    }
+    while (1)
+    {
+        char buf[80];
+        int error, pos;
+        struct ccl_rpn_node *rpn;
+
+	printf ("CCLSH>"); fflush (stdout);
+	if (!fgets (buf, 79, stdin))
+	    break;
+	rpn = ccl_find_str (bibset, buf, &error, &pos);
+        if (error)
+        {
+            printf ("%*s^ - ", 6+pos, " ");
+            printf ("%s\n", ccl_err_msg (error));
+        }
+        else
+        {
+            assert (rpn);
+            ccl_pr_tree (rpn, stdout);
+            putchar ('\n');
+        }
+    }
+    putchar ('\n');
+    return 0;
+}
