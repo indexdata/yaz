@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.76 2004-03-19 20:57:44 adam Exp $
+# $Id: makefile,v 1.77 2004-05-01 23:19:49 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@ ICONV_DIR = c:\iconv-1.9.1.win32
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.6.7.win32
+LIBXML2_DIR=c:\libxml2-2.6.9.win32
 
 # zlib compression (used by libxml2)
 ZLIB_DIR = c:\zlib-1.1.4.win32
