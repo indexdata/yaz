@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-marcdump-man.xml,v 1.3 2003-12-11 00:37:21 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.4 2005-02-08 13:51:30 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>
@@ -16,6 +16,7 @@
    <command>yaz-marcdump</command>
    <arg choice="opt"><option>-x</option></arg>
    <arg choice="opt"><option>-X</option></arg>
+   <arg choice="opt"><option>-e</option></arg>
    <arg choice="opt"><option>-I</option></arg>
    <arg choice="opt"><option>-O</option></arg>
    <arg choice="opt"><option>-f <replaceable>from</replaceable></option></arg>
@@ -60,6 +61,15 @@
     <listitem><para>
       Print MARC records in MARCXML.
       This format is equivalent to YAZ_MARC_MARCXML in
+      <filename>yaz/marcdisp.h</filename>.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-X</term>
+    <listitem><para>
+      Print MARC records in MarcXchange format.
+      This format is equivalent to YAZ_MARC_XCHANGE in
       <filename>yaz/marcdisp.h</filename>.
      </para></listitem>
    </varlistentry>

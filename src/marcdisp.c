@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.15 2005-02-02 23:25:08 adam Exp $
+ * $Id: marcdisp.c,v 1.16 2005-02-08 13:51:30 adam Exp $
  */
 
 /**
@@ -72,6 +72,14 @@ static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
 	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, buf, len);
 }
 
+static int atoi_n_check(const char *buf, int size, int *val)
+{
+    if (!isdigit(*(const unsigned char *) buf))
+	return 0;
+    *val = atoi_n(buf, size);
+    return 1;
+}
+
 int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 {
     int entry_p;
@@ -82,6 +90,14 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     int length_data_entry;
     int length_starting;
     int length_implementation;
+    char lead[24];
+    int produce_warnings = 0;
+
+    if (mt->debug)
+	produce_warnings = 1;
+    if (mt->xml == YAZ_MARC_SIMPLEXML || mt->xml == YAZ_MARC_OAIMARC
+	|| mt->xml == YAZ_MARC_MARCXML || mt->xml == YAZ_MARC_XCHANGE)
+	produce_warnings = 1;
 
     wrbuf_rewind(wr);
 
@@ -92,37 +108,57 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	{
 	    char str[40];
 	    
-	    sprintf (str, "Record length %d - aborting\n", record_length);
-	    wrbuf_puts (wr, str);
+	    wrbuf_printf(wr, "<!-- Record length %d - aborting -->\n",
+			    record_length);
 	}
         return -1;
     }
+    memcpy(lead, buf, 24);  /* se can modify the header for output */
+
     /* ballout if bsize is known and record_length is less than that */
     if (bsize != -1 && record_length > bsize)
 	return -1;
-    if (isdigit(((const unsigned char *) buf)[10]))
-        indicator_length = atoi_n (buf+10, 1);
-    else
-        indicator_length = 2;
-    if (isdigit(((const unsigned char *) buf)[11]))
-	identifier_length = atoi_n (buf+11, 1);
-    else
+    if (!atoi_n_check(buf+10, 1, &indicator_length))
+    {
+	if (produce_warnings)
+	    wrbuf_printf(wr, "<!-- Indicator length at offset 10 should hold a digit. Assuming 2 -->\n");
+	lead[10] = '2';
+	indicator_length = 2;
+    }
+    if (!atoi_n_check(buf+11, 1, &identifier_length))
+    {
+	if (produce_warnings)
+	    wrbuf_printf(wr, "<!-- Identifier length at offset 11 should hold a digit. Assuming 2 -->\n");
+	lead[11] = '2';
         identifier_length = 2;
-    base_address = atoi_n (buf+12, 5);
-
-    length_data_entry = atoi_n (buf+20, 1);
-    if (buf[20] <= '0' || buf[20] >= '9')
-    {
-        wrbuf_printf(wr, "<!-- Length data entry should hold a digit. Assuming 4 -->\n");
-	length_data_entry = 4;
     }
-    length_starting = atoi_n (buf+21, 1);
-    if (buf[21] <= '0' || buf[21] >= '9')
+    if (!atoi_n_check(buf+12, 5, &base_address))
     {
-        wrbuf_printf(wr, "<!-- Length starting should hold a digit. Assuming 5 -->\n");
-	length_starting = 5;
+	if (produce_warnings)
+	    wrbuf_printf(wr, "<!-- Base address at offsets 12..16 should hold a number. Assuming 0 -->\n");
+	base_address = 0;
     }
-    length_implementation = atoi_n (buf+22, 1);
+    if (!atoi_n_check(buf+20, 1, &length_data_entry))
+    {
+	if (produce_warnings)
+	    wrbuf_printf(wr, "<!-- Length data entry at offset 20 should hold a digit. Assuming 4 -->\n");
+        length_data_entry = 4;
+	lead[20] = '4';
+    }
+    if (!atoi_n_check(buf+21, 1, &length_starting))
+    {
+	if (produce_warnings)
+	    wrbuf_printf(wr, "<!-- Length starting at offset 21 should hold a digit. Assuming 5 -->\n");
+        length_starting = 5;
+	lead[21] = '5';
+    }
+    if (!atoi_n_check(buf+22, 1, &length_implementation))
+    {
+	if (produce_warnings)
+	    wrbuf_printf(wr, "<!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->\n");
+	length_implementation = 0;
+	lead[22] = '0';
+    }
 
     if (mt->xml != YAZ_MARC_LINE)
     {
@@ -165,13 +201,16 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                 wr,
                 "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                 "  <leader>");
-#if 1
-	    marc_cdata(mt, buf, 9, wr);
-	    marc_cdata(mt, "a", 1, wr);  /* set leader to signal unicode */
-	    marc_cdata(mt, buf+10, 14, wr);
-#else
-	    marc_cdata(mt, buf, 24, wr); /* leave header as is .. */
-#endif
+	    lead[9] = 'a';                 /* set leader to signal unicode */
+	    marc_cdata(mt, lead, 24, wr); 
+            wrbuf_printf(wr, "</leader>\n");
+            break;
+	case YAZ_MARC_XCHANGE:
+            wrbuf_printf(
+                wr,
+                "<record xmlns=\"http://www.bs.dk/standards/MarcXchange\">\n"
+                "  <leader>");
+	    marc_cdata(mt, lead, 24, wr);
             wrbuf_printf(wr, "</leader>\n");
             break;
         }
@@ -209,8 +248,9 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     }
     if (mt->debug && base_address != entry_p+1)
     {
-	wrbuf_printf (wr,"  <!-- base address not at end of directory "
-		      "base=%d end=%d -->\n", base_address, entry_p+1);
+	if (produce_warnings)
+	    wrbuf_printf (wr,"  <!-- base address not at end of directory "
+			  "base=%d end=%d -->\n", base_address, entry_p+1);
     }
     base_address = entry_p+1;
 
@@ -255,9 +295,9 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	}
 	wrbuf_putc(wr_dir, ISO2709_FS);
 	wrbuf_printf(wr_head, "%05d", data_p+1 + base_address);
-	wrbuf_write(wr_head, buf+5, 7);
+	wrbuf_write(wr_head, lead+5, 7);
 	wrbuf_printf(wr_head, "%05d", base_address);
-	wrbuf_write(wr_head, buf+17, 7);
+	wrbuf_write(wr_head, lead+17, 7);
 
 	wrbuf_write(wr, wrbuf_buf(wr_head), 24);
 	wrbuf_write(wr, wrbuf_buf(wr_dir), wrbuf_len(wr_dir));
@@ -332,6 +372,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	    wrbuf_printf(wr, "\"");
             break;
         case YAZ_MARC_MARCXML:
+        case YAZ_MARC_XCHANGE:
             if (identifier_flag)
                 wrbuf_printf (wr, "  <datafield tag=\"");
             else
@@ -366,6 +407,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                     wrbuf_printf(wr, "\"");
                     break;
                 case YAZ_MARC_MARCXML:
+                case YAZ_MARC_XCHANGE:
                     wrbuf_printf(wr, " ind%d=\"", j+1);
 		    marc_cdata(mt, buf+i, 1, wr);
                     wrbuf_printf(wr, "\"");
@@ -373,7 +415,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             }
 	}
         if (mt->xml == YAZ_MARC_SIMPLEXML || mt->xml == YAZ_MARC_MARCXML
-	    || mt->xml == YAZ_MARC_OAIMARC)
+	    || mt->xml == YAZ_MARC_OAIMARC || mt->xml == YAZ_MARC_XCHANGE)
         {
             wrbuf_puts (wr, ">");
             if (identifier_flag)
@@ -417,6 +459,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                     wrbuf_puts (wr, "\">");
                     break;
                 case YAZ_MARC_MARCXML:
+                case YAZ_MARC_XCHANGE:
                     wrbuf_puts (wr, "    <subfield code=\"");
 		    marc_cdata(mt, buf+i, identifier_length-1, wr);
 		    i = i+identifier_length-1;
@@ -434,6 +477,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 
 		if (mt->xml == YAZ_MARC_SIMPLEXML || 
 		    mt->xml == YAZ_MARC_MARCXML ||
+		    mt->xml == YAZ_MARC_XCHANGE ||
 		    mt->xml == YAZ_MARC_OAIMARC)
                     wrbuf_puts (wr, "</subfield>\n");
             }
@@ -465,6 +509,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                 wrbuf_puts (wr, "</fixfield>\n");
             break;
         case YAZ_MARC_MARCXML:
+        case YAZ_MARC_XCHANGE:
             if (identifier_flag)
                 wrbuf_puts (wr, "  </datafield>\n");
             else
@@ -484,6 +529,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         wrbuf_puts (wr, "</oai_marc>\n");
         break;
     case YAZ_MARC_MARCXML:
+    case YAZ_MARC_XCHANGE:
         wrbuf_puts (wr, "</record>\n");
         break;
     case YAZ_MARC_ISO2709:

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.26 2005-01-15 19:47:15 adam Exp $
+ * $Id: marcdump.c,v 1.27 2005-02-08 13:51:31 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -45,7 +45,7 @@
 
 static void usage(const char *prog)
 {
-    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] [-x] [-O] [-X] [-I] [-v] file...\n",
+    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] [-x] [-O] [-X] [-e] [-I] [-v] file...\n",
              prog);
 } 
 
@@ -123,7 +123,7 @@ int main (int argc, char **argv)
 #endif
 #endif
 
-    while ((r = options("pvc:xOXIf:t:2", argv, argc, &arg)) != -2)
+    while ((r = options("pvc:xOeXIf:t:2", argv, argc, &arg)) != -2)
     {
 	int count;
 	no++;
@@ -146,6 +146,9 @@ int main (int argc, char **argv)
         case 'O':
             xml = YAZ_MARC_OAIMARC;
             break;
+	case 'e':
+	    xml = YAZ_MARC_XCHANGE;
+	    break;
         case 'X':
             xml = YAZ_MARC_MARCXML;
             break;
