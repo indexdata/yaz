@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_marc.c,v $
- * Revision 1.11  1998-02-11 11:53:35  adam
+ * Revision 1.12  1998-02-23 10:57:09  adam
+ * Take care of integer data nodes as well in conversion.
+ *
+ * Revision 1.11  1998/02/11 11:53:35  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.10  1997/09/30 11:50:04  adam
@@ -179,7 +182,8 @@ static char *get_data(data1_node *n, int *len)
 
     while (n->which != DATA1N_data && n->child)
 	n = n->child;
-    if (n->which != DATA1N_data || n->u.data.what != DATA1I_text)
+    if (n->which != DATA1N_data || 
+	(n->u.data.what != DATA1I_text && n->u.data.what != DATA1I_num))
     {
 	r = "[Structured/included data]";
 	*len = strlen(r);
