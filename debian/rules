@@ -34,7 +34,7 @@ YAZSRCDIR=$(shell pwd)
 YAZ_VERSION=$(shell date -r$(YAZSRCDIR)/CVS +"CVS%Y%m%d")
 else
 YAZSRCDIR=$(shell pwd)
-YAZ_VERSION=1.8.4
+YAZ_VERSION=1.8.5
 endif
 
 configure: stamp-configure

@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 1.8.5 2002/XX/XX
+
+New option for YAZ client, -u <auth>, that sets authentication.
+
 ZOOM fix: error information only cleared for Bib-diagnostics (not
 fatal errors, like connection failed, etc).
 

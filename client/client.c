@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.133 2001-11-22 11:04:48 adam Exp $
+ * $Id: client.c,v 1.134 2002-01-11 20:17:03 adam Exp $
  */
 
 #include <stdio.h>
@@ -2221,10 +2221,11 @@ int main(int argc, char **argv)
 {
     char *prog = *argv;
     char *open_command = 0;
+    char *auth_command = 0;
     char *arg;
     int ret;
 
-    while ((ret = options("c:a:m:v:p:", argv, argc, &arg)) != -2)
+    while ((ret = options("c:a:m:v:p:u:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -2256,17 +2257,37 @@ int main(int argc, char **argv)
 	case 'p':
 	    yazProxy=strdup(arg);
 	    break;
+        case 'u':
+            if (!auth_command)
+            {
+                auth_command = xmalloc (strlen(arg)+6);
+                strcpy (auth_command, "auth ");
+                strcat (auth_command, arg);
+            }
+            break;
         case 'v':
             yaz_log_init (yaz_log_mask_str(arg), "", NULL);
             break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
-                     "[-c cclfields] [-p <proxy-addr>] [<server-addr>]\n",
+                     "[-c cclfields]\n      [-p <proxy-addr>] [-u <auth>] "
+                     "[<server-addr>]\n",
                      prog);
             exit (1);
         }
     }
     initialize();
+    if (auth_command)
+    {
+#ifdef HAVE_GETTIMEOFDAY
+        gettimeofday (&tv_start, 0);
+#endif
+        process_cmd_line (auth_command);
+#if HAVE_READLINE_HISTORY_H
+        add_history(auth_command);
+#endif
+        xfree(auth_command);
+    }
     if (open_command)
     {
 #ifdef HAVE_GETTIMEOFDAY
