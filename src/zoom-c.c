@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.33 2004-12-13 14:21:56 heikki Exp $
+ * $Id: zoom-c.c,v 1.34 2004-12-21 00:34:31 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1037,7 +1037,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.33 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.34 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1987,13 +1987,21 @@ static void handle_records (ZOOM_connection c, Z_Records *sr,
 	    if (present_phase && p->num_records == 0)
 	    {
 		/* present response and we didn't get any records! */
-                set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
+		Z_NamePlusRecord *myrec = 
+		    zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
+		record_cache_add(resultset, myrec, resultset->start);
+		yaz_log(YLOG_LOG, "pseudo record 1, at pos %d",
+			resultset->start);
 	    }
 	}
 	else if (present_phase)
 	{
 	    /* present response and we didn't get any records! */
-            set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
+	    Z_NamePlusRecord *myrec = 
+		zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
+	    record_cache_add(resultset, myrec, resultset->start);
+	    yaz_log(YLOG_LOG, "pseudo record 1, at pos %d",
+		    resultset->start);
 	}
     }
 }
