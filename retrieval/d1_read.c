@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.16  1997-09-17 12:10:37  adam
+ * Revision 1.17  1997-11-05 09:20:51  adam
+ * Minor change.
+ *
+ * Revision 1.16  1997/09/17 12:10:37  adam
  * YAZ version 1.4.
  *
  * Revision 1.15  1997/09/05 09:50:57  adam
@@ -238,10 +241,11 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 	{
 	    if (!parent)
 		return 0;
-	    if (!*(tag +1) || (parent->which == DATA1N_root && !strcmp(tag + 1,
-		parent->u.root.type)) ||
-		(parent->which == DATA1N_tag && !strcmp(tag + 1,
-		parent->u.tag.tag)))
+	    if (!*(tag +1) ||
+		(parent->which == DATA1N_root &&
+		 !strcmp(tag + 1,parent->u.root.type)) ||
+		(parent->which == DATA1N_tag &&
+		 !strcmp(tag + 1, parent->u.tag.tag)))
 	    {
 		*buf = t + 1;
 		return 0;
@@ -280,8 +284,9 @@ data1_node *data1_read_node (data1_handle dh, char **buf,
 		logf(LOG_WARN, "Malformed variant triple at '%s'", tag);
 		return 0;
 	    }
-	    if (!(tp = data1_getvartypebyct(dh, parent->root->u.root.absyn->varset,
-		tclass, type)))
+	    if (!(tp =
+		  data1_getvartypebyct(dh, parent->root->u.root.absyn->varset,
+				       tclass, type)))
 		return 0;
 	    
 	    /*
