@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmosi.c,v $
- * Revision 1.13  1996-07-06 19:58:30  quinn
+ * Revision 1.14  1996-07-26 12:34:07  quinn
+ * Porting.
+ *
+ * Revision 1.13  1996/07/06  19:58:30  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.12  1996/05/22  08:34:44  adam
@@ -105,8 +108,16 @@
 #include <string.h>
 #include <assert.h>
 
+<<<<<<< 1.13
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+=======
 #define YNETINCLUDE
 #include <yconfig.h>
+>>>>>>> /tmp/T4a00144
 
 #include <comstack.h>
 #include <xmosi.h>
