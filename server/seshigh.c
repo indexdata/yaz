@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.161 2003-09-09 16:03:46 mike Exp $
+ * $Id: seshigh.c,v 1.162 2003-10-20 18:20:55 adam Exp $
  */
 
 /*
@@ -221,7 +221,9 @@ static void do_close_req(association *a, int reason, char *message,
 
 static void do_close(association *a, int reason, char *message)
 {
-    do_close_req (a, reason, message, request_get(&a->outgoing));
+    request *req = request_get(&a->outgoing);
+    request_release(req);
+    do_close_req (a, reason, message, req);
 }
 
 /*
@@ -336,7 +338,8 @@ void ir_session(IOCHAN h, int event)
                 {
                     yaz_log(LOG_LOG, "PDU dump:");
                     odr_dumpBER(yaz_log_file(), assoc->input_buffer, res);
-                    do_close(assoc, Z_Close_protocolError, "Malformed package");
+		    request_release(req);
+                    do_close(assoc, Z_Close_protocolError,"Malformed package");
                 }
                 else
                 {

@@ -1,40 +1,9 @@
 /*
- * Copyright (C) 1994-1998, Index Data.
+ * Copyright (C) 1994-2003, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: requestq.c,v $
- * Revision 1.9  2003-02-12 15:06:43  adam
- * SOAP, SRW codecs and HTTP transport for YAZ using libxml2.
- * Updated ASN.1 for Z39.50 amendment String Identifiers for Schemas.
- *
- * Revision 1.8  2001/07/19 19:51:41  adam
- * Added typecasts to make C++ happy.
- *
- * Revision 1.7  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.6  1998/02/11 11:53:35  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.5  1998/02/10 11:03:56  adam
- * Added support for extended handlers in backend server interface.
- *
- * Revision 1.4  1997/10/27 13:55:03  adam
- * Fixed memory leak: member response wasn't freed when queue
- * was destroyed.
- *
- * Revision 1.3  1997/09/01 08:53:00  adam
- * New windows NT/95 port using MSV5.0. The test server 'ztest' was
- * moved a separate directory. MSV5.0 project server.dsp created.
- * As an option, the server can now operate as an NT service.
- *
- * Revision 1.2  1995/11/01 13:54:57  quinn
- * Minor adjustments
- *
- * Revision 1.1  1995/05/15  12:12:22  quinn
- * Request queue.
- *
+ * $Id: requestq.c,v 1.10 2003-10-20 18:20:55 adam Exp $
  *
  */
 
