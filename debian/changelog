@@ -1,8 +1,8 @@
 yaz (2.0.13-2) unstable; urgency=low
 
-  * API version 2.0.13.
+  * API version 2.0.13. Fix NS for diagnostic elements.
 
- -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 24 Feb 2004 08:46:37 +0100
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 25 Feb 2004 09:46:37 +0100
 
 yaz (2.0.13-1) unstable; urgency=low
 
