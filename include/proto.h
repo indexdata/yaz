@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.26  1995-09-29 17:12:08  quinn
+ * Revision 1.27  1995-10-12 10:34:46  quinn
+ * Added Espec-1.
+ *
+ * Revision 1.26  1995/09/29  17:12:08  quinn
  * Smallish
  *
  * Revision 1.25  1995/09/27  15:02:49  quinn
@@ -1168,6 +1171,7 @@ Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 #include <prt-grs.h>
 #include <prt-exd.h>
 #include <prt-dia.h>
+#include <prt-esp.h>
 
 #include <prt-ext.h>
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.7  1995-10-10 16:27:12  quinn
+ * Revision 1.8  1995-10-12 10:34:56  quinn
+ * Added Espec-1.
+ *
+ * Revision 1.7  1995/10/10  16:27:12  quinn
  * *** empty log message ***
  *
  * Revision 1.6  1995/09/29  17:12:35  quinn
@@ -108,6 +111,7 @@ static oident oids[] =
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,-1},    "DB. Update"  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_Z3950,   CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
+    {PROTO_Z3950,   CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
     {PROTO_Z3950,   CLASS_VARSET,  VAL_VAR1,      {12,1,-1},   "Variant-1"   },
 
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },
@@ -162,6 +166,7 @@ static oident oids[] =
     {PROTO_SR,      CLASS_EXTSERV, VAL_DBUPDATE,  {9,5,-1},    "DB. Update"  },
     {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTSPEC,{9,6,-1},    "exp. spec."  },
     {PROTO_SR,      CLASS_EXTSERV, VAL_EXPORTINV, {9,7,-1},    "exp. inv."   },
+    {PROTO_SR,      CLASS_ELEMSPEC,VAL_ESPEC1,    {11,1,-1},   "Espec-1"     },
     {PROTO_SR,      CLASS_VARSET,  VAL_VAR1,      {12,1,-1},   "Variant-1"   },
 
     {PROTO_SR,      CLASS_TAGSET,  VAL_SETM,      {14,1,-1},   "TagsetM"     },

@@ -55,7 +55,8 @@ struct Z_External
 	Z_External_grs1,
 	Z_External_extendedService,
 	Z_External_itemOrder,
-	Z_External_diag1
+	Z_External_diag1,
+	Z_External_espec1
     } which;
     union
     {
@@ -74,6 +75,7 @@ struct Z_External
 	Z_TaskPackage *extendedService;
 	Z_ItemOrder *itemOrder;
 	Z_DiagnosticFormat *diag1;
+	Z_Espec1 *espec1;
     } u;
 };
 

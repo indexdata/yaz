@@ -175,5 +175,6 @@ struct Z_GenericRecord
 };
 
 int z_GenericRecord(ODR o, Z_GenericRecord **p, int opt);
+int z_Variant(ODR o, Z_Variant **p, int opt);
 
 #endif

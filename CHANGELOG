@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- XXXXX XXXX/XX/XX
 
+Added Espec-1 format.
+
 Added VisibleString field body type to GRS-1. It is illegal acc. to my copy
 of the protocol and it cannot be selected when encoding (maps into 'string'
 when decoding). Needed to talk to some servers.

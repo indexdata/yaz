@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.6  1995-09-29 17:11:55  quinn
+ * Revision 1.7  1995-10-12 10:34:38  quinn
+ * Added Espec-1.
+ *
+ * Revision 1.6  1995/09/29  17:11:55  quinn
  * Smallish
  *
  * Revision 1.5  1995/09/27  15:02:42  quinn
@@ -51,6 +54,7 @@ int z_External(ODR o, Z_External **p, int opt)
 	    z_TaskPackage},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_itemOrder, z_ItemOrder},
 	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_diag1, z_DiagnosticFormat},
+	{ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_espec1, z_Espec1},
 	{-1, -1, -1, -1, 0}
     };
     /*
@@ -73,6 +77,7 @@ int z_External(ODR o, Z_External **p, int opt)
 	{VAL_EXTENDED, Z_External_extendedService},
 	{VAL_ITEMORDER, Z_External_itemOrder},
 	{VAL_DIAG1, Z_External_diag1},
+	{VAL_ESPEC1, Z_External_espec1},
 	{VAL_NONE, 0}
     };
 

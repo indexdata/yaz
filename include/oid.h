@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.8  1995-10-10 16:27:08  quinn
+ * Revision 1.9  1995-10-12 10:34:45  quinn
+ * Added Espec-1.
+ *
+ * Revision 1.8  1995/10/10  16:27:08  quinn
  * *** empty log message ***
  *
  * Revision 1.7  1995/09/29  17:12:05  quinn
@@ -136,7 +139,8 @@ typedef struct oident
 	VAL_NONE,
 	VAL_SETM,
 	VAL_SETG,
-	VAL_VAR1
+	VAL_VAR1,
+	VAL_ESPEC1
     } value;
     int oidsuffix[20];
     char *desc;
