@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: yaz-ccl.h,v $
- * Revision 1.3  2000-02-28 11:20:06  adam
+ * Revision 1.4  2000-05-25 19:57:35  adam
+ * Changed include of yaz-util.h to wrbuf.h.
+ *
+ * Revision 1.3  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.2  1999/12/20 15:20:13  adam
@@ -62,7 +65,7 @@
 #include <yaz/proto.h>
 #include <yaz/ccl.h>
 #include <yaz/odr.h>
-#include <yaz/yaz-util.h>
+#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
 
