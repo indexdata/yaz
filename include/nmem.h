@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1997, Index Data.
+ * Copyright (c) 1995-1998, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.7  1997-10-31 12:20:08  adam
+ * Revision 1.8  1998-07-20 12:35:59  adam
+ * Added more memory diagnostics (when NMEM_DEBUG is 1).
+ *
+ * Revision 1.7  1997/10/31 12:20:08  adam
  * Improved memory debugging for xmalloc/nmem.c. References to NMEM
  * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
  * Bug fix: missing fclose in data1_read_espec1.
@@ -63,7 +66,6 @@ typedef struct nmem_control
 typedef struct nmem_control *NMEM;
 
 YAZ_EXPORT void nmem_reset(NMEM n);
-YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 YAZ_EXPORT int nmem_total(NMEM n);
 YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
 
@@ -71,13 +73,16 @@ YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
 
 YAZ_EXPORT NMEM nmem_create_f(const char *file, int line);
 YAZ_EXPORT void nmem_destroy_f(const char *file, int line, NMEM n);
+YAZ_EXPORT void *nmem_malloc_f(const char *file, int line, NMEM n, int size);
 #define nmem_create() nmem_create_f(__FILE__, __LINE__)
 #define nmem_destroy(x) nmem_destroy_f(__FILE__, __LINE__, (x))
+#define nmem_malloc(x, y) nmem_malloc_f(__FILE__, __LINE__, (x), (y))
 
 #else
 
 YAZ_EXPORT NMEM nmem_create(void);
 YAZ_EXPORT void nmem_destroy(NMEM n);
+YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 
 #endif
 

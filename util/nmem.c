@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.9  1998-07-07 15:49:01  adam
+ * Revision 1.10  1998-07-20 12:35:57  adam
+ * Added more memory diagnostics (when NMEM_DEBUG is 1).
+ *
+ * Revision 1.9  1998/07/07 15:49:01  adam
  * Reduced chunk size.
  *
  * Revision 1.8  1998/07/03 14:21:27  adam
@@ -75,6 +78,9 @@ static void free_block(nmem_block *p)
 {  
     p->next = freelist;
     freelist = p;
+#if NMEM_DEBUG
+    logf (LOG_DEBUG, "nmem free_block p=%p", p);
+#endif
 }
 
 /*
@@ -84,11 +90,17 @@ static nmem_block *get_block(int size)
 {
     nmem_block *r, *l;
 
+#if NMEM_DEBUG
+    logf (LOG_DEBUG, "nmem get_block size=%d", size);
+#endif
     for (r = freelist, l = 0; r; l = r, r = r->next)
     	if (r->size >= size)
 	    break;
     if (r)
     {
+#if NMEM_DEBUG
+	logf (LOG_DEBUG, "nmem get_block found free block p=%p", r);
+#endif
     	if (l)
 	    l->next = r->next;
 	else
@@ -100,6 +112,9 @@ static nmem_block *get_block(int size)
 
 	if (get < size)
 	    get = size;
+#if NMEM_DEBUG
+	logf (LOG_DEBUG, "nmem get_block alloc new block size=%d", get);
+#endif
 	r = (nmem_block *)xmalloc(sizeof(*r));
 	r->buf = (char *)xmalloc(r->size = get);
     }
@@ -111,6 +126,9 @@ void nmem_reset(NMEM n)
 {
     nmem_block *t;
 
+#if NMEM_DEBUG
+    logf (LOG_DEBUG, "nmem_reset p=%p", n);
+#endif
     if (!n)
 	return;
     NMEM_ENTER;
@@ -124,11 +142,19 @@ void nmem_reset(NMEM n)
     n->total = 0;
 }
 
+#if NMEM_DEBUG
+void *nmem_malloc_f (const char *file, int line, NMEM n, int size)
+#else
 void *nmem_malloc(NMEM n, int size)
+#endif
 {
     struct nmem_block *p;
     char *r;
 
+#if NMEM_DEBUG
+    logf (LOG_DEBUG, "%s:%d: nmem_malloc p=%p size=%d", file, line,
+                     n, size);
+#endif
     if (!n)
 	return xmalloc(size);
     NMEM_ENTER;
