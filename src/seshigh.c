@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.45 2005-01-16 21:51:50 adam Exp $
+ * $Id: seshigh.c,v 1.46 2005-01-19 09:18:08 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1584,7 +1584,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.45 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.46 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2272,12 +2272,14 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     if (log_request)
     {
         WRBUF wr = wrbuf_alloc();
-        if (*res->scanStatus == Z_Scan_success)
-            wrbuf_printf(wr, "OK ");
-        else
+        if (bsrr->errcode)
 	    wr_diag(wr, bsrr->errcode, bsrr->errstring);
+        else if (*res->scanStatus == Z_Scan_success)
+            wrbuf_printf(wr, "OK");
+	else
+	    wrbuf_printf(wr, "Partial");
 
-        wrbuf_printf(wr, "%d+%d %d ",
+        wrbuf_printf(wr, " %d+%d %d ",
 		     *req->preferredPositionInResponse, 
 		     *req->numberOfTermsRequested,
 		     (res->stepSize ? *res->stepSize : 0));
