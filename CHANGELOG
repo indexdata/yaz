@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-New ODR utility, odr_getelement, which returns name element for
+New ODR utility, odr_getelement, which returns name of element for
 which encoding/decoding failed.
 
 Fixed ODR so that it returns error code OREQUIRED rather than ONONE
