@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.11  1995-06-19 12:39:09  quinn
+ * Revision 1.12  1995-08-29 10:41:18  quinn
+ * Small.
+ *
+ * Revision 1.11  1995/06/19  12:39:09  quinn
  * Fixed bug in timeout code. Added BER dumper.
  *
  * Revision 1.10  1995/06/16  10:31:33  quinn
@@ -140,7 +143,10 @@ int event_loop()
 	    }
 	    if (!p->destroyed && p->max_idle && now - p->last_event >
 	    	p->max_idle)
+	    {
+	    	p->last_event = now;
 	    	(*p->fun)(p, EVENT_TIMEOUT);
+	    }
 	}
 	for (p = iochans; p; p = nextp)
 	{
