@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.27  1995-12-12 16:37:02  quinn
+ * Revision 1.28  1995-12-14 11:09:31  quinn
+ * Added Explain record syntax to the format command.
+ *
+ * Revision 1.27  1995/12/12  16:37:02  quinn
  * Added destroy element to data1_node.
  *
  * Revision 1.26  1995/12/12  14:11:00  quinn
@@ -889,6 +892,12 @@ int cmd_format(char *arg)
     {
         printf("Preferred format is GRS1\n");
         recordsyntax = VAL_GRS1;
+        return 1;
+    }
+    else if (!strcmp(arg, "explain"))
+    {
+        printf("Preferred format is Explain\n");
+        recordsyntax = VAL_EXPLAIN;
         return 1;
     }
     else
