@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.75  1998-05-18 10:13:07  adam
+ * Revision 1.76  1998-05-27 16:57:07  adam
+ * Support for surrogate diagnostic records added for bend_fetch.
+ *
+ * Revision 1.75  1998/05/18 10:13:07  adam
  * Fixed call to es_request handler - extra argument was passed.
  *
  * Revision 1.74  1998/03/31 15:13:20  adam
@@ -888,7 +891,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
  * surrogate diagnostic.
  */
 static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
-					    int error, char *addinfo)
+					  int error, char *addinfo)
 {
     int oid[OID_SIZE];
     Z_NamePlusRecord *rec = (Z_NamePlusRecord *)odr_malloc (assoc->encode, sizeof(*rec));
@@ -983,7 +986,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	bend_fetchresult *fres;
 	Z_NamePlusRecord *thisrec;
 	Z_DatabaseRecord *thisext;
-	int this_length;
+	int this_length = 0;
 
 	/*
 	 * we get the number of bytes allocated on the stream before any
@@ -996,6 +999,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	freq.comp = comp;
 	freq.format = format;
 	freq.stream = a->encode;
+	freq.surrogate_flag = 0;
 	if (!(fres = bend_fetch(a->backend, &freq, 0)))
 	{
 	    *pres = Z_PRES_FAILURE;
@@ -1005,8 +1009,17 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	   or only pertaining to current record */
 	if (fres->errcode)
 	{
-	    *pres = Z_PRES_FAILURE;
-	    return diagrec(a, fres->errcode, fres->errstring);
+	    if (!freq.surrogate_flag)
+	    {
+		*pres = Z_PRES_FAILURE;
+		return diagrec(a, fres->errcode, fres->errstring);
+	    }
+	    reclist->records[reclist->num_records] =
+		surrogatediagrec(a, fres->basename, fres->errcode,
+				 fres->errstring);
+	    reclist->num_records++;
+	    *next = fres->last_in_set ? 0 : recno + 1;
+	    continue;
 	}
 	if (fres->len >= 0)
 	    this_length = fres->len;
@@ -1049,6 +1062,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 		continue;
 	    }
 	}
+
 	if (!(thisrec = (Z_NamePlusRecord *)odr_malloc(a->encode, sizeof(*thisrec))))
 	    return 0;
 	if (!(thisrec->databaseName = (char *)odr_malloc(a->encode,

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.19  1998-03-31 11:07:45  adam
+ * Revision 1.20  1998-05-27 16:57:06  adam
+ * Support for surrogate diagnostic records added for bend_fetch.
+ *
+ * Revision 1.19  1998/03/31 11:07:45  adam
  * Furhter work on UNIverse resource report.
  * Added Extended Services handling in frontend server.
  *
@@ -115,7 +118,8 @@ typedef struct
     int number;                /* record number */
     oid_value format;          /* One of the CLASS_RECSYN members */
     Z_RecordComposition *comp; /* Formatting instructions */
-    ODR stream;                /* encoding stream - memory source if required */
+    ODR stream;                /* encoding stream - memory source if req */
+    int surrogate_flag;        /* surrogate diagnostic flag (rw) */
 } bend_fetchrequest;
 
 typedef struct
