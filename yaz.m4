@@ -1,4 +1,4 @@
-## $Id: yaz.m4,v 1.10 2004-09-09 09:54:37 adam Exp $
+## $Id: yaz.m4,v 1.11 2004-09-11 20:52:14 adam Exp $
 ## 
 # Use this m4 function for autoconf if you use YAZ in your own
 # configure script.
@@ -85,7 +85,7 @@ AC_DEFUN([YAZ_INIT],
 	AC_SUBST(YAZVERSION)
 	yazconfig=NONE
 	yazpath=NONE
-	AC_ARG_WITH(yaz-config, [  --with-yaz-config=DIR   use yaz-config in DIR (example /home/yaz-1.7)], [yazpath=$withval])
+	AC_ARG_WITH(yaz, [  --with-yaz=DIR          use yaz-config in DIR (example /home/yaz-1.7)], [yazpath=$withval])
 	if test "x$yazpath" != "xNONE"; then
 		yazconfig=$yazpath/yaz-config
 	else
