@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.8 2003-03-03 19:57:37 adam Exp $
+ * $Id: srw.c,v 1.9 2003-03-18 13:34:37 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -333,7 +333,6 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                                            &res->nextRecordPosition))
                     ;
             }
-
         }
         else
             return -1;
@@ -345,9 +344,12 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         if ((*p)->which == Z_SRW_searchRetrieve_request)
         {
             Z_SRW_searchRetrieveRequest *req = (*p)->u.request;
-            xmlNsPtr ns_srw = xmlNewNs(pptr, ns, "zs");
-            xmlNodePtr ptr = xmlNewChild(pptr, ns_srw,
+            xmlNodePtr ptr = xmlNewChild(pptr, 0,
                                          "searchRetrieveRequest", 0);
+            xmlNsPtr ns_srw = xmlNewNs(ptr, ns, "zs");
+
+            xmlSetNs(ptr, ns_srw);
+
             switch(req->query_type)
             {
             case Z_SRW_query_type_cql:
@@ -380,10 +382,11 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_searchRetrieve_response)
         {
             Z_SRW_searchRetrieveResponse *res = (*p)->u.response;
-            xmlNsPtr ns_srw = xmlNewNs(pptr, ns, "zs");
-            xmlNodePtr ptr = xmlNewChild(pptr, ns_srw,
+            xmlNodePtr ptr = xmlNewChild(pptr, 0,
                                          "searchRetrieveResponse", 0);
+            xmlNsPtr ns_srw = xmlNewNs(ptr, ns, "zs");
 
+            xmlSetNs(ptr, ns_srw);
             add_xsd_integer(ptr, "numberOfRecords", res->numberOfRecords);
             add_xsd_string(ptr, "resultSetId", res->resultSetId);
             add_xsd_integer(ptr, "resultSetIdleTime", res->resultSetIdleTime);

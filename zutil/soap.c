@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.6 2003-03-11 11:09:17 adam Exp $
+ * $Id: soap.c,v 1.7 2003-03-18 13:34:37 adam Exp $
  */
 
 #include <yaz/soap.h>
@@ -184,8 +184,6 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
         Z_SOAP *p = *pp;
         xmlNsPtr ns_env;
         xmlNodePtr envelope_ptr, body_ptr;
-        xmlChar *buf_out;
-        int len_out;
 
         xmlDocPtr doc = xmlNewDoc("1.0");
 
@@ -215,14 +213,23 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
             if (ret)
                 return ret;
         }
-	if (encoding)
-            xmlDocDumpMemoryEnc(doc, &buf_out, &len_out, encoding);
-	else
-            xmlDocDumpMemory(doc, &buf_out, &len_out);
-        *content_buf = (char *) odr_malloc(o, len_out);
-        *content_len = len_out;
-        memcpy(*content_buf, buf_out, len_out);
-        xmlFree(buf_out);
+        if (p->which == Z_SOAP_generic && !strcmp(p->ns, "SRU"))
+        {
+            xmlDocSetRootElement(doc, body_ptr->children);
+        }
+        if (1)
+        {
+            xmlChar *buf_out;
+            int len_out;
+            if (encoding)
+                xmlDocDumpMemoryEnc(doc, &buf_out, &len_out, encoding);
+            else
+                xmlDocDumpMemory(doc, &buf_out, &len_out);
+            *content_buf = (char *) odr_malloc(o, len_out);
+            *content_len = len_out;
+            memcpy(*content_buf, buf_out, len_out);
+            xmlFree(buf_out);
+        }
         xmlFreeDoc(doc);
         return 0;
     }

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.148 2003-03-11 11:09:17 adam Exp $
+ * $Id: seshigh.c,v 1.149 2003-03-18 13:34:36 adam Exp $
  */
 
 /*
@@ -539,8 +539,10 @@ static void srw_bend_search(association *assoc, request *req,
     Z_External *ext;
     
     yaz_log(LOG_LOG, "Got SRW SearchRetrieveRequest");
+    yaz_log(LOG_DEBUG, "srw_bend_search");
     if (!assoc->init)
     {
+        yaz_log(LOG_DEBUG, "srw_bend_init");
         if (!srw_bend_init(assoc))
         {
             srw_error = 3;  /* assume Authentication error */
@@ -612,6 +614,7 @@ static void srw_bend_search(association *assoc, request *req,
 
     if (srw_error)
     {
+        yaz_log(LOG_DEBUG, "srw_bend_search returned SRW error %d", srw_error);
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
 	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
@@ -636,6 +639,7 @@ static void srw_bend_search(association *assoc, request *req,
     srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
     if (rr.errcode)
     {
+        yaz_log(LOG_DEBUG, "bend_search returned Bib-1 code %d", rr.errcode);
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
 	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
@@ -643,6 +647,9 @@ static void srw_bend_search(association *assoc, request *req,
             odr_intdup(assoc->encode, 
                        yaz_diag_bib1_to_srw (rr.errcode));
         srw_res->diagnostics[0].details = rr.errstring;
+        yaz_log(LOG_DEBUG, "srw_bend_search returned SRW error %d",
+                srw_res->diagnostics[0].code);
+                
     }
     else
     {
@@ -652,8 +659,13 @@ static void srw_bend_search(association *assoc, request *req,
             int number = *srw_req->maximumRecords;
             int start = 1;
             int i;
+
             if (srw_req->startRecord)
                 start = *srw_req->startRecord;
+
+            yaz_log(LOG_DEBUG, "srw_bend_search. start=%d max=%d",
+                    start, *srw_req->maximumRecords);
+
             if (start <= rr.hits)
             {
                 int j = 0;
@@ -666,6 +678,7 @@ static void srw_bend_search(association *assoc, request *req,
                 {
                     int errcode;
                     srw_res->records[j].recordData_buf = 0;
+                    yaz_log(LOG_DEBUG, "srw_bend_fetch %d", i+start);
                     errcode = srw_bend_fetch(assoc, i+start, srw_req,
                                              srw_res->records + j);
                     if (errcode)
@@ -691,6 +704,70 @@ static void srw_bend_search(association *assoc, request *req,
     }
 }
 
+static int hex_digit (int ch)
+{
+    if (ch >= '0' && ch <= '9')
+        return ch - '0';
+    else if (ch >= 'a' && ch <= 'f')
+        return ch - 'a'+10;
+    else if (ch >= 'A' && ch <= 'F')
+        return ch - 'A'+10;
+    return 0;
+}
+
+static char *uri_val(const char *path, const char *name, ODR o)
+{
+    size_t nlen = strlen(name);
+    if (*path != '?')
+        return 0;
+    path++;
+    while (path && *path)
+    {
+        const char *p1 = strchr(path, '=');
+        if (!p1)
+            break;
+        if (p1 - path == nlen && !memcmp(path, name, nlen))
+        {
+            size_t i = 0;
+            char *ret;
+            
+            path = p1 + 1;
+            p1 = strchr(path, '&');
+            if (!p1)
+                p1 = strlen(path) + path;
+            ret = odr_malloc(o, p1 - path + 1);
+            while (*path && *path != '&')
+            {
+                if (*path == '+')
+                {
+                    ret[i++] = ' ';
+                    path++;
+                }
+                else if (*path == '%' && path[1] && path[2])
+                {
+                    ret[i++] = hex_digit (path[1])*16 + hex_digit (path[2]);
+                    path = path + 3;
+                }
+                else
+                    ret[i++] = *path++;
+            }
+            ret[i] = '\0';
+            return ret;
+        }
+        path = strchr(p1, '&');
+        if (path)
+            path++;
+    }
+    return 0;
+}
+
+void uri_val_int(const char *path, const char *name, ODR o, int **intp)
+{
+    const char *v = uri_val(path, name, o);
+    if (v)
+        *intp = odr_intdup(o, atoi(v));
+}
+
 static void process_http_request(association *assoc, request *req)
 {
     Z_HTTP_Request *hreq = req->gdu_request->u.HTTP_Request;
@@ -701,6 +778,94 @@ static void process_http_request(association *assoc, request *req)
 
     if (!strcmp(hreq->method, "GET"))
     {
+        char *charset = 0;
+        int ret = -1;
+        Z_SOAP *soap_package = 0;
+        char *db = "Default";
+        const char *p0 = hreq->path, *p1;
+        static Z_SOAP_Handler soap_handlers[2] = {
+#if HAVE_XML2
+            {"http://www.loc.gov/zing/srw/v1.0/", 0,
+             (Z_SOAP_fun) yaz_srw_codec},
+#endif
+            {0, 0, 0}
+        };
+        
+        if (*p0 == '/')
+            p0++;
+        p1 = strchr(p0, '?');
+        if (!p1)
+            p1 = p0 + strlen(p0);
+        if (p1 != p0)
+        {
+            db = odr_malloc(assoc->decode, p1 - p0 + 1);
+            memcpy (db, p0, p1 - p0);
+            db[p1 - p0] = '\0';
+        }
+
+        if (p1 && *p1 == '?' && p1[1])
+        {
+            Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
+            Z_SRW_PDU *sr = yaz_srw_get(o, Z_SRW_searchRetrieve_request);
+            char *query = uri_val(p1, "query", o);
+            char *pQuery = uri_val(p1, "pQuery", o);
+            char *sortKeys = uri_val(p1, "sortKeys", o);
+            
+            if (query)
+            {
+                sr->u.request->query_type = Z_SRW_query_type_cql;
+                sr->u.request->query.cql = query;
+            }
+            if (pQuery)
+            {
+                sr->u.request->query_type = Z_SRW_query_type_pqf;
+                sr->u.request->query.pqf = pQuery;
+            }
+            if (sortKeys)
+            {
+                sr->u.request->sort_type = Z_SRW_sort_type_sort;
+                sr->u.request->sort.sortKeys = sortKeys;
+            }
+            sr->u.request->recordSchema = uri_val(p1, "recordSchema", o);
+            uri_val_int(p1, "maximumRecords", o, 
+                        &sr->u.request->maximumRecords);
+            uri_val_int(p1, "startRecord", o,
+                        &sr->u.request->startRecord);
+            if (sr->u.request->startRecord)
+                yaz_log(LOG_LOG, "startRecord=%d", *sr->u.request->startRecord);
+            sr->u.request->database = db;
+            srw_bend_search(assoc, req, sr->u.request,
+                            res->u.response);
+            
+            soap_package = odr_malloc(o, sizeof(*soap_package));
+            soap_package->which = Z_SOAP_generic;
+
+            soap_package->u.generic =
+                odr_malloc(o, sizeof(*soap_package->u.generic));
+
+            soap_package->u.generic->p = res;
+            soap_package->u.generic->ns = soap_handlers[0].ns;
+            soap_package->u.generic->no = 0;
+            
+            soap_package->ns = "SRU";
+
+            p = z_get_HTTP_Response(o, 200);
+            hres = p->u.HTTP_Response;
+
+            ret = z_soap_codec_enc(assoc->encode, &soap_package,
+                                   &hres->content_buf, &hres->content_len,
+                                   soap_handlers, charset);
+            if (!charset)
+                z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/xml");
+            else
+            {
+                char ctype[60];
+                strcpy(ctype, "text/xml; charset=");
+                strcat(ctype, charset);
+                z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+            }
+
+        }
 #ifdef DOCDIR
 	if (strlen(hreq->path) >= 5 && strlen(hreq->path) < 80 &&
 			 !memcmp(hreq->path, "/doc/", 5))

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.9 2003-03-11 11:03:30 adam Exp $
+ * $Id: odr.h,v 1.10 2003-03-18 13:34:35 adam Exp $
  */
 
 #ifndef ODR_H
@@ -194,6 +194,7 @@ YAZ_EXPORT void odr_setbuf(ODR o, char *buf, int len, int can_grow);
 YAZ_EXPORT char *odr_getbuf(ODR o, int *len, int *size);
 YAZ_EXPORT void *odr_malloc(ODR o, int size);
 YAZ_EXPORT char *odr_strdup(ODR o, const char *str);
+YAZ_EXPORT char *odr_strdupn(ODR o, const char *str, size_t n);
 YAZ_EXPORT int *odr_intdup(ODR o, int v);
 YAZ_EXPORT NMEM odr_extract_mem(ODR o);
 YAZ_EXPORT Odr_null *odr_nullval(void);

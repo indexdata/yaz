@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: nmem.h,v 1.10 2003-01-06 08:20:27 adam Exp $
+ * $Id: nmem.h,v 1.11 2003-03-18 13:34:35 adam Exp $
  */
 
 #ifndef NMEM_H
@@ -64,6 +64,7 @@ typedef struct nmem_control *NMEM;
 YAZ_EXPORT void nmem_reset(NMEM n);
 YAZ_EXPORT int nmem_total(NMEM n);
 YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
+YAZ_EXPORT char *nmem_strdupn (NMEM mem, const char *src, size_t n);
 YAZ_EXPORT int *nmem_intdup (NMEM mem, int v);
 YAZ_EXPORT void nmem_transfer (NMEM dst, NMEM src);
 
