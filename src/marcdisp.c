@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.4 2004-03-15 21:39:06 adam Exp $
+ * $Id: marcdisp.c,v 1.5 2004-03-16 13:15:58 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -43,7 +43,6 @@ void yaz_marc_destroy(yaz_marc_t mt)
 
 static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
 {
-    size_t i;
     if (mt->xml == YAZ_MARC_ISO2709)
 	wrbuf_iconv_write(wr, mt->iconv_cd, buf, len);
     else if (mt->xml == YAZ_MARC_LINE)
