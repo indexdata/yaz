@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.1  1995-06-19 12:38:45  quinn
+ * Revision 1.2  1995-06-27 13:20:51  quinn
+ * Fixed sign-clash. Non-fatal warning
+ *
+ * Revision 1.1  1995/06/19  12:38:45  quinn
  * Added BER dumper.
  *
  *
@@ -22,7 +25,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level)
     	return 0;
     if (!buf[0] && !buf[1])
     	return 0;
-    if ((res = ber_dectag(b, &class, &tag, &cons)) <= 0)
+    if ((res = ber_dectag((unsigned char*)b, &class, &tag, &cons)) <= 0)
     	return 0;
     if (res > len)
     {
@@ -53,7 +56,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level)
 	fprintf(stderr, "[%d:%d]", class, tag);
     b += res;
     len -= res;
-    if ((res = ber_declen(b, &ll)) <= 0)
+    if ((res = ber_declen((unsigned char*)b, &ll)) <= 0)
     {
     	fprintf(stderr, "bad length\n");
     	return 0;
