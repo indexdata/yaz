@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.112  2001-02-20 11:25:32  adam
+ * Revision 1.113  2001-02-21 09:41:15  adam
+ * Fixed problem with old codecs.
+ *
+ * Revision 1.112  2001/02/20 11:25:32  adam
  * Added ill_get_APDU and ill_get_Cancel.
  *
  * Revision 1.111  2001/01/30 15:52:48  ja7
@@ -1492,6 +1495,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
         (int *) odr_malloc(out, sizeof(int));
     *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
 
+#ifdef ASN_COMPILED
     if (!strcmp (type, "item") || !strcmp(type, "2"))
     {
         printf ("using item-request\n");
@@ -1506,6 +1510,10 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
     }
     else
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
+
+#else
+    r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
+#endif
     return r;
 }
 
