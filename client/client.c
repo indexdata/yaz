@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.174 2002-11-08 12:23:38 adam Exp $
+ * $Id: client.c,v 1.175 2002-12-05 12:19:23 adam Exp $
  */
 
 #include <stdio.h>
@@ -472,7 +472,11 @@ int cmd_open(char *arg)
     {
         printf ("error = %s\n", cs_strerror(conn));
         if (conn->cerrno == CSYSERR)
-            perror("system");
+	{
+	    char msg[256];
+	    yaz_strerror(msg, sizeof(msg));
+	    printf ("%s\n", msg);
+	}
         cs_close(conn);
         conn = 0;
         return 0;

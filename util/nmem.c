@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.37 2002-09-25 12:37:07 adam Exp $
+ * $Id: nmem.c,v 1.38 2002-12-05 12:19:24 adam Exp $
  */
 
 /*
@@ -439,4 +439,35 @@ int yaz_errno(void)
 void yaz_set_errno(int v)
 {
     errno = v;
+}
+
+void yaz_strerror(char *buf, int max)
+{
+    char *cp;
+#ifdef WIN32
+    DWORD err = GetLastError();
+    if (err)
+    {
+        FormatMessage(
+		FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL,
+		err,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+		(LPTSTR) buf,
+		max-1,
+		NULL);
+    }
+    else
+	*buf = '\0';
+#else
+#if YAZ_POSIX_THREADS
+    strerror_r(errno, buf, max);
+#else
+    strcpy(buf, strerror(yaz_errno()));
+#endif
+#endif
+    if ((cp=strrchr(buf, '\n')))
+	*cp = '\0';
+    if ((cp=strrchr(buf, '\r')))
+	*cp = '\0';
 }

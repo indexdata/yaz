@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,47 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Log: nmem.h,v $
- * Revision 1.8  2002-09-25 12:37:07  adam
- * Thread-safe handling of errno variable.
- * For server option -a@ produces APDU prints in YAZ log.
- *
- * Revision 1.7  2002/09/10 18:41:18  adam
- * Added yaz_errno
- *
- * Revision 1.6  2001/06/26 14:11:27  adam
- * Added MUTEX functions for NMEM module (used by OID utility).
- *
- * Revision 1.5  2001/03/25 21:55:12  adam
- * Added odr_intdup. Ztest server returns TaskPackage for ItemUpdate.
- *
- * Revision 1.4  2000/05/09 11:48:58  adam
- * Fix (bug introduced by previous commit).
- *
- * Revision 1.3  2000/05/09 10:55:05  adam
- * Public nmem_print_list (for debugging).
- *
- * Revision 1.2  2000/02/28 11:20:06  adam
- * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
- *
- * Revision 1.1  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.10  1998/10/19 15:24:20  adam
- * New nmem utility, nmem_transfer, that transfer blocks from one
- * NMEM to another.
- *
- * Revision 1.9  1998/10/13 16:00:17  adam
- * Implemented nmem_critical_{enter,leave}.
- *
- * Revision 1.8  1998/07/20 12:35:59  adam
- * Added more memory diagnostics (when NMEM_DEBUG is 1).
- *
- * Revision 1.7  1997/10/31 12:20:08  adam
- * Improved memory debugging for xmalloc/nmem.c. References to NMEM
- * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
- * Bug fix: missing fclose in data1_read_espec1.
- *
+ * $Id: nmem.h,v 1.9 2002-12-05 12:19:23 adam Exp $
  */
 
 #ifndef NMEM_H
@@ -135,6 +95,7 @@ YAZ_EXPORT void nmem_init (void);
 YAZ_EXPORT void nmem_exit (void);
 YAZ_EXPORT int yaz_errno (void);
 YAZ_EXPORT void yaz_set_errno (int v);
+YAZ_EXPORT void yaz_strerror(char *buf, int max);
 
 YAZ_END_CDECL
 

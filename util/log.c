@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.31 2002-11-26 16:56:39 adam Exp $
+ * $Id: log.c,v 1.32 2002-12-05 12:19:24 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -162,24 +162,9 @@ void yaz_log(int level, const char *fmt, ...)
 /* WIN32 */
     if (o_level & LOG_ERRNO)
     {
-#ifdef WIN32
-	DWORD err = GetLastError();
-	if (err)
-	{
-	    strcat(buf, " [");
-	    FormatMessage(
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL,
-		err,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-		(LPTSTR) buf + strlen(buf),
-		2048,
-		NULL);
-	    strcat(buf, "]");
-	}
-#else
-        sprintf(buf + strlen(buf), " [%s]", strerror(yaz_errno()));
-#endif
+	strcat(buf, " [");
+	yaz_strerror(buf+strlen(buf), 2048);
+	strcat(buf, "]");
     }
     va_end (ap);
     if (start_hook_func)
