@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.10 2003-03-11 11:05:19 adam Exp $
+ * $Id: comstack.h,v 1.11 2003-11-17 10:40:08 mike Exp $
  */
 
 #ifndef COMSTACK_H
@@ -161,6 +161,7 @@ YAZ_EXPORT int cs_complete_auto(const unsigned char *buf, int len);
 #define CSWRONGBUF 4
 #define CSDENY     5
 #define CSERRORSSL 6
+#define CSLASTERROR CSERRORSSL	/* must be the value of last CS error */
 
 /* backwards compatibility */
 #define CS_SR     PROTO_SR
