@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.6 2004-11-02 13:52:54 heikki Exp $
+ * $Id: log.c,v 1.7 2004-11-02 14:13:09 heikki Exp $
  */
 
 /**
@@ -55,7 +55,8 @@ static char l_custom_format[TIMEFORMAT_LEN]="";
 static char *l_actual_format=l_old_default_format;
 
 /** l_max_size tells when to rotate the log. Default to 1 GB */
-/* static int l_max_size=1024*1024*1024;  */
+static int l_max_size=1024*1024*1024;
+/* static int l_max_size=1024; */  /* while testing */
 
 static struct {
     int mask;
@@ -115,6 +116,25 @@ void yaz_log_reopen(void)
         setvbuf(new_file, 0, _IONBF, 0);
     l_file = new_file;
 }
+
+static void rotate_log()
+{
+    char newname[512];
+    if (l_file==stderr)
+        return; /* can't rotate that */
+    if (!*l_fname)
+        return; /* hmm, no name, can't rotate */
+    strncpy(newname, l_fname, 510);
+    newname[510]='\0'; /* make sure it is terminated */
+    strcat(newname,".1");
+#ifdef WIN32
+    fclose(l_file);
+    l_file=stderr;
+#endif
+    rename(l_fname, newname);
+    yaz_log_reopen();
+}
+
 
 void yaz_log_init_level (int level)
 {
@@ -176,18 +196,20 @@ void yaz_log(int level, const char *fmt, ...)
     struct tm *tim;
     char tbuf[TIMEFORMAT_LEN]="";
     int o_level = level;
-    /* int flen; */
+    int flen; 
 
     if (!(level & l_level))
     	return;
     if (!l_file)
         l_file = stderr;
     
-/*    
-    flen=ftell(l_file);
-    if (flen>l_max_size) 
-        rotate_log();
-*/
+    if (l_file != stderr)
+    {
+        flen=ftell(l_file);
+        if (flen>l_max_size) 
+            rotate_log();
+    }
+
     *flags = '\0';
     for (i = 0; level && mask_names[i].name; i++)
     	if (mask_names[i].mask & level)
