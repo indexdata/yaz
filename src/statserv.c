@@ -1,12 +1,11 @@
 /*
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.4 2004-01-17 01:20:13 adam Exp $
+ * $Id: statserv.c,v 1.5 2004-01-18 02:28:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -743,6 +742,27 @@ int statserv_start(int argc, char **argv)
 	inetd_connection(control_block.default_proto);
     else
     {
+	if (control_block.background)
+	{
+	    switch (fork())
+	    {
+	    case 0: 
+		break;
+	    case -1:
+		return 1;
+	    default: 
+	    _exit(0);
+	    }
+	    
+	    if (setsid() < 0)
+		return 1;
+	    
+	    close(0);
+	    close(1);
+	    close(2);
+	    open("/dev/null",O_RDWR);
+	    dup(0); dup(0);
+	}
 	if (!pListener && *control_block.default_listen)
 	    add_listener(control_block.default_listen,
 			 control_block.default_proto);
@@ -791,27 +811,6 @@ int statserv_start(int argc, char **argv)
 	    yaz_log(LOG_FATAL|LOG_ERRNO, "setuid");
 	    exit(1);
 	}
-    }
-    if (!control_block.inetd && control_block.background)
-    {
-	switch (fork())
-	{
-        case 0: 
-	    break;
-        case -1:
-	    return 1;
-        default: 
-	    _exit(0);
-	}
-	
-	if (setsid() < 0)
-	    return 1;
-	
-	close(0);
-	close(1);
-	close(2);
-        open("/dev/null",O_RDWR);
-        dup(0); dup(0);
     }
 /* UNIX */
 #endif
