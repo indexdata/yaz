@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2000-2003, Index Data
+ * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.16 2004-01-07 20:36:44 adam Exp $
+ * $Id: zoom-c.c,v 1.17 2004-01-07 21:02:42 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -918,7 +918,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.16 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.17 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1059,7 +1059,7 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
     ret = z_soap_codec_enc(o, &p,
                            &gdu->u.HTTP_Request->content_buf,
                            &gdu->u.HTTP_Request->content_len, h,
-                           c->charset, 0);
+                           c->charset);
 
     if (!z_GDU(c->odr_out, &gdu, 0, 0))
         return zoom_complete;

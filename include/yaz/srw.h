@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2002-2003, Index Data.
+ * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.12 2004-01-07 20:36:44 adam Exp $
+ * $Id: srw.h,v 1.13 2004-01-07 21:02:42 adam Exp $
  */
 
 #ifndef YAZ_SRW_H

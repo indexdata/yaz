@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.14 2004-01-07 20:36:44 adam Exp $
+ * $Id: seshigh.c,v 1.15 2004-01-07 21:02:42 adam Exp $
  */
 
 /*
@@ -835,9 +835,9 @@ static void process_http_request(association *assoc, request *req)
 	    int ret;
 	    p = z_get_HTTP_Response(o, 200);
 	    hres = p->u.HTTP_Response;
-	    ret = z_soap_codec_enc(assoc->encode, &soap_package,
-				   &hres->content_buf, &hres->content_len,
-				   soap_handlers, charset, stylesheet);
+	    ret = z_soap_codec_enc_xsl(assoc->encode, &soap_package,
+				       &hres->content_buf, &hres->content_len,
+				       soap_handlers, charset, stylesheet);
 	    hres->code = http_code;
 
 	    strcpy(ctype, "text/xml");
@@ -1274,7 +1274,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.14 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.15 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
