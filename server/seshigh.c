@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.96  1999-11-04 14:58:44  adam
+ * Revision 1.97  1999-11-29 14:36:28  adam
+ * Implementation_name and implementation_version copied verbatim.
+ *
+ * Revision 1.96  1999/11/04 14:58:44  adam
  * Added status elements for backend delete result set handler.
  * Updated delete result result set command for client.
  *
@@ -928,25 +931,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     resp->implementationName = "Index Data/YAZ Generic Frontend Server";
 
     if (binitreq.implementation_name)
-    {
-	char *nv = (char *)
-	    odr_malloc (assoc->encode,
-			strlen(binitreq.implementation_name) + 3 + 
-			       strlen(resp->implementationName));
-	sprintf (nv, "%s %s",
-		 resp->implementationName, binitreq.implementation_name);
-        resp->implementationName = nv;
-    }
+	resp->implementationName = binitreq.implementation_name;
     if (binitreq.implementation_version)
-    {
-	char *nv = (char *)
-	    odr_malloc (assoc->encode,
-			strlen(binitreq.implementation_version) + 3 + 
-			       strlen(resp->implementationVersion));
-	sprintf (nv, "%s %s",
-		 resp->implementationVersion, binitreq.implementation_version);
-        resp->implementationVersion = nv;
-    }
+        resp->implementationVersion = binitreq.implementation_version;
 
     if (binitres->errcode)
     {
