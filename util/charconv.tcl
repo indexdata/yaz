@@ -2,10 +2,10 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.2 2003-05-22 22:44:50 adam Exp $
+# $Id: charconv.tcl,v 1.3 2003-06-02 22:17:20 adam Exp $
 
 proc usage {} {
-    puts {charconv.tcl: [-p prefix] [-s split] input output}
+    puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
     exit 1
 }
 
@@ -229,7 +229,7 @@ proc readfile {fname} {
 
 set verbose 0
 set ifile {}
-set ofile {}
+set ofile out.c
 set trie(split) 40
 set trie(prefix) {}
 # Parse command line
@@ -253,26 +253,23 @@ while {$i < $l} {
             }
             set trie(prefix) $arg
         }
-        default {
-            if {![string length $ifile]} {
-                set ifile $arg
-            } elseif {![string length $ofile]} {
-                set ofile $arg
-            } else {
-                puts "charconv.tcl: too many files given"
-                usage
+	-o {
+            if {[string length $arg]} {
+                set arg [lindex $argv [incr i]]
             }
+            set ofile $arg
+	}	
+        default {
+	    lappend ifiles $arg
         }
     }
     incr i
 }
-if {![string length $ifile]} {
-    puts "charconv.tcl: missing input file"
+if {![info exists ifiles]} {
+    puts "charconv.tcl: missing input file(s)"
     usage
 }
-if {![string length $ofile]} {
-    puts "charconv.tcl: missing output file"
-    usage
+foreach ifile $ifiles {
+    readfile $ifile
 }
-readfile $ifile
 dump_trie $ofile
