@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Implemented mini iconv library supporting conversions between
+UTF-8, UCS4, UCS4LE and ISO-8859-1. Implemented in util/siconv.c.
+
+Removed XML reader (d1_expat.c). It's part of Zebra instead.
+
 --- 1.8.9 2002/08/20
 
 Fixed ZOOM C record cache so that preferredRecordSyntax and
