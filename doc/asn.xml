@@ -1,4 +1,4 @@
-<!-- $Header: /home/cvsroot/yaz/doc/asn.xml,v 1.1 2001-01-04 13:36:24 adam Exp $ -->
+<!-- $Header: /home/cvsroot/yaz/doc/asn.xml,v 1.2 2001-07-19 12:46:57 adam Exp $ -->
 <chapter><title>The ASN Module</title>
 <sect1><title>Introduction</title>
 <para>
@@ -351,54 +351,56 @@ PDU, as well as their default settings.
 </thead>
 <tbody>
 <row>
-<entry namest="field" nameend="value">Z_InitRequest</entry>
+<entry namest="field" nameend="field">Z_InitRequest</entry>
 </row>
 
 <row><entry>
-referenceId
-</entry><entry>
-Z_ReferenceId
-</entry><entry>
-NULL
+referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
 </entry></row>
 
 <row><entry>
-protocolVersion
-</entry><entry>
-Odr_bitmask
-</entry><entry>
-Empty bitmask
+protocolVersion</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
 </entry></row>
 
 <row><entry>
-options
-</entry><entry>
-Odr_bitmask
-</entry><entry>
-Empty bitmask
+options</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
+</entry></row>
+
+<row><entry>
+preferredMessageSize</entry><entry>int</entry><entry>30*1024
+</entry></row>
+
+<row><entry>
+maximumRecordSize</entry><entry>int</entry><entry>30*1024
+</entry></row>
+
+<row><entry>
+idAuthentication</entry><entry>Z_IdAuthentication</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+implementationId</entry><entry>char*</entry><entry>"YAZ (id=81)"
+</entry></row>
+
+<row><entry>
+implementationName</entry><entry>char*</entry><entry>"Index Data/YAZ"
+</entry></row>
+
+<row><entry>
+implementationVersion</entry><entry>char*</entry><entry>YAZ_VERSION
+</entry></row>
+
+<row><entry>
+userInformationField</entry><entry>Z_UserInformation</entry><entry>NULL
+</entry></row>
+
+<row><entry>
+otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
 </entry></row>
 
 </tbody>
 </tgroup>
 </table>
-
-<screen>
-Z_InitRequest
--------------
-Field                        Type                Default value
-
-referenceId                  Z_ReferenceId       NULL
-protocolVersion              Odr_bitmask         Empty bitmask
-options                      Odr_bitmask         Empty bitmask
-preferredMessageSize         int                 30*1024
-maximumRecordSize            int                 30*1024
-idAuthentication             Z_IdAuthentication  NULL
-implementationId             char*               "YAZ (id=81)"
-implementationName           char*               "Index Data/YAZ"
-implementationVersion        char*               YAZ_VERSION
-userInformationField         Z_UserInformation   NULL
-otherInfo                    Z_OtherInformation  NULL
-</screen>
 
 <screen>
 Z_InitResponse

@@ -1,9 +1,10 @@
 <!DOCTYPE style-sheet PUBLIC "-//James Clark//DTD DSSSL Style Sheet//EN" [
-<!ENTITY docbook.dsl SYSTEM "/usr/share/sgml/docbook/dsssl-stylesheets-1.59/html/docbook.dsl" CDATA DSSSL>
+<!ENTITY docbook.dsl SYSTEM "/home/adam/proj/docbook-dsssl-1.70/html/docbook.dsl" CDATA DSSSL>
+<!-- ENTITY docbook.dsl SYSTEM "/usr/lib/sgml/stylesheet/dsssl/docbook/nwalsh/html/docbook.dsl" CDATA DSSSL -->
 <!ENTITY html-common.dsl SYSTEM "./html-common.dsl">
 ]>
 <!--
-  $Header: /home/cvsroot/yaz/doc/Attic/yazhtml.dsl,v 1.1 2001-02-21 23:16:49 adam Exp $
+  $Header: /home/cvsroot/yaz/doc/Attic/yazhtml.dsl,v 1.2 2001-07-19 12:46:57 adam Exp $
 -->
 <style-sheet>
 <style-specification use="docbook">
@@ -16,3 +17,4 @@
 </style-specification>
 <external-specification id="docbook" document="docbook.dsl">
 </style-sheet>
+  

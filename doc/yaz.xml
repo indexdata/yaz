@@ -16,7 +16,7 @@
      <!ENTITY odr "<acronym>ODR</acronym>">
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
 ]>
-<!-- $Header: /home/cvsroot/yaz/doc/yaz.xml,v 1.1 2001-01-04 13:36:25 adam Exp $ -->
+<!-- $Header: /home/cvsroot/yaz/doc/yaz.xml,v 1.2 2001-07-19 12:46:57 adam Exp $ -->
 <book>
 <bookinfo>
 <title>YAZ User's Guide and Reference</title>
@@ -35,7 +35,7 @@
 <abstract><simpara>
 This document is the programmer's guide and reference to the &yaz;
 package. &yaz; is a compact toolkit that provides access to the
-Z39.50/SR protocol, as well as a set of higher-level tools for
+Z39.50 protocol, as well as a set of higher-level tools for
 implementing the server and client roles, respectively.
 The documentation can be used on its own, or as a reference when looking
 at the example applications provided with the package.

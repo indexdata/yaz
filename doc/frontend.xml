@@ -1,4 +1,4 @@
-<!-- $Header: /home/cvsroot/yaz/doc/frontend.xml,v 1.1 2001-01-04 13:36:24 adam Exp $ -->
+<!-- $Header: /home/cvsroot/yaz/doc/frontend.xml,v 1.2 2001-07-19 12:46:57 adam Exp $ -->
 <chapter><title id="server">Making an IR Server for Your Database</title>
 
 <sect1><title>Introduction</title>
@@ -7,7 +7,7 @@
 If you aren't into documentation, a good way to learn how the
 backend interface works is to look at the <filename>backend.h</filename>
 file. Then, look at the small dummy-server in
-<filename>server/ztest.c</filename>. Finally, you can have a look at
+<filename>ztest/ztest.c</filename>. Finally, you can have a look at
 the <filename>seshigh.c</filename> file, which is where most of the
 logic of the frontend server is located. The <filename>backend.h</filename>
 file also makes a good reference, once you've chewed your way through
@@ -16,13 +16,14 @@ the prose of this file.
 
 <para>
 If you have a database system that you would like to make available by
-means of Z39.50/SR, &yaz; basically offers your two options. You
+means of Z39.50, &yaz; basically offers your two options. You
 can use the APIs provided by the &asn;, &odr;, and &comstack;
 modules to
-create and decode PDUs, and exchange them with a client. Using this
-low-level interface gives you access to all fields and options of the
-protocol, and you can construct your server as close to your existing
-database as you like. It is also a fairly involved process, requiring
+create and decode PDUs, and exchange them with a client.
+Using this low-level interface gives you access to all fields and
+options of the protocol, and you can construct your server as close
+to your existing database as you like.
+It is also a fairly involved process, requiring
 you to set up an event-handling mechanism, protocol state machine,
 etc. To simplify server implementation, we have implemented a compact
 and simple, but reasonably full-functioned server-frontend that will
@@ -51,17 +52,17 @@ too many structural changes in existing applications.
 We refer to this software as a generic database frontend. Your
 database system is the <emphasis>backend database</emphasis>, and the
 interface between the two is called the <emphasis>backend API</emphasis>.
-The backend API consists of a small number of function prototypes and
+The backend API consists of a small number of function handlers and
 structure definitions. You are required to provide the
 <function>main()</function> routine for the server (which can be
-quite simple), as well as functions to match each of the prototypes.
+quite simple), as well as a set of handlers to match each of the prototypes.
 The interface functions that you write can use any mechanism you like
 to communicate with your database system: You might link the whole
 thing together with your database application and access it by
 function calls; you might use IPC to talk to a database server
 somewhere; or you might link with third-party software that handles
 the communication for you (like a commercial database client library).
-At any rate, the functions will perform the tasks of:
+At any rate, the handlers will perform the tasks of:
 </para>
 
 <itemizedlist>
@@ -79,7 +80,19 @@ Fetching records.
 </para></listitem>
 
 <listitem><para>
-Scanning the database index (if you wish to implement SCAN).
+Scanning the database index (optional - if you wish to implement SCAN).
+</para></listitem>
+
+<listitem><para>
+Extended Services (optional).
+</para></listitem>
+
+<listitem><para>
+Result-Set Delete (optional).
+</para></listitem>
+
+<listitem><para>
+Result-Set Sort (optional).
 </para></listitem>
 
 </itemizedlist>
@@ -87,14 +100,6 @@ Scanning the database index (if you wish to implement SCAN).
 <para>
 (more functions will be added in time to support as much of
 Z39.50-1995 as possible).
-</para>
-
-<para>
-Because the model where pipes or sockets are used to access the backend
-database is a fairly common one, we have added a mechanism that allows this
-communication to take place asynchronously. In this mode, the frontend
-server doesn't have to block while the backend database is processing
-a request, but can wait for additional PDUs from the client.
 </para>
 
 </sect1>
@@ -123,18 +128,28 @@ call the function
 </para>
 
 <synopsis>
-  int statserv_main(int argc, char **argv);
+int statserv_main(int argc, char **argv,
+          bend_initresult *(*bend_init)(bend_initrequest *r),
+          void (*bend_close)(void *handle));
 </synopsis>
+
+<para>
+The third and fourth arguments are pointers to handlers. Handler
+<function>bend_init</function> is called whenever the server receives
+an Initialize Request, so it serves as a Z39.50 session initializer. The
+<function>bend_close</function> handler is called when the session is
+closed.
+</para>
 
 <para>
 <function>statserv_main</function> will establish listening sockets
 according to the parameters given. When connection requests are received,
-the event handler will typically <function>fork()</function> to handle the
-new request. If you do use global variables, you should be aware, then,
+the event handler will typically <function>fork()</function> and
+create a sub-process to handle a new connection.
+Alternatively the server may be setup to create threads for each connection.
+If you do use global variables and forking, you should be aware, then,
 that these cannot be shared between associations, unless you explicitly
-disallow forking by command line parameters (we advise against this for
-any purposes except debugging, as a crash or hang in the server process
-will affect all users currently signed on to the server).
+disable forking by command line parameters. 
 </para>
 
 <para>
@@ -143,7 +158,7 @@ without using command-line options. The function
 </para>
 
 <synopsis>
-  statserv_options_block *statserv_getcontrol(void);
+statserv_options_block *statserv_getcontrol(void);
 </synopsis>
 
 <para>
@@ -155,12 +170,27 @@ contains these elements:
 <varlistentry><term>int dynamic</term><listitem><para>
 A boolean value, which determines whether the server
 will fork on each incoming request (TRUE), or not (FALSE). Default is
-TRUE.
+TRUE. This flag is only read by UNIX-based servers (WIN32 based servers
+doesn't fork).
 </para></listitem></varlistentry>
+
+<varlistentry><term>int threads</term><listitem><para>
+A boolean value, which determines whether the server
+will create a thread on each incoming request (TRUE), or not (FALSE).
+Default is FALSE. This flag is only read by UNIX-based servers that offer
+POSIX Threads support. WIN32-based servers always operate in threaded mode.
+</para></listitem></varlistentry>
+
+<varlistentry><term>int inetd</term><listitem><para>
+A boolean value, which determines whether the server
+will operates under a UNIX INET daemon (inetd). Default is FALSE.
+</para></listitem></varlistentry>
+
 <varlistentry><term>int loglevel</term><listitem><para>
 Set this by ORing the constants defined in
 <filename>include/yaz/yaz-log.h</filename>.
 </para></listitem></varlistentry>
+
 <varlistentry><term>char logfile&lsqb;ODR_MAXNAME+1&rsqb;</term>
 <listitem><para>File for diagnostic output (&quot;&quot;: stderr).
 </para></listitem></varlistentry>
@@ -169,12 +199,14 @@ Set this by ORing the constants defined in
 Name of file for logging incoming and outgoing APDUs (&quot;&quot;: don't
 log APDUs, &quot;-&quot;: <literal>stderr</literal>).
 </para></listitem></varlistentry>
+
 <varlistentry><term>char default_listen&lsqb;1024&rsqb;</term>
 <listitem><para>Same form as the command-line specification of
 listener address. &quot;&quot;: no default listener address.
 Default is to listen at &quot;tcp:@:9999&quot;. You can only
 specify one default listener address in this fashion.
 </para></listitem></varlistentry>
+
 <varlistentry><term>enum oid_proto default_proto;</term>
 <listitem><para>Either <literal>PROTO_SR</literal> or
 <literal>PROTO_Z3950</literal>. Default is <literal>PROTO_Z39_50</literal>.
@@ -183,6 +215,7 @@ specify one default listener address in this fashion.
 <listitem><para>Maximum session idletime, in minutes. Zero indicates
 no (infinite) timeout. Default is 120 minutes.
 </para></listitem></varlistentry>
+
 <varlistentry><term>int maxrecordsize;</term>
 <listitem><para>Maximum permissible record (message) size. Default
 is 1Mb. This amount of memory will only be allocated if a client requests a
@@ -190,13 +223,40 @@ very large amount of records in one operation (or a big record). Set it
 to a lower number
 if you are worried about resource consumption on your host system.
 </para></listitem></varlistentry>
+
 <varlistentry><term>char configname&lsqb;ODR_MAXNAME+1&rsqb;</term>
 <listitem><para>Passed to the backend when a new connection is received.
 </para></listitem></varlistentry>
+
 <varlistentry><term>char setuid&lsqb;ODR_MAXNAME+1&rsqb;</term>
 <listitem><para>Set user id to the user specified, after binding
 the listener addresses.
 </para></listitem></varlistentry>
+
+<varlistentry><term>void (*bend_start)(struct statserv_options_block *p)</term>
+<listitem><para>Pointer to function which is called after the command line
+options have been parsed - but before the server starts listening. For
+forked UNIX servers this handler is called in the mother process; for
+threaded servers this handler is called in the main thread. The default
+value of this pointer is NULL in which case it isn't invoked by the frontend
+server. When the server operates as an NT service this handler is called
+whenever the service is started. 
+</para></listitem></varlistentry>
+
+<varlistentry><term>void (*bend_stop)(struct statserv_options_block *p)</term>
+<listitem><para>Pointer to function which is called whenver the server
+has stopped listening for incoming connections. This function pointer
+has a default value of NULL in which case it isn't called.
+When the server operates as an NT service this handler is called
+whenever the service is stopped.
+</para></listitem></varlistentry>
+
+<varlistentry><term>void *handle</term>
+<listitem><para>User defined pointer (default value NULL).
+This is a per-server handle that can be used to specify "user-data".
+Do not confuse this with the session-handle as returned by bend_init.
+</para></listitem></varlistentry>
+
 </variablelist>
 </para>
 
@@ -207,7 +267,7 @@ but the changes will not take effect before you call
 </para>
 
 <synopsis>
-  void statserv_setcontrol(statserv_options_block *block);
+void statserv_setcontrol(statserv_options_block *block);
 </synopsis>
 
 <note>
@@ -226,20 +286,47 @@ two functions. You are required to provide implementations of the
 functions representing the services that you wish to implement.
 </para>
 
+<sect2><title>Init</title>
+
 <synopsis>
-  bend_initresult *bend_init(bend_initrequest *r);
+bend_initresult (*bend_init)(bend_initrequest *r);
 </synopsis>
 
 <para>
-This function is called once for each new connection request, after
-a new process has been forked, and an initRequest has been received
-from the client. The parameter and result structures are defined as
+This handler is called once for each new connection request, after
+a new process/thread has been created, and an Initialize Request has been
+received from the client. The pointer to the <function>bend_init</function>
+handler is passed in the call to <function>statserv_start</function>.
+</para>
+<para>
+Unlike previous versions of YAZ, the <function>bend_init</function> also
+serves as a handler that defines the Z39.50 services that the backend
+wish to support. Pointers to <emphasis>all</emphasis> service handlers,
+including search - and fetch must be specified here in this handler.
+</para>
+<para>
+The request  - and result structures are defined as
 </para>
 
 <synopsis>
 typedef struct bend_initrequest
 {
-    char *configname;
+    Z_IdAuthentication *auth;
+    ODR stream;                /* encoding stream */
+    ODR print;                 /* printing stream */
+    Z_ReferenceId *referenceId;/* reference ID */
+    char *peer_name;           /* dns host of peer (client) */
+
+    char *implementation_name;
+    char *implementation_version;
+    int (*bend_sort) (void *handle, bend_sort_rr *rr);
+    int (*bend_search) (void *handle, bend_search_rr *rr);
+    int (*bend_fetch) (void *handle, bend_fetch_rr *rr);
+    int (*bend_present) (void *handle, bend_present_rr *rr);
+    int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
+    int (*bend_delete)(void *handle, bend_delete_rr *rr);
+    int (*bend_scan)(void *handle, bend_scan_rr *rr);
+    int (*bend_segment)(void *handle, bend_segment_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult
@@ -249,13 +336,6 @@ typedef struct bend_initresult
     void *handle;      /* private handle to the backend module */
 } bend_initresult;
 </synopsis>
-
-<para>
-The <literal>configname</literal> of <literal>bend_initrequest</literal>
-is currently always set to &quot;default-config&quot;. We haven't had
-use for putting anything special in the initrequest yet, but something
-might go there if the need arises (account/password info would be obvious).
-</para>
 
 <para>
 In general, the server frontend expects that the
@@ -281,76 +361,84 @@ The typical use is to set it to point to a dynamically allocated state
 structure that is private to your backend module.
 </para>
 
-<synopsis>
-bend_searchresult *bend_search(void *handle, bend_searchrequest *r,
-                               int *fd);
-bend_searchresult *bend_searchresponse(void *handle);
-
-typedef struct bend_searchrequest
-{
-    char *setname;       /* name to give to this set */
-    int replace_set;     /* replace set, if it already exists */
-    int num_bases;       /* number of databases in list */
-    char **basenames;    /* databases to search */
-    Z_Query *query;      /* query structure */
-} bend_searchrequest;
-
-typedef struct bend_searchresult
-{
-    int hits;            /* number of hits */
-    int errcode;         /* 0==OK */
-    char *errstring;     /* system error string or NULL */
-} bend_searchresult;
-</synopsis>
-
 <para>
-The first thing to notice about the search request interface (as well
-as all of the following requests), is that it consists of two separate
-functions. The idea is to provide a simple facility for
-asynchronous communication with the backend server. When a
-searchrequest comes in, the server frontend will fill out the
-<function>bend_searchrequest</function> tructure, and call the
-<function>bend_search</function> function/. The <literal>fd</literal>
-argument will point to an integer variable. If you are able to do
-asynchronous I/O with your database server, you should set
-<literal>*fd</literal> to the file descriptor you use for the
-communication, and return a null pointer.
-The server frontend will then <function>select()</function> on the
-<literal>*fd</literal>, and will call
-<function>bend_searchresult</function> when it sees that data is available.
-If you don't support asynchronous I/O, you should return a pointer to the
-<function>bend_searchresult</function> immediately, and leave 
-<literal>*fd</literal> untouched. This construction is common to
-all of the <function>bend_</function> functions (except 
-<function>bend_init</function>). Note that you can choose to support
-this facility in none, any, or all of the <function>bend_</function>
-functions, and you can respond differently on each request at run-time.
-The server frontend will adapt accordingly.
+The <literal>auth</literal> member holds the authentication information
+part of the Z39.50 Initialize Request. Interpret this if your serves
+requires authentication. 
 </para>
 
 <para>
-The <function>bend_searchrequest</function> is a fairly close
-approximation of a protocol searchRequest PDU. The
-<literal>setname</literal> is the resultSetName from the protocol. You
-are required to establish a mapping between the set name and whatever
-your backend database likes to use. Similarly, the
-<literal>replace_set</literal> is a boolean value corresponding to the
-resultSetIndicator field in the protocol.
-<literal>Num_bases/basenames</literal> is a length of/array of character
-pointers to the database names provided by the client. The
-<literal>query</literal> is the full query structure as defined in the
-protocol ASN.1 specification. It can be either of the possible query
-types, and it's up to you to determine if you can handle the provided
-query type. Rather than reproduce the C interface here, we'll refer you
-to the structure definitions in the file
-<filename>include/yaz/proto.h</filename>. If you want to look at the
+The members <literal>peer_name</literal>,
+<literal>implementation_name</literal> and
+<literal>implementation_version</literal> holds DNS of client, name
+of client (Z39.50) implementation - and version.
+</para>
+
+<para>
+The <literal>bend_</literal> - members are set to NULL when
+<function>bend_init</function> is called. Modify the pointers by setting them
+to point to backend functions.
+</para>
+
+</sect2>
+
+<sect2><title>Search and retrieve</title>
+
+<para>We now describe the handlers that are required to support search -
+and retrieve. You must support two functions - one for seearch - and one
+for fetch (retrieval of one record). If desirable you can provide a
+third handler which is called when a present request is received which
+allows you to optimize retrieval of multiple-records.
+</para>
+
+<synopsis>
+int (*bend_search) (void *handle, bend_search_rr *rr);
+
+typedef struct {
+    char *setname;             /* name to give to this set */
+    int replace_set;           /* replace set, if it already exists */
+    int num_bases;             /* number of databases in list */
+    char **basenames;          /* databases to search */
+    Z_ReferenceId *referenceId;/* reference ID */
+    Z_Query *query;            /* query structure */
+    ODR stream;                /* encode stream */
+    ODR decode;                /* decode stream */
+    ODR print;                 /* print stream */
+
+    bend_request request;
+    bend_association association;
+    int *fd;
+    int hits;                  /* number of hits */
+    int errcode;               /* 0==OK */
+    char *errstring;           /* system error string or NULL */
+} bend_search_rr;
+
+</synopsis>
+
+<para>
+The <function>bend_search</function> handler is a fairly close
+approximation of a protocol Search Request - and Response PDUs
+The <literal>setname</literal> is the resultSetName from the protocol.
+You are required to establish a mapping between the set name and whatever
+your backend database likes to use.
+Similarly, the <literal>replace_set</literal> is a boolean value
+corresponding to the resultSetIndicator field in the protocol.
+<literal>num_bases/basenames</literal> is a length of/array of character
+pointers to the database names provided by the client.
+The <literal>query</literal> is the full query structure as defined in the
+protocol ASN.1 specification.
+It can be either of the possible query types, and it's up to you to
+determine if you can handle the provided query type.
+Rather than reproduce the C interface here, we'll refer you to the
+structure definitions in the file
+<filename>include/yaz/z-core.h</filename>. If you want to look at the
 attributeSetId OID of the RPN query, you can either match it against
 your own internal tables, or you can use the
 <literal>oid_getentbyoid</literal> function provided by &yaz;.
 </para>
 
 <para>
-The result structure contains a number of hits, and an
+The structure contains a number of hits, and an
 <literal>errcode/errstring</literal> pair. If an error occurs
 during the search, or if you're unhappy with the request, you should
 set the errcode to a value from the BIB-1 diagnostic set. The value
@@ -360,42 +448,35 @@ go in the addinfo field. Look at the protocol definition for the
 defined error codes, and the suggested uses of the addinfo field.
 </para>
 
+
 <synopsis>
-bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r,
-                             int *fd);
-bend_fetchresult *bend_fetchresponse(void *handle);
+int (*bend_fetch) (void *handle, bend_fetch_rr *rr);
 
-typedef struct bend_fetchrequest
-{
-    char *setname;       /* set name */
-    int number;          /* record number */
-    oid_value format;
-} bend_fetchrequest;
+typedef struct bend_fetch_rr {
+    char *setname;             /* set name */
+    int number;                /* record number */
+    Z_ReferenceId *referenceId;/* reference ID */
+    oid_value request_format;  /* One of the CLASS_RECSYN members */
+    int *request_format_raw;   /* same as above (raw OID) */
+    Z_RecordComposition *comp; /* Formatting instructions */
+    ODR stream;                /* encoding stream - memory source if req */
+    ODR print;                 /* printing stream */
 
-typedef struct bend_fetchresult
-{
-    char *basename;      /* name of database that provided record */
-    int len;             /* length of record */
-    char *record;        /* record */
-    int last_in_set;     /* is it?  */
-    oid_value format;
-    int errcode;         /* 0==success */
-    char *errstring;     /* system error string or NULL */
-} bend_fetchresult;
+    char *basename;            /* name of database that provided record */
+    int len;                   /* length of record or -1 if structured */
+    char *record;              /* record */
+    int last_in_set;           /* is it?  */
+    oid_value output_format;   /* format */
+    int *output_format_raw;    /* used instead of above if not-null */
+    int errcode;               /* 0==success */
+    char *errstring;           /* system error string or NULL */
+    int surrogate_flag;        /* surrogate diagnostic */
+} bend_fetch_rr;
 </synopsis>
 
-<note>
 <para>
-The <function>bend_fetchresponse()</function> function is not yet supported
-in this version of the software. Your implementation of
-<function>bend_fetch()</function> should always return a pointer to a
-<literal>bend_fetchresult</literal>.
-</para>
-</note>
-
-<para>
-The frontend server calls <function>bend_fetch</function> when it needs
-database records to fulfill a searchRequest or a presentRequest.
+The frontend server calls the <function>bend_fetch</function> handler when
+it needs database records to fulfill a Search Request or a Present Request.
 The <literal>setname</literal> is simply the name of the result set
 that holds the reference to the desired record.
 The <literal>number</literal> is the offset into the set (with 1
@@ -412,22 +493,18 @@ or dynamic buffer for the record between calls.
 </para>
 
 <para>
-In the result structure, the <literal>basename</literal> is the name of the
+In the structure, the <literal>basename</literal> is the name of the
 database that holds the
 record. <literal>len</literal> is the length of the record returned, in
 bytes, and <literal>record</literal> is a pointer to the record.
 <literal>Last_in_set</literal> should be nonzero only if the record
 returned is the last one in the given result set. <literal>errcode</literal>
-and <literal>errstring</literal>, if given, will currently be
-interpreted as a global error pertaining to the set, and will be returned in a
-nonSurrogateDiagnostic.
+and <literal>errstring</literal>, if given, will be
+interpreted as a global error pertaining to the set, and will be returned
+in a non-surrogate-diagnostic. If you wish to return the error as a
+surrogate-diagnostic (local error) you can do this by setting
+<literal>surrogate_flag</literal> to 1 also.
 </para>
-
-<note>
-<para>
-This is silly. Add a flag to say which is which.
-</para>
-</note>
 
 <para>
 If the <literal>len</literal> field has the value -1, then
@@ -456,28 +533,64 @@ The current version of &yaz; only supports the direct reference mode.
 </note>
 
 <synopsis>
-bend_deleteresult *bend_delete(void *handle, bend_deleterequest *r,
-                               int *fd);
-bend_deleteresult *bend_deleteresponse(void *handle);
+int (*bend_present) (void *handle, bend_present_rr *rr);
 
-typedef struct bend_deleterequest
-{
-    char *setname;
-} bend_deleterequest;
+typedef struct {
+    char *setname;             /* set name */
+    int start;
+    int number;                /* record number */
+    oid_value format;          /* One of the CLASS_RECSYN members */
+    Z_ReferenceId *referenceId;/* reference ID */
+    Z_RecordComposition *comp; /* Formatting instructions */
+    ODR stream;                /* encoding stream - memory source if required */
+    ODR print;                 /* printing stream */
+    bend_request request;
+    bend_association association;
 
-typedef struct bend_deleteresult
-{
-    int errcode;         /* 0==success */
-    char *errstring;     /* system error string or NULL */
-} bend_deleteresult;
+    int hits;                  /* number of hits */
+    int errcode;               /* 0==OK */
+    char *errstring;           /* system error string or NULL */
+} bend_present_rr;
 </synopsis>
 
-<note>
 <para>
-The &quot;delete&quot; function is not yet supported in this version of
-the software.
+The <function>bend_present</function> handler is called when
+the server receives a Present Request. The <literal>setname</literal>,
+<literal>start</literal> and <literal>number</literal> is the
+name of the result set - start position - and number of records to
+be retrieved respectively. <literal>format</literal> and
+<literal>comp</literal> is the preferred transfer syntax and element
+specifications of the present request.
 </para>
-</note>
+<para>
+Note that this is handler serves as a supplement for
+<function>bend_fetch</function> and need not to be defined in order to
+support search - and retrieve. 
+</para>
+
+</sect2>
+
+<sect2><title>Delete</title>
+
+<para>
+For backends that supports delete of a result set only one handler
+must be defined.
+</para>
+
+<synopsis>
+int (*bend_delete)(void *handle, bend_delete_rr *rr);
+
+typedef struct bend_delete_rr {
+    int function;
+    int num_setnames;
+    char **setnames;
+    Z_ReferenceId *referenceId;
+    int delete_status;      /* status for the whole operation */
+    int *statuses;          /* status each set - indexed as setnames */
+    ODR stream;
+    ODR print; 
+} bend_delete_rr;
+</synopsis>
 
 <note>
 <para>
@@ -489,47 +602,43 @@ that will actually delete sets they no longer need?
 </para>
 </note>
 
-<synopsis>
-bend_scanresult *bend_scan(void *handle, bend_scanrequest *r,
-    int *fd);
-bend_scanresult *bend_scanresponse(void *handle);
+</sect2>
 
-typedef struct bend_scanrequest
-{
+<sect2><title>scan</title>
+
+<para>
+For servers that wish to offer the scan service one handler
+must be defined.
+</para>
+
+<synopsis>
+int (*bend_delete)(void *handle, bend_delete_rr *rr);
+
+typedef enum {
+    BEND_SCAN_SUCCESS,  /* ok */
+    BEND_SCAN_PARTIAL   /* not all entries could be found */
+} bend_scan_status;
+
+typedef struct bend_scan_rr {
     int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
+    oid_value attributeset;
+    Z_ReferenceId *referenceId; /* reference ID */
     Z_AttributesPlusTerm *term;
-    int term_position;  /* desired index of term in result list */
-    int num_entries;    /* number of entries requested */
-} bend_scanrequest;
+    ODR stream;         /* encoding stream - memory source if required */
+    ODR print;          /* printing stream */
 
-typedef struct bend_scanresult
-{
-    int num_entries;
-    struct scan_entry
-    {
-    	char *term;
-	int occurrences;
-    } *entries;
-    int term_position;
-    enum
-    {
-    	BEND_SCAN_SUCCESS,
-	BEND_SCAN_PARTIAL
-    } status;
+    int *step_size;     /* step size */
+    int term_position;  /* desired index of term in result list/returned */
+    int num_entries;    /* number of entries requested/returned */
+
+    struct scan_entry *entries;
+    bend_scan_status status;
     int errcode;
     char *errstring;
-} bend_scanresult;
+} bend_scan_rr;
 </synopsis>
-
-<note>
-<para>
-The <function>bend_scanresponse()</function> function is not yet supported
-in this version of the software. Your implementation of
-<function>bend_scan()</function> should always return a pointer to a
-<literal>bend_scanresult</literal>.
-</para>
-</note>
+</sect2>
 </sect1>
 
 <sect1><title>Application Invocation</title>
@@ -540,7 +649,7 @@ invocation syntax (by way of <function>statserv_main()</function>):
 </para>
 
 <synopsis>
-appname &lsqb;-szSu -a apdufile -l logfile -v loglevel&rsqb;
+<replaceable>appname</replaceable> &lsqb;-szSiTu -a <replaceable>apdufile</replaceable> -l <replaceable>logfile</replaceable> -v <replaceable>loglevel</replaceable> -c <replaceable>config</replaceable>&rsqb;
 &lsqb;listener ...&rsqb;
 </synopsis>
 
@@ -557,21 +666,28 @@ The special name &quot;-&quot; sends output to <literal>stderr</literal>.
 
 <varlistentry><term>-S</term>
  <listitem><para>
-Don't fork on connection requests. This is good for debugging, but
-not recommended for real operation: Although the server is
+Don't fork or make threads on connection requests. This is good for
+debugging, but not recommended for real operation: Although the server is
 asynchronous and non-blocking, it can be nice to keep a software
 malfunction (okay then, a crash) from affecting all current users.
 </para></listitem></varlistentry>
 
+<varlistentry><term>-T</term>
+<listitem><para>
+Operate the server in threaded mode. The server creates a thread
+for each connection rather than a fork a process. Only available
+on UNIX systems that offers POSIX threads.
+</para></listitem></varlistentry>
+
 <varlistentry><term>-s</term>
 <listitem><para>
-Use the SR protocol.
+Use the SR protocol (obsolete).
 </para></listitem></varlistentry>
 
 <varlistentry><term>-z</term>
 <listitem><para>
 Use the Z39.50 protocol (default). These two options complement
-eachother. You can use both multiple times on the same command
+each other. You can use both multiple times on the same command
 line, between listener-specifications (see below). This way, you
 can set up the server to listen for connections in both protocols
 concurrently, on different local ports.
@@ -579,6 +695,13 @@ concurrently, on different local ports.
 
 <varlistentry><term>-l <replaceable>file</replaceable></term>
 <listitem><para>The logfile.
+</para></listitem></varlistentry>
+
+<varlistentry><term>-c <replaceable>config</replaceable></term>
+<listitem><para>A user option that serves as a specifier for some
+sort of configuration, e.g. a filename.
+The argument to this option is transferred to member
+<literal>configname</literal>of the <literal>statserv_options_block</literal>.
 </para></listitem></varlistentry>
 
 <varlistentry><term>-v <replaceable>level</replaceable></term>
@@ -614,6 +737,7 @@ Idle session timeout, in minutes.
 <listitem><para>
 Maximum record size/message size, in kilobytes.
 </para></listitem></varlistentry>
+
 
 </variablelist>
 </para>
@@ -679,35 +803,6 @@ server application. You can test the procedure with the
 <application>yaz-ztest</application> application.
 </para>
 
-</sect1>
-<sect1><title>Summary and Synopsis</title>
-
-<synopsis>
-#include &lt;backend.h>
-
-bend_initresult *bend_init(bend_initrequest *r);
-
-bend_searchresult *bend_search(void *handle, bend_searchrequest *r,
-                                 int *fd);
-
-bend_searchresult *bend_searchresponse(void *handle);
-
-bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *r,
-                               int *fd);
-
-bend_fetchresult *bend_fetchresponse(void *handle);
-
-bend_scanresult *bend_scan(void *handle, bend_scanrequest *r, int *fd);
-
-bend_scanresult *bend_scanresponse(void *handle);
-
-bend_deleteresult *bend_delete(void *handle, bend_deleterequest *r,
-                                  int *fd);
-
-bend_deleteresult *bend_deleteresponse(void *handle);
-
-void bend_close(void *handle);
-</synopsis>
 </sect1>
 </chapter>
 
