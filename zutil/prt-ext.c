@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: prt-ext.c,v $
- * Revision 1.6  2001-05-17 14:16:15  adam
+ * Revision 1.7  2001-09-24 21:51:56  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.6  2001/05/17 14:16:15  adam
  * Added EXTERNAL handling for item update0 (1.0).
  *
  * Revision 1.5  2001/03/25 21:55:13  adam
@@ -228,20 +232,16 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
 {
     Z_External *thisext;
-    oident recform;
-    int oid[OID_SIZE];
 
     thisext = (Z_External *) odr_malloc(o, sizeof(*thisext));
     thisext->descriptor = 0;
     thisext->indirect_reference = 0;
 
-    recform.proto = PROTO_Z3950;
-    recform.oclass = CLASS_RECSYN;
-    recform.value = (enum oid_value) format;
-    if (!oid_ent_to_oid(&recform, oid))
+    thisext->direct_reference = 
+	yaz_oidval_to_z3950oid (o, CLASS_RECSYN, format);    
+    if (!thisext->direct_reference)
 	return 0;
-    thisext->direct_reference = odr_oiddup(o, oid);
-    
+
     if (len < 0) /* Structured data */
     {
 	switch (format)

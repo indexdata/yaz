@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: pquery.c,v $
- * Revision 1.8  2001-07-19 19:14:53  adam
+ * Revision 1.9  2001-09-24 21:51:56  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.8  2001/07/19 19:14:53  adam
  * C++ compile.
  *
  * Revision 1.7  2001/05/09 23:31:35  adam
@@ -348,20 +352,8 @@ static Z_AttributesPlusTerm *rpn_term (struct lex_info *li, ODR o,
             elements[k] =
                 (Z_AttributeElement*)odr_malloc (o,sizeof(**elements));
             elements[k]->attributeType = &attr_tmp[2*i];
-            if (attr_set[i] == VAL_NONE)
-                elements[k]->attributeSet = 0;
-            else
-            {
-                oident attrid;
-                int oid[OID_SIZE];
-		
-                attrid.proto = PROTO_Z3950;
-                attrid.oclass = CLASS_ATTSET;
-                attrid.value = attr_set[i];
-                   
-                elements[k]->attributeSet =
-		    odr_oiddup (o, oid_ent_to_oid (&attrid, oid));
-            }
+	    elements[k]->attributeSet =
+		yaz_oidval_to_z3950oid(o, attr_set[i], CLASS_ATTSET);
 	    if (attr_clist[i])
 	    {
 		elements[k]->which = Z_AttributeValue_complex;
@@ -621,8 +613,6 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
     char *attr_clist[512];
     oid_value attr_set[512];
     oid_value topSet = VAL_NONE;
-    oident oset;
-    int oid[OID_SIZE];
 
     zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
     lex (li);
@@ -639,13 +629,11 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct lex_info *li, oid_proto proto,
         topSet = p_query_dfset;
     if (topSet == VAL_NONE)
         topSet = VAL_BIB1;
-    oset.proto = proto;
-    oset.oclass = CLASS_ATTSET;
-    oset.value = topSet;
 
-    if (!oid_ent_to_oid (&oset, oid))
-	return NULL;
-    zq->attributeSetId = odr_oiddup (o, oid);
+    zq->attributeSetId = yaz_oidval_to_z3950oid(o, CLASS_ATTSET, topSet);
+
+    if (!zq->attributeSetId)
+	return 0;
 
     if (!(zq->RPNStructure = rpn_structure (li, o, proto, 0, 512,
                                             attr_array, attr_clist, attr_set)))
@@ -678,8 +666,6 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
     int num_attr = 0;
     int max_attr = 512;
     oid_value topSet = VAL_NONE;
-    oident oset;
-    int oid[OID_SIZE];
 
     lex (li);
     if (li->query_look == 'r')
@@ -693,11 +679,8 @@ Z_AttributesPlusTerm *p_query_scan_mk (struct lex_info *li,
         topSet = p_query_dfset;
     if (topSet == VAL_NONE)
         topSet = VAL_BIB1;
-    oset.proto = proto;
-    oset.oclass = CLASS_ATTSET;
-    oset.value = topSet;
 
-    *attributeSetP = odr_oiddup (o, oid_ent_to_oid (&oset, oid));
+    *attributeSetP = yaz_oidval_to_z3950oid (o, CLASS_ATTSET, topSet);
 
     while (li->query_look == 'l')
     {

@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: oid.c,v $
- * Revision 1.46  2001-06-26 14:11:27  adam
+ * Revision 1.47  2001-09-24 21:51:55  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.46  2001/06/26 14:11:27  adam
  * Added MUTEX functions for NMEM module (used by OID utility).
  *
  * Revision 1.45  2001/05/16 07:25:59  adam
@@ -589,28 +593,29 @@ void oid_transfer (struct oident *oident)
 
 void oid_init (void)
 {
-    if (oid_init_flag)
-	return;
-    /* oid_transfer is thread safe, so there's nothing wrong in having
-       two threads calling it simultaniously. On the other hand
-       no thread may exit oid_init before all OID's bave been
-       transferred - which is why checked is set after oid_transfer... 
-    */
-    nmem_mutex_create (&oid_mutex);
-    nmem_mutex_enter (oid_mutex);
-    if (!oid_nmem)
-	oid_nmem = nmem_create ();
-    nmem_mutex_leave (oid_mutex);
-    oid_transfer (standard_oids);
-    oid_init_flag = 1;
+    if (oid_init_flag == 0)
+    {
+	/* oid_transfer is thread safe, so there's nothing wrong in having
+	   two threads calling it simultaniously. On the other hand
+	   no thread may exit oid_init before all OID's bave been
+	   transferred - which is why checked is set after oid_transfer... 
+	*/
+	nmem_mutex_create (&oid_mutex);
+	nmem_mutex_enter (oid_mutex);
+	if (!oid_nmem)
+	    oid_nmem = nmem_create ();
+	nmem_mutex_leave (oid_mutex);
+	oid_transfer (standard_oids);
+	oid_init_flag = 1;
+    }
 }
 
 void oid_exit (void)
 {
     oid_init_flag = 0;
-    oid_nmem = 0;
     nmem_mutex_destroy (&oid_mutex);
     nmem_destroy (oid_nmem);
+    oid_nmem = 0;
 }
 
 static struct oident *oid_getentbyoid_x(int *o)

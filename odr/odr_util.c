@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: odr_util.c,v $
- * Revision 1.19  2000-02-29 13:44:55  adam
+ * Revision 1.20  2001-09-24 21:51:55  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.19  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.18  2000/01/31 13:15:21  adam
@@ -86,10 +90,10 @@ Odr_oid *odr_oiddup(ODR odr, Odr_oid *o)
     return odr_oiddup_nmem (odr->mem, o);
 }
 
-Odr_oid *odr_getoidbystr_nmem(NMEM nmem, char *str)
+Odr_oid *odr_getoidbystr_nmem(NMEM nmem, const char *str)
 {
     int num = 1, i = 0;
-    char *p = str;
+    const char *p = str;
     Odr_oid *ret;
 
     if (!isdigit(*str))
@@ -105,8 +109,9 @@ Odr_oid *odr_getoidbystr_nmem(NMEM nmem, char *str)
     return ret;
 }
 
-Odr_oid *odr_getoidbystr(ODR o, char *str)
+Odr_oid *odr_getoidbystr(ODR o, const char *str)
 {
     return odr_getoidbystr_nmem (o->mem, str);
 }
+
 

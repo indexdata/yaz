@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: prt-proto.h,v 1.2 2001-02-21 13:46:53 adam Exp $
+ * $Id: prt-proto.h,v 1.3 2001-09-24 21:51:55 adam Exp $
  */
 
 #ifndef PRT_PROTO_H
@@ -1144,6 +1144,12 @@ YAZ_EXPORT int z_DefaultDiagFormat(ODR o, Z_DefaultDiagFormat **p, int opt,
 				   const char *name);
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
 YAZ_EXPORT int z_Query(ODR o, Z_Query **p, int opt, const char *name);
+
+YAZ_EXPORT Odr_oid *yaz_oidval_to_z3950oid (ODR o, int oid_class,
+					int oid_value);
+YAZ_EXPORT Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class,
+					const char *str);
+YAZ_EXPORT const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class);
 
 YAZ_END_CDECL
 

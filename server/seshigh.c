@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.118  2001-07-19 19:51:41  adam
+ * Revision 1.119  2001-09-24 21:51:55  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.118  2001/07/19 19:51:41  adam
  * Added typecasts to make C++ happy.
  *
  * Revision 1.117  2001/06/13 20:47:40  adam
@@ -1126,19 +1130,13 @@ static void set_addinfo (Z_DefaultDiagFormat *dr, char *addinfo, ODR odr)
  */
 static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 {
-    int oid[OID_SIZE];
     Z_Records *rec = (Z_Records *)
 	odr_malloc (assoc->encode, sizeof(*rec));
-    oident bib1;
     int *err = odr_intdup(assoc->encode, error);
     Z_DiagRec *drec = (Z_DiagRec *)
 	odr_malloc (assoc->encode, sizeof(*drec));
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
 	odr_malloc (assoc->encode, sizeof(*dr));
-
-    bib1.proto = assoc->proto;
-    bib1.oclass = CLASS_DIAGSET;
-    bib1.value = VAL_BIB1;
 
     yaz_log(LOG_DEBUG, "Diagnostic: %d -- %s", error, addinfo ? addinfo :
 	"NULL");
@@ -1151,7 +1149,7 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
     drec->u.defaultFormat = dr;
 #endif
     dr->diagnosticSetId =
-	odr_oiddup (assoc->encode, oid_ent_to_oid(&bib1, oid));
+	yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
     dr->condition = err;
     set_addinfo (dr, addinfo, assoc->encode);
     return rec;
@@ -1163,27 +1161,21 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
 					  int error, char *addinfo)
 {
-    int oid[OID_SIZE];
     Z_NamePlusRecord *rec = (Z_NamePlusRecord *)
 	odr_malloc (assoc->encode, sizeof(*rec));
     int *err = odr_intdup(assoc->encode, error);
-    oident bib1;
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
 	odr_malloc (assoc->encode, sizeof(*dr));
     
-    bib1.proto = assoc->proto;
-    bib1.oclass = CLASS_DIAGSET;
-    bib1.value = VAL_BIB1;
-
     yaz_log(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
     rec->databaseName = dbname;
     rec->which = Z_NamePlusRecord_surrogateDiagnostic;
     rec->u.surrogateDiagnostic = drec;
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = dr;
-    dr->diagnosticSetId = odr_oiddup (assoc->encode,
-                                      oid_ent_to_oid(&bib1, oid));
+    dr->diagnosticSetId =
+	yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
     dr->condition = err;
     set_addinfo (dr, addinfo, assoc->encode);
 
@@ -1195,18 +1187,14 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
  */
 static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 {
-    int oid[OID_SIZE];
     Z_DiagRecs *recs = (Z_DiagRecs *)odr_malloc (assoc->encode, sizeof(*recs));
     int *err = odr_intdup(assoc->encode, error);
-    oident bib1;
     Z_DiagRec **recp = (Z_DiagRec **)odr_malloc (assoc->encode, sizeof(*recp));
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
-    Z_DefaultDiagFormat *rec = (Z_DefaultDiagFormat *)odr_malloc (assoc->encode, sizeof(*rec));
+    Z_DefaultDiagFormat *rec = (Z_DefaultDiagFormat *)
+	odr_malloc (assoc->encode, sizeof(*rec));
 
     yaz_log(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo ? addinfo : "");
-    bib1.proto = assoc->proto;
-    bib1.oclass = CLASS_DIAGSET;
-    bib1.value = VAL_BIB1;
 
     recs->num_diagRecs = 1;
     recs->diagRecs = recp;
@@ -1214,8 +1202,8 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     drec->which = Z_DiagRec_defaultFormat;
     drec->u.defaultFormat = rec;
 
-    rec->diagnosticSetId = odr_oiddup (assoc->encode,
-                                      oid_ent_to_oid(&bib1, oid));
+    rec->diagnosticSetId =
+	yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
     rec->condition = err;
 
 #ifdef ASN_COMPILED

@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.24 2001-08-14 12:05:58 adam Exp $
+# $Id: makefile,v 1.25 2001-09-24 21:51:56 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -280,7 +280,8 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\pquery.obj \
    $(OBJDIR)\yaz-ccl.obj \
    $(OBJDIR)\otherinfo.obj \
-   $(OBJDIR)\sortspec.obj
+   $(OBJDIR)\sortspec.obj \
+   $(OBJDIR)\z3950oid.obj
 
 
 YAZ_RET_OBJS= \
@@ -708,7 +709,11 @@ $(PROTOH): $(GENERATED_C_FILES) $(GENERATED_H_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.24  2001-08-14 12:05:58  adam
+# Revision 1.25  2001-09-24 21:51:56  adam
+# New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+# and yaz_z3950oid_to_str.
+#
+# Revision 1.24  2001/08/14 12:05:58  adam
 # Added sortspec.
 #
 # Revision 1.23  2001/05/18 11:42:03  adam

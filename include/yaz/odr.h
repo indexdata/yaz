@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.4 2001-03-25 21:55:12 adam Exp $
+ * $Id: odr.h,v 1.5 2001-09-24 21:51:55 adam Exp $
  */
 
 #ifndef ODR_H
@@ -339,8 +339,9 @@ YAZ_EXPORT void odr_choice_bias(ODR o, int what);
 YAZ_EXPORT void odr_choice_enable_bias(ODR o, int mode);
 YAZ_EXPORT int odr_total(ODR o);
 YAZ_EXPORT char *odr_errmsg(int n);
-YAZ_EXPORT Odr_oid *odr_getoidbystr(ODR o, char *str);
-YAZ_EXPORT Odr_oid *odr_getoidbystr_nmem(NMEM o, char *str);
+YAZ_EXPORT Odr_oid *odr_getoidbystr(ODR o, const char *str);
+YAZ_EXPORT Odr_oid *odr_getoidbystr_nmem(NMEM o, const char *str);
+
 YAZ_EXPORT int odr_initmember(ODR o, void *p, int size);
 YAZ_EXPORT int odr_peektag(ODR o, int *zclass, int *tag, int *cons);
 YAZ_EXPORT void odr_setlenlen(ODR o, int len);

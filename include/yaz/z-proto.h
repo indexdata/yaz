@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: z-proto.h,v $
- * Revision 1.6  2001-09-19 10:19:07  adam
+ * Revision 1.7  2001-09-24 21:51:55  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.6  2001/09/19 10:19:07  adam
  * Z_SortCase_caseInsensitive was set to wrong value.
  *
  * Revision 1.5  2001/05/17 14:16:15  adam
@@ -126,6 +130,11 @@ typedef struct Z_IOItemOrder Z_ItemOrder;
 
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
 YAZ_EXPORT Z_Close *zget_Close (ODR o);
+YAZ_EXPORT Odr_oid *yaz_oidval_to_z3950oid (ODR o, int oid_class,
+					    int oid_value);
+YAZ_EXPORT Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class,
+					 const char *str);
+YAZ_EXPORT const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class);
 
 YAZ_END_CDECL
 

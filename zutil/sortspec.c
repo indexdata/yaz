@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2001, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.2 2001-08-10 12:50:40 adam Exp $
+ * $Id: sortspec.c,v 1.3 2001-09-24 21:51:56 adam Exp $
  */
 
 #include <stdio.h>
@@ -15,8 +15,6 @@
 
 Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
 {
-    int oid[OID_SIZE];
-    oident bib1;
     char sort_string_buf[32], sort_flags[32];
     Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
         odr_malloc (out, sizeof(*sksl));
@@ -25,9 +23,6 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
     sksl->num_specs = 0;
     sksl->specs = (Z_SortKeySpec **)odr_malloc (out, sizeof(sksl->specs) * 20);
     
-    bib1.proto = PROTO_Z3950;
-    bib1.oclass = CLASS_ATTSET;
-    bib1.value = VAL_BIB1;
     while ((sscanf (arg, "%31s %31s%n", sort_string_buf,
 		    sort_flags, &off)) == 2  && off > 1)
     {
@@ -50,7 +45,8 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
             sk->which = Z_SortKey_sortAttributes;
             sk->u.sortAttributes = (Z_SortAttributes *)
 		odr_malloc (out, sizeof(*sk->u.sortAttributes));
-            sk->u.sortAttributes->id = oid_ent_to_oid(&bib1, oid);
+            sk->u.sortAttributes->id = 
+		yaz_oidval_to_z3950oid(out, CLASS_ATTSET, VAL_BIB1);
             sk->u.sortAttributes->list = (Z_AttributeList *)
 		odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
             sk->u.sortAttributes->list->attributes = (Z_AttributeElement **)

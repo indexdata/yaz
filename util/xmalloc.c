@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.11  2000-02-29 13:44:55  adam
+ * Revision 1.12  2001-09-24 21:51:56  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.11  2000/02/29 13:44:55  adam
  * Check for config.h (currently not generated).
  *
  * Revision 1.10  1999/11/30 13:47:12  adam
@@ -70,7 +74,7 @@
 #include <yaz/log.h>
 #include <yaz/xmalloc.h>
 
-#define TRACE_XMALLOC 1
+#define TRACE_XMALLOC 2
 
 #if TRACE_XMALLOC > 1
 
@@ -239,7 +243,7 @@ void xmalloc_trav_d(const char *file, int line)
     while (dinfo)
     {
 	yaz_log (LOG_LOG, " %20s:%d p=%p size=%d", dinfo->file, dinfo->line,
-	      dinfo+sizeof(*dinfo)+4*sizeof(char), dinfo->len);
+	      ((char*) dinfo)+sizeof(*dinfo)+4*sizeof(char), dinfo->len);
 	size += dinfo->len;
 	dinfo = dinfo->next;
     }

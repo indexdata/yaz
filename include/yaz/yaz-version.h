@@ -2,7 +2,11 @@
  * Current software version.
  *
  * $Log: yaz-version.h,v $
- * Revision 1.5  2001-05-18 11:42:03  adam
+ * Revision 1.6  2001-09-24 21:51:55  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.5  2001/05/18 11:42:03  adam
  * YAZ Build date for WIN32.
  *
  * Revision 1.4  2001/05/16 07:37:39  adam
@@ -109,3 +113,4 @@
 #endif
 
 #endif
+

@@ -3,7 +3,11 @@
  * See the file LICENSE for details.
  *
  * $Log: yaz-ccl.c,v $
- * Revision 1.13  2001-05-09 23:31:35  adam
+ * Revision 1.14  2001-09-24 21:51:56  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.13  2001/05/09 23:31:35  adam
  * String attribute values for PQF. Proper C-backslash escaping for PQF.
  *
  * Revision 1.12  2001/03/07 13:24:40  adam
@@ -112,14 +116,8 @@ static Z_AttributesPlusTerm *ccl_rpn_term (ODR o, struct ccl_rpn_node *p)
 
 		if (value != VAL_NONE)
 		{
-		    int oid[OID_SIZE];
-		    struct oident ident;
-
-		    ident.oclass = CLASS_ATTSET;
-		    ident.proto = PROTO_Z3950;
-		    ident.value = (oid_value) value;
 		    elements[i]->attributeSet =
-			odr_oiddup (o, oid_ent_to_oid (&ident, oid));
+			yaz_oidval_to_z3950oid(o, CLASS_ATTSET, value);
 		}
 	    }
 	    elements[i]->which = Z_AttributeValue_numeric;
@@ -256,15 +254,8 @@ static Z_RPNStructure *ccl_rpn_structure (ODR o, struct ccl_rpn_node *p)
 
 Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p)
 {
-    Z_RPNQuery *zq;
-    oident bib1;
-    int oid[OID_SIZE];
-    bib1.proto = PROTO_Z3950;
-    bib1.oclass = CLASS_ATTSET;
-    bib1.value = VAL_BIB1;
-
-    zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
-    zq->attributeSetId = odr_oiddup (o, oid_ent_to_oid (&bib1, oid));
+    Z_RPNQuery *zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
+    zq->attributeSetId = yaz_oidval_to_z3950oid (o, CLASS_ATTSET, VAL_BIB1);
     zq->RPNStructure = ccl_rpn_structure (o, p);
     return zq;
 }

@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1999, Index Data
+ * Copyright (c) 1999-2001, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: otherinfo.c,v $
- * Revision 1.4  1999-11-30 13:47:12  adam
+ * Revision 1.5  2001-09-24 21:51:56  adam
+ * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
+ * and yaz_z3950oid_to_str.
+ *
+ * Revision 1.4  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.3  1999/11/10 09:06:40  adam
