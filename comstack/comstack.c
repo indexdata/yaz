@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.14 2003-04-24 13:04:45 adam Exp $
+ * $Id: comstack.c,v 1.15 2003-10-16 10:18:56 adam Exp $
  */
 
 #include <string.h>
@@ -99,10 +99,10 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
         host = type_and_host + 6;
         if (host[0] == '/' && host[1] == '/')
             host = host + 2;
+        proto = PROTO_HTTP;
 #else
 	return 0;
 #endif
-        proto = PROTO_HTTP;
     }
     else
     {
