@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.10  1998-02-11 11:53:33  adam
+ * Revision 1.11  1999-03-31 11:15:37  adam
+ * Fixed memory leaks in ccl_find_str and ccl_qual_rm.
+ *
+ * Revision 1.10  1998/02/11 11:53:33  adam
  * Changed code so that it compiles as C++.
  *
  * Revision 1.9  1997/09/29 08:56:37  adam
@@ -856,5 +859,6 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
     if (*error)
         *pos = cclp->error_pos - str;
     ccl_parser_destroy (cclp);
+    ccl_token_del (list);
     return p;
 }

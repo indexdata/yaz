@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclqual.c,v $
- * Revision 1.10  1998-07-07 15:49:40  adam
+ * Revision 1.11  1999-03-31 11:15:37  adam
+ * Fixed memory leaks in ccl_find_str and ccl_qual_rm.
+ *
+ * Revision 1.10  1998/07/07 15:49:40  adam
  * Added braces to avoid warning.
  *
  * Revision 1.9  1998/02/11 11:53:33  adam
@@ -191,6 +194,7 @@ void ccl_qual_rm (CCL_bibset *b)
 	    free (attr);
 	}
         q1 = q->next;
+	free (q->name);
 	free (q);
     }
     free (*b);

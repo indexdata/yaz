@@ -45,7 +45,10 @@
  * Europagate 1995
  *
  * $Log: cclsh.c,v $
- * Revision 1.3  1997-04-30 08:52:07  quinn
+ * Revision 1.4  1999-03-31 11:15:37  adam
+ * Fixed memory leaks in ccl_find_str and ccl_qual_rm.
+ *
+ * Revision 1.3  1997/04/30 08:52:07  quinn
  * Null
  *
  * Revision 1.2  1996/10/11  15:00:25  adam
@@ -111,9 +114,6 @@ int main (int argc, char **argv)
         {
             switch (argv[0][1])
             {
-            case 'c':
-                ccl_case_sensitive = 0;
-                break;
             case 'd':
                 debug = 1;
                 break;
@@ -155,23 +155,31 @@ int main (int argc, char **argv)
     while (1)
     {
         char buf[80];
-        int error, pos;
+        int i, error, pos;
         struct ccl_rpn_node *rpn;
 
 	printf ("CCLSH>"); fflush (stdout);
 	if (!fgets (buf, 79, stdin))
 	    break;
-	rpn = ccl_find_str (bibset, buf, &error, &pos);
-        if (error)
+        for (i = 0; i<1; i++)
         {
-            printf ("%*s^ - ", 6+pos, " ");
-            printf ("%s\n", ccl_err_msg (error));
-        }
-        else
-        {
-            assert (rpn);
-            ccl_pr_tree (rpn, stdout);
-            putchar ('\n');
+	    rpn = ccl_find_str (bibset, buf, &error, &pos);
+            if (error)
+            {
+                printf ("%*s^ - ", 6+pos, " ");
+                printf ("%s\n", ccl_err_msg (error));
+            }
+            else
+            {
+                assert (rpn);
+		if (i == 0)
+		{
+		    ccl_pr_tree (rpn, stdout);
+		    putchar ('\n');
+		}
+            }
+            if (rpn)
+                ccl_rpn_delete(rpn);
         }
     }
     putchar ('\n');
