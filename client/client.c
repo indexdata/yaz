@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.74  1999-02-01 15:35:21  adam
+ * Revision 1.75  1999-02-01 15:37:32  adam
+ * Fixed minor bug introduced by previous commit.
+ *
+ * Revision 1.74  1999/02/01 15:35:21  adam
  * Added XML display.
  *
  * Revision 1.73  1998/10/20 13:55:43  quinn
@@ -663,7 +666,7 @@ static void display_record(Z_DatabaseRecord *p)
     else if (r->which == Z_External_octet && p->u.octet_aligned->len)
     {
         const char *octet_buf = (char*)p->u.octet_aligned->buf;
-	if (ent->value == VAL_TEXT_XML || VAL_APPLICATION_XML)
+	if (ent->value == VAL_TEXT_XML || ent->value == VAL_APPLICATION_XML)
 	{
 	    fwrite (octet_buf, 1, p->u.octet_aligned->len, stdout);
 	    printf ("\n");
