@@ -1,7 +1,7 @@
 # Copyright (C) 1994-1998, Index Data 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile.in,v 1.1 1998-09-02 12:41:52 adam Exp $
+# $Id: Makefile.in,v 1.2 1998-09-22 09:40:54 adam Exp $
 
 SHELL=/bin/sh
 
@@ -14,7 +14,7 @@ LIB=libyaz.a
 
 all: $(LIB)
 
-$(LIB): $(LIBS)
+$(LIB): $(YAZLIBS)
 	rm -f $(LIB)
 	for i in $(YAZLIBS); do echo $$i; ar x $$i; rm -f __*; done
 	ar qc $(LIB) *.o
@@ -22,6 +22,6 @@ $(LIB): $(LIBS)
 	$(RANLIB) $(LIB)
 
 clean:
-	-rm -f *.o $(LIB)
+	-rm -f *.[oa]
 
 depend:
