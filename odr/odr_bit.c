@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_bit.c,v $
- * Revision 1.1  1995-02-02 20:38:50  quinn
+ * Revision 1.2  1995-02-03 17:04:37  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.1  1995/02/02  20:38:50  quinn
  * Updates.
  *
  *
@@ -17,7 +20,7 @@
  * Top level bitstring string en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_bitstring(ODR o, ODR_BITMASK **p, int opt)
+int odr_bitstring(ODR o, Odr_bitmask **p, int opt)
 {
     int res, cons = 0;
 
@@ -40,7 +43,7 @@ int odr_bitstring(ODR o, ODR_BITMASK **p, int opt)
     }
     if (o->direction == ODR_DECODE && !*p)
     {
-    	*p = nalloc(o, sizeof(ODR_BITMASK));
+    	*p = nalloc(o, sizeof(Odr_bitmask));
     	memset((*p)->bits, 0, ODR_BITMASK_SIZE);
     	(*p)->top = -1;
     }

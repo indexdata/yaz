@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_oct.c,v $
- * Revision 1.2  1995-02-02 20:38:50  quinn
+ * Revision 1.3  1995-02-03 17:04:34  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.2  1995/02/02  20:38:50  quinn
  * Updates.
  *
  * Revision 1.1  1995/02/02  16:21:52  quinn
@@ -14,7 +17,7 @@
 
 #include <odr.h>
 
-int ber_octetstring(ODR o, ODR_OCT *p, int cons)
+int ber_octetstring(ODR o, Odr_oct *p, int cons)
 {
     int res, len;
     unsigned char *base, *c;

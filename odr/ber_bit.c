@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_bit.c,v $
- * Revision 1.1  1995-02-02 20:38:49  quinn
+ * Revision 1.2  1995-02-03 17:04:31  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.1  1995/02/02  20:38:49  quinn
  * Updates.
  *
  *
@@ -12,7 +15,7 @@
 
 #include <odr.h>
 
-int ber_bitstring(ODR o, ODR_BITMASK *p, int cons)
+int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
 {
     int res, len;
     unsigned char *base;

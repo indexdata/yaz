@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_oct.c,v $
- * Revision 1.2  1995-02-02 20:38:51  quinn
+ * Revision 1.3  1995-02-03 17:04:38  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.2  1995/02/02  20:38:51  quinn
  * Updates.
  *
  * Revision 1.1  1995/02/02  16:21:54  quinn
@@ -18,7 +21,7 @@
  * Top level octet string en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_octetstring(ODR o, ODR_OCT **p, int opt)
+int odr_octetstring(ODR o, Odr_oct **p, int opt)
 {
     int res, cons = 0;
 
@@ -41,7 +44,7 @@ int odr_octetstring(ODR o, ODR_OCT **p, int opt)
     }
     if (o->direction == ODR_DECODE && !*p)
     {
-    	*p = nalloc(o, sizeof(ODR_OCT));
+    	*p = nalloc(o, sizeof(Odr_oct));
     	(*p)->size= 0;
     	(*p)->len = 0;
     	(*p)->buf = 0;
@@ -52,15 +55,15 @@ int odr_octetstring(ODR o, ODR_OCT **p, int opt)
 /*
  * Friendlier interface to octetstring.
  */
-int odr_visiblestring(ODR o, char **p, int opt)
+int odr_cstring(ODR o, char **p, int opt)
 {
     int cons = 0, res;
-    ODR_OCT *t;
+    Odr_oct *t;
 
     if (o->t_class < 0)
     {
     	o->t_class = ODR_UNIVERSAL;
-    	o->t_tag = ODR_VISIBLESTRING;
+    	o->t_tag = ODR_OCTETSTRING;
     }
     if ((res = ber_tag(o, *p, o->t_class, o->t_tag, &cons)) < 0)
     	return 0;
@@ -74,7 +77,7 @@ int odr_visiblestring(ODR o, char **p, int opt)
     	fprintf(o->print, "'%s'\n", *p);
     	return 1;
     }
-    t = nalloc(o, sizeof(ODR_OCT));   /* wrapper for octstring */
+    t = nalloc(o, sizeof(Odr_oct));   /* wrapper for octstring */
     if (o->direction == ODR_ENCODE)
     {
     	t->buf = (unsigned char *) *p;
