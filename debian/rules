@@ -121,15 +121,15 @@ endif
 	dh_installman -p yaz-devel doc/yaz-config.1
 	dh_undocumented -p yaz-devel yaz-comp.1
 	dh_installman -p yaz-runtime doc/yaz-client.1 doc/yaz-ztest.8 doc/yaz.7 doc/zoomsh.1
-	echo "libyaz 1 yaz-runtime" > debian/yaz-runtime/DEBIAN/shlibs
-	echo "libyazthread 1 yaz-runtime" >> debian/yaz-runtime/DEBIAN/shlibs
-	echo "libyazmalloc 1 yaz-runtime" >> debian/yaz-runtime/DEBIAN/shlibs
+	echo "libyaz 2 yaz-runtime (>= 1.9.3)" > debian/yaz-runtime/DEBIAN/shlibs
+	echo "libyazthread 2 yaz-runtime (>= 1.9.3)" >> debian/yaz-runtime/DEBIAN/shlibs
+	echo "libyazmalloc 2 yaz-runtime (>= 1.9.3)" >> debian/yaz-runtime/DEBIAN/shlibs
 	chmod 644 debian/yaz-runtime/DEBIAN/shlibs
 	dh_shlibdeps -p yaz-runtime $(LOCAL_LINK) 
 ifeq ($(YAZ_WITH_SSL),1)
 	dh_installdeb -p yaz-ssl
 	dh_installman -p yaz-ssl doc/yaz-client-ssl.1 doc/yaz-ztest-ssl.8
-	echo "libyazssl 1 yaz-ssl" >> debian/yaz-ssl/DEBIAN/shlibs
+	echo "libyazssl 2 yaz-ssl (>= 1.9.3)" >> debian/yaz-ssl/DEBIAN/shlibs
 	chmod 644 debian/yaz-ssl/DEBIAN/shlibs
 	dh_shlibdeps -p yaz-ssl $(LOCAL_LINK)
 	cat debian/postinst >> debian/yaz-ssl/DEBIAN/postinst
