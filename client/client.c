@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.154 2002-05-20 09:13:39 oleg Exp $
+ * $Id: client.c,v 1.155 2002-06-02 21:29:30 adam Exp $
  */
 
 #include <stdio.h>
@@ -442,6 +442,7 @@ int cmd_authentication(char *arg)
 }
 
 /* SEARCH SERVICE ------------------------------ */
+static void display_record(Z_External *r);
 
 static void display_variant(Z_Variant *v, int level)
 {
@@ -463,7 +464,9 @@ static void display_grs1(Z_GenericRecord *r, int level)
     int i;
 
     if (!r)
+    {
         return;
+    }
     for (i = 0; i < r->num_elements; i++)
     {
         Z_TaggedElement *t;
@@ -481,8 +484,13 @@ static void display_grs1(Z_GenericRecord *r, int level)
             printf("%s) ", t->tagValue->u.string);
         if (t->content->which == Z_ElementData_subtree)
         {
-            printf("\n");
-            display_grs1(t->content->u.subtree, level+1);
+            if (!t->content->u.subtree)
+                printf (" (no subtree)\n");
+            else
+            {
+                printf("\n");
+                display_grs1(t->content->u.subtree, level+1);
+            }
         }
         else if (t->content->which == Z_ElementData_string)
             printf("%s\n", t->content->u.string);
@@ -509,8 +517,15 @@ static void display_grs1(Z_GenericRecord *r, int level)
             printf("[Element empty]\n");
         else if (t->content->which == Z_ElementData_elementNotThere)
             printf("[Element not there]\n");
+        else if (t->content->which == Z_ElementData_date)
+            printf("Date: %s\n", t->content->u.date);
+        else if (t->content->which == Z_ElementData_ext)
+        {
+            printf ("External\n");
+            display_record (t->content->u.ext);
+        } 
         else
-            printf("??????\n");
+            printf("? type = %d\n",t->content->which);
         if (t->appliedVariant)
             display_variant(t->appliedVariant, level+1);
         if (t->metaData && t->metaData->supportedVariants)
@@ -587,6 +602,8 @@ static void display_record(Z_External *r)
             r->which = type->what;
         }
     }
+    if (ent && ent->oclass != CLASS_RECSYN)
+        return;
     if (ent && ent->value == VAL_SOIF)
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
