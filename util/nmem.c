@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.8  1998-07-03 14:21:27  adam
+ * Revision 1.9  1998-07-07 15:49:01  adam
+ * Reduced chunk size.
+ *
+ * Revision 1.8  1998/07/03 14:21:27  adam
  * Added critical sections for pthreads-library. Thanks to Ian Ibbotson,
  * Fretwell Downing Informatics.
  *
@@ -49,7 +52,7 @@
 #include <pthread.h>
 #endif
 
-#define NMEM_CHUNK (10*1024)
+#define NMEM_CHUNK (4*1024)
 
 #ifdef WINDOWS
 static CRITICAL_SECTION critical_section;
@@ -85,10 +88,12 @@ static nmem_block *get_block(int size)
     	if (r->size >= size)
 	    break;
     if (r)
+    {
     	if (l)
 	    l->next = r->next;
 	else
 	    freelist = r->next;
+    }
     else
     {
     	int get = NMEM_CHUNK;
