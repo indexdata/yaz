@@ -1,0 +1,42 @@
+# Copyright (C) 1994-1999, Index Data
+# All rights reserved.
+# Sebastian Hammer, Adam Dickmeiss
+# $Id: Makefile.in,v 1.1 1999-06-08 10:10:49 adam Exp $
+
+SHELL=/bin/sh
+
+CC=@CC@
+CPP=@CPP@
+RANLIB=@RANLIB@
+CDEFS=@DEFS@
+LIBS=@LIBS@
+
+INCLUDE=-I../z39.50 -I../include -I.
+LIBDIR=../lib
+
+DEFS=$(INCLUDE) $(CDEFS)
+LIB=$(LIBDIR)/libzutil.a
+PO = zget.o prt-ext.o yaz-ccl.o diagbib1.o logrpn.o otherinfo.o query.o \
+     pquery.o
+
+all: $(LIB)
+
+alll:
+
+$(LIB): $(PO)
+	rm -f $(LIB)
+	ar qc $(LIB) $(PO)
+	$(RANLIB) $(LIB)
+
+.c.o:
+	$(CC) -c $(DEFS) $(CFLAGS) $<
+
+clean:
+	rm -f *.[oa] core mon.out gmon.out errlist
+
+depend:
+	sed '/^#Depend/q' <Makefile >Makefile.tmp
+	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
+	mv -f Makefile.tmp Makefile
+
+#Depend --- DOT NOT DELETE THIS LINE
