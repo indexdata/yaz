@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: read-marc.c,v 1.2 2002-03-19 13:48:27 adam Exp $
+ * $Id: read-marc.c,v 1.3 2002-09-24 08:05:41 adam Exp $
  */
 
 /*
@@ -1610,7 +1610,7 @@ char *dummy_xml_record (int num, ODR odr)
     if (len > 1)
     {
         len = wrbuf_len(wr);
-        rec = odr_malloc (odr, len+1);
+        rec = (char *) odr_malloc (odr, len+1);
         memcpy (rec, wrbuf_buf(wr), len+1);
         rec[len] = 0;
     }

@@ -1,5 +1,5 @@
 /* 
- $ $Id: charneg.c,v 1.4 2002-07-25 12:50:17 adam Exp $
+ $ $Id: charneg.c,v 1.5 2002-09-24 08:05:42 adam Exp $
  * Helper functions for Character Set and Language Negotiation - 3
  */
 
@@ -20,8 +20,8 @@ static Z_External* z_ext_record2(ODR o, int oid_class, int oid_value,
     p->indirect_reference = 0;
     
     oid.proto = PROTO_Z3950;
-    oid.oclass = oid_class;
-    oid.value = oid_value;
+    oid.oclass = (enum oid_class) oid_class;
+    oid.value = (enum oid_value) oid_value;
     p->direct_reference = odr_oiddup(o, oid_getoidbyent(&oid));
     
     p->which = Z_External_octet;

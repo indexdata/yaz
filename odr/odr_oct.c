@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: odr_oct.c,v 1.18 2002-08-28 07:53:51 adam Exp $
+ * $Id: odr_oct.c,v 1.19 2002-09-24 08:05:41 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -143,10 +143,10 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             size_t inleft = strlen(*p);
             char *inbuf = *p;
             size_t outleft = 4 * inleft + 2;
-            char *outbuf = odr_malloc (o, outleft);
+            char *outbuf = (char *) odr_malloc (o, outleft);
             size_t ret;
             
-            t->buf = outbuf;
+            t->buf = (unsigned char *) outbuf;
             
             ret = yaz_iconv (o->op->iconv_handle, &inbuf, &inleft,
                              &outbuf, &outleft);
@@ -178,9 +178,9 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
         if (o->op->iconv_handle != 0)
         {
             size_t inleft = t->len;
-            char *inbuf = t->buf;
+            char *inbuf = (char *) t->buf;
             size_t outleft = 4 * inleft + 2;
-            char *outbuf = odr_malloc (o, outleft);
+            char *outbuf = (char *) odr_malloc (o, outleft);
             size_t ret;
 
             *p = outbuf;

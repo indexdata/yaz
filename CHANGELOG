@@ -2,6 +2,12 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.9.1 2002/MM/DD
 
+SGML reader parses comments and makes them part of the data1 tree.
+
+Added several type casts so that YAZ compiles as C++ code.
+
+ZOOM didn't handle PDU encoding failures properly.
+
 Added more Bib-1 diagnostics (approved extensions).
 
 Better check for iconv.

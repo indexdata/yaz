@@ -2,12 +2,13 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.170 2002-09-17 21:19:38 adam Exp $
+ * $Id: client.c,v 1.171 2002-09-24 08:05:41 adam Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 
 #include <yaz/yaz-util.h>
 
@@ -106,7 +107,7 @@ int rl_attempted_completion_over = 0;
 #define maxOtherInfosSupported 10
 struct {
     int oidval;
-	char* value;
+    char* value;
 } extraOtherInfos[maxOtherInfosSupported];
 	
 
@@ -1568,7 +1569,7 @@ static int cmd_update(char *arg)
         if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))
         {
             size_t len = status.st_size;
-            char *buf = xmalloc (len);
+            char *buf = (char *) xmalloc (len);
 
             fread (buf, 1, len, inf);
 
@@ -1632,8 +1633,9 @@ static int cmd_update(char *arg)
     notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
     if (*recid)
     {
-        notToKeep->elements[0]->u.opaque = odr_malloc (out, sizeof(Odr_oct));
-        notToKeep->elements[0]->u.opaque->buf = recid;
+        notToKeep->elements[0]->u.opaque = (Odr_oct *)
+            odr_malloc (out, sizeof(Odr_oct));
+        notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
         notToKeep->elements[0]->u.opaque->size = strlen(recid);
         notToKeep->elements[0]->u.opaque->len = strlen(recid);
     }
@@ -2538,7 +2540,7 @@ int cmd_register_oid(char* args) {
         {"schema",CLASS_SCHEMA},
         {"tagset",CLASS_TAGSET},
         {"general",CLASS_GENERAL},
-        {0,0}
+        {0,(enum oid_class) 0}
     };
     char oname_str[101], oclass_str[101], oid_str[101];  
     char* name;
@@ -2860,12 +2862,22 @@ int cmd_list_otherinfo(char* args)
         }
 
         if(extraOtherInfos[i].oidval != -1) 
-            printf("  otherinfo %d %s %s\n",i,yaz_z3950_oid_value_to_str(extraOtherInfos[i].oidval,CLASS_RECSYN), extraOtherInfos[i].value);
+            printf("  otherinfo %d %s %s\n",
+                   i,
+                   yaz_z3950_oid_value_to_str(
+                       (enum oid_value) extraOtherInfos[i].oidval,
+                       CLASS_RECSYN),
+                   extraOtherInfos[i].value);
         
     } else {		
         for(i=0; i<maxOtherInfosSupported; ++i) {
             if(extraOtherInfos[i].oidval != -1) 
-                printf("  otherinfo %d %s %s\n",i,yaz_z3950_oid_value_to_str(extraOtherInfos[i].oidval,CLASS_RECSYN), extraOtherInfos[i].value);
+                printf("  otherinfo %d %s %s\n",
+                       i,
+                       yaz_z3950_oid_value_to_str(
+                           (enum oid_value) extraOtherInfos[i].oidval,
+                           CLASS_RECSYN),
+                       extraOtherInfos[i].value);
         }
         
     }
@@ -3101,9 +3113,8 @@ int cmd_register_tab(char* arg) {
     }
     
         
-    if(!cmd[i].local_tabcompletes) {
-        cmd[i].local_tabcompletes = calloc(1,sizeof(char**));
-    }
+    if(!cmd[i].local_tabcompletes)
+        cmd[i].local_tabcompletes = (char **) calloc(1,sizeof(char**));
     
     num_of_tabs=0;		
     
@@ -3112,7 +3123,7 @@ int cmd_register_tab(char* arg) {
         num_of_tabs++;
     }
     
-    cmd[i].local_tabcompletes = 
+    cmd[i].local_tabcompletes =  (char **)
         realloc(cmd[i].local_tabcompletes,(num_of_tabs+2)*sizeof(char**));
     tabslist=cmd[i].local_tabcompletes;
     tabslist[num_of_tabs]=strdup(tabargument);

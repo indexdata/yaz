@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.4 2002-08-30 11:27:44 adam Exp $
+ * $Id: siconv.c,v 1.5 2002-09-24 08:05:41 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -188,7 +188,7 @@ static unsigned long yaz_read_UCS4LE (yaz_iconv_t cd, unsigned char *inp,
 static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
                               char **outbuf, size_t *outbytesleft)
 {
-    unsigned char *outp = *outbuf;
+    unsigned char *outp = (unsigned char *) *outbuf;
     if (x <= 0x7f && *outbytesleft >= 1)
     {
         *outp++ = (unsigned char) x;
@@ -239,14 +239,14 @@ static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
         cd->my_errno = YAZ_ICONV_E2BIG;  /* not room for output */
         return (size_t)(-1);
     }
-    *outbuf = outp;
+    *outbuf = (char *) outp;
     return 0;
 }
 
 static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
                                    char **outbuf, size_t *outbytesleft)
 {
-    unsigned char *outp = *outbuf;
+    unsigned char *outp = (unsigned char *) *outbuf;
     if (x > 255 || x < 1)
     {
         cd->my_errno = YAZ_ICONV_EILSEQ;
@@ -262,7 +262,7 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
         cd->my_errno = YAZ_ICONV_E2BIG;
         return (size_t)(-1);
     }
-    *outbuf = outp;
+    *outbuf = (char *) outp;
     return 0;
 }
 
@@ -270,7 +270,7 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
 static size_t yaz_write_UCS4 (yaz_iconv_t cd, unsigned long x,
                               char **outbuf, size_t *outbytesleft)
 {
-    unsigned char *outp = *outbuf;
+    unsigned char *outp = (unsigned char *) *outbuf;
     if (*outbytesleft >= 4)
     {
         *outp++ = (unsigned char) (x<<24);
@@ -284,14 +284,14 @@ static size_t yaz_write_UCS4 (yaz_iconv_t cd, unsigned long x,
         cd->my_errno = YAZ_ICONV_E2BIG;
         return (size_t)(-1);
     }
-    *outbuf = outp;
+    *outbuf = (char *) outp;
     return 0;
 }
 
 static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
                                 char **outbuf, size_t *outbytesleft)
 {
-    unsigned char *outp = *outbuf;
+    unsigned char *outp = (unsigned char *) *outbuf;
     if (*outbytesleft >= 4)
     {
         *outp++ = (unsigned char) x;
@@ -305,13 +305,13 @@ static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
         cd->my_errno = YAZ_ICONV_E2BIG;
         return (size_t)(-1);
     }
-    *outbuf = outp;
+    *outbuf = (char *) outp;
     return 0;
 }
 
 yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
 {
-    yaz_iconv_t cd = xmalloc (sizeof(*cd));
+    yaz_iconv_t cd = (yaz_iconv_t) xmalloc (sizeof(*cd));
 
     cd->write_handle = 0;
     cd->read_handle = 0;
@@ -404,7 +404,8 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
         if (cd->init_handle)
         {
             size_t no_read;
-            size_t r = (cd->init_handle)(cd, *inbuf, *inbytesleft, &no_read);
+            size_t r = (cd->init_handle)(cd, (unsigned char *) *inbuf,
+                                         *inbytesleft, &no_read);
             if (r)
             {
                 if (cd->my_errno == YAZ_ICONV_EINVAL)
@@ -428,7 +429,8 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             break;
         }
         
-        x = (cd->read_handle)(cd, *inbuf, *inbytesleft, &no_read);
+        x = (cd->read_handle)(cd, (unsigned char *) *inbuf, *inbytesleft,
+                              &no_read);
         if (no_read == 0)
         {
             r = (size_t)(-1);

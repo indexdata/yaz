@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.13 2002-09-17 11:07:30 adam Exp $
+ * $Id: admin.c,v 1.14 2002-09-24 08:05:41 adam Exp $
  */
 
 #include <stdio.h>
@@ -26,6 +26,7 @@
 
 #include <yaz/pquery.h>
 
+#include "admin.h"
 
 /* Helper functions to get to various statics in the client */
 ODR getODROutputStream();

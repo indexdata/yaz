@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2002
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.91 2002-09-20 22:23:13 adam Exp $
+dnl $Id: configure.in,v 1.92 2002-09-24 08:05:41 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.1)
 dnl
@@ -184,12 +184,24 @@ AC_CACHE_VAL(ac_cv_check_socklen_t,[ac_cv_check_socklen_t=''
 	AC_TRY_COMPILE([
 	#include <sys/types.h>
 	#include <sys/socket.h>
-	extern accept(int, struct sockaddr *, socklen_t *);
+	#ifdef __cplusplus
+	extern "C" {
+	#endif
+	extern int accept(int, struct sockaddr *, socklen_t *);
+	#ifdef __cplusplus
+	}
+	#endif
 	],,[ac_cv_check_socklen_t=socklen_t],[
 		AC_TRY_COMPILE([
 		#include <sys/types.h>
 		#include <sys/socket.h>
-		extern accept(int, struct sockaddr *, size_t t *);
+		#ifdef __cplusplus
+		extern "C" {
+		#endif
+		extern int accept(int, struct sockaddr *, size_t t *);
+		#ifdef __cplusplus
+		}
+		#endif
 		],,[ac_cv_check_socklen_t=size_t],[ac_cv_check_socklen_t=int])
 	])
 ])

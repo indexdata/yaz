@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.17 2002-09-02 13:59:07 adam Exp $
+ * $Id: pquery.c,v 1.18 2002-09-24 08:05:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -324,11 +324,12 @@ static Z_AttributesPlusTerm *rpn_term (struct yaz_pqf_parser *li, ODR o,
         break;
     case Z_Term_characterString:
         term->which = Z_Term_characterString;
-        term->u.characterString = term_octet->buf;  /* null terminated above */
+        term->u.characterString = (char*) term_octet->buf; 
+                                    /* null terminated above */
         break;
     case Z_Term_numeric:
         term->which = Z_Term_numeric;
-        term->u.numeric = odr_intdup (o, atoi(term_octet->buf));
+        term->u.numeric = odr_intdup (o, atoi((char*) (term_octet->buf)));
         break;
     case Z_Term_null:
         term->which = Z_Term_null;
@@ -743,7 +744,7 @@ int p_query_attset (const char *arg)
 
 YAZ_PQF_Parser yaz_pqf_create (void)
 {
-    YAZ_PQF_Parser p = xmalloc (sizeof(*p));
+    YAZ_PQF_Parser p = (YAZ_PQF_Parser) xmalloc (sizeof(*p));
 
     p->error = 0;
     p->left_sep = "{\"";

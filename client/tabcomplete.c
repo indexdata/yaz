@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.7 2002-08-29 19:34:44 ja7 Exp $
+ * $Id: tabcomplete.c,v 1.8 2002-09-24 08:05:41 adam Exp $
  */
 
 #include <string.h>
@@ -80,7 +80,7 @@ void oid_loader(struct oident* oid, void* data_)
 
 char** build_list_for_oclass(oid_class oclass) {	
 	oid_callback_t data;	
-	data.values = calloc(10,sizeof(char*));
+	data.values = (char **) calloc(10,sizeof(char*));
 	data.index = 0;
 	data.max = 9;
 	data.oclass = oclass;

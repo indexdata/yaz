@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_map.c,v 1.24 2002-07-29 20:04:08 adam Exp $
+ * $Id: d1_map.c,v 1.25 2002-09-24 08:05:41 adam Exp $
  */
 
 #include <stdio.h>
@@ -225,7 +225,7 @@ static data1_node *dup_child (data1_handle dh, data1_node *n,
 
     for (; n; n = n->next)
     {
-        *last = *m = nmem_malloc (mem, sizeof(**m));
+        *last = *m = (data1_node *) nmem_malloc (mem, sizeof(**m));
         memcpy (*m, n, sizeof(**m));
         
         (*m)->parent = parent;

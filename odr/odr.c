@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.37 2002-08-28 08:12:49 adam Exp $
+ * $Id: odr.c,v 1.38 2002-09-24 08:05:41 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -84,7 +84,7 @@ ODR odr_createmem(int direction)
     r->can_grow = 1;
     r->mem = nmem_create();
     r->enable_bias = 1;
-    r->op = xmalloc (sizeof(*r->op));
+    r->op = (struct Odr_private *) xmalloc (sizeof(*r->op));
     r->op->odr_ber_tag.lclass = -1;
     r->op->iconv_handle = 0;
     odr_reset(r);

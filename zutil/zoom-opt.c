@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-opt.c,v 1.1 2002-09-16 18:45:14 adam Exp $
+ * $Id: zoom-opt.c,v 1.2 2002-09-24 08:05:42 adam Exp $
  *
  * ZOOM layer for C, options handling
  */
@@ -101,7 +101,7 @@ ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
             (*e)->value = 0;
             if (value)
             {
-                (*e)->value = xmalloc (len+1);
+                (*e)->value = (char *) xmalloc (len+1);
                 memcpy ((*e)->value, value, len);
                 (*e)->value[len] = '\0';
             }
@@ -114,7 +114,7 @@ ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
     (*e)->value = 0;
     if (value)
     {
-        (*e)->value = xmalloc (len+1);
+        (*e)->value = (char *) xmalloc (len+1);
         memcpy ((*e)->value, value, len);
         (*e)->value[len] = '\0';
     }
