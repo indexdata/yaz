@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.5 2004-01-18 02:28:42 adam Exp $
+ * $Id: statserv.c,v 1.6 2004-04-29 21:27:22 adam Exp $
  */
 
 #include <stdio.h>
@@ -654,7 +654,7 @@ static int add_listener(char *where, int what)
     l = cs_create_host(where, 2, &ap);
     if (!l)
     {
-	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to listen on %s", where);
+	yaz_log(LOG_FATAL, "Failed to listen on %s", where);
 	return -1;
     }
     if (cs_bind(l, ap, CS_SERVER) < 0)
