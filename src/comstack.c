@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.4 2004-01-06 20:21:37 adam Exp $
+ * $Id: comstack.c,v 1.5 2004-02-19 23:20:44 adam Exp $
  */
 
 #include <string.h>
@@ -140,6 +140,7 @@ int cs_look (COMSTACK cs)
     return cs->event;
 }
 
+#define CHUNK_DEBUG 0
 int cs_complete_auto(const unsigned char *buf, int len)
 {
     if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
@@ -160,23 +161,25 @@ int cs_complete_auto(const unsigned char *buf, int len)
                 {
                     if (chunked)
                     { 
+			/* inside chunked body .. */
                         while(1)
                         {
                             int chunk_len = 0;
                             i += 2;
-#if 0
+#if CHUNK_DEBUG
 /* debugging */
                             if (i <len-2)
                             {
-                                printf ("\n>>>");
+                                printf ("\n<<<");
+				int j;
                                 for (j = i; j <= i+4; j++)
                                     printf ("%c", buf[j]);
-                                printf ("<<<\n");
+                                printf (">>>\n");
                             }
 #endif
                             while (1)
                                 if (i >= len-2) {
-#if 0
+#if CHUNK_DEBUG
 /* debugging */                                    
                                     printf ("XXXXXXXX not there yet 1\n");
                                     printf ("i=%d len=%d\n", i, len);
@@ -196,6 +199,9 @@ int cs_complete_auto(const unsigned char *buf, int len)
                             if (buf[i] != '\r' || buf[i+1] != '\n' ||
                                 chunk_len < 0)
                                 return i+2;    /* bad. stop now */
+#if CHUNK_DEBUG
+			    printf ("XXXXXX chunk_len=%d\n", chunk_len);
+#endif			    
                             if (chunk_len == 0)
                             {
                                 /* consider trailing headers .. */
@@ -207,7 +213,7 @@ int cs_complete_auto(const unsigned char *buf, int len)
                                             return i+4;
                                     i++;
                                 }
-#if 0
+#if CHUNK_DEBUG
 /* debugging */
                                 printf ("XXXXXXXXX not there yet 2\n");
                                 printf ("i=%d len=%d\n", i, len);
