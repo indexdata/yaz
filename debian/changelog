@@ -1,3 +1,9 @@
+yaz (2.0.4-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu,  4 Sep 2003 20:16:16 +0200
+
 yaz (2.0.3-7) unstable; urgency=low
 
   * Use smallSetUpperBound=1 for ZOOM piggyback searches.
