@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.3 2002-03-16 12:48:47 adam Exp $
+; $Id: yaz.nsi,v 1.4 2002-03-16 17:37:40 adam Exp $
 
 !define VERSION "1.8.6"
 
@@ -34,25 +34,28 @@ Section "" ; (default section)
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YAZ" "UninstallString" '"$INSTDIR\uninst.exe"'
 	; write out uninstaller
 	WriteUninstaller "$INSTDIR\uninst.exe"
-SectionEnd ; end of default section
-
-Section "yaz core (required)"
-	SectionIn 12
+	SetOutPath $SMPROGRAMS\YAZ
+ 	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Program Directory.lnk" \
+                 "$INSTDIR"
+	WriteINIStr "$SMPROGRAMS\YAZ\YAZ Home page.url" \
+              "InternetShortcut" "URL" "http://www.indexdata.dk/yaz/"
 	SetOutPath $INSTDIR
 	File LICENSE.txt
 	File ..\README
-	SetOutPath $INSTDIR\bin
-	File ..\bin\*.exe
-	File ..\bin\*.dll
+	SetOutPath $INSTDIR
+	File /r ..\tab
 	SetOutPath $INSTDIR\ztest
 	File ..\ztest\dummy-records
 	File ..\ztest\dummy-grs
 	File ..\ztest\dummy-words
-	SetOutPath $INSTDIR
-	File /r ..\tab
+SectionEnd ; end of default section
+
+Section "YAZ Runtime"
+	SectionIn 12
+	SetOutPath $INSTDIR\bin
+	File ..\bin\*.exe
+	File ..\bin\*.dll
 	SetOutPath $SMPROGRAMS\YAZ
- 	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Program Directory.lnk" \
-                 "$INSTDIR"
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
                  "$INSTDIR\bin\yaz-client.exe"
 	SetOutPath $SMPROGRAMS\YAZ\Server
@@ -62,11 +65,9 @@ Section "yaz core (required)"
                   "$INSTDIR\bin\yaz-ztest.exe" '-installa tcp:@:210'
  	CreateShortCut "$SMPROGRAMS\YAZ\Server\Remove Z39.50 service.lnk" \
                  "$INSTDIR\bin\yaz-ztest.exe" '-remove'
-	WriteINIStr "$SMPROGRAMS\YAZ\YAZ Home page.url" \
-              "InternetShortcut" "URL" "http://www.indexdata.dk/yaz/"
 SectionEnd
 
-Section "yaz development"
+Section "YAZ Development"
 	SectionIn 12
 	SetOutPath $INSTDIR\include\yaz
 	File ..\include\yaz\*.h
@@ -74,7 +75,7 @@ Section "yaz development"
 	File ..\lib\*.lib
 SectionEnd
 
-Section "yaz documentation"
+Section "YAZ Documentation"
 	SectionIn 12
 	SetOutPath $INSTDIR
 	File /r ..\doc
@@ -85,7 +86,7 @@ Section "yaz documentation"
                  "$INSTDIR\doc\yaz.pdf"
 SectionEnd
 
-Section "yaz source"
+Section "YAZ Source"
 	SectionIn 1
 	SetOutPath $INSTDIR\util
 	File ..\util\*.c
