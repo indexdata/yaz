@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: ber_null.c,v $
- * Revision 1.5  1995-05-16 08:50:46  quinn
+ * Revision 1.6  1995-05-22 11:32:01  quinn
+ * Fixing Interface to odr_null.
+ *
+ * Revision 1.5  1995/05/16  08:50:46  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.4  1995/04/18  08:15:16  quinn
@@ -27,7 +30,7 @@
 /*
  * BER-en/decoder for NULL type.
  */
-int ber_null(ODR o, int *val)
+int ber_null(ODR o)
 {
     switch (o->direction)
     {

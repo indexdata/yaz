@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_null.c,v $
- * Revision 1.5  1995-05-16 08:50:56  quinn
+ * Revision 1.6  1995-05-22 11:32:03  quinn
+ * Fixing Interface to odr_null.
+ *
+ * Revision 1.5  1995/05/16  08:50:56  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.4  1995/03/08  12:12:26  quinn
@@ -27,10 +30,9 @@
  * Top level null en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_null(ODR o, int **p, int opt)
+int odr_null(ODR o, Odr_null **p, int opt)
 {
     int res, cons = 0;
-    static int nullval = 0;
 
     if (o->error)
     	return 0;
@@ -54,6 +56,6 @@ int odr_null(ODR o, int **p, int opt)
     	return 0;
     }
     if (o->direction == ODR_DECODE)
-    	*p = &nullval;
-    return ber_null(o, *p);
+    	*p = ODR_NULLVAL;
+    return ber_null(o);
 }

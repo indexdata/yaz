@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.12  1995-05-16 08:50:49  quinn
+ * Revision 1.13  1995-05-22 11:32:02  quinn
+ * Fixing Interface to odr_null.
+ *
+ * Revision 1.12  1995/05/16  08:50:49  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.11  1995/05/15  11:56:08  quinn
@@ -49,6 +52,8 @@
 
 #include <dmalloc.h>
 #include <odr.h>
+
+Odr_null *ODR_NULLVAL = "NULL";  /* the presence of a null value */
 
 char *odr_errlist[] =
 {
