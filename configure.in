@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.32 2000-09-14 12:05:08 adam Exp $
+dnl $Id: configure.in,v 1.33 2000-10-02 12:31:43 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -118,6 +118,9 @@ if test "$enable_threads" = "yes"; then
 		AC_MSG_RESULT(no)
 	fi
 fi
+dnl ------ Using this for "in-source" yaz-config
+AC_SUBST(YAZ_SRC_ROOT)
+YAZ_SRC_ROOT=`pwd`
 dnl
 SUBDIRS_VAR="util odr $ASNMODULE $ILLMODULE zutil comstack ccl tab retrieval server include lib client ztest"
 AC_SUBST(SUBDIRS_VAR)
@@ -143,4 +146,5 @@ lib/Makefile
 client/Makefile
 ztest/Makefile
 doc/Makefile
-lib/yaz-config],[chmod +x lib/yaz-config])
+yaz-config
+lib/yaz-config],[chmod +x lib/yaz-config yaz-config])

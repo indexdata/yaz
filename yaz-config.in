@@ -1,0 +1,7 @@
+#!/bin/sh
+# yaz-config for source tree
+YAZVERSION=@VERSION@
+YAZBIN="@YAZ_SRC_ROOT@/bin"
+YAZTAB="@YAZ_SRC_ROOT@/tab"
+YAZLIB="-L@YAZ_SRC_ROOT@/lib/.libs -lyaz"
+YAZINC="-I@YAZ_SRC_ROOT@/include"

@@ -2337,6 +2337,8 @@ EOF
 		echo "$ac_t""no" 1>&6
 	fi
 fi
+
+YAZ_SRC_ROOT=`pwd`
 SUBDIRS_VAR="util odr $ASNMODULE $ILLMODULE zutil comstack ccl tab retrieval server include lib client ztest"
 
 trap '' 1 2 15
@@ -2471,6 +2473,7 @@ lib/Makefile
 client/Makefile
 ztest/Makefile
 doc/Makefile
+yaz-config
 lib/yaz-config" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
@@ -2535,6 +2538,7 @@ s%@LIBTOOL@%$LIBTOOL%g
 s%@ASNMODULE@%$ASNMODULE%g
 s%@ILLMODULE@%$ILLMODULE%g
 s%@ILLLIB@%$ILLLIB%g
+s%@YAZ_SRC_ROOT@%$YAZ_SRC_ROOT%g
 s%@SUBDIRS_VAR@%$SUBDIRS_VAR%g
 
 CEOF
@@ -2595,6 +2599,7 @@ lib/Makefile
 client/Makefile
 ztest/Makefile
 doc/Makefile
+yaz-config
 lib/yaz-config"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
@@ -2659,7 +2664,7 @@ cat >> $CONFIG_STATUS <<EOF
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF
-chmod +x lib/yaz-config
+chmod +x lib/yaz-config yaz-config
 exit 0
 EOF
 chmod +x $CONFIG_STATUS
