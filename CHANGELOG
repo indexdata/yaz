@@ -1,5 +1,12 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added Segment handlers for backend server.
+
+Added Zmbol/Zebra administrative functions to YAZ client.
+
+Added multi threading for frontend server when POSIX Threads are available.
+Starting the server with option -T enables multi-threading.
+
 --- 1.6 2000/03/03
 
 Added configure option --enable-comp/disable-comp to control use

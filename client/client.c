@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.99  2000-03-20 19:06:25  adam
+ * Revision 1.100  2000-03-20 19:29:59  adam
+ * Minor change.
+ *
+ * Revision 1.99  2000/03/20 19:06:25  adam
  * Added Segment request for fronend server. Work on admin for client.
  *
  * Revision 1.98  2000/03/16 13:55:49  ian
@@ -2276,7 +2279,7 @@ static int client(int wait)
 	{"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>"},
 	{"adm-create", cmd_adm_create, "<database-name>"},
 	{"adm-delete", cmd_adm_delete, "('database'|'index')<object-name>"},
-	{"adm-import", cmd_adm_import, "<database-name> <record-type> <source-file-name>"},
+	{"adm-import", cmd_adm_import, "<record-type> <dir> <pattern>"},
 	{"adm-refresh", cmd_adm_refresh, "<database-name>"},
 	{"adm-commit", cmd_adm_commit, ""},
 	{"adm-shutdown", cmd_adm_shutdown, ""},
