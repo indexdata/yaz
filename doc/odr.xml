@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.12 2004-03-19 21:12:13 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.13 2004-08-11 12:47:35 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -355,6 +355,31 @@ void do_nothing_useful(int value)
     
    </sect2>
 
+   <sect2><title>Printing</title>
+    <para>
+     When an ODR stream is created of type <literal>ODR_PRINT</literal>
+     the ODR module will print the contents of a PDU in a readable format.
+     By default output is written to the <literal>stderr</literal> stream.
+     This behavior can be changed, however, by calling the function
+     <synopsis>
+      odr_setprint(ODR o, FILE *file);
+     </synopsis>
+     before encoders or decoders are being invoked.
+     It is also possible to direct the output to a buffer (of indeed
+     another file), by using the more generic mechanism:
+     <synopsis>
+      void odr_set_stream(ODR o, void *handle,
+                         void (*stream_puts)(void *handle, const char *strz),
+                         void (*stream_close)(void *handle));
+     </synopsis>
+     Here the user provides an opaque handle and two handlers,
+     <replaceable>stream_puts</replaceable> for printing,
+     and <replaceable>stream_close</replaceable> which is supposed
+     to close/free resources associated with handle. 
+     The <replaceable>stream_close</replaceable> handler is optional and
+     if NULL for the function is provided, it will not be invoked.
+    </para>
+   </sect2>
    <sect2><title>Diagnostics</title>
 
     <para>
