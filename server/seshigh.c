@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2000, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.100  1999-12-16 23:36:19  adam
+ * Revision 1.101  2000-01-12 14:36:07  adam
+ * Added printing stream (ODR) for backend functions.
+ *
+ * Revision 1.100  1999/12/16 23:36:19  adam
  * Implemented ILL protocol. Minor updates ASN.1 compiler.
  *
  * Revision 1.99  1999/11/30 13:47:12  adam
@@ -834,6 +836,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	yaz_log(LOG_LOG, "Version:   %s", req->implementationVersion);
 
     binitreq.stream = assoc->encode;
+    binitreq.print = assoc->print;
     binitreq.configname = "default-config";
     binitreq.auth = req->idAuthentication;
     binitreq.referenceId = req->referenceId;
@@ -1135,6 +1138,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	freq.comp = comp;
 	freq.format = format;
 	freq.stream = a->encode;
+	freq.print = a->print;
 	freq.surrogate_flag = 0;
 	freq.referenceId = referenceId;
 	if (!(fres = bend_fetch(a->backend, &freq, 0)))
@@ -1255,6 +1259,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 	bsrr->query = req->query;
 	bsrr->stream = assoc->encode;
 	bsrr->decode = assoc->decode;
+	bsrr->print = assoc->print;
 	bsrr->errcode = 0;
 	bsrr->hits = 0;
 	bsrr->errstring = NULL;
@@ -1276,6 +1281,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
         bsrq.referenceId = req->referenceId;
 	bsrq.stream = assoc->encode;
 	bsrq.decode = assoc->decode;
+	bsrq.print = assoc->print;
 	if (!(bsrt = bend_search (assoc->backend, &bsrq, fd)))
 	    return 0;
 	bsrr->hits = bsrt->hits;
@@ -1441,6 +1447,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 	bprr->comp = req->recordComposition;
 	bprr->referenceId = req->referenceId;
 	bprr->stream = assoc->encode;
+	bprr->print = assoc->print;
 	bprr->request = reqb;
 	bprr->association = assoc;
 	bprr->errcode = 0;
@@ -1491,6 +1498,7 @@ static int bend_default_scan (void *handle, bend_scan_rr *rr)
     srq.term_position = rr->term_position;
     srq.num_entries = rr->num_entries;
     srq.stream = rr->stream;
+    srq.print = rr->print;
     
     srs = bend_scan(handle, &srq, 0);
 
@@ -1564,6 +1572,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	bsrr->term = req->termListAndStartPoint;
 	bsrr->referenceId = req->referenceId;
 	bsrr->stream = assoc->encode;
+	bsrr->print = assoc->print;
 	if (!(attset = oid_getentbyoid(req->attributeSet)) ||
 	    attset->oclass != CLASS_RECSYN)
 	    bsrr->attributeset = VAL_NONE;
@@ -1665,6 +1674,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     bsrr->output_setname = req->sortedResultSetName;
     bsrr->sort_sequence = req->sortSequence;
     bsrr->stream = assoc->encode;
+    bsrr->print = assoc->print;
 
     bsrr->sort_status = Z_SortStatus_failure;
     bsrr->errcode = 0;
@@ -1717,6 +1727,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     bdrr->num_setnames = req->num_resultSetList;
     bdrr->setnames = req->resultSetList;
     bdrr->stream = assoc->encode;
+    bdrr->print = assoc->print;
     bdrr->function = *req->deleteFunction;
     bdrr->referenceId = req->referenceId;
     bdrr->statuses = 0;
@@ -1875,6 +1886,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     esrequest.esr = reqb->request->u.extendedServicesRequest;
     esrequest.stream = assoc->encode;
     esrequest.decode = assoc->decode;
+    esrequest.print = assoc->print;
     esrequest.errcode = 0;
     esrequest.errstring = NULL;
     esrequest.request = reqb;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.2  1999-12-16 23:36:19  adam
+ * Revision 1.3  2000-01-12 14:36:07  adam
+ * Added printing stream (ODR) for backend functions.
+ *
+ * Revision 1.2  1999/12/16 23:36:19  adam
  * Implemented ILL protocol. Minor updates ASN.1 compiler.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -99,6 +102,7 @@ typedef struct
     Z_Query *query;            /* query structure */
     ODR stream;                /* encoding stream */
     ODR decode;                /* decoding stream */
+    ODR print;                 /* printing stream */
 } bend_searchrequest;
 
 /* old search request output */
@@ -119,6 +123,7 @@ typedef struct {
     Z_Query *query;            /* query structure */
     ODR stream;                /* encode stream */
     ODR decode;                /* decode stream */
+    ODR print;                 /* print stream */
 
     bend_request request;
     bend_association association;
@@ -137,6 +142,7 @@ typedef struct {
     Z_ReferenceId *referenceId;/* reference ID */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if required */
+    ODR print;                 /* printing stream */
     bend_request request;
     bend_association association;
 
@@ -157,6 +163,7 @@ typedef struct
     oid_value format;          /* One of the CLASS_RECSYN members */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
+    ODR print;                 /* printing stream */
     int surrogate_flag;        /* surrogate diagnostic flag (rw) */
 } bend_fetchrequest;
 
@@ -185,6 +192,7 @@ typedef struct
     int term_position;  /* desired index of term in result list */
     int num_entries;    /* number of entries requested */
     ODR stream;         /* encoding stream - memory source if required */
+    ODR print;          /* printing stream */
 } bend_scanrequest;
 
 struct scan_entry {
@@ -216,6 +224,7 @@ typedef struct bend_scan_rr {
     Z_ReferenceId *referenceId; /* reference ID */
     Z_AttributesPlusTerm *term;
     ODR stream;         /* encoding stream - memory source if required */
+    ODR print;          /* printing stream */
 
     int term_position;  /* desired index of term in result list/returned */
     int num_entries;    /* number of entries requested/returned */
@@ -239,6 +248,7 @@ typedef struct bend_delete_rr {
     int delete_status;      /* status for the whole operation */
     int *statuses;          /* status each set - indexed as setnames */
     ODR stream;
+    ODR print; 
 } bend_delete_rr;
 
 /* close handler */
@@ -252,6 +262,7 @@ typedef struct bend_sort_rr
     char *output_setname;
     Z_SortKeySpecList *sort_sequence;
     ODR stream;
+    ODR print;
     Z_ReferenceId *referenceId;/* reference ID */
 
     int sort_status;
@@ -266,6 +277,7 @@ typedef struct bend_esrequest_rr
     
     ODR stream;                /* encoding stream */
     ODR decode;                /* decoding stream */
+    ODR print;                 /* printing stream */
     Z_ReferenceId *referenceId;/* reference ID */
     bend_request request;
     bend_association association;
@@ -278,6 +290,7 @@ typedef struct bend_initrequest
     char *configname;
     Z_IdAuthentication *auth;
     ODR stream;                /* encoding stream */
+    ODR print;                 /* printing stream */
     Z_ReferenceId *referenceId;/* reference ID */
     
     char *implementation_name;

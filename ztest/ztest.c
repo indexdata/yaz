@@ -1,13 +1,15 @@
 /*
- * Copyright (c) 1995-1999, Index Data.
+ * Copyright (c) 1995-2000, Index Data.
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * NT Service interface by
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.28  1999-12-16 23:36:19  adam
+ * Revision 1.29  2000-01-12 14:36:07  adam
+ * Added printing stream (ODR) for backend functions.
+ *
+ * Revision 1.28  1999/12/16 23:36:19  adam
  * Implemented ILL protocol. Minor updates ASN.1 compiler.
  *
  * Revision 1.27  1999/11/30 13:47:12  adam
@@ -211,6 +213,8 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 				       r->u.single_ASN1_type->len, 0);
 			    
 			    ill_ItemRequest (rr->decode, &item_req, 0, 0);
+			    if (rr->print)
+				ill_ItemRequest (rr->print, &item_req, 0, 0);
 			}
 		    }
 		}
