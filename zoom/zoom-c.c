@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.7 2001-11-15 13:16:02 adam Exp $
+ * $Id: zoom-c.c,v 1.8 2001-11-15 21:59:40 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -442,6 +442,12 @@ static void Z3950_resultset_retrieve (Z3950_resultset r,
     c = r->connection;
     if (!c)
 	return;
+    if (start >= r->size)
+        return;
+
+    if (start + count > r->size)
+	count = r->size - start;
+
     task = Z3950_connection_add_task (c, Z3950_TASK_RETRIEVE);
     task->u.resultset = r;
     Z3950_resultset_addref (r);

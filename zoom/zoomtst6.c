@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst6.c,v 1.4 2001-11-15 08:58:29 adam Exp $
+ * $Id: zoomtst6.c,v 1.5 2001-11-15 21:59:40 adam Exp $
  *
  * Asynchronous multi-target client doing two searches
  */
@@ -16,7 +16,7 @@ static void display_records (const char *tname, Z3950_resultset r)
     int pos;
     printf ("%s: %d hits\n", tname, Z3950_resultset_size(r));
     /* go through all records at target */
-    for (pos = 0; pos < 20; pos++)
+    for (pos = 0; pos < 2; pos++)
     {
         Z3950_record rec = Z3950_resultset_record (r, pos);
 
@@ -85,6 +85,14 @@ int main(int argc, char **argv)
     /* queue second search */
     for (i = 0; i<no; i++)
         r2[i] = Z3950_connection_search (z[i], q);
+
+
+    /* network I/O */
+    while (Z3950_event (no, z))
+	;
+
+    for (i = 0; i<no; i++)
+        Z3950_resultset_records (r1[i], 0, 4, 1);
 
     /* network I/O */
     while (Z3950_event (no, z))
