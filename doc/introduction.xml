@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.12 2003-02-23 21:10:06 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.13 2003-03-07 08:39:40 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -91,7 +91,7 @@
 
     <listitem>
      <para>
-      <xref linkend="zoom"/> describes the generic frontend server
+      <xref linkend="server"/> describes the generic frontend server
       and explains how to develop server Z39.50/SRW applications for &yaz;.
      Obviously worth reading if you're to develop a server.
     </para>
