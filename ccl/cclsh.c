@@ -45,7 +45,10 @@
  * Europagate 1995
  *
  * $Log: cclsh.c,v $
- * Revision 1.7  2000-10-17 19:50:28  adam
+ * Revision 1.8  2001-03-18 20:45:39  ja7
+ * Added readline and history support to cclsh
+ *
+ * Revision 1.7  2000/10/17 19:50:28  adam
  * Implemented and-list and or-list for CCL module.
  *
  * Revision 1.6  2000/01/31 13:15:21  adam
@@ -106,6 +109,15 @@
 #include <stdlib.h>
 
 #include <yaz/ccl.h>
+
+
+#if HAVE_READLINE_READLINE_H
+#include <readline/readline.h> 
+#endif
+#if HAVE_READLINE_HISTORY_H
+#include <readline/history.h>
+#endif
+
 
 static int debug = 0;
 static char *prog;
@@ -168,13 +180,31 @@ int main (int argc, char **argv)
     }
     while (1)
     {
-        char buf[80];
+        char buf[1000];
         int i, error, pos;
         struct ccl_rpn_node *rpn;
 
+#if HAVE_READLINE_READLINE_H
+            char* line_in;
+            line_in=readline("CCLSH>");
+            if (!line_in)
+                break;
+#if HAVE_READLINE_HISTORY_H
+            if (*line_in)
+                add_history(line_in);
+#endif
+	    if(strlen(line_in) > 999) {
+	      fprintf(stderr,"Input line to long\n");
+	      break;
+	    };
+            strcpy(buf,line_in);
+            free (line_in);
+#else    
 	printf ("CCLSH>"); fflush (stdout);
-	if (!fgets (buf, 79, stdin))
+	if (!fgets (buf, 999, stdin))
 	    break;
+#endif 
+
         for (i = 0; i<1; i++)
         {
 	    rpn = ccl_find_str (bibset, buf, &error, &pos);
