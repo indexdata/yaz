@@ -1,4 +1,4 @@
-<!-- $Id: asn.xml,v 1.7 2001-08-13 09:42:54 adam Exp $ -->
+<!-- $Id: asn.xml,v 1.8 2001-08-23 09:12:09 adam Exp $ -->
  <chapter><title>The ASN Module</title>
   <sect1><title>Introduction</title>
    <para>
@@ -342,9 +342,9 @@ typedef struct Z_ext_typeent
    
    <table frame="top"><title>Default settings for PDU Initialize Request</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-    <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
     <thead>
      <row>
       <entry>Field</entry>
@@ -393,9 +393,9 @@ typedef struct Z_ext_typeent
   <table frame="top"><title>Default settings for PDU Initialize
     Response</title>
    <tgroup cols="3">
-    <colspec colname="field"></colspec>
-    <colspec colname="type"></colspec>
-    <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
     <thead>
       <row>
        <entry>Field</entry>
@@ -443,9 +443,9 @@ typedef struct Z_ext_typeent
 
    <table frame="top"><title>Default settings for PDU Search Request</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -505,9 +505,9 @@ typedef struct Z_ext_typeent
 
    <table frame="top"><title>Default settings for PDU Search Response</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -554,9 +554,9 @@ typedef struct Z_ext_typeent
 
    <table frame="top"><title>Default settings for PDU Present Request</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -607,9 +607,9 @@ typedef struct Z_ext_typeent
    
    <table frame="top"><title>Default settings for PDU Present Response</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -643,9 +643,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Delete Result Set Request
     </title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -676,9 +676,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Delete Result Set Response
     </title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -721,9 +721,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Scan Request
     </title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -766,9 +766,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Scan Response
     </title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -809,9 +809,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Trigger Resource
      Control Request </title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -845,9 +845,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Resource
      Control Request</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -885,9 +885,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Resource
      Control Response</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -916,9 +916,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Access
      Control Request</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -947,9 +947,9 @@ typedef struct Z_ext_typeent
    <table frame="top"><title>Default settings for Access
      Control Response</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -980,9 +980,9 @@ typedef struct Z_ext_typeent
 
    <table frame="top"><title>Default settings for Segment</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
@@ -1012,9 +1012,9 @@ typedef struct Z_ext_typeent
 
    <table frame="top"><title>Default settings for Close</title>
     <tgroup cols="3">
-     <colspec colname="field"></colspec>
-     <colspec colname="type"></colspec>
-     <colspec colname="value"></colspec>
+     <colspec colwidth="7*" colname="field"></colspec>
+     <colspec colwidth="5*" colname="type"></colspec>
+     <colspec colwidth="7*" colname="value"></colspec>
      <thead>
       <row>
        <entry>Field</entry>
