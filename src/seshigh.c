@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.36 2004-11-18 15:18:13 heikki Exp $
+ * $Id: seshigh.c,v 1.37 2004-12-02 19:12:52 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1220,7 +1220,6 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
         yaz_log(YLOG_WARN, "ODR error when encoding PDU: %s [element %s]",
                 odr_errmsg(odr_geterror(assoc->decode)),
                 odr_getelement(assoc->decode));
-        request_release(req);
         return -1;
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,
@@ -1420,7 +1419,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.36 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.37 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
