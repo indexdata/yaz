@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.21 2002-10-04 10:19:58 adam Exp $
+ * $Id: marcdisp.c,v 1.22 2002-10-04 11:24:55 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -64,19 +64,15 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         {
             wrbuf_puts(
                 wr,
-                "<sequence xmlns=\"http://www.dlib.vt.edu/projects/OAi/marcxml/container\"\n"
-                
-                "  xmlns:xsi=\"http://www.w3.org/2000/10/XMLSchema-instance\"\n"
-                "    xsi:schemaLocation=\"http://www.openarchives.org/OAI/oai_marc\n"
-                "    http://www.openarchives.org/OAI/oai_marc.xsd\n"
-                "    http://www.dlib.vt.edu/projects/OAi/marcxml/container\n"
-                "    http://www.dlib.vt.edu/projects/OAi/marcxml/container.xsd\"\n"
+                "<oai_marc xmlns=\"http://www.openarchives.org/OIA/oai_marc\""
+                "\n"
+                " xmlns:xsi=\"http://www.w3.org/2000/10/XMLSchema-instance\""
+                "\n"
+                " xsi:schemaLocation=\"http://www.openarchives.org/OAI/oai_marc.xsd\""
+                "\n"
                 );
-            wrbuf_puts(
-                wr,
-                "<oai_marc xmlns=\"http://www.openarchives.org/OIA/oai_marc\"" );
             
-            sprintf (str, "status=\"%c\" type=\"%c\" catForm=\"%c\">\n",
+            sprintf (str, " status=\"%c\" type=\"%c\" catForm=\"%c\">\n",
                      buf[5], buf[6], buf[7]);
             wrbuf_puts (wr, str);
         }
@@ -279,7 +275,12 @@ int yaz_marc_decode (const char *buf, WRBUF wr, int debug, int bsize, int xml)
         }
     }
     if (xml)
-        wrbuf_puts (wr, "</iso2709>\n");
+    {
+        if (xml > 1)
+            wrbuf_puts (wr, "</oai_marc>\n");
+        else
+            wrbuf_puts (wr, "</iso2709>\n");
+    }
     wrbuf_puts (wr, "");
     return record_length;
 }
