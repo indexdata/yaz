@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.8  1995-12-15 16:20:41  quinn
+ * Revision 1.9  1996-01-17 14:52:47  adam
+ * Changed prototype for reader function parsed to data1_read_record.
+ *
+ * Revision 1.8  1995/12/15  16:20:41  quinn
  * Added formatted text.
  *
  * Revision 1.7  1995/12/13  13:44:32  quinn
@@ -412,7 +415,8 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 /*
  * Read a record in the native syntax.
  */
-data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd, NMEM m)
+data1_node *data1_read_record(int (*rf)(void *, char *, size_t), void *fh,
+                              NMEM m)
 {
     static char *buf = 0;
     char *bp;
@@ -427,7 +431,7 @@ data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd, NMEM m)
     {
 	if (rd + 4096 > size && !(buf =xrealloc(buf, size *= 2)))
 	    abort();
-	if ((res = (*rf)(fd, buf + rd, 4096)) <= 0)
+	if ((res = (*rf)(fh, buf + rd, 4096)) <= 0)
 	{
 	    if (!res)
 	    {
