@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.4 2004-11-02 12:55:04 heikki Exp $
+ * $Id: log.c,v 1.5 2004-11-02 12:57:54 heikki Exp $
  */
 
 /**
@@ -69,6 +69,7 @@ static struct {
     { LOG_APP2  , "app2" },
     { LOG_APP3  , "app3" },
     { LOG_ALL,   "all"  },
+    { LOG_FLUSH, "flush" },
     { 0,         "none" },
     { 0, NULL }
 };  
