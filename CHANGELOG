@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.5 2002/XX/XX
 
+Fix memory leaks in MARC record handling for ZOOM.
+
 More fixes for scan. Non-zero stepSize handled. OID's fixes.
 
 Prefix query parser reports "fail" when bad attribute set is given.
