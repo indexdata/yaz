@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.6 2005-02-01 17:23:36 adam Exp $
+ * $Id: tstccl.c,v 1.7 2005-03-15 16:32:53 adam Exp $
  */
 
 /* CCL test */
@@ -37,6 +37,10 @@ static struct ccl_tst query_str[] = {
     { "x= -1980", "@attr 2=3 -1980 "},
     { "x=234-1990", "@attr 2=3 234-1990 "},
     { "x=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
+    { "ti=a,b", "@attr 4=1 @attr 1=4 a,b "},
+    { "ti=a, b", "@attr 4=1 @attr 1=4 a,\\ b "},
+    { "ti=a-b", "@attr 4=2 @attr 1=4 a-b "},
+    { "ti=a - b", "@attr 4=1 @attr 1=4 a\\ -\\ b "},
     {0, 0}
 };
 
@@ -101,14 +105,14 @@ void tst1(int pass, int *number_of_errors)
 	    if (!query_str[i].result)
 	    {
 		printf ("Failed %s\n", query_str[i].query);
-		printf (" got:%s:\n", wrbuf_buf(wrbuf));
+		printf (" got:     %s:\n", wrbuf_buf(wrbuf));
 		printf (" expected failure\n");
 		(*number_of_errors)++;
 	    }
 	    else if (strcmp(wrbuf_buf(wrbuf), query_str[i].result))
 	    {
 		printf ("Failed %s\n", query_str[i].query);
-		printf (" got:%s:\n", wrbuf_buf(wrbuf));
+		printf (" got:     %s:\n", wrbuf_buf(wrbuf));
 		printf (" expected:%s:\n", query_str[i].result);
 		(*number_of_errors)++;
 	    }

@@ -49,7 +49,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.20 2004-10-15 00:18:59 adam Exp $
+ * $Id: ccl.h,v 1.21 2005-03-15 16:32:52 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -219,10 +219,12 @@ typedef struct ccl_qualifiers *CCL_bibset;
 /** CCL token */
 struct ccl_token {
     char kind;
-    size_t len;
-    const char *name;
+    size_t len;                 /* length of name below */
+    const char *name;           /* string / name of token */
     struct ccl_token *next;
     struct ccl_token *prev;
+    const char *ws_prefix_buf;  /* leading white space buf */
+    size_t ws_prefix_len;       /* leading white space len */
 };
 
 /** CCL Qualifier */

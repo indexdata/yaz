@@ -48,7 +48,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.5 2004-10-15 00:19:00 adam Exp $
+ * $Id: ccltoken.c,v 1.6 2005-03-15 16:32:52 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -211,6 +211,7 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 
     while (1)
     {
+	const unsigned char *cp0 = cp;
 	while (*cp && strchr (" \t\r\n", *cp))
 	{
 	    cp++;
@@ -229,6 +230,8 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 	    last->next->prev = last;
 	    last = last->next;
 	}
+	last->ws_prefix_buf = cp0;
+	last->ws_prefix_len = cp - cp0;
 	last->next = NULL;
 	last->name = (const char *) cp;
 	last->len = 1;

@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed bug #272: Preserve spacing for CCL terms.
+
 --- 2.1.0 2005/03/14 
 
 Added support for virtual hosts and multiple backend servers for

@@ -56,7 +56,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.6 2004-10-15 00:18:59 adam Exp $
+ * $Id: cclfind.c,v 1.7 2005-03-15 16:32:52 adam Exp $
  *
  * Old Europagate log:
  *
@@ -371,7 +371,7 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
                     else
                         mid_trunc = 1;
                 }
-            len += 1+lookahead->len;
+            len += 1+lookahead->len+lookahead->ws_prefix_len;
             lookahead = lookahead->next;
         }
 
@@ -481,15 +481,12 @@ static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
             }
             if (i == no-1 && right_trunc)
                 src_len--;
-            if (src_len)
-            {
-                int len = strlen(p->u.t.term);
-                if (len &&
-                    !strchr("-+", *src_str) &&
-                    !strchr("-+", p->u.t.term[len-1]))
-                {
-                    strcat (p->u.t.term, " ");
-                }
+	    if (i && cclp->look_token->ws_prefix_len)
+	    {
+                size_t len = strlen(p->u.t.term);
+		memcpy(p->u.t.term + len, cclp->look_token->ws_prefix_buf,
+				cclp->look_token->ws_prefix_len);
+		p->u.t.term[len + cclp->look_token->ws_prefix_len] = '\0';
             }
             strxcat (p->u.t.term, src_str, src_len);
             ADVANCE;
