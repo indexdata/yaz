@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.72 2005-02-01 14:46:48 adam Exp $
+ * $Id: ztest.c,v 1.73 2005-02-09 12:41:45 adam Exp $
  */
 
 /*
@@ -677,17 +677,11 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_explain = ztest_explain;
     q->bend_srw_scan = ztest_scan;
 
-    yaz_log(YLOG_LOG, "ztest_init handle=%p control=%p",
-	    counter, statserv_getcontrol());
-
     return r;
 }
 
 void bend_close(void *handle)
 {
-    yaz_log(YLOG_LOG, "ztest_close handle=%p control=%p",
-	    handle, statserv_getcontrol());
-
     xfree (handle);              /* release our user-defined handle */
     return;
 }
