@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.11  1995-12-15 16:19:45  quinn
+ * Revision 1.12  1996-01-18 09:46:34  adam
+ * Changed prototype for reader function parsed to data1_read_record.
+ *
+ * Revision 1.11  1995/12/15  16:19:45  quinn
  * Added formatted_text.
  *
  * Revision 1.10  1995/12/14  11:09:43  quinn
@@ -325,7 +328,8 @@ typedef struct data1_node
 data1_node *get_parent_tag(data1_node *n);
 data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
     data1_absyn *absyn, NMEM m);
-data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd, NMEM m);
+data1_node *data1_read_record(int (*rf)(void *, char *, size_t),
+    void *fh, NMEM m);
 data1_absyn *data1_read_absyn(char *file);
 data1_tag *data1_gettagbynum(data1_tagset *s, int type, int value);
 data1_tagset *data1_read_tagset(char *file);
