@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.54 2003-01-06 08:20:29 adam Exp $
+ * $Id: ztest.c,v 1.55 2003-02-20 15:14:10 adam Exp $
  */
 
 /*
@@ -599,7 +599,8 @@ int ztest_scan(void *handle, bend_scan_rr *q)
 
 bend_initresult *bend_init(bend_initrequest *q)
 {
-    bend_initresult *r = (bend_initresult *) odr_malloc (q->stream, sizeof(*r));
+    bend_initresult *r = (bend_initresult *)
+        odr_malloc (q->stream, sizeof(*r));
     int *counter = (int *) xmalloc (sizeof(int));
 
     *counter = 0;
