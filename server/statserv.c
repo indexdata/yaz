@@ -7,7 +7,10 @@
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
  * $Log: statserv.c,v $
- * Revision 1.65  2000-09-04 08:58:15  adam
+ * Revision 1.66  2000-10-06 12:00:28  adam
+ * Fixed Handle leak for WIN32.
+ *
+ * Revision 1.65  2000/09/04 08:58:15  adam
  * Added prefix yaz_ for most logging utility functions.
  *
  * Revision 1.64  2000/04/05 07:39:55  adam
@@ -452,9 +455,9 @@ void statserv_closedown()
     }
 }
 
-int __stdcall event_loop_thread (IOCHAN iochan)
+void event_loop_thread (IOCHAN iochan)
 {
-    return event_loop (&iochan);
+    event_loop (&iochan);
 }
 
 static void listener(IOCHAN h, int event)
@@ -462,7 +465,7 @@ static void listener(IOCHAN h, int event)
     COMSTACK line = (COMSTACK) iochan_getdata(h);
     association *newas;
     int res;
-    HANDLE NewHandle;
+    HANDLE newHandle;
 
     if (event == EVENT_INPUT)
     {
@@ -482,7 +485,6 @@ static void listener(IOCHAN h, int event)
     	COMSTACK new_line;
     	IOCHAN new_chan;
 	char *a = NULL;
-        DWORD ThreadId;
 
 	if (!(new_line = cs_accept(line)))
 	{
@@ -510,20 +512,11 @@ static void listener(IOCHAN h, int event)
 	yaz_log(LOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
-#ifndef WIN32
-	yaz_log(LOG_DEBUG, "Determining client address");
-	a = cs_addrstr(new_line);
-	yaz_log(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
-#endif
+
 	/* Now what we need todo is create a new thread with this iochan as
 	   the parameter */
-	/* if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop_thread,
-	   new_chan, 0, &ThreadId) == NULL) */
-	/* Somehow, somewhere we need to store this thread id, otherwise we
-	   won't be able to close cleanly */
-        NewHandle = (HANDLE)_beginthreadex(NULL, 0, event_loop_thread,
-					   new_chan, 0, &ThreadId);
-        if (NewHandle == (HANDLE)-1)
+        newHandle = (HANDLE) _beginthread(event_loop_thread, 0, new_chan);
+        if (newHandle == (HANDLE) -1)
 	{
 	    
 	    yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to create new thread.");
@@ -531,9 +524,9 @@ static void listener(IOCHAN h, int event)
             return;
 	}
         /* We successfully created the thread, so add it to the list */
-        statserv_add(NewHandle, new_chan);
+        statserv_add(newHandle, new_chan);
 
-        yaz_log(LOG_DEBUG, "Created new thread, iochan %p", new_chan);
+        yaz_log(LOG_DEBUG, "Created new thread, id = %ld iochan %p",(long) newHandle, new_chan);
         iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
     }
     else
@@ -544,7 +537,7 @@ static void listener(IOCHAN h, int event)
     }
 }
 
-#else /* WIN32 */
+#else /* ! WIN32 */
 
 /* To save having an #ifdef in event_loop we need to define this empty function */
 void statserv_remove(IOCHAN pIOChannel)
