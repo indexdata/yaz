@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.14 2002-07-25 12:52:53 adam Exp $
+ * $Id: data1.h,v 1.15 2002-07-29 20:04:08 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -294,6 +294,10 @@ typedef struct data1_node
 } data1_node;
 
 YAZ_EXPORT data1_handle data1_create (void);
+
+#define DATA1_FLAG_XML  1
+YAZ_EXPORT data1_handle data1_createx (int flags);
+
 YAZ_EXPORT void data1_destroy(data1_handle dh);
 YAZ_EXPORT data1_node *get_parent_tag(data1_handle dh, data1_node *n);
 YAZ_EXPORT data1_node *data1_read_node(data1_handle dh, const char **buf,
@@ -475,6 +479,8 @@ YAZ_EXPORT int data1_iconv (data1_handle dh, NMEM m, data1_node *n,
                             const char *fromcode);
 
 YAZ_EXPORT const char *data1_get_encoding (data1_handle dh, data1_node *n);
+
+YAZ_EXPORT int data1_is_xmlmode(data1_handle dh);
 
 YAZ_END_CDECL
 

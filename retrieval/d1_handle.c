@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: d1_handle.c,v 1.8 2002-04-05 12:46:07 adam Exp $
+ * $Id: d1_handle.c,v 1.9 2002-07-29 20:04:08 adam Exp $
  */
 
 #include <stdio.h>
@@ -26,9 +26,15 @@ struct data1_handle_info {
     int map_len;
 
     NMEM mem;
+    int flags;
 };
 
 data1_handle data1_create (void)
+{
+    return data1_createx(0);
+}
+
+data1_handle data1_createx (int flags)
 {
     data1_handle p = (data1_handle)xmalloc (sizeof(*p));
     if (!p)
@@ -43,6 +49,7 @@ data1_handle data1_create (void)
     p->absyn_cache = NULL;
     p->attset_cache = NULL;
     p->mem = nmem_create ();
+    p->flags = flags;
     return p;
 }
 
@@ -129,4 +136,9 @@ FILE *data1_path_fopen (data1_handle dh, const char *file, const char *mode)
     const char *path = data1_get_tabpath(dh);
     const char *root = data1_get_tabroot(dh);
     return yaz_fopen (path, file, "r", root);
+}
+
+int data1_is_xmlmode(data1_handle dh)
+{
+    return dh->flags & DATA1_FLAG_XML;
 }

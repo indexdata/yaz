@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_map.c,v 1.23 2002-07-03 14:09:34 adam Exp $
+ * $Id: d1_map.c,v 1.24 2002-07-29 20:04:08 adam Exp $
  */
 
 #include <stdio.h>
@@ -302,10 +302,15 @@ data1_node *data1_map_record (data1_handle dh, data1_node *n,
 	yaz_log(LOG_WARN, "%s: Failed to load target absyn '%s'",
 		map->name, map->target_absyn_name);
     }
-    n = n->child;
-    if (!n)
-        return 0;
-    res1 = data1_mk_tag (dh, m, map->target_absyn_name, 0, res);
+    if (data1_is_xmlmode(dh))
+    {
+        n = n->child;
+        if (!n)
+            return 0;
+        res1 = data1_mk_tag (dh, m, map->target_absyn_name, 0, res);
+    }
+    else
+        res1 = res;
 
     if (map_children(dh, n, map, res1, m) < 0)
     {

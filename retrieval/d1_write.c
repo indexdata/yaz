@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_write.c,v 1.15 2002-07-25 12:52:53 adam Exp $
+ * $Id: d1_write.c,v 1.16 2002-07-29 20:04:08 adam Exp $
  */
 
 #include <string.h>
@@ -220,8 +220,20 @@ char *data1_nodetoidsgml (data1_handle dh, data1_node *n, int select, int *len)
     
     wrbuf_rewind(b);
     
+    if (!data1_is_xmlmode (dh))
+    {
+        wrbuf_puts (b, "<");
+        wrbuf_puts (b, n->u.root.type);
+        wrbuf_puts (b, ">\n");
+    }
     if (nodetoidsgml(n, select, b, 0, 0 /* no pretty format */))
 	return 0;
+    if (!data1_is_xmlmode (dh))
+    {
+        wrbuf_puts (b, "</");
+        wrbuf_puts (b, n->u.root.type);
+        wrbuf_puts (b, ">\n");
+    }
     *len = wrbuf_len(b);
     return wrbuf_buf(b);
 }

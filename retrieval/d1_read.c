@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.46 2002-07-25 12:52:53 adam Exp $
+ * $Id: d1_read.c,v 1.47 2002-07-29 20:04:08 adam Exp $
  */
 
 #include <assert.h>
@@ -24,9 +24,12 @@ data1_node *data1_get_root_tag (data1_handle dh, data1_node *n)
 {
     if (!n)
         return 0;
-    n = n->child;
-    while (n && n->which != DATA1N_tag)
-        n = n->next;
+    if (data1_is_xmlmode(dh))
+    {
+        n = n->child;
+        while (n && n->which != DATA1N_tag)
+            n = n->next;
+    }
     return n;
 }
         
@@ -622,8 +625,16 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 			break;
 		    }
 		}
-		if (level <= 1)
-		    return d1_stack[0];
+                if (data1_is_xmlmode(dh))
+                {
+                    if (level <= 1)
+                        return d1_stack[0];
+                }
+                else
+                {
+                    if (level <= 0)
+                        return d1_stack[0];
+                }
 		continue;
 	    }	
 	    else if (!strcmp(tag, "var"))
@@ -676,10 +687,20 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
                 if (level == 0)
                 {
                     parent = data1_mk_root (dh, m, tag);
-                    d1_stack[level++] = parent;
+                    res = d1_stack[level] = parent;
+
+                    if (data1_is_xmlmode(dh))
+                    {
+                        level++;
+                        res = data1_mk_tag (dh, m, tag, 0 /* attr */, parent);
+                        res->u.tag.attributes = xattr;
+                    }
                 }
-                res = data1_mk_tag (dh, m, tag, 0 /* attr */, parent);
-                res->u.tag.attributes = xattr;
+                else
+                {
+                    res = data1_mk_tag (dh, m, tag, 0 /* attr */, parent);
+                    res->u.tag.attributes = xattr;
+                }
             }
 	    d1_stack[level] = res;
 	    d1_stack[level+1] = 0;
