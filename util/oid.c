@@ -1,179 +1,8 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Log: oid.c,v $
- * Revision 1.49  2001-10-24 20:11:46  adam
- * Removed SR OID's.
- *
- * Revision 1.48  2001/09/27 12:09:18  adam
- * Function nmem_exit calls oid_exit (when reference is 0).
- *
- * Revision 1.47  2001/09/24 21:51:55  adam
- * New Z39.50 OID utilities: yaz_oidval_to_z3950oid, yaz_str_to_z3950oid
- * and yaz_z3950oid_to_str.
- *
- * Revision 1.46  2001/06/26 14:11:27  adam
- * Added MUTEX functions for NMEM module (used by OID utility).
- *
- * Revision 1.45  2001/05/16 07:25:59  adam
- * Modified oid_ent_to_oid so that if proto is general, then class
- * is ignored (only oid value is compared).
- *
- * Revision 1.44  2000/10/02 13:58:50  adam
- * Added some OID's.
- *
- * Revision 1.43  2000/03/14 09:21:08  ian
- * Added Admin Extended Service OID
- *
- * Revision 1.42  2000/02/29 13:44:55  adam
- * Check for config.h (currently not generated).
- *
- * Revision 1.41  2000/01/10 15:16:53  adam
- * Added several OID's.
- *
- * Revision 1.40  2000/01/06 14:59:13  adam
- * Added oid_init/oid_exit. Changed oid_exit.
- *
- * Revision 1.39  1999/12/16 23:36:19  adam
- * Implemented ILL protocol. Minor updates ASN.1 compiler.
- *
- * Revision 1.38  1999/11/30 13:47:12  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.37  1999/09/13 12:51:15  adam
- * Added CLIENT IP OID.
- *
- * Revision 1.36  1999/05/27 13:02:20  adam
- * Assigned OID for old DB Update (VAL_DBUPDATE0).
- *
- * Revision 1.35  1999/04/20 09:56:49  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.34  1999/04/15 09:19:43  adam
- * Added COOKIE UserInfo OID.
- *
- * Revision 1.33  1999/04/09 12:16:11  adam
- * Added OtherInfo private OID proxy.
- *
- * Revision 1.32  1999/02/18 10:30:46  quinn
- * Changed ES: Update OID
- *
- * Revision 1.31  1998/12/03 11:33:05  adam
- * Added OID's for XML.
- *
- * Revision 1.30  1998/10/18 07:48:56  adam
- * Fixed oid_getentbyoid so that it returns NULL when parsed oid is NULL.
- *
- * Revision 1.29  1998/10/14 13:32:35  adam
- * Added include of string.h.
- *
- * Revision 1.28  1998/10/13 16:01:53  adam
- * Implemented support for dynamic object identifiers.
- * Function oid_getvalbyname now accepts raw OID's as well as traditional
- * names.
- *
- * Revision 1.27  1998/05/18 10:10:02  adam
- * Added Explain-schema and Explain-tagset to OID database.
- *
- * Revision 1.26  1998/03/20 14:46:06  adam
- * Added UNIverse Resource Reports.
- *
- * Revision 1.25  1998/02/10 15:32:03  adam
- * Added new Object Identifiers.
- *
- * Revision 1.24  1997/09/29 13:19:00  adam
- * Added function, oid_ent_to_oid, to replace the function
- * oid_getoidbyent, which is not thread safe.
- *
- * Revision 1.23  1997/09/09 10:10:19  adam
- * Another MSV5.0 port. Changed projects to include proper
- * library/include paths.
- * Server starts server in test-mode when no options are given.
- *
- * Revision 1.22  1997/08/29 13:34:58  quinn
- * Added thesaurus oids
- *
- * Revision 1.21  1997/08/19 08:46:05  quinn
- * Added Thesaurus OID
- *
- * Revision 1.20  1997/07/28 12:34:43  adam
- * Added new OID entries (RVDM).
- *
- * Revision 1.19  1997/05/02 08:39:41  quinn
- * Support for private OID table added. Thanks to Ronald van der Meer
- *
- * Revision 1.18  1997/04/30 08:52:12  quinn
- * Null
- *
- * Revision 1.17  1996/10/10  12:35:23  quinn
- * Added Update extended service.
- *
- * Revision 1.16  1996/10/09  15:55:02  quinn
- * Added SearchInfoReport
- *
- * Revision 1.15  1996/10/07  15:29:43  quinn
- * Added SOIF support
- *
- * Revision 1.14  1996/02/20  17:58:28  adam
- * Added const to oid_getvalbyname.
- *
- * Revision 1.13  1996/02/20  16:37:33  quinn
- * Using yaz_matchstr in oid_getvalbyname
- *
- * Revision 1.12  1996/01/02  08:57:53  quinn
- * Changed enums in the ASN.1 .h files to #defines. Changed oident.class to oclass
- *
- * Revision 1.11  1995/12/13  16:03:35  quinn
- * *** empty log message ***
- *
- * Revision 1.10  1995/11/28  09:30:44  quinn
- * Work.
- *
- * Revision 1.9  1995/11/13  09:27:53  quinn
- * Fiddling with the variant stuff.
- *
- * Revision 1.8  1995/10/12  10:34:56  quinn
- * Added Espec-1.
- *
- * Revision 1.7  1995/10/10  16:27:12  quinn
- * *** empty log message ***
- *
- * Revision 1.6  1995/09/29  17:12:35  quinn
- * Smallish
- *
- * Revision 1.5  1995/09/29  17:01:51  quinn
- * More Windows work
- *
- * Revision 1.4  1995/09/27  15:03:03  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.3  1995/09/12  11:32:06  quinn
- * Added a looker-upper by name.
- *
- * Revision 1.2  1995/08/21  09:11:16  quinn
- * Smallish fixes to suppport new formats.
- *
- * Revision 1.1  1995/05/29  08:17:13  quinn
- * iMoved oid to util to support comstack.
- *
- * Revision 1.5  1995/05/22  11:30:16  quinn
- * Adding Z39.50-1992 stuff to proto.c. Adding zget.c
- *
- * Revision 1.4  1995/05/16  08:50:22  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.3  1995/04/11  11:52:02  quinn
- * Fixed possible buf in proto.c
- *
- * Revision 1.2  1995/03/29  15:39:38  quinn
- * Adding some resource control elements, and a null-check to getentbyoid
- *
- * Revision 1.1  1995/03/27  08:32:12  quinn
- * Added OID database
- *
- *
+ * $Id: oid.c,v 1.50 2002-01-23 20:22:49 adam Exp $
  */
 
 /*
@@ -233,6 +62,8 @@ static oident standard_oids[] =
      "CCL-1"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_GILS,         {3,5,-1},
      "GILS-attset"},
+    {PROTO_Z3950,   CLASS_ATTSET,  VAL_GILS,         {3,5,-1},
+     "GILS"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_STAS,         {3,6,-1},
      "STAS-attset"},
     {PROTO_Z3950,   CLASS_ATTSET,  VAL_COLLECT1,     {3,7,-1},
@@ -613,10 +444,11 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
 			   enum oid_class oclass,
 			   const char *desc, int value)
 {
-    struct oident *oident;
+    struct oident *oident = 0;
 
     nmem_mutex_enter (oid_mutex);
-    oident = oid_getentbyoid_x (oid);
+    if (desc)
+        oident = oid_getentbyoid_x (oid);
     if (!oident)
     {
 	char desc_str[200];
