@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: wrbuf.c,v $
- * Revision 1.2  1995-11-01 13:55:06  quinn
+ * Revision 1.3  1997-05-01 15:08:15  adam
+ * Added log_mask_str_x routine.
+ *
+ * Revision 1.2  1995/11/01 13:55:06  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/10/06  08:51:25  quinn
@@ -18,6 +21,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <wrbuf.h>
 

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdisp.c,v $
- * Revision 1.4  1995-09-29 17:12:34  quinn
+ * Revision 1.5  1997-05-01 15:08:15  adam
+ * Added log_mask_str_x routine.
+ *
+ * Revision 1.4  1995/09/29 17:12:34  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:03:03  quinn
@@ -51,6 +54,8 @@ int marc_display (const char *buf, FILE *outf)
     int length_starting;
     int length_implementation;
 
+    if (!outf)
+        outf = stdout;
     record_length = atoi_n (buf, 5);
     if (record_length < 25)
         return -1;

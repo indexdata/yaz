@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.11  1996-02-05 12:24:32  adam
+ * Revision 1.12  1997-05-01 15:08:14  adam
+ * Added log_mask_str_x routine.
+ *
+ * Revision 1.11  1996/02/05 12:24:32  adam
  * Implemented log_event_{start,end}-functions.
  *
  * Revision 1.10  1995/12/06  09:51:27  quinn
@@ -71,6 +74,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <time.h>
@@ -176,8 +180,13 @@ void logf(int level, const char *fmt, ...)
 
 int log_mask_str (const char *str)
 {
+    return log_mask_str_x (str, LOG_DEFAULT_LEVEL);
+}
+
+int log_mask_str_x (const char *str, int level)
+{
     const char *p;
-    int i, level = LOG_DEFAULT_LEVEL;
+    int i;
 
     while (*str)
     {

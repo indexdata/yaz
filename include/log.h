@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.8  1996-05-01 12:45:00  quinn
+ * Revision 1.9  1997-05-01 15:06:42  adam
+ * Added log_mask_str_x routine.
+ *
+ * Revision 1.8  1996/05/01 12:45:00  quinn
  * *** empty log message ***
  *
  * Revision 1.7  1996/02/05  12:24:26  adam
@@ -82,6 +85,7 @@
 void log_init(int level, const char *prefix, const char *name);
 void logf(int level, const char *fmt, ...);
 int log_mask_str (const char *str);
+int log_mask_str_x (const char *str, int level);
 FILE *log_file(void);
 
 void log_event_start (void (*func)(int level, const char *msg, void *info),
