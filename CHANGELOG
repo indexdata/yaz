@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed memory leak in server. Request queue member wasn't freed.
+
+Fixed nmem_exit so that memory is freed.
+
 --- 1.4 1997/10/2
 
 Revised the CCL parser utility to be thread safe.

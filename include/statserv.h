@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: statserv.h,v $
- * Revision 1.10  1997-09-01 09:31:26  adam
+ * Revision 1.11  1997-10-27 14:03:01  adam
+ * Added new member to statserver_options_block, pre_init, which
+ * specifies a callback to be invoked after command line parsing and
+ * before the server listens for the first time.
+ *
+ * Revision 1.10  1997/09/01 09:31:26  adam
  * Removed definition statserv_remove to eventl.h. (A hack really).
  *
  * Revision 1.9  1997/09/01 08:49:53  adam
@@ -74,6 +79,8 @@ typedef struct statserv_options_block
     int maxrecordsize;            /* maximum value for negotiation */
     char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */
     char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
+
+    void (*pre_init)(struct statserv_options_block *p);
 } statserv_options_block;
 
 int statserv_main(int argc, char **argv);

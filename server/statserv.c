@@ -7,7 +7,12 @@
  *   Chas Woodfield, Fretwell Downing Datasystem.
  *
  * $Log: statserv.c,v $
- * Revision 1.41  1997-09-29 07:19:32  adam
+ * Revision 1.42  1997-10-27 14:03:02  adam
+ * Added new member to statserver_options_block, pre_init, which
+ * specifies a callback to be invoked after command line parsing and
+ * before the server listens for the first time.
+ *
+ * Revision 1.41  1997/09/29 07:19:32  adam
  * Server library uses nmem_init/nmem_exit. The log prefix no longer
  * includes leading path on NT.
  *
@@ -181,7 +186,8 @@ static statserv_options_block control_block = {
     60,                         /* idle timeout (minutes) */
     1024*1024,                  /* maximum PDU size (approx.) to allow */
     "default-config",           /* configuration name to pass to backend */
-    ""                          /* set user id */
+    "",                         /* set user id */
+    NULL
 };
 
 /*
@@ -777,10 +783,6 @@ int statserv_main(int argc, char **argv)
             }
     }
 
-#if 0
-    log_init(control_block.loglevel, NULL, control_block.logfile);
-#endif /* WINDOWS */
-
     if ((pListener == NULL) && *control_block.default_listen)
 	    add_listener(control_block.default_listen, protocol);
 
@@ -789,6 +791,8 @@ int statserv_main(int argc, char **argv)
 	inetd_connection(protocol);
     else
     {
+	if (control_block.pre_init)
+	    (*control_block.pre_init)(&control_block);
 	if (control_block.dynamic)
 	    signal(SIGCHLD, catchchld);
     }
