@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.16  1995-03-31 09:18:55  quinn
+ * Revision 1.17  1995-04-10 10:23:36  quinn
+ * Some work to add scan and other things.
+ *
+ * Revision 1.16  1995/03/31  09:18:55  quinn
  * Added logging.
  *
  * Revision 1.15  1995/03/30  14:03:23  quinn
@@ -56,6 +59,8 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <assert.h>
 
 #include <comstack.h>
@@ -63,7 +68,6 @@
 #include <session.h>
 #include <proto.h>
 #include <oid.h>
-#include <iso2709.h>
 #include <log.h>
 
 #include <backend.h>
@@ -74,6 +78,12 @@ static int process_apdu(IOCHAN chan);
 static int process_initRequest(IOCHAN client, Z_InitRequest *req);
 static int process_searchRequest(IOCHAN client, Z_SearchRequest *req);
 static int process_presentRequest(IOCHAN client, Z_PresentRequest *req);
+static int process_scanRequest(IOCHAN client, Z_ScanRequest *req);
+
+extern int dynamic;
+extern char *apdufile;
+
+static FILE *apduf = 0; /* for use in static mode */
 
 association *create_association(IOCHAN channel, COMSTACK link)
 {
@@ -86,6 +96,44 @@ association *create_association(IOCHAN channel, COMSTACK link)
     if (!(new->decode = odr_createmem(ODR_DECODE)) ||
     	!(new->encode = odr_createmem(ODR_ENCODE)))
 	return 0;
+    if (apdufile)
+    {
+    	char filename[256];
+	FILE *f;
+
+	if (!(new->print = odr_createmem(ODR_PRINT)))
+	    return 0;
+	if (*apdufile)
+	{
+	    strcpy(filename, apdufile);
+	    if (!dynamic)
+	    {
+		if (!apduf)
+		{
+		    if (!(apduf = fopen(filename, "w")))
+		    {
+			logf(LOG_WARN|LOG_ERRNO, "%s", filename);
+			return 0;
+		    }
+		    setvbuf(apduf, 0, _IONBF, 0);
+		}
+		f = apduf;
+	    }
+	    else 
+	    {
+		sprintf(filename + strlen(filename), ".%d", getpid());
+		if (!(f = fopen(filename, "w")))
+		{
+		    logf(LOG_WARN|LOG_ERRNO, "%s", filename);
+		    return 0;
+		}
+		setvbuf(f, 0, _IONBF, 0);
+	    }
+	    odr_setprint(new->print, f);
+    	}
+    }
+    else
+    	new->print = 0;
     if (!(new->encode_buffer = malloc(ENCODE_BUFFER_SIZE)))
     	return 0;
     odr_setbuf(new->encode, new->encode_buffer, ENCODE_BUFFER_SIZE);
@@ -104,6 +152,8 @@ void destroy_association(association *h)
 {
     odr_destroy(h->decode);
     odr_destroy(h->encode);
+    if (h->print)
+	odr_destroy(h->print);
     free(h->encode_buffer);
     if (h->input_buffer)
     	free(h->input_buffer);
@@ -182,6 +232,12 @@ static int process_apdu(IOCHAN chan)
 	    odr_errlist[odr_geterror(assoc->decode)]);
 	return -1;
     }
+    if (assoc->print && !z_APDU(assoc->print, &apdu, 0))
+    {
+    	logf(LOG_WARN, "ODR print error: %s", 
+	    odr_errlist[odr_geterror(assoc->print)]);
+	return -1;
+    }
     switch (apdu->which)
     {
     	case Z_APDU_initRequest:
@@ -190,6 +246,8 @@ static int process_apdu(IOCHAN chan)
 	    res = process_searchRequest(chan, apdu->u.searchRequest); break;
 	case Z_APDU_presentRequest:
 	    res = process_presentRequest(chan, apdu->u.presentRequest); break;
+	case Z_APDU_scanRequest:
+	    res = process_scanRequest(chan, apdu->u.scanRequest); break;
 	default:
 	    logf(LOG_WARN, "Bad APDU");
 	    return -1;
@@ -260,7 +318,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "Index Data/YAZ Generic Frontend Server";
-    resp.implementationVersion = "$Revision: 1.16 $";
+    resp.implementationVersion = "$Revision: 1.17 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -319,6 +377,28 @@ static Z_NamePlusRecord *surrogatediagrec(oid_proto proto, char *dbname,
     return &rec;
 }
 
+static Z_DiagRecs *diagrecs(oid_proto proto, int error, char *addinfo)
+{
+    static Z_DiagRecs recs;
+    static Z_DiagRec *recp[1], rec;
+    static int err;
+    oident bib1;
+
+    logf(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo);
+    bib1.proto = proto;
+    bib1.class = CLASS_DIAGSET;
+    bib1.value = VAL_BIB1;
+
+    err = error;
+    recs.num_diagRecs = 1;
+    recs.diagRecs = recp;
+    recp[0] = &rec;
+    rec.diagnosticSetId = oid_getoidbyent(&bib1);
+    rec.condition = &err;
+    rec.addinfo = addinfo ? addinfo : "";
+    return &recs;
+}
+
 #define MAX_RECORDS 256
 
 static Z_Records *pack_records(association *a, char *setname, int start,
@@ -375,7 +455,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 	    *pres = Z_PRES_FAILURE;
 	    return diagrec(a->proto, fres->errcode, fres->errstring);
 	}
-	logf(LOG_DEBUG, "  Got record, len=%d, total=%d",
+	logf(LOG_DEBUG, "  fetched record, len=%d, total=%d",
 	    fres->len, total_length);
 	if (fres->len + total_length > a->preferredMessageSize)
 	{
@@ -519,6 +599,8 @@ static int process_searchRequest(IOCHAN client, Z_SearchRequest *req)
 	    else if (bsrt->hits < *req->largeSetLowerBound)
 	    {
 		toget = *req->mediumSetPresentNumber;
+		if (toget > bsrt->hits)
+		    toget = bsrt->hits;
 		setnames = req->mediumSetElementSetNames;
 	    }
 	    else
@@ -581,6 +663,105 @@ static int process_presentRequest(IOCHAN client, Z_PresentRequest *req)
     resp.presentStatus = &presst;
     resp.nextResultSetPosition = &next;
 
+    if (!z_APDU(assoc->encode, &apdup, 0))
+    {
+	logf(LOG_FATAL, "ODR error encoding initres: %s",
+	    odr_errlist[odr_geterror(assoc->encode)]);
+	return -1;
+    }
+    odr_getbuf(assoc->encode, &assoc->encoded_len);
+    odr_reset(assoc->encode);
+    iochan_setflags(client, EVENT_OUTPUT | EVENT_EXCEPT);
+    return 0;
+}
+
+static int process_scanRequest(IOCHAN client, Z_ScanRequest *req)
+{
+    association *assoc = iochan_getdata(client);
+    Z_APDU apdu, *apdup;
+    Z_ScanResponse res;
+    bend_scanrequest srq;
+    bend_scanresult *srs;
+    int scanStatus = Z_Scan_failure;
+    int numberOfEntriesReturned = 0;
+    oident *attent;
+    Z_ListEntries ents;
+#define SCAN_MAX_ENTRIES 200
+    Z_Entry *tab[SCAN_MAX_ENTRIES];
+
+    apdup = &apdu;
+    apdu.which = Z_APDU_scanResponse;
+    apdu.u.scanResponse = &res;
+    res.referenceId = req->referenceId;
+    res.stepSize = 0;
+    res.scanStatus = &scanStatus;
+    res.numberOfEntriesReturned = &numberOfEntriesReturned;
+    res.positionOfTerm = 0;
+    res.entries = &ents;
+    ents.which = Z_ListEntries_nonSurrogateDiagnostics;
+    res.attributeSet = 0;
+
+    if (req->attributeSet && (!(attent = oid_getentbyoid(req->attributeSet)) ||
+    	attent->class != CLASS_ATTSET || attent->value != VAL_BIB1))
+	ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto, 121, 0);
+    else if (req->stepSize && *req->stepSize > 0)
+    	ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto, 205, 0);
+    else
+    {
+	srq.num_bases = req->num_databaseNames;
+	srq.basenames = req->databaseNames;
+	srq.num_entries = *req->numberOfTermsRequested;
+	srq.term = req->termListAndStartPoint;
+	srq.term_position = req->preferredPositionInResponse ?
+	    *req->preferredPositionInResponse : 1;
+	if (!(srs = bend_scan(assoc->backend, &srq, 0)))
+	    ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto, 2, 0);
+	else if (srs->errcode)
+	    ents.u.nonSurrogateDiagnostics = diagrecs(assoc->proto,
+		srs->errcode, srs->errstring);
+	else
+	{
+	    int i;
+	    static Z_Entries list;
+
+	    if (srs->status == BEND_SCAN_PARTIAL)
+	    	scanStatus = Z_Scan_partial_5;
+	    else
+	    	scanStatus = 1;  /* Z_Scan_success; */ /* assumption for now */
+	    ents.which = Z_ListEntries_entries;
+	    ents.u.entries = &list;
+	    list.entries = tab;
+	    for (i = 0; i < srs->num_entries; i++)
+	    {
+	    	Z_Entry *e;
+		Z_TermInfo *t;
+		Odr_oct *o;
+
+		if (i >= SCAN_MAX_ENTRIES)
+		{
+		    scanStatus = Z_Scan_partial_4;
+		    break;
+		}
+		list.entries[i] = e = odr_malloc(assoc->encode, sizeof(*e));
+		e->which = Z_Entry_termInfo;
+		e->u.termInfo = t = odr_malloc(assoc->encode, sizeof(*t));
+		t->suggestedAttributes = 0;
+		t->alternativeTerm = 0;
+		t->byAttributes = 0;
+		t->globalOccurrences = &srs->entries[i].occurrences;
+		t->term = odr_malloc(assoc->encode, sizeof(*t->term));
+		t->term->which = Z_Term_general;
+		t->term->u.general = o = odr_malloc(assoc->encode,
+		    sizeof(Odr_oct));
+		o->buf = odr_malloc(assoc->encode, o->len = o->size =
+		    strlen(srs->entries[i].term));
+		memcpy(o->buf, srs->entries[i].term, o->len);
+	    }
+	    list.num_entries = i;
+	    res.numberOfEntriesReturned = &list.num_entries;
+	    res.positionOfTerm = &srs->term_position;
+	}
+    }
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
 	logf(LOG_FATAL, "ODR error encoding initres: %s",

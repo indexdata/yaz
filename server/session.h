@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.3  1995-03-30 09:09:27  quinn
+ * Revision 1.4  1995-04-10 10:23:39  quinn
+ * Some work to add scan and other things.
+ *
+ * Revision 1.3  1995/03/30  09:09:27  quinn
  * Added state-handle and some support for asynchronous activities.
  *
  * Revision 1.2  1995/03/27  08:34:29  quinn
@@ -31,6 +34,7 @@ typedef struct association
     COMSTACK client_link;
     ODR decode;
     ODR encode;
+    ODR print;
     char *encode_buffer;
     int encoded_len;
     char *input_buffer;

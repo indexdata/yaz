@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.15  1995-03-31 10:16:51  quinn
+ * Revision 1.16  1995-04-10 10:23:40  quinn
+ * Some work to add scan and other things.
+ *
+ * Revision 1.15  1995/03/31  10:16:51  quinn
  * Fixed logging.
  *
  * Revision 1.14  1995/03/31  09:18:58  quinn
@@ -78,8 +81,9 @@
 #include <log.h>
 
 static char *me = "statserver";
-static int dynamic = 1;   /* fork on incoming connection */
+int dynamic = 1;   /* fork on incoming connection */
 static int loglevel = LOG_DEFAULT_LEVEL;
+char *apdufile = 0;
 
 #define DEFAULT_LISTENER "tcp:localhost:9999"
 
@@ -284,7 +288,7 @@ int statserv_main(int argc, char **argv)
     char *logfile = 0;
 
     me = argv[0];
-    while ((ret = options("szSl:v:", argv, argc, &arg)) != -2)
+    while ((ret = options("a:szSl:v:", argv, argc, &arg)) != -2)
     	switch (ret)
     	{
 	    case 0:
@@ -295,13 +299,15 @@ int statserv_main(int argc, char **argv)
 	    case 's': protocol = CS_SR; break;
 	    case 'S': dynamic = 0; break;
 	    case 'l':
-	   	 logfile = arg;
-		 log_init(loglevel, me, logfile);
-		 break;
+	   	logfile = arg;
+		log_init(loglevel, me, logfile);
+		break;
 	    case 'v':
-	   	 loglevel = log_mask_str(arg);
-	   	 log_init(loglevel, me, logfile);
-		 break;
+		loglevel = log_mask_str(arg);
+		log_init(loglevel, me, logfile);
+		break;
+	    case 'a':
+	    	apdufile = arg; break;
 	    default:
 	    	fprintf(stderr, "Usage: %s [ -v <loglevel> -l <logfile> -zsS <listener-addr> ... ]\n", me);
 	    	exit(1);
@@ -311,5 +317,6 @@ int statserv_main(int argc, char **argv)
     if (!listeners)
 	add_listener(DEFAULT_LISTENER, protocol);
     logf(LOG_LOG, "Entering event loop.");
+	    
     return event_loop();
 }
