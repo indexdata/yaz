@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.152 2003-03-25 09:55:11 adam Exp $
+ * $Id: seshigh.c,v 1.153 2003-04-18 15:11:04 adam Exp $
  */
 
 /*
@@ -651,7 +651,7 @@ static void srw_bend_search(association *assoc, request *req,
                        yaz_diag_bib1_to_srw (rr.errcode));
         srw_res->diagnostics[0].details = rr.errstring;
         yaz_log(LOG_DEBUG, "srw_bend_search returned SRW error %d",
-                srw_res->diagnostics[0].code);
+                *srw_res->diagnostics[0].code);
                 
     }
     else
@@ -866,6 +866,8 @@ static void process_http_request(association *assoc, request *req)
             }
             sr->u.request->recordSchema = uri_val(p1, "recordSchema", o);
             sr->u.request->recordPacking = uri_val(p1, "recordPacking", o);
+            if (!sr->u.request->recordPacking)
+                sr->u.request->recordPacking = "xml";
             uri_val_int(p1, "maximumRecords", o, 
                         &sr->u.request->maximumRecords);
             uri_val_int(p1, "startRecord", o,
