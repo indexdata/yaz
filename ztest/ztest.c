@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.41  2001-04-05 13:08:48  adam
+ * Revision 1.42  2001-04-06 12:26:46  adam
+ * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
+ *
+ * Revision 1.41  2001/04/05 13:08:48  adam
  * New configure options: --enable-module.
  *
  * Revision 1.40  2001/03/25 21:55:13  adam
@@ -226,6 +229,13 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 		    oident *ent = oid_getentbyoid(r->direct_reference);
 		    if (ent)
 			yaz_log(LOG_LOG, "OID %s", ent->desc);
+                    if (ent && ent->value == VAL_TEXT_XML)
+                    {
+			yaz_log (LOG_LOG, "ILL XML request");
+                        if (r->which == Z_External_octet)
+                            yaz_log (LOG_LOG, "%.*s", r->u.octet_aligned->len,
+                                     r->u.octet_aligned->buf); 
+                    }
 		    if (ent && ent->value == VAL_ISO_ILL_1)
 		    {
 			yaz_log (LOG_LOG, "Decode ItemRequest begin");

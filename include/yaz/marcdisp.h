@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: marcdisp.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
+ * Revision 1.3  2001-04-06 12:26:46  adam
+ * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
+ *
+ * Revision 1.2  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -66,6 +69,7 @@ YAZ_BEGIN_CDECL
 
 YAZ_EXPORT int marc_display (const char *buf, FILE *outf);
 YAZ_EXPORT int marc_display_ex (const char *buf, FILE *outf, int debug);
+YAZ_EXPORT int atoi_n (const char *buf, int len);
 
 #define ISO2709_RS 035
 #define ISO2709_FS 036

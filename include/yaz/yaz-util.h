@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: yaz-util.h,v $
- * Revision 1.2  2000-02-28 11:20:06  adam
+ * Revision 1.3  2001-04-06 12:26:46  adam
+ * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
+ *
+ * Revision 1.2  2000/02/28 11:20:06  adam
  * Using autoconf. New definitions: YAZ_BEGIN_CDECL/YAZ_END_CDECL.
  *
  * Revision 1.1  1999/11/30 13:47:11  adam
@@ -41,11 +44,11 @@
 #include <yaz/wrbuf.h>
 #include <yaz/nmem.h>
 #include <yaz/readconf.h>
+#include <yaz/marcdisp.h>
 
 YAZ_BEGIN_CDECL
 
 YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
-YAZ_EXPORT int atoi_n (const char *buf, int len);
 
 YAZ_END_CDECL
 

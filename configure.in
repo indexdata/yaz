@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2001
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.43 2001-04-05 13:08:48 adam Exp $
+dnl $Id: configure.in,v 1.44 2001-04-06 12:26:46 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -23,9 +23,15 @@ else
 	EXTRAMODULE=asn
 	HFILE=${srcdir}/asn/prt-proto.h
 fi
-AC_ARG_ENABLE(module,[  --enable-module=\"mod ..\" ill],[
- EXTRAMODULE="$EXTRAMODULE $enable_module"])
+AC_ARG_ENABLE(modules,[  --enable-modules=\"mod ..\" ill],[
+if test "$enable_modules" != "no"; then
+		EXTRAMODULE="$EXTRAMODULE $enable_modules"
+fi
+],[
+EXTRAMODULE="$EXTRAMODULE ill ccl"
+])
 EXTRALIB=""
+echo $EXTRAMODULE
 for module in $EXTRAMODULE; do
 	EXTRALIB="$EXTRALIB ../$module/lib${module}.la"
 	if test $module = "z39.50"; then
@@ -153,7 +159,7 @@ if test -f ${srcdir}/lib/yaz-config.in; then
 fi
 sed s%yaz_echo_source=yes%yaz_echo_source=no%g < ${srcdir}/yaz-config.in >${srcdir}/lib/yaz-config.in
 dnl
-SUBDIRS_VAR="util odr $EXTRAMODULE zutil comstack ccl tab retrieval server include lib client ztest"
+SUBDIRS_VAR="util odr $EXTRAMODULE zutil comstack tab retrieval server include lib client ztest"
 AC_SUBST(SUBDIRS_VAR)
 dnl ------ Makefiles
 dnl

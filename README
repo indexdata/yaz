@@ -3,7 +3,7 @@ Copyright (C) 1995-2001, Index Data ApS.
 See the file LICENSE for details.
 
 Compilation and installation instructions for YAZ 
-  $Id: README,v 1.34 2001-03-13 18:11:38 adam Exp $
+  $Id: README,v 1.35 2001-04-06 12:26:45 adam Exp $
 
 The primary output of the source here is the lib/libyaz.a library,
 which contains support functions for implementing the server or client
@@ -16,8 +16,8 @@ On Unix, GNU configure is used to configure YAZ and generate Makefiles.
 Type "./configure", then "make" to build YAZ.
 
 Note: If you are using the CVS snapshot of YAZ you must have autoconf,
-automake and libtool installed. Before running configure generate
-support files by running buildconf.sh which is part of YAZ.  
+automake and libtool installed. Before running configure, create
+support files by running buildconf.sh in the top-level directory of YAZ.  
 
 Two test-programs of interest are generated when you type 'make' at the
 top level: ztest/yaz-ztest and client/yaz-client. Ztest is a dummy

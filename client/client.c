@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: client.c,v $
- * Revision 1.119  2001-04-05 13:08:48  adam
+ * Revision 1.120  2001-04-06 12:26:46  adam
+ * Optional CCL module. Moved atoi_n to marcdisp.h from yaz-util.h.
+ *
+ * Revision 1.119  2001/04/05 13:08:48  adam
  * New configure options: --enable-module.
  *
  * Revision 1.118  2001/03/27 14:48:06  adam
@@ -408,7 +411,7 @@
 #include <yaz/ill.h>
 #endif
 
-#if CCL2RPN
+#if YAZ_MODULE_ccl
 #include <yaz/yaz-ccl.h>
 #endif
 
@@ -445,7 +448,7 @@ static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
 static char ccl_fields[512] = "default.bib";
-char* esPackageName = 0;
+static char* esPackageName = 0;
 
 static char last_cmd[100] = "?";
 static FILE *marcdump = 0;
@@ -459,7 +462,7 @@ typedef enum {
 
 static QueryType queryType = QueryType_Prefix;
 
-#if CCL2RPN
+#if YAZ_MODULE_ccl
 static CCL_bibset bibset;               /* CCL bibset handle */
 #endif
 
@@ -1022,7 +1025,7 @@ static int send_searchRequest(char *arg)
     Z_SearchRequest *req = apdu->u.searchRequest;
     Z_Query query;
     int oid[OID_SIZE];
-#if CCL2RPN
+#if YAZ_MODULE_ccl
     struct ccl_rpn_node *rpn = NULL;
     int error, pos;
 #endif
@@ -1030,7 +1033,7 @@ static int send_searchRequest(char *arg)
     Z_RPNQuery *RPNquery;
     Odr_oct ccl_query;
 
-#if CCL2RPN
+#if YAZ_MODULE_ccl
     if (queryType == QueryType_CCL2RPN)
     {
         rpn = ccl_find_str(bibset, arg, &error, &pos);
@@ -1098,7 +1101,7 @@ static int send_searchRequest(char *arg)
         ccl_query.buf = (unsigned char*) arg;
         ccl_query.len = strlen(arg);
         break;
-#if CCL2RPN
+#if YAZ_MODULE_ccl
     case QueryType_CCL2RPN:
         query.which = Z_Query_type_1;
         RPNquery = ccl_rpn_query(out, rpn);
@@ -1502,6 +1505,17 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
             create_external_ILL_APDU(ILL_APDU_ILL_Request);
     }
+    else if (!strcmp(type, "xml") || !strcmp(type, "3"))
+    {
+	const char *xml_buf =
+		"<itemorder>\n"
+		"  <type>request</type>\n"
+		"  <libraryNo>000200</libraryNo>\n"
+		"  <borrowerTicketNo> 1212 </borrowerTicketNo>\n"
+		"</itemorder>";
+        r->u.itemOrder->u.esRequest->notToKeep->itemRequest =
+            z_ext_record (out, VAL_TEXT_XML, xml_buf, strlen(xml_buf));
+    }
     else
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
 
@@ -1864,9 +1878,9 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
     int use_rpn = 1;
+#if YAZ_MODULE_ccl
     int oid[OID_SIZE];
     
-#if CCL2RPN
     if (queryType == QueryType_CCL2RPN)
     {
         oident bib1;
@@ -2288,7 +2302,7 @@ int cmd_querytype (char *arg)
         queryType = QueryType_CCL;
     else if (!strcmp (arg, "prefix") || !strcmp(arg, "rpn"))
         queryType = QueryType_Prefix;
-#if CCL2RPN
+#if YAZ_MODULE_ccl
     else if (!strcmp (arg, "ccl2rpn") || !strcmp (arg, "cclrpn"))
         queryType = QueryType_CCL2RPN;
 #endif
@@ -2297,7 +2311,7 @@ int cmd_querytype (char *arg)
         printf ("Querytype must be one of:\n");
         printf (" prefix         - Prefix query\n");
         printf (" ccl            - CCL query\n");
-#if CCL2RPN
+#if YAZ_MODULE_ccl
         printf (" ccl2rpn        - CCL query converted to RPN\n");
 #endif
         return 0;
@@ -2346,7 +2360,7 @@ int cmd_packagename(char* arg) {
 
 static void initialize(void)
 {
-#if CCL2RPN
+#if YAZ_MODULE_ccl
     FILE *inf;
 #endif
     nmem_init();
@@ -2361,7 +2375,7 @@ static void initialize(void)
     if (apdu_file)
         odr_setprint(print, apdu_file);
 
-#if CCL2RPN
+#if YAZ_MODULE_ccl
     bibset = ccl_qual_mk (); 
     inf = fopen (ccl_fields, "r");
     if (inf)
