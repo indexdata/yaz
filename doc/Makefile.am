@@ -1,8 +1,8 @@
-## $Id: Makefile.am,v 1.28 2002-03-23 20:35:51 adam Exp $
+## $Id: Makefile.am,v 1.29 2002-03-23 21:13:20 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
-XMLFILES=$(srcdir)/yaz.xml $(srcdir)/introduction.xml \
+XMLFILES=$(srcdir)/yaz.xml.in $(srcdir)/introduction.xml \
  $(srcdir)/installation.xml $(srcdir)/indexdata.xml $(srcdir)/asn.xml \
  $(srcdir)/tools.xml $(srcdir)/odr.xml $(srcdir)/comstack.xml \
  $(srcdir)/frontend.xml $(srcdir)/license.xml $(srcdir)/future.xml  \
@@ -28,17 +28,17 @@ DOCFILES=$(HTMLFILES) yaz.pdf
 
 SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl xml.dcl
 
-EXTRA_DIST = $(XMLFILES) $(DOCFILES) $(SUPPORTFILES)
+EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(DOCFILES)
 
 doc_DATA = $(DOCFILES)
 
-$(HTMLFILES): $(XMLFILES) $(srcdir)/yazhtml.dsl
+$(HTMLFILES): $(XMLFILES) 
 	cd $(srcdir); jade -E14 -d yazhtml.dsl -t sgml xml.dcl yaz.xml
 
-$(srcdir)/yaz.php: $(XMLFILES) $(srcdir)/yazphp.dsl
+$(srcdir)/yaz.php: $(XMLFILES)
 	cd $(srcdir); jade -E14 -d yazphp.dsl -t sgml xml.dcl yaz.xml
 
-$(srcdir)/yaz.pdf: $(XMLFILES) $(srcdir)/yazprint.dsl
+$(srcdir)/yaz.pdf: $(XMLFILES)
 	cd $(srcdir); jade -d yazprint.dsl -t tex xml.dcl yaz.xml
 	pdfjadetex yaz.tex
 	pdfjadetex yaz.tex
