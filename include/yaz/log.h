@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.14 2004-11-02 11:37:21 heikki Exp $
+ * $Id: log.h,v 1.15 2004-11-02 12:55:04 heikki Exp $
  */
 
 /**
@@ -40,17 +40,18 @@
 
 YAZ_BEGIN_CDECL
 
-#define LOG_FATAL  0x0001
-#define LOG_DEBUG  0x0002
-#define LOG_WARN   0x0004
-#define LOG_LOG    0x0008
-#define LOG_ERRNO  0x0010     /* append strerror to message */
-#define LOG_FILE   0x0020
-#define LOG_APP    0x0040     /* For application level events such as new-connection */
-#define LOG_MALLOC 0x0080     /* debugging mallocs */
-#define LOG_NOTIME 0x0100     /* do not output date and time */
-#define LOG_APP2   0x0200     /* For application-level events, such as api calls */
-#define LOG_APP3   0x0400     /* For more application-level events */
+#define LOG_FATAL  0x00000001
+#define LOG_DEBUG  0x00000002
+#define LOG_WARN   0x00000004
+#define LOG_LOG    0x00000008
+#define LOG_ERRNO  0x00000010 /* append strerror to message */
+#define LOG_FILE   0x00000020
+#define LOG_APP    0x00000040 /* Application level events (new-connection) */
+#define LOG_MALLOC 0x00000080 /* debugging mallocs */
+#define LOG_NOTIME 0x00000100 /* do not output date and time */
+#define LOG_APP2   0x00000200 /* Application-level events, such as api calls */
+#define LOG_APP3   0x00000400 /* For more application-level events */
+#define LOG_FLUSH  0x00000800 /* Flush log after every write (DEBUG does too) */
 
 #define LOG_ALL   (0xffff&~LOG_MALLOC&~LOG_NOTIME)
 

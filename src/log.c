@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.3 2004-11-02 11:37:21 heikki Exp $
+ * $Id: log.c,v 1.4 2004-11-02 12:55:04 heikki Exp $
  */
 
 /**
@@ -208,7 +208,8 @@ void yaz_log(int level, const char *fmt, ...)
     tbuf[TIMEFORMAT_LEN-1]='\0';
     fprintf(l_file, "%s %s%s %s%s\n", tbuf, l_prefix, flags,
             l_prefix2, buf);
-    fflush(l_file);
+    if (l_level & (LOG_FLUSH|LOG_DEBUG) )
+        fflush(l_file);
     if (end_hook_func)
 	(*end_hook_func)(o_level, buf, end_hook_info);
 }
