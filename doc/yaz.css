@@ -8,6 +8,14 @@
 	margin-right: auto;
 }
 
+.author {
+	font-style: italic;
+}
+
+.TITLEPAGE, .LOT, .TOC {
+	font-family: sans-serif;
+}
+
 .table th {
 	padding: 3px 6px;
 	border: 1px solid black;
@@ -17,7 +25,12 @@
 	padding: 3px 6px;
 }
 
-h1, h2, h3, h4 {
+h1, h3, h4 {
+	font-family: sans-serif;
+}
+
+h2 {
+	font-style: italic;
 	font-family: sans-serif;
 }
 
