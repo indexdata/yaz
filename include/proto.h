@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.11  1995-06-02 09:49:47  quinn
+ * Revision 1.12  1995-06-05 10:53:13  quinn
+ * Smallish.
+ *
+ * Revision 1.11  1995/06/02  09:49:47  quinn
  * Add access control
  *
  * Revision 1.10  1995/05/29  08:11:34  quinn
@@ -647,7 +650,6 @@ typedef struct Z_ScanRequest
     int num_databaseNames;
     char **databaseNames;
     Odr_oid *attributeSet;          /* OPTIONAL */
-    Odr_any *eatme1;
     Z_AttributesPlusTerm *termListAndStartPoint;
     int *stepSize;                    /* OPTIONAL */
     int *numberOfTermsRequested;
