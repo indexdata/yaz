@@ -2,12 +2,10 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.6 2003-02-18 11:59:15 adam Exp $
+ * $Id: zgdu.c,v 1.7 2003-02-20 15:12:28 adam Exp $
  */
 
 #include <yaz/proto.h>
-
-#define HTTP_DEBUG 0
 
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
@@ -185,9 +183,6 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             Z_HTTP_Response *hr;
 	    (*p)->which = Z_GDU_HTTP_Response;
 
-#if HTTP_DEBUG
-	    fprintf(stderr, "-- HTTP decode:\n%.*s\n", o->size, o->buf);
-#endif
             hr = (*p)->u.HTTP_Response = (Z_HTTP_Response *)
                 odr_malloc(o, sizeof(*hr));
             po = i = 5;
@@ -223,9 +218,6 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             int i, po;
             Z_HTTP_Request *hr;
 
-#if HTTP_DEBUG
-	    fprintf(stderr, "-- HTTP decode:\n%.*s\n", o->size, o->buf);
-#endif
 	    (*p)->which = Z_GDU_HTTP_Request;
             hr = (*p)->u.HTTP_Request = 
                 (Z_HTTP_Request *) odr_malloc(o, sizeof(*hr));
@@ -283,7 +275,7 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             return z_APDU(o, &(*p)->u.z3950, opt, 0);
         }
     }
-    else if (o->direction == ODR_ENCODE)
+    else /* ENCODE or PRINT */
     {
         char sbuf[80];
         Z_HTTP_Header *h;
@@ -316,9 +308,10 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                 odr_write(o, (unsigned char *) 
                           (*p)->u.HTTP_Response->content_buf,
                           (*p)->u.HTTP_Response->content_len);
-#if HTTP_DEBUG
-            fprintf(stderr, "-- HTTP response:\n%.*s\n", o->top, o->buf);
-#endif
+            if (o->direction == ODR_PRINT)
+            {
+                fprintf(o->print, "-- HTTP response:\n%.*s\n", o->top, o->buf);
+            }
             break;
         case Z_GDU_HTTP_Request:
             odr_write(o, (unsigned char *) (*p)->u.HTTP_Request->method,
@@ -352,23 +345,10 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                 odr_write(o, (unsigned char *)
                           (*p)->u.HTTP_Request->content_buf,
                           (*p)->u.HTTP_Request->content_len);
-#if HTTP_DEBUG
-            fprintf(stderr, "-- HTTP request:\n%.*s\n", o->top, o->buf);
-#endif
-            break;
-        case Z_GDU_Z3950:
-            return z_APDU(o, &(*p)->u.z3950, opt, 0);
-        }
-    }
-    else if (o->direction == ODR_PRINT)
-    {
-        switch((*p)->which)
-        {
-        case Z_GDU_HTTP_Response:
-            fprintf (stderr, "not implemented");
-            break;
-        case Z_GDU_HTTP_Request:
-            fprintf (stderr, "not implemented");
+            if (o->direction == ODR_PRINT)
+            {
+                fprintf(o->print, "-- HTTP request:\n%.*s\n", o->top, o->buf);
+            }
             break;
         case Z_GDU_Z3950:
             return z_APDU(o, &(*p)->u.z3950, opt, 0);
