@@ -22,7 +22,7 @@
      <!ENTITY comstack "<acronym>COMSTACK</acronym>">
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
 ]>
-<!-- $Id: yaz.xml.in,v 1.3 2002-04-08 13:56:02 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.4 2002-05-02 10:35:44 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User's Guide and Reference</title>
@@ -39,6 +39,16 @@
     tools for implementing the server and client roles, respectively.
     The documentation can be used on its own, or as a reference when
     looking at the example applications provided with the package.
+   </simpara>
+   <simpara>
+    <inlinemediaobject>
+     <imageobject>
+      <imagedata fileref="id.png" format="PNG"/>
+     </imageobject>
+     <imageobject>
+      <imagedata fileref="id.eps" format="EPS"/>
+     </imageobject>
+    </inlinemediaobject>
    </simpara></abstract>
  </bookinfo>
  

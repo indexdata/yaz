@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.29 2002-03-23 21:13:20 adam Exp $
+## $Id: Makefile.am,v 1.30 2002-05-02 10:35:44 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -26,7 +26,7 @@ HTMLFILES = asn.external.html asn.html asn.oid.html asn.pdu.html \
 
 DOCFILES=$(HTMLFILES) yaz.pdf
 
-SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl xml.dcl
+SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl xml.dcl id.eps id.png
 
 EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(DOCFILES)
 
