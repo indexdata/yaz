@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.18 2005-02-25 17:04:45 adam Exp $
+ * $Id: marcdisp.c,v 1.19 2005-03-06 21:27:09 adam Exp $
  */
 
 /**
@@ -86,6 +86,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     int record_length;
     int indicator_length;
     int identifier_length;
+    int end_of_directory;
     int base_address;
     int length_data_entry;
     int length_starting;
@@ -236,18 +237,37 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     /* first pass. determine length of directory & base of data */
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
     {
-        entry_p += 3+length_data_entry+length_starting;
-        if (entry_p >= record_length)
+	/* length of directory entry */
+	int l = 3 + length_data_entry + length_starting;
+	if (entry_p + l >= record_length)
+	{
+	    wrbuf_printf (wr, "<!-- Directory offset %d: end of record. "
+			    "Missing FS char -->\n", entry_p);
             return -1;
+	}
+        if (mt->debug)
+	    wrbuf_printf (wr, "<!-- Directory offset %d: Tag %.3s -->\n",
+			    entry_p, buf+entry_p);
+	/* check for digits in length info */
+	while (--l >= 3)
+            if (!isdigit(*(const unsigned char *) (buf + entry_p+l)))
+		break;
+        if (l >= 3)
+	{
+	    /* not all digits, so stop directory scan */
+	    wrbuf_printf (wr, "<!-- Directory offset %d: Bad data for data "
+			    "length and/or length starting -->\n", entry_p);
+	    break;
+	}
+        entry_p += 3 + length_data_entry + length_starting;
     }
+    end_of_directory = entry_p;
     if (base_address != entry_p+1)
     {
 	if (produce_warnings)
-	    wrbuf_printf (wr,"  <!-- Base address not at end of directory "
-			  "base=%d end=%d -->\n", base_address, entry_p+1);
+	    wrbuf_printf (wr,"  <!-- Base address not at end of directory, "
+			  "base %d, end %d -->\n", base_address, entry_p+1);
     }
-    base_address = entry_p+1;
-
     if (mt->xml == YAZ_MARC_ISO2709)
     {
 	WRBUF wr_head = wrbuf_alloc();
@@ -256,7 +276,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 
 	int data_p = 0;
 	/* second pass. create directory for ISO2709 output */
-	for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
+	for (entry_p = 24; entry_p != end_of_directory; )
 	{
 	    int data_length, data_offset, end_offset;
 	    int i, sz1, sz2;
@@ -303,7 +323,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	wrbuf_free(wr_tmp, 1);
     }
     /* third pass. create data output */
-    for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
+    for (entry_p = 24; entry_p != end_of_directory; )
     {
         int data_length;
 	int data_offset;
@@ -311,11 +331,10 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	int i, j;
 	char tag[4];
         int identifier_flag = 0;
-	int entry_p0;
+	int entry_p0 = entry_p;
 
         memcpy (tag, buf+entry_p, 3);
 	entry_p += 3;
-	entry_p0 = entry_p;
         tag[3] = '\0';
 	data_length = atoi_n (buf+entry_p, length_data_entry);
 	entry_p += length_data_entry;
@@ -324,19 +343,21 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	i = data_offset + base_address;
 	end_offset = i+data_length-1;
 
-	if (data_length <= 0 || data_offset < 0 || end_offset >= record_length)
-	{
-	    if (produce_warnings)
-	        wrbuf_printf (wr,"  <!-- Bad data-offset=%d or "
-				    "data-length=%d -->\n",
-			                  data_length, data_offset);
+	if (data_length <= 0 || data_offset < 0)
 	    break;
-	}
         
 	if (mt->debug)
 	{
-	    wrbuf_printf(wr, "<!-- offset=%d data dlength=%d doffset=%d -->\n",
+	    wrbuf_printf(wr, "<!-- Directory offset %d: data-length %d, "
+			    "data-offset %d -->\n",
 		    entry_p0, data_length, data_offset);
+	}
+	if (end_offset >= record_length)
+	{
+	    wrbuf_printf (wr,"<!-- Directory offset %d: Data out of bounds "
+			    "%d >= %d -->\n",
+			           entry_p0, end_offset, record_length);
+	    break;
 	}
         
         if (memcmp (tag, "00", 2))
@@ -552,13 +573,10 @@ int yaz_marc_decode_buf (yaz_marc_t mt, const char *buf, int bsize,
                          char **result, int *rsize)
 {
     int r = yaz_marc_decode_wrbuf(mt, buf, bsize, mt->m_wr);
-    if (r > 0)
-    {
-        if (result)
-            *result = wrbuf_buf(mt->m_wr);
-        if (rsize)
-            *rsize = wrbuf_len(mt->m_wr);
-    }
+    if (result)
+        *result = wrbuf_buf(mt->m_wr);
+    if (rsize)
+        *rsize = wrbuf_len(mt->m_wr);
     return r;
 }
 

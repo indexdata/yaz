@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.27 2005-02-08 13:51:31 adam Exp $
+ * $Id: marcdump.c,v 1.28 2005-03-06 21:27:09 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -193,7 +193,7 @@ int main (int argc, char **argv)
                 while (1)
                 {
                     int len;
-                    char *result;
+                    char *result = 0;
                     int rlen;
                     
                     r = fread (buf, 1, 5, inf);
@@ -216,11 +216,10 @@ int main (int argc, char **argv)
                     if (r < len)
                         break;
                     r = yaz_marc_decode_buf (mt, buf, -1, &result, &rlen);
-                    if (r <= 0)
-                        break;
-		    fwrite (result, rlen, 1, stdout);
+		    if (result)
+		        fwrite (result, rlen, 1, stdout);
 #if HAVE_XML2
-		    if (libxml_dom_test)
+		    if (r > 0 && libxml_dom_test)
 		    {
 			xmlDocPtr doc = xmlParseMemory(result, rlen);
 			if (!doc)
@@ -256,7 +255,7 @@ int main (int argc, char **argv)
 			}
 		    }
 #endif
-                    if (cfile)
+                    if (r > 0 && cfile)
                     {
                         char *p = buf;
                         int i;
