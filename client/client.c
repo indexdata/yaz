@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.71  1998-10-20 13:21:43  adam
+ * Revision 1.72  1998-10-20 13:23:15  quinn
+ * changed preferred pos to 1
+ *
+ * Revision 1.71  1998/10/20 13:21:43  adam
  * Fixed scan response handler.
  *
  * Revision 1.70  1998/09/22 09:40:37  adam
@@ -1680,7 +1683,7 @@ int cmd_scan(char *arg)
     }
     if (*arg)
     {
-        if (send_scanrequest(arg, 5, 20) < 0)
+        if (send_scanrequest(arg, 1 20) < 0)
             return 0;
     }
     else
