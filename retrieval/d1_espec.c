@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.11  1997-09-29 13:18:59  adam
+ * Revision 1.12  1997-10-31 12:20:09  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.11  1997/09/29 13:18:59  adam
  * Added function, oid_ent_to_oid, to replace the function
  * oid_getoidbyent, which is not thread safe.
  *
@@ -46,7 +51,6 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
-#include <xmalloc.h>
 #include <odr.h>
 #include <proto.h>
 #include <log.h>
@@ -54,9 +58,9 @@
 #include <tpath.h>
 #include <data1.h>
 
-static Z_Variant *read_variant(int argc, char **argv, ODR o)
+static Z_Variant *read_variant(int argc, char **argv, NMEM nmem)
 {
-    Z_Variant *r = odr_malloc(o, sizeof(*r));
+    Z_Variant *r = nmem_malloc(nmem, sizeof(*r));
     oident var1;
     int i;
     int oid[OID_SIZE];
@@ -64,10 +68,10 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
     var1.proto = PROTO_Z3950;
     var1.oclass = CLASS_VARSET;
     var1.value = VAL_VAR1;
-    r->globalVariantSetId = odr_oiddup(o, oid_ent_to_oid(&var1, oid));
+    r->globalVariantSetId = odr_oiddup_nmem(nmem, oid_ent_to_oid(&var1, oid));
 
     if (argc)
-	r->triples = odr_malloc(o, sizeof(Z_Triple*) * argc);
+	r->triples = nmem_malloc(nmem, sizeof(Z_Triple*) * argc);
     else
 	r->triples = 0;
     r->num_triples = argc;
@@ -83,11 +87,11 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
 	    	argv[i]);
 	    return 0;
 	}
-	t = r->triples[i] = odr_malloc(o, sizeof(Z_Triple));
+	t = r->triples[i] = nmem_malloc(nmem, sizeof(Z_Triple));
 	t->variantSetId = 0;
-	t->zclass = odr_malloc(o, sizeof(int));
+	t->zclass = nmem_malloc(nmem, sizeof(int));
 	*t->zclass = zclass;
-	t->type = odr_malloc(o, sizeof(int));
+	t->type = nmem_malloc(nmem, sizeof(int));
 	*t->type = type;
 	/*
 	 * This is wrong.. we gotta look up the correct type for the
@@ -101,29 +105,29 @@ static Z_Variant *read_variant(int argc, char **argv, ODR o)
 	else if (isdigit(*value))
 	{
 	    t->which = Z_Triple_integer;
-	    t->value.integer = odr_malloc(o, sizeof(*t->value.integer));
+	    t->value.integer = nmem_malloc(nmem, sizeof(*t->value.integer));
 	    *t->value.integer = atoi(value);
 	}
 	else
 	{
 	    t->which = Z_Triple_internationalString;
-	    t->value.internationalString = odr_malloc(o, strlen(value)+1);
+	    t->value.internationalString = nmem_malloc(nmem, strlen(value)+1);
 	    strcpy(t->value.internationalString, value);
 	}
     }
     return r;
 }
 
-static Z_Occurrences *read_occurrences(char *occ, ODR o)
+static Z_Occurrences *read_occurrences(char *occ, NMEM nmem)
 {
-    Z_Occurrences *op = odr_malloc(o, sizeof(*op));
+    Z_Occurrences *op = nmem_malloc(nmem, sizeof(*op));
     char *p;
 
     if (!occ)
     {
 	op->which = Z_Occurrences_values;
-	op->u.values = odr_malloc(o, sizeof(Z_OccurValues));
-	op->u.values->start = odr_malloc(o, sizeof(int));
+	op->u.values = nmem_malloc(nmem, sizeof(Z_OccurValues));
+	op->u.values->start = nmem_malloc(nmem, sizeof(int));
 	*op->u.values->start = 1;
 	op->u.values->howMany = 0;
     }
@@ -139,7 +143,7 @@ static Z_Occurrences *read_occurrences(char *occ, ODR o)
     }
     else
     {
-	Z_OccurValues *ov = odr_malloc(o, sizeof(*ov));
+	Z_OccurValues *ov = nmem_malloc(nmem, sizeof(*ov));
 
 	if (!isdigit(*occ))
 	{
@@ -148,11 +152,11 @@ static Z_Occurrences *read_occurrences(char *occ, ODR o)
 	}
 	op->which = Z_Occurrences_values;
 	op->u.values = ov;
-	ov->start = odr_malloc(o, sizeof(*ov->start));
+	ov->start = nmem_malloc(nmem, sizeof(*ov->start));
 	*ov->start = atoi(occ);
 	if ((p = strchr(occ, '+')))
 	{
-	    ov->howMany = odr_malloc(o, sizeof(*ov->howMany));
+	    ov->howMany = nmem_malloc(nmem, sizeof(*ov->howMany));
 	    *ov->howMany = atoi(p + 1);
 	}
 	else
@@ -162,9 +166,9 @@ static Z_Occurrences *read_occurrences(char *occ, ODR o)
 }
 
 
-static Z_ETagUnit *read_tagunit(char *buf, ODR o)
+static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem)
 {
-    Z_ETagUnit *u = odr_malloc(o, sizeof(*u));
+    Z_ETagUnit *u = nmem_malloc(nmem, sizeof(*u));
     int terms;
     int type;
     char value[512], occ[512];
@@ -178,9 +182,9 @@ static Z_ETagUnit *read_tagunit(char *buf, ODR o)
     {
 	u->which = Z_ETagUnit_wildThing;
 	if (buf[1] == ':')
-	    u->u.wildThing = read_occurrences(buf+2, o);
+	    u->u.wildThing = read_occurrences(buf+2, nmem);
 	else
-	    u->u.wildThing = read_occurrences(0, o);
+	    u->u.wildThing = read_occurrences(0, nmem);
     }
     else if ((terms = sscanf(buf, "(%d,%[^)]):%[a-z0-9+]", &type, value,
 	occ)) >= 2)
@@ -196,24 +200,24 @@ static Z_ETagUnit *read_tagunit(char *buf, ODR o)
 	    force_string = 1;
 	}
 	u->which = Z_ETagUnit_specificTag;
-	u->u.specificTag = t = odr_malloc(o, sizeof(*t));
-	t->tagType = odr_malloc(o, sizeof(*t->tagType));
+	u->u.specificTag = t = nmem_malloc(nmem, sizeof(*t));
+	t->tagType = nmem_malloc(nmem, sizeof(*t->tagType));
 	*t->tagType = type;
-	t->tagValue = odr_malloc(o, sizeof(*t->tagValue));
+	t->tagValue = nmem_malloc(nmem, sizeof(*t->tagValue));
 	if (!force_string && (numval = atoi(valp)))
 	{
 	    t->tagValue->which = Z_StringOrNumeric_numeric;
-	    t->tagValue->u.numeric = odr_malloc(o, sizeof(int));
+	    t->tagValue->u.numeric = nmem_malloc(nmem, sizeof(int));
 	    *t->tagValue->u.numeric = numval;
 	}
 	else
 	{
 	    t->tagValue->which = Z_StringOrNumeric_string;
-	    t->tagValue->u.string = odr_malloc(o, strlen(valp)+1);
+	    t->tagValue->u.string = nmem_malloc(nmem, strlen(valp)+1);
 	    strcpy(t->tagValue->u.string, valp);
 	}
 	if (terms > 2) /* an occurrences-spec exists */
-	    t->occurrences = read_occurrences(occ, o);
+	    t->occurrences = read_occurrences(occ, nmem);
 	else
 	    t->occurrences = 0;
     }
@@ -222,14 +226,15 @@ static Z_ETagUnit *read_tagunit(char *buf, ODR o)
 
 /*
  * Read an element-set specification from a file.
- * NOTE: If !o, memory is allocated directly from the heap by odr_malloc().
+ * NOTE: If !o, memory is allocated directly from the heap by nmem_malloc().
  */
-Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
+Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file)
 {
     FILE *f;
+    NMEM nmem = data1_nmem_get (dh);
     int argc, size_esn = 0;
     char *argv[50], line[512];
-    Z_Espec1 *res = odr_malloc(o, sizeof(*res));
+    Z_Espec1 *res = nmem_malloc(nmem, sizeof(*res));
 
     if (!(f = yaz_path_fopen(data1_get_tabpath(dh), file, "r")))
     {
@@ -257,10 +262,11 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 		continue;
 	    }
 
-	    res->elementSetNames = odr_malloc(o, sizeof(char**)*nnames);
+	    res->elementSetNames = nmem_malloc(nmem, sizeof(char**)*nnames);
 	    for (i = 0; i < nnames; i++)
 	    {
-		res->elementSetNames[i] = odr_malloc(o, strlen(argv[i+1])+1);
+		res->elementSetNames[i] = nmem_malloc(nmem,
+                                                      strlen(argv[i+1])+1);
 		strcpy(res->elementSetNames[i], argv[i+1]);
 	    }
 	    res->num_elementSetNames = nnames;
@@ -268,7 +274,7 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 	else if (!strcmp(argv[0], "defaultvariantsetid"))
 	{
 	    if (argc != 2 || !(res->defaultVariantSetId =
-		odr_getoidbystr(o, argv[1])))
+		odr_getoidbystr_nmem(nmem, argv[1])))
 	    {
 		logf(LOG_WARN, "%s: Bad defaultvariantsetid directive", file);
 		continue;
@@ -281,12 +287,13 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 		logf(LOG_WARN, "%s: Bad defaulttagtype directive", file);
 		continue;
 	    }
-	    res->defaultTagType = odr_malloc(o, sizeof(int));
+	    res->defaultTagType = nmem_malloc(nmem, sizeof(int));
 	    *res->defaultTagType = atoi(argv[1]);
 	}
 	else if (!strcmp(argv[0], "defaultvariantrequest"))
 	{
-	    if (!(res->defaultVariantRequest = read_variant(argc-1, argv+1, o)))
+	    if (!(res->defaultVariantRequest = read_variant(argc-1,
+                                                            argv+1, nmem)))
 	    {
 		logf(LOG_WARN, "%s: Bad defaultvariantrequest", file);
 		continue;
@@ -302,20 +309,13 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 	    int num, i = 0;
 	    
 	    if (!res->elements)
-		res->elements = odr_malloc(o, size_esn = 24*sizeof(er));
+		res->elements = nmem_malloc(nmem, size_esn = 24*sizeof(er));
 	    else if (res->num_elements >= (int) (size_esn/sizeof(er)))
 	    {
+		Z_ElementRequest **oe = res->elements;
 		size_esn *= 2;
-		if (o)
-		{
-		    Z_ElementRequest **oe = res->elements;
-		    
-		    res->elements = odr_malloc (o, size_esn*sizeof(er));
-		    memcpy (res->elements, oe, size_esn/2);
-		}
-		else
-		    res->elements =
-			xrealloc(res->elements, size_esn*sizeof(er));
+		res->elements = nmem_malloc (nmem, size_esn*sizeof(er));
+		memcpy (res->elements, oe, size_esn/2);
 	    }
 	    if (argc < 2)
 	    {
@@ -324,18 +324,18 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 	    }
 	    
 	    res->elements[res->num_elements++] = er =
-		odr_malloc(o, sizeof(*er));
+		nmem_malloc(nmem, sizeof(*er));
 	    er->which = Z_ERequest_simpleElement;
-	    er->u.simpleElement = se = odr_malloc(o, sizeof(*se));
+	    er->u.simpleElement = se = nmem_malloc(nmem, sizeof(*se));
 	    se->variantRequest = 0;
-	    se->path = tp = odr_malloc(o, sizeof(*tp));
+	    se->path = tp = nmem_malloc(nmem, sizeof(*tp));
 	    tp->num_tags = 0;
 	    /*
 	     * Parse the element selector.
 	     */
 	    for (num = 1, ep = path; (ep = strchr(ep, '/')); num++, ep++)
 		;
-	    tp->tags = odr_malloc(o, sizeof(Z_ETagUnit*)*num);
+	    tp->tags = nmem_malloc(nmem, sizeof(Z_ETagUnit*)*num);
 	    
 	    for ((ep = strchr(path, '/')) ; path ;
 		 (void)((path = ep) && (ep = strchr(path, '/'))))
@@ -344,11 +344,11 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 		    ep++;
 		
 		assert(i<num);
-		tp->tags[tp->num_tags++] = read_tagunit(path, o);
+		tp->tags[tp->num_tags++] = read_tagunit(path, nmem);
 	    }
 	    
 	    if (argc > 2 && !strcmp(argv[2], "variant"))
-		se->variantRequest= read_variant(argc-3, argv+3, o);
+		se->variantRequest= read_variant(argc-3, argv+3, nmem);
 	}
 	else
 	{
@@ -356,6 +356,6 @@ Z_Espec1 *data1_read_espec1 (data1_handle dh, const char *file, ODR o)
 	    fclose(f);
 	    return 0;
 	}
-
+    fclose (f);
     return res;
 }

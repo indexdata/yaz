@@ -1,14 +1,13 @@
 # Copyright (C) 1994-1997, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.25 1997-10-27 14:04:21 adam Exp $
+# $Id: Makefile,v 1.26 1997-10-31 12:20:09 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
 LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
 DEFS=$(INCLUDE) $(CDEFS)
-#DEFS=$(INCLUDE) $(CDEFS) -DTRACE_XMALLOC=1
 LIB=$(LIBDIR)/libutil.a
 LIBS=
 PO = options.o log.o marcdisp.o yaz-ccl.o pquery.o oid.o wrbuf.o nmemsdup.o \

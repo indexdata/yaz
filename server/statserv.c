@@ -7,7 +7,12 @@
  *   Chas Woodfield, Fretwell Downing Datasystem.
  *
  * $Log: statserv.c,v $
- * Revision 1.42  1997-10-27 14:03:02  adam
+ * Revision 1.43  1997-10-31 12:20:09  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.42  1997/10/27 14:03:02  adam
  * Added new member to statserver_options_block, pre_init, which
  * specifies a callback to be invoked after command line parsing and
  * before the server listens for the first time.
@@ -400,9 +405,11 @@ static void listener(IOCHAN h, int event)
 	logf(LOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
+#ifndef WINDOWS
 	logf(LOG_DEBUG, "Determining client address");
 	a = cs_addrstr(new_line);
 	logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+#endif
     /* Now what we need todo is create a new thread with this iochan as
        the parameter */
     /* if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop, new_chan,

@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.29  1997-10-27 13:54:18  adam
+ * Revision 1.30  1997-10-31 12:20:07  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.29  1997/10/27 13:54:18  adam
  * Changed structure field in data1 node to be simple string which
  * is "unknown" to the retrieval system itself.
  *
@@ -433,8 +438,7 @@ YAZ_EXPORT data1_varset *data1_read_varset(data1_handle dh, const char *file);
 YAZ_EXPORT data1_vartype *data1_getvartypebyct(data1_handle dh,
 					       data1_varset *set,
 					       char *zclass, char *type);
-YAZ_EXPORT Z_Espec1 *data1_read_espec1(data1_handle dh, const char *file,
-				       ODR o);
+YAZ_EXPORT Z_Espec1 *data1_read_espec1(data1_handle dh, const char *file);
 YAZ_EXPORT int data1_doespec1(data1_handle dh, data1_node *n, Z_Espec1 *e);
 YAZ_EXPORT data1_esetname *data1_getesetbyname(data1_handle dh, 
 					       data1_absyn *a, char *name);

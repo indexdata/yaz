@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.13  1997-10-27 13:54:18  adam
+ * Revision 1.14  1997-10-31 12:20:09  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.13  1997/10/27 13:54:18  adam
  * Changed structure field in data1 node to be simple string which
  * is "unknown" to the retrieval system itself.
  *
@@ -162,6 +167,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     data1_termlist *all = 0;
     int level = 0;
 
+    logf (LOG_DEBUG, "begin data1_read_absyn file=%s", file);
     if (!(f = yaz_path_fopen(data1_get_tabpath (dh), file, "r")))
     {
 	logf(LOG_WARN|LOG_ERRNO, "%s", file);
@@ -194,10 +200,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		break;
 	}
 	if (!r)
-	{
-	    fclose(f);
-	    return res;
-	}
+            break;
 	if (sscanf(r, "%s %[^\n]", cmd, args) < 2)
 	    *args = '\0';
 	if (!strcmp(cmd, "elm"))
@@ -267,7 +270,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		    new_element->tag = nmem_malloc(data1_nmem_get (dh),
 						   sizeof(*new_element->tag));
 		nt->which = DATA1T_string;
-		nt->value.string = xstrdup(p);
+		nt->value.string = nmem_strdup(data1_nmem_get (dh), p);
 		nt->names = nmem_malloc(data1_nmem_get(dh), 
 					sizeof(*new_element->tag->names));
 		nt->names->name = nt->value.string;
@@ -334,7 +337,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	        *tp = all; /* append any ALL entries to the list */
 	    }
 
-	    new_element->name = xstrdup(name);
+	    new_element->name = nmem_strdup(data1_nmem_get (dh), name);
 	}
 	else if (!strcmp(cmd, "all"))
 	{
@@ -485,7 +488,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    (*esetpp)->next = 0;
 	    if (*fname == '@')
 		(*esetpp)->spec = 0;
-	    else if (!((*esetpp)->spec = data1_read_espec1 (dh, fname, 0)))
+	    else if (!((*esetpp)->spec = data1_read_espec1 (dh, fname)))
 	    {
 		logf(LOG_WARN, "%s: Espec-1 read failed", file);
 		fclose(f);
@@ -534,4 +537,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 	    return 0;
 	}
     }
+    fclose(f);
+    logf (LOG_DEBUG, "end data1_read_absyn file=%s", file);
+    return res;
 }

@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: wrbuf.h,v $
- * Revision 1.5  1997-09-17 12:10:32  adam
+ * Revision 1.6  1997-10-31 12:20:08  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.5  1997/09/17 12:10:32  adam
  * YAZ version 1.4.
  *
  */
@@ -45,11 +50,11 @@ typedef struct wrbuf
     int size;
 } wrbuf, *WRBUF;
 
-WRBUF wrbuf_alloc(void);
-void wrbuf_free(WRBUF b, int free_buf);
-void wrbuf_rewind(WRBUF b);
-int wrbuf_grow(WRBUF b, int minsize);
-int wrbuf_write(WRBUF b, char *buf, int size);
+YAZ_EXPORT WRBUF wrbuf_alloc(void);
+YAZ_EXPORT void wrbuf_free(WRBUF b, int free_buf);
+YAZ_EXPORT void wrbuf_rewind(WRBUF b);
+YAZ_EXPORT int wrbuf_grow(WRBUF b, int minsize);
+YAZ_EXPORT int wrbuf_write(WRBUF b, char *buf, int size);
 
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)

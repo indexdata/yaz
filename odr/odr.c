@@ -1,10 +1,15 @@
 /*
- * Copyright (c) 1995, Index Data
+ * Copyright (c) 1995-1997, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.24  1997-09-01 08:51:07  adam
+ * Revision 1.25  1997-10-31 12:20:08  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.24  1997/09/01 08:51:07  adam
  * New windows NT/95 port using MSV5.0. Had to avoid a few static
  * variables used in function ber_tag. These are now part of the
  * ODR structure.
@@ -127,10 +132,14 @@ void odr_setprint(ODR o, FILE *file)
     o->print = file;
 }
 
+#include <log.h>
+
 ODR odr_createmem(int direction)
 {
     struct odr *r;
 
+
+    logf (LOG_DEBUG, "odr_createmem dir=%d", direction);
     if (!(r = xmalloc(sizeof(*r))))
         return 0;
     r->direction = direction;
@@ -170,7 +179,7 @@ void odr_destroy(ODR o)
        xfree(o->ecb.buf);
     if (o->print != stderr)
         fclose(o->print);
-   xfree(o);
+    xfree(o);
 }
 
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)

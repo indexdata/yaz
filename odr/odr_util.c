@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 1995-1997, Index Data
+ * See the file LICENSE for details.
+ * Sebastian Hammer, Adam Dickmeiss
+ *
+ * $Log: odr_util.c,v $
+ * Revision 1.12  1997-10-31 12:20:08  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -35,19 +48,24 @@ int odp_more_chunks(ODR o, unsigned char *base, int len)
         return o->bp - base < len;
 }
 
-Odr_oid *odr_oiddup(ODR odr, Odr_oid *o)
+Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o)
 {
     Odr_oid *r;
 
     if (!o)
     	return 0;
-    if (!(r = odr_malloc(odr, (oid_oidlen(o) + 1) * sizeof(int))))
+    if (!(r = nmem_malloc(nmem, (oid_oidlen(o) + 1) * sizeof(int))))
     	return 0;
     oid_oidcpy(r, o);
     return r;
 }
 
-Odr_oid *odr_getoidbystr(ODR o, char *str)
+Odr_oid *odr_oiddup(ODR odr, Odr_oid *o)
+{
+    return odr_oiddup_nmem (odr->mem, o);
+}
+
+Odr_oid *odr_getoidbystr_nmem(NMEM nmem, char *str)
 {
     int num = 1, i = 0;
     char *p = str;
@@ -57,7 +75,7 @@ Odr_oid *odr_getoidbystr(ODR o, char *str)
 	return 0;
     while ((p = strchr(p, '.')))
 	num++, p++;
-    ret = odr_malloc(o, sizeof(*ret)*(num + 1));
+    ret = nmem_malloc(nmem, sizeof(*ret)*(num + 1));
     p = str;
     do
 	ret[i++] = atoi(p);
@@ -65,3 +83,9 @@ Odr_oid *odr_getoidbystr(ODR o, char *str)
     ret[i] = -1;
     return ret;
 }
+
+Odr_oid *odr_getoidbystr(ODR o, char *str)
+{
+    return odr_getoidbystr_nmem (o->mem, str);
+}
+

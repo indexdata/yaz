@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.54  1997-10-27 13:52:46  adam
+ * Revision 1.55  1997-10-31 12:20:08  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.54  1997/10/27 13:52:46  adam
  * Header yaz-util includes all YAZ utility header files.
  *
  * Revision 1.53  1997/09/29 13:18:59  adam
@@ -672,7 +677,6 @@ static int send_searchRequest(char *arg)
         mediumSetPresentNumber > 0))
     {
         oident prefsyn;
-        int oid[OID_SIZE];
 
         prefsyn.proto = protocol;
         prefsyn.oclass = CLASS_RECSYN;

@@ -24,7 +24,12 @@
  * OF THIS SOFTWARE.
  *
  * $Log: xmalloc.h,v $
- * Revision 1.3  1997-09-01 08:49:54  adam
+ * Revision 1.4  1997-10-31 12:20:08  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.3  1997/09/01 08:49:54  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -70,6 +75,12 @@
 #include <stdlib.h>
 
 #include <yconfig.h>
+
+#define TRACE_XMALLOC 0
+
+#ifndef TRACE_XMALLOC
+#define TRACE_XMALLOC 0
+#endif
 
 #ifdef __cplusplus
 extern "C" {

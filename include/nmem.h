@@ -23,12 +23,24 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $log$
+ * $Log: nmem.h,v $
+ * Revision 1.7  1997-10-31 12:20:08  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
  */
 
 #ifndef NMEM_H
 #define NMEM_H
 #include <yconfig.h>
+
+#define NMEM_DEBUG 0
+
+#ifndef NMEM_DEBUG
+#define NMEM_DEBUG 0
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,9 +65,21 @@ typedef struct nmem_control *NMEM;
 YAZ_EXPORT void nmem_reset(NMEM n);
 YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 YAZ_EXPORT int nmem_total(NMEM n);
+YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
+
+#if NMEM_DEBUG
+
+YAZ_EXPORT NMEM nmem_create_f(const char *file, int line);
+YAZ_EXPORT void nmem_destroy_f(const char *file, int line, NMEM n);
+#define nmem_create() nmem_create_f(__FILE__, __LINE__)
+#define nmem_destroy(x) nmem_destroy_f(__FILE__, __LINE__, (x))
+
+#else
+
 YAZ_EXPORT NMEM nmem_create(void);
 YAZ_EXPORT void nmem_destroy(NMEM n);
-YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
+
+#endif
 
 YAZ_EXPORT void nmem_init (void);
 YAZ_EXPORT void nmem_exit (void);

@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.5  1997-10-06 09:09:52  adam
+ * Revision 1.6  1997-10-31 12:20:09  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.5  1997/10/06 09:09:52  adam
  * Function mmem_exit releases memory used by the freelists.
  *
  * Revision 1.4  1997/09/29 07:12:50  adam
@@ -30,6 +35,7 @@
 
 #include <xmalloc.h>
 #include <nmem.h>
+#include <log.h>
 #ifdef WINDOWS
 #include <windows.h>
 #endif
@@ -47,6 +53,7 @@ static CRITICAL_SECTION critical_section;
 
 static nmem_block *freelist = NULL;        /* "global" freelists */
 static nmem_control *cfreelist = NULL;
+static int nmem_active_no = 0;
 
 static void free_block(nmem_block *p)
 {  
@@ -127,32 +134,51 @@ int nmem_total(NMEM n)
     return n->total;
 }
 
+#if NMEM_DEBUG
+NMEM nmem_create_f(const char *file, int line)
+#else
 NMEM nmem_create(void)
+#endif
 {
     NMEM r;
     
     NMEM_ENTER;
+    nmem_active_no++;
     r = cfreelist;
     if (r)
 	cfreelist = cfreelist->next;
     else
 	r = xmalloc(sizeof(*r));
     NMEM_LEAVE;
+
+#if NMEM_DEBUG
+    logf (LOG_DEBUG, "%s:%d: nmem_create %d p=%p", file, line,
+                     nmem_active_no-1, r);
+#endif
     r->blocks = 0;
     r->total = 0;
     r->next = 0;
     return r;
 }
 
+#if NMEM_DEBUG
+void nmem_destroy_f(const char *file, int line, NMEM n)
+#else
 void nmem_destroy(NMEM n)
+#endif
 {
     if (!n)
 	return;
     nmem_reset(n);
     NMEM_ENTER;
+    nmem_active_no--;
     n->next = cfreelist;
     cfreelist = n;
     NMEM_LEAVE;
+#if NMEM_DEBUG
+    logf (LOG_DEBUG, "%s:%d: nmem_destroy %d p=%p", file, line,
+                     nmem_active_no, n);
+#endif
 }
 
 void nmem_init (void)
@@ -160,6 +186,7 @@ void nmem_init (void)
 #ifdef WINDOWS
     InitializeCriticalSection(&critical_section);
 #endif
+    nmem_active_no = 0;
     freelist = NULL;
     cfreelist = NULL;
 }

@@ -62,7 +62,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
-     $(OutDir)\$(TargetName).dll $(ProjDir)\lib
+      $(OutDir)\$(TargetName).dll $(ProjDir)\lib
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
@@ -99,7 +99,7 @@ TargetName=yaz
 SOURCE=$(InputPath)
 PostBuild_Desc=Copy Lib and Dll
 PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
-     $(OutDir)\$(TargetName).dll $(ProjDir)\lib
+      $(OutDir)\$(TargetName).dll $(ProjDir)\lib
 # End Special Build Tool
 
 !ENDIF 
@@ -114,266 +114,98 @@ PostBuild_Cmds=copy $(OutDir)\$(TargetName).lib $(ProjDir)\lib	copy\
 # Begin Source File
 
 SOURCE=.\Util\atoin.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_any.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_bit.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_bool.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_int.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_len.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_null.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_oct.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_oid.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\ber_tag.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ccl\cclerrms.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ccl\cclfind.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ccl\cclptree.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ccl\cclqfile.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ccl\cclqual.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ccl\cclstr.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ccl\ccltoken.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\comstack\comstack.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_absyn.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_attset.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_doespec.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_espec.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_expout.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_grs.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -382,167 +214,66 @@ SOURCE=.\retrieval\d1_handle.c
 # Begin Source File
 
 SOURCE=.\retrieval\d1_map.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_marc.c
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=.\retrieval\d1_prtree.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_read.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_soif.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_sumout.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_sutrs.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_tagset.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_varset.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\retrieval\d1_write.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\asn\diagbib1.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\dmalloc.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\dumpber.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\log.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\marcdisp.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\nmem.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -551,442 +282,162 @@ SOURCE=.\util\nmemsdup.c
 # Begin Source File
 
 SOURCE=.\odr\odr.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_any.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_bit.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_bool.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_choice.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_cons.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_int.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_mem.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_null.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_oct.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_oid.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_priv.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_seq.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_tag.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_use.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\odr\odr_util.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\oid.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\options.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\pquery.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\asn\proto.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-acc.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-add.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-arc.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-dia.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-esp.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-exd.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-exp.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-ext.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-grs.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\asn\prt-rsc.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\query.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\readconf.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\comstack\tcpip.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\tpath.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\comstack\waislen.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\wrbuf.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\util\xmalloc.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\util\yaz-ccl.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=".\util\yaz-util.c"
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\asn\zget.c
-
-!IF  "$(CFG)" == "yaz - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "yaz - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "Header Files"

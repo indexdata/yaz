@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1997, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,16 +23,25 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
+ * $Log: tpath.h,v $
+ * Revision 1.4  1997-10-31 12:20:08  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
  */
 
 #ifndef TPATH_H
 #define TPATH_H
 
+#include <yconfig.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-FILE *yaz_path_fopen(const char *path, const char *name, const char *mode);
+YAZ_EXPORT FILE *yaz_path_fopen(const char *path,
+				const char *name, const char *mode);
 
 #ifdef __cplusplus
 }

@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 1995-1997, Index Data
+ * See the file LICENSE for details.
+ * Sebastian Hammer, Adam Dickmeiss
+ *
+ * $Log: prt.h,v $
+ * Revision 1.21  1997-10-31 12:20:08  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ */
+
 #ifndef PRT_H
 #define PRT_H
 
@@ -46,6 +59,7 @@ YAZ_EXPORT int completeBER(unsigned char *buf, int len);
 YAZ_EXPORT void odr_begin(ODR o);
 YAZ_EXPORT void odr_end(ODR o);
 YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
+YAZ_EXPORT Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o);
 YAZ_EXPORT int odr_grow_block(odr_ecblock *b, int min_bytes);
 YAZ_EXPORT int odr_write(ODR o, unsigned char *buf, int bytes);
 YAZ_EXPORT int odr_seek(ODR o, int whence, int offset);
@@ -55,6 +69,7 @@ YAZ_EXPORT void odr_choice_enable_bias(ODR o, int mode);
 YAZ_EXPORT int odr_total(ODR o);
 YAZ_EXPORT char *odr_errmsg(int n);
 YAZ_EXPORT Odr_oid *odr_getoidbystr(ODR o, char *str);
+YAZ_EXPORT Odr_oid *odr_getoidbystr_nmem(NMEM o, char *str);
 YAZ_EXPORT int odr_initmember(ODR o, void *p, int size);
 YAZ_EXPORT int odr_peektag(ODR o, int *zclass, int *tag, int *cons);
 YAZ_EXPORT void odr_setlenlen(ODR o, int len);

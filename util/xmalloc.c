@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.4  1996-07-03 13:21:36  adam
+ * Revision 1.5  1997-10-31 12:20:09  adam
+ * Improved memory debugging for xmalloc/nmem.c. References to NMEM
+ * instead of ODR in n ESPEC-1 handling in source d1_espec.c.
+ * Bug fix: missing fclose in data1_read_espec1.
+ *
+ * Revision 1.4  1996/07/03 13:21:36  adam
  * Function xfree_f checks for NULL pointer.
  *
  * Revision 1.3  1995/12/05  15:08:44  adam
@@ -48,8 +53,9 @@ void *xrealloc_f (void *o, size_t size, char *file, int line)
 {
     void *p = realloc (o, size);
 
-#ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xrealloc(s=%d) %p -> %p\n", file, line, size, o, p);
+#if TRACE_XMALLOC
+    logf (LOG_DEBUG,
+            "%s:%d: xrealloc(s=%d) %p -> %p", file, line, size, o, p);
 #endif
     if (!p)
     {
@@ -63,8 +69,8 @@ void *xmalloc_f (size_t size, char *file, int line)
 {
     void *p = malloc (size);
 
-#ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xmalloc(s=%d) %p\n", file, line, size, p);
+#if TRACE_XMALLOC
+    logf (LOG_DEBUG, "%s:%d: xmalloc(s=%d) %p", file, line, size, p);
 #endif
     if (!p)
     {
@@ -77,8 +83,8 @@ void *xmalloc_f (size_t size, char *file, int line)
 void *xcalloc_f (size_t nmemb, size_t size, char *file, int line)
 {
     void *p = calloc (nmemb, size);
-#ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xcalloc(s=%d) %p\n", file, line, size, p);
+#if TRACE_XMALLOC
+    logf (LOG_DEBUG, "%s:%d: xcalloc(s=%d) %p", file, line, size, p);
 #endif
     if (!p)
     {
@@ -91,8 +97,8 @@ void *xcalloc_f (size_t nmemb, size_t size, char *file, int line)
 char *xstrdup_f (const char *s, char *file, int line)
 {
     char *p = xmalloc (strlen(s)+1);
-#ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xstrdup(s=%d) %p\n", file, line, strlen(s)+1, p);
+#if TRACE_XMALLOC
+    logf (LOG_DEBUG, "%s:%d: xstrdup(s=%d) %p", file, line, strlen(s)+1, p);
 #endif
     strcpy (p, s);
     return p;
@@ -103,9 +109,9 @@ void xfree_f(void *p, char *file, int line)
 {
     if (!p)
         return ;
-#ifdef TRACE_XMALLOC
+#if TRACE_XMALLOC
     if (p)
-        fprintf(stderr, "%s:%d: xfree %p\n", file, line, p);
+        logf (LOG_DEBUG, "%s:%d: xfree %p", file, line, p);
 #endif
     free(p);
 }
