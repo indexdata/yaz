@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.274 2005-02-25 17:03:41 adam Exp $
+ * $Id: client.c,v 1.275 2005-03-06 12:54:32 adam Exp $
  */
 
 #include <stdio.h>
@@ -2085,7 +2085,7 @@ static int cmd_update_common(const char *arg, int version)
         FILE *inf;
         struct stat status;
         stat (fname, &status);
-        if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))
+        if (S_ISREG(status.st_mode) && (inf = fopen(fname, "rb")))
         {
             size_t len = status.st_size;
             char *buf = (char *) xmalloc (len);
