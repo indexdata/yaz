@@ -7,7 +7,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.15  1998-10-13 20:05:57  adam
+ * Revision 1.16  1998-10-15 08:26:23  adam
+ * Added type cast to make C++ happy.
+ *
+ * Revision 1.15  1998/10/13 20:05:57  adam
  * Minor change.
  *
  * Revision 1.14  1998/10/13 16:12:25  adam
@@ -232,7 +235,7 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *fd)
 
 	sprintf(buf, "This is dummy SUTRS record number %d\n", q->number);
 	r->len = strlen(buf);
-	r->record = odr_malloc (q->stream, r->len+1);
+	r->record = (char *) odr_malloc (q->stream, r->len+1);
 	strcpy(r->record, buf);
     }
     else if (q->format == VAL_GRS1)
