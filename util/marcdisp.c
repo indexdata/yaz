@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdisp.c,v $
- * Revision 1.6  1997-09-04 07:52:27  adam
+ * Revision 1.7  1997-09-24 13:29:40  adam
+ * Added verbose option -v to marcdump utility.
+ *
+ * Revision 1.6  1997/09/04 07:52:27  adam
  * Moved atoi_n function to separate source file.
  *
  * Revision 1.5  1997/05/01 15:08:15  adam
@@ -30,7 +33,7 @@
 #include <marcdisp.h>
 #include <yaz-util.h>
 
-int marc_display (const char *buf, FILE *outf)
+int marc_display_ex (const char *buf, FILE *outf, int debug)
 {
     int entry_p;
     int record_length;
@@ -50,10 +53,22 @@ int marc_display (const char *buf, FILE *outf)
     identifier_length = atoi_n (buf+11, 1);
     base_address = atoi_n (buf+12, 4);
 
+    indicator_length = identifier_length = 2;
+
     length_data_entry = atoi_n (buf+20, 1);
     length_starting = atoi_n (buf+21, 1);
     length_implementation = atoi_n (buf+22, 1);
 
+    if (debug)
+    {
+	fprintf (outf, "Record length         %5d\n", record_length);
+	fprintf (outf, "Indicator length      %5d\n", indicator_length);
+	fprintf (outf, "Identifier length     %5d\n", identifier_length);
+	fprintf (outf, "Base address          %5d\n", base_address);
+	fprintf (outf, "Length data entry     %5d\n", length_data_entry);
+	fprintf (outf, "Length starting       %5d\n", length_starting);
+	fprintf (outf, "Length implementation %5d\n", length_implementation);
+    }
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
         entry_p += 3+length_data_entry+length_starting;
     base_address = entry_p+1;
@@ -68,6 +83,8 @@ int marc_display (const char *buf, FILE *outf)
         memcpy (tag, buf+entry_p, 3);
 	entry_p += 3;
         tag[3] = '\0';
+	if (debug)
+	    fprintf (outf, "Tag: ");
 	fprintf (outf, "%s ", tag);
 	data_length = atoi_n (buf+entry_p, length_data_entry);
 	entry_p += length_data_entry;
@@ -75,11 +92,15 @@ int marc_display (const char *buf, FILE *outf)
 	entry_p += length_starting;
 	i = data_offset + base_address;
 	end_offset = i+data_length-1;
+	if (debug)
+	    fprintf (outf, " Ind: ");
         if (memcmp (tag, "00", 2) && indicator_length)
 	{
             for (j = 0; j<indicator_length; j++)
 		fprintf (outf, "%c", buf[i++]);
 	}
+	if (debug)
+	    fprintf (outf, " Fields: ");
 	while (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS && i < end_offset)
 	{
             if (memcmp (tag, "00", 2) && identifier_length)
@@ -104,4 +125,10 @@ int marc_display (const char *buf, FILE *outf)
     }
     return record_length;
 }
+
+int marc_display (const char *buf, FILE *outf)
+{
+    return marc_display_ex (buf, outf, 0);
+}
+
 

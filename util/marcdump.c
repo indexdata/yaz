@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: marcdump.c,v $
- * Revision 1.4  1995-11-01 13:55:05  quinn
+ * Revision 1.5  1997-09-24 13:29:40  adam
+ * Added verbose option -v to marcdump utility.
+ *
+ * Revision 1.4  1995/11/01 13:55:05  quinn
  * Minor adjustments
  *
  * Revision 1.3  1995/05/16  08:51:12  quinn
@@ -23,6 +26,7 @@
 #include <errno.h>
 #include <marcdisp.h>
 #include <xmalloc.h>
+#include <options.h>
 
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -33,50 +37,75 @@
  
 int main (int argc, char **argv)
 {
+    int ret;
+    char *arg;
+    int verbose = 0;
     FILE *inf;
     long file_size;
     char *buf;
-    int r;
+    char *prog = *argv;
+    int count = 0;
+    int no = 0;
 
-    if (argc < 2)
+    while ((ret = options("v", argv, argc, &arg)) != -2)
     {
-        fprintf (stderr, "usage\n%s <file>\n", *argv);
+	no++;
+        switch (ret)
+        {
+        case 0:
+	    inf = fopen (arg, "r");
+	    if (!inf)
+	    {
+		fprintf (stderr, "%s: cannot open %s:%s\n",
+			 prog, arg, strerror (errno));
+		exit (1);
+	    }
+	    if (fseek (inf, 0L, SEEK_END))
+	    {
+		fprintf (stderr, "%s: cannot seek in %s:%s\n",
+			 prog, arg, strerror (errno));
+		exit (1);
+	    }
+	    file_size = ftell (inf);    
+	    if (fseek (inf, 0L, SEEK_SET))
+	    {
+		fprintf (stderr, "%s: cannot seek in %s:%s\n",
+			 prog, arg, strerror (errno));
+		exit (1);
+	    }
+	    buf = xmalloc (file_size);
+	    if (!buf)
+	    {
+		fprintf (stderr, "%s: cannot xmalloc: %s\n",
+			 prog, strerror (errno));
+		exit (1);
+	    }
+	    if (fread (buf, 1, file_size, inf) != file_size)
+	    {
+		fprintf (stderr, "%s: cannot read %s: %s\n",
+			 prog, arg, strerror (errno));
+		exit (1);
+	    }
+	    while ((ret = marc_display_ex (buf, stdout, verbose)) > 0)
+	    {
+		buf += ret;
+		count++;
+	    }
+	    fclose (inf);
+	    xfree (buf);
+            break;
+        case 'v':
+	    verbose++;
+            break;
+        default:
+            fprintf (stderr, "Usage: %s [-v] file...\n", prog);
+            exit (1);
+        }
+    }
+    if (!no)
+    {
+	fprintf (stderr, "Usage: %s [-v] file...\n", prog);
 	exit (1);
     }
-    inf = fopen (argv[1], "r");
-    if (!inf)
-    {
-        fprintf (stderr, "%s: cannot open %s:%s\n",
-		 *argv, argv[1], strerror (errno));
-        exit (1);
-    }
-    if (fseek (inf, 0L, SEEK_END))
-    {
-        fprintf (stderr, "%s: cannot seek in %s:%s\n",
-		 *argv, argv[1], strerror (errno));
-        exit (1);
-    }
-    file_size = ftell (inf);    
-    if (fseek (inf, 0L, SEEK_SET))
-    {
-        fprintf (stderr, "%s: cannot seek in %s:%s\n",
-		 *argv, argv[1], strerror (errno));
-        exit (1);
-    }
-    buf = xmalloc (file_size);
-    if (!buf)
-    {
-        fprintf (stderr, "%s: cannot xmalloc: %s\n",
-		 *argv, strerror (errno));
-        exit (1);
-    }
-    if (fread (buf, 1, file_size, inf) != file_size)
-    {
-        fprintf (stderr, "%s: cannot read %s: %s\n",
-		 *argv, argv[1], strerror (errno));
-        exit (1);
-    }
-    while ((r = marc_display (buf, stdout)) > 0)
-        buf += r;
     exit (0);
 }
