@@ -24,8 +24,14 @@
  * OF THIS SOFTWARE.
  *
  * $Log: oid.h,v $
- * Revision 1.20  1997-08-19 08:40:52  quinn
- * Added thesaurus OID
+ * Revision 1.21  1997-08-19 08:43:49  quinn
+ * Housekeeping
+ *
+ * Revision 1.19  1997/07/28 12:34:42  adam
+ * Added new OID entries (RVDM).
+ *
+ * Revision 1.18  1997/05/14 06:53:42  adam
+ * C++ support.
  *
  * Revision 1.17  1997/05/02 08:39:27  quinn
  * Support for private OID table added. Thanks to Ronald van der Meer
@@ -89,6 +95,10 @@
 
 #include <yconfig.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define OID_SIZE 100
     
 typedef enum oid_proto
@@ -129,6 +139,9 @@ typedef enum oid_value
     VAL_GILS,
     VAL_WAIS,
     VAL_STAS,
+    VAL_COLLECT1,
+    VAL_CIMI1,
+    VAL_GEO,
     VAL_DIAG1,
     VAL_ISO2709,
     VAL_UNIMARC,
@@ -146,6 +159,8 @@ typedef enum oid_value
     VAL_PICAMARC,
     VAL_AUSMARC,
     VAL_IBERMARC,
+    VAL_CATMARC,
+    VAL_MALMARC,
     VAL_EXPLAIN,
     VAL_SUTRS,
     VAL_OPAC,
@@ -153,6 +168,7 @@ typedef enum oid_value
     VAL_GRS0,
     VAL_GRS1,
     VAL_EXTENDED,
+    VAL_FRAGMENT,
     VAL_RESOURCE1,
     VAL_RESOURCE2,
     VAL_PROMPT1,
@@ -171,8 +187,7 @@ typedef enum oid_value
     VAL_VAR1,
     VAL_ESPEC1,
     VAL_SOIF,
-    VAL_SEARCHRES1,
-    VAL_THESAURUS
+    VAL_SEARCHRES1
 } oid_value;
 
 typedef struct oident
@@ -192,5 +207,9 @@ int oid_oidcmp(int *o1, int *o2);
 int oid_oidlen(int *o);
 oid_value oid_getvalbyname(const char *name);
 void oid_setprivateoids(oident *list);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
