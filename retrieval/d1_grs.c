@@ -1,0 +1,255 @@
+/*
+ * Copyright (c) 1995, Index Data.
+ * See the file LICENSE for details.
+ * Sebastian Hammer, Adam Dickmeiss
+ *
+ * $Log: d1_grs.c,v $
+ * Revision 1.1  1995-11-01 11:56:07  quinn
+ * Added Retrieval (data management) functions en masse.
+ *
+ *
+ */
+
+#include <assert.h>
+#include <stdlib.h>
+
+#include <proto.h>
+#include <log.h>
+
+#include "data1.h"
+
+#define D1_VARIANTARRAY 20 /* fixed max length on sup'd variant-list. Lazy me */
+
+Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o);
+
+static Z_ElementMetaData *get_ElementMetaData(ODR o)
+{
+    Z_ElementMetaData *r = odr_malloc(o, sizeof(*r));
+
+    r->seriesOrder = 0;
+    r->usageRight = 0;
+    r->num_hits = 0;
+    r->hits = 0;
+    r->displayName = 0;
+    r->num_supportedVariants = 0;
+    r->supportedVariants = 0;
+    r->message = 0;
+    r->elementDescriptor = 0;
+    r->surrogateFor = 0;
+    r->surrogateElement = 0;
+    r->other = 0;
+
+    return r;
+}
+
+/*
+ * N should point to the *last* (leaf) triple in a sequence. Construct a variant
+ * from each of the triples beginning (ending) with 'n', up to the
+ * nearest parent tag. num should equal the number of triples in the
+ * sequence.
+ */
+static Z_Variant *make_variant(data1_node *n, int num, ODR o)
+{
+    Z_Variant *v = odr_malloc(o, sizeof(*v));
+    data1_node *p;
+
+    v->globalVariantSetId = 0;
+    v->num_triples = num;
+    v->triples = odr_malloc(o, sizeof(Z_Triple*) * num);
+
+    /*
+     * cycle back up through the tree of variants
+     * (traversing exactly 'level' variants).
+     */
+    for (p = n, num--; p && num >= 0; p = p->parent, num--)
+    {
+	Z_Triple *t;
+
+	assert(p->which == DATA1N_variant);
+	t = v->triples[num] = odr_malloc(o, sizeof(*t));
+	t->variantSetId = 0;
+	t->class = odr_malloc(o, sizeof(int));
+	*t->class = p->u.variant.type->class->class;
+	t->type = odr_malloc(o, sizeof(int));
+	*t->type = p->u.variant.type->type;
+
+	switch (p->u.variant.type->datatype)
+	{
+	    case DATA1K_string:
+		t->which = Z_Triple_internationalString;
+		t->value.internationalString = odr_malloc(o,
+		    strlen(p->u.variant.value)+1);
+		strcpy(t->value.internationalString, p->u.variant.value);
+		break;
+	    default:
+		logf(LOG_WARN, "Unable to handle value for variant %s",
+		    p->u.variant.type->name);
+		return 0;
+	}
+    }
+    return v;
+}
+
+/*
+ * Traverse the variant children of n, constructing a supportedVariant list.
+ */
+static int traverse_triples(data1_node *n, int level, Z_ElementMetaData *m,
+    ODR o)
+{
+    data1_node *c;
+    
+    for (c = n->child; c; c = c->next)
+	if (c->which == DATA1N_data && level)
+	{
+	    if (!m->supportedVariants)
+		m->supportedVariants = odr_malloc(o, sizeof(Z_Variant*) *
+		    D1_VARIANTARRAY);
+	    else if (m->num_supportedVariants >= D1_VARIANTARRAY)
+	    {
+		logf(LOG_WARN, "Too many variants (D1_VARIANTARRAY==%d)",
+		    D1_VARIANTARRAY);
+		return -1;
+	    }
+
+	    if (!(m->supportedVariants[m->num_supportedVariants++] =
+	    	make_variant(n, level, o)))
+		return -1;
+	}
+	else if (c->which == DATA1N_variant)
+	    if (traverse_triples(c, level+1, m, o) < 0)
+		return -1;
+    return 0;
+}
+
+static Z_ElementData *nodetoelementdata(data1_node *n, int select, int leaf,
+    ODR o)
+{
+    Z_ElementData *res = odr_malloc(o, sizeof(*res));
+
+    if (!n)
+    {
+	res->which = Z_ElementData_elementNotThere;
+	res->u.elementNotThere = ODR_NULLVAL;
+    }
+    else if (n->which == DATA1N_data && (leaf || n->parent->num_children == 1))
+    {
+	switch (n->u.data.what)
+	{
+	    case DATA1I_num:
+	    	res->which = Z_ElementData_numeric;
+		res->u.numeric = odr_malloc(o, sizeof(int));
+		*res->u.numeric = atoi(n->u.data.data);
+		break;
+	    case DATA1I_text:
+	    	res->which = Z_ElementData_string;
+		res->u.string = odr_malloc(o, n->u.data.len+1);
+		memcpy(res->u.string, n->u.data.data, n->u.data.len);
+		res->u.string[n->u.data.len] = '\0';
+		break;
+	    default:
+	    	logf(LOG_WARN, "Can't handle datatype.");
+		return 0;
+	}
+    }
+    else
+    {
+	res->which = Z_ElementData_subtree;
+	if (!(res->u.subtree = data1_nodetogr(n->parent, select, o)))
+	    return 0;
+    }
+    return res;
+}
+
+static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o)
+{
+    Z_TaggedElement *res = odr_malloc(o, sizeof(*res));
+    data1_tag *tag = 0;
+    data1_node *data;
+    int leaf;
+
+    if (n->which == DATA1N_tag)
+    {
+	if (n->u.tag.element)
+	    tag = n->u.tag.element->tag;
+	data = n->child;
+	leaf = 0;
+    }
+    else if (n->which == DATA1N_data || n->which == DATA1N_variant)
+    {
+	if (!(tag = data1_gettagbyname(n->root->u.root.absyn->tagset,
+	    "wellKnown")))
+	{
+	    logf(LOG_WARN, "Unable to locate tag for 'wellKnown'");
+	    return 0;
+	}
+	data = n;
+	leaf = 1;
+    }
+    else
+    {
+	logf(LOG_WARN, "Bad data.");
+	return 0;
+    }
+
+    res->tagType = odr_malloc(o, sizeof(int));
+    *res->tagType = tag ? tag->tagset->type : 3;
+    res->tagValue = odr_malloc(o, sizeof(Z_StringOrNumeric));
+    if (tag && tag->which == DATA1T_numeric)
+    {
+	res->tagValue->which = Z_StringOrNumeric_numeric;
+	res->tagValue->u.numeric = odr_malloc(o, sizeof(int));
+	*res->tagValue->u.numeric = tag->value.numeric;
+    }
+    else
+    {
+	char *tagstr;
+
+	if (tag) /* well-known tag */
+	    tagstr = tag->value.string;
+	else /* tag local to this file */
+	    tagstr = n->u.tag.tag;
+
+	res->tagValue->which = Z_StringOrNumeric_string;
+	res->tagValue->u.string = odr_malloc(o, strlen(tagstr)+1);
+	strcpy(res->tagValue->u.string, tagstr);
+    }
+    res->tagOccurrence = 0;
+    res->appliedVariant = 0;
+    res->metaData = 0;
+    if (n->which == DATA1N_variant || (data && data->which ==
+	DATA1N_variant && data->parent->num_children == 1))
+    {
+	int nvars = 0;
+
+	res->metaData = get_ElementMetaData(o);
+	if (traverse_triples(data, 0, res->metaData, o) < 0)
+	    return 0;
+	while (data && data->which == DATA1N_variant)
+	{
+	    nvars++;
+	    data = data->child;
+	}
+	res->appliedVariant = make_variant(data->parent, nvars-1, o);
+    }
+    if (!(res->content = nodetoelementdata(data, select, leaf, o)))
+	return 0;
+    return res;
+}
+
+Z_GenericRecord *data1_nodetogr(data1_node *n, int select, ODR o)
+{
+    Z_GenericRecord *res = odr_malloc(o, sizeof(*res));
+    data1_node *c;
+
+    res->elements = odr_malloc(o, sizeof(Z_TaggedElement *) * n->num_children);
+    res->num_elements = 0;
+    for (c = n->child; c; c = c->next)
+    {
+	if (c->which == DATA1N_tag && select && !c->u.tag.node_selected)
+	    continue;
+	if (!(res->elements[res->num_elements++] =
+	    nodetotaggedelement(c, select, o)))
+	    return 0;
+    }
+    return res;
+}
