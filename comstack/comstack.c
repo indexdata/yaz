@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1995-1998, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: comstack.c,v $
- * Revision 1.7  2001-03-21 12:43:36  adam
+ * Revision 1.8  2001-07-19 19:49:02  adam
+ * Added include of string.h.
+ *
+ * Revision 1.7  2001/03/21 12:43:36  adam
  * Implemented cs_create_host. Better error reporting for SSL comstack.
  *
  * Revision 1.6  1999/11/30 13:47:11  adam
@@ -34,6 +36,7 @@
  *
  */
 
+#include <string.h>
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 
