@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.3  1997-07-21 12:47:38  adam
+ * Revision 1.4  1997-09-29 07:12:50  adam
+ * NMEM thread safe. NMEM must be initialized before use (sigh) -
+ * routine nmem_init/nmem_exit implemented.
+ *
+ * Revision 1.3  1997/07/21 12:47:38  adam
  * Moved definition of nmem_control and nmem_block.
  *
  * Revision 1.2  1995/12/13 13:44:37  quinn
@@ -23,14 +27,26 @@
 
 #include <xmalloc.h>
 #include <nmem.h>
+#ifdef WINDOWS
+#include <windows.h>
+#endif
 
 #define NMEM_CHUNK (10*1024)
 
-static nmem_block *freelist = 0;           /* global freelists */
-static nmem_control *cfreelist = 0;
+#ifdef WINDOWS
+static CRITICAL_SECTION critical_section;
+#define NMEM_ENTER EnterCriticalSection(&critical_section)
+#define NMEM_LEAVE LeaveCriticalSection(&critical_section)
+#else
+#define NMEM_ENTER
+#define NMEM_LEAVE
+#endif
+
+static nmem_block *freelist = NULL;        /* "global" freelists */
+static nmem_control *cfreelist = NULL;
 
 static void free_block(nmem_block *p)
-{
+{  
     p->next = freelist;
     freelist = p;
 }
@@ -69,12 +85,14 @@ void nmem_reset(NMEM n)
 
     if (!n)
 	return;
+    NMEM_ENTER;
     while (n->blocks)
     {
     	t = n->blocks;
 	n->blocks = n->blocks->next;
 	free_block(t);
     }
+    NMEM_LEAVE;
     n->total = 0;
 }
 
@@ -85,6 +103,7 @@ void *nmem_malloc(NMEM n, int size)
 
     if (!n)
 	return xmalloc(size);
+    NMEM_ENTER;
     p = n->blocks;
     if (!p || p->size - p->top < size)
     {
@@ -96,6 +115,7 @@ void *nmem_malloc(NMEM n, int size)
     /* align size */
     p->top += (size + (sizeof(long) - 1)) & ~(sizeof(long) - 1);
     n->total += size;
+    NMEM_LEAVE;
     return r;
 }
 
@@ -106,12 +126,15 @@ int nmem_total(NMEM n)
 
 NMEM nmem_create(void)
 {
-    NMEM r = cfreelist;
+    NMEM r;
     
+    NMEM_ENTER;
+    r = cfreelist;
     if (r)
 	cfreelist = cfreelist->next;
     else
 	r = xmalloc(sizeof(*r));
+    NMEM_LEAVE;
     r->blocks = 0;
     r->total = 0;
     r->next = 0;
@@ -123,6 +146,25 @@ void nmem_destroy(NMEM n)
     if (!n)
 	return;
     nmem_reset(n);
+    NMEM_ENTER;
     n->next = cfreelist;
     cfreelist = n;
+    NMEM_LEAVE;
 }
+
+void nmem_init (void)
+{
+#ifdef WINDOWS
+    InitializeCriticalSection(&critical_section);
+#endif
+    freelist = NULL;
+    cfreelist = NULL;
+}
+
+void nmem_exit (void)
+{
+#ifdef WINDOWS
+    DeleteCriticalSection(&critical_section);
+#endif
+}
+
