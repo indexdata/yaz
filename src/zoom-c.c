@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.8 2003-11-26 16:22:35 mike Exp $
+ * $Id: zoom-c.c,v 1.9 2003-11-26 16:56:00 mike Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -919,12 +919,12 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.8 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.9 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
 	ZOOM_options_get(c->options, "implementationVersion"),
-	odr_prepend(c->odr_out, &version[10], ireq->implementationVersion));
+	odr_prepend(c->odr_out, &version[11], ireq->implementationVersion));
 
     *ireq->maximumRecordSize =
 	ZOOM_options_get_int (c->options, "maximumRecordSize", 1024*1024);
