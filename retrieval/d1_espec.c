@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_espec.c,v $
- * Revision 1.18  1999-11-30 13:47:12  adam
+ * Revision 1.19  2001-09-28 14:50:23  adam
+ * Simpleelement allows upper case (as well as lower case).
+ *
+ * Revision 1.18  1999/11/30 13:47:12  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.17  1999/10/21 12:06:29  adam
@@ -216,7 +219,7 @@ static Z_ETagUnit *read_tagunit(char *buf, NMEM nmem,
 	else
 	    u->u.wildThing = read_occurrences(0, nmem, file, lineno);
     }
-    else if ((terms = sscanf(buf, "(%d,%[^)]):%[a-z0-9+]", &type, value,
+    else if ((terms = sscanf(buf, "(%d,%[^)]):%[a-zA-Z0-9+]", &type, value,
 			     occ)) >= 2)
     {
 	int numval;
