@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-grs.c,v $
- * Revision 1.1  1995-08-17 12:47:09  quinn
+ * Revision 1.2  1995-08-28 10:58:58  quinn
+ * Added extra choice-entry to data to catch visiblestring.
+ *
+ * Revision 1.1  1995/08/17  12:47:09  quinn
  * Added GRS-1.
  *
  *
@@ -59,6 +62,8 @@ int z_ElementData(ODR o, Z_ElementData **p, int opt)
 	{ODR_NONE, -1, -1, Z_ElementData_date, odr_generalizedtime},
 	{ODR_NONE, -1, -1, Z_ElementData_ext, z_External},
 	{ODR_NONE, -1, -1, Z_ElementData_string, z_InternationalString},
+	/* The entry below provides some backwards compatibility */
+	{ODR_NONE, -1, -1, Z_ElementData_string, odr_visiblestring},
 	{ODR_NONE, -1, -1, Z_ElementData_trueOrFalse, odr_bool},
 	{ODR_NONE, -1, -1, Z_ElementData_oid, odr_oid},
 	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ElementData_intUnit, z_IntUnit},
