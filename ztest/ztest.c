@@ -1,5 +1,20 @@
+/*
+ * Copyright (c) 1995-1997, Index Data.
+ * See the file LICENSE for details.
+ * Sebastian Hammer, Adam Dickmeiss
+ *
+ * NT Service interface by
+ *    Chas Woodfield, Fretwell Downing Datasystems.
+ *
+ * $Log: ztest.c,v $
+ * Revision 1.2  1997-09-04 13:50:31  adam
+ * Bug fix in ztest.
+ *
+ */
 
-/* little dummy-server */
+/*
+ * Demonstration of simple server
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -142,32 +157,6 @@ bend_fetchresult *bend_fetch(void *handle, bend_fetchrequest *q, int *num)
 	strcpy(bbb, buf);
 	r.len = strlen(buf);
     }
-#if 0
-    else if (q->format == VAL_GRS1)
-    {
-	Z_GenericRecord *rec = odr_malloc(q->stream, sizeof(*rec));
-	Z_TaggedElement *t1 = odr_malloc(q->stream, sizeof(*t1));
-	Z_StringOrNumeric *s1 = odr_malloc(q->stream, sizeof(*s1));
-	Z_ElementData *c1 = odr_malloc(q->stream, sizeof(*c1));
-
-	rec->elements = odr_malloc(q->stream, sizeof(Z_TaggedElement*)*10);
-	rec->num_elements = 1;
-	rec->elements[0] = t1 ;
-	t1->tagType = odr_malloc(q->stream, sizeof(int));
-	*t1->tagType = 3;
-	t1->tagValue = s1;
-	s1->which = Z_StringOrNumeric_string;
-	s1->u.string = "title";
-	t1->tagOccurrence = 0;
-	t1->content = c1;
-	c1->which = Z_ElementData_string;
-	c1->u.string = "The Bad Seed and The Ugly Duckling";
-	t1->metaData = 0;
-	t1->appliedVariant = 0;
-	r.record = (char*) rec;
-	r.len = -1;
-    }
-#endif
     else if (q->format == VAL_GRS1)
     {
 	r.len = -1;
@@ -338,7 +327,7 @@ int main(int argc, char **argv)
 
     /* The service controller does the following for us under windows */
     if (StartAppService(NULL, argc, argv))
-        RunAppService(NULL);
+        RunAppService(&ArgDetails);
 
     /* Ensure the service has been stopped */
     StopAppService(NULL);
