@@ -1,15 +1,16 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.4 1995-03-27 08:29:30 quinn Exp $
+# $Id: Makefile,v 1.5 1995-03-30 14:02:36 quinn Exp $
 
 #CC=
 SHELL=/bin/sh
 MAKE=make
-SUBDIR=util odr asn yazlib server makelib
+SUBDIR=util odr asn rfc1006 yazlib server makelib
+DEFS=-DUSE_XTIMOSI
 
 all:
-	for i in $(SUBDIR); do cd $$i; if $(MAKE) CFLAGS="$(CFLAGS)"; then cd ..; else exit 1; fi; done
+	for i in $(SUBDIR); do cd $$i; if $(MAKE) CFLAGS="$(CFLAGS) $(DEFS)"; then cd ..; else exit 1; fi; done
 
 dep depend:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) depend; then cd ..; else exit 1; fi; done
