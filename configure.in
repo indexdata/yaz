@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.22 2000-03-02 08:48:20 adam Exp $
+dnl $Id: configure.in,v 1.23 2000-03-10 08:41:30 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.6)
 dnl
@@ -10,14 +10,6 @@ AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_RANLIB
-AC_CHECK_PROGS(have_sgml2txt,sgml2txt,no)
-AC_CHECK_PROGS(have_sgml2latex,sgml2latex,no)
-AC_CHECK_PROGS(have_sgml2html,sgml2html,no)
-if test "$have_sgml2txt" = "no" -o "$have_sgml2latex" = "no" -o "$have_sgml2html" = "no"; then
-	DOCMODULE=""
-else
-	DOCMODULE="doc"
-fi
 dnl 
 dnl ----- yaz-comp: The Yaz Compiler
 AC_SUBST(ASNMODULE)
@@ -99,7 +91,7 @@ if test "$enable_threads" = "yes"; then
 	AC_DEFINE(_REENTRANT)
 fi
 dnl
-SUBDIRS_VAR="util odr $ASNMODULE $ILLMODULE zutil comstack ccl tab retrieval server include lib client ztest $DOCMODULE"
+SUBDIRS_VAR="util odr $ASNMODULE $ILLMODULE zutil comstack ccl tab retrieval server include lib client ztest"
 AC_SUBST(SUBDIRS_VAR)
 dnl
 dnl ------ Makefiles

@@ -67,9 +67,6 @@ PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
-have_sgml2html = @have_sgml2html@
-have_sgml2latex = @have_sgml2latex@
-have_sgml2txt = @have_sgml2txt@
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -344,6 +341,7 @@ yaz-config:
 	chmod +x yaz-config
 
 dist-hook:
+	cd doc; make
 	mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
 

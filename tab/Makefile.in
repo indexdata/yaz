@@ -67,9 +67,6 @@ PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
-have_sgml2html = @have_sgml2html@
-have_sgml2latex = @have_sgml2latex@
-have_sgml2txt = @have_sgml2txt@
 
 tabdatadir = $(pkgdatadir)/tab
 tabdata_DATA = bib1.att dan1.att danmarc.abs explain.abs explain.att  explain.tag generic.tag gils-a.est gils-b.est gils-f.est gils-g.est  gils-summary.map gils-usmarc.map gils-variant.est gils.abs gils.att  gils.tag meta-b.est meta-usmarc.map meta.abs meta.tag summary.abs  summary.tag tagsetg.tag tagsetm.tag usmarc-b.est usmarc.abs usmarc.mar  usmarc.tag var1.var wais-b.est wais-variant.est wais.abs 

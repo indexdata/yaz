@@ -1,7 +1,7 @@
 Summary: YAZ - A Z39.50 Library
 Name: yaz
 Version: 1.6
-Release: 1
+Release: 2
 Copyright: BSD
 Group: Development/Libraries
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -13,7 +13,7 @@ Packager: Adam Dickmeiss <adam@indexdata.dk>
 %description
 The YAZ package is a developers' library for developing client - and
 server application using the ANSI/NISO Z39.50 protocol for Information
-Retrieval.
+Retrieval. YAZ' homepage is http://www.indexdata.dk/yaz/
 
 %prep
 %setup
@@ -27,6 +27,7 @@ make CFLAGS="$RPM_OPT_FLAGS"
 %install
 rm -fr $RPM_BUILD_ROOT
 make prefix=$RPM_BUILD_ROOT/usr install
+cd doc; make prefix=$RPM_BUILD_ROOT/usr install
 
 %files
 %defattr(-,root,root)

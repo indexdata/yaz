@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.4 2000-02-29 15:52:33 adam Exp $
+## $Id: Makefile.am,v 1.5 2000-03-10 08:41:30 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -20,6 +20,7 @@ yaz-config:
 	chmod +x yaz-config
 
 dist-hook:
+	cd doc; make
 	mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
 

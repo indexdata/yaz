@@ -67,9 +67,6 @@ PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SUBDIRS_VAR = @SUBDIRS_VAR@
 VERSION = @VERSION@
-have_sgml2html = @have_sgml2html@
-have_sgml2latex = @have_sgml2latex@
-have_sgml2txt = @have_sgml2txt@
 
 lib_LIBRARIES = libyaz.a
 
