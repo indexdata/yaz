@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.88 2003-01-06 08:20:28 adam Exp $
+ * $Id: statserv.c,v 1.89 2003-01-13 14:32:06 adam Exp $
  */
 
 #include <stdio.h>
@@ -354,7 +354,6 @@ void statserv_closedown()
 {
     IOCHAN p;
 
-/* CHANGE */
     if (control_block.bend_stop)
         (*control_block.bend_stop)(&control_block);
     for (p = pListener; p; p = p->next)
@@ -416,6 +415,10 @@ static void listener(IOCHAN h, int event)
 		}
 		sprintf(nbuf, "%s(%d)", me, getpid());
 		yaz_log_init(control_block.loglevel, nbuf, 0);
+                /* ensure that bend_stop is not called when each child exits -
+                   only for the main process .. 
+                */
+                control_block.bend_stop = 0;
 	    }
 	    else /* parent */
 	    {
