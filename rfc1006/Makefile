@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.4 1995-05-29 08:11:54 quinn Exp $
+# $Id: Makefile,v 1.5 1995-05-30 10:25:46 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
@@ -38,10 +38,9 @@ clean:
 depend: depend2
 
 depend1:
-	mv Makefile Makefile.tmp
-	sed '/^#Depend/q' <Makefile.tmp >Makefile
-	$(CPP) $(INCLUDE) -M *.c >>Makefile
-	-rm Makefile.tmp
+	sed '/^#Depend/q' <Makefile >Makefile.tmp
+	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
+	mv -f Makefile.tmp Makefile
 
 depend2:
 	$(CPP) $(INCLUDE) -M *.c >.depend	

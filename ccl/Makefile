@@ -2,7 +2,10 @@
 # Europagate, 1995
 #
 # $Log: Makefile,v $
-# Revision 1.2  1995-04-17 09:37:36  quinn
+# Revision 1.3  1995-05-30 10:25:45  quinn
+# Fixed dependency control
+#
+# Revision 1.2  1995/04/17  09:37:36  quinn
 # *** empty log message ***
 #
 # Revision 1.1  1995/04/10  10:28:16  quinn
@@ -57,10 +60,6 @@ clean:
 depend: depend2
 
 depend1:
-	mv Makefile Makefile.tmp
-	sed '/^#Depend/q' <Makefile.tmp >Makefile
-	$(CPP) $(INCLUDE) -M *.c >>Makefile
-	-rm Makefile.tmp
 
 depend2:
 	$(CPP) $(INCLUDE) -M *.c >.depend	

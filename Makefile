@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.13 1995-05-22 14:02:23 quinn Exp $
+# $Id: Makefile,v 1.14 1995-05-30 10:25:40 quinn Exp $
 
 # Uncomment the lines below to enable mOSI communcation.
 DEFS=-DUSE_XTIMOSI
@@ -30,28 +30,28 @@ cleanup:
 	rm -f `find $(SUBDIR) -name "errlist" -print`
 	rm -f `find $(SUBDIR) -name "a.out" -print`
 
-distclean: cleanup clean
-	for i in $(SUBDIR); do (cd $$i; \
-		mv Makefile Makefile.old; \
-		sed '/^#Depend/q' <Makefile.old >Makefile; \
-		rm Makefile.old); done
+distclean: clean cleandepend
 
-usedepend1:
+cleandepend: 
 	for i in $(SUBDIR); do (cd $$i; \
-		mv Makefile Makefile.tmp; \
-		sed 's/^if/#if/' <Makefile.tmp|sed 's/^include/#include/'| \
+		if sed '/^#Depend/q' <Makefile >Makefile.tmp; then \
+		mv -f Makefile.tmp Makefile; fi; rm -f .depend); done
+
+taildepend:
+	for i in $(SUBDIR); do (cd $$i; \
+		if sed 's/^if/#if/' <Makefile|sed 's/^include/#include/'| \
 		sed 's/^endif/#endif/' | \
-		sed 's/^depend: depend2/depend: depend1/g' >Makefile; \
-		rm Makefile.tmp); done
+		sed 's/^depend: depend2/depend: depend1/g' | \
+		sed '/^#Depend/q' >Makefile.tmp; then \
+		mv -f Makefile.tmp Makefile; fi); done
 
-usedepend2:
+gnudepend:
 	for i in $(SUBDIR); do (cd $$i; \
-		mv Makefile Makefile.tmp; \
-		sed '/^#Depend/q' <Makefile.tmp| \
+		if sed '/^#Depend/q' <Makefile| \
 		sed 's/^#if/if/' |sed 's/^#include/include/'| \
 		sed 's/^#endif/endif/' | \
-		sed 's/^depend: depend1/depend: depend2/g' >Makefile; \
-		rm Makefile.tmp); done
+		sed 's/^depend: depend1/depend: depend2/g' >Makefile.tmp;then \
+		mv -f Makefile.tmp Makefile; fi); done
 
 wc:
 	wc `find . -name '*.[ch]'`

@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.11 1995-05-29 08:12:16 quinn Exp $
+# $Id: Makefile,v 1.12 1995-05-30 10:25:47 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -41,10 +41,9 @@ clean:
 depend: depend2
 
 depend1:
-	mv Makefile Makefile.tmp
-	sed '/^#Depend/q' <Makefile.tmp >Makefile
-	$(CPP) $(INCLUDE) -M *.c >>Makefile
-	-rm Makefile.tmp
+	sed '/^#Depend/q' <Makefile >Makefile.tmp
+	$(CPP) $(DEFS) -M *.c >>Makefile.tmp
+	mv -f Makefile.tmp Makefile
 
 depend2:
 	$(CPP) $(INCLUDE) -M *.c >.depend	
