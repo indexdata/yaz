@@ -63,7 +63,6 @@ rm -fr ${RPM_BUILD_ROOT}
 
 %files -n lib%{name}
 /usr/lib/*.so.*
-/usr/share/doc/yaz
 /usr/share/yaz/z39.50
 /usr/share/yaz/ill
 /usr/share/man/man7/yaz.*
@@ -74,6 +73,7 @@ rm -fr ${RPM_BUILD_ROOT}
 /usr/include/yaz
 /usr/lib/*.so
 /usr/lib/*.a
-/usr/lib/*.[la]
+/usr/lib/*.la
 /usr/share/aclocal/yaz.m4
 /usr/share/man/man1/yaz-config.*
+/usr/share/doc/yaz

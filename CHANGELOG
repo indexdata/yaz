@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.1 2003/04/25
+
+Redhat package is now several packages: libyaz (runtime libraries),
+libyaz-devel (development and documentation, and yaz (utility programs).
+
 New member 'schema' in struct bend_fetch_rr which the name of requested
 schema (SRW/SRU) for record (or NULL if none was given). The fetch
 handler MAY set this to reflect the schema of the returned record.
