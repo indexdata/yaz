@@ -75,6 +75,8 @@ noinst_LIBRARIES = libutil.a
 
 bin_SCRIPTS = yaz-comp
 
+EXTRA_DIST = yaz-comp
+
 INCLUDES = -I../include
 
 libutil_a_SOURCES = options.c log.c marcdisp.c oid.c wrbuf.c nmemsdup.c    xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c 
