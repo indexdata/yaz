@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.25 2003-06-19 23:05:29 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.26 2003-06-20 10:18:05 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -16,7 +16,7 @@
     <token>Z_RPNQuery</token> structure. Some programmers will prefer to
     construct the query manually, perhaps using
     <function>odr_malloc()</function> to simplify memory management.
-    The &yaz; distribution includes two separate, query-generating tools
+    The &yaz; distribution includes three separate, query-generating tools
     that may be of use to you.
    </para>
 
@@ -548,82 +548,153 @@
        or <literal>c</literal> for completeness.
        The attributes for the special qualifier name <literal>term</literal>
        are used when no CCL qualifier is given in a query.
+       <table><title>Common Bib-1 attributes</title>
+	<tgroup cols="2">
+	 <colspec colwidth="2*" colname="type"></colspec>
+	 <colspec colwidth="9*" colname="description"></colspec>
+	 <thead>
+	  <row>
+	   <entry>Type</entry>
+	   <entry>Description</entry>
+	  </row>
+	 </thead>
+	 <tbody>
+	  <row>
+	   <entry><literal>u=</literal><replaceable>value</replaceable></entry>
+	   <entry>
+	    Use attribute. Common use attributes are
+	    1 Personal-name, 4 Title, 7 ISBN, 8 ISSN, 30 Date,
+	    62 Subject, 1003 Author), 1016 Any. Specify value
+	    as an integer.
+	   </entry>
+	  </row>
+
+	  <row>
+	   <entry><literal>r=</literal><replaceable>value</replaceable></entry>
+	   <entry>
+	    Relation attribute. Common values are
+	    1 &lt;, 2 &lt;=, 3 =, 4 &gt;=, 5 &gt;, 6 &lt;&gt;,
+	    100 phonetic, 101 stem, 102 relevance, 103 always matches.
+	   </entry>
+	  </row>
+
+	  <row>
+	   <entry><literal>p=</literal><replaceable>value</replaceable></entry>
+	   <entry>
+	    Position attribute. Values: 1 first in field, 2
+	    first in any subfield, 3 any position in field.
+	   </entry>
+	  </row>
+
+	  <row>
+	   <entry><literal>s=</literal><replaceable>value</replaceable></entry>
+	   <entry>
+	    Structure attribute. Values: 1 phrase, 2 word,
+	    3 key, 4 year, 5 date, 6 word list, 100 date (un),
+	    101 name (norm), 102 name (un), 103 structure, 104 urx,
+	    105 free-form-text, 106 document-text, 107 local-number,
+	    108 string, 109 numeric string.
+	   </entry>
+	  </row>
+
+	  <row>
+	   <entry><literal>t=</literal><replaceable>value</replaceable></entry>
+	   <entry>
+	    Truncation attribute. Values: 1 right, 2 left,
+	    3 left&amp; right, 100 none, 101 process #, 102 regular-1,
+	    103 regular-2, 104 CCL.
+	   </entry>
+	  </row>
+
+	  <row>
+	   <entry><literal>c=</literal><replaceable>value</replaceable></entry>
+	   <entry>
+	    Completeness attribute. Values: 1 incomplete subfield,
+	    2 complete subfield, 3 complete field.
+	   </entry>
+	  </row>
+
+	 </tbody>
+	 </tgroup>
+	</table>
       </para>
       <para>
-       The attribute value <replaceable>val</replaceable> may be
-       specified as in integer. It is also possible to specify
-       non-numeric values, however, which are used in combination with
-       certain types. The special combinations are:
-      <variablelist>
-	<varlistentry><term><literal>s=pw</literal></term>
-	 <listitem><para>
-	   The structure is set to either word or phrase depending
-	   on the number of tokens in a term (phrase-word).
-	  </para>
-	 </listitem>
-	</varlistentry>
-	
-	<varlistentry><term><literal>s=al</literal></term>
-	 <listitem><para>
-	   Each token in the term is ANDed. (and-list).
-	   This does not set the structure at all.
-	  </para>
-	 </listitem>
-	</varlistentry>
-	
-	<varlistentry><term><literal>s=ol</literal></term>
-	 <listitem><para>
-	  Each token in the term is ORed. (or-list).
-	   This does not set the structure at all.
-	 </para>
-	 </listitem>
-	</varlistentry>
-	
-	<varlistentry><term><literal>r=o</literal></term>
-	 <listitem><para>
-	   Allows operators greather-than, less-than, ... equals and
-	   sets relation attribute accordingly (relation ordered).
-	  </para>
-	 </listitem>
-	</varlistentry>
-	
-	<varlistentry><term><literal>t=l</literal></term>
-	 <listitem><para>
-	   Allows term to be left-truncated.
-	   If term is of the form <literal>?x</literal>, the resulting
-	   Type-1 term is <literal>x</literal> and truncation is left.
-	  </para>
-	 </listitem>
-	</varlistentry>
-	
-	<varlistentry><term><literal>t=r</literal></term>
-	 <listitem><para>
-	   Allows term to be right-truncated.
-	   If term is of the form <literal>x?</literal>, the resulting
-	   Type-1 term is <literal>x</literal> and truncation is right.
-	  </para>
-	 </listitem>
-	</varlistentry>
-	
-	<varlistentry><term><literal>t=n</literal></term>
-	 <listitem><para>
-	   If term is does not include <literal>?</literal>, the
-	   truncation attribute is set to none (100).
-	  </para>
-	 </listitem>
-	</varlistentry>
-	
-	<varlistentry><term><literal>t=b</literal></term>
-	 <listitem><para>
-	   Allows term to be both left&amp;right truncated.
-	   If term is of the form <literal>?x?</literal>, the
-	   resulting term is <literal>x</literal> and trunctation is
-	   set to both left&amp;right.
-	  </para>
-	 </listitem>
-	</varlistentry>
-	
-       </variablelist>
+       The complete list of Bib-1 attributes can be found 
+       <ulink url="http://lcweb.loc.gov/z3950/agency/defns/bib1.html">
+	here
+       </ulink>.
+      </para>
+      <para>
+       It is also possible to specify non-numeric attribute values, 
+       which are used in combination with certain types.
+       The special combinations are:
+       
+       <table><title>Special attribute combos</title>
+	<tgroup cols="2">
+	 <colspec colwidth="2*" colname="name"></colspec>
+	 <colspec colwidth="9*" colname="description"></colspec>
+	 <thead>
+	  <row>
+	   <entry>Name</entry>
+	   <entry>Description</entry>
+	  </row>
+	 </thead>
+	 <tbody>
+	  <row>
+	   <entry><literal>s=pw</literal></entry><entry>
+	    The structure is set to either word or phrase depending
+	    on the number of tokens in a term (phrase-word).
+	   </entry>
+	  </row>
+	  <row>
+	   <entry><literal>s=al</literal></entry><entry>
+	    Each token in the term is ANDed. (and-list).
+	    This does not set the structure at all.
+	   </entry>
+	  </row>
+	  
+	  <row><entry><literal>s=ol</literal></entry><entry>
+	    Each token in the term is ORed. (or-list).
+	    This does not set the structure at all.
+	   </entry>
+	  </row>
+	  
+	  <row><entry><literal>r=o</literal></entry><entry>
+	    Allows operators greather-than, less-than, ... equals and
+	    sets relation attribute accordingly (relation ordered).
+	   </entry>
+	  </row>
+	  
+	  <row><entry><literal>t=l</literal></entry><entry>
+	    Allows term to be left-truncated.
+	    If term is of the form <literal>?x</literal>, the resulting
+	    Type-1 term is <literal>x</literal> and truncation is left.
+	   </entry>
+	  </row>
+	  
+	  <row><entry><literal>t=r</literal></entry><entry>
+	    Allows term to be right-truncated.
+	    If term is of the form <literal>x?</literal>, the resulting
+	    Type-1 term is <literal>x</literal> and truncation is right.
+	   </entry>
+	  </row>
+	  
+	  <row><entry><literal>t=n</literal></entry><entry>
+	    If term is does not include <literal>?</literal>, the
+	    truncation attribute is set to none (100).
+	   </entry>
+	  </row>
+	  
+	  <row><entry><literal>t=b</literal></entry><entry>
+	    Allows term to be both left&amp;right truncated.
+	    If term is of the form <literal>?x?</literal>, the
+	    resulting term is <literal>x</literal> and trunctation is
+	    set to both left&amp;right.
+	   </entry>
+	  </row>
+	 </tbody>
+	</tgroup>
+       </table>
       </para>
       <example><title>CCL profile</title>
        <para>
@@ -635,26 +706,43 @@
 	au       u=1 s=1
 	term     s=105
 	ranked   r=102
+	date     u=30 r=o
       </screen>
        <para>
-	Three qualifiers are defined, <literal>ti</literal>, 
-	<literal>au</literal> and <literal>ranked</literal>.
+	Four qualifiers are defined - <literal>ti</literal>, 
+	<literal>au</literal>, <literal>ranked</literal> and
+	<literal>date</literal>.
+       </para>
+       <para>
 	<literal>ti</literal> and <literal>au</literal> both set 
 	structure attribute to phrase (s=1).
 	<literal>ti</literal>
 	sets the use-attribute to 4. <literal>au</literal> sets the
 	use-attribute to 1.
 	When no qualifiers are used in the query the structure-attribute is
-	set to free-form-text (105).
-      </para>
+	set to free-form-text (105) (rule for <literal>term</literal>).
+	The <literal>date</literal> sets the relation attribute to
+	the relation used in the CCL query and sets the use attribute
+	to 30 (Bib-1 Date).
+       </para>
        <para>
 	You can combine attributes. To Search for "ranked title" you
 	can do 
 	<screen>
 	 ti,ranked=knuth computer
 	</screen>
-	which will use "relation is ranked", "use is title", "structure is
-	phrase".
+	which will set relation=ranked, use=title, structure=phrase.
+       </para>
+       <para>
+	Query
+	<screen>
+	 year > 1980
+	</screen>
+	is a valid query, while
+	<screen>
+	 ti > 1980
+	</screen>
+	is invalid.
        </para>
       </example>
      </sect4>
@@ -690,9 +778,9 @@
       </para>
       <table><title>CCL directives</title>
        <tgroup cols="3">
-	<colspec colwidth="3*" colname="name"></colspec>
-	<colspec colwidth="7*" colname="description"></colspec>
-	<colspec colwidth="2*" colname="default"></colspec>
+	<colspec colwidth="2*" colname="name"></colspec>
+	<colspec colwidth="8*" colname="description"></colspec>
+	<colspec colwidth="1*" colname="default"></colspec>
 	<thead>
 	 <row>
 	  <entry>Name</entry>
@@ -1415,15 +1503,13 @@ typedef struct oident
 
    <screen>
     PROTO_Z3950
-    PROTO_SR
+    PROTO_GENERAL
    </screen>
 
    <para>
-    If you don't care about talking to SR-based implementations (few
-    exist, and they may become fewer still if and when the ISO SR and ANSI
-    Z39.50 documents are merged into a single standard), you can ignore
-    this field on incoming packages, and always set it to PROTO_Z3950
-    for outgoing packages.
+    Use <literal>PROTO_Z3950</literal> for Z39.50 Object Identifers,
+    <literal>PROTO_GENERAL</literal> for other types (such as
+    those associated with ILL).
    </para>
    <para>
 
@@ -1510,6 +1596,10 @@ typedef struct oident
 
    <para>
     again, corresponding to the specific OIDs defined by the standard.
+    Refer to the
+    <ulink url="http://lcweb.loc.gov/z3950/agency/defns/oids.html">
+     Registry of Z39.50 Object Identifiers</ulink> for the
+     whole list.
    </para>
 
    <para>
