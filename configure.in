@@ -1,8 +1,8 @@
 dnl YAZ Toolkit, Index Data 1994-2004
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.134 2004-03-20 07:02:22 adam Exp $
+dnl $Id: configure.in,v 1.135 2004-03-29 20:13:07 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
-AM_INIT_AUTOMAKE(yaz, 2.0.18)
+AM_INIT_AUTOMAKE(yaz, 2.0.19)
 AM_MAINTAINER_MODE
 dnl
 AC_SUBST(READLINE_LIBS)
