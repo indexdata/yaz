@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.29 2000-06-19 09:49:35 adam Exp $
+dnl $Id: configure.in,v 1.30 2000-07-06 10:38:47 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.7)
 dnl
@@ -66,20 +66,27 @@ dnl ------ snprintf
 AC_CHECK_FUNCS(vsnprintf gettimeofday)
 dnl
 dnl ------ tcpd
-AC_ARG_ENABLE(tcpd,[  --enable-tcpd           enable TCP wrapper for server if available])
-if test "$enable_tcpd" = "yes"; then
-	AC_MSG_CHECKING(for working tcpd.h)
+AC_ARG_ENABLE(tcpd,[  --enable-tcpd[=PREFIX]    enable TCP wrapper for server if available])
+if test "$enable_tcpd" != "no"; then
 	oldLibs=$LIBS
+	oldCPPFLAGS=$CPPFLAGS
+	if test "$enable_tcpd" != "yes"; then
+		LIBS="$LIBS -L$enable_tcpd/lib"
+		CPPFLAGS="$CPPFLAGS -I$enable_tcpd/include"
+	fi
+	AC_MSG_CHECKING(for working tcpd.h)
 	LIBS="$LIBS -lwrap -lnsl"
 	AC_TRY_LINK([#include <syslog.h>
-	#include <tcpd.h>
+#include <tcpd.h>
 	int allow_severity = LOG_INFO;
 	int deny_severity = LOG_WARNING;],
 	[struct request_info request_info; int i;
-	i = hosts_access(&request_info);],tcpd_ok=1, tcpd_ok=0)
+	i = hosts_access(&request_info);],
+	tcpd_ok=1, tcpd_ok=0)
 	if test "$tcpd_ok" = "0"; then
 		AC_MSG_RESULT(no)
 		LIBS=$oldLibs
+		CPPFLAGS=$oldCPPFLAGS
 	else
 		AC_MSG_RESULT(yes)
 		AC_DEFINE(HAVE_TCPD_H)

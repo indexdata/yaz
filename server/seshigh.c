@@ -3,7 +3,10 @@
  * See the file LICENSE for details.
  *
  * $Log: seshigh.c,v $
- * Revision 1.104  2000-04-05 07:39:55  adam
+ * Revision 1.105  2000-07-06 10:38:47  adam
+ * Enhanced option --enable-tcpd.
+ *
+ * Revision 1.104  2000/04/05 07:39:55  adam
  * Added shared library support (libtool).
  *
  * Revision 1.103  2000/03/20 19:06:25  adam
@@ -668,6 +671,11 @@ static int process_request(association *assoc, request *req, char **msg)
     
     *msg = "Unknown Error";
     assert(req && req->state == REQUEST_IDLE);
+    if (req->request->which != Z_APDU_initRequest && !assoc->init)
+    {
+	*msg = "Missing InitRequest";
+	return -1;
+    }
     switch (req->request->which)
     {
     case Z_APDU_initRequest:

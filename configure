@@ -24,7 +24,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --disable-comp          use old encoders, i.e. disable the YAZ ASN.1 Compiler"
 ac_help="$ac_help
-  --enable-tcpd           enable TCP wrapper for server if available"
+  --enable-tcpd[=PREFIX]    enable TCP wrapper for server if available"
 ac_help="$ac_help
   --disable-threads       disable threads"
 
@@ -2096,16 +2096,21 @@ if test "${enable_tcpd+set}" = set; then
   :
 fi
 
-if test "$enable_tcpd" = "yes"; then
-	echo $ac_n "checking for working tcpd.h""... $ac_c" 1>&6
-echo "configure:2102: checking for working tcpd.h" >&5
+if test "$enable_tcpd" != "no"; then
 	oldLibs=$LIBS
+	oldCPPFLAGS=$CPPFLAGS
+	if test "$enable_tcpd" != "yes"; then
+		LIBS="$LIBS -L$enable_tcpd/lib"
+		CPPFLAGS="$CPPFLAGS -I$enable_tcpd/include"
+	fi
+	echo $ac_n "checking for working tcpd.h""... $ac_c" 1>&6
+echo "configure:2108: checking for working tcpd.h" >&5
 	LIBS="$LIBS -lwrap -lnsl"
 	cat > conftest.$ac_ext <<EOF
-#line 2106 "configure"
+#line 2111 "configure"
 #include "confdefs.h"
 #include <syslog.h>
-	#include <tcpd.h>
+#include <tcpd.h>
 	int allow_severity = LOG_INFO;
 	int deny_severity = LOG_WARNING;
 int main() {
@@ -2113,7 +2118,7 @@ struct request_info request_info; int i;
 	i = hosts_access(&request_info);
 ; return 0; }
 EOF
-if { (eval echo configure:2117: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2122: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   tcpd_ok=1
 else
@@ -2126,6 +2131,7 @@ rm -f conftest*
 	if test "$tcpd_ok" = "0"; then
 		echo "$ac_t""no" 1>&6
 		LIBS=$oldLibs
+		CPPFLAGS=$oldCPPFLAGS
 	else
 		echo "$ac_t""yes" 1>&6
 		cat >> confdefs.h <<\EOF
@@ -2135,12 +2141,12 @@ EOF
 	fi
 fi
 echo $ac_n "checking for ANSI C header files""... $ac_c" 1>&6
-echo "configure:2139: checking for ANSI C header files" >&5
+echo "configure:2145: checking for ANSI C header files" >&5
 if eval "test \"`echo '$''{'ac_cv_header_stdc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2144 "configure"
+#line 2150 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <stdarg.h>
@@ -2148,7 +2154,7 @@ else
 #include <float.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2152: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2158: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2165,7 +2171,7 @@ rm -f conftest*
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 2169 "configure"
+#line 2175 "configure"
 #include "confdefs.h"
 #include <string.h>
 EOF
@@ -2183,7 +2189,7 @@ fi
 if test $ac_cv_header_stdc = yes; then
   # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 2187 "configure"
+#line 2193 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
@@ -2204,7 +2210,7 @@ if test "$cross_compiling" = yes; then
   :
 else
   cat > conftest.$ac_ext <<EOF
-#line 2208 "configure"
+#line 2214 "configure"
 #include "confdefs.h"
 #include <ctype.h>
 #define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
@@ -2215,7 +2221,7 @@ if (XOR (islower (i), ISLOWER (i)) || toupper (i) != TOUPPER (i)) exit(2);
 exit (0); }
 
 EOF
-if { (eval echo configure:2219: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2225: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   :
 else
@@ -2251,7 +2257,7 @@ fi
 
 if test "$enable_threads" = "yes"; then
 	echo $ac_n "checking for main in -lpthread""... $ac_c" 1>&6
-echo "configure:2255: checking for main in -lpthread" >&5
+echo "configure:2261: checking for main in -lpthread" >&5
 ac_lib_var=`echo pthread'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2259,14 +2265,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpthread  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2263 "configure"
+#line 2269 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2270: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2276: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2294,9 +2300,9 @@ else
 fi
 
 	echo $ac_n "checking for working POSIX Threads""... $ac_c" 1>&6
-echo "configure:2298: checking for working POSIX Threads" >&5
+echo "configure:2304: checking for working POSIX Threads" >&5
 	cat > conftest.$ac_ext <<EOF
-#line 2300 "configure"
+#line 2306 "configure"
 #include "confdefs.h"
 #include <pthread.h>
 	int func(void *p) { return 0; }
@@ -2307,7 +2313,7 @@ int main() {
 	int r = pthread_create (&pthread_id, 0, func, 0);
 ; return 0; }
 EOF
-if { (eval echo configure:2311: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2317: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   thread_ok=yes
 else
