@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.253 2004-10-12 13:23:46 ja7 Exp $
+ * $Id: client.c,v 1.254 2004-11-01 21:19:08 adam Exp $
  */
 
 #include <stdio.h>
@@ -3714,8 +3714,12 @@ int cmd_sleep(const char* args )
 {
     int sec=atoi(args);
     if( sec > 0 ) {
+#ifdef WIN32
+	Sleep(sec*1000);
+#else
 	sleep(sec);
-	printf("Done sleeping %d secunds\n", sec);	
+#endif
+	printf("Done sleeping %d seconds\n", sec);	
     }
     return 1;    
 }
