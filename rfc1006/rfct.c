@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.2  1995-05-02 08:53:09  quinn
+ * Revision 1.3  1995-05-16 09:37:18  quinn
+ * Fixed bug
+ *
+ * Revision 1.2  1995/05/02  08:53:09  quinn
  * Trying in vain to fix comm with ISODE
  *
  * Revision 1.1  1995/03/30  14:03:17  quinn
@@ -257,7 +260,7 @@ int t_open(char *name, int oflag, struct t_info *info)
     {
 	info->addr = TSEL_MAXLEN + sizeof(struct sockaddr_in) + 1;
 	info->options = 1024;
-	info->tsdu = 2041; /* trying to please the ISODE */
+	info->tsdu = -1; /* is this right? */
 	info->etsdu = 0;
 	info->connect = -2;
 	info->discon = -2;

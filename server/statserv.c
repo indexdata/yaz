@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.18  1995-05-16 08:51:09  quinn
+ * Revision 1.19  1995-05-16 09:37:27  quinn
+ * Fixed bug
+ *
+ * Revision 1.18  1995/05/16  08:51:09  quinn
  * License, documentation, and memory fixes
  *
  * Revision 1.17  1995/05/15  11:56:42  quinn
@@ -320,8 +323,6 @@ int statserv_main(int argc, char **argv)
     me = argv[0];
     while ((ret = options("a:szSl:v:", argv, argc, &arg)) != -2)
     {
-    	if (!arg)
-	    arg = "";
     	switch (ret)
     	{
 	    case 0:
@@ -332,7 +333,7 @@ int statserv_main(int argc, char **argv)
 	    case 's': protocol = CS_SR; break;
 	    case 'S': control_block.dynamic = 0; break;
 	    case 'l':
-	    	strcpy(control_block.logfile, arg);
+	    	strcpy(control_block.logfile, arg ? arg : "");
 		log_init(control_block.loglevel, me, control_block.logfile);
 		break;
 	    case 'v':
@@ -340,7 +341,7 @@ int statserv_main(int argc, char **argv)
 		log_init(control_block.loglevel, me, control_block.logfile);
 		break;
 	    case 'a':
-	    	strcpy(control_block.apdufile, arg); break;
+	    	strcpy(control_block.apdufile, arg ? arg : ""); break;
 	    default:
 	    	fprintf(stderr, "Usage: %s [ -a <apdufile> -v <loglevel> -l <logfile> -zsS <listener-addr> ... ]\n", me);
 	    	exit(1);
