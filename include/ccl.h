@@ -46,7 +46,12 @@
  * CCL - header file
  *
  * $Log: ccl.h,v $
- * Revision 1.7  1997-09-01 08:49:47  adam
+ * Revision 1.8  1997-09-29 09:01:19  adam
+ * Changed CCL parser to be thread safe. New type, CCL-parser, declared
+ * and a create/destructor ccl_parser_create/ccl_parser_destroy has been
+ * added.
+ *
+ * Revision 1.7  1997/09/01 08:49:47  adam
  * New windows NT/95 port using MSV5.0. To export DLL functions the
  * YAZ_EXPORT modifier was added. Defined in yconfig.h.
  *
@@ -98,7 +103,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 /* CCL error numbers */
 #define CCL_ERR_OK                0
 #define CCL_ERR_TERM_EXPECTED     1
@@ -113,7 +118,7 @@ extern "C" {
 #define CCL_ERR_TRUNC_NOT_LEFT   10
 #define CCL_ERR_TRUNC_NOT_BOTH   11
 #define CCL_ERR_TRUNC_NOT_RIGHT  12
-
+    
 /* attribute pair (type, value) */
 struct ccl_rpn_attr {
     struct ccl_rpn_attr *next;
@@ -216,9 +221,31 @@ struct ccl_qualifier {
     struct ccl_qualifier *next;
 };
 
+struct ccl_parser {
+/* current lookahead token */
+    struct ccl_token *look_token;
+    
+/* holds error code if error occur (and approx position of error) */
+    int error_code;
+    const char *error_pos;
+    
+/* current bibset */
+    CCL_bibset bibset;
+    
+    char *ccl_token_and;
+    char *ccl_token_or;
+    char *ccl_token_not;
+    char *ccl_token_set;
+    int ccl_case_sensitive;
+};
+    
+typedef struct ccl_parser *CCL_parser;
+    
 /* Generate tokens from command string - obeys all CCL opererators */
+struct ccl_token *ccl_parser_tokenize (CCL_parser cclp,
+				       const char *command);
 struct ccl_token *ccl_tokenize (const char *command);
-
+    
 /* Generate tokens from command string - oebeys only simple tokens and 
    quoted strings */
 struct ccl_token *ccl_token_simple (const char *command);
@@ -258,15 +285,6 @@ CCL_bibset ccl_qual_mk (void);
 /* Delete CCL qualifier set */
 void ccl_qual_rm (CCL_bibset *b);
 
-/* Misc. reserved words */
-extern const char *ccl_token_and;
-extern const char *ccl_token_or;
-extern const char *ccl_token_not;
-extern const char *ccl_token_set;
-
-/* Whether the CCL parser is command sensitive */
-extern int ccl_case_sensitive;
-
 /* Char-to-upper function */
 extern int (*ccl_toupper)(int c);
 
@@ -275,8 +293,14 @@ int ccl_stricmp (const char *s1, const char *s2);
 int ccl_memicmp (const char *s1, const char *s2, size_t n);
 
 /* Search for qualifier 'name' in set 'b'. */
-struct ccl_rpn_attr *ccl_qual_search (CCL_bibset b, const char *name,
+struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp, const char *name,
                                       size_t len);
+
+/* Create CCL parser */
+CCL_parser ccl_parser_create (void);
+
+/* Destroy CCL parser */
+void ccl_parser_destroy (CCL_parser p);
 
 #ifdef __cplusplus
 }
