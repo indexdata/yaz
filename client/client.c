@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.195 2003-05-20 20:33:29 adam Exp $
+ * $Id: client.c,v 1.196 2003-05-22 17:01:33 mike Exp $
  */
 
 #include <stdio.h>
@@ -41,6 +41,7 @@
 #include <yaz/ill.h>
 #include <yaz/srw.h>
 #include <yaz/yaz-ccl.h>
+#include <yaz/cql.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -60,8 +61,10 @@
 static char *codeset = 0;               /* character set for output */
 
 static ODR out, in, print;              /* encoding and decoding streams */
+#ifdef THESE_ARE_NOT_USED
 static ODR srw_sr_odr_out = 0;
 static Z_SRW_PDU *srw_sr = 0;
+#endif /*THESE_ARE_NOT_USED*/
 static FILE *apdu_file = 0;
 static FILE *ber_file = 0;
 static COMSTACK conn = 0;               /* our z-association */
@@ -84,6 +87,7 @@ static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
 static char ccl_fields[512] = "default.bib";
+static char cql_fields[512] = "pqf.properties";
 static char *esPackageName = 0;
 static char *yazProxy = 0;
 static int kilobytes = 1024;
@@ -102,12 +106,14 @@ typedef enum {
     QueryType_Prefix,
     QueryType_CCL,
     QueryType_CCL2RPN,
-    QueryType_CQL
+    QueryType_CQL,
+    QueryType_CQL2RPN
 } QueryType;
 
 static QueryType queryType = QueryType_Prefix;
 
 static CCL_bibset bibset;               /* CCL bibset handle */
+static cql_transform_t cqltrans;	/* CQL qualifier-set handle */
 
 #if HAVE_READLINE_COMPLETION_OVER
 
@@ -146,6 +152,7 @@ const char* query_type_as_string(QueryType q)
     case QueryType_CCL: return "CCL (CCL sent to server) ";
     case QueryType_CCL2RPN: return "CCL -> RPN (RPN sent to server)";
     case QueryType_CQL: return "CQL (CQL sent to server)";
+    case QueryType_CQL2RPN: return "CQL -> RPN (RPN sent to server)";
     default: 
         return "unknown Query type internal yaz-client error";
     }
@@ -1038,8 +1045,11 @@ static int send_searchRequest(const char *arg)
     Odr_oct ccl_query;
     YAZ_PQF_Parser pqf_parser;
     Z_External *ext;
+    QueryType myQueryType = queryType;
+    char pqfbuf[512];
+    char *addinfo;
 
-    if (queryType == QueryType_CCL2RPN)
+    if (myQueryType == QueryType_CCL2RPN)
     {
         rpn = ccl_find_str(bibset, arg, &error, &pos);
         if (error)
@@ -1047,7 +1057,27 @@ static int send_searchRequest(const char *arg)
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
             return 0;
         }
+    } else if (myQueryType == QueryType_CQL2RPN) {
+	/* ### All this code should be wrapped in a utility function */
+	CQL_parser parser = cql_parser_create();
+	struct cql_node *node;
+	if ((error = cql_parser_string(parser, arg)) != 0) {
+	    /* ### must do better with the reporting here */
+            printf("CQL ERROR %d: presumably a syntax error?\n", error);
+            return 0;
+	}
+	node = cql_parser_result(parser);
+	if ((error = cql_transform_buf(cqltrans, node, pqfbuf,
+				       sizeof pqfbuf)) != 0) {
+	    error = cql_transform_error(cqltrans, &addinfo);
+            printf ("Couldn't convert CQL to PQF: error #%d (addinfo=%s)\n",
+		    error, addinfo);
+            return 0;
+        }
+	arg = pqfbuf;
+	myQueryType = QueryType_Prefix;
     }
+
     req->referenceId = set_refid (out);
     if (!strcmp(arg, "@big")) /* strictly for troublemaking */
     {
@@ -1087,7 +1117,7 @@ static int send_searchRequest(const char *arg)
 
     req->query = &query;
 
-    switch (queryType)
+    switch (myQueryType)
     {
     case QueryType_Prefix:
         query.which = Z_Query_type_1;
@@ -2487,6 +2517,8 @@ int cmd_querytype (const char *arg)
         queryType = QueryType_CCL2RPN;
     else if (!strcmp(arg, "cql"))
         queryType = QueryType_CQL;        
+    else if (!strcmp (arg, "cql2rpn") || !strcmp (arg, "cqlrpn"))
+        queryType = QueryType_CQL2RPN;
     else
     {
         printf ("Querytype must be one of:\n");
@@ -2494,6 +2526,7 @@ int cmd_querytype (const char *arg)
         printf (" ccl            - CCL query\n");
         printf (" ccl2rpn        - CCL query converted to RPN\n");
         printf (" cql            - CQL\n");
+        printf (" cql2rpn        - CQL query converted to RPN\n");
         return 0;
     }
     return 1;
@@ -2731,6 +2764,20 @@ int cmd_set_cclfile(const char* arg)
     return 0;
 }
 
+int cmd_set_cqlfile(const char* arg)
+{
+    cql_transform_t newcqltrans;
+
+    if ((newcqltrans = cql_transform_open_fname(arg)) == 0) {
+        perror("unable to open CQL file");
+	return 0;
+    }
+    cql_transform_close(cqltrans);
+    cqltrans = newcqltrans;
+    strcpy(cql_fields, arg);
+    return 0;
+}
+
 int cmd_set_auto_reconnect(const char* arg)
 {  
     if(strlen(arg)==0) {
@@ -2917,6 +2964,12 @@ static void initialize(void)
         ccl_qual_file (bibset, inf);
         fclose (inf);
     }
+
+    if ((cqltrans = cql_transform_open_fname(cql_fields)) == 0) {
+	/* ### There should be a better way to make an empty set! */
+	cqltrans = cql_transform_open_fname("/dev/null");
+    }
+
 #if HAVE_READLINE_READLINE_H
     rl_attempted_completion_function = (CPPFunction*)readline_completer;
 #endif
@@ -3328,6 +3381,7 @@ int cmd_list_all(const char* args) {
     
     /* Query options */
     printf("CCL file             : %s\n",ccl_fields);
+    printf("CQL file             : %s\n",cql_fields);
     printf("Query type           : %s\n",query_type_as_string(queryType));
     
     printf("Named Result Sets    : %s\n",setnumber==-1?"off":"on");
@@ -3427,6 +3481,7 @@ static struct {
     {"set_berfile", cmd_set_berfile, "<filename>",NULL,1,NULL},
     {"set_marcdump", cmd_set_marcdump," <filename>",NULL,1,NULL},
     {"set_cclfile", cmd_set_cclfile," <filename>",NULL,1,NULL},
+    {"set_cqlfile", cmd_set_cqlfile," <filename>",NULL,1,NULL},
     {"set_auto_reconnect", cmd_set_auto_reconnect," on|off",complete_auto_reconnect,1,NULL},
 	{"set_otherinfo", cmd_set_otherinfo,"<otherinfoinddex> <oid> <string>",NULL,0,NULL},
     {"register_oid", cmd_register_oid,"<name> <class> <oid>",NULL,0,NULL},
@@ -3743,7 +3798,7 @@ int main(int argc, char **argv)
 #endif
 #endif
 
-    while ((ret = options("k:c:a:b:m:v:p:u:t:V", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:q:a:b:m:v:p:u:t:V", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -3771,6 +3826,10 @@ int main(int argc, char **argv)
         case 'c':
             strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
             ccl_fields[sizeof(ccl_fields)-1] = '\0';
+            break;
+        case 'q':
+            strncpy (cql_fields, arg, sizeof(cql_fields)-1);
+            cql_fields[sizeof(cql_fields)-1] = '\0';
             break;
         case 'b':
             if (!strcmp(arg, "-"))
@@ -3803,7 +3862,8 @@ int main(int argc, char **argv)
             break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
-                     "[-b berdump] [-c cclfields]\n      [-p <proxy-addr>] [-u <auth>] "
+                     "[-b berdump] [-c cclfields] \n"
+		     "[-q cqlfields] [-p <proxy-addr>] [-u <auth>] "
                      "[-k size] [-V] [<server-addr>]\n",
                      prog);
             exit (1);
