@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.6 1995-04-17 09:37:50 quinn Exp $
+# $Id: Makefile,v 1.7 1995-05-17 08:19:08 adam Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I.
@@ -36,7 +36,7 @@ $(LIBDIR):
 	$(CC) -c $(DEFS) $(CFLAGS) $<
 
 clean:
-	rm -f *.[oa] test core mon.out gmon.out errlist
+	rm -f *.[oa] test marcdump core mon.out gmon.out errlist
 
 depend: depend2
 
