@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.0.9 NOT YET RELEASED
+
 --- 2.0.8 2003/12/22
 
 * SRW/SRU 1.1. Since the Namespace has changed for SRW/SRU, it means that
