@@ -1,0 +1,586 @@
+<!-- ============================================================= -->
+<!-- MODULE:    Character to Entity Specification                  -->
+<!-- VERSION:   3.0 (Morgan Cundiff and Randll Barry)                                   -->
+<!-- DATE:      June 18, 2001                                  -->
+<!--                                                               -->
+<!-- MULBERRY INTERNAL VERSION CONTROL:                            -->
+<!-- $Id: charconv.sgm,v 1.1 2002-12-16 13:26:06 adam Exp $         -->
+<!-- ============================================================= -->
+
+<!-- ============================================================= -->
+<!-- SYSTEM:    MARC <-> SGML <-> XML Conversion                           -->
+<!--                                                               -->
+<!-- PURPOSE:   Define relationships between MARC Extended Latin   -->
+<!--            character set, character numbers, SGML entities    -->
+<!--            and XML entities.                                  -->
+<!--                                                               -->
+<!-- CONTAINS:  SGML Document conforming to the Character-Entity   -->
+<!--            Map File DTD                                       -->
+<!--                                                               -->
+<!-- MODULES REQUIRED:                                             -->
+<!--            None                                               -->
+<!--                                                               -->
+<!-- CREATED FOR:                                                  -->
+<!--            MARC Standards Office                              -->
+<!--                                                               -->
+<!-- ORIGINAL CREATION DATE:                                       -->
+<!--            October 1997                                       -->
+<!--                                                               -->
+<!-- CREATED BY:                                                   -->
+<!--            Mulberry Technologies, Inc. (TKG)                  -->
+<!--            17 West Jefferson Street, Suite 207                -->
+<!--            Rockville, MD  20850  USA                          -->
+<!--            Phone:  +1 301/315-9631                            -->
+<!--            Fax:    +1 301/315-8285                            -->
+<!--            e-mail: info@mulberrytech.com                      -->
+<!--            WWW:    http://www.mulberrytech.com                -->
+<!-- ============================================================= -->
+<entitymap>
+<character hex="E2 41" dec="226 065"><isoentity>Aacute</isoentity><desc>latin capital letter a with acute</desc><unientity>00C1</unientity></character>
+<character hex="E2 61" dec="226 097"><isoentity>aacute</isoentity><desc>latin small letter a with acute</desc><unientity>00E1</unientity></character>
+<character hex="E2 E6 41" dec="226 230 065"><isoentity>Abreveac</isoentity><desc>latin capital letter a with breve and acute</desc><unientity>1EAE</unientity></character>
+<character hex="E2 E6 61" dec="226 230 096"><isoentity>abreveac</isoentity><desc>latin small letter a with breve and acute</desc><unientity>1EAF</unientity></character>
+<character hex="E6 F2 41" dec="230 242 065"><isoentity>Abrevedb</isoentity><desc>latin capital letter a with breve and dot below</desc><unientity>1EB6</unientity></character>
+<character hex="E6 F2 61" dec="230 242 097"><isoentity>abrevedb</isoentity><desc>latin small letter a with breve and dot below</desc><unientity>1EB7</unientity></character>
+<character hex="E1 E6 41" dec="225 230 065"><isoentity>Abrevegr</isoentity><desc>latin capital letter a with breve and grave</desc><unientity>1EB0</unientity></character>
+<character hex="E1 E6 61" dec="225 230 097"><isoentity>abrevegr</isoentity><desc>latin small letter a with breve and grave</desc><unientity>1EB1</unientity></character>
+<character hex="E0 E6 41" dec="224 230 065"><isoentity>Abreveha</isoentity><desc>latin capital letter a with breve and hook above</desc><unientity>1EB2</unientity></character>
+<character hex="E0 E6 61" dec="224 230 097"><isoentity>abreveha</isoentity><desc>latin small letter a with breve and hook above</desc><unientity>1EB3</unientity></character>
+<character hex="E4 E6 41" dec="228 230 065"><isoentity>Abreveti</isoentity><desc>latin capital letter a with breve and tilde</desc><unientity>1EB4</unientity></character>
+<character hex="E4 E6 61" dec="228 230 097"><isoentity>abreveti</isoentity><desc>latin small letter a with breve and tilde</desc><unientity>1EB5</unientity></character>
+<character hex="E6 41" dec="230 065"><isoentity>Abreve</isoentity><desc>latin capital letter a with breve</desc><unientity>0102</unientity></character>
+<character hex="E6 61" dec="230 097"><isoentity>abreve</isoentity><desc>latin small letter a with breve</desc><unientity>0103</unientity></character>
+<character hex="E9 41" dec="233 065"><isoentity>Acaron</isoentity><desc>latin capital letter a with caron</desc><unientity>01CD</unientity></character>
+<character hex="E9 61" dec="233 097"><isoentity>acaron</isoentity><desc>latin small letter a with caron</desc><unientity>01CE</unientity></character>
+<character hex="E3 E2 41" dec="227 226 065"><isoentity>Acircac</isoentity><desc>latin capital letter a with circumflex and acute</desc><unientity>1EA4</unientity></character>
+<character hex="E3 E2 61" dec="227 226 097"><isoentity>acircac</isoentity><desc>latin small letter a with circumflex and acute</desc><unientity>1EA5</unientity></character>
+<character hex="E3 F2 41" dec="227 242 065"><isoentity>Acircdb</isoentity><desc>latin capital letter a with circumflex and dot below</desc><unientity>1EAC</unientity></character>
+<character hex="E3 F2 61" dec="227 242 097"><isoentity>acircdb</isoentity><desc>latin small letter a with circumflex and dot below</desc><unientity>1EAD</unientity></character>
+<character hex="E3 E1 41" dec="227 225 065"><isoentity>acircgr</isoentity><desc>latin capital letter a with circumflex and grave</desc><unientity>1EA6</unientity></character>
+<character hex="E3 E1 61" dec="227 225 097"><isoentity>acircgr</isoentity><desc>latin small letter a with circumflex and grave</desc><unientity>1EA7</unientity></character>
+<character hex="E3 E0 41" dec="227 224 064"><isoentity>Acircha</isoentity><desc>latin capital letter a with circumflex and hook above</desc><unientity>1EA8</unientity></character>
+<character hex="E3 E0 61" dec="227 224 097"><isoentity>acircha</isoentity><desc>latin small letter a with circumflex and hook above</desc><unientity>1EA9</unientity></character>
+<character hex="E4 E3 41" dec="228 227 065"><isoentity>Acircti</isoentity><desc>latin capital letter a with circumflex and tilde</desc><unientity>1EAA</unientity></character>
+<character hex="E4 E3 61" dec="228 227 097"><isoentity>acircti</isoentity><desc>latin small letter a with circumflex and tilde</desc><unientity>1EAB</unientity></character>
+<character hex="E3 41" dec="227 065"><isoentity>Acirc</isoentity><desc>latin capital letter a with circumflex</desc><unientity>00C2</unientity></character>
+<character hex="E3 61" dec="227 097"><isoentity>acirc</isoentity><desc>latin small letter a with circumflex</desc><unientity>00E2</unientity></character>
+<character hex="E2" dec="226"><isoentity>acute</isoentity><desc>combining acute accent</desc><unientity>0301</unientity></character>
+<character hex="E5 E7 41" dec="229 231 065"><isoentity>Adotama</isoentity><desc>latin capital letter a with dot above and macron</desc><unientity>01E0</unientity></character>
+<character hex="E5 E7 61" dec="229 231 097"><isoentity>adotama</isoentity><desc>latin small letter a with dot above and macron</desc><unientity>01E1</unientity></character>
+<character hex="F2 41" dec="242 065"><isoentity>Adotb</isoentity><desc>latin capital letter a with dot below</desc><unientity>1EA0</unientity></character>
+<character hex="F2 61" dec="242 097"><isoentity>adotb</isoentity><desc>latin small letter a with dot below</desc><unientity>1EA1</unientity></character>
+<character hex="E7 41" dec="231 065"><isoentity>Adot</isoentity><desc>latin capital letter a with dot above</desc><unientity>0226</unientity></character>
+<character hex="E7 61" dec="231 097"><isoentity>adot</isoentity><desc>latin small letter a with dot above</desc><unientity>0227</unientity></character>
+<character hex="E2 A5" dec="226 165"><isoentity>Aeacute</isoentity><desc>latin capital letter ae with acute</desc><unientity>01FC</unientity></character>
+<character hex="E2 B5" dec="226 181"><isoentity>aeacute</isoentity><desc>latin small letter ae with acute</desc><unientity>01FD</unientity></character>
+<character hex="A5" dec="165"><isoentity>AElig</isoentity><desc>latin capital letter ae</desc><unientity>00C6</unientity></character>
+<character hex="B5" dec="181"><isoentity>aelig</isoentity><desc>latin small letter ae</desc><unientity>00E6</unientity></character>
+<character hex="E5 A5" dec="229 065"><isoentity>Aemacr</isoentity><desc>latin capital letter ae with macron</desc><unientity>01E2</unientity></character>
+<character hex="E5 B5" dec="229 097"><isoentity>aemacr</isoentity><desc>latin small letter ae with macron</desc><unientity>01E3</unientity></character>
+<character hex="E1 41" dec="225 065"><isoentity>Agrave</isoentity><desc>latin capital letter a with grave</desc><unientity>00C0</unientity></character>
+<character hex="E1 61" dec="225 097"><isoentity>agrave</isoentity><desc>latin small letter a with grave</desc><unientity>00E0</unientity></character>
+<character hex="E0 41" dec="224 065"><isoentity>Ahooka</isoentity><desc>latin capital letter a with hook above</desc><unientity>1EA2</unientity></character>
+<character hex="E0 61" dec="224 097"><isoentity>ahooka</isoentity><desc>latin small letter a with hook above</desc><unientity>1EA3</unientity></character>
+<character hex="1B 67 61 1B 73" dec="027 103 097 027 115"><isoentity>alpha</isoentity><desc>greek small letter alpha</desc><unientity>03B1</unientity></character>
+<character hex="E5 41" dec="229 065"><isoentity>Amacr</isoentity><desc>latin capital letter a with macron</desc><unientity>0100</unientity></character>
+<character hex="E5 61" dec="229 097"><isoentity>amacr</isoentity><desc>latin small letter a with macron</desc><unientity>0101</unientity></character>
+<character hex="F1 41" dec="241 065"><isoentity>Aogon</isoentity><desc>latin capital letter a with ogonek</desc><unientity>0104</unientity></character>
+<character hex="F1 61" dec="241 097"><isoentity>aogon</isoentity><desc>latin small letter a with ogonek</desc><unientity>0105</unientity></character>
+<character hex="E2 EA 41" dec="226 234 065"><isoentity>Aringac</isoentity><desc>latin capital letter a with ring above and acute</desc><unientity>01FA</unientity></character>
+<character hex="E2 EA 61" dec="226 234 096"><isoentity>aringac</isoentity><desc>latin small letter a with ring above and acute</desc><unientity>01FB</unientity></character>
+<character hex="EA 41" dec="234 065"><isoentity>Aring</isoentity><desc>latin capital letter a with ring</desc><unientity>00C5</unientity></character>
+<character hex="EA 61" dec="234 097"><isoentity>aring</isoentity><desc>latin small letter a with ring</desc><unientity>00E5</unientity></character>
+<character hex="E4 41" dec="228 065"><isoentity>Atilde</isoentity><desc>latin capital letter a with tilde</desc><unientity>00C3</unientity></character>
+<character hex="E4 61" dec="228 097"><isoentity>atilde</isoentity><desc>latin small letter a with tilde</desc><unientity>00E3</unientity></character>
+<character hex="E5 E8 41" dec="229 232 065"><isoentity>Aumlma</isoentity><desc>latin capital letter a with diaeresis and macron</desc><unientity>01DE</unientity></character>
+<character hex="E5 E8 61" dec="229 232 097"><isoentity>aumlma</isoentity><desc>latin small letter a with diaeresis and macron</desc><unientity>01DF</unientity></character>
+<character hex="E8 41" dec="232 065"><isoentity>Auml</isoentity><desc>latin capital letter a with umlaut</desc><unientity>00C4</unientity></character>
+<character hex="E8 61" dec="232 097"><isoentity>auml</isoentity><desc>latin small letter a with umlaut</desc><unientity>00E4</unientity></character>
+<character hex="E7 42" dec="231 066"><isoentity>Bdota</isoentity><desc>latin capital letter b with dot above</desc><unientity>1E02</unientity></character>
+<character hex="E7 62" dec="231 098"><isoentity>bdota</isoentity><desc>latin small letter b with dot above</desc><unientity>1E03</unientity></character>
+<character hex="F2 42" dec="242 066"><isoentity>Bdotb</isoentity><desc>latin capital letter b with dot below</desc><unientity>1E04</unientity></character>
+<character hex="F2 62" dec="242 098"><isoentity>bdotb</isoentity><desc>latin small letter b with dot below</desc><unientity>1E05</unientity></character>
+<character hex="1B 67 62 1B 73" dec="027 103 098 027 115"><isoentity>beta</isoentity><desc>greek small letter beta</desc><unientity>03B2</unientity></character>
+<character hex="F6 42" dec="246 066"><isoentity>Bmacrb</isoentity><desc>latin capital letter b with line below</desc><unientity>1E06</unientity></character>
+<character hex="F6 62" dec="246 098"><isoentity>bmacrb</isoentity><desc>latin small letter b with line below</desc><unientity>1E07</unientity></character>
+<character hex="F9" dec="249"><isoentity>breveb</isoentity><desc>combining breve below</desc><unientity>032E</unientity></character>
+<character hex="E6" dec="230"><isoentity>breve</isoentity><desc>combining breve</desc><unientity>0306</unientity></character>
+<character hex="E2 43" dec="226 067"><isoentity>Cacute</isoentity><desc>latin capital letter c with acute</desc><unientity>0106</unientity></character>
+<character hex="E2 63" dec="226 099"><isoentity>cacute</isoentity><desc>latin small letter c with acute</desc><unientity>0107</unientity></character>
+<character hex="EF" dec="239"><isoentity>candra</isoentity><desc>combining candrabindu</desc><unientity>0310</unientity></character>
+<character hex="E9" dec="233"><isoentity>caron</isoentity><desc>combining caron</desc><unientity>030C</unientity></character>
+<character hex="E9 43" dec="233 067"><isoentity>Ccaron</isoentity><desc>latin capital letter c with caron</desc><unientity>010C</unientity></character>
+<character hex="E9 63" dec="233 099"><isoentity>ccaron</isoentity><desc>latin small letter c with caron</desc><unientity>010D</unientity></character>
+<character hex="E2 F0 43" dec="226 240 067"><isoentity>Ccedilac</isoentity><desc>latin capital letter c with cedilla and acute</desc><unientity>1E08</unientity></character>
+<character hex="E2 F0 63" dec="226 240 099"><isoentity>ccedilac</isoentity><desc>latin small letter c with cedilla and acute</desc><unientity>1E09</unientity></character>
+<character hex="F0 43" dec="240 067"><isoentity>Ccedil</isoentity><desc>latin capital letter c with cedilla</desc><unientity>00C7</unientity></character>
+<character hex="F0 63" dec="240 099"><isoentity>ccedil</isoentity><desc>latin small letter c with cedilla</desc><unientity>00E7</unientity></character>
+<character hex="E3 43" dec="227 067"><isoentity>Ccirc</isoentity><desc>latin capital letter c with circumflex</desc><unientity>0108</unientity></character>
+<character hex="E3 63" dec="227 099"><isoentity>ccirc</isoentity><desc>latin small letter c with circumflex</desc><unientity>0109</unientity></character>
+<character hex="E7 43" dec="231 067"><isoentity>Cdot</isoentity><desc>latin capital letter c with dot above</desc><unientity>010A</unientity></character>
+<character hex="E7 63" dec="231 099"><isoentity>cdot</isoentity><desc>latin small letter c with dot above</desc><unientity>010B</unientity></character>
+<character hex="F0" dec="240"><isoentity>cedil</isoentity><desc>combining cedilla</desc><unientity>0327</unientity></character>
+<character hex="E3" dec="227"><isoentity>circ</isoentity><desc>combining circumflex</desc><unientity>0302</unientity></character>
+<character hex="FE" dec="254"><isoentity>commaa</isoentity><desc>combining comma above</desc><unientity>0313</unientity></character>
+<character hex="F7" dec="247"><isoentity>commab</isoentity><desc>combining comma below</desc><unientity>0326</unientity></character>
+<character hex="C2" dec="194"><isoentity>copysr</isoentity><desc>sound recording copyright</desc><unientity>2117</unientity></character>
+<character hex="C3" dec="195"><isoentity>copy</isoentity><desc>copyright sign</desc><unientity>00A9</unientity></character>
+<character hex="EE" dec="238"><isoentity>dblac</isoentity><desc>combining double acute accent</desc><unientity>030B</unientity></character>
+<character hex="F3" dec="243"><isoentity>dbldotb</isoentity><desc>combining double dot below</desc><unientity>0324</unientity></character>
+<character hex="F5" dec="245"><isoentity>dblunder</isoentity><desc>combining double low line</desc><unientity>0333</unientity></character>
+<character hex="E9 44" dec="233 068"><isoentity>Dcaron</isoentity><desc>latin capital letter d with caron</desc><unientity>010E</unientity></character>
+<character hex="E9 64" dec="233 100"><isoentity>dcaron</isoentity><desc>latin small letter d with caron</desc><unientity>010F</unientity></character>
+<character hex="F7 44" dec="247 068"><isoentity>Dcommab</isoentity><desc>latin capital letter d with comma below</desc><unientity>1E10</unientity></character>
+<character hex="F7 64" dec="247 100"><isoentity>dcommab</isoentity><desc>latin small letter d with comma below</desc><unientity>1E11</unientity></character>
+<character hex="E7 44" dec="231 068"><isoentity>Ddota</isoentity><desc>latin capital letter d with dot above</desc><unientity>1E0A</unientity></character>
+<character hex="E7 64" dec="231 100"><isoentity>ddota</isoentity><desc>latin small letter d with dot above</desc><unientity>1E0B</unientity></character>
+<character hex="F2 44" dec="242 068"><isoentity>Ddotb</isoentity><desc>latin capital letter d with dot below</desc><unientity>1E0C</unientity></character>
+<character hex="F2 64" dec="242 100"><isoentity>ddotb</isoentity><desc>latin small letter d with dot below</desc><unientity>1E0D</unientity></character>
+<character hex="C0" dec="192"><isoentity>deg</isoentity><desc>degree sign</desc><unientity>00B0</unientity></character>
+<character hex="F6 44" dec="246 068"><isoentity>Dmacrb</isoentity><desc>latin capital letter d with line below</desc><unientity>1E0E</unientity></character>
+<character hex="F6 64" dec="246 100"><isoentity>dmacrb</isoentity><desc>latin small letter d with line below</desc><unientity>1E0F</unientity></character>
+<character hex="F2" dec="242"><isoentity>dotb</isoentity><desc>combining dot below</desc><unientity>0323</unientity></character>
+<character hex="E7" dec="231"><isoentity>dot</isoentity><desc>combining dot above</desc><unientity>0307</unientity></character>
+<character hex="A3" dec="163"><isoentity>Dstrok</isoentity><desc>latin capital letter d with stroke</desc><unientity>0110</unientity></character>
+<character hex="B3" dec="179"><isoentity>dstrok</isoentity><desc>latin small letter d with stroke</desc><unientity>0111</unientity></character>
+<character hex="E2 45" dec="226 069"><isoentity>Eacute</isoentity><desc>latin capital letter e with acute</desc><unientity>00C9</unientity></character>
+<character hex="E2 65" dec="226 101"><isoentity>eacute</isoentity><desc>latin small letter e with acute</desc><unientity>00E9</unientity></character>
+<character hex="E6 45" dec="230 069"><isoentity>Ebreve</isoentity><desc>latin capital letter e with breve</desc><unientity>0114</unientity></character>
+<character hex="E6 65" dec="230 101"><isoentity>ebreve</isoentity><desc>latin small letter e with breve</desc><unientity>0115</unientity></character>
+<character hex="E9 45" dec="233 069"><isoentity>Ecaron</isoentity><desc>latin capital letter e with caron</desc><unientity>011A</unientity></character>
+<character hex="E9 65" dec="233 101"><isoentity>ecaron</isoentity><desc>latin small letter e with caron</desc><unientity>011B</unientity></character>
+<character hex="E6 F0 45" dec="230 240 069"><isoentity>Ecedilbr</isoentity><desc>latin capital letter e with cedilla and breve</desc><unientity>1E1C</unientity></character>
+<character hex="E6 F0 65" dec="230 240 101"><isoentity>ecedilbr</isoentity><desc>latin small letter e with cedilla and breve</desc><unientity>1E1D</unientity></character>
+<character hex="F0 45" dec="240 069"><isoentity>Ecedil</isoentity><desc>latin capital letter e with cedilla</desc><unientity>0228</unientity></character>
+<character hex="F0 65" dec="240 101"><isoentity>ecedil</isoentity><desc>latin small letter e with cedilla</desc><unientity>0229</unientity></character>
+<character hex="E3 E2 45" dec="227 226 069"><isoentity>Ecircac</isoentity><desc>latin capital letter e with circumflex and acute</desc><unientity>1EBE</unientity></character>
+<character hex="E3 E2 65" dec="227 226 101"><isoentity>ecircac</isoentity><desc>latin small letter e with circumflex and acute</desc><unientity>1EBF</unientity></character>
+<character hex="E3 F2 45" dec="227 242 069"><isoentity>Ecircdb</isoentity><desc>latin capital letter e with circumflex and dot below</desc><unientity>1EC6</unientity></character>
+<character hex="E3 F2 65" dec="227 242 101"><isoentity>ecircdb</isoentity><desc>latin small letter e with circumflex and dot below</desc><unientity>1EC7</unientity></character>
+<character hex="E1 E3 45" dec="225 227 069"><isoentity>Ecircgr</isoentity><desc>latin capital letter e with circumflex and grave</desc><unientity>1EC0</unientity></character>
+<character hex="E1 E3 65" dec="225 227 101"><isoentity>ecircgr</isoentity><desc>latin small letter e with circumflex and grave</desc><unientity>1EC1</unientity></character>
+<character hex="E3 E0 45" dec="227 224 069"><isoentity>Ecircha</isoentity><desc>latin capital letter e with circumflex and hook above</desc><unientity>1EC2</unientity></character>
+<character hex="E3 E0 65" dec="227 224 101"><isoentity>ecircha</isoentity><desc>latin small letter e with circumflex and hook above</desc><unientity>1EC3</unientity></character>
+<character hex="E4 E3 45" dec="228 227 069"><isoentity>Ecircti</isoentity><desc>latin capital letter e with circumflex and tilde</desc><unientity>1EC4</unientity></character>
+<character hex="E3 45" dec="227 069"><isoentity>Ecirc</isoentity><desc>latin capital letter e with circumflex</desc><unientity>00CA</unientity></character>
+<character hex="E3 65" dec="227 101"><isoentity>ecirc</isoentity><desc>latin small letter e with circumflex</desc><unientity>00EA</unientity></character>
+<character hex="F2 45" dec="242 069"><isoentity>Edotb</isoentity><desc>latin capital letter e with dot below</desc><unientity>1EB8</unientity></character>
+<character hex="F2 65" dec="242 101"><isoentity>edotb</isoentity><desc>latin small letter e with dot below</desc><unientity>1EB9</unientity></character>
+<character hex="E7 45" dec="231 069"><isoentity>Edot</isoentity><desc>latin capital letter e with dot above</desc><unientity>0116</unientity></character>
+<character hex="E7 65" dec="231 101"><isoentity>edot</isoentity><desc>latin small letter e with dot above</desc><unientity>0117</unientity></character>
+<character hex="E1 45" dec="225 069"><isoentity>Egrave</isoentity><desc>latin capital letter e with grave</desc><unientity>00C8</unientity></character>
+<character hex="E1 65" dec="225 101"><isoentity>egrave</isoentity><desc>latin small letter e with grave</desc><unientity>00E8</unientity></character>
+<character hex="E0 45" dec="224 069"><isoentity>Ehooka</isoentity><desc>latin capital letter e with hook above</desc><unientity>1EBA</unientity></character>
+<character hex="E0 65" dec="224 101"><isoentity>ehooka</isoentity><desc>latin small letter e with hook above</desc><unientity>1EBB</unientity></character>
+<character hex="E2 E5 45" dec="226 229 069"><isoentity>Emacrac</isoentity><desc>latin capital letter e with macron and acute</desc><unientity>1E16</unientity></character>
+<character hex="E2 E5 65" dec="226 229 101"><isoentity>emacrac</isoentity><desc>latin small letter e with macron and acute</desc><unientity>1E17</unientity></character>
+<character hex="E1 E5 45" dec="225 229 069"><isoentity>Emacrgr</isoentity><desc>latin capital letter e with macron and grave</desc><unientity>1E14</unientity></character>
+<character hex="E1 E5 65" dec="225 229 101"><isoentity>emacrgr</isoentity><desc>latin small letter e with macron and grave</desc><unientity>1E15</unientity></character>
+<character hex="E5 45" dec="229 069"><isoentity>Emacr</isoentity><desc>latin capital letter e with macron</desc><unientity>0112</unientity></character>
+<character hex="E5 65" dec="229 101"><isoentity>emacr</isoentity><desc>latin small letter e with macron</desc><unientity>0113</unientity></character>
+<character hex="F1 45" dec="241 069"><isoentity>Eogon</isoentity><desc>latin capital letter e with ogon</desc><unientity>0118</unientity></character>
+<character hex="F1 65" dec="241 101"><isoentity>eogon</isoentity><desc>latin small letter e with ogon</desc><unientity>0119</unientity></character>
+<character hex="BA" dec="186"><isoentity>eth</isoentity><desc>latin small letter eth</desc><unientity>00F0</unientity></character>
+<character hex="E4 45" dec="228 069"><isoentity>Etilde</isoentity><desc>latin capital letter e with tilde</desc><unientity>1EBC</unientity></character>
+<character hex="E4 65" dec="228 101"><isoentity>etilde</isoentity><desc>latin small letter e with tilde</desc><unientity>1EBD</unientity></character>
+<character hex="E8 45" dec="232 069"><isoentity>Euml</isoentity><desc>latin capital letter e with umlaut</desc><unientity>00CB</unientity></character>
+<character hex="E8 65" dec="232 101"><isoentity>euml</isoentity><desc>latin small letter e with umlaut</desc><unientity>00EB</unientity></character>
+<character hex="E7 46" dec="231 070"><isoentity>Fdot</isoentity><desc>latin capital letter f with dot above</desc><unientity>1E1E</unientity></character>
+<character hex="E7 66" dec="231 102"><isoentity>fdot</isoentity><desc>latin small letter f with dot above</desc><unientity>1E1F</unientity></character>
+<character hex="A9" dec="169"><isoentity>flat</isoentity><desc>musical flat sign</desc><unientity>266D</unientity></character>
+<character hex="E2 47" dec="226 071"><isoentity>Gacute</isoentity><desc>latin capital letter g with acute</desc><unientity>01F4</unientity></character>
+<character hex="E2 67" dec="226 103"><isoentity>gacute</isoentity><desc>latin small letter g with acute</desc><unientity>01F5</unientity></character>
+<character hex="1B 67 63 1B 73" dec="027 103 099 027 115"><isoentity>gamma</isoentity><desc>greek small letter gamma</desc><unientity>03B3</unientity></character>
+<character hex="E6 47" dec="230 071"><isoentity>Gbreve</isoentity><desc>latin capital letter g with breve</desc><unientity>011E</unientity></character>
+<character hex="E6 67" dec="230 103"><isoentity>gbreve</isoentity><desc>latin small letter g with breve</desc><unientity>011F</unientity></character>
+<character hex="E9 47" dec="233 071"><isoentity>Gcaron</isoentity><desc>latin capital letter g with caron</desc><unientity>01E6</unientity></character>
+<character hex="E9 67" dec="233 103"><isoentity>gcaron</isoentity><desc>latin small letter g with caron</desc><unientity>01E7</unientity></character>
+<character hex="F0 47" dec="240 071"><isoentity>Gcedil</isoentity><desc>latin capital letter g with cedilla</desc><unientity>0122</unientity></character>
+<character hex="F0 67" dec="240 103"><isoentity>gcedil</isoentity><desc>latin small letter g with cedilla</desc><unientity>0123</unientity></character>
+<character hex="E3 47" dec="227 071"><isoentity>Gcirc</isoentity><desc>latin capital letter g with circumflex</desc><unientity>011C</unientity></character>
+<character hex="E3 67" dec="227 103"><isoentity>gcirc</isoentity><desc>latin small letter g with circumflex</desc><unientity>011D</unientity></character>
+<character hex="E7 47" dec="231 071"><isoentity>Gdot</isoentity><desc>latin capital letter g with dot above</desc><unientity>0120</unientity></character>
+<character hex="E7 67" dec="231 103"><isoentity>gdot</isoentity><desc>latin small letter g with dot above</desc><unientity>0121</unientity></character>
+<character hex="E5 47" dec="229 071"><isoentity>Gmacr</isoentity><desc>latin capital letter g with macron</desc><unientity>1E20</unientity></character>
+<character hex="E5 67" dec="229 103"><isoentity>gmacr</isoentity><desc>latin small letter g with macron</desc><unientity>1E21</unientity></character>
+<character hex="E1" dec="225"><isoentity>grave</isoentity><desc>combining grave accent</desc><unientity>0300</unientity></character>
+<character hex="F5 47" dec="245 071"><isoentity>Gstrok</isoentity><desc>latin capital letter g with stroke</desc><unientity>01E4</unientity></character>
+<character hex="F5 67" dec="245 103"><isoentity>gstrok</isoentity><desc>latin small letter g with stroke</desc><unientity>01E5</unientity></character>
+<character hex="B7" dec="183"><isoentity>hardsign</isoentity><desc>modifier letter double prime</desc><unientity>02BA</unientity></character>
+<character hex="F9 48" dec="249 072"><isoentity>Hbreveb</isoentity><desc>latin capital letter h with breve below</desc><unientity>1E2A</unientity></character>
+<character hex="F9 68" dec="249 104"><isoentity>hbreveb</isoentity><desc>latin small letter h with breve below</desc><unientity>1E2B</unientity></character>
+<character hex="E9 48" dec="233 072"><isoentity>Hcaron</isoentity><desc>latin capital letter h with caron</desc><unientity>021E</unientity></character>
+<character hex="E9 68" dec="233 104"><isoentity>hcaron</isoentity><desc>latin small letter h with caron</desc><unientity>021F</unientity></character>
+<character hex="F0 48" dec="240 072"><isoentity>Hcedil</isoentity><desc>latin capital letter h with cedilla</desc><unientity>1E28</unientity></character>
+<character hex="F0 68" dec="240 104"><isoentity>hcedil</isoentity><desc>latin small letter h with cedilla</desc><unientity>1E29</unientity></character>
+<character hex="E3 48" dec="227 072"><isoentity>Hcirc</isoentity><desc>latin capital letter h with circumflex</desc><unientity>0124</unientity></character>
+<character hex="E3 68" dec="227 104"><isoentity>hcirc</isoentity><desc>latin small letter h with circumflex</desc><unientity>0125</unientity></character>
+<character hex="F2 48" dec="242 072"><isoentity>Hdotb</isoentity><desc>latin capital letter h with dot below</desc><unientity>1E24</unientity></character>
+<character hex="F2 68" dec="242 104"><isoentity>hdotb</isoentity><desc>latin small letter h with dot below</desc><unientity>1E25</unientity></character>
+<character hex="E7 48" dec="231 072"><isoentity>Hdot</isoentity><desc>latin capital letter h with dot above</desc><unientity>1E22</unientity></character>
+<character hex="E7 68" dec="231 104"><isoentity>hdot</isoentity><desc>latin small letter h with dot above</desc><unientity>1E23</unientity></character>
+<character hex="F6 68" dec="246 104"><isoentity>hlowline</isoentity><desc>latin small letter h with low line</desc><unientity>1E96</unientity></character>
+<character hex="E0" dec="224"><isoentity>hooka</isoentity><desc>combining hook above</desc><unientity>0309</unientity></character>
+<character hex="F5 48" dec="245 072"><isoentity>Hstroke</isoentity><desc>latin capital letter h with stroke</desc><unientity>0126</unientity></character>
+<character hex="F5 68" dec="245 104"><isoentity>hstroke</isoentity><desc>latin small letter h with stroke</desc><unientity>0127</unientity></character>
+<character hex="E8 48" dec="232 072"><isoentity>Huml</isoentity><desc>latin capital letter h with diaeresis</desc><unientity>1E26</unientity></character>
+<character hex="E8 68" dec="232 104"><isoentity>huml</isoentity><desc>latin small letter h with diaeresis</desc><unientity>1E27</unientity></character>
+<character hex="E2 49" dec="226 073"><isoentity>Iacute</isoentity><desc>latin capital letter i with acute</desc><unientity>00CD</unientity></character>
+<character hex="E2 69" dec="226 105"><isoentity>iacute</isoentity><desc>latin small letter i with acute</desc><unientity>00ED</unientity></character>
+<character hex="E6 49" dec="230 073"><isoentity>Ibreve</isoentity><desc>latin capital letter i with breve</desc><unientity>012C</unientity></character>
+<character hex="E6 69" dec="230 105"><isoentity>ibreve</isoentity><desc>latin small letter i with breve</desc><unientity>012D</unientity></character>
+<character hex="E9 49" dec="233 073"><isoentity>Icaron</isoentity><desc>latin capital letter i with caron</desc><unientity>01CF</unientity></character>
+<character hex="E9 69" dec="233 105"><isoentity>icaron</isoentity><desc>latin small letter i with caron</desc><unientity>01D0</unientity></character>
+<character hex="E3 49" dec="227 073"><isoentity>Icirc</isoentity><desc>latin capital letter i with circumflex</desc><unientity>00CE</unientity></character>
+<character hex="E3 69" dec="227 105"><isoentity>icirc</isoentity><desc>latin small letter i with circumflex</desc><unientity>00EE</unientity></character>
+<character hex="F2 49" dec="242 073"><isoentity>Idotb</isoentity><desc>latin capital letter i with dot below</desc><unientity>1ECA</unientity></character>
+<character hex="F2 69" dec="242 105"><isoentity>idotb</isoentity><desc>latin small letter i with dot below</desc><unientity>1ECB</unientity></character>
+<character hex="E7 49" dec="231 073"><isoentity>Idot</isoentity><desc>latin capital letter i with dot above</desc><unientity>0130</unientity></character>
+<character hex="C6" dec="198"><isoentity>iexcl</isoentity><desc>inverted exclamation mark</desc><unientity>00A1</unientity></character>
+<character hex="E1 49" dec="225 073"><isoentity>Igrave</isoentity><desc>latin capital letter i with grave</desc><unientity>00CC</unientity></character>
+<character hex="E1 69" dec="225 105"><isoentity>igrave</isoentity><desc>latin small letter i with grave</desc><unientity>00EC</unientity></character>
+<character hex="E0 49" dec="224 073"><isoentity>Ihooka</isoentity><desc>latin capital letter i with hook above</desc><unientity>1EC8</unientity></character>
+<character hex="E0 69" dec="224 105"><isoentity>ihooka</isoentity><desc>latin small letter i with hook above</desc><unientity>1EC9</unientity></character>
+<character hex="E5 49" dec="229 073"><isoentity>Imacr</isoentity><desc>latin capital letter i with macron</desc><unientity>012A</unientity></character>
+<character hex="E5 69" dec="229 105"><isoentity>imacr</isoentity><desc>latin small letter i with macron</desc><unientity>012B</unientity></character>
+<character hex="B8" dec="184"><isoentity>inodot</isoentity><desc>latin small letter dotless i</desc><unientity>0131</unientity></character>
+<character hex="F1 49" dec="241 073"><isoentity>Iogon</isoentity><desc>latin capital letter i with ogon</desc><unientity>012E</unientity></character>
+<character hex="F1 69" dec="241 105"><isoentity>iogon</isoentity><desc>latin small letter i with ogon</desc><unientity>012F</unientity></character>
+<character hex="C5" dec="197"><isoentity>iquest</isoentity><desc>inverted question mark</desc><unientity>00BF</unientity></character>
+<character hex="E4 49" dec="228 073"><isoentity>Itilde</isoentity><desc>latin capital letter i with tilde</desc><unientity>0128</unientity></character>
+<character hex="E4 69" dec="228 105"><isoentity>itilde</isoentity><desc>latin small letter i with tilde</desc><unientity>0129</unientity></character>
+<character hex="E2 E8 49" dec="226 232 073"><isoentity>Iumlac</isoentity><desc>latin capital letter i with diaeresis and acute</desc><unientity>1E2E</unientity></character>
+<character hex="E2 E8 69" dec="226 232 105"><isoentity>iumlac</isoentity><desc>latin small letter i with diaeresis and acute</desc><unientity>1E2F</unientity></character>
+<character hex="E8 49" dec="232 073"><isoentity>Iuml</isoentity><desc>latin capital letter i with umlaut</desc><unientity>00CF</unientity></character>
+<character hex="E8 69" dec="232 105"><isoentity>iuml</isoentity><desc>latin small letter i with umlaut</desc><unientity>00EF</unientity></character>
+<character hex="E9 6A" dec="233 106"><isoentity>jcaron</isoentity><desc>latin small letter j with caron</desc><unientity>01F0</unientity></character>
+<character hex="E3 4A" dec="227 074"><isoentity>Jcirc</isoentity><desc>latin capital letter j with circumflex</desc><unientity>0134</unientity></character>
+<character hex="E3 6A" dec="227 106"><isoentity>jcirc</isoentity><desc>latin small letter j with circumflex</desc><unientity>0135</unientity></character>
+<character hex="E2 4B" dec="226 075"><isoentity>Kacute</isoentity><desc>latin capital letter k with acute</desc><unientity>1E30</unientity></character>
+<character hex="E2 6B" dec="226 107"><isoentity>kacute</isoentity><desc>latin small letter k with acute</desc><unientity>1E31</unientity></character>
+<character hex="F0 4B" dec="240 075"><isoentity>Kcedil</isoentity><desc>latin capital letter k with cedilla</desc><unientity>0136</unientity></character>
+<character hex="F0 6B" dec="240 107"><isoentity>kcedil</isoentity><desc>latin small letter k with cedilla</desc><unientity>0137</unientity></character>
+<character hex="E3 4B" dec="227 075"><isoentity>Kcirc</isoentity><desc>latin capital letter k with circumflex</desc><unientity>01E8</unientity></character>
+<character hex="E3 6B" dec="227 107"><isoentity>kcirc</isoentity><desc>latin small letter k with circumflex</desc><unientity>01E9</unientity></character>
+<character hex="F2 4B" dec="242 075"><isoentity>Kdotb</isoentity><desc>latin capital letter k with dot below</desc><unientity>1E32</unientity></character>
+<character hex="F2 6B" dec="242 107"><isoentity>kdotb</isoentity><desc>latin small letter k with dot below</desc><unientity>1E33</unientity></character>
+<character hex="F6 4B" dec="246 075"><isoentity>Kmacrb</isoentity><desc>latin capital letter k with line below</desc><unientity>1E34</unientity></character>
+<character hex="F6 6B" dec="246 107"><isoentity>kmacrb</isoentity><desc>latin small letter k with line below</desc><unientity>1E35</unientity></character>
+<character hex="E2 4C" dec="226 076"><isoentity>Lacute</isoentity><desc>latin capital letter l with acute</desc><unientity>0139</unientity></character>
+<character hex="E2 6C" dec="226 108"><isoentity>lacute</isoentity><desc>latin small letter l with acute</desc><unientity>013A</unientity></character>
+<character hex="E9 4C" dec="233 076"><isoentity>Lcaron</isoentity><desc>latin capital letter l with caron</desc><unientity>013D</unientity></character>
+<character hex="E9 6C" dec="233 108"><isoentity>lcaron</isoentity><desc>latin small letter l with caron</desc><unientity>013E</unientity></character>
+<character hex="F0 4C" dec="240 076"><isoentity>Lcedil</isoentity><desc>latin capital letter l with cedilla</desc><unientity>013B</unientity></character>
+<character hex="F0 6C" dec="240 108"><isoentity>lcedil</isoentity><desc>latin small letter l with cedilla</desc><unientity>013C</unientity></character>
+<character hex="E3 4C" dec="227 076"><isoentity>Lcirc</isoentity><desc>latin capital letter l with circumflex</desc><unientity>1E3C</unientity></character>
+<character hex="E3 6C" dec="227 108"><isoentity>lcirc</isoentity><desc>latin small letter l with circumflex</desc><unientity>1E3D</unientity></character>
+<character hex="FA" dec="250"><isoentity>ldbltil</isoentity><desc>combining double tilde left half</desc><unientity>FE22</unientity></character>
+<character hex="E5 F2 4C" dec="229 242 079"><isoentity>Ldotbma</isoentity><desc>latin capital letter l with dot below and macron</desc><unientity>1E38</unientity></character>
+<character hex="E5 F2 6C" dec="229 242 111"><isoentity>ldotbma</isoentity><desc>latin small letter l with dot below and macron</desc><unientity>1E39</unientity></character>
+<character hex="F2 4C" dec="242 076"><isoentity>Ldotb</isoentity><desc>latin capital letter l with dot below</desc><unientity>1E36</unientity></character>
+<character hex="F2 6C" dec="242 108"><isoentity>ldotb</isoentity><desc>latin small letter l with dot below</desc><unientity>1E37</unientity></character>
+<character hex="EB" dec="235"><isoentity>llig</isoentity><desc>combining ligature left half</desc><unientity>FE20</unientity></character>
+<character hex="F6 4C" dec="246 076"><isoentity>Lmacrb</isoentity><desc>latin capital letter l with line below</desc><unientity>1E3A</unientity></character>
+<character hex="F6 6C" dec="246 108"><isoentity>lmacrb</isoentity><desc>latin small letter l with line below</desc><unientity>1E3B</unientity></character>
+<character hex="4C A8" dec="076 168"><isoentity>Lmidot</isoentity><desc>latin capital letter l with middle dot</desc><unientity>013F</unientity></character>
+<character hex="6C A8" dec="108 168"><isoentity>lmidot</isoentity><desc>latin small letter l with middle dot</desc><unientity>0140</unientity></character>
+<character hex="A1" dec="161"><isoentity>Lstrok</isoentity><desc>latin capital letter l with stroke</desc><unientity>0141</unientity></character>
+<character hex="B1" dec="177"><isoentity>lstrok</isoentity><desc>latin small letter l with stroke</desc><unientity>0142</unientity></character>
+<character hex="E5" dec="229"><isoentity>macr</isoentity><desc>combining macron</desc><unientity>0304</unientity></character>
+<character hex="E2 4D" dec="226 077"><isoentity>Macute</isoentity><desc>latin capital letter m with acute</desc><unientity>1E3E</unientity></character>
+<character hex="E2 6D" dec="226 109"><isoentity>macute</isoentity><desc>latin small letter m with acute</desc><unientity>1E3F</unientity></character>
+<character hex="F2 4D" dec="242 077"><isoentity>Mdotb</isoentity><desc>latin capital letter m with dot below</desc><unientity>1E42</unientity></character>
+<character hex="F2 6D" dec="242 109"><isoentity>mdotb</isoentity><desc>latin small letter m with dot below</desc><unientity>1E43</unientity></character>
+<character hex="E7 4D" dec="231 077"><isoentity>Mdot</isoentity><desc>latin capital letter m with dot above</desc><unientity>1E40</unientity></character>
+<character hex="E7 6D" dec="231 109"><isoentity>mdot</isoentity><desc>latin small letter m with dot above</desc><unientity>1E41</unientity></character>
+<character hex="A8" dec="168"><isoentity>middot</isoentity><desc>middle dot</desc><unientity>00B7</unientity></character>
+<character hex="B0" dec="176"><isoentity>mllhring</isoentity><desc>modifier letter left half ring</desc><unientity>02BF</unientity></character>
+<character hex="AE" dec="174"><isoentity>mlrhring</isoentity><desc>modifier letter right half ring</desc><unientity>02BE</unientity></character>
+<character hex="E2 4E" dec="226 078"><isoentity>Nacute</isoentity><desc>latin capital letter n with acute</desc><unientity>0143</unientity></character>
+<character hex="E2 6E" dec="226 110"><isoentity>nacute</isoentity><desc>latin small letter n with acute</desc><unientity>0144</unientity></character>
+<character hex="ED 6E" dec="237 110"><isoentity>napos</isoentity><desc>latin small letter n with apostrophe</desc><unientity>0149</unientity></character>
+<character hex="E9 4E" dec="233 078"><isoentity>Ncaron</isoentity><desc>latin capital letter n with caron</desc><unientity>0147</unientity></character>
+<character hex="E9 6E" dec="233 110"><isoentity>ncaron</isoentity><desc>latin small letter n with caron</desc><unientity>0148</unientity></character>
+<character hex="F0 4E" dec="240 078"><isoentity>Ncedil</isoentity><desc>latin capital letter n with cedilla</desc><unientity>0145</unientity></character>
+<character hex="F0 6E" dec="240 110"><isoentity>ncedil</isoentity><desc>latin small letter n with cedilla</desc><unientity>0146</unientity></character>
+<character hex="F2 4E" dec="242 078"><isoentity>Ndotb</isoentity><desc>latin capital letter n with dot below</desc><unientity>1E46</unientity></character>
+<character hex="F2 6E" dec="242 110"><isoentity>ndotb</isoentity><desc>latin small letter n with dot below</desc><unientity>1E47</unientity></character>
+<character hex="E7 4E" dec="231 078"><isoentity>Ndot</isoentity><desc>latin capital letter n with dot above</desc><unientity>1E44</unientity></character>
+<character hex="E7 6E" dec="231 110"><isoentity>ndot</isoentity><desc>latin small letter n with dot above</desc><unientity>1E45</unientity></character>
+<character hex="E1 4E" dec="225 078"><isoentity>Ngrave</isoentity><desc>latin capital letter n with grave</desc><unientity>01F8</unientity></character>
+<character hex="E1 6E" dec="225 110"><isoentity>ngrave</isoentity><desc>latin small letter n with grave</desc><unientity>01F9</unientity></character>
+<character hex="F6 4E" dec="246 078"><isoentity>Nmacrb</isoentity><desc>latin capital letter n with line below</desc><unientity>1E48</unientity></character>
+<character hex="F6 6E" dec="246 110"><isoentity>nmacrb</isoentity><desc>latin small letter n with line below</desc><unientity>1E49</unientity></character>
+<character hex="E4 4E" dec="228 078"><isoentity>Ntilde</isoentity><desc>latin capital letter n with tilde</desc><unientity>00D1</unientity></character>
+<character hex="E4 6E" dec="228 110"><isoentity>ntilde</isoentity><desc>latin small letter n with tilde</desc><unientity>00F1</unientity></character>
+<character hex="E2 4F" dec="226 079"><isoentity>Oacute</isoentity><desc>latin capital letter o with acute</desc><unientity>00D3</unientity></character>
+<character hex="E2 6F" dec="226 111"><isoentity>oacute</isoentity><desc>latin small letter o with acute</desc><unientity>00F3</unientity></character>
+<character hex="E6 4F" dec="230 079"><isoentity>Obreve</isoentity><desc>latin capital letter o with breve</desc><unientity>014E</unientity></character>
+<character hex="E6 6F" dec="230 111"><isoentity>obreve</isoentity><desc>latin small letter o with breve</desc><unientity>014F</unientity></character>
+<character hex="E9 4F" dec="233 079"><isoentity>Ocaron</isoentity><desc>latin capital letter o with caron</desc><unientity>01D1</unientity></character>
+<character hex="E9 6F" dec="233 111"><isoentity>ocaron</isoentity><desc>latin small letter o with caron</desc><unientity>01D2</unientity></character>
+<character hex="E3 E2 4F" dec="227 226 079"><isoentity>Ocircac</isoentity><desc>latin capital letter o with circumflex and acute</desc><unientity>1ED0</unientity></character>
+<character hex="E3 E2 6F" dec="227 226 111"><isoentity>ocircac</isoentity><desc>latin small letter o with circumflex and acute</desc><unientity>1ED1</unientity></character>
+<character hex="E3 F2 4F" dec="227 242 079"><isoentity>Ocircdb</isoentity><desc>latin capital letter o with circumflex and dot below</desc><unientity>1ED8</unientity></character>
+<character hex="E3 F2 6F" dec="227 242 111"><isoentity>ocircdb</isoentity><desc>latin small letter o with circumflex and dot below</desc><unientity>1ED9</unientity></character>
+<character hex="E1 E3 4F" dec="225 227 079"><isoentity>Ocircgr</isoentity><desc>latin capital letter o with circumflex and grave</desc><unientity>1ED2</unientity></character>
+<character hex="E1 E3 6F" dec="225 227 111"><isoentity>ocircgr</isoentity><desc>latin small letter o with circumflex and grave</desc><unientity>1ED3</unientity></character>
+<character hex="E3 E0 4F" dec="227 224 079"><isoentity>Ocircha</isoentity><desc>latin capital letter o with circumflex and hook above</desc><unientity>1ED4</unientity></character>
+<character hex="E3 E0 6F" dec="227 224 111"><isoentity>ocircha</isoentity><desc>latin small letter o with circumflex and hook above</desc><unientity>1ED5</unientity></character>
+<character hex="E4 E3 4F" dec="228 227 079"><isoentity>Ocircti</isoentity><desc>latin capital letter o with circumflex and tilde</desc><unientity>1ED6</unientity></character>
+<character hex="E4 E3 6F" dec="228 227 111"><isoentity>ocircti</isoentity><desc>latin small letter o with circumflex and tilde</desc><unientity>1ED7</unientity></character>
+<character hex="E3 4F" dec="227 079"><isoentity>Ocirc</isoentity><desc>latin capital letter o with circumflex</desc><unientity>00D4</unientity></character>
+<character hex="E3 6F" dec="227 111"><isoentity>ocirc</isoentity><desc>latin small letter o with circumflex</desc><unientity>00F4</unientity></character>
+<character hex="EE 4F" dec="238 079"><isoentity>Odblac</isoentity><desc>latin capital letter o with double acute</desc><unientity>0150</unientity></character>
+<character hex="EE 6F" dec="238 111"><isoentity>odblac</isoentity><desc>latin small letter o with double acute</desc><unientity>0151</unientity></character>
+<character hex="E5 E7 4F" dec="229 231 079"><isoentity>Odotama</isoentity><desc>latin capital letter o with dot above and macron</desc><unientity>0230</unientity></character>
+<character hex="E5 E7 6F" dec="229 231 111"><isoentity>odotama</isoentity><desc>latin small letter o with dot above and macron</desc><unientity>0231</unientity></character>
+<character hex="E7 4F" dec="231 079"><isoentity>Odota</isoentity><desc>latin capital letter o with dot above</desc><unientity>022E</unientity></character>
+<character hex="E7 6F" dec="231 111"><isoentity>odota</isoentity><desc>latin small letter o with dot above</desc><unientity>022F</unientity></character>
+<character hex="F2 4F" dec="242 079"><isoentity>Odotb</isoentity><desc>latin capital letter o with dot below</desc><unientity>1ECC</unientity></character>
+<character hex="F2 6F" dec="242 111"><isoentity>odotb</isoentity><desc>latin small letter o with dot below</desc><unientity>1ECD</unientity></character>
+<character hex="A6" dec="166"><isoentity>OElig</isoentity><desc>latin capital letter oe</desc><unientity>0152</unientity></character>
+<character hex="B6" dec="182"><isoentity>oelig</isoentity><desc>latin small letter oe</desc><unientity>0153</unientity></character>
+<character hex="F1" dec="241"><isoentity>ogon</isoentity><desc>combining ogonek</desc><unientity>0328</unientity></character>
+<character hex="E1 4F" dec="225 079"><isoentity>Ograve</isoentity><desc>latin capital letter o with grave</desc><unientity>00D2</unientity></character>
+<character hex="E1 6F" dec="225 111"><isoentity>ograve</isoentity><desc>latin small letter o with grave</desc><unientity>00F2</unientity></character>
+<character hex="E0 4F" dec="224 079"><isoentity>Ohooka</isoentity><desc>latin capital letter o with hook above</desc><unientity>1ECE</unientity></character>
+<character hex="E0 6F" dec="224 111"><isoentity>ohooka</isoentity><desc>latin small letter o with hook above</desc><unientity>1ECF</unientity></character>
+<character hex="E2 AC" dec="226 172"><isoentity>Ohornac</isoentity><desc>latin capital letter o with horn and acute</desc><unientity>1EDA</unientity></character>
+<character hex="E2 AD" dec="226 173"><isoentity>Ohornac</isoentity><desc>latin capital letter u with horn and acute</desc><unientity>1EE8</unientity></character>
+<character hex="E2 BC" dec="226 188"><isoentity>ohornac</isoentity><desc>latin small letter o with horn and acute</desc><unientity>1EDB</unientity></character>
+<character hex="F2 AC" dec="242 172"><isoentity>Ohorndb</isoentity><desc>latin capital letter o with horn and dot below</desc><unientity>1EE2</unientity></character>
+<character hex="F2 BC" dec="242 188"><isoentity>ohorndb</isoentity><desc>latin small letter o with horn and dot below</desc><unientity>1EE3</unientity></character>
+<character hex="E1 AC" dec="225 172"><isoentity>Ohorngr</isoentity><desc>latin capital letter o with horn and grave</desc><unientity>1EDC</unientity></character>
+<character hex="E1 BC" dec="225 188"><isoentity>ohorngr</isoentity><desc>latin small letter o with horn and grave</desc><unientity>1EDD</unientity></character>
+<character hex="E0 AC" dec="224 172"><isoentity>Ohornha</isoentity><desc>latin capital letter o with horn and hook above</desc><unientity>1EDE</unientity></character>
+<character hex="E0 BC" dec="224 188"><isoentity>ohornha</isoentity><desc>latin small letter o with horn and hook above</desc><unientity>1EDF</unientity></character>
+<character hex="E4 AC" dec="228 172"><isoentity>Ohornti</isoentity><desc>latin capital letter o with horn and tilde</desc><unientity>1EE0</unientity></character>
+<character hex="E4 BC" dec="228 188"><isoentity>ohornti</isoentity><desc>latin small letter o with horn and tilde</desc><unientity>1EE1</unientity></character>
+<character hex="AC" dec="172"><isoentity>Ohorn</isoentity><desc>latin capital letter o with horn</desc><unientity>01A0</unientity></character>
+<character hex="BC" dec="188"><isoentity>ohorn</isoentity><desc>latin small letter o with horn</desc><unientity>01A1</unientity></character>
+<character hex="E2 E5 4F" dec="226 229 079"><isoentity>Omacrac</isoentity><desc>latin capital letter o with macron and acute</desc><unientity>1E52</unientity></character>
+<character hex="E2 E5 6F" dec="226 229 111"><isoentity>omacrac</isoentity><desc>latin small letter o with macron and acute</desc><unientity>1E53</unientity></character>
+<character hex="E1 E5 4F" dec="225 229 079"><isoentity>Omacrgr</isoentity><desc>latin capital letter o with macron and grave</desc><unientity>1E50</unientity></character>
+<character hex="E1 E5 6F" dec="225 229 111"><isoentity>omacrgr</isoentity><desc>latin small letter o with macron and grave</desc><unientity>1E51</unientity></character>
+<character hex="E5 4F" dec="229 079"><isoentity>Omacr</isoentity><desc>latin capital letter o with macron</desc><unientity>014C</unientity></character>
+<character hex="E5 6F" dec="229 111"><isoentity>omacr</isoentity><desc>latin small letter o with macron</desc><unientity>014D</unientity></character>
+<character hex="E5 F1 4F" dec="229 241 079"><isoentity>Oogonma</isoentity><desc>latin capital letter o with ogonek and macron</desc><unientity>01EC</unientity></character>
+<character hex="E5 F1 6F" dec="229 241 111"><isoentity>oogonma</isoentity><desc>latin small letter o with ogonek and macron</desc><unientity>01ED</unientity></character>
+<character hex="F1 4F" dec="241 111"><isoentity>Oogon</isoentity><desc>latin capital letter o with ogonek</desc><unientity>01EA</unientity></character>
+<character hex="F1 6F" dec="241 111"><isoentity>oogon</isoentity><desc>latin small letter o with ogonek</desc><unientity>01EB</unientity></character>
+<character hex="E2 A2" dec="226 162"><isoentity>Oslasha</isoentity><desc>latin capital letter o with stroke and acute</desc><unientity>01FE</unientity></character>
+<character hex="E2 B2" dec="226 178"><isoentity>oslasha</isoentity><desc>latin small letter o with stroke and acute</desc><unientity>01FF</unientity></character>
+<character hex="A2" dec="162"><isoentity>Oslash</isoentity><desc>latin capital letter o with stroke</desc><unientity>00D8</unientity></character>
+<character hex="B2" dec="178"><isoentity>oslash</isoentity><desc>latin small letter o with stroke</desc><unientity>00F8</unientity></character>
+<character hex="E2 E4 4F" dec="226 228 079"><isoentity>Otildeac</isoentity><desc>latin capital letter o with tilde and acute</desc><unientity>1E4C</unientity></character>
+<character hex="E2 E4 6F" dec="226 228 111"><isoentity>otildeac</isoentity><desc>latin small letter o with tilde and acute</desc><unientity>1E4D</unientity></character>
+<character hex="E5 E4 4F" dec="229 228 079"><isoentity>Otildema</isoentity><desc>latin capital letter o with tilde and macron</desc><unientity>022C</unientity></character>
+<character hex="E5 E4 6F" dec="229 228 111"><isoentity>otildema</isoentity><desc>latin small letter o with tilde and macron</desc><unientity>022D</unientity></character>
+<character hex="E8 E4 4F" dec="232 228 079"><isoentity>Otildeum</isoentity><desc>latin capital letter o with tilde and diaeresis</desc><unientity>1E4E</unientity></character>
+<character hex="E8 E4 6F" dec="232 228 111"><isoentity>otildeum</isoentity><desc>latin small letter o with tilde and diaeresis</desc><unientity>1E4F</unientity></character>
+<character hex="E4 4F" dec="228 079"><isoentity>Otilde</isoentity><desc>latin capital letter o with tilde</desc><unientity>00D5</unientity></character>
+<character hex="E4 6F" dec="228 111"><isoentity>otilde</isoentity><desc>latin small letter o with tilde</desc><unientity>00F5</unientity></character>
+<character hex="E5 E8 4F" dec="229 232 079"><isoentity>Oumlma</isoentity><desc>latin capital letter o with diaeresis and macron</desc><unientity>022A</unientity></character>
+<character hex="E5 E8 6F" dec="229 232 111"><isoentity>oumlma</isoentity><desc>latin small letter o with diaeresis and macron</desc><unientity>022B</unientity></character>
+<character hex="E8 4F" dec="232 079"><isoentity>Ouml</isoentity><desc>latin capital letter o with umlaut</desc><unientity>00D6</unientity></character>
+<character hex="E8 6F" dec="232 111"><isoentity>ouml</isoentity><desc>latin small letter o with umlaut</desc><unientity>00F6</unientity></character>
+<character hex="E2 50" dec="226 080"><isoentity>Pacute</isoentity><desc>latin capital letter p with acute</desc><unientity>1E54</unientity></character>
+<character hex="E2 70" dec="226 112"><isoentity>pacute</isoentity><desc>latin small letter p with acute</desc><unientity>1E55</unientity></character>
+<character hex="E7 50" dec="231 080"><isoentity>Pdota</isoentity><desc>latin capital letter p with dot above</desc><unientity>1E56</unientity></character>
+<character hex="E7 70" dec="231 112"><isoentity>pdota</isoentity><desc>latin small letter p with dot above</desc><unientity>1E57</unientity></character>
+<character hex="AB" dec="171"><isoentity>plusmn</isoentity><desc>plus-minus sign</desc><unientity>00B1</unientity></character>
+<character hex="B9" dec="185"><isoentity>pound</isoentity><desc>pound sign</desc><unientity>00A3</unientity></character>
+<character hex="E2 52" dec="226 082"><isoentity>Racute</isoentity><desc>latin capital letter r with acute</desc><unientity>0154</unientity></character>
+<character hex="E2 72" dec="226 114"><isoentity>racute</isoentity><desc>latin small letter r with acute</desc><unientity>0155</unientity></character>
+<character hex="E9 52" dec="233 082"><isoentity>Rcaron</isoentity><desc>latin capital letter r with caron</desc><unientity>0158</unientity></character>
+<character hex="E9 72" dec="233 114"><isoentity>rcaron</isoentity><desc>latin small letter r with caron</desc><unientity>0159</unientity></character>
+<character hex="F8" dec="248"><isoentity>rcedil</isoentity><desc>combining left half ring below</desc><unientity>031C</unientity></character>
+<character hex="F8 52" dec="240 082"><isoentity>Rcedil</isoentity><desc>latin capital letter r with cedilla</desc><unientity>0156</unientity></character>
+<character hex="F0 72" dec="240 114"><isoentity>rcedil</isoentity><desc>latin small letter r with cedilla</desc><unientity>0157</unientity></character>
+<character hex="ED" dec="237"><isoentity>rcommaa</isoentity><desc>combining comma above right</desc><unientity>0315</unientity></character>
+<character hex="FB" dec="251"><isoentity>rdbltil</isoentity><desc>combining double tilde right half</desc><unientity>FE23</unientity></character>
+<character hex="E7 52" dec="231 082"><isoentity>Rdota</isoentity><desc>latin capital letter r with dot above</desc><unientity>1E58</unientity></character>
+<character hex="E7 72" dec="231 114"><isoentity>rdota</isoentity><desc>latin small letter r with dot above</desc><unientity>1E59</unientity></character>
+<character hex="F2 52" dec="242 082"><isoentity>Rdotb</isoentity><desc>latin capital letter r with dot below</desc><unientity>1E5A</unientity></character>
+<character hex="F2 72" dec="242 114"><isoentity>rdotb</isoentity><desc>latin small letter r with dot below</desc><unientity>1E5B</unientity></character>
+<character hex="AA" dec="170"><isoentity>reg</isoentity><desc>registered sign</desc><unientity>00AE</unientity></character>
+<character hex="F4" dec="244"><isoentity>ringb</isoentity><desc>combining ring below</desc><unientity>0325</unientity></character>
+<character hex="EA" dec="234"><isoentity>ring</isoentity><desc>combining ring above</desc><unientity>030A</unientity></character>
+<character hex="EC" dec="236"><isoentity>rlig</isoentity><desc>combining ligature right half</desc><unientity>FE21</unientity></character>
+<character hex="F6 52" dec="246 082"><isoentity>Rmacrb</isoentity><desc>latin capital letter r with line below</desc><unientity>1E5E</unientity></character>
+<character hex="F6 72" dec="246 114"><isoentity>rmacrb</isoentity><desc>latin small letter r with line below</desc><unientity>1E5F</unientity></character>
+<character hex="E7 E2 53" dec="231 226 083"><isoentity>Sacuteda</isoentity><desc>latin capital letter s with acute and dot above</desc><unientity>1E64</unientity></character>
+<character hex="E7 E2 73" dec="231 226 115"><isoentity>sacuteda</isoentity><desc>latin small letter s with acute and dot above</desc><unientity>1E65</unientity></character>
+<character hex="E2 53" dec="226 083"><isoentity>Sacute</isoentity><desc>latin capital letter s with acute</desc><unientity>015A</unientity></character>
+<character hex="E2 73" dec="226 115"><isoentity>sacute</isoentity><desc>latin small letter s with acute</desc><unientity>015B</unientity></character>
+<character hex="E7 E9 53" dec="231 233 083"><isoentity>Scaronda</isoentity><desc>latin capital letter s with caron and dot above</desc><unientity>1E66</unientity></character>
+<character hex="E7 E9 73" dec="231 233 115"><isoentity>scaronda</isoentity><desc>latin small letter s with caron and dot above</desc><unientity>1E67</unientity></character>
+<character hex="E9 53" dec="233 083"><isoentity>Scaron</isoentity><desc>latin capital letter s with caron</desc><unientity>0160</unientity></character>
+<character hex="E9 73" dec="233 115"><isoentity>scaron</isoentity><desc>latin small letter s with caron</desc><unientity>0161</unientity></character>
+<character hex="F0 53" dec="240 083"><isoentity>Scedil</isoentity><desc>latin capital letter s with cedil</desc><unientity>015E</unientity></character>
+<character hex="F0 73" dec="240 115"><isoentity>scedil</isoentity><desc>latin small letter s with cedil</desc><unientity>015F</unientity></character>
+<character hex="E3 53" dec="227 083"><isoentity>Scirc</isoentity><desc>latin capital letter s with circumflex</desc><unientity>015C</unientity></character>
+<character hex="E3 73" dec="227 115"><isoentity>scirc</isoentity><desc>latin small letter s with circumflex</desc><unientity>015D</unientity></character>
+<character hex="F7 53" dec="247 083"><isoentity>scommab</isoentity><desc>latin capital letter s with comma below</desc><unientity>0218</unientity></character>
+<character hex="F7 73" dec="247 115"><isoentity>scommab</isoentity><desc>latin small letter s with comma below</desc><unientity>0219</unientity></character>
+<character hex="C1" dec="193"><isoentity>scriptl</isoentity><desc>script small l</desc><unientity>2113</unientity></character>
+<character hex="E7 53" dec="231 083"><isoentity>Sdota</isoentity><desc>latin capital letter s with dot above</desc><unientity>1E60</unientity></character>
+<character hex="E7 73" dec="231 115"><isoentity>sdota</isoentity><desc>latin small letter s with dot above</desc><unientity>1E61</unientity></character>
+<character hex="E7 F2 53" dec="231 242 083"><isoentity>Sdotbda</isoentity><desc>latin capital letter s with dot below and dot above</desc><unientity>1E68</unientity></character>
+<character hex="E7 F2 73" dec="231 242 115"><isoentity>sdotbda</isoentity><desc>latin small letter s with dot below and dot above</desc><unientity>1E69</unientity></character>
+<character hex="F2 53" dec="242 083"><isoentity>Sdotb</isoentity><desc>latin capital letter s with dot below</desc><unientity>1E62</unientity></character>
+<character hex="F2 73" dec="242 115"><isoentity>sdotb</isoentity><desc>latin small letter s with dot below</desc><unientity>1E63</unientity></character>
+<character hex="C4" dec="196"><isoentity>sharp</isoentity><desc>sharp</desc><unientity>266F</unientity></character>
+<character hex="A7" dec="167"><isoentity>softsign</isoentity><desc>modifier letter prime</desc><unientity>02B9</unientity></character>
+<character hex="1B 62 30 1B 73" dec="027 098 048 027 115"><isoentity>sub0</isoentity><desc>subscript zero</desc><unientity>2080</unientity></character>
+<character hex="1B 62 31 1B 73" dec="027 098 049 027 115"><isoentity>sub1</isoentity><desc>subscript one</desc><unientity>2081</unientity></character>
+<character hex="1B 62 32 1B 73" dec="027 098 050 027 115"><isoentity>sub2</isoentity><desc>subscript two</desc><unientity>2082</unientity></character>
+<character hex="1B 62 33 1B 73" dec="027 098 051 027 115"><isoentity>sub3</isoentity><desc>subscript three</desc><unientity>2083</unientity></character>
+<character hex="1B 62 34 1B 73" dec="027 098 052 027 115"><isoentity>sub4</isoentity><desc>subscript four</desc><unientity>2084</unientity></character>
+<character hex="1B 62 35 1B 73" dec="027 098 053 027 115"><isoentity>sub5</isoentity><desc>subscript five</desc><unientity>2085</unientity></character>
+<character hex="1B 62 36 1B 73" dec="027 098 054 027 115"><isoentity>sub6</isoentity><desc>subscript six</desc><unientity>2086</unientity></character>
+<character hex="1B 62 37 1B 73" dec="027 098 055 027 115"><isoentity>sub7</isoentity><desc>subscript seven</desc><unientity>2087</unientity></character>
+<character hex="1B 62 38 1B 73" dec="027 098 056 027 115"><isoentity>sub8</isoentity><desc>subscript eight</desc><unientity>2088</unientity></character>
+<character hex="1B 62 39 1B 73" dec="027 098 057 027 115"><isoentity>sub9</isoentity><desc>subscript nine</desc><unientity>2089</unientity></character>
+<character hex="1B 62 28 1B 73" dec="027 098 040 027 115"><isoentity>sublpar</isoentity><desc>subscript left parenthesis</desc><unientity>208D</unientity></character>
+<character hex="1B 62 2D 1B 73" dec="027 098 045 027 115"><isoentity>subminus</isoentity><desc>subscript minus</desc><unientity>208B</unientity></character>
+<character hex="1B 62 2B 1B 73" dec="027 098 043 027 115"><isoentity>subplus</isoentity><desc>subscript plus sign</desc><unientity>208A</unientity></character>
+<character hex="1B 62 29 1B 73" dec="027 098 041 027 115"><isoentity>subrpar</isoentity><desc>subscript right parenthesis</desc><unientity>208E</unientity></character>
+<character hex="1B 70 30 1B 73" dec="027 112 048 027 115"><isoentity>sup0</isoentity><desc>superscript zero</desc><unientity>2070</unientity></character>
+<character hex="1B 70 31 1B 73" dec="027 112 049 027 115"><isoentity>sup1</isoentity><desc>superscript one</desc><unientity>00B9</unientity></character>
+<character hex="1B 70 32 1B 73" dec="027 112 050 027 115"><isoentity>sup2</isoentity><desc>superscript two</desc><unientity>00B2</unientity></character>
+<character hex="1B 70 33 1B 73" dec="027 112 051 027 115"><isoentity>sup3</isoentity><desc>superscript three</desc><unientity>00B3</unientity></character>
+<character hex="1B 70 34 1B 73" dec="027 112 052 027 115"><isoentity>sup4</isoentity><desc>superscript four</desc><unientity>2074</unientity></character>
+<character hex="1B 70 35 1B 73" dec="027 112 053 027 115"><isoentity>sup5</isoentity><desc>superscript five</desc><unientity>2075</unientity></character>
+<character hex="1B 70 36 1B 73" dec="027 112 054 027 115"><isoentity>sup6</isoentity><desc>superscript six</desc><unientity>2076</unientity></character>
+<character hex="1B 70 37 1B 73" dec="027 112 055 027 115"><isoentity>sup7</isoentity><desc>superscript seven</desc><unientity>2077</unientity></character>
+<character hex="1B 70 38 1B 73" dec="027 112 056 027 115"><isoentity>sup8</isoentity><desc>superscript eight</desc><unientity>2078</unientity></character>
+<character hex="1B 70 39 1B 73" dec="027 112 056 027 115"><isoentity>sup9</isoentity><desc>superscript nine</desc><unientity>2079</unientity></character>
+<character hex="1B 70 28 1B 73" dec="027 112 040 027 115"><isoentity>suplpar</isoentity><desc>superscript left parenthesis</desc><unientity>207D</unientity></character>
+<character hex="1B 70 2D 1B 73" dec="027 112 045 027 115"><isoentity>supminus</isoentity><desc>superscript minus</desc><unientity>207B</unientity></character>
+<character hex="1B 70 2B 1B 73" dec="027 112 043 027 115"><isoentity>supplus</isoentity><desc>superscript plus sign</desc><unientity>207A</unientity></character>
+<character hex="1B 70 29 1B 73" dec="027 112 041 027 115"><isoentity>suprpar</isoentity><desc>superscript right parenthesis</desc><unientity>207E</unientity></character>
+<character hex="E9 54" dec="233 084"><isoentity>Tcaron</isoentity><desc>latin capital letter t with caron</desc><unientity>0164</unientity></character>
+<character hex="E9 74" dec="233 116"><isoentity>tcaron</isoentity><desc>latin small letter t with caron</desc><unientity>0165</unientity></character>
+<character hex="F0 54" dec="240 084"><isoentity>Tcedil</isoentity><desc>latin capital letter t with cedilla</desc><unientity>0162</unientity></character>
+<character hex="F0 74" dec="240 116"><isoentity>tcedil</isoentity><desc>latin small letter t with cedilla</desc><unientity>0163</unientity></character>
+<character hex="E4 E3 65" dec="228 227 101"><isoentity>tcircti</isoentity><desc>latin small letter e with circumflex and tilde</desc><unientity>1EC5</unientity></character>
+<character hex="F7 54" dec="247 084"><isoentity>Tcommab</isoentity><desc>latin capital letter t with comma below</desc><unientity>021A</unientity></character>
+<character hex="F7 74" dec="247 116"><isoentity>tcommab</isoentity><desc>latin small letter t with comma below</desc><unientity>021B</unientity></character>
+<character hex="F2 54" dec="242 084"><isoentity>Tdotb</isoentity><desc>latin capital letter t with dot below</desc><unientity>1E6C</unientity></character>
+<character hex="F2 74" dec="242 116"><isoentity>tdotb</isoentity><desc>latin small letter t with dot below</desc><unientity>1E6D</unientity></character>
+<character hex="E7 54" dec="231 084"><isoentity>Tdot</isoentity><desc>latin capital letter t with dot above</desc><unientity>1E6A</unientity></character>
+<character hex="E7 74" dec="231 116"><isoentity>tdot</isoentity><desc>latin small letter t with dot above</desc><unientity>1E6B</unientity></character>
+<character hex="A4" dec="164"><isoentity>THORN</isoentity><desc>latin capital letter thorn</desc><unientity>00DE</unientity></character>
+<character hex="B4" dec="180"><isoentity>thorn</isoentity><desc>latin small letter thorn</desc><unientity>00FE</unientity></character>
+<character hex="E4" dec="228"><isoentity>tilde</isoentity><desc>combining tilde</desc><unientity>0303</unientity></character>
+<character hex="F6 54" dec="246 084"><isoentity>Tmacrb</isoentity><desc>latin capital letter t with line below</desc><unientity>1E6E</unientity></character>
+<character hex="F6 74" dec="246 116"><isoentity>tmacrb</isoentity><desc>latin small letter t with line below</desc><unientity>1E6F</unientity></character>
+<character hex="E8 74" dec="232 116"><isoentity>tuml</isoentity><desc>latin small letter t with diaeresis</desc><unientity>1E97</unientity></character>
+<character hex="E2 55" dec="226 085"><isoentity>Uacute</isoentity><desc>latin capital letter u with acute</desc><unientity>00DA</unientity></character>
+<character hex="E2 75" dec="226 117"><isoentity>uacute</isoentity><desc>latin small letter u with acute</desc><unientity>00FA</unientity></character>
+<character hex="E6 55" dec="230 085"><isoentity>Ubreve</isoentity><desc>latin capital letter u with breve</desc><unientity>016C</unientity></character>
+<character hex="E6 75" dec="230 117"><isoentity>ubreve</isoentity><desc>latin small letter u with breve</desc><unientity>016D</unientity></character>
+<character hex="E9 55" dec="233 085"><isoentity>ucaron</isoentity><desc>latin capital letter u with caron</desc><unientity>01D3</unientity></character>
+<character hex="E9 75" dec="233 117"><isoentity>ucaron</isoentity><desc>latin small letter u with caron</desc><unientity>01D4</unientity></character>
+<character hex="E3 55" dec="227 085"><isoentity>Ucirc</isoentity><desc>latin capital letter u with circumflex</desc><unientity>00DB</unientity></character>
+<character hex="E3 75" dec="227 117"><isoentity>ucirc</isoentity><desc>latin small letter u with circumflex</desc><unientity>00FB</unientity></character>
+<character hex="EE 55" dec="238 085"><isoentity>Udblac</isoentity><desc>latin capital letter u with double acute</desc><unientity>0170</unientity></character>
+<character hex="EE 75" dec="238 117"><isoentity>udblac</isoentity><desc>latin small letter u with double acute</desc><unientity>0171</unientity></character>
+<character hex="F3 75" dec="243 117"><isoentity>udbldb</isoentity><desc>latin small letter u with double dot below</desc><unientity>1E73</unientity></character>
+<character hex="F3 55" dec="243 084"><isoentity>Udlbdb</isoentity><desc>latin capital letter u with double dot below</desc><unientity>1E72</unientity></character>
+<character hex="F2 55" dec="242 085"><isoentity>Udotb</isoentity><desc>latin capital letter u with dot below</desc><unientity>1EE4</unientity></character>
+<character hex="F2 75" dec="242 117"><isoentity>udotb</isoentity><desc>latin small letter u with dot below</desc><unientity>1EE5</unientity></character>
+<character hex="E1 55" dec="225 085"><isoentity>Ugrave</isoentity><desc>latin capital letter u with grave</desc><unientity>00D9</unientity></character>
+<character hex="E1 75" dec="225 117"><isoentity>ugrave</isoentity><desc>latin small letter u with grave</desc><unientity>00F9</unientity></character>
+<character hex="E0 55" dec="224 085"><isoentity>uhooka</isoentity><desc>latin capital letter u with hook above</desc><unientity>1EE6</unientity></character>
+<character hex="E0 75" dec="224 117"><isoentity>uhooka</isoentity><desc>latin small letter u with hook above</desc><unientity>1EE7</unientity></character>
+<character hex="E2 BD" dec="226 189"><isoentity>uhornac</isoentity><desc>latin small letter u with horn and acute</desc><unientity>1EE9</unientity></character>
+<character hex="F2 AD" dec="242 173"><isoentity>Uhorndb</isoentity><desc>latin capital letter u with horn and dot below</desc><unientity>1EF0</unientity></character>
+<character hex="F2 BD" dec="242 189"><isoentity>uhorndb</isoentity><desc>latin small letter u with horn and dot below</desc><unientity>1EF1</unientity></character>
+<character hex="E1 AD" dec="225 173"><isoentity>Uhorngr</isoentity><desc>latin capital letter u with horn and grave</desc><unientity>1EEA</unientity></character>
+<character hex="E1 BD" dec="225 189"><isoentity>uhorngr</isoentity><desc>latin small letter u with horn and grave</desc><unientity>1EEB</unientity></character>
+<character hex="E0 AD" dec="224 173"><isoentity>Uhornha</isoentity><desc>latin capital letter u with horn and hook above</desc><unientity>1EEC</unientity></character>
+<character hex="E0 BD" dec="224 189"><isoentity>uhornha</isoentity><desc>latin small letter u with horn and hook above</desc><unientity>1EED</unientity></character>
+<character hex="E4 AD" dec="228 173"><isoentity>Uhornti</isoentity><desc>latin capital letter u with horn and tilde</desc><unientity>1EEE</unientity></character>
+<character hex="E4 BD" dec="228 189"><isoentity>uhornti</isoentity><desc>latin small letter u with horn and tilde</desc><unientity>1EEF</unientity></character>
+<character hex="AD" dec="173"><isoentity>Uhorn</isoentity><desc>latin capital letter u with horn</desc><unientity>01AF</unientity></character>
+<character hex="BD" dec="189"><isoentity>uhorn</isoentity><desc>latin small letter u with horn</desc><unientity>01B0</unientity></character>
+<character hex="E8 E5 55" dec="232 229 085"><isoentity>Umacrum</isoentity><desc>latin capital letter u with macron and diaeresis</desc><unientity>1E7A</unientity></character>
+<character hex="E8 E5 75" dec="232 229 117"><isoentity>umacrum</isoentity><desc>latin small letter u with macron and diaeresis</desc><unientity>1E7B</unientity></character>
+<character hex="E5 55" dec="229 085"><isoentity>Umacr</isoentity><desc>latin capital letter u with macron</desc><unientity>016A</unientity></character>
+<character hex="E5 75" dec="229 117"><isoentity>umacr</isoentity><desc>latin small letter u with macron</desc><unientity>016B</unientity></character>
+<character hex="E8" dec="232"><isoentity>uml</isoentity><desc>combining diaeresis</desc><unientity>0308</unientity></character>
+<character hex="F6" dec="246"><isoentity>under</isoentity><desc>combining low line</desc><unientity>0332</unientity></character>
+<character hex="F1 55" dec="241 085"><isoentity>Uogon</isoentity><desc>latin capital letter u with ogon</desc><unientity>0172</unientity></character>
+<character hex="F1 75" dec="241 117"><isoentity>uogon</isoentity><desc>latin small letter u with ogon</desc><unientity>0173</unientity></character>
+<character hex="EA 55" dec="234 085"><isoentity>Uring</isoentity><desc>latin capital letter u with ring</desc><unientity>016E</unientity></character>
+<character hex="EA 75" dec="234 117"><isoentity>uring</isoentity><desc>latin small letter u with ring</desc><unientity>016F</unientity></character>
+<character hex="E2 E4 55" dec="226 228 085"><isoentity>utildeac</isoentity><desc>latin capital letter u with tilde and acute</desc><unientity>1E78</unientity></character>
+<character hex="E2 E4 75" dec="226 228 117"><isoentity>utildeac</isoentity><desc>latin small letter u with tilde and acute</desc><unientity>1E79</unientity></character>
+<character hex="E4 55" dec="228 085"><isoentity>Utilde</isoentity><desc>latin capital letter u with tilde</desc><unientity>0168</unientity></character>
+<character hex="E4 75" dec="228 117"><isoentity>utilde</isoentity><desc>latin small letter u with tilde</desc><unientity>0169</unientity></character>
+<character hex="E2 E8 55" dec="226 232 085"><isoentity>Uumlac</isoentity><desc>latin capital letter u with diaeresis and acute</desc><unientity>01D7</unientity></character>
+<character hex="E2 E8 75" dec="226 232 117"><isoentity>uumlac</isoentity><desc>latin small letter u with diaeresis and acute</desc><unientity>01D8</unientity></character>
+<character hex="E9 E8 55" dec="233 232 085"><isoentity>Uumlca</isoentity><desc>latin capital letter u with diaeresis and caron</desc><unientity>01D9</unientity></character>
+<character hex="E9 E8 75" dec="233 232 117"><isoentity>uumlca</isoentity><desc>latin small letter u with diaresis and caron</desc><unientity>01DA</unientity></character>
+<character hex="E1 E8 55" dec="225 230 085"><isoentity>Uumlgr</isoentity><desc>latin capital letter u with diaeresis and grave</desc><unientity>01DB</unientity></character>
+<character hex="E1 E8 75" dec="225 230 117"><isoentity>uumlgr</isoentity><desc>latin small letter u with diaeresis and grave</desc><unientity>01DC</unientity></character>
+<character hex="E5 E8 55" dec="229 232 085"><isoentity>Uumlma</isoentity><desc>latin capital letter u with diaeresis and macron</desc><unientity>01D5</unientity></character>
+<character hex="E5 E8 75" dec="229 232 117"><isoentity>uumlma</isoentity><desc>latin small letter u with diaeresis and macron</desc><unientity>01D6</unientity></character>
+<character hex="E8 55" dec="232 085"><isoentity>Uuml</isoentity><desc>latin capital letter u with umlaut</desc><unientity>00DC</unientity></character>
+<character hex="E8 75" dec="232 117"><isoentity>uuml</isoentity><desc>latin small letter u with umlaut</desc><unientity>00FC</unientity></character>
+<character hex="F2 56" dec="242 086"><isoentity>Vdotb</isoentity><desc>latin capital letter v with dot below</desc><unientity>1E7E</unientity></character>
+<character hex="F2 76" dec="242 118"><isoentity>vdotb</isoentity><desc>latin small letter v with dot below</desc><unientity>1E7F</unientity></character>
+<character hex="E4 56" dec="228 086"><isoentity>Vtilde</isoentity><desc>latin capital letter v with tilde</desc><unientity>1E7C</unientity></character>
+<character hex="E4 76" dec="228 118"><isoentity>vtilde</isoentity><desc>latin small letter v with tilde</desc><unientity>1E7D</unientity></character>
+<character hex="E2 57" dec="226 087"><isoentity>Wacute</isoentity><desc>latin capital letter w with acute</desc><unientity>1E82</unientity></character>
+<character hex="E2 77" dec="226 119"><isoentity>wacute</isoentity><desc>latin small letter w with acute</desc><unientity>1E83</unientity></character>
+<character hex="E3 57" dec="227 087"><isoentity>Wcirc</isoentity><desc>latin capital letter w with circumflex</desc><unientity>0174</unientity></character>
+<character hex="E3 77" dec="227 119"><isoentity>wcirc</isoentity><desc>latin small letter w with circumflex</desc><unientity>0175</unientity></character>
+<character hex="F2 57" dec="242 087"><isoentity>wdotb</isoentity><desc>latin capital letter w with dot below</desc><unientity>1E88</unientity></character>
+<character hex="F2 77" dec="242 119"><isoentity>wdotb</isoentity><desc>latin small letter w with dot below</desc><unientity>1E89</unientity></character>
+<character hex="E7 57" dec="231 087"><isoentity>Wdot</isoentity><desc>latin capital letter w with dot above</desc><unientity>1E86</unientity></character>
+<character hex="E7 77" dec="231 119"><isoentity>wdot</isoentity><desc>latin small letter w with dot above</desc><unientity>1E87</unientity></character>
+<character hex="E1 57" dec="225 087"><isoentity>Wgrave</isoentity><desc>latin capital letter w with grave</desc><unientity>1E80</unientity></character>
+<character hex="E1 77" dec="225 119"><isoentity>wgrave</isoentity><desc>latin small letter w with grave</desc><unientity>1E81</unientity></character>
+<character hex="EA 77" dec="234 119"><isoentity>wring</isoentity><desc>latin small letter w with ring</desc><unientity>1E98</unientity></character>
+<character hex="E8 57" dec="232 087"><isoentity>Wuml</isoentity><desc>latin capital letter w with diaeresis</desc><unientity>1E84</unientity></character>
+<character hex="E8 77" dec="232 119"><isoentity>wuml</isoentity><desc>latin small letter w with diaeresis</desc><unientity>1E85</unientity></character>
+<character hex="E7 58" dec="231 088"><isoentity>Xdot</isoentity><desc>latin capital letter x with dot</desc><unientity>1E8A</unientity></character>
+<character hex="E7 78" dec="231 120"><isoentity>xdot</isoentity><desc>latin small letter x with dot</desc><unientity>1E8B</unientity></character>
+<character hex="E8 58" dec="232 088"><isoentity>Xuml</isoentity><desc>latin capital letter x with diaeresis</desc><unientity>1E8C</unientity></character>
+<character hex="E8 78" dec="232 120"><isoentity>xuml</isoentity><desc>latin small letter x with diaeresis</desc><unientity>1E8D</unientity></character>
+<character hex="E2 59" dec="226 089"><isoentity>Yacute</isoentity><desc>latin capital letter y with acute</desc><unientity>00DD</unientity></character>
+<character hex="E2 79" dec="226 121"><isoentity>yacute</isoentity><desc>latin small letter y with acute</desc><unientity>00FD</unientity></character>
+<character hex="E3 59" dec="227 089"><isoentity>Ycirc</isoentity><desc>latin capital letter y with circumflex</desc><unientity>0176</unientity></character>
+<character hex="E3 79" dec="227 121"><isoentity>ycirc</isoentity><desc>latin small letter y with circumflex</desc><unientity>0177</unientity></character>
+<character hex="F2 59" dec="242 089"><isoentity>Ydotb</isoentity><desc>latin capital letter y with dot below</desc><unientity>1EF4</unientity></character>
+<character hex="F2 79" dec="242 121"><isoentity>ydotb</isoentity><desc>latin small letter y with dot below</desc><unientity>1EF5</unientity></character>
+<character hex="E7 59" dec="231 089"><isoentity>Ydot</isoentity><desc>latin capital letter y with dot</desc><unientity>1E8E</unientity></character>
+<character hex="E7 79" dec="231 121"><isoentity>ydot</isoentity><desc>latin small letter y with dot</desc><unientity>1E8F</unientity></character>
+<character hex="E1 59" dec="225 089"><isoentity>Ygrave</isoentity><desc>latin capital letter y with grave</desc><unientity>1EF2</unientity></character>
+<character hex="E1 79" dec="225 121"><isoentity>ygrave</isoentity><desc>latin small letter y with grave</desc><unientity>1EF3</unientity></character>
+<character hex="E0 59" dec="224 089"><isoentity>Yhooka</isoentity><desc>latin capital letter y with hook above</desc><unientity>1EF6</unientity></character>
+<character hex="E0 79" dec="224 121"><isoentity>yhooka</isoentity><desc>latin small letter y with hook above</desc><unientity>1EF7</unientity></character>
+<character hex="E5 59" dec="229 089"><isoentity>Ymacr</isoentity><desc>latin capital letter y with macron</desc><unientity>0232</unientity></character>
+<character hex="E5 79" dec="229 121"><isoentity>ymacr</isoentity><desc>latin small letter y with macron</desc><unientity>0233</unientity></character>
+<character hex="EA 79" dec="234 121"><isoentity>yring</isoentity><desc>latin small letter y with ring</desc><unientity>1E99</unientity></character>
+<character hex="E4 59" dec="228 089"><isoentity>Ytilde</isoentity><desc>latin capital letter y with tilde</desc><unientity>1EF8</unientity></character>
+<character hex="E4 79" dec="228 121"><isoentity>ytilde</isoentity><desc>latin small letter y with tilde</desc><unientity>1EF9</unientity></character>
+<character hex="E8 59" dec="232 089"><isoentity>Yuml</isoentity><desc>latin capital letter y with umlaut</desc><unientity>0178</unientity></character>
+<character hex="E8 79" dec="232 121"><isoentity>yuml</isoentity><desc>latin small letter y with umlaut</desc><unientity>00FF</unientity></character>
+<character hex="E2 5A" dec="226 090"><isoentity>Zacute</isoentity><desc>latin capital letter z with acute</desc><unientity>0179</unientity></character>
+<character hex="E2 7A" dec="226 122"><isoentity>zacute</isoentity><desc>latin small letter z with acute</desc><unientity>017A</unientity></character>
+<character hex="E9 5A" dec="233 090"><isoentity>Zcaron</isoentity><desc>latin capital letter z with caron</desc><unientity>017D</unientity></character>
+<character hex="E9 7A" dec="233 122"><isoentity>zcaron</isoentity><desc>latin small letter z with caron</desc><unientity>017E</unientity></character>
+<character hex="E3 5A" dec="227 090"><isoentity>Zcirc</isoentity><desc>latin capital letter z with circumflex</desc><unientity>1E90</unientity></character>
+<character hex="E3 7A" dec="227 122"><isoentity>zcirc</isoentity><desc>latin small letter z with circumflex</desc><unientity>1E91</unientity></character>
+<character hex="F2 5A" dec="242 090"><isoentity>Zdotb</isoentity><desc>latin capital letter z with dot below</desc><unientity>1E92</unientity></character>
+<character hex="F2 7A" dec="242 122"><isoentity>zdotb</isoentity><desc>latin small letter z with dot below</desc><unientity>1E93</unientity></character>
+<character hex="E7 5A" dec="231 090"><isoentity>Zdot</isoentity><desc>latin capital letter z with dot above</desc><unientity>017B</unientity></character>
+<character hex="E7 7A" dec="231 122"><isoentity>zdot</isoentity><desc>latin small letter z with dot above</desc><unientity>017C</unientity></character>
+<character hex="F6 5A" dec="246 090"><isoentity>Zlowline</isoentity><desc>latin capital letter z with low line</desc><unientity>1E94</unientity></character>
+<character hex="F6 7A" dec="246 122"><isoentity>zlowline</isoentity><desc>latin small letter z with low line</desc><unientity>1E95</unientity></character>
+  </entitymap>
