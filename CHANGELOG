@@ -1,5 +1,10 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- XXXXXX XXXX/XX/XX
+
+Fixed small problem in SUTRS-filter. A newline was sometimes inserted before
+the rank and record number.
+
 --- 1.0pl3 1996/1/2
 
 Various changes to retrieval module.
