@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.17  1997-09-17 12:10:30  adam
+ * Revision 1.18  1997-09-29 07:15:25  adam
+ * Changed use of setsockopt to avoid warnings on MSVC.
+ *
+ * Revision 1.17  1997/09/17 12:10:30  adam
  * YAZ version 1.4.
  *
  * Revision 1.16  1997/09/01 08:49:14  adam
@@ -362,10 +365,15 @@ int tcpip_rcvconnect(COMSTACK h)
 int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     struct sockaddr *addr = address;
+#ifdef WINDOWS
+    BOOL one = 1;
+#else
     unsigned long one = 1;
+#endif
 
     TRC(fprintf(stderr, "tcpip_bind\n"));
-    if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) < 0)
+    if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (void*) 
+	&one, sizeof(one)) < 0)
     {
         h->cerrno = CSYSERR;
         return -1;
