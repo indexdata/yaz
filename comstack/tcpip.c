@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.23  1998-06-23 15:37:50  adam
+ * Revision 1.24  1998-06-29 07:59:17  adam
+ * Minor fix.
+ *
+ * Revision 1.23  1998/06/23 15:37:50  adam
  * Added type cast to prevent warning.
  *
  * Revision 1.22  1998/06/22 11:32:36  adam
@@ -463,16 +466,17 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_in));
     else if (addrlen)
         *addrlen = 0;
-
-#if 1
     if (check_ip && (*check_ip)(cd, (const char *) &addr.sin_addr,
         sizeof(addr.sin_addr), AF_INET))
     {
 	h->cerrno = CSDENY;
-	close (h->newfd);
+#ifdef WINDOWS
+        closesocket(h->iofile);
+#else
+        close(h->iofile);
+#endif
 	return -1;
     }
-#endif
     h->state = CS_INCON;
     return 0;
 }
