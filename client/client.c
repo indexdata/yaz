@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.78  1999-03-18 12:57:18  adam
+ * Revision 1.79  1999-03-23 14:14:25  adam
+ * Yet another fix.
+ *
+ * Revision 1.78  1999/03/18 12:57:18  adam
  * Minor fix.
  *
  * Revision 1.77  1999/03/11 15:26:51  adam
@@ -1909,9 +1912,11 @@ static int client(int wait)
 #if HAVE_READLINE_READLINE_H
 	    char* line_in;
 	    line_in=readline(C_PROMPT);
+            if (!line_in)
+                break;
 #if HAVE_READLINE_HISTORY_H
-	    if (line_in && *line_in)
-		add_history(line_in);
+            if (*line_in)
+	        add_history(line_in);
 #endif
 	    strcpy(line,line_in);
             free (line_in);
