@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: xmalloc.c,v $
- * Revision 1.1  1995-11-01 11:56:53  quinn
+ * Revision 1.2  1995-12-05 11:08:37  adam
+ * More verbose malloc routines.
+ *
+ * Revision 1.1  1995/11/01  11:56:53  quinn
  * Added Xmalloc.
  *
  * Revision 1.6  1995/10/16  14:03:11  quinn
@@ -40,7 +43,7 @@ void *xrealloc_f (void *o, size_t size, char *file, int line)
     void *p;
 
 #ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xrealloc(s=%d)\n", file, line, size);
+    fprintf(stderr, "%s:%d: xrealloc(s=%d) %p", file, line, size, p);
 #endif
     p = realloc (o, size);
     if (!p)
@@ -48,17 +51,19 @@ void *xrealloc_f (void *o, size_t size, char *file, int line)
     	logf (LOG_FATAL|LOG_ERRNO, "Out of memory, realloc (%d bytes)", size);
     	exit(1);
     }
+#ifdef TRACE_XMALLOC
+    fprintf(stderr, " -> %p\n", p);
+#endif
     return p;
 }
 
 void *xmalloc_f (size_t size, char *file, int line)
 {
-    void *p;
+    void *p = malloc (size);
 
 #ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xmalloc(s=%d)\n", file, line, size);
+    fprintf(stderr, "%s:%d: xmalloc(s=%d) %p\n", file, line, size, p);
 #endif
-    p = malloc (size);
     if (!p)
     {
         logf (LOG_FATAL, "Out of memory - malloc (%d bytes)", size);
@@ -69,11 +74,10 @@ void *xmalloc_f (size_t size, char *file, int line)
 
 void *xcalloc_f (size_t nmemb, size_t size, char *file, int line)
 {
-    void *p;
+    void *p = calloc (nmemb, size);
 #ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xcalloc(s=%d)\n", file, line, size);
+    fprintf(stderr, "%s:%d: xcalloc(s=%d) %p\n", file, line, size, p);
 #endif
-    p = calloc (nmemb, size);
     if (!p)
     {
         logf (LOG_FATAL, "Out of memory - calloc (%d, %d)", nmemb, size);
@@ -86,7 +90,7 @@ char *xstrdup_f (const char *s, char *file, int line)
 {
     char *p = xmalloc (strlen(s)+1);
 #ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xstrdup(s=%d)\n", file, line, strlen(s)+1);
+    fprintf(stderr, "%s:%d: xstrdup(s=%d) %p\n", file, line, strlen(s)+1, p);
 #endif
     strcpy (p, s);
     return p;
@@ -96,7 +100,8 @@ char *xstrdup_f (const char *s, char *file, int line)
 void xfree_f(void *p, char *file, int line)
 {
 #ifdef TRACE_XMALLOC
-    fprintf(stderr, "%s:%d: xfree\n", file, line);
+    if (p)
+        fprintf(stderr, "%s:%d: xfree %p\n", file, line, p);
 #endif
     free(p);
 }
