@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.15 2003-02-18 20:21:22 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.16 2003-03-18 13:30:21 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -12,34 +12,29 @@
    <para>
     We have tried our best to keep the software portable, and on many
     platforms, you should be able to compile everything with little or
-    no changes.
-    So far, the software has been ported to the following platforms with
-    little or no difficulties.
-    
-    <itemizedlist>
-     <listitem><para>Unix systems</para>
-      <itemizedlist>
-       <listitem><para>HP/UX</para></listitem>
-       <listitem><para>SunOS/Solaris</para></listitem>
-       <listitem><para>DEC Unix</para></listitem>
-       <listitem><para>BSDs: FreeBSD, OpenBSD, NetBSD</para></listitem>
-       <listitem><para>MAC OSX</para></listitem>
-       <listitem><para>Linux</para></listitem>
-       <listitem><para>IBM AIX</para></listitem>
-       <listitem><para>Data General DG/UX (with some CFLAGS tinkering)
-        </para></listitem>
-       <listitem><para>SGI/IRIX</para></listitem>
-       <listitem><para>DDE Supermax</para></listitem>
-      </itemizedlist></listitem>
-     <listitem><para>Non-unix systems</para>
-      <itemizedlist>
-       <listitem><para>Apple Macintosh (using the Codewarrior programming
-         environment and the GUSI socket libraries)</para></listitem>
-       <listitem><para>MS Windows 95/98/NT/2K/XP (Win32)</para></listitem>
-       <listitem><para>IBM AS/400</para></listitem>
-      </itemizedlist></listitem>
-    </itemizedlist>
-    
+    no changes. 
+   </para>
+
+   <para>
+    The software is regularly tested on
+    <ulink url="http://www.debian.org/">Debian GNU/Linux</ulink>,
+    <ulink url="http://www.redhat.com/">Redhat Linux</ulink>,
+    <ulink url="http://www.gentoo.org/">Gentoo Linux</ulink>,
+    <ulink url="http://www.netbsd.org/Ports/cobalt/">
+     NetBSD (Cobalt MIPS)</ulink>,
+    <ulink url="http://www.freebsd.org/">FreeBSD (i386)</ulink>,
+    <ulink url="http://www.apple.com/macosx/">MAC OSX</ulink>,
+    <ulink url="http://wwws.sun.com/software/solaris/">
+     SunOS 5.8 (sparc)</ulink>,
+    <ulink url="http://www.microsoft.com/windows2000/">
+     Windows 2000 SP3</ulink>.
+   </para>
+   
+   <para>
+    Some versions have be known to work on HP/UX,
+    DEC Unix, OpenBSD, IBM AIX, Data General DG/UX (with some CFLAGS tinkering),
+    SGI/IRIX, DDE Supermax, Apple Macintosh (using the Codewarrior programming
+    environment and the GUSI socket libraries), IBM AS/400 .
    </para>
 
    <para>

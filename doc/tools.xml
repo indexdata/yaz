@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.21 2003-02-23 14:23:40 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.22 2003-03-18 13:30:21 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -318,40 +318,43 @@
       -- Proximity operator
 
      </screen>
+     
+     <example><title>CCL queries</title>
+      <para>
+       The following queries are all valid:
+      </para>
+      
+      <screen>
+       dylan
+       
+       "bob dylan"
+       
+       dylan or zimmerman
+       
+       set=1
+       
+       (dylan and bob) or set=1
+       
+      </screen>
+      <para>
+       Assuming that the qualifiers <literal>ti</literal>,
+       <literal>au</literal>
+       and <literal>date</literal> are defined we may use:
+      </para>
+      
+      <screen>
+       ti=self portrait
+       
+       au=(bob dylan and slow train coming)
 
-     <para>
-      The following queries are all valid:
-     </para>
-
-     <screen>
-      dylan
-
-      "bob dylan"
-
-      dylan or zimmerman
-
-      set=1
-
-      (dylan and bob) or set=1
-
-     </screen>
-     <para>
-      Assuming that the qualifiers <literal>ti</literal>, <literal>au</literal>
-      and <literal>date</literal> are defined we may use:
-     </para>
-
-     <screen>
-      ti=self portrait
-
-      au=(bob dylan and slow train coming)
-
-      date>1980 and (ti=((self portrait)))
-
-     </screen>
-
+       date>1980 and (ti=((self portrait)))
+       
+      </screen>
+     </example>
+     
     </sect3>
     <sect3><title>CCL Qualifiers</title>
-
+     
      <para>
       Qualifiers are used to direct the search to a particular searchable
       index, such as title (ti) and author indexes (au). The CCL standard
@@ -365,66 +368,67 @@
      </para>
 
      <para>
-      Consider a scenario where the target support ranked searches in the
-      title-index. In this case, the user could specify
-     </para>
-
-     <screen>
-      ti,ranked=knuth computer
-     </screen>
-     <para>
-      and the <literal>ranked</literal> would map to relation=relevance
-      (2=102) and the <literal>ti</literal> would map to title (1=4).
-     </para>
-
-     <para>
-      A "profile" with a set predefined CCL qualifiers can be read from a
-      file. The YAZ client reads its CCL qualifiers from a file named
+      A  CCL profile is a set of predefined CCL qualifiers that may be
+      read from a file.
+      The YAZ client reads its CCL qualifiers from a file named
       <filename>default.bib</filename>. Each line in the file has the form:
      </para>
 
      <para>
       <replaceable>qualifier-name</replaceable>  
-      <replaceable>type</replaceable>=<replaceable>val</replaceable>
-      <replaceable>type</replaceable>=<replaceable>val</replaceable> ...
+      [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable>
+      [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable> ...      
      </para>
 
      <para>
       where <replaceable>qualifier-name</replaceable> is the name of the
       qualifier to be used (eg. <literal>ti</literal>),
-      <replaceable>type</replaceable> is a BIB-1 category type and
-      <replaceable>val</replaceable> is the corresponding BIB-1 attribute
-      value.
-      The <replaceable>type</replaceable> can be either numeric or it may be
-      either <literal>u</literal> (use), <literal>r</literal> (relation),
-      <literal>p</literal> (position), <literal>s</literal> (structure),
-      <literal>t</literal> (truncation) or <literal>c</literal> (completeness).
-      The <replaceable>qualifier-name</replaceable> <literal>term</literal>
-      has a special meaning.
-      The types and values for this definition is used when
-      <emphasis>no</emphasis> qualifiers are present.
+      <replaceable>type</replaceable> is attribute type in the attribute
+      set (Bib-1 is used if no attribute set is given) and
+      <replaceable>val</replaceable> is attribute value.
+      The <replaceable>type</replaceable> can be specified as an
+      integer or as it be specified either as a single-letter:
+      <literal>u</literal> for use, 
+      <literal>r</literal> for relation,<literal>p</literal> for position,
+      <literal>s</literal> for structure,<literal>t</literal> for truncation
+      or <literal>c</literal> for completeness.
+      The attributes for the special qualifier name <literal>term</literal>
+      are used when no CCL qualifier is given in a query.
      </para>
 
-     <para>
-      Consider the following definition:
-     </para>
-
-     <screen>
-      ti       u=4 s=1
-      au       u=1 s=1
-      term     s=105
-     </screen>
-     <para>
-      Two qualifiers are defined, <literal>ti</literal> and
-      <literal>au</literal>.
-      They both set the structure-attribute to phrase (1).
-      <literal>ti</literal>
-      sets the use-attribute to 4. <literal>au</literal> sets the
-      use-attribute to 1.
-      When no qualifiers are used in the query the structure-attribute is
-      set to free-form-text (105).
-     </para>
-
+     <example><title>CCL profile</title>
+      <para>
+       Consider the following definition:
+      </para>
+      
+      <screen>
+       ti       u=4 s=1
+       au       u=1 s=1
+       term     s=105
+       ranked   r=102
+      </screen>
+      <para>
+       Three qualifiers are defined, <literal>ti</literal>, 
+       <literal>au</literal> and <literal>ranked</literal>.
+       <literal>ti</literal> and <literal>au</literal> both set 
+       structure attribute to phrase (s=1).
+       <literal>ti</literal>
+       sets the use-attribute to 4. <literal>au</literal> sets the
+       use-attribute to 1.
+       When no qualifiers are used in the query the structure-attribute is
+       set to free-form-text (105).
+      </para>
+      <para>
+       You can combine attributes. To Search for "ranked title" you
+       can do 
+       <screen>
+        ti,ranked=knuth computer
+       </screen>
+       which will use "relation is ranked", "use is title", "structure is
+       phrase".
+      </para>
+     </example>
+     
     </sect3>
     <sect3><title>CCL API</title>
      <para>
@@ -927,9 +931,9 @@ int cql_transform_FILE(cql_transform_t ct,
        </varlistentry>
       </variablelist>
      </para>
-     <example><title>Small CQL to RPN mapping file</title>
+     <example><title>CQL to RPN mapping file</title>
       <para>
-       This small file defines two index sets, three qualifiers and three
+       This simple file defines two index sets, three qualifiers and three
        relations, a position pattern and a default structure.
       </para>
       <programlisting><![CDATA[
