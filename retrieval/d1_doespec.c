@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.3  1995-11-13 09:27:33  quinn
+ * Revision 1.4  1996-06-07 11:04:32  quinn
+ * Fixed tag->tagset dependency
+ *
+ * Revision 1.3  1995/11/13  09:27:33  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.2  1995/11/01  13:54:45  quinn
@@ -103,7 +106,8 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
 	    occur = want->occurrences;
 	    if (c->u.tag.element)
 		tag = c->u.tag.element->tag;
-	    if (*want->tagType != (tag ? tag->tagset->type : 3))
+	    if (*want->tagType != ((tag && tag->tagset) ? tag->tagset->type :
+		3))
 		continue;
 	    if (want->tagValue->which == Z_StringOrNumeric_numeric)
 	    {
