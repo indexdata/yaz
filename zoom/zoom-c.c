@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.21 2002-01-21 21:50:32 adam Exp $
+ * $Id: zoom-c.c,v 1.22 2002-01-24 19:33:09 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -416,6 +416,11 @@ void ZOOM_resultset_destroy(ZOOM_resultset r)
     yaz_log (LOG_DEBUG, "destroy r = %p count=%d", r, r->refcount);
     if (r->refcount == 0)
     {
+        ZOOM_record_cache rc;
+
+        for (rc = r->record_cache; rc; rc = rc->next)
+            if (rc->rec.wrbuf_marc)
+                wrbuf_free (rc->rec.wrbuf_marc, 1);
 	if (r->connection)
 	{
 	    /* remove ourselves from the resultsets in connection */
@@ -915,6 +920,7 @@ void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len)
 		default:
 		    if (!rec->wrbuf_marc)
 			rec->wrbuf_marc = wrbuf_alloc();
+                    wrbuf_rewind (rec->wrbuf_marc);
 		    if (marc_display_wrbuf (r->u.octet_aligned->buf,
 					rec->wrbuf_marc, 0,
 					    r->u.octet_aligned->len) > 0)
@@ -982,7 +988,6 @@ static void record_cache_add (ZOOM_resultset r,
 		return;
 	    }
 	}
-
     }
     rc = odr_malloc (r->odr, sizeof(*rc));
     rc->rec.npr = npr; 
