@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.18 2002-01-03 12:18:38 adam Exp $
+ * $Id: zoom-c.c,v 1.19 2002-01-09 11:03:41 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -923,8 +923,23 @@ void *ZOOM_record_get (ZOOM_record rec, const char *type, size_t *len)
     {
 	if (npr->which == Z_NamePlusRecord_databaseRecord)
 	{
-            *len = -1;
-	    return (Z_External *) npr->u.databaseRecord;
+	    Z_External *r = (Z_External *) npr->u.databaseRecord;
+	    
+	    if (r->which == Z_External_sutrs)
+	    {
+		*len = r->u.sutrs->len;
+		return r->u.sutrs->buf;
+	    }
+	    else if (r->which == Z_External_octet)
+	    {
+		*len = r->u.octet_aligned->len;
+		return r->u.octet_aligned->buf;
+	    }
+	    else /* grs-1, explain, ... */
+	    {
+		*len = -1;
+                return (Z_External *) npr->u.databaseRecord;
+	    }
 	}
 	return 0;
     }
