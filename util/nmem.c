@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.4  1997-09-29 07:12:50  adam
+ * Revision 1.5  1997-10-06 09:09:52  adam
+ * Function mmem_exit releases memory used by the freelists.
+ *
+ * Revision 1.4  1997/09/29 07:12:50  adam
  * NMEM thread safe. NMEM must be initialized before use (sigh) -
  * routine nmem_init/nmem_exit implemented.
  *
@@ -163,6 +166,19 @@ void nmem_init (void)
 
 void nmem_exit (void)
 {
+    while (freelist)
+    {
+	struct nmem_block *fl = freelist;
+	freelist = freelist->next;
+	xfree (fl->buf);
+	xfree (fl);
+    }
+    while (cfreelist)
+    {
+	struct nmem_control *cfl = cfreelist;
+	cfreelist = cfreelist->next;
+	xfree (cfl);
+    }
 #ifdef WINDOWS
     DeleteCriticalSection(&critical_section);
 #endif
