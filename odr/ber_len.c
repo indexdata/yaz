@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: ber_len.c,v 1.12 2003-03-11 11:03:31 adam Exp $
+ * $Id: ber_len.c,v 1.13 2003-10-20 13:44:05 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -79,10 +79,14 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
 }
 
 /*
- * Decode BER length octets. Returns number of bytes read or -1 for error.
+ * Decode BER length octets. Returns 
+ *  > 0  : number of bytes read 
+ *   -1  : not enough room to read bytes within max bytes
+ *   -2  : other error
+ *
  * After return:
- * len = -1   indefinite.
- * len >= 0    Length.
+ * len = -1   indefinite length.
+ * len >= 0   definite length
  */
 int ber_declen(const unsigned char *buf, int *len, int max)
 {
@@ -108,7 +112,7 @@ int ber_declen(const unsigned char *buf, int *len, int max)
     	return 1;
     }
     if (*b == 0XFF)     /* reserved value */
-	return -1;
+	return -2;
     /* indefinite long form */ 
     n = *b & 0X7F;
     if (n >= max)
@@ -121,7 +125,7 @@ int ber_declen(const unsigned char *buf, int *len, int max)
     	*len |= *(b++);
     }
     if (*len < 0)
-        return -1;
+        return -2;
 #ifdef ODR_DEBUG
     fprintf(stderr, "[len=%d]", *len);
 #endif
