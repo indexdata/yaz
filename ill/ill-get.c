@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 1999-2000, Index Data.
+ * Copyright (c) 1999-2001, Index Data.
  * See the file LICENSE for details.
  *
  * $Log: ill-get.c,v $
- * Revision 1.6  2000-08-10 08:41:26  adam
+ * Revision 1.7  2001-02-20 11:25:32  adam
+ * Added ill_get_APDU and ill_get_Cancel.
+ *
+ * Revision 1.6  2000/08/10 08:41:26  adam
  * Fixes for ILL.
  *
  * Revision 1.5  2000/02/24 08:52:01  adam
@@ -619,5 +622,63 @@ ILL_ItemRequest *ill_get_ItemRequest (
     r->forward_note = ill_get_ILL_String(gc, element, "forward-note");
     r->num_iLL_request_extensions = 0;
     r->iLL_request_extensions = 0;
+    return r;
+}
+
+ILL_Cancel *ill_get_Cancel (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    ODR o = gc->odr;
+    ILL_Cancel *r = (ILL_Cancel *)odr_malloc(o, sizeof(*r));
+    char element[128];
+    
+    strcpy(element, name);
+    if (sub)
+    {
+	strcat (element, ",");
+	strcat (element, sub);
+    }
+    r->protocol_version_num =
+	ill_get_enumerated (gc, element, "protocol-version-num", 
+			    ILL_Request_version_2);
+    
+    r->transaction_id = ill_get_Transaction_Id (gc, element, "transaction-id");
+    r->service_date_time =
+	ill_get_Service_Date_Time (gc, element, "service-date-time");
+    r->requester_id = ill_get_System_Id (gc, element, "requester-id");
+    r->responder_id = ill_get_System_Id (gc, element, "responder-id");
+    r->requester_note = ill_get_ILL_String(gc, element, "requester-note");
+
+    r->num_cancel_extensions = 0;
+    r->cancel_extensions = 0;
+    return r;
+}
+
+ILL_APDU *ill_get_APDU (
+    struct ill_get_ctl *gc, const char *name, const char *sub)
+{
+    ODR o = gc->odr;
+    ILL_APDU *r = (ILL_APDU *)odr_malloc(o, sizeof(*r));
+    char element[128];
+    const char *v;
+
+    strcpy (element, name);
+    strcat (element, ",which");
+
+    v = (gc->f)(gc->clientData, element);
+    if (!v)
+	v = "request";
+    if (!strcmp (v, "request"))
+    {
+	r->which = ILL_APDU_ILL_Request;
+	r->u.ILL_Request = ill_get_ILLRequest(gc, name, sub);
+    }
+    else if (!strcmp (v, "cancel"))
+    {
+	r->which = ILL_APDU_Cancel;
+	r->u.Cancel = ill_get_Cancel(gc, name, sub);
+    }
+    else
+	return 0;
     return r;
 }

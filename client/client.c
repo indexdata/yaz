@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.111  2001-01-30 15:52:48  ja7
+ * Revision 1.112  2001-02-20 11:25:32  adam
+ * Added ill_get_APDU and ill_get_Cancel.
+ *
+ * Revision 1.111  2001/01/30 15:52:48  ja7
  * added command for setting packageName in ES packages!
  * command is named packagename default is NULL for server suplyed package name
  *
@@ -1381,10 +1383,10 @@ static Z_External *create_external_itemRequest()
 #endif
 
 #ifdef ASN_COMPILED
-static Z_External *create_external_ILLRequest()
+static Z_External *create_external_ILL_APDU(int which)
 {
     struct ill_get_ctl ctl;
-    ILL_Request *req;
+    ILL_APDU *ill_apdu;
     Z_External *r = 0;
     int ill_request_size = 0;
     char *ill_request_buf = 0;
@@ -1393,14 +1395,14 @@ static Z_External *create_external_ILLRequest()
     ctl.clientData = 0;
     ctl.f = get_ill_element;
 
-    req = ill_get_ILLRequest(&ctl, "ill", 0);
+    ill_apdu = ill_get_APDU(&ctl, "ill", 0);
 
-    if (!ill_Request (out, &req, 0, 0))
+    if (!ill_APDU (out, &ill_apdu, 0, 0))
     {
         if (apdu_file)
         {
             printf ("-------------------\n");
-            ill_Request(print, &req, 0, 0);
+            ill_APDU(print, &ill_apdu, 0, 0);
             odr_reset(print);
             printf ("-------------------\n");
         }
@@ -1500,7 +1502,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
     {
         printf ("using ILL-request\n");
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
-            create_external_ILLRequest();
+            create_external_ILL_APDU(ILL_APDU_ILL_Request);
     }
     else
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;

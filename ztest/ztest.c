@@ -6,7 +6,10 @@
  *    Chas Woodfield, Fretwell Downing Datasystems.
  *
  * $Log: ztest.c,v $
- * Revision 1.36  2001-01-30 21:34:18  adam
+ * Revision 1.37  2001-02-20 11:25:32  adam
+ * Added ill_get_APDU and ill_get_Cancel.
+ *
+ * Revision 1.36  2001/01/30 21:34:18  adam
  * Added step-size for Scan backend interface.
  *
  * Revision 1.35  2000/11/23 10:58:33  adam
@@ -205,7 +208,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 	    {
 		Z_External *r = (Z_External*) n->itemRequest;
 		ILL_ItemRequest *item_req = 0;
-		ILL_Request *ill_req = 0;
+		ILL_APDU *ill_apdu = 0;
 		if (r->direct_reference)
 		{
 		    oident *ent = oid_getentbyoid(r->direct_reference);
@@ -244,15 +247,15 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 			}
 			if (!item_req && r->which == ODR_EXTERNAL_single)
 			{
-			    yaz_log (LOG_LOG, "Decode ILLRequest begin");
+			    yaz_log (LOG_LOG, "Decode ILL APDU begin");
 			    odr_setbuf(rr->decode,
 				       r->u.single_ASN1_type->buf,
 				       r->u.single_ASN1_type->len, 0);
 			    
-			    if (!ill_Request (rr->decode, &ill_req, 0, 0))
+			    if (!ill_APDU (rr->decode, &ill_apdu, 0, 0))
 			    {
 				yaz_log (LOG_LOG,
-                                    "Couldn't decode ILLRequest %s near %d",
+                                    "Couldn't decode ILL APDU %s near %d",
                                        odr_errmsg(odr_geterror(rr->decode)),
                                        odr_offset(rr->decode));
                                 yaz_log(LOG_LOG, "PDU dump:");
@@ -261,11 +264,11 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                      r->u.single_ASN1_type->len);
                             }
 			    else
-			        yaz_log(LOG_LOG, "Decode ILLRequest OK");
+			        yaz_log(LOG_LOG, "Decode ILL APDU OK");
 			    if (rr->print)
                             {
-				ill_Request (rr->print, &ill_req, 0,
-                                    "ILLRequest");
+				ill_APDU (rr->print, &ill_apdu, 0,
+                                    "ILL APDU");
 				odr_reset (rr->print);
 			    }
 			}
