@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.214 2003-12-09 17:13:35 adam Exp $
+ * $Id: client.c,v 1.215 2003-12-18 17:02:24 mike Exp $
  */
 
 #include <stdio.h>
@@ -117,7 +117,7 @@ typedef enum {
 static QueryType queryType = QueryType_Prefix;
 
 static CCL_bibset bibset;               /* CCL bibset handle */
-static cql_transform_t cqltrans;	/* CQL qualifier-set handle */
+static cql_transform_t cqltrans;	/* CQL context-set handle */
 
 #if HAVE_READLINE_COMPLETION_OVER
 
