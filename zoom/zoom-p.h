@@ -1,6 +1,6 @@
 /*
  * Private C header for ZOOM C.
- * $Id: zoom-p.h,v 1.11 2002-06-02 21:27:17 adam Exp $
+ * $Id: zoom-p.h,v 1.12 2002-08-20 08:19:40 adam Exp $
  */
 #include <yaz/proto.h>
 #include <yaz/comstack.h>
@@ -99,6 +99,7 @@ struct ZOOM_record_p {
 struct ZOOM_record_cache_p {
     struct ZOOM_record_p rec;
     char *elementSetName;
+    char *syntax;
     int pos;
     ZOOM_record_cache next;
 };

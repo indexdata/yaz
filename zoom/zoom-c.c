@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.39 2002-08-19 21:09:10 adam Exp $
+ * $Id: zoom-c.c,v 1.40 2002-08-20 08:19:40 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -151,9 +151,7 @@ void ZOOM_connection_remove_tasks (ZOOM_connection c)
 	ZOOM_connection_remove_task(c);
 }
 
-static ZOOM_record record_cache_lookup (ZOOM_resultset r,
-					 int pos,
-					 const char *elementSetName);
+static ZOOM_record record_cache_lookup (ZOOM_resultset r, int pos);
 
 ZOOM_API(ZOOM_connection)
 ZOOM_connection_create (ZOOM_options options)
@@ -1001,7 +999,7 @@ ZOOM_record_clone (ZOOM_record srec)
 ZOOM_API(ZOOM_record)
 ZOOM_resultset_record_immediate (ZOOM_resultset s,size_t pos)
 {
-    return record_cache_lookup (s, pos, 0);
+    return record_cache_lookup (s, pos);
 }
 
 ZOOM_API(ZOOM_record)
@@ -1181,12 +1179,14 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
     return 0;
 }
 
-static void record_cache_add (ZOOM_resultset r,
-			      Z_NamePlusRecord *npr,
-			      int pos,
-			      const char *elementSetName)
+static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr, int pos)
 {
     ZOOM_record_cache rc;
+    const char *elementSetName =
+        ZOOM_resultset_option_get (r, "elementSetName");
+    const char *syntax = 
+        ZOOM_resultset_option_get (r, "preferredRecordSyntax");
+    
 
     for (rc = r->record_cache; rc; rc = rc->next)
     {
@@ -1196,10 +1196,15 @@ static void record_cache_add (ZOOM_resultset r,
 		|| (elementSetName && rc->elementSetName &&
 		    !strcmp (elementSetName, rc->elementSetName)))
 	    {
-		/* not destroying rc->npr (it's handled by nmem )*/
-		rc->rec.npr = npr;
-		/* keeping wrbuf_marc too */
-		return;
+                if ((!syntax && !rc->syntax)
+                    || (syntax && rc->syntax &&
+                        !strcmp (syntax, rc->syntax)))
+                {
+                    /* not destroying rc->npr (it's handled by nmem )*/
+                    rc->rec.npr = npr;
+                    /* keeping wrbuf_marc too */
+                    return;
+                }
 	    }
 	}
     }
@@ -1211,17 +1216,25 @@ static void record_cache_add (ZOOM_resultset r,
 	rc->elementSetName = odr_strdup (r->odr, elementSetName);
     else
 	rc->elementSetName = 0;
+
+    if (syntax)
+	rc->syntax = odr_strdup (r->odr, syntax);
+    else
+	rc->syntax = 0;
+
     rc->pos = pos;
     rc->next = r->record_cache;
     r->record_cache = rc;
 }
 
-static ZOOM_record record_cache_lookup (ZOOM_resultset r,
-					 int pos,
-					 const char *elementSetName)
+static ZOOM_record record_cache_lookup (ZOOM_resultset r, int pos)
 {
     ZOOM_record_cache rc;
-
+    const char *elementSetName =
+        ZOOM_resultset_option_get (r, "elementSetName");
+    const char *syntax = 
+        ZOOM_resultset_option_get (r, "preferredRecordSyntax");
+    
     for (rc = r->record_cache; rc; rc = rc->next)
     {
 	if (pos == rc->pos)
@@ -1229,7 +1242,12 @@ static ZOOM_record record_cache_lookup (ZOOM_resultset r,
 	    if ((!elementSetName && !rc->elementSetName)
 		|| (elementSetName && rc->elementSetName &&
 		    !strcmp (elementSetName, rc->elementSetName)))
-		return &rc->rec;
+            {
+                if ((!syntax && !rc->syntax)
+                    || (syntax && rc->syntax &&
+                        !strcmp (syntax, rc->syntax)))
+                    return &rc->rec;
+            }
 	}
     }
     return 0;
@@ -1283,7 +1301,7 @@ static void handle_records (ZOOM_connection c, Z_Records *sr,
 	    for (i = 0; i<p->num_records; i++)
 	    {
 		record_cache_add (resultset, p->records[i],
-				  i+ resultset->start, 0);
+                                  i+ resultset->start);
 	    }
 	    /* transfer our response to search_nmem .. we need it later */
 	    nmem_transfer (resultset->odr->mem, nmem);
@@ -1392,12 +1410,9 @@ static int send_present (ZOOM_connection c)
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
     int i = 0;
-    const char *syntax = 
-	ZOOM_options_get (c->options, "preferredRecordSyntax");
-    const char *element =
-	ZOOM_options_get (c->options, "elementSetName");
-    const char *schema =
-	ZOOM_options_get (c->options, "schema");
+    const char *syntax = 0;
+    const char *elementSetName = 0;
+    const char *schema = 0;
     ZOOM_resultset  resultset;
 
     if (!c->tasks)
@@ -1422,6 +1437,10 @@ static int send_present (ZOOM_connection c)
         return 0;
     }
 
+    syntax = ZOOM_resultset_option_get (resultset, "preferredRecordSyntax");
+    elementSetName = ZOOM_resultset_option_get (resultset, "elementSetName");
+    schema = ZOOM_resultset_option_get (resultset, "schema");
+
     if (c->error)                  /* don't continue on error */
 	return 0;
     if (resultset->start < 0)
@@ -1429,7 +1448,7 @@ static int send_present (ZOOM_connection c)
     for (i = 0; i<resultset->count; i++)
     {
 	ZOOM_record rec =
-	    record_cache_lookup (resultset, i + resultset->start, 0);
+	    record_cache_lookup (resultset, i + resultset->start);
 	if (!rec)
 	    break;
     }
@@ -1472,14 +1491,14 @@ static int send_present (ZOOM_connection c)
             compo->u.complex->generic->schema = (Odr_oid *)
                 yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, schema);
         }
-        if (element && *element)
+        if (elementSetName && *elementSetName)
         {
             compo->u.complex->generic->elementSpec = (Z_ElementSpec *)
                 odr_malloc(c->odr_out, sizeof(Z_ElementSpec));
             compo->u.complex->generic->elementSpec->which =
                 Z_ElementSpec_elementSetName;
             compo->u.complex->generic->elementSpec->u.elementSetName =
-                odr_strdup (c->odr_out, element);
+                odr_strdup (c->odr_out, elementSetName);
         }
         else
             compo->u.complex->generic->elementSpec = 0;
@@ -1488,7 +1507,7 @@ static int send_present (ZOOM_connection c)
         compo->u.complex->num_recordSyntax = 0;
         compo->u.complex->recordSyntax = 0;
     }
-    else if (element && *element)
+    else if (elementSetName && *elementSetName)
     {
 	Z_ElementSetNames *esn = (Z_ElementSetNames *)
             odr_malloc (c->odr_out, sizeof(*esn));
@@ -1496,7 +1515,7 @@ static int send_present (ZOOM_connection c)
             odr_malloc (c->odr_out, sizeof(*compo));
 	
 	esn->which = Z_ElementSetNames_generic;
-	esn->u.generic = odr_strdup (c->odr_out, element);
+	esn->u.generic = odr_strdup (c->odr_out, elementSetName);
 	compo->which = Z_RecordComp_simple;
 	compo->u.simple = esn;
 	req->recordComposition = compo;
@@ -2343,7 +2362,6 @@ ZOOM_event (int no, ZOOM_connection *cs)
     FD_ZERO (&output);
     FD_ZERO (&except);
 #endif
-    yaz_log (LOG_LOG, "select begin");
     nfds = 0;
     for (i = 0; i<no; i++)
     {
@@ -2364,8 +2382,6 @@ ZOOM_event (int no, ZOOM_connection *cs)
         this_timeout = ZOOM_options_get_int (c->options, "timeout", -1);
         if (this_timeout != -1 && this_timeout < timeout)
             timeout = this_timeout;
-        yaz_log (LOG_LOG, "time_timeout = %d, p=%p, timeout=%d", this_timeout, 
-                 c, timeout);
 #if HAVE_SYS_POLL_H
         if (mask)
         {
@@ -2406,7 +2422,6 @@ ZOOM_event (int no, ZOOM_connection *cs)
 
     if (!nfds)
         return 0;
-    yaz_log (LOG_LOG, "select with timeout %d", timeout);
 
 #if HAVE_SYS_POLL_H
     r = poll (pollfds, nfds, timeout * 1000);
