@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.33  1995-06-06 14:57:05  quinn
+ * Revision 1.34  1995-06-14 15:26:46  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.33  1995/06/06  14:57:05  quinn
  * Better diagnostics.
  *
  * Revision 1.32  1995/06/06  08:41:44  quinn
@@ -150,7 +153,6 @@
 #include <oid.h>
 #include <log.h>
 #include <statserv.h>
-#include "../version.h"
 
 #include <backend.h>
 

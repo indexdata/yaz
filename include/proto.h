@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.14  1995-06-07 14:42:34  quinn
+ * Revision 1.15  1995-06-14 15:26:43  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.14  1995/06/07  14:42:34  quinn
  * Fixed CLOSE
  *
  * Revision 1.13  1995/06/07  14:36:47  quinn
@@ -105,6 +108,18 @@
 #include <odr.h>
 #include <oid.h>
 #include <odr_use.h>
+#include <yaz-version.h>
+
+/*
+ * Because we didn't have time to put all of the extra v3 elements in here
+ * before the first applications were written, we have to place them
+ * in #ifdefs in places where they would break existing code. If you are
+ * developing new stuff, we urge you to leave them in, even if you don't
+ * intend to use any v3 features. When we are comfortable that the old
+ * apps have been updated, we'll remove the #ifdefs.
+ */
+
+#define Z_V3
 
 /* ----------------- GLOBAL AUXILIARY DEFS ----------------*/
 
@@ -112,7 +127,6 @@ typedef Odr_oct Z_ReferenceId;
 typedef char Z_DatabaseName;
 typedef char Z_ResultSetId;
 typedef Odr_oct Z_ResultsetId;
-typedef Odr_external Z_UserInformationField;
 
 typedef struct Z_InfoCategory
 {
@@ -200,52 +214,58 @@ typedef struct Z_IdAuthentication
     } u;
 } Z_IdAuthentication;
 
-#define Z_ProtocolVersion_1            0
-#define Z_ProtocolVersion_2            1
-#define Z_ProtocolVersion_3            2
+#define Z_ProtocolVersion_1               0
+#define Z_ProtocolVersion_2               1
+#define Z_ProtocolVersion_3               2
 
-#define Z_Options_search               0
-#define Z_Options_present              1
-#define Z_Options_delSet               2
-#define Z_Options_resourceReport       3
-#define Z_Options_triggerResourceCtrl  4
-#define Z_Options_resourceCtrl         5
-#define Z_Options_accessCtrl           6
-#define Z_Options_scan                 7
-#define Z_Options_sort                 8
-#define Z_Options_reserved             9
-#define Z_Options_extendedServices    10
-#define Z_Options_level_1Segmentation 11
-#define Z_Options_level_2Segmentation 12
-#define Z_Options_concurrentOperations 13
-#define Z_Options_namedResultSets     14
+#define Z_Options_search                  0
+#define Z_Options_present                 1
+#define Z_Options_delSet                  2
+#define Z_Options_resourceReport          3
+#define Z_Options_triggerResourceCtrl     4
+#define Z_Options_resourceCtrl            5
+#define Z_Options_accessCtrl              6
+#define Z_Options_scan                    7
+#define Z_Options_sort                    8
+#define Z_Options_reserved                9
+#define Z_Options_extendedServices       10
+#define Z_Options_level_1Segmentation    11
+#define Z_Options_level_2Segmentation    12
+#define Z_Options_concurrentOperations   13
+#define Z_Options_namedResultSets        14
 
 typedef struct Z_InitRequest
 {
     Z_ReferenceId *referenceId;                   /* OPTIONAL */
-    Odr_bitmask *options;
     Odr_bitmask *protocolVersion;
+    Odr_bitmask *options;
     int *preferredMessageSize;
     int *maximumRecordSize;
     Z_IdAuthentication* idAuthentication;        /* OPTIONAL */
     char *implementationId;                      /* OPTIONAL */
     char *implementationName;                    /* OPTIONAL */
     char *implementationVersion;                 /* OPTIONAL */
-    Z_UserInformationField *userInformationField; /* OPTIONAL */
+    Odr_external *userInformationField;          /* OPTIONAL */
+#ifdef Z_95
+    Z_OtherInformation *otherInfo;               /* OPTIONAL */
+#endif
 } Z_InitRequest;
 
 typedef struct Z_InitResponse
 {
     Z_ReferenceId *referenceId;    /* OPTIONAL */
-    Odr_bitmask *options;
     Odr_bitmask *protocolVersion;
+    Odr_bitmask *options;
     int *preferredMessageSize;
     int *maximumRecordSize;
     bool_t *result;
     char *implementationId;      /* OPTIONAL */
     char *implementationName;    /* OPTIONAL */
     char *implementationVersion; /* OPTIONAL */
-    Z_UserInformationField *userInformationField; /* OPTIONAL */
+    Odr_external *userInformationField; /* OPTIONAL */
+#ifdef Z_95
+    Z_OtherInformation *otherInfo;    /* OPTIONAL */
+#endif
 } Z_InitResponse;
 
 typedef struct Z_NSRAuthentication
@@ -259,43 +279,7 @@ int z_NSRAuthentication(ODR o, Z_NSRAuthentication **p, int opt);
 
 int z_StrAuthentication(ODR o, char **p, int opt);
 
-
-/* ------------------ RESOURCE CONTROL ----------------*/
-
-typedef struct Z_TriggerResourceControlRequest
-{
-    Z_ReferenceId *referenceId;    /* OPTIONAL */
-    int *requestedAction;
-#define Z_TriggerResourceCtrl_resourceReport  1
-#define Z_TriggerResourceCtrl_resourceControl 2
-#define Z_TriggerResourceCtrl_cancel          3
-    Odr_oid *prefResourceReportFormat;  /* OPTIONAL */
-    bool_t *resultSetWanted;            /* OPTIONAL */
-} Z_TriggerResourceControlRequest;
-
-typedef struct Z_ResourceControlRequest
-{
-    Z_ReferenceId *referenceId;    /* OPTIONAL */
-    bool_t *suspendedFlag;         /* OPTIONAL */
-    Odr_external *resourceReport; /* OPTIONAL */
-    int *partialResultsAvailable;  /* OPTIONAL */
-#define Z_ResourceControlRequest_subset    1
-#define Z_ResourceControlRequest_interim   2
-#define Z_ResourceControlRequest_none      3
-    bool_t *responseRequired;
-    bool_t *triggeredRequestFlag;  /* OPTIONAL */
-} Z_ResourceControlRequest;
-
-typedef struct Z_ResourceControlResponse
-{
-    Z_ReferenceId *referenceId;    /* OPTIONAL */
-    bool_t *continueFlag;
-    bool_t *resultSetWanted;       /* OPTIONAL */
-} Z_ResourceControlResponse;
-
 /* ------------------ SEARCH SERVICE ----------------*/
-
-typedef Odr_oid Z_PreferredRecordSyntax;
 
 typedef struct Z_DatabaseSpecificUnit
 {
@@ -323,13 +307,36 @@ typedef struct Z_ElementSetNames
 
 /* ---------------------- RPN QUERY --------------------------- */
 
+typedef struct Z_ComplexAttribute
+{
+    int num_list;
+    Z_StringOrNumeric **list;
+    int num_semanticAction;
+    int **semanticAction;           /* OPTIONAL */
+} Z_ComplexAttribute;
+
 typedef struct Z_AttributeElement
 {
+#ifdef Z_95
+    Odr_oid *attributeSet;           /* OPTIONAL - v3 only */
+#endif
     int *attributeType;
+#ifdef Z_95
+    enum
+    {
+    	Z_AttributeValue_numeric,
+	Z_AttributeValue_complex
+    } which;
+    union
+    {
+    	int *numeric;
+	Z_ComplexAttribute *complex;
+    } u;
+#else
     int *attributeValue;
+#endif
 } Z_AttributeElement;
 
-#define Z_V3
 #ifdef Z_V3
 
 typedef struct Z_Term 
@@ -370,6 +377,13 @@ typedef struct Z_AttributesPlusTerm
     Odr_oct *term;
 #endif
 } Z_AttributesPlusTerm;
+
+typedef struct Z_ResultSetPlusAttributes
+{
+    char *resultSet;
+    int num_attributes;
+    Z_AttributeElement **attributeList;
+} Z_ResultSetPlusAttributes;
 
 typedef struct Z_ProximityOperator
 {
@@ -422,13 +436,17 @@ typedef struct Z_Operator
 
 typedef struct Z_Operand
 {
-    int which;
-#define Z_Operand_APT 0
-#define Z_Operand_resultSetId 1
+    enum
+    {
+	Z_Operand_APT,
+	Z_Operand_resultSetId,
+	Z_Operand_resultAttr             /* v3 only */
+    } which;
     union
     {
     	Z_AttributesPlusTerm *attributesPlusTerm;
     	Z_ResultSetId *resultSetId;
+	Z_ResultSetPlusAttributes *resultAttr;
     } u;
 } Z_Operand;
 
@@ -441,9 +459,11 @@ typedef struct Z_Complex
 
 typedef struct Z_RPNStructure
 {
-    int which;
-#define Z_RPNStructure_simple 0
-#define Z_RPNStructure_complex 1
+    enum
+    {
+	Z_RPNStructure_simple,
+	Z_RPNStructure_complex
+    } which;
     union
     {
     	Z_Operand *simple;
@@ -461,13 +481,18 @@ typedef struct Z_RPNQuery
 
 typedef struct Z_Query
 {
-    int which;
-#define Z_Query_type_1 1
-#define Z_Query_type_2 2
+    enum
+    {
+	Z_Query_type_1 = 1,
+	Z_Query_type_2,
+	Z_Query_type_101
+    }
+    which;
     union
     {
     	Z_RPNQuery *type_1;
     	Odr_oct *type_2;
+	Z_RPNQuery *type_101;
     } u;
 } Z_Query;
 
@@ -483,31 +508,73 @@ typedef struct Z_SearchRequest
     char **databaseNames;
     Z_ElementSetNames *smallSetElementSetNames;    /* OPTIONAL */
     Z_ElementSetNames *mediumSetElementSetNames;    /* OPTIONAL */
-    Z_PreferredRecordSyntax *preferredRecordSyntax;  /* OPTIONAL */
+    Odr_oid *preferredRecordSyntax;  /* OPTIONAL */
     Z_Query *query;
+#ifdef Z_95
+    Z_OtherInformation *additionalSearchInfo;       /* OPTIONAL */
+    Z_OtherInformation *otherInfo;                  /* OPTIONAL */
+#endif
 } Z_SearchRequest;
 
 /* ------------------------ RECORD -------------------------- */
 
 typedef Odr_external Z_DatabaseRecord;
 
+#ifdef Z_95
+
+typedef struct Z_DefaultDiagFormat
+{
+    Odr_oid *diagnosticSetId; /* This is opt'l to interwork with bad targets */
+    int *condition;
+    char *addinfo;
+} Z_DefaultDiagFormat;
+
 typedef struct Z_DiagRec
 {
-    Odr_oid *diagnosticSetId;
+    enum
+    {	
+    	Z_DiagRec_defaultFormat,
+	Z_DiagRec_externallyDefined
+    } which;
+    union
+    {
+    	Z_DefaultDiagFormat *defaultFormat;
+	Odr_external *externallyDefined;
+    } u;
+} Z_DiagRec;
+
+#else
+
+typedef struct Z_DiagRec
+{
+    Odr_oid *diagnosticSetId; /* This is opt'l to interwork with bad targets */
     int *condition;
     char *addinfo;
 } Z_DiagRec;
 
+#endif
+
+typedef struct Z_DiagRecList
+{
+    int num;
+    Z_DiagRec **list;
+} Z_DiagRecList;
+
 typedef struct Z_NamePlusRecord
 {
     char *databaseName;      /* OPTIONAL */
-    int which;
-#define Z_NamePlusRecord_databaseRecord 0
-#define Z_NamePlusRecord_surrogateDiagnostic 1
+    enum
+    {
+	Z_NamePlusRecord_databaseRecord,
+	Z_NamePlusRecord_surrogateDiagnostic,
+	Z_NamePlusRecord_multipleNonSurDiagnostics
+    }
+    which;
     union
     {
     	Z_DatabaseRecord *databaseRecord;
     	Z_DiagRec *surrogateDiagnostic;
+	Z_DiagRecList *multipleNonSurDiagnostics;
     } u;
 } Z_NamePlusRecord;
 
@@ -519,15 +586,172 @@ typedef struct Z_NamePlusRecordList
 
 typedef struct Z_Records
 {
-    int which;
-#define Z_Records_DBOSD 0
-#define Z_Records_NSD 1
+    enum
+    {
+	Z_Records_DBOSD,
+	Z_Records_NSD,
+	Z_Records_multipleNSD
+    } which;
     union
     {
     	Z_NamePlusRecordList *databaseOrSurDiagnostics;
     	Z_DiagRec *nonSurrogateDiagnostic;
+	Z_DiagRecList *multipleNonSurDiagnostics;
     } u;
 } Z_Records;
+
+/* ------------------------ SEARCHRESPONSE ------------------ */
+
+typedef struct Z_SearchResponse
+{
+    Z_ReferenceId *referenceId;       /* OPTIONAL */
+    int *resultCount;
+    int *numberOfRecordsReturned;
+    int *nextResultSetPosition;
+    bool_t *searchStatus;
+    int *resultSetStatus;              /* OPTIONAL */
+#define Z_RES_SUBSET        1
+#define Z_RES_INTERIM       2
+#define Z_RES_NONE          3
+    int *presentStatus;                /* OPTIONAL */
+#define Z_PRES_SUCCESS      0
+#define Z_PRES_PARTIAL_1    1
+#define Z_PRES_PARTIAL_2    2
+#define Z_PRES_PARTIAL_3    3
+#define Z_PRES_PARTIAL_4    4
+#define Z_PRES_FAILURE      5
+    Z_Records *records;                  /* OPTIONAL */
+#ifdef Z_95
+    Z_OtherInformation *additionalSearchInfo;
+    Z_OtherInformation *otherInfo;
+#endif
+} Z_SearchResponse;
+
+/* ------------------------- PRESENT SERVICE -----------------*/
+
+typedef struct Z_ElementSpec
+{
+    enum
+    {
+    	Z_ElementSpec_elementSetName,
+	Z_ElementSpec_externalSpec
+    } which;
+    union
+    {
+    	char *elementSetName;
+	Odr_external *externalSpec;
+    } u;
+} Z_ElementSpec;
+
+typedef struct Z_Specification
+{
+    Odr_oid *schema;                  /* OPTIONAL */
+    Z_ElementSpec *elementSpec;       /* OPTIONAL */
+} Z_Specification;
+
+typedef struct Z_DbSpecific
+{
+    char *databaseName;
+    Z_Specification *spec;
+} Z_DbSpecific;
+
+typedef struct Z_CompSpec
+{
+    bool_t *selectAlternativeSyntax;
+    Z_Specification *generic;            /* OPTIONAL */
+    int num_dbSpecific;
+    Z_DbSpecific **dbSpecific;           /* OPTIONAL */
+    int num_recordSyntax;
+    Odr_oid **recordSyntax;              /* OPTIONAL */
+} Z_CompSpec;
+
+typedef struct Z_RecordComposition
+{
+    enum
+    {
+    	Z_RecordComp_simple,
+	Z_RecordComp_complex
+    } which;
+    union
+    {
+    	Z_ElementSetNames *simple;
+	Z_CompSpec *complex;
+    } u;
+} Z_RecordComposition;
+
+typedef struct Z_Range
+{
+    int *startingPosition;
+    int *numberOfRecords;
+} Z_Range;
+
+typedef struct Z_PresentRequest
+{
+    Z_ReferenceId *referenceId;              /* OPTIONAL */
+    Z_ResultSetId *resultSetId;
+    int *resultSetStartPoint;
+    int *numberOfRecordsRequested;
+#ifdef Z_95
+    int num_ranges;
+    Z_Range **additionalRanges;              /* OPTIONAL */
+    Z_RecordComposition *recordComposition;  /* OPTIONAL */
+#else
+    Z_ElementSetNames *elementSetNames;  /* OPTIONAL */
+#endif
+    Odr_oid *preferredRecordSyntax;  /* OPTIONAL */
+#ifdef Z_95
+    int *maxSegmentCount;                 /* OPTIONAL */
+    int *maxRecordSize;                   /* OPTIONAL */
+    int *maxSegmentSize;                  /* OPTIONAL */
+    Z_OtherInformation *otherInfo;        /* OPTIONAL */
+#endif
+} Z_PresentRequest;
+
+typedef struct Z_PresentResponse
+{
+    Z_ReferenceId *referenceId;        /* OPTIONAL */
+    int *numberOfRecordsReturned;
+    int *nextResultSetPosition;
+    int *presentStatus;
+    Z_Records *records;
+#ifdef Z_95
+    Z_OtherInformation *otherInfo;     /* OPTIONAL */
+#endif
+} Z_PresentResponse;
+
+/* ------------------ RESOURCE CONTROL ----------------*/
+
+typedef struct Z_TriggerResourceControlRequest
+{
+    Z_ReferenceId *referenceId;    /* OPTIONAL */
+    int *requestedAction;
+#define Z_TriggerResourceCtrl_resourceReport  1
+#define Z_TriggerResourceCtrl_resourceControl 2
+#define Z_TriggerResourceCtrl_cancel          3
+    Odr_oid *prefResourceReportFormat;  /* OPTIONAL */
+    bool_t *resultSetWanted;            /* OPTIONAL */
+} Z_TriggerResourceControlRequest;
+
+typedef struct Z_ResourceControlRequest
+{
+    Z_ReferenceId *referenceId;    /* OPTIONAL */
+    bool_t *suspendedFlag;         /* OPTIONAL */
+    Odr_external *resourceReport; /* OPTIONAL */
+    int *partialResultsAvailable;  /* OPTIONAL */
+#define Z_ResourceControlRequest_subset    1
+#define Z_ResourceControlRequest_interim   2
+#define Z_ResourceControlRequest_none      3
+    bool_t *responseRequired;
+    bool_t *triggeredRequestFlag;  /* OPTIONAL */
+} Z_ResourceControlRequest;
+
+typedef struct Z_ResourceControlResponse
+{
+    Z_ReferenceId *referenceId;    /* OPTIONAL */
+    bool_t *continueFlag;
+    bool_t *resultSetWanted;       /* OPTIONAL */
+} Z_ResourceControlResponse;
+
 
 /* ------------------ ACCESS CTRL SERVICE ----------------*/
 
@@ -680,49 +904,6 @@ typedef struct Z_ScanResponse
     Odr_oid *attributeSet;            /* OPTIONAL */
 } Z_ScanResponse; 
 
-/* ------------------------ SEARCHRESPONSE ------------------ */
-
-typedef struct Z_SearchResponse
-{
-    Z_ReferenceId *referenceId;       /* OPTIONAL */
-    int *resultCount;
-    int *numberOfRecordsReturned;
-    int *nextResultSetPosition;
-    bool_t *searchStatus;
-    int *resultSetStatus;              /* OPTIONAL */
-#define Z_RES_SUBSET        1
-#define Z_RES_INTERIM       2
-#define Z_RES_NONE          3
-    int *presentStatus;                /* OPTIONAL */
-#define Z_PRES_SUCCESS      0
-#define Z_PRES_PARTIAL_1    1
-#define Z_PRES_PARTIAL_2    2
-#define Z_PRES_PARTIAL_3    3
-#define Z_PRES_PARTIAL_4    4
-#define Z_PRES_FAILURE      5
-    Z_Records *records;                  /* OPTIONAL */
-} Z_SearchResponse;
-
-/* ------------------------- PRESENT SERVICE -----------------*/
-
-typedef struct Z_PresentRequest
-{
-    Z_ReferenceId *referenceId;          /* OPTIONAL */
-    Z_ResultSetId *resultSetId;
-    int *resultSetStartPoint;
-    int *numberOfRecordsRequested;
-    Z_ElementSetNames *elementSetNames;  /* OPTIONAL */
-    Z_PreferredRecordSyntax *preferredRecordSyntax;  /* OPTIONAL */
-} Z_PresentRequest;
-
-typedef struct Z_PresentResponse
-{
-    Z_ReferenceId *referenceId;        /* OPTIONAL */
-    int *numberOfRecordsReturned;
-    int *nextResultSetPosition;
-    int *presentStatus;
-    Z_Records *records;
-} Z_PresentResponse;
 
 /* ------------------------ DELETE -------------------------- */
 
@@ -796,6 +977,17 @@ typedef struct Z_Close
 #endif
 } Z_Close;
 
+/* ------------------------ SEGMENTATION -------------------- */
+
+typedef struct Z_Segment
+{
+    Z_ReferenceId *referenceid;   /* OPTIONAL */
+    int *numberOfRecordsReturned;
+    Z_NamePlusRecord *segmentRecords;
+    Z_OtherInformation *otherInfo;  /* OPTIONAL */
+} Z_Segment;
+
+
 /* ------------------------ APDU ---------------------------- */
 
 typedef struct Z_APDU
@@ -815,6 +1007,7 @@ typedef struct Z_APDU
 	Z_APDU_triggerResourceControlRequest,
 	Z_APDU_scanRequest,
 	Z_APDU_scanResponse,
+	Z_APDU_segmentRequest,
 	Z_APDU_close
     } which;
     union
@@ -832,6 +1025,7 @@ typedef struct Z_APDU
 	Z_TriggerResourceControlRequest *triggerResourceControlRequest;
 	Z_ScanRequest *scanRequest;
 	Z_ScanResponse *scanResponse;
+	Z_Segment *segmentRequest;
 	Z_Close *close;
     } u;
 } Z_APDU;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.27  1995-06-07 14:36:22  quinn
+ * Revision 1.28  1995-06-14 15:26:35  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.27  1995/06/07  14:36:22  quinn
  * Added CLOSE
  *
  * Revision 1.26  1995/06/02  09:49:13  quinn
@@ -110,7 +113,7 @@ int z_ResultSetId(ODR o, char **p, int opt)
 	opt);
 }
 
-int z_UserInformationField(ODR o, Z_UserInformationField **p, int opt)
+int z_UserInformationField(ODR o, Odr_external **p, int opt)
 {
     return odr_explicit(o, odr_external, (Odr_external **)p, ODR_CONTEXT,
     	11, opt);
@@ -284,7 +287,7 @@ int z_InitRequest(ODR o, Z_InitRequest **p, int opt)
 	odr_implicit(o, odr_visiblestring, &pp->implementationVersion,
 	    ODR_CONTEXT, 112, 1) &&
 	z_UserInformationField(o, &pp->userInformationField, 1) &&
-#ifdef Z_OTHERINFO
+#ifdef Z_95
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
 #endif
 	odr_sequence_end(o);
@@ -314,7 +317,7 @@ int z_InitResponse(ODR o, Z_InitResponse **p, int opt)
 	odr_implicit(o, odr_visiblestring, &pp->implementationVersion,
 	    ODR_CONTEXT, 112, 1) &&
 	z_UserInformationField(o, &pp->userInformationField, 1) &&
-#ifdef Z_OTHERINFO
+#ifdef Z_95
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
 #endif
 	odr_sequence_end(o);
@@ -385,11 +388,6 @@ int z_ElementSetName(ODR o, char **p, int opt)
     	opt);
 }
 
-int z_PreferredRecordSyntax(ODR o, Z_PreferredRecordSyntax **p, int opt)
-{
-    return odr_implicit(o, odr_oid, (Odr_oid**) p, ODR_CONTEXT, 104, opt);
-}
-
 int z_DatabaseSpecificUnit(ODR o, Z_DatabaseSpecificUnit **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
@@ -441,19 +439,49 @@ int z_ElementSetNames(ODR o, Z_ElementSetNames **p, int opt)
 
 /* ----------------------- RPN QUERY -----------------------*/
 
-int z_AttributeElement(ODR o, Z_AttributeElement **p, int opt)
+int z_ComplexAttribute(ODR o, Z_ComplexAttribute **p, int opt)
 {
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
     return
-    	odr_implicit(o, odr_integer, &(*p)->attributeType, ODR_CONTEXT,
-	    120, 0) &&
-    	odr_implicit(o, odr_integer, &(*p)->attributeValue, ODR_CONTEXT,
-	    121, 0) &&
-    	odr_sequence_end(o);
+    	odr_implicit_settag(o, ODR_CONTEXT, 1) &&
+    	odr_sequence_of(o, z_StringOrNumeric, &(*p)->list,
+	    &(*p)->num_list) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 2) &&
+	(odr_sequence_of(o, odr_integer, &(*p)->semanticAction,
+	    &(*p)->num_semanticAction) || odr_ok(o)) &&
+	odr_sequence_end(o);
 }
 
-#ifdef Z_V3
+int z_AttributeElement(ODR o, Z_AttributeElement **p, int opt)
+{
+#ifdef Z_95
+    static Odr_arm arm[] =
+    {
+    	{ODR_IMPLICIT, ODR_CONTEXT, 121, Z_AttributeValue_numeric,
+	    odr_integer},
+	{ODR_IMPLICIT, ODR_CONTEXT, 224, Z_AttributeValue_complex,
+	    z_ComplexAttribute},
+	{-1, -1, -1, -1, 0}
+    };
+#endif
+
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+#ifdef Z_95
+    	odr_implicit(o, odr_oid, &(*p)->attributeSet, ODR_CONTEXT, 1, 1) &&
+#endif
+    	odr_implicit(o, odr_integer, &(*p)->attributeType, ODR_CONTEXT,
+	    120, 0) &&
+#ifdef Z_95
+	odr_choice(o, arm, &(*p)->u, &(*p)->which) &&
+#else
+    	odr_implicit(o, odr_integer, &(*p)->attributeValue, ODR_CONTEXT,
+	    121, 0) &&
+#endif
+    	odr_sequence_end(o);
+}
 
 int z_Term(ODR o, Z_Term **p, int opt)
 {
@@ -481,8 +509,6 @@ int z_Term(ODR o, Z_Term **p, int opt)
     return opt && odr_ok(o);
 }
 
-#endif
-
 int z_AttributesPlusTerm(ODR o, Z_AttributesPlusTerm **p, int opt)
 {
     if (!(odr_implicit_settag(o, ODR_CONTEXT, 102) &&
@@ -493,6 +519,19 @@ int z_AttributesPlusTerm(ODR o, Z_AttributesPlusTerm **p, int opt)
     	odr_sequence_of(o, z_AttributeElement, &(*p)->attributeList,
 	    &(*p)->num_attributes) &&
 	z_Term(o, &(*p)->term, 0) &&
+	odr_sequence_end(o);
+}
+
+int z_ResultSetPlusAttributes(ODR o, Z_ResultSetPlusAttributes **p, int opt)
+{
+    if (!(odr_implicit_settag(o, ODR_CONTEXT, 214) &&
+    	odr_sequence_begin(o, p, sizeof(**p))))
+    	return opt && odr_ok(o);
+    return
+    	z_ResultSetId(o, &(*p)->resultSet, 0) &&
+    	odr_implicit_settag(o, ODR_CONTEXT, 44) &&
+    	odr_sequence_of(o, z_AttributeElement, &(*p)->attributeList,
+	    &(*p)->num_attributes) &&
 	odr_sequence_end(o);
 }
 
@@ -551,6 +590,7 @@ int z_Operand(ODR o, Z_Operand **p, int opt)
     {
     	{-1, -1, -1, Z_Operand_APT, z_AttributesPlusTerm},
     	{-1, -1, -1, Z_Operand_resultSetId, z_ResultSetId},
+    	{-1, -1, -1, Z_Operand_resultAttr, z_ResultSetPlusAttributes},
     	{-1, -1, -1, -1, 0}
     };
 
@@ -614,6 +654,7 @@ int z_Query(ODR o, Z_Query **p, int opt)
     {
     	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_Query_type_1, z_RPNQuery},
     	{ODR_EXPLICIT, ODR_CONTEXT, 2, Z_Query_type_2, odr_octetstring},
+    	{ODR_EXPLICIT, ODR_CONTEXT, 101, Z_Query_type_101, z_RPNQuery},
     	{-1, -1, -1, -1, 0}
     };
 
@@ -652,10 +693,10 @@ int z_SearchRequest(ODR o, Z_SearchRequest **p, int opt)
 	    ODR_CONTEXT, 100, 1) &&
 	odr_explicit(o, z_ElementSetNames, &pp->mediumSetElementSetNames,
 	    ODR_CONTEXT, 101, 1) &&
-	odr_implicit(o, z_PreferredRecordSyntax, &pp->preferredRecordSyntax,
+	odr_implicit(o, odr_oid, &pp->preferredRecordSyntax,
 	    ODR_CONTEXT, 104, 1) &&
 	odr_explicit(o, z_Query, &pp->query, ODR_CONTEXT, 21, 0) &&
-#ifdef Z_OTHERINFO
+#ifdef Z_95
 	odr_implicit(o, z_OtherInformation, &(*p)->additionalSearchInfo,
 	    ODR_CONTEXT, 203, 1) &&
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
@@ -675,10 +716,17 @@ int z_DiagRec(ODR o, Z_DiagRec **p, int opt)
     if (!odr_sequence_begin(o, p, sizeof(**p)))
     	return opt && odr_ok(o);
     return
-    	odr_oid(o, &(*p)->diagnosticSetId, 1) &&       /* SHOULD NOT BE OPT */
+    	odr_oid(o, &(*p)->diagnosticSetId, 1) && /* SHOULD NOT BE OPT! */
     	odr_integer(o, &(*p)->condition, 0) &&
+	/*
+	 * I no longer recall what server tagged the addinfo.. but it isn't
+	 * hurting anyone, so...
+	 * We need to turn it into a choice, or something, because of
+	 * that damn generalstring in v3.
+	 */
     	(odr_visiblestring(o, &(*p)->addinfo, 0) ||
-    	odr_implicit(o, odr_cstring, &(*p)->addinfo, ODR_CONTEXT, ODR_VISIBLESTRING, 1)) &&
+	    odr_implicit(o, odr_cstring, &(*p)->addinfo, ODR_CONTEXT,
+	    ODR_VISIBLESTRING, 1)) &&
     	odr_sequence_end(o);
 }
 
@@ -1011,10 +1059,11 @@ int z_SearchResponse(ODR o, Z_SearchResponse **p, int opt)
     	z_NumberOfRecordsReturned(o, &pp->numberOfRecordsReturned, 0) &&
     	z_NextResultSetPosition(o, &pp->nextResultSetPosition, 0) &&
     	odr_implicit(o, odr_bool, &pp->searchStatus, ODR_CONTEXT, 22, 0) &&
-    	odr_implicit(o, odr_integer, &pp->resultSetStatus, ODR_CONTEXT, 26, 1) &&
+    	odr_implicit(o, odr_integer, &pp->resultSetStatus, ODR_CONTEXT, 26,
+	    1) &&
     	z_PresentStatus(o, &pp->presentStatus, 1) &&
     	z_Records(o, &pp->records, 1) &&
-#ifdef Z_OTHERINFO
+#ifdef Z_95
 	odr_implicit(o, z_OtherInformation, &(*p)->additionalSearchInfo,
 	    ODR_CONTEXT, 203, 1) &&
 	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
@@ -1023,6 +1072,95 @@ int z_SearchResponse(ODR o, Z_SearchResponse **p, int opt)
 }
 
 /* --------------------- PRESENT SERVICE ---------------------- */
+
+int z_ElementSpec(ODR o, Z_ElementSpec **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+    	{ODR_IMPLICIT, ODR_CONTEXT, 1, Z_ElementSpec_elementSetName,
+	    odr_visiblestring},
+	{ODR_IMPLICIT; ODR_CONTEXT, 2, Z_ElementSpec_externalSpec,
+	    odr_external},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+    	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_Specification(ODR o, Z_Specification **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_implicit(o, odr_oid, &(*p)->schema, ODR_CONTEXT, 1, 1) &&
+	z_ElementSpec(o, &(*p)->elementSpec, 1) &&
+	odr_sequence_end(o);
+}
+
+int z_DbSpecific(ODR o, Z_DbSpecific **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_explicit(o, z_DatabaseName, &(*p)->db, ODR_CONTEXT, 1, 0) &&
+	odr_implicit(o, z_Specification, &(*p)->spec, ODR_CONTEXT, 2, 0) &&
+	odr_sequence_end(o);
+}
+
+int z_CompSpec(ODR o, Z_CompSpec **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_implicit(o, odr_bool, &(*p)->selectAlternativeSyntax, ODR_CONTEXT,
+	    1, 0) &&
+	odr_implicit(o, z_Specification, &(*p)->generic, ODR_CONTEXT, 2, 1) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 3) &&
+	(odr_sequence_of(o, z_DbSpecific, &(*p)->num_dbSpecific,
+	    &(*p)->dbSpecific) || odr_ok(o)) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 4) &&
+	(odr_sequence_of(o, odr_oid, &(*p)->num_recordSyntax,
+	    &(*p)->recordSyntax) || odr_ok(o)) &&
+	odr_sequence_end(o);
+}
+
+int z_RecordComposition(ODR o, Z_RecordComposition **p, int opt)
+{
+    static Odr_arm arm[] =
+    {
+    	{ODR_EXPLICIT, ODR_CONTEXT, 1, Z_RecordComp_simple,
+	    z_ElementSetNames},
+	{ODR_IMPLICIT, ODR_CONTEXT, 209, Z_RecordComp_complex,
+	    z_CompSpec},
+	{-1, -1, -1, -1, 0}
+    };
+
+    if (o->direction == ODR_DECODE)
+    	*p = odr_malloc(o, sizeof(**p));
+
+    if (odr_choice(o, arm, &(*p)->u, &(*p)->which))
+    	return 1;
+    *p = 0;
+    return opt && odr_ok(o);
+}
+
+int z_Range(ODR o, Z_Range **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	odr_implicit(o, odr_integer, &(*p)->startingPosition, ODR_CONTEXT,
+	    1, 0) &&
+	odr_implicit(o, odr_integer, &(*p)->numberOfRecords, ODR_CONTEXT,
+	    2, 0) &&
+	odr_sequence_end(o);
+}
 
 int z_PresentRequest(ODR o, Z_PresentRequest **p, int opt)
 {
@@ -1038,8 +1176,25 @@ int z_PresentRequest(ODR o, Z_PresentRequest **p, int opt)
 	    30, 0) &&
 	odr_implicit(o, odr_integer, &pp->numberOfRecordsRequested, ODR_CONTEXT,
 	    29, 0) &&
+#ifdef Z_95
+	odr_implicit_settag(o, ODR_CONTEXT, 212) &&
+	(odr_sequence_of(o, z_Range, &(*p)->num_ranges,
+	    &(*p)->additionalRanges) || odr_ok(o)) &&
+	z_RecordComposition(o, &(*p)->recordComposition, 1) &&
+#else
 	z_ElementSetNames(o, &pp->elementSetNames, 1) &&
-	z_PreferredRecordSyntax(o, &pp->preferredRecordSyntax, 1) &&
+#endif
+	odr_implicit(o, odr_oid, &(*p)->preferredRecordSyntax, ODR_CONTEXT,
+	    104, 1) &&
+#ifdef Z_95
+	odr_implicit(o, odr_integer, &(*p)->maxSegmentCount, ODR_CONTEXT,
+	    204, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->maxRecordSize, ODR_CONTEXT,
+	    206, 1) &&
+	odr_impplicit(o, odr_integer, &(*p)->maxSegmentSize, ODR_CONTEXT,
+	    207, 1) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
 	odr_sequence_end(o);
 }
 
@@ -1056,6 +1211,9 @@ int z_PresentResponse(ODR o, Z_PresentResponse **p, int opt)
     	z_NextResultSetPosition(o, &pp->nextResultSetPosition, 0) &&
     	z_PresentStatus(o, &pp->presentStatus, 0) &&
     	z_Records(o, &pp->records, 1) &&
+#ifdef Z_95
+	Z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+#endif
     	odr_sequence_end(o);
 }
 
@@ -1116,6 +1274,23 @@ int z_DeleteResultSetResponse(ODR o, Z_DeleteResultSetResponse **p, int opt)
 	odr_sequence_end(o);
 }
 
+/* ------------------------ SEGMENT SERVICE -------------- */
+
+int z_Segment(ODR o, Z_Segment **p, int opt)
+{
+    if (!odr_sequence_begin(o, p, sizeof(**p)))
+    	return opt && odr_ok(o);
+    return
+    	z_ReferenceId(o, &(*p)->referenceId, 1) &&
+	odr_implicit(o, odr_integer, &(*p)->numberOfRecordsReturned,
+	    ODR_CONTEXT, 24, 0) &&
+	odr_implicit_settag(o, ODR_CONTEXT, 0) &&
+	odr_sequence_of(o, z_NamePlusRecord, &(*p)->num_segmentRecords,
+	    &(*p)->segmentRecords) &&
+	z_OtherInformation(o, &(*p)->otherInfo, 1) &&
+	odr_sequence_end(o);
+}
+
 /* ------------------------ CLOSE SERVICE ---------------- */
 
 int z_Close(ODR o, Z_Close **p, int opt)
@@ -1164,6 +1339,7 @@ int z_APDU(ODR o, Z_APDU **p, int opt)
 	    z_TriggerResourceControlRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 35, Z_APDU_scanRequest, z_ScanRequest},
 	{ODR_IMPLICIT, ODR_CONTEXT, 36, Z_APDU_scanResponse, z_ScanResponse},
+	{ODR_IMPLICIT, ODR_CONTEXT, 45, Z_APDU_segmentRequest, z_Segment},
 	{ODR_IMPLICIT, ODR_CONTEXT, 48, Z_APDU_close, z_Close},
 
     	{-1, -1, -1, -1, 0}

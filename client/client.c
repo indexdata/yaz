@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.10  1995-06-06 14:56:58  quinn
+ * Revision 1.11  1995-06-14 15:26:40  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.10  1995/06/06  14:56:58  quinn
  * Better diagnostics.
  *
  * Revision 1.9  1995/06/06  08:15:19  quinn
@@ -67,8 +70,6 @@
 #include <yaz-ccl.h>
 #endif
 #endif
-
-#include "../version.h"
 
 #define C_PROMPT "Z> "
 

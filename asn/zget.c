@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.5  1995-06-07 14:42:30  quinn
+ * Revision 1.6  1995-06-14 15:26:37  quinn
+ * *** empty log message ***
+ *
+ * Revision 1.5  1995/06/07  14:42:30  quinn
  * Fixed CLOSE
  *
  * Revision 1.4  1995/06/07  14:36:25  quinn
@@ -23,7 +26,6 @@
  */
 
 #include <proto.h>
-#include "../version.h"
 
 Z_InitRequest *zget_InitRequest(ODR o)
 {
