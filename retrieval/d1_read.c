@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.5  1995-12-11 15:22:37  quinn
+ * Revision 1.6  1995-12-12 16:37:08  quinn
+ * Added destroy element to data1_node.
+ *
+ * Revision 1.5  1995/12/11  15:22:37  quinn
  * Added last_child field to the node.
  * Rewrote schema-mapping.
  *
@@ -103,6 +106,7 @@ data1_node *data1_mk_node(void)
 	    abort();
     r->next = r->child = r->last_child = r->parent = 0;
     r->num_children = 0;
+    r->destroy = 0;
     return r;
 }
 
@@ -122,6 +126,8 @@ void data1_free_tree(data1_node *t)
 	data1_free_tree(p);
 	p = pn;
     }
+    if (t->destroy)
+	(*t->destroy)(t);
     fr_node(t);
 }
 

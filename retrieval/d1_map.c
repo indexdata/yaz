@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.5  1995-12-12 14:11:31  quinn
+ * Revision 1.6  1995-12-12 16:37:08  quinn
+ * Added destroy element to data1_node.
+ *
+ * Revision 1.5  1995/12/12  14:11:31  quinn
  * More work on the large-record problem.
  *
  * Revision 1.4  1995/12/11  15:22:37  quinn
@@ -250,7 +253,7 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res)
 		     */
 		    for (mt = m->target_path; mt; mt = mt->next)
 		    {
-			if (!cur || !tagmatch(cur, mt))
+			if (!cur || mt->new_field || !tagmatch(cur, mt))
 			{
 			    cur = data1_mk_node();
 			    cur->which = DATA1N_tag;

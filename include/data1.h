@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.6  1995-12-11 15:22:12  quinn
+ * Revision 1.7  1995-12-12 16:37:05  quinn
+ * Added destroy element to data1_node.
+ *
+ * Revision 1.6  1995/12/11  15:22:12  quinn
  * Added last_child field to the node.
  *
  * Revision 1.5  1995/12/05  14:26:40  quinn
@@ -294,6 +297,7 @@ typedef struct data1_node
 	} indicator;
     } u;
 
+    void (*destroy)(struct data1_node *n);
     char lbuf[DATA1_LOCALDATA]; /* small buffer for local data */
     int line;
     int num_children;

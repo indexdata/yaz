@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.26  1995-12-12 14:11:00  quinn
+ * Revision 1.27  1995-12-12 16:37:02  quinn
+ * Added destroy element to data1_node.
+ *
+ * Revision 1.26  1995/12/12  14:11:00  quinn
  * Minimal.
  *
  * Revision 1.25  1995/11/13  09:27:22  quinn
@@ -180,6 +183,8 @@ static void send_initRequest()
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_3);
+
+    *req->maximumRecordSize = 1024*1024;
 
     req->idAuthentication = auth;
 
