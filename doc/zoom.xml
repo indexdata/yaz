@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.9 2001-11-15 08:58:28 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.10 2001-11-15 21:58:50 adam Exp $ -->
  <chapter id="zoom"><title>Building clients with ZOOM</title>
   
   <para>
@@ -80,21 +80,21 @@
     <function>Z3950_connection_destroy</function>.
    </para>
    <synopsis>
-    const char *Z3950_connection_option (Z3950_connection c,
-                                         const char *key,
-                                         const char *val);
+    void Z3950_connection_option_set (Z3950_connection c,
+                                      const char *key,
+                                      const char *val);
+
+    const char *Z3950_connection_option_get (Z3950_connection c,
+                                             const char *key);
+
     const char *Z3950_connection_host (Z3950_connection c);
    </synopsis>
    <para>
-    The <function>Z3950_connection_option</function> allows you to
-    inspect or set an option given by <parameter>key</parameter>
-    for the connection.
-    If <parameter>val</parameter> is non-<literal>NULL</literal> that
-    holds the new value for option.
-    Otherwise, if <parameter>val</parameter> is
-    <literal>NULL</literal>,
-    the option is unchanged.
-    The function returns the (new) value of the option.
+    The <function>Z3950_connection_option_set</function> allows you to
+    set an option given by <parameter>key</parameter> to the value
+    <parameter>value</parameter> for the connection.
+     Function <function>Z3950_connection_option_get</function> returns
+    the value for an option given by <parameter>key</parameter>.
    </para>
    <table frame="top"><title>ZOOM Connection Options</title>
     <tgroup cols="3">
@@ -256,16 +256,20 @@
     creating query objects is not necessary.
    </para>
    <synopsis>
-     const char *Z3950_resultset_option (Z3950_resultset r,
-                                         const char *key,
-                                         const char *val);
+     void Z3950_resultset_option_set (Z3950_resultset r,
+                                      const char *key,
+                                      const char *val);
+
+     const char *Z3950_resultset_option_get (Z3950_resultset r,
+                                             const char *key);
 
      size_t Z3950_resultset_size (Z3950_resultset r);
    </synopsis>
    <para>
-    Function <function>Z3950_resultset_options</function> sets or
-    modifies an option for a result set similar to 
-    <function>Z3950_connection_option</function>.
+    Functions <function>Z3950_resultset_options_set</function> and
+    <function>Z3950_resultset_get</function> sets and gets an option
+    for a result set similar to <function>Z3950_connection_option_get</function>
+    and <function>Z3950_connection_option_set</function>.
    </para>
    <para>
     The number of hits also called result-count is returned by
@@ -463,7 +467,7 @@
      <varlistentry><term><literal>raw</literal></term>
       <listitem><para>The record is returned in the internal
         YAZ specific format. The raw data is returned as type 
-        <literal>Z_External *</literal> is just the type for
+        <literal>Z_External *</literal> which is just the type for
         the member <literal>retrievalRecord</literal> in
         type <literal>NamePlusRecord</literal>.
        </para></listitem>
