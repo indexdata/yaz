@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.4  1995-03-17 10:18:08  quinn
+ * Revision 1.5  1995-03-17 10:44:13  quinn
+ * Added catch of null-string in makediagrec
+ *
+ * Revision 1.4  1995/03/17  10:18:08  quinn
  * Added memory management.
  *
  * Revision 1.3  1995/03/16  17:42:39  quinn
@@ -226,7 +229,7 @@ static int process_initRequest(IOCHAN client, Z_InitRequest *req)
     resp.result = &result;
     resp.implementationId = "YAZ";
     resp.implementationName = "YAZ/Simple asynchronous test server";
-    resp.implementationVersion = "$Revision: 1.4 $";
+    resp.implementationVersion = "$Revision: 1.5 $";
     resp.userInformationField = 0;
     if (!z_APDU(assoc->encode, &apdup, 0))
     {
@@ -252,7 +255,7 @@ static Z_Records *diagrec(int error, char *addinfo)
     rec.u.nonSurrogateDiagnostic = &dr;
     dr.diagnosticSetId = bib1;
     dr.condition = &err;
-    dr.addinfo = addinfo;
+    dr.addinfo = addinfo ? addinfo : "";
     return &rec;
 }
 
