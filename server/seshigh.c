@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.65  1997-09-01 08:53:01  adam
+ * Revision 1.66  1997-09-05 15:26:44  adam
+ * Added ODR encode in search and scen bend request structures.
+ * Fixed a few enums that caused trouble with C++.
+ *
+ * Revision 1.65  1997/09/01 08:53:01  adam
  * New windows NT/95 port using MSV5.0. The test server 'ztest' was
  * moved a separate directory. MSV5.0 project server.dsp created.
  * As an option, the server can now operate as an NT service.
@@ -1024,6 +1028,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     bsrq.num_bases = req->num_databaseNames;
     bsrq.basenames = req->databaseNames;
     bsrq.query = req->query;
+    bsrq.stream = assoc->encode;
 
     if (!(bsrt = bend_search(assoc->backend, &bsrq, fd)))
 	return 0;
@@ -1244,6 +1249,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 	srq.basenames = req->databaseNames;
 	srq.num_entries = *req->numberOfTermsRequested;
 	srq.term = req->termListAndStartPoint;
+	srq.stream = assoc->encode;
 	if (!(attset = oid_getentbyoid(req->attributeSet)) ||
 	    attset->oclass != CLASS_RECSYN)
 	    srq.attributeset = VAL_NONE;

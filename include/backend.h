@@ -58,6 +58,7 @@ typedef struct bend_searchrequest
     int num_bases;             /* number of databases in list */
     char **basenames;          /* databases to search */
     Z_Query *query;            /* query structure */
+    ODR stream;                /* encoding stream */
 } bend_searchrequest;
 
 typedef struct bend_searchresult
@@ -103,22 +104,25 @@ typedef struct bend_scanrequest
     Z_AttributesPlusTerm *term;
     int term_position;  /* desired index of term in result list */
     int num_entries;    /* number of entries requested */
+    ODR stream;         /* encoding stream - memory source if required */
 } bend_scanrequest;
+
+struct scan_entry {
+    char *term;
+    int occurrences;
+};
+
+typedef enum {
+    BEND_SCAN_SUCCESS,   /* ok */
+    BEND_SCAN_PARTIAL   /* not all entries could be found */
+} bend_scan_status;
 
 typedef struct bend_scanresult
 {
     int num_entries;
-    struct scan_entry
-    {
-    	char *term;
-	int occurrences;
-    } *entries;
+    struct scan_entry *entries;
     int term_position;
-    enum
-    {
-    	BEND_SCAN_SUCCESS,   /* ok */
-	BEND_SCAN_PARTIAL   /* not all entries could be found */
-    } status;
+    bend_scan_status status;
     int errcode;
     char *errstring;
 } bend_scanresult;
