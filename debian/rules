@@ -98,9 +98,6 @@ binary-arch: build install
 
 	dh_installchangelogs
 	dh_link
-	dh_strip
-	dh_compress -a
-	dh_fixperms -a
 
 	dh_installdeb -p libyaz
 	dh_installdeb -p libyaz-dev
@@ -112,14 +109,16 @@ binary-arch: build install
 	dh_installman -p yaz doc/yaz-client.1 doc/yaz-ztest.8 doc/zoomsh.1
 	dh_installman -p yaz doc/yaz-client-ssl.1 doc/yaz-ztest-ssl.8
 
+	dh_strip
+	dh_compress -a
+	dh_fixperms -a
+
 	echo "libyaz 2 libyaz (>= 2.0.2)" > debian/libyaz/DEBIAN/shlibs
 	echo "libyazthread 2 libyaz (>= 2.0.2)" >> debian/libyaz/DEBIAN/shlibs
 	echo "libyazmalloc 2 libyaz (>= 2.0.2)" >> debian/libyaz/DEBIAN/shlibs
 	echo "libyazssl 2 libyaz (>= 2.0.2)" >> debian/libyaz/DEBIAN/shlibs
 	chmod 644 debian/libyaz/DEBIAN/shlibs
 	dh_shlibdeps -p libyaz $(LOCAL_LINK) 
-	cat debian/postinst >> debian/libyaz/DEBIAN/postinst
-	chmod +x debian/libyaz/DEBIAN/postinst
 
 	dh_gencontrol -p libyaz
 	dh_md5sums -p libyaz
