@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_choice.c,v $
- * Revision 1.4  1995-03-14 16:59:38  quinn
+ * Revision 1.5  1995-03-18 12:16:31  quinn
+ * Minor changes.
+ *
+ * Revision 1.4  1995/03/14  16:59:38  quinn
  * Added odr_constructed_more check
  *
  * Revision 1.3  1995/03/08  12:12:22  quinn
@@ -20,9 +23,9 @@
 
 #include <odr.h>
 
-int odr_choice(ODR o, Odr_arm arm[], void *p, int *which)
+int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp)
 {
-    int i, cl = -1, tg, cn;
+    int i, cl = -1, tg, cn, *which = whichp;
 
     if (o->error)
     	return 0;
