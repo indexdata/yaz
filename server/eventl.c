@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: eventl.c,v $
- * Revision 1.3  1995-03-14 11:30:14  quinn
+ * Revision 1.4  1995-03-14 16:59:48  quinn
+ * Bug-fixes
+ *
+ * Revision 1.3  1995/03/14  11:30:14  quinn
  * Works better now.
  *
  * Revision 1.2  1995/03/14  10:27:59  quinn
@@ -36,6 +39,7 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags)
     new->flags = flags;
     new->fun = cb;
     new->next = iochans;
+    new->force_event = 0;
     iochans = new;
     return new;
 }

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.3  1995-03-14 11:30:15  quinn
+ * Revision 1.4  1995-03-14 16:59:48  quinn
+ * Bug-fixes
+ *
+ * Revision 1.3  1995/03/14  11:30:15  quinn
  * Works better now.
  *
  * Revision 1.2  1995/03/14  10:28:03  quinn
@@ -31,6 +34,8 @@
 #include <xmosi.h>
 
 static char *me = "";
+
+#define DEFAULT_LISTENER "tcp:localhost:9999"
 
 /*
  * handle incoming connect requests.
@@ -93,6 +98,7 @@ void add_listener(char *where)
     void *ap;
     IOCHAN lst;
 
+    fprintf(stderr, "Adding listener on %s\n", where);
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
     {
     	fprintf(stderr, "%s: Address format: ('tcp'|'osi')':'<address>.\n",
@@ -148,6 +154,7 @@ int main(int argc, char **argv)
     int ret, listeners = 0;
     char *arg;
 
+    me = argv[0];
     while ((ret = options("l:", argv, argc, &arg)) != -2)
     	switch (ret)
     	{
@@ -158,9 +165,6 @@ int main(int argc, char **argv)
 	    	exit(1);
 	}
     if (!listeners)
-    {
-    	fprintf(stderr, "%s: Must specify at least one listener.\n", me);
-    	exit(1);
-    }
+	add_listener(DEFAULT_LISTENER);
     return event_loop();
 }
