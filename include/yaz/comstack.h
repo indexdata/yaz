@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2000, Index Data.
+ * Copyright (c) 1995-2001, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.3 2000-11-23 10:58:32 adam Exp $
+ * $Id: comstack.h,v 1.4 2001-03-08 20:18:55 adam Exp $
  */
 
 #ifndef COMSTACK_H
@@ -111,6 +111,7 @@ struct comstack
     int (*f_close)(COMSTACK handle);
     char *(*f_addrstr)(COMSTACK handle);
     void *(*f_straddr)(COMSTACK handle, const char *str);
+    int (*f_set_blocking)(COMSTACK handle, int blocking);
 };
 
 #define cs_put(handle, buf, size) ((*(handle)->f_put)(handle, buf, size))
@@ -136,6 +137,7 @@ struct comstack
 #define cs_straddr(handle, str) ((*(handle)->f_straddr)(handle, str))
 #define cs_want_read(handle) ((handle)->io_pending & CS_WANT_READ)
 #define cs_want_write(handle) ((handle)->io_pending & CS_WANT_WRITE)
+#define cs_set_blocking(handle,blocking) ((handle)->f_set_blocking(handle, blocking)
 
 #define CS_WANT_READ 1
 #define CS_WANT_WRITE 2

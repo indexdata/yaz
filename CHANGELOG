@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added cs_set_blocking to set change blocking mode of a COMSTACK. Thanks
+to Matthew Carey.
+
 CCL operator names may be set in field definition files (CCL_bibset).
 See ccl/bib1 for an example.
 

@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
- * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.36  2001-02-21 13:46:53  adam
+ * Revision 1.37  2001-03-08 20:18:55  adam
+ * Added cs_set_blocking. Patch from Matthew Carey.
+ *
+ * Revision 1.36  2001/02/21 13:46:53  adam
  * C++ fixes.
  *
  * Revision 1.35  2000/11/27 15:17:40  adam
@@ -214,6 +216,7 @@ int tcpip_bind(COMSTACK h, void *address, int mode);
 int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 		 int (*check_ip)(void *cd, const char *a, int len, int type),
 		 void *cd);
+int static tcpip_set_blocking(COMSTACK p, int blocking);
 
 #if HAVE_OPENSSL_SSL_H
 int ssl_get(COMSTACK h, char **buf, int *bufsize);
@@ -336,6 +339,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
     p->f_accept = tcpip_accept;
     p->f_addrstr = tcpip_addrstr;
     p->f_straddr = tcpip_straddr;
+    p->f_set_blocking = tcpip_set_blocking;
 
     p->state = new_socket ? CS_UNBND : CS_IDLE; /* state of line */
     p->event = CS_NONE;
@@ -1133,4 +1137,28 @@ char *tcpip_addrstr(COMSTACK h)
 	sprintf(buf, "ssl:%s", r);
 #endif
     return buf;
+}
+
+int static tcpip_set_blocking(COMSTACK p, int blocking)
+{
+    unsigned long flag;
+    
+    if (p->blocking == blocking)
+	return 1;
+    if(blocking)
+#ifdef WIN32
+        flag = blocking;
+    if (ioctlsocket(p->iofile, FIONBIO, &flag) < 0)
+	return 0;
+#else
+    flag = fcntl(p->iofile, F_GETFL, 0);
+    if(!blocking)
+	flag = flag & ~O_NONBLOCK;
+    else
+        flag = flag | O_NONBLOCK;
+    if (fcntl(p->iofile, F_SETFL, flag) < 0)
+	return 0;
+#endif
+    p->blocking = blocking;
+    return 1;
 }
