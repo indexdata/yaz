@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.1 2003-10-27 12:21:30 adam Exp $
+# $Id: charconv.tcl,v 1.2 2004-03-15 23:14:40 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -14,6 +14,10 @@ proc ins_trie {from to} {
     if {![info exists trie(no)]} {
         set trie(no) 1
         set trie(size) 0
+	set trie(max) 0
+    }
+    if {$trie(max) < $to} {
+	set trie(max) $to
     }
     incr trie(size)
     ins_trie_r [split $from] $to 0
@@ -77,23 +81,29 @@ proc dump_trie {ofile} {
 
     set f [open $ofile w]
 
+    if {[string length $trie(max)] > 4} {
+	set totype int
+    } else {
+	set totype {unsigned short}
+    }
+
     puts $f "/* TRIE: size $trie(size) */"
     puts $f "\#include <string.h>"
-    puts $f {
+    puts $f "
         struct yaz_iconv_trie_flat {
             char *from;
-            int to;
+            $totype to;
         };
         struct yaz_iconv_trie_dir {
             struct yaz_iconv_trie *ptr;
-            int to;
+            $totype to;
         };
         
         struct yaz_iconv_trie {
             struct yaz_iconv_trie_flat *flat;
             struct yaz_iconv_trie_dir *dir;
         };
-    }
+    "
 
     set this $trie(no)
     while { [incr this -1] >= 0 } {
@@ -272,4 +282,5 @@ if {![info exists ifiles]} {
 foreach ifile $ifiles {
     readfile $ifile
 }
+
 dump_trie $ofile
