@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: diagbib1.c,v $
- * Revision 1.4  1995-09-29 17:11:52  quinn
+ * Revision 1.5  1996-01-02 13:57:30  adam
+ * Added error messages.
+ *
+ * Revision 1.4  1995/09/29  17:11:52  quinn
  * Smallish
  *
  * Revision 1.3  1995/09/27  15:02:39  quinn
@@ -94,6 +97,54 @@ struct {
 { 130, "Illegal result set in proximity search" },
 { 131, "Unsupported proximity relation" },
 { 132, "Unsupported proximity unit code" },
+{ 201, "Proximity not supported with this attribute combination" },
+{ 202, "Unsupported distance for proximity" },
+{ 203, "Ordered flag not supported for proximity" },
+{ 205, "Only zero step size supported for Scan" },
+{ 206, "Specified step size not supported for Scan" },
+{ 207, "Cannot sort according to sequence" },
+{ 208, "No result set name supplied on Sort" },
+{ 209, "Generic sort not supported (database-specific sort only supported)" },
+{ 210, "Database specific sort not supported" },
+{ 211, "Too many sort keys" },
+{ 212, "Duplicate sort keys" },
+{ 213, "Unsupported missing data action" },
+{ 214, "Illegal sort relation" },
+{ 215, "Illegal case value" },
+{ 216, "Illegal missing data action" },
+{ 217, "Segmentation: Cannot guarantee records will fit in specified segments"
+},
+{ 218, "ES: Package name already in use" },
+{ 219, "ES: no such package, on modify/delete" },
+{ 220, "ES: quota exceeded" },
+{ 221, "ES: extended service type not supported" },
+{ 222, "ES: permission denied on ES - id not authorized" },
+{ 223, "ES: permission denied on ES - cannot modify or delete" },
+{ 224, "ES: immediate execution failed" },
+{ 225, "ES: immediate execution not supported for this service" },
+{ 226, "ES: immediate execution not supported for these parameters" },
+{ 227, "No data available in requested record syntax" },
+{ 228, "Scan: malformed scan" },
+{ 229, "Term type not supported" },
+{ 230, "Sort: too many input results" },
+{ 231, "Sort: incompatible record formats" },
+{ 232, "Scan: term list not supported" },
+{ 233, "Scan: unsupported value of position-in-response" },
+{ 234, "Too many index terms processed" },
+{ 235, "Database does not exist" },
+{ 236, "Access to specified database denied" },
+{ 237, "Sort: illegal sort" },
+{ 238, "Record not available in requested syntax" },
+{ 239, "Record syntax not supported" },
+{ 240, "Scan: Resources exhausted looking for satisfying terms" },
+{ 241, "Scan: Beginning or end of term list" },
+{ 242, "Segmentation: max-segment-size too small to segment record" },
+{ 243, "Present:  additional-ranges parameter not supported" },
+{ 244, "Present:  comp-spec parameter not supported" },
+{ 245, "Type-1 query: restriction ('resultAttr') operand not supported" },
+{ 246, "Type-1 query: 'complex' attributeValue not supported" },
+{ 247, "Type-1 query: 'attributeSet' as part of AttributeElement not supported"
+},
 { 0, NULL} 
 };
 
