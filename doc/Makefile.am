@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.17 2001-10-24 12:50:44 adam Exp $
+## $Id: Makefile.am,v 1.18 2001-10-24 20:25:07 adam Exp $
 
 docdir=$(pkgdatadir)/doc
 
@@ -18,8 +18,8 @@ HTMLFILES = asn.external.html asn.html asn.oid.html asn.pdu.html \
  odr.html odr.programming.html odr.use.html server.backend.html \
  server.backendfunctions.html server.frontend.html server.html \
  server.invocation.html server.main.html tools.html tools.nmem.html \
- tools.oid.html yaz.html zoom.events.html zoom.html zoom.options.html \
- zoom.records.html zoom.resultsets.html zoom.search.html
+ tools.oid.html unix.html yaz.html zoom.events.html zoom.html \
+ zoom.options.html zoom.records.html zoom.resultsets.html zoom.search.html
 
 DOCFILES=$(XMLFILES) $(HTMLFILES) yaz.pdf
 
