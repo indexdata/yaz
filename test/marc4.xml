@@ -4,6 +4,6 @@
 <!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
 <record xmlns="http://www.loc.gov/MARC21/slim">
   <leader>009140091a22a  22003370 </leader>
-  <!-- Base address not at end of directory base=0 end=402 -->
-  <!-- Bad data-offset=0 or data-length=100170 -->
+<!-- Directory offset 24: Bad data for data length and/or length starting -->
+<!-- Base address not at end of directory, base 0, end 25 -->
 </record>
