@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.15 2003-01-22 09:43:32 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.16 2003-01-23 20:26:37 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -473,8 +473,7 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
      In many ways CQL has a similar syntax to CCL.
      The objective of CQL is different. Where CCL aims to be
      an end-user language, CQL is <emphasis>the</emphasis> protocol
-     query language for SRW. Unlike PQF (Z39.50 Type-1), CQL is easy
-     to read.
+     query language for SRW.
     </para>
     <tip>
      <para>
@@ -529,13 +528,16 @@ typedef struct cql_parser *CQL_parser;
 
 CQL_parser cql_parser_create(void);
 void cql_parser_destroy(CQL_parser cp);
-
-int cql_parser_string(CQL_parser cp, const char *str);
       </synopsis>
      A parser is created by <function>cql_parser_create</function> and
      is destroyed by <function>cql_parser_destroy</function>.
      </para>
      <para>
+      To parse a CQL query string, the following function
+      is provided:
+      <synopsis>
+int cql_parser_string(CQL_parser cp, const char *str);
+      </synopsis>
       A CQL query is parsed by the <function>cql_parser_string</function>
       which takes a query <parameter>str</parameter>.
       If the query was valid (no syntax errors), then zero is returned;
@@ -560,9 +562,24 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
       uses a <literal>FILE</literal> handle which is opened for reading.
      </para>
     </sect3>
+    
     <sect3 id="tools.cql.tree"><title>CQL tree</title>
      <para>
-      We now turn to the tree representation of a valid CQL query.
+      The the query string is validl, the CQL parser
+      generates a tree representing the structure of the
+      CQL query.
+     </para>
+     <para>
+      <synopsis>
+struct cql_node *cql_parser_result(CQL_parser cp);
+      </synopsis>
+      <function>cql_parser_result</function> returns the
+      a pointer to the root node of the resulting tree.
+     </para>
+     <para>
+      Each node in a CQL tree is represented by a 
+      <literal>struct cql_node</literal>.
+      It is defined as follows:
       <synopsis>
 #define CQL_NODE_ST 1
 #define CQL_NODE_BOOL 2
@@ -684,6 +701,91 @@ struct cql_node {
       </itemizedlist>
      </para>
 
+    </sect3>
+    <sect3 id="tools.cql.pqf"><title>CQL to PQF conversion</title>
+     <para>
+      Conversion to PQF (and Z39.50 RPN) is tricky by the fact
+      that the resulting RPN depends on the Z39.50 target
+      capabilities (combinations of supported attributes). 
+      Furthermore, the CQL and SRW operates on index prefixes
+      (URI or strings), whereas the RPN uses Object Identifiers
+      for attribute sets.
+     </para>
+     <para>
+      The CQL library of &yaz; defines a <literal>cql_transform_t</literal>
+      type. It represents a particular mapping between CQL and RPN.
+      This handle is created and destroyed by the functions:
+     <synopsis>
+cql_transform_t cql_transform_open_FILE (FILE *f);
+cql_transform_t cql_transform_open_fname(const char *fname);
+void cql_transform_close(cql_transform_t ct);
+      </synopsis>
+      The first two functions create a tranformation handle from
+      either an already open FILE or from a filename.
+     </para>
+     <para>
+      The handle is destroyed by <function>cql_transform_close</function> 
+      in which case no further reference of the handle is allowed.
+     </para>
+     <para>
+      When a <literal>cql_transform_t</literal> handle has been created
+      you can convert to RPN.
+      <synopsis>
+int cql_transform_buf(cql_transform_t ct,
+                      struct cql_node *cn, char *out, int max);
+      </synopsis>
+      This function converts the CQL tree <literal>cn</literal> 
+      using handle <literal>ct</literal>.
+      For the resulting PQF, you supply a buffer <literal>out</literal>
+      which must be able to hold at at least <literal>max</literal>
+      characters.
+     </para>
+     <para>
+      If conversion failed, <function>cql_transform_buf</function>
+      returns a non-zero error code; otherwise zero is returned
+      (conversion successful).
+     </para>
+     <para>
+      If you wish to be able to produce a PQF result in a different
+      way, there are two alternatives.
+      <synopsis>
+void cql_transform_pr(cql_transform_t ct,
+                      struct cql_node *cn,
+                      void (*pr)(const char *buf, void *client_data),
+                      void *client_data);
+
+int cql_transform_FILE(cql_transform_t ct,
+                       struct cql_node *cn, FILE *f);
+      </synopsis>
+      The former function produces output to a user-defined
+      output stream. The latter writes the result to an already
+      open <literal>FILE</literal>.
+     </para>
+    </sect3>
+    <sect3 id="toolq.cql.xcql"><title>CQL to XCQL conversion</title>
+     <para>
+      Conversion from CQL to XCQL is trivial and does not
+      require a mapping to be defined.
+      There three functions to choose from depending on the
+      way you wish to store the resulting output (XML buffer
+      containing XCQL).
+      <synopsis>
+int cql_to_xml_buf(struct cql_node *cn, char *out, int max);
+void cql_to_xml(struct cql_node *cn, 
+                void (*pr)(const char *buf, void *client_data),
+                void *client_data);
+void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
+      </synopsis>
+      Function <function>cql_to_xml_buf</function> converts
+      to XCQL and stores result in a user supplied buffer of a given
+      max size.
+     </para>
+     <para>
+      <function>cql_to_xml</function> writes the result in
+      a user defined output stream.
+      <function>cql_to_xml_stdio</function> writes to a
+      a file.
+     </para>
     </sect3>
    </sect2>
   </sect1>
