@@ -1,10 +1,14 @@
+
 /*
  * Copyright (c) 1995-1996, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.46  1997-06-23 10:30:18  adam
+ * Revision 1.47  1997-07-01 13:49:56  adam
+ * Take care of case when invalid target is specified on command line.
+ *
+ * Revision 1.46  1997/06/23 10:30:18  adam
  * Added call to ccl_rpn_delete in search. Added ODR stream "out"
  * as parameter to ccl_rpn_query to release RPN query.
  *
@@ -1341,8 +1345,8 @@ int main(int argc, char **argv)
         switch (ret)
         {
         case 0:
-            cmd_open (arg);
-            opened = 1;
+            if (cmd_open (arg) == 2)
+                opened = 1;
             break;
         case 'm':
             if (!(marcdump = fopen (arg, "a")))
