@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.40  1998-11-03 10:14:12  adam
+ * Revision 1.41  1999-07-13 13:23:47  adam
+ * Non-recursive version of data1_read_node. data1_read_nodex reads
+ * stream of bytes (instead of buffer in memory).
+ *
+ * Revision 1.40  1998/11/03 10:14:12  adam
  * Changed definition of data1 node so that it uses less space.
  *
  * Revision 1.39  1998/10/28 15:10:06  adam
@@ -458,8 +462,10 @@ YAZ_EXPORT data1_handle data1_create (void);
 YAZ_EXPORT void data1_destroy(data1_handle dh);
 YAZ_EXPORT data1_node *get_parent_tag(data1_handle dh, data1_node *n);
 YAZ_EXPORT data1_node *data1_read_node(data1_handle dh, const char **buf,
-				       data1_node *parent,
-				       int *line, data1_absyn *absyn, NMEM m);
+				       NMEM m);
+YAZ_EXPORT data1_node *data1_read_nodex (data1_handle dh, NMEM m,
+					 int (*get_byte)(void *fh), void *fh,
+					 WRBUF wrbuf);
 YAZ_EXPORT data1_node *data1_read_record(data1_handle dh, 
 					 int (*rf)(void *, char *, size_t),
 					 void *fh, NMEM m);

@@ -1,10 +1,14 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.25  1999-04-20 09:56:48  adam
+ * Revision 1.26  1999-07-13 13:23:48  adam
+ * Non-recursive version of data1_read_node. data1_read_nodex reads
+ * stream of bytes (instead of buffer in memory).
+ *
+ * Revision 1.25  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -197,7 +201,6 @@ char *data1_insert_string (data1_handle dh, data1_node *res,
     }
 }
 
-
 data1_node *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
 					data1_node *at,
 					const char *tagname, NMEM m,
@@ -274,211 +277,260 @@ data1_node *data1_insert_taggeddata(data1_handle dh, data1_node *root,
  * Ugh. Sometimes functions just grow and grow on you. This one reads a
  * 'node' and its children.
  */
-data1_node *data1_read_node (data1_handle dh, const char **buf,
-			     data1_node *parent, int *line,
-			     data1_absyn *absyn, NMEM m)
+data1_node *data1_read_nodex (data1_handle dh, NMEM m,
+			      int (*get_byte)(void *fh), void *fh, WRBUF wrbuf)
 {
+    data1_absyn *absyn = 0;
+    data1_node *d1_stack[256];
     data1_node *res;
+    int c;
+    int level = 0;
+    int line = 1;
 
-    while (**buf && isspace(**buf))
+    d1_stack[level] = 0;
+    c = (*get_byte)(fh);
+    while (1)
     {
-	if (**buf == '\n')
-	    (*line)++;
-	(*buf)++;
-    }
-    if (!**buf)
-	return 0;
-
-    if (**buf == '<') /* beginning of tag */
-    {
-	char tag[64];
-	char args[256];
-	size_t i;
-	const char *t = (*buf) + 1;
-	data1_node **pp;
-	data1_element *elem = 0;
+	data1_node *parent = level ? d1_stack[level-1] : 0;
+	while (c != '\0' && isspace(c))
+	{
+	    if (c == '\n')
+		line++;
+	    c = (*get_byte)(fh);
+	}
+	if (c == '\0')
+	    break;
 	
-	for (i = 0; *t && *t != '>' && !isspace(*t); t++)
-	    if (i < (sizeof(tag)-1))
-		tag[i++] = *t;
-	tag[i] = '\0';
-	while (isspace(*t))
-	    t++;
-	for (i = 0; *t && *t != '>'; t++)
-	    if (i < (sizeof(args)-1))
-		args[i++] = *t;
-	args[i] = '\0';
-	if (*t != '>' && !isspace(*t))
+	if (c == '<') /* beginning of tag */
 	{
-	    logf(LOG_WARN, "d1: %d: Malformed tag", *line);
-	    return 0;
-	}
-	/*
-	 * if end-tag, see if we terminate parent. If so, consume and return.
-	 * Else, return.
-	 */
-	if (*tag == '/')
-	{
-	    if (parent && (!*(tag +1) ||
-		    (parent->which == DATA1N_root &&
-		     !strcmp(tag + 1,parent->u.root.type)) ||
-		    (parent->which == DATA1N_tag &&
-		     !strcmp(tag + 1, parent->u.tag.tag))))
-		*buf = t + 1;
-	    return 0;
-	}	
-	if (!absyn) /* parent node - what are we? */
-	{
-	    if (!(absyn = data1_get_absyn (dh, tag)))
-	    {
-		logf(LOG_WARN, "Unable to acquire abstract syntax for '%s'",
-		    tag);
-		return 0;
-	    }
-	    res = data1_mk_node (dh, m);
-	    res->which = DATA1N_root;
-	    res->u.root.type = data1_insert_string (dh, res, m, tag);
-	    res->u.root.absyn = absyn;
-	    res->root = res;
-	    *buf = t + 1;
-	}
-	else if (!strcmp(tag, "var"))
-	{
-	    char tclass[DATA1_MAX_SYMBOL], type[DATA1_MAX_SYMBOL];
-	    data1_vartype *tp;
-	    int val_offset;
-	    data1_node *p;
-
-	    if (sscanf(args, "%s %s %n", tclass, type, &val_offset) != 2)
-	    {
-		logf(LOG_WARN, "Malformed variant triple at '%s'", tag);
-		return 0;
-	    }
-	    if (!(tp =
-		  data1_getvartypebyct(dh, parent->root->u.root.absyn->varset,
-				       tclass, type)))
-		return 0;
+	    char tag[64];
+	    char args[256];
+	    size_t i;
 	    
-	    /*
-	     * If we're the first variant in this group, create a parent var,
-	     * and insert it before the current variant.
-	     */
-	    if (parent->which != DATA1N_variant)
+	    for (i = 0; (c=(*get_byte)(fh)) && c != '>' && !isspace(c);)
+		if (i < (sizeof(tag)-1))
+		    tag[i++] = c;
+	    tag[i] = '\0';
+	    while (isspace(c))
+		c = (*get_byte)(fh);
+	    for (i = 0; c && c != '>'; c = (*get_byte)(fh))
+		if (i < (sizeof(args)-1))
+		    args[i++] = c;
+	    args[i] = '\0';
+	    if (c != '>')
 	    {
-		res = data1_mk_node (dh, m);
-		res->which = DATA1N_variant;
-		res->u.variant.type = 0;
-		res->u.variant.value = 0;
-		res->root = parent->root;
-	    }
-	    else
-	    {
-		/*
-		 * now determine if one of our ancestor triples is of same type.
-		 * If so, we break here. This will make the parser unwind until
-		 * we become a sibling (alternate variant) to the aforementioned
-		 * triple. It stinks that we re-parse these tags on every
-		 * iteration of this. This is a function in need of a rewrite.
-		 */
-		for (p = parent; p->which == DATA1N_variant; p = p->parent)
-		    if (p->u.variant.type == tp)
-			return 0;
-		res =  data1_mk_node (dh, m);
-		res->which = DATA1N_variant;
-		res->root = parent->root;
-		res->u.variant.type = tp;
-	        res->u.variant.value =
-                    data1_insert_string (dh, res, m, args + val_offset);
-		*buf = t + 1;
-	    }
-	}
-	else /* tag.. acquire our element in the abstract syntax */
-	{
-	    data1_node *partag = get_parent_tag (dh, parent);
-	    data1_element *e = 0;
-	    int localtag = 0;
-
-	    if (parent->which == DATA1N_variant)
+		logf(LOG_WARN, "d1: %d: Malformed tag", line);
 		return 0;
-	    if (partag)
-		if (!(e = partag->u.tag.element))
-		    localtag = 1; /* our parent is a local tag */
-
-	    elem = data1_getelementbytagname(dh, absyn, e, tag);
-	    res = data1_mk_node (dh, m);
-	    res->which = DATA1N_tag;
-            res->u.tag.tag = data1_insert_string (dh, res, m, tag);
-	    res->u.tag.element = elem;
-	    res->u.tag.node_selected = 0;
-	    res->u.tag.make_variantlist = 0;
-	    res->u.tag.no_data_requested = 0;
-	    res->u.tag.get_bytes = -1;
-	    res->root = parent->root;
-	    *buf = t + 1;
-	}
-
-	res->parent = parent;
-	pp = &res->child;
-	/*
-	 * Read child nodes.
-	 */
-	while ((*pp = data1_read_node(dh, buf, res, line, absyn, m)))
-	{
-	    res->last_child = *pp;
-	    pp = &(*pp)->next;
-	}
-    }
-    else /* != '<'... this is a body of text */
-    {
-	const char *src;
-	char *dst;
-	int len, prev_char = 0;
-
-	if (!parent)
-	    return 0;
-
-	res = data1_mk_node(dh, m);
-	res->parent = parent;
-	res->which = DATA1N_data;
-	res->u.data.what = DATA1I_text;
-	res->u.data.formatted_text = 0;
-	res->root = parent->root;
-
-	/* determine length of "data" */
-	src = strchr (*buf, '<');
-	if (src)
-	    len = src - *buf;
-	else
-	    len = strlen (*buf);
-
-	/* use local buffer of nmem if too large */
-	if (len >= DATA1_LOCALDATA)
-	    res->u.data.data = (char*) nmem_malloc (m, len);
-	else
-	    res->u.data.data = res->lbuf;
-
-	/* read "data" and transfer while removing white space */
-	dst = res->u.data.data;
-	for (src = *buf; --len >= 0; src++)
-	{
-	    if (*src == '\n')
-		(*line)++;
-	    if (isspace (*src))
-		prev_char = ' ';
-	    else
-	    {
-		if (prev_char)
-		{
-		    *dst++ = prev_char;
-		    prev_char = 0;
-		}
-		*dst++ = *src;
 	    }
+	    else
+		c = (*get_byte)(fh);
+
+	    /* End tag? */
+	    if (*tag == '/')       
+	    {
+		if (tag[1] == '\0')
+		    --level;        /* </> */
+		else
+		{                   /* </tag> */
+		    int i = level;
+		    while (i > 0)
+		    {
+			parent = d1_stack[--i];
+			if ((parent->which == DATA1N_root &&
+			     !strcmp(tag+1, parent->u.root.type)) ||
+			    (parent->which == DATA1N_tag &&
+			     !strcmp(tag+1, parent->u.tag.tag)))
+			{
+			    level = i;
+			    break;
+			}
+		    }
+		    if (i != level)
+		    {
+			logf (LOG_WARN, "%d: no begin tag for %s",
+			      line, tag);
+			break;
+		    }
+		}
+		if (level == 0)
+		    return d1_stack[0];
+		continue;
+	    }	
+	    if (level == 0) /* root ? */
+	    {
+		if (!(absyn = data1_get_absyn (dh, tag)))
+		{
+		    logf(LOG_WARN, "Unable to acquire abstract syntax "
+			 "for '%s'", tag);
+		    return 0;
+		}
+		res = data1_mk_node (dh, m);
+		res->which = DATA1N_root;
+		res->u.root.type = data1_insert_string (dh, res, m, tag);
+		res->u.root.absyn = absyn;
+		res->root = res;
+	    }
+	    else if (!strcmp(tag, "var"))
+	    {
+		char tclass[DATA1_MAX_SYMBOL], type[DATA1_MAX_SYMBOL];
+		data1_vartype *tp;
+		int val_offset;
+		
+		if (sscanf(args, "%s %s %n", tclass, type, &val_offset) != 2)
+		{
+		    logf(LOG_WARN, "Malformed variant triple at '%s'", tag);
+		    continue;
+		}
+		if (!(tp =
+		      data1_getvartypebyct(dh,
+					   parent->root->u.root.absyn->varset,
+					   tclass, type)))
+		    continue;
+		/*
+		 * If we're the first variant in this group, create a parent 
+		 * variant, and insert it before the current variant.
+		 */
+		if (parent->which != DATA1N_variant)
+		{
+		    res = data1_mk_node (dh, m);
+		    res->which = DATA1N_variant;
+		    res->u.variant.type = 0;
+		    res->u.variant.value = 0;
+		}
+		else
+		{
+		    /*
+		     * now determine if one of our ancestor triples is of
+		     * same type. If so, we break here.
+		     */
+		    int i;
+		    for (i = level-1; d1_stack[i]->which==DATA1N_variant; --i)
+			if (d1_stack[i]->u.variant.type == tp)
+			{
+			    level = i;
+			    break;
+			}
+		    res = data1_mk_node (dh, m);
+		    res->which = DATA1N_variant;
+		    res->u.variant.type = tp;
+		    res->u.variant.value =
+			data1_insert_string (dh, res, m, args + val_offset);
+		}
+	    }
+	    else /* tag.. acquire our element in the abstract syntax */
+	    {
+		data1_node *partag = get_parent_tag (dh, parent);
+		data1_element *elem, *e = 0;
+		int localtag = 0;
+		
+		if (parent->which == DATA1N_variant)
+		    return 0;
+		if (partag)
+		    if (!(e = partag->u.tag.element))
+			localtag = 1; /* our parent is a local tag */
+		
+		elem = data1_getelementbytagname(dh, absyn, e, tag);
+		res = data1_mk_node (dh, m);
+		res->which = DATA1N_tag;
+		res->u.tag.tag = data1_insert_string (dh, res, m, tag);
+		res->u.tag.element = elem;
+		res->u.tag.node_selected = 0;
+		res->u.tag.make_variantlist = 0;
+		res->u.tag.no_data_requested = 0;
+		res->u.tag.get_bytes = -1;
+	    }
+	    if (parent)
+	    {
+		parent->last_child = res;
+		res->root = parent->root;
+	    }
+	    res->parent = parent;
+	    if (d1_stack[level])
+		d1_stack[level]->next = res;
+	    else if (parent)
+		parent->child = res;
+	    d1_stack[level] = res;
+	    d1_stack[++level] = 0;
 	}
-	*buf = src;
-	res->u.data.len = dst - res->u.data.data;
+	else /* != '<'... this is a body of text */
+	{
+	    const char *src;
+	    char *dst;
+	    int len, prev_char = 0;
+	    
+	    if (level == 0)
+	    {
+		c = (*get_byte)(fh);
+		continue;
+	    }
+	    res = data1_mk_node(dh, m);
+	    res->parent = parent;
+	    res->which = DATA1N_data;
+	    res->u.data.what = DATA1I_text;
+	    res->u.data.formatted_text = 0;
+	    res->root = parent->root;
+	    parent->last_child = res;
+	    if (d1_stack[level])
+		d1_stack[level]->next = res;
+	    else
+		parent->child = res;
+	    d1_stack[level] = res;
+	    
+	    wrbuf_rewind(wrbuf);
+
+	    while (c != '<')
+	    {
+		wrbuf_putc (wrbuf, c);
+		c = (*get_byte)(fh);
+	    }
+	    len = wrbuf_len(wrbuf);
+
+	    /* use local buffer of nmem if too large */
+	    if (len >= DATA1_LOCALDATA)
+		res->u.data.data = (char*) nmem_malloc (m, len);
+	    else
+		res->u.data.data = res->lbuf;
+	    
+	    /* read "data" and transfer while removing white space */
+	    dst = res->u.data.data;
+	    for (src = wrbuf_buf(wrbuf); --len >= 0; src++)
+	    {
+		if (*src == '\n')
+		    line++;
+		if (isspace (*src))
+		    prev_char = ' ';
+		else
+		{
+		    if (prev_char)
+		    {
+			*dst++ = prev_char;
+			prev_char = 0;
+		    }
+		    *dst++ = *src;
+		}
+	    }
+	    res->u.data.len = dst - res->u.data.data;
+	}
     }
-    return res;
+    return 0;
+}
+
+int getc_mem (void *fh)
+{
+    const char **p = (const char **) fh;
+    if (**p)
+	return *(*p)++;
+    return 0;
+}
+
+data1_node *data1_read_node (data1_handle dh, const char **buf, NMEM m)
+{
+    WRBUF wrbuf = wrbuf_alloc();
+    data1_node *node;
+
+    node = data1_read_nodex(dh, m, getc_mem, buf, wrbuf);
+    wrbuf_free (wrbuf, 1);
+    return node;
 }
 
 /*
@@ -492,21 +544,21 @@ data1_node *data1_read_record(data1_handle dh,
     char **buf = data1_get_read_buf (dh, &size);
     const char *bp;
     int rd = 0, res;
-    int line = 0;
     
     if (!*buf)
 	*buf = (char *)xmalloc(*size = 4096);
     
     for (;;)
     {
-	if (rd + 4096 > *size && !(*buf =(char *)xrealloc(*buf, *size *= 2)))
+	if (rd + 2048 >= *size && !(*buf =(char *)xrealloc(*buf, *size *= 2)))
 	    abort();
-	if ((res = (*rf)(fh, *buf + rd, 4096)) <= 0)
+	if ((res = (*rf)(fh, *buf + rd, 2048)) <= 0)
 	{
 	    if (!res)
 	    {
 		bp = *buf;
-		return data1_read_node(dh, &bp, 0, &line, 0, m);
+		(*buf)[rd] = '\0';
+		return data1_read_node(dh, &bp, m);
 	    }
 	    else
 		return 0;
@@ -518,6 +570,6 @@ data1_node *data1_read_record(data1_handle dh,
 data1_node *data1_read_sgml (data1_handle dh, NMEM m, const char *buf)
 {
     const char *bp = buf;
-    int line = 0;
-    return data1_read_node (dh, &bp, 0, &line, 0, m);
+    return data1_read_node (dh, &bp, m);
 }
+
