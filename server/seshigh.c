@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.82  1998-10-20 14:00:30  quinn
+ * Revision 1.83  1998-11-03 10:09:36  adam
+ * Fixed bug regarding YC.
+ *
+ * Revision 1.82  1998/10/20 14:00:30  quinn
  * Fixed Scan
  *
  * Revision 1.81  1998/10/13 16:12:24  adam
@@ -972,7 +975,7 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
     Z_DefaultDiagFormat *rec = (Z_DefaultDiagFormat *)odr_malloc (assoc->encode, sizeof(*rec));
 
-    logf(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo);
+    logf(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo ? addinfo : "");
     bib1.proto = assoc->proto;
     bib1.oclass = CLASS_DIAGSET;
     bib1.value = VAL_BIB1;
@@ -1531,17 +1534,13 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 		}
 		else
 		{
-		    Z_Records *zrecords = diagrec (assoc,
-						   srs->entries[i].errcode,
-						   srs->entries[i].errstring);
-		    logf(LOG_DEBUG, "  term sd code=%d addinfo=%s",
-			 srs->entries[i].errcode,
-			 (srs->entries[i].errstring?srs->entries[i].errstring :
-			  "<null>"));
-		    assert (zrecords->which == Z_Records_NSD);
+		    Z_DiagRecs *drecs = diagrecs (assoc,
+						  srs->entries[i].errcode,
+						  srs->entries[i].errstring);
+		    assert (drecs->num_diagRecs == 1);
 		    e->which = Z_Entry_surrogateDiagnostic;
-		    e->u.surrogateDiagnostic =
-			zrecords->u.nonSurrogateDiagnostic;
+		    assert (drecs->diagRecs[0]);
+		    e->u.surrogateDiagnostic = drecs->diagRecs[0];
 		}
 	    }
 	}
