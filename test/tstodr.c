@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.1 2003-10-27 12:21:38 adam Exp $
+ * $Id: tstodr.c,v 1.2 2004-09-29 20:14:56 adam Exp $
  *
  */
 #include <stdio.h>
@@ -50,10 +50,7 @@ void tst_MySequence1(ODR encode, ODR decode)
 
 void tst_MySequence2(ODR encode, ODR decode)
 {
-    char *ber_buf;
-    int ber_len;
     Yc_MySequence *s = odr_malloc(encode, sizeof(*s));
-    Yc_MySequence *t;
 
     s->first = 0;  /* deliberately miss this .. */
     s->second = odr_malloc(encode, sizeof(*s->second));
