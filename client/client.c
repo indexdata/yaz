@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.67  1998-06-09 13:55:06  adam
+ * Revision 1.68  1998-07-20 12:37:06  adam
+ * Added 'delete <resultset>' command. Changed open command so that
+ * it reconnects if already connected.
+ *
+ * Revision 1.67  1998/06/09 13:55:06  adam
  * Minor changes.
  *
  * Revision 1.66  1998/05/18 13:06:53  adam
@@ -263,7 +267,7 @@ static int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 static enum oid_value recordsyntax = VAL_USMARC;
 static int sent_close = 0;
-static ODR_MEM session_mem;             /* memory handle for init-response */
+static NMEM session_mem = NULL;      /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
 static char last_scan[512] = "0";
 static char last_cmd[100] = "?";
@@ -335,6 +339,7 @@ static void send_initRequest()
     ODR_MASK_SET(req->options, Z_Options_scan);
     ODR_MASK_SET(req->options, Z_Options_sort);
     ODR_MASK_SET(req->options, Z_Options_extendedServices);
+    ODR_MASK_SET(req->options, Z_Options_delSet);
 
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(req->protocolVersion, Z_ProtocolVersion_2);
@@ -378,6 +383,7 @@ static int process_initResponse(Z_InitResponse *res)
             printf("Guessing visiblestring:\n");
             printf("'%s'\n", res->userInformationField->u. octet_aligned->buf);
         }
+	odr_reset (print);
     }
     return 0;
 }
@@ -421,7 +427,14 @@ int cmd_open(char *arg)
     if (conn)
     {
         printf("Already connected.\n");
-        return 0;
+
+	cs_close (conn);
+	conn = NULL;
+	if (session_mem)
+	{
+	    nmem_destroy (session_mem);
+	    session_mem = NULL;
+	}
     }
     base[0] = '\0';
     if (!*arg || sscanf(arg, "%[^:]:%[^/]/%s", type, addr, base) < 2)
@@ -741,6 +754,26 @@ static void display_records(Z_Records *p)
         for (i = 0; i < p->u.databaseOrSurDiagnostics->num_records; i++)
             display_nameplusrecord(p->u.databaseOrSurDiagnostics->records[i]);
     }
+}
+
+static int send_deleteResultSetRequest(char *arg)
+{
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_deleteResultSetRequest);
+    Z_DeleteResultSetRequest *req = apdu->u.deleteResultSetRequest;
+
+    req->referenceId = set_refid (out);
+
+    req->num_ids = 1;
+    req->resultSetList = (char **)
+	odr_malloc (out, sizeof(*req->resultSetList));
+    *req->resultSetList = arg;
+    req->deleteFunction = (int *)
+	odr_malloc (out, sizeof(*req->deleteFunction));
+    *req->deleteFunction = Z_DeleteRequest_list;
+    
+    send_apdu(apdu);
+    printf("Sent deleteResultSetRequest.\n");
+    return 2;
 }
 
 static int send_searchRequest(char *arg)
@@ -1147,6 +1180,23 @@ static int cmd_find(char *arg)
     return 2;
 }
 
+static int cmd_delete(char *arg)
+{
+    if (!*arg)
+    {
+        printf("Delete what?\n");
+        return 0;
+    }
+    if (!conn)
+    {
+        printf("Not connected yet\n");
+        return 0;
+    }
+    if (!send_deleteResultSetRequest(arg))
+        return 0;
+    return 2;
+}
+
 static int cmd_ssub(char *arg)
 {
     if (!(smallSetUpperBound = atoi(arg)))
@@ -1270,17 +1320,31 @@ void process_close(Z_Close *req)
         req->diagnosticInformation ? req->diagnosticInformation : "NULL");
     if (sent_close)
     {
-        printf("Goodbye.\n");
-        exit(0);
+	cs_close (conn);
+	conn = NULL;
+	if (session_mem)
+	{
+	    nmem_destroy (session_mem);
+	    session_mem = NULL;
+	}
+	sent_close = 0;
     }
-    *res->closeReason = Z_Close_finished;
-    send_apdu(apdu);
-    printf("Sent response.\n");
-    sent_close = 1;
+    else
+    {
+	*res->closeReason = Z_Close_finished;
+	send_apdu(apdu);
+	printf("Sent response.\n");
+	sent_close = 1;
+    }
 }
 
 static int cmd_show(char *arg)
 {
+    if (!conn)
+    {
+        printf("Not connected yet\n");
+        return 0;
+    }
     if (!send_presentRequest(arg))
         return 0;
     return 2;
@@ -1300,7 +1364,7 @@ int cmd_cancel(char *arg)
         apdu->u.triggerResourceControlRequest;
     bool_t rfalse = 0;
     
-    if (!session)
+    if (!conn)
     {
         printf("Session not initialized yet\n");
         return 0;
@@ -1561,7 +1625,7 @@ void process_sortResponse(Z_SortResponse *res)
 
 int cmd_sort_generic(char *arg, int newset)
 {
-    if (!session)
+    if (!conn)
     {
         printf("Session not initialized yet\n");
         return 0;
@@ -1592,7 +1656,7 @@ int cmd_sort_newset (char *arg)
 
 int cmd_scan(char *arg)
 {
-    if (!session)
+    if (!conn)
     {
         printf("Session not initialized yet\n");
         return 0;
@@ -1701,9 +1765,13 @@ int cmd_refid (char *arg)
 
 int cmd_close(char *arg)
 {
-    Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
-    Z_Close *req = apdu->u.close;
+    Z_APDU *apdu;
+    Z_Close *req;
+    if (!conn)
+	return 0;
 
+    apdu = zget_APDU(out, Z_APDU_close);
+    req = apdu->u.close;
     *req->closeReason = Z_Close_finished;
     send_apdu(apdu);
     printf("Sent close request.\n");
@@ -1735,6 +1803,7 @@ static void initialize(void)
         fclose (inf);
     }
 #endif
+    cmd_base("Default");
 }
 
 static int client(int wait)
@@ -1747,6 +1816,7 @@ static int client(int wait)
         {"open", cmd_open, "('tcp'|'osi')':'[<tsel>'/']<host>[':'<port>]"},
         {"quit", cmd_quit, ""},
         {"find", cmd_find, "<query>"},
+	{"delete", cmd_delete, "<setname>"},
         {"base", cmd_base, "<base-name>"},
         {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]"},
         {"scan", cmd_scan, "<term>"},
@@ -1905,13 +1975,18 @@ static int client(int wait)
 		    process_resourceControlRequest
 			(apdu->u.resourceControlRequest);
 		    break;
+		case Z_APDU_deleteResultSetResponse:
+		    printf("Got deleteResultSetResponse status=%d\n",
+			   *apdu->u.deleteResultSetResponse->
+			   deleteOperationStatus);
+		    break;
 		default:
 		    printf("Received unknown APDU type (%d).\n", 
 			   apdu->which);
 		    exit(1);
                 }
             }
-            while (cs_more(conn));
+            while (conn && cs_more(conn));
 	    printf(C_PROMPT);
 	    fflush(stdout);
         }
@@ -1926,16 +2001,17 @@ int main(int argc, char **argv)
     int ret;
     int opened = 0;
 
-    initialize();
-    cmd_base("Default");
-
-    while ((ret = options("m:", argv, argc, &arg)) != -2)
+    while ((ret = options("m:v:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
         case 0:
-            if (cmd_open (arg) == 2)
-                opened = 1;
+            if (!opened)
+	    {
+		initialize ();
+		if (cmd_open (arg) == 2)
+		    opened = 1;
+	    }
             break;
         case 'm':
             if (!(marcdump = fopen (arg, "a")))
@@ -1944,6 +2020,9 @@ int main(int argc, char **argv)
                 exit (1);
             }
             break;
+	case 'v':
+	    log_init (log_mask_str(arg), "", NULL);
+	    break;
         default:
             fprintf (stderr, "Usage: %s [-m <marclog>] [<server-addr>]\n",
                      prog);
@@ -1951,7 +2030,10 @@ int main(int argc, char **argv)
         }
     }
     if (!opened)
+    {
+	initialize ();
         printf (C_PROMPT);
+    }
     return client (opened);
 }
 
