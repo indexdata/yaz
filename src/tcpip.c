@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.5 2004-04-29 21:19:23 adam Exp $
+ * $Id: tcpip.c,v 1.6 2004-04-30 19:10:35 adam Exp $
  */
 
 #include <stdio.h>
@@ -79,6 +79,7 @@ typedef struct tcpip_state
     SSL_CTX *ctx;       /* current CTX. */
     SSL_CTX *ctx_alloc; /* If =ctx it is owned by CS. If 0 it is not owned */
     SSL *ssl;
+    char cert_fname[256];
 #endif
 } tcpip_state;
 
@@ -112,7 +113,7 @@ static int tcpip_init (void)
 COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
 {
     COMSTACK p;
-    tcpip_state *state;
+    tcpip_state *sp;
     int new_socket;
 #ifdef WIN32
     unsigned long tru = 1;
@@ -130,7 +131,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
 	new_socket = 0;
     if (!(p = (struct comstack *)xmalloc(sizeof(struct comstack))))
 	return 0;
-    if (!(state = (struct tcpip_state *)(p->cprivate =
+    if (!(sp = (struct tcpip_state *)(p->cprivate =
                                          xmalloc(sizeof(tcpip_state)))))
 	return 0;
 
@@ -172,17 +173,18 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
     p->stackerr = 0;
 
 #if HAVE_OPENSSL_SSL_H
-    state->ctx = state->ctx_alloc = 0;
-    state->ssl = 0;
+    sp->ctx = sp->ctx_alloc = 0;
+    sp->ssl = 0;
+    strcpy(sp->cert_fname, "yaz.pem");
 #endif
 
-    state->altbuf = 0;
-    state->altsize = state->altlen = 0;
-    state->towrite = state->written = -1;
+    sp->altbuf = 0;
+    sp->altsize = sp->altlen = 0;
+    sp->towrite = sp->written = -1;
     if (protocol == PROTO_WAIS)
-	state->complete = completeWAIS;
+	sp->complete = completeWAIS;
     else
-	state->complete = cs_complete_auto;
+	sp->complete = cs_complete_auto;
 
     p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new TCPIP comstack\n"));
@@ -194,7 +196,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
 
 COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
 {
-    tcpip_state *state;
+    tcpip_state *sp;
     COMSTACK p;
 
     p = tcpip_type (s, blocking, protocol, 0);
@@ -203,9 +205,9 @@ COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
     p->f_get = ssl_get;
     p->f_put = ssl_put;
     p->type = ssl_type;
-    state = (tcpip_state *) p->cprivate;
+    sp = (tcpip_state *) p->cprivate;
 
-    state->ctx = vp;  /* may be NULL */
+    sp->ctx = vp;  /* may be NULL */
 
     /* note: we don't handle already opened socket in SSL mode - yet */
     return p;
@@ -466,14 +468,14 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 	if (sp->ctx_alloc)
 	{
 	    int res;
-	    res = SSL_CTX_use_certificate_file (sp->ctx, CERTF,
+	    res = SSL_CTX_use_certificate_file (sp->ctx, sp->cert_fname,
 						SSL_FILETYPE_PEM);
 	    if (res <= 0)
 	    {
 		ERR_print_errors_fp(stderr);
 		exit (2);
 	    }
-	    res = SSL_CTX_use_PrivateKey_file (sp->ctx, KEYF,
+	    res = SSL_CTX_use_PrivateKey_file (sp->ctx, sp->cert_fname,
 					       SSL_FILETYPE_PEM);
 	    if (res <= 0)
 	    {
@@ -1110,23 +1112,34 @@ int static tcpip_set_blocking(COMSTACK p, int blocking)
 #if HAVE_OPENSSL_SSL_H
 int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
 {
-    struct tcpip_state *state;
+    struct tcpip_state *sp;
     if (!cs || cs->type != ssl_type)
         return 0;
-    state = (struct tcpip_state *) cs->cprivate;
-    if (state->ctx_alloc)
+    sp = (struct tcpip_state *) cs->cprivate;
+    if (sp->ctx_alloc)
 	return 0;
-    state->ctx = ctx;
+    sp->ctx = ctx;
     return 1;
 }
 
 void *cs_get_ssl(COMSTACK cs)
 {
-    struct tcpip_state *state;
+    struct tcpip_state *sp;
     if (!cs || cs->type != ssl_type)
         return 0;
-    state = (struct tcpip_state *) cs->cprivate;
-    return state->ssl;  
+    sp = (struct tcpip_state *) cs->cprivate;
+    return sp->ssl;  
+}
+
+int cs_set_ssl_certf(COMSTACK cs, const char *fname)
+{
+    struct tcpip_state *sp;
+    if (!cs || cs->type != ssl_type)
+	return 0;
+    sp = (struct tcpip_state *) cs->cprivate;
+    strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
+    sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
+    return 1;
 }
 
 int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
@@ -1166,5 +1179,9 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     return 0;
 }
 
+int cs_set_ssl_certf(COMSTACK cs, const char *fname)
+{
+    return 0;
+}
 #endif
 

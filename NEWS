@@ -1,5 +1,11 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+SSL comstack now uses yaz.pem certificate file on server side
+by default. Certificate filename can be configured by calling
+comstack function cs_set_ssl_cert before cs_bind is used.
+
+Fix bug regarding multiple calls to ZOOM_connection_connect.
+
 Implement cs_set_ssl_ctx which sets SSL_CTX for SSL comstack.
 
 Do not create SSL_CTX in cs_create (ssl_type). Create in tcpip_bind,

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.24 2004-02-16 17:57:05 adam Exp $
+ * $Id: backend.h,v 1.25 2004-04-30 19:10:35 adam Exp $
  */
 
 #ifndef BACKEND_H
@@ -275,6 +275,7 @@ typedef struct statserv_options_block
     struct bend_soap_handler *soap_handlers;
     char pid_fname[128];            /* pid fname */
     int background;                 /* auto daemon */
+    char cert_fname[128];           /* SSL certificate fname */
 } statserv_options_block;
 
 YAZ_EXPORT int statserv_main(

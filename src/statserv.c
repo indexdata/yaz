@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.6 2004-04-29 21:27:22 adam Exp $
+ * $Id: statserv.c,v 1.7 2004-04-30 19:10:35 adam Exp $
  */
 
 #include <stdio.h>
@@ -78,7 +78,8 @@ statserv_options_block control_block = {
 #endif /* WIN32 */
     0,                          /* SOAP handlers */
     "",                         /* PID fname */
-    0                           /* background daemon */
+    0,                          /* background daemon */
+    ""                          /* SSL certificate filename */
 };
 
 static int max_sessions = 0;
@@ -657,6 +658,9 @@ static int add_listener(char *where, int what)
 	yaz_log(LOG_FATAL, "Failed to listen on %s", where);
 	return -1;
     }
+    if (*control_block.cert_fname)
+	cs_set_ssl_certf(l, control_block.cert_fname);
+
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
     	yaz_log(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s", where);
@@ -833,7 +837,8 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:D", argv, argc, &arg)) != -2)
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:",
+			  argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
@@ -884,6 +889,9 @@ int check_options(int argc, char **argv)
 	case 'c':
 	    strcpy(control_block.configname, arg ? arg : "");
 	    break;
+	case 'C':
+	    strcpy(control_block.cert_fname, arg ? arg : "");
+	    break;
 	case 'd':
 	    strcpy(control_block.daemon_name, arg ? arg : "");
 	    break;
@@ -930,7 +938,7 @@ int check_options(int argc, char **argv)
 	default:
 	    fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
 		    " -l <logfile> -u <user> -c <config> -t <minutes>"
-		    " -k <kilobytes> -d <daemon> -p <pidfile>"
+		    " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
                         " -ziDST1 -w <directory> <listener-addr>... ]\n", me);
 	    return 1;
         }
