@@ -1,5 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+---
+
+Added Attribute set to the bend_scanrequest API.
+
+[retrieval] Allow multiple local values for attribute.
+
+[retrieval} Allow multiple attributes per element in .abs files. index type.
+
 --- 1.1pl2  1996/4/10
 
 Minor changes, mostly specific to Zebra
