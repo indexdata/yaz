@@ -2,7 +2,7 @@
  * Copyright (c) 1996-2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: yaz-ccl.c,v 1.16 2002-12-28 12:13:03 adam Exp $
+ * $Id: yaz-ccl.c,v 1.17 2002-12-28 12:16:26 adam Exp $
  */
 
 #include <stdio.h>
@@ -20,7 +20,6 @@ Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p)
 
     ccl_pquery(wr, p);
 
-    printf ("pqf=%s\n", wrbuf_buf(wr));
     q = yaz_pqf_parse(parser, o, wrbuf_buf(wr));
 
     wrbuf_free(wr, 1);
