@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: tcpip.c,v $
- * Revision 1.1  1995-06-14 09:58:20  quinn
+ * Revision 1.2  1995-06-15 12:30:06  quinn
+ * Added @ as hostname alias for INADDR ANY.
+ *
+ * Revision 1.1  1995/06/14  09:58:20  quinn
  * Renamed yazlib to comstack.
  *
  * Revision 1.20  1995/05/16  08:51:16  quinn
@@ -176,7 +179,9 @@ struct sockaddr_in *tcpip_strtoaddr(const char *str)
     	port = atoi(p + 1);
     }
     add.sin_port = htons(port);
-    if ((hp = gethostbyname(buf)))
+    if (!strcmp("@", buf))
+    	add.sin_addr.s_addr = INADDR_ANY;
+    else if ((hp = gethostbyname(buf)))
     	memcpy(&add.sin_addr.s_addr, *hp->h_addr_list, sizeof(struct in_addr));
     else if ((tmpadd = (unsigned) inet_addr(buf)) != 0)
     	memcpy(&add.sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
