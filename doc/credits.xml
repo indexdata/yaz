@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.9 2002-05-06 07:31:48 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.10 2002-06-12 19:47:44 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
    <para>
    This appendix lists individuals that have contributed in the development
@@ -64,6 +64,9 @@
     </para></listitem>
    <listitem><para>
      Jacob Chr. Poulsen
+    </para></listitem>
+   <listitem><para>
+     Ko van der Sloot
     </para></listitem>
    <listitem><para>
      Mike Taylor
