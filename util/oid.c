@@ -1,9 +1,13 @@
 /*
- * Copyright (c) 1995-2000, Index Data
+ * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
  * $Log: oid.c,v $
- * Revision 1.44  2000-10-02 13:58:50  adam
+ * Revision 1.45  2001-05-16 07:25:59  adam
+ * Modified oid_ent_to_oid so that if proto is general, then class
+ * is ignored (only oid value is compared).
+ *
+ * Revision 1.44  2000/10/02 13:58:50  adam
  * Added some OID's.
  *
  * Revision 1.43  2000/03/14 09:21:08  ian
@@ -639,9 +643,9 @@ int *oid_ent_to_oid(struct oident *ent, int *ret)
     for (ol = oident_table; ol; ol = ol->next)
     {
 	struct oident *p = &ol->oident;
-	if ((ent->proto == p->proto || p->proto == PROTO_GENERAL) &&
-	    (ent->oclass == p->oclass || p->oclass == CLASS_GENERAL) &&
-	    ent->value == p->value)
+        if (ent->value == p->value &&
+            (p->proto == PROTO_GENERAL || (ent->proto == p->proto &&  
+	    (ent->oclass == p->oclass || ent->oclass == CLASS_GENERAL))))
 	{
 	    if (p->proto == PROTO_Z3950)
 		oid_oidcpy(ret, z3950_prefix);
