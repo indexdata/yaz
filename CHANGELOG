@@ -1,7 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
-Make a few private functions 'static' in unic.c. This prevents
-duplicate definitions of unix_close in PHP. PHP Bug 20977.
+Make a few private functions 'static' in unix.c. This prevents
+duplicate unix_close in PHP with YAZ and imap. PHP Bug 20977.
 
 For ZOOM connection, the options targetImplementation{Id,Name,Version}
 are set when Init Response is received.
