@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.4 2003-12-18 16:59:28 mike Exp $
+/* $Id: cqltransform.c,v 1.5 2003-12-18 17:00:55 mike Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -354,6 +354,8 @@ void cql_transform_r(cql_transform_t ct,
                 (*pr)("\" ", client_data);
                 return ;
             }
+	    /* ### It would be nice if this could fall back to whichever 
+	       of cql.serverChoice and srw.serverChoice is defined */
 	    if (!cql_pr_attr(ct, "index.", n_full, "cql.serverChoice",
 			     pr, client_data, 16)) {
 		/* No index.foo; reset error and fall back to qualifier.foo */
