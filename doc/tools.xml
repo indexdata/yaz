@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.20 2003-02-14 20:33:00 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.21 2003-02-23 14:23:40 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -181,45 +181,70 @@
     </para>
 
     <para>
-     Z39.50 version 3 defines various encoding of terms.
-     Use the @term operator to indicate the encoding type:
-     <literal>general</literal>, <literal>numeric</literal>,
-     <literal>string</literal> (for InternationalString), ..
+     Version 3 of the Z39.50 specification defines various encoding of terms.
+     Use the <literal>@term </literal> <replaceable>type</replaceable>,
+     where type is one of: <literal>general</literal>,
+     <literal>numeric</literal>, <literal>string</literal>
+     (for InternationalString), ..
      If no term type has been given, the <literal>general</literal> form
      is used which is the only encoding allowed in both version 2 - and 3
      of the Z39.50 standard.
     </para>
     
-    <para>
-     The following are all examples of valid queries in the PQF.
-    </para>
+    <example><title>PQF queries</title>
 
-    <screen>
-     dylan
-
-     "bob dylan"
-
-     @or "dylan" "zimmerman"
-
-     @set Result-1
-
-     @or @and bob dylan @set Result-1
-
-     @attr 1=4 computer
-
-     @attr 4=1 @and @attr 1=1 "bob dylan" @attr 1=4 "slow train coming"
-
-     @attr 4=1 @attr 1=4 "self portrait"
-
-     @prox 0 3 1 2 k 2 dylan zimmerman
-
-     @and @attr 2=4 @attr gils 1=2038 -114 @attr 2=2 @attr gils 1=2039 -109
-
-     @term string "a UTF-8 string, maybe?"
-
-     @attr 1=/book/title computer
-    </screen>
-
+     <para>Queries using simple terms.
+      <screen>
+      dylan
+      "bob dylan"
+      </screen>
+     </para>
+     <para>Boolean operators.
+      <screen>
+       @or "dylan" "zimmerman"
+       @and @or dylan zimmerman when
+       @and when @or dylan zimmerman
+      </screen>
+     </para>
+     <para>
+      Reference to result sets.
+      <screen>
+       @set Result-1
+       @and @set seta setb
+      </screen>
+     </para>
+     <para>
+      Attributes for terms.
+      <screen>
+       @attr 1=4 computer
+       @attr 1=4 @attr 4=1 "self portrait"
+       @attr exp1 @attr 1=1 CategoryList
+       @attr gils 1=2008 Copenhagen
+       @attr 1=/book/title computer
+      </screen>
+     </para>
+     <para>
+      Proximity.
+      <screen>
+       @prox 0 3 1 2 k 2 dylan zimmerman
+       </screen>
+      </para>
+     <para>
+      Specifying term type.
+      <screen>
+       @term string "a UTF-8 string, maybe?"
+      </screen>
+     </para>
+     <para>Mixed queries
+      <screen>
+       @or @and bob dylan @set Result-1
+       
+       @attr 4=1 @and @attr 1=1 "bob dylan" @attr 1=4 "slow train coming"
+       
+       @and @attr 2=4 @attr gils 1=2038 -114 @attr 2=2 @attr gils 1=2039 -109
+      </screen>
+     </para>
+    </example>
    </sect2>
    <sect2 id="CCL"><title>Common Command Language</title>
 
