@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.211 2003-10-21 12:44:42 mike Exp $
+ * $Id: client.c,v 1.212 2003-11-02 17:59:28 adam Exp $
  */
 
 #include <stdio.h>
@@ -103,6 +103,8 @@ static FILE *marc_file = 0;
 static char *refid = NULL;
 static char *last_open_command = NULL;
 static int auto_reconnect = 0;
+
+static char cur_host[200];
 
 typedef enum {
     QueryType_Prefix,
@@ -629,7 +631,6 @@ int session_connect(const char *arg)
 
 int cmd_open(const char *arg)
 {
-    static char cur_host[200];
     if (arg)
     {
         strncpy (cur_host, arg, sizeof(cur_host)-1);
@@ -1126,7 +1127,7 @@ static int send_deleteResultSetRequest(const char *arg)
 static int send_srw(Z_SRW_PDU *sr)
 {
     const char *charset = negotiationCharset;
-    const char *host_port = 0;
+    const char *host_port = cur_host;
     char *path = 0;
     char ctype[50];
     Z_SOAP_Handler h[2] = {
@@ -1164,7 +1165,7 @@ static int send_srw(Z_SRW_PDU *sr)
             memcpy (h, cp0, cp1 - cp0);
             h[cp1-cp0] = '\0';
             z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
-                              "host", h);
+                              "Host", h);
         }
     }
 
@@ -1196,6 +1197,8 @@ static int send_srw(Z_SRW_PDU *sr)
         char *buf_out;
         int len_out;
         int r;
+	if (apdu_file && !z_GDU(print, &gdu, 0, 0))
+            printf ("Failed to print outgoing APDU\n");
         buf_out = odr_getbuf(out, &len_out, 0);
         
         /* we don't odr_reset(out), since we may need the buffer again */
