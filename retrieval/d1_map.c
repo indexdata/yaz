@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.7  1995-12-13 13:44:31  quinn
+ * Revision 1.8  1996-05-01 12:45:31  quinn
+ * Support use of local tag names in abs file.
+ *
+ * Revision 1.7  1995/12/13  13:44:31  quinn
  * Modified Data1-system to use nmem
  *
  * Revision 1.6  1995/12/12  16:37:08  quinn
@@ -198,7 +201,12 @@ static int tagmatch(data1_node *n, data1_maptag *t)
 	return 0;
     if (n->u.tag.element)
     {
-	if (n->u.tag.element->tag->tagset->type != t->type)
+	if (n->u.tag.element->tag->tagset)
+	{
+	    if (n->u.tag.element->tag->tagset->type != t->type)
+		return 0;
+	}
+	else if (t->type != 3)
 	    return 0;
 	if (n->u.tag.element->tag->which == DATA1T_numeric)
 	{

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.3  1995-11-13 09:27:35  quinn
+ * Revision 1.4  1996-05-01 12:45:30  quinn
+ * Support use of local tag names in abs file.
+ *
+ * Revision 1.3  1995/11/13  09:27:35  quinn
  * Fiddling with the variant stuff.
  *
  * Revision 1.2  1995/11/01  13:54:46  quinn
@@ -202,7 +205,7 @@ static Z_TaggedElement *nodetotaggedelement(data1_node *n, int select, ODR o)
     }
 
     res->tagType = odr_malloc(o, sizeof(int));
-    *res->tagType = tag ? tag->tagset->type : 3;
+    *res->tagType = (tag && tag->tagset) ? tag->tagset->type : 3;
     res->tagValue = odr_malloc(o, sizeof(Z_StringOrNumeric));
     if (tag && tag->which == DATA1T_numeric)
     {

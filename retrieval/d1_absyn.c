@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.3  1995-11-01 16:34:55  quinn
+ * Revision 1.4  1996-05-01 12:45:28  quinn
+ * Support use of local tag names in abs file.
+ *
+ * Revision 1.3  1995/11/01  16:34:55  quinn
  * Making data1 look for tables in data1_tabpath
  *
  * Revision 1.2  1995/11/01  13:54:44  quinn
@@ -184,29 +187,47 @@ data1_absyn *data1_read_absyn(char *file)
 	    level = i;
 	    if (!(new = *ppl[level] = xmalloc(sizeof(*new))))
 		abort;
-	    new ->next = new->children = 0;
+	    new->next = new->children = 0;
+	    new->tag = 0;
+	    new->att = 0;
 	    ppl[level] = &new->next;
 	    ppl[level+1] = &new->children;
 
-	    if (sscanf(p, "(%d,%d)", &type, &value) < 2)
+	    /* well-defined tag */
+	    if (sscanf(p, "(%d,%d)", &type, &value) == 2)
 	    {
-		logf(LOG_WARN, "Malformed element '%s' in %s", p, file);
+		if (!res->tagset)
+		{
+		    logf(LOG_WARN, "No tagset loaded in %s", file);
+		    fclose(f);
+		    return 0;
+		}
+		if (!(new->tag = data1_gettagbynum(res->tagset, type, value)))
+		{
+		    logf(LOG_WARN, "Couldn't find tag %s in tagset in %s",
+			p, file);
+		    fclose(f);
+		    return 0;
+		}
+	    }
+	    /* private tag */
+	    else if (*p)
+	    {
+		data1_tag *nt = new->tag = xmalloc(sizeof(*new->tag));
+		nt->which = DATA1T_string;
+		nt->value.string = xstrdup(p);
+		nt->names = xmalloc(sizeof(*new->tag->names));
+		nt->names->name = nt->value.string;
+		nt->names->next = 0;
+		nt->kind = DATA1K_string;
+	    }
+	    else
+	    {
+		logf(LOG_WARN, "Bad element is %s", file);
 		fclose(f);
 		return 0;
 	    }
-	    if (!res->tagset)
-	    {
-		logf(LOG_WARN, "No tagset loaded in %s", file);
-		fclose(f);
-		return 0;
-	    }
-	    if (!(new->tag = data1_gettagbynum(res->tagset, type, value)))
-	    {
-		logf(LOG_WARN, "Couldn't find tag %s in tagset in %s",
-		    p, file);
-		fclose(f);
-		return 0;
-	    }
+
 	    if (*att == '!')
 		strcpy(att, name);
 	    if (*att == '-')
