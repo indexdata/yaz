@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.45 2002-01-21 21:50:32 adam Exp $
+ * $Id: tcpip.c,v 1.46 2002-02-19 20:02:40 adam Exp $
  */
 
 #include <stdio.h>
@@ -13,6 +13,7 @@
 #endif
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #if HAVE_OPENSSL_SSL_H
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -125,10 +126,17 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
 
 #ifdef WIN32
     if (!(p->blocking = blocking) && ioctlsocket(s, FIONBIO, &tru) < 0)
+        return 0;
 #else
-    if (!(p->blocking = blocking) && fcntl(s, F_SETFL, O_NONBLOCK) < 0)
+    if (!(p->blocking = blocking))
+    {   
+        if (fcntl(s, F_SETFL, O_NONBLOCK) < 0)
+            return 0;
+#ifndef MSG_NOSIGNAL
+        signal (SIGPIPE, SIG_IGN);
 #endif
-	return 0;
+    }
+#endif
 
     p->io_pending = 0;
     p->iofile = s;
