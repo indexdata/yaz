@@ -1,8 +1,8 @@
 /* 
- * Copyright (c) 1995-2003, Index Data
+ * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.219 2003-12-31 00:14:00 adam Exp $
+ * $Id: client.c,v 1.220 2004-01-06 09:09:13 adam Exp $
  */
 
 #include <stdio.h>
@@ -81,7 +81,7 @@ static Z_ElementSetNames *elementSetNames = 0;
 static int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 static enum oid_value recordsyntax = VAL_USMARC;
-static char *schema = 0;
+static char *record_schema = 0;
 static int sent_close = 0;
 static NMEM session_mem = NULL;         /* memory handle for init-response */
 static Z_InitResponse *session = 0;     /* session parameters */
@@ -1242,8 +1242,8 @@ static int send_SRW_searchRequest(const char *arg)
     sr = yaz_srw_get(out, Z_SRW_searchRetrieve_request);
     sr->u.request->query_type = Z_SRW_query_type_cql;
     sr->u.request->query.cql = odr_strdup(out, arg);
-    if (schema)
-        sr->u.request->recordSchema = schema;
+    if (record_schema)
+        sr->u.request->recordSchema = record_schema;
     return send_srw(sr);
 }
 #endif
@@ -2311,13 +2311,13 @@ static int send_presentRequest(const char *arg)
     req->preferredRecordSyntax =
         odr_oiddup (out, oid_ent_to_oid(&prefsyn, oid));
 
-    if (schema)
+    if (record_schema)
     {
         oident prefschema;
 
         prefschema.proto = protocol;
         prefschema.oclass = CLASS_SCHEMA;
-        prefschema.value = oid_getvalbyname(schema);
+        prefschema.value = oid_getvalbyname(record_schema);
 
         req->recordComposition = &compo;
         compo.which = Z_RecordComp_complex;
@@ -2378,8 +2378,8 @@ static int send_SRW_presentRequest(const char *arg)
     parse_show_args(arg, setstring, &setno, &nos);
     sr->u.request->startRecord = odr_intdup(out, setno);
     sr->u.request->maximumRecords = odr_intdup(out, nos);
-    if (schema)
-        sr->u.request->recordSchema = schema;
+    if (record_schema)
+        sr->u.request->recordSchema = record_schema;
     return send_srw(sr);
 }
 #endif
@@ -2757,10 +2757,10 @@ int cmd_scan(const char *arg)
 
 int cmd_schema(const char *arg)
 {
-    xfree(schema);
-    schema = 0;
+    xfree(record_schema);
+    record_schema = 0;
     if (arg && *arg)
-        schema = xstrdup(arg);
+        record_schema = xstrdup(arg);
     return 1;
 }
 
@@ -3701,7 +3701,7 @@ int cmd_list_all(const char* args) {
     
     /* print present related options */
     printf("Format               : %s\n",yaz_z3950_oid_value_to_str(recordsyntax,CLASS_RECSYN));
-    printf("Schema               : %s\n",schema);
+    printf("Schema               : %s\n",record_schema ? record_schema : "not set");
     printf("Elements             : %s\n",elementSetNames?elementSetNames->u.generic:"");
     
     /* loging options */
