@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.48 2002-08-19 21:09:10 adam Exp $
+ * $Id: d1_read.c,v 1.49 2002-08-23 14:27:18 adam Exp $
  */
 
 #include <assert.h>
@@ -483,10 +483,48 @@ data1_node *data1_mk_tag_data_text_uni (data1_handle dh, data1_node *at,
     }
 }
 
+static int ampr (int (*get_byte)(void *fh), void *fh, int *amp)
+{
+    int c = (*get_byte)(fh);
+    *amp = 0;
+    if (c == '&')
+    {
+        char ent[20];
+        int i = 0;
+       
+        while (1)
+        {
+            c = (*get_byte)(fh);
+            if (c == ';')
+            {
+                ent[i] = 0;
+                
+                c = ' ';
+                if (!strcmp (ent, "quot"))
+                    c = '"';
+                if (!strcmp (ent, "apos"))
+                    c = '\'';
+                if (!strcmp (ent, "gt"))
+                    c = '>';
+                if (!strcmp (ent, "lt"))
+                    c = '<';
+                if (!strcmp (ent, "amp"))
+                    c = '&';
+                *amp = 1;
+                break;
+            }
+            else if (c == 0 || d1_isspace(c))
+                break;
+            if (i < 19)
+                ent[i++] = c;
+        }
+    }
+    return c;
+}
 
 data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 			       int (*get_byte)(void *fh), void *fh,
-			       WRBUF wrbuf, int *ch)
+			       WRBUF wrbuf, int *ch, int *amp)
 {
     data1_xattr *p_first = 0;
     data1_xattr **pp = &p_first;
@@ -495,9 +533,9 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
     {
 	data1_xattr *p;
 	int len;
-	while (c && d1_isspace(c))
-	    c = (*get_byte)(fh);
-	if (!c  || c == '>' || c == '/')
+	while (amp || (c && d1_isspace(c)))
+	    c = ampr (get_byte, fh, amp);
+	if (amp == 0 && (c == 0 || c == '>' || c == '/'))
 	    break;
 	*pp = p = (data1_xattr *) nmem_malloc (m, sizeof(*p));
 	p->next = 0;
@@ -508,7 +546,7 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	while (c && c != '=' && c != '>' && c != '/' && !d1_isspace(c))
 	{
 	    wrbuf_putc (wrbuf, c);
-	    c = (*get_byte)(fh);
+	    c = ampr (get_byte, fh, amp);
 	}
 	wrbuf_putc (wrbuf, '\0');
 	len = wrbuf_len(wrbuf);
@@ -516,26 +554,38 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 	strcpy (p->name, wrbuf_buf(wrbuf));
 	if (c == '=')
 	{
-	    c = (*get_byte)(fh);
-	    if (c == '"')
+	    c = ampr (get_byte, fh, amp);
+	    if (amp == 0 && c == '"')
 	    {
-		c = (*get_byte)(fh);	
+		c = ampr (get_byte, fh, amp);	
 		wrbuf_rewind(wrbuf);
-		while (c && c != '"')
+		while (amp || (c && c != '"'))
 		{
 		    wrbuf_putc (wrbuf, c);
-		    c = (*get_byte)(fh);
+		    c = ampr (get_byte, fh, amp);
 	        }
 	        if (c)
-		    c = (*get_byte)(fh);	
+		    c = ampr (get_byte, fh, amp);
+	    }
+	    else if (amp == 0 && c == '\'')
+	    {
+		c = ampr (get_byte, fh, amp);	
+		wrbuf_rewind(wrbuf);
+		while (amp || (c && c != '\''))
+		{
+		    wrbuf_putc (wrbuf, c);
+		    c = ampr (get_byte, fh, amp);
+	        }
+	        if (c)
+		    c = ampr (get_byte, fh, amp);
 	    }
 	    else
 	    {
 	        wrbuf_rewind(wrbuf);
-	        while (c && c != '>' && c != '/')
+	        while (amp || (c && c != '>' && c != '/'))
 	        {
 		    wrbuf_putc (wrbuf, c);
-		    c = (*get_byte)(fh);
+		    c = ampr (get_byte, fh, amp);
 	        }
             }
 	    wrbuf_putc (wrbuf, '\0');
@@ -557,25 +607,17 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 {
     data1_node *d1_stack[256];
     data1_node *res;
-    int c;
+    int c, amp;
     int level = 0;
     int line = 1;
 
     d1_stack[level] = 0;
-    c = (*get_byte)(fh);
-    while (1)
+    c = ampr (get_byte, fh, &amp);
+    while (c != '\0')
     {
 	data1_node *parent = level ? d1_stack[level-1] : 0;
-	while (c != '\0' && d1_isspace(c))
-	{
-	    if (c == '\n')
-		line++;
-	    c = (*get_byte)(fh);
-	}
-	if (c == '\0')
-	    break;
-	
-	if (c == '<') /* beginning of tag */
+
+	if (amp == 0 && c == '<') /* beginning of tag */
 	{
 	    data1_xattr *xattr;
 
@@ -585,41 +627,42 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    int end_tag = 0;
 	    size_t i = 0;
 
-	    c = (*get_byte)(fh);
-	    if (c == '/')
+	    c = ampr (get_byte, fh, &amp);
+	    if (amp == 0 && c == '/')
 	    {
 		end_tag = 1;
-		c = (*get_byte)(fh);
+		c = ampr (get_byte, fh, &amp);
 	    }
-	    else if (c == '!')  /* tags/comments that we don't deal with yet */
+	    else if (amp == 0 && c == '!')
+                /* tags/comments that we don't deal with yet */
 	    {
-		while (c && c != '>')
-		    c = (*get_byte)(fh);
+		while (amp || (c && c != '>'))
+		    c = ampr (get_byte, fh, &amp);
 		if (c)
-		    c = (*get_byte)(fh);
+		    c = ampr (get_byte, fh, &amp);
 		continue;
 	    }
-	    while (c && c != '>' && c != '/' && !d1_isspace(c))
+	    while (amp || (c && c != '>' && c != '/' && !d1_isspace(c)))
 	    {
 		if (i < (sizeof(tag)-1))
 		    tag[i++] = c;
-		c = (*get_byte)(fh);
+		c = ampr (get_byte, fh, &amp);
 	    }
 	    tag[i] = '\0';
-	    xattr = data1_read_xattr (dh, m, get_byte, fh, wrbuf, &c);
+	    xattr = data1_read_xattr (dh, m, get_byte, fh, wrbuf, &c, &amp);
 	    args[0] = '\0';
-	    if (c == '/')
+	    if (amp == 0 && c == '/')
 	    {    /* <tag attrs/> or <tag/> */
 		null_tag = 1;
-		c = (*get_byte)(fh);
+		c = ampr (get_byte, fh, &amp);
 	    }
-	    if (c != '>')
+	    if (amp || c != '>')
 	    {
 		yaz_log(LOG_WARN, "d1: %d: Malformed tag", line);
 		return 0;
 	    }
 	    else
-		c = (*get_byte)(fh);
+		c = ampr (get_byte, fh, &amp);
 
 	    /* End tag? */
 	    if (end_tag)       
@@ -732,13 +775,11 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	}
 	else /* != '<'... this is a body of text */
 	{
-	    const char *src;
-	    char *dst;
-	    int len, prev_char = 0;
+	    int len;
 	    
 	    if (level == 0)
 	    {
-		c = (*get_byte)(fh);
+		c = ampr (get_byte, fh, &amp);
 		continue;
 	    }
 	    res = data1_mk_node2 (dh, m, DATA1N_data, parent);
@@ -748,10 +789,10 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	    
 	    wrbuf_rewind(wrbuf);
 
-	    while (c && c != '<')
+	    while (amp || (c && c != '<'))
 	    {
 		wrbuf_putc (wrbuf, c);
-		c = (*get_byte)(fh);
+		c = ampr (get_byte, fh, &amp);
 	    }
 	    len = wrbuf_len(wrbuf);
 
@@ -760,26 +801,12 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		res->u.data.data = (char*) nmem_malloc (m, len);
 	    else
 		res->u.data.data = res->lbuf;
-	    
-	    /* read "data" and transfer while removing white space */
-	    dst = res->u.data.data;
-	    for (src = wrbuf_buf(wrbuf); --len >= 0; src++)
-	    {
-		if (*src == '\n')
-		    line++;
-		if (d1_isspace (*src))
-		    prev_char = ' ';
-		else
-		{
-		    if (prev_char)
-		    {
-			*dst++ = prev_char;
-			prev_char = 0;
-		    }
-		    *dst++ = *src;
-		}
-	    }
-	    res->u.data.len = dst - res->u.data.data;
+	
+            if (len)
+                memcpy (res->u.data.data, wrbuf_buf(wrbuf), len);
+            else
+                res->u.data.data = 0;
+            res->u.data.len = len;
 	}
     }
     return 0;

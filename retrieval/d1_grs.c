@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_grs.c,v 1.24 2002-07-25 12:52:53 adam Exp $
+ * $Id: d1_grs.c,v 1.25 2002-08-23 14:27:18 adam Exp $
  *
  */
 
@@ -114,6 +114,45 @@ static int traverse_triples(data1_node *n, int level, Z_ElementMetaData *m,
     return 0;
 }
 
+/*
+ * Locate some data under this node. This routine should handle variants
+ * prettily.
+ */
+static char *get_data(data1_node *n, int *len)
+{
+    char *r;
+    data1_node *np = 0;
+
+    while (n)
+    {
+        if (n->which == DATA1N_data)
+        {
+            int i;
+            *len = n->u.data.len;
+
+            for (i = 0; i<*len; i++)
+                if (!d1_isspace(n->u.data.data[i]))
+                    break;
+            while (*len && d1_isspace(n->u.data.data[*len - 1]))
+                (*len)--;
+            *len = *len - i;
+            if (*len > 0)
+                return n->u.data.data + i;
+        }
+        if (n->which == DATA1N_tag)
+            np = n->child;
+        n = n->next;
+        if (!n)
+        {
+            n = np;
+            np = 0;
+        }
+    }
+    r = "";
+    *len = strlen(r);
+    return r;
+}
+
 static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 					int select, int leaf,
 					ODR o, int *len)
@@ -127,35 +166,35 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
     }
     else if (n->which == DATA1N_data && leaf)
     {
-	char str[512];
-	int toget;
-	data1_node *p;
+	char str[64], *cp;
+	int toget = n->u.data.len;
 
-	for (p = n->parent; p && p->which != DATA1N_tag; p = p->parent)
-	    ;
+        cp = get_data (n, &toget);
 
 	switch (n->u.data.what)
 	{
         case DATA1I_num:
             res->which = Z_ElementData_numeric;
             res->u.numeric = (int *)odr_malloc(o, sizeof(int));
-            *res->u.numeric = atoi(n->u.data.data);
+            *res->u.numeric = atoi_n (cp, toget);
             *len += 4;
             break;
         case DATA1I_text:
-            toget = n->u.data.len;
             res->which = Z_ElementData_string;
             res->u.string = (char *)odr_malloc(o, toget+1);
-            memcpy(res->u.string, n->u.data.data, toget);
+            if (toget)
+                memcpy(res->u.string, cp, toget);
             res->u.string[toget] = '\0';
             *len += toget;
             break;
         case DATA1I_oid:
             res->which = Z_ElementData_oid;
-            strncpy(str, n->u.data.data, n->u.data.len);
-            str[n->u.data.len] = '\0';
+            if (toget > 63)
+                toget = 63;
+            memcpy (str, cp, toget);
+            str[toget] = '\0';
             res->u.oid = odr_getoidbystr(o, str);
-            *len += n->u.data.len;
+            *len += oid_oidlen(res->u.oid) * sizeof(int);
             break;
         default:
             yaz_log(LOG_WARN, "Can't handle datatype.");

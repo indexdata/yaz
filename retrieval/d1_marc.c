@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_marc.c,v 1.23 2002-08-19 21:09:10 adam Exp $
+ * $Id: d1_marc.c,v 1.24 2002-08-23 14:27:18 adam Exp $
  */
 
 
@@ -158,11 +158,17 @@ static char *get_data(data1_node *n, int *len)
     {
         if (n->which == DATA1N_data)
         {
+            int i;
             *len = n->u.data.len;
+
+            for (i = 0; i<*len; i++)
+                if (!d1_isspace(n->u.data.data[i]))
+                    break;
             while (*len && d1_isspace(n->u.data.data[*len - 1]))
                 (*len)--;
-            if (*len != 0)
-                return n->u.data.data;
+            *len = *len - i;
+            if (*len > 0)
+                return n->u.data.data + i;
         }
         if (n->which == DATA1N_tag)
             np = n->child;
