@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.39  1995-06-27 13:21:00  quinn
+ * Revision 1.40  1995-07-31 14:34:26  quinn
+ * Fixed bug in process_searchResponse (numberOfRecordsReturned).
+ *
+ * Revision 1.39  1995/06/27  13:21:00  quinn
  * SUTRS support
  *
  * Revision 1.38  1995/06/19  12:39:11  quinn
@@ -935,9 +938,9 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     }
     else
     {
-    	int toget;
+    	static int toget;
 	Z_ElementSetNames *setnames;
-	int presst = 0;
+	static int presst = 0;
 
 	resp.records = 0;
 	resp.resultCount = &bsrt->hits;
