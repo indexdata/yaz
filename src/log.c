@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.7 2004-11-02 14:13:09 heikki Exp $
+ * $Id: log.c,v 1.8 2004-11-02 15:47:31 heikki Exp $
  */
 
 /**
@@ -18,6 +18,14 @@
 #include <windows.h>
 #endif
 
+#if YAZ_POSIX_THREADS
+#include <pthread.h>
+#endif
+
+#if YAZ_GNU_THREADS
+#include <pth.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -27,6 +35,10 @@
 #include <time.h>
 #include <yaz/nmem.h>
 #include <yaz/log.h>
+#include <yaz/nmem.h>
+
+static NMEM_MUTEX log_mutex=0;
+static mutex_init_flag=0; /* not yet initialized */
 
 #define HAS_STRERROR 1
 
@@ -42,6 +54,7 @@ char *strerror(int n)
 #endif
 
 
+
 static int l_level = LOG_DEFAULT_LEVEL;
 static FILE *l_file = NULL;
 static char l_prefix[512] = "";
@@ -55,8 +68,8 @@ static char l_custom_format[TIMEFORMAT_LEN]="";
 static char *l_actual_format=l_old_default_format;
 
 /** l_max_size tells when to rotate the log. Default to 1 GB */
-static int l_max_size=1024*1024*1024;
-/* static int l_max_size=1024; */  /* while testing */
+/*static int l_max_size=1024*1024*1024;*/
+static int l_max_size=1024;   /* while testing */
 
 static struct {
     int mask;
@@ -79,6 +92,15 @@ static struct {
     { 0, NULL }
 };  
 
+static void init_mutex()
+{
+    if (mutex_init_flag)
+        return;
+    nmem_mutex_create (&log_mutex);
+    mutex_init_flag=1;
+}
+
+
 FILE *yaz_log_file(void)
 {
     if (!l_file)
@@ -88,6 +110,8 @@ FILE *yaz_log_file(void)
 
 void yaz_log_init_file (const char *fname)
 {
+    if (!mutex_init_flag)
+        init_mutex();
     if (fname)
     {
 	strncpy(l_fname, fname, sizeof(l_fname)-1);
@@ -101,9 +125,10 @@ void yaz_log_init_file (const char *fname)
 void yaz_log_reopen(void)
 {
     FILE *new_file;
+    if (!mutex_init_flag)
+        init_mutex();
     if (!l_file)
         l_file = stderr;
-
     if (!*l_fname)
 	new_file=stderr;
     else if (!(new_file = fopen(l_fname, "a")))
@@ -164,6 +189,8 @@ void yaz_log_init_prefix2 (const char *prefix)
 
 void yaz_log_init(int level, const char *prefix, const char *fname)
 {
+    if (!mutex_init_flag)
+        init_mutex();
     yaz_log_init_level (level);
     yaz_log_init_prefix (prefix);
     if (fname && *fname)
@@ -200,14 +227,18 @@ void yaz_log(int level, const char *fmt, ...)
 
     if (!(level & l_level))
     	return;
+    if (!mutex_init_flag)
+        init_mutex();
     if (!l_file)
         l_file = stderr;
     
     if (l_file != stderr)
     {
+        nmem_mutex_enter (log_mutex);
         flen=ftell(l_file);
         if (flen>l_max_size) 
             rotate_log();
+        nmem_mutex_leave (log_mutex);
     }
 
     *flags = '\0';
