@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.51 2002-12-05 12:16:39 adam Exp $
+# $Id: makefile,v 1.52 2002-12-16 14:06:34 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -136,6 +136,7 @@ COMMON_C_OPTIONS=          \
   $(ICONV_DEF)             \
   /D "_WINDOWS"            \
   /D "WIN32"               \
+  /D "HAVE_WCHAR_H=1"      \
   /FR"$(OBJDIR)\\"         \
   /Fo"$(OBJDIR)\\"         \
   /Fd"$(OBJDIR)\\" 
@@ -312,8 +313,8 @@ YAZ_UTIL_OBJS= \
    $(OBJDIR)\wrbuf.obj \
    $(OBJDIR)\xmalloc.obj \
    $(OBJDIR)\matchstr.obj \
-   $(OBJDIR)\siconv.obj
-
+   $(OBJDIR)\siconv.obj \
+   $(OBJDIR)\marc8.obj
 
 YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\diagbib1.obj \
@@ -600,6 +601,10 @@ $(ITEM_REQ_FILES): $(ILLDIR)\item-req.asn
 	$(TCL) $(TCLOPT) -d ill.tcl item-req.asn
 	@cd $(WINDIR)
 
+$(UTILDIR)\marc8.c: $(UTILDIR)\charconv.sgm
+	@cd $(UTILDIR)
+	$(TCL) charconv.tcl -p marc8 -s 50 charconv.sgm marc8.c
+
 !endif
 
 
@@ -845,7 +850,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.51  2002-12-05 12:16:39  adam
+# Revision 1.52  2002-12-16 14:06:34  adam
+# WIN32 updates for marc8.c
+#
+# Revision 1.51  2002/12/05 12:16:39  adam
 # yaz_strerror. WIN32 updates for mterm2.asn
 #
 # Revision 1.50  2002/10/24 12:14:01  heikki

@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.15 2002-11-26 13:42:35 adam Exp $
+; $Id: yaz.nsi,v 1.16 2002-12-16 14:06:34 adam Exp $
 
 !define VERSION "1.9.2"
 
@@ -95,15 +95,19 @@ Section "YAZ Source"
 	SetOutPath $INSTDIR\util
 	File ..\util\*.c
 	File ..\util\*.tcl
+	File ..\util\*.sgm
+	File ..\util\yaz-comp
 	SetOutPath $INSTDIR\odr
 	File ..\odr\*.c
 	File ..\odr\*.h
 	SetOutPath $INSTDIR\z39.50
 	File ..\z39.50\*.c
 	File ..\z39.50\*.asn
+	File ..\z39.50\*.tcl
 	SetOutPath $INSTDIR\ill
 	File ..\ill\*.c
 	File ..\ill\*.asn
+	File ..\ill\*.tcl
 	SetOutPath $INSTDIR\zutil
 	File ..\zutil\*.c
 	File ..\zutil\*.h
