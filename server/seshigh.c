@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.138 2003-02-17 22:34:39 adam Exp $
+ * $Id: seshigh.c,v 1.139 2003-02-17 22:35:48 adam Exp $
  */
 
 /*
@@ -695,7 +695,7 @@ static void process_http_request(association *assoc, request *req)
     }
     else if (!strcmp(hreq->method, "POST"))
     {
-#if HAVE_XSLT
+#if HAVE_XML2
         const char *content_type = z_HTTP_header_lookup(hreq->headers,
                                                         "Content-Type");
         const char *soap_action = z_HTTP_header_lookup(hreq->headers,

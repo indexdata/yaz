@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.105 2003-02-14 20:32:59 adam Exp $
+dnl $Id: configure.in,v 1.106 2003-02-17 22:35:47 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.3)
 dnl
@@ -329,7 +329,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 fi
 AM_CONDITIONAL(ISTHR, test $HAVETHREADS = "1")
 dnl
-dnl ----- libXML2/XSLT
+dnl ----- libXSLT
 AC_SUBST(XSLT_LIB)
 AC_SUBST(XSLT_CFLAGS)
 xsltdir=no
@@ -349,6 +349,31 @@ if test "$xsltdir" != "no"; then
 		XSLT_VER=`$xsltdir/bin/xslt-config --version`
 		AC_MSG_RESULT($XSLT_VER)
 		AC_DEFINE(HAVE_XSLT)
+	else
+		AC_MSG_RESULT(Not found)
+	fi
+fi
+dnl
+dnl ----- libXML2
+AC_SUBST(XML2_LIBS)
+AC_SUBST(XML2_CFLAGS)
+xml2dir=no
+AC_ARG_WITH(xml2, [  --with-xml2[=PREFIX]    Use libxml2 in PREFIX/{lib,include}],[xml2dir=$withval])
+if test "$xml2dir" = "yes"; then
+	for d in /usr /usr/local; do
+		if test -x $d/bin/xml2-config; then
+			xml2dir=$d
+		fi
+	done
+fi
+if test "$xml2dir" != "no"; then
+	AC_MSG_CHECKING(for libXML2)
+	if test -x $xml2dir/bin/xml2-config; then
+		XML2_LIBS=`$xml2dir/bin/xml2-config --libs`
+		XML2_CFLAGS=`$xml2dir/bin/xml2-config --cflags`
+		XML2_VER=`$xml2dir/bin/xml2-config --version`
+		AC_MSG_RESULT($XML2_VER)
+		AC_DEFINE(HAVE_XML2)
 	else
 		AC_MSG_RESULT(Not found)
 	fi

@@ -2,12 +2,12 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srwtst.c,v 1.2 2003-02-17 21:23:31 adam Exp $
+ * $Id: srwtst.c,v 1.3 2003-02-17 22:35:48 adam Exp $
  */
 
 #include <yaz/srw.h>
 
-#if HAVE_XSLT
+#if HAVE_XML2
 Z_SOAP_Handler h[2] = {
     {"http://www.loc.gov/zing/srw/v1.0/", 0, (Z_SOAP_fun) yaz_srw_codec},
     {0, 0, 0}

@@ -2,12 +2,12 @@
  * Copyright (c) 2002-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.3 2003-02-17 14:35:42 adam Exp $
+ * $Id: srw.c,v 1.4 2003-02-17 22:35:48 adam Exp $
  */
 
 #include <yaz/srw.h>
 
-#if HAVE_XSLT
+#if HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.21 2003-02-17 21:23:32 adam Exp $
+ * $Id: zoom-c.c,v 1.22 2003-02-17 22:35:48 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -712,7 +712,7 @@ static zoom_ret do_connect (ZOOM_connection c)
 
     if (memcmp(c->host_port, "http:", 5) == 0)
     {
-#if HAVE_XSLT
+#if HAVE_XML2
         const char *path;
         c->proto = PROTO_SRW;
         effective_host = c->host_port + 5;
@@ -975,7 +975,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     return send_APDU (c, apdu);
 }
 
-#if HAVE_XSLT
+#if HAVE_XML2
 static zoom_ret send_srw (ZOOM_connection c, Z_SRW_searchRetrieve *sr)
 {
     Z_SOAP_Handler h[2] = {
@@ -1018,7 +1018,7 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_searchRetrieve *sr)
 }
 #endif
 
-#if HAVE_XSLT
+#if HAVE_XML2
 static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
     int i;
@@ -2391,7 +2391,7 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
     }
 }
 
-#if HAVE_XSLT
+#if HAVE_XML2
 static void handle_srw_response(ZOOM_connection c,
                                 Z_SRW_searchRetrieveResponse *res)
 {
@@ -2458,7 +2458,7 @@ static void handle_srw_response(ZOOM_connection c,
 }
 #endif
 
-#if HAVE_XSLT
+#if HAVE_XML2
 static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
     int ret = -1;
@@ -2572,7 +2572,7 @@ static int do_read (ZOOM_connection c)
 	    handle_apdu (c, gdu->u.z3950);
         else if (gdu->which == Z_GDU_HTTP_Response)
         {
-#if HAVE_XSLT
+#if HAVE_XML2
             handle_http (c, gdu->u.HTTP_Response);
 #else
             set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
