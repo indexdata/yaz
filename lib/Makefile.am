@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.20 2002-03-18 12:22:00 adam Exp $
+## $Id: Makefile.am,v 1.21 2002-03-22 23:44:55 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -34,6 +34,8 @@ THREADED_FLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/server @CFLAGSTHREADS@
 
 XMALLOC_FLAGS = -DTRACE_XMALLOC=2 -I$(top_srcdir)/include
 
+SSL_FLAGS= -I$(top_srcdir)/include $(SSL_DEFS) $(SSL_CFLAGS)
+
 nmem.lo: $(top_srcdir)/util/nmem.c
 	$(LTCOMPILE) $(THREADED_FLAGS) -c $(top_srcdir)/util/nmem.c
 
@@ -59,16 +61,16 @@ xmalloc.o: $(top_srcdir)/util/xmalloc.c
 	$(COMPILE) $(XMALLOC_FLAGS) -c $(top_srcdir)/util/xmalloc.c
 
 comstack.lo: $(top_srcdir)/comstack/comstack.c
-	$(LTCOMPILE) $(SSL_DEFS) $(SSL_CFLAGS) -c $(top_srcdir)/comstack/comstack.c
+	$(LTCOMPILE) $(SSL_FLAGS) -c $(top_srcdir)/comstack/comstack.c
 
 comstack.o: $(top_srcdir)/comstack/comstack.c
-	$(COMPILE) $(SSL_DEFS) $(SSL_CFLAGS) -c $(top_srcdir)/comstack/comstack.c
+	$(COMPILE) $(SSL_FLAGS) -c $(top_srcdir)/comstack/comstack.c
 
 tcpip.lo: $(top_srcdir)/comstack/tcpip.c
-	$(LTCOMPILE) $(SSL_DEFS) $(SSL_CFLAGS) -c $(top_srcdir)/comstack/tcpip.c
+	$(LTCOMPILE) $(SSL_FLAGS) -c $(top_srcdir)/comstack/tcpip.c
 
 tcpip.o: $(top_srcdir)/comstack/tcpip.c
-	$(COMPILE) $(SSL_DEFS) $(SSL_CFLAGS) -c $(top_srcdir)/comstack/tcpip.c
+	$(COMPILE) $(SSL_FLAGS) -c $(top_srcdir)/comstack/tcpip.c
 
 libyaz_la_LIBADD=../odr/libodr.la \
  ../comstack/libcomstack.la ../server/libserver.la \
