@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_doespec.c,v $
- * Revision 1.10  1997-10-02 12:10:24  quinn
+ * Revision 1.11  1997-11-06 11:36:44  adam
+ * Implemented variant match on simple elements -data1 tree and Espec-1.
+ *
+ * Revision 1.10  1997/10/02 12:10:24  quinn
  * Attempt to fix bug in especs
  *
  * Revision 1.9  1997/09/17 12:10:35  adam
@@ -44,12 +47,16 @@
 #include <proto.h>
 #include <data1.h>
 
-static int match_children(data1_node *n, Z_Espec1 *e, int i, Z_ETagUnit **t,
+static int match_children(data1_handle dh, data1_node *n,
+			  Z_Espec1 *e, int i, Z_ETagUnit **t,
     int num);
 
-static int match_children_wildpath(data1_node *n, Z_Espec1 *e, int i,
-    Z_ETagUnit **t, int num)
-{return 0;}
+static int match_children_wildpath(data1_handle dh, data1_node *n,
+				   Z_Espec1 *e, int i,
+				   Z_ETagUnit **t, int num)
+{
+    return 0;
+}
 
 /*
  * Locate a specific triple within a variant.
@@ -115,8 +122,52 @@ static void mark_subtree(data1_node *n, int make_variantlist, int no_data,
     }
 }
 
-static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
-    Z_ETagUnit **t, int num)
+
+static void match_triple (data1_handle dh, Z_Variant *vreq,
+			  oid_value defsetval,
+			  oid_value var1, data1_node *n)
+{
+    data1_node **c;
+
+    n = n->child;
+    if (n->which != DATA1N_variant)
+	return;
+    c = &n->child;
+    while (*c)
+    {
+	int remove_flag = 0;
+	Z_Triple *r;
+	
+	assert ((*c)->which == DATA1N_variant);
+	
+	if ((*c)->u.variant.type->zclass->zclass == 4 &&
+	    (*c)->u.variant.type->type == 1)
+	{
+	    if ((r = find_triple(vreq, defsetval, var1, 4, 1)) &&
+		(r->which == Z_Triple_internationalString))
+	    {
+		const char *string_value =
+		    r->value.internationalString;
+		if (strcmp ((*c)->u.variant.value, string_value))
+		    remove_flag = 1;
+	    }
+	}
+	if (remove_flag)
+	{
+	    data1_free_tree (dh, *c);
+	    *c = (*c)->next;
+	}
+	else
+	{
+	    match_triple (dh, vreq, defsetval, var1, *c);
+	    c = &(*c)->next;
+	}
+    }
+}
+				
+static int match_children_here (data1_handle dh, data1_node *n,
+				Z_Espec1 *e, int i,
+				Z_ETagUnit **t, int num)
 {
     int counter = 0, hits = 0;
     data1_node *c;
@@ -126,7 +177,6 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
     for (c = n->child; c ; c = c->next)
     {
 	data1_tag *tag = 0;
-
 	if (c->which != DATA1N_tag)
 	    return 0;
 
@@ -172,7 +222,7 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
 	    (occur->which == Z_Occurrences_values && counter >=
 	    *occur->u.values->start))
 	{
-	    if (match_children(c, e, i, t + 1, num - 1))
+	    if (match_children(dh, c, e, i, t + 1, num - 1))
 	    {
 		c->u.tag.node_selected = 1;
 		/*
@@ -213,6 +263,9 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
 			if ((r = find_triple(vreq, defsetval, var1, 5, 5)))
 			    if (r->which == Z_Triple_integer)
 				get_bytes = *r->value.integer;
+
+			if (!show_variantlist)
+			    match_triple (dh, vreq, defsetval, var1, c);
 		    }
 		    mark_subtree(c, show_variantlist, no_data, get_bytes, vreq);
 		}
@@ -231,8 +284,8 @@ static int match_children_here(data1_node *n, Z_Espec1 *e, int i,
     return hits;
 }
 
-static int match_children(data1_node *n, Z_Espec1 *e, int i, Z_ETagUnit **t,
-    int num)
+static int match_children(data1_handle dh, data1_node *n, Z_Espec1 *e,
+			  int i, Z_ETagUnit **t, int num)
 {
     int res;
 
@@ -241,10 +294,10 @@ static int match_children(data1_node *n, Z_Espec1 *e, int i, Z_ETagUnit **t,
     switch (t[0]->which)
     {
 	case Z_ETagUnit_wildThing:
-	case Z_ETagUnit_specificTag: res = match_children_here(n, e, i,
-	    t, num); break;
-	case Z_ETagUnit_wildPath: res = match_children_wildpath(n, e, i,
-	    t, num); break;
+	case Z_ETagUnit_specificTag:
+	    res = match_children_here(dh, n, e, i, t, num); break;
+	case Z_ETagUnit_wildPath:
+	    res = match_children_wildpath(dh, n, e, i, t, num); break;
 	default:
 	    abort();
     }
@@ -259,8 +312,9 @@ int data1_doespec1 (data1_handle dh, data1_node *n, Z_Espec1 *e)
     {
 	if (e->elements[i]->which != Z_ERequest_simpleElement)
 	    return 100;
-    	match_children(n, e, i, e->elements[i]->u.simpleElement->path->tags,
-	    e->elements[i]->u.simpleElement->path->num_tags);
+    	match_children(dh, n, e, i,
+		       e->elements[i]->u.simpleElement->path->tags,
+		       e->elements[i]->u.simpleElement->path->num_tags);
     }
     return 0;
 }

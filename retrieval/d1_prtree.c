@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_prtree.c,v $
- * Revision 1.1  1997-10-27 14:04:07  adam
+ * Revision 1.2  1997-11-06 11:36:44  adam
+ * Implemented variant match on simple elements -data1 tree and Espec-1.
+ *
+ * Revision 1.1  1997/10/27 14:04:07  adam
  * New debug utility, data1_pr_tree, that dumps a data1 tree.
  *
  */
@@ -49,6 +52,12 @@ static void pr_tree (data1_handle dh, data1_node *n, FILE *out, int level)
          break;
      case DATA1N_variant:
          fprintf (out, "variant\n");
+#if 0
+	 if (n->u.variant.type->name)
+	     fprintf (out, " class=%s type=%d value=%s\n",
+		      n->u.variant.type->name, n->u.variant.type->type,
+		      n->u.variant.value);
+#endif
          break;
      default:
          fprintf (out, "unknown(%d)\n", n->which);
