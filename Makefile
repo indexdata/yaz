@@ -1,14 +1,13 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.10 1995-05-15 11:55:13 quinn Exp $
+# $Id: Makefile,v 1.11 1995-05-15 13:20:38 quinn Exp $
 
-# Define -DUSE_XTIMOSI to enable the xtimosi functionality. Remeber to
-# also modify the makefiles under yazlib/ and server/ (according the
-# comments found there). Uncomment RFC1006.
-
-DEFS=-DUSE_XTIMOSI -DDEBUG_MALLOC
+# Uncomment the lines below to enable mOSI communcation.
+DEFS=-DUSE_XTIMOSI
 RFC1006=rfc1006
+LIBMOSI=../../xtimosi/src/libmosi.a ../lib/librfc.a
+XMOSI=xmosi.o
 
 #CC=
 SHELL=/bin/sh
@@ -16,7 +15,7 @@ MAKE=make
 SUBDIR=util odr asn $(RFC1006) ccl yazlib server makelib
 
 all:
-	for i in $(SUBDIR); do cd $$i; if $(MAKE) CFLAGS="$(CFLAGS) $(DEFS)"; then cd ..; else exit 1; fi; done
+	for i in $(SUBDIR); do cd $$i; if $(MAKE) CFLAGS="$(CFLAGS) $(DEFS)" LIBMOSI="$(LIBMOSI)" XMOSI="$(XMOSI)"; then cd ..; else exit 1; fi; done
 
 dep depend:
 	for i in $(SUBDIR); do cd $$i; if $(MAKE) depend; then cd ..; else exit 1; fi; done
