@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.6 2002-09-20 22:23:13 adam Exp $
+ * $Id: unix.c,v 1.7 2002-09-25 12:37:07 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 #ifndef WIN32
@@ -213,7 +213,7 @@ int unix_connect(COMSTACK h, void *address)
     r = connect(h->iofile, (struct sockaddr *) add, SUN_LEN(add));
     if (r < 0)
     {
-	if (errno == EINPROGRESS)
+	if (yaz_errno() == EINPROGRESS)
 	{
 	    h->event = CS_CONNECT;
 	    h->state = CS_ST_CONNECTING;
@@ -264,7 +264,7 @@ int unix_bind(COMSTACK h, void *address, int mode)
 	int socket_out = -1;
 	if(! S_ISSOCK(stat_buf.st_mode)) {
 	    h->cerrno = CSYSERR;
-	    errno = EEXIST; /* Not a socket (File exists) */
+	    yaz_set_errno(EEXIST); /* Not a socket (File exists) */
 	    return -1;
 	}
 	if((socket_out = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
@@ -274,7 +274,7 @@ int unix_bind(COMSTACK h, void *address, int mode)
 	socket_unix.sun_family = AF_UNIX;
 	strncpy(socket_unix.sun_path, path, sizeof(socket_unix.sun_path));
 	if(connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0) {
-	    if(errno == ECONNREFUSED) {
+	    if(yaz_errno() == ECONNREFUSED) {
 		TRC (fprintf (stderr, "Socket exists but nobody is listening\n"));
 	    } else {
 		h->cerrno = CSYSERR;
@@ -283,7 +283,7 @@ int unix_bind(COMSTACK h, void *address, int mode)
 	} else {
 	    close(socket_out);
 	    h->cerrno = CSYSERR;
-	    errno = EADDRINUSE;
+	    yaz_set_errno(EADDRINUSE);
 	    return -1;
 	}
 	unlink(path);
@@ -321,10 +321,10 @@ int unix_listen(COMSTACK h, char *raddr, int *addrlen,
     if (h->newfd < 0)
     {
 	if (
-	    errno == EWOULDBLOCK
+	    yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-	    || errno == EAGAIN
+	    || yaz_errno() == EAGAIN
 #endif
 #endif
 	    )
@@ -451,19 +451,19 @@ int unix_get(COMSTACK h, char **buf, int *bufsize)
 	TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
 	if (res < 0)
 	{
-	    if (errno == EWOULDBLOCK
+	    if (yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-		|| errno == EAGAIN
+		|| yaz_errno() == EAGAIN
 #endif
 #endif
-		|| errno == EINPROGRESS
+		|| yaz_errno() == EINPROGRESS
 		)
 	    {
 		h->io_pending = CS_WANT_READ;
 		break;
 	    }
-	    else if (errno == 0)
+	    else if (yaz_errno() == 0)
 		continue;
 	    else
 		return -1;
@@ -535,10 +535,10 @@ int unix_put(COMSTACK h, char *buf, int size)
 		 )) < 0)
 	{
 	    if (
-		errno == EWOULDBLOCK
+		yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-		|| errno == EAGAIN
+		|| yaz_errno() == EAGAIN
 #endif
 #endif
 		)

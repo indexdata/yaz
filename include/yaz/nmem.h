@@ -24,7 +24,11 @@
  * OF THIS SOFTWARE.
  *
  * $Log: nmem.h,v $
- * Revision 1.7  2002-09-10 18:41:18  adam
+ * Revision 1.8  2002-09-25 12:37:07  adam
+ * Thread-safe handling of errno variable.
+ * For server option -a@ produces APDU prints in YAZ log.
+ *
+ * Revision 1.7  2002/09/10 18:41:18  adam
  * Added yaz_errno
  *
  * Revision 1.6  2001/06/26 14:11:27  adam
@@ -130,6 +134,7 @@ YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 YAZ_EXPORT void nmem_init (void);
 YAZ_EXPORT void nmem_exit (void);
 YAZ_EXPORT int yaz_errno (void);
+YAZ_EXPORT void yaz_set_errno (int v);
 
 YAZ_END_CDECL
 

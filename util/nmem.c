@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: nmem.c,v 1.36 2002-09-10 18:41:18 adam Exp $
+ * $Id: nmem.c,v 1.37 2002-09-25 12:37:07 adam Exp $
  */
 
 /*
@@ -434,4 +434,9 @@ BOOL WINAPI DllMain (HINSTANCE hinstDLL,
 int yaz_errno(void)
 {
     return errno;
+}
+
+void yaz_set_errno(int v)
+{
+    errno = v;
 }

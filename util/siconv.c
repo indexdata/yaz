@@ -2,7 +2,7 @@
  * Copyright (c) 1997-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.5 2002-09-24 08:05:41 adam Exp $
+ * $Id: siconv.c,v 1.6 2002-09-25 12:37:08 adam Exp $
  */
 
 /* mini iconv and wrapper for system iconv library (if present) */
@@ -373,7 +373,7 @@ size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             iconv(cd->iconv_cd, inbuf, inbytesleft, outbuf, outbytesleft);
         if (r == (size_t)(-1))
         {
-            switch (errno)
+            switch (yaz_errno())
             {
             case E2BIG:
                 cd->my_errno = YAZ_ICONV_E2BIG;

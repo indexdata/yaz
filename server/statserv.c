@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.84 2002-09-06 19:52:57 adam Exp $
+ * $Id: statserv.c,v 1.85 2002-09-25 12:37:07 adam Exp $
  */
 
 #include <stdio.h>
@@ -412,7 +412,8 @@ static void listener(IOCHAN h, int event)
 		    char dummy[1];
 		    int res;
 		    
-		    if ((res = read(hand[0], dummy, 1)) < 0 && errno != EINTR)
+		    if ((res = read(hand[0], dummy, 1)) < 0 &&
+				     yaz_errno() != EINTR)
 		    {
 			yaz_log(LOG_FATAL|LOG_ERRNO, "handshake read");
                         return;

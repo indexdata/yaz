@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.49 2002-09-20 22:23:13 adam Exp $
+ * $Id: tcpip.c,v 1.50 2002-09-25 12:37:07 adam Exp $
  */
 
 #include <stdio.h>
@@ -310,7 +310,7 @@ int tcpip_connect(COMSTACK h, void *address)
             return 1;
         }
 #else
-        if (errno == EINPROGRESS)
+        if (yaz_errno() == EINPROGRESS)
         {
             h->event = CS_CONNECT;
             h->state = CS_ST_CONNECTING;
@@ -468,10 +468,10 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #ifdef WIN32
 	    WSAGetLastError() == WSAEWOULDBLOCK
 #else
-	    errno == EWOULDBLOCK 
+	    yaz_errno() == EWOULDBLOCK 
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-            || errno == EAGAIN
+            || yaz_errno() == EAGAIN
 #endif
 #endif
 #endif
@@ -672,22 +672,22 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 	    else
 		return -1;
 #else
-	    if (errno == EWOULDBLOCK 
+	    if (yaz_errno() == EWOULDBLOCK 
 #ifdef EAGAIN   
 #if EAGAIN != EWOULDBLOCK
-                || errno == EAGAIN
+                || yaz_errno() == EAGAIN
 #endif
 #endif
-		|| errno == EINPROGRESS
+		|| yaz_errno() == EINPROGRESS
 #ifdef __sun__
-		|| errno == ENOENT /* Sun's sometimes set errno to this */
+		|| yaz_errno() == ENOENT /* Sun's sometimes set errno to this */
 #endif
 		)
 	    {
 		h->io_pending = CS_WANT_READ;
 		break;
 	    }
-	    else if (errno == 0)
+	    else if (yaz_errno() == 0)
 		continue;
 	    else
 		return -1;
@@ -847,10 +847,10 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 #ifdef WIN32
 		WSAGetLastError() == WSAEWOULDBLOCK
 #else
-	        errno == EWOULDBLOCK 
+	        yaz_errno() == EWOULDBLOCK 
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-             || errno == EAGAIN
+             || yaz_errno() == EAGAIN
 #endif
 #endif
 #endif

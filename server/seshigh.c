@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.131 2002-07-25 12:52:54 adam Exp $
+ * $Id: seshigh.c,v 1.132 2002-09-25 12:37:07 adam Exp $
  */
 
 /*
@@ -107,7 +107,11 @@ association *create_association(IOCHAN channel, COMSTACK link)
 	strcpy(filename, control_block->apdufile);
 	if (!(anew->print = odr_createmem(ODR_PRINT)))
 	    return 0;
-	if (*control_block->apdufile != '-')
+	if (*control_block->apdufile == '@')
+        {
+	    odr_setprint(anew->print, yaz_log_file());
+	}	
+	else if (*control_block->apdufile != '-')
 	{
 	    strcpy(filename, control_block->apdufile);
 	    if (!control_block->dynamic)

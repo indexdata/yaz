@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: eventl.c,v 1.31 2001-10-05 14:43:22 adam Exp $
+ * $Id: eventl.c,v 1.32 2002-09-25 12:37:07 adam Exp $
  */
 
 #include <stdio.h>
@@ -83,7 +83,7 @@ int event_loop(IOCHAN *iochans)
 	res = YAZ_EV_SELECT(max + 1, &in, &out, &except, timeout);
 	if (res < 0)
 	{
-	    if (errno == EINTR)
+	    if (yaz_errno() == EINTR)
     		continue;
             else
             {
