@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
 ]>
-<!-- $Id: yaz-client.sgml,v 1.6 2003-05-23 00:24:04 mike Exp $ -->
+<!-- $Id: yaz-client.sgml,v 1.7 2003-10-17 14:14:10 adam Exp $ -->
 <refentry id="yaz-client">
  
  <refmeta>
@@ -24,6 +24,7 @@
    <arg choice="opt"><option>-p <replaceable>addr</replaceable></option></arg>
    <arg choice="opt"><option>-u <replaceable>auth</replaceable></option></arg>
    <arg choice="opt"><option>-k <replaceable>size</replaceable></option></arg>
+   <arg choice="opt"><option>-x</option></arg>
    <arg choice="opt">addr</arg>
   </cmdsynopsis>
 
@@ -89,11 +90,28 @@
        the file given.
       </para></listitem>
     </varlistentry>
+
     <varlistentry>
      <term>-p <replaceable>addr</replaceable></term>
      <listitem><para>
        If specified, the client will use the proxy at the address
        given.
+      </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+     <term>-k <replaceable>size</replaceable></term>
+     <listitem><para>
+      Sets preferred messages and maximum record size for Initialize
+      Request in kilobytes. Default value is 1024 (1 MB).
+      </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+     <term>-x</term>
+    <listitem><para>
+      Makes the YAZ client print hex dumps of packages sent and received
+      on standard output.
       </para></listitem>
     </varlistentry>
    </variablelist>
