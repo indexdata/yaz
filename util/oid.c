@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: oid.c,v $
- * Revision 1.28  1998-10-13 16:01:53  adam
+ * Revision 1.29  1998-10-14 13:32:35  adam
+ * Added include of string.h.
+ *
+ * Revision 1.28  1998/10/13 16:01:53  adam
  * Implemented support for dynamic object identifiers.
  * Function oid_getvalbyname now accepts raw OID's as well as traditional
  * names.
@@ -118,6 +121,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
 #include <oid.h>
