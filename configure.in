@@ -1,7 +1,7 @@
 dnl YAZ Toolkit
 dnl (c) Index Data 1994-2000
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.19 2000-03-01 11:06:09 adam Exp $
+dnl $Id: configure.in,v 1.20 2000-03-01 11:08:22 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.6)
 dnl
@@ -13,7 +13,7 @@ AC_PROG_RANLIB
 AC_CHECK_PROGS(have_sgml2txt,sgml2txt)
 AC_CHECK_PROGS(have_sgml2latex,sgml2latex)
 AC_CHECK_PROGS(have_sgml2html,sgml2html)
-if test "$have_sgml2txt" = "no" -o "$have_sgml2latex" = "no" - "$have_sgml2html" = "no"; then
+if test "$have_sgml2txt" = "no" -o "$have_sgml2latex" = "no" -o "$have_sgml2html" = "no"; then
 	DOCMODULE=""
 else
 	DOCMODULE="doc"

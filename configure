@@ -1277,7 +1277,7 @@ fi
 test -n "$have_sgml2html" && break
 done
 
-if test "$have_sgml2txt" = "no" -o "$have_sgml2latex" = "no" - "$have_sgml2html" = "no"; then
+if test "$have_sgml2txt" = "no" -o "$have_sgml2latex" = "no" -o "$have_sgml2html" = "no"; then
 	DOCMODULE=""
 else
 	DOCMODULE="doc"
