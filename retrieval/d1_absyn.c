@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.8  1997-01-02 10:47:59  quinn
+ * Revision 1.9  1997-02-19 14:46:15  adam
+ * The "all" specifier only affects elements that are indexed (and not
+ * all elements).
+ *
+ * Revision 1.8  1997/01/02 10:47:59  quinn
  * Added optional, physical ANY
  *
  * Revision 1.7  1996/06/10 08:56:01  quinn
@@ -294,8 +298,8 @@ data1_absyn *data1_read_absyn(char *file)
 		    tp = &(*tp)->next;
 		}
 		while ((p = strchr(p, ',')) && *(++p));
+	        *tp = all; /* append any ALL entries to the list */
 	    }
-	    *tp = all; /* append any ALL entries to the list */
 
 	    new->name = xstrdup(name);
 	}
