@@ -7,7 +7,11 @@
  *   Chas Woodfield, Fretwell Downing Datasystem.
  *
  * $Log: statserv.c,v $
- * Revision 1.40  1997-09-17 12:10:41  adam
+ * Revision 1.41  1997-09-29 07:19:32  adam
+ * Server library uses nmem_init/nmem_exit. The log prefix no longer
+ * includes leading path on NT.
+ *
+ * Revision 1.40  1997/09/17 12:10:41  adam
  * YAZ version 1.4.
  *
  * Revision 1.39  1997/09/09 10:10:19  adam
@@ -137,6 +141,7 @@
 
 #include <yconfig.h>
 #include <stdio.h>
+#include <string.h>
 #ifdef WINDOWS
 #include <process.h>
 #include <winsock.h>
@@ -370,7 +375,7 @@ static void listener(IOCHAN h, int event)
 	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
 	    return;
 	}
-	logf(LOG_DEBUG, "accept ok");
+	logf(LOG_DEBUG, "Accept ok");
 
 	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, EVENT_INPUT)))
 	{
@@ -379,16 +384,17 @@ static void listener(IOCHAN h, int event)
             return;
 	}
 
-	logf(LOG_DEBUG, "accept ok 2");
+	logf(LOG_DEBUG, "Creating association");
 	if (!(newas = create_association(new_chan, new_line)))
 	{
 	    logf(LOG_FATAL, "Failed to create new assoc.");
             iochan_destroy(h);
             return;
 	}
-	logf(LOG_DEBUG, "accept ok 3");
+	logf(LOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
+	logf(LOG_DEBUG, "Determining client address");
 	a = cs_addrstr(new_line);
 	logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
     /* Now what we need todo is create a new thread with this iochan as
@@ -695,12 +701,20 @@ int statserv_main(int argc, char **argv)
     char *arg;
     int protocol = control_block.default_proto;
 
+    nmem_init ();
 #ifdef WINDOWS
     /* We need to initialize the thread list */
     ThreadList_Initialize();
 #endif /* WINDOWS */
 
+#ifdef WINDOWS
+    if ((me = strrchr (argv[0], '\\')))
+	me++;
+    else
+	me = argv[0];
+#else
     me = argv[0];
+#endif
     while ((ret = options("a:iszSl:v:u:c:w:t:k:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
@@ -798,7 +812,9 @@ int statserv_main(int argc, char **argv)
     logf(LOG_LOG, "Entering event loop.");
 	
     if (pListener == NULL)
-        return(1);
+	ret = 1;
     else
-        return event_loop(pListener);
+        ret = event_loop(pListener);
+    nmem_exit ();
+    return ret;
 }
