@@ -44,7 +44,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.9 2001-11-27 22:38:50 adam Exp $
+ * $Id: cclptree.c,v 1.10 2002-07-12 12:11:33 ja7 Exp $
  *
  * Old Europagate Log:
  *
@@ -73,56 +73,70 @@
 
 #include <yaz/ccl.h>
 
-void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
+void fprintSpaces(int indent,FILE * fd_out) 
 {
+	char buf[100];
+	sprintf(buf,"%%%d.s",indent);
+	fprintf(fd_out,buf," ");
+};
 
+
+void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
+{
+	if(indent>0) fprintSpaces(indent,fd_out);
     switch (rpn->kind)
     {
     case CCL_RPN_TERM:
-	fprintf (fd_out, "\"%s\"", rpn->u.t.term);
         if (rpn->u.t.attr_list)
         {
             struct ccl_rpn_attr *attr;
             for (attr = rpn->u.t.attr_list; attr; attr = attr->next)
                 if (attr->set)
-                    fprintf (fd_out, " %s,%d=%d", attr->set, attr->type,
+                    fprintf (fd_out, "@attr %s %d=%d ", attr->set, attr->type,
                              attr->value);
                 else
-                    fprintf (fd_out, " %d=%d", attr->type, attr->value);
+                    fprintf (fd_out, "@attr %d=%d ", attr->type, attr->value);
         }
+		fprintf (fd_out, "\"%s\"\n", rpn->u.t.term);
 	break;
     case CCL_RPN_AND:
-	fprintf (fd_out, "(");
-	ccl_pr_tree (rpn->u.p[0], fd_out);
-	fprintf (fd_out, ") and (");
-	ccl_pr_tree (rpn->u.p[1], fd_out);
-	fprintf (fd_out, ")");
+	fprintf (fd_out, "@and \n");
+	ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
+	ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
 	break;
     case CCL_RPN_OR:
-	fprintf (fd_out, "(");
-	ccl_pr_tree (rpn->u.p[0], fd_out);
-	fprintf (fd_out, ") or (");
-	ccl_pr_tree (rpn->u.p[1], fd_out);
-	fprintf (fd_out, ")");
+	fprintf (fd_out, "@or \n");
+	ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
+	ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
 	break;
     case CCL_RPN_NOT:
-	fprintf (fd_out, "(");
-	ccl_pr_tree (rpn->u.p[0], fd_out);
-	fprintf (fd_out, ") not (");
-	ccl_pr_tree (rpn->u.p[1], fd_out);
-	fprintf (fd_out, ")");
+	fprintf (fd_out, "@not ");
+	ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
+	ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
 	break;
     case CCL_RPN_SET:
-	fprintf (fd_out, "set=%s", rpn->u.setname);
+	fprintf (fd_out, "set=%s ", rpn->u.setname);
 	break;
     case CCL_RPN_PROX:
-	fprintf (fd_out, "(");
-	ccl_pr_tree (rpn->u.p[0], fd_out);
-	fprintf (fd_out, ") prox (");
-	ccl_pr_tree (rpn->u.p[1], fd_out);
-	fprintf (fd_out, ")");
+	fprintf (fd_out, "@prox ");
+	ccl_pr_tree_as_qrpn (rpn->u.p[0], fd_out,indent+2);
+	ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
 	break;
     default:
-	ccl_assert (0);
+		fprintf(stderr,"Internal Error Unknown ccl_rpn node type %d\n",rpn->kind);
     }
 }
+
+
+void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
+{
+	ccl_pr_tree_as_qrpn(rpn,fd_out,0);
+}
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
