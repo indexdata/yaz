@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.3 2004-01-06 19:12:19 adam Exp $
+ * $Id: comstack.c,v 1.4 2004-01-06 20:21:37 adam Exp $
  */
 
 #include <string.h>
@@ -13,6 +13,10 @@
 #include <yaz/tcpip.h>
 #include <yaz/unix.h>
 #include <yaz/odr.h>
+
+#ifdef WIN32
+#define strncasecmp _strnicmp
+#endif
 
 static const char *cs_errlist[] =
 {
