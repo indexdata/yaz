@@ -2,6 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- (IN PROGRESS)
 
+Allow any CQL relation (not just all,any,exact,scr).
+
 Fixes for OCLC UI ASN.1 to make it work with SilverPlatter targets
 that features the same UI.
 

@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.5 2003-06-04 09:44:05 adam Exp $
+/* $Id: cql.y,v 1.6 2003-09-04 18:13:39 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -44,7 +44,7 @@ See the file LICENSE.
 %}
 
 %pure_parser
-%token TERM AND OR NOT PROX EXACT ALL ANY GE LE NE SCR
+%token TERM AND OR NOT PROX GE LE NE
 %expect 8
 
 %%
@@ -113,6 +113,8 @@ searchClause:
     $$.cql = cql_node_prefix($4.cql, 0, $2.buf);
    }
 ;
+
+/* unary NOT search TERM here .. */
 
 boolean: 
   AND | OR | NOT | PROX proxqualifiers {
@@ -206,10 +208,7 @@ baseRelation:
 | GE
 | LE
 | NE
-| EXACT 
-| ALL
-| ANY
-| SCR
+| TERM
 ;
 
 index: 
@@ -220,9 +219,6 @@ searchTerm:
 | AND
 | OR
 | NOT
-| EXACT
-| ALL
-| ANY
 | PROX
 ;
 

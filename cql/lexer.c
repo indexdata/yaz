@@ -1,4 +1,4 @@
-/* $Id: lexer.c,v 1.4 2003-04-14 16:52:10 adam Exp $
+/* $Id: lexer.c,v 1.5 2003-09-04 18:13:39 adam Exp $
    Copyright (C) 2002-2003
    Index Data Aps
 
@@ -106,16 +106,8 @@ int yylex(YYSTYPE *lval, void *vp)
             return OR;
         if (!strcmp(lval->buf, "not"))
             return NOT;
-        if (!strcmp(lval->buf, "exact"))
-            return EXACT;
-        if (!strcmp(lval->buf, "all"))
-            return ALL;
         if (!strncmp(lval->buf, "prox", 4))
             return PROX;
-        if (!strcmp(lval->buf, "any"))
-            return ANY;
-        if (!strcmp(lval->buf, "scr"))
-            return SCR;
     }
     return TERM;
 }
