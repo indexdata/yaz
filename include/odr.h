@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: odr.h,v $
- * Revision 1.9  1995-06-19 12:38:26  quinn
+ * Revision 1.10  1995-08-10 08:54:33  quinn
+ * Added Explain.
+ *
+ * Revision 1.9  1995/06/19  12:38:26  quinn
  * Reorganized include-files. Added small features.
  *
  * Revision 1.8  1995/06/16  13:16:04  quinn
@@ -141,6 +144,7 @@
 #define ODR_SET         17
 #define ODR_NUMERICSTRING   18
 #define ODR_PRINTABLESTRING 19
+#define ODR_GENERALIZEDTIME 24
 #define ODR_GRAPHICSTRING   25
 #define ODR_VISIBLESTRING   26
 #define ODR_GENERALSTRING   27

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: proto.h,v $
- * Revision 1.19  1995-06-19 12:38:28  quinn
+ * Revision 1.20  1995-08-10 08:54:35  quinn
+ * Added Explain.
+ *
+ * Revision 1.19  1995/06/19  12:38:28  quinn
  * Reorganized include-files. Added small features.
  *
  * Revision 1.18  1995/06/16  13:16:05  quinn
@@ -1068,6 +1071,16 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o);
 Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o);
 Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o);
 Z_Close *zget_Close(ODR o);
+int z_InternationalString(ODR o, char **p, int opt);
+int z_OtherInformation(ODR o, Z_OtherInformation **p, int opt);
+int z_ElementSetName(ODR o, char **p, int opt);
+int z_IntUnit(ODR o, Z_IntUnit **p, int opt);
+int z_Unit(ODR o, Z_Unit **p, int opt);
+int z_DatabaseName(ODR o, Z_DatabaseName **p, int opt);
+int z_StringOrNumeric(ODR o, Z_StringOrNumeric **p, int opt);
+int z_OtherInformationUnit(ODR o, Z_OtherInformationUnit **p, int opt);
+int z_Term(ODR o, Z_Term **p, int opt);
+int z_Specification(ODR o, Z_Specification **p, int opt);
 Z_APDU *zget_APDU(ODR o, enum Z_APDU_which which);
 
 #include <prt-rsc.h>

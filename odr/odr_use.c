@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr_use.c,v $
- * Revision 1.4  1995-06-16 13:16:12  quinn
+ * Revision 1.5  1995-08-10 08:54:47  quinn
+ * Added Explain.
+ *
+ * Revision 1.4  1995/06/16  13:16:12  quinn
  * Fixed Defaultdiagformat.
  *
  * Revision 1.3  1995/05/16  08:51:00  quinn
@@ -65,3 +68,9 @@ int odr_graphicstring(ODR o, char **p, int opt)
     return odr_implicit(o, odr_cstring, p, ODR_UNIVERSAL, ODR_GRAPHICSTRING,
     	opt);
 }    
+
+int odr_generalizedtime(ODR o, char **p, int opt)
+{
+    return odr_implicit(o, odr_cstring, p, ODR_UNIVERSAL, ODR_GENERALIZEDTIME,
+    	opt);
+}
