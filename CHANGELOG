@@ -2,8 +2,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 2.0.3 2003/06/04
 
-Fix CCL directive @case handling so that it affects both keywords and
-qualifiers.
+Fix CCL directive @case handling so that it affects string match for
+both CCL keywords and qualifiers.
 
 * ESFormat-Update updates. Packages with OID 1.2.840.10003.9.5.1 and
 1.2.840.10003.9.5 are now handled by the same decoder z_IU0Update .
