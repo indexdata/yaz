@@ -72,9 +72,9 @@ INCLUDES = -I../include
 
 noinst_LIBRARIES = libasn.a
 
-EXTRA_DIST = datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl
+EXTRA_DIST = datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl esadmin.asn
 
-libasn_a_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c  zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c
+libasn_a_SOURCES = z-accdes1.c z-accform1.c z-acckrb1.c z-core.c  z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-opac.c z-uifr1.c  z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c  zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c  zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
@@ -90,7 +90,7 @@ libasn_a_OBJECTS =  z-accdes1.o z-accform1.o z-acckrb1.o z-core.o \
 z-diag1.o z-espec1.o z-estask.o z-exp.o z-grs.o z-opac.o z-uifr1.o \
 z-rrf1.o z-rrf2.o z-sum.o z-sutrs.o zes-expi.o zes-exps.o zes-order.o \
 zes-pquery.o zes-psched.o zes-pset.o zes-update0.o z-date.o z-univ.o \
-zes-update.o
+zes-update.o zes-admin.o
 AR = ar
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -107,9 +107,10 @@ DEP_FILES =  .deps/z-accdes1.P .deps/z-accform1.P .deps/z-acckrb1.P \
 .deps/z-core.P .deps/z-date.P .deps/z-diag1.P .deps/z-espec1.P \
 .deps/z-estask.P .deps/z-exp.P .deps/z-grs.P .deps/z-opac.P \
 .deps/z-rrf1.P .deps/z-rrf2.P .deps/z-sum.P .deps/z-sutrs.P \
-.deps/z-uifr1.P .deps/z-univ.P .deps/zes-expi.P .deps/zes-exps.P \
-.deps/zes-order.P .deps/zes-pquery.P .deps/zes-psched.P \
-.deps/zes-pset.P .deps/zes-update.P .deps/zes-update0.P
+.deps/z-uifr1.P .deps/z-univ.P .deps/zes-admin.P .deps/zes-expi.P \
+.deps/zes-exps.P .deps/zes-order.P .deps/zes-pquery.P \
+.deps/zes-psched.P .deps/zes-pset.P .deps/zes-update.P \
+.deps/zes-update0.P
 SOURCES = $(libasn_a_SOURCES)
 OBJECTS = $(libasn_a_OBJECTS)
 
@@ -196,7 +197,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -324,6 +325,9 @@ z-univ.c ../include/yaz/z-univ.h: z.tcl univres.asn ../util/yaz-comp
 
 zes-update.c ../include/yaz/zes-update.h: z.tcl esupdate.asn ../util/yaz-comp
 	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esupdate.asn
+
+zes-admin.c ../include/yaz/zes-admin.h: z.tcl esadmin.asn ../util/yaz-comp
+	../util/yaz-comp -d z.tcl -i yaz -I ../include $(YCFLAGS) esadmin.asn
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,5 +1,5 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.2 1999-12-16 23:36:19 adam Exp $
+# $Id: z.tcl,v 1.3 2000-03-14 09:22:15 ian Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -320,6 +320,14 @@ set unionmap($m,DateFlags,era) {}
 # ----
 set m ResourceReport-Format-Universe-1 
 set filename($m) z-univ
+# ----
+set m ESFormat-Admin
+set filename($m) zes-admin
+set map($m,EsRequest) ESAdminRequest
+set map($m,TaskPackage) ESAdminTaskPackage
+set map($m,OriginPartToKeep) ESAdminOriginPartToKeep
+set map($m,OriginPartNotToKeep) ESAdminOriginPartNotToKeep
+set map($m,TargetPart) ESAdminTargetPart
 
 # ----------------------------------------------------------
 # "Constructed" types defined by means of C-types are declared here.
