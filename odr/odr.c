@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.36 2002-08-28 07:53:51 adam Exp $
+ * $Id: odr.c,v 1.37 2002-08-28 08:12:49 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -63,7 +63,7 @@ int odr_set_charset(ODR o, const char *to, const char *from)
     if (o->op->iconv_handle)
         yaz_iconv_close (o->op->iconv_handle);
 
-    o->op->iconv_handle = iconv_open (to, from);
+    o->op->iconv_handle = yaz_iconv_open (to, from);
     if (o->op->iconv_handle == 0)
         return -1;
     return 0;
