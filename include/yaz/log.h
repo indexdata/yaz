@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.29 2004-12-13 14:31:19 heikki Exp $
+ * $Id: log.h,v 1.30 2004-12-13 20:16:50 adam Exp $
  */
 
 /**
@@ -38,41 +38,6 @@
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
-
-#ifndef YAZ_USE_NEW_LOG
-
-#include <yaz/xmalloc.h>
-
-/* The old LOG_ bit names are here for compatibility only. They may 
- * conflict with bits defined in syslog.h, or other places. 'LOG'
- * really is not such a good name. YLOG must be more unique
- */
-#define LOG_FATAL  YLOG_FATAL
-#define LOG_DEBUG  YLOG_DEBUG
-#define LOG_WARN   YLOG_WARN
-#define LOG_LOG    YLOG_LOG /* Deprecated, use the modern dynamic log levels*/
-#define LOG_ERRNO  YLOG_ERRNO 
-#define LOG_FILE   0x00000020 /* Deprecated - not in ylog.h at all*/
-#define LOG_APP    0x00000040 /* Deprecated - not in ylog.h at all*/
-#define LOG_MALLOC YLOG_MALLOC /* deprecated */
-#define LOG_NOTIME YLOG_NOTIME /* do not output date and time */
-#define LOG_APP2   0x00000200 /* Deprecated - not in ylog.h at all*/
-#define LOG_APP3   0x00000400 /* Deprecated - not in ylog.h at all*/
-#define LOG_FLUSH  YLOG_FLUSH 
- /*     LOG_LOGLVL is a new one in ylog.h. So new that no log.h users should
-  *     use it */
-
-#define LOG_ALL    YLOG_ALL
-
-#define LOG_DEFAULT_LEVEL YLOG_DEFAULT_LEVEL
-
-
-/* logf is deprecated, as it conflicts with a math function */
-#define logf yaz_log
-
-
-
-#endif /* ndef YAZ_USE_NEW_LOG */
 
 #define YLOG_FATAL  0x00000001
 #define YLOG_DEBUG  0x00000002
@@ -169,6 +134,39 @@ YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg, void *inf
 	void *info);
 
 YAZ_EXPORT void yaz_log_reopen(void);
+
+#if YAZ_USE_NEW_LOG
+
+#else
+
+#include <yaz/xmalloc.h>
+
+/* The old LOG_ bit names are here for compatibility only. They may 
+ * conflict with bits defined in syslog.h, or other places. 'LOG'
+ * really is not such a good name. YLOG must be more unique
+ */
+#define LOG_FATAL  YLOG_FATAL
+#define LOG_DEBUG  YLOG_DEBUG
+#define LOG_WARN   YLOG_WARN
+#define LOG_LOG    YLOG_LOG /* Deprecated, use the modern dynamic log levels*/
+#define LOG_ERRNO  YLOG_ERRNO 
+#define LOG_FILE   0x00000020 /* Deprecated - no YLOG_ equivalent */
+#define LOG_APP    0x00000040 /* Deprecated - no YLOG_ equivalent */
+#define LOG_MALLOC YLOG_MALLOC /* deprecated */
+#define LOG_NOTIME YLOG_NOTIME /* do not output date and time */
+#define LOG_APP2   0x00000200 /* Deprecated - no YLOG_ equivalent */
+#define LOG_APP3   0x00000400 /* Deprecated - no YLOG_ equivalent */
+#define LOG_FLUSH  YLOG_FLUSH 
+
+#define LOG_ALL    YLOG_ALL
+
+#define LOG_DEFAULT_LEVEL YLOG_DEFAULT_LEVEL
+
+
+/* logf is deprecated, as it conflicts with a math function */
+#define logf yaz_log
+
+#endif /* if YAZ_USE_NEW_LOG */
 
 YAZ_END_CDECL
 
