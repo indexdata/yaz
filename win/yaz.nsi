@@ -1,6 +1,6 @@
-; $Id: yaz.nsi,v 1.30 2003-12-16 14:45:59 adam Exp $
+; $Id: yaz.nsi,v 1.31 2003-12-22 14:46:26 adam Exp $
 
-!define VERSION "2.0.7"
+!define VERSION "2.0.8"
 
 Name "YAZ"
 Caption "Index Data YAZ ${VERSION} Setup"

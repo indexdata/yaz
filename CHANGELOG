@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- NOT YET RELEASED
+--- 2.0.8 2003/12/22
 
 * SRW/SRU 1.1. Since the Namespace has changed for SRW/SRU, it means that
 this version is incompatible with version 1.0 and older YAZ SRW/SRU
