@@ -1,7 +1,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
      <!ENTITY ztest-options SYSTEM "ztest-options.xml">
 ]>
-<!-- $Id: yaz-ztest.sgml,v 1.3 2002-10-08 09:07:29 adam Exp $ -->
+<!-- $Id: yaz-ztest.sgml,v 1.4 2002-10-23 10:11:44 adam Exp $ -->
 <refentry id="yaz-ztest">
  
  <refmeta>
@@ -80,7 +80,7 @@
    <para>
     <citerefentry>
      <refentrytitle>yaz</refentrytitle>
-     <manvolnum>1</manvolnum></citerefentry>
+     <manvolnum>7</manvolnum></citerefentry>
    </para>
    <para>
     Section "Generic server" in the YAZ manual.
