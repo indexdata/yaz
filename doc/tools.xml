@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.24 2003-05-27 09:52:38 mike Exp $ -->
+<!-- $Id: tools.xml,v 1.25 2003-06-19 23:05:29 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -394,13 +394,13 @@
      </para>
     </sect3>
    </sect2>
-   <sect2 id="CCL"><title>Common Command Language</title>
+   <sect2 id="CCL"><title>CCL</title>
 
     <para>
      Not all users enjoy typing in prefix query structures and numerical
      attribute values, even in a minimalistic test client. In the library
-     world, the more intuitive Common Command Language (or ISO 8777) has
-     enjoyed some popularity - especially before the widespread
+     world, the more intuitive Common Command Language - CCL (ISO 8777)
+     has enjoyed some popularity - especially before the widespread
      availability of graphical interfaces. It is still useful in
      applications where you for some reason or other need to provide a
      symbolic language for expressing boolean query structures.
@@ -510,73 +510,247 @@
       suggest a few short-hand notations. You can customize the CCL parser
       to support a particular set of qualifiers to reflect the current target
       profile. Traditionally, a qualifier would map to a particular
-      use-attribute within the BIB-1 attribute set. However, you could also
-      define qualifiers that would set, for example, the
-      structure-attribute.
+      use-attribute within the BIB-1 attribute set. It is also
+      possible to set other attributes, such as the structure
+      attribute.
      </para>
 
      <para>
       A  CCL profile is a set of predefined CCL qualifiers that may be
-      read from a file.
+      read from a file or set in the CCL API.
       The YAZ client reads its CCL qualifiers from a file named
-      <filename>default.bib</filename>. Each line in the file has the form:
+      <filename>default.bib</filename>. There are four types of
+      lines in a CCL profile: qualifier specification,
+      qualifier alias, comments and directives.
      </para>
-
-     <para>
-      <replaceable>qualifier-name</replaceable>  
-      [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable>
-      [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable> ...      
-     </para>
-
-     <para>
-      where <replaceable>qualifier-name</replaceable> is the name of the
-      qualifier to be used (eg. <literal>ti</literal>),
-      <replaceable>type</replaceable> is attribute type in the attribute
-      set (Bib-1 is used if no attribute set is given) and
-      <replaceable>val</replaceable> is attribute value.
-      The <replaceable>type</replaceable> can be specified as an
-      integer or as it be specified either as a single-letter:
-      <literal>u</literal> for use, 
-      <literal>r</literal> for relation,<literal>p</literal> for position,
-      <literal>s</literal> for structure,<literal>t</literal> for truncation
-      or <literal>c</literal> for completeness.
-      The attributes for the special qualifier name <literal>term</literal>
-      are used when no CCL qualifier is given in a query.
-     </para>
-
-     <example><title>CCL profile</title>
+     <sect4><title id="qualifier-specification">Qualifier specification</title>
       <para>
-       Consider the following definition:
+       A qualifier specification is of the form:
       </para>
       
-      <screen>
-       ti       u=4 s=1
-       au       u=1 s=1
-       term     s=105
-       ranked   r=102
-      </screen>
       <para>
-       Three qualifiers are defined, <literal>ti</literal>, 
-       <literal>au</literal> and <literal>ranked</literal>.
-       <literal>ti</literal> and <literal>au</literal> both set 
-       structure attribute to phrase (s=1).
-       <literal>ti</literal>
-       sets the use-attribute to 4. <literal>au</literal> sets the
-       use-attribute to 1.
-       When no qualifiers are used in the query the structure-attribute is
-       set to free-form-text (105).
+       <replaceable>qualifier-name</replaceable>  
+       [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable>
+       [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable> ...      
+      </para>
+      
+      <para>
+       where <replaceable>qualifier-name</replaceable> is the name of the
+       qualifier to be used (eg. <literal>ti</literal>),
+       <replaceable>type</replaceable> is attribute type in the attribute
+       set (Bib-1 is used if no attribute set is given) and
+       <replaceable>val</replaceable> is attribute value.
+       The <replaceable>type</replaceable> can be specified as an
+       integer or as it be specified either as a single-letter:
+       <literal>u</literal> for use, 
+       <literal>r</literal> for relation,<literal>p</literal> for position,
+       <literal>s</literal> for structure,<literal>t</literal> for truncation
+       or <literal>c</literal> for completeness.
+       The attributes for the special qualifier name <literal>term</literal>
+       are used when no CCL qualifier is given in a query.
       </para>
       <para>
-       You can combine attributes. To Search for "ranked title" you
-       can do 
+       The attribute value <replaceable>val</replaceable> may be
+       specified as in integer. It is also possible to specify
+       non-numeric values, however, which are used in combination with
+       certain types. The special combinations are:
+      <variablelist>
+	<varlistentry><term><literal>s=pw</literal></term>
+	 <listitem><para>
+	   The structure is set to either word or phrase depending
+	   on the number of tokens in a term (phrase-word).
+	  </para>
+	 </listitem>
+	</varlistentry>
+	
+	<varlistentry><term><literal>s=al</literal></term>
+	 <listitem><para>
+	   Each token in the term is ANDed. (and-list).
+	   This does not set the structure at all.
+	  </para>
+	 </listitem>
+	</varlistentry>
+	
+	<varlistentry><term><literal>s=ol</literal></term>
+	 <listitem><para>
+	  Each token in the term is ORed. (or-list).
+	   This does not set the structure at all.
+	 </para>
+	 </listitem>
+	</varlistentry>
+	
+	<varlistentry><term><literal>r=o</literal></term>
+	 <listitem><para>
+	   Allows operators greather-than, less-than, ... equals and
+	   sets relation attribute accordingly (relation ordered).
+	  </para>
+	 </listitem>
+	</varlistentry>
+	
+	<varlistentry><term><literal>t=l</literal></term>
+	 <listitem><para>
+	   Allows term to be left-truncated.
+	   If term is of the form <literal>?x</literal>, the resulting
+	   Type-1 term is <literal>x</literal> and truncation is left.
+	  </para>
+	 </listitem>
+	</varlistentry>
+	
+	<varlistentry><term><literal>t=r</literal></term>
+	 <listitem><para>
+	   Allows term to be right-truncated.
+	   If term is of the form <literal>x?</literal>, the resulting
+	   Type-1 term is <literal>x</literal> and truncation is right.
+	  </para>
+	 </listitem>
+	</varlistentry>
+	
+	<varlistentry><term><literal>t=n</literal></term>
+	 <listitem><para>
+	   If term is does not include <literal>?</literal>, the
+	   truncation attribute is set to none (100).
+	  </para>
+	 </listitem>
+	</varlistentry>
+	
+	<varlistentry><term><literal>t=b</literal></term>
+	 <listitem><para>
+	   Allows term to be both left&amp;right truncated.
+	   If term is of the form <literal>?x?</literal>, the
+	   resulting term is <literal>x</literal> and trunctation is
+	   set to both left&amp;right.
+	  </para>
+	 </listitem>
+	</varlistentry>
+	
+       </variablelist>
+      </para>
+      <example><title>CCL profile</title>
+       <para>
+	Consider the following definition:
+       </para>
+       
        <screen>
-        ti,ranked=knuth computer
-       </screen>
-       which will use "relation is ranked", "use is title", "structure is
-       phrase".
+	ti       u=4 s=1
+	au       u=1 s=1
+	term     s=105
+	ranked   r=102
+      </screen>
+       <para>
+	Three qualifiers are defined, <literal>ti</literal>, 
+	<literal>au</literal> and <literal>ranked</literal>.
+	<literal>ti</literal> and <literal>au</literal> both set 
+	structure attribute to phrase (s=1).
+	<literal>ti</literal>
+	sets the use-attribute to 4. <literal>au</literal> sets the
+	use-attribute to 1.
+	When no qualifiers are used in the query the structure-attribute is
+	set to free-form-text (105).
       </para>
-     </example>
-     
+       <para>
+	You can combine attributes. To Search for "ranked title" you
+	can do 
+	<screen>
+	 ti,ranked=knuth computer
+	</screen>
+	which will use "relation is ranked", "use is title", "structure is
+	phrase".
+       </para>
+      </example>
+     </sect4>
+     <sect4><title>Qualifier alias</title>
+      <para>
+       A qualifier alias is of the form:
+      </para>
+      <para>
+       <replaceable>q</replaceable>  
+       <replaceable>q1</replaceable> <replaceable>q2</replaceable> ..
+      </para>
+      <para>
+       which declares <replaceable>q</replaceable> to
+       be an alias for <replaceable>q1</replaceable>, 
+       <replaceable>q2</replaceable>... such that the CCL
+       query <replaceable>q=x</replaceable> is equivalent to
+       <replaceable>q1=x or w2=x or ...</replaceable>.
+      </para>
+     </sect4>
+
+     <sect4><title>Comments</title>
+      <para>
+       Lines with white space or lines that begin with
+       character <literal>#</literal> are treated as comments.
+      </para>
+     </sect4>
+
+     <sect4><title>Directives</title>
+      <para>
+       Directive specifications takes the form
+      </para>
+      <para><literal>@</literal><replaceable>directive</replaceable> <replaceable>value</replaceable>
+      </para>
+      <table><title>CCL directives</title>
+       <tgroup cols="3">
+	<colspec colwidth="3*" colname="name"></colspec>
+	<colspec colwidth="7*" colname="description"></colspec>
+	<colspec colwidth="2*" colname="default"></colspec>
+	<thead>
+	 <row>
+	  <entry>Name</entry>
+	  <entry>Description</entry>
+	  <entry>Default</entry>
+	 </row>
+	</thead>
+	<tbody>
+	 <row>
+	  <entry>truncation</entry>
+	  <entry>Truncation character</entry>
+	  <entry><literal>?</literal></entry>
+	 </row>
+	 <row>
+	  <entry>field</entry>
+	  <entry>Specifies how multiple fields are to be
+	   combined. There are two modes: <literal>or</literal>:
+	   multiple qualifier fields are ORed,
+	   <literal>merge</literal>: attributes for the qualifier
+	   fields are merged and assigned to one term.
+	   </entry>
+	  <entry><literal>merge</literal></entry>
+	 </row>
+	 <row>
+	  <entry>case</entry>
+	  <entry>Specificies if CCL operatores and qualifiers should be
+	   compared with case sensitivity or not. Specify 0 for
+	   case sensitive; 1 for case insensitive.</entry>
+	  <entry><literal>0</literal></entry>
+	 </row>
+
+	 <row>
+	  <entry>and</entry>
+	  <entry>Specifies token for CCL operator AND.</entry>
+	  <entry><literal>and</literal></entry>
+	 </row>
+
+	 <row>
+	  <entry>or</entry>
+	  <entry>Specifies token for CCL operator OR.</entry>
+	  <entry><literal>or</literal></entry>
+	 </row>
+
+	 <row>
+	  <entry>not</entry>
+	  <entry>Specifies token for CCL operator NOT.</entry>
+	  <entry><literal>not</literal></entry>
+	 </row>
+
+	 <row>
+	  <entry>set</entry>
+	  <entry>Specifies token for CCL operator SET.</entry>
+	  <entry><literal>set</literal></entry>
+	 </row>
+	</tbody>
+	</tgroup>
+      </table>
+     </sect4>
     </sect3>
     <sect3><title>CCL API</title>
      <para>
