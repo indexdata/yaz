@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.140 2002-01-30 22:02:03 adam Exp $
+ * $Id: client.c,v 1.141 2002-02-01 23:59:49 adam Exp $
  */
 
 #include <stdio.h>
@@ -2284,7 +2284,7 @@ static void initialize(void)
 struct timeval tv_start, tv_end;
 #endif
 
-void  wait_and_handle_responce() 
+void wait_and_handle_responce() 
 {
     
     int res;
@@ -2293,11 +2293,7 @@ void  wait_and_handle_responce()
     Z_APDU *apdu;
     
     
-    if (conn
-#ifdef USE_SELECT
-        && FD_ISSET(cs_fileno(conn), &input)
-#endif
-        )
+    if (conn)
     {
         do
         {
@@ -2393,6 +2389,7 @@ void  wait_and_handle_responce()
                 ((double) tv_start.tv_usec / 1e6 + tv_start.tv_sec));
 #endif
     }
+    xfree (netbuffer);
 }
 
 
@@ -2477,11 +2474,11 @@ void process_cmd_line(char* line)
         for(;*p; ++p) {
             if(!isspace(*p)) {
                 lastnonspace = p;
-            };
-        };
+            }
+        }
         if(lastnonspace) 
             *(++lastnonspace) = 0;
-    };
+    }
     
 
     for (i = 0; cmd[i].cmd; i++)
@@ -2504,8 +2501,10 @@ void process_cmd_line(char* line)
     if (res >= 2)
         wait_and_handle_responce();
 
-    if(apdu_file) fflush(apdu_file);
-    if(marcdump) fflush(marcdump);
+    if(apdu_file)
+        fflush(apdu_file);
+    if(marcdump)
+        fflush(marcdump);
 }
 
 
@@ -2587,6 +2586,9 @@ char ** readline_completer(char *text, int start, int end) {
 
 static void client(void)
 {
+    char line[1024];
+
+    line[1023] = '\0';
 
 #if HAVE_GETTIMEOFDAY
     gettimeofday (&tv_start, 0);
@@ -2594,14 +2596,10 @@ static void client(void)
 
     while (1)
     {
-#ifdef USE_SELECT
-        fd_set input;
-#endif
-        char line[1024];
-        
-        {
+        char *line_in = NULL;
 #if HAVE_READLINE_READLINE_H
-            char* line_in=NULL;
+        if (isatty(0))
+        {
             line_in=readline(C_PROMPT);
             if (!line_in)
                 break;
@@ -2609,9 +2607,12 @@ static void client(void)
             if (*line_in)
                 add_history(line_in);
 #endif
-            strcpy(line,line_in);
+            strncpy(line, line_in, 1023);
             free (line_in);
-#else    
+        }
+#endif 
+        if (!line_in)
+        {
             char *end_p;
             printf (C_PROMPT);
             fflush(stdout);
@@ -2619,9 +2620,8 @@ static void client(void)
                 break;
             if ((end_p = strchr (line, '\n')))
                 *end_p = '\0';
-#endif 
+        }
         process_cmd_line(line);
-    }
     }
 }
 
