@@ -2,207 +2,7 @@
  * Copyright (c) 1995-2001, Index Data
  * See the file LICENSE for details.
  *
- * $Log: tcpip.c,v $
- * Revision 1.43  2001-10-22 16:00:04  adam
- * Renamed states for COMSTACKs to avoid confusion with events.
- *
- * Revision 1.42  2001/10/22 13:57:24  adam
- * Implemented cs_rcvconnect and cs_look as described in the documentation.
- *
- * Revision 1.41  2001/10/12 21:49:26  adam
- * For accept/recv/send check for EAGAIN if it's differs from EWOULDBLOCK.
- *
- * Revision 1.40  2001/08/23 09:02:46  adam
- * WIN32 fixes: Socket not re-used for bind. yaz_log logs WIN32 error
- * message.
- *
- * Revision 1.39  2001/07/19 19:49:40  adam
- * Fixed bug in tcpip_set_blocking.
- *
- * Revision 1.38  2001/03/21 12:43:36  adam
- * Implemented cs_create_host. Better error reporting for SSL comstack.
- *
- * Revision 1.37  2001/03/08 20:18:55  adam
- * Added cs_set_blocking. Patch from Matthew Carey.
- *
- * Revision 1.36  2001/02/21 13:46:53  adam
- * C++ fixes.
- *
- * Revision 1.35  2000/11/27 15:17:40  adam
- * Using SSLeay_add_all_algorithms instead of OpenSSL_add_all_algorithms.
- *
- * Revision 1.34  2000/11/23 10:58:32  adam
- * SSL comstack support. Separate POSIX thread support library.
- *
- * Revision 1.33  2000/09/04 08:27:11  adam
- * Work on error handling for tcpip_accept.
- *
- * Revision 1.32  1999/11/30 13:47:11  adam
- * Improved installation. Moved header files to include/yaz.
- *
- * Revision 1.31  1999/04/29 07:31:23  adam
- * Changed tcpip_strtoaddr_ex so that only part 'till '/' is considered
- * part of hostname.
- *
- * Revision 1.30  1999/04/20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.29  1999/04/16 14:45:55  adam
- * Added interface for tcpd wrapper for access control.
- *
- * Revision 1.28  1999/03/31 11:11:14  adam
- * Function getprotobyname only called once. Minor change in tcpip_get
- * to handle multi-threaded conditions.
- *
- * Revision 1.27  1999/02/02 13:57:31  adam
- * Uses preprocessor define WIN32 instead of WINDOWS to build code
- * for Microsoft WIN32.
- *
- * Revision 1.26  1999/01/08 11:23:14  adam
- * Added const modifier to some of the BER/ODR encoding routines.
- *
- * Revision 1.25  1998/07/07 15:49:23  adam
- * Added braces to avoid warning.
- *
- * Revision 1.24  1998/06/29 07:59:17  adam
- * Minor fix.
- *
- * Revision 1.23  1998/06/23 15:37:50  adam
- * Added type cast to prevent warning.
- *
- * Revision 1.22  1998/06/22 11:32:36  adam
- * Added 'conditional cs_listen' feature.
- *
- * Revision 1.21  1998/05/20 09:55:32  adam
- * Function tcpip_get treats EINPROGRESS error in the same way as
- * EWOULDBLOCK. EINPROGRESS shouldn't be returned - but it is on
- * Solaris in some cases.
- *
- * Revision 1.20  1998/05/18 10:10:40  adam
- * Minor change to avoid C++ warning.
- *
- * Revision 1.19  1998/02/11 11:53:33  adam
- * Changed code so that it compiles as C++.
- *
- * Revision 1.18  1997/09/29 07:15:25  adam
- * Changed use of setsockopt to avoid warnings on MSVC.
- *
- * Revision 1.17  1997/09/17 12:10:30  adam
- * YAZ version 1.4.
- *
- * Revision 1.16  1997/09/01 08:49:14  adam
- * New windows NT/95 port using MSV5.0. Minor changes only.
- *
- * Revision 1.15  1997/05/14 06:53:33  adam
- * C++ support.
- *
- * Revision 1.14  1997/05/01 15:06:32  adam
- * Moved WINSOCK init. code to tcpip_init routine.
- *
- * Revision 1.13  1996/11/01 08:45:18  adam
- * Bug fix: used close on MS-Windows. Fixed to closesocket.
- *
- * Revision 1.12  1996/07/06 19:58:30  quinn
- * System headerfiles gathered in yconfig
- *
- * Revision 1.11  1996/02/23  10:00:39  quinn
- * WAIS Work
- *
- * Revision 1.10  1996/02/20  12:52:11  quinn
- * WAIS protocol support.
- *
- * Revision 1.9  1996/02/10  12:23:11  quinn
- * Enablie inetd operations fro TCP/IP stack
- *
- * Revision 1.8  1995/11/01  13:54:27  quinn
- * Minor adjustments
- *
- * Revision 1.7  1995/10/30  12:41:16  quinn
- * Added hostname lookup for server.
- *
- * Revision 1.6  1995/09/29  17:12:00  quinn
- * Smallish
- *
- * Revision 1.5  1995/09/29  17:01:48  quinn
- * More Windows work
- *
- * Revision 1.4  1995/09/28  10:12:26  quinn
- * Windows-support changes
- *
- * Revision 1.3  1995/09/27  15:02:45  quinn
- * Modified function heads & prototypes.
- *
- * Revision 1.2  1995/06/15  12:30:06  quinn
- * Added @ as hostname alias for INADDR ANY.
- *
- * Revision 1.1  1995/06/14  09:58:20  quinn
- * Renamed yazlib to comstack.
- *
- * Revision 1.20  1995/05/16  08:51:16  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.19  1995/04/10  10:24:08  quinn
- * Some bug-fixes.
- *
- * Revision 1.18  1995/03/30  13:29:27  quinn
- * Added REUSEADDR in tcpip_bind
- *
- * Revision 1.17  1995/03/27  08:36:10  quinn
- * Some work on nonblocking operation in xmosi.c and rfct.c.
- * Added protocol parameter to cs_create()
- *
- * Revision 1.16  1995/03/21  15:53:41  quinn
- * Added rcvconnect
- *
- * Revision 1.15  1995/03/21  12:31:27  quinn
- * Added check for EINPROGRESS on connect.
- *
- * Revision 1.14  1995/03/20  09:47:21  quinn
- * Added server-side support to xmosi.c
- * Fixed possible problems in rfct
- * Other little mods
- *
- * Revision 1.13  1995/03/15  16:15:13  adam
- * Removed p_write.
- *
- * Revision 1.12  1995/03/15  15:36:27  quinn
- * Mods to support nonblocking I/O
- *
- * Revision 1.11  1995/03/15  08:37:57  quinn
- * Now we're pretty much set for nonblocking I/O.
- *
- * Revision 1.10  1995/03/14  17:00:07  quinn
- * Bug-fixes - added tracing info to tcpip.c
- *
- * Revision 1.9  1995/03/14  10:28:42  quinn
- * Adding server-side support to tcpip.c and fixing bugs in nonblocking I/O
- *
- * Revision 1.8  1995/03/10  14:22:50  quinn
- * Removed debug output.
- *
- * Revision 1.7  1995/03/10  11:44:59  quinn
- * Fixes and debugging
- *
- * Revision 1.6  1995/03/07  10:26:55  quinn
- * Initialized type field in the comstacks.
- *
- * Revision 1.5  1995/02/14  20:40:07  quinn
- * Various stuff.
- *
- * Revision 1.4  1995/02/14  11:54:49  quinn
- * Beginning to add full CCL.
- *
- * Revision 1.3  1995/02/10  18:58:10  quinn
- * Fixed tcpip_get (formerly tcpip_read).
- * Turned tst (cli) into a proper, event-driven thingy.
- *
- * Revision 1.2  1995/02/10  15:55:47  quinn
- * Small things.
- *
- * Revision 1.1  1995/02/09  15:51:52  quinn
- * Works better now.
- *
+ * $Id: tcpip.c,v 1.44 2001-11-06 17:01:25 adam Exp $
  */
 
 #include <stdio.h>
@@ -288,15 +88,8 @@ static int tcpip_init (void)
     return 1;
 }
 #else
-static int proto_number = 0;
-
 static int tcpip_init (void)
 {
-    struct protoent *proto;
-    /* only call getprotobyname once, in case it allocates memory */
-    if (!(proto = getprotobyname("tcp")))
-	return 0;
-    proto_number = proto->p_proto;
     return 1;
 }
 #endif
@@ -318,13 +111,8 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
         return 0;
     if (s < 0)
     {
-#ifdef WIN32
 	if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	    return 0;
-#else
-	if ((s = socket(AF_INET, SOCK_STREAM, proto_number)) < 0)
-	    return 0;
-#endif
 	new_socket = 1;
     }
     else
