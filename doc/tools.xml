@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.41 2004-11-21 21:55:15 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.42 2004-11-23 14:11:03 heikki Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1835,10 +1835,11 @@ typedef struct oident
    The <literal>log level</literal> is a bit mask, that says on which level(s)
    the log entry should be made, and optionally set some behaviour of the
    logging. In the most simple cases, it can be one of <literal>YLOG_FATAL,
-     YLOG_DEBUG, YLOG_WARN, YLOG_LOG</literal>. Those can be combined with bits
-    that modify the way the log entry is written:<literal>YLOG_ERRNO,
-     YLOG_NOTIME, YLOG_FLUSH</literal>.
-    Most of the rest of the bits are deprecated, and should not be used.
+   YLOG_DEBUG, YLOG_WARN, YLOG_LOG</literal>. Those can be combined with bits
+   that modify the way the log entry is written:<literal>YLOG_ERRNO,
+   YLOG_NOTIME, YLOG_FLUSH</literal>.
+   Most of the rest of the bits are deprecated, and should not be used. Use
+   the dynamic log levels instead.
   </para>
 
   <para>
@@ -1874,6 +1875,17 @@ typedef struct oident
   </para>
 
   <para>
+   Yaz uses the following dynamic log levels:
+   <literal>server, session, request, requestdetail</literal> for the server
+   functionality.
+   <literal>zoom</literal> for the zoom client api.
+   <literal>ztest</literal> for the simple test server.
+   <literal>malloc, nmem, odr, eventl</literal> for internal debugging of yaz itself.
+   Of course, any program using yaz is welcome to define as many new ones, as
+   it needs.
+  </para>
+
+  <para>
    By default the log is written to stderr, but this can be changed by a call
    to <function>yaz_log_init_file</function> or
    <function>yaz_log_init</function>. If the log is directed to a file, the
@@ -1883,6 +1895,15 @@ typedef struct oident
    the name). The size defaults to 1GB. Setting it to zero will disable the
    rotation feature.
   </para>
+
+  <screen>
+  A typical yaz-log looks like this
+  13:23:14-23/11 yaz-ztest(1) [session] Starting session from tcp:127.0.0.1 (pid=30968)
+  13:23:14-23/11 yaz-ztest(1) [request] Init from 'YAZ' (81) (ver 2.0.28) OK
+  13:23:17-23/11 yaz-ztest(1) [request] Search Z: @attrset Bib-1 foo  OK:7 hits
+  13:23:22-23/11 yaz-ztest(1) [request] Present: [1] 2+2  OK 2 records returned
+  13:24:13-23/11 yaz-ztest(1) [request] Close OK
+  </screen>
 
   <para>
    The log entries start with a time stamp. This can be omitted by setting the
@@ -1894,10 +1915,11 @@ typedef struct oident
   </para>
 
   <para>
-   Next in a log line comes the prefix, often the name of the program. Then
+   Next in a log line comes the prefix, often the name of the program. For
+   yaz-based servers, it can also contain the session number. Then
    comes one or more logbits in square brackets, depending on the logging
    level set by <function>yaz_log_init_level</function> and the loglevel
-   passed to <function>yaz_log_init_level</function>. Finally comes all format
+   passed to <function>yaz_log_init_level</function>. Finally comes the format
    string and additional values passed to <function>yaz_log</function>
   </para>
 
@@ -1915,7 +1937,10 @@ typedef struct oident
   </para>
 
   <para>
-   The dynamic log levels and log rotation were introduced in &yaz; 2.0.28.
+   The dynamic log levels and log rotation were introduced in &yaz; 2.0.28. At
+   the same time, the log bit names were changed from
+   <literal>LOG_something</literal> to <literal>YLOG_something</literal>, 
+   to avoid collision with <filename>syslog.h</filename>.
   </para>
 
   </sect1>
