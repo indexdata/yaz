@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: client.c,v $
- * Revision 1.59  1998-01-29 13:17:56  adam
+ * Revision 1.60  1998-01-29 14:08:52  adam
+ * Better sort diagnostics.
+ *
+ * Revision 1.59  1998/01/29 13:17:56  adam
  * Added sort.
  *
  * Revision 1.58  1998/01/07 13:51:45  adam
@@ -1029,7 +1032,8 @@ int send_sortrequest(char *arg, int newset)
     bib1.proto = protocol;
     bib1.oclass = CLASS_ATTSET;
     bib1.value = VAL_BIB1;
-    while ((sscanf (arg, "%31s %31s%n", sort_string, sort_flags, &off)) == 2)
+    while ((sscanf (arg, "%31s %31s%n", sort_string, sort_flags, &off)) == 2 
+           && off > 1)
     {
 	int i;
 	char *sort_string_sep;
@@ -1102,7 +1106,10 @@ int send_sortrequest(char *arg, int newset)
 	}
     }
     if (!sksl->num_specs)
-	return 0;
+    {
+        printf ("Missing sort specifications\n");
+	return -1;
+    }
     send_apdu(apdu);
     return 2;
 }
