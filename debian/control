@@ -37,12 +37,12 @@ Description: The YAZ Z39.50 toolkit (documentation)
  This packages includes documentation for YAZ in HTML and PDF.
 
 Package: libyaz-dev
-Depends: libyaz
+Depends: libyaz, libxml2-dev
 Replaces: yaz-devel
 Conflicts: yaz-devel
 Section: devel
 Architecture: any
-Recommends: yaz-doc, libxml2-dev
+Recommends: yaz-doc
 Description: The YAZ Z39.50 toolkit (development files)
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
