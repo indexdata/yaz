@@ -45,7 +45,10 @@
  * Europagate, 1995
  *
  * $Log: cclfind.c,v $
- * Revision 1.12  1999-11-30 13:47:11  adam
+ * Revision 1.13  1999-12-22 13:13:32  adam
+ * Search terms may include "operators" without causing error.
+ *
+ * Revision 1.12  1999/11/30 13:47:11  adam
  * Improved installation. Moved header files to include/yaz.
  *
  * Revision 1.11  1999/03/31 11:15:37  adam
@@ -240,6 +243,15 @@ void ccl_rpn_delete (struct ccl_rpn_node *rpn)
 
 static struct ccl_rpn_node *find_spec (CCL_parser cclp,
 				       struct ccl_rpn_attr **qa);
+
+static int is_term_ok (int look, int *list)
+{
+    for (;*list >= 0; list++)
+        if (look == *list)
+            return 1;
+    return 0;
+}
+
 static struct ccl_rpn_node *search_terms (CCL_parser cclp,
 					  struct ccl_rpn_attr **qa);
 
@@ -267,8 +279,9 @@ static void add_attr (struct ccl_rpn_node *p, int type, int value)
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *search_term (CCL_parser cclp,
-					 struct ccl_rpn_attr **qa)
+static struct ccl_rpn_node *search_term_x (CCL_parser cclp,
+					   struct ccl_rpn_attr **qa,
+                                           int *term_list)
 {
     struct ccl_rpn_node *p;
     struct ccl_token *lookahead = cclp->look_token;
@@ -283,7 +296,7 @@ static struct ccl_rpn_node *search_term (CCL_parser cclp,
     int truncation_value = -1;
     int completeness_value = -1;
 
-    if (KIND != CCL_TOK_TERM)
+    if (!is_term_ok(KIND, term_list))
     {
         cclp->error_code = CCL_ERR_TERM_EXPECTED;
         return NULL;
@@ -345,14 +358,14 @@ static struct ccl_rpn_node *search_term (CCL_parser cclp,
     /* go through each TERM token. If no truncation attribute is yet
        met, then look for left/right truncation markers (?) and
        set left_trunc/right_trunc/mid_trunc accordingly */
-    for (no = 0; lookahead->kind == CCL_TOK_TERM; no++)
+    for (no = 0; is_term_ok(lookahead->kind, term_list); no++)
     {
         for (i = 0; i<lookahead->len; i++)
             if (truncation_value == -1 && lookahead->name[i] == '?')
             {
                 if (no == 0 && i == 0 && lookahead->len >= 1)
                     left_trunc = 1;
-                else if (lookahead->next->kind != CCL_TOK_TERM &&
+                else if (!is_term_ok(lookahead->next->kind, term_list) &&
                          i == lookahead->len-1 && i >= 1)
                     right_trunc = 1;
                 else
@@ -436,6 +449,13 @@ static struct ccl_rpn_node *search_term (CCL_parser cclp,
     return p;
 }
 
+static struct ccl_rpn_node *search_term (CCL_parser cclp,
+					 struct ccl_rpn_attr **qa)
+{
+    static int list[] = {CCL_TOK_TERM, CCL_TOK_COMMA, -1};
+    return search_term_x(cclp, qa, list);
+}
+
 /*
  * qualifiers: Parse CCL qualifiers and search terms. 
  * cclp:   CCL Parser
@@ -516,6 +536,7 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
         free (ap);
         return p;
     }
+    /* ordered relation ... */
     rel = 0;
     if (cclp->look_token->len == 1)
     {
@@ -634,8 +655,11 @@ static struct ccl_rpn_node *qualifiers (CCL_parser cclp, struct ccl_token *la,
 static struct ccl_rpn_node *search_terms (CCL_parser cclp,
 					  struct ccl_rpn_attr **qa)
 {
+    static int list[] = {
+        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ,
+        CCL_TOK_REL, CCL_TOK_MINUS, -1};
     struct ccl_rpn_node *p1, *p2, *pn;
-    p1 = search_term (cclp, qa);
+    p1 = search_term_x (cclp, qa, list);
     if (!p1)
         return NULL;
     while (1)
@@ -643,7 +667,7 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
 	if (KIND == CCL_TOK_PROX)
 	{
 	    ADVANCE;
-	    p2 = search_term (cclp, qa);
+	    p2 = search_term_x (cclp, qa, list);
             if (!p2)
             {
                 ccl_rpn_delete (p1);
@@ -654,9 +678,9 @@ static struct ccl_rpn_node *search_terms (CCL_parser cclp,
 	    pn->u.p[1] = p2;
 	    p1 = pn;
 	}
-	else if (KIND == CCL_TOK_TERM)
+	else if (is_term_ok(KIND, list))
 	{
-	    p2 = search_term (cclp, qa);
+	    p2 = search_term_x (cclp, qa, list);
             if (!p2)
             {
                 ccl_rpn_delete (p1);
