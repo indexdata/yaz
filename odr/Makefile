@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.11 1995-03-28 09:15:45 quinn Exp $
+# $Id: Makefile,v 1.12 1995-03-29 08:06:35 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../util
@@ -17,7 +17,7 @@ PO = odr_bool.o ber_bool.o ber_len.o ber_tag.o odr_util.o odr_null.o \
 	odr_choice.o odr_any.o ber_any.o odr.o odr_mem.o
 CPP=cc -E
 
-all: $(LIBDIR) $(LIB)
+all: $(LIBDIR) $(INCDIR) $(LIB)
 
 test: test.o $(LIB)
 	$(CC) $(CFLAGS) $(LIBINCLUDE) -o test test.o $(LIBS)
