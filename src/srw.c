@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.16 2004-01-09 18:10:32 adam Exp $
+ * $Id: srw.c,v 1.17 2004-01-09 19:53:42 adam Exp $
  */
 
 #include <yaz/srw.h>
@@ -26,7 +26,7 @@ static void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len)
     }
 }
 
-xmlNodePtr add_xsd_string_n(xmlNodePtr ptr, const char *elem, char *val,
+xmlNodePtr add_xsd_string_n(xmlNodePtr ptr, const char *elem, const char *val,
 			    int len)
 {
     if (val)
@@ -39,14 +39,14 @@ xmlNodePtr add_xsd_string_n(xmlNodePtr ptr, const char *elem, char *val,
     return 0;
 }
 
-xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, char *val)
+xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, const char *val)
 {
     if (val)
         return xmlNewChild(ptr, 0, elem, val);
     return 0;
 }
 
-static void add_xsd_integer(xmlNodePtr ptr, const char *elem, int *val)
+static void add_xsd_integer(xmlNodePtr ptr, const char *elem, const int *val)
 {
     if (val)
     {
@@ -319,6 +319,12 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
             xmlNodePtr rptr = xmlNewChild(pptr, ns_diag, "diagnostic", 0);
             add_xsd_integer(rptr, "code", (*recs)[i].code);
             add_xsd_string(rptr, "details", (*recs)[i].details);
+	    if ((*recs)[i].code)
+	    {
+		const char *message = yaz_diag_srw_str(*(*recs)[i].code);
+		if (message)
+		    add_xsd_string(rptr, "message", message);
+	    }
         }
     }
     return 0;
