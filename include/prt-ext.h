@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-1998, Index Data.
+ * Copyright (c) 1995-1999, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -106,6 +106,8 @@ struct Z_External
 
 YAZ_EXPORT int z_External(ODR o, Z_External **p, int opt, const char *name);
 YAZ_EXPORT Z_ext_typeent *z_ext_getentbyref(oid_value val);
+YAZ_EXPORT Z_External *z_ext_record(ODR o, int format, const char *buf,
+				    int len);
 
 #ifdef __cplusplus
 }

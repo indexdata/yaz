@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: prt-ext.c,v $
- * Revision 1.20  1999-04-20 09:56:48  adam
+ * Revision 1.21  1999-05-26 14:47:12  adam
+ * Implemented z_ext_record.
+ *
+ * Revision 1.20  1999/04/20 09:56:48  adam
  * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
  * Modified all encoders/decoders to reflect this change.
  *
@@ -192,5 +195,80 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
     return
 	odr_choice(o, arm, &(*p)->u, &(*p)->which, name) &&
 	odr_sequence_end(o);
+}
+
+Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
+{
+    Z_External *thisext;
+    oident recform;
+    int oid[OID_SIZE];
+
+    thisext = (Z_External *) odr_malloc(o, sizeof(*thisext));
+    thisext->descriptor = 0;
+    thisext->indirect_reference = 0;
+
+    recform.proto = PROTO_Z3950;
+    recform.oclass = CLASS_RECSYN;
+    recform.value = (enum oid_value) format;
+    if (!oid_ent_to_oid(&recform, oid))
+	return 0;
+    thisext->direct_reference = odr_oiddup(o, oid);
+    thisext->indirect_reference = 0;
+    thisext->descriptor = 0;
+    
+    if (len < 0) /* Structured data */
+    {
+	switch (format)
+	{
+	case VAL_SUTRS:
+	    thisext->which = Z_External_sutrs;
+	    break;
+	case VAL_GRS1:
+	    thisext->which = Z_External_grs1;
+	    break;
+	case VAL_EXPLAIN:
+	    thisext->which = Z_External_explainRecord;
+	    break;
+	case VAL_SUMMARY:
+	    thisext->which = Z_External_summary;
+	    break;
+	case VAL_OPAC:
+	    thisext->which = Z_External_OPAC;
+	    break;
+	default:
+	    return 0;
+	}
+	
+	/*
+	 * We cheat on the pointers here. Obviously, the record field
+	 * of the backend-fetch structure should have been a union for
+	 * correctness, but we're stuck with this for backwards
+	 * compatibility.
+	 */
+	thisext->u.grs1 = (Z_GenericRecord*) buf;
+    }
+    else if (format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
+    {
+	Odr_oct *sutrs = (Odr_oct *)odr_malloc(o, sizeof(*sutrs));
+	
+	thisext->which = Z_External_sutrs;
+	thisext->u.sutrs = sutrs;
+	sutrs->buf = (unsigned char *)odr_malloc(o, len);
+	sutrs->len = sutrs->size = len;
+	memcpy(sutrs->buf, buf, len);
+    }
+    else
+    {
+	thisext->which = Z_External_octet;
+	if (!(thisext->u.octet_aligned = (Odr_oct *)
+	      odr_malloc(o, sizeof(Odr_oct))))
+	    return 0;
+	if (!(thisext->u.octet_aligned->buf = (unsigned char *)
+	      odr_malloc(o, len)))
+	    return 0;
+	memcpy(thisext->u.octet_aligned->buf, buf, len);
+	thisext->u.octet_aligned->len = thisext->u.octet_aligned->size = len;
+    }
+    return thisext;
 }
 
