@@ -101,7 +101,7 @@ IdAuthentication ::=
       accessCtrl       (6),
       scan         (7),
       sort        (8), 
-      --        (9) (reserved)
+      -- (not used) (9),
       extendedServices    (10),
       level-1Segmentation    (11),
       level-2Segmentation    (12),
@@ -109,9 +109,12 @@ IdAuthentication ::=
       namedResultSets    (14),
       encapsulation    (15),
       resultCount    (16),
-      negotiationModel    (17),
-      duplicateDetection    (18),
-      queryType104    (19)}
+      negotiationModel (17),
+      duplicateDetection (18),
+      queryType104 (19),
+      pQESCorrection (20),
+      stringSchema (21)
+}
 -- end auxiliary definitions for Init PDUs
 
 
@@ -355,7 +358,10 @@ SearchResponse ::= SEQUENCE{
                -- selectAlternativeSyntax is 'true'.
         }
   Specification ::= SEQUENCE{
-  schema    [1] IMPLICIT OBJECT IDENTIFIER OPTIONAL,
+  schema CHOICE {
+              oid [1]   IMPLICIT OBJECT IDENTIFIER,
+              uri [300] IMPLICIT InternationalString
+  } OPTIONAL,
   elementSpec    [2] CHOICE{
               elementSetName   [1] IMPLICIT InternationalString,
           externalEspec  [2] IMPLICIT EXTERNAL} OPTIONAL}

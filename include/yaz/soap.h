@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2002-2003, Index Data.
+ * See the file LICENSE for details.
+ *
+ * $Id: soap.h,v 1.1 2003-02-12 15:06:43 adam Exp $
+ */
+
+#ifndef YAZ_SOAP_H
+#define YAZ_SOAP_H
+
+#include <yaz/odr.h>
+
+#if HAVE_XSLT
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#endif
+
+typedef struct {
+    char *fault_code;
+    char *fault_string;
+    char *details;
+} Z_SOAP_Fault;
+
+typedef struct {
+    int no;
+    char *ns;
+    void *p;
+} Z_SOAP_Generic;
+
+#define Z_SOAP_fault 1
+#define Z_SOAP_generic 2
+#define Z_SOAP_error 3
+typedef struct {
+    int which;
+    union {
+        Z_SOAP_Fault   *fault;
+        Z_SOAP_Generic *generic;
+        Z_SOAP_Fault   *soap_error;
+    } u;
+    const char *ns;
+} Z_SOAP;
+
+typedef struct {
+    char *ns;
+    void *client_data;
+    int (*f)(ODR o, xmlNodePtr ptr, void **handler_data,
+             void *client_data, const char *ns);
+} Z_SOAP_Handler;
+
+YAZ_EXPORT int z_soap_codec(ODR o, Z_SOAP **pp, 
+                            char **content_buf, int *content_len,
+                            Z_SOAP_Handler *handlers);
+
+#endif

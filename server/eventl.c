@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 1995-2001, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: eventl.c,v 1.34 2002-11-26 16:56:21 adam Exp $
+ * $Id: eventl.c,v 1.35 2003-02-12 15:06:43 adam Exp $
  */
 
 #include <stdio.h>
@@ -74,6 +74,8 @@ int event_loop(IOCHAN *iochans)
 	max = 0;
     	for (p = *iochans; p; p = p->next)
     	{
+            yaz_log(LOG_LOG, "fd=%d flags=%d force_event=%d",
+                    p->fd, p->flags, p->force_event);
 	    if (p->force_event)
 		timeout = &nullto;        /* polling select */
 	    if (p->flags & EVENT_INPUT)
@@ -85,7 +87,9 @@ int event_loop(IOCHAN *iochans)
 	    if (p->fd > max)
 	        max = p->fd;
 	}
+        yaz_log(LOG_LOG, "select start");
 	res = YAZ_EV_SELECT(max + 1, &in, &out, &except, timeout);
+        yaz_log(LOG_LOG, "select end");
 	if (res < 0)
 	{
 	    if (yaz_errno() == EINTR)

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2001, Index Data
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.9 2003-01-06 08:20:29 adam Exp $
+ * $Id: logrpn.c,v 1.10 2003-02-12 15:06:44 adam Exp $
  */
 #include <stdio.h>
 
@@ -353,7 +353,6 @@ void log_scan_term (Z_AttributesPlusTerm *zapt, oid_value ast)
 
 void yaz_log_zquery (Z_Query *q)
 {
-    static int cql_oid[] = {1, 2, 840, 10003, 16, 2, -1};
     switch (q->which)
     {
     case Z_Query_type_1: case Z_Query_type_101:

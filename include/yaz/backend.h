@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.17 2003-01-06 08:20:27 adam Exp $
+ * $Id: backend.h,v 1.18 2003-02-12 15:06:43 adam Exp $
  */
 
 #ifndef BACKEND_H
@@ -259,8 +259,38 @@ typedef struct statserv_options_block
     char service_dependencies[128]; /* The services we are dependent on */
     char service_display_name[128]; /* The service display name */
 #endif /* WIN32 */
+    struct bend_soap_handler *soap_handlers;
 } statserv_options_block;
 
+struct bend_http_rr {
+    void *handle;
+    ODR stream;           /* encoding stream */
+    ODR decode;           /* decoding stream */
+    ODR print;            /* print stream */
+    Z_HTTP_Request *hreq; /* whole HTTP request */
+    char *buf;
+    int len;
+};
+
+struct bend_soap_rr {
+    void *handle;         /* user handle */
+    ODR stream;
+    ODR decode;
+    ODR print;
+    const char *ns_env;         /* SOAP NS */
+    const char *ns_enc;         /* SOAP Encoding NS */
+    void *request_method;
+    void *response_body;
+    char *fault_code;
+    char *fault_string;
+};
+
+struct bend_soap_handler {
+    char *ns;
+    int (*handler)(struct bend_soap_rr *rr);
+    struct bend_soap_handler *next;
+};
+    
 YAZ_EXPORT int statserv_main(
     int argc, char **argv,
     bend_initresult *(*bend_init)(bend_initrequest *r),
@@ -270,6 +300,9 @@ YAZ_EXPORT void statserv_closedown(void);
 YAZ_EXPORT statserv_options_block *statserv_getcontrol(void);
 YAZ_EXPORT void statserv_setcontrol(statserv_options_block *block);
 YAZ_EXPORT int check_ip_tcpd(void *cd, const char *addr, int len, int type);
+
+YAZ_EXPORT void statserv_add_soap_handler(int (*h)(struct bend_soap_rr *rr),
+                                          const char *ns);
 
 YAZ_END_CDECL
 

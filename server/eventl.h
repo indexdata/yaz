@@ -1,44 +1,9 @@
 /*
- * Copyright (c) 1995-1999, Index Data
+ * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Log: eventl.h,v $
- * Revision 1.11  1999-04-20 09:56:48  adam
- * Added 'name' paramter to encoder/decoder routines (typedef Odr_fun).
- * Modified all encoders/decoders to reflect this change.
- *
- * Revision 1.10  1998/01/29 13:30:23  adam
- * Better event handle system for NT/Unix.
- *
- * Revision 1.9  1997/09/01 09:31:48  adam
- * Removed definition statserv_remove from statserv.h to eventl.h.
- *
- * Revision 1.8  1995/06/19 12:39:09  quinn
- * Fixed bug in timeout code. Added BER dumper.
- *
- * Revision 1.7  1995/06/16  10:31:34  quinn
- * Added session timeout.
- *
- * Revision 1.6  1995/05/16  08:51:02  quinn
- * License, documentation, and memory fixes
- *
- * Revision 1.5  1995/05/15  11:56:37  quinn
- * Asynchronous facilities. Restructuring of seshigh code.
- *
- * Revision 1.4  1995/03/27  08:34:23  quinn
- * Added dynamic server functionality.
- * Released bindings to session.c (is now redundant)
- *
- * Revision 1.3  1995/03/15  08:37:42  quinn
- * Now we're pretty much set for nonblocking I/O.
- *
- * Revision 1.2  1995/03/14  10:28:00  quinn
- * More work on demo server.
- *
- * Revision 1.1  1995/03/10  18:22:45  quinn
- * The rudiments of an asynchronous server.
- *
+ * $Id: eventl.h,v 1.12 2003-02-12 15:06:43 adam Exp $
  */
 
 #ifndef EVENTL_H

@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.102 2003-02-10 08:59:00 adam Exp $
+dnl $Id: configure.in,v 1.103 2003-02-12 15:06:42 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.3)
 dnl
@@ -308,35 +308,6 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 fi
 AM_CONDITIONAL(ISTHR, test $HAVETHREADS = "1")
 dnl
-dnl ----- gSOAP
-AC_SUBST(GSOAP_LIB)
-AC_SUBST(GSOAP_INCLUDE)
-AC_SUBST(GSOAP_PREFIX)
-gsoapdir=NONE
-AC_ARG_WITH(gsoap, [  --with-gsoap[=PREFIX]   Use gSOAP in PREFIX/{lib,include}],[gsoapdir=$withval])
-if test "x$gsoapdir" = "xNONE"; then
-	for d in /usr /usr/local; do
-		if test -f $d/include/stdsoap2.h; then
-			gsoapdir=$d
-		fi
-	done
-fi
-AC_MSG_CHECKING(for gSOAP prefix)
-GSOAP_PREFIX=$gsoapdir
-if test -x $gsoapdir/bin/soapcpp2; then
-	AC_MSG_RESULT($gsoapdir)
-	if test "$gsoapdir" != "/usr"; then
-		GSOAP_LIB="-L$gsoapdir/lib -lgsoap"
-		GSOAP_INCLUDE=-I$gsoapdir/include
-	fi
-        AC_DEFINE(HAVE_GSOAP)
-        usesrw=1
-else
-	AC_MSG_RESULT(Not found)
-        usesrw=0
-fi
-AM_CONDITIONAL(SRW, test $usesrw = "1")
-dnl
 dnl ----- XML/XSLT
 AC_SUBST(XSLT_LIB)
 AC_SUBST(XSLT_CFLAGS)
@@ -384,7 +355,6 @@ yaz.spec
 util/Makefile
 odr/Makefile
 z39.50/Makefile
-srw/Makefile
 ill/Makefile
 zutil/Makefile
 comstack/Makefile
@@ -393,7 +363,6 @@ cql/Makefile
 server/Makefile
 include/Makefile
 include/yaz/Makefile
-srwapps/Makefile
 lib/Makefile
 client/Makefile
 ztest/Makefile

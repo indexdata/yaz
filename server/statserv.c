@@ -6,7 +6,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.90 2003-01-14 08:21:14 adam Exp $
+ * $Id: statserv.c,v 1.91 2003-02-12 15:06:43 adam Exp $
  */
 
 #include <stdio.h>
@@ -70,13 +70,14 @@ statserv_options_block control_block = {
     0,                          /* default value for inet deamon */
     0,                          /* handle (for service, etc) */
     0,                          /* bend_init handle */
-    0                           /* bend_close handle */
+    0,                          /* bend_close handle */
 #ifdef WIN32
-    ,"Z39.50 Server",           /* NT Service Name */
+    "Z39.50 Server",            /* NT Service Name */
     "Server",                   /* NT application Name */
     "",                         /* NT Service Dependencies */
-    "Z39.50 Server"             /* NT Service Display Name */
+    "Z39.50 Server",            /* NT Service Display Name */
 #endif /* WIN32 */
+    0                           /* SOAP handlers */
 };
 
 /*
@@ -446,7 +447,7 @@ static void listener(IOCHAN h, int event)
 	if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
 				   control_block.daemon_name)) < 0)
 	{
-	    yaz_log(LOG_WARN, "cs_listen failed");
+	    yaz_log(LOG_WARN|LOG_ERRNO, "cs_listen failed");
 	    return;
 	}
 	else if (res == 1)
@@ -691,6 +692,32 @@ void statserv_setcontrol(statserv_options_block *block)
     memcpy(&control_block, block, sizeof(*block));
 }
 
+void statserv_add_soap_handler(int (*h)(struct bend_soap_rr *rr),
+                               const char *ns)
+{
+    struct bend_soap_handler *sh = xmalloc(sizeof(*sh));
+
+    sh->handler = h;
+    sh->ns = xstrdup(ns);
+    sh->next = control_block.soap_handlers;
+    control_block.soap_handlers = sh;
+    yaz_log(LOG_LOG, "soap handler added");
+}
+
+static void statserv_reset(void)
+{
+    struct bend_soap_handler *sh = control_block.soap_handlers;
+
+    control_block.soap_handlers = 0;
+    while (sh)
+    {
+        struct bend_soap_handler *sh_next = sh->next;
+        xfree (sh->ns);
+        xfree (sh);
+        sh = sh_next;
+    }
+}
+
 int statserv_start(int argc, char **argv)
 {
     int ret;
@@ -921,6 +948,7 @@ void StopAppService(void *pHandle)
 {
     /* Stops the app */
     statserv_closedown();
+    statserv_reset();
 }
 /* WIN32 */
 #else
@@ -938,6 +966,7 @@ int statserv_main(int argc, char **argv,
     statserv_setcontrol(cb);
     ret = statserv_start (argc, argv);
     statserv_closedown ();
+    statserv_reset();
     return ret;
 }
 #endif

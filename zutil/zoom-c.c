@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.16 2003-01-24 12:15:45 adam Exp $
+ * $Id: zoom-c.c,v 1.17 2003-02-12 15:06:44 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -401,8 +401,6 @@ ZOOM_API(int)
 ZOOM_query_cql(ZOOM_query s, const char *str)
 {
     Z_External *ext;
-    char *buf;
-    int len;
 
     ext = (Z_External *) odr_malloc(s->odr, sizeof(*ext));
     ext->direct_reference = odr_getoidbystr(s->odr, "1.2.840.10003.16.2");
@@ -1582,14 +1580,15 @@ static zoom_ret send_present (ZOOM_connection c)
         compo->u.complex->generic = (Z_Specification *)
             odr_malloc(c->odr_out, sizeof(*compo->u.complex->generic));
 
-        compo->u.complex->generic->schema = (Odr_oid *)
+        compo->u.complex->generic->which = Z_Specification_oid;
+        compo->u.complex->generic->u.oid = (Odr_oid *)
             yaz_str_to_z3950oid (c->odr_out, CLASS_SCHEMA, schema);
 
-        if (!compo->u.complex->generic->schema)
+        if (!compo->u.complex->generic->u.oid)
         {
             /* OID wasn't a schema! Try record syntax instead. */
 
-            compo->u.complex->generic->schema = (Odr_oid *)
+            compo->u.complex->generic->u.oid = (Odr_oid *)
                 yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, schema);
         }
         if (elementSetName && *elementSetName)

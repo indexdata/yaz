@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: proto.h,v 1.6 2003-01-06 08:20:27 adam Exp $
+ * $Id: proto.h,v 1.7 2003-02-12 15:06:43 adam Exp $
  */
 #ifndef Z_PROTO_H
 #define Z_PROTO_H
@@ -109,6 +109,51 @@ YAZ_EXPORT const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class);
 YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
 
 YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);
+
+typedef struct Z_HTTP_Header Z_HTTP_Header;
+
+struct Z_HTTP_Header {
+    char *name;
+    char *value;
+    Z_HTTP_Header *next;
+};
+
+typedef struct {
+    char *method;
+    char *version;
+    char *path;
+    Z_HTTP_Header *headers;
+    char *content_buf;
+    int content_len;
+} Z_HTTP_Request;
+
+typedef struct {
+    int code;
+    char *version;
+    Z_HTTP_Header *headers;
+    char *content_buf;
+    int content_len;
+} Z_HTTP_Response;
+
+#define Z_GDU_Z3950         1
+#define Z_GDU_HTTP_Request  2
+#define Z_GDU_HTTP_Response 3
+typedef struct {
+    int which;
+    union {
+        Z_APDU *z3950;
+        Z_HTTP_Request *HTTP_Request;
+        Z_HTTP_Response *HTTP_Response;
+    } u;
+} Z_GDU ;
+YAZ_EXPORT int z_GDU (ODR o, Z_GDU **p, int opt, const char *name);
+YAZ_EXPORT void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
+                                  const char *v);
+YAZ_EXPORT const char *z_HTTP_header_lookup(Z_HTTP_Header *hp, const char *n);
+
+YAZ_EXPORT const char *z_HTTP_errmsg(int code);
+
+YAZ_EXPORT Z_GDU *z_get_HTTP_Response(ODR o, int code);
 
 YAZ_END_CDECL
 

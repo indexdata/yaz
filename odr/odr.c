@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.39 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr.c,v 1.40 2003-02-12 15:06:43 adam Exp $
  *
  */
 #if HAVE_CONFIG_H
@@ -35,7 +35,8 @@ char *odr_errlist[] =
     "Malformed data",
     "Stack overflow",
     "Length of constructed type different from sum of members",
-    "Overflow writing definite length of constructed type"
+    "Overflow writing definite length of constructed type",
+    "HTTP Bad Request"
 };
 
 char *odr_errmsg(int n)

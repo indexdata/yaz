@@ -1,10 +1,4 @@
-## $Id: Makefile.am,v 1.25 2003-01-06 08:20:27 adam Exp $
-
-if SRW
-libsrw=../srw/libsrw.la
-else
-libsrw=
-endif
+## $Id: Makefile.am,v 1.26 2003-02-12 15:06:43 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -81,5 +75,5 @@ tcpip.o: $(top_srcdir)/comstack/tcpip.c
 libyaz_la_LIBADD=../odr/libodr.la \
  ../comstack/libcomstack.la ../server/libserver.la \
  ../util/libutil.la ../ccl/libccl.la ../cql/libcql.la ../zutil/libzutil.la \
- ../ill/libill.la ../z39.50/libz39.50.la $(libsrw)
+ ../ill/libill.la ../z39.50/libz39.50.la
 

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.7 2003-01-06 08:20:27 adam Exp $
+ * $Id: odr.h,v 1.8 2003-02-12 15:06:43 adam Exp $
  */
 
 #ifndef ODR_H
@@ -178,6 +178,7 @@ typedef struct odr_arm
 #define OSTACK          9
 #define OCONLEN        10
 #define OLENOV         11
+#define OHTTP          12
 
 extern char *odr_errlist[];
 

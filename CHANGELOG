@@ -3,9 +3,8 @@ Possible compatibility problems with earlier versions marked with '*'.
 --- 1.9.3 2003/MM/DD
 
 Support for SRW 1.0. This is an optional feature and requires
-gSOAP to operate. Enable it by specifying --with-gsoap for
-configure. SRW stuff is located in sub directory srw.
-Example applications are located in srwapps. 
+libxml and libxslt to operate. Enable it by specifying --with-xslt for
+configure. 
 
 Z39.50 Query Type-104 added - to facilitate CQL within Z39.50.
 

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: session.h,v 1.27 2003-01-06 08:20:28 adam Exp $
+ * $Id: session.h,v 1.28 2003-02-12 15:06:43 adam Exp $
  */
 
 #ifndef SESSION_H
@@ -28,7 +28,8 @@ typedef struct request
     char *refid;            /* referenceid */
     request_state state;
 
-    Z_APDU *apdu_request;   /* Current request */
+    Z_GDU *gdu_request;     /* Current request */
+    Z_APDU *apdu_request;   /* Current Z39.50 request */
     NMEM request_mem;    /* memory handle for request */
 
     int size_response;     /* size of buffer */

@@ -2,12 +2,13 @@
  * Copyright (c) 1996-2003, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: yaz-ccl.c,v 1.18 2003-01-06 08:20:29 adam Exp $
+ * $Id: yaz-ccl.c,v 1.19 2003-02-12 15:06:44 adam Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <yaz/yaz-ccl.h>
 #include <yaz/pquery.h>

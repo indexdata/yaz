@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.11 2002-04-15 09:44:44 adam Exp $
+## $Id: Makefile.am,v 1.12 2003-02-12 15:06:44 adam Exp $
 
 if ISSSL
 sslbin=yaz-ztest-ssl
@@ -16,11 +16,11 @@ extra=../lib/libyazthread.la
 endif
 
 yaz_ztest_LDADD=$(extra) ../lib/libyaz.la \
- $(LIBTHREAD)
+ $(XSLT_LIB) $(LIBTHREAD)
 
 yaz_ztest_ssl_LDADD=$(extra) ../lib/libyazssl.la ../lib/libyaz.la \
- $(SSL_LIBS) $(LIBTHREAD)
+ $(SSL_LIBS) $(XSLT_LIB) $(LIBTHREAD)
 
 AM_CFLAGS=@CFLAGSTHREADS@
 
-AM_CPPFLAGS=-I$(top_srcdir)/include
+AM_CPPFLAGS=-I$(top_srcdir)/include $(XSLT_CFLAGS)
