@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: nmem.c,v $
- * Revision 1.1  1995-11-13 09:27:52  quinn
+ * Revision 1.2  1995-12-13 13:44:37  quinn
+ * Modified Data1-system to use nmem
+ *
+ * Revision 1.1  1995/11/13  09:27:52  quinn
  * Fiddling with the variant stuff.
  *
  *
@@ -32,9 +35,11 @@ typedef struct nmem_control
 {
     int total;
     nmem_block *blocks;
+    struct nmem_control *next;
 } nmem_control;
 
-static nmem_block *freelist = 0; /* global freelist */
+static nmem_block *freelist = 0;           /* global freelists */
+static nmem_control *cfreelist = 0;
 
 static void free_block(nmem_block *p)
 {
@@ -113,10 +118,15 @@ int nmem_total(NMEM n)
 
 NMEM nmem_create(void)
 {
-    NMEM r = xmalloc(sizeof(*r));
+    NMEM r = cfreelist;
     
+    if (r)
+	cfreelist = cfreelist->next;
+    else
+	r = xmalloc(sizeof(*r));
     r->blocks = 0;
     r->total = 0;
+    r->next = 0;
     return r;
 }
 
@@ -125,5 +135,6 @@ void nmem_destroy(NMEM n)
     if (!n)
 	return;
     nmem_reset(n);
-    xfree(n);
+    n->next = cfreelist;
+    cfreelist = n;
 }

@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.7  1995-12-12 16:37:05  quinn
+ * Revision 1.8  1995-12-13 13:44:23  quinn
+ * Modified Data1-system to use nmem
+ *
+ * Revision 1.7  1995/12/12  16:37:05  quinn
  * Added destroy element to data1_node.
  *
  * Revision 1.6  1995/12/11  15:22:12  quinn
@@ -92,6 +95,7 @@
 
 #include <stdio.h>
 
+#include <nmem.h>
 #include <oid.h>
 #include <proto.h>
 
@@ -310,8 +314,8 @@ typedef struct data1_node
 
 data1_node *get_parent_tag(data1_node *n);
 data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
-    data1_absyn *absyn);
-data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd);
+    data1_absyn *absyn, NMEM m);
+data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd, NMEM m);
 data1_absyn *data1_read_absyn(char *file);
 data1_tag *data1_gettagbynum(data1_tagset *s, int type, int value);
 data1_tagset *data1_read_tagset(char *file);
@@ -323,7 +327,7 @@ data1_tag *data1_gettagbyname(data1_tagset *s, char *name);
 void data1_free_tree(data1_node *t);
 char *data1_nodetobuf(data1_node *n, int select, int *len);
 data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
-    char *tagname);
+    char *tagname, NMEM m);
 data1_datatype data1_maptype(char *t);
 data1_varset *data1_read_varset(char *file);
 data1_vartype *data1_getvartypebyct(data1_varset *set, char *class, char *type);
@@ -331,10 +335,10 @@ Z_Espec1 *data1_read_espec1(char *file, ODR o);
 int data1_doespec1(data1_node *n, Z_Espec1 *e);
 data1_esetname *data1_getesetbyname(data1_absyn *a, char *name);
 data1_element *data1_getelementbyname(data1_absyn *absyn, char *name);
-data1_node *data1_mk_node(void);
+data1_node *data1_mk_node(NMEM m);
 data1_absyn *data1_get_absyn(char *name);
 data1_maptab *data1_read_maptab(char *file);
-data1_node *data1_map_record(data1_node *n, data1_maptab *map);
+data1_node *data1_map_record(data1_node *n, data1_maptab *map, NMEM m);
 data1_marctab *data1_read_marctab(char *file);
 char *data1_nodetomarc(data1_marctab *p, data1_node *n, int selected, int *len);
 

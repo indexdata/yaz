@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_map.c,v $
- * Revision 1.6  1995-12-12 16:37:08  quinn
+ * Revision 1.7  1995-12-13 13:44:31  quinn
+ * Modified Data1-system to use nmem
+ *
+ * Revision 1.6  1995/12/12  16:37:08  quinn
  * Added destroy element to data1_node.
  *
  * Revision 1.5  1995/12/12  14:11:31  quinn
@@ -229,7 +232,8 @@ static int tagmatch(data1_node *n, data1_maptag *t)
     return 1;
 }
 
-static int map_children(data1_node *n, data1_maptab *map, data1_node *res)
+static int map_children(data1_node *n, data1_maptab *map, data1_node *res,
+    NMEM mem)
 {
     data1_node *c;
     data1_mapunit *m;
@@ -255,7 +259,7 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res)
 		    {
 			if (!cur || mt->new_field || !tagmatch(cur, mt))
 			{
-			    cur = data1_mk_node();
+			    cur = data1_mk_node(mem);
 			    cur->which = DATA1N_tag;
 			    cur->u.tag.element = 0;
 			    cur->u.tag.tag = mt->value.string;
@@ -285,7 +289,7 @@ static int map_children(data1_node *n, data1_maptab *map, data1_node *res)
 		    break;
 		}
 	    }
-	    if (map_children(c, map, res) < 0)
+	    if (map_children(c, map, res, mem) < 0)
 		return -1;
 	}
     return 0;
@@ -405,9 +409,9 @@ static int map_record(data1_node *res, data1_node *n, data1_maptab *map)
  * table. The new copy will refer back to the data of the original record,
  * which should not be discarded during the lifetime of the copy.
  */
-data1_node *data1_map_record(data1_node *n, data1_maptab *map)
+data1_node *data1_map_record(data1_node *n, data1_maptab *map, NMEM m)
 {
-    data1_node *res = data1_mk_node();
+    data1_node *res = data1_mk_node(m);
 
     res->which = DATA1N_root;
     res->u.root.type = map->target_absyn_name;
@@ -419,7 +423,7 @@ data1_node *data1_map_record(data1_node *n, data1_maptab *map)
     res->parent = 0;
     res->root = res;
 
-    if (map_children(n, map, res) < 0)
+    if (map_children(n, map, res, m) < 0)
     {
 	data1_free_tree(res);
 	return 0;

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.6  1995-12-12 16:37:08  quinn
+ * Revision 1.7  1995-12-13 13:44:32  quinn
+ * Modified Data1-system to use nmem
+ *
+ * Revision 1.6  1995/12/12  16:37:08  quinn
  * Added destroy element to data1_node.
  *
  * Revision 1.5  1995/12/11  15:22:37  quinn
@@ -81,7 +84,9 @@ char *data1_tabpath = 0; /* global path for tables */
 void data1_set_tabpath(char *p)
 { data1_tabpath = p; }
 
+#if 0
 static data1_node *freelist = 0;
+#endif
 
 /*
  * get the tag which is the immediate parent of this node (this may mean
@@ -95,26 +100,32 @@ data1_node *get_parent_tag(data1_node *n)
     return 0;
 }
 
-data1_node *data1_mk_node(void)
+data1_node *data1_mk_node(NMEM m)
 {
     data1_node *r;
 
+#if 0
     if ((r = freelist))
 	freelist = r->next;
     else
 	if (!(r = xmalloc(sizeof(*r))))
 	    abort();
+#else
+    r = nmem_malloc(m, sizeof(*r));
+#endif
     r->next = r->child = r->last_child = r->parent = 0;
     r->num_children = 0;
     r->destroy = 0;
     return r;
 }
 
+#if 0
 static void fr_node(data1_node *n)
 {
     n->next = freelist;
     freelist = n;
 }
+#endif
 
 void data1_free_tree(data1_node *t)
 {
@@ -128,7 +139,9 @@ void data1_free_tree(data1_node *t)
     }
     if (t->destroy)
 	(*t->destroy)(t);
+#if 0
     fr_node(t);
+#endif
 }
 
 /*
@@ -137,9 +150,9 @@ void data1_free_tree(data1_node *t)
  * which can then be modified.
  */
 data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
-    char *tagname)
+    char *tagname, NMEM m)
 {
-    data1_node *tagn = data1_mk_node();
+    data1_node *tagn = data1_mk_node(m);
     data1_node *datn;
 
     tagn->which = DATA1N_tag;
@@ -150,11 +163,8 @@ data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
     tagn->u.tag.no_data_requested = 0;
     if (!(tagn->u.tag.element = data1_getelementbytagname(root->u.root.absyn,
 	0, tagname)))
-    {
-	fr_node(tagn);
 	return 0;
-    }
-    tagn->child = datn = data1_mk_node();
+    tagn->child = datn = data1_mk_node(m);
     tagn->num_children = 1;
     datn->parent = tagn;
     datn->root = root;
@@ -171,7 +181,7 @@ data1_node *data1_insert_taggeddata(data1_node *root, data1_node *at,
  * 'node' and its children.
  */
 data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
-    data1_absyn *absyn)
+    data1_absyn *absyn, NMEM m)
 {
     data1_node *res;
 
@@ -246,7 +256,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 		    tag);
 		return 0;
 	    }
-	    res = data1_mk_node();
+	    res = data1_mk_node(m);
 	    res->which = DATA1N_root;
 	    res->u.root.type = tag;
 	    res->u.root.absyn = absyn;
@@ -275,7 +285,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	     */
 	    if (parent->which != DATA1N_variant)
 	    {
-		res = data1_mk_node();
+		res = data1_mk_node(m);
 		res->which = DATA1N_variant;
 		res->u.variant.type = 0;
 		res->u.variant.value = 0;
@@ -298,7 +308,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 			return 0;
 		    }
 
-		res =  data1_mk_node();
+		res =  data1_mk_node(m);
 		res->which = DATA1N_variant;
 		res->root = parent->root;
 		res->u.variant.type = tp;
@@ -333,7 +343,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 #else
 	    elem = data1_getelementbytagname(absyn, e, tag);
 #endif
-	    res = data1_mk_node();
+	    res = data1_mk_node(m);
 	    res->which = DATA1N_tag;
 	    res->u.tag.element = elem;
 	    res->u.tag.tag = tag;
@@ -351,7 +361,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	/*
 	 * Read child nodes.
 	 */
-	while ((*pp = data1_read_node(buf, res, line, absyn)))
+	while ((*pp = data1_read_node(buf, res, line, absyn, m)))
 	{
 	    res->last_child = *pp;
 	    res->num_children++;
@@ -384,46 +394,13 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 	}
 	while (isspace(data[len-1]))
 	    len--;
-	res = data1_mk_node();
+	res = data1_mk_node(m);
 	res->parent = parent;
 	res->which = DATA1N_data;
 	res->u.data.what = DATA1I_text;
 	res->u.data.len = len;
 	res->u.data.data = data;
 	res->root = parent->root;
-
-	/*
-	 * if the parent is structured, we'll insert a 'wellKnown' marker
-	 * in front of the data.
-	 */
-#if 0
-	if (partag->u.tag.element && partag->u.tag.element->tag->kind ==
-	    DATA1K_structured)
-	{
-	    data1_node *wk = mk_node();
-	    static data1_element wk_element = { 0, 0, 0, 0, 0};
-
-	    wk->parent = partag;
-	    wk->root = partag->root;
-	    wk->which = DATA1N_tag;
-	    wk->u.tag.tag = 0;
-	    /*
-	     * get well-known tagdef if required.
-	     */
-	    if (!wk_element.tag && !(wk_element.tag =
-		data1_gettagbynum(wk->root->u.root.absyn->tagset, 1, 19)))
-		{
-		    logf(LOG_WARN,
-			"Failed to initialize 'wellknown' tag from tagsetM");
-		    return 0;
-		}
-	    wk->u.tag.element = &wk_element;
-	    wk->child = partag->child;
-	    if (wk->child)
-		wk->child->parent = wk;
-	    partag->child = wk;
-	}
-#endif
     }
     return res;
 }
@@ -431,7 +408,7 @@ data1_node *data1_read_node(char **buf, data1_node *parent, int *line,
 /*
  * Read a record in the native syntax.
  */
-data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd)
+data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd, NMEM m)
 {
     static char *buf = 0;
     char *bp;
@@ -441,6 +418,7 @@ data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd)
 
     if (!buf && !(buf = xmalloc(size = 4096)))
 	abort();
+
     for (;;)
     {
 	if (rd + 4096 > size && !(buf =xrealloc(buf, size *= 2)))
@@ -450,7 +428,7 @@ data1_node *data1_read_record(int (*rf)(int, char *, size_t), int fd)
 	    if (!res)
 	    {
 		bp = buf;
-		return data1_read_node(&bp, 0, &line, 0);
+		return data1_read_node(&bp, 0, &line, 0, m);
 	    }
 	    else
 		return 0;
