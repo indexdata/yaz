@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2004, Index Data
 # All rights reserved.
-# $Id: makefile,v 1.75 2004-03-17 19:07:09 adam Exp $
+# $Id: makefile,v 1.76 2004-03-19 20:57:44 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -25,7 +25,10 @@ ICONV_DIR = c:\iconv-1.9.1.win32
 HAVE_LIBXML2=1
 LIBXML2_DIR=c:\libxml2-2.6.7.win32
 
-# WIN32 binaries libxml2 & iconv from here:
+# zlib compression (used by libxml2)
+ZLIB_DIR = c:\zlib-1.1.4.win32
+
+# get WIN32 binaries libxml2 & iconv & zlib from here:
 #  http://www.zlatkovic.com/projects/libxml/binaries.html
 
 # bison
@@ -127,10 +130,14 @@ iconv:
 !if $(HAVE_LIBXML2)
 LIBXML2_LIB="$(LIBXML2_DIR)\lib\libxml2.lib"
 LIBXML2_DEF=/D HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
-libxml2: $(BINDIR)\libxml2.dll
+libxml2: $(BINDIR)\libxml2.dll $(BINDIR)\zlib.dll
 
 $(BINDIR)\libxml2.dll:
   copy "$(LIBXML2_DIR)\lib\libxml2.dll" $(BINDIR)
+
+$(BINDIR)\zlib.dll:
+  copy "$(ZLIB_DIR)\lib\zlib.dll" $(BINDIR)
+
 !else
 LIBXML2_LIB=
 LIBXML2_DEF=/D HAVE_XML2=0
