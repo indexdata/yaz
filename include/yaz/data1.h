@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.9 2002-05-07 11:02:56 adam Exp $
+ * $Id: data1.h,v 1.10 2002-05-13 14:13:37 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -42,8 +42,6 @@
 
 #define d1_isspace(c) strchr(" \r\n\t\f", c)
 #define d1_isdigit(c) ((c) <= '9' && (c) >= '0')
-
-#define DATA1_USING_XATTR 1
 
 YAZ_BEGIN_CDECL
 
@@ -195,13 +193,11 @@ typedef struct data1_sub_elements {
     data1_element *elements;
 } data1_sub_elements;
 
-#if DATA1_USING_XATTR
 typedef struct data1_xattr {
     char *name;
     char *value;
     struct data1_xattr *next;
 } data1_xattr;
-#endif
 
 typedef struct data1_absyn
 {
@@ -249,9 +245,7 @@ typedef struct data1_node
 	    int get_bytes;
 	    unsigned node_selected : 1;
 	    unsigned make_variantlist : 1;
-#if DATA1_USING_XATTR
             data1_xattr *attributes;
-#endif
 	} tag;
 
 	struct
@@ -342,9 +336,11 @@ YAZ_EXPORT data1_node *data1_mk_node2(data1_handle dh, NMEM m,
                                       int type, data1_node *parent);
 
 YAZ_EXPORT data1_node *data1_mk_tag (data1_handle dh, NMEM nmem, 
-                                     const char *tag, data1_node *at);
+                                     const char *tag, const char **attr,
+                                     data1_node *at);
 YAZ_EXPORT data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem,
                                        const char *tag, size_t len,
+                                       const char **attr,
                                        data1_node *at);
 
 YAZ_EXPORT data1_node *data1_mk_text_n (data1_handle dh, NMEM mem,
@@ -414,6 +410,9 @@ YAZ_EXPORT char *data1_insert_string_n (data1_handle dh, data1_node *res,
                                         NMEM m, const char *str, size_t len);
 YAZ_EXPORT data1_node *data1_read_sgml (data1_handle dh, NMEM m,
 					const char *buf);
+YAZ_EXPORT data1_node *data1_read_xml (data1_handle dh,
+                                       int (*rf)(void *, char *, size_t),
+                                       void *fh, NMEM m);
 YAZ_EXPORT void data1_absyn_trav (data1_handle dh, void *handle,
 				  void (*fh)(data1_handle dh,
 					     void *h, data1_absyn *a));

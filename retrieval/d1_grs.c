@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_grs.c,v $
- * Revision 1.19  2002-04-15 09:06:30  adam
+ * Revision 1.20  2002-05-13 14:13:37  adam
+ * XML reader for data1 (EXPAT)
+ *
+ * Revision 1.19  2002/04/15 09:06:30  adam
  * Fix explain tags for XML writer
  *
  * Revision 1.18  2002/04/12 14:40:07  adam
@@ -204,7 +207,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 		break;
 	    case DATA1I_text:
 	        toget = n->u.data.len;
-		if (p->u.tag.get_bytes > 0 && p->u.tag.get_bytes < toget)
+		if (p && p->u.tag.get_bytes > 0 && p->u.tag.get_bytes < toget)
 		    toget = p->u.tag.get_bytes;
 	    	res->which = Z_ElementData_string;
 		res->u.string = (char *)odr_malloc(o, toget+1);

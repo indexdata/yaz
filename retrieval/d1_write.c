@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_write.c,v 1.10 2002-04-15 09:06:30 adam Exp $
+ * $Id: d1_write.c,v 1.11 2002-05-13 14:13:37 adam Exp $
  */
 
 #include <string.h>
@@ -43,13 +43,11 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 	    }
 	    else
 	    {
-#if DATA1_USING_XATTR
 		data1_xattr *p;
-#endif
+
 		sprintf (line, "%*s<", col, "");
 		wrbuf_puts (b, line);
 		wrbuf_puts (b, tag);
-#if DATA1_USING_XATTR
 		for (p = c->u.tag.attributes; p; p = p->next)
 		{
 		    wrbuf_putc (b, ' ');
@@ -59,7 +57,6 @@ static int nodetoidsgml(data1_node *n, int select, WRBUF b, int col)
 		    wrbuf_puts (b, p->value);
 		    wrbuf_putc (b, '"');
 		}
-#endif
 		wrbuf_puts(b, ">\n");
 		if (nodetoidsgml(c, select, b, (col > 40) ? 40 : col+2) < 0)
 		    return -1;

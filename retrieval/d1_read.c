@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.41 2002-05-07 11:02:56 adam Exp $
+ * $Id: d1_read.c,v 1.42 2002-05-13 14:13:37 adam Exp $
  */
 
 #include <assert.h>
@@ -69,9 +69,7 @@ data1_node *data1_mk_node2 (data1_handle dh, NMEM m, int type,
 	r->u.tag.node_selected = 0;
 	r->u.tag.make_variantlist = 0;
 	r->u.tag.get_bytes = -1;
-#if DATA1_USING_XATTR
 	r->u.tag.attributes = 0;
-#endif
 	break;
     case DATA1N_root:
 	r->u.root.type = 0;
@@ -124,11 +122,13 @@ data1_node *data1_mk_root (data1_handle dh, NMEM nmem,  const char *name)
 }
 
 data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem, 
-                            const char *tag, size_t len, data1_node *at)
+                            const char *tag, size_t len, const char **attr,
+                            data1_node *at)
 {
     data1_node *partag = get_parent_tag(dh, at);
     data1_node *res = data1_mk_node2 (dh, nmem, DATA1N_tag, at);
     data1_element *e = NULL;
+    data1_xattr **p;
     
     res->u.tag.tag = data1_insert_string_n (dh, res, nmem, tag, len);
     
@@ -137,13 +137,22 @@ data1_node *data1_mk_tag_n (data1_handle dh, NMEM nmem,
     res->u.tag.element =
 	data1_getelementbytagname (dh, at->root->u.root.absyn,
 				   e, res->u.tag.tag);
+    p = &res->u.tag.attributes;
+    while (attr && *attr)
+    {
+        *p = (data1_xattr*) nmem_malloc (nmem, sizeof(**p));
+        (*p)->name = nmem_strdup (nmem, attr[0]);
+        (*p)->value = nmem_strdup (nmem, attr[1]);
+        p = &(*p)->next;
+    }
+    *p = 0;
     return res;
 }
 
 data1_node *data1_mk_tag (data1_handle dh, NMEM nmem,
-                          const char *tag, data1_node *at) 
+                          const char *tag, const char **attr, data1_node *at) 
 {
-    return data1_mk_tag_n (dh, nmem, tag, strlen(tag), at);
+    return data1_mk_tag_n (dh, nmem, tag, strlen(tag), attr, at);
 }
 
 data1_node *data1_search_tag (data1_handle dh, data1_node *n,
@@ -163,7 +172,7 @@ data1_node *data1_mk_tag_uni (data1_handle dh, NMEM nmem,
 {
     data1_node *node = data1_search_tag (dh, at->child, tag);
     if (!node)
-	node = data1_mk_tag (dh, nmem, tag, at);
+	node = data1_mk_tag (dh, nmem, tag, 0 /* attr */, at);
     else
         node->child = node->last_child = 0;
     return node;
@@ -341,7 +350,6 @@ data1_node *data1_mk_tag_data_text_uni (data1_handle dh, data1_node *at,
 }
 
 
-#if DATA1_USING_XATTR
 data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
 			       int (*get_byte)(void *fh), void *fh,
 			       WRBUF wrbuf, int *ch)
@@ -405,7 +413,6 @@ data1_xattr *data1_read_xattr (data1_handle dh, NMEM m,
     *ch = c;
     return p_first;
 }
-#endif
 
 /*
  * Ugh. Sometimes functions just grow and grow on you. This one reads a
@@ -436,9 +443,8 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 	
 	if (c == '<') /* beginning of tag */
 	{
-#if DATA1_USING_XATTR
 	    data1_xattr *xattr;
-#endif
+
 	    char tag[64];
 	    char args[256];
 	    int null_tag = 0;
@@ -466,17 +472,8 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 		c = (*get_byte)(fh);
 	    }
 	    tag[i] = '\0';
-#if DATA1_USING_XATTR
 	    xattr = data1_read_xattr (dh, m, get_byte, fh, wrbuf, &c);
 	    args[0] = '\0';
-#else
-	    while (d1_isspace(c))
-		c = (*get_byte)(fh);
-	    for (i = 0; c && c != '>' && c != '/'; c = (*get_byte)(fh))
-		if (i < (sizeof(args)-1))
-		    args[i++] = c;
-	    args[i] = '\0';
-#endif
 	    if (c == '/')
 	    {    /* <tag attrs/> or <tag/> */
 		null_tag = 1;
@@ -568,8 +565,12 @@ data1_node *data1_read_nodex (data1_handle dh, NMEM m,
 			data1_insert_string (dh, res, m, args + val_offset);
 		}
 	    }
-	    else /* tag.. acquire our element in the abstract syntax */
-                res = data1_mk_tag (dh, m, tag, parent);
+	    else 
+            {
+                /* tag.. acquire our element in the abstract syntax */
+                res = data1_mk_tag (dh, m, tag, 0 /* attr */, parent);
+                res->u.tag.attributes = xattr;
+            }
 	    d1_stack[level] = res;
 	    d1_stack[level+1] = 0;
 	    if (level < 250 && !null_tag)
