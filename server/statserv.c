@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.12  1995-03-30 13:29:02  quinn
+ * Revision 1.13  1995-03-30 16:08:39  quinn
+ * Little mods.
+ *
+ * Revision 1.12  1995/03/30  13:29:02  quinn
  * Smallish
  *
  * Revision 1.11  1995/03/30  12:18:17  quinn
@@ -62,7 +65,9 @@
 #include <eventl.h>
 #include <comstack.h>
 #include <tcpip.h>
+#ifdef USE_XTIMOSI
 #include <xmosi.h>
+#endif
 #include <dmalloc.h>
 #include <log.h>
 
