@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: proto.h,v 1.16 2004-10-15 00:18:59 adam Exp $
+ * $Id: proto.h,v 1.17 2004-12-20 23:35:42 adam Exp $
  */
 /**
  * \file proto.h
@@ -125,6 +125,23 @@ YAZ_EXPORT void yaz_init_opt_decode(Z_Options *opt,
 				    void (*pr)(const char *name,
 					       void *clientData),
 				    void *clientData);
+YAZ_EXPORT
+Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
+					    const char *addinfo);
+
+YAZ_EXPORT
+Z_NamePlusRecord *zget_surrogateDiagRec(ODR o, const char *dbname,
+					int error, const char *addinfo);
+
+YAZ_EXPORT
+Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo);
+
+YAZ_EXPORT
+Z_DiagRecs *zget_DiagRecs(ODR o, int error, const char *addinfo);
+
+YAZ_EXPORT
+Z_DiagRec *zget_DiagRec(ODR o, int error, const char *addinfo);
+
 YAZ_END_CDECL
 
 #include <yaz/prt-ext.h>

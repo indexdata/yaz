@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.6 2004-10-15 00:19:01 adam Exp $
+ * $Id: zget.c,v 1.7 2004-12-20 23:35:42 adam Exp $
  */
 /**
  * \file zget.c
@@ -499,3 +499,101 @@ Z_APDU *zget_APDU(ODR o, int which)
     }
     return r;
 }
+
+Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
+					    const char *addinfo)
+{
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *) 
+	odr_malloc (o, sizeof(*dr));
+    
+    dr->diagnosticSetId = yaz_oidval_to_z3950oid (o, CLASS_DIAGSET, VAL_BIB1);
+    dr->condition = odr_intdup(o, error);
+    dr->which = Z_DefaultDiagFormat_v2Addinfo;
+    dr->u.v2Addinfo = odr_strdup (o, addinfo ? addinfo : "");
+    return dr;
+}
+
+Z_DiagRec *zget_DiagRec(ODR o, int error, const char *addinfo)
+{
+    Z_DiagRec *dr = (Z_DiagRec*) odr_malloc(o, sizeof(*dr));
+    dr->which = Z_DiagRec_defaultFormat;
+    dr->u.defaultFormat = zget_DefaultDiagFormat(o, error, addinfo);
+    return dr;
+}
+
+Z_DiagRecs *zget_DiagRecs(ODR o, int error, const char *addinfo)
+{
+    Z_DiagRecs *drecs = (Z_DiagRecs*) odr_malloc(o, sizeof(*drecs));
+    Z_DiagRec **dr = (Z_DiagRec**) odr_malloc(o, sizeof(**dr));
+    drecs->diagRecs = dr;
+    dr[0] = zget_DiagRec(o, error, addinfo);
+    drecs->num_diagRecs = 1;
+    return drecs;
+}
+
+Z_NamePlusRecord *zget_surrogateDiagRec(ODR o, const char *dbname,
+					int error, const char *addinfo)
+{
+    Z_NamePlusRecord *rec = (Z_NamePlusRecord *) odr_malloc (o, sizeof(*rec));
+    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (o, sizeof(*drec));
+    
+    if (dbname)
+	rec->databaseName = odr_strdup(o, dbname);
+    else
+	rec->databaseName = 0;
+    rec->which = Z_NamePlusRecord_surrogateDiagnostic;
+    rec->u.surrogateDiagnostic = drec;
+    drec->which = Z_DiagRec_defaultFormat;
+    drec->u.defaultFormat = zget_DefaultDiagFormat(o, error, addinfo);
+    return rec;
+}
+
+Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
+{
+    Z_External *x, *x2;
+    oident oid;
+    Z_OtherInformation *u;
+    Z_OtherInformationUnit *l;
+    Z_DiagnosticFormat *d;
+    Z_DiagnosticFormat_s *e;
+
+    x = (Z_External*) odr_malloc(odr, sizeof *x);
+    x->descriptor = 0;
+    x->indirect_reference = 0;  
+    oid.proto = PROTO_Z3950;
+    oid.oclass = CLASS_USERINFO;
+    oid.value = VAL_USERINFO1;
+    x->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+    x->which = Z_External_userInfo1;
+
+    u = odr_malloc(odr, sizeof *u);
+    x->u.userInfo1 = u;
+    u->num_elements = 1;
+    u->list = (Z_OtherInformationUnit**) odr_malloc(odr, sizeof *u->list);
+    u->list[0] = (Z_OtherInformationUnit*) odr_malloc(odr, sizeof *u->list[0]);
+    l = u->list[0];
+    l->category = 0;
+    l->which = Z_OtherInfo_externallyDefinedInfo;
+
+    x2 = (Z_External*) odr_malloc(odr, sizeof *x);
+    l->information.externallyDefinedInfo = x2;
+    x2->descriptor = 0;
+    x2->indirect_reference = 0;
+    oid.oclass = CLASS_DIAGSET;
+    oid.value = VAL_DIAG1;
+    x2->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+    x2->which = Z_External_diag1;
+
+    d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
+    x2->u.diag1 = d;
+    d->num = 1;
+    d->elements = (Z_DiagnosticFormat_s**) odr_malloc (odr, sizeof *d->elements);
+    d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc (odr, sizeof *d->elements[0]);
+    e = d->elements[0];
+
+    e->which = Z_DiagnosticFormat_s_defaultDiagRec;
+    e->u.defaultDiagRec = zget_DefaultDiagFormat(odr, error, addinfo);
+    e->message = 0;
+    return x;
+}
+
