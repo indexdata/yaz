@@ -1,5 +1,5 @@
 /*
- * $Id: zoomsh.c,v 1.15 2003-02-17 21:23:31 adam Exp $
+ * $Id: zoomsh.c,v 1.16 2003-02-23 15:24:27 adam Exp $
  *
  * ZOOM-C Shell
  */
@@ -185,6 +185,8 @@ static void cmd_show (ZOOM_connection *c, ZOOM_resultset *r,
 	    display_records (c[i], r[i], start, count);
 	}
     }
+    ZOOM_options_set (options, "count", "0");
+    ZOOM_options_set (options, "start", "0");
 }
 
 static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
