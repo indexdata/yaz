@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 1995, Index Data.
+ * Copyright (c) 1995-1996, Index Data.
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: pquery.c,v $
- * Revision 1.9  1996-03-15 11:03:46  adam
+ * Revision 1.10  1996-08-12 14:10:35  adam
+ * New function p_query_attset to define default attribute set.
+ *
+ * Revision 1.9  1996/03/15  11:03:46  adam
  * Attribute set can be set globally for a query with the @attrset
  * operator. The @attr operator has an optional attribute-set specifier
  * that sets the attribute set locally.
@@ -43,6 +46,8 @@
 #include <oid.h>
 
 #include <pquery.h>
+
+static oid_value p_query_dfset = VAL_NONE;
 
 static const char *query_buf;
 static const char *query_lex_buf;
@@ -332,6 +337,8 @@ Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf)
         lex ();
     }
     if (topSet == VAL_NONE)
+        topSet = p_query_dfset;
+    if (topSet == VAL_NONE)
         topSet = VAL_BIB1;
     oset.proto = proto;
     oset.oclass = CLASS_ATTSET;
@@ -367,6 +374,8 @@ Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
 
         lex ();
     }
+    if (topSet == VAL_NONE)
+        topSet = p_query_dfset;
     if (topSet == VAL_NONE)
         topSet = VAL_BIB1;
     oset.proto = proto;
@@ -407,5 +416,11 @@ Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
     if (!query_look)
         return NULL;
     return rpn_term (o, proto, num_attr, attr_list, attr_set);
+}
+
+int p_query_attset (const char *arg)
+{
+    p_query_dfset = oid_getvalbyname (arg);
+    return (p_query_dfset == VAL_NONE) ? -1 : 0;
 }
 
