@@ -1,5 +1,6 @@
-# $Id: cqlsample,v 1.1 2004-03-10 16:34:30 adam Exp $
+# $Id: cqlsample,v 1.2 2004-03-10 18:50:56 adam Exp $
 # CQL queries for testing.
+# from http://www.loc.gov/z3950/agency/zing/cql/sample-queries.html
 # Simple Term
 
 cat
