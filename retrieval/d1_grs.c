@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_grs.c,v 1.23 2002-07-11 10:40:34 adam Exp $
+ * $Id: d1_grs.c,v 1.24 2002-07-25 12:52:53 adam Exp $
  *
  */
 
@@ -125,7 +125,7 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
 	res->which = Z_ElementData_elementNotThere;
 	res->u.elementNotThere = odr_nullval();
     }
-    else if (n->which == DATA1N_data && (leaf || n->next == NULL))
+    else if (n->which == DATA1N_data && leaf)
     {
 	char str[512];
 	int toget;
@@ -144,8 +144,6 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
             break;
         case DATA1I_text:
             toget = n->u.data.len;
-            if (p && p->u.tag.get_bytes > 0 && p->u.tag.get_bytes < toget)
-                toget = p->u.tag.get_bytes;
             res->which = Z_ElementData_string;
             res->u.string = (char *)odr_malloc(o, toget+1);
             memcpy(res->u.string, n->u.data.data, toget);
@@ -173,6 +171,21 @@ static Z_ElementData *nodetoelementdata(data1_handle dh, data1_node *n,
     return res;
 }
 
+static int is_empty_data (data1_node *n)
+{
+    if (n && n->which == DATA1N_data && n->u.data.what == DATA1I_text)
+    {
+        int i = n->u.data.len;
+        
+        while (i > 0 && n->u.data.data[i-1] == '\n')
+            i--;
+        if (i == 0)
+            return 1;
+    }
+    return 0;
+}
+
+
 static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 					    int select, ODR o,
 					    int *len)
@@ -187,7 +200,20 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 	if (n->u.tag.element)
 	    tag = n->u.tag.element->tag;
 	data = n->child;
-	leaf = 0;
+
+        /* skip empty data children */
+        while (is_empty_data(data))
+            data = data->next;
+        if (!data)
+            data = n->child;
+        else
+        {   /* got one. see if this is the only non-empty one */
+            data1_node *sub = data->next;
+            while (sub && is_empty_data(sub))
+                sub = sub->next;
+            if (!sub)
+                leaf = 1;  /* all empty. 'data' is the only child */
+        }
     }
     /*
      * If we're a data element at this point, we need to insert a
@@ -204,6 +230,8 @@ static Z_TaggedElement *nodetotaggedelement(data1_handle dh, data1_node *n,
 	}
 	data = n;
 	leaf = 1;
+        if (is_empty_data(data))
+            return 0;
     }
     else
     {

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.161 2002-07-12 12:20:34 ja7 Exp $
+ * $Id: client.c,v 1.162 2002-07-25 12:52:53 adam Exp $
  */
 
 #include <stdio.h>
@@ -306,10 +306,11 @@ static int process_initResponse(Z_InitResponse *res)
     		char *charset=NULL, *lang=NULL;
     		int selected;
     		
-    		yaz_get_response_charneg(session_mem, p, &charset, &lang, &selected);
+    		yaz_get_response_charneg(session_mem, p, &charset, &lang,
+                                     &selected);
     		
-    		printf("Accepted character set : `%s'\n", charset);
-    		printf("Accepted code language : `%s'\n", lang);
+    		printf("Accepted character set : %s\n", charset);
+    		printf("Accepted code language : %s\n", lang ? lang : "none");
     		printf("Accepted records in ...: %d\n", selected );
     	}
     }
@@ -901,11 +902,23 @@ static void display_queryExpression (Z_QueryExpression *qe)
         if (qe->u.term->queryTerm)
         {
             Z_Term *term = qe->u.term->queryTerm;
-            if (term->which == Z_Term_general)
+            switch (term->which)
+            {
+            case Z_Term_general:
                 printf (" %.*s", term->u.general->len, term->u.general->buf);
+                break;
+            case Z_Term_characterString:
+                printf (" %s", term->u.characterString);
+                break;
+            case Z_Term_numeric:
+                printf (" %d", *term->u.numeric);
+                break;
+            case Z_Term_null:
+                printf (" null");
+                break;
+            }
         }
     }
-
 }
 
 /* see if we can find USR:SearchResult-1 */
@@ -2114,17 +2127,24 @@ int cmd_proxy(char* arg)
 
 int cmd_charset(char* arg)
 {
-    if (*arg == '\0') {
-    	printf("Current character set is `%s'\n", (yazCharset)?yazCharset:NULL);
+    char l1[30], l2[30];
+
+    *l1 = *l2 = 0;
+    if (sscanf(arg, "%29s %29s", l1, l2) < 1)
+    {
+    	printf("Current character set is `%s'\n", (yazCharset) ?
+               yazCharset:NULL);
     	return 1;
     }
     xfree (yazCharset);
     yazCharset = NULL;
-    if (*arg)
+    if (*l1)
+        yazCharset = xstrdup(l1);
+    if (*l2)
     {
-        yazCharset = (char *) xmalloc (strlen(arg)+1);
-        strcpy (yazCharset, arg);
-    } 
+        odr_set_charset (out, l1, l2);
+        odr_set_charset (in, l2, l1);
+    }
     return 1;
 }
 

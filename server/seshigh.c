@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.130 2002-06-18 21:30:39 adam Exp $
+ * $Id: seshigh.c,v 1.131 2002-07-25 12:52:54 adam Exp $
  */
 
 /*
@@ -46,6 +46,8 @@
 #include <yaz/logrpn.h>
 #include <yaz/statserv.h>
 #include <yaz/diagbib1.h>
+#include <yaz/charneg.h>
+#include <yaz/otherinfo.h>
 
 #include <yaz/backend.h>
 
@@ -358,6 +360,8 @@ void ir_session(IOCHAN h, int event)
 		iochan_clearflag(h, EVENT_OUTPUT|EVENT_INPUT);
 		iochan_setflag(h, assoc->cs_get_mask);
 	    }
+            else
+                assoc->cs_put_mask = EVENT_OUTPUT;
 	    break;
 	default:
 	    if (conn->io_pending & CS_WANT_WRITE)
@@ -574,7 +578,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_initResponse);
     Z_InitResponse *resp = apdu->u.initResponse;
     bend_initresult *binitres;
-    char options[100];
+
+    char options[140];
 
     xfree (assoc->init);
     assoc->init = (bend_initrequest *) xmalloc (sizeof(*assoc->init));
@@ -602,6 +607,17 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     assoc->init->bend_scan = NULL;
     assoc->init->bend_segment = NULL;
     assoc->init->bend_fetch = NULL;
+    assoc->init->charneg_request = NULL;
+    assoc->init->charneg_response = NULL;
+    assoc->init->decode = assoc->decode;
+
+    if (ODR_MASK_GET(req->options, Z_Options_negotiationModel))
+    {
+        Z_CharSetandLanguageNegotiation *negotiation =
+            yaz_get_charneg_record (req->otherInfo);
+        if (negotiation->which == Z_CharSetandLanguageNegotiation_proposal)
+            assoc->init->charneg_request = negotiation;
+    }
     
     assoc->init->peer_name =
 	odr_strdup (assoc->encode, cs_addrstr(assoc->client_link));
@@ -665,13 +681,33 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     if (ODR_MASK_GET(req->options, Z_Options_concurrentOperations))
     {
     	ODR_MASK_SET(resp->options, Z_Options_concurrentOperations);
-	strcat(options, " concurop");
+	strcat(options, " concurrop");
     }
     if (ODR_MASK_GET(req->options, Z_Options_sort) && assoc->init->bend_sort)
     {
 	ODR_MASK_SET(resp->options, Z_Options_sort);
 	strcat(options, " sort");
     }
+
+    if (ODR_MASK_GET(req->options, Z_Options_negotiationModel)
+        && assoc->init->charneg_response)
+    {
+    	Z_OtherInformation **p;
+    	Z_OtherInformationUnit *p0;
+    	
+    	yaz_oi_APDU(apdu, &p);
+    	
+    	if ((p0=yaz_oi_update(p, assoc->encode, NULL, 0, 0))) {
+            ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
+            
+            p0->which = Z_OtherInfo_externallyDefinedInfo;
+            p0->information.externallyDefinedInfo =
+                assoc->init->charneg_response;
+        }
+	ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
+	strcat(options, " negotiation");
+    }
+
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
     {
     	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_1);
@@ -687,6 +723,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_3);
 	assoc->version = 3;
     }
+
     yaz_log(LOG_LOG, "Negotiated to v%d: %s", assoc->version, options);
     assoc->maximumRecordSize = *req->maximumRecordSize;
     if (assoc->maximumRecordSize > control_block->maxrecordsize)

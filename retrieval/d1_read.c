@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_read.c,v 1.45 2002-07-05 16:04:28 adam Exp $
+ * $Id: d1_read.c,v 1.46 2002-07-25 12:52:53 adam Exp $
  */
 
 #include <assert.h>
@@ -834,7 +834,7 @@ static int conv_item (NMEM m, iconv_t t,
 }
 
 static void data1_iconv_s (data1_handle dh, NMEM m, data1_node *n,
-                           iconv_t t, WRBUF wrbuf)
+                           iconv_t t, WRBUF wrbuf, const char *tocode)
 {
     for (; n; n = n->next)
     {
@@ -872,24 +872,55 @@ static void data1_iconv_s (data1_handle dh, NMEM m, data1_node *n,
                 }
             }
             break;
+        case DATA1N_preprocess:
+            if (strcmp(n->u.preprocess.target, "xml") == 0)
+            {
+                data1_xattr *p = n->u.preprocess.attributes;
+                for (; p; p = p->next)
+                    if (strcmp (p->name, "encoding") == 0)
+                        p->value = nmem_strdup (m, tocode);
+            }
+            break;
         }
-        data1_iconv_s (dh, m, n->child, t, wrbuf);
+        data1_iconv_s (dh, m, n->child, t, wrbuf, tocode);
     }
 }
 #endif
+
+const char *data1_get_encoding (data1_handle dh, data1_node *n)
+{
+    /* see if we have an xml header that specifies encoding */
+    if (n && n->child && n->child->which == DATA1N_preprocess &&
+        strcmp (n->child->u.preprocess.target, "xml") == 0)
+    {
+        data1_xattr *xp = n->child->u.preprocess.attributes;
+        for (; xp; xp = xp->next)
+            if (!strcmp (xp->name, "encoding") == 0)
+                return xp->value;
+    }
+    /* no encoding in header, so see if "encoding" was specified for abs */
+    if (n && n->which == DATA1N_root &&
+        n->u.root.absyn && n->u.root.absyn->encoding)
+        return n->u.root.absyn->encoding;
+    /* none of above, return a hard coded default */
+    return "ISO-8859-1";
+}
 
 int data1_iconv (data1_handle dh, NMEM m, data1_node *n,
                   const char *tocode, 
                   const char *fromcode)
 {
 #if HAVE_ICONV_H
-    WRBUF wrbuf = wrbuf_alloc();
-    iconv_t t = iconv_open (tocode, fromcode);
-    if (t == (iconv_t) (-1))
-        return -1;
-    data1_iconv_s (dh, m, n, t, wrbuf);
-    iconv_close (t);
-    wrbuf_free (wrbuf, 1);
+    if (strcmp (tocode, fromcode))
+    {
+        WRBUF wrbuf = wrbuf_alloc();
+        iconv_t t = iconv_open (tocode, fromcode);
+        if (t == (iconv_t) (-1))
+            return -1;
+        data1_iconv_s (dh, m, n, t, wrbuf, tocode);
+        iconv_close (t);
+        wrbuf_free (wrbuf, 1);
+    }
     return 0;
 #else
     return -2;

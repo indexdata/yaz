@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  * Sebastian Hammer, Adam Dickmeiss
  *
- * $Id: d1_marc.c,v 1.20 2002-07-03 14:09:34 adam Exp $
+ * $Id: d1_marc.c,v 1.21 2002-07-25 12:52:53 adam Exp $
  */
 
 
@@ -144,6 +144,7 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
     return res;
 }
 
+
 /*
  * Locate some data under this node. This routine should handle variants
  * prettily.
@@ -151,21 +152,30 @@ data1_marctab *data1_read_marctab (data1_handle dh, const char *file)
 static char *get_data(data1_node *n, int *len)
 {
     char *r;
+    data1_node *np = 0;
 
-    while (n->which != DATA1N_data && n->child)
-	n = n->child;
-    if (n->which != DATA1N_data || 
-	(n->u.data.what != DATA1I_text && n->u.data.what != DATA1I_num))
+    while (n)
     {
-	r = "[Structured/included data]";
-	*len = strlen(r);
-	return r;
+        if (n->which == DATA1N_data)
+        {
+            *len = n->u.data.len;
+            while (*len && d1_isspace(n->u.data.data[*len - 1]))
+                (*len)--;
+            if (*len != 0)
+                return n->u.data.data;
+        }
+        if (n->which == DATA1N_tag)
+            np = n->child;
+        n = n->next;
+        if (!n)
+        {
+            n = np;
+            np = 0;
+        }
     }
-
-    *len = n->u.data.len;
-    while (*len && d1_isspace(n->u.data.data[*len - 1]))
-	(*len)--;
-    return n->u.data.data;
+    r = "";
+    *len = strlen(r);
+    return r;
 }
 
 static void memint (char *p, int val, int len)

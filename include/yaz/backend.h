@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2001, Index Data.
+ * Copyright (c) 1995-2002, Index Data.
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: backend.h,v $
- * Revision 1.14  2002-03-20 14:36:00  adam
+ * Revision 1.15  2002-07-25 12:52:53  adam
+ * Character set negotiation updates
+ *
+ * Revision 1.14  2002/03/20 14:36:00  adam
  * Additional Search Info for GFS
  *
  * Revision 1.13  2002/03/05 12:45:49  mike
@@ -285,6 +288,12 @@ typedef struct bend_initrequest
     int (*bend_delete)(void *handle, bend_delete_rr *rr);
     int (*bend_scan)(void *handle, bend_scan_rr *rr);
     int (*bend_segment)(void *handle, bend_segment_rr *rr);
+
+    ODR decode;                 /* decoding stream */
+    /* character set and language negotiation - see include/yaz/z-charneg.h */
+    Z_CharSetandLanguageNegotiation *charneg_request;
+    Z_External *charneg_response;
+
 } bend_initrequest;
 
 typedef struct bend_initresult

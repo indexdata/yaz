@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_absyn.c,v $
- * Revision 1.31  2002-04-04 20:49:46  adam
+ * Revision 1.32  2002-07-25 12:52:53  adam
+ * Character set negotiation updates
+ *
+ * Revision 1.31  2002/04/04 20:49:46  adam
  * New functions yaz_is_abspath, yaz_path_fopen_base
  *
  * Revision 1.30  2000/12/05 19:07:24  adam
@@ -429,6 +432,7 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
     res->name = 0;
     res->reference = VAL_NONE;
     res->tagset = 0;
+    res->encoding = 0;
     tagset_childp = &res->tagset;
 
     res->attset = data1_empty_attset (dh);
@@ -768,6 +772,16 @@ data1_absyn *data1_read_absyn (data1_handle dh, const char *file)
 		continue;
 	    }
 	    marcp = &(*marcp)->next;
+	}
+	else if (!strcmp(cmd, "encoding"))
+	{
+	    if (argc != 2)
+	    {
+		yaz_log(LOG_WARN, "%s:%d: Bad # or args for encoding",
+		     file, lineno);
+		continue;
+	    }
+            res->encoding = nmem_strdup (data1_nmem_get(dh), argv[1]);
 	}
 	else
 	{

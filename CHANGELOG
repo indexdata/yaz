@@ -2,6 +2,28 @@ Possible compatibility problems with earlier versions marked with '*'.
 
 --- 1.8.8 2002/MM/DD
 
+Added three members in bend_initrequest structure to facilitate
+character set negotiation.
+
+Fixed a bug in frontend server that could cause indefinite
+loops under rare conditions. 
+
+Revised character set utilities (charneg.h) so that encoding
+UCS-4, UCSA-4, UTF-16 and UTF-8 are encoded non-privately.
+
+For PQF, directive @term <type> sets term type for Scan/Search.
+Here <type> is general, string, numeric, null. The term type
+is inherited - just like @attr.
+
+New call odr_set_charset that sets character set conversion for
+international-strings on a ODR stream. Prototype is:
+ int odr_set_charset(ODR o, const char *to, const char *from);
+The InternationalString is still represented as C string in YAZ 
+so native strings of type UTF-8, ASCII, etc. will work (UTF-16
+won't). On the protocol level, you can use any encoding.
+
+Support for UNIX sockets in ZOOM.
+
 Solaris recv sometimes returns errno == ENOENT. It is treated as
 EINPROGRESS. COMSTACK patch by Ko van der Sloot.
 

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: data1.h,v 1.13 2002-07-05 16:04:28 adam Exp $
+ * $Id: data1.h,v 1.14 2002-07-25 12:52:53 adam Exp $
  */
 
 #ifndef DATA1_H
@@ -211,6 +211,7 @@ typedef struct data1_absyn
     data1_marctab *marc;
     data1_sub_elements *sub_elements;
     data1_element *main_elements;
+    char *encoding;
 } data1_absyn;
 
 /*
@@ -472,6 +473,8 @@ YAZ_EXPORT data1_node *data1_get_root_tag (data1_handle dh, data1_node *n);
 YAZ_EXPORT int data1_iconv (data1_handle dh, NMEM m, data1_node *n,
                             const char *tocode, 
                             const char *fromcode);
+
+YAZ_EXPORT const char *data1_get_encoding (data1_handle dh, data1_node *n);
 
 YAZ_END_CDECL
 

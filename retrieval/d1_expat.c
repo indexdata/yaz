@@ -2,7 +2,7 @@
  * Copyright (c) 2002, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: d1_expat.c,v 1.5 2002-07-11 10:39:49 adam Exp $
+ * $Id: d1_expat.c,v 1.6 2002-07-25 12:52:53 adam Exp $
  */
 
 #if HAVE_EXPAT_H
@@ -79,7 +79,7 @@ static void cb_decl (void *user, const char *version, const char*encoding,
     attr_list[1] = version;
 
     attr_list[2] = "encoding";
-    attr_list[3] = encoding;
+    attr_list[3] = "UTF-8"; /* encoding */
 
     attr_list[4] = "standalone";
     attr_list[5] = standalone  ? "yes" : "no";
