@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpdchk.c,v 1.6 2005-01-16 21:51:50 adam Exp $
+ * $Id: tcpdchk.c,v 1.7 2005-01-17 10:29:25 adam Exp $
  */
 /**
  * \file tcpdchk.c
@@ -12,11 +12,21 @@
 #include <stdio.h>
 #include <string.h>
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 #ifdef WIN32
 #include <winsock.h>
 #else
+#include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
+#endif
+
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
 #endif
 
 #include <yaz/yconfig.h>
