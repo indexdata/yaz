@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: dumpber.c,v $
- * Revision 1.5  1995-10-18 16:12:55  quinn
+ * Revision 1.6  1996-01-19 15:41:34  quinn
+ * dumpber was ignoring the file argument.
+ *
+ * Revision 1.5  1995/10/18  16:12:55  quinn
  * Better diagnostics. Added special case in NULL to handle WAIS server.
  *
  * Revision 1.4  1995/09/29  17:12:21  quinn
@@ -41,7 +44,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
     	fprintf(stderr, "Unexpected end of buffer\n");
     	return 0;
     }
-    fprintf(stderr, "%5d: %*s", offset, level * 4, "");
+    fprintf(f, "%5d: %*s", offset, level * 4, "");
     if (class == ODR_UNIVERSAL)
     {
     	static char *nl[] =
@@ -55,37 +58,37 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
 	};
 
 	if (tag < 28)
-	    fprintf(stderr, "%s", nl[tag]);
+	    fprintf(f, "%s", nl[tag]);
 	else
-	    fprintf(stderr, "[UNIV %d]", tag);
+	    fprintf(f, "[UNIV %d]", tag);
     }
     else if (class == ODR_CONTEXT)
-	fprintf(stderr, "[%d]", tag);
+	fprintf(f, "[%d]", tag);
     else
-	fprintf(stderr, "[%d:%d]", class, tag);
+	fprintf(f, "[%d:%d]", class, tag);
     b += res;
     len -= res;
     if ((res = ber_declen((unsigned char*)b, &ll)) <= 0)
     {
-    	fprintf(stderr, "bad length\n");
+    	fprintf(f, "bad length\n");
     	return 0;
     }
     if (res > len)
     {
-    	fprintf(stderr, "Unexpected end of buffer\n");
+    	fprintf(f, "Unexpected end of buffer\n");
     	return 0;
     }
     b += res;
     len -= res;
     if (ll >= 0)
-    	fprintf(stderr, " len=%d\n", ll);
+    	fprintf(f, " len=%d\n", ll);
     else
-    	fprintf(stderr, " len=?\n");
+    	fprintf(f, " len=?\n");
     if (!cons)
     {
     	if (ll < 0)
 	{
-	    fprintf(stderr, "Bad length on primitive type.\n");
+	    fprintf(f, "Bad length on primitive type.\n");
 	    return 0;
 	}
     	return ll + (b - buf);
@@ -99,7 +102,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
 	    break;
 	if (!(res = do_dumpBER(f, b, len, level + 1, offset + (b - buf))))
 	{
-	    fprintf(stderr, "Dump of content element failed.\n");
+	    fprintf(f, "Dump of content element failed.\n");
 	    return 0;
 	}
 	b += res;
@@ -109,7 +112,7 @@ static int do_dumpBER(FILE *f, char *buf, int len, int level, int offset)
     {
     	if (len < 2)
 	{
-	    fprintf(stderr, "Buffer too short in indefinite lenght.\n");
+	    fprintf(f, "Buffer too short in indefinite lenght.\n");
 	    return 0;
 	}
 	return (b - buf) + 2;
