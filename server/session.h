@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.17  1998-07-20 12:38:43  adam
+ * Revision 1.18  1998-08-03 10:23:57  adam
+ * Fixed bug regarding Options for Sort.
+ *
+ * Revision 1.17  1998/07/20 12:38:43  adam
  * Implemented delete result set service to server API.
  *
  * Revision 1.16  1998/03/31 11:07:45  adam
@@ -109,9 +112,9 @@ typedef struct request_q
  */
 typedef enum
 {
-   	ASSOC_NEW,                /* not initialized yet */
-	ASSOC_UP,                 /* normal operation */
-	ASSOC_DEAD                /* dead. Close if input arrives */
+    ASSOC_NEW,                /* not initialized yet */
+    ASSOC_UP,                 /* normal operation */
+    ASSOC_DEAD                /* dead. Close if input arrives */
 } association_state;
 
 typedef struct association

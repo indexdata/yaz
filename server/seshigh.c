@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: seshigh.c,v $
- * Revision 1.77  1998-07-20 12:38:42  adam
+ * Revision 1.78  1998-08-03 10:23:55  adam
+ * Fixed bug regarding Options for Sort.
+ *
+ * Revision 1.77  1998/07/20 12:38:42  adam
  * Implemented delete result set service to server API.
  *
  * Revision 1.76  1998/05/27 16:57:07  adam
@@ -814,7 +817,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     	ODR_MASK_SET(resp->options, Z_Options_concurrentOperations);
 	strcat(options, " concurop");
     }
-    if (ODR_MASK_GET(req->options, Z_Options_sort && binitreq.bend_sort))
+    if (ODR_MASK_GET(req->options, Z_Options_sort) && binitreq.bend_sort)
     {
 	ODR_MASK_SET(resp->options, Z_Options_sort);
 	strcat(options, " sort");
