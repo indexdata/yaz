@@ -1,6 +1,6 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
---- XXXXXX XXXX/XX/X
+--- 1.0pl2 1995/12/6
 
 Memory bug in log module fixed.
 

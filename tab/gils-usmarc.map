@@ -5,8 +5,11 @@
 targetname usmarc
 targetref USmarc
 
-map title			/(3,245)/(3,a)
 map localControlNumber		/(3,001)/(3,@)
+map dateLastModified		/(3,005)/(3,@)
+map ControlIdentifier		/(3,035)/(3,a)
+
+map title			/(3,245)/(3,a)
 map abstract			/(3,520)/(3,a)
 map purpose			/(3,500)/(3,a)
 map originator			/(3,710)/(3,a)
@@ -50,7 +53,6 @@ map contactTelephone		/(3,270)/(3,k)
 map contactFax			/(3,270)/(3,l)
 
 map recordSource		/(3,040)/(3,a)
-map dateLastModified		/(3,005)/(3,@)
 map agencyProgram		/(3,500)/(3,a)
 map sourcesOfData		/(3,537)/(3,a)
 map controlledTerm      	/(3,650)/(3,a)
@@ -72,5 +74,4 @@ map crossReference              /(3,787):new     nodata
 map crossReferenceTitle		/(3,787)/(3,t)
 map crossReferenceLinkage	/(3,787)/(3,w)
 
-map ControlIdentifier		/(3,035)/(3,a)
 map supplementalInformation	/(3,500)/(3,a)
