@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Reverted modifications for ES Update definition for z_IU0Update 
+(OID 1.2.840.10003.9.5.1 and 1.2.840.10003.9.5). The definition
+is back to YAZ 2.0.2.
+
 String value attributes for CCL parser.
 
 --- 2.0.3 2003/06/20
