@@ -12,7 +12,7 @@
 export DH_COMPAT=2
 
 YAZ_WITH_SSL?=1
-CONFIG_FLAGS=--without-gsoap --enable-static --enable-shared --enable-tcpd --prefix=/usr
+CONFIG_FLAGS=--with-xml2=/usr --enable-static --enable-shared --enable-tcpd --prefix=/usr
 
 # Enable parallel builds if CONCURRENCY_LEVEL is set
 ifdef CONCURRENCY_LEVEL

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.26 2003-02-12 15:06:43 adam Exp $
+## $Id: Makefile.am,v 1.27 2003-02-18 10:37:08 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -8,7 +8,7 @@ if ISSSL
 ssllib=libyazssl.la
 endif
 
-LDFLAGS=-version-info 1:0:0
+LDFLAGS=-version-info 2:0:0
 
 bin_SCRIPTS = yaz-config
 

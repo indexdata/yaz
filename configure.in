@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2003
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.106 2003-02-17 22:35:47 adam Exp $
+dnl $Id: configure.in,v 1.107 2003-02-18 10:37:08 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 1.9.3)
 dnl
@@ -370,6 +370,7 @@ if test "$xml2dir" != "no"; then
 	AC_MSG_CHECKING(for libXML2)
 	if test -x $xml2dir/bin/xml2-config; then
 		XML2_LIBS=`$xml2dir/bin/xml2-config --libs`
+		LIBS="$XML2_LIBS $LIBS"
 		XML2_CFLAGS=`$xml2dir/bin/xml2-config --cflags`
 		XML2_VER=`$xml2dir/bin/xml2-config --version`
 		AC_MSG_RESULT($XML2_VER)

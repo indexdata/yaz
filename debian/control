@@ -2,7 +2,7 @@ Source: yaz
 Standards-Version: 3.5.7.0
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex
+Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,libxml2-dev
 
 Package: yaz-runtime
 Section: libs
