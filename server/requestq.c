@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: requestq.c,v $
- * Revision 1.2  1995-11-01 13:54:57  quinn
+ * Revision 1.3  1997-09-01 08:53:00  adam
+ * New windows NT/95 port using MSV5.0. The test server 'ztest' was
+ * moved a separate directory. MSV5.0 project server.dsp created.
+ * As an option, the server can now operate as an NT service.
+ *
+ * Revision 1.2  1995/11/01 13:54:57  quinn
  * Minor adjustments
  *
  * Revision 1.1  1995/05/15  12:12:22  quinn
@@ -23,9 +28,7 @@
 #include <stdlib.h>
 
 #include <xmalloc.h>
-#include <session.h>
-
-static request *request_list = 0;  /* global freelist for requests */
+#include "session.h"
 
 void request_enq(request_q *q, request *r)
 {
@@ -57,16 +60,27 @@ request *request_deq(request_q *q)
 
 void request_initq(request_q *q)
 {
-    q->head = q->tail = 0;
+    q->head = q->tail = q->list = 0;
     q->num = 0;
 }
 
-request *request_get(void)
+void request_delq(request_q *q)
 {
-    request *r = request_list;
+    request *r1, *r = q->list;
+    while (r)
+    {
+        r1 = r;
+        r = r->next;
+        xfree (r1);
+    }
+}
+
+request *request_get(request_q *q)
+{
+    request *r = q->list;
 
     if (r)
-    	request_list = r->next;
+    	q->list = r->next;
     else
     {
     	if (!(r = xmalloc(sizeof(*r))))
@@ -74,6 +88,7 @@ request *request_get(void)
 	r->response = 0;
 	r->size_response = 0;
     }
+    r->q = q;
     r->len_refid = 0;
     r->request = 0;
     r->request_mem = 0;
@@ -85,6 +100,7 @@ request *request_get(void)
 
 void request_release(request *r)
 {
-    r->next = request_list;
-    request_list = r;
+    request_q *q = r->q;
+    r->next = q->list;
+    q->list = r;
 }

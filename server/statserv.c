@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: statserv.c,v $
- * Revision 1.36  1996-07-06 19:58:36  quinn
+ * Revision 1.37  1997-09-01 08:53:01  adam
+ * New windows NT/95 port using MSV5.0. The test server 'ztest' was
+ * moved a separate directory. MSV5.0 project server.dsp created.
+ * As an option, the server can now operate as an NT service.
+ *
+ * Revision 1.36  1996/07/06 19:58:36  quinn
  * System headerfiles gathered in yconfig
  *
  * Revision 1.35  1996/05/29  10:03:28  quinn
@@ -123,16 +128,21 @@
 
 #include <yconfig.h>
 #include <stdio.h>
+#ifdef WINDOWS
+#include <process.h>
+#include <winsock.h>
+#include <direct.h>
+#else
 #include <unistd.h>
+#include <pwd.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
-#include <pwd.h>
 
 #include <options.h>
-#include <eventl.h>
-#include <session.h>
-#include <eventl.h>
+#include "eventl.h"
+#include "session.h"
 #include <comstack.h>
 #include <tcpip.h>
 #ifdef USE_XTIMOSI
@@ -140,6 +150,8 @@
 #endif
 #include <log.h>
 #include <statserv.h>
+
+static IOCHAN pListener;
 
 static char *me = "statserver";
 /*
@@ -164,6 +176,249 @@ static statserv_options_block control_block = {
  * doing all of the listening and accepting in the parent - it's
  * safer that way.
  */
+#ifdef WINDOWS
+
+typedef struct _ThreadList ThreadList;
+
+typedef struct _ThreadList
+{
+    HANDLE hThread;
+    IOCHAN pIOChannel;
+    ThreadList *pNext;
+} ThreadList;
+
+static ThreadList *pFirstThread;
+static CRITICAL_SECTION Thread_CritSect;
+static BOOL bInitialized = FALSE;
+
+static void ThreadList_Initialize()
+{
+    /* Initialize the critical Sections */
+     InitializeCriticalSection(&Thread_CritSect);
+
+     /* Set the first thraed */
+     pFirstThread = NULL;
+
+     /* we have been initialized */
+     bInitialized = TRUE;
+}
+
+static void statserv_add(HANDLE hThread, IOCHAN pIOChannel)
+{
+    /* Only one thread can go through this section at a time */
+    EnterCriticalSection(&Thread_CritSect);
+
+    {
+        /* Lets create our new object */
+        ThreadList *pNewThread = (ThreadList *)malloc(sizeof(ThreadList));
+        pNewThread->hThread = hThread;
+        pNewThread->pIOChannel = pIOChannel;
+        pNewThread->pNext = pFirstThread;
+        pFirstThread = pNewThread;
+
+        /* Lets let somebody else create a new object now */
+        LeaveCriticalSection(&Thread_CritSect);
+    }
+}
+
+void statserv_remove(IOCHAN pIOChannel)
+{
+    /* Only one thread can go through this section at a time */
+    EnterCriticalSection(&Thread_CritSect);
+
+    {
+        ThreadList *pCurrentThread = pFirstThread;
+        ThreadList *pNextThread;
+        ThreadList *pPrevThread =NULL;
+
+        /* Step through alll the threads */
+        for (; pCurrentThread != NULL; pCurrentThread = pNextThread)
+        {
+            /* We only need to compare on the IO Channel */
+            if (pCurrentThread->pIOChannel == pIOChannel)
+            {
+                /* We have found the thread we want to delete */
+                /* First of all reset the next pointers */
+                if (pPrevThread == NULL)
+                    pFirstThread = pCurrentThread->pNext;
+                else
+                    pPrevThread->pNext = pCurrentThread->pNext;
+
+                /* All we need todo now is delete the memory */
+                free(pCurrentThread);
+
+                /* No need to look at any more threads */
+                pNextThread = NULL;
+            }
+            else
+            {
+                /* We need to look at another thread */
+                pNextThread = pCurrentThread->pNext;
+            }
+        }
+
+        /* Lets let somebody else remove an object now */
+        LeaveCriticalSection(&Thread_CritSect);
+    }
+}
+
+void statserv_closedown()
+{
+    /* Shouldn't do anything if we are not initialized */
+    if (bInitialized)
+    {
+        int iHandles = 0;
+        HANDLE *pThreadHandles = NULL;
+
+        /* We need to stop threads adding and removing while we start the closedown process */
+        EnterCriticalSection(&Thread_CritSect);
+
+        {
+            /* We have exclusive access to the thread stuff now */
+            /* Y didn't i use a semaphore - Oh well never mind */
+            ThreadList *pCurrentThread = pFirstThread;
+
+            /* Before we do anything else, we need to shutdown the listener */
+            if (pListener != NULL)
+                iochan_destroy(pListener);
+
+            for (; pCurrentThread != NULL; pCurrentThread = pCurrentThread->pNext)
+            {
+                /* Just destroy the IOCHAN, that should do the trick */
+                iochan_destroy(pCurrentThread->pIOChannel);
+
+                /* Keep a running count of our handles */
+                iHandles++;
+            }
+
+            if (iHandles > 0)
+            {
+                HANDLE *pCurrentHandle ;
+
+                /* Allocate the thread handle array */
+                pThreadHandles = (HANDLE *)malloc(sizeof(HANDLE) * iHandles);
+                pCurrentHandle = pThreadHandles; 
+
+                for (pCurrentThread = pFirstThread;
+                     pCurrentThread != NULL;
+                     pCurrentThread = pCurrentThread->pNext, pCurrentHandle++)
+                {
+                    /* Just the handle */
+                    *pCurrentHandle = pCurrentThread->hThread;
+                }
+            }
+
+            /* We can now leave the critical section */
+            LeaveCriticalSection(&Thread_CritSect);
+        }
+
+        /* Now we can really do something */
+        if (iHandles > 0)
+        {
+            /* This will now wait, until all the threads close */
+            WaitForMultipleObjects(iHandles, pThreadHandles, TRUE, INFINITE);
+
+            /* Free the memory we allocated for the handle array */
+            free(pThreadHandles);
+        }
+
+        /* No longer require the critical section, since all threads are dead */
+        DeleteCriticalSection(&Thread_CritSect);
+    }
+}
+
+static void listener(IOCHAN h, int event)
+{
+    COMSTACK line = (COMSTACK) iochan_getdata(h);
+    association *newas;
+    int res;
+    HANDLE NewHandle;
+
+    if (event == EVENT_INPUT)
+    {
+        if ((res = cs_listen(line, 0, 0)) < 0)
+        {
+	        logf(LOG_FATAL, "cs_listen failed.");
+    	    return;
+        }
+        else if (res == 1)
+	        return;
+        logf(LOG_DEBUG, "listen ok");
+        iochan_setevent(h, EVENT_OUTPUT);
+        iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
+    }
+    else if (event == EVENT_OUTPUT)
+    {
+    	COMSTACK new_line;
+    	IOCHAN new_chan;
+	    char *a;
+        DWORD ThreadId;
+
+	    if (!(new_line = cs_accept(line)))
+	    {
+	        logf(LOG_FATAL, "Accept failed.");
+	        iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+	        return;
+	    }
+	    logf(LOG_DEBUG, "accept ok");
+
+	    if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, EVENT_INPUT)))
+	    {
+	        logf(LOG_FATAL, "Failed to create iochan");
+            iochan_destroy(h);
+            return;
+	    }
+	    if (!(newas = create_association(new_chan, new_line)))
+	    {
+	        logf(LOG_FATAL, "Failed to create new assoc.");
+            iochan_destroy(h);
+            return;
+	    }
+	    iochan_setdata(new_chan, newas);
+	    iochan_settimeout(new_chan, control_block.idle_timeout * 60);
+	    a = cs_addrstr(new_line);
+	    logf(LOG_LOG, "Accepted connection from %s", a ? a : "[Unknown]");
+
+        /* Now what we need todo is create a new thread with this iochan as the parameter */
+/*        if (CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)event_loop, new_chan, 0, &ThreadId) == NULL)
+*/
+        /* Somehow, somewhere we need to store this thread id, otherwise we won't be able to close cleanly */
+        NewHandle = (HANDLE)_beginthreadex(NULL, 0, event_loop, new_chan, 0, &ThreadId);
+        if (NewHandle == (HANDLE)-1)
+	    {
+	        logf(LOG_FATAL, "Failed to create new thread.");
+            iochan_destroy(h);
+            return;
+	    }
+
+        /* We successfully created the thread, so add it to the list */
+        statserv_add(NewHandle, new_chan);
+
+        logf(LOG_DEBUG, "Created new thread, iochan %p", new_chan);
+        iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+    }
+    else
+    {
+    	logf(LOG_FATAL, "Bad event on listener.");
+        iochan_destroy(h);
+        return;
+    }
+}
+
+#else /* WINDOWS */
+
+/* To save having an #ifdef in event_loop we need to define this empty function */
+void statserv_remove(IOCHAN pIOChannel)
+{
+}
+
+void statserv_closedown()
+{
+    /* We don't need todoanything here - or do we */
+    if (pListener != NULL)
+        iochan_destroy(pListener);
+}
+
 static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
@@ -181,12 +436,14 @@ static void listener(IOCHAN h, int event)
 	    if (pipe(hand) < 0)
 	    {
 		logf(LOG_FATAL|LOG_ERRNO, "pipe");
-		exit(1);
+                iochan_destroy(h);
+                return;
 	    }
 	    if ((res = fork()) < 0)
 	    {
 		logf(LOG_FATAL|LOG_ERRNO, "fork");
-		exit(1);
+                iochan_destroy(h);
+                return;
 	    }
 	    else if (res == 0) /* child */
 	    {
@@ -219,7 +476,7 @@ static void listener(IOCHAN h, int event)
 		    if ((res = read(hand[0], dummy, 1)) < 0 && errno != EINTR)
 		    {
 			logf(LOG_FATAL|LOG_ERRNO, "handshake read");
-			exit(1);
+                        return;
 		    }
 		    else if (res >= 0)
 		    	break;
@@ -275,12 +532,14 @@ static void listener(IOCHAN h, int event)
 	    EVENT_INPUT)))
 	{
 	    logf(LOG_FATAL, "Failed to create iochan");
-	    exit(1);
+            iochan_destroy(h);
+            return;
 	}
 	if (!(newas = create_association(new_chan, new_line)))
 	{
 	    logf(LOG_FATAL, "Failed to create new assoc.");
-	    exit(1);
+            iochan_destroy(h);
+            return;
 	}
 	iochan_setdata(new_chan, newas);
 	iochan_settimeout(new_chan, control_block.idle_timeout * 60);
@@ -290,9 +549,12 @@ static void listener(IOCHAN h, int event)
     else
     {
     	logf(LOG_FATAL, "Bad event on listener.");
-    	exit(1);
+        iochan_destroy(h);
+        return;
     }
 }
+
+#endif /* WINDOWS */
 
 static void inetd_connection(int what)
 {
@@ -301,25 +563,31 @@ static void inetd_connection(int what)
     association *assoc;
     char *addr;
 
-    if (!(line = cs_createbysocket(0, tcpip_type, 0, what)))
+    if ((line = cs_createbysocket(0, tcpip_type, 0, what)))
+    {
+        if ((chan = iochan_create(cs_fileno(line), ir_session, EVENT_INPUT)))
+        {
+            if ((assoc = create_association(chan, line)))
+            {
+                iochan_setdata(chan, assoc);
+                iochan_settimeout(chan, control_block.idle_timeout * 60);
+                addr = cs_addrstr(line);
+                logf(LOG_LOG, "Inetd association from %s", addr ? addr : "[UNKNOWN]");
+            }
+            else
+            {
+	        logf(LOG_FATAL, "Failed to create association structure");
+            }
+        }
+        else
+        {
+            logf(LOG_FATAL, "Failed to create iochan");
+        }
+    }
+    else
     {
 	logf(LOG_ERRNO|LOG_FATAL, "Failed to create comstack on socket 0");
-	exit(1);
     }
-    if (!(chan = iochan_create(cs_fileno(line), ir_session, EVENT_INPUT)))
-    {
-	logf(LOG_FATAL, "Failed to create iochan");
-	exit(1);
-    }
-    if (!(assoc = create_association(chan, line)))
-    {
-	logf(LOG_FATAL, "Failed to create association structure");
-	exit(1);
-    }
-    iochan_setdata(chan, assoc);
-    iochan_settimeout(chan, control_block.idle_timeout * 60);
-    addr = cs_addrstr(line);
-    logf(LOG_LOG, "Inetd association from %s", addr ? addr : "[UNKNOWN]");
 }
 
 /*
@@ -331,20 +599,18 @@ static void add_listener(char *where, int what)
     CS_TYPE type;
     char mode[100], addr[100];
     void *ap;
-    IOCHAN lst;
+    IOCHAN lst = NULL;
 
     if (!where || sscanf(where, "%[^:]:%s", mode, addr) != 2)
     {
     	fprintf(stderr, "%s: Address format: ('tcp'|'osi')':'<address>.\n",
 	    me);
-	exit(1);
     }
     if (!strcmp(mode, "tcp"))
     {
     	if (!(ap = tcpip_strtoaddr(addr)))
     	{
 	    fprintf(stderr, "Address resolution failed for TCP.\n");
-	    exit(1);
 	}
 	type = tcpip_type;
     }
@@ -354,18 +620,15 @@ static void add_listener(char *where, int what)
     	if (!(ap = mosi_strtoaddr(addr)))
     	{
 	    fprintf(stderr, "Address resolution failed for TCP.\n");
-	    exit(1);
 	}
 	type = mosi_type;
 #else
 	fprintf(stderr, "OSI Transport not allowed by configuration.\n");
-	exit(1);
 #endif
     }
     else
     {
     	fprintf(stderr, "You must specify either 'osi:' or 'tcp:'.\n");
-    	exit(1);
     }
     logf(LOG_LOG, "Adding %s %s listener on %s",
         control_block.dynamic ? "dynamic" : "static",
@@ -373,28 +636,32 @@ static void add_listener(char *where, int what)
     if (!(l = cs_create(type, 0, what)))
     {
     	logf(LOG_FATAL|LOG_ERRNO, "Failed to create listener");
-    	exit(1);
     }
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
     	logf(LOG_FATAL|LOG_ERRNO, "Failed to bind to %s", where);
-    	exit(1);
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
    	 EVENT_EXCEPT)))
     {
     	logf(LOG_FATAL|LOG_ERRNO, "Failed to create IOCHAN-type");
-    	exit(1);
     }
     iochan_setdata(lst, l);
+
+    /* Ensure our listener chain is setup properly */
+    lst->next = pListener;
+    pListener = lst;
 }
 
+#ifndef WINDOWS
+/* For windows we don't need to catch the signals */
 static void catchchld(int num)
 {
     while (waitpid(-1, 0, WNOHANG) > 0)
 	;
     signal(SIGCHLD, catchchld);
 }
+#endif /* WINDOWS */
 
 statserv_options_block *statserv_getcontrol(void)
 {
@@ -415,14 +682,19 @@ int statserv_main(int argc, char **argv)
     char *arg;
     int protocol = control_block.default_proto;
 
+#ifdef WINDOWS
+    /* We need to initialize the thread list */
+    ThreadList_Initialize();
+#endif /* WINDOWS */
+
     me = argv[0];
     while ((ret = options("a:iszSl:v:u:c:w:t:k:", argv, argc, &arg)) != -2)
     {
     	switch (ret)
     	{
 	    case 0:
-		add_listener(arg, protocol);
-		listeners++;
+		    add_listener(arg, protocol);
+		    listeners++;
 		break;
 	    case 'z': protocol = PROTO_Z3950; break;
 	    case 's': protocol = PROTO_SR; break;
@@ -446,7 +718,7 @@ int statserv_main(int argc, char **argv)
 		{
 		    fprintf(stderr, "%s: Specify positive timeout for -t.\n",
 		        me);
-		    exit(1);
+		    return(1);
 		}
 		control_block.idle_timeout = r;
 		break;
@@ -455,7 +727,7 @@ int statserv_main(int argc, char **argv)
 		{
 		    fprintf(stderr, "%s: Specify positive timeout for -t.\n",
 			me);
-		    exit(1);
+		    return(1);
 		}
 		control_block.maxrecordsize = r * 1024;
 		break;
@@ -465,7 +737,8 @@ int statserv_main(int argc, char **argv)
 	        if (chdir(arg))
 		{
 		    perror(arg);
-		    exit(1);
+
+		    return(1);
 		}
 		break;
 	    default:
@@ -473,17 +746,24 @@ int statserv_main(int argc, char **argv)
                         " -l <logfile> -u <user> -c <config> -t <minutes>"
 			" -k <kilobytes>"
                         " -zsS <listener-addr> -w <directory> ... ]\n", me);
-	    	exit(1);
+	    	return(1);
             }
     }
+
+#ifdef WINDOWS
+    log_init(control_block.loglevel, NULL, control_block.logfile);
+#endif /* WINDOWS */
+
+    if ((pListener == NULL) && *control_block.default_listen)
+	    add_listener(control_block.default_listen, protocol);
+
+#ifndef WINDOWS
     if (inetd)
 	inetd_connection(protocol);
     else
     {
 	if (control_block.dynamic)
 	    signal(SIGCHLD, catchchld);
-	if (!listeners && *control_block.default_listen)
-	    add_listener(control_block.default_listen, protocol);
     }
     if (*control_block.setuid)
     {
@@ -492,7 +772,7 @@ int statserv_main(int argc, char **argv)
 	if (!(pw = getpwnam(control_block.setuid)))
 	{
 	    logf(LOG_FATAL, "%s: Unknown user", control_block.setuid);
-	    exit(1);
+	    return(1);
 	}
 	if (setuid(pw->pw_uid) < 0)
 	{
@@ -500,7 +780,12 @@ int statserv_main(int argc, char **argv)
 	    exit(1);
 	}
     }
+#endif /* WINDOWS */
+
     logf(LOG_LOG, "Entering event loop.");
-	    
-    return event_loop();
+	
+    if (pListener == NULL)
+        return(1);
+    else
+        return event_loop(pListener);
 }

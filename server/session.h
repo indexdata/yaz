@@ -4,7 +4,12 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: session.h,v $
- * Revision 1.11  1995-11-08 17:41:40  quinn
+ * Revision 1.12  1997-09-01 08:53:01  adam
+ * New windows NT/95 port using MSV5.0. The test server 'ztest' was
+ * moved a separate directory. MSV5.0 project server.dsp created.
+ * As an option, the server can now operate as an NT service.
+ *
+ * Revision 1.11  1995/11/08 17:41:40  quinn
  * Smallish.
  *
  * Revision 1.10  1995/08/29  11:18:01  quinn
@@ -49,7 +54,7 @@
 #include <oid.h>
 #include <proto.h>
 #include <sys/types.h>
-#include <eventl.h>
+#include "eventl.h"
 
 typedef struct request
 {
@@ -69,12 +74,14 @@ typedef struct request
     char *response;        /* encoded data waiting for transmission */
 
     struct request *next;
+    struct request_q *q; 
 } request;
 
 typedef struct request_q
 {
     request *head;
     request *tail;
+    request *list;
     int num;
 } request_q;
 
@@ -118,7 +125,8 @@ void request_enq(request_q *q, request *r);
 request *request_head(request_q *q);
 request *request_deq(request_q *q);
 void request_initq(request_q *q);
-request *request_get(void);
+void request_delq(request_q *q);
+request *request_get(request_q *q);
 void request_release(request *r);
 
 #endif
