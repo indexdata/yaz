@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: proto.c,v $
- * Revision 1.4  1995-02-10 15:54:30  quinn
+ * Revision 1.5  1995-02-14 11:54:22  quinn
+ * Fixing include.
+ *
+ * Revision 1.4  1995/02/10  15:54:30  quinn
  * Small adjustments.
  *
  * Revision 1.3  1995/02/09  15:51:39  quinn
@@ -94,8 +97,6 @@ int z_InitResponse(ODR o, Z_InitResponse **p, int opt)
 	odr_implicit(o, odr_integer, &pp->maximumRecordSize, ODR_CONTEXT,
 	    6, 0) &&
 	odr_implicit(o, odr_bool, &pp->result, ODR_CONTEXT, 12, 0) &&
-	odr_implicit(o, odr_visiblestring, &pp->idAuthentication, ODR_CONTEXT,
-	    7, 1) &&
 	odr_implicit(o, odr_visiblestring, &pp->implementationId, ODR_CONTEXT,
 	    110, 1) &&
 	odr_implicit(o, odr_visiblestring, &pp->implementationName, ODR_CONTEXT,
