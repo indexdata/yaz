@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.18 2004-11-04 14:19:58 heikki Exp $
+ * $Id: log.h,v 1.19 2004-11-16 17:08:11 heikki Exp $
  */
 
 /**
@@ -52,12 +52,14 @@ YAZ_BEGIN_CDECL
 #define LOG_APP2   0x00000200 /* Application-level events, such as api calls */
 #define LOG_APP3   0x00000400 /* For more application-level events */
 #define LOG_FLUSH  0x00000800 /* Flush log after every write (DEBUG does too) */
+#define LOG_LOGLVL 0x00001000 /* log when modules query log levels */
+                              /* this has to be a hard-coded bit, not to loop*/
 
 #define LOG_ALL   (0xffff&~LOG_MALLOC&~LOG_NOTIME)
 
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 
-#define LOG_LAST_BIT LOG_FLUSH  /* the last bit used for regular log bits */
+#define LOG_LAST_BIT LOG_LOGLVL /* the last bit used for regular log bits */
                                 /* the rest are for dynamic modules */
 
 #define logf yaz_log

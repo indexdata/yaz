@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.33 2004-10-15 00:19:00 adam Exp $
+ * $Id: seshigh.c,v 1.34 2004-11-16 17:08:11 heikki Exp $
  */
 /**
  * \file seshigh.c
@@ -88,6 +88,24 @@ static statserv_options_block *control_block = 0;
 
 static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd);
 
+/* dynamic logging levels */
+static int logbits_set=0;
+static int log_session=0; 
+static int log_request=0; /* one-line logs for requests */
+static int log_requestdetail=0;  /* more detailed stuff */
+
+/** get_logbits sets global loglevel bits */
+static void get_logbits()
+{ /* needs to be called after parsing cmd-line args that can set loglevels!*/
+    if (!logbits_set)
+    {
+        logbits_set=1;
+        log_session=yaz_log_module_level("session"); 
+        log_request=yaz_log_module_level("request"); 
+        log_requestdetail=yaz_log_module_level("requestdetail"); 
+    }
+}
+
 /*
  * Create and initialize a new association-handle.
  *  channel  : iochannel for the current line.
@@ -98,10 +116,12 @@ association *create_association(IOCHAN channel, COMSTACK link)
 {
     association *anew;
 
+    if (!logbits_set)
+        get_logbits();
     if (!control_block)
-    	control_block = statserv_getcontrol();
+        control_block = statserv_getcontrol();
     if (!(anew = (association *)xmalloc(sizeof(*anew))))
-    	return 0;
+        return 0;
     anew->init = 0;
     anew->version = 0;
     anew->client_chan = channel;
@@ -110,51 +130,51 @@ association *create_association(IOCHAN channel, COMSTACK link)
     anew->cs_put_mask = 0;
     anew->cs_accept_mask = 0;
     if (!(anew->decode = odr_createmem(ODR_DECODE)) ||
-    	!(anew->encode = odr_createmem(ODR_ENCODE)))
-	return 0;
+        !(anew->encode = odr_createmem(ODR_ENCODE)))
+        return 0;
     if (*control_block->apdufile)
     {
-    	char filename[256];
-	FILE *f;
+        char filename[256];
+        FILE *f;
 
-	strcpy(filename, control_block->apdufile);
-	if (!(anew->print = odr_createmem(ODR_PRINT)))
-	    return 0;
-	if (*control_block->apdufile == '@')
+        strcpy(filename, control_block->apdufile);
+        if (!(anew->print = odr_createmem(ODR_PRINT)))
+            return 0;
+        if (*control_block->apdufile == '@')
         {
-	    odr_setprint(anew->print, yaz_log_file());
-	}	
-	else if (*control_block->apdufile != '-')
-	{
-	    strcpy(filename, control_block->apdufile);
-	    if (!control_block->dynamic)
-	    {
-		if (!apduf)
-		{
-		    if (!(apduf = fopen(filename, "w")))
-		    {
-			yaz_log(LOG_WARN|LOG_ERRNO, "%s", filename);
-			return 0;
-		    }
-		    setvbuf(apduf, 0, _IONBF, 0);
-		}
-		f = apduf;
-	    }
-	    else 
-	    {
-		sprintf(filename + strlen(filename), ".%d", getpid());
-		if (!(f = fopen(filename, "w")))
-		{
-		    yaz_log(LOG_WARN|LOG_ERRNO, "%s", filename);
-		    return 0;
-		}
-		setvbuf(f, 0, _IONBF, 0);
-	    }
-	    odr_setprint(anew->print, f);
-    	}
+            odr_setprint(anew->print, yaz_log_file());
+        }       
+        else if (*control_block->apdufile != '-')
+        {
+            strcpy(filename, control_block->apdufile);
+            if (!control_block->dynamic)
+            {
+                if (!apduf)
+                {
+                    if (!(apduf = fopen(filename, "w")))
+                    {
+                        yaz_log(LOG_WARN|LOG_ERRNO, "can't open apdu dump %s", filename);
+                        return 0;
+                    }
+                    setvbuf(apduf, 0, _IONBF, 0);
+                }
+                f = apduf;
+            }
+            else 
+            {
+                sprintf(filename + strlen(filename), ".%d", getpid());
+                if (!(f = fopen(filename, "w")))
+                {
+                    yaz_log(LOG_WARN|LOG_ERRNO, "%s", filename);
+                    return 0;
+                }
+                setvbuf(f, 0, _IONBF, 0);
+            }
+            odr_setprint(anew->print, f);
+        }
     }
     else
-    	anew->print = 0;
+        anew->print = 0;
     anew->input_buffer = 0;
     anew->input_buffer_len = 0;
     anew->backend = 0;
@@ -177,27 +197,27 @@ void destroy_association(association *h)
     odr_destroy(h->decode);
     odr_destroy(h->encode);
     if (h->print)
-	odr_destroy(h->print);
+        odr_destroy(h->print);
     if (h->input_buffer)
     xfree(h->input_buffer);
     if (h->backend)
-    	(*cb->bend_close)(h->backend);
+        (*cb->bend_close)(h->backend);
     while ((req = request_deq(&h->incoming)))
-	request_release(req);
+        request_release(req);
     while ((req = request_deq(&h->outgoing)))
-	request_release(req);
+        request_release(req);
     request_delq(&h->incoming);
     request_delq(&h->outgoing);
     xfree(h);
     xmalloc_trav("session closed");
     if (control_block && control_block->one_shot)
     {
-	exit (0);
+        exit (0);
     }
 }
 
 static void do_close_req(association *a, int reason, char *message,
-			 request *req)
+                         request *req)
 {
     Z_APDU apdu;
     Z_Close *cls = zget_Close(a->encode);
@@ -207,20 +227,20 @@ static void do_close_req(association *a, int reason, char *message,
     while (request_deq(&a->outgoing));
     if (a->version >= 3)
     {
-	yaz_log(LOG_LOG, "Sending Close PDU, reason=%d, message=%s",
-	    reason, message ? message : "none");
-	apdu.which = Z_APDU_close;
-	apdu.u.close = cls;
-	*cls->closeReason = reason;
-	cls->diagnosticInformation = message;
-	process_z_response(a, req, &apdu);
-	iochan_settimeout(a->client_chan, 20);
+        yaz_log(log_requestdetail, "Sending Close PDU, reason=%d, message=%s",
+            reason, message ? message : "none");
+        apdu.which = Z_APDU_close;
+        apdu.u.close = cls;
+        *cls->closeReason = reason;
+        cls->diagnosticInformation = message;
+        process_z_response(a, req, &apdu);
+        iochan_settimeout(a->client_chan, 20);
     }
     else
     {
-	request_release(req);
-	yaz_log(LOG_DEBUG, "v2 client. No Close PDU");
-	iochan_setevent(a->client_chan, EVENT_TIMEOUT); /* force imm close */
+        request_release(req);
+        yaz_log(log_requestdetail, "v2 client. No Close PDU");
+        iochan_setevent(a->client_chan, EVENT_TIMEOUT); /* force imm close */
     }
     a->state = ASSOC_DEAD;
 }
@@ -250,100 +270,101 @@ void ir_session(IOCHAN h, int event)
     assert(h && conn && assoc);
     if (event == EVENT_TIMEOUT)
     {
-	if (assoc->state != ASSOC_UP)
-	{
-	    yaz_log(LOG_LOG, "Final timeout - closing connection.");
-	    cs_close(conn);
-	    destroy_association(assoc);
-	    iochan_destroy(h);
-	}
-	else
-	{
-	    yaz_log(LOG_LOG, "Session idle too long. Sending close.");
-	    do_close(assoc, Z_Close_lackOfActivity, 0);
-	}
-	return;
+        if (assoc->state != ASSOC_UP)
+        {
+            yaz_log(LOG_DEBUG, "Final timeout - closing connection.");
+            /* do we need to lod this at all */
+            cs_close(conn);
+            destroy_association(assoc);
+            iochan_destroy(h);
+        }
+        else
+        {
+            yaz_log(log_session, "Session idle too long. Sending close.");
+            do_close(assoc, Z_Close_lackOfActivity, 0);
+        }
+        return;
     }
     if (event & assoc->cs_accept_mask)
     {
-	yaz_log (LOG_DEBUG, "ir_session (accept)");
-	if (!cs_accept (conn))
-	{
-	    yaz_log (LOG_LOG, "accept failed");
-	    destroy_association(assoc);
-	    iochan_destroy(h);
-	}
-	iochan_clearflag (h, EVENT_OUTPUT);
-	if (conn->io_pending) 
-	{   /* cs_accept didn't complete */
-	    assoc->cs_accept_mask = 
-		((conn->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
-		((conn->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
+        yaz_log (log_session, "ir_session (accept)");
+        if (!cs_accept (conn))
+        {
+            yaz_log (LOG_WARN, "accept failed");
+            destroy_association(assoc);
+            iochan_destroy(h);
+        }
+        iochan_clearflag (h, EVENT_OUTPUT);
+        if (conn->io_pending) 
+        {   /* cs_accept didn't complete */
+            assoc->cs_accept_mask = 
+                ((conn->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
+                ((conn->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
 
-	    iochan_setflag (h, assoc->cs_accept_mask);
-	}
-	else
-	{   /* cs_accept completed. Prepare for reading (cs_get) */
-	    assoc->cs_accept_mask = 0;
-	    assoc->cs_get_mask = EVENT_INPUT;
-	    iochan_setflag (h, assoc->cs_get_mask);
-	}
-	return;
+            iochan_setflag (h, assoc->cs_accept_mask);
+        }
+        else
+        {   /* cs_accept completed. Prepare for reading (cs_get) */
+            assoc->cs_accept_mask = 0;
+            assoc->cs_get_mask = EVENT_INPUT;
+            iochan_setflag (h, assoc->cs_get_mask);
+        }
+        return;
     }
     if ((event & assoc->cs_get_mask) || (event & EVENT_WORK)) /* input */
     {
-    	if ((assoc->cs_put_mask & EVENT_INPUT) == 0 && (event & assoc->cs_get_mask))
-	{
-	    yaz_log(LOG_DEBUG, "ir_session (input)");
-	    /* We aren't speaking to this fellow */
-	    if (assoc->state == ASSOC_DEAD)
-	    {
-		yaz_log(LOG_LOG, "Connection closed - end of session");
-		cs_close(conn);
-		destroy_association(assoc);
-		iochan_destroy(h);
-		return;
-	    }
-	    assoc->cs_get_mask = EVENT_INPUT;
-	    if ((res = cs_get(conn, &assoc->input_buffer,
-		&assoc->input_buffer_len)) <= 0)
-	    {
-		yaz_log(LOG_LOG, "Connection closed by client");
-		cs_close(conn);
-		destroy_association(assoc);
-		iochan_destroy(h);
-		return;
-	    }
-	    else if (res == 1) /* incomplete read - wait for more  */
-	    {
-		if (conn->io_pending & CS_WANT_WRITE)
-		    assoc->cs_get_mask |= EVENT_OUTPUT;
-		iochan_setflag(h, assoc->cs_get_mask);
-		return;
-	    }
-	    if (cs_more(conn)) /* more stuff - call us again later, please */
-		iochan_setevent(h, EVENT_INPUT);
-	    	
-	    /* we got a complete PDU. Let's decode it */
-	    yaz_log(LOG_DEBUG, "Got PDU, %d bytes: lead=%02X %02X %02X", res,
-			    assoc->input_buffer[0] & 0xff,
-			    assoc->input_buffer[1] & 0xff,
-			    assoc->input_buffer[2] & 0xff);
-	    req = request_get(&assoc->incoming); /* get a new request */
-	    odr_reset(assoc->decode);
-	    odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
-	    if (!z_GDU(assoc->decode, &req->gdu_request, 0, 0))
-	    {
-		yaz_log(LOG_LOG, "ODR error on incoming PDU: %s [element %s] "
+        if ((assoc->cs_put_mask & EVENT_INPUT) == 0 && (event & assoc->cs_get_mask))
+        {
+            yaz_log(LOG_DEBUG, "ir_session (input)");
+            /* We aren't speaking to this fellow */
+            if (assoc->state == ASSOC_DEAD)
+            {
+                yaz_log(log_session, "Connection closed - end of session");
+                cs_close(conn);
+                destroy_association(assoc);
+                iochan_destroy(h);
+                return;
+            }
+            assoc->cs_get_mask = EVENT_INPUT;
+            if ((res = cs_get(conn, &assoc->input_buffer,
+                &assoc->input_buffer_len)) <= 0)
+            {
+                yaz_log(log_session, "Connection closed by client");
+                cs_close(conn);
+                destroy_association(assoc);
+                iochan_destroy(h);
+                return;
+            }
+            else if (res == 1) /* incomplete read - wait for more  */
+            {
+                if (conn->io_pending & CS_WANT_WRITE)
+                    assoc->cs_get_mask |= EVENT_OUTPUT;
+                iochan_setflag(h, assoc->cs_get_mask);
+                return;
+            }
+            if (cs_more(conn)) /* more stuff - call us again later, please */
+                iochan_setevent(h, EVENT_INPUT);
+                
+            /* we got a complete PDU. Let's decode it */
+            yaz_log(LOG_DEBUG, "Got PDU, %d bytes: lead=%02X %02X %02X", res,
+                            assoc->input_buffer[0] & 0xff,
+                            assoc->input_buffer[1] & 0xff,
+                            assoc->input_buffer[2] & 0xff);
+            req = request_get(&assoc->incoming); /* get a new request */
+            odr_reset(assoc->decode);
+            odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
+            if (!z_GDU(assoc->decode, &req->gdu_request, 0, 0))
+            {
+                yaz_log(LOG_WARN, "ODR error on incoming PDU: %s [element %s] "
                         "[near byte %d] ",
-			odr_errmsg(odr_geterror(assoc->decode)),
+                        odr_errmsg(odr_geterror(assoc->decode)),
                         odr_getelement(assoc->decode),
-			odr_offset(assoc->decode));
+                        odr_offset(assoc->decode));
                 if (assoc->decode->error != OHTTP)
                 {
-                    yaz_log(LOG_LOG, "PDU dump:");
+                    yaz_log(LOG_WARN, "PDU dump:");
                     odr_dumpBER(yaz_log_file(), assoc->input_buffer, res);
-		    request_release(req);
+                    request_release(req);
                     do_close(assoc, Z_Close_protocolError,"Malformed package");
                 }
                 else
@@ -352,77 +373,77 @@ void ir_session(IOCHAN h, int event)
                     assoc->state = ASSOC_DEAD;
                     process_gdu_response(assoc, req, p);
                 }
-		return;
-	    }
-	    req->request_mem = odr_extract_mem(assoc->decode);
-	    if (assoc->print) 
+                return;
+            }
+            req->request_mem = odr_extract_mem(assoc->decode);
+            if (assoc->print) 
             {
-		if (!z_GDU(assoc->print, &req->gdu_request, 0, 0))
-		    yaz_log(LOG_WARN, "ODR print error: %s", 
-		       odr_errmsg(odr_geterror(assoc->print)));
-		odr_reset(assoc->print);
-	    }
-	    request_enq(&assoc->incoming, req);
-	}
+                if (!z_GDU(assoc->print, &req->gdu_request, 0, 0))
+                    yaz_log(LOG_WARN, "ODR print error: %s", 
+                       odr_errmsg(odr_geterror(assoc->print)));
+                odr_reset(assoc->print);
+            }
+            request_enq(&assoc->incoming, req);
+        }
 
-	/* can we do something yet? */
-	req = request_head(&assoc->incoming);
-	if (req->state == REQUEST_IDLE)
-	{
-	    request_deq(&assoc->incoming);
-	    process_gdu_request(assoc, req);
-	}
+        /* can we do something yet? */
+        req = request_head(&assoc->incoming);
+        if (req->state == REQUEST_IDLE)
+        {
+            request_deq(&assoc->incoming);
+            process_gdu_request(assoc, req);
+        }
     }
     if (event & assoc->cs_put_mask)
     {
-    	request *req = request_head(&assoc->outgoing);
+        request *req = request_head(&assoc->outgoing);
 
-	assoc->cs_put_mask = 0;
-	yaz_log(LOG_DEBUG, "ir_session (output)");
+        assoc->cs_put_mask = 0;
+        yaz_log(LOG_DEBUG, "ir_session (output)");
         req->state = REQUEST_PENDING;
-    	switch (res = cs_put(conn, req->response, req->len_response))
-	{
-	case -1:
-	    yaz_log(LOG_LOG, "Connection closed by client");
-	    cs_close(conn);
-	    destroy_association(assoc);
-	    iochan_destroy(h);
-	    break;
-	case 0: /* all sent - release the request structure */
-	    yaz_log(LOG_DEBUG, "Wrote PDU, %d bytes", req->len_response);
+        switch (res = cs_put(conn, req->response, req->len_response))
+        {
+        case -1:
+            yaz_log(log_session, "Connection closed by client");
+            cs_close(conn);
+            destroy_association(assoc);
+            iochan_destroy(h);
+            break;
+        case 0: /* all sent - release the request structure */
+            yaz_log(LOG_DEBUG, "Wrote PDU, %d bytes", req->len_response);
 #if 0
-	    yaz_log(LOG_DEBUG, "HTTP out:\n%.*s", req->len_response,
+            yaz_log(LOG_DEBUG, "HTTP out:\n%.*s", req->len_response,
                     req->response);
 #endif
-	    nmem_destroy(req->request_mem);
-	    request_deq(&assoc->outgoing);
-	    request_release(req);
-	    if (!request_head(&assoc->outgoing))
-	    {   /* restore mask for cs_get operation ... */
-		iochan_clearflag(h, EVENT_OUTPUT|EVENT_INPUT);
-		iochan_setflag(h, assoc->cs_get_mask);
+            nmem_destroy(req->request_mem);
+            request_deq(&assoc->outgoing);
+            request_release(req);
+            if (!request_head(&assoc->outgoing))
+            {   /* restore mask for cs_get operation ... */
+                iochan_clearflag(h, EVENT_OUTPUT|EVENT_INPUT);
+                iochan_setflag(h, assoc->cs_get_mask);
                 if (assoc->state == ASSOC_DEAD)
                     iochan_setevent(assoc->client_chan, EVENT_TIMEOUT);
-	    }
+            }
             else
             {
                 assoc->cs_put_mask = EVENT_OUTPUT;
             }
-	    break;
-	default:
-	    if (conn->io_pending & CS_WANT_WRITE)
-		assoc->cs_put_mask |= EVENT_OUTPUT;
-	    if (conn->io_pending & CS_WANT_READ)
-		assoc->cs_put_mask |= EVENT_INPUT;
-	    iochan_setflag(h, assoc->cs_put_mask);
-	}
+            break;
+        default:
+            if (conn->io_pending & CS_WANT_WRITE)
+                assoc->cs_put_mask |= EVENT_OUTPUT;
+            if (conn->io_pending & CS_WANT_READ)
+                assoc->cs_put_mask |= EVENT_INPUT;
+            iochan_setflag(h, assoc->cs_put_mask);
+        }
     }
     if (event & EVENT_EXCEPT)
     {
-	yaz_log(LOG_LOG, "ir_session (exception)");
-	cs_close(conn);
-	destroy_association(assoc);
-	iochan_destroy(h);
+        yaz_log(LOG_WARN, "ir_session (exception)");
+        cs_close(conn);
+        destroy_association(assoc);
+        iochan_destroy(h);
     }
 }
 
@@ -476,8 +497,8 @@ static int srw_bend_init(association *assoc)
     assoc->backend = 0;
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
-    	yaz_log(LOG_WARN, "Bad response from backend.");
-    	return 0;
+        yaz_log(LOG_WARN, "Bad response from backend.");
+        return 0;
     }
     assoc->backend = binitres->handle;
     return 1;
@@ -498,10 +519,10 @@ static int srw_bend_fetch(association *assoc, int pos,
                                                    CLASS_TRANSYN,
                                                    VAL_TEXT_XML);
     rr.comp = (Z_RecordComposition *)
-	    odr_malloc(assoc->decode, sizeof(*rr.comp));
+            odr_malloc(assoc->decode, sizeof(*rr.comp));
     rr.comp->which = Z_RecordComp_complex;
     rr.comp->u.complex = (Z_CompSpec *)
-	    odr_malloc(assoc->decode, sizeof(Z_CompSpec));
+            odr_malloc(assoc->decode, sizeof(Z_CompSpec));
     rr.comp->u.complex->selectAlternativeSyntax = (bool_t *)
         odr_malloc(assoc->encode, sizeof(bool_t));
     *rr.comp->u.complex->selectAlternativeSyntax = 0;    
@@ -511,7 +532,7 @@ static int srw_bend_fetch(association *assoc, int pos,
     rr.comp->u.complex->recordSyntax = 0;
 
     rr.comp->u.complex->generic = (Z_Specification *) 
-	    odr_malloc(assoc->decode, sizeof(Z_Specification));
+            odr_malloc(assoc->decode, sizeof(Z_Specification));
 
     /* schema uri = recordSchema (or NULL if recordSchema is not given) */
     rr.comp->u.complex->generic->which = Z_Schema_uri;
@@ -521,12 +542,12 @@ static int srw_bend_fetch(association *assoc, int pos,
     rr.comp->u.complex->generic->elementSpec = 0;
     if (srw_req->recordSchema)
     {
-	rr.comp->u.complex->generic->elementSpec = 
-	    (Z_ElementSpec *) odr_malloc(assoc->encode, sizeof(Z_ElementSpec));
-	rr.comp->u.complex->generic->elementSpec->which = 
-	    Z_ElementSpec_elementSetName;
-	rr.comp->u.complex->generic->elementSpec->u.elementSetName =
-	    srw_req->recordSchema;
+        rr.comp->u.complex->generic->elementSpec = 
+            (Z_ElementSpec *) odr_malloc(assoc->encode, sizeof(Z_ElementSpec));
+        rr.comp->u.complex->generic->elementSpec->which = 
+            Z_ElementSpec_elementSetName;
+        rr.comp->u.complex->generic->elementSpec->u.elementSetName =
+            srw_req->recordSchema;
     }
     
     rr.stream = assoc->encode;
@@ -550,31 +571,31 @@ static int srw_bend_fetch(association *assoc, int pos,
 
     if (rr.errcode && rr.surrogate_flag)
     {
-	int code = yaz_diag_bib1_to_srw(rr.errcode);
-	const char *message = yaz_diag_srw_str(code);
-	int len = 200;
-	if (message)
-	    len += strlen(message);
-	if (rr.errstring)
-	    len += strlen(rr.errstring);
+        int code = yaz_diag_bib1_to_srw(rr.errcode);
+        const char *message = yaz_diag_srw_str(code);
+        int len = 200;
+        if (message)
+            len += strlen(message);
+        if (rr.errstring)
+            len += strlen(rr.errstring);
 
         record->recordData_buf = odr_malloc(o, len);
-	
-	sprintf(record->recordData_buf, "<diagnostic "
-		"xmlns=\"http://www.loc.gov/zing/srw/diagnostic/\">\n"
-		" <uri>info:srw/diagnostic/1/%d</uri>\n", code);
-	if (rr.errstring)
-	    sprintf(record->recordData_buf + strlen(record->recordData_buf),
-		    " <details>%s</details>\n", rr.errstring);
-	if (message)
-	    sprintf(record->recordData_buf + strlen(record->recordData_buf),
-		    " <message>%s</message>\n", message);
-	sprintf(record->recordData_buf + strlen(record->recordData_buf),
-		"</diagnostic>\n");
-	record->recordData_len = strlen(record->recordData_buf);
+        
+        sprintf(record->recordData_buf, "<diagnostic "
+                "xmlns=\"http://www.loc.gov/zing/srw/diagnostic/\">\n"
+                " <uri>info:srw/diagnostic/1/%d</uri>\n", code);
+        if (rr.errstring)
+            sprintf(record->recordData_buf + strlen(record->recordData_buf),
+                    " <details>%s</details>\n", rr.errstring);
+        if (message)
+            sprintf(record->recordData_buf + strlen(record->recordData_buf),
+                    " <message>%s</message>\n", message);
+        sprintf(record->recordData_buf + strlen(record->recordData_buf),
+                "</diagnostic>\n");
+        record->recordData_len = strlen(record->recordData_buf);
         record->recordPosition = odr_intdup(o, pos);
-	record->recordSchema = "info:srw/schema/1/diagnostics-v1.1";
-	return 0;
+        record->recordSchema = "info:srw/schema/1/diagnostics-v1.1";
+        return 0;
     }
     else if (rr.len >= 0)
     {
@@ -592,14 +613,15 @@ static int srw_bend_fetch(association *assoc, int pos,
 static void srw_bend_search(association *assoc, request *req,
                             Z_SRW_searchRetrieveRequest *srw_req,
                             Z_SRW_searchRetrieveResponse *srw_res,
-			    int *http_code)
+                            int *http_code)
 {
     int srw_error = 0;
     bend_search_rr rr;
     Z_External *ext;
+    char *querystr="";
     
     *http_code = 200;
-    yaz_log(LOG_LOG, "Got SRW SearchRetrieveRequest");
+    yaz_log(log_requestdetail, "Got SRW SearchRetrieveRequest");
     yaz_log(LOG_DEBUG, "srw_bend_search");
     if (!assoc->init)
     {
@@ -608,8 +630,9 @@ static void srw_bend_search(association *assoc, request *req,
         {
             srw_error = 3;  /* assume Authentication error */
 
-	    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-				   &srw_res->num_diagnostics, 1, 0);
+            yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                   &srw_res->num_diagnostics, 1, 0);
+            yaz_log(log_request,"Search SRW: backend init failed");
             return;
         }
     }
@@ -631,6 +654,7 @@ static void srw_bend_search(association *assoc, request *req,
         ext->descriptor = 0;
         ext->which = Z_External_CQL;
         ext->u.cql = srw_req->query.cql;
+        querystr=srw_req->query.cql;
 
         rr.query->which = Z_Query_type_104;
         rr.query->u.type_104 =  ext;
@@ -642,6 +666,7 @@ static void srw_bend_search(association *assoc, request *req,
 
         pqf_parser = yaz_pqf_create ();
 
+        querystr=srw_req->query.pqf;
         RPNquery = yaz_pqf_parse (pqf_parser, assoc->decode,
                                   srw_req->query.pqf);
         if (!RPNquery)
@@ -649,10 +674,8 @@ static void srw_bend_search(association *assoc, request *req,
             const char *pqf_msg;
             size_t off;
             int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
-	    if (off < 200)
-		yaz_log(LOG_LOG, "%*s^\n", (int)off+4, "");
-            yaz_log(LOG_LOG, "Bad PQF: %s (code %d)\n", pqf_msg, code);
-            
+            yaz_log(log_requestdetail, "Parse error %d %s near offset %d",
+                    code, pqf_msg, off);
             srw_error = 10;
         }
 
@@ -672,12 +695,19 @@ static void srw_bend_search(association *assoc, request *req,
 
     if (srw_error)
     {
-        yaz_log(LOG_DEBUG, "srw_bend_search returned SRW error %d", srw_error);
+        if (log_request)
+        {
+            WRBUF wr=wrbuf_alloc();
+            wrbuf_printf(wr, "Search: SRW: %s ",querystr);
+            wrbuf_printf(wr," ERROR %d ", srw_error);
+            yaz_log(log_request, "Search %s", wrbuf_buf(wr) );
+            wrbuf_free(wr,1);
+        }
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
-	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
-	yaz_mk_std_diagnostic(assoc->encode,
-			      srw_res->diagnostics, srw_error, 0);
+            odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
+        yaz_mk_std_diagnostic(assoc->encode,
+                              srw_res->diagnostics, srw_error, 0);
         return;
     }
     
@@ -691,23 +721,24 @@ static void srw_bend_search(association *assoc, request *req,
     rr.errcode = 0;
     rr.errstring = 0;
     rr.search_info = 0;
-    yaz_log_zquery(rr.query);
+    yaz_log_zquery_level(log_requestdetail,rr.query);
+
     (assoc->init->bend_search)(assoc->backend, &rr);
     if (rr.errcode)
     {
-        yaz_log(LOG_DEBUG, "bend_search returned Bib-1 code %d", rr.errcode);
-	if (rr.errcode == 109) /* database unavailable */
-	{
-	    *http_code = 404;
-	    return;
-	}
+        yaz_log(log_request, "bend_search returned Bib-1 code %d", rr.errcode);
+        if (rr.errcode == 109) /* database unavailable */
+        {
+            *http_code = 404;
+            return;
+        }
         srw_res->num_diagnostics = 1;
         srw_res->diagnostics = (Z_SRW_diagnostic *)
-	    odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
-	yaz_mk_std_diagnostic(assoc->encode, srw_res->diagnostics,
-			      yaz_diag_bib1_to_srw (rr.errcode),
-			      rr.errstring);
-        yaz_log(LOG_DEBUG, "srw_bend_search returned SRW error %s",
+            odr_malloc(assoc->encode, sizeof(*srw_res->diagnostics));
+        yaz_mk_std_diagnostic(assoc->encode, srw_res->diagnostics,
+                              yaz_diag_bib1_to_srw (rr.errcode),
+                              rr.errstring);
+        yaz_log(log_request, "srw_bend_search returned SRW error %s",
                 srw_res->diagnostics[0].uri);
     }
     else
@@ -715,7 +746,7 @@ static void srw_bend_search(association *assoc, request *req,
         int number = srw_req->maximumRecords ? *srw_req->maximumRecords : 0;
         int start = srw_req->startRecord ? *srw_req->startRecord : 1;
 
-        yaz_log(LOG_LOG, "Request to pack %d+%d out of %d",
+        yaz_log(log_requestdetail, "Request to pack %d+%d out of %d",
                 start, number, rr.hits);
 
         srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
@@ -725,12 +756,12 @@ static void srw_bend_search(association *assoc, request *req,
 
             if (start > rr.hits)
             {
-		srw_res->num_diagnostics = 1;
-		srw_res->diagnostics = (Z_SRW_diagnostic *)
-		    odr_malloc(assoc->encode, 
-			       sizeof(*srw_res->diagnostics));
-		yaz_mk_std_diagnostic(assoc->encode,  srw_res->diagnostics,
-				      61, 0);
+                srw_res->num_diagnostics = 1;
+                srw_res->diagnostics = (Z_SRW_diagnostic *)
+                    odr_malloc(assoc->encode, 
+                               sizeof(*srw_res->diagnostics));
+                yaz_mk_std_diagnostic(assoc->encode,  srw_res->diagnostics,
+                                      61, 0);
             }
             else
             {
@@ -760,10 +791,10 @@ static void srw_bend_search(association *assoc, request *req,
                             odr_malloc(assoc->encode, 
                                        sizeof(*srw_res->diagnostics));
 
-			yaz_mk_std_diagnostic(assoc->encode, 
-					      srw_res->diagnostics,
-					      yaz_diag_bib1_to_srw (errcode),
-					      rr.errstring);
+                        yaz_mk_std_diagnostic(assoc->encode, 
+                                              srw_res->diagnostics,
+                                              yaz_diag_bib1_to_srw (errcode),
+                                              rr.errstring);
                         break;
                     }
                     if (srw_res->records[j].recordData_buf)
@@ -775,22 +806,37 @@ static void srw_bend_search(association *assoc, request *req,
             }
         }
     }
+    if (log_request)
+    {
+        WRBUF wr=wrbuf_alloc();
+        wrbuf_printf(wr,"SRW: %s",querystr );
+        if (srw_error)
+            wrbuf_printf(wr," ERROR %d ", srw_error);
+        else
+        {
+            wrbuf_printf(wr," OK:%d hits ",rr.hits);
+            if (srw_res->num_records)
+                wrbuf_printf(wr," Returned %d records", srw_res->num_records);
+        }
+        yaz_log(log_request, "Search %s", wrbuf_buf(wr) );
+        wrbuf_free(wr,1);
+    }
 }
 
 static void srw_bend_explain(association *assoc, request *req,
                              Z_SRW_explainRequest *srw_req,
                              Z_SRW_explainResponse *srw_res,
-			     int *http_code)
+                             int *http_code)
 {
-    yaz_log(LOG_LOG, "Got SRW ExplainRequest");
+    yaz_log(log_requestdetail, "Got SRW ExplainRequest");
     *http_code = 404;
     if (!assoc->init)
     {
         yaz_log(LOG_DEBUG, "srw_bend_init");
         if (!srw_bend_init(assoc))
-	{
+        {
             return;
-	}
+        }
     }
     if (assoc->init && assoc->init->bend_explain)
     {
@@ -800,21 +846,21 @@ static void srw_bend_explain(association *assoc, request *req,
         rr.decode = assoc->decode;
         rr.print = assoc->print;
         rr.explain_buf = 0;
-	rr.database = srw_req->database;
-	rr.schema = "http://explain.z3950.org/dtd/2.0/";
+        rr.database = srw_req->database;
+        rr.schema = "http://explain.z3950.org/dtd/2.0/";
         (*assoc->init->bend_explain)(assoc->backend, &rr);
         if (rr.explain_buf)
         {
-	    int packing = Z_SRW_recordPacking_string;
-	    if (srw_req->recordPacking && 
-		!strcmp(srw_req->recordPacking, "xml"))
-		packing = Z_SRW_recordPacking_XML;
-	    srw_res->record.recordSchema = rr.schema;
-	    srw_res->record.recordPacking = packing;
+            int packing = Z_SRW_recordPacking_string;
+            if (srw_req->recordPacking && 
+                !strcmp(srw_req->recordPacking, "xml"))
+                packing = Z_SRW_recordPacking_XML;
+            srw_res->record.recordSchema = rr.schema;
+            srw_res->record.recordPacking = packing;
             srw_res->record.recordData_buf = rr.explain_buf;
             srw_res->record.recordData_len = strlen(rr.explain_buf);
-	    srw_res->record.recordPosition = 0;
-	    *http_code = 200;
+            srw_res->record.recordPosition = 0;
+            *http_code = 200;
         }
     }
 }
@@ -835,117 +881,118 @@ static void process_http_request(association *assoc, request *req)
     int num_diagnostic = 0;
 
     if (!strcmp(hreq->path, "/test")) 
-    {	
-	p = z_get_HTTP_Response(o, 200);
-	hres = p->u.HTTP_Response;
-	hres->content_buf = "1234567890\n";
-	hres->content_len = strlen(hres->content_buf);
-	r = 1;
+    {   
+        p = z_get_HTTP_Response(o, 200);
+        hres = p->u.HTTP_Response;
+        hres->content_buf = "1234567890\n";
+        hres->content_len = strlen(hres->content_buf);
+        r = 1;
     }
     if (r == 2)
     {
-	r = yaz_srw_decode(hreq, &sr, &soap_package, assoc->decode, &charset);
-	yaz_log(LOG_DEBUG, "yaz_srw_decode returned %d", r);
+        r = yaz_srw_decode(hreq, &sr, &soap_package, assoc->decode, &charset);
+        yaz_log(LOG_DEBUG, "yaz_srw_decode returned %d", r);
     }
     if (r == 2)  /* not taken */
     {
-	r = yaz_sru_decode(hreq, &sr, &soap_package, assoc->decode, &charset,
-			   &diagnostic, &num_diagnostic);
-	yaz_log(LOG_DEBUG, "yaz_sru_decode returned %d", r);
+        r = yaz_sru_decode(hreq, &sr, &soap_package, assoc->decode, &charset,
+                           &diagnostic, &num_diagnostic);
+        yaz_log(LOG_DEBUG, "yaz_sru_decode returned %d", r);
     }
     if (r == 0)  /* decode SRW/SRU OK .. */
     {
-	int http_code = 200;
-	if (sr->which == Z_SRW_searchRetrieve_request)
-	{
-	    Z_SRW_PDU *res =
-		yaz_srw_get(assoc->encode, Z_SRW_searchRetrieve_response);
+        int http_code = 200;
+        if (sr->which == Z_SRW_searchRetrieve_request)
+        {
+            Z_SRW_PDU *res =
+                yaz_srw_get(assoc->encode, Z_SRW_searchRetrieve_response);
 
-	    stylesheet = sr->u.request->stylesheet;
-	    if (num_diagnostic)
-	    {
-		res->u.response->diagnostics = diagnostic;
-		res->u.response->num_diagnostics = num_diagnostic;
-	    }
-	    else
-	    {
-		srw_bend_search(assoc, req, sr->u.request, res->u.response, 
-				&http_code);
-	    }
-	    if (http_code == 200)
-		soap_package->u.generic->p = res;
-	}
-	else if (sr->which == Z_SRW_explain_request)
-	{
+            stylesheet = sr->u.request->stylesheet;
+            if (num_diagnostic)
+            {
+                res->u.response->diagnostics = diagnostic;
+                res->u.response->num_diagnostics = num_diagnostic;
+            }
+            else
+            {
+                srw_bend_search(assoc, req, sr->u.request, res->u.response, 
+                                &http_code);
+            }
+            if (http_code == 200)
+                soap_package->u.generic->p = res;
+        }
+        else if (sr->which == Z_SRW_explain_request)
+        {
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_explain_response);
-	    stylesheet = sr->u.explain_request->stylesheet;
-	    if (num_diagnostic)
-	    {	
-		res->u.explain_response->diagnostics = diagnostic;
-		res->u.explain_response->num_diagnostics = num_diagnostic;
-	    }
-	    srw_bend_explain(assoc, req, sr->u.explain_request,
-			     res->u.explain_response, &http_code);
-	    if (http_code == 200)
-		soap_package->u.generic->p = res;
-	}
-	else if (sr->which == Z_SRW_scan_request)
-	{
+            stylesheet = sr->u.explain_request->stylesheet;
+            if (num_diagnostic)
+            {   
+                res->u.explain_response->diagnostics = diagnostic;
+                res->u.explain_response->num_diagnostics = num_diagnostic;
+            }
+            srw_bend_explain(assoc, req, sr->u.explain_request,
+                             res->u.explain_response, &http_code);
+            if (http_code == 200)
+                soap_package->u.generic->p = res;
+        }
+        else if (sr->which == Z_SRW_scan_request)
+        {
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_scan_response);
-	    stylesheet = sr->u.scan_request->stylesheet;
-	    if (num_diagnostic)
-	    {	
-		res->u.scan_response->diagnostics = diagnostic;
-		res->u.scan_response->num_diagnostics = num_diagnostic;
-	    }
-	    yaz_add_srw_diagnostic(o, 
-				   &res->u.scan_response->diagnostics,
-				   &res->u.scan_response->num_diagnostics,
-				   4, "scan");
-	    if (http_code == 200)
-		soap_package->u.generic->p = res;
-	}
-	else
-	{
-		 yaz_log(LOG_LOG, "generate soap error");
-	    http_code = 500;
-	    z_soap_error(assoc->encode, soap_package,
-			 "SOAP-ENV:Client", "Bad method", 0); 
-	}
-	if (http_code == 200 || http_code == 500)
-	{
-	    static Z_SOAP_Handler soap_handlers[3] = {
+            stylesheet = sr->u.scan_request->stylesheet;
+            if (num_diagnostic)
+            {   
+                res->u.scan_response->diagnostics = diagnostic;
+                res->u.scan_response->num_diagnostics = num_diagnostic;
+            }
+            yaz_add_srw_diagnostic(o, 
+                                   &res->u.scan_response->diagnostics,
+                                   &res->u.scan_response->num_diagnostics,
+                                   4, "scan");
+            if (http_code == 200)
+                soap_package->u.generic->p = res;
+        }
+        else
+        {
+            yaz_log(log_request, "generate soap error"); 
+               /* FIXME - what error, what query */
+            http_code = 500;
+            z_soap_error(assoc->encode, soap_package,
+                         "SOAP-ENV:Client", "Bad method", 0); 
+        }
+        if (http_code == 200 || http_code == 500)
+        {
+            static Z_SOAP_Handler soap_handlers[3] = {
 #if HAVE_XML2
-		{"http://www.loc.gov/zing/srw/", 0,
-		 (Z_SOAP_fun) yaz_srw_codec},
+                {"http://www.loc.gov/zing/srw/", 0,
+                 (Z_SOAP_fun) yaz_srw_codec},
                 {"http://www.loc.gov/zing/srw/v1.0/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
 #endif
-		{0, 0, 0}
-	    };
-	    char ctype[60];
-	    int ret;
-	    p = z_get_HTTP_Response(o, 200);
-	    hres = p->u.HTTP_Response;
-	    ret = z_soap_codec_enc_xsl(assoc->encode, &soap_package,
-				       &hres->content_buf, &hres->content_len,
-				       soap_handlers, charset, stylesheet);
-	    hres->code = http_code;
+                {0, 0, 0}
+            };
+            char ctype[60];
+            int ret;
+            p = z_get_HTTP_Response(o, 200);
+            hres = p->u.HTTP_Response;
+            ret = z_soap_codec_enc_xsl(assoc->encode, &soap_package,
+                                       &hres->content_buf, &hres->content_len,
+                                       soap_handlers, charset, stylesheet);
+            hres->code = http_code;
 
-	    strcpy(ctype, "text/xml");
-	    if (charset)
-	    {
-		strcat(ctype, "; charset=");
-		strcat(ctype, charset);
-	    }
-	    z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
-	}
-	else
-	    p = z_get_HTTP_Response(o, http_code);
+            strcpy(ctype, "text/xml");
+            if (charset)
+            {
+                strcat(ctype, "; charset=");
+                strcat(ctype, charset);
+            }
+            z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+        }
+        else
+            p = z_get_HTTP_Response(o, http_code);
     }
 
     if (p == 0)
-	p = z_get_HTTP_Response(o, 500);
+        p = z_get_HTTP_Response(o, 500);
     hres = p->u.HTTP_Response;
     if (!strcmp(hreq->version, "1.0")) 
     {
@@ -969,7 +1016,7 @@ static void process_http_request(association *assoc, request *req)
     {
         z_HTTP_header_add(o, &hres->headers, "Connection", "close");
         assoc->state = ASSOC_DEAD;
-	assoc->cs_get_mask = 0;
+        assoc->cs_get_mask = 0;
     }
     else
     {
@@ -1018,97 +1065,97 @@ static int process_z_request(association *assoc, request *req, char **msg)
     assert(req && req->state == REQUEST_IDLE);
     if (req->apdu_request->which != Z_APDU_initRequest && !assoc->init)
     {
-	*msg = "Missing InitRequest";
-	return -1;
+        *msg = "Missing InitRequest";
+        return -1;
     }
     switch (req->apdu_request->which)
     {
     case Z_APDU_initRequest:
         iochan_settimeout(assoc->client_chan,
                           statserv_getcontrol()->idle_timeout * 60);
-	res = process_initRequest(assoc, req); break;
+        res = process_initRequest(assoc, req); break;
     case Z_APDU_searchRequest:
-	res = process_searchRequest(assoc, req, &fd); break;
+        res = process_searchRequest(assoc, req, &fd); break;
     case Z_APDU_presentRequest:
-	res = process_presentRequest(assoc, req, &fd); break;
+        res = process_presentRequest(assoc, req, &fd); break;
     case Z_APDU_scanRequest:
-	if (assoc->init->bend_scan)
-	    res = process_scanRequest(assoc, req, &fd);
-	else
-	{
-	    *msg = "Cannot handle Scan APDU";
-	    return -1;
-	}
-	break;
+        if (assoc->init->bend_scan)
+            res = process_scanRequest(assoc, req, &fd);
+        else
+        {
+            *msg = "Cannot handle Scan APDU";
+            return -1;
+        }
+        break;
     case Z_APDU_extendedServicesRequest:
-	if (assoc->init->bend_esrequest)
-	    res = process_ESRequest(assoc, req, &fd);
-	else
-	{
-	    *msg = "Cannot handle Extended Services APDU";
-	    return -1;
-	}
-	break;
+        if (assoc->init->bend_esrequest)
+            res = process_ESRequest(assoc, req, &fd);
+        else
+        {
+            *msg = "Cannot handle Extended Services APDU";
+            return -1;
+        }
+        break;
     case Z_APDU_sortRequest:
-	if (assoc->init->bend_sort)
-	    res = process_sortRequest(assoc, req, &fd);
-	else
-	{
-	    *msg = "Cannot handle Sort APDU";
-	    return -1;
-	}
-	break;
+        if (assoc->init->bend_sort)
+            res = process_sortRequest(assoc, req, &fd);
+        else
+        {
+            *msg = "Cannot handle Sort APDU";
+            return -1;
+        }
+        break;
     case Z_APDU_close:
-	process_close(assoc, req);
-	return 0;
+        process_close(assoc, req);
+        return 0;
     case Z_APDU_deleteResultSetRequest:
-	if (assoc->init->bend_delete)
-	    res = process_deleteRequest(assoc, req, &fd);
-	else
-	{
-	    *msg = "Cannot handle Delete APDU";
-	    return -1;
-	}
-	break;
+        if (assoc->init->bend_delete)
+            res = process_deleteRequest(assoc, req, &fd);
+        else
+        {
+            *msg = "Cannot handle Delete APDU";
+            return -1;
+        }
+        break;
     case Z_APDU_segmentRequest:
-	if (assoc->init->bend_segment)
-	{
-	    res = process_segmentRequest (assoc, req);
-	}
-	else
-	{
-	    *msg = "Cannot handle Segment APDU";
-	    return -1;
-	}
-	break;
+        if (assoc->init->bend_segment)
+        {
+            res = process_segmentRequest (assoc, req);
+        }
+        else
+        {
+            *msg = "Cannot handle Segment APDU";
+            return -1;
+        }
+        break;
     case Z_APDU_triggerResourceControlRequest:
-	return 0;
+        return 0;
     default:
-	*msg = "Bad APDU received";
-	return -1;
+        *msg = "Bad APDU received";
+        return -1;
     }
     if (res)
     {
-    	yaz_log(LOG_DEBUG, "  result immediately available");
-    	retval = process_z_response(assoc, req, res);
+        yaz_log(LOG_DEBUG, "  result immediately available");
+        retval = process_z_response(assoc, req, res);
     }
     else if (fd < 0)
     {
-    	yaz_log(LOG_DEBUG, "  result unavailble");
-	retval = 0;
+        yaz_log(LOG_DEBUG, "  result unavailble");
+        retval = 0;
     }
     else /* no result yet - one will be provided later */
     {
-    	IOCHAN chan;
+        IOCHAN chan;
 
-	/* Set up an I/O handler for the fd supplied by the backend */
+        /* Set up an I/O handler for the fd supplied by the backend */
 
-	yaz_log(LOG_DEBUG, "   establishing handler for result");
-	req->state = REQUEST_PENDING;
-	if (!(chan = iochan_create(fd, backend_response, EVENT_INPUT)))
-	    abort();
-	iochan_setdata(chan, assoc);
-	retval = 0;
+        yaz_log(LOG_DEBUG, "   establishing handler for result");
+        req->state = REQUEST_PENDING;
+        if (!(chan = iochan_create(fd, backend_response, EVENT_INPUT)))
+            abort();
+        iochan_setdata(chan, assoc);
+        retval = 0;
     }
     return retval;
 }
@@ -1128,29 +1175,29 @@ void backend_response(IOCHAN i, int event)
     /* determine what it is we're waiting for */
     switch (req->apdu_request->which)
     {
-	case Z_APDU_searchRequest:
-	    res = response_searchRequest(assoc, req, 0, &fd); break;
+        case Z_APDU_searchRequest:
+            res = response_searchRequest(assoc, req, 0, &fd); break;
 #if 0
-	case Z_APDU_presentRequest:
-	    res = response_presentRequest(assoc, req, 0, &fd); break;
-	case Z_APDU_scanRequest:
-	    res = response_scanRequest(assoc, req, 0, &fd); break;
+        case Z_APDU_presentRequest:
+            res = response_presentRequest(assoc, req, 0, &fd); break;
+        case Z_APDU_scanRequest:
+            res = response_scanRequest(assoc, req, 0, &fd); break;
 #endif
-	default:
-	    yaz_log(LOG_WARN, "Serious programmer's lapse or bug");
-	    abort();
+        default:
+            yaz_log(LOG_FATAL, "Serious programmer's lapse or bug");
+            abort();
     }
     if ((res && process_z_response(assoc, req, res) < 0) || fd < 0)
     {
-	yaz_log(LOG_LOG, "Fatal error when talking to backend");
-	do_close(assoc, Z_Close_systemProblem, 0);
-	iochan_destroy(i);
-	return;
+        yaz_log(LOG_WARN, "Fatal error when talking to backend");
+        do_close(assoc, Z_Close_systemProblem, 0);
+        iochan_destroy(i);
+        return;
     }
     else if (!res) /* no result yet - try again later */
     {
-    	yaz_log(LOG_DEBUG, "   no result yet");
-    	iochan_setfd(i, fd); /* in case fd has changed */
+        yaz_log(LOG_DEBUG, "   no result yet");
+        iochan_setfd(i, fd); /* in case fd has changed */
     }
 }
 
@@ -1163,21 +1210,21 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
 
     if (assoc->print)
     {
-	if (!z_GDU(assoc->print, &res, 0, 0))
-	    yaz_log(LOG_WARN, "ODR print error: %s", 
-	        odr_errmsg(odr_geterror(assoc->print)));
-	odr_reset(assoc->print);
+        if (!z_GDU(assoc->print, &res, 0, 0))
+            yaz_log(LOG_WARN, "ODR print error: %s", 
+                odr_errmsg(odr_geterror(assoc->print)));
+        odr_reset(assoc->print);
     }
     if (!z_GDU(assoc->encode, &res, 0, 0))
     {
-    	yaz_log(LOG_WARN, "ODR error when encoding PDU: %s [element %s]",
+        yaz_log(LOG_WARN, "ODR error when encoding PDU: %s [element %s]",
                 odr_errmsg(odr_geterror(assoc->decode)),
                 odr_getelement(assoc->decode));
-	request_release(req);
-	return -1;
+        request_release(req);
+        return -1;
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,
-	&req->size_response);
+        &req->size_response);
     odr_setbuf(assoc->encode, 0, 0, 0); /* don'txfree if we abort later */
     odr_reset(assoc->encode);
     req->state = REQUEST_IDLE;
@@ -1189,8 +1236,8 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
 #if 1
     if (request_head(&assoc->incoming))
     {
-	yaz_log (LOG_DEBUG, "more work to be done");
-    	iochan_setevent(assoc->client_chan, EVENT_WORK);
+        yaz_log (LOG_DEBUG, "more work to be done");
+        iochan_setevent(assoc->client_chan, EVENT_WORK);
     }
 #endif
     return 0;
@@ -1226,13 +1273,13 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     char *version;
     char options[140];
 
-    yaz_log(LOG_LOG, "Got initRequest");
+    yaz_log(log_requestdetail, "Got initRequest");
     if (req->implementationId)
-    	yaz_log(LOG_LOG, "Id:        %s", req->implementationId);
+        yaz_log(log_requestdetail, "Id:        %s", req->implementationId);
     if (req->implementationName)
-    	yaz_log(LOG_LOG, "Name:      %s", req->implementationName);
+        yaz_log(log_requestdetail, "Name:      %s", req->implementationName);
     if (req->implementationVersion)
-    	yaz_log(LOG_LOG, "Version:   %s", req->implementationVersion);
+        yaz_log(log_requestdetail, "Version:   %s", req->implementationVersion);
 
     assoc_init_reset(assoc);
 
@@ -1244,154 +1291,166 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
         Z_CharSetandLanguageNegotiation *negotiation =
             yaz_get_charneg_record (req->otherInfo);
         if (negotiation &&
-	    negotiation->which == Z_CharSetandLanguageNegotiation_proposal)
+            negotiation->which == Z_CharSetandLanguageNegotiation_proposal)
             assoc->init->charneg_request = negotiation;
     }
     
     assoc->backend = 0;
     if (!(binitres = (*cb->bend_init)(assoc->init)))
     {
-    	yaz_log(LOG_WARN, "Bad response from backend.");
-    	return 0;
+        yaz_log(LOG_WARN, "Bad response from backend.");
+        return 0;
     }
 
     assoc->backend = binitres->handle;
     if ((assoc->init->bend_sort))
-	yaz_log (LOG_DEBUG, "Sort handler installed");
+        yaz_log (LOG_DEBUG, "Sort handler installed");
     if ((assoc->init->bend_search))
-	yaz_log (LOG_DEBUG, "Search handler installed");
+        yaz_log (LOG_DEBUG, "Search handler installed");
     if ((assoc->init->bend_present))
-	yaz_log (LOG_DEBUG, "Present handler installed");   
+        yaz_log (LOG_DEBUG, "Present handler installed");   
     if ((assoc->init->bend_esrequest))
-	yaz_log (LOG_DEBUG, "ESRequest handler installed");   
+        yaz_log (LOG_DEBUG, "ESRequest handler installed");   
     if ((assoc->init->bend_delete))
-	yaz_log (LOG_DEBUG, "Delete handler installed");   
+        yaz_log (LOG_DEBUG, "Delete handler installed");   
     if ((assoc->init->bend_scan))
-	yaz_log (LOG_DEBUG, "Scan handler installed");   
+        yaz_log (LOG_DEBUG, "Scan handler installed");   
     if ((assoc->init->bend_segment))
-	yaz_log (LOG_DEBUG, "Segment handler installed");   
+        yaz_log (LOG_DEBUG, "Segment handler installed");   
     
     resp->referenceId = req->referenceId;
     *options = '\0';
     /* let's tell the client what we can do */
     if (ODR_MASK_GET(req->options, Z_Options_search))
     {
-    	ODR_MASK_SET(resp->options, Z_Options_search);
-	strcat(options, "srch");
+        ODR_MASK_SET(resp->options, Z_Options_search);
+        strcat(options, "srch");
     }
     if (ODR_MASK_GET(req->options, Z_Options_present))
     {
-    	ODR_MASK_SET(resp->options, Z_Options_present);
-	strcat(options, " prst");
+        ODR_MASK_SET(resp->options, Z_Options_present);
+        strcat(options, " prst");
     }
     if (ODR_MASK_GET(req->options, Z_Options_delSet) &&
-	assoc->init->bend_delete)
+        assoc->init->bend_delete)
     {
-    	ODR_MASK_SET(resp->options, Z_Options_delSet);
-	strcat(options, " del");
+        ODR_MASK_SET(resp->options, Z_Options_delSet);
+        strcat(options, " del");
     }
     if (ODR_MASK_GET(req->options, Z_Options_extendedServices) &&
-	assoc->init->bend_esrequest)
+        assoc->init->bend_esrequest)
     {
-	ODR_MASK_SET(resp->options, Z_Options_extendedServices);
-	strcat (options, " extendedServices");
+        ODR_MASK_SET(resp->options, Z_Options_extendedServices);
+        strcat (options, " extendedServices");
     }
     if (ODR_MASK_GET(req->options, Z_Options_namedResultSets))
     {
-    	ODR_MASK_SET(resp->options, Z_Options_namedResultSets);
-	strcat(options, " namedresults");
+        ODR_MASK_SET(resp->options, Z_Options_namedResultSets);
+        strcat(options, " namedresults");
     }
     if (ODR_MASK_GET(req->options, Z_Options_scan) && assoc->init->bend_scan)
     {
-    	ODR_MASK_SET(resp->options, Z_Options_scan);
-	strcat(options, " scan");
+        ODR_MASK_SET(resp->options, Z_Options_scan);
+        strcat(options, " scan");
     }
     if (ODR_MASK_GET(req->options, Z_Options_concurrentOperations))
     {
-    	ODR_MASK_SET(resp->options, Z_Options_concurrentOperations);
-	strcat(options, " concurrop");
+        ODR_MASK_SET(resp->options, Z_Options_concurrentOperations);
+        strcat(options, " concurrop");
     }
     if (ODR_MASK_GET(req->options, Z_Options_sort) && assoc->init->bend_sort)
     {
-	ODR_MASK_SET(resp->options, Z_Options_sort);
-	strcat(options, " sort");
+        ODR_MASK_SET(resp->options, Z_Options_sort);
+        strcat(options, " sort");
     }
 
     if (ODR_MASK_GET(req->options, Z_Options_negotiationModel)
         && assoc->init->charneg_response)
     {
-    	Z_OtherInformation **p;
-    	Z_OtherInformationUnit *p0;
-    	
-    	yaz_oi_APDU(apdu, &p);
-    	
-    	if ((p0=yaz_oi_update(p, assoc->encode, NULL, 0, 0))) {
+        Z_OtherInformation **p;
+        Z_OtherInformationUnit *p0;
+        
+        yaz_oi_APDU(apdu, &p);
+        
+        if ((p0=yaz_oi_update(p, assoc->encode, NULL, 0, 0))) {
             ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
             
             p0->which = Z_OtherInfo_externallyDefinedInfo;
             p0->information.externallyDefinedInfo =
                 assoc->init->charneg_response;
         }
-	ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
-	strcat(options, " negotiation");
+        ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
+        strcat(options, " negotiation");
     }
-	
+        
     ODR_MASK_SET(resp->options, Z_Options_triggerResourceCtrl);
 
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
     {
-    	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_1);
-	assoc->version = 1; /* 1 & 2 are equivalent */
+        ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_1);
+        assoc->version = 1; /* 1 & 2 are equivalent */
     }
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_2))
     {
-    	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_2);
-	assoc->version = 2;
+        ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_2);
+        assoc->version = 2;
     }
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_3))
     {
-    	ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_3);
-	assoc->version = 3;
+        ODR_MASK_SET(resp->protocolVersion, Z_ProtocolVersion_3);
+        assoc->version = 3;
     }
 
-    yaz_log(LOG_LOG, "Negotiated to v%d: %s", assoc->version, options);
+    yaz_log(log_requestdetail, "Negotiated to v%d: %s", assoc->version, options);
     assoc->maximumRecordSize = *req->maximumRecordSize;
     if (assoc->maximumRecordSize > control_block->maxrecordsize)
-    	assoc->maximumRecordSize = control_block->maxrecordsize;
+        assoc->maximumRecordSize = control_block->maxrecordsize;
     assoc->preferredMessageSize = *req->preferredMessageSize;
     if (assoc->preferredMessageSize > assoc->maximumRecordSize)
-    	assoc->preferredMessageSize = assoc->maximumRecordSize;
+        assoc->preferredMessageSize = assoc->maximumRecordSize;
 
     resp->preferredMessageSize = &assoc->preferredMessageSize;
     resp->maximumRecordSize = &assoc->maximumRecordSize;
 
     resp->implementationId = odr_prepend(assoc->encode,
-		assoc->init->implementation_id,
-		resp->implementationId);
+                assoc->init->implementation_id,
+                resp->implementationId);
 
     resp->implementationName = odr_prepend(assoc->encode,
-		assoc->init->implementation_name,
-		odr_prepend(assoc->encode, "GFS", resp->implementationName));
+                assoc->init->implementation_name,
+                odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.33 $");
-    if (strlen(version) > 10)	/* check for unexpanded CVS strings */
-	version[strlen(version)-2] = '\0';
+    version = odr_strdup(assoc->encode, "$Revision: 1.34 $");
+    if (strlen(version) > 10)   /* check for unexpanded CVS strings */
+        version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
-		assoc->init->implementation_version,
-		odr_prepend(assoc->encode, &version[11],
-			    resp->implementationVersion));
+                assoc->init->implementation_version,
+                odr_prepend(assoc->encode, &version[11],
+                            resp->implementationVersion));
 
     if (binitres->errcode)
     {
-    	yaz_log(LOG_LOG, "Connection rejected by backend.");
-    	*resp->result = 0;
-	assoc->state = ASSOC_DEAD;
-	resp->userInformationField = init_diagnostics(assoc->encode,
-						      binitres->errcode,
-						      binitres->errstring);
+        yaz_log(LOG_DEBUG, "Connection rejected by backend.");
+        *resp->result = 0;
+        assoc->state = ASSOC_DEAD;
+        resp->userInformationField = init_diagnostics(assoc->encode,
+                                                      binitres->errcode,
+                                                      binitres->errstring);
+        yaz_log(log_request,"Init from '%s' (%s) (ver %s) Error %d %s",
+            req->implementationName ? req->implementationName :"??",
+            req->implementationId ? req->implementationId :"?", 
+            req->implementationVersion ? req->implementationVersion: "?",
+            binitres->errcode,binitres->errstring );
     }
     else
-	assoc->state = ASSOC_UP;
+    {
+        assoc->state = ASSOC_UP;
+        yaz_log(log_request,"Init from '%s' (%s) (ver %s) OK",
+            req->implementationName ? req->implementationName :"??",
+            req->implementationId ? req->implementationId :"?", 
+            req->implementationVersion ? req->implementationVersion: "?");
+    }
+
     return apdu;
 }
 
@@ -1404,13 +1463,13 @@ static Z_DefaultDiagFormat *justdiag(ODR odr, int error, char *addinfo)
 {
     int *err = odr_intdup(odr, error);
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
-	odr_malloc (odr, sizeof(*dr));
+        odr_malloc (odr, sizeof(*dr));
 
-    yaz_log(LOG_LOG, "[%d] %s%s%s", error, diagbib1_str(error),
+    yaz_log(log_requestdetail, "[%d] %s%s%s", error, diagbib1_str(error),
         addinfo ? " -- " : "", addinfo ? addinfo : "");
 
     dr->diagnosticSetId =
-	yaz_oidval_to_z3950oid (odr, CLASS_DIAGSET, VAL_BIB1);
+        yaz_oidval_to_z3950oid (odr, CLASS_DIAGSET, VAL_BIB1);
     dr->condition = err;
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
     dr->u.v2Addinfo = odr_strdup (odr, addinfo ? addinfo : "");
@@ -1421,7 +1480,7 @@ static Z_DefaultDiagFormat *justdiag(ODR odr, int error, char *addinfo)
  * Set the specified `errcode' and `errstring' into a UserInfo-1
  * external to be returned to the client in accordance with Z35.90
  * Implementor Agreement 5 (Returning diagnostics in an InitResponse):
- *	http://lcweb.loc.gov/z3950/agency/agree/initdiag.html
+ *      http://lcweb.loc.gov/z3950/agency/agree/initdiag.html
  */
 static Z_External *init_diagnostics(ODR odr, int error, char *addinfo)
 {
@@ -1434,7 +1493,7 @@ static Z_External *init_diagnostics(ODR odr, int error, char *addinfo)
 
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;
-    x->indirect_reference = 0;	
+    x->indirect_reference = 0;  
     oid.proto = PROTO_Z3950;
     oid.oclass = CLASS_USERINFO;
     oid.value = VAL_USERINFO1;
@@ -1478,7 +1537,7 @@ static Z_External *init_diagnostics(ODR odr, int error, char *addinfo)
 static Z_Records *diagrec(association *assoc, int error, char *addinfo)
 {
     Z_Records *rec = (Z_Records *)
-	odr_malloc (assoc->encode, sizeof(*rec));
+        odr_malloc (assoc->encode, sizeof(*rec));
     rec->which = Z_Records_NSD;
     rec->u.nonSurrogateDiagnostic = justdiag(assoc->encode, error, addinfo);
     return rec;
@@ -1488,10 +1547,10 @@ static Z_Records *diagrec(association *assoc, int error, char *addinfo)
  * surrogate diagnostic.
  */
 static Z_NamePlusRecord *surrogatediagrec(association *assoc, char *dbname,
-					  int error, char *addinfo)
+                                          int error, char *addinfo)
 {
     Z_NamePlusRecord *rec = (Z_NamePlusRecord *)
-	odr_malloc (assoc->encode, sizeof(*rec));
+        odr_malloc (assoc->encode, sizeof(*rec));
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
     
     yaz_log(LOG_DEBUG, "SurrogateDiagnotic: %d -- %s", error, addinfo);
@@ -1514,7 +1573,7 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     Z_DiagRec **recp = (Z_DiagRec **)odr_malloc (assoc->encode, sizeof(*recp));
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (assoc->encode, sizeof(*drec));
     Z_DefaultDiagFormat *rec = (Z_DefaultDiagFormat *)
-	odr_malloc (assoc->encode, sizeof(*rec));
+        odr_malloc (assoc->encode, sizeof(*rec));
 
     yaz_log(LOG_DEBUG, "DiagRecs: %d -- %s", error, addinfo ? addinfo : "");
 
@@ -1525,7 +1584,7 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
     drec->u.defaultFormat = rec;
 
     rec->diagnosticSetId =
-	yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
+        yaz_oidval_to_z3950oid (assoc->encode, CLASS_DIAGSET, VAL_BIB1);
     rec->condition = err;
 
     rec->which = Z_DefaultDiagFormat_v2Addinfo;
@@ -1534,18 +1593,19 @@ static Z_DiagRecs *diagrecs(association *assoc, int error, char *addinfo)
 }
 
 static Z_Records *pack_records(association *a, char *setname, int start,
-			       int *num, Z_RecordComposition *comp,
-			       int *next, int *pres, oid_value format,
-			       Z_ReferenceId *referenceId,
-			       int *oid)
+                               int *num, Z_RecordComposition *comp,
+                               int *next, int *pres, oid_value format,
+                               Z_ReferenceId *referenceId,
+                               int *oid, int *errcode)
 {
     int recno, total_length = 0, toget = *num, dumped_records = 0;
+    *errcode=0;
     Z_Records *records =
-	(Z_Records *) odr_malloc (a->encode, sizeof(*records));
+        (Z_Records *) odr_malloc (a->encode, sizeof(*records));
     Z_NamePlusRecordList *reclist =
-	(Z_NamePlusRecordList *) odr_malloc (a->encode, sizeof(*reclist));
+        (Z_NamePlusRecordList *) odr_malloc (a->encode, sizeof(*reclist));
     Z_NamePlusRecord **list =
-	(Z_NamePlusRecord **) odr_malloc (a->encode, sizeof(*list) * toget);
+        (Z_NamePlusRecord **) odr_malloc (a->encode, sizeof(*list) * toget);
 
     records->which = Z_Records_DBOSD;
     records->u.databaseOrSurDiagnostics = reclist;
@@ -1555,127 +1615,130 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     *num = 0;
     *next = 0;
 
-    yaz_log(LOG_LOG, "Request to pack %d+%d+%s", start, toget, setname);
-    yaz_log(LOG_DEBUG, "pms=%d, mrs=%d", a->preferredMessageSize,
-    	a->maximumRecordSize);
+    yaz_log(log_requestdetail, "Request to pack %d+%d %s", start, toget, setname);
+    yaz_log(log_requestdetail, "pms=%d, mrs=%d", a->preferredMessageSize,
+        a->maximumRecordSize);
     for (recno = start; reclist->num_records < toget; recno++)
     {
-    	bend_fetch_rr freq;
-	Z_NamePlusRecord *thisrec;
-	int this_length = 0;
-	/*
-	 * we get the number of bytes allocated on the stream before any
-	 * allocation done by the backend - this should give us a reasonable
-	 * idea of the total size of the data so far.
-	 */
-	total_length = odr_total(a->encode) - dumped_records;
-	freq.errcode = 0;
-	freq.errstring = 0;
-	freq.basename = 0;
-	freq.len = 0;
-	freq.record = 0;
-	freq.last_in_set = 0;
-	freq.setname = setname;
-	freq.surrogate_flag = 0;
-	freq.number = recno;
-	freq.comp = comp;
-	freq.request_format = format;
-	freq.request_format_raw = oid;
-	freq.output_format = format;
-	freq.output_format_raw = 0;
-	freq.stream = a->encode;
-	freq.print = a->print;
-	freq.referenceId = referenceId;
+        bend_fetch_rr freq;
+        Z_NamePlusRecord *thisrec;
+        int this_length = 0;
+        /*
+         * we get the number of bytes allocated on the stream before any
+         * allocation done by the backend - this should give us a reasonable
+         * idea of the total size of the data so far.
+         */
+        total_length = odr_total(a->encode) - dumped_records;
+        freq.errcode = 0;
+        freq.errstring = 0;
+        freq.basename = 0;
+        freq.len = 0;
+        freq.record = 0;
+        freq.last_in_set = 0;
+        freq.setname = setname;
+        freq.surrogate_flag = 0;
+        freq.number = recno;
+        freq.comp = comp;
+        freq.request_format = format;
+        freq.request_format_raw = oid;
+        freq.output_format = format;
+        freq.output_format_raw = 0;
+        freq.stream = a->encode;
+        freq.print = a->print;
+        freq.referenceId = referenceId;
         freq.schema = 0;
-	(*a->init->bend_fetch)(a->backend, &freq);
-	/* backend should be able to signal whether error is system-wide
-	   or only pertaining to current record */
-	if (freq.errcode)
-	{
-	    if (!freq.surrogate_flag)
-	    {
-		char s[20];
-		*pres = Z_PresentStatus_failure;
-		/* for 'present request out of range',
+        (*a->init->bend_fetch)(a->backend, &freq);
+        /* backend should be able to signal whether error is system-wide
+           or only pertaining to current record */
+        if (freq.errcode)
+        {
+            if (!freq.surrogate_flag)
+            {
+                char s[20];
+                *pres = Z_PresentStatus_failure;
+                /* for 'present request out of range',
                    set addinfo to record position if not set */
-		if (freq.errcode == 13 && freq.errstring == 0)
-		{
-		    sprintf (s, "%d", recno);
-		    freq.errstring = s;
-		}
-		return diagrec(a, freq.errcode, freq.errstring);
-	    }
-	    reclist->records[reclist->num_records] =
-		surrogatediagrec(a, freq.basename, freq.errcode,
-				 freq.errstring);
-	    reclist->num_records++;
-	    *next = freq.last_in_set ? 0 : recno + 1;
-	    continue;
-	}
-	if (freq.len >= 0)
-	    this_length = freq.len;
-	else
-	    this_length = odr_total(a->encode) - total_length - dumped_records;
-	yaz_log(LOG_DEBUG, "  fetched record, len=%d, total=%d dumped=%d",
-	    this_length, total_length, dumped_records);
-	if (a->preferredMessageSize > 0 &&
-		this_length + total_length > a->preferredMessageSize)
-	{
-	    /* record is small enough, really */
-	    if (this_length <= a->preferredMessageSize && recno > start)
-	    {
-	    	yaz_log(LOG_DEBUG, "  Dropped last normal-sized record");
-		*pres = Z_PresentStatus_partial_2;
-		break;
-	    }
-	    /* record can only be fetched by itself */
-	    if (this_length < a->maximumRecordSize)
-	    {
-	    	yaz_log(LOG_DEBUG, "  Record > prefmsgsz");
-	    	if (toget > 1)
-		{
-		    yaz_log(LOG_DEBUG, "  Dropped it");
-		    reclist->records[reclist->num_records] =
-		   	 surrogatediagrec(a, freq.basename, 16, 0);
-		    reclist->num_records++;
-		    *next = freq.last_in_set ? 0 : recno + 1;
-		    dumped_records += this_length;
-		    continue;
-		}
-	    }
-	    else /* too big entirely */
-	    {
-	    	yaz_log(LOG_LOG, "Record > maxrcdsz this=%d max=%d", this_length, a->maximumRecordSize);
-		reclist->records[reclist->num_records] =
-		    surrogatediagrec(a, freq.basename, 17, 0);
-		reclist->num_records++;
-		*next = freq.last_in_set ? 0 : recno + 1;
-		dumped_records += this_length;
-		continue;
-	    }
-	}
+                if (freq.errcode == 13 && freq.errstring == 0)
+                {
+                    sprintf (s, "%d", recno);
+                    freq.errstring = s;
+                }
+                if (errcode)
+                    *errcode=freq.errcode;
+                return diagrec(a, freq.errcode, freq.errstring);
+            }
+            reclist->records[reclist->num_records] =
+                surrogatediagrec(a, freq.basename, freq.errcode,
+                                 freq.errstring);
+            reclist->num_records++;
+            *next = freq.last_in_set ? 0 : recno + 1;
+            continue;
+        }
+        if (freq.len >= 0)
+            this_length = freq.len;
+        else
+            this_length = odr_total(a->encode) - total_length - dumped_records;
+        yaz_log(LOG_DEBUG, "  fetched record, len=%d, total=%d dumped=%d",
+            this_length, total_length, dumped_records);
+        if (a->preferredMessageSize > 0 &&
+                this_length + total_length > a->preferredMessageSize)
+        {
+            /* record is small enough, really */
+            if (this_length <= a->preferredMessageSize && recno > start)
+            {
+                yaz_log(log_requestdetail, "  Dropped last normal-sized record");
+                *pres = Z_PresentStatus_partial_2;
+                break;
+            }
+            /* record can only be fetched by itself */
+            if (this_length < a->maximumRecordSize)
+            {
+                yaz_log(log_requestdetail, "  Record > prefmsgsz");
+                if (toget > 1)
+                {
+                    yaz_log(LOG_DEBUG, "  Dropped it");
+                    reclist->records[reclist->num_records] =
+                         surrogatediagrec(a, freq.basename, 16, 0);
+                    reclist->num_records++;
+                    *next = freq.last_in_set ? 0 : recno + 1;
+                    dumped_records += this_length;
+                    continue;
+                }
+            }
+            else /* too big entirely */
+            {
+                yaz_log(log_requestdetail, "Record > maxrcdsz this=%d max=%d",
+                        this_length, a->maximumRecordSize);
+                reclist->records[reclist->num_records] =
+                    surrogatediagrec(a, freq.basename, 17, 0);
+                reclist->num_records++;
+                *next = freq.last_in_set ? 0 : recno + 1;
+                dumped_records += this_length;
+                continue;
+            }
+        }
 
-	if (!(thisrec = (Z_NamePlusRecord *)
-	      odr_malloc(a->encode, sizeof(*thisrec))))
-	    return 0;
-	if (!(thisrec->databaseName = (char *)odr_malloc(a->encode,
-	    strlen(freq.basename) + 1)))
-	    return 0;
-	strcpy(thisrec->databaseName, freq.basename);
-	thisrec->which = Z_NamePlusRecord_databaseRecord;
+        if (!(thisrec = (Z_NamePlusRecord *)
+              odr_malloc(a->encode, sizeof(*thisrec))))
+            return 0;
+        if (!(thisrec->databaseName = (char *)odr_malloc(a->encode,
+            strlen(freq.basename) + 1)))
+            return 0;
+        strcpy(thisrec->databaseName, freq.basename);
+        thisrec->which = Z_NamePlusRecord_databaseRecord;
 
-	if (freq.output_format_raw)
-	{
-	    struct oident *ident = oid_getentbyoid(freq.output_format_raw);
-	    freq.output_format = ident->value;
-	}
-	thisrec->u.databaseRecord = z_ext_record(a->encode, freq.output_format,
-						 freq.record, freq.len);
-	if (!thisrec->u.databaseRecord)
-	    return 0;
-	reclist->records[reclist->num_records] = thisrec;
-	reclist->num_records++;
-	*next = freq.last_in_set ? 0 : recno + 1;
+        if (freq.output_format_raw)
+        {
+            struct oident *ident = oid_getentbyoid(freq.output_format_raw);
+            freq.output_format = ident->value;
+        }
+        thisrec->u.databaseRecord = z_ext_record(a->encode, freq.output_format,
+                                                 freq.record, freq.len);
+        if (!thisrec->u.databaseRecord)
+            return 0;
+        reclist->records[reclist->num_records] = thisrec;
+        reclist->num_records++;
+        *next = freq.last_in_set ? 0 : recno + 1;
     }
     *num = reclist->num_records;
     return records;
@@ -1686,42 +1749,48 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 {
     Z_SearchRequest *req = reqb->apdu_request->u.searchRequest;
     bend_search_rr *bsrr = 
-	(bend_search_rr *)nmem_malloc (reqb->request_mem, sizeof(*bsrr));
+        (bend_search_rr *)nmem_malloc (reqb->request_mem, sizeof(*bsrr));
     
-    yaz_log(LOG_LOG, "Got SearchRequest.");
+    yaz_log(log_requestdetail, "Got SearchRequest.");
     bsrr->fd = fd;
     bsrr->request = reqb;
     bsrr->association = assoc;
     bsrr->referenceId = req->referenceId;
     save_referenceId (reqb, bsrr->referenceId);
 
-    yaz_log (LOG_LOG, "ResultSet '%s'", req->resultSetName);
+    yaz_log (log_requestdetail, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)
     {
-	int i;
-	for (i = 0; i < req->num_databaseNames; i++)
-	    yaz_log (LOG_LOG, "Database '%s'", req->databaseNames[i]);
+        int i;
+        for (i = 0; i < req->num_databaseNames; i++)
+            yaz_log (log_requestdetail, "Database '%s'", req->databaseNames[i]);
     }
-    yaz_log_zquery(req->query);
+
+    yaz_log_zquery_level(log_requestdetail,req->query);
 
     if (assoc->init->bend_search)
     {
-	bsrr->setname = req->resultSetName;
-	bsrr->replace_set = *req->replaceIndicator;
-	bsrr->num_bases = req->num_databaseNames;
-	bsrr->basenames = req->databaseNames;
-	bsrr->query = req->query;
-	bsrr->stream = assoc->encode;
-	nmem_transfer(bsrr->stream->mem, reqb->request_mem);
-	bsrr->decode = assoc->decode;
-	bsrr->print = assoc->print;
-	bsrr->errcode = 0;
-	bsrr->hits = 0;
-	bsrr->errstring = NULL;
+        bsrr->setname = req->resultSetName;
+        bsrr->replace_set = *req->replaceIndicator;
+        bsrr->num_bases = req->num_databaseNames;
+        bsrr->basenames = req->databaseNames;
+        bsrr->query = req->query;
+        bsrr->stream = assoc->encode;
+        nmem_transfer(bsrr->stream->mem, reqb->request_mem);
+        bsrr->decode = assoc->decode;
+        bsrr->print = assoc->print;
+        bsrr->errcode = 0;
+        bsrr->hits = 0;
+        bsrr->errstring = NULL;
         bsrr->search_info = NULL;
-	(assoc->init->bend_search)(assoc->backend, bsrr);
-	if (!bsrr->request)
-	    return 0;
+        (assoc->init->bend_search)(assoc->backend, bsrr);
+        if (!bsrr->request)  /* backend not ready with the search response */
+            return 0;  /* should not be used any more */
+    }
+    else
+    { 
+        /* FIXME - make a diagnostic for it */
+        yaz_log(LOG_WARN,"Search not supported ?!?!");
     }
     return response_searchRequest(assoc, reqb, bsrr, fd);
 }
@@ -1741,11 +1810,12 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     Z_SearchRequest *req = reqb->apdu_request->u.searchRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
     Z_SearchResponse *resp = (Z_SearchResponse *)
-	odr_malloc (assoc->encode, sizeof(*resp));
+        odr_malloc (assoc->encode, sizeof(*resp));
     int *nulint = odr_intdup (assoc->encode, 0);
     bool_t *sr = odr_intdup(assoc->encode, 1);
     int *next = odr_intdup(assoc->encode, 0);
     int *none = odr_intdup(assoc->encode, Z_SearchResponse_none);
+    int returnedrecs=0;
 
     apdu->which = Z_APDU_searchResponse;
     apdu->u.searchResponse = resp;
@@ -1755,81 +1825,98 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     *fd = -1;
     if (!bsrt && !bend_searchresponse(assoc->backend, bsrt))
     {
-    	yaz_log(LOG_FATAL, "Bad result from backend");
-    	return 0;
+        yaz_log(LOG_FATAL, "Bad result from backend");
+        return 0;
     }
     else if (bsrt->errcode)
     {
-	resp->records = diagrec(assoc, bsrt->errcode, bsrt->errstring);
-	resp->resultCount = nulint;
-	resp->numberOfRecordsReturned = nulint;
-	resp->nextResultSetPosition = nulint;
-	resp->searchStatus = nulint;
-	resp->resultSetStatus = none;
-	resp->presentStatus = 0;
+        resp->records = diagrec(assoc, bsrt->errcode, bsrt->errstring);
+        resp->resultCount = nulint;
+        resp->numberOfRecordsReturned = nulint;
+        resp->nextResultSetPosition = nulint;
+        resp->searchStatus = nulint;
+        resp->resultSetStatus = none;
+        resp->presentStatus = 0;
     }
     else
     {
-    	int *toget = odr_intdup(assoc->encode, 0);
+        int *toget = odr_intdup(assoc->encode, 0);
         int *presst = odr_intdup(assoc->encode, 0);
-	Z_RecordComposition comp, *compp = 0;
+        Z_RecordComposition comp, *compp = 0;
 
-        yaz_log (LOG_LOG, "resultCount: %d", bsrt->hits);
+        yaz_log (log_requestdetail, "resultCount: %d", bsrt->hits);
 
-	resp->records = 0;
-	resp->resultCount = &bsrt->hits;
+        resp->records = 0;
+        resp->resultCount = &bsrt->hits;
 
-	comp.which = Z_RecordComp_simple;
-	/* how many records does the user agent want, then? */
-	if (bsrt->hits <= *req->smallSetUpperBound)
-	{
-	    *toget = bsrt->hits;
-	    if ((comp.u.simple = req->smallSetElementSetNames))
-	        compp = &comp;
-	}
-	else if (bsrt->hits < *req->largeSetLowerBound)
-	{
-	    *toget = *req->mediumSetPresentNumber;
-	    if (*toget > bsrt->hits)
-		*toget = bsrt->hits;
-	    if ((comp.u.simple = req->mediumSetElementSetNames))
-	        compp = &comp;
-	}
-	else
-	    *toget = 0;
+        comp.which = Z_RecordComp_simple;
+        /* how many records does the user agent want, then? */
+        if (bsrt->hits <= *req->smallSetUpperBound)
+        {
+            *toget = bsrt->hits;
+            if ((comp.u.simple = req->smallSetElementSetNames))
+                compp = &comp;
+        }
+        else if (bsrt->hits < *req->largeSetLowerBound)
+        {
+            *toget = *req->mediumSetPresentNumber;
+            if (*toget > bsrt->hits)
+                *toget = bsrt->hits;
+            if ((comp.u.simple = req->mediumSetElementSetNames))
+                compp = &comp;
+        }
+        else
+            *toget = 0;
 
-	if (*toget && !resp->records)
-	{
-	    oident *prefformat;
-	    oid_value form;
+        if (*toget && !resp->records)
+        {
+            oident *prefformat;
+            oid_value form;
 
-	    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)))
-		form = VAL_NONE;
-	    else
-	    	form = prefformat->value;
-	    resp->records = pack_records(assoc, req->resultSetName, 1,
-		toget, compp, next, presst, form, req->referenceId,
-					 req->preferredRecordSyntax);
-	    if (!resp->records)
-		return 0;
-	    resp->numberOfRecordsReturned = toget;
-	    resp->nextResultSetPosition = next;
-	    resp->searchStatus = sr;
-	    resp->resultSetStatus = 0;
-	    resp->presentStatus = presst;
-	}
-	else
-	{
-	    if (*resp->resultCount)
-	    	*next = 1;
-	    resp->numberOfRecordsReturned = nulint;
-	    resp->nextResultSetPosition = next;
-	    resp->searchStatus = sr;
-	    resp->resultSetStatus = 0;
-	    resp->presentStatus = 0;
-	}
+            if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)))
+                form = VAL_NONE;
+            else
+                form = prefformat->value;
+            resp->records = pack_records(assoc, req->resultSetName, 1,
+                toget, compp, next, presst, form, req->referenceId,
+                               req->preferredRecordSyntax, NULL);
+            if (!resp->records)
+                return 0;
+            resp->numberOfRecordsReturned = toget;
+            returnedrecs=*toget;
+            resp->nextResultSetPosition = next;
+            resp->searchStatus = sr;
+            resp->resultSetStatus = 0;
+            resp->presentStatus = presst;
+        }
+        else
+        {
+            if (*resp->resultCount)
+                *next = 1;
+            resp->numberOfRecordsReturned = nulint;
+            resp->nextResultSetPosition = next;
+            resp->searchStatus = sr;
+            resp->resultSetStatus = 0;
+            resp->presentStatus = 0;
+        }
     }
     resp->additionalSearchInfo = bsrt->search_info;
+
+    if (log_request)
+    {
+        WRBUF wr=wrbuf_alloc();
+        wrbuf_put_zquery(wr, req->query);
+        if (bsrt->errcode)
+            wrbuf_printf(wr," ERROR %d %s", bsrt->errcode, bsrt->errstring);
+        else
+        {
+            wrbuf_printf(wr," OK:%d hits ",bsrt->hits);
+            if (returnedrecs)
+                wrbuf_printf(wr," Returned %d records", returnedrecs);
+        }
+        yaz_log(log_request, "Search %s", wrbuf_buf(wr) );
+        wrbuf_free(wr,1);
+    }
     return apdu;
 }
 
@@ -1849,7 +1936,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
  * speed - which is normally more true for search than for present.
  */
 static Z_APDU *process_presentRequest(association *assoc, request *reqb,
-				      int *fd)
+                                      int *fd)
 {
     Z_PresentRequest *req = reqb->apdu_request->u.presentRequest;
     oident *prefformat;
@@ -1858,41 +1945,43 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     Z_PresentResponse *resp;
     int *next;
     int *num;
+    int errcode=0;
 
-    yaz_log(LOG_LOG, "Got PresentRequest.");
+    yaz_log(log_requestdetail, "Got PresentRequest.");
 
     if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)))
-	form = VAL_NONE;
+        form = VAL_NONE;
     else
-	form = prefformat->value;
+        form = prefformat->value;
     resp = (Z_PresentResponse *)odr_malloc (assoc->encode, sizeof(*resp));
     resp->records = 0;
     resp->presentStatus = odr_intdup(assoc->encode, 0);
     if (assoc->init->bend_present)
     {
-	bend_present_rr *bprr = (bend_present_rr *)
-	    nmem_malloc (reqb->request_mem, sizeof(*bprr));
-	bprr->setname = req->resultSetId;
-	bprr->start = *req->resultSetStartPoint;
-	bprr->number = *req->numberOfRecordsRequested;
-	bprr->format = form;
-	bprr->comp = req->recordComposition;
-	bprr->referenceId = req->referenceId;
-	bprr->stream = assoc->encode;
-	bprr->print = assoc->print;
-	bprr->request = reqb;
-	bprr->association = assoc;
-	bprr->errcode = 0;
-	bprr->errstring = NULL;
-	(*assoc->init->bend_present)(assoc->backend, bprr);
-	
-	if (!bprr->request)
-	    return 0;
-	if (bprr->errcode)
-	{
-	    resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
-	    *resp->presentStatus = Z_PresentStatus_failure;
-	}
+        bend_present_rr *bprr = (bend_present_rr *)
+            nmem_malloc (reqb->request_mem, sizeof(*bprr));
+        bprr->setname = req->resultSetId;
+        bprr->start = *req->resultSetStartPoint;
+        bprr->number = *req->numberOfRecordsRequested;
+        bprr->format = form;
+        bprr->comp = req->recordComposition;
+        bprr->referenceId = req->referenceId;
+        bprr->stream = assoc->encode;
+        bprr->print = assoc->print;
+        bprr->request = reqb;
+        bprr->association = assoc;
+        bprr->errcode = 0;
+        bprr->errstring = NULL;
+        (*assoc->init->bend_present)(assoc->backend, bprr);
+        
+        if (!bprr->request)
+            return 0; /* should not happen */
+        if (bprr->errcode)
+        {
+            resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
+            *resp->presentStatus = Z_PresentStatus_failure;
+            errcode=bprr->errcode;
+        }
     }
     apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
     next = odr_intdup(assoc->encode, 0);
@@ -1905,16 +1994,35 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     
     if (!resp->records)
     {
-	*num = *req->numberOfRecordsRequested;
-	resp->records =
-	    pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
-		     num, req->recordComposition, next, resp->presentStatus,
-			 form, req->referenceId, req->preferredRecordSyntax);
+        *num = *req->numberOfRecordsRequested;
+        resp->records =
+            pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
+                     num, req->recordComposition, next, resp->presentStatus,
+                         form, req->referenceId, req->preferredRecordSyntax, 
+                         &errcode);
     }
     if (!resp->records)
-	return 0;
+        return 0;
     resp->numberOfRecordsReturned = num;
     resp->nextResultSetPosition = next;
+    if (log_request)
+    {
+        WRBUF wr=wrbuf_alloc();
+        wrbuf_printf(wr, "Present: [%s] %d+%d ",
+                req->resultSetId, *req->resultSetStartPoint,
+                *req->numberOfRecordsRequested);
+        if (*resp->presentStatus == Z_PresentStatus_failure)
+        {
+            wrbuf_printf(wr," ERROR %d ", errcode);
+        }
+        else if (*resp->presentStatus == Z_PresentStatus_success)
+            wrbuf_printf(wr," OK %d records returned ", *num);
+        else
+            wrbuf_printf(wr," Partial (%d) OK %d records returned ", 
+                    *resp->presentStatus, *num);
+        yaz_log(log_request, "%s", wrbuf_buf(wr) );
+        wrbuf_free(wr,1);
+    }
     
     return apdu;
 }
@@ -1928,18 +2036,18 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     Z_ScanRequest *req = reqb->apdu_request->u.scanRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
     Z_ScanResponse *res = (Z_ScanResponse *)
-	odr_malloc (assoc->encode, sizeof(*res));
+        odr_malloc (assoc->encode, sizeof(*res));
     int *scanStatus = odr_intdup(assoc->encode, Z_Scan_failure);
     int *numberOfEntriesReturned = odr_intdup(assoc->encode, 0);
     Z_ListEntries *ents = (Z_ListEntries *)
-	odr_malloc (assoc->encode, sizeof(*ents));
+        odr_malloc (assoc->encode, sizeof(*ents));
     Z_DiagRecs *diagrecs_p = NULL;
     oident *attset;
     bend_scan_rr *bsrr = (bend_scan_rr *)
         odr_malloc (assoc->encode, sizeof(*bsrr));
     struct scan_entry *save_entries;
 
-    yaz_log(LOG_LOG, "Got ScanRequest");
+    yaz_log(log_requestdetail, "Got ScanRequest");
 
     apdu->which = Z_APDU_scanResponse;
     apdu->u.scanResponse = res;
@@ -1948,7 +2056,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     /* if step is absent, set it to 0 */
     res->stepSize = odr_intdup(assoc->encode, 0);
     if (req->stepSize)
-	*res->stepSize = *req->stepSize;
+        *res->stepSize = *req->stepSize;
 
     res->scanStatus = scanStatus;
     res->numberOfEntriesReturned = numberOfEntriesReturned;
@@ -1965,8 +2073,11 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     {
         int i;
         for (i = 0; i < req->num_databaseNames; i++)
-            yaz_log (LOG_LOG, "Database '%s'", req->databaseNames[i]);
+            yaz_log (log_requestdetail, "Database '%s'", req->databaseNames[i]);
     }
+    yaz_log(log_requestdetail, "pos %d  step %d  entries %d",
+            *req->preferredPositionInResponse, *res->stepSize, 
+            *req->numberOfTermsRequested);
     bsrr->num_bases = req->num_databaseNames;
     bsrr->basenames = req->databaseNames;
     bsrr->num_entries = *req->numberOfTermsRequested;
@@ -2003,11 +2114,14 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
         bsrr->attributeset = attset->value;
     else
         bsrr->attributeset = VAL_NONE;
-    log_scan_term (req->termListAndStartPoint, bsrr->attributeset);
+    log_scan_term_level (log_requestdetail, req->termListAndStartPoint, 
+            bsrr->attributeset);
     bsrr->term_position = req->preferredPositionInResponse ?
         *req->preferredPositionInResponse : 1;
+
     ((int (*)(void *, bend_scan_rr *))
      (*assoc->init->bend_scan))(assoc->backend, bsrr);
+
     if (bsrr->errcode)
         diagrecs_p = diagrecs(assoc, bsrr->errcode, bsrr->errstring);
     else
@@ -2022,7 +2136,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
             *scanStatus = Z_Scan_success;
         ents->entries = tab;
         ents->num_entries = bsrr->num_entries;
-        res->numberOfEntriesReturned = &ents->num_entries;	    
+        res->numberOfEntriesReturned = &ents->num_entries;          
         res->positionOfTerm = &bsrr->term_position;
         for (i = 0; i < bsrr->num_entries; i++)
         {
@@ -2062,7 +2176,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
                                strlen(bsrr->entries[i].term));
                 memcpy(o->buf, bsrr->entries[i].term, o->len);
                 yaz_log(LOG_DEBUG, "  term #%d: '%s' (%d)", i,
-			 bsrr->entries[i].term, bsrr->entries[i].occurrences);
+                         bsrr->entries[i].term, bsrr->entries[i].occurrences);
             }
             else
             {
@@ -2078,8 +2192,28 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     }
     if (diagrecs_p)
     {
-	ents->num_nonsurrogateDiagnostics = diagrecs_p->num_diagRecs;
-	ents->nonsurrogateDiagnostics = diagrecs_p->diagRecs;
+        ents->num_nonsurrogateDiagnostics = diagrecs_p->num_diagRecs;
+        ents->nonsurrogateDiagnostics = diagrecs_p->diagRecs;
+    }
+    if (log_request)
+    {
+        WRBUF wr=wrbuf_alloc();
+        wrbuf_printf(wr, "Scan  %d@%d ",
+            *req->preferredPositionInResponse, 
+            *req->numberOfTermsRequested);
+        if (*res->stepSize)
+            wrbuf_printf(wr, "(step %d) ",*res->stepSize);
+        wrbuf_scan_term(wr, req->termListAndStartPoint, 
+            bsrr->attributeset);
+        
+        if (*res->scanStatus == Z_Scan_success)
+        {
+            wrbuf_printf(wr," OK");
+        }
+        else 
+            wrbuf_printf(wr," Error");
+        yaz_log(log_request, "%s", wrbuf_buf(wr) );
+        wrbuf_free(wr,1);
     }
     return apdu;
 }
@@ -2087,21 +2221,28 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     int *fd)
 {
+    int i;
     Z_SortRequest *req = reqb->apdu_request->u.sortRequest;
     Z_SortResponse *res = (Z_SortResponse *)
-	odr_malloc (assoc->encode, sizeof(*res));
+        odr_malloc (assoc->encode, sizeof(*res));
     bend_sort_rr *bsrr = (bend_sort_rr *)
-	odr_malloc (assoc->encode, sizeof(*bsrr));
+        odr_malloc (assoc->encode, sizeof(*bsrr));
 
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
 
-    yaz_log(LOG_LOG, "Got SortRequest.");
+    yaz_log(log_requestdetail, "Got SortRequest.");
 
     bsrr->num_input_setnames = req->num_inputResultSetNames;
+    for (i=0;i<req->num_inputResultSetNames;i++)
+        yaz_log(log_requestdetail, "Input resultset: '%s'",
+                req->inputResultSetNames[i]);
     bsrr->input_setnames = req->inputResultSetNames;
     bsrr->referenceId = req->referenceId;
     bsrr->output_setname = req->sortedResultSetName;
+    yaz_log(log_requestdetail, "Output resultset: '%s'",
+                req->sortedResultSetName);
     bsrr->sort_sequence = req->sortSequence;
+       /*FIXME - dump those sequences too */
     bsrr->stream = assoc->encode;
     bsrr->print = assoc->print;
 
@@ -2116,38 +2257,62 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     res->resultSetStatus = 0;
     if (bsrr->errcode)
     {
-	Z_DiagRecs *dr = diagrecs (assoc, bsrr->errcode, bsrr->errstring);
-	res->diagnostics = dr->diagRecs;
-	res->num_diagnostics = dr->num_diagRecs;
+        Z_DiagRecs *dr = diagrecs (assoc, bsrr->errcode, bsrr->errstring);
+        res->diagnostics = dr->diagRecs;
+        res->num_diagnostics = dr->num_diagRecs;
     }
     else
     {
-	res->num_diagnostics = 0;
-	res->diagnostics = 0;
+        res->num_diagnostics = 0;
+        res->diagnostics = 0;
     }
     res->resultCount = 0;
     res->otherInfo = 0;
 
     apdu->which = Z_APDU_sortResponse;
     apdu->u.sortResponse = res;
+    if (log_request)
+    {
+        WRBUF wr=wrbuf_alloc();
+        wrbuf_printf(wr, "Sort (");
+        for (i=0;i<req->num_inputResultSetNames;i++)
+        {
+            if (i)
+                wrbuf_printf(wr,",");
+            wrbuf_printf(wr, req->inputResultSetNames[i]);
+        }
+        wrbuf_printf(wr,")->%s ",req->sortedResultSetName);
+
+        /* FIXME - dump also the sort sequence */
+        if (bsrr->errcode)
+            wrbuf_diags(wr, res->num_diagnostics, res->diagnostics);
+        else
+            wrbuf_printf(wr," OK");
+        yaz_log(log_request, "%s", wrbuf_buf(wr) );
+        wrbuf_free(wr,1);
+    }
     return apdu;
 }
 
 static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     int *fd)
 {
+    int i;
     Z_DeleteResultSetRequest *req =
         reqb->apdu_request->u.deleteResultSetRequest;
     Z_DeleteResultSetResponse *res = (Z_DeleteResultSetResponse *)
-	odr_malloc (assoc->encode, sizeof(*res));
+        odr_malloc (assoc->encode, sizeof(*res));
     bend_delete_rr *bdrr = (bend_delete_rr *)
-	odr_malloc (assoc->encode, sizeof(*bdrr));
+        odr_malloc (assoc->encode, sizeof(*bdrr));
     Z_APDU *apdu = (Z_APDU *)odr_malloc (assoc->encode, sizeof(*apdu));
 
-    yaz_log(LOG_LOG, "Got DeleteRequest.");
+    yaz_log(log_requestdetail, "Got DeleteRequest.");
 
     bdrr->num_setnames = req->num_resultSetList;
     bdrr->setnames = req->resultSetList;
+    for (i=0;i<req->num_resultSetList;i++)
+        yaz_log(log_requestdetail, "resultset: '%s'",
+                req->resultSetList[i]);
     bdrr->stream = assoc->encode;
     bdrr->print = assoc->print;
     bdrr->function = *req->deleteFunction;
@@ -2155,12 +2320,11 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     bdrr->statuses = 0;
     if (bdrr->num_setnames > 0)
     {
-	int i;
-	bdrr->statuses = (int*) 
-	    odr_malloc(assoc->encode, sizeof(*bdrr->statuses) *
-		       bdrr->num_setnames);
-	for (i = 0; i < bdrr->num_setnames; i++)
-	    bdrr->statuses[i] = 0;
+        bdrr->statuses = (int*) 
+            odr_malloc(assoc->encode, sizeof(*bdrr->statuses) *
+                       bdrr->num_setnames);
+        for (i = 0; i < bdrr->num_setnames; i++)
+            bdrr->statuses[i] = 0;
     }
     (*assoc->init->bend_delete)(assoc->backend, bdrr);
     
@@ -2171,26 +2335,26 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     res->deleteListStatuses = 0;
     if (bdrr->num_setnames > 0)
     {
-	int i;
-	res->deleteListStatuses = (Z_ListStatuses *)
-	    odr_malloc(assoc->encode, sizeof(*res->deleteListStatuses));
-	res->deleteListStatuses->num = bdrr->num_setnames;
-	res->deleteListStatuses->elements =
-	    (Z_ListStatus **)
-	    odr_malloc (assoc->encode, 
-			sizeof(*res->deleteListStatuses->elements) *
-			bdrr->num_setnames);
-	for (i = 0; i<bdrr->num_setnames; i++)
-	{
-	    res->deleteListStatuses->elements[i] =
-		(Z_ListStatus *)
-		odr_malloc (assoc->encode,
-			    sizeof(**res->deleteListStatuses->elements));
-	    res->deleteListStatuses->elements[i]->status = bdrr->statuses+i;
-	    res->deleteListStatuses->elements[i]->id =
-		odr_strdup (assoc->encode, bdrr->setnames[i]);
-	    
-	}
+        int i;
+        res->deleteListStatuses = (Z_ListStatuses *)
+            odr_malloc(assoc->encode, sizeof(*res->deleteListStatuses));
+        res->deleteListStatuses->num = bdrr->num_setnames;
+        res->deleteListStatuses->elements =
+            (Z_ListStatus **)
+            odr_malloc (assoc->encode, 
+                        sizeof(*res->deleteListStatuses->elements) *
+                        bdrr->num_setnames);
+        for (i = 0; i<bdrr->num_setnames; i++)
+        {
+            res->deleteListStatuses->elements[i] =
+                (Z_ListStatus *)
+                odr_malloc (assoc->encode,
+                            sizeof(**res->deleteListStatuses->elements));
+            res->deleteListStatuses->elements[i]->status = bdrr->statuses+i;
+            res->deleteListStatuses->elements[i]->id =
+                odr_strdup (assoc->encode, bdrr->setnames[i]);
+            
+        }
     }
     res->numberNotDeleted = 0;
     res->bulkStatuses = 0;
@@ -2199,6 +2363,19 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
 
     apdu->which = Z_APDU_deleteResultSetResponse;
     apdu->u.deleteResultSetResponse = res;
+    if (log_request)
+    {
+        WRBUF wr=wrbuf_alloc();
+        wrbuf_printf(wr, "Delete ");
+        for (i=0;i<req->num_resultSetList;i++)
+            wrbuf_printf(wr, " '%s' ", req->resultSetList[i]);
+        if (bdrr->delete_status)
+            wrbuf_printf(wr," ERROR %d", bdrr->delete_status);
+        else
+            wrbuf_printf(wr,"OK");
+        yaz_log(log_request, "%s", wrbuf_buf(wr) );
+        wrbuf_free(wr,1);
+    }
     return apdu;
 }
 
@@ -2207,39 +2384,40 @@ static void process_close(association *assoc, request *reqb)
     Z_Close *req = reqb->apdu_request->u.close;
     static char *reasons[] =
     {
-	"finished",
-	"shutdown",
-	"systemProblem",
-	"costLimit",
-	"resources",
-	"securityViolation",
-	"protocolError",
-	"lackOfActivity",
-	"peerAbort",
-	"unspecified"
+        "finished",
+        "shutdown",
+        "systemProblem",
+        "costLimit",
+        "resources",
+        "securityViolation",
+        "protocolError",
+        "lackOfActivity",
+        "peerAbort",
+        "unspecified"
     };
 
-    yaz_log(LOG_LOG, "Got Close, reason %s, message %s",
-	reasons[*req->closeReason], req->diagnosticInformation ?
-	req->diagnosticInformation : "NULL");
+    yaz_log(log_requestdetail, "Got Close, reason %s, message %s",
+        reasons[*req->closeReason], req->diagnosticInformation ?
+        req->diagnosticInformation : "NULL");
     if (assoc->version < 3) /* to make do_force respond with close */
-    	assoc->version = 3;
+        assoc->version = 3;
     do_close_req(assoc, Z_Close_finished,
-		 "Association terminated by client", reqb);
+                 "Association terminated by client", reqb);
+    yaz_log(log_request,"Close OK");
 }
 
 void save_referenceId (request *reqb, Z_ReferenceId *refid)
 {
     if (refid)
     {
-	reqb->len_refid = refid->len;
-	reqb->refid = (char *)nmem_malloc (reqb->request_mem, refid->len);
-	memcpy (reqb->refid, refid->buf, refid->len);
+        reqb->len_refid = refid->len;
+        reqb->refid = (char *)nmem_malloc (reqb->request_mem, refid->len);
+        memcpy (reqb->refid, refid->buf, refid->len);
     }
     else
     {
-	reqb->len_refid = 0;
-	reqb->refid = NULL;
+        reqb->len_refid = 0;
+        reqb->refid = NULL;
     }
 }
 
@@ -2259,7 +2437,7 @@ Z_ReferenceId *bend_request_getid (ODR odr, bend_request req)
 {
     Z_ReferenceId *id;
     if (!req->refid)
-	return 0;
+        return 0;
     id = (Odr_oct *)odr_malloc (odr, sizeof(*odr));
     id->buf = (unsigned char *)odr_malloc (odr, req->len_refid);
     id->len = id->size = req->len_refid;
@@ -2280,7 +2458,7 @@ int bend_backend_respond (bend_association a, bend_request req)
     int r;
     r = process_z_request (a, req, &msg);
     if (r < 0)
-	yaz_log (LOG_WARN, "%s", msg);
+        yaz_log (LOG_WARN, "%s", msg);
     return r;
 }
 
@@ -2319,7 +2497,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 
     Z_ExtendedServicesResponse *resp = apdu->u.extendedServicesResponse;
 
-    yaz_log(LOG_DEBUG,"inside Process esRequest");
+    yaz_log(log_requestdetail,"Got EsRequest");
 
     esrequest.esr = reqb->apdu_request->u.extendedServicesRequest;
     esrequest.stream = assoc->encode;
@@ -2343,31 +2521,39 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     if (esrequest.errcode == -1)
     {
         /* Backend service indicates request will be processed */
-        yaz_log(LOG_DEBUG,"Request could be processed...Accepted !");
+        yaz_log(log_request,"EsRequest OK: Accepted !");
         *resp->operationStatus = Z_ExtendedServicesResponse_accepted;
     }
     else if (esrequest.errcode == 0)
     {
         /* Backend service indicates request will be processed */
-        yaz_log(LOG_DEBUG,"Request could be processed...Done !");
+        yaz_log(log_request,"EsRequest OK: Done !");
         *resp->operationStatus = Z_ExtendedServicesResponse_done;
     }
     else
     {
-	Z_DiagRecs *diagRecs = diagrecs (assoc, esrequest.errcode,
-					 esrequest.errstring);
+        Z_DiagRecs *diagRecs = diagrecs (assoc, esrequest.errcode,
+                                         esrequest.errstring);
 
         /* Backend indicates error, request will not be processed */
         yaz_log(LOG_DEBUG,"Request could not be processed...failure !");
         *resp->operationStatus = Z_ExtendedServicesResponse_failure;
-	resp->num_diagnostics = diagRecs->num_diagRecs;
-	resp->diagnostics = diagRecs->diagRecs;
+        resp->num_diagnostics = diagRecs->num_diagRecs;
+        resp->diagnostics = diagRecs->diagRecs;
+        if (log_request)
+        {
+            WRBUF wr=wrbuf_alloc();
+            wrbuf_diags(wr, resp->num_diagnostics, resp->diagnostics);
+            yaz_log(log_request, "EsRequest %s", wrbuf_buf(wr) );
+            wrbuf_free(wr,1);
+        }
+
     }
     /* Do something with the members of bend_extendedservice */
     if (esrequest.taskPackage)
-	resp->taskPackage = z_ext_record (assoc->encode, VAL_EXTENDED,
-					 (const char *)  esrequest.taskPackage,
-					  -1);
+        resp->taskPackage = z_ext_record (assoc->encode, VAL_EXTENDED,
+                                         (const char *)  esrequest.taskPackage,
+                                          -1);
     yaz_log(LOG_DEBUG,"Send the result apdu");
     return apdu;
 }

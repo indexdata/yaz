@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.55 2004-05-10 10:46:26 adam Exp $
+## $Id: Makefile.am,v 1.56 2004-11-16 17:08:11 heikki Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -20,8 +20,8 @@ HTMLFILES = \
  odr.programming.html odr.use.html server.backendfunctions.html \
  server.backend.html server.frontend.html server.html server.invocation.html \
  server.main.html soap.html soap.http.html soap.xml.html soap.srw.html \
- tools.html tools.marc.html tools.nmem.html tools.oid.html yaz.html \
- zoom.events.html zoom.html zoom.options.html zoom.query.html \
+ tools.html tools.marc.html tools.nmem.html tools.log.html tools.oid.html \
+ yaz.html zoom.events.html zoom.html zoom.options.html zoom.query.html \
  zoom.records.html zoom.resultsets.html zoom.scan.html
 
 MANFILES=yaz-client.1 yaz-ztest.8 \
@@ -95,7 +95,7 @@ dist-hook:
 			fi \
 		done; \
 		if test "$$found" = "0"; then \
-			echo "$$h not found in HTMLFILES"; \
+			echo "$$b not found in HTMLFILES"; \
 			exit 1; \
 		fi \
 	done

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.13 2004-11-09 20:54:08 adam Exp $
+ * $Id: log.c,v 1.14 2004-11-16 17:08:11 heikki Exp $
  */
 
 /**
@@ -35,7 +35,6 @@
 #include <time.h>
 #include <yaz/nmem.h>
 #include <yaz/log.h>
-#include <yaz/nmem.h>
 
 static NMEM_MUTEX log_mutex = 0;
 static int mutex_init_flag = 0; /* not yet initialized */
@@ -89,6 +88,7 @@ static struct {
     { LOG_APP3,   "app3" },
     { LOG_ALL,    "all"  },
     { LOG_FLUSH,  "flush" },
+    { LOG_LOGLVL, "loglevel" }, 
     { 0,          "none" },
     { 0, NULL }
     /* the rest will be filled in if the user defines dynamic modules*/
@@ -156,6 +156,7 @@ static void rotate_log()
     newname[509] = '\0'; /* make sure it is terminated */
     strcat(newname,".1");
 #ifdef WIN32
+    /* windows can't rename a file if it is open */
     fclose(l_file);
     l_file = stderr;
 #endif
@@ -172,6 +173,22 @@ void yaz_log_init_level (int level)
         yaz_log_reopen(); /* make sure we set buffering right */
     } else
         l_level = level;
+    if (l_level  & LOG_LOGLVL)
+    {  /* dump the log level bits */
+        char *bittype="Static ";
+        int i;
+        yaz_log(LOG_LOGLVL,"Setting log level to %d = 0x%08x",l_level,l_level);
+        for (i = 0; mask_names[i].name; i++)
+            if (mask_names[i].mask && *mask_names[i].name)
+                if (strcmp(mask_names[i].name,"all")!=0)
+                {
+                    yaz_log(LOG_LOGLVL,"%s log bit %08x '%s' is %s",
+                        bittype, mask_names[i].mask, mask_names[i].name,
+                        (level & mask_names[i].mask)?  "ON": "off");
+                if (mask_names[i].mask>LOG_LAST_BIT)
+                    bittype="Dynamic";
+                }
+    }
 }
 
 void yaz_log_init_prefix (const char *prefix)
@@ -359,7 +376,14 @@ int yaz_log_module_level(const char *name)
     char *n = clean_name(name, strlen(name), clean, sizeof(clean));
     for (i = 0; mask_names[i].name; i++)
         if (0==strcmp(n,mask_names[i].name))
+        {
+            yaz_log(LOG_LOGLVL,"returning log bit 0x%x for '%s' %s",
+                    mask_names[i].mask, n, 
+                    strcmp(n,name)?name:"" );
             return mask_names[i].mask;
+        }
+    yaz_log(LOG_LOGLVL,"returning NO log bit for '%s' %s", n, 
+                    strcmp(n,name)?name:"" );
     return 0;
 }
 
@@ -390,14 +414,12 @@ int yaz_log_mask_str_x (const char *str, int level)
         {
             n = clean_name(str, p-str, clean, sizeof(clean));
             for (i = 0; mask_names[i].name; i++)
-                /*if (strlen (mask_names[i].name) == (size_t) (p-str) &&
-                    memcmp (mask_names[i].name, str, p-str) == 0)*/
                 if (0==strcmp (mask_names[i].name,n))
                 {
                     if (mask_names[i].mask)
                         level |= mask_names[i].mask;
                     else
-                        level = 0;
+                        level = 0; /* 'none' clears them all */
                     found = 1;
                 }
         }

@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.38 2004-10-02 13:41:46 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.39 2004-11-16 17:08:11 heikki Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1796,6 +1796,126 @@ typedef struct oident
 
   </sect1>
 
+  <sect1 id="tools.log"><title>Log</title>
+  <para>
+   Yaz has evolved a fairly complex log system which should be useful both 
+   for debugging &yaz; itself, debugging applications that use yaz, and for
+   production use of those applications.  
+  </para>
+  <para>
+   The log functions are declared in <filename>log.h</filename> and 
+   implemented in <filename>log.c</filename>.  The key points of the interface
+   are:
+  </para>
+  <screen>
+   void yaz_log(int level, const char *fmt, ...)
+
+   void yaz_log_init(int level, const char *prefix, const char *name);
+   void yaz_log_init_file(const char *fname);
+   void yaz_log_init_level(int level);
+   void yaz_log_init_prefix(const char *prefix);
+   void yaz_log_time_format(const char *fmt);
+   void yaz_log_init_max_size(int mx);
+
+   int yaz_log_mask_str(const char *str);
+   int yaz_log_module_level(const char *name);
+  </screen>
+
+  <para>
+   The reason for the whole log module is the <function>yaz_log</function>
+   function. It takes a bitmask indicating the log levels, a
+   <literal>printf</literal>-like format string, and a variable number of
+   arguments to log.
+  </para>
+
+  <para>
+   The <literal>log level</literal> is a bit mask, that says on which level(s)
+   the log entry should be made, and optionally set some behaviour of the
+   logging. In the most simple cases, it can be one of <literal>LOG_FATAL,
+   LOG_DEBUG, LOG_WARN, LOG_LOG</literal>. Those can be combined with bits
+   that modify the way the log entry is written:<literal>LOG_ERRNO, LOG_NOTIME,
+   LOG_FLUSH</literal>. Most of the rest of the bits are deprecated, and
+   should not be used.
+  </para>
+
+  <para>
+   Applications that use yaz, should not use the LOG_LOG for ordinary
+   messages, but should make use of the dynamic loglevel system. This consists
+   of two parts, defining the loglevel and checking it.
+  </para>
+
+  <para>
+   To define the log levels, the (main) program should pass a string to
+   <function>yaz_log_mask_str</function> to define which log levels are to be
+   logged. This string should be a comma-separated list of log level names,
+   and can contain both hard-coded names and dynamic ones. The log level
+   calculation starts with <literal>LOG_DEFAULT_LEVEL</literal> and adds a bit
+   for each word it meets. If the string <literal>'none'</literal> is found,
+   the bits are cleared. Typically this string comes from the command-line,
+   often identified by <literal>-v</literal>. The
+   <function>yaz_log_mask_str</function> returns a log level that should be
+   passed to <function>yaz_log_init_level</function> for it to take effect.
+  </para>
+
+  <para>
+   Each module should check what log bits it should be used, by calling 
+   <function>yaz_log_module_level</function> with a suitable name for the
+   module. The name is cleared from a preceding path and an extension, if any,
+   so it is quite possible to use <literal>__FILE__</literal> for it. If the
+   name has been passed to <function>yaz_log_mask_str</function>, the routine
+   returns a non-zero bitmask, which should then be used in consequent calls
+   to yaz_log. (It can also be tested, so as to avoid unnecessary calls to
+   yaz_log, in time-critical places, or when the log entry would take time 
+   to construct.) 
+  </para>
+
+  <para>
+   By default the log is written to stderr, but this can be changed by a call
+   to <function>yaz_log_init_file</function> or
+   <function>yaz_log_init</function>. If the log is directed to a file, the
+   file size is checked at every write, and if it exceeds the limit given in
+   <function>yaz_log_init_max_size</function>, the log is rotated. The
+   rotation keeps one old version (with a <literal>.1</literal> appended to
+   the name). The size defaults to 1GB. Setting it to zero will disable the
+   rotation feature.
+  </para>
+
+  <para>
+   The log entries start with a time stamp. This can be omitted by setting the
+   <literal>LOG_NOTIME</literal> bit in the loglevel. This way automatic tests
+   can be hoped to produce identical log files, that are easy to diff. The
+   format of the time stamp can be set with
+   <function>yaz_log_time_format</function>, which takes a format string just
+   like <function>strftime</function>.
+  </para>
+
+  <para>
+   Next in a log line comes the prefix, often the name of the program. Then
+   comes one or more logbits in square brackets, depending on the logging
+   level set by <function>yaz_log_init_level</function> and the loglevel
+   passed to <function>yaz_log_init_level</function>. Finally comes all format
+   string and additional values passed to <function>yaz_log</function>
+  </para>
+
+  <para>
+   The log level <literal>LOG_LOGLVL</literal>, enabled by the string
+   <literal>loglevel</literal>, will log all the log-level affecting
+   operations. This can come in handy if you need to know what other log
+   levels would be useful. Grep the logfile for <literal>[loglevel]</literal>.
+  </para>
+
+  <para>
+   The log system is almost independent of the rest of &yaz;, the only
+   important dependence is of <filename>nmem</filename>, and that only for
+   using the semaphore definition there. 
+  </para>
+
+  <para>
+   The dynamic log levels and log rotation were introduced in &yaz; 2.0.28.
+  </para>
+
+  </sect1>
+  
   <sect1 id="tools.marc"><title>MARC</title>
    
    <para>

@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.10 2004-11-02 11:37:21 heikki Exp $
+ * $Id: statserv.c,v 1.11 2004-11-16 17:08:11 heikki Exp $
  */
 
 /**
@@ -48,10 +48,14 @@
 
 static IOCHAN pListener = NULL;
 
-static char *me = "statserver";
+static char *me = "statserver"; /* log prefix */
+static char *programname="statserver"; /* full program name */
 /*
  * default behavior.
  */
+#define STAT_DEFAULT_LOG_LEVEL "none,fatal,warn,log,server,session,request"
+/* the 'none' clears yaz' own default settings, including [log] */
+
 int check_options(int argc, char **argv);
 statserv_options_block control_block = {
     1,                          /* dynamic mode */
@@ -88,6 +92,22 @@ statserv_options_block control_block = {
 };
 
 static int max_sessions = 0;
+
+static int logbits_set=0;
+static int log_session=0;
+static int log_server=0;
+
+/** get_logbits sets global loglevel bits */
+static void get_logbits(int force)
+{ /* needs to be called after parsing cmd-line args that can set loglevels!*/
+    if (force || !logbits_set)
+    {
+        logbits_set=1;
+        log_session=yaz_log_module_level("session");
+        log_server=yaz_log_module_level("server");
+    }
+}
+
 
 /*
  * handle incoming connect requests.
@@ -238,7 +258,7 @@ void statserv_closedown()
         /* Now we can really do something */
         if (iHandles > 0)
         {
-            logf (LOG_LOG, "waiting for %d to die", iHandles);
+            logf (log_server, "waiting for %d to die", iHandles);
             /* This will now wait, until all the threads close */
             WaitForMultipleObjects(iHandles, pThreadHandles, TRUE, INFINITE);
 
@@ -423,7 +443,7 @@ static void listener(IOCHAN h, int event)
 			iochan_destroy(pp);
 		    }
 		}
-		sprintf(nbuf, "%s(%d)", me, getpid());
+		sprintf(nbuf, "%s(%d)", me, no_sessions);
 		yaz_log_init(control_block.loglevel, nbuf, 0);
                 /* ensure that bend_stop is not called when each child exits -
                    only for the main process ..  */
@@ -514,9 +534,9 @@ static void listener(IOCHAN h, int event)
             pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
             pth_attr_set (attr, PTH_ATTR_STACK_SIZE, 32*1024);
             pth_attr_set (attr, PTH_ATTR_NAME, "session");
-            yaz_log (LOG_LOG, "pth_spawn begin");
+            yaz_log (LOG_DEBUG, "pth_spawn begin");
 	    child_thread = pth_spawn (attr, new_session, new_line);
-            yaz_log (LOG_LOG, "pth_spawn finish");
+            yaz_log (LOG_DEBUG, "pth_spawn finish");
             pth_attr_destroy (attr);
 	}
 	else
@@ -527,7 +547,7 @@ static void listener(IOCHAN h, int event)
     }
     else if (event == EVENT_TIMEOUT)
     {
-    	yaz_log(LOG_LOG, "Shutting down listener.");
+    	yaz_log(log_server, "Shutting down listener.");
         iochan_destroy(h);
     }
     else
@@ -579,8 +599,8 @@ static void *new_session (void *vp)
 #else
     a = 0;
 #endif
-    yaz_log(LOG_LOG, "Starting session %d from %s",
-        no_sessions, a ? a : "[Unknown]");
+    yaz_log(log_session, "Starting session from %s (pid=%d)",
+        a ? a : "[Unknown]", getpid());
     if (max_sessions && no_sessions == max_sessions)
         control_block.one_shot = 1;
     if (control_block.threads)
@@ -614,7 +634,7 @@ static void inetd_connection(int what)
                 iochan_setdata(chan, assoc);
                 iochan_settimeout(chan, 60);
                 addr = cs_addrstr(line);
-                yaz_log(LOG_LOG, "Inetd association from %s",
+                yaz_log(log_session, "Inetd association from %s",
                         addr ? addr : "[UNKNOWN]");
 		assoc->cs_get_mask = EVENT_INPUT;
             }
@@ -653,7 +673,7 @@ static int add_listener(char *where, int what)
     else
 	mode = "static";
 
-    yaz_log(LOG_LOG, "Adding %s %s listener on %s", mode,
+    yaz_log(log_server, "Adding %s %s listener on %s", mode,
 	    what == PROTO_SR ? "SR" : "Z3950", where);
 
     l = cs_create_host(where, 2, &ap);
@@ -716,7 +736,7 @@ static void statserv_reset(void)
 int statserv_start(int argc, char **argv)
 {
     int ret = 0;
-
+    char sep;
 #ifdef WIN32
     /* We need to initialize the thread list */
     ThreadList_Initialize();
@@ -724,20 +744,23 @@ int statserv_start(int argc, char **argv)
 #endif
     
 #ifdef WIN32
-    if ((me = strrchr (argv[0], '\\')))
-	me++;
+    sep='\\';
+#else
+    sep='/';
+#endif
+    if ((me = strrchr (argv[0], sep)))
+	me++; /* get the basename */
     else
 	me = argv[0];
-#else
-    me = argv[0];
-#endif
+    programname=argv[0];
+
     if (control_block.options_func(argc, argv))
         return(1);
     
     if (control_block.bend_start)
         (*control_block.bend_start)(&control_block);
 #ifdef WIN32
-    yaz_log (LOG_LOG, "Starting server %s", me);
+    yaz_log (log_server, "Starting server %s", me);
     if (!pListener && *control_block.default_listen)
 	add_listener(control_block.default_listen,
 		     control_block.default_proto);
@@ -791,7 +814,8 @@ int statserv_start(int argc, char **argv)
 	    fclose(f);
 	}
 
-	yaz_log (LOG_LOG, "Starting server %s pid=%d", me, getpid());
+	yaz_log (log_server, "Starting server %s pid=%d", programname, getpid());
+        
 #if 0
 	sigset_t sigs_to_block;
 	
@@ -830,7 +854,7 @@ int statserv_start(int argc, char **argv)
 	ret = 1;
     else
     {
-	yaz_log(LOG_LOG, "Entering event loop.");
+	yaz_log(LOG_DEBUG, "Entering event loop.");
         ret = event_loop(&pListener);
     }
     return ret;
@@ -840,6 +864,10 @@ int check_options(int argc, char **argv)
 {
     int ret = 0, r;
     char *arg;
+
+    /* set default log level */
+    control_block.loglevel = yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL);
+    yaz_log_init_level(control_block.loglevel);
 
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:",
 			  argv, argc, &arg)) != -2)
@@ -881,7 +909,7 @@ int check_options(int argc, char **argv)
 	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
 	    break;
 	case 'v':
-	    control_block.loglevel = yaz_log_mask_str(arg);
+	    control_block.loglevel = yaz_log_mask_str_x(arg,control_block.loglevel);
 	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
 	    break;
 	case 'a':
@@ -947,6 +975,7 @@ int check_options(int argc, char **argv)
 	    return 1;
         }
     }
+    get_logbits(1); 
     return 0;
 }
 
