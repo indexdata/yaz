@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added yaz-client commands scansize that sets maximum number of
+entries to be returned by scan.
+
 --- 2.0.32 2005/01/11 
 
 Added support for SRW scan in yaz-client and Generic Frontend Server.

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.272 2005-01-27 09:05:09 adam Exp $
+ * $Id: client.c,v 1.273 2005-02-02 17:11:05 adam Exp $
  */
 
 #include <stdio.h>
@@ -130,6 +130,7 @@ static Odr_bitmask z3950_options;
 static int z3950_version = 3;
 static int scan_stepSize = 0;
 static int scan_position = 1;
+static int scan_size = 20;
 static char cur_host[200];
 
 typedef enum {
@@ -601,7 +602,7 @@ int session_connect(const char *arg)
     strncpy(type_and_host, arg, sizeof(type_and_host)-1);
     type_and_host[sizeof(type_and_host)-1] = '\0';
 
-    cmd_open_remember_last_open_command(arg,type_and_host);
+    cmd_open_remember_last_open_command(arg, type_and_host);
 
     if (yazProxy)
         conn = cs_create_host(yazProxy, 1, &add);
@@ -2285,9 +2286,14 @@ static int cmd_explain(const char *arg)
 
 static int cmd_init(const char *arg)
 {
+    if (*arg)
+    {
+        strncpy (cur_host, arg, sizeof(cur_host)-1);
+        cur_host[sizeof(cur_host)-1] = 0;
+    }
     if (!conn || protocol != PROTO_Z3950)
        return 0;
-    send_initRequest(0);
+    send_initRequest(cur_host);
     return 2;
 }
 
@@ -2870,6 +2876,14 @@ int cmd_scanpos(const char *arg)
     return 0;
 }
 
+int cmd_scansize(const char *arg)
+{
+    int r = sscanf(arg, "%d", &scan_size);
+    if (r == 0)
+        scan_size = 20;
+    return 0;
+}
+
 int cmd_scan(const char *arg)
 {
     if (protocol == PROTO_HTTP)
@@ -2881,12 +2895,12 @@ int cmd_scan(const char *arg)
 	    return 0;
 	if (*arg)
 	{
-	    if (send_SRW_scanRequest(arg, scan_position, 20) < 0)
+	    if (send_SRW_scanRequest(arg, scan_position, scan_size) < 0)
 		return 0;
 	}
 	else
 	{
-	    if (send_SRW_scanRequest(last_scan_line, 1, 20) < 0)
+	    if (send_SRW_scanRequest(last_scan_line, 1, scan_size) < 0)
 		return 0;
 	}
 	return 2;
@@ -2913,12 +2927,12 @@ int cmd_scan(const char *arg)
 	if (*arg)
 	{
 	    strcpy (last_scan_query, arg);
-	    if (send_scanrequest(arg, scan_position, 20, 0) < 0)
+	    if (send_scanrequest(arg, scan_position, scan_size, 0) < 0)
 		return 0;
 	}
 	else
 	{
-	    if (send_scanrequest(last_scan_query, 1, 20, last_scan_line) < 0)
+	    if (send_scanrequest(last_scan_query, 1, scan_size, last_scan_line) < 0)
 		return 0;
 	}
 	return 2;
@@ -4052,6 +4066,7 @@ static struct {
     {"scan", cmd_scan, "<term>",NULL,0,NULL},
     {"scanstep", cmd_scanstep, "<size>",NULL,0,NULL},
     {"scanpos", cmd_scanpos, "<size>",NULL,0,NULL},
+    {"scansize", cmd_scansize, "<size>",NULL,0,NULL},
     {"sort", cmd_sort, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0,NULL},
     {"sort+", cmd_sort_newset, "<sortkey> <flag> <sortkey> <flag> ...",NULL,0,NULL},
     {"authentication", cmd_authentication, "<acctstring>",NULL,0,NULL},

@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.6 2004-12-09 09:30:00 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.7 2005-02-02 17:11:05 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -98,6 +98,16 @@
    <simpara>
     Sets preferred position for scan. This value
     is used in next scan. By default position is 1.
+   </simpara>
+  </listitem>
+ </varlistentry>
+ <varlistentry><term>
+   <literal>scansize</literal> <replaceable>size</replaceable>
+  </term>
+  <listitem>
+   <simpara>
+    Sets number of entries to be returned by scan. Default
+    number of entries is 20.
    </simpara>
   </listitem>
  </varlistentry>
