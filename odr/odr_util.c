@@ -57,10 +57,11 @@ Odr_oid *odr_getoidbystr(ODR o, char *str)
 	return 0;
     while ((p = strchr(p, '.')))
 	num++, p++;
-    ret = odr_malloc(o, sizeof(*ret)*num);
+    ret = odr_malloc(o, sizeof(*ret)*(num + 1));
     p = str;
     do
 	ret[i++] = atoi(p);
-    while ((p = strchr(p, '.')));
+    while ((p = strchr(p, '.')) && ++p);
+    ret[i] = -1;
     return ret;
 }
