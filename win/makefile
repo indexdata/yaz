@@ -1,5 +1,5 @@
 # makefile.mak - makefile for MS NMAKE 
-# $Id: makefile,v 1.39 2002-05-31 08:48:06 adam Exp $
+# $Id: makefile,v 1.40 2002-06-02 21:34:45 adam Exp $
 #
 # Programmed by
 #  HL: Heikki Levanto, Index Data
@@ -23,7 +23,7 @@
 ############### Parameters 
 ###########################################################
 
-DEBUG=1   # 0 for release, 1 for debug
+DEBUG=0   # 0 for release, 1 for debug
 
 default: all
 
@@ -112,8 +112,6 @@ zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
 
 COMMON_C_OPTIONS=          \
   /nologo /W3 /GX /FD /c   \
-  /D "YAZ_MODULE_ill=1"    \
-  /D "YAZ_MODULE_ccl=1"    \
   /D "_WINDOWS"            \
   /D "WIN32"               \
   /FR"$(OBJDIR)\\"         \
@@ -835,7 +833,10 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 ###########################################################
 #
 # $Log: makefile,v $
-# Revision 1.39  2002-05-31 08:48:06  adam
+# Revision 1.40  2002-06-02 21:34:45  adam
+# Remove --enable-module option
+#
+# Revision 1.39  2002/05/31 08:48:06  adam
 # Changed SectionIns for NSIS v1.98
 #
 # Revision 1.38  2002/05/18 09:52:37  oleg

@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.155 2002-06-02 21:29:30 adam Exp $
+ * $Id: client.c,v 1.156 2002-06-02 21:34:45 adam Exp $
  */
 
 #include <stdio.h>
@@ -25,13 +25,9 @@
 #include <yaz/pquery.h>
 #include <yaz/sortspec.h>
 
-#if YAZ_MODULE_ill
 #include <yaz/ill.h>
-#endif
 
-#if YAZ_MODULE_ccl
 #include <yaz/yaz-ccl.h>
-#endif
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -88,9 +84,7 @@ typedef enum {
 
 static QueryType queryType = QueryType_Prefix;
 
-#if YAZ_MODULE_ccl
 static CCL_bibset bibset;               /* CCL bibset handle */
-#endif
 
 #if HAVE_READLINE_COMPLETION_OVER
 
@@ -790,15 +784,12 @@ static int send_searchRequest(char *arg)
     Z_SearchRequest *req = apdu->u.searchRequest;
     Z_Query query;
     int oid[OID_SIZE];
-#if YAZ_MODULE_ccl
     struct ccl_rpn_node *rpn = NULL;
     int error, pos;
-#endif
     char setstring[100];
     Z_RPNQuery *RPNquery;
     Odr_oct ccl_query;
 
-#if YAZ_MODULE_ccl
     if (queryType == QueryType_CCL2RPN)
     {
         rpn = ccl_find_str(bibset, arg, &error, &pos);
@@ -808,7 +799,6 @@ static int send_searchRequest(char *arg)
             return 0;
         }
     }
-#endif
     req->referenceId = set_refid (out);
     if (!strcmp(arg, "@big")) /* strictly for troublemaking */
     {
@@ -866,7 +856,6 @@ static int send_searchRequest(char *arg)
         ccl_query.buf = (unsigned char*) arg;
         ccl_query.len = strlen(arg);
         break;
-#if YAZ_MODULE_ccl
     case QueryType_CCL2RPN:
         query.which = Z_Query_type_1;
         RPNquery = ccl_rpn_query(out, rpn);
@@ -878,7 +867,6 @@ static int send_searchRequest(char *arg)
         query.u.type_1 = RPNquery;
         ccl_rpn_delete (rpn);
         break;
-#endif
     default:
         printf ("Unsupported query type\n");
         return 0;
@@ -1191,8 +1179,6 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
     }
 }
 
-#if YAZ_MODULE_ill
-
 const char *get_ill_element (void *clientData, const char *element)
 {
     return 0;
@@ -1254,9 +1240,7 @@ static Z_External *create_external_itemRequest()
     }
     return r;
 }
-#endif
 
-#ifdef YAZ_MODULE_ill
 static Z_External *create_external_ILL_APDU(int which)
 {
     struct ill_get_ctl ctl;
@@ -1312,7 +1296,6 @@ static Z_External *create_external_ILL_APDU(int which)
     }
     return r;
 }
-#endif
 
 
 static Z_External *create_ItemOrderExternal(const char *type, int itemno)

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.21 2002-03-22 23:44:55 adam Exp $
+## $Id: Makefile.am,v 1.22 2002-06-02 21:34:45 adam Exp $
 
 if ISTHR
 extra=libyazthread.la
@@ -75,5 +75,6 @@ tcpip.o: $(top_srcdir)/comstack/tcpip.c
 libyaz_la_LIBADD=../odr/libodr.la \
  ../comstack/libcomstack.la ../server/libserver.la \
  ../util/libutil.la ../retrieval/libret.la \
- $(EXTRALIB)
+ ../ccl/libccl.la ../zutil/libzutil.la \
+ ../zoom/libzoom.la ../ill/libill.la ../z39.50/libz39.50.la
 
