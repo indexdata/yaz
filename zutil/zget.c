@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: zget.c,v $
- * Revision 1.9  2001-05-18 11:42:03  adam
+ * Revision 1.10  2001-09-24 21:48:46  adam
+ * Setting v1,v2,search and present options for init request.
+ *
+ * Revision 1.9  2001/05/18 11:42:03  adam
  * YAZ Build date for WIN32.
  *
  * Revision 1.8  2001/05/17 14:16:15  adam
@@ -97,8 +100,17 @@ Z_InitRequest *zget_InitRequest(ODR o)
     r->referenceId = 0;
     r->options = (Odr_bitmask *)odr_malloc(o, sizeof(*r->options));
     ODR_MASK_ZERO(r->options);
-    r->protocolVersion = (Odr_bitmask *)odr_malloc(o, sizeof(*r->protocolVersion));
+    r->protocolVersion = (Odr_bitmask *)
+	odr_malloc(o, sizeof(*r->protocolVersion));
+
+    ODR_MASK_SET(r->options, Z_Options_search);
+    ODR_MASK_SET(r->options, Z_Options_present);
+
     ODR_MASK_ZERO(r->protocolVersion);
+
+    ODR_MASK_SET(r->protocolVersion, Z_ProtocolVersion_1);
+    ODR_MASK_SET(r->protocolVersion, Z_ProtocolVersion_2);
+
     r->preferredMessageSize = odr_intdup(o, 30*1024);
     r->maximumRecordSize = odr_intdup(o, 30*1024);
     r->idAuthentication = 0;
