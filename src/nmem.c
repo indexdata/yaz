@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data.
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.7 2004-12-13 14:21:55 heikki Exp $
+ * $Id: nmem.c,v 1.8 2004-12-16 08:59:36 adam Exp $
  */
 
 /**
@@ -472,15 +472,18 @@ void yaz_set_errno(int v)
 
 void yaz_strerror(char *buf, int max)
 {
+#ifdef WIN32
+    DWORD err;
+#endif
     char *cp;
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("nmem");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("nmem");
+        log_level_initialized = 1;
     }
     
 #ifdef WIN32
-    DWORD err = GetLastError();
+    err = GetLastError();
     if (err)
     {
         FormatMessage(
