@@ -1,11 +1,11 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.1 1995-03-30 14:03:17 quinn Exp $
+# $Id: Makefile,v 1.2 1995-04-10 10:23:17 quinn Exp $
 
 SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
-LIBDIR=../../lib
+LIBDIR=../lib
 LIBINCLUDE=-L$(LIBDIR)
 CFLAGS= -g -Wall -pedantic -ansi
 DEFS=$(INCLUDE)

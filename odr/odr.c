@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: odr.c,v $
- * Revision 1.8  1995-03-17 10:17:43  quinn
+ * Revision 1.9  1995-04-10 10:23:11  quinn
+ * Smallish changes.
+ *
+ * Revision 1.8  1995/03/17  10:17:43  quinn
  * Added memory management.
  *
  * Revision 1.7  1995/03/10  11:44:41  quinn
@@ -72,7 +75,7 @@ ODR odr_createmem(int direction)
     if (!(r = malloc(sizeof(*r))))
     	return 0;
     r->direction = direction;
-    r->print = stdout;
+    r->print = stderr;
     r->buf = 0;
     r->buflen = 0;
     r->mem = 0;
@@ -96,6 +99,8 @@ void odr_reset(ODR o)
 void odr_destroy(ODR o)
 {
     odr_release_mem(o->mem);
+    if (o->print != stderr)
+    	fclose(o->print);
     free(o);
 }
 
