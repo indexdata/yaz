@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.9 2003-12-29 14:54:33 adam Exp $
+ * $Id: seshigh.c,v 1.10 2003-12-30 00:13:05 adam Exp $
  */
 
 /*
@@ -1028,9 +1028,11 @@ static void process_http_request(association *assoc, request *req)
             const char *charset_p = 0;
             char *charset = 0;
 
-            static Z_SOAP_Handler soap_handlers[2] = {
+            static Z_SOAP_Handler soap_handlers[3] = {
 #if HAVE_XML2
                 {"http://www.loc.gov/zing/srw/", 0,
+                 (Z_SOAP_fun) yaz_srw_codec},
+                {"http://www.loc.gov/zing/srw/v1.0/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
 #endif
                 {0, 0, 0}
@@ -1051,11 +1053,11 @@ static void process_http_request(association *assoc, request *req)
                                &hreq->content_buf, &hreq->content_len,
                                soap_handlers);
 #if HAVE_XML2
-            if (!ret && soap_package->which == Z_SOAP_generic &&
-                soap_package->u.generic->no == 0)
+            if (!ret && soap_package->which == Z_SOAP_generic)
             {
                 /* SRW package */
 		char *db = "Default";
+		char *srw_version = 0;
 		const char *p0 = hreq->path, *p1;
                 Z_SRW_PDU *sr = soap_package->u.generic->p;
 		
@@ -1080,6 +1082,9 @@ static void process_http_request(association *assoc, request *req)
                     if (!sr->u.request->database)
 			sr->u.request->database = db;
 
+		    if (soap_package->u.generic->no == 1)  /* SRW 1.0 */
+			res->srw_version = 0;
+
                     srw_bend_search(assoc, req, sr->u.request,
                                     res->u.response, &http_code);
                     
@@ -1091,6 +1096,9 @@ static void process_http_request(association *assoc, request *req)
                         yaz_srw_get(assoc->encode, Z_SRW_explain_response);
 		    sr->u.explain_request->database = db;
 
+		    if (soap_package->u.generic->no == 1)  /* SRW 1.0 */
+			res->srw_version = 0;
+
                     srw_bend_explain(assoc, req, sr->u.explain_request,
                                      res->u.explain_response, &http_code);
 		    if (http_code == 200)
@@ -1101,6 +1109,7 @@ static void process_http_request(association *assoc, request *req)
                     z_soap_error(assoc->encode, soap_package,
                                  "SOAP-ENV:Client", "Bad method", 0); 
                 }
+
             }
 #endif
 	    if (http_code == 200 || http_code == 500)
@@ -1553,7 +1562,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.9 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.10 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
