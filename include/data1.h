@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: data1.h,v $
- * Revision 1.39  1998-10-28 15:10:06  adam
+ * Revision 1.40  1998-11-03 10:14:12  adam
+ * Changed definition of data1 node so that it uses less space.
+ *
+ * Revision 1.39  1998/10/28 15:10:06  adam
  * Added --with-yc option to configure. For the data1_node in data1.h:
  * decreased size of localdata and removed member "line" which wasn't useful.
  *
@@ -410,14 +413,16 @@ typedef struct data1_node
 	{
 	    char *tag;
 	    data1_element *element;
-	    int node_selected;
-	    int make_variantlist;
 	    int no_data_requested;
 	    int get_bytes;
+	    unsigned node_selected : 1;
+	    unsigned make_variantlist : 1;
 	} tag;
 
 	struct
 	{
+	    char *data;      /* filename or data */
+	    int len;
         /* text inclusion */
 #define DATA1I_inctxt 1
         /* binary data inclusion */
@@ -428,10 +433,8 @@ typedef struct data1_node
 #define DATA1I_num 4
         /* object identifier */
 #define DATA1I_oid 5         
-            int what;
-	    int formatted_text;     /* newlines are significant */
-	    int len;
-	    char *data;      /* filename or data */
+            unsigned what:7;
+	    unsigned formatted_text : 1;   /* newlines are significant */
 	} data;
 
 	struct
@@ -442,7 +445,7 @@ typedef struct data1_node
     } u;
 
     void (*destroy)(struct data1_node *n);
-#define DATA1_LOCALDATA 20
+#define DATA1_LOCALDATA 12
     char lbuf[DATA1_LOCALDATA]; /* small buffer for local data */
     struct data1_node *next;
     struct data1_node *child;
