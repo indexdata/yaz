@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tstmatchstr.c,v 1.1 2003-05-06 10:07:33 adam Exp $
+ * $Id: tstmatchstr.c,v 1.2 2003-06-22 11:47:18 adam Exp $
  */
 
 #include <stdio.h>
@@ -14,22 +14,22 @@ struct {
     char *s2;
     int res;
 } comp_strings[] = {
-    "x", "x", 0,
-    "x", "X", 0,
-    "a", "b", 1,
-    "b", "a", 1,
-    "aa","a", 1,
-    "a-", "a", 1,
-    "A-b", "ab", 0,
-    "A--b", "ab", 1,
-    "A--b", "a-b", 1,
-    "A--b", "a--b", 0,
-    "a123",  "a?", 0,
-    "a123",   "a1.3", 0,
-    "a123",   "..?", 0,
-    "a123",   "a1.", 1,
-    "a123",   "a...", 0,
-    0,     0, 0};
+    { "x", "x", 0 },
+    { "x", "X", 0 },
+    { "a", "b", 1 },
+    { "b", "a", 1 },
+    { "aa","a", 1 },
+    { "a-", "a", 1 },
+    { "A-b", "ab", 0},
+    { "A--b", "ab", 1},
+    { "A--b", "a-b", 1},
+    { "A--b", "a--b", 0},
+    { "a123",  "a?", 0},
+    {"a123",   "a1.3", 0},
+    {"a123",   "..?", 0},
+    {"a123",   "a1.", 1},
+    {"a123",   "a...", 0},
+    {0,  0, 0} };
 
 int main (int argc, char **argv)
 {

@@ -2,7 +2,7 @@
  * Copyright (c) 2002-2003, Index Data
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.3 2003-05-22 22:44:50 adam Exp $
+ * $Id: tsticonv.c,v 1.4 2003-06-22 11:47:18 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -36,7 +36,7 @@ const char *marc8_strings[] = {
     0
 };
 
-static marc8_tst()
+static void marc8_tst()
 {
     int i;
     yaz_iconv_t cd;
