@@ -1,0 +1,35 @@
+#
+# This is a simple profile based on the Dublin Core of metadata elements.
+# Tags are pulled from tagsetG when 
+
+name meta
+attset bib1.att
+tagset meta.tag
+varset var1.var
+
+esetname F @
+esetname B meta-b.est
+
+maptab meta-usmarc.map
+
+elm (1,10)		rank			-
+elm (1,12)		url			-
+elm (1,14)		localControlNumber	Local-number
+elm (1,16)		dateOfLastModification	Date/time-last-modified
+elm (4,1)		subject			Subject-heading
+elm (2,1)		title			Title
+elm (2,2)		author			Author
+elm (2,3)		publisher		Publisher
+elm (4,2)		otherAgent		-
+elm (2,4)		date			Date
+elm (4,3)		objectType		Content-type
+elm (4,4)		form			Material-type
+elm (4,5)		identifier		-
+elm (4,6)		relation		-
+elm (4,7)		source			-
+elm (4,8)		language		Code-language
+elm (4,9)		coverage		-
+
+# Sorry - I can't bear the thought of not having an abstract.
+
+elm (2,6)		abstract		Abstract
