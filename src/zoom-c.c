@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.28 2004-04-30 12:43:32 adam Exp $
+ * $Id: zoom-c.c,v 1.29 2004-08-02 10:06:34 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1001,7 +1001,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.28 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.29 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2670,17 +2670,22 @@ ZOOM_API(void)
             apdu->u.extendedServicesRequest->taskSpecificParameters = r;
         }
     }
-    if (!strcmp(type, "create"))  /* create database */
+    else if (!strcmp(type, "create"))  /* create database */
     {
 	apdu = create_admin_package(p, Z_ESAdminOriginPartToKeep_create,
 				    0, 0);
     }	
-    if (!strcmp(type, "drop"))  /* drop database */
+    else if (!strcmp(type, "drop"))  /* drop database */
     {
 	apdu = create_admin_package(p, Z_ESAdminOriginPartToKeep_drop,
 				    0, 0);
     }
-    if (!strcmp(type, "update")) /* update record(s) */
+    else if (!strcmp(type, "commit"))  /* commit changes */
+    {
+	apdu = create_admin_package(p, Z_ESAdminOriginPartToKeep_commit,
+				    0, 0);
+    }
+    else if (!strcmp(type, "update")) /* update record(s) */
     {
 	apdu = create_update_package(p);
     }

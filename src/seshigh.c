@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.25 2004-06-15 10:53:26 adam Exp $
+ * $Id: seshigh.c,v 1.26 2004-08-02 10:06:34 adam Exp $
  */
 
 /*
@@ -1034,6 +1034,8 @@ static int process_z_request(association *assoc, request *req, char **msg)
 	    return -1;
 	}
 	break;
+    case Z_APDU_triggerResourceControlRequest:
+	return 0;
     default:
 	*msg = "Bad APDU received";
 	return -1;
@@ -1286,6 +1288,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 	ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
 	strcat(options, " negotiation");
     }
+	
+    ODR_MASK_SET(resp->options, Z_Options_triggerResourceCtrl);
 
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
     {
@@ -1322,7 +1326,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 		assoc->init->implementation_name,
 		odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.25 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.26 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
