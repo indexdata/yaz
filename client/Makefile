@@ -1,7 +1,7 @@
 # Copyright (C) 1994, Index Data I/S 
 # All rights reserved.
 # Sebastian Hammer, Adam Dickmeiss
-# $Id: Makefile,v 1.7 1996-02-12 18:18:07 quinn Exp $
+# $Id: Makefile,v 1.8 1996-03-08 14:38:25 quinn Exp $
 
 LIBDIR=../lib
 
@@ -11,7 +11,7 @@ SHELL=/bin/sh
 INCLUDE=-I../include -I. -I../../xtimosi/src
 LIBINCLUDE=-L$(LIBDIR)
 #CFLAGS=-Wall -pedantic -g
-DEFS=$(INCLUDE) -DRPN_QUERY #-DPREFIX_QUERY
+DEFS=$(INCLUDE) -DRPN_QUERY -DPREFIX_QUERY
 LIBS=$(LIBDIR)/libasn.a $(LIBDIR)/libodr.a \
   $(LIBDIR)/libcomstack.a ../lib/ccl.a $(LIBMOSI) $(LIBDIR)/libutil.a $(ELIBS)
 CPP=$(CC) -E
