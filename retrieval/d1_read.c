@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: d1_read.c,v $
- * Revision 1.22  1998-03-05 08:15:32  adam
+ * Revision 1.23  1998-03-12 11:28:45  adam
+ * Fix: didn't set root member of tagged node in function.
+ * data1_add_insert_taggeddata.
+ *
+ * Revision 1.22  1998/03/05 08:15:32  adam
  * Implemented data1_add_insert_taggeddata utility which is more flexible
  * than data1_insert_taggeddata.
  *
@@ -211,6 +215,7 @@ data1_node *data1_add_insert_taggeddata(data1_handle dh, data1_node *root,
     if (!local_allowed && !tagn->u.tag.element)
 	return NULL;
     tagn->last_child = tagn->child = datn = data1_mk_node (dh, m);
+    tagn->root = root;
     datn->parent = tagn;
     datn->root = root;
     datn->which = DATA1N_data;
