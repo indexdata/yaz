@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE.
  *
  * $Log: log.h,v $
- * Revision 1.13  1998-10-13 16:11:11  adam
+ * Revision 1.14  1998-10-28 10:26:59  adam
+ * New functions log_init_file, log_init_level, log_init_prefix.
+ *
+ * Revision 1.13  1998/10/13 16:11:11  adam
  * Added printf-format check for logf when using GNUC.
  *
  * Revision 1.12  1997/09/04 07:59:02  adam
@@ -101,6 +104,10 @@ extern "C" {
 #define LOG_DEFAULT_LEVEL (LOG_FATAL | LOG_ERRNO | LOG_LOG | LOG_WARN)
 
 YAZ_EXPORT void log_init(int level, const char *prefix, const char *name);
+YAZ_EXPORT void log_init_file (const char *fname);
+YAZ_EXPORT void log_init_level (int level);
+YAZ_EXPORT void log_init_prefix (const char *prefix);
+
 YAZ_EXPORT void logf(int level, const char *fmt, ...)
 #ifdef __GNUC__
 	__attribute__ ((format (printf, 2, 3)))

@@ -4,7 +4,10 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: log.c,v $
- * Revision 1.17  1997-12-09 16:11:02  adam
+ * Revision 1.18  1998-10-28 10:27:00  adam
+ * New functions log_init_file, log_init_level, log_init_prefix.
+ *
+ * Revision 1.17  1997/12/09 16:11:02  adam
  * Assume strerror is defined on Unixes as well. It's standard ANSI.
  *
  * Revision 1.16  1997/10/06 08:55:07  adam
@@ -135,24 +138,39 @@ FILE *log_file(void)
     return l_file;
 }
 
-void log_init(int level, const char *prefix, const char *name)
+void log_init_file (const char *fname)
 {
     FILE *new_file;
-    l_level = level;
-    if (prefix && *prefix)
-    	sprintf(l_prefix, "%.512s", prefix);
     if (!l_file)
         l_file = stderr;
-    if (!name || !*name)
+    if (!fname || !*fname)
         return;
-    if (!(new_file = fopen(name, "a")))
+    if (!(new_file = fopen(fname, "a")))
         return;
     if (l_file != stderr)
     {
-        setvbuf(new_file, 0, _IONBF, 0);
         fclose (l_file);
     }
+    setvbuf(new_file, 0, _IONBF, 0);
     l_file = new_file;
+}
+
+void log_init_level (int level)
+{
+    l_level = level;
+}
+
+void log_init_prefix (const char *prefix)
+{
+    if (prefix && *prefix)
+    	sprintf(l_prefix, "%.512s", prefix);
+}
+
+void log_init(int level, const char *prefix, const char *fname)
+{
+    log_init_level (level);
+    log_init_prefix (prefix);
+    log_init_file (fname);
 }
 
 static void (*start_hook_func)(int, const char *, void *) = NULL;
