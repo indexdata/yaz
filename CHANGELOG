@@ -15,7 +15,7 @@ New ZOOM option, schema, that specifies shema OID for retrieval.
 New CCL feature. Qualifiers can be aliases for one or more
 other qualifiers (if more than one is given, OR is used).
 
-ZOOM allocates result set name if target supports it.
+ZOOM uses named result sets if target supports it.
 
 Two new YAZ client commands: .  (dot, which sources a script of YAZ
 client commands), and ! (to execute shell command.). Implemented
