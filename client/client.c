@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2004, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.248 2004-09-03 18:55:59 adam Exp $
+ * $Id: client.c,v 1.249 2004-09-13 09:24:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -584,6 +584,8 @@ int session_connect(const char *arg)
         return 0;
     }
 #if HAVE_XML2
+    if (conn->protocol == PROTO_HTTP)
+	queryType = QueryType_CQL;
 #else
     if (conn->protocol == PROTO_HTTP)
     {
@@ -1260,13 +1262,28 @@ static int send_SRW_searchRequest(const char *arg)
 
     /* save this for later .. when fetching individual records */
     srw_sr = sr = yaz_srw_get(srw_sr_odr_out, Z_SRW_searchRetrieve_request);
-    sr->u.request->query_type = Z_SRW_query_type_cql;
-    sr->u.request->query.cql = odr_strdup(srw_sr_odr_out, arg);
-
+    
+    /* regular request .. */
     sr = yaz_srw_get(out, Z_SRW_searchRetrieve_request);
-    sr->u.request->query_type = Z_SRW_query_type_cql;
-    sr->u.request->query.cql = odr_strdup(out, arg);
 
+    switch(queryType)
+    {
+    case QueryType_CQL:
+	sr->u.request->query_type = Z_SRW_query_type_cql;
+	sr->u.request->query.cql = odr_strdup(srw_sr_odr_out, arg);
+	sr->u.request->query_type = Z_SRW_query_type_cql;
+	sr->u.request->query.cql = odr_strdup(out, arg);
+	break;
+    case QueryType_Prefix:
+	sr->u.request->query_type = Z_SRW_query_type_pqf;
+	sr->u.request->query.pqf = odr_strdup(srw_sr_odr_out, arg);
+	sr->u.request->query_type = Z_SRW_query_type_pqf;
+	sr->u.request->query.pqf = odr_strdup(out, arg);
+	break;
+    default:
+	printf ("Only CQL and PQF supported in SRW\n");
+	return 0;
+    }
     sr->u.request->maximumRecords = odr_intdup(out, 0);
 
     if (record_schema)
