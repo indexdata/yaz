@@ -2,7 +2,7 @@
  * Copyright (c) 1995-2002, Index Data
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.148 2002-04-08 11:40:41 adam Exp $
+ * $Id: client.c,v 1.149 2002-04-13 18:09:01 adam Exp $
  */
 
 #include <stdio.h>
@@ -2606,7 +2606,7 @@ void process_cmd_line(char* line)
     {
         printf("Unknown command: %s.\n", word);
         cmd_help ("");
-
+        res = 1;
     }
 
     if(apdu_file) fflush(apdu_file);
