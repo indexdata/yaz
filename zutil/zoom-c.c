@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-c.c,v 1.5 2002-10-22 10:05:36 adam Exp $
+ * $Id: zoom-c.c,v 1.6 2002-10-28 10:53:09 adam Exp $
  *
  * ZOOM layer for C, connections, result sets, queries.
  */
@@ -1054,18 +1054,19 @@ ZOOM_record_get (ZOOM_record rec, const char *type, int *len)
     }
     else if (!strcmp (type, "syntax"))
     {
+        const char *desc = 0;	
 	if (npr->which == Z_NamePlusRecord_databaseRecord)
 	{
 	    Z_External *r = (Z_External *) npr->u.databaseRecord;
 	    oident *ent = oid_getentbyoid(r->direct_reference);
 	    if (ent)
-	    {
-	    	if (len)
-                    *len = strlen(ent->desc);
-		return ent->desc;
-	    }
+	    	desc = ent->desc;
 	}
-	return "none";
+	if (!desc)
+            desc = "none";
+    	if (len)
+            *len = strlen(desc);
+	return desc;
     }
     else if (!strcmp (type, "render") && 
              npr->which == Z_NamePlusRecord_databaseRecord)
