@@ -61,11 +61,17 @@
   <datafield tag="648" ind1=" " ind2=" ">
     <subfield code="a">Eng, Dagfin</subfield>
   </datafield>
-  <controlfield tag="648">  Granlund, TomcKristian AugustsgatecPilestredet 19  </controlfield>
+  <datafield tag="648" ind1=" " ind2=" ">
+    <subfield code="r">anlund, Tom</subfield>
+    <subfield code="c">Kristian Augustsgate</subfield>
+    <subfield code="c">Pilestredet 19</subfield>
+  </datafield>
   <datafield tag="J01" ind1=" " ind2=" ">
     <subfield code="a">a</subfield>
   </datafield>
-  <controlfield tag="BAS">  20  </controlfield>
+  <datafield tag="BAS" ind1=" " ind2=" ">
+    <subfield code="0"></subfield>
+  </datafield>
   <datafield tag="LKR" ind1=" " ind2=" ">
     <subfield code="a">ITM</subfield>
     <subfield code="l">ARK50</subfield>
