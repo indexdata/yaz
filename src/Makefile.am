@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.18 2004-11-21 21:56:28 adam Exp $
+## $Id: Makefile.am,v 1.19 2005-04-11 08:41:39 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -9,6 +9,9 @@ endif
 YAZ_VERSION_INFO=2:0:0
 
 lib_LTLIBRARIES = libyaz.la $(thrlib) 
+
+dist-hook:
+	test -f cql.c || exit 1
 
 tabdatadir = $(pkgdatadir)/z39.50
 tabdata_DATA=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl \
