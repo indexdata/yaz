@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.51 2005-03-05 12:14:12 adam Exp $
+ * $Id: seshigh.c,v 1.52 2005-04-14 11:59:46 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1760,7 +1760,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.51 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.52 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1966,10 +1966,10 @@ static Z_Records *pack_records(association *a, char *setname, int start,
         if (!(thisrec = (Z_NamePlusRecord *)
               odr_malloc(a->encode, sizeof(*thisrec))))
             return 0;
-        if (!(thisrec->databaseName = (char *)odr_malloc(a->encode,
-            strlen(freq.basename) + 1)))
-            return 0;
-        strcpy(thisrec->databaseName, freq.basename);
+	if (freq.basename)
+	    thisrec->databaseName = odr_strdup(a->encode, freq.basename);
+	else
+	    thisrec->databaseName = 0;
         thisrec->which = Z_NamePlusRecord_databaseRecord;
 
         if (freq.output_format_raw)
