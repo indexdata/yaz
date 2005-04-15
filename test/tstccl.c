@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.7 2005-03-15 16:32:53 adam Exp $
+ * $Id: tstccl.c,v 1.8 2005-04-15 21:47:56 adam Exp $
  */
 
 /* CCL test */
@@ -93,9 +93,11 @@ void tst1(int pass, int *number_of_errors)
 
     for (i = 0; query_str[i].query; i++)
     {
-	struct ccl_token *token_list =
-	    ccl_parser_tokenize(parser, query_str[i].query);
-	struct ccl_rpn_node *rpn = ccl_parser_find(parser, token_list);
+	struct ccl_token *token_list;
+	struct ccl_rpn_node *rpn;
+
+	token_list = ccl_parser_tokenize(parser, query_str[i].query);
+	rpn = ccl_parser_find(parser, token_list);
 	ccl_token_del (token_list);
 	if (rpn)
 	{

@@ -48,7 +48,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.6 2005-03-15 16:32:52 adam Exp $
+ * $Id: ccltoken.c,v 1.7 2005-04-15 21:47:56 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -137,68 +137,6 @@ static int token_cmp (CCL_parser cclp, const char *kw, struct ccl_token *token)
 }
 
 /*
- * ccl_token_simple: tokenize CCL raw tokens
- */
-struct ccl_token *ccl_token_simple (const char *command)
-{
-    const char *cp = command;
-    struct ccl_token *first = NULL;
-    struct ccl_token *last = NULL;
-
-    while (1)
-    {
-	while (*cp && strchr (" \t\r\n", *cp))
-	{
-	    cp++;
-	    continue;
-	}
-	if (!first)
-	{
-	    first = last = (struct ccl_token *)xmalloc (sizeof (*first));
-	    ccl_assert (first);
-	    last->prev = NULL;
-	}
-	else
-	{
-	    last->next = (struct ccl_token *)xmalloc (sizeof(*first));
-	    ccl_assert (last->next);
-	    last->next->prev = last;
-	    last = last->next;
-	}
-	last->next = NULL;
-	last->name = cp;
-	last->len = 1;
-	switch (*cp++)
-	{
-        case '\0':
-            last->kind = CCL_TOK_EOL;
-            return first;
-	case '\"':
-	    last->kind = CCL_TOK_TERM;
-	    last->name = cp;
-	    last->len = 0;
-	    while (*cp && *cp != '\"')
-	    {
-		cp++;
-		++ last->len;
-	    }
-	    if (*cp == '\"')
-		cp++;
-	    break;
-	default:
-	    while (*cp && !strchr (" \t\n\r", *cp))
-	    {
-		cp++;
-		++ last->len;
-	    }
-            last->kind = CCL_TOK_TERM;
-	}
-    }
-    return first;
-}
-
-
-/*
  * ccl_tokenize: tokenize CCL command string.
  * return: CCL token list.
  */
@@ -213,10 +151,7 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
     {
 	const unsigned char *cp0 = cp;
 	while (*cp && strchr (" \t\r\n", *cp))
-	{
 	    cp++;
-	    continue;
-	}
 	if (!first)
 	{
 	    first = last = (struct ccl_token *)xmalloc (sizeof (*first));
@@ -337,6 +272,8 @@ struct ccl_token *ccl_token_add (struct ccl_token *at)
     n->kind = CCL_TOK_TERM;
     n->name = 0;
     n->len = 0;
+    n->ws_prefix_buf = 0;
+    n->ws_prefix_len = 0;
     return n;
 }
     

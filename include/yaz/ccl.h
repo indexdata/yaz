@@ -49,7 +49,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.21 2005-03-15 16:32:52 adam Exp $
+ * $Id: ccl.h,v 1.22 2005-04-15 21:47:55 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -279,13 +279,6 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command);
 YAZ_EXPORT
 struct ccl_token *ccl_tokenize (const char *command);
     
-/**
- * Splits CCL command into tokens. This function is obsolete. Use
- * ccl_parser_tokenize instead.
- */
-YAZ_EXPORT
-struct ccl_token *ccl_token_simple (const char *command);
-
 /** 
  * Deletes token list
  */
