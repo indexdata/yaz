@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.20 2005-03-07 06:07:33 adam Exp $
+ * $Id: marcdisp.c,v 1.21 2005-04-20 13:17:51 adam Exp $
  */
 
 /**
@@ -214,8 +214,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     {
 	char str[40];
 
-        if (mt->xml)
-            wrbuf_puts (wr, "<!--\n");
+	wrbuf_puts (wr, "<!--\n");
 	sprintf (str, "Record length         %5d\n", record_length);
 	wrbuf_puts (wr, str);
 	sprintf (str, "Indicator length      %5d\n", indicator_length);
@@ -230,8 +229,7 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 	wrbuf_puts (wr, str);
 	sprintf (str, "Length implementation %5d\n", length_implementation);
 	wrbuf_puts (wr, str);
-        if (mt->xml)
-            wrbuf_puts (wr, "-->\n");
+	wrbuf_puts (wr, "-->\n");
     }
 
     /* first pass. determine length of directory & base of data */
@@ -380,8 +378,6 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         switch(mt->xml)
         {
         case YAZ_MARC_LINE:
-            if (mt->debug)
-                wrbuf_puts (wr, "Tag: ");
             wrbuf_puts (wr, tag);
             wrbuf_puts (wr, " ");
             break;
@@ -419,8 +415,6 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 		    wrbuf_putc(wr, buf[i]);
 		    break;
                 case YAZ_MARC_LINE:
-                    if (mt->debug)
-                        wrbuf_puts (wr, " Ind: ");
                     wrbuf_putc(wr, buf[i]);
                     break;
                 case YAZ_MARC_SIMPLEXML:
@@ -447,11 +441,6 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             wrbuf_puts (wr, ">");
             if (identifier_flag)
                 wrbuf_puts (wr, "\n");
-        }
-        if (mt->xml == YAZ_MARC_LINE)
-        {
-            if (mt->debug)
-                wrbuf_puts (wr, " Fields: ");
         }
         if (identifier_flag)
         {
