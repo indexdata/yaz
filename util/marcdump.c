@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.28 2005-03-06 21:27:09 adam Exp $
+ * $Id: marcdump.c,v 1.29 2005-04-20 13:04:04 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -199,18 +199,45 @@ int main (int argc, char **argv)
                     r = fread (buf, 1, 5, inf);
                     if (r < 5)
 		    {
-			if (r && print_offset)
-			    printf ("Extra %d bytes", r);
+			if (r && print_offset && verbose)
+			    printf ("Extra %d bytes at end of file", r);
                         break;
+		    }
+		    while (*buf < '0' || *buf > '9')
+		    {
+			int i;
+			long off = ftell(inf) - 5;
+			if (verbose || print_offset)
+			    printf("Skipping bad byte %d (0x%02X) at offset "
+				   "%ld (0x%lx)\n", 
+				   *buf & 0xff, *buf & 0xff,
+				   off, off);
+			for (i = 0; i<4; i++)
+			    buf[i] = buf[i+1];
+			r = fread(buf+4, 1, 1, inf);
+			if (r < 1)
+			    break;
+		    }
+		    if (r < 1)
+		    {
+			if (verbose || print_offset)
+			    printf ("End of file with extra garbage\n");
+			break;
 		    }
 		    if (print_offset)
 		    {
-			long off = ftell(inf);
-			printf ("Record %d offset %ld\n", num, (long) off);
+			long off = ftell(inf) - 5;
+			printf ("Record %d offset %ld (0x%lx)\n", num, 
+				off, off);
 		    }
                     len = atoi_n(buf, 5);
                     if (len < 25 || len > 100000)
+		    {
+			long off = ftell(inf) - 5;
+			printf("Bad Length %d read at offset %ld (%lx)\n",
+			       len, (long) off, (long) off);
                         break;
+		    }
                     len = len - 5;
                     r = fread (buf + 5, 1, len, inf);
                     if (r < len)
