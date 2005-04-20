@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.275 2005-03-06 12:54:32 adam Exp $
+ * $Id: client.c,v 1.276 2005-04-20 12:59:51 adam Exp $
  */
 
 #include <stdio.h>
@@ -4447,6 +4447,12 @@ int main(int argc, char **argv)
                 strcpy (open_command, "open ");
                 strcat (open_command, arg);
             }
+	    else
+	    {
+		fprintf(stderr, "%s: Specify at most one server address\n",
+			prog);
+		exit(1);
+	    }
             break;
 	case 'd':
 	    dump_file_prefix = arg;
