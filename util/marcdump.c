@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.29 2005-04-20 13:04:04 adam Exp $
+ * $Id: marcdump.c,v 1.30 2005-04-20 13:17:29 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -200,7 +200,7 @@ int main (int argc, char **argv)
                     if (r < 5)
 		    {
 			if (r && print_offset && verbose)
-			    printf ("Extra %d bytes at end of file", r);
+			    printf ("<!-- Extra %d bytes at end of file -->\n", r);
                         break;
 		    }
 		    while (*buf < '0' || *buf > '9')
@@ -208,8 +208,8 @@ int main (int argc, char **argv)
 			int i;
 			long off = ftell(inf) - 5;
 			if (verbose || print_offset)
-			    printf("Skipping bad byte %d (0x%02X) at offset "
-				   "%ld (0x%lx)\n", 
+			    printf("<!-- Skipping bad byte %d (0x%02X) at offset "
+				   "%ld (0x%lx) -->\n", 
 				   *buf & 0xff, *buf & 0xff,
 				   off, off);
 			for (i = 0; i<4; i++)
@@ -221,14 +221,14 @@ int main (int argc, char **argv)
 		    if (r < 1)
 		    {
 			if (verbose || print_offset)
-			    printf ("End of file with extra garbage\n");
+			    printf ("<!-- End of file with data -->\n");
 			break;
 		    }
 		    if (print_offset)
 		    {
 			long off = ftell(inf) - 5;
-			printf ("Record %d offset %ld (0x%lx)\n", num, 
-				off, off);
+			printf ("<!-- Record %d offset %ld (0x%lx) -->\n",
+				num, off, off);
 		    }
                     len = atoi_n(buf, 5);
                     if (len < 25 || len > 100000)
@@ -302,6 +302,8 @@ int main (int argc, char **argv)
                         fprintf (cfile, "\"\n");
                     }
 		    num++;
+		    if (verbose)
+			printf("\n");
                 }
                 count++;
                 if (cd)
