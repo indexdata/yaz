@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.20 2005-04-22 08:27:57 adam Exp $
+## $Id: Makefile.am,v 1.21 2005-04-22 14:59:42 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -11,7 +11,7 @@ YAZ_VERSION_INFO=2:0:0
 lib_LTLIBRARIES = libyaz.la $(thrlib) 
 
 dist-hook:
-	test -f cql.c || exit 1
+	test -f $(srcdir)/cql.c || exit 1
 
 tabdatadir = $(pkgdatadir)/z39.50
 tabdata_DATA=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl \
