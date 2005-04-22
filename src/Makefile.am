@@ -1,6 +1,6 @@
-## Copyright (C) 1994-2004, Index Data
-## All rights reserved.
-## $Id: Makefile.am,v 1.19 2005-04-11 08:41:39 adam Exp $
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1994-2005, Index Data, All rights reserved.
+## $Id: Makefile.am,v 1.20 2005-04-22 08:27:57 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -21,7 +21,8 @@ illdatadir=$(pkgdatadir)/ill
 illdata_DATA=ill9702.asn item-req.asn ill.tcl
 
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
- charconv.tcl codetables.xml
+ charconv.tcl codetables.xml \
+ csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv
 
 YAZCOMP = $(top_srcdir)/util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
@@ -33,6 +34,13 @@ THREADED_FLAGS = @CFLAGSTHREADS@
 # MARC8 conversion is generated from codetables.xml
 marc8.c: charconv.tcl codetables.xml
 	cd $(srcdir); ./charconv.tcl -p marc8 codetables.xml -o marc8.c
+
+# Generate diagnostics from CSVs
+$(top_srcdir)/include/yaz/diagbib1.h diagbib1.c: csvtobib1.tcl bib1.csv
+	cd $(srcdir); ./csvtobib1.tcl
+
+$(top_srcdir)/include/yaz/diagsrw.h diagsrw.c: csvtosrw.tcl srw.csv
+	cd $(srcdir); ./csvtosrw.tcl
 
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
@@ -51,7 +59,7 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   z-charneg.c \
   prt-ext.c \
   ill-core.c item-req.c ill-get.c \
-  zget.c yaz-ccl.c diagbib1.c diagsrw.c logrpn.c \
+  zget.c yaz-ccl.c diag-entry.c diag-entry.h diagbib1.c diagsrw.c logrpn.c \
   otherinfo.c pquery.c sortspec.c z3950oid.c charneg.c initopt.c \
   zoom-c.c zoom-opt.c zoom-p.h grs1disp.c zgdu.c soap.c srw.c srwutil.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c \
@@ -89,8 +97,8 @@ $(srcdir)/zes-pquery.c \
 $(srcdir)/zes-psched.c \
 $(srcdir)/zes-pset.c \
 $(srcdir)/zes-update0.c \
-$(top_srcdir)/include/z-accdes1.h \
-$(top_srcdir)/include/z-core.h: \
+$(top_srcdir)/include/yaz/z-accdes1.h \
+$(top_srcdir)/include/yaz/z-core.h: \
 $(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMPLINE) z3950v3.asn
 

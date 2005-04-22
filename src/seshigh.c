@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.52 2005-04-14 11:59:46 adam Exp $
+ * $Id: seshigh.c,v 1.53 2005-04-22 08:27:58 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -506,7 +506,8 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num)
 	if (!(binitres = (*cb->bend_init)(assoc->init)))
 	{
 	    assoc->state = ASSOC_DEAD;
-	    yaz_add_srw_diagnostic(assoc->encode, d, num, 3, 0);
+	    yaz_add_srw_diagnostic(assoc->encode, d, num,
+			    YAZ_SRW_AUTHENTICATION_ERROR, 0);
 	    return 0;
 	}
 	assoc->backend = binitres->handle;
@@ -714,7 +715,8 @@ static void srw_bend_search(association *assoc, request *req,
     srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
     if (srw_req->sort_type != Z_SRW_sort_type_none)
 	yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-			       &srw_res->num_diagnostics, 80, 0);
+			       &srw_res->num_diagnostics,
+			       YAZ_SRW_SORT_UNSUPP, 0);
     else if (srw_res->num_diagnostics == 0 && assoc->init)
     {
 	bend_search_rr rr;
@@ -772,7 +774,7 @@ static void srw_bend_search(association *assoc, request *req,
 		int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
 		yaz_log(log_requestdetail, "Parse error %d %s near offset %d",
 			code, pqf_msg, off);
-		srw_error = 10;
+		srw_error = YAZ_SRW_QUERY_SYNTAX_ERROR;
 	    }
 	    
 	    rr.query->which = Z_Query_type_1;
@@ -783,7 +785,8 @@ static void srw_bend_search(association *assoc, request *req,
 	else
 	{
 	    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-				   &srw_res->num_diagnostics, 11, 0);
+				   &srw_res->num_diagnostics,
+				   YAZ_SRW_UNSUPP_QUERY_TYPE, 0);
 	}
 	if (rr.query->u.type_1)
 	{
@@ -802,7 +805,7 @@ static void srw_bend_search(association *assoc, request *req,
 	    (assoc->init->bend_search)(assoc->backend, &rr);
 	    if (rr.errcode)
 	    {
-		if (rr.errcode == 109) /* database unavailable */
+		if (rr.errcode == YAZ_BIB1_DATABASE_UNAVAILABLE)
 		{
 		    *http_code = 404;
 		}
@@ -832,7 +835,7 @@ static void srw_bend_search(association *assoc, request *req,
 		    {
 			yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
 					       &srw_res->num_diagnostics,
-					       61, 0);
+					       YAZ_SRW_FIRST_RECORD_POSITION_OUT_OF_RANGE, 0);
 		    }
 		    else
 		    {
@@ -1094,12 +1097,13 @@ static void srw_bend_scan(association *assoc, request *req,
 	else
 	{
 	    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-				   &srw_res->num_diagnostics, 4, "scan");
+				   &srw_res->num_diagnostics,
+				   YAZ_SRW_UNSUPP_OPERATION, "scan");
 	}
 	if (bsrr->errcode)
 	{
 	    int srw_error;
-	    if (bsrr->errcode == 109) /* database unavailable */
+	    if (bsrr->errcode == YAZ_BIB1_DATABASE_UNAVAILABLE)
 	    {
 		*http_code = 404;
 		return;
@@ -1639,8 +1643,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 	/* no backend. return error */
 	binitres = odr_malloc(assoc->encode, sizeof(*binitres));
 	binitres->errstring = 0;
-	binitres->errcode = 1;
-        iochan_settimeout(assoc->client_chan, 10);
+	binitres->errcode = YAZ_BIB1_PERMANENT_SYSTEM_ERROR;
+	iochan_settimeout(assoc->client_chan, 10);
     }
     if ((assoc->init->bend_sort))
 	yaz_log (YLOG_DEBUG, "Sort handler installed");
@@ -1760,7 +1764,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.52 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.53 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1903,7 +1907,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
                 *pres = Z_PresentStatus_failure;
                 /* for 'present request out of range',
                    set addinfo to record position if not set */
-                if (freq.errcode == 13 && freq.errstring == 0)
+                if (freq.errcode == YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE  && 
+				freq.errstring == 0)
                 {
                     sprintf (s, "%d", recno);
                     freq.errstring = s;

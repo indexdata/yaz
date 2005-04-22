@@ -1,5 +1,18 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Changed include/yaz/diagbib1.h and added include/yaz/diagsrw.h with
+diagnostic messages+codes for Bib-1 and SRW. Preprocessor defines are
+now defined for all those error codes. So instead of putting 109 in
+your program you'd use YAZ_BIB1_DATABASE_UNAVAILABLE. The
+messages are now generated from a .csv - file. See src/bib1.csv and
+srw/srw.csv.
+
+Modified the yaz-marcdump utility to skip garbage bytes between MARC
+records in a file.
+
+Fixed bug - uinitialized memory - introduced by code introduced by
+the fix of bug #272.
+
 --- 2.1.2 2005/03/16 
 
 Fixed bug #273: Update for recent MARC-8 -> UNICODE changes. 

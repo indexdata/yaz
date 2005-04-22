@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.20 2005-01-15 19:47:10 adam Exp $
+ * $Id: srw.h,v 1.21 2005-04-22 08:27:57 adam Exp $
  */
 /**
  * \file srw.h
@@ -14,6 +14,7 @@
 
 #include <yaz/soap.h>
 #include <yaz/zgdu.h>
+#include <yaz/diagsrw.h>
 
 YAZ_BEGIN_CDECL
 
@@ -140,8 +141,6 @@ YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
                              Z_SRW_PDU **handler_data,
                              void *client_data, const char *ns);
 YAZ_EXPORT Z_SRW_PDU *yaz_srw_get(ODR o, int which);
-
-YAZ_EXPORT const char *yaz_diag_srw_str (int code);
 
 YAZ_EXPORT int yaz_diag_bib1_to_srw (int bib1_code);
 

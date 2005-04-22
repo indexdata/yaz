@@ -1,6 +1,6 @@
-## Copyright (C) 1994-2004, Index Data
-## All rights reserved.
-## $Id: Makefile.am,v 1.30 2004-10-10 22:17:55 adam Exp $
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1994-2005, Index Data, All rights reserved.
+## $Id: Makefile.am,v 1.31 2005-04-22 08:27:57 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
