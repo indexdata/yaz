@@ -1,6 +1,6 @@
-; $Id: yaz.nsi,v 1.65 2005-03-16 21:30:23 adam Exp $
+; $Id: yaz.nsi,v 1.66 2005-04-22 14:51:11 adam Exp $
 
-!define VERSION "2.1.2"
+!define VERSION "2.1.3"
 
 !include "MUI.nsh"
 
@@ -137,6 +137,7 @@ Section "YAZ Source" YAZ_Source
 	File ..\src\*.h
 	File ..\src\*.y
 	File ..\src\*.tcl
+	File ..\src\*.csv
 	File ..\src\*.asn
 	File ..\src\codetables.xml
 	SetOutPath $INSTDIR\zoom

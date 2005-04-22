@@ -2,7 +2,7 @@
 # Copyright (c) Index Data 1996-2005
 # See the file LICENSE for details.
 #
-# $Id: csvtodiag.tcl,v 1.1 2005-04-22 08:27:58 adam Exp $
+# $Id: csvtodiag.tcl,v 1.2 2005-04-22 14:51:11 adam Exp $
 #
 # Converts a CSV file with diagnostics to C+H file for easy
 # maintenance
@@ -21,6 +21,7 @@ proc csvtodiag {ifiles name alias} {
     puts $cfile $preamble
     puts $cfile "
 #include \"diag-entry.h\"
+\#include \"[lindex $ifiles 2]\"
 struct yaz_diag_entry yaz_diag_${name}_tab\[\] = \{
 "
     puts $hfile $preamble
