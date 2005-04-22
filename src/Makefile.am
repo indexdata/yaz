@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.21 2005-04-22 14:59:42 adam Exp $
+## $Id: Makefile.am,v 1.22 2005-04-22 15:09:36 adam Exp $
 
 if ISTHR
 thrlib=libyazthread.la
@@ -24,7 +24,7 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml \
  csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv
 
-YAZCOMP = $(top_srcdir)/util/yaz-asncomp
+YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS)
@@ -32,14 +32,14 @@ AM_YFLAGS=-p cql_
 THREADED_FLAGS = @CFLAGSTHREADS@
 
 # MARC8 conversion is generated from codetables.xml
-marc8.c: charconv.tcl codetables.xml
+$(srcdir)/marc8.c: charconv.tcl codetables.xml
 	cd $(srcdir); ./charconv.tcl -p marc8 codetables.xml -o marc8.c
 
 # Generate diagnostics from CSVs
-$(top_srcdir)/include/yaz/diagbib1.h diagbib1.c: csvtobib1.tcl bib1.csv
+$(top_srcdir)/include/yaz/diagbib1.h $(srcdir)/diagbib1.c: csvtobib1.tcl bib1.csv
 	cd $(srcdir); ./csvtobib1.tcl
 
-$(top_srcdir)/include/yaz/diagsrw.h diagsrw.c: csvtosrw.tcl srw.csv
+$(top_srcdir)/include/yaz/diagsrw.h $(srcdir)/diagsrw.c: csvtosrw.tcl srw.csv
 	cd $(srcdir); ./csvtosrw.tcl
 
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
