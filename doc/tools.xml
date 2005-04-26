@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.45 2005-03-14 11:12:16 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.46 2005-04-26 19:51:31 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -305,6 +305,7 @@
       <para>
        <screen>
 	dylan
+
 	"bob dylan"
        </screen>
       </para>
@@ -313,7 +314,9 @@
       <para>
        <screen>
 	@or "dylan" "zimmerman"
+
 	@and @or dylan zimmerman when
+
 	@and when @or dylan zimmerman
        </screen>
       </para>
@@ -322,7 +325,8 @@
       <para>
        <screen>
 	@set Result-1
-	@and @set seta setb
+
+	@and @set seta @set setb
        </screen>
       </para>
      </example>
@@ -330,9 +334,13 @@
       <para>
        <screen>
 	@attr 1=4 computer
+
 	@attr 1=4 @attr 4=1 "self portrait"
+
 	@attrset exp1 @attr 1=1 CategoryList
+
 	@attr gils 1=2008 Copenhagen
+
 	@attr 1=/book/title computer
        </screen>
       </para>
@@ -1081,6 +1089,8 @@ struct cql_node {
          If an index is unspecified for a search term,
          <literal>index</literal> will be NULL.
         </para>
+       </listitem>
+       <listitem>
         <para>
          <literal>index_uri</literal>: index URi for search term
 	 or NULL if none could be resolved for the index.
