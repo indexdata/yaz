@@ -1,6 +1,6 @@
-; $Id: yaz.nsi,v 1.66 2005-04-22 14:51:11 adam Exp $
+; $Id: yaz.nsi,v 1.67 2005-04-26 18:46:42 adam Exp $
 
-!define VERSION "2.1.3"
+!define VERSION "2.1.4"
 
 !include "MUI.nsh"
 
