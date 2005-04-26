@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.13 2004-08-13 07:26:28 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.14 2005-04-26 18:46:24 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
   <para>
    This appendix lists individuals that have contributed in the development
@@ -21,16 +21,19 @@
      Matthew Carey
     </para></listitem>
    <listitem><para>
+     Hans van Dalen
+    </para></listitem>
+   <listitem><para>
      Irina Dijour
     </para></listitem>
    <listitem><para>
      Larry E. Dixson
     </para></listitem>
    <listitem><para>
-     Hans van Dalen
+     Hans van den Dool
     </para></listitem>
    <listitem><para>
-     Hans van den Dool
+     Mads Bondo Dydensborg
     </para></listitem>
    <listitem><para>
      Franck Falcoz
