@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.14 2005-01-21 09:23:27 adam Exp $
+ * $Id: nmem.c,v 1.15 2005-04-29 10:36:05 heikki Exp $
  */
 
 /**
@@ -94,12 +94,6 @@ struct nmem_mutex {
 
 YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
 {
-    if (!log_level_initialized)
-    {
-        log_level = yaz_log_module_level("nmem");
-        log_level_initialized = 1;
-    }
-
     if (!*p)
     {
 	*p = (NMEM_MUTEX) malloc (sizeof(**p));
@@ -111,6 +105,12 @@ YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
         pth_mutex_init (&(*p)->m_handle);
 #endif
     }
+    if (!log_level_initialized)
+    {
+        log_level_initialized = 1;
+        log_level = yaz_log_module_level("nmem");
+    }
+
 }
 
 YAZ_EXPORT void nmem_mutex_enter(NMEM_MUTEX p)

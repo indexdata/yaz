@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.21 2005-01-15 19:47:13 adam Exp $
+ * $Id: log.c,v 1.22 2005-04-29 10:36:05 heikki Exp $
  */
 
 /**
@@ -174,6 +174,8 @@ static void rotate_log()
 
 void yaz_log_init_level (int level)
 {
+    if (!mutex_init_flag)
+        init_mutex();
     if ( (l_level & YLOG_FLUSH) != (level & YLOG_FLUSH) )
     {
         l_level = level;
@@ -361,6 +363,8 @@ static char *clean_name(const char *name, int len, char *namebuf, int buflen)
 static int define_module_bit(const char *name)
 {
     int i;
+    if (!mutex_init_flag)
+        init_mutex();
     for (i = 0; mask_names[i].name; i++)
         ;
     if ( (i>=MAX_MASK_NAMES) || (next_log_bit >= 1<<31 ))
@@ -381,6 +385,8 @@ int yaz_log_module_level(const char *name)
     int i;
     char clean[255];
     char *n = clean_name(name, strlen(name), clean, sizeof(clean));
+    if (!mutex_init_flag)
+        init_mutex();
     for (i = 0; mask_names[i].name; i++)
         if (0==strcmp(n,mask_names[i].name))
         {
