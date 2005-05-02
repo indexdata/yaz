@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmemsdup.c,v 1.3 2005-01-15 19:47:14 adam Exp $
+ * $Id: nmemsdup.c,v 1.4 2005-05-02 19:14:33 adam Exp $
  */
 
 /**
@@ -38,3 +38,43 @@ int *nmem_intdup(NMEM mem, int v)
     *dst = v;
     return dst;
 }
+
+void nmem_strsplit_blank(NMEM nmem, const char *dstr, char ***darray, int *num)
+{
+    nmem_strsplit(nmem, " ", dstr, darray, num);
+}
+
+void nmem_strsplit(NMEM nmem, const char *delim, const char *dstr,
+		   char ***darray, int *num)
+{
+    const char *cp = dstr;
+    for (*num = 0; *cp; (*num)++)
+    {
+	while (*cp && strchr(delim, *cp))
+	    cp++;
+	if (!*cp)
+	    break;
+	while (*cp && !strchr(delim, *cp))
+	    cp++;
+    }
+    if (!*num)
+	*darray = 0;
+    else
+    {
+	size_t i = 0;
+	*darray = nmem_malloc(nmem, *num * sizeof(**darray));
+	for (cp = dstr; *cp; )
+	{
+	    const char *cp0;
+	    while (*cp && strchr(delim, *cp))
+		cp++;
+	    if (!*cp)
+		break;
+	    cp0 = cp;
+	    while (*cp && !strchr(delim, *cp))
+		cp++;
+	    (*darray)[i++] = nmem_strdupn(nmem, cp0, cp - cp0);
+	}
+    }
+}
+

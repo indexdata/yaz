@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: nmem.h,v 1.14 2005-01-15 19:47:09 adam Exp $
+ * $Id: nmem.h,v 1.15 2005-05-02 19:14:33 adam Exp $
  */
 
 /**
@@ -72,6 +72,12 @@ YAZ_EXPORT void nmem_reset(NMEM n);
 YAZ_EXPORT int nmem_total(NMEM n);
 YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
 YAZ_EXPORT char *nmem_strdupn (NMEM mem, const char *src, size_t n);
+YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
+				    char ***darray, int *num);
+YAZ_EXPORT void nmem_strsplit(NMEM nmem, const char *delim,
+			      const char *dstr,
+			      char ***darray, int *num);
+
 YAZ_EXPORT int *nmem_intdup (NMEM mem, int v);
 YAZ_EXPORT void nmem_transfer (NMEM dst, NMEM src);
 
