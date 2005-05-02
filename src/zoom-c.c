@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.38 2005-05-02 19:17:48 adam Exp $
+ * $Id: zoom-c.c,v 1.39 2005-05-02 19:33:00 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1018,7 +1018,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.38 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.39 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -3476,7 +3476,8 @@ ZOOM_connection_last_event(ZOOM_connection cs)
 ZOOM_API(int)
 ZOOM_event (int no, ZOOM_connection *cs)
 {
-    int timeout = 5000;
+    int timeout = 30;      /* default timeout in seconds */
+    int timeout_set = 0;   /* whether it was overriden at all */
 #if HAVE_SYS_POLL_H
     struct pollfd pollfds[1024];
     ZOOM_connection poll_cs[1024];
@@ -3533,10 +3534,18 @@ ZOOM_event (int no, ZOOM_connection *cs)
 	    continue;
 	if (max_fd < fd)
 	    max_fd = fd;
-
-        this_timeout = ZOOM_options_get_int (c->options, "timeout", -1);
-        if (this_timeout != -1 && this_timeout < timeout)
-            timeout = this_timeout;
+	
+	/* -1 is used for indefinite timeout (no timeout), so -2 here. */
+        this_timeout = ZOOM_options_get_int (c->options, "timeout", -2);
+	if (this_timeout != -2)
+	{
+	    /* ensure the minimum timeout is used */
+	    if (!timeout_set)
+		timeout = this_timeout;
+	    else if (this_timeout != -1 && this_timeout < timeout)
+		timeout = this_timeout;
+	    timeout_set = 1;
+	}		
 #if HAVE_SYS_POLL_H
         if (mask)
         {
@@ -3572,14 +3581,11 @@ ZOOM_event (int no, ZOOM_connection *cs)
 	}
 #endif
     }
-    if (timeout >= 5000)
-        timeout = 30;
-
     if (!nfds)
         return 0;
 
 #if HAVE_SYS_POLL_H
-    r = poll (pollfds, nfds, timeout * 1000);
+    r = poll (pollfds, nfds, (timeout == -1 ? -1 : timeout * 1000));
     for (i = 0; i<nfds; i++)
     {
         ZOOM_connection c = poll_cs[i];
@@ -3608,7 +3614,7 @@ ZOOM_event (int no, ZOOM_connection *cs)
     tv.tv_sec = timeout;
     tv.tv_usec = 0;
     yaz_log (log_level, "select start");
-    r = select (max_fd+1, &input, &output, &except, &tv);
+    r = select (max_fd+1, &input, &output, &except, (timeout == -1 ? 0 : &tv));
     yaz_log (log_level, "select stop, returned r=%d", r);
     for (i = 0; i<no; i++)
     {
