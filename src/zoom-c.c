@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.37 2005-01-16 22:01:13 adam Exp $
+ * $Id: zoom-c.c,v 1.38 2005-05-02 19:17:48 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -299,54 +299,20 @@ static char **set_DatabaseNames (ZOOM_connection con, ZOOM_options options,
                                  int *num)
 {
     char **databaseNames;
-    const char *c;
-    int no = 2;
     const char *cp = ZOOM_options_get (options, "databaseName");
     
     if (!cp || !*cp)
     {
         if (strncmp (con->host_port, "unix:", 5) == 0)
-	    cp = strchr (con->host_port+5, ':');
+	    cp = strchr(con->host_port+5, ':');
 	else
-	    cp = strchr (con->host_port, '/');
+	    cp = strchr(con->host_port, '/');
 	if (cp)
 	    cp++;
     }
-    if (cp)
-    {
-	c = cp;
-	while ((c = strchr(c, '+')))
-	{
-	    c++;
-	    no++;
-	}
-    }
-    else
+    if (!cp)
 	cp = "Default";
-    databaseNames = (char**)
-        odr_malloc (con->odr_out, no * sizeof(*databaseNames));
-    no = 0;
-    while (*cp)
-    {
-	c = strchr (cp, '+');
-	if (!c)
-	    c = cp + strlen(cp);
-	else if (c == cp)
-	{
-	    cp++;
-	    continue;
-	}
-	/* cp ptr to first char of db name, c is char
-	   following db name */
-	databaseNames[no] = (char*) odr_malloc (con->odr_out, 1+c-cp);
-	memcpy (databaseNames[no], cp, c-cp);
-	databaseNames[no++][c-cp] = '\0';
-	cp = c;
-	if (*cp)
-	    cp++;
-    }
-    databaseNames[no] = NULL;
-    *num = no;
+    nmem_strsplit(con->odr_out->mem, "+", cp,  &databaseNames, num);
     return databaseNames;
 }
 
@@ -389,7 +355,10 @@ ZOOM_connection_connect(ZOOM_connection c,
     xfree (c->charset);
     val = ZOOM_options_get (c->options, "charset");
     if (val && *val)
+    {
 	c->charset = xstrdup (val);
+	yaz_log(YLOG_LOG, "connect charset=%s", c->charset);
+    }
     else
 	c->charset = 0;
 
@@ -943,7 +912,7 @@ static void otherInfo_attach (ZOOM_connection c, Z_APDU *a, ODR out)
         val = ZOOM_options_get (c->options, buf);
         if (!val)
             break;
-        cp = strchr (val, ':');
+        cp = strchr(val, ':');
         if (!cp)
             continue;
         len = cp - val;
@@ -1049,7 +1018,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.37 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.38 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1107,7 +1076,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     if (c->proxy)
 	yaz_oi_set_string_oidval(&ireq->otherInfo, c->odr_out,
 				 VAL_PROXY, 1, c->host_port);
-    if (c->charset||c->lang)
+    if (c->charset || c->lang)
     {
     	Z_OtherInformation **oi;
     	Z_OtherInformationUnit *oi_unit;
@@ -1116,14 +1085,26 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     	
     	if ((oi_unit = yaz_oi_update(oi, c->odr_out, NULL, 0, 0)))
     	{
+            char **charsets_addresses = 0;
+            char **langs_addresses = 0;
+            int charsets_count = 0;
+            int langs_count = 0;
+	   
+            if (c->charset)
+		nmem_strsplit_blank(c->odr_out->mem, c->charset,
+				    &charsets_addresses, &charsets_count);
+            if (c->lang)
+		nmem_strsplit_blank(c->odr_out->mem, c->lang,
+				    &langs_addresses, &langs_count);
             ODR_MASK_SET(ireq->options, Z_Options_negotiationModel);
-            
             oi_unit->which = Z_OtherInfo_externallyDefinedInfo;
             oi_unit->information.externallyDefinedInfo =
-                yaz_set_proposal_charneg
-                (c->odr_out,
-                 (const char **)&c->charset, (c->charset) ? 1:0,
-                 (const char **)&c->lang, (c->lang) ? 1:0, 1);
+                yaz_set_proposal_charneg(c->odr_out,
+					 (const char **) charsets_addresses,
+					 charsets_count,
+					 (const char **) langs_addresses,
+					 langs_count, 
+					 1);
     	}
     }
     assert (apdu);
@@ -1510,7 +1491,7 @@ static const char *marc_iconv_return(ZOOM_record rec, int marc_type,
     if (record_charset && *record_charset)
     {
 	/* Use "from,to" or just "from" */
-	const char *cp =strchr(record_charset, ',');
+	const char *cp = strchr(record_charset, ',');
 	int clen = strlen(record_charset);
 	if (cp && cp[1])
 	{
@@ -1564,7 +1545,7 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
     if (record_charset && *record_charset)
     {
 	/* Use "from,to" or just "from" */
-	const char *cp =strchr(record_charset, ',');
+	const char *cp = strchr(record_charset, ',');
 	int clen = strlen(record_charset);
 	if (cp && cp[1])
 	{
@@ -2989,6 +2970,10 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
                 if (lang)
                     ZOOM_connection_option_set (c, "negotiation-lang",
                                                 lang);
+
+                ZOOM_connection_option_set (
+		    c,  "negotiation-charset-in-effect-for-records",
+		    (sel != 0) ? "1" : "0");
                 nmem_destroy(tmpmem);
             }
 	}	
