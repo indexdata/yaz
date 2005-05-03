@@ -1,5 +1,22 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Fixed bug #307: It was impossible to specify indefinite/no timeout
+for ZOOM_event. Special timeout value -1 now means indefinite timeout
+(i.e.  no timeout).
+
+Added support for multiple languages and charsets to be specified in
+ZOOM. Each charset/language is separated by a blank. If negotiation is
+in effect in init-response, Option
+"negotiation-charset-in-effect-for-records" set to 1(true) or 0(false). 
+Code based on patch by Vasiliy Osadchuk.
+
+Fixed bug #306: infinite recursion that occurred when calling
+yaz_log_level_init as the first call (before other log level or
+nmem_init calls)
+
+Fixed bug in scan handling in front end server: if preferred-Position-In-
+Response was non-present, a NULL pointer referece was performed.
+
 --- 2.1.4 2005/04/26 
 
 Changed include/yaz/diagbib1.h and added include/yaz/diagsrw.h with
