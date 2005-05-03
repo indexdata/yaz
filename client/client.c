@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.276 2005-04-20 12:59:51 adam Exp $
+ * $Id: client.c,v 1.277 2005-05-03 12:30:13 adam Exp $
  */
 
 #include <stdio.h>
@@ -4145,29 +4145,48 @@ static int cmd_help (const char *line)
     for (i = 0; cmd_array[i].cmd; i++)
         if (*topic == 0 || strcmp (topic, cmd_array[i].cmd) == 0)
             printf("   %s %s\n", cmd_array[i].cmd, cmd_array[i].ad);
-    if (strcmp (topic, "find") == 0)
+    if (!strcmp(topic, "find"))
     {
-        printf ("RPN:\n");
-        printf (" \"term\"                        Simple Term\n");
-        printf (" @attr [attset] type=value op  Attribute\n");
-        printf (" @and opl opr                  And\n");
-        printf (" @or opl opr                   Or\n");
-        printf (" @not opl opr                  And-Not\n");
-        printf (" @set set                      Result set\n");
-        printf ("\n");
-        printf ("Bib-1 attribute types\n");
-        printf ("1=Use:         ");
-        printf ("4=Title 7=ISBN 8=ISSN 30=Date 62=Abstract 1003=Author 1016=Any\n");
-        printf ("2=Relation:    ");
-        printf ("1<   2<=  3=  4>=  5>  6!=  102=Relevance\n");
-        printf ("3=Position:    ");
-        printf ("1=First in Field  2=First in subfield  3=Any position\n");
-        printf ("4=Structure:   ");
-        printf ("1=Phrase  2=Word  3=Key  4=Year  5=Date  6=WordList\n");
-        printf ("5=Truncation:  ");
-        printf ("1=Right  2=Left  3=L&R  100=No  101=#  102=Re-1  103=Re-2\n");
-        printf ("6=Completeness:");
-        printf ("1=Incomplete subfield  2=Complete subfield  3=Complete field\n");
+        printf("RPN:\n");
+        printf(" \"term\"                        Simple Term\n");
+        printf(" @attr [attset] type=value op  Attribute\n");
+        printf(" @and opl opr                  And\n");
+        printf(" @or opl opr                   Or\n");
+        printf(" @not opl opr                  And-Not\n");
+        printf(" @set set                      Result set\n");
+	printf(" @prox exl dist ord rel uc ut  Proximity. Use help prox\n");
+        printf("\n");
+        printf("Bib-1 attribute types\n");
+        printf("1=Use:         ");
+        printf("4=Title 7=ISBN 8=ISSN 30=Date 62=Abstract 1003=Author 1016=Any\n");
+        printf("2=Relation:    ");
+        printf("1<   2<=  3=  4>=  5>  6!=  102=Relevance\n");
+        printf("3=Position:    ");
+        printf("1=First in Field  2=First in subfield  3=Any position\n");
+        printf("4=Structure:   ");
+        printf("1=Phrase  2=Word  3=Key  4=Year  5=Date  6=WordList\n");
+        printf("5=Truncation:  ");
+        printf("1=Right  2=Left  3=L&R  100=No  101=#  102=Re-1  103=Re-2\n");
+        printf("6=Completeness:");
+        printf("1=Incomplete subfield  2=Complete subfield  3=Complete field\n");
+    }
+    if (!strcmp(topic, "prox"))
+    {
+	printf("Proximity:\n");
+	printf(" @prox exl dist ord rel uc ut\n");
+	printf(" exl:  exclude flag . 0=include, 1=exclude.\n");
+	printf(" dist: distance integer.\n");
+	printf(" ord:  order flag. 0=unordered, 1=ordered.\n");
+	printf(" rel:  relation integer. 1<  2<=  3= 4>=  5>  6!= .\n");
+	printf(" uc:   unit class. k=known, p=private.\n");
+	printf(" ut:   unit type. 1=character, 2=word, 3=sentence,\n");
+	printf("        4=paragraph, 5=section, 6=chapter, 7=document,\n");
+	printf("        8=element, 9=subelement, 10=elementType, 11=byte.\n");
+	printf("\nExamples:\n");
+	printf(" Search for a and b in-order at most 3 words apart:\n");
+	printf("  @prox 0 3 1 2 k 2\n");
+	printf(" Search for any order of a and b next to each other:\n");
+	printf("  @prox 0 1 0 3 k 2\n");
     }
     return 1;
 }
@@ -4257,8 +4276,7 @@ void process_cmd_line(char* line)
     if (!cmd_array[i].cmd) /* dump our help-screen */
     {
         printf("Unknown command: %s.\n", word);
-        printf("use help for list of commands\n");
-        /* cmd_help (""); */
+        printf("Type 'help' for list of commands\n");
         res = 1;
     }
     
