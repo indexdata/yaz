@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.277 2005-05-03 12:30:13 adam Exp $
+ * $Id: client.c,v 1.278 2005-05-06 12:18:26 adam Exp $
  */
 
 #include <stdio.h>
@@ -1280,6 +1280,34 @@ static int send_srw(Z_SRW_PDU *sr)
 #endif
 
 #if HAVE_XML2
+static char *encode_SRW_term(ODR o, const char *q)
+{
+    const char *in_charset = "ISO-8859-1";
+    WRBUF w = wrbuf_alloc();
+    yaz_iconv_t cd;
+    char *res;
+    if (outputCharset)
+	in_charset = in_charset;
+    cd = yaz_iconv_open("UTF-8", in_charset);
+    if (!cd)
+    {
+	wrbuf_free(w, 1);
+	return odr_strdup(o, q);
+    }
+    wrbuf_iconv_write(w, cd, q, strlen(q));
+    if (wrbuf_len(w))
+    {
+	int len = wrbuf_len(w);
+	res = odr_strdupn(o, wrbuf_buf(w), len);
+    }
+    else
+	res = odr_strdup(o, q);    
+    yaz_iconv_close(cd);
+    wrbuf_free(w, 1);
+    return res;
+}
+
+
 static int send_SRW_scanRequest(const char *arg, int pos, int num)
 {
     Z_SRW_PDU *sr = 0;
@@ -1291,11 +1319,11 @@ static int send_SRW_scanRequest(const char *arg, int pos, int num)
     {
     case QueryType_CQL:
 	sr->u.scan_request->query_type = Z_SRW_query_type_cql;
-	sr->u.scan_request->scanClause.cql = odr_strdup(out, arg);
+	sr->u.scan_request->scanClause.cql = encode_SRW_term(out, arg);
 	break;
     case QueryType_Prefix:
 	sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
-	sr->u.scan_request->scanClause.pqf = odr_strdup(out, arg);
+	sr->u.scan_request->scanClause.pqf = encode_SRW_term(out, arg);
 	break;
     default:
 	printf ("Only CQL and PQF supported in SRW\n");
@@ -1329,17 +1357,17 @@ static int send_SRW_searchRequest(const char *arg)
     {
     case QueryType_CQL:
 	srw_sr->u.request->query_type = Z_SRW_query_type_cql;
-	srw_sr->u.request->query.cql = odr_strdup(srw_sr_odr_out, arg);
+	srw_sr->u.request->query.cql = encode_SRW_term(srw_sr_odr_out, arg);
 
 	sr->u.request->query_type = Z_SRW_query_type_cql;
-	sr->u.request->query.cql = odr_strdup(out, arg);
+	sr->u.request->query.cql = encode_SRW_term(srw_sr_odr_out, arg);
 	break;
     case QueryType_Prefix:
 	srw_sr->u.request->query_type = Z_SRW_query_type_pqf;
-	srw_sr->u.request->query.pqf = odr_strdup(srw_sr_odr_out, arg);
+	srw_sr->u.request->query.pqf = encode_SRW_term(srw_sr_odr_out, arg);
 
 	sr->u.request->query_type = Z_SRW_query_type_pqf;
-	sr->u.request->query.pqf = odr_strdup(out, arg);
+	sr->u.request->query.pqf = encode_SRW_term(srw_sr_odr_out, arg);
 	break;
     default:
 	printf ("Only CQL and PQF supported in SRW\n");
