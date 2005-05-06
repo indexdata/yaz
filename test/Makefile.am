@@ -1,8 +1,9 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.5 2005-02-25 09:37:53 adam Exp $
+## $Id: Makefile.am,v 1.6 2005-05-06 11:11:37 adam Exp $
 
-check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog
+check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
+ tstsoap1 tstsoap2
 check_SCRIPTS = tstcql.sh tstmarc.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
@@ -40,4 +41,8 @@ tstodr_SOURCES = tstodrcodec.c tstodrcodec.h tstodr.c
 tstccl_SOURCES = tstccl.c
 
 tstlog_SOURCES = tstlog.c
+
+tstsoap1_SOURCES = tstsoap1.c
+
+tstsoap2_SOURCES = tstsoap2.c
 
