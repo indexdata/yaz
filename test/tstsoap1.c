@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap1.c,v 1.1 2005-05-06 11:11:37 adam Exp $
+ * $Id: tstsoap1.c,v 1.2 2005-05-08 07:33:12 adam Exp $
  */
 
 #include <stdlib.h>
@@ -31,7 +31,9 @@ int main(int argc, char **argv)
 	xmlDocSetRootElement(doc, top);
 	
 	xmlDocDumpMemory(doc, &buf_out, &len_out);
+#if 0
 	printf("%*s", len_out, buf_out);
+#endif
     }
 #endif
     return 0;
