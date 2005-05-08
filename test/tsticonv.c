@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.8 2005-02-02 23:27:05 adam Exp $
+ * $Id: tsticonv.c,v 1.9 2005-05-08 07:35:23 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -52,8 +52,11 @@ static int compare_buffers(char *msg, int no,
 /* some test strings in ISO-8859-1 format */
 static const char *iso_8859_1_a[] = {
     "ax" ,
-    "\330",
+    "\xd8",
     "eneb\346r",
+    "\xe5" "\xd8",
+    "\xe5" "\xd8" "b",
+    "\xe5" "\xe5",
     0 };
 
 /* same test strings in MARC-8 format */
@@ -61,6 +64,9 @@ static const char *marc8_a[] = {
     "ax",   
     "\xa2",          /* latin capital letter o with stroke */
     "eneb\xb5r",     /* latin small letter ae */
+    "\xea" "a\xa2",
+    "\xea" "a\xa2" "b",
+    "\xea" "a"  "\xea" "a",
     0
 };
 
@@ -265,7 +271,7 @@ static void dconvert(int mandatory, const char *tmpcode)
         {
             if (!mandatory)
                 return;
-            printf ("tsticonv code=%s 1\n", tmpcode);
+            printf ("tsticonv code=%s i=%d 1\n", tmpcode, i);
 	    exit(1);
         }
 	r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
@@ -273,7 +279,7 @@ static void dconvert(int mandatory, const char *tmpcode)
         {
             int e = yaz_iconv_error(cd);
 
-            printf ("tsticonv code=%s 2 e=%d\n", tmpcode, e);
+            printf ("tsticonv code=%s i=%d 2 e=%d\n", tmpcode, i, e);
 	    exit(2);
         }
 	yaz_iconv_close(cd);
@@ -283,7 +289,7 @@ static void dconvert(int mandatory, const char *tmpcode)
         {
             if (!mandatory)
                 return;
-            printf ("tsticonv code=%s 3\n", tmpcode);
+            printf ("tsticonv code=%s i=%d 3\n", tmpcode, i);
 	    exit(3);
         }
 	inbuf = outbuf0;
@@ -295,7 +301,7 @@ static void dconvert(int mandatory, const char *tmpcode)
 	if (r == (size_t)(-1)) {
             int e = yaz_iconv_error(cd);
 
-            printf ("tsticonv code=%s 4 e=%d\n", tmpcode, e);
+            printf ("tsticonv code=%s i=%d 4 e=%d\n", tmpcode, i, e);
 	    exit(4);
 	}
 	compare_buffers("dconvert", i,
@@ -315,5 +321,5 @@ int main (int argc, char **argv)
     tst_marc8_to_iso_8859_1();
     tst_marc8_to_ucs4b();
     tst_ucs4b_to_utf8();
-    exit (0);
+    exit(0);
 }
