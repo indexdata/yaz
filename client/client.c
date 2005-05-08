@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.278 2005-05-06 12:18:26 adam Exp $
+ * $Id: client.c,v 1.279 2005-05-08 22:53:59 adam Exp $
  */
 
 #include <stdio.h>
@@ -1287,7 +1287,7 @@ static char *encode_SRW_term(ODR o, const char *q)
     yaz_iconv_t cd;
     char *res;
     if (outputCharset)
-	in_charset = in_charset;
+	in_charset = outputCharset;
     cd = yaz_iconv_open("UTF-8", in_charset);
     if (!cd)
     {
