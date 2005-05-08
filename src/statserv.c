@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.29 2005-03-14 11:14:21 adam Exp $
+ * $Id: statserv.c,v 1.30 2005-05-08 07:13:57 adam Exp $
  */
 
 /**
@@ -1297,6 +1297,7 @@ int check_options(int argc, char **argv)
     control_block.loglevel = yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL);
     yaz_log_init_level(control_block.loglevel);
 
+    get_logbits(1); 
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:",
 			  argv, argc, &arg)) != -2)
     {
@@ -1340,6 +1341,7 @@ int check_options(int argc, char **argv)
 	    control_block.loglevel =
 		yaz_log_mask_str_x(arg,control_block.loglevel);
 	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
+	    get_logbits(1); 
 	    break;
 	case 'a':
 	    option_copy(control_block.apdufile, arg);
@@ -1407,7 +1409,6 @@ int check_options(int argc, char **argv)
 	    return 1;
         }
     }
-    get_logbits(1); 
     return 0;
 }
 
