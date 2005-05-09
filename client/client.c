@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.280 2005-05-09 08:51:48 adam Exp $
+ * $Id: client.c,v 1.281 2005-05-09 11:01:07 adam Exp $
  */
 
 #include <stdio.h>
@@ -3539,7 +3539,7 @@ static void initialize(void)
 
 
 #if HAVE_GETTIMEOFDAY
-struct timeval tv_start, tv_end;
+struct timeval tv_start;
 #endif
 
 #if HAVE_XML2
@@ -3719,6 +3719,10 @@ void wait_and_handle_response()
     int res;
     char *netbuffer= 0;
     int netbufferlen = 0;
+#if HAVE_GETTIMEOFDAY
+    int got_tv_end = 0;
+    struct timeval tv_end;
+#endif
     Z_GDU *gdu;
     
     while(conn)
@@ -3751,6 +3755,11 @@ void wait_and_handle_response()
             close_session();
             break;
         }
+#if HAVE_GETTIMEOFDAY
+	if (got_tv_end == 0)
+	    gettimeofday (&tv_end, 0); /* count first one only */
+	got_tv_end++;
+#endif
         odr_reset(out);
         odr_reset(in); /* release APDU from last round */
         record_last = 0;
@@ -3841,10 +3850,9 @@ void wait_and_handle_response()
         if (conn && !cs_more(conn))
             break;
     }
-    if (conn)
-    {
 #if HAVE_GETTIMEOFDAY
-        gettimeofday (&tv_end, 0);
+    if (got_tv_end)
+    {
 #if 0
         printf ("S/U S/U=%ld/%ld %ld/%ld",
                 (long) tv_start.tv_sec,
@@ -3855,8 +3863,8 @@ void wait_and_handle_response()
         printf ("Elapsed: %.6f\n",
                 (double) tv_end.tv_usec / 1e6 + tv_end.tv_sec -
                 ((double) tv_start.tv_usec / 1e6 + tv_start.tv_sec));
-#endif
     }
+#endif
     xfree (netbuffer);
 }
 
