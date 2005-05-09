@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.279 2005-05-08 22:53:59 adam Exp $
+ * $Id: client.c,v 1.280 2005-05-09 08:51:48 adam Exp $
  */
 
 #include <stdio.h>
@@ -4212,9 +4212,9 @@ static int cmd_help (const char *line)
 	printf("        8=element, 9=subelement, 10=elementType, 11=byte.\n");
 	printf("\nExamples:\n");
 	printf(" Search for a and b in-order at most 3 words apart:\n");
-	printf("  @prox 0 3 1 2 k 2\n");
+	printf("  @prox 0 3 1 2 k 2 a b\n");
 	printf(" Search for any order of a and b next to each other:\n");
-	printf("  @prox 0 1 0 3 k 2\n");
+	printf("  @prox 0 1 0 3 k 2 a b\n");
     }
     return 1;
 }
