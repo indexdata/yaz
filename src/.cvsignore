@@ -11,3 +11,5 @@ item-req.c
 ill-core.c
 marc8.c
 cql.c
+diagbib1.c
+diagsrw.c
