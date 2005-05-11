@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.54 2005-04-29 19:06:13 adam Exp $
+ * $Id: seshigh.c,v 1.55 2005-05-11 12:07:48 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1764,7 +1764,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.54 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.55 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2340,6 +2340,9 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
         for (i = 0; i < req->num_databaseNames; i++)
             yaz_log (log_requestdetail, "Database '%s'", req->databaseNames[i]);
     }
+    bsrr->scanClause = 0;
+    bsrr->errcode = 0;
+    bsrr->errstring = 0;
     bsrr->num_bases = req->num_databaseNames;
     bsrr->basenames = req->databaseNames;
     bsrr->num_entries = *req->numberOfTermsRequested;
