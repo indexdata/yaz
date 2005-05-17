@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.40 2005-05-02 19:33:55 adam Exp $
+ * $Id: zoom-c.c,v 1.41 2005-05-17 11:48:36 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1015,7 +1015,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.40 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.41 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1386,20 +1386,11 @@ static zoom_ret ZOOM_connection_send_search (ZOOM_connection c)
     return send_APDU (c, apdu);
 }
 
-static void response_diag (ZOOM_connection c, Z_DiagRec *p)
+static void response_default_diag(ZOOM_connection c, Z_DefaultDiagFormat *r)
 {
     int oclass;
-    Z_DefaultDiagFormat *r;
     char *addinfo = 0;
-    
-    xfree (c->addinfo);
-    c->addinfo = 0;
-    if (p->which != Z_DiagRec_defaultFormat)
-    {
-        set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
-	return;
-    }
-    r = p->u.defaultFormat;
+
     switch (r->which)
     {
     case Z_DefaultDiagFormat_v2Addinfo:
@@ -1409,9 +1400,19 @@ static void response_diag (ZOOM_connection c, Z_DiagRec *p)
 	addinfo = r->u.v3Addinfo;
 	break;
     }
+    xfree (c->addinfo);
+    c->addinfo = 0;
     set_dset_error(c, *r->condition,
                    yaz_z3950oid_to_str(r->diagnosticSetId, &oclass),
                    addinfo, 0);
+}
+
+static void response_diag(ZOOM_connection c, Z_DiagRec *p)
+{
+    if (p->which != Z_DiagRec_defaultFormat)
+        set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
+    else
+	response_default_diag(c, p->u.defaultFormat);
 }
 
 ZOOM_API(ZOOM_record)
@@ -1940,13 +1941,7 @@ static void handle_records (ZOOM_connection c, Z_Records *sr,
         return;
     }
     if (sr && sr->which == Z_Records_NSD)
-    {
-	Z_DiagRec dr, *dr_p = &dr;
-	dr.which = Z_DiagRec_defaultFormat;
-	dr.u.defaultFormat = sr->u.nonSurrogateDiagnostic;
-	
-	response_diag (c, dr_p);
-    }
+	response_default_diag(c, sr->u.nonSurrogateDiagnostic);
     else if (sr && sr->which == Z_Records_multipleNSD)
     {
 	if (sr->u.multipleNonSurDiagnostics->num_diagRecs >= 1)
@@ -2889,6 +2884,34 @@ static int es_response (ZOOM_connection c,
     return 1;
 }
 
+static void interpret_init_diag(ZOOM_connection c,
+				Z_DiagnosticFormat *diag)
+{
+    if (diag->num > 0)
+    {
+	Z_DiagnosticFormat_s *ds = diag->elements[0];
+	if (ds->which == Z_DiagnosticFormat_s_defaultDiagRec)
+	    response_default_diag(c, ds->u.defaultDiagRec);
+    }
+}
+
+
+static void interpret_otherinformation_field(ZOOM_connection c,
+					     Z_OtherInformation *ui)
+{
+    int i;
+    for (i = 0; i < ui->num_elements; i++)
+    {
+	Z_OtherInformationUnit *unit = ui->list[i];
+	if (unit->which == Z_OtherInfo_externallyDefinedInfo &&
+	    unit->information.externallyDefinedInfo &&
+	    unit->information.externallyDefinedInfo->which ==
+	    Z_External_diag1) 
+	{
+	    interpret_init_diag(c, unit->information.externallyDefinedInfo->u.diag1);
+	} 
+    }
+}
 
 static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
 {
@@ -2921,7 +2944,12 @@ static void handle_apdu (ZOOM_connection c, Z_APDU *apdu)
                                    initrs->implementationVersion : "");
 	if (!*initrs->result)
 	{
-            set_ZOOM_error(c, ZOOM_ERROR_INIT, 0);
+	    Z_External *uif = initrs->userInformationField;
+
+	    set_ZOOM_error(c, ZOOM_ERROR_INIT, 0); /* default error */
+
+	    if (uif && uif->which == Z_External_userInfo1)
+		interpret_otherinformation_field(c, uif->u.userInfo1);
 	}
 	else
 	{
