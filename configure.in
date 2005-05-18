@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2005
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.177 2005-05-11 12:19:15 adam Exp $
+dnl $Id: configure.in,v 1.178 2005-05-18 20:23:47 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.1.5)
 AM_MAINTAINER_MODE
@@ -331,8 +331,11 @@ if test "$xml2dir" != "no"; then
 		AC_DEFINE(HAVE_XML2)
 	else
 		AC_MSG_RESULT([Not found])
-		if test "$xml2dir" != "default"; then
-		        AC_MSG_ERROR([libXML2 development libraries missing])
+		if test "$xml2dir" = "default"; then
+			AC_MSG_WARN([Libxml2 development libraries not found.])
+			AC_MSG_WARN([YAZ will NOT support SRW/SRU.])
+		else
+		        AC_MSG_ERROR([libXML2 development libraries not found.])
 		fi
 	fi
 fi
