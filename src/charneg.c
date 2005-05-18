@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: charneg.c,v 1.3 2005-01-15 19:47:11 adam Exp $
+ * $Id: charneg.c,v 1.4 2005-05-18 12:38:40 adam Exp $
  */
 
 /** 
@@ -260,28 +260,63 @@ Z_External *yaz_set_response_charneg(ODR o, const char *charset,
 /* Get negotiation from OtherInformation. Client&Server side */
 Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
 {
-    Z_External *pext;
     int i;
 	
-    if(!p)
+    if (!p)
         return 0;
 	
-    for (i=0; i<p->num_elements; i++) {
-	
+    for (i = 0; i < p->num_elements; i++) {
+	Z_External *pext;
         if ((p->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
             (pext = p->list[i]->information.externallyDefinedInfo)) {
-					
+	    
             oident *ent = oid_getentbyoid(pext->direct_reference);
-			
-            if (ent && ent->value == VAL_CHARNEG3 && ent->oclass == CLASS_NEGOT &&
-                pext->which == Z_External_charSetandLanguageNegotiation) {
-				
+	    
+            if (ent && ent->value == VAL_CHARNEG3 
+		&& ent->oclass == CLASS_NEGOT
+		&&  pext->which == Z_External_charSetandLanguageNegotiation)
+	    {
                 return pext->u.charNeg3;
             }
         }
     }
     return 0;
 }
+
+/* Delete negotiation from OtherInformation. Client&Server side */
+int yaz_del_charneg_record(Z_OtherInformation **p)
+{
+    int i;
+	
+    if (!*p)
+        return 0;
+	
+    for (i = 0; i < (*p)->num_elements; i++) {
+	Z_External *pext;
+        if (((*p)->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
+            (pext = (*p)->list[i]->information.externallyDefinedInfo)) {
+	    
+            oident *ent = oid_getentbyoid(pext->direct_reference);
+	    
+            if (ent && ent->value == VAL_CHARNEG3 
+		&& ent->oclass == CLASS_NEGOT
+		&& pext->which == Z_External_charSetandLanguageNegotiation)
+	    {
+		--((*p)->num_elements);
+		if ((*p)->num_elements == 0)
+		    *p = 0;
+		else
+		{
+		    for(; i < (*p)->num_elements; i++)
+			(*p)->list[i] = (*p)->list[i+1];
+		}
+		return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 
 /* Get charsets, langs, selected from negotiation.. Server side */
 void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,

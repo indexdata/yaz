@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: charneg.h,v 1.5 2005-01-15 19:47:09 adam Exp $
+ * $Id: charneg.h,v 1.6 2005-05-18 12:38:40 adam Exp $
  */
 /** 
  * \file charneg.h
@@ -50,35 +50,46 @@ YAZ_BEGIN_CDECL
 /*
  * Get (*) record from request
  */
-YAZ_EXPORT Z_CharSetandLanguageNegotiation *
-	yaz_get_charneg_record(Z_OtherInformation *p);
+YAZ_EXPORT
+Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p);
+
+/*
+ * Delete (*) record from request
+ */
+YAZ_EXPORT
+int yaz_del_charneg_record(Z_OtherInformation **p);
 
 /*
  * Client's part. 
  */
-YAZ_EXPORT Z_External *yaz_set_proposal_charneg(ODR odr,
-	const char **charsets, int num_charsets, const char **langs,
-		int num_langs, int selected);
+YAZ_EXPORT
+Z_External *yaz_set_proposal_charneg(ODR odr,
+				     const char **charsets, int num_charsets,
+				     const char **langs,
+				     int num_langs, int selected);
 
-YAZ_EXPORT void yaz_get_response_charneg(NMEM mem,
-	Z_CharSetandLanguageNegotiation *p, char **charset, char **lang,
-		int *selected);
+YAZ_EXPORT
+void yaz_get_response_charneg(NMEM mem,
+			      Z_CharSetandLanguageNegotiation *p,
+			      char **charset, char **lang,
+			      int *selected);
 
 /*
  * Server's part
  */
  
-YAZ_EXPORT Z_External *yaz_set_response_charneg(ODR odr,
-	const char *charset, const char *lang, int selected);
+YAZ_EXPORT
+Z_External *yaz_set_response_charneg(ODR odr,
+				     const char *charset, const char *lang,
+				     int selected);
 
 
-YAZ_EXPORT void yaz_get_proposal_charneg(NMEM mem,
-	Z_CharSetandLanguageNegotiation *p,
-                                         char ***charsets, int *num_charsets,
-                                         char ***langs, int *num_langs,
-                                         int *selected);
-
-
+YAZ_EXPORT
+void yaz_get_proposal_charneg(NMEM mem,
+			      Z_CharSetandLanguageNegotiation *p,
+			      char ***charsets, int *num_charsets,
+			      char ***langs, int *num_langs,
+			      int *selected);
 YAZ_END_CDECL
 
 #endif
