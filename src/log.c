@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.22 2005-04-29 10:36:05 heikki Exp $
+ * $Id: log.c,v 1.23 2005-05-18 12:23:42 adam Exp $
  */
 
 /**
@@ -83,10 +83,10 @@ static struct {
     { YLOG_LOG,    "log"  },
     { YLOG_ERRNO,  ""},
     { YLOG_MALLOC, "malloc"},
- /*   { YLOG_APP,    "app"  }, */
+    { YLOG_APP,    "app"  },
     { YLOG_NOTIME, "notime" },
- /*   { YLOG_APP2,   "app2" }, */
- /*   { YLOG_APP3,   "app3" }, */
+    { YLOG_APP2,   "app2" }, */
+    { YLOG_APP3,   "app3" }, */
     { YLOG_ALL,    "all"  },
     { YLOG_FLUSH,  "flush" },
     { YLOG_LOGLVL, "loglevel" }, 
