@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.32 2005-01-15 19:47:09 adam Exp $
+ * $Id: log.h,v 1.33 2005-05-18 12:30:00 adam Exp $
  */
 
 /**
@@ -45,13 +45,13 @@ YAZ_BEGIN_CDECL
 #define YLOG_LOG    0x00000008
 #define YLOG_ERRNO  0x00000010 /* append strerror to message */
 /*#define YLOG_FILE   0x00000020 */
-/*#define YLOG_APP    0x00000040 */ 
+#define YLOG_APP    0x00000040 
    /* Application level events (new-connection) */
 #define YLOG_MALLOC 0x00000080 /* debugging mallocs */
 #define YLOG_NOTIME 0x00000100 /* do not output date and time */
-/* #define YLOG_APP2   0x00000200 */
+#define YLOG_APP2   0x00000200 
    /* Application-level events, such as api calls */
-/* #define YLOG_APP3   0x00000400 */
+#define YLOG_APP3   0x00000400
    /* For more application-level events */
 #define YLOG_FLUSH  0x00000800 /* Flush log after every write (DEBUG does too) */
 #define YLOG_LOGLVL 0x00001000 /* log when modules query log levels */
@@ -154,11 +154,11 @@ YAZ_EXPORT void yaz_log_reopen(void);
 #define LOG_LOG    YLOG_LOG /* Deprecated, use the modern dynamic log levels*/
 #define LOG_ERRNO  YLOG_ERRNO 
 #define LOG_FILE   0x00000020 /* Deprecated - no YLOG_ equivalent */
-#define LOG_APP    0x00000040 /* Deprecated - no YLOG_ equivalent */
+#define LOG_APP    YLOG_APP   /* Deprecated - no YLOG_ equivalent */
 #define LOG_MALLOC YLOG_MALLOC /* deprecated */
 #define LOG_NOTIME YLOG_NOTIME /* do not output date and time */
-#define LOG_APP2   0x00000200 /* Deprecated - no YLOG_ equivalent */
-#define LOG_APP3   0x00000400 /* Deprecated - no YLOG_ equivalent */
+#define LOG_APP2   YLOG_APP2  /* Deprecated - no YLOG_ equivalent */
+#define LOG_APP3   YLOG_APP3  /* Deprecated - no YLOG_ equivalent */
 #define LOG_FLUSH  YLOG_FLUSH 
 
 #define LOG_ALL    YLOG_ALL
