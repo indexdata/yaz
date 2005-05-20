@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.55 2005-05-11 12:07:48 adam Exp $
+ * $Id: seshigh.c,v 1.56 2005-05-20 19:29:18 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -713,11 +713,7 @@ static void srw_bend_search(association *assoc, request *req,
     *http_code = 200;
     yaz_log(log_requestdetail, "Got SRW SearchRetrieveRequest");
     srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
-    if (srw_req->sort_type != Z_SRW_sort_type_none)
-	yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-			       &srw_res->num_diagnostics,
-			       YAZ_SRW_SORT_UNSUPP, 0);
-    else if (srw_res->num_diagnostics == 0 && assoc->init)
+    if (srw_res->num_diagnostics == 0 && assoc->init)
     {
 	bend_search_rr rr;
 	rr.setname = "default";
@@ -725,6 +721,7 @@ static void srw_bend_search(association *assoc, request *req,
 	rr.num_bases = 1;
 	rr.basenames = &srw_req->database;
 	rr.referenceId = 0;
+	rr.srw_sortKeys = 0;
 	
 	rr.query = (Z_Query *) odr_malloc (assoc->decode, sizeof(*rr.query));
 	rr.query->u.type_1 = 0;
@@ -794,6 +791,9 @@ static void srw_bend_search(association *assoc, request *req,
 	    rr.decode = assoc->decode;
 	    rr.print = assoc->print;
 	    rr.request = req;
+	    if ( srw_req->sort.sortKeys )
+	        rr.srw_sortKeys = odr_strdup(assoc->encode, 
+					     srw_req->sort.sortKeys );
 	    rr.association = assoc;
 	    rr.fd = 0;
 	    rr.hits = 0;
@@ -1764,7 +1764,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.55 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.56 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2007,6 +2007,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     bsrr->association = assoc;
     bsrr->referenceId = req->referenceId;
     save_referenceId (reqb, bsrr->referenceId);
+    bsrr->srw_sortKeys = 0;
 
     yaz_log (log_requestdetail, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)

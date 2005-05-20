@@ -1,5 +1,9 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added support for SRW sort in Generic Frontend Server. Patch
+by Ko van der Sloot. Member srw_sortKeys in bend_search_rr holds
+sortKeys - or NULL if none is provided.
+
 Fixed bug #307: It was impossible to specify indefinite/no timeout
 for ZOOM_event. Special timeout value -1 now means indefinite timeout
 (i.e.  no timeout).
