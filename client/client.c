@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.281 2005-05-09 11:01:07 adam Exp $
+ * $Id: client.c,v 1.282 2005-05-20 06:22:48 ja7 Exp $
  */
 
 #include <stdio.h>
@@ -126,6 +126,7 @@ static FILE *marc_file = 0;
 static char *refid = NULL;
 static char *last_open_command = NULL;
 static int auto_reconnect = 0;
+static int auto_wait = 1;
 static Odr_bitmask z3950_options;
 static int z3950_version = 3;
 static int scan_stepSize = 0;
@@ -3363,6 +3364,28 @@ int cmd_set_auto_reconnect(const char* arg)
     return 0;
 }
 
+
+int cmd_set_auto_wait(const char* arg)
+{  
+    if(strlen(arg)==0) {
+        auto_wait = ! auto_wait;
+    } else if(strcmp(arg,"on")==0) {
+        auto_wait = 1;
+    } else if(strcmp(arg,"off")==0) {
+        auto_wait = 0;		
+    } else {
+        printf("Error use on or off\n");
+        return 1;
+    }
+    
+    if (auto_wait)
+        printf("Set auto wait enabled.\n");
+    else
+        printf("Set auto wait disabled.\n");
+    
+    return 0;
+}
+
 int cmd_set_marcdump(const char* arg)
 {
     if(marc_file && marc_file != stderr) { /* don't close stdout*/
@@ -4003,6 +4026,7 @@ int cmd_list_all(const char* args) {
     if(yazProxy) printf("using proxy          : %s\n",yazProxy);		
     
     printf("auto_reconnect       : %s\n",auto_reconnect?"on":"off");
+    printf("auto_wait            : %s\n",auto_wait?"on":"off");
     
     if (!auth) {
         printf("Authentication       : none\n");
@@ -4084,6 +4108,20 @@ int cmd_clear_otherinfo(const char* args)
     return 0;
 }
 
+int cmd_wait_response(const char *arg)
+{
+    int wait_for = atoi(arg);
+    int i=0;
+    if( wait_for < 1 ) {
+	wait_for = 1;
+    };
+    
+    for( i=0 ; i < wait_for ; ++i ) {
+	wait_and_handle_response( );
+    };
+    return 0;
+}
+
 static int cmd_help (const char *line);
 
 typedef char *(*completerFunctionType)(const char *text, int state);
@@ -4141,6 +4179,7 @@ static struct {
     {"set_cclfile", cmd_set_cclfile," <filename>",NULL,1,NULL},
     {"set_cqlfile", cmd_set_cqlfile," <filename>",NULL,1,NULL},
     {"set_auto_reconnect", cmd_set_auto_reconnect," on|off",complete_auto_reconnect,1,NULL},
+    {"set_auto_wait", cmd_set_auto_wait," on|off",complete_auto_reconnect,1,NULL},
     {"set_otherinfo", cmd_set_otherinfo,"<otherinfoinddex> <oid> <string>",NULL,0,NULL},
     {"sleep", cmd_sleep,"<seconds>",NULL,0,NULL},
     {"register_oid", cmd_register_oid,"<name> <class> <oid>",NULL,0,NULL},
@@ -4150,6 +4189,7 @@ static struct {
     {"list_otherinfo",cmd_list_otherinfo,"[otherinfoinddex]",NULL,0,NULL},
     {"list_all",cmd_list_all,"",NULL,0,NULL},
     {"clear_otherinfo",cmd_clear_otherinfo,"",NULL,0,NULL},
+    {"wait_response",cmd_wait_response,"<number>",NULL,0,NULL},
     /* Server Admin Functions */
     {"adm-reindex", cmd_adm_reindex, "<database-name>",NULL,0,NULL},
     {"adm-truncate", cmd_adm_truncate, "('database'|'index')<object-name>",NULL,0,NULL},
@@ -4318,7 +4358,7 @@ void process_cmd_line(char* line)
     
     if(apdu_file) fflush(apdu_file);
     
-    if (res >= 2)
+    if (res >= 2 && auto_wait)
         wait_and_handle_response();
     
     if(apdu_file)
