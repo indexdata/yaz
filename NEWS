@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+--- 2.1.6 2005/05/24 
+
 Added support for SRW sort in Generic Frontend Server. Patch
 by Ko van der Sloot. Member srw_sortKeys in bend_search_rr holds
 sortKeys - or NULL if none is provided.
