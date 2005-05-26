@@ -2,13 +2,16 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.4 2005-02-01 17:23:36 adam Exp $
+ * $Id: tstodr.c,v 1.5 2005-05-26 21:47:16 adam Exp $
  *
  */
 #include <stdlib.h>
 #include <stdio.h>
 #include <yaz/odr.h>
+#include <yaz/oid.h>
 #include "tstodrcodec.h"
+
+#define MYOID  "1.2.3.4.5.6.7.8.9.10.11.12.13.14.15.16.17.18.19"
 
 void tst_MySequence1(ODR encode, ODR decode)
 {
@@ -25,6 +28,8 @@ void tst_MySequence1(ODR encode, ODR decode)
     s->third = odr_intdup(encode, 1);
     s->fourth = odr_nullval();
     s->fifth = odr_intdup(encode, YC_MySequence_enum1);
+    
+    s->myoid = odr_getoidbystr(decode, MYOID);
 
     if (!yc_MySequence(encode, &s, 0, 0))
         exit(1);
@@ -47,6 +52,17 @@ void tst_MySequence1(ODR encode, ODR decode)
         exit(7);
     if (!t->fifth || *t->fifth != YC_MySequence_enum1)
         exit(8);
+    if (!t->myoid)
+	exit(9);
+    else
+    {
+	int *myoid = odr_getoidbystr(decode, MYOID);
+	struct oident *oident;
+
+	if (oid_oidcmp(myoid, t->myoid))
+	    exit(10);
+	oident = oid_getentbyoid(t->myoid);
+    }
 }
 
 void tst_MySequence2(ODR encode, ODR decode)
@@ -61,6 +77,7 @@ void tst_MySequence2(ODR encode, ODR decode)
     s->third = odr_intdup(encode, 1);
     s->fourth = odr_nullval();
     s->fifth = odr_intdup(encode, YC_MySequence_enum1);
+    s->myoid = odr_getoidbystr(encode, MYOID);
 
     if (yc_MySequence(encode, &s, 0, 0)) /* should fail */
         exit(9);

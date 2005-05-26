@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.19 2005-01-27 09:04:07 adam Exp $
+ * $Id: odr.h,v 1.20 2005-05-26 21:47:16 adam Exp $
  */
 
 /**
@@ -259,7 +259,7 @@ YAZ_EXPORT int odr_bitstring(ODR o, Odr_bitmask **p, int opt,
 			     const char *name);
 YAZ_EXPORT int ber_bitstring(ODR o, Odr_bitmask *p, int cons);
 YAZ_EXPORT int odr_generalstring(ODR o, char **p, int opt, const char *name);
-YAZ_EXPORT int ber_oidc(ODR o, Odr_oid *p);
+YAZ_EXPORT int ber_oidc(ODR o, Odr_oid *p, int max_oid_size);
 YAZ_EXPORT int odr_oid(ODR o, Odr_oid **p, int opt, const char *name);
 YAZ_EXPORT int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
 			  const char *name);
