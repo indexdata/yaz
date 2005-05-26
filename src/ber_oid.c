@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_oid.c,v 1.5 2005-01-15 19:47:11 adam Exp $
+ * $Id: ber_oid.c,v 1.6 2005-05-26 21:46:40 adam Exp $
  */
 
 /** 
@@ -18,7 +18,7 @@
 
 #include "odr-priv.h"
 
-int ber_oidc(ODR o, Odr_oid *p)
+int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
 {
     int len, lenp, end;
     int pos, n, res, id;
@@ -32,7 +32,7 @@ int ber_oidc(ODR o, Odr_oid *p)
             odr_seterror(o, OPROTO, 18);
             return 0;
         }
-        if (len <= 0)
+        if (len < 0)
         {
             odr_seterror(o, OPROTO, 19);
             return 0;
@@ -69,6 +69,11 @@ int ber_oidc(ODR o, Odr_oid *p)
 		p[1] = id - p[0] * 40;
 		pos = 2;
             }
+	    if (pos >= max_oid_size)
+	    {
+		odr_seterror(o, OPROTO, 55);
+		return 0;
+	    }
 	}
         p[pos] = -1;
         return 1;

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.7 2005-01-15 19:47:14 adam Exp $
+ * $Id: oid.c,v 1.8 2005-05-26 21:46:41 adam Exp $
  */
 
 /**
@@ -493,7 +493,6 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
     nmem_mutex_enter (oid_mutex);
     if (!oident)
     {
-	char desc_str[200];
 	struct oident_list *oident_list;
 	oident_list = (struct oident_list *)
 	    nmem_malloc (oid_nmem, sizeof(*oident_list));
@@ -503,14 +502,20 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
 
 	if (!desc)
 	{
+	    char desc_str[OID_SIZE*10];
 	    int i;
 
-	    sprintf (desc_str, "%d", *oid);
-	    for (i = 1; i < 12 && oid[i] >= 0; i++)
-		sprintf (desc_str+strlen(desc_str), ".%d", oid[i]);
-	    desc = desc_str;
+	    *desc_str = '\0';
+	    if (*oid >= 0)
+	    {
+		sprintf (desc_str, "%d", *oid);
+		for (i = 1; i < OID_SIZE && oid[i] >= 0; i++)
+		    sprintf (desc_str+strlen(desc_str), ".%d", oid[i]);
+	    }
+	    oident->desc = nmem_strdup(oid_nmem, desc_str);
 	}
-	oident->desc = nmem_strdup (oid_nmem, desc);
+	else
+	    oident->desc = nmem_strdup(oid_nmem, desc);
 	if (value == VAL_DYNAMIC)
 	    oident->value = (enum oid_value) (++oid_value_dynamic);
 	else
