@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.16 2005-06-03 20:30:30 adam Exp $
+ * $Id: nmem.c,v 1.17 2005-06-03 20:33:13 adam Exp $
  */
 
 /**
@@ -46,8 +46,8 @@
 struct nmem_block
 {
     char *buf;              /* memory allocated in this block */
-    int size;               /* size of buf */
-    int top;                /* top of buffer */
+    size_t size;            /* size of buf */
+    size_t top;             /* top of buffer */
     struct nmem_block *next;
 };
 
