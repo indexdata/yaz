@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: nmem.h,v 1.15 2005-05-02 19:14:33 adam Exp $
+ * $Id: nmem.h,v 1.16 2005-06-03 20:30:30 adam Exp $
  */
 
 /**
@@ -35,6 +35,8 @@
  */
 #ifndef NMEM_H
 #define NMEM_H
+
+#include <stddef.h>
 #include <yaz/yconfig.h>
 
 #define NMEM_DEBUG 0
@@ -45,20 +47,9 @@
 
 YAZ_BEGIN_CDECL
 
-typedef struct nmem_block
-{
-    char *buf;              /* memory allocated in this block */
-    int size;               /* size of buf */
-    int top;                /* top of buffer */
-    struct nmem_block *next;
-} nmem_block;
+typedef struct nmem_block nmem_block;
 
-typedef struct nmem_control
-{
-    int total;
-    nmem_block *blocks;
-    struct nmem_control *next;
-} nmem_control;
+typedef struct nmem_control nmem_control;
 
 typedef struct nmem_mutex *NMEM_MUTEX;
 YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *);

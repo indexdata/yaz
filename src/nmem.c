@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.15 2005-04-29 10:36:05 heikki Exp $
+ * $Id: nmem.c,v 1.16 2005-06-03 20:30:30 adam Exp $
  */
 
 /**
@@ -42,6 +42,21 @@
 #endif
 
 #define NMEM_CHUNK (4*1024)
+
+struct nmem_block
+{
+    char *buf;              /* memory allocated in this block */
+    int size;               /* size of buf */
+    int top;                /* top of buffer */
+    struct nmem_block *next;
+};
+
+struct nmem_control
+{
+    int total;
+    nmem_block *blocks;
+    struct nmem_control *next;
+};
 
 struct align {
     char x;
