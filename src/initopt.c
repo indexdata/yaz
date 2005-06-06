@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: initopt.c,v 1.4 2005-01-15 19:47:13 adam Exp $
+ * $Id: initopt.c,v 1.5 2005-06-06 07:12:47 ja7 Exp $
  */
 
 /**
@@ -51,7 +51,7 @@ int yaz_init_opt_encode(Z_Options *opt, const char *opt_str, int *error_pos)
     ODR_MASK_ZERO(opt);
     while (*cp)
     {
-	char this_opt[20];
+	char this_opt[42];
 	int i, j;
 	if (*cp == ' ' || *cp == ',')
 	{
