@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.284 2005-06-06 10:29:33 adam Exp $
+ * $Id: client.c,v 1.285 2005-06-06 17:34:58 adam Exp $
  */
 
 #include <stdio.h>
@@ -2256,10 +2256,10 @@ static int cmd_xmlupdate(const char *arg)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
 
-    req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
-                                              VAL_XMLUPDATE);
     Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
     req->taskSpecificParameters = ext;
+    req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
+                                              VAL_XMLUPDATE);
     ext->direct_reference = req->packageType;
     ext->descriptor = 0;
     ext->indirect_reference = 0;
