@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.34 2005-06-06 10:45:33 adam Exp $
+ * $Id: zoomsh.c,v 1.35 2005-06-06 12:32:03 adam Exp $
  */
 
 /* ZOOM-C Shell */
@@ -586,8 +586,24 @@ static void zoomsh(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    int mask = yaz_log_mask_str("zoom");
-    yaz_log_init_level(mask);
+    const char *maskstr = 0;
+    if (argc > 2 && !strcmp(argv[1], "-v"))
+    {
+        maskstr = argv[2];
+        argv += 2;
+        argc -= 2;
+    }
+    else if (argc > 1 && !strncmp(argv[1], "-v", 2))
+    {
+        maskstr = argv[1]+2;
+        argv++;
+        argc--;
+    }
+    if (maskstr)
+    {
+        int mask = yaz_log_mask_str(maskstr);
+        yaz_log_init_level(mask);
+    }
     nmem_init();
     zoomsh(argc, argv);
     nmem_exit();
