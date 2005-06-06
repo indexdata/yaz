@@ -1,3 +1,9 @@
+yaz (2.1.7-1) unstable; urgency=low
+
+  * Internal package for testing.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon,  6 Jun 2005 12:36:35 +0200
+
 yaz (2.1.6-1) unstable; urgency=low
 
   * Upstream.
