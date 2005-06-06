@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.282 2005-05-20 06:22:48 ja7 Exp $
+ * $Id: client.c,v 1.283 2005-06-06 07:25:47 adam Exp $
  */
 
 #include <stdio.h>
@@ -2283,6 +2283,8 @@ static int cmd_options(const char *arg)
 	int r;
 	int pos;
 	r = yaz_init_opt_encode(&z3950_options, arg, &pos);
+	if (r == -1)
+	    printf("Unknown option(s) near %s\n", arg+pos);
     }
     else
     {
