@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.283 2005-06-06 07:25:47 adam Exp $
+ * $Id: client.c,v 1.284 2005-06-06 10:29:33 adam Exp $
  */
 
 #include <stdio.h>
@@ -1841,6 +1841,11 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
             }
         }
     }
+    if (res->taskPackage && res->taskPackage->which == Z_External_octet)
+    {
+	Odr_oct *doc = res->taskPackage->u.octet_aligned;
+	printf("%.*s\n", doc->len, doc->buf);
+    }
 }
 
 const char *get_ill_element (void *clientData, const char *element)
@@ -2241,6 +2246,29 @@ static int cmd_update_common(const char *arg, int version)
 	notToKeep->elements[0]->record = record_this;
     }
     
+    send_apdu(apdu);
+
+    return 2;
+}
+
+static int cmd_xmlupdate(const char *arg)
+{
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
+    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+
+    req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
+                                              VAL_XMLUPDATE);
+    Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
+    req->taskSpecificParameters = ext;
+    ext->direct_reference = req->packageType;
+    ext->descriptor = 0;
+    ext->indirect_reference = 0;
+    
+    ext->which = Z_External_octet;
+    ext->u.single_ASN1_type = (Odr_oct *) odr_malloc (out, sizeof(Odr_oct));
+    
+    ext->u.single_ASN1_type->buf = (unsigned char*) odr_strdup(out, arg);
+    ext->u.single_ASN1_type->size = ext->u.single_ASN1_type->len = strlen(arg);
     send_apdu(apdu);
 
     return 2;
@@ -4166,6 +4194,7 @@ static struct {
     {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0,NULL},
     {"update", cmd_update, "<action> <recid> [<file>]",NULL,0,NULL},
     {"update0", cmd_update0, "<action> <recid> [<file>]",NULL,0,NULL},
+    {"xmlupdate", cmd_xmlupdate, "<action> <doc>",NULL,0,NULL},
     {"packagename", cmd_packagename, "<packagename>",NULL,0,NULL},
     {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0,NULL},
     {"charset", cmd_charset, "<nego_charset> <output_charset>",NULL,0,NULL},

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.32 2005-01-15 19:47:15 adam Exp $
+ * $Id: zoomsh.c,v 1.33 2005-06-06 10:29:35 adam Exp $
  */
 
 /* ZOOM-C Shell */
@@ -259,7 +259,14 @@ static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
 		     dset, error, addinfo);
 	else if (p[i])
 	{
+	    const char *v;
             printf ("ok\n");
+	    v = ZOOM_package_option_get (p[i], "targetReference");
+	    if (v)
+		printf("targetReference: %s\n", v);
+	    v = ZOOM_package_option_get (p[i], "xmlUpdateDoc");
+	    if (v)
+		printf("xmlUpdateDoc: %s\n", v);
 	}
         ZOOM_package_destroy (p[i]);
     }

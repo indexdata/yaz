@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.41 2005-05-17 11:48:36 adam Exp $
+ * $Id: zoom-c.c,v 1.42 2005-06-06 10:29:33 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1015,7 +1015,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.41 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.42 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2549,6 +2549,30 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
     return apdu;
 }
 
+static Z_APDU *create_xmlupdate_package(ZOOM_package p)
+{
+    Z_APDU *apdu = create_es_package(p, VAL_XMLUPDATE);
+    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+    Z_External *ext = (Z_External *) odr_malloc(p->odr_out, sizeof(*ext));
+    const char *doc = ZOOM_options_get(p->options, "doc");
+
+    req->taskSpecificParameters = ext;
+    ext->direct_reference = req->packageType;
+    ext->descriptor = 0;
+    ext->indirect_reference = 0;
+    
+    ext->which = Z_External_octet;
+    ext->u.single_ASN1_type = (Odr_oct *)
+	odr_malloc (p->odr_out, sizeof(Odr_oct));
+
+    if (!doc)
+	doc = "";
+    ext->u.single_ASN1_type->buf = (unsigned char*)
+	odr_strdup(p->odr_out, doc);
+    ext->u.single_ASN1_type->size = ext->u.single_ASN1_type->len = strlen(doc);
+    return apdu;
+}
+
 static Z_APDU *create_update_package(ZOOM_package p)
 {
     Z_APDU *apdu = 0;
@@ -2715,6 +2739,10 @@ ZOOM_API(void)
     {
 	apdu = create_update_package(p);
     }
+    else if (!strcmp(type, "xmlupdate"))
+    {
+	apdu = create_xmlupdate_package(p);
+    }
     if (apdu)
     {
         if (encode_APDU(p->connection, apdu, p->odr_out) == 0)
@@ -2880,6 +2908,13 @@ static int es_response (ZOOM_connection c,
         if (id)
             ZOOM_options_setl (c->tasks->u.package->options,
                                "targetReference", (char*) id->buf, id->len);
+    }
+    if (res->taskPackage && 
+	res->taskPackage->which == Z_External_octet)
+    {
+	Odr_oct *doc = res->taskPackage->u.octet_aligned;
+	ZOOM_options_setl (c->tasks->u.package->options,
+			   "xmlUpdateDoc", (char*) doc->buf, doc->len);
     }
     return 1;
 }

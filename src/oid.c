@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.8 2005-05-26 21:46:41 adam Exp $
+ * $Id: oid.c,v 1.9 2005-06-06 10:29:33 adam Exp $
  */
 
 /**
@@ -317,17 +317,19 @@ static oident standard_oids[] =
      "ID-Charset" },
     {PROTO_Z3950,   CLASS_USERINFO,VAL_CQL,          {16, 2, -1},
      "CQL"},
-    {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS2,    {1,0,10646,1,0,2,-1},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS2,         {1,0,10646,1,0,2,-1},
      "UCS-2"},
-    {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS4,    {1,0,10646,1,0,4,-1},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_UCS4,         {1,0,10646,1,0,4,-1},
      "UCS-4"},
-    {PROTO_GENERAL, CLASS_GENERAL, VAL_UTF16,   {1,0,10646,1,0,5,-1},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_UTF16,        {1,0,10646,1,0,5,-1},
      "UTF-16"},
-    {PROTO_GENERAL, CLASS_GENERAL, VAL_UTF8,    {1,0,10646,1,0,8,-1},
+    {PROTO_GENERAL, CLASS_GENERAL, VAL_UTF8,         {1,0,10646,1,0,8,-1},
      "UTF-8"},
-    {PROTO_Z3950,   CLASS_USERINFO,VAL_OCLCUI,  {10, 1000, 17, 1, -1},
+    {PROTO_Z3950,   CLASS_USERINFO,VAL_OCLCUI,       {10, 1000, 17, 1, -1},
      "OCLC-userInfo"},
-    {PROTO_NOP,     CLASS_NOP,     VAL_NOP,       {-1},        0          }
+    {PROTO_Z3950,   CLASS_EXTSERV, VAL_XMLUPDATE,    {9,1000,105,4,-1},
+     "XMLUpdate-ES"},
+    {PROTO_NOP,     CLASS_NOP,     VAL_NOP,          {-1},      0     }
 };
 
 /* OID utilities */
