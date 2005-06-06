@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.33 2005-06-06 10:29:35 adam Exp $
+ * $Id: zoomsh.c,v 1.34 2005-06-06 10:45:33 adam Exp $
  */
 
 /* ZOOM-C Shell */
@@ -549,14 +549,13 @@ void shell(ZOOM_connection *c, ZOOM_resultset *r,
     }
 }
 
-int main (int argc, char **argv)
+static void zoomsh(int argc, char **argv)
 {
     ZOOM_options options = ZOOM_options_create();
     int i, res;
     ZOOM_connection z39_con[MAX_CON];
     ZOOM_resultset  z39_res[MAX_CON];
 
-    nmem_init();
     for (i = 0; i<MAX_CON; i++)
     {
 	z39_con[i] = 0;
@@ -583,6 +582,14 @@ int main (int argc, char **argv)
 	ZOOM_connection_destroy(z39_con[i]);
 	ZOOM_resultset_destroy(z39_res[i]);
     }
+}
+
+int main(int argc, char **argv)
+{
+    int mask = yaz_log_mask_str("zoom");
+    yaz_log_init_level(mask);
+    nmem_init();
+    zoomsh(argc, argv);
     nmem_exit();
     exit (0);
 }
