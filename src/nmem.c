@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.17 2005-06-03 20:33:13 adam Exp $
+ * $Id: nmem.c,v 1.18 2005-06-07 19:47:31 adam Exp $
  */
 
 /**
@@ -211,12 +211,12 @@ void nmem_print_list_l (int level)
 /*
  * acquire a block with a minimum of size free bytes.
  */
-static nmem_block *get_block(int size)
+static nmem_block *get_block(size_t size)
 {
     nmem_block *r, *l;
 
     if (log_level)
-        yaz_log (log_level, "nmem get_block size=%d", size);
+        yaz_log (log_level, "nmem get_block size=%ld", (long) size);
 
     for (r = freelist, l = 0; r; l = r, r = r->next)
     	if (r->size >= size)
@@ -288,7 +288,7 @@ void *nmem_malloc(NMEM n, int size)
 #endif
     NMEM_ENTER;
     p = n->blocks;
-    if (!p || p->size - p->top < size)
+    if (!p || p->size < size + p->top)
     {
     	p = get_block(size);
 	p->next = n->blocks;
