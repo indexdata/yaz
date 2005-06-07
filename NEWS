@@ -5,6 +5,10 @@ Possible compatibility problems with earlier versions marked with '*'.
 Fixed bug in yaz_marc_decode_buf. By mistake the routine appended
 MARC output rather than returning "new" buffer.
 
+yaz-client warns about unknown init options.
+
+Fixed bug #371: "options concurrentOperations ignores concurrentOperations"
+
 --- 2.1.6 2005/05/24 
 
 Added support for SRW sort in Generic Frontend Server. Patch
