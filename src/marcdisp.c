@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.21 2005-04-20 13:17:51 adam Exp $
+ * $Id: marcdisp.c,v 1.22 2005-06-07 19:25:38 adam Exp $
  */
 
 /**
@@ -561,7 +561,10 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 int yaz_marc_decode_buf (yaz_marc_t mt, const char *buf, int bsize,
                          char **result, int *rsize)
 {
-    int r = yaz_marc_decode_wrbuf(mt, buf, bsize, mt->m_wr);
+    int r;
+
+    wrbuf_rewind(mt->m_wr);
+    r = yaz_marc_decode_wrbuf(mt, buf, bsize, mt->m_wr);
     if (result)
         *result = wrbuf_buf(mt->m_wr);
     if (rsize)
