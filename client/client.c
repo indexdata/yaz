@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.285 2005-06-06 17:34:58 adam Exp $
+ * $Id: client.c,v 1.286 2005-06-08 09:11:03 adam Exp $
  */
 
 #include <stdio.h>
@@ -3766,7 +3766,7 @@ static void http_response(Z_HTTP_Response *hres)
 }
 #endif
 
-void wait_and_handle_response() 
+void wait_and_handle_response(int one_response_only) 
 {
     int reconnect_ok = 1;
     int res;
@@ -3900,6 +3900,8 @@ void wait_and_handle_response()
             http_response(gdu->u.HTTP_Response);
         }
 #endif
+	if (one_response_only)
+	    break;
         if (conn && !cs_more(conn))
             break;
     }
@@ -4147,7 +4149,7 @@ int cmd_wait_response(const char *arg)
     };
     
     for( i=0 ; i < wait_for ; ++i ) {
-	wait_and_handle_response( );
+	wait_and_handle_response(1);
     };
     return 0;
 }
@@ -4390,7 +4392,7 @@ void process_cmd_line(char* line)
     if(apdu_file) fflush(apdu_file);
     
     if (res >= 2 && auto_wait)
-        wait_and_handle_response();
+        wait_and_handle_response(0);
     
     if(apdu_file)
         fflush(apdu_file);
