@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.286 2005-06-08 09:11:03 adam Exp $
+ * $Id: client.c,v 1.287 2005-06-08 12:34:05 adam Exp $
  */
 
 #include <stdio.h>
@@ -104,7 +104,7 @@ static enum oid_value recordsyntax = VAL_USMARC;
 static char *record_schema = 0;
 static int sent_close = 0;
 static NMEM session_mem = NULL;         /* memory handle for init-response */
-static Z_InitResponse *session = 0;     /* session parameters */
+static Z_InitResponse *session_initResponse = 0;   /* session parameters */
 static char last_scan_line[512] = "0";
 static char last_scan_query[512] = "0";
 static char ccl_fields[512] = "default.bib";
@@ -365,7 +365,7 @@ static int process_initResponse(Z_InitResponse *res)
     int ver = 0;
     /* save session parameters for later use */
     session_mem = odr_extract_mem(in);
-    session = res;
+    session_initResponse = res;
 
     for (ver = 0; ver < 8; ver++)
         if (!ODR_MASK_GET(res->protocolVersion, ver))
@@ -591,13 +591,14 @@ int session_connect(const char *arg)
     if (conn)
     {
         cs_close (conn);
-        conn = NULL;
-        if (session_mem)
-        {
-            nmem_destroy (session_mem);
-            session_mem = NULL;
-        }
+        conn = 0;
     }   
+    if (session_mem)
+    {
+	nmem_destroy (session_mem);
+	session_mem = NULL;
+	session_initResponse = 0;
+    }
     cs_get_host_args(arg, &basep);
 
     strncpy(type_and_host, arg, sizeof(type_and_host)-1);
@@ -2582,11 +2583,6 @@ static void close_session (void)
     if (conn)
         cs_close (conn);
     conn = 0;
-    if (session_mem)
-    {
-        nmem_destroy (session_mem);
-        session_mem = NULL;
-    }
     sent_close = 0;
     odr_reset(out);
     odr_reset(in);
@@ -2675,7 +2671,9 @@ int cmd_cancel(const char *arg)
     }
     if (only_z3950())
 	return 0;
-    if (!ODR_MASK_GET(session->options, Z_Options_triggerResourceCtrl))
+    if (session_initResponse &&
+	!ODR_MASK_GET(session_initResponse->options,
+		      Z_Options_triggerResourceCtrl))
     {
         printf("Target doesn't support cancel (trigger resource ctrl)\n");
         return 0;
@@ -2900,7 +2898,8 @@ int cmd_sort_generic(const char *arg, int newset)
     }
     if (only_z3950())
 	return 0;
-    if (!ODR_MASK_GET(session->options, Z_Options_sort))
+    if (session_initResponse && 
+	!ODR_MASK_GET(session_initResponse->options, Z_Options_sort))
     {
         printf("Target doesn't support sort\n");
         return 0;
@@ -2981,7 +2980,8 @@ int cmd_scan(const char *arg)
 		return 0;
 	    }
 	}
-	if (!ODR_MASK_GET(session->options, Z_Options_scan))
+	if (session_initResponse && 
+	    !ODR_MASK_GET(session_initResponse->options, Z_Options_scan))
 	{
 	    printf("Target doesn't support scan\n");
 	    return 0;
