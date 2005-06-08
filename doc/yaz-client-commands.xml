@@ -1,10 +1,10 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.7 2005-02-02 17:11:05 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.8 2005-06-08 11:22:15 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
 <variablelist>
- <varlistentry><term>
+ <varlistentry id="command-open"><term>
    <literal>open </literal><replaceable>zurl</replaceable>
   </term>
   <listitem>
@@ -28,11 +28,12 @@
    <para>Quits YAZ client</para>
   </listitem>
  </varlistentry>
- <varlistentry><term>
-   <literal>f </literal><replaceable>query</replaceable></term>
+ <varlistentry id="command-find"><term>
+   <literal>find </literal><replaceable>query</replaceable></term>
   <listitem>
    <para>Sends a Search Request using the <replaceable>query</replaceable>
-    given.
+    given. By default the query is assumed to be PQF. See command
+    <link linkend="command-querytype"><literal>querytype</literal></link>.
    </para>
   </listitem>
  </varlistentry>
@@ -76,7 +77,7 @@
   <listitem>
    <simpara>Scans
     database index for a term. The syntax resembles the syntax
-    for <literal>find</literal>.
+    for <link linkend="command-find"><literal>find</literal></link>.
     If you want to scan for the word <literal>water</literal> you could
     write
    </simpara>
@@ -157,7 +158,8 @@
   <listitem>
    <para>Sets up a authentication string if a server requires
     authentication (v2 OpenStyle). The authentication string is first
-    sent to the server when the <literal>open</literal> command is
+    sent to the server when the 
+    <link linkend="command-open"><literal>open</literal></link> command is
     issued and the Z39.50 Initialize Request is sent, so this command
     must be used before <literal>open</literal> in order to be effective.
     A common convention for the <replaceable>authopen</replaceable> string
@@ -281,11 +283,12 @@
    </para>
   </listitem>
  </varlistentry>
- <varlistentry><term>
+ <varlistentry id="command-querytype"><term>
    <literal>querytype</literal> <replaceable>type</replaceable>
   </term>
   <listitem>
-   <para>Sets the query type as used by command <literal>find</literal>.
+   <para>Sets the query type as used by command 
+   <link linkend="command-find"><literal>find</literal></link>.
     The following is supported:
     <literal>prefix</literal> for
 	<link linkend="PQF">Prefix Query Notation</link> (Type-1 Query);
@@ -364,7 +367,7 @@
  </varlistentry>
 
  <varlistentry><term>
-   <literal>push_commande</literal>
+   <literal>push_command</literal>
    <replaceable>command</replaceable>
   </term>
   <listitem>
@@ -383,8 +386,8 @@
   </term>
   <listitem>
    <para>Sets that APDU should be logged to file
-    <replaceable>filename</replaceable>. This command does the
-    thing as option <literal>-a</literal>.
+    <replaceable>filename</replaceable>. Another way to achieve
+    APDU log is by using command-line option <literal>-a</literal>.
    </para>
   </listitem>
  </varlistentry>
@@ -396,8 +399,32 @@
   <listitem>
    <para>Specifies whether YAZ client automatically reconnect if
     target closes connection (Z39.50 only).
+   </para>
+   <para>
     <replaceable>flag</replaceable> must be either
     <literal>on</literal> or <literal>off</literal>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry id="command-set-auto-wait"><term>
+   <literal>set_auto_wait</literal>
+   <replaceable>flag</replaceable>
+  </term>
+  <listitem>
+   <para>Specifies whether YAZ client should wait for
+   response protocol packages after a request.
+   By default YAZ client waits (on) for response packages immediately
+   after a command (find, show) has been issued. If <literal>off</literal>
+   is used, YAZ client does not attempt to receive packages automatically.
+   These will have to be manually received when command 
+   <link linkend="command-wait-response">
+    <literal>wait_response</literal>
+   </link> is used.
+   </para>
+   <para>
+   <replaceable>flag</replaceable> must be either
+   <literal>on</literal> or <literal>off</literal>.
    </para>
   </listitem>
  </varlistentry>
@@ -407,7 +434,7 @@
    <replaceable>filename</replaceable>
   </term>
   <listitem>
-   <para>Specifies that all retrieved records should be appended ot
+   <para>Specifies that all retrieved records should be appended to
     file <replaceable>filename</replaceable>. This command does the
     thing as option <literal>-m</literal>.
    </para>
@@ -426,7 +453,7 @@
   </listitem>
  </varlistentry>
 
- <varlistentry><term>
+ <varlistentry id="command-charset"><term>
    <literal>charset</literal>
    <replaceable>negotiationcharset</replaceable>
    [<replaceable>displaycharset</replaceable>]
@@ -461,7 +488,8 @@
     <para>
      Since character set negotation takes effect in the Z39.50
      Initialize Request you should issue this command before
-     command <literal>open</literal> is used.
+     command <link linkend="command-open"><literal>open</literal></link>
+     is used.
     </para>
    </note>
    <note>
@@ -481,7 +509,7 @@
   <listitem>
    <para>Specifies character set for negotiation (Z39.50). The
     argument is the same as second argument for command
-    <literal>charset</literal>.
+    <link linkend="command-charset"><literal>charset</literal></link>.
    </para>
   </listitem>
  </varlistentry>
@@ -492,8 +520,8 @@
   </term>
   <listitem>
    <para>Specifies character set for output (display). The
-    argument is the same as second argument for
-    command <literal>charset</literal>.
+    argument is the same as second argument for command 
+    <link linkend="command-charset"><literal>charset</literal></link>.
    </para>
   </listitem>
  </varlistentry>
@@ -509,7 +537,8 @@
     If <literal>auto</literal> is given, YAZ will assume
     that MARC21/USMARC is using MARC8/UTF8 and ISO-8859-1
     for all other MARC variants. The charset argument is the
-    same as third argument for <literal>charset</literal> command.
+    same as third argument for command
+    <link linkend="command-charset"><literal>charset</literal></link>.
    </para>
   </listitem>
  </varlistentry>
@@ -587,15 +616,33 @@
    </para>
   </listitem>
  </varlistentry>
- 
+
+ <varlistentry id="command-wait-response"><term>
+   <literal>wait_response</literal>
+   [ <replaceable>number</replaceable>]
+  </term>
+  <listitem>
+   <para>This command makes YAZ client wait for a number of
+    response packages from target. If <literal>number</literal> is
+    omitted, 1 is assumed. 
+   </para>
+   <para>This command is rarely used and is only useful if command
+    <link linkend="command-set-auto-wait">
+     <literal>set_auto_wait</literal>
+    </link> is set to off.
+   </para>
+  </listitem>
+ </varlistentry>
+
  <varlistentry><term>
    <literal>zversion</literal>
    <replaceable>ver</replaceable>
   </term>
   <listitem>
    <para>This command sets Z39.50 version for negotiation. 
-    Should be used before <literal>open</literal>.
-    By default, 3 (version 3) is used.
+    Should be used before 
+    <link linkend="command-open"><literal>open</literal></link>.
+    By default 3 (version 3) is used.
    </para>
   </listitem>
  </varlistentry>
@@ -606,7 +653,8 @@
   </term>
   <listitem>
    <para>This command sets Z39.50 options for negotiation. 
-    Should be used before <literal>open</literal>.
+    Should be used before 
+   <link linkend="command-open"><literal>open</literal></link>.
    </para>
    <para>
     The following options are supported:

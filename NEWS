@@ -1,5 +1,7 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Describe new yaz-client commands wait_response and set_auto_wait.
+
 --- 2.1.8 2005/06/07 
 
 Fixed bug in yaz_marc_decode_buf. By mistake the routine appended
