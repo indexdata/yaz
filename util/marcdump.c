@@ -2,8 +2,10 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.30 2005-04-20 13:17:29 adam Exp $
+ * $Id: marcdump.c,v 1.31 2005-06-09 18:47:07 adam Exp $
  */
+
+#define _FILE_OFFSET_BITS 64
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -138,7 +140,7 @@ int main (int argc, char **argv)
 	case 'c':
 	    if (cfile)
 		fclose (cfile);
-	    cfile = fopen (arg, "w");
+	    cfile = fopen(arg, "w");
 	    break;
         case 'x':
             xml = YAZ_MARC_SIMPLEXML;
@@ -162,7 +164,7 @@ int main (int argc, char **argv)
 	    libxml_dom_test = 1;
 	    break;
         case 0:
-	    inf = fopen (arg, "rb");
+	    inf = fopen(arg, "rb");
 	    count = 0;
 	    if (!inf)
 	    {
