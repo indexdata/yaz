@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.56 2005-05-20 19:29:18 adam Exp $
+ * $Id: seshigh.c,v 1.57 2005-06-13 10:27:00 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -851,25 +851,25 @@ static void srw_bend_search(association *assoc, request *req,
 				       number * sizeof(*srw_res->records));
 			for (i = 0; i<number; i++)
 			{
-			int errcode;
-			
-			srw_res->records[j].recordPacking = packing;
-			srw_res->records[j].recordData_buf = 0;
-			yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
-			errcode = srw_bend_fetch(assoc, i+start, srw_req,
-						 srw_res->records + j);
-			if (errcode)
-			{
-			    yaz_add_srw_diagnostic(assoc->encode,
-						   &srw_res->diagnostics,
-						   &srw_res->num_diagnostics,
-						   yaz_diag_bib1_to_srw (errcode),
-						   rr.errstring);
-
-			    break;
-			}
-			if (srw_res->records[j].recordData_buf)
-			    j++;
+			    int errcode;
+			    
+			    srw_res->records[j].recordPacking = packing;
+			    srw_res->records[j].recordData_buf = 0;
+			    yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
+			    errcode = srw_bend_fetch(assoc, i+start, srw_req,
+						     srw_res->records + j);
+			    if (errcode)
+			    {
+				yaz_add_srw_diagnostic(assoc->encode,
+						       &srw_res->diagnostics,
+						       &srw_res->num_diagnostics,
+						       yaz_diag_bib1_to_srw (errcode),
+						       rr.errstring);
+				
+				break;
+			    }
+			    if (srw_res->records[j].recordData_buf)
+				j++;
 			}
 			srw_res->num_records = j;
 			if (!j)
@@ -1764,7 +1764,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.56 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.57 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1897,6 +1897,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
         freq.referenceId = referenceId;
         freq.schema = 0;
         (*a->init->bend_fetch)(a->backend, &freq);
+
+	*next = freq.last_in_set ? 0 : recno + 1;
+
         /* backend should be able to signal whether error is system-wide
            or only pertaining to current record */
         if (freq.errcode)
@@ -1921,9 +1924,13 @@ static Z_Records *pack_records(association *a, char *setname, int start,
                 surrogatediagrec(a, freq.basename, freq.errcode,
                                  freq.errstring);
             reclist->num_records++;
-            *next = freq.last_in_set ? 0 : recno + 1;
             continue;
         }
+	if (freq.record == 0)  /* no error and no record ? */
+	{
+	    *next = 0;   /* signal end-of-set and stop */
+	    break;
+	}
         if (freq.len >= 0)
             this_length = freq.len;
         else
@@ -1950,7 +1957,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
                     reclist->records[reclist->num_records] =
                          surrogatediagrec(a, freq.basename, 16, 0);
                     reclist->num_records++;
-                    *next = freq.last_in_set ? 0 : recno + 1;
                     dumped_records += this_length;
                     continue;
                 }
@@ -1962,7 +1968,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
                 reclist->records[reclist->num_records] =
                     surrogatediagrec(a, freq.basename, 17, 0);
                 reclist->num_records++;
-                *next = freq.last_in_set ? 0 : recno + 1;
                 dumped_records += this_length;
                 continue;
             }
@@ -1988,7 +1993,6 @@ static Z_Records *pack_records(association *a, char *setname, int start,
             return 0;
         reclist->records[reclist->num_records] = thisrec;
         reclist->num_records++;
-        *next = freq.last_in_set ? 0 : recno + 1;
     }
     *num = reclist->num_records;
     return records;
