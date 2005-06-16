@@ -3,7 +3,7 @@ Name: yaz
 Version: @VERSION@
 Release: 1
 Requires: libxml2 openssl readline libyaz = %{version}
-Copyright: YAZ License
+License: YAZ License
 Group: Other
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
