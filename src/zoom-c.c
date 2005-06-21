@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.43 2005-06-06 12:23:47 adam Exp $
+ * $Id: zoom-c.c,v 1.44 2005-06-21 07:33:09 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1045,7 +1045,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 	ZOOM_options_get(c->options, "implementationName"),
 	odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.43 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.44 $");
     if (strlen(version) > 10)	/* check for unexpanded CVS strings */
 	version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2605,7 +2605,7 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
 
 static Z_APDU *create_xmlupdate_package(ZOOM_package p)
 {
-    Z_APDU *apdu = create_es_package(p, VAL_XMLUPDATE);
+    Z_APDU *apdu = create_es_package(p, VAL_XMLES);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *ext = (Z_External *) odr_malloc(p->odr_out, sizeof(*ext));
     const char *doc = ZOOM_options_get(p->options, "doc");

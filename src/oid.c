@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.9 2005-06-06 10:29:33 adam Exp $
+ * $Id: oid.c,v 1.10 2005-06-21 07:33:08 adam Exp $
  */
 
 /**
@@ -327,8 +327,8 @@ static oident standard_oids[] =
      "UTF-8"},
     {PROTO_Z3950,   CLASS_USERINFO,VAL_OCLCUI,       {10, 1000, 17, 1, -1},
      "OCLC-userInfo"},
-    {PROTO_Z3950,   CLASS_EXTSERV, VAL_XMLUPDATE,    {9,1000,105,4,-1},
-     "XMLUpdate-ES"},
+    {PROTO_Z3950,   CLASS_EXTSERV, VAL_XMLES,        {9,1000,105,4,-1},
+     "XML-ES"},
     {PROTO_NOP,     CLASS_NOP,     VAL_NOP,          {-1},      0     }
 };
 

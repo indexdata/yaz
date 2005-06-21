@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.287 2005-06-08 12:34:05 adam Exp $
+ * $Id: client.c,v 1.288 2005-06-21 07:33:09 adam Exp $
  */
 
 #include <stdio.h>
@@ -559,6 +559,74 @@ static int set_base(const char *arg)
         databaseNames[0] = xstrdup("");
     }
     return 1;
+}
+
+static int parse_cmd_doc(const char **arg, ODR out, char **buf,
+			 int *len, int opt)
+{
+    const char *sep;
+    while (**arg && strchr(" \t\n\r\f", **arg))
+	(*arg)++;
+    if ((*arg)[0] == '\"' && (sep=strchr(*arg+1, '"')))
+    {
+	(*arg)++;
+	*len = sep - *arg;
+	*buf = odr_strdupn(out, *arg, *len);
+	(*arg) = sep+1;
+	return 1;
+    }
+    else if ((*arg)[0] && (*arg)[0] != '\"')
+    {
+	long fsize;
+	FILE *inf;
+	const char *fname = *arg;
+	
+	while (**arg != '\0' && **arg != ' ')
+	    (*arg)++;
+	    
+	inf = fopen(fname, "rb");
+	if (!inf)
+	{
+	    printf("Couldn't open %s\n", fname);
+	    return 0;
+	}
+	if (fseek(inf, 0L, SEEK_END) == -1)
+	{
+	    printf("Couldn't seek in %s\n", fname);
+	    fclose(inf);
+	    return 0;
+	}
+	fsize = ftell(inf);
+	if (fseek(inf, 0L, SEEK_SET) == -1)
+	{
+	    printf("Couldn't seek in %s\n", fname);
+	    fclose(inf);
+	    return 0;
+	}
+	*len = fsize;
+	*buf = odr_malloc(out, fsize);
+	if (fread(*buf, 1, fsize, inf) != fsize)
+	{
+	    printf("Unable to read %s\n", fname);
+	    fclose(inf);
+	    return 0;
+	}
+	fclose(inf);
+	return 1;
+    }
+    else if (**arg == '\0')
+    {
+	if (opt)
+	{
+	    *len = 0;
+	    *buf = 0;
+	    return 1;
+	}
+	printf("Missing doc argument\n");
+    }
+    else
+	printf("Bad doc argument %s\n", *arg);
+    return 0;
 }
 
 static int cmd_base(const char *arg)
@@ -2089,16 +2157,25 @@ static int cmd_update_common(const char *arg, int version)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *r;
-    char action[20], recid[20], fname[80];
+    char action[20], recid[20];
+    char *rec_buf;
+    int rec_len;
     int action_no;
+    int noread = 0;
     Z_External *record_this = 0;
 
     if (only_z3950())
 	return 0;
     *action = 0;
     *recid = 0;
-    *fname = 0;
-    sscanf (arg, "%19s %19s %79s", action, recid, fname);
+    sscanf (arg, "%19s %19s%n", action, recid, &noread);
+    if (noread == 0)
+    {
+	printf("Update must be followed by action and recid\n");
+	printf(" where action is one of insert,replace,delete.update\n");
+	printf(" recid is some record ID (any string)\n");
+	return 0;
+    }
 
     if (!strcmp (action, "insert"))
         action_no = Z_IUOriginPartToKeep_recordInsert;
@@ -2115,30 +2192,12 @@ static int cmd_update_common(const char *arg, int version)
         return 0;
     }
 
-    if (*fname)
-    {
-        FILE *inf;
-        struct stat status;
-        stat (fname, &status);
-        if (S_ISREG(status.st_mode) && (inf = fopen(fname, "rb")))
-        {
-            size_t len = status.st_size;
-            char *buf = (char *) xmalloc (len);
+    arg += noread;
+    if (parse_cmd_doc(&arg, out, &rec_buf, &rec_len, 1) == 0)
+	return 0;
 
-            fread (buf, 1, len, inf);
-
-            fclose (inf);
-            
-            record_this = z_ext_record (out, VAL_TEXT_XML, buf, len);
-            
-            xfree (buf);
-        }
-        else
-        {
-            printf ("File %s doesn't exist\n", fname);
-            return 0;
-        }
-    }
+    if (rec_buf)
+	record_this = z_ext_record (out, VAL_TEXT_XML, rec_buf, rec_len);
     else
     {
         if (!record_last)
@@ -2252,7 +2311,7 @@ static int cmd_update_common(const char *arg, int version)
     return 2;
 }
 
-static int cmd_xmlupdate(const char *arg)
+static int cmd_xmles(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -2260,16 +2319,17 @@ static int cmd_xmlupdate(const char *arg)
     Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
     req->taskSpecificParameters = ext;
     req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
-                                              VAL_XMLUPDATE);
+                                              VAL_XMLES);
     ext->direct_reference = req->packageType;
     ext->descriptor = 0;
     ext->indirect_reference = 0;
     
     ext->which = Z_External_octet;
     ext->u.single_ASN1_type = (Odr_oct *) odr_malloc (out, sizeof(Odr_oct));
-    
-    ext->u.single_ASN1_type->buf = (unsigned char*) odr_strdup(out, arg);
-    ext->u.single_ASN1_type->size = ext->u.single_ASN1_type->len = strlen(arg);
+
+    if (parse_cmd_doc(&arg, out, (char **) &ext->u.single_ASN1_type->buf,
+		      &ext->u.single_ASN1_type->len, 0) == 0)
+	return 0;
     send_apdu(apdu);
 
     return 2;
@@ -4194,9 +4254,9 @@ static struct {
     {"querytype", cmd_querytype, "<type>",complete_querytype,0,NULL},
     {"refid", cmd_refid, "<id>",NULL,0,NULL},
     {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0,NULL},
-    {"update", cmd_update, "<action> <recid> [<file>]",NULL,0,NULL},
-    {"update0", cmd_update0, "<action> <recid> [<file>]",NULL,0,NULL},
-    {"xmlupdate", cmd_xmlupdate, "<action> <doc>",NULL,0,NULL},
+    {"update", cmd_update, "<action> <recid> [<doc>]",NULL,0,NULL},
+    {"update0", cmd_update0, "<action> <recid> [<doc>]",NULL,0,NULL},
+    {"xmles", cmd_xmles, "<doc>",NULL,0,NULL},
     {"packagename", cmd_packagename, "<packagename>",NULL,0,NULL},
     {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0,NULL},
     {"charset", cmd_charset, "<nego_charset> <output_charset>",NULL,0,NULL},
@@ -4638,10 +4698,18 @@ int main(int argc, char **argv)
 	    show_version();
             break;
         default:
-            fprintf (stderr, "Usage: %s [-m <marclog>] [ -a <apdulog>] "
-                     "[-b berdump] [-c cclfields] \n"
-		     "[-q cqlfields] [-p <proxy-addr>] [-u <auth>] "
-                     "[-k size] [-d dump] [-V] [<server-addr>]\n",
+            fprintf (stderr, "Usage: %s "
+		     " [-a <apdulog>]"
+                     " [-b berdump]"
+		     " [-d dump]\n"
+		     " [-c cclfields]"
+                     " [-k size]"
+		     " [-m <marclog>]\n" 
+		     " [-p <proxy-addr>]"
+		     " [-q cqlfields]"
+		     " [-u <auth>]"
+		     " [-V]"
+		     " [<server-addr>]\n",
                      prog);
             exit (1);
         }      
