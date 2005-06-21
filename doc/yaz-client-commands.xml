@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.8 2005-06-08 11:22:15 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.9 2005-06-21 07:34:26 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -332,13 +332,23 @@
  </varlistentry>
  <varlistentry><term>
    <literal>update</literal>
+   <replaceable>action</replaceable>
+   <replaceable>recid</replaceable>
+   <replaceable>doc</replaceable>
   </term>
   <listitem>
-   <para>Sends Item Update Request. This command sends a "minimal"
-    PDU Update to the target supplying the last received record from
-    the target.
-    If no record has been received from the target this command is ignored
-    and nothing is sent to the target.
+   <para>Sends Item Update Request. The <replaceable>action</replaceable>
+    argument must be the action type: one of <literal>insert</literal>,
+    <literal>replace</literal>, <literal>delete</literal> and
+    <literal>update</literal>. The second argument, 
+    <replaceable>recid</replaceable>, is the
+    record identifier (any string). Third argument which is optional is
+    the record document for the request. If doc is a quoted string
+    (double quotes) the string content is used verbatim. If doc is not
+    a quoted string, it is assumed to be a filename which is read, then
+    sent as the docuemnt content. If doc is omitted, the last received
+    record (as parf of present response or piggybacked search response) 
+    is used for the update.
    </para>
   </listitem>
  </varlistentry>
@@ -623,13 +633,25 @@
   </term>
   <listitem>
    <para>This command makes YAZ client wait for a number of
-    response packages from target. If <literal>number</literal> is
+    response packages from target. If <replaceable>number</replaceable> is
     omitted, 1 is assumed. 
    </para>
    <para>This command is rarely used and is only useful if command
     <link linkend="command-set-auto-wait">
      <literal>set_auto_wait</literal>
     </link> is set to off.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry id="command-xmles"><term>
+   <literal>xmles</literal>
+   <replaceable>doc</replaceable>
+  </term>
+  <listitem>
+   <para>Sends XML Extended Services request using the doc given.
+    This is a privately defined Extended Service using OID
+    1.2.840.10003.9.1000.105.4.
    </para>
   </listitem>
  </varlistentry>
