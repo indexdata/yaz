@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.288 2005-06-21 07:33:09 adam Exp $
+ * $Id: client.c,v 1.289 2005-06-23 13:09:42 adam Exp $
  */
 
 #include <stdio.h>
@@ -2313,13 +2313,14 @@ static int cmd_update_common(const char *arg, int version)
 
 static int cmd_xmles(const char *arg)
 {
+    int noread = 0;
+    char oid_str[51];
+    int oid_value_xmles = VAL_XMLES;
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
 
     Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
     req->taskSpecificParameters = ext;
-    req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
-                                              VAL_XMLES);
     ext->direct_reference = req->packageType;
     ext->descriptor = 0;
     ext->indirect_reference = 0;
@@ -2327,9 +2328,25 @@ static int cmd_xmles(const char *arg)
     ext->which = Z_External_octet;
     ext->u.single_ASN1_type = (Odr_oct *) odr_malloc (out, sizeof(Odr_oct));
 
+    sscanf(arg, "%50s%n", oid_str, &noread);
+    if (noread == 0)
+    {
+	printf("Missing OID for xmles\n");
+	return 0;
+    }
+    arg += noread;
+    oid_value_xmles  = oid_getvalbyname(oid_str);
+    if (oid_value_xmles == VAL_NONE)
+    {
+	printf("Bad OID: %s\n", oid_str);
+	return 0;
+    }
+
     if (parse_cmd_doc(&arg, out, (char **) &ext->u.single_ASN1_type->buf,
 		      &ext->u.single_ASN1_type->len, 0) == 0)
 	return 0;
+    req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
+					      oid_value_xmles);
     send_apdu(apdu);
 
     return 2;
@@ -4256,7 +4273,7 @@ static struct {
     {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0,NULL},
     {"update", cmd_update, "<action> <recid> [<doc>]",NULL,0,NULL},
     {"update0", cmd_update0, "<action> <recid> [<doc>]",NULL,0,NULL},
-    {"xmles", cmd_xmles, "<doc>",NULL,0,NULL},
+    {"xmles", cmd_xmles, "<OID> <doc>",NULL,0,NULL},
     {"packagename", cmd_packagename, "<packagename>",NULL,0,NULL},
     {"proxy", cmd_proxy, "[('tcp'|'ssl')]<host>[':'<port>]",NULL,0,NULL},
     {"charset", cmd_charset, "<nego_charset> <output_charset>",NULL,0,NULL},

@@ -1,5 +1,8 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added new yaz-client, xmles, which takes a (private) OID and
+a document to be sent as an extended service request.
+
 Describe new yaz-client commands wait_response and set_auto_wait.
 
 --- 2.1.8 2005/06/07 

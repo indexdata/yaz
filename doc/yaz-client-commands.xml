@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.9 2005-06-21 07:34:26 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.10 2005-06-23 13:09:42 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -646,12 +646,11 @@
 
  <varlistentry id="command-xmles"><term>
    <literal>xmles</literal>
+   <replaceable>OID</replaceable>
    <replaceable>doc</replaceable>
   </term>
   <listitem>
-   <para>Sends XML Extended Services request using the doc given.
-    This is a privately defined Extended Service using OID
-    1.2.840.10003.9.1000.105.4.
+   <para>Sends XML Extended Services request using the OID and doc given.
    </para>
   </listitem>
  </varlistentry>
