@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.13 2005-01-15 19:47:11 adam Exp $
+/* $Id: cqltransform.c,v 1.14 2005-06-23 15:03:40 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -419,7 +419,7 @@ void cql_transform_r(cql_transform_t ct,
             struct cql_node *mod = cn->u.st.modifiers;
             for (; mod; mod = mod->u.st.modifiers)
             {
-                cql_pr_attr(ct, "relationModifier", mod->u.st.term, 0,
+                cql_pr_attr(ct, "relationModifier", mod->u.st.index, 0,
                             pr, client_data, 20);
             }
         }
