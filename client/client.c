@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.289 2005-06-23 13:09:42 adam Exp $
+ * $Id: client.c,v 1.290 2005-06-24 12:50:46 adam Exp $
  */
 
 #include <stdio.h>
@@ -2321,10 +2321,7 @@ static int cmd_xmles(const char *arg)
 
     Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
     req->taskSpecificParameters = ext;
-    ext->direct_reference = req->packageType;
     ext->descriptor = 0;
-    ext->indirect_reference = 0;
-    
     ext->which = Z_External_octet;
     ext->u.single_ASN1_type = (Odr_oct *) odr_malloc (out, sizeof(Odr_oct));
 
@@ -2347,6 +2344,9 @@ static int cmd_xmles(const char *arg)
 	return 0;
     req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
 					      oid_value_xmles);
+
+    ext->direct_reference = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
+						   oid_value_xmles);
     send_apdu(apdu);
 
     return 2;
