@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.19 2005-01-16 21:51:49 adam Exp $
+ * $Id: admin.c,v 1.20 2005-06-24 19:56:52 adam Exp $
  */
 
 #include <stdio.h>
@@ -303,12 +303,3 @@ int cmd_adm_startup(const char *arg)
     sendAdminES(Z_ESAdminOriginPartToKeep_start, NULL);
     return 2;
 }
-
-/*
- * Local variables:
- * tab-width: 8
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=8 fdm=marker
- * vim<600: sw=4 ts=8
- */

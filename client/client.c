@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.290 2005-06-24 12:50:46 adam Exp $
+ * $Id: client.c,v 1.291 2005-06-24 19:56:52 adam Exp $
  */
 
 #include <stdio.h>
@@ -4757,12 +4757,3 @@ int main(int argc, char **argv)
     client ();
     exit (0);
 }
-
-/*
- * Local variables:
- * tab-width: 8
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=8 fdm=marker
- * vim<600: sw=4 ts=8
- */

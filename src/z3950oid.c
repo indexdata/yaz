@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: z3950oid.c,v 1.2 2005-01-15 19:47:14 adam Exp $
+ * $Id: z3950oid.c,v 1.3 2005-06-24 19:56:52 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -70,13 +70,3 @@ const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc)
         return "";
     }
 }
-
-
-/*
- * Local variables:
- * tab-width: 8
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=8 fdm=marker
- * vim<600: sw=4 ts=8
- */

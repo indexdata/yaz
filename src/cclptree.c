@@ -53,7 +53,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.4 2004-12-30 00:22:25 adam Exp $
+ * $Id: cclptree.c,v 1.5 2005-06-24 19:56:52 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -85,14 +85,15 @@
 
 void fprintSpaces(int indent,FILE * fd_out) 
 {
-	char buf[100];
-	sprintf(buf,"%%%d.s",indent);
-	fprintf(fd_out,buf," ");
+    char buf[100];
+    sprintf(buf,"%%%d.s",indent);
+    fprintf(fd_out,buf," ");
 }
 
 void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
 {
-	if(indent>0) fprintSpaces(indent,fd_out);
+    if(indent>0)
+        fprintSpaces(indent,fd_out);
     switch (rpn->kind)
     {
     case CCL_RPN_TERM:
@@ -100,24 +101,24 @@ void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
         {
             struct ccl_rpn_attr *attr;
             for (attr = rpn->u.t.attr_list; attr; attr = attr->next)
-			{
-				if (attr->set)
-					fprintf(fd_out, "@attr %s ", attr->set);
-				else
-					fprintf(fd_out, "@attr ");
-				switch(attr->kind)
-				{
-				case CCL_RPN_ATTR_NUMERIC:
+            {
+                if (attr->set)
+                    fprintf(fd_out, "@attr %s ", attr->set);
+                else
+                    fprintf(fd_out, "@attr ");
+                switch(attr->kind)
+                {
+                case CCL_RPN_ATTR_NUMERIC:
                     fprintf (fd_out, "%d=%d ", attr->type,
                              attr->value.numeric);
-					break;
-				case CCL_RPN_ATTR_STRING:
+                    break;
+                case CCL_RPN_ATTR_STRING:
                     fprintf (fd_out, "%d=%s ", attr->type,
-							 attr->value.str);
-				}
-			}
+                             attr->value.str);
+                }
+            }
         }
-		fprintf (fd_out, "\"%s\"\n", rpn->u.t.term);
+        fprintf (fd_out, "\"%s\"\n", rpn->u.t.term);
         break;
     case CCL_RPN_AND:
         fprintf (fd_out, "@and \n");
@@ -163,14 +164,14 @@ void ccl_pr_tree_as_qrpn(struct ccl_rpn_node *rpn, FILE *fd_out, int indent)
         ccl_pr_tree_as_qrpn (rpn->u.p[1], fd_out,indent+2);
         break;
     default:
-		fprintf(stderr,"Internal Error Unknown ccl_rpn node type %d\n",rpn->kind);
+        fprintf(stderr,"Internal Error Unknown ccl_rpn node type %d\n",rpn->kind);
     }
 }
 
 
 void ccl_pr_tree (struct ccl_rpn_node *rpn, FILE *fd_out)
 {
-	ccl_pr_tree_as_qrpn(rpn,fd_out,0);
+    ccl_pr_tree_as_qrpn(rpn,fd_out,0);
 }
 
 
@@ -180,13 +181,13 @@ static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
     {
     case CCL_RPN_AND:
     	wrbuf_puts(w, "@and ");
-		break;
+        break;
     case CCL_RPN_OR:
     	wrbuf_puts(w, "@or ");
-		break;
+        break;
     case CCL_RPN_NOT:
     	wrbuf_puts(w, "@not ");
-		break;
+        break;
     case CCL_RPN_PROX:
         if (p->u.p[2] && p->u.p[2]->kind == CCL_RPN_TERM)
         {
@@ -211,9 +212,9 @@ static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
         }
         else
             wrbuf_puts(w, "@prox 0 2 0 1 k 2 ");
-		break;
+        break;
     default:
-		wrbuf_puts(w, "@ bad op (unknown) ");
+        wrbuf_puts(w, "@ bad op (unknown) ");
     }
     ccl_pquery(w, p->u.p[0]);
     ccl_pquery(w, p->u.p[1]);
@@ -231,50 +232,43 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
     case CCL_RPN_NOT:
     case CCL_RPN_PROX:
     	ccl_pquery_complex (w, p);
-		break;
+        break;
     case CCL_RPN_SET:
-		wrbuf_puts (w, "@set ");
-		wrbuf_puts (w, p->u.setname);
-		wrbuf_puts (w, " ");
-		break;
+        wrbuf_puts (w, "@set ");
+        wrbuf_puts (w, p->u.setname);
+        wrbuf_puts (w, " ");
+        break;
     case CCL_RPN_TERM:
     	for (att = p->u.t.attr_list; att; att = att->next)
-		{
-			char tmpattr[128];
-			wrbuf_puts (w, "@attr ");
-			if (att->set)
-			{
-				wrbuf_puts (w, att->set);
-				wrbuf_puts (w, " ");
-			}
-			switch(att->kind)
-			{
-			case CCL_RPN_ATTR_NUMERIC:
-				sprintf(tmpattr, "%d=%d ", att->type, att->value.numeric);
-				wrbuf_puts (w, tmpattr);
-				break;
-			case CCL_RPN_ATTR_STRING:
-				sprintf(tmpattr, "%d=", att->type);
-				wrbuf_puts (w, tmpattr);
-				wrbuf_puts(w, att->value.str);
-				wrbuf_puts (w, " ");
-				break;
-			}
-		}
-		for (cp = p->u.t.term; *cp; cp++)
-		{
-			if (*cp == ' ' || *cp == '\\')
-				wrbuf_putc (w, '\\');
-			wrbuf_putc (w, *cp);
-		}
-		wrbuf_puts (w, " ");
-		break;
+        {
+            char tmpattr[128];
+            wrbuf_puts (w, "@attr ");
+            if (att->set)
+            {
+                wrbuf_puts (w, att->set);
+                wrbuf_puts (w, " ");
+            }
+            switch(att->kind)
+            {
+            case CCL_RPN_ATTR_NUMERIC:
+                sprintf(tmpattr, "%d=%d ", att->type, att->value.numeric);
+                wrbuf_puts (w, tmpattr);
+                break;
+            case CCL_RPN_ATTR_STRING:
+                sprintf(tmpattr, "%d=", att->type);
+                wrbuf_puts (w, tmpattr);
+                wrbuf_puts(w, att->value.str);
+                wrbuf_puts (w, " ");
+                break;
+            }
+        }
+        for (cp = p->u.t.term; *cp; cp++)
+        {
+            if (*cp == ' ' || *cp == '\\')
+                wrbuf_putc (w, '\\');
+            wrbuf_putc (w, *cp);
+        }
+        wrbuf_puts (w, " ");
+        break;
     }
 }
-
-/*
- * Local variables:
- * tab-width: 8
- * c-basic-offset: 4
- * End:
- */
