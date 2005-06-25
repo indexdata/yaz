@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.35 2005-06-06 12:32:03 adam Exp $
+ * $Id: zoomsh.c,v 1.36 2005-06-25 15:42:19 adam Exp $
  */
 
 /* ZOOM-C Shell */
@@ -406,6 +406,7 @@ static void cmd_help (ZOOM_connection *c, ZOOM_resultset *r,
     printf ("scan <term>\n");
     printf ("quit\n");
     printf ("close <zurl>\n");
+    printf ("ext <type>\n");
     printf ("set <option> [<value>]\n");
     printf ("get <option>\n");
     printf ("\n");
