@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.4 2005-01-15 19:47:14 adam Exp $
+ * $Id: sortspec.c,v 1.5 2005-06-25 15:46:05 adam Exp $
  */
 /**
  * \file sortspec.c
@@ -28,52 +28,52 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
     sksl->specs = (Z_SortKeySpec **)odr_malloc (out, sizeof(sksl->specs) * 20);
     
     while ((sscanf (arg, "%31s %31s%n", sort_string_buf,
-		    sort_flags, &off)) == 2  && off > 1)
+                    sort_flags, &off)) == 2  && off > 1)
     {
         int i;
         char *sort_string_sep;
-	char *sort_string = sort_string_buf;
+        char *sort_string = sort_string_buf;
         Z_SortKeySpec *sks = (Z_SortKeySpec *)odr_malloc (out, sizeof(*sks));
         Z_SortKey *sk = (Z_SortKey *)odr_malloc (out, sizeof(*sk));
-	
+        
         arg += off;
         sksl->specs[sksl->num_specs++] = sks;
         sks->sortElement = (Z_SortElement *)
-	    odr_malloc (out, sizeof(*sks->sortElement));
+            odr_malloc (out, sizeof(*sks->sortElement));
         sks->sortElement->which = Z_SortElement_generic;
         sks->sortElement->u.generic = sk;
         
         if ((sort_string_sep = strchr (sort_string, '=')))
         {
-	    int i = 0;
+            int i = 0;
             sk->which = Z_SortKey_sortAttributes;
             sk->u.sortAttributes = (Z_SortAttributes *)
-		odr_malloc (out, sizeof(*sk->u.sortAttributes));
+                odr_malloc (out, sizeof(*sk->u.sortAttributes));
             sk->u.sortAttributes->id = 
-		yaz_oidval_to_z3950oid(out, CLASS_ATTSET, VAL_BIB1);
+                yaz_oidval_to_z3950oid(out, CLASS_ATTSET, VAL_BIB1);
             sk->u.sortAttributes->list = (Z_AttributeList *)
-		odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
+                odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
             sk->u.sortAttributes->list->attributes = (Z_AttributeElement **)
-		odr_malloc (out, 10 * 
-			    sizeof(*sk->u.sortAttributes->list->attributes));
-	    while (i < 10 && sort_string && sort_string_sep)
-	    {
-		Z_AttributeElement *el = (Z_AttributeElement *)
-		    odr_malloc (out, sizeof(*el));
-		sk->u.sortAttributes->list->attributes[i] = el;
-		el->attributeSet = 0;
-		el->attributeType = odr_intdup (out, atoi (sort_string));
-		el->which = Z_AttributeValue_numeric;
-		el->value.numeric =
-		    odr_intdup (out, atoi (sort_string_sep + 1));
-		i++;
-		sort_string = strchr(sort_string, ',');
-		if (sort_string)
-		{
-		    sort_string++;
-		    sort_string_sep = strchr (sort_string, '=');
-		}
-	    }
+                odr_malloc (out, 10 * 
+                            sizeof(*sk->u.sortAttributes->list->attributes));
+            while (i < 10 && sort_string && sort_string_sep)
+            {
+                Z_AttributeElement *el = (Z_AttributeElement *)
+                    odr_malloc (out, sizeof(*el));
+                sk->u.sortAttributes->list->attributes[i] = el;
+                el->attributeSet = 0;
+                el->attributeType = odr_intdup (out, atoi (sort_string));
+                el->which = Z_AttributeValue_numeric;
+                el->value.numeric =
+                    odr_intdup (out, atoi (sort_string_sep + 1));
+                i++;
+                sort_string = strchr(sort_string, ',');
+                if (sort_string)
+                {
+                    sort_string++;
+                    sort_string_sep = strchr (sort_string, '=');
+                }
+            }
             sk->u.sortAttributes->list->num_attributes = i;
         }
         else
@@ -86,7 +86,7 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
 
         sks->which = Z_SortKeySpec_null;
         sks->u.null = odr_nullval ();
-	
+        
         for (i = 0; sort_flags[i]; i++)
         {
             switch (sort_flags[i])
@@ -113,6 +113,14 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
         }
     }
     if (!sksl->num_specs)
-	return 0;
+        return 0;
     return sksl;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

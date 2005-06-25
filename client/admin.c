@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.20 2005-06-24 19:56:52 adam Exp $
+ * $Id: admin.c,v 1.21 2005-06-25 15:46:01 adam Exp $
  */
 
 #include <stdio.h>
@@ -85,44 +85,44 @@ int sendAdminES(int type, char* param1)
     switch ( type )
     {
     case Z_ESAdminOriginPartToKeep_reIndex:
-	toKeep->u.reIndex=odr_nullval();
-	break;
-	
+        toKeep->u.reIndex=odr_nullval();
+        break;
+        
     case Z_ESAdminOriginPartToKeep_truncate:
-	toKeep->u.truncate=odr_nullval();
-	break;
+        toKeep->u.truncate=odr_nullval();
+        break;
     case Z_ESAdminOriginPartToKeep_drop:
-	toKeep->u.drop=odr_nullval();
-	break;
+        toKeep->u.drop=odr_nullval();
+        break;
     case Z_ESAdminOriginPartToKeep_create:
-	toKeep->u.create=odr_nullval();
-	break;
+        toKeep->u.create=odr_nullval();
+        break;
     case Z_ESAdminOriginPartToKeep_import:
-	toKeep->u.import = (Z_ImportParameters*)
+        toKeep->u.import = (Z_ImportParameters*)
             odr_malloc(out, sizeof(*toKeep->u.import));
-	toKeep->u.import->recordType=param1;
-	/* Need to add additional setup of records here */
-	break;
+        toKeep->u.import->recordType=param1;
+        /* Need to add additional setup of records here */
+        break;
     case Z_ESAdminOriginPartToKeep_refresh:
-	toKeep->u.refresh=odr_nullval();
-	break;
+        toKeep->u.refresh=odr_nullval();
+        break;
     case Z_ESAdminOriginPartToKeep_commit:
-	toKeep->u.commit=odr_nullval();
-	break;
+        toKeep->u.commit=odr_nullval();
+        break;
     case Z_ESAdminOriginPartToKeep_shutdown:
-	toKeep->u.commit=odr_nullval();
-	break;
+        toKeep->u.commit=odr_nullval();
+        break;
     case Z_ESAdminOriginPartToKeep_start:
-	toKeep->u.commit=odr_nullval();
-	break;
+        toKeep->u.commit=odr_nullval();
+        break;
     default:
-	/* Unknown admin service */
-	break;
+        /* Unknown admin service */
+        break;
     }
     
     notToKeep = r->u.adminService->u.esRequest->notToKeep =
-	(Z_ESAdminOriginPartNotToKeep *)
-	odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->notToKeep));
+        (Z_ESAdminOriginPartNotToKeep *)
+        odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->notToKeep));
     notToKeep->which=Z_ESAdminOriginPartNotToKeep_recordsWillFollow;
     notToKeep->u.recordsWillFollow=odr_nullval();
     
@@ -147,7 +147,7 @@ int cmd_adm_truncate(const char *arg)
     if ( arg )
     {
         sendAdminES(Z_ESAdminOriginPartToKeep_truncate, NULL);
-	return 2;
+        return 2;
     }
     return 0;
 }
@@ -159,7 +159,7 @@ int cmd_adm_create(const char *arg)
     if ( arg )
     {
         sendAdminES(Z_ESAdminOriginPartToKeep_create, NULL);
-	return 2;
+        return 2;
     }
     return 0;
 }
@@ -171,7 +171,7 @@ int cmd_adm_drop(const char *arg)
     if ( arg )
     {
         sendAdminES(Z_ESAdminOriginPartToKeep_drop, NULL);
-	return 2;
+        return 2;
     }
     return 0;
 }
@@ -195,69 +195,69 @@ int cmd_adm_import(const char *arg)
     ODR out = getODROutputStream();
 
     if (arg && sscanf (arg, "%19s %1023s %1023s", type_str,
-		       dir_str, pattern_str) != 3)
-	return 0;
+                       dir_str, pattern_str) != 3)
+        return 0;
     if (num_databaseNames != 1)
-	return 0;
+        return 0;
     dir = opendir(dir_str);
     if (!dir)
-	return 0;
+        return 0;
     
     sendAdminES(Z_ESAdminOriginPartToKeep_import, type_str);
     
     printf ("sent es request\n");
     if ((cp=strrchr(dir_str, '/')) && cp[1] == 0)
-	sep="";
-	
+        sep="";
+        
     while ((ent = readdir(dir)))
     {
-	if (fnmatch (pattern_str, ent->d_name, 0) == 0)
-	{
-	    char fname[1024];
-	    struct stat status;
-	    FILE *inf;
-		
-	    sprintf (fname, "%s%s%s", dir_str, sep, ent->d_name);
-	    stat (fname, &status);
+        if (fnmatch (pattern_str, ent->d_name, 0) == 0)
+        {
+            char fname[1024];
+            struct stat status;
+            FILE *inf;
+                
+            sprintf (fname, "%s%s%s", dir_str, sep, ent->d_name);
+            stat (fname, &status);
 
-	    if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))
-	    {
-		Z_NamePlusRecord *rec;
-		Odr_oct *oct = (Odr_oct *) odr_malloc (out, sizeof(*oct));
+            if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))
+            {
+                Z_NamePlusRecord *rec;
+                Odr_oct *oct = (Odr_oct *) odr_malloc (out, sizeof(*oct));
 
-		if (!apdu)
-		{
-		    apdu = zget_APDU(out, Z_APDU_segmentRequest);
-		    segment = apdu->u.segmentRequest;
-		    segment->segmentRecords = (Z_NamePlusRecord **)
-			odr_malloc (out, chunk * sizeof(*segment->segmentRecords));
-		}
-		rec = (Z_NamePlusRecord *) odr_malloc (out, sizeof(*rec));
-		rec->databaseName = 0;
-		rec->which = Z_NamePlusRecord_intermediateFragment;
-		rec->u.intermediateFragment = (Z_FragmentSyntax *)
-		    odr_malloc (out, sizeof(*rec->u.intermediateFragment));
-		rec->u.intermediateFragment->which =
-		    Z_FragmentSyntax_notExternallyTagged;
-		rec->u.intermediateFragment->u.notExternallyTagged = oct;
-		
-		oct->len = oct->size = status.st_size;
-		oct->buf = (unsigned char *) odr_malloc (out, oct->size);
-		fread (oct->buf, 1, oct->size, inf);
-		fclose (inf);
-		
-		segment->segmentRecords[segment->num_segmentRecords++] = rec;
+                if (!apdu)
+                {
+                    apdu = zget_APDU(out, Z_APDU_segmentRequest);
+                    segment = apdu->u.segmentRequest;
+                    segment->segmentRecords = (Z_NamePlusRecord **)
+                        odr_malloc (out, chunk * sizeof(*segment->segmentRecords));
+                }
+                rec = (Z_NamePlusRecord *) odr_malloc (out, sizeof(*rec));
+                rec->databaseName = 0;
+                rec->which = Z_NamePlusRecord_intermediateFragment;
+                rec->u.intermediateFragment = (Z_FragmentSyntax *)
+                    odr_malloc (out, sizeof(*rec->u.intermediateFragment));
+                rec->u.intermediateFragment->which =
+                    Z_FragmentSyntax_notExternallyTagged;
+                rec->u.intermediateFragment->u.notExternallyTagged = oct;
+                
+                oct->len = oct->size = status.st_size;
+                oct->buf = (unsigned char *) odr_malloc (out, oct->size);
+                fread (oct->buf, 1, oct->size, inf);
+                fclose (inf);
+                
+                segment->segmentRecords[segment->num_segmentRecords++] = rec;
 
-		if (segment->num_segmentRecords == chunk)
-		{
-		    send_apdu (apdu);
-		    apdu = 0;
-		}
-	    }	
-	}
+                if (segment->num_segmentRecords == chunk)
+                {
+                    send_apdu (apdu);
+                    apdu = 0;
+                }
+            }   
+        }
     }
     if (apdu)
-	send_apdu(apdu);
+        send_apdu(apdu);
     apdu = zget_APDU(out, Z_APDU_segmentRequest);
     send_apdu (apdu);
     closedir(dir);
@@ -279,7 +279,7 @@ int cmd_adm_refresh(const char *arg)
     if ( arg )
     {
         sendAdminES(Z_ESAdminOriginPartToKeep_refresh, NULL);
-	return 2;
+        return 2;
     }
     return 0;
 }
@@ -303,3 +303,11 @@ int cmd_adm_startup(const char *arg)
     sendAdminES(Z_ESAdminOriginPartToKeep_start, NULL);
     return 2;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

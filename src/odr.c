@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.11 2005-01-15 19:47:14 adam Exp $
+ * $Id: odr.c,v 1.12 2005-06-25 15:46:04 adam Exp $
  *
  */
 
@@ -106,34 +106,34 @@ void odr_setelement(ODR o, const char *element)
 }
 
 void odr_FILE_write(ODR o, void *handle, int type,
-		    const char *buf, int len)
+                    const char *buf, int len)
 {
     int i;
 #if 0
     if (type  == ODR_OCTETSTRING)
     {
-	const char **stack_names = odr_get_element_path(o);
-	for (i = 0; stack_names[i]; i++)
-	    fprintf((FILE*) handle, "[%s]", stack_names[i]);
-	fputs("\n", (FILE*) handle);
+        const char **stack_names = odr_get_element_path(o);
+        for (i = 0; stack_names[i]; i++)
+            fprintf((FILE*) handle, "[%s]", stack_names[i]);
+        fputs("\n", (FILE*) handle);
     }
 #endif
     for (i = 0; i<len; i++)
     {
-	unsigned c = ((const unsigned char *) buf)[i];
-	if (i == 2000 && len > 3100)
-	{
-	    fputs(" ..... ", (FILE*) handle);
-		i = len - 1000;
-	}
-	if (strchr("\r\n\f\t", c) || (c >= ' ' && c <= 126))
-	    putc(c, (FILE*) handle);
-	else
-	{
-	    char x[5];
-	    sprintf(x, "\\X%02X", c);
-	    fputs(x, (FILE*) handle);
-	}
+        unsigned c = ((const unsigned char *) buf)[i];
+        if (i == 2000 && len > 3100)
+        {
+            fputs(" ..... ", (FILE*) handle);
+                i = len - 1000;
+        }
+        if (strchr("\r\n\f\t", c) || (c >= ' ' && c <= 126))
+            putc(c, (FILE*) handle);
+        else
+        {
+            char x[5];
+            sprintf(x, "\\X%02X", c);
+            fputs(x, (FILE*) handle);
+        }
     }
 }
 
@@ -141,7 +141,7 @@ void odr_FILE_close(void *handle)
 {
     FILE *f = (FILE *) handle;
     if (f && f != stderr && f != stdout)
-	fclose(f);
+        fclose(f);
 }
 
 void odr_setprint(ODR o, FILE *file)
@@ -150,10 +150,10 @@ void odr_setprint(ODR o, FILE *file)
 }
 
 void odr_set_stream(ODR o, void *handle,
-		    void (*stream_write)(ODR o, 
-					 void *handle, int type,
-					 const char *buf, int len),
-		    void (*stream_close)(void *handle))
+                    void (*stream_write)(ODR o, 
+                                         void *handle, int type,
+                                         const char *buf, int len),
+                    void (*stream_close)(void *handle))
 {
     o->print = (FILE*) handle;
     o->op->stream_write = stream_write;
@@ -231,7 +231,7 @@ void odr_destroy(ODR o)
     if (o->buf && o->can_grow)
        xfree(o->buf);
     if (o->op->stream_close)
-	o->op->stream_close(o->print);
+        o->op->stream_close(o->print);
     if (o->op->iconv_handle != 0)
         yaz_iconv_close (o->op->iconv_handle);
     xfree(o->op);
@@ -276,3 +276,11 @@ void odr_printf(ODR o, const char *fmt, ...)
     o->op->stream_write(o, o->print, ODR_VISIBLESTRING, buf, strlen(buf));
     va_end(ap);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

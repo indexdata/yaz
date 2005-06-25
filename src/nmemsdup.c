@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmemsdup.c,v 1.4 2005-05-02 19:14:33 adam Exp $
+ * $Id: nmemsdup.c,v 1.5 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -45,36 +45,44 @@ void nmem_strsplit_blank(NMEM nmem, const char *dstr, char ***darray, int *num)
 }
 
 void nmem_strsplit(NMEM nmem, const char *delim, const char *dstr,
-		   char ***darray, int *num)
+                   char ***darray, int *num)
 {
     const char *cp = dstr;
     for (*num = 0; *cp; (*num)++)
     {
-	while (*cp && strchr(delim, *cp))
-	    cp++;
-	if (!*cp)
-	    break;
-	while (*cp && !strchr(delim, *cp))
-	    cp++;
+        while (*cp && strchr(delim, *cp))
+            cp++;
+        if (!*cp)
+            break;
+        while (*cp && !strchr(delim, *cp))
+            cp++;
     }
     if (!*num)
-	*darray = 0;
+        *darray = 0;
     else
     {
-	size_t i = 0;
-	*darray = nmem_malloc(nmem, *num * sizeof(**darray));
-	for (cp = dstr; *cp; )
-	{
-	    const char *cp0;
-	    while (*cp && strchr(delim, *cp))
-		cp++;
-	    if (!*cp)
-		break;
-	    cp0 = cp;
-	    while (*cp && !strchr(delim, *cp))
-		cp++;
-	    (*darray)[i++] = nmem_strdupn(nmem, cp0, cp - cp0);
-	}
+        size_t i = 0;
+        *darray = nmem_malloc(nmem, *num * sizeof(**darray));
+        for (cp = dstr; *cp; )
+        {
+            const char *cp0;
+            while (*cp && strchr(delim, *cp))
+                cp++;
+            if (!*cp)
+                break;
+            cp0 = cp;
+            while (*cp && !strchr(delim, *cp))
+                cp++;
+            (*darray)[i++] = nmem_strdupn(nmem, cp0, cp - cp0);
+        }
     }
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

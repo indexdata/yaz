@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: logrpn.h,v 1.7 2005-01-15 19:47:09 adam Exp $
+ * $Id: logrpn.h,v 1.8 2005-06-25 15:46:03 adam Exp $
  */
 
 /**
@@ -37,3 +37,11 @@ YAZ_EXPORT void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

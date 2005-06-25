@@ -53,7 +53,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.5 2005-06-24 19:56:52 adam Exp $
+ * $Id: cclptree.c,v 1.6 2005-06-25 15:46:03 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -180,13 +180,13 @@ static void ccl_pquery_complex (WRBUF w, struct ccl_rpn_node *p)
     switch (p->kind)
     {
     case CCL_RPN_AND:
-    	wrbuf_puts(w, "@and ");
+        wrbuf_puts(w, "@and ");
         break;
     case CCL_RPN_OR:
-    	wrbuf_puts(w, "@or ");
+        wrbuf_puts(w, "@or ");
         break;
     case CCL_RPN_NOT:
-    	wrbuf_puts(w, "@not ");
+        wrbuf_puts(w, "@not ");
         break;
     case CCL_RPN_PROX:
         if (p->u.p[2] && p->u.p[2]->kind == CCL_RPN_TERM)
@@ -224,14 +224,14 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
 {
     struct ccl_rpn_attr *att;
     const char *cp;
-	
+        
     switch (p->kind)
     {
     case CCL_RPN_AND:
     case CCL_RPN_OR:
     case CCL_RPN_NOT:
     case CCL_RPN_PROX:
-    	ccl_pquery_complex (w, p);
+        ccl_pquery_complex (w, p);
         break;
     case CCL_RPN_SET:
         wrbuf_puts (w, "@set ");
@@ -239,7 +239,7 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
         wrbuf_puts (w, " ");
         break;
     case CCL_RPN_TERM:
-    	for (att = p->u.t.attr_list; att; att = att->next)
+        for (att = p->u.t.attr_list; att; att = att->next)
         {
             char tmpattr[128];
             wrbuf_puts (w, "@attr ");
@@ -272,3 +272,11 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
         break;
     }
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

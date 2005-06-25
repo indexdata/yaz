@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-version.h,v 1.71 2005-06-08 09:11:17 adam Exp $
+ * $Id: yaz-version.h,v 1.72 2005-06-25 15:46:03 adam Exp $
  */
 
 /**
@@ -33,4 +33,12 @@ YAZ_EXPORT unsigned long yaz_version(char *version_str, char *sys_str);
 YAZ_END_CDECL
 
 #endif
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

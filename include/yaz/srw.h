@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.21 2005-04-22 08:27:57 adam Exp $
+ * $Id: srw.h,v 1.22 2005-06-25 15:46:03 adam Exp $
  */
 /**
  * \file srw.h
@@ -148,20 +148,28 @@ YAZ_EXPORT int yaz_diag_srw_to_bib1(int srw_code);
 
 YAZ_EXPORT char *yaz_uri_val(const char *path, const char *name, ODR o);
 YAZ_EXPORT void yaz_uri_val_int(const char *path, const char *name,
-				ODR o, int **intp);
+                                ODR o, int **intp);
 YAZ_EXPORT int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-			      Z_SOAP **soap_package, ODR decode, char **charset);
+                              Z_SOAP **soap_package, ODR decode, char **charset);
 YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-			      Z_SOAP **soap_package, ODR decode, 
-			      char **charset,
-			      Z_SRW_diagnostic **, int *num_diagnostic);
+                              Z_SOAP **soap_package, ODR decode, 
+                              char **charset,
+                              Z_SRW_diagnostic **, int *num_diagnostic);
 
 YAZ_EXPORT void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
-				       int *num, int code,
-				       const char *addinfo);
+                                       int *num, int code,
+                                       const char *addinfo);
     
 YAZ_EXPORT void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d, 
-				      int code, const char *details);
+                                      int code, const char *details);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

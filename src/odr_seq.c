@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_seq.c,v 1.3 2005-01-15 19:47:14 adam Exp $
+ * $Id: odr_seq.c,v 1.4 2005-06-25 15:46:04 adam Exp $
  */
 /**
  * \file odr_seq.c
@@ -19,22 +19,22 @@ int odr_sequence_begin(ODR o, void *p, int size, const char *name)
     char **pp = (char**) p;
 
     if (o->error)
-    	return 0;
+        return 0;
     if (o->t_class < 0)
     {
-    	o->t_class = ODR_UNIVERSAL;
-    	o->t_tag = ODR_SEQUENCE;
+        o->t_class = ODR_UNIVERSAL;
+        o->t_tag = ODR_SEQUENCE;
     }
     if (o->direction == ODR_DECODE)
-    	*pp = 0;
+        *pp = 0;
     if (odr_constructed_begin(o, p, o->t_class, o->t_tag, name))
     {
-    	if (o->direction == ODR_DECODE && size)
-	    *pp = (char *)odr_malloc(o, size);
-    	return 1;
+        if (o->direction == ODR_DECODE && size)
+            *pp = (char *)odr_malloc(o, size);
+        return 1;
     }
     else
-    	return 0;
+        return 0;
 }
 
 int odr_set_begin(ODR o, void *p, int size, const char *name)
@@ -42,22 +42,22 @@ int odr_set_begin(ODR o, void *p, int size, const char *name)
     char **pp = (char**) p;
 
     if (o->error)
-    	return 0;
+        return 0;
     if (o->t_class < 0)
     {
-    	o->t_class = ODR_UNIVERSAL;
-    	o->t_tag = ODR_SET;
+        o->t_class = ODR_UNIVERSAL;
+        o->t_tag = ODR_SET;
     }
     if (o->direction == ODR_DECODE)
-    	*pp = 0;
+        *pp = 0;
     if (odr_constructed_begin(o, p, o->t_class, o->t_tag, name))
     {
-    	if (o->direction == ODR_DECODE && size)
-	    *pp = (char *)odr_malloc(o, size);
-    	return 1;
+        if (o->direction == ODR_DECODE && size)
+            *pp = (char *)odr_malloc(o, size);
+        return 1;
     }
     else
-    	return 0;
+        return 0;
 }
 
 int odr_sequence_end(ODR o)
@@ -83,48 +83,48 @@ static int odr_sequence_x (ODR o, Odr_fun type, void *p, int *num)
 
     switch (o->direction)
     {
-    	case ODR_DECODE:
-	    *num = 0;
-	    *pp = (char **)odr_nullval();
-	    while (odr_sequence_more(o))
-	    {
-		/* outgrown array? */
-		if (*num * (int) sizeof(void*) >= size)
-		{
-		    /* double the buffer size */
-		    tmp = (char **)odr_malloc(o, sizeof(void*) *
-					      (size += size ? size : 128));
-		    if (*num)
-		    {
-			memcpy(tmp, *pp, *num * sizeof(void*));
-			/*
-			 * For now, we just throw the old *p away, since we use
-			 * nibble memory anyway (disgusting, isn't it?).
-			 */
-		    }
-		    *pp = tmp;
-		}
-		if (!(*type)(o, (*pp) + *num, 0, 0))
-		    return 0;
-		(*num)++;
-	    }
-	    break;
-    	case ODR_ENCODE: case ODR_PRINT:
+        case ODR_DECODE:
+            *num = 0;
+            *pp = (char **)odr_nullval();
+            while (odr_sequence_more(o))
+            {
+                /* outgrown array? */
+                if (*num * (int) sizeof(void*) >= size)
+                {
+                    /* double the buffer size */
+                    tmp = (char **)odr_malloc(o, sizeof(void*) *
+                                              (size += size ? size : 128));
+                    if (*num)
+                    {
+                        memcpy(tmp, *pp, *num * sizeof(void*));
+                        /*
+                         * For now, we just throw the old *p away, since we use
+                         * nibble memory anyway (disgusting, isn't it?).
+                         */
+                    }
+                    *pp = tmp;
+                }
+                if (!(*type)(o, (*pp) + *num, 0, 0))
+                    return 0;
+                (*num)++;
+            }
+            break;
+        case ODR_ENCODE: case ODR_PRINT:
 #ifdef ODR_DEBUG
-	    fprintf(stderr, "[seqof: num=%d]", *num);
+            fprintf(stderr, "[seqof: num=%d]", *num);
 #endif
-	    for (i = 0; i < *num; i++)
-	    {
+            for (i = 0; i < *num; i++)
+            {
 #ifdef ODR_DEBUG
-		fprintf(stderr, "[seqof: elem #%d]", i);
+                fprintf(stderr, "[seqof: elem #%d]", i);
 #endif
-	    	if (!(*type)(o, *pp + i, 0, 0))
-		    return 0;
-	    }
-	    break;
-    	default:
+                if (!(*type)(o, *pp + i, 0, 0))
+                    return 0;
+            }
+            break;
+        default:
             odr_seterror(o, OOTHER, 47);
-	    return 0;
+            return 0;
     }
     return odr_sequence_end(o);
 }
@@ -132,21 +132,29 @@ static int odr_sequence_x (ODR o, Odr_fun type, void *p, int *num)
 int odr_set_of(ODR o, Odr_fun type, void *p, int *num, const char *name)
 {
     if (!odr_set_begin(o, p, 0, name)) {
-	if (o->direction == ODR_DECODE)
-	    *num = 0;
-    	return 0;
+        if (o->direction == ODR_DECODE)
+            *num = 0;
+        return 0;
     }
     return odr_sequence_x (o, type, p, num);
 }
 
 int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num,
-		    const char *name)
+                    const char *name)
 {
     if (!odr_sequence_begin(o, p, 0, name)) {
-	if (o->direction == ODR_DECODE)
-	    *num = 0;
-    	return 0;
+        if (o->direction == ODR_DECODE)
+            *num = 0;
+        return 0;
     }
     return odr_sequence_x (o, type, p, num);
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

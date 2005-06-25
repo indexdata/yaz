@@ -54,7 +54,7 @@
 /*
  * Europagate, 1995
  *
- * $Id: cclerrms.c,v 1.2 2004-10-15 00:18:59 adam Exp $
+ * $Id: cclerrms.c,v 1.3 2005-06-25 15:46:03 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -108,3 +108,11 @@ const char *ccl_err_msg (int ccl_errno)
 {
     return err_msg_array[ccl_errno];
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstnmem.c,v 1.4 2005-01-15 19:47:15 adam Exp $
+ * $Id: tstnmem.c,v 1.5 2005-06-25 15:46:07 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -31,14 +31,14 @@ int main (int argc, char **argv)
         cp = nmem_malloc(n, j);
         if (!cp)
             exit(2);
-	if (sizeof(long) >= j)
-	    *(long*) cp = 123L;
+        if (sizeof(long) >= j)
+            *(long*) cp = 123L;
 #if HAVE_LONG_LONG
-	if (sizeof(long long) >= j)
-	    *(long long*) cp = 123L;
+        if (sizeof(long long) >= j)
+            *(long long*) cp = 123L;
 #endif
-	if (sizeof(double) >= j)
-	    *(double*) cp = 12.2;
+        if (sizeof(double) >= j)
+            *(double*) cp = 12.2;
     }
     
     for (j = 2000; j<20000; j+= 2000)
@@ -51,3 +51,11 @@ int main (int argc, char **argv)
     nmem_exit();
     exit(0);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

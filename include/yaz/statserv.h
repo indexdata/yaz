@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: statserv.h,v 1.8 2005-01-15 19:47:10 adam Exp $
+ * $Id: statserv.h,v 1.9 2005-06-25 15:46:03 adam Exp $
  */
 
 /**
@@ -38,3 +38,11 @@
 #include <yaz/backend.h>
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: matchstr.c,v 1.4 2005-01-15 19:47:14 adam Exp $
+ * $Id: matchstr.c,v 1.5 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -30,28 +30,28 @@ int yaz_matchstr(const char *s1, const char *s2)
 {
     while (*s1 && *s2)
     {
-	unsigned char c1 = *s1;
-	unsigned char c2 = *s2;
+        unsigned char c1 = *s1;
+        unsigned char c2 = *s2;
 
         if (c2 == '?')
             return 0;
-	if (c1 == '-')
-	    c1 = *++s1;
-	if (c2 == '-')
-	    c2 = *++s2;
-	if (!c1 || !c2)
-	    break;
+        if (c1 == '-')
+            c1 = *++s1;
+        if (c2 == '-')
+            c2 = *++s2;
+        if (!c1 || !c2)
+            break;
         if (c2 != '.')
         {
-	    if (isupper(c1))
-	        c1 = tolower(c1);
-	    if (isupper(c2))
-	        c2 = tolower(c2);
-	    if (c1 != c2)
-	        break;
+            if (isupper(c1))
+                c1 = tolower(c1);
+            if (isupper(c2))
+                c2 = tolower(c2);
+            if (c1 != c2)
+                break;
         }
-	s1++;
-	s2++;
+        s1++;
+        s2++;
     }
     return *s1 || *s2;
 }
@@ -81,3 +81,11 @@ void __assert_fail (const char *assertion, const char *file,
 }
 #endif
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

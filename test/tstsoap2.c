@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap2.c,v 1.1 2005-05-06 11:11:37 adam Exp $
+ * $Id: tstsoap2.c,v 1.2 2005-06-25 15:46:07 adam Exp $
  */
 
 #include <stdlib.h>
@@ -43,8 +43,8 @@ static void tst_srw(void)
     odr_destroy(o);
     if (ret)
     {
-	printf("z_soap_codec_enc failed\n");
-	exit(1);
+        printf("z_soap_codec_enc failed\n");
+        exit(1);
     }
 }
 #endif
@@ -55,8 +55,16 @@ int main(int argc, char **argv)
     LIBXML_TEST_VERSION
     if (argc <= 1)
     {
-	tst_srw();
+        tst_srw();
     }
 #endif
     return 0;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

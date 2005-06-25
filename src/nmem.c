@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.18 2005-06-07 19:47:31 adam Exp $
+ * $Id: nmem.c,v 1.19 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -61,15 +61,15 @@ struct nmem_control
 struct align {
     char x;
     union {
-	char c;
-	short s;
-	int i;
-	long l;
+        char c;
+        short s;
+        int i;
+        long l;
 #if HAVE_LONG_LONG
-	long long ll;
+        long long ll;
 #endif
-	float f;
-	double d;
+        float f;
+        double d;
     } u;
 };
 
@@ -111,11 +111,11 @@ YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
 {
     if (!*p)
     {
-	*p = (NMEM_MUTEX) malloc (sizeof(**p));
+        *p = (NMEM_MUTEX) malloc (sizeof(**p));
 #ifdef WIN32
-	InitializeCriticalSection(&(*p)->m_handle);
+        InitializeCriticalSection(&(*p)->m_handle);
 #elif YAZ_POSIX_THREADS
-	pthread_mutex_init (&(*p)->m_handle, 0);
+        pthread_mutex_init (&(*p)->m_handle, 0);
 #elif YAZ_GNU_THREADS
         pth_mutex_init (&(*p)->m_handle);
 #endif
@@ -133,9 +133,9 @@ YAZ_EXPORT void nmem_mutex_enter(NMEM_MUTEX p)
     if (p)
     {
 #ifdef WIN32
-	EnterCriticalSection(&p->m_handle);
+        EnterCriticalSection(&p->m_handle);
 #elif YAZ_POSIX_THREADS
-	pthread_mutex_lock(&p->m_handle);
+        pthread_mutex_lock(&p->m_handle);
 #endif
     }
 }
@@ -145,9 +145,9 @@ YAZ_EXPORT void nmem_mutex_leave(NMEM_MUTEX p)
     if (p)
     {
 #ifdef WIN32
-	LeaveCriticalSection(&p->m_handle);
+        LeaveCriticalSection(&p->m_handle);
 #elif YAZ_POSIX_THREADS
-	pthread_mutex_unlock(&p->m_handle);
+        pthread_mutex_unlock(&p->m_handle);
 #endif
     }
 }
@@ -157,10 +157,10 @@ YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
     if (*p)
     {
 #ifdef WIN32
-	DeleteCriticalSection(&(*p)->m_handle);
+        DeleteCriticalSection(&(*p)->m_handle);
 #endif
-	free (*p);
-	*p = 0;
+        free (*p);
+        *p = 0;
     }
 }
 
@@ -203,8 +203,8 @@ void nmem_print_list_l (int level)
     yaz_log (level, "nmem print list");
     NMEM_ENTER;
     for (p = nmem_debug_list; p; p = p->next)
-	yaz_log (level, " %s:%d p=%p size=%d", p->file, p->line, p->p,
-		 nmem_total(p->p));
+        yaz_log (level, " %s:%d p=%p size=%d", p->file, p->line, p->p,
+                 nmem_total(p->p));
     NMEM_LEAVE;
 }
 #endif
@@ -219,28 +219,28 @@ static nmem_block *get_block(size_t size)
         yaz_log (log_level, "nmem get_block size=%ld", (long) size);
 
     for (r = freelist, l = 0; r; l = r, r = r->next)
-    	if (r->size >= size)
-	    break;
+        if (r->size >= size)
+            break;
     if (r)
     {
         if (log_level)
-	    yaz_log (log_level, "nmem get_block found free block p=%p", r);
-    	if (l)
-	    l->next = r->next;
-	else
-	    freelist = r->next;
+            yaz_log (log_level, "nmem get_block found free block p=%p", r);
+        if (l)
+            l->next = r->next;
+        else
+            freelist = r->next;
     }
     else
     {
-    	int get = NMEM_CHUNK;
+        int get = NMEM_CHUNK;
 
-	if (get < size)
-	    get = size;
+        if (get < size)
+            get = size;
         if(log_level)
-	    yaz_log (log_level, "nmem get_block alloc new block size=%d", get);
+            yaz_log (log_level, "nmem get_block alloc new block size=%d", get);
 
-	r = (nmem_block *)xmalloc(sizeof(*r));
-	r->buf = (char *)xmalloc(r->size = get);
+        r = (nmem_block *)xmalloc(sizeof(*r));
+        r->buf = (char *)xmalloc(r->size = get);
     }
     r->top = 0;
     return r;
@@ -252,13 +252,13 @@ void nmem_reset(NMEM n)
     
     yaz_log (log_level, "nmem_reset p=%p", n);
     if (!n)
-	return;
+        return;
     NMEM_ENTER;
     while (n->blocks)
     {
-    	t = n->blocks;
-	n->blocks = n->blocks->next;
-	free_block(t);
+        t = n->blocks;
+        n->blocks = n->blocks->next;
+        free_block(t);
     }
     n->total = 0;
     NMEM_LEAVE;
@@ -290,9 +290,9 @@ void *nmem_malloc(NMEM n, int size)
     p = n->blocks;
     if (!p || p->size < size + p->top)
     {
-    	p = get_block(size);
-	p->next = n->blocks;
-	n->blocks = p;
+        p = get_block(size);
+        p->next = n->blocks;
+        n->blocks = p;
     }
     r = p->buf + p->top;
     /* align size */
@@ -327,9 +327,9 @@ NMEM nmem_create(void)
     nmem_active_no++;
     r = cfreelist;
     if (r)
-	cfreelist = cfreelist->next;
+        cfreelist = cfreelist->next;
     else
-	r = (nmem_control *)xmalloc(sizeof(*r));
+        r = (nmem_control *)xmalloc(sizeof(*r));
     NMEM_LEAVE;
 
 #if NMEM_DEBUG
@@ -342,11 +342,11 @@ NMEM nmem_create(void)
 
 #if NMEM_DEBUG
     for (debug_p = nmem_debug_list; debug_p; debug_p = debug_p->next)
-	if (debug_p->p == r)
-	{
-	    yaz_log (YLOG_FATAL, "multi used block in nmem");
-	    abort ();
-	}
+        if (debug_p->p == r)
+        {
+            yaz_log (YLOG_FATAL, "multi used block in nmem");
+            abort ();
+        }
     debug_p = xmalloc (sizeof(*debug_p));
     strncpy (debug_p->file, file, sizeof(debug_p->file)-1);
     debug_p->file[sizeof(debug_p->file)-1] = '\0';
@@ -371,28 +371,28 @@ void nmem_destroy(NMEM n)
     int ok = 0;
 #endif
     if (!n)
-	return;
+        return;
     
 #if NMEM_DEBUG
     yaz_log (log_level, "%s:%d: nmem_destroy %d p=%p", file, line,
                      nmem_active_no-1, n);
     NMEM_ENTER;
     for (debug_p = &nmem_debug_list; *debug_p; debug_p = &(*debug_p)->next)
-	if ((*debug_p)->p == n)
-	{
-	    struct nmem_debug_info *debug_save = *debug_p;
-	    *debug_p = (*debug_p)->next;
-	    xfree (debug_save);
-	    ok = 1;
-	    break;
-	}
+        if ((*debug_p)->p == n)
+        {
+            struct nmem_debug_info *debug_save = *debug_p;
+            *debug_p = (*debug_p)->next;
+            xfree (debug_save);
+            ok = 1;
+            break;
+        }
     NMEM_LEAVE;
     nmem_print_list();
     if (!ok)
     {
-	yaz_log (YLOG_WARN, "%s:%d destroying unallocated nmem block p=%p",
-		 file, line, n);
-	return;
+        yaz_log (YLOG_WARN, "%s:%d destroying unallocated nmem block p=%p",
+                 file, line, n);
+        return;
     }
 #endif
     nmem_reset(n);
@@ -408,9 +408,9 @@ void nmem_transfer (NMEM dst, NMEM src)
     nmem_block *t;
     while ((t = src->blocks))
     {
-	src->blocks = t->next;
-	t->next = dst->blocks;
-	dst->blocks = t;
+        src->blocks = t->next;
+        t->next = dst->blocks;
+        dst->blocks = t;
     }
     dst->total += src->total;
     src->total = 0;
@@ -432,13 +432,13 @@ void nmem_init (void)
     if (++nmem_init_flag == 1)
     {
 #ifdef WIN32
-	InitializeCriticalSection(&critical_section);
+        InitializeCriticalSection(&critical_section);
 #elif YAZ_GNU_THREADS
         pth_init ();
 #endif
-	nmem_active_no = 0;
-	freelist = NULL;
-	cfreelist = NULL;
+        nmem_active_no = 0;
+        freelist = NULL;
+        cfreelist = NULL;
     }
     if (!log_level_initialized)
     {
@@ -452,21 +452,21 @@ void nmem_exit (void)
     if (--nmem_init_flag == 0)
     {
         oid_exit();
-	while (freelist)
-	{
-	    struct nmem_block *fl = freelist;
-	    freelist = freelist->next;
-	    xfree (fl->buf);
-	    xfree (fl);
-	}
-	while (cfreelist)
-	{
-	    struct nmem_control *cfl = cfreelist;
-	    cfreelist = cfreelist->next;
-	    xfree (cfl);
-	}
+        while (freelist)
+        {
+            struct nmem_block *fl = freelist;
+            freelist = freelist->next;
+            xfree (fl->buf);
+            xfree (fl);
+        }
+        while (cfreelist)
+        {
+            struct nmem_control *cfl = cfreelist;
+            cfreelist = cfreelist->next;
+            xfree (cfl);
+        }
 #ifdef WIN32
-	DeleteCriticalSection(&critical_section);
+        DeleteCriticalSection(&critical_section);
 #endif
     }
 }
@@ -474,16 +474,16 @@ void nmem_exit (void)
 
 #ifdef WIN32
 BOOL WINAPI DllMain (HINSTANCE hinstDLL,
-		     DWORD reason,
-		     LPVOID reserved)
+                     DWORD reason,
+                     LPVOID reserved)
 {
     switch (reason)
     {
     case DLL_PROCESS_ATTACH:
-	nmem_init ();
-	break;
+        nmem_init ();
+        break;
     case DLL_PROCESS_DETACH:
-	nmem_exit ();
+        nmem_exit ();
     }
     return TRUE;
 }
@@ -516,16 +516,16 @@ void yaz_strerror(char *buf, int max)
     if (err)
     {
         FormatMessage(
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL,
-		err,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default lang */
-		(LPTSTR) buf,
-		max-1,
-		NULL);
+                FORMAT_MESSAGE_FROM_SYSTEM,
+                NULL,
+                err,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default lang */
+                (LPTSTR) buf,
+                max-1,
+                NULL);
     }
     else
-	*buf = '\0';
+        *buf = '\0';
 #else
 /* UNIX */
 #if HAVE_STRERROR_R
@@ -544,7 +544,15 @@ void yaz_strerror(char *buf, int max)
 /* UNIX */
 #endif
     if ((cp = strrchr(buf, '\n')))
-	*cp = '\0';
+        *cp = '\0';
     if ((cp = strrchr(buf, '\r')))
-	*cp = '\0';
+        *cp = '\0';
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

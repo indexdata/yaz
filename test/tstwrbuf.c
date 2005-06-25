@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstwrbuf.c,v 1.3 2005-02-01 17:23:36 adam Exp $
+ * $Id: tstwrbuf.c,v 1.4 2005-06-25 15:46:07 adam Exp $
  */
 
 #include <stdlib.h>
@@ -56,4 +56,12 @@ int main (int argc, char **argv)
     wrbuf_free(wr, 1);
     exit(0);
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

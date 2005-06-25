@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: xmalloc.h,v 1.6 2005-01-16 21:51:49 adam Exp $
+ * $Id: xmalloc.h,v 1.7 2005-06-25 15:46:03 adam Exp $
  */
 /**
  * \file xmalloc.h
@@ -49,7 +49,7 @@ YAZ_BEGIN_CDECL
 YAZ_EXPORT void *xrealloc_f (void *o, size_t size, const char *file, int line);
 YAZ_EXPORT void *xmalloc_f (size_t size, const char *file, int line);
 YAZ_EXPORT void *xcalloc_f (size_t nmemb, size_t size,
-			    const char *file, int line);
+                            const char *file, int line);
 YAZ_EXPORT char *xstrdup_f (const char *p, const char *file, int line);
 YAZ_EXPORT void xfree_f (void *p, const char *file, int line);
 YAZ_EXPORT void xmalloc_trav_f(const char *s, const char *file, int line);
@@ -57,3 +57,11 @@ YAZ_EXPORT void xmalloc_trav_f(const char *s, const char *file, int line);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

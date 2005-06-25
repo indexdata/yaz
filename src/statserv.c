@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.30 2005-05-08 07:13:57 adam Exp $
+ * $Id: statserv.c,v 1.31 2005-06-25 15:46:05 adam Exp $
  */
 
 /**
@@ -153,15 +153,15 @@ static xmlNodePtr xml_config_get_root()
     xmlNodePtr ptr = 0;
     if (xml_config_doc)
     {
-	ptr = xmlDocGetRootElement(xml_config_doc);
-	if (!ptr || ptr->type != XML_ELEMENT_NODE ||
-	    strcmp((const char *) ptr->name, "yazgfs"))
-	{
-	    yaz_log(YLOG_WARN, "Bad/missing root element for config %s",
-		    control_block.xml_config);
-	    return 0;
-	
-	}
+        ptr = xmlDocGetRootElement(xml_config_doc);
+        if (!ptr || ptr->type != XML_ELEMENT_NODE ||
+            strcmp((const char *) ptr->name, "yazgfs"))
+        {
+            yaz_log(YLOG_WARN, "Bad/missing root element for config %s",
+                    control_block.xml_config);
+            return 0;
+        
+        }
     }
     return ptr;
 }
@@ -178,31 +178,31 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
     /* determine length */
     for (p = ptr; p; p = p->next)
     {
-	if (p->type == XML_TEXT_NODE)
-	    len += strlen(p->content);
+        if (p->type == XML_TEXT_NODE)
+            len += strlen(p->content);
     }
     /* now allocate for the string */
     str = nmem_malloc(n, len);
     *str = '\0'; /* so we can use strcat */
     for (p = ptr; p; p = p->next)
     {
-	if (p->type == XML_TEXT_NODE)
-	{
-	    cp = p->content;
-	    if (first)
-	    {
-		while(*cp && isspace(*cp))
-		    cp++;
-		if (*cp)
-		    first = 0;  /* reset if we got non-whitespace out */
-	    }
-	    strcat(str, cp); /* append */
-	}
+        if (p->type == XML_TEXT_NODE)
+        {
+            cp = p->content;
+            if (first)
+            {
+                while(*cp && isspace(*cp))
+                    cp++;
+                if (*cp)
+                    first = 0;  /* reset if we got non-whitespace out */
+            }
+            strcat(str, cp); /* append */
+        }
     }
     /* remove trailing whitespace */
     cp = strlen(str) + str;
     while ((char*) cp != str && isspace(cp[-1]))
-	cp--;
+        cp--;
     *cp = '\0';
     /* return resulting string */
     return str;
@@ -223,13 +223,13 @@ static struct gfs_server * gfs_server_new()
 }
 
 static struct gfs_listen * gfs_listen_new(const char *id, 
-					  const char *address)
+                                          const char *address)
 {
     struct gfs_listen *n = nmem_malloc(gfs_nmem, sizeof(*n));
     if (id)
-	n->id = nmem_strdup(gfs_nmem, id);
+        n->id = nmem_strdup(gfs_nmem, id);
     else
-	n->id = 0;
+        n->id = 0;
     n->next = 0;
     n->address = nmem_strdup(gfs_nmem, address);
     return n;
@@ -239,14 +239,14 @@ static void gfs_server_chdir(struct gfs_server *gfs)
 {
     if (gfs_root_dir[0])
     {
-	if (chdir(gfs_root_dir))
-	    yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s", gfs_root_dir);
+        if (chdir(gfs_root_dir))
+            yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s", gfs_root_dir);
     }
     if (gfs->directory)
     {
-	if (chdir(gfs->directory))
-	    yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s",
-		    gfs->directory);
+        if (chdir(gfs->directory))
+            yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s",
+                    gfs->directory);
     }
 }
 
@@ -255,64 +255,64 @@ int control_association(association *assoc, const char *host, int force_open)
     char vhost[128], *cp;
     if (host)
     {
-	strncpy(vhost, host, 127);
-	vhost[127] = '\0';
-	cp = strchr(vhost, ':');
-	if (cp)
-	    *cp = '\0';
-	host = vhost;
+        strncpy(vhost, host, 127);
+        vhost[127] = '\0';
+        cp = strchr(vhost, ':');
+        if (cp)
+            *cp = '\0';
+        host = vhost;
     }
     if (control_block.xml_config[0])
     {
-	struct gfs_server *gfs;
-	for (gfs = gfs_server_list; gfs; gfs = gfs->next)
-	{
-	    int listen_match = 0;
-	    int host_match = 0;
-	    if ( !gfs->host || (host && gfs->host && !strcmp(host, gfs->host)))
-		host_match = 1;
-	    if (!gfs->listen_ref ||
-		gfs->listen_ref == assoc->client_chan->chan_id)
-		listen_match = 1;
-	    if (listen_match && host_match)
-	    {
-		if (force_open ||
-		    (assoc->last_control != &gfs->cb && assoc->backend))
-		{
-		    statserv_setcontrol(assoc->last_control);
-		    if (assoc->backend && assoc->init)
-		    {
-			gfs_server_chdir(gfs);
-			(assoc->last_control->bend_close)(assoc->backend);
-		    }
-		    assoc->backend = 0;
-		    xfree(assoc->init);
-		    assoc->init = 0;
-		}
-		assoc->cql_transform = gfs->cql_transform;
-		assoc->server_node_ptr = gfs->server_node_ptr;
-		assoc->last_control = &gfs->cb;
-		statserv_setcontrol(&gfs->cb);
-		gfs_server_chdir(gfs);
-		yaz_log(YLOG_DEBUG, "server select: %s", gfs->cb.configname);
-		return 1;
-	    }
-	}
-	statserv_setcontrol(0);
-	assoc->last_control = 0;
-	assoc->cql_transform = 0;
-	assoc->server_node_ptr = 0;
-	yaz_log(YLOG_DEBUG, "server select: no match");
-	return 0;
+        struct gfs_server *gfs;
+        for (gfs = gfs_server_list; gfs; gfs = gfs->next)
+        {
+            int listen_match = 0;
+            int host_match = 0;
+            if ( !gfs->host || (host && gfs->host && !strcmp(host, gfs->host)))
+                host_match = 1;
+            if (!gfs->listen_ref ||
+                gfs->listen_ref == assoc->client_chan->chan_id)
+                listen_match = 1;
+            if (listen_match && host_match)
+            {
+                if (force_open ||
+                    (assoc->last_control != &gfs->cb && assoc->backend))
+                {
+                    statserv_setcontrol(assoc->last_control);
+                    if (assoc->backend && assoc->init)
+                    {
+                        gfs_server_chdir(gfs);
+                        (assoc->last_control->bend_close)(assoc->backend);
+                    }
+                    assoc->backend = 0;
+                    xfree(assoc->init);
+                    assoc->init = 0;
+                }
+                assoc->cql_transform = gfs->cql_transform;
+                assoc->server_node_ptr = gfs->server_node_ptr;
+                assoc->last_control = &gfs->cb;
+                statserv_setcontrol(&gfs->cb);
+                gfs_server_chdir(gfs);
+                yaz_log(YLOG_DEBUG, "server select: %s", gfs->cb.configname);
+                return 1;
+            }
+        }
+        statserv_setcontrol(0);
+        assoc->last_control = 0;
+        assoc->cql_transform = 0;
+        assoc->server_node_ptr = 0;
+        yaz_log(YLOG_DEBUG, "server select: no match");
+        return 0;
     }
     else
     {
-	statserv_setcontrol(&control_block);
-	assoc->last_control = &control_block;
-	assoc->cql_transform = 0;
-	assoc->server_node_ptr = 0;
-	yaz_log(YLOG_DEBUG, "server select: config=%s", control_block.configname);
-	return 1;
+        statserv_setcontrol(&control_block);
+        assoc->last_control = &control_block;
+        assoc->cql_transform = 0;
+        assoc->server_node_ptr = 0;
+        yaz_log(YLOG_DEBUG, "server select: config=%s", control_block.configname);
+        return 1;
     }
 }
 
@@ -324,93 +324,93 @@ static void xml_config_read()
     xmlNodePtr ptr = xml_config_get_root();
 
     if (!ptr)
-	return;
+        return;
     for (ptr = ptr->children; ptr; ptr = ptr->next)
     {
-	struct _xmlAttr *attr;
-	if (ptr->type != XML_ELEMENT_NODE)
-	    continue;
-	attr = ptr->properties;
-	if (!strcmp((const char *) ptr->name, "listen"))
-	{
-	    /*
-	      <listen id="listenerid">tcp:@:9999</listen>
-	    */
-	    const char *id = 0;
-	    const char *address =
-		nmem_dup_xml_content(gfs_nmem, ptr->children);
-	    for ( ; attr; attr = attr->next)
-		if (!strcmp(attr->name, "id")
-		    && attr->children && attr->children->type == XML_TEXT_NODE)
-		    id = nmem_dup_xml_content(gfs_nmem, attr->children);
-	    if (address)
-	    {
-		*gfslp = gfs_listen_new(id, address);
-		gfslp = &(*gfslp)->next;
-		*gfslp = 0; /* make listener list consistent for search */
-	    }
-	}
-	else if (!strcmp((const char *) ptr->name, "server"))
-	{
-	    xmlNodePtr ptr_server = ptr;
-	    xmlNodePtr ptr;
-	    const char *listenref = 0;
-	    const char *id = 0;
+        struct _xmlAttr *attr;
+        if (ptr->type != XML_ELEMENT_NODE)
+            continue;
+        attr = ptr->properties;
+        if (!strcmp((const char *) ptr->name, "listen"))
+        {
+            /*
+              <listen id="listenerid">tcp:@:9999</listen>
+            */
+            const char *id = 0;
+            const char *address =
+                nmem_dup_xml_content(gfs_nmem, ptr->children);
+            for ( ; attr; attr = attr->next)
+                if (!strcmp(attr->name, "id")
+                    && attr->children && attr->children->type == XML_TEXT_NODE)
+                    id = nmem_dup_xml_content(gfs_nmem, attr->children);
+            if (address)
+            {
+                *gfslp = gfs_listen_new(id, address);
+                gfslp = &(*gfslp)->next;
+                *gfslp = 0; /* make listener list consistent for search */
+            }
+        }
+        else if (!strcmp((const char *) ptr->name, "server"))
+        {
+            xmlNodePtr ptr_server = ptr;
+            xmlNodePtr ptr;
+            const char *listenref = 0;
+            const char *id = 0;
 
-	    for ( ; attr; attr = attr->next)
-		if (!strcmp(attr->name, "listenref") && attr->children &&
-		    attr->children->type == XML_TEXT_NODE)
-		    listenref = nmem_dup_xml_content(gfs_nmem, attr->children);
-		else if (!strcmp(attr->name, "id") && attr->children &&
-			 attr->children->type == XML_TEXT_NODE)
-		    id = nmem_dup_xml_content(gfs_nmem, attr->children);
-		else
-		    yaz_log(YLOG_WARN, "Unknown attribute '%s' for server",
-			    attr->name);
-	    *gfsp = gfs_server_new();
-	    (*gfsp)->server_node_ptr = ptr_server;
-	    if (listenref)
-	    {
-		int id_no;
-		struct gfs_listen *gl = gfs_listen_list;
-		for (id_no = 1; gl; gl = gl->next, id_no++)
-		    if (gl->id && !strcmp(gl->id, listenref))
-		    {
-			(*gfsp)->listen_ref = id_no;
-			break;
-		    }
-		if (!gl)
-		    yaz_log(YLOG_WARN, "Non-existent listenref '%s' in server "
-			    "config element", listenref);
-	    }
-	    for (ptr = ptr_server->children; ptr; ptr = ptr->next)
-	    {
-		if (ptr->type != XML_ELEMENT_NODE)
-		    continue;
-		if (!strcmp((const char *) ptr->name, "host"))
-		{
-		    (*gfsp)->host = nmem_dup_xml_content(gfs_nmem,
-							 ptr->children);
-		}
-		else if (!strcmp((const char *) ptr->name, "config"))
-		{
-		    strcpy((*gfsp)->cb.configname,
-			   nmem_dup_xml_content(gfs_nmem, ptr->children));
-		}
-		else if (!strcmp((const char *) ptr->name, "cql2rpn"))
-		{
-		    (*gfsp)->cql_transform = cql_transform_open_fname(
-			nmem_dup_xml_content(gfs_nmem, ptr->children)
-			);
-		}
-		else if (!strcmp((const char *) ptr->name, "directory"))
-		{
-		    (*gfsp)->directory = 
-			nmem_dup_xml_content(gfs_nmem, ptr->children);
-		}
-	    }
-	    gfsp = &(*gfsp)->next;
-	}
+            for ( ; attr; attr = attr->next)
+                if (!strcmp(attr->name, "listenref") && attr->children &&
+                    attr->children->type == XML_TEXT_NODE)
+                    listenref = nmem_dup_xml_content(gfs_nmem, attr->children);
+                else if (!strcmp(attr->name, "id") && attr->children &&
+                         attr->children->type == XML_TEXT_NODE)
+                    id = nmem_dup_xml_content(gfs_nmem, attr->children);
+                else
+                    yaz_log(YLOG_WARN, "Unknown attribute '%s' for server",
+                            attr->name);
+            *gfsp = gfs_server_new();
+            (*gfsp)->server_node_ptr = ptr_server;
+            if (listenref)
+            {
+                int id_no;
+                struct gfs_listen *gl = gfs_listen_list;
+                for (id_no = 1; gl; gl = gl->next, id_no++)
+                    if (gl->id && !strcmp(gl->id, listenref))
+                    {
+                        (*gfsp)->listen_ref = id_no;
+                        break;
+                    }
+                if (!gl)
+                    yaz_log(YLOG_WARN, "Non-existent listenref '%s' in server "
+                            "config element", listenref);
+            }
+            for (ptr = ptr_server->children; ptr; ptr = ptr->next)
+            {
+                if (ptr->type != XML_ELEMENT_NODE)
+                    continue;
+                if (!strcmp((const char *) ptr->name, "host"))
+                {
+                    (*gfsp)->host = nmem_dup_xml_content(gfs_nmem,
+                                                         ptr->children);
+                }
+                else if (!strcmp((const char *) ptr->name, "config"))
+                {
+                    strcpy((*gfsp)->cb.configname,
+                           nmem_dup_xml_content(gfs_nmem, ptr->children));
+                }
+                else if (!strcmp((const char *) ptr->name, "cql2rpn"))
+                {
+                    (*gfsp)->cql_transform = cql_transform_open_fname(
+                        nmem_dup_xml_content(gfs_nmem, ptr->children)
+                        );
+                }
+                else if (!strcmp((const char *) ptr->name, "directory"))
+                {
+                    (*gfsp)->directory = 
+                        nmem_dup_xml_content(gfs_nmem, ptr->children);
+                }
+            }
+            gfsp = &(*gfsp)->next;
+        }
     }
 #endif
     *gfsp = 0;
@@ -420,8 +420,8 @@ static void xml_config_open()
 {
     if (!getcwd(gfs_root_dir, FILENAME_MAX))
     {
-	yaz_log(YLOG_WARN|YLOG_ERRNO, "getcwd failed");
-	gfs_root_dir[0] = '\0';
+        yaz_log(YLOG_WARN|YLOG_ERRNO, "getcwd failed");
+        gfs_root_dir[0] = '\0';
     }
 #ifdef WIN32
     init_control_tls = 1;
@@ -434,26 +434,26 @@ static void xml_config_open()
     gfs_nmem = nmem_create();
 #if HAVE_XML2
     if (control_block.xml_config[0] == '\0')
-	return;
+        return;
 
     if (!xml_config_doc)
     {
-	xml_config_doc = xmlParseFile(control_block.xml_config);
-	if (!xml_config_doc)
-	{
-	    yaz_log(YLOG_FATAL, "Could not parse %s", control_block.xml_config);
-	    exit(1);
-	}
-	else
-	{
-	    int noSubstitutions = xmlXIncludeProcess(xml_config_doc);
-	    if (noSubstitutions == -1)
-	    {
-		yaz_log(YLOG_WARN, "XInclude processing failed for config %s",
-			control_block.xml_config);
-		exit(1);
-	    }
-	}
+        xml_config_doc = xmlParseFile(control_block.xml_config);
+        if (!xml_config_doc)
+        {
+            yaz_log(YLOG_FATAL, "Could not parse %s", control_block.xml_config);
+            exit(1);
+        }
+        else
+        {
+            int noSubstitutions = xmlXIncludeProcess(xml_config_doc);
+            if (noSubstitutions == -1)
+            {
+                yaz_log(YLOG_WARN, "XInclude processing failed for config %s",
+                        control_block.xml_config);
+                exit(1);
+            }
+        }
     }
     xml_config_read();
 #endif
@@ -464,15 +464,15 @@ static void xml_config_close()
 #if HAVE_XML2
     if (xml_config_doc)
     {
-	xmlFreeDoc(xml_config_doc);
-	xml_config_doc = 0;
+        xmlFreeDoc(xml_config_doc);
+        xml_config_doc = 0;
     }
 #endif
     gfs_server_list = 0;
     nmem_destroy(gfs_nmem);
 #ifdef WIN32
     if (init_control_tls)
-	TlsFree(current_control_tls);
+        TlsFree(current_control_tls);
 #elif YAZ_POSIX_THREADS
     if (init_control_tls)
         pthread_key_delete(current_control_tls);
@@ -486,8 +486,8 @@ static void xml_config_add_listeners()
 
     for (id_no = 1; gfs; gfs = gfs->next, id_no++)
     {
-	if (gfs->address)
-	    add_listener(gfs->address, id_no);
+        if (gfs->address)
+            add_listener(gfs->address, id_no);
     }
 }
 
@@ -495,25 +495,25 @@ static void xml_config_bend_start()
 {
     if (control_block.xml_config[0])
     {
-	struct gfs_server *gfs = gfs_server_list;
-	for (; gfs; gfs = gfs->next)
-	{
-	    yaz_log(YLOG_DEBUG, "xml_config_bend_start config=%s",
-		    gfs->cb.configname);
-	    statserv_setcontrol(&gfs->cb);
-	    if (control_block.bend_start)
-	    {
-		gfs_server_chdir(gfs);
-		(control_block.bend_start)(&gfs->cb);
-	    }
-	}
+        struct gfs_server *gfs = gfs_server_list;
+        for (; gfs; gfs = gfs->next)
+        {
+            yaz_log(YLOG_DEBUG, "xml_config_bend_start config=%s",
+                    gfs->cb.configname);
+            statserv_setcontrol(&gfs->cb);
+            if (control_block.bend_start)
+            {
+                gfs_server_chdir(gfs);
+                (control_block.bend_start)(&gfs->cb);
+            }
+        }
     }
     else
     {
-	yaz_log(YLOG_DEBUG, "xml_config_bend_start default config");
-	statserv_setcontrol(&control_block);
-	if (control_block.bend_start)
-	    (*control_block.bend_start)(&control_block);
+        yaz_log(YLOG_DEBUG, "xml_config_bend_start default config");
+        statserv_setcontrol(&control_block);
+        if (control_block.bend_start)
+            (*control_block.bend_start)(&control_block);
     }
 }
 
@@ -521,22 +521,22 @@ static void xml_config_bend_stop()
 {
     if (control_block.xml_config[0])
     {
-	struct gfs_server *gfs = gfs_server_list;
-	for (; gfs; gfs = gfs->next)
-	{
-	    yaz_log(YLOG_DEBUG, "xml_config_bend_stop config=%s",
-		    gfs->cb.configname);
-	    statserv_setcontrol(&gfs->cb);
-	    if (control_block.bend_stop)
-		(control_block.bend_stop)(&gfs->cb);
-	}
+        struct gfs_server *gfs = gfs_server_list;
+        for (; gfs; gfs = gfs->next)
+        {
+            yaz_log(YLOG_DEBUG, "xml_config_bend_stop config=%s",
+                    gfs->cb.configname);
+            statserv_setcontrol(&gfs->cb);
+            if (control_block.bend_stop)
+                (control_block.bend_stop)(&gfs->cb);
+        }
     }
     else
     {
-	yaz_log(YLOG_DEBUG, "xml_config_bend_stop default config");
-	statserv_setcontrol(&control_block);
-	if (control_block.bend_stop)
-	    (*control_block.bend_stop)(&control_block);
+        yaz_log(YLOG_DEBUG, "xml_config_bend_stop default config");
+        statserv_setcontrol(&control_block);
+        if (control_block.bend_stop)
+            (*control_block.bend_stop)(&control_block);
     }
 }
 
@@ -643,7 +643,7 @@ void statserv_closedown()
         HANDLE *pThreadHandles = NULL;
 
         /* We need to stop threads adding and removing while we */
-	/* start the closedown process */
+        /* start the closedown process */
         EnterCriticalSection(&Thread_CritSect);
 
         {
@@ -697,7 +697,7 @@ void statserv_closedown()
             free(pThreadHandles);
         }
 
-	xml_config_bend_stop();
+        xml_config_bend_stop();
         /* No longer require the critical section, since all threads are dead */
         DeleteCriticalSection(&Thread_CritSect);
     }
@@ -722,8 +722,8 @@ static void listener(IOCHAN h, int event)
     {
         if ((res = cs_listen(line, 0, 0)) < 0)
         {
-	    yaz_log(YLOG_FATAL, "cs_listen failed");
-    	    return;
+            yaz_log(YLOG_FATAL, "cs_listen failed");
+            return;
         }
         else if (res == 1)
             return;
@@ -733,52 +733,52 @@ static void listener(IOCHAN h, int event)
     }
     else if (event == EVENT_OUTPUT)
     {
-    	COMSTACK new_line = cs_accept(line);
-    	IOCHAN new_chan;
-	char *a = NULL;
+        COMSTACK new_line = cs_accept(line);
+        IOCHAN new_chan;
+        char *a = NULL;
 
-	if (!new_line)
-	{
-	    yaz_log(YLOG_FATAL, "Accept failed.");
-	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT);
-	    return;
-	}
-	yaz_log(YLOG_DEBUG, "Accept ok");
+        if (!new_line)
+        {
+            yaz_log(YLOG_FATAL, "Accept failed.");
+            iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT);
+            return;
+        }
+        yaz_log(YLOG_DEBUG, "Accept ok");
 
-	if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
-				       EVENT_INPUT, parent_chan->chan_id)))
-	{
-	    yaz_log(YLOG_FATAL, "Failed to create iochan");
+        if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session,
+                                       EVENT_INPUT, parent_chan->chan_id)))
+        {
+            yaz_log(YLOG_FATAL, "Failed to create iochan");
             iochan_destroy(h);
             return;
-	}
+        }
 
-	yaz_log(YLOG_DEBUG, "Creating association");
-	if (!(newas = create_association(new_chan, new_line,
-					 control_block.apdufile)))
-	{
-	    yaz_log(YLOG_FATAL, "Failed to create new assoc.");
+        yaz_log(YLOG_DEBUG, "Creating association");
+        if (!(newas = create_association(new_chan, new_line,
+                                         control_block.apdufile)))
+        {
+            yaz_log(YLOG_FATAL, "Failed to create new assoc.");
             iochan_destroy(h);
             return;
-	}
-	newas->cs_get_mask = EVENT_INPUT;
-	newas->cs_put_mask = 0;
-	newas->cs_accept_mask = 0;
+        }
+        newas->cs_get_mask = EVENT_INPUT;
+        newas->cs_put_mask = 0;
+        newas->cs_accept_mask = 0;
 
-	yaz_log(YLOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
-	iochan_setdata(new_chan, newas);
-	iochan_settimeout(new_chan, 60);
+        yaz_log(YLOG_DEBUG, "Setting timeout %d", control_block.idle_timeout);
+        iochan_setdata(new_chan, newas);
+        iochan_settimeout(new_chan, 60);
 
-	/* Now what we need todo is create a new thread with this iochan as
-	   the parameter */
+        /* Now what we need todo is create a new thread with this iochan as
+           the parameter */
         newHandle = (HANDLE) _beginthread(event_loop_thread, 0, new_chan);
         if (newHandle == (HANDLE) -1)
-	{
-	    
-	    yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create new thread.");
+        {
+            
+            yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create new thread.");
             iochan_destroy(h);
             return;
-	}
+        }
         /* We successfully created the thread, so add it to the list */
         statserv_add(newHandle, new_chan);
 
@@ -787,7 +787,7 @@ static void listener(IOCHAN h, int event)
     }
     else
     {
-    	yaz_log(YLOG_FATAL, "Bad event on listener.");
+        yaz_log(YLOG_FATAL, "Bad event on listener.");
         iochan_destroy(h);
         return;
     }
@@ -841,94 +841,94 @@ static void listener(IOCHAN h, int event)
 
     if (event == EVENT_INPUT)
     {
-	COMSTACK new_line;
-	if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
-				   control_block.daemon_name)) < 0)
-	{
-	    yaz_log(YLOG_WARN|YLOG_ERRNO, "cs_listen failed");
-	    return;
-	}
-	else if (res == 1)
-	{
-	    yaz_log(YLOG_WARN, "cs_listen incomplete");
-	    return;
-	}
-    	new_line = cs_accept(line);
-	if (!new_line)
-	{
-	    yaz_log(YLOG_FATAL, "Accept failed.");
-	    iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
-	    return;
-	}
+        COMSTACK new_line;
+        if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
+                                   control_block.daemon_name)) < 0)
+        {
+            yaz_log(YLOG_WARN|YLOG_ERRNO, "cs_listen failed");
+            return;
+        }
+        else if (res == 1)
+        {
+            yaz_log(YLOG_WARN, "cs_listen incomplete");
+            return;
+        }
+        new_line = cs_accept(line);
+        if (!new_line)
+        {
+            yaz_log(YLOG_FATAL, "Accept failed.");
+            iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+            return;
+        }
 
-	yaz_log(log_session, "Connect from %s", cs_addrstr(new_line));
+        yaz_log(log_session, "Connect from %s", cs_addrstr(new_line));
 
-	no_sessions++;
-	if (control_block.dynamic)
-	{
-	    if ((res = fork()) < 0)
-	    {
-		yaz_log(YLOG_FATAL|YLOG_ERRNO, "fork");
+        no_sessions++;
+        if (control_block.dynamic)
+        {
+            if ((res = fork()) < 0)
+            {
+                yaz_log(YLOG_FATAL|YLOG_ERRNO, "fork");
                 iochan_destroy(h);
                 return;
-	    }
-	    else if (res == 0) /* child */
-	    {
-	    	char nbuf[100];
-		IOCHAN pp;
+            }
+            else if (res == 0) /* child */
+            {
+                char nbuf[100];
+                IOCHAN pp;
 
-		for (pp = pListener; pp; pp = iochan_getnext(pp))
-		{
-		    COMSTACK l = (COMSTACK)iochan_getdata(pp);
-		    cs_close(l);
-		    iochan_destroy(pp);
-		}
-		sprintf(nbuf, "%s(%d)", me, no_sessions);
-		yaz_log_init(control_block.loglevel, nbuf, 0);
+                for (pp = pListener; pp; pp = iochan_getnext(pp))
+                {
+                    COMSTACK l = (COMSTACK)iochan_getdata(pp);
+                    cs_close(l);
+                    iochan_destroy(pp);
+                }
+                sprintf(nbuf, "%s(%d)", me, no_sessions);
+                yaz_log_init(control_block.loglevel, nbuf, 0);
                 /* ensure that bend_stop is not called when each child exits -
                    only for the main process ..  */
                 control_block.bend_stop = 0;
-	    }
-	    else /* parent */
-	    {
-		cs_close(new_line);
-		return;
-	    }
-	}
+            }
+            else /* parent */
+            {
+                cs_close(new_line);
+                return;
+            }
+        }
 
-	if (control_block.threads)
-	{
+        if (control_block.threads)
+        {
 #if YAZ_POSIX_THREADS
-	    pthread_t child_thread;
-	    pthread_create (&child_thread, 0, new_session, new_line);
-	    pthread_detach (child_thread);
+            pthread_t child_thread;
+            pthread_create (&child_thread, 0, new_session, new_line);
+            pthread_detach (child_thread);
 #elif YAZ_GNU_THREADS
-	    pth_attr_t attr;
-	    pth_t child_thread;
+            pth_attr_t attr;
+            pth_t child_thread;
 
             attr = pth_attr_new ();
             pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
             pth_attr_set (attr, PTH_ATTR_STACK_SIZE, 32*1024);
             pth_attr_set (attr, PTH_ATTR_NAME, "session");
             yaz_log (YLOG_DEBUG, "pth_spawn begin");
-	    child_thread = pth_spawn (attr, new_session, new_line);
+            child_thread = pth_spawn (attr, new_session, new_line);
             yaz_log (YLOG_DEBUG, "pth_spawn finish");
             pth_attr_destroy (attr);
 #else
-	    new_session(new_line);
+            new_session(new_line);
 #endif
-	}
-	else
-	    new_session(new_line);
+        }
+        else
+            new_session(new_line);
     }
     else if (event == EVENT_TIMEOUT)
     {
-    	yaz_log(log_server, "Shutting down listener.");
+        yaz_log(log_server, "Shutting down listener.");
         iochan_destroy(h);
     }
     else
     {
-    	yaz_log(YLOG_FATAL, "Bad event on listener.");
+        yaz_log(YLOG_FATAL, "Bad event on listener.");
         iochan_destroy(h);
     }
 }
@@ -942,31 +942,31 @@ static void *new_session (void *vp)
     IOCHAN parent_chan = new_line->user;
 
     unsigned cs_get_mask, cs_accept_mask, mask =  
-	((new_line->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
-	((new_line->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
+        ((new_line->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
+        ((new_line->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
 
     if (mask)
     {
-	cs_accept_mask = mask;  /* accept didn't complete */
-	cs_get_mask = 0;
+        cs_accept_mask = mask;  /* accept didn't complete */
+        cs_get_mask = 0;
     }
     else
     {
-	cs_accept_mask = 0;     /* accept completed.  */
-	cs_get_mask = mask = EVENT_INPUT;
+        cs_accept_mask = 0;     /* accept completed.  */
+        cs_get_mask = mask = EVENT_INPUT;
     }
 
     if (!(new_chan = iochan_create(cs_fileno(new_line), ir_session, mask,
-				   parent_chan->chan_id)))
+                                   parent_chan->chan_id)))
     {
-	yaz_log(YLOG_FATAL, "Failed to create iochan");
-	return 0;
+        yaz_log(YLOG_FATAL, "Failed to create iochan");
+        return 0;
     }
     if (!(newas = create_association(new_chan, new_line,
-				     control_block.apdufile)))
+                                     control_block.apdufile)))
     {
-	yaz_log(YLOG_FATAL, "Failed to create new assoc.");
-	return 0;
+        yaz_log(YLOG_FATAL, "Failed to create new assoc.");
+        return 0;
     }
     newas->cs_accept_mask = cs_accept_mask;
     newas->cs_get_mask = cs_get_mask;
@@ -979,17 +979,17 @@ static void *new_session (void *vp)
     a = 0;
 #endif
     yaz_log(log_session, "Starting session %d from %s (pid=%ld)",
-	    no_sessions, a ? a : "[Unknown]", (long) getpid());
+            no_sessions, a ? a : "[Unknown]", (long) getpid());
     if (max_sessions && no_sessions >= max_sessions)
         control_block.one_shot = 1;
     if (control_block.threads)
     {
-	event_loop(&new_chan);
+        event_loop(&new_chan);
     }
     else
     {
-	new_chan->next = pListener;
-	pListener = new_chan;
+        new_chan->next = pListener;
+        pListener = new_chan;
     }
     return 0;
 }
@@ -1007,21 +1007,21 @@ static void inetd_connection(int what)
     if ((line = cs_createbysocket(0, tcpip_type, 0, what)))
     {
         if ((chan = iochan_create(cs_fileno(line), ir_session, EVENT_INPUT,
-				  0)))
+                                  0)))
         {
             if ((assoc = create_association(chan, line,
-					    control_block.apdufile)))
+                                            control_block.apdufile)))
             {
                 iochan_setdata(chan, assoc);
                 iochan_settimeout(chan, 60);
                 addr = cs_addrstr(line);
                 yaz_log(log_session, "Inetd association from %s",
                         addr ? addr : "[UNKNOWN]");
-		assoc->cs_get_mask = EVENT_INPUT;
+                assoc->cs_get_mask = EVENT_INPUT;
             }
             else
             {
-	        yaz_log(YLOG_FATAL, "Failed to create association structure");
+                yaz_log(YLOG_FATAL, "Failed to create association structure");
             }
             chan->next = pListener;
             pListener = chan;
@@ -1033,7 +1033,7 @@ static void inetd_connection(int what)
     }
     else
     {
-	yaz_log(YLOG_ERRNO|YLOG_FATAL, "Failed to create comstack on socket 0");
+        yaz_log(YLOG_ERRNO|YLOG_FATAL, "Failed to create comstack on socket 0");
     }
 }
 
@@ -1048,36 +1048,36 @@ static int add_listener(char *where, int listen_id)
     const char *mode;
 
     if (control_block.dynamic)
-	mode = "dynamic";
+        mode = "dynamic";
     else if (control_block.threads)
-	mode = "threaded";
+        mode = "threaded";
     else
-	mode = "static";
+        mode = "static";
 
     yaz_log(log_server, "Adding %s listener on %s id=%d", mode, where,
-	    listen_id);
+            listen_id);
 
     l = cs_create_host(where, 2, &ap);
     if (!l)
     {
-	yaz_log(YLOG_FATAL, "Failed to listen on %s", where);
-	return -1;
+        yaz_log(YLOG_FATAL, "Failed to listen on %s", where);
+        return -1;
     }
     if (*control_block.cert_fname)
-	cs_set_ssl_certificate_file(l, control_block.cert_fname);
+        cs_set_ssl_certificate_file(l, control_block.cert_fname);
 
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
-    	yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to bind to %s", where);
-	cs_close (l);
-	return -1;
+        yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to bind to %s", where);
+        cs_close (l);
+        return -1;
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
-   	 EVENT_EXCEPT, listen_id)))
+         EVENT_EXCEPT, listen_id)))
     {
-    	yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create IOCHAN-type");
-	cs_close (l);
-	return -1;
+        yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create IOCHAN-type");
+        cs_close (l);
+        return -1;
     }
     iochan_setdata(lst, l); /* user-defined data for listener is COMSTACK */
     l->user = lst;  /* user-defined data for COMSTACK is listener chan */
@@ -1093,7 +1093,7 @@ static int add_listener(char *where, int listen_id)
 static void catchchld(int num)
 {
     while (waitpid(-1, 0, WNOHANG) > 0)
-	;
+        ;
     signal(SIGCHLD, catchchld);
 }
 #endif
@@ -1102,14 +1102,14 @@ statserv_options_block *statserv_getcontrol(void)
 {
 #ifdef WIN32
     if (init_control_tls)
-	return (statserv_options_block *) TlsGetValue(current_control_tls);
+        return (statserv_options_block *) TlsGetValue(current_control_tls);
     else
-	return &control_block;
+        return &control_block;
 #elif YAZ_POSIX_THREADS
     if (init_control_tls)
-	return pthread_getspecific(current_control_tls);
+        return pthread_getspecific(current_control_tls);
     else
-	return &control_block;
+        return &control_block;
 #else
     if (current_control_block)
         return current_control_block;
@@ -1122,10 +1122,10 @@ void statserv_setcontrol(statserv_options_block *block)
     chdir(gfs_root_dir);
 #ifdef WIN32
     if (init_control_tls)
-	TlsSetValue(current_control_tls, block);
+        TlsSetValue(current_control_tls, block);
 #elif YAZ_POSIX_THREADS
     if (init_control_tls)
-	pthread_setspecific(current_control_tls, block);
+        pthread_setspecific(current_control_tls, block);
 #else
     current_control_block = block;
 #endif
@@ -1151,9 +1151,9 @@ int statserv_start(int argc, char **argv)
     sep = '/';
 #endif
     if ((me = strrchr (argv[0], sep)))
-	me++; /* get the basename */
+        me++; /* get the basename */
     else
-	me = argv[0];
+        me = argv[0];
     programname = argv[0];
 
     if (control_block.options_func(argc, argv))
@@ -1168,116 +1168,116 @@ int statserv_start(int argc, char **argv)
 
     yaz_log (log_server, "Starting server %s", me);
     if (!pListener && *control_block.default_listen)
-	add_listener(control_block.default_listen, 0);
+        add_listener(control_block.default_listen, 0);
 #else
 /* UNIX */
     if (control_block.inetd)
-	inetd_connection(control_block.default_proto);
+        inetd_connection(control_block.default_proto);
     else
     {
-	static int hand[2];
-	if (control_block.background)
-	{
-	    /* create pipe so that parent waits until child has created
-	       PID (or failed) */
-	    if (pipe(hand) < 0)
-	    {
-		yaz_log(YLOG_FATAL|YLOG_ERRNO, "pipe");
-		return 1;
-	    }
-	    switch (fork())
-	    {
-	    case 0: 
-		break;
-	    case -1:
-		return 1;
-	    default:
-		close(hand[1]);
-		while(1)
-		{
-		    char dummy[1];
-		    int res = read(hand[0], dummy, 1);
-		    if (res < 0 && yaz_errno() != EINTR)
-		    {
-			yaz_log(YLOG_FATAL|YLOG_ERRNO, "read fork handshake");
-			break;
-		    }
-		    else if (res >= 0)
-			break;
-		}
-		close(hand[0]);
-		_exit(0);
-	    }
-	    /* child */
-	    close(hand[0]);
-	    if (setsid() < 0)
-		return 1;
-	    
-	    close(0);
-	    close(1);
-	    close(2);
-	    open("/dev/null", O_RDWR);
-	    dup(0); dup(0);
-	}
-	xml_config_add_listeners();
+        static int hand[2];
+        if (control_block.background)
+        {
+            /* create pipe so that parent waits until child has created
+               PID (or failed) */
+            if (pipe(hand) < 0)
+            {
+                yaz_log(YLOG_FATAL|YLOG_ERRNO, "pipe");
+                return 1;
+            }
+            switch (fork())
+            {
+            case 0: 
+                break;
+            case -1:
+                return 1;
+            default:
+                close(hand[1]);
+                while(1)
+                {
+                    char dummy[1];
+                    int res = read(hand[0], dummy, 1);
+                    if (res < 0 && yaz_errno() != EINTR)
+                    {
+                        yaz_log(YLOG_FATAL|YLOG_ERRNO, "read fork handshake");
+                        break;
+                    }
+                    else if (res >= 0)
+                        break;
+                }
+                close(hand[0]);
+                _exit(0);
+            }
+            /* child */
+            close(hand[0]);
+            if (setsid() < 0)
+                return 1;
+            
+            close(0);
+            close(1);
+            close(2);
+            open("/dev/null", O_RDWR);
+            dup(0); dup(0);
+        }
+        xml_config_add_listeners();
 
-	if (!pListener && *control_block.default_listen)
-	    add_listener(control_block.default_listen, 0);
-	
-	if (!pListener)
-	    return 1;
+        if (!pListener && *control_block.default_listen)
+            add_listener(control_block.default_listen, 0);
+        
+        if (!pListener)
+            return 1;
 
-	if (*control_block.pid_fname)
-	{
-	    FILE *f = fopen(control_block.pid_fname, "w");
-	    if (!f)
-	    {
-		yaz_log(YLOG_FATAL|YLOG_ERRNO, "Couldn't create %s", 
-			control_block.pid_fname);
-		exit(0);
-	    }
-	    fprintf(f, "%ld", (long) getpid());
-	    fclose(f);
-	}
-	
-	if (control_block.background)
-	    close(hand[1]);
+        if (*control_block.pid_fname)
+        {
+            FILE *f = fopen(control_block.pid_fname, "w");
+            if (!f)
+            {
+                yaz_log(YLOG_FATAL|YLOG_ERRNO, "Couldn't create %s", 
+                        control_block.pid_fname);
+                exit(0);
+            }
+            fprintf(f, "%ld", (long) getpid());
+            fclose(f);
+        }
+        
+        if (control_block.background)
+            close(hand[1]);
 
 
-	yaz_log (log_server, "Starting server %s pid=%ld", programname, 
-		 (long) getpid());
+        yaz_log (log_server, "Starting server %s pid=%ld", programname, 
+                 (long) getpid());
 #if 0
-	sigset_t sigs_to_block;
-	
-	sigemptyset(&sigs_to_block);
-	sigaddset (&sigs_to_block, SIGTERM);
-	pthread_sigmask (SIG_BLOCK, &sigs_to_block, 0);
-	/* missing... */
+        sigset_t sigs_to_block;
+        
+        sigemptyset(&sigs_to_block);
+        sigaddset (&sigs_to_block, SIGTERM);
+        pthread_sigmask (SIG_BLOCK, &sigs_to_block, 0);
+        /* missing... */
 #endif
-	if (control_block.dynamic)
-	    signal(SIGCHLD, catchchld);
+        if (control_block.dynamic)
+            signal(SIGCHLD, catchchld);
     }
     signal (SIGPIPE, SIG_IGN);
     signal (SIGTERM, sigterm);
     if (*control_block.setuid)
     {
-    	struct passwd *pw;
-	
-	if (!(pw = getpwnam(control_block.setuid)))
-	{
-	    yaz_log(YLOG_FATAL, "%s: Unknown user", control_block.setuid);
-	    return(1);
-	}
-	if (setuid(pw->pw_uid) < 0)
-	{
-	    yaz_log(YLOG_FATAL|YLOG_ERRNO, "setuid");
-	    exit(1);
-	}
+        struct passwd *pw;
+        
+        if (!(pw = getpwnam(control_block.setuid)))
+        {
+            yaz_log(YLOG_FATAL, "%s: Unknown user", control_block.setuid);
+            return(1);
+        }
+        if (setuid(pw->pw_uid) < 0)
+        {
+            yaz_log(YLOG_FATAL|YLOG_ERRNO, "setuid");
+            exit(1);
+        }
     }
 /* UNIX */
 #endif
     if (pListener == NULL)
-	return 1;
+        return 1;
     yaz_log(YLOG_DEBUG, "Entering event loop.");
     return event_loop(&pListener);
 }
@@ -1299,114 +1299,114 @@ int check_options(int argc, char **argv)
 
     get_logbits(1); 
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:",
-			  argv, argc, &arg)) != -2)
+                          argv, argc, &arg)) != -2)
     {
-    	switch (ret)
-    	{
-	case 0:
-	    if (add_listener(arg, 0))
+        switch (ret)
+        {
+        case 0:
+            if (add_listener(arg, 0))
                 return 1;  /* failed to create listener */
-	    break;
-	case '1':	 
-	    control_block.one_shot = 1;
-	    control_block.dynamic = 0;
-	    break;
-	case 'z':
-	    control_block.default_proto = PROTO_Z3950;
-	    break;
-	case 's':
+            break;
+        case '1':        
+            control_block.one_shot = 1;
+            control_block.dynamic = 0;
+            break;
+        case 'z':
+            control_block.default_proto = PROTO_Z3950;
+            break;
+        case 's':
             fprintf (stderr, "%s: SR protocol no longer supported\n", me);
             exit (1);
-	    break;
-	case 'S':
-	    control_block.dynamic = 0;
-	    break;
-	case 'T':
+            break;
+        case 'S':
+            control_block.dynamic = 0;
+            break;
+        case 'T':
 #if YAZ_POSIX_THREADS
-	    control_block.dynamic = 0;
-	    control_block.threads = 1;
+            control_block.dynamic = 0;
+            control_block.threads = 1;
 #elif YAZ_GNU_THREADS
-	    control_block.dynamic = 0;
-	    control_block.threads = 1;
+            control_block.dynamic = 0;
+            control_block.threads = 1;
 #else
-	    fprintf(stderr, "%s: Threaded mode not available.\n", me);
-	    return 1;
+            fprintf(stderr, "%s: Threaded mode not available.\n", me);
+            return 1;
 #endif
-	    break;
-	case 'l':
-	    option_copy(control_block.logfile, arg);
-	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
-	    break;
-	case 'v':
-	    control_block.loglevel =
-		yaz_log_mask_str_x(arg,control_block.loglevel);
-	    yaz_log_init(control_block.loglevel, me, control_block.logfile);
-	    get_logbits(1); 
-	    break;
-	case 'a':
-	    option_copy(control_block.apdufile, arg);
-	    break;
-	case 'u':
-	    option_copy(control_block.setuid, arg);
-	    break;
-	case 'c':
-	    option_copy(control_block.configname, arg);
-	    break;
-	case 'C':
-	    option_copy(control_block.cert_fname, arg);
-	    break;
-	case 'd':
-	    option_copy(control_block.daemon_name, arg);
-	    break;
-	case 't':
-	    if (!arg || !(r = atoi(arg)))
-	    {
-		fprintf(stderr, "%s: Specify positive timeout for -t.\n", me);
-		return(1);
-	    }
-	    control_block.idle_timeout = r;
-	    break;
-	case  'k':
-	    if (!arg || !(r = atoi(arg)))
-	    {
-		fprintf(stderr, "%s: Specify positive size for -k.\n", me);
-		return(1);
-	    }
-	    control_block.maxrecordsize = r * 1024;
-	    break;
-	case 'i':
-	    control_block.inetd = 1;
-	    break;
-	case 'w':
-	    if (chdir(arg))
-	    {
-		perror(arg);		
-		return 1;
-	    }
-	    break;
+            break;
+        case 'l':
+            option_copy(control_block.logfile, arg);
+            yaz_log_init(control_block.loglevel, me, control_block.logfile);
+            break;
+        case 'v':
+            control_block.loglevel =
+                yaz_log_mask_str_x(arg,control_block.loglevel);
+            yaz_log_init(control_block.loglevel, me, control_block.logfile);
+            get_logbits(1); 
+            break;
+        case 'a':
+            option_copy(control_block.apdufile, arg);
+            break;
+        case 'u':
+            option_copy(control_block.setuid, arg);
+            break;
+        case 'c':
+            option_copy(control_block.configname, arg);
+            break;
+        case 'C':
+            option_copy(control_block.cert_fname, arg);
+            break;
+        case 'd':
+            option_copy(control_block.daemon_name, arg);
+            break;
+        case 't':
+            if (!arg || !(r = atoi(arg)))
+            {
+                fprintf(stderr, "%s: Specify positive timeout for -t.\n", me);
+                return(1);
+            }
+            control_block.idle_timeout = r;
+            break;
+        case  'k':
+            if (!arg || !(r = atoi(arg)))
+            {
+                fprintf(stderr, "%s: Specify positive size for -k.\n", me);
+                return(1);
+            }
+            control_block.maxrecordsize = r * 1024;
+            break;
+        case 'i':
+            control_block.inetd = 1;
+            break;
+        case 'w':
+            if (chdir(arg))
+            {
+                perror(arg);            
+                return 1;
+            }
+            break;
         case 'A':
             max_sessions = atoi(arg);
             break;
-	case 'p':
-	    option_copy(control_block.pid_fname, arg);
-	    break;
-	case 'f':
+        case 'p':
+            option_copy(control_block.pid_fname, arg);
+            break;
+        case 'f':
 #if HAVE_XML2
-	    option_copy(control_block.xml_config, arg);
+            option_copy(control_block.xml_config, arg);
 #else
-	    fprintf(stderr, "%s: Option -f unsupported since YAZ is compiled without Libxml2 support\n", me);
-	    exit(1);
+            fprintf(stderr, "%s: Option -f unsupported since YAZ is compiled without Libxml2 support\n", me);
+            exit(1);
 #endif
-	    break;
-	case 'D':
-	    control_block.background = 1;
-	    break;
-	default:
-	    fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
-		    " -l <logfile> -u <user> -c <config> -t <minutes>"
-		    " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
+            break;
+        case 'D':
+            control_block.background = 1;
+            break;
+        default:
+            fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
+                    " -l <logfile> -u <user> -c <config> -t <minutes>"
+                    " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
                         " -ziDST1 -w <directory> <listener-addr>... ]\n", me);
-	    return 1;
+            return 1;
         }
     }
     return 0;
@@ -1428,8 +1428,8 @@ static Args ArgDetails;
 #define SZDEPENDENCIES       ""
 
 int statserv_main(int argc, char **argv,
-		  bend_initresult *(*bend_init)(bend_initrequest *r),
-		  void (*bend_close)(void *handle))
+                  bend_initresult *(*bend_init)(bend_initrequest *r),
+                  void (*bend_close)(void *handle))
 {
     struct statserv_options_block *cb = &control_block;
     cb->bend_init = bend_init;
@@ -1441,9 +1441,9 @@ int statserv_main(int argc, char **argv,
     
     /* Now setup the service with the service controller */
     SetupService(argc, argv, &ArgDetails, SZAPPNAME,
-		 cb->service_name, /* internal service name */
-		 cb->service_display_name, /* displayed name */
-		 SZDEPENDENCIES);
+                 cb->service_name, /* internal service name */
+                 cb->service_display_name, /* displayed name */
+                 SZDEPENDENCIES);
     return 0;
 }
 
@@ -1471,8 +1471,8 @@ void StopAppService(void *pHandle)
 #else
 /* UNIX */
 int statserv_main(int argc, char **argv,
-		  bend_initresult *(*bend_init)(bend_initrequest *r),
-		  void (*bend_close)(void *handle))
+                  bend_initresult *(*bend_init)(bend_initrequest *r),
+                  void (*bend_close)(void *handle))
 {
     int ret;
 
@@ -1485,3 +1485,11 @@ int statserv_main(int argc, char **argv,
     return ret;
 }
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

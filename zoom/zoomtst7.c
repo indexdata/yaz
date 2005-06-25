@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst7.c,v 1.13 2005-02-03 09:09:55 adam Exp $
+ * $Id: zoomtst7.c,v 1.14 2005-06-25 15:46:08 adam Exp $
  *
  * API test..
  */
@@ -35,126 +35,126 @@ int main(int argc, char **argv)
 
     for (block = 0; block < 3; block++)
     {
-	switch (block)
-	{
-	case 0:
-	    printf ("blocking - not calling ZOOM_events\n");
-	    break;
-	case 1:
-	    printf ("blocking - calling ZOOM_events\n");
-	    break;
-	case 2:
-	    printf ("non-blocking - calling ZOOM_events\n");
-	    break;
-	}
-	if (block > 1)
-	    ZOOM_options_set (o, "async", "1");
-	for (i = 0; i<10; i++)
-	{
-	    char host[40];
+        switch (block)
+        {
+        case 0:
+            printf ("blocking - not calling ZOOM_events\n");
+            break;
+        case 1:
+            printf ("blocking - calling ZOOM_events\n");
+            break;
+        case 2:
+            printf ("non-blocking - calling ZOOM_events\n");
+            break;
+        }
+        if (block > 1)
+            ZOOM_options_set (o, "async", "1");
+        for (i = 0; i<10; i++)
+        {
+            char host[40];
 
-	    printf ("session %2d", i);
-	    sprintf (host, "localhost:9999/%d", i);
-	    z = ZOOM_connection_create (o);
-	    ZOOM_connection_connect (z, host, 0);
-	    
-	    for (j = 0; j < 10; j++)
-	    {
-		ZOOM_record recs[2];
-		char query[40];
-		ZOOM_query s = ZOOM_query_create ();
-		
-		sprintf (query, "i%dr%d", i, j);
-		
-		if (ZOOM_query_prefix (s, query))
-		{
-		    printf ("bad PQF: %s\n", query);
-		    exit (2);
-		}
-		ZOOM_options_set (o, "start", "0");
-		ZOOM_options_set (o, "count", "0");
-		
-		r[j] = ZOOM_connection_search (z, s); /* non-piggy */
-		
-		ZOOM_resultset_records (r[j], recs, 0, 2);  /* first two */
-		
-		ZOOM_resultset_records (r[j], recs, 1, 2);  /* third */
+            printf ("session %2d", i);
+            sprintf (host, "localhost:9999/%d", i);
+            z = ZOOM_connection_create (o);
+            ZOOM_connection_connect (z, host, 0);
+            
+            for (j = 0; j < 10; j++)
+            {
+                ZOOM_record recs[2];
+                char query[40];
+                ZOOM_query s = ZOOM_query_create ();
+                
+                sprintf (query, "i%dr%d", i, j);
+                
+                if (ZOOM_query_prefix (s, query))
+                {
+                    printf ("bad PQF: %s\n", query);
+                    exit (2);
+                }
+                ZOOM_options_set (o, "start", "0");
+                ZOOM_options_set (o, "count", "0");
+                
+                r[j] = ZOOM_connection_search (z, s); /* non-piggy */
+                
+                ZOOM_resultset_records (r[j], recs, 0, 2);  /* first two */
+                
+                ZOOM_resultset_records (r[j], recs, 1, 2);  /* third */
 
-		ZOOM_resultset_records (r[j], recs, 0, 0);  /* ignored */
+                ZOOM_resultset_records (r[j], recs, 0, 0);  /* ignored */
 
-		if (ZOOM_resultset_size (r[j]) > 2)
-		{
-		    if (!recs[0])
-		    {
-			fprintf (stderr, "\nrecord missing\n");
-			exit (1);
-		    }
-		}
-		
-		ZOOM_query_destroy (s);
+                if (ZOOM_resultset_size (r[j]) > 2)
+                {
+                    if (!recs[0])
+                    {
+                        fprintf (stderr, "\nrecord missing\n");
+                        exit (1);
+                    }
+                }
+                
+                ZOOM_query_destroy (s);
 
-		printf (".");
-		if (block > 0)
-		    while (ZOOM_event (1, &z))
-			;
-	    }
-	    for (j = 0; j<i; j++)
-		ZOOM_resultset_destroy (r[j]);
-	    ZOOM_connection_destroy (z);
-	    for (; j < 10; j++)
-		ZOOM_resultset_destroy (r[j]);
-	    printf ("10 searches, 20 presents done\n");
+                printf (".");
+                if (block > 0)
+                    while (ZOOM_event (1, &z))
+                        ;
+            }
+            for (j = 0; j<i; j++)
+                ZOOM_resultset_destroy (r[j]);
+            ZOOM_connection_destroy (z);
+            for (; j < 10; j++)
+                ZOOM_resultset_destroy (r[j]);
+            printf ("10 searches, 20 presents done\n");
 
-	}
+        }
 
-	for (i = 0; i<1; i++)
-	{
-	    ZOOM_query q = ZOOM_query_create ();
-	    char host[40];
+        for (i = 0; i<1; i++)
+        {
+            ZOOM_query q = ZOOM_query_create ();
+            char host[40];
 
-	    printf ("session %2d", i+10);
-	    sprintf (host, "localhost:9999/%d", i);
-	    z = ZOOM_connection_create (o);
-	    ZOOM_connection_connect (z, host, 0);
-	    
-	    for (j = 0; j < 10; j++)
-	    {
-		char query[40];
-		
-		sprintf (query, "i%dr%d", i, j);
-		
-		ZOOM_options_set (o, "count", "0");
-		
-		r[j] = ZOOM_connection_search_pqf (z, query);
+            printf ("session %2d", i+10);
+            sprintf (host, "localhost:9999/%d", i);
+            z = ZOOM_connection_create (o);
+            ZOOM_connection_connect (z, host, 0);
+            
+            for (j = 0; j < 10; j++)
+            {
+                char query[40];
+                
+                sprintf (query, "i%dr%d", i, j);
+                
+                ZOOM_options_set (o, "count", "0");
+                
+                r[j] = ZOOM_connection_search_pqf (z, query);
 
-		printf (".");
-		if (block > 0)
-		    while (ZOOM_event (1, &z))
-			;
-	    }
+                printf (".");
+                if (block > 0)
+                    while (ZOOM_event (1, &z))
+                        ;
+            }
 
-	    ZOOM_connection_destroy (z);
-	    
-	    for (j = 0; j < 10; j++)
-	    {
-		ZOOM_resultset_records (r[j], 0, 0, 1);
-	    }
-	    for (j = 0; j < 10; j++)
-		ZOOM_resultset_destroy (r[j]);
-	    ZOOM_query_destroy (q);
-	    printf ("10 searches, 10 ignored presents done\n");
-	}
+            ZOOM_connection_destroy (z);
+            
+            for (j = 0; j < 10; j++)
+            {
+                ZOOM_resultset_records (r[j], 0, 0, 1);
+            }
+            for (j = 0; j < 10; j++)
+                ZOOM_resultset_destroy (r[j]);
+            ZOOM_query_destroy (q);
+            printf ("10 searches, 10 ignored presents done\n");
+        }
 
 
         for (i = 0; i<1; i++)
         {
-	    char host[40];
+            char host[40];
             ZOOM_scanset scan = 0;
 
-	    printf ("session %2d", i);
-	    sprintf (host, "localhost:9999/%d", i);
-	    z = ZOOM_connection_create (o);
-	    ZOOM_connection_connect (z, host, 0);
+            printf ("session %2d", i);
+            sprintf (host, "localhost:9999/%d", i);
+            z = ZOOM_connection_create (o);
+            ZOOM_connection_connect (z, host, 0);
 
             scan = ZOOM_connection_scan (z, "@attr 1=4 a");
             if (block > 0)
@@ -171,11 +171,19 @@ int main(int argc, char **argv)
                 
             }
             ZOOM_scanset_destroy (scan);
-	    ZOOM_connection_destroy (z);
+            ZOOM_connection_destroy (z);
         }
 
     }
     ZOOM_options_destroy (o);
     exit (0);
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

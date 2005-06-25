@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: initopt.c,v 1.5 2005-06-06 07:12:47 ja7 Exp $
+ * $Id: initopt.c,v 1.6 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -51,44 +51,52 @@ int yaz_init_opt_encode(Z_Options *opt, const char *opt_str, int *error_pos)
     ODR_MASK_ZERO(opt);
     while (*cp)
     {
-	char this_opt[42];
-	int i, j;
-	if (*cp == ' ' || *cp == ',')
-	{
-	    cp++;
-	    continue;
-	}
-	for (i = 0; i < (sizeof(this_opt)-1) &&
-		 cp[i] && cp[i] != ' ' && cp[i] != ','; i++)
-	    this_opt[i] = cp[i];
-	this_opt[i] = 0;
-	for (j = 0; opt_array[j].name; j++)
-	{
-	    if (yaz_matchstr(this_opt, opt_array[j].name) == 0)
-	    {
-		ODR_MASK_SET(opt, opt_array[j].opt);
-		break;
-	    }
-	}
-	if (!opt_array[j].name)
-	{
-	    if (error_pos)
-	    {
-		*error_pos = cp - opt_str;
-		return -1;
-	    }
-	}
-	cp += i;
+        char this_opt[42];
+        int i, j;
+        if (*cp == ' ' || *cp == ',')
+        {
+            cp++;
+            continue;
+        }
+        for (i = 0; i < (sizeof(this_opt)-1) &&
+                 cp[i] && cp[i] != ' ' && cp[i] != ','; i++)
+            this_opt[i] = cp[i];
+        this_opt[i] = 0;
+        for (j = 0; opt_array[j].name; j++)
+        {
+            if (yaz_matchstr(this_opt, opt_array[j].name) == 0)
+            {
+                ODR_MASK_SET(opt, opt_array[j].opt);
+                break;
+            }
+        }
+        if (!opt_array[j].name)
+        {
+            if (error_pos)
+            {
+                *error_pos = cp - opt_str;
+                return -1;
+            }
+        }
+        cp += i;
     }
     return 0;
 }
 
 void yaz_init_opt_decode(Z_Options *opt, void (*pr)(const char *name,
-						    void *clientData),
-			 void *clientData)
+                                                    void *clientData),
+                         void *clientData)
 {
     int i;
     for (i = 0; opt_array[i].name; i++)
-	if (ODR_MASK_GET(opt, opt_array[i].opt))
-	    (*pr)(opt_array[i].name, clientData);
+        if (ODR_MASK_GET(opt, opt_array[i].opt))
+            (*pr)(opt_array[i].name, clientData);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

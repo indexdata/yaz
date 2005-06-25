@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.14 2005-02-09 09:18:27 adam Exp $
+ * $Id: unix.c,v 1.15 2005-06-25 15:46:06 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -55,8 +55,8 @@ static int unix_more(COMSTACK h);
 static int unix_rcvconnect(COMSTACK h);
 static int unix_bind(COMSTACK h, void *address, int mode);
 static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
-		int (*check_ip)(void *cd, const char *a, int len, int type),
-		void *cd);
+                int (*check_ip)(void *cd, const char *a, int len, int type),
+                void *cd);
 static int unix_set_blocking(COMSTACK p, int blocking);
 
 static COMSTACK unix_accept(COMSTACK h);
@@ -65,7 +65,7 @@ static void *unix_straddr(COMSTACK h, const char *str);
 
 #ifndef SUN_LEN
 #define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) \
-  		      + strlen ((ptr)->sun_path))
+                      + strlen ((ptr)->sun_path))
 #endif
 #if 0
 #define TRC(x) x
@@ -106,27 +106,27 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
     int new_socket;
 
     if (!unix_init ())
-	return 0;
+        return 0;
     if (s < 0)
     {
-	if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	    return 0;
-	new_socket = 1;
+        if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+            return 0;
+        new_socket = 1;
     }
     else
-	new_socket = 0;
+        new_socket = 0;
     if (!(p = (struct comstack *)xmalloc(sizeof(struct comstack))))
-	return 0;
+        return 0;
     if (!(state = (struct unix_state *)(p->cprivate =
-					xmalloc(sizeof(unix_state)))))
-	return 0;
+                                        xmalloc(sizeof(unix_state)))))
+        return 0;
 
     if (!((p->blocking = blocking)&1))
     {
-	if (fcntl(s, F_SETFL, O_NONBLOCK) < 0)
-	    return 0;
+        if (fcntl(s, F_SETFL, O_NONBLOCK) < 0)
+            return 0;
 #ifndef MSG_NOSIGNAL
-	signal (SIGPIPE, SIG_IGN);
+        signal (SIGPIPE, SIG_IGN);
 #endif
     }
 
@@ -158,9 +158,9 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
     if (protocol == PROTO_WAIS)
-	state->complete = completeWAIS;
+        state->complete = completeWAIS;
     else
-	state->complete = cs_complete_auto;
+        state->complete = cs_complete_auto;
 
     p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new UNIX comstack\n"));
@@ -173,13 +173,13 @@ static int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
 {
     char *cp;
     if (!unix_init ())
-	return 0;
+        return 0;
     TRC(fprintf(stderr, "unix_strtoaddress: %s\n", str ? str : "NULL"));
     add->sun_family = AF_UNIX;
     strncpy(add->sun_path, str, sizeof(add->sun_path));
     cp = strchr (add->sun_path, ':');
     if (cp)
-	*cp = '\0';
+        *cp = '\0';
     return 1;
 }
 
@@ -195,91 +195,91 @@ static void *unix_straddr(COMSTACK h, const char *str)
 
     if ((eol = strchr(s, ',')))
     {
-	do
-	{
-	    if ((eol = strchr(s, ',')))
-		*eol++ = '\0';
-	    if (sp->uid  == -1 && strncmp(s, "user=",  5) == 0)
-	    {
-		char * arg = s + 5;
-		if (strspn(arg, "0123456789") == strlen(arg))
-		{
-		    sp->uid = atoi(arg);
-		}
-		else
-		{
-		    struct passwd * pw = getpwnam(arg);
-		    if(pw == NULL)
-		    {
-			printf("No such user\n");
-			free(f);
-			return 0;
-		    }
-		    sp->uid = pw->pw_uid;
-		}
-	    }
-	    else if (sp->gid == -1 && strncmp(s, "group=", 6) == 0)
-	    {
-		char * arg = s + 6;
-		if (strspn(arg, "0123456789") == strlen(arg))
-		{
-		    sp->gid = atoi(arg);
-		}
-		else
-		{
-		    struct group * gr = getgrnam(arg);
-		    if (gr == NULL)
-		    {
-			printf("No such group\n");
-			free(f);
-			return 0;
-		    }
-		    sp->gid = gr->gr_gid;
-		}
-	    }
-	    else if (sp->umask == -1 && strncmp(s, "umask=", 6) == 0)
-	    {
-		char * end;
-		char * arg = s + 6;
-		
-		sp->umask = strtol(arg, &end, 8);
-		if (errno == EINVAL ||
-		    *end)
-		{
-		    printf("Invalid umask\n");
-		    free(f);
-		    return 0;
-		}
-	    }
-	    else if (file == NULL && strncmp(s, "file=", 5) == 0)
-	    {
-		char * arg = s + 5;
-		file = arg;
-	    }
-	    else
-	    {
-		printf("invalid or double argument: %s\n", s);
-		free(f);
-		return 0;
-	    }
-	} while((s = eol));
+        do
+        {
+            if ((eol = strchr(s, ',')))
+                *eol++ = '\0';
+            if (sp->uid  == -1 && strncmp(s, "user=",  5) == 0)
+            {
+                char * arg = s + 5;
+                if (strspn(arg, "0123456789") == strlen(arg))
+                {
+                    sp->uid = atoi(arg);
+                }
+                else
+                {
+                    struct passwd * pw = getpwnam(arg);
+                    if(pw == NULL)
+                    {
+                        printf("No such user\n");
+                        free(f);
+                        return 0;
+                    }
+                    sp->uid = pw->pw_uid;
+                }
+            }
+            else if (sp->gid == -1 && strncmp(s, "group=", 6) == 0)
+            {
+                char * arg = s + 6;
+                if (strspn(arg, "0123456789") == strlen(arg))
+                {
+                    sp->gid = atoi(arg);
+                }
+                else
+                {
+                    struct group * gr = getgrnam(arg);
+                    if (gr == NULL)
+                    {
+                        printf("No such group\n");
+                        free(f);
+                        return 0;
+                    }
+                    sp->gid = gr->gr_gid;
+                }
+            }
+            else if (sp->umask == -1 && strncmp(s, "umask=", 6) == 0)
+            {
+                char * end;
+                char * arg = s + 6;
+                
+                sp->umask = strtol(arg, &end, 8);
+                if (errno == EINVAL ||
+                    *end)
+                {
+                    printf("Invalid umask\n");
+                    free(f);
+                    return 0;
+                }
+            }
+            else if (file == NULL && strncmp(s, "file=", 5) == 0)
+            {
+                char * arg = s + 5;
+                file = arg;
+            }
+            else
+            {
+                printf("invalid or double argument: %s\n", s);
+                free(f);
+                return 0;
+            }
+        } while((s = eol));
     }
     else
     {
-	file = str;
+        file = str;
     }
     if(! file)
     {
-	errno = EINVAL;
-	return 0;
+        errno = EINVAL;
+        return 0;
     }
 
     TRC(fprintf(stderr, "unix_straddr: %s\n", str ? str : "NULL"));
 
     if (!unix_strtoaddr_ex (file, &sp->addr))
     {
-	free(f);
-	return 0;
+        free(f);
+        return 0;
     }
     free(f);
     return &sp->addr;
@@ -292,7 +292,7 @@ struct sockaddr_un *unix_strtoaddr(const char *str)
     TRC(fprintf(stderr, "unix_strtoaddr: %s\n", str ? str : "NULL"));
 
     if (!unix_strtoaddr_ex (str, &add))
-	return 0;
+        return 0;
     return &add;
 }
 
@@ -301,7 +301,7 @@ static int unix_more(COMSTACK h)
     unix_state *sp = (unix_state *)h->cprivate;
 
     return sp->altlen && (*sp->complete)((unsigned char *) sp->altbuf,
-					 sp->altlen);
+                                         sp->altlen);
 }
 
 /*
@@ -319,35 +319,35 @@ static int unix_connect(COMSTACK h, void *address)
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
     {
-	h->cerrno = CSOUTSTATE;
-	return -1;
+        h->cerrno = CSOUTSTATE;
+        return -1;
     }
     for (i = 0; i<3; i++)
     {
-	r = connect(h->iofile, (struct sockaddr *) add, SUN_LEN(add));
-	if (r < 0 && yaz_errno() == EAGAIN)
-	{
+        r = connect(h->iofile, (struct sockaddr *) add, SUN_LEN(add));
+        if (r < 0 && yaz_errno() == EAGAIN)
+        {
 #if HAVE_USLEEP
-	    usleep(i*10000+1000); /* 1ms, 11ms, 21ms */
+            usleep(i*10000+1000); /* 1ms, 11ms, 21ms */
 #else
-	    sleep(1);
+            sleep(1);
 #endif
-	    continue;
-	}
-	else
-	    break;
+            continue;
+        }
+        else
+            break;
     }
     if (r < 0)
     {
-	if (yaz_errno() == EINPROGRESS)
-	{
-	    h->event = CS_CONNECT;
-	    h->state = CS_ST_CONNECTING;
-	    h->io_pending = CS_WANT_WRITE;
-	    return 1;
-	}
-	h->cerrno = CSYSERR;
-	return -1;
+        if (yaz_errno() == EINPROGRESS)
+        {
+            h->event = CS_CONNECT;
+            h->state = CS_ST_CONNECTING;
+            h->io_pending = CS_WANT_WRITE;
+            return 1;
+        }
+        h->cerrno = CSYSERR;
+        return -1;
     }
     h->event = CS_CONNECT;
     h->state = CS_ST_CONNECTING;
@@ -363,11 +363,11 @@ static int unix_rcvconnect(COMSTACK h)
     TRC(fprintf(stderr, "unix_rcvconnect\n"));
 
     if (h->state == CS_ST_DATAXFER)
-	return 0;
+        return 0;
     if (h->state != CS_ST_CONNECTING)
     {
-	h->cerrno = CSOUTSTATE;
-	return -1;
+        h->cerrno = CSOUTSTATE;
+        return -1;
     }
     h->event = CS_DATA;
     h->state = CS_ST_DATAXFER;
@@ -384,46 +384,46 @@ static int unix_bind(COMSTACK h, void *address, int mode)
     TRC (fprintf (stderr, "unix_bind\n"));
 
     if(stat(path, &stat_buf) != -1) {
-	struct sockaddr_un socket_unix;
-	int socket_out = -1;
-	if(! S_ISSOCK(stat_buf.st_mode)) {
-	    h->cerrno = CSYSERR;
-	    yaz_set_errno(EEXIST); /* Not a socket (File exists) */
-	    return -1;
-	}
-	if((socket_out = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
-	    h->cerrno = CSYSERR;
-	    return -1;
-	}
-	socket_unix.sun_family = AF_UNIX;
-	strncpy(socket_unix.sun_path, path, sizeof(socket_unix.sun_path));
-	if(connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0) {
-	    if(yaz_errno() == ECONNREFUSED) {
-		TRC (fprintf (stderr, "Socket exists but nobody is listening\n"));
-	    } else {
-		h->cerrno = CSYSERR;
-		return -1;
-	    }
-	} else {
-	    close(socket_out);
-	    h->cerrno = CSYSERR;
-	    yaz_set_errno(EADDRINUSE);
-	    return -1;
-	}
-	unlink(path);
+        struct sockaddr_un socket_unix;
+        int socket_out = -1;
+        if(! S_ISSOCK(stat_buf.st_mode)) {
+            h->cerrno = CSYSERR;
+            yaz_set_errno(EEXIST); /* Not a socket (File exists) */
+            return -1;
+        }
+        if((socket_out = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+            h->cerrno = CSYSERR;
+            return -1;
+        }
+        socket_unix.sun_family = AF_UNIX;
+        strncpy(socket_unix.sun_path, path, sizeof(socket_unix.sun_path));
+        if(connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0) {
+            if(yaz_errno() == ECONNREFUSED) {
+                TRC (fprintf (stderr, "Socket exists but nobody is listening\n"));
+            } else {
+                h->cerrno = CSYSERR;
+                return -1;
+            }
+        } else {
+            close(socket_out);
+            h->cerrno = CSYSERR;
+            yaz_set_errno(EADDRINUSE);
+            return -1;
+        }
+        unlink(path);
     }
 
     if (bind(h->iofile, (struct sockaddr *) addr, SUN_LEN((struct sockaddr_un *)addr)))
     {
-	h->cerrno = CSYSERR;
-	return -1;
+        h->cerrno = CSYSERR;
+        return -1;
     }
     chown(path, sp->uid, sp->gid);
     chmod(path, sp->umask != -1 ? sp->umask : 0666);
     if (mode == CS_SERVER && listen(h->iofile, 100) < 0)
     {
-	h->cerrno = CSYSERR;
-	return -1;
+        h->cerrno = CSYSERR;
+        return -1;
     }
     h->state = CS_ST_IDLE;
     h->event = CS_LISTEN;
@@ -432,7 +432,7 @@ static int unix_bind(COMSTACK h, void *address, int mode)
 
 static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
                     int (*check_ip)(void *cd, const char *a, int len, int t),
-		    void *cd)
+                    void *cd)
 {
     struct sockaddr_un addr;
     YAZ_SOCKLEN_T len = sizeof(addr);
@@ -440,29 +440,29 @@ static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
     TRC(fprintf(stderr, "unix_listen pid=%d\n", getpid()));
     if (h->state != CS_ST_IDLE)
     {
-	h->cerrno = CSOUTSTATE;
-	return -1;
+        h->cerrno = CSOUTSTATE;
+        return -1;
     }
     h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len);
     if (h->newfd < 0)
     {
-	if (
-	    yaz_errno() == EWOULDBLOCK
+        if (
+            yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-	    || yaz_errno() == EAGAIN
+            || yaz_errno() == EAGAIN
 #endif
 #endif
-	    )
-	    h->cerrno = CSNODATA;
-	else
-	    h->cerrno = CSYSERR;
-	return -1;
+            )
+            h->cerrno = CSNODATA;
+        else
+            h->cerrno = CSYSERR;
+        return -1;
     }
     if (addrlen && (size_t) (*addrlen) >= sizeof(struct sockaddr_un))
-	memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_un));
+        memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_un));
     else if (addrlen)
-	*addrlen = 0;
+        *addrlen = 0;
     h->state = CS_ST_INCON;
     return 0;
 }
@@ -475,60 +475,60 @@ static COMSTACK unix_accept(COMSTACK h)
     TRC(fprintf(stderr, "unix_accept\n"));
     if (h->state == CS_ST_INCON)
     {
-	if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
-	{
-	    h->cerrno = CSYSERR;
-	    close(h->newfd);
-	    h->newfd = -1;
-	    return 0;
-	}
-	memcpy(cnew, h, sizeof(*h));
-	cnew->iofile = h->newfd;
-	cnew->io_pending = 0;
-	if (!(state = (unix_state *)
-	      (cnew->cprivate = xmalloc(sizeof(unix_state)))))
-	{
-	    h->cerrno = CSYSERR;
-	    if (h->newfd != -1)
-	    {
-		close(h->newfd);
-		h->newfd = -1;
-	    }
-	    return 0;
-	}
-	if (!(cnew->blocking&1) && 
+        if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
+        {
+            h->cerrno = CSYSERR;
+            close(h->newfd);
+            h->newfd = -1;
+            return 0;
+        }
+        memcpy(cnew, h, sizeof(*h));
+        cnew->iofile = h->newfd;
+        cnew->io_pending = 0;
+        if (!(state = (unix_state *)
+              (cnew->cprivate = xmalloc(sizeof(unix_state)))))
+        {
+            h->cerrno = CSYSERR;
+            if (h->newfd != -1)
+            {
+                close(h->newfd);
+                h->newfd = -1;
+            }
+            return 0;
+        }
+        if (!(cnew->blocking&1) && 
             (fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
-	    )
-	{
-	    h->cerrno = CSYSERR;
-	    if (h->newfd != -1)
-	    {
-		close(h->newfd);
-		h->newfd = -1;
-	    }
-	    xfree (cnew);
-	    xfree (state);
-	    return 0;
-	}
-	h->newfd = -1;
-	state->altbuf = 0;
-	state->altsize = state->altlen = 0;
-	state->towrite = state->written = -1;
-	state->complete = st->complete;
-	memcpy(&state->addr, &st->addr, sizeof(state->addr));
-	cnew->state = CS_ST_ACCEPT;
-	cnew->event = CS_NONE;
-	h->state = CS_ST_IDLE;
+            )
+        {
+            h->cerrno = CSYSERR;
+            if (h->newfd != -1)
+            {
+                close(h->newfd);
+                h->newfd = -1;
+            }
+            xfree (cnew);
+            xfree (state);
+            return 0;
+        }
+        h->newfd = -1;
+        state->altbuf = 0;
+        state->altsize = state->altlen = 0;
+        state->towrite = state->written = -1;
+        state->complete = st->complete;
+        memcpy(&state->addr, &st->addr, sizeof(state->addr));
+        cnew->state = CS_ST_ACCEPT;
+        cnew->event = CS_NONE;
+        h->state = CS_ST_IDLE;
 
-	h = cnew;
+        h = cnew;
     }
     if (h->state == CS_ST_ACCEPT)
     {
     }
     else
     {
-	h->cerrno = CSOUTSTATE;
-	return 0;
+        h->cerrno = CSOUTSTATE;
+        return 0;
     }
     h->io_pending = 0;
     h->state = CS_ST_DATAXFER;
@@ -552,75 +552,75 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
     TRC(fprintf(stderr, "unix_get: bufsize=%d\n", *bufsize));
     if (sp->altlen) /* switch buffers */
     {
-	TRC(fprintf(stderr, "  %d bytes in altbuf (0x%x)\n", sp->altlen,
-		    (unsigned) sp->altbuf));
-	tmpc = *buf;
-	tmpi = *bufsize;
-	*buf = sp->altbuf;
-	*bufsize = sp->altsize;
-	hasread = sp->altlen;
-	sp->altlen = 0;
-	sp->altbuf = tmpc;
-	sp->altsize = tmpi;
+        TRC(fprintf(stderr, "  %d bytes in altbuf (0x%x)\n", sp->altlen,
+                    (unsigned) sp->altbuf));
+        tmpc = *buf;
+        tmpi = *bufsize;
+        *buf = sp->altbuf;
+        *bufsize = sp->altsize;
+        hasread = sp->altlen;
+        sp->altlen = 0;
+        sp->altbuf = tmpc;
+        sp->altsize = tmpi;
     }
     h->io_pending = 0;
     while (!(berlen = (*sp->complete)((unsigned char *)*buf, hasread)))
     {
-	if (!*bufsize)
-	{
-	    if (!(*buf = (char *)xmalloc(*bufsize = CS_UNIX_BUFCHUNK)))
-		return -1;
-	}
-	else if (*bufsize - hasread < CS_UNIX_BUFCHUNK)
-	    if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
-		return -1;
-	res = recv(h->iofile, *buf + hasread, CS_UNIX_BUFCHUNK, 0);
-	TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
-	if (res < 0)
-	{
-	    if (yaz_errno() == EWOULDBLOCK
+        if (!*bufsize)
+        {
+            if (!(*buf = (char *)xmalloc(*bufsize = CS_UNIX_BUFCHUNK)))
+                return -1;
+        }
+        else if (*bufsize - hasread < CS_UNIX_BUFCHUNK)
+            if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
+                return -1;
+        res = recv(h->iofile, *buf + hasread, CS_UNIX_BUFCHUNK, 0);
+        TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
+        if (res < 0)
+        {
+            if (yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-		|| yaz_errno() == EAGAIN
+                || yaz_errno() == EAGAIN
 #endif
 #endif
-		|| yaz_errno() == EINPROGRESS
-		)
-	    {
-		h->io_pending = CS_WANT_READ;
-		break;
-	    }
-	    else if (yaz_errno() == 0)
-		continue;
-	    else
-		return -1;
-	}
-	else if (!res)
-	    return hasread;
-	hasread += res;
+                || yaz_errno() == EINPROGRESS
+                )
+            {
+                h->io_pending = CS_WANT_READ;
+                break;
+            }
+            else if (yaz_errno() == 0)
+                continue;
+            else
+                return -1;
+        }
+        else if (!res)
+            return hasread;
+        hasread += res;
     }
     TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
-		  hasread, berlen));
+                  hasread, berlen));
     /* move surplus buffer (or everything if we didn't get a BER rec.) */
     if (hasread > berlen)
     {
-	tomove = req = hasread - berlen;
-	rest = tomove % CS_UNIX_BUFCHUNK;
-	if (rest)
-	    req += CS_UNIX_BUFCHUNK - rest;
-	if (!sp->altbuf)
-	{
-	    if (!(sp->altbuf = (char *)xmalloc(sp->altsize = req)))
-		return -1;
-	} else if (sp->altsize < req)
-	    if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
-		return -1;
-	TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
-		    (unsigned) sp->altbuf));
-	memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
+        tomove = req = hasread - berlen;
+        rest = tomove % CS_UNIX_BUFCHUNK;
+        if (rest)
+            req += CS_UNIX_BUFCHUNK - rest;
+        if (!sp->altbuf)
+        {
+            if (!(sp->altbuf = (char *)xmalloc(sp->altsize = req)))
+                return -1;
+        } else if (sp->altsize < req)
+            if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
+                return -1;
+        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
+                    (unsigned) sp->altbuf));
+        memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
     }
     if (berlen < CS_UNIX_BUFCHUNK - 1)
-	*(*buf + berlen) = '\0';
+        *(*buf + berlen) = '\0';
     return berlen ? berlen : 1;
 }
 
@@ -641,45 +641,45 @@ static int unix_put(COMSTACK h, char *buf, int size)
     h->event = CS_DATA;
     if (state->towrite < 0)
     {
-	state->towrite = size;
-	state->written = 0;
+        state->towrite = size;
+        state->written = 0;
     }
     else if (state->towrite != size)
     {
-	h->cerrno = CSWRONGBUF;
-	return -1;
+        h->cerrno = CSWRONGBUF;
+        return -1;
     }
     while (state->towrite > state->written)
     {
-	if ((res =
-	     send(h->iofile, buf + state->written, size -
-		  state->written,
+        if ((res =
+             send(h->iofile, buf + state->written, size -
+                  state->written,
 #ifdef MSG_NOSIGNAL
-		  MSG_NOSIGNAL
+                  MSG_NOSIGNAL
 #else
-		  0
+                  0
 #endif
-		 )) < 0)
-	{
-	    if (
-		yaz_errno() == EWOULDBLOCK
+                 )) < 0)
+        {
+            if (
+                yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-		|| yaz_errno() == EAGAIN
+                || yaz_errno() == EAGAIN
 #endif
 #endif
-		)
-	    {
-		TRC(fprintf(stderr, "  Flow control stop\n"));
-		h->io_pending = CS_WANT_WRITE;
-		return 1;
-	    }
-	    h->cerrno = CSYSERR;
-	    return -1;
-	}
-	state->written += res;
-	TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
-		    res, state->written, size));
+                )
+            {
+                TRC(fprintf(stderr, "  Flow control stop\n"));
+                h->io_pending = CS_WANT_WRITE;
+                return 1;
+            }
+            h->cerrno = CSYSERR;
+            return -1;
+        }
+        state->written += res;
+        TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
+                    res, state->written, size));
     }
     state->towrite = state->written = -1;
     TRC(fprintf(stderr, "  Ok\n"));
@@ -693,10 +693,10 @@ static int unix_close(COMSTACK h)
     TRC(fprintf(stderr, "unix_close\n"));
     if (h->iofile != -1)
     {
-	close(h->iofile);
+        close(h->iofile);
     }
     if (sp->altbuf)
-	xfree(sp->altbuf);
+        xfree(sp->altbuf);
     xfree(sp);
     xfree(h);
     return 0;
@@ -715,15 +715,23 @@ static int unix_set_blocking(COMSTACK p, int blocking)
     unsigned long flag;
 
     if (p->blocking == blocking)
-	return 1;
+        return 1;
     flag = fcntl(p->iofile, F_GETFL, 0);
     if(!blocking)
-	flag = flag & ~O_NONBLOCK;
+        flag = flag & ~O_NONBLOCK;
     else
-	flag = flag | O_NONBLOCK;
+        flag = flag | O_NONBLOCK;
     if (fcntl(p->iofile, F_SETFL, flag) < 0)
-	return 0;
+        return 0;
     p->blocking = blocking;
     return 1;
 }
 #endif /* WIN32 */
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

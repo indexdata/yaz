@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst6.c,v 1.9 2002-02-20 14:40:42 adam Exp $
+ * $Id: zoomtst6.c,v 1.10 2005-06-25 15:46:08 adam Exp $
  *
  * Asynchronous multi-target client doing two searches
  */
@@ -50,9 +50,9 @@ int main(int argc, char **argv)
     o = ZOOM_options_create ();
     if (argc < 4)
     {
-	fprintf (stderr, "usage:\n%s target1 .. targetN query1 query2\n",
-		 *argv);
-	exit (1);
+        fprintf (stderr, "usage:\n%s target1 .. targetN query1 query2\n",
+                 *argv);
+        exit (1);
     }
     if (no > 500)
         no = 500;
@@ -69,20 +69,20 @@ int main(int argc, char **argv)
     q = ZOOM_query_create ();
     if (ZOOM_query_prefix (q, argv[argc-2]))
     {
-	printf ("bad PQF: %s\n", argv[argc-2]);
-	exit (2);
+        printf ("bad PQF: %s\n", argv[argc-2]);
+        exit (2);
     }
     /* connect - and search all */
     for (i = 0; i<no; i++)
     {
-    	z[i] = ZOOM_connection_create (o);
-    	ZOOM_connection_connect (z[i], argv[i+1], 0);
+        z[i] = ZOOM_connection_create (o);
+        ZOOM_connection_connect (z[i], argv[i+1], 0);
         r1[i] = ZOOM_connection_search (z[i], q);
     }
     if (ZOOM_query_prefix (q, argv[argc-1]))
     {
-	printf ("bad sort spec: %s\n", argv[argc-1]);
-	exit (2);
+        printf ("bad sort spec: %s\n", argv[argc-1]);
+        exit (2);
     }
     /* queue second search */
     for (i = 0; i<no; i++)
@@ -94,22 +94,22 @@ int main(int argc, char **argv)
 
     /* network I/O */
     while (ZOOM_event (no, z))
-	;
+        ;
 
     /* handle errors */
     for (i = 0; i<no; i++)
     {
-	int error;
-	const char *errmsg, *addinfo;
-	if ((error = ZOOM_connection_error(z[i], &errmsg, &addinfo)))
-	    fprintf (stderr, "%s error: %s (%d) %s\n",
-		     ZOOM_connection_option_get(z[i], "host"),
-		     errmsg, error, addinfo);
-	else
-	{
-	    display_records (ZOOM_connection_option_get(z[i], "host"), r1[i]);
-	    display_records (ZOOM_connection_option_get(z[i], "host"), r2[i]);
-	}
+        int error;
+        const char *errmsg, *addinfo;
+        if ((error = ZOOM_connection_error(z[i], &errmsg, &addinfo)))
+            fprintf (stderr, "%s error: %s (%d) %s\n",
+                     ZOOM_connection_option_get(z[i], "host"),
+                     errmsg, error, addinfo);
+        else
+        {
+            display_records (ZOOM_connection_option_get(z[i], "host"), r1[i]);
+            display_records (ZOOM_connection_option_get(z[i], "host"), r2[i]);
+        }
     }
     /* destroy stuff and exit */
     ZOOM_query_destroy (q);
@@ -122,3 +122,11 @@ int main(int argc, char **argv)
     ZOOM_options_destroy(o);
     exit (0);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

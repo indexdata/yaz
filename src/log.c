@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.24 2005-05-18 12:30:00 adam Exp $
+ * $Id: log.c,v 1.25 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -118,11 +118,11 @@ void yaz_log_init_file (const char *fname)
         init_mutex();
     if (fname)
     {
-	strncpy(l_fname, fname, sizeof(l_fname)-1);
-	l_fname[sizeof(l_fname)-1] = '\0';
+        strncpy(l_fname, fname, sizeof(l_fname)-1);
+        l_fname[sizeof(l_fname)-1] = '\0';
     }
     else
-	l_fname[0] = '\0';
+        l_fname[0] = '\0';
     yaz_log_reopen();
 }
 
@@ -134,7 +134,7 @@ void yaz_log_reopen(void)
     if (!l_file)
         l_file = stderr;
     if (!*l_fname)
-	new_file = stderr;
+        new_file = stderr;
     else if (!(new_file = fopen(l_fname, "a")))
     {
         new_file=l_file;
@@ -203,7 +203,7 @@ void yaz_log_init_level (int level)
 void yaz_log_init_prefix (const char *prefix)
 {
     if (prefix && *prefix)
-    	sprintf(l_prefix, "%.511s ", prefix);
+        sprintf(l_prefix, "%.511s ", prefix);
     else
         *l_prefix = 0;
 }
@@ -211,7 +211,7 @@ void yaz_log_init_prefix (const char *prefix)
 void yaz_log_init_prefix2 (const char *prefix)
 {
     if (prefix && *prefix)
-    	sprintf(l_prefix2, "%.511s ", prefix);
+        sprintf(l_prefix2, "%.511s ", prefix);
     else
         *l_prefix2 = 0;
 }
@@ -263,7 +263,7 @@ void yaz_log(int level, const char *fmt, ...)
     int flen; 
 
     if (!(level & l_level))
-    	return;
+        return;
     if (!mutex_init_flag)
         init_mutex();
     if (!l_file)
@@ -280,15 +280,15 @@ void yaz_log(int level, const char *fmt, ...)
 
     *flags = '\0';
     for (i = 0; level && mask_names[i].name; i++)
-    	if ( mask_names[i].mask & level)
-    	{
-	    if (*mask_names[i].name && mask_names[i].mask && 
+        if ( mask_names[i].mask & level)
+        {
+            if (*mask_names[i].name && mask_names[i].mask && 
                  mask_names[i].mask != YLOG_ALL)
             {
-		sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
-	        level &= ~mask_names[i].mask;
+                sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
+                level &= ~mask_names[i].mask;
             }
-	}
+        }
     va_start(ap, fmt);
 #ifdef WIN32
     _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
@@ -313,16 +313,16 @@ void yaz_log(int level, const char *fmt, ...)
     ti = time(0);
     tim = localtime(&ti);
     if (l_level & YLOG_NOTIME)
-	tbuf[0] = '\0';
+        tbuf[0] = '\0';
     else
-	strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tim);
+        strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tim);
     tbuf[TIMEFORMAT_LEN-1] = '\0';
     fprintf(l_file, "%s %s%s %s%s\n", tbuf, l_prefix, flags,
             l_prefix2, buf);
     if (l_level & (YLOG_FLUSH|YLOG_DEBUG) )
         fflush(l_file);
     if (end_hook_func)
-	(*end_hook_func)(o_level, buf, end_hook_info);
+        (*end_hook_func)(o_level, buf, end_hook_info);
 }
 
 void yaz_log_time_format(const char *fmt)
@@ -452,3 +452,11 @@ int yaz_log_mask_str_x (const char *str, int level)
     }
     return level;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

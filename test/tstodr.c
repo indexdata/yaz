@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.5 2005-05-26 21:47:16 adam Exp $
+ * $Id: tstodr.c,v 1.6 2005-06-25 15:46:07 adam Exp $
  *
  */
 #include <stdlib.h>
@@ -53,15 +53,15 @@ void tst_MySequence1(ODR encode, ODR decode)
     if (!t->fifth || *t->fifth != YC_MySequence_enum1)
         exit(8);
     if (!t->myoid)
-	exit(9);
+        exit(9);
     else
     {
-	int *myoid = odr_getoidbystr(decode, MYOID);
-	struct oident *oident;
+        int *myoid = odr_getoidbystr(decode, MYOID);
+        struct oident *oident;
 
-	if (oid_oidcmp(myoid, t->myoid))
-	    exit(10);
-	oident = oid_getentbyoid(t->myoid);
+        if (oid_oidcmp(myoid, t->myoid))
+            exit(10);
+        oident = oid_getentbyoid(t->myoid);
     }
 }
 
@@ -128,3 +128,11 @@ int main(int argc, char **argv)
     odr_destroy(odr_decode);
     exit(0);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-opt.c,v 1.3 2005-01-15 19:47:15 adam Exp $
+ * $Id: zoom-opt.c,v 1.4 2005-06-25 15:46:07 adam Exp $
  */
 /**
  * \file zoom-opt.c
@@ -37,10 +37,10 @@ ZOOM_options_create_with_parent2 (ZOOM_options parent1, ZOOM_options parent2)
     opt->entries = 0;
     opt->parent1= parent1;
     if (parent1)
-	(parent1->refcount)++;
+        (parent1->refcount)++;
     opt->parent2= parent2;
     if (parent2)
-	(parent2->refcount)++;
+        (parent2->refcount)++;
     return opt;
 }
 
@@ -69,24 +69,24 @@ ZOOM_API(void)
 ZOOM_options_destroy (ZOOM_options opt)
 {
     if (!opt)
-	return;
+        return;
     (opt->refcount)--;
     if (opt->refcount == 0)
     {
-	struct ZOOM_options_entry *e;
-	
-	ZOOM_options_destroy (opt->parent1);
-	ZOOM_options_destroy (opt->parent2);
-	e = opt->entries;
-	while (e)
-	{
-	    struct ZOOM_options_entry *e0 = e;
-	    xfree (e->name);
-	    xfree (e->value);
-	    e = e->next;
-	    xfree (e0);
-	}
-	xfree (opt);
+        struct ZOOM_options_entry *e;
+        
+        ZOOM_options_destroy (opt->parent1);
+        ZOOM_options_destroy (opt->parent2);
+        e = opt->entries;
+        while (e)
+        {
+            struct ZOOM_options_entry *e0 = e;
+            xfree (e->name);
+            xfree (e->value);
+            e = e->next;
+            xfree (e0);
+        }
+        xfree (opt);
     }
 }
 
@@ -99,9 +99,9 @@ ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
     e = &opt->entries;
     while (*e)
     {
-	if (!strcmp((*e)->name, name))
-	{
-	    xfree ((*e)->value);
+        if (!strcmp((*e)->name, name))
+        {
+            xfree ((*e)->value);
             (*e)->value = 0;
             if (value)
             {
@@ -109,9 +109,9 @@ ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
                 memcpy ((*e)->value, value, len);
                 (*e)->value[len] = '\0';
             }
-	    return;
-	}
-	e = &(*e)->next;
+            return;
+        }
+        e = &(*e)->next;
     }
     *e = (struct ZOOM_options_entry *) xmalloc (sizeof(**e));
     (*e)->name = xstrdup (name);
@@ -136,23 +136,23 @@ ZOOM_options_get (ZOOM_options opt, const char *name)
 {
     const char *v = 0;
     if (!opt)
-	return 0;
+        return 0;
     if (opt->callback_func)
-	v = (*opt->callback_func)(opt->callback_handle, name);
+        v = (*opt->callback_func)(opt->callback_handle, name);
     if (!v)
     {
-	struct ZOOM_options_entry *e;
-	for (e = opt->entries; e; e = e->next)
-	    if (!strcmp(e->name, name))
-	    {
-		v = e->value;
-		break;
-	    }
+        struct ZOOM_options_entry *e;
+        for (e = opt->entries; e; e = e->next)
+            if (!strcmp(e->name, name))
+            {
+                v = e->value;
+                break;
+            }
     }
     if (!v)
-	v = ZOOM_options_get(opt->parent1, name);
+        v = ZOOM_options_get(opt->parent1, name);
     if (!v)
-	v = ZOOM_options_get(opt->parent2, name);
+        v = ZOOM_options_get(opt->parent2, name);
     return v;
 }
 
@@ -162,9 +162,9 @@ ZOOM_options_get_bool (ZOOM_options opt, const char *name, int defa)
     const char *v = ZOOM_options_get (opt, name);
 
     if (!v)
-	return defa;
+        return defa;
     if (!strcmp (v, "1") || !strcmp(v, "T"))
-	return 1;
+        return 1;
     return 0;
 }
 
@@ -174,7 +174,7 @@ ZOOM_options_get_int (ZOOM_options opt, const char *name, int defa)
     const char *v = ZOOM_options_get (opt, name);
 
     if (!v || !*v)
-	return defa;
+        return defa;
     return atoi(v);
 }
 
@@ -186,3 +186,11 @@ ZOOM_options_set_int(ZOOM_options opt, const char *name, int value)
     sprintf (s, "%d", value);
     ZOOM_options_set (opt, name, s);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

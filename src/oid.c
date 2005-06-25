@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.10 2005-06-21 07:33:08 adam Exp $
+ * $Id: oid.c,v 1.11 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -304,7 +304,7 @@ static oident standard_oids[] =
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_CIMI1,        {14,6,-1},
      "CIMI-tagset"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_THESAURUS,    {14,1000,81,1,-1},
-     "thesaurus-tagset"},	/* What is this Satan-spawn doing here? */
+     "thesaurus-tagset"},       /* What is this Satan-spawn doing here? */
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_EXPLAIN,      {14,1000,81,2,-1},
      "Explain-tagset"},
     {PROTO_Z3950,   CLASS_TAGSET,  VAL_ZTHES,        {14,8,-1},
@@ -385,10 +385,10 @@ void oid_transfer (struct oident *oidentp)
 {
     while (*oidentp->oidsuffix >= 0)
     {
-	oid_addent (oidentp->oidsuffix, oidentp->proto,
-		    oidentp->oclass,
-		    oidentp->desc, oidentp->value);
-	oidentp++;
+        oid_addent (oidentp->oidsuffix, oidentp->proto,
+                    oidentp->oclass,
+                    oidentp->desc, oidentp->value);
+        oidentp++;
     }
 }
 
@@ -396,18 +396,18 @@ void oid_init (void)
 {
     if (oid_init_flag == 0)
     {
-	/* oid_transfer is thread safe, so there's nothing wrong in having
-	   two threads calling it simultaniously. On the other hand
-	   no thread may exit oid_init before all OID's bave been
-	   transferred - which is why checked is set after oid_transfer... 
-	*/
-	nmem_mutex_create (&oid_mutex);
-	nmem_mutex_enter (oid_mutex);
-	if (!oid_nmem)
-	    oid_nmem = nmem_create ();
-	nmem_mutex_leave (oid_mutex);
-	oid_transfer (standard_oids);
-	oid_init_flag = 1;
+        /* oid_transfer is thread safe, so there's nothing wrong in having
+           two threads calling it simultaniously. On the other hand
+           no thread may exit oid_init before all OID's bave been
+           transferred - which is why checked is set after oid_transfer... 
+        */
+        nmem_mutex_create (&oid_mutex);
+        nmem_mutex_enter (oid_mutex);
+        if (!oid_nmem)
+            oid_nmem = nmem_create ();
+        nmem_mutex_leave (oid_mutex);
+        oid_transfer (standard_oids);
+        oid_init_flag = 1;
     }
 }
 
@@ -437,11 +437,11 @@ static struct oident *oid_getentbyoid_x(int *o)
         proto = PROTO_GENERAL;
     for (ol = oident_table; ol; ol = ol->next)
     {
-	struct oident *p = &ol->oident;
+        struct oident *p = &ol->oident;
         if (p->proto == proto && !oid_oidcmp(o + prelen, p->oidsuffix))
             return p;
-	if (p->proto == PROTO_GENERAL && !oid_oidcmp (o, p->oidsuffix))
-	    return p;
+        if (p->proto == PROTO_GENERAL && !oid_oidcmp (o, p->oidsuffix))
+            return p;
     }
     return 0;
 }
@@ -456,21 +456,21 @@ int *oid_ent_to_oid(struct oident *ent, int *ret)
     oid_init ();
     for (ol = oident_table; ol; ol = ol->next)
     {
-	struct oident *p = &ol->oident;
+        struct oident *p = &ol->oident;
         if (ent->value == p->value &&
             (p->proto == PROTO_GENERAL || (ent->proto == p->proto &&  
-	    (ent->oclass == p->oclass || ent->oclass == CLASS_GENERAL))))
-	{
-	    if (p->proto == PROTO_Z3950)
-		oid_oidcpy(ret, z3950_prefix);
-	    else if (p->proto == PROTO_SR)
-		oid_oidcpy(ret, sr_prefix);
-	    else
-		ret[0] = -1;
-	    oid_oidcat(ret, p->oidsuffix);
-	    ent->desc = p->desc;
-	    return ret;
-	}
+            (ent->oclass == p->oclass || ent->oclass == CLASS_GENERAL))))
+        {
+            if (p->proto == PROTO_Z3950)
+                oid_oidcpy(ret, z3950_prefix);
+            else if (p->proto == PROTO_SR)
+                oid_oidcpy(ret, sr_prefix);
+            else
+                ret[0] = -1;
+            oid_oidcat(ret, p->oidsuffix);
+            ent->desc = p->desc;
+            return ret;
+        }
     }
     ret[0] = -1;
     return 0;
@@ -487,44 +487,44 @@ int *oid_getoidbyent(struct oident *ent)
 }
 
 struct oident *oid_addent (int *oid, enum oid_proto proto,
-			   enum oid_class oclass,
-			   const char *desc, int value)
+                           enum oid_class oclass,
+                           const char *desc, int value)
 {
     struct oident *oident = 0;
 
     nmem_mutex_enter (oid_mutex);
     if (!oident)
     {
-	struct oident_list *oident_list;
-	oident_list = (struct oident_list *)
-	    nmem_malloc (oid_nmem, sizeof(*oident_list));
-	oident = &oident_list->oident;
-	oident->proto = proto;
-	oident->oclass = oclass;
+        struct oident_list *oident_list;
+        oident_list = (struct oident_list *)
+            nmem_malloc (oid_nmem, sizeof(*oident_list));
+        oident = &oident_list->oident;
+        oident->proto = proto;
+        oident->oclass = oclass;
 
-	if (!desc)
-	{
-	    char desc_str[OID_SIZE*10];
-	    int i;
+        if (!desc)
+        {
+            char desc_str[OID_SIZE*10];
+            int i;
 
-	    *desc_str = '\0';
-	    if (*oid >= 0)
-	    {
-		sprintf (desc_str, "%d", *oid);
-		for (i = 1; i < OID_SIZE && oid[i] >= 0; i++)
-		    sprintf (desc_str+strlen(desc_str), ".%d", oid[i]);
-	    }
-	    oident->desc = nmem_strdup(oid_nmem, desc_str);
-	}
-	else
-	    oident->desc = nmem_strdup(oid_nmem, desc);
-	if (value == VAL_DYNAMIC)
-	    oident->value = (enum oid_value) (++oid_value_dynamic);
-	else
-	    oident->value = (enum oid_value) value;
-	oid_oidcpy (oident->oidsuffix, oid);
-	oident_list->next = oident_table;
-	oident_table = oident_list;
+            *desc_str = '\0';
+            if (*oid >= 0)
+            {
+                sprintf (desc_str, "%d", *oid);
+                for (i = 1; i < OID_SIZE && oid[i] >= 0; i++)
+                    sprintf (desc_str+strlen(desc_str), ".%d", oid[i]);
+            }
+            oident->desc = nmem_strdup(oid_nmem, desc_str);
+        }
+        else
+            oident->desc = nmem_strdup(oid_nmem, desc);
+        if (value == VAL_DYNAMIC)
+            oident->value = (enum oid_value) (++oid_value_dynamic);
+        else
+            oident->value = (enum oid_value) value;
+        oid_oidcpy (oident->oidsuffix, oid);
+        oident_list->next = oident_table;
+        oident_table = oident_list;
     }
     nmem_mutex_leave (oid_mutex);
     return oident;
@@ -535,12 +535,12 @@ struct oident *oid_getentbyoid(int *oid)
     struct oident *oident;
 
     if (!oid)
-	return 0;
+        return 0;
     oid_init ();
     oident = oid_getentbyoid_x (oid);
     if (!oident)
-	oident = oid_addent (oid, PROTO_GENERAL, CLASS_GENERAL,
-			     NULL, VAL_DYNAMIC);
+        oident = oid_addent (oid, PROTO_GENERAL, CLASS_GENERAL,
+                             NULL, VAL_DYNAMIC);
     return oident;
 }
 
@@ -557,7 +557,7 @@ static oid_value oid_getval_raw(const char *name)
         {
             if (i < OID_SIZE-1)
                 oid[i++] = val;
-	    val = 0;
+            val = 0;
             name++;
         }
     }
@@ -566,7 +566,7 @@ static oid_value oid_getval_raw(const char *name)
     oident = oid_getentbyoid_x (oid);
     if (!oident)
         oident = oid_addent (oid, PROTO_GENERAL, CLASS_GENERAL, NULL,
-			 VAL_DYNAMIC);
+                         VAL_DYNAMIC);
     return oident->value;
 }
 
@@ -578,10 +578,10 @@ oid_value oid_getvalbyname(const char *name)
     if (isdigit (*(const unsigned char *) name))
         return oid_getval_raw (name);
     for (ol = oident_table; ol; ol = ol->next)
-	if (!yaz_matchstr(ol->oident.desc, name))
-	{
-	    return ol->oident.value;
-	}
+        if (!yaz_matchstr(ol->oident.desc, name))
+        {
+            return ol->oident.value;
+        }
     return VAL_NONE;
 }
 
@@ -620,9 +620,9 @@ char *oid_to_dotstring(const int *oid, char *oidbuf) {
 
     oidbuf[0] = '\0';
     for (i = 0; oid[i] != -1; i++) {
-	sprintf(tmpbuf, "%d", oid[i]);
-	if (i > 0) strcat(oidbuf, ".");
-	strcat(oidbuf, tmpbuf);
+        sprintf(tmpbuf, "%d", oid[i]);
+        if (i > 0) strcat(oidbuf, ".");
+        strcat(oidbuf, tmpbuf);
     }
 
     return oidbuf;
@@ -634,4 +634,12 @@ char *oid_name_to_dotstring(oid_class oclass, const char *name, char *oidbuf) {
     (void) oid_name_to_oid(oclass, name, oid);
     return oid_to_dotstring(oid, oidbuf);
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

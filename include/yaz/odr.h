@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.20 2005-05-26 21:47:16 adam Exp $
+ * $Id: odr.h,v 1.21 2005-06-25 15:46:03 adam Exp $
  */
 
 /**
@@ -230,10 +230,10 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 
 YAZ_EXPORT int ber_boolean(ODR o, int *val);
 YAZ_EXPORT int ber_tag(ODR o, void *p, int zclass, int tag,
-		       int *constructed, int opt, const char *name);
+                       int *constructed, int opt, const char *name);
 YAZ_EXPORT int ber_enctag(ODR o, int zclass, int tag, int constructed);
 YAZ_EXPORT int ber_dectag(const unsigned char *buf, int *zclass,
-			  int *tag, int *constructed, int max);
+                          int *tag, int *constructed, int max);
 YAZ_EXPORT int odr_bool(ODR o, int **p, int opt, const char *name);
 YAZ_EXPORT int odr_integer(ODR o, int **p, int opt, const char *name);
 YAZ_EXPORT int odr_enum(ODR o, int **p, int opt, const char *name);
@@ -245,7 +245,7 @@ YAZ_EXPORT int ber_null(ODR o);
 YAZ_EXPORT int odr_null(ODR o, Odr_null **p, int opt, const char *name);
 YAZ_EXPORT int ber_integer(ODR o, int *val);
 YAZ_EXPORT int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
-				     const char *name);
+                                     const char *name);
 YAZ_EXPORT int odr_constructed_end(ODR o);
 YAZ_EXPORT int odr_sequence_begin(ODR o, void *p, int size, const char *name);
 YAZ_EXPORT int odr_set_begin(ODR o, void *p, int size, const char *name);
@@ -256,19 +256,19 @@ YAZ_EXPORT int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name);
 YAZ_EXPORT int odp_more_chunks(ODR o, const unsigned char *base, int len);
 YAZ_EXPORT int odr_constructed_more(ODR o);
 YAZ_EXPORT int odr_bitstring(ODR o, Odr_bitmask **p, int opt,
-			     const char *name);
+                             const char *name);
 YAZ_EXPORT int ber_bitstring(ODR o, Odr_bitmask *p, int cons);
 YAZ_EXPORT int odr_generalstring(ODR o, char **p, int opt, const char *name);
 YAZ_EXPORT int ber_oidc(ODR o, Odr_oid *p, int max_oid_size);
 YAZ_EXPORT int odr_oid(ODR o, Odr_oid **p, int opt, const char *name);
 YAZ_EXPORT int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
-			  const char *name);
+                          const char *name);
 YAZ_EXPORT int odr_cstring(ODR o, char **p, int opt, const char *name);
 YAZ_EXPORT int odr_iconv_string(ODR o, char **p, int opt, const char *name);
 YAZ_EXPORT int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num,
-			       const char *name);
+                               const char *name);
 YAZ_EXPORT int odr_set_of(ODR o, Odr_fun type, void *p, int *num,
-			  const char *name);
+                          const char *name);
 YAZ_EXPORT int odr_any(ODR o, Odr_any **p, int opt, const char *name);
 YAZ_EXPORT int ber_any(ODR o, Odr_any **p);
 YAZ_EXPORT int completeBER(const unsigned char *buf, int len);
@@ -304,30 +304,30 @@ typedef struct Odr_external
 #define ODR_EXTERNAL_arbitrary 2
     union
     {
-	Odr_any  *single_ASN1_type;
-	Odr_oct  *octet_aligned; 
-	Odr_bitmask *arbitrary;      /* we aren't really equipped for this*/
+        Odr_any  *single_ASN1_type;
+        Odr_oct  *octet_aligned; 
+        Odr_bitmask *arbitrary;      /* we aren't really equipped for this*/
     } u;
 } Odr_external;
 
 YAZ_EXPORT int odr_external(ODR o, Odr_external **p, int opt,
-			    const char *name);
+                            const char *name);
 YAZ_EXPORT int odr_visiblestring(ODR o, char **p, int opt,
-				 const char *name);
+                                 const char *name);
 YAZ_EXPORT int odr_graphicstring(ODR o, char **p, int opt,
-				 const char *name);
+                                 const char *name);
 YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt,
-				   const char *name);
+                                   const char *name);
 
 YAZ_EXPORT int odr_set_charset(ODR o, const char *to, const char *from);
 
 YAZ_EXPORT void odr_set_stream(ODR o,  void *handle,
-			       void (*stream_write)(ODR o, 
-						    void *handle,
-						    int type,
-						    const char *buf,
-						    int len),
-			       void (*stream_close)(void *handle));
+                               void (*stream_write)(ODR o, 
+                                                    void *handle,
+                                                    int type,
+                                                    const char *buf,
+                                                    int len),
+                               void (*stream_close)(void *handle));
 
 YAZ_EXPORT void odr_printf(ODR o, const char *fmt, ...);
 
@@ -338,3 +338,11 @@ YAZ_END_CDECL
 #include <yaz/xmalloc.h>
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

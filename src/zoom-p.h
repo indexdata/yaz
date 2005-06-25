@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.6 2005-01-15 19:47:15 adam Exp $
+ * $Id: zoom-p.h,v 1.7 2005-06-25 15:46:07 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -158,10 +158,10 @@ struct ZOOM_task_p {
 #define ZOOM_TASK_PACKAGE 5
         ZOOM_package package;
 #define ZOOM_TASK_SORT 6
-	struct {
-	    ZOOM_resultset resultset;
-	    ZOOM_query q;
-	} sort;
+        struct {
+            ZOOM_resultset resultset;
+            ZOOM_query q;
+        } sort;
     } u;
     ZOOM_task next;
 };
@@ -173,3 +173,11 @@ struct ZOOM_Event_p {
 };
 
 void ZOOM_options_addref (ZOOM_options opt);
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

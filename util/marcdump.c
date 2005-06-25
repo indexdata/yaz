@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.31 2005-06-09 18:47:07 adam Exp $
+ * $Id: marcdump.c,v 1.32 2005-06-25 15:46:07 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -62,40 +62,40 @@ void print_xpath_nodes(xmlNodeSetPtr nodes, FILE* output) {
     
     fprintf(output, "Result (%d nodes):\n", size);
     for(i = 0; i < size; ++i) {
-	assert(nodes->nodeTab[i]);
-	
-	if(nodes->nodeTab[i]->type == XML_NAMESPACE_DECL)
-	{
-	    xmlNsPtr ns;
-	    
-	    ns = (xmlNsPtr)nodes->nodeTab[i];
-	    cur = (xmlNodePtr)ns->next;
-	    if(cur->ns) { 
-	        fprintf(output, "= namespace \"%s\"=\"%s\" for node %s:%s\n", 
-		    ns->prefix, ns->href, cur->ns->href, cur->name);
-	    } else {
-	        fprintf(output, "= namespace \"%s\"=\"%s\" for node %s\n", 
-		    ns->prefix, ns->href, cur->name);
-	    }
-	} 
-	else if(nodes->nodeTab[i]->type == XML_ELEMENT_NODE)
-	{
-	    cur = nodes->nodeTab[i];   	    
-	    if(cur->ns) { 
-    	        fprintf(output, "= element node \"%s:%s\"\n", 
-		    cur->ns->href, cur->name);
-	    } 
-	    else
-	    {
-    	        fprintf(output, "= element node \"%s\"\n", 
-		    cur->name);
-	    }
-	}
-	else
-	{
-	    cur = nodes->nodeTab[i];    
-	    fprintf(output, "= node \"%s\": type %d\n", cur->name, cur->type);
-	}
+        assert(nodes->nodeTab[i]);
+        
+        if(nodes->nodeTab[i]->type == XML_NAMESPACE_DECL)
+        {
+            xmlNsPtr ns;
+            
+            ns = (xmlNsPtr)nodes->nodeTab[i];
+            cur = (xmlNodePtr)ns->next;
+            if(cur->ns) { 
+                fprintf(output, "= namespace \"%s\"=\"%s\" for node %s:%s\n", 
+                    ns->prefix, ns->href, cur->ns->href, cur->name);
+            } else {
+                fprintf(output, "= namespace \"%s\"=\"%s\" for node %s\n", 
+                    ns->prefix, ns->href, cur->name);
+            }
+        } 
+        else if(nodes->nodeTab[i]->type == XML_ELEMENT_NODE)
+        {
+            cur = nodes->nodeTab[i];        
+            if(cur->ns) { 
+                fprintf(output, "= element node \"%s:%s\"\n", 
+                    cur->ns->href, cur->name);
+            } 
+            else
+            {
+                fprintf(output, "= element node \"%s\"\n", 
+                    cur->name);
+            }
+        }
+        else
+        {
+            cur = nodes->nodeTab[i];    
+            fprintf(output, "= node \"%s\": type %d\n", cur->name, cur->type);
+        }
     }
 }
 #endif
@@ -127,8 +127,8 @@ int main (int argc, char **argv)
 
     while ((r = options("pvc:xOeXIf:t:2", argv, argc, &arg)) != -2)
     {
-	int count;
-	no++;
+        int count;
+        no++;
         switch (r)
         {
         case 'f':
@@ -137,43 +137,43 @@ int main (int argc, char **argv)
         case 't':
             to = arg;
             break;
-	case 'c':
-	    if (cfile)
-		fclose (cfile);
-	    cfile = fopen(arg, "w");
-	    break;
+        case 'c':
+            if (cfile)
+                fclose (cfile);
+            cfile = fopen(arg, "w");
+            break;
         case 'x':
             xml = YAZ_MARC_SIMPLEXML;
             break;
         case 'O':
             xml = YAZ_MARC_OAIMARC;
             break;
-	case 'e':
-	    xml = YAZ_MARC_XCHANGE;
-	    break;
+        case 'e':
+            xml = YAZ_MARC_XCHANGE;
+            break;
         case 'X':
             xml = YAZ_MARC_MARCXML;
             break;
-	case 'I':
-	    xml = YAZ_MARC_ISO2709;
-	    break;
-	case 'p':
-	    print_offset = 1;
-	    break;
-	case '2':
-	    libxml_dom_test = 1;
-	    break;
+        case 'I':
+            xml = YAZ_MARC_ISO2709;
+            break;
+        case 'p':
+            print_offset = 1;
+            break;
+        case '2':
+            libxml_dom_test = 1;
+            break;
         case 0:
-	    inf = fopen(arg, "rb");
-	    count = 0;
-	    if (!inf)
-	    {
-		fprintf (stderr, "%s: cannot open %s:%s\n",
-			 prog, arg, strerror (errno));
-		exit(1);
-	    }
-	    if (cfile)
-		fprintf (cfile, "char *marc_records[] = {\n");
+            inf = fopen(arg, "rb");
+            count = 0;
+            if (!inf)
+            {
+                fprintf (stderr, "%s: cannot open %s:%s\n",
+                         prog, arg, strerror (errno));
+                exit(1);
+            }
+            if (cfile)
+                fprintf (cfile, "char *marc_records[] = {\n");
             if (1)
             {
                 yaz_marc_t mt = yaz_marc_create();
@@ -188,7 +188,7 @@ int main (int argc, char **argv)
                                 "unsupported\n", from, to);
                         exit(2);
                     }
-		    yaz_marc_iconv(mt, cd);
+                    yaz_marc_iconv(mt, cd);
                 }
                 yaz_marc_xml(mt, xml);
                 yaz_marc_debug(mt, verbose);
@@ -200,89 +200,89 @@ int main (int argc, char **argv)
                     
                     r = fread (buf, 1, 5, inf);
                     if (r < 5)
-		    {
-			if (r && print_offset && verbose)
-			    printf ("<!-- Extra %d bytes at end of file -->\n", r);
+                    {
+                        if (r && print_offset && verbose)
+                            printf ("<!-- Extra %d bytes at end of file -->\n", r);
                         break;
-		    }
-		    while (*buf < '0' || *buf > '9')
-		    {
-			int i;
-			long off = ftell(inf) - 5;
-			if (verbose || print_offset)
-			    printf("<!-- Skipping bad byte %d (0x%02X) at offset "
-				   "%ld (0x%lx) -->\n", 
-				   *buf & 0xff, *buf & 0xff,
-				   off, off);
-			for (i = 0; i<4; i++)
-			    buf[i] = buf[i+1];
-			r = fread(buf+4, 1, 1, inf);
-			if (r < 1)
-			    break;
-		    }
-		    if (r < 1)
-		    {
-			if (verbose || print_offset)
-			    printf ("<!-- End of file with data -->\n");
-			break;
-		    }
-		    if (print_offset)
-		    {
-			long off = ftell(inf) - 5;
-			printf ("<!-- Record %d offset %ld (0x%lx) -->\n",
-				num, off, off);
-		    }
+                    }
+                    while (*buf < '0' || *buf > '9')
+                    {
+                        int i;
+                        long off = ftell(inf) - 5;
+                        if (verbose || print_offset)
+                            printf("<!-- Skipping bad byte %d (0x%02X) at offset "
+                                   "%ld (0x%lx) -->\n", 
+                                   *buf & 0xff, *buf & 0xff,
+                                   off, off);
+                        for (i = 0; i<4; i++)
+                            buf[i] = buf[i+1];
+                        r = fread(buf+4, 1, 1, inf);
+                        if (r < 1)
+                            break;
+                    }
+                    if (r < 1)
+                    {
+                        if (verbose || print_offset)
+                            printf ("<!-- End of file with data -->\n");
+                        break;
+                    }
+                    if (print_offset)
+                    {
+                        long off = ftell(inf) - 5;
+                        printf ("<!-- Record %d offset %ld (0x%lx) -->\n",
+                                num, off, off);
+                    }
                     len = atoi_n(buf, 5);
                     if (len < 25 || len > 100000)
-		    {
-			long off = ftell(inf) - 5;
-			printf("Bad Length %d read at offset %ld (%lx)\n",
-			       len, (long) off, (long) off);
+                    {
+                        long off = ftell(inf) - 5;
+                        printf("Bad Length %d read at offset %ld (%lx)\n",
+                               len, (long) off, (long) off);
                         break;
-		    }
+                    }
                     len = len - 5;
                     r = fread (buf + 5, 1, len, inf);
                     if (r < len)
                         break;
                     r = yaz_marc_decode_buf (mt, buf, -1, &result, &rlen);
-		    if (result)
-		        fwrite (result, rlen, 1, stdout);
+                    if (result)
+                        fwrite (result, rlen, 1, stdout);
 #if HAVE_XML2
-		    if (r > 0 && libxml_dom_test)
-		    {
-			xmlDocPtr doc = xmlParseMemory(result, rlen);
-			if (!doc)
-			    fprintf(stderr, "xmLParseMemory failed\n");
-			else
-			{
-			    int i;
-			    xmlXPathContextPtr xpathCtx; 
-			    xmlXPathObjectPtr xpathObj; 
-			    static const char *xpathExpr[] = {
-				"/record/datafield[@tag='245']/subfield[@code='a']",
-				"/record/datafield[@tag='100']/subfield",
-				"/record/datafield[@tag='245']/subfield[@code='a']",
-				"/record/datafield[@tag='650']/subfield",
-				"/record/datafield[@tag='650']",
-				0};
-			    
-			    xpathCtx = xmlXPathNewContext(doc);
+                    if (r > 0 && libxml_dom_test)
+                    {
+                        xmlDocPtr doc = xmlParseMemory(result, rlen);
+                        if (!doc)
+                            fprintf(stderr, "xmLParseMemory failed\n");
+                        else
+                        {
+                            int i;
+                            xmlXPathContextPtr xpathCtx; 
+                            xmlXPathObjectPtr xpathObj; 
+                            static const char *xpathExpr[] = {
+                                "/record/datafield[@tag='245']/subfield[@code='a']",
+                                "/record/datafield[@tag='100']/subfield",
+                                "/record/datafield[@tag='245']/subfield[@code='a']",
+                                "/record/datafield[@tag='650']/subfield",
+                                "/record/datafield[@tag='650']",
+                                0};
+                            
+                            xpathCtx = xmlXPathNewContext(doc);
 
-			    for (i = 0; xpathExpr[i]; i++) {
-				xpathObj = xmlXPathEvalExpression(xpathExpr[i], xpathCtx);
-				if(xpathObj == NULL) {
-				    fprintf(stderr,"Error: unable to evaluate xpath expression \"%s\"\n", xpathExpr[i]);
-				}
-				else
-				{
-				    print_xpath_nodes(xpathObj->nodesetval, stdout);
-				    xmlXPathFreeObject(xpathObj);
-				}
-			    }
-			    xmlXPathFreeContext(xpathCtx); 
-			    xmlFreeDoc(doc);
-			}
-		    }
+                            for (i = 0; xpathExpr[i]; i++) {
+                                xpathObj = xmlXPathEvalExpression(xpathExpr[i], xpathCtx);
+                                if(xpathObj == NULL) {
+                                    fprintf(stderr,"Error: unable to evaluate xpath expression \"%s\"\n", xpathExpr[i]);
+                                }
+                                else
+                                {
+                                    print_xpath_nodes(xpathObj->nodesetval, stdout);
+                                    xmlXPathFreeObject(xpathObj);
+                                }
+                            }
+                            xmlXPathFreeContext(xpathCtx); 
+                            xmlFreeDoc(doc);
+                        }
+                    }
 #endif
                     if (r > 0 && cfile)
                     {
@@ -300,24 +300,24 @@ int main (int argc, char **argv)
                             if (i < r - 1 && (i & 15) == 15)
                                 fprintf (cfile, "\"\n");
                             
-			}
+                        }
                         fprintf (cfile, "\"\n");
                     }
-		    num++;
-		    if (verbose)
-			printf("\n");
+                    num++;
+                    if (verbose)
+                        printf("\n");
                 }
                 count++;
                 if (cd)
                     yaz_iconv_close(cd);
                 yaz_marc_destroy(mt);
-	    }
-	    if (cfile)
-		fprintf (cfile, "};\n");
-	    fclose(inf);
+            }
+            if (cfile)
+                fprintf (cfile, "};\n");
+            fclose(inf);
             break;
         case 'v':
-	    verbose++;
+            verbose++;
             break;
         default:
             usage(prog);
@@ -325,11 +325,19 @@ int main (int argc, char **argv)
         }
     }
     if (cfile)
-	fclose (cfile);
+        fclose (cfile);
     if (!no)
     {
         usage(prog);
-	exit (1);
+        exit (1);
     }
     exit (0);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

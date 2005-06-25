@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.5 2005-01-15 19:47:14 adam Exp $
+ * $Id: pquery.c,v 1.6 2005-06-25 15:46:04 adam Exp $
  */
 /**
  * \file pquery.c
@@ -37,7 +37,7 @@ static Z_RPNStructure *rpn_structure (struct yaz_pqf_parser *li, ODR o,
                                       oid_proto, 
                                       int num_attr, int max_attr, 
                                       int *attr_list, char **attr_clist,
-				      oid_value *attr_set);
+                                      oid_value *attr_set);
 
 static enum oid_value query_oid_getvalbyname (struct yaz_pqf_parser *li)
 {
@@ -58,7 +58,7 @@ static int compare_term (struct yaz_pqf_parser *li, const char *src,
     size_t len=strlen(src);
     
     if (li->lex_len == len+off && !memcmp (li->lex_buf+off, src, len-off))
-	return 1;
+        return 1;
     return 0;
 }
 
@@ -75,34 +75,34 @@ static int query_token (struct yaz_pqf_parser *li)
     li->lex_len = 0;
     if ((sep_match = strchr (li->left_sep, **qptr)))
     {
-	sep_char = li->right_sep[sep_match - li->left_sep];
+        sep_char = li->right_sep[sep_match - li->left_sep];
         ++(*qptr);
     }
     li->lex_buf = *qptr;
    
     if (**qptr == li->escape_char && isdigit (((const unsigned char *) *qptr)[1]))
     {
-	++(li->lex_len);
-	++(*qptr);
-	return 'l';
+        ++(li->lex_len);
+        ++(*qptr);
+        return 'l';
     }
     while (**qptr && **qptr != sep_char)
     {
-	if (**qptr == '\\')
-	{
-	    ++(li->lex_len);
-	    ++(*qptr);
-	}
-	++(li->lex_len);
-	++(*qptr);
+        if (**qptr == '\\')
+        {
+            ++(li->lex_len);
+            ++(*qptr);
+        }
+        ++(li->lex_len);
+        ++(*qptr);
     }
     if (**qptr)
-	++(*qptr);
+        ++(*qptr);
     if (sep_char == ' ' &&
         li->lex_len >= 1 && li->lex_buf[0] == li->escape_char)
     {
-	if (compare_term (li, "and", 1))
-	    return 'a';
+        if (compare_term (li, "and", 1))
+            return 'a';
         if (compare_term (li, "or", 1))
             return 'o';
         if (compare_term (li, "not", 1))
@@ -131,110 +131,110 @@ static int escape_string(char *out_buf, const char *in, int len)
 
     char *out = out_buf;
     while (--len >= 0)
-	if (*in == '\\' && len > 0)
-	{
-	    --len;
-	    switch (*++in)
-	    {
-	    case 't':
-		*out++ = '\t';
-		break;
-	    case 'n':
-		*out++ = '\n';
-		break;
-	    case 'r':
-		*out++ = '\r';
-		break;
-	    case 'f':
-		*out++ = '\f';
-		break;
-	    case 'x':
-		if (len > 1)
-		{
-		    char s[4];
-		    int n = 0;
-		    s[0] = *++in;
-		    s[1] = *++in;
-		    s[2] = '\0';
-		    len = len - 2;
-		    sscanf (s, "%x", &n);
-		    *out++ = n;
-		}
-		break;
-	    case '0':
-	    case '1':
-	    case '2':
-	    case '3':
-		if (len > 1)
-		{
-		    char s[4];
-		    int n = 0;
-		    s[0] = *in;
-		    s[1] = *++in;		    
-		    s[2] = *++in;
-		    s[3] = '\0';
-		    len = len - 2;
-		    sscanf (s, "%o", &n);
-		    *out++ = n;
-		}
-		break;
-	    default:
-		*out++ = *in;
-		break;
-	    }
-	    in++;
-	}
-	else
-	    *out++ = *in++;
+        if (*in == '\\' && len > 0)
+        {
+            --len;
+            switch (*++in)
+            {
+            case 't':
+                *out++ = '\t';
+                break;
+            case 'n':
+                *out++ = '\n';
+                break;
+            case 'r':
+                *out++ = '\r';
+                break;
+            case 'f':
+                *out++ = '\f';
+                break;
+            case 'x':
+                if (len > 1)
+                {
+                    char s[4];
+                    int n = 0;
+                    s[0] = *++in;
+                    s[1] = *++in;
+                    s[2] = '\0';
+                    len = len - 2;
+                    sscanf (s, "%x", &n);
+                    *out++ = n;
+                }
+                break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+                if (len > 1)
+                {
+                    char s[4];
+                    int n = 0;
+                    s[0] = *in;
+                    s[1] = *++in;                   
+                    s[2] = *++in;
+                    s[3] = '\0';
+                    len = len - 2;
+                    sscanf (s, "%o", &n);
+                    *out++ = n;
+                }
+                break;
+            default:
+                *out++ = *in;
+                break;
+            }
+            in++;
+        }
+        else
+            *out++ = *in++;
     return out - out_buf;
 }
 
 static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
-			      int num_attr, int *attr_list,
-			      char **attr_clist, oid_value *attr_set)
+                              int num_attr, int *attr_list,
+                              char **attr_clist, oid_value *attr_set)
 {
     const char *cp;
     if (!(cp = strchr (li->lex_buf, '=')) ||
-	(size_t) (cp-li->lex_buf) > li->lex_len)
+        (size_t) (cp-li->lex_buf) > li->lex_len)
     {
-	attr_set[num_attr] = query_oid_getvalbyname (li);
-	if (attr_set[num_attr] == VAL_NONE)
+        attr_set[num_attr] = query_oid_getvalbyname (li);
+        if (attr_set[num_attr] == VAL_NONE)
         {
             li->error = YAZ_PQF_ERROR_ATTSET;
-	    return 0;
+            return 0;
         }
-	if (!lex (li))
+        if (!lex (li))
         {
             li->error = YAZ_PQF_ERROR_MISSING;
             return 0;
         }
-	if (!(cp = strchr (li->lex_buf, '=')))
+        if (!(cp = strchr (li->lex_buf, '=')))
         {
             li->error = YAZ_PQF_ERROR_BADATTR;
-	    return 0;
+            return 0;
         }
     }
     else 
     {
-	if (num_attr > 0)
-	    attr_set[num_attr] = attr_set[num_attr-1];
-	else
-	    attr_set[num_attr] = VAL_NONE;
+        if (num_attr > 0)
+            attr_set[num_attr] = attr_set[num_attr-1];
+        else
+            attr_set[num_attr] = VAL_NONE;
     }
     attr_list[2*num_attr] = atoi(li->lex_buf);
-	cp++;
+        cp++;
     if (*cp >= '0' && *cp <= '9')
     {
-	attr_list[2*num_attr+1] = atoi (cp);
-	attr_clist[num_attr] = 0;
+        attr_list[2*num_attr+1] = atoi (cp);
+        attr_clist[num_attr] = 0;
     }
     else
     {
-	int len = li->lex_len - (cp - li->lex_buf);
-	attr_list[2*num_attr+1] = 0;
-	attr_clist[num_attr] = (char *) odr_malloc (o, len+1);
-	len = escape_string(attr_clist[num_attr], cp, len);
-	attr_clist[num_attr][len] = '\0';
+        int len = li->lex_len - (cp - li->lex_buf);
+        attr_list[2*num_attr+1] = 0;
+        attr_clist[num_attr] = (char *) odr_malloc (o, len+1);
+        len = escape_string(attr_clist[num_attr], cp, len);
+        attr_clist[num_attr][len] = '\0';
     }
     return 1;
 }
@@ -242,7 +242,7 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
 static Z_AttributesPlusTerm *rpn_term (struct yaz_pqf_parser *li, ODR o,
                                        oid_proto proto, 
                                        int num_attr, int *attr_list,
-				       char **attr_clist, oid_value *attr_set)
+                                       char **attr_clist, oid_value *attr_set)
 {
     Z_AttributesPlusTerm *zapt;
     Odr_oct *term_octet;
@@ -261,7 +261,7 @@ static Z_AttributesPlusTerm *rpn_term (struct yaz_pqf_parser *li, ODR o,
         int *attr_tmp;
 
         elements = (Z_AttributeElement**)
-	    odr_malloc (o, num_attr * sizeof(*elements));
+            odr_malloc (o, num_attr * sizeof(*elements));
 
         attr_tmp = (int *)odr_malloc (o, num_attr * 2 * sizeof(int));
         memcpy (attr_tmp, attr_list, num_attr * 2 * sizeof(int));
@@ -276,40 +276,40 @@ static Z_AttributesPlusTerm *rpn_term (struct yaz_pqf_parser *li, ODR o,
             elements[k] =
                 (Z_AttributeElement*)odr_malloc (o,sizeof(**elements));
             elements[k]->attributeType = &attr_tmp[2*i];
-	    elements[k]->attributeSet =
-		yaz_oidval_to_z3950oid(o, CLASS_ATTSET, attr_set[i]);
+            elements[k]->attributeSet =
+                yaz_oidval_to_z3950oid(o, CLASS_ATTSET, attr_set[i]);
 
-	    if (attr_clist[i])
-	    {
-		elements[k]->which = Z_AttributeValue_complex;
-		elements[k]->value.complex = (Z_ComplexAttribute *)
-		    odr_malloc (o, sizeof(Z_ComplexAttribute));
-		elements[k]->value.complex->num_list = 1;
-		elements[k]->value.complex->list =
-		    (Z_StringOrNumeric **)
-		    odr_malloc (o, 1 * sizeof(Z_StringOrNumeric *));
-		elements[k]->value.complex->list[0] =
-		    (Z_StringOrNumeric *)
-		    odr_malloc (o, sizeof(Z_StringOrNumeric));
-		elements[k]->value.complex->list[0]->which =
-		    Z_StringOrNumeric_string;
-		elements[k]->value.complex->list[0]->u.string =
-		    attr_clist[i];
-		elements[k]->value.complex->semanticAction = (int **)
-		    odr_nullval();
-		elements[k]->value.complex->num_semanticAction = 0;
-	    }
-	    else
-	    {
-		elements[k]->which = Z_AttributeValue_numeric;
-		elements[k]->value.numeric = &attr_tmp[2*i+1];
-	    }
+            if (attr_clist[i])
+            {
+                elements[k]->which = Z_AttributeValue_complex;
+                elements[k]->value.complex = (Z_ComplexAttribute *)
+                    odr_malloc (o, sizeof(Z_ComplexAttribute));
+                elements[k]->value.complex->num_list = 1;
+                elements[k]->value.complex->list =
+                    (Z_StringOrNumeric **)
+                    odr_malloc (o, 1 * sizeof(Z_StringOrNumeric *));
+                elements[k]->value.complex->list[0] =
+                    (Z_StringOrNumeric *)
+                    odr_malloc (o, sizeof(Z_StringOrNumeric));
+                elements[k]->value.complex->list[0]->which =
+                    Z_StringOrNumeric_string;
+                elements[k]->value.complex->list[0]->u.string =
+                    attr_clist[i];
+                elements[k]->value.complex->semanticAction = (int **)
+                    odr_nullval();
+                elements[k]->value.complex->num_semanticAction = 0;
+            }
+            else
+            {
+                elements[k]->which = Z_AttributeValue_numeric;
+                elements[k]->value.numeric = &attr_tmp[2*i+1];
+            }
             k++;
         }
         num_attr = k;
     }
     zapt->attributes = (Z_AttributeList *)
-	odr_malloc (o, sizeof(*zapt->attributes));
+        odr_malloc (o, sizeof(*zapt->attributes));
     zapt->attributes->num_attributes = num_attr;
     zapt->attributes->attributes = elements;
 
@@ -341,8 +341,8 @@ static Z_AttributesPlusTerm *rpn_term (struct yaz_pqf_parser *li, ODR o,
         break;
     case Z_Term_external:
         term->which = Z_Term_external;
-	term->u.external = 0;
-	break;
+        term->u.external = 0;
+        break;
     default:
         term->which = Z_Term_null;
         term->u.null = odr_nullval();
@@ -364,7 +364,7 @@ static Z_Operand *rpn_simple (struct yaz_pqf_parser *li, ODR o, oid_proto proto,
         zo->which = Z_Operand_APT;
         if (!(zo->u.attributesPlusTerm =
               rpn_term (li, o, proto, num_attr, attr_list, attr_clist,
-			attr_set)))
+                        attr_set)))
             return 0;
         lex (li);
         break;
@@ -451,7 +451,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
 static Z_Complex *rpn_complex (struct yaz_pqf_parser *li, ODR o, oid_proto proto,
                                int num_attr, int max_attr, 
                                int *attr_list, char **attr_clist,
-			       oid_value *attr_set)
+                               oid_value *attr_set)
 {
     Z_Complex *zc;
     Z_Operator *zo;
@@ -488,7 +488,7 @@ static Z_Complex *rpn_complex (struct yaz_pqf_parser *li, ODR o, oid_proto proto
     lex (li);
     if (!(zc->s1 =
           rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
-			 attr_clist, attr_set)))
+                         attr_clist, attr_set)))
         return NULL;
     if (!(zc->s2 =
           rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
@@ -515,9 +515,9 @@ static void rpn_term_type (struct yaz_pqf_parser *li, ODR o)
         li->term_type = Z_Term_null;
     else if (compare_term(li, "range", 0))
     {
-	/* prepare for external: range search .. */
+        /* prepare for external: range search .. */
         li->term_type = Z_Term_external;
-	li->external_type = VAL_MULTISRCH2;
+        li->external_type = VAL_MULTISRCH2;
     }
     lex (li);
 }
@@ -526,8 +526,8 @@ static Z_RPNStructure *rpn_structure (struct yaz_pqf_parser *li, ODR o,
                                       oid_proto proto, 
                                       int num_attr, int max_attr, 
                                       int *attr_list,
-				      char **attr_clist,
-				      oid_value *attr_set)
+                                      char **attr_clist,
+                                      oid_value *attr_set)
 {
     Z_RPNStructure *sz;
 
@@ -564,20 +564,20 @@ static Z_RPNStructure *rpn_structure (struct yaz_pqf_parser *li, ODR o,
             li->error = YAZ_PQF_ERROR_TOOMANY;
             return 0;
         }
-	if (!p_query_parse_attr(li, o, num_attr, attr_list,
+        if (!p_query_parse_attr(li, o, num_attr, attr_list,
                                 attr_clist, attr_set))
             return 0;
-	num_attr++;
+        num_attr++;
         lex (li);
         return
             rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
-			   attr_clist,  attr_set);
+                           attr_clist,  attr_set);
     case 'y':
-	lex (li);
+        lex (li);
         rpn_term_type (li, o);
         return
             rpn_structure (li, o, proto, num_attr, max_attr, attr_list,
-			   attr_clist, attr_set);
+                           attr_clist, attr_set);
     case 0:                /* operator/operand expected! */
         li->error = YAZ_PQF_ERROR_MISSING;
         return 0;
@@ -618,7 +618,7 @@ Z_RPNQuery *p_query_rpn_mk (ODR o, struct yaz_pqf_parser *li, oid_proto proto,
     if (!zq->attributeSetId)
     {
         li->error = YAZ_PQF_ERROR_ATTSET;
-	return 0;
+        return 0;
     }
 
     if (!(zq->RPNStructure = rpn_structure (li, o, proto, 0, 512,
@@ -806,3 +806,11 @@ int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off)
     *off = p->query_ptr - p->query_buf;
     return p->error;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

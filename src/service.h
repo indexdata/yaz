@@ -2,7 +2,7 @@
  * NT Service interface Utility.
  *  Based on code written by
  *     Chas Woodfield, Fretwell Downing Datasystems.
- * $Id: service.h,v 1.2 2004-10-15 00:19:00 adam Exp $
+ * $Id: service.h,v 1.3 2005-06-25 15:46:05 adam Exp $
  */
 /**
  * \file service.h
@@ -46,3 +46,11 @@ void RunAppService(void *pHandle);
 void StopAppService(void *pHandle);
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

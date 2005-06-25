@@ -1,4 +1,4 @@
-/* $Id: cqlstring.c,v 1.4 2005-01-15 19:47:11 adam Exp $
+/* $Id: cqlstring.c,v 1.5 2005-06-25 15:46:03 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -43,4 +43,12 @@ int cql_parser_string(CQL_parser cp, const char *str)
     
     return cql_parser_stream(cp, getbuf, ungetbuf, &b);
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: requestq.c,v 1.3 2005-01-15 19:47:14 adam Exp $
+ * $Id: requestq.c,v 1.4 2005-06-25 15:46:04 adam Exp $
  */
 /**
  * \file requestq.c
@@ -20,9 +20,9 @@
 void request_enq(request_q *q, request *r)
 {
     if (q->tail)
-    	q->tail->next = r;
+        q->tail->next = r;
     else
-    	q->head = r;
+        q->head = r;
     q->tail = r;
     q->num++;
 }
@@ -37,10 +37,10 @@ request *request_deq(request_q *q)
     request *r = q->head;
 
     if (!r)
-    	return 0;
+        return 0;
     q->head = q->head->next;
     if (!q->head)
-    	q->tail = 0;
+        q->tail = 0;
     q->num--;
     return r;
 }
@@ -56,7 +56,7 @@ void request_delq(request_q *q)
     request *r1, *r = q->list;
     while (r)
     {
-	xfree (r->response);
+        xfree (r->response);
         r1 = r;
         r = r->next;
         xfree (r1);
@@ -68,13 +68,13 @@ request *request_get(request_q *q)
     request *r = q->list;
 
     if (r)
-    	q->list = r->next;
+        q->list = r->next;
     else
     {
-    	if (!(r = (request *)xmalloc(sizeof(*r))))
-	    abort();
-	r->response = 0;
-	r->size_response = 0;
+        if (!(r = (request *)xmalloc(sizeof(*r))))
+            abort();
+        r->response = 0;
+        r->size_response = 0;
     }
     r->q = q;
     r->len_refid = 0;
@@ -95,4 +95,12 @@ void request_release(request *r)
     r->next = q->list;
     q->list = r;
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

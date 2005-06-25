@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.6 2004-10-15 00:19:00 adam Exp $
+ * $Id: cclqfile.c,v 1.7 2005-06-25 15:46:03 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -87,11 +87,11 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
         int no_scan = 0;
         
         if (sscanf (cp, "%100s%n", qual_spec, &no_scan) < 1)
-	    break;
+            break;
 
         if (!(split = strchr (qual_spec, '=')))
         {
-	    /* alias specification .. */
+            /* alias specification .. */
             if (pair_no == 0)
             {
                 ccl_qual_add_combi (bibset, qual_name, cp);
@@ -99,23 +99,23 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
             }
             break;
         }
-	/* [set,]type=value ... */
+        /* [set,]type=value ... */
         cp += no_scan;
         
         *split++ = '\0';
 
-	setp = strchr (qual_spec, ',');
-	if (setp)
-	{
-	    /* set,type=value ... */
-	    *setp++ = '\0';
+        setp = strchr (qual_spec, ',');
+        if (setp)
+        {
+            /* set,type=value ... */
+            *setp++ = '\0';
             qual_type = setp;
-	}
-	else
-	{
-	    /* type=value ... */
+        }
+        else
+        {
+            /* type=value ... */
             qual_type = qual_spec;
-	}
+        }
         while (pair_no < 128)
         {
             int type, value;
@@ -124,7 +124,7 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
             if ((split = strchr (qual_value, ',')))
                 *split++ = '\0';
 
-	    value = 0;
+            value = 0;
             switch (qual_type[0])
             {
             case 'u':
@@ -175,49 +175,49 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 
             type_ar[pair_no] = type;
 
-	    if (value)
-	    {
-		value_ar[pair_no] = value;
-		svalue_ar[pair_no] = 0;
-	    }
-	    else if (*qual_value >= '0' && *qual_value <= '9')
-	    {
-		value_ar[pair_no] = atoi (qual_value);
-		svalue_ar[pair_no] = 0;
-	    }
-	    else
-	    {
-		size_t len;
-		if (split)
-		    len = split - qual_value;
-		else
-		    len = strlen(qual_value);
-		svalue_ar[pair_no] = (char *) xmalloc(len+1);
-		memcpy(svalue_ar[pair_no], qual_value, len);
-		svalue_ar[pair_no][len] = '\0';
-	    }
-	    if (setp)
-	    {
-	        attsets[pair_no] = (char*) xmalloc (strlen(qual_spec)+1);
-	        strcpy (attsets[pair_no], qual_spec);
-	    }
-	    else
-	        attsets[pair_no] = 0;
+            if (value)
+            {
+                value_ar[pair_no] = value;
+                svalue_ar[pair_no] = 0;
+            }
+            else if (*qual_value >= '0' && *qual_value <= '9')
+            {
+                value_ar[pair_no] = atoi (qual_value);
+                svalue_ar[pair_no] = 0;
+            }
+            else
+            {
+                size_t len;
+                if (split)
+                    len = split - qual_value;
+                else
+                    len = strlen(qual_value);
+                svalue_ar[pair_no] = (char *) xmalloc(len+1);
+                memcpy(svalue_ar[pair_no], qual_value, len);
+                svalue_ar[pair_no][len] = '\0';
+            }
+            if (setp)
+            {
+                attsets[pair_no] = (char*) xmalloc (strlen(qual_spec)+1);
+                strcpy (attsets[pair_no], qual_spec);
+            }
+            else
+                attsets[pair_no] = 0;
             pair_no++;
             if (!split)
                 break;
         }
     }
     ccl_qual_add_set (bibset, qual_name, pair_no, type_ar, value_ar, svalue_ar,
-		      attsets);
+                      attsets);
 }
 
 void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
 {
     if (*qual_name == '@')
-	ccl_qual_add_special(bibset, qual_name+1, cp);
+        ccl_qual_add_special(bibset, qual_name+1, cp);
     else
-	ccl_qual_field(bibset, cp, qual_name);
+        ccl_qual_field(bibset, cp, qual_name);
 }
 
 void ccl_qual_buf(CCL_bibset bibset, const char *buf)
@@ -226,22 +226,22 @@ void ccl_qual_buf(CCL_bibset bibset, const char *buf)
     char line[256];
     while (1)
     {
-	const char *cp2 = cp1;
-	int len;
-	while (*cp2 && !strchr("\r\n", *cp2))
-	    cp2++;
-	len = cp2 - cp1;
-	if (len > 0)
-	{
-	    if (len >= (sizeof(line)-1))
-		len = sizeof(line)-1;
-	    memcpy(line, cp1, len);
-	    line[len] = '\0';
-	    ccl_qual_line(bibset, line);
-	}
-	if (!*cp2)
-	    break;
-	cp1 = cp2+1;
+        const char *cp2 = cp1;
+        int len;
+        while (*cp2 && !strchr("\r\n", *cp2))
+            cp2++;
+        len = cp2 - cp1;
+        if (len > 0)
+        {
+            if (len >= (sizeof(line)-1))
+                len = sizeof(line)-1;
+            memcpy(line, cp1, len);
+            line[len] = '\0';
+            ccl_qual_line(bibset, line);
+        }
+        if (!*cp2)
+            break;
+        cp1 = cp2+1;
     }
 }
 
@@ -252,13 +252,13 @@ void ccl_qual_line(CCL_bibset bibset, char *line)
     char *cp1, *cp = line;
     
     if (*cp == '#')
-	return;        /* ignore lines starting with # */
+        return;        /* ignore lines starting with # */
     if (sscanf (cp, "%100s%n", qual_name, &no_scan) < 1)
-	return;        /* also ignore empty lines */
+        return;        /* also ignore empty lines */
     cp += no_scan;
     cp1 = strchr(cp, '#');
     if (cp1)
-	*cp1 = '\0';
+        *cp1 = '\0';
     ccl_qual_fitem (bibset, cp, qual_name);
 }
 
@@ -280,7 +280,7 @@ void ccl_qual_file (CCL_bibset bibset, FILE *inf)
     char line[256];
 
     while (fgets (line, 255, inf))
-	ccl_qual_line(bibset, line);
+        ccl_qual_line(bibset, line);
 }
 
 int ccl_qual_fname (CCL_bibset bibset, const char *fname)
@@ -293,3 +293,11 @@ int ccl_qual_fname (CCL_bibset bibset, const char *fname)
     fclose (inf);
     return 0;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

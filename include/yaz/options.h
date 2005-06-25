@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: options.h,v 1.5 2005-01-15 19:47:09 adam Exp $
+ * $Id: options.h,v 1.6 2005-06-25 15:46:03 adam Exp $
  */
 
 /**
@@ -42,4 +42,12 @@ YAZ_EXPORT int options (const char *desc, char **argv, int argc, char **arg);
 YAZ_END_CDECL
 
 #endif
-	
+        
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

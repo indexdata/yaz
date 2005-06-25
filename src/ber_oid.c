@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_oid.c,v 1.6 2005-05-26 21:46:40 adam Exp $
+ * $Id: ber_oid.c,v 1.7 2005-06-25 15:46:03 adam Exp $
  */
 
 /** 
@@ -44,8 +44,8 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
             return 0;
         }
         pos = 0;
-	while (len)
-	{
+        while (len)
+        {
             int id = 0;
             do
             {
@@ -61,20 +61,20 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
             while (*(o->bp++) & 0X80);
             if (pos > 0)
                 p[pos++] = id;
-	    else
+            else
             {
                 p[0] = id / 40;
-		if (p[0] > 2)
+                if (p[0] > 2)
                     p[0] = 2;
-		p[1] = id - p[0] * 40;
-		pos = 2;
+                p[1] = id - p[0] * 40;
+                pos = 2;
             }
-	    if (pos >= max_oid_size)
-	    {
-		odr_seterror(o, OPROTO, 55);
-		return 0;
-	    }
-	}
+            if (pos >= max_oid_size)
+            {
+                odr_seterror(o, OPROTO, 55);
+                return 0;
+            }
+        }
         p[pos] = -1;
         return 1;
     case ODR_ENCODE:
@@ -93,7 +93,7 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
             n = 0;
             if (pos == 1)
                 id = p[0]*40 + p[1];
-	    else 
+            else 
                 id = p[pos];
             do
             {
@@ -124,3 +124,11 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
         return 0;
     }
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

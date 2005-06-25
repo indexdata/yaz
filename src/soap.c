@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.10 2005-01-15 19:47:14 adam Exp $
+ * $Id: soap.c,v 1.11 2005-06-25 15:46:05 adam Exp $
  */
 /**
  * \file soap.c
@@ -22,10 +22,10 @@ static const char *soap_v1_1 = "http://schemas.xmlsoap.org/soap/envelope/";
 static const char *soap_v1_2 = "http://www.w3.org/2001/06/soap-envelope";
 
 int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp, 
-			 char **content_buf, int *content_len,
-			 Z_SOAP_Handler *handlers,
-			 const char *encoding,
-			 const char *stylesheet)
+                         char **content_buf, int *content_len,
+                         Z_SOAP_Handler *handlers,
+                         const char *encoding,
+                         const char *stylesheet)
 {
     if (o->direction == ODR_DECODE)
     {
@@ -156,7 +156,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                 {
                     p->which = Z_SOAP_generic;
                     p->u.generic = (Z_SOAP_Generic *)
-			odr_malloc(o, sizeof(*p->u.generic));
+                        odr_malloc(o, sizeof(*p->u.generic));
                     p->u.generic->no = i;
                     p->u.generic->ns = handlers[i].ns;
                     p->u.generic->p = handler_data;
@@ -203,26 +203,26 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                                     handlers[no].client_data,
                                     handlers[no].ns);
             if (ret)
-	    {
-		xmlFreeDoc(doc);
+            {
+                xmlFreeDoc(doc);
                 return ret;
-	    }
+            }
         }
         if (p->which == Z_SOAP_generic && !strcmp(p->ns, "SRU"))
         {
             xmlDocSetRootElement(doc, body_ptr->children);
-	    body_ptr->children = 0;
-	    xmlFreeNode(envelope_ptr);
+            body_ptr->children = 0;
+            xmlFreeNode(envelope_ptr);
         }
-	if (stylesheet)
-	{
-	    char *content = odr_malloc(o, strlen(stylesheet) + 40);
-	    
-	    xmlNodePtr pi, ptr = xmlDocGetRootElement(doc);
-	    sprintf(content, "type=\"text/xsl\" href=\"%s\"", stylesheet);
-	    pi = xmlNewPI("xml-stylesheet", content);
-	    xmlAddPrevSibling(ptr, pi);
-	}
+        if (stylesheet)
+        {
+            char *content = odr_malloc(o, strlen(stylesheet) + 40);
+            
+            xmlNodePtr pi, ptr = xmlDocGetRootElement(doc);
+            sprintf(content, "type=\"text/xsl\" href=\"%s\"", stylesheet);
+            pi = xmlNewPI("xml-stylesheet", content);
+            xmlAddPrevSibling(ptr, pi);
+        }
         if (1)
         {
             xmlChar *buf_out;
@@ -243,9 +243,9 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
 }
 #else
 int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp, 
-			 char **content_buf, int *content_len,
-			 Z_SOAP_Handler *handlers, const char *encoding,
-			 const char *stylesheet)
+                         char **content_buf, int *content_len,
+                         Z_SOAP_Handler *handlers, const char *encoding,
+                         const char *stylesheet)
 {
     static char *err_xml =
         "<?xml version=\"1.0\"?>\n"
@@ -268,12 +268,12 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
 }
 #endif
 int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
-		     char **content_buf, int *content_len,
-		     Z_SOAP_Handler *handlers,
-		     const char *encoding)
+                     char **content_buf, int *content_len,
+                     Z_SOAP_Handler *handlers,
+                     const char *encoding)
 {
     return z_soap_codec_enc_xsl(o, pp, content_buf, content_len, handlers,
-				encoding, 0);
+                                encoding, 0);
 }
 
 int z_soap_codec(ODR o, Z_SOAP **pp, 
@@ -298,4 +298,12 @@ int z_soap_error(ODR o, Z_SOAP *p,
         p->u.soap_error->details = 0;
     return -1;
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

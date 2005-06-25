@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: z3950oid.c,v 1.3 2005-06-24 19:56:52 adam Exp $
+ * $Id: z3950oid.c,v 1.4 2005-06-25 15:46:06 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -21,7 +21,7 @@ Odr_oid *yaz_oidval_to_z3950oid (ODR o, int oid_class, int oid_value)
     ident.value = (enum oid_value) oid_value;
 
     if (ident.value == VAL_NONE)
-	return 0;
+        return 0;
 
     return odr_oiddup(o, oid_ent_to_oid(&ident, oid));
 }
@@ -36,7 +36,7 @@ Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class, const char *str)
     ident.value = oid_getvalbyname(str);
 
     if (ident.value == VAL_NONE)
-	return 0;
+        return 0;
 
     return odr_oiddup(o, oid_ent_to_oid(&ident, oid));
 }
@@ -46,7 +46,7 @@ const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class)
     struct oident *ident = oid_getentbyoid(oid);
 
     if (!ident || ident->value == VAL_NONE)
-	return 0;
+        return 0;
     *oid_class = ident->oclass;
     return ident->desc;
 }
@@ -70,3 +70,11 @@ const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc)
         return "";
     }
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

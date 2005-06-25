@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: read-marc.c,v 1.6 2005-01-15 19:47:16 adam Exp $
+ * $Id: read-marc.c,v 1.7 2005-06-25 15:46:09 adam Exp $
  */
 
 /*
@@ -1617,3 +1617,11 @@ char *dummy_xml_record (int num, ODR odr)
     yaz_marc_destroy(mt);
     return rec;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

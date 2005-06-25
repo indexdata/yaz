@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: nmem.h,v 1.16 2005-06-03 20:30:30 adam Exp $
+ * $Id: nmem.h,v 1.17 2005-06-25 15:46:03 adam Exp $
  */
 
 /**
@@ -64,10 +64,10 @@ YAZ_EXPORT int nmem_total(NMEM n);
 YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
 YAZ_EXPORT char *nmem_strdupn (NMEM mem, const char *src, size_t n);
 YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
-				    char ***darray, int *num);
+                                    char ***darray, int *num);
 YAZ_EXPORT void nmem_strsplit(NMEM nmem, const char *delim,
-			      const char *dstr,
-			      char ***darray, int *num);
+                              const char *dstr,
+                              char ***darray, int *num);
 
 YAZ_EXPORT int *nmem_intdup (NMEM mem, int v);
 YAZ_EXPORT void nmem_transfer (NMEM dst, NMEM src);
@@ -106,3 +106,11 @@ YAZ_EXPORT void yaz_strerror(char *buf, int max);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

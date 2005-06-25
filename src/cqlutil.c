@@ -1,4 +1,4 @@
-/* $Id: cqlutil.c,v 1.7 2005-01-15 19:47:13 adam Exp $
+/* $Id: cqlutil.c,v 1.8 2005-06-25 15:46:04 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -36,10 +36,10 @@ struct cql_node *cql_node_dup (NMEM nmem, struct cql_node *cp)
                             cp->u.st.relation,
                             cp->u.st.term);
         cn->u.st.modifiers = cql_node_dup(nmem, cp->u.st.modifiers);
-	cn->u.st.index_uri = cp->u.st.index_uri ? 
-	    nmem_strdup(nmem, cp->u.st.index_uri) : 0;
-	cn->u.st.relation_uri = cp->u.st.relation_uri ?
-	    nmem_strdup(nmem, cp->u.st.relation_uri) : 0;
+        cn->u.st.index_uri = cp->u.st.index_uri ? 
+            nmem_strdup(nmem, cp->u.st.index_uri) : 0;
+        cn->u.st.relation_uri = cp->u.st.relation_uri ?
+            nmem_strdup(nmem, cp->u.st.relation_uri) : 0;
         break;
     case CQL_NODE_BOOL:
         cn = cql_node_mk_boolean(nmem, cp->u.boolean.value);
@@ -50,7 +50,7 @@ struct cql_node *cql_node_dup (NMEM nmem, struct cql_node *cp)
 }
 
 struct cql_node *cql_node_mk_sc(NMEM nmem,
-				const char *index,
+                                const char *index,
                                 const char *relation,
                                 const char *term)
 {
@@ -90,44 +90,44 @@ const char *cql_uri()
 }
 
 struct cql_node *cql_apply_prefix(NMEM nmem,
-				  struct cql_node *n, const char *prefix,
-				  const char *uri)
+                                  struct cql_node *n, const char *prefix,
+                                  const char *uri)
 {
     if (n->which == CQL_NODE_ST)
     {
-	if (!n->u.st.index_uri && n->u.st.index)
-	{   /* not yet resolved.. */
-	    const char *cp = strchr(n->u.st.index, '.');
-	    if (prefix && cp && 
-		strlen(prefix) == (size_t) (cp - n->u.st.index) &&
-		!memcmp(n->u.st.index, prefix, strlen(prefix)))
-	    {
-		char *nval = nmem_strdup(nmem, cp+1);
-		n->u.st.index_uri = nmem_strdup(nmem, uri);
-		n->u.st.index = nval;
-	    }
-	    else if (!prefix && !cp)
-	    {
-		n->u.st.index_uri = nmem_strdup(nmem, uri);
-	    }
-	}
-	if (!n->u.st.relation_uri && n->u.st.relation)
-	{
-	    const char *cp = strchr(n->u.st.relation, '.');
-	    if (prefix && cp &&
-		strlen(prefix) == (size_t)(cp - n->u.st.relation) &&
-		!memcmp(n->u.st.relation, prefix, strlen(prefix)))
-	    {
-		char *nval = nmem_strdup(nmem, cp+1);
-		n->u.st.relation_uri = nmem_strdup(nmem, uri);
-		n->u.st.relation = nval;
-	    }
-	}
+        if (!n->u.st.index_uri && n->u.st.index)
+        {   /* not yet resolved.. */
+            const char *cp = strchr(n->u.st.index, '.');
+            if (prefix && cp && 
+                strlen(prefix) == (size_t) (cp - n->u.st.index) &&
+                !memcmp(n->u.st.index, prefix, strlen(prefix)))
+            {
+                char *nval = nmem_strdup(nmem, cp+1);
+                n->u.st.index_uri = nmem_strdup(nmem, uri);
+                n->u.st.index = nval;
+            }
+            else if (!prefix && !cp)
+            {
+                n->u.st.index_uri = nmem_strdup(nmem, uri);
+            }
+        }
+        if (!n->u.st.relation_uri && n->u.st.relation)
+        {
+            const char *cp = strchr(n->u.st.relation, '.');
+            if (prefix && cp &&
+                strlen(prefix) == (size_t)(cp - n->u.st.relation) &&
+                !memcmp(n->u.st.relation, prefix, strlen(prefix)))
+            {
+                char *nval = nmem_strdup(nmem, cp+1);
+                n->u.st.relation_uri = nmem_strdup(nmem, uri);
+                n->u.st.relation = nval;
+            }
+        }
     }
     else if (n->which == CQL_NODE_BOOL)
     {
-	cql_apply_prefix(nmem, n->u.boolean.left, prefix, uri);
-	cql_apply_prefix(nmem, n->u.boolean.right, prefix, uri);
+        cql_apply_prefix(nmem, n->u.boolean.left, prefix, uri);
+        cql_apply_prefix(nmem, n->u.boolean.right, prefix, uri);
     }
     return n;
 }
@@ -147,3 +147,11 @@ void cql_node_destroy(struct cql_node *cn)
         cql_node_destroy(cn->u.boolean.modifiers);
     }
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

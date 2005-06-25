@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.7 2005-01-15 19:47:14 adam Exp $
+ * $Id: wrbuf.c,v 1.8 2005-06-25 15:46:06 adam Exp $
  */
 
 /**
@@ -27,7 +27,7 @@ WRBUF wrbuf_alloc(void)
     WRBUF n;
 
     if (!(n = (WRBUF)xmalloc(sizeof(*n))))
-	abort();
+        abort();
     n->buf = 0;
     n->size = 0;
     n->pos = 0;
@@ -37,7 +37,7 @@ WRBUF wrbuf_alloc(void)
 void wrbuf_free(WRBUF b, int free_buf)
 {
     if (free_buf && b->buf)
-	xfree(b->buf);
+        xfree(b->buf);
     xfree(b);
 }
 
@@ -51,15 +51,15 @@ int wrbuf_grow(WRBUF b, int minsize)
     int togrow;
 
     if (!b->size)
-    	togrow = 1024;
+        togrow = 1024;
     else
-    	togrow = b->size;
+        togrow = b->size;
     if (togrow < minsize)
-    	togrow = minsize;
+        togrow = minsize;
     if (b->size && !(b->buf =(char *)xrealloc(b->buf, b->size += togrow)))
-    	abort();
+        abort();
     else if (!b->size && !(b->buf = (char *)xmalloc(b->size = togrow)))
-    	abort();
+        abort();
     return 0;
 }
 
@@ -68,7 +68,7 @@ int wrbuf_write(WRBUF b, const char *buf, int size)
     if (size <= 0)
         return 0;
     if (b->pos + size >= b->size)
-	wrbuf_grow(b, size);
+        wrbuf_grow(b, size);
     memcpy(b->buf + b->pos, buf, size);
     b->pos += size;
     return 0;
@@ -90,34 +90,34 @@ int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size)
 {
     while (--size >= 0)
     {
-	/* only TAB,CR,LF of ASCII CTRL are allowed in XML 1.0! */
-	if (*cp >= 0 && *cp <= 31)
-	    if (*cp != 9 && *cp != 10 && *cp != 13)
-	    {
-		cp++;  /* we silently ignore (delete) these.. */
-		continue;
-	    }
-	switch(*cp)
-	{
-	case '<':
-	    wrbuf_puts(b, "&lt;");
-	    break;
-	case '>':
-	    wrbuf_puts(b, "&gt;");
-	    break;
-	case '&':
-	    wrbuf_puts(b, "&amp;");
-	    break;
-	case '"':
-	    wrbuf_puts(b, "&quot;");
-	    break;
-	case '\'':
-	    wrbuf_puts(b, "&apos;");
-	    break;
-	default:
-	    wrbuf_putc(b, *cp);
-	}
-	cp++;
+        /* only TAB,CR,LF of ASCII CTRL are allowed in XML 1.0! */
+        if (*cp >= 0 && *cp <= 31)
+            if (*cp != 9 && *cp != 10 && *cp != 13)
+            {
+                cp++;  /* we silently ignore (delete) these.. */
+                continue;
+            }
+        switch(*cp)
+        {
+        case '<':
+            wrbuf_puts(b, "&lt;");
+            break;
+        case '>':
+            wrbuf_puts(b, "&gt;");
+            break;
+        case '&':
+            wrbuf_puts(b, "&amp;");
+            break;
+        case '"':
+            wrbuf_puts(b, "&quot;");
+            break;
+        case '\'':
+            wrbuf_puts(b, "&apos;");
+            break;
+        default:
+            wrbuf_putc(b, *cp);
+        }
+        cp++;
     }
     wrbuf_putc(b, 0);
     (b->pos)--;
@@ -146,37 +146,37 @@ void wrbuf_printf(WRBUF b, const char *fmt, ...)
 }
 
 static int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
-			       int size, int cdata)
+                               int size, int cdata)
 {
     if (cd)
     {
-	char outbuf[12];
-	size_t inbytesleft = size;
-	const char *inp = buf;
-	while (inbytesleft)
-	{
-	    size_t outbytesleft = sizeof(outbuf);
-	    char *outp = outbuf;
-	    size_t r = yaz_iconv(cd, (char**) &inp,  &inbytesleft,
-				 &outp, &outbytesleft);
-	    if (r == (size_t) (-1))
-	    {
-		int e = yaz_iconv_error(cd);
-		if (e != YAZ_ICONV_E2BIG)
-		    break;
-	    }
-	    if (cdata)
-		wrbuf_xmlputs_n(b, outbuf, outp - outbuf);
-	    else
-		wrbuf_write(b, outbuf, outp - outbuf);
-	}
+        char outbuf[12];
+        size_t inbytesleft = size;
+        const char *inp = buf;
+        while (inbytesleft)
+        {
+            size_t outbytesleft = sizeof(outbuf);
+            char *outp = outbuf;
+            size_t r = yaz_iconv(cd, (char**) &inp,  &inbytesleft,
+                                 &outp, &outbytesleft);
+            if (r == (size_t) (-1))
+            {
+                int e = yaz_iconv_error(cd);
+                if (e != YAZ_ICONV_E2BIG)
+                    break;
+            }
+            if (cdata)
+                wrbuf_xmlputs_n(b, outbuf, outp - outbuf);
+            else
+                wrbuf_write(b, outbuf, outp - outbuf);
+        }
     }
     else
     {
-	if (cdata)
-	    wrbuf_xmlputs_n(b, buf, size);
-	else
-	    wrbuf_write(b, buf, size);
+        if (cdata)
+            wrbuf_xmlputs_n(b, buf, size);
+        else
+            wrbuf_write(b, buf, size);
     }
     return wrbuf_len(b);
 }
@@ -190,4 +190,12 @@ int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
 {
     return wrbuf_iconv_write_x(b, cd, buf, size, 1);
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.h,v 1.5 2005-03-01 20:37:01 adam Exp $
+ * $Id: eventl.h,v 1.6 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -62,3 +62,11 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int port);
 int event_loop(IOCHAN *iochans);
 void statserv_remove (IOCHAN pIOChannel);
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

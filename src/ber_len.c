@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_len.c,v 1.3 2005-01-15 19:47:11 adam Exp $
+ * $Id: ber_len.c,v 1.4 2005-06-25 15:46:03 adam Exp $
  */
 
 /** 
@@ -40,49 +40,49 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
 #endif
     if (len < 0)      /* Indefinite */
     {
-    	if (odr_putc(o, 0x80) < 0)
-	    return 0;
+        if (odr_putc(o, 0x80) < 0)
+            return 0;
 #ifdef ODR_DEBUG
-	fprintf(stderr, "[indefinite]");
+        fprintf(stderr, "[indefinite]");
 #endif
-	return 0;
+        return 0;
     }
     if (len <= 127 && (lenlen == 1 || !exact)) /* definite short form */
     {
-    	if (odr_putc(o, (unsigned char) len) < 0)
-	    return 0;
-    	return 1;
+        if (odr_putc(o, (unsigned char) len) < 0)
+            return 0;
+        return 1;
     }
     if (lenlen == 1)
     {
-    	if (odr_putc(o, 0x80) < 0)
-	    return 0;
-    	return 0;
+        if (odr_putc(o, 0x80) < 0)
+            return 0;
+        return 0;
     }
     /* definite long form */
     do
     {
-    	octs[n++] = len;
-    	len >>= 8;
+        octs[n++] = len;
+        len >>= 8;
     }
     while (len);
     if (n >= lenlen)
-    	return -1;
+        return -1;
     lenpos = odr_tell(o); /* remember length-of-length position */
     if (odr_putc(o, 0) < 0)  /* dummy */
-    	return 0;
+        return 0;
     if (exact)
-    	while (n < --lenlen)        /* pad length octets */
-	    if (odr_putc(o, 0) < 0)
-	    	return 0;
+        while (n < --lenlen)        /* pad length octets */
+            if (odr_putc(o, 0) < 0)
+                return 0;
     while (n--)
-    	if (odr_putc(o, octs[n]) < 0)
-	    return 0;
+        if (odr_putc(o, octs[n]) < 0)
+            return 0;
     /* set length of length */
     end = odr_tell(o);
     odr_seek(o, ODR_S_SET, lenpos);
     if (odr_putc(o, (end - lenpos - 1) | 0X80) < 0)
-    	return 0;
+        return 0;
     odr_seek(o, ODR_S_END, 0);
     return odr_tell(o) - lenpos;
 }
@@ -107,22 +107,22 @@ int ber_declen(const unsigned char *buf, int *len, int max)
         return -1;
     if (*b == 0X80)     /* Indefinite */
     {
-    	*len = -1;
+        *len = -1;
 #ifdef ODR_DEBUG
-	fprintf(stderr, "[len=%d]", *len);
+        fprintf(stderr, "[len=%d]", *len);
 #endif
-    	return 1;
+        return 1;
     }
     if (!(*b & 0X80))   /* Definite short form */
     {
-    	*len = (int) *b;
+        *len = (int) *b;
 #ifdef ODR_DEBUG
-	fprintf(stderr, "[len=%d]", *len);
+        fprintf(stderr, "[len=%d]", *len);
 #endif
-    	return 1;
+        return 1;
     }
     if (*b == 0XFF)     /* reserved value */
-	return -2;
+        return -2;
     /* indefinite long form */ 
     n = *b & 0X7F;
     if (n >= max)
@@ -131,8 +131,8 @@ int ber_declen(const unsigned char *buf, int *len, int max)
     b++;
     while (--n >= 0)
     {
-    	*len <<= 8;
-    	*len |= *(b++);
+        *len <<= 8;
+        *len |= *(b++);
     }
     if (*len < 0)
         return -2;
@@ -141,3 +141,11 @@ int ber_declen(const unsigned char *buf, int *len, int max)
 #endif
     return (b - buf);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

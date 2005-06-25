@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwtst.c,v 1.3 2005-01-17 13:09:43 adam Exp $
+ * $Id: srwtst.c,v 1.4 2005-06-25 15:46:07 adam Exp $
  */
 
 #include <stdlib.h>
@@ -106,3 +106,11 @@ int main(int argc, char **argv)
     exit(1);
 }
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

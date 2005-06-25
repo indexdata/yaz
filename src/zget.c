@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.10 2005-01-27 09:06:12 adam Exp $
+ * $Id: zget.c,v 1.11 2005-06-25 15:46:06 adam Exp $
  */
 /**
  * \file zget.c
@@ -19,7 +19,7 @@ Z_InitRequest *zget_InitRequest(ODR o)
     r->options = (Odr_bitmask *)odr_malloc(o, sizeof(*r->options));
     ODR_MASK_ZERO(r->options);
     r->protocolVersion = (Odr_bitmask *)
-	odr_malloc(o, sizeof(*r->protocolVersion));
+        odr_malloc(o, sizeof(*r->protocolVersion));
 
     ODR_MASK_SET(r->options, Z_Options_search);
     ODR_MASK_SET(r->options, Z_Options_present);
@@ -41,7 +41,7 @@ Z_InitRequest *zget_InitRequest(ODR o)
 #ifdef YAZ_OS
     " " YAZ_OS
 #endif
-	;
+        ;
     r->userInformationField = 0;
     r->otherInfo = 0;
     return r;
@@ -68,7 +68,7 @@ Z_InitResponse *zget_InitResponse(ODR o)
 #ifdef YAZ_OS
     " " YAZ_OS
 #endif
-	;
+        ;
     r->userInformationField = 0;
     r->otherInfo = 0;
     return r;
@@ -147,7 +147,7 @@ Z_PresentResponse *zget_PresentResponse(ODR o)
 Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
 {
     Z_DeleteResultSetRequest *r = (Z_DeleteResultSetRequest *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->deleteFunction = odr_intdup(o, Z_DeleteResultSetRequest_list);
@@ -160,7 +160,7 @@ Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
 Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
 {
     Z_DeleteResultSetResponse *r = (Z_DeleteResultSetResponse *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
     
     r->referenceId = 0;
     r->deleteOperationStatus = odr_intdup(o, Z_DeleteStatus_success);
@@ -206,7 +206,7 @@ Z_ScanResponse *zget_ScanResponse(ODR o)
 Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
 {
     Z_TriggerResourceControlRequest *r = (Z_TriggerResourceControlRequest *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
     
     r->referenceId = 0;
     r->requestedAction = odr_intdup(o, Z_TriggerResourceControlRequest_resourceReport);
@@ -219,7 +219,7 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
 Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
 {
     Z_ResourceControlRequest *r = (Z_ResourceControlRequest *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->suspendedFlag = 0;
@@ -234,7 +234,7 @@ Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
 Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
 {
     Z_ResourceControlResponse *r = (Z_ResourceControlResponse *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->continueFlag = odr_intdup(o, 1);
@@ -246,7 +246,7 @@ Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
 Z_AccessControlRequest *zget_AccessControlRequest(ODR o)
 {
     Z_AccessControlRequest *r = (Z_AccessControlRequest *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->which = Z_AccessControlRequest_simpleForm;
@@ -258,7 +258,7 @@ Z_AccessControlRequest *zget_AccessControlRequest(ODR o)
 Z_AccessControlResponse *zget_AccessControlResponse(ODR o)
 {
     Z_AccessControlResponse *r = (Z_AccessControlResponse *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->which = Z_AccessControlResponse_simpleForm;
@@ -296,7 +296,7 @@ Z_Close *zget_Close(ODR o)
 Z_ResourceReportRequest *zget_ResourceReportRequest(ODR o)
 {
     Z_ResourceReportRequest *r = (Z_ResourceReportRequest *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->opId = 0;
@@ -308,7 +308,7 @@ Z_ResourceReportRequest *zget_ResourceReportRequest(ODR o)
 Z_ResourceReportResponse *zget_ResourceReportResponse(ODR o)
 {
     Z_ResourceReportResponse *r = (Z_ResourceReportResponse *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->resourceReportStatus = odr_intdup(o, Z_ResourceReportResponse_success);
@@ -345,7 +345,7 @@ Z_SortResponse *zget_SortResponse(ODR o)
 Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
 {
     Z_ExtendedServicesRequest *r = (Z_ExtendedServicesRequest *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->function = odr_intdup(o, Z_ExtendedServicesRequest_create);
@@ -365,7 +365,7 @@ Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
 Z_ExtendedServicesResponse *zget_ExtendedServicesResponse(ODR o)
 {
     Z_ExtendedServicesResponse *r = (Z_ExtendedServicesResponse *)
-	odr_malloc(o, sizeof(*r));
+        odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
     r->operationStatus = odr_intdup(o, Z_ExtendedServicesResponse_done);
@@ -486,7 +486,7 @@ Z_APDU *zget_APDU(ODR o, int which)
         break;
     case Z_APDU_extendedServicesResponse:
         r->u.extendedServicesResponse = zget_ExtendedServicesResponse(o);
-	break;
+        break;
     case Z_APDU_duplicateDetectionRequest:
         r->u.duplicateDetectionRequest = zget_DuplicateDetectionRequest(o);
         break;
@@ -494,16 +494,16 @@ Z_APDU *zget_APDU(ODR o, int which)
         r->u.duplicateDetectionResponse = zget_DuplicateDetectionResponse(o);
         break;
     default:
-	return 0;
+        return 0;
     }
     return r;
 }
 
 Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
-					    const char *addinfo)
+                                            const char *addinfo)
 {
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *) 
-	odr_malloc (o, sizeof(*dr));
+        odr_malloc (o, sizeof(*dr));
     
     dr->diagnosticSetId = yaz_oidval_to_z3950oid (o, CLASS_DIAGSET, VAL_BIB1);
     dr->condition = odr_intdup(o, error);
@@ -531,15 +531,15 @@ Z_DiagRecs *zget_DiagRecs(ODR o, int error, const char *addinfo)
 }
 
 Z_NamePlusRecord *zget_surrogateDiagRec(ODR o, const char *dbname,
-					int error, const char *addinfo)
+                                        int error, const char *addinfo)
 {
     Z_NamePlusRecord *rec = (Z_NamePlusRecord *) odr_malloc (o, sizeof(*rec));
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (o, sizeof(*drec));
     
     if (dbname)
-	rec->databaseName = odr_strdup(o, dbname);
+        rec->databaseName = odr_strdup(o, dbname);
     else
-	rec->databaseName = 0;
+        rec->databaseName = 0;
     rec->which = Z_NamePlusRecord_surrogateDiagnostic;
     rec->u.surrogateDiagnostic = drec;
     drec->which = Z_DiagRec_defaultFormat;
@@ -597,7 +597,7 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
 }
 
 Z_External *zget_init_diagnostics_octet(ODR odr, int error,
-					const char *addinfo)
+                                        const char *addinfo)
 {
     Z_External *x, *x2;
     oident oid;
@@ -662,4 +662,12 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
 
     return x;
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

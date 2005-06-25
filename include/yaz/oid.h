@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.26 2005-06-21 07:33:08 adam Exp $
+ * $Id: oid.h,v 1.27 2005-06-25 15:46:03 adam Exp $
  */
 
 /**
@@ -256,8 +256,8 @@ YAZ_EXPORT int oid_oidlen(int *o);
 YAZ_EXPORT oid_value oid_getvalbyname(const char *name);
 YAZ_EXPORT void oid_setprivateoids(oident *list);
 YAZ_EXPORT struct oident *oid_addent (int *oid, enum oid_proto proto,
-				      enum oid_class oclass,
-				      const char *desc, int value);
+                                      enum oid_class oclass,
+                                      const char *desc, int value);
 
 YAZ_EXPORT void oid_trav (void (*func)(struct oident *oidinfo, void *vp),
                           void *vp);
@@ -267,8 +267,16 @@ YAZ_EXPORT void oid_exit(void);
 YAZ_EXPORT int *oid_name_to_oid(oid_class oclass, const char *name, int *oid);
 YAZ_EXPORT char *oid_to_dotstring(const int *oid, char *oidbuf);
 YAZ_EXPORT char *oid_name_to_dotstring(oid_class oclass, const char *name,
-				       char *oidbuf);
+                                       char *oidbuf);
 
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

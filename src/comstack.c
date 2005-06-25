@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.14 2005-01-15 19:47:11 adam Exp $
+ * $Id: comstack.c,v 1.15 2005-06-25 15:46:03 adam Exp $
  */
 
 /** 
@@ -39,12 +39,12 @@ const char *cs_errmsg(int n)
     static char buf[250];
 
     if (n < CSNONE || n > CSLASTERROR) {
-	sprintf(buf, "unknown comstack error %d", n);
-	return buf;
+        sprintf(buf, "unknown comstack error %d", n);
+        return buf;
     }
     if (n == CSYSERR) {
-	sprintf(buf, "%s: %s", cs_errlist[n], strerror(errno));
-	return buf;
+        sprintf(buf, "%s: %s", cs_errlist[n], strerror(errno));
+        return buf;
     }
     return cs_errlist[n];
 }
@@ -81,30 +81,30 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
 
     if (strncmp (type_and_host, "tcp:", 4) == 0)
     {
-	t = tcpip_type;
+        t = tcpip_type;
         host = type_and_host + 4;
     }
     else if (strncmp (type_and_host, "ssl:", 4) == 0)
     {
 #if HAVE_OPENSSL_SSL_H
-	t = ssl_type;
+        t = ssl_type;
         host = type_and_host + 4;
 #else
-	return 0;
+        return 0;
 #endif
     }
     else if (strncmp (type_and_host, "unix:", 5) == 0)
     {
 #ifndef WIN32
-	t = unix_type;
+        t = unix_type;
         host = type_and_host + 5;
 #else
-	return 0;
+        return 0;
 #endif
     }
     else if (strncmp(type_and_host, "http:", 5) == 0)
     {
-	t = tcpip_type;
+        t = tcpip_type;
         host = type_and_host + 5;
         while (host[0] == '/')
             host++;
@@ -113,28 +113,28 @@ COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
     else if (strncmp(type_and_host, "https:", 6) == 0)
     {
 #if HAVE_OPENSSL_SSL_H
-	t = ssl_type;
+        t = ssl_type;
         host = type_and_host + 6;
         while (host[0] == '/')
             host++;
         proto = PROTO_HTTP;
 #else
-	return 0;
+        return 0;
 #endif
     }
     else
     {
-	t = tcpip_type;
-	host = type_and_host;
+        t = tcpip_type;
+        host = type_and_host;
     }
     cs = cs_create (t, blocking, proto);
     if (!cs)
-	return 0;
+        return 0;
 
     if (!(*vp = cs_straddr(cs, host)))
     {
-	cs_close (cs);
-	return 0;
+        cs_close (cs);
+        return 0;
     }    
     return cs;
 }
@@ -148,23 +148,23 @@ int cs_look (COMSTACK cs)
 int cs_complete_auto(const unsigned char *buf, int len)
 {
     if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
-		&& buf[1] >= 0x20 && buf[1] < 0x7f
-		&& buf[2] >= 0x20 && buf[2] < 0x7f)
+                && buf[1] >= 0x20 && buf[1] < 0x7f
+                && buf[2] >= 0x20 && buf[2] < 0x7f)
     {
         /* deal with HTTP request/response */
-	int i = 2, content_len = 0, chunked = 0;
-	
-	/* if dealing with HTTP responses - then default
-	   content length is unlimited (socket close) */
-	if (!memcmp(buf, "HTTP/", 5))
-	    content_len = -1; 
+        int i = 2, content_len = 0, chunked = 0;
+        
+        /* if dealing with HTTP responses - then default
+           content length is unlimited (socket close) */
+        if (!memcmp(buf, "HTTP/", 5))
+            content_len = -1; 
 
         while (i <= len-4)
         {
-	    if (i > 8192)
-	    {
-		return i;  /* do not allow more than 8K HTTP header */
-	    }
+            if (i > 8192)
+            {
+                return i;  /* do not allow more than 8K HTTP header */
+            }
             if (buf[i] == '\r' && buf[i+1] == '\n')
             {
                 i += 2;
@@ -172,7 +172,7 @@ int cs_complete_auto(const unsigned char *buf, int len)
                 {
                     if (chunked)
                     { 
-			/* inside chunked body .. */
+                        /* inside chunked body .. */
                         while(1)
                         {
                             int j, chunk_len = 0;
@@ -182,13 +182,13 @@ int cs_complete_auto(const unsigned char *buf, int len)
                             if (i <len-2)
                             {
                                 printf ("\n<<<");
-				int j;
+                                int j;
                                 for (j = i; j <= i+4; j++)
                                     printf ("%c", buf[j]);
                                 printf (">>>\n");
                             }
 #endif
-			    /* read chunk length */
+                            /* read chunk length */
                             while (1)
                                 if (i >= len-2) {
 #if CHUNK_DEBUG
@@ -208,52 +208,52 @@ int cs_complete_auto(const unsigned char *buf, int len)
                                         (buf[i++] - ('a'-10));
                                 else
                                     break;
-			    /* move forward until CRLF - skip chunk ext */
-			    j = 0;
-			    while (buf[i] != '\r' && buf[i+1] != '\n')
-			    {
-				if (i >= len-2)
-				    return 0;   /* need more buffer .. */
-				if (++j > 1000)
-				    return i; /* enough.. stop */
-				i++;
-			    }
-			    /* got CRLF */
+                            /* move forward until CRLF - skip chunk ext */
+                            j = 0;
+                            while (buf[i] != '\r' && buf[i+1] != '\n')
+                            {
+                                if (i >= len-2)
+                                    return 0;   /* need more buffer .. */
+                                if (++j > 1000)
+                                    return i; /* enough.. stop */
+                                i++;
+                            }
+                            /* got CRLF */
 #if CHUNK_DEBUG
-			    printf ("XXXXXX chunk_len=%d\n", chunk_len);
-#endif			    
-			    if (chunk_len < 0)
-				return i+2;    /* bad chunk_len */
+                            printf ("XXXXXX chunk_len=%d\n", chunk_len);
+#endif                      
+                            if (chunk_len < 0)
+                                return i+2;    /* bad chunk_len */
                             if (chunk_len == 0)
-				break;
+                                break;
                             i += chunk_len+2;
                         }
-			/* consider trailing headers .. */
-			while(i <= len-4)
-			{
-			    if (buf[i] == '\r' &&  buf[i+1] == '\n' &&
-				buf[i+2] == '\r' && buf[i+3] == '\n')
-				if (len >= i+4)
-				    return i+4;
-			    i++;
-			}
+                        /* consider trailing headers .. */
+                        while(i <= len-4)
+                        {
+                            if (buf[i] == '\r' &&  buf[i+1] == '\n' &&
+                                buf[i+2] == '\r' && buf[i+3] == '\n')
+                                if (len >= i+4)
+                                    return i+4;
+                            i++;
+                        }
 #if CHUNK_DEBUG
 /* debugging */
-			printf ("XXXXXXXXX not there yet 2\n");
-			printf ("i=%d len=%d\n", i, len);
+                        printf ("XXXXXXXXX not there yet 2\n");
+                        printf ("i=%d len=%d\n", i, len);
 #endif
-			return 0;
+                        return 0;
                     }
                     else
                     {   /* not chunked ; inside body */
                         /* i += 2 seems not to work with GCC -O2 .. 
                            so i+2 is used instead .. */
-			if (content_len == -1)
-			    return 0;   /* no content length */
+                        if (content_len == -1)
+                            return 0;   /* no content length */
                         else if (len >= (i+2)+ content_len)
-			{
+                        {
                             return (i+2)+ content_len;
-			}
+                        }
                     }
                     break;
                 }
@@ -289,3 +289,11 @@ int cs_complete_auto(const unsigned char *buf, int len)
     }
     return completeBER(buf, len);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

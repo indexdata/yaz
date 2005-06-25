@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ill.h,v 1.7 2005-01-15 19:47:09 adam Exp $
+ * $Id: ill.h,v 1.8 2005-06-25 15:46:02 adam Exp $
  */
 #ifndef ILL_H
 #define ILL_H
@@ -33,3 +33,11 @@ YAZ_EXPORT ILL_APDU *ill_get_APDU (
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

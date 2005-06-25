@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_int.c,v 1.4 2005-01-15 19:47:14 adam Exp $
+ * $Id: odr_int.c,v 1.5 2005-06-25 15:46:04 adam Exp $
  */
 /**
  * \file odr_int.c
@@ -35,7 +35,7 @@ int odr_integer(ODR o, int **p, int opt, const char *name)
         return odr_missing(o, opt, name);
     if (o->direction == ODR_PRINT)
     {
-	odr_prname(o, name);
+        odr_prname(o, name);
         odr_printf(o, "%d\n", **p);
         return 1;
     }
@@ -48,3 +48,11 @@ int odr_integer(ODR o, int **p, int opt, const char *name)
         *p = (int *)odr_malloc(o, sizeof(int));
     return ber_integer(o, *p);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

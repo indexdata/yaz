@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.2 2004-10-15 00:19:00 adam Exp $
+ * $Id: cclqual.c,v 1.3 2005-06-25 15:46:03 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -120,25 +120,25 @@ void ccl_qual_add_special (CCL_bibset bibset, const char *n, const char *v)
     const char *pe;
 
     for (p = bibset->special; p && strcmp(p->name, n); p = p->next)
-	;
+        ;
     if (p)
-	xfree (p->value);
+        xfree (p->value);
     else
     {
-	p = (struct ccl_qualifier_special *) xmalloc (sizeof(*p));
-	p->name = ccl_strdup (n);
-	p->value = 0;
-	p->next = bibset->special;
-	bibset->special = p;
+        p = (struct ccl_qualifier_special *) xmalloc (sizeof(*p));
+        p->name = ccl_strdup (n);
+        p->value = 0;
+        p->next = bibset->special;
+        bibset->special = p;
     }
     while (strchr(" \t", *v))
-	++v;
+        ++v;
     for (pe = v + strlen(v); pe != v; --pe)
-	if (!strchr(" \n\r\t", pe[-1]))
-	    break;
+        if (!strchr(" \n\r\t", pe[-1]))
+            break;
     p->value = (char*) xmalloc (pe - v + 1);
     if (pe - v)
-	memcpy (p->value, v, pe - v);
+        memcpy (p->value, v, pe - v);
     p->value[pe - v] = '\0';
 }
 
@@ -166,7 +166,7 @@ void ccl_qual_add_combi (CCL_bibset b, const char *n, const char *names)
     int i, len;
     struct ccl_qualifier *q;
     for (q = b->list; q && strcmp(q->name, n); q = q->next)
-	;
+        ;
     if (q)
         return ;
     q = (struct ccl_qualifier *) xmalloc (sizeof(*q));
@@ -199,8 +199,8 @@ void ccl_qual_add_combi (CCL_bibset b, const char *n, const char *names)
  */
 
 void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
-		       int *type_ar, int *value_ar, char **svalue_ar,
-		       char **attsets)
+                       int *type_ar, int *value_ar, char **svalue_ar,
+                       char **attsets)
 {
     struct ccl_qualifier *q;
     struct ccl_rpn_attr **attrp;
@@ -212,7 +212,7 @@ void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
     if (!q)
     {
         struct ccl_qualifier *new_qual =
-	    (struct ccl_qualifier *)xmalloc (sizeof(*new_qual));
+            (struct ccl_qualifier *)xmalloc (sizeof(*new_qual));
         ccl_assert (new_qual);
         
         new_qual->next = b->list;
@@ -238,20 +238,20 @@ void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
 
         attr = (struct ccl_rpn_attr *)xmalloc (sizeof(*attr));
         ccl_assert (attr);
-	attr->set = *attsets++;
+        attr->set = *attsets++;
         attr->type = *type_ar++;
-	if (*svalue_ar)
-	{
-	    attr->kind = CCL_RPN_ATTR_STRING;
-	    attr->value.str = *svalue_ar;
-	}
-	else
-	{
-	    attr->kind = CCL_RPN_ATTR_NUMERIC;
-	    attr->value.numeric = *value_ar;
-	}
-	svalue_ar++;
-	value_ar++;
+        if (*svalue_ar)
+        {
+            attr->kind = CCL_RPN_ATTR_STRING;
+            attr->value.str = *svalue_ar;
+        }
+        else
+        {
+            attr->kind = CCL_RPN_ATTR_NUMERIC;
+            attr->value.numeric = *value_ar;
+        }
+        svalue_ar++;
+        value_ar++;
         *attrp = attr;
         attrp = &attr->next;
     }
@@ -287,26 +287,26 @@ void ccl_qual_rm (CCL_bibset *b)
         struct ccl_rpn_attr *attr, *attr1;
 
         for (attr = q->attr_list; attr; attr = attr1)
-	{
-	    attr1 = attr->next;
-	    if (attr->set)
-		xfree(attr->set);
-	    if (attr->kind == CCL_RPN_ATTR_STRING)
-		xfree(attr->value.str);
-	    xfree (attr);
-	}
+        {
+            attr1 = attr->next;
+            if (attr->set)
+                xfree(attr->set);
+            if (attr->kind == CCL_RPN_ATTR_STRING)
+                xfree(attr->value.str);
+            xfree (attr);
+        }
         q1 = q->next;
-	xfree (q->name);
+        xfree (q->name);
         if (q->sub)
             xfree (q->sub);
-	xfree (q);
+        xfree (q);
     }
     for (sp = (*b)->special; sp; sp = sp1)
     {
-	sp1 = sp->next;
-	xfree (sp->name);
-	xfree (sp->value);
-	xfree (sp);
+        sp1 = sp->next;
+        xfree (sp->name);
+        xfree (sp->value);
+        xfree (sp);
     }
     xfree (*b);
     *b = NULL;
@@ -320,7 +320,7 @@ void ccl_qual_rm (CCL_bibset *b)
  * return: Attribute info. NULL if not found.
  */
 struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
-				      const char *name, size_t len,
+                                      const char *name, size_t len,
                                       int seq)
 {
     struct ccl_qualifier *q;
@@ -329,11 +329,11 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
 
     ccl_assert (cclp);
     if (!cclp->bibset)
-	return NULL;
+        return NULL;
 
     aliases = ccl_qual_search_special(cclp->bibset, "case");
     if (aliases)
-	case_sensitive = atoi(aliases);
+        case_sensitive = atoi(aliases);
 
     for (q = cclp->bibset->list; q; q = q->next)
         if (strlen(q->name) == len)
@@ -362,14 +362,22 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp,
 }
 
 const char *ccl_qual_search_special (CCL_bibset b,
-				     const char *name)
+                                     const char *name)
 {
     struct ccl_qualifier_special *q;
     if (!b)
-	return 0;
+        return 0;
     for (q = b->special; q && strcmp(q->name, name); q = q->next)
-	;
+        ;
     if (q)
-	return q->value;
+        return q->value;
     return 0;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

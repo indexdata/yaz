@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: marcdisp.h,v 1.13 2005-02-08 13:51:30 adam Exp $
+ * $Id: marcdisp.h,v 1.14 2005-06-25 15:46:03 adam Exp $
  */
 
 /**
@@ -78,7 +78,7 @@ YAZ_EXPORT int marc_display_ex (const char *buf, FILE *outf, int debug);
 YAZ_EXPORT int marc_display_exl (const char *buf, FILE *outf, int debug,
                                  int length);
 YAZ_EXPORT int marc_display_wrbuf (const char *buf, WRBUF wr, int debug,
-				   int bsize);
+                                   int bsize);
 YAZ_EXPORT int yaz_marc_decode(const char *buf, WRBUF wr,
                                int debug, int bsize, int xml);
 
@@ -96,3 +96,11 @@ YAZ_EXPORT int atoi_n (const char *buf, int len);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -48,7 +48,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.7 2005-04-15 21:47:56 adam Exp $
+ * $Id: ccltoken.c,v 1.8 2005-06-25 15:46:03 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -109,7 +109,7 @@ static int token_cmp (CCL_parser cclp, const char *kw, struct ccl_token *token)
 
     aliases = ccl_qual_search_special(cclp->bibset, "case");
     if (aliases)
-	case_sensitive = atoi(aliases);
+        case_sensitive = atoi(aliases);
     if (!kw)
         return 0;
     while ((cp2 = strchr (cp1, ' ')))
@@ -127,7 +127,7 @@ static int token_cmp (CCL_parser cclp, const char *kw, struct ccl_token *token)
                     return 1;
             }
         }
-	cp1 = cp2+1;
+        cp1 = cp2+1;
     }
     if (case_sensitive)
         return token->len == strlen(cp1) 
@@ -149,112 +149,112 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
 
     while (1)
     {
-	const unsigned char *cp0 = cp;
-	while (*cp && strchr (" \t\r\n", *cp))
-	    cp++;
-	if (!first)
-	{
-	    first = last = (struct ccl_token *)xmalloc (sizeof (*first));
-	    ccl_assert (first);
-	    last->prev = NULL;
-	}
-	else
-	{
-	    last->next = (struct ccl_token *)xmalloc (sizeof(*first));
-	    ccl_assert (last->next);
-	    last->next->prev = last;
-	    last = last->next;
-	}
-	last->ws_prefix_buf = cp0;
-	last->ws_prefix_len = cp - cp0;
-	last->next = NULL;
-	last->name = (const char *) cp;
-	last->len = 1;
-	switch (*cp++)
-	{
+        const unsigned char *cp0 = cp;
+        while (*cp && strchr (" \t\r\n", *cp))
+            cp++;
+        if (!first)
+        {
+            first = last = (struct ccl_token *)xmalloc (sizeof (*first));
+            ccl_assert (first);
+            last->prev = NULL;
+        }
+        else
+        {
+            last->next = (struct ccl_token *)xmalloc (sizeof(*first));
+            ccl_assert (last->next);
+            last->next->prev = last;
+            last = last->next;
+        }
+        last->ws_prefix_buf = cp0;
+        last->ws_prefix_len = cp - cp0;
+        last->next = NULL;
+        last->name = (const char *) cp;
+        last->len = 1;
+        switch (*cp++)
+        {
         case '\0':
             last->kind = CCL_TOK_EOL;
             return first;
-	case '(':
-	    last->kind = CCL_TOK_LP;
-	    break;
-	case ')':
-	    last->kind = CCL_TOK_RP;
-	    break;
-	case ',':
-	    last->kind = CCL_TOK_COMMA;
-	    break;
-	case '%':
-	case '!':
-	    last->kind = CCL_TOK_PROX;
+        case '(':
+            last->kind = CCL_TOK_LP;
+            break;
+        case ')':
+            last->kind = CCL_TOK_RP;
+            break;
+        case ',':
+            last->kind = CCL_TOK_COMMA;
+            break;
+        case '%':
+        case '!':
+            last->kind = CCL_TOK_PROX;
             while (isdigit(*cp))
-	    {
-		++ last->len;
-		cp++;
-	    }
-	    break;
-	case '>':
-	case '<':
-	case '=':
-	    if (*cp == '=' || *cp == '<' || *cp == '>')
-	    {
-		cp++;
-		last->kind = CCL_TOK_REL;
-		++ last->len;
-	    }
-	    else if (cp[-1] == '=')
-		last->kind = CCL_TOK_EQ;
-	    else
-		last->kind = CCL_TOK_REL;
-	    break;
-	case '\"':
-	    last->kind = CCL_TOK_TERM;
-	    last->name = (const char *) cp;
-	    last->len = 0;
-	    while (*cp && *cp != '\"')
-	    {
-		cp++;
-		++ last->len;
-	    }
-	    if (*cp == '\"')
-		cp++;
-	    break;
-	default:
-	    if (!strchr ("(),%!><= \t\n\r", cp[-1]))
-	    {
-		while (*cp && !strchr ("(),%!><= \t\n\r", *cp))
-		{
-		    cp++;
-		    ++ last->len;
-		}
-	    }
-	    last->kind = CCL_TOK_TERM;
+            {
+                ++ last->len;
+                cp++;
+            }
+            break;
+        case '>':
+        case '<':
+        case '=':
+            if (*cp == '=' || *cp == '<' || *cp == '>')
+            {
+                cp++;
+                last->kind = CCL_TOK_REL;
+                ++ last->len;
+            }
+            else if (cp[-1] == '=')
+                last->kind = CCL_TOK_EQ;
+            else
+                last->kind = CCL_TOK_REL;
+            break;
+        case '\"':
+            last->kind = CCL_TOK_TERM;
+            last->name = (const char *) cp;
+            last->len = 0;
+            while (*cp && *cp != '\"')
+            {
+                cp++;
+                ++ last->len;
+            }
+            if (*cp == '\"')
+                cp++;
+            break;
+        default:
+            if (!strchr ("(),%!><= \t\n\r", cp[-1]))
+            {
+                while (*cp && !strchr ("(),%!><= \t\n\r", *cp))
+                {
+                    cp++;
+                    ++ last->len;
+                }
+            }
+            last->kind = CCL_TOK_TERM;
 
-	    aliases = ccl_qual_search_special(cclp->bibset, "and");
-	    if (!aliases)
-		aliases = cclp->ccl_token_and;
-	    if (token_cmp (cclp, aliases, last))
-	        last->kind = CCL_TOK_AND;
-
-	    aliases = ccl_qual_search_special(cclp->bibset, "or");
-	    if (!aliases)
-		aliases = cclp->ccl_token_or;
-	    if (token_cmp (cclp, aliases, last))
-	        last->kind = CCL_TOK_OR;
-
-	    aliases = ccl_qual_search_special(cclp->bibset, "not");
-	    if (!aliases)
-		aliases = cclp->ccl_token_not;
+            aliases = ccl_qual_search_special(cclp->bibset, "and");
+            if (!aliases)
+                aliases = cclp->ccl_token_and;
             if (token_cmp (cclp, aliases, last))
-	        last->kind = CCL_TOK_NOT;
+                last->kind = CCL_TOK_AND;
 
-	    aliases = ccl_qual_search_special(cclp->bibset, "set");
-	    if (!aliases)
-		aliases = cclp->ccl_token_set;
+            aliases = ccl_qual_search_special(cclp->bibset, "or");
+            if (!aliases)
+                aliases = cclp->ccl_token_or;
+            if (token_cmp (cclp, aliases, last))
+                last->kind = CCL_TOK_OR;
 
-	    if (token_cmp (cclp, aliases, last))
-	        last->kind = CCL_TOK_SET;
-	}
+            aliases = ccl_qual_search_special(cclp->bibset, "not");
+            if (!aliases)
+                aliases = cclp->ccl_token_not;
+            if (token_cmp (cclp, aliases, last))
+                last->kind = CCL_TOK_NOT;
+
+            aliases = ccl_qual_search_special(cclp->bibset, "set");
+            if (!aliases)
+                aliases = cclp->ccl_token_set;
+
+            if (token_cmp (cclp, aliases, last))
+                last->kind = CCL_TOK_SET;
+        }
     }
     return first;
 }
@@ -267,7 +267,7 @@ struct ccl_token *ccl_token_add (struct ccl_token *at)
     n->prev = at;
     at->next = n;
     if (n->next)
-	n->next->prev = n;
+        n->next->prev = n;
 
     n->kind = CCL_TOK_TERM;
     n->name = 0;
@@ -315,7 +315,7 @@ CCL_parser ccl_parser_create (void)
 {
     CCL_parser p = (CCL_parser)xmalloc (sizeof(*p));
     if (!p)
-	return p;
+        return p;
     p->look_token = NULL;
     p->error_code = 0;
     p->error_pos = NULL;
@@ -333,7 +333,7 @@ CCL_parser ccl_parser_create (void)
 void ccl_parser_destroy (CCL_parser p)
 {
     if (!p)
-	return;
+        return;
     xfree (p->ccl_token_and);
     xfree (p->ccl_token_or);
     xfree (p->ccl_token_not);
@@ -345,9 +345,9 @@ void ccl_parser_set_op_and (CCL_parser p, const char *op)
 {
     if (p && op)
     {
-	if (p->ccl_token_and)
-	    xfree (p->ccl_token_and);
-	p->ccl_token_and = ccl_strdup (op);
+        if (p->ccl_token_and)
+            xfree (p->ccl_token_and);
+        p->ccl_token_and = ccl_strdup (op);
     }
 }
 
@@ -355,32 +355,40 @@ void ccl_parser_set_op_or (CCL_parser p, const char *op)
 {
     if (p && op)
     {
-	if (p->ccl_token_or)
-	    xfree (p->ccl_token_or);
-	p->ccl_token_or = ccl_strdup (op);
+        if (p->ccl_token_or)
+            xfree (p->ccl_token_or);
+        p->ccl_token_or = ccl_strdup (op);
     }
 }
 void ccl_parser_set_op_not (CCL_parser p, const char *op)
 {
     if (p && op)
     {
-	if (p->ccl_token_not)
-	    xfree (p->ccl_token_not);
-	p->ccl_token_not = ccl_strdup (op);
+        if (p->ccl_token_not)
+            xfree (p->ccl_token_not);
+        p->ccl_token_not = ccl_strdup (op);
     }
 }
 void ccl_parser_set_op_set (CCL_parser p, const char *op)
 {
     if (p && op)
     {
-	if (p->ccl_token_set)
-	    xfree (p->ccl_token_set);
-	p->ccl_token_set = ccl_strdup (op);
+        if (p->ccl_token_set)
+            xfree (p->ccl_token_set);
+        p->ccl_token_set = ccl_strdup (op);
     }
 }
 
 void ccl_parser_set_case (CCL_parser p, int case_sensitivity_flag)
 {
     if (p)
-	p->ccl_case_sensitive = case_sensitivity_flag;
+        p->ccl_case_sensitive = case_sensitivity_flag;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -1,4 +1,4 @@
-/* $Id: xcqlutil.c,v 1.5 2005-01-15 19:47:14 adam Exp $
+/* $Id: xcqlutil.c,v 1.6 2005-06-25 15:46:06 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -64,59 +64,59 @@ static void prefixes(struct cql_node *cn,
     if (cn->u.st.index_uri)
     {
         pr_n("<prefixes>\n", pr, client_data, level);
-	head = 1;
+        head = 1;
 
-	pr_n("<prefix>\n", pr, client_data, level+2);
-	pr_n("<identifier>", pr, client_data, level+4);
-	pr_cdata(cn->u.st.index_uri, pr, client_data);
-	pr_n("</identifier>\n", pr, client_data, 0);
-	pr_n("</prefix>\n", pr, client_data, level+2);
+        pr_n("<prefix>\n", pr, client_data, level+2);
+        pr_n("<identifier>", pr, client_data, level+4);
+        pr_cdata(cn->u.st.index_uri, pr, client_data);
+        pr_n("</identifier>\n", pr, client_data, 0);
+        pr_n("</prefix>\n", pr, client_data, level+2);
     }
     if (cn->u.st.relation_uri && cn->u.st.relation)
     {
-	if (!head)
-	    pr_n("<prefixes>\n", pr, client_data, level);
-	pr_n("<prefix>\n", pr, client_data, level+2);
-	pr_n("<name>", pr, client_data, level+4);
-	pr_cdata("rel", pr, client_data);
-	pr_n("</name>\n", pr, client_data, 0);
-	pr_n("<identifier>", pr, client_data, level+4);
-	pr_cdata(cn->u.st.relation_uri, pr, client_data);
-	pr_n("</identifier>\n", pr, client_data, 0);
-	pr_n("</prefix>\n", pr, client_data, level+2);
+        if (!head)
+            pr_n("<prefixes>\n", pr, client_data, level);
+        pr_n("<prefix>\n", pr, client_data, level+2);
+        pr_n("<name>", pr, client_data, level+4);
+        pr_cdata("rel", pr, client_data);
+        pr_n("</name>\n", pr, client_data, 0);
+        pr_n("<identifier>", pr, client_data, level+4);
+        pr_cdata(cn->u.st.relation_uri, pr, client_data);
+        pr_n("</identifier>\n", pr, client_data, 0);
+        pr_n("</prefix>\n", pr, client_data, level+2);
     }
     if (head)
         pr_n("</prefixes>\n", pr, client_data, level);
 }
                      
 static void cql_to_xml_mod(struct cql_node *m,
-			   void (*pr)(const char *buf, void *client_data),
-			   void *client_data, int level)
+                           void (*pr)(const char *buf, void *client_data),
+                           void *client_data, int level)
 {
     if (m)
     {
-	pr_n("<modifiers>\n", pr, client_data, level);
-	for (; m; m = m->u.st.modifiers)
-	{
-	    pr_n("<modifier>\n", pr, client_data, level+2);
-	    pr_n("<type>", pr, client_data, level+4);
-	    pr_cdata(m->u.st.index, pr, client_data);
-	    pr_n("</type>\n", pr, client_data, 0);
-	    if (m->u.st.relation)
-	    {
-		pr_n("<relation>", pr, client_data, level+4);
-		pr_cdata(m->u.st.relation, pr, client_data);
-		pr_n("</relation>\n", pr, client_data, 0);
-	    }
-	    if (m->u.st.term)
-	    {
-		pr_n("<value>", pr, client_data, level+4);
-		pr_cdata(m->u.st.term, pr, client_data);
-		pr_n("</value>\n", pr, client_data, 0);
-	    }
-	    pr_n("</modifier>\n", pr, client_data, level+2);
-	}
-	pr_n("</modifiers>\n", pr, client_data, level);
+        pr_n("<modifiers>\n", pr, client_data, level);
+        for (; m; m = m->u.st.modifiers)
+        {
+            pr_n("<modifier>\n", pr, client_data, level+2);
+            pr_n("<type>", pr, client_data, level+4);
+            pr_cdata(m->u.st.index, pr, client_data);
+            pr_n("</type>\n", pr, client_data, 0);
+            if (m->u.st.relation)
+            {
+                pr_n("<relation>", pr, client_data, level+4);
+                pr_cdata(m->u.st.relation, pr, client_data);
+                pr_n("</relation>\n", pr, client_data, 0);
+            }
+            if (m->u.st.term)
+            {
+                pr_n("<value>", pr, client_data, level+4);
+                pr_cdata(m->u.st.term, pr, client_data);
+                pr_n("</value>\n", pr, client_data, 0);
+            }
+            pr_n("</modifier>\n", pr, client_data, level+2);
+        }
+        pr_n("</modifiers>\n", pr, client_data, level);
     }
 }
 
@@ -141,19 +141,19 @@ static void cql_to_xml_r(struct cql_node *cn,
         {
             pr_n("<relation>\n", pr, client_data, level+2);
             pr_n("<value>", pr, client_data, level+4);
-	    if (cn->u.st.relation_uri)
-		pr_cdata("rel.", pr, client_data);
+            if (cn->u.st.relation_uri)
+                pr_cdata("rel.", pr, client_data);
             pr_cdata(cn->u.st.relation, pr, client_data);
             pr_n("</value>\n", pr, client_data, 0);
 
-	    if (cn->u.st.relation_uri)
-	    {
-		pr_n("<identifier>", pr, client_data, level+4);
-		pr_cdata(cn->u.st.relation_uri, pr, client_data);
-		pr_n("</identifier>\n", pr, client_data, 0);
-	    }
-	    cql_to_xml_mod(cn->u.st.modifiers,
-			   pr, client_data, level+4);
+            if (cn->u.st.relation_uri)
+            {
+                pr_n("<identifier>", pr, client_data, level+4);
+                pr_cdata(cn->u.st.relation_uri, pr, client_data);
+                pr_n("</identifier>\n", pr, client_data, 0);
+            }
+            cql_to_xml_mod(cn->u.st.modifiers,
+                           pr, client_data, level+4);
 
             pr_n("</relation>\n", pr, client_data, level+2);
         }
@@ -175,8 +175,8 @@ static void cql_to_xml_r(struct cql_node *cn,
             pr_cdata(cn->u.boolean.value, pr, client_data);
             pr_n("</value>\n", pr, client_data, 0);
 
-	    cql_to_xml_mod(cn->u.boolean.modifiers,
-			   pr, client_data, level+4);
+            cql_to_xml_mod(cn->u.boolean.modifiers,
+                           pr, client_data, level+4);
 
             pr_n("</boolean>\n", pr, client_data, level+2);
         }
@@ -232,4 +232,12 @@ int cql_to_xml_buf(struct cql_node *cn, char *out, int max)
         info.buf[info.off] = '\0';
     return info.off;
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

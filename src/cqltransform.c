@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.14 2005-06-23 15:03:40 adam Exp $
+/* $Id: cqltransform.c,v 1.15 2005-06-25 15:46:03 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -109,7 +109,7 @@ cql_transform_t cql_transform_open_fname(const char *fname)
 
 static const char *cql_lookup_property(cql_transform_t ct,
                                        const char *pat1, const char *pat2,
-				       const char *pat3)
+                                       const char *pat3)
 {
     char pattern[120];
     struct cql_prop_entry *e;
@@ -123,7 +123,7 @@ static const char *cql_lookup_property(cql_transform_t ct,
     else if (pat1)
         sprintf (pattern, "%.39s", pat1);
     else
-	return 0;
+        return 0;
     
     for (e = ct->entry; e; e = e->next)
     {
@@ -134,10 +134,10 @@ static const char *cql_lookup_property(cql_transform_t ct,
 }
 
 int cql_pr_attr_uri(cql_transform_t ct, const char *category,
-		   const char *uri, const char *val, const char *default_val,
-		   void (*pr)(const char *buf, void *client_data),
-		   void *client_data,
-		   int errcode)
+                   const char *uri, const char *val, const char *default_val,
+                   void (*pr)(const char *buf, void *client_data),
+                   void *client_data,
+                   int errcode)
 {
     const char *res = 0;
     const char *eval = val ? val : default_val;
@@ -145,24 +145,24 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
     
     if (uri)
     {
-	struct cql_prop_entry *e;
-	
-	for (e = ct->entry; e; e = e->next)
-	    if (!memcmp(e->pattern, "set.", 4) && e->value &&
-		!strcmp(e->value, uri))
-	    {
-		prefix = e->pattern+4;
-		break;
-	    }
-	/* must have a prefix now - if not it's an error */
+        struct cql_prop_entry *e;
+        
+        for (e = ct->entry; e; e = e->next)
+            if (!memcmp(e->pattern, "set.", 4) && e->value &&
+                !strcmp(e->value, uri))
+            {
+                prefix = e->pattern+4;
+                break;
+            }
+        /* must have a prefix now - if not it's an error */
     }
 
     if (!uri || prefix)
     {
-	if (!res)
-	    res = cql_lookup_property(ct, category, prefix, eval);
-	if (!res)
-	    res = cql_lookup_property(ct, category, prefix, "*");
+        if (!res)
+            res = cql_lookup_property(ct, category, prefix, eval);
+        if (!res)
+            res = cql_lookup_property(ct, category, prefix, "*");
     }
     if (res)
     {
@@ -190,22 +190,22 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
     if (errcode && !ct->error)
     {
         ct->error = errcode;
-	if (val)
-	    ct->addinfo = xstrdup(val);
-	else
-	    ct->addinfo = 0;
+        if (val)
+            ct->addinfo = xstrdup(val);
+        else
+            ct->addinfo = 0;
     }
     return 0;
 }
 
 int cql_pr_attr(cql_transform_t ct, const char *category,
-		const char *val, const char *default_val,
-		void (*pr)(const char *buf, void *client_data),
-		void *client_data,
-		int errcode)
+                const char *val, const char *default_val,
+                void (*pr)(const char *buf, void *client_data),
+                void *client_data,
+                int errcode)
 {
     return cql_pr_attr_uri(ct, category, 0 /* uri */,
-			   val, default_val, pr, client_data, errcode);
+                           val, default_val, pr, client_data, errcode);
 }
 
 
@@ -220,9 +220,9 @@ static const char *wcchar(const char *term, int length)
     char *whichp;
 
     for (whichp = "*?"; *whichp != '\0'; whichp++) {
-	current = (const char *) memchr(term, *whichp, length);
-	if (current != 0 && (best == 0 || current < best))
-	    best = current;
+        current = (const char *) memchr(term, *whichp, length);
+        if (current != 0 && (best == 0 || current < best))
+            best = current;
     }
 
     return best;
@@ -249,7 +249,7 @@ void emit_term(cql_transform_t ct,
             cql_pr_attr(ct, "position", "first", 0,
                         pr, client_data, 32);
             term++;
-	    length--;
+            length--;
         }
         else if (term[length-1] == '^')
         {
@@ -266,58 +266,58 @@ void emit_term(cql_transform_t ct,
 
     if (length > 0)
     {
-	/* Check for well-known globbing patterns that represent
-	 * simple truncation attributes as expected by, for example,
-	 * Bath-compliant server.  If we find such a pattern but
-	 * there's no mapping for it, that's fine: we just use a
-	 * general pattern-matching attribute.
-	 */
+        /* Check for well-known globbing patterns that represent
+         * simple truncation attributes as expected by, for example,
+         * Bath-compliant server.  If we find such a pattern but
+         * there's no mapping for it, that's fine: we just use a
+         * general pattern-matching attribute.
+         */
         if (length > 1 && term[0] == '*' && term[length-1] == '*' &&
-	    wcchar(term+1, length-2) == 0 &&
+            wcchar(term+1, length-2) == 0 &&
             cql_pr_attr(ct, "truncation", "both", 0,
-			pr, client_data, 0)) {
-	    term++;
-	    length -= 2;
+                        pr, client_data, 0)) {
+            term++;
+            length -= 2;
         }
         else if (term[0] == '*' &&
-		 wcchar(term+1, length-1) == 0 &&
-		 cql_pr_attr(ct, "truncation", "left", 0,
-			     pr, client_data, 0)) {
-	    term++;
-	    length--;
+                 wcchar(term+1, length-1) == 0 &&
+                 cql_pr_attr(ct, "truncation", "left", 0,
+                             pr, client_data, 0)) {
+            term++;
+            length--;
         }
         else if (term[length-1] == '*' &&
-		 wcchar(term, length-1) == 0 &&
-		 cql_pr_attr(ct, "truncation", "right", 0,
-			     pr, client_data, 0)) {
-	    length--;
+                 wcchar(term, length-1) == 0 &&
+                 cql_pr_attr(ct, "truncation", "right", 0,
+                             pr, client_data, 0)) {
+            length--;
         }
         else if (wcchar(term, length))
         {
-	    /* We have one or more wildcard characters, but not in a
-	     * way that can be dealt with using only the standard
-	     * left-, right- and both-truncation attributes.  We need
-	     * to translate the pattern into a Z39.58-type pattern,
-	     * which has been supported in BIB-1 since 1996.  If
-	     * there's no configuration element for "truncation.z3958"
-	     * we indicate this as error 28 "Masking character not
-	     * supported".
-	     */
-	    int i;
-	    char *mem;
+            /* We have one or more wildcard characters, but not in a
+             * way that can be dealt with using only the standard
+             * left-, right- and both-truncation attributes.  We need
+             * to translate the pattern into a Z39.58-type pattern,
+             * which has been supported in BIB-1 since 1996.  If
+             * there's no configuration element for "truncation.z3958"
+             * we indicate this as error 28 "Masking character not
+             * supported".
+             */
+            int i;
+            char *mem;
             cql_pr_attr(ct, "truncation", "z3958", 0,
                         pr, client_data, 28);
-	    mem = (char *) xmalloc(length+1);
+            mem = (char *) xmalloc(length+1);
             for (i = 0; i < length; i++) {
-		if (term[i] == '*')      mem[i] = '?';
-		else if (term[i] == '?') mem[i] = '#';
-		else                     mem[i] = term[i];
-	    }
-	    mem[length] = '\0';
-	    term = mem;
+                if (term[i] == '*')      mem[i] = '?';
+                else if (term[i] == '?') mem[i] = '#';
+                else                     mem[i] = term[i];
+            }
+            mem[length] = '\0';
+            term = mem;
         }
         else {
-	    /* No masking characters.  Use "truncation.none" if given. */
+            /* No masking characters.  Use "truncation.none" if given. */
             cql_pr_attr(ct, "truncation", "none", 0,
                         pr, client_data, 0);
         }
@@ -379,29 +379,29 @@ void cql_transform_r(cql_transform_t ct,
     switch (cn->which)
     {
     case CQL_NODE_ST:
-	ns = cn->u.st.index_uri;
+        ns = cn->u.st.index_uri;
         if (ns)
         {
             if (!strcmp(ns, cql_uri())
-		&& cn->u.st.index && !strcmp(cn->u.st.index, "resultSet"))
+                && cn->u.st.index && !strcmp(cn->u.st.index, "resultSet"))
             {
                 (*pr)("@set \"", client_data);
                 (*pr)(cn->u.st.term, client_data);
                 (*pr)("\" ", client_data);
                 return ;
             }
-	    cql_pr_attr_uri(ct, "index", ns,
-			    cn->u.st.index, "serverChoice",
-			    pr, client_data, 16);
+            cql_pr_attr_uri(ct, "index", ns,
+                            cn->u.st.index, "serverChoice",
+                            pr, client_data, 16);
         }
-	else
-	{
-	    if (!ct->error)
-	    {
-		ct->error = 15;
-		ct->addinfo = 0;
-	    }
-	}
+        else
+        {
+            if (!ct->error)
+            {
+                ct->error = 15;
+                ct->addinfo = 0;
+            }
+        }
         if (cn->u.st.relation && !strcmp(cn->u.st.relation, "="))
             cql_pr_attr(ct, "relation", "eq", "scr",
                         pr, client_data, 19);
@@ -465,9 +465,9 @@ int cql_transform(cql_transform_t ct,
     for (e = ct->entry; e ; e = e->next)
     {
         if (!memcmp(e->pattern, "set.", 4))
-	    cql_apply_prefix(nmem, cn, e->pattern+4, e->value);
+            cql_apply_prefix(nmem, cn, e->pattern+4, e->value);
         else if (!strcmp(e->pattern, "set"))
-	    cql_apply_prefix(nmem, cn, 0, e->value);
+            cql_apply_prefix(nmem, cn, 0, e->value);
     }
     cql_transform_r (ct, cn, pr, client_data);
     nmem_destroy(nmem);
@@ -500,3 +500,11 @@ int cql_transform_error(cql_transform_t ct, const char **addinfo)
     *addinfo = ct->addinfo;
     return ct->error;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: proto.h,v 1.20 2005-02-25 17:05:09 adam Exp $
+ * $Id: proto.h,v 1.21 2005-06-25 15:46:03 adam Exp $
  */
 /**
  * \file proto.h
@@ -109,9 +109,9 @@ typedef struct Z_IOItemOrder Z_ItemOrder;
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
 YAZ_EXPORT Z_Close *zget_Close (ODR o);
 YAZ_EXPORT Odr_oid *yaz_oidval_to_z3950oid (ODR o, int oid_class,
-					    int oid_value);
+                                            int oid_value);
 YAZ_EXPORT Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class,
-					 const char *str);
+                                         const char *str);
 YAZ_EXPORT const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class);
 
 YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
@@ -127,22 +127,22 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf);
 
 /** \brief Encodes Z39.50 Init OPtions based on string mnemonics */
 YAZ_EXPORT int yaz_init_opt_encode(Z_Options *opt, const char *opt_str,
-				   int *error_pos);
+                                   int *error_pos);
 
 /** \brief Decodes Z39.50 Init Options - for printing */
 YAZ_EXPORT void yaz_init_opt_decode(Z_Options *opt,
-				    void (*pr)(const char *name,
-					       void *clientData),
-				    void *clientData);
+                                    void (*pr)(const char *name,
+                                               void *clientData),
+                                    void *clientData);
 /** \brief Creates Default Diag Format Diagnostic */
 YAZ_EXPORT
 Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
-					    const char *addinfo);
+                                            const char *addinfo);
 
 /** \brief Creates Surrogate Diagnostic Records */
 YAZ_EXPORT
 Z_NamePlusRecord *zget_surrogateDiagRec(ODR o, const char *dbname,
-					int error, const char *addinfo);
+                                        int error, const char *addinfo);
 
 /** \brief Creates Initialize Response diagnostics */
 YAZ_EXPORT
@@ -165,3 +165,11 @@ YAZ_END_CDECL
 #include <yaz/prt-ext.h>
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

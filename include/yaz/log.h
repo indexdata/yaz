@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.33 2005-05-18 12:30:00 adam Exp $
+ * $Id: log.h,v 1.34 2005-06-25 15:46:02 adam Exp $
  */
 
 /**
@@ -104,9 +104,9 @@ YAZ_EXPORT void yaz_log_init_max_size(int mx);
  * yaz_log_init_level, optionally defined via yaz_log_mask_str. */
 YAZ_EXPORT void yaz_log(int level, const char *fmt, ...)
 #ifdef __GNUC__
-	__attribute__ ((format (printf, 2, 3)))
+        __attribute__ ((format (printf, 2, 3)))
 #endif
-	;
+        ;
 
 /** 
  * yaz_log_mask_str converts a comma-separated list of log levels to a bit 
@@ -132,9 +132,9 @@ YAZ_EXPORT int yaz_log_module_level(const char *name);
 YAZ_EXPORT FILE *yaz_log_file(void);
 
 YAZ_EXPORT void log_event_start(void (*func)(int level, const char *msg, void *info),
-	void *info);
+        void *info);
 YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg, void *info),
-	void *info);
+        void *info);
 
 YAZ_EXPORT void yaz_log_reopen(void);
 
@@ -174,3 +174,11 @@ YAZ_EXPORT void yaz_log_reopen(void);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst1.c,v 1.3 2001-11-18 21:14:23 adam Exp $
+ * $Id: zoomtst1.c,v 1.4 2005-06-25 15:46:08 adam Exp $
  *
  * Synchronous single-target client doing search (but no retrieval)
  */
@@ -26,16 +26,24 @@ int main(int argc, char **argv)
     
     if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
     {
-	fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
-	exit (2);
+        fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
+        exit (2);
     }
 
     r = ZOOM_connection_search_pqf (z, argv[2]);
     if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
-	fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
+        fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
     else
-	printf ("Result count: %d\n", ZOOM_resultset_size(r));
+        printf ("Result count: %d\n", ZOOM_resultset_size(r));
     ZOOM_resultset_destroy (r);
     ZOOM_connection_destroy (z);
     exit (0);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

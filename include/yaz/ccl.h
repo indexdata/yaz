@@ -49,7 +49,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.22 2005-04-15 21:47:55 adam Exp $
+ * $Id: ccl.h,v 1.23 2005-06-25 15:46:01 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -124,10 +124,10 @@ struct ccl_rpn_attr {
 #define CCL_RPN_ATTR_NUMERIC 1
 #define CCL_RPN_ATTR_STRING 2
     union {
-	/** numeric attribute value */
-	int numeric;
-	/** string attribute value */
-	char *str;
+        /** numeric attribute value */
+        int numeric;
+        /** string attribute value */
+        char *str;
     } value;
 };
 
@@ -143,15 +143,15 @@ struct ccl_rpn_node {
     /** RPN tree node type */
     int kind;
     union {
-	/** Boolean including proximity 0=left, 2=right, 3=prox parms */
-	struct ccl_rpn_node *p[3];
-	/** Attributes + Term */
-	struct {
-	    char *term;
-	    struct ccl_rpn_attr *attr_list;
-	} t;
-	/** Result set */
-	char *setname;
+        /** Boolean including proximity 0=left, 2=right, 3=prox parms */
+        struct ccl_rpn_node *p[3];
+        /** Attributes + Term */
+        struct {
+            char *term;
+            struct ccl_rpn_attr *attr_list;
+        } t;
+        /** Result set */
+        char *setname;
     } u;
 };
 
@@ -298,7 +298,7 @@ struct ccl_token *ccl_token_add (struct ccl_token *at);
  */
 YAZ_EXPORT
 struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset,
-				   const char *str, int *error, int *pos);
+                                   const char *str, int *error, int *pos);
 
 /**
  * Parses CCL Find command from a list of CCL tokens. Otherwise similar to
@@ -354,7 +354,7 @@ void ccl_qual_add (CCL_bibset b, const char *name, int no, int *attr);
 /** Add qualifier and supply attributes pairs+attribute set for it */
 YAZ_EXPORT
 void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
-		       int *type, int *value, char **svalue, char **attsets);
+                       int *type, int *value, char **svalue, char **attsets);
 
 /** Add special qualifier */
 YAZ_EXPORT
@@ -383,7 +383,7 @@ void ccl_qual_line(CCL_bibset bibset, char *line);
 /* Add CCL qualifier by using qual_name + value pair */
 YAZ_EXPORT
 void ccl_qual_fitem (CCL_bibset bibset, const char *value,
-		     const char *qual_name);
+                     const char *qual_name);
 
 /** Make CCL qualifier set */
 YAZ_EXPORT
@@ -407,7 +407,7 @@ int ccl_memicmp (const char *s1, const char *s2, size_t n);
 /** Search for qualifier 'name' in set 'b'. */
 YAZ_EXPORT
 struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp, const char *name,
-				      size_t len, int seq);
+                                      size_t len, int seq);
 
 /** Create CCL parser */
 YAZ_EXPORT
@@ -424,7 +424,7 @@ char *ccl_strdup (const char *str);
 /** Search for special qualifier */
 YAZ_EXPORT
 const char *ccl_qual_search_special (CCL_bibset b,
-						const char *name);
+                                                const char *name);
 /** Pretty-print CCL RPN node tree to WRBUF */
 YAZ_EXPORT
 void ccl_pquery (WRBUF w, struct ccl_rpn_node *p);
@@ -436,4 +436,12 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p);
 YAZ_END_CDECL
 
 #endif
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

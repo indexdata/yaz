@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: tpath.h,v 1.7 2005-01-15 19:47:10 adam Exp $
+ * $Id: tpath.h,v 1.8 2005-06-25 15:46:03 adam Exp $
  *
  */
 /**
@@ -50,3 +50,11 @@ YAZ_EXPORT int yaz_is_abspath (const char *p);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

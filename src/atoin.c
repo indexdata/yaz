@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: atoin.c,v 1.6 2005-01-15 19:47:10 adam Exp $
+ * $Id: atoin.c,v 1.7 2005-06-25 15:46:03 adam Exp $
  */
 
 /** 
@@ -29,8 +29,16 @@ int atoi_n (const char *buf, int len)
     {
         if (isdigit (*(const unsigned char *) buf))
             val = val*10 + (*buf - '0');
-	buf++;
+        buf++;
     }
     return val;
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

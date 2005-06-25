@@ -44,7 +44,7 @@
 /* CCL shell.
  * Europagate 1995
  *
- * $Id: cclsh.c,v 1.1 2003-10-27 12:21:38 adam Exp $
+ * $Id: cclsh.c,v 1.2 2005-06-25 15:46:07 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -148,7 +148,7 @@ int main (int argc, char **argv)
                 fclose (bib_inf);
                 break;
             default:
-		usage(prog);
+                usage(prog);
             }
         }
         else
@@ -172,31 +172,31 @@ int main (int argc, char **argv)
             if (*line_in)
                 add_history(line_in);
 #endif
-	    if (strlen(line_in) > 999) {
+            if (strlen(line_in) > 999) {
                 fprintf(stderr,"Input line to long\n");
                 break;
-	    }
+            }
             strcpy(buf,line_in);
             free (line_in);
 #else    
-	printf ("CCLSH>"); fflush (stdout);
-	if (!fgets (buf, 999, stdin))
-	    break;
+        printf ("CCLSH>"); fflush (stdout);
+        if (!fgets (buf, 999, stdin))
+            break;
 #endif 
 
         for (i = 0; i<1; i++)
         {
-	    CCL_parser cclp = ccl_parser_create ();
-	    struct ccl_token *list;
-	    
-	    cclp->bibset = bibset;
-	    
-	    list = ccl_parser_tokenize (cclp, buf);
-	    rpn = ccl_parser_find (cclp, list);
-	    
-	    error = cclp->error_code;
-	    if (error)
-		pos = cclp->error_pos - buf;
+            CCL_parser cclp = ccl_parser_create ();
+            struct ccl_token *list;
+            
+            cclp->bibset = bibset;
+            
+            list = ccl_parser_tokenize (cclp, buf);
+            rpn = ccl_parser_find (cclp, list);
+            
+            error = cclp->error_code;
+            if (error)
+                pos = cclp->error_pos - buf;
 
             if (error)
             {
@@ -205,20 +205,20 @@ int main (int argc, char **argv)
             }
             else
             {
-		if (rpn && i == 0)
-		{
-		    ccl_pr_tree (rpn, stdout);
-		    printf ("\n");
-		}
+                if (rpn && i == 0)
+                {
+                    ccl_pr_tree (rpn, stdout);
+                    printf ("\n");
+                }
             }
-	    if (debug)
-	    {
-		struct ccl_token *lp;
-		for (lp = list; lp; lp = lp->next)
-		    printf ("%d %.*s\n", lp->kind, (int) (lp->len), lp->name);
-	    }
-	    ccl_token_del (list);
-	    ccl_parser_destroy (cclp);
+            if (debug)
+            {
+                struct ccl_token *lp;
+                for (lp = list; lp; lp = lp->next)
+                    printf ("%d %.*s\n", lp->kind, (int) (lp->len), lp->name);
+            }
+            ccl_token_del (list);
+            ccl_parser_destroy (cclp);
             if (rpn)
                 ccl_rpn_delete(rpn);
         }
@@ -226,3 +226,11 @@ int main (int argc, char **argv)
     printf ("\n");
     return 0;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

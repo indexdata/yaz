@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst3.c,v 1.8 2002-06-05 21:09:04 adam Exp $
+ * $Id: zoomtst3.c,v 1.9 2005-06-25 15:46:08 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -24,14 +24,14 @@ int main(int argc, char **argv)
 
     if (argc < 3)
     {
-	fprintf (stderr, "usage:\n%s target1 target2 ... targetN query\n",
-		 *argv);
-	exit (1);
+        fprintf (stderr, "usage:\n%s target1 target2 ... targetN query\n",
+                 *argv);
+        exit (1);
     }
     if (argc == 4 && isdigit(argv[1][0]) && !strchr(argv[1],'.'))
     {
-	no = atoi(argv[1]);
-	same_target = 1;
+        no = atoi(argv[1]);
+        same_target = 1;
     }
 
     if (no > 500)
@@ -50,14 +50,14 @@ int main(int argc, char **argv)
     /* connect to all */
     for (i = 0; i<no; i++)
     {
-	/* create connection - pass options (they are the same for all) */
-    	z[i] = ZOOM_connection_create (o);
+        /* create connection - pass options (they are the same for all) */
+        z[i] = ZOOM_connection_create (o);
 
-	/* connect and init */
-	if (same_target)
-    	    ZOOM_connection_connect (z[i], argv[2], 0);
-	else
-    	    ZOOM_connection_connect (z[i], argv[1+i], 0);
+        /* connect and init */
+        if (same_target)
+            ZOOM_connection_connect (z[i], argv[2], 0);
+        else
+            ZOOM_connection_connect (z[i], argv[1+i], 0);
     }
     /* search all */
     for (i = 0; i<no; i++)
@@ -73,35 +73,35 @@ int main(int argc, char **argv)
     /* no more to be done. Inspect results */
     for (i = 0; i<no; i++)
     {
-	int error;
-	const char *errmsg, *addinfo;
-	const char *tname = (same_target ? argv[2] : argv[1+i]);
-	/* display errors if any */
-	if ((error = ZOOM_connection_error(z[i], &errmsg, &addinfo)))
-	    fprintf (stderr, "%s error: %s (%d) %s\n", tname, errmsg,
-		     error, addinfo);
-	else
-	{
-	    /* OK, no major errors. Look at the result count */
-	    int pos;
-	    printf ("%s: %d hits\n", tname, ZOOM_resultset_size(r[i]));
-	    /* go through all records at target */
-	    for (pos = 0; pos < 10; pos++)
-	    {
-		int len; /* length of buffer rec */
-		const char *rec =
-		    ZOOM_record_get (
+        int error;
+        const char *errmsg, *addinfo;
+        const char *tname = (same_target ? argv[2] : argv[1+i]);
+        /* display errors if any */
+        if ((error = ZOOM_connection_error(z[i], &errmsg, &addinfo)))
+            fprintf (stderr, "%s error: %s (%d) %s\n", tname, errmsg,
+                     error, addinfo);
+        else
+        {
+            /* OK, no major errors. Look at the result count */
+            int pos;
+            printf ("%s: %d hits\n", tname, ZOOM_resultset_size(r[i]));
+            /* go through all records at target */
+            for (pos = 0; pos < 10; pos++)
+            {
+                int len; /* length of buffer rec */
+                const char *rec =
+                    ZOOM_record_get (
                         ZOOM_resultset_record (r[i], pos), "render", &len);
-		/* if rec is non-null, we got a record for display */
-		if (rec)
-		{
-		    printf ("%d\n", pos+1);
-		    if (rec)
-			fwrite (rec, 1, len, stdout);
-		    printf ("\n");
-		}
-	    }
-	}
+                /* if rec is non-null, we got a record for display */
+                if (rec)
+                {
+                    printf ("%d\n", pos+1);
+                    if (rec)
+                        fwrite (rec, 1, len, stdout);
+                    printf ("\n");
+                }
+            }
+        }
     }
     /* destroy and exit */
     for (i = 0; i<no; i++)
@@ -112,3 +112,11 @@ int main(int argc, char **argv)
     ZOOM_options_destroy(o);
     exit (0);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

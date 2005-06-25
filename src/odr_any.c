@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_any.c,v 1.4 2005-01-15 19:47:14 adam Exp $
+ * $Id: odr_any.c,v 1.5 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -25,17 +25,25 @@
 int odr_any(ODR o, Odr_any **p, int opt, const char *name)
 {
     if (o->error)
-    	return 0;
+        return 0;
     if (o->direction == ODR_PRINT)
     {
-	odr_prname(o, name);
-    	odr_printf(o, "ANY (len=%d)\n", (*p)->len);
-    	return 1;
+        odr_prname(o, name);
+        odr_printf(o, "ANY (len=%d)\n", (*p)->len);
+        return 1;
     }
     if (o->direction == ODR_DECODE)
-    	*p = (Odr_oct *)odr_malloc(o, sizeof(**p));
+        *p = (Odr_oct *)odr_malloc(o, sizeof(**p));
     if (ber_any(o, p))
-    	return 1;
+        return 1;
     *p = 0;
     return odr_missing(o, opt, name);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

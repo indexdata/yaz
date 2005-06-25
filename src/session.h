@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.8 2005-03-08 11:07:49 adam Exp $
+ * $Id: session.h,v 1.9 2005-06-25 15:46:05 adam Exp $
  */
 /**
  * \file session.h
@@ -112,7 +112,7 @@ typedef struct association
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link,
-				const char *apdufile);
+                                const char *apdufile);
 void destroy_association(association *h);
 void ir_session(IOCHAN h, int event);
 
@@ -130,3 +130,11 @@ int statserv_must_terminate(void);
 int control_association(association *assoc, const char *host, int force);
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmalloc.c,v 1.5 2005-01-15 19:47:14 adam Exp $
+ * $Id: xmalloc.c,v 1.6 2005-06-25 15:46:06 adam Exp $
  */
 /**
  * \file xmalloc.c
@@ -56,7 +56,7 @@ void *xmalloc_d(size_t nbytes, const char *file, int line)
     }
 
     if (!(res = (char*) malloc(nbytes + sizeof(*dinfo)+16*sizeof(char))))
-	return 0;
+        return 0;
     dinfo = (struct dmalloc_info *) res;
     strncpy (dinfo->file, file, sizeof(dinfo->file)-1);
     dinfo->file[sizeof(dinfo->file)-1] = '\0';
@@ -66,7 +66,7 @@ void *xmalloc_d(size_t nbytes, const char *file, int line)
     dinfo->prev = 0;
     dinfo->next = dmalloc_list;
     if (dinfo->next)
-	dinfo->next->prev = dinfo;
+        dinfo->next->prev = dinfo;
     dmalloc_list = dinfo;
     
     memcpy(res + sizeof(*dinfo), head, 8*sizeof(char));
@@ -80,25 +80,25 @@ void xfree_d(void *ptr, const char *file, int line)
     struct dmalloc_info *dinfo;
 
     if (!ptr)
-	return;
+        return;
     dinfo = (struct dmalloc_info *)
-	((char*)ptr - 8*sizeof(char) - sizeof(*dinfo));
+        ((char*)ptr - 8*sizeof(char) - sizeof(*dinfo));
     if (memcmp(head, (char*) ptr - 8*sizeof(char), 8*sizeof(char)))
     {
-	yaz_log(YLOG_FATAL, "xfree_d bad head, %s:%d, %p", file, line, ptr);
+        yaz_log(YLOG_FATAL, "xfree_d bad head, %s:%d, %p", file, line, ptr);
         abort();
     }
     if (memcmp((char*) ptr + dinfo->len, tail, 8*sizeof(char)))
     {
-	yaz_log(YLOG_FATAL, "xfree_d bad tail, %s:%d, %p", file, line, ptr);
+        yaz_log(YLOG_FATAL, "xfree_d bad tail, %s:%d, %p", file, line, ptr);
         abort();
     }
     if (dinfo->prev)
-	dinfo->prev->next = dinfo->next;
+        dinfo->prev->next = dinfo->next;
     else
-	dmalloc_list = dinfo->next;
+        dmalloc_list = dinfo->next;
     if (dinfo->next)
-	dinfo->next->prev = dinfo->prev;
+        dinfo->next->prev = dinfo->prev;
     memcpy ((char*) ptr - 8*sizeof(char), freed, 8*sizeof(char));
     free(dinfo);
     return;
@@ -118,42 +118,42 @@ void *xrealloc_d(void *p, size_t nbytes, const char *file, int line)
 
     if (!ptr)
     {
-	if (!nbytes)
-	    return 0;
-	res = (char *) malloc(nbytes + sizeof(*dinfo) + 16*sizeof(char));
+        if (!nbytes)
+            return 0;
+        res = (char *) malloc(nbytes + sizeof(*dinfo) + 16*sizeof(char));
     }
     else
     {
-	if (memcmp(head, ptr - 8*sizeof(char), 8*sizeof(char)))
-	{
-	    yaz_log(YLOG_FATAL, "xrealloc_d bad head, %s:%d, %p",
-		    file, line, ptr);
-	    abort();
-	}
-	dinfo = (struct dmalloc_info *) (ptr-8*sizeof(char) - sizeof(*dinfo));
-	if (memcmp(ptr + dinfo->len, tail, 8*sizeof(char)))
-	{
-	    yaz_log(YLOG_FATAL, "xrealloc_d bad tail, %s:%d, %p",
-		    file, line, ptr);
-	    abort();
-	}
-	if (dinfo->prev)
-	    dinfo->prev->next = dinfo->next;
-	else
-	    dmalloc_list = dinfo->next;
-	if (dinfo->next)
-	    dinfo->next->prev = dinfo->prev;
-	
-	if (!nbytes)
-	{
-	    free (dinfo);
-	    return 0;
-	}
-	res = (char *)
-	    realloc(dinfo, nbytes + sizeof(*dinfo) + 16*sizeof(char));
+        if (memcmp(head, ptr - 8*sizeof(char), 8*sizeof(char)))
+        {
+            yaz_log(YLOG_FATAL, "xrealloc_d bad head, %s:%d, %p",
+                    file, line, ptr);
+            abort();
+        }
+        dinfo = (struct dmalloc_info *) (ptr-8*sizeof(char) - sizeof(*dinfo));
+        if (memcmp(ptr + dinfo->len, tail, 8*sizeof(char)))
+        {
+            yaz_log(YLOG_FATAL, "xrealloc_d bad tail, %s:%d, %p",
+                    file, line, ptr);
+            abort();
+        }
+        if (dinfo->prev)
+            dinfo->prev->next = dinfo->next;
+        else
+            dmalloc_list = dinfo->next;
+        if (dinfo->next)
+            dinfo->next->prev = dinfo->prev;
+        
+        if (!nbytes)
+        {
+            free (dinfo);
+            return 0;
+        }
+        res = (char *)
+            realloc(dinfo, nbytes + sizeof(*dinfo) + 16*sizeof(char));
     }
     if (!res)
-	return 0;
+        return 0;
     dinfo = (struct dmalloc_info *) res;
     strncpy (dinfo->file, file, sizeof(dinfo->file)-1);
     dinfo->file[sizeof(dinfo->file)-1] = '\0';
@@ -163,7 +163,7 @@ void *xrealloc_d(void *p, size_t nbytes, const char *file, int line)
     dinfo->prev = 0;
     dinfo->next = dmalloc_list;
     if (dmalloc_list)
-	dmalloc_list->prev = dinfo;
+        dmalloc_list->prev = dinfo;
     dmalloc_list = dinfo;
     
     memcpy(res + sizeof(*dinfo), head, 8*sizeof(char));
@@ -185,7 +185,7 @@ void *xcalloc_d(size_t nmemb, size_t size, const char *file, int line)
     }
 
     if (!(res = (char*) calloc(1, nbytes+sizeof(*dinfo)+16*sizeof(char))))
-	return 0;
+        return 0;
     dinfo = (struct dmalloc_info *) res;
     strncpy (dinfo->file, file, sizeof(dinfo->file)-1);
     dinfo->file[sizeof(dinfo->file)-1] = '\0';
@@ -195,7 +195,7 @@ void *xcalloc_d(size_t nmemb, size_t size, const char *file, int line)
     dinfo->prev = 0;
     dinfo->next = dmalloc_list;
     if (dinfo->next)
-	dinfo->next->prev = dinfo;
+        dinfo->next->prev = dinfo;
     dmalloc_list = dinfo;
     
     memcpy(res + sizeof(*dinfo), head, 8*sizeof(char));
@@ -218,10 +218,10 @@ void xmalloc_trav_d(const char *file, int line)
     yaz_log (log_level, "malloc_trav %s:%d", file, line);
     while (dinfo)
     {
-	yaz_log (log_level, " %20s:%d p=%p size=%d", dinfo->file, dinfo->line,
-	      ((char*) dinfo)+sizeof(*dinfo)+8*sizeof(char), dinfo->len);
-	size += dinfo->len;
-	dinfo = dinfo->next;
+        yaz_log (log_level, " %20s:%d p=%p size=%d", dinfo->file, dinfo->line,
+              ((char*) dinfo)+sizeof(*dinfo)+8*sizeof(char), dinfo->len);
+        size += dinfo->len;
+        dinfo = dinfo->next;
     }
     yaz_log (log_level, "total bytes %ld", (long) size);
 }
@@ -261,9 +261,9 @@ void *xrealloc_f (void *o, size_t size, const char *file, int line)
             "%s:%d: xrealloc(s=%d) %p -> %p", file, line, size, o, p);
     if (!p)
     {
-    	yaz_log (YLOG_FATAL|YLOG_ERRNO, "Out of memory, realloc (%d bytes)",
-		 size);
-    	exit(1);
+        yaz_log (YLOG_FATAL|YLOG_ERRNO, "Out of memory, realloc (%d bytes)",
+                 size);
+        exit(1);
     }
     return p;
 }
@@ -333,3 +333,11 @@ void xfree_f(void *p, const char *file, int line)
         yaz_log (log_level, "%s:%d: xfree %p", file, line, p);
     xfree_d(p, file, line);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

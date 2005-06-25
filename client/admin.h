@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: admin.h,v 1.8 2005-01-15 19:47:08 adam Exp $
+ * $Id: admin.h,v 1.9 2005-06-25 15:46:01 adam Exp $
  */
 
 int cmd_adm_reindex(const char* arg);
@@ -18,9 +18,9 @@ int cmd_adm_startup(const char* arg);
 int send_apdu(Z_APDU *a);
 /*
  * Local variables:
- * tab-width: 8
  * c-basic-offset: 4
+ * indent-tabs-mode: nil
  * End:
- * vim600: sw=4 ts=8 fdm=marker
- * vim<600: sw=4 ts=8
+ * vim: shiftwidth=4 tabstop=8 expandtab
  */
+

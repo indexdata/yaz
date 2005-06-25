@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tpath.c,v 1.5 2005-01-15 19:47:14 adam Exp $
+ * $Id: tpath.c,v 1.6 2005-06-25 15:46:06 adam Exp $
  */
 /**
  * \file tpath.c
@@ -37,7 +37,7 @@ FILE *yaz_fopen(const char *path, const char *name, const char *mode,
 
     for(;;)
     {
-	FILE *f;
+        FILE *f;
 
         const char *path_sep = 0;
         size_t len = 0;
@@ -71,8 +71,8 @@ FILE *yaz_fopen(const char *path, const char *name, const char *mode,
                 spath[slen++] = '/';
         }
         strcpy (spath+slen, name);
-	if ((f = fopen(spath, mode)))
-	    return f;
+        if ((f = fopen(spath, mode)))
+            return f;
         
         if (!path_sep)
             break;
@@ -93,3 +93,11 @@ int yaz_is_abspath (const char *p)
 #endif
     return 0;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

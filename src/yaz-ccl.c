@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-ccl.c,v 1.3 2005-01-15 19:47:14 adam Exp $
+ * $Id: yaz-ccl.c,v 1.4 2005-06-25 15:46:06 adam Exp $
  */
 /**
  * \file yaz-ccl.c
@@ -47,4 +47,12 @@ Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p)
     yaz_pqf_destroy(parser);
     return q;
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

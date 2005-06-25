@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yconfig.h,v 1.8 2005-01-15 19:47:10 adam Exp $
+ * $Id: yconfig.h,v 1.9 2005-06-25 15:46:03 adam Exp $
  */
 /**
  * \file yconfig.h
@@ -56,3 +56,11 @@
 #endif
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

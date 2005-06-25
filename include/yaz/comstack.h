@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.20 2005-02-01 14:37:47 adam Exp $
+ * $Id: comstack.h,v 1.21 2005-06-25 15:46:01 adam Exp $
  */
 
 /** 
@@ -82,8 +82,8 @@ struct comstack
 #define CS_CLIENT 0
 #define CS_SERVER 1
     int (*f_listen)(COMSTACK h, char *raddr, int *addrlen,
-		   int (*check_ip)(void *cd, const char *a, int len, int type),
-		   void *cd);
+                   int (*check_ip)(void *cd, const char *a, int len, int type),
+                   void *cd);
     COMSTACK (*f_accept)(COMSTACK handle);
     int (*f_close)(COMSTACK handle);
     char *(*f_addrstr)(COMSTACK handle);
@@ -104,7 +104,7 @@ struct comstack
 #define cs_close(handle) ((*(handle)->f_close)(handle))
 #define cs_create(type, blocking, proto) ((*type)(-1, blocking, proto, 0))
 #define cs_createbysocket(sock, type, blocking, proto) \
-	((*type)(sock, blocking, proto, 0))
+        ((*type)(sock, blocking, proto, 0))
 #define cs_type(handle) ((handle)->type)
 #define cs_fileno(handle) ((handle)->iofile)
 #define cs_stackerr(handle) ((handle)->stackerr)
@@ -116,7 +116,7 @@ struct comstack
 #define cs_want_read(handle) ((handle)->io_pending & CS_WANT_READ)
 #define cs_want_write(handle) ((handle)->io_pending & CS_WANT_WRITE)
 #define cs_set_blocking(handle,blocking) ((handle)->f_set_blocking(handle, blocking))
-					  
+                                          
 #define CS_WANT_READ 1
 #define CS_WANT_WRITE 2
 
@@ -135,7 +135,7 @@ YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 /*
  * error management.
  */
-					  
+                                          
 #define CSNONE     0
 #define CSYSERR    1
 #define CSOUTSTATE 2
@@ -143,7 +143,7 @@ YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 #define CSWRONGBUF 4
 #define CSDENY     5
 #define CSERRORSSL 6
-#define CSLASTERROR CSERRORSSL	/* must be the value of last CS error */
+#define CSLASTERROR CSERRORSSL  /* must be the value of last CS error */
 
 /* backwards compatibility */
 #define CS_SR     PROTO_SR
@@ -152,3 +152,11 @@ YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

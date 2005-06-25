@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: grs1disp.c,v 1.3 2005-01-15 19:47:13 adam Exp $
+ * $Id: grs1disp.c,v 1.4 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -119,4 +119,12 @@ void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags)
 {
     display_grs1 (wrbuf, r, 0);
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: wrbuf.h,v 1.14 2005-01-15 19:47:10 adam Exp $
+ * $Id: wrbuf.h,v 1.15 2005-06-25 15:46:03 adam Exp $
  */
 /**
  * \file wrbuf.h
@@ -55,9 +55,9 @@ YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
 YAZ_EXPORT int wrbuf_xmlputs(WRBUF b, const char *cp);
 YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...);
 YAZ_EXPORT int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf,
-				 int size);
+                                 int size);
 YAZ_EXPORT int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd,
-				       const char *buf, int size);
+                                       const char *buf, int size);
 
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)
@@ -69,3 +69,11 @@ YAZ_EXPORT int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd,
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

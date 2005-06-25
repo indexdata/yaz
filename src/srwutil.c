@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.27 2005-02-01 14:43:50 adam Exp $
+ * $Id: srwutil.c,v 1.28 2005-06-25 15:46:05 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -30,13 +30,13 @@ int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
     const char *cp;
     *name = 0;
     if (*path != '?')
-	return no;
+        return no;
     path++;
     cp = path;
     while ((cp = strchr(cp, '&')))
     {
-	cp++;
-	no++;
+        cp++;
+        no++;
     }
     *name = odr_malloc(o, no * sizeof(char**));
     *val = odr_malloc(o, no * sizeof(char**));
@@ -44,39 +44,39 @@ int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
     for (no = 0; *path; no++)
     {
         const char *p1 = strchr(path, '=');
-	size_t i = 0;
-	char *ret;
+        size_t i = 0;
+        char *ret;
         if (!p1)
             break;
 
-	(*name)[no] = odr_malloc(o, (p1-path)+1);
-	memcpy((*name)[no], path, p1-path);
-	(*name)[no][p1-path] = '\0';
+        (*name)[no] = odr_malloc(o, (p1-path)+1);
+        memcpy((*name)[no], path, p1-path);
+        (*name)[no][p1-path] = '\0';
 
-	path = p1 + 1;
-	p1 = strchr(path, '&');
-	if (!p1)
-	    p1 = strlen(path) + path;
-	(*val)[no] = ret = odr_malloc(o, p1 - path + 1);
-	while (*path && *path != '&')
-	{
-	    if (*path == '+')
-	    {
-		ret[i++] = ' ';
-		path++;
-	    }
-	    else if (*path == '%' && path[1] && path[2])
-	    {
-		ret[i++] = hex_digit (path[1])*16 + hex_digit (path[2]);
-		path = path + 3;
-	    }
-	    else
-		ret[i++] = *path++;
-	}
-	ret[i] = '\0';
+        path = p1 + 1;
+        p1 = strchr(path, '&');
+        if (!p1)
+            p1 = strlen(path) + path;
+        (*val)[no] = ret = odr_malloc(o, p1 - path + 1);
+        while (*path && *path != '&')
+        {
+            if (*path == '+')
+            {
+                ret[i++] = ' ';
+                path++;
+            }
+            else if (*path == '%' && path[1] && path[2])
+            {
+                ret[i++] = hex_digit (path[1])*16 + hex_digit (path[2]);
+                path = path + 3;
+            }
+            else
+                ret[i++] = *path++;
+        }
+        ret[i] = '\0';
 
-	if (*path)
-	    path++;
+        if (*path)
+            path++;
     }
     (*name)[no] = 0;
     (*val)[no] = 0;
@@ -137,24 +137,24 @@ void yaz_uri_val_int(const char *path, const char *name, ODR o, int **intp)
 }
 
 void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d, 
-			   int code, const char *details)
+                           int code, const char *details)
 {
     d->uri = (char *) odr_malloc(o, 50);
     sprintf(d->uri, "info:srw/diagnostic/1/%d", code);
     d->message = 0;
     if (details)
-	d->details = odr_strdup(o, details);
+        d->details = odr_strdup(o, details);
     else
-	d->details = 0;
+        d->details = 0;
 }
 
 void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
-			    int *num, int code, const char *addinfo)
+                            int *num, int code, const char *addinfo)
 {
     Z_SRW_diagnostic *d_new;
     d_new = (Z_SRW_diagnostic *) odr_malloc (o, (*num + 1)* sizeof(**d));
     if (*num)
-	memcpy (d_new, *d, *num *sizeof(**d));
+        memcpy (d_new, *d, *num *sizeof(**d));
     *d = d_new;
 
     yaz_mk_std_diagnostic(o, *d + *num, code, addinfo);
@@ -162,21 +162,21 @@ void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
 }
 
 int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-		   Z_SOAP **soap_package, ODR decode, char **charset)
+                   Z_SOAP **soap_package, ODR decode, char **charset)
 {
     if (!strcmp(hreq->method, "POST"))
     {
-	const char *content_type = z_HTTP_header_lookup(hreq->headers,
-							"Content-Type");
-	if (content_type && 
-	    (!yaz_strcmp_del("text/xml", content_type, "; ") ||
-	     !yaz_strcmp_del("text/plain", content_type, "; ")))
-	{
-	    char *db = "Default";
-	    const char *p0 = hreq->path, *p1;
+        const char *content_type = z_HTTP_header_lookup(hreq->headers,
+                                                        "Content-Type");
+        if (content_type && 
+            (!yaz_strcmp_del("text/xml", content_type, "; ") ||
+             !yaz_strcmp_del("text/plain", content_type, "; ")))
+        {
+            char *db = "Default";
+            const char *p0 = hreq->path, *p1;
             int ret = -1;
             const char *charset_p = 0;
-	    
+            
             static Z_SOAP_Handler soap_handlers[3] = {
 #if HAVE_XML2
                 {"http://www.loc.gov/zing/srw/", 0,
@@ -186,18 +186,18 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 #endif
                 {0, 0, 0}
             };
-	    
-	    if (*p0 == '/')
-		p0++;
-	    p1 = strchr(p0, '?');
-	    if (!p1)
-		p1 = p0 + strlen(p0);
-	    if (p1 != p0)
-	    {
-		db = (char*) odr_malloc(decode, p1 - p0 + 1);
-		memcpy (db, p0, p1 - p0);
-		db[p1 - p0] = '\0';
-	    }
+            
+            if (*p0 == '/')
+                p0++;
+            p1 = strchr(p0, '?');
+            if (!p1)
+                p1 = p0 + strlen(p0);
+            if (p1 != p0)
+            {
+                db = (char*) odr_malloc(decode, p1 - p0 + 1);
+                memcpy (db, p0, p1 - p0);
+                db[p1 - p0] = '\0';
+            }
 
             if (charset && (charset_p = strstr(content_type, "; charset=")))
             {
@@ -213,26 +213,26 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             ret = z_soap_codec(decode, soap_package, 
                                &hreq->content_buf, &hreq->content_len,
                                soap_handlers);
-	    if (ret == 0 && (*soap_package)->which == Z_SOAP_generic)
-	    {
-		*srw_pdu = (Z_SRW_PDU*) (*soap_package)->u.generic->p;
-		
-		if ((*srw_pdu)->which == Z_SRW_searchRetrieve_request &&
-		    (*srw_pdu)->u.request->database == 0)
-		    (*srw_pdu)->u.request->database = db;
+            if (ret == 0 && (*soap_package)->which == Z_SOAP_generic)
+            {
+                *srw_pdu = (Z_SRW_PDU*) (*soap_package)->u.generic->p;
+                
+                if ((*srw_pdu)->which == Z_SRW_searchRetrieve_request &&
+                    (*srw_pdu)->u.request->database == 0)
+                    (*srw_pdu)->u.request->database = db;
 
-		if ((*srw_pdu)->which == Z_SRW_explain_request &&
-		    (*srw_pdu)->u.explain_request->database == 0)
-		    (*srw_pdu)->u.explain_request->database = db;
+                if ((*srw_pdu)->which == Z_SRW_explain_request &&
+                    (*srw_pdu)->u.explain_request->database == 0)
+                    (*srw_pdu)->u.explain_request->database = db;
 
-		if ((*srw_pdu)->which == Z_SRW_scan_request &&
-		    (*srw_pdu)->u.scan_request->database == 0)
-		    (*srw_pdu)->u.scan_request->database = db;
+                if ((*srw_pdu)->which == Z_SRW_scan_request &&
+                    (*srw_pdu)->u.scan_request->database == 0)
+                    (*srw_pdu)->u.scan_request->database = db;
 
-		return 0;
-	    }
-	    return 1;
-	}
+                return 0;
+            }
+            return 1;
+        }
     }
     return 2;
 }
@@ -241,14 +241,14 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
   http://www.loc.gov/z3950/agency/zing/srw/service.html
 */ 
 int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-		   Z_SOAP **soap_package, ODR decode, char **charset,
-		   Z_SRW_diagnostic **diag, int *num_diag)
+                   Z_SOAP **soap_package, ODR decode, char **charset,
+                   Z_SRW_diagnostic **diag, int *num_diag)
 {
 #if HAVE_XML2
     static Z_SOAP_Handler soap_handlers[2] = {
-	{"http://www.loc.gov/zing/srw/", 0,
-	 (Z_SOAP_fun) yaz_srw_codec},
-	{0, 0, 0}
+        {"http://www.loc.gov/zing/srw/", 0,
+         (Z_SOAP_fun) yaz_srw_codec},
+        {0, 0, 0}
     };
 #endif
     if (!strcmp(hreq->method, "GET"))
@@ -256,28 +256,28 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
 #if HAVE_XML2
-	const char *operation = 0;
-	char *version = 0;
-	char *query = 0;
-	char *pQuery = 0;
-	char *sortKeys = 0;
-	char *stylesheet = 0;
-	char *scanClause = 0;
-	char *pScanClause = 0;
-	char *recordXPath = 0;
-	char *recordSchema = 0;
-	char *recordPacking = "xml";  /* xml packing is default for SRU */
-	char *maximumRecords = 0;
-	char *startRecord = 0;
-	char *maximumTerms = 0;
-	char *responsePosition = 0;
-	char *extraRequestData = 0;
+        const char *operation = 0;
+        char *version = 0;
+        char *query = 0;
+        char *pQuery = 0;
+        char *sortKeys = 0;
+        char *stylesheet = 0;
+        char *scanClause = 0;
+        char *pScanClause = 0;
+        char *recordXPath = 0;
+        char *recordSchema = 0;
+        char *recordPacking = "xml";  /* xml packing is default for SRU */
+        char *maximumRecords = 0;
+        char *startRecord = 0;
+        char *maximumTerms = 0;
+        char *responsePosition = 0;
+        char *extraRequestData = 0;
 #endif
-	char **uri_name;
-	char **uri_val;
+        char **uri_name;
+        char **uri_val;
 
-	if (charset)
-	    *charset = 0;
+        if (charset)
+            *charset = 0;
         if (*p0 == '/')
             p0++;
         p1 = strchr(p0, '?');
@@ -289,71 +289,71 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             memcpy (db, p0, p1 - p0);
             db[p1 - p0] = '\0';
         }
-	yaz_uri_array(p1, decode, &uri_name, &uri_val);
+        yaz_uri_array(p1, decode, &uri_name, &uri_val);
 #if HAVE_XML2
-	if (uri_name)
-	{
-	    int i;
-	    for (i = 0; uri_name[i]; i++)
-	    {
-		char *n = uri_name[i];
-		char *v = uri_val[i];
-		if (!strcmp(n, "query"))
-		    query = v;
-		else if (!strcmp(n, "x-pquery"))
-		    pQuery = v;
-		else if (!strcmp(n, "operation"))
-		    operation = v;
-		else if (!strcmp(n, "stylesheet"))
-		    stylesheet = v;
-		else if (!strcmp(n, "sortKeys"))
-		    sortKeys = v;
-		else if (!strcmp(n, "recordXPath"))
-		    recordXPath = v;
-		else if (!strcmp(n, "recordSchema"))
-		    recordSchema = v;
-		else if (!strcmp(n, "recordPacking"))
-		    recordPacking = v;
-		else if (!strcmp(n, "version"))
-		    version = v;
-		else if (!strcmp(n, "scanClause"))
-		    scanClause = v;
-		else if (!strcmp(n, "x-pScanClause"))
-		    pScanClause = v;
-		else if (!strcmp(n, "maximumRecords"))
-		    maximumRecords = v;
-		else if (!strcmp(n, "startRecord"))
-		    startRecord = v;
-		else if (!strcmp(n, "maximumTerms"))
-		    maximumTerms = v;
-		else if (!strcmp(n, "responsePosition"))
-		    responsePosition = v;
-		else if (!strcmp(n, "extraRequestData"))
-		    extraRequestData = v;
-		else
-		    yaz_add_srw_diagnostic(decode, diag, num_diag, 8, n);
-	    }
-	}
-	if (!version)
-	{
-	    if (uri_name)
-		yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "version");
-	    version = "1.1";
-	}
-	if (strcmp(version, "1.1"))
-	    yaz_add_srw_diagnostic(decode, diag, num_diag, 5, "1.1");
-	if (!operation)
-	{
-	    if (uri_name)
-		yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "operation");
-	    operation = "explain";
-	}
+        if (uri_name)
+        {
+            int i;
+            for (i = 0; uri_name[i]; i++)
+            {
+                char *n = uri_name[i];
+                char *v = uri_val[i];
+                if (!strcmp(n, "query"))
+                    query = v;
+                else if (!strcmp(n, "x-pquery"))
+                    pQuery = v;
+                else if (!strcmp(n, "operation"))
+                    operation = v;
+                else if (!strcmp(n, "stylesheet"))
+                    stylesheet = v;
+                else if (!strcmp(n, "sortKeys"))
+                    sortKeys = v;
+                else if (!strcmp(n, "recordXPath"))
+                    recordXPath = v;
+                else if (!strcmp(n, "recordSchema"))
+                    recordSchema = v;
+                else if (!strcmp(n, "recordPacking"))
+                    recordPacking = v;
+                else if (!strcmp(n, "version"))
+                    version = v;
+                else if (!strcmp(n, "scanClause"))
+                    scanClause = v;
+                else if (!strcmp(n, "x-pScanClause"))
+                    pScanClause = v;
+                else if (!strcmp(n, "maximumRecords"))
+                    maximumRecords = v;
+                else if (!strcmp(n, "startRecord"))
+                    startRecord = v;
+                else if (!strcmp(n, "maximumTerms"))
+                    maximumTerms = v;
+                else if (!strcmp(n, "responsePosition"))
+                    responsePosition = v;
+                else if (!strcmp(n, "extraRequestData"))
+                    extraRequestData = v;
+                else
+                    yaz_add_srw_diagnostic(decode, diag, num_diag, 8, n);
+            }
+        }
+        if (!version)
+        {
+            if (uri_name)
+                yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "version");
+            version = "1.1";
+        }
+        if (strcmp(version, "1.1"))
+            yaz_add_srw_diagnostic(decode, diag, num_diag, 5, "1.1");
+        if (!operation)
+        {
+            if (uri_name)
+                yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "operation");
+            operation = "explain";
+        }
         if (!strcmp(operation, "searchRetrieve"))
         {
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_searchRetrieve_request);
 
-	    sr->srw_version = version;
-	    *srw_pdu = sr;
+            sr->srw_version = version;
+            *srw_pdu = sr;
             if (query)
             {
                 sr->u.request->query_type = Z_SRW_query_type_cql;
@@ -364,8 +364,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 sr->u.request->query_type = Z_SRW_query_type_pqf;
                 sr->u.request->query.pqf = pQuery;
             }
-	    else
-		yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "query");
+            else
+                yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "query");
 
             if (sortKeys)
             {
@@ -377,134 +377,134 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             sr->u.request->recordPacking = recordPacking;
             sr->u.request->stylesheet = stylesheet;
 
-	    if (maximumRecords)
-		sr->u.request->maximumRecords =
-		    odr_intdup(decode, atoi(maximumRecords));
-	    if (startRecord)
-		sr->u.request->startRecord =
-		    odr_intdup(decode, atoi(startRecord));
+            if (maximumRecords)
+                sr->u.request->maximumRecords =
+                    odr_intdup(decode, atoi(maximumRecords));
+            if (startRecord)
+                sr->u.request->startRecord =
+                    odr_intdup(decode, atoi(startRecord));
 
             sr->u.request->database = db;
 
-	    (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
-	    (*soap_package)->which = Z_SOAP_generic;
-	    
-	    (*soap_package)->u.generic =
-		odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
-	    
-	    (*soap_package)->u.generic->p = sr;
-	    (*soap_package)->u.generic->ns = soap_handlers[0].ns;
-	    (*soap_package)->u.generic->no = 0;
-	    
-	    (*soap_package)->ns = "SRU";
+            (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
+            (*soap_package)->which = Z_SOAP_generic;
+            
+            (*soap_package)->u.generic =
+                odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
+            
+            (*soap_package)->u.generic->p = sr;
+            (*soap_package)->u.generic->ns = soap_handlers[0].ns;
+            (*soap_package)->u.generic->no = 0;
+            
+            (*soap_package)->ns = "SRU";
 
-	    return 0;
+            return 0;
         }
-	else if (!strcmp(operation, "explain"))
-	{
-	    /* Transfer SRU explain parameters to common struct */
-	    /* http://www.loc.gov/z3950/agency/zing/srw/explain.html */
+        else if (!strcmp(operation, "explain"))
+        {
+            /* Transfer SRU explain parameters to common struct */
+            /* http://www.loc.gov/z3950/agency/zing/srw/explain.html */
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_explain_request);
 
-	    sr->srw_version = version;
-	    *srw_pdu = sr;
+            sr->srw_version = version;
+            *srw_pdu = sr;
             sr->u.explain_request->recordPacking = recordPacking;
-	    sr->u.explain_request->database = db;
+            sr->u.explain_request->database = db;
 
             sr->u.explain_request->stylesheet = stylesheet;
 
-	    (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
-	    (*soap_package)->which = Z_SOAP_generic;
-	    
-	    (*soap_package)->u.generic =
-		odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
-	    
-	    (*soap_package)->u.generic->p = sr;
-	    (*soap_package)->u.generic->ns = soap_handlers[0].ns;
-	    (*soap_package)->u.generic->no = 0;
-	    
-	    (*soap_package)->ns = "SRU";
+            (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
+            (*soap_package)->which = Z_SOAP_generic;
+            
+            (*soap_package)->u.generic =
+                odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
+            
+            (*soap_package)->u.generic->p = sr;
+            (*soap_package)->u.generic->ns = soap_handlers[0].ns;
+            (*soap_package)->u.generic->no = 0;
+            
+            (*soap_package)->ns = "SRU";
 
-	    return 0;
-	}
-	else if (!strcmp(operation, "scan"))
-	{
-	    /* Transfer SRU scan parameters to common struct */
-	    /* http://www.loc.gov/z3950/agency/zing/srw/scan.html */
+            return 0;
+        }
+        else if (!strcmp(operation, "scan"))
+        {
+            /* Transfer SRU scan parameters to common struct */
+            /* http://www.loc.gov/z3950/agency/zing/srw/scan.html */
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_scan_request);
 
-	    sr->srw_version = version;
-	    *srw_pdu = sr;
+            sr->srw_version = version;
+            *srw_pdu = sr;
 
             if (scanClause)
             {
                 sr->u.scan_request->query_type = Z_SRW_query_type_cql;
-		sr->u.scan_request->scanClause.cql = scanClause;
+                sr->u.scan_request->scanClause.cql = scanClause;
             }
             else if (pScanClause)
             {
                 sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
                 sr->u.scan_request->scanClause.pqf = pScanClause;
             }
-	    else
-		yaz_add_srw_diagnostic(decode, diag, num_diag, 7,
-				       "scanClause");
-	    sr->u.scan_request->database = db;
+            else
+                yaz_add_srw_diagnostic(decode, diag, num_diag, 7,
+                                       "scanClause");
+            sr->u.scan_request->database = db;
 
-	    if (maximumTerms)
-		sr->u.scan_request->maximumTerms =
-		    odr_intdup(decode, atoi(maximumTerms));
-	    if (responsePosition)
-		sr->u.scan_request->responsePosition =
-		    odr_intdup(decode, atoi(responsePosition));
+            if (maximumTerms)
+                sr->u.scan_request->maximumTerms =
+                    odr_intdup(decode, atoi(maximumTerms));
+            if (responsePosition)
+                sr->u.scan_request->responsePosition =
+                    odr_intdup(decode, atoi(responsePosition));
 
             sr->u.scan_request->stylesheet = stylesheet;
 
-	    (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
-	    (*soap_package)->which = Z_SOAP_generic;
-	    
-	    (*soap_package)->u.generic =
-		odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
-	    
-	    (*soap_package)->u.generic->p = sr;
-	    (*soap_package)->u.generic->ns = soap_handlers[0].ns;
-	    (*soap_package)->u.generic->no = 0;
-	    
-	    (*soap_package)->ns = "SRU";
+            (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
+            (*soap_package)->which = Z_SOAP_generic;
+            
+            (*soap_package)->u.generic =
+                odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
+            
+            (*soap_package)->u.generic->p = sr;
+            (*soap_package)->u.generic->ns = soap_handlers[0].ns;
+            (*soap_package)->u.generic->no = 0;
+            
+            (*soap_package)->ns = "SRU";
 
-	    return 0;
-	}
-	else
-	{
-	    /* unsupported operation ... */
-	    /* Act as if we received a explain request and throw diagnostic. */
+            return 0;
+        }
+        else
+        {
+            /* unsupported operation ... */
+            /* Act as if we received a explain request and throw diagnostic. */
 
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_explain_request);
 
-	    sr->srw_version = version;
-	    *srw_pdu = sr;
+            sr->srw_version = version;
+            *srw_pdu = sr;
             sr->u.explain_request->recordPacking = recordPacking;
-	    sr->u.explain_request->database = db;
+            sr->u.explain_request->database = db;
 
             sr->u.explain_request->stylesheet = stylesheet;
 
-	    (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
-	    (*soap_package)->which = Z_SOAP_generic;
-	    
-	    (*soap_package)->u.generic =
-		odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
-	    
-	    (*soap_package)->u.generic->p = sr;
-	    (*soap_package)->u.generic->ns = soap_handlers[0].ns;
-	    (*soap_package)->u.generic->no = 0;
-	    
-	    (*soap_package)->ns = "SRU";
+            (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
+            (*soap_package)->which = Z_SOAP_generic;
+            
+            (*soap_package)->u.generic =
+                odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
+            
+            (*soap_package)->u.generic->p = sr;
+            (*soap_package)->u.generic->ns = soap_handlers[0].ns;
+            (*soap_package)->u.generic->no = 0;
+            
+            (*soap_package)->ns = "SRU";
 
-	    yaz_add_srw_diagnostic(decode, diag, num_diag, 4, operation);
-	    return 0;
-	}
+            yaz_add_srw_diagnostic(decode, diag, num_diag, 4, operation);
+            return 0;
+        }
 #endif
-	return 1;
+        return 1;
     }
     return 2;
 }
@@ -529,9 +529,9 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
         sr->u.request->recordSchema = 0;
         sr->u.request->recordPacking = 0;
         sr->u.request->recordXPath = 0;
-	sr->u.request->database = 0;
-	sr->u.request->resultSetTTL = 0;
-	sr->u.request->stylesheet = 0;
+        sr->u.request->database = 0;
+        sr->u.request->resultSetTTL = 0;
+        sr->u.request->stylesheet = 0;
         break;
     case Z_SRW_searchRetrieve_response:
         sr->u.response = (Z_SRW_searchRetrieveResponse *)
@@ -549,38 +549,38 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
         sr->u.explain_request = (Z_SRW_explainRequest *)
             odr_malloc(o, sizeof(*sr->u.explain_request));
         sr->u.explain_request->recordPacking = 0;
-	sr->u.explain_request->database = 0;
-	sr->u.explain_request->stylesheet = 0;
+        sr->u.explain_request->database = 0;
+        sr->u.explain_request->stylesheet = 0;
         break;
     case Z_SRW_explain_response:
         sr->u.explain_response = (Z_SRW_explainResponse *)
             odr_malloc(o, sizeof(*sr->u.explain_response));
-	sr->u.explain_response->record.recordData_buf = 0;
-	sr->u.explain_response->record.recordData_len = 0;
-	sr->u.explain_response->record.recordSchema = 0;
-	sr->u.explain_response->record.recordPosition = 0;
-	sr->u.explain_response->record.recordPacking =
-	    Z_SRW_recordPacking_string;
-	sr->u.explain_response->diagnostics = 0;
-	sr->u.explain_response->num_diagnostics = 0;
-	break;
+        sr->u.explain_response->record.recordData_buf = 0;
+        sr->u.explain_response->record.recordData_len = 0;
+        sr->u.explain_response->record.recordSchema = 0;
+        sr->u.explain_response->record.recordPosition = 0;
+        sr->u.explain_response->record.recordPacking =
+            Z_SRW_recordPacking_string;
+        sr->u.explain_response->diagnostics = 0;
+        sr->u.explain_response->num_diagnostics = 0;
+        break;
     case Z_SRW_scan_request:
         sr->u.scan_request = (Z_SRW_scanRequest *)
             odr_malloc(o, sizeof(*sr->u.scan_request));
-	sr->u.scan_request->database = 0;
-	sr->u.scan_request->stylesheet = 0;
-	sr->u.scan_request->maximumTerms = 0;
-	sr->u.scan_request->responsePosition = 0;
-	sr->u.scan_request->query_type = Z_SRW_query_type_cql;
-	sr->u.scan_request->scanClause.cql = 0;
+        sr->u.scan_request->database = 0;
+        sr->u.scan_request->stylesheet = 0;
+        sr->u.scan_request->maximumTerms = 0;
+        sr->u.scan_request->responsePosition = 0;
+        sr->u.scan_request->query_type = Z_SRW_query_type_cql;
+        sr->u.scan_request->scanClause.cql = 0;
         break;
     case Z_SRW_scan_response:
         sr->u.scan_response = (Z_SRW_scanResponse *)
             odr_malloc(o, sizeof(*sr->u.scan_response));
-	sr->u.scan_response->terms = 0;
-	sr->u.scan_response->num_terms = 0;
-	sr->u.scan_response->diagnostics = 0;
-	sr->u.scan_response->num_diagnostics = 0;
+        sr->u.scan_response->terms = 0;
+        sr->u.scan_response->num_terms = 0;
+        sr->u.scan_response->diagnostics = 0;
+        sr->u.scan_response->num_diagnostics = 0;
     }
     return sr;
 }
@@ -780,4 +780,12 @@ int yaz_diag_srw_to_bib1(int code)
     }
     return 1;
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

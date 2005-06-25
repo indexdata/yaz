@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.8 2005-04-15 21:47:56 adam Exp $
+ * $Id: tstccl.c,v 1.9 2005-06-25 15:46:07 adam Exp $
  */
 
 /* CCL test */
@@ -59,9 +59,9 @@ void tst1(int pass, int *number_of_errors)
         ccl_qual_fitem(bibset, "1=/my/title",         "dc.title");
         ccl_qual_fitem(bibset, "r=r",         "date");
         ccl_qual_fitem(bibset, "r=o",         "x");
-	break;
+        break;
     case 1:
-	strcpy(tstline, "ti u=4    s=pw t=l,r");
+        strcpy(tstline, "ti u=4    s=pw t=l,r");
         ccl_qual_line(bibset, tstline);
 
         strcpy(tstline, "term 1=1016 s=al,pw   # default term");
@@ -75,60 +75,60 @@ void tst1(int pass, int *number_of_errors)
 
         strcpy(tstline, "x r=o # ordered relation");
         ccl_qual_line(bibset, tstline);
-	break;
+        break;
     case 2:
         ccl_qual_buf(bibset, "ti u=4    s=pw t=l,r\n"
-		     "term 1=1016 s=al,pw\r\n"
-		     "\n"
-		     "dc.title 1=/my/title\n"
-		     "date r=r\n" 
-		     "x r=o\n"
-	    );
-	break;
+                     "term 1=1016 s=al,pw\r\n"
+                     "\n"
+                     "dc.title 1=/my/title\n"
+                     "date r=r\n" 
+                     "x r=o\n"
+            );
+        break;
     default:
-	exit(23);
+        exit(23);
     }
 
     parser->bibset = bibset;
 
     for (i = 0; query_str[i].query; i++)
     {
-	struct ccl_token *token_list;
-	struct ccl_rpn_node *rpn;
+        struct ccl_token *token_list;
+        struct ccl_rpn_node *rpn;
 
-	token_list = ccl_parser_tokenize(parser, query_str[i].query);
-	rpn = ccl_parser_find(parser, token_list);
-	ccl_token_del (token_list);
-	if (rpn)
-	{
-	    WRBUF wrbuf = wrbuf_alloc();
-	    ccl_pquery(wrbuf, rpn);
+        token_list = ccl_parser_tokenize(parser, query_str[i].query);
+        rpn = ccl_parser_find(parser, token_list);
+        ccl_token_del (token_list);
+        if (rpn)
+        {
+            WRBUF wrbuf = wrbuf_alloc();
+            ccl_pquery(wrbuf, rpn);
 
-	    if (!query_str[i].result)
-	    {
-		printf ("Failed %s\n", query_str[i].query);
-		printf (" got:     %s:\n", wrbuf_buf(wrbuf));
-		printf (" expected failure\n");
-		(*number_of_errors)++;
-	    }
-	    else if (strcmp(wrbuf_buf(wrbuf), query_str[i].result))
-	    {
-		printf ("Failed %s\n", query_str[i].query);
-		printf (" got:     %s:\n", wrbuf_buf(wrbuf));
-		printf (" expected:%s:\n", query_str[i].result);
-		(*number_of_errors)++;
-	    }
-	    ccl_rpn_delete(rpn);
-	    wrbuf_free(wrbuf, 1);
-	}
-	else if (query_str[i].result)
-	{
-	    printf ("Failed %s\n", query_str[i].query);
-	    printf (" got failure\n");
-	    printf (" expected:%s:\n", query_str[i].result);
-	    (*number_of_errors)++;
-	}
-    }	
+            if (!query_str[i].result)
+            {
+                printf ("Failed %s\n", query_str[i].query);
+                printf (" got:     %s:\n", wrbuf_buf(wrbuf));
+                printf (" expected failure\n");
+                (*number_of_errors)++;
+            }
+            else if (strcmp(wrbuf_buf(wrbuf), query_str[i].result))
+            {
+                printf ("Failed %s\n", query_str[i].query);
+                printf (" got:     %s:\n", wrbuf_buf(wrbuf));
+                printf (" expected:%s:\n", query_str[i].result);
+                (*number_of_errors)++;
+            }
+            ccl_rpn_delete(rpn);
+            wrbuf_free(wrbuf, 1);
+        }
+        else if (query_str[i].result)
+        {
+            printf ("Failed %s\n", query_str[i].query);
+            printf (" got failure\n");
+            printf (" expected:%s:\n", query_str[i].result);
+            (*number_of_errors)++;
+        }
+    }   
     ccl_parser_destroy (parser);
     ccl_qual_rm(&bibset);
 }
@@ -138,12 +138,20 @@ int main(int argc, char **argv)
     int number_of_errors = 0;
     tst1(0, &number_of_errors);
     if (number_of_errors)
-	exit(1);
+        exit(1);
     tst1(1, &number_of_errors);
     if (number_of_errors)
-	exit(1);
+        exit(1);
     tst1(2, &number_of_errors);
     if (number_of_errors)
-	exit(1);
+        exit(1);
     exit(0);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

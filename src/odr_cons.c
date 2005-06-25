@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_cons.c,v 1.5 2005-01-15 19:47:14 adam Exp $
+ * $Id: odr_cons.c,v 1.6 2005-06-25 15:46:04 adam Exp $
  *
  */
 
@@ -23,29 +23,29 @@ void odr_setlenlen(ODR o, int len)
 }
 
 int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
-			  const char *name)
+                          const char *name)
 {
     int res;
     int cons = 1;
     int lenlen = o->lenlen;
 
     if (o->error)
-    	return 0;
+        return 0;
     o->lenlen = 1; /* reset lenlen */
     if (o->t_class < 0)
     {
-	o->t_class = zclass;
-	o->t_tag = tag;
+        o->t_class = zclass;
+        o->t_tag = tag;
     }
     if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, 1, name)) < 0)
-    	return 0;
+        return 0;
     if (!res || !cons)
-    	return 0;
+        return 0;
 
     if (o->op->stackp == ODR_MAX_STACK - 1)
     {
         odr_seterror(o, OSTACK, 30);
-    	return 0;
+        return 0;
     }
     o->op->stack[++(o->op->stackp)].lenb = o->bp;
     o->op->stack[o->op->stackp].len_offset = odr_tell(o);
@@ -56,49 +56,49 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
 #endif
     if (o->direction == ODR_ENCODE)
     {
-	static unsigned char dummy[sizeof(int)+1];
+        static unsigned char dummy[sizeof(int)+1];
 
-	o->op->stack[o->op->stackp].lenlen = lenlen;
+        o->op->stack[o->op->stackp].lenlen = lenlen;
 
-	if (odr_write(o, dummy, lenlen) < 0)  /* dummy */
+        if (odr_write(o, dummy, lenlen) < 0)  /* dummy */
         {
-	    o->op->stack_names[o->op->stackp] = 0;
+            o->op->stack_names[o->op->stackp] = 0;
             --(o->op->stackp);
-	    return 0;
+            return 0;
         }
     }
     else if (o->direction == ODR_DECODE)
     {
-    	if ((res = ber_declen(o->bp, &o->op->stack[o->op->stackp].len,
+        if ((res = ber_declen(o->bp, &o->op->stack[o->op->stackp].len,
                               odr_max(o))) < 0)
         {
             odr_seterror(o, OOTHER, 31);
-	    o->op->stack_names[o->op->stackp] = 0;
+            o->op->stack_names[o->op->stackp] = 0;
             --(o->op->stackp);
-	    return 0;
+            return 0;
         }
-	o->op->stack[o->op->stackp].lenlen = res;
-	o->bp += res;
+        o->op->stack[o->op->stackp].lenlen = res;
+        o->bp += res;
         if (o->op->stack[o->op->stackp].len > odr_max(o))
         {
             odr_seterror(o, OOTHER, 32);
-	    o->op->stack_names[o->op->stackp] = 0;
+            o->op->stack_names[o->op->stackp] = 0;
             --(o->op->stackp);
-	    return 0;
+            return 0;
         }
     }
     else if (o->direction == ODR_PRINT)
     {
-	odr_prname(o, name);
-    	odr_printf(o, "{\n");
-	o->indent++;
+        odr_prname(o, name);
+        odr_printf(o, "{\n");
+        o->indent++;
     }
     else
     {
         odr_seterror(o, OOTHER, 33);
-	o->op->stack_names[o->op->stackp] = 0;
+        o->op->stack_names[o->op->stackp] = 0;
         --(o->op->stackp);
-	return 0;
+        return 0;
     }
     o->op->stack[o->op->stackp].base = o->bp;
     o->op->stack[o->op->stackp].base_offset = odr_tell(o);
@@ -108,13 +108,13 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
 int odr_constructed_more(ODR o)
 {
     if (o->error)
-    	return 0;
+        return 0;
     if (o->op->stackp < 0)
-    	return 0;
+        return 0;
     if (o->op->stack[o->op->stackp].len >= 0)
-    	return o->bp - o->op->stack[o->op->stackp].base < o->op->stack[o->op->stackp].len;
+        return o->bp - o->op->stack[o->op->stackp].base < o->op->stack[o->op->stackp].len;
     else
-    	return (!(*o->bp == 0 && *(o->bp + 1) == 0));
+        return (!(*o->bp == 0 && *(o->bp + 1) == 0));
 }
 
 int odr_constructed_end(ODR o)
@@ -123,11 +123,11 @@ int odr_constructed_end(ODR o)
     int pos;
 
     if (o->error)
-    	return 0;
+        return 0;
     if (o->op->stackp < 0)
     {
         odr_seterror(o, OOTHER, 34);
-    	return 0;
+        return 0;
     }
     o->op->stack_names[o->op->stackp] = 0;
     switch (o->direction)
@@ -137,8 +137,8 @@ int odr_constructed_end(ODR o)
         {
             if (*o->bp++ == 0 && *(o->bp++) == 0)
             {
-		    o->op->stackp--;
-		    return 1;
+                    o->op->stackp--;
+                    return 1;
             }
             else
             {
@@ -191,3 +191,11 @@ int odr_constructed_end(ODR o)
         return 0;
     }
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

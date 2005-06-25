@@ -1,4 +1,4 @@
-/* $Id: cql2pqf.c,v 1.6 2005-01-15 19:47:15 adam Exp $
+/* $Id: cql2pqf.c,v 1.7 2005-06-25 15:46:07 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -36,20 +36,20 @@ int main(int argc, char **argv)
         switch (ret)
         {
         case 0:
-	    if (!fname)
-		fname = arg;
-	    else
-		query = arg;
+            if (!fname)
+                fname = arg;
+            else
+                query = arg;
             break;
-	case 'n':
-	    iterations = atoi(arg);
-	    break;
-	default:
-	    usage();
-	}
+        case 'n':
+            iterations = atoi(arg);
+            break;
+        default:
+            usage();
+        }
     }
     if (!fname)
-	usage();
+        usage();
     ct = cql_transform_open_fname(fname);
     if (!ct)
     {
@@ -59,33 +59,41 @@ int main(int argc, char **argv)
 
     if (query)
     {
-	for (i = 0; i<iterations; i++)
-	    r = cql_parser_string(cp, query);
+        for (i = 0; i<iterations; i++)
+            r = cql_parser_string(cp, query);
     }
     else
-	r = cql_parser_stdio(cp, stdin);
+        r = cql_parser_stdio(cp, stdin);
 
     if (r)
         fprintf (stderr, "Syntax error\n");
     else
     {
         r = cql_transform_FILE(ct, cql_parser_result(cp), stdout);
-	printf("\n");
+        printf("\n");
         if (r)
         {
             const char *addinfo;
             cql_transform_error(ct, &addinfo);
             printf ("Transform error %d %s\n", r, addinfo ? addinfo : "");
         }
-	else
-	{
-	    FILE *null = fopen("/dev/null", "w");
-	    for (i = 1; i<iterations; i++)
-		cql_transform_FILE(ct, cql_parser_result(cp), null);
-	    fclose(null);
-	}
+        else
+        {
+            FILE *null = fopen("/dev/null", "w");
+            for (i = 1; i<iterations; i++)
+                cql_transform_FILE(ct, cql_parser_result(cp), null);
+            fclose(null);
+        }
     }
     cql_transform_close(ct);
     cql_parser_destroy(cp);
     return 0;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

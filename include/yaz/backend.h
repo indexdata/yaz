@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.31 2005-05-20 19:29:18 adam Exp $
+ * $Id: backend.h,v 1.32 2005-06-25 15:46:01 adam Exp $
  */
 
 /** 
@@ -241,7 +241,7 @@ typedef struct bend_initresult
 } bend_initresult;
 
 YAZ_EXPORT void bend_request_send (bend_association a, bend_request req,
-				   Z_APDU *res);
+                                   Z_APDU *res);
 
 YAZ_EXPORT bend_request bend_request_mk (bend_association a);
 
@@ -305,3 +305,11 @@ YAZ_EXPORT int check_ip_tcpd(void *cd, const char *addr, int len, int type);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

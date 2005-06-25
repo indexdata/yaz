@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_int.c,v 1.4 2005-01-16 21:51:50 adam Exp $
+ * $Id: ber_int.c,v 1.5 2005-06-25 15:46:03 adam Exp $
  */
 
 /** 
@@ -41,21 +41,21 @@ int ber_integer(ODR o, int *val)
     switch (o->direction)
     {
     case ODR_DECODE:
-	if ((res = ber_decinteger(o->bp, val, odr_max(o))) <= 0)
-	{
-	    odr_seterror(o, OPROTO, 50);
-	    return 0;
-	}
-	o->bp += res;
-	return 1;
+        if ((res = ber_decinteger(o->bp, val, odr_max(o))) <= 0)
+        {
+            odr_seterror(o, OPROTO, 50);
+            return 0;
+        }
+        o->bp += res;
+        return 1;
     case ODR_ENCODE:
-	if ((res = ber_encinteger(o, *val)) < 0)
-	    return 0;
-	return 1;
+        if ((res = ber_encinteger(o, *val)) < 0)
+            return 0;
+        return 1;
     case ODR_PRINT:
-	return 1;
+        return 1;
     default:
-	odr_seterror(o, OOTHER, 51);  return 0;
+        odr_seterror(o, OOTHER, 51);  return 0;
     }
 }
 
@@ -116,3 +116,11 @@ int ber_decinteger(const unsigned char *buf, int *val, int max)
 #endif
     return b - buf;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.25 2005-01-15 19:47:10 adam Exp $
+ * $Id: zoom.h,v 1.26 2005-06-25 15:46:03 adam Exp $
  */
 /**
  * \file zoom.h
@@ -29,7 +29,7 @@ ZOOM_BEGIN_CDECL
 typedef struct ZOOM_options_p *ZOOM_options;
 typedef struct ZOOM_query_p *ZOOM_query;
 typedef struct ZOOM_connection_p *ZOOM_connection;
-typedef	struct ZOOM_resultset_p *ZOOM_resultset;
+typedef struct ZOOM_resultset_p *ZOOM_resultset;
 typedef struct ZOOM_task_p *ZOOM_task;
 typedef struct ZOOM_record_p *ZOOM_record;
 typedef struct ZOOM_scanset_p *ZOOM_scanset;
@@ -52,7 +52,7 @@ ZOOM_connection_create (ZOOM_options options);
 /* connect given existing connection */
 ZOOM_API(void)
 ZOOM_connection_connect(ZOOM_connection c, const char *host,
-			      int portnum);
+                              int portnum);
 
 /* destroy connection (close connection also) */
 ZOOM_API(void)
@@ -68,14 +68,14 @@ ZOOM_connection_option_set (ZOOM_connection c, const char *key,
 
 ZOOM_API(void)
 ZOOM_connection_option_setl (ZOOM_connection c, const char *key,
-			     const char *val, int len);
+                             const char *val, int len);
 
 /* return error code (0 == success, failure otherwise). cp
    holds error string on failure, addinfo holds addititional info (if any)
 */
 ZOOM_API(int)
 ZOOM_connection_error (ZOOM_connection c, const char **cp,
-			    const char **addinfo);
+                            const char **addinfo);
 
 ZOOM_API(int)
 ZOOM_connection_error_x (ZOOM_connection c, const char **cp,
@@ -207,7 +207,7 @@ ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
 
 ZOOM_API(const char *)
 ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
-			  int *occ, int *len);
+                          int *occ, int *len);
 
 ZOOM_API(size_t)
 ZOOM_scanset_size(ZOOM_scanset scan);
@@ -244,7 +244,7 @@ ZOOM_API(void)
 /* Sort */
 ZOOM_API(void)
     ZOOM_resultset_sort(ZOOM_resultset r,
-			const char *sort_type, const char *sort_spec);
+                        const char *sort_type, const char *sort_spec);
 
 /* ----------------------------------------------------------- */
 /* options */
@@ -295,3 +295,11 @@ ZOOM_API(int)
 ZOOM_event (int no, ZOOM_connection *cs);
 
 ZOOM_END_CDECL
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

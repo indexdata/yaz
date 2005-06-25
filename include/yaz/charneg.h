@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: charneg.h,v 1.6 2005-05-18 12:38:40 adam Exp $
+ * $Id: charneg.h,v 1.7 2005-06-25 15:46:01 adam Exp $
  */
 /** 
  * \file charneg.h
@@ -64,15 +64,15 @@ int yaz_del_charneg_record(Z_OtherInformation **p);
  */
 YAZ_EXPORT
 Z_External *yaz_set_proposal_charneg(ODR odr,
-				     const char **charsets, int num_charsets,
-				     const char **langs,
-				     int num_langs, int selected);
+                                     const char **charsets, int num_charsets,
+                                     const char **langs,
+                                     int num_langs, int selected);
 
 YAZ_EXPORT
 void yaz_get_response_charneg(NMEM mem,
-			      Z_CharSetandLanguageNegotiation *p,
-			      char **charset, char **lang,
-			      int *selected);
+                              Z_CharSetandLanguageNegotiation *p,
+                              char **charset, char **lang,
+                              int *selected);
 
 /*
  * Server's part
@@ -80,16 +80,24 @@ void yaz_get_response_charneg(NMEM mem,
  
 YAZ_EXPORT
 Z_External *yaz_set_response_charneg(ODR odr,
-				     const char *charset, const char *lang,
-				     int selected);
+                                     const char *charset, const char *lang,
+                                     int selected);
 
 
 YAZ_EXPORT
 void yaz_get_proposal_charneg(NMEM mem,
-			      Z_CharSetandLanguageNegotiation *p,
-			      char ***charsets, int *num_charsets,
-			      char ***langs, int *num_langs,
-			      int *selected);
+                              Z_CharSetandLanguageNegotiation *p,
+                              char ***charsets, int *num_charsets,
+                              char ***langs, int *num_langs,
+                              int *selected);
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

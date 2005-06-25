@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: otherinfo.h,v 1.4 2005-01-15 19:47:09 adam Exp $
+ * $Id: otherinfo.h,v 1.5 2005-06-25 15:46:03 adam Exp $
  */
 /**
  * \file otherinfo.h
@@ -37,3 +37,11 @@ YAZ_EXPORT char *yaz_oi_get_string_oidval(
 YAZ_END_CDECL
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

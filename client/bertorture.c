@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: bertorture.c,v 1.3 2005-01-16 21:51:49 adam Exp $
+ * $Id: bertorture.c,v 1.4 2005-06-25 15:46:01 adam Exp $
  */
 
 #include <signal.h>
@@ -221,3 +221,11 @@ int main(int argc, char **argv)
             printf ("%3d %9d\n", i, estat[i]);
     exit(0);
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

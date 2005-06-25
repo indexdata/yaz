@@ -4,7 +4,11 @@
  * Sebastian Hammer, Adam Dickmeiss
  *
  * $Log: rfct.c,v $
- * Revision 1.9  1996-02-23 10:01:00  quinn
+ * Revision 1.10  2005-06-25 15:46:03  adam
+ * Expanded tabs in all source files. Added vim/emacs local variables
+ * trailer.
+ *
+ * Revision 1.9  1996/02/23 10:01:00  quinn
  * Smallish
  *
  * Revision 1.8  1995/11/01  13:54:52  quinn
@@ -220,7 +224,7 @@ static void init_rfc(void)
     int i;
 
     for (i = 0; i < NOFILE; i++)
-    	control[i] = 0;
+        control[i] = 0;
     rfc_running = 1;
 }
 
@@ -233,24 +237,24 @@ int t_open(char *name, int oflag, struct t_info *info)
     TRC(fprintf(stderr, "T_OPEN\n"));
 
     if (!rfc_running)
-    	init_rfc();
+        init_rfc();
 
     if (!(proto = getprotobyname("tcp")))
-    	return 0;
+        return 0;
     if ((s = socket(AF_INET, SOCK_STREAM, proto->p_proto)) < 0)
-    	return 0;
+        return 0;
 #ifdef NONBLOCKING_OSI
     if ((oflag & O_NONBLOCK) && fcntl(s, F_SETFL, O_NONBLOCK) < 0)
     {
-    	t_errno = TSYSERR;
-	return -1;
+        t_errno = TSYSERR;
+        return -1;
     }
 #endif
     if (!(cnt = control[s] = malloc(sizeof(struct rfct_control))))
     {
-    	TRC(perror("malloc()"));
-	t_errno = TSYSERR;
-	return -1;
+        TRC(perror("malloc()"));
+        t_errno = TSYSERR;
+        return -1;
     }
 
     cnt->togo = 0;
@@ -263,7 +267,7 @@ int t_open(char *name, int oflag, struct t_info *info)
     cnt->tmpfd = -1;
     cnt->ltsel_len = 0;
     for (i = 0; i < MAX_QLEN; i++)
-    	cnt->oci[i] = -1;
+        cnt->oci[i] = -1;
 
     /*
      * RFC1006 sets a higher than standard (TP) default max TPDU size, but the
@@ -275,14 +279,14 @@ int t_open(char *name, int oflag, struct t_info *info)
 
     if (info)
     {
-	info->addr = TSEL_MAXLEN + sizeof(struct sockaddr_in) + 1;
-	info->options = 1024;
-	info->tsdu = -1; /* is this right? */
-	info->etsdu = 0;
-	info->connect = -2;
-	info->discon = -2;
-	info->servtype = T_COTS_ORD;  /* lets hope our user doesn't
-					try something funny. */
+        info->addr = TSEL_MAXLEN + sizeof(struct sockaddr_in) + 1;
+        info->options = 1024;
+        info->tsdu = -1; /* is this right? */
+        info->etsdu = 0;
+        info->connect = -2;
+        info->discon = -2;
+        info->servtype = T_COTS_ORD;  /* lets hope our user doesn't
+                                        try something funny. */
     }
     return s;
 }
@@ -301,33 +305,33 @@ int t_connect(int fd, struct t_call *sndcall, struct t_call *rcvcall)
     TRC(fprintf(stderr, "T_CONNECT\n"));
     if (!cnt || cnt->state != T_IDLE)
     {
-    	TRC(fprintf(stderr, "TOUTSTATE\n"));
-	t_errno = TOUTSTATE;
-	return -1;
+        TRC(fprintf(stderr, "TOUTSTATE\n"));
+        t_errno = TOUTSTATE;
+        return -1;
     }
     /* take the address apart */
     p = sndcall->addr.buf;
     if (*p) /* transport selector */
     {
-    	TRC(fprintf(stderr, "Tsel length is %d.\n", *p));
-	pbuf[0] = TPDU_PARM_CLDID;
-	pbuf[1] = *p;
-	memcpy(pbuf + 2, p + 1, *p);
-	plen = *p + 2;
+        TRC(fprintf(stderr, "Tsel length is %d.\n", *p));
+        pbuf[0] = TPDU_PARM_CLDID;
+        pbuf[1] = *p;
+        memcpy(pbuf + 2, p + 1, *p);
+        plen = *p + 2;
     }
     p += *p + 1; /* skip tsel */
     if (*p != sizeof(addr))
     {
-    	TRC(fprintf(stderr, "Expected  sockaddr here.\n"));
-	t_errno = TBADADDR;
-    	return -1;
+        TRC(fprintf(stderr, "Expected  sockaddr here.\n"));
+        t_errno = TBADADDR;
+        return -1;
     }
     p++;
     memcpy(&addr, p, sizeof(addr));
     if (connect(fd, (struct sockaddr*) &addr, sizeof(addr)) < 0)
     {
-    	t_errno = TSYSERR;
-    	return -1;
+        t_errno = TSYSERR;
+        return -1;
     }
 
     /*
@@ -340,9 +344,9 @@ int t_connect(int fd, struct t_call *sndcall, struct t_call *rcvcall)
      */
     if (cnt->tsize <= 2048)
     {
-	pbuf[plen++] = TPDU_PARM_TSIZE;
-	pbuf[plen++] = 1;
-	pbuf[plen++] = 0x0b; /* request max PDU size (2048 octets) */
+        pbuf[plen++] = TPDU_PARM_TSIZE;
+        pbuf[plen++] = 1;
+        pbuf[plen++] = 0x0b; /* request max PDU size (2048 octets) */
     }
 
     rfc.version = RFC_VERSION;
@@ -368,9 +372,9 @@ int t_connect(int fd, struct t_call *sndcall, struct t_call *rcvcall)
      */
     if (writev(fd, vec, 3) < 4 + 7 + plen)
     {
-    	TRC(fprintf(stderr, "writev came up short. Aborting connect\n"));
-	t_errno = TSYSERR;
-	return -1;
+        TRC(fprintf(stderr, "writev came up short. Aborting connect\n"));
+        t_errno = TSYSERR;
+        return -1;
     }
     cnt->state = T_OUTCON;
     cnt->event = 0;
@@ -387,26 +391,26 @@ static int read_n(int fd, char *buf, int toget)
 
     do
     {
-    	if ((res = read(fd, buf, toget - got)) < 0)
-	{
-	    if (errno == EAGAIN)
-	    	t_errno = TNODATA;
-	    else
-	    {
-		TRC(fprintf(stderr, "Error on read.\n"));
-		t_errno = TSYSERR;
-	    }
-	    return -1;
-	}
-	if (!res) /* peer closed network connection */
-	{
-	    t_errno = TLOOK;
-	    cnt->event = T_DISCONNECT;  /* is this correct ? ## */
-	    cnt->hlen = cnt->pending = 0;
-	    cnt->state = T_IDLE; /* this can't be correct ## */
-	    return 0;
-	}
-	buf += res;
+        if ((res = read(fd, buf, toget - got)) < 0)
+        {
+            if (errno == EAGAIN)
+                t_errno = TNODATA;
+            else
+            {
+                TRC(fprintf(stderr, "Error on read.\n"));
+                t_errno = TSYSERR;
+            }
+            return -1;
+        }
+        if (!res) /* peer closed network connection */
+        {
+            t_errno = TLOOK;
+            cnt->event = T_DISCONNECT;  /* is this correct ? ## */
+            cnt->hlen = cnt->pending = 0;
+            cnt->state = T_IDLE; /* this can't be correct ## */
+            return 0;
+        }
+        buf += res;
     }
     while ((got += res) < toget);
     return toget;
@@ -423,75 +427,75 @@ int t_rcvconnect(int fd, struct t_call *call)
     TRC(fprintf(stderr, "T_RCVCONNECT\n"));
     if (!cnt || cnt->state != T_OUTCON)
     {
-    	TRC(fprintf(stderr, "TOUTSTATE\n"));
-	t_errno = TOUTSTATE;
-	return -1;
+        TRC(fprintf(stderr, "TOUTSTATE\n"));
+        t_errno = TOUTSTATE;
+        return -1;
     }
     if (!cnt->event)
-    	if (t_look_wait(fd, 1) <= 0)
-	    return -1;
+        if (t_look_wait(fd, 1) <= 0)
+            return -1;
     if (cnt->event != T_CONNECT)
     {
-    	t_errno = TLOOK;
-	return -1;
+        t_errno = TLOOK;
+        return -1;
     }
     /* read the rest of the CC TPDU */
     if (read_n(fd, buf, cnt->hlen) <= 0)
-    	return -1;
+        return -1;
     memcpy(&chead, buf, 5);
     if (chead.class != 0)
     {
-    	TRC(fprintf(stderr, "Expected TP0, got %d\n", (int)chead.class));
-	t_errno = TSYSERR;
-    	return -1;
+        TRC(fprintf(stderr, "Expected TP0, got %d\n", (int)chead.class));
+        t_errno = TSYSERR;
+        return -1;
     }
     if (call)
-    	*(addrp = call->addr.buf) = 0;
+        *(addrp = call->addr.buf) = 0;
     cnt->hlen -= 5;
     for (p = buf + 5; cnt->hlen > 0;)
     {
-	switch ((unsigned char)*p)
-	{
-	    case TPDU_PARM_TSIZE:
-	    	cnt->tsize = 1 << *(p + 2);
-		break;
-	    case TPDU_PARM_CLDID:
-	    	if (call)
-		{
-		    if (*(p + 1) > TSEL_MAXLEN)
-		    {
-			TRC(fprintf(stderr, "Called TSEL too long.\n"));
-			t_errno = TSYSERR; /* Wrong.. ## */
-			return -1;
-		    }
-		    *addrp = *(p + 1); /* length */
-		    memcpy(addrp + 1, p + 2, *(p + 1)); /* remote TSEL */
-		    addrp += *(p + 1); /* move past TSEL */
-		}
-		break;
-	    case TPDU_PARM_CLGID: break; /* ignoring this for now */
-	    default:
-	    	TRC(fprintf(stderr, "Inoring CR parameter: %d\n",
-		    (unsigned char)*p));
-	    /* we silently ignore anything else */
-	}
-	p++;
-	cnt->hlen -= (unsigned char) *p + 2;
-	p += (unsigned char) *p + 1;
+        switch ((unsigned char)*p)
+        {
+            case TPDU_PARM_TSIZE:
+                cnt->tsize = 1 << *(p + 2);
+                break;
+            case TPDU_PARM_CLDID:
+                if (call)
+                {
+                    if (*(p + 1) > TSEL_MAXLEN)
+                    {
+                        TRC(fprintf(stderr, "Called TSEL too long.\n"));
+                        t_errno = TSYSERR; /* Wrong.. ## */
+                        return -1;
+                    }
+                    *addrp = *(p + 1); /* length */
+                    memcpy(addrp + 1, p + 2, *(p + 1)); /* remote TSEL */
+                    addrp += *(p + 1); /* move past TSEL */
+                }
+                break;
+            case TPDU_PARM_CLGID: break; /* ignoring this for now */
+            default:
+                TRC(fprintf(stderr, "Inoring CR parameter: %d\n",
+                    (unsigned char)*p));
+            /* we silently ignore anything else */
+        }
+        p++;
+        cnt->hlen -= (unsigned char) *p + 2;
+        p += (unsigned char) *p + 1;
     }
     addrp++; /* skip to end of addr + 1 */
     if (call)
     {
-	if (getpeername(fd, (struct sockaddr*) &peer, &len) < 0)
-	{
-	    TRC(perror("getpeername()"));
-	    t_errno = TSYSERR;
-	    return -1;
-	}
-	*(addrp++) = sizeof(struct sockaddr_in);
-	memcpy(addrp, &peer, sizeof(struct sockaddr_in));
-	addrp += sizeof(struct sockaddr_in);
-	call->addr.len = addrp - call->addr.buf + 1;
+        if (getpeername(fd, (struct sockaddr*) &peer, &len) < 0)
+        {
+            TRC(perror("getpeername()"));
+            t_errno = TSYSERR;
+            return -1;
+        }
+        *(addrp++) = sizeof(struct sockaddr_in);
+        memcpy(addrp, &peer, sizeof(struct sockaddr_in));
+        addrp += sizeof(struct sockaddr_in);
+        call->addr.len = addrp - call->addr.buf + 1;
     }
     cnt->state = T_DATAXFER;
     cnt->event = 0;
@@ -509,107 +513,107 @@ int t_snd(int fd, char *buf, unsigned nbytes, int flags)
     TRC(fprintf(stderr, "T_SND [%d bytes, flags %d]\n", nbytes, flags));
     if (!cnt || cnt->state != T_DATAXFER)
     {
-    	TRC(fprintf(stderr, "Trying to write in the wrong state on fd %d.\n",
-	    fd));
-	t_errno = TOUTSTATE;
-    	return -1;
+        TRC(fprintf(stderr, "Trying to write in the wrong state on fd %d.\n",
+            fd));
+        t_errno = TOUTSTATE;
+        return -1;
     }
     if (!nbytes)
     {
-    	t_errno = TBADDATA;
-	return -1;
+        t_errno = TBADDATA;
+        return -1;
     }
     do /* write the TSDU (segment) in chunks depending on the TPDU max size */
     {
-	if (cnt->togo > 0) /* we have a partial TPDU on the wire */
-	{
-	    TRC(fprintf(stderr, "  writing continuation block (%d)\n",
-		cnt->togo));
-	    if ((res = write(fd, buf, cnt->togo)) < 0)
-	    {
-	    	if (errno == EAGAIN)
-		{
-		    t_errno = TFLOW;
-		    return -1;
-		}
-		cnt->togo -= res;
-		return res;
-	    }
-	    writ += res;
-	    cnt->togo = 0;
-	    TRC(fprintf(stderr, "  wrote %d, total %d\n", res, writ));
-	}
-	else /* prepare and send (possibly partial) header */
-	{
-	    towrite = nbytes - writ;
-	    if (towrite + 3 + 4 > cnt->tsize)
-		towrite = cnt->tsize - (3 + 4); /* space for DATA header */
-	    rfc.version = RFC_VERSION;
-	    rfc.reserved = 0;
-	    rfc.len = htons(towrite + 4 + 3); /* RFC1006 length */
-	    rfc.hlen = 2;
-	    rfc.code = TPDU_CODE_DATA;
-	    if (flags & T_MORE || towrite + writ < nbytes)
-	    	eot = 0;
-	    else
-	    	eot = 1;
-	    rfc.suffix[0] = eot << 7; /* DATA EOT marker */
-	    if (cnt->togo < 0)
-	    	head_offset = 7 + cnt->togo;
-	    else
-	    	head_offset = 0;
-	    vec[0].iov_base = (caddr_t) (char*)&rfc + head_offset;
-	    vec[0].iov_len = 7 - head_offset;
-	    vec[1].iov_base = (caddr_t) buf + writ;
-	    vec[1].iov_len = towrite;
-	    TRC(fprintf(stderr, "  sending beg of block (%d+%d)\n",
-	    	7 - head_offset, towrite));
-	    if ((res = writev(fd, vec, 2)) < 0)
-	    {
-	    	TRC(fprintf(stderr, "  write returned -1\n"));
-		/* thwarted by flow control */
-	    	if (errno == EAGAIN)
-		{
-		    if (writ)
-		    	return writ;
-		    else
-		    {
-		    	t_errno = TFLOW;
-			return -1;
-		    }
-		}
-		else
-		    t_errno = TSYSERR;
-		return -1;
-	    }
-	    /* somewhat thwarted */
-	    else if (res < towrite + 7 - head_offset)
-	    {
-	    	/*
-		 * Write came up short. We assume that this is a flow-
-		 * control thing, and return immediately. Maybe it'd
-		 * be better to take another loop, and generate an
-		 * actual EAGAIN from write?
-		 */
-		TRC(fprintf(stderr, "  write returned %d\n", res));
-	    	if (res < 7 - head_offset) /* we didn't send a full header */
-		{
-		    cnt->togo = -(7 - head_offset - res);
-		    t_errno = TFLOW;
-		    return -1;
-		}
-		else if ((res -= 7 - head_offset) < towrite) /* not all data */
-		{
-		    cnt->togo = towrite - res;
-		    return nbytes - (writ + res);
-		}
-	    }
-	    else /* whew... nonblocking I/O is hard work */
-	    {
-	    	cnt->togo = 0;
-	    	writ += res - (7 - head_offset);
-	    }
-	}
+        if (cnt->togo > 0) /* we have a partial TPDU on the wire */
+        {
+            TRC(fprintf(stderr, "  writing continuation block (%d)\n",
+                cnt->togo));
+            if ((res = write(fd, buf, cnt->togo)) < 0)
+            {
+                if (errno == EAGAIN)
+                {
+                    t_errno = TFLOW;
+                    return -1;
+                }
+                cnt->togo -= res;
+                return res;
+            }
+            writ += res;
+            cnt->togo = 0;
+            TRC(fprintf(stderr, "  wrote %d, total %d\n", res, writ));
+        }
+        else /* prepare and send (possibly partial) header */
+        {
+            towrite = nbytes - writ;
+            if (towrite + 3 + 4 > cnt->tsize)
+                towrite = cnt->tsize - (3 + 4); /* space for DATA header */
+            rfc.version = RFC_VERSION;
+            rfc.reserved = 0;
+            rfc.len = htons(towrite + 4 + 3); /* RFC1006 length */
+            rfc.hlen = 2;
+            rfc.code = TPDU_CODE_DATA;
+            if (flags & T_MORE || towrite + writ < nbytes)
+                eot = 0;
+            else
+                eot = 1;
+            rfc.suffix[0] = eot << 7; /* DATA EOT marker */
+            if (cnt->togo < 0)
+                head_offset = 7 + cnt->togo;
+            else
+                head_offset = 0;
+            vec[0].iov_base = (caddr_t) (char*)&rfc + head_offset;
+            vec[0].iov_len = 7 - head_offset;
+            vec[1].iov_base = (caddr_t) buf + writ;
+            vec[1].iov_len = towrite;
+            TRC(fprintf(stderr, "  sending beg of block (%d+%d)\n",
+                7 - head_offset, towrite));
+            if ((res = writev(fd, vec, 2)) < 0)
+            {
+                TRC(fprintf(stderr, "  write returned -1\n"));
+                /* thwarted by flow control */
+                if (errno == EAGAIN)
+                {
+                    if (writ)
+                        return writ;
+                    else
+                    {
+                        t_errno = TFLOW;
+                        return -1;
+                    }
+                }
+                else
+                    t_errno = TSYSERR;
+                return -1;
+            }
+            /* somewhat thwarted */
+            else if (res < towrite + 7 - head_offset)
+            {
+                /*
+                 * Write came up short. We assume that this is a flow-
+                 * control thing, and return immediately. Maybe it'd
+                 * be better to take another loop, and generate an
+                 * actual EAGAIN from write?
+                 */
+                TRC(fprintf(stderr, "  write returned %d\n", res));
+                if (res < 7 - head_offset) /* we didn't send a full header */
+                {
+                    cnt->togo = -(7 - head_offset - res);
+                    t_errno = TFLOW;
+                    return -1;
+                }
+                else if ((res -= 7 - head_offset) < towrite) /* not all data */
+                {
+                    cnt->togo = towrite - res;
+                    return nbytes - (writ + res);
+                }
+            }
+            else /* whew... nonblocking I/O is hard work */
+            {
+                cnt->togo = 0;
+                writ += res - (7 - head_offset);
+            }
+        }
     }
     while (writ < nbytes);
     TRC(fprintf(stderr, "  finishing with %d written\n", nbytes));
@@ -627,104 +631,104 @@ int _t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
     TRC(fprintf(stderr, "T_RCV [nbytes=%d, flags=0x%x]\n", nbytes, *flags));
     if (!cnt || cnt->state != T_DATAXFER)
     {
-    	t_errno = TOUTSTATE;
-	return -1;
+        t_errno = TOUTSTATE;
+        return -1;
     }
     *flags = 0;
     do /* loop until we have a full TSDU or an error */
     {
-    	if (!cnt->event)
-	    if (t_look_wait(fd, 0) <= 0)
-	    	return -1;
-	if (cnt->event != T_DATA)
-	{
-	    t_errno = TLOOK;
-	    return -1;
-	}
-	if (cnt->hlen)  /* beginning of block */
-	{
-	    TRC(fprintf(stderr, "  Beginning of TPDU\n"));
-	    if (cnt->hlen > 2)
-	    {
-	    	TRC(fprintf(stderr, "We can't handle parameters to DATA\n"));
-		t_errno = TSYSERR;
-		return -1;
-	    }
-	    toget = cnt->pending;
-	    if (toget > nbytes - got)
-	    	toget = nbytes - got;
-	    TRC(fprintf(stderr, "  toget=%d\n", toget));
-	    vec[0].iov_base = (caddr_t) &dhead;
-	    vec[0].iov_len = 1;
-	    vec[1].iov_base = (caddr_t) buf + got;
-	    vec[1].iov_len = toget;
-	    if ((res = readv(fd, vec, 2)) < 0)
-	    {
-	    	TRC(perror("readv()"));
-	        if (errno == EAGAIN)
-		{
-		    if (got)  /* we got some data in previous cycle */
-		    	break;
-		    t_errno = TNODATA; /* no data */
-		    return -1;
-		}
-	    	t_errno = TSYSERR;
-		return -1;
-	    }
-	    TRC(fprintf(stderr, "  readv() returned %d\n", res));
-	    if (res == 0)
-	    {
-	    	t_errno = TLOOK;
-		cnt->event = T_DISCONNECT;
-		return -1;
-	    }
-	    got += res - 1;
- 	    cnt->eot_flag = (dhead.nr & DATA_EOT) >> 7;
-	    cnt->hlen = 0;
-	    cnt->pending -= got;
-	    TRC(fprintf(stderr, "  Got total of %d octets, %d pending\n",
-		got, cnt->pending));
-	}
-	else /* continuation */
-	{
-	    TRC(fprintf(stderr, "  Reading middle of TPDU\n"));
-	    toget = cnt->pending;
-	    if (toget > nbytes - got)
-	    	toget = nbytes - got;
-	    TRC(fprintf(stderr, "  toget=%d\n", toget));
-	    if ((res = read(fd, buf + got, toget)) < 0)
-	    {
-	    	TRC(perror("read()"));
-	        if (errno == EAGAIN)
-		{
-		    if (got)  /* we got some data in previous cycle */
-		    	break;
-		    t_errno = TNODATA; /* no data */
-		    return -1;
-		}
-	    	t_errno = TSYSERR;
-		return -1;
-	    }
-	    TRC(fprintf(stderr, "  read() returned %d\n", res));
-	    if (res == 0)
-	    {
-	    	t_errno = TLOOK;
-		cnt->event = T_DISCONNECT;
-		return -1;
-	    }
-	    got += res;
-	    cnt->pending -= res;
-	    TRC(fprintf(stderr, "  Got total of %d octets, %d pending\n",
-		got, cnt->pending));
-	}
-	TRC(fprintf(stderr, "  bottom of loop: pending=%d, got=%d\n",
-	    cnt->pending, got));
+        if (!cnt->event)
+            if (t_look_wait(fd, 0) <= 0)
+                return -1;
+        if (cnt->event != T_DATA)
+        {
+            t_errno = TLOOK;
+            return -1;
+        }
+        if (cnt->hlen)  /* beginning of block */
+        {
+            TRC(fprintf(stderr, "  Beginning of TPDU\n"));
+            if (cnt->hlen > 2)
+            {
+                TRC(fprintf(stderr, "We can't handle parameters to DATA\n"));
+                t_errno = TSYSERR;
+                return -1;
+            }
+            toget = cnt->pending;
+            if (toget > nbytes - got)
+                toget = nbytes - got;
+            TRC(fprintf(stderr, "  toget=%d\n", toget));
+            vec[0].iov_base = (caddr_t) &dhead;
+            vec[0].iov_len = 1;
+            vec[1].iov_base = (caddr_t) buf + got;
+            vec[1].iov_len = toget;
+            if ((res = readv(fd, vec, 2)) < 0)
+            {
+                TRC(perror("readv()"));
+                if (errno == EAGAIN)
+                {
+                    if (got)  /* we got some data in previous cycle */
+                        break;
+                    t_errno = TNODATA; /* no data */
+                    return -1;
+                }
+                t_errno = TSYSERR;
+                return -1;
+            }
+            TRC(fprintf(stderr, "  readv() returned %d\n", res));
+            if (res == 0)
+            {
+                t_errno = TLOOK;
+                cnt->event = T_DISCONNECT;
+                return -1;
+            }
+            got += res - 1;
+            cnt->eot_flag = (dhead.nr & DATA_EOT) >> 7;
+            cnt->hlen = 0;
+            cnt->pending -= got;
+            TRC(fprintf(stderr, "  Got total of %d octets, %d pending\n",
+                got, cnt->pending));
+        }
+        else /* continuation */
+        {
+            TRC(fprintf(stderr, "  Reading middle of TPDU\n"));
+            toget = cnt->pending;
+            if (toget > nbytes - got)
+                toget = nbytes - got;
+            TRC(fprintf(stderr, "  toget=%d\n", toget));
+            if ((res = read(fd, buf + got, toget)) < 0)
+            {
+                TRC(perror("read()"));
+                if (errno == EAGAIN)
+                {
+                    if (got)  /* we got some data in previous cycle */
+                        break;
+                    t_errno = TNODATA; /* no data */
+                    return -1;
+                }
+                t_errno = TSYSERR;
+                return -1;
+            }
+            TRC(fprintf(stderr, "  read() returned %d\n", res));
+            if (res == 0)
+            {
+                t_errno = TLOOK;
+                cnt->event = T_DISCONNECT;
+                return -1;
+            }
+            got += res;
+            cnt->pending -= res;
+            TRC(fprintf(stderr, "  Got total of %d octets, %d pending\n",
+                got, cnt->pending));
+        }
+        TRC(fprintf(stderr, "  bottom of loop: pending=%d, got=%d\n",
+            cnt->pending, got));
     }
     while (cnt->pending && got < nbytes);
     *flags = cnt->pending || !cnt->eot_flag ? T_MORE : 0;
     TRC(fprintf(stderr, "  flags=0x%x\n", *flags));
     if (!cnt->pending)
-    	cnt->event = 0;
+        cnt->event = 0;
     TRC(fprintf(stderr, "  Return value: %d\n", got));
     memset(buf + got, 0, 10);
     return got;
@@ -739,11 +743,11 @@ int t_rcv(int fd, char *buf, unsigned nbytes, int *flags)
 
     do
     {
-    	if ((res = _t_rcv(fd, buf, nbytes, flags)) <= 0)
-	    return res;
-	buf += res;
-	nbytes -= res;
-	total += res;
+        if ((res = _t_rcv(fd, buf, nbytes, flags)) <= 0)
+            return res;
+        buf += res;
+        nbytes -= res;
+        total += res;
     }
     while (*flags & T_MORE && nbytes > 0);
     return total;
@@ -758,9 +762,9 @@ int t_close(int fd)
     TRC(fprintf(stderr, "T_CLOSE\n"));
     if (!cnt || cnt->state == T_UNINIT)
     {
-    	TRC(fprintf(stderr, "Trying to close a bad fd.\n"));
-	t_errno = TBADF;
-    	return -1;
+        TRC(fprintf(stderr, "Trying to close a bad fd.\n"));
+        t_errno = TBADF;
+        return -1;
     }
     free(cnt);
     return close(fd);
@@ -789,43 +793,43 @@ static int t_look_wait(int fd, int wait)
     TRC(fprintf(stderr, "T_LOOK\n"));
     if (!cnt || cnt->state == T_UNINIT)
     {
-    	t_errno = TBADF;
-	return -1;
+        t_errno = TBADF;
+        return -1;
     }
     if (cnt->event)
-	return cnt->event;
+        return cnt->event;
     if (cnt->state == T_IDLE && cnt->tmpfd < 0)
-    	return T_LISTEN; /* the only possible type of event */
+        return T_LISTEN; /* the only possible type of event */
     if ((res = read_n(fd, (char*) &head, 6)) < 0)
-    	return -1;
+        return -1;
     if (res == 0)
     {
-    	TRC(fprintf(stderr, "Network disconnect\n"));
-    	return cnt->event = T_DISCONNECT;
+        TRC(fprintf(stderr, "Network disconnect\n"));
+        return cnt->event = T_DISCONNECT;
     }
     TRC(fprintf(stderr, "t_look got %d bytes\n", res));
     if (head.version != RFC_VERSION)
     {
-    	TRC(fprintf(stderr, "Got bad RFC1006 version in t_look: %d.\n",
-	    head.version));
-	t_errno = TSYSERR; /* should signal protocol error, somehow ## */
-    	return -1;
+        TRC(fprintf(stderr, "Got bad RFC1006 version in t_look: %d.\n",
+            head.version));
+        t_errno = TSYSERR; /* should signal protocol error, somehow ## */
+        return -1;
     }
     cnt->curcode = head.code;
     cnt->hlen = head.hlen - 1; /* length of header suffix */
     cnt->pending = ntohs(head.len) - 6 - cnt->hlen;
     TRC(fprintf(stderr, "t_look: len=%d, code=0x%2.2x, hlen=%d.\n",
-    	cnt->pending + 6, cnt->curcode, cnt->hlen));
+        cnt->pending + 6, cnt->curcode, cnt->hlen));
     switch (cnt->curcode)
     {
-    	case TPDU_CODE_CREQ: cnt->event = T_LISTEN; break;
-	case TPDU_CODE_CCON: cnt->event = T_CONNECT; break;
-	case TPDU_CODE_DATA: cnt->event = T_DATA; break;
-	case TPDU_CODE_DREQ: cnt->event = T_DISCONNECT; break; 
-	default:
-	    TRC(fprintf(stderr, "t_look: Bad package: 0x%2.2x.\n", cnt->curcode));
-	    t_errno = TSYSERR;  /* protocol error */
-	    return -1;
+        case TPDU_CODE_CREQ: cnt->event = T_LISTEN; break;
+        case TPDU_CODE_CCON: cnt->event = T_CONNECT; break;
+        case TPDU_CODE_DATA: cnt->event = T_DATA; break;
+        case TPDU_CODE_DREQ: cnt->event = T_DISCONNECT; break; 
+        default:
+            TRC(fprintf(stderr, "t_look: Bad package: 0x%2.2x.\n", cnt->curcode));
+            t_errno = TSYSERR;  /* protocol error */
+            return -1;
     }
     return cnt->event;
 }    
@@ -850,86 +854,86 @@ int t_bind(int fd, struct t_bind *req, struct t_bind *ret)
     TRC(fprintf(stderr, "T_BIND\n"));
     if (!cnt || cnt->state != T_UNBND)
     {
-    	TRC(fprintf(stderr, "Bad state\n"));
-	t_errno = TOUTSTATE;
-	return -1;
+        TRC(fprintf(stderr, "Bad state\n"));
+        t_errno = TOUTSTATE;
+        return -1;
     }
     cnt->ltsel_len = 0;
     if (req)
     {
-    	cnt->qlen = req->qlen < MAX_QLEN ? req->qlen : MAX_QLEN;
-	if (req->addr.len)
-	{
-	    p = req->addr.buf;
-	    if (*p > TSEL_MAXLEN)
-	    {
-	    	TRC(fprintf(stderr, "Tsel too large.\n"));
-		t_errno = TBADADDR;
-		return -1;
-	    }
-	    cnt->ltsel_len = *p;
-	    if (cnt->ltsel_len)
-	    	memcpy(cnt->ltsel, p + 1, cnt->ltsel_len);
-	    p += cnt->ltsel_len + 1;
-	    if (*p < sizeof(addr))
-	    {
-	    	TRC(fprintf(stderr, "W: No NSAP provided for local bind\n"));
-	    }
-	    else
-	    {
-	    	memcpy(&addr, p + 1, sizeof(addr));
-		got_addr = 1;
-	    }
-	}
+        cnt->qlen = req->qlen < MAX_QLEN ? req->qlen : MAX_QLEN;
+        if (req->addr.len)
+        {
+            p = req->addr.buf;
+            if (*p > TSEL_MAXLEN)
+            {
+                TRC(fprintf(stderr, "Tsel too large.\n"));
+                t_errno = TBADADDR;
+                return -1;
+            }
+            cnt->ltsel_len = *p;
+            if (cnt->ltsel_len)
+                memcpy(cnt->ltsel, p + 1, cnt->ltsel_len);
+            p += cnt->ltsel_len + 1;
+            if (*p < sizeof(addr))
+            {
+                TRC(fprintf(stderr, "W: No NSAP provided for local bind\n"));
+            }
+            else
+            {
+                memcpy(&addr, p + 1, sizeof(addr));
+                got_addr = 1;
+            }
+        }
     }
     else
-	cnt->qlen = 0;
+        cnt->qlen = 0;
     if (!got_addr) /* user didn't give an address - local bind */
     {
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = INADDR_ANY;
-	if (cnt->qlen)
-	    addr.sin_port = htons(RFC_DEFAULT_PORT);
-	else /* we'll leave binding to connect - just set dummy */
-	    addr.sin_port = 0; /* dummy for ret */
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = INADDR_ANY;
+        if (cnt->qlen)
+            addr.sin_port = htons(RFC_DEFAULT_PORT);
+        else /* we'll leave binding to connect - just set dummy */
+            addr.sin_port = 0; /* dummy for ret */
     }
     if (cnt->qlen && bind(fd, (struct sockaddr *) &addr,
-   	 sizeof(addr)) < 0 )
+         sizeof(addr)) < 0 )
     {
-    	TRC(perror("bind()"));
-	t_errno = TSYSERR; /* this should be refined */
-	return -1;
+        TRC(perror("bind()"));
+        t_errno = TSYSERR; /* this should be refined */
+        return -1;
     }
     if (cnt->qlen)
     {
-	if (listen(fd, cnt->qlen) < 0)
-	{
-	    t_errno = TSYSERR;
-	    return -1;
-	}
-	cnt->listen = 1;
-	TRC(fprintf(stderr, "  listen OK\n"));
+        if (listen(fd, cnt->qlen) < 0)
+        {
+            t_errno = TSYSERR;
+            return -1;
+        }
+        cnt->listen = 1;
+        TRC(fprintf(stderr, "  listen OK\n"));
     }
     cnt->state = T_IDLE;
     /* All right! Now let's give something back, if our user wants it */
     if (ret)
     {
-    	ret->qlen = cnt->qlen;
-    	if (ret->addr.maxlen < (ret->addr.len = cnt->ltsel_len + 2 +
-	    sizeof(addr)))
-	{
-	    /* No space - but we're still bound */
-	    t_errno = TBUFOVFLW;
-	    ret->addr.len = 0;
-	    return -1;
-	}
-	p = ret->addr.buf;
-	*(p++) = cnt->ltsel_len;
-	if (cnt->ltsel_len)
-	    memcpy(p, cnt->ltsel, cnt->ltsel_len);
-	p += cnt->ltsel_len;
-	*(p++) = sizeof(addr);
-	memcpy(p, &addr, sizeof(addr));
+        ret->qlen = cnt->qlen;
+        if (ret->addr.maxlen < (ret->addr.len = cnt->ltsel_len + 2 +
+            sizeof(addr)))
+        {
+            /* No space - but we're still bound */
+            t_errno = TBUFOVFLW;
+            ret->addr.len = 0;
+            return -1;
+        }
+        p = ret->addr.buf;
+        *(p++) = cnt->ltsel_len;
+        if (cnt->ltsel_len)
+            memcpy(p, cnt->ltsel, cnt->ltsel_len);
+        p += cnt->ltsel_len;
+        *(p++) = sizeof(addr);
+        memcpy(p, &addr, sizeof(addr));
     }
     return 0;
 }    
@@ -952,64 +956,64 @@ int t_rcvdis(int fd, struct t_discon *discon)
     TRC(fprintf(stderr, "T_RCVDIS\n"));
     if (!cnt) 
     {
-    	TRC(fprintf(stderr, "TOUTSTATE\n"));
-	t_errno = TOUTSTATE;
-	return -1;
+        TRC(fprintf(stderr, "TOUTSTATE\n"));
+        t_errno = TOUTSTATE;
+        return -1;
     }
     if (!cnt->event)
-    	if (t_look_wait(fd, 1) <= 0)
-	    return -1;
+        if (t_look_wait(fd, 1) <= 0)
+            return -1;
     if (cnt->event != T_DISCONNECT)
     {
-    	t_errno = TLOOK;
-	return -1;
+        t_errno = TLOOK;
+        return -1;
     }
     /* read the rest of the DR TPDU */
     if (read_n(fd, buf, cnt->hlen) <= 0)
-    	return -1;
+        return -1;
     memcpy(&chead, buf, 5);
     cnt->hlen -= 5;
     for (p = buf + 5; cnt->hlen > 0;)
     {
-	switch ((unsigned char)*p)
-	{
-	    default:
-	    	TRC(fprintf(stderr, "Inoring RD parameter: %d\n",
-		    (unsigned char)*p));
-	    /* we silently ignore anything else */
-	}
-	p++;
-	cnt->hlen -= (unsigned char) *p + 2;
-	p += (unsigned char) *p + 1;
+        switch ((unsigned char)*p)
+        {
+            default:
+                TRC(fprintf(stderr, "Inoring RD parameter: %d\n",
+                    (unsigned char)*p));
+            /* we silently ignore anything else */
+        }
+        p++;
+        cnt->hlen -= (unsigned char) *p + 2;
+        p += (unsigned char) *p + 1;
     }
     if (cnt->pending)
     {
-    	if (read_n(fd, udata, cnt->pending) < cnt->pending)
-    	{
-	    TRC(fprintf(stderr, "Unable to read user data\n"));
-	    t_errno = TSYSERR;
-	    return -1;
-	}
+        if (read_n(fd, udata, cnt->pending) < cnt->pending)
+        {
+            TRC(fprintf(stderr, "Unable to read user data\n"));
+            t_errno = TSYSERR;
+            return -1;
+        }
     }
     cnt->state = T_IDLE;  /* should we close transport? */
     cnt->event = 0;
     if (discon)
     {
-    	discon->sequence = -1; /* TOFIX */
-    	discon->reason = chead.reason;
-    	TRC(fprintf(stderr, "Diconnect reason %d\n", chead.reason));
-    	if (cnt->pending > discon->udata.maxlen)
-    	{
-	    t_errno = TBUFOVFLW;
-	    return -1;
-	}
-	if (cnt->pending)
-	{
-	    memcpy(discon->udata.buf, udata, cnt->pending);
-	    udata[cnt->pending] = '\0';
-	    TRC(fprintf(stderr, "Discon udata: '%s'\n", udata));
-	}
-	discon->udata.len = cnt->pending;
+        discon->sequence = -1; /* TOFIX */
+        discon->reason = chead.reason;
+        TRC(fprintf(stderr, "Diconnect reason %d\n", chead.reason));
+        if (cnt->pending > discon->udata.maxlen)
+        {
+            t_errno = TBUFOVFLW;
+            return -1;
+        }
+        if (cnt->pending)
+        {
+            memcpy(discon->udata.buf, udata, cnt->pending);
+            udata[cnt->pending] = '\0';
+            TRC(fprintf(stderr, "Discon udata: '%s'\n", udata));
+        }
+        discon->udata.len = cnt->pending;
     }
     return 0;
 }    
@@ -1028,7 +1032,7 @@ char *t_alloc(int fd, int struct_type, int fields)
 {
     char *r = malloc(1024);
     if (!r)
-    	return 0;
+        return 0;
     TRC(fprintf(stderr, "T_ALLOC\n"));
     memset(r, 0, 1024);
     return r;
@@ -1045,10 +1049,10 @@ static int switch_fds(int fd1, int fd2)
     
     TRC(fprintf(stderr, "Switching fds %d <--> %d\n", fd1, fd2));
     if ((tmp = dup(fd1)) < 0 ||
-    	dup2(fd2, fd1) < 0 ||
-	dup2(tmp, fd2) < 0 ||
-	close(tmp) < 0)
-	    return -1;
+        dup2(fd2, fd1) < 0 ||
+        dup2(tmp, fd2) < 0 ||
+        close(tmp) < 0)
+            return -1;
     tmpc = control[fd1];
     control[fd1] = control[fd2];
     control[fd2] = tmpc;
@@ -1069,70 +1073,70 @@ static int rcvconreq(int fd, struct t_call *call)
     TRC(fprintf(stderr, "RCVCONRES\n"));
     if (!call)
     {
-    	t_errno = TSYSERR;
-	return -1;
+        t_errno = TSYSERR;
+        return -1;
     }
     for (qslot = 0; qslot < cnt->qlen; qslot++)
-    	if (cnt->oci[qslot] < 0)
-	    break;
+        if (cnt->oci[qslot] < 0)
+            break;
     if (qslot == cnt->qlen) /* no free slots - shouldn't happen here */
     {
-    	t_errno = TBADF;
-	return -1;
+        t_errno = TBADF;
+        return -1;
     }
     /* read the rest of the CREQ TPDU */
     if (read_n(cnt->tmpfd, buf, new->hlen) <= 0)
-    	return -1;
+        return -1;
     memcpy(&chead, buf, 5);
     if (chead.class != 0)
     {
-    	TRC(fprintf(stderr, "Expected TP0, got %d\n", (int)chead.class));
-	t_errno = TSYSERR;
-    	return -1;
+        TRC(fprintf(stderr, "Expected TP0, got %d\n", (int)chead.class));
+        t_errno = TSYSERR;
+        return -1;
     }
     memcpy(new->rref, chead.src_ref, 2); /* we'll echo this back at her */
     new->hlen -= 5;
     if (call && call->addr.maxlen)
-    	*(addrp = call->addr.buf) = 0;
+        *(addrp = call->addr.buf) = 0;
     for (p = buf + 5; new->hlen > 0;)
     {
-	switch ((unsigned char)*p)
-	{
-	    case TPDU_PARM_TSIZE:
-	    	new->tsize = 1 << *(p + 2); /* we go with their max */
-		break;
-	    case TPDU_PARM_CLDID: break; /* ignore */
-	    case TPDU_PARM_CLGID:
-	    	if (addrp)
-		{
-		    if (*(p + 1) > TSEL_MAXLEN)
-		    {
-			TRC(fprintf(stderr, "Called TSEL too long.\n"));
-			t_errno = TSYSERR; /* Wrong.. ## */
-			return -1;
-		    }
-		    *addrp = *(p + 1); /* length */
-		    memcpy(addrp + 1, p + 2, *(p + 1)); /* remote TSEL */
-		    addrp += *(p + 1); /* move past TSEL */
-		}
-		break;
-	    /* we silently ignore preferred TPDU size and others */
-	}
-	p++;
-	new->hlen -= (unsigned char) *p + 2;
-	p += (unsigned char) *p + 1;
+        switch ((unsigned char)*p)
+        {
+            case TPDU_PARM_TSIZE:
+                new->tsize = 1 << *(p + 2); /* we go with their max */
+                break;
+            case TPDU_PARM_CLDID: break; /* ignore */
+            case TPDU_PARM_CLGID:
+                if (addrp)
+                {
+                    if (*(p + 1) > TSEL_MAXLEN)
+                    {
+                        TRC(fprintf(stderr, "Called TSEL too long.\n"));
+                        t_errno = TSYSERR; /* Wrong.. ## */
+                        return -1;
+                    }
+                    *addrp = *(p + 1); /* length */
+                    memcpy(addrp + 1, p + 2, *(p + 1)); /* remote TSEL */
+                    addrp += *(p + 1); /* move past TSEL */
+                }
+                break;
+            /* we silently ignore preferred TPDU size and others */
+        }
+        p++;
+        new->hlen -= (unsigned char) *p + 2;
+        p += (unsigned char) *p + 1;
     }
     if (addrp)
     {
-	addrp++;
-	if (getpeername(cnt->tmpfd, (struct sockaddr*) &addr, &len) < 0)
-	{
-	    TRC(perror("getpeername()"));
-	    t_errno = TSYSERR;
-	    return -1;
-	}
-	*(addrp++) = sizeof(struct sockaddr_in);
-	memcpy(addrp, (struct sockaddr *) &addr, sizeof(struct sockaddr_in));
+        addrp++;
+        if (getpeername(cnt->tmpfd, (struct sockaddr*) &addr, &len) < 0)
+        {
+            TRC(perror("getpeername()"));
+            t_errno = TSYSERR;
+            return -1;
+        }
+        *(addrp++) = sizeof(struct sockaddr_in);
+        memcpy(addrp, (struct sockaddr *) &addr, sizeof(struct sockaddr_in));
     }
     new->event = 0;
     cnt->event = 0;
@@ -1174,118 +1178,118 @@ int t_listen(int fd, struct t_call *call)
     TRC(fprintf(stderr, "T_LISTEN\n"));
     if (!cnt || cnt->state != T_IDLE)
     {
-    	TRC(fprintf(stderr, "T_listen expects state==T_IDLE (wrong?)\n"));
-	t_errno = TOUTSTATE;
-	return -1;
+        TRC(fprintf(stderr, "T_listen expects state==T_IDLE (wrong?)\n"));
+        t_errno = TOUTSTATE;
+        return -1;
     }
     if (!cnt->qlen)
     {
-    	t_errno = TBADQLEN;
-	return -1;
+        t_errno = TBADQLEN;
+        return -1;
     }
     for (i = 0; i < cnt->qlen; i++)
-    	if (cnt->oci[i] < 0)
-	    break;
+        if (cnt->oci[i] < 0)
+            break;
     if (i == cnt->qlen) /* no slots in queue */
     {
-    	TRC(fprintf(stderr, "No more space in queue\n"));
-	t_errno = TBADF; /* what would be more correct? */
-	return -1;
+        TRC(fprintf(stderr, "No more space in queue\n"));
+        t_errno = TBADF; /* what would be more correct? */
+        return -1;
     }
     if (cnt->tmpfd < 0)
     {
-    	TRC(fprintf(stderr, "Accept..."));
-	if ((cnt->tmpfd = accept(fd, (struct sockaddr*) &addr, &addrlen)) < 0)
-	{
-	    if (errno == EWOULDBLOCK)
-	    {
-		t_errno = TNODATA;
-		TRC(fprintf(stderr, "Accept returned WOULDBLOCK\n"));
-	    }
-	    else
-	    {
-		TRC(fprintf(stderr, "accept failed\n"));
-		t_errno = TSYSERR;
-	    }
-	    return -1;
-	}
+        TRC(fprintf(stderr, "Accept..."));
+        if ((cnt->tmpfd = accept(fd, (struct sockaddr*) &addr, &addrlen)) < 0)
+        {
+            if (errno == EWOULDBLOCK)
+            {
+                t_errno = TNODATA;
+                TRC(fprintf(stderr, "Accept returned WOULDBLOCK\n"));
+            }
+            else
+            {
+                TRC(fprintf(stderr, "accept failed\n"));
+                t_errno = TSYSERR;
+            }
+            return -1;
+        }
 #ifdef NONBLOCKING_OSI
-	if ((cnt->flags & O_NONBLOCK) && fcntl(cnt->tmpfd, F_SETFL,
-	    O_NONBLOCK) < 0)
-	{
-	    t_errno = TSYSERR;
-	    return -1;
-	}
+        if ((cnt->flags & O_NONBLOCK) && fcntl(cnt->tmpfd, F_SETFL,
+            O_NONBLOCK) < 0)
+        {
+            t_errno = TSYSERR;
+            return -1;
+        }
 #endif
-	tmpfd_is_new = 1;
-	TRC(fprintf(stderr, "Accept OK\n"));
-	if (!(new = control[cnt->tmpfd] = malloc(sizeof(*new))))
-	{
-	    TRC(perror("malloc()"));
-	    t_errno = TSYSERR;
-	    return -1;
-	}
-	new->togo = 0;
-	new->pending = 0;
-	new->state = T_IDLE;
-	new->event = 0;
-	new->listen = 0;
-	new->qlen = cnt->qlen;
-	new->flags = cnt->flags;
-	new->tmpfd = cnt->tmpfd;
-	new->ltsel_len = 0;
-	for (i = 0; i < MAX_QLEN; i++)
-	    new->oci[i] = -1;
+        tmpfd_is_new = 1;
+        TRC(fprintf(stderr, "Accept OK\n"));
+        if (!(new = control[cnt->tmpfd] = malloc(sizeof(*new))))
+        {
+            TRC(perror("malloc()"));
+            t_errno = TSYSERR;
+            return -1;
+        }
+        new->togo = 0;
+        new->pending = 0;
+        new->state = T_IDLE;
+        new->event = 0;
+        new->listen = 0;
+        new->qlen = cnt->qlen;
+        new->flags = cnt->flags;
+        new->tmpfd = cnt->tmpfd;
+        new->ltsel_len = 0;
+        for (i = 0; i < MAX_QLEN; i++)
+            new->oci[i] = -1;
     }
     /* we got a network connection. Now try to read transport CREQ TPDU */
     if ((event = t_look_wait(tmpfd_is_new ? cnt->tmpfd : fd, 1)) < 0)
     {
-    	if (t_errno == TNODATA)
-	{
-	    if (tmpfd_is_new)
-	    {
-		/*
-		 * We give the user something to select on for the incoming
-		 * CR. Switch the new association with the listener socket.
-		 */
-		TRC(fprintf(stderr, "Switching FDs\n"));
-		if (switch_fds(cnt->tmpfd, fd) < 0)
-		{
-		    t_errno = TSYSERR;
-		    return -1;
-		}
-	    }
-	    return -1;
-	}
-	else
-	{
-	    t_close(cnt->tmpfd);
-	    cnt->tmpfd = -1;
-	}
-    	return -1; /* t_look & t_read hopefully set up the right errcodes */
+        if (t_errno == TNODATA)
+        {
+            if (tmpfd_is_new)
+            {
+                /*
+                 * We give the user something to select on for the incoming
+                 * CR. Switch the new association with the listener socket.
+                 */
+                TRC(fprintf(stderr, "Switching FDs\n"));
+                if (switch_fds(cnt->tmpfd, fd) < 0)
+                {
+                    t_errno = TSYSERR;
+                    return -1;
+                }
+            }
+            return -1;
+        }
+        else
+        {
+            t_close(cnt->tmpfd);
+            cnt->tmpfd = -1;
+        }
+        return -1; /* t_look & t_read hopefully set up the right errcodes */
     }
     else
     {
-    	/* We got something! */
-	if (event != T_LISTEN)
-	{
-	    TRC(fprintf(stderr, "Expected T_LISTEN\n"));
-	    t_errno = TLOOK;
-	    return -1;
-	}
-	/*
-	 * switch back the fds, if necessary */
-	if (!tmpfd_is_new && switch_fds(fd, cnt->tmpfd) < 0)
-	{
-	    t_errno = TSYSERR;
-	    return -1;
-	}
-	if (rcvconreq(fd, call) < 0)
-	{
-	    t_close(cnt->tmpfd);
-	    cnt->tmpfd = -1;
-	}
-	return 0;
+        /* We got something! */
+        if (event != T_LISTEN)
+        {
+            TRC(fprintf(stderr, "Expected T_LISTEN\n"));
+            t_errno = TLOOK;
+            return -1;
+        }
+        /*
+         * switch back the fds, if necessary */
+        if (!tmpfd_is_new && switch_fds(fd, cnt->tmpfd) < 0)
+        {
+            t_errno = TSYSERR;
+            return -1;
+        }
+        if (rcvconreq(fd, call) < 0)
+        {
+            t_close(cnt->tmpfd);
+            cnt->tmpfd = -1;
+        }
+        return 0;
     }
 }    
 
@@ -1298,7 +1302,7 @@ int t_listen(int fd, struct t_call *call)
 int t_unbind(int fd)
 {
     TRC(fprintf(stderr,
-	"T_UNBIND [not supported by transport implementation]\n"));
+        "T_UNBIND [not supported by transport implementation]\n"));
     t_errno = TNOTSUPPORT;
     return -1;
 }    
@@ -1317,64 +1321,64 @@ int t_accept(int fd, int resfd, struct t_call *call)
     TRC(fprintf(stderr, "T_ACCEPT\n"));
     if (!listener || listener->state != T_INCON)
     {
-    	TRC(fprintf(stderr, "TOUTSTATE\n"));
-	t_errno = TOUTSTATE;
-	return -1;
+        TRC(fprintf(stderr, "TOUTSTATE\n"));
+        t_errno = TOUTSTATE;
+        return -1;
     }
     /* Get the semi-connection */
     if (call->sequence >= listener->qlen || listener->oci[call->sequence] < 0)
     {
-    	TRC(fprintf(stderr, "TBADSEQ\n"));
-    	t_errno = TBADSEQ;
-	return -1;
+        TRC(fprintf(stderr, "TBADSEQ\n"));
+        t_errno = TBADSEQ;
+        return -1;
     }
     new = control[(newfd = listener->oci[call->sequence])];
     listener->oci[call->sequence] = -1;
     res = control[resfd];
     if (!res)
     {
-    	t_errno = TBADF;
-	return -1;
+        t_errno = TBADF;
+        return -1;
     }
     if (res != listener) /* move the new connection */
     {
-	TRC(fprintf(stderr, "  Moving to new fd (%d)\n", resfd));
-    	if (res->state != T_IDLE || res->qlen)
-	{
-	    TRC(fprintf(stderr, "Trying to move new assc. to bad fd.\n"));
-	    t_errno = TBADF;
-	    return -1;
-	}
-	dup2(newfd, resfd); /* closes resfd */
-	close(newfd);
-	control[resfd] = new;
-	/* transfer local bindings from res */
-	if (res->ltsel_len)
-	    memcpy(control[resfd]->ltsel, res->ltsel, res->ltsel_len);
-	control[resfd]->ltsel_len = res->ltsel_len;
-	free(res);
-	res = control[resfd];
-	listener->event = 0;
-	listener->state = T_IDLE;
+        TRC(fprintf(stderr, "  Moving to new fd (%d)\n", resfd));
+        if (res->state != T_IDLE || res->qlen)
+        {
+            TRC(fprintf(stderr, "Trying to move new assc. to bad fd.\n"));
+            t_errno = TBADF;
+            return -1;
+        }
+        dup2(newfd, resfd); /* closes resfd */
+        close(newfd);
+        control[resfd] = new;
+        /* transfer local bindings from res */
+        if (res->ltsel_len)
+            memcpy(control[resfd]->ltsel, res->ltsel, res->ltsel_len);
+        control[resfd]->ltsel_len = res->ltsel_len;
+        free(res);
+        res = control[resfd];
+        listener->event = 0;
+        listener->state = T_IDLE;
     }
     else /* lose our listener */
     {
-	TRC(fprintf(stderr, "  Moving to listener fd\n"));
-	for (i = 0; i < listener->qlen; i++)
-	    if (listener->oci[i] >= 0)
-	    {
-		TRC(fprintf(stderr, "Still conn indications on listener\n"));
-	    	t_errno = TBADF;
-		return -1;
-	    }
-	dup2(newfd, fd);
-	close(newfd);
-	control[fd] = new;
-	if (listener->ltsel_len)
-	    memcpy(control[resfd]->ltsel, listener->ltsel, listener->ltsel_len);
-	control[resfd]->ltsel_len = listener->ltsel_len;
-	free(listener);
-	res = control[resfd];
+        TRC(fprintf(stderr, "  Moving to listener fd\n"));
+        for (i = 0; i < listener->qlen; i++)
+            if (listener->oci[i] >= 0)
+            {
+                TRC(fprintf(stderr, "Still conn indications on listener\n"));
+                t_errno = TBADF;
+                return -1;
+            }
+        dup2(newfd, fd);
+        close(newfd);
+        control[fd] = new;
+        if (listener->ltsel_len)
+            memcpy(control[resfd]->ltsel, listener->ltsel, listener->ltsel_len);
+        control[resfd]->ltsel_len = listener->ltsel_len;
+        free(listener);
+        res = control[resfd];
     }
     rfc.version = RFC_VERSION;
     rfc.reserved = 0;
@@ -1394,7 +1398,7 @@ int t_accept(int fd, int resfd, struct t_call *call)
     parm[3] = TPDU_PARM_CLDID;
     parm[4] = res->ltsel_len; 
     if (res->ltsel_len)
-	memcpy(parm + 5, res->ltsel, res->ltsel_len);
+        memcpy(parm + 5, res->ltsel, res->ltsel_len);
 
     rfc.len =  htons(4 + 7 + 3 + 2 + res->ltsel_len);
     rfc.hlen = 6 + 3 + 2 + res->ltsel_len;
@@ -1406,9 +1410,9 @@ int t_accept(int fd, int resfd, struct t_call *call)
     vec[2].iov_len = 3 + 2 + res->ltsel_len;
     if (writev(resfd, vec, 3) < 4 + 7 + 3 + (2 + res->ltsel_len))
     {
-    	TRC(fprintf(stderr, "writev came up short. Aborting connect\n"));
-	t_errno = TSYSERR;
-	return -1;
+        TRC(fprintf(stderr, "writev came up short. Aborting connect\n"));
+        t_errno = TSYSERR;
+        return -1;
     }
     res->state = T_DATAXFER;
     res->event = 0;
@@ -1420,3 +1424,11 @@ int t_getstate(int fd)
     TRC(fprintf(stderr, "T_GETSTATE\n"));
     return control[fd] ? control[fd]->state : T_UNINIT;
 }
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

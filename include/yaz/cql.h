@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.11 2005-01-15 19:47:09 adam Exp $
+/* $Id: cql.h,v 1.12 2005-06-25 15:46:02 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -81,30 +81,30 @@ struct cql_node {
     /** node type */
     int which;
     union {
-	/** which == CQL_NODE_ST */
+        /** which == CQL_NODE_ST */
         struct {
-	    /** CQL index */
+            /** CQL index */
             char *index;
-	    /** CQL index URI or NULL if no URI */
-	    char *index_uri;
-	    /** Search term */
+            /** CQL index URI or NULL if no URI */
+            char *index_uri;
+            /** Search term */
             char *term;
-	    /** relation */
+            /** relation */
             char *relation;
-	    /** relation URL or NULL if no relation URI) */
-	    char *relation_uri;
-	    /** relation modifiers */
+            /** relation URL or NULL if no relation URI) */
+            char *relation_uri;
+            /** relation modifiers */
             struct cql_node *modifiers;
         } st;
-	/** which == CQL_NODE_BOOL */
+        /** which == CQL_NODE_BOOL */
         struct {
             /** operator name "and", "or", ... */
             char *value;
-	    /** left operand */
+            /** left operand */
             struct cql_node *left;
-	    /** right operand */ 
+            /** right operand */ 
             struct cql_node *right;
-	    /** modifiers (NULL for no list) */
+            /** modifiers (NULL for no list) */
             struct cql_node *modifiers;
         } boolean;
     } u;
@@ -153,7 +153,7 @@ struct cql_node *cql_node_mk_sc(NMEM nmem, const char *index,
  */
 YAZ_EXPORT
 struct cql_node *cql_apply_prefix(NMEM nmem, struct cql_node *cn,
-				  const char *prefix, const char *uri);
+                                  const char *prefix, const char *uri);
 
 /**
  * This function creates a boolean node.
@@ -285,3 +285,11 @@ YAZ_END_CDECL
 
 #endif
 /* CQL_H_INCLUDED */
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

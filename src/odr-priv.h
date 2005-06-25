@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr-priv.h,v 1.5 2005-01-15 19:47:14 adam Exp $
+ * $Id: odr-priv.h,v 1.6 2005-06-25 15:46:04 adam Exp $
  */
 
 /**
@@ -71,7 +71,7 @@ struct Odr_private {
     int error_id;
     char element[80];
     void (*stream_write)(ODR o, void *handle, int type,
-			 const char *buf, int len);
+                         const char *buf, int len);
     void (*stream_close)(void *handle);
 };
 
@@ -113,3 +113,11 @@ struct Odr_private {
 )
 
 #endif
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+
