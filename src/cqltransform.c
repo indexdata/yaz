@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.15 2005-06-25 15:46:03 adam Exp $
+/* $Id: cqltransform.c,v 1.16 2005-06-27 22:03:59 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -127,7 +127,7 @@ static const char *cql_lookup_property(cql_transform_t ct,
     
     for (e = ct->entry; e; e = e->next)
     {
-        if (!strcmp(e->pattern, pattern))
+        if (!cql_strcmp(e->pattern, pattern))
             return e->value;
     }
     return 0;
@@ -383,7 +383,7 @@ void cql_transform_r(cql_transform_t ct,
         if (ns)
         {
             if (!strcmp(ns, cql_uri())
-                && cn->u.st.index && !strcmp(cn->u.st.index, "resultSet"))
+                && cn->u.st.index && !cql_strcmp(cn->u.st.index, "resultSet"))
             {
                 (*pr)("@set \"", client_data);
                 (*pr)(cn->u.st.term, client_data);
@@ -402,13 +402,13 @@ void cql_transform_r(cql_transform_t ct,
                 ct->addinfo = 0;
             }
         }
-        if (cn->u.st.relation && !strcmp(cn->u.st.relation, "="))
+        if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "="))
             cql_pr_attr(ct, "relation", "eq", "scr",
                         pr, client_data, 19);
-        else if (cn->u.st.relation && !strcmp(cn->u.st.relation, "<="))
+        else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "<="))
             cql_pr_attr(ct, "relation", "le", "scr",
                         pr, client_data, 19);
-        else if (cn->u.st.relation && !strcmp(cn->u.st.relation, ">="))
+        else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, ">="))
             cql_pr_attr(ct, "relation", "ge", "scr",
                         pr, client_data, 19);
         else
@@ -425,11 +425,11 @@ void cql_transform_r(cql_transform_t ct,
         }
         cql_pr_attr(ct, "structure", cn->u.st.relation, 0,
                     pr, client_data, 24);
-        if (cn->u.st.relation && !strcmp(cn->u.st.relation, "all"))
+        if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "all"))
         {
             emit_wordlist(ct, cn, pr, client_data, "and");
         }
-        else if (cn->u.st.relation && !strcmp(cn->u.st.relation, "any"))
+        else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "any"))
         {
             emit_wordlist(ct, cn, pr, client_data, "or");
         }
@@ -464,9 +464,9 @@ int cql_transform(cql_transform_t ct,
 
     for (e = ct->entry; e ; e = e->next)
     {
-        if (!memcmp(e->pattern, "set.", 4))
+        if (!cql_strncmp(e->pattern, "set.", 4))
             cql_apply_prefix(nmem, cn, e->pattern+4, e->value);
-        else if (!strcmp(e->pattern, "set"))
+        else if (!cql_strcmp(e->pattern, "set"))
             cql_apply_prefix(nmem, cn, 0, e->value);
     }
     cql_transform_r (ct, cn, pr, client_data);

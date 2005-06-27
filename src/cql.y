@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.8 2004-11-01 20:13:02 adam Exp $
+/* $Id: cql.y,v 1.9 2005-06-27 22:03:59 adam Exp $
    Copyright (C) 2002-2004
    Index Data Aps
 
@@ -299,13 +299,13 @@ int yylex(YYSTYPE *lval, void *vp)
 #endif
         if (c != 0)
             cp->ungetbyte(c, cp->client_data);
-        if (!strcmp(lval->buf, "and"))
+        if (!cql_strcmp(lval->buf, "and"))
             return AND;
-        if (!strcmp(lval->buf, "or"))
+        if (!cql_strcmp(lval->buf, "or"))
             return OR;
-        if (!strcmp(lval->buf, "not"))
+        if (!cql_strcmp(lval->buf, "not"))
             return NOT;
-        if (!strncmp(lval->buf, "prox", 4))
+        if (!cql_strcmp(lval->buf, "prox"))
             return PROX;
     }
     return TERM;

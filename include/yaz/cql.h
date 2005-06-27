@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.12 2005-06-25 15:46:02 adam Exp $
+/* $Id: cql.h,v 1.13 2005-06-27 22:03:59 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -280,6 +280,20 @@ const char *cql_strerror(int code);
  */
 YAZ_EXPORT
 const char *cql_uri();
+
+/**
+ * Compares two CQL strings (for relations, operators, etc)
+ * (unfortunately defined as case-insensitive unlike XML etc)
+ */
+YAZ_EXPORT
+int cql_strcmp(const char *s1, const char *s2);
+
+/**
+ * Compares two CQL strings at most n bytes
+ * (unfortunately defined as case-insensitive unlike XML etc)
+ */
+YAZ_EXPORT
+int cql_strncmp(const char *s1, const char *s2, size_t n);
 
 YAZ_END_CDECL
 

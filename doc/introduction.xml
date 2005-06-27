@@ -1,11 +1,11 @@
-<!-- $Id: introduction.xml,v 1.18 2004-02-05 11:55:56 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.19 2005-06-27 22:03:59 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
    &yaz; is a C/C++ library for information retrieval applications
    using the Z39.50/SRW/SRU protocols for information retrieval.
   </para>
-
+  
   <para>
    Properties of &yaz;:
    <itemizedlist>
