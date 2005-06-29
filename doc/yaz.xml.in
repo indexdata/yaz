@@ -1,8 +1,7 @@
 <?xml version="1.0" standalone="no"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-                    "@DTD_DIR@/docbookx.dtd" [
-
-     <!ENTITY oslash "&#x00F8;"> <!-- CIRCLED DIVISION SLASH -->
+<!-- $Id: yaz.xml.in,v 1.18 2005-06-29 22:52:54 adam Exp $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4//EN"
+          "@DTD_DIR@/docbookx.dtd" [
      <!ENTITY yaz "YAZ">
      <!ENTITY chap-introduction SYSTEM "introduction.xml">
      <!ENTITY chap-installation SYSTEM "installation.xml">
@@ -28,8 +27,8 @@
      <!ENTITY zoom "<acronym>ZOOM</acronym>">
      <!ENTITY gfs-synopsis-app "application">
      <!ENTITY reference-tools-cql-map "<xref linkend='tools.cql.map'/>">
+     <!ENTITY copyright-year "1995-2005">
 ]>
-<!-- $Id: yaz.xml.in,v 1.17 2005-03-14 11:12:16 adam Exp $ -->
 <book id="yaz">
  <bookinfo>
   <title>YAZ User&apos;s Guide and Reference</title>
@@ -38,7 +37,7 @@
   <author><firstname>Mike</firstname><surname>Taylor</surname></author>
   <author><firstname>Heikki</firstname><surname>Levanto</surname></author>
   <copyright>
-   <year>1995-2005</year>
+   <year>&copyright-year;</year>
    <holder>Index Data</holder>
   </copyright>
   <abstract><simpara>

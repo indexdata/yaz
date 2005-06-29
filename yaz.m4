@@ -15,14 +15,12 @@ AC_ARG_WITH(docbook-dtd,[[  --with-docbook-dtd=DIR  use docbookx.dtd in DIR]],
 	DTD_DIR=""
 	for d in /usr/lib/sgml/dtd/docbook-xml \
 		 /usr/share/sgml/docbook/dtd/4.2 \
-		 /usr/share/sgml/docbook/dtd/xml/4.0 \
-		 /usr/share/sgml/docbook/dtd/xml/4.1.2 \
+		 /usr/share/sgml/docbook/dtd/xml/4.* \
 		 /usr/share/sgml/docbook/xml-dtd-4.* 
 	do
 		if test -f $d/docbookx.dtd; then
 			AC_MSG_RESULT($d)
 			DTD_DIR=$d
-			break
 		fi
 	done
 	if test -z "$DTD_DIR"; then
