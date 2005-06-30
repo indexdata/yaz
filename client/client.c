@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.292 2005-06-25 15:46:01 adam Exp $
+ * $Id: client.c,v 1.293 2005-06-30 08:34:01 adam Exp $
  */
 
 #include <stdio.h>
@@ -2132,6 +2132,11 @@ static int send_itemorder(const char *type, int itemno)
 
 static int only_z3950()
 {
+    if (!conn)
+    {
+        printf ("Not connected yet\n");
+        return 1;
+    }
     if (protocol == PROTO_HTTP)
     {
         printf ("Not supported by SRW\n");
@@ -2165,7 +2170,7 @@ static int cmd_update_common(const char *arg, int version)
     Z_External *record_this = 0;
 
     if (only_z3950())
-        return 0;
+        return 1;
     *action = 0;
     *recid = 0;
     sscanf (arg, "%19s %19s%n", action, recid, &noread);
@@ -2313,43 +2318,49 @@ static int cmd_update_common(const char *arg, int version)
 
 static int cmd_xmles(const char *arg)
 {
-    int noread = 0;
-    char oid_str[51];
-    int oid_value_xmles = VAL_XMLES;
-    Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
-    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
-
-    Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
-    req->taskSpecificParameters = ext;
-    ext->descriptor = 0;
-    ext->which = Z_External_octet;
-    ext->u.single_ASN1_type = (Odr_oct *) odr_malloc (out, sizeof(Odr_oct));
-
-    sscanf(arg, "%50s%n", oid_str, &noread);
-    if (noread == 0)
+    if (only_z3950())
+        return 1;
+    else
     {
-        printf("Missing OID for xmles\n");
-        return 0;
+        int noread = 0;
+        char oid_str[51];
+        int oid_value_xmles = VAL_XMLES;
+        Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
+        Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+        
+        Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
+        
+        req->taskSpecificParameters = ext;
+        ext->indirect_reference = 0;
+        ext->descriptor = 0;
+        ext->which = Z_External_octet;
+        ext->u.single_ASN1_type = (Odr_oct *) odr_malloc (out, sizeof(Odr_oct));        
+        sscanf(arg, "%50s%n", oid_str, &noread);
+        if (noread == 0)
+        {
+            printf("Missing OID for xmles\n");
+            return 0;
+        }
+        arg += noread;
+        oid_value_xmles  = oid_getvalbyname(oid_str);
+        if (oid_value_xmles == VAL_NONE)
+        {
+            printf("Bad OID: %s\n", oid_str);
+            return 0;
+        }
+        
+        if (parse_cmd_doc(&arg, out, (char **) &ext->u.single_ASN1_type->buf,
+                          &ext->u.single_ASN1_type->len, 0) == 0)
+            return 0;
+        req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
+                                                  oid_value_xmles);
+        
+        ext->direct_reference = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
+                                                       oid_value_xmles);
+        send_apdu(apdu);
+        
+        return 2;
     }
-    arg += noread;
-    oid_value_xmles  = oid_getvalbyname(oid_str);
-    if (oid_value_xmles == VAL_NONE)
-    {
-        printf("Bad OID: %s\n", oid_str);
-        return 0;
-    }
-
-    if (parse_cmd_doc(&arg, out, (char **) &ext->u.single_ASN1_type->buf,
-                      &ext->u.single_ASN1_type->len, 0) == 0)
-        return 0;
-    req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
-                                              oid_value_xmles);
-
-    ext->direct_reference = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
-                                                   oid_value_xmles);
-    send_apdu(apdu);
-
-    return 2;
 }
 
 static int cmd_itemorder(const char *arg)
@@ -2358,7 +2369,7 @@ static int cmd_itemorder(const char *arg)
     int itemno;
    
     if (only_z3950())
-        return 0;
+        return 1;
     if (sscanf (arg, "%10s %d", type, &itemno) != 2)
         return 0;
 
@@ -2431,8 +2442,8 @@ static int cmd_init(const char *arg)
         strncpy (cur_host, arg, sizeof(cur_host)-1);
         cur_host[sizeof(cur_host)-1] = 0;
     }
-    if (!conn || protocol != PROTO_Z3950)
-       return 0;
+    if (only_z3950())
+        return 1;
     send_initRequest(cur_host);
     return 2;
 }
@@ -2476,11 +2487,6 @@ static int cmd_find(const char *arg)
 
 static int cmd_delete(const char *arg)
 {
-    if (!conn)
-    {
-        printf("Not connected yet\n");
-        return 0;
-    }
     if (only_z3950())
         return 0;
     if (!send_deleteResultSetRequest(arg))
@@ -2497,8 +2503,6 @@ static int cmd_ssub(const char *arg)
 
 static int cmd_lslb(const char *arg)
 {
-    if (only_z3950())
-        return 0;
     if (!(largeSetLowerBound = atoi(arg)))
         return 0;
     return 1;
@@ -2506,8 +2510,6 @@ static int cmd_lslb(const char *arg)
 
 static int cmd_mspn(const char *arg)
 {
-    if (only_z3950())
-        return 0;
     if (!(mediumSetPresentNumber = atoi(arg)))
         return 0;
     return 1;
@@ -2741,11 +2743,6 @@ int cmd_cancel(const char *arg)
         apdu->u.triggerResourceControlRequest;
     bool_t rfalse = 0;
     
-    if (!conn)
-    {
-        printf("Session not initialized yet\n");
-        return 0;
-    }
     if (only_z3950())
         return 0;
     if (session_initResponse &&
@@ -2968,11 +2965,6 @@ void process_deleteResultSetResponse (Z_DeleteResultSetResponse *res)
 
 int cmd_sort_generic(const char *arg, int newset)
 {
-    if (!conn)
-    {
-        printf("Session not initialized yet\n");
-        return 0;
-    }
     if (only_z3950())
         return 0;
     if (session_initResponse && 
@@ -3178,11 +3170,8 @@ int cmd_close(const char *arg)
 {
     Z_APDU *apdu;
     Z_Close *req;
-    if (!conn)
-        return 0;
     if (only_z3950())
         return 0;
-
     apdu = zget_APDU(out, Z_APDU_close);
     req = apdu->u.close;
     *req->closeReason = Z_Close_finished;
@@ -4422,7 +4411,7 @@ int cmd_register_tab(const char* arg) {
 
 void process_cmd_line(char* line)
 {  
-    int i,res;
+    int i, res;
     char word[32], arg[10240];
     
 #if HAVE_GETTIMEOFDAY
