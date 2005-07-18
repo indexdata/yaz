@@ -1,3 +1,10 @@
+yaz (2.1.9-1) unstable; urgency=low
+
+  * Upstream updated number for new development version
+
+ -- Marc Cromme <marc@indexdata.dk>  Mon, 18 Jul 2005 11:52:09 +0200
+
+
 yaz (2.1.8-1) unstable; urgency=low
 
   * Upstream.
