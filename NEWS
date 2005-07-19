@@ -5,6 +5,18 @@ a document to be sent as an extended service request.
 
 Describe new yaz-client commands wait_response and set_auto_wait.
 
+Increase TCP/IP listener backlog from 3 (which I am guessing was
+copied from the SunOS manual entry way back when) so SOMAXCONN, so
+that the socket will queue as many incoming connections as it's able
+to handle ongoing connections.  In other words, it will never now
+refuse a connection that it would be able to handle merely because
+it's not got around to accepting() enough of the pending connections
+yet.  This is the behaviour anyway under Linux, where the listen()
+argument is ignored; but not under BSD and on systems such as
+MS-Windows that use BSD-derived TCP/IP stacks.  The behaviour of
+YAZ-based servers should now be uniform across operating systems in
+this respect.
+
 --- 2.1.8 2005/06/07 
 
 Fixed bug in yaz_marc_decode_buf. By mistake the routine appended
