@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.16 2005-06-25 15:46:06 adam Exp $
+ * $Id: tcpip.c,v 1.17 2005-07-19 12:40:52 mike Exp $
  */
 /**
  * \file tcpip.c
@@ -534,7 +534,8 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         h->cerrno = CSYSERR;
         return -1;
     }
-    if (mode == CS_SERVER && listen(h->iofile, 3) < 0)
+    /* Allow a maximum-sized backlog of waiting-to-connect clients */
+    if (mode == CS_SERVER && listen(h->iofile, SOMAXCONN) < 0)
     {
         h->cerrno = CSYSERR;
         return -1;
