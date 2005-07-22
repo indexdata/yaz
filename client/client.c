@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.293 2005-06-30 08:34:01 adam Exp $
+ * $Id: client.c,v 1.294 2005-07-22 06:23:14 adam Exp $
  */
 
 #include <stdio.h>
@@ -133,6 +133,7 @@ static int scan_stepSize = 0;
 static int scan_position = 1;
 static int scan_size = 20;
 static char cur_host[200];
+static int last_hit_count = 0;
 
 typedef enum {
     QueryType_Prefix,
@@ -1668,6 +1669,7 @@ static int process_searchResponse(Z_SearchResponse *res)
     else
         printf("Search was a bloomin' failure.\n");
     printf("Number of hits: %d", *res->resultCount);
+    last_hit_count = *res->resultCount;
     if (setnumber >= 0)
         printf (", setno %d", setnumber);
     printf ("\n");
@@ -2558,7 +2560,15 @@ static void parse_show_args(const char *arg_c, char *setstring,
         *p = '\0';
     }
     if (*arg)
-        *start = atoi(arg);
+    {
+        if (!strcmp(arg, "all"))
+        {
+            *number = last_hit_count;
+            *start = 1;
+        }
+        else
+            *start = atoi(arg);
+    }
     if (p && (p=strchr(p+1, '+')))
         strcpy (setstring, p+1);
     else if (setnumber >= 0)
@@ -2666,6 +2676,7 @@ static void close_session (void)
     odr_reset(out);
     odr_reset(in);
     odr_reset(print);
+    last_hit_count = 0;
 }
 
 void process_close(Z_Close *req)
