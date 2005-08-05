@@ -1,5 +1,5 @@
 <!-- 
-   $Id: gfs-virtual.xml,v 1.2 2005-03-14 11:12:16 adam Exp $
+   $Id: gfs-virtual.xml,v 1.3 2005-08-05 09:36:15 adam Exp $
    Description of the virtual host mechanism in YAZ GFS
    Included in both manual and man page for yaz-ztest
 -->
@@ -156,7 +156,7 @@
  </para>
  <screen>
   <![CDATA[
-
+ <yazgfs>
   <listen id="public">tcp:@:9900</listen>
   <listen id="internal">unix:/var/tmp/socket</listen>
   <server id="server1">
