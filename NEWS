@@ -1,5 +1,13 @@
 Possible compatibility problems with earlier versions marked with '*'.
 
+CQL module modified to be case insensitive for relations/indexes/operations.
+
+Fixed bug in CQL transform code: incorrect value relationModifieder
+was used.
+
+Added 'show all' command for yaz-client which retrieves all results
+for last search.
+
 Added new yaz-client, xmles, which takes a (private) OID and
 a document to be sent as an extended service request.
 
@@ -16,6 +24,14 @@ argument is ignored; but not under BSD and on systems such as
 MS-Windows that use BSD-derived TCP/IP stacks.  The behaviour of
 YAZ-based servers should now be uniform across operating systems in
 this respect.
+
+yaz-marcdump uses 64-bit file access on some systems. This is enabled 
+on Linux and other Unix variants where _FILE_OFSET_BITS=64 is supported.
+This allows yaz-marcdump to read large MARC batches (>2 GB).
+
+Modified all YAZ source files - except the source which is auto-generated
+by tools - to use spaces rather than TABS. Emacs/VIM trailer added to
+all source files.
 
 --- 2.1.8 2005/06/07 
 
