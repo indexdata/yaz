@@ -43,11 +43,11 @@ void test2()
     if (!rpn_query)
         exit(1);
 
-    /* make a bad recursive refernce */
+    /* make the circular reference */
     rpn_query->RPNStructure->u.complex->s1 = rpn_query->RPNStructure;
 
-    if (!z_RPNQuery(odr, &rpn_query, 0, 0))
-        odr_perror(odr, "Encoding query");
+    if (z_RPNQuery(odr, &rpn_query, 0, 0))  /* should fail */
+        exit(2);
 
     yaz_pqf_destroy(parser);
     odr_destroy(odr);
