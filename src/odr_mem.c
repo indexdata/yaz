@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_mem.c,v 1.5 2005-06-25 15:46:04 adam Exp $
+ * $Id: odr_mem.c,v 1.6 2005-08-11 14:21:55 adam Exp $
  */
 /**
  * \file odr_mem.c
@@ -81,9 +81,6 @@ int odr_grow_block(ODR b, int min_bytes)
     else if (!b->size && !(b->buf = (unsigned char *)
                            xmalloc(b->size = togrow)))
         abort();
-#ifdef ODR_DEBUG
-    fprintf(stderr, "New size for encode_buffer: %d\n", b->size);
-#endif
     return 0;
 }
 

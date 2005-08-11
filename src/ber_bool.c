@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_bool.c,v 1.4 2005-06-25 15:46:03 adam Exp $
+ * $Id: ber_bool.c,v 1.5 2005-08-11 14:21:55 adam Exp $
  */
 
 /** 
@@ -31,9 +31,6 @@ int ber_boolean(ODR o, int *val)
             return 0;
         if (odr_putc(o, *val) < 0)
             return 0;
-#ifdef ODR_DEBUG
-        fprintf(stderr, "[val=%d]\n", *val);
-#endif
         return 1;
     case ODR_DECODE:
         if ((res = ber_declen(o->bp, &len, odr_max(o))) < 0)
@@ -49,9 +46,6 @@ int ber_boolean(ODR o, int *val)
         }
         *val = *o->bp;
         o->bp++;
-#ifdef ODR_DEBUG
-        fprintf(stderr, "[val=%d]\n", *val);
-#endif
         return 1;
     case ODR_PRINT:
         return 1;

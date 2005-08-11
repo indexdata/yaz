@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_cons.c,v 1.6 2005-06-25 15:46:04 adam Exp $
+ * $Id: odr_cons.c,v 1.7 2005-08-11 14:21:55 adam Exp $
  *
  */
 
@@ -15,6 +15,8 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
+
 #include "odr-priv.h"
 
 void odr_setlenlen(ODR o, int len)
@@ -22,7 +24,7 @@ void odr_setlenlen(ODR o, int len)
     o->lenlen = len;
 }
 
-int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
+int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
                           const char *name)
 {
     int res;
@@ -37,53 +39,82 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
         o->t_class = zclass;
         o->t_tag = tag;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, 1, name)) < 0)
+    if ((res = ber_tag(o, xxp, o->t_class, o->t_tag, &cons, 1, name)) < 0)
         return 0;
     if (!res || !cons)
         return 0;
 
-    if (o->op->stackp == ODR_MAX_STACK - 1)
+    /* push the odr_constack */
+    if (o->op->stack_top && o->op->stack_top->next)
     {
-        odr_seterror(o, OSTACK, 30);
-        return 0;
+        /* reuse old entry */
+        o->op->stack_top = o->op->stack_top->next;
     }
-    o->op->stack[++(o->op->stackp)].lenb = o->bp;
-    o->op->stack[o->op->stackp].len_offset = odr_tell(o);
-    o->op->stack_names[o->op->stackp] = name ? name : "?";
-    o->op->stack_names[o->op->stackp + 1] = 0;
-#ifdef ODR_DEBUG
-    fprintf(stderr, "[cons_begin(%d)]", o->op->stackp);
-#endif
+    else if (o->op->stack_top && !o->op->stack_top->next)
+    {
+        /* must allocate new entry (not first) */
+        int sz = 0;
+        struct odr_constack *st;
+        /* check size first */
+        for (st = o->op->stack_top; st; st = st->prev)
+            sz++;
+
+        if (sz >= ODR_MAX_STACK)
+        {
+            odr_seterror(o, OSTACK, 30);
+            return 0;
+        }
+        o->op->stack_top->next = (struct odr_constack *)
+            odr_malloc(o, sizeof(*o->op->stack_top));
+        o->op->stack_top->next->prev = o->op->stack_top;
+        o->op->stack_top->next->next = 0;
+
+        o->op->stack_top = o->op->stack_top->next;
+    }
+    else if (!o->op->stack_top)
+    {
+        /* stack empty */
+        if (!o->op->stack_first)
+        {
+            /* first item must be allocated */
+            o->op->stack_first = (struct odr_constack *)
+                odr_malloc(o, sizeof(*o->op->stack_top));
+            o->op->stack_first->prev = 0;
+            o->op->stack_first->next = 0;
+        }
+        o->op->stack_top = o->op->stack_first;
+        assert(o->op->stack_top->prev == 0);
+    }
+    o->op->stack_top->lenb = o->bp;
+    o->op->stack_top->len_offset = odr_tell(o);
+    o->op->stack_top->name = name ? name : "?";
     if (o->direction == ODR_ENCODE)
     {
         static unsigned char dummy[sizeof(int)+1];
 
-        o->op->stack[o->op->stackp].lenlen = lenlen;
+        o->op->stack_top->lenlen = lenlen;
 
         if (odr_write(o, dummy, lenlen) < 0)  /* dummy */
         {
-            o->op->stack_names[o->op->stackp] = 0;
-            --(o->op->stackp);
+            ODR_STACK_POP(o);
             return 0;
         }
     }
     else if (o->direction == ODR_DECODE)
     {
-        if ((res = ber_declen(o->bp, &o->op->stack[o->op->stackp].len,
+        if ((res = ber_declen(o->bp, &o->op->stack_top->len,
                               odr_max(o))) < 0)
         {
             odr_seterror(o, OOTHER, 31);
-            o->op->stack_names[o->op->stackp] = 0;
-            --(o->op->stackp);
+            ODR_STACK_POP(o);
             return 0;
         }
-        o->op->stack[o->op->stackp].lenlen = res;
+        o->op->stack_top->lenlen = res;
         o->bp += res;
-        if (o->op->stack[o->op->stackp].len > odr_max(o))
+        if (o->op->stack_top->len > odr_max(o))
         {
             odr_seterror(o, OOTHER, 32);
-            o->op->stack_names[o->op->stackp] = 0;
-            --(o->op->stackp);
+            ODR_STACK_POP(o);
             return 0;
         }
     }
@@ -96,12 +127,11 @@ int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
     else
     {
         odr_seterror(o, OOTHER, 33);
-        o->op->stack_names[o->op->stackp] = 0;
-        --(o->op->stackp);
+        ODR_STACK_POP(o);
         return 0;
     }
-    o->op->stack[o->op->stackp].base = o->bp;
-    o->op->stack[o->op->stackp].base_offset = odr_tell(o);
+    o->op->stack_top->base = o->bp;
+    o->op->stack_top->base_offset = odr_tell(o);
     return 1;
 }
 
@@ -109,10 +139,10 @@ int odr_constructed_more(ODR o)
 {
     if (o->error)
         return 0;
-    if (o->op->stackp < 0)
+    if (ODR_STACK_EMPTY(o))
         return 0;
-    if (o->op->stack[o->op->stackp].len >= 0)
-        return o->bp - o->op->stack[o->op->stackp].base < o->op->stack[o->op->stackp].len;
+    if (o->op->stack_top->len >= 0)
+        return o->bp - o->op->stack_top->base < o->op->stack_top->len;
     else
         return (!(*o->bp == 0 && *(o->bp + 1) == 0));
 }
@@ -124,21 +154,20 @@ int odr_constructed_end(ODR o)
 
     if (o->error)
         return 0;
-    if (o->op->stackp < 0)
+    if (ODR_STACK_EMPTY(o))
     {
         odr_seterror(o, OOTHER, 34);
         return 0;
     }
-    o->op->stack_names[o->op->stackp] = 0;
     switch (o->direction)
     {
     case ODR_DECODE:
-        if (o->op->stack[o->op->stackp].len < 0)
+        if (o->op->stack_top->len < 0)
         {
             if (*o->bp++ == 0 && *(o->bp++) == 0)
             {
-                    o->op->stackp--;
-                    return 1;
+                ODR_STACK_POP(o);
+                return 1;
             }
             else
             {
@@ -146,19 +175,19 @@ int odr_constructed_end(ODR o)
                 return 0;
             }
         }
-        else if (o->bp - o->op->stack[o->op->stackp].base !=
-                 o->op->stack[o->op->stackp].len)
+        else if (o->bp - o->op->stack_top->base !=
+                 o->op->stack_top->len)
         {
             odr_seterror(o, OCONLEN, 36);
             return 0;
         }
-        o->op->stackp--;
+        ODR_STACK_POP(o);
         return 1;
     case ODR_ENCODE:
         pos = odr_tell(o);
-        odr_seek(o, ODR_S_SET, o->op->stack[o->op->stackp].len_offset);
-        if ((res = ber_enclen(o, pos - o->op->stack[o->op->stackp].base_offset,
-                              o->op->stack[o->op->stackp].lenlen, 1)) < 0)
+        odr_seek(o, ODR_S_SET, o->op->stack_top->len_offset);
+        if ((res = ber_enclen(o, pos - o->op->stack_top->base_offset,
+                              o->op->stack_top->lenlen, 1)) < 0)
         {
             odr_seterror(o, OLENOV, 37);
             return 0;
@@ -166,22 +195,13 @@ int odr_constructed_end(ODR o)
         odr_seek(o, ODR_S_END, 0);
         if (res == 0)   /* indefinite encoding */
         {
-#ifdef ODR_DEBUG
-            fprintf(stderr, "[cons_end(%d): indefinite]", o->op->stackp);
-#endif
             if (odr_putc(o, 0) < 0 || odr_putc(o, 0) < 0)
                 return 0;
         }
-#ifdef ODR_DEBUG
-        else
-        {
-            fprintf(stderr, "[cons_end(%d): definite]", o->op->stackp);
-        }
-#endif
-        o->op->stackp--;
+        ODR_STACK_POP(o);
         return 1;
     case ODR_PRINT:
-        o->op->stackp--;
+        ODR_STACK_POP(o);
         o->indent--;
         odr_prname(o, 0);
         odr_printf(o, "}\n");

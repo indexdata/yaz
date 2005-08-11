@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_int.c,v 1.5 2005-06-25 15:46:03 adam Exp $
+ * $Id: ber_int.c,v 1.6 2005-08-11 14:21:55 adam Exp $
  */
 
 /** 
@@ -77,9 +77,6 @@ int ber_encinteger(ODR o, int val)
         return -1;
     if (odr_write(o, (unsigned char*) tmp.c + a, len) < 0)
         return -1;
-#ifdef ODR_DEBUG
-    fprintf(stderr, "[val=%d]", val);
-#endif
     return 0;
 }
 
@@ -111,9 +108,6 @@ int ber_decinteger(const unsigned char *buf, int *val, int max)
     *val = ntohl(tmp.i);
 
     b += len;
-#ifdef ODR_DEBUG
-    fprintf(stderr, "[val=%d]", *val);
-#endif
     return b - buf;
 }
 /*

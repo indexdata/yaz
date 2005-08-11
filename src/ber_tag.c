@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_tag.c,v 1.5 2005-06-25 15:46:03 adam Exp $
+ * $Id: ber_tag.c,v 1.6 2005-08-11 14:21:55 adam Exp $
  */
 
 /** 
@@ -19,15 +19,19 @@
 #include <stdio.h>
 #include "odr-priv.h"
 
-/* ber_tag
+/**
+ * \brief Encode/decode BER tags
+ *
  * On encoding:
+ * \verbatim
  *      if  p: write tag. return 1 (success) or -1 (error).
  *      if !p: return 0.
+ * \endverbatim
  * On decoding:
+ * \verbatim
  *      if tag && zclass match up, advance pointer and return 1. set cons.
  *      else leave pointer unchanged. Return 0.
- *
- * Should perhaps be odr_tag?
+ * \endverbatim
  */
 int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
             const char *name)
@@ -39,7 +43,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
     if (o->direction == ODR_DECODE)
         *pp = 0;
     o->t_class = -1;
-    if (o->op->stackp < 0)
+    if (ODR_STACK_EMPTY(o))
     {
         odr_seek(o, ODR_S_SET, 0);
         o->top = 0;
@@ -60,14 +64,9 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
         }
         if ((rd = ber_enctag(o, zclass, tag, *constructed)) < 0)
             return -1;
-#ifdef ODR_DEBUG
-        fprintf(stderr, "\n[class=%d,tag=%d,cons=%d,stackp=%d]", zclass, tag,
-                *constructed, o->op->stackp);
-#endif
         return 1;
-        
     case ODR_DECODE:
-        if (o->op->stackp > -1 && !odr_constructed_more(o))
+        if (ODR_STACK_NOT_EMPTY(o) && !odr_constructed_more(o))
         {
             if (!opt)
             {
@@ -87,12 +86,6 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
                 odr_setelement(o, name);
                 return 0;
             }
-#ifdef ODR_DEBUG
-            fprintf(stderr,
-                    "\n[class=%d,tag=%d,cons=%d,stackp=%d]",
-                    odr_ber_tag->lclass, odr_ber_tag->ltag,
-                    odr_ber_tag->lcons, o->op->stackp);
-#endif
         }
         if (zclass == odr_ber_tag->lclass && tag == odr_ber_tag->ltag)
         {
@@ -124,9 +117,10 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
     }
 }
 
-/* ber_enctag
- * BER-encode a zclass/tag/constructed package (identifier octets). Return
- * number of bytes encoded, or -1 if out of bounds.
+/**
+ * \brief BER-encode a zclass/tag/constructed package (identifier octets).
+ *
+ * Return number of bytes encoded, or -1 if out of bounds.
  */
 int ber_enctag(ODR o, int zclass, int tag, int constructed)
 {
@@ -165,8 +159,10 @@ int ber_enctag(ODR o, int zclass, int tag, int constructed)
     }
 }
 
-/* ber_dectag
- * Decode BER identifier octets. Return number of bytes read or -1 for error.
+/** 
+ * \brief Decodes BER identifier octets.
+ *
+ * Returns number of bytes read or -1 for error.
  */
 int ber_dectag(const unsigned char *b, int *zclass, int *tag,
                int *constructed, int max)

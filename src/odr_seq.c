@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_seq.c,v 1.4 2005-06-25 15:46:04 adam Exp $
+ * $Id: odr_seq.c,v 1.5 2005-08-11 14:21:55 adam Exp $
  */
 /**
  * \file odr_seq.c
@@ -110,14 +110,8 @@ static int odr_sequence_x (ODR o, Odr_fun type, void *p, int *num)
             }
             break;
         case ODR_ENCODE: case ODR_PRINT:
-#ifdef ODR_DEBUG
-            fprintf(stderr, "[seqof: num=%d]", *num);
-#endif
             for (i = 0; i < *num; i++)
             {
-#ifdef ODR_DEBUG
-                fprintf(stderr, "[seqof: elem #%d]", i);
-#endif
                 if (!(*type)(o, *pp + i, 0, 0))
                     return 0;
             }

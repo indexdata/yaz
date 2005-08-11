@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.12 2005-06-25 15:46:04 adam Exp $
+ * $Id: odr.c,v 1.13 2005-08-11 14:21:55 adam Exp $
  *
  */
 
@@ -15,6 +15,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -58,13 +59,22 @@ char *odr_errmsg(int n)
 void odr_perror(ODR o, const char *message)
 {
     const char *e = odr_getelement(o);
+    const char **element_path = odr_get_element_path(o);
     int err, x;
 
     err =  odr_geterrorx(o, &x);
     fprintf(stderr, "%s: %s (code %d:%d)", message, odr_errlist[err], err, x);
     if (e && *e)
-        fprintf (stderr, " element %s", e);
+        fprintf(stderr, " element %s", e);
+    
     fprintf(stderr, "\n");
+    if (element_path)
+    {
+        fprintf(stderr, "Element path:");
+        while (*element_path)
+            fprintf(stderr, " %s", *element_path++);
+        fprintf(stderr, "\n");
+    }
 }
 
 int odr_geterror(ODR o)
@@ -86,7 +96,25 @@ const char *odr_getelement(ODR o)
 
 const char **odr_get_element_path(ODR o)
 {
-    return o->op->stack_names;
+    int cur_sz = 0;
+    struct odr_constack *st;
+
+    for (st = o->op->stack_top; st; st = st->prev)
+        cur_sz++;
+    if (o->op->tmp_names_sz < cur_sz + 1)
+    {
+        o->op->tmp_names_sz = 2 * cur_sz + 5;
+        o->op->tmp_names_buf = (const char **)
+            odr_malloc(o, o->op->tmp_names_sz * sizeof(char*));
+    }
+    o->op->tmp_names_buf[cur_sz] = 0;
+    for (st = o->op->stack_top; st; st = st->prev)
+    {
+        cur_sz--;
+        o->op->tmp_names_buf[cur_sz] = st->name;
+    }
+    assert(cur_sz == 0);
+    return o->op->tmp_names_buf;
 }
 
 void odr_seterror(ODR o, int error, int id)
@@ -216,7 +244,10 @@ void odr_reset(ODR o)
     o->t_class = -1;
     o->t_tag = -1;
     o->indent = 0;
-    o->op->stackp = -1;
+    o->op->stack_first = 0;
+    o->op->stack_top = 0;
+    o->op->tmp_names_sz = 0;
+    o->op->tmp_names_buf = 0;
     nmem_reset(o->mem);
     o->choice_bias = -1;
     o->lenlen = 1;

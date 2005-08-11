@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_choice.c,v 1.5 2005-06-25 15:46:04 adam Exp $
+ * $Id: odr_choice.c,v 1.6 2005-08-11 14:21:55 adam Exp $
  */
 
 /**
@@ -56,7 +56,7 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
         {
             if (o->direction == ODR_DECODE && cl < 0)
             {
-                if (o->op->stackp > -1 && !odr_constructed_more(o))
+                if (o->op->stack_top && !odr_constructed_more(o))
                     return 0;
                 if (ber_dectag(o->bp, &cl, &tg, &cn, odr_max(o)) <= 0)
                     return 0;

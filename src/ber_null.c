@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_null.c,v 1.4 2005-06-25 15:46:03 adam Exp $
+ * $Id: ber_null.c,v 1.5 2005-08-11 14:21:55 adam Exp $
  */
 
 /** 
@@ -28,9 +28,6 @@ int ber_null(ODR o)
     case ODR_ENCODE:
         if (odr_putc(o, 0X00) < 0)
             return 0;
-#ifdef ODR_DEBUG
-        fprintf(stderr, "[NULL]\n");
-#endif
         return 1;
     case ODR_DECODE:
         if (odr_max(o) < 1)
@@ -43,9 +40,6 @@ int ber_null(ODR o)
             odr_seterror(o, OPROTO, 12);
             return 0;
         }
-#ifdef ODR_DEBUG
-        fprintf(stderr, "[NULL]\n");
-#endif
         return 1;
     case ODR_PRINT:
         return 1;

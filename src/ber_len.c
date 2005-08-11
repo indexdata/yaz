@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_len.c,v 1.4 2005-06-25 15:46:03 adam Exp $
+ * $Id: ber_len.c,v 1.5 2005-08-11 14:21:55 adam Exp $
  */
 
 /** 
@@ -35,16 +35,10 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
     int n = 0;
     int lenpos, end;
 
-#ifdef ODR_DEBUG
-    fprintf(stderr, "[len=%d]", len);
-#endif
     if (len < 0)      /* Indefinite */
     {
         if (odr_putc(o, 0x80) < 0)
             return 0;
-#ifdef ODR_DEBUG
-        fprintf(stderr, "[indefinite]");
-#endif
         return 0;
     }
     if (len <= 127 && (lenlen == 1 || !exact)) /* definite short form */
@@ -108,17 +102,11 @@ int ber_declen(const unsigned char *buf, int *len, int max)
     if (*b == 0X80)     /* Indefinite */
     {
         *len = -1;
-#ifdef ODR_DEBUG
-        fprintf(stderr, "[len=%d]", *len);
-#endif
         return 1;
     }
     if (!(*b & 0X80))   /* Definite short form */
     {
         *len = (int) *b;
-#ifdef ODR_DEBUG
-        fprintf(stderr, "[len=%d]", *len);
-#endif
         return 1;
     }
     if (*b == 0XFF)     /* reserved value */
@@ -136,9 +124,6 @@ int ber_declen(const unsigned char *buf, int *len, int max)
     }
     if (*len < 0)
         return -2;
-#ifdef ODR_DEBUG
-    fprintf(stderr, "[len=%d]", *len);
-#endif
     return (b - buf);
 }
 /*

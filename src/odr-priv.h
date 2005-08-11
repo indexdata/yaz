@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr-priv.h,v 1.6 2005-06-25 15:46:04 adam Exp $
+ * $Id: odr-priv.h,v 1.7 2005-08-11 14:21:55 adam Exp $
  */
 
 /**
@@ -38,7 +38,8 @@
 #include <yaz/odr.h>
 #include <yaz/yaz-util.h>
 
-struct Odr_ber_tag {      /* used to be statics in ber_tag... */
+/** \brief Utility structure used by ber_tag */
+struct Odr_ber_tag {
     int lclass;
     int ltag;
     int br;
@@ -48,25 +49,51 @@ struct Odr_ber_tag {      /* used to be statics in ber_tag... */
 #define odr_max(o) ((o)->size - ((o)->bp - (o)->buf))
 #define odr_offset(o) ((o)->bp - (o)->buf)
 
-typedef struct odr_constack
+/**
+ * \brief stack for BER constructed items
+ *
+ * data structure for con stack.. a little peculiar. Since we can't
+ * deallocate memory we reuse stack items (popped items gets reused)
+ *
+ *\verbatim
+ *       +---+     +---+     +---+     +---+
+ * NULL -|p n|-----|p n|-----|p n|-----|p n|-- NULL
+ *       +---+     +---+     +---+     +---+
+ *         |                   |
+ *     stack_first         stack_top   reused item
+ *\endverbatim
+ */
+struct odr_constack
 {
-    const unsigned char *base;   /* starting point of data */
+    const unsigned char *base;   /** starting point of data */
     int base_offset;
-    int len;                     /* length of data, if known, else -1
+    int len;                     /** length of data, if known, else -1
                                         (decoding only) */
-    const unsigned char *lenb;   /* where to encode length */
+    const unsigned char *lenb;   /** where to encode length */
     int len_offset;
-    int lenlen;                  /* length of length-field */
-} odr_constack;
+    int lenlen;                  /** length of length-field */
+    const char *name;            /** name of stack entry */
 
+    struct odr_constack *prev;   /** pointer back in stack */
+    struct odr_constack *next;   /** pointer forward */
+};
+
+#define ODR_MAX_STACK 10000
+
+/**
+ * \brief ODR private data
+ */
 struct Odr_private {
-    /* stack for constructed types */
-#define ODR_MAX_STACK 50
-    int stackp;          /* top of stack (-1 == initial state) */
-    odr_constack stack[ODR_MAX_STACK];
-    const char *stack_names[1 + ODR_MAX_STACK];
+    /* stack for constructed types (we above) */
+    struct odr_constack *stack_first; /** first member of allocated stack */
+    struct odr_constack *stack_top;   /** top of stack */
 
-    struct Odr_ber_tag odr_ber_tag;
+
+    const char **tmp_names_buf;   /** array returned by odr_get_element_path */
+    int tmp_names_sz;                 /** size of tmp_names_buf */
+
+    struct Odr_ber_tag odr_ber_tag;   /** used by ber_tag */
+
     yaz_iconv_t iconv_handle;
     int error_id;
     char element[80];
@@ -74,6 +101,10 @@ struct Odr_private {
                          const char *buf, int len);
     void (*stream_close)(void *handle);
 };
+
+#define ODR_STACK_POP(x) (x)->op->stack_top = (x)->op->stack_top->prev
+#define ODR_STACK_EMPTY(x) (!(x)->op->stack_top)
+#define ODR_STACK_NOT_EMPTY(x) ((x)->op->stack_top)
 
 /* Private macro.
  * write a single character at the current position - grow buffer if

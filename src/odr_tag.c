@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_tag.c,v 1.4 2005-06-25 15:46:04 adam Exp $
+ * $Id: odr_tag.c,v 1.5 2005-08-11 14:21:55 adam Exp $
  */
 /**
  * \file odr_tag.c
@@ -21,7 +21,7 @@ int odr_peektag(ODR o, int *zclass, int *tag, int *cons)
         odr_seterror(o, OOTHER, 48);
         return 0;
     }
-    if (o->op->stackp > -1 && !odr_constructed_more(o))
+    if (ODR_STACK_NOT_EMPTY(o) && !odr_constructed_more(o))
         return 0;
     if (ber_dectag(o->bp, zclass, tag, cons, odr_max(o)) <= 0)
     {
