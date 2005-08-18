@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.94 2005-04-22 14:51:11 adam Exp $
+# $Id: makefile,v 1.95 2005-08-18 18:42:37 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -22,10 +22,10 @@ ICONV_DIR = c:\iconv-1.9.1.win32
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.6.19.win32
+LIBXML2_DIR=c:\libxml2-2.6.20.win32
 
 # zlib compression (used by libxml2)
-ZLIB_DIR = c:\zlib-1.2.2.win32
+ZLIB_DIR = c:\zlib-1.2.3.win32
 
 # get WIN32 binaries libxml2 & iconv & zlib from here:
 #  http://www.zlatkovic.com/libxml.en.html
@@ -134,7 +134,7 @@ ICONV_LIB= \
 iconv: $(BINDIR)\iconv.dll
 
 $(BINDIR)\iconv.dll:
-  copy "$(ICONV_DIR)\lib\iconv.dll" $(BINDIR)
+  copy "$(ICONV_DIR)\bin\iconv.dll" $(BINDIR)
 !else
 ICONV_DEF= \
   /D HAVE_ICONV_H=0
