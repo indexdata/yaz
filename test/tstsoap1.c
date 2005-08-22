@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap1.c,v 1.3 2005-06-25 15:46:07 adam Exp $
+ * $Id: tstsoap1.c,v 1.4 2005-08-22 20:34:23 adam Exp $
  */
 
 #include <stdlib.h>
@@ -19,15 +19,15 @@ int main(int argc, char **argv)
     {
         xmlChar *buf_out;
         int len_out;
-        xmlDocPtr doc = xmlNewDoc("1.0");
+        xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
 #if 0
         const char *val = "jordbær"; /* makes xmlDocDumpMemory hang .. */
 #else
         const char *val = "jordbaer"; /* OK */
 #endif
-        xmlNodePtr top = xmlNewNode(0, "top");
+        xmlNodePtr top = xmlNewNode(0, BAD_CAST "top");
         
-        xmlNewTextChild(top, 0, "sub", val);
+        xmlNewTextChild(top, 0, BAD_CAST "sub", BAD_CAST val);
         xmlDocSetRootElement(doc, top);
         
         xmlDocDumpMemory(doc, &buf_out, &len_out);

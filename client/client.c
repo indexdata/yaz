@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.294 2005-07-22 06:23:14 adam Exp $
+ * $Id: client.c,v 1.295 2005-08-22 20:34:21 adam Exp $
  */
 
 #include <stdio.h>
@@ -406,7 +406,7 @@ static int process_initResponse(Z_InitResponse *res)
                 if (oid->value == VAL_OCLCUI) {
                     Z_OCLC_UserInformation *oclc_ui;
                     ODR decode = odr_createmem(ODR_DECODE);
-                    odr_setbuf(decode, sat->buf, sat->len, 0);
+                    odr_setbuf(decode, (char *) sat->buf, sat->len, 0);
                     if (!z_OCLC_UserInformation(decode, &oclc_ui, 0, 0))
                         printf ("Bad OCLC UserInformation:\n");
                     else

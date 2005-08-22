@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.6 2005-06-25 15:46:07 adam Exp $
+ * $Id: tstodr.c,v 1.7 2005-08-22 20:34:23 adam Exp $
  *
  */
 #include <stdlib.h>
@@ -22,7 +22,7 @@ void tst_MySequence1(ODR encode, ODR decode)
 
     s->first = odr_intdup(encode, 12345);
     s->second = odr_malloc(encode, sizeof(*s->second));
-    s->second->buf = "hello";
+    s->second->buf = (unsigned char *) "hello";
     s->second->len = 5;
     s->second->size = 0;
     s->third = odr_intdup(encode, 1);
@@ -71,7 +71,7 @@ void tst_MySequence2(ODR encode, ODR decode)
 
     s->first = 0;  /* deliberately miss this .. */
     s->second = odr_malloc(encode, sizeof(*s->second));
-    s->second->buf = "hello";
+    s->second->buf = (unsigned char *) "hello";
     s->second->len = 5;
     s->second->size = 0;
     s->third = odr_intdup(encode, 1);

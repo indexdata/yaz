@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.11 2005-06-25 15:46:04 adam Exp $
+ * $Id: logrpn.c,v 1.12 2005-08-22 20:34:21 adam Exp $
  */
 
 /**
@@ -417,7 +417,7 @@ static void wrbuf_apt(WRBUF b, Z_AttributesPlusTerm *zapt)
     switch (zapt->term->which)
     {
     case Z_Term_general:
-        wrbuf_term(b, zapt->term->u.general->buf,
+        wrbuf_term(b, (const char *)zapt->term->u.general->buf,
                    zapt->term->u.general->len);
         break;
     case Z_Term_characterString:

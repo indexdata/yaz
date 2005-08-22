@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.58 2005-06-25 15:46:05 adam Exp $
+ * $Id: seshigh.c,v 1.59 2005-08-22 20:34:21 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -930,7 +930,7 @@ static char *srw_bend_explain_default(void *handle, bend_explain_rr *rr)
         if (!strcmp((const char *) ptr->name, "explain"))
         {
             int len;
-            xmlDocPtr doc = xmlNewDoc("1.0");
+            xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
             xmlChar *buf_out;
             char *content;
 
@@ -1764,7 +1764,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.58 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.59 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

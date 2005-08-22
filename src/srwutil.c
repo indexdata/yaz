@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.28 2005-06-25 15:46:05 adam Exp $
+ * $Id: srwutil.c,v 1.29 2005-08-22 20:34:21 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -251,7 +251,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         {0, 0, 0}
     };
 #endif
-    if (!strcmp(hreq->method, "GET"))
+    if (!strcmp(hreq->method, "GET") ||
+      !strcmp(hreq->method, "POST") )
     {
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
@@ -289,6 +290,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             memcpy (db, p0, p1 - p0);
             db[p1 - p0] = '\0';
         }
+        if (!strcmp(hreq->method, "POST"))
+            p1 = hreq->content_buf;
         yaz_uri_array(p1, decode, &uri_name, &uri_val);
 #if HAVE_XML2
         if (uri_name)

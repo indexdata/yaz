@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.11 2005-06-25 15:46:05 adam Exp $
+ * $Id: soap.c,v 1.12 2005-08-22 20:34:21 adam Exp $
  */
 /**
  * \file soap.c
@@ -44,10 +44,11 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         if (!doc)
             return z_soap_error(o, p, "SOAP-ENV:Client",
                                 "Bad XML Document", 0);
+
         /* check that root node is Envelope */
         ptr = xmlDocGetRootElement(doc);
         if (!ptr || ptr->type != XML_ELEMENT_NODE ||
-            strcmp(ptr->name, "Envelope") || !ptr->ns)
+            xmlStrcmp(ptr->name, BAD_CAST "Envelope") || !ptr->ns)
         {
             xmlFreeDoc(doc);
             return z_soap_error(o, p, "SOAP-ENV:Client",
@@ -56,7 +57,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         else
         {
             /* determine SOAP version */
-            const char * ns_envelope = ptr->ns->href;
+            const char * ns_envelope = (const char *) ptr->ns->href;
             if (!strcmp(ns_envelope, soap_v1_1))
                 p->ns = soap_v1_1;
             else if (!strcmp(ns_envelope, soap_v1_2))
@@ -72,8 +73,8 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         while(ptr && ptr->type == XML_TEXT_NODE)
             ptr = ptr->next;
         if (ptr && ptr->type == XML_ELEMENT_NODE &&
-            !strcmp(ptr->ns->href, p->ns) &&
-            !strcmp(ptr->name, "Header"))
+            !xmlStrcmp(ptr->ns->href, BAD_CAST p->ns) &&
+            !xmlStrcmp(ptr->name, BAD_CAST "Header"))
         {
             ptr = ptr->next;
             while(ptr && ptr->type == XML_TEXT_NODE)
@@ -81,13 +82,13 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         }
         /* check that Body is present */
         if (!ptr || ptr->type != XML_ELEMENT_NODE || 
-            strcmp(ptr->name, "Body"))
+            xmlStrcmp(ptr->name, BAD_CAST "Body"))
         {
             xmlFreeDoc(doc);
             return z_soap_error(o, p, "SOAP-ENV:Client",
                                 "SOAP Body element not found", 0);
         }
-        if (strcmp(ptr->ns->href, p->ns))
+        if (xmlStrcmp(ptr->ns->href, BAD_CAST p->ns))
         {
             xmlFreeDoc(doc);
             return z_soap_error(o, p, "SOAP-ENV:Client",
@@ -110,8 +111,8 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                                 "SOAP No namespace for content", 0);
         }
         /* check for fault package */
-        if (!strcmp(ptr->ns->href, p->ns)
-            && !strcmp(ptr->name, "Fault") && ptr->children)
+        if (!xmlStrcmp(ptr->ns->href, BAD_CAST p->ns)
+            && !xmlStrcmp(ptr->name, BAD_CAST "Fault") && ptr->children)
         {
             ptr = ptr->children;
 
@@ -124,15 +125,18 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             {
                 if (ptr->children && ptr->children->type == XML_TEXT_NODE)
                 {
-                    if (!strcmp(ptr->name, "faultcode"))
+                    if (!xmlStrcmp(ptr->name, BAD_CAST "faultcode"))
                         p->u.fault->fault_code =
-                            odr_strdup(o, ptr->children->content);
-                    if (!strcmp(ptr->name, "faultstring"))
+                            odr_strdup(o, (const char *)
+                                       ptr->children->content);
+                    if (!xmlStrcmp(ptr->name, BAD_CAST "faultstring"))
                         p->u.fault->fault_string =
-                            odr_strdup(o, ptr->children->content);
-                    if (!strcmp(ptr->name, "details"))
+                            odr_strdup(o, (const char *)
+                                       ptr->children->content);
+                    if (!xmlStrcmp(ptr->name, BAD_CAST "details"))
                         p->u.fault->details =
-                            odr_strdup(o, ptr->children->content);
+                            odr_strdup(o, (const char *)
+                                       ptr->children->content);
                 }
                 ptr = ptr->next;
             }
@@ -141,7 +145,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         else
         {
             for (i = 0; handlers[i].ns; i++)
-                if (!strcmp(ptr->ns->href, handlers[i].ns))
+                if (!xmlStrcmp(ptr->ns->href, BAD_CAST handlers[i].ns))
                     break;
             if (handlers[i].ns)
             {
@@ -165,7 +169,8 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             else
             {
                 ret = z_soap_error(o, p, "SOAP-ENV:Client", 
-                                   "No handler for NS", ptr->ns->href);
+                                   "No handler for NS",
+                                   (const char *)ptr->ns->href);
             }
         }
         xmlFreeDoc(doc);
@@ -177,23 +182,29 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         xmlNsPtr ns_env;
         xmlNodePtr envelope_ptr, body_ptr;
 
-        xmlDocPtr doc = xmlNewDoc("1.0");
+        xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
 
-        envelope_ptr = xmlNewNode(0, "Envelope");
-        ns_env = xmlNewNs(envelope_ptr, p->ns, "SOAP-ENV");
+        envelope_ptr = xmlNewNode(0, BAD_CAST "Envelope");
+        ns_env = xmlNewNs(envelope_ptr, BAD_CAST p->ns,
+                          BAD_CAST "SOAP-ENV");
         xmlSetNs(envelope_ptr, ns_env);
 
-        body_ptr = xmlNewChild(envelope_ptr, ns_env, "Body", 0);
+        body_ptr = xmlNewChild(envelope_ptr, ns_env, BAD_CAST "Body",
+                               0);
         xmlDocSetRootElement(doc, envelope_ptr);
 
         if (p->which == Z_SOAP_fault || p->which == Z_SOAP_error)
         {
             Z_SOAP_Fault *f = p->u.fault;
-            xmlNodePtr fault_ptr = xmlNewChild(body_ptr, ns_env, "Fault", 0);
-            xmlNewChild(fault_ptr, ns_env, "faultcode",  f->fault_code);
-            xmlNewChild(fault_ptr, ns_env, "faultstring", f->fault_string);
+            xmlNodePtr fault_ptr = xmlNewChild(body_ptr, ns_env,
+                                               BAD_CAST "Fault", 0);
+            xmlNewChild(fault_ptr, ns_env, BAD_CAST "faultcode", 
+                        BAD_CAST f->fault_code);
+            xmlNewChild(fault_ptr, ns_env, BAD_CAST "faultstring",
+                        BAD_CAST f->fault_string);
             if (f->details)
-                xmlNewChild(fault_ptr, ns_env, "details", f->details);
+                xmlNewChild(fault_ptr, ns_env, BAD_CAST "details",
+                            BAD_CAST f->details);
         }
         else if (p->which == Z_SOAP_generic)
         {
@@ -220,7 +231,8 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             
             xmlNodePtr pi, ptr = xmlDocGetRootElement(doc);
             sprintf(content, "type=\"text/xsl\" href=\"%s\"", stylesheet);
-            pi = xmlNewPI("xml-stylesheet", content);
+            pi = xmlNewPI(BAD_CAST "xml-stylesheet",
+                          BAD_CAST content);
             xmlAddPrevSibling(ptr, pi);
         }
         if (1)

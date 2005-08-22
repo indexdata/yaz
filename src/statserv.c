@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.31 2005-06-25 15:46:05 adam Exp $
+ * $Id: statserv.c,v 1.32 2005-08-22 20:34:21 adam Exp $
  */
 
 /**
@@ -173,13 +173,13 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
     unsigned char *cp;
     xmlNodePtr p;
     int len = 1;  /* start with 1, because of trailing 0 */
-    char *str;
+    unsigned char *str;
     int first = 1; /* whitespace lead flag .. */
     /* determine length */
     for (p = ptr; p; p = p->next)
     {
         if (p->type == XML_TEXT_NODE)
-            len += strlen(p->content);
+            len += xmlStrlen(p->content);
     }
     /* now allocate for the string */
     str = nmem_malloc(n, len);
@@ -196,16 +196,16 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
                 if (*cp)
                     first = 0;  /* reset if we got non-whitespace out */
             }
-            strcat(str, cp); /* append */
+            strcat((char *)str, (const char *)cp); /* append */
         }
     }
     /* remove trailing whitespace */
-    cp = strlen(str) + str;
-    while ((char*) cp != str && isspace(cp[-1]))
+    cp = strlen((const char *)str) + str;
+    while (cp != str && isspace(cp[-1]))
         cp--;
     *cp = '\0';
     /* return resulting string */
-    return str;
+    return (char *) str;
 }
 #endif
 
@@ -340,7 +340,7 @@ static void xml_config_read()
             const char *address =
                 nmem_dup_xml_content(gfs_nmem, ptr->children);
             for ( ; attr; attr = attr->next)
-                if (!strcmp(attr->name, "id")
+                if (!xmlStrcmp(attr->name, BAD_CAST "id")
                     && attr->children && attr->children->type == XML_TEXT_NODE)
                     id = nmem_dup_xml_content(gfs_nmem, attr->children);
             if (address)
@@ -358,11 +358,12 @@ static void xml_config_read()
             const char *id = 0;
 
             for ( ; attr; attr = attr->next)
-                if (!strcmp(attr->name, "listenref") && attr->children &&
-                    attr->children->type == XML_TEXT_NODE)
+                if (!xmlStrcmp(attr->name, BAD_CAST "listenref") 
+                    && attr->children && attr->children->type == XML_TEXT_NODE)
                     listenref = nmem_dup_xml_content(gfs_nmem, attr->children);
-                else if (!strcmp(attr->name, "id") && attr->children &&
-                         attr->children->type == XML_TEXT_NODE)
+                else if (!xmlStrcmp(attr->name, BAD_CAST "id")
+                         && attr->children
+                         && attr->children->type == XML_TEXT_NODE)
                     id = nmem_dup_xml_content(gfs_nmem, attr->children);
                 else
                     yaz_log(YLOG_WARN, "Unknown attribute '%s' for server",

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.32 2005-06-25 15:46:07 adam Exp $
+ * $Id: marcdump.c,v 1.33 2005-08-22 20:34:23 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -269,7 +269,7 @@ int main (int argc, char **argv)
                             xpathCtx = xmlXPathNewContext(doc);
 
                             for (i = 0; xpathExpr[i]; i++) {
-                                xpathObj = xmlXPathEvalExpression(xpathExpr[i], xpathCtx);
+                                xpathObj = xmlXPathEvalExpression(BAD_CAST xpathExpr[i], xpathCtx);
                                 if(xpathObj == NULL) {
                                     fprintf(stderr,"Error: unable to evaluate xpath expression \"%s\"\n", xpathExpr[i]);
                                 }

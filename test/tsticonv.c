@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.10 2005-06-25 15:46:07 adam Exp $
+ * $Id: tsticonv.c,v 1.11 2005-08-22 20:34:23 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -17,8 +17,8 @@
 #include <yaz/yaz-util.h>
 
 static int compare_buffers(char *msg, int no,
-                           int expect_len, const unsigned char *expect_buf,
-                           int got_len, const unsigned char *got_buf)
+                           int expect_len, const char *expect_buf,
+                           int got_len, const char *got_buf)
 {
     int i;
     if (expect_len == got_len
@@ -108,9 +108,9 @@ static void tst_marc8_to_iso_8859_1()
 static void tst_marc8_to_ucs4b()
 {
     static struct {
-        const unsigned char *marc8_b;
+        const char *marc8_b;
         int len;
-        const unsigned char *ucs4_b;
+        const char *ucs4_b;
     } ar[] = {
     { 
         "\033$1" "\x21\x2B\x3B" /* FF1F */ "\033(B" "o",

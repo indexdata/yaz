@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: opacdisp.c,v 1.7 2005-06-25 15:46:04 adam Exp $
+ * $Id: opacdisp.c,v 1.8 2005-08-22 20:34:21 adam Exp $
  */
 /**
  * \file opacdisp.c
@@ -61,7 +61,7 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
         
         wrbuf_puts (wrbuf, "  <bibliographicRecord>\n");
         if (ext->which == Z_External_octet)
-            yaz_marc_decode_wrbuf(mt, ext->u.octet_aligned->buf,
+            yaz_marc_decode_wrbuf(mt, (const char *) ext->u.octet_aligned->buf,
                                   ext->u.octet_aligned->len, wrbuf);
         wrbuf_puts (wrbuf, "  </bibliographicRecord>\n");
     }
@@ -78,7 +78,8 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
 
             wrbuf_puts (wrbuf, "  <marcHoldingsRecord>\n");
             if (ext->which == Z_External_octet)
-                yaz_marc_decode_wrbuf(mt, ext->u.octet_aligned->buf,
+                yaz_marc_decode_wrbuf(mt, (const char *)
+                                      ext->u.octet_aligned->buf,
                                       ext->u.octet_aligned->len, wrbuf);
             wrbuf_puts (wrbuf, "  </marcHoldingsRecord>\n");
         }
