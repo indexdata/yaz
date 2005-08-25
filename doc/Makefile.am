@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.59 2005-03-13 21:43:00 adam Exp $
+## $Id: Makefile.am,v 1.60 2005-08-25 12:44:24 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -32,7 +32,7 @@ REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
 	yaz-marcdump-man.xml yaz-iconv-man.xml yaz-log-man.xml
 
-SUPPORTFILES=yazhtml.dsl yazphp.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
+SUPPORTFILES=yazhtml.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
 	apilayer.obj yaz.css
 
 doc_DATA = $(HTMLFILES) yaz.pdf id.png apilayer.png yaz.css
@@ -70,9 +70,6 @@ yaz-log.7: yaz-log-man.xml
 
 $(HTMLFILES): $(XMLFILES)  
 	jade -E14 -D $(srcdir) -d yazhtml.dsl -t sgml $(srcdir)/xml.dcl yaz.xml
-
-yaz.php: $(XMLFILES)
-	jade -E14 -D $(srcdir) -d yazphp.dsl -t sgml $(srcdir)/xml.dcl yaz.xml
 
 yaz.pdf: $(XMLFILES) $(srcdir)/id.png
 	if test ! -f id.png ; then ln -s $(srcdir)/id.png .; fi
