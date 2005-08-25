@@ -1,6 +1,7 @@
-; $Id: yaz.nsi,v 1.69 2005-06-07 19:31:40 adam Exp $
+; $Id: yaz.nsi,v 1.70 2005-08-25 11:48:26 adam Exp $
 
 !define VERSION "2.1.8"
+!define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
 
 !include "MUI.nsh"
 
@@ -83,7 +84,7 @@ Section "YAZ Runtime" YAZ_Runtime
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
 Noservice:
 	SetOutPath $INSTDIR\bin
-	File c:\winnt\system32\msvcr71.dll
+	File "${VS_RUNTIME_LOCATION}\msvcr71.dll"
 	File ..\bin\iconv.dll
 	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
