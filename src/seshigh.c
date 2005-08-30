@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.59 2005-08-22 20:34:21 adam Exp $
+ * $Id: seshigh.c,v 1.60 2005-08-30 20:13:51 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1595,7 +1595,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     if (control_association(assoc, get_vhost(req->otherInfo), 1))
         cb = statserv_getcontrol();  /* got control block for backend */
-    
+
+    if (cb && assoc->backend)
+        (*cb->bend_close)(assoc->backend);
+
     yaz_log(log_requestdetail, "Got initRequest");
     if (req->implementationId)
         yaz_log(log_requestdetail, "Id:        %s",
@@ -1620,7 +1623,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
             negotiation->which == Z_CharSetandLanguageNegotiation_proposal)
             assoc->init->charneg_request = negotiation;
     }
-    
+
     assoc->backend = 0;
     if (cb)
     {
@@ -1764,7 +1767,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.59 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.60 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
