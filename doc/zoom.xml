@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.37 2004-01-16 10:04:54 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.38 2005-09-07 11:53:25 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -830,6 +830,72 @@
     To ensure that all outstanding requests are performed call this function
     repeatedly until zero is returned.
    </para>
+   <para>
+    If <function>ZOOM_event</function> returns and returns non-zero, the
+    last event that occurred can be expected.
+   </para>
+   <synopsis>
+    int ZOOM_connection_last_event(ZOOM_connection cs);
+   </synopsis>
+   <para>
+    <function>ZOOM_connection_last_event</function> returns an event type
+    (integer) for the last event.
+   </para>
+
+   <table frame="top"><title>ZOOM Event IDs</title>
+    <tgroup cols="2">
+     <colspec colwidth="4*" colname="name"></colspec>
+     <colspec colwidth="7*" colname="description"></colspec>
+     <thead>
+      <row>
+       <entry>Event</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>ZOOM_EVENT_NONE</entry>
+       <entry>No event has occurred</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_CONNECT</entry>
+       <entry>TCP/IP connect has initiated</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_SEND_DATA</entry>
+       <entry>Data has been transmitted (sending)</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_RECV_DATA</entry>
+       <entry>Data has been received)</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_TIMEOUT</entry>
+       <entry>Timeout</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_UNKNOWN</entry>
+       <entry>Unknown event</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_SEND_APDU</entry>
+       <entry>An APDU has been transmitted (sending)</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_RECV_APDU</entry>
+       <entry>An APDU has been received</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_RECV_RECORD</entry>
+       <entry>A result-set record has been received</entry>
+      </row>
+      <row>
+       <entry>ZOOM_EVENT_RECV_SEARCH</entry>
+       <entry>A search result been received</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
   </sect1>
  </chapter>
  
