@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: tstlogthread.c,v 1.1 2005-09-08 13:25:33 adam Exp $
+ * $Id: tstlogthread.c,v 1.2 2005-09-08 13:51:27 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -14,7 +14,7 @@
 #include <yaz/log.h>
 #include <yaz/options.h>
 
-#if HAVE_POSIX_THREADS
+#if YAZ_POSIX_THREADS
 #include <pthread.h>
 
 
