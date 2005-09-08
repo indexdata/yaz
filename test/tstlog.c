@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.5 2005-06-25 15:46:07 adam Exp $
+ * $Id: tstlog.c,v 1.6 2005-09-08 13:22:58 adam Exp $
  *
  */
 #include <stdio.h>
@@ -13,13 +13,17 @@
 int main(int argc, char **argv)
 {
     char *arg;
-    int ret;
+    int i, ret;
     int level = YLOG_LOG;
+    int number = 1;
 
-    while ((ret = options("f:v:l:m:", argv, argc, &arg)) != -2)
+    while ((ret = options("f:v:l:m:n:s:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
+        case 's':
+            yaz_log_init_max_size(atoi(arg));
+            break;
         case 'f':
             yaz_log_time_format(arg);
             break;
@@ -29,11 +33,15 @@ int main(int argc, char **argv)
         case 'l':
             yaz_log_init_file(arg);
             break;
+        case 'n':
+            number = atoi(arg);
+            break;
         case 'm':        
             level = yaz_log_module_level(arg);
             break;
         case 0:
-            yaz_log(level, "%s", arg);
+            for (i = 0; i<number; i++)
+                yaz_log(level, "%s", arg);
             break;
         default:
             fprintf(stderr, "tstlog. Bad option\n");
