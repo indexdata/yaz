@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.19 2005-06-25 15:46:04 adam Exp $
+ * $Id: nmem.c,v 1.20 2005-09-09 10:32:09 adam Exp $
  */
 
 /**
@@ -109,17 +109,19 @@ struct nmem_mutex {
 
 YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
 {
+    NMEM_ENTER;
     if (!*p)
     {
-        *p = (NMEM_MUTEX) malloc (sizeof(**p));
+        *p = (NMEM_MUTEX) malloc(sizeof(**p));
 #ifdef WIN32
         InitializeCriticalSection(&(*p)->m_handle);
 #elif YAZ_POSIX_THREADS
-        pthread_mutex_init (&(*p)->m_handle, 0);
+        pthread_mutex_init(&(*p)->m_handle, 0);
 #elif YAZ_GNU_THREADS
-        pth_mutex_init (&(*p)->m_handle);
+        pth_mutex_init(&(*p)->m_handle);
 #endif
     }
+    NMEM_LEAVE;
     if (!log_level_initialized)
     {
         log_level_initialized = 1;
@@ -159,7 +161,7 @@ YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
 #ifdef WIN32
         DeleteCriticalSection(&(*p)->m_handle);
 #endif
-        free (*p);
+        free(*p);
         *p = 0;
     }
 }
