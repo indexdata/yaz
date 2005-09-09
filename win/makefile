@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.95 2005-08-18 18:42:37 adam Exp $
+# $Id: makefile,v 1.96 2005-09-09 11:28:48 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -36,9 +36,10 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll client ztest zoomsh utilprog iconv libxml2
+all: dirs generate dll client ztest zoomsh utilprog testprog iconv libxml2
 
 NSIS="c:\program files\nsis\makensis.exe"
+HHC="c:\program files\html help workshop\hhc.exe"
 
 dist: 
 	nmake DEBUG=1 clean
@@ -54,6 +55,8 @@ nsishelp:
 
 generate: generated_files
 
+
+
 ###########################################################
 ############### Directories
 ###########################################################
@@ -66,6 +69,7 @@ LIBDIR=$(ROOTDIR)\lib       # We produce .lib, .exp etc there
 BINDIR=$(ROOTDIR)\bin       # We produce exes and dlls there
 WINDIR=$(ROOTDIR)\win       # all these Win make things
 SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
+DOCDIR=$(ROOTDIR)\doc       # where the doc is
 
 # where we store intermediate files
 !if $(DEBUG)
@@ -78,6 +82,7 @@ CLIENTDIR=$(ROOTDIR)\CLIENT
 ZTESTDIR=$(ROOTDIR)\ZTEST
 ZOOMDIR=$(ROOTDIR)\ZOOM
 UTILDIR=$(ROOTDIR)\UTIL
+TESTDIR=$(ROOTDIR)\TEST
 
 TMPDIR=$(ROOTDIR)\win\tmp
 TMP=$(TMPDIR)
@@ -111,6 +116,8 @@ CQL2PQF=$(BINDIR)\cql2pqf.exe
 CQL2XCQL=$(BINDIR)\cql2xcql.exe
 YAZ_MARCDUMP=$(BINDIR)\yaz-marcdump.exe
 
+TSTLOG=$(BINDIR)\tstlog.exe
+
 # shortcut names defined here
 dll: dirs generate $(DLL) 
 client: dirs generate $(CLIENT)
@@ -120,6 +127,10 @@ zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8)
 
 utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP)
+
+testprog: $(TSTLOG)
+
+htmlhelp: $(DOCDIR)\htmlhelp.chm
 
 ###########################################################
 ############### Compiler and linker options 
@@ -284,6 +295,9 @@ YAZ_CQL2XCQL_OBJS = \
    $(OBJDIR)\cql2xcql.obj
 YAZ_MARCDUMP_OBJS = \
    $(OBJDIR)\marcdump.obj
+
+TSTLOG_OBJS = \
+   $(OBJDIR)\tstlog.obj
 
 YAZ_SERVER_OBJS= \
    "$(OBJDIR)\eventl.obj" \
@@ -583,6 +597,9 @@ generated_files: \
 {$(UTILDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
+{$(TESTDIR)}.c{$(OBJDIR)}.obj:
+	$(CPP) $(COPT) $< 
+
 ############### ASN-generated files
 
 !if $(HAVE_TCL)
@@ -868,6 +885,23 @@ $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(DLL)
 		/out:$(YAZ_MARCDUMP) 
 <<
 
+
+$(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) 
+	@echo Linking $(TSTLOG)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(CLIENT_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(TSTLOG_OBJS)
+		/map:"$(LIBDIR)\tstlog.map"
+		/out:$(TSTLOG)
+<<
+
+$(DOCDIR)\htmlhelp.chm: $(DOCDIR)\htmlhelp.hhp
+	@cd $(DOCDIR)
+	-$(HHC) htmlhelp.hhp
+	@cd $(WINDIR)
 
 # note that this links a lib, so it uses completely different options.
 
