@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.26 2005-09-09 10:33:45 adam Exp $
+ * $Id: log.c,v 1.27 2005-09-09 11:29:54 adam Exp $
  */
 
 /**
@@ -164,8 +164,10 @@ static void rotate_log()
     /* windows can't rename a file if it is open */
     fclose(l_file);
     l_file = stderr;
-#endif
+    MoveFileEx(l_fname, newname, MOVEFILE_REPLACE_EXISTING);
+#else
     rename(l_fname, newname);
+#endif
     yaz_log_reopen();
 }
 
