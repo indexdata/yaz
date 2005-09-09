@@ -1,14 +1,10 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.22 2005-04-22 15:09:36 adam Exp $
-
-if ISTHR
-thrlib=libyazthread.la
-endif
+## $Id: Makefile.am,v 1.23 2005-09-09 10:34:09 adam Exp $
 
 YAZ_VERSION_INFO=2:0:0
 
-lib_LTLIBRARIES = libyaz.la $(thrlib) 
+lib_LTLIBRARIES = libyaz.la
 
 dist-hook:
 	test -f $(srcdir)/cql.c || exit 1
@@ -27,9 +23,10 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
 YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS)
+AM_CFLAGS=$(THREAD_CFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
+
 AM_YFLAGS=-p cql_
-THREADED_FLAGS = @CFLAGSTHREADS@
 
 # MARC8 conversion is generated from codetables.xml
 $(srcdir)/marc8.c: charconv.tcl codetables.xml
@@ -69,10 +66,6 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
   eventl.h service.c service.h session.h
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
-
-libyazthread_la_SOURCES=
-libyazthread_la_LIBADD=thr-nmem.lo thr-statserv.lo thr-eventl.lo
-libyazthread_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # Rules for Z39.50 V3
 $(srcdir)/z-accdes1.c \
@@ -148,14 +141,4 @@ $(srcdir)/item-req.c \
 $(top_srcdir)/include/yaz/item-req.h: \
 $(srcdir)/ill.tcl $(srcdir)/item-req.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) -d ill.tcl -i yaz -I ../include $(YCFLAGS) item-req.asn
-
-# Threaded versions of objects.
-thr-nmem.lo: nmem.c
-	$(LTCOMPILE) $(THREADED_FLAGS) -c $(srcdir)/nmem.c -o thr-nmem.lo
-
-thr-statserv.lo: statserv.c
-	$(LTCOMPILE) $(THREADED_FLAGS) -c $(srcdir)/statserv.c -o thr-statserv.lo
-thr-eventl.lo: eventl.c
-	$(LTCOMPILE) $(THREADED_FLAGS) -c $(srcdir)/eventl.c -o thr-eventl.lo
-
 

@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2005
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.184 2005-08-25 12:44:24 adam Exp $
+dnl $Id: configure.in,v 1.185 2005-09-09 10:34:09 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.1.9)
 AM_MAINTAINER_MODE
@@ -244,10 +244,9 @@ if test "$enable_tcpd" -a "$enable_tcpd" != "no"; then
 	fi
 fi
 dnl
-AC_SUBST(LIBTHREAD)
-AC_SUBST(CFLAGSTHREADS)
+AC_SUBST(THREAD_CFLAGS)
 HAVETHREADS=0
-CFLAGSTHREADS=""
+THREAD_CFLAGS=""
 LIBTHREAD=""
 dnl
 dnl ------ GNU threads
@@ -260,11 +259,11 @@ if test "$enable_pth" = "yes"; then
         	AC_CHECK_HEADERS(pth.h)
 		if test "$ac_cv_header_pth_h" = "yes"; then
 			LIBTHREAD="-lpth"
-			CFLAGSTHREADS="-DYAZ_GNU_THREADS=1"
+			THREAD_CFLAGS="-DYAZ_GNU_THREADS=1"
 			HAVETHREADS=1
 		fi
 	fi	
-	LIBS=$OLIBS
+	LIBS="$OLIBS $LIBTHREAD"
 fi
 dnl
 dnl ------ POSIX Threads
@@ -283,7 +282,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 	if test "$thread_ok" = "yes"; then
 		AC_MSG_RESULT(yes)
 		LIBTHREAD="-lpthread"
-		CFLAGSTHREADS="-DYAZ_POSIX_THREADS=1 -D_REENTRANT"
+		THREAD_CFLAGS="-DYAZ_POSIX_THREADS=1 -D_REENTRANT"
 		HAVETHREADS=1
 	else
 		CC="$CC -pthread"
@@ -295,7 +294,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 			thread_ok=yes,thread_ok=no)
 		if test "$thread_ok" = "yes"; then
 			AC_MSG_RESULT([yes,BSD])
-			CFLAGSTHREADS="-pthread -DYAZ_POSIX_THREADS=1 -D_REENTRANT"
+			THREAD_CFLAGS="-pthread -DYAZ_POSIX_THREADS=1 -D_REENTRANT"
 			LIBTHREAD="-pthread"
 			HAVETHREADS=1
 		fi
@@ -304,9 +303,8 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 		AC_MSG_RESULT(no)
 	fi
 	CC=$OCC
-	LIBS=$OLIBS
+	LIBS="$OLIBS $LIBTHREAD"
 fi
-AM_CONDITIONAL(ISTHR, test $HAVETHREADS = "1")
 dnl
 dnl ----- libXML2
 AC_SUBST(XML2_LIBS)

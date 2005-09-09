@@ -19,12 +19,13 @@ AC_ARG_WITH(docbook-dtd,[[  --with-docbook-dtd=DIR  use docbookx.dtd in DIR]],
 		 /usr/share/sgml/docbook/xml-dtd-4.* 
 	do
 		if test -f $d/docbookx.dtd; then
-			AC_MSG_RESULT($d)
 			DTD_DIR=$d
 		fi
 	done
 	if test -z "$DTD_DIR"; then
 		AC_MSG_RESULT(Not found)
+	else
+		AC_MSG_RESULT($d)
 	fi
 ])
 AC_SUBST(DSSSL_DIR)
