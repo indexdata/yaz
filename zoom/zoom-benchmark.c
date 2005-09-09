@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.1 2005-09-07 13:45:15 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.2 2005-09-09 13:51:43 marc Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -11,56 +11,28 @@
 #include <sys/time.h>
 
 #include <yaz/xmalloc.h>
+#include <yaz/options.h>
 #include <yaz/zoom.h>
 
 
+/* naming events */
+static char* zoom_events[10];
+
+/* re-sorting event numbers to progress numbers */
+static int zoom_progress[10];
+
+/* commando line parameters */
+static struct parameters_t { 
+    char host[1024];
+    char query[1024];
+    int concurrent;
+    int timeout;
+} parameters;
 
 
-int main(int argc, char **argv)
+void init_statics()
 {
-
-    struct timeval now;
-    struct timeval then;
-    long sec=0, usec=0;
-
-    int i;
-    int same_target = 0;
-    int no = argc-2;
-    ZOOM_connection z[1024]; /* allow at most 1024 connections */
-    ZOOM_resultset r[1024];  /* and result sets .. */
-    ZOOM_options o = ZOOM_options_create ();
-
-    if (argc < 3)
-    {
-        fprintf (stderr, "usage:\n%s target1 target2 ... targetN query\n",
-                 *argv);
-        exit (1);
-    }
-    if (argc == 4 && isdigit(argv[1][0]) && !strchr(argv[1],'.'))
-    {
-        no = atoi(argv[1]);
-        same_target = 1;
-    }
-
-    if (no > 500)
-        no = 500;
-
     /* naming events */
-    
-    //typedef enum {
-    //    ZOOM_EVENT_NONE = 0,
-    //    ZOOM_EVENT_CONNECT = 1,
-    //    ZOOM_EVENT_SEND_DATA  = 2,
-    //    ZOOM_EVENT_RECV_DATA = 3,
-    //    ZOOM_EVENT_TIMEOUT = 4,
-    //    ZOOM_EVENT_UNKNOWN = 5,
-    //    ZOOM_EVENT_SEND_APDU = 6,
-    //    ZOOM_EVENT_RECV_APDU = 7,
-    //    ZOOM_EVENT_RECV_RECORD = 8,
-    //    ZOOM_EVENT_RECV_SEARCH = 9
-    //} ZOOM_events;
-
-    char* zoom_events[10];
     zoom_events[ZOOM_EVENT_NONE] = "ZOOM_EVENT_NONE";
     zoom_events[ZOOM_EVENT_CONNECT] = "ZOOM_EVENT_CONNECT";
     zoom_events[ZOOM_EVENT_SEND_DATA] = "ZOOM_EVENT_SEND_DATA";
@@ -72,7 +44,7 @@ int main(int argc, char **argv)
     zoom_events[ZOOM_EVENT_RECV_RECORD] = "ZOOM_EVENT_RECV_RECORD";
     zoom_events[ZOOM_EVENT_RECV_SEARCH] = "ZOOM_EVENT_RECV_SEARCH";
 
-    int zoom_progress[10];
+    /* re-sorting event numbers to progress numbers */
     zoom_progress[ZOOM_EVENT_NONE] = 0;
     zoom_progress[ZOOM_EVENT_CONNECT] = 1;
     zoom_progress[ZOOM_EVENT_SEND_DATA] = 3;
@@ -83,41 +55,151 @@ int main(int argc, char **argv)
     zoom_progress[ZOOM_EVENT_RECV_APDU] = 5;
     zoom_progress[ZOOM_EVENT_RECV_RECORD] = 7;
     zoom_progress[ZOOM_EVENT_RECV_SEARCH] = 6;
-   
+
+    /* parameters */
+    //parameters.host = "";
+    //parameters.query = "";
+    parameters.concurrent = 1;
+    parameters.timeout = 0;
+}
+ 
+struct time_type 
+{
+    struct timeval now;
+    struct timeval then;
+    long sec;
+    long usec;
+};
+
+void time_init(struct time_type *ptime)
+{
+    gettimeofday(&(ptime->now), 0);
+    gettimeofday(&(ptime->then), 0);
+    ptime->sec = 0;
+    ptime->usec = 0;
+}
+
+void time_stamp(struct time_type *ptime)
+{
+    gettimeofday(&(ptime->now), 0);
+    ptime->sec = ptime->now.tv_sec - ptime->then.tv_sec;
+    ptime->usec = ptime->now.tv_usec - ptime->then.tv_usec;
+    if (ptime->usec < 0){
+        ptime->sec--;
+        ptime->usec += 1000000;
+    }
+}
+
+long time_sec(struct time_type *ptime)
+{
+    return ptime->sec;
+}
+
+long time_usec(struct time_type *ptime)
+{
+    return ptime->usec;
+}
+
+void print_option_error()
+{
+    fprintf(stderr, "zoom-benchmark:  Call error\n");
+    fprintf(stderr, "zoom-benchmark -h host:port -q pqf-query "
+            "[-c no_concurrent] "
+            "[-t timeout] \n");
+    exit(1);
+}
+
+
+void read_params(int argc, char **argv, struct parameters_t *p_parameters){    
+    char *arg;
+    int ret;
+    while ((ret = options("h:q:c:t:", argv, argc, &arg)) != -2)
+        {
+            switch (ret)
+                {
+                case 'h':
+                    strcpy(p_parameters->host, arg);
+                    break;
+                case 'q':
+                    strcpy(p_parameters->query, arg);
+                    break;
+                case 'c':
+                    p_parameters->concurrent = atoi(arg);
+                    break;
+                case 't':
+                    p_parameters->timeout = atoi(arg);
+                    break;
+                case 0:
+                    //for (i = 0; i<number; i++)
+                    //    yaz_log(level, "%s", arg);
+                    print_option_error();
+                    break;
+                default:
+                    print_option_error();
+                }
+        }
+
+    //printf("zoom-benchmark\n");
+    //printf("   host:       %s \n", p_parameters->host);
+    //printf("   query:      %s \n", p_parameters->query);
+    //printf("   concurrent: %d \n", p_parameters->concurrent);
+    //printf("   timeout:    %d \n\n", p_parameters->timeout);
+
+    if (! strlen(p_parameters->host))
+        print_option_error();
+    if (! strlen(p_parameters->query))
+        print_option_error();
+    if (! (p_parameters->concurrent > 0))
+        print_option_error();
+    if (! (p_parameters->timeout >= 0))
+        print_option_error();
+}
+
+
+
+int main(int argc, char **argv)
+{
+    init_statics();
+    
+    struct time_type time;
+
+    read_params(argc, argv, &parameters);
+
+    ZOOM_connection z[parameters.concurrent];
+    ZOOM_resultset r[parameters.concurrent];
+    ZOOM_options o = ZOOM_options_create();
+
 
     /* async mode */
     ZOOM_options_set (o, "async", "1");
 
-    /* get first 10 records of result set (using piggyback) */
+    /* get first record of result set (using piggyback) */
     ZOOM_options_set (o, "count", "1");
 
     /* preferred record syntax */
     //ZOOM_options_set (o, "preferredRecordSyntax", "usmarc");
     //ZOOM_options_set (o, "elementSetName", "F");
 
-    /* connect to all */
-    for (i = 0; i<no; i++)
-    {
+    /* connect to all concurrent connections*/
+    int i;
+    for ( i = 0; i < parameters.concurrent; i++){
         /* create connection - pass options (they are the same for all) */
-        z[i] = ZOOM_connection_create (o);
+        z[i] = ZOOM_connection_create(o);
 
         /* connect and init */
-        if (same_target)
-            ZOOM_connection_connect (z[i], argv[2], 0);
-        else
-            ZOOM_connection_connect (z[i], argv[1+i], 0);
+            ZOOM_connection_connect(z[i], parameters.host, 0);
     }
     /* search all */
-    for (i = 0; i<no; i++)
-        r[i] = ZOOM_connection_search_pqf (z[i], argv[argc-1]);
+    for (i = 0; i < parameters.concurrent; i++)
+        r[i] = ZOOM_connection_search_pqf (z[i], parameters.query);
 
-    printf ("second.usec target progress event eventname error errorname\n");
-
-
-    gettimeofday(&then, 0);
+    // print header of table
+    printf ("second.usec\ttarget\tprogress\tevent\teventname\terror\terrorname\n");
+    time_init(&time);
     /* network I/O. pass number of connections and array of connections */
-    while ((i = ZOOM_event (no, z)))
+    while ((i = ZOOM_event (parameters.concurrent, z)))
     { 
+        time_stamp(&time);
 
         int event = ZOOM_connection_last_event(z[i-1]);
         const char *errmsg;
@@ -125,20 +207,13 @@ int main(int argc, char **argv)
         int error = 0;
         int progress = zoom_progress[event];
 
-        gettimeofday(&now, 0);
-        //stamp(&now, &then);
-        sec = now.tv_sec - then.tv_sec;
-        usec = now.tv_usec - then.tv_usec;
-        if (usec < 0){
-            sec--;
-            usec += 1000000;
-        }
  
         error = ZOOM_connection_error(z[i-1] , &errmsg, &addinfo);
         if (error)
             progress = -progress;
         
-        printf ("%i.%06i %d %d %d %s %d '%s' \n", sec, usec, 
+        printf ("%i.%06i\t%d\t%d\t%d\t%s\t%d\t%s\n",
+                time_sec(&time), time_usec(&time), 
                 i-1, progress,
                 event, zoom_events[event], 
                 error, errmsg);
@@ -146,41 +221,42 @@ int main(int argc, char **argv)
     }
     
     /* no more to be done. Inspect results */
-    for (i = 0; i<no && 0; i++)
-    {
-        int error;
-        const char *errmsg, *addinfo;
-        const char *tname = (same_target ? argv[2] : argv[1+i]);
-        /* display errors if any */
-        if ((error = ZOOM_connection_error(z[i], &errmsg, &addinfo)))
-            fprintf (stderr, "%s error: %s (%d) %s\n", tname, errmsg,
-                     error, addinfo);
-        else
-        {
-            /* OK, no major errors. Look at the result count */
-            int pos;
-            printf ("%s: %d hits\n", tname, ZOOM_resultset_size(r[i]));
-            /* go through all records at target */
-            for (pos = 0; pos < 10; pos++)
-            {
-                int len; /* length of buffer rec */
-                const char *rec =
-                    ZOOM_record_get (
-                        ZOOM_resultset_record (r[i], pos), "render", &len);
-                /* if rec is non-null, we got a record for display */
-                if (rec)
-                {
-                    printf ("%d\n", pos+1);
-                    if (rec)
-                        fwrite (rec, 1, len, stdout);
-                    printf ("\n");
-                }
-            }
-        }
-    }
+    // commented out right now - do nothing
+/*     for (i = 0; i<parameters.concurrent; i++) */
+/*     { */
+/*         int error; */
+/*         const char *errmsg, *addinfo; */
+/*         const char *tname = (same_target ? argv[2] : argv[1+i]); */
+/*         /\* display errors if any *\/ */
+/*         if ((error = ZOOM_connection_error(z[i], &errmsg, &addinfo))) */
+/*             fprintf (stderr, "%s error: %s (%d) %s\n", tname, errmsg, */
+/*                      error, addinfo); */
+/*         else */
+/*         { */
+/*             /\* OK, no major errors. Look at the result count *\/ */
+/*             int pos; */
+/*             printf ("%s: %d hits\n", tname, ZOOM_resultset_size(r[i])); */
+/*             /\* go through all records at target *\/ */
+/*             for (pos = 0; pos < 10; pos++) */
+/*             { */
+/*                 int len; /\* length of buffer rec *\/ */
+/*                 const char *rec = */
+/*                     ZOOM_record_get ( */
+/*                         ZOOM_resultset_record (r[i], pos), "render", &len); */
+/*                 /\* if rec is non-null, we got a record for display *\/ */
+/*                 if (rec) */
+/*                 { */
+/*                     printf ("%d\n", pos+1); */
+/*                     if (rec) */
+/*                         fwrite (rec, 1, len, stdout); */
+/*                     printf ("\n"); */
+/*                 } */
+/*             } */
+/*         } */
+/*     } */
 
     /* destroy and exit */
-    for (i = 0; i<no; i++)
+    for (i = 0; i<parameters.concurrent; i++)
     {
         ZOOM_resultset_destroy (r[i]);
         ZOOM_connection_destroy (z[i]);
