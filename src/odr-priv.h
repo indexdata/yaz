@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr-priv.h,v 1.7 2005-08-11 14:21:55 adam Exp $
+ * $Id: odr-priv.h,v 1.8 2005-09-09 10:30:35 adam Exp $
  */
 
 /**
@@ -78,7 +78,7 @@ struct odr_constack
     struct odr_constack *next;   /** pointer forward */
 };
 
-#define ODR_MAX_STACK 10000
+#define ODR_MAX_STACK 2000
 
 /**
  * \brief ODR private data
