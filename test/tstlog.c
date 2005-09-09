@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.6 2005-09-08 13:22:58 adam Exp $
+ * $Id: tstlog.c,v 1.7 2005-09-09 10:20:14 adam Exp $
  *
  */
 #include <stdio.h>
@@ -41,12 +41,12 @@ int main(int argc, char **argv)
             break;
         case 0:
             for (i = 0; i<number; i++)
-                yaz_log(level, "%s", arg);
+                yaz_log(level, "%d %s", i, arg);
             break;
         default:
             fprintf(stderr, "tstlog. Bad option\n");
             fprintf(stderr, "tstlog [-f logformat] [-v level] [-l file] "
-                    "[-m module] msg ..\n");
+                    "[-m module] [-s max] [-n num] msg ..\n");
             exit(1);
         }
     }
