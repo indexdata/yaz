@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.3 2005-09-11 13:32:39 adam Exp $
+ * $Id: zoom-benchmark.c,v 1.4 2005-09-11 20:21:27 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -160,15 +160,18 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
 int main(int argc, char **argv)
 {
     struct time_type time;
+    ZOOM_connection *z;
+    ZOOM_resultset *r;
+    ZOOM_options o;
+    int i;
 
     init_statics();
 
     read_params(argc, argv, &parameters);
 
-    ZOOM_connection z[parameters.concurrent];
-    ZOOM_resultset r[parameters.concurrent];
-    ZOOM_options o = ZOOM_options_create();
-
+    z = xmalloc(sizeof(*z) * parameters.concurrent);
+    r = xmalloc(sizeof(*r) * parameters.concurrent);
+    o = ZOOM_options_create();
 
     /* async mode */
     ZOOM_options_set (o, "async", "1");
@@ -181,7 +184,6 @@ int main(int argc, char **argv)
     //ZOOM_options_set (o, "elementSetName", "F");
 
     /* connect to all concurrent connections*/
-    int i;
     for ( i = 0; i < parameters.concurrent; i++){
         /* create connection - pass options (they are the same for all) */
         z[i] = ZOOM_connection_create(o);
@@ -199,20 +201,19 @@ int main(int argc, char **argv)
     /* network I/O. pass number of connections and array of connections */
     while ((i = ZOOM_event (parameters.concurrent, z)))
     { 
-        time_stamp(&time);
-
         int event = ZOOM_connection_last_event(z[i-1]);
         const char *errmsg;
         const char *addinfo;
         int error = 0;
         int progress = zoom_progress[event];
 
+        time_stamp(&time);
  
         error = ZOOM_connection_error(z[i-1] , &errmsg, &addinfo);
         if (error)
             progress = -progress;
         
-        printf ("%i.%06i\t%d\t%d\t%d\t%s\t%d\t%s\n",
+        printf ("%ld.%06ld\t%d\t%d\t%d\t%s\t%d\t%s\n",
                 time_sec(&time), time_usec(&time), 
                 i-1, progress,
                 event, zoom_events[event], 
@@ -261,6 +262,8 @@ int main(int argc, char **argv)
         ZOOM_resultset_destroy (r[i]);
         ZOOM_connection_destroy (z[i]);
     }
+    xfree(z);
+    xfree(r);
     ZOOM_options_destroy(o);
     exit (0);
 }
