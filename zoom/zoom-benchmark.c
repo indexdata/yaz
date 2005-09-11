@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.2 2005-09-09 13:51:43 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.3 2005-09-11 13:32:39 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -159,9 +159,9 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
 
 int main(int argc, char **argv)
 {
-    init_statics();
-    
     struct time_type time;
+
+    init_statics();
 
     read_params(argc, argv, &parameters);
 
