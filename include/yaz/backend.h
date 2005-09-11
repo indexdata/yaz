@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.32 2005-06-25 15:46:01 adam Exp $
+ * $Id: backend.h,v 1.33 2005-09-11 18:39:11 adam Exp $
  */
 
 /** 
@@ -65,6 +65,8 @@ typedef struct {
     char *errstring;           /* system error string or NULL */
     Z_OtherInformation *search_info; /* additional search info */
     char *srw_sortKeys;        /* holds SRU/SRW sortKeys info */
+    char *srw_setname;         /* holds SRU/SRW generated resultsetID */
+    int *srw_setnameIdleTime;  /* holds SRU/SRW life-time */
 } bend_search_rr;
 
 /* extended present handler. Does not replace bend_fetch. */

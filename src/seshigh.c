@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.60 2005-08-30 20:13:51 adam Exp $
+ * $Id: seshigh.c,v 1.61 2005-09-11 18:39:11 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -722,7 +722,8 @@ static void srw_bend_search(association *assoc, request *req,
         rr.basenames = &srw_req->database;
         rr.referenceId = 0;
         rr.srw_sortKeys = 0;
-        
+        rr.srw_setname = 0;
+        rr.srw_setnameIdleTime = 0;
         rr.query = (Z_Query *) odr_malloc (assoc->decode, sizeof(*rr.query));
         rr.query->u.type_1 = 0;
         
@@ -827,6 +828,13 @@ static void srw_bend_search(association *assoc, request *req,
                         start, number, rr.hits);
                 
                 srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
+		if (rr.srw_setname)
+                {
+                    srw_res->resultSetId =
+                        odr_strdup(assoc->encode, rr.srw_setname );
+                    srw_res->resultSetIdleTime =
+                        odr_intdup(assoc->encode, *rr.srw_setnameIdleTime );
+		}
                 if (number > 0)
                 {
                     int i;
@@ -1767,7 +1775,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.60 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.61 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2015,6 +2023,8 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     bsrr->referenceId = req->referenceId;
     save_referenceId (reqb, bsrr->referenceId);
     bsrr->srw_sortKeys = 0;
+    bsrr->srw_setname = 0;
+    bsrr->srw_setnameIdleTime = 0;
 
     yaz_log (log_requestdetail, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)

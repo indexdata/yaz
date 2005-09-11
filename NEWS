@@ -2,6 +2,9 @@ Added 'exit' as synonym for 'quit' in yaz-client
 
 Possible compatibility problems with earlier versions marked with '*'.
 
+Added support for specifying srw resultset id + resultset TTL in a
+Generic Frontend Server's search handler. Patch by Ko van der Sloot.
+
 Do not build the separate Multi-threaded (MT) library libyazthread.la.
 Instead make the library libyaz.la multi-threaded. Threading as a whole
 can still be disabled by configure option --disable-threads. Previosly, 
