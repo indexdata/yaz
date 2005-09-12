@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.30 2005-09-12 09:14:57 adam Exp $
+ * $Id: srwutil.c,v 1.31 2005-09-12 10:23:53 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -252,8 +252,21 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         {0, 0, 0}
     };
 #endif
-    if (!strcmp(hreq->method, "GET") ||
-      !strcmp(hreq->method, "POST") )
+    const char *content_type = z_HTTP_header_lookup(hreq->headers,
+                                                    "Content-Type");
+    /*
+      SRU GET: allow any content type.
+      SRU POST: we support "application/x-www-form-urlencoded";
+      not  "multipart/form-data" .
+    */
+    if (!strcmp(hreq->method, "GET") 
+        ||
+        (!strcmp(hreq->method, "POST") 
+         && content_type &&
+         !yaz_strcmp_del("application/x-www-form-urlencoded",
+                         content_type, "; ")
+            )
+        )
     {
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
