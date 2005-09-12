@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.29 2005-08-22 20:34:21 adam Exp $
+ * $Id: srwutil.c,v 1.30 2005-09-12 09:14:57 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -29,17 +29,18 @@ int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
     int no = 2;
     const char *cp;
     *name = 0;
-    if (*path != '?')
+    if (*path == '?')
+        path++;
+    if (!*path)
         return no;
-    path++;
     cp = path;
     while ((cp = strchr(cp, '&')))
     {
         cp++;
         no++;
     }
-    *name = odr_malloc(o, no * sizeof(char**));
-    *val = odr_malloc(o, no * sizeof(char**));
+    *name = odr_malloc(o, no * sizeof(char*));
+    *val = odr_malloc(o, no * sizeof(char*));
 
     for (no = 0; *path; no++)
     {
