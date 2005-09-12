@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.61 2005-09-11 18:39:11 adam Exp $
+ * $Id: seshigh.c,v 1.62 2005-09-12 09:13:26 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -243,6 +243,7 @@ static void do_close_req(association *a, int reason, char *message,
         request_release(req);
         yaz_log(log_requestdetail, "v2 client. No Close PDU");
         iochan_setevent(a->client_chan, EVENT_TIMEOUT); /* force imm close */
+        a->cs_put_mask = 0;
     }
     a->state = ASSOC_DEAD;
 }
@@ -1775,7 +1776,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.61 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.62 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
