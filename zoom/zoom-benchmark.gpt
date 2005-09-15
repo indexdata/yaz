@@ -1,31 +1,21 @@
 
 #
-# $Id: zoom-benchmark.gpt,v 1.2 2005-09-15 11:14:22 marc Exp $
+# $Id: zoom-benchmark.gpt,v 1.3 2005-09-15 20:51:16 marc Exp $
 #
 
 set title "Z39.50 connection plot"
 #set style data fsteps
-set xlabel "Time Seconds"
-set ylabel "Progress"
-#set timefmt "%d/%m/%y\t%H%M"
-set yrange [ -9 :  ]
-#set xdata time
-#set xrange [ "1/6/93":"1/11/93" ]
-#set ylabel "Concentration\nmg/l"
-#set format x "%d/%m\n%H:%M"
+set xlabel "Connection"
+set ylabel "Time Seconds"
+set zlabel "Progress"
+#set yrange [ 0 :  ]
+#set zrange [ -9 :  ]
 set grid
+#set pm3d
 #set multiplot
-#set key left
-#plot 'out.txt' using 1:3 t '', \
-#     'out.txt' using 1:3 t 'Total P' with points, \
-#     'out.txt' using 1:4 t '', \
-#     'out.txt' using 1:4 t 'PO4' with points 
 
-#if ( $2 = 3 ) plot 'out.txt' using 1:3
-#plot 'out.txt' using ($1):($2==3 ? $3 : 1/0)
-#plot 'out.txt' using 1:3 t '' with points
-plot 'out.txt' using ($1):($3) t '' with points
-#plot 'out.txt' using ($1):($3) t '' with lines
+splot 'out.txt' using ($1):($2):($3) t '' with points
+#splot 'out.txt' using ($1):($3) t '' with lines
 pause -1 "Hit return to continue"
 
 

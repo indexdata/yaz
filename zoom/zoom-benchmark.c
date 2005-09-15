@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.5 2005-09-15 10:38:03 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.6 2005-09-15 20:51:16 marc Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
         r[i] = ZOOM_connection_search_pqf (z[i], parameters.query);
 
     // print header of table
-    printf ("second.usec\ttarget\tprogress\tevent\teventname\t");
+    printf ("target\tsecond.usec\tprogress\tevent\teventname\t");
     printf("error\terrorname\n");
     time_init(&time);
     /* network I/O. pass number of connections and array of connections */
@@ -228,9 +228,9 @@ int main(int argc, char **argv)
         else
             parameters.progress[i] += 1;
 
-        printf ("%ld.%06ld\t%d\t%d\t%d\t%s\t%d\t%s\n",
-                time_sec(&time), time_usec(&time), 
-                i-1, parameters.progress[i],
+        printf ("%d\t%ld.%06ld\t%d\t%d\t%s\t%d\t%s\n",
+                i-1, time_sec(&time), time_usec(&time), 
+                parameters.progress[i],
                 event, zoom_events[event], 
                 error, errmsg);
 
