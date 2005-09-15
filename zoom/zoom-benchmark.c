@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.4 2005-09-11 20:21:27 adam Exp $
+ * $Id: zoom-benchmark.c,v 1.5 2005-09-15 10:38:03 marc Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -23,8 +23,9 @@ static int zoom_progress[10];
 
 /* commando line parameters */
 static struct parameters_t { 
-    char host[1024];
-    char query[1024];
+    char host[4096];
+    char query[4096];
+    char progress[4096];
     int concurrent;
     int timeout;
 } parameters;
@@ -61,6 +62,13 @@ void init_statics()
     //parameters.query = "";
     parameters.concurrent = 1;
     parameters.timeout = 0;
+
+    /* progress initializing */
+    int i;
+    for (i = 0; i < 4096; i++){
+        parameters.progress[i] = 0;
+    }
+    
 }
  
 struct time_type 
@@ -196,7 +204,8 @@ int main(int argc, char **argv)
         r[i] = ZOOM_connection_search_pqf (z[i], parameters.query);
 
     // print header of table
-    printf ("second.usec\ttarget\tprogress\tevent\teventname\terror\terrorname\n");
+    printf ("second.usec\ttarget\tprogress\tevent\teventname\t");
+    printf("error\terrorname\n");
     time_init(&time);
     /* network I/O. pass number of connections and array of connections */
     while ((i = ZOOM_event (parameters.concurrent, z)))
@@ -207,15 +216,21 @@ int main(int argc, char **argv)
         int error = 0;
         int progress = zoom_progress[event];
 
+        if (event == ZOOM_EVENT_SEND_DATA | event == ZOOM_EVENT_RECV_DATA)
+            continue;
+ 
+
         time_stamp(&time);
  
         error = ZOOM_connection_error(z[i-1] , &errmsg, &addinfo);
         if (error)
-            progress = -progress;
-        
+            parameters.progress[i] = -progress;
+        else
+            parameters.progress[i] += 1;
+
         printf ("%ld.%06ld\t%d\t%d\t%d\t%s\t%d\t%s\n",
                 time_sec(&time), time_usec(&time), 
-                i-1, progress,
+                i-1, parameters.progress[i],
                 event, zoom_events[event], 
                 error, errmsg);
 
