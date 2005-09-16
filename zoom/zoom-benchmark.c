@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.6 2005-09-15 20:51:16 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.7 2005-09-16 07:05:46 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
         int error = 0;
         int progress = zoom_progress[event];
 
-        if (event == ZOOM_EVENT_SEND_DATA | event == ZOOM_EVENT_RECV_DATA)
+        if (event == ZOOM_EVENT_SEND_DATA || event == ZOOM_EVENT_RECV_DATA)
             continue;
  
 
