@@ -2,13 +2,16 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.7 2005-09-09 10:20:14 adam Exp $
+ * $Id: tstlog.c,v 1.8 2005-09-16 21:14:38 adam Exp $
  *
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <yaz/options.h>
 #include <yaz/log.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 int main(int argc, char **argv)
 {
@@ -16,8 +19,9 @@ int main(int argc, char **argv)
     int i, ret;
     int level = YLOG_LOG;
     int number = 1;
+    unsigned int wait_between_log = 0;
 
-    while ((ret = options("f:v:l:m:n:s:", argv, argc, &arg)) != -2)
+    while ((ret = options("f:v:l:m:n:s:w:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -39,14 +43,23 @@ int main(int argc, char **argv)
         case 'm':        
             level = yaz_log_module_level(arg);
             break;
+        case 'w':
+            wait_between_log = atoi(arg);
+            break;
         case 0:
             for (i = 0; i<number; i++)
+            {
                 yaz_log(level, "%d %s", i, arg);
+#if HAVE_UNISTD_H
+                if (wait_between_log)
+                    sleep(wait_between_log);
+#endif
+            }
             break;
         default:
             fprintf(stderr, "tstlog. Bad option\n");
             fprintf(stderr, "tstlog [-f logformat] [-v level] [-l file] "
-                    "[-m module] [-s max] [-n num] msg ..\n");
+                    "[-m module] [-w sec] [-s max] [-n num] msg ..\n");
             exit(1);
         }
     }
