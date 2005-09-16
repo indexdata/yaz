@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2005
 dnl See the file LICENSE for details.
-dnl $Id: configure.in,v 1.185 2005-09-09 10:34:09 adam Exp $
+dnl $Id: configure.in,v 1.186 2005-09-16 21:44:23 adam Exp $
 AC_INIT(include/yaz/yaz-version.h)
 AM_INIT_AUTOMAKE(yaz, 2.1.9)
 AM_MAINTAINER_MODE
@@ -160,7 +160,7 @@ if test "$with_iconv" != "no"; then
 	])
 fi
 dnl ------ various functions
-AC_CHECK_FUNCS(vsnprintf gettimeofday poll strerror_r usleep fopen64)
+AC_CHECK_FUNCS(vsnprintf gettimeofday poll strerror_r localtime_r usleep fopen64)
 if test "$ac_cv_func_poll" = "yes"; then
         AC_CHECK_HEADERS(sys/poll.h)
 fi
