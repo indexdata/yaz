@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.28 2005-09-16 21:13:54 adam Exp $
+ * $Id: log.c,v 1.29 2005-09-16 21:46:24 adam Exp $
  */
 
 /**
@@ -224,32 +224,21 @@ void log_event_end(void (*func)(int, const char *, void *), void *info)
     end_hook_info = info;
 }
 
-static void yaz_log_open_check(int force)
+static void yaz_log_open_check(struct tm *tm, int force)
 {
     char new_filename[512];
     static char cur_filename[512] = "";
-    time_t new_time;
-    static time_t cur_time = 0;
-    struct tm tm;
 
-    nmem_mutex_enter(log_mutex);
     if (!l_file)
         l_file = stderr;
 
     if (l_fname && *l_fname)
     {
-        time(&new_time);
-        if (new_time != cur_time)
+        strftime(new_filename, sizeof(new_filename)-1, l_fname, tm);
+        if (strcmp(new_filename, cur_filename))
         {
-            cur_time = new_time;
-            localtime_r(&new_time, &tm);
-            
-            strftime(new_filename, sizeof(new_filename)-1, l_fname, &tm);
-            if (strcmp(new_filename, cur_filename))
-            {
-                strcpy(cur_filename, new_filename);
-                force = 1;
-            }
+            strcpy(cur_filename, new_filename);
+            force = 1;
         }
         if (l_max_size > 0 && (l_file && l_file != stderr))
         {
@@ -269,12 +258,25 @@ static void yaz_log_open_check(int force)
                 setvbuf(l_file, 0, _IONBF, 0);
         }
     }
-    nmem_mutex_leave(log_mutex);
 }
 
 void yaz_log_reopen()
 {
-    yaz_log_open_check(1);
+    time_t cur_time = time(0);
+#if HAVE_LOCALTIME_R
+    struct tm tm0, *tm = &tm0;
+#else
+    struct tm *tm;
+#endif
+
+    nmem_mutex_enter(log_mutex);
+#if HAVE_LOCALTIME_R
+    localtime_r(&cur_time, tm);
+#else
+    tm = localtime(&cur_time);
+#endif
+    yaz_log_open_check(tm, 1);
+    nmem_mutex_leave(log_mutex);
 }
 
 void yaz_log(int level, const char *fmt, ...)
@@ -283,7 +285,11 @@ void yaz_log(int level, const char *fmt, ...)
     char buf[4096], flags[1024];
     int i;
     time_t ti;
-    struct tm *tim;
+#if HAVE_LOCALTIME_R
+    struct tm tm0, *tm = &tm0;
+#else
+    struct tm *tm;
+#endif
     char tbuf[TIMEFORMAT_LEN] = "";
     int o_level = level;
 
@@ -291,9 +297,16 @@ void yaz_log(int level, const char *fmt, ...)
         return;
     init_mutex();
 
-    yaz_log_open_check(0);
-
     nmem_mutex_enter(log_mutex);
+    ti = time(0);
+#if HAVE_LOCALTIME_R
+    localtime_r(&ti, tm);
+#else
+    tm = localtime(&ti);
+#endif
+
+    yaz_log_open_check(tm, 0);
+
     if (!l_file)
         l_file = stderr;
 
@@ -330,12 +343,10 @@ void yaz_log(int level, const char *fmt, ...)
     va_end (ap);
     if (start_hook_func)
         (*start_hook_func)(o_level, buf, start_hook_info);
-    ti = time(0);
-    tim = localtime(&ti);
     if (l_level & YLOG_NOTIME)
         tbuf[0] = '\0';
     else
-        strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tim);
+        strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tm);
     tbuf[TIMEFORMAT_LEN-1] = '\0';
     fprintf(l_file, "%s %s%s %s%s\n", tbuf, l_prefix, flags,
             l_prefix2, buf);
