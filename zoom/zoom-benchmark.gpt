@@ -1,19 +1,16 @@
 
 #
-# $Id: zoom-benchmark.gpt,v 1.3 2005-09-15 20:51:16 marc Exp $
+# $Id: zoom-benchmark.gpt,v 1.4 2005-09-16 06:57:21 marc Exp $
 #
 
 set title "Z39.50 connection plot"
-#set style data fsteps
 set xlabel "Connection"
 set ylabel "Time Seconds"
 set zlabel "Progress"
 #set yrange [ 0 :  ]
 #set zrange [ -9 :  ]
+#set  ticslevel 0
 set grid
-#set pm3d
-#set multiplot
-
 splot 'out.txt' using ($1):($2):($3) t '' with points
 #splot 'out.txt' using ($1):($3) t '' with lines
 pause -1 "Hit return to continue"
