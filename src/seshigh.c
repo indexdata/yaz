@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.62 2005-09-12 09:13:26 adam Exp $
+ * $Id: seshigh.c,v 1.63 2005-09-16 09:16:40 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1776,7 +1776,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.62 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.63 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -1791,6 +1791,38 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
             init_diagnostics(assoc->encode, binitres->errcode,
                              binitres->errstring);
         *resp->result = 0;
+    }
+    if (log_request)
+    {
+        if (!req->idAuthentication)
+            yaz_log(log_request, "Auth none");
+        else if (req->idAuthentication->which == Z_IdAuthentication_open)
+        {
+            const char *open = req->idAuthentication->u.open;
+            const char *slash = strchr(open, '/');
+            int len;
+            if (slash)
+                len = slash - open;
+            else
+                len = strlen(open);
+                yaz_log(log_request, "Auth open %.*s", len, open);
+        }
+        else if (req->idAuthentication->which == Z_IdAuthentication_idPass)
+        {
+            const char *user = req->idAuthentication->u.idPass->userId;
+            const char *group = req->idAuthentication->u.idPass->groupId;
+            yaz_log(log_request, "Auth idPass %s %s",
+                    user ? user : "-", group ? group : "-");
+        }
+        else if (req->idAuthentication->which 
+                 == Z_IdAuthentication_anonymous)
+        {
+            yaz_log(log_request, "Auth anonymous");
+        }
+        else
+        {
+            yaz_log(log_request, "Auth other");
+        }
     }
     if (log_request)
     {
