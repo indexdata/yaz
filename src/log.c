@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.27 2005-09-09 11:29:54 adam Exp $
+ * $Id: log.c,v 1.28 2005-09-16 21:13:54 adam Exp $
  */
 
 /**
@@ -53,8 +53,6 @@ char *strerror(int n)
 
 #endif
 
-
-
 static int l_level = YLOG_DEFAULT_LEVEL;
 static FILE *l_file = NULL;
 static char l_prefix[512] = "";
@@ -94,16 +92,16 @@ static struct {
     { 0, NULL }
     /* the rest will be filled in if the user defines dynamic modules*/
 };  
+
 static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
 static void init_mutex()
 {
     if (mutex_init_flag)
         return;
-    nmem_mutex_create (&log_mutex);
+    nmem_mutex_create(&log_mutex);
     mutex_init_flag = 1;
 }
-
 
 FILE *yaz_log_file(void)
 {
@@ -112,7 +110,7 @@ FILE *yaz_log_file(void)
     return l_file;
 }
 
-void yaz_log_init_file (const char *fname)
+void yaz_log_init_file(const char *fname)
 {
     init_mutex();
     if (fname)
@@ -125,54 +123,23 @@ void yaz_log_init_file (const char *fname)
     yaz_log_reopen();
 }
 
-void yaz_log_reopen(void)
-{
-    FILE *new_file;
-    init_mutex();
-    if (!l_file)
-        l_file = stderr;
-    if (!*l_fname)
-        new_file = stderr;
-    else if (!(new_file = fopen(l_fname, "a")))
-    {
-        new_file=l_file;
-        l_file=stderr;  /* just to be sure we don't rotate logs and recurse */
-        yaz_log(YLOG_WARN|YLOG_ERRNO,"Could not open log file '%s'",l_fname);
-        l_file=new_file; /* restore to old value, probably stderr as well */
-        return;
-    }
-    if (l_file != stderr)
-    {
-        fclose (l_file);
-    }
-    if (l_level & YLOG_FLUSH)
-        setvbuf(new_file, 0, _IONBF, 0);
-    l_file = new_file;
-}
-
-static void rotate_log()
+static void rotate_log(const char *cur_fname)
 {
     char newname[512];
-    if (l_file==stderr)
-        return; /* can't rotate that */
-    if (!*l_fname)
-        return; /* hmm, no name, can't rotate */
-    strncpy(newname, l_fname, 509);
+    strncpy(newname, cur_fname, 509);
     newname[509] = '\0'; /* make sure it is terminated */
-    strcat(newname,".1");
+    strcat(newname, ".1");
 #ifdef WIN32
     /* windows can't rename a file if it is open */
     fclose(l_file);
-    l_file = stderr;
-    MoveFileEx(l_fname, newname, MOVEFILE_REPLACE_EXISTING);
+    l_file = 0;
+    MoveFileEx(cur_fname, newname, MOVEFILE_REPLACE_EXISTING);
 #else
-    rename(l_fname, newname);
+    rename(cur_fname, newname);
 #endif
-    yaz_log_reopen();
 }
 
-
-void yaz_log_init_level (int level)
+void yaz_log_init_level(int level)
 {
     init_mutex();
     if ( (l_level & YLOG_FLUSH) != (level & YLOG_FLUSH) )
@@ -207,7 +174,7 @@ void yaz_log_init_level (int level)
     }
 }
 
-void yaz_log_init_prefix (const char *prefix)
+void yaz_log_init_prefix(const char *prefix)
 {
     if (prefix && *prefix)
         sprintf(l_prefix, "%.511s ", prefix);
@@ -215,7 +182,7 @@ void yaz_log_init_prefix (const char *prefix)
         *l_prefix = 0;
 }
 
-void yaz_log_init_prefix2 (const char *prefix)
+void yaz_log_init_prefix2(const char *prefix)
 {
     if (prefix && *prefix)
         sprintf(l_prefix2, "%.511s ", prefix);
@@ -226,10 +193,10 @@ void yaz_log_init_prefix2 (const char *prefix)
 void yaz_log_init(int level, const char *prefix, const char *fname)
 {
     init_mutex();
-    yaz_log_init_level (level);
-    yaz_log_init_prefix (prefix);
+    yaz_log_init_level(level);
+    yaz_log_init_prefix(prefix);
     if (fname && *fname)
-        yaz_log_init_file (fname);
+        yaz_log_init_file(fname);
 }
 
 void yaz_log_init_max_size(int mx)
@@ -245,16 +212,69 @@ static void *start_hook_info;
 static void (*end_hook_func)(int, const char *, void *) = NULL;
 static void *end_hook_info;
 
-void log_event_start (void (*func)(int, const char *, void *), void *info)
+void log_event_start(void (*func)(int, const char *, void *), void *info)
 {
     start_hook_func = func;
     start_hook_info = info;
 }
 
-void log_event_end (void (*func)(int, const char *, void *), void *info)
+void log_event_end(void (*func)(int, const char *, void *), void *info)
 {
     end_hook_func = func;
     end_hook_info = info;
+}
+
+static void yaz_log_open_check(int force)
+{
+    char new_filename[512];
+    static char cur_filename[512] = "";
+    time_t new_time;
+    static time_t cur_time = 0;
+    struct tm tm;
+
+    nmem_mutex_enter(log_mutex);
+    if (!l_file)
+        l_file = stderr;
+
+    if (l_fname && *l_fname)
+    {
+        time(&new_time);
+        if (new_time != cur_time)
+        {
+            cur_time = new_time;
+            localtime_r(&new_time, &tm);
+            
+            strftime(new_filename, sizeof(new_filename)-1, l_fname, &tm);
+            if (strcmp(new_filename, cur_filename))
+            {
+                strcpy(cur_filename, new_filename);
+                force = 1;
+            }
+        }
+        if (l_max_size > 0 && (l_file && l_file != stderr))
+        {
+            long flen = ftell(l_file);
+            if (flen > l_max_size)
+            {
+                rotate_log(cur_filename);
+                force = 1;
+            }
+        }
+        if (force)
+        {
+            if (l_file && l_file != stderr)
+                fclose(l_file);
+            l_file = fopen(cur_filename, "a");
+            if (l_level & YLOG_FLUSH)
+                setvbuf(l_file, 0, _IONBF, 0);
+        }
+    }
+    nmem_mutex_leave(log_mutex);
+}
+
+void yaz_log_reopen()
+{
+    yaz_log_open_check(1);
 }
 
 void yaz_log(int level, const char *fmt, ...)
@@ -266,21 +286,16 @@ void yaz_log(int level, const char *fmt, ...)
     struct tm *tim;
     char tbuf[TIMEFORMAT_LEN] = "";
     int o_level = level;
-    int flen; 
 
     if (!(level & l_level))
         return;
     init_mutex();
+
+    yaz_log_open_check(0);
+
     nmem_mutex_enter(log_mutex);
     if (!l_file)
         l_file = stderr;
-    
-    if ((l_file != stderr) && (l_max_size>0))
-    {
-        flen = ftell(l_file);
-        if (flen>l_max_size) 
-            rotate_log();
-    }
 
     *flags = '\0';
     for (i = 0; level && mask_names[i].name; i++)
@@ -338,7 +353,7 @@ void yaz_log_time_format(const char *fmt)
         l_actual_format = l_new_default_format;
         return; 
     }
-    if (0==strcmp(fmt,"old"))
+    if (0==strcmp(fmt, "old"))
     { /* force the old format */
         l_actual_format = l_old_default_format;
         return; 
@@ -358,9 +373,9 @@ static char *clean_name(const char *name, int len, char *namebuf, int buflen)
         len = buflen-1; 
     strncpy(namebuf, name, len);
     namebuf[len] = '\0';
-    while ((p = strchr(start,'/')))
+    while ((p = strchr(start, '/')))
         start = p+1;
-    if ((p = strrchr(start,'.')))
+    if ((p = strrchr(start, '.')))
         *p = '\0';
     return start;
 }
@@ -384,7 +399,7 @@ static int define_module_bit(const char *name)
     }
     mask_names[i].mask = next_log_bit;
     next_log_bit = next_log_bit<<1;
-    mask_names[i].name = malloc (strlen(name)+1);
+    mask_names[i].name = malloc(strlen(name)+1);
     strcpy(mask_names[i].name, name);
     mask_names[i+1].name = NULL;
     mask_names[i+1].mask = 0;
@@ -415,12 +430,12 @@ int yaz_log_module_level(const char *name)
     return 0;
 }
 
-int yaz_log_mask_str (const char *str)
+int yaz_log_mask_str(const char *str)
 {
-    return yaz_log_mask_str_x (str, YLOG_DEFAULT_LEVEL);
+    return yaz_log_mask_str_x(str, YLOG_DEFAULT_LEVEL);
 }
 
-int yaz_log_mask_str_x (const char *str, int level)
+int yaz_log_mask_str_x(const char *str, int level)
 {
     const char *p;
 
