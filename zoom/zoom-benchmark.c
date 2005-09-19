@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.8 2005-09-16 10:51:05 adam Exp $
+ * $Id: zoom-benchmark.c,v 1.9 2005-09-19 14:14:01 marc Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -30,6 +30,85 @@ static struct parameters_t {
     int timeout;
 } parameters;
 
+struct  event_line_t 
+{
+    int connection;
+    long time_sec;
+    long time_usec;
+    int progress;
+    int event;
+    char zoom_event[128];
+    int error;
+    char errmsg[128];
+};
+
+
+void print_event_line(struct event_line_t *pel)
+{
+    printf ("%d\t%ld.%06ld\t%d\t%d\t%s\t%d\t%s\n",
+            pel->connection, pel->time_sec, pel->time_usec, 
+            pel->progress,
+            pel->event, pel->zoom_event, 
+            pel->error, pel->errmsg);
+}
+
+//void update_event_line(struct event_line_t *pel,
+//                       int conn,
+//                       long sec,
+//                       long usec,
+//                       int prog,
+//                       int event,
+//                       const char * eventmsg,
+//                       int error,
+//                       const char * errmsg)
+//{
+//    pel->connection = conn;
+//    pel->time_sec = sec;
+//    pel->time_usec = usec;
+//    pel->progress = prog;
+//    pel->event = event;
+//    strcpy(pel->zoom_event, eventmsg);
+//    pel->error = error;
+//    strcpy(pel->errmsg, errmsg);
+//}
+
+void  update_events(int *elc, struct event_line_t *els,
+                    int conn,
+                    long sec,
+                    long usec,
+                    int prog,
+                    int event,
+                    const char * eventmsg,
+                    int error,
+                    const char * errmsg){
+    
+    els[conn * 10 + elc[conn]].connection = conn;
+    els[conn * 10 + elc[conn]].time_sec = sec;
+    els[conn * 10 + elc[conn]].time_usec = usec;
+    els[conn * 10 + elc[conn]].progress = prog;
+    els[conn * 10 + elc[conn]].event = event;
+    strcpy(els[conn * 10 + elc[conn]].zoom_event, eventmsg);
+    els[conn * 10 + elc[conn]].error = error;
+    strcpy(els[conn * 10 + elc[conn]].errmsg, errmsg);
+
+    //print_event_line(&els[conn*10 + elc[conn]]);
+
+    elc[conn] += 1;
+}
+
+void  print_events(int *elc,  struct event_line_t *els, 
+                   int connections){
+    int i;
+    int j;
+    for (i=0; i < connections; i++){
+        for (j=0; j < elc[i]; j++){
+            print_event_line(&els[i*10 + j]);
+        }
+        printf("\n");
+    }
+}
+
+
 
 void init_statics()
 {
@@ -58,20 +137,13 @@ void init_statics()
     zoom_progress[ZOOM_EVENT_RECV_SEARCH] = 6;
 
     /* parameters */
-#if 0
-    parameters.host = "";
-    parameters.query = "";
-#endif
     parameters.concurrent = 1;
     parameters.timeout = 0;
 
     /* progress initializing */
-    if (1)
-    {
-        int i;
-        for (i = 0; i < 4096; i++){
-            parameters.progress[i] = 0;
-        }
+    int i;
+    for (i = 0; i < 4096; i++){
+        parameters.progress[i] = 0;
     }
     
 }
@@ -150,13 +222,13 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         }
     }
     
-#if 0
-    printf("zoom-benchmark\n");
-    printf("   host:       %s \n", p_parameters->host);
-    printf("   query:      %s \n", p_parameters->query);
-    printf("   concurrent: %d \n", p_parameters->concurrent);
-    printf("   timeout:    %d \n\n", p_parameters->timeout);
-#endif
+    if(0){
+        printf("zoom-benchmark\n");
+        printf("   host:       %s \n", p_parameters->host);
+        printf("   query:      %s \n", p_parameters->query);
+        printf("   concurrent: %d \n", p_parameters->concurrent);
+        printf("   timeout:    %d \n\n", p_parameters->timeout);
+    }
 
     if (! strlen(p_parameters->host))
         print_option_error();
@@ -168,6 +240,11 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         print_option_error();
 }
 
+void print_table_header()
+{
+    printf ("target\tsecond.usec\tprogress\tevent\teventname\t");
+    printf("error\terrorname\n");
+}
 
 
 int main(int argc, char **argv)
@@ -175,6 +252,8 @@ int main(int argc, char **argv)
     struct time_type time;
     ZOOM_connection *z;
     ZOOM_resultset *r;
+    int *elc;
+    struct event_line_t *els;
     ZOOM_options o;
     int i;
 
@@ -184,6 +263,8 @@ int main(int argc, char **argv)
 
     z = xmalloc(sizeof(*z) * parameters.concurrent);
     r = xmalloc(sizeof(*r) * parameters.concurrent);
+    elc = xmalloc(sizeof(*elc) * parameters.concurrent);
+    els = xmalloc(sizeof(*els) * parameters.concurrent * 10);
     o = ZOOM_options_create();
 
     /* async mode */
@@ -193,13 +274,17 @@ int main(int argc, char **argv)
     ZOOM_options_set (o, "count", "1");
 
     /* preferred record syntax */
-#if 0
-    ZOOM_options_set (o, "preferredRecordSyntax", "usmarc");
-    ZOOM_options_set (o, "elementSetName", "F");
-#endif
+    if (0){
+        ZOOM_options_set (o, "preferredRecordSyntax", "usmarc");
+        ZOOM_options_set (o, "elementSetName", "F");
+    }
+    
 
     /* connect to all concurrent connections*/
     for ( i = 0; i < parameters.concurrent; i++){
+        /* set event count to zero */
+        elc[i] = 0;
+
         /* create connection - pass options (they are the same for all) */
         z[i] = ZOOM_connection_create(o);
 
@@ -210,9 +295,6 @@ int main(int argc, char **argv)
     for (i = 0; i < parameters.concurrent; i++)
         r[i] = ZOOM_connection_search_pqf (z[i], parameters.query);
 
-    /* print header of table */
-    printf ("target\tsecond.usec\tprogress\tevent\teventname\t");
-    printf("error\terrorname\n");
     time_init(&time);
     /* network I/O. pass number of connections and array of connections */
     while ((i = ZOOM_event (parameters.concurrent, z)))
@@ -222,26 +304,44 @@ int main(int argc, char **argv)
         const char *addinfo;
         int error = 0;
         int progress = zoom_progress[event];
-
+        struct event_line_t el;
+        
         if (event == ZOOM_EVENT_SEND_DATA || event == ZOOM_EVENT_RECV_DATA)
             continue;
- 
 
         time_stamp(&time);
- 
+
+        /* updating events and event list */
         error = ZOOM_connection_error(z[i-1] , &errmsg, &addinfo);
         if (error)
             parameters.progress[i] = -progress;
         else
             parameters.progress[i] += 1;
 
-        printf ("%d\t%ld.%06ld\t%d\t%d\t%s\t%d\t%s\n",
-                i-1, time_sec(&time), time_usec(&time), 
-                parameters.progress[i],
-                event, zoom_events[event], 
-                error, errmsg);
 
+        //if (0){
+        // printf ("%d\t%ld.%06ld\t%d\t%d\t%s\t%d\t%s\n",
+        //update_event_line(& el,
+        //                  i-1, time_sec(&time), time_usec(&time), 
+        //                  parameters.progress[i],
+        //                  event, zoom_events[event], 
+        //                  error, errmsg);
+        //print_event_line(&el);
+        //}
+        
+        update_events(elc, els,
+                      i-1, time_sec(&time), time_usec(&time), 
+                      parameters.progress[i],
+                      event, zoom_events[event], 
+                      error, errmsg);
+        
+        
     }
+
+
+    /* output */
+    print_table_header();    
+    print_events(elc,  els, parameters.concurrent);
     
     /* destroy and exit */
     for (i = 0; i<parameters.concurrent; i++)
@@ -251,6 +351,8 @@ int main(int argc, char **argv)
     }
     xfree(z);
     xfree(r);
+    xfree(elc);
+    xfree(els);
     ZOOM_options_destroy(o);
     exit (0);
 }
