@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.9 2005-09-19 14:14:01 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.10 2005-09-20 09:36:18 marc Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -52,25 +52,6 @@ void print_event_line(struct event_line_t *pel)
             pel->error, pel->errmsg);
 }
 
-//void update_event_line(struct event_line_t *pel,
-//                       int conn,
-//                       long sec,
-//                       long usec,
-//                       int prog,
-//                       int event,
-//                       const char * eventmsg,
-//                       int error,
-//                       const char * errmsg)
-//{
-//    pel->connection = conn;
-//    pel->time_sec = sec;
-//    pel->time_usec = usec;
-//    pel->progress = prog;
-//    pel->event = event;
-//    strcpy(pel->zoom_event, eventmsg);
-//    pel->error = error;
-//    strcpy(pel->errmsg, errmsg);
-//}
 
 void  update_events(int *elc, struct event_line_t *els,
                     int conn,
@@ -112,6 +93,8 @@ void  print_events(int *elc,  struct event_line_t *els,
 
 void init_statics()
 {
+    int i;
+
     /* naming events */
     zoom_events[ZOOM_EVENT_NONE] = "ZOOM_EVENT_NONE";
     zoom_events[ZOOM_EVENT_CONNECT] = "ZOOM_EVENT_CONNECT";
@@ -141,7 +124,6 @@ void init_statics()
     parameters.timeout = 0;
 
     /* progress initializing */
-    int i;
     for (i = 0; i < 4096; i++){
         parameters.progress[i] = 0;
     }
@@ -304,7 +286,6 @@ int main(int argc, char **argv)
         const char *addinfo;
         int error = 0;
         int progress = zoom_progress[event];
-        struct event_line_t el;
         
         if (event == ZOOM_EVENT_SEND_DATA || event == ZOOM_EVENT_RECV_DATA)
             continue;
@@ -319,16 +300,6 @@ int main(int argc, char **argv)
             parameters.progress[i] += 1;
 
 
-        //if (0){
-        // printf ("%d\t%ld.%06ld\t%d\t%d\t%s\t%d\t%s\n",
-        //update_event_line(& el,
-        //                  i-1, time_sec(&time), time_usec(&time), 
-        //                  parameters.progress[i],
-        //                  event, zoom_events[event], 
-        //                  error, errmsg);
-        //print_event_line(&el);
-        //}
-        
         update_events(elc, els,
                       i-1, time_sec(&time), time_usec(&time), 
                       parameters.progress[i],
