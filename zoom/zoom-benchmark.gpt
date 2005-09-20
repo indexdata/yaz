@@ -1,6 +1,6 @@
 
 #
-# $Id: zoom-benchmark.gpt,v 1.5 2005-09-19 14:14:01 marc Exp $
+# $Id: zoom-benchmark.gpt,v 1.6 2005-09-20 11:29:03 marc Exp $
 #
 
 set title "Z39.50 connection plot"
@@ -9,7 +9,8 @@ set ylabel "Time Seconds"
 set zlabel "Progress"
 #set yrange [ 0 :  ]
 #set zrange [ -9 :  ]
-#set ticslevel 0
+set ticslevel 0
+#set hidden3d
 set grid
 set pm3d
 splot 'out.txt' using ($1):($2):($3) t '' with points

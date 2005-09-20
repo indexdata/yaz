@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.10 2005-09-20 09:36:18 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.11 2005-09-20 11:29:03 marc Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -23,11 +23,14 @@ static int zoom_progress[10];
 
 /* commando line parameters */
 static struct parameters_t { 
-    char host[4096];
-    char query[4096];
-    char progress[4096];
+    char host[1024];
+    char query[1024];
+    int progress[4096];
     int concurrent;
+    int repeat;
     int timeout;
+    char proxy[1024];
+    int piggypack;
 } parameters;
 
 struct  event_line_t 
@@ -52,8 +55,8 @@ void print_event_line(struct event_line_t *pel)
             pel->error, pel->errmsg);
 }
 
-
 void  update_events(int *elc, struct event_line_t *els,
+                    int repeat,
                     int conn,
                     long sec,
                     long usec,
@@ -62,28 +65,38 @@ void  update_events(int *elc, struct event_line_t *els,
                     const char * eventmsg,
                     int error,
                     const char * errmsg){
-    
-    els[conn * 10 + elc[conn]].connection = conn;
-    els[conn * 10 + elc[conn]].time_sec = sec;
-    els[conn * 10 + elc[conn]].time_usec = usec;
-    els[conn * 10 + elc[conn]].progress = prog;
-    els[conn * 10 + elc[conn]].event = event;
-    strcpy(els[conn * 10 + elc[conn]].zoom_event, eventmsg);
-    els[conn * 10 + elc[conn]].error = error;
-    strcpy(els[conn * 10 + elc[conn]].errmsg, errmsg);
 
-    //print_event_line(&els[conn*10 + elc[conn]]);
+    int ielc = repeat*parameters.concurrent + conn;
+    int iels = repeat*parameters.concurrent*10 + conn*10 + elc[ielc];
 
-    elc[conn] += 1;
+    els[iels].connection = conn;
+    els[iels].time_sec = sec;
+    els[iels].time_usec = usec;
+    els[iels].progress = prog;
+    els[iels].event = event;
+    strcpy(els[iels].zoom_event, eventmsg);
+    els[iels].error = error;
+    strcpy(els[iels].errmsg, errmsg);
+    //print_event_line(&els[iels]);
+    elc[ielc] += 1;
 }
 
 void  print_events(int *elc,  struct event_line_t *els, 
                    int connections){
     int i;
     int j;
-    for (i=0; i < connections; i++){
-        for (j=0; j < elc[i]; j++){
-            print_event_line(&els[i*10 + j]);
+    int k;
+    int ielc;
+    int iels;
+
+    for (k=0; k < parameters.repeat; k++){
+        for (i=0; i < connections; i++){
+            ielc = k * parameters.concurrent + i;
+            for (j=0; j < elc[ielc]; j++){
+                iels = k * parameters.concurrent * 10 + i * 10 + j;
+                print_event_line(&els[iels]);
+            }
+            printf("\n");
         }
         printf("\n");
     }
@@ -94,6 +107,7 @@ void  print_events(int *elc,  struct event_line_t *els,
 void init_statics()
 {
     int i;
+    char nullstring[1] = "";
 
     /* naming events */
     zoom_events[ZOOM_EVENT_NONE] = "ZOOM_EVENT_NONE";
@@ -122,6 +136,9 @@ void init_statics()
     /* parameters */
     parameters.concurrent = 1;
     parameters.timeout = 0;
+    parameters.repeat = 1;
+    strcpy(parameters.proxy, nullstring);
+    parameters.piggypack = 0;
 
     /* progress initializing */
     for (i = 0; i < 4096; i++){
@@ -171,8 +188,11 @@ void print_option_error()
 {
     fprintf(stderr, "zoom-benchmark:  Call error\n");
     fprintf(stderr, "zoom-benchmark -h host:port -q pqf-query "
-            "[-c no_concurrent] "
-            "[-t timeout] \n");
+            "[-c no_concurrent (max 4096)] "
+            "[-n no_repeat] "
+            "[-b (piggypack)] "
+            "[-p proxy] \n");
+    //"[-t timeout] \n");
     exit(1);
 }
 
@@ -180,7 +200,7 @@ void print_option_error()
 void read_params(int argc, char **argv, struct parameters_t *p_parameters){    
     char *arg;
     int ret;
-    while ((ret = options("h:q:c:t:", argv, argc, &arg)) != -2)
+    while ((ret = options("h:q:c:t:p:bn:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -190,11 +210,20 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         case 'q':
             strcpy(p_parameters->query, arg);
             break;
+        case 'p':
+            strcpy(p_parameters->proxy, arg);
+            break;
         case 'c':
             p_parameters->concurrent = atoi(arg);
             break;
-        case 't':
-            p_parameters->timeout = atoi(arg);
+            //case 't':
+            //p_parameters->timeout = atoi(arg);
+            //        break;
+        case 'b':
+            p_parameters->piggypack = 1;
+                    break;
+        case 'n':
+            p_parameters->repeat = atoi(arg);
                     break;
         case 0:
             print_option_error();
@@ -209,7 +238,10 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         printf("   host:       %s \n", p_parameters->host);
         printf("   query:      %s \n", p_parameters->query);
         printf("   concurrent: %d \n", p_parameters->concurrent);
-        printf("   timeout:    %d \n\n", p_parameters->timeout);
+        printf("   repeat:     %d \n", p_parameters->repeat);
+        //printf("   timeout:    %d \n", p_parameters->timeout);
+        printf("   proxy:      %s \n", p_parameters->proxy);
+        printf("   piggypack:  %d \n\n", p_parameters->piggypack);
     }
 
     if (! strlen(p_parameters->host))
@@ -218,7 +250,11 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         print_option_error();
     if (! (p_parameters->concurrent > 0))
         print_option_error();
+    if (! (p_parameters->repeat > 0))
+        print_option_error();
     if (! (p_parameters->timeout >= 0))
+        print_option_error();
+    if (! ( p_parameters->concurrent <= 4096))
         print_option_error();
 }
 
@@ -238,6 +274,7 @@ int main(int argc, char **argv)
     struct event_line_t *els;
     ZOOM_options o;
     int i;
+    int k;
 
     init_statics();
 
@@ -245,15 +282,22 @@ int main(int argc, char **argv)
 
     z = xmalloc(sizeof(*z) * parameters.concurrent);
     r = xmalloc(sizeof(*r) * parameters.concurrent);
-    elc = xmalloc(sizeof(*elc) * parameters.concurrent);
-    els = xmalloc(sizeof(*els) * parameters.concurrent * 10);
+    elc = xmalloc(sizeof(*elc) * parameters.concurrent * parameters.repeat);
+    els = xmalloc(sizeof(*els) 
+                  * parameters.concurrent * parameters.repeat * 10);
     o = ZOOM_options_create();
 
     /* async mode */
     ZOOM_options_set (o, "async", "1");
 
-    /* get first record of result set (using piggyback) */
-    ZOOM_options_set (o, "count", "1");
+    /* get first record of result set (using piggypack) */
+    if (parameters.piggypack)
+        ZOOM_options_set (o, "count", "1");
+
+    /* set proxy */
+    if (strlen(parameters.proxy))
+        ZOOM_options_set (o, "proxy", parameters.proxy);
+
 
     /* preferred record syntax */
     if (0){
@@ -261,65 +305,75 @@ int main(int argc, char **argv)
         ZOOM_options_set (o, "elementSetName", "F");
     }
     
-
-    /* connect to all concurrent connections*/
-    for ( i = 0; i < parameters.concurrent; i++){
-        /* set event count to zero */
-        elc[i] = 0;
-
-        /* create connection - pass options (they are the same for all) */
-        z[i] = ZOOM_connection_create(o);
-
-        /* connect and init */
-        ZOOM_connection_connect(z[i], parameters.host, 0);
-    }
-    /* search all */
-    for (i = 0; i < parameters.concurrent; i++)
-        r[i] = ZOOM_connection_search_pqf (z[i], parameters.query);
-
     time_init(&time);
-    /* network I/O. pass number of connections and array of connections */
-    while ((i = ZOOM_event (parameters.concurrent, z)))
-    { 
-        int event = ZOOM_connection_last_event(z[i-1]);
-        const char *errmsg;
-        const char *addinfo;
-        int error = 0;
-        int progress = zoom_progress[event];
-        
-        if (event == ZOOM_EVENT_SEND_DATA || event == ZOOM_EVENT_RECV_DATA)
-            continue;
+    /* repeat loop */
+    for (k = 0; k < parameters.repeat; k++){
 
-        time_stamp(&time);
+        /* progress zeroing */
+        for (i = 0; i < 4096; i++){
+            parameters.progress[i] = k * 5 -1;
+        }
 
-        /* updating events and event list */
-        error = ZOOM_connection_error(z[i-1] , &errmsg, &addinfo);
-        if (error)
-            parameters.progress[i] = -progress;
-        else
-            parameters.progress[i] += 1;
+        /* connect to all concurrent connections*/
+        for ( i = 0; i < parameters.concurrent; i++){
+            /* set event count to zero */
+            elc[k * parameters.concurrent + i] = 0;
+
+            /* create connection - pass options (they are the same for all) */
+            z[i] = ZOOM_connection_create(o);
+            
+            /* connect and init */
+            ZOOM_connection_connect(z[i], parameters.host, 0);
+        }
+        /* search all */
+        for (i = 0; i < parameters.concurrent; i++)
+            r[i] = ZOOM_connection_search_pqf (z[i], parameters.query);
+
+        /* network I/O. pass number of connections and array of connections */
+        while ((i = ZOOM_event (parameters.concurrent, z))){ 
+            int event = ZOOM_connection_last_event(z[i-1]);
+            const char *errmsg;
+            const char *addinfo;
+            int error = 0;
+            int progress = zoom_progress[event];
+            
+            if (event == ZOOM_EVENT_SEND_DATA || event == ZOOM_EVENT_RECV_DATA)
+                continue;
+
+            time_stamp(&time);
+
+            /* updating events and event list */
+            error = ZOOM_connection_error(z[i-1] , &errmsg, &addinfo);
+            if (error)
+                parameters.progress[i] = -progress;
+            else
+                parameters.progress[i] += 1;
+            
+            update_events(elc, els,
+                          k, i-1, 
+                          time_sec(&time), time_usec(&time), 
+                          parameters.progress[i],
+                          event, zoom_events[event], 
+                          error, errmsg);
+        }
+
+        /* destroy connections */
+        for (i = 0; i<parameters.concurrent; i++)
+            {
+                ZOOM_resultset_destroy (r[i]);
+                ZOOM_connection_destroy (z[i]);
+            }
 
 
-        update_events(elc, els,
-                      i-1, time_sec(&time), time_usec(&time), 
-                      parameters.progress[i],
-                      event, zoom_events[event], 
-                      error, errmsg);
-        
-        
-    }
 
+    } // for (k = 0; k < parameters.repeat; k++) repeat loop
 
     /* output */
     print_table_header();    
     print_events(elc,  els, parameters.concurrent);
     
-    /* destroy and exit */
-    for (i = 0; i<parameters.concurrent; i++)
-    {
-        ZOOM_resultset_destroy (r[i]);
-        ZOOM_connection_destroy (z[i]);
-    }
+
+    /* destroy data structures and exit */
     xfree(z);
     xfree(r);
     xfree(elc);
