@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.11 2005-09-20 11:29:03 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.12 2005-09-20 12:07:29 marc Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -31,6 +31,7 @@ static struct parameters_t {
     int timeout;
     char proxy[1024];
     int piggypack;
+    int gnuplot;
 } parameters;
 
 struct  event_line_t 
@@ -138,6 +139,7 @@ void init_statics()
     parameters.timeout = 0;
     parameters.repeat = 1;
     strcpy(parameters.proxy, nullstring);
+    parameters.gnuplot = 0;
     parameters.piggypack = 0;
 
     /* progress initializing */
@@ -191,6 +193,7 @@ void print_option_error()
             "[-c no_concurrent (max 4096)] "
             "[-n no_repeat] "
             "[-b (piggypack)] "
+            "[-g (gnuplot outfile)] "
             "[-p proxy] \n");
     //"[-t timeout] \n");
     exit(1);
@@ -200,7 +203,7 @@ void print_option_error()
 void read_params(int argc, char **argv, struct parameters_t *p_parameters){    
     char *arg;
     int ret;
-    while ((ret = options("h:q:c:t:p:bn:", argv, argc, &arg)) != -2)
+    while ((ret = options("h:q:c:t:p:bgn:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -222,6 +225,9 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         case 'b':
             p_parameters->piggypack = 1;
                     break;
+        case 'g':
+            p_parameters->gnuplot = 1;
+                    break;
         case 'n':
             p_parameters->repeat = atoi(arg);
                     break;
@@ -242,6 +248,7 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         //printf("   timeout:    %d \n", p_parameters->timeout);
         printf("   proxy:      %s \n", p_parameters->proxy);
         printf("   piggypack:  %d \n\n", p_parameters->piggypack);
+        printf("   gnuplot:    %d \n\n", p_parameters->gnuplot);
     }
 
     if (! strlen(p_parameters->host))
@@ -260,6 +267,8 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
 
 void print_table_header()
 {
+    if (parameters.gnuplot)
+        printf("#");
     printf ("target\tsecond.usec\tprogress\tevent\teventname\t");
     printf("error\terrorname\n");
 }
@@ -369,9 +378,30 @@ int main(int argc, char **argv)
     } // for (k = 0; k < parameters.repeat; k++) repeat loop
 
     /* output */
+
+    if (parameters.gnuplot){
+        printf("# gnuplot data and instruction file \n");
+        printf("# gnuplot thisfile \n");
+        printf("\n");
+        printf("set title \"Z39.50 connection plot\"\n");
+        printf("set xlabel \"Connection\"\n");
+        printf("set ylabel \"Time Seconds\"\n");
+        printf("set zlabel \"Progress\"\n");
+        printf("set ticslevel 0\n");
+        printf("set grid\n");
+        printf("set pm3d\n");
+        printf("splot '-' using ($1):($2):($3) t '' with points\n");
+        printf("\n");
+        printf("\n");
+    }
+    
     print_table_header();    
     print_events(elc,  els, parameters.concurrent);
     
+    if (parameters.gnuplot){
+        printf("end\n");
+        printf("pause -1 \"Hit ENTER to return\"\n");
+    }
 
     /* destroy data structures and exit */
     xfree(z);
