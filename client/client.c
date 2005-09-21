@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.296 2005-08-24 11:25:34 heikki Exp $
+ * $Id: client.c,v 1.297 2005-09-21 19:46:33 adam Exp $
  */
 
 #include <stdio.h>
@@ -100,7 +100,10 @@ static int mediumSetPresentNumber = 0;
 static Z_ElementSetNames *elementSetNames = 0; 
 static int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
-static enum oid_value recordsyntax = VAL_USMARC;
+#define RECORDSYNTAX_MAX 20
+static enum oid_value recordsyntax_list[RECORDSYNTAX_MAX]  = { VAL_USMARC };
+static int recordsyntax_size = 1;
+
 static char *record_schema = 0;
 static int sent_close = 0;
 static NMEM session_mem = NULL;         /* memory handle for init-response */
@@ -1448,7 +1451,7 @@ static int send_SRW_searchRequest(const char *arg)
 
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
-    if (recordsyntax == VAL_TEXT_XML)
+    if (recordsyntax_size == 1 && recordsyntax_list[0] == VAL_TEXT_XML)
         sr->u.explain_request->recordPacking = "xml";
     return send_srw(sr);
 }
@@ -1527,9 +1530,9 @@ static int send_searchRequest(const char *arg)
     if (smallSetUpperBound > 0 || (largeSetLowerBound > 1 &&
         mediumSetPresentNumber > 0))
     {
-        req->preferredRecordSyntax =
-            yaz_oidval_to_z3950oid(out, CLASS_RECSYN, recordsyntax);
-
+        if (recordsyntax_list > 0)
+            req->preferredRecordSyntax =
+                yaz_oidval_to_z3950oid(out, CLASS_RECSYN, recordsyntax_list[0]);
         req->smallSetElementSetNames =
             req->mediumSetElementSetNames = elementSetNames;
     }
@@ -2428,7 +2431,7 @@ static int cmd_explain(const char *arg)
         
         /* save this for later .. when fetching individual records */
         sr = yaz_srw_get(out, Z_SRW_explain_request);
-        if (recordsyntax == VAL_TEXT_XML)
+        if (recordsyntax_size > 0 && recordsyntax_list[0] == VAL_TEXT_XML)
             sr->u.explain_request->recordPacking = "xml";
         send_srw(sr);
         return 2;
@@ -2594,10 +2597,11 @@ static int send_presentRequest(const char *arg)
     req->resultSetStartPoint = &setno;
     req->numberOfRecordsRequested = &nos;
 
-    req->preferredRecordSyntax =
-        yaz_oidval_to_z3950oid(out, CLASS_RECSYN, recordsyntax);
+    if (recordsyntax_size == 1)
+        req->preferredRecordSyntax =
+            yaz_oidval_to_z3950oid(out, CLASS_RECSYN, recordsyntax_list[0]);
 
-    if (record_schema)
+    if (record_schema || recordsyntax_size >= 2)
     {
         req->recordComposition = &compo;
         compo.which = Z_RecordComp_complex;
@@ -2609,16 +2613,21 @@ static int send_presentRequest(const char *arg)
 
         compo.u.complex->generic = (Z_Specification *)
             odr_malloc(out, sizeof(*compo.u.complex->generic));
+        
         compo.u.complex->generic->which = Z_Schema_oid;
-
-        compo.u.complex->generic->schema.oid =
-            yaz_str_to_z3950oid(out, CLASS_SCHEMA, record_schema);
-
-        if (!compo.u.complex->generic->schema.oid)
+        if (!record_schema)
+            compo.u.complex->generic->schema.oid = 0;
+        else 
         {
-            /* OID wasn't a schema! Try record syntax instead. */
-            compo.u.complex->generic->schema.oid = (Odr_oid *)
-                yaz_str_to_z3950oid(out, CLASS_RECSYN, record_schema);
+            compo.u.complex->generic->schema.oid =
+                yaz_str_to_z3950oid(out, CLASS_SCHEMA, record_schema);
+            
+            if (!compo.u.complex->generic->schema.oid)
+            {
+                /* OID wasn't a schema! Try record syntax instead. */
+                compo.u.complex->generic->schema.oid = (Odr_oid *)
+                    yaz_str_to_z3950oid(out, CLASS_RECSYN, record_schema);
+            }
         }
         if (!elementSetNames)
             compo.u.complex->generic->elementSpec = 0;
@@ -2633,8 +2642,22 @@ static int send_presentRequest(const char *arg)
         }
         compo.u.complex->num_dbSpecific = 0;
         compo.u.complex->dbSpecific = 0;
-        compo.u.complex->num_recordSyntax = 0;
-        compo.u.complex->recordSyntax = 0;
+        if (recordsyntax_size >= 2)
+        {
+            int i;
+            compo.u.complex->num_recordSyntax = recordsyntax_size;
+            compo.u.complex->recordSyntax = (Odr_oid **)
+                odr_malloc(out, recordsyntax_size * sizeof(Odr_oid*));
+            for (i = 0; i < recordsyntax_size; i++)
+            compo.u.complex->recordSyntax[i] =                 
+                yaz_oidval_to_z3950oid(out, CLASS_RECSYN,
+                                       recordsyntax_list[i]);
+        }
+        else
+        {
+            compo.u.complex->num_recordSyntax = 0;
+            compo.u.complex->recordSyntax = 0;
+        }
     }
     else if (elementSetNames)
     {
@@ -2661,7 +2684,7 @@ static int send_SRW_presentRequest(const char *arg)
     sr->u.request->maximumRecords = odr_intdup(out, nos);
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
-    if (recordsyntax == VAL_TEXT_XML)
+    if (recordsyntax_size == 1 && recordsyntax_list[0] == VAL_TEXT_XML)
         sr->u.request->recordPacking = "xml";
     return send_srw(sr);
 }
@@ -3092,19 +3115,32 @@ int cmd_schema(const char *arg)
 
 int cmd_format(const char *arg)
 {
-    oid_value nsyntax;
+    const char *cp = arg;
+    int nor;
+    int idx = 0;
+    oid_value nsyntax[RECORDSYNTAX_MAX];
+    char form_str[41];
     if (!arg || !*arg)
     {
         printf("Usage: format <recordsyntax>\n");
         return 0;
     }
-    nsyntax = oid_getvalbyname (arg);
-    if (strcmp(arg, "none") && nsyntax == VAL_NONE)
+    while (sscanf(cp, "%40s%n", form_str, &nor) >= 1 && nor > 0 
+           && idx < RECORDSYNTAX_MAX)
     {
-        printf ("unknown record syntax\n");
-        return 0;
+        nsyntax[idx] = oid_getvalbyname(form_str);
+        if (!strcmp(form_str, "none"))
+            break;
+        if (nsyntax[idx] == VAL_NONE)
+        {
+            printf ("unknown record syntax: %s\n", form_str);
+            return 0;
+        }
+        cp += nor;
+        idx++;
     }
-    recordsyntax = nsyntax;
+    recordsyntax_size = idx;
+    memcpy(recordsyntax_list, nsyntax, idx * sizeof(*nsyntax));
     return 1;
 }
 
@@ -4174,7 +4210,10 @@ int cmd_list_all(const char* args) {
     printf("ssub/lslb/mspn       : %d/%d/%d\n",smallSetUpperBound,largeSetLowerBound,mediumSetPresentNumber);
     
     /* print present related options */
-    printf("Format               : %s\n",yaz_z3950_oid_value_to_str(recordsyntax,CLASS_RECSYN));
+    printf("Format               : %s\n",
+           (recordsyntax_size > 0) ? 
+           yaz_z3950_oid_value_to_str(recordsyntax_list[0], CLASS_RECSYN) :
+           "none");
     printf("Schema               : %s\n",record_schema ? record_schema : "not set");
     printf("Elements             : %s\n",elementSetNames?elementSetNames->u.generic:"");
     
