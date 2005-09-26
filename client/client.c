@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.297 2005-09-21 19:46:33 adam Exp $
+ * $Id: client.c,v 1.298 2005-09-26 09:15:27 adam Exp $
  */
 
 #include <stdio.h>
@@ -2776,7 +2776,11 @@ int cmd_cancel(const char *arg)
     Z_TriggerResourceControlRequest *req =
         apdu->u.triggerResourceControlRequest;
     bool_t rfalse = 0;
-    
+    char command[16];
+  
+    *command = '\0';
+    sscanf(arg, "%15s", command);
+
     if (only_z3950())
         return 0;
     if (session_initResponse &&
@@ -2792,7 +2796,9 @@ int cmd_cancel(const char *arg)
 
     send_apdu(apdu);
     printf("Sent cancel request\n");
-    return 2;
+    if (!strcmp(command, "wait"))
+         return 2;
+    return 1;
 }
 
 
