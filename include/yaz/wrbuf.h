@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: wrbuf.h,v 1.15 2005-06-25 15:46:03 adam Exp $
+ * $Id: wrbuf.h,v 1.16 2005-09-27 17:52:46 adam Exp $
  */
 /**
  * \file wrbuf.h
@@ -58,6 +58,8 @@ YAZ_EXPORT int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf,
                                  int size);
 YAZ_EXPORT int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd,
                                        const char *buf, int size);
+
+YAZ_EXPORT void wrbuf_chop_right(WRBUF b);
 
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)

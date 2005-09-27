@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.12 2005-08-22 20:34:21 adam Exp $
+ * $Id: logrpn.c,v 1.13 2005-09-27 17:52:46 adam Exp $
  */
 
 /**
@@ -53,126 +53,126 @@ static void attrStr (int type, int value, enum oid_value ast, char *str)
         case 2:
             rstr = relToStr(value);
             if (rstr)
-                sprintf (str, "relation=%s", rstr);
+                sprintf(str, "relation=%s", rstr);
             else
-                sprintf (str, "relation=%d", value);
+                sprintf(str, "relation=%d", value);
             break;
         case 3:
             switch (value)
             {
             case 1:
-                sprintf (str, "position=First in field");
+                sprintf(str, "position=First in field");
                 break;
             case 2:
-                sprintf (str, "position=First in any subfield");
+                sprintf(str, "position=First in any subfield");
                 break;
             case 3:
-                sprintf (str, "position=Any position in field");
+                sprintf(str, "position=Any position in field");
                 break;
             default:
-                sprintf (str, "position");
+                sprintf(str, "position");
             }
             break;
         case 4:
             switch (value)
             {
             case 1:
-                sprintf (str, "structure=Phrase");
+                sprintf(str, "structure=Phrase");
                 break;
             case 2:
-                sprintf (str, "structure=Word");
+                sprintf(str, "structure=Word");
                 break;
             case 3:
-                sprintf (str, "structure=Key");
+                sprintf(str, "structure=Key");
                 break;
             case 4:
-                sprintf (str, "structure=Year");
+                sprintf(str, "structure=Year");
                 break;
             case 5:
-                sprintf (str, "structure=Date");
+                sprintf(str, "structure=Date");
                 break;
             case 6:
-                sprintf (str, "structure=Word list");
+                sprintf(str, "structure=Word list");
                 break;
             case 100:
-                sprintf (str, "structure=Date (un)");
+                sprintf(str, "structure=Date (un)");
                 break;
             case 101:
-                sprintf (str, "structure=Name (norm)");
+                sprintf(str, "structure=Name (norm)");
                 break;
             case 102:
-                sprintf (str, "structure=Name (un)");
+                sprintf(str, "structure=Name (un)");
                 break;
             case 103:
-                sprintf (str, "structure=Structure");
+                sprintf(str, "structure=Structure");
                 break;
             case 104:
-                sprintf (str, "structure=urx");
+                sprintf(str, "structure=urx");
                 break;
             case 105:
-                sprintf (str, "structure=free-form-text");
+                sprintf(str, "structure=free-form-text");
                 break;
             case 106:
-                sprintf (str, "structure=document-text");
+                sprintf(str, "structure=document-text");
                 break;
             case 107:
-                sprintf (str, "structure=local-number");
+                sprintf(str, "structure=local-number");
                 break;
             case 108:
-                sprintf (str, "structure=string");
+                sprintf(str, "structure=string");
                 break;
             case 109:
-                sprintf (str, "structure=numeric string");
+                sprintf(str, "structure=numeric string");
                 break;
             default:
-                sprintf (str, "structure");
+                sprintf(str, "structure");
             }
             break;
         case 5:
             switch (value)
             {
             case 1:
-                sprintf (str, "truncation=Right");
+                sprintf(str, "truncation=Right");
                 break;
             case 2:
-                sprintf (str, "truncation=Left");
+                sprintf(str, "truncation=Left");
                 break;
             case 3:
-                sprintf (str, "truncation=Left&right");
+                sprintf(str, "truncation=Left&right");
                 break;
             case 100:
-                sprintf (str, "truncation=Do not truncate");
+                sprintf(str, "truncation=Do not truncate");
                 break;
             case 101:
-                sprintf (str, "truncation=Process #");
+                sprintf(str, "truncation=Process #");
                 break;
             case 102:
-                sprintf (str, "truncation=re-1");
+                sprintf(str, "truncation=re-1");
                 break;
             case 103:
-                sprintf (str, "truncation=re-2");
+                sprintf(str, "truncation=re-2");
                 break;
             case 104:
-                sprintf (str, "truncation=CCL");
+                sprintf(str, "truncation=CCL");
                 break;
             default:
-                sprintf (str, "truncation");
+                sprintf(str, "truncation");
             }
             break;
         case 6:
-            switch (value)
+            switch(value)
             {
             case 1:
-                sprintf (str, "completeness=Incomplete subfield");
+                sprintf(str, "completeness=Incomplete subfield");
                 break;
             case 2:
-                sprintf (str, "completeness=Complete subfield");
+                sprintf(str, "completeness=Complete subfield");
                 break;
             case 3:
-                sprintf (str, "completeness=Complete field");
+                sprintf(str, "completeness=Complete field");
                 break;
             default:
-                sprintf (str, "completeness");
+                sprintf(str, "completeness");
             }
             break;
         }
@@ -181,9 +181,9 @@ static void attrStr (int type, int value, enum oid_value ast, char *str)
         break;
     }
     if (*str)
-        sprintf (str + strlen(str), " (%d=%d)", type, value);
+        sprintf(str + strlen(str), " (%d=%d)", type, value);
     else
-        sprintf (str, "%d=%d", type, value);
+        sprintf(str, "%d=%d", type, value);
 }
 
 static void wrbuf_term(WRBUF b, const char *term, int len)
@@ -521,22 +521,17 @@ static void wrbuf_rpn_query(WRBUF b, Z_RPNQuery *rpn)
         ast = attrset->value;
         wrbuf_printf(b, " @attrset %s ", attrset->desc);
     } 
-    else
-    {
-        ast = VAL_NONE;
-        wrbuf_printf (b, "Unknown:");
-    }
-    wrbuf_structure (b,rpn->RPNStructure, ast);
-
+    wrbuf_structure (b, rpn->RPNStructure, ast);
+    wrbuf_chop_right(b);
 }
 
-void log_rpn_query (Z_RPNQuery *rpn)
+void log_rpn_query(Z_RPNQuery *rpn)
 {
     log_rpn_query_level(YLOG_LOG, rpn);
 }
 
-void log_scan_term_level (int loglevel, 
-         Z_AttributesPlusTerm *zapt, oid_value ast)
+void log_scan_term_level(int loglevel, 
+                         Z_AttributesPlusTerm *zapt, oid_value ast)
 {
     int depth = 0;
     if (!loglevel)
@@ -551,7 +546,7 @@ void log_scan_term_level (int loglevel,
     zlog_attributes (zapt, depth+2, ast, loglevel);
 }
 
-void log_scan_term (Z_AttributesPlusTerm *zapt, oid_value ast)
+void log_scan_term(Z_AttributesPlusTerm *zapt, oid_value ast)
 {
     log_scan_term_level (YLOG_LOG, zapt, ast);
 }
@@ -585,7 +580,7 @@ void yaz_log_zquery_level (int loglevel, Z_Query *q)
 
 void yaz_log_zquery (Z_Query *q)
 {
-    yaz_log_zquery_level(YLOG_LOG,q);
+    yaz_log_zquery_level(YLOG_LOG, q);
 }
 
 void wrbuf_put_zquery(WRBUF b, Z_Query *q)
@@ -597,7 +592,7 @@ void wrbuf_put_zquery(WRBUF b, Z_Query *q)
     case Z_Query_type_1: 
     case Z_Query_type_101:
         wrbuf_printf(b,"RPN:");
-        wrbuf_rpn_query(b,q->u.type_1);
+        wrbuf_rpn_query(b, q->u.type_1);
         break;
     case Z_Query_type_2:
         wrbuf_printf(b, "CCL: %.*s", q->u.type_2->len, q->u.type_2->buf);
