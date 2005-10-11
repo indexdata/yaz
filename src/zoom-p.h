@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.7 2005-06-25 15:46:07 adam Exp $
+ * $Id: zoom-p.h,v 1.8 2005-10-11 18:24:33 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -23,6 +23,8 @@ struct ZOOM_query_p {
     ODR odr;
     char *query_string;
 };
+
+typedef struct ZOOM_task_p *ZOOM_task;
 
 #define STATE_IDLE 0
 #define STATE_CONNECTING 1

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.26 2005-06-25 15:46:03 adam Exp $
+ * $Id: zoom.h,v 1.27 2005-10-11 18:24:33 adam Exp $
  */
 /**
  * \file zoom.h
@@ -30,7 +30,6 @@ typedef struct ZOOM_options_p *ZOOM_options;
 typedef struct ZOOM_query_p *ZOOM_query;
 typedef struct ZOOM_connection_p *ZOOM_connection;
 typedef struct ZOOM_resultset_p *ZOOM_resultset;
-typedef struct ZOOM_task_p *ZOOM_task;
 typedef struct ZOOM_record_p *ZOOM_record;
 typedef struct ZOOM_scanset_p *ZOOM_scanset;
 typedef struct ZOOM_package_p *ZOOM_package;
