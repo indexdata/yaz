@@ -1,8 +1,9 @@
-## $Id: Makefile.am,v 1.60 2005-08-25 12:44:24 adam Exp $
+## $Id: Makefile.am,v 1.61 2005-10-15 10:40:37 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
-XMLFILES=yaz.xml.in introduction.xml installation.xml indexdata.xml \
+XMLFILES=yaz.xml.in bookinfo.xml introduction.xml installation.xml \
+ indexdata.xml \
  asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml \
  future.xml client.xml zoom.xml credits.xml gfs-options.xml \
  yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml
@@ -32,7 +33,7 @@ REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
 	yaz-marcdump-man.xml yaz-iconv-man.xml yaz-log-man.xml
 
-SUPPORTFILES=yazhtml.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
+SUPPORTFILES=entities.ent yazhtml.dsl yazprint.dsl tkl.xsl xml.dcl id.eps \
 	apilayer.obj yaz.css
 
 doc_DATA = $(HTMLFILES) yaz.pdf id.png apilayer.png yaz.css

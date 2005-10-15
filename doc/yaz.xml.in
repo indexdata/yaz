@@ -1,66 +1,14 @@
 <?xml version="1.0" standalone="no"?>
-<!-- $Id: yaz.xml.in,v 1.18 2005-06-29 22:52:54 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.19 2005-10-15 10:40:37 adam Exp $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4//EN"
           "@DTD_DIR@/docbookx.dtd" [
-     <!ENTITY yaz "YAZ">
-     <!ENTITY chap-introduction SYSTEM "introduction.xml">
-     <!ENTITY chap-installation SYSTEM "installation.xml">
-     <!ENTITY chap-zoom SYSTEM "zoom.xml">
-     <!ENTITY chap-client SYSTEM "client.xml">
-     <!ENTITY chap-asn SYSTEM "asn.xml">
-     <!ENTITY chap-soap SYSTEM "soap.xml">
-     <!ENTITY chap-tools SYSTEM "tools.xml">
-     <!ENTITY chap-odr SYSTEM "odr.xml">
-     <!ENTITY chap-comstack SYSTEM "comstack.xml">
-     <!ENTITY chap-frontend SYSTEM "frontend.xml">
-     <!ENTITY chap-future SYSTEM "future.xml">
-     <!ENTITY app-license SYSTEM "license.xml">
-     <!ENTITY app-indexdata SYSTEM "indexdata.xml">
-     <!ENTITY app-credits SYSTEM "credits.xml">
-     <!ENTITY gfs-options SYSTEM "gfs-options.xml">
-     <!ENTITY gfs-synopsis SYSTEM "gfs-synopsis.xml">
-     <!ENTITY gfs-virtual SYSTEM "gfs-virtual.xml">
-     <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
-     <!ENTITY asn "Z39.50 ASN.1">
-     <!ENTITY odr "<acronym>ODR</acronym>">
-     <!ENTITY comstack "<acronym>COMSTACK</acronym>">
-     <!ENTITY zoom "<acronym>ZOOM</acronym>">
-     <!ENTITY gfs-synopsis-app "application">
-     <!ENTITY reference-tools-cql-map "<xref linkend='tools.cql.map'/>">
-     <!ENTITY copyright-year "1995-2005">
+     <!ENTITY version "@VERSION@">
+
+     <!ENTITY % entities  SYSTEM "entities.ent">
+     %entities;
 ]>
 <book id="yaz">
- <bookinfo>
-  <title>YAZ User&apos;s Guide and Reference</title>
-  <author><firstname>Sebastian</firstname><surname>Hammer</surname></author>
-  <author><firstname>Adam</firstname><surname>Dickmeiss</surname></author>
-  <author><firstname>Mike</firstname><surname>Taylor</surname></author>
-  <author><firstname>Heikki</firstname><surname>Levanto</surname></author>
-  <copyright>
-   <year>&copyright-year;</year>
-   <holder>Index Data</holder>
-  </copyright>
-  <abstract><simpara>
-    This document is the programmer's guide and reference to the &yaz;
-    package version @VERSION@. &yaz; is a compact toolkit that provides
-    access to the Z39.50 and SRW/SRU protocols, as well as a set of
-    higher-level tools for implementing the server and client
-    roles, respectively.
-    The documentation can be used on its own, or as a reference when
-    looking at the example applications provided with the package.
-   </simpara>
-   <simpara>
-    <inlinemediaobject>
-     <imageobject>
-      <imagedata fileref="id.png" format="PNG"/>
-     </imageobject>
-     <imageobject>
-      <imagedata fileref="id.eps" format="EPS"/>
-     </imageobject>
-    </inlinemediaobject>
-   </simpara></abstract>
- </bookinfo>
- 
+ &bookinfo; 
  &chap-introduction;
  &chap-installation;
  &chap-zoom;
