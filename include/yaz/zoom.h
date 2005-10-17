@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.27 2005-10-11 18:24:33 adam Exp $
+ * $Id: zoom.h,v 1.28 2005-10-17 12:25:04 mike Exp $
  */
 /**
  * \file zoom.h
@@ -60,6 +60,9 @@ ZOOM_connection_destroy (ZOOM_connection c);
 /* get/set option for connection */
 ZOOM_API(const char *)
 ZOOM_connection_option_get (ZOOM_connection c, const char *key);
+
+ZOOM_API(const char *)
+ZOOM_connection_option_getl (ZOOM_connection c, const char *key, int *lenp);
 
 ZOOM_API(void)
 ZOOM_connection_option_set (ZOOM_connection c, const char *key,
@@ -264,6 +267,9 @@ ZOOM_API(ZOOM_options)
 
 ZOOM_API(const char *)
 ZOOM_options_get (ZOOM_options opt, const char *name);
+
+ZOOM_API(const char *)
+ZOOM_options_getl (ZOOM_options opt, const char *name, int *lenp);
 
 ZOOM_API(void)
 ZOOM_options_set (ZOOM_options opt, const char *name, const char *v);
