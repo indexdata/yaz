@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.8 2005-10-11 18:24:33 adam Exp $
+ * $Id: zoom-p.h,v 1.9 2005-10-17 12:25:39 mike Exp $
  */
 /**
  * \file zoom-p.h
@@ -70,6 +70,7 @@ struct ZOOM_connection_p {
 struct ZOOM_options_entry {
     char *name;
     char *value;
+    int len;                  /* of `value', which may contain NULs */
     struct ZOOM_options_entry *next;
 };
 
