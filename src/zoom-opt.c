@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-opt.c,v 1.4 2005-06-25 15:46:07 adam Exp $
+ * $Id: zoom-opt.c,v 1.5 2005-10-17 12:28:20 mike Exp $
  */
 /**
  * \file zoom-opt.c
@@ -90,6 +90,21 @@ ZOOM_options_destroy (ZOOM_options opt)
     }
 }
 
+/* PRIVATE to ZOOM_options_setl() */
+static void
+_set_value(struct ZOOM_options_entry **e, const char *value, int len)
+{
+    (*e)->value = 0;
+    (*e)->len = 0;
+    if (value)
+    {
+        (*e)->value = (char *) xmalloc (len+1);
+        memcpy ((*e)->value, value, len);
+        (*e)->value[len] = '\0';
+        (*e)->len = len;
+    }
+}
+
 ZOOM_API(void)
 ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
                    int len)
@@ -102,26 +117,14 @@ ZOOM_options_setl (ZOOM_options opt, const char *name, const char *value,
         if (!strcmp((*e)->name, name))
         {
             xfree ((*e)->value);
-            (*e)->value = 0;
-            if (value)
-            {
-                (*e)->value = (char *) xmalloc (len+1);
-                memcpy ((*e)->value, value, len);
-                (*e)->value[len] = '\0';
-            }
+            _set_value(e, value, len);
             return;
         }
         e = &(*e)->next;
     }
     *e = (struct ZOOM_options_entry *) xmalloc (sizeof(**e));
     (*e)->name = xstrdup (name);
-    (*e)->value = 0;
-    if (value)
-    {
-        (*e)->value = (char *) xmalloc (len+1);
-        memcpy ((*e)->value, value, len);
-        (*e)->value[len] = '\0';
-    }
+    _set_value(e, value, len);
     (*e)->next = 0;
 }
 
@@ -132,7 +135,7 @@ ZOOM_options_set (ZOOM_options opt, const char *name, const char *value)
 }
 
 ZOOM_API(const char *)
-ZOOM_options_get (ZOOM_options opt, const char *name)
+ZOOM_options_getl (ZOOM_options opt, const char *name, int *lenp)
 {
     const char *v = 0;
     if (!opt)
@@ -146,14 +149,22 @@ ZOOM_options_get (ZOOM_options opt, const char *name)
             if (!strcmp(e->name, name))
             {
                 v = e->value;
+                *lenp = e->len;
                 break;
             }
     }
     if (!v)
-        v = ZOOM_options_get(opt->parent1, name);
+        v = ZOOM_options_getl(opt->parent1, name, lenp);
     if (!v)
-        v = ZOOM_options_get(opt->parent2, name);
+        v = ZOOM_options_getl(opt->parent2, name, lenp);
     return v;
+}
+
+ZOOM_API(const char *)
+ZOOM_options_get (ZOOM_options opt, const char *name)
+{
+    int dummy;
+    return ZOOM_options_getl(opt, name, &dummy);
 }
 
 ZOOM_API(int)
