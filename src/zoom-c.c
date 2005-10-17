@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.46 2005-08-09 18:29:35 adam Exp $
+ * $Id: zoom-c.c,v 1.47 2005-10-17 12:29:44 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -1045,7 +1045,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.46 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.47 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -3408,6 +3408,12 @@ ZOOM_API(const char *)
 ZOOM_connection_option_get (ZOOM_connection c, const char *key)
 {
     return ZOOM_options_get (c->options, key);
+}
+
+ZOOM_API(const char *)
+ZOOM_connection_option_getl (ZOOM_connection c, const char *key, int *lenp)
+{
+    return ZOOM_options_getl (c->options, key, lenp);
 }
 
 ZOOM_API(void)
