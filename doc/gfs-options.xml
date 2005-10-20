@@ -1,5 +1,5 @@
 <!-- 
-   $Id: gfs-options.xml,v 1.2 2005-03-14 11:12:16 adam Exp $
+   $Id: gfs-options.xml,v 1.3 2005-10-20 19:28:04 quinn Exp $
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->
@@ -169,6 +169,14 @@
      <refentrytitle>tcpd</refentrytitle>
      <manvolnum>8</manvolnum>
     </citerefentry>.
+   </para></listitem>
+ </varlistentry>
+
+ <varlistentry><term><literal>-m </literal>
+   <replaceable>time-format</replaceable></term>
+  <listitem><para>
+   Sets the format of time-stamps in the log-file. Specify a string in
+   the input format to <literal>strftime()</literal>.
    </para></listitem>
  </varlistentry>
  

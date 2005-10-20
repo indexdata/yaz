@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.32 2005-08-22 20:34:21 adam Exp $
+ * $Id: statserv.c,v 1.33 2005-10-20 19:28:04 quinn Exp $
  */
 
 /**
@@ -1299,7 +1299,7 @@ int check_options(int argc, char **argv)
     yaz_log_init_level(control_block.loglevel);
 
     get_logbits(1); 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:",
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:",
                           argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -1337,6 +1337,13 @@ int check_options(int argc, char **argv)
         case 'l':
             option_copy(control_block.logfile, arg);
             yaz_log_init(control_block.loglevel, me, control_block.logfile);
+            break;
+        case 'm':
+            if (!arg) {
+                fprintf(stderr, "%s: Specify time format for log file.\n", me);
+                return(1);
+            }
+            yaz_log_time_format(arg);
             break;
         case 'v':
             control_block.loglevel =
@@ -1406,7 +1413,7 @@ int check_options(int argc, char **argv)
             fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
                     " -l <logfile> -u <user> -c <config> -t <minutes>"
                     " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
-                        " -ziDST1 -w <directory> <listener-addr>... ]\n", me);
+                        " -ziDST1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
             return 1;
         }
     }

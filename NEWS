@@ -1,3 +1,5 @@
+Added option -m to GFS to control formatting of timestamps in log file.
+
 Added 'exit' as synonym for 'quit' in yaz-client
 
 Possible compatibility problems with earlier versions marked with '*'.
