@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.12 2005-09-20 12:07:29 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.13 2005-10-22 13:28:03 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -78,7 +78,7 @@ void  update_events(int *elc, struct event_line_t *els,
     strcpy(els[iels].zoom_event, eventmsg);
     els[iels].error = error;
     strcpy(els[iels].errmsg, errmsg);
-    //print_event_line(&els[iels]);
+    /* print_event_line(&els[iels]); */
     elc[ielc] += 1;
 }
 
@@ -195,7 +195,7 @@ void print_option_error()
             "[-b (piggypack)] "
             "[-g (gnuplot outfile)] "
             "[-p proxy] \n");
-    //"[-t timeout] \n");
+    /* "[-t timeout] \n"); */
     exit(1);
 }
 
@@ -219,9 +219,11 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         case 'c':
             p_parameters->concurrent = atoi(arg);
             break;
-            //case 't':
-            //p_parameters->timeout = atoi(arg);
-            //        break;
+#if 0
+            case 't':
+            p_parameters->timeout = atoi(arg);
+            break;
+#endif
         case 'b':
             p_parameters->piggypack = 1;
                     break;
@@ -245,7 +247,9 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         printf("   query:      %s \n", p_parameters->query);
         printf("   concurrent: %d \n", p_parameters->concurrent);
         printf("   repeat:     %d \n", p_parameters->repeat);
-        //printf("   timeout:    %d \n", p_parameters->timeout);
+#if 0
+        printf("   timeout:    %d \n", p_parameters->timeout);
+#endif
         printf("   proxy:      %s \n", p_parameters->proxy);
         printf("   piggypack:  %d \n\n", p_parameters->piggypack);
         printf("   gnuplot:    %d \n\n", p_parameters->gnuplot);
@@ -375,7 +379,7 @@ int main(int argc, char **argv)
 
 
 
-    } // for (k = 0; k < parameters.repeat; k++) repeat loop
+    } /* for (k = 0; k < parameters.repeat; k++) repeat loop */
 
     /* output */
 
