@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: tstlogthread.c,v 1.2 2005-09-08 13:51:27 adam Exp $
+ * $Id: tstlogthread.c,v 1.3 2005-10-22 13:27:29 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -60,6 +60,7 @@ int main(int argc, char **argv)
     char *arg;
     int ret;
 
+    /* t_test is only invoked if a non-option arg is given .. */
     while ((ret = options("v:l:", argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -70,11 +71,13 @@ int main(int argc, char **argv)
         case 'l':
             yaz_log_init_file(arg);
             break;
+        case 0:
+            t_test();
+            break;
         default:
-            return 1;
+            exit(1);
         }
     }
-    t_test();
     return 0;
 }
 /*
