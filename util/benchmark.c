@@ -1,4 +1,4 @@
-/* $Id: benchmark.c,v 1.8 2005-06-25 15:46:07 adam Exp $
+/* $Id: benchmark.c,v 1.9 2005-10-22 13:13:56 adam Exp $
  * Copyright (C) 1995-2005, Index Data ApS
  *
  * This file is part of the YAZ toolkit.
@@ -14,12 +14,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <yaz/options.h>
 #include <stdarg.h>
 
 #include <yaz/zoom.h>
 
 
-struct options {
+struct boptions {
     int nconnect;               /* number of connections to make */
     int nsearch;                /* number of searches on each connection */
     int npresent;               /* number of presents for each search */
@@ -27,7 +28,7 @@ struct options {
     int delay;                  /* number of ms to delay between ops */
     int random;                 /* if true, delay is random 0-specified */
     int verbosity;              /* 0 = quiet, higher => more verbose */
-} options = {
+} boptions = {
     3,
     3,
     3,
@@ -40,33 +41,60 @@ struct options {
 
 static int test(char *host, int port);
 static void db_printf(int level, char *fmt, ...);
+static void usage(const char *prog);
 
 int main(int argc, char **argv)
 {
-    char *host;
-    int port;
+    char *host = 0;
+    int port = 0;
     int c;
     int i;
     int ok;
     int nok = 0;
-
-    while ((c = getopt(argc, argv, "c:s:p:fbd:rv:")) != -1) {
+    char *arg;
+    
+    while ((c = options("c:s:p:fbd:rv:", argv, argc, &arg)) != -2) {
         switch (c) {
-        case 'c': options.nconnect = atoi(optarg); break;
-        case 's': options.nsearch = atoi(optarg); break;
-        case 'p': options.npresent = atoi(optarg); break;
-        case 'f': options.full = 1; break;
-        case 'b': options.full = 0; break;
-        case 'd': options.delay = atoi(optarg); break;
-        case 'r': options.random = 1; break;
-        case 'v': options.verbosity = atoi(optarg); break;
-        default: goto USAGE;
+        case 0:
+            if (!host)
+                host = arg;
+            else if (!port)
+                port = atoi(arg);
+            else
+                usage(*argv);
+            break;
+        case 'c': boptions.nconnect = atoi(arg); break;
+        case 's': boptions.nsearch = atoi(arg); break;
+        case 'p': boptions.npresent = atoi(arg); break;
+        case 'f': boptions.full = 1; break;
+        case 'b': boptions.full = 0; break;
+        case 'd': boptions.delay = atoi(arg); break;
+        case 'r': boptions.random = 1; break;
+        case 'v': boptions.verbosity = atoi(arg); break;
+        default: usage(*argv);
         }
     }
 
-    if (argc-optind != 2) {
-    USAGE:
-        fprintf(stderr, "Usage: %s [options] <host> <port>\n"
+    if (!host || !port)
+        usage(*argv);
+
+    for (i = 0; i < boptions.nconnect; i++) {
+        db_printf(2, "iteration %d of %d", i+1, boptions.nconnect);
+        ok = test(host, port);
+        if (ok) nok++;
+    }
+
+    db_printf(1, "passed %d of %d tests", nok, boptions.nconnect);
+    if (nok < boptions.nconnect)
+        printf("Failed %d of %d tests\n",
+               boptions.nconnect-nok, boptions.nconnect);
+
+    return 0;
+}
+
+static void usage(const char *prog)
+{
+    fprintf(stderr, "Usage: %s [options] <host> <port>\n"
 "       -c <n>  Make <n> connection to the server [default: 3]\n"
 "       -s <n>  Perform <n> searches on each connection [3]\n"
 "       -p <n>  Make <n> present requests after each search [3]\n"
@@ -75,28 +103,9 @@ int main(int argc, char **argv)
 "       -d <n>  Delay <n> ms after each operation\n"
 "       -r      Delays are random between 0 and the specified number of ms\n"
 "       -v <n>  Set verbosity level to <n> [0, silent on success]\n"
-, argv[0]);
-        return 1;
-    }
-
-    host = argv[optind];
-    port = atoi(argv[optind+1]);
-
-    for (i = 0; i < options.nconnect; i++) {
-        db_printf(2, "iteration %d of %d", i+1, options.nconnect);
-        ok = test(host, port);
-        if (ok) nok++;
-    }
-
-    db_printf(1, "passed %d of %d tests", nok, options.nconnect);
-    if (nok < options.nconnect)
-        printf("Failed %d of %d tests\n",
-               options.nconnect-nok, options.nconnect);
-
-
-    return 0;
+            , prog);
+    exit(1);
 }
-
 
 static int test(char *host, int port)
 {
@@ -118,7 +127,7 @@ static void db_printf(int level, char *fmt, ...)
 {
     va_list ap;
 
-    if (level > options.verbosity)
+    if (level > boptions.verbosity)
         return;
 
     fprintf(stderr, "DEBUG(%d): ", level);
