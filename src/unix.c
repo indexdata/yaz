@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.15 2005-06-25 15:46:06 adam Exp $
+ * $Id: unix.c,v 1.16 2005-10-22 13:32:04 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -45,6 +45,14 @@
 
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int
+#endif
+
+/* stat(2) masks: S_IFMT and S_IFSOCK may not be defined in gcc -ansi mode */
+#if __STRICT_ANSI__
+#ifndef S_IFSOCK
+#define S_IFMT   0170000
+#define S_IFSOCK 0140000
+#endif
 #endif
 
 static int unix_close(COMSTACK h);
@@ -183,11 +191,10 @@ static int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
     return 1;
 }
 
-static void *unix_straddr(COMSTACK h, const char *str)
+static void *unix_straddr1(COMSTACK h, const char *str, char *f)
 {
     unix_state *sp = (unix_state *)h->cprivate;
-    char * s = strdup(str);
-    char * f = s;
+    char * s = f;
     const char * file = NULL;
     char * eol;
 
@@ -212,7 +219,6 @@ static void *unix_straddr(COMSTACK h, const char *str)
                     if(pw == NULL)
                     {
                         printf("No such user\n");
-                        free(f);
                         return 0;
                     }
                     sp->uid = pw->pw_uid;
@@ -231,7 +237,6 @@ static void *unix_straddr(COMSTACK h, const char *str)
                     if (gr == NULL)
                     {
                         printf("No such group\n");
-                        free(f);
                         return 0;
                     }
                     sp->gid = gr->gr_gid;
@@ -247,7 +252,6 @@ static void *unix_straddr(COMSTACK h, const char *str)
                     *end)
                 {
                     printf("Invalid umask\n");
-                    free(f);
                     return 0;
                 }
             }
@@ -259,7 +263,6 @@ static void *unix_straddr(COMSTACK h, const char *str)
             else
             {
                 printf("invalid or double argument: %s\n", s);
-                free(f);
                 return 0;
             }
         } while((s = eol));
@@ -277,12 +280,16 @@ static void *unix_straddr(COMSTACK h, const char *str)
     TRC(fprintf(stderr, "unix_straddr: %s\n", str ? str : "NULL"));
 
     if (!unix_strtoaddr_ex (file, &sp->addr))
-    {
-        free(f);
         return 0;
-    }
-    free(f);
     return &sp->addr;
+}
+
+static void *unix_straddr(COMSTACK h, const char *str)
+{
+    char *f = xstrdup(str);
+    void *vp = unix_straddr1(h, str, f);
+    xfree(f);
+    return vp;
 }
 
 struct sockaddr_un *unix_strtoaddr(const char *str)
@@ -386,7 +393,8 @@ static int unix_bind(COMSTACK h, void *address, int mode)
     if(stat(path, &stat_buf) != -1) {
         struct sockaddr_un socket_unix;
         int socket_out = -1;
-        if(! S_ISSOCK(stat_buf.st_mode)) {
+
+        if((stat_buf.st_mode&S_IFMT) != S_IFSOCK) { /* used to be S_ISSOCK */
             h->cerrno = CSYSERR;
             yaz_set_errno(EEXIST); /* Not a socket (File exists) */
             return -1;
