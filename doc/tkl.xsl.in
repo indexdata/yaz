@@ -12,7 +12,7 @@
   <xsl:param name="prev"/>
   <xsl:param name="next"/>
 
-  <document>
+  <xsl:element name="document">
     <title>
        <xsl:apply-templates select="." mode="object.title.markup"/>
     </title>
@@ -39,7 +39,7 @@
 
       <xsl:call-template name="user.footer.navigation"/>
     </body>
-  </document>
+  </xsl:element>
 </xsl:template>
 
 </xsl:stylesheet>
