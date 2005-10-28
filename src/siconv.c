@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.13 2005-06-25 15:46:05 adam Exp $
+ * $Id: siconv.c,v 1.14 2005-10-28 18:36:58 adam Exp $
  */
 /**
  * \file siconv.c
@@ -266,6 +266,14 @@ static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
     {
         *no_read = cd->comb_no_read[cd->comb_offset];
         x = cd->comb_x[cd->comb_offset];
+
+        /* special case for double-diacritic combining characters, 
+           INVERTED BREVE and DOUBLE TILDE.
+           We'll increment the no_read counter by 1, since we want to skip over
+           the processing of the closing ligature character
+        */
+        if (x == 0x0361 || x == 0x0360)
+            *no_read += 1;
         cd->comb_offset++;
         return x;
     }

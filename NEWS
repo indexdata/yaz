@@ -1,8 +1,9 @@
+Fixed bug #416: First/second comb characters not handled in the
+MARC-8 to UTF-8 conversion. Patch by Raj Patel.
+
 Added option -m to GFS to control formatting of timestamps in log file.
 
 Added 'exit' as synonym for 'quit' in yaz-client
-
-Possible compatibility problems with earlier versions marked with '*'.
 
 Added support for specifying SRW resultSetId + resultSetIdleTime in a
 Generic Frontend Server's search handler. Refer to include/yaz/backend.h

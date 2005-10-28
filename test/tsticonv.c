@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.11 2005-08-22 20:34:23 adam Exp $
+ * $Id: tsticonv.c,v 1.12 2005-10-28 18:36:59 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -159,6 +159,14 @@ static void tst_marc8_to_ucs4b()
         "\xe5\xe8\x41",
         12, "\x00\x00\x00\x41" "\x00\x00\x03\x04" "\x00\x00\x03\x08"
     }, 
+    { /* bug #416 */
+        "\xEB\x74\xEC\x73",
+        12, "\x00\x00\x00\x74" "\x00\x00\x03\x61" "\x00\x00\x00\x73"
+    },
+    { /* bug #416 */
+        "\xFA\x74\xFB\x73",
+        12, "\x00\x00\x00\x74" "\x00\x00\x03\x60" "\x00\x00\x00\x73"
+    },
     {
         0, 0, 0
     }
