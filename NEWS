@@ -1,3 +1,7 @@
+Allow retrieval of Search Result-1 information in ZOOM by the
+use of options that are attached to a result set. ZOOM documentation
+updated accordingly.
+
 Fixed bug #416: First/second comb characters not handled in the
 MARC-8 to UTF-8 conversion. Patch by Raj Patel.
 

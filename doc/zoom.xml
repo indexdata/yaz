@@ -1,4 +1,4 @@
-<!-- $Id: zoom.xml,v 1.38 2005-09-07 11:53:25 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.39 2005-11-01 15:08:01 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -413,6 +413,66 @@
         If this option isn't set, the ZOOM module will automatically
         allocate a result set name.
        </entry><entry>default</entry></row>
+     </tbody>
+    </tgroup>
+   </table>
+   <para>
+    For servers that support Search Info report, the following
+    options may be read using <function>ZOOM_resultset_get</function>.
+    This detailed information is read after a successful search has
+    completed.
+   </para>
+   <para>
+    This information is a list of of items, where each item is
+    information about a term or subquery. All items in the list 
+    are prefixed by 
+    <literal>SearchResult.</literal><replaceable>no</replaceable>
+    where no presents the item number (0=first, 1=second). 
+    Read <literal>SearchResult.size</literal> to determine the
+    number of items.
+   </para>
+   <table frame="top"><title>Search Info Report options</title>
+    <tgroup cols="2">
+     <colspec colwidth="4*" colname="name"></colspec>
+     <colspec colwidth="7*" colname="description"></colspec>
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>SearchResult.size</entry>
+       <entry>
+	number of search result entries. This option is-nonexistant
+	if no entries are returned by the server.
+       </entry>
+      </row>
+      <row>
+       <entry>SearchResult.<replaceable>no</replaceable>.subqueryId</entry>
+       <entry>sub query ID</entry>
+      </row>
+      <row>
+       <entry>SearchResult.<replaceable>no</replaceable>.subqueryCount</entry>
+       <entry>result count for item (number of hits)</entry>
+      </row>
+      <row>
+       <entry>SearchResult.<replaceable>no</replaceable>.subquery.term</entry>
+       <entry>subquery term</entry>
+      </row>
+      <row>
+       <entry>
+	SearchResult.<replaceable>no</replaceable>.interpretation.term
+       </entry>
+       <entry>interpretation term</entry>
+      </row>
+      <row>
+       <entry>
+	SearchResult.<replaceable>no</replaceable>.recommendation.term
+       </entry>
+       <entry>recommendation term</entry>
+      </row>
      </tbody>
     </tgroup>
    </table>

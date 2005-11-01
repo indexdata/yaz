@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.47 2005-10-17 12:29:44 mike Exp $
+ * $Id: zoom-c.c,v 1.48 2005-11-01 15:08:02 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1045,7 +1045,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.47 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.48 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2028,6 +2028,111 @@ static void handle_present_response (ZOOM_connection c, Z_PresentResponse *pr)
     handle_records (c, pr->records, 1);
 }
 
+static void handle_queryExpressionTerm(ZOOM_options opt, const char *name,
+                                       Z_Term *term)
+{
+    switch (term->which)
+    {
+    case Z_Term_general:
+        ZOOM_options_setl(opt, name,
+                          term->u.general->buf, term->u.general->len);
+        break;
+    case Z_Term_characterString:
+        ZOOM_options_set(opt, name, term->u.characterString);
+        break;
+    case Z_Term_numeric:
+        ZOOM_options_set_int(opt, name, *term->u.numeric);
+        break;
+    }
+}
+
+static void handle_queryExpression(ZOOM_options opt, const char *name,
+                                   Z_QueryExpression *exp)
+{
+    char opt_name[80];
+    
+    switch (exp->which)
+    {
+    case Z_QueryExpression_term:
+        if (exp->u.term && exp->u.term->queryTerm)
+        {
+            sprintf(opt_name, "%s.term", name);
+            handle_queryExpressionTerm(opt, opt_name, exp->u.term->queryTerm);
+        }
+        break;
+    case Z_QueryExpression_query:
+        break;
+    }
+}
+
+static void handle_searchResult(ZOOM_connection c, ZOOM_resultset resultset,
+                                Z_OtherInformation *o)
+{
+    int i;
+    for (i = 0; o && i < o->num_elements; i++)
+    {
+        if (o->list[i]->which == Z_OtherInfo_externallyDefinedInfo)
+        {
+            Z_External *ext = o->list[i]->information.externallyDefinedInfo;
+            
+            if (ext->which == Z_External_searchResult1)
+            {
+                int j;
+                Z_SearchInfoReport *sr = ext->u.searchResult1;
+                
+                if (sr->num)
+                    ZOOM_options_set_int(
+                        resultset->options, "SearchResult.size", sr->num);
+
+                for (j = 0; j < sr->num; j++)
+                {
+                    Z_SearchInfoReport_s *ent =
+                        ext->u.searchResult1->elements[j];
+                    char pref[80];
+                    
+                    sprintf(pref, "SearchResult.%d", j);
+
+                    if (ent->subqueryId)
+                    {
+                        char opt_name[80];
+                        sprintf(opt_name, "%s.subqueryId", pref);
+                        ZOOM_options_set(resultset->options, opt_name,
+                                         ent->subqueryId);
+                    }
+                    if (ent->subqueryExpression)
+                    {
+                        char opt_name[80];
+                        sprintf(opt_name, "%s.subquery", pref);
+                        handle_queryExpression(resultset->options, opt_name,
+                                               ent->subqueryExpression);
+                    }
+                    if (ent->subqueryInterpretation)
+                    {
+                        char opt_name[80];
+                        sprintf(opt_name, "%s.interpretation", pref);
+                        handle_queryExpression(resultset->options, opt_name,
+                                               ent->subqueryInterpretation);
+                    }
+                    if (ent->subqueryRecommendation)
+                    {
+                        char opt_name[80];
+                        sprintf(opt_name, "%s.recommendation", pref);
+                        handle_queryExpression(resultset->options, opt_name,
+                                               ent->subqueryRecommendation);
+                    }
+                    if (ent->subqueryCount)
+                    {
+                        char opt_name[80];
+                        sprintf(opt_name, "%s.subqueryCount", pref);
+                        ZOOM_options_set_int(resultset->options, opt_name,
+                                             *ent->subqueryCount);
+                    }                                             
+                }
+            }
+        }
+    }
+}
+
 static void handle_search_response (ZOOM_connection c, Z_SearchResponse *sr)
 {
     ZOOM_resultset resultset;
@@ -2035,11 +2140,13 @@ static void handle_search_response (ZOOM_connection c, Z_SearchResponse *sr)
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
         return ;
-    
+
     event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
     ZOOM_connection_put_event(c, event);
 
     resultset = c->tasks->u.search.resultset;
+
+    handle_searchResult(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;
     handle_records (c, sr->records, 0);
