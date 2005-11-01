@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.37 2005-06-25 15:46:08 adam Exp $
+ * $Id: zoomsh.c,v 1.38 2005-11-01 15:07:29 adam Exp $
  */
 
 /* ZOOM-C Shell */
@@ -119,6 +119,29 @@ static void cmd_get (ZOOM_connection *c, ZOOM_resultset *r,
     {
         const char *val = ZOOM_options_get(options, key);
         printf ("%s = %s\n", key, val ? val : "<null>");
+    }
+}
+
+static void cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options,
+                     const char **args)
+{
+    char key[40];
+    if (next_token_copy (args, key, sizeof(key)) < 0)
+    {
+        printf ("missing argument for get\n");
+    }
+    else
+    {
+        int i;
+        for (i = 0; i<MAX_CON; i++)
+        {
+            if (!r[i])
+                continue;
+            
+            const char *val = ZOOM_resultset_option_get(r[i], key);
+            printf ("%s = %s\n", key, val ? val : "<null>");
+        }
     }
 }
 
@@ -488,6 +511,8 @@ static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
         cmd_set (c, r, options, buf);
     else if (is_command ("get", cmd_str, cmd_len))
         cmd_get (c, r, options, buf);
+    else if (is_command ("rget", cmd_str, cmd_len))
+        cmd_rget (c, r, options, buf);
     else if (is_command ("connect", cmd_str, cmd_len))
         cmd_connect (c, r, options, buf);
     else if (is_command ("open", cmd_str, cmd_len))
