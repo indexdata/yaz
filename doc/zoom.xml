@@ -1,4 +1,29 @@
-<!-- $Id: zoom.xml,v 1.40 2005-11-02 10:19:46 adam Exp $ -->
+<!--
+### Still to document:
+ZOOM_connection_option_getl(c, key, len)
+ZOOM_connection_option_setl(c, key, val, len)
+ZOOM_connection_errcode(c)
+ZOOM_connection_errmsg(c)
+ZOOM_connection_addinfo(c)
+ZOOM_diag_str(error)
+ZOOM_resultset_record_immediate(s, pos)
+ZOOM_resultset_cache_reset(r)
+ZOOM_connection_package(c, options)
+ZOOM_package_destroy(p)
+ZOOM_package_send(p, type)
+ZOOM_package_option_get(p, key)
+ZOOM_package_option_set(p, key, val)
+ZOOM_resultset_sort(r, sort_type, sort_spec)
+ZOOM_options_set_callback(opt, function, handle)
+ZOOM_options_create_with_parent2(parent1, parent2)
+ZOOM_options_getl(opt, name, len)
+ZOOM_options_setl(opt, name, value, len)
+ZOOM_options_get_bool(opt, name, defa)
+ZOOM_options_get_int(opt, name, defa)
+ZOOM_options_set_int(opt, name, value)
+ZOOM_event(no, cs)
+-->
+<!-- $Id: zoom.xml,v 1.41 2005-11-02 14:54:01 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
