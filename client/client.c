@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.298 2005-09-26 09:15:27 adam Exp $
+ * $Id: client.c,v 1.299 2005-11-02 11:54:40 adam Exp $
  */
 
 #include <stdio.h>
@@ -1599,10 +1599,11 @@ static int send_searchRequest(const char *arg)
 }
 
 /* display Query Expression as part of searchResult-1 */
-static void display_queryExpression (Z_QueryExpression *qe)
+static void display_queryExpression (const char *lead, Z_QueryExpression *qe)
 {
     if (!qe)
         return;
+    printf(" %s=", lead);
     if (qe->which == Z_QueryExpression_term)
     {
         if (qe->u.term->queryTerm)
@@ -1611,16 +1612,16 @@ static void display_queryExpression (Z_QueryExpression *qe)
             switch (term->which)
             {
             case Z_Term_general:
-                printf (" %.*s", term->u.general->len, term->u.general->buf);
+                printf ("%.*s", term->u.general->len, term->u.general->buf);
                 break;
             case Z_Term_characterString:
-                printf (" %s", term->u.characterString);
+                printf ("%s", term->u.characterString);
                 break;
             case Z_Term_numeric:
-                printf (" %d", *term->u.numeric);
+                printf ("%d", *term->u.numeric);
                 break;
             case Z_Term_null:
-                printf (" null");
+                printf ("null");
                 break;
             }
         }
@@ -1646,16 +1647,20 @@ static void display_searchResult (Z_OtherInformation *o)
                 printf ("SearchResult-1:");
                 for (j = 0; j < sr->num; j++)
                 {
+                    if (j)
+                        printf(",");
                     if (!sr->elements[j]->subqueryExpression)
-                        printf (" %d", j);
-                    display_queryExpression (
+                        printf("%d", j);
+                    display_queryExpression("term",
                         sr->elements[j]->subqueryExpression);
-                    display_queryExpression (
+                    display_queryExpression("interpretation",
                         sr->elements[j]->subqueryInterpretation);
-                    display_queryExpression (
+                    display_queryExpression("recommendation",
                         sr->elements[j]->subqueryRecommendation);
                     if (sr->elements[j]->subqueryCount)
-                        printf ("(%d)", *sr->elements[j]->subqueryCount);
+                        printf(" cnt=%d", *sr->elements[j]->subqueryCount);
+                    if (sr->elements[j]->subqueryId)
+                        printf(" id=%s ", sr->elements[j]->subqueryId);
                 }
                 printf ("\n");
             }
