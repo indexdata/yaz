@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.38 2005-11-01 15:07:29 adam Exp $
+ * $Id: zoomsh.c,v 1.39 2005-11-02 21:41:27 adam Exp $
  */
 
 /* ZOOM-C Shell */
@@ -136,10 +136,11 @@ static void cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
         int i;
         for (i = 0; i<MAX_CON; i++)
         {
+            const char *val;
             if (!r[i])
                 continue;
             
-            const char *val = ZOOM_resultset_option_get(r[i], key);
+            val = ZOOM_resultset_option_get(r[i], key);
             printf ("%s = %s\n", key, val ? val : "<null>");
         }
     }
