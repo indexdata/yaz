@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.9 2005-09-09 10:34:09 adam Exp $
+## $Id: Makefile.am,v 1.10 2005-11-02 13:32:58 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread
@@ -12,7 +12,7 @@ EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample \
  $(check_SCRIPTS) \
  marc1 marc1.xml marc2 marc2.xml marc3 marc3.xml marc4 marc4.xml
 
-YAZCOMP = $(top_srcdir)/util/yaz-asncomp
+YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
 
 AM_CFLAGS=$(THREAD_CFLAGS)
