@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.48 2005-11-01 15:08:02 adam Exp $
+ * $Id: zoom-c.c,v 1.49 2005-11-02 10:19:46 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1045,7 +1045,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.48 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.49 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2082,7 +2082,7 @@ static void handle_searchResult(ZOOM_connection c, ZOOM_resultset resultset,
                 
                 if (sr->num)
                     ZOOM_options_set_int(
-                        resultset->options, "SearchResult.size", sr->num);
+                        resultset->options, "searchresult.size", sr->num);
 
                 for (j = 0; j < sr->num; j++)
                 {
@@ -2090,12 +2090,12 @@ static void handle_searchResult(ZOOM_connection c, ZOOM_resultset resultset,
                         ext->u.searchResult1->elements[j];
                     char pref[80];
                     
-                    sprintf(pref, "SearchResult.%d", j);
+                    sprintf(pref, "searchresult.%d", j);
 
                     if (ent->subqueryId)
                     {
                         char opt_name[80];
-                        sprintf(opt_name, "%s.subqueryId", pref);
+                        sprintf(opt_name, "%s.id", pref);
                         ZOOM_options_set(resultset->options, opt_name,
                                          ent->subqueryId);
                     }
@@ -2123,7 +2123,7 @@ static void handle_searchResult(ZOOM_connection c, ZOOM_resultset resultset,
                     if (ent->subqueryCount)
                     {
                         char opt_name[80];
-                        sprintf(opt_name, "%s.subqueryCount", pref);
+                        sprintf(opt_name, "%s.count", pref);
                         ZOOM_options_set_int(resultset->options, opt_name,
                                              *ent->subqueryCount);
                     }                                             
