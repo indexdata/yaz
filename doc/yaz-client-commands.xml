@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.10 2005-06-23 13:09:42 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.11 2005-11-04 17:15:30 mike Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -127,19 +127,24 @@
   </term>
   <listitem>
    <para>Sorts a result set. The sort command takes a
-    sequence of sort specifications. A sort
-    specification holds a field (sort criteria) and is followed by flags.
-    If the sort criteria includes <literal>=</literal> it is assumed
-    that the sort SortKey is of type sortAttributes using Bib-1.
-    The integer before <literal>=</literal> is
+    sequence of space-separated sort specifications, with each sort
+    specification consisting of two space-separated words (so that the
+    whole specification list is made up of an even number of words).
+    The first word of each specification
+    holds a field (sort criterion) and the second holds flags.
+    If the sort criterion includes <literal>=</literal> it is assumed
+    that the <literal>SortKey</literal> is of type
+    <literal>sortAttributes</literal> using Bib-1: in this case
+    the integer before <literal>=</literal> is
     the attribute type and the integer following <literal>=</literal>
     is the attribute value.
-    If no <literal>=</literal> is in the SortKey it is treated as a
-    sortfield-type of type InternationalString.
-    Flags observed are: <literal>s</literal>
-    for case sensitive, <literal>i</literal> for case insensitive,
-    <literal>&lt;</literal> for sort ascending and <literal>&gt;</literal>
-    for sort descending.
+    If no <literal>=</literal> is in the criterion it is treated as a
+    sortfield of type InternationalString.
+    The flags word of each sort specification must consist of
+    <literal>s</literal> 
+    for case sensitive or <literal>i</literal> for case insensitive, and
+    <literal>&lt;</literal> for ascending order or <literal>&gt;</literal>
+    for descending order.
    </para>
   </listitem>
  </varlistentry>
