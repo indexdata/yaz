@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst6.c,v 1.10 2005-06-25 15:46:08 adam Exp $
+ * $Id: zoomtst6.c,v 1.11 2005-11-04 15:51:02 mike Exp $
  *
  * Asynchronous multi-target client doing two searches
  */
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
     }
     if (ZOOM_query_prefix (q, argv[argc-1]))
     {
-        printf ("bad sort spec: %s\n", argv[argc-1]);
+        printf ("bad prefix query: %s\n", argv[argc-1]);
         exit (2);
     }
     /* queue second search */
