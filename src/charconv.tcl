@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.8 2005-03-16 21:26:37 adam Exp $
+# $Id: charconv.tcl,v 1.9 2005-11-06 01:55:06 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -249,7 +249,6 @@ proc dump_trie {ofilehandle} {
             if (!code)
             {
                 *no_read = 1;
-                code = *inp;
             }
             return code;
         }
