@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.28 2005-10-17 12:25:04 mike Exp $
+ * $Id: zoom.h,v 1.29 2005-11-08 16:51:34 mike Exp $
  */
 /**
  * \file zoom.h
@@ -243,9 +243,12 @@ ZOOM_API(void)
                              const char *val);
 
 /* ----------------------------------------------------------- */
-/* Sort */
+/* Sort.  First function is deprecated, use second instead */
 ZOOM_API(void)
     ZOOM_resultset_sort(ZOOM_resultset r,
+                        const char *sort_type, const char *sort_spec);
+ZOOM_API(int)
+    ZOOM_resultset_sort1(ZOOM_resultset r,
                         const char *sort_type, const char *sort_spec);
 
 /* ----------------------------------------------------------- */
