@@ -1,18 +1,11 @@
 <!--
 ### Still to document:
-ZOOM_connection_option_getl(c, key, len)
-ZOOM_connection_option_setl(c, key, val, len)
 ZOOM_connection_errcode(c)
 ZOOM_connection_errmsg(c)
 ZOOM_connection_addinfo(c)
 ZOOM_diag_str(error)
 ZOOM_resultset_record_immediate(s, pos)
 ZOOM_resultset_cache_reset(r)
-ZOOM_connection_package(c, options)
-ZOOM_package_destroy(p)
-ZOOM_package_send(p, type)
-ZOOM_package_option_get(p, key)
-ZOOM_package_option_set(p, key, val)
 ZOOM_resultset_sort(r, sort_type, sort_spec)
 ZOOM_resultset_sort1(r, sort_type, sort_spec)
 ZOOM_options_set_callback(opt, function, handle)
@@ -22,9 +15,8 @@ ZOOM_options_setl(opt, name, value, len)
 ZOOM_options_get_bool(opt, name, defa)
 ZOOM_options_get_int(opt, name, defa)
 ZOOM_options_set_int(opt, name, value)
-ZOOM_event(no, cs)
 -->
-<!-- $Id: zoom.xml,v 1.42 2005-11-08 17:12:55 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.43 2005-11-08 21:53:01 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -119,18 +111,32 @@ ZOOM_event(no, cs)
     <function>ZOOM_connection_destroy</function>.
    </para>
    <synopsis>
-    void ZOOM_connection_option_set (ZOOM_connection c,
-                                     const char *key,
-                                     const char *val);
+    void ZOOM_connection_option_set(ZOOM_connection c,
+                                    const char *key, const char *val);
 
-    const char *ZOOM_connection_option_get (ZOOM_connection c,
-                                            const char *key);
+    void ZOOM_connection_option_setl(ZOOM_connection c,
+                                     const char *key,
+                                     const char *val, int len);
+
+    const char *ZOOM_connection_option_get(ZOOM_connection c,
+                                           const char *key);
+    const char *ZOOM_connection_option_getl(ZOOM_connection c,
+                                            const char *key,
+                                            int *lenp);
    </synopsis>
    <para>
-    The <function>ZOOM_connection_option_set</function> allows you to
+    The functions <function>ZOOM_connection_option_set</function> and
+    <function>ZOOM_connection_option_setl</function> allows you to
     set an option given by <parameter>key</parameter> to the value
-    <parameter>value</parameter> for the connection.
-    Function <function>ZOOM_connection_option_get</function> returns
+    <parameter>value</parameter> for the connection. 
+    For <function>ZOOM_connection_option_set</function>, the
+    value is assumed to be a 0-terminated string. Function
+    <function>ZOOM_connection_option_setl</function> specifies a
+    value of a certain size (len).
+   </para>
+   <para>
+    Functions <function>ZOOM_connection_option_get</function> and
+    <function>ZOOM_connection_option_getl</function> returns
     the value for an option given by <parameter>key</parameter>.
    </para>
    <table frame="top"><title>ZOOM Connection Options</title>
@@ -782,8 +788,8 @@ ZOOM_event(no, cs)
    </para>
 
    <synopsis>
-    ZOOM_scanset ZOOM_connection_scan (ZOOM_connection c,
-                                       const char *startterm);
+    ZOOM_scanset ZOOM_connection_scan(ZOOM_connection c,
+                                      const char *startpqf);
 
     size_t ZOOM_scanset_size(ZOOM_scanset scan);
 
@@ -795,16 +801,17 @@ ZOOM_event(no, cs)
 
     void ZOOM_scanset_destroy (ZOOM_scanset scan);
 
-    const char *ZOOM_scanset_option_get (ZOOM_scanset scan,
+    const char *ZOOM_scanset_option_get(ZOOM_scanset scan,
                                          const char *key);
 
-    void ZOOM_scanset_option_set (ZOOM_scanset scan, const char *key,
-                                  const char *val);
+    void ZOOM_scanset_option_set(ZOOM_scanset scan, const char *key,
+                                 const char *val);
     </synopsis>
    <para>
     The scan set is created by function
     <function>ZOOM_connection_scan</function> which performs a scan
-    operation on the connection using the specified startterm.
+    operation on the connection using the specified
+    <parameter>startpqf</parameter>.
     If the operation was successful, the size of the scan set can be
     retrieved by a call to <function>ZOOM_scanset_size</function>.
     Like result sets, the items are numbered 0,..size-1.
@@ -829,6 +836,15 @@ ZOOM_event(no, cs)
     Functions <function>ZOOM_scanset_option_get</function> and
     <function>ZOOM_scanset_option_set</function> retrieves and sets
     an option respectively.
+   </para>
+
+   <para>
+    The <parameter>startpqf</parameter> is a subset of PQF, namely
+    the Attributes+Term part. Multiple <literal>@attr</literal> can
+    be used. For example to scan in title (complete) phrases:
+    <literallayout>
+     @attr 1=4 @attr 6=2 "science o"
+    </literallayout>
    </para>
    
    <table frame="top"><title>ZOOM Scan Set Options</title>
@@ -862,13 +878,325 @@ ZOOM_event(no, cs)
      </tbody>
     </tgroup>
    </table>
-   
   </sect1>
+
+  <sect1 id="zoom.ext"><title>Extended Services</title>
+   <para>
+    ZOOM offers an interface to a subset of the Z39.50 extended services
+    as well as a few privately defined ones:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Z39.50 Item Order (ILL).
+      See <xref linkend="zoom.ext.itemorder"/>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Record Update. This allows a client to insert, modify or delete
+      records.
+      See <xref linkend="zoom.ext.update"/>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Database Create. This a non-standard feature. Allows a client
+      to create a database.
+      See <xref linkend="zoom.ext.dbcreate"/>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Database Drop. This a non-standard feature. Allows a client
+      to delete/drop a database.
+      See <xref linkend="zoom.ext.dbdrop"/>.
+     </para>
+     </listitem>
+    <listitem>
+     <para>
+      Commit operation. This a non-standard feature. Allows a client
+      to commit operations.
+      See <xref linkend="zoom.ext.commit"/>.
+     </para>
+    </listitem>
+    <!-- all the ILL PDU options should go here too -->
+   </itemizedlist>
+   <para>
+    To create an extended service operation a <literal>ZOOM_package</literal>
+    must be created. The operation is a five step operation. The
+    package is created, package is configured by means of options,
+    the package is send, result is inspected (by means of options),
+    the package is destroyed.
+   </para>
+   <synopsis>
+    ZOOM_package ZOOM_connection_package(ZOOM_connection c,
+                                         ZOOM_options options);
+
+    const char *ZOOM_package_option_get(ZOOM_package p,
+                                        const char *key);
+    void ZOOM_package_option_set(ZOOM_package p, const char *key,
+                                 const char *val);
+    void ZOOM_package_send(ZOOM_package p, const char *type);
+
+    void ZOOM_package_destroy(ZOOM_package p);
+   </synopsis>
+   <para>
+    The <function>ZOOM_connection_package</function> creates a
+    package for the connection given using the options specified.
+   </para>
+   <para>
+    Functions <function>ZOOM_package_option_get</function> and
+    <function>ZOOM_package_option_set</function> gets and sets
+    options.
+   </para>
+   <para>
+    <function>ZOOM_package_send</function> sends
+    the package the via connection specified in 
+    <function>ZOOM_connection_package</function>.
+    The <parameter>type</parameter> specifies the actual extended service
+    package type to be sent.
+   </para>
+
+   <table frame="top"><title>Extended Service Common Options</title>
+    <tgroup cols="3">
+     <colspec colwidth="4*" colname="name"></colspec>
+     <colspec colwidth="7*" colname="description"></colspec>
+     <colspec colwidth="3*" colname="default"></colspec>
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Description</entry>
+       <entry>Default</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>package-name</entry>
+       <entry>Extended Service Request package name. Must be specified
+       as part of a request</entry>
+       <entry>none</entry>
+      </row>
+      <row>
+       <entry>user-id</entry>
+       <entry>User ID of Extended Service Package. Is a request option</entry>
+       <entry>none</entry>
+      </row>
+      <row>
+       <entry>function</entry>
+       <entry>
+	Function of package - one of <literal>create</literal>,
+	<literal>delete</literal>, <literal>modify</literal>. Is
+	a request option.
+       </entry>
+       <entry><literal>create</literal></entry>
+      </row>
+      <row>
+       <entry>targetReference</entry>
+       <entry>
+	Target Reference. This is part of the response as returned
+	by the server. Read it after a succesful operation.
+       </entry>
+       <entry><literal>none</literal></entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+
+   <sect2 id="zoom.ext.itemorder"><title>Item Order</title>
+    <para>
+     For Item Order, type must be set to <literal>itemorder</literal> in
+     <function>ZOOM_package_send</function>.
+    </para>
+
+    <table frame="top"><title>Item Order Options</title>
+     <tgroup cols="3">
+      <colspec colwidth="4*" colname="name"></colspec>
+      <colspec colwidth="7*" colname="description"></colspec>
+      <colspec colwidth="3*" colname="default"></colspec>
+      <thead>
+       <row>
+	<entry>Option</entry>
+	<entry>Description</entry>
+	<entry>Default</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+	<entry>contact-name</entry>
+	<entry>ILL contact name</entry>
+	<entry>none</entry>
+       </row>
+       <row>
+	<entry>contact-phone</entry>
+	<entry>ILL contact phone</entry>
+	<entry>none</entry>
+       </row>
+       <row>
+	<entry>contact-email</entry>
+	<entry>ILL contact email</entry>
+	<entry>none</entry>
+       </row>
+       <row>
+	<entry>itemorder-item</entry>
+	<entry>Position for item (record) requested. An integer</entry>
+	<entry>1</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+
+   </sect2>
+
+   <sect2 id="zoom.ext.update"><title>Record Update</title>
+    <para>
+     For Record Update, type must be set to <literal>update</literal> in
+     <function>ZOOM_package_send</function>.
+    </para>
+
+    <table frame="top"><title>Record Update Options</title>
+     <tgroup cols="3">
+      <colspec colwidth="4*" colname="name"></colspec>
+      <colspec colwidth="7*" colname="description"></colspec>
+      <colspec colwidth="3*" colname="default"></colspec>
+      <thead>
+       <row>
+	<entry>Option</entry>
+	<entry>Description</entry>
+	<entry>Default</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+	<entry>action</entry>
+	<entry>
+	 The update action. One of 
+	 <literal>specialUpdate</literal>,
+	 <literal>recordInsert</literal>,
+	 <literal>recordReplace</literal>,
+	 <literal>recordDelete</literal>,
+	 <literal>elementUpdate</literal>.
+	</entry>
+	<entry><literal>specialUpdate</literal></entry>
+       </row>
+       <row>
+	<entry>recordIdOpaque</entry>
+	<entry>Opaque Record ID</entry>
+	<entry>none</entry>
+       </row>
+       <row>
+	<entry>recordIdNumber</entry>
+	<entry>Record ID number</entry>
+	<entry>none</entry>
+       </row>
+       <row>
+	<entry>record</entry>
+	<entry>The record itself</entry>
+	<entry>none</entry>
+       </row>
+       <row>
+	<entry>syntax</entry>
+	<entry>The record syntax (transfer syntax). Is a string that
+	 is a known record syntax.
+	</entry>
+	<entry>no syntax</entry>
+       </row>
+       <row>
+	<entry>databaseName</entry>
+	<entry>Database from connection object</entry>
+	<entry>Default</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+    
+   </sect2>
+
+   <sect2 id="zoom.ext.dbcreate"><title>Database Create</title>
+    <para>
+     For Database Create, type must be set to <literal>create</literal> in
+     <function>ZOOM_package_send</function>.
+    </para>
+    
+    <table frame="top"><title>Database Create Options</title>
+     <tgroup cols="3">
+      <colspec colwidth="4*" colname="name"></colspec>
+      <colspec colwidth="7*" colname="description"></colspec>
+      <colspec colwidth="3*" colname="default"></colspec>
+      <thead>
+       <row>
+	<entry>Option</entry>
+	<entry>Description</entry>
+	<entry>Default</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+	<entry>databaseName</entry>
+	<entry>Database from connection object</entry>
+	<entry>Default</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </sect2>
+   
+   <sect2 id="zoom.ext.dbdrop"><title>Database Drop</title>
+    <para>
+     For Database Drop, type must be set to <literal>drop</literal> in
+     <function>ZOOM_package_send</function>.
+    </para>
+    
+    <table frame="top"><title>Database Create Options</title>
+     <tgroup cols="3">
+      <colspec colwidth="4*" colname="name"></colspec>
+      <colspec colwidth="7*" colname="description"></colspec>
+      <colspec colwidth="3*" colname="default"></colspec>
+      <thead>
+       <row>
+	<entry>Option</entry>
+	<entry>Description</entry>
+	<entry>Default</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+	<entry>databaseName</entry>
+	<entry>Database from connection object</entry>
+	<entry>Default</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </sect2>
+   
+   <sect2 id="zoom.ext.commit"><title>Commit Operation</title>
+    <para>
+     For Commit, type must be set to <literal>commit</literal> in
+     <function>ZOOM_package_send</function>.
+    </para>
+   </sect2>
+
+   <sect2><title>Protocol behavior</title>
+    <para>
+     All the extended services are Z39.50-only.
+    </para>
+    <note>
+     <para>
+      The database create, drop and commit services are privately defined
+      operations.
+      Refer to <filename>esadmin.asn</filename> in YAZ for the ASN.1
+      definitions.
+     </para>
+    </note>
+   </sect2>
+  </sect1>
+
   <sect1 id="zoom.options"><title>Options</title>
    <para>
     Most &zoom; objects provide a way to specify options to change behavior.
     From an implementation point of view a set of options is just like
-    an associative array / hash array, etc.
+    an associative array / hash.
    </para>
    <synopsis>
      ZOOM_options ZOOM_options_create (void);
