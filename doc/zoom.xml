@@ -14,6 +14,7 @@ ZOOM_package_send(p, type)
 ZOOM_package_option_get(p, key)
 ZOOM_package_option_set(p, key, val)
 ZOOM_resultset_sort(r, sort_type, sort_spec)
+ZOOM_resultset_sort1(r, sort_type, sort_spec)
 ZOOM_options_set_callback(opt, function, handle)
 ZOOM_options_create_with_parent2(parent1, parent2)
 ZOOM_options_getl(opt, name, len)
@@ -23,7 +24,7 @@ ZOOM_options_get_int(opt, name, defa)
 ZOOM_options_set_int(opt, name, value)
 ZOOM_event(no, cs)
 -->
-<!-- $Id: zoom.xml,v 1.41 2005-11-02 14:54:01 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.42 2005-11-08 17:12:55 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
