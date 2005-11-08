@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.63 2005-09-16 09:16:40 adam Exp $
+ * $Id: seshigh.c,v 1.64 2005-11-08 15:08:02 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -474,6 +474,7 @@ static void assoc_init_reset(association *assoc)
     assoc->init->bend_fetch = NULL;
     assoc->init->bend_explain = NULL;
     assoc->init->bend_srw_scan = NULL;
+    assoc->init->bend_srw_update = NULL;
 
     assoc->init->charneg_request = NULL;
     assoc->init->charneg_response = NULL;
@@ -852,18 +853,27 @@ static void srw_bend_search(association *assoc, request *req,
                         int packing = Z_SRW_recordPacking_string;
                         if (start + number > rr.hits)
                             number = rr.hits - start + 1;
-                        if (srw_req->recordPacking && 
-                            !strcmp(srw_req->recordPacking, "xml"))
-                            packing = Z_SRW_recordPacking_XML;
+                        if (srw_req->recordPacking){
+                            if (!strcmp(srw_req->recordPacking, "xml"))
+                                packing = Z_SRW_recordPacking_XML;
+                            if (!strcmp(srw_req->recordPacking, "url"))
+                                packing = Z_SRW_recordPacking_URL;
+                        }
                         srw_res->records = (Z_SRW_record *)
                             odr_malloc(assoc->encode,
                                        number * sizeof(*srw_res->records));
+                        
+                        srw_res->extra_records = (Z_SRW_extra_record **)
+                            odr_malloc(assoc->encode,
+                                       number*sizeof(*srw_res->extra_records));
+
                         for (i = 0; i<number; i++)
                         {
                             int errcode;
                             
                             srw_res->records[j].recordPacking = packing;
                             srw_res->records[j].recordData_buf = 0;
+                            srw_res->extra_records[j] = 0;
                             yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
                             errcode = srw_bend_fetch(assoc, i+start, srw_req,
                                                      srw_res->records + j);
@@ -989,9 +999,13 @@ static void srw_bend_explain(association *assoc, request *req,
         if (rr.explain_buf)
         {
             int packing = Z_SRW_recordPacking_string;
-            if (srw_req->recordPacking && 
-                !strcmp(srw_req->recordPacking, "xml"))
-                packing = Z_SRW_recordPacking_XML;
+            if (srw_req->recordPacking)
+            {
+                if (!strcmp(srw_req->recordPacking, "xml"))
+                    packing = Z_SRW_recordPacking_XML;
+                else if (!strcmp(srw_req->recordPacking, "url"))
+                    packing = Z_SRW_recordPacking_URL;
+            }
             srw_res->record.recordSchema = rr.schema;
             srw_res->record.recordPacking = packing;
             srw_res->record.recordData_buf = rr.explain_buf;
@@ -1188,6 +1202,187 @@ static void srw_bend_scan(association *assoc, request *req,
 
 }
 
+static void srw_bend_update(association *assoc, request *req,
+			    Z_SRW_updateRequest *srw_req,
+			    Z_SRW_updateResponse *srw_res,
+			    int *http_code)
+{
+    yaz_log(YLOG_DEBUG, "Got SRW UpdateRequest");
+    yaz_log(YLOG_DEBUG, "num_diag = %d", srw_res->num_diagnostics );
+    *http_code = 404;
+    srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics);
+    if (assoc->init)
+    {
+	bend_update_rr rr;
+	
+	rr.stream = assoc->encode;
+	rr.print = assoc->print;
+        rr.num_bases = 1;
+        rr.basenames = &srw_req->database;
+	rr.operation = srw_req->operation;
+	rr.operation_status = "failed";
+	rr.record_id = 0;
+        rr.record_version = 0;
+        rr.record_checksum = 0;
+        rr.record_old_version = 0;
+        rr.record_packing = "xml";
+	rr.record_schema = 0;
+        rr.record_data = 0;
+        rr.request_extra_record = 0;
+        rr.response_extra_record = 0;
+        rr.extra_request_data = 0;
+        rr.extra_response_data = 0;
+        rr.errcode = 0;
+        rr.errstring = 0;
+
+        yaz_log(YLOG_DEBUG, "basename = %s", rr.basenames[0] );
+        yaz_log(YLOG_DEBUG, "Operation = %s", rr.operation );
+	if ( !strcmp( rr.operation, "delete" ) ){
+            if ( !srw_req->recordId ){
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       7, "recordId" );
+            }
+            else {
+                rr.record_id = srw_req->recordId;
+            }
+            if (  !srw_req->recordVersion ){
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       7, "recordVersion" );
+            }
+            else {
+                rr.record_version = odr_strdup( assoc->encode,
+                                                srw_req->recordVersion );
+                
+            }
+            if ( srw_req->recordOldVersion ){
+                rr.record_old_version = odr_strdup(assoc->encode,
+                                                   srw_req->recordOldVersion );
+            }
+            if ( srw_req->extraRequestData ){
+                rr.extra_request_data = odr_strdup(assoc->encode,
+                                                   srw_req->extraRequestData );
+            }
+	}
+	else if ( !strcmp( rr.operation, "replace" ) ){
+            if ( !srw_req->recordId ){
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       7, "recordId" );
+            }
+            else {
+                rr.record_id = srw_req->recordId;
+            }
+            if ( srw_req->record.recordSchema == 0 ){
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       7, "recordSchema" );
+            }
+            else {
+                rr.record_schema = odr_strdup(assoc->encode,
+                                              srw_req->record.recordSchema );
+            }
+            switch (srw_req->record.recordPacking)
+            {
+            case Z_SRW_recordPacking_string: 
+                rr.record_packing = "string";
+                break;
+            case Z_SRW_recordPacking_XML: 
+                rr.record_packing = "xml";
+                break;
+            case Z_SRW_recordPacking_URL: 
+                rr.record_packing = "url";
+                break;
+            }
+            if ( srw_req->record.recordData_len ){
+                rr.record_data = odr_strdupn(assoc->encode, 
+                                             srw_req->record.recordData_buf,
+                                             srw_req->record.recordData_len );
+                rr.request_extra_record = srw_req->extra_record;
+            }
+            else {
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       7, "recordData" );
+            }
+            if (srw_req->extraRequestData)
+                rr.extra_request_data = odr_strdup(assoc->encode,
+                                                   srw_req->extraRequestData );
+	}
+	else if ( !strcmp( rr.operation, "insert" ) )
+        {
+            if ( srw_req->record.recordSchema == 0 ){
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       7, "recordSchema" );
+            }
+            else {
+                rr.record_schema = odr_strdup(assoc->encode,
+                                              srw_req->record.recordSchema);
+            }
+            switch (srw_req->record.recordPacking)
+            {
+            case Z_SRW_recordPacking_string: 
+                rr.record_packing = "string";
+                break;
+            case Z_SRW_recordPacking_XML: 
+                rr.record_packing = "xml";
+                break;
+            case Z_SRW_recordPacking_URL: 
+                rr.record_packing = "url";
+                break;
+            }
+            
+            if (srw_req->record.recordData_len)
+            {
+                rr.record_data = odr_strdupn(assoc->encode, 
+                                             srw_req->record.recordData_buf,
+                                             srw_req->record.recordData_len );
+                rr.request_extra_record = srw_req->extra_record;
+            }
+            else
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       7, "recordData" );
+            if ( srw_req->extraRequestData )
+                rr.extra_request_data = odr_strdup(assoc->encode,
+                                                   srw_req->extraRequestData );
+	}
+        if (srw_res->num_diagnostics == 0)
+        {
+            if ( assoc->init->bend_srw_update)
+                (*assoc->init->bend_srw_update)(assoc->backend, &rr);
+            else {
+                yaz_log( YLOG_WARN, "Got No Update function!");
+                return;
+            }
+        }
+        if (rr.errcode)
+            yaz_add_srw_diagnostic(assoc->encode,
+                                   &srw_res->diagnostics,
+                                   &srw_res->num_diagnostics,
+                                   rr.errcode, rr.errstring);
+	srw_res->recordId = rr.record_id;
+	srw_res->operationStatus = rr.operation_status;
+	srw_res->recordVersion = rr.record_version;
+	srw_res->recordChecksum = rr.record_checksum;
+	srw_res->extraResponseData = rr.extra_response_data;
+        srw_res->record.recordPosition = 0;
+	if (srw_res->num_diagnostics == 0 && rr.record_data)
+	{
+            srw_res->record.recordSchema = rr.record_schema;
+            srw_res->record.recordPacking = srw_req->record.recordPacking;
+            srw_res->record.recordData_buf = rr.record_data;
+            srw_res->record.recordData_len = strlen(rr.record_data);
+            srw_res->extra_record = rr.response_extra_record;
+                
+	}
+	else
+            srw_res->record.recordData_len = 0;
+	*http_code = 200;
+    }
+}
 
 static void process_http_request(association *assoc, request *req)
 {
@@ -1275,26 +1470,43 @@ static void process_http_request(association *assoc, request *req)
                 res->u.scan_response->num_diagnostics = num_diagnostic;
             }
             srw_bend_scan(assoc, req, sr->u.scan_request,
-                              res->u.scan_response, &http_code);
+                          res->u.scan_response, &http_code);
+            if (http_code == 200)
+                soap_package->u.generic->p = res;
+        }
+        else if (sr->which == Z_SRW_update_request)
+        {
+            yaz_log(YLOG_DEBUG, "handling SRW UpdateRequest");
+            Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_update_response);
+            if (num_diagnostic)
+            {   
+                res->u.update_response->diagnostics = diagnostic;
+                res->u.update_response->num_diagnostics = num_diagnostic;
+            }
+            yaz_log(YLOG_DEBUG, "num_diag = %d", res->u.update_response->num_diagnostics );
+            srw_bend_update(assoc, req, sr->u.update_request,
+                            res->u.update_response, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }
         else
         {
             yaz_log(log_request, "SOAP ERROR"); 
-               /* FIXME - what error, what query */
+            /* FIXME - what error, what query */
             http_code = 500;
             z_soap_error(assoc->encode, soap_package,
                          "SOAP-ENV:Client", "Bad method", 0); 
         }
         if (http_code == 200 || http_code == 500)
         {
-            static Z_SOAP_Handler soap_handlers[3] = {
+            static Z_SOAP_Handler soap_handlers[4] = {
 #if HAVE_XML2
                 {"http://www.loc.gov/zing/srw/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
                 {"http://www.loc.gov/zing/srw/v1.0/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
+                {"http://www.loc.gov/zing/srw/update/", 0,
+                 (Z_SOAP_fun) yaz_ucp_codec},
 #endif
                 {0, 0, 0}
             };
@@ -1776,7 +1988,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.63 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.64 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

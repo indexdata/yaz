@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.33 2005-09-11 18:39:11 adam Exp $
+ * $Id: backend.h,v 1.34 2005-11-08 15:08:02 adam Exp $
  */
 
 /** 
@@ -39,6 +39,7 @@
 
 #include <yaz/yconfig.h>
 #include <yaz/proto.h>
+#include <yaz/srw.h>
 
 YAZ_BEGIN_CDECL
     
@@ -144,6 +145,29 @@ typedef struct bend_scan_rr {
     char *scanClause;   /* CQL scan clause */
 } bend_scan_rr;
 
+typedef struct bend_update_rr {
+    int num_bases;      /* number of elements in databaselist */
+    char **basenames;   /* databases to search */
+    Z_ReferenceId *referenceId; /* reference ID */
+    ODR stream;         /* encoding stream - memory source if required */
+    ODR print;          /* printing stream */
+    char *operation;
+    char *operation_status;
+    char *record_id;
+    char *record_version;
+    char *record_checksum;
+    char *record_old_version;
+    char *record_packing;
+    char *record_schema;
+    char *record_data;
+    Z_SRW_extra_record *request_extra_record;
+    Z_SRW_extra_record *response_extra_record;
+    char *extra_request_data;
+    char *extra_response_data;
+    int errcode;
+    char *errstring;
+} bend_update_rr;
+
 /* delete handler */
 typedef struct bend_delete_rr {
     int function;
@@ -233,6 +257,7 @@ typedef struct bend_initrequest
     Z_External *charneg_response;
     int (*bend_explain)(void *handle, bend_explain_rr *rr);
     int (*bend_srw_scan)(void *handle, bend_scan_rr *rr);
+    int (*bend_srw_update)(void *handle, bend_update_rr *rr);
 } bend_initrequest;
 
 typedef struct bend_initresult

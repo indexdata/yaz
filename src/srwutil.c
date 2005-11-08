@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.31 2005-09-12 10:23:53 adam Exp $
+ * $Id: srwutil.c,v 1.32 2005-11-08 15:08:03 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -178,12 +178,14 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             int ret = -1;
             const char *charset_p = 0;
             
-            static Z_SOAP_Handler soap_handlers[3] = {
+            static Z_SOAP_Handler soap_handlers[4] = {
 #if HAVE_XML2
                 {"http://www.loc.gov/zing/srw/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
                 {"http://www.loc.gov/zing/srw/v1.0/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
+                {"http://www.loc.gov/zing/srw/update/", 0,
+                 (Z_SOAP_fun) yaz_ucp_codec},
 #endif
                 {0, 0, 0}
             };
@@ -229,6 +231,10 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 if ((*srw_pdu)->which == Z_SRW_scan_request &&
                     (*srw_pdu)->u.scan_request->database == 0)
                     (*srw_pdu)->u.scan_request->database = db;
+
+                if ((*srw_pdu)->which == Z_SRW_update_request &&
+                    (*srw_pdu)->u.update_request->database == 0)
+                    (*srw_pdu)->u.update_request->database = db;
 
                 return 0;
             }
@@ -526,6 +532,20 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     return 2;
 }
 
+Z_SRW_extra_record *yaz_srw_get_extra_record(ODR o)
+{
+    Z_SRW_extra_record *res = (Z_SRW_extra_record *)
+        odr_malloc(o, sizeof(*res));
+    res->type = 1;
+    res->recordReviewCode = 0;
+    res->recordReviewNote = 0;
+    res->recordId = 0;
+    res->nonDupRecordId = 0;
+    res->recordLockStatus = 0;
+    res->recordOldVersion = 0;
+    return res;
+}
+
 Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 {
     Z_SRW_PDU *sr = (Z_SRW_PDU *) odr_malloc(o, sizeof(*o));
@@ -561,6 +581,7 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
         sr->u.response->diagnostics = 0;
         sr->u.response->num_diagnostics = 0;
         sr->u.response->nextRecordPosition = 0;
+        sr->u.response->extra_records = 0;
         break;
     case Z_SRW_explain_request:
         sr->u.explain_request = (Z_SRW_explainRequest *)
@@ -580,6 +601,7 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
             Z_SRW_recordPacking_string;
         sr->u.explain_response->diagnostics = 0;
         sr->u.explain_response->num_diagnostics = 0;
+        sr->u.explain_response->extra_record = 0;
         break;
     case Z_SRW_scan_request:
         sr->u.scan_request = (Z_SRW_scanRequest *)
@@ -594,15 +616,45 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
     case Z_SRW_scan_response:
         sr->u.scan_response = (Z_SRW_scanResponse *)
             odr_malloc(o, sizeof(*sr->u.scan_response));
-        sr->u.scan_response->terms = 0;
-        sr->u.scan_response->num_terms = 0;
-        sr->u.scan_response->diagnostics = 0;
-        sr->u.scan_response->num_diagnostics = 0;
+	sr->u.scan_response->terms = 0;
+	sr->u.scan_response->num_terms = 0;
+	sr->u.scan_response->diagnostics = 0;
+	sr->u.scan_response->num_diagnostics = 0;
+    case Z_SRW_update_request:
+        sr->u.update_request = (Z_SRW_updateRequest *)
+            odr_malloc(o, sizeof(*sr->u.update_request));
+	sr->u.update_request->database = 0;
+	sr->u.update_request->stylesheet = 0;
+        sr->u.update_request->record.recordSchema = 0;
+        sr->u.update_request->record.recordPacking = Z_SRW_recordPacking_XML;
+	sr->u.update_request->recordId = 0;
+	sr->u.update_request->recordVersion = 0;
+	sr->u.update_request->recordOldVersion = 0;
+        sr->u.update_request->record.recordData_buf = 0;
+        sr->u.update_request->record.recordData_len = 0;
+        sr->u.update_request->extra_record = 0;
+        sr->u.update_request->extraRequestData = 0;
+	sr->u.request->database = 0;
+        break;
+    case Z_SRW_update_response:
+        sr->u.update_response = (Z_SRW_updateResponse *)
+            odr_malloc(o, sizeof(*sr->u.update_response));
+	sr->u.update_response->operationStatus = 0;
+	sr->u.update_response->recordId = 0;
+	sr->u.update_response->recordVersion = 0;
+	sr->u.update_response->recordChecksum = 0;
+	sr->u.update_response->record.recordData_buf = 0;
+	sr->u.update_response->record.recordData_len = 0;
+	sr->u.update_response->record.recordSchema = 0;
+	sr->u.update_response->record.recordPacking =
+	    Z_SRW_recordPacking_XML;
+        sr->u.update_response->extra_record = 0;
+        sr->u.update_response->extraResponseData = 0;
+	sr->u.update_response->diagnostics = 0;
+	sr->u.update_response->num_diagnostics = 0;
     }
     return sr;
 }
-
-
 
 /* bib1:srw */
 static int srw_bib1_map[] = {

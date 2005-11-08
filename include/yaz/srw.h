@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.22 2005-06-25 15:46:03 adam Exp $
+ * $Id: srw.h,v 1.23 2005-11-08 15:08:02 adam Exp $
  */
 /**
  * \file srw.h
@@ -19,10 +19,21 @@
 YAZ_BEGIN_CDECL
 
 typedef struct {
+    int type;
+    char *recordReviewCode;
+    char *recordReviewNote;
+    char *recordId;
+    char *nonDupRecordId;
+    char *recordLockStatus;
+    char *recordOldVersion;
+} Z_SRW_extra_record;
+
+typedef struct {
     char *recordSchema;
     int recordPacking;
 #define Z_SRW_recordPacking_string 0
 #define Z_SRW_recordPacking_XML 1
+#define Z_SRW_recordPacking_URL 2
     char *recordData_buf;
     int recordData_len;
     int *recordPosition;
@@ -76,6 +87,8 @@ typedef struct {
     Z_SRW_diagnostic *diagnostics;
     int num_diagnostics;
     int *nextRecordPosition;
+
+    Z_SRW_extra_record **extra_records;  /* of size num_records */
 } Z_SRW_searchRetrieveResponse;
 
 typedef struct {
@@ -88,6 +101,7 @@ typedef struct {
     Z_SRW_record record;
     Z_SRW_diagnostic *diagnostics;
     int num_diagnostics;
+    Z_SRW_extra_record *extra_record;
 } Z_SRW_explainResponse;
     
 typedef struct {
@@ -117,12 +131,39 @@ typedef struct {
     int num_diagnostics;
 } Z_SRW_scanResponse;
 
+
+typedef struct {
+    char *database;
+    char *operation;
+    char *recordId;
+    char *recordVersion;
+    char *recordOldVersion;
+    Z_SRW_record record;
+    Z_SRW_extra_record *extra_record;
+    char *extraRequestData;
+    char *stylesheet;
+} Z_SRW_updateRequest;
+
+typedef struct {
+    char *operationStatus;
+    char *recordId;
+    char *recordVersion;
+    char *recordChecksum;
+    char *extraResponseData;
+    Z_SRW_record record;
+    Z_SRW_extra_record *extra_record;
+    Z_SRW_diagnostic *diagnostics;
+    int num_diagnostics;
+} Z_SRW_updateResponse;
+
 #define Z_SRW_searchRetrieve_request  1
 #define Z_SRW_searchRetrieve_response 2
 #define Z_SRW_explain_request 3
 #define Z_SRW_explain_response 4
 #define Z_SRW_scan_request 5
 #define Z_SRW_scan_response 6
+#define Z_SRW_update_request 7
+#define Z_SRW_update_response 8
 
 typedef struct {
     int which;
@@ -133,6 +174,8 @@ typedef struct {
         Z_SRW_explainResponse *explain_response;
         Z_SRW_scanRequest *scan_request;
         Z_SRW_scanResponse *scan_response;
+        Z_SRW_updateRequest *update_request;
+        Z_SRW_updateResponse *update_response;
     } u;
     char *srw_version;
 } Z_SRW_PDU;
@@ -140,7 +183,11 @@ typedef struct {
 YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
                              Z_SRW_PDU **handler_data,
                              void *client_data, const char *ns);
+YAZ_EXPORT int yaz_ucp_codec(ODR o, void * pptr,
+                             Z_SRW_PDU **handler_data,
+                             void *client_data, const char *ns);
 YAZ_EXPORT Z_SRW_PDU *yaz_srw_get(ODR o, int which);
+YAZ_EXPORT Z_SRW_extra_record *yaz_srw_get_extra_record(ODR o);
 
 YAZ_EXPORT int yaz_diag_bib1_to_srw (int bib1_code);
 
