@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.50 2005-11-03 16:49:00 mike Exp $
+ * $Id: zoom-c.c,v 1.51 2005-11-08 16:52:29 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -644,17 +644,34 @@ ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
     return r;
 }
 
+/*
+ * This is the old result-set sorting API, which is maintained only
+ * for the sake of binary compatibility.  There is no reason ever to
+ * use this rather than ZOOM_resultset_sort1().
+ */
 ZOOM_API(void)
 ZOOM_resultset_sort(ZOOM_resultset r,
                     const char *sort_type, const char *sort_spec)
 {
+    (void) ZOOM_resultset_sort1(r, sort_type, sort_spec);
+}
+
+ZOOM_API(int)
+ZOOM_resultset_sort1(ZOOM_resultset r,
+                     const char *sort_type, const char *sort_spec)
+{
     ZOOM_connection c = r->connection;
     ZOOM_task task;
+    ZOOM_query newq;
+
+    newq = ZOOM_query_create();
+    if (ZOOM_query_sortby(newq, sort_spec) < 0)
+        return -1;
 
     yaz_log(log_api, "%p ZOOM_resultset_sort r=%p sort_type=%s sort_spec=%s",
             r, r, sort_type, sort_spec);
     if (!c)
-        return;
+        return 0;
 
     if (c->host_port && c->proto == PROTO_HTTP)
     {
@@ -674,8 +691,7 @@ ZOOM_resultset_sort(ZOOM_resultset r,
     ZOOM_resultset_cache_reset(r);
     task = ZOOM_connection_add_task (c, ZOOM_TASK_SORT);
     task->u.sort.resultset = r;
-    task->u.sort.q = ZOOM_query_create();
-    ZOOM_query_sortby(task->u.sort.q, sort_spec);
+    task->u.sort.q = newq;
 
     ZOOM_resultset_addref (r);  
 
@@ -684,6 +700,8 @@ ZOOM_resultset_sort(ZOOM_resultset r,
         while (ZOOM_event (1, &c))
             ;
     }
+
+    return 0;
 }
 
 ZOOM_API(void)
@@ -1045,7 +1063,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.50 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.51 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
