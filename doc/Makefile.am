@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.61 2005-10-15 10:40:37 adam Exp $
+## $Id: Makefile.am,v 1.62 2005-11-08 21:57:47 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -23,8 +23,8 @@ HTMLFILES = \
  server.main.html server.vhosts.html \
  soap.html soap.http.html soap.xml.html soap.srw.html \
  tools.html tools.marc.html tools.nmem.html tools.log.html tools.oid.html \
- yaz.html zoom.events.html zoom.html zoom.options.html zoom.query.html \
- zoom.records.html zoom.resultsets.html zoom.scan.html
+ yaz.html zoom.events.html zoom.ext.html zoom.html zoom.options.html \
+ zoom.query.html zoom.records.html zoom.resultsets.html zoom.scan.html
 
 MANFILES=yaz-client.1 yaz-ztest.8 \
 	yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
