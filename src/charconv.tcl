@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.9 2005-11-06 01:55:06 adam Exp $
+# $Id: charconv.tcl,v 1.10 2005-11-09 17:48:11 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -22,7 +22,7 @@ proc preamble_trie {ofilehandle} {
             $totype to : 24;
         };
         struct yaz_iconv_trie_dir {
-            short ptr : 15;
+            int ptr : 15;
             unsigned combining : 1;
             $totype to : 24;
         };

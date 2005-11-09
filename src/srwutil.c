@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.32 2005-11-08 15:08:03 adam Exp $
+ * $Id: srwutil.c,v 1.33 2005-11-09 17:48:11 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -763,7 +763,7 @@ static int srw_bib1_map[] = {
     219, 1,  /* bad map */
     220, 1,  /* bad map */
     221, 1,  /* bad map */
-    222, 1,  /* bad map */
+    222, 3,
     223, 1,  /* bad map */
     224, 1,  /* bad map */
     225, 1,  /* bad map */
