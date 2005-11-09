@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.37 2005-11-08 15:08:02 adam Exp $
+ * $Id: srw.c,v 1.38 2005-11-09 17:47:07 adam Exp $
  */
 /**
  * \file srw.c
@@ -972,6 +972,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         {
             xmlNodePtr ptr = method->children;
             Z_SRW_updateRequest *req;
+            char *oper = 0;
 
             (*p)->which = Z_SRW_update_request;
             req = (*p)->u.update_request = (Z_SRW_updateRequest *)
@@ -989,8 +990,6 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             req->extraRequestData = 0;
             req->stylesheet = 0;
 
-            char *oper = 0;
-            
             for (; ptr; ptr = ptr->next)
             {
                 if (match_xsd_string(ptr, "version", o,

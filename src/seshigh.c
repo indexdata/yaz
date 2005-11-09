@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.64 2005-11-08 15:08:02 adam Exp $
+ * $Id: seshigh.c,v 1.65 2005-11-09 17:47:11 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1476,8 +1476,8 @@ static void process_http_request(association *assoc, request *req)
         }
         else if (sr->which == Z_SRW_update_request)
         {
-            yaz_log(YLOG_DEBUG, "handling SRW UpdateRequest");
             Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_update_response);
+            yaz_log(YLOG_DEBUG, "handling SRW UpdateRequest");
             if (num_diagnostic)
             {   
                 res->u.update_response->diagnostics = diagnostic;
@@ -1988,7 +1988,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.64 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.65 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
