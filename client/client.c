@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.299 2005-11-02 11:54:40 adam Exp $
+ * $Id: client.c,v 1.300 2005-11-09 17:47:50 adam Exp $
  */
 
 #include <stdio.h>
@@ -1530,7 +1530,7 @@ static int send_searchRequest(const char *arg)
     if (smallSetUpperBound > 0 || (largeSetLowerBound > 1 &&
         mediumSetPresentNumber > 0))
     {
-        if (recordsyntax_list > 0)
+        if (recordsyntax_size > 0)
             req->preferredRecordSyntax =
                 yaz_oidval_to_z3950oid(out, CLASS_RECSYN, recordsyntax_list[0]);
         req->smallSetElementSetNames =
