@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.39 2005-11-11 22:06:46 adam Exp $
+ * $Id: srw.c,v 1.40 2005-11-11 22:07:11 adam Exp $
  */
 /**
  * \file srw.c
@@ -291,8 +291,6 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
                 match_xsd_string_n(data_ptr, "recordData", o, 
                                    &rec->recordData_buf, &rec->recordData_len);
                 break;
-            default:
-                /* need some way to signal diagnostic here */
             }
         }
         rec->recordPacking = pack;
