@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.38 2005-11-09 17:47:07 adam Exp $
+ * $Id: srw.c,v 1.39 2005-11-11 22:06:46 adam Exp $
  */
 /**
  * \file srw.c
@@ -234,7 +234,7 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
         char *spack = 0;
         int pack = Z_SRW_recordPacking_string;
         xmlNodePtr ptr;
-        xmlNodePtr data_ptr;
+        xmlNodePtr data_ptr = 0;
         rec->recordSchema = 0;
         rec->recordData_buf = 0;
         rec->recordData_len = 0;
@@ -244,8 +244,8 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
         {
             
             if (match_xsd_string(ptr, "recordSchema", o, 
-                                 &rec->recordSchema)){
-            }
+                                 &rec->recordSchema))
+                ;
             else if (match_xsd_string(ptr, "recordPacking", o, &spack))
             {
                 if (spack && !strcmp(spack, "xml"))
@@ -258,39 +258,42 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
             else if (match_xsd_integer(ptr, "recordPosition", o, 
                                        &rec->recordPosition))
                 ;
-            else if (match_element(ptr, "recordData")){
+            else if (match_element(ptr, "recordData"))
+            {
                 /* save position of Data until after the loop
                    then we will know the packing (hopefully), and
                    unpacking is done once
                 */
                 data_ptr = ptr;
             }
-            else if (match_element(ptr, "extraRecordData")){
+            else if (match_element(ptr, "extraRecordData"))
+            {
                 *extra = (Z_SRW_extra_record *)
                     odr_malloc(o, sizeof(Z_SRW_extra_record));
                 yaz_srw_extra_record(o, ptr, *extra, client_data, ns);
             }
         }
-        switch(pack)
+        if (data_ptr)
         {
-        case Z_SRW_recordPacking_XML:
-            match_xsd_XML_n(data_ptr, "recordData", o, 
-                            &rec->recordData_buf, &rec->recordData_len);
-            break;
-        case Z_SRW_recordPacking_URL:
-            /* just store it as a string.
-               leave it to the backend to collect the document */
-            match_xsd_string_n(ptr, "recordData", o, 
-                               &rec->recordData_buf, &rec->recordData_len);
-            break;
-        case Z_SRW_recordPacking_string:
-            match_xsd_string_n(ptr, "recordData", o, 
-                               &rec->recordData_buf, &rec->recordData_len);
-            break;
-        default:
-            rec->recordData_buf = 0;
-            rec->recordData_len = 0;
-            /* need some way to signal diagnostic here */
+            switch(pack)
+            {
+            case Z_SRW_recordPacking_XML:
+                match_xsd_XML_n(data_ptr, "recordData", o, 
+                                &rec->recordData_buf, &rec->recordData_len);
+                break;
+            case Z_SRW_recordPacking_URL:
+                /* just store it as a string.
+                   leave it to the backend to collect the document */
+                match_xsd_string_n(data_ptr, "recordData", o, 
+                                   &rec->recordData_buf, &rec->recordData_len);
+                break;
+            case Z_SRW_recordPacking_string:
+                match_xsd_string_n(data_ptr, "recordData", o, 
+                                   &rec->recordData_buf, &rec->recordData_len);
+                break;
+            default:
+                /* need some way to signal diagnostic here */
+            }
         }
         rec->recordPacking = pack;
     }
