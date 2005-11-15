@@ -62,6 +62,15 @@ Modified all YAZ source files - except the source which is auto-generated
 by tools - to use spaces rather than TABS. Emacs/VIM trailer added to
 all source files.
 
+Add ZOOM_connection_option_getl() and ZOOM_options_getl(),
+corresponding to the existing *_setl() function.  These allow option
+values containing arbitrary valuues.
+
+Add ZOOM_resultset_sort1(), which should ALWAYS be used in place of
+ZOOM_resultset_sort() in new applications.  Its behaviour is identical
+except that it returns an indicator of whether or not the sort
+criterion was accepted (0 for OK, -1 for invalid).
+
 --- 2.1.8 2005/06/07 
 
 Fixed bug in yaz_marc_decode_buf. By mistake the routine appended
