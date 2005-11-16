@@ -3,6 +3,8 @@
 ZOOM_connection_errcode(c)
 ZOOM_connection_errmsg(c)
 ZOOM_connection_addinfo(c)
+ZOOM_connection_addinfo(c)
+ZOOM_connection_diagset(c);
 ZOOM_diag_str(error)
 ZOOM_resultset_record_immediate(s, pos)
 ZOOM_resultset_cache_reset(r)
@@ -16,7 +18,7 @@ ZOOM_options_get_bool(opt, name, defa)
 ZOOM_options_get_int(opt, name, defa)
 ZOOM_options_set_int(opt, name, value)
 -->
-<!-- $Id: zoom.xml,v 1.43 2005-11-08 21:53:01 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.44 2005-11-16 16:04:19 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is

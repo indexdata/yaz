@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.29 2005-11-08 16:51:34 mike Exp $
+ * $Id: zoom.h,v 1.30 2005-11-16 16:03:51 mike Exp $
  */
 /**
  * \file zoom.h
@@ -92,6 +92,9 @@ ZOOM_connection_errmsg (ZOOM_connection c);
 /* returns additional info */
 ZOOM_API(const char *)
 ZOOM_connection_addinfo (ZOOM_connection c);
+/* returns diagnostic set */
+ZOOM_API(const char *)
+ZOOM_connection_diagset (ZOOM_connection c);
 /* translates error code into human-readable string */
 ZOOM_API(const char *)
 ZOOM_diag_str (int error);
