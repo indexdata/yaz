@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.40 2005-11-11 22:07:11 adam Exp $
+ * $Id: srw.c,v 1.41 2005-11-28 13:21:38 adam Exp $
  */
 /**
  * \file srw.c
@@ -321,7 +321,7 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
         }
         if (rec->recordPosition)
             add_xsd_integer(ptr, "recordPosition", rec->recordPosition );
-        if (*extra)
+        if (extra && *extra)
         {
             xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "extraRecordData",
                                           0);
@@ -367,7 +367,8 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
         {
             xmlNodePtr rptr = xmlNewChild(pptr, 0, BAD_CAST "record",
                                           0);
-            yaz_srw_record(o, rptr, (*recs)+i, *extra + i, client_data, ns);
+            yaz_srw_record(o, rptr, (*recs)+i, (*extra ? *extra + i : 0),
+                           client_data, ns);
         }
     }
     return 0;
