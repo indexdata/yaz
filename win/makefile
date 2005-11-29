@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.96 2005-09-09 11:28:48 adam Exp $
+# $Id: makefile,v 1.97 2005-11-29 20:40:33 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -111,6 +111,7 @@ ZOOMTST5=$(BINDIR)\zoomtst5.exe
 ZOOMTST6=$(BINDIR)\zoomtst6.exe
 ZOOMTST7=$(BINDIR)\zoomtst7.exe
 ZOOMTST8=$(BINDIR)\zoomtst8.exe
+ZOOMTST9=$(BINDIR)\zoomtst9.exe
 
 CQL2PQF=$(BINDIR)\cql2pqf.exe
 CQL2XCQL=$(BINDIR)\cql2xcql.exe
@@ -124,7 +125,7 @@ client: dirs generate $(CLIENT)
 ztest: dirs generate $(ZTEST)
 
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
- $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8)
+ $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8) $(ZOOMTST9)
 
 utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP)
 
@@ -288,6 +289,8 @@ YAZ_ZOOMTST7_OBJS = \
    $(OBJDIR)\zoomtst7.obj
 YAZ_ZOOMTST8_OBJS = \
    $(OBJDIR)\zoomtst8.obj
+YAZ_ZOOMTST9_OBJS = \
+   $(OBJDIR)\zoomtst9.obj
 
 YAZ_CQL2PQF_OBJS = \
    $(OBJDIR)\cql2pqf.obj
@@ -832,6 +835,19 @@ $(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS)
 		$(YAZ_ZOOMTST8_OBJS)
 		/map:"$(LIBDIR)\zoomtst8.map"
 		/out:$(ZOOMTST8)
+<<
+
+
+$(ZOOMTST9) : "$(BINDIR)" $(YAZ_ZOOMTST9_OBJS) 
+	@echo Linking $(ZOOMTST9)
+	$(LINK) @<<
+        $(LNKOPT) 
+		$(CLIENT_LINK_OPTIONS)
+		$(LINK_LIBS) 
+		$(IMPLIB)
+		$(YAZ_ZOOMTST9_OBJS)
+		/map:"$(LIBDIR)\zoomtst9.map"
+		/out:$(ZOOMTST9)
 <<
 
 $(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS) 
