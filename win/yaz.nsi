@@ -1,6 +1,6 @@
-; $Id: yaz.nsi,v 1.70 2005-08-25 11:48:26 adam Exp $
+; $Id: yaz.nsi,v 1.71 2005-11-29 20:26:06 adam Exp $
 
-!define VERSION "2.1.8"
+!define VERSION "2.1.10"
 !define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
 
 !include "MUI.nsh"

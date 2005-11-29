@@ -1,3 +1,9 @@
+yaz (2.1.10-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 29 Nov 2005 21:17:15 +0100
+
 yaz (2.1.9-2) unstable; urgency=low
 
   * Removed /usr/share/yaz/etc from libyaz. All /usr/share/yaz content is
