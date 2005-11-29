@@ -1,3 +1,5 @@
+--- 2.1.10 2005/11/29 
+
 Added ZiNG Update Support. New codecs are defined in srw.h. Extended the
 GFS to support this as well. Backend handler, bend_srw_update, does the
 update work. Code contributed by Ko van der Sloot.
