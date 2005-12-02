@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.300 2005-11-09 17:47:50 adam Exp $
+ * $Id: client.c,v 1.301 2005-12-02 16:13:50 adam Exp $
  */
 
 #include <stdio.h>
@@ -4295,7 +4295,6 @@ static struct {
 } cmd_array[] = {
     {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]",NULL,0,NULL},
     {"quit", cmd_quit, "",NULL,0,NULL},
-    {"exit", cmd_quit, "",NULL,0,NULL},
     {"find", cmd_find, "<query>",NULL,0,NULL},
     {"delete", cmd_delete, "<setname>",NULL,0,NULL},
     {"base", cmd_base, "<base-name>",NULL,0,NULL},
@@ -4366,6 +4365,7 @@ static struct {
     {"zversion", cmd_zversion, "", NULL, 0, NULL},
     {"help", cmd_help, "", NULL,0,NULL},
     {"init", cmd_init, "", NULL,0,NULL},
+    {"exit", cmd_quit, "",NULL,0,NULL},
     {0,0,0,0,0,0}
 };
 
