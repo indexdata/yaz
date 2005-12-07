@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.52 2005-11-16 16:07:52 mike Exp $
+ * $Id: zoom-c.c,v 1.53 2005-12-07 16:15:15 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -387,6 +387,24 @@ ZOOM_connection_connect(ZOOM_connection c,
     }
     else
         c->host_port = xstrdup(host);
+
+    if ((val = strchr(c->host_port, '%')) != 0) {
+        /* We recognise <username>:<password>%<string> for embedded
+         * authentication.  This is slightly hacky syntax, but it's
+         * hard to get into the comstack code in a
+         * protocol-independent way.
+         */
+        *(char*)val = '\0';
+        char *remainder = xstrdup(val+1);
+        char *pass = strchr(c->host_port, ':');
+        if (pass != 0) {
+            *pass++ = '\0';
+            ZOOM_connection_option_set(c, "user", c->host_port);
+            ZOOM_connection_option_set(c, "password", pass);
+        }
+        xfree(c->host_port);
+        c->host_port = remainder;
+    }
 
     ZOOM_options_set(c->options, "host", c->host_port);
 
@@ -1063,7 +1081,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.52 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.53 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
