@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.53 2005-12-07 16:15:15 mike Exp $
+ * $Id: zoom-c.c,v 1.54 2005-12-08 15:36:31 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -394,9 +394,11 @@ ZOOM_connection_connect(ZOOM_connection c,
          * hard to get into the comstack code in a
          * protocol-independent way.
          */
+        char *remainder, *pass;
+
         *(char*)val = '\0';
-        char *remainder = xstrdup(val+1);
-        char *pass = strchr(c->host_port, ':');
+        remainder = xstrdup(val+1);
+        pass = strchr(c->host_port, ':');
         if (pass != 0) {
             *pass++ = '\0';
             ZOOM_connection_option_set(c, "user", c->host_port);
@@ -1081,7 +1083,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.53 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.54 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
