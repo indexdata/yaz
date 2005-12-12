@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.54 2005-12-08 15:36:31 adam Exp $
+ * $Id: zoom-c.c,v 1.55 2005-12-12 12:02:04 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -388,24 +388,35 @@ ZOOM_connection_connect(ZOOM_connection c,
     else
         c->host_port = xstrdup(host);
 
-    if ((val = strchr(c->host_port, '%')) != 0) {
-        /* We recognise <username>:<password>%<string> for embedded
-         * authentication.  This is slightly hacky syntax, but it's
-         * hard to get into the comstack code in a
-         * protocol-independent way.
+    {
+        /*
+         * If the "<scheme>:" part of the host string is preceded by one
+         * or more comma-separated <name>=<value> pairs, these are taken
+         * to be options to be set on the connection object.  Among other
+         * applications, this facility can be used to embed authentication
+         * in a host string:
+         *          user=admin,password=secret,tcp:localhost:9999
          */
-        char *remainder, *pass;
-
-        *(char*)val = '\0';
-        remainder = xstrdup(val+1);
-        pass = strchr(c->host_port, ':');
-        if (pass != 0) {
-            *pass++ = '\0';
-            ZOOM_connection_option_set(c, "user", c->host_port);
-            ZOOM_connection_option_set(c, "password", pass);
+        char *remainder = c->host_port;
+        char *pcolon = strchr(remainder, ':');
+        char *pcomma;
+        char *pequals;
+        while ((pcomma = strchr(remainder, ',')) != 0 &&
+               (pcolon == 0 || pcomma < pcolon)) {
+            *pcomma = '\0';
+            if ((pequals = strchr(remainder, '=')) != 0) {
+                *pequals = '\0';
+                /*printf("# setting '%s'='%s'\n", remainder, pequals+1);*/
+                ZOOM_connection_option_set(c, remainder, pequals+1);
+            }
+            remainder = pcomma+1;
         }
-        xfree(c->host_port);
-        c->host_port = remainder;
+
+        if (remainder != c->host_port) {
+            xfree(c->host_port);
+            c->host_port = xstrdup(remainder);
+            /*printf("# reset hp='%s'\n", remainder);*/
+        }
     }
 
     ZOOM_options_set(c->options, "host", c->host_port);
@@ -1083,7 +1094,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.54 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.55 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
