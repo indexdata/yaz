@@ -18,7 +18,7 @@ ZOOM_options_get_bool(opt, name, defa)
 ZOOM_options_get_int(opt, name, defa)
 ZOOM_options_set_int(opt, name, value)
 -->
-<!-- $Id: zoom.xml,v 1.44 2005-11-16 16:04:19 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.45 2005-12-12 12:09:29 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -107,6 +107,17 @@ ZOOM_options_set_int(opt, name, value)
     You can prefix the host with a scheme followed by colon. The
     default scheme is <literal>tcp</literal> (Z39.50 protocol).
     The scheme <literal>http</literal> selects SRW over HTTP.
+   </para>
+   <para>
+    You can prefix the scheme-qualified host-string with one or more
+    comma-separated
+    <literal><parameter>key</parameter>=<parameter>value</parameter></literal>
+    sequences, each of which represents an option to be set into the
+    connection structure <emphasis>before</emphasis> the
+    protocol-level connection is forged and the initialisation
+    handshake takes place.  This facility can be used to provide
+    authentication credentials, as in host-strings such as:
+    <literal>user=admin,password=halfAm4n,tcp:localhost:8017/db</literal>
    </para>
    <para>
     Connection objects should be destroyed using the function
