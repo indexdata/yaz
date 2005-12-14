@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.23 2005-11-08 15:08:02 adam Exp $
+ * $Id: srw.h,v 1.24 2005-12-14 14:05:55 adam Exp $
  */
 /**
  * \file srw.h
@@ -207,8 +207,19 @@ YAZ_EXPORT void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
                                        int *num, int code,
                                        const char *addinfo);
     
+
 YAZ_EXPORT void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d, 
                                       int code, const char *details);
+
+YAZ_EXPORT void yaz_add_srw_diagnostic_uri(ODR o, Z_SRW_diagnostic **d,
+                                           int *num, const char *uri,
+                                           const char *message,
+                                           const char *details);
+
+YAZ_EXPORT void yaz_mk_srw_diagnostic(ODR o, Z_SRW_diagnostic *d, 
+                                      const char *uri, const char *message,
+                                      const char *details);
+
 YAZ_END_CDECL
 
 #endif
