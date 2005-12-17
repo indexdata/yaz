@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.33 2005-08-22 20:34:23 adam Exp $
+ * $Id: marcdump.c,v 1.34 2005-12-17 20:22:01 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -115,6 +115,7 @@ int main (int argc, char **argv)
     FILE *cfile = 0;
     char *from = 0, *to = 0;
     int num = 1;
+    const char *split_fname = 0;
     
 #if HAVE_LOCALE_H
     setlocale(LC_CTYPE, "");
@@ -125,7 +126,7 @@ int main (int argc, char **argv)
 #endif
 #endif
 
-    while ((r = options("pvc:xOeXIf:t:2", argv, argc, &arg)) != -2)
+    while ((r = options("pvc:xOeXIf:t:2s:", argv, argc, &arg)) != -2)
     {
         int count;
         no++;
@@ -163,6 +164,9 @@ int main (int argc, char **argv)
         case '2':
             libxml_dom_test = 1;
             break;
+        case 's':
+            split_fname = arg;
+            break;
         case 0:
             inf = fopen(arg, "rb");
             count = 0;
@@ -178,6 +182,7 @@ int main (int argc, char **argv)
             {
                 yaz_marc_t mt = yaz_marc_create();
                 yaz_iconv_t cd = 0;
+                int marc_no = 0;
 
                 if (from && to)
                 {
@@ -192,7 +197,7 @@ int main (int argc, char **argv)
                 }
                 yaz_marc_xml(mt, xml);
                 yaz_marc_debug(mt, verbose);
-                while (1)
+                for(;; marc_no++)
                 {
                     int len;
                     char *result = 0;
@@ -240,10 +245,31 @@ int main (int argc, char **argv)
                                len, (long) off, (long) off);
                         break;
                     }
-                    len = len - 5;
-                    r = fread (buf + 5, 1, len, inf);
-                    if (r < len)
+                    rlen = len - 5;
+                    r = fread (buf + 5, 1, rlen, inf);
+                    if (r < rlen)
                         break;
+                    if (split_fname)
+                    {
+                        char fname[256];
+                        sprintf(fname, "%.200s%07d", split_fname, marc_no);
+                        FILE *sf = fopen(fname, "wb");
+                        if (!sf)
+                        {
+                            fprintf(stderr, "Could not open %s\n", fname);
+                            split_fname = 0;
+                        }
+                        else
+                        {
+                            if (fwrite(buf, 1, len, sf) != len)
+                            {
+                                fprintf(stderr, "Could write content to %s\n",
+                                        fname);
+                                split_fname = 0;
+                            }
+                            fclose(sf);
+                        }
+                    }
                     r = yaz_marc_decode_buf (mt, buf, -1, &result, &rlen);
                     if (result)
                         fwrite (result, rlen, 1, stdout);
