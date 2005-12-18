@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.34 2005-12-17 20:22:01 adam Exp $
+ * $Id: marcdump.c,v 1.35 2005-12-18 15:58:02 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -252,8 +252,9 @@ int main (int argc, char **argv)
                     if (split_fname)
                     {
                         char fname[256];
+                        FILE *sf;
                         sprintf(fname, "%.200s%07d", split_fname, marc_no);
-                        FILE *sf = fopen(fname, "wb");
+                        sf = fopen(fname, "wb");
                         if (!sf)
                         {
                             fprintf(stderr, "Could not open %s\n", fname);
