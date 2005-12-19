@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.30 2005-11-16 16:03:51 mike Exp $
+ * $Id: zoom.h,v 1.31 2005-12-19 17:04:22 mike Exp $
  */
 /**
  * \file zoom.h
@@ -205,6 +205,9 @@ ZOOM_query_sortby(ZOOM_query s, const char *criteria);
 /* scan */
 ZOOM_API(ZOOM_scanset)
 ZOOM_connection_scan (ZOOM_connection c, const char *startterm);
+
+ZOOM_API(ZOOM_scanset)
+ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm);
 
 ZOOM_API(const char *)
 ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,

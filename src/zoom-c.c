@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.55 2005-12-12 12:02:04 mike Exp $
+ * $Id: zoom-c.c,v 1.56 2005-12-19 17:04:35 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -1094,7 +1094,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.55 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.56 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2397,7 +2397,22 @@ static zoom_ret send_present(ZOOM_connection c)
 ZOOM_API(ZOOM_scanset)
 ZOOM_connection_scan (ZOOM_connection c, const char *start)
 {
+    ZOOM_scanset s;
+    ZOOM_query q = ZOOM_query_create();
+
+    ZOOM_query_prefix (q, start);
+
+    s = ZOOM_connection_scan1(c, q);
+    ZOOM_query_destroy (q);
+    return s;
+
+}
+
+ZOOM_API(ZOOM_scanset)
+ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query q)
+{
     ZOOM_scanset scan = (ZOOM_scanset) xmalloc (sizeof(*scan));
+    char *start;
 
     scan->connection = c;
     scan->odr = odr_createmem (ODR_DECODE);
@@ -2405,9 +2420,32 @@ ZOOM_connection_scan (ZOOM_connection c, const char *start)
     scan->refcount = 1;
     scan->scan_response = 0;
 
+    /*
+     * We need to check the query-type, so we can recognise CQL and
+     * compile it into a form that we can use here.  The ZOOM_query
+     * structure has no explicit `type' member, but inspection of the
+     * ZOOM_query_prefix() and ZOOM_query_cql() functions shows how
+     * the structure is set up in each case.
+     */
+
+    if (q->z_query->which == Z_Query_type_1) {
+        yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p PQF '%s'",
+                c, q, q->query_string);
+        start = q->query_string;
+    } else if (q->z_query->which == Z_Query_type_104) {
+        yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p CQL '%s'",
+                c, q, q->query_string);
+        /* Not yet supported */
+        abort();
+    } else {
+        yaz_log(YLOG_FATAL, "%p ZOOM_connection_scan1 q=%p unknown type '%s'",
+                c, q, q->query_string);
+        abort();
+    }
+
     if ((scan->termListAndStartPoint =
          p_query_scan(scan->odr, PROTO_Z3950, &scan->attributeSet,
-                      start)))
+                      start)) != 0)
     {
         ZOOM_task task = ZOOM_connection_add_task (c, ZOOM_TASK_SCAN);
         task->u.scan.scan = scan;
