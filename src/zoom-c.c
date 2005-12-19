@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.56 2005-12-19 17:04:35 mike Exp $
+ * $Id: zoom-c.c,v 1.57 2005-12-19 20:19:29 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -954,7 +954,7 @@ static zoom_ret do_connect (ZOOM_connection c)
         }
     }
     c->state = STATE_IDLE;
-    set_ZOOM_error(c, ZOOM_ERROR_CONNECT, effective_host);
+    set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
     return zoom_complete;
 }
 
@@ -1094,7 +1094,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.56 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.57 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2084,7 +2084,8 @@ static void handle_queryExpressionTerm(ZOOM_options opt, const char *name,
     {
     case Z_Term_general:
         ZOOM_options_setl(opt, name,
-                          term->u.general->buf, term->u.general->len);
+                          (const char *)(term->u.general->buf), 
+                          term->u.general->len);
         break;
     case Z_Term_characterString:
         ZOOM_options_set(opt, name, term->u.characterString);
@@ -3324,7 +3325,7 @@ static void recv_apdu (ZOOM_connection c, Z_APDU *apdu)
         }
         else
         {
-            set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, 0);
+            set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
             do_close(c);
         }
         break;
@@ -3504,7 +3505,7 @@ static int do_read (ZOOM_connection c)
         }
         else
         {
-            set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, 0);
+            set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
             do_close (c);
         }
     }
@@ -3567,9 +3568,9 @@ static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out)
             return zoom_pending;
         }
         if (c->state == STATE_CONNECTING)
-            set_ZOOM_error(c, ZOOM_ERROR_CONNECT, 0);
+            set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
         else
-            set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, 0);
+            set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
         do_close (c);
         return zoom_complete;
     }
@@ -3744,7 +3745,7 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
     if (r == CS_NONE)
     {
         event = ZOOM_Event_create (ZOOM_EVENT_CONNECT);
-        set_ZOOM_error(c, ZOOM_ERROR_CONNECT, 0);
+        set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
         do_close (c);
         ZOOM_connection_put_event (c, event);
     }
@@ -3783,7 +3784,7 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
         }
         else
         {
-            set_ZOOM_error(c, ZOOM_ERROR_CONNECT, 0);
+            set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
             do_close (c);
             ZOOM_connection_put_event (c, event);
         }
