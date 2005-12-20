@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.301 2005-12-02 16:13:50 adam Exp $
+ * $Id: client.c,v 1.302 2005-12-20 23:07:27 adam Exp $
  */
 
 #include <stdio.h>
@@ -3250,8 +3250,8 @@ int cmd_packagename(const char* arg)
 
 int cmd_proxy(const char* arg)
 {
-    xfree (yazProxy);
-    yazProxy = NULL;
+    xfree(yazProxy);
+    yazProxy = 0;
     if (*arg)
         yazProxy = xstrdup (arg);
     return 1;
@@ -4093,6 +4093,7 @@ int cmd_set_otherinfo(const char* args)
         extraOtherInfos[otherinfoNo].oidval = -1;
         if (extraOtherInfos[otherinfoNo].value)
             free(extraOtherInfos[otherinfoNo].value);                   
+        extraOtherInfos[otherinfoNo].value = 0;
         return 0;
     }
     if (sscan_res<3) {
@@ -4749,7 +4750,7 @@ int main(int argc, char **argv)
             hex_dump = 1;
             break;
         case 'p':
-            yazProxy=strdup(arg);
+            yazProxy = xstrdup(arg);
             break;
         case 'u':
             if (!auth_command)
