@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.57 2005-12-19 20:19:29 adam Exp $
+ * $Id: zoom-c.c,v 1.58 2005-12-20 22:24:05 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -11,6 +11,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <errno.h>
 #include "zoom-p.h"
 
 #include <yaz/yaz-util.h>
@@ -23,6 +24,7 @@
 #include <yaz/charneg.h>
 #include <yaz/ill.h>
 #include <yaz/srw.h>
+#include <yaz/cql.h>
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -50,6 +52,8 @@ typedef enum {
 
 static zoom_ret ZOOM_connection_send_init (ZOOM_connection c);
 static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out);
+static char *cql2pqf(ZOOM_connection c, const char *cql);
+
 
 static void initlog()
 {
@@ -1094,7 +1098,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.57 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.58 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2414,6 +2418,7 @@ ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query q)
 {
     ZOOM_scanset scan = (ZOOM_scanset) xmalloc (sizeof(*scan));
     char *start;
+    char *freeme = 0;
 
     scan->connection = c;
     scan->odr = odr_createmem (ODR_DECODE);
@@ -2436,17 +2441,19 @@ ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query q)
     } else if (q->z_query->which == Z_Query_type_104) {
         yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p CQL '%s'",
                 c, q, q->query_string);
-        /* Not yet supported */
-        abort();
+        start = freeme = cql2pqf(c, q->query_string);
+        if (start == 0)
+            return 0;
     } else {
         yaz_log(YLOG_FATAL, "%p ZOOM_connection_scan1 q=%p unknown type '%s'",
                 c, q, q->query_string);
         abort();
     }
 
-    if ((scan->termListAndStartPoint =
-         p_query_scan(scan->odr, PROTO_Z3950, &scan->attributeSet,
-                      start)) != 0)
+    scan->termListAndStartPoint =
+        p_query_scan(scan->odr, PROTO_Z3950, &scan->attributeSet, start);
+    xfree (freeme);
+    if (scan->termListAndStartPoint != 0)
     {
         ZOOM_task task = ZOOM_connection_add_task (c, ZOOM_TASK_SCAN);
         task->u.scan.scan = scan;
@@ -3698,6 +3705,10 @@ ZOOM_diag_str (int error)
         return "Unsupported query type";
     case ZOOM_ERROR_INVALID_QUERY:
         return "Invalid query";
+    case ZOOM_ERROR_CQL_PARSE:
+        return "CQL parsing error";
+    case ZOOM_ERROR_CQL_TRANSFORM:
+        return "CQL transformation error";
     default:
         return diagbib1_str (error);
     }
@@ -3991,6 +4002,74 @@ ZOOM_event (int no, ZOOM_connection *cs)
     }
     return 0;
 }
+
+
+/*
+ * Returns an xmalloc()d string containing RPN that corresponds to the
+ * CQL passed in.  On error, sets the Connection object's error state
+ * and returns a null pointer.
+ * ### We could cache CQL parser and/or transformer in Connection.
+ */
+static char *cql2pqf(ZOOM_connection c, const char *cql)
+{
+    CQL_parser parser;
+    int error;
+    struct cql_node *node;
+    const char *cqlfile;
+    static cql_transform_t trans;
+    char pqfbuf[512];
+
+    parser = cql_parser_create();
+    printf("*** got CQL parser %p\n", parser);
+    if ((error = cql_parser_string(parser, cql)) != 0) {
+        cql_parser_destroy(parser);
+        set_ZOOM_error(c, ZOOM_ERROR_CQL_PARSE, cql);
+        return 0;
+    }
+
+    node = cql_parser_result(parser);
+    printf("*** got CQL node %p\n", node);
+    cql_parser_destroy(parser);
+    printf("*** destroyed parser\n");
+
+    cqlfile = ZOOM_connection_option_get(c, "cqlfile");
+    printf("*** cqlfile is %p\n", cqlfile);
+    if (cqlfile == 0) {
+        printf("*** cqlfile is null\n");
+        cql_node_destroy(node);
+        printf("*** destroyed node\n");
+        set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, "no CQL transform file");
+        printf("*** set ZOOM_error\n");
+        return 0;
+    }
+    printf("*** got CQL file %s\n", cqlfile);
+
+    if ((trans = cql_transform_open_fname(cqlfile)) == 0) {
+        char buf[512];        
+        cql_node_destroy(node);
+        sprintf(buf, "can't open CQL transform file '%.200s': %.200s",
+                cqlfile, strerror(errno));
+        set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
+        return 0;
+    }
+
+    error = cql_transform_buf(trans, node, pqfbuf, sizeof pqfbuf);
+    cql_node_destroy(node);
+    if (error != 0) {
+        char buf[512];
+        const char *addinfo;
+        error = cql_transform_error(trans, &addinfo);
+        cql_transform_close(trans);
+        sprintf(buf, "%.200s (addinfo=%.200s)", cql_strerror(error), addinfo);
+        set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
+        return 0;
+    }
+
+    cql_transform_close(trans);
+    return xstrdup(pqfbuf);
+}
+
+
 /*
  * Local variables:
  * c-basic-offset: 4
