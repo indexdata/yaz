@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.31 2005-12-19 17:04:22 mike Exp $
+ * $Id: zoom.h,v 1.32 2005-12-20 22:23:04 mike Exp $
  */
 /**
  * \file zoom.h
@@ -111,6 +111,8 @@ ZOOM_diag_str (int error);
 #define ZOOM_ERROR_UNSUPPORTED_PROTOCOL 10008
 #define ZOOM_ERROR_UNSUPPORTED_QUERY 10009
 #define ZOOM_ERROR_INVALID_QUERY 10010
+#define ZOOM_ERROR_CQL_PARSE 10011
+#define ZOOM_ERROR_CQL_TRANSFORM 10012
 
 ZOOM_API(int)
 ZOOM_connection_last_event(ZOOM_connection cs);
