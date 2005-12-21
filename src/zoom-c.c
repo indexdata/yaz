@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.59 2005-12-21 00:06:34 mike Exp $
+ * $Id: zoom-c.c,v 1.60 2005-12-21 00:07:21 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -1098,7 +1098,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.59 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.60 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -4020,7 +4020,6 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
     char pqfbuf[512];
 
     parser = cql_parser_create();
-    /*printf("*** got CQL parser %p\n", parser);*/
     if ((error = cql_parser_string(parser, cql)) != 0) {
         cql_parser_destroy(parser);
         set_ZOOM_error(c, ZOOM_ERROR_CQL_PARSE, cql);
@@ -4028,21 +4027,15 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
     }
 
     node = cql_parser_result(parser);
-    /*printf("*** got CQL node %p\n", node);*/
     /* ### Do not call cql_parser_destroy() yet: it destroys `node'! */
 
     cqlfile = ZOOM_connection_option_get(c, "cqlfile");
-    /*printf("*** cqlfile is %p\n", cqlfile);*/
     if (cqlfile == 0) {
-        /*printf("*** cqlfile is null\n");*/
         cql_parser_destroy(parser);
         cql_node_destroy(node);
-        /*printf("*** destroyed node\n");*/
         set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, "no CQL transform file");
-        /*printf("*** set ZOOM_error\n");*/
         return 0;
     }
-    /*printf("*** got CQL file %s\n", cqlfile);*/
 
     if ((trans = cql_transform_open_fname(cqlfile)) == 0) {
         char buf[512];        
@@ -4054,11 +4047,8 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
         return 0;
     }
 
-    /*printf("*** got trans %p\n", trans);*/
     error = cql_transform_buf(trans, node, pqfbuf, sizeof pqfbuf);
     cql_parser_destroy(parser);
-    /*printf("*** destroyed parser\n");*/
-    /*printf("*** got cql_transform_buf() retval %d\n", error);*/
     cql_node_destroy(node);
     if (error != 0) {
         char buf[512];
@@ -4071,11 +4061,7 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
     }
 
     cql_transform_close(trans);
-    {
-        char *s = xstrdup(pqfbuf);
-        /*printf("*** translated '%s' to '%s'\n", cql, s);*/
-        return s;
-    }
+    return xstrdup(pqfbuf);
 }
 
 
