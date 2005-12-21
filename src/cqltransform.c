@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.17 2005-12-21 00:04:14 mike Exp $
+/* $Id: cqltransform.c,v 1.18 2005-12-21 15:09:50 mike Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -446,6 +446,7 @@ void cql_transform_r(cql_transform_t ct,
 
         cql_transform_r(ct, cn->u.boolean.left, pr, client_data);
         cql_transform_r(ct, cn->u.boolean.right, pr, client_data);
+        break;
 
     default:
         fprintf(stderr, "Fatal: impossible CQL node-type %d\n", cn->which);
