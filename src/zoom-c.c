@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.60 2005-12-21 00:07:21 mike Exp $
+ * $Id: zoom-c.c,v 1.61 2005-12-21 08:35:36 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -167,7 +167,13 @@ static void set_ZOOM_error (ZOOM_connection c, int error,
 
 static void clear_error (ZOOM_connection c)
 {
-
+    /*
+     * If an error is tied to an operation then it's ok to clear: for
+     * example, a diagnostic returned from a search is cleared by a
+     * subsequent search.  However, problems such as Connection Lost
+     * or Init Refused are not cleared, because they are not
+     * recoverable: doing another search doesn't help.
+     */
     switch (c->error)
     {
     case ZOOM_ERROR_CONNECT:
@@ -1098,7 +1104,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.60 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.61 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
