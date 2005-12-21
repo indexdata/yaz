@@ -17,8 +17,10 @@ ZOOM_options_setl(opt, name, value, len)
 ZOOM_options_get_bool(opt, name, defa)
 ZOOM_options_get_int(opt, name, defa)
 ZOOM_options_set_int(opt, name, value)
+ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
+ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.45 2005-12-12 12:09:29 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.46 2005-12-21 16:45:38 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
