@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.32 2005-12-20 22:23:04 mike Exp $
+ * $Id: zoom.h,v 1.33 2005-12-21 16:43:13 mike Exp $
  */
 /**
  * \file zoom.h
@@ -196,6 +196,9 @@ ZOOM_query_destroy(ZOOM_query s);
 /* CQL */
 ZOOM_API(int)
 ZOOM_query_cql(ZOOM_query s, const char *str);
+/* CQL translated client-side into RPN: `conn' is optional for diagnostics */
+ZOOM_API(int)
+ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn);
 /* PQF */
 ZOOM_API(int)
 ZOOM_query_prefix(ZOOM_query s, const char *str);

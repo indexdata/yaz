@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.61 2005-12-21 08:35:36 mike Exp $
+ * $Id: zoom-c.c,v 1.62 2005-12-21 16:41:36 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -528,6 +528,31 @@ ZOOM_query_cql(ZOOM_query s, const char *str)
     yaz_log(log_details, "%p ZOOM_query_cql str=%s", s, str);
 
     return 0;
+}
+
+/*
+ * Translate the CQL string client-side into RPN which is passed to
+ * the server.  This is useful for server's that don't themselves
+ * support CQL, for which ZOOM_query_cql() is useless.  `conn' is used
+ * only as a place to stash diagnostics if compilation fails; if this
+ * information is not needed, a null pointer may be used.
+ */
+ZOOM_API(int)
+ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
+{
+    char *rpn;
+    int ret;
+
+    yaz_log(log_details, "%p ZOOM_query_cql2rpn str=%s conn=%p", s, str, conn);
+    if (conn == 0)
+        conn = ZOOM_connection_create(0);
+
+    if ((rpn = cql2pqf(conn, str)) == 0)
+        return -1;
+
+    ret = ZOOM_query_prefix(s, rpn);
+    xfree(rpn);
+    return ret;
 }
 
 ZOOM_API(int)
@@ -1104,7 +1129,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.61 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.62 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
