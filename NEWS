@@ -1,3 +1,17 @@
+--- NOT YET RELEASED
+
+ZOOM-C now support client-side compilation of CQL into RPN that is
+sent to the server, enabling CQL to be used against all Z39.50
+servers.  Use ZOOM_query_cql2rpn() to set the compiled CQL into a
+ZOOM_query object, and submit it using ZOOM_connection_search().
+The CQL-to-RPN translation uses a configuration file, the name of
+which must be specified in the Connection's "cqlfile" option.
+
+ZOOM-C also support CQL scanning, via the new ZOOM_connection_scan1()
+function, which takes as its start-term parameter a ZOOM_query object
+(which may have had either CQL or RPN set into it).
+
+
 --- 2.1.10 2005/11/29 
 
 Added ZiNG Update Support. New codecs are defined in srw.h. Extended the
