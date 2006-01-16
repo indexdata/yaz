@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: otherinfo.c,v 1.4 2005-06-25 15:46:04 adam Exp $
+ * $Id: otherinfo.c,v 1.5 2006-01-16 15:53:28 adam Exp $
  */
 /**
  * \file otherinfo.c
@@ -190,7 +190,8 @@ char *yaz_oi_get_string_oid (
 {
     Z_OtherInformationUnit *oi;
     
-    if ((oi = yaz_oi_update(otherInformation, 0, oid, 1, delete_flag)) &&
+    if ((oi = yaz_oi_update(otherInformation, 0, oid, categoryValue,
+                            delete_flag)) &&
         oi->which == Z_OtherInfo_characterInfo)
         return oi->information.characterInfo;
     return 0;
