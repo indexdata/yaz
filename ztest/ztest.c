@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.75 2005-06-25 15:46:09 adam Exp $
+ * $Id: ztest.c,v 1.76 2006-01-17 19:04:05 adam Exp $
  */
 
 /*
@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <yaz/yaz-util.h>
 #include <yaz/backend.h>
@@ -45,8 +48,17 @@ int ztest_search(void *handle, bend_search_rr *rr)
         exit(0);
     }
 #endif
-    /* Throw Database unavailable if other than Default */
-    if (yaz_matchstr (rr->basenames[0], "Default"))
+    /* Throw Database unavailable if other than Default or Slow */
+    if (!yaz_matchstr (rr->basenames[0], "Default"))
+        ;  /* Default is OK in our test */
+    else if(!yaz_matchstr (rr->basenames[0], "Slow"))
+    {
+#if HAVE_UNISTD_H
+        sleep(3);
+#endif
+        ;
+    }
+    else
     {
         rr->errcode = 109;
         rr->errstring = rr->basenames[0];
@@ -536,7 +548,17 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     int term_position_req = q->term_position;
     int num_entries_req = q->num_entries;
 
-    if (yaz_matchstr (q->basenames[0], "Default"))
+    /* Throw Database unavailable if other than Default or Slow */
+    if (!yaz_matchstr (q->basenames[0], "Default"))
+        ;  /* Default is OK in our test */
+    else if(!yaz_matchstr (q->basenames[0], "Slow"))
+    {
+#if HAVE_UNISTD_H
+        sleep(3);
+#endif
+        ;
+    }
+    else
     {
         q->errcode = 109;
         q->errstring = q->basenames[0];
