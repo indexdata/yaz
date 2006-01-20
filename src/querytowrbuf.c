@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: querytowrbuf.c,v 1.2 2006-01-20 11:01:46 adam Exp $
+ * $Id: querytowrbuf.c,v 1.3 2006-01-20 14:44:55 adam Exp $
  */
 
 /**
@@ -189,7 +189,7 @@ void yaz_rpnquery_to_wrbuf(WRBUF b, const Z_RPNQuery *rpn)
     if (attrset)
     {
         ast = attrset->value;
-        wrbuf_printf(b, " @attrset %s ", attrset->desc);
+        wrbuf_printf(b, "@attrset %s ", attrset->desc);
     } 
     yaz_rpnstructure_to_wrbuf(b, rpn->RPNStructure);
     wrbuf_chop_right(b);
@@ -203,7 +203,7 @@ void yaz_query_to_wrbuf(WRBUF b, const Z_Query *q)
     {
     case Z_Query_type_1: 
     case Z_Query_type_101:
-        wrbuf_printf(b,"RPN:");
+        wrbuf_printf(b,"RPN: ");
         yaz_rpnquery_to_wrbuf(b, q->u.type_1);
         break;
     case Z_Query_type_2:
