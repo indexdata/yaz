@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.41 2005-11-28 13:21:38 adam Exp $
+ * $Id: srw.c,v 1.42 2006-01-20 10:34:52 adam Exp $
  */
 /**
  * \file srw.c
@@ -1101,7 +1101,8 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_update_response)
         {
             Z_SRW_updateResponse *res = (*p)->u.update_response;
-            xmlNodePtr ptr = xmlNewChild(pptr, 0, "updateResponse", 0);
+            xmlNodePtr ptr = xmlNewChild(pptr, 0, (xmlChar *) 
+                                         "updateResponse", 0);
 	    ns_srw = xmlNewNs(ptr, ns, "zu");
 	    xmlSetNs(ptr, ns_srw);
             

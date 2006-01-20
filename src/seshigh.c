@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.65 2005-11-09 17:47:11 adam Exp $
+ * $Id: seshigh.c,v 1.66 2006-01-20 10:34:51 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -64,6 +64,7 @@
 #include <yaz/oid.h>
 #include <yaz/log.h>
 #include <yaz/logrpn.h>
+#include <yaz/querytowrbuf.h>
 #include <yaz/statserv.h>
 #include <yaz/diagbib1.h>
 #include <yaz/charneg.h>
@@ -1988,7 +1989,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.65 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.66 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2437,7 +2438,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
             wrbuf_printf(wr, "OK %d", bsrt->hits);
         wrbuf_printf(wr, " %s 1+%d ",
                      req->resultSetName, returnedrecs);
-        wrbuf_put_zquery(wr, req->query);
+        yaz_query_to_wrbuf(wr, req->query);
         
         yaz_log(log_request, "Search %s", wrbuf_buf(wr));
         wrbuf_free(wr, 1);
@@ -2741,9 +2742,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
                       *req->preferredPositionInResponse : 1),
                      *req->numberOfTermsRequested,
                      (res->stepSize ? *res->stepSize : 0));
-        wrbuf_scan_term(wr, req->termListAndStartPoint, 
-                        bsrr->attributeset);
-        
+        yaz_scan_to_wrbuf(wr, req->termListAndStartPoint, 
+                          bsrr->attributeset);
         yaz_log(log_request, "Scan %s", wrbuf_buf(wr) );
         wrbuf_free(wr, 1);
     }

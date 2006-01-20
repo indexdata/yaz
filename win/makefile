@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.97 2005-11-29 20:40:33 adam Exp $
+# $Id: makefile,v 1.98 2006-01-20 10:34:52 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -380,6 +380,7 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\diag-entry.obj \
    $(OBJDIR)\zget.obj \
    $(OBJDIR)\logrpn.obj \
+   $(OBJDIR)\querytowrbuf.obj \
    $(OBJDIR)\pquery.obj \
    $(OBJDIR)\yaz-ccl.obj \
    $(OBJDIR)\otherinfo.obj \

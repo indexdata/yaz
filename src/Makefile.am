@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.24 2005-11-29 20:25:38 adam Exp $
+## $Id: Makefile.am,v 1.25 2006-01-20 10:34:51 adam Exp $
 
 YAZ_VERSION_INFO=2:0:0
 
@@ -62,7 +62,7 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c \
   cclqfile.c cclstr.c \
   cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \
-  cqlstrer.c \
+  cqlstrer.c querytowrbuf.c \
   eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
   eventl.h service.c service.h session.h
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
