@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: querytowrbuf.c,v 1.1 2006-01-20 10:34:51 adam Exp $
+ * $Id: querytowrbuf.c,v 1.2 2006-01-20 11:01:46 adam Exp $
  */
 
 /**
@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include <yaz/logrpn.h>
 #include <yaz/querytowrbuf.h>
 
 static void yaz_term_to_wrbuf(WRBUF b, const char *term, int len)

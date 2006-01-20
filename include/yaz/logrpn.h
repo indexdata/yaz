@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: logrpn.h,v 1.9 2006-01-20 10:34:51 adam Exp $
+ * $Id: logrpn.h,v 1.10 2006-01-20 11:01:46 adam Exp $
  */
 
 /**
@@ -30,6 +30,7 @@ YAZ_EXPORT void yaz_log_zquery(Z_Query *q);
 YAZ_EXPORT void yaz_log_zquery_level(int loglevel, Z_Query *q);
 
 YAZ_EXPORT void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags);
+YAZ_EXPORT void wrbuf_put_zquery(WRBUF b, const Z_Query *q);
 
 YAZ_END_CDECL
 
