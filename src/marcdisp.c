@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.23 2005-06-25 15:46:04 adam Exp $
+ * $Id: marcdisp.c,v 1.24 2006-01-20 15:30:24 adam Exp $
  */
 
 /**
@@ -72,6 +72,30 @@ static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
         wrbuf_iconv_write_cdata(wr, mt->iconv_cd, buf, len);
 }
 
+/* try to guess how many bytes the identifier really is! */
+static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
+{
+    if (mt->iconv_cd)
+    {
+        size_t i;
+        for (i = 1; i<5; i++)
+        {
+            char outbuf[12];
+            size_t outbytesleft = sizeof(outbuf);
+            char *outp = outbuf;
+            const char *inp = buf;
+
+            size_t inbytesleft = i;
+            size_t r = yaz_iconv(mt->iconv_cd, (char**) &inp, &inbytesleft,
+                                 &outp, &outbytesleft);
+            if (r != (size_t) (-1))
+                return i;  /* got a complete sequence */
+        }
+        return 1; /* giving up */
+    }
+    return 1; /* we don't know */
+}
+                              
 static int atoi_n_check(const char *buf, int size, int *val)
 {
     if (!isdigit(*(const unsigned char *) buf))
@@ -449,6 +473,11 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
             {
                 int i0;
                 i++;
+
+                int sb_octet_length = identifier_length-1;
+                if (identifier_length == 2)
+                    sb_octet_length = cdata_one_character(mt, buf+i);
+
                 switch(mt->xml)
                 {
                 case YAZ_MARC_ISO2709:
@@ -459,27 +488,27 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                     break;
                 case YAZ_MARC_LINE: 
                     wrbuf_puts (wr, mt->subfield_str); 
-                    marc_cdata(mt, buf+i, identifier_length-1, wr);
-                    i = i+identifier_length-1;
+                    marc_cdata(mt, buf+i, sb_octet_length, wr);
+                    i = i+sb_octet_length;
                     wrbuf_putc (wr, ' ');
                     break;
                 case YAZ_MARC_SIMPLEXML:
                     wrbuf_puts (wr, "  <subfield code=\"");
-                    marc_cdata(mt, buf+i, identifier_length-1, wr);
-                    i = i+identifier_length-1;
+                    marc_cdata(mt, buf+i, sb_octet_length, wr);
+                    i = i+sb_octet_length;
                     wrbuf_puts (wr, "\">");
                     break;
                 case YAZ_MARC_OAIMARC:
                     wrbuf_puts (wr, "    <subfield label=\"");
-                    marc_cdata(mt, buf+i, identifier_length-1, wr);
-                    i = i+identifier_length-1;
+                    marc_cdata(mt, buf+i, sb_octet_length, wr);
+                    i = i+sb_octet_length;
                     wrbuf_puts (wr, "\">");
                     break;
                 case YAZ_MARC_MARCXML:
                 case YAZ_MARC_XCHANGE:
                     wrbuf_puts (wr, "    <subfield code=\"");
-                    marc_cdata(mt, buf+i, identifier_length-1, wr);
-                    i = i+identifier_length-1;
+                    marc_cdata(mt, buf+i, sb_octet_length, wr);
+                    i = i+sb_octet_length;
                     wrbuf_puts (wr, "\">");
                     break;
                 }
