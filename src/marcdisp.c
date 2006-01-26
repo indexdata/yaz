@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.24 2006-01-20 15:30:24 adam Exp $
+ * $Id: marcdisp.c,v 1.25 2006-01-26 15:37:05 adam Exp $
  */
 
 /**
@@ -472,12 +472,12 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                     buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
             {
                 int i0;
-                i++;
 
                 int sb_octet_length = identifier_length-1;
                 if (identifier_length == 2)
                     sb_octet_length = cdata_one_character(mt, buf+i);
 
+                i++;
                 switch(mt->xml)
                 {
                 case YAZ_MARC_ISO2709:
