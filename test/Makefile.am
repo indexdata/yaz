@@ -1,9 +1,9 @@
-## Copyright (C) 1994-2004, Index Data
+## Copyright (C) 1994-2006, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.10 2005-11-02 13:32:58 adam Exp $
+## $Id: Makefile.am,v 1.11 2006-01-27 17:33:15 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
- tstsoap1 tstsoap2 tstodrstack tstlogthread
+ tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery
 check_SCRIPTS = tstcql.sh tstmarc.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
@@ -31,24 +31,15 @@ tstodrcodec.c tstodrcodec.h: tstodr.asn $(YAZCOMP)
 LDADD = ../src/libyaz.la
 
 tsticonv_SOURCES = tsticonv.c
-
 tstnmem_SOURCES = tstnmem.c
-
 tstmatchstr_SOURCES = tstmatchstr.c
-
 tstwrbuf_SOURCES = tstwrbuf.c
-
 tstodr_SOURCES = tstodrcodec.c tstodrcodec.h tstodr.c
-
 tstodrstack_SOURCES = tstodrstack.c
-
 tstccl_SOURCES = tstccl.c
-
 tstlog_SOURCES = tstlog.c
-
 tstsoap1_SOURCES = tstsoap1.c
-
 tstsoap2_SOURCES = tstsoap2.c
-
 tstlogthread_SOURCES = tstlogthread.c
+tstxmlquery_SOURCES = tstxmlquery.c
 
