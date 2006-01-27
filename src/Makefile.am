@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.25 2006-01-20 10:34:51 adam Exp $
+## $Id: Makefile.am,v 1.26 2006-01-27 17:31:37 adam Exp $
 
 YAZ_VERSION_INFO=2:0:0
 
@@ -64,7 +64,9 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \
   cqlstrer.c querytowrbuf.c \
   eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
-  eventl.h service.c service.h session.h
+  eventl.h service.c service.h session.h \
+  xmlquery.c
+
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # This library is only built and installed for backwards
