@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.1 2006-01-27 18:58:58 adam Exp $
+ * $Id: test.c,v 1.2 2006-01-27 19:01:56 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -13,7 +13,7 @@
 
 #include <yaz/test.h>
 
-static FILE *test_fout;
+static FILE *test_fout = 0; /* can't init this to stderr on some systems */
 static int test_number = 0;
 static int test_verbose = 0;
 
@@ -23,7 +23,6 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
     int argc = *argc_p;
     char **argv = *argv_p;
 
-    test_fout = 0;
     for (i = 1; i<argc; i++)
     {
         if (strlen(argv[i]) >= 7 && !memcmp(argv[i], "--test-", 7))
@@ -67,8 +66,8 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
     --i;
     *argc_p -= i;
     *argv_p += i;
-    if (!test_fout)
-        test_fout = stdout;
+    if (!test_fout)   
+        test_fout = stdout;  /* by default, set output to this */
 }
 
 void yaz_check_print1(int type, const char *file, int line, const char *expr)
