@@ -2,22 +2,27 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstwrbuf.c,v 1.4 2005-06-25 15:46:07 adam Exp $
+ * $Id: tstwrbuf.c,v 1.5 2006-01-29 21:59:13 adam Exp $
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <yaz/wrbuf.h>
+#include <yaz/test.h>
 
-int main (int argc, char **argv)
+static void tstwrbuf(void)
 {
     int step;
     WRBUF wr = wrbuf_alloc();
 
+    YAZ_CHECK(wr);
+
     wrbuf_free(wr, 1);
 
     wr = wrbuf_alloc();
+
+    YAZ_CHECK(wr);
 
     for (step = 1; step < 65; step++)
     {
@@ -35,26 +40,24 @@ int main (int argc, char **argv)
         
         cp = wrbuf_buf(wr);
         len = wrbuf_len(wr);
-        if (len != step * (step-1) / 2)
-        {
-            printf ("tstwrbuf 1 %d len=%d\n", step, len);
-            exit(1);
-        }
+        YAZ_CHECK(len == step * (step-1) / 2);
         k = 0;
         for (j = 1; j<step; j++)
             for (i = 0; i<j; i++)
             {
-                if (cp[k] != i+1)
-                {
-                    printf ("tstwrbuf 2 %d k=%d\n", step, k);
-                    exit(1);
-                }
+                YAZ_CHECK(cp[k] == i+1);
                 k++;
             }
         wrbuf_rewind(wr);
     }
     wrbuf_free(wr, 1);
-    exit(0);
+}
+
+int main (int argc, char **argv)
+{
+    YAZ_CHECK_INIT(argc, argv);
+    tstwrbuf();
+    YAZ_CHECK_TERM;
 }
 
 /*

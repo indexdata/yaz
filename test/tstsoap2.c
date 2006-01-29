@@ -2,13 +2,14 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap2.c,v 1.2 2005-06-25 15:46:07 adam Exp $
+ * $Id: tstsoap2.c,v 1.3 2006-01-29 21:59:13 adam Exp $
  */
 
 #include <stdlib.h>
 #if HAVE_XML2
 #include <libxml/parser.h>
 
+#include <yaz/test.h>
 #include <yaz/srw.h>
 #include <yaz/soap.h>
 
@@ -26,6 +27,9 @@ static void tst_srw(void)
     Z_SRW_PDU *sr = yaz_srw_get(o, Z_SRW_searchRetrieve_request);
     Z_SOAP *p = odr_malloc(o, sizeof(*p));
 
+    YAZ_CHECK(o);
+    YAZ_CHECK(sr);
+    YAZ_CHECK(p);
 #if 0
     sr->u.request->query.cql = "jordbær"; 
 #else
@@ -41,24 +45,18 @@ static void tst_srw(void)
 
     ret = z_soap_codec_enc(o, &p, &content_buf, &content_len, h, charset);
     odr_destroy(o);
-    if (ret)
-    {
-        printf("z_soap_codec_enc failed\n");
-        exit(1);
-    }
+    YAZ_CHECK(ret == 0);  /* codec failed ? */
 }
 #endif
 
 int main(int argc, char **argv)
 {
+    YAZ_CHECK_INIT(argc, argv);
 #if HAVE_XML2
-    LIBXML_TEST_VERSION
-    if (argc <= 1)
-    {
-        tst_srw();
-    }
+    LIBXML_TEST_VERSION;
+    tst_srw();
 #endif
-    return 0;
+    YAZ_CHECK_TERM;
 }
 /*
  * Local variables:

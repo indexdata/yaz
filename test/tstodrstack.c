@@ -1,6 +1,14 @@
+/*
+ * Copyright (C) 1995-2005, Index Data ApS
+ * See the file LICENSE for details.
+ *
+ * $Id: tstodrstack.c,v 1.4 2006-01-29 21:59:13 adam Exp $
+ *
+ */
 #include <stdlib.h>
 #include <yaz/pquery.h>
 #include <yaz/proto.h>
+#include <yaz/test.h>
 
 /** \brief build a 100 level query */
 void test1()
@@ -10,6 +18,10 @@ void test1()
     Z_RPNQuery *rpn_query;
     char qstr[10000];
     int i;
+    int ret;
+
+    YAZ_CHECK(odr);
+    YAZ_CHECK(parser);
 
     *qstr = '\0';
     for (i = 0; i<100; i++)
@@ -17,15 +29,10 @@ void test1()
     strcat(qstr, "1");
 
     rpn_query = yaz_pqf_parse (parser, odr, qstr);
+    YAZ_CHECK(rpn_query);
 
-    if (!rpn_query)
-        exit(1);
-
-    if (!z_RPNQuery(odr, &rpn_query, 0, 0))
-    {
-        odr_perror(odr, "Encoding query");
-        exit(1);
-    }
+    ret = z_RPNQuery(odr, &rpn_query, 0, 0);
+    YAZ_CHECK(ret);
 
     yaz_pqf_destroy(parser);
     odr_destroy(odr);
@@ -37,17 +44,18 @@ void test2()
     ODR odr = odr_createmem(ODR_ENCODE);
     YAZ_PQF_Parser parser = yaz_pqf_create();
     Z_RPNQuery *rpn_query;
+    int ret;
+
+    YAZ_CHECK(odr);
 
     rpn_query = yaz_pqf_parse (parser, odr, "@and @and a b c");
-
-    if (!rpn_query)
-        exit(1);
+    YAZ_CHECK(rpn_query);
 
     /* make the circular reference */
     rpn_query->RPNStructure->u.complex->s1 = rpn_query->RPNStructure;
 
-    if (z_RPNQuery(odr, &rpn_query, 0, 0))  /* should fail */
-        exit(2);
+    ret = z_RPNQuery(odr, &rpn_query, 0, 0);  /* should fail */
+    YAZ_CHECK(!ret);
 
     yaz_pqf_destroy(parser);
     odr_destroy(odr);
@@ -55,9 +63,10 @@ void test2()
 
 int main(int argc, char **argv)
 {
+    YAZ_CHECK_INIT(argc, argv);
     test1();
     test2();
-    exit(0);
+    YAZ_CHECK_TERM;
 }
 /*
  * Local variables:

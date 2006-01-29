@@ -2,54 +2,36 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstmatchstr.c,v 1.4 2005-06-25 15:46:07 adam Exp $
+ * $Id: tstmatchstr.c,v 1.5 2006-01-29 21:59:13 adam Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <yaz/yaz-iconv.h>
-
-struct {
-    char *s1;
-    char *s2;
-    int res;
-} comp_strings[] = {
-    { "x", "x", 0 },
-    { "x", "X", 0 },
-    { "a", "b", 1 },
-    { "b", "a", 1 },
-    { "aa","a", 1 },
-    { "a-", "a", 1 },
-    { "A-b", "ab", 0},
-    { "A--b", "ab", 1},
-    { "A--b", "a-b", 1},
-    { "A--b", "a--b", 0},
-    { "a123",  "a?", 0},
-    {"a123",   "a1.3", 0},
-    {"a123",   "..?", 0},
-    {"a123",   "a1.", 1},
-    {"a123",   "a...", 0},
-    {0,  0, 0} };
+#include <yaz/test.h>
 
 int main (int argc, char **argv)
 {
-    int i;
-    for (i = 0; comp_strings[i].s1; i++)
-    {
-        int got = yaz_matchstr(comp_strings[i].s1,comp_strings[i].s2);
-        if (got > 0)
-            got = 1;
-        else if (got < 0)
-            got = -1;
-        if (got != comp_strings[i].res)
-        {
-            printf ("tststr %d got=%d res=%d\n", i,
-                    got, comp_strings[i].res);
-            exit(1);
-        }
-    }
-    exit(0);
+    YAZ_CHECK_INIT(argc, argv);
+
+    YAZ_CHECK(yaz_matchstr("x", "x") == 0);
+    YAZ_CHECK(yaz_matchstr("x", "X") == 0);
+    YAZ_CHECK(yaz_matchstr("a", "b") > 0);
+    YAZ_CHECK(yaz_matchstr("b", "a") > 0);
+    YAZ_CHECK(yaz_matchstr("aa","a") > 0);
+    YAZ_CHECK(yaz_matchstr("a-", "a") > 0);
+    YAZ_CHECK(yaz_matchstr("A-b", "ab") == 0);
+    YAZ_CHECK(yaz_matchstr("A--b", "ab") > 0);
+    YAZ_CHECK(yaz_matchstr("A--b", "a-b") > 0);
+    YAZ_CHECK(yaz_matchstr("A--b", "a--b") == 0);
+    YAZ_CHECK(yaz_matchstr("a123",  "a?") == 0);
+    YAZ_CHECK(yaz_matchstr("a123",   "a1.3") == 0);
+    YAZ_CHECK(yaz_matchstr("a123",   "..?") == 0);
+    YAZ_CHECK(yaz_matchstr("a123",   "a1.") > 0);
+    YAZ_CHECK(yaz_matchstr("a123",   "a...") == 0);
+
+    YAZ_CHECK_TERM;
 }
 
 /*

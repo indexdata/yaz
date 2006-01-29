@@ -2,14 +2,14 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.9 2005-06-25 15:46:07 adam Exp $
+ * $Id: tstccl.c,v 1.10 2006-01-29 21:59:13 adam Exp $
  */
 
 /* CCL test */
 
-#include <stdlib.h>
 #include <string.h>
 #include <yaz/ccl.h>
+#include <yaz/test.h>
 
 struct ccl_tst {
     char *query;
@@ -44,13 +44,15 @@ static struct ccl_tst query_str[] = {
     {0, 0}
 };
 
-void tst1(int pass, int *number_of_errors)
+void tst1(int pass)
 {
     CCL_parser parser = ccl_parser_create ();
     CCL_bibset bibset = ccl_qual_mk();
     int i;
     char tstline[128];
 
+    YAZ_CHECK(parser);
+    YAZ_CHECK(bibset);
     switch(pass)
     {
     case 0:
@@ -86,7 +88,7 @@ void tst1(int pass, int *number_of_errors)
             );
         break;
     default:
-        exit(23);
+        YAZ_CHECK(0);
     }
 
     parser->bibset = bibset;
@@ -101,32 +103,23 @@ void tst1(int pass, int *number_of_errors)
         ccl_token_del (token_list);
         if (rpn)
         {
+            /* parse ok. check that result is there and match */
             WRBUF wrbuf = wrbuf_alloc();
             ccl_pquery(wrbuf, rpn);
 
-            if (!query_str[i].result)
+            /* check expect a result and that it matches */
+            YAZ_CHECK(query_str[i].result);
+            if (query_str[i].result)
             {
-                printf ("Failed %s\n", query_str[i].query);
-                printf (" got:     %s:\n", wrbuf_buf(wrbuf));
-                printf (" expected failure\n");
-                (*number_of_errors)++;
-            }
-            else if (strcmp(wrbuf_buf(wrbuf), query_str[i].result))
-            {
-                printf ("Failed %s\n", query_str[i].query);
-                printf (" got:     %s:\n", wrbuf_buf(wrbuf));
-                printf (" expected:%s:\n", query_str[i].result);
-                (*number_of_errors)++;
+                YAZ_CHECK(!strcmp(wrbuf_buf(wrbuf), query_str[i].result));
             }
             ccl_rpn_delete(rpn);
             wrbuf_free(wrbuf, 1);
         }
-        else if (query_str[i].result)
+        else 
         {
-            printf ("Failed %s\n", query_str[i].query);
-            printf (" got failure\n");
-            printf (" expected:%s:\n", query_str[i].result);
-            (*number_of_errors)++;
+            /* parse failed. So we expect no result either */
+            YAZ_CHECK(!query_str[i].result);
         }
     }   
     ccl_parser_destroy (parser);
@@ -135,17 +128,11 @@ void tst1(int pass, int *number_of_errors)
 
 int main(int argc, char **argv)
 {
-    int number_of_errors = 0;
-    tst1(0, &number_of_errors);
-    if (number_of_errors)
-        exit(1);
-    tst1(1, &number_of_errors);
-    if (number_of_errors)
-        exit(1);
-    tst1(2, &number_of_errors);
-    if (number_of_errors)
-        exit(1);
-    exit(0);
+    YAZ_CHECK_INIT(argc, argv);
+    tst1(0);
+    tst1(1);
+    tst1(2);
+    YAZ_CHECK_TERM;
 }
 /*
  * Local variables:

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.3 2006-01-27 19:04:15 adam Exp $
+ * $Id: tstxmlquery.c,v 1.4 2006-01-29 21:59:13 adam Exp $
  */
 
 #include <stdlib.h>
@@ -45,8 +45,7 @@ int main (int argc, char **argv)
 
     pqf2xml_text("@attr 1=4 computer");
 
-    exit(0);
-    return 0;
+    YAZ_CHECK_TERM;
 }
 
 /*

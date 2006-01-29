@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstnmem.c,v 1.5 2005-06-25 15:46:07 adam Exp $
+ * $Id: tstnmem.c,v 1.6 2006-01-29 21:59:13 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -15,22 +15,22 @@
 #include <ctype.h>
 
 #include <yaz/nmem.h>
+#include <yaz/test.h>
 
-int main (int argc, char **argv)
+void tst(void)
 {
-    void *cp;
     NMEM n;
     int j;
+    char *cp;
 
     nmem_init();
     n = nmem_create();
-    if (!n)
-        exit (1);
+    YAZ_CHECK(n);
+
     for (j = 1; j<500; j++)
     {
         cp = nmem_malloc(n, j);
-        if (!cp)
-            exit(2);
+        YAZ_CHECK(cp);
         if (sizeof(long) >= j)
             *(long*) cp = 123L;
 #if HAVE_LONG_LONG
@@ -44,12 +44,17 @@ int main (int argc, char **argv)
     for (j = 2000; j<20000; j+= 2000)
     {
         cp = nmem_malloc(n, j);
-        if (!cp)
-            exit(3);
+        YAZ_CHECK(cp);
     }
     nmem_destroy(n);
     nmem_exit();
-    exit(0);
+}
+
+int main (int argc, char **argv)
+{
+    YAZ_CHECK_INIT(argc, argv);
+    tst();
+    YAZ_CHECK_TERM;
 }
 /*
  * Local variables:

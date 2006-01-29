@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.h,v 1.2 2006-01-27 18:58:57 adam Exp $
+ * $Id: test.h,v 1.3 2006-01-29 21:59:12 adam Exp $
  */
 
 #ifndef YAZ_TEST_H
@@ -23,9 +23,11 @@
 }
 
 #define YAZ_CHECK_INIT(argc, argv) yaz_check_init1(&argc, &argv)
+#define YAZ_CHECK_TERM yaz_check_term1(); return 0
 
 YAZ_BEGIN_CDECL
 YAZ_EXPORT void yaz_check_init1(int *argc, char ***argv);
+YAZ_EXPORT void yaz_check_term1(void);
 YAZ_EXPORT void yaz_check_print1(int type, const char *file, int line,
                                  const char *expr);
 YAZ_END_CDECL
