@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.4 2006-01-29 21:59:13 adam Exp $
+ * $Id: tstxmlquery.c,v 1.5 2006-01-30 08:08:23 adam Exp $
  */
 
 #include <stdlib.h>
@@ -18,6 +18,7 @@ static void pqf2xml_text(const char *pqf)
     YAZ_PQF_Parser parser = yaz_pqf_create();
     ODR odr = odr_createmem(ODR_ENCODE);
     Z_RPNQuery *rpn;
+    Z_Query *query;
 
     YAZ_CHECK(parser);
 
@@ -29,7 +30,7 @@ static void pqf2xml_text(const char *pqf)
 
     yaz_pqf_destroy(parser);
 
-    Z_Query *query = odr_malloc(odr, sizeof(*query));
+    query = odr_malloc(odr, sizeof(*query));
     query->which = Z_Query_type_1;
     query->u.type_1 = rpn;
 
