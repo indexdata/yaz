@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap1.c,v 1.5 2006-01-29 21:59:13 adam Exp $
+ * $Id: tstsoap1.c,v 1.6 2006-01-30 16:58:06 adam Exp $
  */
 
 #include <stdlib.h>
@@ -16,14 +16,17 @@ void tst()
 #if HAVE_XML2
     xmlChar *buf_out;
     int len_out;
-    xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
-    YAZ_CHECK(doc);
+    xmlDocPtr doc;
+    xmlNodePtr top;
 #if 0
     const char *val = "jordbær"; /* makes xmlDocDumpMemory hang .. */
 #else
     const char *val = "jordbaer"; /* OK */
 #endif
-    xmlNodePtr top = xmlNewNode(0, BAD_CAST "top");
+    doc = xmlNewDoc(BAD_CAST "1.0");
+    YAZ_CHECK(doc);
+
+    top = xmlNewNode(0, BAD_CAST "top");
     YAZ_CHECK(top);
     
     xmlNewTextChild(top, 0, BAD_CAST "sub", BAD_CAST val);
