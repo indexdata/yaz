@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.3 2006-01-29 21:59:13 adam Exp $
+ * $Id: test.c,v 1.4 2006-01-30 14:02:07 adam Exp $
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -118,7 +118,17 @@ void yaz_check_term1(void)
     exit(0);
 }
 
-void yaz_check_print1(int type, const char *file, int line, const char *expr)
+void yaz_check_eq1(int type, const char *file, int line,
+                   const char *left, const char *right, int lval, int rval)
+{
+    char formstr[2048];
+    
+    sprintf(formstr, "%.500s != %.500s\n%d != %d", left, right, lval, rval);
+    yaz_check_print1(type, file, line, formstr);
+}
+
+void yaz_check_print1(int type, const char *file, int line, 
+                      const char *expr)
 {
     const char *msg = "unknown";
 
@@ -137,7 +147,8 @@ void yaz_check_print1(int type, const char *file, int line, const char *expr)
             return;
         break;
     }
-    fprintf(get_file(), "%s:%d %s: %s\n", file, line, msg, expr);
+    fprintf(get_file(), "%s:%d %s: ", file, line, msg);
+    fprintf(get_file(), "%s\n", expr);
 }
 
 

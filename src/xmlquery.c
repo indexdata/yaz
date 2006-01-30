@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.1 2006-01-27 17:28:16 adam Exp $
+ * $Id: xmlquery.c,v 1.2 2006-01-30 14:02:07 adam Exp $
  */
 
 /**
@@ -20,48 +20,60 @@
 #include <yaz/logrpn.h>
 #include <yaz/xmlquery.h>
 
-xmlNodePtr yaz_query2xml_attribute_element(const Z_AttributeElement *element,
-					   xmlNodePtr parent)
+void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
+                                     xmlNodePtr parent)
 {
-    xmlNodePtr node = xmlNewChild(parent, 0, BAD_CAST "attr", 0);
-#if 0
-    int i;
-    char *setname  = 0;
+    char formstr[30];
+    const char *setname = 0;
+    
     if (element->attributeSet)
     {
         oident *attrset;
         attrset = oid_getentbyoid (element->attributeSet);
         setname = attrset->desc;
     }
-    switch (element->which) 
+
+    if (element->which == Z_AttributeValue_numeric)
     {
-    case Z_AttributeValue_numeric:
-        wrbuf_printf(b,"@attr %s%s%d=%d ", setname, sep,
-                     *element->attributeType, *element->value.numeric);
-        break;
-    case Z_AttributeValue_complex:
-        wrbuf_printf(b,"@attr %s%s\"%d=", setname, sep,
-                     *element->attributeType);
+        xmlNodePtr node = xmlNewChild(parent, 0, BAD_CAST "attr", 0);
+
+        if (setname)
+            xmlNewProp(node, BAD_CAST "set", BAD_CAST setname);
+
+        sprintf(formstr, "%d", *element->attributeType);
+        xmlNewProp(node, BAD_CAST "type", BAD_CAST formstr);
+
+        sprintf(formstr, "%d", *element->value.numeric);
+        xmlNewProp(node, BAD_CAST "value", BAD_CAST formstr);
+    }
+    else if (element->which == Z_AttributeValue_complex)
+    {
+        int i;
         for (i = 0; i<element->value.complex->num_list; i++)
         {
-            if (i)
-                wrbuf_printf(b,",");
+            xmlNodePtr node = xmlNewChild(parent, 0, BAD_CAST "attr", 0);
+            
+            if (setname)
+                xmlNewProp(node, BAD_CAST "set", BAD_CAST setname);
+            
+            sprintf(formstr, "%d", *element->attributeType);
+            xmlNewProp(node, BAD_CAST "type", BAD_CAST formstr);
+            
             if (element->value.complex->list[i]->which ==
                 Z_StringOrNumeric_string)
-                wrbuf_printf (b, "%s",
-                              element->value.complex->list[i]->u.string);
+            {
+                xmlNewProp(node, BAD_CAST "value", BAD_CAST 
+                           element->value.complex->list[i]->u.string);
+            }
             else if (element->value.complex->list[i]->which ==
                      Z_StringOrNumeric_numeric)
-                wrbuf_printf (b, "%d", 
-                              *element->value.complex->list[i]->u.numeric);
+            {
+                sprintf(formstr, "%d",
+                        *element->value.complex->list[i]->u.numeric);
+                xmlNewProp(node, BAD_CAST "value", BAD_CAST formstr);
+            }
         }
-        wrbuf_printf(b, "\" ");
-        break;
-    default:
-        wrbuf_printf (b, "@attr 1=unknown ");
     }
-#endif
-    return node;
 }
 
 
@@ -107,47 +119,79 @@ xmlNodePtr yaz_query2xml_apt(const Z_AttributesPlusTerm *zapt,
     return node;
 }
 
+
+void yaz_query2xml_operator(Z_Operator *op, xmlNodePtr node)
+{
+    const char *type = 0;
+    switch(op->which)
+    {
+    case Z_Operator_and:
+        type = "and";
+        break;
+    case Z_Operator_or:
+        type = "or";
+        break;
+    case Z_Operator_and_not:
+        type = "not";
+        break;
+    case Z_Operator_prox:
+        type = "prox";
+        break;
+    default:
+        return;
+    }
+    xmlNewProp(node, BAD_CAST "type", BAD_CAST type);
+    
+    if (op->which == Z_Operator_prox)
+    {
+        char formstr[30];
+        
+        if (op->u.prox->exclusion)
+        {
+            if (*op->u.prox->exclusion)
+                xmlNewProp(node, BAD_CAST "exclusion", BAD_CAST "true");
+            else
+                xmlNewProp(node, BAD_CAST "exclusion", BAD_CAST "false");
+        }
+        sprintf(formstr, "%d", *op->u.prox->distance);
+        xmlNewProp(node, BAD_CAST "distance", BAD_CAST formstr);
+
+        if (*op->u.prox->ordered)
+            xmlNewProp(node, BAD_CAST "ordered", BAD_CAST "true");
+        else 
+            xmlNewProp(node, BAD_CAST "ordered", BAD_CAST "false");
+       
+        sprintf(formstr, "%d", *op->u.prox->relationType);
+        xmlNewProp(node, BAD_CAST "relationType", BAD_CAST formstr);
+        
+        switch(op->u.prox->which)
+        {
+        case Z_ProximityOperator_known:
+            sprintf(formstr, "%d", *op->u.prox->u.known);
+            xmlNewProp(node, BAD_CAST "knownProximityUnit",
+                       BAD_CAST formstr);
+            break;
+        default:
+            xmlNewProp(node, BAD_CAST "privateProximityUnit",
+                       BAD_CAST "private");
+            break;
+        }
+    }
+}
+
 xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
 				      xmlNodePtr parent)
 {
     if (zs->which == Z_RPNStructure_complex)
     {
-	return 0;
-#if 0
-        Z_Operator *op = zs->u.complex->roperator;
-        wrbuf_printf(b, "@%s ", complex_op_name(op) );
-        if (op->which== Z_Operator_prox)
-        {
-            if (!op->u.prox->exclusion)
-                wrbuf_putc(b, 'n');
-            else if (*op->u.prox->exclusion)
-                wrbuf_putc(b, '1');
-            else
-                wrbuf_putc(b, '0');
+        Z_Complex *zc = zs->u.complex;
 
-            wrbuf_printf(b, " %d %d %d ", *op->u.prox->distance,
-                         *op->u.prox->ordered,
-                         *op->u.prox->relationType);
-
-            switch(op->u.prox->which)
-            {
-            case Z_ProximityOperator_known:
-                wrbuf_putc(b, 'k');
-                break;
-            case Z_ProximityOperator_private:
-                wrbuf_putc(b, 'p');
-                break;
-            default:
-                wrbuf_printf(b, "%d", op->u.prox->which);
-            }
-            if (op->u.prox->u.known)
-                wrbuf_printf(b, " %d ", *op->u.prox->u.known);
-            else
-                wrbuf_printf(b, " 0 ");
-        }
-        yaz_rpnstructure_to_wrbuf(b,zs->u.complex->s1);
-        yaz_rpnstructure_to_wrbuf(b,zs->u.complex->s2);
-#endif
+        xmlNodePtr node = xmlNewChild(parent, /* NS */ 0, BAD_CAST "binary", 0);
+        if (zc->roperator)
+            yaz_query2xml_operator(zc->roperator, node);
+        yaz_query2xml_rpnstructure(zc->s1, node);
+        yaz_query2xml_rpnstructure(zc->s2, node);
+        return node;
     }
     else if (zs->which == Z_RPNStructure_simple)
     {
@@ -155,15 +199,8 @@ xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
             return yaz_query2xml_apt(zs->u.simple->u.attributesPlusTerm,
 				     parent);
         else if (zs->u.simple->which == Z_Operand_resultSetId)
-        {
-	    return 0;
-#if 0
-            yaz_term_to_wrbuf(b, zs->u.simple->u.resultSetId,
-                              strlen(zs->u.simple->u.resultSetId));
-#endif
-        }
-        else
-	    return 0;
+            return xmlNewChild(parent, /* NS */ 0, BAD_CAST "rset", 
+                               BAD_CAST zs->u.simple->u.resultSetId);
     }
     return 0;
 }
@@ -172,8 +209,7 @@ xmlNodePtr yaz_query2xml_rpn(const Z_RPNQuery *rpn, xmlNodePtr parent)
 {
     oident *attrset = oid_getentbyoid (rpn->attributeSetId);
     if (attrset && attrset->value)
-	parent = xmlNewChild(parent, /*ns */ 0,
-			     BAD_CAST "attrset", BAD_CAST attrset->desc);
+        xmlNewProp(parent, BAD_CAST "set", BAD_CAST attrset->desc);
     return yaz_query2xml_rpnstructure(rpn->RPNStructure, parent);
 }
 
@@ -190,6 +226,15 @@ xmlNodePtr yaz_query2xml_z3958(const Odr_oct *ccl, xmlNodePtr node)
 xmlNodePtr yaz_query2xml_cql(const char *cql, xmlNodePtr node)
 {
     return 0;
+}
+
+void yaz_rpnquery2xml(const Z_RPNQuery *rpn, void *docp_void)
+{
+    Z_Query query;
+
+    query.which = Z_Query_type_1;
+    query.u.type_1 = (Z_RPNQuery *) rpn;
+    yaz_query2xml(&query, docp_void);
 }
 
 void yaz_query2xml(const Z_Query *q, void *docp_void)

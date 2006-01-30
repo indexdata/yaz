@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.5 2006-01-30 08:08:23 adam Exp $
+ * $Id: tstxmlquery.c,v 1.6 2006-01-30 14:02:07 adam Exp $
  */
 
 #include <stdlib.h>
@@ -13,12 +13,25 @@
 #include <yaz/pquery.h>
 #include <yaz/test.h>
 
-static void pqf2xml_text(const char *pqf)
+#if HAVE_XML2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#endif
+
+enum pqf2xml_status {
+    PQF_FAILED,
+    QUERY2XML_FAILED,
+    XML_NO_MATCH,
+    XML_MATCH,
+    XML_NO_ERROR
+};
+
+enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml)
 {
     YAZ_PQF_Parser parser = yaz_pqf_create();
     ODR odr = odr_createmem(ODR_ENCODE);
     Z_RPNQuery *rpn;
-    Z_Query *query;
+    enum pqf2xml_status status = XML_NO_ERROR;
 
     YAZ_CHECK(parser);
 
@@ -26,16 +39,111 @@ static void pqf2xml_text(const char *pqf)
 
     rpn = yaz_pqf_parse(parser, odr, pqf);
 
-    YAZ_CHECK(rpn);
-
     yaz_pqf_destroy(parser);
 
-    query = odr_malloc(odr, sizeof(*query));
-    query->which = Z_Query_type_1;
-    query->u.type_1 = rpn;
-
-    odr_destroy(odr);
+    if (!rpn)
+        status = PQF_FAILED;
+    else
+    {
+        status = QUERY2XML_FAILED;
 #if HAVE_XML2
+        xmlDocPtr doc = 0;
+        yaz_rpnquery2xml(rpn, &doc);
+        
+        if (!doc)
+            status = QUERY2XML_FAILED;
+        else
+        {
+            char *buf_out;
+            int len_out;
+
+            xmlDocDumpMemory(doc, (xmlChar **) &buf_out, &len_out);
+            
+            if (len_out == strlen(expect_xml)
+                && memcmp(buf_out, expect_xml, len_out) == 0)
+            {
+                status = XML_MATCH;
+            }
+            else
+            {
+                printf("%.*s\n", len_out, buf_out);
+                status = XML_NO_MATCH;
+            }
+            xmlFreeDoc(doc);
+        }
+#endif
+    }
+    odr_destroy(odr);
+    return status;
+}
+
+void tst()
+{
+    YAZ_CHECK_EQ(pqf2xml_text("@attr 1=4 bad query", ""), PQF_FAILED);
+#if HAVE_XML2
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@attr 1=4 computer", 
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<apt><attr type=\"1\" value=\"4\"/>"
+                     "<term>computer</term></apt>"
+                     "</query>\n"), XML_MATCH);
+    
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@attr 2=1 @attr 1=title computer",
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<apt><attr type=\"1\" value=\"title\"/>"
+                     "<attr type=\"2\" value=\"1\"/>"
+                     "<term>computer</term></apt>"
+                     "</query>\n"), XML_MATCH);
+
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@attr 2=1 @attr exp1 1=1 computer",
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<apt><attr set=\"Exp-1\" type=\"1\" value=\"1\"/>"
+                     "<attr type=\"2\" value=\"1\"/>"
+                     "<term>computer</term></apt>"
+                     "</query>\n"), XML_MATCH);
+    
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@and a b", 
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<binary type=\"and\">"
+                     "<apt><term>a</term></apt><apt><term>b</term></apt>"
+                     "</binary></query>\n"), XML_MATCH);
+    
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@or @and a b c", 
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<binary type=\"or\">"
+                     "<binary type=\"and\"><apt><term>a</term></apt>"
+                     "<apt><term>b</term></apt></binary>"
+                     "<apt><term>c</term></apt>"
+                     "</binary></query>\n"), XML_MATCH);
+
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@set abe", 
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<rset>abe</rset></query>\n"), XML_MATCH);
+
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     /* exclusion, distance, ordered, relationtype, 
+                        knownunit, proxunit */
+                     "@prox 0 3 1 2 k 2           a b", 
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<binary type=\"prox\" exclusion=\"false\" "
+                     "distance=\"3\" "
+                     "ordered=\"true\" "
+                     "relationType=\"2\" "
+                     "knownProximityUnit=\"2\">"
+                     "<apt><term>a</term></apt><apt><term>b</term></apt>"
+                     "</binary></query>\n"), XML_MATCH);
 
 #endif
 }
@@ -43,9 +151,7 @@ static void pqf2xml_text(const char *pqf)
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
-
-    pqf2xml_text("@attr 1=4 computer");
-
+    tst();
     YAZ_CHECK_TERM;
 }
 
