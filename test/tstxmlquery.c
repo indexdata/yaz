@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.6 2006-01-30 14:02:07 adam Exp $
+ * $Id: tstxmlquery.c,v 1.7 2006-01-31 11:01:26 adam Exp $
  */
 
 #include <stdlib.h>
@@ -45,9 +45,9 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml)
         status = PQF_FAILED;
     else
     {
-        status = QUERY2XML_FAILED;
 #if HAVE_XML2
         xmlDocPtr doc = 0;
+
         yaz_rpnquery2xml(rpn, &doc);
         
         if (!doc)
@@ -71,6 +71,8 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml)
             }
             xmlFreeDoc(doc);
         }
+#else
+        status = QUERY2XML_FAILED;
 #endif
     }
     odr_destroy(odr);
