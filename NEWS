@@ -1,5 +1,9 @@
 --- NOT YET RELEASED
 
+Fixed bug in yaz_oi_update which uesd incorrect value for categoryValue.
+
+In ZOOM socket code, use select instead of poll on MacOSX.
+
 ZOOM-C now support client-side compilation of CQL into RPN that is
 sent to the server, enabling CQL to be used against all Z39.50
 servers.  Use ZOOM_query_cql2rpn() to set the compiled CQL into a
