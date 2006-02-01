@@ -1,6 +1,6 @@
-YAZ toolkit - $Id: README,v 1.47 2005-01-03 13:28:35 adam Exp $
+YAZ toolkit - $Id: README,v 1.48 2006-02-01 20:07:20 adam Exp $
 
-Copyright (C) 1995-2005, Index Data ApS.
+Copyright (C) 1995-2006, Index Data ApS.
 See the file LICENSE for details.
 
 The primary output of the source here is the YAZ library, which
@@ -21,7 +21,7 @@ automake and libtool installed. Before running configure, create
 support files by running buildconf.sh in the top-level directory of YAZ.  
 
 In any case refer to the documentation in sub directory doc or read
-it online at http://www.indexdata.dk/yaz/
+it online at http://www.indexdata.com/yaz/
 
 File organisation:
 
@@ -42,5 +42,5 @@ include/yaz The various header files.
 
 To get more information or assistance, send mail to yaz-help@indexdata.dk.
 Even better, sign on to the YAZ mailing list here:
-http://www.indexdata.dk/mailman/listinfo/yazlist
+http://lists.indexdata.dk/cgi-bin/mailman/listinfo/yazlist
 
