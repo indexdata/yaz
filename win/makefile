@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.98 2006-01-20 10:34:52 adam Exp $
+# $Id: makefile,v 1.99 2006-02-01 20:14:31 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -372,7 +372,8 @@ YAZ_UTIL_OBJS= \
    $(OBJDIR)\xmalloc.obj \
    $(OBJDIR)\matchstr.obj \
    $(OBJDIR)\siconv.obj \
-   $(OBJDIR)\marc8.obj
+   $(OBJDIR)\marc8.obj \
+   $(OBJDIR)\test.obj
 
 YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\diagbib1.obj \
@@ -395,7 +396,8 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
    $(OBJDIR)\zoom-opt.obj \
-   $(OBJDIR)\initopt.obj
+   $(OBJDIR)\initopt.obj \
+   $(OBJDIR)\xmlquery.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
