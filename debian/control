@@ -2,7 +2,7 @@ Source: yaz
 Standards-Version: 3.6.1
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,libxml2-dev, libssl-dev, libreadline4-dev, libwrap0-dev
+Build-Depends: docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,libxml2-dev, libssl-dev, libreadline5-dev, libwrap0-dev
 
 Package: libyaz
 Section: libs
