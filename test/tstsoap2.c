@@ -2,16 +2,16 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap2.c,v 1.3 2006-01-29 21:59:13 adam Exp $
+ * $Id: tstsoap2.c,v 1.4 2006-02-01 19:53:00 adam Exp $
  */
 
 #include <stdlib.h>
-#if HAVE_XML2
-#include <libxml/parser.h>
-
 #include <yaz/test.h>
 #include <yaz/srw.h>
 #include <yaz/soap.h>
+
+#if HAVE_XML2
+#include <libxml/parser.h>
 
 static void tst_srw(void)
 {
