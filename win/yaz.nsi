@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.72 2006-02-01 20:11:22 adam Exp $
+; $Id: yaz.nsi,v 1.73 2006-02-01 20:31:00 adam Exp $
 
 !define VERSION "2.1.12"
 !define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
@@ -142,6 +142,12 @@ Section "YAZ Source" YAZ_Source
 	File ..\src\*.csv
 	File ..\src\*.asn
 	File ..\src\codetables.xml
+	SetOutPath $INSTDIR\test
+	File ..\test\marc*.*
+	File ..\test\*.c
+	File ..\test\*.sh
+	File ..\test\*.xml
+	File ..\test\*.asn
 	SetOutPath $INSTDIR\zoom
 	File ..\zoom\*.c
 	SetOutPath $INSTDIR\ztest
