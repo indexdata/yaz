@@ -1,6 +1,6 @@
-; $Id: yaz.nsi,v 1.71 2005-11-29 20:26:06 adam Exp $
+; $Id: yaz.nsi,v 1.72 2006-02-01 20:11:22 adam Exp $
 
-!define VERSION "2.1.10"
+!define VERSION "2.1.12"
 !define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
 
 !include "MUI.nsh"
@@ -121,6 +121,7 @@ Section "YAZ Documentation" YAZ_Documentation
 	File ..\doc\*.dsl
 	File ..\doc\*.xsl
 	File ..\doc\*.css
+	File ..\doc\*.ent
 	SetOutPath $SMPROGRAMS\YAZ
 	CreateShortCut "$SMPROGRAMS\YAZ\HTML Documentation.lnk" \
                  "$INSTDIR\doc\yaz.html"

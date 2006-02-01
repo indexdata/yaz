@@ -1,4 +1,4 @@
-<!-- $Id: entities.ent,v 1.1 2005-10-15 10:40:37 adam Exp $ -->
+<!-- $Id: entities.ent,v 1.2 2006-02-01 20:11:22 adam Exp $ -->
 <!ENTITY yaz "YAZ">
 <!ENTITY bookinfo SYSTEM "bookinfo.xml">
 <!ENTITY chap-introduction SYSTEM "introduction.xml">
@@ -25,4 +25,4 @@
 <!ENTITY zoom "<acronym>ZOOM</acronym>">
 <!ENTITY gfs-synopsis-app "application">
 <!ENTITY reference-tools-cql-map "<xref linkend='tools.cql.map'/>">
-<!ENTITY copyright-year "1995-2005">
+<!ENTITY copyright-year "1995-2006">

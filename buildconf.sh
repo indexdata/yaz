@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.22 2006-01-20 10:34:50 adam Exp $
+# $Id: buildconf.sh,v 1.23 2006-02-01 20:11:22 adam Exp $
 set -x
 aclocal -I .
 libtoolize --automake --force 
@@ -17,7 +17,7 @@ sh_flags=""
 conf_flags=""
 case $1 in
     -d)
-	sh_flags="-g -Wall -ansi"
+	sh_flags="-g -Wall"
 	enable_configure=true
 	enable_help=false
 	shift

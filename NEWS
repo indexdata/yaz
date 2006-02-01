@@ -1,4 +1,4 @@
---- NOT YET RELEASED
+--- 2.1.12 2006/02/01 
 
 Fixed bug in yaz_oi_update which uesd incorrect value for categoryValue.
 
