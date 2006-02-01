@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.20 2005-09-09 10:32:09 adam Exp $
+ * $Id: nmem.c,v 1.21 2006-02-01 20:29:19 adam Exp $
  */
 
 /**
@@ -234,7 +234,7 @@ static nmem_block *get_block(size_t size)
     }
     else
     {
-        int get = NMEM_CHUNK;
+        size_t get = NMEM_CHUNK;
 
         if (get < size)
             get = size;
