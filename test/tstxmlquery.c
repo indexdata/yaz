@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.7 2006-01-31 11:01:26 adam Exp $
+ * $Id: tstxmlquery.c,v 1.8 2006-02-02 15:00:58 adam Exp $
  */
 
 #include <stdlib.h>
@@ -88,7 +88,7 @@ void tst()
                      "<?xml version=\"1.0\"?>\n"
                      "<query set=\"Bib-1\" type=\"rpn\">"
                      "<apt><attr type=\"1\" value=\"4\"/>"
-                     "<term>computer</term></apt>"
+                     "<term type=\"general\">computer</term></apt>"
                      "</query>\n"), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -97,7 +97,7 @@ void tst()
                      "<query set=\"Bib-1\" type=\"rpn\">"
                      "<apt><attr type=\"1\" value=\"title\"/>"
                      "<attr type=\"2\" value=\"1\"/>"
-                     "<term>computer</term></apt>"
+                     "<term type=\"general\">computer</term></apt>"
                      "</query>\n"), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -106,7 +106,7 @@ void tst()
                      "<query set=\"Bib-1\" type=\"rpn\">"
                      "<apt><attr set=\"Exp-1\" type=\"1\" value=\"1\"/>"
                      "<attr type=\"2\" value=\"1\"/>"
-                     "<term>computer</term></apt>"
+                     "<term type=\"general\">computer</term></apt>"
                      "</query>\n"), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -114,7 +114,8 @@ void tst()
                      "<?xml version=\"1.0\"?>\n"
                      "<query set=\"Bib-1\" type=\"rpn\">"
                      "<binary type=\"and\">"
-                     "<apt><term>a</term></apt><apt><term>b</term></apt>"
+                     "<apt><term type=\"general\">a</term></apt>"
+                     "<apt><term type=\"general\">b</term></apt>"
                      "</binary></query>\n"), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -122,9 +123,10 @@ void tst()
                      "<?xml version=\"1.0\"?>\n"
                      "<query set=\"Bib-1\" type=\"rpn\">"
                      "<binary type=\"or\">"
-                     "<binary type=\"and\"><apt><term>a</term></apt>"
-                     "<apt><term>b</term></apt></binary>"
-                     "<apt><term>c</term></apt>"
+                     "<binary type=\"and\">"
+                     "<apt><term type=\"general\">a</term></apt>"
+                     "<apt><term type=\"general\">b</term></apt></binary>"
+                     "<apt><term type=\"general\">c</term></apt>"
                      "</binary></query>\n"), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -144,9 +146,34 @@ void tst()
                      "ordered=\"true\" "
                      "relationType=\"2\" "
                      "knownProximityUnit=\"2\">"
-                     "<apt><term>a</term></apt><apt><term>b</term></apt>"
+                     "<apt><term type=\"general\">a</term></apt>"
+                     "<apt><term type=\"general\">b</term></apt>"
                      "</binary></query>\n"), XML_MATCH);
 
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@term numeric 32", 
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<apt>"
+                     "<term type=\"numeric\">32</term></apt>"
+                     "</query>\n"), XML_MATCH);
+    
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@term string computer", 
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<apt>"
+                     "<term type=\"string\">computer</term></apt>"
+                     "</query>\n"), XML_MATCH);
+    
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@term null void", 
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<apt>"
+                     "<term type=\"null\"/></apt>"
+                     "</query>\n"), XML_MATCH);
+    
 #endif
 }
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.2 2006-01-30 14:02:07 adam Exp $
+ * $Id: xmlquery.c,v 1.3 2006-02-02 15:00:58 adam Exp $
  */
 
 /**
@@ -83,26 +83,45 @@ xmlNodePtr yaz_query2xml_term(const Z_Term *term,
     xmlNodePtr t = 0;
     xmlNodePtr node = xmlNewChild(parent, /* NS */ 0, BAD_CAST "term", 0);
     char formstr[20];
+    const char *type = 0;
 
     switch (term->which)
     {
     case Z_Term_general:
+        type = "general";
 	t = xmlNewTextLen(BAD_CAST term->u.general->buf, term->u.general->len);
         break;
-    case Z_Term_characterString:
-	t = xmlNewText(BAD_CAST term->u.characterString);
-        break;
     case Z_Term_numeric:
+        type = "numeric";
 	sprintf(formstr, "%d", *term->u.numeric);
 	t = xmlNewText(BAD_CAST formstr);	
         break;
+    case Z_Term_characterString:
+        type = "string";
+	t = xmlNewText(BAD_CAST term->u.characterString);
+        break;
+    case Z_Term_oid:
+        type = "oid";
+        break;
+    case Z_Term_dateTime:
+        type = "dateTime";
+        break;
+    case Z_Term_external:
+        type = "external";
+        break;
+    case Z_Term_integerAndUnit:
+        type ="integerAndUnit";
+        break;
     case Z_Term_null:
+        type = "null";
         break;
     default:
 	break;
     }
     if (t) /* got a term node ? */
 	xmlAddChild(node, t);
+    if (type)
+        xmlNewProp(node, BAD_CAST "type", BAD_CAST type);
     return node;
 }
 
