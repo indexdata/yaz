@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.42 2006-01-20 10:34:52 adam Exp $
+ * $Id: srw.c,v 1.43 2006-02-03 10:44:57 adam Exp $
  */
 /**
  * \file srw.c
@@ -1090,8 +1090,8 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         if ((*p)->which == Z_SRW_update_request)
         {
             Z_SRW_updateRequest *req = (*p)->u.update_request;
-            xmlNodePtr ptr = xmlNewChild(pptr, 0, "updateRequest", 0);
-	    ns_srw = xmlNewNs(ptr, ns, "zu");
+            xmlNodePtr ptr = xmlNewChild(pptr, 0, BAD_CAST "updateRequest", 0);
+	    ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zu");
 	    xmlSetNs(ptr, ns_srw);
 
 	    add_xsd_string(ptr, "version", (*p)->srw_version);
@@ -1103,7 +1103,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             Z_SRW_updateResponse *res = (*p)->u.update_response;
             xmlNodePtr ptr = xmlNewChild(pptr, 0, (xmlChar *) 
                                          "updateResponse", 0);
-	    ns_srw = xmlNewNs(ptr, ns, "zu");
+	    ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zu");
 	    xmlSetNs(ptr, ns_srw);
             
 	    add_xsd_string(ptr, "version", (*p)->srw_version);
@@ -1115,13 +1115,13 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 add_xsd_string(ptr, "recordChecksum", res->recordChecksum );
 	    if (res->record.recordData_len)
             {
-                xmlNodePtr rptr = xmlNewChild(ptr, 0, "record", 0);
+                xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "record", 0);
                 yaz_srw_record(o, rptr, &res->record, &res->extra_record,
                                client_data, ns);
 	    }
 	    if (res->num_diagnostics)
 	    {
-		xmlNodePtr rptr = xmlNewChild(ptr, 0, "diagnostics", 0);
+		xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "diagnostics", 0);
 		yaz_srw_diagnostics(o, rptr, &res->diagnostics,
                                     &res->num_diagnostics, client_data, ns);
             }
