@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.99 2006-02-01 20:14:31 adam Exp $
+# $Id: makefile,v 1.100 2006-02-09 12:36:18 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -179,9 +179,10 @@ libxml2:
 # (if you set things up right!)
 
 COMMON_C_OPTIONS=          \
-  /nologo /W3 /GX /FD /c   \
+  /nologo /W3 /EHsc /FD /c   \
   $(ICONV_DEF)             \
   $(LIBXML2_DEF)           \
+  /D "_CRT_SECURE_NO_DEPRECATE" \
   /D "_WINDOWS"            \
   /D "WIN32"               \
   /FR"$(OBJDIR)\\"         \
@@ -583,11 +584,11 @@ generated_files: \
 
 # yaz client
 {$(CLIENTDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< /D"_CONSOLE"
+	$(CPP) $(COPT) $< /D"_CONSOLE"
 
 # Ztest
 {$(ZTESTDIR)}.c{$(OBJDIR)}.obj:
-	@$(CPP) $(COPT) $< /D"_CONSOLE"
+	$(CPP) $(COPT) $< /D"_CONSOLE"
 
 # Server
 {$(SERVERDIR)}.c{$(OBJDIR)}.obj:
