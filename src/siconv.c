@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.16 2005-11-06 01:55:06 adam Exp $
+ * $Id: siconv.c,v 1.17 2006-02-10 12:45:39 adam Exp $
  */
 /**
  * \file siconv.c
@@ -133,7 +133,7 @@ static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
     else if (inp[0] <= 0xef && inbytesleft >= 3)
     {
         x = ((inp[0] & 0x0f) << 12) | ((inp[1] & 0x3f) << 6) |
-            (inp[1] & 0x3f);
+            (inp[2] & 0x3f);
         if (x >= 0x800)
             *no_read = 3;
         else
