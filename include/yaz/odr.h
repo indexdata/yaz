@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.21 2005-06-25 15:46:03 adam Exp $
+ * $Id: odr.h,v 1.22 2006-02-19 18:33:08 adam Exp $
  */
 
 /**
@@ -192,6 +192,8 @@ YAZ_EXPORT void *odr_malloc(ODR o, int size);
 YAZ_EXPORT char *odr_strdup(ODR o, const char *str);
 YAZ_EXPORT char *odr_strdupn(ODR o, const char *str, size_t n);
 YAZ_EXPORT int *odr_intdup(ODR o, int v);
+YAZ_EXPORT Odr_oct *odr_create_Odr_oct(ODR o, const unsigned char *buf,
+                                       int sz);
 YAZ_EXPORT NMEM odr_extract_mem(ODR o);
 YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_release_mem(m) nmem_destroy(m)
