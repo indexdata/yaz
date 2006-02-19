@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.6 2005-06-25 15:46:04 adam Exp $
+ * $Id: pquery.c,v 1.7 2006-02-19 18:34:13 adam Exp $
  */
 /**
  * \file pquery.c
@@ -463,11 +463,11 @@ static Z_Complex *rpn_complex (struct yaz_pqf_parser *li, ODR o, oid_proto proto
     {
     case 'a':
         zo->which = Z_Operator_and;
-        zo->u.and_not = odr_nullval();
+        zo->u.op_and = odr_nullval();
         break;
     case 'o':
         zo->which = Z_Operator_or;
-        zo->u.and_not = odr_nullval();
+        zo->u.op_or = odr_nullval();
         break;
     case 'n':
         zo->which = Z_Operator_and_not;
