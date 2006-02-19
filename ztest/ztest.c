@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.76 2006-01-17 19:04:05 adam Exp $
+ * $Id: ztest.c,v 1.77 2006-02-19 18:37:20 adam Exp $
  */
 
 /*
@@ -659,7 +659,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     return 0;
 }
 
-static int ztest_explain(void *handle, bend_explain_rr *rr)
+int ztest_explain(void *handle, bend_explain_rr *rr)
 {
     if (rr->database && !strcmp(rr->database, "Default"))
     {
