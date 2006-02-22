@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.13 2006-01-29 21:59:13 adam Exp $
+ * $Id: tsticonv.c,v 1.14 2006-02-22 19:48:53 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -302,10 +302,71 @@ static void dconvert(int mandatory, const char *tmpcode)
         yaz_iconv_close(cd);
     }
 }
+
+int utf8_check(unsigned c)
+{
+    if (sizeof(c) >= 4)
+    {
+        size_t r;
+        char src[4];
+        char dst[4];
+        char utf8buf[6];
+        char *inbuf = src;
+        size_t inbytesleft = 4;
+        char *outbuf = utf8buf;
+        size_t outbytesleft = sizeof(utf8buf);
+        int i;
+        yaz_iconv_t cd = yaz_iconv_open("UTF-8", "UCS4LE");
+        if (!cd)
+            return 0;
+        for (i = 0; i<4; i++)
+            src[i] = c >> (i*8);
+        
+        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        yaz_iconv_close(cd);
+
+        if (r == (size_t)(-1))
+            return 0;
+
+        cd = yaz_iconv_open("UCS4LE", "UTF-8");
+        if (!cd)
+            return 0;
+        inbytesleft = sizeof(utf8buf) - outbytesleft;
+        inbuf = utf8buf;
+
+        outbuf = dst;
+        outbytesleft = 4;
+
+        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        if (r == (size_t)(-1))
+            return 0;
+
+        yaz_iconv_close(cd);
+
+        if (memcmp(src, dst, 4))
+            return 0;
+    }
+    return 1;
+}
         
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+
+    YAZ_CHECK(utf8_check(3));
+    YAZ_CHECK(utf8_check(127));
+    YAZ_CHECK(utf8_check(128));
+    YAZ_CHECK(utf8_check(255));
+    YAZ_CHECK(utf8_check(256));
+    YAZ_CHECK(utf8_check(900));
+    YAZ_CHECK(utf8_check(1000));
+    YAZ_CHECK(utf8_check(10000));
+    YAZ_CHECK(utf8_check(100000));
+    YAZ_CHECK(utf8_check(100000));
+    YAZ_CHECK(utf8_check(1000000));
+    YAZ_CHECK(utf8_check(10000000));
+    YAZ_CHECK(utf8_check(100000000));
+
     dconvert(1, "UTF-8");
     dconvert(1, "ISO-8859-1");
     dconvert(1, "UCS4");
@@ -314,6 +375,7 @@ int main (int argc, char **argv)
     tst_marc8_to_iso_8859_1();
     tst_marc8_to_ucs4b();
     tst_ucs4b_to_utf8();
+
     YAZ_CHECK_TERM;
 }
 /*
