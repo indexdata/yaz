@@ -1,6 +1,12 @@
+
+Fixed bug in character set conversion yaz_iconv. Some three byte UTF-8
+sequences where not read correctly. Fix by Rustam Usmanov.
+
+Updates to win/makefile which makes things compile happily with VS C 2005.
+
 --- 2.1.12 2006/02/01 
 
-Fixed bug in yaz_oi_update which uesd incorrect value for categoryValue.
+Fixed bug in yaz_oi_update which used incorrect value for categoryValue.
 
 In ZOOM socket code, use select instead of poll on MacOSX.
 
