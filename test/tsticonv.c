@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.14 2006-02-22 19:48:53 adam Exp $
+ * $Id: tsticonv.c,v 1.15 2006-02-23 11:16:22 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -361,7 +361,6 @@ int main (int argc, char **argv)
     YAZ_CHECK(utf8_check(900));
     YAZ_CHECK(utf8_check(1000));
     YAZ_CHECK(utf8_check(10000));
-    YAZ_CHECK(utf8_check(100000));
     YAZ_CHECK(utf8_check(100000));
     YAZ_CHECK(utf8_check(1000000));
     YAZ_CHECK(utf8_check(10000000));
