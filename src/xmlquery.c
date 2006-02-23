@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.5 2006-02-23 11:17:25 adam Exp $
+ * $Id: xmlquery.c,v 1.6 2006-02-23 13:09:54 adam Exp $
  */
 
 /**
@@ -787,7 +787,7 @@ static void yaz_xml2query_(const xmlNode *ptr, Z_Query **query, ODR odr,
 void yaz_xml2query(const void *xmlnodep, Z_Query **query, ODR odr,
                    int *error_code, const char **addinfo)
 {
-    return yaz_xml2query_(xmlnodep, query, odr, error_code, addinfo);
+    yaz_xml2query_(xmlnodep, query, odr, error_code, addinfo);
 }
 
 /* HAVE_XML2 */
