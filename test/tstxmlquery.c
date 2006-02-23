@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.9 2006-02-19 18:44:23 adam Exp $
+ * $Id: tstxmlquery.c,v 1.10 2006-02-23 11:17:25 adam Exp $
  */
 
 #include <stdlib.h>
@@ -111,64 +111,64 @@ static void tst()
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@attr 1=4 computer", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<query><rpn set=\"Bib-1\">"
                      "<apt><attr type=\"1\" value=\"4\"/>"
                      "<term type=\"general\">computer</term></apt>"
-                     "</query>\n",
+                     "</rpn></query>\n",
                      "RPN: @attrset Bib-1 @attr 1=4 computer"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@attr 2=1 @attr 1=title computer",
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<query><rpn set=\"Bib-1\">"
                      "<apt><attr type=\"1\" value=\"title\"/>"
                      "<attr type=\"2\" value=\"1\"/>"
                      "<term type=\"general\">computer</term></apt>"
-                     "</query>\n",
+                     "</rpn></query>\n",
                      "RPN: @attrset Bib-1 @attr \"1=title\" @attr 2=1 computer"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@attr 2=1 @attr exp1 1=1 computer",
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<query><rpn set=\"Bib-1\">"
                      "<apt><attr set=\"Exp-1\" type=\"1\" value=\"1\"/>"
                      "<attr type=\"2\" value=\"1\"/>"
                      "<term type=\"general\">computer</term></apt>"
-                     "</query>\n",
+                     "</rpn></query>\n",
                      "RPN: @attrset Bib-1 @attr Exp-1 1=1 @attr 2=1 computer"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@and a b", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
-                     "<binary type=\"and\">"
+                     "<query><rpn set=\"Bib-1\">"
+                     "<operator type=\"and\">"
                      "<apt><term type=\"general\">a</term></apt>"
                      "<apt><term type=\"general\">b</term></apt>"
-                     "</binary></query>\n",
+                     "</operator></rpn></query>\n",
                      "RPN: @attrset Bib-1 @and a b"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@or @and a b c", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
-                     "<binary type=\"or\">"
-                     "<binary type=\"and\">"
+                     "<query><rpn set=\"Bib-1\">"
+                     "<operator type=\"or\">"
+                     "<operator type=\"and\">"
                      "<apt><term type=\"general\">a</term></apt>"
-                     "<apt><term type=\"general\">b</term></apt></binary>"
+                     "<apt><term type=\"general\">b</term></apt></operator>"
                      "<apt><term type=\"general\">c</term></apt>"
-                     "</binary></query>\n",
+                     "</operator></rpn></query>\n",
                      "RPN: @attrset Bib-1 @or @and a b c"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@set abe", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
-                     "<rset>abe</rset></query>\n",
+                     "<query><rpn set=\"Bib-1\">"
+                     "<rset>abe</rset></rpn></query>\n",
                      "RPN: @attrset Bib-1 @set abe"
                      ), XML_MATCH);
 
@@ -177,56 +177,56 @@ static void tst()
                         knownunit, proxunit */
                      "@prox 0 3 1 2 k 2           a b", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
-                     "<binary type=\"prox\" exclusion=\"false\" "
+                     "<query><rpn set=\"Bib-1\">"
+                     "<operator type=\"prox\" exclusion=\"false\" "
                      "distance=\"3\" "
                      "ordered=\"true\" "
                      "relationType=\"2\" "
                      "knownProximityUnit=\"2\">"
                      "<apt><term type=\"general\">a</term></apt>"
                      "<apt><term type=\"general\">b</term></apt>"
-                     "</binary></query>\n",
+                     "</operator></rpn></query>\n",
                      "RPN: @attrset Bib-1 @prox 0 3 1 2 k 2 a b"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@term numeric 32", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<query><rpn set=\"Bib-1\">"
                      "<apt>"
                      "<term type=\"numeric\">32</term></apt>"
-                     "</query>\n",
+                     "</rpn></query>\n",
                      "RPN: @attrset Bib-1 @term numeric 32"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@term string computer", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<query><rpn set=\"Bib-1\">"
                      "<apt>"
                      "<term type=\"string\">computer</term></apt>"
-                     "</query>\n",
+                     "</rpn></query>\n",
                      "RPN: @attrset Bib-1 @term string computer"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@term null void", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"Bib-1\" type=\"rpn\">"
+                     "<query><rpn set=\"Bib-1\">"
                      "<apt>"
                      "<term type=\"null\"/></apt>"
-                     "</query>\n",
+                     "</rpn></query>\n",
                      "RPN: @attrset Bib-1 @term null x"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@attrset gils @attr 4=2 x", 
                      "<?xml version=\"1.0\"?>\n"
-                     "<query set=\"GILS\" type=\"rpn\">"
+                     "<query><rpn set=\"GILS\">"
                      "<apt>"
                      "<attr type=\"4\" value=\"2\"/>"
                      "<term type=\"general\">x</term></apt>"
-                     "</query>\n",
+                     "</rpn></query>\n",
                      "RPN: @attrset GILS @attr 4=2 x"
                      ), XML_MATCH);
 #endif

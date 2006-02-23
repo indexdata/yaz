@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.4 2006-02-19 18:44:23 adam Exp $
+ * $Id: xmlquery.c,v 1.5 2006-02-23 11:17:25 adam Exp $
  */
 
 /**
@@ -207,7 +207,7 @@ xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
     {
         Z_Complex *zc = zs->u.complex;
 
-        xmlNodePtr node = xmlNewChild(parent, /* NS */ 0, BAD_CAST "binary", 0);
+        xmlNodePtr node = xmlNewChild(parent, /* NS */ 0, BAD_CAST "operator", 0);
         if (zc->roperator)
             yaz_query2xml_operator(zc->roperator, node);
         yaz_query2xml_rpnstructure(zc->s1, node);
@@ -261,8 +261,7 @@ void yaz_rpnquery2xml(const Z_RPNQuery *rpn, void *docp_void)
 void yaz_query2xml(const Z_Query *q, void *docp_void)
 {
     xmlDocPtr *docp = (xmlDocPtr *) docp_void;
-    xmlNodePtr top_node, child_node = 0;
-    const char *type = 0;
+    xmlNodePtr top_node, q_node = 0, child_node = 0;
 
     assert(q);
     assert(docp);
@@ -273,31 +272,28 @@ void yaz_query2xml(const Z_Query *q, void *docp_void)
     {
     case Z_Query_type_1: 
     case Z_Query_type_101:
-	type = "rpn";
-	child_node = yaz_query2xml_rpn(q->u.type_1, top_node);
+        q_node = xmlNewChild(top_node, 0, BAD_CAST "rpn", 0);
+	child_node = yaz_query2xml_rpn(q->u.type_1, q_node);
         break;
     case Z_Query_type_2:
-	type = "ccl";
-	child_node = yaz_query2xml_ccl(q->u.type_2, top_node);
+        q_node = xmlNewChild(top_node, 0, BAD_CAST "ccl", 0);
+	child_node = yaz_query2xml_ccl(q->u.type_2, q_node);
         break;
     case Z_Query_type_100:
-	type = "z39.58";
-	child_node = yaz_query2xml_z3958(q->u.type_100, top_node);
+        q_node = xmlNewChild(top_node, 0, BAD_CAST "z39.58", 0);
+	child_node = yaz_query2xml_z3958(q->u.type_100, q_node);
         break;
     case Z_Query_type_104:
         if (q->u.type_104->which == Z_External_CQL)
 	{
-	    type = "cql";
-	    child_node = yaz_query2xml_cql(q->u.type_104->u.cql, top_node);
+            q_node = xmlNewChild(top_node, 0, BAD_CAST "cql", 0);
+	    child_node = yaz_query2xml_cql(q->u.type_104->u.cql, q_node);
 	}
     }
-    if (child_node && type)
+    if (child_node && q_node)
     {
 	*docp = xmlNewDoc(BAD_CAST "1.0");
 	xmlDocSetRootElement(*docp, top_node); /* make it top node in doc */
-
-	/* set type attribute now */
-	xmlNewProp(top_node, BAD_CAST "type", BAD_CAST type);
     }
     else
     {
@@ -672,11 +668,11 @@ void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
     if (!ptr || ptr->type != XML_ELEMENT_NODE)
     {
         *error_code = 1;
-        *addinfo = "missing rpn structure node";
+        *addinfo = "missing rpn operator, rset, apt node";
         return;
     }
     *zs = (Z_RPNStructure *) odr_malloc(odr, sizeof(Z_RPNStructure));
-    if (!xmlStrcmp(ptr->name, BAD_CAST "binary"))
+    if (!xmlStrcmp(ptr->name, BAD_CAST "operator"))
     {
         Z_Complex *zc = odr_malloc(odr, sizeof(Z_Complex));
         
@@ -741,8 +737,18 @@ static void yaz_xml2query_(const xmlNode *ptr, Z_Query **query, ODR odr,
     if (ptr && ptr->type == XML_ELEMENT_NODE && 
         !xmlStrcmp(ptr->name, BAD_CAST "query"))
     {
-        const char *type = (const char *)
-            xmlGetProp((xmlNodePtr) ptr, BAD_CAST "type");
+        const char *type;
+        ptr = ptr->children;
+        while (ptr && ptr->type != XML_ELEMENT_NODE)
+            ptr = ptr->next;
+        if (!ptr || ptr->type != XML_ELEMENT_NODE)
+        {
+            *error_code = 1;
+            *addinfo = "missing query content";
+            return;
+        }
+        type = (const char *) ptr->name;
+
         *query = (Z_Query*) odr_malloc(odr, sizeof(Z_Query));
         if (!type || !strcmp(type, "rpn"))
         {
