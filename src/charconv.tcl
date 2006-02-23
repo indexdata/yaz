@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.10 2005-11-09 17:48:11 adam Exp $
+# $Id: charconv.tcl,v 1.11 2006-02-23 13:15:43 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -36,7 +36,7 @@ proc preamble_trie {ofilehandle} {
         static unsigned long lookup(struct yaz_iconv_trie **ptrs, int ptr, unsigned char *inp,
                                     size_t inbytesleft, size_t *no_read, int *combining)
         {
-            struct yaz_iconv_trie *t = (ptr >= 0) ? ptrs[ptr] : 0;
+            struct yaz_iconv_trie *t = (ptr > 0) ? ptrs[ptr-1] : 0;
             if (!t || inbytesleft < 1)
                 return 0;
             if (t->dir)
@@ -200,10 +200,10 @@ proc dump_trie {ofilehandle} {
                 set ch [format %02X $i]
                 set null 1
                 if {[info exist trie($this,ptr,$ch)]} {
-                    puts -nonewline $f "$trie($this,ptr,$ch), "
+                    puts -nonewline $f "[expr $trie($this,ptr,$ch)+1], "
                     set null 0
                 } else {
-                    puts -nonewline $f "-1, "
+                    puts -nonewline $f "0, "
                 }
                 if {[info exist trie($this,combining,$ch)]} {
                     puts -nonewline $f "$trie($this,combining,$ch), "
@@ -245,7 +245,7 @@ proc dump_trie {ofilehandle} {
         {
             unsigned long code;
             
-            code = lookup($trie(prefix)ptrs, 0, inp, inbytesleft, no_read, combining);
+            code = lookup($trie(prefix)ptrs, 1, inp, inbytesleft, no_read, combining);
             if (!code)
             {
                 *no_read = 1;
