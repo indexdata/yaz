@@ -1,6 +1,6 @@
-## Copyright (C) 1994-2004, Index Data
+## Copyright (C) 1994-2006, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.28 2004-08-07 08:18:20 adam Exp $
+## $Id: Makefile.am,v 1.29 2006-02-23 10:40:59 adam Exp $
 
 bin_SCRIPTS = yaz-asncomp yaz-config
 
@@ -11,7 +11,7 @@ DISTCLEANFILES = yaz-config
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
 
 bin_PROGRAMS = yaz-marcdump yaz-iconv
-noinst_PROGRAMS = cclsh cql2pqf cql2xcql srwtst yaz-benchmark
+noinst_PROGRAMS = cclsh cql2pqf cql2xcql srwtst yaz-benchmark yaz-xmlquery
 
 # MARC dumper utility
 yaz_marcdump_SOURCES = marcdump.c
@@ -36,3 +36,5 @@ cql2xcql_LDADD = ../src/libyaz.la
 yaz_benchmark_SOURCES = benchmark.c
 yaz_benchmark_LDADD = ../src/libyaz.la
 
+yaz_xmlquery_SOURCES = yaz-xmlquery.c
+yaz_xmlquery_LDADD = ../src/libyaz.la
