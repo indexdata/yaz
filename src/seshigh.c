@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.66 2006-01-20 10:34:51 adam Exp $
+ * $Id: seshigh.c,v 1.67 2006-02-27 21:31:33 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1087,36 +1087,34 @@ static void srw_bend_scan(association *assoc, request *req,
              (*assoc->init->bend_scan))(assoc->backend, bsrr);
         }
         else if (srw_req->query_type == Z_SRW_query_type_cql
-                 && assoc->init->bend_srw_scan)
+                 && assoc->init->bend_scan && assoc->cql_transform)
         {
-            if (assoc->cql_transform)
-            {
-                int srw_error;
-                bsrr->scanClause = 0;
-                bsrr->attributeset = VAL_NONE;
-                bsrr->term = odr_malloc(assoc->decode, sizeof(*bsrr->term));
-                srw_error = cql2pqf_scan(assoc->encode,
-                                             srw_req->scanClause.cql,
-                                             assoc->cql_transform,
-                                             bsrr->term);
-                if (srw_error)
-                    yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                           &srw_res->num_diagnostics,
-                                           srw_error, 0);
-                else
-                {
-                    ((int (*)(void *, bend_scan_rr *))
-                     (*assoc->init->bend_scan))(assoc->backend, bsrr);
-                }
-            }
+            int srw_error;
+            bsrr->scanClause = 0;
+            bsrr->attributeset = VAL_NONE;
+            bsrr->term = odr_malloc(assoc->decode, sizeof(*bsrr->term));
+            srw_error = cql2pqf_scan(assoc->encode,
+                                     srw_req->scanClause.cql,
+                                     assoc->cql_transform,
+                                     bsrr->term);
+            if (srw_error)
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       srw_error, 0);
             else
             {
-                bsrr->term = 0;
-                bsrr->attributeset = VAL_NONE;
-                bsrr->scanClause = srw_req->scanClause.cql;
                 ((int (*)(void *, bend_scan_rr *))
-                 (*assoc->init->bend_srw_scan))(assoc->backend, bsrr);
+                 (*assoc->init->bend_scan))(assoc->backend, bsrr);
             }
+        }
+        else if (srw_req->query_type == Z_SRW_query_type_cql
+                 && assoc->init->bend_srw_scan)
+        {
+            bsrr->term = 0;
+            bsrr->attributeset = VAL_NONE;
+            bsrr->scanClause = srw_req->scanClause.cql;
+            ((int (*)(void *, bend_scan_rr *))
+             (*assoc->init->bend_srw_scan))(assoc->backend, bsrr);
         }
         else
         {
@@ -1989,7 +1987,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.66 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.67 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
