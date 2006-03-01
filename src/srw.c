@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.43 2006-02-03 10:44:57 adam Exp $
+ * $Id: srw.c,v 1.44 2006-03-01 22:33:06 adam Exp $
  */
 /**
  * \file srw.c
@@ -592,8 +592,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_string(ptr, "recordXPath", o,
                                           &req->recordXPath))
                     ;
-                else if (match_xsd_string(ptr, "resultSetTTL", o,
-                                           &req->database))
+                else if (match_xsd_integer(ptr, "resultSetTTL", o,
+                                           &req->resultSetTTL))
                     ;
                 else if (match_xsd_string(ptr, "sortKeys", o, 
                                           &req->sort.sortKeys))
@@ -604,7 +604,6 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_string(ptr, "database", o,
                                            &req->database))
                     ;
-                /* missing is xQuery, xSortKeys .. */
             }
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "searchRetrieveResponse"))
