@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst2.c,v 1.6 2005-06-25 15:46:08 adam Exp $
+ * $Id: zoomtst2.c,v 1.7 2006-03-01 23:24:26 adam Exp $
  *
  * Asynchronous single-target client performing search (no retrieval)
  */
@@ -26,6 +26,9 @@ int main(int argc, char **argv)
 
     /* create connection (don't connect yet) */
     z = ZOOM_connection_create(0);
+
+    /* option: set sru/get operation (only applicable if http: is used) */
+    ZOOM_connection_option_set (z, "sru", "post");
 
     /* option: set async operation */
     ZOOM_connection_option_set (z, "async", "1");

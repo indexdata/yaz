@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.12 2005-08-22 20:34:21 adam Exp $
+ * $Id: soap.c,v 1.13 2006-03-01 23:24:25 adam Exp $
  */
 /**
  * \file soap.c
@@ -45,8 +45,45 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             return z_soap_error(o, p, "SOAP-ENV:Client",
                                 "Bad XML Document", 0);
 
-        /* check that root node is Envelope */
         ptr = xmlDocGetRootElement(doc);
+        if (!ptr || !ptr->ns)
+        {
+            xmlFreeDoc(doc);
+            return z_soap_error(o, p, "SOAP-ENV:Client",
+                                "No Envelope element", 0);
+        }
+        /* check for SRU root node match */
+        
+        for (i = 0; handlers[i].ns; i++)
+            if (!xmlStrcmp(ptr->ns->href, BAD_CAST handlers[i].ns))
+                break;
+        if (handlers[i].ns)
+        {
+            void *handler_data = 0;
+            xmlNode p_top_tmp; /* pseudo parent node needed */
+
+            p_top_tmp.children = ptr;
+            ret = (*handlers[i].f)(o, &p_top_tmp, &handler_data,
+                                   handlers[i].client_data,
+                                   handlers[i].ns);
+            
+            if (ret || !handler_data)
+                z_soap_error(o, p, "SOAP-ENV:Client",
+                             "SOAP Handler returned error", 0);
+            else
+            {
+                p->which = Z_SOAP_generic;
+                p->u.generic = (Z_SOAP_Generic *)
+                    odr_malloc(o, sizeof(*p->u.generic));
+                p->u.generic->no = i;
+                p->u.generic->ns = handlers[i].ns;
+                p->u.generic->p = handler_data;
+            }
+            xmlFreeDoc(doc);
+            return ret;
+        }
+        /* OK: assume SOAP */
+
         if (!ptr || ptr->type != XML_ELEMENT_NODE ||
             xmlStrcmp(ptr->name, BAD_CAST "Envelope") || !ptr->ns)
         {

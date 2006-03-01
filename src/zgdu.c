@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.13 2005-06-25 15:46:06 adam Exp $
+ * $Id: zgdu.c,v 1.14 2006-03-01 23:24:25 adam Exp $
  */
 
 /**
@@ -150,6 +150,22 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         }
     }
     return 1;
+}
+
+void z_HTTP_header_add_content_type(ODR o, Z_HTTP_Header **hp,
+                                    const char *content_type,
+                                    const char *charset)
+{
+    const char *l = "Content-Type";
+    if (charset)
+    {
+        char *ctype = odr_malloc(o, strlen(content_type)+strlen(charset) + 15);
+        sprintf(ctype, "%s; charset=%s", content_type, charset);
+        z_HTTP_header_add(o, hp, l, ctype);
+    }
+    else
+        z_HTTP_header_add(o, hp, l, content_type);
+
 }
 
 void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,

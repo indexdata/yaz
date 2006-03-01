@@ -1,4 +1,7 @@
 
+Added SRU-GET and SRU-POST support for ZOOM C. Option "sru" specifies
+which mode to use; one of "post", "get" or "soap" (SRW, default).
+
 Fixed bug in character set conversion yaz_iconv. Some three byte UTF-8
 sequences where not read correctly. Fix by Rustam Usmanov.
 

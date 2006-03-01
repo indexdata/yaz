@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.35 2006-02-01 20:28:44 adam Exp $
+ * $Id: srwutil.c,v 1.36 2006-03-01 23:24:25 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -24,6 +24,52 @@ static int hex_digit (int ch)
     return 0;
 }
 
+void encode_uri_char(char *dst, char ch)
+{
+    if (ch == ' ')
+        strcpy(dst, "+");
+    else if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
+        (ch >= '0' && ch <= '9'))
+    {
+        dst[0] = ch;
+        dst[1] = '\0';
+    }
+    else
+    {
+        dst[0] = '%';
+        sprintf(dst+1, "%02X", (unsigned char ) ch);
+    }
+}
+
+void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
+{
+    size_t i, szp = 0, sz = 0;
+    for(i = 0; name[i]; i++)
+        sz += strlen(name[i]) + 3 + strlen(value[i]) * 3;
+    *path = odr_malloc(o, sz);
+    
+    for(i = 0; name[i]; i++)
+    {
+        size_t j, ilen;
+        if (i)
+            (*path)[szp++] = '&';
+        ilen = strlen(name[i]);
+        memcpy(*path+szp, name[i], ilen);
+        szp += ilen;
+        (*path)[szp++] = '=';
+        for (j = 0; value[i][j]; j++)
+        {
+            size_t vlen;
+            char vstr[5];
+            encode_uri_char(vstr, value[i][j]);
+            vlen = strlen(vstr);
+            memcpy(*path+szp, vstr, vlen);
+            szp += vlen;
+        }
+    }
+    (*path)[szp] = '\0';
+}
+
 int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
 {
     int no = 2;
@@ -32,7 +78,7 @@ int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
     if (*path == '?')
         path++;
     if (!*path)
-        return no;
+        return 0;
     cp = path;
     while ((cp = strchr(cp, '&')))
     {
@@ -870,6 +916,162 @@ int yaz_diag_srw_to_bib1(int code)
         p += 2;
     }
     return 1;
+}
+
+static void add_val_int(ODR o, char **name, char **value,  int *i,
+                        char *a_name, int *val)
+{
+    if (val)
+    {
+        name[*i] = a_name;
+        value[*i] = odr_malloc(o, 30);
+        sprintf(value[*i], "%d", *val);
+        (*i)++;
+    }
+}
+
+static void add_val_str(ODR o, char **name, char **value,  int *i,
+                        char *a_name, char *val)
+{
+    if (val)
+    {
+        name[*i] = a_name;
+        value[*i] = val;
+        (*i)++;
+    }
+}
+
+static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
+                              char **name, char **value)
+{
+    int i = 0;
+    add_val_str(encode, name, value, &i, "version", srw_pdu->srw_version);
+    name[i] = "operation";
+    switch(srw_pdu->which)
+    {
+    case Z_SRW_searchRetrieve_request:
+        value[i++] = "searchRetrieve";
+        switch(srw_pdu->u.request->query_type)
+        {
+        case Z_SRW_query_type_cql:
+            add_val_str(encode, name, value, &i, "query",
+                        srw_pdu->u.request->query.cql);
+            break;
+        case Z_SRW_query_type_pqf:
+            add_val_str(encode, name, value, &i, "x-pquery",
+                        srw_pdu->u.request->query.pqf);
+            break;
+        case Z_SRW_query_type_xcql:
+            add_val_str(encode, name, value, &i, "x-cql",
+                        srw_pdu->u.request->query.xcql);
+            break;
+        }
+        switch(srw_pdu->u.request->sort_type)
+        {
+        case Z_SRW_sort_type_none:
+            break;
+        case Z_SRW_sort_type_sort:            
+            add_val_str(encode, name, value, &i, "sortKeys",
+                        srw_pdu->u.request->sort.sortKeys);
+            break;
+        }
+        add_val_int(encode, name, value, &i, "startRecord", 
+                    srw_pdu->u.request->startRecord);
+        add_val_int(encode, name, value, &i, "maximumRecords", 
+                    srw_pdu->u.request->maximumRecords);
+        add_val_str(encode, name, value, &i, "recordSchema",
+                    srw_pdu->u.request->recordSchema);
+        add_val_str(encode, name, value, &i, "recordPacking",
+                    srw_pdu->u.request->recordPacking);
+        add_val_str(encode, name, value, &i, "recordXPath",
+                    srw_pdu->u.request->recordXPath);
+        add_val_str(encode, name, value, &i, "stylesheet",
+                    srw_pdu->u.request->stylesheet);
+        add_val_int(encode, name, value, &i, "resultSetTTL", 
+                    srw_pdu->u.request->resultSetTTL);
+        break;
+    case Z_SRW_explain_request:
+        value[i++] = "explain";
+        add_val_str(encode, name, value, &i, "stylesheet",
+                    srw_pdu->u.explain_request->stylesheet);
+        break;
+    case Z_SRW_scan_request:
+        value[i++] = "scan";
+
+        switch(srw_pdu->u.scan_request->query_type)
+        {
+        case Z_SRW_query_type_cql:
+            add_val_str(encode, name, value, &i, "scanClause",
+                        srw_pdu->u.scan_request->scanClause.cql);
+            break;
+        case Z_SRW_query_type_pqf:
+            add_val_str(encode, name, value, &i, "x-pScanClause",
+                        srw_pdu->u.scan_request->scanClause.pqf);
+            break;
+        case Z_SRW_query_type_xcql:
+            add_val_str(encode, name, value, &i, "x-cqlScanClause",
+                        srw_pdu->u.scan_request->scanClause.xcql);
+            break;
+        }
+        add_val_int(encode, name, value, &i, "responsePosition", 
+                    srw_pdu->u.scan_request->responsePosition);
+        add_val_int(encode, name, value, &i, "maximumTerms", 
+                    srw_pdu->u.scan_request->maximumTerms);
+        add_val_str(encode, name, value, &i, "stylesheet",
+                    srw_pdu->u.scan_request->stylesheet);
+        break;
+    case Z_SRW_update_request:
+        value[i++] = "update";
+        break;
+    default:
+        return -1;
+    }
+    name[i++] = 0;
+    return 0;
+}
+
+int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
+                       ODR encode, char *charset)
+{
+    char *name[30], *value[30]; /* definite upper limit for SRU params */
+    char *uri_args;
+    char *path;
+
+    if (yaz_get_sru_parms(srw_pdu, encode, name, value))
+        return -1;
+    yaz_array_to_uri(&uri_args, encode, name, value);
+
+    hreq->method = "GET";
+    
+    path = odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 3);
+    sprintf(path, "%s?%s", hreq->path, uri_args);
+    hreq->path = path;
+
+    z_HTTP_header_add_content_type(encode, &hreq->headers,
+                                   "text/xml", charset);
+    return 0;
+}
+
+int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
+                        ODR encode, char *charset)
+{
+    char *name[30], *value[30]; /* definite upper limit for SRU params */
+    char *uri_args;
+
+    if (yaz_get_sru_parms(srw_pdu, encode, name, value))
+        return -1;
+
+    yaz_array_to_uri(&uri_args, encode, name, value);
+
+    hreq->method = "POST";
+    
+    hreq->content_buf = uri_args;
+    hreq->content_len = strlen(uri_args);
+
+    z_HTTP_header_add_content_type(encode, &hreq->headers,
+                                   "application/x-www-form-urlencoded",
+                                   charset);
+    return 0;
 }
 
 /*

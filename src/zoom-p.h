@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.9 2005-10-17 12:25:39 mike Exp $
+ * $Id: zoom-p.h,v 1.10 2006-03-01 23:24:26 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -23,6 +23,14 @@ struct ZOOM_query_p {
     ODR odr;
     char *query_string;
 };
+
+typedef enum {
+    zoom_sru_error,
+    zoom_sru_soap,
+    zoom_sru_get,
+    zoom_sru_post,
+} zoom_sru_mode;
+    
 
 typedef struct ZOOM_task_p *ZOOM_task;
 
@@ -65,6 +73,7 @@ struct ZOOM_connection_p {
     ZOOM_resultset resultsets;
     ZOOM_Event m_queue_front;
     ZOOM_Event m_queue_back;
+    zoom_sru_mode sru_mode;
 };
 
 struct ZOOM_options_entry {

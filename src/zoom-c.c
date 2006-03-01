@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.63 2006-02-19 18:36:10 adam Exp $
+ * $Id: zoom-c.c,v 1.64 2006-03-01 23:24:25 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -53,7 +53,6 @@ typedef enum {
 static zoom_ret ZOOM_connection_send_init (ZOOM_connection c);
 static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out);
 static char *cql2pqf(ZOOM_connection c, const char *cql);
-
 
 static void initlog()
 {
@@ -339,6 +338,19 @@ ZOOM_connection_new (const char *host, int portnum)
     return c;
 }
 
+static zoom_sru_mode get_sru_mode_from_string(const char *s)
+{
+    if (!s || !*s)
+        return zoom_sru_soap;
+    if (!yaz_matchstr(s, "soap"))
+        return zoom_sru_soap;
+    else if (!yaz_matchstr(s, "get"))
+        return zoom_sru_get;
+    else if (!yaz_matchstr(s, "post"))
+        return zoom_sru_post;
+    return zoom_sru_error;
+}
+
 ZOOM_API(void)
 ZOOM_connection_connect(ZOOM_connection c,
                         const char *host, int portnum)
@@ -387,6 +399,9 @@ ZOOM_connection_connect(ZOOM_connection c,
     }
     else
         c->lang = 0;
+
+    val = ZOOM_options_get (c->options, "sru");
+    c->sru_mode = get_sru_mode_from_string(val);
 
     xfree (c->host_port);
     if (portnum)
@@ -1129,7 +1144,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.63 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.64 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1225,7 +1240,6 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
 #if HAVE_XML2
 static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
 {
-    char ctype[50];
     Z_SOAP_Handler h[2] = {
         {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
         {0, 0, 0}
@@ -1262,34 +1276,40 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
         }
     }
 
-    strcpy(ctype, "text/xml");
-    if (c->charset && strlen(c->charset) < 20)
+    if (c->sru_mode == zoom_sru_get)
     {
-        strcat(ctype, "; charset=");
-        strcat(ctype, c->charset);
+        yaz_sru_get_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
     }
-    z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
-                      "Content-Type", ctype);
-    z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
-                      "SOAPAction", "\"\"");
-    p->which = Z_SOAP_generic;
-    p->u.generic = (Z_SOAP_Generic *) odr_malloc(o, sizeof(*p->u.generic));
-    p->u.generic->no = 0;
-    p->u.generic->ns = 0;
-    p->u.generic->p = sr;
-    p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
+    else if (c->sru_mode == zoom_sru_post)
+    {
+        yaz_sru_post_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
+    }
+    else if (c->sru_mode == zoom_sru_soap)
+    {
+        z_HTTP_header_add_content_type(c->odr_out,
+                                       &gdu->u.HTTP_Request->headers,
+                                       "text/xml", c->charset);
 
-    ret = z_soap_codec_enc(o, &p,
-                           &gdu->u.HTTP_Request->content_buf,
-                           &gdu->u.HTTP_Request->content_len, h,
-                           c->charset);
+        z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
+                          "SOAPAction", "\"\"");
+        p->which = Z_SOAP_generic;
+        p->u.generic = (Z_SOAP_Generic *) odr_malloc(o, sizeof(*p->u.generic));
+        p->u.generic->no = 0;
+        p->u.generic->ns = 0;
+        p->u.generic->p = sr;
+        p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
+        
+        ret = z_soap_codec_enc(o, &p,
+                               &gdu->u.HTTP_Request->content_buf,
+                               &gdu->u.HTTP_Request->content_len, h,
+                               c->charset);
 
+    }
     if (!z_GDU(c->odr_out, &gdu, 0, 0))
         return zoom_complete;
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
-
     odr_destroy(o);
-
+        
     event = ZOOM_Event_create (ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event (c, event);
     odr_reset(c->odr_out);

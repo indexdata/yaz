@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zgdu.h,v 1.5 2005-06-25 15:46:03 adam Exp $
+ * $Id: zgdu.h,v 1.6 2006-03-01 23:24:25 adam Exp $
  */
 
 /**
@@ -56,6 +56,10 @@ typedef struct {
 YAZ_EXPORT int z_GDU (ODR o, Z_GDU **p, int opt, const char *name);
 YAZ_EXPORT void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
                                   const char *v);
+YAZ_EXPORT void z_HTTP_header_add_content_type(ODR o, Z_HTTP_Header **hp,
+                                               const char *content_type,
+                                               const char *charset);
+
 YAZ_EXPORT const char *z_HTTP_header_lookup(Z_HTTP_Header *hp, const char *n);
 
 YAZ_EXPORT const char *z_HTTP_errmsg(int code);
