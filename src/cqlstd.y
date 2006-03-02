@@ -1,10 +1,17 @@
-/* $Id: cqlstd.y,v 1.1 2005-11-15 12:23:32 adam Exp $ 
+/* $Id: cqlstd.y,v 1.2 2006-03-02 09:37:35 adam Exp $ 
   YACC CQL grammar taken verbatim from the official spec. We don't
   use that in YAZ but I don't know of a better place to put it.
  */
-%term GE LE NE AND OR NOT PROX CHARSTRING1 CHARSTRING2
+%term GE LE NE AND OR NOT PROX CHARSTRING1 CHARSTRING2 SORTBY
 
 %%
+sortedQuery : prefixAssignment sortedQuery 
+            | scopedClause
+            | scopedClause SORTBY sortSpec;
+
+sortSpec : sortSpec singleSpec | singleSpec;
+singleSpec : index modifierList | index ;
+
 cqlQuery : prefixAssignment cqlQuery | scopedClause;
 
 prefixAssignment : '>' prefix '=' uri | '>' uri;
@@ -42,7 +49,7 @@ modifierValue: term;
 searchTerm: term;
 index: term;
 
-term: identifier | AND | OR | NOT | PROX ;
+term: identifier | AND | OR | NOT | PROX | SORTBY ;
 
 identifier: CHARSTRING1 | CHARSTRING2;
 
