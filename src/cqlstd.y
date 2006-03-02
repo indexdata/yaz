@@ -1,4 +1,4 @@
-/* $Id: cqlstd.y,v 1.2 2006-03-02 09:37:35 adam Exp $ 
+/* $Id: cqlstd.y,v 1.3 2006-03-02 09:38:41 adam Exp $ 
   YACC CQL grammar taken verbatim from the official spec. We don't
   use that in YAZ but I don't know of a better place to put it.
  */
@@ -23,7 +23,7 @@ booleanGroup: boolean | boolean modifierList;
 boolean : AND | OR | NOT | PROX ;
 
 searchClause : '(' cqlQuery ')'
-             | index relation searchTerm
+             | index relation searchClause
 	     | searchTerm
 	     ;
 
