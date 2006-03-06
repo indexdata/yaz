@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-xmlquery.c,v 1.1 2006-02-23 10:40:59 adam Exp $
+ * $Id: yaz-xmlquery.c,v 1.2 2006-03-06 08:11:41 adam Exp $
  */
 
 #include <stdlib.h>
@@ -143,7 +143,8 @@ void xmlfiletopqf(const char *xmlfile)
 	exit(1);
     }
     rewind(f);
-    xmlstr = xmalloc(sz);
+    xmlstr = xmalloc(sz+1);
+    xmlstr[sz] = '\0';
     fread(xmlstr, sz, 1, f);
     fclose(f);
     
