@@ -1,3 +1,9 @@
+cql_transform() now map structure and other attributes before indexes,
+so that index-specific structures and other attributes can override
+defaults.  So now a combination of mapping specifications such as:
+	structure.* = 4=1
+	index.dc.date = 1=date-modified 4=5
+does the right thing.
 
 Added SRU-GET and SRU-POST support for ZOOM C. Option "sru" specifies
 which mode to use; one of "post", "get" or "soap" (SRW, default).

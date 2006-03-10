@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.18 2005-12-21 15:09:50 mike Exp $
+/* $Id: cqltransform.c,v 1.19 2006-03-10 14:43:13 mike Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -390,9 +390,6 @@ void cql_transform_r(cql_transform_t ct,
                 (*pr)("\" ", client_data);
                 return ;
             }
-            cql_pr_attr_uri(ct, "index", ns,
-                            cn->u.st.index, "serverChoice",
-                            pr, client_data, 16);
         }
         else
         {
@@ -425,6 +422,11 @@ void cql_transform_r(cql_transform_t ct,
         }
         cql_pr_attr(ct, "structure", cn->u.st.relation, 0,
                     pr, client_data, 24);
+        if (ns) {
+            cql_pr_attr_uri(ct, "index", ns,
+                            cn->u.st.index, "serverChoice",
+                            pr, client_data, 16);
+        }
         if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "all"))
         {
             emit_wordlist(ct, cn, pr, client_data, "and");
