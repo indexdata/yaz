@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.19 2006-03-10 14:43:13 mike Exp $
+/* $Id: cqltransform.c,v 1.20 2006-03-10 17:18:09 mike Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -399,6 +399,7 @@ void cql_transform_r(cql_transform_t ct,
                 ct->addinfo = 0;
             }
         }
+        cql_pr_attr(ct, "always", 0, 0, pr, client_data, 0);
         if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "="))
             cql_pr_attr(ct, "relation", "eq", "scr",
                         pr, client_data, 19);

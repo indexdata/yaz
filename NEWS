@@ -5,6 +5,11 @@ defaults.  So now a combination of mapping specifications such as:
 	index.dc.date = 1=date-modified 4=5
 does the right thing.
 
+cql_transform() now also respects the "always" mapping specification,
+which establishes an initial set of attributes to be used for all
+terms except where overridden by more specific attributes associated
+with the index, relation or modifier.
+
 Added SRU-GET and SRU-POST support for ZOOM C. Option "sru" specifies
 which mode to use; one of "post", "get" or "soap" (SRW, default).
 
