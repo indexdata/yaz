@@ -1,4 +1,4 @@
-/* $Id: cqlstrer.c,v 1.5 2005-06-25 15:46:03 adam Exp $
+/* $Id: cqlstrer.c,v 1.6 2006-03-10 10:43:32 mike Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -17,7 +17,7 @@ See the file LICENSE details.
 /*
  * The error-messages associated with these codes are taken from
  * the SRW diagnostic specifications at
- *      http://www.loc.gov/srw/diagnostic-list.html
+ *      http://www.loc.gov/standards/sru/diagnostics-list.html
  */
 const char *cql_strerror(int code) {
     static char buf[80];
