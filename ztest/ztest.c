@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.77 2006-02-19 18:37:20 adam Exp $
+ * $Id: ztest.c,v 1.78 2006-03-13 12:14:00 adam Exp $
  */
 
 /*
@@ -409,16 +409,6 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 }
             }
         }
-    }
-    else if (rr->esr->taskSpecificParameters->which == Z_External_update0)
-    {
-        yaz_log(log_level, "Received DB Update (version 0)");
-    }
-    else
-    {
-        yaz_log (YLOG_WARN, "Unknown Extended Service(%d)",
-                 rr->esr->taskSpecificParameters->which);
-        
     }
     return 0;
 }
