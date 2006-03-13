@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.67 2006-02-27 21:31:33 adam Exp $
+ * $Id: seshigh.c,v 1.68 2006-03-13 11:59:27 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1987,7 +1987,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.67 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.68 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -3020,14 +3020,13 @@ static Z_APDU *process_segmentRequest (association *assoc, request *reqb)
 static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 {
     bend_esrequest_rr esrequest;
+    const char *ext_name = "unknown";
 
     Z_ExtendedServicesRequest *req =
         reqb->apdu_request->u.extendedServicesRequest;
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_extendedServicesResponse);
 
     Z_ExtendedServicesResponse *resp = apdu->u.extendedServicesResponse;
-
-    yaz_log(log_requestdetail,"Got EsRequest");
 
     esrequest.esr = reqb->apdu_request->u.extendedServicesRequest;
     esrequest.stream = assoc->encode;
@@ -3039,7 +3038,24 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     esrequest.association = assoc;
     esrequest.taskPackage = 0;
     esrequest.referenceId = req->referenceId;
+
     
+    if (esrequest.esr && esrequest.esr->taskSpecificParameters)
+    {
+        switch(esrequest.esr->taskSpecificParameters->which)
+        {
+        case Z_External_itemOrder:
+            ext_name = "ItemOrder"; break;
+        case Z_External_update:
+            ext_name = "Update"; break;
+        case Z_External_update0:
+            ext_name = "Update0"; break;
+        case Z_External_ESAdmin:
+            ext_name = "Admin"; break;
+
+        }
+    }
+
     (*assoc->init->bend_esrequest)(assoc->backend, &esrequest);
     
     /* If the response is being delayed, return NULL */
@@ -3051,13 +3067,13 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     if (esrequest.errcode == -1)
     {
         /* Backend service indicates request will be processed */
-        yaz_log(log_request,"EsRequest OK: Accepted !");
+        yaz_log(log_request, "Extended Service: %s (accepted)", ext_name);
         *resp->operationStatus = Z_ExtendedServicesResponse_accepted;
     }
     else if (esrequest.errcode == 0)
     {
         /* Backend service indicates request will be processed */
-        yaz_log(log_request,"EsRequest OK: Done !");
+        yaz_log(log_request, "Extended Service: %s (done)", ext_name);
         *resp->operationStatus = Z_ExtendedServicesResponse_done;
     }
     else
@@ -3066,7 +3082,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
             zget_DiagRecs(assoc->encode, esrequest.errcode,
                           esrequest.errstring);
         /* Backend indicates error, request will not be processed */
-        yaz_log(YLOG_DEBUG,"Request could not be processed...failure !");
+        yaz_log(log_request, "Extended Service: %s (failed)", ext_name);
         *resp->operationStatus = Z_ExtendedServicesResponse_failure;
         resp->num_diagnostics = diagRecs->num_diagRecs;
         resp->diagnostics = diagRecs->diagRecs;

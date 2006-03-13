@@ -1,10 +1,11 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.27 2006-01-27 18:58:58 adam Exp $
+## $Id: Makefile.am,v 1.28 2006-03-13 11:59:27 adam Exp $
 
 YAZ_VERSION_INFO=2:0:0
 
 lib_LTLIBRARIES = libyaz.la libyazthread.la
+# noinst_PROGRAMS = cqlparse
 
 dist-hook:
 	test -f $(srcdir)/cql.c || exit 1
@@ -149,4 +150,6 @@ $(srcdir)/item-req.c \
 $(top_srcdir)/include/yaz/item-req.h: \
 $(srcdir)/ill.tcl $(srcdir)/item-req.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) -d ill.tcl -i yaz -I ../include $(YCFLAGS) item-req.asn
+
+# cqlparse_SOURCES = cqlstd.y
 
