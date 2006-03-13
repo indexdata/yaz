@@ -1,3 +1,10 @@
+If the environment variable YAZ_LOG is set, then it is used as a
+string indicating the default level of logging to use if not
+overridden by calls to yaz_log_init() or yaz_log_init_level().  If
+it's not defined, then the manifest constant YLOG_DEFAULT_LEVEL is
+used as before.  So, for example, to omit warnings from YAZ logging,
+	export YAZ_LOG=-warn
+
 cql_transform() now map structure and other attributes before indexes,
 so that index-specific structures and other attributes can override
 defaults.  So now a combination of mapping specifications such as:

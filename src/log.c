@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.29 2005-09-16 21:46:24 adam Exp $
+ * $Id: log.c,v 1.30 2006-03-13 17:33:19 mike Exp $
  */
 
 /**
@@ -53,7 +53,17 @@ char *strerror(int n)
 
 #endif
 
-static int l_level = YLOG_DEFAULT_LEVEL;
+
+static int default_log_level() {
+    char *env = getenv("YAZ_LOG");
+    if (env != 0)
+        return yaz_log_mask_str_x(env, YLOG_DEFAULT_LEVEL);
+    else
+        return YLOG_DEFAULT_LEVEL;
+}
+
+
+static int l_level = -1;        /* will be set from default_log_level() */
 static FILE *l_file = NULL;
 static char l_prefix[512] = "";
 static char l_prefix2[512] = "";
@@ -142,6 +152,7 @@ static void rotate_log(const char *cur_fname)
 void yaz_log_init_level(int level)
 {
     init_mutex();
+    if (l_level < 0) l_level = default_log_level();
     if ( (l_level & YLOG_FLUSH) != (level & YLOG_FLUSH) )
     {
         l_level = level;
@@ -254,6 +265,7 @@ static void yaz_log_open_check(struct tm *tm, int force)
             if (l_file && l_file != stderr)
                 fclose(l_file);
             l_file = fopen(cur_filename, "a");
+            if (l_level < 0) l_level = default_log_level();
             if (l_level & YLOG_FLUSH)
                 setvbuf(l_file, 0, _IONBF, 0);
         }
@@ -293,6 +305,7 @@ void yaz_log(int level, const char *fmt, ...)
     char tbuf[TIMEFORMAT_LEN] = "";
     int o_level = level;
 
+    if (l_level < 0) l_level = default_log_level();
     if (!(level & l_level))
         return;
     init_mutex();
@@ -443,7 +456,7 @@ int yaz_log_module_level(const char *name)
 
 int yaz_log_mask_str(const char *str)
 {
-    return yaz_log_mask_str_x(str, YLOG_DEFAULT_LEVEL);
+    return yaz_log_mask_str_x(str, default_log_level());
 }
 
 int yaz_log_mask_str_x(const char *str, int level)
@@ -489,4 +502,3 @@ int yaz_log_mask_str_x(const char *str, int level)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
