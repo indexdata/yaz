@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.73 2006-02-01 20:31:00 adam Exp $
+; $Id: yaz.nsi,v 1.74 2006-03-14 08:50:19 adam Exp $
 
 !define VERSION "2.1.12"
 !define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
@@ -108,6 +108,9 @@ Section "YAZ Development" YAZ_Development
 	File ..\include\yaz\*.h
 	SetOutPath $INSTDIR\lib
 	File ..\lib\yaz.lib
+	File ..\lib\yazd.lib
+	SetOutPath $INSTDIR\bin
+	File ..\bin\yazd.dll
 SectionEnd
 
 Section "YAZ Documentation" YAZ_Documentation
