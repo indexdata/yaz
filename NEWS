@@ -1,3 +1,8 @@
+--- 2.1.14 2006/03/14 
+
+Updated Windows package to include yazd.dll + yazd.lib for the
+Development component.
+
 If the environment variable YAZ_LOG is set, then it is used as a
 string indicating the default level of logging to use if not
 overridden by calls to yaz_log_init() or yaz_log_init_level().  If
@@ -20,10 +25,15 @@ with the index, relation or modifier.
 Added SRU-GET and SRU-POST support for ZOOM C. Option "sru" specifies
 which mode to use; one of "post", "get" or "soap" (SRW, default).
 
+Fixes for yaz_iconv routines: changed trie-based character set conversions
+to use only non-negative values for bit fields due to Sun's C compiler not
+supporting negative values.
+
 Fixed bug in character set conversion yaz_iconv. Some three byte UTF-8
 sequences where not read correctly. Fix by Rustam Usmanov.
 
-Updates to win/makefile which makes things compile happily with VS C 2005.
+Updated win/makefile to use options, settings which makes things
+compile with VS C 2005.
 
 --- 2.1.12 2006/02/01 
 
