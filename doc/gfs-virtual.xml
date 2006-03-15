@@ -1,5 +1,5 @@
 <!-- 
-   $Id: gfs-virtual.xml,v 1.3 2005-08-05 09:36:15 adam Exp $
+   $Id: gfs-virtual.xml,v 1.4 2006-03-15 13:32:05 adam Exp $
    Description of the virtual host mechanism in YAZ GFS
    Included in both manual and man page for yaz-ztest
 -->
@@ -131,6 +131,30 @@
      Specifies a filename that includes CQL to RPN conversion for this
      backend server. See &reference-tools-cql-map;
      If given, the backend server will only "see" a Type-1/RPN query. 
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry><term>element <literal>stylesheet</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies the stylesheet reference to be part of SRU HTTP responses
+     when the client does not specify one. If neither this is given, nor
+     the client specifies one, no stylesheet reference is part of the
+     SRU HTTP response.
+    </para>
+   </listitem>
+  </varlistentry>
+   
+  <varlistentry><term>element <literal>docpath</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies a path for local file access using HTTP. All URLs with
+     a leading prefix (/ exluded) that matches the value of docpath
+     are used for file access. For example, if the server is to offer
+     access in directory <literal>xsl</literal>, the docpath would be
+     <literal>xsl</literal> and all URLs of the form
+     <literal>http://host/exl</literal> will result in a local file access.
     </para>
    </listitem>
   </varlistentry>

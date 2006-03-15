@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.101 2006-03-14 08:50:19 adam Exp $
+# $Id: makefile,v 1.102 2006-03-15 13:32:06 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -399,7 +399,8 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\zoom-c.obj \
    $(OBJDIR)\zoom-opt.obj \
    $(OBJDIR)\initopt.obj \
-   $(OBJDIR)\xmlquery.obj
+   $(OBJDIR)\xmlquery.obj \
+   $(OBJDIR)\mime.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\

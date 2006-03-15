@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.33 2005-10-20 19:28:04 quinn Exp $
+ * $Id: statserv.c,v 1.34 2006-03-15 13:32:05 adam Exp $
  */
 
 /**
@@ -219,6 +219,8 @@ static struct gfs_server * gfs_server_new()
     n->cql_transform = 0;
     n->server_node_ptr = 0;
     n->directory = 0;
+    n->docpath = 0;
+    n->stylesheet = 0;
     return n;
 }
 
@@ -262,6 +264,10 @@ int control_association(association *assoc, const char *host, int force_open)
             *cp = '\0';
         host = vhost;
     }
+    assoc->cql_transform = 0;
+    assoc->server_node_ptr = 0;
+    assoc->docpath = 0;
+    assoc->stylesheet = 0;
     if (control_block.xml_config[0])
     {
         struct gfs_server *gfs;
@@ -289,6 +295,8 @@ int control_association(association *assoc, const char *host, int force_open)
                     xfree(assoc->init);
                     assoc->init = 0;
                 }
+                assoc->docpath = gfs->docpath;
+                assoc->stylesheet = gfs->stylesheet;
                 assoc->cql_transform = gfs->cql_transform;
                 assoc->server_node_ptr = gfs->server_node_ptr;
                 assoc->last_control = &gfs->cb;
@@ -300,8 +308,6 @@ int control_association(association *assoc, const char *host, int force_open)
         }
         statserv_setcontrol(0);
         assoc->last_control = 0;
-        assoc->cql_transform = 0;
-        assoc->server_node_ptr = 0;
         yaz_log(YLOG_DEBUG, "server select: no match");
         return 0;
     }
@@ -309,8 +315,6 @@ int control_association(association *assoc, const char *host, int force_open)
     {
         statserv_setcontrol(&control_block);
         assoc->last_control = &control_block;
-        assoc->cql_transform = 0;
-        assoc->server_node_ptr = 0;
         yaz_log(YLOG_DEBUG, "server select: config=%s", control_block.configname);
         return 1;
     }
@@ -408,6 +412,28 @@ static void xml_config_read()
                 {
                     (*gfsp)->directory = 
                         nmem_dup_xml_content(gfs_nmem, ptr->children);
+                }
+                else if (!strcmp((const char *) ptr->name, "docpath"))
+                {
+                    (*gfsp)->docpath = 
+                        nmem_dup_xml_content(gfs_nmem, ptr->children);
+                }
+                else if (!strcmp((const char *) ptr->name, "stylesheet"))
+                {
+                    char *s = nmem_dup_xml_content(gfs_nmem, ptr->children);
+                    (*gfsp)->stylesheet = 
+                        nmem_malloc(gfs_nmem, strlen(s) + 2);
+                    sprintf((*gfsp)->stylesheet, "/%s", s);
+                }
+                else if (!strcmp((const char *) ptr->name, "explain"))
+                {
+                    ; /* being processed separately */
+                }
+                else
+                {
+                    yaz_log(YLOG_FATAL, "Unknown element '%s' in config %s",
+                            ptr->name, control_block.xml_config);
+                    exit(1);
                 }
             }
             gfsp = &(*gfsp)->next;

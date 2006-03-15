@@ -1,12 +1,14 @@
-<!-- $Id: yazgfs.xml,v 1.1 2005-12-16 15:01:25 adam Exp $ -->
+<!-- $Id: yazgfs.xml,v 1.2 2006-03-15 13:32:05 adam Exp $ -->
 <!-- sample YAZ GFS config file .. see 
   http://indexdata.dk/yaz/doc/server.vhosts.tkl -->
 <yazgfs>
   <listen id="public1">tcp:@:9000</listen>
-  <server id="server1">
+  <server id="server1" listenref="public1">
      <directory>.</directory> <!-- directory where backend is running -->
      <config>zebra.cfg</config>
      <cql2rpn>pqf.properties</cql2rpn>
+     <docpath>xsl</docpath>
+     <stylesheet>xsl/default.xsl</stylesheet>
      <explain xmlns="http://explain.z3950.org/dtd/2.0/">
         <serverInfo>
            <host>myserver.org</host>

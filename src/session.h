@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.9 2005-06-25 15:46:05 adam Exp $
+ * $Id: session.h,v 1.10 2006-03-15 13:32:05 adam Exp $
  */
 /**
  * \file session.h
@@ -26,6 +26,8 @@ struct gfs_server {
     cql_transform_t cql_transform;
     void *server_node_ptr;
     char *directory;
+    char *docpath;
+    char *stylesheet;
     struct gfs_server *next;
 };
 
@@ -109,6 +111,8 @@ typedef struct association
     statserv_options_block *last_control;
     cql_transform_t cql_transform;
     void *server_node_ptr;
+    const char *docpath;
+    const char *stylesheet;
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link,

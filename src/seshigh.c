@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.68 2006-03-13 11:59:27 adam Exp $
+ * $Id: seshigh.c,v 1.69 2006-03-15 13:32:05 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -60,6 +60,7 @@
 #include <yaz/comstack.h>
 #include "eventl.h"
 #include "session.h"
+#include "mime.h"
 #include <yaz/proto.h>
 #include <yaz/oid.h>
 #include <yaz/log.h>
@@ -1383,6 +1384,32 @@ static void srw_bend_update(association *assoc, request *req,
     }
 }
 
+/* check if path is OK (1); BAD (0) */
+static int check_path(const char *path)
+{
+    if (*path != '/')
+        return 0;
+    if (strstr(path, ".."))
+        return 0;
+    return 1;
+}
+
+static char *read_file(const char *fname, ODR o, int *sz)
+{
+    char *buf;
+    FILE *inf = fopen(fname, "rb");
+    if (!inf)
+        return 0;
+
+    fseek(inf, 0L, SEEK_END);
+    *sz = ftell(inf);
+    rewind(inf);
+    buf = odr_malloc(o, *sz);
+    fread(buf, 1, *sz, inf);
+    fclose(inf);
+    return buf;     
+}
+
 static void process_http_request(association *assoc, request *req)
 {
     Z_HTTP_Request *hreq = req->gdu_request->u.HTTP_Request;
@@ -1394,7 +1421,7 @@ static void process_http_request(association *assoc, request *req)
     char *charset = 0;
     Z_HTTP_Response *hres = 0;
     int keepalive = 1;
-    char *stylesheet = 0;
+    const char *stylesheet = 0; /* for now .. set later */
     Z_SRW_diagnostic *diagnostic = 0;
     int num_diagnostic = 0;
     const char *host = z_HTTP_header_lookup(hreq->headers, "Host");
@@ -1404,14 +1431,63 @@ static void process_http_request(association *assoc, request *req)
         p = z_get_HTTP_Response(o, 404);
         r = 1;
     }
-    if (r == 2 && !strcmp(hreq->path, "/test")) 
+    if (r == 2 && assoc->docpath && hreq->path[0] == '/' 
+        && 
+        /* check if path is a proper prefix of documentroot */
+        strncmp(hreq->path+1, assoc->docpath, strlen(assoc->docpath))
+        == 0)
     {   
-        p = z_get_HTTP_Response(o, 200);
-        hres = p->u.HTTP_Response;
-        hres->content_buf = "1234567890\n";
-        hres->content_len = strlen(hres->content_buf);
+        if (!check_path(hreq->path))
+        {
+            yaz_log(YLOG_LOG, "File %s access forbidden", hreq->path+1);
+            p = z_get_HTTP_Response(o, 404);
+        }
+        else
+        {
+            int content_size = 0;
+            char *content_buf = read_file(hreq->path+1, o, &content_size);
+            if (!content_buf)
+            {
+                yaz_log(YLOG_LOG, "File %s not found", hreq->path+1);
+                p = z_get_HTTP_Response(o, 404);
+            }
+            else
+            {
+                const char *ctype = 0;
+                yaz_mime_types types = yaz_mime_types_create();
+                
+                yaz_mime_types_add(types, "xsl", "application/xml");
+                yaz_mime_types_add(types, "xml", "application/xml");
+                yaz_mime_types_add(types, "css", "text/css");
+                yaz_mime_types_add(types, "html", "text/html");
+                yaz_mime_types_add(types, "htm", "text/html");
+                yaz_mime_types_add(types, "txt", "text/plain");
+                
+                yaz_mime_types_add(types, "gif", "image/gif");
+                yaz_mime_types_add(types, "png", "image/png");
+                yaz_mime_types_add(types, "jpg", "image/jpeg");
+                yaz_mime_types_add(types, "jpeg", "image/jpeg");
+                
+                ctype = yaz_mime_lookup_fname(types, hreq->path);
+                if (!ctype)
+                {
+                    yaz_log(YLOG_LOG, "No mime type for %s", hreq->path+1);
+                    p = z_get_HTTP_Response(o, 404);
+                }
+                else
+                {
+                    p = z_get_HTTP_Response(o, 200);
+                    hres = p->u.HTTP_Response;
+                    hres->content_buf = content_buf;
+                    hres->content_len = content_size;
+                    z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+                }
+                yaz_mime_types_destroy(types);
+            }
+        }
         r = 1;
     }
+
     if (r == 2)
     {
         r = yaz_srw_decode(hreq, &sr, &soap_package, assoc->decode, &charset);
@@ -1513,6 +1589,11 @@ static void process_http_request(association *assoc, request *req)
             int ret;
             p = z_get_HTTP_Response(o, 200);
             hres = p->u.HTTP_Response;
+
+            yaz_log(YLOG_LOG, "assoc->stylesheet=%s", assoc->stylesheet);
+            if (!stylesheet)
+                stylesheet = assoc->stylesheet;
+
             ret = z_soap_codec_enc_xsl(assoc->encode, &soap_package,
                                        &hres->content_buf, &hres->content_len,
                                        soap_handlers, charset, stylesheet);
@@ -1987,7 +2068,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.68 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.69 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
