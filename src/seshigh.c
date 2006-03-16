@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.70 2006-03-15 14:12:26 marc Exp $
+ * $Id: seshigh.c,v 1.71 2006-03-16 08:55:28 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1593,6 +1593,10 @@ static void process_http_request(association *assoc, request *req)
             if (!stylesheet)
                 stylesheet = assoc->stylesheet;
 
+            /* empty stylesheet means NO stylesheet */
+            if (stylesheet && *stylesheet == '\0')
+                stylesheet = 0;
+
             ret = z_soap_codec_enc_xsl(assoc->encode, &soap_package,
                                        &hres->content_buf, &hres->content_len,
                                        soap_handlers, charset, stylesheet);
@@ -2067,7 +2071,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.70 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.71 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
