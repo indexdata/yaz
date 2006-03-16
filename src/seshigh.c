@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.71 2006-03-16 08:55:28 adam Exp $
+ * $Id: seshigh.c,v 1.72 2006-03-16 12:30:03 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -517,8 +517,9 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num)
         assoc->backend = binitres->handle;
         if (binitres->errcode)
         {
+            int srw_code = yaz_diag_bib1_to_srw(binitres->errcode);
             assoc->state = ASSOC_DEAD;
-            yaz_add_srw_diagnostic(assoc->encode, d, num, binitres->errcode,
+            yaz_add_srw_diagnostic(assoc->encode, d, num, srw_code,
                                    binitres->errstring);
             return 0;
         }
@@ -2071,7 +2072,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.71 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.72 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
