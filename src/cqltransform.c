@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.20 2006-03-10 17:18:09 mike Exp $
+/* $Id: cqltransform.c,v 1.21 2006-03-20 14:56:40 mike Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -209,6 +209,93 @@ int cql_pr_attr(cql_transform_t ct, const char *category,
 }
 
 
+static void cql_pr_int (int val,
+                        void (*pr)(const char *buf, void *client_data),
+                        void *client_data)
+{
+    char buf[21];              /* enough characters to 2^64 */
+    sprintf(buf, "%d", val);
+    (*pr)(buf, client_data);
+    (*pr)(" ", client_data);
+}
+
+
+static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
+                       void (*pr)(const char *buf, void *client_data),
+                       void *client_data)
+{
+    int exclusion = 0;
+    int distance;               /* to be filled in later depending on unit */
+    int distance_defined = 0;
+    int ordered = 0;
+    int proxrel = 2;            /* less than or equal */
+    int unit = 2;               /* word */
+
+    while (mods != 0) {
+        char *name = mods->u.st.index;
+        char *term = mods->u.st.term;
+        char *relation = mods->u.st.relation;
+
+        if (!strcmp(name, "distance")) {
+            distance = strtol(term, (char**) 0, 0);
+            distance_defined = 1;
+            if (!strcmp(relation, "=")) {
+                proxrel = 3;
+            } else if (!strcmp(relation, ">")) {
+                proxrel = 5;
+            } else if (!strcmp(relation, "<")) {
+                proxrel = 1;
+            } else if (!strcmp(relation, ">=")) {
+                proxrel = 4;
+            } else if (!strcmp(relation, "<=")) {
+                proxrel = 2;
+            } else if (!strcmp(relation, "<>")) {
+                proxrel = 6;
+            } else {
+                ct->error = 40; /* Unsupported proximity relation */
+                ct->addinfo = xstrdup(relation);
+                return 0;
+            }
+        } else if (!strcmp(name, "ordered")) {
+            ordered = 1;
+        } else if (!strcmp(name, "unordered")) {
+            ordered = 0;
+        } else if (!strcmp(name, "unit")) {
+            if (!strcmp(term, "word")) {
+                unit = 2;
+            } else if (!strcmp(term, "sentence")) {
+                unit = 3;
+            } else if (!strcmp(term, "paragraph")) {
+                unit = 4;
+            } else if (!strcmp(term, "element")) {
+                unit = 8;
+            } else {
+                ct->error = 42; /* Unsupported proximity unit */
+                ct->addinfo = xstrdup(term);
+                return 0;
+            }
+        } else {
+            ct->error = 46;     /* Unsupported boolean modifier */
+            ct->addinfo = xstrdup(name);
+            return 0;
+        }
+
+        mods = mods->u.st.modifiers;
+    }
+
+    if (!distance_defined)
+        distance = (unit == 2) ? 1 : 0;
+
+    cql_pr_int(exclusion, pr, client_data);
+    cql_pr_int(distance, pr, client_data);
+    cql_pr_int(ordered, pr, client_data);
+    cql_pr_int(proxrel, pr, client_data);
+    (*pr)("k ", client_data);
+    cql_pr_int(unit, pr, client_data);
+
+    return 1;
+}
+
 /* Returns location of first wildcard character in the `length'
  * characters starting at `term', or a null pointer of there are
  * none -- like memchr().
@@ -373,6 +460,7 @@ void cql_transform_r(cql_transform_t ct,
                      void *client_data)
 {
     const char *ns;
+    struct cql_node *mods;
 
     if (!cn)
         return;
@@ -446,6 +534,16 @@ void cql_transform_r(cql_transform_t ct,
         (*pr)("@", client_data);
         (*pr)(cn->u.boolean.value, client_data);
         (*pr)(" ", client_data);
+        mods = cn->u.boolean.modifiers;
+        if (!strcmp(cn->u.boolean.value, "prox")) {
+            if (!cql_pr_prox(ct, mods, pr, client_data))
+                return;
+        } else if (mods) {
+            /* Boolean modifiers other than on proximity not supported */
+            ct->error = 46; /* SRW diag: "Unsupported boolean modifier" */
+            ct->addinfo = xstrdup(mods->u.st.index);
+            return;
+        }
 
         cql_transform_r(ct, cn->u.boolean.left, pr, client_data);
         cql_transform_r(ct, cn->u.boolean.right, pr, client_data);
