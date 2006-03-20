@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.23 2006-02-01 20:11:22 adam Exp $
+# $Id: buildconf.sh,v 1.24 2006-03-20 09:38:13 mike Exp $
 set -x
 aclocal -I .
 libtoolize --automake --force 
@@ -61,7 +61,7 @@ Or just build the Debian packages without configuring
   dpkg-buildpackage -rfakeroot
 
 When building from a CVS checkout, you need these Debian tools:
-  autoconf, automake, bison, gcc, libtools,
+  autoconf, automake, bison, gcc, libtool,
   docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,
   libxml2-dev, libssl-dev, libreadline4-dev, libwrap0-dev, any tcl
 EOF
