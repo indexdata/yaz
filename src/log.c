@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.30 2006-03-13 17:33:19 mike Exp $
+ * $Id: log.c,v 1.31 2006-03-21 12:31:48 adam Exp $
  */
 
 /**
@@ -42,6 +42,7 @@ static int mutex_init_flag = 0; /* not yet initialized */
 
 #define HAS_STRERROR 1
 
+
 #if HAS_STRERROR
 
 #else
@@ -64,10 +65,15 @@ static int default_log_level() {
 
 
 static int l_level = -1;        /* will be set from default_log_level() */
-static FILE *l_file = NULL;
+
+enum l_file_type {  use_stderr, use_none, use_file };
+static enum l_file_type yaz_file_type = use_stderr;
+static FILE *yaz_global_log_file = NULL;
+
 static char l_prefix[512] = "";
 static char l_prefix2[512] = "";
 static char l_fname[512] = "";
+
 
 static char l_old_default_format[] = "%H:%M:%S-%d/%m";
 static char l_new_default_format[] = "%Y%m%d-%H%M%S";
@@ -115,21 +121,44 @@ static void init_mutex()
 
 FILE *yaz_log_file(void)
 {
-    if (!l_file)
-        l_file = stderr;
-    return l_file;
+    FILE *f = 0;
+    switch(yaz_file_type)
+    {
+        case use_stderr: f = stderr; break;
+        case use_none: f = 0; break;
+        case use_file: f = yaz_global_log_file; break;
+    }
+    return f;
+}
+
+void yaz_log_close()
+{
+    if (yaz_file_type == use_file && yaz_global_log_file)
+    {
+        fclose(yaz_global_log_file);
+        yaz_global_log_file = 0;
+    }
 }
 
 void yaz_log_init_file(const char *fname)
 {
     init_mutex();
+
+    yaz_log_close();
     if (fname)
     {
+        if (*fname == '\0')
+            yaz_file_type = use_stderr; /* empty name; use stderr */
+        else
+            yaz_file_type = use_file;
         strncpy(l_fname, fname, sizeof(l_fname)-1);
         l_fname[sizeof(l_fname)-1] = '\0';
     }
     else
-        l_fname[0] = '\0';
+    {
+        yaz_file_type = use_none;  /* NULL name; use no file at all */
+        l_fname[0] = '\0'; 
+    }
     yaz_log_reopen();
 }
 
@@ -240,9 +269,6 @@ static void yaz_log_open_check(struct tm *tm, int force)
     char new_filename[512];
     static char cur_filename[512] = "";
 
-    if (!l_file)
-        l_file = stderr;
-
     if (l_fname && *l_fname)
     {
         strftime(new_filename, sizeof(new_filename)-1, l_fname, tm);
@@ -251,24 +277,24 @@ static void yaz_log_open_check(struct tm *tm, int force)
             strcpy(cur_filename, new_filename);
             force = 1;
         }
-        if (l_max_size > 0 && (l_file && l_file != stderr))
+    }
+
+    if (l_max_size > 0 && yaz_global_log_file && yaz_file_type == use_file)
+    {
+        long flen = ftell(yaz_global_log_file);
+        if (flen > l_max_size)
         {
-            long flen = ftell(l_file);
-            if (flen > l_max_size)
-            {
-                rotate_log(cur_filename);
-                force = 1;
-            }
+            rotate_log(cur_filename);
+            force = 1;
         }
-        if (force)
-        {
-            if (l_file && l_file != stderr)
-                fclose(l_file);
-            l_file = fopen(cur_filename, "a");
-            if (l_level < 0) l_level = default_log_level();
-            if (l_level & YLOG_FLUSH)
-                setvbuf(l_file, 0, _IONBF, 0);
-        }
+    }
+    if (force && yaz_file_type == use_file && *cur_filename)
+    {
+        yaz_log_close();
+        yaz_global_log_file = fopen(cur_filename, "a");
+        if (l_level < 0) l_level = default_log_level();
+        if (l_level & YLOG_FLUSH)
+            setvbuf(yaz_global_log_file, 0, _IONBF, 0);
     }
 }
 
@@ -291,50 +317,70 @@ void yaz_log_reopen()
     nmem_mutex_leave(log_mutex);
 }
 
-void yaz_log(int level, const char *fmt, ...)
+static void yaz_log_to_file(int level, FILE *file, const char *buf)
 {
-    va_list ap;
-    char buf[4096], flags[1024];
+    time_t ti = time(0);
     int i;
-    time_t ti;
 #if HAVE_LOCALTIME_R
     struct tm tm0, *tm = &tm0;
 #else
     struct tm *tm;
 #endif
-    char tbuf[TIMEFORMAT_LEN] = "";
-    int o_level = level;
 
-    if (l_level < 0) l_level = default_log_level();
-    if (!(level & l_level))
-        return;
     init_mutex();
 
     nmem_mutex_enter(log_mutex);
-    ti = time(0);
-#if HAVE_LOCALTIME_R
+
+    #if HAVE_LOCALTIME_R
     localtime_r(&ti, tm);
 #else
     tm = localtime(&ti);
 #endif
+    
+    yaz_log_open_check(tm, 0);  
+    file = yaz_log_file(); /* file may change in yaz_log_open_check */
 
-    yaz_log_open_check(tm, 0);
-
-    if (!l_file)
-        l_file = stderr;
-
-    *flags = '\0';
-    for (i = 0; level && mask_names[i].name; i++)
-        if ( mask_names[i].mask & level)
-        {
-            if (*mask_names[i].name && mask_names[i].mask && 
-                 mask_names[i].mask != YLOG_ALL)
+    if (file)
+    {
+        char tbuf[TIMEFORMAT_LEN];
+        char flags[1024];
+        
+        *flags = '\0';
+        for (i = 0; level && mask_names[i].name; i++)
+            if ( mask_names[i].mask & level)
             {
-                sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
-                level &= ~mask_names[i].mask;
+                if (*mask_names[i].name && mask_names[i].mask && 
+                    mask_names[i].mask != YLOG_ALL)
+                {
+                    sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
+                    level &= ~mask_names[i].mask;
+                }
             }
-        }
+        
+        if (l_level & YLOG_NOTIME)
+            tbuf[0] = '\0';
+        else
+            strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tm);
+        tbuf[TIMEFORMAT_LEN-1] = '\0';
+        
+        fprintf(file, "%s %s%s %s%s\n", tbuf, l_prefix, flags, l_prefix2, buf);
+        if (l_level & (YLOG_FLUSH|YLOG_DEBUG) )
+            fflush(file);
+    }
+    nmem_mutex_leave(log_mutex);
+}
 
+void yaz_log(int level, const char *fmt, ...)
+{
+    va_list ap;
+    char buf[4096];
+    FILE *file;
+    int o_level = level;
+
+    if (l_level < 0)
+        l_level = default_log_level();
+    if (!(level & l_level))
+        return;
     va_start(ap, fmt);
 #ifdef WIN32
     _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
@@ -356,18 +402,12 @@ void yaz_log(int level, const char *fmt, ...)
     va_end (ap);
     if (start_hook_func)
         (*start_hook_func)(o_level, buf, start_hook_info);
-    if (l_level & YLOG_NOTIME)
-        tbuf[0] = '\0';
-    else
-        strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tm);
-    tbuf[TIMEFORMAT_LEN-1] = '\0';
-    fprintf(l_file, "%s %s%s %s%s\n", tbuf, l_prefix, flags,
-            l_prefix2, buf);
-    if (l_level & (YLOG_FLUSH|YLOG_DEBUG) )
-        fflush(l_file);
+
+    file = yaz_log_file();
+    if (file)
+        yaz_log_to_file(level, file, buf);
     if (end_hook_func)
         (*end_hook_func)(o_level, buf, end_hook_info);
-    nmem_mutex_leave(log_mutex);
 }
 
 void yaz_log_time_format(const char *fmt)
