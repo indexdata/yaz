@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.34 2005-06-25 15:46:02 adam Exp $
+ * $Id: log.h,v 1.35 2006-03-21 12:54:02 adam Exp $
  */
 
 /**
@@ -131,10 +131,9 @@ YAZ_EXPORT int yaz_log_module_level(const char *name);
 /** yaz_log_file returns the file handle for yaz_log. */
 YAZ_EXPORT FILE *yaz_log_file(void);
 
-YAZ_EXPORT void log_event_start(void (*func)(int level, const char *msg, void *info),
-        void *info);
-YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg, void *info),
-        void *info);
+/** yza_log_set_handler allows log output to be captured to something else */
+YAZ_EXPORT void yaz_log_set_handler(void (*func)(int, const char *,
+                                                 void *), void *info);
 
 YAZ_EXPORT void yaz_log_reopen(void);
 

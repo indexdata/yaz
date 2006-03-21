@@ -2,10 +2,11 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.9 2006-03-21 12:32:16 adam Exp $
+ * $Id: tstlog.c,v 1.10 2006-03-21 12:54:02 adam Exp $
  *
  */
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <yaz/options.h>
 #include <yaz/log.h>
@@ -55,7 +56,7 @@ int main(int argc, char **argv)
             wait_between_log = atoi(arg);
             break;
         case 'H':
-            log_event_start(hook_func, 0);
+            yaz_log_set_handler(hook_func, 0);
             break;
         case 0:
             for (i = 0; i<number; i++)

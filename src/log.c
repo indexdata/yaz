@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.31 2006-03-21 12:31:48 adam Exp $
+ * $Id: log.c,v 1.32 2006-03-21 12:54:02 adam Exp $
  */
 
 /**
@@ -247,21 +247,13 @@ void yaz_log_init_max_size(int mx)
         l_max_size = mx;
 }
 
-static void (*start_hook_func)(int, const char *, void *) = NULL;
-static void *start_hook_info;
-static void (*end_hook_func)(int, const char *, void *) = NULL;
-static void *end_hook_info;
+static void (*hook_func)(int, const char *, void *) = NULL;
+static void *hook_info;
 
-void log_event_start(void (*func)(int, const char *, void *), void *info)
+void yaz_log_set_handler(void (*func)(int, const char *, void *), void *info)
 {
-    start_hook_func = func;
-    start_hook_info = info;
-}
-
-void log_event_end(void (*func)(int, const char *, void *), void *info)
-{
-    end_hook_func = func;
-    end_hook_info = info;
+    hook_func = func;
+    hook_info = info;
 }
 
 static void yaz_log_open_check(struct tm *tm, int force)
@@ -400,14 +392,12 @@ void yaz_log(int level, const char *fmt, ...)
         strcat(buf, "]");
     }
     va_end (ap);
-    if (start_hook_func)
-        (*start_hook_func)(o_level, buf, start_hook_info);
+    if (hook_func)
+        (*hook_func)(o_level, buf, hook_info);
 
     file = yaz_log_file();
     if (file)
         yaz_log_to_file(level, file, buf);
-    if (end_hook_func)
-        (*end_hook_func)(o_level, buf, end_hook_info);
 }
 
 void yaz_log_time_format(const char *fmt)
