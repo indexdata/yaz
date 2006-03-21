@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.8 2005-09-16 21:14:38 adam Exp $
+ * $Id: tstlog.c,v 1.9 2006-03-21 12:32:16 adam Exp $
  *
  */
 #include <stdio.h>
@@ -13,6 +13,11 @@
 #include <unistd.h>
 #endif
 
+void hook_func(int level, const char *msg, void *vp)
+{
+    fprintf(stderr, "[HOOK level=%d msg=%s]\n", level, msg);
+}
+
 int main(int argc, char **argv)
 {
     char *arg;
@@ -21,7 +26,7 @@ int main(int argc, char **argv)
     int number = 1;
     unsigned int wait_between_log = 0;
 
-    while ((ret = options("f:v:l:m:n:s:w:", argv, argc, &arg)) != -2)
+    while ((ret = options("f:v:l:m:n:s:w:Hh", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -35,7 +40,10 @@ int main(int argc, char **argv)
             yaz_log_init_level(yaz_log_mask_str(arg));
             break;
         case 'l':
-            yaz_log_init_file(arg);
+            if (!strcmp(arg, "@"))
+                yaz_log_init_file(0);
+            else
+                yaz_log_init_file(arg);
             break;
         case 'n':
             number = atoi(arg);
@@ -45,6 +53,9 @@ int main(int argc, char **argv)
             break;
         case 'w':
             wait_between_log = atoi(arg);
+            break;
+        case 'H':
+            log_event_start(hook_func, 0);
             break;
         case 0:
             for (i = 0; i<number; i++)
@@ -56,10 +67,11 @@ int main(int argc, char **argv)
 #endif
             }
             break;
+        case 'h':
         default:
             fprintf(stderr, "tstlog. Bad option\n");
             fprintf(stderr, "tstlog [-f logformat] [-v level] [-l file] "
-                    "[-m module] [-w sec] [-s max] [-n num] msg ..\n");
+                    "[-m module] [-w sec] [-s max] [-n num] [-H] msg ..\n");
             exit(1);
         }
     }
