@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: log.h,v 1.35 2006-03-21 12:54:02 adam Exp $
+ * $Id: log.h,v 1.36 2006-03-21 13:58:50 adam Exp $
  */
 
 /**
@@ -136,6 +136,12 @@ YAZ_EXPORT void yaz_log_set_handler(void (*func)(int, const char *,
                                                  void *), void *info);
 
 YAZ_EXPORT void yaz_log_reopen(void);
+
+YAZ_EXPORT void log_event_start(void (*func)(int level, const char *msg,
+                                             void *info), void *info);
+
+YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg,
+                                           void *info), void *info);
 
 #if YAZ_USE_NEW_LOG
 
