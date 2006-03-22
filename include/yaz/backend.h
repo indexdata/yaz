@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.35 2006-03-22 13:38:17 mike Exp $
+ * $Id: backend.h,v 1.36 2006-03-22 13:55:06 mike Exp $
  */
 
 /** 
@@ -284,6 +284,7 @@ typedef struct statserv_options_block
     int dynamic;                  /* fork on incoming requests */
     int threads;                  /* use threads */
     int one_shot;                 /* one session then exit(1) */
+    int __UNUSED__loglevel;       /* desired logging-level */
     char apdufile[ODR_MAXNAME+1]; /* file for pretty-printed PDUs */
     char logfile[ODR_MAXNAME+1];  /* file for diagnostic output */
     char default_listen[1024];    /* 0 == no default listen */
