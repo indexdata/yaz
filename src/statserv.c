@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.34 2006-03-15 13:32:05 adam Exp $
+ * $Id: statserv.c,v 1.35 2006-03-22 13:50:46 mike Exp $
  */
 
 /**
@@ -14,6 +14,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #ifdef WIN32
@@ -92,7 +93,6 @@ statserv_options_block control_block = {
     1,                          /* dynamic mode */
     0,                          /* threaded mode */
     0,                          /* one shot (single session) */
-    YLOG_DEFAULT_LEVEL,          /* log level */
     "",                         /* no PDUs */
     "",                         /* diagnostic output to stderr */
     "tcp:@:9999",               /* default listener port */
@@ -911,7 +911,7 @@ static void listener(IOCHAN h, int event)
                     iochan_destroy(pp);
                 }
                 sprintf(nbuf, "%s(%d)", me, no_sessions);
-                yaz_log_init(control_block.loglevel, nbuf, 0);
+                yaz_log_init_prefix(nbuf);
                 /* ensure that bend_stop is not called when each child exits -
                    only for the main process ..  */
                 control_block.bend_stop = 0;
@@ -1320,9 +1320,16 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    /* set default log level */
-    control_block.loglevel = yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL);
-    yaz_log_init_level(control_block.loglevel);
+    if (getenv("YAZ_LOG") == 0) {
+        /*
+         * Set default log level.  We want to avoid doing this if the
+         * user has already explicitly specified a preferred default
+         * log-level, hence the inelegant peek at the YAZ_LOG
+         * environment variable that will subsequently be interpreted
+         * by the YAZ logging module itself.
+         */
+        yaz_log_init_level(yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL));
+    }
 
     get_logbits(1); 
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:",
@@ -1362,7 +1369,7 @@ int check_options(int argc, char **argv)
             break;
         case 'l':
             option_copy(control_block.logfile, arg);
-            yaz_log_init(control_block.loglevel, me, control_block.logfile);
+            yaz_log_init_file(control_block.logfile);
             break;
         case 'm':
             if (!arg) {
@@ -1371,12 +1378,12 @@ int check_options(int argc, char **argv)
             }
             yaz_log_time_format(arg);
             break;
-        case 'v':
-            control_block.loglevel =
-                yaz_log_mask_str_x(arg,control_block.loglevel);
-            yaz_log_init(control_block.loglevel, me, control_block.logfile);
+        case 'v': {
+            int default_level = yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL);
+            yaz_log_init_level(yaz_log_mask_str_x(arg, default_level));
             get_logbits(1); 
             break;
+        }
         case 'a':
             option_copy(control_block.apdufile, arg);
             break;
