@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.35 2006-03-22 13:50:46 mike Exp $
+ * $Id: statserv.c,v 1.36 2006-03-22 17:58:32 mike Exp $
  */
 
 /**
@@ -93,6 +93,7 @@ statserv_options_block control_block = {
     1,                          /* dynamic mode */
     0,                          /* threaded mode */
     0,                          /* one shot (single session) */
+    0, /* __UNUSED_loglevel */
     "",                         /* no PDUs */
     "",                         /* diagnostic output to stderr */
     "tcp:@:9999",               /* default listener port */
