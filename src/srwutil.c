@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.36 2006-03-01 23:24:25 adam Exp $
+ * $Id: srwutil.c,v 1.37 2006-03-22 13:03:59 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -239,6 +239,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                                                         "Content-Type");
         if (content_type && 
             (!yaz_strcmp_del("text/xml", content_type, "; ") ||
+             !yaz_strcmp_del("application/soap+xml", content_type, "; ") ||
              !yaz_strcmp_del("text/plain", content_type, "; ")))
         {
             char *db = "Default";
