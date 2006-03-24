@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.33 2006-03-21 13:58:50 adam Exp $
+ * $Id: log.c,v 1.34 2006-03-24 13:58:43 adam Exp $
  */
 
 /**
@@ -179,8 +179,8 @@ static void rotate_log(const char *cur_fname)
     strcat(newname, ".1");
 #ifdef WIN32
     /* windows can't rename a file if it is open */
-    fclose(l_file);
-    l_file = 0;
+    fclose(yaz_global_log_file);
+    yaz_global_log_file = 0;
     MoveFileEx(cur_fname, newname, MOVEFILE_REPLACE_EXISTING);
 #else
     rename(cur_fname, newname);
@@ -327,6 +327,30 @@ void yaz_log_reopen()
     nmem_mutex_leave(log_mutex);
 }
 
+static void yaz_strftime(char *dst, size_t sz,
+                         const char *fmt, const struct tm *tm)
+{
+    const char *cp = strstr(fmt, "%!");
+    if (cp && strlen(fmt) < 60)
+    {
+        char fmt2[80];
+        char tpidstr[20];
+#ifdef WIN32
+        DWORD tid = GetCurrentThreadId();
+#else
+        long tid = 0;
+#endif
+        memcpy(fmt2, fmt, cp-fmt);
+        fmt2[cp-fmt] = '\0';
+        sprintf(tpidstr, "%08lx", (long) tid);
+        strcat(fmt2, tpidstr);
+        strcat(fmt2, cp+2);
+        strftime(dst, sz, fmt2, tm);     
+    }
+    else
+        strftime(dst, sz, fmt, tm);
+}
+                            
 static void yaz_log_to_file(int level, FILE *file, const char *buf)
 {
     time_t ti = time(0);
@@ -370,7 +394,7 @@ static void yaz_log_to_file(int level, FILE *file, const char *buf)
         if (l_level & YLOG_NOTIME)
             tbuf[0] = '\0';
         else
-            strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tm);
+            yaz_strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tm);
         tbuf[TIMEFORMAT_LEN-1] = '\0';
         
         fprintf(file, "%s %s%s %s%s\n", tbuf, l_prefix, flags, l_prefix2, buf);
