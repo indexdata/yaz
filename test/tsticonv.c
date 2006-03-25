@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.15 2006-02-23 11:16:22 adam Exp $
+ * $Id: tsticonv.c,v 1.16 2006-03-25 14:42:16 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -349,9 +349,68 @@ int utf8_check(unsigned c)
     return 1;
 }
         
+
+static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
+{
+    int ret = 0;
+    WRBUF b = wrbuf_alloc();
+    char outbuf[12];
+    size_t inbytesleft = strlen(buf);
+    const char *inp = buf;
+    while (inbytesleft)
+    {
+        size_t outbytesleft = sizeof(outbuf);
+        char *outp = outbuf;
+        size_t r = yaz_iconv(cd, (char**) &inp,  &inbytesleft,
+                             &outp, &outbytesleft);
+        if (r == (size_t) (-1))
+        {
+            int e = yaz_iconv_error(cd);
+            if (e != YAZ_ICONV_E2BIG)
+                break;
+        }
+        wrbuf_write(b, outbuf, outp - outbuf);
+    }
+    if (wrbuf_len(b) == strlen(cmpbuf) 
+        && !memcmp(cmpbuf, wrbuf_buf(b), wrbuf_len(b)))
+        ret = 1;
+    else
+        yaz_log(YLOG_LOG, "GOT (%.*s)", wrbuf_len(b), wrbuf_buf(b));
+    wrbuf_free(b, 1);
+    return ret;
+}
+
+static void tst_x()
+{
+    yaz_iconv_t cd = yaz_iconv_open("ISO-8859-1", "MARC8");
+
+    YAZ_CHECK(cd);
+
+    YAZ_CHECK(tst_convert(cd, "Cours de math", 
+                          "Cours de math"));
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
+                          "Cours de mathé"));
+    YAZ_CHECK(tst_convert(cd, "12345678âe", 
+                          "12345678é"));
+    YAZ_CHECK(tst_convert(cd, "123456789âe", 
+                          "123456789é"));
+    YAZ_CHECK(tst_convert(cd, "1234567890âe", 
+                          "1234567890é"));
+    YAZ_CHECK(tst_convert(cd, "12345678901âe", 
+                          "12345678901é"));
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâem", 
+                          "Cours de mathém"));
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâematiques", 
+                          "Cours de mathématiques"));
+
+    yaz_iconv_close(cd);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+
+    tst_x();
 
     YAZ_CHECK(utf8_check(3));
     YAZ_CHECK(utf8_check(127));
