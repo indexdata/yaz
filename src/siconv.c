@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.17 2006-02-10 12:45:39 adam Exp $
+ * $Id: siconv.c,v 1.18 2006-03-25 14:41:53 adam Exp $
  */
 /**
  * \file siconv.c
@@ -376,6 +376,7 @@ static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
                               int last)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
+
     if (x <= 0x7f && *outbytesleft >= 1)
     {
         *outp++ = (unsigned char) x;
@@ -514,12 +515,7 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
     };
     unsigned char *outp = (unsigned char *) *outbuf;
 
-    if (!last && x > 32 && x < 127 && cd->compose_char == 0)
-    {
-        cd->compose_char = x;
-        return 0;
-    }
-    else if (cd->compose_char)
+    if (cd->compose_char)
     {
         int i;
         for (i = 0; comb[i].x1; i++)
@@ -528,43 +524,38 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
                 x = comb[i].y;
                 break;
             }
-        if (!comb[i].x1) 
-        {   /* not found */
-            if (*outbytesleft >= 1)
-            {
-                *outp++ = (unsigned char) cd->compose_char;
-                (*outbytesleft)--;
-                *outbuf = (char *) outp;
-                if (!last && x > 32 && x < 127)
-                {
-                    cd->compose_char = x;
-                    return 0;
-                }
-            }
-            else
-            {
-                cd->my_errno = YAZ_ICONV_E2BIG;
-                return (size_t)(-1);
-            }
+        if (*outbytesleft < 1)
+        {  /* no room. Retain compose_char and bail out */
+            cd->my_errno = YAZ_ICONV_E2BIG;
+            return (size_t)(-1);
         }
-        /* compose_char and old x combined to one new char: x */
+        if (!comb[i].x1) 
+        {   /* not found. Just write compose_char */
+            *outp++ = (unsigned char) cd->compose_char;
+            (*outbytesleft)--;
+            *outbuf = (char *) outp;
+        }
+        /* compose_char used so reset it. x now holds current char */
         cd->compose_char = 0;
     }
-    if (x > 255 || x < 1)
+
+    if (!last && x > 32 && x < 127 && cd->compose_char == 0)
+    {
+        cd->compose_char = x;
+        return 0;
+    }
+    else if (x > 255 || x < 1)
     {
         cd->my_errno = YAZ_ICONV_EILSEQ;
         return (size_t) -1;
     }
-    else if (*outbytesleft >= 1)
-    {
-        *outp++ = (unsigned char) x;
-        (*outbytesleft)--;
-    }
-    else 
+    else if (*outbytesleft < 1)
     {
         cd->my_errno = YAZ_ICONV_E2BIG;
         return (size_t)(-1);
     }
+    *outp++ = (unsigned char) x;
+    (*outbytesleft)--;
     *outbuf = (char *) outp;
     return 0;
 }
@@ -719,6 +710,7 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
 {
     char *inbuf0;
     size_t r = 0;
+
 #if HAVE_ICONV_H
     if (cd->iconv_cd)
     {
@@ -806,9 +798,12 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             {
                 /* unable to write it. save it because read_handle cannot
                    rewind .. */
-                cd->unget_x = x;
-                cd->no_read_x = no_read;
-                break;
+                if (cd->my_errno == YAZ_ICONV_E2BIG)
+                {
+                    cd->unget_x = x;
+                    cd->no_read_x = no_read;
+                    break;
+                }
             }
             cd->unget_x = 0;
         }
