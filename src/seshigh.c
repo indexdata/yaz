@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.72 2006-03-16 12:30:03 adam Exp $
+ * $Id: seshigh.c,v 1.73 2006-03-26 21:00:09 marc Exp $
  */
 /**
  * \file seshigh.c
@@ -1463,6 +1463,7 @@ static void process_http_request(association *assoc, request *req)
                 yaz_mime_types_add(types, "html", "text/html");
                 yaz_mime_types_add(types, "htm", "text/html");
                 yaz_mime_types_add(types, "txt", "text/plain");
+                yaz_mime_types_add(types, "js", "application/x-javascript");
                 
                 yaz_mime_types_add(types, "gif", "image/gif");
                 yaz_mime_types_add(types, "png", "image/png");
@@ -2072,7 +2073,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.72 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.73 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
