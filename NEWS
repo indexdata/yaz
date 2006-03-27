@@ -1,3 +1,6 @@
+
+For SRW, accept application/soap+xml as content-type for SOAP msg.
+
 --- 2.1.14 2006/03/14 
 
 Updated Windows package to include yazd.dll + yazd.lib for the
