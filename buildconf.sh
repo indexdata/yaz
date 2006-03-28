@@ -1,9 +1,19 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.24 2006-03-20 09:38:13 mike Exp $
+# $Id: buildconf.sh,v 1.25 2006-03-28 16:36:35 adam Exp $
+
+if automake --version|head -1 |grep '1\.[4-7]'; then
+    echo "automake 1.4-1.7 is active. You should use automake 1.8 or later"
+    if test -f /etc/debian_version; then
+        echo " sudo apt-get install automake1.9"
+        echo " sudo update-alternatives --config automake"
+    fi
+    exit 1
+fi
+
 set -x
-aclocal -I .
+# I am tired of underquoted warnings for Tcl macros
+aclocal -I . 2>&1 | grep -v aclocal/tcl.m4
 libtoolize --automake --force 
-automake --add-missing 
 automake --add-missing 
 autoconf
 set -
