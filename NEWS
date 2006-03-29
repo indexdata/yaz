@@ -1,4 +1,6 @@
 
+Translation of proximity nodes from CQL into PQF now works.
+
 For SRW, accept application/soap+xml as content-type for SOAP msg.
 
 --- 2.1.14 2006/03/14 
