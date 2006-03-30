@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: proto.h,v 1.21 2005-06-25 15:46:03 adam Exp $
+ * $Id: proto.h,v 1.22 2006-03-30 14:15:20 adam Exp $
  */
 /**
  * \file proto.h
@@ -123,7 +123,7 @@ YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);
 YAZ_EXPORT void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags);
 
 /** \brief Performs "pretty" display of OPAC record to WRBUF using marc_t */
-void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf);
+YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf);
 
 /** \brief Encodes Z39.50 Init OPtions based on string mnemonics */
 YAZ_EXPORT int yaz_init_opt_encode(Z_Options *opt, const char *opt_str,
