@@ -1,18 +1,20 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.31 2005-04-22 08:27:57 adam Exp $
+## $Id: Makefile.am,v 1.32 2006-03-30 16:30:25 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
+
+ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src include util test client ztest zoom doc etc
 
 aclocaldir=$(datadir)/aclocal
 
-aclocal_DATA = yaz.m4
+aclocal_DATA = m4/yaz.m4
 
 SPEC_FILE=$(PACKAGE).spec
 EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS TODO windows.txt \
-	yaz-config.in yaz.m4 buildconf.sh Doxyfile.in
+	yaz-config.in m4/yaz.m4 buildconf.sh Doxyfile.in
 
 dist-hook:
 	mkdir $(distdir)/win
