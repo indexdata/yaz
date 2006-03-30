@@ -1,7 +1,22 @@
+--- 2.1.16 2006/03/30 
 
 Translation of proximity nodes from CQL into PQF now works.
 
-For SRW, accept application/soap+xml as content-type for SOAP msg.
+Moved to automake 1.8, 1.9.
+
+Added function yaz_log_set_handler which allows a log handler
+to be installed. This handler will be called for all log messages.
+Output to file is also produced; but that can be disabled by passing
+NULL fname to yaz_log_init_file.
+
+Fixed another problem with MARC-8 -> ISO-8859-1 conversions. Bug #537.
+
+For SRW (including GFS), accept application/soap+xml as content-type
+for SOAP msg.
+
+For GFS in SRU mode, an empty stylesheet in SRU URL (&stylesheet=&)
+produces NO stylesheet reference even if a default stylesheet is specified
+in GFS XML config.
 
 --- 2.1.14 2006/03/14 
 
