@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-man.xml,v 1.3 2005-06-10 17:56:35 adam Exp $ -->
+<!-- $Id: yaz-man.xml,v 1.4 2006-03-31 09:54:48 adam Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -30,7 +30,7 @@
 
  <refsect1><title>COPYRIGHT</title>
   <para>
-   Copyright (c) 1995-2005, Index Data.
+   Copyright (c) 1995-2006, Index Data.
   </para>
   <para>
    Permission to use, copy, modify, distribute, and sell this software and
