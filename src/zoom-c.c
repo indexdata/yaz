@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.65 2006-03-13 10:48:14 adam Exp $
+ * $Id: zoom-c.c,v 1.66 2006-03-31 09:51:22 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1144,7 +1144,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.65 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.66 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1211,26 +1211,11 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         
         if ((oi_unit = yaz_oi_update(oi, c->odr_out, NULL, 0, 0)))
         {
-            char **charsets_addresses = 0;
-            char **langs_addresses = 0;
-            int charsets_count = 0;
-            int langs_count = 0;
-           
-            if (c->charset)
-                nmem_strsplit_blank(c->odr_out->mem, c->charset,
-                                    &charsets_addresses, &charsets_count);
-            if (c->lang)
-                nmem_strsplit_blank(c->odr_out->mem, c->lang,
-                                    &langs_addresses, &langs_count);
             ODR_MASK_SET(ireq->options, Z_Options_negotiationModel);
             oi_unit->which = Z_OtherInfo_externallyDefinedInfo;
             oi_unit->information.externallyDefinedInfo =
-                yaz_set_proposal_charneg(c->odr_out,
-                                         (const char **) charsets_addresses,
-                                         charsets_count,
-                                         (const char **) langs_addresses,
-                                         langs_count, 
-                                         1);
+                yaz_set_proposal_charneg_list(c->odr_out, " ",
+                                              c->charset, c->lang, 1);
         }
     }
     assert (apdu);

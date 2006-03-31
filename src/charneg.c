@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: charneg.c,v 1.5 2005-06-25 15:46:03 adam Exp $
+ * $Id: charneg.c,v 1.6 2006-03-31 09:51:22 adam Exp $
  */
 
 /** 
@@ -192,6 +192,32 @@ Z_External *yaz_set_proposal_charneg(ODR o,
 
     return p;
 }
+
+Z_External *yaz_set_proposal_charneg_list(ODR o,
+                                          const char *delim,
+                                          const char *charset_list,
+                                          const char *lang_list,
+                                          int selected)
+{
+    char **charsets_addresses = 0;
+    char **langs_addresses = 0;
+    int charsets_count = 0;
+    int langs_count = 0;
+    
+    if (charset_list)
+        nmem_strsplit(o->mem, delim, charset_list,
+                      &charsets_addresses, &charsets_count);
+    if (lang_list)
+        nmem_strsplit(o->mem, delim, lang_list,
+                      &langs_addresses, &langs_count);    
+    return yaz_set_proposal_charneg(o,
+                                    (const char **) charsets_addresses,
+                                    charsets_count,
+                                    (const char **) langs_addresses,
+                                    langs_count, 
+                                    selected);
+}
+
 
 /* used by yaz_set_response_charneg */
 static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,

@@ -1,4 +1,8 @@
---- 2.1.16 2006/03/30 
+--- 2.1.16 2006/03/31 
+
+Allow multiple languages and charsets to be specified with
+yaz-client. Each item must be separated by comma (NO BLANKS). E.g.
+  negcharset iso-8859-1,utf-8
 
 Translation of proximity nodes from CQL into PQF now works.
 

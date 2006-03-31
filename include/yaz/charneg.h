@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: charneg.h,v 1.7 2005-06-25 15:46:01 adam Exp $
+ * $Id: charneg.h,v 1.8 2006-03-31 09:51:22 adam Exp $
  */
 /** 
  * \file charneg.h
@@ -69,6 +69,13 @@ Z_External *yaz_set_proposal_charneg(ODR odr,
                                      int num_langs, int selected);
 
 YAZ_EXPORT
+Z_External *yaz_set_proposal_charneg_list(ODR o,
+                                          const char *delim,
+                                          const char *charset_list,
+                                          const char *lang_list,
+                                          int selected);
+
+YAZ_EXPORT
 void yaz_get_response_charneg(NMEM mem,
                               Z_CharSetandLanguageNegotiation *p,
                               char **charset, char **lang,
@@ -90,6 +97,8 @@ void yaz_get_proposal_charneg(NMEM mem,
                               char ***charsets, int *num_charsets,
                               char ***langs, int *num_langs,
                               int *selected);
+
+
 YAZ_END_CDECL
 
 #endif

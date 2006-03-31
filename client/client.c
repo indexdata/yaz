@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.302 2005-12-20 23:07:27 adam Exp $
+ * $Id: client.c,v 1.303 2006-03-31 09:51:21 adam Exp $
  */
 
 #include <stdio.h>
@@ -341,12 +341,10 @@ static void send_initRequest(const char* type_and_host)
             
             p0->which = Z_OtherInfo_externallyDefinedInfo;
             p0->information.externallyDefinedInfo =
-                yaz_set_proposal_charneg(
-                    out,
-                    (const char**)&negotiationCharset, 
-                    negotiationCharset ? 1 : 0,
-                    (const char**)&yazLang, yazLang ? 1 : 0, 
-                    negotiationCharsetRecords);
+                yaz_set_proposal_charneg_list(out, ",", 
+                                              negotiationCharset, 
+                                              yazLang,
+                                              negotiationCharsetRecords);
         }
     }
     
