@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.66 2006-03-31 09:51:22 adam Exp $
+ * $Id: zoom-c.c,v 1.67 2006-04-01 07:21:12 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1144,7 +1144,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.66 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.67 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2368,8 +2368,9 @@ static zoom_ret send_present(ZOOM_connection c)
     *req->resultSetStartPoint = resultset->start + 1;
     *req->numberOfRecordsRequested = resultset->step>0 ?
         resultset->step : resultset->count;
+    if (*req->numberOfRecordsRequested + resultset->start > resultset->size)
+        *req->numberOfRecordsRequested = resultset->size -  resultset->start;
     assert (*req->numberOfRecordsRequested > 0);
-
 
     if (syntax && *syntax)
         req->preferredRecordSyntax =
