@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.7 2006-02-19 18:34:13 adam Exp $
+ * $Id: pquery.c,v 1.8 2006-04-01 11:45:23 adam Exp $
  */
 /**
  * \file pquery.c
@@ -194,6 +194,7 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
                               char **attr_clist, oid_value *attr_set)
 {
     const char *cp;
+
     if (!(cp = strchr (li->lex_buf, '=')) ||
         (size_t) (cp-li->lex_buf) > li->lex_len)
     {
@@ -221,8 +222,13 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
         else
             attr_set[num_attr] = VAL_NONE;
     }
+    if (*li->lex_buf < '0' || *li->lex_buf > '9')
+    {
+        li->error = YAZ_PQF_ERROR_BAD_INTEGER;
+        return 0;
+    }
     attr_list[2*num_attr] = atoi(li->lex_buf);
-        cp++;
+    cp++;
     if (*cp >= '0' && *cp <= '9')
     {
         attr_list[2*num_attr+1] = atoi (cp);
@@ -403,29 +409,54 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         p->exclusion = odr_intdup (o, 1);
     else if (*li->lex_buf == '0')
         p->exclusion = odr_intdup (o, 0);
-    else
+    else if (*li->lex_buf == 'v' || *li->lex_buf == 'n')
         p->exclusion = NULL;
+    else
+    {
+        li->error = YAZ_PQF_ERROR_PROXIMITY;
+        return NULL;
+    }
 
     if (!lex (li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
     }
-    p->distance = odr_intdup (o, atoi(li->lex_buf));
+    if (*li->lex_buf >= '0' && *li->lex_buf <= '9')
+        p->distance = odr_intdup (o, atoi (li->lex_buf));
+    else
+    {
+        li->error = YAZ_PQF_ERROR_BAD_INTEGER;
+        return NULL;
+    }
 
     if (!lex (li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
     }
-    p->ordered = odr_intdup (o, atoi (li->lex_buf));
+    if (*li->lex_buf == '1')
+        p->ordered = odr_intdup (o, 1);
+    else if (*li->lex_buf == '0')
+        p->ordered = odr_intdup (o, 0);
+    else
+    {
+        li->error = YAZ_PQF_ERROR_PROXIMITY;
+        return NULL;
+    }
     
     if (!lex (li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
     }
-    p->relationType = odr_intdup (o, atoi (li->lex_buf));
+    if (*li->lex_buf >= '0' && *li->lex_buf <= '9')
+        p->relationType = odr_intdup (o, atoi (li->lex_buf));
+    else
+    {
+        li->error = YAZ_PQF_ERROR_BAD_INTEGER;
+        return NULL;
+    }
 
     if (!lex (li))
     {
@@ -439,12 +470,25 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
     else
         p->which = atoi (li->lex_buf);
 
+    if (p->which != Z_ProximityOperator_known
+        && p->which != Z_ProximityOperator_private)
+    {
+        li->error = YAZ_PQF_ERROR_PROXIMITY;
+        return NULL;
+    }
+
     if (!lex (li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
     }
-    p->u.known = odr_intdup (o, atoi(li->lex_buf));
+    if (*li->lex_buf >= '0' && *li->lex_buf <= '9')
+        p->u.known = odr_intdup (o, atoi(li->lex_buf));
+    else
+    {
+        li->error = YAZ_PQF_ERROR_BAD_INTEGER;
+        return NULL;
+    }
     return p;
 }
 
@@ -800,6 +844,10 @@ int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off)
         *msg = "bad attribute specification"; break;
     case YAZ_PQF_ERROR_INTERNAL:
         *msg = "internal error"; break;
+    case YAZ_PQF_ERROR_PROXIMITY:
+        *msg = "proximity error"; break;
+    case YAZ_PQF_ERROR_BAD_INTEGER:
+        *msg = "bad integer"; break;
     default:
         *msg = "unknown error"; break;
     }

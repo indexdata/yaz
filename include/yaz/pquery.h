@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: pquery.h,v 1.7 2005-06-25 15:46:03 adam Exp $
+ * $Id: pquery.h,v 1.8 2006-04-01 11:45:23 adam Exp $
  */
 /**
  * \file pquery.h
@@ -77,6 +77,12 @@ YAZ_EXPORT int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off);
 
 /* internal failure */
 #define YAZ_PQF_ERROR_INTERNAL 6
+
+/* bad proximity args */
+#define YAZ_PQF_ERROR_PROXIMITY 7
+
+/* bad unsigned integer */
+#define YAZ_PQF_ERROR_BAD_INTEGER 8
 
 YAZ_END_CDECL
 
