@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.21 2006-03-20 14:56:40 mike Exp $
+/* $Id: cqltransform.c,v 1.22 2006-04-05 12:04:51 mike Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -16,6 +16,7 @@ See the file LICENSE.
 #include <string.h>
 #include <yaz/cql.h>
 #include <yaz/xmalloc.h>
+#include <yaz/diagsrw.h>
 
 struct cql_prop_entry {
     char *pattern;
@@ -596,6 +597,16 @@ int cql_transform_buf(cql_transform_t ct, struct cql_node *cn,
     info.max = max;
     info.buf = out;
     r = cql_transform(ct, cn, cql_buf_write_handler, &info);
+    if (info.off < 0) {
+        /* Attempt to write past end of buffer.  For some reason, this
+           SRW diagnostic is deprecated, but it's so perfect for our
+           purposes that it would be stupid not to use it. */
+        char numbuf[30];
+        ct->error = YAZ_SRW_TOO_MANY_CHARS_IN_QUERY;
+        sprintf(numbuf, "%ld", (long) info.max);
+        ct->addinfo = xstrdup(numbuf);
+        return -1;
+    }
     if (info.off >= 0)
         info.buf[info.off] = '\0';
     return r;
