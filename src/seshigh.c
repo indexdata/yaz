@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.73 2006-03-26 21:00:09 marc Exp $
+ * $Id: seshigh.c,v 1.74 2006-04-05 12:05:36 mike Exp $
  */
 /**
  * \file seshigh.c
@@ -642,7 +642,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
     int r;
     int srw_errcode = 0;
     const char *add = 0;
-    char rpn_buf[512];
+    char rpn_buf[5120];
             
     r = cql_parser_string(cp, cql);
     if (r)
@@ -2073,7 +2073,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.73 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.74 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
