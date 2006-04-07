@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.33 2005-12-21 16:43:13 mike Exp $
+ * $Id: zoom.h,v 1.34 2006-04-07 11:27:24 adam Exp $
  */
 /**
  * \file zoom.h
@@ -127,6 +127,7 @@ ZOOM_connection_last_event(ZOOM_connection cs);
 #define ZOOM_EVENT_RECV_APDU 7
 #define ZOOM_EVENT_RECV_RECORD 8
 #define ZOOM_EVENT_RECV_SEARCH 9
+#define ZOOM_EVENT_END 10
 
 /* ----------------------------------------------------------- */
 /* result sets */
