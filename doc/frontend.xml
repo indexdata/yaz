@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.25 2005-03-14 11:12:16 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.26 2006-04-12 18:25:21 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -817,7 +817,7 @@ typedef struct bend_scan_rr {
        ErrorLog /home/srw/logs/error_log
        TransferLog /home/srw/logs/access_log
        ProxyPass / http://srw.mydomain:210/
-      &lt;/VirualHost>
+      &lt;/VirtualHost>
      </screen>
     </para>
     <para>
