@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_oid.c,v 1.7 2005-06-25 15:46:03 adam Exp $
+ * $Id: ber_oid.c,v 1.8 2006-04-17 07:40:15 adam Exp $
  */
 
 /** 
@@ -59,6 +59,12 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
                 len--;
             }
             while (*(o->bp++) & 0X80);
+
+            if (id < 0)
+            {
+                odr_seterror(o, ODATA, 23);
+                return 0;
+            }
             if (pos > 0)
                 p[pos++] = id;
             else
@@ -75,6 +81,11 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
                 return 0;
             }
         }
+        if (pos < 2 || p[0] < 0 || p[1] < 0)
+        {
+            odr_seterror(o, ODATA, 23);
+            return 0;
+        }
         p[pos] = -1;
         return 1;
     case ODR_ENCODE:
@@ -88,7 +99,7 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
             odr_seterror(o, ODATA, 23);
             return 0;
         }
-        for (pos = 1; p[pos] >= 0; pos++)
+        for (pos = 1; p[pos] != -1; pos++)
         {
             n = 0;
             if (pos == 1)
