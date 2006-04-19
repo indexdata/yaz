@@ -1,5 +1,5 @@
 /*
- * $Id: zoomtst3.c,v 1.9 2005-06-25 15:46:08 adam Exp $
+ * $Id: zoomtst3.c,v 1.10 2006-04-19 09:05:09 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -24,8 +24,8 @@ int main(int argc, char **argv)
 
     if (argc < 3)
     {
-        fprintf (stderr, "usage:\n%s target1 target2 ... targetN query\n",
-                 *argv);
+        fprintf (stderr, "usage:\n%s target1 target2 ... targetN query\n"
+                         "%s number target query\n", *argv, *argv);
         exit (1);
     }
     if (argc == 4 && isdigit(argv[1][0]) && !strchr(argv[1],'.'))
