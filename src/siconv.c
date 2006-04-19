@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.19 2006-04-19 23:15:39 adam Exp $
+ * $Id: siconv.c,v 1.20 2006-04-19 23:46:15 adam Exp $
  */
 /**
  * \file siconv.c
@@ -722,13 +722,13 @@ static size_t flush_combos(yaz_iconv_t cd,
     if (!y)
         return 0;
 
-    byte = (y>>16) & 0xff;
+    byte = (unsigned char )((y>>16) & 0xff);
     if (byte)
         out_buf[out_no++] = byte;
-    byte = (y>>8) & 0xff;
+    byte = (unsigned char)((y>>8) & 0xff);
     if (byte)
         out_buf[out_no++] = byte;
-    byte = y & 0xff;
+    byte = (unsigned char )(y & 0xff);
     if (byte)
         out_buf[out_no++] = byte;
 

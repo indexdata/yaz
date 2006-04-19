@@ -10,6 +10,7 @@ z-*.c
 item-req.c
 ill-core.c
 marc8.c
+marc8r.c
 cql.c
 diagbib1.c
 diagsrw.c
