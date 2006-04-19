@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.102 2006-03-15 13:32:06 adam Exp $
+# $Id: makefile,v 1.103 2006-04-19 23:49:50 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -375,6 +375,7 @@ YAZ_UTIL_OBJS= \
    $(OBJDIR)\matchstr.obj \
    $(OBJDIR)\siconv.obj \
    $(OBJDIR)\marc8.obj \
+   $(OBJDIR)\marc8r.obj \
    $(OBJDIR)\test.obj
 
 YAZ_ZUTIL_OBJS= \
@@ -666,6 +667,10 @@ $(ITEM_REQ_FILES): $(SRCDIR)\item-req.asn
 $(SRCDIR)\marc8.c: $(SRCDIR)\codetables.xml $(SRCDIR)\charconv.tcl
 	@cd $(SRCDIR)
 	$(TCL) charconv.tcl -p marc8 codetables.xml -o marc8.c
+
+$(SRCDIR)\marc8r.c: $(SRCDIR)\codetables.xml $(SRCDIR)\charconv.tcl
+	@cd $(SRCDIR)
+	$(TCL) charconv.tcl -r -p marc8r codetables.xml -o marc8r.c
 
 $(SRCDIR)\diagbib1.c: $(SRCDIR)\bib1.csv
 	@cd $(SRCDIR)
