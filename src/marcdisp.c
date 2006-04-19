@@ -1,19 +1,24 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.25 2006-01-26 15:37:05 adam Exp $
+ * $Id: marcdisp.c,v 1.26 2006-04-19 10:05:03 adam Exp $
  */
 
 /**
  * \file marcdisp.c
- * \brief Implements MARC display - and conversion utilities
+ * \brief Implements MARC conversion utilities
  */
 
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -21,13 +26,70 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 
+#if HAVE_XML2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#endif
+
+static void yaz_marc_reset(yaz_marc_t mt);
+
+/** \brief node types for yaz_marc_node */
+enum YAZ_MARC_NODE_TYPE
+{ 
+    YAZ_MARC_DATAFIELD,
+    YAZ_MARC_CONTROLFIELD,
+    YAZ_MARC_COMMENT,
+    YAZ_MARC_LEADER
+};
+
+/** \brief represets a data field */
+struct yaz_marc_datafield {
+    char *tag;
+    char *indicator;
+    struct yaz_marc_subfield *subfields;
+};
+
+/** \brief represents a control field */
+struct yaz_marc_controlfield {
+    char *tag;
+    char *data;
+};
+
+/** \brief a comment node */
+struct yaz_marc_comment {
+    char *comment;
+};
+
+/** \brief MARC node */
+struct yaz_marc_node {
+    enum YAZ_MARC_NODE_TYPE which;
+    union {
+        struct yaz_marc_datafield datafield;
+        struct yaz_marc_controlfield controlfield;
+        char *comment;
+        char *leader;
+    } u;
+    struct yaz_marc_node *next;
+};
+
+/** \brief represents a subfield */
+struct yaz_marc_subfield {
+    char *code_data;
+    struct yaz_marc_subfield *next;
+};
+
+/** \brief the internals of a yaz_marc_t handle */
 struct yaz_marc_t_ {
     WRBUF m_wr;
+    NMEM nmem;
     int xml;
     int debug;
     yaz_iconv_t iconv_cd;
     char subfield_str[8];
     char endline_str[8];
+    struct yaz_marc_node *nodes;
+    struct yaz_marc_node **nodes_pp;
+    struct yaz_marc_subfield **subfield_pp;
 };
 
 yaz_marc_t yaz_marc_create(void)
@@ -39,7 +101,261 @@ yaz_marc_t yaz_marc_create(void)
     mt->iconv_cd = 0;
     strcpy(mt->subfield_str, " $");
     strcpy(mt->endline_str, "\n");
+
+    mt->nmem = nmem_create();
+    yaz_marc_reset(mt);
     return mt;
+}
+
+void yaz_marc_destroy(yaz_marc_t mt)
+{
+    if (!mt)
+        return ;
+    nmem_destroy(mt->nmem);
+    wrbuf_free (mt->m_wr, 1);
+    xfree (mt);
+}
+
+struct yaz_marc_node *yaz_marc_add_node(yaz_marc_t mt)
+{
+    struct yaz_marc_node *n = nmem_malloc(mt->nmem, sizeof(*n));
+    n->next = 0;
+    *mt->nodes_pp = n;
+    mt->nodes_pp = &n->next;
+    return n;
+}
+
+void yaz_marc_add_comment(yaz_marc_t mt, char *comment)
+{
+    struct yaz_marc_node *n = yaz_marc_add_node(mt);
+    n->which = YAZ_MARC_COMMENT;
+    n->u.comment = nmem_strdup(mt->nmem, comment);
+}
+
+#if HAVE_XML2
+static char *yaz_marc_get_xml_text(const xmlNode *ptr_cdata, NMEM nmem)
+{
+    char *cdata;
+    int len = 0;
+    const xmlNode *ptr;
+
+    for (ptr = ptr_cdata; ptr; ptr = ptr->next)
+        if (ptr->type == XML_TEXT_NODE)
+            len += xmlStrlen(ptr->content);
+    cdata = (char *) nmem_malloc(nmem, len+1);
+    *cdata = '\0';
+    for (ptr = ptr_cdata; ptr; ptr = ptr->next)
+        if (ptr->type == XML_TEXT_NODE)
+            strcat(cdata, (const char *) ptr->content);
+    return cdata;
+}
+#endif
+
+void yaz_marc_cprintf(yaz_marc_t mt, const char *fmt, ...)
+{
+    va_list ap;
+    char buf[200];
+    va_start(ap, fmt);
+
+#ifdef WIN32
+    _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
+#else
+/* !WIN32 */
+#if HAVE_VSNPRINTF
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+#else
+    vsprintf(buf, fmt, ap);
+#endif
+#endif
+/* WIN32 */
+    yaz_marc_add_comment(mt, buf);
+    va_end (ap);
+}
+
+void yaz_marc_add_leader(yaz_marc_t mt, const char *leader, size_t leader_len)
+{
+    struct yaz_marc_node *n = yaz_marc_add_node(mt);
+    n->which = YAZ_MARC_LEADER;
+    n->u.leader = nmem_strdupn(mt->nmem, leader, leader_len);
+}
+
+void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
+                               const char *data, size_t data_len)
+{
+    struct yaz_marc_node *n = yaz_marc_add_node(mt);
+    n->which = YAZ_MARC_CONTROLFIELD;
+    n->u.controlfield.tag = nmem_strdup(mt->nmem, tag);
+    n->u.controlfield.data = nmem_strdupn(mt->nmem, data, data_len);
+    if (mt->debug)
+    {
+        size_t i;
+        char msg[80];
+
+        sprintf(msg, "controlfield:");
+        for (i = 0; i < 16 && i < data_len; i++)
+            sprintf(msg + strlen(msg), " %02X", data[i] & 0xff);
+        if (i < data_len)
+            sprintf(msg + strlen(msg), " ..");
+        yaz_marc_add_comment(mt, msg);
+    }
+}
+
+#if HAVE_XML2
+void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
+                                   const xmlNode *ptr_data)
+{
+    struct yaz_marc_node *n = yaz_marc_add_node(mt);
+    n->which = YAZ_MARC_CONTROLFIELD;
+    n->u.controlfield.tag = yaz_marc_get_xml_text(ptr_tag, mt->nmem);
+    n->u.controlfield.data = yaz_marc_get_xml_text(ptr_data, mt->nmem);
+}
+#endif
+
+void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
+                            const char *indicator, size_t indicator_len)
+{
+    struct yaz_marc_node *n = yaz_marc_add_node(mt);
+    n->which = YAZ_MARC_DATAFIELD;
+    n->u.datafield.tag = nmem_strdup(mt->nmem, tag);
+    n->u.datafield.indicator =
+        nmem_strdupn(mt->nmem, indicator, indicator_len);
+    n->u.datafield.subfields = 0;
+
+    /* make subfield_pp the current (last one) */
+    mt->subfield_pp = &n->u.datafield.subfields;
+}
+
+#if HAVE_XML2
+void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
+                                const char *indicator, size_t indicator_len)
+{
+    struct yaz_marc_node *n = yaz_marc_add_node(mt);
+    n->which = YAZ_MARC_DATAFIELD;
+    n->u.datafield.tag = yaz_marc_get_xml_text(ptr_tag, mt->nmem);
+    n->u.datafield.indicator =
+        nmem_strdupn(mt->nmem, indicator, indicator_len);
+    n->u.datafield.subfields = 0;
+
+    /* make subfield_pp the current (last one) */
+    mt->subfield_pp = &n->u.datafield.subfields;
+}
+#endif
+
+void yaz_marc_add_subfield(yaz_marc_t mt,
+                           const char *code_data, size_t code_data_len)
+{
+    if (mt->debug)
+    {
+        size_t i;
+        char msg[80];
+
+        sprintf(msg, "subfield:");
+        for (i = 0; i < 16 && i < code_data_len; i++)
+            sprintf(msg + strlen(msg), " %02X", code_data[i] & 0xff);
+        if (i < code_data_len)
+            sprintf(msg + strlen(msg), " ..");
+        yaz_marc_add_comment(mt, msg);
+    }
+
+    if (mt->subfield_pp)
+    {
+        struct yaz_marc_subfield *n = nmem_malloc(mt->nmem, sizeof(*n));
+        n->code_data = nmem_strdupn(mt->nmem, code_data, code_data_len);
+        n->next = 0;
+        /* mark subfield_pp to point to this one, so we append here next */
+        *mt->subfield_pp = n;
+        mt->subfield_pp = &n->next;
+    }
+}
+
+static int atoi_n_check(const char *buf, int size, int *val)
+{
+    if (!isdigit(*(const unsigned char *) buf))
+        return 0;
+    *val = atoi_n(buf, size);
+    return 1;
+}
+
+/** \brief reads the MARC 24 bytes leader and checks content
+    \param mt handle
+    \param leader of the 24 byte leader
+    \param indicator_length indicator length
+    \param identifier_length identifier length
+    \param base_address base address
+    \param length_data_entry length of data entry
+    \param length_starting length of starting 
+    \param length_implementation length of implementation defined data
+*/
+static void yaz_marc_read_leader(yaz_marc_t mt, const char *leader_c,
+                                 int *indicator_length,
+                                 int *identifier_length,
+                                 int *base_address,
+                                 int *length_data_entry,
+                                 int *length_starting,
+                                 int *length_implementation)
+{
+    char leader[24];
+
+    memcpy(leader, leader_c, 24);
+
+    if (!atoi_n_check(leader+10, 1, indicator_length))
+    {
+        yaz_marc_cprintf(mt, 
+                         "Indicator length at offset 10 should hold a digit."
+                         " Assuming 2");
+        leader[10] = '2';
+        *indicator_length = 2;
+    }
+    if (!atoi_n_check(leader+11, 1, identifier_length))
+    {
+        yaz_marc_cprintf(mt, 
+                         "Identifier length at offset 11 should hold a digit."
+                         " Assuming 2");
+        leader[11] = '2';
+        *identifier_length = 2;
+    }
+    if (!atoi_n_check(leader+12, 5, base_address))
+    {
+        yaz_marc_cprintf(mt, 
+                         "Base address at offsets 12..16 should hold a number."
+                         " Assuming 0");
+        *base_address = 0;
+    }
+    if (!atoi_n_check(leader+20, 1, length_data_entry))
+    {
+        yaz_marc_cprintf(mt, 
+                         "Length data entry at offset 20 should hold a digit."
+                         " Assuming 4");
+        *length_data_entry = 4;
+        leader[20] = '4';
+    }
+    if (!atoi_n_check(leader+21, 1, length_starting))
+    {
+        yaz_marc_cprintf(mt,
+                         "Length starting at offset 21 should hold a digit."
+                         " Assuming 5");
+        *length_starting = 5;
+        leader[21] = '5';
+    }
+    if (!atoi_n_check(leader+22, 1, length_implementation))
+    {
+        yaz_marc_cprintf(mt, 
+                         "Length implementation at offset 22 should hold a digit."
+                         " Assuming 0");
+        *length_implementation = 0;
+        leader[22] = '0';
+    }
+
+    if (mt->debug)
+    {
+        yaz_marc_cprintf(mt, "Indicator length      %5d", *indicator_length);
+        yaz_marc_cprintf(mt, "Identifier length     %5d", *identifier_length);
+        yaz_marc_cprintf(mt, "Base address          %5d", *base_address);
+        yaz_marc_cprintf(mt, "Length data entry     %5d", *length_data_entry);
+        yaz_marc_cprintf(mt, "Length starting       %5d", *length_starting);
+        yaz_marc_cprintf(mt, "Length implementation %5d", *length_implementation);
+    }
+    yaz_marc_add_leader(mt, leader, 24);
 }
 
 void yaz_marc_subfield_str(yaz_marc_t mt, const char *s)
@@ -52,14 +368,6 @@ void yaz_marc_endline_str(yaz_marc_t mt, const char *s)
 {
     strncpy(mt->endline_str, s, sizeof(mt->endline_str)-1);
     mt->endline_str[sizeof(mt->endline_str)-1] = '\0';
-}
-
-void yaz_marc_destroy(yaz_marc_t mt)
-{
-    if (!mt)
-        return ;
-    wrbuf_free (mt->m_wr, 1);
-    xfree (mt);
 }
 
 static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
@@ -96,15 +404,522 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
     return 1; /* we don't know */
 }
                               
-static int atoi_n_check(const char *buf, int size, int *val)
+static void yaz_marc_reset(yaz_marc_t mt)
 {
-    if (!isdigit(*(const unsigned char *) buf))
-        return 0;
-    *val = atoi_n(buf, size);
-    return 1;
+    nmem_reset(mt->nmem);
+    mt->nodes = 0;
+    mt->nodes_pp = &mt->nodes;
+    mt->subfield_pp = 0;
 }
 
-int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
+int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
+{
+    struct yaz_marc_node *n;
+    int identifier_length;
+    const char *leader = 0;
+
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+        {
+            leader = n->u.leader;
+            break;
+        }
+    
+    if (!leader)
+        return -1;
+    if (!atoi_n_check(leader+11, 1, &identifier_length))
+        return -1;
+
+    for (n = mt->nodes; n; n = n->next)
+    {
+        struct yaz_marc_subfield *s;
+        switch(n->which)
+        {
+        case YAZ_MARC_DATAFIELD:
+            wrbuf_printf(wr, "%s %s", n->u.datafield.tag,
+                         n->u.datafield.indicator);
+            for (s = n->u.datafield.subfields; s; s = s->next)
+            {
+                /* if identifier length is 2 (most MARCs),
+                   the code is a single character .. However we've
+                   seen multibyte codes, so see how big it really is */
+                size_t using_code_len = 
+                    (identifier_length != 2) ? identifier_length - 1
+                    :
+                    cdata_one_character(mt, s->code_data);
+                
+                wrbuf_puts (wr, mt->subfield_str); 
+                wrbuf_iconv_write(wr, mt->iconv_cd, s->code_data, 
+                                  using_code_len);
+                wrbuf_printf(wr, " ");
+                wrbuf_iconv_puts(wr, mt->iconv_cd, 
+                                 s->code_data + using_code_len);
+            }
+            wrbuf_puts (wr, mt->endline_str);
+            break;
+        case YAZ_MARC_CONTROLFIELD:
+            wrbuf_printf(wr, "%s ", n->u.controlfield.tag);
+            wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
+            wrbuf_puts (wr, mt->endline_str);
+            break;
+        case YAZ_MARC_COMMENT:
+            wrbuf_puts(wr, "(");
+            wrbuf_iconv_write(wr, mt->iconv_cd, 
+                              n->u.comment, strlen(n->u.comment));
+            wrbuf_puts(wr, ")\n");
+            break;
+        case YAZ_MARC_LEADER:
+            wrbuf_printf(wr, "%s\n", n->u.leader);
+        }
+    }
+    return 0;
+}
+
+int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
+{
+    switch(mt->xml)
+    {
+    case YAZ_MARC_LINE:
+        return yaz_marc_write_line(mt, wr);
+    case YAZ_MARC_MARCXML:
+        return yaz_marc_write_marcxml(mt, wr);
+    case YAZ_MARC_XCHANGE:
+        return yaz_marc_write_marcxchange(mt, wr);
+    case YAZ_MARC_ISO2709:
+        return yaz_marc_write_iso2709(mt, wr);
+    }
+    return -1;
+}
+
+static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
+                                     const char *ns)
+{
+    struct yaz_marc_node *n;
+    int identifier_length;
+    const char *leader = 0;
+
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+        {
+            leader = n->u.leader;
+            break;
+        }
+    
+    if (!leader)
+        return -1;
+    if (!atoi_n_check(leader+11, 1, &identifier_length))
+        return -1;
+
+    wrbuf_printf(wr, "<record xmlns=\"%s\">\n", ns);
+    for (n = mt->nodes; n; n = n->next)
+    {
+        struct yaz_marc_subfield *s;
+        switch(n->which)
+        {
+        case YAZ_MARC_DATAFIELD:
+            wrbuf_printf(wr, "  <datafield tag=\"");
+            wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
+                                    strlen(n->u.datafield.tag));
+            wrbuf_printf(wr, "\"");
+            if (n->u.datafield.indicator)
+            {
+                int i;
+                for (i = 0; n->u.datafield.indicator[i]; i++)
+                {
+                    wrbuf_printf(wr, " ind%d=\"", i+1);
+                    wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                          n->u.datafield.indicator+i, 1);
+                    wrbuf_printf(wr, "\"");
+                }
+            }
+            wrbuf_printf(wr, ">\n");
+            for (s = n->u.datafield.subfields; s; s = s->next)
+            {
+                /* if identifier length is 2 (most MARCs),
+                   the code is a single character .. However we've
+                   seen multibyte codes, so see how big it really is */
+                size_t using_code_len = 
+                    (identifier_length != 2) ? identifier_length - 1
+                    :
+                    cdata_one_character(mt, s->code_data);
+                
+                wrbuf_puts(wr, "    <subfield code=\"");
+                wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                        s->code_data, using_code_len);
+                wrbuf_puts(wr, "\">");
+                wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                        s->code_data + using_code_len,
+                                        strlen(s->code_data + using_code_len));
+                wrbuf_puts(wr, "</subfield>\n");
+            }
+            wrbuf_printf(wr, "  </datafield>\n");
+            break;
+        case YAZ_MARC_CONTROLFIELD:
+            wrbuf_printf(wr, "  <controlfield tag=\"");
+            wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
+                                    strlen(n->u.controlfield.tag));
+            wrbuf_printf(wr, "\">");
+            wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
+            wrbuf_printf(wr, "</controlfield>\n");
+            break;
+        case YAZ_MARC_COMMENT:
+            wrbuf_printf(wr, "<!-- %s -->\n", n->u.comment);
+            break;
+        case YAZ_MARC_LEADER:
+            wrbuf_printf(wr, "  <leader>");
+            wrbuf_iconv_write_cdata(wr, 
+                                    0 /* no charset conversion for leader */,
+                                    n->u.leader, strlen(n->u.leader));
+            wrbuf_printf(wr, "</leader>\n");
+        }
+    }
+    wrbuf_puts(wr, "</record>\n");
+    return 0;
+}
+
+int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wr)
+{
+    return yaz_marc_write_marcxml_ns(mt, wr, "http://www.loc.gov/MARC21/slim");
+}
+
+int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr)
+{
+    return yaz_marc_write_marcxml_ns(mt, wr,
+                                     "http://www.bs.dk/standards/MarcXchange");
+}
+
+int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
+{
+    struct yaz_marc_node *n;
+    int indicator_length;
+    int identifier_length;
+    int length_data_entry;
+    int length_starting;
+    int length_implementation;
+    int data_offset = 0;
+    const char *leader = 0;
+    WRBUF wr_dir, wr_head;
+    int base_address;
+    
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+            leader = n->u.leader;
+    
+    if (!leader)
+        return -1;
+    if (!atoi_n_check(leader+10, 1, &indicator_length))
+        return -1;
+    if (!atoi_n_check(leader+11, 1, &identifier_length))
+        return -1;
+    if (!atoi_n_check(leader+20, 1, &length_data_entry))
+        return -1;
+    if (!atoi_n_check(leader+21, 1, &length_starting))
+        return -1;
+    if (!atoi_n_check(leader+22, 1, &length_implementation))
+        return -1;
+
+    wr_dir = wrbuf_alloc();
+    for (n = mt->nodes; n; n = n->next)
+    {
+        int data_length = 0;
+        struct yaz_marc_subfield *s;
+        switch(n->which)
+        {
+        case YAZ_MARC_DATAFIELD:
+            wrbuf_printf(wr_dir, "%.3s", n->u.datafield.tag);
+            data_length += indicator_length;
+            for (s = n->u.datafield.subfields; s; s = s->next)
+                data_length += 1+strlen(s->code_data);
+            data_length++;
+            break;
+        case YAZ_MARC_CONTROLFIELD:
+            wrbuf_printf(wr_dir, "%.3s", n->u.controlfield.tag);
+            data_length += strlen(n->u.controlfield.data);
+            data_length++;
+            break;
+        case YAZ_MARC_COMMENT:
+            break;
+        case YAZ_MARC_LEADER:
+            break;
+        }
+        if (data_length)
+        {
+            wrbuf_printf(wr_dir, "%0*d", length_data_entry, data_length);
+            wrbuf_printf(wr_dir, "%0*d", length_starting, data_offset);
+            data_offset += data_length;
+        }
+    }
+    /* mark end of directory */
+    wrbuf_putc(wr_dir, ISO2709_FS);
+
+    /* base address of data (comes after leader+directory) */
+    base_address = 24 + wrbuf_len(wr_dir);
+
+    wr_head = wrbuf_alloc();
+
+    /* write record length */
+    wrbuf_printf(wr_head, "%05d", base_address + data_offset + 1);
+    /* from "original" leader */
+    wrbuf_write(wr_head, leader+5, 7);
+    /* base address of data */
+    wrbuf_printf(wr_head, "%05d", base_address);
+    /* from "original" leader */
+    wrbuf_write(wr_head, leader+17, 7);
+    
+    wrbuf_write(wr, wrbuf_buf(wr_head), 24);
+    wrbuf_write(wr, wrbuf_buf(wr_dir), wrbuf_len(wr_dir));
+    wrbuf_free(wr_head, 1);
+    wrbuf_free(wr_dir, 1);
+
+    for (n = mt->nodes; n; n = n->next)
+    {
+        struct yaz_marc_subfield *s;
+        switch(n->which)
+        {
+        case YAZ_MARC_DATAFIELD:
+            wrbuf_printf(wr, "%.*s", indicator_length,
+                         n->u.datafield.indicator);
+            for (s = n->u.datafield.subfields; s; s = s->next)
+                wrbuf_printf(wr, "%c%s", ISO2709_IDFS, s->code_data);
+            wrbuf_printf(wr, "%c", ISO2709_FS);
+            break;
+        case YAZ_MARC_CONTROLFIELD:
+            wrbuf_printf(wr, "%s%c", n->u.controlfield.data, ISO2709_FS);
+            break;
+        case YAZ_MARC_COMMENT:
+            break;
+        case YAZ_MARC_LEADER:
+            break;
+        }
+    }
+    wrbuf_printf(wr, "%c", ISO2709_RS);
+    return 0;
+}
+
+#if HAVE_XML2
+int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
+{
+    for (; ptr; ptr = ptr->next)
+    {
+        if (ptr->type == XML_ELEMENT_NODE)
+        {
+            if (!strcmp((const char *) ptr->name, "subfield"))
+            {
+                size_t ctrl_data_len = 0;
+                char *ctrl_data_buf = 0;
+                const xmlNode *p = 0, *ptr_code = 0;
+                struct _xmlAttr *attr;
+                for (attr = ptr->properties; attr; attr = attr->next)
+                    if (!strcmp((const char *)attr->name, "code"))
+                        ptr_code = attr->children;
+                    else
+                    {
+                        yaz_marc_cprintf(
+                            mt, "Bad attribute '%.80s' for 'subfield'",
+                            attr->name);
+                        return -1;
+                    }
+                if (!ptr_code)
+                {
+                    yaz_marc_cprintf(
+                        mt, "Missing attribute 'code' for 'subfield'" );
+                    return -1;
+                }
+                if (ptr_code->type == XML_TEXT_NODE)
+                {
+                    ctrl_data_len = 
+                        strlen((const char *)ptr_code->content);
+                }
+                else
+                {
+                    yaz_marc_cprintf(
+                        mt, "Missing value for 'code' in 'subfield'" );
+                    return -1;
+                }
+                for (p = ptr->children; p ; p = p->next)
+                    if (p->type == XML_TEXT_NODE)
+                        ctrl_data_len += strlen((const char *)p->content);
+                ctrl_data_buf = nmem_malloc(mt->nmem, ctrl_data_len+1);
+                strcpy(ctrl_data_buf, (const char *)ptr_code->content);
+                for (p = ptr->children; p ; p = p->next)
+                    if (p->type == XML_TEXT_NODE)
+                        strcat(ctrl_data_buf, (const char *)p->content);
+                yaz_marc_add_subfield(mt, ctrl_data_buf, ctrl_data_len);
+            }
+            else
+            {
+                yaz_marc_cprintf(
+                    mt, "Expected element 'subfield', got '%.80s'", ptr->name);
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+
+static int yaz_marc_read_xml_leader(yaz_marc_t mt, const xmlNode **ptr_p)
+{
+    int indicator_length;
+    int identifier_length;
+    int base_address;
+    int length_data_entry;
+    int length_starting;
+    int length_implementation;
+    const char *leader = 0;
+    const xmlNode *ptr = *ptr_p;
+
+    for(; ptr; ptr = ptr->next)
+        if (ptr->type == XML_ELEMENT_NODE)
+        {
+            if (!strcmp((const char *) ptr->name, "leader"))
+            {
+                xmlNode *p = ptr->children;
+                for(; p; p = p->next)
+                    if (p->type == XML_TEXT_NODE)
+                        leader = (const char *) p->content;
+                break;
+            }
+            else
+            {
+                yaz_marc_cprintf(
+                    mt, "Expected element 'leader', got '%.80s'", ptr->name);
+                return -1;
+            }
+        }
+    if (!leader)
+    {
+        yaz_marc_cprintf(mt, "Missing element 'leader'");
+        return -1;
+    }
+    if (strlen(leader) != 24)
+    {
+        yaz_marc_cprintf(mt, "Bad length %d of leader data."
+                         " Must have length of 24 characters", strlen(leader));
+        return -1;
+    }
+    yaz_marc_read_leader(mt, leader,
+                         &indicator_length,
+                         &identifier_length,
+                         &base_address,
+                         &length_data_entry,
+                         &length_starting,
+                         &length_implementation);
+    *ptr_p = ptr;
+    return 0;
+}
+
+static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
+{
+    for(; ptr; ptr = ptr->next)
+        if (ptr->type == XML_ELEMENT_NODE)
+        {
+            if (!strcmp((const char *) ptr->name, "controlfield"))
+            {
+                const xmlNode *ptr_tag = 0;
+                struct _xmlAttr *attr;
+                for (attr = ptr->properties; attr; attr = attr->next)
+                    if (!strcmp((const char *)attr->name, "tag"))
+                        ptr_tag = attr->children;
+                    else
+                    {
+                        yaz_marc_cprintf(
+                            mt, "Bad attribute '%.80s' for 'controlfield'",
+                            attr->name);
+                        return -1;
+                    }
+                if (!ptr_tag)
+                {
+                    yaz_marc_cprintf(
+                        mt, "Missing attribute 'tag' for 'controlfield'" );
+                    return -1;
+                }
+                yaz_marc_add_controlfield_xml(mt, ptr_tag, ptr->children);
+            }
+            else if (!strcmp((const char *) ptr->name, "datafield"))
+            {
+                char indstr[11]; /* 0(unused), 1,....9, + zero term */
+                const xmlNode *ptr_tag = 0;
+                struct _xmlAttr *attr;
+                int i;
+                for (i = 0; i<11; i++)
+                    indstr[i] = '\0';
+                for (attr = ptr->properties; attr; attr = attr->next)
+                    if (!strcmp((const char *)attr->name, "tag"))
+                        ptr_tag = attr->children;
+                    else if (strlen((const char *)attr->name) == 4 &&
+                             !memcmp(attr->name, "ind", 3))
+                    {
+                        int no = atoi((const char *)attr->name+3);
+                        if (attr->children
+                            && attr->children->type == XML_TEXT_NODE)
+                            indstr[no] = attr->children->content[0];
+                    }
+                    else
+                    {
+                        yaz_marc_cprintf(
+                            mt, "Bad attribute '%.80s' for 'datafield'",
+                            attr->name);
+                        return -1;
+                    }
+                if (!ptr_tag)
+                {
+                    yaz_marc_cprintf(
+                        mt, "Missing attribute 'tag' for 'datafield'" );
+                    return -1;
+                }
+                /* note that indstr[0] is unused so we use indstr[1..] */
+                yaz_marc_add_datafield_xml(mt, ptr_tag,
+                                           indstr+1, strlen(indstr+1));
+                
+                if (yaz_marc_read_xml_subfields(mt, ptr->children))
+                    return -1;
+            }
+            else
+            {
+                yaz_marc_cprintf(mt,
+                                 "Expected element controlfield or datafield,"
+                                 " got %.80s", ptr->name);
+                return -1;
+            }
+        }
+    return 0;
+}
+
+int yaz_marc_read_xml(yaz_marc_t mt, const void *xmlnode)
+{
+    const xmlNode *ptr = xmlnode;
+    for(; ptr; ptr = ptr->next)
+        if (ptr->type == XML_ELEMENT_NODE)
+        {
+            if (!strcmp((const char *) ptr->name, "record"))
+                break;
+            else
+            {
+                yaz_marc_cprintf(
+                    mt, "Unknown element '%.80s' in MARC XML reader",
+                    ptr->name);
+                return -1;
+            }
+        }
+    if (!ptr)
+    {
+        yaz_marc_cprintf(mt, "Missing element 'record' in MARC XML record");
+        return -1;
+    }
+    /* ptr points to record node now */
+    ptr = ptr->children;
+    if (yaz_marc_read_xml_leader(mt, &ptr))
+        return -1;
+    return yaz_marc_read_xml_fields(mt, ptr->next);
+}
+#else
+int yaz_marc_read_xml(yaz_marc_t mt, const void *xmlnode)
+{
+    return -1;
+}
+#endif
+
+int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
 {
     int entry_p;
     int record_length;
@@ -115,170 +930,58 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     int length_data_entry;
     int length_starting;
     int length_implementation;
-    char lead[24];
-    int produce_warnings = 0;
 
-    if (mt->debug)
-        produce_warnings = 1;
-    if (mt->xml == YAZ_MARC_SIMPLEXML || mt->xml == YAZ_MARC_OAIMARC
-        || mt->xml == YAZ_MARC_MARCXML || mt->xml == YAZ_MARC_XCHANGE)
-        produce_warnings = 1;
+    yaz_marc_reset(mt);
 
     record_length = atoi_n (buf, 5);
     if (record_length < 25)
     {
-        if (mt->debug)
-            wrbuf_printf(wr, "<!-- Record length %d - aborting -->\n",
-                            record_length);
+        yaz_marc_cprintf(mt, "Record length %d < 24", record_length);
         return -1;
     }
-    memcpy(lead, buf, 24);  /* se can modify the header for output */
-
     /* ballout if bsize is known and record_length is less than that */
     if (bsize != -1 && record_length > bsize)
+    {
+        yaz_marc_cprintf(mt, "Record appears to be larger than buffer %d < %d",
+                         record_length, bsize);
         return -1;
-    if (!atoi_n_check(buf+10, 1, &indicator_length))
-    {
-        if (produce_warnings)
-            wrbuf_printf(wr, "<!-- Indicator length at offset 10 should hold a digit. Assuming 2 -->\n");
-        lead[10] = '2';
-        indicator_length = 2;
-    }
-    if (!atoi_n_check(buf+11, 1, &identifier_length))
-    {
-        if (produce_warnings)
-            wrbuf_printf(wr, "<!-- Identifier length at offset 11 should hold a digit. Assuming 2 -->\n");
-        lead[11] = '2';
-        identifier_length = 2;
-    }
-    if (!atoi_n_check(buf+12, 5, &base_address))
-    {
-        if (produce_warnings)
-            wrbuf_printf(wr, "<!-- Base address at offsets 12..16 should hold a number. Assuming 0 -->\n");
-        base_address = 0;
-    }
-    if (!atoi_n_check(buf+20, 1, &length_data_entry))
-    {
-        if (produce_warnings)
-            wrbuf_printf(wr, "<!-- Length data entry at offset 20 should hold a digit. Assuming 4 -->\n");
-        length_data_entry = 4;
-        lead[20] = '4';
-    }
-    if (!atoi_n_check(buf+21, 1, &length_starting))
-    {
-        if (produce_warnings)
-            wrbuf_printf(wr, "<!-- Length starting at offset 21 should hold a digit. Assuming 5 -->\n");
-        length_starting = 5;
-        lead[21] = '5';
-    }
-    if (!atoi_n_check(buf+22, 1, &length_implementation))
-    {
-        if (produce_warnings)
-            wrbuf_printf(wr, "<!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->\n");
-        length_implementation = 0;
-        lead[22] = '0';
-    }
-
-    if (mt->xml != YAZ_MARC_LINE)
-    {
-        char str[80];
-        int i;
-        switch(mt->xml)
-        {
-        case YAZ_MARC_ISO2709:
-            break;
-        case YAZ_MARC_SIMPLEXML:
-            wrbuf_puts (wr, "<iso2709\n");
-            sprintf (str, " RecordStatus=\"%c\"\n", buf[5]);
-            wrbuf_puts (wr, str);
-            sprintf (str, " TypeOfRecord=\"%c\"\n", buf[6]);
-            wrbuf_puts (wr, str);
-            for (i = 1; i<=19; i++)
-            {
-                sprintf (str, " ImplDefined%d=\"%c\"\n", i, buf[6+i]);
-                wrbuf_puts (wr, str);
-            }
-            wrbuf_puts (wr, ">\n");
-            break;
-        case YAZ_MARC_OAIMARC:
-            wrbuf_puts(
-                wr,
-                "<oai_marc xmlns=\"http://www.openarchives.org/OIA/oai_marc\""
-                "\n"
-                " xmlns:xsi=\"http://www.w3.org/2000/10/XMLSchema-instance\""
-                "\n"
-                " xsi:schemaLocation=\"http://www.openarchives.org/OAI/oai_marc.xsd\""
-                "\n"
-                );
-            
-            sprintf (str, " status=\"%c\" type=\"%c\" catForm=\"%c\">\n",
-                     buf[5], buf[6], buf[7]);
-            wrbuf_puts (wr, str);
-            break;
-        case YAZ_MARC_MARCXML:
-            wrbuf_printf(
-                wr,
-                "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
-                "  <leader>");
-            lead[9] = 'a';                 /* set leader to signal unicode */
-            marc_cdata(mt, lead, 24, wr); 
-            wrbuf_printf(wr, "</leader>\n");
-            break;
-        case YAZ_MARC_XCHANGE:
-            wrbuf_printf(
-                wr,
-                "<record xmlns=\"http://www.bs.dk/standards/MarcXchange\">\n"
-                "  <leader>");
-            marc_cdata(mt, lead, 24, wr);
-            wrbuf_printf(wr, "</leader>\n");
-            break;
-        }
     }
     if (mt->debug)
-    {
-        char str[40];
+        yaz_marc_cprintf(mt, "Record length         %5d", record_length);
 
-        wrbuf_puts (wr, "<!--\n");
-        sprintf (str, "Record length         %5d\n", record_length);
-        wrbuf_puts (wr, str);
-        sprintf (str, "Indicator length      %5d\n", indicator_length);
-        wrbuf_puts (wr, str);
-        sprintf (str, "Identifier length     %5d\n", identifier_length);
-        wrbuf_puts (wr, str);
-        sprintf (str, "Base address          %5d\n", base_address);
-        wrbuf_puts (wr, str);
-        sprintf (str, "Length data entry     %5d\n", length_data_entry);
-        wrbuf_puts (wr, str);
-        sprintf (str, "Length starting       %5d\n", length_starting);
-        wrbuf_puts (wr, str);
-        sprintf (str, "Length implementation %5d\n", length_implementation);
-        wrbuf_puts (wr, str);
-        wrbuf_puts (wr, "-->\n");
-    }
+    yaz_marc_read_leader(mt, buf,
+                         &indicator_length,
+                         &identifier_length,
+                         &base_address,
+                         &length_data_entry,
+                         &length_starting,
+                         &length_implementation);
 
-    /* first pass. determine length of directory & base of data */
+    /* First pass. determine length of directory & base of data */
     for (entry_p = 24; buf[entry_p] != ISO2709_FS; )
     {
         /* length of directory entry */
         int l = 3 + length_data_entry + length_starting;
         if (entry_p + l >= record_length)
         {
-            wrbuf_printf (wr, "<!-- Directory offset %d: end of record. "
-                            "Missing FS char -->\n", entry_p);
+            yaz_marc_cprintf(mt, "Directory offset %d: end of record."
+                             " Missing FS char", entry_p);
             return -1;
         }
         if (mt->debug)
-            wrbuf_printf (wr, "<!-- Directory offset %d: Tag %.3s -->\n",
-                            entry_p, buf+entry_p);
-        /* check for digits in length info */
+        {
+            yaz_marc_cprintf(mt, "Directory offset %d: Tag %.3s",
+                             entry_p, buf+entry_p);
+        }
+        /* Check for digits in length info */
         while (--l >= 3)
             if (!isdigit(*(const unsigned char *) (buf + entry_p+l)))
                 break;
         if (l >= 3)
         {
-            /* not all digits, so stop directory scan */
-            wrbuf_printf (wr, "<!-- Directory offset %d: Bad data for data "
-                            "length and/or length starting -->\n", entry_p);
+            /* Not all digits, so stop directory scan */
+            yaz_marc_cprintf(mt, "Directory offset %d: Bad value for data"
+                             " length and/or length starting", entry_p);
             break;
         }
         entry_p += 3 + length_data_entry + length_starting;
@@ -286,71 +989,17 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     end_of_directory = entry_p;
     if (base_address != entry_p+1)
     {
-        if (produce_warnings)
-            wrbuf_printf (wr,"<!-- Base address not at end of directory, "
-                          "base %d, end %d -->\n", base_address, entry_p+1);
+        yaz_marc_cprintf(mt, "Base address not at end of directory,"
+                         " base %d, end %d", base_address, entry_p+1);
     }
-    if (mt->xml == YAZ_MARC_ISO2709)
-    {
-        WRBUF wr_head = wrbuf_alloc();
-        WRBUF wr_dir = wrbuf_alloc();
-        WRBUF wr_tmp = wrbuf_alloc();
 
-        int data_p = 0;
-        /* second pass. create directory for ISO2709 output */
-        for (entry_p = 24; entry_p != end_of_directory; )
-        {
-            int data_length, data_offset, end_offset;
-            int i, sz1, sz2;
-            
-            wrbuf_write(wr_dir, buf+entry_p, 3);
-            entry_p += 3;
-            
-            data_length = atoi_n (buf+entry_p, length_data_entry);
-            entry_p += length_data_entry;
-            data_offset = atoi_n (buf+entry_p, length_starting);
-            entry_p += length_starting;
-            i = data_offset + base_address;
-            end_offset = i+data_length-1;
-            
-            if (data_length <= 0 || data_offset < 0 || end_offset >= record_length)
-                return -1;
-        
-            while (i < end_offset &&
-                    buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
-                i++;
-            sz1 = 1+i - (data_offset + base_address);
-            if (mt->iconv_cd)
-            {
-                sz2 = wrbuf_iconv_write(wr_tmp, mt->iconv_cd,
-                                        buf + data_offset+base_address, sz1);
-                wrbuf_rewind(wr_tmp);
-            }
-            else
-                sz2 = sz1;
-            wrbuf_printf(wr_dir, "%0*d", length_data_entry, sz2);
-            wrbuf_printf(wr_dir, "%0*d", length_starting, data_p);
-            data_p += sz2;
-        }
-        wrbuf_putc(wr_dir, ISO2709_FS);
-        wrbuf_printf(wr_head, "%05d", data_p+1 + base_address);
-        wrbuf_write(wr_head, lead+5, 7);
-        wrbuf_printf(wr_head, "%05d", base_address);
-        wrbuf_write(wr_head, lead+17, 7);
-
-        wrbuf_write(wr, wrbuf_buf(wr_head), 24);
-        wrbuf_write(wr, wrbuf_buf(wr_dir), wrbuf_len(wr_dir));
-        wrbuf_free(wr_head, 1);
-        wrbuf_free(wr_dir, 1);
-        wrbuf_free(wr_tmp, 1);
-    }
-    /* third pass. create data output */
+    /* Second pass. parse control - and datafields */
     for (entry_p = 24; entry_p != end_of_directory; )
     {
         int data_length;
         int data_offset;
         int end_offset;
-        int i, j;
+        int i;
         char tag[4];
         int identifier_flag = 0;
         int entry_p0 = entry_p;
@@ -358,9 +1007,9 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         memcpy (tag, buf+entry_p, 3);
         entry_p += 3;
         tag[3] = '\0';
-        data_length = atoi_n (buf+entry_p, length_data_entry);
+        data_length = atoi_n(buf+entry_p, length_data_entry);
         entry_p += length_data_entry;
-        data_offset = atoi_n (buf+entry_p, length_starting);
+        data_offset = atoi_n(buf+entry_p, length_starting);
         entry_p += length_starting;
         i = data_offset + base_address;
         end_offset = i+data_length-1;
@@ -370,15 +1019,14 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
         
         if (mt->debug)
         {
-            wrbuf_printf(wr, "<!-- Directory offset %d: data-length %d, "
-                            "data-offset %d -->\n",
-                    entry_p0, data_length, data_offset);
+            yaz_marc_cprintf(mt, "Tag: %s. Directory offset %d: data-length %d,"
+                             " data-offset %d",
+                             tag, entry_p0, data_length, data_offset);
         }
         if (end_offset >= record_length)
         {
-            wrbuf_printf (wr,"<!-- Directory offset %d: Data out of bounds "
-                            "%d >= %d -->\n",
-                                   entry_p0, end_offset, record_length);
+            yaz_marc_cprintf(mt, "Directory offset %d: Data out of bounds %d >= %d",
+                             entry_p0, end_offset, record_length);
             break;
         }
         
@@ -393,198 +1041,58 @@ int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
                 identifier_flag = 2;
         }
 
-        if (mt->debug)
-        {
-            wrbuf_printf(wr, "<!-- identifier_flag = %d -->\n",
-                         identifier_flag);
-        } 
-       
-        switch(mt->xml)
-        {
-        case YAZ_MARC_LINE:
-            wrbuf_puts (wr, tag);
-            wrbuf_puts (wr, " ");
-            break;
-        case YAZ_MARC_SIMPLEXML:
-            wrbuf_printf (wr, "<field tag=\"");
-            marc_cdata(mt, tag, strlen(tag), wr);
-            wrbuf_printf(wr, "\"");
-            break;
-        case YAZ_MARC_OAIMARC:
-            if (identifier_flag)
-                wrbuf_printf (wr, "  <varfield id=\"");
-            else
-                wrbuf_printf (wr, "  <fixfield id=\"");
-            marc_cdata(mt, tag, strlen(tag), wr);
-            wrbuf_printf(wr, "\"");
-            break;
-        case YAZ_MARC_MARCXML:
-        case YAZ_MARC_XCHANGE:
-            if (identifier_flag)
-                wrbuf_printf (wr, "  <datafield tag=\"");
-            else
-                wrbuf_printf (wr, "  <controlfield tag=\"");
-            marc_cdata(mt, tag, strlen(tag), wr);
-            wrbuf_printf(wr, "\"");
-        }
-        
         if (identifier_flag)
         {
+            /* datafield */
             i += identifier_flag-1;
-            for (j = 0; j<indicator_length; j++, i++)
-            {
-                switch(mt->xml)
-                {
-                case YAZ_MARC_ISO2709:
-                    wrbuf_putc(wr, buf[i]);
-                    break;
-                case YAZ_MARC_LINE:
-                    wrbuf_putc(wr, buf[i]);
-                    break;
-                case YAZ_MARC_SIMPLEXML:
-                    wrbuf_printf(wr, " Indicator%d=\"", j+1);
-                    marc_cdata(mt, buf+i, 1, wr);
-                    wrbuf_printf(wr, "\"");
-                    break;
-                case YAZ_MARC_OAIMARC:
-                    wrbuf_printf(wr, " i%d=\"", j+1);
-                    marc_cdata(mt, buf+i, 1, wr);
-                    wrbuf_printf(wr, "\"");
-                    break;
-                case YAZ_MARC_MARCXML:
-                case YAZ_MARC_XCHANGE:
-                    wrbuf_printf(wr, " ind%d=\"", j+1);
-                    marc_cdata(mt, buf+i, 1, wr);
-                    wrbuf_printf(wr, "\"");
-                }
-            }
-        }
-        if (mt->xml == YAZ_MARC_SIMPLEXML || mt->xml == YAZ_MARC_MARCXML
-            || mt->xml == YAZ_MARC_OAIMARC || mt->xml == YAZ_MARC_XCHANGE)
-        {
-            wrbuf_puts (wr, ">");
-            if (identifier_flag)
-                wrbuf_puts (wr, "\n");
-        }
-        if (identifier_flag)
-        {
+            yaz_marc_add_datafield(mt, tag, buf+i, indicator_length);
+            i += indicator_length;
+
             while (i < end_offset &&
                     buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
             {
-                int i0;
+                int code_offset = i+1;
 
-                int sb_octet_length = identifier_length-1;
-                if (identifier_length == 2)
-                    sb_octet_length = cdata_one_character(mt, buf+i);
-
-                i++;
-                switch(mt->xml)
-                {
-                case YAZ_MARC_ISO2709:
-                    --i;
-                    wrbuf_iconv_write(wr, mt->iconv_cd, 
-                                      buf+i, identifier_length);
-                    i += identifier_length;
-                    break;
-                case YAZ_MARC_LINE: 
-                    wrbuf_puts (wr, mt->subfield_str); 
-                    marc_cdata(mt, buf+i, sb_octet_length, wr);
-                    i = i+sb_octet_length;
-                    wrbuf_putc (wr, ' ');
-                    break;
-                case YAZ_MARC_SIMPLEXML:
-                    wrbuf_puts (wr, "  <subfield code=\"");
-                    marc_cdata(mt, buf+i, sb_octet_length, wr);
-                    i = i+sb_octet_length;
-                    wrbuf_puts (wr, "\">");
-                    break;
-                case YAZ_MARC_OAIMARC:
-                    wrbuf_puts (wr, "    <subfield label=\"");
-                    marc_cdata(mt, buf+i, sb_octet_length, wr);
-                    i = i+sb_octet_length;
-                    wrbuf_puts (wr, "\">");
-                    break;
-                case YAZ_MARC_MARCXML:
-                case YAZ_MARC_XCHANGE:
-                    wrbuf_puts (wr, "    <subfield code=\"");
-                    marc_cdata(mt, buf+i, sb_octet_length, wr);
-                    i = i+sb_octet_length;
-                    wrbuf_puts (wr, "\">");
-                    break;
-                }
-                i0 = i;
+                i ++;
                 while (i < end_offset &&
                         buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
-                        buf[i] != ISO2709_FS)
+                       buf[i] != ISO2709_FS)
                     i++;
-                marc_cdata(mt, buf + i0, i - i0, wr);
-
-                if (mt->xml == YAZ_MARC_ISO2709 && buf[i] != ISO2709_IDFS)
-                    marc_cdata(mt, buf + i, 1, wr);
-
-                if (mt->xml == YAZ_MARC_SIMPLEXML || 
-                    mt->xml == YAZ_MARC_MARCXML ||
-                    mt->xml == YAZ_MARC_XCHANGE ||
-                    mt->xml == YAZ_MARC_OAIMARC)
-                    wrbuf_puts (wr, "</subfield>\n");
+                yaz_marc_add_subfield(mt, buf+code_offset, i - code_offset);
             }
         }
         else
         {
+            /* controlfield */
             int i0 = i;
             while (i < end_offset && 
                 buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
                 i++;
-            marc_cdata(mt, buf + i0, i - i0, wr);
-            if (mt->xml == YAZ_MARC_ISO2709)
-                marc_cdata(mt, buf + i, 1, wr);
+            yaz_marc_add_controlfield(mt, tag, buf+i0, i-i0);
         }
-        if (mt->xml == YAZ_MARC_LINE)
-            wrbuf_puts (wr, mt->endline_str);
         if (i < end_offset)
-            wrbuf_printf(wr, "<!-- separator but not at end of field length=%d-->\n", data_length);
-        if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
-            wrbuf_printf(wr, "<!-- no separator at end of field length=%d-->\n", data_length);
-        switch(mt->xml)
         {
-        case YAZ_MARC_SIMPLEXML:
-            wrbuf_puts (wr, "</field>\n");
-            break;
-        case YAZ_MARC_OAIMARC:
-            if (identifier_flag)
-                wrbuf_puts (wr, "</varfield>\n");
-            else
-                wrbuf_puts (wr, "</fixfield>\n");
-            break;
-        case YAZ_MARC_MARCXML:
-        case YAZ_MARC_XCHANGE:
-            if (identifier_flag)
-                wrbuf_puts (wr, "  </datafield>\n");
-            else
-                wrbuf_puts (wr, "</controlfield>\n");
-            break;
+            yaz_marc_cprintf(mt, "Separator but not at end of field length=%d",
+                    data_length);
         }
-    }
-    switch (mt->xml)
-    {
-    case YAZ_MARC_LINE:
-        wrbuf_puts (wr, "");
-        break;
-    case YAZ_MARC_SIMPLEXML:
-        wrbuf_puts (wr, "</iso2709>\n");
-        break;
-    case YAZ_MARC_OAIMARC:
-        wrbuf_puts (wr, "</oai_marc>\n");
-        break;
-    case YAZ_MARC_MARCXML:
-    case YAZ_MARC_XCHANGE:
-        wrbuf_puts (wr, "</record>\n");
-        break;
-    case YAZ_MARC_ISO2709:
-        wrbuf_putc (wr, ISO2709_RS);
-        break;
+        if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
+        {
+            yaz_marc_cprintf(mt, "No separator at end of field length=%d",
+                    data_length);
+        }
     }
     return record_length;
+}
+
+int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
+{
+    int s, r = yaz_marc_read_iso2709(mt, buf, bsize);
+    if (r <= 0)
+        return r;
+    s = yaz_marc_write_mode(mt, wr); /* returns 0 for OK, -1 otherwise */
+    if (s != 0)
+        return -1; /* error */
+    return r; /* OK, return length > 0 */
 }
 
 int yaz_marc_decode_buf (yaz_marc_t mt, const char *buf, int bsize,
@@ -618,7 +1126,7 @@ void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd)
     mt->iconv_cd = cd;
 }
 
-/* depricated */
+/* deprecated */
 int yaz_marc_decode(const char *buf, WRBUF wr, int debug, int bsize, int xml)
 {
     yaz_marc_t mt = yaz_marc_create();
@@ -631,13 +1139,13 @@ int yaz_marc_decode(const char *buf, WRBUF wr, int debug, int bsize, int xml)
     return r;
 }
 
-/* depricated */
+/* deprecated */
 int marc_display_wrbuf (const char *buf, WRBUF wr, int debug, int bsize)
 {
     return yaz_marc_decode(buf, wr, debug, bsize, 0);
 }
 
-/* depricated */
+/* deprecated */
 int marc_display_exl (const char *buf, FILE *outf, int debug, int bsize)
 {
     yaz_marc_t mt = yaz_marc_create();
@@ -653,13 +1161,13 @@ int marc_display_exl (const char *buf, FILE *outf, int debug, int bsize)
     return r;
 }
 
-/* depricated */
+/* deprecated */
 int marc_display_ex (const char *buf, FILE *outf, int debug)
 {
     return marc_display_exl (buf, outf, debug, -1);
 }
 
-/* depricated */
+/* deprecated */
 int marc_display (const char *buf, FILE *outf)
 {
     return marc_display_ex (buf, outf, 0);

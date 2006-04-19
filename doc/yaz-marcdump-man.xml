@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-marcdump-man.xml,v 1.5 2005-02-08 23:43:56 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.6 2006-04-19 10:05:02 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>
@@ -18,7 +18,6 @@
    <arg choice="opt"><option>-X</option></arg>
    <arg choice="opt"><option>-e</option></arg>
    <arg choice="opt"><option>-I</option></arg>
-   <arg choice="opt"><option>-O</option></arg>
    <arg choice="opt"><option>-f <replaceable>from</replaceable></option></arg>
    <arg choice="opt"><option>-t <replaceable>to</replaceable></option></arg>
    <arg choice="opt"><option>-v</option></arg>
@@ -29,14 +28,26 @@
  
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-marcdump</command> reads ISO2709/MARC records from one or
+   <command>yaz-marcdump</command> reads MARC records from one or
    more files.
-   It validates each record and supports output in line-format, 
-   MARCXML, OAIMARC as well as Hex output.
+   It parses each record and supports output in line-format, 
+   ISO2709, MARCXML, MarcXchange as well as Hex output.
   </para>
   <para>
-   By default, each record is printed to standard output in a line
+   This utility parses records ISO2709(raw MARC) as well as XML
+   if that is structured as MARCXML/MarcXchange.
+  </para>
+  <note>
+   <para>
+    As of YAZ 2.1.18, OAI-MARC is no longer supported.
+    OAI-MARC is deprecated. Use MARCXML instead.
+   </para>
+  </note>
+  <para>
+   By default, each record is written to standard output in a line
    format with newline for each field, $x for each subfield x.
+   The output format may be changed with options <literal>-X</literal>,
+   <literal>-e</literal>, <literal>-I</literal>.
   </para>
   <para>
    <command>yaz-marcdump</command> can also be requested to perform
@@ -50,16 +61,16 @@
    <varlistentry>
     <term>-x</term>
     <listitem><para>
-      Print MARC records in a simple XML format. 
-      This format is equivalent to YAZ_MARC_SIMPLEXML in
-      <filename>yaz/marcdisp.h</filename>.
+      Reads MARC records in MARCXML/MarcXchange format. Without
+      this option, <command>yaz-marcdump</command> reads records
+      in ISO2709 format.
      </para></listitem>
    </varlistentry>
 
    <varlistentry>
     <term>-X</term>
     <listitem><para>
-      Print MARC records in MARCXML.
+      Writes MARC records in MARCXML.
       This format is equivalent to YAZ_MARC_MARCXML in
       <filename>yaz/marcdisp.h</filename>.
      </para></listitem>
@@ -68,7 +79,7 @@
    <varlistentry>
     <term>-e</term>
     <listitem><para>
-      Print MARC records in MarcXchange format.
+      Writes MARC records in MarcXchange format.
       This format is equivalent to YAZ_MARC_XCHANGE in
       <filename>yaz/marcdisp.h</filename>.
      </para></listitem>
@@ -77,21 +88,12 @@
    <varlistentry>
     <term>-I</term>
     <listitem><para>
-      Print MARC records in ISO2709 format.
+      Writes MARC records in ISO2709 format.
       This format is equivalent to YAZ_MARC_ISO2709 in
       <filename>yaz/marcdisp.h</filename>.
      </para></listitem>
    </varlistentry>
 
-   <varlistentry>
-    <term>-O</term>
-    <listitem><para>
-      Print MARC records in OAIMARC. Another XML variant.
-      This format is equivalent to YAZ_MARC_OAIMARC in
-      <filename>yaz/marcdisp.h</filename>.
-     </para></listitem>
-   </varlistentry>
-   
    <varlistentry>
     <term>-f<replaceable>from</replaceable>]</term>
     <listitem><para>
@@ -113,7 +115,7 @@
    <varlistentry>
     <term>-v</term>
     <listitem><para>
-      Print more information about the parsing process.
+      Writes more information about the parsing process.
       Useful if you have ill-formatted ISO2709 records as input.
      </para></listitem>
    </varlistentry>

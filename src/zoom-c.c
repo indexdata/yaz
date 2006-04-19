@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.68 2006-04-07 11:27:24 adam Exp $
+ * $Id: zoom-c.c,v 1.69 2006-04-19 10:05:03 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1150,7 +1150,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.68 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.69 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1865,7 +1865,7 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
         }
         return 0;
     }
-    else if (!strcmp (type, "xml") || !strcmp(type, "oai"))
+    else if (!strcmp (type, "xml"))
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
         oident *ent = oid_getentbyoid(r->direct_reference);
@@ -1889,8 +1889,6 @@ ZOOM_record_get (ZOOM_record rec, const char *type_spec, int *len)
             const char *ret_buf;
             int marc_decode_type = YAZ_MARC_MARCXML;
 
-            if (!strcmp(type, "oai"))
-                marc_decode_type = YAZ_MARC_OAIMARC;
             switch (ent->value)
             {
             case VAL_SOIF:

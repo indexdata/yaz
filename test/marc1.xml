@@ -1,6 +1,6 @@
-<!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
 <record xmlns="http://www.loc.gov/MARC21/slim">
-  <leader>00988nam0a32003011  450 </leader>
+<!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
+  <leader>00988nam0 32003011  450 </leader>
   <datafield tag="001" ind1="0" ind2="0" ind3="0">
     <subfield code="a">9 181 423 4</subfield>
     <subfield code="b">710100</subfield>

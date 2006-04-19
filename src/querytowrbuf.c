@@ -2,12 +2,11 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: querytowrbuf.c,v 1.3 2006-01-20 14:44:55 adam Exp $
+ * $Id: querytowrbuf.c,v 1.4 2006-04-19 10:05:03 adam Exp $
  */
 
-/**
- * \file querytostr.c
- * \brief Query to WRBUF (to strings)
+/** \file querytowrbuf.c
+    \brief Query to WRBUF (to strings)
  */
 
 #include <stdio.h>

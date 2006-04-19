@@ -2,13 +2,12 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.6 2006-02-23 13:09:54 adam Exp $
+ * $Id: xmlquery.c,v 1.7 2006-04-19 10:05:03 adam Exp $
  */
 
-/**
- * \file querytostr.c
- * \brief Query / XML conversions
- */
+/** \file xmlquery.c
+    \brief Query / XML conversions
+*/
 
 #include <stdio.h>
 #include <string.h>
