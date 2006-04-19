@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.20 2006-04-19 23:46:15 adam Exp $
+ * $Id: siconv.c,v 1.21 2006-04-19 23:48:06 adam Exp $
  */
 /**
  * \file siconv.c
@@ -740,7 +740,8 @@ static size_t flush_combos(yaz_iconv_t cd,
 
     for (i = 0; i < cd->write_marc8_comb_no; i++)
     {
-        byte = cd->write_marc8_comb_ch[i];
+        /* all MARC-8 combined characters are simple bytes */
+        byte = (unsigned char )(cd->write_marc8_comb_ch[i]);
         if (byte == 0xEB)
             second_half = 0xEC;
         else if (byte == 0xFA)
