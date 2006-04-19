@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.29 2006-03-15 13:32:05 adam Exp $
+## Copyright (C) 1994-2006, Index Data, All rights reserved.
+## $Id: Makefile.am,v 1.30 2006-04-19 23:15:39 adam Exp $
 
 YAZ_VERSION_INFO=2:0:0
 
@@ -29,9 +29,13 @@ AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS)
 
 AM_YFLAGS=-p cql_
 
-# MARC8 conversion is generated from codetables.xml
+# MARC8->UTF8 conversion is generated from codetables.xml
 $(srcdir)/marc8.c: charconv.tcl codetables.xml
 	cd $(srcdir); ./charconv.tcl -p marc8 codetables.xml -o marc8.c
+
+# UTF-8->MARC8 conversion is generated from codetables.xml
+$(srcdir)/marc8r.c: charconv.tcl codetables.xml
+	cd $(srcdir); ./charconv.tcl -r -p marc8r codetables.xml -o marc8r.c
 
 # Generate diagnostics from CSVs
 $(top_srcdir)/include/yaz/diagbib1.h $(srcdir)/diagbib1.c: csvtobib1.tcl bib1.csv
@@ -42,7 +46,7 @@ $(top_srcdir)/include/yaz/diagsrw.h $(srcdir)/diagsrw.c: csvtosrw.tcl srw.csv
 
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
-  siconv.c marc8.c \
+  siconv.c marc8.c marc8r.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
   odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
   odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \

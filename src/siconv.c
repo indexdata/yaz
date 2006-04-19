@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.18 2006-03-25 14:41:53 adam Exp $
+ * $Id: siconv.c,v 1.19 2006-04-19 23:15:39 adam Exp $
  */
 /**
  * \file siconv.c
@@ -11,7 +11,7 @@
  * This implements an interface similar to that of iconv and
  * is used by YAZ to interface with iconv (if present).
  * For systems where iconv is not present, this layer
- * provides a few important conversion: UTF-8, MARC-8, Latin-1.
+ * provides a few important conversions: UTF-8, MARC-8, Latin-1.
  */
 
 #if HAVE_CONFIG_H
@@ -31,25 +31,45 @@
 
 #include <yaz/yaz-util.h>
 
-unsigned long yaz_marc8_1_conv (unsigned char *inp, size_t inbytesleft,
-                              size_t *no_read, int *combining);
-unsigned long yaz_marc8_2_conv (unsigned char *inp, size_t inbytesleft,
+unsigned long yaz_marc8_1_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+unsigned long yaz_marc8_2_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+unsigned long yaz_marc8_3_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+unsigned long yaz_marc8_4_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+unsigned long yaz_marc8_5_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+unsigned long yaz_marc8_6_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+unsigned long yaz_marc8_7_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+unsigned long yaz_marc8_8_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+unsigned long yaz_marc8_9_conv(unsigned char *inp, size_t inbytesleft,
+                               size_t *no_read, int *combining);
+
+
+unsigned long yaz_marc8r_1_conv(unsigned char *inp, size_t inbytesleft,
                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8_3_conv (unsigned char *inp, size_t inbytesleft,
+unsigned long yaz_marc8r_2_conv(unsigned char *inp, size_t inbytesleft,
                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8_4_conv (unsigned char *inp, size_t inbytesleft,
+unsigned long yaz_marc8r_3_conv(unsigned char *inp, size_t inbytesleft,
                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8_5_conv (unsigned char *inp, size_t inbytesleft,
+unsigned long yaz_marc8r_4_conv(unsigned char *inp, size_t inbytesleft,
                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8_6_conv (unsigned char *inp, size_t inbytesleft,
+unsigned long yaz_marc8r_5_conv(unsigned char *inp, size_t inbytesleft,
                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8_7_conv (unsigned char *inp, size_t inbytesleft,
+unsigned long yaz_marc8r_6_conv(unsigned char *inp, size_t inbytesleft,
                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8_8_conv (unsigned char *inp, size_t inbytesleft,
+unsigned long yaz_marc8r_7_conv(unsigned char *inp, size_t inbytesleft,
                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8_9_conv (unsigned char *inp, size_t inbytesleft,
+unsigned long yaz_marc8r_8_conv(unsigned char *inp, size_t inbytesleft,
                                 size_t *no_read, int *combining);
-    
+unsigned long yaz_marc8r_9_conv(unsigned char *inp, size_t inbytesleft,
+                                size_t *no_read, int *combining);
+
 struct yaz_iconv_struct {
     int my_errno;
     int init_flag;
@@ -72,6 +92,11 @@ struct yaz_iconv_struct {
     iconv_t iconv_cd;
 #endif
     unsigned long compose_char;
+
+    unsigned long write_marc8_comb_ch[8];
+    size_t write_marc8_comb_no;
+    unsigned long write_marc8_last;
+    const char *write_marc8_page_chr;
 };
 
 static unsigned long yaz_read_ISO8859_1 (yaz_iconv_t cd, unsigned char *inp,
@@ -95,12 +120,10 @@ static size_t yaz_init_UTF8 (yaz_iconv_t cd, unsigned char *inp,
         cd->my_errno = YAZ_ICONV_EINVAL;
         return (size_t) -1;
     }
-    if (inp[1] != 0xbb || inp[2] != 0xbf)
-    {
-        cd->my_errno = YAZ_ICONV_EILSEQ;
-        return (size_t) -1;
-    }
-    *no_read = 3;
+    if (inp[1] != 0xbb && inp[2] == 0xbf)
+        *no_read = 3;
+    else
+        *no_read = 0;
     return 0;
 }
 
@@ -446,7 +469,7 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
     static struct {
         unsigned long x1, x2;
         unsigned y;
-    } comb[] = {
+    } latin1_comb[] = {
         { 'A', 0x0300, 0xc0}, /* LATIN CAPITAL LETTER A WITH GRAVE */
         { 'A', 0x0301, 0xc1}, /* LATIN CAPITAL LETTER A WITH ACUTE */
         { 'A', 0x0302, 0xc2}, /* LATIN CAPITAL LETTER A WITH CIRCUMFLEX */
@@ -518,10 +541,10 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
     if (cd->compose_char)
     {
         int i;
-        for (i = 0; comb[i].x1; i++)
-            if (cd->compose_char == comb[i].x1 && x == comb[i].x2)
+        for (i = 0; latin1_comb[i].x1; i++)
+            if (cd->compose_char == latin1_comb[i].x1 && x == latin1_comb[i].x2)
             {
-                x = comb[i].y;
+                x = latin1_comb[i].y;
                 break;
             }
         if (*outbytesleft < 1)
@@ -529,7 +552,7 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
             cd->my_errno = YAZ_ICONV_E2BIG;
             return (size_t)(-1);
         }
-        if (!comb[i].x1) 
+        if (!latin1_comb[i].x1) 
         {   /* not found. Just write compose_char */
             *outp++ = (unsigned char) cd->compose_char;
             (*outbytesleft)--;
@@ -605,6 +628,193 @@ static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
     return 0;
 }
 
+static unsigned long lookup_marc8(yaz_iconv_t cd,
+                                  unsigned long x, int *comb,
+                                  const char **page_chr)
+{
+    char utf8_buf[7];
+    char *utf8_outbuf = utf8_buf;
+    size_t utf8_outbytesleft = sizeof(utf8_buf)-1, r;
+
+    r = yaz_write_UTF8(cd, x, &utf8_outbuf, &utf8_outbytesleft, 0);
+    if (r == (size_t)(-1))
+    {
+        cd->my_errno = YAZ_ICONV_EILSEQ;
+        return 0;
+    }
+    else
+    {
+        unsigned char *inp;
+        size_t inbytesleft, no_read_sub = 0;
+        unsigned long x;
+
+        *utf8_outbuf = '\0';        
+        inp = (unsigned char *) utf8_buf;
+        inbytesleft = strlen(utf8_buf);
+        
+        x = yaz_marc8r_1_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033(B";
+            return x;
+        }
+        x = yaz_marc8r_2_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033g";
+            return x;
+        }
+        x = yaz_marc8r_3_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033b";
+            return x;
+        }
+        x = yaz_marc8r_4_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033p";
+            return x;
+        }
+        x = yaz_marc8r_5_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033(2";
+            return x;
+        }
+        x = yaz_marc8r_6_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033(N";
+            return x;
+        }
+        x = yaz_marc8r_7_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033(3";
+            return x;
+        }
+        x = yaz_marc8r_8_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033(S";
+            return x;
+        }
+        x = yaz_marc8r_9_conv(inp, inbytesleft, &no_read_sub, comb);
+        if (x)
+        {
+            *page_chr = "\033(1";
+            return x;
+        }
+        cd->my_errno = YAZ_ICONV_EILSEQ;
+        return x;
+    }
+}
+
+static size_t flush_combos(yaz_iconv_t cd,
+                           char **outbuf, size_t *outbytesleft)
+{
+    unsigned long y = cd->write_marc8_last;
+    unsigned char byte, second_half = 0;
+    char out_buf[10];
+    size_t i, out_no = 0;
+
+    if (!y)
+        return 0;
+
+    byte = (y>>16) & 0xff;
+    if (byte)
+        out_buf[out_no++] = byte;
+    byte = (y>>8) & 0xff;
+    if (byte)
+        out_buf[out_no++] = byte;
+    byte = y & 0xff;
+    if (byte)
+        out_buf[out_no++] = byte;
+
+    if (out_no + cd->write_marc8_comb_no + 1 > *outbytesleft)
+    {
+        cd->my_errno = YAZ_ICONV_E2BIG;
+        return (size_t) (-1);
+    }
+
+    for (i = 0; i < cd->write_marc8_comb_no; i++)
+    {
+        byte = cd->write_marc8_comb_ch[i];
+        if (byte == 0xEB)
+            second_half = 0xEC;
+        else if (byte == 0xFA)
+            second_half = 0xFB;
+
+        *(*outbuf)++ = byte;
+        (*outbytesleft)--;
+    }
+    memcpy(*outbuf, out_buf, out_no);
+    *outbuf += out_no;
+    (*outbytesleft) -= out_no;
+    if (second_half)
+    {
+        *(*outbuf)++ = second_half;
+        (*outbytesleft)--;
+    }        
+
+    cd->write_marc8_last = 0;
+    cd->write_marc8_comb_no = 0;
+    return 0;
+}
+
+static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
+                              char **outbuf, size_t *outbytesleft,
+                              int last)
+{
+    int comb = 0;
+    const char *page_chr = 0;
+    unsigned long y = lookup_marc8(cd, x, &comb, &page_chr);
+
+    if (!y)
+        return (size_t) (-1);
+
+    if (comb)
+    {
+        if (cd->write_marc8_comb_no < 6)
+            cd->write_marc8_comb_ch[cd->write_marc8_comb_no++] = y;
+    }
+    else
+    {
+        size_t r = flush_combos(cd, outbuf, outbytesleft);
+        if (r)
+            return r;
+        if (strcmp(page_chr, cd->write_marc8_page_chr))
+        {
+            size_t plen = strlen(page_chr);
+
+            if (*outbytesleft < plen)
+            {
+                cd->my_errno = YAZ_ICONV_E2BIG;
+                return (size_t) (-1);
+            }
+            memcpy(*outbuf, page_chr, plen);
+            (*outbuf) += plen;
+            (*outbytesleft) -= plen;
+            cd->write_marc8_page_chr = page_chr;            
+        }
+        cd->write_marc8_last = y;
+    }
+    if (last)
+    {
+        size_t r = flush_combos(cd, outbuf, outbytesleft);
+        if (r)
+        {
+            if (comb)
+                cd->write_marc8_comb_no--;
+            else
+                cd->write_marc8_last = 0;
+            return r;
+        }
+    }
+    return 0;
+}
+
 #if HAVE_WCHAR_H
 static size_t yaz_write_wchar_t (yaz_iconv_t cd, unsigned long x,
                                  char **outbuf, size_t *outbytesleft,
@@ -646,6 +856,10 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
     cd->comb_offset = cd->comb_size = 0;
     cd->compose_char = 0;
 
+    cd->write_marc8_comb_no = 0;
+    cd->write_marc8_last = 0;
+    cd->write_marc8_page_chr = "\033(B";
+
     /* a useful hack: if fromcode has leading @,
        the library not use YAZ's own conversions .. */
     if (fromcode[0] == '@')
@@ -678,6 +892,8 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
             cd->write_handle = yaz_write_UCS4;
         else if (!yaz_matchstr(tocode, "UCS4LE"))
             cd->write_handle = yaz_write_UCS4LE;
+        else if (!yaz_matchstr(tocode, "MARC8"))
+            cd->write_handle = yaz_write_marc8;
 #if HAVE_WCHAR_H
         else if (!yaz_matchstr(tocode, "WCHAR_T"))
             cd->write_handle = yaz_write_wchar_t;
@@ -828,7 +1044,6 @@ int yaz_iconv_close (yaz_iconv_t cd)
     return 0;
 }
 
-    
 /*
  * Local variables:
  * c-basic-offset: 4

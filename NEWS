@@ -1,3 +1,5 @@
+Utility yaz_iconv now supports conversion to MARC-8.
+
 New facilities for the MARC module. The reading - and writing of
 content are separate methods for the yaz_marc_t handle. The following
 read functions are available: yaz_marc_read_iso2709 (Reads MARC in

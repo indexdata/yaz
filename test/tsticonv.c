@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.16 2006-03-25 14:42:16 adam Exp $
+ * $Id: tsticonv.c,v 1.17 2006-04-19 23:15:40 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -349,7 +349,6 @@ int utf8_check(unsigned c)
     return 1;
 }
         
-
 static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
 {
     int ret = 0;
@@ -380,11 +379,13 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
     return ret;
 }
 
-static void tst_x()
+static void tst_conversion_marc8_to_latin1()
 {
     yaz_iconv_t cd = yaz_iconv_open("ISO-8859-1", "MARC8");
 
     YAZ_CHECK(cd);
+    if (!cd)
+        return;
 
     YAZ_CHECK(tst_convert(cd, "Cours de math", 
                           "Cours de math"));
@@ -406,11 +407,88 @@ static void tst_x()
     yaz_iconv_close(cd);
 }
 
+static void tst_conversion_utf8_to_marc8()
+{
+    yaz_iconv_t cd = yaz_iconv_open("MARC8", "UTF-8");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    YAZ_CHECK(tst_convert(cd, "Cours ", "Cours "));
+
+    /** Pure ASCII. 11 characters (sizeof(outbuf)-1) */
+    YAZ_CHECK(tst_convert(cd, "Cours de mat", "Cours de mat"));
+
+    /** Pure ASCII. 12 characters (sizeof(outbuf)) */
+    YAZ_CHECK(tst_convert(cd, "Cours de math", "Cours de math"));
+
+    /** Pure ASCII. 13 characters (sizeof(outbuf)) */
+    YAZ_CHECK(tst_convert(cd, "Cours de math.", "Cours de math."));
+
+    /** UPPERCASE SCANDINAVIAN O */
+    YAZ_CHECK(tst_convert(cd, "S\xc3\x98", "S\xa2"));
+
+    /** ARING */
+    YAZ_CHECK(tst_convert(cd, "A" "\xCC\x8A", "\xEA" "A"));
+
+    /** A MACRON + UMLAUT, DIAERESIS */
+    YAZ_CHECK(tst_convert(cd, "A" "\xCC\x84" "\xCC\x88",
+                          "\xE5\xE8\x41"));
+    
+    /* Ligature spanning two characters */
+    YAZ_CHECK(tst_convert(cd,
+                          "\x74" "\xCD\xA1" "\x73",  /* UTF-8 */
+                          "\xEB\x74\xEC\x73"));      /* MARC-8 */
+
+    /* Double title spanning two characters */
+    YAZ_CHECK(tst_convert(cd,
+                          "\x74" "\xCD\xA0" "\x73",  /* UTF-8 */
+                          "\xFA\x74\xFB\x73"));      /* MARC-8 */
+
+    /** Ideographic question mark (Unicode FF1F) */
+    YAZ_CHECK(tst_convert(cd,
+                          "\xEF\xBC\x9F" "o",        /* UTF-8 */
+                          "\033(1" "\x21\x2B\x3B" "\033(B" "o" ));
+
+    yaz_iconv_close(cd);
+}
+
+
+static void tst_conversion_latin1_to_marc8()
+{
+    yaz_iconv_t cd = yaz_iconv_open("MARC8", "ISO-8859-1");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    YAZ_CHECK(tst_convert(cd, "Cours ", "Cours "));
+
+    /** Pure ASCII. 11 characters (sizeof(outbuf)-1) */
+    YAZ_CHECK(tst_convert(cd, "Cours de mat", "Cours de mat"));
+
+    /** Pure ASCII. 12 characters (sizeof(outbuf)) */
+    YAZ_CHECK(tst_convert(cd, "Cours de math", "Cours de math"));
+
+    /** Pure ASCII. 13 characters (sizeof(outbuf)) */
+    YAZ_CHECK(tst_convert(cd, "Cours de math.", "Cours de math."));
+
+    /** UPPERCASE SCANDINAVIAN O */
+    YAZ_CHECK(tst_convert(cd, "SØ", "S\xa2"));
+
+    yaz_iconv_close(cd);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
 
-    tst_x();
+    tst_conversion_marc8_to_latin1();
+
+    tst_conversion_utf8_to_marc8();
+
+    tst_conversion_latin1_to_marc8();
 
     YAZ_CHECK(utf8_check(3));
     YAZ_CHECK(utf8_check(127));

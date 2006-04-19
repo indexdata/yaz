@@ -2,7 +2,7 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.11 2006-02-23 13:15:43 adam Exp $
+# $Id: charconv.tcl,v 1.12 2006-04-19 23:15:39 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -255,11 +255,12 @@ proc dump_trie {ofilehandle} {
     "
 }
 
-proc readfile {fname ofilehandle prefix omits} {
+proc readfile {fname ofilehandle prefix omits reverse} {
     global trie
 
     set marc_lines 0
     set ucs_lines 0
+    set utf_lines 0
     set codename_lines 0
     set lineno 0
     set f [open $fname r]
@@ -290,12 +291,21 @@ proc readfile {fname ofilehandle prefix omits} {
 	    }
 	} elseif {[regexp {</code>} $line s]} {
 	    if {[string length $ucs]} {
-		for {set i 0} {$i < [string length $marc]} {incr i 2} {
-		    lappend hex [string range $marc $i [expr $i+1]]
+		if {$reverse} {
+		    for {set i 0} {$i < [string length $utf]} {incr i 2} {
+			lappend hex [string range $utf $i [expr $i+1]]
+		    }
+		    # puts "ins_trie $hex $marc
+		    ins_trie $hex $marc $combining $codename
+		    unset hex
+		} else {
+		    for {set i 0} {$i < [string length $marc]} {incr i 2} {
+			lappend hex [string range $marc $i [expr $i+1]]
+		    }
+		    # puts "ins_trie $hex $ucs"
+		    ins_trie $hex $ucs $combining $codename
+		    unset hex
 		}
-		# puts "ins_trie $hex $ucs"
-		ins_trie $hex $ucs $combining $codename
-		unset hex
 	    }
 	    set marc {}
 	    set uni {}
@@ -319,6 +329,8 @@ proc readfile {fname ofilehandle prefix omits} {
 	    set combining 1
 	} elseif {[regexp {<ucs>([0-9A-Fa-f]*)</ucs>} $line s ucs]} {
 	    incr ucs_lines
+	} elseif {[regexp {<utf-8>([0-9A-Fa-f]*)</utf-8>} $line s utf]} {
+	    incr utf_lines
 	}
     }
     close $f
@@ -328,6 +340,7 @@ set verbose 0
 set ifile {}
 set ofile out.c
 set prefix {c}
+set reverse_map 0
 # Parse command line
 set l [llength $argv]
 set i 0
@@ -362,6 +375,9 @@ while {$i < $l} {
             }
             lappend omits $arg
 	}
+	-r {
+	    set reverse_map 1
+	}
         default {
 	    lappend ifiles $arg
         }
@@ -377,7 +393,7 @@ set ofilehandle [open $ofile w]
 preamble_trie $ofilehandle
 
 foreach ifile $ifiles {
-    readfile $ifile $ofilehandle $prefix $omits
+    readfile $ifile $ofilehandle $prefix $omits $reverse_map
 }
 close $ofilehandle
 

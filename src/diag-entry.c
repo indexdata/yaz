@@ -1,9 +1,18 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: diag-entry.c,v 1.2 2005-06-25 15:46:04 adam Exp $
+ * $Id: diag-entry.c,v 1.3 2006-04-19 23:15:39 adam Exp $
  */
+
+/**
+ * \file diag-entry.c
+ * \brief Diagnostic table lookup
+ */
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "diag-entry.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-iconv.h,v 1.8 2005-06-25 15:46:03 adam Exp $
+ * $Id: yaz-iconv.h,v 1.9 2006-04-19 23:15:39 adam Exp $
  */
 /**
  * \file yaz-iconv.h
@@ -38,20 +38,31 @@
 
 YAZ_BEGIN_CDECL
 
+/** \brief yaz_iconv handle (similar to iconv_t) */
 typedef struct yaz_iconv_struct *yaz_iconv_t;
+
+/** \brief error code: unknown */
 #define YAZ_ICONV_UNKNOWN 1
+/** \brief error code: Not sufficient room for output buffer */
 #define YAZ_ICONV_E2BIG 2
+/** \brief error code: Invalid sequence */
 #define YAZ_ICONV_EILSEQ 3
+/** \brief error code: An incomplete multibyte sequence is in input buffer */
 #define YAZ_ICONV_EINVAL 4
 
+/** \brief just like iconv_open(3) */
 YAZ_EXPORT yaz_iconv_t yaz_iconv_open (const char *tocode,
                                        const char *fromcode);
+/** \brief just like iconv(3) */
 YAZ_EXPORT size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
                              char **outbuf, size_t *outbytesleft);
+/** \brief returns last error - like errno for iconv(3) */
 YAZ_EXPORT int yaz_iconv_error (yaz_iconv_t cd);
 
+/** \brief just like iconv_close(3) */
 YAZ_EXPORT int yaz_iconv_close (yaz_iconv_t cd);
 
+/** \brief tests whether conversion is handled by YAZ' iconv or system iconv */
 YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
 
 YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
