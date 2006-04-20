@@ -1,3 +1,5 @@
+--- 2.1.17 2006/04/20
+
 Utility yaz_iconv now supports conversion to MARC-8.
 
 New facilities for the MARC module. The reading - and writing of
