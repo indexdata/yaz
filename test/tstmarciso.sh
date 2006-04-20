@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: tstmarciso.sh,v 1.1 2006-04-19 10:05:04 adam Exp $
+# $Id: tstmarciso.sh,v 1.2 2006-04-20 19:47:02 adam Exp $
 # Tests reading of ISO2709 and checks that we get identical MARCXML
 srcdir=${srcdir:-.}
 ecode=0
@@ -9,24 +9,24 @@ for f in ${srcdir}/marc?; do
     DIFF=`basename ${f}`.diff
     ../util/yaz-marcdump -f `cat ${f}.chr` -t utf-8 -X $f > $NEW
     if test $? != "0"; then
-	echo "Failed decode of $f"
+	echo "$f: yaz-marcdump returned error"
 	ecode=1
     elif test -f $OLD; then
         if diff $OLD $NEW >$DIFF; then
 	    rm $DIFF
 	    rm $NEW
 	else
-	    echo "Differ in $f"
+	    echo "$f: $NEW and $OLD differ"
 	    ecode=1
 	fi
     else
-	echo "Making test $f for the first time"
+	echo "$f: Making test result $OLD for the first time"
 	if test -x /usr/bin/xmllint; then
 	    if xmllint --noout $NEW >out 2>stderr; then
-		echo "XML for $f is OK"
+		echo "$f: $NEW is well-formed"
 	        mv $NEW $OLD
 	    else
-		echo "XML for $f is invalid"
+		echo "$f: $NEW not well-formed"
 		ecode=1
 	    fi
 	else

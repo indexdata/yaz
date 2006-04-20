@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: marcdisp.h,v 1.15 2006-04-19 10:05:02 adam Exp $
+ * $Id: marcdisp.h,v 1.16 2006-04-20 19:47:01 adam Exp $
  */
 
 /**
@@ -108,6 +108,10 @@ YAZ_EXPORT int yaz_marc_decode(const char *buf, WRBUF wr,
 
 YAZ_EXPORT void yaz_marc_subfield_str(yaz_marc_t mt, const char *s);
 YAZ_EXPORT void yaz_marc_endline_str(yaz_marc_t mt, const char *s);
+
+/** \brief modifies part of the MARC leader */
+YAZ_EXPORT void yaz_marc_modify_leader(yaz_marc_t mt, size_t off,
+                                       const char *str);
 
 /** \brief like atoi except that it reads exactly len characters */
 YAZ_EXPORT int atoi_n(const char *buf, int len);

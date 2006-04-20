@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.26 2006-04-19 10:05:03 adam Exp $
+ * $Id: marcdisp.c,v 1.27 2006-04-20 19:47:01 adam Exp $
  */
 
 /**
@@ -579,6 +579,7 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
 
 int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wr)
 {
+    yaz_marc_modify_leader(mt, 9, "a");
     return yaz_marc_write_marcxml_ns(mt, wr, "http://www.loc.gov/MARC21/slim");
 }
 
@@ -1124,6 +1125,19 @@ void yaz_marc_debug(yaz_marc_t mt, int level)
 void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd)
 {
     mt->iconv_cd = cd;
+}
+
+void yaz_marc_modify_leader(yaz_marc_t mt, size_t off, const char *str)
+{
+    struct yaz_marc_node *n;
+    char *leader = 0;
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+        {
+            leader = n->u.leader;
+            memcpy(leader+off, str, strlen(str));
+            break;
+        }
 }
 
 /* deprecated */

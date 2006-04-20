@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: tstmarcxml.sh,v 1.1 2006-04-19 10:05:04 adam Exp $
+# $Id: tstmarcxml.sh,v 1.2 2006-04-20 19:47:02 adam Exp $
 # Tests reading of MARCXML and checks that we get identical ISO2709 output.
 srcdir=${srcdir:-.}
 ecode=0
@@ -21,11 +21,11 @@ for f in ${srcdir}/marc?.xml; do
 	    rm $DIFF
 	    rm $NEW
 	else
-	    echo "Differ in $f"
+	    echo "$f: $NEW and $OLD Differ"
 	    ecode=1
 	fi
     else
-	echo "Making test $f for the first time"
+	echo "$f: Making test result $OLD for the first time"
 	mv $NEW $OLD
     fi
 done
