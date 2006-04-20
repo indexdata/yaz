@@ -1,3 +1,8 @@
+--- 2.1.18 2006/04/20
+
+ASN.1 compiler 0.4: generates brief Doxygen file header for 
+generated .h/.c files. 
+
 --- 2.1.17 2006/04/20
 
 Utility yaz_iconv now supports conversion to MARC-8.
