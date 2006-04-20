@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.37 2006-03-22 13:03:59 adam Exp $
+ * $Id: srwutil.c,v 1.38 2006-04-20 00:01:01 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -689,6 +689,7 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 	sr->u.scan_response->num_terms = 0;
 	sr->u.scan_response->diagnostics = 0;
 	sr->u.scan_response->num_diagnostics = 0;
+        break;
     case Z_SRW_update_request:
         sr->u.update_request = (Z_SRW_updateRequest *)
             odr_malloc(o, sizeof(*sr->u.update_request));
