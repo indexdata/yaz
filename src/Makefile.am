@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.30 2006-04-19 23:15:39 adam Exp $
+## $Id: Makefile.am,v 1.31 2006-04-20 08:24:31 adam Exp $
 
 YAZ_VERSION_INFO=2:0:0
 
@@ -133,15 +133,15 @@ $(srcdir)/z.tcl $(srcdir)/esadmin.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMPLINE) esadmin.asn
 
 # Charset negotiation
-$(srcdir)/z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn
+$(srcdir)/z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMPLINE) $(YCFLAGS) charneg-3.asn
 
 # UserInfoFormat-multipleSearchTerms-2
-$(srcdir)/z-mterm2.c: $(srcdir)/z.tcl $(srcdir)/mterm2.asn
+$(srcdir)/z-mterm2.c: $(srcdir)/z.tcl $(srcdir)/mterm2.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMPLINE) mterm2.asn
 
 # UserInfoFormat-multipleSearchTerms-2
-$(srcdir)/z-oclcui.c: $(srcdir)/z.tcl $(srcdir)/oclcui.asn
+$(srcdir)/z-oclcui.c: $(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMPLINE) oclcui.asn
 
 # ILL protocol
