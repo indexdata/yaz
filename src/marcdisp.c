@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.27 2006-04-20 19:47:01 adam Exp $
+ * $Id: marcdisp.c,v 1.28 2006-04-20 20:35:02 adam Exp $
  */
 
 /**
@@ -370,16 +370,6 @@ void yaz_marc_endline_str(yaz_marc_t mt, const char *s)
     mt->endline_str[sizeof(mt->endline_str)-1] = '\0';
 }
 
-static void marc_cdata (yaz_marc_t mt, const char *buf, size_t len, WRBUF wr)
-{
-    if (mt->xml == YAZ_MARC_ISO2709)
-        wrbuf_iconv_write(wr, mt->iconv_cd, buf, len);
-    else if (mt->xml == YAZ_MARC_LINE)
-        wrbuf_iconv_write(wr, mt->iconv_cd, buf, len);
-    else
-        wrbuf_iconv_write_cdata(wr, mt->iconv_cd, buf, len);
-}
-
 /* try to guess how many bytes the identifier really is! */
 static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
 {
@@ -484,15 +474,24 @@ int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
     case YAZ_MARC_MARCXML:
         return yaz_marc_write_marcxml(mt, wr);
     case YAZ_MARC_XCHANGE:
-        return yaz_marc_write_marcxchange(mt, wr);
+        return yaz_marc_write_marcxchange(mt, wr, 0, 0); /* no format, type */
     case YAZ_MARC_ISO2709:
         return yaz_marc_write_iso2709(mt, wr);
     }
     return -1;
 }
 
+/** \brief common MARC XML/Xchange writer
+    \param mt handle
+    \param wr WRBUF output
+    \param ns XMLNS for the elements
+    \param format record format (e.g. "MARC21")
+    \param type record type (e.g. "Bibliographic")
+*/
 static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
-                                     const char *ns)
+                                     const char *ns, 
+                                     const char *format,
+                                     const char *type)
 {
     struct yaz_marc_node *n;
     int identifier_length;
@@ -510,7 +509,12 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
     if (!atoi_n_check(leader+11, 1, &identifier_length))
         return -1;
 
-    wrbuf_printf(wr, "<record xmlns=\"%s\">\n", ns);
+    wrbuf_printf(wr, "<record xmlns=\"%s\"", ns);
+    if (format)
+        wrbuf_printf(wr, " format=\"%.80s\"", format);
+    if (type)
+        wrbuf_printf(wr, " type=\"%.80s\"", type);
+    wrbuf_printf(wr, ">\n");
     for (n = mt->nodes; n; n = n->next)
     {
         struct yaz_marc_subfield *s;
@@ -580,13 +584,17 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
 int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wr)
 {
     yaz_marc_modify_leader(mt, 9, "a");
-    return yaz_marc_write_marcxml_ns(mt, wr, "http://www.loc.gov/MARC21/slim");
+    return yaz_marc_write_marcxml_ns(mt, wr, "http://www.loc.gov/MARC21/slim",
+                                     0, 0);
 }
 
-int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr)
+int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr,
+                               const char *format,
+                               const char *type)
 {
     return yaz_marc_write_marcxml_ns(mt, wr,
-                                     "http://www.bs.dk/standards/MarcXchange");
+                                     "http://www.bs.dk/standards/MarcXchange",
+                                     0, 0);
 }
 
 int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
