@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.79 2006-04-20 08:38:01 marc Exp $
+; $Id: yaz.nsi,v 1.80 2006-04-20 13:45:20 adam Exp $
 
 !define VERSION "2.1.18"
 !define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
@@ -116,15 +116,15 @@ SectionEnd
 Section "YAZ Documentation" YAZ_Documentation
 	SectionIn 1 2
 	SetOutPath $INSTDIR\doc
-	File ..\doc\*.html
-	File ..\doc\*.png
-	File ..\doc\*.pdf
-	File ..\doc\*.xml
-	File ..\doc\*.in
-	File ..\doc\*.dsl
-	File ..\doc\*.xsl
-	File ..\doc\*.css
-	File ..\doc\*.ent
+	File /r ..\doc\*.css
+	File /r ..\doc\*.dcl
+	File /r ..\doc\*.dsl
+	File /r ..\doc\*.ent
+	File /r ..\doc\*.html
+	File /r ..\doc\*.pdf
+	File /r ..\doc\*.xml
+	File /r ..\doc\*.png
+	File /r ..\doc\*.xsl
 	SetOutPath $SMPROGRAMS\YAZ
 	CreateShortCut "$SMPROGRAMS\YAZ\HTML Documentation.lnk" \
                  "$INSTDIR\doc\yaz.html"
@@ -134,12 +134,12 @@ SectionEnd
 
 Section "YAZ Source" YAZ_Source
 	SectionIn 1
+	SetOutPath $INSTDIR
+	File /r ..\*.c
+	File /r /x yaz ..\*.h
 	SetOutPath $INSTDIR\util
-	File ..\util\*.c
 	File ..\util\yaz-asncomp
 	SetOutPath $INSTDIR\src
-	File ..\src\*.c
-	File ..\src\*.h
 	File ..\src\*.y
 	File ..\src\*.tcl
 	File ..\src\*.csv
@@ -147,22 +147,13 @@ Section "YAZ Source" YAZ_Source
 	File ..\src\codetables.xml
 	SetOutPath $INSTDIR\test
 	File ..\test\marc*.*
-	File ..\test\*.c
 	File ..\test\*.sh
 	File ..\test\*.xml
 	File ..\test\*.asn
-	SetOutPath $INSTDIR\zoom
-	File ..\zoom\*.c
-	SetOutPath $INSTDIR\ztest
-	File ..\ztest\*.c
-	SetOutPath $INSTDIR\client
-	File ..\client\*.c
-	File ..\client\*.h
 	SetOutPath $INSTDIR\win
 	File makefile
 	File *.nsi
 	File *.rc
-	File *.h
 SectionEnd
 
 ; begin uninstall settings/section
