@@ -1,6 +1,8 @@
-## $Id: Makefile.am,v 1.63 2006-04-20 11:56:20 adam Exp $
+## $Id: Makefile.am,v 1.64 2006-04-20 13:04:16 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
+
+SUBDIRS = common
 
 XMLFILES=yaz.xml.in bookinfo.xml introduction.xml installation.xml \
  indexdata.xml \
