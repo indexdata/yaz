@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: z3950oid.c,v 1.4 2005-06-25 15:46:06 adam Exp $
+ * $Id: z3950oid.c,v 1.5 2006-04-20 20:50:51 adam Exp $
  */
+
+/** \file z3950oid.c
+    \brief Z3950 OID conversion utilities
+*/
 
 #if HAVE_CONFIG_H
 #include <config.h>

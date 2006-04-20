@@ -1,10 +1,17 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: mime.c,v 1.1 2006-03-15 13:32:05 adam Exp $
+ * $Id: mime.c,v 1.2 2006-04-20 20:50:51 adam Exp $
  */
 
+/** \file mime.c
+    \brief Small utility to manage MIME types
+*/
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <string.h>

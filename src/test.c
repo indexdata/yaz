@@ -2,8 +2,13 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.4 2006-01-30 14:02:07 adam Exp $
+ * $Id: test.c,v 1.5 2006-04-20 20:50:51 adam Exp $
  */
+
+/** \file test.c
+    \brief Unit Test for YAZ
+*/
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif

@@ -2,8 +2,14 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ill.h,v 1.8 2005-06-25 15:46:02 adam Exp $
+ * $Id: ill.h,v 1.9 2006-04-20 20:50:51 adam Exp $
  */
+
+/**
+ * \file ill.h
+ * \brief ILL Package utilities
+ */
+
 #ifndef ILL_H
 #define ILL_H
 

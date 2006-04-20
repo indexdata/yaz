@@ -2,18 +2,23 @@
 # the next line restats using tclsh \
 exec tclsh "$0" "$@"
 #
-# $Id: charconv.tcl,v 1.12 2006-04-19 23:15:39 adam Exp $
+# $Id: charconv.tcl,v 1.13 2006-04-20 20:50:51 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
     exit 1
 }
 
-proc preamble_trie {ofilehandle} {
+proc preamble_trie {ofilehandle ifiles ofile} {
     set f $ofilehandle
 
     set totype {unsigned }
 
+    puts $f "/** \\file $ofile"
+    puts $f "    \\brief Character conversion, generated from [lindex $ifiles 0]"
+    puts $f ""
+    puts $f "    Generated automatically by charconv.tcl"
+    puts $f "*/"
     puts $f "\#include <string.h>"
     puts $f "
         struct yaz_iconv_trie_flat {
@@ -390,7 +395,7 @@ if {![info exists ifiles]} {
 }
 
 set ofilehandle [open $ofile w]
-preamble_trie $ofilehandle
+preamble_trie $ofilehandle $ifiles $ofile
 
 foreach ifile $ifiles {
     readfile $ifile $ofilehandle $prefix $omits $reverse_map

@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: xmlquery.h,v 1.3 2006-02-19 18:44:23 adam Exp $
+ * $Id: xmlquery.h,v 1.4 2006-04-20 20:50:51 adam Exp $
  */
+
+/** \file xmlquery.h
+    \brief Query / XML conversions
+*/
 
 #ifndef YAZ_XMLQUERY_H
 #define YAZ_XMLQUERY_H
