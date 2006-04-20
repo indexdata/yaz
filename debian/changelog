@@ -1,7 +1,12 @@
+yaz (2.1.17-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Marc Cromme <marc@indexdata.dk>  Thu, 20 Apr 2006 10:03:06 +0200
+
 yaz (2.1.16-1) unstable; urgency=low
 
   * Upstream.
-  * -
 
  -- Adam Dickmeiss <adam@indexdata.dk>  Fri, 31 Mar 2006 14:44:12 +0200
 
