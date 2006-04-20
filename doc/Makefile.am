@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.64 2006-04-20 13:04:16 adam Exp $
+## $Id: Makefile.am,v 1.65 2006-04-20 13:46:55 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -74,7 +74,7 @@ $(HTMLFILES): $(XMLFILES)
 	jade -E14 -D $(srcdir) -d common/html.dsl -t sgml $(srcdir)/common/xml.dcl yaz.xml
 
 yaz.pdf: $(XMLFILES)
-	if test ! -f common/id.png ; then cp  $(srcdir)/id.png common; fi
+	if test ! -f common/id.png ; then cp $(srcdir)/common/id.png common; fi
 	if test ! -f apilayer.png ; then cp $(srcdir)/apilayer.png .; fi
 	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl yaz.xml
 	pdfjadetex yaz.tex >/dev/null
