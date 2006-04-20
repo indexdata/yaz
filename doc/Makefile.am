@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.65 2006-04-20 13:46:55 adam Exp $
+## $Id: Makefile.am,v 1.66 2006-04-20 20:45:38 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -41,7 +41,7 @@ doc_DATA = $(HTMLFILES) yaz.pdf apilayer.png
 man_MANS = $(MANFILES)
 
 EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
-	$(doc_DATA) Doxyfile
+	$(doc_DATA)
 
 yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
 	docbook2man $(srcdir)/yaz-client-man.xml
