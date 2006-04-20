@@ -1,4 +1,4 @@
-<!-- $Id: bookinfo.xml,v 1.1 2005-10-15 10:40:37 adam Exp $ -->
+<!-- $Id: bookinfo.xml,v 1.2 2006-04-20 11:56:20 adam Exp $ -->
  <bookinfo>
   <title>YAZ User&apos;s Guide and Reference</title>
   <author><firstname>Sebastian</firstname><surname>Hammer</surname></author>
@@ -21,10 +21,10 @@
    <simpara>
     <inlinemediaobject>
      <imageobject>
-      <imagedata fileref="id.png" format="PNG"/>
+      <imagedata fileref="common/id.png" format="PNG"/>
      </imageobject>
      <imageobject>
-      <imagedata fileref="id.eps" format="EPS"/>
+      <imagedata fileref="common/id.eps" format="EPS"/>
      </imageobject>
     </inlinemediaobject>
    </simpara></abstract>
