@@ -1,6 +1,7 @@
 yaz (2.1.18-1) unstable; urgency=low
 
-  * Upstream.
+  * Added common directory to be part of yaz-doc
+  * API version 2.1.17.
 
  -- Marc Cromme <marc@indexdata.dk>  Thu, 20 Apr 2006 10:43:56 +0200
 
