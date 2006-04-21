@@ -109,7 +109,7 @@
        Notice that the selection rules can equally either be written 
        'attr/@type=7' or 'attr[@type=8]' with no difference -->
   <!--
-  <xsl:template match="apt[attr/@type=7 and attr/@type=8]">
+  <xsl:template match="apt[attr/@type=7 and attr[@type=8]]">
     <apt>
       <xsl:apply-templates select="attr[@type=1]"/>
       <xsl:apply-templates select="attr[@type=2]"/>
