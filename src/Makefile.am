@@ -1,8 +1,8 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.31 2006-04-20 08:24:31 adam Exp $
+## $Id: Makefile.am,v 1.32 2006-04-21 12:54:36 marc Exp $
 
-YAZ_VERSION_INFO=2:0:0
+YAZ_VERSION_INFO=2:1:0
 
 lib_LTLIBRARIES = libyaz.la libyazthread.la
 # noinst_PROGRAMS = cqlparse

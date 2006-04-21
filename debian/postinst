@@ -1,3 +1,0 @@
-#!/bin/bash
-# Postinst script for YAZ
-ldconfig
