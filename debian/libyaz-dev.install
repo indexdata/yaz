@@ -6,5 +6,3 @@ debian/tmp/usr/bin/yaz-config
 debian/tmp/usr/bin/yaz-asncomp
 debian/tmp/usr/share/aclocal/yaz.m4
 debian/tmp/usr/share/yaz
-debian/tmp/usr/share/man/man8/yaz-config.8
-debian/tmp/usr/share/man/man1/yaz-asncomp.1

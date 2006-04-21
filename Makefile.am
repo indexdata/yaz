@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.33 2006-04-21 12:54:36 marc Exp $
+## $Id: Makefile.am,v 1.34 2006-04-21 14:24:53 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -25,4 +25,5 @@ dist-hook:
 	cp $(srcdir)/debian/rules $(distdir)/debian
 	cp $(srcdir)/debian/*.postinst $(distdir)/debian
 	cp $(srcdir)/debian/*.install $(distdir)/debian
+	cp $(srcdir)/debian/*.manpages $(distdir)/debian
 

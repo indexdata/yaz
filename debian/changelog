@@ -1,5 +1,7 @@
 yaz (2.1.18-1) unstable; urgency=low
 
+  * Moved yaz.7 from libyaz to libyaz-dev.
+  * Moved man page lists to .manpages files.
   * Added common directory to be part of yaz-doc
   * API version 2.1.17.
 
