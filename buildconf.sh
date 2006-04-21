@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.27 2006-03-30 16:30:25 adam Exp $
+# $Id: buildconf.sh,v 1.28 2006-04-21 12:54:52 adam Exp $
 
 if automake --version|head -1 |grep '1\.[4-7]'; then
     echo "automake 1.4-1.7 is active. You should use automake 1.8 or later"
@@ -27,7 +27,7 @@ sh_flags=""
 conf_flags=""
 case $1 in
     -d)
-	sh_flags="-g -Wall"
+	sh_flags="-g -Wall -Wdeclaration-after-statement"
 	enable_configure=true
 	enable_help=false
 	shift
