@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 4), libxml2-dev, libssl-dev, libreadline5-dev, libw
 Package: libyaz2
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}
 Provides: libyaz
 Replaces: libyaz
 Conflicts: idzebra (<= 1.3.4-2), php4-yaz (<= 4.1.2-5)
@@ -21,7 +21,7 @@ Description: The YAZ Z39.50 toolkit (runtime files)
 Package: yaz
 Section: utils
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}
 Conflicts: yaz-runtime, yaz-ssl
 Description: The YAZ Z39.50 toolkit (utilities)
  YAZ is a toolkit that allows you to develop software using the
