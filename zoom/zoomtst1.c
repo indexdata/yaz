@@ -1,8 +1,8 @@
-/*
- * $Id: zoomtst1.c,v 1.4 2005-06-25 15:46:08 adam Exp $
- *
- * Synchronous single-target client doing search (but no retrieval)
- */
+/* $Id: zoomtst1.c,v 1.5 2006-04-21 10:28:08 adam Exp $  */
+
+/** \file zoomtst1.c
+    \brief Synchronous single-target client doing search (but no retrieval)
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
         fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
     else
-        printf ("Result count: %d\n", ZOOM_resultset_size(r));
+        printf ("Result count: %ld\n", (long) ZOOM_resultset_size(r));
     ZOOM_resultset_destroy (r);
     ZOOM_connection_destroy (z);
     exit (0);

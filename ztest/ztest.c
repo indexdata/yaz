@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.78 2006-03-13 12:14:00 adam Exp $
+ * $Id: ztest.c,v 1.79 2006-04-21 10:28:09 adam Exp $
  */
 
 /*
@@ -149,9 +149,9 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                             if (!ill_ItemRequest (rr->decode, &item_req, 0, 0))
                             {
                                 yaz_log (log_level,
-                                    "Couldn't decode ItemRequest %s near %d",
+                                    "Couldn't decode ItemRequest %s near %ld",
                                        odr_errmsg(odr_geterror(rr->decode)),
-                                       odr_offset(rr->decode));
+                                       (long) odr_offset(rr->decode));
                             }
                             else
                                 yaz_log(log_level, "Decode ItemRequest OK");
@@ -172,9 +172,9 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                             if (!ill_APDU (rr->decode, &ill_apdu, 0, 0))
                             {
                                 yaz_log (log_level,
-                                    "Couldn't decode ILL APDU %s near %d",
+                                    "Couldn't decode ILL APDU %s near %ld",
                                        odr_errmsg(odr_geterror(rr->decode)),
-                                       odr_offset(rr->decode));
+                                       (long) odr_offset(rr->decode));
                                 yaz_log(log_level, "PDU dump:");
                                 odr_dumpBER(yaz_log_file(),
                                      (char *) r->u.single_ASN1_type->buf,

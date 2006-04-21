@@ -1,8 +1,8 @@
-/*
- * $Id: zoomtst8.c,v 1.4 2005-06-25 15:46:08 adam Exp $
- *
- * Asynchronous multi-target client doing scan
- */
+/* $Id: zoomtst8.c,v 1.5 2006-04-21 10:28:08 adam Exp $  */
+
+/** \file zoomtst8.c
+    \brief Asynchronous multi-target client doing scan
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
                      errmsg, error, addinfo);
         else
         {
-            size_t j;
+            int j;
             printf ("%s\n", ZOOM_connection_option_get(z[i], "host"));
             for (j = 0; j<ZOOM_scanset_size (s[i]); j++)
             {

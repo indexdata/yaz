@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.36 2006-04-19 10:05:04 adam Exp $
+ * $Id: marcdump.c,v 1.37 2006-04-21 10:28:07 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -139,7 +139,8 @@ static void dump(const char *fname, const char *from, const char *to,
                 if (r < 5)
                 {
                     if (r && print_offset && verbose)
-                        printf ("<!-- Extra %d bytes at end of file -->\n", r);
+                        printf ("<!-- Extra %ld bytes at end of file -->\n",
+                                (long) r);
                     break;
                 }
                 while (*buf < '0' || *buf > '9')

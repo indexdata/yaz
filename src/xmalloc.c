@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmalloc.c,v 1.6 2005-06-25 15:46:06 adam Exp $
+ * $Id: xmalloc.c,v 1.7 2006-04-21 10:28:07 adam Exp $
  */
 /**
  * \file xmalloc.c
@@ -258,11 +258,11 @@ void *xrealloc_f (void *o, size_t size, const char *file, int line)
 
     if(log_level)
         yaz_log (log_level,
-            "%s:%d: xrealloc(s=%d) %p -> %p", file, line, size, o, p);
+            "%s:%d: xrealloc(s=%ld) %p -> %p", file, line, (long) size, o, p);
     if (!p)
     {
-        yaz_log (YLOG_FATAL|YLOG_ERRNO, "Out of memory, realloc (%d bytes)",
-                 size);
+        yaz_log (YLOG_FATAL|YLOG_ERRNO, "Out of memory, realloc (%ld bytes)",
+                 (long) size);
         exit(1);
     }
     return p;
@@ -279,11 +279,13 @@ void *xmalloc_f (size_t size, const char *file, int line)
     }
 
     if (log_level)
-        yaz_log (log_level, "%s:%d: xmalloc(s=%d) %p", file, line, size, p);
+        yaz_log (log_level, "%s:%d: xmalloc(s=%ld) %p", file, line, 
+                 (long) size, p);
 
     if (!p)
     {
-        yaz_log (YLOG_FATAL, "Out of memory - malloc (%d bytes)", size);
+        yaz_log (YLOG_FATAL, "Out of memory - malloc (%ld bytes)",
+                 (long) size);
         exit (1);
     }
     return p;
@@ -299,11 +301,13 @@ void *xcalloc_f (size_t nmemb, size_t size, const char *file, int line)
     }
 
     if (log_level)
-        yaz_log (log_level, "%s:%d: xcalloc(s=%d) %p", file, line, size, p);
+        yaz_log (log_level, "%s:%d: xcalloc(s=%ld) %p", file, line,
+                 (long) size, p);
 
     if (!p)
     {
-        yaz_log (YLOG_FATAL, "Out of memory - calloc (%d, %d)", nmemb, size);
+        yaz_log (YLOG_FATAL, "Out of memory - calloc (%ld, %ld)",
+                 (long) nmemb, (long) size);
         exit (1);
     }
     return p;
@@ -319,7 +323,8 @@ char *xstrdup_f (const char *s, const char *file, int line)
     }
 
     if (log_level)
-        yaz_log (log_level, "%s:%d: xstrdup(s=%d) %p", file, line, strlen(s)+1, p);
+        yaz_log (log_level, "%s:%d: xstrdup(s=%ld) %p", file, line, 
+                 (long) strlen(s)+1, p);
 
     strcpy (p, s);
     return p;

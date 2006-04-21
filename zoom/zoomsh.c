@@ -2,10 +2,12 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.39 2005-11-02 21:41:27 adam Exp $
+ * $Id: zoomsh.c,v 1.40 2006-04-21 10:28:07 adam Exp $
  */
 
-/* ZOOM-C Shell */
+/** \file zoomsh.c
+    \brief ZOOM C command line tool (shell)
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -354,7 +356,7 @@ static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
             int start = ZOOM_options_get_int (options, "start", 0);
             int count = ZOOM_options_get_int (options, "count", 0);
 
-            printf ("%s: %d hits\n", ZOOM_connection_option_get(c[i], "host"),
+            printf ("%s: %ld hits\n", ZOOM_connection_option_get(c[i], "host"),
                     ZOOM_resultset_size(r[i]));
             /* and display */
             display_records (c[i], r[i], start, count);

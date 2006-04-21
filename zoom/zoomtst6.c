@@ -1,8 +1,8 @@
-/*
- * $Id: zoomtst6.c,v 1.11 2005-11-04 15:51:02 mike Exp $
- *
- * Asynchronous multi-target client doing two searches
- */
+/* $Id: zoomtst6.c,v 1.12 2006-04-21 10:28:08 adam Exp $  */
+
+/** \file zoomtst6.c
+    \brief Asynchronous multi-target client with two searches
+*/
 
 #include <stdio.h>
 #include <yaz/nmem.h>
@@ -14,7 +14,7 @@ static void display_records (const char *tname, ZOOM_resultset r)
 {
     /* OK, no major errors. Look at the result count */
     int pos;
-    printf ("%s: %d hits\n", tname, ZOOM_resultset_size(r));
+    printf ("%s: %ld hits\n", tname, (long) ZOOM_resultset_size(r));
     /* go through all records at target */
     for (pos = 0; pos < 4; pos++)
     {

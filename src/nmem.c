@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.21 2006-02-01 20:29:19 adam Exp $
+ * $Id: nmem.c,v 1.22 2006-04-21 10:28:06 adam Exp $
  */
 
 /**
@@ -239,7 +239,8 @@ static nmem_block *get_block(size_t size)
         if (get < size)
             get = size;
         if(log_level)
-            yaz_log (log_level, "nmem get_block alloc new block size=%d", get);
+            yaz_log (log_level, "nmem get_block alloc new block size=%ld",
+                     (long) get);
 
         r = (nmem_block *)xmalloc(sizeof(*r));
         r->buf = (char *)xmalloc(r->size = get);

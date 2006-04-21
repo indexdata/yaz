@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.303 2006-03-31 09:51:21 adam Exp $
+ * $Id: client.c,v 1.304 2006-04-21 10:28:06 adam Exp $
  */
 
 #include <stdio.h>
@@ -880,7 +880,7 @@ static void display_record(Z_External *r)
             if (!(*type->fun)(in, &rr, 0, 0))
             {
                 odr_perror(in, "Decoding constructed record.");
-                fprintf(stdout, "[Near %d]\n", odr_offset(in));
+                fprintf(stdout, "[Near %ld]\n", (long) odr_offset(in));
                 fprintf(stdout, "Packet dump:\n---------\n");
                 odr_dumpBER(stdout, (char*)r->u.octet_aligned->buf,
                             r->u.octet_aligned->len);
@@ -1550,7 +1550,8 @@ static int send_searchRequest(const char *arg)
             const char *pqf_msg;
             size_t off;
             int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
-            printf("%*s^\n", off+4, "");
+            int ioff = off;
+            printf("%*s^\n", ioff+4, "");
             printf("Prefix query error: %s (code %d)\n", pqf_msg, code);
             
             yaz_pqf_destroy (pqf_parser);
@@ -2851,7 +2852,8 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
             const char *pqf_msg;
             size_t off;
             int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
-            printf("%*s^\n", off+7, "");
+            int ioff = off;
+            printf("%*s^\n", ioff+7, "");
             printf("Prefix query error: %s (code %d)\n", pqf_msg, code);
             yaz_pqf_destroy (pqf_parser);
             return -1;
@@ -3945,7 +3947,7 @@ void wait_and_handle_response(int one_response_only)
         {
             FILE *f = ber_file ? ber_file : stdout;
             odr_perror(in, "Decoding incoming APDU");
-            fprintf(f, "[Near %d]\n", odr_offset(in));
+            fprintf(f, "[Near %ld]\n", (long) odr_offset(in));
             fprintf(f, "Packet dump:\n---------\n");
             odr_dumpBER(f, netbuffer, res);
             fprintf(f, "---------\n");
@@ -4055,7 +4057,8 @@ int cmd_cclparse(const char* arg)
     rpn = ccl_find_str (bibset, arg, &error, &pos);
     
     if (error) {
-        printf ("%*s^ - ", 3+strlen(last_cmd)+1+pos, " ");
+        int ioff = 3+strlen(last_cmd)+1+pos;
+        printf ("%*s^ - ", ioff, " ");
         printf ("%s\n", ccl_err_msg (error));
     }
     else

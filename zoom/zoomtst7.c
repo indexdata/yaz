@@ -1,8 +1,8 @@
-/*
- * $Id: zoomtst7.c,v 1.14 2005-06-25 15:46:08 adam Exp $
- *
- * API test..
- */
+/* $Id: zoomtst7.c,v 1.15 2006-04-21 10:28:08 adam Exp $  */
+
+/** \file zoomtst7.c
+    \brief Mix of operations
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +16,7 @@
 int main(int argc, char **argv)
 {
     int block;
-    size_t j, i;
+    int i, j;
     ZOOM_connection z;
     ZOOM_resultset r[10];  /* and result sets .. */
     ZOOM_options o;
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
             if (block > 0)
                 while (ZOOM_event (1, &z))
                     ;
-            printf (" scan size = %d\n", ZOOM_scanset_size(scan));
+            printf (" scan size = %ld\n", (long) ZOOM_scanset_size(scan));
             for (j = 0; j<ZOOM_scanset_size (scan); j++)
             {
                 int occur, len;

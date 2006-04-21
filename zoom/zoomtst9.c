@@ -1,8 +1,8 @@
-/*
- * $Id: zoomtst9.c,v 1.1 2005-11-24 10:04:12 adam Exp $
- *
- * Program which illustrates the use of extended services update
- */
+/* $Id: zoomtst9.c,v 1.2 2006-04-21 10:28:08 adam Exp $  */
+
+/** \file zoomtst9.c
+    \brief Extended Service Update
+*/
 
 #include <stdio.h>
 #include <string.h>

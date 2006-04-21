@@ -1,8 +1,10 @@
-/*
- * $Id: zoomtst3.c,v 1.10 2006-04-19 09:05:09 adam Exp $
- *
- * Asynchronous multi-target client doing search and piggyback retrieval
- */
+/* $Id: zoomtst3.c,v 1.11 2006-04-21 10:28:08 adam Exp $  */
+
+/** \file zoomtst3.c
+    \brief Asynchronous multi-target client
+    
+    Performs search and piggyback retrieval of records
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -84,7 +86,7 @@ int main(int argc, char **argv)
         {
             /* OK, no major errors. Look at the result count */
             int pos;
-            printf ("%s: %d hits\n", tname, ZOOM_resultset_size(r[i]));
+            printf ("%s: %ld hits\n", tname, (long) ZOOM_resultset_size(r[i]));
             /* go through all records at target */
             for (pos = 0; pos < 10; pos++)
             {

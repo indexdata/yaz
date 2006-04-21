@@ -1,9 +1,11 @@
-/*
- * $Id: zoomtst4.c,v 1.8 2005-06-25 15:46:08 adam Exp $
- *
- * Asynchronous multi-target going through proxy doing search and retrieve
- * using present.
- */
+/* $Id: zoomtst4.c,v 1.9 2006-04-21 10:28:08 adam Exp $  */
+
+/** \file zoomtst4.c
+    \brief Asynchronous multi-target client with separate present
+    
+    Asynchronous multi-target going through proxy doing search and retrieve
+    using present.
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -77,8 +79,8 @@ int main(int argc, char **argv)
                      ZOOM_connection_option_get(z[i], "host"),
                      errmsg, error, addinfo);
         else
-            printf ("%s: %d hits\n", ZOOM_connection_option_get(z[i], "host"),
-                    ZOOM_resultset_size(r[i]));
+            printf ("%s: %ld hits\n", ZOOM_connection_option_get(z[i], "host"),
+                    (long) ZOOM_resultset_size(r[i]));
     }
 
     /* destroy stuff and exit */

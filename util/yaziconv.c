@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaziconv.c,v 1.4 2005-06-25 15:46:07 adam Exp $
+ * $Id: yaziconv.c,v 1.5 2006-04-21 10:28:07 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -51,8 +51,8 @@ void convert (FILE *inf, yaz_iconv_t cd, int verbose)
         }
         if (verbose > 1)
         {
-            fprintf (stderr, "yaz_iconv: inbytesleft=%d outbytesleft=%d\n",
-                     inbytesleft, outbytesleft);
+            fprintf (stderr, "yaz_iconv: inbytesleft=%ld outbytesleft=%ld\n",
+                     (long) inbytesleft, (long) outbytesleft);
 
         }
         r = yaz_iconv (cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);

@@ -1,8 +1,8 @@
-/*
- * $Id: zoomtst2.c,v 1.7 2006-03-01 23:24:26 adam Exp $
- *
- * Asynchronous single-target client performing search (no retrieval)
- */
+/* $Id: zoomtst2.c,v 1.8 2006-04-21 10:28:08 adam Exp $  */
+
+/** \file zoomtst2.c
+    \brief Asynchronous single-target client performing search (no retrieval)
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
         exit (2);
     }
     else /* OK print hit count */
-        printf ("Result count: %d\n", ZOOM_resultset_size(r));  
+        printf ("Result count: %ld\n", (long) ZOOM_resultset_size(r));  
     ZOOM_resultset_destroy (r);
     ZOOM_connection_destroy (z);
     exit (0);

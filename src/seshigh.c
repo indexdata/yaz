@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.74 2006-04-05 12:05:36 mike Exp $
+ * $Id: seshigh.c,v 1.75 2006-04-21 10:28:07 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -360,10 +360,10 @@ void ir_session(IOCHAN h, int event)
             if (!z_GDU(assoc->decode, &req->gdu_request, 0, 0))
             {
                 yaz_log(YLOG_WARN, "ODR error on incoming PDU: %s [element %s] "
-                        "[near byte %d] ",
+                        "[near byte %ld] ",
                         odr_errmsg(odr_geterror(assoc->decode)),
                         odr_getelement(assoc->decode),
-                        odr_offset(assoc->decode));
+                        (long) odr_offset(assoc->decode));
                 if (assoc->decode->error != OHTTP)
                 {
                     yaz_log(YLOG_WARN, "PDU dump:");
@@ -775,8 +775,8 @@ static void srw_bend_search(association *assoc, request *req,
                 const char *pqf_msg;
                 size_t off;
                 int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
-                yaz_log(log_requestdetail, "Parse error %d %s near offset %d",
-                        code, pqf_msg, off);
+                yaz_log(log_requestdetail, "Parse error %d %s near offset %ld",
+                        code, pqf_msg, (long) off);
                 srw_error = YAZ_SRW_QUERY_SYNTAX_ERROR;
             }
             
@@ -2073,7 +2073,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.74 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.75 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
