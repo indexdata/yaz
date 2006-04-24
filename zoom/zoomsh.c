@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.40 2006-04-21 10:28:07 adam Exp $
+ * $Id: zoomsh.c,v 1.41 2006-04-24 10:30:44 adam Exp $
  */
 
 /** \file zoomsh.c
@@ -357,7 +357,7 @@ static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
             int count = ZOOM_options_get_int (options, "count", 0);
 
             printf ("%s: %ld hits\n", ZOOM_connection_option_get(c[i], "host"),
-                    ZOOM_resultset_size(r[i]));
+                    (long) ZOOM_resultset_size(r[i]));
             /* and display */
             display_records (c[i], r[i], start, count);
         }
