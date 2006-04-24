@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.21 2006-04-19 23:48:06 adam Exp $
+ * $Id: siconv.c,v 1.22 2006-04-24 23:21:26 adam Exp $
  */
 /**
  * \file siconv.c
@@ -97,6 +97,77 @@ struct yaz_iconv_struct {
     size_t write_marc8_comb_no;
     unsigned long write_marc8_last;
     const char *write_marc8_page_chr;
+};
+
+static struct {
+    unsigned long x1, x2;
+    unsigned y;
+} latin1_comb[] = {
+    { 'A', 0x0300, 0xc0}, /* LATIN CAPITAL LETTER A WITH GRAVE */
+    { 'A', 0x0301, 0xc1}, /* LATIN CAPITAL LETTER A WITH ACUTE */
+    { 'A', 0x0302, 0xc2}, /* LATIN CAPITAL LETTER A WITH CIRCUMFLEX */
+    { 'A', 0x0303, 0xc3}, /* LATIN CAPITAL LETTER A WITH TILDE */
+    { 'A', 0x0308, 0xc4}, /* LATIN CAPITAL LETTER A WITH DIAERESIS */
+    { 'A', 0x030a, 0xc5}, /* LATIN CAPITAL LETTER A WITH RING ABOVE */
+    /* no need for 0xc6      LATIN CAPITAL LETTER AE */
+    { 'C', 0x0327, 0xc7}, /* LATIN CAPITAL LETTER C WITH CEDILLA */
+    { 'E', 0x0300, 0xc8}, /* LATIN CAPITAL LETTER E WITH GRAVE */
+    { 'E', 0x0301, 0xc9}, /* LATIN CAPITAL LETTER E WITH ACUTE */
+    { 'E', 0x0302, 0xca}, /* LATIN CAPITAL LETTER E WITH CIRCUMFLEX */
+    { 'E', 0x0308, 0xcb}, /* LATIN CAPITAL LETTER E WITH DIAERESIS */
+    { 'I', 0x0300, 0xcc}, /* LATIN CAPITAL LETTER I WITH GRAVE */
+    { 'I', 0x0301, 0xcd}, /* LATIN CAPITAL LETTER I WITH ACUTE */
+    { 'I', 0x0302, 0xce}, /* LATIN CAPITAL LETTER I WITH CIRCUMFLEX */
+    { 'I', 0x0308, 0xcf}, /* LATIN CAPITAL LETTER I WITH DIAERESIS */
+    { 'N', 0x0303, 0xd1}, /* LATIN CAPITAL LETTER N WITH TILDE */
+    { 'O', 0x0300, 0xd2}, /* LATIN CAPITAL LETTER O WITH GRAVE */
+    { 'O', 0x0301, 0xd3}, /* LATIN CAPITAL LETTER O WITH ACUTE */
+    { 'O', 0x0302, 0xd4}, /* LATIN CAPITAL LETTER O WITH CIRCUMFLEX */
+    { 'O', 0x0303, 0xd5}, /* LATIN CAPITAL LETTER O WITH TILDE */
+    { 'O', 0x0308, 0xd6}, /* LATIN CAPITAL LETTER O WITH DIAERESIS */
+    /* omitted:    0xd7      MULTIPLICATION SIGN */
+    /* omitted:    0xd8      LATIN CAPITAL LETTER O WITH STROKE */
+    { 'U', 0x0300, 0xd9}, /* LATIN CAPITAL LETTER U WITH GRAVE */
+    { 'U', 0x0301, 0xda}, /* LATIN CAPITAL LETTER U WITH ACUTE */
+    { 'U', 0x0302, 0xdb}, /* LATIN CAPITAL LETTER U WITH CIRCUMFLEX */
+    { 'U', 0x0308, 0xdc}, /* LATIN CAPITAL LETTER U WITH DIAERESIS */
+    { 'Y', 0x0301, 0xdd}, /* LATIN CAPITAL LETTER Y WITH ACUTE */
+    /* omitted:    0xde      LATIN CAPITAL LETTER THORN */
+    /* omitted:    0xdf      LATIN SMALL LETTER SHARP S */
+    { 'a', 0x0300, 0xe0}, /* LATIN SMALL LETTER A WITH GRAVE */
+    { 'a', 0x0301, 0xe1}, /* LATIN SMALL LETTER A WITH ACUTE */
+    { 'a', 0x0302, 0xe2}, /* LATIN SMALL LETTER A WITH CIRCUMFLEX */
+    { 'a', 0x0303, 0xe3}, /* LATIN SMALL LETTER A WITH TILDE */
+    { 'a', 0x0308, 0xe4}, /* LATIN SMALL LETTER A WITH DIAERESIS */
+    { 'a', 0x030a, 0xe5}, /* LATIN SMALL LETTER A WITH RING ABOVE */
+    /* omitted:    0xe6      LATIN SMALL LETTER AE */
+    { 'c', 0x0327, 0xe7}, /* LATIN SMALL LETTER C WITH CEDILLA */
+    { 'e', 0x0300, 0xe8}, /* LATIN SMALL LETTER E WITH GRAVE */
+    { 'e', 0x0301, 0xe9}, /* LATIN SMALL LETTER E WITH ACUTE */
+    { 'e', 0x0302, 0xea}, /* LATIN SMALL LETTER E WITH CIRCUMFLEX */
+    { 'e', 0x0308, 0xeb}, /* LATIN SMALL LETTER E WITH DIAERESIS */
+    { 'i', 0x0300, 0xec}, /* LATIN SMALL LETTER I WITH GRAVE */
+    { 'i', 0x0301, 0xed}, /* LATIN SMALL LETTER I WITH ACUTE */
+    { 'i', 0x0302, 0xee}, /* LATIN SMALL LETTER I WITH CIRCUMFLEX */
+    { 'i', 0x0308, 0xef}, /* LATIN SMALL LETTER I WITH DIAERESIS */
+    /* omitted:    0xf0      LATIN SMALL LETTER ETH */
+    { 'n', 0x0303, 0xf1}, /* LATIN SMALL LETTER N WITH TILDE */
+    { 'o', 0x0300, 0xf2}, /* LATIN SMALL LETTER O WITH GRAVE */
+    { 'o', 0x0301, 0xf3}, /* LATIN SMALL LETTER O WITH ACUTE */
+    { 'o', 0x0302, 0xf4}, /* LATIN SMALL LETTER O WITH CIRCUMFLEX */
+    { 'o', 0x0303, 0xf5}, /* LATIN SMALL LETTER O WITH TILDE */
+    { 'o', 0x0308, 0xf6}, /* LATIN SMALL LETTER O WITH DIAERESIS */
+    /* omitted:    0xf7      DIVISION SIGN */
+    /* omitted:    0xf8      LATIN SMALL LETTER O WITH STROKE */
+    { 'u', 0x0300, 0xf9}, /* LATIN SMALL LETTER U WITH GRAVE */
+    { 'u', 0x0301, 0xfa}, /* LATIN SMALL LETTER U WITH ACUTE */
+    { 'u', 0x0302, 0xfb}, /* LATIN SMALL LETTER U WITH CIRCUMFLEX */
+    { 'u', 0x0308, 0xfc}, /* LATIN SMALL LETTER U WITH DIAERESIS */
+    { 'y', 0x0301, 0xfd}, /* LATIN SMALL LETTER Y WITH ACUTE */
+    /* omitted:    0xfe      LATIN SMALL LETTER THORN */
+    { 'y', 0x0308, 0xff}, /* LATIN SMALL LETTER Y WITH DIAERESIS */
+    
+    { 0, 0, 0}
 };
 
 static unsigned long yaz_read_ISO8859_1 (yaz_iconv_t cd, unsigned char *inp,
@@ -318,9 +389,29 @@ static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
     return x;
 }
 
-static unsigned long yaz_read_marc8_comb (yaz_iconv_t cd, unsigned char *inp,
-                                          size_t inbytesleft, size_t *no_read,
-                                          int *comb)
+static unsigned long yaz_read_marc8s(yaz_iconv_t cd, unsigned char *inp,
+                                     size_t inbytesleft, size_t *no_read)
+{
+    unsigned long x = yaz_read_marc8(cd, inp, inbytesleft, no_read);
+    if (x && cd->comb_size == 1)
+    {
+        /* For MARC8s we try to get a Latin-1 page code out of it */
+        int i;
+        for (i = 0; latin1_comb[i].x1; i++)
+            if (cd->comb_x[0] == latin1_comb[i].x2 && x == latin1_comb[i].x1)
+            {
+                *no_read += cd->comb_no_read[0];
+                cd->comb_size = 0;
+                x = latin1_comb[i].y;
+                break;
+            }
+    }
+    return x;
+}
+
+static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
+                                         size_t inbytesleft, size_t *no_read,
+                                         int *comb)
 {
     *no_read = 0;
     while(inbytesleft >= 1 && inp[0] == 27)
@@ -466,76 +557,6 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
        but since MARC-8 to UTF-8 generates these composed sequence
        we get a better chance of a successful MARC-8 -> ISO-8859-1
        conversion */
-    static struct {
-        unsigned long x1, x2;
-        unsigned y;
-    } latin1_comb[] = {
-        { 'A', 0x0300, 0xc0}, /* LATIN CAPITAL LETTER A WITH GRAVE */
-        { 'A', 0x0301, 0xc1}, /* LATIN CAPITAL LETTER A WITH ACUTE */
-        { 'A', 0x0302, 0xc2}, /* LATIN CAPITAL LETTER A WITH CIRCUMFLEX */
-        { 'A', 0x0303, 0xc3}, /* LATIN CAPITAL LETTER A WITH TILDE */
-        { 'A', 0x0308, 0xc4}, /* LATIN CAPITAL LETTER A WITH DIAERESIS */
-        { 'A', 0x030a, 0xc5}, /* LATIN CAPITAL LETTER A WITH RING ABOVE */
-        /* no need for 0xc6      LATIN CAPITAL LETTER AE */
-        { 'C', 0x0327, 0xc7}, /* LATIN CAPITAL LETTER C WITH CEDILLA */
-        { 'E', 0x0300, 0xc8}, /* LATIN CAPITAL LETTER E WITH GRAVE */
-        { 'E', 0x0301, 0xc9}, /* LATIN CAPITAL LETTER E WITH ACUTE */
-        { 'E', 0x0302, 0xca}, /* LATIN CAPITAL LETTER E WITH CIRCUMFLEX */
-        { 'E', 0x0308, 0xcb}, /* LATIN CAPITAL LETTER E WITH DIAERESIS */
-        { 'I', 0x0300, 0xcc}, /* LATIN CAPITAL LETTER I WITH GRAVE */
-        { 'I', 0x0301, 0xcd}, /* LATIN CAPITAL LETTER I WITH ACUTE */
-        { 'I', 0x0302, 0xce}, /* LATIN CAPITAL LETTER I WITH CIRCUMFLEX */
-        { 'I', 0x0308, 0xcf}, /* LATIN CAPITAL LETTER I WITH DIAERESIS */
-        { 'N', 0x0303, 0xd1}, /* LATIN CAPITAL LETTER N WITH TILDE */
-        { 'O', 0x0300, 0xd2}, /* LATIN CAPITAL LETTER O WITH GRAVE */
-        { 'O', 0x0301, 0xd3}, /* LATIN CAPITAL LETTER O WITH ACUTE */
-        { 'O', 0x0302, 0xd4}, /* LATIN CAPITAL LETTER O WITH CIRCUMFLEX */
-        { 'O', 0x0303, 0xd5}, /* LATIN CAPITAL LETTER O WITH TILDE */
-        { 'O', 0x0308, 0xd6}, /* LATIN CAPITAL LETTER O WITH DIAERESIS */
-        /* omitted:    0xd7      MULTIPLICATION SIGN */
-        /* omitted:    0xd8      LATIN CAPITAL LETTER O WITH STROKE */
-        { 'U', 0x0300, 0xd9}, /* LATIN CAPITAL LETTER U WITH GRAVE */
-        { 'U', 0x0301, 0xda}, /* LATIN CAPITAL LETTER U WITH ACUTE */
-        { 'U', 0x0302, 0xdb}, /* LATIN CAPITAL LETTER U WITH CIRCUMFLEX */
-        { 'U', 0x0308, 0xdc}, /* LATIN CAPITAL LETTER U WITH DIAERESIS */
-        { 'Y', 0x0301, 0xdd}, /* LATIN CAPITAL LETTER Y WITH ACUTE */
-        /* omitted:    0xde      LATIN CAPITAL LETTER THORN */
-        /* omitted:    0xdf      LATIN SMALL LETTER SHARP S */
-        { 'a', 0x0300, 0xe0}, /* LATIN SMALL LETTER A WITH GRAVE */
-        { 'a', 0x0301, 0xe1}, /* LATIN SMALL LETTER A WITH ACUTE */
-        { 'a', 0x0302, 0xe2}, /* LATIN SMALL LETTER A WITH CIRCUMFLEX */
-        { 'a', 0x0303, 0xe3}, /* LATIN SMALL LETTER A WITH TILDE */
-        { 'a', 0x0308, 0xe4}, /* LATIN SMALL LETTER A WITH DIAERESIS */
-        { 'a', 0x030a, 0xe5}, /* LATIN SMALL LETTER A WITH RING ABOVE */
-        /* omitted:    0xe6      LATIN SMALL LETTER AE */
-        { 'c', 0x0327, 0xe7}, /* LATIN SMALL LETTER C WITH CEDILLA */
-        { 'e', 0x0300, 0xe8}, /* LATIN SMALL LETTER E WITH GRAVE */
-        { 'e', 0x0301, 0xe9}, /* LATIN SMALL LETTER E WITH ACUTE */
-        { 'e', 0x0302, 0xea}, /* LATIN SMALL LETTER E WITH CIRCUMFLEX */
-        { 'e', 0x0308, 0xeb}, /* LATIN SMALL LETTER E WITH DIAERESIS */
-        { 'i', 0x0300, 0xec}, /* LATIN SMALL LETTER I WITH GRAVE */
-        { 'i', 0x0301, 0xed}, /* LATIN SMALL LETTER I WITH ACUTE */
-        { 'i', 0x0302, 0xee}, /* LATIN SMALL LETTER I WITH CIRCUMFLEX */
-        { 'i', 0x0308, 0xef}, /* LATIN SMALL LETTER I WITH DIAERESIS */
-        /* omitted:    0xf0      LATIN SMALL LETTER ETH */
-        { 'n', 0x0303, 0xf1}, /* LATIN SMALL LETTER N WITH TILDE */
-        { 'o', 0x0300, 0xf2}, /* LATIN SMALL LETTER O WITH GRAVE */
-        { 'o', 0x0301, 0xf3}, /* LATIN SMALL LETTER O WITH ACUTE */
-        { 'o', 0x0302, 0xf4}, /* LATIN SMALL LETTER O WITH CIRCUMFLEX */
-        { 'o', 0x0303, 0xf5}, /* LATIN SMALL LETTER O WITH TILDE */
-        { 'o', 0x0308, 0xf6}, /* LATIN SMALL LETTER O WITH DIAERESIS */
-        /* omitted:    0xf7      DIVISION SIGN */
-        /* omitted:    0xf8      LATIN SMALL LETTER O WITH STROKE */
-        { 'u', 0x0300, 0xf9}, /* LATIN SMALL LETTER U WITH GRAVE */
-        { 'u', 0x0301, 0xfa}, /* LATIN SMALL LETTER U WITH ACUTE */
-        { 'u', 0x0302, 0xfb}, /* LATIN SMALL LETTER U WITH CIRCUMFLEX */
-        { 'u', 0x0308, 0xfc}, /* LATIN SMALL LETTER U WITH DIAERESIS */
-        { 'y', 0x0301, 0xfd}, /* LATIN SMALL LETTER Y WITH ACUTE */
-        /* omitted:    0xfe      LATIN SMALL LETTER THORN */
-        { 'y', 0x0308, 0xff}, /* LATIN SMALL LETTER Y WITH DIAERESIS */
-        
-        { 0, 0, 0}
-    };
     unsigned char *outp = (unsigned char *) *outbuf;
 
     if (cd->compose_char)
@@ -880,6 +901,8 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
             cd->read_handle = yaz_read_UCS4LE;
         else if (!yaz_matchstr(fromcode, "MARC8"))
             cd->read_handle = yaz_read_marc8;
+        else if (!yaz_matchstr(fromcode, "MARC8s"))
+            cd->read_handle = yaz_read_marc8s;
 #if HAVE_WCHAR_H
         else if (!yaz_matchstr(fromcode, "WCHAR_T"))
             cd->read_handle = yaz_read_wchar_t;
@@ -894,6 +917,8 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
         else if (!yaz_matchstr(tocode, "UCS4LE"))
             cd->write_handle = yaz_write_UCS4LE;
         else if (!yaz_matchstr(tocode, "MARC8"))
+            cd->write_handle = yaz_write_marc8;
+        else if (!yaz_matchstr(tocode, "MARC8s"))
             cd->write_handle = yaz_write_marc8;
 #if HAVE_WCHAR_H
         else if (!yaz_matchstr(tocode, "WCHAR_T"))

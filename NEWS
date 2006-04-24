@@ -1,3 +1,7 @@
+Added support for a new character set MARC8s identical to MARC8 except
+that it converts combined characters to single Unicode characters in the
+Latin-1 range (when possible).
+
 --- 2.1.18 2006/04/24
 
 ASN.1 compiler 0.4: generates brief Doxygen file header for 

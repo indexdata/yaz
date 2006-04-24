@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.17 2006-04-19 23:15:40 adam Exp $
+ * $Id: tsticonv.c,v 1.18 2006-04-24 23:21:26 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -54,6 +54,66 @@ static int compare_buffers(char *msg, int no,
     return 0;
 }
 
+static int tst_convert_l(yaz_iconv_t cd, size_t in_len, const char *in_buf,
+                         size_t expect_len, const char *expect_buf)
+{
+    size_t r;
+    char *inbuf= (char*) in_buf;
+    size_t inbytesleft = in_len > 0 ? in_len : strlen(in_buf);
+    char outbuf0[64];
+    char *outbuf = outbuf0;
+
+    while (inbytesleft)
+    {
+        size_t outbytesleft = outbuf0 + sizeof(outbuf0) - outbuf;
+        if (outbytesleft > 12)
+            outbytesleft = 12;
+        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        if (r == (size_t) (-1))
+        {
+            int e = yaz_iconv_error(cd);
+            if (e != YAZ_ICONV_E2BIG)
+                return 0;
+        }
+        else
+            break;
+    }
+    return compare_buffers("tsticonv 22", 0,
+                           expect_len, expect_buf,
+                           outbuf - outbuf0, outbuf0);
+}
+
+static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
+{
+    int ret = 0;
+    WRBUF b = wrbuf_alloc();
+    char outbuf[12];
+    size_t inbytesleft = strlen(buf);
+    const char *inp = buf;
+    while (inbytesleft)
+    {
+        size_t outbytesleft = sizeof(outbuf);
+        char *outp = outbuf;
+        size_t r = yaz_iconv(cd, (char**) &inp,  &inbytesleft,
+                             &outp, &outbytesleft);
+        if (r == (size_t) (-1))
+        {
+            int e = yaz_iconv_error(cd);
+            if (e != YAZ_ICONV_E2BIG)
+                break;
+        }
+        wrbuf_write(b, outbuf, outp - outbuf);
+    }
+    if (wrbuf_len(b) == strlen(cmpbuf) 
+        && !memcmp(cmpbuf, wrbuf_buf(b), wrbuf_len(b)))
+        ret = 1;
+    else
+        yaz_log(YLOG_LOG, "GOT (%.*s)", wrbuf_len(b), wrbuf_buf(b));
+    wrbuf_free(b, 1);
+    return ret;
+}
+
+
 /* some test strings in ISO-8859-1 format */
 static const char *iso_8859_1_a[] = {
     "ax" ,
@@ -64,195 +124,123 @@ static const char *iso_8859_1_a[] = {
     "\xe5" "\xe5",
     0 };
 
-/* same test strings in MARC-8 format */
-static const char *marc8_a[] = {
-    "ax",   
-    "\xa2",          /* latin capital letter o with stroke */
-    "eneb\xb5r",     /* latin small letter ae */
-    "\xea" "a\xa2",
-    "\xea" "a\xa2" "b",
-    "\xea" "a"  "\xea" "a",
-    0
-};
-
-static void tst_marc8_to_iso_8859_1()
-{
-    int i;
-    yaz_iconv_t cd;
-    int ret;
-
-    cd = yaz_iconv_open("ISO-8859-1", "MARC8");
-    YAZ_CHECK(cd);
-    if (!cd)
-        return;
-    for (i = 0; iso_8859_1_a[i]; i++)
-    {
-        size_t r;
-        char *inbuf= (char*) marc8_a[i];
-        size_t inbytesleft = strlen(inbuf);
-        char outbuf0[32];
-        char *outbuf = outbuf0;
-        size_t outbytesleft = sizeof(outbuf0);
-
-        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-        YAZ_CHECK(r != (size_t)(-1));
-        if (r == (size_t) (-1))
-            break;
-
-        ret = compare_buffers("tsticonv 11", i,
-                              strlen(iso_8859_1_a[i]), iso_8859_1_a[i],
-                              outbuf - outbuf0, outbuf0);
-        YAZ_CHECK(ret);
-    }
-    yaz_iconv_close(cd);
-}
-
 static void tst_marc8_to_ucs4b()
 {
-    static struct {
-        const char *marc8_b;
-        int len;
-        const char *ucs4_b;
-    } ar[] = {
-    { 
-        "\033$1" "\x21\x2B\x3B" /* FF1F */ "\033(B" "o",
-        8, "\x00\x00\xFF\x1F" "\x00\x00\x00o"
-    }, {
-        "\033$1" "\x6F\x77\x29" /* AE0E */ "\x6F\x52\x7C" /* c0F4 */ "\033(B",
-        8, "\x00\x00\xAE\x0E" "\x00\x00\xC0\xF4",
-    }, {
-        "\033$1"
-        "\x21\x50\x6E"  /* UCS 7CFB */
-        "\x21\x51\x31"  /* UCS 7D71 */
-        "\x21\x3A\x67"  /* UCS 5B89 */
-        "\x21\x33\x22"  /* UCS 5168 */
-        "\x21\x33\x53"  /* UCS 5206 */
-        "\x21\x44\x2B"  /* UCS 6790 */
-        "\033(B",
-        24, "\x00\x00\x7C\xFB"
-        "\x00\x00\x7D\x71"
-        "\x00\x00\x5B\x89"
-        "\x00\x00\x51\x68"
-        "\x00\x00\x52\x06"
-        "\x00\x00\x67\x90"
-    }, {
-        "\xB0\xB2",     /* AYN and oSLASH */
-        8, "\x00\x00\x02\xBB"  "\x00\x00\x00\xF8"
-    }, {
-        "\xF6\x61",     /* a underscore */
-        8, "\x00\x00\x00\x61"  "\x00\x00\x03\x32"
-    }, {
-        "\x61\xC2",     /* a, phonorecord mark */
-        8, "\x00\x00\x00\x61"  "\x00\x00\x21\x17"
-    },
-    {  /* bug #258 */
-        "el" "\xe8" "am\xe8" "an", /* elaman where a is a" */
-        32,
-        "\x00\x00\x00" "e"
-        "\x00\x00\x00" "l"
-        "\x00\x00\x00" "a"
-        "\x00\x00\x03\x08"
-        "\x00\x00\x00" "m"
-        "\x00\x00\x00" "a"
-        "\x00\x00\x03\x08"
-        "\x00\x00\x00" "n"
-    }, 
-    { /* bug #260 */
-        "\xe5\xe8\x41",
-        12, "\x00\x00\x00\x41" "\x00\x00\x03\x04" "\x00\x00\x03\x08"
-    }, 
-    { /* bug #416 */
-        "\xEB\x74\xEC\x73",
-        12, "\x00\x00\x00\x74" "\x00\x00\x03\x61" "\x00\x00\x00\x73"
-    },
-    { /* bug #416 */
-        "\xFA\x74\xFB\x73",
-        12, "\x00\x00\x00\x74" "\x00\x00\x03\x60" "\x00\x00\x00\x73"
-    },
-    {
-        0, 0, 0
-    }
-    };
-    int i;
-    int ret;
-    yaz_iconv_t cd;
-
-    cd = yaz_iconv_open("UCS4", "MARC8");
+    yaz_iconv_t cd = yaz_iconv_open("UCS4", "MARC8");
     YAZ_CHECK(cd);
     if (!cd)
         return;
-    for (i = 0; ar[i].len; i++)
-    {
-        size_t r;
-        size_t expect_len = ar[i].len;
-        char *inbuf= (char*) ar[i].marc8_b;
-        size_t inbytesleft = strlen(inbuf);
-        char outbuf0[64];
-        char *outbuf = outbuf0;
+    
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\033$1" "\x21\x2B\x3B" /* FF1F */ "\033(B" "o",
+                  8, 
+                  "\x00\x00\xFF\x1F" "\x00\x00\x00o"));
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\033$1" "\x6F\x77\x29" /* AE0E */
+                  "\x6F\x52\x7C" /* c0F4 */ "\033(B",
+                  8,
+                  "\x00\x00\xAE\x0E" "\x00\x00\xC0\xF4"));
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\033$1"
+                  "\x21\x50\x6E"  /* UCS 7CFB */
+                  "\x21\x51\x31"  /* UCS 7D71 */
+                  "\x21\x3A\x67"  /* UCS 5B89 */
+                  "\x21\x33\x22"  /* UCS 5168 */
+                  "\x21\x33\x53"  /* UCS 5206 */
+                  "\x21\x44\x2B"  /* UCS 6790 */
+                  "\033(B",
+                  24, 
+                  "\x00\x00\x7C\xFB"
+                  "\x00\x00\x7D\x71"
+                  "\x00\x00\x5B\x89"
+                  "\x00\x00\x51\x68"
+                  "\x00\x00\x52\x06"
+                  "\x00\x00\x67\x90"));
 
-        while (inbytesleft)
-        {
-            size_t outbytesleft = outbuf0 + sizeof(outbuf0) - outbuf;
-            if (outbytesleft > 12)
-                outbytesleft = 12;
-            r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-            if (r == (size_t) (-1))
-            {
-                int e = yaz_iconv_error(cd);
-                YAZ_CHECK(e == YAZ_ICONV_E2BIG);
-                if (e != YAZ_ICONV_E2BIG)
-                    return;
-            }
-            else
-                break;
-        }
-        ret = compare_buffers("tsticonv 22", i,
-                              expect_len, ar[i].ucs4_b,
-                              outbuf - outbuf0, outbuf0);
-        YAZ_CHECK(ret);
-    }
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\xB0\xB2",     /* AYN and oSLASH */
+                  8, 
+                  "\x00\x00\x02\xBB"  "\x00\x00\x00\xF8"));
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\xF6\x61",     /* a underscore */
+                  8, 
+                  "\x00\x00\x00\x61"  "\x00\x00\x03\x32"));
+
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\x61\xC2",     /* a, phonorecord mark */
+                  8,
+                  "\x00\x00\x00\x61"  "\x00\x00\x21\x17"));
+
+    /* bug #258 */
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "el" "\xe8" "am\xe8" "an", /* elaman where a is a" */
+                  32,
+                  "\x00\x00\x00" "e"
+                  "\x00\x00\x00" "l"
+                  "\x00\x00\x00" "a"
+                  "\x00\x00\x03\x08"
+                  "\x00\x00\x00" "m"
+                  "\x00\x00\x00" "a"
+                  "\x00\x00\x03\x08"
+                  "\x00\x00\x00" "n"));
+    /* bug #260 */
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\xe5\xe8\x41",
+                  12, 
+                  "\x00\x00\x00\x41" "\x00\x00\x03\x04" "\x00\x00\x03\x08"));
+    /* bug #416 */
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\xEB\x74\xEC\x73",
+                  12,
+                  "\x00\x00\x00\x74" "\x00\x00\x03\x61" "\x00\x00\x00\x73"));
+    /* bug #416 */
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  0,
+                  "\xFA\x74\xFB\x73",
+                  12, 
+                  "\x00\x00\x00\x74" "\x00\x00\x03\x60" "\x00\x00\x00\x73"));
+
     yaz_iconv_close(cd);
 }
 
 static void tst_ucs4b_to_utf8()
 {
-    static const char *ucs4_c[] = {
-        "\x00\x00\xFF\x1F\x00\x00\x00o",
-        "\x00\x00\xAE\x0E\x00\x00\xC0\xF4",
-        0
-    };
-    static const char *utf8_c[] = {
-        "\xEF\xBC\x9F\x6F",
-        "\xEA\xB8\x8E\xEC\x83\xB4",
-        0
-    };
-    
-    int i;
-    int ret;
-    yaz_iconv_t cd;
-
-    cd = yaz_iconv_open("UTF8", "UCS4");
+    yaz_iconv_t cd = yaz_iconv_open("UTF8", "UCS4");
     YAZ_CHECK(cd);
     if (!cd)
         return;
-    for (i = 0; ucs4_c[i]; i++)
-    {
-        size_t r;
-        char *inbuf= (char*) ucs4_c[i];
-        size_t inbytesleft = 8;
-        char outbuf0[24];
-        char *outbuf = outbuf0;
-        size_t outbytesleft = sizeof(outbuf0);
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  8,
+                  "\x00\x00\xFF\x1F\x00\x00\x00o",
+                  4,
+                  "\xEF\xBC\x9F\x6F"));
 
-        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-        YAZ_CHECK(r != (size_t) (-1));
-        if (r == (size_t) (-1))
-            return;
-        ret = compare_buffers("tsticonv 32", i,
-                              strlen(utf8_c[i]), utf8_c[i],
-                              outbuf - outbuf0, outbuf0);
-        YAZ_CHECK(ret);
-    }
+    YAZ_CHECK(tst_convert_l(
+                  cd,
+                  8, 
+                  "\x00\x00\xAE\x0E\x00\x00\xC0\xF4",
+                  6,
+                  "\xEA\xB8\x8E\xEC\x83\xB4"));
     yaz_iconv_close(cd);
 }
 
@@ -349,43 +337,61 @@ int utf8_check(unsigned c)
     return 1;
 }
         
-static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
+static void tst_marc8_to_utf8()
 {
-    int ret = 0;
-    WRBUF b = wrbuf_alloc();
-    char outbuf[12];
-    size_t inbytesleft = strlen(buf);
-    const char *inp = buf;
-    while (inbytesleft)
-    {
-        size_t outbytesleft = sizeof(outbuf);
-        char *outp = outbuf;
-        size_t r = yaz_iconv(cd, (char**) &inp,  &inbytesleft,
-                             &outp, &outbytesleft);
-        if (r == (size_t) (-1))
-        {
-            int e = yaz_iconv_error(cd);
-            if (e != YAZ_ICONV_E2BIG)
-                break;
-        }
-        wrbuf_write(b, outbuf, outp - outbuf);
-    }
-    if (wrbuf_len(b) == strlen(cmpbuf) 
-        && !memcmp(cmpbuf, wrbuf_buf(b), wrbuf_len(b)))
-        ret = 1;
-    else
-        yaz_log(YLOG_LOG, "GOT (%.*s)", wrbuf_len(b), wrbuf_buf(b));
-    wrbuf_free(b, 1);
-    return ret;
+    yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC8");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    YAZ_CHECK(tst_convert(cd, "Cours de math", 
+                          "Cours de math"));
+    /* COMBINING ACUTE ACCENT */
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
+                          "Cours de mathe\xcc\x81"));
+    yaz_iconv_close(cd);
 }
 
-static void tst_conversion_marc8_to_latin1()
+static void tst_marc8s_to_utf8()
+{
+    yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC8s");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    YAZ_CHECK(tst_convert(cd, "Cours de math", 
+                          "Cours de math"));
+    /* E9: LATIN SMALL LETTER E WITH ACUTE */
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
+                          "Cours de math\xc3\xa9"));
+
+    yaz_iconv_close(cd);
+}
+
+
+static void tst_marc8_to_latin1()
 {
     yaz_iconv_t cd = yaz_iconv_open("ISO-8859-1", "MARC8");
 
     YAZ_CHECK(cd);
     if (!cd)
         return;
+
+    YAZ_CHECK(tst_convert(cd, "ax", "ax"));
+
+    /* latin capital letter o with stroke */
+    YAZ_CHECK(tst_convert(cd, "\xa2", "\xd8"));
+
+    /* with latin small letter ae */
+    YAZ_CHECK(tst_convert(cd, "eneb\xb5r", "eneb\346r"));
+
+    YAZ_CHECK(tst_convert(cd, "\xea" "a\xa2", "\xe5" "\xd8"));
+
+    YAZ_CHECK(tst_convert(cd, "\xea" "a\xa2" "b", "\xe5" "\xd8" "b"));
+
+    YAZ_CHECK(tst_convert(cd, "\xea" "a"  "\xea" "a", "\xe5" "\xe5"));
 
     YAZ_CHECK(tst_convert(cd, "Cours de math", 
                           "Cours de math"));
@@ -407,7 +413,7 @@ static void tst_conversion_marc8_to_latin1()
     yaz_iconv_close(cd);
 }
 
-static void tst_conversion_utf8_to_marc8()
+static void tst_utf8_to_marc8()
 {
     yaz_iconv_t cd = yaz_iconv_open("MARC8", "UTF-8");
 
@@ -455,7 +461,7 @@ static void tst_conversion_utf8_to_marc8()
 }
 
 
-static void tst_conversion_latin1_to_marc8()
+static void tst_latin1_to_marc8()
 {
     yaz_iconv_t cd = yaz_iconv_open("MARC8", "ISO-8859-1");
 
@@ -480,16 +486,8 @@ static void tst_conversion_latin1_to_marc8()
     yaz_iconv_close(cd);
 }
 
-int main (int argc, char **argv)
+static void tst_utf8_codes()
 {
-    YAZ_CHECK_INIT(argc, argv);
-
-    tst_conversion_marc8_to_latin1();
-
-    tst_conversion_utf8_to_marc8();
-
-    tst_conversion_latin1_to_marc8();
-
     YAZ_CHECK(utf8_check(3));
     YAZ_CHECK(utf8_check(127));
     YAZ_CHECK(utf8_check(128));
@@ -502,15 +500,32 @@ int main (int argc, char **argv)
     YAZ_CHECK(utf8_check(1000000));
     YAZ_CHECK(utf8_check(10000000));
     YAZ_CHECK(utf8_check(100000000));
+}
+
+int main (int argc, char **argv)
+{
+    YAZ_CHECK_INIT(argc, argv);
+
+    tst_utf8_codes();
+
+    tst_marc8_to_utf8();
+
+    tst_marc8s_to_utf8();
+
+    tst_marc8_to_latin1();
+
+    tst_utf8_to_marc8();
+
+    tst_latin1_to_marc8();
+
+    tst_marc8_to_ucs4b();
+    tst_ucs4b_to_utf8();
 
     dconvert(1, "UTF-8");
     dconvert(1, "ISO-8859-1");
     dconvert(1, "UCS4");
     dconvert(1, "UCS4LE");
     dconvert(0, "CP865");
-    tst_marc8_to_iso_8859_1();
-    tst_marc8_to_ucs4b();
-    tst_ucs4b_to_utf8();
 
     YAZ_CHECK_TERM;
 }
