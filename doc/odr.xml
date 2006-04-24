@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.14 2004-08-13 07:30:06 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.15 2006-04-24 09:21:35 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -540,9 +540,9 @@ void do_nothing_useful(int value)
    <tip>
     <para>
      There is an ASN.1 tutorial available at
-     <ulink url="http://asn1.elibel.tm.fr/en/introduction/">this site</ulink>.
+     <ulink url="&url.asn.1.tutorial;">this site</ulink>.
      This site also has standards for ASN.1 (X.680) and BER (X.690) 
-     <ulink url="http://asn1.elibel.tm.fr/en/standards/">online</ulink>.
+     <ulink url="&url.asn.1.standards/">online</ulink>.
     </para>
    </tip>
    

@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.26 2004-08-19 07:48:00 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.27 2006-04-24 09:21:35 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -6,8 +6,7 @@
     The latest version of the software will generally be found at:
    </para>
    <para>
-    <ulink url="http://ftp.indexdata.dk/pub/yaz/">
-     http://ftp.indexdata.dk/pub/yaz/</ulink>
+    <ulink url="&url.yaz.download;"/>
    </para>
    <para>
     We have tried our best to keep the software portable, and on many
@@ -17,21 +16,22 @@
 
    <para>
     The software is regularly tested on
-    <ulink url="http://www.debian.org/">Debian GNU/Linux</ulink>,
-    <ulink url="http://www.redhat.com/">Redhat Linux</ulink>,
-    <ulink url="http://www.gentoo.org/">Gentoo Linux</ulink>,
-    <ulink url="http://www.freebsd.org/">FreeBSD (i386)</ulink>,
-    <ulink url="http://www.apple.com/macosx/">MAC OSX</ulink>,
-    <ulink url="http://wwws.sun.com/software/solaris/">
-     SunOS 5.8 (sparc)</ulink>,
-    <ulink url="http://www.microsoft.com/windows2000/">
-     Windows 2000</ulink>.
+    <ulink url="&url.debian;">Debian GNU/Linux</ulink>,
+    <ulink url="&url.redhat;">Redhat Linux</ulink>,
+    <ulink url="&url.gentoo;">Gentoo Linux</ulink>,
+    <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
+    <ulink url="&url.macosx;">MAC OSX</ulink>,
+    <ulink url="&url.solaris;">SunOS 5.8 (sparc)</ulink>,
+    <ulink url="&url.windows2000;">,
+     Windows 2000</ulink>,
+    <ulink url="&url.windows2003server;">,
+     Windows 2003 server</ulink>.
    </para>
    
    <para>
     Some versions have be known to work on HP/UX,
-    DEC Unix, <ulink url="http://www.netbsd.org/">NetBSD</ulink>,
-    <ulink url="http://www.openbsd.org/">OpenBSD</ulink>,
+    DEC Unix, <ulink url="&url.netbsd;">NetBSD</ulink>,
+    <ulink url="&url.openbsd;">OpenBSD</ulink>,
     IBM AIX,
     Data General DG/UX (with some CFLAGS tinkering),
     SGI/IRIX, DDE Supermax, Apple Macintosh (using the Codewarrior programming
@@ -50,16 +50,12 @@
    
    <para>
     We maintain a mailing-list for the purpose of announcing new releases and
-    bug-fixes, as well as general discussion. Subscribe by sending mail to
-    <ulink url="mailto:yaz-request@indexdata.dk">
-     yaz-request@indexdata.dk
-    </ulink> or fill-in the form
-    <ulink url="http://www.indexdata.dk/mailman/listinfo/yazlist">
-     here</ulink>.
+    bug-fixes, as well as general discussion. Subscribe by 
+    filling-in the form
+    <ulink url="&url.yaz.mailinglist;">here</ulink>.
     General questions and problems can be directed at 
-    <ulink url="mailto:yaz-help@indexdata.dk">
-     yaz-help@indexdata.dk
-    </ulink>, or the address given at the top of this document.
+    <ulink url="&url.yaz.mail;"/>, or the address given at the top of
+     this document.
    </para>
    
   </sect1>
@@ -67,9 +63,9 @@
 
    <para>
     We provide 
-    <ulink url="http://www.debian.org/">Debian GNU/Linux</ulink>
+    <ulink url="&url.debian;">Debian GNU/Linux</ulink>
     and 
-    <ulink url="http://www.redhat.com/">Redhat</ulink> packages for &yaz;. 
+    <ulink url="&url.redhat;">Redhat</ulink> packages for &yaz;. 
     Only i386 binary packages are available. You should be able to
     create packages for other CPUs by building them from the source
     package.
@@ -81,7 +77,7 @@
     <para>
      Note that if your system doesn't have a native ANSI C compiler, you may
      have to acquire one separately. We recommend
-     <ulink url="http://gcc.gnu.org/">GCC</ulink>.
+     <ulink url="&url.gcc;">GCC</ulink>.
     </para>
 
     <para>
@@ -89,11 +85,11 @@
      are compiling &yaz; for use with Zebra it is a good idea to ensure that
      the iconv library is installed. Some Unixes today already have it
      - if not, we suggest 
-     <ulink url="http://www.gnu.org/software/libiconv/">GNU iconv</ulink>.
+     <ulink url="&url.libiconv;">GNU libiconv</ulink>.
     </para>
 
     <para>
-     The XML C library <ulink url="http://www.xmlsoft.org/">libxml2</ulink>
+     The XML C library <ulink url="&url.libxml2;">libxml2</ulink>
      is required if &yaz; is to support SRW and SRU.
      This library is very portable and should compile out-of-the
      box on virtually all Unix platforms. It is available in binary
@@ -102,9 +98,9 @@
 
     <para>
      The GNU tools
-     <ulink url="http://www.gnu.org/software/autoconf/">Autoconf</ulink>,
-     <ulink url="http://www.gnu.org/software/automake/">Automake</ulink> and
-     <ulink url="http://www.gnu.org/software/libtool/">Libtool</ulink>
+     <ulink url="&url.autoconf;">Autoconf</ulink>,
+     <ulink url="&url.automake;">Automake</ulink> and
+     <ulink url="&url.libtool;">Libtool</ulink>
      are used to generate Makefiles and configure &yaz; for the system.
      You do <emphasis>not</emphasis> these tools unless you're using the
      CVS version of &yaz;.
@@ -112,13 +108,13 @@
 
     <para>
      The CQL parser for &yaz; is built using
-     GNU <ulink url="http://www.gnu.org/software/bison/">Bison</ulink>.
+     GNU <ulink url="&url.bison;">Bison</ulink>.
      This tool is only needed if you're using the CVS version of &yaz;.
     </para>
         
     <para>
      &yaz; includes a tiny ASN.1 compiler. This compiler is
-     written in <ulink url="http://www.tcl.tk/">Tcl</ulink>.
+     written in <ulink url="&url.tcl;">Tcl</ulink>.
      But as for Bison you do not need it unless you're using CVS
      version of &yaz; or you're using the compiler to built own codecs
      for private ASN.1. 
@@ -161,10 +157,10 @@
       </varlistentry>
       <varlistentry><term><literal>--enable-tcpd</literal></term>
        <listitem><para>The front end server will be built using Wietse's
-         <ulink url="ftp://ftp.porcupine.org/pub/security/index.html">
-          TCP wrapper library</ulink>. It allows you to allow/deny
-         clients depending on IP number. The TCP wrapper library is
-         often used in Linux/BSD distributions.
+         <ulink url="&url.tcpwrapper;">TCP wrapper library</ulink>.
+	 It allows you to allow/deny clients depending on IP number.
+	 The TCP wrapper library is often used in GNU/Linux and
+	 BSD distributions.
          See
          <citerefentry>
           <refentrytitle>hosts_access</refentrytitle>
@@ -217,7 +213,7 @@
         <literal>--with-xml2</literal>[=<replaceable>prefix</replaceable>]
        </term>
        <listitem><para>Compile &yaz; with 
-         <ulink url="http://www.xmlsoft.org/">libxml2</ulink> in directory
+         <ulink url="&url.libxml2;">libxml2</ulink> in directory
          <replaceable>prefix</replaceable>. 
          Use this option if you want SOAP support.
          By default configure will
@@ -434,7 +430,7 @@
    
    <para>The easiest way to install YAZ on Windows is by downloading
     an installer from 
-    <ulink url="http://ftp.indexdata.dk/pub/yaz/win32">here</ulink>.
+    <ulink url="&url.yaz.download.win32;">here</ulink>.
     The installer comes with source too - in case you wish to
     compile YAZ with different Compiler options etc. 
    </para>
@@ -443,7 +439,7 @@
     <title>Compiling from Source on WIN32</title>
     <para>
      &yaz; is shipped with "makefiles" for the NMAKE tool that comes
-     with <ulink url="http://msdn.microsoft.com/vstudio/">
+     with <ulink url="&url.vstudio;">
       Microsoft Visual Studio</ulink>.
      Version 6 and .NET has been tested. We expect that &yaz; compiles
      with version 5 as well.
@@ -492,7 +488,7 @@
         </para>
         <para>
          A Windows version of GNU Bison is part of 
-         <ulink url="http://unxutils.sourceforge.net/">unxutils</ulink>.
+         <ulink url="&url.unxutils;">unxutils</ulink>.
         </para></listitem>
       </varlistentry>
 
@@ -514,14 +510,14 @@
          If <literal>HAVE_LIBXML2</literal> is set to 1, YAZ is compiled
          with SRW and SRU support. In this configuration, set 
          <literal>LIBXML2_DIR</literal> to the 
-         <ulink url="http://www.xmlsoft.org/">libxml2</ulink> source directory
+         <ulink url="&url.libxml2;">libxml2</ulink> source directory
 	 and
 	 <literal>ZLIB_DIR</literal> to the zlib directory.
         </para>
 
         <para>
          Windows versions of libxml2, zlib and iconv can be found
-	 <ulink url="http://www.zlatkovic.com/libxml.en.html">
+	 <ulink url="&url.libxml2.download.win32;">
 	  Igor Zlatkovi&#x0107;' site</ulink>.
         </para>
 

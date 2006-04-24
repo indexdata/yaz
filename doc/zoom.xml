@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.46 2005-12-21 16:45:38 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.47 2006-04-24 09:21:35 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -49,7 +49,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    There are other language bindings available for &yaz;, and still
    more
    are in active development. See the
-   <ulink url="http://zoom.z3950.org/">ZOOM web-site</ulink> for
+   <ulink url="&url.zoom;">ZOOM web-site</ulink> for
    more information.
   </para>
   
@@ -258,7 +258,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <para>
     If either option <literal>lang</literal> or <literal>charset</literal>
     is set, then 
-    <ulink url="http://lcweb.loc.gov/z3950/agency/defns/charneg-3.html">
+    <ulink url="&url.z39.50.charneg;">
      Character Set and Language Negotiation</ulink> is in effect.
    </para>
    <synopsis>
@@ -731,7 +731,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
       <listitem><para>The record is returned in XML if possible.
 	SRW/SRU and Z39.50 records with transfer syntax XML are
 	returned verbatim. MARC records are returned in
-	<ulink url="http://www.loc.gov/standards/marcxml/">
+	<ulink url="&url.marcxml;">
 	 MARCXML
 	 </ulink> 
 	(converted from ISO2709 to MARCXML by YAZ).
@@ -749,13 +749,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </para>
    <para>
     Most
-    <ulink url="http://www.loc.gov/marc/">
-     MARC21
-    </ulink>
+    <ulink url="&url.marc21;">MARC21</ulink>
     records uses the 
-    <ulink url="http://www.loc.gov/marc/specifications/speccharmarc8.html">
-     MARC-8
-    </ulink>
+    <ulink url="&url.marc8;">MARC-8</ulink>
     character set encoding.
     An application that wishes to display in Latin-1 would use
     <screen>

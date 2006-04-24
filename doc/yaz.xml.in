@@ -1,11 +1,13 @@
 <?xml version="1.0" standalone="no"?>
-<!-- $Id: yaz.xml.in,v 1.19 2005-10-15 10:40:37 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.20 2006-04-24 09:21:35 adam Exp $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4//EN"
           "@DTD_DIR@/docbookx.dtd" [
      <!ENTITY version "@VERSION@">
 
      <!ENTITY % entities  SYSTEM "entities.ent">
      %entities;
+     <!ENTITY % common  SYSTEM "common/common.ent">
+     %common;
 ]>
 <book id="yaz">
  &bookinfo; 

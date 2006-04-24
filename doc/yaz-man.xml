@@ -1,5 +1,8 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-man.xml,v 1.4 2006-03-31 09:54:48 adam Exp $ -->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+     <!ENTITY % common  SYSTEM "common/common.ent">
+     %common;
+]>
+<!-- $Id: yaz-man.xml,v 1.5 2006-04-24 09:21:35 adam Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -84,11 +87,10 @@
    <filename><replaceable>prefix</replaceable>/share/doc/yaz</filename>)
   </para>
   <para>
-   <ulink url="http://www.indexdata.dk/yaz/">YAZ home page</ulink>.
+   <ulink url="&url.yaz;">YAZ home page</ulink>.
   </para>
   <para>
-   <ulink url="http://www.loc.gov/z3950/agency/">Z39.50 Maintenance
-    Agency Page</ulink>.
+   <ulink url="&url.z39.50;">Z39.50 Maintenance Agency Page</ulink>.
   </para>
  </refsect1>
 </refentry>

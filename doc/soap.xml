@@ -1,13 +1,13 @@
-<!-- $Id: soap.xml,v 1.5 2003-11-19 22:05:15 adam Exp $ -->
+<!-- $Id: soap.xml,v 1.6 2006-04-24 09:21:35 adam Exp $ -->
 <chapter id="soap"><title>SOAP and SRW</title>
   <sect1 id="soap.introduction"><title>Introduction</title>
     <para>
       &yaz; uses a very simple implementation of 
-      <ulink url="http://www.w3.org/TR/SOAP/">SOAP</ulink> that only,
+      <ulink url="&url.soap;">SOAP</ulink> that only,
       currenly, supports what is sufficient to offer SRW functionality.
       The implementation uses the 
-      <ulink url="http://www.xmlsoft.org/html/libxml-tree.html">tree
-        API</ulink> of libxml2 to encode and decode SOAP packages.
+      <ulink url="&url.libxml2.api.tree;">tree API</ulink> of
+      libxml2 to encode and decode SOAP packages.
     </para>
     <para>
       Like the Z39.50 ASN.1 module, the &yaz; SRW implementation uses

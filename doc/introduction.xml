@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.19 2005-06-27 22:03:59 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.20 2006-04-24 09:21:35 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -11,43 +11,41 @@
    <itemizedlist>
     <listitem><para>
       Complete 
-      <ulink url="http://www.loc.gov/z3950/agency/">Z39.50</ulink>
-      version 3 support. Amendments and Z39.50-2002 revision is
-      supported.
+      <ulink url="&url.z39.50;">Z39.50</ulink> version 3 support.
+      Amendments and Z39.50-2002 revision is supported.
      </para></listitem>
     <listitem><para>
       Supports 
-      <ulink url="http://www.loc.gov/z3950/agency/zing/srw/">SRW/SRU</ulink>
+      <ulink url="&url.sru;">SRW/SRU</ulink>
       version 1.1 (over HTTP and HTTPS).
      </para></listitem>
     <listitem><para>
       Includes BER encoders/decoders for the 
-      <ulink url="http://www.nlc-bnc.ca/iso/ill/">ISO ILL</ulink>
+      <ulink url="&url.ill;">ISO ILL</ulink>
       protocol.
      </para></listitem>
     <listitem><para>
       Supports the following transports: BER over TCP/IP
-      (<ulink url="http://www.faqs.org/rfcs/rfc1729.html">RFC1729</ulink>),
+      (<ulink url="&url.ber.over.tcpip;">RFC1729</ulink>),
       BER over unix local socket, and 
-      <ulink url="http://www.w3.org/Protocols/rfc2616/rfc2616.html">HTTP
-       1.1</ulink>.
+      <ulink url="&url.http.1.1;">HTTP 1.1</ulink>.
      </para></listitem>
     <listitem><para>
       Secure Socket Layer support using
-      <ulink url="http://www.openssl.org/">OpenSSL</ulink>.
+      <ulink url="&url.openssl;">OpenSSL</ulink>.
       If enabled, &yaz; uses HTTPS transport (for SOAP) or
       "Secure BER" (for Z39.50).
      </para></listitem>
     <listitem><para>
       Offers 
-      <ulink url="http://zoom.z3950.org/">ZOOM</ulink>
-      C API implementing both Z39.50 and SRW.
+      <ulink url="&url.zoom;">ZOOM</ulink> C API implementing both
+      Z39.50 and SRW.
      </para></listitem>
     <listitem><para>
       The &yaz; library offers a set of useful utilities
       related to the protocols, such as MARC (ISO2709) parser,
       CCL (ISO8777) parser, 
-      <ulink url="http://www.loc.gov/z3950/agency/zing/cql/">CQL</ulink>
+      <ulink url="&url.cql;">CQL</ulink>
       parser, memory management routines, character set conversion.
      </para></listitem>
     <listitem><para>
@@ -158,11 +156,11 @@
   <sect1 id="introduction.api"><title>The API</title>
    
    <para>
-    The <ulink url="http://www.indexdata.dk/yaz/">&yaz;</ulink>
+    The <ulink url="&url.yaz;">&yaz;</ulink>
     toolkit offers several different levels of access to the
-    <ulink url="http://www.loc.gov/z3950/agency/">ISO23950/Z39.50</ulink>,
-    <ulink url="http://www.nlc-bnc.ca/iso/ill/">ILL</ulink> and
-    <ulink url="http://www.loc.gov/z3950/agency/zing/srw/">SRW</ulink>
+    <ulink url="&url.z39.50">ISO23950/Z39.50</ulink>,
+    <ulink url="&url.ill;">ILL</ulink> and
+    <ulink url="&url.sru/">SRU</ulink>/<ulink url="&url.srw/">SRW</ulink>
     protocols.
     The level that you need to use depends on your requirements, and
     the role (server or client) that you want to implement.
@@ -172,8 +170,7 @@
     Server implementers should consider the 
     <link linkend="server">generic frontend server</link>.
     None of those high-level APIs support the whole protocol, but
-    they do include most facilities used in existing Z39.50
-    applications.
+    they do include most facilities used in existing Z39.50 applications.
    </para>
    <para>
     If you're using 'exotic' functionality (meaning anything not included in

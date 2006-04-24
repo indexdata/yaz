@@ -1,7 +1,9 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+     <!ENTITY % common  SYSTEM "common/common.ent">
+     %common;
      <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
 ]>
-<!-- $Id: yaz-client-man.xml,v 1.5 2005-06-21 07:34:26 adam Exp $ -->
+<!-- $Id: yaz-client-man.xml,v 1.6 2006-04-24 09:21:35 adam Exp $ -->
 <refentry id="yaz-client">
  
  <refmeta>

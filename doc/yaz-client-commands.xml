@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.11 2005-11-04 17:15:30 mike Exp $
+   $Id: yaz-client-commands.xml,v 1.12 2006-04-24 09:21:35 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -191,7 +191,7 @@
     together with the search result.
     See the
     <ulink
-           url="http://lcweb.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
+     url="http://www.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
      Z39.50 standard
     </ulink>
     for more details.
@@ -207,7 +207,7 @@
     the search result.
     See the
     <ulink
-           url="http://lcweb.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
+     url="http://www.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
      Z39.50 standard
     </ulink> for more details.
    </para>
@@ -223,7 +223,7 @@
     <literal>lslb</literal> and <literal>ssub</literal>.
     See the
     <ulink
-           url="http://lcweb.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
+     url="http://www.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
      Z39.50 standard
     </ulink>
     for more details.
@@ -263,7 +263,7 @@
     yaz-client supports all the record syntaxes that currently
     are registered. See
     <ulink
-           url="http://lcweb.loc.gov/z3950/agency/defns/oids.html#5">
+     url="http://www.loc.gov/z3950/agency/defns/oids.html#5">
      Z39.50 Standard
     </ulink>
     for more details. Commonly used records syntaxes include usmarc,
