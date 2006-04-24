@@ -1,8 +1,81 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
-     <!ENTITY % common  SYSTEM "common/common.ent">
-     %common;
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" 
+    "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd" [
+<!ENTITY % common SYSTEM "common/common.ent">
+<!-- $Id: yaz-man.xml,v 1.6 2006-04-24 12:41:00 marc Exp $ --><!-- Index Data software --><!ENTITY url.indexdata "http://www.indexdata.com/">
+<!ENTITY url.yaz "http://www.indexdata.com/yaz/">
+<!ENTITY url.yaz.download "http://ftp.indexdata.com/pub/yaz/">
+<!ENTITY url.yaz.download.win32 "http://ftp.indexdata.com/pub/yaz/win32/">
+<!ENTITY url.yaz.mailinglist "http://lists.indexdata.dk/cgi-bin/mailman/listinfo/yazlist">
+<!ENTITY url.yaz.mail "mailto:yaz-help@indexdata.dk">
+<!ENTITY url.yazplusplus "http://www.indexdata.com/yazplusplus/">
+<!ENTITY url.yazproxy "http://www.indexdata.com/yazproxy/">
+<!ENTITY url.idzebra "http://www.indexdata.com/zebra/">
+<!ENTITY url.idzebra.mailinglist "http://lists.indexdata.dk/cgi-bin/mailman/listinfo/zebralist">
+<!ENTITY url.metaproxy "http://www.indexdata.com/metaproxy/">
+<!-- Specifications and Standards --><!ENTITY url.w3c "http://www.w3.org/">
+<!ENTITY url.xml "http://www.w3.org/XML/">
+<!ENTITY url.sru "http://www.loc.gov/standards/sru/">
+<!ENTITY url.sru.diagnostics "http://www.loc.gov/standards/sru/diagnostics.html">
+<!ENTITY url.sru.diagnostics.list "http://www.loc.gov/standards/sru/diagnostics-list.html">
+<!ENTITY url.srw "http://www.loc.gov/standards/sru/srw/">
+<!ENTITY url.soap "http://www.w3.org/TR/soap/">
+<!ENTITY url.z39.50 "http://www.loc.gov/z3950/agency/">
+<!ENTITY url.z39.50.doc "http://www.loc.gov/z3950/agency/markup/toc.html">
+<!ENTITY url.z39.50.asn.1 "http://www.loc.gov/z3950/agency/asn1.html">
+<!ENTITY url.z39.50.diagnostics "http://www.loc.gov/z3950/agency/defns/bib1diag.html">
+<!ENTITY url.z39.50.attset.bib1 "http://www.loc.gov/z3950/agency/defns/bib1.html">
+<!ENTITY url.z39.50.charneg "http://www.loc.gov/z3950/agency/defns/charneg-3.html">
+<!ENTITY url.z39.50.proximity "http://www.loc.gov/z3950/agency/markup/09.html#3.7.2">
+<!ENTITY url.z39.50.proximity.asn1 "http://www.loc.gov/z3950/agency/asn1.html#ProximityOperator">
+<!ENTITY url.z39.50.oids "http://www.loc.gov/z3950/agency/defns/oids.html">
+<!ENTITY url.asn.1.tutorial "http://asn1.elibel.tm.fr/en/introduction/">
+<!ENTITY url.asn.1.standards "http://asn1.elibel.tm.fr/en/standards/">
+<!ENTITY url.cql "http://www.loc.gov/standards/sru/cql/">
+<!ENTITY url.cql.intro "http://zing.z3950.org/cql/intro.html">
+<!ENTITY url.xcql "http://www.loc.gov/standards/sru/xml-files/srw-types.xsd">
+<!ENTITY url.zoom "http://zoom.z3950.org/">
+<!ENTITY url.marc21 "http://www.loc.gov/marc/">
+<!ENTITY url.marc8 "http://www.loc.gov/marc/specifications/speccharmarc8.html">
+<!ENTITY url.marcxml "http://www.loc.gov/standards/marcxml/">
+<!ENTITY url.ill "http://www.nlc-bnc.ca/iso/ill/">
+<!ENTITY url.ber.over.tcpip "http://www.faqs.org/rfcs/rfc1729.html">
+<!ENTITY url.http "http://www.w3.org/Protocols/">
+<!ENTITY url.http.1.1 "http://www.w3.org/Protocols/rfc2616/rfc2616.html">
+<!-- External libraries + tools --><!ENTITY url.apache "http://httpd.apache.org/">
+<!ENTITY url.apache.directive.proxypass "http://httpd.apache.org/docs/mod/mod_proxy.html#proxypass">
+<!ENTITY url.bison "http://www.gnu.org/software/bison/">
+<!ENTITY url.libxml2 "http://xmlsoft.org/">
+<!ENTITY url.libxml2.api "http://www.xmlsoft.org/html/index.html">
+<!ENTITY url.libxml2.api.tree "http://www.xmlsoft.org/html/libxml-tree.html">
+<!ENTITY url.libxslt "http://xmlsoft.org/XSLT/">
+<!ENTITY url.libxml2.download.win32 "http://www.zlatkovic.com/libxml.en.html">
+<!ENTITY url.autoconf "http://www.gnu.org/software/autoconf/">
+<!ENTITY url.automake "http://www.gnu.org/software/automake/">
+<!ENTITY url.libtool "http://www.gnu.org/software/libtool/">
+<!ENTITY url.libiconv "http://www.gnu.org/software/libiconv/">
+<!ENTITY url.tcl "http://www.tcl.tk/">
+<!ENTITY url.perl "http://www.perl.com/">
+<!ENTITY url.gcc "http://gcc.gnu.org/">
+<!ENTITY url.vstudio "http://msdn.microsoft.com/vstudio/">
+<!ENTITY url.boost "http://www.boost.org/">
+<!ENTITY url.boost.compilers.status "http://www.boost.org/status/compiler_status.html">
+<!ENTITY url.openssl "http://www.openssl.org/">
+<!ENTITY url.unxutils "http://unxutils.sourceforge.net/">
+<!ENTITY url.tcpwrapper "ftp://ftp.porcupine.org/pub/security/index.html">
+<!-- Operating Systems --><!ENTITY url.linux.kernel "http://www.kernel.org/">
+<!ENTITY url.debian "http://www.debian.org/">
+<!ENTITY url.redhat "http://www.redhat.com/">
+<!ENTITY url.gentoo "http://www.gentoo.org/">
+<!ENTITY url.freebsd "http://www.freebsd.org/">
+<!ENTITY url.macosx "http://www.apple.com/macosx/">
+<!ENTITY url.solaris "http://www.sun.com/software/solaris/">
+<!ENTITY url.windows2000 "http://www.microsoft.com/windows2000/">
+<!ENTITY url.windows2003server "http://www.microsoft.com/windowsserver2003/default.mspx">
+<!ENTITY url.netbsd "http://www.netbsd.org/">
+<!ENTITY url.openbsd "http://www.openbsd.org/">
+<!ENTITY url.ubunto "http://www.ubuntu.com/">
 ]>
-<!-- $Id: yaz-man.xml,v 1.5 2006-04-24 09:21:35 adam Exp $ -->
+<!-- $Id: yaz-man.xml,v 1.6 2006-04-24 12:41:00 marc Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -87,25 +160,15 @@
    <filename><replaceable>prefix</replaceable>/share/doc/yaz</filename>)
   </para>
   <para>
-   <ulink url="&url.yaz;">YAZ home page</ulink>.
+   <ulink url="http://www.indexdata.com/yaz/">YAZ home page</ulink>.
   </para>
   <para>
-   <ulink url="&url.z39.50;">Z39.50 Maintenance Agency Page</ulink>.
+   <ulink url="http://www.loc.gov/z3950/agency/">Z39.50 Maintenance Agency Page</ulink>.
   </para>
  </refsect1>
 </refentry>
-
-<!-- Keep this comment at the end of the file
+<!-- Keep this Emacs mode comment at the end of the file
 Local variables:
-mode: sgml
-sgml-omittag:t
-sgml-shorttag:t
-sgml-minimize-attributes:nil
-sgml-always-quote-attributes:t
-sgml-indent-step:1
-sgml-indent-data:t
-sgml-parent-document:nil
-sgml-local-catalogs: nil
-sgml-namecase-general:t
+mode: nxml
 End:
 -->

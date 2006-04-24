@@ -1,4 +1,4 @@
-<!-- $Id: indexdata.xml,v 1.7 2003-11-03 14:05:54 adam Exp $ -->
+<!-- $Id: indexdata.xml,v 1.8 2006-04-24 12:41:00 marc Exp $ -->
  <appendix id="indexdata"><title>About Index Data</title>
 
   <para>
@@ -46,17 +46,9 @@
 
   </para>
  </appendix>
- <!-- Keep this comment at the end of the file
- Local variables:
- mode: sgml
- sgml-omittag:t
- sgml-shorttag:t
- sgml-minimize-attributes:nil
- sgml-always-quote-attributes:t
- sgml-indent-step:1
- sgml-indent-data:t
- sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: nil
- sgml-namecase-general:t
- End:
- -->
+ <!-- Keep this Emacs mode comment at the end of the file
+Local variables:
+mode: nxml
+End:
+-->
+

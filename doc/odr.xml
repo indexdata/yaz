@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.16 2006-04-24 12:12:24 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.17 2006-04-24 12:41:00 marc Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -1289,17 +1289,9 @@ void odr_choice_bias(ODR o, int what);
    </para>
   </sect1>
  </chapter>
- <!-- Keep this comment at the end of the file
- Local variables:
- mode: sgml
- sgml-omittag:t
- sgml-shorttag:t
- sgml-minimize-attributes:nil
- sgml-always-quote-attributes:t
- sgml-indent-step:1
- sgml-indent-data:t
- sgml-parent-document: "yaz.xml"
- sgml-local-catalogs: nil
- sgml-namecase-general:t
- End:
- -->
+ <!-- Keep this Emacs mode comment at the end of the file
+Local variables:
+mode: nxml
+End:
+-->
+
