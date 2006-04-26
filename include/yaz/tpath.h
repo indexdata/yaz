@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,12 +23,12 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: tpath.h,v 1.9 2006-04-26 09:40:43 adam Exp $
+ * $Id: tpath.h,v 1.10 2006-04-26 10:01:31 adam Exp $
  *
  */
 /**
  * \file tpath.h
- * \brief Header for path fopen
+ * \brief File Path utilities
  */
 
 #ifndef TPATH_H
@@ -39,14 +39,12 @@
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT FILE *yaz_fopen(const char *path, const char *name,
-                           const char *mode, const char *base);
-YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *name,
-                           const char *mode);
+/** \brief checks whether path is absolute
+    \param path path to checked
 
-YAZ_EXPORT int yaz_fclose(FILE *f);
-
-YAZ_EXPORT int yaz_is_abspath (const char *p);
+    Returns 1 if path is absolute, 0 if relative
+*/
+YAZ_EXPORT int yaz_is_abspath (const char *path);
 
 /** \brief resolve file on path 
     \param fname "short" filename (without path)
@@ -60,6 +58,37 @@ YAZ_EXPORT int yaz_is_abspath (const char *p);
 */
 YAZ_EXPORT char *yaz_filepath_resolve(const char *fname, const char *path,
                                       const char *base, char *fullpath);
+
+
+/** \brief opens first file in path in path 
+    \param fname "short" filename (without path)
+    \param path the path (dir1:dir2,..) - ala Unix
+    \param base can be added to relative paths (NULL for no append)
+    \param fullpath the full path to filename (if succesful)
+
+    Returns 0/NULL if no fname could be found in path; 
+    FILE * pointer if fname could be found.
+*/
+YAZ_EXPORT FILE *yaz_fopen(const char *path, const char *name,
+                           const char *mode, const char *base);
+
+/** \brief opens first file in path in path 
+    \param fname "short" filename (without path)
+    \param path the path (dir1:dir2,..) - ala Unix
+    \param fullpath the full path to filename (if succesful)
+
+    Returns 0/NULL if no fname could be found in path; 
+    FILE * pointer if fname could be found.
+*/
+YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *name,
+                           const char *mode);
+
+/** \brief closes file
+    \param f FILE handle
+
+    Returns -1 on failure; 0 on success
+*/
+YAZ_EXPORT int yaz_fclose(FILE *f);
 
 
 YAZ_END_CDECL

@@ -2,11 +2,11 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tpath.c,v 1.7 2006-04-26 09:40:43 adam Exp $
+ * $Id: tpath.c,v 1.8 2006-04-26 10:01:31 adam Exp $
  */
 /**
  * \file tpath.c
- * \brief Implements path fopen
+ * \brief File Path utilities
  */
 
 #if HAVE_CONFIG_H
