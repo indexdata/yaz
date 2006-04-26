@@ -1,9 +1,10 @@
 ## Copyright (C) 1994-2006, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.13 2006-04-19 10:05:04 adam Exp $
+## $Id: Makefile.am,v 1.14 2006-04-26 09:40:43 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
- tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery
+ tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
+ tst_filepath
 check_SCRIPTS = tstcql.sh tstmarciso.sh tstmarcxml.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
@@ -48,4 +49,5 @@ tstsoap2_SOURCES = tstsoap2.c
 tstlogthread_SOURCES = tstlogthread.c
 tstxmlquery_SOURCES = tstxmlquery.c
 tstpquery_SOURCES = tstpquery.c
+tst_filepath_SOURCES = tst_filepath.c
 

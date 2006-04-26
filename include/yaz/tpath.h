@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: tpath.h,v 1.8 2005-06-25 15:46:03 adam Exp $
+ * $Id: tpath.h,v 1.9 2006-04-26 09:40:43 adam Exp $
  *
  */
 /**
@@ -35,6 +35,7 @@
 #define TPATH_H
 
 #include <yaz/yconfig.h>
+#include <stdio.h>
 
 YAZ_BEGIN_CDECL
 
@@ -46,6 +47,20 @@ YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *name,
 YAZ_EXPORT int yaz_fclose(FILE *f);
 
 YAZ_EXPORT int yaz_is_abspath (const char *p);
+
+/** \brief resolve file on path 
+    \param fname "short" filename (without path)
+    \param path the path (dir1:dir2,..) - ala Unix
+    \param base can be added to relative paths (NULL for no append)
+    \param fullpath the full path to filename (if succesful)
+
+    Returns 0/NULL if no fname could be found in path; 
+    pointer to fullpath if fname could be found.
+    We assume fullpath is 1024 bytes in length!
+*/
+YAZ_EXPORT char *yaz_filepath_resolve(const char *fname, const char *path,
+                                      const char *base, char *fullpath);
+
 
 YAZ_END_CDECL
 
