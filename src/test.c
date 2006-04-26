@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.5 2006-04-20 20:50:51 adam Exp $
+ * $Id: test.c,v 1.6 2006-04-26 16:58:27 heikki Exp $
  */
 
 /** \file test.c
@@ -128,7 +128,10 @@ void yaz_check_eq1(int type, const char *file, int line,
 {
     char formstr[2048];
     
-    sprintf(formstr, "%.500s != %.500s\n%d != %d", left, right, lval, rval);
+    if (type==YAZ_TEST_TYPE_OK) 
+        sprintf(formstr, "%.500s == %.500s ", left, right);
+    else
+        sprintf(formstr, "%.500s != %.500s\n %d != %d", left, right, lval,rval);
     yaz_check_print1(type, file, line, formstr);
 }
 
@@ -142,12 +145,12 @@ void yaz_check_print1(int type, const char *file, int line,
     {
     case YAZ_TEST_TYPE_FAIL:
         test_failed++;
-        msg = "failed";
+        msg = "FAILED";
         if (test_verbose < 1)
             return;
         break;
     case YAZ_TEST_TYPE_OK:
-        msg = "OK";
+        msg = "ok";
         if (test_verbose < 3)
             return;
         break;
