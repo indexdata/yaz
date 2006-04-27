@@ -1,3 +1,11 @@
+yaz (2.1.19-1) unstable; urgency=low
+
+  * Upstream
+  * added yaz_filepath_resolve(...) to API
+  * API version 2.1.17.
+
+ -- Marc Cromme <marc@indexdata.dk>  Thu, 27 Apr 2006 21:56:29 +0200
+
 yaz (2.1.18-1) unstable; urgency=low
 
   * Moved yaz.7 from libyaz to libyaz-dev.
