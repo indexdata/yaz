@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tpath.c,v 1.8 2006-04-26 10:01:31 adam Exp $
+ * $Id: tpath.c,v 1.9 2006-04-27 08:39:05 adam Exp $
  */
 /**
  * \file tpath.c
@@ -20,9 +20,7 @@
 #include <yaz/tpath.h>
 #include <yaz/log.h>
 #include <sys/types.h>
-#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
