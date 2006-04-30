@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2005, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.103 2006-04-19 23:49:50 adam Exp $
+# $Id: makefile,v 1.104 2006-04-30 07:23:08 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -195,7 +195,7 @@ COMMON_C_INCLUDES= \
 
 DEBUG_C_OPTIONS=  \
   /D "_DEBUG"      \
-  /MDd  /Od /YX /Zi /Gm
+  /MDd  /Od /Zi /Gm
 
 RELEASE_C_OPTIONS=  \
   /D "NDEBUG"        \
@@ -212,7 +212,6 @@ RELEASE_C_OPTIONS=  \
 # /MDd = Runtime library: Multithread DLL (debug)
 # /Od  = Disable optimising (debug)
 # /O2  = Optimize for speed
-# /YX  = Automatic use of precomipled headers
 # /Gm  = Minimal rebuild (some cpp class stuff)
 # /Zi  = Program database for debuggers
 # /ZI  = Pgm database with special "edit&continue" stuff - not available in C5
