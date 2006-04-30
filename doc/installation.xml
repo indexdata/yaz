@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.29 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: installation.xml,v 1.30 2006-04-30 06:50:09 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -22,10 +22,8 @@
     <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
     <ulink url="&url.macosx;">MAC OSX</ulink>,
     <ulink url="&url.solaris;">SunOS 5.8 (sparc)</ulink>,
-    <ulink url="&url.windows2000;">,
-     Windows 2000</ulink>,
-    <ulink url="&url.windows2003server;">,
-     Windows 2003 server</ulink>.
+    <ulink url="&url.windows2000;">Windows 2000</ulink>,
+    <ulink url="&url.windows2003server;">Windows 2003 server</ulink>.
    </para>
    
    <para>
