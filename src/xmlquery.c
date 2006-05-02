@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.8 2006-04-20 20:50:51 adam Exp $
+ * $Id: xmlquery.c,v 1.9 2006-05-02 20:47:45 adam Exp $
  */
 
 /** \file xmlquery.c
@@ -500,19 +500,7 @@ void yaz_xml2query_attribute_element(const xmlNode *ptr,
 
 char *strVal(const xmlNode *ptr_cdata, ODR odr)
 {
-    char *cdata;
-    int len = 0;
-    const xmlNode *ptr;
-
-    for (ptr = ptr_cdata; ptr; ptr = ptr->next)
-        if (ptr->type == XML_TEXT_NODE)
-            len += xmlStrlen(ptr->content);
-    cdata = (char *) odr_malloc(odr, len+1);
-    *cdata = '\0';
-    for (ptr = ptr_cdata; ptr; ptr = ptr->next)
-        if (ptr->type == XML_TEXT_NODE)
-            strcat(cdata, (const char *) ptr->content);
-    return cdata;
+    return nmem_text_node_cdata(ptr_cdata, odr->mem);
 }
 
 void yaz_xml2query_term(const xmlNode *ptr,

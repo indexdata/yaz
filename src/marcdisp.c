@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.28 2006-04-20 20:35:02 adam Exp $
+ * $Id: marcdisp.c,v 1.29 2006-05-02 20:47:45 adam Exp $
  */
 
 /**
@@ -132,25 +132,6 @@ void yaz_marc_add_comment(yaz_marc_t mt, char *comment)
     n->u.comment = nmem_strdup(mt->nmem, comment);
 }
 
-#if HAVE_XML2
-static char *yaz_marc_get_xml_text(const xmlNode *ptr_cdata, NMEM nmem)
-{
-    char *cdata;
-    int len = 0;
-    const xmlNode *ptr;
-
-    for (ptr = ptr_cdata; ptr; ptr = ptr->next)
-        if (ptr->type == XML_TEXT_NODE)
-            len += xmlStrlen(ptr->content);
-    cdata = (char *) nmem_malloc(nmem, len+1);
-    *cdata = '\0';
-    for (ptr = ptr_cdata; ptr; ptr = ptr->next)
-        if (ptr->type == XML_TEXT_NODE)
-            strcat(cdata, (const char *) ptr->content);
-    return cdata;
-}
-#endif
-
 void yaz_marc_cprintf(yaz_marc_t mt, const char *fmt, ...)
 {
     va_list ap;
@@ -206,8 +187,8 @@ void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
 {
     struct yaz_marc_node *n = yaz_marc_add_node(mt);
     n->which = YAZ_MARC_CONTROLFIELD;
-    n->u.controlfield.tag = yaz_marc_get_xml_text(ptr_tag, mt->nmem);
-    n->u.controlfield.data = yaz_marc_get_xml_text(ptr_data, mt->nmem);
+    n->u.controlfield.tag = nmem_text_node_cdata(ptr_tag, mt->nmem);
+    n->u.controlfield.data = nmem_text_node_cdata(ptr_data, mt->nmem);
 }
 #endif
 
@@ -231,7 +212,7 @@ void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
 {
     struct yaz_marc_node *n = yaz_marc_add_node(mt);
     n->which = YAZ_MARC_DATAFIELD;
-    n->u.datafield.tag = yaz_marc_get_xml_text(ptr_tag, mt->nmem);
+    n->u.datafield.tag = nmem_text_node_cdata(ptr_tag, mt->nmem);
     n->u.datafield.indicator =
         nmem_strdupn(mt->nmem, indicator, indicator_len);
     n->u.datafield.subfields = 0;

@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmemsdup.c,v 1.5 2005-06-25 15:46:04 adam Exp $
+ * $Id: nmemsdup.c,v 1.6 2006-05-02 20:47:45 adam Exp $
  */
 
 /**
@@ -16,6 +16,9 @@
 
 #include <string.h>
 #include <yaz/nmem.h>
+#if HAVE_XML2
+#include <libxml/tree.h>
+#endif
 
 char *nmem_strdup (NMEM mem, const char *src)
 {
@@ -77,6 +80,25 @@ void nmem_strsplit(NMEM nmem, const char *delim, const char *dstr,
         }
     }
 }
+
+#if HAVE_XML2
+char *nmem_text_node_cdata(const void *ptr_cdata, NMEM nmem)
+{
+    char *cdata;
+    int len = 0;
+    const xmlNode *ptr;
+
+    for (ptr = (const xmlNode *) ptr_cdata; ptr; ptr = ptr->next)
+        if (ptr->type == XML_TEXT_NODE)
+            len += xmlStrlen(ptr->content);
+    cdata = (char *) nmem_malloc(nmem, len+1);
+    *cdata = '\0';
+    for (ptr = (const xmlNode *) ptr_cdata; ptr; ptr = ptr->next)
+        if (ptr->type == XML_TEXT_NODE)
+            strcat(cdata, (const char *) ptr->content);
+    return cdata;
+}
+#endif
 
 /*
  * Local variables:
