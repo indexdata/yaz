@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: tpath.h,v 1.10 2006-04-26 10:01:31 adam Exp $
+ * $Id: tpath.h,v 1.11 2006-05-02 12:11:08 adam Exp $
  *
  */
 /**
@@ -62,26 +62,26 @@ YAZ_EXPORT char *yaz_filepath_resolve(const char *fname, const char *path,
 
 /** \brief opens first file in path in path 
     \param fname "short" filename (without path)
+    \param mode mode as in fopen(3)
     \param path the path (dir1:dir2,..) - ala Unix
     \param base can be added to relative paths (NULL for no append)
-    \param fullpath the full path to filename (if succesful)
 
     Returns 0/NULL if no fname could be found in path; 
-    FILE * pointer if fname could be found.
+    FILE pointer if fname could be found.
 */
-YAZ_EXPORT FILE *yaz_fopen(const char *path, const char *name,
+YAZ_EXPORT FILE *yaz_fopen(const char *path, const char *fname,
                            const char *mode, const char *base);
 
 /** \brief opens first file in path in path 
     \param fname "short" filename (without path)
+    \param mode mode as in fopen(3)
     \param path the path (dir1:dir2,..) - ala Unix
-    \param fullpath the full path to filename (if succesful)
 
     Returns 0/NULL if no fname could be found in path; 
-    FILE * pointer if fname could be found.
+    FILE pointer if fname could be found.
 */
-YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *name,
-                           const char *mode);
+YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *fname,
+                                const char *mode);
 
 /** \brief closes file
     \param f FILE handle
