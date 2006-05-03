@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.3 2006-05-03 11:36:14 mike Exp $ 
+ *  $Id: nfa.c,v 1.4 2006-05-03 13:47:35 heikki Exp $ 
  *
  *  This is a simple NFA-based system for character set normalizing
  *  in yaz and zebra. Unlike standard NFA's, this operates on ranges of
@@ -41,6 +41,7 @@ struct yaz_nfa {
     yaz_nfa_state *firststate; /* the initial state */
     yaz_backref_info *curr_backrefs; /* the backrefs we are matching */
     yaz_backref_info *best_backrefs; /* backrefs of the best match so far*/
+    int lastmatch; /* the result of last match */
 };
 
 struct yaz_nfa_state {
@@ -85,6 +86,7 @@ yaz_nfa *yaz_nfa_init() {
     n->nbackrefs=0;
     n->curr_backrefs=0;
     n->best_backrefs=0;
+    n->lastmatch= YAZ_NFA_NOMATCH;
     return n;
 }
 
@@ -129,15 +131,15 @@ void *yaz_nfa_get_result(yaz_nfa *n, yaz_nfa_state *s) {
     return s->result;
 }
 
-int yaz_nfa_set_backref(yaz_nfa *n, yaz_nfa_state *s,
+int yaz_nfa_set_backref_point(yaz_nfa *n, yaz_nfa_state *s,
            int backref_number,
            int is_start ){
     if (is_start) {
         if (s->backref_start)
             return 1;
         s->backref_start=backref_number;
-        if (n->nbackrefs<backref_number) {
-            n->nbackrefs=backref_number;
+        if (n->nbackrefs<=backref_number) {
+            n->nbackrefs=backref_number+1;
             n->curr_backrefs=0;
             n->best_backrefs=0;
             /* clear them just in case we have already matched on */
@@ -154,7 +156,7 @@ int yaz_nfa_set_backref(yaz_nfa *n, yaz_nfa_state *s,
     return 0; /* ok */
 }
 
-int yaz_nfa_get_backref(yaz_nfa *n, yaz_nfa_state *s,
+int yaz_nfa_get_backref_point(yaz_nfa *n, yaz_nfa_state *s,
                 int is_start ) {
     if (!s) 
         return 0;
@@ -285,6 +287,11 @@ static void match_state(
                 t=t->next;
                 if ( (( t->range_start <= *inchar ) && ( t->range_end >= *inchar )) ){
                     m->empties=0;
+                    if (t->range_start!=t->range_end){
+                        /* backref 0 is special: the last range operation */
+                        m->n->curr_backrefs[0].start=inchar;
+                        m->n->curr_backrefs[0].end=inchar;
+                    }
                     match_state(t->to_state, inchar+1,incharsleft-1,m);
                     /* yes, descent to all matching nodes, even if overrun, */
                     /* since we can find a better one later */
@@ -308,14 +315,17 @@ static void match_state(
            m->bestnode=s->num;
            m->result=s->result;
            if (m->n->curr_backrefs) 
-               for (i=0; i<m->n->nbackrefs;i++) 
+               for (i=0; i<m->n->nbackrefs;i++)  {
                    m->n->best_backrefs[i]=m->n->curr_backrefs[i];
+               }
         }
     }
     if (s->backref_start) 
         m->n->curr_backrefs[s->backref_start].start=0;
     if (s->backref_end) 
         m->n->curr_backrefs[s->backref_end].end=0;
+    m->n->curr_backrefs[0].start=0;
+    m->n->curr_backrefs[0].end=0;
 } /* match_state */
 
 int yaz_nfa_match(yaz_nfa *n, 
@@ -323,33 +333,59 @@ int yaz_nfa_match(yaz_nfa *n,
            size_t incharsleft,
            void **result ){
     struct matcher m;
-    if (!n->firststate)
-        return YAZ_NFA_NOMATCH; 
+    int sz;
+    int i;
+    if (!n->firststate) {
+        n->lastmatch=YAZ_NFA_NOMATCH;
+        return n->lastmatch;
+    }
     m.n=n;
     m.longest=*inbuff;
     m.bestnode=n->nstates;
     m.result=0;
     m.errorcode=0;
-    if ((!n->curr_backrefs) && (n->nbackrefs)){
-        int sz=sizeof( struct yaz_nfa_backref_info) * (n->nbackrefs+1);
+    sz=sizeof( struct yaz_nfa_backref_info) * n->nbackrefs;
+    if (!n->curr_backrefs) {
         n->curr_backrefs=nmem_malloc( n->nmem, sz);
         n->best_backrefs=nmem_malloc( n->nmem, sz);
     }
-    
+    for (i=0;i<n->nbackrefs;i++) {
+        n->curr_backrefs[i].start=0;
+        n->curr_backrefs[i].end=0;
+        n->best_backrefs[i].start=0;
+        n->best_backrefs[i].end=0;
+    }
 
     match_state(n->firststate, *inbuff, incharsleft, &m);
     if (m.result) {
         *result=m.result;
         *inbuff=m.longest;
         if (m.errorcode)
-            return m.errorcode;
+            n->lastmatch=m.errorcode;
         else
-            return YAZ_NFA_SUCCESS;
+            n->lastmatch= YAZ_NFA_SUCCESS;
+        return n->lastmatch;
     }
-    return YAZ_NFA_NOMATCH;
+    n->lastmatch=YAZ_NFA_NOMATCH;
+    return n->lastmatch; 
 }
 
 
+int yaz_nfa_get_backref( yaz_nfa *n,
+                int backref_no,
+                yaz_nfa_char **start,
+                yaz_nfa_char **end) {
+    if (backref_no>=n->nbackrefs)
+        return 2;
+    if (backref_no<0)
+        return 2;
+    if (n->lastmatch== YAZ_NFA_NOMATCH)
+        return 1;  /* accept other errors, they return partial matches*/
+
+    *start=n->best_backrefs[backref_no].start;
+    *end=n->best_backrefs[backref_no].end;
+    return 0;
+}
 
 
 /* * * * * * * * *
@@ -429,7 +465,8 @@ void yaz_nfa_dump(FILE *F, yaz_nfa *n,
     yaz_nfa_state *s;
     if (!F)   /* lazy programmers can just pass 0 for F */
         F=stdout;
-    fprintf(F,"The NFA has %d states \n",n->nstates);
+    fprintf(F,"The NFA has %d states and %d backrefs\n",
+            n->nstates, n->nbackrefs);
     s=n->laststate;
     if (s) {
         do {

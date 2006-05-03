@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.2 2006-05-03 11:09:59 heikki Exp $
+ *  $Id: nfa.h,v 1.3 2006-05-03 13:47:35 heikki Exp $
  */
 
 /**
@@ -86,12 +86,13 @@ void *yaz_nfa_get_result(
          yaz_nfa *n /** The NFA itself */, 
          yaz_nfa_state *s /** The state whose result you want */);
 
-/** \brief Set the backref number to a state.
+/** \brief Set a backref point to a state.
  * 
- *  Each state can be the beginning and/or ending of a backref
- *  sequence. This call sets those flags in the states. After matching,
- *  we can get hold of the backrefs that matched, and use them in our
- *  translations. The backrefs start at 1, not zero!
+ *  Each state can be the beginning and/or ending point of a backref
+ *  sequence. This call sets one of those flags in the state. After 
+ *  matching, we can get hold of the backrefs that matched, and use 
+ *  them in our translations. The numbering of backrefs start at 1, 
+ *  not zero!
  *
  *  \param n   the nfa
  *  \param s   the state to add to
@@ -103,11 +104,11 @@ void *yaz_nfa_get_result(
  *     
  */
 
-int yaz_nfa_set_backref(yaz_nfa *n, yaz_nfa_state *s,
+int yaz_nfa_set_backref_point(yaz_nfa *n, yaz_nfa_state *s,
         int backref_number,
         int is_start );
 
-/** \brief Get the backref number of a state.
+/** \brief Get the backref point of a state
  * 
  *  \param n   the nfa
  *  \param s   the state to add to
@@ -115,7 +116,7 @@ int yaz_nfa_set_backref(yaz_nfa *n, yaz_nfa_state *s,
  *  \return the backref number associated with the state, or 0 if none.
  */
 
-int yaz_nfa_get_backref(yaz_nfa *n, yaz_nfa_state *s,
+int yaz_nfa_get_backref_point(yaz_nfa *n, yaz_nfa_state *s,
         int is_start );
 
 /**  \brief Add a transition to the NFA.
@@ -196,6 +197,31 @@ int yaz_nfa_match(yaz_nfa *n, yaz_nfa_char **inbuff, size_t incharsleft,
 #define YAZ_NFA_OVERRUN 2
 #define YAZ_NFA_LOOP 3
 
+/** \brief Get a back reference after a successfull match.
+ *
+ *  \param n   the nfa
+ *  \param backref_no  the number of the backref to get
+ *  \param begin  beginning of the matching substring
+ *  \param end    end of the matching substring
+ *
+ * Returns pointers to the beginning and end of a backref, or null
+ * pointers if one endpoint not met.  Those pointers point to the
+ * original buffer that was matched, so the caller will not have to
+ * worry about freeing anything special.
+ *
+ * It is technically possible to create NFAs that meet the start but 
+ * not the end of a backref.  It is up to the caller to decide how
+ * to handle such a situation.
+ *
+ * \retval 0 OK
+ * \retval 1 no match
+ * \retval 2 no such backref
+ */
+
+int yaz_nfa_get_backref( yaz_nfa *n, 
+        int backref_no,
+        yaz_nfa_char **start,
+        yaz_nfa_char **end );
 
 /** \brief Get the first state of the NFA. 
  *
