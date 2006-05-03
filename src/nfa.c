@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.1 2006-05-03 09:04:33 heikki Exp $ 
+ *  $Id: nfa.c,v 1.2 2006-05-03 11:10:00 heikki Exp $ 
  *
  *  This is a simple NFA-based system for character set normalizing
  *  in yaz and zebra. Unlike standard NFA's, this operates on ranges of
@@ -81,6 +81,10 @@ yaz_nfa *yaz_nfa_init() {
     n->nmem=my_nmem;
     n->nstates=0;
     n->laststate=0;
+    n->firststate=0;
+    n->nbackrefs=0;
+    n->curr_backrefs=0;
+    n->best_backrefs=0;
     return n;
 }
 
@@ -132,11 +136,19 @@ int yaz_nfa_set_backref(yaz_nfa *n, yaz_nfa_state *s,
         if (s->backref_start)
             return 1;
         s->backref_start=backref_number;
-        if (n->nbackrefs<backref_number)
+        if (n->nbackrefs<backref_number) {
             n->nbackrefs=backref_number;
+            n->curr_backrefs=0;
+            n->best_backrefs=0;
+            /* clear them just in case we have already matched on */
+            /* with this nfa, and created a too small backref table */
+            /* we will reallocate when matching. */
+        }
     } else {
         if (s->backref_end)
             return 1;
+        if (n->nbackrefs<backref_number) 
+            return 2; /* can't end a backref that has not been started */
         s->backref_end=backref_number;
     }
     return 0; /* ok */
@@ -245,6 +257,7 @@ yaz_nfa_state *yaz_nfa_add_sequence(yaz_nfa *n,
  * * * * * * */
 
 struct matcher {
+    yaz_nfa *n; 
     yaz_nfa_char *longest;
     int bestnode;
     void *result;
@@ -253,13 +266,19 @@ struct matcher {
 };
 
 /* Finds the longest match. In case of ties, chooses the one with the 
- * lowest numbered state */
-static void match_state(yaz_nfa_state *s, 
+ * lowest numbered state. Keep track of the back references. Recursively
+ * traverses the NFA. Keeps track of the best hit it has found. */
+
+static void match_state(
+              yaz_nfa_state *s, 
               yaz_nfa_char *inchar,
               size_t incharsleft,
               struct matcher *m ) {
     yaz_nfa_transition *t=s->lasttrans;
-    
+    if (s->backref_start) 
+        m->n->curr_backrefs[s->backref_start].start=inchar;
+    if (s->backref_end) 
+        m->n->curr_backrefs[s->backref_end].end=inchar;
     if (t) {
         if (incharsleft) {
             do {
@@ -284,11 +303,19 @@ static void match_state(yaz_nfa_state *s,
         if ( (m->longest < inchar) ||  /* longer result */
              ((m->longest == inchar)&&(m->bestnode<s->num)) ){
               /* or as long, but with lower node number. Still better */
+           int i;
            m->longest=inchar;
            m->bestnode=s->num;
            m->result=s->result;
+           if (m->n->curr_backrefs) 
+               for (i=0; i<m->n->nbackrefs;i++) 
+                   m->n->best_backrefs[i]=m->n->curr_backrefs[i];
         }
     }
+    if (s->backref_start) 
+        m->n->curr_backrefs[s->backref_start].start=0;
+    if (s->backref_end) 
+        m->n->curr_backrefs[s->backref_end].end=0;
 } /* match_state */
 
 int yaz_nfa_match(yaz_nfa *n, 
@@ -298,14 +325,15 @@ int yaz_nfa_match(yaz_nfa *n,
     struct matcher m;
     if (!n->firststate)
         return YAZ_NFA_NOMATCH; 
+    m.n=n;
     m.longest=*inbuff;
     m.bestnode=n->nstates;
     m.result=0;
     m.errorcode=0;
-    if (!n->curr_backrefs) {
-        int sz=sizeof( struct yaz_nfa_backref_info);
-        n->curr_backrefs=nmem_malloc( n->nmem, n->nbackrefs* sz);
-        n->best_backrefs=nmem_malloc( n->nmem, n->nbackrefs* sz);
+    if ((!n->curr_backrefs) && (n->nbackrefs)){
+        int sz=sizeof( struct yaz_nfa_backref_info) * (n->nbackrefs+1);
+        n->curr_backrefs=nmem_malloc( n->nmem, sz);
+        n->best_backrefs=nmem_malloc( n->nmem, sz);
     }
     
 

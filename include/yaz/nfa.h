@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.1 2006-05-03 09:04:33 heikki Exp $
+ *  $Id: nfa.h,v 1.2 2006-05-03 11:09:59 heikki Exp $
  */
 
 /**
@@ -91,16 +91,15 @@ void *yaz_nfa_get_result(
  *  Each state can be the beginning and/or ending of a backref
  *  sequence. This call sets those flags in the states. After matching,
  *  we can get hold of the backrefs that matched, and use them in our
- *  translations.
+ *  translations. The backrefs start at 1, not zero!
  *
  *  \param n   the nfa
  *  \param s   the state to add to
  *  \param backref_number is the number of the back reference. 0 for clearing
  *  \param is_start is 1 for start of the backref, 0 for end
- *  \return
- *     0 for OK
- *     1 if the backref is already set
- *     
+ *  \retval   0 for OK
+ *  \retval   1 if the backref is already set
+ *  \retval   2 for ending a backref that has not been started
  *     
  */
 
