@@ -3,7 +3,7 @@ Section: devel
 Standards-Version: 3.6.2
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: debhelper (>= 4), libxml2-dev, libssl-dev, libreadline5-dev, libwrap0-dev
+Build-Depends: debhelper (>= 4), libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev
 
 Package: libyaz
 Section: libs
@@ -37,7 +37,7 @@ Description: The YAZ Z39.50 toolkit (documentation)
  This packages includes documentation for YAZ in HTML and PDF.
 
 Package: libyaz-dev
-Depends: libyaz (= ${Source-Version}), libxml2-dev, libwrap0-dev, libssl-dev
+Depends: libyaz (= ${Source-Version}), libxslt1-dev, libwrap0-dev, libssl-dev
 Replaces: yaz-devel
 Conflicts: yaz-devel
 Section: devel

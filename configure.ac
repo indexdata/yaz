@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.9 2006-04-26 09:40:42 adam Exp $
+dnl $Id: configure.ac,v 1.10 2006-05-03 12:02:23 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.19],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -316,37 +316,46 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 	CC=$OCC
 	LIBS="$OLIBS $LIBTHREAD"
 fi
-dnl
-dnl ----- libXML2
-AC_SUBST(XML2_LIBS)
+
+dnl ----- libXSLT
+AC_SUBST(XSLT_CFLAGS)
 AC_SUBST(XML2_CFLAGS)
-xml2dir=default
-AC_ARG_WITH(xml2, [  --with-xml2[=PREFIX]      use libxml2 in PREFIX],[xml2dir=$withval])
-if test "$xml2dir" = "yes" -o "$xml2dir" = "default"; then
+xsltdir=default
+AC_ARG_WITH(xslt,[[  --with-xslt[=PREFIX]    use libxslt in PREFIX]],xsltdir=$withval)
+if test "$xsltdir" = "yes" -o "$xsltdir" = "default"; then
 	for d in /usr /usr/local; do
-		if test -x $d/bin/xml2-config; then
-			xml2dir=$d
+		if test -x $d/bin/xslt-config; then
+			xsltdir=$d
 		fi
 	done
 fi
-if test "$xml2dir" != "no"; then
-	AC_MSG_CHECKING(for libXML2)
-	if test -x $xml2dir/bin/xml2-config; then
-		XML2_LIBS=`$xml2dir/bin/xml2-config --libs`
-		LIBS="$XML2_LIBS $LIBS"
-		XML2_CFLAGS=`$xml2dir/bin/xml2-config --cflags`
-		XML2_VER=`$xml2dir/bin/xml2-config --version`
-		AC_MSG_RESULT($XML2_VER)
+if test "$xsltdir" != "no"; then
+	AC_MSG_CHECKING(for libXSLT)
+	if test -x $xsltdir/bin/xslt-config; then
+		XSLT_LIBS=`$xsltdir/bin/xslt-config --libs`
+		XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
+		XML2_CFLAGS=$XSLT_CFLAGS
+		XSLT_VER=`$xsltdir/bin/xslt-config --version`
+		LIBS="$XSLT_LIBS $LIBS"
+		AC_MSG_RESULT($XSLT_VER)
+		AC_DEFINE(HAVE_XSLT)
 		AC_DEFINE(HAVE_XML2)
 	else
-		AC_MSG_RESULT([Not found])
-		if test "$xml2dir" = "default"; then
-			AC_MSG_WARN([Libxml2 development libraries not found.])
-			AC_MSG_WARN([YAZ will NOT support SRW/SRU.])
+		AC_MSG_RESULT(Not found)
+
+		if test "$xsltdir" = "default"; then
+			AC_MSG_WARN([libxslt development libraries not found.])
+			AC_MSG_WARN([YAZ will NOT support SRU.])
 		else
-		        AC_MSG_ERROR([libXML2 development libraries not found.])
+		        AC_MSG_ERROR([libxslt development libraries not found.])
 		fi
 	fi
+fi
+
+xml2dir=default
+AC_ARG_WITH(xml2,[[  --with-xml2[=PREFIX]    OBSOLETE. Use --with-xslt instead]],xml2dir=$withval)
+if test "$xml2dir" != "default"; then
+        AC_MSG_ERROR([--with-xml2 OBSOLETE. Use --with-xslt instead.])
 fi
 dnl
 dnl ------ Memory debugging
