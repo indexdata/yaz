@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.81 2006-04-27 20:08:50 marc Exp $
+; $Id: yaz.nsi,v 1.82 2006-05-03 13:27:20 adam Exp $
 
 !define VERSION "2.1.19"
 !define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
@@ -88,6 +88,7 @@ Noservice:
 	File ..\bin\iconv.dll
 	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
+	File ..\bin\libxslt.dll
 	File ..\bin\yaz.dll
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ

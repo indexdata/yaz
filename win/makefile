@@ -1,6 +1,6 @@
-# Copyright (C) 1994-2005, Index Data ApS
+# Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.104 2006-04-30 07:23:08 adam Exp $
+# $Id: makefile,v 1.105 2006-05-03 13:27:20 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -20,6 +20,10 @@ HAVE_TCL=1
 HAVE_ICONV=1
 ICONV_DIR = c:\iconv-1.9.1.win32
 
+# libxslt
+HAVE_LIBXSLT=1
+LIBXSLT_DIR=c:\libxslt-1.1.14.win32
+
 # libxml2
 HAVE_LIBXML2=1
 LIBXML2_DIR=c:\libxml2-2.6.20.win32
@@ -36,7 +40,7 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll client ztest zoomsh utilprog testprog iconv libxml2
+all: dirs generate dll client ztest zoomsh utilprog testprog iconv libxml2 libxslt
 
 NSIS="c:\program files\nsis\makensis.exe"
 HHC="c:\program files\html help workshop\hhc.exe"
@@ -174,6 +178,19 @@ libxml2:
 
 !endif
 
+!if $(HAVE_LIBXSLT)
+LIBXSLT_LIB="$(LIBXSLT_DIR)\lib\libxslt.lib"
+LIBXSLT_DEF=/D HAVE_XSLT=1 /I"$(LIBXSLT_DIR)\include"
+libxslt: $(BINDIR)\libxslt.dll
+
+$(BINDIR)\libxslt.dll:
+  copy "$(LIBXSLT_DIR)\bin\libxslt.dll" $(BINDIR)
+
+!else
+LIBXSLT_LIB=
+LIBXSLT_DEF=/D HAVE_XSLT=0
+libxslt: 
+
 
 ### C and CPP compiler  (the same thing)
 # Note: $(CPP) has already been defined in the environment
@@ -183,6 +200,7 @@ COMMON_C_OPTIONS=          \
   /nologo /W3 /EHsc /FD /c   \
   $(ICONV_DEF)             \
   $(LIBXML2_DEF)           \
+  $(LIBXSLT_DEF)           \
   /D "_CRT_SECURE_NO_DEPRECATE" \
   /D "_WINDOWS"            \
   /D "WIN32"               \
@@ -221,9 +239,8 @@ RELEASE_C_OPTIONS=  \
 LINK=link.exe
 
 LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
-           advapi32.lib uuid.lib \
-           wsock32.lib  advapi32.lib \
-           $(ICONV_LIB) $(LIBXML2_LIB)
+           advapi32.lib uuid.lib wsock32.lib  advapi32.lib \
+           $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
 COMMON_LNK_OPTIONS= /nologo \
                     /subsystem:windows \
