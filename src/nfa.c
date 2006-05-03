@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.2 2006-05-03 11:10:00 heikki Exp $ 
+ *  $Id: nfa.c,v 1.3 2006-05-03 11:36:14 mike Exp $ 
  *
  *  This is a simple NFA-based system for character set normalizing
  *  in yaz and zebra. Unlike standard NFA's, this operates on ranges of
@@ -375,9 +375,10 @@ yaz_nfa_state *yaz_nfa_get_next(yaz_nfa *n, yaz_nfa_state *s){
 static void dump_trans(FILE *F, yaz_nfa_transition *t ) {
     char c1;
     char c2;
+    char *e;
     c1=t->range_start;
     c2=t->range_end;
-    char *e="";
+    e="";
     if ( (t->range_start <= ' ') || (t->range_start>'z'))
         c1='?';
     if ( (t->range_end <= ' ') || (t->range_end>'z'))
