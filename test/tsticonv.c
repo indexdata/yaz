@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.18 2006-04-24 23:21:26 adam Exp $
+ * $Id: tsticonv.c,v 1.19 2006-05-03 13:01:04 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -480,9 +480,16 @@ static void tst_latin1_to_marc8()
     /** Pure ASCII. 13 characters (sizeof(outbuf)) */
     YAZ_CHECK(tst_convert(cd, "Cours de math.", "Cours de math."));
 
-    /** UPPERCASE SCANDINAVIAN O */
-    YAZ_CHECK(tst_convert(cd, "SØ", "S\xa2"));
+    /** D8: UPPERCASE SCANDINAVIAN O */
+    YAZ_CHECK(tst_convert(cd, "S\xd8", "S\xa2"));
 
+#if 0
+    /* does not pass yet */
+    /** E9: LATIN SMALL LETTER E WITH ACUTE */
+    YAZ_CHECK(tst_convert(cd,
+                          "Cours de math\xe9",
+                          "Cours de mathâe"));
+#endif         
     yaz_iconv_close(cd);
 }
 
