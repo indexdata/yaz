@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.30 2006-04-30 06:50:09 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.31 2006-05-03 13:38:12 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -87,9 +87,10 @@
     </para>
 
     <para>
-     The XML C library <ulink url="&url.libxml2;">libxml2</ulink>
-     is required if &yaz; is to support SRW and SRU.
-     This library is very portable and should compile out-of-the
+     The <ulink url="&url.libxslt;">libxslt</ulink>,
+     <ulink url="&url.libxml2;">libxml2</ulink> librararies are required
+     if &yaz; is to support SRU.
+     These libraries are very portable and should compile out-of-the
      box on virtually all Unix platforms. It is available in binary
      forms for Linux and others.
     </para>
@@ -200,25 +201,25 @@
        </term>
        <listitem><para>Compile &yaz; with iconv library in directory
          <replaceable>prefix</replaceable>. By default configure will
-         search for iconv on your system. Use this option if it
-         doesn't find iconv. Alternatively you can use 
-         <literal>--without-iconv</literal> to force &yaz; not to use
-         iconv.
+         search for iconv on the system. Use this option if it
+         doesn't find iconv. Alternatively, 
+         <literal>--without-iconv</literal>, can be uset to force &yaz;
+	 not to use iconv.
         </para></listitem>
       </varlistentry>
 
       <varlistentry><term>
-        <literal>--with-xml2</literal>[=<replaceable>prefix</replaceable>]
+        <literal>--with-xslt</literal>[=<replaceable>prefix</replaceable>]
        </term>
        <listitem><para>Compile &yaz; with 
-         <ulink url="&url.libxml2;">libxml2</ulink> in directory
+         <ulink url="&url.libxslt;">libxslt</ulink> in directory
          <replaceable>prefix</replaceable>. 
-         Use this option if you want SOAP support.
-         By default configure will
-         search for libxml2 on your system. Use this option if it
-         doesn't find libxml2. Alternatively you can use 
-         <literal>--without-xml2</literal> to force &yaz; not to use
-         libxml2.
+         Use this option if you want SRU support.
+         By default, configure will
+         search for libxslt on the system. Use this option if it
+         libxslt is not found automatically. Alternatively, 
+         <literal>--without-xslt</literal>, can be used to force &yaz;
+	 not to use libxslt.
         </para></listitem>
       </varlistentry>
 
@@ -506,7 +507,7 @@
        <listitem>
         <para>
          If <literal>HAVE_LIBXML2</literal> is set to 1, YAZ is compiled
-         with SRW and SRU support. In this configuration, set 
+         with SRU support. In this configuration, set 
          <literal>LIBXML2_DIR</literal> to the 
          <ulink url="&url.libxml2;">libxml2</ulink> source directory
 	 and
@@ -514,17 +515,37 @@
         </para>
 
         <para>
-         Windows versions of libxml2, zlib and iconv can be found
+         Windows versions of libxslt, libxml2, zlib and iconv can be found
 	 <ulink url="&url.libxml2.download.win32;">
 	  Igor Zlatkovi&#x0107;' site</ulink>.
         </para>
 
 	<note>
 	 <para>
-	  YAZ is not using ZLIB. But libxml2 is.
+	  YAZ is not using zlib but libxml2 is depending on it.
 	 </para>
 	</note>
        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+       <term><literal>HAVE_LIBXSLT</literal>,
+        <literal>LIBXSLT_DIR</literal></term>
+       <listitem>
+        <para>
+         If <literal>HAVE_LIBXSLT</literal> is set to 1, YAZ is compiled
+         with XSLT support. In this configuration, set 
+         <literal>LIBXSLT_DIR</literal> to the 
+         <ulink url="&url.libxslt;">libxslt</ulink> source directory.
+        </para>
+
+	<note>
+	 <para>
+	  libxslt depends libxml2.
+	 </para>
+	</note>
+       </listitem>
+
       </varlistentry>
 
      </variablelist>
