@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: record_conv.h,v 1.1 2006-05-02 20:47:45 adam Exp $
+ * $Id: record_conv.h,v 1.2 2006-05-03 13:04:46 adam Exp $
  */
 /**
  * \file record_conv.h
@@ -34,6 +34,7 @@
 #define YAZ_RECORD_CONV_H
 
 #include <stddef.h>
+#include <yaz/wrbuf.h>
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
@@ -51,12 +52,13 @@ YAZ_EXPORT yaz_record_conv_t yaz_record_conv_create(void);
 */
 YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
 
-
 /** configures record conversion
     \param p record conversion handle
     \param node xmlNode pointer (root element of XML config)
     \retval 0 success
     \retval -1 failure
+
+    On failure, use yaz_record_conv_get_error to get error string.
     
     \verbatim
     <convert>
@@ -88,10 +90,23 @@ YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
        </retrieval>
     </retrievalinfo>
     \endverbatim
+
 */
 YAZ_EXPORT
 int yaz_record_conv_configure(yaz_record_conv_t p, const void *node);
 
+/** performs record conversion
+    \param p record conversion handle
+    \param input_record record to be converted (0-terminated)
+    \param output_record resultint record (WRBUF string)
+    \retval 0 success
+    \retval -1 failure
+
+    On failure, use yaz_record_conv_get_error to get error string.
+*/
+YAZ_EXPORT
+int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record,
+                           WRBUF output_record);
 
 /** returns error string (for last error)
     \param p record conversion handle
@@ -99,6 +114,14 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const void *node);
 */    
 YAZ_EXPORT
 const char *yaz_record_conv_get_error(yaz_record_conv_t p);
+
+
+/** set path for opening stylesheets etc.
+    \param p record conversion handle
+    \param path file path (UNIX style with : / Windows with ;)
+*/    
+YAZ_EXPORT
+void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path);
 
 YAZ_END_CDECL
 

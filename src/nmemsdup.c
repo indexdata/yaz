@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmemsdup.c,v 1.6 2006-05-02 20:47:45 adam Exp $
+ * $Id: nmemsdup.c,v 1.7 2006-05-03 13:04:46 adam Exp $
  */
 
 /**
@@ -25,6 +25,14 @@ char *nmem_strdup (NMEM mem, const char *src)
     char *dst = (char *)nmem_malloc (mem, strlen(src)+1);
     strcpy (dst, src);
     return dst;
+}
+
+char *nmem_strdup_null(NMEM mem, const char *src)
+{
+    if (!src)
+        return 0;
+    else
+        return nmem_strdup(mem, src);
 }
 
 char *nmem_strdupn (NMEM mem, const char *src, size_t n)
