@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.105 2006-05-03 13:27:20 adam Exp $
+# $Id: makefile,v 1.106 2006-05-03 13:31:53 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -190,6 +190,7 @@ $(BINDIR)\libxslt.dll:
 LIBXSLT_LIB=
 LIBXSLT_DEF=/D HAVE_XSLT=0
 libxslt: 
+!endif
 
 
 ### C and CPP compiler  (the same thing)
@@ -392,6 +393,7 @@ YAZ_UTIL_OBJS= \
    $(OBJDIR)\siconv.obj \
    $(OBJDIR)\marc8.obj \
    $(OBJDIR)\marc8r.obj \
+   $(OBJDIR)\record_conv.obj \
    $(OBJDIR)\test.obj
 
 YAZ_ZUTIL_OBJS= \
