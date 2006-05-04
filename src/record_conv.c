@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.2 2006-05-03 13:04:46 adam Exp $
+ * $Id: record_conv.c,v 1.3 2006-05-04 15:31:04 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -53,6 +53,7 @@ enum YAZ_RECORD_CONV_RULE
     YAZ_RECORD_CONV_RULE_XSLT,
     YAZ_RECORD_CONV_RULE_MARC
 };
+
 
 /** \brief tranformation info (rule info) */
 struct yaz_record_conv_rule {
@@ -427,25 +428,6 @@ int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record,
     return ret;
 }
 
-#else
-/* !HAVE_XSLT */
-int yaz_record_conv_configure(yaz_record_conv_t p, const void *ptr_v)
-{
-    wrbuf_rewind(p->wr_error);
-    wrbuf_printf(p->wr_error, "No XML support: yaz_record_conv_configure");
-    return -1;
-}
-
-int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record,
-                           WRBUF output_record);
-{
-    wrbuf_rewind(p->wr_error);
-    wrbuf_printf(p->wr_error, "No XML support: yaz_record_conv_record");
-    return -1;
-}
-
-#endif
-
 const char *yaz_record_conv_get_error(yaz_record_conv_t p)
 {
     return wrbuf_buf(p->wr_error);
@@ -461,6 +443,7 @@ void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path)
             p->path = xstrdup(path);
     }
 }
+#endif
 
 /*
  * Local variables:
