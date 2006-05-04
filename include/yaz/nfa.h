@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.3 2006-05-03 13:47:35 heikki Exp $
+ *  $Id: nfa.h,v 1.4 2006-05-04 18:58:24 adam Exp $
  */
 
 /**
@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef NFA_H
-#define NFA_H
+#ifndef YAZ_NFA_H
+#define YAZ_NFA_H
 
 #include <yaz/yconfig.h>
 
@@ -192,6 +192,7 @@ yaz_nfa_state *yaz_nfa_add_sequence( yaz_nfa *n,
 int yaz_nfa_match(yaz_nfa *n, yaz_nfa_char **inbuff, size_t incharsleft,
                 void **result );
 
+/** yaz_nfa_match return codes */
 #define YAZ_NFA_SUCCESS 0
 #define YAZ_NFA_NOMATCH 1
 #define YAZ_NFA_OVERRUN 2
@@ -201,7 +202,7 @@ int yaz_nfa_match(yaz_nfa *n, yaz_nfa_char **inbuff, size_t incharsleft,
  *
  *  \param n   the nfa
  *  \param backref_no  the number of the backref to get
- *  \param begin  beginning of the matching substring
+ *  \param start  beginning of the matching substring
  *  \param end    end of the matching substring
  *
  * Returns pointers to the beginning and end of a backref, or null
