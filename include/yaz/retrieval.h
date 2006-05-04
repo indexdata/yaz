@@ -23,82 +23,85 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: record_conv.h,v 1.3 2006-05-04 20:00:45 adam Exp $
+ * $Id: retrieval.h,v 1.1 2006-05-04 20:00:45 adam Exp $
  */
 /**
- * \file record_conv.h
- * \brief Record Conversions Utility
+ * \file retrieval.h
+ * \brief Retrieval Utility
  */
 
-#ifndef YAZ_RECORD_CONV_H
-#define YAZ_RECORD_CONV_H
+#ifndef YAZ_RETRIEVAL_H
+#define YAZ_RETRIEVAL_H
 
 #include <stddef.h>
 #include <yaz/wrbuf.h>
 #include <yaz/yconfig.h>
 
+#include <yaz/record_conv.h>
+
 YAZ_BEGIN_CDECL
 
-/** record conversion handle  */
-typedef struct yaz_record_conv_struct *yaz_record_conv_t;
+/** retrieval handle  */
+typedef struct yaz_retrieval_struct *yaz_retrieval_t;
 
-/** creates record handle
-    \return record handle
+/** creates retrieval handle
+    \return retrieval handle
 */
-YAZ_EXPORT yaz_record_conv_t yaz_record_conv_create(void);
+YAZ_EXPORT yaz_retrieval_t yaz_retrieval_create(void);
 
-/** destroys record handle
-    \param p record conversion handle
+/** destroys retrieval handle
+    \param p retrieval handle
 */
-YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
+YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
 
-/** configures record conversion
-    \param p record conversion handle
+/** configures retrieval
+    \param p retrieval handle
     \param node xmlNode pointer (root element of XML config)
     \retval 0 success
     \retval -1 failure
 
-    On failure, use yaz_record_conv_get_error to get error string.
+    On failure, use yaz_retrieval_get_error to get error string.
     
+    For retrieval:
     \verbatim
-    <convert>
-      <xslt stylesheet="dc2marcxml.xsl"/>
-      <marc inputformat="xml" outputformat="marcxml" outputcharset="marc-8"/>
-    </convert>
+    <retrievalinfo>
+       <retrieval syntax="usmarc" name="marcxml"
+            identifier="info:srw/schema/1/marcxml-v1.1"
+       >
+         <title>MARCXML</title>
+         <backend syntax="xml" name="dc" charset="utf-8"/>
+         <convert>
+            <marc inputformat="marc" outputformat="marcxml"
+                         inputcharset="marc-8"/>
+            <xslt stylesheet="marcxml2mods.xsl"/>
+            <xslt stylesheet="mods2dc.xsl"/>
+         </convert>
+       </retrieval>
+    </retrievalinfo>
     \endverbatim
-
-    \verbatim
-    <convert>
-      <marc inputformat="marc" outputformat="marcxml" inputcharset="marc-8"/>
-      <xslt stylesheet="marcxml2mods.xsl"/>
-      <xslt stylesheet="mods2dc.xsl"/>
-    </convert>
-    \endverbatim
-
-
 */
 YAZ_EXPORT
-int yaz_record_conv_configure(yaz_record_conv_t p, const void *node);
+int yaz_retrieval_configure(yaz_retrieval_t p, const void *node);
 
-/** performs record conversion
-    \param p record conversion handle
-    \param input_record record to be converted (0-terminated)
-    \param output_record resultint record (WRBUF string)
+
+/** performs retrieval request based on schema and format
+    \param p retrieval handle
+    \param schema record schema / element set name (Z39.50)
+    \param format record format (syntax)
+    \param rc record conversion reference (holds conversion upon success)
     \retval 0 success
-    \retval -1 failure
-
-    On failure, use yaz_record_conv_get_error to get error string.
+    \retval -1 falure
 */
 YAZ_EXPORT
-int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record,
-                           WRBUF output_record);
+int yaz_retrieval_request(yaz_retrieval_t p, const char *schema,
+                          const char *format, yaz_record_conv_t *rc);
 
 /** returns error string (for last error)
     \param p record conversion handle
     \return error string
 */    
 YAZ_EXPORT
-const char *yaz_record_conv_get_error(yaz_record_conv_t p);
+const char *yaz_retrieval_get_error(yaz_retrieval_t p);
 
 
 /** set path for opening stylesheets etc.
@@ -106,7 +109,7 @@ const char *yaz_record_conv_get_error(yaz_record_conv_t p);
     \param path file path (UNIX style with : / Windows with ;)
 */    
 YAZ_EXPORT
-void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path);
+void yaz_retrieval_set_path(yaz_retrieval_t p, const char *path);
 
 YAZ_END_CDECL
 

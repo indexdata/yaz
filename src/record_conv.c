@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.3 2006-05-04 15:31:04 adam Exp $
+ * $Id: record_conv.c,v 1.4 2006-05-04 20:00:45 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -31,19 +31,19 @@
 
 /** \brief The internal structure for yaz_record_conv_t */
 struct yaz_record_conv_struct {
-    /** memory for configuration */
+    /** \brief memory for configuration */
     NMEM nmem;
 
-    /** conversion rules (allocated using NMEM) */
+    /** \brief conversion rules (allocated using NMEM) */
     struct yaz_record_conv_rule *rules;
 
-    /** pointer to last conversion rule pointer in chain */
+    /** \brief pointer to last conversion rule pointer in chain */
     struct yaz_record_conv_rule **rules_p;
 
-    /** string buffer for error messages */
+    /** \brief string buffer for error messages */
     WRBUF wr_error;
 
-    /** path for opening files  */
+    /** \brief path for opening files  */
     char *path;
 };
 
@@ -72,7 +72,7 @@ struct yaz_record_conv_rule {
     struct yaz_record_conv_rule *next;
 };
 
-/** reset rules+configuration */
+/** \brief reset rules+configuration */
 static void yaz_record_conv_reset(yaz_record_conv_t p)
 {
     struct yaz_record_conv_rule *r;
@@ -120,6 +120,7 @@ void yaz_record_conv_destroy(yaz_record_conv_t p)
     }
 }
 
+/** \brief adds a rule */
 static struct yaz_record_conv_rule *add_rule(yaz_record_conv_t p,
                                              enum YAZ_RECORD_CONV_RULE type)
 {
@@ -131,6 +132,7 @@ static struct yaz_record_conv_rule *add_rule(yaz_record_conv_t p,
     return r;
 }
 
+/** \brief parse 'xslt' conversion node */
 static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
 {
     struct _xmlAttr *attr;
@@ -179,6 +181,7 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
     return 0;
 }
 
+/** \brief parse 'marc' conversion node */
 static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
 {
     struct _xmlAttr *attr;
@@ -435,13 +438,10 @@ const char *yaz_record_conv_get_error(yaz_record_conv_t p)
 
 void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path)
 {
-    if (p)
-    {
-        xfree(p->path);
-        p->path = 0;
-        if (path)
-            p->path = xstrdup(path);
-    }
+    xfree(p->path);
+    p->path = 0;
+    if (path)
+        p->path = xstrdup(path);
 }
 #endif
 

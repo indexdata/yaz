@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.3 2006-05-04 18:22:59 adam Exp $
+ * $Id: tst_record_conv.c,v 1.4 2006-05-04 20:00:45 adam Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -275,7 +275,7 @@ static void tst_convert()
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
-#if HAVE_XML2
+#if HAVE_XSLT
     tst_configure();
     tst_convert();
 #endif
