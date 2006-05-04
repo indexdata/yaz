@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.2 2006-05-03 13:04:46 adam Exp $
+ * $Id: tst_record_conv.c,v 1.3 2006-05-04 18:22:59 adam Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -10,7 +10,11 @@
 #include <yaz/wrbuf.h>
 #include <string.h>
 
-#if HAVE_XML2
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#if HAVE_XSLT
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -264,7 +268,6 @@ static void tst_convert()
                                   "</convert>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, marcxml_rec));
-
 }
 
 #endif
