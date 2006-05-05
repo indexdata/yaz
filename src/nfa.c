@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.5 2006-05-04 18:58:54 adam Exp $ 
+ *  $Id: nfa.c,v 1.6 2006-05-05 09:14:42 heikki Exp $ 
  */
 
 /**
@@ -75,6 +75,20 @@ struct yaz_nfa_transition {
 #define LOOP_LIMIT 100
 
 
+typedef enum {
+    conv_none,
+    conv_string,
+    conv_backref
+} yaz_nfa_converter_type;
+
+struct yaz_nfa_converter {
+    yaz_nfa_converter *next;
+    yaz_nfa_converter_type type;
+    yaz_nfa_char *string;
+    size_t strlen;
+    int backref_no;
+    int char_diff;
+};
 
 
 /* * * * * * *
@@ -177,6 +191,8 @@ void yaz_nfa_add_transition(yaz_nfa *n,
         yaz_nfa_char range_start, 
         yaz_nfa_char range_end) {
     yaz_nfa_transition *t = nmem_malloc(n->nmem, sizeof(yaz_nfa_transition));
+    if (!from_state)
+        from_state = n->firststate;
     t->range_start = range_start;
     t->range_end = range_end;
     t->to_state = to_state;
@@ -335,7 +351,7 @@ static void match_state(
 
 int yaz_nfa_match(yaz_nfa *n, 
            yaz_nfa_char **inbuff, 
-           size_t incharsleft,
+           size_t *incharsleft,
            void **result ){
     struct matcher m;
     int sz;
@@ -349,6 +365,7 @@ int yaz_nfa_match(yaz_nfa *n,
     m.bestnode = n->nstates;
     m.result = 0;
     m.errorcode = 0;
+    m.empties = 0;
     sz = sizeof( struct yaz_nfa_backref_info) * n->nbackrefs;
     if (!n->curr_backrefs) {
         n->curr_backrefs = nmem_malloc( n->nmem, sz);
@@ -361,8 +378,9 @@ int yaz_nfa_match(yaz_nfa *n,
         n->best_backrefs[i].end = 0;
     }
 
-    match_state(n->firststate, *inbuff, incharsleft, &m);
+    match_state(n->firststate, *inbuff, *incharsleft, &m);
     if (m.result) {
+        *incharsleft -= (m.longest-*inbuff);
         *result = m.result;
         *inbuff = m.longest;
         if (m.errorcode)
@@ -392,6 +410,115 @@ int yaz_nfa_get_backref( yaz_nfa *n,
     return 0;
 }
 
+/* * * * * * * * * * * * * *
+ * Converters 
+ * * * * * * * * * * * * * */
+
+static yaz_nfa_converter *create_null_converter ( yaz_nfa *n) {
+    yaz_nfa_converter *c;
+    c=nmem_malloc(n->nmem, sizeof(yaz_nfa_converter));
+    c->next=0;
+    c->type=conv_none;
+    c->string=0;
+    c->strlen=0;
+    c->backref_no=0;
+    c->char_diff=0;
+    return c;
+}
+
+yaz_nfa_converter *yaz_nfa_create_string_converter (
+                yaz_nfa *n,
+                yaz_nfa_char *string,
+                size_t length){
+    yaz_nfa_converter *c;
+    int i;
+    c=create_null_converter(n);
+    c->type=conv_string;
+    c->string=nmem_malloc(n->nmem, length*sizeof(yaz_nfa_char));
+    for (i=0;i<length;i++)
+        c->string[i]=string[i];
+    c->strlen=length;
+    return c;
+}
+
+yaz_nfa_converter *yaz_nfa_create_backref_converter (
+                   yaz_nfa *n, int backref_no ) {
+    yaz_nfa_converter *c;
+    c=create_null_converter(n);
+    c->type=conv_backref;
+    c->backref_no=backref_no;
+    return c;
+}
+
+
+void yaz_nfa_append_converter (
+                yaz_nfa *n,
+                yaz_nfa_converter *startpoint,
+                yaz_nfa_converter *newconverter) {
+    while (startpoint->next)
+        startpoint=startpoint->next;
+    startpoint->next=newconverter;
+}
+
+static int string_convert (
+                yaz_nfa *n,
+                yaz_nfa_converter *c,
+                yaz_nfa_char **outbuff,
+                size_t *outcharsleft){
+    size_t sz=c->strlen;
+    yaz_nfa_char *p=c->string;
+    while (sz--) {
+        if ((*outcharsleft)-- <= 0)
+            return 2;
+        **outbuff=*p++;
+        (*outbuff)++;
+    }
+    return 0;
+}
+static int backref_convert (
+                yaz_nfa *n,
+                yaz_nfa_converter *c,
+                yaz_nfa_char **outbuff,
+                size_t *outcharsleft){
+    yaz_nfa_char *cp1,*cp2;
+    int i;
+    i=yaz_nfa_get_backref(n,c->backref_no, &cp1, &cp2);
+    if (i==2) /* no backref, produce no output, that's ok */
+        return 0;
+    if (i==1) /* no match in dfa */
+        return 1; /* should not happen */
+    while (cp2>cp1) {
+        if ((*outcharsleft)-- <= 0)
+            return 2;
+        **outbuff=*cp1++;
+        (*outbuff)++;
+    }
+    return 0;
+}
+
+
+int yaz_nfa_run_converters(
+                yaz_nfa *n,
+                yaz_nfa_converter *c,
+                yaz_nfa_char **outbuff,
+                size_t *outcharsleft){
+    int rc=0;
+    // yaz_nfa_char *bufstart=*outbuff;
+    while (c && !rc) {
+        switch(c->type) {
+            case conv_string:
+                rc=string_convert(n,c,outbuff,outcharsleft);
+                break;
+            case conv_backref:
+                rc=backref_convert(n,c,outbuff,outcharsleft);
+                break;
+            default:
+                rc=3; /* internal error */
+        }
+        c=c->next;
+    }
+    return rc;
+}
 
 /* * * * * * * * *
  * Debug routines

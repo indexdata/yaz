@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.4 2006-05-04 18:58:24 adam Exp $
+ *  $Id: nfa.h,v 1.5 2006-05-05 09:14:42 heikki Exp $
  */
 
 /**
@@ -14,6 +14,13 @@
  * When matching, we always start at the first state, and find the longest
  * possible sequence of input characters that match the ranges in the
  * conditions, and that leads into a terminal state. 
+ *
+ * Separate from this we have converters. Those can often be used
+ * together with a NFA (think match-pattern and replace-pattern).
+ *
+ * A converter is a routine that produces some output. It can translate a
+ * range of characters into another range, emit a constant string, or
+ * something like that.  
  *
  */
 
@@ -37,6 +44,11 @@ typedef struct yaz_nfa_state yaz_nfa_state;
 
 /** \brief Transition from one state to another */
 typedef struct yaz_nfa_transition yaz_nfa_transition;
+
+
+/** brief  Simple character range converter */
+typedef struct yaz_nfa_converter yaz_nfa_converter;
+
 
 
 /** \brief Initialize the NFA without any states in it  
@@ -124,7 +136,7 @@ int yaz_nfa_get_backref_point(yaz_nfa *n, yaz_nfa_state *s,
  *   Add a transition between two existing states. The condition
  *   is (as always) a range of yaz_nfa_chars. 
  *  \param n   the nfa
- *  \param from_state  which state the transition is from
+ *  \param from_state  which state the transition is from. null=initial
  *  \param to_state    where the transition goes to
  *  \param range_start is the beginning of the range of values
  *  \param range_end is the end of the range of values
@@ -176,7 +188,7 @@ yaz_nfa_state *yaz_nfa_add_sequence( yaz_nfa *n,
  * 
  *  \param n   the nfa itself
  *  \param inbuff  buffer of input data. Will be incremented when match
- *  \param incharsleft   max number of inchars to use from inbuff
+ *  \param incharsleft   max number of inchars to use from inbuff. decrements.
  *  \param result   the result pointer from the nfa (what ever that is)
  *
  *  In case of errors, returns the best match so far,
@@ -189,7 +201,7 @@ yaz_nfa_state *yaz_nfa_add_sequence( yaz_nfa *n,
  *
  */
 
-int yaz_nfa_match(yaz_nfa *n, yaz_nfa_char **inbuff, size_t incharsleft,
+int yaz_nfa_match(yaz_nfa *n, yaz_nfa_char **inbuff, size_t *incharsleft,
                 void **result );
 
 /** yaz_nfa_match return codes */
@@ -224,6 +236,64 @@ int yaz_nfa_get_backref( yaz_nfa *n,
         yaz_nfa_char **start,
         yaz_nfa_char **end );
 
+/** \brief Create a string converter.
+ * \param n  the nfa 
+ * \param string the string to output
+ * \param length how many chars in the string 
+ *
+ * This converter produces a constant string in the output
+ */
+yaz_nfa_converter *yaz_nfa_create_string_converter (
+        yaz_nfa *n,
+        yaz_nfa_char *string,
+        size_t length );
+
+/** \brief Create a backref converter
+ * \param n  the nfa 
+ * \param backref_no   The backreference to reproduce
+ *
+ * This converter copies a backref into the output buffer
+ */
+yaz_nfa_converter *yaz_nfa_create_backref_converter (
+        yaz_nfa *n, int backref_no );
+
+
+
+/** \brief Connects converters in a chain.
+ * \param n  the nfa (mostly for nmem access)
+ * \param startpoint the first converter in the chain
+ * \param newconverter
+ *
+ * Places the new converter at the end of the chain that starts from 
+ * startpoint.
+ *
+ */
+void yaz_nfa_append_converter (
+        yaz_nfa *n,
+        yaz_nfa_converter *startpoint,
+        yaz_nfa_converter *newconverter);
+
+/** brief Runs the chain of converters.
+ * \param n  the nfa (mostly for nmem access)
+ * \param c  the first converter in a chain
+ * \param outbuff  buffer to write the output in. Increments the ptr.
+ * \param outcharsleft how many may we write
+ *
+ * Runs the converters in the chain, placing output into outbuff
+ * (and incrementing the pointer). 
+ *
+ * \retval 0 OK
+ * \retval 1 no match to get backrefs from
+ * \retval 2 no room in outbuf
+ *
+ */
+int yaz_nfa_run_converters(
+        yaz_nfa *n,
+        yaz_nfa_converter *c,
+        yaz_nfa_char **outbuff,
+        size_t *outcharsleft);
+
+
 /** \brief Get the first state of the NFA. 
  *
  *  \param n   the nfa
@@ -257,6 +327,9 @@ yaz_nfa_state *yaz_nfa_get_next(yaz_nfa *n, yaz_nfa_state *s);
  *
  */
 void yaz_nfa_dump(FILE *F, yaz_nfa *n, char *(*strfunc)(void *) ); 
+
+
+
 
 
 YAZ_END_CDECL
