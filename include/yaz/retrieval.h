@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: retrieval.h,v 1.1 2006-05-04 20:00:45 adam Exp $
+ * $Id: retrieval.h,v 1.2 2006-05-05 18:37:08 adam Exp $
  */
 /**
  * \file retrieval.h
@@ -65,11 +65,11 @@ YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
     For retrieval:
     \verbatim
     <retrievalinfo>
-       <retrieval syntax="usmarc" name="marcxml"
+       <retrieval syntax="usmarc" schema="marcxml"
             identifier="info:srw/schema/1/marcxml-v1.1"
+            backendsyntax="xml" backendschema="dc"
        >
          <title>MARCXML</title>
-         <backend syntax="xml" name="dc" charset="utf-8"/>
          <convert>
             <marc inputformat="marc" outputformat="marcxml"
                          inputcharset="marc-8"/>
@@ -87,14 +87,14 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const void *node);
 /** performs retrieval request based on schema and format
     \param p retrieval handle
     \param schema record schema / element set name (Z39.50)
-    \param format record format (syntax)
+    \param syntax record syntax (format)
     \param rc record conversion reference (holds conversion upon success)
     \retval 0 success
     \retval -1 falure
 */
 YAZ_EXPORT
 int yaz_retrieval_request(yaz_retrieval_t p, const char *schema,
-                          const char *format, yaz_record_conv_t *rc);
+                          const char *syntax, yaz_record_conv_t *rc);
 
 /** returns error string (for last error)
     \param p record conversion handle

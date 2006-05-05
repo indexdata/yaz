@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_retrieval.c,v 1.1 2006-05-04 20:00:45 adam Exp $
+ * $Id: tst_retrieval.c,v 1.2 2006-05-05 18:37:08 adam Exp $
  *
  */
 #include <yaz/retrieval.h>
@@ -104,22 +104,21 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
 
 static void tst_configure()
 {
-    YAZ_CHECK(conv_configure_test("<bad", "xmlParseMemory", 0));
-#if 0
-    YAZ_CHECK(conv_configure_test("<bad/>", "Missing 'convert' element", 0));
-    YAZ_CHECK(conv_configure_test("<convert/>", 0, 0));
-    YAZ_CHECK(conv_configure_test("<convert><bad/></convert>",
+    YAZ_CHECK(conv_configure_test("<bad", 
+                                  "xmlParseMemory", 0));
+
+    YAZ_CHECK(conv_configure_test("<bad/>", 
+                                  "Missing 'retrievalinfo' element", 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo/>", 0, 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo><bad/></retrievalinfo>",
                                   "Bad element 'bad'."
-                                  "Expected marc, xslt, ..", 0));
-    YAZ_CHECK(conv_configure_test("<convert>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
-                                  "<marc"
-                                  " inputcharset=\"marc-8\""
-                                  " outputcharset=\"marc-8\""
-                                  "/>"
-                                  "</convert>",
-                                  "Attribute 'inputformat' required", 0));
-    YAZ_CHECK(conv_configure_test("<convert>"
+                                  " Expected 'retrieval'", 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval>"
+                                  "<convert>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
                                   " inputcharset=\"utf-8\""
@@ -127,9 +126,36 @@ static void tst_configure()
                                   " inputformat=\"xml\""
                                   " outputformat=\"marc\""
                                   "/>"
-                                  "</convert>",
+                                  "</convert>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
                                   0, 0));
-#endif
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval>"
+                                  "<convert>"
+                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<marc"
+                                  " inputcharset=\"utf-8\""
+                                  " outputcharset=\"marc-8\""
+                                  " inputformat=\"xml\""
+                                  " outputformat=\"marc\""
+                                  "/>"
+                                  "</convert>"
+                                  "</retrieval>"
+                                  "<retrieval>"
+                                  "<convert>"
+                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<marc"
+                                  " inputcharset=\"utf-8\""
+                                  " outputcharset=\"marc-8\""
+                                  " inputformat=\"xml\""
+                                  " outputformat=\"marc\""
+                                  "/>"
+                                  "</convert>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  0, 0));
 }
 
 #endif

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.4 2006-05-04 20:00:45 adam Exp $
+ * $Id: tst_record_conv.c,v 1.5 2006-05-05 18:37:08 adam Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -91,13 +91,14 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
         }
         else
         {
-            if (pt)
-                *pt = p;
-            else
-                yaz_record_conv_destroy(p);
             ret = 1;
         }
     }
+    if (pt)
+        *pt = p;
+    else
+        yaz_record_conv_destroy(p);
+
     wrbuf_free(w, 1);
     return ret;
 }
@@ -218,6 +219,7 @@ static void tst_convert()
                                   "</convert>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, iso2709_rec));
+    yaz_record_conv_destroy(p);
 
     YAZ_CHECK(conv_configure_test("<convert>"
                                   "<marc"
@@ -229,6 +231,7 @@ static void tst_convert()
                                   "</convert>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, iso2709_rec, marcxml_rec));
+    yaz_record_conv_destroy(p);
 
 
     YAZ_CHECK(conv_configure_test("<convert>"
@@ -249,7 +252,7 @@ static void tst_convert()
                                   "</convert>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, marcxml_rec));
-
+    yaz_record_conv_destroy(p);
 
 
     YAZ_CHECK(conv_configure_test("<convert>"
@@ -268,6 +271,7 @@ static void tst_convert()
                                   "</convert>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, marcxml_rec));
+    yaz_record_conv_destroy(p);
 }
 
 #endif
