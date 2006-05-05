@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.7 2006-05-05 14:02:27 heikki Exp $ 
+ *  $Id: nfa.c,v 1.8 2006-05-05 14:04:03 heikki Exp $ 
  */
 
 /**
@@ -520,7 +520,6 @@ static int range_convert (
     yaz_nfa_char *cp1,*cp2;
     int i;
     i = yaz_nfa_get_backref(n,c->backref_no, &cp1, &cp2);
-    printf ("range_convert: i=%d d=%d, cp1=%p cp2=%p \n",i,c->char_diff,cp1,cp2);
     if (i == 2) /* no backref, produce no output, not ok */
         return 1; /* should not happen */
     if (i == 1) /* no match in dfa */
@@ -528,9 +527,7 @@ static int range_convert (
     while (cp2 >= cp1) {
         if ((*outcharsleft)-- <= 0)
             return 2;
-        printf("   range_convert: %d '%c' -> ",*cp1,*cp1);
         **outbuff=(*cp1++) + c->char_diff ;
-        printf("%d '%c'\n",**outbuff, **outbuff);
         (*outbuff)++;
     }
     return 0;
