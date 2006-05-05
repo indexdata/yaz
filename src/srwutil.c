@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.38 2006-04-20 00:01:01 adam Exp $
+ * $Id: srwutil.c,v 1.39 2006-05-05 20:02:22 quinn Exp $
  */
 /**
  * \file srwutil.c
@@ -174,6 +174,91 @@ char *yaz_uri_val(const char *path, const char *name, ODR o)
             path++;
     }
     return 0;
+}
+
+static int yaz_base64decode(const char *in, char *out)
+{
+    const char *map = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	"abcdefghijklmnopqrstuvwxyz0123456789+/";
+    int olen = 0;
+    int len = strlen(in);
+
+    while (len >= 4)
+    {
+	char i0, i1, i2, i3;
+	char *p;
+
+	if (!(p = index(map, in[0])))
+	    return 0;
+	i0 = p - map;
+	len--;
+	if (!(p = index(map, in[1])))
+	    return 0;
+	i1 = p - map;
+	len--;
+	*(out++) = i0 << 2 | i1 >> 4;
+	olen++;
+	if (in[2] == '=')
+	    break;
+	if (!(p = index(map, in[2])))
+	    return 0;
+	i2 = p - map;
+	len--;
+	*(out++) = i1 << 4 | i2 >> 2;
+	olen++;
+	if (in[3] == '=')
+	    break;
+	if (!(p = index(map, in[3])))
+	    return 0;
+	i3 = p - map;
+	len--;
+	*(out++) = i2 << 6 | i3;
+	olen++;
+
+	in += 4;
+    }
+
+    *out = '\0';
+    return olen;
+}
+
+/**
+ * Look for authentication tokens in HTTP Basic parameters or in x-username/x-password
+ * parameters. Added by SH.
+ */
+static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq, char *username,
+        char *password, ODR decode)
+{
+    const char *basic = z_HTTP_header_lookup(hreq->headers, "Authorization");
+
+    if (username)
+        sr->username = username;
+    if (password)
+        sr->password = password;
+
+    if (basic) {
+        int len, olen;
+        char out[256];
+        char ubuf[256] = "", pbuf[256] = "", *p;
+        if (strncmp(basic, "Basic ", 6))
+            return;
+        basic += 6;
+        len = strlen(basic);
+        if (!len || len > 256)
+            return;
+        olen = yaz_base64decode(basic, out);
+        /* Format of out should be username:password at this point */
+        strcpy(ubuf, out);
+        if ((p = index(ubuf, ':'))) {
+            *(p++) = '\0';
+            if (*p)
+                strcpy(pbuf, p);
+        }
+        if (*ubuf)
+            sr->username = odr_strdup(decode, ubuf);
+        if (*pbuf)
+            sr->password = odr_strdup(decode, pbuf);
+    }
 }
 
 void yaz_uri_val_int(const char *path, const char *name, ODR o, int **intp)
@@ -350,6 +435,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char *version = 0;
         char *query = 0;
         char *pQuery = 0;
+        char *username = 0;
+        char *password = 0;
         char *sortKeys = 0;
         char *stylesheet = 0;
         char *scanClause = 0;
@@ -394,6 +481,10 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     query = v;
                 else if (!strcmp(n, "x-pquery"))
                     pQuery = v;
+                else if (!strcmp(n, "x-username"))
+                    username = v;
+                else if (!strcmp(n, "x-password"))
+                    password = v;
                 else if (!strcmp(n, "operation"))
                     operation = v;
                 else if (!strcmp(n, "stylesheet"))
@@ -446,6 +537,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 
             sr->srw_version = version;
             *srw_pdu = sr;
+            yaz_srw_decodeauth(sr, hreq, username, password, decode);
             if (query)
             {
                 sr->u.request->query_type = Z_SRW_query_type_cql;
@@ -499,6 +591,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_explain_request);
 
             sr->srw_version = version;
+            yaz_srw_decodeauth(sr, hreq, username, password, decode);
             *srw_pdu = sr;
             sr->u.explain_request->recordPacking = recordPacking;
             sr->u.explain_request->database = db;
@@ -527,6 +620,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 
             sr->srw_version = version;
             *srw_pdu = sr;
+            yaz_srw_decodeauth(sr, hreq, username, password, decode);
 
             if (scanClause)
             {
@@ -619,6 +713,8 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 {
     Z_SRW_PDU *sr = (Z_SRW_PDU *) odr_malloc(o, sizeof(*o));
 
+    sr->username = 0;
+    sr->password = 0;
     sr->srw_version = odr_strdup(o, "1.1");
     sr->which = which;
     switch(which)

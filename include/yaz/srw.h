@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.h,v 1.25 2006-03-01 23:24:24 adam Exp $
+ * $Id: srw.h,v 1.26 2006-05-05 20:02:22 quinn Exp $
  */
 /**
  * \file srw.h
@@ -178,6 +178,8 @@ typedef struct {
         Z_SRW_updateResponse *update_response;
     } u;
     char *srw_version;
+    char *username; /* From HTTP header or request */
+    char *password; /* From HTTP header or request  */
 } Z_SRW_PDU;
 
 YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
