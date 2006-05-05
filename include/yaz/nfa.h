@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.5 2006-05-05 09:14:42 heikki Exp $
+ *  $Id: nfa.h,v 1.6 2006-05-05 14:02:27 heikki Exp $
  */
 
 /**
@@ -257,6 +257,24 @@ yaz_nfa_converter *yaz_nfa_create_string_converter (
 yaz_nfa_converter *yaz_nfa_create_backref_converter (
         yaz_nfa *n, int backref_no );
 
+
+/** \brief Create a charcater range converter
+ * \param n  the nfa 
+ * \param backref_no   The backreference to reproduce
+ * \param from_char    the first character of the original range
+ * \param to_char      the first character of the target range
+ *
+ * This converter takes a backreference, and shifts the characters
+ * by a constant value. For example, translating a-z to A-Z.
+ * Note that backref 0 is always the last character that matched a 
+ * range, even if no backrefs were defined in teh nfa. This makes 
+ * it pretty useful with this converter.
+ *
+ */
+yaz_nfa_converter *yaz_nfa_create_range_converter (
+        yaz_nfa *n, int backref_no,
+        yaz_nfa_char from_char,
+        yaz_nfa_char to_char);
 
 
 /** \brief Connects converters in a chain.

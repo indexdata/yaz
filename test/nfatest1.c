@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfatest1.c,v 1.4 2006-05-05 09:14:42 heikki Exp $
+ *  $Id: nfatest1.c,v 1.5 2006-05-05 14:02:27 heikki Exp $
  *
  */
 
@@ -12,7 +12,7 @@
 #include <yaz/nmem.h>
 #include <yaz/test.h>
 
-#define VERBOSE 1
+#define VERBOSE 0
 
 char *printfunc(void *result) {
     static char buf[200];
@@ -175,15 +175,18 @@ void construction_test() {
     test_match(n, tst4, 9, YAZ_NFA_LOOP, "loop");
     test_match(n, tst5, 9, YAZ_NFA_SUCCESS, "y k+ d");
 
-    cp = tst6;
+    cp = tst6;  /* xzkab */
     sz = 8;
     i = yaz_nfa_match(n, &cp, &sz, &p);
     YAZ_CHECK_EQ(i, YAZ_NFA_SUCCESS); 
     i = yaz_nfa_get_backref(n, 2, &cp1, &cp2 );
     YAZ_CHECK_EQ(i, 0);
+    YAZ_CHECK_EQ(cp2-cp1+1,2); 
+    YAZ_CHECK_EQ(*cp1, 'z' );
+    YAZ_CHECK_EQ(*cp2, 'k' );
 #if VERBOSE    
-    printf("backref from %p to %p is %d long. sz is now %d\n",
-            cp1,cp2, cp2-cp1,sz );
+    printf("backref from %p '%c' to %p '%c' is %d long. sz is now %d\n",
+            cp1, *cp1,  cp2, *cp2,  cp2-cp1+1, sz );
 #endif
 
     yaz_nfa_destroy(n);
@@ -191,12 +194,12 @@ void construction_test() {
 
 void converter_test() {
     yaz_nfa* n= yaz_nfa_init();
-    yaz_nfa_converter *c1,*c2;
+    yaz_nfa_converter *c1, *c2, *c3;
     yaz_nfa_char str1[]={'a','b','c'};
     yaz_nfa_char seq1[]={'A','B','C',0};
     yaz_nfa_char seq2[]={'k','m','n','m','x','P','Q','X',0};
     yaz_nfa_char outbuf[1024];
-    yaz_nfa_char *outp,*cp, *cp1, *cp2;
+    yaz_nfa_char *outp, *cp, *cp1, *cp2;
     yaz_nfa_state *s, *s2;
     void *vp;
     int i;
@@ -251,7 +254,7 @@ void converter_test() {
     yaz_nfa_set_result(n,s,c1);
     yaz_nfa_set_backref_point(n,s,1,0);
 
-    /* [k-o][m-n]*x -> m-n sequence */
+    /* ([k-o][m-n]*)x -> \1 */
     s=yaz_nfa_add_state(n);
     yaz_nfa_add_empty_transition(n,0,s);
     yaz_nfa_set_backref_point(n,s,2,1);
@@ -275,8 +278,12 @@ void converter_test() {
     c2=vp;
     YAZ_CHECK_EQ(i,YAZ_NFA_SUCCESS); 
     i=yaz_nfa_get_backref(n, 2, &cp1, &cp2 );
+#if VERBOSE    
+    printf("backref from %p '%c' to %p '%c' is %d long. sz is now %d\n",
+            cp1, *cp1,  cp2, *cp2,  cp2-cp1+1, sz );
+#endif
     YAZ_CHECK_EQ(i,0);
-    YAZ_CHECK_EQ((int)c1,(int)c2);
+    YAZ_CHECK_EQ((int)c1,(int)c2);  /* got our pointer back from nfa */
     for(i=0;i<1024;i++)
         outbuf[i]=10000+i;
     outp=outbuf;
@@ -288,6 +295,21 @@ void converter_test() {
     YAZ_CHECK_EQ(outbuf[2],'n');
     YAZ_CHECK_EQ(outbuf[3],'m');
     YAZ_CHECK_EQ(outbuf[4],'x');
+    YAZ_CHECK_EQ(outbuf[5],10000+5);
+    YAZ_CHECK_EQ(sz,11-5);
+
+    c3=yaz_nfa_create_range_converter(n,2, 'a', 'A' );
+    for(i=0;i<1024;i++)
+        outbuf[i]=10000+i;
+    outp=outbuf;
+    sz=11;
+    i=yaz_nfa_run_converters(n, c3, &outp, &sz);
+    YAZ_CHECK_EQ(i,0); 
+    YAZ_CHECK_EQ(outbuf[0],'K');
+    YAZ_CHECK_EQ(outbuf[1],'M');
+    YAZ_CHECK_EQ(outbuf[2],'N');
+    YAZ_CHECK_EQ(outbuf[3],'M');
+    YAZ_CHECK_EQ(outbuf[4],'X');
     YAZ_CHECK_EQ(outbuf[5],10000+5);
     YAZ_CHECK_EQ(sz,11-5);
 

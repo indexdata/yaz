@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.6 2006-05-05 09:14:42 heikki Exp $ 
+ *  $Id: nfa.c,v 1.7 2006-05-05 14:02:27 heikki Exp $ 
  */
 
 /**
@@ -78,7 +78,8 @@ struct yaz_nfa_transition {
 typedef enum {
     conv_none,
     conv_string,
-    conv_backref
+    conv_backref,
+    conv_range
 } yaz_nfa_converter_type;
 
 struct yaz_nfa_converter {
@@ -282,7 +283,7 @@ yaz_nfa_state *yaz_nfa_add_sequence(yaz_nfa *n,
 struct matcher {
     yaz_nfa *n; 
     yaz_nfa_char *longest;
-    int bestnode;
+    int bestnode; 
     void *result;
     int errorcode;
     int empties; /* count how many consecutive empty transitions */
@@ -294,14 +295,15 @@ struct matcher {
 
 static void match_state(
               yaz_nfa_state *s, 
-              yaz_nfa_char *inchar,
-              size_t incharsleft,
-              struct matcher *m ) {
+              yaz_nfa_char *prevmatch,
+              yaz_nfa_char *inchar,   
+              size_t incharsleft,    
+              struct matcher *m ) {   
     yaz_nfa_transition *t = s->lasttrans;
     if (s->backref_start) 
         m->n->curr_backrefs[s->backref_start].start = inchar;
     if (s->backref_end) 
-        m->n->curr_backrefs[s->backref_end].end = inchar;
+        m->n->curr_backrefs[s->backref_end].end = prevmatch;
     if (t) {
         if (incharsleft) {
             do {
@@ -313,14 +315,15 @@ static void match_state(
                         m->n->curr_backrefs[0].start = inchar;
                         m->n->curr_backrefs[0].end = inchar;
                     }
-                    match_state(t->to_state, inchar+1, incharsleft-1, m);
-                    /* yes, descent to all matching nodes, even if overrun, */
-                    /* since we can find a better one later */
-                } else if (( t->range_start==EMPTY_START) && (t->range_end==EMPTY_END)) {
+                    match_state(t->to_state, inchar, 
+                            inchar+1, incharsleft-1, m);
+                } else if (( t->range_start==EMPTY_START) && 
+                           (t->range_end==EMPTY_END)) {
                     if ( m->empties++ > LOOP_LIMIT ) 
                         m->errorcode= YAZ_NFA_LOOP;
                     else
-                        match_state(t->to_state, inchar, incharsleft, m);
+                        match_state(t->to_state, prevmatch, 
+                                inchar, incharsleft, m);
                 }
             } while (t != s->lasttrans );
         } else {
@@ -378,7 +381,7 @@ int yaz_nfa_match(yaz_nfa *n,
         n->best_backrefs[i].end = 0;
     }
 
-    match_state(n->firststate, *inbuff, *incharsleft, &m);
+    match_state(n->firststate, *inbuff, *inbuff, *incharsleft, &m);
     if (m.result) {
         *incharsleft -= (m.longest-*inbuff);
         *result = m.result;
@@ -450,6 +453,19 @@ yaz_nfa_converter *yaz_nfa_create_backref_converter (
     return c;
 }
 
+yaz_nfa_converter *yaz_nfa_create_range_converter (
+                yaz_nfa *n, int backref_no,
+                yaz_nfa_char from_char,
+                yaz_nfa_char to_char){
+    yaz_nfa_converter *c;
+    c=create_null_converter(n);
+    c->type=conv_range;
+    c->backref_no=backref_no;
+    c->char_diff=to_char - from_char;
+    return c;
+    
+}
+
 
 void yaz_nfa_append_converter (
                 yaz_nfa *n,
@@ -487,10 +503,34 @@ static int backref_convert (
         return 0;
     if (i==1) /* no match in dfa */
         return 1; /* should not happen */
-    while (cp2>cp1) {
+    while (cp2>=cp1) {
         if ((*outcharsleft)-- <= 0)
             return 2;
         **outbuff=*cp1++;
+        (*outbuff)++;
+    }
+    return 0;
+}
+
+static int range_convert (
+                yaz_nfa *n,
+                yaz_nfa_converter *c,
+                yaz_nfa_char **outbuff,
+                size_t *outcharsleft){
+    yaz_nfa_char *cp1,*cp2;
+    int i;
+    i = yaz_nfa_get_backref(n,c->backref_no, &cp1, &cp2);
+    printf ("range_convert: i=%d d=%d, cp1=%p cp2=%p \n",i,c->char_diff,cp1,cp2);
+    if (i == 2) /* no backref, produce no output, not ok */
+        return 1; /* should not happen */
+    if (i == 1) /* no match in dfa */
+        return 1; /* should not happen */
+    while (cp2 >= cp1) {
+        if ((*outcharsleft)-- <= 0)
+            return 2;
+        printf("   range_convert: %d '%c' -> ",*cp1,*cp1);
+        **outbuff=(*cp1++) + c->char_diff ;
+        printf("%d '%c'\n",**outbuff, **outbuff);
         (*outbuff)++;
     }
     return 0;
@@ -503,7 +543,6 @@ int yaz_nfa_run_converters(
                 yaz_nfa_char **outbuff,
                 size_t *outcharsleft){
     int rc=0;
-    // yaz_nfa_char *bufstart=*outbuff;
     while (c && !rc) {
         switch(c->type) {
             case conv_string:
@@ -511,6 +550,9 @@ int yaz_nfa_run_converters(
                 break;
             case conv_backref:
                 rc=backref_convert(n,c,outbuff,outcharsleft);
+                break;
+            case conv_range:
+                rc=range_convert(n,c,outbuff,outcharsleft);
                 break;
             default:
                 rc=3; /* internal error */
