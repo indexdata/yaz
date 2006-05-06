@@ -1,3 +1,7 @@
+Added Authentication support to Generic Frontend Server in SRU
+mode. Authentication using HTTP Basic is supported, as is the use
+of 'x-username' and 'x-password' parameters in the request itself.
+
 Added support for a new character set MARC8s identical to MARC8 except
 that it converts combined characters to single Unicode characters in the
 Latin-1 range (when possible).
