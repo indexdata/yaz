@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.80 2006-05-05 20:02:22 quinn Exp $
+ * $Id: ztest.c,v 1.81 2006-05-06 00:52:15 quinn Exp $
  */
 
 /*
@@ -668,8 +668,6 @@ bend_initresult *bend_init(bend_initrequest *q)
     bend_initresult *r = (bend_initresult *)
         odr_malloc (q->stream, sizeof(*r));
     int *counter = (int *) xmalloc (sizeof(int));
-
-    fprintf(stderr, "FUK\n");
 
     if (!log_level_set)
     {
