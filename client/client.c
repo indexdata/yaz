@@ -1,8 +1,8 @@
 /* 
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.304 2006-04-21 10:28:06 adam Exp $
+ * $Id: client.c,v 1.305 2006-05-07 19:07:10 adam Exp $
  */
 
 #include <stdio.h>
@@ -169,8 +169,10 @@ struct {
         
 
 void process_cmd_line(char* line);
-char ** readline_completer(char *text, int start, int end);
-char *command_generator(const char *text, int state);
+#if HAVE_READLINE_READLINE_H
+char **readline_completer(char *text, int start, int end);
+#endif
+static char *command_generator(const char *text, int state);
 char** curret_global_list=NULL;
 int cmd_register_tab(const char* arg);
 
@@ -3705,9 +3707,7 @@ static void initialize(void)
 #if HAVE_READLINE_READLINE_H
     rl_attempted_completion_function = (CPPFunction*)readline_completer;
 #endif
-    
-    
-    for(i=0; i<maxOtherInfosSupported; ++i) {
+    for(i = 0; i < maxOtherInfosSupported; ++i) {
         extraOtherInfos[i].oidval = -1;
     }
     
@@ -4084,7 +4084,8 @@ int cmd_set_otherinfo(const char* args)
     int sscan_res;
     int oidval;
     
-    sscan_res = sscanf (args, "%d %100[^ ] %100s", &otherinfoNo, oidstr, otherinfoString);
+    sscan_res = sscanf (args, "%d %100[^ ] %100s", 
+                        &otherinfoNo, oidstr, otherinfoString);
     if (sscan_res==1) {
         /* reset this otherinfo */
         if(otherinfoNo>=maxOtherInfosSupported) {
@@ -4093,7 +4094,7 @@ int cmd_set_otherinfo(const char* args)
         }
         extraOtherInfos[otherinfoNo].oidval = -1;
         if (extraOtherInfos[otherinfoNo].value)
-            free(extraOtherInfos[otherinfoNo].value);                   
+            xfree(extraOtherInfos[otherinfoNo].value);                   
         extraOtherInfos[otherinfoNo].value = 0;
         return 0;
     }
@@ -4103,18 +4104,20 @@ int cmd_set_otherinfo(const char* args)
     }
     
     if (otherinfoNo>=maxOtherInfosSupported) {
-        printf("Error otherinfo index to large (%d>%d)\n",
+        printf("Error otherinfo index too large (%d>=%d)\n",
                otherinfoNo,maxOtherInfosSupported);
     }
     
     oidval = oid_getvalbyname (oidstr);
-    if (oidval == -1 ) {
+    if (oidval == VAL_NONE)
+    {
         printf("Error in set_otherinfo command unknown oid %s \n",oidstr);
         return 0;
     }
     extraOtherInfos[otherinfoNo].oidval = oidval;
-    if(extraOtherInfos[otherinfoNo].value) free(extraOtherInfos[otherinfoNo].value);
-    extraOtherInfos[otherinfoNo].value = strdup(otherinfoString);
+    if (extraOtherInfos[otherinfoNo].value)
+        xfree(extraOtherInfos[otherinfoNo].value);
+    extraOtherInfos[otherinfoNo].value = xstrdup(otherinfoString);
     
     return 0;
 }
@@ -4244,25 +4247,26 @@ int cmd_list_all(const char* args) {
 int cmd_clear_otherinfo(const char* args) 
 {
     if(strlen(args)>0) {
-        int otherinfoNo;
-        otherinfoNo = atoi(args);
-        if( otherinfoNo >= maxOtherInfosSupported ) {
-            printf("Error otherinfo index to large (%d>%d)\n",otherinfoNo,maxOtherInfosSupported);
+        int otherinfoNo = atoi(args);
+        if (otherinfoNo >= maxOtherInfosSupported) {
+            printf("Error otherinfo index too large (%d>=%d)\n",
+                   otherinfoNo, maxOtherInfosSupported);
             return 0;
         }
-        
-        if(extraOtherInfos[otherinfoNo].oidval != -1) {                 
+        if (extraOtherInfos[otherinfoNo].oidval != -1)
+        {                 
             /* only clear if set. */
-            extraOtherInfos[otherinfoNo].oidval=-1;
-            free(extraOtherInfos[otherinfoNo].value);
+            extraOtherInfos[otherinfoNo].oidval = -1;
+            xfree(extraOtherInfos[otherinfoNo].value);
         }
     } else {
         int i;
-        
-        for(i=0; i<maxOtherInfosSupported; ++i) {
-            if (extraOtherInfos[i].oidval!=-1 ) {                               
-                extraOtherInfos[i].oidval=-1;
-                free(extraOtherInfos[i].value);
+        for(i = 0; i < maxOtherInfosSupported; ++i) 
+        {
+            if (extraOtherInfos[i].oidval != -1)
+            {                               
+                extraOtherInfos[i].oidval = -1;
+                xfree(extraOtherInfos[i].value);
             }
         }
     }
@@ -4530,15 +4534,14 @@ void process_cmd_line(char* line)
         fflush(marc_file);
 }
 
-
-char *command_generator(const char *text, int state) 
+static char *command_generator(const char *text, int state) 
 {
     static int idx; 
     if (state==0) {
         idx = 0;
     }
     for( ; cmd_array[idx].cmd; ++idx) {
-        if (!strncmp(cmd_array[idx].cmd,text,strlen(text))) {
+        if (!strncmp(cmd_array[idx].cmd, text, strlen(text))) {
             ++idx;  /* skip this entry on the next run */
             return strdup(cmd_array[idx-1].cmd);
         }
@@ -4546,22 +4549,21 @@ char *command_generator(const char *text, int state)
     return NULL;
 }
 
+#if HAVE_READLINE_READLINE_H
 
 /* 
    This function only known how to complete on the first word
 */
-char ** readline_completer(char *text, int start, int end) {
-#if HAVE_READLINE_READLINE_H
-
-        completerFunctionType completerToUse;
-        
+char **readline_completer(char *text, int start, int end)
+{
+    completerFunctionType completerToUse;
+    
     if(start == 0) {
 #if HAVE_READLINE_RL_COMPLETION_MATCHES
-        char** res=rl_completion_matches(text,
-                                      command_generator); 
+        char** res = rl_completion_matches(text, command_generator); 
 #else
-        char** res=completion_matches(text,
-                                      (CPFunction*)command_generator); 
+        char** res = completion_matches(text,
+                                        (CPFunction*)command_generator); 
 #endif
         rl_attempted_completion_over = 1;
         return res;
@@ -4584,33 +4586,29 @@ char ** readline_completer(char *text, int start, int end) {
         curret_global_list = cmd_array[i].local_tabcompletes;
         
         completerToUse = cmd_array[i].rl_completerfunction;
-        if(completerToUse==NULL)  /* if no pr. command completer is defined use the default completer */
+        if (completerToUse==NULL) 
+        { /* if command completer is not defined use the default completer */
             completerToUse = default_completer;
-        
-        if(completerToUse) {
+        }
+        if (completerToUse) {
 #ifdef HAVE_READLINE_RL_COMPLETION_MATCHES
             char** res=
-                rl_completion_matches(text,
-                                      completerToUse);
+                rl_completion_matches(text, completerToUse);
 #else
             char** res=
-                completion_matches(text,
-                                   (CPFunction*)completerToUse);
+                completion_matches(text, (CPFunction*)completerToUse);
 #endif
-            if(!cmd_array[i].complete_filenames) 
+            if (!cmd_array[i].complete_filenames) 
                 rl_attempted_completion_over = 1;
             return res;
         } else {
-            if(!cmd_array[i].complete_filenames) 
+            if (!cmd_array[i].complete_filenames) 
                 rl_attempted_completion_over = 1;
             return 0;
         }
     }
-#else 
-    return 0;
-#endif 
 }
-
+#endif
 
 static void client(void)
 {
@@ -4636,7 +4634,7 @@ static void client(void)
                 add_history(line_in);
 #endif
             strncpy(line, line_in, 10239);
-            free (line_in);
+            free(line_in);
         }
 #endif 
         if (!line_in)
