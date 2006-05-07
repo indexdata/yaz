@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.106 2006-05-03 13:31:53 adam Exp $
+# $Id: makefile,v 1.107 2006-05-07 17:43:42 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -394,6 +394,8 @@ YAZ_UTIL_OBJS= \
    $(OBJDIR)\marc8.obj \
    $(OBJDIR)\marc8r.obj \
    $(OBJDIR)\record_conv.obj \
+   $(OBJDIR)\retrieval.obj \
+   $(OBJDIR)\libxml2_error.obj \
    $(OBJDIR)\test.obj
 
 YAZ_ZUTIL_OBJS= \
