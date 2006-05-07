@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.307 2006-05-07 19:15:16 adam Exp $
+ * $Id: client.c,v 1.308 2006-05-07 19:43:00 adam Exp $
  */
 
 #include <stdio.h>
@@ -173,7 +173,7 @@ void process_cmd_line(char* line);
 char **readline_completer(char *text, int start, int end);
 #endif
 static char *command_generator(const char *text, int state);
-char** curret_global_list=NULL;
+char** current_global_list = NULL;
 int cmd_register_tab(const char* arg);
 
 static void close_session (void);
@@ -4588,7 +4588,7 @@ char **readline_completer(char *text, int start, int end)
         
         if(!cmd_array[i].cmd) return NULL;
         
-        curret_global_list = cmd_array[i].local_tabcompletes;
+        current_global_list = cmd_array[i].local_tabcompletes;
         
         completerToUse = cmd_array[i].rl_completerfunction;
         if (completerToUse==NULL) 

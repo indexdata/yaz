@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.14 2006-05-07 19:38:58 adam Exp $
+ * $Id: tabcomplete.c,v 1.15 2006-05-07 19:43:00 adam Exp $
  */
 
 #include <string.h>
@@ -12,7 +12,7 @@
 #include <yaz/oid.h>
 #include "tabcomplete.h"
 
-extern char** curret_global_list;
+extern char** current_global_list;
 
 /* ***************************************************************************
  *
@@ -80,7 +80,8 @@ void oid_loader(struct oident* oid, void* data_)
     }
 }
 
-char** build_list_for_oclass(oid_class oclass) {        
+char** build_list_for_oclass(oid_class oclass)
+{ 
     oid_callback_t data;        
     data.values = (char **) calloc(10,sizeof(char*));
     data.index = 0;
@@ -123,8 +124,8 @@ char* complete_format(const char* text, int state)
 
 char* complete_schema(const char* text, int state)
 {
-    char** list=build_list_for_oclass(CLASS_SCHEMA);
-    char* res=complete_from_list(list,text,state);  
+    char** list = build_list_for_oclass(CLASS_SCHEMA);
+    char* res = complete_from_list(list,text,state);  
     
     free(list); 
     return res;
@@ -133,8 +134,8 @@ char* complete_schema(const char* text, int state)
 
 char* complete_attributeset(const char* text, int state)
 {
-    char** list=build_list_for_oclass(CLASS_ATTSET);
-    char* res=complete_from_list(list,text,state);  
+    char** list = build_list_for_oclass(CLASS_ATTSET);
+    char* res = complete_from_list(list,text,state);  
     
     free(list); 
     return res;
@@ -143,7 +144,7 @@ char* complete_attributeset(const char* text, int state)
 
 char* default_completer(const char* text, int state)
 {
-    return complete_from_list(curret_global_list,text,state);
+    return complete_from_list(current_global_list, text, state);
 }
 
 /*
