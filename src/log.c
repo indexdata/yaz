@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.34 2006-03-24 13:58:43 adam Exp $
+ * $Id: log.c,v 1.35 2006-05-07 18:26:25 adam Exp $
  */
 
 /**
  * \file log.c
- * \brief Implements logging utility
+ * \brief Logging utility
  */
 
 #if HAVE_CONFIG_H
