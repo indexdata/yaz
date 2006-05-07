@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.305 2006-05-07 19:07:10 adam Exp $
+ * $Id: client.c,v 1.306 2006-05-07 19:13:55 adam Exp $
  */
 
 #include <stdio.h>
@@ -4434,8 +4434,9 @@ static int cmd_help (const char *line)
     return 1;
 }
 
-int cmd_register_tab(const char* arg) {
-        
+int cmd_register_tab(const char* arg) 
+{
+#if HAVE_READLINE_READLINE_H
     char command[101], tabargument[101];
     int i;
     int num_of_tabs;
@@ -4452,27 +4453,29 @@ int cmd_register_tab(const char* arg) {
         }
     }
     
-    if(!cmd_array[i].cmd) { 
+    if (!cmd_array[i].cmd) { 
         fprintf(stderr,"Unknown command %s\n",command);
         return 1;
     }
     
         
-    if(!cmd_array[i].local_tabcompletes)
+    if (!cmd_array[i].local_tabcompletes)
         cmd_array[i].local_tabcompletes = (char **) calloc(1,sizeof(char**));
     
     num_of_tabs=0;              
     
     tabslist = cmd_array[i].local_tabcompletes;
-    for(;tabslist && *tabslist;tabslist++) {
+    for(; tabslist && *tabslist; tabslist++) {
         num_of_tabs++;
     }
     
-    cmd_array[i].local_tabcompletes =  (char **)
-        realloc(cmd_array[i].local_tabcompletes,(num_of_tabs+2)*sizeof(char**));
-    tabslist=cmd_array[i].local_tabcompletes;
-    tabslist[num_of_tabs]=strdup(tabargument);
-    tabslist[num_of_tabs+1]=NULL;
+    cmd_array[i].local_tabcompletes = (char **)
+        realloc(cmd_array[i].local_tabcompletes,
+                (num_of_tabs+2)*sizeof(char**));
+    tabslist = cmd_array[i].local_tabcompletes;
+    tabslist[num_of_tabs] = strdup(tabargument);
+    tabslist[num_of_tabs+1] = NULL;
+#endif
     return 1;
 }
 
