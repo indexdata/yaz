@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.15 2006-05-07 19:43:00 adam Exp $
+ * $Id: tabcomplete.c,v 1.16 2006-05-07 20:57:26 adam Exp $
  */
 
 #include <string.h>
@@ -12,15 +12,13 @@
 #include <yaz/oid.h>
 #include "tabcomplete.h"
 
-extern char** current_global_list;
-
 /* ***************************************************************************
  *
  * generic completer 
  * 
  * ***************************************************************************/
 
-char* complete_from_list(char* completions[], const char *text, int state)
+char *complete_from_list(char* completions[], const char *text, int state)
 {       
 #if HAVE_READLINE_READLINE_H
     static int idx;
@@ -141,11 +139,6 @@ char* complete_attributeset(const char* text, int state)
     return res;
 }
 
-
-char* default_completer(const char* text, int state)
-{
-    return complete_from_list(current_global_list, text, state);
-}
 
 /*
  * Local variables:

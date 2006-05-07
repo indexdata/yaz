@@ -2,7 +2,10 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.308 2006-05-07 19:43:00 adam Exp $
+ * $Id: client.c,v 1.309 2006-05-07 20:57:26 adam Exp $
+ */
+/** \file client.c
+ *  \brief yaz-client program
  */
 
 #include <stdio.h>
@@ -173,7 +176,6 @@ void process_cmd_line(char* line);
 char **readline_completer(char *text, int start, int end);
 #endif
 static char *command_generator(const char *text, int state);
-char** current_global_list = NULL;
 int cmd_register_tab(const char* arg);
 
 static void close_session (void);
@@ -4555,6 +4557,15 @@ static char *command_generator(const char *text, int state)
 }
 
 #if HAVE_READLINE_READLINE_H
+static char** default_completer_list = NULL;
+
+static char* default_completer(const char* text, int state)
+{
+    return complete_from_list(default_completer_list, text, state);
+}
+#endif
+
+#if HAVE_READLINE_READLINE_H
 
 /* 
    This function only known how to complete on the first word
@@ -4580,18 +4591,17 @@ char **readline_completer(char *text, int start, int end)
             return NULL;
         }
         
-        for (i = 0; cmd_array[i].cmd; i++) {
-            if (!strncmp(cmd_array[i].cmd, word, strlen(word))) {
+        for (i = 0; cmd_array[i].cmd; i++)
+            if (!strncmp(cmd_array[i].cmd, word, strlen(word)))
                 break;
-            }
-        }
         
-        if(!cmd_array[i].cmd) return NULL;
+        if(!cmd_array[i].cmd)
+            return NULL;
         
-        current_global_list = cmd_array[i].local_tabcompletes;
+        default_completer_list = cmd_array[i].local_tabcompletes;
         
         completerToUse = cmd_array[i].rl_completerfunction;
-        if (completerToUse==NULL) 
+        if (!completerToUse) 
         { /* if command completer is not defined use the default completer */
             completerToUse = default_completer;
         }

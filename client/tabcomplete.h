@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.h,v 1.6 2005-06-25 15:46:01 adam Exp $
+ * $Id: tabcomplete.h,v 1.7 2006-05-07 20:57:26 adam Exp $
  */
 
 /* 
@@ -13,8 +13,8 @@ char* complete_querytype(const char* text, int state);
 char* complete_format(const char* text, int state);
 char* complete_schema(const char* text, int state);
 char* complete_attributeset(const char* text, int state);
-char* default_completer(const char* text, int state);
 char* complete_auto_reconnect(const char *text, int state);
+char *complete_from_list(char* completions[], const char *text, int state);
 /*
  * Local variables:
  * c-basic-offset: 4
