@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.39 2006-05-05 20:02:22 quinn Exp $
+ * $Id: srwutil.c,v 1.40 2006-05-07 18:35:47 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -188,11 +188,11 @@ static int yaz_base64decode(const char *in, char *out)
 	char i0, i1, i2, i3;
 	char *p;
 
-	if (!(p = index(map, in[0])))
+	if (!(p = strchr(map, in[0])))
 	    return 0;
 	i0 = p - map;
 	len--;
-	if (!(p = index(map, in[1])))
+	if (!(p = strchr(map, in[1])))
 	    return 0;
 	i1 = p - map;
 	len--;
@@ -200,7 +200,7 @@ static int yaz_base64decode(const char *in, char *out)
 	olen++;
 	if (in[2] == '=')
 	    break;
-	if (!(p = index(map, in[2])))
+	if (!(p = strchr(map, in[2])))
 	    return 0;
 	i2 = p - map;
 	len--;
@@ -208,7 +208,7 @@ static int yaz_base64decode(const char *in, char *out)
 	olen++;
 	if (in[3] == '=')
 	    break;
-	if (!(p = index(map, in[3])))
+	if (!(p = strchr(map, in[3])))
 	    return 0;
 	i3 = p - map;
 	len--;
@@ -249,7 +249,7 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq, char *userna
         olen = yaz_base64decode(basic, out);
         /* Format of out should be username:password at this point */
         strcpy(ubuf, out);
-        if ((p = index(ubuf, ':'))) {
+        if ((p = strchr(ubuf, ':'))) {
             *(p++) = '\0';
             if (*p)
                 strcpy(pbuf, p);
