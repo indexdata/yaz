@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.76 2006-05-05 20:02:22 quinn Exp $
+ * $Id: seshigh.c,v 1.77 2006-05-07 14:48:25 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -184,8 +184,7 @@ association *create_association(IOCHAN channel, COMSTACK link,
     request_initq(&anew->incoming);
     request_initq(&anew->outgoing);
     anew->proto = cs_getproto(link);
-    anew->cql_transform = 0;
-    anew->server_node_ptr = 0;
+    anew->server = 0;
     return anew;
 }
 
@@ -549,6 +548,143 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_S
     return 1;
 }
 
+static const char *get_esn(Z_RecordComposition *comp)
+{
+    if (comp && comp->which == Z_RecordComp_complex)
+    {
+        if (comp->u.complex->generic 
+            && comp->u.complex->generic->elementSpec
+            && (comp->u.complex->generic->elementSpec->which == 
+                Z_ElementSpec_elementSetName))
+            return comp->u.complex->generic->elementSpec->u.elementSetName;
+    }
+    else if (comp && comp->which == Z_RecordComp_simple &&
+             comp->u.simple->which == Z_ElementSetNames_generic)
+        return comp->u.simple->u.generic;
+    return 0;
+}
+
+static void set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem)
+{
+    Z_RecordComposition *comp = nmem_malloc(nmem, sizeof(*comp));
+    
+    comp->which = Z_RecordComp_simple;
+    comp->u.simple = nmem_malloc(nmem, sizeof(*comp->u.simple));
+    comp->u.simple->which = Z_ElementSetNames_generic;
+    comp->u.simple->u.generic = nmem_strdup(nmem, esn);
+    *comp_p = comp;
+}
+
+static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
+{
+#if HAVE_XSLT
+    yaz_record_conv_t rc = 0;
+    const char *match_schema = 0;
+    int *match_syntax = 0;
+
+    if (assoc->server)
+    {
+        int r;
+        const char *input_schema = get_esn(rr->comp);
+        Odr_oid *input_syntax_raw = rr->request_format_raw;
+        
+        const char *backend_schema = 0;
+        Odr_oid *backend_syntax = 0;
+
+        r = yaz_retrieval_request(assoc->server->retrieval,
+                                  input_schema,
+                                  input_syntax_raw,
+                                  &match_schema,
+                                  &match_syntax,
+                                  &rc,
+                                  &backend_schema,
+                                  &backend_syntax);
+        if (r == -1) /* error ? */
+        {
+            const char *details = yaz_retrieval_get_error(
+                assoc->server->retrieval);
+
+            rr->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            if (details)
+                rr->errstring = odr_strdup(rr->stream, details);
+            return -1;
+        }
+        else if (r == 1)
+        {
+            const char *details = input_schema;
+            rr->errcode =  YAZ_BIB1_ELEMENT_SET_NAMES_UNSUPP;
+            if (details)
+                rr->errstring = odr_strdup(rr->stream, details);
+            return -1;
+        }
+        else if (r == 2)
+        {
+            rr->errcode = YAZ_BIB1_RECORD_SYNTAX_UNSUPP;
+            return -1;
+        }
+        else if (r == 3)
+        {
+            const char *details = input_schema;
+            rr->errcode =  YAZ_BIB1_ELEMENT_SET_NAMES_UNSUPP;
+            if (details)
+                rr->errstring = odr_strdup(rr->stream, details);
+            return -1;
+        }
+        else if (r == 4)
+        {
+            rr->errcode = YAZ_BIB1_RECORD_NOT_AVAILABLE_IN_REQUESTED_SYNTAX; 
+            return -1;
+        }
+        if (backend_schema)
+        {
+            set_esn(&rr->comp, backend_schema, rr->stream->mem);
+        }
+        if (backend_syntax)
+        {
+            oident *oident_syntax = oid_getentbyoid(backend_syntax);
+
+            rr->request_format_raw = backend_syntax;
+            
+            if (oident_syntax)
+                rr->request_format = oident_syntax->value;
+            else
+                rr->request_format = VAL_NONE;
+        }
+    }
+    (*assoc->init->bend_fetch)(assoc->backend, rr);
+    if (rc && rr->record && rr->errcode == 0 && rr->len > 0)
+    {   /* post conversion must take place .. */
+        WRBUF output_record = wrbuf_alloc();
+        int r = yaz_record_conv_record(rc, rr->record, rr->len, output_record);
+        if (r)
+        {
+            const char *details = yaz_record_conv_get_error(rc);
+            rr->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            if (details)
+                rr->errstring = odr_strdup(rr->stream, details);
+        }
+        else
+        {
+            rr->len = wrbuf_len(output_record);
+            rr->record = odr_malloc(rr->stream, rr->len);
+            memcpy(rr->record, wrbuf_buf(output_record), rr->len);
+        }
+        wrbuf_free(output_record, 1);
+    }
+    if (match_syntax)
+    {
+        struct oident *oi = oid_getentbyoid(match_syntax);
+        rr->output_format = oi ? oi->value : VAL_NONE;
+        rr->output_format_raw = match_syntax;
+    }
+    if (match_schema)
+        rr->schema = odr_strdup(rr->stream, match_schema);
+    return 0;
+#else
+    (*assoc->init->bend_fetch)(assoc->backend, rr);
+#endif
+}
+
 static int srw_bend_fetch(association *assoc, int pos,
                           Z_SRW_searchRetrieveRequest *srw_req,
                           Z_SRW_record *record)
@@ -612,7 +748,7 @@ static int srw_bend_fetch(association *assoc, int pos,
     if (!assoc->init->bend_fetch)
         return 1;
 
-    (*assoc->init->bend_fetch)(assoc->backend, &rr);
+    retrieve_fetch(assoc, &rr);
 
     if (rr.errcode && rr.surrogate_flag)
     {
@@ -756,10 +892,11 @@ static void srw_bend_search(association *assoc, request *req,
         
         if (srw_req->query_type == Z_SRW_query_type_cql)
         {
-            if (assoc->cql_transform)
+            if (assoc->server && assoc->server->cql_transform)
             {
                 int srw_errcode = cql2pqf(assoc->encode, srw_req->query.cql,
-                                          assoc->cql_transform, rr.query);
+                                          assoc->server->cql_transform,
+                                          rr.query);
                 if (srw_errcode)
                 {
                     yaz_add_srw_diagnostic(assoc->encode,
@@ -1015,7 +1152,10 @@ static void srw_bend_explain(association *assoc, request *req,
         rr.print = assoc->print;
         rr.explain_buf = 0;
         rr.database = srw_req->database;
-        rr.server_node_ptr = assoc->server_node_ptr;
+        if (assoc->server)
+            rr.server_node_ptr = assoc->server->server_node_ptr;
+        else
+            rr.server_node_ptr = 0;
         rr.schema = "http://explain.z3950.org/dtd/2.0/";
         if (assoc->init->bend_explain)
             (*assoc->init->bend_explain)(assoc->backend, &rr);
@@ -1113,7 +1253,8 @@ static void srw_bend_scan(association *assoc, request *req,
              (*assoc->init->bend_scan))(assoc->backend, bsrr);
         }
         else if (srw_req->query_type == Z_SRW_query_type_cql
-                 && assoc->init->bend_scan && assoc->cql_transform)
+                 && assoc->init->bend_scan && assoc->server
+                 && assoc->server->cql_transform)
         {
             int srw_error;
             bsrr->scanClause = 0;
@@ -1121,7 +1262,7 @@ static void srw_bend_scan(association *assoc, request *req,
             bsrr->term = odr_malloc(assoc->decode, sizeof(*bsrr->term));
             srw_error = cql2pqf_scan(assoc->encode,
                                      srw_req->scanClause.cql,
-                                     assoc->cql_transform,
+                                     assoc->server->cql_transform,
                                      bsrr->term);
             if (srw_error)
                 yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
@@ -1457,10 +1598,12 @@ static void process_http_request(association *assoc, request *req)
         p = z_get_HTTP_Response(o, 404);
         r = 1;
     }
-    if (r == 2 && assoc->docpath && hreq->path[0] == '/' 
+    if (r == 2 && assoc->server && assoc->server->docpath
+        && hreq->path[0] == '/' 
         && 
         /* check if path is a proper prefix of documentroot */
-        strncmp(hreq->path+1, assoc->docpath, strlen(assoc->docpath))
+        strncmp(hreq->path+1, assoc->server->docpath,
+                strlen(assoc->server->docpath))
         == 0)
     {   
         if (!check_path(hreq->path))
@@ -1617,8 +1760,8 @@ static void process_http_request(association *assoc, request *req)
             p = z_get_HTTP_Response(o, 200);
             hres = p->u.HTTP_Response;
 
-            if (!stylesheet)
-                stylesheet = assoc->stylesheet;
+            if (!stylesheet && assoc->server)
+                stylesheet = assoc->server->stylesheet;
 
             /* empty stylesheet means NO stylesheet */
             if (stylesheet && *stylesheet == '\0')
@@ -2098,7 +2241,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.76 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.77 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2262,7 +2405,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
         freq.print = a->print;
         freq.referenceId = referenceId;
         freq.schema = 0;
-        (*a->init->bend_fetch)(a->backend, &freq);
+
+        retrieve_fetch(a, &freq);
 
         *next = freq.last_in_set ? 0 : recno + 1;
 
@@ -2407,14 +2551,14 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
         bsrr->errstring = NULL;
         bsrr->search_info = NULL;
 
-        if (assoc->cql_transform &&
-            req->query->which == Z_Query_type_104 &&
-            req->query->u.type_104->which == Z_External_CQL)
+        if (assoc->server && assoc->server->cql_transform 
+            && req->query->which == Z_Query_type_104
+            && req->query->u.type_104->which == Z_External_CQL)
         {
             /* have a CQL query and a CQL to PQF transform .. */
             int srw_errcode = 
                 cql2pqf(bsrr->stream, req->query->u.type_104->u.cql,
-                        assoc->cql_transform, bsrr->query);
+                        assoc->server->cql_transform, bsrr->query);
             if (srw_errcode)
                 bsrr->errcode = yaz_diag_srw_to_bib1(srw_errcode);
         }

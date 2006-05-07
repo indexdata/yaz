@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.10 2006-03-15 13:32:05 adam Exp $
+ * $Id: session.h,v 1.11 2006-05-07 14:48:25 adam Exp $
  */
 /**
  * \file session.h
@@ -17,6 +17,7 @@
 #include <yaz/oid.h>
 #include <yaz/proto.h>
 #include <yaz/backend.h>
+#include <yaz/retrieval.h>
 #include "eventl.h"
 
 struct gfs_server {
@@ -28,6 +29,7 @@ struct gfs_server {
     char *directory;
     char *docpath;
     char *stylesheet;
+    yaz_retrieval_t retrieval;
     struct gfs_server *next;
 };
 
@@ -109,10 +111,8 @@ typedef struct association
 
     struct bend_initrequest *init;
     statserv_options_block *last_control;
-    cql_transform_t cql_transform;
-    void *server_node_ptr;
-    const char *docpath;
-    const char *stylesheet;
+
+    struct gfs_server *server;
 } association;
 
 association *create_association(IOCHAN channel, COMSTACK link,

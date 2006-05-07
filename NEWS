@@ -1,3 +1,7 @@
+Added retrieval handling support in Generic Frontend Server to support
+conversion between MARC/XML as well as XSLTtransforms. See
+etc/yazgfs.xml for an example.
+
 Added Authentication support to Generic Frontend Server in SRU
 mode. Authentication using HTTP Basic is supported, as is the use
 of 'x-username' and 'x-password' parameters in the request itself.

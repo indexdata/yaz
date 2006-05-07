@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_retrieval.c,v 1.2 2006-05-05 18:37:08 adam Exp $
+ * $Id: tst_retrieval.c,v 1.3 2006-05-07 14:48:25 adam Exp $
  *
  */
 #include <yaz/retrieval.h>
@@ -116,8 +116,12 @@ static void tst_configure()
                                   "Bad element 'bad'."
                                   " Expected 'retrieval'", 0));
 
+    YAZ_CHECK(conv_configure_test("<retrievalinfo><retrieval/>"
+                                  "</retrievalinfo>", 0, 0));
+
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval>"
+                                  "<retrieval>\n"
+                                  "  "
                                   "<convert>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
@@ -156,6 +160,37 @@ static void tst_configure()
                                   "</retrieval>"
                                   "</retrievalinfo>",
                                   0, 0));
+
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"usmarc\""
+                                  " schema=\"marcxml\"" 
+                                  " identifier=\"info:srw/schema/1/marcxml-v1.1\""
+                                  ">"
+                                  "<convert/>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  0, 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"unknown_synt\""
+                                  ">"
+                                  "<convert/>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  "Bad syntax 'unknown_synt'", 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " backendsyntax=\"unknown_synt\""
+                                  ">"
+                                  "<convert/>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  "Bad backendsyntax 'unknown_synt'", 0));
+
 }
 
 #endif

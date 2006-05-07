@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.36 2006-03-22 17:58:32 mike Exp $
+ * $Id: statserv.c,v 1.37 2006-05-07 14:48:25 adam Exp $
  */
 
 /**
@@ -222,6 +222,9 @@ static struct gfs_server * gfs_server_new()
     n->directory = 0;
     n->docpath = 0;
     n->stylesheet = 0;
+#if HAVE_XSLT
+    n->retrieval = yaz_retrieval_create();
+#endif
     return n;
 }
 
@@ -265,10 +268,7 @@ int control_association(association *assoc, const char *host, int force_open)
             *cp = '\0';
         host = vhost;
     }
-    assoc->cql_transform = 0;
-    assoc->server_node_ptr = 0;
-    assoc->docpath = 0;
-    assoc->stylesheet = 0;
+    assoc->server = 0;
     if (control_block.xml_config[0])
     {
         struct gfs_server *gfs;
@@ -296,10 +296,7 @@ int control_association(association *assoc, const char *host, int force_open)
                     xfree(assoc->init);
                     assoc->init = 0;
                 }
-                assoc->docpath = gfs->docpath;
-                assoc->stylesheet = gfs->stylesheet;
-                assoc->cql_transform = gfs->cql_transform;
-                assoc->server_node_ptr = gfs->server_node_ptr;
+                assoc->server = gfs;
                 assoc->last_control = &gfs->cb;
                 statserv_setcontrol(&gfs->cb);
                 gfs_server_chdir(gfs);
@@ -429,6 +426,16 @@ static void xml_config_read()
                 else if (!strcmp((const char *) ptr->name, "explain"))
                 {
                     ; /* being processed separately */
+                }
+                else if (!strcmp((const char *) ptr->name, "retrievalinfo"))
+                {
+                    if (yaz_retrieval_configure((*gfsp)->retrieval, ptr))
+                    {       
+                        yaz_log(YLOG_FATAL, "%s in config %s",
+                                yaz_retrieval_get_error((*gfsp)->retrieval),
+                                control_block.xml_config);
+                        exit(1);
+                    }
                 }
                 else
                 {

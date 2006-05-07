@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: record_conv.h,v 1.3 2006-05-04 20:00:45 adam Exp $
+ * $Id: record_conv.h,v 1.4 2006-05-07 14:48:24 adam Exp $
  */
 /**
  * \file record_conv.h
@@ -82,7 +82,8 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const void *node);
 
 /** performs record conversion
     \param p record conversion handle
-    \param input_record record to be converted (0-terminated)
+    \param input_record_buf input record buffer
+    \param input_record_len length of input record buffer
     \param output_record resultint record (WRBUF string)
     \retval 0 success
     \retval -1 failure
@@ -90,7 +91,8 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const void *node);
     On failure, use yaz_record_conv_get_error to get error string.
 */
 YAZ_EXPORT
-int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record,
+int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record_buf,
+                           size_t input_record_len,
                            WRBUF output_record);
 
 /** returns error string (for last error)

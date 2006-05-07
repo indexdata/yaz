@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.4 2006-05-04 20:00:45 adam Exp $
+ * $Id: record_conv.c,v 1.5 2006-05-07 14:48:25 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -336,7 +336,9 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const void *ptr_v)
     return 0;
 }
 
-int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record,
+int yaz_record_conv_record(yaz_record_conv_t p,
+                           const char *input_record_buf,
+                           size_t input_record_len,
                            WRBUF output_record)
 {
     int ret = 0;
@@ -344,7 +346,7 @@ int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record,
     struct yaz_record_conv_rule *r = p->rules;
     wrbuf_rewind(p->wr_error);
     
-    wrbuf_puts(record, input_record);
+    wrbuf_write(record, input_record_buf, input_record_len);
     for (; ret == 0 && r; r = r->next)
     {
         if (r->which == YAZ_RECORD_CONV_RULE_XSLT)

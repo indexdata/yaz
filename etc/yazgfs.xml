@@ -1,4 +1,4 @@
-<!-- $Id: yazgfs.xml,v 1.2 2006-03-15 13:32:05 adam Exp $ -->
+<!-- $Id: yazgfs.xml,v 1.3 2006-05-07 14:48:24 adam Exp $ -->
 <!-- sample YAZ GFS config file .. see 
   http://indexdata.dk/yaz/doc/server.vhosts.tkl -->
 <yazgfs>
@@ -9,10 +9,38 @@
      <cql2rpn>pqf.properties</cql2rpn>
      <docpath>xsl</docpath>
      <stylesheet>xsl/default.xsl</stylesheet>
+     <retrievalinfo>
+       <retrieval syntax="usmarc" schema="F"/>
+       <retrieval syntax="usmarc" schema="B"/>
+       <retrieval syntax="xml" schema="marcxml"
+		  identifier="info:srw/schema/1/marcxml-v1.1"
+		  backendsyntax="usmarc" backendschema="F">
+	 <convert>
+	   <marc inputformat="marc" outputformat="marcxml"
+		 inputcharset="marc-8"/>
+	 </convert>
+       </retrieval>
+       <retrieval syntax="xml" schema="danmarc"
+		  backendsyntax="usmarc" backendschema="F">
+	 <convert>
+	   <marc inputformat="marc" outputformat="marcxchange"
+		 inputcharset="marc-8"/>
+	 </convert>
+       </retrieval>
+       <retrieval syntax="xml" schema="dc"
+		  identifier="info:srw/schema/1/dc-v1.1"
+		  backendsyntax="usmarc" backendschema="F">
+	 <convert>
+	   <marc inputformat="marc" outputformat="marcxml"
+		 inputcharset="marc-8"/>
+	   <xslt stylesheet="../etc/MARC21slim2DC.xsl"/>
+	 </convert>
+       </retrieval>
+     </retrievalinfo>
      <explain xmlns="http://explain.z3950.org/dtd/2.0/">
         <serverInfo>
            <host>myserver.org</host>
-           <port>9900</port>
+           <port>9000</port>
            <database>Default</database>
         </serverInfo>
     </explain>

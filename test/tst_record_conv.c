@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.5 2006-05-05 18:37:08 adam Exp $
+ * $Id: tst_record_conv.c,v 1.6 2006-05-07 14:48:25 adam Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -143,7 +143,8 @@ static int conv_convert_test(yaz_record_conv_t p,
     else
     {
         WRBUF output_record = wrbuf_alloc();
-        int r = yaz_record_conv_record(p, input_record, output_record);
+        int r = yaz_record_conv_record(p, input_record, strlen(input_record),
+                                       output_record);
         if (r)
         {
             if (output_expect_record)

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.2 2006-05-05 18:37:08 adam Exp $
+ * $Id: retrieval.c,v 1.3 2006-05-07 14:48:25 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -19,6 +19,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/tpath.h>
+#include <yaz/proto.h>
 
 #if HAVE_XSLT
 #include <libxml/parser.h>
@@ -29,7 +30,10 @@
 
 /** \brief The internal structure for yaz_retrieval_t */
 struct yaz_retrieval_struct {
-    /** \brief memory for configuration */
+    /** \brief ODR memory for configuration */
+    ODR odr;
+
+    /** \brief odr's NMEM memory (odr->mem) */
     NMEM nmem;
 
     /** \brief string buffer for error messages */
@@ -52,16 +56,16 @@ struct yaz_retrieval_elem {
     /** \brief schema short-hand (such sa "dc") */
     const char *schema;
     /** \brief record syntax */
-    const char *syntax;
+    int *syntax;
     /** \brief backend schema */
     const char *backend_schema;
     /** \brief backend syntax */
-    const char *backend_syntax;
+    int *backend_syntax;
 
     /** \brief record conversion */
     yaz_record_conv_t record_conv;
 
-    /** \breif next element in list */
+    /** \brief next element in list */
     struct yaz_retrieval_elem *next;
 };
 
@@ -70,7 +74,8 @@ static void yaz_retrieval_reset(yaz_retrieval_t p);
 yaz_retrieval_t yaz_retrieval_create()
 {
     yaz_retrieval_t p = xmalloc(sizeof(*p));
-    p->nmem = nmem_create();
+    p->odr = odr_createmem(ODR_ENCODE);
+    p->nmem = p->odr->mem;
     p->wr_error = wrbuf_alloc();
     p->list = 0;
     p->path = 0;
@@ -83,7 +88,7 @@ void yaz_retrieval_destroy(yaz_retrieval_t p)
     if (p)
     {
         yaz_retrieval_reset(p);
-        nmem_destroy(p->nmem);
+        odr_destroy(p->odr);
         wrbuf_free(p->wr_error, 1);
         xfree(p->path);
         xfree(p);
@@ -97,7 +102,7 @@ void yaz_retrieval_reset(yaz_retrieval_t p)
         yaz_record_conv_destroy(el->record_conv);
 
     wrbuf_rewind(p->wr_error);
-    nmem_reset(p->nmem);
+    odr_reset(p->odr);
 
     p->list = 0;
     p->list_p = &p->list;
@@ -122,8 +127,17 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "syntax") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
-            el->syntax = 
-                nmem_strdup(p->nmem, (const char *) attr->children->content);
+        {
+            el->syntax = yaz_str_to_z3950oid(
+                p->odr, CLASS_RECSYN,
+                (const char *) attr->children->content);
+            if (!el->syntax)
+            {
+                wrbuf_printf(p->wr_error, "Bad syntax '%s'",
+                             (const char *) attr->children->content);
+                return -1;
+            }
+        }
         else if (!xmlStrcmp(attr->name, BAD_CAST "identifier") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
             el->identifier =
@@ -138,24 +152,46 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
         else if (!xmlStrcmp(attr->name, BAD_CAST "backendsyntax") &&
                  attr->children && attr->children->type == XML_TEXT_NODE)
-            el->backend_syntax = 
-                nmem_strdup(p->nmem, (const char *) attr->children->content);
+        {
+            el->backend_syntax = yaz_str_to_z3950oid(
+                p->odr, CLASS_RECSYN,
+                (const char *) attr->children->content);
+            if (!el->backend_syntax)
+            {
+                wrbuf_printf(p->wr_error, "Bad backendsyntax '%s'",
+                             (const char *) attr->children->content);
+                return -1;
+            }
+        }
         else
         {
             wrbuf_printf(p->wr_error, "Bad attribute '%s'.", attr->name);
             return -1;
         }
     }
-    el->record_conv = yaz_record_conv_create();
-
-    yaz_record_conv_set_path(el->record_conv, p->path);
-    
-    if (yaz_record_conv_configure(el->record_conv, ptr->children))
+    if (!el->syntax)
     {
-        wrbuf_printf(p->wr_error, "%s",
-                     yaz_record_conv_get_error(el->record_conv));
-        yaz_record_conv_destroy(el->record_conv);
+        wrbuf_printf(p->wr_error, "Missing 'syntax' attribute.", attr->name);
         return -1;
+    }
+
+    el->record_conv = 0; /* OK to have no 'convert' sub content */
+    for (ptr = ptr->children; ptr; ptr = ptr->next)
+    {
+        if (ptr->type == XML_ELEMENT_NODE)
+        {
+            el->record_conv = yaz_record_conv_create();
+            
+            yaz_record_conv_set_path(el->record_conv, p->path);
+        
+            if (yaz_record_conv_configure(el->record_conv, ptr))
+            {
+                wrbuf_printf(p->wr_error, "%s",
+                             yaz_record_conv_get_error(el->record_conv));
+                yaz_record_conv_destroy(el->record_conv);
+                return -1;
+            }
+        }
     }
     
     *p->list_p = el;
@@ -197,12 +233,58 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const void *ptr_v)
     return 0;
 }
 
-int yaz_retrieval_request(yaz_retrieval_t p, const char *schema,
-                          const char *syntax, yaz_record_conv_t *rc)
+int yaz_retrieval_request(yaz_retrieval_t p,
+                          const char *schema, int *syntax,
+                          const char **match_schema, int **match_syntax,
+                          yaz_record_conv_t *rc,
+                          const char **backend_schema,
+                          int **backend_syntax)
 {
-    wrbuf_rewind(p->wr_error);
-    wrbuf_printf(p->wr_error, "yaz_retrieval_request: not implemented");
-    return -1;
+    struct yaz_retrieval_elem *el = p->list;
+
+    int syntax_matches = 0;
+    int schema_matches = 0;
+    for(; el; el = el->next)
+    {
+        int schema_ok = 0;
+        int syntax_ok = 0;
+
+        if (schema && el->schema && !strcmp(schema, el->schema))
+            schema_ok = 1;
+        if (schema && el->identifier && !strcmp(schema, el->identifier))
+            schema_ok = 1;
+        if (!schema)
+            schema_ok = 1;
+        
+        if (syntax && el->syntax && !oid_oidcmp(syntax, el->syntax))
+            syntax_ok = 1;
+        if (!syntax)
+            syntax_ok = 1;
+
+        if (syntax_ok)
+            syntax_matches++;
+        if (schema_ok)
+            schema_matches++;
+        if (syntax_ok && schema_ok)
+        {
+            *match_syntax = el->syntax;
+            *match_schema = el->schema;
+            if (backend_schema)
+                *backend_schema = el->backend_schema;
+            if (backend_syntax)
+                *backend_syntax = el->backend_syntax;
+            if (rc)
+                *rc = el->record_conv;
+            return 0;
+        }
+    }
+    if (syntax_matches && !schema_matches)
+        return 1;
+    if (!syntax_matches && schema_matches)
+        return 2;
+    if (!syntax_matches && !schema_matches)
+        return 3;
+    return 4;
 }
 
 const char *yaz_retrieval_get_error(yaz_retrieval_t p)
