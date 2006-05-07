@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.35 2006-05-04 20:00:45 adam Exp $
+## $Id: Makefile.am,v 1.36 2006-05-07 17:45:41 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -51,7 +51,7 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
   odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \
   ber_oid.c odr_use.c odr_choice.c odr_any.c ber_any.c odr.c odr_mem.c \
-  dumpber.c odr_enum.c odr-priv.h \
+  dumpber.c odr_enum.c odr-priv.h libxml2_error.c \
   comstack.c tcpip.c waislen.c unix.c \
   z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
   z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-mterm2.c z-opac.c \

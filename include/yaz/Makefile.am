@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.30 2006-05-04 20:00:45 adam Exp $
+## $Id: Makefile.am,v 1.31 2006-05-07 17:45:41 adam Exp $
 
 pkginclude_HEADERS= backend.h ccl.h cql.h comstack.h \
  diagbib1.h diagsrw.h sortspec.h log.h logrpn.h marcdisp.h nfa.h \
@@ -7,7 +7,7 @@ pkginclude_HEADERS= backend.h ccl.h cql.h comstack.h \
  readconf.h record_conv.h retrieval.h statserv.h \
  tcpip.h test.h unix.h tpath.h wrbuf.h xmalloc.h \
  yaz-ccl.h yaz-iconv.h yaz-util.h yaz-version.h yconfig.h proto.h \
- xmlquery.h \
+ xmlquery.h libxml2_error.h \
  \
  ill.h ill-core.h item-req.h z-accdes1.h z-accform1.h \
  z-acckrb1.h z-core.h z-date.h z-diag1.h z-espec1.h z-estask.h z-exp.h \

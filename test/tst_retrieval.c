@@ -2,13 +2,15 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_retrieval.c,v 1.3 2006-05-07 14:48:25 adam Exp $
+ * $Id: tst_retrieval.c,v 1.4 2006-05-07 17:45:41 adam Exp $
  *
  */
 #include <yaz/retrieval.h>
 #include <yaz/test.h>
 #include <yaz/wrbuf.h>
 #include <string.h>
+#include <yaz/log.h>
+#include <yaz/libxml2_error.h>
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -117,10 +119,11 @@ static void tst_configure()
                                   " Expected 'retrieval'", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo><retrieval/>"
-                                  "</retrievalinfo>", 0, 0));
+                                  "</retrievalinfo>", 
+                                  "Missing 'syntax' attribute", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval>\n"
+                                  "<retrieval syntax=\"usmarc\">\n"
                                   "  "
                                   "<convert>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
@@ -136,7 +139,7 @@ static void tst_configure()
                                   0, 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval>"
+                                  "<retrieval syntax=\"usmarc\">"
                                   "<convert>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
@@ -147,7 +150,7 @@ static void tst_configure()
                                   "/>"
                                   "</convert>"
                                   "</retrieval>"
-                                  "<retrieval>"
+                                  "<retrieval syntax=\"usmarc\">"
                                   "<convert>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
@@ -198,6 +201,9 @@ static void tst_configure()
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+
+    libxml2_error_to_yazlog(0 /* disable it */, "");
+
 #if HAVE_XSLT
     tst_configure();
 #endif

@@ -19,4 +19,5 @@ tstxmlquery
 tstpquery
 tst_filepath
 tst_record_conv
+tst_retrieval
 nfatest1

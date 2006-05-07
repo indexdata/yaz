@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.3 2006-05-07 14:48:25 adam Exp $
+ * $Id: retrieval.c,v 1.4 2006-05-07 17:45:41 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -171,7 +171,7 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
     }
     if (!el->syntax)
     {
-        wrbuf_printf(p->wr_error, "Missing 'syntax' attribute.", attr->name);
+        wrbuf_printf(p->wr_error, "Missing 'syntax' attribute");
         return -1;
     }
 

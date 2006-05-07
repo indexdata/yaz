@@ -2,13 +2,15 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.6 2006-05-07 14:48:25 adam Exp $
+ * $Id: tst_record_conv.c,v 1.7 2006-05-07 17:45:41 adam Exp $
  *
  */
 #include <yaz/record_conv.h>
 #include <yaz/test.h>
 #include <yaz/wrbuf.h>
 #include <string.h>
+#include <yaz/log.h>
+#include <yaz/libxml2_error.h>
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -119,6 +121,10 @@ static void tst_configure()
                                   "/>"
                                   "</convert>",
                                   "Attribute 'inputformat' required", 0));
+    YAZ_CHECK(conv_configure_test("<convert>"
+                                  "<xslt/>"
+                                  "</convert>",
+                                  "Missing attribute 'stylesheet'", 0));
     YAZ_CHECK(conv_configure_test("<convert>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
@@ -280,6 +286,7 @@ static void tst_convert()
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+    libxml2_error_to_yazlog(0 /* disable log */, 0);
 #if HAVE_XSLT
     tst_configure();
     tst_convert();

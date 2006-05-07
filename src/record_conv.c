@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.5 2006-05-07 14:48:25 adam Exp $
+ * $Id: record_conv.c,v 1.6 2006-05-07 17:45:41 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -145,7 +145,7 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
             stylesheet = (const char *) attr->children->content;
         else
         {
-            wrbuf_printf(p->wr_error, "Bad attribute '%s'."
+            wrbuf_printf(p->wr_error, "Bad attribute '%s'"
                          "Expected stylesheet.", attr->name);
             return -1;
         }
@@ -210,7 +210,7 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
             output_format = (const char *) attr->children->content;
         else
         {
-            wrbuf_printf(p->wr_error, "Bad attribute '%s'.", attr->name);
+            wrbuf_printf(p->wr_error, "Bad attribute '%s'", attr->name);
             return -1;
         }
     }
@@ -323,7 +323,7 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const void *ptr_v)
             else
             {
                 wrbuf_printf(p->wr_error, "Bad element '%s'."
-                             "Expected marc, xslt, ..", ptr->name);
+                              "Expected marc, xslt, ..", ptr->name);
                 return -1;
             }
         }
