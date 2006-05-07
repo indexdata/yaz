@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.44 2006-03-01 22:33:06 adam Exp $
+ * $Id: srw.c,v 1.45 2006-05-07 14:31:30 adam Exp $
  */
 /**
  * \file srw.c
@@ -541,6 +541,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 
         *p = (Z_SRW_PDU *) odr_malloc(o, sizeof(**p));
         (*p)->srw_version = odr_strdup(o, "1.1");
+        (*p)->username = 0;
+        (*p)->password = 0;
         
         if (!xmlStrcmp(method->name, BAD_CAST "searchRetrieveRequest"))
         {
