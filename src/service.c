@@ -2,7 +2,7 @@
  * NT Service interface Utility.
  *  Based on code written by
  *     Chas Woodfield, Fretwell Downing Informatics.
- * $Id: service.c,v 1.3 2005-06-25 15:46:04 adam Exp $
+ * $Id: service.c,v 1.4 2006-05-07 20:32:56 adam Exp $
  */
 
 /**
@@ -226,9 +226,9 @@ void CmdInstallService(int argc, char *argv[], BOOL bAutoStart)
             {
                 /* We will add the given command line arguments to the command */
                 /* We are not interested in the install and remove options */
-                if ((stricmp("-install", argv[i]) != 0) &&
-                    (stricmp("-installa", argv[i]) != 0) &&
-                    (stricmp("-remove", argv[i]) != 0))
+                if ((strcmp("-install", argv[i]) != 0) &&
+                    (strcmp("-installa", argv[i]) != 0) &&
+                    (strcmp("-remove", argv[i]) != 0))
                 {
                     strcat(szPath, TEXT(" "));
                     strcat(szPath, argv[i]);
