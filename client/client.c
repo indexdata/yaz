@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.306 2006-05-07 19:13:55 adam Exp $
+ * $Id: client.c,v 1.307 2006-05-07 19:15:16 adam Exp $
  */
 
 #include <stdio.h>
@@ -4539,6 +4539,7 @@ void process_cmd_line(char* line)
 
 static char *command_generator(const char *text, int state) 
 {
+#if HAVE_READLINE_READLINE_H
     static int idx; 
     if (state==0) {
         idx = 0;
@@ -4549,6 +4550,7 @@ static char *command_generator(const char *text, int state)
             return strdup(cmd_array[idx-1].cmd);
         }
     }
+#endif
     return NULL;
 }
 
