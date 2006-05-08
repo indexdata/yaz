@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.11 2006-05-08 10:16:46 adam Exp $
+dnl $Id: configure.ac,v 1.12 2006-05-08 11:50:57 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.19],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -374,7 +374,9 @@ dnl -- if no PREFIX or not specified we just search in default locations
 dnl -- try pkg-config. If not found, use xslt-config
 if test "$xsltdir" = "yes" -o "$xsltdir" = "default"; then
 	if test "$pkgconfigpath" != "NONE"; then
-		if $pkgconfigpath --exists libxslt; then
+	        # pkg-config on woody reports bad CFLAGS which does 
+		# not include libxml2 CFLAGS, so avoid it..
+		if $pkgconfigpath --atleast-version 1.1.0 libxslt; then
 			pkgmodule="libxslt"
 		fi
 	fi
