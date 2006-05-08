@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.7 2006-05-08 10:16:47 adam Exp $
+ * $Id: record_conv.c,v 1.8 2006-05-08 16:58:25 quinn Exp $
  */
 /**
  * \file record_conv.c
@@ -113,7 +113,7 @@ yaz_record_conv_t yaz_record_conv_create()
     p->path = 0;
 
 #if HAVE_EXSLT
-    exsltDynRegister();
+    exsltRegisterAll(); 
 #endif
     yaz_record_conv_reset(p);
     return p;
