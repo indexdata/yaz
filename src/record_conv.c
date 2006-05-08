@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.6 2006-05-07 17:45:41 adam Exp $
+ * $Id: record_conv.c,v 1.7 2006-05-08 10:16:47 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -22,12 +22,17 @@
 #include <yaz/nmem.h>
 #include <yaz/tpath.h>
 
-#if HAVE_XSLT
+#if HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
+#if HAVE_XSLT
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
+#endif
+#if HAVE_EXSLT
+#include <libexslt/exslt.h>
+#endif
 
 /** \brief The internal structure for yaz_record_conv_t */
 struct yaz_record_conv_struct {
@@ -59,10 +64,11 @@ enum YAZ_RECORD_CONV_RULE
 struct yaz_record_conv_rule {
     enum YAZ_RECORD_CONV_RULE which;
     union {
+#if HAVE_XSLT
         struct {
             xsltStylesheetPtr xsp;
-            int dummy;
         } xslt;
+#endif
         struct {
             yaz_iconv_t iconv_t;
             int input_format;
@@ -83,10 +89,12 @@ static void yaz_record_conv_reset(yaz_record_conv_t p)
             if (r->u.marc.iconv_t)
                 yaz_iconv_close(r->u.marc.iconv_t);
         }
+#if HAVE_XSLT
         else if (r->which == YAZ_RECORD_CONV_RULE_XSLT)
         {
             xsltFreeStylesheet(r->u.xslt.xsp);
         }
+#endif
     }
     wrbuf_rewind(p->wr_error);
     nmem_reset(p->nmem);
@@ -104,6 +112,9 @@ yaz_record_conv_t yaz_record_conv_create()
     p->rules = 0;
     p->path = 0;
 
+#if HAVE_EXSLT
+    exsltDynRegister();
+#endif
     yaz_record_conv_reset(p);
     return p;
 }
@@ -135,6 +146,7 @@ static struct yaz_record_conv_rule *add_rule(yaz_record_conv_t p,
 /** \brief parse 'xslt' conversion node */
 static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
 {
+#if HAVE_XSLT
     struct _xmlAttr *attr;
     const char *stylesheet = 0;
 
@@ -179,6 +191,11 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
         }
     }
     return 0;
+#else
+    wrbuf_printf(p->wr_error, "xslt unsupported."
+                 " YAZ compiled without XSLT support");
+    return -1;
+#endif
 }
 
 /** \brief parse 'marc' conversion node */
@@ -315,6 +332,17 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const void *ptr_v)
                 if (conv_xslt(p, ptr))
                     return -1;
             }
+            else if (!strcmp((const char *) ptr->name, "exslt"))
+            {
+#if HAVE_EXSLT
+                if (conv_xslt(p, ptr))
+                    return -1;
+#else
+                wrbuf_printf(p->wr_error, "exslt unsupported."
+                             " YAZ compiled without EXSLT support");
+                return -1;
+#endif
+            }
             else if (!strcmp((const char *) ptr->name, "marc"))
             {
                 if (conv_marc(p, ptr))
@@ -349,39 +377,7 @@ int yaz_record_conv_record(yaz_record_conv_t p,
     wrbuf_write(record, input_record_buf, input_record_len);
     for (; ret == 0 && r; r = r->next)
     {
-        if (r->which == YAZ_RECORD_CONV_RULE_XSLT)
-        {
-            xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
-                                           wrbuf_len(record));
-            if (!doc)
-            {
-                wrbuf_printf(p->wr_error, "xmlParseMemory failed");
-                ret = -1;
-            }
-            else
-            {
-                xmlDocPtr res = xsltApplyStylesheet(r->u.xslt.xsp, doc, 0);
-                if (res)
-                {
-                    xmlChar *out_buf;
-                    int out_len;
-                    xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
-
-                    wrbuf_rewind(record);
-                    wrbuf_write(record, (const char *) out_buf, out_len);
-
-                    xmlFree(out_buf);
-                    xmlFreeDoc(res);
-                }
-                else
-                {
-                    wrbuf_printf(p->wr_error, "xsltApplyStylesheet faailed");
-                    ret = -1;
-                }
-                xmlFreeDoc(doc);
-            }
-        }
-        else if (r->which == YAZ_RECORD_CONV_RULE_MARC)
+        if (r->which == YAZ_RECORD_CONV_RULE_MARC)
         {
             yaz_marc_t mt = yaz_marc_create();
 
@@ -429,6 +425,40 @@ int yaz_record_conv_record(yaz_record_conv_t p,
             }
             yaz_marc_destroy(mt);
         }
+#if HAVE_XSLT
+        else if (r->which == YAZ_RECORD_CONV_RULE_XSLT)
+        {
+            xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
+                                           wrbuf_len(record));
+            if (!doc)
+            {
+                wrbuf_printf(p->wr_error, "xmlParseMemory failed");
+                ret = -1;
+            }
+            else
+            {
+                xmlDocPtr res = xsltApplyStylesheet(r->u.xslt.xsp, doc, 0);
+                if (res)
+                {
+                    xmlChar *out_buf;
+                    int out_len;
+                    xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
+
+                    wrbuf_rewind(record);
+                    wrbuf_write(record, (const char *) out_buf, out_len);
+
+                    xmlFree(out_buf);
+                    xmlFreeDoc(res);
+                }
+                else
+                {
+                    wrbuf_printf(p->wr_error, "xsltApplyStylesheet faailed");
+                    ret = -1;
+                }
+                xmlFreeDoc(doc);
+            }
+        }
+#endif
     }
     return ret;
 }

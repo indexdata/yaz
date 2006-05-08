@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.10 2006-05-03 12:02:23 adam Exp $
+dnl $Id: configure.ac,v 1.11 2006-05-08 10:16:46 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.19],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -317,46 +317,135 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 	LIBS="$OLIBS $LIBTHREAD"
 fi
 
-dnl ----- libXSLT
-AC_SUBST(XSLT_CFLAGS)
+dnl ----- libXSLT/libEXLT/libXML2
 AC_SUBST(XML2_CFLAGS)
-xsltdir=default
-AC_ARG_WITH(xslt,[[  --with-xslt[=PREFIX]    use libxslt in PREFIX]],xsltdir=$withval)
-if test "$xsltdir" = "yes" -o "$xsltdir" = "default"; then
-	for d in /usr /usr/local; do
-		if test -x $d/bin/xslt-config; then
-			xsltdir=$d
+
+xml2dir=default
+AC_ARG_WITH(xml2,[[  --with-xml2[=PREFIX]    use libxml2 in PREFIX]],xml2dir=$withval)
+dnl -- if no PREFIX or not specified we just search in default locations
+dnl -- try pkg-config. If not found, use xml2-config
+if test "$xml2dir" = "yes" -o "$xml2dir" = "default"; then
+	if test "$pkgconfigpath" != "NONE"; then
+		if $pkgconfigpath --exists libxml-2.0; then
+			pkgmodule="libxml-2.0"
 		fi
-	done
+	fi
+	if test -z "$pkgmodule"; then
+		for d in /usr /usr/local; do
+			if test -x $d/bin/xml2-config; then
+				xml2dir=$d
+			fi
+		done
+	fi
 fi
-if test "$xsltdir" != "no"; then
-	AC_MSG_CHECKING(for libXSLT)
-	if test -x $xsltdir/bin/xslt-config; then
-		XSLT_LIBS=`$xsltdir/bin/xslt-config --libs`
-		XSLT_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
-		XML2_CFLAGS=$XSLT_CFLAGS
-		XSLT_VER=`$xsltdir/bin/xslt-config --version`
-		LIBS="$XSLT_LIBS $LIBS"
-		AC_MSG_RESULT($XSLT_VER)
-		AC_DEFINE(HAVE_XSLT)
+dnl --- do the real check (pkg-config, xml2-config, not-found)
+if test "$xml2dir" != "no"; then
+	AC_MSG_CHECKING(for libXML2)
+	if test "$pkgmodule"; then
+		XML2_LIBS=`$pkgconfigpath --libs $pkgmodule`
+		XML2_CFLAGS=`$pkgconfigpath --cflags $pkgmodule`
+		XML2_VER=`$pkgconfigpath --modversion $pkgmodule`
+		AC_MSG_RESULT($XML2_VER)
+		AC_DEFINE(HAVE_XML2)
+	elif test -x $xml2dir/bin/xml2-config; then
+		XML2_LIBS=`$xml2dir/bin/xml2-config --libs`
+		XML2_CFLAGS=`$xml2dir/bin/xml2-config --cflags`
+		XML2_VER=`$xml2dir/bin/xml2-config --version`
+		AC_MSG_RESULT($XML2_VER)
 		AC_DEFINE(HAVE_XML2)
 	else
 		AC_MSG_RESULT(Not found)
 
-		if test "$xsltdir" = "default"; then
-			AC_MSG_WARN([libxslt development libraries not found.])
+		if test "$xml2dir" = "default"; then
+			AC_MSG_WARN([libxml2 development libraries not found.])
 			AC_MSG_WARN([YAZ will NOT support SRU.])
 		else
-		        AC_MSG_ERROR([libxslt development libraries not found.])
+		        AC_MSG_ERROR([libxml2 development libraries not found.])
 		fi
 	fi
 fi
 
-xml2dir=default
-AC_ARG_WITH(xml2,[[  --with-xml2[=PREFIX]    OBSOLETE. Use --with-xslt instead]],xml2dir=$withval)
-if test "$xml2dir" != "default"; then
-        AC_MSG_ERROR([--with-xml2 OBSOLETE. Use --with-xslt instead.])
+dnl ----- libXSLT
+xsltdir=default
+pkgmodule=""
+AC_ARG_WITH(xslt,[[  --with-xslt[=PREFIX]    use libXSLT in PREFIX]],xsltdir=$withval)
+
+dnl -- if no PREFIX or not specified we just search in default locations
+dnl -- try pkg-config. If not found, use xslt-config
+if test "$xsltdir" = "yes" -o "$xsltdir" = "default"; then
+	if test "$pkgconfigpath" != "NONE"; then
+		if $pkgconfigpath --exists libxslt; then
+			pkgmodule="libxslt"
+		fi
+	fi
+	if test -z "$pkgmodule"; then
+		for d in /usr /usr/local; do
+			if test -x $d/bin/xslt-config; then
+				xsltdir=$d
+			fi
+		done
+	fi
 fi
+dnl --- do the real check (pkg-config, xslt-config, not-found)
+if test "$xsltdir" != "no"; then
+	AC_MSG_CHECKING(for libXSLT)
+	if test "$pkgmodule"; then
+		XML2_LIBS=`$pkgconfigpath --libs $pkgmodule`
+		XML2_CFLAGS=`$pkgconfigpath --cflags $pkgmodule`
+		XSLT_VER=`$pkgconfigpath --modversion $pkgmodule`
+		AC_MSG_RESULT($XSLT_VER)
+		AC_DEFINE(HAVE_XSLT)
+	elif test -x $xsltdir/bin/xslt-config; then
+		XML2_LIBS=`$xsltdir/bin/xslt-config --libs`
+		XML2_CFLAGS=`$xsltdir/bin/xslt-config --cflags`
+		XSLT_VER=`$xsltdir/bin/xslt-config --version`
+		AC_MSG_RESULT($XSLT_VER)
+		AC_DEFINE(HAVE_XSLT)
+	else
+		AC_MSG_RESULT(Not found)
+
+		if test "$xsltdir" = "default"; then
+			AC_MSG_WARN([libXSLT development libraries not found.])
+		else
+		        AC_MSG_ERROR([libXSLT development libraries not found.])
+		fi
+	fi
+fi
+
+dnl -- get libEXSLT. xslt-config is no good. So use pkg-config only
+exsltdir=default
+pkgmodule=""
+AC_ARG_WITH(exslt,[[  --with-exslt[=PREFIX]   use libEXSLT in PREFIX]],exsltdir=$withval)
+if test "$exsltdir" = "yes" -o "$exsltdir" = "default"; then
+	if test "$pkgconfigpath" != "NONE"; then
+		if $pkgconfigpath --exists libexslt; then
+			pkgmodule="libexslt"
+		fi
+	fi
+fi
+if test "$exsltdir" != "no"; then
+	AC_MSG_CHECKING(for libEXSLT)
+	if test "$pkgmodule"; then
+		XML2_LIBS=`$pkgconfigpath --libs $pkgmodule`
+		XML2_CFLAGS=`$pkgconfigpath --cflags $pkgmodule`
+		EXSLT_VER=`$pkgconfigpath --modversion $pkgmodule`
+		AC_MSG_RESULT($EXSLT_VER)
+		AC_DEFINE(HAVE_EXSLT)
+	else
+		AC_MSG_RESULT(Not found)
+
+		if test "$exsltdir" = "default"; then
+			AC_MSG_WARN([libEXSLT development libraries not found.])
+		else
+		        AC_MSG_ERROR([libEXSLT development libraries not found.])
+		fi
+	fi
+fi
+
+if test "$XML2_LIBS"; then
+	LIBS="$XML2_LIBS $LIBS"
+fi
+
 dnl
 dnl ------ Memory debugging
 AC_ARG_ENABLE(memdebug, [  --enable-memdebug       enable memory debugging],[enable_memdebug=$enableval],[enable_memdebug=none])

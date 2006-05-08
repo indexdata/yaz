@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.37 2006-05-07 14:48:25 adam Exp $
+ * $Id: statserv.c,v 1.38 2006-05-08 10:16:47 adam Exp $
  */
 
 /**
@@ -222,7 +222,7 @@ static struct gfs_server * gfs_server_new()
     n->directory = 0;
     n->docpath = 0;
     n->stylesheet = 0;
-#if HAVE_XSLT
+#if HAVE_XML2
     n->retrieval = yaz_retrieval_create();
 #endif
     return n;

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.4 2006-05-07 17:45:41 adam Exp $
+ * $Id: retrieval.c,v 1.5 2006-05-08 10:16:47 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -21,12 +21,10 @@
 #include <yaz/tpath.h>
 #include <yaz/proto.h>
 
-#if HAVE_XSLT
+#if HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
-#include <libxslt/xsltutils.h>
-#include <libxslt/transform.h>
 
 /** \brief The internal structure for yaz_retrieval_t */
 struct yaz_retrieval_struct {

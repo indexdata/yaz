@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.7 2006-05-07 17:45:41 adam Exp $
+ * $Id: tst_record_conv.c,v 1.8 2006-05-08 10:16:47 adam Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -16,7 +16,7 @@
 #include <config.h>
 #endif
 
-#if HAVE_XSLT
+#if HAVE_XML2
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -113,6 +113,7 @@ static void tst_configure()
     YAZ_CHECK(conv_configure_test("<convert><bad/></convert>",
                                   "Bad element 'bad'."
                                   "Expected marc, xslt, ..", 0));
+#if HAVE_XSLT
     YAZ_CHECK(conv_configure_test("<convert>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
@@ -135,6 +136,13 @@ static void tst_configure()
                                   "/>"
                                   "</convert>",
                                   0, 0));
+#else
+    YAZ_CHECK(conv_configure_test("<convert>"
+                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "</convert>",
+                                  "xslt unsupported."
+                                  " YAZ compiled without XSLT support", 0));
+#endif
 }
 
 static int conv_convert_test(yaz_record_conv_t p,
@@ -287,8 +295,10 @@ int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     libxml2_error_to_yazlog(0 /* disable log */, 0);
-#if HAVE_XSLT
+#if HAVE_XML2
     tst_configure();
+#endif
+#if HAVE_XSLT
     tst_convert();
 #endif
     YAZ_CHECK_TERM;

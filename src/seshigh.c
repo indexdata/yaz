@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.77 2006-05-07 14:48:25 adam Exp $
+ * $Id: seshigh.c,v 1.78 2006-05-08 10:16:47 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -577,7 +577,7 @@ static void set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem)
 
 static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
 {
-#if HAVE_XSLT
+#if HAVE_XML2
     yaz_record_conv_t rc = 0;
     const char *match_schema = 0;
     int *match_syntax = 0;
@@ -2241,7 +2241,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.77 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.78 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
