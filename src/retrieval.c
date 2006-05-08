@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.6 2006-05-08 11:58:37 adam Exp $
+ * $Id: retrieval.c,v 1.7 2006-05-08 19:48:26 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -242,6 +242,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
     int syntax_matches = 0;
     int schema_matches = 0;
 
+    wrbuf_rewind(p->wr_error);
     if (!el)
         return 0;
     for(; el; el = el->next)
@@ -254,6 +255,8 @@ int yaz_retrieval_request(yaz_retrieval_t p,
         if (schema && el->identifier && !strcmp(schema, el->identifier))
             schema_ok = 1;
         if (!schema)
+            schema_ok = 1;
+        if (schema && !el->schema)
             schema_ok = 1;
         
         if (syntax && el->syntax && !oid_oidcmp(syntax, el->syntax))
@@ -278,13 +281,16 @@ int yaz_retrieval_request(yaz_retrieval_t p,
             return 0;
         }
     }
-    if (syntax_matches && !schema_matches)
-        return 1;
-    if (!syntax_matches && schema_matches)
+    if (!syntax_matches && syntax)
+    {
+        wrbuf_printf(p->wr_error, "%s", syntax);
         return 2;
-    if (!syntax_matches && !schema_matches)
-        return 3;
-    return 4;
+    }
+    if (schema)
+        wrbuf_printf(p->wr_error, "%s", schema);
+    if (!schema_matches)
+        return 1;
+    return 3;
 }
 
 const char *yaz_retrieval_get_error(yaz_retrieval_t p)

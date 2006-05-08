@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: retrieval.h,v 1.3 2006-05-07 14:48:24 adam Exp $
+ * $Id: retrieval.h,v 1.4 2006-05-08 19:48:26 adam Exp $
  */
 /**
  * \file retrieval.h
@@ -97,8 +97,7 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const void *node);
     \retval -1 failure, use yaz_retrieval_get_error() for reason
     \retval 1 schema does not match
     \retval 2 syntax does not match
-    \retval 3 neither schema, nor syntax matches
-    \retval 4 both match but not together
+    \retval 3 both match but not together
 */
 YAZ_EXPORT
 int yaz_retrieval_request(yaz_retrieval_t p,
