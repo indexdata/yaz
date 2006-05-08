@@ -1,4 +1,4 @@
-<!-- $Id: yazgfs.xml,v 1.3 2006-05-07 14:48:24 adam Exp $ -->
+<!-- $Id: yazgfs.xml,v 1.4 2006-05-08 19:44:18 adam Exp $ -->
 <!-- sample YAZ GFS config file .. see 
   http://indexdata.dk/yaz/doc/server.vhosts.tkl -->
 <yazgfs>
@@ -10,6 +10,7 @@
      <docpath>xsl</docpath>
      <stylesheet>xsl/default.xsl</stylesheet>
      <retrievalinfo>
+       <retrieval syntax="grs-1"/>
        <retrieval syntax="usmarc" schema="F"/>
        <retrieval syntax="usmarc" schema="B"/>
        <retrieval syntax="xml" schema="marcxml"
