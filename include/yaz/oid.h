@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: oid.h,v 1.27 2005-06-25 15:46:03 adam Exp $
+ * $Id: oid.h,v 1.28 2006-05-08 19:45:29 adam Exp $
  */
 
 /**
@@ -42,6 +42,7 @@
 YAZ_BEGIN_CDECL
 
 #define OID_SIZE 20
+#define OID_STR_MAX 256
     
 typedef enum oid_proto
 {

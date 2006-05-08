@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid.c,v 1.11 2005-06-25 15:46:04 adam Exp $
+ * $Id: oid.c,v 1.12 2006-05-08 19:45:29 adam Exp $
  */
 
 /**
@@ -504,7 +504,7 @@ struct oident *oid_addent (int *oid, enum oid_proto proto,
 
         if (!desc)
         {
-            char desc_str[OID_SIZE*10];
+            char desc_str[OID_STR_MAX];
             int i;
 
             *desc_str = '\0';
@@ -599,7 +599,8 @@ void oid_trav (void (*func)(struct oident *oidinfo, void *vp), void *vp)
         (*func)(&ol->oident, vp);
 }
 
-int *oid_name_to_oid(oid_class oclass, const char *name, int *oid) {
+int *oid_name_to_oid(oid_class oclass, const char *name, int *oid)
+{
     struct oident ent;
 
     /* Translate syntax to oid_val */
@@ -614,21 +615,24 @@ int *oid_name_to_oid(oid_class oclass, const char *name, int *oid) {
     return oid_ent_to_oid(&ent, oid);
 }
 
-char *oid_to_dotstring(const int *oid, char *oidbuf) {
+char *oid_to_dotstring(const int *oid, char *oidbuf)
+{
     char tmpbuf[20];
     int i;
 
     oidbuf[0] = '\0';
-    for (i = 0; oid[i] != -1; i++) {
+    for (i = 0; oid[i] != -1 && i < OID_SIZE; i++) 
+    {
         sprintf(tmpbuf, "%d", oid[i]);
-        if (i > 0) strcat(oidbuf, ".");
+        if (i > 0)
+            strcat(oidbuf, ".");
         strcat(oidbuf, tmpbuf);
     }
-
     return oidbuf;
 }
 
-char *oid_name_to_dotstring(oid_class oclass, const char *name, char *oidbuf) {
+char *oid_name_to_dotstring(oid_class oclass, const char *name, char *oidbuf)
+{
     int oid[OID_SIZE];
 
     (void) oid_name_to_oid(oclass, name, oid);
