@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.5 2006-05-08 10:16:47 adam Exp $
+ * $Id: retrieval.c,v 1.6 2006-05-08 11:58:37 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -239,9 +239,11 @@ int yaz_retrieval_request(yaz_retrieval_t p,
                           int **backend_syntax)
 {
     struct yaz_retrieval_elem *el = p->list;
-
     int syntax_matches = 0;
     int schema_matches = 0;
+
+    if (!el)
+        return 0;
     for(; el; el = el->next)
     {
         int schema_ok = 0;
