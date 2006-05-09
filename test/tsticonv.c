@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.19 2006-05-03 13:01:04 adam Exp $
+ * $Id: tsticonv.c,v 1.20 2006-05-09 21:37:03 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -483,13 +483,18 @@ static void tst_latin1_to_marc8()
     /** D8: UPPERCASE SCANDINAVIAN O */
     YAZ_CHECK(tst_convert(cd, "S\xd8", "S\xa2"));
 
-#if 0
-    /* does not pass yet */
     /** E9: LATIN SMALL LETTER E WITH ACUTE */
-    YAZ_CHECK(tst_convert(cd,
-                          "Cours de math\xe9",
-                          "Cours de mathâe"));
-#endif         
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe9", "Cours de mathâe"));
+    YAZ_CHECK(tst_convert(cd, "Cours de math", "Cours de math"
+                  ));
+    YAZ_CHECK(tst_convert(cd, "Cours de mathé", "Cours de mathâe" ));
+    YAZ_CHECK(tst_convert(cd, "12345678é","12345678âe"));
+    YAZ_CHECK(tst_convert(cd, "123456789é", "123456789âe"));
+    YAZ_CHECK(tst_convert(cd, "1234567890é","1234567890âe"));
+    YAZ_CHECK(tst_convert(cd, "12345678901é", "12345678901âe"));
+    YAZ_CHECK(tst_convert(cd, "Cours de mathém", "Cours de mathâem"));
+    YAZ_CHECK(tst_convert(cd, "Cours de mathématiques",
+                          "Cours de mathâematiques"));
     yaz_iconv_close(cd);
 }
 

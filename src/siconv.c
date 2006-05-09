@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.22 2006-04-24 23:21:26 adam Exp $
+ * $Id: siconv.c,v 1.23 2006-05-09 21:37:02 adam Exp $
  */
 /**
  * \file siconv.c
@@ -785,9 +785,9 @@ static size_t flush_combos(yaz_iconv_t cd,
     return 0;
 }
 
-static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
-                              char **outbuf, size_t *outbytesleft,
-                              int last)
+static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
+                                char **outbuf, size_t *outbytesleft,
+                                int last)
 {
     int comb = 0;
     const char *page_chr = 0;
@@ -836,6 +836,41 @@ static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
     }
     return 0;
 }
+
+static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
+                              char **outbuf, size_t *outbytesleft,
+                              int last)
+{
+    int i;
+    for (i = 0; latin1_comb[i].x1; i++)
+    {
+        if (x == latin1_comb[i].y)
+        {
+            size_t r ;
+            /* save the output pointers .. */
+            char *outbuf0 = *outbuf;
+            size_t outbytesleft0 = *outbytesleft;
+            int last_ch = cd->write_marc8_last;
+
+            r = yaz_write_marc8_2(cd, latin1_comb[i].x1,
+                                  outbuf, outbytesleft, 0);
+            if (r)
+                return r;
+            r = yaz_write_marc8_2(cd, latin1_comb[i].x2,
+                                  outbuf, outbytesleft, last);
+            if (r && cd->my_errno == YAZ_ICONV_E2BIG)
+            {
+                /* not enough room. reset output to original values */
+                *outbuf = outbuf0;
+                *outbytesleft = outbytesleft0;
+                cd->write_marc8_last = last_ch;
+            }
+            return r;
+        }
+    }
+    return yaz_write_marc8_2(cd, x, outbuf, outbytesleft, last);
+}
+
 
 #if HAVE_WCHAR_H
 static size_t yaz_write_wchar_t (yaz_iconv_t cd, unsigned long x,
