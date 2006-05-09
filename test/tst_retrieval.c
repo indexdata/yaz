@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_retrieval.c,v 1.4 2006-05-07 17:45:41 adam Exp $
+ * $Id: tst_retrieval.c,v 1.5 2006-05-09 13:39:47 adam Exp $
  *
  */
 #include <yaz/retrieval.h>
@@ -168,13 +168,42 @@ static void tst_configure()
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
                                   "<retrieval" 
                                   " syntax=\"usmarc\""
-                                  " schema=\"marcxml\"" 
+                                  " name=\"marcxml\"" 
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
                                   ">"
                                   "<convert/>"
                                   "</retrieval>"
                                   "</retrievalinfo>",
                                   0, 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"usmarc\""
+                                  " name=\"marcxml\""
+                                  " backendsyntax=\"usmarc\""
+                                  " backendname=\"marcxml\""
+                                  " identifier=\"info:srw/schema/1/marcxml-v1.1\""
+                                  ">"
+                                  "<convert/>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  0, 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"usmarc\""
+                                  " name=\"marcxml\""
+                                  " backendsyntax=\"usmarc\""
+                                  " backendschema=\"marcxml\""
+                                  " identifier=\"info:srw/schema/1/marcxml-v1.1\""
+                                  ">"
+                                  "<convert/>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  "Bad attribute 'backendschema'."
+                                  " Use 'backendname' instead", 
+                                  0));
+
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
                                   "<retrieval" 

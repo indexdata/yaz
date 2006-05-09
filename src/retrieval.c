@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.9 2006-05-09 11:35:28 adam Exp $
+ * $Id: retrieval.c,v 1.10 2006-05-09 13:39:47 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -51,12 +51,12 @@ struct yaz_retrieval_struct {
 struct yaz_retrieval_elem {
     /** \brief schema identifier */
     const char *identifier;
-    /** \brief schema short-hand (such sa "dc") */
-    const char *schema;
+    /** \brief schema name , short-hand such sa "dc" */
+    const char *name;
     /** \brief record syntax */
     int *syntax;
-    /** \brief backend schema */
-    const char *backend_schema;
+    /** \brief backend name */
+    const char *backend_name;
     /** \brief backend syntax */
     int *backend_syntax;
 
@@ -115,8 +115,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
 
     el->syntax = 0;
     el->identifier = 0;
-    el->schema = 0;
-    el->backend_schema = 0;
+    el->name = 0;
+    el->backend_name = 0;
     el->backend_syntax = 0;
 
     el->next = 0;
@@ -137,16 +137,30 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
             }
         }
         else if (!xmlStrcmp(attr->name, BAD_CAST "identifier") &&
-            attr->children && attr->children->type == XML_TEXT_NODE)
+                 attr->children && attr->children->type == XML_TEXT_NODE)
             el->identifier =
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
         else if (!xmlStrcmp(attr->name, BAD_CAST "schema") &&
                  attr->children && attr->children->type == XML_TEXT_NODE)
-            el->schema = 
+        {
+            wrbuf_printf(p->wr_error, "Bad attribute 'schema'. "
+                         "Use 'name' instead");
+            return -1;
+        }
+        else if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
+                 attr->children && attr->children->type == XML_TEXT_NODE)
+            el->name = 
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
         else if (!xmlStrcmp(attr->name, BAD_CAST "backendschema") &&
                  attr->children && attr->children->type == XML_TEXT_NODE)
-            el->backend_schema = 
+        {
+            wrbuf_printf(p->wr_error, "Bad attribute 'backendschema'. "
+                         "Use 'backendname' instead");
+            return -1;
+        }
+        else if (!xmlStrcmp(attr->name, BAD_CAST "backendname") &&
+                 attr->children && attr->children->type == XML_TEXT_NODE)
+            el->backend_name = 
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
         else if (!xmlStrcmp(attr->name, BAD_CAST "backendsyntax") &&
                  attr->children && attr->children->type == XML_TEXT_NODE)
@@ -250,14 +264,17 @@ int yaz_retrieval_request(yaz_retrieval_t p,
         int schema_ok = 0;
         int syntax_ok = 0;
 
-        if (schema && el->schema && !strcmp(schema, el->schema))
-            schema_ok = 1;
-        if (schema && el->identifier && !strcmp(schema, el->identifier))
-            schema_ok = 1;
         if (!schema)
             schema_ok = 1;
-        if (schema && !el->schema)
-            schema_ok = 1;
+        else
+        {
+            if (el->name && !strcmp(schema, el->name))
+                schema_ok = 1;
+            if (el->identifier && !strcmp(schema, el->identifier))
+                schema_ok = 1;
+            if (!el->name && !el->identifier)
+                schema_ok = 1;
+        }
         
         if (syntax && el->syntax && !oid_oidcmp(syntax, el->syntax))
             syntax_ok = 1;
@@ -271,9 +288,12 @@ int yaz_retrieval_request(yaz_retrieval_t p,
         if (syntax_ok && schema_ok)
         {
             *match_syntax = el->syntax;
-            *match_schema = el->schema;
+            if (el->identifier)
+                *match_schema = el->identifier;
+            else
+                *match_schema = 0;
             if (backend_schema)
-                *backend_schema = el->backend_schema;
+                *backend_schema = el->backend_name;
             if (backend_syntax)
                 *backend_syntax = el->backend_syntax;
             if (rc)

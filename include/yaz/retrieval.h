@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: retrieval.h,v 1.4 2006-05-08 19:48:26 adam Exp $
+ * $Id: retrieval.h,v 1.5 2006-05-09 13:39:46 adam Exp $
  */
 /**
  * \file retrieval.h
@@ -65,9 +65,9 @@ YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
     For retrieval:
     \verbatim
     <retrievalinfo>
-       <retrieval syntax="usmarc" schema="marcxml"
+       <retrieval syntax="usmarc" name="marcxml"
             identifier="info:srw/schema/1/marcxml-v1.1"
-            backendsyntax="xml" backendschema="dc"
+            backendsyntax="xml" backendname="dc"
        >
          <title>MARCXML</title>
          <convert>
