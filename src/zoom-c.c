@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.70 2006-04-21 10:28:07 adam Exp $
+ * $Id: zoom-c.c,v 1.71 2006-05-09 16:13:28 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -1150,7 +1150,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.70 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.71 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1584,7 +1584,15 @@ ZOOM_resultset_record (ZOOM_resultset r, size_t pos)
 
     if (!rec)
     {
-        ZOOM_resultset_retrieve (r, 1, pos, 1);
+        /*
+         * MIKE: I think force_sync should always be zero, but I don't
+         * want to make this change until I get the go-ahead from
+         * Adam, in case something depends on the old synchronous
+         * behaviour.
+         */
+        int force_sync = 1;
+        if (getenv("ZOOM_RECORD_NO_FORCE_SYNC")) force_sync = 0;
+        ZOOM_resultset_retrieve (r, force_sync, pos, 1);
         rec = ZOOM_resultset_record_immediate (r, pos);
     }
     return rec;
