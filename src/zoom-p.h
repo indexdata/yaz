@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.10 2006-03-01 23:24:26 adam Exp $
+ * $Id: zoom-p.h,v 1.11 2006-05-10 07:34:38 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -92,7 +92,10 @@ struct ZOOM_options_p {
     ZOOM_options parent2;
 };
 
+
 typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
+
+#define RECORD_HASH_SIZE  131
 
 struct ZOOM_resultset_p {
     Z_SortKeySpecList *r_sort_spec;
@@ -106,7 +109,7 @@ struct ZOOM_resultset_p {
     char *setname;
     char *schema;
     ODR odr;
-    ZOOM_record_cache record_cache;
+    ZOOM_record_cache record_hash[RECORD_HASH_SIZE];
     ZOOM_options options;
     ZOOM_connection connection;
     ZOOM_resultset next;

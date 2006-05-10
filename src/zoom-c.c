@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.71 2006-05-09 16:13:28 mike Exp $
+ * $Id: zoom-c.c,v 1.72 2006-05-10 07:34:38 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -634,6 +634,7 @@ void ZOOM_resultset_addref (ZOOM_resultset r)
 
 ZOOM_resultset ZOOM_resultset_create ()
 {
+    int i;
     ZOOM_resultset r = (ZOOM_resultset) xmalloc (sizeof(*r));
 
     initlog();
@@ -648,7 +649,8 @@ ZOOM_resultset ZOOM_resultset_create ()
     r->schema = 0;
     r->count = 0;
     r->step = 0;
-    r->record_cache = 0;
+    for (i = 0; i<RECORD_HASH_SIZE; i++)
+        r->record_hash[i] = 0;
     r->r_sort_spec = 0;
     r->query = 0;
     r->connection = 0;
@@ -794,18 +796,21 @@ ZOOM_resultset_sort1(ZOOM_resultset r,
 ZOOM_API(void)
     ZOOM_resultset_cache_reset(ZOOM_resultset r)
 {
-    ZOOM_record_cache rc;
-    
-    for (rc = r->record_cache; rc; rc = rc->next)
+    int i;
+    for (i = 0; i<RECORD_HASH_SIZE; i++)
     {
-        if (rc->rec.wrbuf_marc)
-            wrbuf_free (rc->rec.wrbuf_marc, 1);
-        if (rc->rec.wrbuf_iconv)
-            wrbuf_free (rc->rec.wrbuf_iconv, 1);
-        if (rc->rec.wrbuf_opac)
-            wrbuf_free (rc->rec.wrbuf_opac, 1);
+        ZOOM_record_cache rc;
+        for (rc = r->record_hash[i]; rc; rc = rc->next)
+        {
+            if (rc->rec.wrbuf_marc)
+                wrbuf_free (rc->rec.wrbuf_marc, 1);
+            if (rc->rec.wrbuf_iconv)
+                wrbuf_free (rc->rec.wrbuf_iconv, 1);
+            if (rc->rec.wrbuf_opac)
+                wrbuf_free (rc->rec.wrbuf_opac, 1);
+        }
+        r->record_hash[i] = 0;
     }
-    r->record_cache = 0;
 }
 
 ZOOM_API(void)
@@ -1150,7 +1155,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.71 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.72 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1981,6 +1986,13 @@ static int strcmp_null(const char *v1, const char *v2)
     return strcmp(v1, v2);
 }
 
+static size_t record_hash(int pos)
+{
+    if (pos < 0)
+        pos = 0;
+    return pos % RECORD_HASH_SIZE;
+}
+
 static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr, 
                               int pos)
 {
@@ -1993,7 +2005,7 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr,
     ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
     ZOOM_connection_put_event(r->connection, event);
 
-    for (rc = r->record_cache; rc; rc = rc->next)
+    for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
         if (pos == rc->pos)
         {
@@ -2031,8 +2043,8 @@ static void record_cache_add (ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc->schema = 0;
 
     rc->pos = pos;
-    rc->next = r->record_cache;
-    r->record_cache = rc;
+    rc->next = r->record_hash[record_hash(pos)];
+    r->record_hash[record_hash(pos)] = rc;
 }
 
 static ZOOM_record record_cache_lookup (ZOOM_resultset r, int pos)
@@ -2043,7 +2055,7 @@ static ZOOM_record record_cache_lookup (ZOOM_resultset r, int pos)
     const char *syntax = 
         ZOOM_resultset_option_get (r, "preferredRecordSyntax");
     
-    for (rc = r->record_cache; rc; rc = rc->next)
+    for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
         if (pos == rc->pos)
         {
