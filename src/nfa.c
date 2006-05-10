@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.8 2006-05-05 14:04:03 heikki Exp $ 
+ *  $Id: nfa.c,v 1.9 2006-05-10 13:58:46 heikki Exp $ 
  */
 
 /**
@@ -23,7 +23,9 @@
  *  strings with it.
  */
 
+
 #include <stdio.h>
+#include <string.h>
 #include <yaz/nfa.h>
 #include <yaz/nmem.h> 
 
@@ -100,13 +102,13 @@ yaz_nfa *yaz_nfa_init() {
     NMEM my_nmem = nmem_create();
     yaz_nfa *n = nmem_malloc(my_nmem, sizeof(yaz_nfa));
     n->nmem = my_nmem;
-    n->nstates = 0;
-    n->laststate = 0;
-    n->firststate = 0;
-    n->nbackrefs = 0;
+    n->nbackrefs = 1;  /* we always have #0, last range match */
     n->curr_backrefs = 0;
     n->best_backrefs = 0;
     n->lastmatch = YAZ_NFA_NOMATCH;
+    n->nstates = 0;
+    n->laststate = 0;
+    n->firststate = n->laststate ;
     return n;
 }
 
@@ -140,7 +142,7 @@ yaz_nfa_state *yaz_nfa_add_state(yaz_nfa *n) {
 
 int yaz_nfa_set_result(yaz_nfa *n, yaz_nfa_state *s, void *result) {
     if ((s->result)&&result)
-        return 1;
+        return YAZ_NFA_ALREADY;
     s->result = result;
     return 0;
 }
@@ -156,7 +158,7 @@ int yaz_nfa_set_backref_point(yaz_nfa *n, yaz_nfa_state *s,
            int is_start ){
     if (is_start) {
         if (s->backref_start)
-            return 1;
+            return YAZ_NFA_ALREADY;
         s->backref_start = backref_number;
         if (n->nbackrefs<=backref_number) {
             n->nbackrefs = backref_number+1;
@@ -168,9 +170,9 @@ int yaz_nfa_set_backref_point(yaz_nfa *n, yaz_nfa_state *s,
         }
     } else {
         if (s->backref_end)
-            return 1;
-        if (n->nbackrefs<backref_number) 
-            return 2; /* can't end a backref that has not been started */
+            return YAZ_NFA_ALREADY;
+        if (n->nbackrefs<=backref_number) 
+            return YAZ_NFA_NOSTART; 
         s->backref_end = backref_number;
     }
     return 0; /* ok */
@@ -240,10 +242,13 @@ yaz_nfa_state *yaz_nfa_add_range(yaz_nfa *n,
         yaz_nfa_state *s,
         yaz_nfa_char range_start, 
         yaz_nfa_char range_end) {
-    yaz_nfa_state *nextstate;
+    yaz_nfa_state *nextstate=0;
     if (!s) /* default to top-level of the nfa */
         s = n->firststate;
-    nextstate = find_single_trans(s, range_start, range_end);
+    if (s)
+        nextstate = find_single_trans(s, range_start, range_end);
+    else
+        s = yaz_nfa_add_state(n); /* create initial state */
     if (!nextstate) {
         nextstate = yaz_nfa_add_state(n);
         yaz_nfa_add_transition(n, s, nextstate, range_start, range_end);
@@ -253,21 +258,25 @@ yaz_nfa_state *yaz_nfa_add_range(yaz_nfa *n,
 
 yaz_nfa_state *yaz_nfa_add_sequence(yaz_nfa *n, 
         yaz_nfa_state *s, 
-        yaz_nfa_char *seq ){
-    yaz_nfa_state *nextstate;
+        yaz_nfa_char *seq,
+        size_t seq_len){
+    yaz_nfa_state *nextstate=0;
     if (!s) /* default to top-level of the nfa */
         s = n->firststate;
-    nextstate = find_single_trans(s, *seq, *seq);
+    if (s) 
+        nextstate = find_single_trans(s, *seq, *seq);
     if (nextstate) {
         seq++;
-        if (!*seq) /* whole sequence matched */
+        seq_len--;
+        if (!seq_len) /* whole sequence matched */
             return nextstate;
         else
-            return yaz_nfa_add_sequence(n, nextstate, seq);
+            return yaz_nfa_add_sequence(n, nextstate, seq,seq_len);
     } else { /* no next state, build the rest */
-        while (*seq) {
+        while (seq_len) {
             s = yaz_nfa_add_range(n, s, *seq, *seq);
             seq++;
+            seq_len--;
         }
         return s;
     }
@@ -308,7 +317,8 @@ static void match_state(
         if (incharsleft) {
             do {
                 t = t->next;
-                if ( (( t->range_start <= *inchar ) && ( t->range_end >= *inchar )) ){
+                if ( (( t->range_start <= *inchar ) && 
+                      ( t->range_end >= *inchar )) ){
                     m->empties = 0;
                     if (t->range_start!=t->range_end){
                         /* backref 0 is special: the last range operation */
@@ -367,7 +377,7 @@ int yaz_nfa_match(yaz_nfa *n,
     m.longest=*inbuff;
     m.bestnode = n->nstates;
     m.result = 0;
-    m.errorcode = 0;
+    m.errorcode = YAZ_NFA_SUCCESS;
     m.empties = 0;
     sz = sizeof( struct yaz_nfa_backref_info) * n->nbackrefs;
     if (!n->curr_backrefs) {
@@ -382,18 +392,17 @@ int yaz_nfa_match(yaz_nfa *n,
     }
 
     match_state(n->firststate, *inbuff, *inbuff, *incharsleft, &m);
-    if (m.result) {
-        *incharsleft -= (m.longest-*inbuff);
-        *result = m.result;
-        *inbuff = m.longest;
-        if (m.errorcode)
-            n->lastmatch = m.errorcode;
-        else
-            n->lastmatch= YAZ_NFA_SUCCESS;
-        return n->lastmatch;
+    if (m.errorcode==YAZ_NFA_SUCCESS) {
+        if (!m.result)
+            m.errorcode=YAZ_NFA_NOMATCH;
+        else {
+            *incharsleft -= (m.longest-*inbuff);
+            *result = m.result;
+            *inbuff = m.longest;
+        }
     }
-    n->lastmatch = YAZ_NFA_NOMATCH;
-    return n->lastmatch; 
+    n->lastmatch=m.errorcode;
+    return m.errorcode;
 }
 
 
@@ -401,12 +410,12 @@ int yaz_nfa_get_backref( yaz_nfa *n,
                 int backref_no,
                 yaz_nfa_char **start,
                 yaz_nfa_char **end) {
-    if (backref_no>=n->nbackrefs)
-        return 2;
-    if (backref_no<0)
-        return 2;
-    if (n->lastmatch== YAZ_NFA_NOMATCH)
-        return 1;  /* accept other errors, they return partial matches*/
+    if (backref_no >= n->nbackrefs)
+        return YAZ_NFA_NOSUCHBACKREF;
+    if (backref_no < 0)
+        return YAZ_NFA_NOSUCHBACKREF;
+    if (n->lastmatch != YAZ_NFA_SUCCESS)
+        return YAZ_NFA_NOMATCH;  
 
     *start = n->best_backrefs[backref_no].start;
     *end = n->best_backrefs[backref_no].end;
@@ -485,11 +494,11 @@ static int string_convert (
     yaz_nfa_char *p=c->string;
     while (sz--) {
         if ((*outcharsleft)-- <= 0)
-            return 2;
+            return YAZ_NFA_NOSPACE;
         **outbuff=*p++;
         (*outbuff)++;
     }
-    return 0;
+    return YAZ_NFA_SUCCESS;
 }
 static int backref_convert (
                 yaz_nfa *n,
@@ -498,18 +507,18 @@ static int backref_convert (
                 size_t *outcharsleft){
     yaz_nfa_char *cp1,*cp2;
     int i;
-    i=yaz_nfa_get_backref(n,c->backref_no, &cp1, &cp2);
-    if (i==2) /* no backref, produce no output, that's ok */
-        return 0;
-    if (i==1) /* no match in dfa */
+    i = yaz_nfa_get_backref(n,c->backref_no, &cp1, &cp2);
+    if ( i == YAZ_NFA_NOSUCHBACKREF) /* no backref, produce no output */
+        return YAZ_NFA_SUCCESS; 
+    if ( i == YAZ_NFA_NOMATCH ) /* no match in dfa */
         return 1; /* should not happen */
-    while (cp2>=cp1) {
+    while (cp2 >= cp1) {
         if ((*outcharsleft)-- <= 0)
-            return 2;
+            return YAZ_NFA_NOSPACE;
         **outbuff=*cp1++;
         (*outbuff)++;
     }
-    return 0;
+    return YAZ_NFA_SUCCESS;
 }
 
 static int range_convert (
@@ -517,20 +526,20 @@ static int range_convert (
                 yaz_nfa_converter *c,
                 yaz_nfa_char **outbuff,
                 size_t *outcharsleft){
-    yaz_nfa_char *cp1,*cp2;
+    yaz_nfa_char *cp1=0, *cp2=0;
     int i;
     i = yaz_nfa_get_backref(n,c->backref_no, &cp1, &cp2);
-    if (i == 2) /* no backref, produce no output, not ok */
-        return 1; /* should not happen */
-    if (i == 1) /* no match in dfa */
-        return 1; /* should not happen */
+    if (i == YAZ_NFA_NOSUCHBACKREF) /* no backref, produce no output, not ok */
+        return YAZ_NFA_NOSUCHBACKREF; /* should not happen */
+    if (i == YAZ_NFA_NOMATCH) /* no match in dfa */
+        return YAZ_NFA_NOMATCH; /* should not happen */
     while (cp2 >= cp1) {
         if ((*outcharsleft)-- <= 0)
-            return 2;
+            return YAZ_NFA_NOSPACE;
         **outbuff=(*cp1++) + c->char_diff ;
         (*outbuff)++;
     }
-    return 0;
+    return YAZ_NFA_SUCCESS;
 }
 
 
@@ -552,9 +561,100 @@ int yaz_nfa_run_converters(
                 rc=range_convert(n,c,outbuff,outcharsleft);
                 break;
             default:
-                rc=3; /* internal error */
+                rc=YAZ_NFA_INTERNAL; /* should never happen */
         }
         c=c->next;
+    }
+    return rc;
+}
+
+/* * * * * * * *
+ * High-level interface
+ * These routines build the nfa and add converters, all 
+ * in one go.
+ * * * * * * * */
+
+int yaz_nfa_add_string_rule( yaz_nfa *n,
+        yaz_nfa_char *from_string,
+        size_t        from_length,
+        yaz_nfa_char *to_string,
+        size_t        to_length ) {
+    yaz_nfa_state *s= 
+        yaz_nfa_add_sequence(n, 0, from_string,from_length);
+    yaz_nfa_converter *c=
+        yaz_nfa_create_string_converter(n,to_string,to_length);
+    return yaz_nfa_set_result(n,s,c);
+}
+
+int yaz_nfa_add_ascii_string_rule( yaz_nfa *n,
+                        char *from_string,
+                        char *to_string) {
+    size_t from_len = strlen(from_string);
+    size_t to_len = strlen(to_string);
+    yaz_nfa_char *from_buf=
+        nmem_malloc(n->nmem, from_len*sizeof(yaz_nfa_char));
+    yaz_nfa_char *to_buf=
+        nmem_malloc(n->nmem, to_len*sizeof(yaz_nfa_char));
+    int i;
+    for (i=0;i<from_len;i++) 
+        from_buf[i]=from_string[i];
+    for (i=0;i<to_len;i++) 
+        to_buf[i]=to_string[i];
+    return yaz_nfa_add_string_rule(n,from_buf, from_len,
+            to_buf, to_len);
+}
+
+int yaz_nfa_add_char_range_rule (yaz_nfa *n,
+        yaz_nfa_char range_start,
+        yaz_nfa_char range_end,
+        yaz_nfa_char output_range_start) {
+    yaz_nfa_state *s= 
+        yaz_nfa_add_range(n, 0, range_start, range_end);
+    yaz_nfa_converter *c=
+        yaz_nfa_create_range_converter(n,0,range_start, output_range_start);
+    return yaz_nfa_set_result(n,s,c);
+}
+
+int yaz_nfa_add_char_string_rule (yaz_nfa *n,
+        yaz_nfa_char range_start,
+        yaz_nfa_char range_end,
+        yaz_nfa_char* to_string,
+        size_t to_length) {
+    yaz_nfa_state *s= 
+        yaz_nfa_add_range(n, 0, range_start, range_end);
+    yaz_nfa_converter *c=
+        yaz_nfa_create_string_converter(n,to_string,to_length);
+    return yaz_nfa_set_result(n,s,c);
+}
+
+
+int yaz_nfa_convert_slice (yaz_nfa *n,
+        yaz_nfa_char **inbuff, 
+        size_t *incharsleft,
+        yaz_nfa_char **outbuff,
+        size_t *outcharsleft) {
+    void *resptr;
+    yaz_nfa_converter *conv;
+    int rc;
+
+    if (*outcharsleft==0)
+        rc=YAZ_NFA_NOSPACE; /* no room in outbuff */
+    else if (*incharsleft==0) 
+        rc = YAZ_NFA_SUCCESS; /* all done */
+    else {
+        rc=yaz_nfa_match(n, inbuff, incharsleft, &resptr);
+        if (rc==YAZ_NFA_SUCCESS) {
+            conv= (yaz_nfa_converter *)resptr;
+            rc=yaz_nfa_run_converters(n,conv,outbuff,outcharsleft);    
+        } else if (rc==YAZ_NFA_NOMATCH) {
+            **outbuff = **inbuff; 
+            (*outbuff)++;
+            (*inbuff)++;
+            (*outcharsleft)--;
+            (*incharsleft)--;
+            rc=YAZ_NFA_SUCCESS; 
+        }
+        /* else just return the error code */
     }
     return rc;
 }
@@ -611,7 +711,7 @@ static void dump_state(FILE *F, yaz_nfa_state *s,
             resultstring = s->result;
     }
     fprintf(F, "  state [%d] %s %s",
-            s->num, s->result?"(FINAL)":"", resultstring );
+            s->num, s->result?"(final)":"", resultstring );
     if (s->backref_start) {
         fprintf(F, " start-%d", s->backref_start);
     }
