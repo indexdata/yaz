@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.6 2006-04-26 16:58:27 heikki Exp $
+ * $Id: test.c,v 1.7 2006-05-10 12:52:28 heikki Exp $
  */
 
 /** \file test.c
@@ -80,6 +80,7 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
                         "       1=Report+Summary only if tests fail.\n"
                         "       2=Report failures. Print summary always\n"
                         "       3=Report + summary always\n"
+                        "       4=Report + summary + extra prints from tests\n"
                     );
                 exit(0);
             }
@@ -159,6 +160,10 @@ void yaz_check_print1(int type, const char *file, int line,
     fprintf(get_file(), "%s\n", expr);
 }
 
+
+int yaz_test_get_verbosity(){
+    return test_verbose;
+}
 
 /*
  * Local variables:

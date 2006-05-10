@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.h,v 1.5 2006-04-20 20:50:51 adam Exp $
+ * $Id: test.h,v 1.6 2006-05-10 12:52:17 heikki Exp $
  */
 
 /** \file test.h
@@ -14,6 +14,9 @@
 
 #include <yaz/yconfig.h>
 #include <stdio.h>
+
+/** \brief Get the verbosity level */
+int yaz_test_get_verbosity();
 
 /** \brief Test OK */
 #define YAZ_TEST_TYPE_OK 1
@@ -46,6 +49,7 @@
 #define YAZ_CHECK_INIT(argc, argv) yaz_check_init1(&argc, &argv)
 /** \brief Macro to terminate the system (end of main, normally) */
 #define YAZ_CHECK_TERM yaz_check_term1(); return 0
+
 
 YAZ_BEGIN_CDECL
 /** \brief used by macro. Should not be called directly */
