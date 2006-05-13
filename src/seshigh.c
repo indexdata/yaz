@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.80 2006-05-09 13:39:47 adam Exp $
+ * $Id: seshigh.c,v 1.81 2006-05-13 03:56:31 quinn Exp $
  */
 /**
  * \file seshigh.c
@@ -2240,7 +2240,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.80 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.81 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2656,9 +2656,39 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
                 form = VAL_NONE;
             else
                 form = prefformat->value;
-            resp->records = pack_records(assoc, req->resultSetName, 1,
-                                         toget, compp, next, presst, form, req->referenceId,
-                                         req->preferredRecordSyntax, NULL);
+
+            /* Call bend_present if defined */
+            if (assoc->init->bend_present)
+            {
+                bend_present_rr *bprr = (bend_present_rr *)
+                    nmem_malloc (reqb->request_mem, sizeof(*bprr));
+                bprr->setname = req->resultSetName;
+                bprr->start = 1;
+                bprr->number = *toget;
+                bprr->format = form;
+                bprr->comp = compp;
+                bprr->referenceId = req->referenceId;
+                bprr->stream = assoc->encode;
+                bprr->print = assoc->print;
+                bprr->request = reqb;
+                bprr->association = assoc;
+                bprr->errcode = 0;
+                bprr->errstring = NULL;
+                (*assoc->init->bend_present)(assoc->backend, bprr);
+
+                if (!bprr->request)
+                    return 0;
+                if (bprr->errcode)
+                {
+                    resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
+                    *resp->presentStatus = Z_PresentStatus_failure;
+                }
+            }
+
+            if (!resp->records)
+                resp->records = pack_records(assoc, req->resultSetName, 1,
+                                             toget, compp, next, presst, form, req->referenceId,
+                                             req->preferredRecordSyntax, NULL);
             if (!resp->records)
                 return 0;
             resp->numberOfRecordsReturned = toget;
