@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.81 2006-05-13 03:56:31 quinn Exp $
+ * $Id: seshigh.c,v 1.82 2006-05-14 20:03:19 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -582,10 +582,6 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
     const char *match_schema = 0;
     int *match_syntax = 0;
 
-    if (!assoc->server)
-    {
-        yaz_log(YLOG_LOG, "no assoc->server");
-    }
     if (assoc->server)
     {
         int r;
@@ -595,8 +591,6 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         const char *backend_schema = 0;
         Odr_oid *backend_syntax = 0;
 
-        yaz_log(YLOG_LOG, "found assoc->server");
-
         r = yaz_retrieval_request(assoc->server->retrieval,
                                   input_schema,
                                   input_syntax_raw,
@@ -605,7 +599,6 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
                                   &rc,
                                   &backend_schema,
                                   &backend_syntax);
-        yaz_log(YLOG_LOG, "yaz_retrieval_request r=%d", r);
         if (r == -1) /* error ? */
         {
             const char *details = yaz_retrieval_get_error(
@@ -677,7 +670,6 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         rr->output_format = oi ? oi->value : VAL_NONE;
         rr->output_format_raw = match_syntax;
     }
-    yaz_log(YLOG_LOG, "match_scheam=%s", match_schema);
     if (match_schema)
         rr->schema = odr_strdup(rr->stream, match_schema);
     return 0;
@@ -2240,7 +2232,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.81 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.82 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
