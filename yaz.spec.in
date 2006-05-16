@@ -2,13 +2,13 @@ Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
 Release: 1
-Requires: libxml2 openssl readline libyaz = %{version}
+Requires: libxslt openssl readline libyaz = %{version}
 License: YAZ License
 Group: Other
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: libxml2 libxml2-devel tcp_wrappers openssl-devel readline-devel
+BuildRequires: libxml2-devel libxslt-devel tcp_wrappers openssl-devel readline-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.dk/yaz/
 
@@ -19,7 +19,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %package -n lib%{name}
 Summary: Z39.50 Library
 Group: Libraries
-Requires: libxml2 openssl
+Requires: libxslt openssl
 
 %description -n lib%{name}
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
@@ -28,7 +28,7 @@ Retrieval.
 %package -n lib%{name}-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyaz = %{version} libxml2-devel
+Requires: libyaz = %{version} libxml2-devel libxslt-devel
 
 %description -n lib%{name}-devel
 Development libraries and includes for the libyaz package.
@@ -39,7 +39,7 @@ Development libraries and includes for the libyaz package.
 %build
 
 CFLAGS="$RPM_OPT_FLAGS" \
- ./configure --prefix=/usr --enable-shared --enable-tcpd --with-xml2 --with-openssl
+ ./configure --prefix=/usr --enable-shared --enable-tcpd --with-xslt --with-openssl
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
