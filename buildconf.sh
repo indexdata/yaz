@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.30 2006-05-22 12:11:45 mike Exp $
+# $Id: buildconf.sh,v 1.31 2006-05-22 15:15:26 mike Exp $
 
 automake=automake
 aclocal=aclocal
@@ -11,6 +11,7 @@ if [ "`uname -s`" = FreeBSD ]; then
     automake=automake19
     aclocal="aclocal19 -I /usr/local/share/aclocal"
     autoconf=autoconf259
+    echo "Remember to use gmake (GNU make) instead of vanilla make"
 fi
 
 if $automake --version|head -1 |grep '1\.[4-7]'; then
