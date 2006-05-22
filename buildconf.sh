@@ -1,7 +1,19 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.29 2006-05-03 12:02:23 adam Exp $
+# $Id: buildconf.sh,v 1.30 2006-05-22 12:11:45 mike Exp $
 
-if automake --version|head -1 |grep '1\.[4-7]'; then
+automake=automake
+aclocal=aclocal
+autoconf=autoconf
+
+if [ "`uname -s`" = FreeBSD ]; then
+    # FreeBSD intalls the various auto* tools with version numbers
+    echo "Using special configuation for FreeBSD ..."
+    automake=automake19
+    aclocal="aclocal19 -I /usr/local/share/aclocal"
+    autoconf=autoconf259
+fi
+
+if $automake --version|head -1 |grep '1\.[4-7]'; then
     echo "automake 1.4-1.7 is active. You should use automake 1.8 or later"
     if test -f /etc/debian_version; then
         echo " sudo apt-get install automake1.9"
@@ -12,10 +24,10 @@ fi
 
 set -x
 # I am tired of underquoted warnings for Tcl macros
-aclocal -I m4 2>&1 | grep -v aclocal/tcl.m4
+$aclocal -I m4 2>&1 | grep -v "warning: underquoted definition"
 libtoolize --automake --force 
-automake --add-missing 
-autoconf
+$automake --add-missing 
+$autoconf
 set -
 if [ -f config.cache ]; then
 	rm config.cache
