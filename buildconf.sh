@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.32 2006-05-23 09:54:12 adam Exp $
+# $Id: buildconf.sh,v 1.33 2006-05-23 14:07:49 adam Exp $
 
 automake=automake
 aclocal=aclocal
@@ -13,7 +13,6 @@ if [ "`uname -s`" = FreeBSD ]; then
     aclocal="aclocal19 -I /usr/local/share/aclocal"
     autoconf=autoconf259
     libtoolize=libtoolize15
-    echo "Remember to use gmake (GNU make) instead of vanilla make"
 fi
 
 if $automake --version|head -1 |grep '1\.[4-7]'; then
@@ -97,8 +96,8 @@ EOF
     if [ "`uname -s`" = FreeBSD ]; then
         cat <<EOF
 When building from a CVS checkout, you need these FreeBSD Ports:
-   gmake, autoconf259, automake19, libtool15, bison, tcl84,
-   jade and friends
+   autoconf259, automake19, libtool15, bison, tcl84,
+   docbook-2-man (?), dsssl-docbook-modular, jadetex
 EOF
     fi
 fi
