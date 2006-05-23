@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.14 2006-05-23 09:13:50 adam Exp $
+dnl $Id: configure.ac,v 1.15 2006-05-23 09:40:43 marc Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.19],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -368,3 +368,42 @@ etc/Makefile
 yaz-config
 Doxyfile
 ],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config])
+
+
+echo \ '
+Build and install binaries with the usual
+  make
+  make check
+  make install
+
+Build distribution tarball with
+  make dist
+
+Verify distribution tarball with
+  make distcheck
+
+Or just build the Debian packages without configuring
+  dpkg-buildpackage -rfakeroot
+'
+
+echo \
+"------------------------------------------------------------------------
+Configuration:
+
+  Package:                    ${PACKAGE}
+  Version:                    ${VERSION}
+  Bugreport:                  ${PACKAGE_BUGREPORT}
+  Source code location:       ${srcdir}
+  C Preprocessor:             ${CPP}
+  C Preprocessor flags:       ${CPPFLAGS}
+  C Compiler:                 ${CC}
+  C Compiler flags:           ${CFLAGS}
+  Linker flags:               ${LDFLAGS}
+  Linked libs:                ${LIBS}
+  Host System Type:           ${host}
+  Install path:               ${prefix}
+  Automake:                   ${AUTOMAKE}
+  Archiver:                   ${AR}
+  Ranlib:                     ${RANLIB}
+
+------------------------------------------------------------------------"
