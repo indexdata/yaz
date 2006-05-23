@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.13 2006-05-08 12:20:48 adam Exp $
+dnl $Id: configure.ac,v 1.14 2006-05-23 09:13:50 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.19],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -14,6 +14,7 @@ AC_PROG_CC
 AC_PROG_CPP
 AC_CHECK_PROGS(YACC, 'bison -y')
 test -z "$YACC" && AC_MSG_WARN([GNU bison not found])
+AC_CHECK_PROGS(TCLSH, tclsh8.5 tclsh8.4 tclsh8.3 tclsh8.2, tclsh)
 AC_PROG_INSTALL
 AM_DISABLE_SHARED
 AM_PROG_LIBTOOL

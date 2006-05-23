@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.36 2006-05-07 17:45:41 adam Exp $
+## $Id: Makefile.am,v 1.37 2006-05-23 09:13:50 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -22,7 +22,7 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv
 
 YAZCOMP = ../util/yaz-asncomp
-YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
+YAZCOMPLINE = $(TCLSH) $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
 
 AM_CFLAGS=$(THREAD_CFLAGS)
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
@@ -31,18 +31,18 @@ AM_YFLAGS=-p cql_
 
 # MARC8->UTF8 conversion is generated from codetables.xml
 $(srcdir)/marc8.c: charconv.tcl codetables.xml
-	cd $(srcdir); ./charconv.tcl -p marc8 codetables.xml -o marc8.c
+	cd $(srcdir); $(TCLSH) ./charconv.tcl -p marc8 codetables.xml -o marc8.c
 
 # UTF-8->MARC8 conversion is generated from codetables.xml
 $(srcdir)/marc8r.c: charconv.tcl codetables.xml
-	cd $(srcdir); ./charconv.tcl -r -p marc8r codetables.xml -o marc8r.c
+	cd $(srcdir); $(TCLSH) ./charconv.tcl -r -p marc8r codetables.xml -o marc8r.c
 
 # Generate diagnostics from CSVs
 $(top_srcdir)/include/yaz/diagbib1.h $(srcdir)/diagbib1.c: csvtobib1.tcl bib1.csv
-	cd $(srcdir); ./csvtobib1.tcl
+	cd $(srcdir); $(TCLSH) ./csvtobib1.tcl
 
 $(top_srcdir)/include/yaz/diagsrw.h $(srcdir)/diagsrw.c: csvtosrw.tcl srw.csv
-	cd $(srcdir); ./csvtosrw.tcl
+	cd $(srcdir); $(TCLSH) ./csvtosrw.tcl
 
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
