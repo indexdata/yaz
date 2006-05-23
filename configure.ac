@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.15 2006-05-23 09:40:43 marc Exp $
+dnl $Id: configure.ac,v 1.16 2006-05-23 10:05:28 marc Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.19],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -390,8 +390,8 @@ echo \
 "------------------------------------------------------------------------
 Configuration:
 
-  Package:                    ${PACKAGE}
-  Version:                    ${VERSION}
+  YAZ Package:                ${PACKAGE}
+  YAZ Version:                ${VERSION}
   Bugreport:                  ${PACKAGE_BUGREPORT}
   Source code location:       ${srcdir}
   C Preprocessor:             ${CPP}
