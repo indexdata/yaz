@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.33 2006-05-23 14:07:49 adam Exp $
+# $Id: buildconf.sh,v 1.34 2006-05-23 19:13:44 adam Exp $
 
 automake=automake
 aclocal=aclocal
@@ -97,7 +97,7 @@ EOF
         cat <<EOF
 When building from a CVS checkout, you need these FreeBSD Ports:
    autoconf259, automake19, libtool15, bison, tcl84,
-   docbook-2-man (?), dsssl-docbook-modular, jadetex
+   docbook-to-man, dsssl-docbook-modular, jadetex
 EOF
     fi
 fi
