@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.37 2006-05-23 09:13:50 adam Exp $
+## $Id: Makefile.am,v 1.38 2006-05-23 13:43:40 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -21,8 +21,9 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml \
  csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv
 
-YAZCOMP = ../util/yaz-asncomp
-YAZCOMPLINE = $(TCLSH) $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
+YAZCOMP=$(top_srcdir)/util/yaz-asncomp
+YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I../include
+YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I ../include
 
 AM_CFLAGS=$(THREAD_CFLAGS)
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
@@ -30,19 +31,19 @@ AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS)
 AM_YFLAGS=-p cql_
 
 # MARC8->UTF8 conversion is generated from codetables.xml
-$(srcdir)/marc8.c: charconv.tcl codetables.xml
-	cd $(srcdir); $(TCLSH) ./charconv.tcl -p marc8 codetables.xml -o marc8.c
+marc8.c: charconv.tcl codetables.xml
+	$(TCLSH) $(srcdir)/charconv.tcl -p marc8 $(srcdir)/codetables.xml -o marc8.c
 
 # UTF-8->MARC8 conversion is generated from codetables.xml
-$(srcdir)/marc8r.c: charconv.tcl codetables.xml
-	cd $(srcdir); $(TCLSH) ./charconv.tcl -r -p marc8r codetables.xml -o marc8r.c
+marc8r.c: charconv.tcl codetables.xml
+	$(TCLSH) $(srcdir)/charconv.tcl -r -p marc8r $(srcdir)/codetables.xml -o marc8r.c
 
 # Generate diagnostics from CSVs
-$(top_srcdir)/include/yaz/diagbib1.h $(srcdir)/diagbib1.c: csvtobib1.tcl bib1.csv
-	cd $(srcdir); $(TCLSH) ./csvtobib1.tcl
+diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: csvtobib1.tcl bib1.csv
+	$(TCLSH) $(srcdir)/csvtobib1.tcl $(srcdir)
 
-$(top_srcdir)/include/yaz/diagsrw.h $(srcdir)/diagsrw.c: csvtosrw.tcl srw.csv
-	cd $(srcdir); $(TCLSH) ./csvtosrw.tcl
+diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h: csvtosrw.tcl srw.csv
+	$(TCLSH) $(srcdir)/csvtosrw.tcl $(srcdir)
 
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
@@ -84,79 +85,79 @@ libyazthread_la_SOURCES=version.c
 libyazthread_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # Rules for Z39.50 V3
-$(srcdir)/z-accdes1.c \
-$(srcdir)/z-accform1.c \
-$(srcdir)/z-acckrb1.c \
-$(srcdir)/z-core.c \
-$(srcdir)/z-diag1.c \
-$(srcdir)/z-espec1.c \
-$(srcdir)/z-estask.c \
-$(srcdir)/z-exp.c \
-$(srcdir)/z-grs.c \
-$(srcdir)/z-opac.c \
-$(srcdir)/z-uifr1.c \
-$(srcdir)/z-rrf1.c \
-$(srcdir)/z-rrf2.c \
-$(srcdir)/z-sum.c \
-$(srcdir)/z-sutrs.c \
-$(srcdir)/zes-expi.c \
-$(srcdir)/zes-exps.c \
-$(srcdir)/zes-order.c \
-$(srcdir)/zes-pquery.c \
-$(srcdir)/zes-psched.c \
-$(srcdir)/zes-pset.c \
-$(srcdir)/zes-update0.c \
+z-accdes1.c \
+z-accform1.c \
+z-acckrb1.c \
+z-core.c \
+z-diag1.c \
+z-espec1.c \
+z-estask.c \
+z-exp.c \
+z-grs.c \
+z-opac.c \
+z-uifr1.c \
+z-rrf1.c \
+z-rrf2.c \
+z-sum.c \
+z-sutrs.c \
+zes-expi.c \
+zes-exps.c \
+zes-order.c \
+zes-pquery.c \
+zes-psched.c \
+zes-pset.c \
+zes-update0.c \
 $(top_srcdir)/include/yaz/z-accdes1.h \
 $(top_srcdir)/include/yaz/z-core.h: \
 $(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMPLINE) z3950v3.asn
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/z3950v3.asn
 
 # Date extension
-$(srcdir)/z-date.c \
+z-date.c \
 $(top_srcdir)/include/yaz/z-date.h: $(srcdir)/z.tcl $(srcdir)/datetime.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMPLINE) datetime.asn
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/datetime.asn
 
 # UNIverse extension
-$(srcdir)/z-univ.c \
+z-univ.c \
 $(top_srcdir)/include/yaz/z-univ.h: \
 $(srcdir)/z.tcl $(srcdir)/univres.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMPLINE) univres.asn
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/univres.asn
 
 # New Update extended service
-$(srcdir)/zes-update.c \
+zes-update.c \
 $(top_srcdir)/include/yaz/zes-update.h: \
 $(srcdir)/z.tcl $(srcdir)/esupdate.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMPLINE) esupdate.asn
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/esupdate.asn
 
 # Admin extended service
-$(srcdir)/zes-admin.c \
+zes-admin.c \
 $(top_srcdir)/include/yaz/zes-admin.h: \
 $(srcdir)/z.tcl $(srcdir)/esadmin.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMPLINE) esadmin.asn
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/esadmin.asn
 
 # Charset negotiation
-$(srcdir)/z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMPLINE) $(YCFLAGS) charneg-3.asn
+z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn $(YAZCOMP)
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/charneg-3.asn
 
 # UserInfoFormat-multipleSearchTerms-2
-$(srcdir)/z-mterm2.c: $(srcdir)/z.tcl $(srcdir)/mterm2.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMPLINE) mterm2.asn
+z-mterm2.c: $(srcdir)/z.tcl $(srcdir)/mterm2.asn $(YAZCOMP)
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/mterm2.asn
 
 # UserInfoFormat-multipleSearchTerms-2
-$(srcdir)/z-oclcui.c: $(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMPLINE) oclcui.asn
+z-oclcui.c: $(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/oclcui.asn
 
 # ILL protocol
-$(srcdir)/ill-core.c \
+ill-core.c \
 $(top_srcdir)/include/yaz/ill-core.h: \
 $(srcdir)/ill.tcl $(srcdir)/ill9702.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMP) -d ill.tcl -i yaz -I ../include $(YCFLAGS) ill9702.asn
+	$(TCLSH) $(YAZCOMP_I) $(srcdir)/ill9702.asn
 
 # Item Request
-$(srcdir)/item-req.c \
+item-req.c \
 $(top_srcdir)/include/yaz/item-req.h: \
 $(srcdir)/ill.tcl $(srcdir)/item-req.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMP) -d ill.tcl -i yaz -I ../include $(YCFLAGS) item-req.asn
+	$(TCLSH) $(YAZCOMP_I) $(srcdir)/item-req.asn
 
 # cqlparse_SOURCES = cqlstd.y
 
