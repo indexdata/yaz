@@ -1,9 +1,10 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.31 2006-05-22 15:15:26 mike Exp $
+# $Id: buildconf.sh,v 1.32 2006-05-23 09:54:12 adam Exp $
 
 automake=automake
 aclocal=aclocal
 autoconf=autoconf
+libtoolize=libtoolize
 
 if [ "`uname -s`" = FreeBSD ]; then
     # FreeBSD intalls the various auto* tools with version numbers
@@ -11,6 +12,7 @@ if [ "`uname -s`" = FreeBSD ]; then
     automake=automake19
     aclocal="aclocal19 -I /usr/local/share/aclocal"
     autoconf=autoconf259
+    libtoolize=libtoolize15
     echo "Remember to use gmake (GNU make) instead of vanilla make"
 fi
 
@@ -26,7 +28,7 @@ fi
 set -x
 # I am tired of underquoted warnings for Tcl macros
 $aclocal -I m4 2>&1 | grep -v "warning: underquoted definition"
-libtoolize --automake --force 
+$libtoolize --automake --force 
 $automake --add-missing 
 $autoconf
 set -
@@ -80,6 +82,9 @@ Build distribution tarball with
 Verify distribution tarball with
   make distcheck
 
+EOF
+    if [ -f /etc/debian_version ]; then
+        cat <<EOF
 Or just build the Debian packages without configuring
   dpkg-buildpackage -rfakeroot
 
@@ -88,4 +93,12 @@ When building from a CVS checkout, you need these Debian tools:
   docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,
   libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev, any tcl
 EOF
+    fi
+    if [ "`uname -s`" = FreeBSD ]; then
+        cat <<EOF
+When building from a CVS checkout, you need these FreeBSD Ports:
+   gmake, autoconf259, automake19, libtool15, bison, tcl84,
+   jade and friends
+EOF
+    fi
 fi
