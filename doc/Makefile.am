@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.66 2006-04-20 20:45:38 adam Exp $
+## $Id: Makefile.am,v 1.67 2006-05-23 19:09:13 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -44,31 +44,31 @@ EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 	$(doc_DATA)
 
 yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
-	docbook2man $(srcdir)/yaz-client-man.xml
+	$(DB2MAN_PROG) $(srcdir)/yaz-client-man.xml $@
 
 yaz-ztest.8: yaz-ztest-man.xml gfs-options.xml gfs-synopsis.xml gfs-virtual.xml
-	docbook2man $(srcdir)/yaz-ztest-man.xml
+	$(DB2MAN_PROG) $(srcdir)/yaz-ztest-man.xml $@
 
 yaz-config.8: yaz-config-man.xml
-	docbook2man $(srcdir)/yaz-config-man.xml
+	$(DB2MAN_PROG) $(srcdir)/yaz-config-man.xml $@
 
 yaz.7: yaz-man.xml
-	docbook2man $(srcdir)/yaz-man.xml
+	$(DB2MAN_PROG) $(srcdir)/yaz-man.xml $@
 
 zoomsh.1: zoomsh-man.xml
-	docbook2man $(srcdir)/zoomsh-man.xml
+	$(DB2MAN_PROG) $(srcdir)/zoomsh-man.xml $@
 
 yaz-asncomp.1: yaz-asncomp-man.xml
-	docbook2man $(srcdir)/yaz-asncomp-man.xml
+	$(DB2MAN_PROG) $(srcdir)/yaz-asncomp-man.xml $@
 
 yaz-marcdump.1: yaz-marcdump-man.xml
-	docbook2man $(srcdir)/yaz-marcdump-man.xml
+	$(DB2MAN_PROG) $(srcdir)/yaz-marcdump-man.xml $@
 
 yaz-iconv.1: yaz-iconv-man.xml
-	docbook2man $(srcdir)/yaz-iconv-man.xml
+	$(DB2MAN_PROG) $(srcdir)/yaz-iconv-man.xml $@
 
 yaz-log.7: yaz-log-man.xml
-	docbook2man $(srcdir)/yaz-log-man.xml
+	$(DB2MAN_PROG) $(srcdir)/yaz-log-man.xml $@
 
 $(HTMLFILES): $(XMLFILES)  
 	jade -E14 -D $(srcdir) -d common/html.dsl -t sgml $(srcdir)/common/xml.dcl yaz.xml
