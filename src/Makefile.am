@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.38 2006-05-23 13:43:40 adam Exp $
+## $Id: Makefile.am,v 1.39 2006-05-23 20:39:27 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -22,8 +22,8 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv
 
 YAZCOMP=$(top_srcdir)/util/yaz-asncomp
-YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I../include
-YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I ../include
+YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
+YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 
 AM_CFLAGS=$(THREAD_CFLAGS)
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
