@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.29 2006-05-02 20:47:45 adam Exp $
+ * $Id: marcdisp.c,v 1.30 2006-05-23 13:17:30 adam Exp $
  */
 
 /**
@@ -548,7 +548,9 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
             wrbuf_printf(wr, "</controlfield>\n");
             break;
         case YAZ_MARC_COMMENT:
-            wrbuf_printf(wr, "<!-- %s -->\n", n->u.comment);
+            wrbuf_printf(wr, "<!-- ");
+            wrbuf_puts(wr, n->u.comment);
+            wrbuf_printf(wr, " -->\n");
             break;
         case YAZ_MARC_LEADER:
             wrbuf_printf(wr, "  <leader>");
@@ -670,11 +672,15 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
             wrbuf_printf(wr, "%.*s", indicator_length,
                          n->u.datafield.indicator);
             for (s = n->u.datafield.subfields; s; s = s->next)
-                wrbuf_printf(wr, "%c%s", ISO2709_IDFS, s->code_data);
+            {
+                wrbuf_printf(wr, "%c", ISO2709_IDFS);
+                wrbuf_puts(wr, s->code_data);
+            }
             wrbuf_printf(wr, "%c", ISO2709_FS);
             break;
         case YAZ_MARC_CONTROLFIELD:
-            wrbuf_printf(wr, "%s%c", n->u.controlfield.data, ISO2709_FS);
+            wrbuf_puts(wr, n->u.controlfield.data);
+            wrbuf_printf(wr, "%c", ISO2709_FS);
             break;
         case YAZ_MARC_COMMENT:
             break;
