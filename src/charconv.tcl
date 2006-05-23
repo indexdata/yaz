@@ -1,8 +1,8 @@
 #!/bin/sh
-# the next line restats using tclsh \
+# the next line restarts using tclsh \
 if [ -f /usr/local/bin/tclsh8.4 ]; then exec tclsh8.4 "$0" "$@"; else exec tclsh "$0" "$@"; fi
 #
-# $Id: charconv.tcl,v 1.15 2006-05-22 19:08:38 adam Exp $
+# $Id: charconv.tcl,v 1.16 2006-05-23 09:43:37 mike Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
