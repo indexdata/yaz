@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.107 2006-05-07 17:43:42 adam Exp $
+# $Id: makefile,v 1.108 2006-05-24 09:40:26 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -694,11 +694,11 @@ $(SRCDIR)\marc8r.c: $(SRCDIR)\codetables.xml $(SRCDIR)\charconv.tcl
 
 $(SRCDIR)\diagbib1.c: $(SRCDIR)\bib1.csv
 	@cd $(SRCDIR)
-	$(TCL) csvtobib1.tcl
+	$(TCL) csvtobib1.tcl $(SRCDIR)
 
 $(SRCDIR)\diagsrw.c: $(SRCDIR)\srw.csv
 	@cd $(SRCDIR)
-	$(TCL) csvtosrw.tcl
+	$(TCL) csvtosrw.tcl $(SRCDIR)
 
 !endif
 
