@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.34 2006-05-23 19:13:44 adam Exp $
+# $Id: buildconf.sh,v 1.35 2006-05-24 16:21:02 adam Exp $
 
 automake=automake
 aclocal=aclocal
@@ -87,17 +87,17 @@ EOF
 Or just build the Debian packages without configuring
   dpkg-buildpackage -rfakeroot
 
-When building from a CVS checkout, you need these Debian tools:
-  autoconf, automake, bison, gcc, libtool,
-  docbook-utils, docbook, docbook-xml, docbook-dsssl, jade, jadetex,
-  libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev, any tcl
+When building from a CVS checkout, you need these Debian packages:
+  autoconf, automake, libtool, gcc, bison, any tcl,
+  xsltproc, docbook, docbook-xml, docbook-xsl,
+  libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev
 EOF
     fi
     if [ "`uname -s`" = FreeBSD ]; then
         cat <<EOF
 When building from a CVS checkout, you need these FreeBSD Ports:
-   autoconf259, automake19, libtool15, bison, tcl84,
-   docbook-to-man, dsssl-docbook-modular, jadetex
+  autoconf259, automake19, libtool15, bison, tcl84,
+  docbook-xsl, libxml2, libxslt
 EOF
     fi
 fi

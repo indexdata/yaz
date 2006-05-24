@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.17 2006-05-24 12:33:21 adam Exp $
+dnl $Id: configure.ac,v 1.18 2006-05-24 16:21:02 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.19],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -382,9 +382,6 @@ Build distribution tarball with
 
 Verify distribution tarball with
   make distcheck
-
-Or just build the Debian packages without configuring
-  dpkg-buildpackage -rfakeroot
 '
 
 echo \
