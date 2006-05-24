@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.68 2006-05-24 12:33:21 adam Exp $
+## $Id: Makefile.am,v 1.69 2006-05-24 14:44:01 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -71,7 +71,7 @@ yaz-log.7: yaz-log-man.xml
 	xsltproc common/man.xsl $(srcdir)/yaz-log-man.xml
 
 $(HTMLFILES): $(XMLFILES)
-	xsltproc common/html.xsl $(srcdir)/yaz.xml
+	xsltproc common/html.xsl yaz.xml
 
 yaz.pdf: $(XMLFILES)
 	if test ! -f common/id.png ; then cp $(srcdir)/common/id.png common; fi
@@ -89,7 +89,7 @@ apilayer.png:
 	xbmtopbm <apilayer.xbm|pnmtopng >apilayer.png
 
 dist-hook:
-	for f in $(srcdir)/*.html; do \
+	for f in *.html; do \
 		found=0; \
 		b=`basename $$f`; \
 		for h in $(HTMLFILES); do \

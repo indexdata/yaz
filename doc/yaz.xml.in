@@ -1,13 +1,13 @@
 <?xml version="1.0" standalone="no"?>
-<!-- $Id: yaz.xml.in,v 1.23 2006-05-24 14:19:32 adam Exp $ -->
+<!-- $Id: yaz.xml.in,v 1.24 2006-05-24 14:44:01 adam Exp $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1//EN"
     "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd" 
 [
      <!ENTITY version "@VERSION@">
 
-     <!ENTITY % entities  SYSTEM "entities.ent">
+     <!ENTITY % entities  SYSTEM "@srcdir@/entities.ent">
      %entities;
-     <!ENTITY % common  SYSTEM "common/common.ent">
+     <!ENTITY % common  SYSTEM "@srcdir@/common/common.ent">
      %common;
 ]>
 <book id="yaz">
