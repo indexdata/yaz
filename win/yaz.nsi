@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.82 2006-05-03 13:27:20 adam Exp $
+; $Id: yaz.nsi,v 1.83 2006-05-24 12:33:22 adam Exp $
 
 !define VERSION "2.1.19"
 !define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
@@ -122,15 +122,12 @@ Section "YAZ Documentation" YAZ_Documentation
 	File /r ..\doc\*.dsl
 	File /r ..\doc\*.ent
 	File /r ..\doc\*.html
-	File /r ..\doc\*.pdf
 	File /r ..\doc\*.xml
 	File /r ..\doc\*.png
 	File /r ..\doc\*.xsl
 	SetOutPath $SMPROGRAMS\YAZ
 	CreateShortCut "$SMPROGRAMS\YAZ\HTML Documentation.lnk" \
-                 "$INSTDIR\doc\yaz.html"
-	CreateShortCut "$SMPROGRAMS\YAZ\PDF Documentaion.lnk" \
-                 "$INSTDIR\doc\yaz.pdf"
+                 "$INSTDIR\doc\index.html"
 SectionEnd
 
 Section "YAZ Source" YAZ_Source
@@ -180,7 +177,7 @@ SectionEnd
   ;Language strings
 LangString DESC_YAZ_Runtime ${LANG_ENGLISH} "YAZ runtime files needed in order for YAZ to run, such as DLLs."
 LangString DESC_YAZ_Development ${LANG_ENGLISH} "Header files and import libraries required for developing software using YAZ."
-LangString DESC_YAZ_Documentation ${LANG_ENGLISH} "YAZ Users' guide and reference in HTML and PDF. Describes both YAZ applications and the API."
+LangString DESC_YAZ_Documentation ${LANG_ENGLISH} "YAZ Users' guide and reference in HTML. Describes both YAZ applications and the API."
 LangString DESC_YAZ_Source ${LANG_ENGLISH} "Source code of YAZ. Required if you need to rebuild YAZ (for debugging purposes)."
 
 ;Assign language strings to sections

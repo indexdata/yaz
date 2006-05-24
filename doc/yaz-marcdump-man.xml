@@ -1,5 +1,8 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN">
-<!-- $Id: yaz-marcdump-man.xml,v 1.8 2006-04-25 11:25:08 marc Exp $ -->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN"
+ "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
+[
+]>
+<!-- $Id: yaz-marcdump-man.xml,v 1.9 2006-05-24 12:33:21 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>

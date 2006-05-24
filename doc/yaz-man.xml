@@ -1,8 +1,10 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" 
+ "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
+[
      <!ENTITY % common  SYSTEM "common/common.ent">
      %common;
 ]>
-<!-- $Id: yaz-man.xml,v 1.7 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: yaz-man.xml,v 1.8 2006-05-24 12:33:21 adam Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -10,7 +12,7 @@
  </refmeta>
  
  <refnamediv>
-  <refname>YAZ</refname>
+  <refname>yaz</refname>
   <refpurpose>Z39.50 toolkit.</refpurpose>
  </refnamediv>
  

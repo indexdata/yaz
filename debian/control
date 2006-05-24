@@ -34,7 +34,7 @@ Description: The YAZ Z39.50 toolkit (documentation)
  YAZ is a toolkit that allows you to develop software using the
  Z39.50/ISO23950 standard for information retrieval.
  .
- This packages includes documentation for YAZ in HTML and PDF.
+ This packages includes HTML documentation for YAZ.
 
 Package: libyaz-dev
 Depends: libyaz (= ${Source-Version}), libxslt1-dev, libwrap0-dev, libssl-dev

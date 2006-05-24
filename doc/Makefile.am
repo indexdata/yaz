@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.67 2006-05-23 19:09:13 adam Exp $
+## $Id: Makefile.am,v 1.68 2006-05-24 12:33:21 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -25,7 +25,7 @@ HTMLFILES = \
  server.main.html server.vhosts.html \
  soap.html soap.http.html soap.xml.html soap.srw.html \
  tools.html tools.marc.html tools.nmem.html tools.log.html tools.oid.html \
- yaz.html zoom.events.html zoom.ext.html zoom.html zoom.options.html \
+ index.html zoom.events.html zoom.ext.html zoom.html zoom.options.html \
  zoom.query.html zoom.records.html zoom.resultsets.html zoom.scan.html
 
 MANFILES=yaz-client.1 yaz-ztest.8 \
@@ -37,41 +37,41 @@ REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 
 SUPPORTFILES=entities.ent apilayer.obj 
 
-doc_DATA = $(HTMLFILES) yaz.pdf apilayer.png 
+doc_DATA = $(HTMLFILES) apilayer.png 
 man_MANS = $(MANFILES)
 
 EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 	$(doc_DATA)
 
 yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
-	$(DB2MAN_PROG) $(srcdir)/yaz-client-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/yaz-client-man.xml
 
 yaz-ztest.8: yaz-ztest-man.xml gfs-options.xml gfs-synopsis.xml gfs-virtual.xml
-	$(DB2MAN_PROG) $(srcdir)/yaz-ztest-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/yaz-ztest-man.xml
 
 yaz-config.8: yaz-config-man.xml
-	$(DB2MAN_PROG) $(srcdir)/yaz-config-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/yaz-config-man.xml
 
 yaz.7: yaz-man.xml
-	$(DB2MAN_PROG) $(srcdir)/yaz-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/yaz-man.xml
 
 zoomsh.1: zoomsh-man.xml
-	$(DB2MAN_PROG) $(srcdir)/zoomsh-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/zoomsh-man.xml
 
 yaz-asncomp.1: yaz-asncomp-man.xml
-	$(DB2MAN_PROG) $(srcdir)/yaz-asncomp-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/yaz-asncomp-man.xml
 
 yaz-marcdump.1: yaz-marcdump-man.xml
-	$(DB2MAN_PROG) $(srcdir)/yaz-marcdump-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/yaz-marcdump-man.xml
 
 yaz-iconv.1: yaz-iconv-man.xml
-	$(DB2MAN_PROG) $(srcdir)/yaz-iconv-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/yaz-iconv-man.xml
 
 yaz-log.7: yaz-log-man.xml
-	$(DB2MAN_PROG) $(srcdir)/yaz-log-man.xml $@
+	xsltproc common/man.xsl $(srcdir)/yaz-log-man.xml
 
-$(HTMLFILES): $(XMLFILES)  
-	jade -E14 -D $(srcdir) -d common/html.dsl -t sgml $(srcdir)/common/xml.dcl yaz.xml
+$(HTMLFILES): $(XMLFILES)
+	xsltproc common/html.xsl $(srcdir)/yaz.xml
 
 yaz.pdf: $(XMLFILES)
 	if test ! -f common/id.png ; then cp $(srcdir)/common/id.png common; fi
