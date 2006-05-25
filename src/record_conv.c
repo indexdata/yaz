@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.8 2006-05-08 16:58:25 quinn Exp $
+ * $Id: record_conv.c,v 1.9 2006-05-25 07:43:58 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -442,7 +442,9 @@ int yaz_record_conv_record(yaz_record_conv_t p,
                 {
                     xmlChar *out_buf;
                     int out_len;
-                    xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
+
+                    xsltSaveResultToString(&out_buf, &out_len, res,
+                                           r->u.xslt.xsp); 
 
                     wrbuf_rewind(record);
                     wrbuf_write(record, (const char *) out_buf, out_len);
