@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.9 2006-05-25 07:43:58 adam Exp $
+ * $Id: record_conv.c,v 1.10 2006-05-26 15:07:08 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -440,21 +440,33 @@ int yaz_record_conv_record(yaz_record_conv_t p,
                 xmlDocPtr res = xsltApplyStylesheet(r->u.xslt.xsp, doc, 0);
                 if (res)
                 {
-                    xmlChar *out_buf;
+                    xmlChar *out_buf = 0;
                     int out_len;
 
+#if HAVE_XSLTSAVERESULTTOSTRING
                     xsltSaveResultToString(&out_buf, &out_len, res,
                                            r->u.xslt.xsp); 
-
-                    wrbuf_rewind(record);
-                    wrbuf_write(record, (const char *) out_buf, out_len);
-
-                    xmlFree(out_buf);
+#else
+                    xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
+#endif
+                    if (!out_buf)
+                    {
+                        wrbuf_printf(p->wr_error,
+                                     "xsltSaveResultToString failed");
+                        ret = -1;
+                    }
+                    else
+                    {
+                        wrbuf_rewind(record);
+                        wrbuf_write(record, (const char *) out_buf, out_len);
+                        
+                        xmlFree(out_buf);
+                    }
                     xmlFreeDoc(res);
                 }
                 else
                 {
-                    wrbuf_printf(p->wr_error, "xsltApplyStylesheet faailed");
+                    wrbuf_printf(p->wr_error, "xsltApplyStylesheet failed");
                     ret = -1;
                 }
                 xmlFreeDoc(doc);
