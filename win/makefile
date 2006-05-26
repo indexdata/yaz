@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.108 2006-05-24 09:40:26 adam Exp $
+# $Id: makefile,v 1.109 2006-05-26 15:46:44 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -180,7 +180,10 @@ libxml2:
 
 !if $(HAVE_LIBXSLT)
 LIBXSLT_LIB="$(LIBXSLT_DIR)\lib\libxslt.lib"
-LIBXSLT_DEF=/D HAVE_XSLT=1 /I"$(LIBXSLT_DIR)\include"
+LIBXSLT_DEF= \
+	/D HAVE_XSLTSAVERESULTTOSTRING=1 \
+	/D HAVE_XSLT=1 \
+	/I"$(LIBXSLT_DIR)\include"
 libxslt: $(BINDIR)\libxslt.dll
 
 $(BINDIR)\libxslt.dll:
