@@ -1,10 +1,14 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" 
  "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
 [
-     <!ENTITY % common  SYSTEM "common/common.ent">
+     <!ENTITY % local SYSTEM "local.ent">
+     %local;
+     <!ENTITY % entities SYSTEM "entities.ent">
+     %entities;
+     <!ENTITY % common SYSTEM "common/common.ent">
      %common;
 ]>
-<!-- $Id: yaz-man.xml,v 1.8 2006-05-24 12:33:21 adam Exp $ -->
+<!-- $Id: yaz-man.xml,v 1.9 2006-05-28 19:56:25 adam Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -35,7 +39,7 @@
 
  <refsect1><title>COPYRIGHT</title>
   <para>
-   Copyright (c) 1995-2006, Index Data.
+   Copyright (c) &copyright-year;, Index Data.
   </para>
   <para>
    Permission to use, copy, modify, distribute, and sell this software and
@@ -86,7 +90,7 @@
     </citerefentry>
   </para>
   <para>YAZ manual (
-   <filename><replaceable>prefix</replaceable>/share/doc/yaz</filename>)
+   <filename>&prefix;/share/doc/yaz</filename>)
   </para>
   <para>
    <ulink url="&url.yaz;">YAZ home page</ulink>.

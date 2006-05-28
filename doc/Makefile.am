@@ -1,14 +1,14 @@
-## $Id: Makefile.am,v 1.69 2006-05-24 14:44:01 adam Exp $
+## $Id: Makefile.am,v 1.70 2006-05-28 19:56:24 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
 SUBDIRS = common
 
-XMLFILES=yaz.xml.in bookinfo.xml introduction.xml installation.xml \
+XMLFILES=bookinfo.xml introduction.xml installation.xml \
  indexdata.xml \
  asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml \
  future.xml client.xml zoom.xml credits.xml gfs-options.xml \
- yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml
+ yaz.xml yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml
 
 HTMLFILES = \
  asn.external.html asn.html asn.oid.html asn.pdu.html asn.preparing.html \
@@ -35,7 +35,7 @@ REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
 	yaz-marcdump-man.xml yaz-iconv-man.xml yaz-log-man.xml
 
-SUPPORTFILES=entities.ent apilayer.obj 
+SUPPORTFILES=entities.ent apilayer.obj local.ent.in
 
 doc_DATA = $(HTMLFILES) apilayer.png 
 man_MANS = $(MANFILES)
@@ -44,45 +44,45 @@ EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 	$(doc_DATA)
 
 yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
-	xsltproc common/man.xsl $(srcdir)/yaz-client-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-client-man.xml
 
 yaz-ztest.8: yaz-ztest-man.xml gfs-options.xml gfs-synopsis.xml gfs-virtual.xml
-	xsltproc common/man.xsl $(srcdir)/yaz-ztest-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-ztest-man.xml
 
 yaz-config.8: yaz-config-man.xml
-	xsltproc common/man.xsl $(srcdir)/yaz-config-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-config-man.xml
 
 yaz.7: yaz-man.xml
-	xsltproc common/man.xsl $(srcdir)/yaz-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-man.xml
 
 zoomsh.1: zoomsh-man.xml
-	xsltproc common/man.xsl $(srcdir)/zoomsh-man.xml
+	$(MAN_COMPILE) $(srcdir)/zoomsh-man.xml
 
 yaz-asncomp.1: yaz-asncomp-man.xml
-	xsltproc common/man.xsl $(srcdir)/yaz-asncomp-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-asncomp-man.xml
 
 yaz-marcdump.1: yaz-marcdump-man.xml
-	xsltproc common/man.xsl $(srcdir)/yaz-marcdump-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-marcdump-man.xml
 
 yaz-iconv.1: yaz-iconv-man.xml
-	xsltproc common/man.xsl $(srcdir)/yaz-iconv-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-iconv-man.xml
 
 yaz-log.7: yaz-log-man.xml
-	xsltproc common/man.xsl $(srcdir)/yaz-log-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-log-man.xml
 
 $(HTMLFILES): $(XMLFILES)
-	xsltproc common/html.xsl yaz.xml
+	$(HTML_COMPILE) $(srcdir)/yaz.xml
+
+index.tkl: $(XMLFILES)
+	$(TKL_COMPILE) $(srcdir)/yaz.xml
 
 yaz.pdf: $(XMLFILES)
 	if test ! -f common/id.png ; then cp $(srcdir)/common/id.png common; fi
 	if test ! -f apilayer.png ; then cp $(srcdir)/apilayer.png .; fi
-	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl yaz.xml
+	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl $(srcdir)/yaz.xml
+	pdfjadetex yaz.tex 
 	pdfjadetex yaz.tex >/dev/null
 	pdfjadetex yaz.tex >/dev/null
-	pdfjadetex yaz.tex >/dev/null
-
-index.tkl: $(XMLFILES) common/tkl.xsl
-	xsltproc common/tkl.xsl yaz.xml
 
 apilayer.png: 
 	tgif -print -xbm apilayer.obj

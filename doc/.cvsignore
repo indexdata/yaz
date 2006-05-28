@@ -1,9 +1,5 @@
 Makefile
 Makefile.in
-yaz.xml
-yazhtml.dsl
-yazphp.dsl
-yazprint.dsl
 *.html
 yaz.tex
 yaz.aux
@@ -15,5 +11,7 @@ yaz.pdf
 manpage.links
 manpage.refs
 *.[178]
-tkl.xsl
-yazhtml.xsl
+local.ent
+htmlhelp.hhp
+toc.hhc
+
