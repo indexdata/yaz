@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.5 2005-06-25 15:46:05 adam Exp $
+ * $Id: sortspec.c,v 1.6 2006-05-30 21:39:15 adam Exp $
  */
 /**
  * \file sortspec.c
@@ -19,7 +19,7 @@
 
 Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
 {
-    char sort_string_buf[32], sort_flags[32];
+    char sort_string_buf[64], sort_flags[64];
     Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
         odr_malloc (out, sizeof(*sksl));
     int off;
@@ -27,7 +27,7 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
     sksl->num_specs = 0;
     sksl->specs = (Z_SortKeySpec **)odr_malloc (out, sizeof(sksl->specs) * 20);
     
-    while ((sscanf (arg, "%31s %31s%n", sort_string_buf,
+    while ((sscanf (arg, "%63s %63s%n", sort_string_buf,
                     sort_flags, &off)) == 2  && off > 1)
     {
         int i;
@@ -109,6 +109,19 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
             case 's':
                 *sks->caseSensitivity = Z_SortKeySpec_caseSensitive;
                 break;
+            case '!':
+                sks->which = Z_SortKeySpec_abort;
+                sks->u.abort = odr_nullval();
+                break;
+            case '=':
+                sks->which = Z_SortKeySpec_missingValueData;
+                sks->u.missingValueData = (Odr_oct*)
+                    odr_malloc(out, sizeof(Odr_oct));
+                i++;
+                sks->u.missingValueData->len = strlen(sort_flags+i);
+                sks->u.missingValueData->size = sks->u.missingValueData->len;
+                sks->u.missingValueData->buf = odr_strdup(out, sort_flags+i);
+                i += strlen(sort_flags+i);
             }
         }
     }
