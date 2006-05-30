@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.6 2006-05-30 21:39:15 adam Exp $
+ * $Id: sortspec.c,v 1.7 2006-05-30 22:00:09 adam Exp $
  */
 /**
  * \file sortspec.c
@@ -120,7 +120,8 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
                 i++;
                 sks->u.missingValueData->len = strlen(sort_flags+i);
                 sks->u.missingValueData->size = sks->u.missingValueData->len;
-                sks->u.missingValueData->buf = odr_strdup(out, sort_flags+i);
+                sks->u.missingValueData->buf = (unsigned char*)
+                                          odr_strdup(out, sort_flags+i);
                 i += strlen(sort_flags+i);
             }
         }
