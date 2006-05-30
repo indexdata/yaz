@@ -1,3 +1,7 @@
+Ensured that Present-handler (if defined) is called in GFS before any call to
+fetch-hhndler.  This now includes piggy-backed presents as well as SRW/U
+searchRetrieve requests.
+
 Documentation for YAZ is now based on the Docbook XML/XSLT using
 xsltproc + N Walsh's stylesheets. It means that the CVS version of YAZ
 is no longer depending on jade/openjade or docbook-to-man scripts.
