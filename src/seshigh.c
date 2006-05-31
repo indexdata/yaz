@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.84 2006-05-30 04:50:04 quinn Exp $
+ * $Id: seshigh.c,v 1.85 2006-05-31 16:20:41 quinn Exp $
  */
 /**
  * \file seshigh.c
@@ -1015,13 +1015,20 @@ static void srw_bend_search(association *assoc, request *req,
                             bprr->start = start;
                             bprr->number = number;
                             bprr->format = VAL_TEXT_XML;
-                            bprr->comp = (Z_RecordComposition *) odr_malloc(assoc->decode,
-                                    sizeof(*bprr->comp));
-                            bprr->comp->which = Z_RecordComp_simple;
-                            bprr->comp->u.simple = (Z_ElementSetNames *)
-                                odr_malloc(assoc->decode, sizeof(Z_ElementSetNames));
-                            bprr->comp->u.simple->which = Z_ElementSetNames_generic;
-                            bprr->comp->u.simple->u.generic = srw_req->recordSchema;
+                            if (srw_req->recordSchema)
+                            {
+                                bprr->comp = (Z_RecordComposition *) odr_malloc(assoc->decode,
+                                        sizeof(*bprr->comp));
+                                bprr->comp->which = Z_RecordComp_simple;
+                                bprr->comp->u.simple = (Z_ElementSetNames *)
+                                    odr_malloc(assoc->decode, sizeof(Z_ElementSetNames));
+                                bprr->comp->u.simple->which = Z_ElementSetNames_generic;
+                                bprr->comp->u.simple->u.generic = srw_req->recordSchema;
+                            }
+                            else
+                            {
+                                bprr->comp = 0;
+                            }
                             bprr->stream = assoc->encode;
                             bprr->referenceId = 0;
                             bprr->print = assoc->print;
@@ -2275,7 +2282,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.84 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.85 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
