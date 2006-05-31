@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.72 2006-05-10 07:34:38 adam Exp $
+ * $Id: zoom-c.c,v 1.73 2006-05-31 15:32:43 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1155,7 +1155,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.72 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.73 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2556,8 +2556,10 @@ static zoom_ret send_package (ZOOM_connection c)
     event = ZOOM_Event_create (ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event (c, event);
     
-    return do_write_ex (c, c->tasks->u.package->buf_out,
-                        c->tasks->u.package->len_out);
+    c->buf_out = c->tasks->u.package->buf_out;
+    c->len_out = c->tasks->u.package->len_out;
+
+    return do_write(c);
 }
 
 static zoom_ret send_scan (ZOOM_connection c)
