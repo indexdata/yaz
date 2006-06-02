@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.14 2006-04-25 11:25:08 marc Exp $
+   $Id: yaz-client-commands.xml,v 1.15 2006-06-02 13:12:54 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -170,6 +170,16 @@
     A common convention for the <replaceable>authopen</replaceable> string
     is that the username - and password is separated by a slash, e.g.
     <literal>myusername/mysecret</literal>.
+   </para>
+  </listitem>
+ </varlistentry>
+
+ <varlistentry><term>
+   <literal>sru</literal> <replaceable>method</replaceable>
+  </term>
+  <listitem>
+   <para>Selects SRU method. Must be one of <literal>POST</literal>,
+    <literal>GET</literal>, <literal>SOAP</literal> (default).
    </para>
   </listitem>
  </varlistentry>

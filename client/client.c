@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.309 2006-05-07 20:57:26 adam Exp $
+ * $Id: client.c,v 1.310 2006-06-02 13:12:53 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -81,6 +81,7 @@
 
 #define C_PROMPT "Z> "
 
+static char *sru_method = "soap";
 static char *codeset = 0;               /* character set for output */
 static int hex_dump = 0;
 static char *dump_file_prefix = 0;
@@ -125,7 +126,6 @@ static int  negotiationCharsetVersion = 3;
 static char *outputCharset = 0;
 static char *marcCharset = 0;
 static char* yazLang = 0;
-static char* http_version = "1.1";
 
 static char last_cmd[32] = "?";
 static FILE *marc_file = 0;
@@ -1262,69 +1262,27 @@ static int send_srw(Z_SRW_PDU *sr)
 {
     const char *charset = negotiationCharset;
     const char *host_port = cur_host;
-    char *path = 0;
-    char ctype[50];
-    Z_SOAP_Handler h[2] = {
-        {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
-        {0, 0, 0}
-    };
-    ODR o = odr_createmem(ODR_ENCODE);
-    int ret;
-    Z_SOAP *p = odr_malloc(o, sizeof(*p));
     Z_GDU *gdu;
+    char *path = 0;
 
-    path = odr_malloc(out, strlen(databaseNames[0])+2);
+    path = odr_malloc(out, 2+strlen(databaseNames[0]));
     *path = '/';
     strcpy(path+1, databaseNames[0]);
 
-    gdu = z_get_HTTP_Request(out);
-    gdu->u.HTTP_Request->version = http_version;
-    gdu->u.HTTP_Request->path = odr_strdup(out, path);
+    gdu = z_get_HTTP_Request_host_path(out, host_port, path);
 
-    if (host_port)
+    if (!strcmp(sru_method, "get"))
     {
-        const char *cp0 = strstr(host_port, "://");
-        const char *cp1 = 0;
-        if (cp0)
-            cp0 = cp0+3;
-        else
-            cp0 = host_port;
-
-        cp1 = strchr(cp0, '/');
-        if (!cp1)
-            cp1 = cp0+strlen(cp0);
-
-        if (cp0 && cp1)
-        {
-            char *h = odr_malloc(out, cp1 - cp0 + 1);
-            memcpy (h, cp0, cp1 - cp0);
-            h[cp1-cp0] = '\0';
-            z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
-                              "Host", h);
-        }
+        yaz_sru_get_encode(gdu->u.HTTP_Request, sr, out, charset);
     }
-
-    strcpy(ctype, "text/xml");
-    if (charset && strlen(charset) < 20)
+    else if (!strcmp(sru_method, "post"))
     {
-        strcat(ctype, "; charset=");
-        strcat(ctype, charset);
+        yaz_sru_post_encode(gdu->u.HTTP_Request, sr, out, charset);
     }
-    z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
-                      "Content-Type", ctype);
-    z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
-                      "SOAPAction", "\"\"");
-    p->which = Z_SOAP_generic;
-    p->u.generic = odr_malloc(o, sizeof(*p->u.generic));
-    p->u.generic->no = 0;
-    p->u.generic->ns = 0;
-    p->u.generic->p = sr;
-    p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
-
-    ret = z_soap_codec_enc(o, &p,
-                           &gdu->u.HTTP_Request->content_buf,
-                           &gdu->u.HTTP_Request->content_len, h,
-                           charset);
+    else if (!strcmp(sru_method, "soap"))
+    {
+        yaz_sru_soap_encode(gdu->u.HTTP_Request, sr, out, charset);
+    }
 
     if (z_GDU(out, &gdu, 0, 0))
     {
@@ -1335,7 +1293,7 @@ static int send_srw(Z_SRW_PDU *sr)
         if (apdu_file)
         {
             if (!z_GDU(print, &gdu, 0, 0))
-                printf ("Failed to print outgoing APDU\n");
+                printf ("Failed to print outgoing SRU package\n");
             odr_reset(print);
         }
         buf_out = odr_getbuf(out, &len_out, 0);
@@ -1346,8 +1304,6 @@ static int send_srw(Z_SRW_PDU *sr)
 
         r = cs_put(conn, buf_out, len_out);
 
-        odr_destroy(o);
-        
         if (r >= 0)
             return 2;
     }
@@ -2459,6 +2415,29 @@ static int cmd_init(const char *arg)
         return 1;
     send_initRequest(cur_host);
     return 2;
+}
+
+static int cmd_sru(const char *arg)
+{
+    if (!*arg)
+    {
+        printf("SRU method is: %s\n", sru_method);
+    }
+    else
+    {
+        if (yaz_matchstr(arg, "post"))
+            sru_method = "post";
+        else if (yaz_matchstr(arg, "get"))
+            sru_method = "get";
+        else if (yaz_matchstr(arg, "soap"))
+            sru_method = "soap";
+        else
+        {
+            printf("Unknown SRU method: %s\n", arg);
+            printf("Specify one of POST, GET, SOAP\n");
+        }
+    }
+    return 0;
 }
 
 static int cmd_find(const char *arg)
@@ -4373,6 +4352,7 @@ static struct {
     {"zversion", cmd_zversion, "", NULL, 0, NULL},
     {"help", cmd_help, "", NULL,0,NULL},
     {"init", cmd_init, "", NULL,0,NULL},
+    {"sru", cmd_sru, "", NULL,0,NULL},
     {"exit", cmd_quit, "",NULL,0,NULL},
     {0,0,0,0,0,0}
 };

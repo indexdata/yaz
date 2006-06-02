@@ -1,3 +1,6 @@
+Bug #600: SRU GET, POST support for yaz-client. Introduced
+command 'sru' which selects method SOAP/GET/POST.
+
 Allow missingValueAction to be specified for the sortspec string - 
 function yaz_sort_spec. By default, the missing value action is null.
 Use ! to specify "abort". Use = followed by stringvalue to specify default
