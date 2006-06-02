@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.19 2006-05-28 19:56:24 adam Exp $
+dnl $Id: configure.ac,v 1.20 2006-06-02 10:50:28 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.19],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -360,11 +360,7 @@ zoom/Makefile
 doc/Makefile
 doc/local.ent
 doc/common/Makefile
-doc/common/html.dsl
-doc/common/html.xsl
 doc/common/print.dsl
-doc/common/tkl.xsl
-doc/common/man.xsl
 etc/Makefile
 yaz-config
 Doxyfile
