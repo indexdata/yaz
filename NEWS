@@ -1,3 +1,5 @@
+--- 2.1.20 2006/06/02
+
 Bug #600: SRU GET, POST support for yaz-client. Introduced
 command 'sru' which selects method SOAP/GET/POST.
 
