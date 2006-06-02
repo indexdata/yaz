@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.40 2006-05-07 18:35:47 adam Exp $
+ * $Id: srwutil.c,v 1.41 2006-06-02 13:08:27 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -1129,7 +1129,7 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
 }
 
 int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
-                       ODR encode, char *charset)
+                       ODR encode, const char *charset)
 {
     char *name[30], *value[30]; /* definite upper limit for SRU params */
     char *uri_args;
@@ -1151,7 +1151,7 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 }
 
 int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
-                        ODR encode, char *charset)
+                        ODR encode, const char *charset)
 {
     char *name[30], *value[30]; /* definite upper limit for SRU params */
     char *uri_args;
@@ -1170,6 +1170,33 @@ int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    "application/x-www-form-urlencoded",
                                    charset);
     return 0;
+}
+
+int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
+                        ODR odr, const char *charset)
+{
+    Z_SOAP_Handler handlers[2] = {
+        {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
+        {0, 0, 0}
+    };
+    Z_SOAP *p = (Z_SOAP*) odr_malloc(odr, sizeof(*p));
+    z_HTTP_header_add_content_type(odr,
+                                   &hreq->headers,
+                                   "text/xml", charset);
+    
+    z_HTTP_header_add(odr, &hreq->headers,
+                      "SOAPAction", "\"\"");
+    p->which = Z_SOAP_generic;
+    p->u.generic = (Z_SOAP_Generic *) odr_malloc(odr, sizeof(*p->u.generic));
+    p->u.generic->no = 0;
+    p->u.generic->ns = 0;
+    p->u.generic->p = srw_pdu;
+    p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
+    
+    return z_soap_codec_enc(odr, &p,
+                            &hreq->content_buf,
+                            &hreq->content_len, handlers,
+                            charset);
 }
 
 /*

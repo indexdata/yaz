@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.14 2006-03-01 23:24:25 adam Exp $
+ * $Id: zgdu.c,v 1.15 2006-06-02 13:08:27 adam Exp $
  */
 
 /**
@@ -206,6 +206,41 @@ Z_GDU *z_get_HTTP_Request(ODR o)
                       "YAZ/" YAZ_VERSION);
     return p;
 }
+
+
+Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
+                                    const char *host,
+                                    const char *path)
+{
+    Z_GDU *p = z_get_HTTP_Request(odr);
+
+    p->u.HTTP_Request->path = odr_strdup(odr, path);
+
+    if (host)
+    {
+        const char *cp0 = strstr(host, "://");
+        const char *cp1 = 0;
+        if (cp0)
+            cp0 = cp0+3;
+        else
+            cp0 = host;
+
+        cp1 = strchr(cp0, '/');
+        if (!cp1)
+            cp1 = cp0+strlen(cp0);
+
+        if (cp0 && cp1)
+        {
+            char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
+            memcpy (h, cp0, cp1 - cp0);
+            h[cp1-cp0] = '\0';
+            z_HTTP_header_add(odr, &p->u.HTTP_Request->headers,
+                              "Host", h);
+        }
+    }
+    return p;
+}
+
 
 Z_GDU *z_get_HTTP_Response(ODR o, int code)
 {

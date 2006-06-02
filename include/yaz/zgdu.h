@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zgdu.h,v 1.6 2006-03-01 23:24:25 adam Exp $
+ * $Id: zgdu.h,v 1.7 2006-06-02 13:08:27 adam Exp $
  */
 
 /**
@@ -66,6 +66,9 @@ YAZ_EXPORT const char *z_HTTP_errmsg(int code);
 
 YAZ_EXPORT Z_GDU *z_get_HTTP_Response(ODR o, int code);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request(ODR o);
+YAZ_EXPORT Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
+                                               const char *host,
+                                               const char *path);
 
 YAZ_END_CDECL
 
