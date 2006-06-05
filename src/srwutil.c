@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.42 2006-06-05 18:08:10 adam Exp $
+ * $Id: srwutil.c,v 1.43 2006-06-05 18:13:01 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -408,7 +408,8 @@ static int yaz_sru_integer_decode(ODR odr, const char *pname,
         return 0;
     if (sscanf(valstr, "%d", &ival) != 1)
     {
-        yaz_add_srw_diagnostic(odr, diag, num_diag, 6, pname);
+        yaz_add_srw_diagnostic(odr, diag, num_diag,
+                               YAZ_SRW_UNSUPP_PARAMETER_VALUE, pname);
         return 0;
     }
     *valp = odr_intdup(odr, ival);
@@ -530,21 +531,27 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 else if (!strcmp(n, "extraRequestData"))
                     extraRequestData = v;
                 else
-                    yaz_add_srw_diagnostic(decode, diag, num_diag, 8, n);
+                    yaz_add_srw_diagnostic(decode, diag, num_diag,
+                                           YAZ_SRW_UNSUPP_PARAMETER, n);
             }
         }
         if (!version)
         {
             if (uri_name)
-                yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "version");
+                yaz_add_srw_diagnostic(
+                    decode, diag, num_diag,
+                    YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "version");
             version = "1.1";
         }
         if (strcmp(version, "1.1"))
-            yaz_add_srw_diagnostic(decode, diag, num_diag, 5, "1.1");
+            yaz_add_srw_diagnostic(decode, diag, num_diag,
+                                   YAZ_SRW_UNSUPP_VERSION, "1.1");
         if (!operation)
         {
             if (uri_name)
-                yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "operation");
+                yaz_add_srw_diagnostic(
+                    decode, diag, num_diag, 
+                    YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "operation");
             operation = "explain";
         }
         if (!strcmp(operation, "searchRetrieve"))
@@ -565,7 +572,9 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 sr->u.request->query.pqf = pQuery;
             }
             else
-                yaz_add_srw_diagnostic(decode, diag, num_diag, 7, "query");
+                yaz_add_srw_diagnostic(
+                    decode, diag, num_diag, 
+                    YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "query");
 
             if (sortKeys)
             {
@@ -650,10 +659,11 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 sr->u.scan_request->scanClause.pqf = pScanClause;
             }
             else
-                yaz_add_srw_diagnostic(decode, diag, num_diag, 7,
-                                       "scanClause");
+                yaz_add_srw_diagnostic(
+                    decode, diag, num_diag, 
+                    YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "scanClause");
             sr->u.scan_request->database = db;
-
+            
             yaz_sru_integer_decode(decode, "maximumTerms",
                                    maximumTerms, 
                                    &sr->u.scan_request->maximumTerms,
@@ -706,7 +716,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             
             (*soap_package)->ns = "SRU";
 
-            yaz_add_srw_diagnostic(decode, diag, num_diag, 4, operation);
+            yaz_add_srw_diagnostic(decode, diag, num_diag, 
+                                   YAZ_SRW_UNSUPP_OPERATION, operation);
             return 0;
         }
 #endif
