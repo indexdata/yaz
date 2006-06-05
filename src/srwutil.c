@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.41 2006-06-02 13:08:27 adam Exp $
+ * $Id: srwutil.c,v 1.42 2006-06-05 18:08:10 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -398,6 +398,22 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     return 2;
 }
 
+static int yaz_sru_integer_decode(ODR odr, const char *pname, 
+                                  const char *valstr, int **valp,
+                                  Z_SRW_diagnostic **diag, int *num_diag)
+
+{
+    int ival;
+    if (!valstr)
+        return 0;
+    if (sscanf(valstr, "%d", &ival) != 1)
+    {
+        yaz_add_srw_diagnostic(odr, diag, num_diag, 6, pname);
+        return 0;
+    }
+    *valp = odr_intdup(odr, ival);
+    return 1;
+}
 /**
   http://www.loc.gov/z3950/agency/zing/srw/service.html
 */ 
@@ -561,12 +577,13 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             sr->u.request->recordPacking = recordPacking;
             sr->u.request->stylesheet = stylesheet;
 
-            if (maximumRecords)
-                sr->u.request->maximumRecords =
-                    odr_intdup(decode, atoi(maximumRecords));
-            if (startRecord)
-                sr->u.request->startRecord =
-                    odr_intdup(decode, atoi(startRecord));
+            yaz_sru_integer_decode(decode, "maximumRecords", maximumRecords, 
+                                   &sr->u.request->maximumRecords, 
+                                   diag, num_diag);
+
+            yaz_sru_integer_decode(decode, "startRecord", startRecord, 
+                                   &sr->u.request->startRecord,
+                                   diag, num_diag);
 
             sr->u.request->database = db;
 
@@ -637,12 +654,15 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                                        "scanClause");
             sr->u.scan_request->database = db;
 
-            if (maximumTerms)
-                sr->u.scan_request->maximumTerms =
-                    odr_intdup(decode, atoi(maximumTerms));
-            if (responsePosition)
-                sr->u.scan_request->responsePosition =
-                    odr_intdup(decode, atoi(responsePosition));
+            yaz_sru_integer_decode(decode, "maximumTerms",
+                                   maximumTerms, 
+                                   &sr->u.scan_request->maximumTerms,
+                                   diag, num_diag);
+
+            yaz_sru_integer_decode(decode, "responsePosition",
+                                   responsePosition, 
+                                   &sr->u.scan_request->responsePosition,
+                                   diag, num_diag);
 
             sr->u.scan_request->stylesheet = stylesheet;
 
