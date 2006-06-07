@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.37 2006-04-21 10:28:07 adam Exp $
+ * $Id: marcdump.c,v 1.38 2006-06-07 10:51:14 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -129,9 +129,9 @@ static void dump(const char *fname, const char *from, const char *to,
             int marc_no = 0;
             for(;; marc_no++)
             {
-                int len;
+                size_t len;
                 char *result = 0;
-                int rlen;
+                size_t rlen;
                 size_t r;
                 char buf[100001];
                 
@@ -212,7 +212,7 @@ static void dump(const char *fname, const char *from, const char *to,
                 if (r > 0 && cfile)
                 {
                     char *p = buf;
-                    int i;
+                    size_t i;
                     if (count)
                         fprintf (cfile, ",");
                     fprintf (cfile, "\n");
