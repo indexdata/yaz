@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.88 2006-06-07 18:23:22 adam Exp $
+; $Id: yaz.nsi,v 1.89 2006-06-07 18:25:32 adam Exp $
 
 !define VERSION "2.1.21"
 
@@ -92,7 +92,7 @@ Section "YAZ Runtime" YAZ_Runtime
 Noservice:
 	SetOutPath $INSTDIR\bin
 	File "${VS_RUNTIME_DLL}"
-	File "${VS_RUNTIME_Manifest}"
+	File "${VS_RUNTIME_MANIFEST}"
 	File ..\bin\iconv.dll
 	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
