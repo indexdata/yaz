@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.109 2006-05-26 15:46:44 adam Exp $
+# $Id: makefile,v 1.110 2006-06-07 09:25:47 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -206,6 +206,7 @@ COMMON_C_OPTIONS=          \
   $(LIBXML2_DEF)           \
   $(LIBXSLT_DEF)           \
   /D "_CRT_SECURE_NO_DEPRECATE" \
+  /D "_CRT_NONSTDC_NO_DEPRECATE" \
   /D "_WINDOWS"            \
   /D "WIN32"               \
   /FR"$(OBJDIR)\\"         \
