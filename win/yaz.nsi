@@ -1,7 +1,13 @@
-; $Id: yaz.nsi,v 1.85 2006-06-02 13:31:21 adam Exp $
+; $Id: yaz.nsi,v 1.86 2006-06-07 11:18:04 adam Exp $
 
-!define VERSION "2.1.20"
-!define VS_RUNTIME_LOCATION "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin"
+!define VERSION "2.1.21"
+
+; Microsoft runtime CRT
+; VS 2003
+; !define VS_RUNTIME "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin\msvcr71.dll"
+
+; VS 2005
+!define VS_RUNTIME "c:\Program Files\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\msvcr80.dll"
 
 !include "MUI.nsh"
 
@@ -84,7 +90,7 @@ Section "YAZ Runtime" YAZ_Runtime
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
 Noservice:
 	SetOutPath $INSTDIR\bin
-	File "${VS_RUNTIME_LOCATION}\msvcr71.dll"
+	File "${VS_RUNTIME}"
 	File ..\bin\iconv.dll
 	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
