@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.86 2006-06-07 11:18:04 adam Exp $
+; $Id: yaz.nsi,v 1.87 2006-06-07 14:25:43 adam Exp $
 
 !define VERSION "2.1.21"
 
@@ -96,6 +96,7 @@ Noservice:
 	File ..\bin\libxml2.dll
 	File ..\bin\libxslt.dll
 	File ..\bin\yaz.dll
+	File ..\bin\*.manifest
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
@@ -115,9 +116,6 @@ Section "YAZ Development" YAZ_Development
 	File ..\include\yaz\*.h
 	SetOutPath $INSTDIR\lib
 	File ..\lib\yaz.lib
-	File ..\lib\yazd.lib
-	SetOutPath $INSTDIR\bin
-	File ..\bin\yazd.dll
 SectionEnd
 
 Section "YAZ Documentation" YAZ_Documentation

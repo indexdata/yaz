@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.110 2006-06-07 09:25:47 adam Exp $
+# $Id: makefile,v 1.111 2006-06-07 14:25:43 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -48,7 +48,6 @@ HHC="c:\program files\html help workshop\hhc.exe"
 dist: 
 	nmake DEBUG=1 clean
 	nmake DEBUG=0 clean
-	nmake DEBUG=1
 	nmake DEBUG=0
 	$(NSIS) yaz.nsi
 
