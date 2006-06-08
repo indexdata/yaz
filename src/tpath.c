@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tpath.c,v 1.10 2006-06-08 10:26:10 adam Exp $
+ * $Id: tpath.c,v 1.11 2006-06-08 20:55:38 adam Exp $
  */
 /**
  * \file tpath.c
@@ -45,19 +45,20 @@ char *yaz_filepath_resolve(const char *fname, const char *path,
         const char *path_sep = 0;
         size_t len = 0;
         size_t slen = 0;
-        
+       
         *fullpath = '\0';
         if (path)
         {
             /* somewhat dirty since we have to consider Windows
              * drive letters..
              */
-            if (strchr ("/\\.", *path))
-            {
+            if (path[0] && strchr ("/\\.", *path))
                 path_sep = strchr (path+1, ':');
-            }
             else if (path[0] && path[1])
                 path_sep = strchr (path+2, ':');
+            else
+                path_sep = 0;
+
             if (path_sep)
                 len = path_sep - path;
             else
@@ -70,13 +71,13 @@ char *yaz_filepath_resolve(const char *fname, const char *path,
                 slen = strlen(fullpath);
                 fullpath[slen++] = '/';
             }
-            memcpy (fullpath+slen, path, len);
+            if (len)
+                memcpy (fullpath+slen, path, len);
             slen += len;
             if (slen > 0 && !strchr("/\\", fullpath[slen-1]))
                 fullpath[slen++] = '/';
         }
         strcpy (fullpath+slen, fname);
-
         if (stat(fullpath, &stat_buf) == 0)
             return fullpath;
         
