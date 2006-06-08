@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tpath.c,v 1.9 2006-04-27 08:39:05 adam Exp $
+ * $Id: tpath.c,v 1.10 2006-06-08 10:26:10 adam Exp $
  */
 /**
  * \file tpath.c
@@ -62,15 +62,17 @@ char *yaz_filepath_resolve(const char *fname, const char *path,
                 len = path_sep - path;
             else
                 len = strlen(path);
+            /* is path is relative and base is to be used */
             if (!strchr ("/\\", *path) && base)
             {
+                /* yes: make base the first part */
                 strcpy (fullpath, base);
                 slen = strlen(fullpath);
                 fullpath[slen++] = '/';
             }
             memcpy (fullpath+slen, path, len);
             slen += len;
-            if (!strchr("/\\", fullpath[slen-1]))
+            if (slen > 0 && !strchr("/\\", fullpath[slen-1]))
                 fullpath[slen++] = '/';
         }
         strcpy (fullpath+slen, fname);
