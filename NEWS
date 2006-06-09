@@ -1,3 +1,5 @@
+YAZ' configure searches for OpenSSL by default.
+
 SSL comstack uses SL_CTX_use_certificate_chain_file rather than
 SL_CTX_use_certificate_file. See
 http://lists.indexdata.dk/pipermail/yazlist/2006-June/001615.html
