@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.22 2006-06-07 10:48:45 adam Exp $
+dnl $Id: configure.ac,v 1.23 2006-06-09 13:29:21 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.21],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -47,13 +47,13 @@ AC_CHECK_FUNC(gethostbyname, ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
 dnl
 dnl ------ OpenSSL
 AC_SUBST(SSL_CFLAGS)
-openssl=no
+openssl=default
 AC_ARG_WITH(openssl, [  --with-openssl[=PREFIX]   OpenSSL library in PREFIX], [openssl=$withval])
 SSL_CFLAGS=""
 SSL_LIBPATH=""
 if test "$openssl" != "no"; then
 	sslver=no
-	if test "$openssl" != "yes"; then
+	if test "$openssl" != "yes" -a "$openssl" != "default"; then
 		if test -x $openssl/bin/pkg-config; then
 			if $openssl/bin/pkg-config --exists openssl; then
 				SSL_CFLAGS=`$openssl/bin/pkg-config --cflags openssl`
@@ -99,7 +99,9 @@ if test "$openssl" != "no"; then
 	else
 		SSL_CFLAGS=""
 		AC_MSG_RESULT([None])
-		AC_MSG_ERROR([OpenSSL development libraries missing])
+		if test "$openssl" != "default"; then
+			AC_MSG_ERROR([OpenSSL development libraries missing])
+		fi
 	fi
 fi
 dnl
