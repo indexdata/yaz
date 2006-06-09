@@ -1,3 +1,8 @@
+SSL comstack uses SL_CTX_use_certificate_chain_file rather than
+SL_CTX_use_certificate_file. See
+http://lists.indexdata.dk/pipermail/yazlist/2006-June/001615.html
+for more info. Thanks to Ko van der Sloot.
+
 --- 2.1.20 2006/06/02
 
 Bug #600: SRU GET, POST support for yaz-client. Introduced

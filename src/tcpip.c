@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.17 2005-07-19 12:40:52 mike Exp $
+ * $Id: tcpip.c,v 1.18 2006-06-09 12:40:53 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -490,8 +490,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         if (sp->ctx_alloc)
         {
             int res;
-            res = SSL_CTX_use_certificate_file (sp->ctx, sp->cert_fname,
-                                                SSL_FILETYPE_PEM);
+            res = SSL_CTX_use_certificate_chain_file(sp->ctx, sp->cert_fname);
             if (res <= 0)
             {
                 ERR_print_errors_fp(stderr);
