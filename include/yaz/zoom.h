@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.34 2006-04-07 11:27:24 adam Exp $
+ * $Id: zoom.h,v 1.35 2006-06-13 16:20:04 mike Exp $
  */
 /**
  * \file zoom.h
@@ -113,6 +113,8 @@ ZOOM_diag_str (int error);
 #define ZOOM_ERROR_INVALID_QUERY 10010
 #define ZOOM_ERROR_CQL_PARSE 10011
 #define ZOOM_ERROR_CQL_TRANSFORM 10012
+#define ZOOM_ERROR_CCL_CONFIG 10013
+#define ZOOM_ERROR_CCL_PARSE 10014
 
 ZOOM_API(int)
 ZOOM_connection_last_event(ZOOM_connection cs);
@@ -200,6 +202,9 @@ ZOOM_query_cql(ZOOM_query s, const char *str);
 /* CQL translated client-side into RPN: `conn' is optional for diagnostics */
 ZOOM_API(int)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn);
+/* CCL translated client-side into RPN: `conn' is optional for diagnostics */
+ZOOM_API(int)
+ZOOM_query_ccl2rpn(ZOOM_query s, const char *str, ZOOM_connection conn);
 /* PQF */
 ZOOM_API(int)
 ZOOM_query_prefix(ZOOM_query s, const char *str);
