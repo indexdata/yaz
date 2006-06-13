@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.23 2005-09-09 10:34:09 adam Exp $
+# $Id: yaz-config.in,v 1.24 2006-06-13 15:36:09 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -15,7 +15,7 @@ YAZVERSION=@VERSION@
 
 usage()
 {
-	cat <<EOF
+    cat <<EOF
 Usage: yaz-config [OPTIONS] [LIBRARIES]
 Options:
 	[--prefix[=DIR]]
@@ -30,51 +30,47 @@ EOF
 	exit $1
 }
 
-#if test $# -eq 0; then
-#	yaz_echo_help=yes
-#fi
-
 while test $# -gt 0; do
-  case "$1" in
-  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
-  *) optarg= ;;
-  esac
-
-  case $1 in
-    --prefix=*)
-      yazprefix=$optarg
-      ;;
-    --prefix)
-      echo $yazprefix
-      exit 0
-      ;;
-    --version)
-      echo $YAZVERSION
-      exit 0
-      ;;
-    --cflags)
-      yaz_echo_cflags=yes
-      ;;
-    --libs)
-      yaz_echo_libs=yes
-      ;;
-    --lalibs)
-      yaz_echo_lalibs=yes
-      ;;
-    --comp)
-      yaz_echo_comp=yes
-      ;;
-    threads)
-      lib_thread=yes
-      ;;
-    malloc)
-      lib_malloc=yes
-      ;;
-    -*)
-      yaz_echo_help=yes
-      ;;
-  esac
-  shift
+    case "$1" in
+	-*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+	*) optarg= ;;
+    esac
+    
+    case $1 in
+	--prefix=*)
+	    yazprefix=$optarg
+	    ;;
+	--prefix)
+	    echo $yazprefix
+	    exit 0
+	    ;;
+	--version)
+	    echo $YAZVERSION
+	    exit 0
+	    ;;
+	--cflags)
+	    yaz_echo_cflags=yes
+	    ;;
+	--libs)
+	    yaz_echo_libs=yes
+	    ;;
+	--lalibs)
+	    yaz_echo_lalibs=yes
+	    ;;
+	--comp)
+	    yaz_echo_comp=yes
+	    ;;
+	threads)
+	    lib_thread=yes
+	    ;;
+	malloc)
+	    lib_malloc=yes
+	    ;;
+	-*)
+	    yaz_echo_help=yes
+	    ;;
+    esac
+    shift
 done
 
 lyaz="-lyaz"
@@ -109,17 +105,22 @@ if test "$lib_thread" = "yes"; then
 fi
 
 if test "$yaz_echo_help" = "yes"; then
-	usage 1 1>&2
+    usage 1 1>&2
 fi
 if test "$yaz_echo_cflags" = "yes"; then
-	echo $YAZINC
+    echo $YAZINC
 fi
 if test "$yaz_echo_libs" = "yes"; then
-	echo $YAZLIB
+    echo $YAZLIB
 fi
 if test "$yaz_echo_lalibs" = "yes"; then
-	echo $YAZLALIB
+    echo $YAZLALIB
 fi
 if test "$yaz_echo_comp" = "yes"; then
-	echo $YAZCOMP
+    echo $YAZCOMP
 fi
+# Local Variables:
+# mode:shell-script
+# sh-indentation: 2
+# sh-basic-offset: 4
+# End:
