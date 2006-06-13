@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.49 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: tools.xml,v 1.50 2006-06-13 16:01:51 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -940,11 +940,11 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
     <para>
      <ulink url="&url.cql;">CQL</ulink>
       - Common Query Language - was defined for the
-     <ulink url="&url.srw;">SRW</ulink> protocol.
+     <ulink url="&url.sru;">SRU</ulink> protocol.
      In many ways CQL has a similar syntax to CCL.
      The objective of CQL is different. Where CCL aims to be
      an end-user language, CQL is <emphasis>the</emphasis> protocol
-     query language for SRW.
+     query language for SRU.
     </para>
     <tip>
      <para>
@@ -969,7 +969,7 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
       <listitem>
        <para>
         The parser converts a valid CQL query to PQF, thus providing a
-        way to use CQL for both SRW/SRU servers and Z39.50 targets at the
+        way to use CQL for both SRU servers and Z39.50 targets at the
         same time.
        </para>
       </listitem>
@@ -978,7 +978,7 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
         The parser converts CQL to
         <ulink url="&url.xcql;">XCQL</ulink>.
         XCQL is an XML representation of CQL.
-        XCQL is part of the SRW specification. However, since SRU
+        XCQL is part of the SRU specification. However, since SRU
         supports CQL only, we don't expect XCQL to be widely used.
         Furthermore, CQL has the advantage over XCQL that it is
         easy to read.
@@ -1141,7 +1141,7 @@ struct cql_node {
       Conversion to PQF (and Z39.50 RPN) is tricky by the fact
       that the resulting RPN depends on the Z39.50 target
       capabilities (combinations of supported attributes). 
-      In addition, the CQL and SRW operates on index prefixes
+      In addition, the CQL and SRU operates on index prefixes
       (URI or strings), whereas the RPN uses Object Identifiers
       for attribute sets.
      </para>
@@ -1176,9 +1176,9 @@ int cql_transform_buf(cql_transform_t ct,
      </para>
      <para>
       If conversion failed, <function>cql_transform_buf</function>
-      returns a non-zero SRW error code; otherwise zero is returned
+      returns a non-zero SRU error code; otherwise zero is returned
       (conversion successful).  The meanings of the numeric error
-      codes are listed in the SRW specifications at
+      codes are listed in the SRU specifications at
       <ulink url="&url.sru.diagnostics.list;"/>
      </para>
      <para>
@@ -1195,7 +1195,7 @@ int cql_transform_error(cql_transform_t ct, char **addinfop);
       context set that was not recognised.
      </para>
      <para>
-      The SRW error-codes may be translated into brief human-readable
+      The SRU error-codes may be translated into brief human-readable
       error messages using
       <synopsis>
 const char *cql_strerror(int code);

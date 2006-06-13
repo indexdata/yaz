@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.49 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: zoom.xml,v 1.50 2006-06-13 16:01:51 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -32,8 +32,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 
   <note>
    <para>
-    A recent addition to &yaz; is SRW support. You can now make
-    SRW ZOOM connections by specifying scheme <literal>http://</literal>
+    A recent addition to &yaz; is SRU support. You can now make
+    SRU ZOOM connections by specifying scheme <literal>http://</literal>
     for the hostname for a connection.
    </para>
   </note>
@@ -108,7 +108,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <para>
     You can prefix the host with a scheme followed by colon. The
     default scheme is <literal>tcp</literal> (Z39.50 protocol).
-    The scheme <literal>http</literal> selects SRW over HTTP.
+    The scheme <literal>http</literal> selects SRU over HTTP.
    </para>
    <para>
     You can prefix the scheme-qualified host-string with one or more
@@ -316,14 +316,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      API cannot tell the outcome (yet).
     </para>
     </sect2>
-   <sect2><title>SRW Protocol behavior</title>
+   <sect2><title>SRU Protocol behavior</title>
     <para>
-     The SRW protocol doesn't feature an Inititialize Request, so
+     The SRU protocol doesn't feature an Inititialize Request, so
      the connection phase merely establishes a TCP/IP connection
      with the SOAP service.
     </para>
     <para>Most of the ZOOM connection options do not
-     affect SRW and they are ignored. However, future versions
+     affect SRU and they are ignored. However, future versions
      of &yaz; might honor <literal>implementationName</literal> and
      put that as part of User-Agent header for HTTP requests.
      </para>
@@ -576,22 +576,22 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </para>
    </sect2>
    <sect2>
-    <title>SRW Protocol behavior</title>
+    <title>SRU Protocol behavior</title>
     <para>
      Current version of &yaz; does not take advantage of a result set id
-     returned by the SRW server. Future versions might do, however.
+     returned by the SRU server. Future versions might do, however.
      Since, the ZOOM driver does not save result set IDs any
-     present (retrieval) is transformed to a SRW SearchRetrieveRequest
+     present (retrieval) is transformed to a SRU SearchRetrieveRequest
      with same query but, possibly, different offsets.
     </para>
     <para>
-     Option <literal>schema</literal> specifies SRW schema
+     Option <literal>schema</literal> specifies SRU schema
      for retrieval. However, options <literal>elementSetName</literal> and
      <literal>preferredRecordSyntax</literal> are ignored.
     </para>
     <para>
      Options <literal>start</literal> and <literal>count</literal> 
-     are supported by SRW.
+     are supported by SRU.
      The remaining options
      <literal>piggyback</literal>, 
      <literal>smallSetUpperBound</literal>, 
@@ -602,18 +602,18 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      unsupported.
     </para>
     <para>
-     SRW supports CQL queries, <emphasis>not</emphasis> PQF.
+     SRU supports CQL queries, <emphasis>not</emphasis> PQF.
      If PQF is used, however, the PQF query is transferred anyway
      using non-standard element <literal>pQuery</literal> in
-     SRW SearchRetrieveRequest.
+     SRU SearchRetrieveRequest.
     </para>
     <para>
-     Unfortunately, SRW does not define a database setting. Hence,
+     Unfortunately, SRU does not define a database setting. Hence,
      <literal>databaseName</literal> is unsupported and ignored.
      However, the path part in host parameter for functions 
      <function>ZOOM_connecton_new</function> and
      <function>ZOOM_connection_connect</function> acts as a
-     database (at least for the &yaz; SRW server).
+     database (at least for the &yaz; SRU server).
     </para>
    </sect2>
   </sect1>
@@ -729,7 +729,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </varlistentry>
      <varlistentry><term><literal>xml</literal></term>
       <listitem><para>The record is returned in XML if possible.
-	SRW/SRU and Z39.50 records with transfer syntax XML are
+	SRU and Z39.50 records with transfer syntax XML are
 	returned verbatim. MARC records are returned in
 	<ulink url="&url.marcxml;">
 	 MARCXML
@@ -777,9 +777,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      <emphasis>now</emphasis>.
     </para>
    </sect2>
-   <sect2><title>SRW Protocol behavior</title>
+   <sect2><title>SRU Protocol behavior</title>
     <para>
-     The ZOOM driver for SRW treats records returned by a SRW server
+     The ZOOM driver for SRU treats records returned by a SRU server
      as if they where Z39.50 records with transfer syntax XML and
      no element set name or database name.
     </para>

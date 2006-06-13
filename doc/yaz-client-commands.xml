@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.15 2006-06-02 13:12:54 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.16 2006-06-13 16:01:51 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -473,7 +473,7 @@
   <listitem>
    <para>Specifies schema for retrieval.
     Schema may be specified as an OID for Z39.50.
-    For SRW, schema is a simple string URI.
+    For SRU, schema is a simple string URI.
    </para>
   </listitem>
  </varlistentry>
@@ -486,7 +486,7 @@
   </term>
   <listitem>
    <para>Specifies character set (encoding) for Z39.50
-    negotiation / SRW encoding and/or character set for output (terminal).
+    negotiation / SRU encoding and/or character set for output (terminal).
    </para>
    <para>
     <replaceable>negotiationcharset</replaceable> is the name

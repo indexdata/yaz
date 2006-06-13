@@ -1,9 +1,9 @@
-<!-- $Id: introduction.xml,v 1.23 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: introduction.xml,v 1.24 2006-06-13 16:01:51 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
    &yaz; is a C/C++ library for information retrieval applications
-   using the Z39.50/SRW/SRU protocols for information retrieval.
+   using the Z39.50/SRU protocols for information retrieval.
   </para>
   
   <para>
@@ -16,7 +16,7 @@
      </para></listitem>
     <listitem><para>
       Supports 
-      <ulink url="&url.sru;">SRW/SRU</ulink>
+      <ulink url="&url.sru;">SRU GET/POST/SOAP</ulink>
       version 1.1 (over HTTP and HTTPS).
      </para></listitem>
     <listitem><para>
@@ -39,7 +39,7 @@
     <listitem><para>
       Offers 
       <ulink url="&url.zoom;">ZOOM</ulink> C API implementing both
-      Z39.50 and SRW.
+      Z39.50 and SRU.
      </para></listitem>
     <listitem><para>
       The &yaz; library offers a set of useful utilities
@@ -82,16 +82,16 @@
     <listitem>
      <para>
       <xref linkend="zoom"/> describes the ZOOM API of &yaz;.
-      This is definitely worth a read if you wish to develop a Z39.50/SRW
-     client.
-    </para>
+      This is definitely worth a read if you wish to develop a Z39.50/SRU
+      client.
+     </para>
     </listitem>
     
     <listitem>
      <para>
       <xref linkend="server"/> describes the generic frontend server
-      and explains how to develop server Z39.50/SRW applications for &yaz;.
-     Obviously worth reading if you're to develop a server.
+      and explains how to develop server Z39.50/SRU applications for &yaz;.
+      Obviously worth reading if you're to develop a server.
     </para>
     </listitem>
 
@@ -114,8 +114,8 @@
 
     <listitem>
      <para>
-      <xref linkend="soap"/> describes how SRW and SOAP is used 
-      in &yaz;. Only if you're developing SOAP/SRW applications
+      <xref linkend="soap"/> describes how SRU and SOAP is used 
+      in &yaz;. Only if you're developing SRU applications
       this section is a must.
      </para>
     </listitem>
@@ -124,7 +124,7 @@
      <para>
       <xref linkend="tools"/> contains sections for the various
       tools offered by &yaz;. Scan through the material quickly
-      and see what's relevant to you! SRW/SRU implementors
+      and see what's relevant to you! SRU implementors
       might find the <link linkend="tools.cql">CQL</link> section
       particularly useful.
      </para>
@@ -204,7 +204,7 @@
       <para>
        The second layer provides a C represenation of the 
        protocol units (packages) for Z39.50 ASN.1, ILL ASN.1,
-       SRW SOAP.
+       SRU.
       </para>
      </listitem>
      <listitem>

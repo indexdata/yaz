@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.29 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: frontend.xml,v 1.30 2006-06-13 16:01:51 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -13,7 +13,7 @@
 
    <para>
     If you have a database system that you would like to make available by
-    means of Z39.50, SRW o SRU, &yaz; basically offers your two options. You
+    means of Z39.50 or SRU, &yaz; basically offers your two options. You
     can use the APIs provided by the &asn;, &odr;, and &comstack;
     modules to
     create and decode PDUs, and exchange them with a client.
@@ -100,7 +100,7 @@
      </para></listitem>
     
     <listitem><para>
-      Return Explain for SRW/SRU (optional).
+      Return Explain for SRU (optional).
      </para></listitem>
     
    </itemizedlist>
@@ -336,8 +336,8 @@ bend_initresult (*bend_init)(bend_initrequest *r);
     </para>
 
     <para>
-     This handler is also called when operating in SRW/SRU mode - when
-     a connection has been made (even though SRW/SRU does not offer
+     This handler is also called when operating in SRU mode - when
+     a connection has been made (even though SRU does not offer
      this service).
     </para>
 
@@ -503,8 +503,8 @@ typedef struct {
 
     <para>
      The <function>bend_search</function> handler is also called when
-     the frontend server receives a SRW/SRU SearchRetrieveRequest.
-     For SRW/SRU, a CQL query is usually provided by the client.
+     the frontend server receives a SRU SearchRetrieveRequest.
+     For SRU, a CQL query is usually provided by the client.
      The CQL query is available as part of <literal>Z_Query</literal>
      structure (note that CQL is now part of Z39.50 via an external).
      To support CQL in existing implementations that only do Type-1,
@@ -515,8 +515,8 @@ typedef struct {
     <para>
      To maintain backwards compatibility, the frontend server
      of yaz always assume that error codes are BIB-1 diagnostics.
-     For SRW/SRU operation, a Bib-1 diagnostic code is mapped to
-     SRW/SRU diagnostic.
+     For SRU operation, a Bib-1 diagnostic code is mapped to
+     SRU diagnostic.
     </para>
     
     <synopsis>
@@ -548,7 +548,7 @@ typedef struct bend_fetch_rr {
     <para>
      The frontend server calls the <function>bend_fetch</function> handler
      when it needs database records to fulfill a Z39.50 Search Request, a
-     Z39.50 Present Request or a SRW SearchRetrieveRequest.
+     Z39.50 Present Request or a SRU SearchRetrieveRequest.
      The <literal>setname</literal> is simply the name of the result set
      that holds the reference to the desired record.
      The <literal>number</literal> is the offset into the set (with 1
@@ -566,11 +566,11 @@ typedef struct bend_fetch_rr {
     </para>
 
     <para>
-     If a SRW/SRU SearchRetrieveRequest is received by the frontend server,
+     If a SRU SearchRetrieveRequest is received by the frontend server,
      the <literal>referenceId</literal> is NULL and the
      <literal>request_format</literal> (transfer syntax) is XML (OID name 
      <literal>VAL_TEXT_XML</literal>).
-     The schema for SRW/SRU is stored in both the
+     The schema for SRU is stored in both the
      <literal>Z_RecordComposition</literal>
      structure and <literal>schema</literal> (simple string).
     </para>
@@ -727,8 +727,7 @@ typedef struct bend_scan_rr {
     </synopsis>
    <para>
     This backend server handles both Z39.50 scan 
-    and SRW/SRU scan. In order for a
-    handler to distinguish between SRW/SRU (CQL) scan 
+    and SRU scan. In order for a handler to distinguish between SRU (CQL) scan 
     Z39.50 Scan , it must check for a non-NULL value of 
     <literal>scanClause</literal>.
    </para>
@@ -797,11 +796,10 @@ typedef struct bend_scan_rr {
      </screen>
     </para>
     <para>
-     The server will accept Z39.50 requests and offer SRW/SRU service
-     on port 210.
+     The server will accept Z39.50 requests and offer SRU service on port 210.
     </para>
    </example>
-   <example><title>Setting up Apache as SRW/SRU Frontend</title>
+   <example><title>Setting up Apache as SRU Frontend</title>
     <para>
      If you use <ulink url="&url.apache;">Apache</ulink>
      as your public web server and want to offer HTTP port 80

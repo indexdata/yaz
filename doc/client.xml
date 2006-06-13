@@ -1,8 +1,8 @@
-<!-- $Id: client.xml,v 1.18 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: client.xml,v 1.19 2006-06-13 16:01:51 adam Exp $ -->
  <chapter id="client"><title>The YAZ client</title>
   <sect1 id="client.introduction"><title>Introduction</title>
    <para>
-    yaz-client is a line-mode Z39.50/SRW client. It supports a fair amount
+    yaz-client is a line-mode Z39.50/SRU client. It supports a fair amount
     of the functionality of the Z39.50v3 standard.
     Its primary purpose is to exercise the package, and verify that
     the protocol works OK.
@@ -31,8 +31,8 @@
    
    <simpara>
     in a UNIX shell / WIN32 console. The <replaceable>zurl</replaceable>,
-    specifies a Z39.50/SRW host and, if specified, the client first tries to
-    establish connection with the Z39.50/SRW target.
+    specifies a Z39.50/SRU host and, if specified, the client first tries to
+    establish connection with the Z39.50/SRU target.
    </simpara>
    <simpara>
     Options are prefixed by <literal>-</literal> followed by a
@@ -130,7 +130,7 @@
     </screen>
    </para>
    <para>
-    The same server is also a SOAP SRW service. Connect to it via HTTP
+    The same server is also a SRU service. Connect to it via HTTP
     as follows:
     <screen>
      yaz-client http://bagel.indexdata.dk:210/marc

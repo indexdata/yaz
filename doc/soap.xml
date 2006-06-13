@@ -1,16 +1,16 @@
-<!-- $Id: soap.xml,v 1.6 2006-04-24 09:21:35 adam Exp $ -->
-<chapter id="soap"><title>SOAP and SRW</title>
+<!-- $Id: soap.xml,v 1.7 2006-06-13 16:01:51 adam Exp $ -->
+<chapter id="soap"><title>SOAP and SRU</title>
   <sect1 id="soap.introduction"><title>Introduction</title>
     <para>
       &yaz; uses a very simple implementation of 
       <ulink url="&url.soap;">SOAP</ulink> that only,
-      currenly, supports what is sufficient to offer SRW functionality.
+      currenly, supports what is sufficient to offer SRU SOAP functionality.
       The implementation uses the 
       <ulink url="&url.libxml2.api.tree;">tree API</ulink> of
       libxml2 to encode and decode SOAP packages.
     </para>
     <para>
-      Like the Z39.50 ASN.1 module, the &yaz; SRW implementation uses
+      Like the Z39.50 ASN.1 module, the &yaz; SRU implementation uses
       simple C structs to represent SOAP packages as well as
       HTTP packages.
     </para>
@@ -104,7 +104,7 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
     </para>
     <para>
       The <literal>handlers</literal> is a list of SOAP codec
-      handlers - one handler for each service namespace. For SRW, the
+      handlers - one handler for each service namespace. For SRU SOAP, the
       namespace would be <literal>http://www.loc.gov/zing/srw/v1.0/</literal>.
     </para>
     <para>
@@ -155,11 +155,11 @@ int handler(ODR o, void * ptr, void **handler_data,
       Finally, <parameter>ns</parameter> the service namespace.
     </para>
   </sect1>
-  <sect1 id="soap.srw"><title>SRW</title>
+  <sect1 id="soap.srw"><title>SRU</title>
     <para>
-      SRW is just one implementation of a SOAP handler as described
+      SRU SOAP is just one implementation of a SOAP handler as described
       in the previous section.
-      The encoder/decoder handler for SRW is defined as
+      The encoder/decoder handler for SRU is defined as
       follows:
       <synopsis>
 #include &lt;yaz/srw.h&gt;

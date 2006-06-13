@@ -8,7 +8,7 @@
      <!ENTITY % common SYSTEM "common/common.ent">
      %common;
 ]>
-<!-- $Id: yaz-man.xml,v 1.9 2006-05-28 19:56:25 adam Exp $ -->
+<!-- $Id: yaz-man.xml,v 1.10 2006-06-13 16:01:51 adam Exp $ -->
 <refentry id="yaz">
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
@@ -30,7 +30,7 @@
   <para>
    YAZ is a C/C++ programmer's toolkit supporting the development
    of Z39.50v3 clients and servers. The YAZ toolkit offers
-   several different levels of access to the ISO23950/Z39.50, SRW/SRU
+   several different levels of access to the ISO23950/Z39.50, SRU
    and ILL protocols. The level that you need to use depends
    on your requirements, and the role (server of client) that you want
    to implement.
