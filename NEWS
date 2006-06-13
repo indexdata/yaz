@@ -1,3 +1,11 @@
+Added support for CCL, compiled on the client side, in ZOOM-C.  This
+is invoked using ZOOM_query_ccl2rpn(); the resulting query objects can
+be used for for searching with ZOOM_connection_search() and scanning
+with ZOOM_connection_scan1().  Before it can be used for CCL
+searching and scanning, the connection object must be configured by
+setting the "cclfile" option to the name of a CCL qualifier file such
+as the one in "client/default.bib".
+
 YAZ' configure searches for OpenSSL by default.
 
 SSL comstack uses SL_CTX_use_certificate_chain_file rather than
