@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.43 2006-06-05 18:13:01 adam Exp $
+ * $Id: srwutil.c,v 1.44 2006-06-14 05:47:10 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -1207,7 +1207,9 @@ int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                         ODR odr, const char *charset)
 {
     Z_SOAP_Handler handlers[2] = {
+#if HAVE_XML2
         {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
+#endif
         {0, 0, 0}
     };
     Z_SOAP *p = (Z_SOAP*) odr_malloc(odr, sizeof(*p));
