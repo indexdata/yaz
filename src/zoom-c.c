@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.76 2006-06-13 16:27:23 mike Exp $
+ * $Id: zoom-c.c,v 1.77 2006-06-14 09:15:28 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -565,12 +565,16 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 {
     char *rpn;
     int ret;
+    ZOOM_connection freeme = 0;
 
     yaz_log(log_details, "%p ZOOM_query_cql2rpn str=%s conn=%p", s, str, conn);
     if (conn == 0)
-        conn = ZOOM_connection_create(0);
+        conn = freeme = ZOOM_connection_create(0);
 
-    if ((rpn = cql2pqf(conn, str)) == 0)
+    rpn = cql2pqf(conn, str);
+    if (freeme != 0)
+        ZOOM_connection_destroy(freeme);
+    if (rpn == 0)
         return -1;
 
     ret = ZOOM_query_prefix(s, rpn);
@@ -588,12 +592,16 @@ ZOOM_query_ccl2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 {
     char *rpn;
     int ret;
+    ZOOM_connection freeme = 0;
 
     yaz_log(log_details, "%p ZOOM_query_ccl2rpn str=%s conn=%p", s, str, conn);
     if (conn == 0)
-        conn = ZOOM_connection_create(0);
+        conn = freeme = ZOOM_connection_create(0);
 
-    if ((rpn = ccl2pqf(conn, str)) == 0)
+    rpn = ccl2pqf(conn, str);
+    if (freeme != 0)
+        ZOOM_connection_destroy(freeme);
+    if (rpn == 0)
         return -1;
 
     ret = ZOOM_query_prefix(s, rpn);
@@ -1180,7 +1188,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.76 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.77 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
