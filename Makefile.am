@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2005, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.35 2006-05-08 12:20:48 adam Exp $
+## $Id: Makefile.am,v 1.36 2006-06-15 14:15:17 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -18,6 +18,7 @@ EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS TODO windows.txt \
 	Doxyfile.in
 
 dist-hook:
+	if test -x /usr/bin/cvs2cl -a -d CVS; then cvs2cl ; fi
 	mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
 	mkdir $(distdir)/debian
