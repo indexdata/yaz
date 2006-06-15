@@ -1,3 +1,8 @@
+Changed SRU update structure bend_update_rr so that SRU diagnostics are
+stored in uri, message and details.. Previously diagnostics were stored
+in errcode, errstring. Patch by Ko van der Sloot. Breaks binary
+compatibility.. but he's probably the only one affected, so.
+
 Added support for CCL, compiled on the client side, in ZOOM-C.  This
 is invoked using ZOOM_query_ccl2rpn() with the CCL configuration as
 input; the resulting query objects can be used for for searching with

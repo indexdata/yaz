@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.85 2006-05-31 16:20:41 quinn Exp $
+ * $Id: seshigh.c,v 1.86 2006-06-15 12:53:58 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1440,8 +1440,9 @@ static void srw_bend_update(association *assoc, request *req,
         rr.response_extra_record = 0;
         rr.extra_request_data = 0;
         rr.extra_response_data = 0;
-        rr.errcode = 0;
-        rr.errstring = 0;
+        rr.uri = 0;
+        rr.message = 0;
+        rr.details = 0;
 
         yaz_log(YLOG_DEBUG, "basename = %s", rr.basenames[0] );
         yaz_log(YLOG_DEBUG, "Operation = %s", rr.operation );
@@ -1520,6 +1521,7 @@ static void srw_bend_update(association *assoc, request *req,
 	}
 	else if ( !strcmp( rr.operation, "insert" ) )
         {
+            rr.record_id = srw_req->recordId; 
             if ( srw_req->record.recordSchema == 0 ){
                 yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
                                        &srw_res->num_diagnostics,
@@ -1566,11 +1568,14 @@ static void srw_bend_update(association *assoc, request *req,
                 return;
             }
         }
-        if (rr.errcode)
-            yaz_add_srw_diagnostic(assoc->encode,
-                                   &srw_res->diagnostics,
-                                   &srw_res->num_diagnostics,
-                                   rr.errcode, rr.errstring);
+
+        if (rr.uri)
+            yaz_add_srw_diagnostic_uri(assoc->encode,
+                                       &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       rr.uri, 
+                                       rr.message,
+                                       rr.details);
 	srw_res->recordId = rr.record_id;
 	srw_res->operationStatus = rr.operation_status;
 	srw_res->recordVersion = rr.record_version;
@@ -2282,7 +2287,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.85 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.86 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

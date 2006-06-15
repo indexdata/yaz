@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: backend.h,v 1.36 2006-03-22 13:55:06 mike Exp $
+ * $Id: backend.h,v 1.37 2006-06-15 12:53:57 adam Exp $
  */
 
 /** 
@@ -164,8 +164,9 @@ typedef struct bend_update_rr {
     Z_SRW_extra_record *response_extra_record;
     char *extra_request_data;
     char *extra_response_data;
-    int errcode;
-    char *errstring;
+    char *uri;
+    char *message;
+    char *details;
 } bend_update_rr;
 
 /* delete handler */
