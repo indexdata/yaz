@@ -1,9 +1,9 @@
-## $Id: Makefile.am,v 1.17 2006-02-02 13:14:58 adam Exp $
+## $Id: Makefile.am,v 1.18 2006-06-15 10:34:24 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
 
-EXTRA_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8 zoomtst9
+EXTRA_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8 zoomtst9 zoomtst10
 bin_PROGRAMS = zoomsh
 noinst_PROGRAMS = zoom-benchmark
 
@@ -18,6 +18,7 @@ zoomtst6_SOURCES = zoomtst6.c
 zoomtst7_SOURCES = zoomtst7.c
 zoomtst8_SOURCES = zoomtst8.c
 zoomtst9_SOURCES = zoomtst9.c
+zoomtst10_SOURCES = zoomtst10.c
 zoomsh_SOURCES = zoomsh.c
 zoom_benchmark_SOURCES = zoom-benchmark.c
 

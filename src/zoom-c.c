@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.77 2006-06-14 09:15:28 mike Exp $
+ * $Id: zoom-c.c,v 1.78 2006-06-15 10:34:17 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -54,7 +54,6 @@ typedef enum {
 static zoom_ret ZOOM_connection_send_init (ZOOM_connection c);
 static zoom_ret do_write_ex (ZOOM_connection c, char *buf_out, int len_out);
 static char *cql2pqf(ZOOM_connection c, const char *cql);
-static char *ccl2pqf(ZOOM_connection c, const char *ccl);
 
 static void initlog()
 {
@@ -588,24 +587,32 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
  * to the server, as the YAZ GFS doesn't know how to handle this.
  */
 ZOOM_API(int)
-ZOOM_query_ccl2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
+    ZOOM_query_ccl2rpn(ZOOM_query s, const char *str, const char *config,
+                       int *ccl_error, const char **error_string,
+                       int *error_pos)
 {
-    char *rpn;
     int ret;
-    ZOOM_connection freeme = 0;
+    struct ccl_rpn_node *rpn;
+    CCL_bibset bibset = ccl_qual_mk();
 
-    yaz_log(log_details, "%p ZOOM_query_ccl2rpn str=%s conn=%p", s, str, conn);
-    if (conn == 0)
-        conn = freeme = ZOOM_connection_create(0);
+    if (config)
+        ccl_qual_buf(bibset, config);
 
-    rpn = ccl2pqf(conn, str);
-    if (freeme != 0)
-        ZOOM_connection_destroy(freeme);
-    if (rpn == 0)
-        return -1;
-
-    ret = ZOOM_query_prefix(s, rpn);
-    xfree(rpn);
+    rpn = ccl_find_str(bibset, str, ccl_error, error_pos);
+    if (!rpn)
+    {
+        *error_string = ccl_err_msg(*ccl_error);
+        ret = -1;
+    }
+    else
+    {
+        WRBUF wr = wrbuf_alloc();
+        ccl_pquery(wr, rpn);
+        ccl_rpn_delete(rpn);
+        ret = ZOOM_query_prefix(s, wrbuf_buf(wr));
+        wrbuf_free(wr, 1);
+    }
+    ccl_qual_rm(&bibset);
     return ret;
 }
 
@@ -1188,7 +1195,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.77 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.78 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2486,12 +2493,6 @@ ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query q)
         yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p CQL '%s'",
                 c, q, q->query_string);
         start = freeme = cql2pqf(c, q->query_string);
-        if (start == 0)
-            return 0;
-    } else if (q->z_query->which == Z_Query_type_2) {
-        yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p CCL '%s'",
-                c, q, q->query_string);
-        start = freeme = ccl2pqf(c, q->query_string);
         if (start == 0)
             return 0;
     } else {
@@ -4113,51 +4114,6 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
     cql_transform_close(trans);
     return xstrdup(pqfbuf);
 }
-
-
-/* ### Could cache `bibset' */
-static char *ccl2pqf(ZOOM_connection c, const char *ccl)
-{
-    const char *cclfile;
-    CCL_bibset bibset;
-    struct ccl_rpn_node *node;
-    int errorcode;
-    int errorpos;
-    WRBUF w;
-    char *pqf;
-
-    if ((cclfile = ZOOM_connection_option_get(c, "cclfile")) == 0) {
-        set_ZOOM_error(c, ZOOM_ERROR_CCL_CONFIG, "no CCL qualifier file");
-        return 0;
-    }
-
-    bibset = ccl_qual_mk();
-    if (ccl_qual_fname(bibset, cclfile) < 0) {
-        char buf[512];
-        ccl_qual_rm(&bibset);
-        sprintf(buf, "can't open CCL qualifier file '%.200s': %.200s",
-                cclfile, strerror(errno));
-        set_ZOOM_error(c, ZOOM_ERROR_CCL_CONFIG, buf);
-        return 0;
-    }
-
-    node = ccl_find_str (bibset, ccl, &errorcode, &errorpos);
-    ccl_qual_rm(&bibset);
-    if (node == 0) {
-        /* code is one of the CCL_ERR_* constants; pos is unused here */
-        set_ZOOM_error(c, ZOOM_ERROR_CCL_PARSE, ccl_err_msg(errorcode));
-        return 0;
-    }
-
-    w = wrbuf_alloc();
-    ccl_pquery(w, node);
-    ccl_rpn_delete(node);
-    pqf = xstrdup(wrbuf_buf(w));
-    wrbuf_free(w, 1);
-
-    return pqf;
-}
-
 
 /*
  * Local variables:
