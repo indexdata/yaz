@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.78 2006-06-15 10:34:17 adam Exp $
+ * $Id: zoom-c.c,v 1.79 2006-06-16 10:20:17 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1195,7 +1195,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.78 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.79 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1339,6 +1339,11 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
                 record_cache_lookup (resultset, i + resultset->start);
             if (!rec)
                 break;
+            else
+            {
+                ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
+                ZOOM_connection_put_event(c, event);
+            }
         }
         if (i == resultset->count)
             return zoom_complete;
@@ -2364,6 +2369,11 @@ static zoom_ret send_present(ZOOM_connection c)
             record_cache_lookup (resultset, i + resultset->start);
         if (!rec)
             break;
+        else
+        {
+            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
+            ZOOM_connection_put_event(c, event);
+        }
     }
     if (i == resultset->count)
     {
