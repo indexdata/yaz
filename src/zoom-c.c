@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.79 2006-06-16 10:20:17 adam Exp $
+ * $Id: zoom-c.c,v 1.80 2006-06-16 12:34:32 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -72,6 +72,7 @@ static ZOOM_Event ZOOM_Event_create (int kind)
     event->kind = kind;
     event->next = 0;
     event->prev = 0;
+    yaz_log(log_details, "ZOOM_event_create(%d)", kind);
     return event;
 }
 
@@ -1195,7 +1196,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.79 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.80 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1345,7 +1346,10 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
                 ZOOM_connection_put_event(c, event);
             }
         }
-        if (i == resultset->count)
+        resultset->start += i;
+        resultset->count -= i;
+
+        if (resultset->count == 0)
             return zoom_complete;
     }
     assert(resultset->query);
@@ -2111,6 +2115,8 @@ static void handle_records (ZOOM_connection c, Z_Records *sr,
                 record_cache_add (resultset, p->records[i],
                                   i+ resultset->start);
             }
+            resultset->count -= i;
+            resultset->start += i;
             /* transfer our response to search_nmem .. we need it later */
             nmem_transfer (resultset->odr->mem, nmem);
             nmem_destroy (nmem);
@@ -2331,6 +2337,7 @@ static zoom_ret send_present(ZOOM_connection c)
         yaz_log(log_details, "%p send_present no tasks", c);
         return zoom_complete;
     }
+    
     switch (c->tasks->which)
     {
     case ZOOM_TASK_SEARCH:
@@ -2375,7 +2382,10 @@ static zoom_ret send_present(ZOOM_connection c)
             ZOOM_connection_put_event(c, event);
         }
     }
-    if (i == resultset->count)
+    resultset->start += i;
+    resultset->count -= i;
+
+    if (resultset->count == 0)
     {
         yaz_log(log_details, "%p send_present skip=%d no more to fetch", c, i);
         return zoom_complete;
@@ -2383,9 +2393,6 @@ static zoom_ret send_present(ZOOM_connection c)
 
     apdu = zget_APDU(c->odr_out, Z_APDU_presentRequest);
     req = apdu->u.presentRequest;
-
-    resultset->start += i;
-    resultset->count -= i;
 
     if (i)
         yaz_log(log_details, "%p send_present skip=%d", c, i);
@@ -3894,6 +3901,7 @@ ZOOM_event (int no, ZOOM_connection *cs)
     int i, r, nfds;
     int max_fd = 0;
 
+    yaz_log(log_details, "ZOOM_event no=%d", no);
     for (i = 0; i<no; i++)
     {
         ZOOM_connection c = cs[i];
@@ -3907,9 +3915,10 @@ ZOOM_event (int no, ZOOM_connection *cs)
     for (i = 0; i<no; i++)
     {
         ZOOM_connection c = cs[i];
-        ZOOM_Event event;
-        if (c && ZOOM_connection_exec_task (c))
+        if (c)
         {
+            ZOOM_Event event;
+            ZOOM_connection_exec_task (c);
             if ((event = ZOOM_connection_get_event(c)))
             {
                 ZOOM_Event_destroy (event);
