@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.86 2006-06-15 12:53:58 adam Exp $
+ * $Id: seshigh.c,v 1.87 2006-06-20 21:20:51 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -2249,7 +2249,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
         strcat(options, " negotiation");
     }
         
-    ODR_MASK_SET(resp->options, Z_Options_triggerResourceCtrl);
+    if (ODR_MASK_GET(req->options, Z_Options_triggerResourceCtrl))
+        ODR_MASK_SET(resp->options, Z_Options_triggerResourceCtrl);
 
     if (ODR_MASK_GET(req->protocolVersion, Z_ProtocolVersion_1))
     {
@@ -2287,7 +2288,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.86 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.87 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
