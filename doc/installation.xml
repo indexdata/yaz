@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.31 2006-05-03 13:38:12 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.32 2006-06-27 12:23:12 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1><title>Introduction</title>
@@ -180,11 +180,11 @@
         </para></listitem>
       </varlistentry>
 
-      <varlistentry><term><literal>--enable-shared</literal></term>
-       <listitem><para>The make process will create shared
+      <varlistentry><term><literal>--disable-shared</literal></term>
+       <listitem><para>The make process will not create shared
          libraries (also known as shared objects <filename>.so</filename>).
-         By default, no shared libraries are created -
-         equivalent to <literal>--disable-shared</literal>.
+         By default, shared libraries are created -
+         equivalent to <literal>--enable-shared</literal>.
         </para></listitem>
       </varlistentry>
 

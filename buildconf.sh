@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.38 2006-05-26 15:09:03 adam Exp $
+# $Id: buildconf.sh,v 1.39 2006-06-27 12:23:11 adam Exp $
 
 automake=automake
 aclocal=aclocal
@@ -56,7 +56,7 @@ esac
 
 if $enable_configure; then
     if test -n "$sh_flags"; then
-	CFLAGS="$sh_flags" ./configure $*
+	CFLAGS="$sh_flags" ./configure --disable-shared --enable-static $*
     else
 	./configure $*
     fi
