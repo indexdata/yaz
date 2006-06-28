@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.70 2006-05-28 19:56:24 adam Exp $
+## $Id: Makefile.am,v 1.71 2006-06-28 21:41:54 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -89,7 +89,7 @@ apilayer.png:
 	xbmtopbm <apilayer.xbm|pnmtopng >apilayer.png
 
 dist-hook:
-	for f in *.html; do \
+	if test -f index.html; then for f in *.html; do \
 		found=0; \
 		b=`basename $$f`; \
 		for h in $(HTMLFILES); do \
@@ -101,6 +101,6 @@ dist-hook:
 			echo "$$b not found in HTMLFILES"; \
 			exit 1; \
 		fi \
-	done
+	done; fi
 
 
