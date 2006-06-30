@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.35 2006-05-07 18:26:25 adam Exp $
+ * $Id: log.c,v 1.36 2006-06-30 11:09:44 adam Exp $
  */
 
 /**
@@ -339,6 +339,9 @@ static void yaz_strftime(char *dst, size_t sz,
         DWORD tid = GetCurrentThreadId();
 #else
         long tid = 0;
+#if YAZ_POSIX_THREADS
+        tid = pthread_self();
+#endif
 #endif
         memcpy(fmt2, fmt, cp-fmt);
         fmt2[cp-fmt] = '\0';
