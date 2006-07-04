@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.7 2006-05-10 13:58:46 heikki Exp $
+ *  $Id: nfa.h,v 1.8 2006-07-04 12:59:56 heikki Exp $
  */
 
 /**
@@ -28,6 +28,7 @@
 #define YAZ_NFA_H
 
 #include <yaz/yconfig.h>
+#include <stdio.h>
 
 YAZ_BEGIN_CDECL
 
@@ -529,7 +530,9 @@ yaz_nfa_state *yaz_nfa_get_next(yaz_nfa *n, yaz_nfa_state *s);
  *  already printable, passing a null pointer here prints them with a %s
  *
  */
-void yaz_nfa_dump(FILE *F, yaz_nfa *n, char *(*strfunc)(void *) ); 
+void yaz_nfa_dump(FILE *F, 
+                  yaz_nfa *n, 
+                  char *(*strfunc)(void *) ); 
 
 /* \} */
 

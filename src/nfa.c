@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.9 2006-05-10 13:58:46 heikki Exp $ 
+ *  $Id: nfa.c,v 1.10 2006-07-04 12:59:56 heikki Exp $ 
  */
 
 /**
@@ -113,7 +113,8 @@ yaz_nfa *yaz_nfa_init() {
 }
 
 void yaz_nfa_destroy(yaz_nfa *n) {
-    nmem_destroy(n->nmem);
+    if (n && n->nmem)
+        nmem_destroy(n->nmem);
 }
 
 
