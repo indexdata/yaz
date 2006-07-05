@@ -1,9 +1,9 @@
 ## Copyright (C) 1994-2006, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.20 2006-07-04 12:59:57 heikki Exp $
+## $Id: Makefile.am,v 1.21 2006-07-05 08:10:40 heikki Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
- tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery nfatest1 \
+ tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  nfatest1 nfaxmltest1 \
  tst_filepath tst_record_conv tst_retrieval tst_tpath
 check_SCRIPTS = tstcql.sh tstmarciso.sh tstmarcxml.sh
