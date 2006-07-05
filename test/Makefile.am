@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2006, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.21 2006-07-05 08:10:40 heikki Exp $
+## $Id: Makefile.am,v 1.22 2006-07-05 14:45:57 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
@@ -11,6 +11,7 @@ check_SCRIPTS = tstcql.sh tstmarciso.sh tstmarcxml.sh
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 
 EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample \
+ cql2pqf-order.txt \
  $(check_SCRIPTS) \
  marc1 marc1.xml marc1.chr marc1.xml.marc \
  marc2 marc2.xml marc2.chr marc2.xml.marc \
