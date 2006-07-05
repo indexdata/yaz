@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.22 2006-04-05 12:04:51 mike Exp $
+/* $Id: cqltransform.c,v 1.23 2006-07-05 14:50:16 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -10,8 +10,19 @@ See the file LICENSE.
 /**
  * \file cqltransform.c
  * \brief Implements CQL transform (CQL to RPN conversion).
+ *
+ * Evaluation order of rules:
+ *
+ * always
+ * relation
+ * structure
+ * position
+ * truncation
+ * index
+ * relationModifier
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <yaz/cql.h>
@@ -318,11 +329,16 @@ static const char *wcchar(const char *term, int length)
 
 
 void emit_term(cql_transform_t ct,
+               struct cql_node *cn,
                const char *term, int length,
                void (*pr)(const char *buf, void *client_data),
                void *client_data)
 {
     int i;
+    const char *ns = cn->u.st.index_uri;
+
+    assert(cn->which == CQL_NODE_ST);
+
     if (length > 0)
     {
         if (length > 1 && term[0] == '^' && term[length-1] == '^')
@@ -410,6 +426,20 @@ void emit_term(cql_transform_t ct,
                         pr, client_data, 0);
         }
     }
+    if (ns) {
+        cql_pr_attr_uri(ct, "index", ns,
+                        cn->u.st.index, "serverChoice",
+                        pr, client_data, 16);
+    }
+    if (cn->u.st.modifiers)
+    {
+        struct cql_node *mod = cn->u.st.modifiers;
+        for (; mod; mod = mod->u.st.modifiers)
+        {
+            cql_pr_attr(ct, "relationModifier", mod->u.st.index, 0,
+                        pr, client_data, 20);
+        }
+    }
 
     (*pr)("\"", client_data);
     for (i = 0; i<length; i++)
@@ -442,7 +472,7 @@ void emit_wordlist(cql_transform_t ct,
             (*pr)("@", client_data);
             (*pr)(op, client_data);
             (*pr)(" ", client_data);
-            emit_term(ct, last_term, last_length, pr, client_data);
+            emit_term(ct, cn, last_term, last_length, pr, client_data);
         }
         last_term = cp0;
         if (cp1)
@@ -452,7 +482,7 @@ void emit_wordlist(cql_transform_t ct,
         cp0 = cp1;
     }
     if (last_term)
-        emit_term(ct, last_term, last_length, pr, client_data);
+        emit_term(ct, cn, last_term, last_length, pr, client_data);
 }
 
 void cql_transform_r(cql_transform_t ct,
@@ -501,22 +531,8 @@ void cql_transform_r(cql_transform_t ct,
         else
             cql_pr_attr(ct, "relation", cn->u.st.relation, "eq",
                         pr, client_data, 19);
-        if (cn->u.st.modifiers)
-        {
-            struct cql_node *mod = cn->u.st.modifiers;
-            for (; mod; mod = mod->u.st.modifiers)
-            {
-                cql_pr_attr(ct, "relationModifier", mod->u.st.index, 0,
-                            pr, client_data, 20);
-            }
-        }
         cql_pr_attr(ct, "structure", cn->u.st.relation, 0,
                     pr, client_data, 24);
-        if (ns) {
-            cql_pr_attr_uri(ct, "index", ns,
-                            cn->u.st.index, "serverChoice",
-                            pr, client_data, 16);
-        }
         if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "all"))
         {
             emit_wordlist(ct, cn, pr, client_data, "and");
@@ -527,7 +543,7 @@ void cql_transform_r(cql_transform_t ct,
         }
         else
         {
-            emit_term(ct, cn->u.st.term, strlen(cn->u.st.term),
+            emit_term(ct, cn, cn->u.st.term, strlen(cn->u.st.term),
                       pr, client_data);
         }
         break;
