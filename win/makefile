@@ -1,13 +1,11 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.111 2006-06-07 14:25:43 adam Exp $
+# $Id: makefile,v 1.112 2006-07-05 13:05:32 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
 
-###########################################################
-############### Parameters 
-###########################################################
+# Parameters 
 
 DEBUG=0   # 0 for release, 1 for debug
 
@@ -59,11 +57,7 @@ nsishelp:
 
 generate: generated_files
 
-
-
-###########################################################
-############### Directories
-###########################################################
+# Directories
 # The current directory is supposed to be something like
 # ..../yaz/win, everything is relative to that
 ROOTDIR=..   # The home of yaz
@@ -91,16 +85,14 @@ TESTDIR=$(ROOTDIR)\TEST
 TMPDIR=$(ROOTDIR)\win\tmp
 TMP=$(TMPDIR)
 
-###########################################################
-############### Targets - what to make
-###########################################################
+# Targets - what to make
 
 !if $(DEBUG)
 DLL=$(BINDIR)\yazd.dll
-IMPLIB=$(LIBDIR)\yazd.lib
+YAZ_IMPLIB=$(LIBDIR)\yazd.lib
 !else
 DLL=$(BINDIR)\yaz.dll
-IMPLIB=$(LIBDIR)\yaz.lib
+YAZ_IMPLIB=$(LIBDIR)\yaz.lib
 !endif
 
 CLIENT=$(BINDIR)\yaz-client.exe
@@ -137,9 +129,7 @@ testprog: $(TSTLOG)
 
 htmlhelp: $(DOCDIR)\htmlhelp.chm
 
-###########################################################
-############### Compiler and linker options 
-###########################################################
+# Modules and conditional flags, etc
 
 !if $(HAVE_ICONV)
 ICONV_DEF= \
@@ -246,10 +236,7 @@ LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
            advapi32.lib uuid.lib wsock32.lib  advapi32.lib \
            $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
-COMMON_LNK_OPTIONS= /nologo \
-                    /subsystem:windows \
-                    /machine:i386 \
-			  /incremental:no
+COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
 
 DEBUG_LNK_OPTIONS= /debug 
 
@@ -257,8 +244,6 @@ RELEASE_LNK_OPTIONS=
 
 DLL_LINK_OPTIONS= /dll  
 CLIENT_LINK_OPTIONS = /subsystem:console  
-SERVER_LINK_OPTIONS = -lib 
-ZTEST_LINK_OPTIONS = /subsystem:console  
 
 COMMON_TCL_OPTIONS= ..\util\yaz-asncomp -I$(INCLDIR) -i yaz
 
@@ -278,10 +263,13 @@ LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
 TCLOPT= $(COMMON_TCL_OPTIONS)
 !endif
 
+LINK_PROGRAM = $(LINK) $(LNKOPT) \
+		$(CLIENT_LINK_OPTIONS) $(LINK_LIBS) $(YAZ_IMPLIB)
 
-###########################################################
-###############  Source and object modules
-###########################################################
+LINK_DLL = $(LINK) $(LNKOPT) \
+		$(LINK_LIBS) $(DLL_LINK_OPTIONS)
+
+# Source and object modules
 
 # Note: Ordinary source files are not specified here at 
 # all, make finds them in suitable dirs. The object modules
@@ -485,10 +473,7 @@ YAZ_OBJS =\
 
 DLL_OBJS= $(YAZ_OBJS)
 
-###########################################################
-############### Generated C and H files
-#####
-######################################################
+# Generated C and H files
 
 Z3950_C_DIR=$(SRCDIR)   
 ILL_C_DIR=$(SRCDIR)
@@ -601,9 +586,7 @@ generated_files: \
 	$(GENERATED_H_FILES) \
 	$(GENERATED_C_FILES) \
 
-###########################################################
-############### Compiling 
-###########################################################
+# Compiling 
 
 # Note: This defines where to look for the necessary
 # source files. Funny way of doing it, but it works.
@@ -633,7 +616,7 @@ generated_files: \
 {$(TESTDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
-############### ASN-generated files
+# ASN-generated files
 
 !if $(HAVE_TCL)
 
@@ -712,11 +695,8 @@ $(SRCDIR)\cql.c: $(SRCDIR)\cql.y
 
 !endif
 
-###########################################################
-############### Resources
-###########################################################
-
-### The RC compiler (resource files)
+# Resources
+# The RC compiler (resource files)
 RSC=rc.exe
 COMMON_RC_OPTIONS= /l 0x406 /i"$(ROOTDIR)" 
 DEBUG_RC_OPTIONS=/d "_DEBUG"
@@ -734,233 +714,122 @@ RSOPT=/d_NDEBUG
 $(YAZ_RES): $(YAZ_RC)
 	$(RSC) $(RSOPT) /fo"$(YAZ_RES)" $(YAZ_RC) 
 
-###########################################################
-############### Linking
-###########################################################
+# Linking
 
-$(DLL) $(IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
-	@echo Linking the dll  $(DLL)
-	$(LINK) @<<
-		$(LNKOPT) 
-		$(LINK_LIBS) 
-		$(DLL_LINK_OPTIONS)
-		$(DLL_OBJS)
-		$(YAZ_RES)
-		/out:$(DLL) 
-		/implib:"$(IMPLIB)"
-		/map:"$(LIBDIR)\yaz.map"  
-<<
+$(DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
+	$(LINK_DLL) \
+		$(DLL_OBJS) \
+		$(YAZ_RES) \
+		/out:$(DLL) \
+		/implib:"$(YAZ_IMPLIB)" \
+		/map:"$(LIBDIR)\yaz.map" 
 
-$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) 
-	@echo Linking $(CLIENT)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_CLIENT_OBJS)
-		/map:"$(LIBDIR)\yaz-client.map"
+$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_CLIENT_OBJS) \
+		/map:"$(LIBDIR)\yaz-client.map" \
 		/out:$(CLIENT)
-<<
 
-$(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) 
-	@echo Linking $(ZOOMSH)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMSH_OBJS)
-		/map:"$(LIBDIR)\zoomsh.map"
+$(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMSH_OBJS) \
+		/map:"$(LIBDIR)\zoomsh.map" \
 		/out:$(ZOOMSH)
-<<
 
-$(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS) 
-	@echo Linking $(ZOOMTST1)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST1_OBJS)
-		/map:"$(LIBDIR)\zoomtst1.map"
+$(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST1_OBJS) \
+		/map:"$(LIBDIR)\zoomtst1.map" \
 		/out:$(ZOOMTST1)
-<<
 
-$(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS) 
-	@echo Linking $(ZOOMTST2)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST2_OBJS)
-		/map:"$(LIBDIR)\zoomtst2.map"
+$(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST2_OBJS) \
+		/map:"$(LIBDIR)\zoomtst2.map" \
 		/out:$(ZOOMTST2)
-<<
 
-$(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS) 
-	@echo Linking $(ZOOMTST3)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST3_OBJS)
-		/map:"$(LIBDIR)\zoomtst3.map"
+$(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST3_OBJS) \
+		/map:"$(LIBDIR)\zoomtst3.map" \
 		/out:$(ZOOMTST3)
-<<
 
-$(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS) 
-	@echo Linking $(ZOOMTST4)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST4_OBJS)
-		/map:"$(LIBDIR)\zoomtst4.map"
+$(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST4_OBJS) \
+		/map:"$(LIBDIR)\zoomtst4.map" \
 		/out:$(ZOOMTST4)
-<<
 
-$(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS) 
-	@echo Linking $(ZOOMTST5)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST5_OBJS)
-		/map:"$(LIBDIR)\zoomtst5.map"
+$(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST5_OBJS) \
+		/map:"$(LIBDIR)\zoomtst5.map" \
 		/out:$(ZOOMTST5)
-<<
 
-$(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS) 
-	@echo Linking $(ZOOMTST6)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST6_OBJS)
-		/map:"$(LIBDIR)\zoomtst6.map"
+$(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST6_OBJS) \
+		/map:"$(LIBDIR)\zoomtst6.map" \
 		/out:$(ZOOMTST6)
-<<
 
-$(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS) 
-	@echo Linking $(ZOOMTST7)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST7_OBJS)
-		/map:"$(LIBDIR)\zoomtst7.map"
+$(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST7_OBJS) \
+		/map:"$(LIBDIR)\zoomtst7.map" \
 		/out:$(ZOOMTST7)
-<<
 
-$(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS) 
-	@echo Linking $(ZOOMTST8)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST8_OBJS)
-		/map:"$(LIBDIR)\zoomtst8.map"
+$(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST8_OBJS) \
+		/map:"$(LIBDIR)\zoomtst8.map" \
 		/out:$(ZOOMTST8)
-<<
 
 
-$(ZOOMTST9) : "$(BINDIR)" $(YAZ_ZOOMTST9_OBJS) 
-	@echo Linking $(ZOOMTST9)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_ZOOMTST9_OBJS)
-		/map:"$(LIBDIR)\zoomtst9.map"
+$(ZOOMTST9) : "$(BINDIR)" $(YAZ_ZOOMTST9_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST9_OBJS) \
+		/map:"$(LIBDIR)\zoomtst9.map" \
 		/out:$(ZOOMTST9)
-<<
 
-$(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS) 
-	@echo Linking $(CQL2PQF)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_CQL2PQF_OBJS)
-		/map:"$(LIBDIR)\cql2pqf.map"
+$(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_CQL2PQF_OBJS) \
+		/map:"$(LIBDIR)\cql2pqf.map" \
 		/out:$(CQL2PQF)
-<<
 
-$(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS) 
-	@echo Linking $(CQL2XCQL)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(YAZ_CQL2XCQL_OBJS)
-		/map:"$(LIBDIR)\cql2xcql.map"
+$(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_CQL2XCQL_OBJS) \
+		/map:"$(LIBDIR)\cql2xcql.map" \
 		/out:$(CQL2XCQL)
-<<
 
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
-	@echo Linking $(ZTEST)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(ZTEST_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		shell32.lib
-		$(IMPLIB)
-		$(ZTEST_OBJS) 
-		/implib:"$(LIBDIR)\yaz-ztest.lib"
-		/map:"$(LIBDIR)\yaz-ztest.map"
+	$(LINK_PROGRAM) \
+		$(ZTEST_OBJS) \
+		/implib:"$(LIBDIR)\yaz-ztest.lib" \
+		/map:"$(LIBDIR)\yaz-ztest.map" \
 		/out:$(ZTEST) 
-<<
 
 $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(DLL)
-	@echo Linking $(YAZ_MARCDUMP)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		shell32.lib
-		$(IMPLIB)
-		$(YAZ_MARCDUMP_OBJS) 
-		/map:"$(LIBDIR)\yaz-marcdump.map"
+	$(LINK_PROGRAM) \
+		$(YAZ_MARCDUMP_OBJS) \
+		/map:"$(LIBDIR)\yaz-marcdump.map" \
 		/out:$(YAZ_MARCDUMP) 
-<<
 
 
-$(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) 
-	@echo Linking $(TSTLOG)
-	$(LINK) @<<
-        $(LNKOPT) 
-		$(CLIENT_LINK_OPTIONS)
-		$(LINK_LIBS) 
-		$(IMPLIB)
-		$(TSTLOG_OBJS)
-		/map:"$(LIBDIR)\tstlog.map"
+$(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(TSTLOG_OBJS) \
+		/map:"$(LIBDIR)\tstlog.map" \
 		/out:$(TSTLOG)
-<<
+
+# Other rules
 
 $(DOCDIR)\htmlhelp.chm: $(DOCDIR)\htmlhelp.hhp
 	@cd $(DOCDIR)
 	-$(HHC) htmlhelp.hhp
 	@cd $(WINDIR)
 
-# note that this links a lib, so it uses completely different options.
-
-###########################################################
-############### Special operations
-###########################################################
-
-
-############## clean
 clean:
 	-del $(BINDIR)\*.exe
 	-del $(BINDIR)\*.dll
@@ -988,16 +857,14 @@ realclean: clean
 # the _H_ files work only on sets that have just one file.
 # Z3950_H_FILES had to be spelled out. One more point for MS!
 
-########### check directories and create if needed
+# check directories and create if needed
 dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR)
 
 $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
 	if not exist "$@/$(NUL)" mkdir "$@"
 
 
-###########################################################
-############### Explicit dependencies
-###########################################################
+# Explicit dependencies
 
 # force recompilation of everything, if makefile changed
 
