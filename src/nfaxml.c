@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfaxml.c,v 1.3 2006-07-06 07:45:07 adam Exp $ 
+ *  $Id: nfaxml.c,v 1.4 2006-07-06 08:26:11 adam Exp $ 
  */
 
 /**
@@ -29,7 +29,7 @@
  */
 yaz_nfa *yaz_nfa_parse_xml_doc(void *xmlDocPtr)
 {
-    xmlDocPtr doc = (xmlDocPtr) *xmlDocPtr;
+    xmlDocPtr doc = (xmlDocPtr) xmlDocPtr;
     if (!doc)
         return 0;
 
