@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.89 2006-07-06 14:16:00 marc Exp $
+ * $Id: seshigh.c,v 1.90 2006-07-06 14:54:29 marc Exp $
  */
 /**
  * \file seshigh.c
@@ -1395,17 +1395,24 @@ static void srw_bend_scan(association *assoc, request *req,
             querytype = "Unknown";
             querystr = "";
         }
-        wrbuf_printf(wr, "SRWScan %d+%d",
+
+        wrbuf_printf(wr, "SRWScan ");
+        wrbuf_printf(wr, srw_req->database);
+        wrbuf_printf(wr, " ");
+
+        if (srw_res->num_diagnostics)
+            wrbuf_printf(wr, "ERROR %s ", srw_res->diagnostics[0].uri);
+        else
+            wrbuf_printf(wr, "OK - ");
+
+        wrbuf_printf(wr, "%d+%d 1 ",
                      (srw_req->responsePosition ? 
                       *srw_req->responsePosition : 1),
                      (srw_req->maximumTerms ?
                       *srw_req->maximumTerms : 1));
-        if (srw_res->num_diagnostics)
-            wrbuf_printf(wr, " ERROR %s", srw_res->diagnostics[0].uri);
-        else
-            wrbuf_printf(wr, " OK -");
-        wrbuf_printf(wr, " %s: %s", querytype, querystr);
-        yaz_log(log_request, "%s", wrbuf_buf(wr) );
+        /* there is no step size in SRU/W ??? */
+        wrbuf_printf(wr, "%s: %s ", querytype, querystr);
+        yaz_log(log_request, "%s ", wrbuf_buf(wr) );
         wrbuf_free(wr, 1);
     }
 
@@ -2290,7 +2297,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.89 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.90 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2765,8 +2772,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     {
         int i;
         WRBUF wr = wrbuf_alloc();
-	/* int num_databaseNames;
-           Z_DatabaseName **databaseNames; */
+
         for (i = 0 ; i < req->num_databaseNames; i++){
             if (i)
                 wrbuf_printf(wr, ",");
@@ -3071,19 +3077,31 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     }
     if (log_request)
     {
+        int i;
         WRBUF wr = wrbuf_alloc();
+
+        for (i = 0 ; i < req->num_databaseNames; i++){
+            if (i)
+                wrbuf_printf(wr, ",");
+            wrbuf_printf(wr, req->databaseNames[i]);
+        }
+        wrbuf_printf(wr, " ");
+        
         if (bsrr->errcode)
             wr_diag(wr, bsrr->errcode, bsrr->errstring);
         else if (*res->scanStatus == Z_Scan_success)
-            wrbuf_printf(wr, "OK");
+            wrbuf_printf(wr, "OK - ");
         else
-            wrbuf_printf(wr, "Partial");
+            wrbuf_printf(wr, "Partial - ");
 
-        wrbuf_printf(wr, " %d+%d %d ",
+        wrbuf_printf(wr, "%d+%d %d ",
                      (req->preferredPositionInResponse ?
                       *req->preferredPositionInResponse : 1),
                      *req->numberOfTermsRequested,
-                     (res->stepSize ? *res->stepSize : 0));
+                     (res->stepSize ? *res->stepSize : 1));
+        /* TODO - make this print out RPN: or CQL: in the beginning!! */
+        /* maybe wrbuf_printf(wr, "%s: %s ", querytype, querystr); 
+           see line 1415 */
         yaz_scan_to_wrbuf(wr, req->termListAndStartPoint, 
                           bsrr->attributeset);
         yaz_log(log_request, "Scan %s", wrbuf_buf(wr) );
