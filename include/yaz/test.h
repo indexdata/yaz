@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.h,v 1.6 2006-05-10 12:52:17 heikki Exp $
+ * $Id: test.h,v 1.7 2006-07-06 13:10:29 heikki Exp $
  */
 
 /** \file test.h
@@ -50,12 +50,20 @@ int yaz_test_get_verbosity();
 /** \brief Macro to terminate the system (end of main, normally) */
 #define YAZ_CHECK_TERM yaz_check_term1(); return 0
 
+/** \brief Macro to enable and initialize the yaz_log(start of main) */
+#define YAZ_CHECK_LOG() yaz_check_init_log(argv[0])
 
 YAZ_BEGIN_CDECL
+
 /** \brief used by macro. Should not be called directly */
 YAZ_EXPORT void yaz_check_init1(int *argc, char ***argv);
+
 /** \brief used by macro. Should not be called directly */
 YAZ_EXPORT void yaz_check_term1(void);
+
+/** \brief used by macro. Should not be called directly */
+YAZ_EXPORT void yaz_check_init_log(char *argv0);
+
 /** \brief used by macro. Should not be called directly */
 YAZ_EXPORT void yaz_check_print1(int type, const char *file, int line,
                                  const char *expr);

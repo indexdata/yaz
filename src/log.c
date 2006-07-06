@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.36 2006-06-30 11:09:44 adam Exp $
+ * $Id: log.c,v 1.37 2006-07-06 13:10:31 heikki Exp $
  */
 
 /**
@@ -187,6 +187,7 @@ static void rotate_log(const char *cur_fname)
 #endif
 }
 
+
 void yaz_log_init_level(int level)
 {
     init_mutex();
@@ -274,7 +275,7 @@ void log_event_end(void (*func)(int, const char *, void *), void *info)
      end_hook_info = info;
 }
 
-static void yaz_log_open_check(struct tm *tm, int force)
+static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
 {
     char new_filename[512];
     static char cur_filename[512] = "";
@@ -301,14 +302,14 @@ static void yaz_log_open_check(struct tm *tm, int force)
     if (force && yaz_file_type == use_file && *cur_filename)
     {
         yaz_log_close();
-        yaz_global_log_file = fopen(cur_filename, "a");
+        yaz_global_log_file = fopen(cur_filename, filemode);
         if (l_level < 0) l_level = default_log_level();
         if (l_level & YLOG_FLUSH)
             setvbuf(yaz_global_log_file, 0, _IONBF, 0);
     }
 }
 
-void yaz_log_reopen()
+static void yaz_log_do_reopen(const char *filemode)
 {
     time_t cur_time = time(0);
 #if HAVE_LOCALTIME_R
@@ -323,9 +324,22 @@ void yaz_log_reopen()
 #else
     tm = localtime(&cur_time);
 #endif
-    yaz_log_open_check(tm, 1);
+    yaz_log_open_check(tm, 1, filemode );
     nmem_mutex_leave(log_mutex);
 }
+
+
+void yaz_log_reopen()
+{
+    yaz_log_do_reopen("a");
+}
+
+void yaz_log_trunc()
+{
+    yaz_log_do_reopen("w");
+}
+
+
 
 static void yaz_strftime(char *dst, size_t sz,
                          const char *fmt, const struct tm *tm)
@@ -374,7 +388,7 @@ static void yaz_log_to_file(int level, FILE *file, const char *buf)
     tm = localtime(&ti);
 #endif
     
-    yaz_log_open_check(tm, 0);  
+    yaz_log_open_check(tm, 0, "a");  
     file = yaz_log_file(); /* file may change in yaz_log_open_check */
 
     if (file)

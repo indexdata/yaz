@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfaxml.h,v 1.3 2006-07-06 07:45:07 adam Exp $
+ *  $Id: nfaxml.h,v 1.4 2006-07-06 13:10:29 heikki Exp $
  */
 
 /**
@@ -35,6 +35,10 @@
 #ifndef YAZ_NFA_XML_H
 #define YAZ_NFA_XML_H
 
+#if YAZ_HAVE_XML2
+
+#include <libxml/parser.h>
+
 #include <yaz/yconfig.h>
 #include <yaz/log.h>
 #include <yaz/nfa.h>
@@ -50,11 +54,15 @@ YAZ_BEGIN_CDECL
  *
  * It is up to the caller to destroy the nfa when done.
  *
+ * Does not expand XIncludes.
+ *
  * In case of errors, returns a null pointer.  You can then
- * call xmlGetLastError() to get the details of the error. 
+ * call xmlGetLastError() to get the details of the error,
+ * if you have a recent enough libxml2. Those are already 
+ * logged in yazlog.
  *
  */
-yaz_nfa *yaz_nfa_parse_xml_doc(void *xmlDocPtr);
+yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc);
 
 
 /** \brief Parse the NFA from a file 
@@ -66,16 +74,40 @@ yaz_nfa *yaz_nfa_parse_xml_doc(void *xmlDocPtr);
  *
  * It is up to the caller to destroy the nfa when done.
  *
- * In case of errors, error_info will be filled with
- * suitable diagnostics. It may be null, if you don't
- * care.
+ * This routine also expands XIncludes.
+ * 
+ * In case of errors, returns a null pointer.  You can then
+ * call xmlGetLastError() to get the details of the error,
+ * if you have a recent enough libxml2. Those are already 
+ * logged in yazlog.
  *
  */
 yaz_nfa *yaz_nfa_parse_xml_file(const char *filepath);
 
 
-YAZ_END_CDECL
+/** \brief Parse the NFA from a memory buffer
+ *
+ * \param filepath path to the xml file to parse
+ * \param error_info will be filled in case of errors
+ * 
+ * \returns either the NFA, or null in case of errors 
+ *
+ * It is up to the caller to destroy the nfa when done.
+ *
+ * Does not expand XIncludes.
+ *
+ * In case of errors, returns a null pointer.  You can then
+ * call xmlGetLastError() to get the details of the error,
+ * if you have a recent enough libxml2. Those are already 
+ * logged in yazlog.
+ *
+ */
+yaz_nfa *yaz_nfa_parse_xml_memory(const char *xmlbuff);
 
+
+YAZ_END_CDECL
+   
+#endif /* YAZ_HAVE_XML2 */
 #endif /* YAZ_NFA_XML_H */
 
 /*

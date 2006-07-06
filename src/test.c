@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.7 2006-05-10 12:52:28 heikki Exp $
+ * $Id: test.c,v 1.8 2006-07-06 13:10:31 heikki Exp $
  */
 
 /** \file test.c
@@ -16,14 +16,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <yaz/test.h>
+#include <yaz/log.h>
 
 static FILE *test_fout = 0; /* can't use '= stdout' on some systems */
 static int test_total = 0;
 static int test_failed = 0;
 static int test_verbose = 1;
 static char *test_prog = 0;
+static int log_tests = 0; 
 
 static FILE *get_file()
 {
@@ -102,6 +105,18 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
     *argv_p += i;
 }
 
+/** \brief  Initialize the log system */
+void yaz_check_init_log(char *argv0)
+{
+    char logfilename[2048];
+    log_tests = 1; 
+    sprintf(logfilename,"%s.log", progname(argv0) );
+    unlink(logfilename);
+    yaz_log_init_file(logfilename);
+    yaz_log_trunc();
+
+}
+
 void yaz_check_term1(void)
 {
     /* summary */
@@ -140,6 +155,7 @@ void yaz_check_print1(int type, const char *file, int line,
                       const char *expr)
 {
     const char *msg = "unknown";
+    int printit=1;
 
     test_total++;
     switch(type)
@@ -148,16 +164,22 @@ void yaz_check_print1(int type, const char *file, int line,
         test_failed++;
         msg = "FAILED";
         if (test_verbose < 1)
-            return;
+            printit=0;
         break;
     case YAZ_TEST_TYPE_OK:
         msg = "ok";
         if (test_verbose < 3)
-            return;
+            printit=0;
         break;
     }
-    fprintf(get_file(), "%s:%d %s: ", file, line, msg);
-    fprintf(get_file(), "%s\n", expr);
+    if (printit) {
+        fprintf(get_file(), "%s:%d %s: ", file, line, msg);
+        fprintf(get_file(), "%s\n", expr);
+    }
+    if (log_tests) {
+        yaz_log(YLOG_LOG, "%s:%d %s: ", file, line, msg);
+        yaz_log(YLOG_LOG, "%s\n", expr);
+    }
 }
 
 

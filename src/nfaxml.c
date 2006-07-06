@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfaxml.c,v 1.6 2006-07-06 10:17:53 adam Exp $ 
+ *  $Id: nfaxml.c,v 1.7 2006-07-06 13:10:31 heikki Exp $ 
  */
 
 /**
@@ -14,7 +14,7 @@
 
 #include <string.h>
 
-#include <libxml/parser.h>
+/* #include <libxml/parser.h> */
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
 
@@ -27,33 +27,16 @@
 
 /** \brief Parse the NFA from a XML document 
  */
-yaz_nfa *yaz_nfa_parse_xml_doc(void *p)
+yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc)
 {
-    xmlDocPtr doc = (xmlDocPtr) p;
+    libxml2_error_to_yazlog(YLOG_FATAL, "yaz_nfa_parse_xml_file");
+
     if (!doc)
         return 0;
 
     return 0;
 }
 
-/** \brief Log XML errors in yaz_log
- *
- * Disabled because xmlErrorPtr does not exist for older Libxml2's
- */
-#if 0
-static void log_xml_error(int errlevel, char *msg) {
-    xmlErrorPtr e=xmlGetLastError();
-    if (!e)  /* no error happened */
-        return;
-    if (!errlevel)
-        errlevel=YLOG_FATAL;
-    yaz_log(errlevel,"%s %d/%d: %s:%d: '%s' ",
-            msg, e->domain, e->code, e->file, e->line, e->message);
-    if (e->str1 || e->str2 || e->str3 )
-        yaz_log(errlevel,"extra info: '%s' '%s' '%s' %d %d",
-            e->str1, e->str2, e->str3, e->int1, e->int2 );
-}
-#endif
 
 /** \brief Parse the NFA from a file 
  */
@@ -70,6 +53,16 @@ yaz_nfa *yaz_nfa_parse_xml_file(const char *filepath) {
     if (nSubst==-1) {
         return 0;
     }
+    return yaz_nfa_parse_xml_doc(doc);
+}
+
+/** \brief Parse the NFA from a memory buffer
+ */
+yaz_nfa *yaz_nfa_parse_xml_memory(const char *xmlbuff) {
+    int nSubst;
+
+    libxml2_error_to_yazlog(YLOG_FATAL, "yaz_nfa_parse_xml_memory");
+    xmlDocPtr doc = xmlParseMemory(xmlbuff, strlen(xmlbuff));
     return yaz_nfa_parse_xml_doc(doc);
 }
 

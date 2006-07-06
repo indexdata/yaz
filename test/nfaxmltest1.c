@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfaxmltest1.c,v 1.2 2006-07-06 10:17:55 adam Exp $
+ *  $Id: nfaxmltest1.c,v 1.3 2006-07-06 13:10:31 heikki Exp $
  *
  */
 
@@ -17,6 +17,7 @@
 #include <libxml/parser.h>
 
 
+/** \brief  Test parsing of a minimal, valid xml string */
 void test1() {
     char *xmlstr="<ruleset> "
                  "<rule> "
@@ -24,18 +25,34 @@ void test1() {
                  "  <tostring>bar</tostring> "
                  "</rule>"
                  "</ruleset>";
-    xmlDocPtr doc = xmlParseMemory(xmlstr, strlen(xmlstr));
-    YAZ_CHECK(doc);
-    if (!doc)
-        return;
+    yaz_nfa *nfa=yaz_nfa_parse_xml_memory(xmlstr);
+    YAZ_CHECK(nfa);
 }
+
+
+
+/** \brief  Test parsing of a minimal, invalid xml string */
+void test2() {
+    char *xmlstr="<ruleset> "
+                 "<rule> "
+                 "  <fromstring>foo</fromstring> "
+                 "  <tostring>bar</tostring> "
+                 "</rule>";
+                 /* missing "</ruleset>" */
+    yaz_log(YLOG_LOG,"Parsing bad xml, expecting errors:");
+    yaz_nfa *nfa=yaz_nfa_parse_xml_memory(xmlstr);
+    YAZ_CHECK(!nfa);
+}
+
 
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+    YAZ_CHECK_LOG();
     nmem_init ();
 
     test1();
+    test2();
 
     nmem_exit ();
     YAZ_CHECK_TERM;
