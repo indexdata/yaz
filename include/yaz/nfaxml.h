@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfaxml.h,v 1.1 2006-07-04 12:59:56 heikki Exp $
+ *  $Id: nfaxml.h,v 1.2 2006-07-06 06:08:19 adam Exp $
  */
 
 /**
@@ -39,12 +39,7 @@
 #include <yaz/log.h>
 #include <yaz/nfa.h>
 
-#if HAVE_XML2
-#include <libxml/parser.h>
-
 YAZ_BEGIN_CDECL
-
- 
 
 /** \brief Parse the NFA from a XML document 
  * 
@@ -76,12 +71,10 @@ yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc);
  * care.
  *
  */
-yaz_nfa *yaz_nfa_parse_xml_file(char *filepath);
+yaz_nfa *yaz_nfa_parse_xml_file(const char *filepath);
 
 
 YAZ_END_CDECL
-
-#endif /* HAVE_XML2 */
 
 #endif /* YAZ_NFA_XML_H */
 
