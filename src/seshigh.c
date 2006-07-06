@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.88 2006-07-06 10:17:53 adam Exp $
+ * $Id: seshigh.c,v 1.89 2006-07-06 14:16:00 marc Exp $
  */
 /**
  * \file seshigh.c
@@ -1119,6 +1119,8 @@ static void srw_bend_search(association *assoc, request *req,
             break;
         }
         wrbuf_printf(wr, "SRWSearch ");
+        wrbuf_printf(wr, srw_req->database);
+        wrbuf_printf(wr, " ");
         if (srw_res->num_diagnostics)
             wrbuf_printf(wr, "ERROR %s", srw_res->diagnostics[0].uri);
         else if (*http_code != 200)
@@ -2288,7 +2290,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.88 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.89 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2761,7 +2763,17 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
     if (log_request)
     {
+        int i;
         WRBUF wr = wrbuf_alloc();
+	/* int num_databaseNames;
+           Z_DatabaseName **databaseNames; */
+        for (i = 0 ; i < req->num_databaseNames; i++){
+            if (i)
+                wrbuf_printf(wr, ",");
+            wrbuf_printf(wr, req->databaseNames[i]);
+        }
+        wrbuf_printf(wr, " ");
+        
         if (bsrt->errcode)
             wrbuf_printf(wr, "ERROR %d", bsrt->errcode);
         else
