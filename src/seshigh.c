@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.90 2006-07-06 14:54:29 marc Exp $
+ * $Id: seshigh.c,v 1.91 2006-07-06 15:06:12 marc Exp $
  */
 /**
  * \file seshigh.c
@@ -496,7 +496,7 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_S
         Z_External *ce;
         bend_initresult *binitres;
 
-        yaz_log(YLOG_LOG, "srw_bend_init config=%s", cb->configname);
+        yaz_log(log_requestdetail, "srw_bend_init config=%s", cb->configname);
         assoc_init_reset(assoc);
         
         assoc->maximumRecordSize = 3000000;
@@ -2297,7 +2297,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.90 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.91 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
