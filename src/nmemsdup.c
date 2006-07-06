@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmemsdup.c,v 1.7 2006-05-03 13:04:46 adam Exp $
+ * $Id: nmemsdup.c,v 1.8 2006-07-06 10:17:53 adam Exp $
  */
 
 /**
@@ -16,7 +16,7 @@
 
 #include <string.h>
 #include <yaz/nmem.h>
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/tree.h>
 #endif
 
@@ -89,7 +89,7 @@ void nmem_strsplit(NMEM nmem, const char *delim, const char *dstr,
     }
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 char *nmem_text_node_cdata(const void *ptr_cdata, NMEM nmem)
 {
     char *cdata;

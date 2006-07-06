@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.10 2006-05-09 13:39:47 adam Exp $
+ * $Id: retrieval.c,v 1.11 2006-07-06 10:17:53 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -21,7 +21,7 @@
 #include <yaz/tpath.h>
 #include <yaz/proto.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>

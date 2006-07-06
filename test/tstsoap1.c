@@ -2,18 +2,18 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap1.c,v 1.6 2006-01-30 16:58:06 adam Exp $
+ * $Id: tstsoap1.c,v 1.7 2006-07-06 10:17:55 adam Exp $
  */
 
 #include <stdlib.h>
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #endif
 #include <yaz/test.h>
 
 void tst()
 {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     xmlChar *buf_out;
     int len_out;
     xmlDocPtr doc;
@@ -38,14 +38,14 @@ void tst()
 #endif
 
 
-/* HAVE_XML2 */
+/* YAZ_HAVE_XML2 */
 #endif
 }
 
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     LIBXML_TEST_VERSION;
 #endif
     tst();

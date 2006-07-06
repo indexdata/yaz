@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.80 2006-06-16 12:34:32 adam Exp $
+ * $Id: zoom-c.c,v 1.81 2006-07-06 10:17:54 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -152,7 +152,7 @@ static void set_dset_error (ZOOM_connection c, int error,
                 addinfo2 ? addinfo2 : "");
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static void set_HTTP_error (ZOOM_connection c, int error,
                             const char *addinfo, const char *addinfo2)
 {
@@ -1008,7 +1008,7 @@ static zoom_ret do_connect (ZOOM_connection c)
 
     if (c->cs && c->cs->protocol == PROTO_HTTP)
     {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         const char *path = 0;
 
         c->proto = PROTO_HTTP;
@@ -1196,7 +1196,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
         ZOOM_options_get(c->options, "implementationName"),
         odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.80 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.81 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -1274,7 +1274,7 @@ static zoom_ret ZOOM_connection_send_init (ZOOM_connection c)
     return send_APDU (c, apdu);
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
 {
     Z_GDU *gdu;
@@ -1305,7 +1305,7 @@ static zoom_ret send_srw (ZOOM_connection c, Z_SRW_PDU *sr)
 }
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
     int i;
@@ -3406,7 +3406,7 @@ static void recv_apdu (ZOOM_connection c, Z_APDU *apdu)
     }
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static void handle_srw_response(ZOOM_connection c,
                                 Z_SRW_searchRetrieveResponse *res)
 {
@@ -3485,7 +3485,7 @@ static void handle_srw_response(ZOOM_connection c,
 }
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
     int ret = -1;
@@ -3605,7 +3605,7 @@ static int do_read (ZOOM_connection c)
             recv_apdu (c, gdu->u.z3950);
         else if (gdu->which == Z_GDU_HTTP_Response)
         {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
             handle_http (c, gdu->u.HTTP_Response);
 #else
             set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);

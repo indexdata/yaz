@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.13 2006-03-01 23:24:25 adam Exp $
+ * $Id: soap.c,v 1.14 2006-07-06 10:17:54 adam Exp $
  */
 /**
  * \file soap.c
@@ -14,7 +14,7 @@
 
 #include <yaz/soap.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 

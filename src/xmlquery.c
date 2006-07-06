@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.9 2006-05-02 20:47:45 adam Exp $
+ * $Id: xmlquery.c,v 1.10 2006-07-06 10:17:54 adam Exp $
  */
 
 /** \file xmlquery.c
@@ -13,7 +13,7 @@
 #include <string.h>
 #include <assert.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
@@ -248,18 +248,17 @@ xmlNodePtr yaz_query2xml_cql(const char *cql, xmlNodePtr node)
     return 0;
 }
 
-void yaz_rpnquery2xml(const Z_RPNQuery *rpn, void *docp_void)
+void yaz_rpnquery2xml(const Z_RPNQuery *rpn, xmlDocPtr *docp)
 {
     Z_Query query;
 
     query.which = Z_Query_type_1;
     query.u.type_1 = (Z_RPNQuery *) rpn;
-    yaz_query2xml(&query, docp_void);
+    yaz_query2xml(&query, docp);
 }
 
-void yaz_query2xml(const Z_Query *q, void *docp_void)
+void yaz_query2xml(const Z_Query *q, xmlDocPtr *docp)
 {
-    xmlDocPtr *docp = (xmlDocPtr *) docp_void;
     xmlNodePtr top_node, q_node = 0, child_node = 0;
 
     assert(q);
@@ -777,7 +776,7 @@ void yaz_xml2query(const void *xmlnodep, Z_Query **query, ODR odr,
     yaz_xml2query_(xmlnodep, query, odr, error_code, addinfo);
 }
 
-/* HAVE_XML2 */
+/* YAZ_HAVE_XML2 */
 #endif
 
 /*

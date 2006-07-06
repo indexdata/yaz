@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.112 2006-07-05 13:05:32 adam Exp $
+# $Id: makefile,v 1.113 2006-07-06 10:17:56 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -151,7 +151,7 @@ iconv:
 
 !if $(HAVE_LIBXML2)
 LIBXML2_LIB="$(LIBXML2_DIR)\lib\libxml2.lib"
-LIBXML2_DEF=/D HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
+LIBXML2_DEF=/D YAZ_HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
 libxml2: $(BINDIR)\libxml2.dll $(BINDIR)\zlib1.dll
 
 $(BINDIR)\libxml2.dll:
@@ -162,7 +162,7 @@ $(BINDIR)\zlib1.dll:
 
 !else
 LIBXML2_LIB=
-LIBXML2_DEF=/D HAVE_XML2=0
+LIBXML2_DEF=/D YAZ_HAVE_XML2=0
 libxml2: 
 
 !endif
@@ -171,7 +171,7 @@ libxml2:
 LIBXSLT_LIB="$(LIBXSLT_DIR)\lib\libxslt.lib"
 LIBXSLT_DEF= \
 	/D HAVE_XSLTSAVERESULTTOSTRING=1 \
-	/D HAVE_XSLT=1 \
+	/D YAZ_HAVE_XSLT=1 \
 	/I"$(LIBXSLT_DIR)\include"
 libxslt: $(BINDIR)\libxslt.dll
 
@@ -180,7 +180,7 @@ $(BINDIR)\libxslt.dll:
 
 !else
 LIBXSLT_LIB=
-LIBXSLT_DEF=/D HAVE_XSLT=0
+LIBXSLT_DEF=/D YAZ_HAVE_XSLT=0
 libxslt: 
 !endif
 

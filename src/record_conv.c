@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.10 2006-05-26 15:07:08 adam Exp $
+ * $Id: record_conv.c,v 1.11 2006-07-06 10:17:53 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -22,15 +22,15 @@
 #include <yaz/nmem.h>
 #include <yaz/tpath.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
 #endif
-#if HAVE_EXSLT
+#if YAZ_HAVE_EXSLT
 #include <libexslt/exslt.h>
 #endif
 
@@ -64,7 +64,7 @@ enum YAZ_RECORD_CONV_RULE
 struct yaz_record_conv_rule {
     enum YAZ_RECORD_CONV_RULE which;
     union {
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
         struct {
             xsltStylesheetPtr xsp;
         } xslt;
@@ -89,7 +89,7 @@ static void yaz_record_conv_reset(yaz_record_conv_t p)
             if (r->u.marc.iconv_t)
                 yaz_iconv_close(r->u.marc.iconv_t);
         }
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
         else if (r->which == YAZ_RECORD_CONV_RULE_XSLT)
         {
             xsltFreeStylesheet(r->u.xslt.xsp);
@@ -112,7 +112,7 @@ yaz_record_conv_t yaz_record_conv_create()
     p->rules = 0;
     p->path = 0;
 
-#if HAVE_EXSLT
+#if YAZ_HAVE_EXSLT
     exsltRegisterAll(); 
 #endif
     yaz_record_conv_reset(p);
@@ -146,7 +146,7 @@ static struct yaz_record_conv_rule *add_rule(yaz_record_conv_t p,
 /** \brief parse 'xslt' conversion node */
 static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
 {
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
     struct _xmlAttr *attr;
     const char *stylesheet = 0;
 
@@ -334,7 +334,7 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const void *ptr_v)
             }
             else if (!strcmp((const char *) ptr->name, "exslt"))
             {
-#if HAVE_EXSLT
+#if YAZ_HAVE_EXSLT
                 if (conv_xslt(p, ptr))
                     return -1;
 #else
@@ -425,7 +425,7 @@ int yaz_record_conv_record(yaz_record_conv_t p,
             }
             yaz_marc_destroy(mt);
         }
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
         else if (r->which == YAZ_RECORD_CONV_RULE_XSLT)
         {
             xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
@@ -443,7 +443,7 @@ int yaz_record_conv_record(yaz_record_conv_t p,
                     xmlChar *out_buf = 0;
                     int out_len;
 
-#if HAVE_XSLTSAVERESULTTOSTRING
+#if YAZ_HAVE_XSLTSAVERESULTTOSTRING
                     xsltSaveResultToString(&out_buf, &out_len, res,
                                            r->u.xslt.xsp); 
 #else

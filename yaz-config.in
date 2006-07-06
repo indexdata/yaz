@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.24 2006-06-13 15:36:09 adam Exp $
+# $Id: yaz-config.in,v 1.25 2006-07-06 10:17:51 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -75,11 +75,13 @@ done
 
 lyaz="-lyaz"
 
+YAZINC="@YAZ_CONFIG_CFLAGS@"
+
 if test "$yaz_echo_source" = "yes"; then
     YAZBIN=${yaz_build_root}/bin
     YAZLIB="-L${yaz_build_root}/src/.libs $lyaz $yazextralibs"
     YAZLALIB="${yaz_build_root}/src/libyaz.la $yazextralibs"
-    YAZINC="-I${yaz_src_root}/include"
+    YAZINC="$YAZINC -I${yaz_src_root}/include"
     YAZCOMP=${yaz_src_root}/util/yaz-asncomp
 else
     YAZBIN=${yazprefix}/bin
@@ -91,14 +93,10 @@ else
 	YAZLIB="-L$yazprefix/lib $lyaz $yazextralibs"
     fi
     YAZLALIB=$YAZLIB
-    if test "$yazprefix" = "/usr"; then
-	YAZINC=
-    else
-	YAZINC=-I$yazprefix/include
+    if test "$yazprefix" != "/usr"; then
+	YAZINC="$YAZINC -I$yazprefix/include"
     fi
 fi
-
-YAZINC="$YAZINC @YAZ_CONF_CFLAGS@"
 
 if test "$lib_thread" = "yes"; then
     YAZINC="$YAZINC @THREAD_CFLAGS@"

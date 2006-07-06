@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.45 2006-05-07 14:31:30 adam Exp $
+ * $Id: srw.c,v 1.46 2006-07-06 10:17:54 adam Exp $
  */
 /**
  * \file srw.c
@@ -10,7 +10,7 @@
  */
 
 #include <yaz/srw.h>
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 

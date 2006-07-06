@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.30 2006-05-23 13:17:30 adam Exp $
+ * $Id: marcdisp.c,v 1.31 2006-07-06 10:17:53 adam Exp $
  */
 
 /**
@@ -26,7 +26,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #endif
@@ -181,7 +181,7 @@ void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
     }
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                    const xmlNode *ptr_data)
 {
@@ -206,7 +206,7 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
     mt->subfield_pp = &n->u.datafield.subfields;
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                 const char *indicator, size_t indicator_len)
 {
@@ -692,7 +692,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     return 0;
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 {
     for (; ptr; ptr = ptr->next)

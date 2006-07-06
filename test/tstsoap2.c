@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap2.c,v 1.4 2006-02-01 19:53:00 adam Exp $
+ * $Id: tstsoap2.c,v 1.5 2006-07-06 10:17:55 adam Exp $
  */
 
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 #include <yaz/srw.h>
 #include <yaz/soap.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 
 static void tst_srw(void)
@@ -52,7 +52,7 @@ static void tst_srw(void)
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     LIBXML_TEST_VERSION;
     tst_srw();
 #endif

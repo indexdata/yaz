@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.39 2006-06-27 12:23:11 adam Exp $
+# $Id: buildconf.sh,v 1.40 2006-07-06 10:17:51 adam Exp $
 
 automake=automake
 aclocal=aclocal
@@ -26,7 +26,7 @@ fi
 
 set -x
 # I am tired of underquoted warnings for Tcl macros
-$aclocal -I m4 2>&1 | grep -v "warning: underquoted definition"
+$aclocal -I m4
 $libtoolize --automake --force 
 $automake --add-missing 
 $autoconf

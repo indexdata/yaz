@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.38 2006-05-08 10:16:47 adam Exp $
+ * $Id: statserv.c,v 1.39 2006-07-06 10:17:54 adam Exp $
  */
 
 /**
@@ -36,7 +36,7 @@
 #include <pwd.h>
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
@@ -144,11 +144,11 @@ static void get_logbits(int force)
 
 static int add_listener(char *where, int listen_id);
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static xmlDocPtr xml_config_doc = 0;
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static xmlNodePtr xml_config_get_root()
 {
     xmlNodePtr ptr = 0;
@@ -168,7 +168,7 @@ static xmlNodePtr xml_config_get_root()
 }
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
 {
     unsigned char *cp;
@@ -222,7 +222,7 @@ static struct gfs_server * gfs_server_new()
     n->directory = 0;
     n->docpath = 0;
     n->stylesheet = 0;
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     n->retrieval = yaz_retrieval_create();
 #endif
     return n;
@@ -322,7 +322,7 @@ static void xml_config_read()
 {
     struct gfs_server **gfsp = &gfs_server_list;
     struct gfs_listen **gfslp = &gfs_listen_list;
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     xmlNodePtr ptr = xml_config_get_root();
 
     if (!ptr)
@@ -467,7 +467,7 @@ static void xml_config_open()
 #endif
     
     gfs_nmem = nmem_create();
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     if (control_block.xml_config[0] == '\0')
         return;
 
@@ -496,7 +496,7 @@ static void xml_config_open()
 
 static void xml_config_close()
 {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     if (xml_config_doc)
     {
         xmlFreeDoc(xml_config_doc);
@@ -1440,7 +1440,7 @@ int check_options(int argc, char **argv)
             option_copy(control_block.pid_fname, arg);
             break;
         case 'f':
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
             option_copy(control_block.xml_config, arg);
 #else
             fprintf(stderr, "%s: Option -f unsupported since YAZ is compiled without Libxml2 support\n", me);

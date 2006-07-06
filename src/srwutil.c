@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.44 2006-06-14 05:47:10 adam Exp $
+ * $Id: srwutil.c,v 1.45 2006-07-06 10:17:54 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -333,7 +333,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             const char *charset_p = 0;
             
             static Z_SOAP_Handler soap_handlers[4] = {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
                 {"http://www.loc.gov/zing/srw/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
                 {"http://www.loc.gov/zing/srw/v1.0/", 0,
@@ -422,7 +422,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                    Z_SOAP **soap_package, ODR decode, char **charset,
                    Z_SRW_diagnostic **diag, int *num_diag)
 {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     static Z_SOAP_Handler soap_handlers[2] = {
         {"http://www.loc.gov/zing/srw/", 0,
          (Z_SOAP_fun) yaz_srw_codec},
@@ -447,7 +447,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     {
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         const char *operation = 0;
         char *version = 0;
         char *query = 0;
@@ -486,7 +486,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         if (!strcmp(hreq->method, "POST"))
             p1 = hreq->content_buf;
         yaz_uri_array(p1, decode, &uri_name, &uri_val);
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         if (uri_name)
         {
             int i;
@@ -1207,7 +1207,7 @@ int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                         ODR odr, const char *charset)
 {
     Z_SOAP_Handler handlers[2] = {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
 #endif
         {0, 0, 0}

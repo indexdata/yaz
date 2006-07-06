@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfaxmltest1.c,v 1.1 2006-07-05 08:12:48 heikki Exp $
+ *  $Id: nfaxmltest1.c,v 1.2 2006-07-06 10:17:55 adam Exp $
  *
  */
 
@@ -13,7 +13,7 @@
 #include <yaz/test.h>
 #include <yaz/nfaxml.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 
 

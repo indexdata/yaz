@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.310 2006-06-02 13:12:53 adam Exp $
+ * $Id: client.c,v 1.311 2006-07-06 10:17:51 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -86,7 +86,7 @@ static char *codeset = 0;               /* character set for output */
 static int hex_dump = 0;
 static char *dump_file_prefix = 0;
 static ODR out, in, print;              /* encoding and decoding streams */
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static ODR srw_sr_odr_out = 0;
 static Z_SRW_PDU *srw_sr = 0;
 #endif
@@ -689,7 +689,7 @@ int session_connect(const char *arg)
         printf ("Couldn't create comstack\n");
         return 0;
     }
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     if (conn->protocol == PROTO_HTTP)
         queryType = QueryType_CQL;
 #else
@@ -1257,7 +1257,7 @@ static int send_deleteResultSetRequest(const char *arg)
     return 2;
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static int send_srw(Z_SRW_PDU *sr)
 {
     const char *charset = negotiationCharset;
@@ -1311,7 +1311,7 @@ static int send_srw(Z_SRW_PDU *sr)
 }
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static char *encode_SRW_term(ODR o, const char *q)
 {
     const char *in_charset = "ISO-8859-1";
@@ -2384,7 +2384,7 @@ static int cmd_explain(const char *arg)
 {
     if (protocol != PROTO_HTTP)
         return 0;
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     if (!conn)
         cmd_open(0);
     if (conn)
@@ -2449,7 +2449,7 @@ static int cmd_find(const char *arg)
     }
     if (protocol == PROTO_HTTP)
     {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         if (!conn)
             cmd_open(0);
         if (!conn)
@@ -2657,7 +2657,7 @@ static int send_presentRequest(const char *arg)
     return 2;
 }
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static int send_SRW_presentRequest(const char *arg)
 {
     char setstring[100];
@@ -2725,7 +2725,7 @@ static int cmd_show(const char *arg)
 {
     if (protocol == PROTO_HTTP)
     {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         if (!conn)
             cmd_open(0);
         if (!conn)
@@ -3046,7 +3046,7 @@ int cmd_scan(const char *arg)
 {
     if (protocol == PROTO_HTTP)
     {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         if (!conn)
             cmd_open(0);
         if (!conn)
@@ -3700,7 +3700,7 @@ static void initialize(void)
 struct timeval tv_start;
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static void handle_srw_record(Z_SRW_record *rec)
 {
     if (rec->recordPosition)
@@ -3999,7 +3999,7 @@ void wait_and_handle_response(int one_response_only)
                 close_session ();
             }
         }
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         else if (gdu->which == Z_GDU_HTTP_Response)
         {
             http_response(gdu->u.HTTP_Response);

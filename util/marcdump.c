@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.39 2006-06-12 16:12:58 mike Exp $
+ * $Id: marcdump.c,v 1.40 2006-07-06 10:17:55 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -11,7 +11,7 @@
 #include <config.h>
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
@@ -54,7 +54,7 @@ static void usage(const char *prog)
              prog);
 } 
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
 {
     xmlNodePtr ptr;
@@ -105,7 +105,7 @@ static void dump(const char *fname, const char *from, const char *to,
 
     if (read_xml)
     {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         marcdump_read_xml(mt, fname);
 #else
         return;
@@ -285,7 +285,7 @@ int main (int argc, char **argv)
             cfile = fopen(arg, "w");
             break;
         case 'x':
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
             read_xml = 1;
 #else
             fprintf(stderr, "%s: -x not supported."

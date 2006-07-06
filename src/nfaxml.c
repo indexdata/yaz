@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfaxml.c,v 1.5 2006-07-06 08:28:37 adam Exp $ 
+ *  $Id: nfaxml.c,v 1.6 2006-07-06 10:17:53 adam Exp $ 
  */
 
 /**
@@ -10,7 +10,7 @@
  *
  */
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 
 #include <string.h>
 
@@ -75,7 +75,7 @@ yaz_nfa *yaz_nfa_parse_xml_file(const char *filepath) {
 
 
 
-#endif /* HAVE_XML2 */
+#endif /* YAZ_HAVE_XML2 */
 
 
 /*

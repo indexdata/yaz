@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.87 2006-06-20 21:20:51 adam Exp $
+ * $Id: seshigh.c,v 1.88 2006-07-06 10:17:53 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -50,7 +50,7 @@
 #include <unistd.h>
 #endif
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #endif
@@ -577,7 +577,7 @@ static void set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem)
 
 static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
 {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     yaz_record_conv_t rc = 0;
     const char *match_schema = 0;
     int *match_syntax = 0;
@@ -1141,7 +1141,7 @@ static void srw_bend_search(association *assoc, request *req,
 
 static char *srw_bend_explain_default(void *handle, bend_explain_rr *rr)
 {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     xmlNodePtr ptr = rr->server_node_ptr;
     if (!ptr)
         return 0;
@@ -1791,7 +1791,7 @@ static void process_http_request(association *assoc, request *req)
         if (http_code == 200 || http_code == 500)
         {
             static Z_SOAP_Handler soap_handlers[4] = {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
                 {"http://www.loc.gov/zing/srw/", 0,
                  (Z_SOAP_fun) yaz_srw_codec},
                 {"http://www.loc.gov/zing/srw/v1.0/", 0,
@@ -2288,7 +2288,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.87 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.88 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

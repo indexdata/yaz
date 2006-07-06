@@ -2,7 +2,7 @@
  * Copyright (C) 2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: libxml2_error.c,v 1.1 2006-05-07 17:45:41 adam Exp $
+ * $Id: libxml2_error.c,v 1.2 2006-07-06 10:17:53 adam Exp $
  */
 /**
  * \file libxml2_error.c
@@ -14,11 +14,11 @@
 #include <yaz/log.h>
 #include <yaz/libxml2_error.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/xmlerror.h>
 #endif
 
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
 #include <libxslt/xsltutils.h>
 #endif
 
@@ -44,10 +44,10 @@ static void proxy_xml_error_handler(void *ctx, const char *fmt, ...)
 int libxml2_error_to_yazlog(int level, const char *lead_msg)
 {
     libxml2_error_level = level;
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
     xsltSetGenericErrorFunc((void *) "XSLT", proxy_xml_error_handler);
 #endif
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     xmlSetGenericErrorFunc((void *) "XML", proxy_xml_error_handler);
     return 0;
 #else

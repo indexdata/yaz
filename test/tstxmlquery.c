@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.10 2006-02-23 11:17:25 adam Exp $
+ * $Id: tstxmlquery.c,v 1.11 2006-07-06 10:17:55 adam Exp $
  */
 
 #include <stdlib.h>
@@ -14,7 +14,7 @@
 #include <yaz/pquery.h>
 #include <yaz/test.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #endif
@@ -47,7 +47,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
         status = PQF_FAILED;
     else
     {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
         xmlDocPtr doc = 0;
 
         yaz_rpnquery2xml(rpn, &doc);
@@ -107,7 +107,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
 static void tst()
 {
     YAZ_CHECK_EQ(pqf2xml_text("@attr 1=4 bad query", "", 0), PQF_FAILED);
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@attr 1=4 computer", 
                      "<?xml version=\"1.0\"?>\n"

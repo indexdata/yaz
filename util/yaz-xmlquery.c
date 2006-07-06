@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-xmlquery.c,v 1.2 2006-03-06 08:11:41 adam Exp $
+ * $Id: yaz-xmlquery.c,v 1.3 2006-07-06 10:17:55 adam Exp $
  */
 
 #include <stdlib.h>
@@ -14,13 +14,13 @@
 #include <yaz/pquery.h>
 #include <yaz/test.h>
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #endif
 
 static char *prog = "yaz-xmlquery";
 
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
 void pqftoxmlquery(const char *pqf)
 {
     YAZ_PQF_Parser parser = yaz_pqf_create();
@@ -163,7 +163,7 @@ void usage()
 
 int main (int argc, char **argv)
 {
-#if HAVE_XML2
+#if YAZ_HAVE_XML2
     char *arg;
     int r;
     int active = 0;

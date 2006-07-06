@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_retrieval.c,v 1.5 2006-05-09 13:39:47 adam Exp $
+ * $Id: tst_retrieval.c,v 1.6 2006-07-06 10:17:55 adam Exp $
  *
  */
 #include <yaz/retrieval.h>
@@ -16,7 +16,7 @@
 #include <config.h>
 #endif
 
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -233,7 +233,7 @@ int main(int argc, char **argv)
 
     libxml2_error_to_yazlog(0 /* disable it */, "");
 
-#if HAVE_XSLT
+#if YAZ_HAVE_XSLT
     tst_configure();
 #endif
     YAZ_CHECK_TERM;
