@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfaxml.c,v 1.2 2006-07-06 06:09:12 adam Exp $ 
+ *  $Id: nfaxml.c,v 1.3 2006-07-06 07:45:07 adam Exp $ 
  */
 
 /**
@@ -23,11 +23,13 @@
 #include <yaz/yconfig.h>
 #include <yaz/nfa.h>
 #include <yaz/nfaxml.h>
-
+#include <yaz/libxml2_error.h>
 
 /** \brief Parse the NFA from a XML document 
  */
-yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc){
+yaz_nfa *yaz_nfa_parse_xml_doc(void *xmlDocPtr)
+{
+    xmlDocPtr doc = (xmlDocPtr) *xmlDocPtr;
     if (!doc)
         return 0;
 

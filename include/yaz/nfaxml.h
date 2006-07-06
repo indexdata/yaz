@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfaxml.h,v 1.2 2006-07-06 06:08:19 adam Exp $
+ *  $Id: nfaxml.h,v 1.3 2006-07-06 07:45:07 adam Exp $
  */
 
 /**
@@ -54,7 +54,7 @@ YAZ_BEGIN_CDECL
  * call xmlGetLastError() to get the details of the error. 
  *
  */
-yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc);
+yaz_nfa *yaz_nfa_parse_xml_doc(void *xmlDocPtr);
 
 
 /** \brief Parse the NFA from a file 
