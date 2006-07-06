@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfaxml.c,v 1.7 2006-07-06 13:10:31 heikki Exp $ 
+ *  $Id: nfaxml.c,v 1.8 2006-07-06 14:06:17 heikki Exp $ 
  */
 
 /**
@@ -29,7 +29,7 @@
  */
 yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc)
 {
-    libxml2_error_to_yazlog(YLOG_FATAL, "yaz_nfa_parse_xml_file");
+    libxml2_error_to_yazlog(YLOG_FATAL, "yaz_nfa_parse_doc");
 
     if (!doc)
         return 0;
@@ -43,9 +43,10 @@ yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc)
 yaz_nfa *yaz_nfa_parse_xml_file(const char *filepath) {
     int nSubst;
 
+    xmlDocPtr doc;
     libxml2_error_to_yazlog(YLOG_FATAL, "yaz_nfa_parse_xml_file");
 
-    xmlDocPtr doc = xmlParseFile(filepath);
+    doc = xmlParseFile(filepath);
     if (!doc) {
         return 0;
     }
@@ -59,10 +60,9 @@ yaz_nfa *yaz_nfa_parse_xml_file(const char *filepath) {
 /** \brief Parse the NFA from a memory buffer
  */
 yaz_nfa *yaz_nfa_parse_xml_memory(const char *xmlbuff) {
-    int nSubst;
-
+    xmlDocPtr doc;
     libxml2_error_to_yazlog(YLOG_FATAL, "yaz_nfa_parse_xml_memory");
-    xmlDocPtr doc = xmlParseMemory(xmlbuff, strlen(xmlbuff));
+    doc = xmlParseMemory(xmlbuff, strlen(xmlbuff));
     return yaz_nfa_parse_xml_doc(doc);
 }
 
