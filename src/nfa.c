@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.10 2006-07-04 12:59:56 heikki Exp $ 
+ *  $Id: nfa.c,v 1.11 2006-07-07 08:36:36 adam Exp $ 
  */
 
 /**
@@ -444,7 +444,7 @@ yaz_nfa_converter *yaz_nfa_create_string_converter (
                 yaz_nfa_char *string,
                 size_t length){
     yaz_nfa_converter *c;
-    int i;
+    size_t i;
     c=create_null_converter(n);
     c->type=conv_string;
     c->string=nmem_malloc(n->nmem, length*sizeof(yaz_nfa_char));
@@ -596,7 +596,7 @@ int yaz_nfa_add_ascii_string_rule( yaz_nfa *n,
         nmem_malloc(n->nmem, from_len*sizeof(yaz_nfa_char));
     yaz_nfa_char *to_buf=
         nmem_malloc(n->nmem, to_len*sizeof(yaz_nfa_char));
-    int i;
+    size_t i;
     for (i=0;i<from_len;i++) 
         from_buf[i]=from_string[i];
     for (i=0;i<to_len;i++) 
