@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: wrbuf.h,v 1.17 2006-04-19 10:05:02 adam Exp $
+ * $Id: wrbuf.h,v 1.18 2006-07-07 10:31:26 marc Exp $
  */
 /**
  * \file wrbuf.h
@@ -52,6 +52,8 @@ YAZ_EXPORT int wrbuf_grow(WRBUF b, int minsize);
 YAZ_EXPORT int wrbuf_write(WRBUF b, const char *buf, int size);
 YAZ_EXPORT int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size);
 YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
+YAZ_EXPORT int wrbuf_puts_replace_char(WRBUF b, const char *buf, 
+                                       const char from, const char to);
 YAZ_EXPORT int wrbuf_xmlputs(WRBUF b, const char *cp);
 YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...)
 #ifdef __GNUC__

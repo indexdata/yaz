@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.10 2006-04-19 10:05:03 adam Exp $
+ * $Id: wrbuf.c,v 1.11 2006-07-07 10:31:26 marc Exp $
  */
 
 /**
@@ -77,6 +77,21 @@ int wrbuf_write(WRBUF b, const char *buf, int size)
 int wrbuf_puts(WRBUF b, const char *buf)
 {
     wrbuf_write(b, buf, strlen(buf)+1);  /* '\0'-terminate as well */
+    (b->pos)--;                          /* don't include '\0' in count */
+    return 0;
+}
+
+int wrbuf_puts_replace_char(WRBUF b, const char *buf, 
+                            const char from, const char to)
+{
+    while(*buf){
+        if (*buf == from)
+            wrbuf_putc(b, to);
+        else
+            wrbuf_putc(b, *buf);
+        buf++;
+    }
+    wrbuf_putc(b, 0);
     (b->pos)--;                          /* don't include '\0' in count */
     return 0;
 }

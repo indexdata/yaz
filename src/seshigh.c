@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.91 2006-07-06 15:06:12 marc Exp $
+ * $Id: seshigh.c,v 1.92 2006-07-07 10:31:26 marc Exp $
  */
 /**
  * \file seshigh.c
@@ -113,16 +113,23 @@ static void get_logbits()
     {
         logbits_set = 1;
         log_session = yaz_log_module_level("session"); 
-        log_request = yaz_log_module_level("request"); 
+        log_request = yaz_log_module_level("request");
         log_requestdetail = yaz_log_module_level("requestdetail"); 
     }
 }
 
+
+
 static void wr_diag(WRBUF w, int error, const char *addinfo)
 {
-    wrbuf_printf(w, "ERROR [%d] %s%s%s",
-                 error, diagbib1_str(error),
-                 addinfo ? "--" : "", addinfo ? addinfo : "");
+    wrbuf_printf(w, "ERROR %d+", error);
+    wrbuf_puts_replace_char(w, diagbib1_str(error), ' ', '_');
+    if (addinfo){
+        wrbuf_puts(w, "+");
+        wrbuf_puts_replace_char(w, addinfo, ' ', '_');
+    }
+    
+    wrbuf_puts(w, " ");    
 }
 
 
@@ -1401,11 +1408,11 @@ static void srw_bend_scan(association *assoc, request *req,
         wrbuf_printf(wr, " ");
 
         if (srw_res->num_diagnostics)
-            wrbuf_printf(wr, "ERROR %s ", srw_res->diagnostics[0].uri);
+            wrbuf_printf(wr, "ERROR %s - ", srw_res->diagnostics[0].uri);
         else
-            wrbuf_printf(wr, "OK - ");
+            wrbuf_printf(wr, "OK - - ");
 
-        wrbuf_printf(wr, "%d+%d 1 ",
+        wrbuf_printf(wr, "%d+%d+0 ",
                      (srw_req->responsePosition ? 
                       *srw_req->responsePosition : 1),
                      (srw_req->maximumTerms ?
@@ -2297,7 +2304,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.91 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.92 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2775,7 +2782,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
         for (i = 0 ; i < req->num_databaseNames; i++){
             if (i)
-                wrbuf_printf(wr, ",");
+                wrbuf_printf(wr, "+");
             wrbuf_printf(wr, req->databaseNames[i]);
         }
         wrbuf_printf(wr, " ");
@@ -2884,11 +2891,11 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
         wrbuf_printf(wr, "Present ");
 
         if (*resp->presentStatus == Z_PresentStatus_failure)
-            wrbuf_printf(wr, "ERROR %d", errcode);
+            wrbuf_printf(wr, "ERROR %d ", errcode);
         else if (*resp->presentStatus == Z_PresentStatus_success)
-            wrbuf_printf(wr, "OK -");
+            wrbuf_printf(wr, "OK -  ");
         else
-            wrbuf_printf(wr, "Partial %d", *resp->presentStatus);
+            wrbuf_printf(wr, "Partial %d - ", *resp->presentStatus);
 
         wrbuf_printf(wr, " %s %d+%d ",
                 req->resultSetId, *req->resultSetStartPoint,
@@ -3079,22 +3086,24 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     {
         int i;
         WRBUF wr = wrbuf_alloc();
-
+        wrbuf_printf(wr, "Scan ");
         for (i = 0 ; i < req->num_databaseNames; i++){
             if (i)
-                wrbuf_printf(wr, ",");
+                wrbuf_printf(wr, "+");
             wrbuf_printf(wr, req->databaseNames[i]);
         }
         wrbuf_printf(wr, " ");
         
-        if (bsrr->errcode)
+        if (bsrr->errcode){
             wr_diag(wr, bsrr->errcode, bsrr->errstring);
+            wrbuf_printf(wr, " ");
+        }
         else if (*res->scanStatus == Z_Scan_success)
-            wrbuf_printf(wr, "OK - ");
+            wrbuf_printf(wr, "OK - - ");
         else
-            wrbuf_printf(wr, "Partial - ");
+            wrbuf_printf(wr, "Partial - - ");
 
-        wrbuf_printf(wr, "%d+%d %d ",
+        wrbuf_printf(wr, "%d+%d+%d ",
                      (req->preferredPositionInResponse ?
                       *req->preferredPositionInResponse : 1),
                      *req->numberOfTermsRequested,
@@ -3104,7 +3113,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
            see line 1415 */
         yaz_scan_to_wrbuf(wr, req->termListAndStartPoint, 
                           bsrr->attributeset);
-        yaz_log(log_request, "Scan %s", wrbuf_buf(wr) );
+        yaz_log(log_request, "%s", wrbuf_buf(wr) );
         wrbuf_free(wr, 1);
     }
     return apdu;
@@ -3176,7 +3185,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
         for (i = 0; i<req->num_inputResultSetNames; i++)
         {
             if (i)
-                wrbuf_printf(wr, ",");
+                wrbuf_printf(wr, "+");
             wrbuf_printf(wr, req->inputResultSetNames[i]);
         }
         wrbuf_printf(wr, ")->%s ",req->sortedResultSetName);
