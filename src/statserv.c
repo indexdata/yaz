@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.39 2006-07-06 10:17:54 adam Exp $
+ * $Id: statserv.c,v 1.40 2006-07-07 13:02:21 marc Exp $
  */
 
 /**
@@ -127,7 +127,8 @@ statserv_options_block control_block = {
 static int max_sessions = 0;
 
 static int logbits_set = 0;
-static int log_session = 0;
+static int log_session = 0; /* one-line logs for session */
+static int log_sessiondetail = 0; /* more detailed stuff */
 static int log_server = 0;
 
 /** get_logbits sets global loglevel bits */
@@ -137,6 +138,7 @@ static void get_logbits(int force)
     {
         logbits_set = 1;
         log_session = yaz_log_module_level("session");
+        log_sessiondetail = yaz_log_module_level("sessiondetail");
         log_server = yaz_log_module_level("server");
     }
 }
@@ -896,7 +898,7 @@ static void listener(IOCHAN h, int event)
             return;
         }
 
-        yaz_log(log_session, "Connect from %s", cs_addrstr(new_line));
+        yaz_log(log_sessiondetail, "Connect from %s", cs_addrstr(new_line));
 
         no_sessions++;
         if (control_block.dynamic)
@@ -1013,7 +1015,7 @@ static void *new_session (void *vp)
 #else
     a = 0;
 #endif
-    yaz_log(log_session, "Starting session %d from %s (pid=%ld)",
+    yaz_log(log_session, "Session - OK %d %s %ld",
             no_sessions, a ? a : "[Unknown]", (long) getpid());
     if (max_sessions && no_sessions >= max_sessions)
         control_block.one_shot = 1;
@@ -1050,7 +1052,7 @@ static void inetd_connection(int what)
                 iochan_setdata(chan, assoc);
                 iochan_settimeout(chan, 60);
                 addr = cs_addrstr(line);
-                yaz_log(log_session, "Inetd association from %s",
+                yaz_log(log_sessiondetail, "Inetd association from %s",
                         addr ? addr : "[UNKNOWN]");
                 assoc->cs_get_mask = EVENT_INPUT;
             }

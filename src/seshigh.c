@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.93 2006-07-07 12:40:15 marc Exp $
+ * $Id: seshigh.c,v 1.94 2006-07-07 13:02:21 marc Exp $
  */
 /**
  * \file seshigh.c
@@ -102,7 +102,8 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd);
 
 /* dynamic logging levels */
 static int logbits_set = 0;
-static int log_session = 0; 
+static int log_session = 0; /* one-line logs for session */
+static int log_sessiondetail = 0; /* more detailed stuff */
 static int log_request = 0; /* one-line logs for requests */
 static int log_requestdetail = 0;  /* more detailed stuff */
 
@@ -113,6 +114,7 @@ static void get_logbits()
     {
         logbits_set = 1;
         log_session = yaz_log_module_level("session"); 
+        log_sessiondetail = yaz_log_module_level("sessiondetail");
         log_request = yaz_log_module_level("request");
         log_requestdetail = yaz_log_module_level("requestdetail"); 
     }
@@ -291,7 +293,8 @@ void ir_session(IOCHAN h, int event)
         }
         else
         {
-            yaz_log(log_session, "Session idle too long. Sending close.");
+            yaz_log(log_sessiondetail, 
+                    "Session idle too long. Sending close.");
             do_close(assoc, Z_Close_lackOfActivity, 0);
         }
         return;
@@ -329,7 +332,7 @@ void ir_session(IOCHAN h, int event)
             /* We aren't speaking to this fellow */
             if (assoc->state == ASSOC_DEAD)
             {
-                yaz_log(log_session, "Connection closed - end of session");
+                yaz_log(log_sessiondetail, "Connection closed - end of session");
                 cs_close(conn);
                 destroy_association(assoc);
                 iochan_destroy(h);
@@ -339,7 +342,7 @@ void ir_session(IOCHAN h, int event)
             if ((res = cs_get(conn, &assoc->input_buffer,
                 &assoc->input_buffer_len)) <= 0)
             {
-                yaz_log(log_session, "Connection closed by client");
+                yaz_log(log_sessiondetail, "Connection closed by client");
                 cs_close(conn);
                 destroy_association(assoc);
                 iochan_destroy(h);
@@ -414,7 +417,7 @@ void ir_session(IOCHAN h, int event)
         switch (res = cs_put(conn, req->response, req->len_response))
         {
         case -1:
-            yaz_log(log_session, "Connection closed by client");
+            yaz_log(log_sessiondetail, "Connection closed by client");
             cs_close(conn);
             destroy_association(assoc);
             iochan_destroy(h);
@@ -2306,7 +2309,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.93 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.94 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
