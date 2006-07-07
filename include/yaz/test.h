@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.h,v 1.7 2006-07-06 13:10:29 heikki Exp $
+ * $Id: test.h,v 1.8 2006-07-07 06:59:49 adam Exp $
  */
 
 /** \file test.h
@@ -62,7 +62,7 @@ YAZ_EXPORT void yaz_check_init1(int *argc, char ***argv);
 YAZ_EXPORT void yaz_check_term1(void);
 
 /** \brief used by macro. Should not be called directly */
-YAZ_EXPORT void yaz_check_init_log(char *argv0);
+YAZ_EXPORT void yaz_check_init_log(const char *argv0);
 
 /** \brief used by macro. Should not be called directly */
 YAZ_EXPORT void yaz_check_print1(int type, const char *file, int line,

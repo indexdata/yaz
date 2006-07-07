@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.8 2006-07-06 13:10:31 heikki Exp $
+ * $Id: test.c,v 1.9 2006-07-07 06:59:49 adam Exp $
  */
 
 /** \file test.c
@@ -16,7 +16,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#if HAVE_UNISTSD_H
 #include <unistd.h>
+#endif
 
 #include <yaz/test.h>
 #include <yaz/log.h>
@@ -25,7 +27,7 @@ static FILE *test_fout = 0; /* can't use '= stdout' on some systems */
 static int test_total = 0;
 static int test_failed = 0;
 static int test_verbose = 1;
-static char *test_prog = 0;
+static const char *test_prog = 0;
 static int log_tests = 0; 
 
 static FILE *get_file()
@@ -35,9 +37,9 @@ static FILE *get_file()
     return stdout;
 }
 
-static char *progname(char *argv0)
+static const char *progname(const char *argv0)
 {
-    char *cp = strrchr(argv0, '/');
+    const char *cp = strrchr(argv0, '/');
     if (cp)
         return cp+1;
     cp = strrchr(argv0, '\\');
@@ -106,7 +108,7 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
 }
 
 /** \brief  Initialize the log system */
-void yaz_check_init_log(char *argv0)
+void yaz_check_init_log(const char *argv0)
 {
     char logfilename[2048];
     log_tests = 1; 
@@ -144,7 +146,7 @@ void yaz_check_eq1(int type, const char *file, int line,
 {
     char formstr[2048];
     
-    if (type==YAZ_TEST_TYPE_OK) 
+    if (type == YAZ_TEST_TYPE_OK) 
         sprintf(formstr, "%.500s == %.500s ", left, right);
     else
         sprintf(formstr, "%.500s != %.500s\n %d != %d", left, right, lval,rval);
@@ -155,7 +157,7 @@ void yaz_check_print1(int type, const char *file, int line,
                       const char *expr)
 {
     const char *msg = "unknown";
-    int printit=1;
+    int printit = 1;
 
     test_total++;
     switch(type)
@@ -164,26 +166,29 @@ void yaz_check_print1(int type, const char *file, int line,
         test_failed++;
         msg = "FAILED";
         if (test_verbose < 1)
-            printit=0;
+            printit = 0;
         break;
     case YAZ_TEST_TYPE_OK:
         msg = "ok";
         if (test_verbose < 3)
-            printit=0;
+            printit = 0;
         break;
     }
-    if (printit) {
+    if (printit)
+    {
         fprintf(get_file(), "%s:%d %s: ", file, line, msg);
         fprintf(get_file(), "%s\n", expr);
     }
-    if (log_tests) {
+    if (log_tests)
+    {
         yaz_log(YLOG_LOG, "%s:%d %s: ", file, line, msg);
         yaz_log(YLOG_LOG, "%s\n", expr);
     }
 }
 
 
-int yaz_test_get_verbosity(){
+int yaz_test_get_verbosity()
+{
     return test_verbose;
 }
 
