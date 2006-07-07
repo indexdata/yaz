@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.113 2006-07-06 10:17:56 adam Exp $
+# $Id: makefile,v 1.114 2006-07-07 08:32:53 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -280,6 +280,11 @@ YAZ_CLIENT_OBJS= \
    $(OBJDIR)\tabcomplete.obj \
    $(OBJDIR)\admin.obj
 
+ZTEST_OBJS= \
+    $(OBJDIR)\read-marc.obj \
+    $(OBJDIR)\read-grs.obj \
+    $(OBJDIR)\ztest.obj 
+
 YAZ_ZOOMSH_OBJS = \
    $(OBJDIR)\zoomsh.obj
 
@@ -312,34 +317,24 @@ YAZ_MARCDUMP_OBJS = \
 TSTLOG_OBJS = \
    $(OBJDIR)\tstlog.obj
 
-YAZ_SERVER_OBJS= \
-   "$(OBJDIR)\eventl.obj" \
-   "$(OBJDIR)\requestq.obj" \
-   "$(OBJDIR)\service.obj" \
-   "$(OBJDIR)\seshigh.obj" \
-   "$(OBJDIR)\statserv.obj" \
-   "$(OBJDIR)\tcpdchk.obj" 
-
-ZTEST_OBJS= \
-   "$(OBJDIR)\read-marc.obj" \
-   "$(OBJDIR)\read-grs.obj" \
-   "$(OBJDIR)\ztest.obj" 
-
-YAZ_CCL_OBJS= \
+MISC_OBJS= \
+   $(OBJDIR)\version.obj \
+   $(OBJDIR)\eventl.obj \
+   $(OBJDIR)\requestq.obj \
+   $(OBJDIR)\service.obj \
+   $(OBJDIR)\seshigh.obj \
+   $(OBJDIR)\statserv.obj \
+   $(OBJDIR)\tcpdchk.obj \
    $(OBJDIR)\cclerrms.obj \
    $(OBJDIR)\cclfind.obj \
    $(OBJDIR)\cclptree.obj \
    $(OBJDIR)\cclqfile.obj \
    $(OBJDIR)\cclqual.obj \
    $(OBJDIR)\cclstr.obj \
-   $(OBJDIR)\ccltoken.obj
-
-YAZ_COMSTACK_OBJS= \
+   $(OBJDIR)\ccltoken.obj \
    $(OBJDIR)\comstack.obj \
    $(OBJDIR)\tcpip.obj \
-   $(OBJDIR)\waislen.obj 
-
-YAZ_ODR_OBJS= \
+   $(OBJDIR)\waislen.obj \
    $(OBJDIR)\ber_any.obj \
    $(OBJDIR)\ber_bit.obj \
    $(OBJDIR)\ber_bool.obj \
@@ -365,10 +360,7 @@ YAZ_ODR_OBJS= \
    $(OBJDIR)\odr_seq.obj \
    $(OBJDIR)\odr_tag.obj \
    $(OBJDIR)\odr_use.obj \
-   $(OBJDIR)\odr_util.obj 
-
-YAZ_UTIL_OBJS= \
-   $(OBJDIR)\version.obj \
+   $(OBJDIR)\odr_util.obj \
    $(OBJDIR)\atoin.obj \
    $(OBJDIR)\log.obj \
    $(OBJDIR)\marcdisp.obj \
@@ -387,9 +379,7 @@ YAZ_UTIL_OBJS= \
    $(OBJDIR)\record_conv.obj \
    $(OBJDIR)\retrieval.obj \
    $(OBJDIR)\libxml2_error.obj \
-   $(OBJDIR)\test.obj
-
-YAZ_ZUTIL_OBJS= \
+   $(OBJDIR)\test.obj \
    $(OBJDIR)\diagbib1.obj \
    $(OBJDIR)\diagsrw.obj \
    $(OBJDIR)\diag-entry.obj \
@@ -412,7 +402,14 @@ YAZ_ZUTIL_OBJS= \
    $(OBJDIR)\zoom-opt.obj \
    $(OBJDIR)\initopt.obj \
    $(OBJDIR)\xmlquery.obj \
-   $(OBJDIR)\mime.obj
+   $(OBJDIR)\mime.obj \
+   $(OBJDIR)\cql.obj \
+   $(OBJDIR)\cqlstdio.obj \
+   $(OBJDIR)\cqlstring.obj \
+   $(OBJDIR)\cqltransform.obj \
+   $(OBJDIR)\cqlutil.obj \
+   $(OBJDIR)\cqlstrer.obj \
+   $(OBJDIR)\xcqlutil.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -451,27 +448,10 @@ ILL_OBJS= \
    $(OBJDIR)\ill-core.obj\
    $(OBJDIR)\item-req.obj
 
-YAZ_CQL_OBJS = \
-   $(OBJDIR)\cql.obj \
-   $(OBJDIR)\cqlstdio.obj \
-   $(OBJDIR)\cqlstring.obj \
-   $(OBJDIR)\cqltransform.obj \
-   $(OBJDIR)\cqlutil.obj \
-   $(OBJDIR)\cqlstrer.obj \
-   $(OBJDIR)\xcqlutil.obj
-
-YAZ_OBJS =\
-   $(YAZ_UTIL_OBJS) \
-   $(YAZ_ODR_OBJS) \
-   $(YAZ_COMSTACK_OBJS) \
+DLL_OBJS =\
+   $(MISC_OBJS) \
    $(Z3950_OBJS) \
    $(ILL_OBJS) \
-   $(YAZ_ZUTIL_OBJS) \
-   $(YAZ_CCL_OBJS) \
-   $(YAZ_CQL_OBJS) \
-   $(YAZ_SERVER_OBJS)
-
-DLL_OBJS= $(YAZ_OBJS)
 
 # Generated C and H files
 
