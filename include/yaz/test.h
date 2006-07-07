@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.h,v 1.8 2006-07-07 06:59:49 adam Exp $
+ * $Id: test.h,v 1.9 2006-07-07 13:39:02 heikki Exp $
  */
 
 /** \file test.h
@@ -29,6 +29,22 @@ int yaz_test_get_verbosity();
     yaz_check_print1(YAZ_TEST_TYPE_OK, __FILE__, __LINE__, #as); \
   } else { \
     yaz_check_print1(YAZ_TEST_TYPE_FAIL, __FILE__, __LINE__, #as); \
+  } \
+}
+
+/** \brief a test we know will fail at this time. 
+ *
+ * Later, when the bug is fixed, this test will suddenly pass,
+ * which will be reported as an error, to remind you to go and fix 
+ * your tests.
+ */
+
+#define YAZ_CHECK_TODO(as) { \
+  yaz_check_inc_todo(); \
+  if (!as) { \
+    yaz_check_print1(YAZ_TEST_TYPE_OK, __FILE__, __LINE__, "TODO: " #as); \
+  } else { \
+    yaz_check_print1(YAZ_TEST_TYPE_FAIL, __FILE__, __LINE__, "TODO: "#as); \
   } \
 }
 
@@ -71,6 +87,8 @@ YAZ_EXPORT void yaz_check_print1(int type, const char *file, int line,
 YAZ_EXPORT void yaz_check_eq1(int type, const char *file, int line,
                               const char *left, const char *right,
                               int lval, int rval);
+/** \brief used by macro. Should not be called directly */
+YAZ_EXPORT void  yaz_check_inc_todo(void);
 YAZ_END_CDECL
 
 #endif

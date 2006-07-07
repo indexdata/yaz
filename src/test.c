@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.9 2006-07-07 06:59:49 adam Exp $
+ * $Id: test.c,v 1.10 2006-07-07 13:39:04 heikki Exp $
  */
 
 /** \file test.c
@@ -26,6 +26,7 @@
 static FILE *test_fout = 0; /* can't use '= stdout' on some systems */
 static int test_total = 0;
 static int test_failed = 0;
+static int test_todo = 0;
 static int test_verbose = 1;
 static const char *test_prog = 0;
 static int log_tests = 0; 
@@ -113,10 +114,14 @@ void yaz_check_init_log(const char *argv0)
     char logfilename[2048];
     log_tests = 1; 
     sprintf(logfilename,"%s.log", progname(argv0) );
-    unlink(logfilename);
     yaz_log_init_file(logfilename);
     yaz_log_trunc();
 
+}
+
+void  yaz_check_inc_todo(void)
+{
+    test_todo++;
 }
 
 void yaz_check_term1(void)
@@ -124,15 +129,27 @@ void yaz_check_term1(void)
     /* summary */
     if (test_failed)
     {
-        if (test_verbose >= 1)
-            fprintf(get_file(), "%d out of %d tests failed for program %s\n",
+        if (test_verbose >= 1) {
+            if (test_todo)
+                fprintf(get_file(), "%d out of %d tests failed for program %s"
+                        " (%d TODO's remaining)\n",
+                    test_failed, test_total, test_prog,test_todo);
+            else
+                fprintf(get_file(), "%d out of %d tests failed for program %s\n",
                     test_failed, test_total, test_prog);
+        }
     }
     else
     {
-        if (test_verbose >= 2)
-            fprintf(get_file(), "%d tests passed for program %s\n",
+        if (test_verbose >= 2) {
+            if (test_todo)
+                fprintf(get_file(), "%d tests passed for program %s"
+                        " (%d TODO's remaining)\n",
+                    test_total, test_prog,test_todo);
+            else
+                fprintf(get_file(), "%d tests passed for program %s\n",
                     test_total, test_prog);
+        }
     }
     if (test_fout)
         fclose(test_fout);
@@ -182,7 +199,7 @@ void yaz_check_print1(int type, const char *file, int line,
     if (log_tests)
     {
         yaz_log(YLOG_LOG, "%s:%d %s: ", file, line, msg);
-        yaz_log(YLOG_LOG, "%s\n", expr);
+        yaz_log(YLOG_LOG, "%s", expr);
     }
 }
 

@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2006, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.22 2006-07-05 14:45:57 adam Exp $
+## $Id: Makefile.am,v 1.23 2006-07-07 13:39:05 heikki Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
@@ -38,6 +38,8 @@ tstodrcodec.c tstodrcodec.h: tstodr.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) tstodr.asn
 
 LDADD = ../src/libyaz.la
+
+CONFIG_CLEAN_FILES=*.log
 
 tsticonv_SOURCES = tsticonv.c
 tstnmem_SOURCES = tstnmem.c

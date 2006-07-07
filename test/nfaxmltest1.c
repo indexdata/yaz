@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfaxmltest1.c,v 1.5 2006-07-07 07:14:30 adam Exp $
+ *  $Id: nfaxmltest1.c,v 1.6 2006-07-07 13:39:05 heikki Exp $
  *
  */
 
@@ -19,33 +19,55 @@
 
 /** \brief  Test parsing of a minimal, valid xml string */
 void test1() {
-    char *xmlstr="<ruleset> "
-                 "<rule> "
-                 "  <fromstring>foo</fromstring> "
-                 "  <tostring>bar</tostring> "
-                 "</rule>"
-                 "</ruleset>";
-    yaz_nfa *nfa=yaz_nfa_parse_xml_memory(xmlstr);
-#if 0
-/* doesn't parse */
-    YAZ_CHECK(nfa);
-#endif
+    char *xmlstr = "<ruleset> "
+                   "<rule> "
+                   "  <fromstring>foo</fromstring> "
+                   "  <tostring>bar</tostring> "
+                   "</rule>"
+                   "</ruleset>";
+    yaz_nfa *nfa = yaz_nfa_parse_xml_memory(xmlstr);
+    YAZ_CHECK_TODO(nfa);
 }
-
 
 
 /** \brief  Test parsing of a minimal, invalid xml string */
 void test2() {
     yaz_nfa *nfa;
-    char *xmlstr="<ruleset> "
-                 "<rule> "
-                 "  <fromstring>foo</fromstring> "
-                 "  <tostring>bar</tostring> "
-                 "</rule>";
+    char *xmlstr = "<ruleset> "
+                   "<rule> "
+                   "  <fromstring>foo</fromstring> "
+                   "  <tostring>bar</tostring> "
+                   "</rule>";
                  /* missing "</ruleset>" */
     yaz_log(YLOG_LOG,"Parsing bad xml, expecting errors:");
     nfa = yaz_nfa_parse_xml_memory(xmlstr);
     YAZ_CHECK(!nfa);
+}
+
+/** \brief  Test parsing a few minimal xml files */
+void test3() {
+    char *goodfilenames[] = {
+             "nfaxml-simple.xml",
+             "nfaxml-main.xml", /* x-includes nfaxml-include */
+              0};
+    char *badfilenames[] = {
+             "nfaxml-missing.xml",  /* file not there at all */
+             "nfaxml-badinclude.xml",  /* bad xinclude in it */
+              0};
+    yaz_nfa *nfa;
+    char **f = goodfilenames;
+    do {
+        yaz_log(YLOG_LOG,"Parsing (good) xml file '%s'", *f);
+        nfa=yaz_nfa_parse_xml_file(*f);
+        YAZ_CHECK_TODO(nfa);
+    } while (*++f);
+
+    f = badfilenames;
+    do {
+        yaz_log(YLOG_LOG,"Parsing bad xml file '%s'. Expecting errors", *f);
+        nfa = yaz_nfa_parse_xml_file(*f);
+        YAZ_CHECK(!nfa);
+    } while (*++f);
 }
 
 
@@ -57,6 +79,7 @@ int main(int argc, char **argv)
 
     test1();
     test2();
+    test3();
 
     nmem_exit ();
     YAZ_CHECK_TERM;
