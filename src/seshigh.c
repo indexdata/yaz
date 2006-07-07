@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.92 2006-07-07 10:31:26 marc Exp $
+ * $Id: seshigh.c,v 1.93 2006-07-07 12:40:15 marc Exp $
  */
 /**
  * \file seshigh.c
@@ -1399,7 +1399,7 @@ static void srw_bend_scan(association *assoc, request *req,
             querystr = srw_req->scanClause.cql;
             break;
         default:
-            querytype = "Unknown";
+            querytype = "UNKNOWN";
             querystr = "";
         }
 
@@ -1409,6 +1409,8 @@ static void srw_bend_scan(association *assoc, request *req,
 
         if (srw_res->num_diagnostics)
             wrbuf_printf(wr, "ERROR %s - ", srw_res->diagnostics[0].uri);
+        else if (srw_res->num_terms)
+            wrbuf_printf(wr, "OK %d - ", srw_res->num_terms);
         else
             wrbuf_printf(wr, "OK - - ");
 
@@ -2304,7 +2306,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.92 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.93 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -3098,19 +3100,24 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
             wr_diag(wr, bsrr->errcode, bsrr->errstring);
             wrbuf_printf(wr, " ");
         }
-        else if (*res->scanStatus == Z_Scan_success)
-            wrbuf_printf(wr, "OK - - ");
         else
-            wrbuf_printf(wr, "Partial - - ");
+            wrbuf_printf(wr, "OK "); 
+        /* else if (*res->scanStatus == Z_Scan_success) */
+        /*    wrbuf_printf(wr, "OK "); */
+        /* else */
+        /* wrbuf_printf(wr, "Partial "); */
+
+        if (*res->numberOfEntriesReturned)
+            wrbuf_printf(wr, "%d - ", *res->numberOfEntriesReturned);
+        else
+            wrbuf_printf(wr, "0 - ");
 
         wrbuf_printf(wr, "%d+%d+%d ",
                      (req->preferredPositionInResponse ?
                       *req->preferredPositionInResponse : 1),
                      *req->numberOfTermsRequested,
                      (res->stepSize ? *res->stepSize : 1));
-        /* TODO - make this print out RPN: or CQL: in the beginning!! */
-        /* maybe wrbuf_printf(wr, "%s: %s ", querytype, querystr); 
-           see line 1415 */
+
         yaz_scan_to_wrbuf(wr, req->termListAndStartPoint, 
                           bsrr->attributeset);
         yaz_log(log_request, "%s", wrbuf_buf(wr) );
