@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfaxmltest1.c,v 1.4 2006-07-07 07:11:05 adam Exp $
+ *  $Id: nfaxmltest1.c,v 1.5 2006-07-07 07:14:30 adam Exp $
  *
  */
 
@@ -36,6 +36,7 @@ void test1() {
 
 /** \brief  Test parsing of a minimal, invalid xml string */
 void test2() {
+    yaz_nfa *nfa;
     char *xmlstr="<ruleset> "
                  "<rule> "
                  "  <fromstring>foo</fromstring> "
@@ -43,7 +44,7 @@ void test2() {
                  "</rule>";
                  /* missing "</ruleset>" */
     yaz_log(YLOG_LOG,"Parsing bad xml, expecting errors:");
-    yaz_nfa *nfa=yaz_nfa_parse_xml_memory(xmlstr);
+    nfa = yaz_nfa_parse_xml_memory(xmlstr);
     YAZ_CHECK(!nfa);
 }
 
