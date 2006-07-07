@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: querytowrbuf.c,v 1.4 2006-04-19 10:05:03 adam Exp $
+ * $Id: querytowrbuf.c,v 1.5 2006-07-07 12:09:05 marc Exp $
  */
 
 /** \file querytowrbuf.c
@@ -202,21 +202,21 @@ void yaz_query_to_wrbuf(WRBUF b, const Z_Query *q)
     {
     case Z_Query_type_1: 
     case Z_Query_type_101:
-        wrbuf_printf(b,"RPN: ");
+        wrbuf_printf(b,"RPN ");
         yaz_rpnquery_to_wrbuf(b, q->u.type_1);
         break;
     case Z_Query_type_2:
-        wrbuf_printf(b, "CCL: %.*s", q->u.type_2->len, q->u.type_2->buf);
+        wrbuf_printf(b, "CCL %.*s", q->u.type_2->len, q->u.type_2->buf);
         break;
     case Z_Query_type_100:
-        wrbuf_printf(b, "Z39.58: %.*s", q->u.type_100->len,
+        wrbuf_printf(b, "Z39.58 %.*s", q->u.type_100->len,
                      q->u.type_100->buf);
         break;
     case Z_Query_type_104:
         if (q->u.type_104->which == Z_External_CQL)
-            wrbuf_printf(b, "CQL: %s", q->u.type_104->u.cql);
+            wrbuf_printf(b, "CQL %s", q->u.type_104->u.cql);
         else
-            wrbuf_printf(b,"Unknown type 104 query %d", q->u.type_104->which);
+            wrbuf_printf(b,"UNKNOWN type 104 query %d", q->u.type_104->which);
     }
 }
 
@@ -224,6 +224,7 @@ void yaz_scan_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt,
                        oid_value ast)
 {
     /* should print attr set here */
+    wrbuf_printf(b, "RPN ");
     yaz_apt_to_wrbuf(b, zapt);
 }
 

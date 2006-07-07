@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.11 2006-07-06 10:17:55 adam Exp $
+ * $Id: tstxmlquery.c,v 1.12 2006-07-07 12:09:05 marc Exp $
  */
 
 #include <stdlib.h>
@@ -115,7 +115,7 @@ static void tst()
                      "<apt><attr type=\"1\" value=\"4\"/>"
                      "<term type=\"general\">computer</term></apt>"
                      "</rpn></query>\n",
-                     "RPN: @attrset Bib-1 @attr 1=4 computer"
+                     "RPN @attrset Bib-1 @attr 1=4 computer"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -126,7 +126,7 @@ static void tst()
                      "<attr type=\"2\" value=\"1\"/>"
                      "<term type=\"general\">computer</term></apt>"
                      "</rpn></query>\n",
-                     "RPN: @attrset Bib-1 @attr \"1=title\" @attr 2=1 computer"
+                     "RPN @attrset Bib-1 @attr \"1=title\" @attr 2=1 computer"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -137,7 +137,7 @@ static void tst()
                      "<attr type=\"2\" value=\"1\"/>"
                      "<term type=\"general\">computer</term></apt>"
                      "</rpn></query>\n",
-                     "RPN: @attrset Bib-1 @attr Exp-1 1=1 @attr 2=1 computer"
+                     "RPN @attrset Bib-1 @attr Exp-1 1=1 @attr 2=1 computer"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -148,7 +148,7 @@ static void tst()
                      "<apt><term type=\"general\">a</term></apt>"
                      "<apt><term type=\"general\">b</term></apt>"
                      "</operator></rpn></query>\n",
-                     "RPN: @attrset Bib-1 @and a b"
+                     "RPN @attrset Bib-1 @and a b"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -161,7 +161,7 @@ static void tst()
                      "<apt><term type=\"general\">b</term></apt></operator>"
                      "<apt><term type=\"general\">c</term></apt>"
                      "</operator></rpn></query>\n",
-                     "RPN: @attrset Bib-1 @or @and a b c"
+                     "RPN @attrset Bib-1 @or @and a b c"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -169,7 +169,7 @@ static void tst()
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<rset>abe</rset></rpn></query>\n",
-                     "RPN: @attrset Bib-1 @set abe"
+                     "RPN @attrset Bib-1 @set abe"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -186,7 +186,7 @@ static void tst()
                      "<apt><term type=\"general\">a</term></apt>"
                      "<apt><term type=\"general\">b</term></apt>"
                      "</operator></rpn></query>\n",
-                     "RPN: @attrset Bib-1 @prox 0 3 1 2 k 2 a b"
+                     "RPN @attrset Bib-1 @prox 0 3 1 2 k 2 a b"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -196,7 +196,7 @@ static void tst()
                      "<apt>"
                      "<term type=\"numeric\">32</term></apt>"
                      "</rpn></query>\n",
-                     "RPN: @attrset Bib-1 @term numeric 32"
+                     "RPN @attrset Bib-1 @term numeric 32"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -206,7 +206,7 @@ static void tst()
                      "<apt>"
                      "<term type=\"string\">computer</term></apt>"
                      "</rpn></query>\n",
-                     "RPN: @attrset Bib-1 @term string computer"
+                     "RPN @attrset Bib-1 @term string computer"
                      ), XML_MATCH);
     
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -216,7 +216,7 @@ static void tst()
                      "<apt>"
                      "<term type=\"null\"/></apt>"
                      "</rpn></query>\n",
-                     "RPN: @attrset Bib-1 @term null x"
+                     "RPN @attrset Bib-1 @term null x"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
@@ -227,7 +227,7 @@ static void tst()
                      "<attr type=\"4\" value=\"2\"/>"
                      "<term type=\"general\">x</term></apt>"
                      "</rpn></query>\n",
-                     "RPN: @attrset GILS @attr 4=2 x"
+                     "RPN @attrset GILS @attr 4=2 x"
                      ), XML_MATCH);
 #endif
 }
