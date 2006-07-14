@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfa.c,v 1.11 2006-07-07 08:36:36 adam Exp $ 
+ *  $Id: nfa.c,v 1.12 2006-07-14 13:06:38 heikki Exp $ 
  */
 
 /**
@@ -746,6 +746,45 @@ void yaz_nfa_dump(FILE *F, yaz_nfa *n,
             dump_state(F, s, strfunc);
         } while (s != n->laststate);
     }
+}
+
+static char buf[5000]="";
+char *yaz_nfa_dump_converter(void *conv)
+{
+    char onebuf[500]="";
+    yaz_nfa_converter *c=conv;
+    yaz_nfa_char *cp;
+    size_t len;
+    *buf=0;
+    while (c) {
+        switch(c->type) {
+            case conv_none:
+                sprintf(onebuf,"(none)" );
+                break;
+            case conv_string:
+                sprintf(onebuf,"(string '" );
+                strcat(buf,onebuf);
+                cp=c->string;
+                len=c->strlen;
+                while (len--) {
+                    onebuf[0]=*cp++;
+                    onebuf[1]=0;
+                    strcat(buf,onebuf);
+                }
+                strcat(buf,"')");
+                onebuf[0]=0;
+                break;
+            case conv_backref:
+                sprintf(onebuf,"(backref %d) ",c->backref_no);
+                break;
+            case conv_range:
+                sprintf(onebuf,"(range %d) ",c->char_diff);
+                break;
+        }
+        strcat(buf,onebuf);
+        c=c->next;
+    } /* while */
+    return buf;
 }
 
 

@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfaxml.h,v 1.4 2006-07-06 13:10:29 heikki Exp $
+ *  $Id: nfaxml.h,v 1.5 2006-07-14 13:06:37 heikki Exp $
  */
 
 /**
@@ -10,7 +10,7 @@
  * The xml file is something like this (using round brakcets 
  * on tags, not to confuse our documentation tools)
  *   (?xml ...)
- *   (charmap)
+ *   (ruleset)
  *      (rule)
  *         (fromstring) FOO (/fromstring)
  *         (tostring)   BAR (/tostring)
@@ -48,7 +48,7 @@ YAZ_BEGIN_CDECL
 /** \brief Parse the NFA from a XML document 
  * 
  * \param doc the xml tree to parse
- * \param error_info will be filled in case of errors
+ * \param filename used for info in error messages
  * 
  * \returns either the NFA, or null in case of errors 
  *
@@ -62,7 +62,7 @@ YAZ_BEGIN_CDECL
  * logged in yazlog.
  *
  */
-yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc);
+yaz_nfa *yaz_nfa_parse_xml_doc(xmlDocPtr doc, const char *filename);
 
 
 /** \brief Parse the NFA from a file 
@@ -102,7 +102,7 @@ yaz_nfa *yaz_nfa_parse_xml_file(const char *filepath);
  * logged in yazlog.
  *
  */
-yaz_nfa *yaz_nfa_parse_xml_memory(const char *xmlbuff);
+yaz_nfa *yaz_nfa_parse_xml_memory(const char *xmlbuff, const char *filename);
 
 
 YAZ_END_CDECL

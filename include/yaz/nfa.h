@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.8 2006-07-04 12:59:56 heikki Exp $
+ *  $Id: nfa.h,v 1.9 2006-07-14 13:06:37 heikki Exp $
  */
 
 /**
@@ -533,6 +533,11 @@ yaz_nfa_state *yaz_nfa_get_next(yaz_nfa *n, yaz_nfa_state *s);
 void yaz_nfa_dump(FILE *F, 
                   yaz_nfa *n, 
                   char *(*strfunc)(void *) ); 
+
+/** \brief Helper to dump converters 
+ *
+ */
+char *yaz_nfa_dump_converter(void *conv);
 
 /* \} */
 
