@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.30 2006-06-13 16:01:51 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.31 2006-07-31 11:47:04 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1><title>Introduction</title>
    
@@ -167,7 +167,7 @@ int statserv_main(int argc, char **argv,
    </para>
 
    <synopsis>
-statserv_options_block *statserv_getcontrol(void);
+    statserv_options_block *statserv_getcontrol(void);
    </synopsis>
 
    <para>
@@ -197,12 +197,6 @@ statserv_options_block *statserv_getcontrol(void);
        <literal>int inetd</literal></term><listitem><para>
 	A boolean value, which determines whether the server
 	will operates under a UNIX INET daemon (inetd). Default is FALSE.
-       </para></listitem></varlistentry>
-     
-     <varlistentry><term>
-       <literal>int loglevel</literal></term><listitem><para>
-	Set this by ORing the constants defined in
-	<filename>include/yaz/yaz-log.h</filename>.
        </para></listitem></varlistentry>
      
      <varlistentry><term>
