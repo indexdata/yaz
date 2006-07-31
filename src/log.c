@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.37 2006-07-06 13:10:31 heikki Exp $
+ * $Id: log.c,v 1.38 2006-07-31 10:05:04 adam Exp $
  */
 
 /**
@@ -191,12 +191,14 @@ static void rotate_log(const char *cur_fname)
 void yaz_log_init_level(int level)
 {
     init_mutex();
-    if (l_level < 0) l_level = default_log_level();
+    if (l_level < 0) 
+        l_level = default_log_level();
     if ( (l_level & YLOG_FLUSH) != (level & YLOG_FLUSH) )
     {
         l_level = level;
         yaz_log_reopen(); /* make sure we set buffering right */
-    } else
+    } 
+    else
         l_level = level;
     if (l_level  & YLOG_LOGLVL)
     {  /* dump the log level bits */
@@ -324,7 +326,7 @@ static void yaz_log_do_reopen(const char *filemode)
 #else
     tm = localtime(&cur_time);
 #endif
-    yaz_log_open_check(tm, 1, filemode );
+    yaz_log_open_check(tm, 1, filemode);
     nmem_mutex_leave(log_mutex);
 }
 
@@ -368,10 +370,10 @@ static void yaz_strftime(char *dst, size_t sz,
         strftime(dst, sz, fmt, tm);
 }
                             
-static void yaz_log_to_file(int level, FILE *file, const char *buf)
+static void yaz_log_to_file(int level, const char *log_message)
 {
+    FILE *file;
     time_t ti = time(0);
-    int i;
 #if HAVE_LOCALTIME_R
     struct tm tm0, *tm = &tm0;
 #else
@@ -381,8 +383,8 @@ static void yaz_log_to_file(int level, FILE *file, const char *buf)
     init_mutex();
 
     nmem_mutex_enter(log_mutex);
-
-    #if HAVE_LOCALTIME_R
+    
+#if HAVE_LOCALTIME_R
     localtime_r(&ti, tm);
 #else
     tm = localtime(&ti);
@@ -395,6 +397,7 @@ static void yaz_log_to_file(int level, FILE *file, const char *buf)
     {
         char tbuf[TIMEFORMAT_LEN];
         char flags[1024];
+        int i;
         
         *flags = '\0';
         for (i = 0; level && mask_names[i].name; i++)
@@ -414,7 +417,8 @@ static void yaz_log_to_file(int level, FILE *file, const char *buf)
             yaz_strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tm);
         tbuf[TIMEFORMAT_LEN-1] = '\0';
         
-        fprintf(file, "%s %s%s %s%s\n", tbuf, l_prefix, flags, l_prefix2, buf);
+        fprintf(file, "%s %s%s %s%s\n", tbuf, l_prefix, flags, l_prefix2,
+                log_message);
         if (l_level & (YLOG_FLUSH|YLOG_DEBUG) )
             fflush(file);
     }
@@ -457,7 +461,7 @@ void yaz_log(int level, const char *fmt, ...)
         (*hook_func)(o_level, buf, hook_info);
     file = yaz_log_file();
     if (file)
-        yaz_log_to_file(level, file, buf);
+        yaz_log_to_file(level, buf);
     if (end_hook_func)
         (*end_hook_func)(o_level, buf, end_hook_info);
 }
