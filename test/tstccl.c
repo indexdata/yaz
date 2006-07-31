@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.10 2006-01-29 21:59:13 adam Exp $
+ * $Id: tstccl.c,v 1.11 2006-07-31 11:42:32 adam Exp $
  */
 
 /* CCL test */
@@ -11,48 +11,59 @@
 #include <yaz/ccl.h>
 #include <yaz/test.h>
 
-struct ccl_tst {
-    char *query;
-    char *result;
-};
 
-static struct ccl_tst query_str[] = {
-    { "x1", "@attr 4=2 @attr 1=1016 x1 "},
-    { "(((((x1)))))", "@attr 4=2 @attr 1=1016 x1 "},
-    {"x1 and x2", "@and @attr 4=2 @attr 1=1016 x1 @attr 4=2 @attr 1=1016 x2 "},
-    { "ti=x3", "@attr 4=2 @attr 1=4 x3 "},
-    { "dc.title=x4", "@attr 1=/my/title x4 "},
-    { "x1 and", 0},
-    { "tix=x5", 0},
-    { "spid%æserne", "@prox 0 1 0 2 k 2 @attr 4=2 @attr 1=1016 spid @attr 4=2 @attr 1=1016 æserne "},
-    { "date=1980", "@attr 2=3 1980 "},
-    { "date=234-1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
-    { "date=234- 1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
-    { "date=234 -1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
-    { "date=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
-    { "date=-1980", "@attr 2=2 1980 "},
-    { "date=- 1980", "@attr 2=2 1980 "},
-    { "x=-1980", "@attr 2=3 -1980 "},
-    { "x=- 1980", "@attr 2=2 1980 "},
-    { "x= -1980", "@attr 2=3 -1980 "},
-    { "x=234-1990", "@attr 2=3 234-1990 "},
-    { "x=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "},
-    { "ti=a,b", "@attr 4=1 @attr 1=4 a,b "},
-    { "ti=a, b", "@attr 4=1 @attr 1=4 a,\\ b "},
-    { "ti=a-b", "@attr 4=2 @attr 1=4 a-b "},
-    { "ti=a - b", "@attr 4=1 @attr 1=4 a\\ -\\ b "},
-    {0, 0}
-};
+static int tst_ccl_query(CCL_bibset bibset,
+                         const char *query,
+                         const char *result)
+{
+    CCL_parser parser = ccl_parser_create();
+    int ret = 0;
+
+    if (parser && bibset)
+    {
+        struct ccl_token *token_list;
+        struct ccl_rpn_node *rpn;
+        
+        parser->bibset = bibset;
+        
+        token_list = ccl_parser_tokenize(parser, query);
+        rpn = ccl_parser_find(parser, token_list);
+        ccl_token_del(token_list);
+        if (rpn)
+        {
+            /* parse ok. check that result is there and match */
+            WRBUF wrbuf = wrbuf_alloc();
+            ccl_pquery(wrbuf, rpn);
+            
+            /* check expect a result and that it matches */
+            if (result && !strcmp(wrbuf_buf(wrbuf), result))
+                ret = 1;
+            else
+                ret = 0;
+            ccl_rpn_delete(rpn);
+            wrbuf_free(wrbuf, 1);
+        }
+        else 
+        {
+            if (result)
+                ret = 0;
+            else
+                ret = 1;
+        }
+    }
+    ccl_parser_destroy (parser);
+    return ret;
+}
 
 void tst1(int pass)
 {
-    CCL_parser parser = ccl_parser_create ();
     CCL_bibset bibset = ccl_qual_mk();
-    int i;
     char tstline[128];
 
-    YAZ_CHECK(parser);
     YAZ_CHECK(bibset);
+    if (!bibset)
+        return;
+
     switch(pass)
     {
     case 0:
@@ -89,40 +100,69 @@ void tst1(int pass)
         break;
     default:
         YAZ_CHECK(0);
+        return;
     }
+    
+    YAZ_CHECK(tst_ccl_query(bibset, "x1", "@attr 4=2 @attr 1=1016 x1 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "(((((x1)))))", "@attr 4=2 @attr 1=1016 x1 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x1 and x2",
+                  "@and "
+                  "@attr 4=2 @attr 1=1016 x1 "
+                  "@attr 4=2 @attr 1=1016 x2 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=x3", "@attr 4=2 @attr 1=4 x3 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "dc.title=x4", "@attr 1=/my/title x4 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x1 and", 0));
+    YAZ_CHECK(tst_ccl_query(bibset, "tix=x5", 0));
 
-    parser->bibset = bibset;
+    YAZ_CHECK(tst_ccl_query(bibset, "a%b", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "a%1b", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
 
-    for (i = 0; query_str[i].query; i++)
-    {
-        struct ccl_token *token_list;
-        struct ccl_rpn_node *rpn;
+    YAZ_CHECK(tst_ccl_query(bibset, "a%2b", 
+                  "@prox 0 2 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
 
-        token_list = ccl_parser_tokenize(parser, query_str[i].query);
-        rpn = ccl_parser_find(parser, token_list);
-        ccl_token_del (token_list);
-        if (rpn)
-        {
-            /* parse ok. check that result is there and match */
-            WRBUF wrbuf = wrbuf_alloc();
-            ccl_pquery(wrbuf, rpn);
+    YAZ_CHECK(tst_ccl_query(bibset, "a%19b", 
+                  "@prox 0 19 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
 
-            /* check expect a result and that it matches */
-            YAZ_CHECK(query_str[i].result);
-            if (query_str[i].result)
-            {
-                YAZ_CHECK(!strcmp(wrbuf_buf(wrbuf), query_str[i].result));
-            }
-            ccl_rpn_delete(rpn);
-            wrbuf_free(wrbuf, 1);
-        }
-        else 
-        {
-            /* parse failed. So we expect no result either */
-            YAZ_CHECK(!query_str[i].result);
-        }
-    }   
-    ccl_parser_destroy (parser);
+    YAZ_CHECK(tst_ccl_query(bibset, "spid%æserne", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 spid "
+                  "@attr 4=2 @attr 1=1016 æserne "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "a!b", 
+                  "@prox 0 1 1 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "a!2b", 
+                  "@prox 0 2 1 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "date=1980", "@attr 2=3 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=234-1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=234- 1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=234 -1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=-1980", "@attr 2=2 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=- 1980", "@attr 2=2 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x=-1980", "@attr 2=3 -1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x=- 1980", "@attr 2=2 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x= -1980", "@attr 2=3 -1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x=234-1990", "@attr 2=3 234-1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a,b", "@attr 4=1 @attr 1=4 a,b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a, b", "@attr 4=1 @attr 1=4 a,\\ b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a-b", "@attr 4=2 @attr 1=4 a-b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a - b", "@attr 4=1 @attr 1=4 a\\ -\\ b "));
     ccl_qual_rm(&bibset);
 }
 
