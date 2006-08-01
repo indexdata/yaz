@@ -1,6 +1,6 @@
 ## Copyright (C) 1994-2006, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.24 2006-07-14 13:06:38 heikki Exp $
+## $Id: Makefile.am,v 1.25 2006-08-01 12:03:58 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
@@ -19,9 +19,7 @@ EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample \
  marc4 marc4.xml marc4.chr marc4.xml.marc \
  marc5 marc5.xml marc5.chr marc5.xml.marc \
  marc6 marc6.xml marc6.chr marc6.xml.marc \
- tst_record_conv.xsl \
- nfaxml-simple.xml nfaxml-main.xml \
- nfaxml-include.xml nfaxml-badinclude.xml  
+ tst_record_conv.xsl 
 
 YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
