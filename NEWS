@@ -1,3 +1,34 @@
+--- 2.1.24 [in progress]
+
+Fixed MARC ISO2709 encoding routines to deal with character set 
+conversion.
+
+Minor changes to GFS logging. Database included in search request log
+line.
+
+Fixes for ZOOM-C: event ZOOM_EVENT_RECV_RECORD was not generated for
+cached/multiple records.
+
+Shared libraries are built by default on Unix+configure.
+
+Changed cql2pqf transformation to use a different evaluation order. The
+new order is: always, relation, structure, position, truncation, index
+and relationModifier. Old order was: always, relation, relationModifier,
+structure, index, position, truncation. Note that the the latter ones
+override former ones for identical attributes.. The new scheme means that
+it is possible to override any existing attribute with a relationModifier.
+And also that it is possible to override everything for the index rule
+(except the ones listed in relationModifier). No order is perfect but this
+one, we believe, covers more real cases.. The "always" should have been
+called "default", since the attributes there can be overridden with all
+the rest.
+
+For Libxml2 and friends, YAZ defines YAZ_HAVE_{XML2,XSLT,EXSLT) in the
+compilation phase, but also for yaz-config --cflags output. This allows
+us to have public headers with Libxml2 stuff in them . It should also,
+eventually, make Libxml2 checks redundant in packages using YAZ, such
+as yazproxy.
+
 --- 2.1.22 2006/06/15
 
 Changed SRU update structure bend_update_rr so that SRU diagnostics are
