@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.9 2006-07-06 10:17:55 adam Exp $
+ * $Id: tst_record_conv.c,v 1.10 2006-08-01 09:28:04 adam Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -206,7 +206,7 @@ static int conv_convert_test(yaz_record_conv_t p,
     return ret;
 }
 
-static void tst_convert()
+static void tst_convert1()
 {
     yaz_record_conv_t p = 0;
     const char *marcxml_rec =
@@ -289,6 +289,37 @@ static void tst_convert()
     yaz_record_conv_destroy(p);
 }
 
+static void tst_convert2()
+{
+    yaz_record_conv_t p = 0;
+    const char *marcxml_rec =
+        "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+        "  <leader>00080nam a22000498a 4500</leader>\n"
+        "  <controlfield tag=\"001\">   11224466 </controlfield>\n"
+        "  <datafield tag=\"010\" ind1=\" \" ind2=\" \">\n"
+        "    <subfield code=\"a\">k&#xf8;benhavn</subfield>\n"
+        "  </datafield>\n"
+        "</record>\n";
+    const char *iso2709_rec =
+        "\x30\x30\x30\x37\x37\x6E\x61\x6D\x20\x61\x32\x32\x30\x30\x30\x34"
+        "\x39\x38\x61\x20\x34\x35\x30\x30\x30\x30\x31\x30\x30\x31\x33\x30"
+        "\x30\x30\x30\x30\x30\x31\x30\x30\x30\x31\x34\x30\x30\x30\x31\x33"
+        "\x1E\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20\x1E\x20\x20"
+        "\x1F\x61\x6b\xb2\x62\x65\x6e\x68\x61\x76\x6e\x1E\x1D";
+
+    YAZ_CHECK(conv_configure_test("<convert>"
+                                  "<marc"
+                                  " inputcharset=\"utf-8\""
+                                  " outputcharset=\"marc-8\""
+                                  " inputformat=\"xml\""
+                                  " outputformat=\"marc\""
+                                  "/>"
+                                  "</convert>",
+                                  0, &p));
+    YAZ_CHECK(conv_convert_test(p, marcxml_rec, iso2709_rec));
+    yaz_record_conv_destroy(p);
+}
+
 #endif
 
 int main(int argc, char **argv)
@@ -299,7 +330,8 @@ int main(int argc, char **argv)
     tst_configure();
 #endif
 #if YAZ_HAVE_XSLT
-    tst_convert();
+    tst_convert1();
+    tst_convert2();
 #endif
     YAZ_CHECK_TERM;
 }
