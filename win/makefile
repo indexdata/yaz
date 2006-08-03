@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.116 2006-07-07 08:41:20 adam Exp $
+# $Id: makefile,v 1.117 2006-08-03 09:27:23 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -16,15 +16,15 @@ HAVE_TCL=1
 
 # iconv charcter conversion utility
 HAVE_ICONV=1
-ICONV_DIR = c:\iconv-1.9.1.win32
+ICONV_DIR = c:\iconv-1.9.2.win32
 
 # libxslt
 HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\libxslt-1.1.14.win32
+LIBXSLT_DIR=c:\libxslt-1.1.17.win32
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.6.20.win32
+LIBXML2_DIR=c:\libxml2-2.6.26.win32
 
 # zlib compression (used by libxml2)
 ZLIB_DIR = c:\zlib-1.2.3.win32
@@ -552,7 +552,9 @@ GENERATED_C_FILES= \
    $(ESADMIN_C_FILES) \
    $(CHARNEG_C_FILES) \
    $(MTERM2_C_FILES) \
-   $(OCLCUI_C_FILES)
+   $(OCLCUI_C_FILES) \
+   $(ILL_CORE_C_FILES) \
+   $(ITEM_REQ_C_FILES)
 
 GENERATED_H_FILES= \
    $(Z3950V3_H_FILES)  \
@@ -562,11 +564,15 @@ GENERATED_H_FILES= \
    $(ESADMIN_H_FILES) \
    $(CHARNEG_H_FILES) \
    $(MTERM2_H_FILES) \
-   $(OCLCUI_H_FILES)
+   $(OCLCUI_H_FILES) \
+   $(ILL_CORE_H_FILES) \
+   $(ITEM_REQ_H_FILES)
 
 generated_files: \
 	$(GENERATED_H_FILES) \
 	$(GENERATED_C_FILES) \
+	$(SRCDIR)\diagsrw.c \
+	$(SRCDIR)\diagbib1.c 
 
 # Compiling 
 
