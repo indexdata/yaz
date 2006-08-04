@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-iconv.h,v 1.9 2006-04-19 23:15:39 adam Exp $
+ * $Id: yaz-iconv.h,v 1.10 2006-08-04 14:35:39 adam Exp $
  */
 /**
  * \file yaz-iconv.h
@@ -68,6 +68,11 @@ YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
 YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
 
 YAZ_EXPORT int yaz_strcmp_del(const char *a, const char *b, const char *b_del);
+
+YAZ_EXPORT unsigned long yaz_read_UTF8_char(unsigned char *inp,
+                                            size_t inbytesleft,
+                                            size_t *no_read,
+                                            int *error);
 
 YAZ_END_CDECL
 

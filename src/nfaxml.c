@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfaxml.c,v 1.9 2006-07-14 13:06:38 heikki Exp $ 
+ *  $Id: nfaxml.c,v 1.10 2006-08-04 14:35:40 adam Exp $ 
  */
 
 /**
@@ -22,6 +22,7 @@
 #include <yaz/nmem.h> 
 #include <yaz/yconfig.h>
 #include <yaz/nfa.h>
+#include <yaz/yaz-iconv.h>
 #include <yaz/nfaxml.h>
 #include <yaz/libxml2_error.h>
 
@@ -34,14 +35,14 @@ static int utf16_content(xmlNodePtr node, yaz_nfa_char *buf, int maxlen,
 {
     int bufidx=0;
     xmlChar *content = xmlNodeGetContent(node);
-    xmlChar *cp=content;
-    int conlen=strlen((char *)content);
-    int len;
-    int res;
-    while (*cp && (bufidx<maxlen) ) {
-        len=conlen;
-        res=xmlGetUTF8Char(cp,&len);
-        if (res==-1) {
+    xmlChar *cp = content;
+    size_t conlen = strlen((char *)content);
+    while (*cp && bufidx<maxlen )
+    {
+        int error;
+        size_t no_read;
+        int res = yaz_read_UTF8_char(cp, conlen, &no_read, &error);
+        if (res == 0) {
             /* should be caught earlier */
             yaz_log(YLOG_FATAL,"Illegal utf-8 sequence "
                     "%d bytes into '%s' in %s, rule %d ",
@@ -49,9 +50,9 @@ static int utf16_content(xmlNodePtr node, yaz_nfa_char *buf, int maxlen,
             xmlFree(content);
             return -1;
         }
-        buf[bufidx++]=res;
-        cp +=len;
-        conlen -=len;
+        buf[bufidx++] = res;
+        cp += no_read;
+        conlen -= no_read;
     }
     buf[bufidx]=0;
     xmlFree(content);
@@ -65,31 +66,28 @@ static int parse_range(xmlNodePtr node,
 {
     xmlChar *content = xmlNodeGetContent(node);
     xmlChar *cp=content;
-    int conlen=strlen((char *)content);
-    int len;
-    int res;
-    len=conlen;
-    res=xmlGetUTF8Char(cp,&len);
-    if ( res != -1 ) {
+    size_t conlen = strlen((char *)content);
+    size_t no_read;
+    int error;
+    int res = yaz_read_UTF8_char(cp, conlen, &no_read, &error);
+    if ( res != 0 ) {
         *range_start=res;
-        cp +=len;
-        conlen -=len;
-        len=conlen;
-        res=xmlGetUTF8Char(cp,&len);
+        cp += no_read;
+        conlen -= no_read;
+        res = yaz_read_UTF8_char(cp, conlen, &no_read, &error);
         if (res != '-' )
-            res = -1;
+            res = 0;
     }
-    if ( res != -1 ) {
-        cp +=len;
-        conlen -=len;
-        len=conlen;
-        res=xmlGetUTF8Char(cp,&len);
+    if ( res != 0 ) {
+        cp += no_read;
+        conlen -= no_read;
+        res = yaz_read_UTF8_char(cp, conlen, &no_read, &error);
     }
-    if ( res != -1 ) {
-        *range_end=res;
+    if ( res != 0) {
+        *range_end = res;
     }
     xmlFree(content);
-    if (res==-1) {
+    if (res == 0) {
         yaz_log(YLOG_FATAL,"Illegal range. '%s'. Must be like 'a-z' "
                 "'in %s, rule %d ",
                 content, filename, rulenumber);

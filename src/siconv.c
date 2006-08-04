@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.23 2006-05-09 21:37:02 adam Exp $
+ * $Id: siconv.c,v 1.24 2006-08-04 14:35:40 adam Exp $
  */
 /**
  * \file siconv.c
@@ -198,8 +198,9 @@ static size_t yaz_init_UTF8 (yaz_iconv_t cd, unsigned char *inp,
     return 0;
 }
 
-static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read)
+unsigned long yaz_read_UTF8_char(unsigned char *inp,
+                                 size_t inbytesleft, size_t *no_read,
+                                 int *error)
 {
     unsigned long x = 0;
 
@@ -211,7 +212,7 @@ static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
     else if (inp[0] <= 0xbf || inp[0] >= 0xfe)
     {
         *no_read = 0;
-        cd->my_errno = YAZ_ICONV_EILSEQ;
+        *error = YAZ_ICONV_EILSEQ;
     }
     else if (inp[0] <= 0xdf && inbytesleft >= 2)
     {
@@ -221,7 +222,7 @@ static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
         else
         {
             *no_read = 0;
-            cd->my_errno = YAZ_ICONV_EILSEQ;
+            *error = YAZ_ICONV_EILSEQ;
         }
     }
     else if (inp[0] <= 0xef && inbytesleft >= 3)
@@ -233,7 +234,7 @@ static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
         else
         {
             *no_read = 0;
-            cd->my_errno = YAZ_ICONV_EILSEQ;
+            *error = YAZ_ICONV_EILSEQ;
         }
     }
     else if (inp[0] <= 0xf7 && inbytesleft >= 4)
@@ -245,7 +246,7 @@ static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
         else
         {
             *no_read = 0;
-            cd->my_errno = YAZ_ICONV_EILSEQ;
+            *error = YAZ_ICONV_EILSEQ;
         }
     }
     else if (inp[0] <= 0xfb && inbytesleft >= 5)
@@ -258,7 +259,7 @@ static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
         else
         {
             *no_read = 0;
-            cd->my_errno = YAZ_ICONV_EILSEQ;
+            *error = YAZ_ICONV_EILSEQ;
         }
     }
     else if (inp[0] <= 0xfd && inbytesleft >= 6)
@@ -271,15 +272,21 @@ static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
         else
         {
             *no_read = 0;
-            cd->my_errno = YAZ_ICONV_EILSEQ;
+            *error = YAZ_ICONV_EILSEQ;
         }
     }
     else
     {
         *no_read = 0;
-        cd->my_errno = YAZ_ICONV_EINVAL;
+        *error = YAZ_ICONV_EINVAL;
     }
     return x;
+}
+
+static unsigned long yaz_read_UTF8 (yaz_iconv_t cd, unsigned char *inp,
+                                    size_t inbytesleft, size_t *no_read)
+{
+    return yaz_read_UTF8_char(inp, inbytesleft, no_read, &cd->my_errno);
 }
 
 static unsigned long yaz_read_UCS4 (yaz_iconv_t cd, unsigned char *inp,
