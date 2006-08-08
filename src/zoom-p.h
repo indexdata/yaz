@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.11 2006-05-10 07:34:38 adam Exp $
+ * $Id: zoom-p.h,v 1.12 2006-08-08 20:58:52 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -102,8 +102,6 @@ struct ZOOM_resultset_p {
     ZOOM_query query;
     int refcount;
     int size;
-    int start;
-    int count;
     int step;
     int piggyback;
     char *setname;
@@ -157,6 +155,8 @@ struct ZOOM_task_p {
     union {
 #define ZOOM_TASK_SEARCH 1
         struct {
+            int count;
+            int start;
             ZOOM_resultset resultset;
         } search;
 #define ZOOM_TASK_RETRIEVE 2
