@@ -1,3 +1,6 @@
+
+Fixed problem another problem with ZOOM_EVENT_RECV_RECORD . Bug #626.
+
 --- 2.1.24 2006/08/08
 
 Fixed MARC ISO2709 encoding routines to deal with character set 
