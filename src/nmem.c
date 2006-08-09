@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.22 2006-04-21 10:28:06 adam Exp $
+ * $Id: nmem.c,v 1.23 2006-08-09 14:00:18 adam Exp $
  */
 
 /**
@@ -166,10 +166,13 @@ YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
     }
 }
 
-static nmem_block *freelist = NULL;        /* "global" freelists */
+static nmem_block *freelist = NULL;       /* "global" freelists */
 static nmem_control *cfreelist = NULL;
 static int nmem_active_no = 0;
 static int nmem_init_flag = 0;
+
+/** \brief whether nmem blocks should be reassigned to heap */
+static int nmem_release_in_heap = 0;
 
 #if NMEM_DEBUG
 struct nmem_debug_info {
@@ -184,9 +187,17 @@ struct nmem_debug_info *nmem_debug_list = 0;
 
 static void free_block(nmem_block *p)
 {  
-    memset(p->buf, 'Y', p->size);
-    p->next = freelist;
-    freelist = p;
+    if (nmem_release_in_heap)
+    {
+        xfree(p->buf);
+        xfree(p);
+    }
+    else
+    {
+        memset(p->buf, 'Y', p->size);
+        p->next = freelist;
+        freelist = p;
+    }
     if (log_level)
         yaz_log (log_level, "nmem free_block p=%p", p);
 }
@@ -194,7 +205,7 @@ static void free_block(nmem_block *p)
 #if NMEM_DEBUG
 void nmem_print_list (void)
 {
-    if(log_level)
+    if (log_level)
         nmem_print_list_l(log_level);
 }
 
@@ -401,8 +412,15 @@ void nmem_destroy(NMEM n)
     nmem_reset(n);
     NMEM_ENTER;
     nmem_active_no--;
-    n->next = cfreelist;
-    cfreelist = n;
+    if (nmem_release_in_heap)
+    {
+        xfree(n);
+    }
+    else
+    {
+        n->next = cfreelist;
+        cfreelist = n;
+    }
     NMEM_LEAVE;
 }
 
