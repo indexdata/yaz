@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmemsdup.c,v 1.8 2006-07-06 10:17:53 adam Exp $
+ * $Id: nmemsdup.c,v 1.9 2006-08-11 12:50:23 adam Exp $
  */
 
 /**
@@ -90,18 +90,18 @@ void nmem_strsplit(NMEM nmem, const char *delim, const char *dstr,
 }
 
 #if YAZ_HAVE_XML2
-char *nmem_text_node_cdata(const void *ptr_cdata, NMEM nmem)
+char *nmem_text_node_cdata(const xmlNode *ptr_cdata, NMEM nmem)
 {
     char *cdata;
     int len = 0;
     const xmlNode *ptr;
 
-    for (ptr = (const xmlNode *) ptr_cdata; ptr; ptr = ptr->next)
+    for (ptr = ptr_cdata; ptr; ptr = ptr->next)
         if (ptr->type == XML_TEXT_NODE)
             len += xmlStrlen(ptr->content);
     cdata = (char *) nmem_malloc(nmem, len+1);
     *cdata = '\0';
-    for (ptr = (const xmlNode *) ptr_cdata; ptr; ptr = ptr->next)
+    for (ptr = ptr_cdata; ptr; ptr = ptr->next)
         if (ptr->type == XML_TEXT_NODE)
             strcat(cdata, (const char *) ptr->content);
     return cdata;

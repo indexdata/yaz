@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.23 2006-08-09 14:00:18 adam Exp $
+ * $Id: nmem.c,v 1.24 2006-08-11 12:50:23 adam Exp $
  */
 
 /**
@@ -54,7 +54,7 @@ struct nmem_block
 struct nmem_control
 {
     int total;
-    nmem_block *blocks;
+    struct nmem_block *blocks;
     struct nmem_control *next;
 };
 
@@ -106,6 +106,9 @@ struct nmem_mutex {
     int dummy;
 };
 #endif
+
+size_t nmem_memory_in_use = 0;
+size_t nmem_memory_free = 0;
 
 YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *p)
 {
@@ -166,9 +169,16 @@ YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *p)
     }
 }
 
-static nmem_block *freelist = NULL;       /* "global" freelists */
-static nmem_control *cfreelist = NULL;
+/** \brief free NMEM memory blocks . Reused in get_block */
+static struct nmem_block *freelist = NULL;
+
+/** \brief free NMEM control blocks. Reused in nmem_create */
+static struct nmem_control *cfreelist = NULL;
+
+/** \brief number NMEM's in use (number of nmem_controls not in free list) */
 static int nmem_active_no = 0;
+
+/** \brief NMEM usage counter */
 static int nmem_init_flag = 0;
 
 /** \brief whether nmem blocks should be reassigned to heap */
@@ -185,8 +195,9 @@ struct nmem_debug_info {
 struct nmem_debug_info *nmem_debug_list = 0;  
 #endif
 
-static void free_block(nmem_block *p)
+static void free_block(struct nmem_block *p)
 {  
+    nmem_memory_in_use -= p->size;
     if (nmem_release_in_heap)
     {
         xfree(p->buf);
@@ -197,6 +208,7 @@ static void free_block(nmem_block *p)
         memset(p->buf, 'Y', p->size);
         p->next = freelist;
         freelist = p;
+        nmem_memory_free += p->size;
     }
     if (log_level)
         yaz_log (log_level, "nmem free_block p=%p", p);
@@ -224,9 +236,9 @@ void nmem_print_list_l (int level)
 /*
  * acquire a block with a minimum of size free bytes.
  */
-static nmem_block *get_block(size_t size)
+static struct nmem_block *get_block(size_t size)
 {
-    nmem_block *r, *l;
+    struct nmem_block *r, *l;
 
     if (log_level)
         yaz_log (log_level, "nmem get_block size=%ld", (long) size);
@@ -253,8 +265,9 @@ static nmem_block *get_block(size_t size)
             yaz_log (log_level, "nmem get_block alloc new block size=%ld",
                      (long) get);
 
-        r = (nmem_block *)xmalloc(sizeof(*r));
+        r = (struct nmem_block *) xmalloc(sizeof(*r));
         r->buf = (char *)xmalloc(r->size = get);
+        nmem_memory_in_use += r->size;
     }
     r->top = 0;
     return r;
@@ -262,7 +275,7 @@ static nmem_block *get_block(size_t size)
 
 void nmem_reset(NMEM n)
 {
-    nmem_block *t;
+    struct nmem_block *t;
     
     yaz_log (log_level, "nmem_reset p=%p", n);
     if (!n)
@@ -343,7 +356,7 @@ NMEM nmem_create(void)
     if (r)
         cfreelist = cfreelist->next;
     else
-        r = (nmem_control *)xmalloc(sizeof(*r));
+        r = (struct nmem_control *)xmalloc(sizeof(*r));
     NMEM_LEAVE;
 
 #if NMEM_DEBUG
@@ -426,7 +439,7 @@ void nmem_destroy(NMEM n)
 
 void nmem_transfer (NMEM dst, NMEM src)
 {
-    nmem_block *t;
+    struct nmem_block *t;
     while ((t = src->blocks))
     {
         src->blocks = t->next;
@@ -435,6 +448,20 @@ void nmem_transfer (NMEM dst, NMEM src)
     }
     dst->total += src->total;
     src->total = 0;
+}
+
+void nmem_get_memory_in_use(size_t *p)
+{
+    NMEM_ENTER;
+    *p = nmem_memory_in_use;
+    NMEM_LEAVE;
+}
+
+void nmem_get_memory_free(size_t *p)
+{
+    NMEM_ENTER;
+    *p = nmem_memory_free;
+    NMEM_LEAVE;
 }
 
 void nmem_critical_enter (void)
@@ -449,7 +476,6 @@ void nmem_critical_leave (void)
 
 void nmem_init (void)
 {
-    
     if (++nmem_init_flag == 1)
     {
 #ifdef WIN32
@@ -476,6 +502,7 @@ void nmem_exit (void)
         while (freelist)
         {
             struct nmem_block *fl = freelist;
+            nmem_memory_free -= fl->size;
             freelist = freelist->next;
             xfree (fl->buf);
             xfree (fl);
