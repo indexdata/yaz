@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.9 2006-07-14 13:06:37 heikki Exp $
+ *  $Id: nfa.h,v 1.10 2006-08-11 12:43:52 adam Exp $
  */
 
 /**
@@ -215,7 +215,7 @@ yaz_nfa_state *yaz_nfa_add_range( yaz_nfa *n,
  *  \param s   the state to add this to. If null, adds to the initial state
  *  \param seq is a sequence of yaz_fna_chars.
  *  \param seq_len is the length of the sequence
- *  \Return the final state
+ *  \return the final state
  *
  *  Starting from state s (or from the initial state, if s is
  *  null), finds as much of seq as possible and inserts the rest. 
