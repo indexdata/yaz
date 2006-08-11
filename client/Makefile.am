@@ -1,6 +1,6 @@
 ## Copyright (C) 1995-2004, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.26 2005-09-09 10:34:09 adam Exp $
+## $Id: Makefile.am,v 1.27 2006-08-11 12:57:30 adam Exp $
 
 
 bin_PROGRAMS=yaz-client 
@@ -13,7 +13,7 @@ yaz_client_SOURCES=client.c $(COMMON)
 
 AM_CFLAGS=$(THREAD_CFLAGS)
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(SSL_CFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS)
 
 yaz_client_LDADD = ../src/libyaz.la $(READLINE_LIBS) 
 bertorture_LDADD = ../src/libyaz.la 

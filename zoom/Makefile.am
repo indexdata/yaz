@@ -1,7 +1,7 @@
-## $Id: Makefile.am,v 1.19 2006-06-15 10:38:35 adam Exp $
+## $Id: Makefile.am,v 1.20 2006-08-11 12:57:31 adam Exp $
 ## Copyright (C) 2001, Index Data
 
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include $(XML2_CFLAGS)
 
 bin_PROGRAMS = zoomsh
 noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8 zoomtst9 zoomtst10 zoom-benchmark
