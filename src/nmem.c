@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.24 2006-08-11 12:50:23 adam Exp $
+ * $Id: nmem.c,v 1.25 2006-08-11 13:10:27 adam Exp $
  */
 
 /**
@@ -254,6 +254,7 @@ static struct nmem_block *get_block(size_t size)
             l->next = r->next;
         else
             freelist = r->next;
+        nmem_memory_free -= r->size;
     }
     else
     {
@@ -267,8 +268,8 @@ static struct nmem_block *get_block(size_t size)
 
         r = (struct nmem_block *) xmalloc(sizeof(*r));
         r->buf = (char *)xmalloc(r->size = get);
-        nmem_memory_in_use += r->size;
     }
+    nmem_memory_in_use += r->size;
     r->top = 0;
     return r;
 }
