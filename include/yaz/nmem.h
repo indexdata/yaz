@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: nmem.h,v 1.20 2006-08-11 12:50:23 adam Exp $
+ * $Id: nmem.h,v 1.21 2006-08-13 17:30:57 adam Exp $
  */
 
 /**
@@ -97,8 +97,10 @@ YAZ_EXPORT void nmem_strsplit(NMEM nmem, const char *delim,
 YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
                                     char ***darray, int *num);
 
+#if YAZ_HAVE_XML2
 /** \brief copies TEXT Libxml2 node data to NMEM */
 YAZ_EXPORT char *nmem_text_node_cdata(const xmlNode *ptr, NMEM nmem);
+#endif
 
 /** \brief creates and allocates integer for NMEM */
 YAZ_EXPORT int *nmem_intdup (NMEM mem, int v);
