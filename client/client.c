@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.311 2006-07-06 10:17:51 adam Exp $
+ * $Id: client.c,v 1.312 2006-08-15 13:30:00 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2425,11 +2425,11 @@ static int cmd_sru(const char *arg)
     }
     else
     {
-        if (yaz_matchstr(arg, "post"))
+        if (!yaz_matchstr(arg, "post"))
             sru_method = "post";
-        else if (yaz_matchstr(arg, "get"))
+        else if (!yaz_matchstr(arg, "get"))
             sru_method = "get";
-        else if (yaz_matchstr(arg, "soap"))
+        else if (!yaz_matchstr(arg, "soap"))
             sru_method = "soap";
         else
         {
