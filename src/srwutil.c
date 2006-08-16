@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.45 2006-07-06 10:17:54 adam Exp $
+ * $Id: srwutil.c,v 1.46 2006-08-16 22:47:10 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -41,9 +41,10 @@ void encode_uri_char(char *dst, char ch)
     }
 }
 
-void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
+static void yaz_array_to_uri_ex(char **path, ODR o, char **name, char **value,
+                                const char *extra_args)
 {
-    size_t i, szp = 0, sz = 0;
+    size_t i, szp = 0, sz = extra_args ? 1+strlen(extra_args) : 1;
     for(i = 0; name[i]; i++)
         sz += strlen(name[i]) + 3 + strlen(value[i]) * 3;
     *path = odr_malloc(o, sz);
@@ -67,7 +68,19 @@ void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
             szp += vlen;
         }
     }
+    if (extra_args)
+    {
+        if (i)
+            (*path)[szp++] = '&';
+        memcpy(*path + szp, extra_args, strlen(extra_args));
+        szp += strlen(extra_args);
+    }
     (*path)[szp] = '\0';
+}
+
+void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
+{
+    return yaz_array_to_uri_ex(path, o, name, value, 0);
 }
 
 int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
@@ -226,8 +239,8 @@ static int yaz_base64decode(const char *in, char *out)
  * Look for authentication tokens in HTTP Basic parameters or in x-username/x-password
  * parameters. Added by SH.
  */
-static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq, char *username,
-        char *password, ODR decode)
+static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
+                               char *username, char *password, ODR decode)
 {
     const char *basic = z_HTTP_header_lookup(hreq->headers, "Authorization");
 
@@ -742,11 +755,7 @@ Z_SRW_extra_record *yaz_srw_get_extra_record(ODR o)
 
 Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 {
-    Z_SRW_PDU *sr = (Z_SRW_PDU *) odr_malloc(o, sizeof(*o));
-
-    sr->username = 0;
-    sr->password = 0;
-    sr->srw_version = odr_strdup(o, "1.1");
+    Z_SRW_PDU *sr = yaz_srw_get_core_v_1_1(o);
     sr->which = which;
     switch(which)
     {
@@ -1168,11 +1177,13 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
     if (yaz_get_sru_parms(srw_pdu, encode, name, value))
         return -1;
-    yaz_array_to_uri(&uri_args, encode, name, value);
+    yaz_array_to_uri_ex(&uri_args, encode, name, value, srw_pdu->extra_args);
 
     hreq->method = "GET";
     
-    path = odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 3);
+    path = odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4
+                      +(srw_pdu->extra_args ? strlen(srw_pdu->extra_args) : 0)
+        );
     sprintf(path, "%s?%s", hreq->path, uri_args);
     hreq->path = path;
 
@@ -1190,7 +1201,7 @@ int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     if (yaz_get_sru_parms(srw_pdu, encode, name, value))
         return -1;
 
-    yaz_array_to_uri(&uri_args, encode, name, value);
+    yaz_array_to_uri_ex(&uri_args, encode, name, value, srw_pdu->extra_args);
 
     hreq->method = "POST";
     

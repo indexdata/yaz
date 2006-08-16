@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.84 2006-08-16 14:18:59 adam Exp $
+ * $Id: zoom-c.c,v 1.85 2006-08-16 22:47:11 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1187,23 +1187,28 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_1);
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_3);
-
+    
     /* Index Data's Z39.50 Implementor Id is 81 */
-    ireq->implementationId = odr_prepend(c->odr_out,
-                                         ZOOM_options_get(c->options, "implementationId"),
-                                         odr_prepend(c->odr_out, "81", ireq->implementationId));
-
-    ireq->implementationName = odr_prepend(c->odr_out,
-                                           ZOOM_options_get(c->options, "implementationName"),
-                                           odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
-
-    version = odr_strdup(c->odr_out, "$Revision: 1.84 $");
+    ireq->implementationId =
+        odr_prepend(c->odr_out,
+                    ZOOM_options_get(c->options, "implementationId"),
+                    odr_prepend(c->odr_out, "81", ireq->implementationId));
+    
+    ireq->implementationName = 
+        odr_prepend(c->odr_out,
+                    ZOOM_options_get(c->options, "implementationName"),
+                    odr_prepend(c->odr_out, "ZOOM-C",
+                                ireq->implementationName));
+    
+    version = odr_strdup(c->odr_out, "$Revision: 1.85 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
-    ireq->implementationVersion = odr_prepend(c->odr_out,
-                                              ZOOM_options_get(c->options, "implementationVersion"),
-                                              odr_prepend(c->odr_out, &version[11], ireq->implementationVersion));
-
+    ireq->implementationVersion = 
+        odr_prepend(c->odr_out,
+                    ZOOM_options_get(c->options, "implementationVersion"),
+                    odr_prepend(c->odr_out, &version[11],
+                                ireq->implementationVersion));
+    
     *ireq->maximumRecordSize =
         ZOOM_options_get_int(c->options, "maximumRecordSize", 1024*1024);
     *ireq->preferredMessageSize =
@@ -1313,7 +1318,7 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     int *start, *count;
     ZOOM_resultset resultset = 0;
     Z_SRW_PDU *sr = 0;
-    const char *recordPacking = 0;
+    const char *option_val = 0;
 
     if (c->error)                  /* don't continue on error */
         return zoom_complete;
@@ -1381,12 +1386,14 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     sr->u.request->maximumRecords = odr_intdup(
         c->odr_out, resultset->step>0 ? resultset->step : *count);
     sr->u.request->recordSchema = resultset->schema;
-
-    recordPacking = ZOOM_resultset_option_get(resultset, "recordPacking");
-
-    if (recordPacking)
-        sr->u.request->recordPacking = odr_strdup(c->odr_out, recordPacking);
     
+    option_val = ZOOM_resultset_option_get(resultset, "recordPacking");
+    if (option_val)
+        sr->u.request->recordPacking = odr_strdup(c->odr_out, option_val);
+
+    option_val = ZOOM_resultset_option_get(resultset, "extraArgs");
+    if (option_val)
+        sr->extra_args = odr_strdup(c->odr_out, option_val);
     return send_srw(c, sr);
 }
 #else

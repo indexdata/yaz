@@ -1,3 +1,6 @@
+ZOOM-C reads option extraArgs. If set the value of extraArgs is appended to
+SRU URI (POST/GET). Value is _raw_ URI part, such as x-id-a=v1&x-id-b=v2 .
+
 --- 2.1.26 2006/08/15
 
 Fixed problem with SRU mode type (soap, get, post) for yaz-client

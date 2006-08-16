@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.46 2006-07-06 10:17:54 adam Exp $
+ * $Id: srw.c,v 1.47 2006-08-16 22:47:10 adam Exp $
  */
 /**
  * \file srw.c
@@ -522,6 +522,16 @@ static int yaz_srw_terms(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm **terms,
     return 0;
 }
 
+Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o)
+{
+    Z_SRW_PDU *p = (Z_SRW_PDU *) odr_malloc(o, sizeof(*p));
+    p->srw_version = odr_strdup(o, "1.1");
+    p->username = 0;
+    p->password = 0;
+    p->extra_args = 0;
+    return p;
+}
+
 int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                   void *client_data, const char *ns)
 {
@@ -539,10 +549,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         if (method->type != XML_ELEMENT_NODE)
             return -1;
 
-        *p = (Z_SRW_PDU *) odr_malloc(o, sizeof(**p));
-        (*p)->srw_version = odr_strdup(o, "1.1");
-        (*p)->username = 0;
-        (*p)->password = 0;
+        *p = yaz_srw_get_core_v_1_1(o);
         
         if (!xmlStrcmp(method->name, BAD_CAST "searchRetrieveRequest"))
         {
@@ -968,8 +975,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         if (method->type != XML_ELEMENT_NODE)
             return -1;
 
-        *p = (Z_SRW_PDU *) odr_malloc(o, sizeof(**p));
-        (*p)->srw_version = odr_strdup(o, "1.1");
+        *p = yaz_srw_get_core_v_1_1(o);
         
         if (!xmlStrcmp(method->name, BAD_CAST "updateRequest"))
         {
