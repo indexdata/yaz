@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.83 2006-08-15 13:31:07 adam Exp $
+ * $Id: zoom-c.c,v 1.84 2006-08-16 14:18:59 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1197,7 +1197,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                                            ZOOM_options_get(c->options, "implementationName"),
                                            odr_prepend(c->odr_out, "ZOOM-C", ireq->implementationName));
 
-    version = odr_strdup(c->odr_out, "$Revision: 1.83 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.84 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = odr_prepend(c->odr_out,
@@ -2503,15 +2503,9 @@ ZOOM_API(ZOOM_scanset)
 ZOOM_API(ZOOM_scanset)
     ZOOM_connection_scan1(ZOOM_connection c, ZOOM_query q)
 {
-    ZOOM_scanset scan = (ZOOM_scanset) xmalloc(sizeof(*scan));
     char *start;
     char *freeme = 0;
-
-    scan->connection = c;
-    scan->odr = odr_createmem(ODR_DECODE);
-    scan->options = ZOOM_options_create_with_parent(c->options);
-    scan->refcount = 1;
-    scan->scan_response = 0;
+    ZOOM_scanset scan = 0;
 
     /*
      * We need to check the query-type, so we can recognise CQL and
@@ -2520,22 +2514,35 @@ ZOOM_API(ZOOM_scanset)
      * inspection of the ZOOM_query_prefix() and ZOOM_query_cql()
      * functions shows how the structure is set up in each case.
      */
-    if (q->z_query->which == Z_Query_type_1) {
+    if (!q->z_query)
+        return 0;
+    else if (q->z_query->which == Z_Query_type_1) 
+    {
         yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p PQF '%s'",
                 c, q, q->query_string);
         start = q->query_string;
-    } else if (q->z_query->which == Z_Query_type_104) {
+    } 
+    else if (q->z_query->which == Z_Query_type_104)
+    {
         yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p CQL '%s'",
                 c, q, q->query_string);
         start = freeme = cql2pqf(c, q->query_string);
         if (start == 0)
             return 0;
-    } else {
+    } 
+    else
+    {
         yaz_log(YLOG_FATAL, "%p ZOOM_connection_scan1 q=%p unknown type '%s'",
                 c, q, q->query_string);
         abort();
     }
 
+    scan = (ZOOM_scanset) xmalloc(sizeof(*scan));
+    scan->connection = c;
+    scan->odr = odr_createmem(ODR_DECODE);
+    scan->options = ZOOM_options_create_with_parent(c->options);
+    scan->refcount = 1;
+    scan->scan_response = 0;
     scan->termListAndStartPoint =
         p_query_scan(scan->odr, PROTO_Z3950, &scan->attributeSet, start);
     xfree(freeme);
