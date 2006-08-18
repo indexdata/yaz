@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.46 2006-08-16 22:47:10 adam Exp $
+ * $Id: srwutil.c,v 1.47 2006-08-18 06:30:05 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -751,6 +751,16 @@ Z_SRW_extra_record *yaz_srw_get_extra_record(ODR o)
     res->recordLockStatus = 0;
     res->recordOldVersion = 0;
     return res;
+}
+
+Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o)
+{
+    Z_SRW_PDU *p = (Z_SRW_PDU *) odr_malloc(o, sizeof(*p));
+    p->srw_version = odr_strdup(o, "1.1");
+    p->username = 0;
+    p->password = 0;
+    p->extra_args = 0;
+    return p;
 }
 
 Z_SRW_PDU *yaz_srw_get(ODR o, int which)

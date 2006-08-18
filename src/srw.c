@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.47 2006-08-16 22:47:10 adam Exp $
+ * $Id: srw.c,v 1.48 2006-08-18 06:30:05 adam Exp $
  */
 /**
  * \file srw.c
@@ -520,16 +520,6 @@ static int yaz_srw_terms(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm **terms,
         }
     }
     return 0;
-}
-
-Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o)
-{
-    Z_SRW_PDU *p = (Z_SRW_PDU *) odr_malloc(o, sizeof(*p));
-    p->srw_version = odr_strdup(o, "1.1");
-    p->username = 0;
-    p->password = 0;
-    p->extra_args = 0;
-    return p;
 }
 
 int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
