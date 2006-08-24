@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.15 2005-06-25 15:46:03 adam Exp $
+ * $Id: comstack.c,v 1.16 2006-08-24 13:25:45 adam Exp $
  */
 
 /** 
@@ -14,6 +14,7 @@
 #include <ctype.h>
 #include <errno.h>
 
+#include <yaz/log.h>
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 #include <yaz/unix.h>
@@ -31,7 +32,8 @@ static const char *cs_errlist[] =
     "No data (operation would block)",
     "New data while half of old buffer is on the line (flow control)",
     "Permission denied",
-    "SSL error"
+    "SSL error",
+    "Too large incoming buffer"
 };
 
 const char *cs_errmsg(int n)
@@ -153,7 +155,7 @@ int cs_complete_auto(const unsigned char *buf, int len)
     {
         /* deal with HTTP request/response */
         int i = 2, content_len = 0, chunked = 0;
-        
+
         /* if dealing with HTTP responses - then default
            content length is unlimited (socket close) */
         if (!memcmp(buf, "HTTP/", 5))
@@ -289,6 +291,12 @@ int cs_complete_auto(const unsigned char *buf, int len)
     }
     return completeBER(buf, len);
 }
+
+void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes)
+{
+    cs->max_recv_bytes = max_recv_bytes;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.18 2006-06-09 12:40:53 adam Exp $
+ * $Id: tcpip.c,v 1.19 2006-08-24 13:25:45 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -187,6 +187,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
     p->f_addrstr = tcpip_addrstr;
     p->f_straddr = tcpip_straddr;
     p->f_set_blocking = tcpip_set_blocking;
+    p->max_recv_bytes = 5000000;
 
     p->state = new_socket ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
@@ -751,11 +752,17 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         if (!*bufsize)
         {
             if (!(*buf = (char *)xmalloc(*bufsize = CS_TCPIP_BUFCHUNK)))
+            {
+                h->cerrno = CSYSERR;
                 return -1;
+            }
         }
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
             if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
+            {
+                h->cerrno = CSYSERR;
                 return -1;
+            }
 #ifdef __sun__
         yaz_set_errno( 0 );
         /* unfortunatly, sun sometimes forgets to set errno in recv
@@ -800,6 +807,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         else if (!res)
             return hasread;
         hasread += res;
+        if (hasread > h->max_recv_bytes)
+        {
+            h->cerrno = CSBUFSIZE;
+            return -1;
+        }
     }
     TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
                   hasread, berlen));

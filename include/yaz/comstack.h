@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.21 2005-06-25 15:46:01 adam Exp $
+ * $Id: comstack.h,v 1.22 2006-08-24 13:25:44 adam Exp $
  */
 
 /** 
@@ -54,7 +54,7 @@ struct comstack
     int iofile;    /* UNIX file descriptor for iochannel */
     int timeout;   /* how long to wait for trailing blocks (ignored for now) */
     void *cprivate;/* state info for lower stack */
-    int more;      /* connection has extra data in buffer */
+    int max_recv_bytes;      /* max size of incoming package */
     int state;     /* current state */
 #define CS_ST_UNBND      0
 #define CS_ST_IDLE       1
@@ -131,6 +131,7 @@ YAZ_EXPORT void *cs_get_ssl(COMSTACK cs);
 YAZ_EXPORT int cs_set_ssl_ctx(COMSTACK cs, void *ctx);
 YAZ_EXPORT int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
 YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
+YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
                                           
 /*
  * error management.
@@ -143,7 +144,8 @@ YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 #define CSWRONGBUF 4
 #define CSDENY     5
 #define CSERRORSSL 6
-#define CSLASTERROR CSERRORSSL  /* must be the value of last CS error */
+#define CSBUFSIZE  7
+#define CSLASTERROR CSBUFSIZE  /* must be the value of last CS error */
 
 /* backwards compatibility */
 #define CS_SR     PROTO_SR
