@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: odr.h,v 1.22 2006-02-19 18:33:08 adam Exp $
+ * $Id: odr.h,v 1.23 2006-08-24 13:11:27 adam Exp $
  */
 
 /**
@@ -272,8 +272,16 @@ YAZ_EXPORT int odr_sequence_of(ODR o, Odr_fun type, void *p, int *num,
 YAZ_EXPORT int odr_set_of(ODR o, Odr_fun type, void *p, int *num,
                           const char *name);
 YAZ_EXPORT int odr_any(ODR o, Odr_any **p, int opt, const char *name);
+
 YAZ_EXPORT int ber_any(ODR o, Odr_any **p);
+/** \brief determine whether a buffer is a complete BER buffer
+    \param buf BER buffer
+    \param len length of buffer
+    \retval 0 package is incomplete
+    \retval >0 package is complete and length is return value
+*/
 YAZ_EXPORT int completeBER(const unsigned char *buf, int len);
+
 YAZ_EXPORT void odr_begin(ODR o);
 YAZ_EXPORT void odr_end(ODR o);
 YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
